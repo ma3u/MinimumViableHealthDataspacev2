@@ -34,18 +34,19 @@ All three core specifications are now final or near-final:
 
 ## Implementation Progress
 
-| Phase  | Title                                                  | Status         | Notes                                                                                           |
-| ------ | ------------------------------------------------------ | -------------- | ----------------------------------------------------------------------------------------------- |
-| **1**  | Infrastructure Migration (EDC-V + DCore + CFM)         | 🔲 Not started | Highest priority for full dataspace functionality                                               |
-| **2**  | Identity and Trust (DCP v1.0 + Verifiable Credentials) | 🔲 Not started | Depends on Phase 1                                                                              |
-| **3**  | Health Knowledge Graph Layer — Schema & Synthetic Data | ✅ Complete    | 5-layer Neo4j schema, EHDS HDAB chain, style sheet                                              |
-| **3b** | Real FHIR Data Pipeline (Synthea → Neo4j → OMOP)       | ✅ Complete    | 127 patients · 3,031 encounters · 1,045 conditions · 19,195 observations · 2,232 drug Rxes      |
-| **3c** | HealthDCAT-AP Metadata Registration for FHIR Dataset   | ✅ Complete    | Synthea cohort registered as HealthDCAT-AP catalog entry; 2 distributions + EHDS Art 53 purpose |
-| **3d** | README + UI completeness hardening                     | ✅ Complete    | README step order fixed; catalog UI shows datasetType/legalBasis/recordCount                    |
-| **4**  | Dataspace Integration (EDC-V ↔ Neo4j data assets)     | 🔲 Not started | Depends on Phases 1, 2, 3c                                                                      |
-| **5**  | Federated Queries & GraphRAG                           | 🔲 Not started | Depends on Phase 4                                                                              |
-| **6a** | Graph Explorer UI (Next.js → Neo4j Bolt)               | ✅ Complete    | Four views; runs at localhost:3000                                                              |
-| **6b** | Full Participant Portal (Aruba + Fraunhofer + Redline) | 🔲 Not started | Depends on Phases 1–4                                                                           |
+| Phase  | Title                                                  | Status         | Notes                                                                                            |
+| ------ | ------------------------------------------------------ | -------------- | ------------------------------------------------------------------------------------------------ |
+| **1**  | Infrastructure Migration (EDC-V + DCore + CFM)         | 🔲 Not started | Highest priority for full dataspace functionality                                                |
+| **2**  | Identity and Trust (DCP v1.0 + Verifiable Credentials) | 🔲 Not started | Depends on Phase 1                                                                               |
+| **3**  | Health Knowledge Graph Layer — Schema & Synthetic Data | ✅ Complete    | 5-layer Neo4j schema, EHDS HDAB chain, style sheet                                               |
+| **3b** | Real FHIR Data Pipeline (Synthea → Neo4j → OMOP)       | ✅ Complete    | 127 patients · 3,031 encounters · 1,045 conditions · 19,195 observations · 2,232 drug Rxes       |
+| **3c** | HealthDCAT-AP Metadata Registration for FHIR Dataset   | ✅ Complete    | Synthea cohort registered as HealthDCAT-AP catalog entry; 2 distributions + EHDS Art 53 purpose  |
+| **3d** | README + UI completeness hardening                     | ✅ Complete    | README step order fixed; catalog UI shows datasetType/legalBasis/recordCount                     |
+| **3e** | DSP Marketplace Registration + Compliance Chain        | ✅ Complete    | Layer 1 DataProduct/Contract/HDABApproval wired to Synthea dataset; compliance UI live dropdowns |
+| **4**  | Dataspace Integration (EDC-V ↔ Neo4j data assets)     | 🔲 Not started | Depends on Phases 1, 2, 3c                                                                       |
+| **5**  | Federated Queries & GraphRAG                           | 🔲 Not started | Depends on Phase 4                                                                               |
+| **6a** | Graph Explorer UI (Next.js → Neo4j Bolt)               | ✅ Complete    | Four views; runs at localhost:3000                                                               |
+| **6b** | Full Participant Portal (Aruba + Fraunhofer + Redline) | 🔲 Not started | Depends on Phases 1–4                                                                            |
 
 ---
 
@@ -141,6 +142,35 @@ With Phases 3–3c forming a working end-to-end local stack (Synthea → Neo4j �
 - Card footer shows `legalBasis` in green (mapped to human-readable label, e.g. “EHDS Art. 53”)
 - Card footer shows `recordCount` (patient count from live Neo4j graph)
 - Filter now also searches `description` text
+
+### Phase 3e: DSP Marketplace Registration + Compliance Chain ✅
+
+With the Synthea FHIR dataset registered in HealthDCAT-AP (Phase 3c), Phase 3e wires the full Layer 1 DSP marketplace chain and fixes the EHDS compliance checker UI.
+
+**DSP Marketplace Cypher (`neo4j/register-dsp-marketplace.cypher`):**
+
+- MERGEs three Participants: `Charité Berlin` (CLINIC), `Bayer Research` (CRO), `BfArM` (HDAB)
+- Creates `DataProduct {productId: 'product-synthea-fhir-r4-2026'}` → `[:DESCRIBED_BY]` → `HealthDataset {id: 'dataset:synthea-fhir-r4-mvd'}`
+- Creates `OdrlPolicy` with EHDS Art.53 `researchPurpose` permission and re-identification `prohibition`
+- Creates `Contract` → `[:GOVERNS]` → DataProduct
+- Creates `AccessApplication` (status: `APPROVED`) and `HDABApproval` with relationships:
+  - `[:APPROVES]` → AccessApplication
+  - `[:APPROVED]` → Contract
+  - `[:GRANTS_ACCESS_TO]` → HealthDataset ← key relationship enabling compliance check
+- Verification RETURN confirms full chain: consumer, applicationStatus, approvalId, EHDS article, dataset
+
+**Compliance API (`ui/src/app/api/compliance/route.ts`):**
+
+- Added list mode (no query params → returns `{consumers, datasets}` for UI dropdowns)
+- Fixed participant lookup: `coalesce(participantId, id) = $consumerId`
+- Fixed chain path: `(approval:HDABApproval)-[:APPROVES]->(app)` then `(approval)-[:GRANTS_ACCESS_TO]->(dataset)`
+- Fixed contract path: `Contract -[:GOVERNS]-> DataProduct -[:DESCRIBED_BY]-> HealthDataset`
+
+**Compliance UI (`ui/src/app/compliance/page.tsx`):**
+
+- Replaced static text inputs with dropdowns populated from live graph
+- Shows consumer name + participantId, dataset title + id
+- Result table adds `Contract` column alongside Application / Approval / EHDS Article
 
 ### Phase 4: Dataspace Integration
 

@@ -1,7 +1,18 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ShieldCheck, AlertCircle } from "lucide-react";
+
+interface Consumer {
+  id: string;
+  name: string;
+  type: string;
+}
+
+interface DatasetOption {
+  id: string;
+  title: string;
+}
 
 interface ChainEntry {
   consumer: string;
@@ -20,12 +31,30 @@ interface Result {
 }
 
 export default function CompliancePage() {
-  const [consumerId, setConsumerId] = useState("consumer-01");
-  const [datasetId, setDatasetId] = useState("dataset-001");
+  const [consumers, setConsumers] = useState<Consumer[]>([]);
+  const [datasets, setDatasets] = useState<DatasetOption[]>([]);
+  const [consumerId, setConsumerId] = useState("");
+  const [datasetId, setDatasetId] = useState("");
   const [result, setResult] = useState<Result | null>(null);
   const [loading, setLoading] = useState(false);
+  const [optionsLoading, setOptionsLoading] = useState(true);
+
+  // Load dropdown options from graph on mount
+  useEffect(() => {
+    fetch("/api/compliance")
+      .then((r) => r.json())
+      .then((d) => {
+        setConsumers(d.consumers ?? []);
+        setDatasets(d.datasets ?? []);
+        if ((d.consumers ?? []).length > 0) setConsumerId(d.consumers[0].id);
+        if ((d.datasets ?? []).length > 0) setDatasetId(d.datasets[0].id);
+        setOptionsLoading(false);
+      })
+      .catch(() => setOptionsLoading(false));
+  }, []);
 
   const check = async () => {
+    if (!consumerId || !datasetId) return;
     setLoading(true);
     const r = await fetch(
       `/api/compliance?consumerId=${encodeURIComponent(
@@ -41,31 +70,73 @@ export default function CompliancePage() {
     <div className="max-w-2xl mx-auto px-6 py-10">
       <h1 className="text-2xl font-bold mb-1">EHDS Compliance Checker</h1>
       <p className="text-gray-400 text-sm mb-8">
-        Validate HDAB approval chain — Articles 45–52
+        Validate HDAB approval chain — Articles 45–53
       </p>
 
       <div className="flex flex-col gap-3 mb-6">
         <label className="text-sm text-gray-400">
-          Consumer ID
-          <input
-            type="text"
-            value={consumerId}
-            onChange={(e) => setConsumerId(e.target.value)}
-            className="mt-1 w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded text-sm outline-none focus:border-layer5 block"
-          />
+          Consumer (Participant)
+          {optionsLoading ? (
+            <div className="mt-1 w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded text-sm text-gray-500">
+              Loading from graph…
+            </div>
+          ) : consumers.length > 0 ? (
+            <select
+              value={consumerId}
+              onChange={(e) => setConsumerId(e.target.value)}
+              className="mt-1 w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded text-sm outline-none focus:border-layer5 block"
+            >
+              <option value="">— select consumer —</option>
+              {consumers.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name} [{c.type}]
+                </option>
+              ))}
+            </select>
+          ) : (
+            <input
+              type="text"
+              value={consumerId}
+              onChange={(e) => setConsumerId(e.target.value)}
+              placeholder="Participant ID or DID"
+              className="mt-1 w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded text-sm outline-none focus:border-layer5 block"
+            />
+          )}
         </label>
+
         <label className="text-sm text-gray-400">
-          Dataset ID
-          <input
-            type="text"
-            value={datasetId}
-            onChange={(e) => setDatasetId(e.target.value)}
-            className="mt-1 w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded text-sm outline-none focus:border-layer5 block"
-          />
+          Dataset
+          {optionsLoading ? (
+            <div className="mt-1 w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded text-sm text-gray-500">
+              Loading from graph…
+            </div>
+          ) : datasets.length > 0 ? (
+            <select
+              value={datasetId}
+              onChange={(e) => setDatasetId(e.target.value)}
+              className="mt-1 w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded text-sm outline-none focus:border-layer5 block"
+            >
+              <option value="">— select dataset —</option>
+              {datasets.map((d) => (
+                <option key={d.id} value={d.id}>
+                  {d.title}
+                </option>
+              ))}
+            </select>
+          ) : (
+            <input
+              type="text"
+              value={datasetId}
+              onChange={(e) => setDatasetId(e.target.value)}
+              placeholder="Dataset ID"
+              className="mt-1 w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded text-sm outline-none focus:border-layer5 block"
+            />
+          )}
         </label>
+
         <button
           onClick={check}
-          disabled={loading}
+          disabled={loading || !consumerId || !datasetId}
           className="mt-2 px-4 py-2 bg-layer5 hover:bg-layer5-dark rounded font-medium text-sm disabled:opacity-50"
         >
           {loading ? "Checking…" : "Validate Compliance"}
@@ -106,15 +177,21 @@ export default function CompliancePage() {
                   <th className="text-left pb-1">Status</th>
                   <th className="text-left pb-1">Approval</th>
                   <th className="text-left pb-1">EHDS Article</th>
+                  <th className="text-left pb-1">Contract</th>
                 </tr>
               </thead>
               <tbody>
                 {result.chain.map((c, i) => (
                   <tr key={i} className="border-b border-gray-800">
-                    <td className="py-1 pr-2">{c.applicationId}</td>
-                    <td className="py-1 pr-2">{c.applicationStatus}</td>
-                    <td className="py-1 pr-2">{c.approvalId}</td>
-                    <td className="py-1">{c.ehdsArticle}</td>
+                    <td className="py-1 pr-2 font-mono">{c.applicationId}</td>
+                    <td className="py-1 pr-2 text-green-400">
+                      {c.applicationStatus}
+                    </td>
+                    <td className="py-1 pr-2 font-mono">{c.approvalId}</td>
+                    <td className="py-1 pr-2">{c.ehdsArticle}</td>
+                    <td className="py-1 font-mono text-gray-400">
+                      {c.contract ?? "—"}
+                    </td>
                   </tr>
                 ))}
               </tbody>
