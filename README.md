@@ -2,10 +2,10 @@
 
 This repository contains the ongoing planning documents, architecture decisions, and schema definitions for the Minimum Viable Health Dataspace v2.
 
-## Structure
+## Background & Resources
 
-- `planning-health-dataspace-v2.md`: Core project planning, objectives, and proposed steps.
-- `health-dataspace-graph-schema.md`: Schema definitions and initial data graph structures.
+- **Article:** [European Health Dataspaces, Digital Twins: A Journey from FHIR Basics to Intelligent Patient Models](https://www.linkedin.com/pulse/european-health-dataspaces-digital-twins-journey-fhir-buchhorn-roth-8t51c/)
+
 - `/`: Future location for planned implementations and code components.
 
 ## Development and Contributing

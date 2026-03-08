@@ -1,5 +1,10 @@
 Now I have comprehensive information on all the new EDC components. Let me provide the updated implementation roadmap.
 
+## Background & Inspiration
+
+This phase of the project is contextualized and inspired by:
+[European Health Dataspaces, Digital Twins: A Journey from FHIR Basics to Intelligent Patient Models](https://www.linkedin.com/pulse/european-health-dataspaces-digital-twins-journey-fhir-buchhorn-roth-8t51c/)
+
 Here is the updated **"What I'm Building Next"** chapter, rewritten to align your MVD extension with the new EDC component architecture:
 
 ---
