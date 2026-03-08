@@ -16,6 +16,7 @@ A EHDS-compliant health dataspace demo using Eclipse Dataspace Components (EDC-V
 │   ├── init-schema.cypher                  # Constraint & index initialization
 │   ├── insert-synthetic-schema-data.cypher # Sample data for all 5 layers
 │   ├── fhir-to-omop-transform.cypher       # Phase 3b: FHIR → OMOP transformation
+│   ├── register-fhir-dataset-hdcatap.cypher # Phase 3c: HealthDCAT-AP metadata registration
 │   ├── health-dataspace-style.grass        # Neo4j Browser color style sheet
 │   └── import/fhir/                        # Synthea FHIR bundle staging (gitignored)
 ├── scripts/
@@ -171,8 +172,9 @@ RETURN *
 
 ### 9. Phase 3b — Real FHIR Data Pipeline (Synthea → Neo4j → OMOP)
 
-Replace the hand-crafted synthetic data with a real Synthea-generated Type 2 Diabetes cohort.
-The Graph Explorer UI will automatically show the new patients.
+Replace the hand-crafted synthetic data with a real Synthea-generated patient cohort.
+All Synthea clinical modules run (chronic conditions, medications, labs etc. emerge naturally).
+The Graph Explorer UI will automatically reflect the new patients.
 
 **Requirements:** Java ≥ 21 on `$PATH`.
 
@@ -190,11 +192,36 @@ cat neo4j/fhir-to-omop-transform.cypher | \
   docker exec -i health-dataspace-neo4j cypher-shell -u neo4j -p healthdataspace
 ```
 
-After loading, explore the real patient data in the Graph Explorer (`/graph`) or Patient Journey (`/patient`) views.
+Expected result for a 50-patient cohort (~127 patients incl. deceased):
+
+| Layer 3 FHIR      | Count   | Layer 4 OMOP            | Count  |
+| ----------------- | ------- | ----------------------- | ------ |
+| Patient           | ~127    | OMOPPerson              | ~127   |
+| Encounter         | ~3,000  | OMOPVisitOccurrence     | ~3,000 |
+| Condition         | ~1,000  | OMOPConditionOccurrence | ~1,000 |
+| Observation       | ~19,000 | OMOPMeasurement         | ~700   |
+| MedicationRequest | ~2,200  | OMOPDrugExposure        | ~2,200 |
 
 > **Note:** FHIR bundles in `neo4j/import/fhir/` are `.gitignore`d — no patient data is stored in the repository.
 
-### 8. Launch the Graph Explorer UI (Phase 6a)
+### 10. Phase 3c — Register the FHIR Dataset in the HealthDCAT-AP Catalog
+
+Register the loaded cohort as a formal HealthDCAT-AP entry in Neo4j Layer 2.
+This is idempotent — re-running updates record counts from the live graph.
+
+```bash
+cat neo4j/register-fhir-dataset-hdcatap.cypher | \
+  docker exec -i health-dataspace-neo4j cypher-shell -u neo4j -p healthdataspace
+```
+
+Creates:
+
+- `DataCatalog` → `HealthDataset` with HealthDCAT-AP properties (type, legal basis, temporal/spatial coverage)
+- Two `DataDistribution` nodes: Neo4j Bolt + HTTP REST (access endpoints for EDC-V)
+- `EhdsPurpose` (EHDS Article 53 permitted secondary uses)
+- `FROM_DATASET` links from all `Patient` nodes — visible in the Dataset Catalog UI (`/catalog`)
+
+### 11. Launch the Graph Explorer UI (Phase 6a)
 
 A Next.js 14 web app connects directly to Neo4j Bolt and provides four interactive views.
 

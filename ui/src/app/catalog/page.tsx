@@ -10,7 +10,14 @@ interface Dataset {
   conformsTo: string;
   publisher: string;
   theme: string;
+  datasetType: string;
+  legalBasis: string;
+  recordCount: number;
 }
+
+const LEGAL_BASIS_LABELS: Record<string, string> = {
+  "EHDS-Art53-SecondaryUse": "EHDS Art. 53",
+};
 
 export default function CatalogPage() {
   const [datasets, setDatasets] = useState<Dataset[]>([]);
@@ -31,6 +38,7 @@ export default function CatalogPage() {
     (d) =>
       !filter ||
       d.title?.toLowerCase().includes(filter.toLowerCase()) ||
+      d.description?.toLowerCase().includes(filter.toLowerCase()) ||
       d.theme?.toLowerCase().includes(filter.toLowerCase()),
   );
 
@@ -43,7 +51,7 @@ export default function CatalogPage() {
 
       <input
         type="search"
-        placeholder="Filter by title or theme…"
+        placeholder="Filter by title, description or theme…"
         value={filter}
         onChange={(e) => setFilter(e.target.value)}
         className="w-full mb-6 px-3 py-2 bg-gray-800 border border-gray-600 rounded text-sm outline-none focus:border-layer2"
@@ -71,14 +79,32 @@ export default function CatalogPage() {
                     </p>
                   )}
                 </div>
-                {d.theme && (
-                  <span className="shrink-0 text-xs bg-layer2/20 text-layer2 px-2 py-0.5 rounded-full">
-                    {d.theme}
-                  </span>
-                )}
+                <div className="shrink-0 flex flex-col items-end gap-1">
+                  {d.datasetType && (
+                    <span className="text-xs bg-layer2/20 text-layer2 px-2 py-0.5 rounded-full">
+                      {d.datasetType}
+                    </span>
+                  )}
+                  {d.theme && (
+                    <span className="text-xs bg-gray-700 text-gray-300 px-2 py-0.5 rounded-full">
+                      {d.theme}
+                    </span>
+                  )}
+                </div>
               </div>
+
+              {/* HealthDCAT-AP metadata row */}
               <div className="mt-3 flex flex-wrap gap-4 text-xs text-gray-500">
                 {d.publisher && <span>Publisher: {d.publisher}</span>}
+                {d.legalBasis && (
+                  <span className="text-green-500">
+                    Legal basis:{" "}
+                    {LEGAL_BASIS_LABELS[d.legalBasis] ?? d.legalBasis}
+                  </span>
+                )}
+                {d.recordCount != null && (
+                  <span>{d.recordCount.toLocaleString()} records</span>
+                )}
                 {d.license && <span>License: {d.license}</span>}
                 {d.conformsTo && <span>Conforms to: {d.conformsTo}</span>}
               </div>

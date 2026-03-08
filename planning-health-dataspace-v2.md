@@ -41,6 +41,7 @@ All three core specifications are now final or near-final:
 | **3**  | Health Knowledge Graph Layer — Schema & Synthetic Data | ✅ Complete    | 5-layer Neo4j schema, EHDS HDAB chain, style sheet                                              |
 | **3b** | Real FHIR Data Pipeline (Synthea → Neo4j → OMOP)       | ✅ Complete    | 127 patients · 3,031 encounters · 1,045 conditions · 19,195 observations · 2,232 drug Rxes      |
 | **3c** | HealthDCAT-AP Metadata Registration for FHIR Dataset   | ✅ Complete    | Synthea cohort registered as HealthDCAT-AP catalog entry; 2 distributions + EHDS Art 53 purpose |
+| **3d** | README + UI completeness hardening                     | ✅ Complete    | README step order fixed; catalog UI shows datasetType/legalBasis/recordCount                    |
 | **4**  | Dataspace Integration (EDC-V ↔ Neo4j data assets)     | 🔲 Not started | Depends on Phases 1, 2, 3c                                                                      |
 | **5**  | Federated Queries & GraphRAG                           | 🔲 Not started | Depends on Phase 4                                                                              |
 | **6a** | Graph Explorer UI (Next.js → Neo4j Bolt)               | ✅ Complete    | Four views; runs at localhost:3000                                                              |
@@ -121,6 +122,25 @@ The Synthea cohort loaded in Phase 3b needs a corresponding **Layer 2** catalog 
 - Links the dataset to all 127 `Patient` nodes via `FROM_DATASET`
 - Registers a `DataDistribution` node (Bolt + REST endpoints) so EDC-V can reference the access URL
 - Adds EHDS purpose restriction annotation (Article 53 permitted purposes)
+
+### Phase 3d: README and UI Completeness Hardening ✅
+
+With Phases 3–3c forming a working end-to-end local stack (Synthea → Neo4j → OMOP → HealthDCAT-AP → UI), the documentation and UI were brought to match:
+
+**README (`README.md`):**
+
+- Corrected step numbering (Phase 3b → Step 9, Phase 3c → Step 10, UI → Step 11)
+- Removed stale “Type 2 Diabetes cohort” reference — all Synthea modules now run
+- Added Phase 3c CLI invocation and expected outcome
+- Added new `register-fhir-dataset-hdcatap.cypher` to the directory structure listing
+- Added expected row-count table for the 50-patient cohort
+
+**Dataset Catalog UI (`/catalog`):**
+
+- Card now shows `datasetType` badge (e.g. `SyntheticData`)
+- Card footer shows `legalBasis` in green (mapped to human-readable label, e.g. “EHDS Art. 53”)
+- Card footer shows `recordCount` (patient count from live Neo4j graph)
+- Filter now also searches `description` text
 
 ### Phase 4: Dataspace Integration
 
