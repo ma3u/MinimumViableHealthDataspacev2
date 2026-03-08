@@ -9,14 +9,16 @@ A EHDS-compliant health dataspace demo using Eclipse Dataspace Components (EDC-V
 ## Structure
 
 ```
-├── planning-health-dataspace-v2.md   # Implementation roadmap (5 phases)
-├── health-dataspace-graph-schema.md  # 5-layer Neo4j graph schema
-├── docker-compose.yml                # Neo4j + APOC + n10s local dev stack
+├── planning-health-dataspace-v2.md      # Implementation roadmap (5 phases)
+├── health-dataspace-graph-schema.md     # 5-layer Neo4j graph schema
+├── docker-compose.yml                   # Neo4j + APOC + n10s local dev stack
 ├── neo4j/
-│   ├── init-schema.cypher            # Constraint & index initialization
-│   └── import/                       # FHIR bundle / CSV import staging
-├── .pre-commit-config.yaml           # Formatting hooks (Prettier, etc.)
-└── .github/copilot-instructions.md   # AI agent workspace guidance
+│   ├── init-schema.cypher               # Constraint & index initialization
+│   ├── insert-synthetic-schema-data.cypher # Sample data for all 5 layers
+│   ├── health-dataspace-style.grass     # Neo4j Browser color style sheet
+│   └── import/                          # FHIR bundle / CSV import staging
+├── .pre-commit-config.yaml              # Formatting hooks (Prettier, etc.)
+└── .github/copilot-instructions.md      # AI agent workspace guidance
 ```
 
 ## Technical Requirements
@@ -104,12 +106,53 @@ Open [Neo4j Browser](http://localhost:7474) and run the contents of `neo4j/init-
 cat neo4j/init-schema.cypher | docker exec -i health-dataspace-neo4j cypher-shell -u neo4j -p healthdataspace
 ```
 
-### 5. Visualize the Data Model
+### Step 5: Insert Synthetic Data (Optional but Recommended)
 
-To view the structure of the data model you just initialized, run this built-in meta-graph command in the Neo4j Browser UI query bar:
+To visualize the 5-layer architecture properly, Neo4j needs sample data. We provide a script that generates a complex, interconnected dataspace scenario covering Marketplace Metadata down to Clinical Ontology.
+
+```bash
+cat neo4j/insert-synthetic-schema-data.cypher | docker exec -i health-dataspace-neo4j cypher-shell -u neo4j -p healthdataspace
+```
+
+### 6. Apply the Color Style
+
+To colorize nodes by architectural layer, import the included GraSS style sheet into Neo4j Browser:
+
+1. Open [Neo4j Browser](http://localhost:7474)
+2. Click the **database icon** in the left sidebar → scroll down to **"Style"**
+3. Click **"Load from file"** (or drag-and-drop) and select `neo4j/health-dataspace-style.grass`
+
+Alternatively, paste the contents of the file directly into the style editor.
+
+**Layer color legend:**
+
+| Color     | Layer                                 | Node Types                                                                                            |
+| --------- | ------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| 🔵 Blue   | **Layer 1** — Dataspace Marketplace   | `Participant`, `DataProduct`, `Contract`, `AccessApplication`, `HDABApproval`                         |
+| 🩵 Teal   | **Layer 2** — HealthDCAT-AP Metadata  | `HealthDataset`, `Distribution`                                                                       |
+| 🟢 Green  | **Layer 3** — FHIR Clinical Graph     | `Patient`, `Encounter`, `Condition`, `Observation`, `MedicationRequest`                               |
+| 🟠 Orange | **Layer 4** — OMOP Research Analytics | `OMOPPerson`, `OMOPVisitOccurrence`, `OMOPConditionOccurrence`, `OMOPMeasurement`, `OMOPDrugExposure` |
+| 🟣 Purple | **Layer 5** — Clinical Ontology       | `SnomedConcept`, `LoincCode`, `ICD10Code`, `RxNormConcept`                                            |
+
+### 7. Visualize the Data Model
+
+Run this in the Neo4j Browser query bar to see the schema meta-graph:
 
 ```cypher
 CALL db.schema.visualization()
+```
+
+Or explore the full synthetic patient journey across all 5 layers:
+
+```cypher
+MATCH (hd:HealthDataset {datasetId: 'urn:uuid:charite:dataset:diab-001'})
+MATCH (dp:DataProduct)-[:DESCRIBED_BY]->(hd)
+MATCH (contract:Contract)-[:GOVERNS]->(dp)
+MATCH (hd)-[:HAS_DISTRIBUTION]->(dist:Distribution)
+MATCH (p:Patient)-[:FROM_DATASET]->(hd)
+MATCH (p)-[:MAPPED_TO]->(op:OMOPPerson)
+MATCH (p)-[:HAS_CONDITION]->(c)-[:CODED_BY]->(sc)
+RETURN *
 ```
 
 ## Development and Contributing
@@ -119,13 +162,3 @@ We use `pre-commit` hooks alongside Prettier to ensure consistent formatting acr
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-### Step 5: Insert Synthetic Data (Optional but Recommended)
-
-To visualize the 5-layer architecture properly, Neo4j needs sample data. We provide a script that generates a complex, interconnected dataspace scenario covering Marketplace Metadata down to Clinical Ontology.
-
-```bash
-cat neo4j/insert-synthetic-schema-data.cypher | docker exec -i health-dataspace-neo4j cypher-shell -u neo4j -p healthdataspace
-```
-
-After running this, execute `CALL db.schema.visualization()` in your Neo4j browser again to see the fully connected layer metadata mapping!

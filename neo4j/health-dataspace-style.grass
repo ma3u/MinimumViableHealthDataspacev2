@@ -1,0 +1,266 @@
+/*
+ * Health Dataspace Neo4j Browser Style Sheet (GraSS)
+ *
+ * Import via: Neo4j Browser → left sidebar → "Browser Settings" → "Style" → paste or upload this file
+ * Or drag-and-drop this file onto the Neo4j Browser window.
+ *
+ * Color scheme follows the 5-layer architecture:
+ *   Layer 1 — Dataspace Marketplace  → Blue
+ *   Layer 2 — HealthDCAT-AP Metadata → Teal
+ *   Layer 3 — FHIR Clinical Graph    → Green
+ *   Layer 4 — OMOP Research          → Orange
+ *   Layer 5 — Clinical Ontology      → Purple
+ */
+
+/* ─── Default Node ─────────────────────────────────────────── */
+node {
+  diameter: 50px;
+  color: #A5ABB6;
+  border-color: #9AA1AC;
+  border-width: 2px;
+  text-color-internal: #FFFFFF;
+  font-size: 10px;
+  caption: "{name}";
+}
+
+/* ─── Layer 1: Dataspace Marketplace Metadata (Blue) ───────── */
+node.Participant {
+  color: #2471A3;
+  border-color: #1A5276;
+  text-color-internal: #FFFFFF;
+  diameter: 60px;
+  caption: "{name}";
+}
+
+node.DataProduct {
+  color: #1F618D;
+  border-color: #154360;
+  text-color-internal: #FFFFFF;
+  diameter: 55px;
+  caption: "{name}";
+}
+
+node.Contract {
+  color: #5499C7;
+  border-color: #2E86C1;
+  text-color-internal: #FFFFFF;
+  diameter: 50px;
+  caption: "{name}";
+}
+
+node.AccessApplication {
+  color: #7FB3D3;
+  border-color: #5499C7;
+  text-color-internal: #1A2E40;
+  diameter: 50px;
+  caption: "{name}";
+}
+
+node.HDABApproval {
+  color: #AED6F1;
+  border-color: #7FB3D3;
+  text-color-internal: #1A2E40;
+  diameter: 50px;
+  caption: "{name}";
+}
+
+/* ─── Layer 2: HealthDCAT-AP Metadata (Teal) ───────────────── */
+node.HealthDataset {
+  color: #148F77;
+  border-color: #0E6655;
+  text-color-internal: #FFFFFF;
+  diameter: 60px;
+  caption: "{name}";
+}
+
+node.Distribution {
+  color: #76D7C4;
+  border-color: #45B39D;
+  text-color-internal: #1A3530;
+  diameter: 45px;
+  caption: "{name}";
+}
+
+/* ─── Layer 3: FHIR Clinical Knowledge Graph (Green) ───────── */
+node.Patient {
+  color: #1E8449;
+  border-color: #145A32;
+  text-color-internal: #FFFFFF;
+  diameter: 65px;
+  caption: "{name}";
+}
+
+node.Encounter {
+  color: #27AE60;
+  border-color: #1E8449;
+  text-color-internal: #FFFFFF;
+  diameter: 50px;
+  caption: "{name}";
+}
+
+node.Condition {
+  color: #52BE80;
+  border-color: #27AE60;
+  text-color-internal: #1A4030;
+  diameter: 55px;
+  caption: "{name}";
+}
+
+node.Observation {
+  color: #82E0AA;
+  border-color: #52BE80;
+  text-color-internal: #1A4030;
+  diameter: 50px;
+  caption: "{name}";
+}
+
+node.MedicationRequest {
+  color: #196F3D;
+  border-color: #0E3D21;
+  text-color-internal: #FFFFFF;
+  diameter: 50px;
+  caption: "{name}";
+}
+
+node.Procedure {
+  color: #A9DFBF;
+  border-color: #82E0AA;
+  text-color-internal: #1A4030;
+  diameter: 45px;
+  caption: "{name}";
+}
+
+/* ─── Layer 4: OMOP Research Analytics (Orange) ────────────── */
+node.OMOPPerson {
+  color: #CA6F1E;
+  border-color: #935116;
+  text-color-internal: #FFFFFF;
+  diameter: 65px;
+  caption: "{name}";
+}
+
+node.OMOPVisitOccurrence {
+  color: #D35400;
+  border-color: #922B21;
+  text-color-internal: #FFFFFF;
+  diameter: 50px;
+  caption: "{name}";
+}
+
+node.OMOPConditionOccurrence {
+  color: #E59866;
+  border-color: #CA6F1E;
+  text-color-internal: #4A2010;
+  diameter: 50px;
+  caption: "{name}";
+}
+
+node.OMOPMeasurement {
+  color: #F0B27A;
+  border-color: #E59866;
+  text-color-internal: #4A2010;
+  diameter: 50px;
+  caption: "{name}";
+}
+
+node.OMOPDrugExposure {
+  color: #F5CBA7;
+  border-color: #F0B27A;
+  text-color-internal: #4A2010;
+  diameter: 50px;
+  caption: "{name}";
+}
+
+/* ─── Layer 5: Clinical Ontology Backbone (Purple) ─────────── */
+node.SnomedConcept {
+  color: #7D3C98;
+  border-color: #6C3483;
+  text-color-internal: #FFFFFF;
+  diameter: 55px;
+  caption: "{name}";
+}
+
+node.LoincCode {
+  color: #A569BD;
+  border-color: #7D3C98;
+  text-color-internal: #FFFFFF;
+  diameter: 50px;
+  caption: "{name}";
+}
+
+node.ICD10Code {
+  color: #C39BD3;
+  border-color: #A569BD;
+  text-color-internal: #4A2060;
+  diameter: 50px;
+  caption: "{name}";
+}
+
+node.RxNormConcept {
+  color: #D7BDE2;
+  border-color: #C39BD3;
+  text-color-internal: #4A2060;
+  diameter: 50px;
+  caption: "{name}";
+}
+
+/* ─── Relationships ─────────────────────────────────────────── */
+relationship {
+  color: #A5ABB6;
+  shaft-width: 1px;
+  font-size: 8px;
+  padding: 3px;
+  text-color-external: #000000;
+  text-color-internal: #FFFFFF;
+  caption: "{type}";
+}
+
+relationship.OFFERS {
+  color: #2471A3;
+  shaft-width: 2px;
+}
+
+relationship.GOVERNS {
+  color: #5499C7;
+  shaft-width: 2px;
+}
+
+relationship.SUBMITTED {
+  color: #7FB3D3;
+  shaft-width: 1px;
+}
+
+relationship.APPROVES {
+  color: #AED6F1;
+  shaft-width: 2px;
+}
+
+relationship.DESCRIBED_BY {
+  color: #148F77;
+  shaft-width: 2px;
+}
+
+relationship.FROM_DATASET {
+  color: #76D7C4;
+  shaft-width: 1px;
+}
+
+relationship.MAPPED_TO {
+  color: #E59866;
+  shaft-width: 2px;
+}
+
+relationship.CODED_BY {
+  color: #A569BD;
+  shaft-width: 1px;
+}
+
+relationship.IS_A {
+  color: #7D3C98;
+  shaft-width: 1px;
+}
+
+relationship.STANDARD_CONCEPT {
+  color: #C39BD3;
+  shaft-width: 1px;
+}
