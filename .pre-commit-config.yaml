@@ -9,6 +9,7 @@ repos:
       - id: check-yaml
       - id: check-json
       - id: check-added-large-files
+        args: ["--maxkb=5000"]
 
   # Flexible linter/formatter suitable for Markdown, JS, TS, YAML, and JSON.
   - repo: https://github.com/pre-commit/mirrors-prettier
