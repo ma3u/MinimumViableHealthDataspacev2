@@ -5,7 +5,7 @@
 **Version:** 1.0
 **Author:** Matthias Buchhorn-Roth
 **Date:** March 2026
-**License:** Apache 2.0
+**License:** MIT
 
 ---
 
@@ -955,8 +955,8 @@ This schema provides a **production-ready, layered Neo4j data model** for health
 **Contact:**
 Matthias Buchhorn-Roth
 Solutions Architect, Sopra Steria
-LinkedIn: [linkedin.com/in/ma3u](https://linkedin.com/in/ma3u)
+LinkedIn: [linkedin.com/in/ma3u](https://www.linkedin.com/in/ma3u)
 GitHub: [github.com/ma3u](https://github.com/ma3u)
 
-**License:** Apache 2.0
-**Repository:** [github.com/ma3u/MinimumViableDataspace](https://github.com/ma3u/MinimumViableDataspace)
+**License:** MIT
+**Repository:** [github.com/ma3u/MinimumViableHealthDataspacev2](https://github.com/ma3u/MinimumViableHealthDataspacev2)

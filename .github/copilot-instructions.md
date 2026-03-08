@@ -1,43 +1,49 @@
 # Project Guidelines
 
-This repository contains planning documents and schema definitions for the Minimum Viable Health Dataspace v2 project. There is no compiled code, services, or automated build system; most work is in Markdown.
+Health Dataspace v2: an EHDS-compliant demo using EDC-V, DCore, CFM, Neo4j, FHIR R4, and OMOP CDM.
 
 ## Code Style
 
-- Primary artifacts are Markdown (`.md`) files. Follow common Markdown conventions:
-  - Use `#`, `##`, etc. for headings.
-  - Use fenced code blocks (`` ` ``) for snippets.
-  - Keep lines wrapped at ~80 characters when possible.
-  - Tables and lists should be formatted cleanly.
-- If any scripts or source files are added later, follow the appropriate language idioms and formatting tools (prettier/black) where applicable.
+- Markdown (`.md`): headings, fenced code blocks, ~80 char line wrap, clean tables.
+- Cypher (`.cypher`): UPPER_SNAKE_CASE relationship types, PascalCase node labels, camelCase properties.
+- Prettier auto-formats `.md`, `.yaml`, `.json` via pre-commit hooks.
+- Future Java/Rust/Python code should follow standard language formatters.
 
 ## Architecture
 
-- There is no application architecture; the repo is a collection of planning and schema documents:
-  - `planning-health-dataspace-v2.md` describes goals and steps.
-  - `health-dataspace-graph-schema.md` defines the data graph schema.
-- Agents should treat each file as a self‑contained specification.
+- `planning-health-dataspace-v2.md` — 5-phase implementation roadmap (EDC-V + DCore + CFM + Neo4j).
+- `health-dataspace-graph-schema.md` — 5-layer Neo4j graph schema (Marketplace → HealthDCAT-AP → FHIR → OMOP → Ontology).
+- `docker-compose.yml` — Local Neo4j 5 with APOC + n10s plugins.
+- `neo4j/init-schema.cypher` — All Neo4j constraints and indexes for the 5-layer model.
 
 ## Build and Test
 
-- There are no build or test commands for this workspace.
-- If future code is introduced, default to standard tools (e.g. `npm install && npm test` for JS, `python -m pytest` for Python) and update these instructions accordingly.
+```bash
+# Start Neo4j locally
+docker compose up -d
+
+# Initialize schema
+cat neo4j/init-schema.cypher | docker exec -i health-dataspace-neo4j cypher-shell -u neo4j -p healthdataspace
+
+# Run pre-commit checks
+pre-commit run --all-files
+```
 
 ## Project Conventions
 
-- When editing existing Markdown, maintain the existing tone and formatting.
-- Use relative links when referring to other documents in the repo.
-- Add new files under the root or appropriate subfolders.
+- Maintain existing tone and formatting when editing Markdown.
+- Use relative links between documents.
+- Schema changes in `.md` must be reflected in `neo4j/init-schema.cypher`.
+- Keep `docker-compose.yml` in sync with technical requirements in `README.md`.
 
 ## Integration Points
 
-- There are no external dependencies or services currently.
-- Any future integrations (APIs, databases, etc.) should be documented clearly in the planning files.
+- **Neo4j 5** (Community Edition) — graph database via Docker, Bolt on port 7687, Browser on port 7474.
+- **Synthea** — synthetic FHIR patient data generation (Phase 3).
+- **Eclipse EDC-V / DCore / CFM** — dataspace connector stack (Phase 1-2).
 
 ## Security
 
-- No sensitive data should be committed; the repository contains only design documents.
-
----
-
-> _Note for AI agents_: your role is to help draft and refine project documentation, suggest schema improvements, and assist with planning. There is no executable code to run currently. Feel free to prompt the user for clarification when specifications are vague.
+- No patient data or credentials in the repository.
+- Default Neo4j credentials (`neo4j/healthdataspace`) are for local dev only.
+- Production credentials must use `.env` files (excluded via `.gitignore`).

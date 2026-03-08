@@ -1,0 +1,48 @@
+// Neo4j schema initialization for the Health Dataspace Graph
+// Run against a fresh Neo4j instance after startup
+// See: health-dataspace-graph-schema.md for full documentation
+
+// ============================================================
+// Layer 1: Dataspace Marketplace Metadata
+// ============================================================
+CREATE CONSTRAINT participant_id IF NOT EXISTS FOR (p:Participant) REQUIRE p.participantId IS UNIQUE;
+CREATE INDEX participant_type IF NOT EXISTS FOR (p:Participant) ON (p.participantType);
+CREATE CONSTRAINT product_id IF NOT EXISTS FOR (dp:DataProduct) REQUIRE dp.productId IS UNIQUE;
+CREATE INDEX product_type IF NOT EXISTS FOR (dp:DataProduct) ON (dp.productType);
+CREATE CONSTRAINT contract_id IF NOT EXISTS FOR (c:Contract) REQUIRE c.contractId IS UNIQUE;
+
+// ============================================================
+// Layer 2: HealthDCAT-AP Metadata
+// ============================================================
+CREATE CONSTRAINT dataset_id IF NOT EXISTS FOR (hd:HealthDataset) REQUIRE hd.datasetId IS UNIQUE;
+
+// ============================================================
+// Layer 3: FHIR Clinical Knowledge Graph
+// ============================================================
+CREATE CONSTRAINT patient_id IF NOT EXISTS FOR (p:Patient) REQUIRE p.resourceId IS UNIQUE;
+CREATE INDEX patient_identifier IF NOT EXISTS FOR (p:Patient) ON (p.identifier);
+CREATE CONSTRAINT condition_id IF NOT EXISTS FOR (c:Condition) REQUIRE c.resourceId IS UNIQUE;
+CREATE INDEX condition_code IF NOT EXISTS FOR (c:Condition) ON (c.code);
+CREATE CONSTRAINT observation_id IF NOT EXISTS FOR (o:Observation) REQUIRE o.resourceId IS UNIQUE;
+CREATE INDEX observation_code IF NOT EXISTS FOR (o:Observation) ON (o.code);
+CREATE INDEX observation_category IF NOT EXISTS FOR (o:Observation) ON (o.category);
+CREATE CONSTRAINT medication_request_id IF NOT EXISTS FOR (mr:MedicationRequest) REQUIRE mr.resourceId IS UNIQUE;
+CREATE INDEX medication_code IF NOT EXISTS FOR (mr:MedicationRequest) ON (mr.medicationCode);
+CREATE CONSTRAINT encounter_id IF NOT EXISTS FOR (e:Encounter) REQUIRE e.resourceId IS UNIQUE;
+
+// ============================================================
+// Layer 4: OMOP Research Analytics
+// ============================================================
+CREATE CONSTRAINT omop_person_id IF NOT EXISTS FOR (op:OMOPPerson) REQUIRE op.personId IS UNIQUE;
+CREATE CONSTRAINT omop_condition_occurrence_id IF NOT EXISTS FOR (oco:OMOPConditionOccurrence) REQUIRE oco.conditionOccurrenceId IS UNIQUE;
+CREATE INDEX omop_condition_concept IF NOT EXISTS FOR (oco:OMOPConditionOccurrence) ON (oco.conditionConceptId);
+CREATE CONSTRAINT omop_measurement_id IF NOT EXISTS FOR (om:OMOPMeasurement) REQUIRE om.measurementId IS UNIQUE;
+CREATE INDEX omop_measurement_concept IF NOT EXISTS FOR (om:OMOPMeasurement) ON (om.measurementConceptId);
+
+// ============================================================
+// Layer 5: Clinical Ontology Backbone
+// ============================================================
+CREATE CONSTRAINT snomed_concept_id IF NOT EXISTS FOR (sc:SnomedConcept) REQUIRE sc.conceptId IS UNIQUE;
+CREATE CONSTRAINT loinc_code IF NOT EXISTS FOR (lc:LoincCode) REQUIRE lc.loincNumber IS UNIQUE;
+CREATE CONSTRAINT icd10_code IF NOT EXISTS FOR (icd:ICD10Code) REQUIRE icd.code IS UNIQUE;
+CREATE CONSTRAINT rxnorm_rxcui IF NOT EXISTS FOR (rx:RxNormConcept) REQUIRE rx.rxcui IS UNIQUE;

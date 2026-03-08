@@ -1,0 +1,21 @@
+services:
+  neo4j:
+    image: neo4j:5-community
+    container_name: health-dataspace-neo4j
+    ports:
+      - "7474:7474" # Browser UI
+      - "7687:7687" # Bolt protocol
+    environment:
+      NEO4J_AUTH: neo4j/healthdataspace
+      NEO4J_PLUGINS: '["apoc", "n10s"]'
+      NEO4J_server_memory_heap_initial__size: 512m
+      NEO4J_server_memory_heap_max__size: 1G
+    volumes:
+      - neo4j_data:/data
+      - neo4j_logs:/logs
+      - ./neo4j/import:/var/lib/neo4j/import
+      - ./neo4j/plugins:/plugins
+
+volumes:
+  neo4j_data:
+  neo4j_logs:

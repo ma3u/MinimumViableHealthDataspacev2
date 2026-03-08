@@ -1,0 +1,41 @@
+# Dependency & build artifacts
+node_modules/
+target/
+build/
+.gradle/
+*.class
+*.jar
+
+# Neo4j local data
+neo4j_data/
+neo4j_logs/
+
+# Environment
+.env
+.env.local
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+*.iml
+*.swp
+*.swo
+*~
+
+# Rust
+/debug/
+**/*.rs.bk
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+venv/
+.venv/
+
+# Docker
+docker-compose.override.yml

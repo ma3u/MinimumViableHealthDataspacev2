@@ -1,11 +1,9 @@
-Now I have comprehensive information on all the new EDC components. Let me provide the updated implementation roadmap.
+# Planning: Health Dataspace v2
 
 ## Background & Inspiration
 
 This phase of the project is contextualized and inspired by:
 [European Health Dataspaces, Digital Twins: A Journey from FHIR Basics to Intelligent Patient Models](https://www.linkedin.com/pulse/european-health-dataspaces-digital-twins-journey-fhir-buchhorn-roth-8t51c/)
-
-Here is the updated **"What I'm Building Next"** chapter, rewritten to align your MVD extension with the new EDC component architecture:
 
 ---
 
@@ -148,5 +146,3 @@ When complete, the Health MVD v2 will demonstrate:
 The [JAD demo](https://github.com/Metaform/jad) provides the cloud-provider reference for EDC-V + CFM. The Health MVD v2 extends this with the **domain-specific health knowledge layer** — the piece that makes a generic dataspace into a health dataspace. [linkedin](https://www.linkedin.com/posts/mbuchhorn_fulcrum-daas-edc-activity-7427340949279809536-OaG6)
 
 ---
-
-This rewritten chapter replaces the original "What I'm Building Next" section in your article. It gives your audience a concrete, phased implementation plan that maps directly to the new EDC components and final protocol specifications — showing that you're not just writing about it, but building it.
