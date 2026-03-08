@@ -57,6 +57,33 @@ MERGE (contract)-[:PROVIDER {participantId: clinic.participantId}]->(clinic)
 MERGE (contract)-[:CONSUMER {participantId: cro.participantId}]->(cro)
 MERGE (cro)-[:CONSUMES]->(dp)
 
+// EHDS Governance: HDAB Access Application and Approval Chain (Articles 45-52)
+// Step 1: CRO submits an access application to BfArM HDAB
+MERGE (app:AccessApplication {applicationId: 'app-bfarm-2025-001'})
+  SET app.applicantId = cro.participantId,
+      app.datasetId = 'urn:uuid:charite:dataset:diab-001',
+      app.requestedPurpose = 'SCIENTIFIC_RESEARCH',
+      app.submittedAt = datetime('2025-01-10T09:00:00'),
+      app.status = 'APPROVED',
+      app.justification = 'Phase II clinical trial for novel antidiabetic compound. Requires historical HbA1c and comorbidity data for study arm stratification.',
+      app.ethicsCommitteeRef = 'EC-BfArM-2024-1138',
+      app.dataMinimisationStatement = 'Only pseudonymized cohort-level data required; no individual re-identification attempted.'
+MERGE (cro)-[:SUBMITTED]->(app)
+MERGE (app)-[:REQUESTS_ACCESS_TO]->(dp)
+MERGE (hdab)-[:REVIEWED]->(app)
+
+// Step 2: BfArM HDAB issues formal approval decision
+MERGE (approval:HDABApproval {approvalId: 'hdab-decision-bfarm-2025-001'})
+  SET approval.applicationId = app.applicationId,
+      approval.approvedAt = datetime('2025-02-03T14:30:00'),
+      approval.validUntil = datetime('2026-02-03T23:59:59'),
+      approval.permittedPurpose = 'SCIENTIFIC_RESEARCH',
+      approval.conditions = ['No re-identification', 'Results must be aggregated before export', 'Quarterly usage reports to BfArM'],
+      approval.hdabOfficer = 'Dr. Anna Müller (BfArM Data Access Board)',
+      approval.legalBasisArticle = 'EHDS_Art_46'
+MERGE (approval)-[:APPROVES]->(app)
+MERGE (approval)-[:APPROVED {permittedPurpose: 'SCIENTIFIC_RESEARCH'}]->(contract)
+
 // ==============================================================================
 // LAYER 2: HEALTHDCAT-AP METADATA
 // ==============================================================================

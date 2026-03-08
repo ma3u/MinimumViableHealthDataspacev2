@@ -155,6 +155,54 @@ CREATE CONSTRAINT contract_id IF NOT EXISTS FOR (c:Contract) REQUIRE c.contractI
 
 ---
 
+#### `AccessApplication`
+
+Represents a formal data access request submitted to an HDAB by a data consumer, as required by **EHDS Articles 45–52**. An `AccessApplication` is a prerequisite for contract negotiation — the HDAB must approve the stated purpose before a `Contract` can be formed.
+
+**Properties:**
+
+- `applicationId: String!` — Unique application reference number
+- `applicantId: String!` — Participant ID of the data consumer
+- `datasetId: String!` — URI of the requested `HealthDataset`
+- `requestedPurpose: String!` — EHDS Article 53 permitted purpose (e.g., `SCIENTIFIC_RESEARCH`)
+- `submittedAt: DateTime!` — Submission timestamp
+- `status: String!` — One of: `SUBMITTED`, `UNDER_REVIEW`, `APPROVED`, `REJECTED`, `REVOKED`
+- `justification: String` — Scientific or public-interest justification text
+- `ethicsCommitteeRef: String` — Reference to ethics committee approval
+- `dataMinimisationStatement: String` — GDPR Art. 5(1)(c) justification
+
+**Indexes:**
+
+```cypher
+CREATE CONSTRAINT access_application_id IF NOT EXISTS FOR (aa:AccessApplication) REQUIRE aa.applicationId IS UNIQUE;
+CREATE INDEX access_application_status IF NOT EXISTS FOR (aa:AccessApplication) ON (aa.status);
+```
+
+---
+
+#### `HDABApproval`
+
+An approval decision issued by a Health Data Access Body authorising a specific data consumer to access a dataset for a stated purpose. Bridges the `AccessApplication` to a `Contract` and provides the formal legal basis for data exchange under EHDS.
+
+**Properties:**
+
+- `approvalId: String!` — Unique approval decision identifier
+- `applicationId: String!` — Reference back to the `AccessApplication`
+- `approvedAt: DateTime!` — Date of formal HDAB decision
+- `validUntil: DateTime!` — Approval expiry date
+- `permittedPurpose: String!` — Granted EHDS Article 53 purpose (must match `AccessApplication.requestedPurpose`)
+- `conditions: String[]` — Any conditions or restrictions attached to the approval
+- `hdabOfficer: String` — Name or ID of the issuing HDAB officer
+- `legalBasisArticle: String` — EHDS legal basis (e.g., `EHDS_Art_46`, `GDPR_Art_9_2_j`)
+
+**Indexes:**
+
+```cypher
+CREATE CONSTRAINT hdab_approval_id IF NOT EXISTS FOR (ha:HDABApproval) REQUIRE ha.approvalId IS UNIQUE;
+```
+
+---
+
 ### 2.2 Relationships
 
 ```cypher
@@ -163,6 +211,13 @@ CREATE CONSTRAINT contract_id IF NOT EXISTS FOR (c:Contract) REQUIRE c.contractI
 (:Contract)-[:GOVERNS]->(:DataProduct)
 (:Contract)-[:PROVIDER {participantId}]->(:Participant)
 (:Contract)-[:CONSUMER {participantId}]->(:Participant)
+
+// EHDS HDAB approval chain (Articles 45–52)
+(:Participant)-[:SUBMITTED]->(:AccessApplication)
+(:AccessApplication)-[:REQUESTS_ACCESS_TO]->(:DataProduct)
+(:Participant {participantType: 'HDAB'})-[:REVIEWED]->(:AccessApplication)
+(:HDABApproval)-[:APPROVES]->(:AccessApplication)
+(:HDABApproval)-[:APPROVED {approvalId, permittedPurpose}]->(:Contract)
 ```
 
 ---
@@ -866,6 +921,28 @@ RETURN descendant.conceptId, descendant.preferredTerm
 LIMIT 100
 ```
 
+### 9.6 EHDS Governance: Validate Full HDAB Approval Chain
+
+Verify a data consumer has a valid, non-expired HDAB approval before executing a contract-governed query. This is the canonical pre-flight check for EHDS Articles 45–52 compliance.
+
+```cypher
+// Full approval chain: Consumer → Application → HDABApproval → Contract → DataProduct
+MATCH (consumer:Participant {participantId: $consumerId})
+MATCH (consumer)-[:SUBMITTED]->(app:AccessApplication {status: 'APPROVED'})
+MATCH (app)-[:REQUESTS_ACCESS_TO]->(hd:HealthDataset {datasetId: $datasetId})
+MATCH (approval:HDABApproval)-[:APPROVES]->(app)
+WHERE approval.validUntil > datetime()
+  AND approval.permittedPurpose = $requestedPurpose
+MATCH (approval)-[:APPROVED]->(contract:Contract)-[:GOVERNS]->(dp:DataProduct)-[:DESCRIBED_BY]->(hd)
+WHERE contract.validUntil > datetime()
+RETURN
+  consumer.legalName AS consumer,
+  approval.approvalId AS hdabApproval,
+  approval.permittedPurpose AS grantedPurpose,
+  contract.contractId AS contract,
+  dp.productId AS dataProduct
+```
+
 ---
 
 ## 10. Validation Rules
@@ -902,6 +979,50 @@ WHERE NOT EXISTS((consumer)<-[:CONSUMER]-(contract:Contract)-[:GOVERNS]->(dp))
      WHERE contract.validUntil > datetime()
    }
 RETURN consumer.participantId, dp.productId
+```
+
+### 10.3 EHDS HDAB Compliance (Articles 45–52)
+
+**Find contracts missing a valid HDAB approval — EHDS non-compliant access:**
+
+```cypher
+MATCH (contract:Contract)-[:GOVERNS]->(dp:DataProduct)
+WHERE NOT EXISTS {
+  MATCH (approval:HDABApproval)-[:APPROVED]->(contract)
+  WHERE approval.validUntil > datetime()
+}
+RETURN contract.contractId AS nonCompliantContract,
+       contract.consumerId AS consumer,
+       dp.productId AS dataProduct
+```
+
+**Detect approved applications whose contracts have since expired:**
+
+```cypher
+MATCH (app:AccessApplication {status: 'APPROVED'})
+MATCH (approval:HDABApproval)-[:APPROVES]->(app)
+MATCH (approval)-[:APPROVED]->(contract:Contract)
+WHERE contract.validUntil < datetime()
+  AND approval.validUntil > datetime()
+RETURN app.applicationId, contract.contractId,
+       contract.validUntil AS contractExpired,
+       approval.validUntil AS approvalStillValid
+```
+
+**List all active HDAB approvals for audit:**
+
+```cypher
+MATCH (hdab:Participant {participantType: 'HDAB'})-[:REVIEWED]->(app:AccessApplication)
+MATCH (approval:HDABApproval)-[:APPROVES]->(app)
+MATCH (consumer:Participant)-[:SUBMITTED]->(app)
+WHERE approval.validUntil > datetime()
+RETURN
+  hdab.legalName AS hdab,
+  consumer.legalName AS consumer,
+  approval.approvalId AS approvalId,
+  approval.permittedPurpose AS purpose,
+  approval.validUntil AS expiresAt
+ORDER BY approval.validUntil ASC
 ```
 
 ---

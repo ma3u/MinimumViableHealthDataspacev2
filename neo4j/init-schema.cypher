@@ -10,6 +10,9 @@ CREATE INDEX participant_type IF NOT EXISTS FOR (p:Participant) ON (p.participan
 CREATE CONSTRAINT product_id IF NOT EXISTS FOR (dp:DataProduct) REQUIRE dp.productId IS UNIQUE;
 CREATE INDEX product_type IF NOT EXISTS FOR (dp:DataProduct) ON (dp.productType);
 CREATE CONSTRAINT contract_id IF NOT EXISTS FOR (c:Contract) REQUIRE c.contractId IS UNIQUE;
+CREATE CONSTRAINT access_application_id IF NOT EXISTS FOR (aa:AccessApplication) REQUIRE aa.applicationId IS UNIQUE;
+CREATE INDEX access_application_status IF NOT EXISTS FOR (aa:AccessApplication) ON (aa.status);
+CREATE CONSTRAINT hdab_approval_id IF NOT EXISTS FOR (ha:HDABApproval) REQUIRE ha.approvalId IS UNIQUE;
 
 // ============================================================
 // Layer 2: HealthDCAT-AP Metadata
