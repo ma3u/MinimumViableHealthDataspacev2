@@ -32,12 +32,51 @@ A production-ready, EHDS-compliant health dataspace demo using Eclipse Dataspace
 | **Python**         | ≥ 3.10  | pre-commit, Synthea data generation scripts |
 | **pre-commit**     | latest  | Git hook framework                          |
 
+## Tooling & Container Strategy Recommendations
+
+This project targets a multi-participant architecture (EDC-V + CFM + DCore). Because of the complexity of running multiple connectors and databases simultaneously:
+
+- **macOS Users:** We strongly recommend [OrbStack](https://orbstack.dev/) over Docker Desktop. It is significantly faster, uses less memory, and integrates seamlessly with both Docker Compose and local Kubernetes instances.
+- **Local Kubernetes:** For Phase 4 (Dataspace Integration), running a local cluster becomes necessary. We recommend [KinD (Kubernetes in Docker)](https://kind.sigs.k8s.io/) as it is lightweight and CI/CD friendly. If you use OrbStack, its built-in zero-config Kubernetes is also an excellent choice.
+- **Cluster Management:** Use [Lens](https://k8slens.dev/) or [OpenLens](https://github.com/lensapp/lens) for visual debugging of the local cluster deployments (pods, services, logs).
+
 ## Getting Started
 
-### 1. Install prerequisites (macOS)
+### 1. Install prerequisites
+
+**macOS:**
 
 ```bash
+# Core dependencies
 brew install openjdk gradle pre-commit
+
+# Container & Kubernetes tools
+brew install orbstack kind
+brew install --cask lens
+
+# Rust (via rustup)
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+```
+
+**Linux (WSL2 / Ubuntu):**
+
+```bash
+# Core dependencies
+sudo apt update && sudo apt install -y openjdk-21-jdk gradle python3-pre-commit
+
+# Container tools (Docker Engine)
+sudo apt-get install ca-certificates curl
+sudo install -m 0755 -d /etc/apt/keyrings
+sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+sudo chmod a+r /etc/apt/keyrings/docker.asc
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
+  $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+sudo apt-get update && sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+
+# KinD
+[ $(uname -m) = x86_64 ] && curl -Lo ./kind https://kind.sigs.k8s.io/dl/v0.22.0/kind-linux-amd64
+chmod +x ./kind && sudo mv ./kind /usr/local/bin/kind
+
 # Rust (via rustup)
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 ```
