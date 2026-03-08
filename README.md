@@ -180,7 +180,8 @@ The Graph Explorer UI will automatically show the new patients.
 # Step 1 — generate 50 patients (FHIR R4 bundles → neo4j/import/fhir/)
 ./scripts/generate-synthea.sh 50
 
-# Step 2 — load bundles into Neo4j (install deps first)
+# Step 2 — install Python deps (venv avoids PEP 668 conflicts on macOS/Linux)
+python3 -m venv .venv && source .venv/bin/activate
 pip install -r scripts/requirements.txt
 python3 scripts/load_fhir_neo4j.py
 

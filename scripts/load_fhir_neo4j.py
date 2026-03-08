@@ -51,7 +51,7 @@ MERGE_ENCOUNTER = """
 MERGE (e:Encounter {id: $id})
 SET e.name   = $name,
     e.date   = $date,
-    e.class  = $class,
+    e.class  = $encClass,
     e.type   = $type,
     e.status = $status
 WITH e
@@ -173,7 +173,7 @@ def process_encounter(tx, resource: dict, patient_id: str):
         _, enc_type, _ = _first_coding(resource["type"][0])
     tx.run(MERGE_ENCOUNTER, id=eid,
            name=f"Encounter {date[:10] if date else eid}",
-           date=date, class=enc_class, type=enc_type,
+           date=date, encClass=enc_class, type=enc_type,
            status=resource.get("status", ""),
            patientId=patient_id)
 
