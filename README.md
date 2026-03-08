@@ -11,12 +11,18 @@ A EHDS-compliant health dataspace demo using Eclipse Dataspace Components (EDC-V
 ```
 ├── planning-health-dataspace-v2.md      # Implementation roadmap (5 phases)
 ├── health-dataspace-graph-schema.md     # 5-layer Neo4j graph schema
-├── docker-compose.yml                   # Neo4j + APOC + n10s local dev stack
+├── docker-compose.yml                   # Neo4j + Graph Explorer UI stack
 ├── neo4j/
 │   ├── init-schema.cypher               # Constraint & index initialization
 │   ├── insert-synthetic-schema-data.cypher # Sample data for all 5 layers
 │   ├── health-dataspace-style.grass     # Neo4j Browser color style sheet
 │   └── import/                          # FHIR bundle / CSV import staging
+├── ui/                                  # Phase 6a Next.js Graph Explorer
+│   ├── src/app/                         # Next.js App Router pages + API routes
+│   ├── src/lib/neo4j.ts                 # Neo4j driver singleton
+│   ├── src/components/Navigation.tsx    # Top navigation bar
+│   ├── Dockerfile                       # Multi-stage production image
+│   └── package.json
 ├── .pre-commit-config.yaml              # Formatting hooks (Prettier, etc.)
 └── .github/copilot-instructions.md      # AI agent workspace guidance
 ```
@@ -157,6 +163,35 @@ RETURN *
 ```
 
 ![Full Synthetic Patient Journey](image-1.png)
+
+### 8. Launch the Graph Explorer UI (Phase 6a)
+
+A Next.js 14 web app connects directly to Neo4j Bolt and provides four interactive views.
+
+**Run locally (development mode):**
+
+```bash
+cd ui
+cp .env.local.example .env.local   # credentials already match local Neo4j
+npm install
+npm run dev
+# Open http://localhost:3000
+```
+
+**Run via Docker Compose (alongside Neo4j):**
+
+```bash
+docker compose up -d
+# Graph Explorer UI: http://localhost:3000
+```
+
+| View            | Path          | Description                                |
+| --------------- | ------------- | ------------------------------------------ |
+| Home            | `/`           | Dashboard with links to all views          |
+| Graph Explorer  | `/graph`      | Force-directed graph of all 5 layers       |
+| Dataset Catalog | `/catalog`    | HealthDCAT-AP metadata table               |
+| EHDS Compliance | `/compliance` | HDAB approval chain validator (Art. 45–52) |
+| Patient Journey | `/patient`    | FHIR R4 → OMOP CDM timeline                |
 
 ## Development and Contributing
 
