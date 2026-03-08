@@ -1,5 +1,65 @@
 # Planning: Health Dataspace v2
 
+## Implementation Progress
+
+| Phase  | Title                                                  | Status         | Notes                                              |
+| ------ | ------------------------------------------------------ | -------------- | -------------------------------------------------- |
+| **3**  | Health Knowledge Graph Layer — Schema & Synthetic Data | ✅ Complete    | 5-layer Neo4j schema, EHDS HDAB chain, style sheet |
+| **1**  | Infrastructure Migration (EDC-V + DCore + CFM)         | 🔲 Not started | Highest priority for full dataspace functionality  |
+| **2**  | Identity and Trust (DCP v1.0 + Verifiable Credentials) | 🔲 Not started | Depends on Phase 1                                 |
+| **3b** | Real FHIR Data Pipeline (Synthea → CyFHIR → Neo4j)     | 🔲 Not started | Replaces synthetic data with real patient records  |
+| **4**  | Dataspace Integration (EDC-V ↔ Neo4j data assets)     | 🔲 Not started | Depends on Phases 1, 2, 3b                         |
+| **5**  | Federated Queries & GraphRAG                           | 🔲 Not started | Depends on Phase 4                                 |
+| **6a** | Graph Explorer UI (Next.js → Neo4j Bolt)               | 🟡 Proposed    | Fast demo win — no EDC dependency                  |
+| **6b** | Full Participant Portal (Aruba + Fraunhofer + Redline) | 🔲 Not started | Depends on Phase 1-4                               |
+
+---
+
+## Recommended Next Step: Phase 6a — Graph Explorer UI
+
+A lightweight **Next.js web app** connecting directly to Neo4j Bolt (`bolt://localhost:7687`) lets stakeholders interact with the 5-layer health model immediately — without waiting for EDC-V infrastructure. This is deployable in 1–2 days and makes the demo tangible for clinical and business audiences.
+
+### Phase 6a Scope
+
+- **Tech stack:** Next.js 14 (App Router) + Neo4j JavaScript Driver + `@neo4j-nvl/react` (Neo4j Visualization Library)
+- **Views:**
+  1. **Graph Explorer** — Interactive force-directed graph of the full patient journey (color-coded by layer, matching the GraSS style)
+  2. **Dataset Catalog** — List of `HealthDataset` nodes with properties, permissions, distributions — simulating an HDAB catalog browser
+  3. **EHDS Compliance Checker** — Form that validates the HDAB approval chain for a given consumer + dataset pair (runs the Section 9.6 Cypher query)
+  4. **Patient Journey Viewer** — Timeline view of a patient's FHIR resources mapped to OMOP analytics
+- **Deployment:** Docker Compose service alongside Neo4j, accessible at `http://localhost:3000`
+
+### Phase 6a Tasks
+
+1. Scaffold Next.js app in `ui/` folder with Neo4j driver configuration
+2. Implement Neo4j Bolt connection service with read-only credentials
+3. Build Graph Explorer view using `@neo4j-nvl/react` with layer color palette from `health-dataspace-style.grass`
+4. Build Dataset Catalog view with HealthDCAT-AP metadata display
+5. Build EHDS Compliance Checker with approval chain validation query
+6. Build Patient Journey Timeline view
+7. Add Docker Compose service for the UI
+8. Document in README
+
+### After Phase 6a — Parallel Tracks
+
+Once the UI provides a working demo foundation, the two parallel workstreams are:
+
+**Track A — Real Data (Phase 3b):**
+
+- Install Synthea, generate a Type 2 Diabetes cohort (500 patients)
+- Load FHIR Bundles via CyFHIR into Neo4j
+- Run FHIR → OMOP transformation
+- The UI immediately reflects real patient data
+
+**Track B — Dataspace Infrastructure (Phase 1):**
+
+- Deploy EDC-V control plane in Docker Compose
+- Deploy DCore Rust HTTP data plane
+- Configure CFM Tenant Manager for Clinic, CRO, HDAB tenants
+- The UI gains a "Contract Negotiation" tab once EDC-V APIs are available
+
+---
+
 ## Background & Inspiration
 
 This phase of the project is contextualized and inspired by:
