@@ -39,7 +39,7 @@ All three core specifications are now final or near-final:
 | **1**  | Infrastructure Migration (EDC-V + DCore + CFM)         | 🔲 Not started | Highest priority for full dataspace functionality  |
 | **2**  | Identity and Trust (DCP v1.0 + Verifiable Credentials) | 🔲 Not started | Depends on Phase 1                                 |
 | **3**  | Health Knowledge Graph Layer — Schema & Synthetic Data | ✅ Complete    | 5-layer Neo4j schema, EHDS HDAB chain, style sheet |
-| **3b** | Real FHIR Data Pipeline (Synthea → CyFHIR → Neo4j)     | 🔲 Not started | Replaces synthetic data with real patient records  |
+| **3b** | Real FHIR Data Pipeline (Synthea → CyFHIR → Neo4j)     | � In progress  | Synthea loader + FHIR→OMOP transform scripts       |
 | **4**  | Dataspace Integration (EDC-V ↔ Neo4j data assets)     | 🔲 Not started | Depends on Phases 1, 2, 3b                         |
 | **5**  | Federated Queries & GraphRAG                           | 🔲 Not started | Depends on Phase 4                                 |
 | **6a** | Graph Explorer UI (Next.js → Neo4j Bolt)               | ✅ Complete    | Four views; runs at localhost:3000                 |
@@ -82,12 +82,24 @@ All three core specifications are now final or near-final:
     - Expose metadata via the EDC-V Federated Catalog extension
 11. Implement **FHIR → OMOP transformation** pipeline for secondary use analytics
 
-### Phase 3b: Real FHIR Data Pipeline
+### Phase 3b: Real FHIR Data Pipeline 🟡
 
-- Install Synthea, generate a Type 2 Diabetes cohort (500 patients)
-- Load FHIR Bundles via CyFHIR into Neo4j
-- Run FHIR → OMOP transformation
-- The Graph Explorer UI immediately reflects real patient data
+Scripts in `scripts/` automate the full pipeline:
+
+1. **Generate cohort** — `scripts/generate-synthea.sh [N]`
+   - Downloads Synthea JAR (v3.3.0) on first run
+   - Runs the `diabetes` module for N patients (default 50)
+   - Outputs FHIR R4 JSON bundles to `neo4j/import/fhir/`
+2. **Load into Neo4j** — `python3 scripts/load_fhir_neo4j.py`
+   - Parses all Bundle resources: `Patient`, `Encounter`, `Condition`, `Observation`, `MedicationRequest`
+   - Upserts Layer 3 nodes; creates `CODED_BY` links to SNOMED CT / LOINC codes already in the graph
+   - Links each `Patient` to the target `HealthDataset` node
+3. **FHIR → OMOP transform** — `neo4j/fhir-to-omop-transform.cypher`
+   - Creates Layer 4 OMOP nodes: `OMOPPerson`, `OMOPVisitOccurrence`, `OMOPConditionOccurrence`, `OMOPMeasurement`, `OMOPDrugExposure`
+   - Adds `MAPPED_TO` relationships from FHIR → OMOP nodes
+   - Adds vocabulary bridges: `OMOPConditionOccurrence -[:CODED_BY]-> SnomedConcept`, etc.
+
+The Graph Explorer UI (`/graph` and `/patient`) reflects the real data immediately.
 
 ### Phase 4: Dataspace Integration (Weeks 8–11)
 
@@ -189,3 +201,4 @@ When complete, the Health MVD v2 will demonstrate:
 5. **Production-grade schema** — The 5-layer Neo4j health graph model working with real FHIR/OMOP data
 
 The [JAD demo](https://github.com/Metaform/jad) provides the cloud-provider reference for EDC-V + CFM. The Health MVD v2 extends this with the **domain-specific health knowledge layer** — the piece that makes a generic dataspace into a health dataspace.
+cd ui && npm run dev # http://localhost:3000

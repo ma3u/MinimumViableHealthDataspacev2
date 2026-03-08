@@ -13,18 +13,23 @@ A EHDS-compliant health dataspace demo using Eclipse Dataspace Components (EDC-V
 ├── health-dataspace-graph-schema.md     # 5-layer Neo4j graph schema
 ├── docker-compose.yml                   # Neo4j + Graph Explorer UI stack
 ├── neo4j/
-│   ├── init-schema.cypher               # Constraint & index initialization
+│   ├── init-schema.cypher                  # Constraint & index initialization
 │   ├── insert-synthetic-schema-data.cypher # Sample data for all 5 layers
-│   ├── health-dataspace-style.grass     # Neo4j Browser color style sheet
-│   └── import/                          # FHIR bundle / CSV import staging
-├── ui/                                  # Phase 6a Next.js Graph Explorer
-│   ├── src/app/                         # Next.js App Router pages + API routes
-│   ├── src/lib/neo4j.ts                 # Neo4j driver singleton
-│   ├── src/components/Navigation.tsx    # Top navigation bar
-│   ├── Dockerfile                       # Multi-stage production image
+│   ├── fhir-to-omop-transform.cypher       # Phase 3b: FHIR → OMOP transformation
+│   ├── health-dataspace-style.grass        # Neo4j Browser color style sheet
+│   └── import/fhir/                        # Synthea FHIR bundle staging (gitignored)
+├── scripts/
+│   ├── generate-synthea.sh                 # Phase 3b: Download Synthea & generate cohort
+│   ├── load_fhir_neo4j.py                  # Phase 3b: Load FHIR bundles into Neo4j
+│   └── requirements.txt                    # Python deps (neo4j driver)
+├── ui/                                     # Phase 6a Next.js Graph Explorer
+│   ├── src/app/                            # Next.js App Router pages + API routes
+│   ├── src/lib/neo4j.ts                    # Neo4j driver singleton
+│   ├── src/components/Navigation.tsx       # Top navigation bar
+│   ├── Dockerfile                          # Multi-stage production image
 │   └── package.json
-├── .pre-commit-config.yaml              # Formatting hooks (Prettier, etc.)
-└── .github/copilot-instructions.md      # AI agent workspace guidance
+├── .pre-commit-config.yaml                 # Formatting hooks (Prettier, etc.)
+└── .github/copilot-instructions.md         # AI agent workspace guidance
 ```
 
 ## Technical Requirements
@@ -163,6 +168,30 @@ RETURN *
 ```
 
 ![Full Synthetic Patient Journey](image-1.png)
+
+### 9. Phase 3b — Real FHIR Data Pipeline (Synthea → Neo4j → OMOP)
+
+Replace the hand-crafted synthetic data with a real Synthea-generated Type 2 Diabetes cohort.
+The Graph Explorer UI will automatically show the new patients.
+
+**Requirements:** Java ≥ 21 on `$PATH`.
+
+```bash
+# Step 1 — generate 50 patients (FHIR R4 bundles → neo4j/import/fhir/)
+./scripts/generate-synthea.sh 50
+
+# Step 2 — load bundles into Neo4j (install deps first)
+pip install -r scripts/requirements.txt
+python3 scripts/load_fhir_neo4j.py
+
+# Step 3 — transform FHIR Layer 3 nodes → OMOP Layer 4 nodes
+cat neo4j/fhir-to-omop-transform.cypher | \
+  docker exec -i health-dataspace-neo4j cypher-shell -u neo4j -p healthdataspace
+```
+
+After loading, explore the real patient data in the Graph Explorer (`/graph`) or Patient Journey (`/patient`) views.
+
+> **Note:** FHIR bundles in `neo4j/import/fhir/` are `.gitignore`d — no patient data is stored in the repository.
 
 ### 8. Launch the Graph Explorer UI (Phase 6a)
 
