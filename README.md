@@ -1,10 +1,10 @@
 # Minimum Viable Health Dataspace v2
 
-A production-ready, EHDS-compliant health dataspace demo using Eclipse Dataspace Components (EDC-V, DCore, CFM), Neo4j knowledge graphs, FHIR R4, and OMOP CDM.
+A EHDS-compliant health dataspace demo using Eclipse Dataspace Components (EDC-V, DCore, CFM), Neo4j knowledge graphs, FHIR R4, and OMOP CDM.
 
 ## Background & Resources
 
-- **Article:** [European Health Dataspaces, Digital Twins: A Journey from FHIR Basics to Intelligent Patient Models](https://www.linkedin.com/pulse/european-health-dataspaces-digital-twins-journey-fhir-buchhorn-roth-8t51c/)
+- **LinkedIn Article:** [European Health Dataspaces, Digital Twins: A Journey from FHIR Basics to Intelligent Patient Models](https://www.linkedin.com/pulse/european-health-dataspaces-digital-twins-journey-fhir-buchhorn-roth-8t51c/)
 
 ## Structure
 
@@ -38,7 +38,7 @@ This project targets a multi-participant architecture (EDC-V + CFM + DCore). Bec
 
 - **macOS Users:** We strongly recommend [OrbStack](https://orbstack.dev/) over Docker Desktop. It is significantly faster, uses less memory, and integrates seamlessly with both Docker Compose and local Kubernetes instances.
 - **Local Kubernetes:** For Phase 4 (Dataspace Integration), running a local cluster becomes necessary. We recommend [KinD (Kubernetes in Docker)](https://kind.sigs.k8s.io/) as it is lightweight and CI/CD friendly. If you use OrbStack, its built-in zero-config Kubernetes is also an excellent choice.
-- **Cluster Management:** Use [Lens](https://k8slens.dev/) or [OpenLens](https://github.com/lensapp/lens) for visual debugging of the local cluster deployments (pods, services, logs).
+- **Cluster Management:** Use [OpenLens](https://github.com/lensapp/lens) for visual debugging of the local cluster deployments (pods, services, logs).
 
 ## Getting Started
 
@@ -52,7 +52,7 @@ brew install openjdk gradle pre-commit
 
 # Container & Kubernetes tools
 brew install orbstack kind
-brew install --cask lens
+brew install --cask openlens
 
 # Rust (via rustup)
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
@@ -98,10 +98,18 @@ docker compose up -d
 
 ### 4. Initialize the graph schema
 
-Open Neo4j Browser and run the contents of `neo4j/init-schema.cypher`, or:
+Open [Neo4j Browser](http://localhost:7474) and run the contents of `neo4j/init-schema.cypher`, or:
 
 ```bash
 cat neo4j/init-schema.cypher | docker exec -i health-dataspace-neo4j cypher-shell -u neo4j -p healthdataspace
+```
+
+### 5. Visualize the Data Model
+
+To view the structure of the data model you just initialized, run this built-in meta-graph command in the Neo4j Browser UI query bar:
+
+```cypher
+CALL db.schema.visualization()
 ```
 
 ## Development and Contributing
