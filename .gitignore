@@ -43,6 +43,8 @@ docker-compose.override.yml
 # Synthea — generated patient data (never commit)
 neo4j/import/fhir/*.json
 neo4j/import/fhir/*.ndjson
+neo4j/import/metadata/*.json
+neo4j/metadata/*.json
 scripts/synthea-with-dependencies.jar
 scripts/output/
 output/
