@@ -96,20 +96,35 @@ Here is the concrete implementation plan, organized in phases:
     - Vector embeddings for semantic search across clinical narratives
     - Structured + unstructured retrieval for comprehensive patient context
 
+**Phase 6: User Interfaces & Ecosystem Portals (Weeks 14–16)**
+
+To make the health dataspace tangible for business and clinical users, the final phase integrates web-based graphical user interfaces (GUIs) over the core control and management planes:
+
+19. Deploy **Participant & Operator Dashboards**:
+    - Evaluate and integrate [Dataspace Builder Redline](https://dataspacebuilder.github.io/website/docs/components/redline), providing a visual dashboard for connector operators to manage data assets, usage policies, and dataspace contracts easily.
+20. Implement **Ecosystem Onboarding Portals**:
+    - Deploy self-service UIs using components from the [Aruba EDC Public Participant Portal](https://github.com/Aruba-it-S-p-A/edc-public-participant-portal) and the [Fraunhofer ISST End-User API (Ecosystem Registration)](https://github.com/FraunhoferISST/End-User-API/tree/feat/ecosystem-registration).
+    - Enable Clinics and CROs to self-register, undergo automated credential provisioning via Keycloak/CFM, and discover synthetic health datasets through an intuitive catalog browser rather than raw APIs.
+
 ### Target Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                    CFM (Management Plane)                    │
-│  Tenant Manager · Provision Manager · Operator UI           │
+│                 Ecosystem & End-User Portals                │
+│  (Aruba Participant Portal / Fraunhofer End-User API / Redline UI) │
+└────────────┬──────────────────────────────┬─────────────────┘
+             │                              │
+┌────────────┴──────────────────────────────┴─────────────────┐
+│                    CFM (Management Plane)                   │
+│  Tenant Manager · Provision Manager · Operator API          │
 │  Credential Issuance · Lifecycle Management                 │
 └────────────┬──────────────────────────────┬─────────────────┘
              │                              │
     ┌────────┴────────┐           ┌────────┴────────┐
     │   EDC-V Clinic  │           │   EDC-V CRO     │
-    │  Control Plane  │           │  Control Plane   │
-    │  (DSP + DCP)    │           │  (DSP + DCP)     │
-    └────────┬────────┘           └────────┬─────────┘
+    │  Control Plane  │           │  Control Plane  │
+    │  (DSP + DCP)    │           │  (DSP + DCP)    │
+    └────────┬────────┘           └────────┬────────┘
              │                              │
     ┌────────┴────────┐           ┌────────┴─────────┐
     │  DCore Rust     │           │  DCore Rust      │
