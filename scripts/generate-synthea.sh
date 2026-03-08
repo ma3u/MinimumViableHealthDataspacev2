@@ -48,25 +48,17 @@ mkdir -p "${OUTPUT_DIR}"
 
 # ── 4. Run Synthea ───────────────────────────────────────────────────────────
 echo ""
-echo "Generating ${POPULATION} patients (Type 2 Diabetes module)…"
+echo "Generating ${POPULATION} patients (all modules — chronic conditions emerge naturally)…"
 java -jar "${JAR_PATH}" \
   -p "${POPULATION}" \
-  -m "diabetes" \
   --exporter.fhir.export=true \
   --exporter.fhir.version=R4 \
   --exporter.hospital.fhir.export=false \
   --exporter.practitioner.fhir.export=false \
-  --exporter.baseDirectory="${OUTPUT_DIR}/../.." \
+  --exporter.baseDirectory="${OUTPUT_DIR}/.." \
   --exporter.subdir="fhir" \
   Massachusetts
-
-# Synthea writes to output/fhir/ — move to our target
-SYNTHEA_OUT="$(pwd)/output/fhir"
-if [[ -d "${SYNTHEA_OUT}" ]]; then
-  echo "Moving bundles from ${SYNTHEA_OUT} → ${OUTPUT_DIR}…"
-  mv "${SYNTHEA_OUT}"/*.json "${OUTPUT_DIR}/" 2>/dev/null || true
-  rmdir "${SYNTHEA_OUT}" 2>/dev/null || true
-fi
+# Synthea writes to {baseDirectory}/fhir/ which equals OUTPUT_DIR — no mv needed
 
 BUNDLE_COUNT=$(ls -1 "${OUTPUT_DIR}"/*.json 2>/dev/null | wc -l | tr -d ' ')
 echo ""

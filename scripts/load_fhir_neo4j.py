@@ -2,9 +2,8 @@
 """
 Phase 3b: Load Synthea FHIR R4 bundles into the Neo4j Health Knowledge Graph.
 
-Reads every *.json bundle from neo4j/import/fhir/ and upserts nodes/
-relationships into the Layer 3 (FHIR Clinical Graph) following the schema in
-health-dataspace-graph-schema.md.
+Uses UNWIND bulk upserts (one Cypher call per resource type per bundle) for
+fast loading of large cohorts.
 
 Usage:
     python3 scripts/load_fhir_neo4j.py [--dir neo4j/import/fhir] \
@@ -12,9 +11,6 @@ Usage:
                                         [--user neo4j] \
                                         [--password healthdataspace] \
                                         [--dataset-id urn:uuid:charite:dataset:diab-001]
-
-Requirements:
-    pip install neo4j
 """
 
 import argparse
@@ -27,245 +23,269 @@ from pathlib import Path
 try:
     from neo4j import GraphDatabase
 except ImportError:
-    sys.exit("ERROR: neo4j package not found. Run: pip install neo4j")
+    sys.exit("ERROR: neo4j package not found.  Run: pip install neo4j")
 
-# ── Cypher templates ──────────────────────────────────────────────────────────
+# ── Bulk UNWIND Cypher (one call per resource type per bundle) ────────────────
 
-MERGE_PATIENT = """
-MERGE (p:Patient {id: $id})
-SET p.name       = $name,
-    p.birthDate  = $birthDate,
-    p.gender     = $gender,
-    p.deceased   = $deceased,
-    p.city       = $city,
-    p.state      = $state
-"""
-
-LINK_PATIENT_DATASET = """
-MATCH (p:Patient {id: $patientId})
-MATCH (hd:HealthDataset {id: $datasetId})
+UPSERT_PATIENTS = """
+UNWIND $rows AS row
+MERGE (p:Patient {id: row.id})
+SET p.name      = row.name,
+    p.birthDate = row.birthDate,
+    p.gender    = row.gender,
+    p.deceased  = row.deceased,
+    p.city      = row.city,
+    p.state     = row.state
+WITH p, row WHERE row.datasetId <> ''
+MATCH (hd:HealthDataset {id: row.datasetId})
 MERGE (p)-[:FROM_DATASET]->(hd)
 """
 
-MERGE_ENCOUNTER = """
-MERGE (e:Encounter {id: $id})
-SET e.name   = $name,
-    e.date   = $date,
-    e.class  = $encClass,
-    e.type   = $type,
-    e.status = $status
-WITH e
-MATCH (p:Patient {id: $patientId})
+UPSERT_ENCOUNTERS = """
+UNWIND $rows AS row
+MERGE (e:Encounter {id: row.id})
+SET e.name   = row.name,
+    e.date   = row.date,
+    e.class  = row.encClass,
+    e.type   = row.type,
+    e.status = row.status
+WITH e, row WHERE row.patientId <> ''
+MATCH (p:Patient {id: row.patientId})
 MERGE (p)-[:HAS_ENCOUNTER]->(e)
 """
 
-MERGE_CONDITION = """
-MERGE (c:Condition {id: $id})
-SET c.name      = $name,
-    c.onsetDate = $onsetDate,
-    c.code      = $code,
-    c.display   = $display,
-    c.system    = $system,
-    c.status    = $status
-WITH c
-MATCH (p:Patient {id: $patientId})
+UPSERT_CONDITIONS = """
+UNWIND $rows AS row
+MERGE (c:Condition {id: row.id})
+SET c.name      = row.name,
+    c.onsetDate = row.onsetDate,
+    c.code      = row.code,
+    c.display   = row.display,
+    c.system    = row.system,
+    c.status    = row.status
+WITH c, row WHERE row.patientId <> ''
+MATCH (p:Patient {id: row.patientId})
 MERGE (p)-[:HAS_CONDITION]->(c)
 """
 
-LINK_CONDITION_SNOMED = """
-MATCH (c:Condition {id: $conditionId})
-MERGE (s:SnomedConcept {code: $code})
-  ON CREATE SET s.name = $display, s.description = $display
+LINK_CONDITIONS_SNOMED = """
+UNWIND $rows AS row
+MATCH (c:Condition {id: row.id})
+MERGE (s:SnomedConcept {code: row.code})
+  ON CREATE SET s.name = row.display, s.description = row.display
 MERGE (c)-[:CODED_BY]->(s)
 """
 
-MERGE_OBSERVATION = """
-MERGE (o:Observation {id: $id})
-SET o.name      = $name,
-    o.dateTime  = $dateTime,
-    o.code      = $code,
-    o.display   = $display,
-    o.system    = $system,
-    o.value     = $value,
-    o.unit      = $unit,
-    o.category  = $category
-WITH o
-MATCH (p:Patient {id: $patientId})
+UPSERT_OBSERVATIONS = """
+UNWIND $rows AS row
+MERGE (o:Observation {id: row.id})
+SET o.name     = row.name,
+    o.dateTime = row.dateTime,
+    o.code     = row.code,
+    o.display  = row.display,
+    o.system   = row.system,
+    o.value    = row.value,
+    o.unit     = row.unit,
+    o.category = row.category
+WITH o, row WHERE row.patientId <> ''
+MATCH (p:Patient {id: row.patientId})
 MERGE (p)-[:HAS_OBSERVATION]->(o)
 """
 
-LINK_OBSERVATION_LOINC = """
-MATCH (o:Observation {id: $observationId})
-MERGE (l:LoincCode {code: $code})
-  ON CREATE SET l.name = $display, l.description = $display
+LINK_OBSERVATIONS_LOINC = """
+UNWIND $rows AS row
+MATCH (o:Observation {id: row.id})
+MERGE (l:LoincCode {code: row.code})
+  ON CREATE SET l.name = row.display, l.description = row.display
 MERGE (o)-[:CODED_BY]->(l)
 """
 
-MERGE_MEDICATION = """
-MERGE (m:MedicationRequest {id: $id})
-SET m.name    = $name,
-    m.date    = $date,
-    m.code    = $code,
-    m.display = $display,
-    m.system  = $system,
-    m.status  = $status,
-    m.intent  = $intent
-WITH m
-MATCH (p:Patient {id: $patientId})
+UPSERT_MEDICATIONS = """
+UNWIND $rows AS row
+MERGE (m:MedicationRequest {id: row.id})
+SET m.name    = row.name,
+    m.date    = row.date,
+    m.code    = row.code,
+    m.display = row.display,
+    m.system  = row.system,
+    m.status  = row.status,
+    m.intent  = row.intent
+WITH m, row WHERE row.patientId <> ''
+MATCH (p:Patient {id: row.patientId})
 MERGE (p)-[:HAS_MEDICATION]->(m)
 """
 
-LINK_MEDICATION_RXNORM = """
-MATCH (m:MedicationRequest {id: $medicationId})
-MERGE (r:RxNormConcept {code: $code})
-  ON CREATE SET r.name = $display, r.description = $display
+LINK_MEDICATIONS_RXNORM = """
+UNWIND $rows AS row
+MATCH (m:MedicationRequest {id: row.id})
+MERGE (r:RxNormConcept {code: row.code})
+  ON CREATE SET r.name = row.display, r.description = row.display
 MERGE (m)-[:CODED_BY]->(r)
 """
 
 
-# ── Helpers ───────────────────────────────────────────────────────────────────
+# ── Bundle parser ─────────────────────────────────────────────────────────────
 
-def _ref_id(reference: str) -> str:
-    """Extract bare id from 'ResourceType/id' reference string."""
-    return reference.split("/")[-1] if reference else ""
-
-
-def _first_coding(concept: dict) -> tuple[str, str, str]:
-    """Return (code, display, system) from a CodeableConcept."""
-    codings = concept.get("coding", [])
-    if not codings:
-        return "", concept.get("text", ""), ""
-    c = codings[0]
-    return c.get("code", ""), c.get("display", concept.get("text", "")), c.get("system", "")
-
-
-def _patient_name(resource: dict) -> str:
-    names = resource.get("name", [])
-    if not names:
-        return resource.get("id", "Unknown")
-    n = names[0]
-    given = " ".join(n.get("given", []))
-    family = n.get("family", "")
-    return f"{given} {family}".strip() or resource.get("id", "Unknown")
-
-
-# ── Resource processors ───────────────────────────────────────────────────────
-
-def process_patient(tx, resource: dict, dataset_id: str):
-    pid = resource["id"]
-    tx.run(MERGE_PATIENT, id=pid,
-           name=_patient_name(resource),
-           birthDate=resource.get("birthDate", ""),
-           gender=resource.get("gender", ""),
-           deceased=resource.get("deceasedDateTime", resource.get("deceasedBoolean", False)),
-           city=resource.get("address", [{}])[0].get("city", ""),
-           state=resource.get("address", [{}])[0].get("state", ""))
-    if dataset_id:
-        tx.run(LINK_PATIENT_DATASET, patientId=pid, datasetId=dataset_id)
-
-
-def process_encounter(tx, resource: dict, patient_id: str):
-    eid = resource["id"]
-    date = resource.get("period", {}).get("start", "")
-    enc_class = resource.get("class", {}).get("code", "")
-    enc_type = ""
-    if resource.get("type"):
-        _, enc_type, _ = _first_coding(resource["type"][0])
-    tx.run(MERGE_ENCOUNTER, id=eid,
-           name=f"Encounter {date[:10] if date else eid}",
-           date=date, encClass=enc_class, type=enc_type,
-           status=resource.get("status", ""),
-           patientId=patient_id)
-
-
-def process_condition(tx, resource: dict, patient_id: str):
-    cid = resource["id"]
-    code, display, system = _first_coding(resource.get("code", {}))
-    onset = resource.get("onsetDateTime", resource.get("onsetPeriod", {}).get("start", ""))
-    tx.run(MERGE_CONDITION, id=cid,
-           name=display or cid,
-           onsetDate=onset, code=code, display=display, system=system,
-           status=resource.get("clinicalStatus", {}).get("coding", [{}])[0].get("code", ""),
-           patientId=patient_id)
-    if code and "snomed" in system.lower():
-        tx.run(LINK_CONDITION_SNOMED, conditionId=cid, code=code, display=display)
-
-
-def process_observation(tx, resource: dict, patient_id: str):
-    oid = resource["id"]
-    code, display, system = _first_coding(resource.get("code", {}))
-    vq = resource.get("valueQuantity", {})
-    category = ""
-    if resource.get("category"):
-        _, category, _ = _first_coding(resource["category"][0])
-    tx.run(MERGE_OBSERVATION, id=oid,
-           name=display or oid,
-           dateTime=resource.get("effectiveDateTime", ""),
-           code=code, display=display, system=system,
-           value=str(vq.get("value", "")), unit=vq.get("unit", ""),
-           category=category,
-           patientId=patient_id)
-    if code and "loinc" in system.lower():
-        tx.run(LINK_OBSERVATION_LOINC, observationId=oid, code=code, display=display)
-
-
-def process_medication_request(tx, resource: dict, patient_id: str):
-    mid = resource["id"]
-    med = resource.get("medicationCodeableConcept", {})
-    code, display, system = _first_coding(med)
-    tx.run(MERGE_MEDICATION, id=mid,
-           name=display or mid,
-           date=resource.get("authoredOn", ""),
-           code=code, display=display, system=system,
-           status=resource.get("status", ""),
-           intent=resource.get("intent", ""),
-           patientId=patient_id)
-    if code and "rxnorm" in system.lower():
-        tx.run(LINK_MEDICATION_RXNORM, medicationId=mid, code=code, display=display)
-
-
-PROCESSORS = {
-    "Patient": process_patient,
-    "Encounter": process_encounter,
-    "Condition": process_condition,
-    "Observation": process_observation,
-    "MedicationRequest": process_medication_request,
-}
-
-
-# ── Bundle loader ─────────────────────────────────────────────────────────────
-
-def load_bundle(session, bundle_path: str, dataset_id: str, stats: dict):
+def parse_bundle(bundle_path: str, dataset_id: str):
+    """Parse a FHIR bundle into typed row lists ready for UNWIND upserts."""
     with open(bundle_path, encoding="utf-8") as f:
         bundle = json.load(f)
 
     if bundle.get("resourceType") != "Bundle":
-        return
+        return None
 
-    # Index resources by (type, id) first, find patient id
-    patient_id = None
     entries = bundle.get("entry", [])
+
+    # Find patient id first
+    patient_id = ""
     for entry in entries:
         r = entry.get("resource", {})
         if r.get("resourceType") == "Patient":
             patient_id = r["id"]
             break
 
+    patients, encounters, conditions, observations, medications = [], [], [], [], []
+    snomed_rows, loinc_rows, rxnorm_rows = [], [], []
+
     for entry in entries:
         r = entry.get("resource", {})
         rtype = r.get("resourceType", "")
-        if rtype not in PROCESSORS:
-            continue
-        try:
-            with session.begin_transaction() as tx:
-                if rtype == "Patient":
-                    PROCESSORS[rtype](tx, r, dataset_id)
-                else:
-                    PROCESSORS[rtype](tx, r, patient_id or "")
-                tx.commit()
-            stats[rtype] = stats.get(rtype, 0) + 1
-        except Exception as e:
-            print(f"  WARN: failed to load {rtype}/{r.get('id', '?')}: {e}")
+
+        if rtype == "Patient":
+            pid = r["id"]
+            names = r.get("name", [])
+            n = names[0] if names else {}
+            given = " ".join(n.get("given", []))
+            family = n.get("family", "")
+            name = f"{given} {family}".strip() or pid
+            patients.append({
+                "id": pid, "name": name,
+                "birthDate": r.get("birthDate", ""),
+                "gender": r.get("gender", ""),
+                "deceased": r.get("deceasedDateTime", r.get("deceasedBoolean", False)),
+                "city": (r.get("address") or [{}])[0].get("city", ""),
+                "state": (r.get("address") or [{}])[0].get("state", ""),
+                "datasetId": dataset_id or "",
+            })
+
+        elif rtype == "Encounter" and patient_id:
+            eid = r["id"]
+            date = r.get("period", {}).get("start", "")
+            enc_class = r.get("class", {}).get("code", "")
+            enc_type_codings = (r.get("type") or [{}])[0].get("coding", [])
+            enc_type = (
+                enc_type_codings[0].get("display", enc_type_codings[0].get("code", ""))
+                if enc_type_codings else ""
+            )
+            encounters.append({
+                "id": eid,
+                "name": f"Encounter {date[:10] if date else eid}",
+                "date": date, "encClass": enc_class, "type": enc_type,
+                "status": r.get("status", ""), "patientId": patient_id,
+            })
+
+        elif rtype == "Condition" and patient_id:
+            cid = r["id"]
+            codings = r.get("code", {}).get("coding", [])
+            code = codings[0].get("code", "") if codings else ""
+            display = (
+                codings[0].get("display", r.get("code", {}).get("text", ""))
+                if codings else ""
+            )
+            system = codings[0].get("system", "") if codings else ""
+            onset = r.get("onsetDateTime", (r.get("onsetPeriod") or {}).get("start", ""))
+            cs_codings = (r.get("clinicalStatus") or {}).get("coding", [])
+            status = cs_codings[0].get("code", "") if cs_codings else ""
+            row = {
+                "id": cid, "name": display or cid, "onsetDate": onset,
+                "code": code, "display": display, "system": system,
+                "status": status, "patientId": patient_id,
+            }
+            conditions.append(row)
+            if code and "snomed" in system.lower():
+                snomed_rows.append({"id": cid, "code": code, "display": display})
+
+        elif rtype == "Observation" and patient_id:
+            oid = r["id"]
+            codings = r.get("code", {}).get("coding", [])
+            code = codings[0].get("code", "") if codings else ""
+            display = (
+                codings[0].get("display", r.get("code", {}).get("text", ""))
+                if codings else ""
+            )
+            system = codings[0].get("system", "") if codings else ""
+            vq = r.get("valueQuantity") or {}
+            cat_codings = (r.get("category") or [{}])[0].get("coding", [])
+            cat = cat_codings[0].get("code", "") if cat_codings else ""
+            row = {
+                "id": oid, "name": display or oid,
+                "dateTime": r.get("effectiveDateTime", ""),
+                "code": code, "display": display, "system": system,
+                "value": str(vq.get("value", "")), "unit": vq.get("unit", ""),
+                "category": cat, "patientId": patient_id,
+            }
+            observations.append(row)
+            if code and "loinc" in system.lower():
+                loinc_rows.append({"id": oid, "code": code, "display": display})
+
+        elif rtype == "MedicationRequest" and patient_id:
+            mid = r["id"]
+            med = r.get("medicationCodeableConcept") or {}
+            codings = med.get("coding", [])
+            code = codings[0].get("code", "") if codings else ""
+            display = codings[0].get("display", med.get("text", "")) if codings else ""
+            system = codings[0].get("system", "") if codings else ""
+            row = {
+                "id": mid, "name": display or mid,
+                "date": r.get("authoredOn", ""),
+                "code": code, "display": display, "system": system,
+                "status": r.get("status", ""), "intent": r.get("intent", ""),
+                "patientId": patient_id,
+            }
+            medications.append(row)
+            if code and "rxnorm" in system.lower():
+                rxnorm_rows.append({"id": mid, "code": code, "display": display})
+
+    return {
+        "patients": patients, "encounters": encounters,
+        "conditions": conditions, "snomed_rows": snomed_rows,
+        "observations": observations, "loinc_rows": loinc_rows,
+        "medications": medications, "rxnorm_rows": rxnorm_rows,
+    }
+
+
+def load_bundle(session, bundle_path: str, dataset_id: str, stats: dict):
+    data = parse_bundle(bundle_path, dataset_id)
+    if data is None:
+        return
+    try:
+        with session.begin_transaction() as tx:
+            if data["patients"]:
+                tx.run(UPSERT_PATIENTS, rows=data["patients"])
+                stats["Patient"] = stats.get("Patient", 0) + len(data["patients"])
+            if data["encounters"]:
+                tx.run(UPSERT_ENCOUNTERS, rows=data["encounters"])
+                stats["Encounter"] = stats.get("Encounter", 0) + len(data["encounters"])
+            if data["conditions"]:
+                tx.run(UPSERT_CONDITIONS, rows=data["conditions"])
+                if data["snomed_rows"]:
+                    tx.run(LINK_CONDITIONS_SNOMED, rows=data["snomed_rows"])
+                stats["Condition"] = stats.get("Condition", 0) + len(data["conditions"])
+            if data["observations"]:
+                tx.run(UPSERT_OBSERVATIONS, rows=data["observations"])
+                if data["loinc_rows"]:
+                    tx.run(LINK_OBSERVATIONS_LOINC, rows=data["loinc_rows"])
+                stats["Observation"] = stats.get("Observation", 0) + len(data["observations"])
+            if data["medications"]:
+                tx.run(UPSERT_MEDICATIONS, rows=data["medications"])
+                if data["rxnorm_rows"]:
+                    tx.run(LINK_MEDICATIONS_RXNORM, rows=data["rxnorm_rows"])
+                stats["MedicationRequest"] = (
+                    stats.get("MedicationRequest", 0) + len(data["medications"])
+                )
+            tx.commit()
+    except Exception as e:
+        print(f"\n  WARN [{os.path.basename(bundle_path)}]: {e}")
 
 
 # ── Main ──────────────────────────────────────────────────────────────────────
@@ -274,8 +294,11 @@ def main():
     repo_root = Path(__file__).parent.parent
     default_fhir_dir = repo_root / "neo4j" / "import" / "fhir"
 
-    parser = argparse.ArgumentParser(description="Load Synthea FHIR bundles into Neo4j")
-    parser.add_argument("--dir", default=str(default_fhir_dir), help="Directory with *.json bundles")
+    parser = argparse.ArgumentParser(
+        description="Load Synthea FHIR bundles into Neo4j (bulk UNWIND)"
+    )
+    parser.add_argument("--dir", default=str(default_fhir_dir),
+                        help="Directory with *.json bundles")
     parser.add_argument("--uri", default="bolt://localhost:7687")
     parser.add_argument("--user", default="neo4j")
     parser.add_argument("--password", default="healthdataspace")
@@ -285,10 +308,12 @@ def main():
 
     bundles = sorted(glob.glob(os.path.join(args.dir, "*.json")))
     if not bundles:
-        sys.exit(f"ERROR: No *.json files found in {args.dir}\n"
-                 "Run scripts/generate-synthea.sh first.")
+        sys.exit(
+            f"ERROR: No *.json files found in {args.dir}\n"
+            "Run scripts/generate-synthea.sh first."
+        )
 
-    print(f"=== Phase 3b: Load FHIR Bundles → Neo4j ===")
+    print("=== Phase 3b: Load FHIR Bundles → Neo4j ===")
     print(f"Bundles   : {len(bundles)}")
     print(f"Neo4j URI : {args.uri}")
     print(f"Dataset   : {args.dataset_id}")
@@ -312,8 +337,10 @@ def main():
         print(f"  {rtype:<25} {count:>6} nodes upserted")
     print("")
     print("Next: run FHIR → OMOP transform:")
-    print("  cat neo4j/fhir-to-omop-transform.cypher | "
-          "docker exec -i health-dataspace-neo4j cypher-shell -u neo4j -p healthdataspace")
+    print(
+        "  cat neo4j/fhir-to-omop-transform.cypher | "
+        "docker exec -i health-dataspace-neo4j cypher-shell -u neo4j -p healthdataspace"
+    )
 
 
 if __name__ == "__main__":
