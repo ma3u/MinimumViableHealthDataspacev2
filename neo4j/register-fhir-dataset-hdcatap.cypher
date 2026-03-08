@@ -134,8 +134,14 @@ MERGE (distHttp:DataDistribution {id: 'dist:synthea-fhir-neo4j-http'})
     distHttp.createdAt     = datetime();
 
 MATCH (ds:HealthDataset {id: 'dataset:synthea-fhir-r4-mvd'})
-MERGE (ds)-[:HAS_DISTRIBUTION]->(distBolt)
-MERGE (ds)-[:HAS_DISTRIBUTION]->(distHttp);
+MATCH (dist:DataDistribution {id: 'dist:synthea-fhir-neo4j-bolt'})
+  WHERE dist.accessURL IS NOT NULL
+MERGE (ds)-[:HAS_DISTRIBUTION]->(dist);
+
+MATCH (ds:HealthDataset {id: 'dataset:synthea-fhir-r4-mvd'})
+MATCH (dist:DataDistribution {id: 'dist:synthea-fhir-neo4j-http'})
+  WHERE dist.accessURL IS NOT NULL
+MERGE (ds)-[:HAS_DISTRIBUTION]->(dist);
 
 // ---------------------------------------------------------------------------
 // 7. Attach EHDS Purpose Restriction annotation
@@ -164,7 +170,7 @@ MERGE (ds)-[:APPROVED_UNDER]->(approval);
 // ---------------------------------------------------------------------------
 MATCH (ds:HealthDataset {id: 'dataset:synthea-fhir-r4-mvd'})
 OPTIONAL MATCH (ds)-[:HAS_DISTRIBUTION]->(dist:DataDistribution)
-OPTIONAL MATCH (ds)<-[:FROM_DATASET]-(p:Patient)
+WITH ds, collect(DISTINCT dist.title) AS distributions
 RETURN
   ds.title                      AS dataset,
   ds.hdcatapDatasetType         AS type,
@@ -173,4 +179,4 @@ RETURN
   ds.statEncounters             AS encounters,
   ds.statConditions             AS conditions,
   ds.statsUpdatedAt             AS statsUpdated,
-  collect(dist.title)           AS distributions;
+  distributions;
