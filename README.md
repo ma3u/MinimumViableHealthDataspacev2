@@ -119,3 +119,13 @@ We use `pre-commit` hooks alongside Prettier to ensure consistent formatting acr
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+### Step 5: Insert Synthetic Data (Optional but Recommended)
+
+To visualize the 5-layer architecture properly, Neo4j needs sample data. We provide a script that generates a complex, interconnected dataspace scenario covering Marketplace Metadata down to Clinical Ontology.
+
+```bash
+cat neo4j/insert-synthetic-schema-data.cypher | docker exec -i health-dataspace-neo4j cypher-shell -u neo4j -p healthdataspace
+```
+
+After running this, execute `CALL db.schema.visualization()` in your Neo4j browser again to see the fully connected layer metadata mapping!
