@@ -39,5 +39,3 @@ venv/
 
 # Docker
 docker-compose.override.yml
-*.png
-*.jpg

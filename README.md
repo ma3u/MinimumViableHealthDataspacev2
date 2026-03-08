@@ -142,8 +142,7 @@ Run this in the Neo4j Browser query bar to see the schema meta-graph:
 CALL db.schema.visualization()
 ```
 
-![Knowledge Graph Data Schema](image-1.png)
-
+![Knowledge Graph Data Schema](image-2.png)
 Or explore the full synthetic patient journey across all 5 layers:
 
 ```cypher
@@ -157,7 +156,7 @@ MATCH (p)-[:HAS_CONDITION]->(c)-[:CODED_BY]->(sc)
 RETURN *
 ```
 
-![full synthetic patient journey](image-2.png)
+![Full Synthetic Patient Journey](image-1.png)
 
 ## Development and Contributing
 
