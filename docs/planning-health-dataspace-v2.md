@@ -1,5 +1,38 @@
 # Planning: Health Dataspace v2
 
+## Table of Contents
+
+- [Background & Inspiration](#background--inspiration)
+- [New EDC Component Architecture](#new-edc-component-architecture)
+  - [Protocol Foundation: DSP + DCP + DPS](#protocol-foundation-dsp--dcp--dps)
+- [Implementation Progress](#implementation-progress)
+- [Implementation Roadmap](#implementation-roadmap)
+  - [Phase 1: Infrastructure Migration (JAD-Based)](#phase-1-infrastructure-migration-jad-based)
+    - [1e: ADR-2 Implementation — Dual Data Planes + Neo4j Query Proxy ✅](#1e-adr-2-implementation--dual-data-planes--neo4j-query-proxy-)
+  - [Phase 2: Identity and Trust (DCP v1.0)](#phase-2-identity-and-trust-dcp-v10)
+  - [Phase 3: Health Knowledge Graph Layer ✅](#phase-3-health-knowledge-graph-layer-)
+  - [Phase 3b: Real FHIR Data Pipeline ✅](#phase-3b-real-fhir-data-pipeline-)
+  - [Phase 3c: HealthDCAT-AP Metadata Registration ✅](#phase-3c-healthdcat-ap-metadata-registration-)
+  - [Phase 3d: README and UI Completeness Hardening ✅](#phase-3d-readme-and-ui-completeness-hardening-)
+  - [Phase 3e: DSP Marketplace Registration + Compliance Chain ✅](#phase-3e-dsp-marketplace-registration--compliance-chain-)
+  - [Phase 3f: OMOP Research Analytics View ✅](#phase-3f-omop-research-analytics-view-)
+  - [Phase 3g: Procedure Pipeline + UI Polish ✅](#phase-3g-procedure-pipeline--ui-polish-)
+  - [Phase 3h: EEHRxF FHIR Profile Alignment ✅](#phase-3h-eehrxf-fhir-profile-alignment-)
+  - [Phase 4: Dataspace Integration (EDC-V ↔ Neo4j)](#phase-4-dataspace-integration-edc-v--neo4j)
+  - [Phase 5: Federated Queries and GraphRAG](#phase-5-federated-queries-and-graphrag)
+  - [Phase 6a: Graph Explorer UI ✅](#phase-6a-graph-explorer-ui-)
+  - [Phase 6b: Unified Participant Portal (Next.js)](#phase-6b-unified-participant-portal-nextjs)
+  - [Phase 7: TCK DCP & DSP Compliance Verification](#phase-7-tck-dcp--dsp-compliance-verification)
+- [Architecture Decisions](#architecture-decisions)
+  - [ADR-1: PostgreSQL vs Neo4j Data Storage Split](#adr-1-postgresql-vs-neo4j-data-storage-split)
+  - [ADR-2: EDC Data Plane Architecture](#adr-2-edc-data-plane-architecture)
+  - [ADR-3: W3C HealthDCAT-AP Alignment](#adr-3-w3c-healthdcat-ap-alignment-replacing-generic-dcat)
+- [Target Architecture](#target-architecture)
+- [What This Proves](#what-this-proves)
+- [Implementation Dependencies](#implementation-dependencies)
+
+---
+
 ## Background & Inspiration
 
 This project is contextualised by:
@@ -36,7 +69,7 @@ All three core specifications are now final or near-final:
 
 | Phase  | Title                                                  | Status         | Notes                                                                                            |
 | ------ | ------------------------------------------------------ | -------------- | ------------------------------------------------------------------------------------------------ |
-| **1**  | Infrastructure Migration (EDC-V + DCore + CFM)         | � In progress  | Phase 1c complete: docker-compose.jad.yml + configs + bootstrap script + OpenAPI client setup    |
+| **1**  | Infrastructure Migration (EDC-V + DCore + CFM)         | 🏗️ In progress | 1c+1d+1e complete; ADR-1/2/3 accepted+implemented; 1a (KinD) + 1b (tenant config) pending        |
 | **2**  | Identity and Trust (DCP v1.0 + Verifiable Credentials) | 🔲 Not started | Depends on Phase 1                                                                               |
 | **3**  | Health Knowledge Graph Layer — Schema & Synthetic Data | ✅ Complete    | 5-layer Neo4j schema, EHDS HDAB chain, style sheet                                               |
 | **3b** | Real FHIR Data Pipeline (Synthea → Neo4j → OMOP)       | ✅ Complete    | 127 patients · 3,031 encounters · 1,045 conditions · 19,195 observations · 2,232 drug Rxes       |
@@ -119,6 +152,19 @@ Phase 1 bootstraps the full EDC-V + DCore + CFM stack using the [JAD (Joint Arch
 11. Publish clients as `ui/src/lib/edc/` module for use by Next.js API routes and client components
 
 **Deliverables:** Full EDC-V + CFM + DCore stack running locally; 3 health-specific tenants provisioned; OpenAPI TypeScript clients generated; existing Neo4j graph accessible via EDC-V data plane.
+
+#### 1e: ADR-2 Implementation — Dual Data Planes + Neo4j Query Proxy ✅
+
+12. Implement ADR-2 Docker Compose changes:
+    - Renamed `dataplane` → `dataplane-fhir` (DCore PUSH, port 11002, `application/fhir+json`)
+    - Added `dataplane-omop` (DCore PULL, port 11012, `application/json` / `text/csv`)
+    - Added `neo4j-proxy` service (Node.js/Express, port 9090, bridges DCore ↔ Neo4j)
+    - Added `dataplane_omop` PostgreSQL database to `jad/init-postgres.sql`
+13. Scaffold Neo4j Query Proxy (`services/neo4j-proxy/`):
+    - TypeScript/Express with `neo4j-driver`, multi-stage Docker build
+    - 6 endpoints: FHIR `$everything` + cohort, OMOP cohort + timeline, HealthDCAT-AP catalog listing + detail
+    - JSON-LD serialization with HealthDCAT-AP `@context` for catalog endpoints
+    - Health check at `/health` verifying Neo4j connectivity
 
 ### Phase 2: Identity and Trust (DCP v1.0)
 
@@ -325,7 +371,7 @@ Synthea generates ~43 Procedure resources per patient (96% SNOMED CT, 4% ADA CDT
 | MedicationRequest | 3,895     | OMOPDrugExposure            | 3,895     |
 | **Procedure**     | **8,534** | **OMOPProcedureOccurrence** | **8,534** |
 
-### Phase 3h: EEHRxF FHIR Profile Alignment
+### Phase 3h: EEHRxF FHIR Profile Alignment ✅
 
 The **European Electronic Health Record Exchange Format (EEHRxF)** was established by [Commission Recommendation C(2019)800](https://digital-strategy.ec.europa.eu/en/library/recommendation-european-electronic-health-record-exchange-format) of 6 February 2019. The [EHDS Regulation](https://health.ec.europa.eu/ehealth-digital-health-and-care/european-health-data-space_en) (entered into force 26 March 2025) elevates EEHRxF as the standard exchange format for 6 priority categories of electronic health data, with phased rollout:
 

@@ -17,15 +17,17 @@
 #     - keycloak       (Keycloak — OAuth2/OIDC identity provider)
 #     - nats           (NATS JetStream — async messaging)
 #   Application (k8s/apps equivalent):
-#     - controlplane   (EDC-V virtualized control plane)
-#     - dataplane      (DCore HTTP data plane)
-#     - identityhub    (DCP v1.0 credential storage & presentation)
-#     - issuerservice  (Verifiable Credential issuance)
-#     - tenant-manager (CFM tenant lifecycle management)
+#     - controlplane     (EDC-V virtualized control plane)
+#     - dataplane-fhir   (DCore HTTP data plane — FHIR PUSH, port 11002)
+#     - dataplane-omop   (DCore HTTP data plane — OMOP PULL, port 11012)
+#     - neo4j-proxy      (Node.js/Express — DCore ↔ Neo4j bridge, port 9090)
+#     - identityhub      (DCP v1.0 credential storage & presentation)
+#     - issuerservice    (Verifiable Credential issuance)
+#     - tenant-manager   (CFM tenant lifecycle management)
 #     - provision-manager (CFM automated resource provisioning)
-#     - cfm-agents     (CFM background provisioning agents)
+#     - cfm-agents       (CFM background provisioning agents)
 #   Routing:
-#     - traefik        (API Gateway — replaces K8s Gateway API)
+#     - traefik          (API Gateway — replaces K8s Gateway API)
 #
 # All services use *.localhost hostnames via Traefik for parity with KinD setup.
 # See: https://github.com/Metaform/jad
@@ -59,7 +61,8 @@ services:
   # PostgreSQL — Multi-database server for all EDC-V/CFM services
   # ---------------------------------------------------------------------------
   # Databases: controlplane (cp/cp), identityhub (ih/ih), issuerservice (issuer/issuer),
-  #            dataplane (dp/dp), keycloak (kc/kc), cfm (cfm/cfm), redlinedb (redline/redline)
+  #            dataplane (dp/dp), dataplane_omop (dp_omop/dp_omop),
+  #            keycloak (kc/kc), cfm (cfm/cfm), redlinedb (redline/redline)
   # ---------------------------------------------------------------------------
   postgres:
     image: postgres:17.7-alpine
@@ -290,16 +293,24 @@ services:
     restart: unless-stopped
 
   # ---------------------------------------------------------------------------
-  # DCore Data Plane — HTTP data transfer (Data Plane Signaling)
+  # DCore Data Plane — FHIR (HttpData-PUSH, clinical FHIR R4 bundles)
   # ---------------------------------------------------------------------------
-  dataplane:
+  # ADR-2: Renamed from 'dataplane' → 'dataplane-fhir'.
+  # Pushes FHIR Bundle JSON to consumer endpoints via Neo4j Query Proxy.
+  # ---------------------------------------------------------------------------
+  dataplane-fhir:
     image: ghcr.io/metaform/jad/dataplane:latest
-    container_name: health-dataspace-dataplane
+    container_name: health-dataspace-dataplane-fhir
     environment:
-      edc.hostname: "dataplane"
-      edc.transfer.proxy.token.verifier.publickey.alias: "dataplane-private"
-      edc.transfer.proxy.token.signer.privatekey.alias: "dataplane-public"
+      edc.hostname: "dataplane-fhir"
+      edc.participant.id: "did:web:connector"
+      edc.transfer.proxy.token.verifier.publickey.alias: "dataplane-fhir-private"
+      edc.transfer.proxy.token.signer.privatekey.alias: "dataplane-fhir-public"
       edc.dpf.selector.url: "http://controlplane:8083/api/control/v1/dataplanes"
+      # DPS registration — PUSH transfer for FHIR bundles
+      edc.dataplane.selector.fhir.sourcetype: "HttpData"
+      edc.dataplane.selector.fhir.destinationtype: "HttpData"
+      edc.dataplane.selector.fhir.transfertype: "HttpData-PUSH"
       # Web config
       web.http.port: "8080"
       web.http.path: "/api"
@@ -312,13 +323,13 @@ services:
       # Vault
       edc.vault.hashicorp.url: "http://vault:8200"
       edc.vault.hashicorp.token: "root"
-      # Database
+      # Database (shared dataplane DB)
       edc.datasource.default.url: "jdbc:postgresql://postgres:5432/dataplane"
       edc.datasource.default.user: "dp"
       edc.datasource.default.password: "dp"
       edc.sql.schema.autocreate: "true"
     ports:
-      - "11002:11002" # Public data transfer port
+      - "11002:11002" # Public data transfer port (FHIR)
     networks:
       - edcv
     depends_on:
@@ -330,10 +341,10 @@ services:
         condition: service_healthy
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.dataplane-public.rule=Host(`dp.localhost`) && PathPrefix(`/public`)"
-      - "traefik.http.routers.dataplane-public.middlewares=strip-public"
-      - "traefik.http.middlewares.strip-public.stripprefix.prefixes=/public"
-      - "traefik.http.services.dataplane-public.loadbalancer.server.port=11002"
+      - "traefik.http.routers.dataplane-fhir.rule=Host(`dp-fhir.localhost`) && PathPrefix(`/public`)"
+      - "traefik.http.routers.dataplane-fhir.middlewares=strip-fhir-public"
+      - "traefik.http.middlewares.strip-fhir-public.stripprefix.prefixes=/public"
+      - "traefik.http.services.dataplane-fhir.loadbalancer.server.port=11002"
     healthcheck:
       test:
         [
@@ -344,6 +355,111 @@ services:
       timeout: 5s
       retries: 15
       start_period: 30s
+    restart: unless-stopped
+
+  # ---------------------------------------------------------------------------
+  # DCore Data Plane — OMOP (HttpData-PULL, research analytics queries)
+  # ---------------------------------------------------------------------------
+  # ADR-2: New second DCore instance for OMOP CDM aggregate queries.
+  # Consumer pulls query results from provider via Neo4j Query Proxy.
+  # ---------------------------------------------------------------------------
+  dataplane-omop:
+    image: ghcr.io/metaform/jad/dataplane:latest
+    container_name: health-dataspace-dataplane-omop
+    environment:
+      edc.hostname: "dataplane-omop"
+      edc.participant.id: "did:web:connector"
+      edc.transfer.proxy.token.verifier.publickey.alias: "dataplane-omop-private"
+      edc.transfer.proxy.token.signer.privatekey.alias: "dataplane-omop-public"
+      edc.dpf.selector.url: "http://controlplane:8083/api/control/v1/dataplanes"
+      # DPS registration — PULL transfer for OMOP analytics
+      edc.dataplane.selector.omop.sourcetype: "HttpData"
+      edc.dataplane.selector.omop.destinationtype: "HttpData"
+      edc.dataplane.selector.omop.transfertype: "HttpData-PULL"
+      # Web config
+      web.http.port: "8080"
+      web.http.path: "/api"
+      web.http.control.port: "8083"
+      web.http.control.path: "/api/control"
+      web.http.public.port: "11012"
+      web.http.public.path: "/api/public"
+      web.http.certs.port: "8186"
+      web.http.certs.path: "/api/data"
+      # Vault
+      edc.vault.hashicorp.url: "http://vault:8200"
+      edc.vault.hashicorp.token: "root"
+      # Database (separate OMOP dataplane DB)
+      edc.datasource.default.url: "jdbc:postgresql://postgres:5432/dataplane_omop"
+      edc.datasource.default.user: "dp_omop"
+      edc.datasource.default.password: "dp_omop"
+      edc.sql.schema.autocreate: "true"
+    ports:
+      - "11012:11012" # Public data transfer port (OMOP)
+    networks:
+      - edcv
+    depends_on:
+      postgres:
+        condition: service_healthy
+      vault:
+        condition: service_healthy
+      controlplane:
+        condition: service_healthy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.dataplane-omop.rule=Host(`dp-omop.localhost`) && PathPrefix(`/public`)"
+      - "traefik.http.routers.dataplane-omop.middlewares=strip-omop-public"
+      - "traefik.http.middlewares.strip-omop-public.stripprefix.prefixes=/public"
+      - "traefik.http.services.dataplane-omop.loadbalancer.server.port=11012"
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "wget -q --spider http://127.0.0.1:8080/api/check/readiness || exit 1",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 15
+      start_period: 30s
+    restart: unless-stopped
+
+  # ---------------------------------------------------------------------------
+  # Neo4j Query Proxy — Bridges DCore data planes ↔ Neo4j graph (ADR-2)
+  # ---------------------------------------------------------------------------
+  # Translates HTTP requests into Cypher queries, serialises results as
+  # FHIR Bundle JSON, OMOP CSV/JSON, or HealthDCAT-AP JSON-LD.
+  # Only accessible from the Docker network (no host port by default).
+  # ---------------------------------------------------------------------------
+  neo4j-proxy:
+    build:
+      context: ./services/neo4j-proxy
+      dockerfile: Dockerfile
+    image: health-dataspace/neo4j-proxy:latest
+    container_name: health-dataspace-neo4j-proxy
+    environment:
+      NODE_ENV: "production"
+      PORT: "9090"
+      NEO4J_URI: "bolt://health-dataspace-neo4j:7687"
+      NEO4J_USER: "neo4j"
+      NEO4J_PASSWORD: "healthdataspace"
+    ports:
+      - "9090:9090" # Exposed for local debugging; remove in production
+    networks:
+      - edcv
+      - default # Connects to the Neo4j network from base docker-compose.yml
+    depends_on:
+      controlplane:
+        condition: service_healthy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.neo4j-proxy.rule=Host(`proxy.localhost`)"
+      - "traefik.http.services.neo4j-proxy.loadbalancer.server.port=9090"
+    healthcheck:
+      test:
+        ["CMD-SHELL", "wget -q --spider http://127.0.0.1:9090/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 15s
     restart: unless-stopped
 
   # ---------------------------------------------------------------------------

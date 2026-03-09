@@ -24,6 +24,13 @@ GRANT ALL PRIVILEGES ON DATABASE dataplane TO dp;
 \c dataplane
 GRANT ALL ON SCHEMA public TO dp;
 
+-- ADR-2: Separate database for the OMOP DCore data plane instance
+CREATE DATABASE dataplane_omop;
+CREATE USER dp_omop WITH PASSWORD 'dp_omop';
+GRANT ALL PRIVILEGES ON DATABASE dataplane_omop TO dp_omop;
+\c dataplane_omop
+GRANT ALL ON SCHEMA public TO dp_omop;
+
 CREATE DATABASE keycloak;
 CREATE USER kc WITH PASSWORD 'kc';
 GRANT ALL PRIVILEGES ON DATABASE keycloak TO kc;
