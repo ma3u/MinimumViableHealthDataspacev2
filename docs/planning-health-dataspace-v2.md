@@ -28,6 +28,7 @@
   - [ADR-1: PostgreSQL vs Neo4j Data Storage Split](#adr-1-postgresql-vs-neo4j-data-storage-split)
   - [ADR-2: EDC Data Plane Architecture](#adr-2-edc-data-plane-architecture)
   - [ADR-3: W3C HealthDCAT-AP Alignment](#adr-3-w3c-healthdcat-ap-alignment-replacing-generic-dcat)
+  - [ADR-4: Next.js 14 as Unified Frontend](#adr-4-nextjs-14-as-unified-frontend-consolidating-angular-reference-uis)
 - [Target Architecture](#target-architecture)
 - [What This Proves](#what-this-proves)
 - [Implementation Dependencies](#implementation-dependencies)
@@ -1125,6 +1126,106 @@ The Neo4j Query Proxy (from ADR-2) must serialize `HealthDataset` nodes as valid
 - The JSON-LD serialization is required by the DSP Catalog Protocol for cross-HDAB discovery
 - Existing Cypher queries referencing `DataDistribution` or `DataCatalog` must be updated
 - Phase 7c EHDS compliance tests (HealthDCAT-AP Schema Compliance) will validate the new vocabulary
+
+---
+
+### ADR-4: Next.js 14 as Unified Frontend (Consolidating Angular Reference UIs)
+
+**Status:** Accepted
+**Date:** 2025-07-25
+**Context:** The Eclipse Dataspace ecosystem provides three separate reference frontend implementations, each built with different Angular versions: [Aruba Participant Portal](https://github.com/Aruba-it-S-p-A/edc-public-participant-portal) (Angular 20, self-registration and credential management), [Fraunhofer End-User API / Data Dashboard](https://github.com/FraunhoferISST/End-User-API) (Angular + daisyUI, data sharing and catalog browsing), and [Dataspace Builder Redline](https://dataspacebuilder.github.io/website/docs/components/redline) (operator dashboard and policy editor). Running all three alongside the existing Next.js UI would mean four frontend stacks — four build pipelines, four dependency trees, four sets of styling conventions, and four runtime processes.
+
+Meanwhile, this project already has a **Next.js 14 application** with 6 working views (Graph Explorer, HealthDCAT-AP Catalogue, Compliance Chain, Patient Journey, OMOP Analytics, EEHRxF Profiles), 8 API routes querying Neo4j over Bolt, Tailwind CSS styling, static export to GitHub Pages, and OpenAPI-generated TypeScript clients for all JAD services (Phase 1d).
+
+#### Decision
+
+Use **Next.js 14 (App Router)** as the single frontend framework for the entire Health Dataspace v2. Port the Aruba, Fraunhofer, and Redline Angular UIs into Next.js pages rather than running them as separate applications.
+
+#### Alternatives Considered
+
+| Option                                | Description                                                                | Pros                                                                                                        | Cons                                                                                             |
+| ------------------------------------- | -------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| **A: Next.js 14 (chosen)**            | Single unified app, port Angular UIs into Next.js pages                    | One build, one deployment, consistent DX, existing 6 views reusable, SSR/ISR support, NextAuth.js ecosystem | Must rewrite Angular component logic in React                                                    |
+| **B: Angular 20 monorepo**            | Migrate existing Next.js views to Angular, adopt Aruba/Fraunhofer directly | Reuse reference code as-is, strong typing with Angular forms                                                | Throw away 6 working views + 8 API routes, no SSR (SPA only), lose static export to GitHub Pages |
+| **C: Micro-frontends**                | Keep all four apps, compose via Module Federation or iframe embedding      | No rewrite needed, each team owns their stack                                                               | 4 build pipelines, inconsistent UX, complex routing and auth sharing, Docker Compose bloat       |
+| **D: Angular + Next.js side-by-side** | Run Angular for EDC-V admin, Next.js for knowledge graph views             | Clear domain separation                                                                                     | Two auth setups, two styling systems, confusing navigation, doubled static hosting config        |
+
+#### Rationale
+
+1. **Existing investment:** 6 views + 8 API routes + Tailwind CSS + mock data layer already work. Rewriting them in Angular means discarding tested code.
+2. **Static export:** Next.js `output: "export"` produces a static site deployable to GitHub Pages — the live demo at `ma3u.github.io/MinimumViableHealthDataspacev2` depends on this. Angular can also build static, but the existing `next.config.js` with `basePath` handling is already wired into the GitHub Actions deployment.
+3. **API route co-location:** Next.js API routes (`/api/catalog`, `/api/graph`, etc.) run server-side alongside the pages. Adding `/api/participants`, `/api/negotiations`, `/api/transfers` for EDC-V means the frontend and backend share one TypeScript codebase with the same typed EDC clients.
+4. **SSR and ISR:** Next.js App Router supports server components and incremental static regeneration. The catalogue view can render server-side with fresh Neo4j data; the compliance chain can cache and revalidate. Angular SPAs require a separate API proxy for this.
+5. **Authentication:** NextAuth.js provides a mature Keycloak provider with session management, JWT handling, and role-based middleware. The Angular portals each implement their own PKCE flows. Centralising on NextAuth.js means one auth configuration for all 16 routes.
+6. **Portable styling:** All three Angular reference UIs use Tailwind CSS. Porting Tailwind markup from Angular templates to JSX is a mechanical translation — the design tokens, colour scales, and layout classes carry over directly.
+
+#### Technology Stack
+
+| Concern             | Choice                                | Version    | Notes                                                            |
+| ------------------- | ------------------------------------- | ---------- | ---------------------------------------------------------------- |
+| **Framework**       | Next.js (App Router)                  | 14.2.x     | React 18 server + client components                              |
+| **Language**        | TypeScript                            | 5.x        | Strict mode, path aliases `@/`                                   |
+| **Styling**         | Tailwind CSS                          | 3.3.x      | Same as Aruba/Fraunhofer, utility-first                          |
+| **Icons**           | Lucide React                          | 0.378.x    | Tree-shakeable SVG icons                                         |
+| **Graph rendering** | react-force-graph-2d                  | 1.25.x     | Phase 6a interactive graph explorer                              |
+| **Neo4j driver**    | neo4j-driver                          | 5.18.x     | Bolt protocol, `disableLosslessIntegers: true`                   |
+| **Authentication**  | NextAuth.js + Keycloak                | Phase 2c   | PKCE, JWT sessions, role-based middleware                        |
+| **EDC API clients** | OpenAPI-generated TS-fetch            | Phase 1d   | Type-safe clients for all JAD services                           |
+| **Linting**         | ESLint + eslint-config-next           | 8.x / 14.x | Next.js recommended rules                                        |
+| **Formatting**      | Prettier (pre-commit hook)            | —          | Auto-formats on commit                                           |
+| **Static export**   | `output: "export"`                    | —          | GitHub Pages deployment, API routes disabled in export           |
+| **Deployment**      | GitHub Pages (static) + Docker (full) | —          | Static demo at GH Pages; full stack via `docker-compose.jad.yml` |
+
+#### Application Structure
+
+```
+ui/src/app/
+├── layout.tsx              # Root layout with navigation
+├── page.tsx                # Home / landing
+│
+│  Phase 6a (existing — knowledge graph views)
+├── graph/page.tsx          # Force-directed 5-layer graph explorer
+├── catalog/page.tsx        # HealthDCAT-AP dataset catalogue
+├── compliance/page.tsx     # DSP compliance chain inspector
+├── patient/page.tsx        # FHIR R4 patient journey timeline
+├── analytics/page.tsx      # OMOP CDM research analytics dashboard
+├── eehrxf/page.tsx         # EEHRxF profile alignment + gap analysis
+│
+│  Phase 6b (planned — dataspace participant portal)
+├── onboarding/page.tsx     # Self-registration (from Aruba)
+├── onboarding/status/      # Registration status tracker
+├── credentials/page.tsx    # VC management (from Aruba)
+├── settings/page.tsx       # Participant profile + API keys
+├── data/share/page.tsx     # Publish assets with policies (from Fraunhofer)
+├── data/discover/page.tsx  # Federated catalog browser (from Fraunhofer)
+├── data/transfer/page.tsx  # Transfer monitoring (from Fraunhofer)
+├── negotiate/page.tsx      # Contract negotiation wizard (from Fraunhofer)
+├── admin/page.tsx          # Operator dashboard (from Redline)
+├── admin/tenants/page.tsx  # Tenant management
+├── admin/policies/page.tsx # ODRL policy editor
+└── admin/audit/page.tsx    # Contract + transfer audit log
+│
+│  API routes (server-side, not available in static export)
+└── api/
+    ├── graph/route.ts      # Neo4j Bolt → graph JSON
+    ├── catalog/route.ts    # Neo4j Bolt → HealthDCAT-AP JSON
+    ├── compliance/route.ts # Neo4j Bolt → compliance chain
+    ├── patient/route.ts    # Neo4j Bolt → FHIR timeline
+    ├── analytics/route.ts  # Neo4j Bolt → OMOP stats
+    ├── eehrxf/route.ts     # Neo4j Bolt → EEHRxF coverage
+    ├── participants/       # CFM Tenant Manager API (Phase 6b)
+    ├── credentials/        # IdentityHub + IssuerService (Phase 6b)
+    ├── assets/             # EDC-V Admin API (Phase 6b)
+    ├── negotiations/       # EDC-V DSP API (Phase 6b)
+    └── transfers/          # EDC-V DSP API (Phase 6b)
+```
+
+#### Consequences
+
+- **Positive:** Single build pipeline, single deployment artefact, shared Tailwind design system, unified Keycloak auth, server-side rendering for catalogue/compliance views, consistent TypeScript codebase from Neo4j queries to React components
+- **Trade-off:** Must rewrite ~15 Angular components into React. This is a mechanical translation (Tailwind classes port 1:1, REST fetch patterns are identical), but adds Phase 6b implementation effort. Estimated at 2–3 days of porting per sub-phase (6b-1, 6b-2, 6b-3).
+- **Risk:** Next.js 14 App Router is stable but newer than Angular's mature ecosystem. Edge cases with `"use client"` directives and server component boundaries may require workarounds for interactive EDC-V admin views. Mitigated by using client components for all form-heavy pages.
+- **Static export limitation:** The GitHub Pages static demo cannot serve API routes. Phase 6b views that require live EDC-V/CFM connections will show a "demo mode" banner with mock data when running as a static export, matching the existing pattern used by the 6a views.
 
 ---
 

@@ -2,36 +2,34 @@
 
 [![EHDS Compliant](https://img.shields.io/badge/EHDS-Compliant-0ea5e9)](https://health.ec.europa.eu/ehealth-digital-health-and-care/european-health-data-space_en) [![FHIR R4](https://img.shields.io/badge/FHIR-R4-orange)](https://hl7.org/fhir/R4/) [![OMOP CDM](https://img.shields.io/badge/OMOP-CDM%20v5.4-yellow)](https://ohdsi.github.io/CommonDataModel/) [![EEHRxF](https://img.shields.io/badge/EEHRxF-HL7%20Europe-148F77)](https://hl7.eu/fhir/) [![Neo4j 5](https://img.shields.io/badge/Neo4j-5%20Community-008CC1?logo=neo4j&logoColor=white)](https://neo4j.com/) [![Next.js 14](https://img.shields.io/badge/Next.js-14-black?logo=next.js&logoColor=white)](https://nextjs.org/) [![Eclipse EDC](https://img.shields.io/badge/Eclipse-EDC--V-blue)](https://eclipse-edc.github.io/docs/) [![DSP Dataspace Protocol 2025-1](https://img.shields.io/badge/DSP-Dataspace%20Protocol%202025--1-6366f1)](https://docs.internationaldataspaces.org/ids-knowledgebase/v/dataspace-protocol) [![DCP Decentralized Claims Protocol v1.0](https://img.shields.io/badge/DCP-Decentralized%20Claims%20Protocol%20v1.0-7c3aed)](https://projects.eclipse.org/projects/technology.dataspace-dcp/releases/1.0.0) [![DPS](https://img.shields.io/badge/DPS-Data%20Plane%20Signaling-0891b2)](https://projects.eclipse.org/proposals/eclipse-data-plane-core) [![SIMPL](https://img.shields.io/badge/SIMPL-EU%20Cloud%20Federation-e11d48)](https://simpl-programme.eu/) [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 
-**An open-source, EHDS-compliant health data space demo** combining Eclipse EDC-V, DCore, CFM, HealthDCAT-AP, FHIR R4, OMOP CDM v5.4, and Neo4j 5 into a unified 5-layer knowledge graph. Synthetic patient journeys are navigable through a Next.js UI with compliance chain inspection, OMOP research analytics, and an interactive graph explorer.
+## Why This Project Exists
+
+The [European Health Data Space (EHDS)](https://health.ec.europa.eu/ehealth-digital-health-and-care/european-health-data-space_en) regulation creates a legal framework for sharing health data across the EU — but turning that regulation into running software is an unsolved integration challenge. A hospital in Berlin that wants to share de-identified patient cohorts with a pharmaceutical researcher in Amsterdam needs to navigate five layers of technology: dataspace governance contracts, standardised metadata catalogues, clinical data formats, research-grade analytics schemas, and biomedical terminologies. Today, no single reference implementation shows how these layers connect end-to-end.
+
+This project builds that missing reference. It takes the [Eclipse Dataspace Components](https://eclipse-edc.github.io/docs/) — the open-source building blocks for sovereign data exchange — and wires them to a health-domain knowledge graph that speaks FHIR R4, OMOP CDM, and HealthDCAT-AP natively. The result is a **self-contained local demo** you can run on your laptop in under five minutes, without any cloud account or real patient data.
+
+The motivation comes from a practical gap: the Eclipse [JAD (Joint Architecture Demo)](https://github.com/Metaform/jad) shows how EDC-V, DCore, and CFM work together for generic cloud-provider deployments, but it has no health-domain content. Conversely, FHIR servers and OMOP databases exist in isolation, disconnected from dataspace governance. This project bridges that gap — it puts EHDS governance contracts, HealthDCAT-AP catalogue metadata, FHIR patient journeys, OMOP research analytics, and SNOMED/LOINC ontologies into a single queryable graph, all accessible through the Dataspace Protocol.
+
+For the full background, see the companion article: [European Health Dataspaces, Digital Twins: A Journey from FHIR Basics to Intelligent Patient Models](https://www.linkedin.com/pulse/european-health-dataspaces-digital-twins-journey-fhir-buchhorn-roth-8t51c/).
 
 **Live Demo:** The UI layout is deployed as a static page at [ma3u.github.io/MinimumViableHealthDataspacev2](https://ma3u.github.io/MinimumViableHealthDataspacev2/).
 ![Architecture Diagram](docs/images/architecture.svg)
 
 ---
 
-## Key Features
+## What It Does
 
-This project is a self-contained local demo that shows how the multi-layer European Health Data
-Space stack fits together, from governance contracts down to biomedical terminologies, without requiring any cloud infrastructure or real patient records.
+The demo models a concrete EHDS secondary-use scenario: a **clinical research organisation (CRO)** in Amsterdam wants to run a drug-repurposing study using synthetic patient data held by a **hospital (Clinic)** in Berlin, with access governed by a **Health Data Access Body (HDAB)** in Germany. All five layers of this scenario live in a single Neo4j knowledge graph:
 
-- **DSP Marketplace**: Eclipse EDC-V DataProduct / OdrlPolicy / Contract / HDABApproval chain
-  models the full EHDS secondary-use access flow governed by the Dataspace Protocol (DSP).
-- **HealthDCAT-AP Catalogue**: Dataset / Distribution / DataService / Organization nodes expose
-  standardised DCAT-AP 3 metadata so datasets are discoverable and machine-readable.
-- **FHIR R4 Clinical Data**: Patient, Observation, Condition, Encounter, MedicationRequest, and
-  Procedure nodes are generated by Synthea and loaded as first-class graph citizens.
-- **OMOP CDM Research Layer** — FHIR clinical events are transformed into OMOP v5.4 nodes
-  (PersonNode, ConditionOccurrence, DrugExposure, ProcedureOccurrence, Measurement) enabling
-  cohort-level analytics without leaving Neo4j.
-- **Biomedical Ontology Layer**: SNOMED CT, ICD-10-CM, RxNorm, LOINC, and CPT-4 concept nodes
-  link clinical events to standardised terminologies via `CODED_BY` edges.
-- **EEHRxF Profile Alignment**: EEHRxFCategory and EEHRxFProfile nodes map the six EHDS
-  priority categories (Patient Summary, ePrescription, Laboratory Results, Hospital Discharge,
-  Medical Imaging, Rare Disease) to HL7 Europe FHIR Implementation Guides, with dynamic coverage
-  scores computed against the loaded FHIR data.
-- **Interactive UI**: A Next.js 14 app provides six purpose-built views: graph explorer,
-  HealthDCAT-AP catalogue, DSP compliance chain, patient timeline, OMOP analytics dashboard,
-  and EEHRxF profile alignment.
+- **Layer 1 — DSP Marketplace**: DataProduct / OdrlPolicy / Contract / HDABApproval nodes model the full EHDS Article 45–53 secondary-use access flow, enforced by the Dataspace Protocol (DSP 2025-1).
+- **Layer 2 — HealthDCAT-AP Catalogue**: Dataset / Distribution / DataService / Organization nodes expose W3C HealthDCAT-AP 1.0 metadata — the mandatory standard for health dataset discovery across EU Health Data Access Bodies.
+- **Layer 3 — FHIR R4 Clinical Data**: 127 synthetic patients generated by [Synthea](https://github.com/synthetichealth/synthea) with Encounters, Conditions, Observations, MedicationRequests, and Procedures — loaded as first-class graph nodes with full provenance chains.
+- **Layer 4 — OMOP CDM Research Layer**: FHIR clinical events are transformed into OMOP v5.4 nodes (Person, ConditionOccurrence, DrugExposure, ProcedureOccurrence, Measurement), enabling cohort-level analytics without moving data out of the graph.
+- **Layer 5 — Biomedical Ontology Backbone**: SNOMED CT, ICD-10-CM, RxNorm, LOINC, and CPT-4 concept nodes link clinical events to standardised terminologies via `CODED_BY` edges.
+
+On top of these five layers, **EEHRxF Profile Alignment** nodes map the six EHDS priority categories (Patient Summary, ePrescription, Laboratory Results, Hospital Discharge, Medical Imaging, Rare Disease) to HL7 Europe FHIR Implementation Guides, with dynamic coverage scores computed against the loaded data.
+
+A **Next.js 14 application** provides six purpose-built views to explore all of this: an interactive graph explorer, a HealthDCAT-AP dataset catalogue, a DSP compliance chain inspector, a patient journey timeline, an OMOP research analytics dashboard, and an EEHRxF profile gap analysis view.
 
 ---
 
