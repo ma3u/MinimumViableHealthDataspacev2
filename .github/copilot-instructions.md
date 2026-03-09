@@ -41,6 +41,7 @@ pre-commit run --all-files
 - **Neo4j 5** (Community Edition) — graph database via Docker, Bolt on port 7687, Browser on port 7474.
 - **Synthea** — synthetic FHIR patient data generation (Phase 3).
 - **Eclipse EDC-V / DCore / CFM** — dataspace connector stack (Phase 1-2).
+- **GitHub Pages Deployment** — The Next.js UI is deployed to GitHub Pages via a dedicated GitHub Action (`.github/workflows/pages.yml`). Since GitHub Pages only supports static files and the API routes require a live Neo4j connection, the deployed version uses the Next.js static `export` output, and specifically renames/disables the `src/app/api` folder during the build process to avoid prerendering errors. The `basePath` is dynamically set in `next.config.js` when running inside GitHub Actions.
 
 ## Security
 

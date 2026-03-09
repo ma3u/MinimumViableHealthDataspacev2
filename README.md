@@ -1,19 +1,13 @@
 # Minimum Viable Health Dataspace v2
 
-[![Neo4j 5](https://img.shields.io/badge/Neo4j-5%20Community-008CC1?logo=neo4j&logoColor=white)](https://neo4j.com/)
-[![FHIR R4](https://img.shields.io/badge/FHIR-R4-orange)](https://hl7.org/fhir/R4/)
-[![OMOP CDM](https://img.shields.io/badge/OMOP-CDM%20v5.4-yellow)](https://ohdsi.github.io/CommonDataModel/)
-[![Next.js 14](https://img.shields.io/badge/Next.js-14-black?logo=next.js&logoColor=white)](https://nextjs.org/)
-[![Eclipse EDC](https://img.shields.io/badge/Eclipse-EDC--V-blue)](https://eclipse-edc.github.io/docs/)
-[![EHDS Compliant](https://img.shields.io/badge/EHDS-Compliant-0ea5e9)](https://health.ec.europa.eu/ehealth-digital-health-and-care/european-health-data-space_en)
-[![EEHRxF](https://img.shields.io/badge/EEHRxF-HL7%20Europe-148F77)](https://hl7.eu/fhir/)
-[![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
-[![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit)](https://pre-commit.com/)
+[![Neo4j 5](https://img.shields.io/badge/Neo4j-5%20Community-008CC1?logo=neo4j&logoColor=white)](https://neo4j.com/) [![FHIR R4](https://img.shields.io/badge/FHIR-R4-orange)](https://hl7.org/fhir/R4/) [![OMOP CDM](https://img.shields.io/badge/OMOP-CDM%20v5.4-yellow)](https://ohdsi.github.io/CommonDataModel/) [![Next.js 14](https://img.shields.io/badge/Next.js-14-black?logo=next.js&logoColor=white)](https://nextjs.org/) [![Eclipse EDC](https://img.shields.io/badge/Eclipse-EDC--V-blue)](https://eclipse-edc.github.io/docs/) [![EHDS Compliant](https://img.shields.io/badge/EHDS-Compliant-0ea5e9)](https://health.ec.europa.eu/ehealth-digital-health-and-care/european-health-data-space_en) [![EEHRxF](https://img.shields.io/badge/EEHRxF-HL7%20Europe-148F77)](https://hl7.eu/fhir/) [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE) [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit)](https://pre-commit.com/)
 
 > **An open-source, EHDS-compliant health data space demo** combining Eclipse EDC-V, DCore, CFM,
 > HealthDCAT-AP, FHIR R4, OMOP CDM v5.4, and Neo4j 5 into a unified 5-layer knowledge graph.
 > Synthetic patient journeys are navigable through a Next.js UI with compliance chain inspection,
 > OMOP research analytics, and an interactive graph explorer.
+
+> [!NOTE] > **Live Demo:** The UI layout is deployed as a static page at [ma3u.github.io/MinimumViableHealthDataspacev2](https://ma3u.github.io/MinimumViableHealthDataspacev2/). Because the live data requires the local Neo4j backend to be running, navigating to specific data views on GitHub Pages will show no records, but the static shell of the application is explorable.
 
 ![Architecture Diagram](docs/images/architecture.svg)
 
@@ -21,9 +15,8 @@
 
 ## Key Features
 
-This project is a self-contained local demo that shows how the five-layer European Health Data
-Space stack fits together — from governance contracts down to biomedical terminologies — without
-requiring any cloud infrastructure or real patient records.
+This project is a self-contained local demo that shows how the multi-layer European Health Data
+Space stack fits together, from governance contracts down to biomedical terminologies, without requiring any cloud infrastructure or real patient records.
 
 - **DSP Marketplace** — Eclipse EDC-V DataProduct / OdrlPolicy / Contract / HDABApproval chain
   models the full EHDS secondary-use access flow governed by the Dataspace Protocol (DSP).
@@ -227,8 +220,7 @@ cd ui && npm install
 
 ### Step 9 — Start the UI
 
-Start the development server. Hot-reload is enabled, so any UI changes are reflected immediately
-without restarting Neo4j or reloading data.
+Start the development server. Hot-reload is enabled, so any UI changes are reflected immediately without restarting Neo4j or reloading data.
 
 ```bash
 npm run dev
@@ -243,8 +235,7 @@ Open <http://localhost:3000> in your browser. The home page links to all six vie
 ## Development
 
 This project uses [pre-commit](https://pre-commit.com/) hooks to keep Markdown, YAML, and JSON
-sources consistently formatted. Hooks run automatically on every `git commit` and fix files in
-place (e.g. trailing whitespace, missing newlines, Prettier formatting).
+sources consistently formatted. Hooks run automatically on every `git commit` and fix files in place (e.g. trailing whitespace, missing newlines, Prettier formatting).
 
 ### Run pre-commit checks
 
@@ -262,10 +253,7 @@ pre-commit run --all-files
 
 ### Neo4j driver note
 
-The UI driver (`ui/src/lib/neo4j.ts`) is configured with `{ disableLosslessIntegers: true }`. By
-default the JavaScript Neo4j driver wraps 64-bit integers as `{ low, high }` objects; this flag
-converts them to native JavaScript numbers so stat card values render correctly instead of showing
-`[object Object]`.
+The UI driver (`ui/src/lib/neo4j.ts`) is configured with `{ disableLosslessIntegers: true }`. By default the JavaScript Neo4j driver wraps 64-bit integers as `{ low, high }` objects; this flag converts them to native JavaScript numbers so stat card values render correctly instead of showing `[object Object]`.
 
 ---
 
@@ -305,30 +293,22 @@ onwards will introduce live Eclipse EDC-V connector instances and real patient d
 
 ## Contributing
 
-Contributions are welcome — whether that is a bug fix, a new UI view, an improved Cypher query,
-or additional documentation. Please open an issue first to discuss larger changes before sending a
-pull request. See [.github/CONTRIBUTING.md](.github/CONTRIBUTING.md) for coding conventions,
+Contributions are welcome — whether that is a bug fix, a new UI view, an improved Cypher query, or additional documentation. Please open an issue first to discuss larger changes before sending a pull request. See [.github/CONTRIBUTING.md](.github/CONTRIBUTING.md) for coding conventions,
 schema change rules, and the PR checklist.
 
 ---
 
 ## Background
 
-- **LinkedIn Article:**
-  [European Health Dataspaces, Digital Twins: A Journey from FHIR Basics to Intelligent Patient
-  Models](https://www.linkedin.com/pulse/european-health-dataspaces-digital-twins-journey-fhir-buchhorn-roth-8t51c/)
+- **Background LinkedIn Article:** [European Health Dataspaces, Digital Twins: A Journey from FHIR Basics to Intelligent Patient Models](https://www.linkedin.com/pulse/european-health-dataspaces-digital-twins-journey-fhir-buchhorn-roth-8t51c/)
 
 ---
 
 ## Security
 
-- **No patient data** — all clinical records are synthetic (Synthea-generated) and are excluded
-  from the repository via `.gitignore`. Never commit real patient data.
-- **Local credentials only** — the default Neo4j credentials (`neo4j` / `healthdataspace`) are
-  intentionally weak and suitable only for local development. They must not be used in any
-  internet-facing deployment.
-- **Environment files** — production deployments should inject credentials via `.env` files or
-  secret managers. `.env` is excluded from version control via `.gitignore`.
+- **No patient data** — all clinical records are synthetic (Synthea-generated) and are excluded from the repository via `.gitignore`. Never commit real patient data.
+- **Local credentials only** — the default Neo4j credentials (`neo4j` / `healthdataspace`) are intentionally weak and suitable only for local development. They must not be used in any internet-facing deployment.
+- **Environment files** — production deployments should inject credentials via `.env` files or secret managers. `.env` is excluded from version control via `.gitignore`.
 
 ---
 
