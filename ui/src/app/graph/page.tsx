@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, useCallback } from "react";
 import dynamic from "next/dynamic";
+import { X } from "lucide-react";
 
 // react-force-graph-2d requires browser APIs — load client-side only
 const ForceGraph2D = dynamic(() => import("react-force-graph-2d"), {
@@ -19,14 +20,21 @@ interface GraphNode {
 }
 
 interface GraphLink {
-  source: string;
-  target: string;
+  // after force-graph resolves string IDs these become node objects
+  source: string | GraphNode;
+  target: string | GraphNode;
   type: string;
 }
 
 interface GraphData {
   nodes: GraphNode[];
   links: GraphLink[];
+}
+
+interface Neighbour {
+  direction: "out" | "in";
+  relType: string;
+  node: GraphNode;
 }
 
 const LAYER_LABELS: Record<number, string> = {
@@ -45,9 +53,14 @@ const LAYER_COLORS: Record<number, string> = {
   5: "#7D3C98",
 };
 
+function nodeId(n: string | GraphNode): string {
+  return typeof n === "string" ? n : n.id;
+}
+
 export default function GraphPage() {
   const [data, setData] = useState<GraphData>({ nodes: [], links: [] });
   const [selectedNode, setSelectedNode] = useState<GraphNode | null>(null);
+  const [neighbours, setNeighbours] = useState<Neighbour[]>([]);
   const [loading, setLoading] = useState(true);
   const containerRef = useRef<HTMLDivElement>(null);
   const [dims, setDims] = useState({ width: 800, height: 600 });
@@ -76,33 +89,139 @@ export default function GraphPage() {
     return () => window.removeEventListener("resize", update);
   }, []);
 
+  // Build neighbour list whenever selection changes
+  useEffect(() => {
+    if (!selectedNode) {
+      setNeighbours([]);
+      return;
+    }
+    const nodeMap = new Map(data.nodes.map((n) => [n.id, n]));
+    const nbrs: Neighbour[] = [];
+    for (const link of data.links) {
+      const srcId = nodeId(link.source);
+      const tgtId = nodeId(link.target);
+      if (srcId === selectedNode.id) {
+        const n = nodeMap.get(tgtId);
+        if (n) nbrs.push({ direction: "out", relType: link.type, node: n });
+      } else if (tgtId === selectedNode.id) {
+        const n = nodeMap.get(srcId);
+        if (n) nbrs.push({ direction: "in", relType: link.type, node: n });
+      }
+    }
+    setNeighbours(nbrs);
+  }, [selectedNode, data.links, data.nodes]);
+
+  // Set of IDs connected to selected node — for highlighting
+  const connectedIds = new Set(neighbours.map((nb) => nb.node.id));
+
   const paintNode = useCallback(
     (node: GraphNode, ctx: CanvasRenderingContext2D, globalScale: number) => {
+      const isSelected = selectedNode?.id === node.id;
+      const isConnected = connectedIds.has(node.id);
       const r = Math.max(4, 8 / Math.sqrt(globalScale));
+
+      // Dim unrelated nodes when something is selected
+      const alpha = selectedNode && !isSelected && !isConnected ? 0.2 : 1.0;
+
+      if (isSelected) {
+        // White ring around selected node
+        ctx.beginPath();
+        ctx.arc(node.x ?? 0, node.y ?? 0, r + 3, 0, 2 * Math.PI);
+        ctx.strokeStyle = "rgba(255,255,255,0.9)";
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+      }
+
+      ctx.globalAlpha = alpha;
       ctx.beginPath();
       ctx.arc(node.x ?? 0, node.y ?? 0, r, 0, 2 * Math.PI);
       ctx.fillStyle = node.color ?? "#888";
       ctx.fill();
-      // Only draw labels when zoomed in enough to read them
-      if (globalScale >= 0.6) {
+
+      if (globalScale >= 0.6 || isSelected || isConnected) {
         const fontSize = Math.max(3, 10 / globalScale);
-        ctx.font = `${fontSize}px sans-serif`;
-        ctx.fillStyle = "#d1d5db";
+        ctx.font = `${isSelected ? "bold " : ""}${fontSize}px sans-serif`;
+        ctx.fillStyle = isSelected
+          ? "#ffffff"
+          : isConnected
+            ? "#f3f4f6"
+            : "#9ca3af";
         ctx.textAlign = "center";
         ctx.fillText(
-          node.name.length > 24 ? node.name.slice(0, 22) + "…" : node.name,
+          node.name.length > 28 ? node.name.slice(0, 26) + "…" : node.name,
           node.x ?? 0,
           (node.y ?? 0) + r + fontSize * 1.2,
         );
       }
+      ctx.globalAlpha = 1.0;
     },
-    [],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [selectedNode, connectedIds],
   );
+
+  const paintLink = useCallback(
+    (link: GraphLink, ctx: CanvasRenderingContext2D, globalScale: number) => {
+      const srcId = nodeId(link.source);
+      const tgtId = nodeId(link.target);
+      const isAdjacent =
+        selectedNode &&
+        (srcId === selectedNode.id || tgtId === selectedNode.id);
+
+      const color = isAdjacent ? "#93c5fd" : "#374151";
+      const width = isAdjacent ? 1.5 : 0.8;
+
+      const src = link.source as GraphNode;
+      const tgt = link.target as GraphNode;
+      if (src.x == null || tgt.x == null) return;
+
+      ctx.strokeStyle = color;
+      ctx.lineWidth = width / globalScale;
+      ctx.globalAlpha = isAdjacent ? 1.0 : selectedNode ? 0.15 : 0.7;
+      ctx.beginPath();
+      ctx.moveTo(src.x, src.y ?? 0);
+      ctx.lineTo(tgt.x, tgt.y ?? 0);
+      ctx.stroke();
+
+      // Draw relationship type label on adjacent edges
+      if (isAdjacent && selectedNode) {
+        const mx = (src.x + tgt.x) / 2;
+        const my = ((src.y ?? 0) + (tgt.y ?? 0)) / 2;
+        const fontSize = Math.max(3, 9 / globalScale);
+        ctx.font = `${fontSize}px sans-serif`;
+        ctx.fillStyle = "#93c5fd";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+
+        // White background pill for readability
+        const tw = ctx.measureText(link.type).width;
+        ctx.globalAlpha = 0.75;
+        ctx.fillStyle = "#0f172a";
+        ctx.fillRect(
+          mx - tw / 2 - 2,
+          my - fontSize / 2 - 1,
+          tw + 4,
+          fontSize + 2,
+        );
+        ctx.globalAlpha = 1.0;
+        ctx.fillStyle = "#93c5fd";
+        ctx.fillText(link.type, mx, my);
+        ctx.textBaseline = "alphabetic";
+      }
+      ctx.globalAlpha = 1.0;
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [selectedNode],
+  );
+
+  const handleNodeClick = useCallback((n: object) => {
+    const node = n as GraphNode;
+    setSelectedNode((prev) => (prev?.id === node.id ? null : node));
+  }, []);
 
   return (
     <div className="flex h-[calc(100vh-44px)]">
       {/* Sidebar */}
-      <aside className="w-52 shrink-0 bg-gray-900 border-r border-gray-700 p-4 flex flex-col gap-4">
+      <aside className="w-56 shrink-0 bg-gray-900 border-r border-gray-700 p-4 flex flex-col gap-4 overflow-y-auto">
         <div>
           <h2 className="text-xs font-semibold uppercase text-gray-500 mb-2">
             Layers
@@ -110,25 +229,91 @@ export default function GraphPage() {
           {Object.entries(LAYER_LABELS).map(([k, v]) => (
             <div key={k} className="flex items-center gap-2 text-xs mb-1">
               <span
-                className="w-3 h-3 rounded-full"
+                className="w-3 h-3 rounded-full shrink-0"
                 style={{ background: LAYER_COLORS[Number(k)] }}
               />
               {v}
             </div>
           ))}
         </div>
+
         <div className="text-xs text-gray-500">
           {data.nodes.length} nodes · {data.links.length} edges
         </div>
+
+        {!selectedNode && (
+          <p className="text-xs text-gray-600 italic">
+            Click a node to see details and relationships.
+          </p>
+        )}
+
         {selectedNode && (
-          <div className="border border-gray-700 rounded p-2 text-xs">
-            <div className="font-semibold text-gray-200 mb-1">
-              {selectedNode.name}
+          <div className="flex flex-col gap-3">
+            {/* Node header */}
+            <div className="border border-gray-600 rounded-lg p-3 bg-gray-800/60">
+              <div className="flex items-start justify-between gap-1 mb-1">
+                <span
+                  className="text-xs font-bold text-white leading-tight"
+                  style={{ color: selectedNode.color }}
+                >
+                  {selectedNode.name}
+                </span>
+                <button
+                  onClick={() => setSelectedNode(null)}
+                  className="shrink-0 text-gray-500 hover:text-gray-200"
+                >
+                  <X size={12} />
+                </button>
+              </div>
+              <div className="text-xs text-gray-400 mb-1">
+                {selectedNode.label}
+              </div>
+              <div className="text-gray-500 text-xs">
+                {LAYER_LABELS[selectedNode.layer]}
+              </div>
+              <div className="text-gray-600 text-xs mt-1 break-all leading-tight">
+                {selectedNode.id}
+              </div>
             </div>
-            <div className="text-gray-400">{selectedNode.label}</div>
-            <div className="text-gray-500 mt-1 break-all">
-              {selectedNode.id}
-            </div>
+
+            {/* Relationships */}
+            {neighbours.length > 0 && (
+              <div>
+                <h3 className="text-xs font-semibold uppercase text-gray-500 mb-2">
+                  Relationships ({neighbours.length})
+                </h3>
+                <div className="flex flex-col gap-1.5">
+                  {neighbours.map((nb, i) => (
+                    <button
+                      key={i}
+                      onClick={() => setSelectedNode(nb.node)}
+                      className="text-left rounded-lg border border-gray-700 bg-gray-800/40 hover:border-gray-500 px-2 py-1.5 transition-colors"
+                    >
+                      <div className="flex items-center gap-1 mb-0.5">
+                        <span className="text-blue-400 text-xs font-mono font-semibold tracking-tight">
+                          {nb.direction === "out" ? "→" : "←"}
+                        </span>
+                        <span className="text-blue-300 text-xs font-mono truncate">
+                          {nb.relType}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <span
+                          className="w-2 h-2 rounded-full shrink-0"
+                          style={{ background: nb.node.color }}
+                        />
+                        <span className="text-xs text-gray-300 truncate">
+                          {nb.node.name}
+                        </span>
+                      </div>
+                      <div className="text-xs text-gray-600">
+                        {nb.node.label}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         )}
       </aside>
@@ -148,10 +333,10 @@ export default function GraphPage() {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             nodeCanvasObject={paintNode as any}
             nodeCanvasObjectMode={() => "replace"}
-            linkColor={() => "#374151"}
-            linkWidth={0.8}
-            linkLabel="type"
-            onNodeClick={(n) => setSelectedNode(n as unknown as GraphNode)}
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            linkCanvasObject={paintLink as any}
+            linkCanvasObjectMode={() => "replace"}
+            onNodeClick={handleNodeClick}
             backgroundColor="#030712"
             d3AlphaDecay={0.02}
             d3VelocityDecay={0.3}
