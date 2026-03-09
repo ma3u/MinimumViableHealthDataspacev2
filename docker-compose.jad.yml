@@ -98,6 +98,7 @@ services:
     environment:
       VAULT_DEV_ROOT_TOKEN_ID: "root"
       VAULT_DEV_LISTEN_ADDRESS: "0.0.0.0:8200"
+      VAULT_ADDR: "http://127.0.0.1:8200"
     cap_add:
       - IPC_LOCK
     ports:
@@ -130,9 +131,9 @@ services:
       KC_BOOTSTRAP_ADMIN_USERNAME: admin
       KC_BOOTSTRAP_ADMIN_PASSWORD: admin
       KC_HTTP_ENABLED: "true"
-      KC_HOSTNAME: "http://keycloak.localhost"
+      # Use Docker-internal hostname so token 'iss' claim matches EDC services' expected issuer
+      KC_HOSTNAME: "http://keycloak:8080"
       KC_HOSTNAME_STRICT: "false"
-      KC_HOSTNAME_URL: "http://keycloak.localhost"
       KC_PROXY: edge
       KC_HEALTH_ENABLED: "true"
       KC_METRICS_ENABLED: "true"
@@ -172,7 +173,7 @@ services:
   # NATS — JetStream messaging bus
   # ---------------------------------------------------------------------------
   nats:
-    image: nats:latest
+    image: nats:alpine
     container_name: health-dataspace-nats
     command: ["-c", "/etc/nats/nats.conf"]
     volumes:
@@ -196,6 +197,7 @@ services:
       interval: 5s
       timeout: 5s
       retries: 10
+      start_period: 5s
     restart: unless-stopped
 
   # ---------------------------------------------------------------------------
@@ -223,6 +225,7 @@ services:
   # ---------------------------------------------------------------------------
   controlplane:
     image: ghcr.io/metaform/jad/controlplane:latest
+    pull_policy: never
     container_name: health-dataspace-controlplane
     environment:
       # Base config
@@ -261,6 +264,10 @@ services:
       edc.iam.dcp.scopes.membership.id: "membership-scope"
       edc.iam.dcp.scopes.membership.type: "DEFAULT"
       edc.iam.dcp.scopes.membership.value: "org.eclipse.edc.vc.type:MembershipCredential:read"
+      edc.iam.dcp.scopes.manufacturer.id: "manufacturer-scope"
+      edc.iam.dcp.scopes.manufacturer.type: "POLICY"
+      edc.iam.dcp.scopes.manufacturer.value: "org.eclipse.edc.vc.type:ManufacturerCredential:read"
+      edc.iam.dcp.scopes.manufacturer.prefix-mapping: "ManufacturerCredential"
       # Trusted issuers
       edc.iam.trusted-issuer.issuer.id: "did:web:issuerservice%3A10016:issuer"
     ports:
@@ -300,6 +307,7 @@ services:
   # ---------------------------------------------------------------------------
   dataplane-fhir:
     image: ghcr.io/metaform/jad/dataplane:latest
+    pull_policy: never
     container_name: health-dataspace-dataplane-fhir
     environment:
       edc.hostname: "dataplane-fhir"
@@ -365,6 +373,7 @@ services:
   # ---------------------------------------------------------------------------
   dataplane-omop:
     image: ghcr.io/metaform/jad/dataplane:latest
+    pull_policy: never
     container_name: health-dataspace-dataplane-omop
     environment:
       edc.hostname: "dataplane-omop"
@@ -467,6 +476,7 @@ services:
   # ---------------------------------------------------------------------------
   identityhub:
     image: ghcr.io/metaform/jad/identity-hub:latest
+    pull_policy: never
     container_name: health-dataspace-identityhub
     env_file:
       - ./jad/identityhub.env
@@ -506,6 +516,7 @@ services:
   # ---------------------------------------------------------------------------
   issuerservice:
     image: ghcr.io/metaform/jad/issuerservice:latest
+    pull_policy: never
     container_name: health-dataspace-issuerservice
     env_file:
       - ./jad/issuerservice.env
@@ -549,9 +560,10 @@ services:
   # ---------------------------------------------------------------------------
   tenant-manager:
     image: ghcr.io/eclipse-cfm/cfm/tmanager:latest
+    pull_policy: never
     container_name: health-dataspace-tenant-manager
     volumes:
-      - ./jad/tenant-manager-config.yaml:/etc/appname/application.yaml:ro
+      - ./jad/tenant-manager-config.yaml:/etc/appname/tm.env:ro
     ports:
       - "11006:8080" # Tenant Manager API
     networks:
@@ -572,9 +584,10 @@ services:
   # ---------------------------------------------------------------------------
   provision-manager:
     image: ghcr.io/eclipse-cfm/cfm/pmanager:latest
+    pull_policy: never
     container_name: health-dataspace-provision-manager
     volumes:
-      - ./jad/provision-manager-config.yaml:/etc/appname/application.yaml:ro
+      - ./jad/provision-manager-config.yaml:/etc/appname/pm.env:ro
     ports:
       - "11007:8080" # Provision Manager API
     networks:
@@ -597,9 +610,10 @@ services:
   # ---------------------------------------------------------------------------
   cfm-agents:
     image: ghcr.io/eclipse-cfm/cfm/kcagent:latest
+    pull_policy: never
     container_name: health-dataspace-cfm-keycloak-agent
     volumes:
-      - ./jad/keycloak-agent-config.yaml:/etc/appname/application.yaml:ro
+      - ./jad/keycloak-agent-config.yaml:/etc/appname/kcagent.env:ro
     networks:
       - edcv
     depends_on:
@@ -611,9 +625,10 @@ services:
 
   cfm-edcv-agent:
     image: ghcr.io/eclipse-cfm/cfm/edcvagent:latest
+    pull_policy: never
     container_name: health-dataspace-cfm-edcv-agent
     volumes:
-      - ./jad/edcv-agent-config.yaml:/etc/appname/application.yaml:ro
+      - ./jad/edcv-agent-config.yaml:/etc/appname/edcvagent.env:ro
     networks:
       - edcv
     depends_on:
@@ -625,9 +640,10 @@ services:
 
   cfm-registration-agent:
     image: ghcr.io/eclipse-cfm/cfm/regagent:latest
+    pull_policy: never
     container_name: health-dataspace-cfm-registration-agent
     volumes:
-      - ./jad/registration-agent-config.yaml:/etc/appname/application.yaml:ro
+      - ./jad/registration-agent-config.yaml:/etc/appname/regagent.env:ro
     networks:
       - edcv
     depends_on:
@@ -641,9 +657,10 @@ services:
 
   cfm-onboarding-agent:
     image: ghcr.io/eclipse-cfm/cfm/obagent:latest
+    pull_policy: never
     container_name: health-dataspace-cfm-onboarding-agent
     volumes:
-      - ./jad/onboarding-agent-config.yaml:/etc/appname/application.yaml:ro
+      - ./jad/onboarding-agent-config.yaml:/etc/appname/obagent.env:ro
     networks:
       - edcv
     depends_on:
@@ -656,6 +673,42 @@ services:
       tenant-manager:
         condition: service_started
     restart: unless-stopped
+
+  # ---------------------------------------------------------------------------
+  # JAD Seed Job — Initializes IssuerService, TenantManager, ProvisionManager
+  # ---------------------------------------------------------------------------
+  # Docker Compose equivalent of K8s seed jobs (issuerservice-seed-job,
+  # tenant-manager-seed-job, provision-manager-seed-job).
+  # Runs once after all services are healthy, then exits.
+  # ---------------------------------------------------------------------------
+  jad-seed:
+    image: curlimages/curl:latest
+    container_name: health-dataspace-jad-seed
+    entrypoint: ["/bin/sh", "/scripts/seed-jad.sh"]
+    environment:
+      KC_HOST: "http://keycloak:8080"
+      ISSUER_HOST: "http://issuerservice"
+      TM_HOST: "http://tenant-manager:8080"
+      PM_HOST: "http://provision-manager:8080"
+      ISSUER_CLIENT_ID: "issuer"
+      ISSUER_CLIENT_SECRET: "issuer-secret"
+    volumes:
+      - ./jad/seed-jad.sh:/scripts/seed-jad.sh:ro
+    networks:
+      - edcv
+    depends_on:
+      controlplane:
+        condition: service_healthy
+      identityhub:
+        condition: service_healthy
+      issuerservice:
+        condition: service_healthy
+      tenant-manager:
+        condition: service_started
+      provision-manager:
+        condition: service_started
+    profiles:
+      - seed
 
 networks:
   edcv:

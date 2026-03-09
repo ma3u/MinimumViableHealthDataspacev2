@@ -1,28 +1,14 @@
 # =============================================================================
-# CFM Tenant Manager Configuration
+# CFM Tenant Manager Configuration (tm.env format)
 # =============================================================================
-# Docker Compose equivalent of K8s tenant-manager-config ConfigMap.
+# Docker Compose equivalent of K8s tm-config ConfigMap.
+# Flat key-value format expected by CFM Go binary (Viper).
+# Mount as: /etc/appname/tm.env
 # =============================================================================
 
-spring:
-  datasource:
-    url: jdbc:postgresql://postgres:5432/cfm
-    username: cfm
-    password: cfm
-    driver-class-name: org.postgresql.Driver
-  jpa:
-    hibernate:
-      ddl-auto: update
-    show-sql: false
-
-server:
-  port: 8080
-
-cfm:
-  keycloak:
-    url: http://keycloak:8080
-    realm: edcv
-    client-id: provisioner
-    client-secret: provisioner-secret
-  nats:
-    url: nats://nats:4222
+uri: nats://nats:4222
+bucket: cfm-bucket
+stream: cfm-stream
+httpport: 8080
+postgres: true
+dsn: postgres://cfm:cfm@postgres:5432/cfm?sslmode=disable

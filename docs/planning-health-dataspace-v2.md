@@ -2,36 +2,89 @@
 
 ## Table of Contents
 
-- [Background & Inspiration](#background--inspiration)
-- [New EDC Component Architecture](#new-edc-component-architecture)
-  - [Protocol Foundation: DSP + DCP + DPS](#protocol-foundation-dsp--dcp--dps)
-- [Implementation Progress](#implementation-progress)
-- [Implementation Roadmap](#implementation-roadmap)
-  - [Phase 1: Infrastructure Migration (JAD-Based)](#phase-1-infrastructure-migration-jad-based)
-    - [1e: ADR-2 Implementation — Dual Data Planes + Neo4j Query Proxy ✅](#1e-adr-2-implementation--dual-data-planes--neo4j-query-proxy-)
-    - [1f: Phase 4a Prep — EDC-V Asset Registration + Vault Keys ✅](#1f-phase-4a-prep--edc-v-asset-registration--vault-keys-)
-  - [Phase 2: Identity and Trust (DCP v1.0)](#phase-2-identity-and-trust-dcp-v10)
-  - [Phase 3: Health Knowledge Graph Layer ✅](#phase-3-health-knowledge-graph-layer-)
-  - [Phase 3b: Real FHIR Data Pipeline ✅](#phase-3b-real-fhir-data-pipeline-)
-  - [Phase 3c: HealthDCAT-AP Metadata Registration ✅](#phase-3c-healthdcat-ap-metadata-registration-)
-  - [Phase 3d: README and UI Completeness Hardening ✅](#phase-3d-readme-and-ui-completeness-hardening-)
-  - [Phase 3e: DSP Marketplace Registration + Compliance Chain ✅](#phase-3e-dsp-marketplace-registration--compliance-chain-)
-  - [Phase 3f: OMOP Research Analytics View ✅](#phase-3f-omop-research-analytics-view-)
-  - [Phase 3g: Procedure Pipeline + UI Polish ✅](#phase-3g-procedure-pipeline--ui-polish-)
-  - [Phase 3h: EEHRxF FHIR Profile Alignment ✅](#phase-3h-eehrxf-fhir-profile-alignment-)
-  - [Phase 4: Dataspace Integration (EDC-V ↔ Neo4j)](#phase-4-dataspace-integration-edc-v--neo4j)
-  - [Phase 5: Federated Queries and GraphRAG](#phase-5-federated-queries-and-graphrag)
-  - [Phase 6a: Graph Explorer UI ✅](#phase-6a-graph-explorer-ui-)
-  - [Phase 6b: Unified Participant Portal (Next.js)](#phase-6b-unified-participant-portal-nextjs)
-  - [Phase 7: TCK DCP & DSP Compliance Verification](#phase-7-tck-dcp--dsp-compliance-verification)
-- [Architecture Decisions](#architecture-decisions)
-  - [ADR-1: PostgreSQL vs Neo4j Data Storage Split](#adr-1-postgresql-vs-neo4j-data-storage-split)
-  - [ADR-2: EDC Data Plane Architecture](#adr-2-edc-data-plane-architecture)
-  - [ADR-3: W3C HealthDCAT-AP Alignment](#adr-3-w3c-healthdcat-ap-alignment-replacing-generic-dcat)
-  - [ADR-4: Next.js 14 as Unified Frontend](#adr-4-nextjs-14-as-unified-frontend-consolidating-angular-reference-uis)
-- [Target Architecture](#target-architecture)
-- [What This Proves](#what-this-proves)
-- [Implementation Dependencies](#implementation-dependencies)
+- [Planning: Health Dataspace v2](#planning-health-dataspace-v2)
+  - [Table of Contents](#table-of-contents)
+  - [Background \& Inspiration](#background--inspiration)
+  - [New EDC Component Architecture](#new-edc-component-architecture)
+    - [Protocol Foundation: DSP + DCP + DPS](#protocol-foundation-dsp--dcp--dps)
+  - [Implementation Progress](#implementation-progress)
+  - [Implementation Roadmap](#implementation-roadmap)
+    - [Phase 1: Infrastructure Migration (JAD-Based)](#phase-1-infrastructure-migration-jad-based)
+      - [1a: JAD Local Deployment](#1a-jad-local-deployment)
+      - [1b: Health-Specific Tenant Configuration](#1b-health-specific-tenant-configuration)
+      - [1c: Docker Compose Development Profile](#1c-docker-compose-development-profile)
+      - [1d: OpenAPI TypeScript Client Generation](#1d-openapi-typescript-client-generation)
+      - [1e: ADR-2 Implementation — Dual Data Planes + Neo4j Query Proxy ✅](#1e-adr-2-implementation--dual-data-planes--neo4j-query-proxy-)
+      - [1f: Phase 4a Prep — EDC-V Asset Registration + Vault Keys ✅](#1f-phase-4a-prep--edc-v-asset-registration--vault-keys-)
+    - [Phase 2: Identity and Trust (DCP v1.0)](#phase-2-identity-and-trust-dcp-v10)
+      - [2a: DID:web and Verifiable Credential Setup](#2a-didweb-and-verifiable-credential-setup)
+      - [2b: EHDS-Specific Credential Types](#2b-ehds-specific-credential-types)
+      - [2c: Keycloak SSO Integration](#2c-keycloak-sso-integration)
+    - [Phase 3: Health Knowledge Graph Layer ✅](#phase-3-health-knowledge-graph-layer-)
+    - [Phase 3b: Real FHIR Data Pipeline ✅](#phase-3b-real-fhir-data-pipeline-)
+    - [Phase 3c: HealthDCAT-AP Metadata Registration ✅](#phase-3c-healthdcat-ap-metadata-registration-)
+    - [Phase 3d: README and UI Completeness Hardening ✅](#phase-3d-readme-and-ui-completeness-hardening-)
+    - [Phase 3e: DSP Marketplace Registration + Compliance Chain ✅](#phase-3e-dsp-marketplace-registration--compliance-chain-)
+    - [Phase 3f: OMOP Research Analytics View ✅](#phase-3f-omop-research-analytics-view-)
+    - [Phase 3g: Procedure Pipeline + UI Polish ✅](#phase-3g-procedure-pipeline--ui-polish-)
+    - [Phase 3h: EEHRxF FHIR Profile Alignment ✅](#phase-3h-eehrxf-fhir-profile-alignment-)
+    - [Phase 4: Dataspace Integration (EDC-V ↔ Neo4j)](#phase-4-dataspace-integration-edc-v--neo4j)
+      - [4a: Data Asset Registration](#4a-data-asset-registration)
+      - [4b: Contract Negotiation Flow](#4b-contract-negotiation-flow)
+      - [4c: Federated Catalog with HealthDCAT-AP](#4c-federated-catalog-with-healthdcat-ap)
+      - [4d: Data Plane Transfer via DCore](#4d-data-plane-transfer-via-dcore)
+    - [Phase 5: Federated Queries and GraphRAG](#phase-5-federated-queries-and-graphrag)
+    - [Phase 6a: Graph Explorer UI ✅](#phase-6a-graph-explorer-ui-)
+    - [Phase 6b: Unified Participant Portal (Next.js)](#phase-6b-unified-participant-portal-nextjs)
+      - [Technology Decision: Next.js 14 as Unified Frontend](#technology-decision-nextjs-14-as-unified-frontend)
+      - [6b-1: Participant Onboarding Portal (from Aruba)](#6b-1-participant-onboarding-portal-from-aruba)
+      - [6b-2: Data Sharing \& Discovery Portal (from Fraunhofer)](#6b-2-data-sharing--discovery-portal-from-fraunhofer)
+      - [6b-3: Operator Dashboard (from Redline)](#6b-3-operator-dashboard-from-redline)
+      - [Updated Navigation Structure](#updated-navigation-structure)
+    - [Phase 7: TCK DCP \& DSP Compliance Verification](#phase-7-tck-dcp--dsp-compliance-verification)
+      - [7a: DSP 2025-1 Technology Compatibility Kit](#7a-dsp-2025-1-technology-compatibility-kit)
+      - [7b: DCP v1.0 Compliance Tests](#7b-dcp-v10-compliance-tests)
+      - [7c: EHDS Health-Domain Compliance Tests](#7c-ehds-health-domain-compliance-tests)
+      - [7d: Automated CI/CD Compliance Pipeline](#7d-automated-cicd-compliance-pipeline)
+  - [Architecture Decisions](#architecture-decisions)
+    - [ADR-1: PostgreSQL vs Neo4j Data Storage Split](#adr-1-postgresql-vs-neo4j-data-storage-split)
+      - [Decision](#decision)
+      - [Storage Assignment](#storage-assignment)
+      - [Event Projection: EDC-V PostgreSQL → Neo4j Layer 1](#event-projection-edc-v-postgresql--neo4j-layer-1)
+      - [Consequences](#consequences)
+    - [ADR-2: EDC Data Plane Architecture](#adr-2-edc-data-plane-architecture)
+      - [Decision](#decision-1)
+      - [Data Plane Topology](#data-plane-topology)
+      - [Data Plane Specifications](#data-plane-specifications)
+      - [Neo4j Query Proxy Service](#neo4j-query-proxy-service)
+      - [EDC-V Asset Registration (Phase 4a)](#edc-v-asset-registration-phase-4a)
+      - [Docker Compose Changes](#docker-compose-changes)
+      - [Consequences](#consequences-1)
+    - [ADR-3: W3C HealthDCAT-AP Alignment (Replacing Generic DCAT)](#adr-3-w3c-healthdcat-ap-alignment-replacing-generic-dcat)
+      - [HealthDCAT-AP Specification Overview](#healthdcat-ap-specification-overview)
+      - [Property Mapping: Current → HealthDCAT-AP](#property-mapping-current--healthdcat-ap)
+      - [Node Label Changes](#node-label-changes)
+      - [Relationship Changes](#relationship-changes)
+      - [JSON-LD Serialization (for Federated Catalog)](#json-ld-serialization-for-federated-catalog)
+      - [Migration Steps](#migration-steps)
+      - [Consequences](#consequences-2)
+    - [ADR-4: Next.js 14 as Unified Frontend (Consolidating Angular Reference UIs)](#adr-4-nextjs-14-as-unified-frontend-consolidating-angular-reference-uis)
+      - [Decision](#decision-2)
+      - [Alternatives Considered](#alternatives-considered)
+      - [Rationale](#rationale)
+      - [Technology Stack](#technology-stack)
+      - [Application Structure](#application-structure)
+      - [Consequences](#consequences-3)
+    - [ADR-5: JAD + CFM Source Builds (EDC-V 0.16.0-SNAPSHOT + CFM Go Stack)](#adr-5-jad--cfm-source-builds-edc-v-0160-snapshot--cfm-go-stack)
+      - [Decision](#decision-3)
+      - [Alternatives Considered](#alternatives-considered-1)
+      - [Build Instructions](#build-instructions)
+      - [Images Produced](#images-produced)
+      - [Configuration Alignment](#configuration-alignment)
+      - [Consequences](#consequences-4)
+  - [Target Architecture](#target-architecture)
+  - [What This Proves](#what-this-proves)
+  - [Implementation Dependencies](#implementation-dependencies)
 
 ---
 
@@ -1226,6 +1279,83 @@ ui/src/app/
 - **Trade-off:** Must rewrite ~15 Angular components into React. This is a mechanical translation (Tailwind classes port 1:1, REST fetch patterns are identical), but adds Phase 6b implementation effort. Estimated at 2–3 days of porting per sub-phase (6b-1, 6b-2, 6b-3).
 - **Risk:** Next.js 14 App Router is stable but newer than Angular's mature ecosystem. Edge cases with `"use client"` directives and server component boundaries may require workarounds for interactive EDC-V admin views. Mitigated by using client components for all form-heavy pages.
 - **Static export limitation:** The GitHub Pages static demo cannot serve API routes. Phase 6b views that require live EDC-V/CFM connections will show a "demo mode" banner with mock data when running as a static export, matching the existing pattern used by the 6a views.
+
+---
+
+### ADR-5: JAD + CFM Source Builds (EDC-V 0.16.0-SNAPSHOT + CFM Go Stack)
+
+**Status:** Accepted (revised)
+**Date:** 2026-03-09 (revised 2026-03-10)
+**Context:** The `docker-compose.jad.yml` references container images from `ghcr.io/metaform/jad/*` and `ghcr.io/eclipse-cfm/cfm/*`. These pre-built images require GHCR authentication (`denied: denied`). However, **both source repositories are public**:
+
+- **JAD** ([github.com/Metaform/jad](https://github.com/Metaform/jad)) — Java/Gradle project using EDC 0.16.0-SNAPSHOT with Virtual Connector BOMs. Produces 4 Docker images via `./gradlew dockerize`.
+- **CFM** ([github.com/eclipse-cfm/cfm](https://github.com/eclipse-cfm/cfm)) — Go project using Makefile-based builds. Produces 7 Docker images via `make docker-build`.
+
+Both repos are cloned to `vendor/` (gitignored) and built locally. The locally-built images use the same GHCR-style tags that `docker-compose.jad.yml` expects, so **no compose file image changes were needed**.
+
+#### Decision
+
+Build all connector and management images from source by cloning JAD and CFM repos to `vendor/`. Use `pull_policy: never` in compose to prevent accidental GHCR pull attempts. The custom `connector/` build (EDC 0.13.0) is retained as a simpler fallback but is not the primary deployment path.
+
+**CFM is included in the initial deployment** (not deferred) — Tenant Manager, Provision Manager, and all 4 agents run alongside the EDC-V stack.
+
+#### Alternatives Considered
+
+| Option                                       | Description                                                        | Pros                                                                                    | Cons                                                                          |
+| -------------------------------------------- | ------------------------------------------------------------------ | --------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| **A: Source builds from JAD + CFM (chosen)** | Clone repos, build locally with Gradle/Make                        | Full Virtual Connector features, multi-tenant SaaS, uses reference architecture exactly | Must rebuild on EDC version changes, 0.16.0-SNAPSHOT may have API instability |
+| **B: Custom minimal connector (fallback)**   | Our `connector/` Gradle project with EDC 0.13.0 from Maven Central | Stable released version, full extension control, no upstream dependency                 | Lacks Virtual Connector BOMs, no CFM integration, more manual wiring          |
+| **C: Tractus-X EDC images**                  | Use `tractusx/edc-*` images                                        | Public, tested                                                                          | Catena-X automotive policies, BPNL validation — irrelevant for health         |
+| **D: Wait for public GHCR images**           | Wait for Metaform/Eclipse to publish publicly                      | Zero build effort                                                                       | Blocked indefinitely                                                          |
+
+#### Build Instructions
+
+**Prerequisites:** JDK 17 (Temurin), Docker, Go 1.25+
+
+```bash
+# Clone source repos (one-time)
+git clone --depth 1 https://github.com/eclipse-cfm/cfm.git vendor/cfm
+git clone --depth 1 https://github.com/Metaform/jad.git vendor/jad
+
+# Build CFM images (7 Go images, ~2 min)
+cd vendor/cfm && make docker-build
+
+# Build JAD images (4 Java images, ~8 min)
+cd vendor/jad
+export JAVA_HOME=$(/usr/libexec/java_home -v 17)
+unset JAVA_TOOL_OPTIONS
+./gradlew dockerize
+```
+
+#### Images Produced
+
+| Image                                       | Source     | Size    | Service                        |
+| ------------------------------------------- | ---------- | ------- | ------------------------------ |
+| `ghcr.io/metaform/jad/controlplane:latest`  | JAD (Java) | ~283 MB | EDC-V control plane            |
+| `ghcr.io/metaform/jad/dataplane:latest`     | JAD (Java) | ~274 MB | DCore data plane (FHIR + OMOP) |
+| `ghcr.io/metaform/jad/identity-hub:latest`  | JAD (Java) | ~275 MB | DCP v1.0 identity hub          |
+| `ghcr.io/metaform/jad/issuerservice:latest` | JAD (Java) | ~231 MB | VC issuance service            |
+| `ghcr.io/eclipse-cfm/cfm/tmanager:latest`   | CFM (Go)   | ~18 MB  | Tenant lifecycle manager       |
+| `ghcr.io/eclipse-cfm/cfm/pmanager:latest`   | CFM (Go)   | ~19 MB  | Provision manager              |
+| `ghcr.io/eclipse-cfm/cfm/kcagent:latest`    | CFM (Go)   | ~25 MB  | Keycloak provisioning agent    |
+| `ghcr.io/eclipse-cfm/cfm/edcvagent:latest`  | CFM (Go)   | ~25 MB  | EDC-V provisioning agent       |
+| `ghcr.io/eclipse-cfm/cfm/regagent:latest`   | CFM (Go)   | ~20 MB  | Registration agent             |
+| `ghcr.io/eclipse-cfm/cfm/obagent:latest`    | CFM (Go)   | ~20 MB  | Onboarding agent               |
+
+#### Configuration Alignment
+
+All environment variables and config files were aligned with the JAD K8s reference manifests (`vendor/jad/k8s/apps/`):
+
+- **EDC-V services** (controlplane, dataplane, identityhub, issuerservice): Java `-D` style env vars (e.g., `edc.hostname`, `web.http.port`). Validated against K8s ConfigMaps.
+- **CFM Go services** (tmanager, pmanager, agents): Flat key-value Viper config files mounted at `/etc/appname/<name>.env`. Config files rewritten from incorrect Spring Boot YAML to correct flat format.
+- **Seed jobs**: Three K8s batch Jobs (issuerservice-seed, tenant-manager-seed, provision-manager-seed) translated into a single `jad/seed-jad.sh` script run as a Docker Compose `jad-seed` service (profile: `seed`).
+
+#### Consequences
+
+- **Positive:** Full JAD reference architecture running locally — EDC-V Virtual Connector with multi-tenant CFM management plane, exactly as designed by the JAD project. All 11 services replicate the K8s deployment without KinD.
+- **Trade-off:** JAD uses EDC 0.16.0-SNAPSHOT from Sonatype snapshots — not a released version. API may change. Mitigated by pinning to the cloned commit hash.
+- **Fallback:** The `connector/` directory contains a simpler EDC 0.13.0 build from Maven Central releases. It can be used if JAD upstream breaks, but lacks Virtual Connector capabilities.
+- **Image naming:** Images use the official upstream GHCR-style tags (not custom `health-dataspace/*` prefix) to match `docker-compose.jad.yml` without changes. `pull_policy: never` prevents pull attempts.
 
 ---
 

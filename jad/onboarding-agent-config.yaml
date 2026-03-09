@@ -1,24 +1,20 @@
 # =============================================================================
-# CFM Onboarding Agent Configuration
+# CFM Onboarding Agent Configuration (obagent.env format)
 # =============================================================================
-# Docker Compose equivalent of K8s onboarding-agent-config ConfigMap.
+# Docker Compose equivalent of K8s ob-agent-config ConfigMap.
+# Flat key-value format expected by CFM Go binary (Viper).
+# Mount as: /etc/appname/obagent.env
 # =============================================================================
 
-cfm:
-  controlplane:
-    management-url: http://controlplane:8081/api/mgmt
-  identityhub:
-    url: http://identityhub:7081/api/identity
-    credentials-url: http://identityhub:7082/api/credentials
-  issuerservice:
-    admin-url: http://issuerservice:10013/api/admin
-  keycloak:
-    url: http://keycloak:8080
-    realm: edcv
-    client-id: provisioner
-    client-secret: provisioner-secret
-  vault:
-    url: http://vault:8200
-    token: root
-  nats:
-    url: nats://nats:4222
+uri: nats://nats:4222
+bucket: cfm-bucket
+stream: cfm-stream
+httpport: 8080
+postgres: true
+dsn: postgres://cfm:cfm@postgres:5432/cfm?sslmode=disable
+keycloak.tokenUrl: http://keycloak:8080/realms/edcv/protocol/openid-connect/token
+keycloak.clientId: admin
+keycloak.clientSecret: edc-v-admin-secret
+identityhub.url: http://identityhub:7081/api/identity
+issuerservice.url: http://issuerservice:10013/api/admin
+issuer.id: issuer

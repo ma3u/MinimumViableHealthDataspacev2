@@ -40,6 +40,13 @@ venv/
 # Docker
 docker-compose.override.yml
 
+# Vendor — cloned upstream repos for local Docker image builds
+vendor/
+
+# Connector — custom EDC connector build artifacts
+connector/.gradle/
+connector/*/build/
+
 # Synthea — generated patient data (never commit)
 neo4j/import/fhir/*.json
 neo4j/import/fhir/*.ndjson

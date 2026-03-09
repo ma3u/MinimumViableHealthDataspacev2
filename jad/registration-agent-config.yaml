@@ -1,19 +1,19 @@
 # =============================================================================
-# CFM Registration Agent Configuration
+# CFM Registration Agent Configuration (regagent.env format)
 # =============================================================================
-# Docker Compose equivalent of K8s registration-agent-config ConfigMap.
+# Docker Compose equivalent of K8s reg-agent-config ConfigMap.
+# Flat key-value format expected by CFM Go binary (Viper).
+# Mount as: /etc/appname/regagent.env
 # =============================================================================
 
-cfm:
-  identityhub:
-    url: http://identityhub:7081/api/identity
-    credentials-url: http://identityhub:7082/api/credentials
-  issuerservice:
-    admin-url: http://issuerservice:10013/api/admin
-  keycloak:
-    url: http://keycloak:8080
-    realm: edcv
-    client-id: provisioner
-    client-secret: provisioner-secret
-  nats:
-    url: nats://nats:4222
+uri: nats://nats:4222
+bucket: cfm-bucket
+stream: cfm-stream
+httpport: 8080
+postgres: true
+dsn: postgres://cfm:cfm@postgres:5432/cfm?sslmode=disable
+keycloak.tokenUrl: http://keycloak:8080/realms/edcv/protocol/openid-connect/token
+keycloak.clientId: provisioner
+keycloak.clientSecret: provisioner-secret
+issuerservice.url: http://issuerservice:10013/api/admin
+issuer.id: issuer

@@ -1,14 +1,24 @@
 # =============================================================================
-# CFM Keycloak Agent Configuration
+# CFM Keycloak Agent Configuration (kcagent.env format)
 # =============================================================================
 # Docker Compose equivalent of K8s keycloak-agent-config ConfigMap.
+# Flat key-value format expected by CFM Go binary (Viper).
+# Mount as: /etc/appname/kcagent.env
 # =============================================================================
 
-cfm:
-  keycloak:
-    url: http://keycloak:8080
-    realm: edcv
-    client-id: provisioner
-    client-secret: provisioner-secret
-  nats:
-    url: nats://nats:4222
+uri: nats://nats:4222
+bucket: cfm-bucket
+stream: cfm-stream
+httpport: 8080
+postgres: true
+dsn: postgres://cfm:cfm@postgres:5432/cfm?sslmode=disable
+vault.url: http://vault:8200
+vault.path: secret
+vault.clientId: provisioner
+vault.clientSecret: provisioner-secret
+vault.tokenUrl: http://keycloak:8080/realms/edcv/protocol/openid-connect/token
+keycloak.url: http://keycloak:8080
+keycloak.realm: edcv
+keycloak.username: admin
+keycloak.password: admin
+keycloak.clientId: admin-cli
