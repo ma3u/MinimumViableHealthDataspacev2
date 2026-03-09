@@ -50,31 +50,120 @@ All three core specifications are now final or near-final:
 | **5**  | Federated Queries & GraphRAG                           | 🔲 Not started | Depends on Phase 4                                                                               |
 | **6a** | Graph Explorer UI (Next.js → Neo4j Bolt)               | ✅ Complete    | Four views; runs at localhost:3000                                                               |
 | **6b** | Full Participant Portal (Aruba + Fraunhofer + Redline) | 🔲 Not started | Depends on Phases 1–4                                                                            |
+| **7**  | TCK DCP & DSP Compliance Verification                  | 🔲 Not started | Protocol conformance testing; depends on Phases 1–2                                              |
 
 ---
 
 ## Implementation Roadmap
 
-### Phase 1: Infrastructure Migration
+### Phase 1: Infrastructure Migration (JAD-Based)
 
-1. Replace the monolithic EDC Connector with **EDC-V** as the virtualized control plane
-2. Deploy **DCore** Rust-based HTTP data plane for FHIR Bundle transfers
-3. Set up **CFM** with Tenant Manager and Provision Manager for multi-participant orchestration
-4. Configure three tenant profiles:
-   - **Clinic** (data provider — FHIR R4 patient data)
-   - **CRO** (data consumer — OMOP research queries)
-   - **HDAB** (intermediary — HealthDCAT-AP catalog + SPE operator)
+Phase 1 bootstraps the full EDC-V + DCore + CFM stack using the [JAD (Joint Architecture Demo)](https://github.com/Metaform/jad) as the reference deployment. JAD provides pre-built container images, Kubernetes manifests, and automated end-to-end tests — we adapt its infrastructure to serve the health dataspace domain.
 
-### Phase 2: Identity and Trust
+#### 1a: JAD Local Deployment
 
-5. Implement DCP v1.0 credential flows using EDC-V's built-in IdentityHub:
-   - Generate DID:web identifiers for each participant
-   - Issue Verifiable Credentials via CFM's IssuerService integration
-   - Configure credential presentation during DSP contract negotiation
-6. Set up a Credential Issuer Service representing a trust anchor (simulated EHDS authority)
-7. Define EHDS-specific credential types:
-   - `EHDSParticipantCredential` (proof of HDAB registration)
-   - `DataProcessingPurposeCredential` (EHDS Article 53 permitted purpose attestation)
+1. Set up **KinD** (Kubernetes in Docker) cluster with Traefik Gateway API ingress as per JAD's `deployment/kind/` manifests
+2. Deploy JAD's 11 core services from pre-built **GHCR images** (`ghcr.io/metaform/jad/*`):
+   - `controlplane` — EDC-V virtualized control plane (DSP + admin APIs)
+   - `dataplane` — DCore HTTP data plane (Data Plane Signaling)
+   - `identityhub` — DCP v1.0 credential storage and presentation
+   - `issuerservice` — Verifiable Credential issuance (trust anchor)
+   - `keycloak` — OAuth2/OIDC identity provider (PKCE flows)
+   - `vault` — HashiCorp Vault for secret management
+   - `postgres` — Persistent storage for EDC-V state
+   - `nats` — Event messaging bus
+   - `cfm-tenant-manager` — Multi-tenant participant lifecycle
+   - `cfm-provision-manager` — Automated resource provisioning
+   - `cfm-agents` — Background provisioning agents
+3. Validate deployment with JAD's **Bruno API collection** (interactive testing) and automated smoke tests
+
+#### 1b: Health-Specific Tenant Configuration
+
+4. Configure three tenant profiles via CFM Tenant Manager API:
+   - **Clinic** (`clinic-charité`) — data provider publishing FHIR R4 patient data
+   - **CRO** (`cro-bayer`) — data consumer requesting OMOP research queries
+   - **HDAB** (`hdab-bfarm`) — intermediary operating HealthDCAT-AP catalog + SPE
+5. Configure CFM Provision Manager to automatically provision per-tenant:
+   - EDC-V control plane instance (participant-scoped DSP endpoint)
+   - DCore data plane instance (FHIR HTTP transfer + query result streaming)
+   - IdentityHub instance (DID:web document + credential wallet)
+6. Wire the existing **Neo4j Health Knowledge Graph** as a data source:
+   - Register Cypher query endpoint as a DSP Data Asset on the Clinic's EDC-V instance
+   - Register HealthDCAT-AP catalog metadata on the HDAB's Federated Catalog
+
+#### 1c: Docker Compose Development Profile
+
+7. Create `docker-compose.jad.yml` extending the existing `docker-compose.yml`:
+   - Adds JAD services alongside Neo4j for **local development without KinD**
+   - Maps JAD service ports to localhost (controlplane:11003, identityhub:11005, keycloak:8080)
+   - Shares the `neo4j-data` Docker volume with the EDC-V data plane
+   - Configures Traefik routing to match KinD Gateway API routes
+8. Create `scripts/bootstrap-jad.sh` automation script:
+   - Checks prerequisites (Docker, KinD or docker-compose)
+   - Pulls latest JAD GHCR images
+   - Initializes Keycloak realm with health-specific roles
+   - Provisions the three tenant profiles via CFM API
+   - Runs Neo4j schema initialization + Synthea data load
+   - Validates end-to-end with JAD's E2E test suite
+
+#### 1d: OpenAPI TypeScript Client Generation
+
+9. Generate typed TypeScript API clients from JAD's OpenAPI specifications:
+   - **EDC-V Admin API** — participant management, data asset registration, policy CRUD
+   - **EDC-V DSP API** — catalog queries, contract negotiation, transfer processes
+   - **CFM Tenant Manager API** — tenant CRUD, provisioning status, lifecycle events
+   - **CFM Provision Manager API** — provisioning triggers, status polling, resource inventory
+   - **IdentityHub API** — DID resolution, credential storage, presentation exchange
+   - **IssuerService API** — credential issuance requests, schema management
+10. Use `openapi-typescript-codegen` or `openapi-generator-cli` with TypeScript-fetch template
+11. Publish clients as `ui/src/lib/edc/` module for use by Next.js API routes and client components
+
+**Deliverables:** Full EDC-V + CFM + DCore stack running locally; 3 health-specific tenants provisioned; OpenAPI TypeScript clients generated; existing Neo4j graph accessible via EDC-V data plane.
+
+### Phase 2: Identity and Trust (DCP v1.0)
+
+Phase 2 implements the full DCP v1.0 credential lifecycle using JAD's IdentityHub and IssuerService, then adds EHDS-specific credential types.
+
+#### 2a: DID:web and Verifiable Credential Setup
+
+5. Configure **DID:web** identifiers for each tenant (auto-provisioned by CFM in Phase 1):
+   - `did:web:clinic-charite.localhost` → Clinic's IdentityHub
+   - `did:web:cro-bayer.localhost` → CRO's IdentityHub
+   - `did:web:hdab-bfarm.localhost` → HDAB's IdentityHub
+6. Configure the **IssuerService** as the trust anchor (simulating an EHDS-recognized authority):
+   - Define credential schemas for `MembershipCredential` (dataspace membership attestation)
+   - Configure Keycloak realm roles mapping to credential issuance policies
+   - Set up credential revocation list (StatusList2021)
+7. Implement the DCP **Credential Issuance** flow:
+   - Participant registers via onboarding portal → CFM creates tenant → IssuerService issues `MembershipCredential`
+   - IdentityHub stores issued credentials and exposes DID document at `.well-known/did.json`
+
+#### 2b: EHDS-Specific Credential Types
+
+8. Define and register EHDS health domain credentials:
+   - `EHDSParticipantCredential` — proof of HDAB registration (issued to Clinics and CROs by the HDAB)
+   - `DataProcessingPurposeCredential` — EHDS Article 53 permitted purpose attestation (research, public health, etc.)
+   - `DataQualityLabelCredential` — attests to data quality metrics (completeness, conformance to EEHRxF)
+9. Implement DCP **Credential Presentation** during DSP contract negotiation:
+   - CRO presents `EHDSParticipantCredential` + `DataProcessingPurposeCredential` to Clinic's EDC-V
+   - Clinic's EDC-V validates credentials via IdentityHub before proceeding with contract agreement
+   - Policy engine uses **CEL (Common Expression Language)** rules (as used by JAD) to evaluate credential claims
+10. Add credential verification to the **Compliance UI** (`/compliance`):
+    - Display VC status (valid/expired/revoked) alongside HDAB approval chain
+    - Show trust chain: IssuerService → IdentityHub → Credential Presentation → Policy Evaluation
+
+#### 2c: Keycloak SSO Integration
+
+11. Configure **Keycloak** for unified authentication across all portals:
+    - Single realm `health-dataspace` with client registrations for Next.js UI and EDC-V Admin API
+    - PKCE authorization code flow for browser-based login (follows Aruba portal's pattern)
+    - Service account flow for backend-to-backend API calls (Next.js API routes → EDC-V)
+    - Role mapping: `EDC_ADMIN` (operator), `EDC_USER_PARTICIPANT` (clinic/CRO user), `HDAB_AUTHORITY` (regulator)
+12. Integrate **NextAuth.js** with Keycloak provider in the Next.js app:
+    - Session management with JWT tokens containing EDC-V participant context
+    - Role-based route protection: `/admin/*` requires `EDC_ADMIN`, `/onboarding` requires authenticated, `/compliance` requires `HDAB_AUTHORITY`
+
+**Deliverables:** DID:web identifiers for all participants; EHDS-specific VCs issued and stored; credential presentation integrated into DSP negotiation; Keycloak SSO protecting all UI views.
 
 ### Phase 3: Health Knowledge Graph Layer ✅
 
@@ -288,20 +377,55 @@ The **European Electronic Health Record Exchange Format (EEHRxF)** was establish
 - EHDS implementation timeline visualization (2025 → 2031)
 - Gap analysis highlighting missing resources (e.g., DiagnosticReport, ImagingStudy)
 
-### Phase 4: Dataspace Integration
+### Phase 4: Dataspace Integration (EDC-V ↔ Neo4j)
 
-12. Wire the Neo4j health graph into the EDC-V data plane:
-    - Register Neo4j Cypher query endpoint as a DSP Data Asset
-    - Define usage policies (EHDS purpose restriction, temporal limits, anonymization requirements)
-    - Implement contract negotiation: CRO requests access → HDAB validates credentials → contract agreed → query endpoint provisioned
-13. Implement **Federated Catalog** with HealthDCAT-AP:
-    - Clinic publishes dataset descriptions to HDAB catalog
-    - CRO discovers available cohorts via federated catalog search
+Phase 4 wires the Neo4j health knowledge graph into the live EDC-V data plane, enabling full DSP contract negotiation and credentialed data access.
+
+#### 4a: Data Asset Registration
+
+12. Register Neo4j data assets on the Clinic's EDC-V instance via the generated TypeScript Admin API client:
+    - **FHIR Cohort Asset** — Cypher query endpoint returning FHIR R4 patient bundles
+    - **OMOP Analytics Asset** — Cypher query endpoint returning OMOP CDM aggregated results
+    - **HealthDCAT-AP Catalog Asset** — Metadata endpoint for federated catalog discovery
+13. Define **ODRL usage policies** per asset:
+    - EHDS purpose restriction (Article 53 permitted purposes array)
+    - Temporal access limits (e.g., 90-day research window)
+    - Anonymization requirements (k-anonymity threshold for cohort queries)
+    - Re-identification prohibition (as currently modeled in `OdrlPolicy` graph nodes)
+
+#### 4b: Contract Negotiation Flow
+
+14. Implement end-to-end DSP contract negotiation:
+    - CRO discovers FHIR Cohort Asset via HDAB Federated Catalog
+    - CRO initiates `ContractNegotiation` request with `DataProcessingPurposeCredential` presentation
+    - HDAB validates EHDS compliance (credential verification + policy evaluation via CEL)
+    - Contract agreed → `TransferProcess` initiated → DCore data plane provisions query endpoint
+15. Capture contract lifecycle events in Neo4j provenance graph:
+    - `(:Contract)-[:NEGOTIATED_BY]->(:Participant)` with timestamps
+    - `(:TransferProcess)-[:GOVERNED_BY]->(:Contract)` linking data flows to legal basis
+
+#### 4c: Federated Catalog with HealthDCAT-AP
+
+16. Configure HDAB's EDC-V **Federated Catalog** extension:
+    - Clinic publishes HealthDCAT-AP dataset descriptions to HDAB catalog
+    - CRO discovers available cohorts via DSP catalog request protocol
     - CFM orchestrates catalog federation across multiple HDAB instances
-14. Implement **Data Plane Signaling** for FHIR transfer:
-    - DCore Rust data plane handles FHIR Bundle HTTP transfers
-    - Control plane (EDC-V) signals start/suspend/terminate via DPS
-    - Transfer audit log captured in Neo4j provenance graph
+17. Expose Federated Catalog via the `/catalog` UI view (extending Phase 6a):
+    - Live catalog queries via EDC-V DSP API (replacing mock data in production mode)
+    - Show dataset provenance: publisher participant + access conditions + credential requirements
+
+#### 4d: Data Plane Transfer via DCore
+
+18. Configure DCore Rust data plane for FHIR transfer:
+    - HTTP push/pull transfer types for FHIR Bundle JSON streaming
+    - Data Plane Signaling (DPS) for control plane → data plane coordination
+    - Transfer audit log: `(:TransferProcess)-[:ACCESSED]->(asset)` stored in Neo4j
+19. Implement query result proxying:
+    - CRO sends parameterized Cypher query via DCore HTTP endpoint
+    - DCore enforces contract-scoped access (only permitted OMOP aggregation queries)
+    - Query results streamed back through DCore with transfer completion signaling
+
+**Deliverables:** Neo4j assets registered in EDC-V; DSP contract negotiation working end-to-end; Federated Catalog exposing HealthDCAT-AP metadata; DCore handling FHIR transfers with audit trail.
 
 ### Phase 5: Federated Queries and GraphRAG
 
@@ -325,12 +449,261 @@ Deployed as a standalone Next.js 14 web app connecting directly to Neo4j Bolt �
 | Patient Journey | `/patient`    | FHIR R4 → OMOP CDM event timeline                  |
 | OMOP Analytics  | `/analytics`  | Cohort-level OMOP CDM research analytics dashboard |
 
-### Phase 6b: Full Participant Portal
+### Phase 6b: Unified Participant Portal (Next.js)
 
-19. Deploy **Participant & Operator Dashboards** using [Dataspace Builder Redline](https://dataspacebuilder.github.io/website/docs/components/redline)
-20. Implement **Ecosystem Onboarding Portals**:
-    - [Aruba EDC Public Participant Portal](https://github.com/Aruba-it-S-p-A/edc-public-participant-portal) — self-registration for Clinics and CROs
-    - [Fraunhofer ISST End-User API](https://github.com/FraunhoferISST/End-User-API/tree/feat/ecosystem-registration) — automated credential provisioning via Keycloak/CFM
+Phase 6b consolidates the onboarding and management functionality from three reference implementations — [Aruba Participant Portal](https://github.com/Aruba-it-S-p-A/edc-public-participant-portal) (Angular 20), [Fraunhofer End-User API](https://github.com/FraunhoferISST/End-User-API) (Angular + daisyUI), and [Dataspace Builder Redline](https://dataspacebuilder.github.io/website/docs/components/redline) — into the existing **Next.js 14** application. This avoids running three separate frontend stacks and leverages the 6 views already built in Phase 6a.
+
+#### Technology Decision: Next.js 14 as Unified Frontend
+
+| Criteria             | Next.js 14 (existing)             | Angular 20 (Aruba/Fraunhofer) | Decision                           |
+| -------------------- | --------------------------------- | ----------------------------- | ---------------------------------- |
+| Existing investment  | 6 views, 8 API routes, mock layer | None in this project          | **Next.js** — avoid rewrite        |
+| Styling              | Tailwind CSS                      | Tailwind CSS (both)           | Compatible — port styles directly  |
+| API integration      | Next.js API routes → Neo4j        | REST fetch + mock server      | Next.js routes also serve EDC-V    |
+| Static export        | `output: "export"` for GH Pages   | nginx static build            | Next.js already configured         |
+| SSR/ISR              | Full support                      | Not applicable (SPA)          | **Next.js** — SEO + performance    |
+| Auth                 | NextAuth.js ecosystem             | Keycloak PKCE (custom)        | NextAuth.js with Keycloak provider |
+| EDC client libraries | OpenAPI-generated TS-fetch        | `edc-connector-client` (npm)  | Both usable; prefer typed clients  |
+
+**Decision:** Remain on Next.js 14. Port the Aruba and Fraunhofer Angular UIs into Next.js pages, reusing their REST API patterns, Tailwind CSS layouts, and Keycloak authentication flow.
+
+#### 6b-1: Participant Onboarding Portal (from Aruba)
+
+Ported from Aruba's Angular self-registration flow into Next.js:
+
+| New Route            | Source                                | Description                                         |
+| -------------------- | ------------------------------------- | --------------------------------------------------- |
+| `/onboarding`        | Aruba `RegistrationComponent`         | Self-registration form: org name, DID, contact info |
+| `/onboarding/status` | Aruba `DashboardComponent`            | Registration status tracker, pending approvals      |
+| `/credentials`       | Aruba `CredentialManagementComponent` | View/request/revoke Verifiable Credentials          |
+| `/settings`          | Aruba `AccountSettingsComponent`      | Participant profile, API keys, notification prefs   |
+
+**API routes backing onboarding:**
+
+- `POST /api/participants` → CFM Tenant Manager API (create participant tenant)
+- `GET /api/participants/me` → EDC-V Admin API (current participant profile)
+- `PUT /api/participants/me` → CFM Tenant Manager API (update participant)
+- `POST /api/credentials/request` → IssuerService API (request VC issuance)
+- `GET /api/credentials` → IdentityHub API (list stored credentials)
+
+**Keycloak integration:** Follows Aruba's PKCE pattern via NextAuth.js Keycloak provider. Registration creates both a Keycloak user and a CFM tenant. Roles `EDC_ADMIN` and `EDC_USER_PARTICIPANT` gate access.
+
+#### 6b-2: Data Sharing & Discovery Portal (from Fraunhofer)
+
+Ported from Fraunhofer's Angular + EDC Data Dashboard into Next.js:
+
+| New Route        | Source                                    | Description                                         |
+| ---------------- | ----------------------------------------- | --------------------------------------------------- |
+| `/data/share`    | Fraunhofer `DataSharingComponent`         | Publish data assets with usage policies             |
+| `/data/discover` | Fraunhofer `DataDiscoveryComponent`       | Browse federated catalog, initiate negotiations     |
+| `/data/transfer` | Fraunhofer `TransferManagementComponent`  | Monitor active/completed transfers                  |
+| `/negotiate`     | Fraunhofer `ContractNegotiationComponent` | Contract negotiation wizard with credential prompts |
+
+**API routes backing data sharing:**
+
+- `POST /api/assets` → EDC-V Admin API (register data asset)
+- `GET /api/catalog` → EDC-V DSP API (federated catalog query) — extends existing `/api/catalog`
+- `POST /api/negotiations` → EDC-V DSP API (initiate contract negotiation)
+- `GET /api/negotiations/:id` → EDC-V DSP API (negotiation status)
+- `POST /api/transfers` → EDC-V DSP API (initiate data transfer)
+- `GET /api/transfers/:id` → EDC-V DSP API (transfer status)
+
+**EDC client integration:** Uses the OpenAPI-generated TypeScript clients from Phase 1d (`ui/src/lib/edc/`) rather than Fraunhofer's `edc-connector-client` npm package, ensuring consistent typing with the exact JAD API version.
+
+#### 6b-3: Operator Dashboard (from Redline)
+
+| New Route         | Source                     | Description                                   |
+| ----------------- | -------------------------- | --------------------------------------------- |
+| `/admin`          | Redline operator dashboard | Tenant overview, system health, audit log     |
+| `/admin/tenants`  | CFM Tenant Manager         | Manage participant tenants (create/suspend)   |
+| `/admin/policies` | Redline policy editor      | ODRL policy templates + CEL rule editor       |
+| `/admin/audit`    | Neo4j provenance graph     | Contract negotiation + transfer event history |
+
+**Role requirement:** All `/admin/*` routes require `EDC_ADMIN` role in Keycloak JWT.
+
+#### Updated Navigation Structure
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  Health Dataspace v2                                [User ▼]│
+├─────────────────────────────────────────────────────────────┤
+│  Existing (Phase 6a)          │  New (Phase 6b)             │
+│  ─────────────────────        │  ───────────────────        │
+│  /graph      Graph Explorer   │  /onboarding  Registration  │
+│  /catalog    Dataset Catalog  │  /credentials Credentials   │
+│  /compliance EHDS Compliance  │  /data/share  Data Sharing  │
+│  /patient    Patient Journey  │  /data/discover Discovery   │
+│  /analytics  OMOP Analytics   │  /negotiate   Negotiation   │
+│  /eehrxf     EEHRxF Profiles  │  /admin       Operator      │
+└─────────────────────────────────────────────────────────────┘
+```
+
+**Deliverables:** 10 new Next.js routes implementing Aruba onboarding + Fraunhofer data sharing + Redline operator dashboard; Keycloak SSO protecting all views; EDC-V/CFM/IdentityHub APIs accessible via typed TypeScript clients.
+
+### Phase 7: TCK DCP & DSP Compliance Verification
+
+Phase 7 validates that the Health Dataspace v2 deployment is **protocol-conformant** using the official Technology Compatibility Kits and custom EHDS-specific test suites. This phase runs after Phases 1–2 provide a working EDC-V + DCP stack.
+
+#### 7a: DSP 2025-1 Technology Compatibility Kit
+
+The [DSP 2025-1 specification](https://internationaldataspaces.org/dataspace-protocol-nears-first-official-release/) includes a **TCK with 140+ test cases** that both EDC and TNO connectors have passed. We run these against our health dataspace deployment:
+
+1. **Catalog Protocol Tests** — Verify DSP catalog request/response between CRO → HDAB Federated Catalog
+   - `CatalogRequestMessage` / `CatalogAcknowledgementMessage` schema validation
+   - Federated catalog crawling across multiple HDAB instances
+   - HealthDCAT-AP metadata faithfully represented in DSP catalog responses
+2. **Contract Negotiation Tests** — Verify full negotiation lifecycle
+   - `ContractOfferMessage` → `ContractNegotiationEventMessage` → `ContractAgreementMessage`
+   - Policy evaluation with EHDS-specific ODRL constraints
+   - Error handling: negotiation rejection on invalid credentials
+3. **Transfer Process Tests** — Verify DPS-compliant data transfer
+   - `TransferRequestMessage` → `TransferStartMessage` → `TransferCompletionMessage`
+   - Data Plane Signaling between EDC-V control plane and DCore data plane
+   - FHIR Bundle HTTP transfer completion and acknowledgment
+4. **Message Schema Validation** — All DSP messages conform to normative JSON schemas
+   - Request/response payload validation against published JSON Schema definitions
+   - HTTP status code compliance (201 Created, 400 Bad Request, etc.)
+
+**Test execution:**
+
+```bash
+# Clone DSP TCK
+git clone https://github.com/International-Data-Spaces-Association/ids-specification.git
+cd ids-specification/tck
+
+# Configure TCK to target our deployment
+export DSP_CONNECTOR_URL=https://clinic-charite.localhost/api/dsp
+export DSP_CATALOG_URL=https://hdab-bfarm.localhost/api/dsp/catalog
+
+# Run full TCK suite
+./gradlew test
+```
+
+#### 7b: DCP v1.0 Compliance Tests
+
+The [DCP v1.0 specification](https://projects.eclipse.org/projects/technology.dataspace-dcp/releases/1.0.0) defines credential presentation and issuance protocols. We verify compliance of IdentityHub and IssuerService:
+
+1. **DID Resolution Tests** — Verify DID:web document resolution
+   - `GET /.well-known/did.json` returns valid DID Document
+   - DID Document contains correct verification methods and service endpoints
+   - Cross-participant DID resolution works (CRO resolves Clinic's DID)
+2. **Self-Issued Identity Token Tests** — Verify SI token generation and validation
+   - Token format conforms to DCP SI Token specification
+   - Token contains required claims (iss, sub, aud, iat, exp, jti)
+   - Token signature verifiable against DID Document verification method
+3. **Credential Presentation Tests** — Verify Verifiable Presentation exchange
+   - `PresentationRequestMessage` triggers IdentityHub to assemble VP
+   - VP contains requested credential types (`EHDSParticipantCredential`, etc.)
+   - Verifier validates VP signature chain: VC issuer → VP holder → DID Document
+4. **Credential Issuance Tests** — Verify IssuerService protocol compliance
+   - `CredentialRequestMessage` triggers credential issuance
+   - Issued VC conforms to W3C Verifiable Credentials Data Model 2.0
+   - Credential status (StatusList2021) correctly reports active/revoked
+
+**Test execution:**
+
+```bash
+# Run DCP compliance tests against local deployment
+cd tests/dcp-compliance
+
+# DID resolution
+curl -s https://clinic-charite.localhost/.well-known/did.json | jq '.verificationMethod'
+
+# SI Token validation
+npm run test:si-token -- --issuer=did:web:clinic-charite.localhost
+
+# Full presentation exchange
+npm run test:presentation -- --verifier=did:web:cro-bayer.localhost \
+  --holder=did:web:clinic-charite.localhost \
+  --credential-type=EHDSParticipantCredential
+```
+
+#### 7c: EHDS Health-Domain Compliance Tests
+
+Custom test suite verifying health-specific requirements not covered by generic DSP/DCP TCKs:
+
+1. **EHDS Article 53 Purpose Enforcement** — Verify that access requests with unauthorized purposes are rejected
+   - Submit negotiation with `researchPurpose` → accepted
+   - Submit negotiation with `commercialPurpose` → rejected (CEL policy evaluation)
+   - Submit negotiation without `DataProcessingPurposeCredential` → rejected
+2. **HealthDCAT-AP Schema Compliance** — Verify catalog entries conform to HealthDCAT-AP v3.0
+   - DCAT mandatory properties present (title, description, publisher, theme)
+   - Health-specific extensions present (healthCategory, healthTheme, legalBasis)
+   - EHDS data quality label annotations present
+3. **EEHRxF Conformance** — Verify FHIR data transferred via DCore conforms to EEHRxF profiles
+   - Patient Summary resources validate against `hl7.fhir.eu.base` profiles
+   - Laboratory resources validate against `hl7.fhir.eu.laboratory` profiles
+   - Coverage gap report generated per EEHRxF priority category
+4. **OMOP CDM Integrity** — Verify FHIR → OMOP transformation correctness
+   - All FHIR resources have corresponding OMOP entities (`MAPPED_TO` relationships complete)
+   - Vocabulary mappings correct: SNOMED → condition_concept_id, LOINC → measurement_concept_id
+   - No orphaned OMOP entities (every OMOPPerson links to at least one clinical event)
+
+#### 7d: Automated CI/CD Compliance Pipeline
+
+5. Add compliance verification to GitHub Actions:
+
+```yaml
+# .github/workflows/compliance.yml
+name: Protocol Compliance
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: "0 6 * * 1" # Weekly Monday 6am UTC
+
+jobs:
+  dsp-tck:
+    name: DSP 2025-1 TCK
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Start JAD infrastructure
+        run: docker compose -f docker-compose.jad.yml up -d --wait
+      - name: Run DSP TCK (140+ tests)
+        run: ./scripts/run-dsp-tck.sh
+      - name: Upload TCK results
+        uses: actions/upload-artifact@v4
+        with:
+          name: dsp-tck-results
+          path: test-results/dsp-tck/
+
+  dcp-compliance:
+    name: DCP v1.0 Compliance
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Start JAD infrastructure
+        run: docker compose -f docker-compose.jad.yml up -d --wait
+      - name: Run DCP compliance suite
+        run: ./scripts/run-dcp-tests.sh
+      - name: Upload DCP results
+        uses: actions/upload-artifact@v4
+        with:
+          name: dcp-compliance-results
+          path: test-results/dcp/
+
+  ehds-compliance:
+    name: EHDS Health Domain
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Start full stack
+        run: docker compose -f docker-compose.jad.yml up -d --wait
+      - name: Run EHDS compliance tests
+        run: npm run test:ehds-compliance
+      - name: Generate compliance report
+        run: npm run report:compliance
+```
+
+**Compliance Dashboard:** Results are aggregated into a `/compliance/tck` UI view showing:
+
+- DSP TCK pass/fail matrix (140+ test cases)
+- DCP compliance status per participant
+- EHDS domain test results with remediation guidance
+- Historical compliance trend (from CI runs)
+
+**Deliverables:** DSP 2025-1 TCK passing for all 3 participants; DCP v1.0 compliance verified for IdentityHub + IssuerService; EHDS-specific tests validating Article 53 enforcement + HealthDCAT-AP + EEHRxF; automated weekly CI compliance runs.
 
 ---
 
@@ -338,8 +711,15 @@ Deployed as a standalone Next.js 14 web app connecting directly to Neo4j Bolt �
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                 Ecosystem & End-User Portals                │
-│  (Aruba Participant Portal / Fraunhofer End-User API / Redline) │
+│             TCK & Compliance Verification (Phase 7)         │
+│  DSP 2025-1 TCK (140+ tests) · DCP v1.0 Suite · EHDS Tests│
+└────────────┬──────────────────────────────┬─────────────────┘
+             │                              │
+┌────────────┴──────────────────────────────┴─────────────────┐
+│          Unified Next.js 14 Portal (Phase 6a + 6b)         │
+│  Graph Explorer · Catalog · Compliance · Patient · OMOP    │
+│  Onboarding · Credentials · Data Sharing · Operator Admin  │
+│  (Keycloak SSO via NextAuth.js · OpenAPI TypeScript clients)│
 └────────────┬──────────────────────────────┬─────────────────┘
              │                              │
 ┌────────────┴──────────────────────────────┴─────────────────┐
@@ -387,5 +767,39 @@ When complete, the Health MVD v2 will demonstrate:
 3. **Disaggregated data planes** — DCore Rust HTTP planes independently handling FHIR transfers and query results
 4. **Federated knowledge graphs** — Cross-HDAB analytics without centralizing patient data
 5. **Production-grade schema** — The 5-layer Neo4j health graph model working with real FHIR/OMOP data
+6. **Protocol conformance** — DSP 2025-1 TCK passing (140+ test cases), DCP v1.0 compliance verified, EHDS-specific tests validating Article 53 enforcement
+7. **Unified portal experience** — Single Next.js 14 app serving participant onboarding (Aruba pattern), data sharing (Fraunhofer pattern), operator admin (Redline pattern), and health knowledge graph exploration
 
 The [JAD demo](https://github.com/Metaform/jad) provides the cloud-provider reference for EDC-V + CFM. The Health MVD v2 extends this with the **domain-specific health knowledge layer** — the piece that makes a generic dataspace into a health dataspace.
+
+---
+
+## Implementation Dependencies
+
+```mermaid
+graph TD
+    P3[Phase 3: Health Knowledge Graph ✅] --> P4[Phase 4: Dataspace Integration]
+    P1[Phase 1: JAD Infrastructure] --> P2[Phase 2: DCP Identity & Trust]
+    P1 --> P4
+    P2 --> P4
+    P2 --> P7[Phase 7: TCK Compliance]
+    P1 --> P7
+    P4 --> P5[Phase 5: Federated Queries & GraphRAG]
+    P1 --> P6b[Phase 6b: Unified Portal]
+    P2 --> P6b
+    P4 --> P6b
+    P3 --> P6a[Phase 6a: Graph Explorer UI ✅]
+
+    style P3 fill:#22c55e,color:#fff
+    style P6a fill:#22c55e,color:#fff
+    style P1 fill:#f59e0b,color:#fff
+    style P2 fill:#f59e0b,color:#fff
+    style P4 fill:#64748b,color:#fff
+    style P5 fill:#64748b,color:#fff
+    style P6b fill:#64748b,color:#fff
+    style P7 fill:#8b5cf6,color:#fff
+```
+
+**Critical path:** Phase 1 (JAD infrastructure) → Phase 2 (DCP identity) → Phase 4 (dataspace integration) → Phase 6b (unified portal)
+
+**Parallel track:** Phase 7 (TCK compliance) can begin as soon as Phases 1–2 complete, running in parallel with Phase 4.
