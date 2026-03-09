@@ -170,7 +170,7 @@ RETURN *
 
 ![Full Synthetic Patient Journey](image-1.png)
 
-### 9. Phase 3b — Real FHIR Data Pipeline (Synthea → Neo4j → OMOP)
+### 9. Real FHIR Data Pipeline (Synthea → Neo4j → OMOP)
 
 Replace the hand-crafted synthetic data with a real Synthea-generated patient cohort.
 All Synthea clinical modules run (chronic conditions, medications, labs etc. emerge naturally).
@@ -204,7 +204,7 @@ Expected result for a 50-patient cohort (~127 patients incl. deceased):
 
 > **Note:** FHIR bundles in `neo4j/import/fhir/` are `.gitignore`d — no patient data is stored in the repository.
 
-### 10. Phase 3c — Register the FHIR Dataset in the HealthDCAT-AP Catalog
+### 10. Register the FHIR Dataset in the HealthDCAT-AP Catalog
 
 Register the loaded cohort as a formal HealthDCAT-AP entry in Neo4j Layer 2.
 This is idempotent — re-running updates record counts from the live graph.
@@ -221,7 +221,7 @@ Creates:
 - `EhdsPurpose` (EHDS Article 53 permitted secondary uses)
 - `FROM_DATASET` links from all `Patient` nodes — visible in the Dataset Catalog UI (`/catalog`)
 
-### 11. Launch the Graph Explorer UI (Phase 6a)
+### 11. Launch the Graph Explorer UI
 
 A Next.js 14 web app connects directly to Neo4j Bolt and provides four interactive views.
 
@@ -235,6 +235,7 @@ npm run dev
 # Open http://localhost:3000
 ```
 
+![Graph Explorer UI](image.png)
 **Run via Docker Compose (alongside Neo4j):**
 
 ```bash
