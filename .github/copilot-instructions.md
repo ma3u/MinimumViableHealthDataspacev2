@@ -11,8 +11,8 @@ Health Dataspace v2: an EHDS-compliant demo using EDC-V, DCore, CFM, Neo4j, FHIR
 
 ## Architecture
 
-- `planning-health-dataspace-v2.md` — 5-phase implementation roadmap (EDC-V + DCore + CFM + Neo4j).
-- `health-dataspace-graph-schema.md` — 5-layer Neo4j graph schema (Marketplace → HealthDCAT-AP → FHIR → OMOP → Ontology).
+- `docs/planning-health-dataspace-v2.md` — 5-phase implementation roadmap (EDC-V + DCore + CFM + Neo4j).
+- `docs/health-dataspace-graph-schema.md` — 5-layer Neo4j graph schema (Marketplace → HealthDCAT-AP → FHIR → OMOP → Ontology).
 - `docker-compose.yml` — Local Neo4j 5 with APOC + n10s plugins.
 - `neo4j/init-schema.cypher` — All Neo4j constraints and indexes for the 5-layer model.
 

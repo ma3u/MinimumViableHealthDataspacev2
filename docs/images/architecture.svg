@@ -1,0 +1,160 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 700" width="1000" height="700" role="img" aria-label="Health Dataspace v2 Five-Layer Architecture: Marketplace, HealthDCAT-AP, FHIR R4, OMOP CDM, Ontology on Neo4j graph database">
+  <defs>
+    <linearGradient id="bg2" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#0b1020"/>
+      <stop offset="100%" style="stop-color:#0d1628"/>
+    </linearGradient>
+    <marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#475569"/>
+    </marker>
+    <marker id="arr-blue" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#3b82f6"/>
+    </marker>
+  </defs>
+
+  <rect width="1000" height="700" fill="url(#bg2)"/>
+  <rect width="1000" height="4" fill="#0ea5e9"/>
+
+  <!-- Title -->
+  <text x="500" y="44" font-family="'Segoe UI', system-ui, sans-serif" font-size="22" font-weight="700" fill="#e2e8f0" text-anchor="middle">Health Dataspace v2 — 5-Layer Architecture</text>
+  <text x="500" y="66" font-family="'Segoe UI', system-ui, sans-serif" font-size="13" fill="#64748b" text-anchor="middle">Neo4j Knowledge Graph  ·  EHDS-Compliant</text>
+
+  <!-- ─── Layer columns (top to bottom: L1 → L5) ─── -->
+
+  <!-- LAYER 1: Marketplace / EDC -->
+  <rect x="40" y="90" rx="10" ry="10" width="920" height="96" fill="#0e1e3a" stroke="#3b82f6" stroke-width="1.5"/>
+  <text x="60" y="120" font-family="'Segoe UI', system-ui, sans-serif" font-size="11" font-weight="600" fill="#60a5fa" letter-spacing="1.5">LAYER 1 — MARKETPLACE</text>
+
+  <!-- nodes L1 -->
+  <rect x="64" y="130" rx="6" ry="6" width="130" height="40" fill="#1d3461" stroke="#60a5fa" stroke-width="1"/>
+  <text x="129" y="154" font-family="'Segoe UI', system-ui, sans-serif" font-size="13" fill="#bfdbfe" text-anchor="middle">DataProduct</text>
+
+  <rect x="218" y="130" rx="6" ry="6" width="130" height="40" fill="#1d3461" stroke="#60a5fa" stroke-width="1"/>
+  <text x="283" y="154" font-family="'Segoe UI', system-ui, sans-serif" font-size="13" fill="#bfdbfe" text-anchor="middle">OdrlPolicy</text>
+
+  <rect x="372" y="130" rx="6" ry="6" width="130" height="40" fill="#1d3461" stroke="#60a5fa" stroke-width="1"/>
+  <text x="437" y="154" font-family="'Segoe UI', system-ui, sans-serif" font-size="13" fill="#bfdbfe" text-anchor="middle">Contract</text>
+
+  <rect x="526" y="130" rx="6" ry="6" width="160" height="40" fill="#1d3461" stroke="#60a5fa" stroke-width="1"/>
+  <text x="606" y="154" font-family="'Segoe UI', system-ui, sans-serif" font-size="13" fill="#bfdbfe" text-anchor="middle">AccessApplication</text>
+
+  <rect x="710" y="130" rx="6" ry="6" width="140" height="40" fill="#1d3461" stroke="#60a5fa" stroke-width="1"/>
+  <text x="780" y="154" font-family="'Segoe UI', system-ui, sans-serif" font-size="13" fill="#bfdbfe" text-anchor="middle">HDABApproval</text>
+
+  <text x="889" y="118" font-family="'Segoe UI', system-ui, sans-serif" font-size="10" fill="#3b82f6">Eclipse EDC-V</text>
+  <text x="889" y="132" font-family="'Segoe UI', system-ui, sans-serif" font-size="10" fill="#3b82f6">DSP Protocol</text>
+  <text x="889" y="146" font-family="'Segoe UI', system-ui, sans-serif" font-size="10" fill="#3b82f6">CFM Policy</text>
+  <text x="889" y="160" font-family="'Segoe UI', system-ui, sans-serif" font-size="10" fill="#3b82f6">DCore</text>
+
+  <!-- LAYER 2: HealthDCAT-AP -->
+  <rect x="40" y="210" rx="10" ry="10" width="920" height="96" fill="#0e2a18" stroke="#22c55e" stroke-width="1.5"/>
+  <text x="60" y="238" font-family="'Segoe UI', system-ui, sans-serif" font-size="11" font-weight="600" fill="#4ade80" letter-spacing="1.5">LAYER 2 — HEALTHDCAT-AP CATALOGUE</text>
+
+  <rect x="64" y="248" rx="6" ry="6" width="120" height="40" fill="#14532d" stroke="#4ade80" stroke-width="1"/>
+  <text x="124" y="272" font-family="'Segoe UI', system-ui, sans-serif" font-size="13" fill="#bbf7d0" text-anchor="middle">Catalogue</text>
+
+  <rect x="204" y="248" rx="6" ry="6" width="110" height="40" fill="#14532d" stroke="#4ade80" stroke-width="1"/>
+  <text x="259" y="272" font-family="'Segoe UI', system-ui, sans-serif" font-size="13" fill="#bbf7d0" text-anchor="middle">Dataset</text>
+
+  <rect x="334" y="248" rx="6" ry="6" width="120" height="40" fill="#14532d" stroke="#4ade80" stroke-width="1"/>
+  <text x="394" y="272" font-family="'Segoe UI', system-ui, sans-serif" font-size="13" fill="#bbf7d0" text-anchor="middle">Distribution</text>
+
+  <rect x="474" y="248" rx="6" ry="6" width="120" height="40" fill="#14532d" stroke="#4ade80" stroke-width="1"/>
+  <text x="534" y="272" font-family="'Segoe UI', system-ui, sans-serif" font-size="13" fill="#bbf7d0" text-anchor="middle">DataService</text>
+
+  <rect x="614" y="248" rx="6" ry="6" width="130" height="40" fill="#14532d" stroke="#4ade80" stroke-width="1"/>
+  <text x="679" y="272" font-family="'Segoe UI', system-ui, sans-serif" font-size="13" fill="#bbf7d0" text-anchor="middle">Organization</text>
+
+  <rect x="764" y="248" rx="6" ry="6" width="110" height="40" fill="#14532d" stroke="#4ade80" stroke-width="1"/>
+  <text x="819" y="272" font-family="'Segoe UI', system-ui, sans-serif" font-size="13" fill="#bbf7d0" text-anchor="middle">Concept</text>
+
+  <text x="889" y="262" font-family="'Segoe UI', system-ui, sans-serif" font-size="10" fill="#22c55e">HealthDCAT-AP</text>
+  <text x="889" y="276" font-family="'Segoe UI', system-ui, sans-serif" font-size="10" fill="#22c55e">DCAT-AP 3</text>
+
+  <!-- LAYER 3: FHIR R4 -->
+  <rect x="40" y="330" rx="10" ry="10" width="920" height="96" fill="#1a0e30" stroke="#a855f7" stroke-width="1.5"/>
+  <text x="60" y="358" font-family="'Segoe UI', system-ui, sans-serif" font-size="11" font-weight="600" fill="#c084fc" letter-spacing="1.5">LAYER 3 — FHIR R4 CLINICAL</text>
+
+  <rect x="64" y="368" rx="6" ry="6" width="110" height="40" fill="#3b0764" stroke="#c084fc" stroke-width="1"/>
+  <text x="119" y="392" font-family="'Segoe UI', system-ui, sans-serif" font-size="13" fill="#e9d5ff" text-anchor="middle">Patient</text>
+
+  <rect x="188" y="368" rx="6" ry="6" width="130" height="40" fill="#3b0764" stroke="#c084fc" stroke-width="1"/>
+  <text x="253" y="392" font-family="'Segoe UI', system-ui, sans-serif" font-size="13" fill="#e9d5ff" text-anchor="middle">Observation</text>
+
+  <rect x="332" y="368" rx="6" ry="6" width="120" height="40" fill="#3b0764" stroke="#c084fc" stroke-width="1"/>
+  <text x="392" y="392" font-family="'Segoe UI', system-ui, sans-serif" font-size="13" fill="#e9d5ff" text-anchor="middle">Condition</text>
+
+  <rect x="466" y="368" rx="6" ry="6" width="120" height="40" fill="#3b0764" stroke="#c084fc" stroke-width="1"/>
+  <text x="526" y="392" font-family="'Segoe UI', system-ui, sans-serif" font-size="13" fill="#e9d5ff" text-anchor="middle">Encounter</text>
+
+  <rect x="600" y="368" rx="6" ry="6" width="140" height="40" fill="#3b0764" stroke="#c084fc" stroke-width="1"/>
+  <text x="670" y="392" font-family="'Segoe UI', system-ui, sans-serif" font-size="13" fill="#e9d5ff" text-anchor="middle">MedicationReq</text>
+
+  <rect x="754" y="368" rx="6" ry="6" width="110" height="40" fill="#3b0764" stroke="#c084fc" stroke-width="1"/>
+  <text x="809" y="392" font-family="'Segoe UI', system-ui, sans-serif" font-size="13" fill="#e9d5ff" text-anchor="middle">Procedure</text>
+
+  <text x="889" y="372" font-family="'Segoe UI', system-ui, sans-serif" font-size="10" fill="#a855f7">FHIR R4</text>
+  <text x="889" y="386" font-family="'Segoe UI', system-ui, sans-serif" font-size="10" fill="#a855f7">Synthea</text>
+
+  <!-- LAYER 4: OMOP CDM -->
+  <rect x="40" y="450" rx="10" ry="10" width="920" height="96" fill="#1f150a" stroke="#f59e0b" stroke-width="1.5"/>
+  <text x="60" y="478" font-family="'Segoe UI', system-ui, sans-serif" font-size="11" font-weight="600" fill="#fbbf24" letter-spacing="1.5">LAYER 4 — OMOP CDM RESEARCH</text>
+
+  <rect x="64" y="488" rx="6" ry="6" width="110" height="40" fill="#451a03" stroke="#fbbf24" stroke-width="1"/>
+  <text x="119" y="512" font-family="'Segoe UI', system-ui, sans-serif" font-size="12" fill="#fef3c7" text-anchor="middle">PersonNode</text>
+
+  <rect x="188" y="488" rx="6" ry="6" width="165" height="40" fill="#451a03" stroke="#fbbf24" stroke-width="1"/>
+  <text x="270" y="512" font-family="'Segoe UI', system-ui, sans-serif" font-size="12" fill="#fef3c7" text-anchor="middle">ConditionOccurrence</text>
+
+  <rect x="368" y="488" rx="6" ry="6" width="155" height="40" fill="#451a03" stroke="#fbbf24" stroke-width="1"/>
+  <text x="445" y="512" font-family="'Segoe UI', system-ui, sans-serif" font-size="12" fill="#fef3c7" text-anchor="middle">DrugExposure</text>
+
+  <rect x="538" y="488" rx="6" ry="6" width="170" height="40" fill="#451a03" stroke="#fbbf24" stroke-width="1"/>
+  <text x="623" y="512" font-family="'Segoe UI', system-ui, sans-serif" font-size="12" fill="#fef3c7" text-anchor="middle">ProcedureOccurrence</text>
+
+  <rect x="724" y="488" rx="6" ry="6" width="140" height="40" fill="#451a03" stroke="#fbbf24" stroke-width="1"/>
+  <text x="794" y="512" font-family="'Segoe UI', system-ui, sans-serif" font-size="12" fill="#fef3c7" text-anchor="middle">Measurement</text>
+
+  <text x="889" y="492" font-family="'Segoe UI', system-ui, sans-serif" font-size="10" fill="#f59e0b">OMOP CDM</text>
+  <text x="889" y="506" font-family="'Segoe UI', system-ui, sans-serif" font-size="10" fill="#f59e0b">v5.4</text>
+
+  <!-- LAYER 5: Ontology -->
+  <rect x="40" y="570" rx="10" ry="10" width="920" height="72" fill="#0a1e1e" stroke="#14b8a6" stroke-width="1.5"/>
+  <text x="60" y="596" font-family="'Segoe UI', system-ui, sans-serif" font-size="11" font-weight="600" fill="#2dd4bf" letter-spacing="1.5">LAYER 5 — BIOMEDICAL ONTOLOGY</text>
+
+  <rect x="64" y="604" rx="6" ry="6" width="130" height="30" fill="#042f2e" stroke="#2dd4bf" stroke-width="1"/>
+  <text x="129" y="623" font-family="'Segoe UI', system-ui, sans-serif" font-size="12" fill="#ccfbf1" text-anchor="middle">OntologyConcept</text>
+
+  <rect x="214" y="604" rx="6" ry="6" width="110" height="30" fill="#042f2e" stroke="#2dd4bf" stroke-width="1"/>
+  <text x="269" y="623" font-family="'Segoe UI', system-ui, sans-serif" font-size="12" fill="#ccfbf1" text-anchor="middle">SNOMED CT</text>
+
+  <rect x="344" y="604" rx="6" ry="6" width="100" height="30" fill="#042f2e" stroke="#2dd4bf" stroke-width="1"/>
+  <text x="394" y="623" font-family="'Segoe UI', system-ui, sans-serif" font-size="12" fill="#ccfbf1" text-anchor="middle">ICD-10-CM</text>
+
+  <rect x="464" y="604" rx="6" ry="6" width="90" height="30" fill="#042f2e" stroke="#2dd4bf" stroke-width="1"/>
+  <text x="509" y="623" font-family="'Segoe UI', system-ui, sans-serif" font-size="12" fill="#ccfbf1" text-anchor="middle">RxNorm</text>
+
+  <rect x="574" y="604" rx="6" ry="6" width="80" height="30" fill="#042f2e" stroke="#2dd4bf" stroke-width="1"/>
+  <text x="614" y="623" font-family="'Segoe UI', system-ui, sans-serif" font-size="12" fill="#ccfbf1" text-anchor="middle">LOINC</text>
+
+  <rect x="674" y="604" rx="6" ry="6" width="80" height="30" fill="#042f2e" stroke="#2dd4bf" stroke-width="1"/>
+  <text x="714" y="623" font-family="'Segoe UI', system-ui, sans-serif" font-size="12" fill="#ccfbf1" text-anchor="middle">CPT-4</text>
+
+  <text x="889" y="608" font-family="'Segoe UI', system-ui, sans-serif" font-size="10" fill="#14b8a6">Biomedical</text>
+  <text x="889" y="622" font-family="'Segoe UI', system-ui, sans-serif" font-size="10" fill="#14b8a6">Terminologies</text>
+
+  <!-- Cross-layer relationship arrows (left side) -->
+  <line x1="30" y1="186" x2="30" y2="210" stroke="#3b82f6" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#arr-blue)"/>
+  <line x1="30" y1="306" x2="30" y2="330" stroke="#22c55e" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#arr-blue)"/>
+  <line x1="30" y1="426" x2="30" y2="450" stroke="#a855f7" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#arr-blue)"/>
+  <line x1="30" y1="546" x2="30" y2="570" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#arr-blue)"/>
+
+  <!-- Labels on arrows -->
+  <text x="5" y="202" font-family="'Segoe UI', system-ui, sans-serif" font-size="8" fill="#475569" text-anchor="middle" transform="rotate(-90,5,202)">GOVERNS</text>
+  <text x="5" y="322" font-family="'Segoe UI', system-ui, sans-serif" font-size="8" fill="#475569" text-anchor="middle" transform="rotate(-90,5,322)">DESCRIBES</text>
+  <text x="5" y="442" font-family="'Segoe UI', system-ui, sans-serif" font-size="8" fill="#475569" text-anchor="middle" transform="rotate(-90,5,442)">MAPS_TO</text>
+  <text x="5" y="562" font-family="'Segoe UI', system-ui, sans-serif" font-size="8" fill="#475569" text-anchor="middle" transform="rotate(-90,5,562)">CODED_BY</text>
+
+  <!-- Bottom note -->
+  <text x="500" y="680" font-family="'Segoe UI', system-ui, sans-serif" font-size="12" fill="#334155" text-anchor="middle">All 5 layers stored as a unified knowledge graph in Neo4j 5 · ~116 nodes · ~144 edges in local demo</text>
+</svg>
