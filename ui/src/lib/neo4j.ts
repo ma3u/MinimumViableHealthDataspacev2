@@ -10,6 +10,8 @@ export function getDriver(): Driver {
         process.env.NEO4J_USER ?? "neo4j",
         process.env.NEO4J_PASSWORD ?? "healthdataspace",
       ),
+      // Return plain JS numbers instead of Neo4j Integer {low, high} objects
+      { disableLosslessIntegers: true },
     );
   }
   return driver;

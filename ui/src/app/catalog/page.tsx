@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { ChevronDown, ChevronUp, ExternalLink } from "lucide-react";
 
 interface Dataset {
   id: string;
@@ -19,10 +20,27 @@ const LEGAL_BASIS_LABELS: Record<string, string> = {
   "EHDS-Art53-SecondaryUse": "EHDS Art. 53",
 };
 
+function DetailRow({
+  label,
+  value,
+}: {
+  label: string;
+  value?: string | number | null;
+}) {
+  if (value == null || value === "") return null;
+  return (
+    <div className="flex gap-3 py-1.5 border-b border-gray-800 last:border-0">
+      <span className="text-xs text-gray-500 w-36 shrink-0">{label}</span>
+      <span className="text-xs text-gray-200 break-all">{String(value)}</span>
+    </div>
+  );
+}
+
 export default function CatalogPage() {
   const [datasets, setDatasets] = useState<Dataset[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("");
+  const [expanded, setExpanded] = useState<string | null>(null);
 
   useEffect(() => {
     fetch("/api/catalog")
@@ -63,53 +81,117 @@ export default function CatalogPage() {
         <p className="text-gray-500">No datasets found.</p>
       ) : (
         <div className="grid gap-4">
-          {visible.map((d) => (
-            <div
-              key={d.id}
-              className="border border-gray-700 rounded-xl p-4 hover:border-layer2 transition-colors"
-            >
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <h2 className="font-semibold text-layer2">
-                    {d.title ?? d.id}
-                  </h2>
-                  {d.description && (
-                    <p className="text-sm text-gray-400 mt-0.5">
-                      {d.description}
-                    </p>
-                  )}
-                </div>
-                <div className="shrink-0 flex flex-col items-end gap-1">
-                  {d.datasetType && (
-                    <span className="text-xs bg-layer2/20 text-layer2 px-2 py-0.5 rounded-full">
-                      {d.datasetType}
-                    </span>
-                  )}
-                  {d.theme && (
-                    <span className="text-xs bg-gray-700 text-gray-300 px-2 py-0.5 rounded-full">
-                      {d.theme}
-                    </span>
-                  )}
-                </div>
-              </div>
+          {visible.map((d) => {
+            const isOpen = expanded === d.id;
+            return (
+              <div
+                key={d.id}
+                className={`border rounded-xl transition-colors ${
+                  isOpen
+                    ? "border-layer2 bg-gray-900/60"
+                    : "border-gray-700 hover:border-layer2"
+                }`}
+              >
+                {/* Card header — click to expand */}
+                <button
+                  className="w-full text-left p-4"
+                  onClick={() => setExpanded(isOpen ? null : d.id)}
+                >
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex-1 min-w-0">
+                      <h2 className="font-semibold text-layer2">
+                        {d.title ?? d.id}
+                      </h2>
+                      {d.description && (
+                        <p className="text-sm text-gray-400 mt-0.5 line-clamp-2">
+                          {d.description}
+                        </p>
+                      )}
+                    </div>
+                    <div className="shrink-0 flex flex-col items-end gap-1">
+                      {d.datasetType && (
+                        <span className="text-xs bg-layer2/20 text-layer2 px-2 py-0.5 rounded-full">
+                          {d.datasetType}
+                        </span>
+                      )}
+                      {d.theme && (
+                        <span className="text-xs bg-gray-700 text-gray-300 px-2 py-0.5 rounded-full">
+                          {d.theme}
+                        </span>
+                      )}
+                    </div>
+                    <div className="shrink-0 text-gray-500 mt-0.5">
+                      {isOpen ? (
+                        <ChevronUp size={16} />
+                      ) : (
+                        <ChevronDown size={16} />
+                      )}
+                    </div>
+                  </div>
 
-              {/* HealthDCAT-AP metadata row */}
-              <div className="mt-3 flex flex-wrap gap-4 text-xs text-gray-500">
-                {d.publisher && <span>Publisher: {d.publisher}</span>}
-                {d.legalBasis && (
-                  <span className="text-green-500">
-                    Legal basis:{" "}
-                    {LEGAL_BASIS_LABELS[d.legalBasis] ?? d.legalBasis}
-                  </span>
+                  {/* Summary row */}
+                  <div className="mt-3 flex flex-wrap gap-4 text-xs text-gray-500">
+                    {d.publisher && <span>Publisher: {d.publisher}</span>}
+                    {d.legalBasis && (
+                      <span className="text-green-500">
+                        Legal basis:{" "}
+                        {LEGAL_BASIS_LABELS[d.legalBasis] ?? d.legalBasis}
+                      </span>
+                    )}
+                    {d.recordCount != null && (
+                      <span>
+                        {Number(d.recordCount).toLocaleString()} records
+                      </span>
+                    )}
+                    {d.license && <span>License: {d.license}</span>}
+                  </div>
+                </button>
+
+                {/* Expanded detail panel */}
+                {isOpen && (
+                  <div className="px-4 pb-4 border-t border-gray-700 mt-1 pt-3">
+                    <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
+                      HealthDCAT-AP Metadata
+                    </h3>
+                    <div className="bg-gray-800/50 rounded-lg px-3 py-1">
+                      <DetailRow label="Dataset ID" value={d.id} />
+                      <DetailRow label="Title" value={d.title} />
+                      <DetailRow label="Description" value={d.description} />
+                      <DetailRow label="Publisher" value={d.publisher} />
+                      <DetailRow label="Dataset Type" value={d.datasetType} />
+                      <DetailRow
+                        label="Legal Basis"
+                        value={LEGAL_BASIS_LABELS[d.legalBasis] ?? d.legalBasis}
+                      />
+                      <DetailRow
+                        label="Record Count"
+                        value={
+                          d.recordCount != null
+                            ? Number(d.recordCount).toLocaleString()
+                            : null
+                        }
+                      />
+                      <DetailRow label="Theme" value={d.theme} />
+                      <DetailRow label="License" value={d.license} />
+                      <DetailRow label="Conforms To" value={d.conformsTo} />
+                    </div>
+                    {d.conformsTo && (
+                      <a
+                        href={d.conformsTo}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="mt-3 inline-flex items-center gap-1 text-xs text-layer2 hover:underline"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <ExternalLink size={11} />
+                        View specification
+                      </a>
+                    )}
+                  </div>
                 )}
-                {d.recordCount != null && (
-                  <span>{d.recordCount.toLocaleString()} records</span>
-                )}
-                {d.license && <span>License: {d.license}</span>}
-                {d.conformsTo && <span>Conforms to: {d.conformsTo}</span>}
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>
