@@ -1,0 +1,258 @@
+{
+  "categories": [
+    {
+      "categoryId": "eprescription",
+      "name": "ePrescription / eDispensation",
+      "description": "Electronic prescription and dispensation of medicinal products across borders",
+      "ehdsDeadline": "2029-03",
+      "ehdsGroup": 1,
+      "status": "partial",
+      "totalResources": 3895,
+      "profileCount": 2,
+      "profiles": [
+        {
+          "profileId": "medication-dispense-eu",
+          "name": "MedicationDispense (EU MPD)",
+          "igName": "HL7 Europe Medication Prescription & Dispense",
+          "igPackage": "hl7.fhir.eu.mpd",
+          "fhirVersion": "R4",
+          "status": "Ballot",
+          "url": "https://build.fhir.org/ig/hl7-eu/medications/",
+          "baseResource": "MedicationDispense",
+          "description": "European eDispensation record for cross-border medication fulfillment.",
+          "coverage": "none",
+          "resourceCount": 0
+        },
+        {
+          "profileId": "medication-request-eu",
+          "name": "MedicationRequest (EU MPD)",
+          "igName": "HL7 Europe Medication Prescription & Dispense",
+          "igPackage": "hl7.fhir.eu.mpd",
+          "fhirVersion": "R4",
+          "status": "Ballot",
+          "url": "https://build.fhir.org/ig/hl7-eu/medications/",
+          "baseResource": "MedicationRequest",
+          "description": "European ePrescription as MedicationRequest with cross-border dispensation support.",
+          "coverage": "partial",
+          "resourceCount": 3895
+        }
+      ]
+    },
+    {
+      "categoryId": "patient-summary",
+      "name": "Patient Summaries",
+      "description": "Cross-border patient summary including demographics, allergies, conditions, medications, and immunizations",
+      "ehdsDeadline": "2029-03",
+      "ehdsGroup": 1,
+      "status": "partial",
+      "totalResources": 167,
+      "profileCount": 3,
+      "profiles": [
+        {
+          "profileId": "organization-eu-core",
+          "name": "Organization (EU core)",
+          "igName": "HL7 Europe Base and Core",
+          "igPackage": "hl7.fhir.eu.base#0.1.0",
+          "fhirVersion": "R4",
+          "status": "STU",
+          "url": "https://hl7.eu/fhir/base/StructureDefinition-Organization-eu.html",
+          "baseResource": "Organization",
+          "description": "Core Organization profile for the European context.",
+          "coverage": "none",
+          "resourceCount": 0
+        },
+        {
+          "profileId": "patient-eu-core",
+          "name": "Patient (EU core)",
+          "igName": "HL7 Europe Base and Core",
+          "igPackage": "hl7.fhir.eu.base#0.1.0",
+          "fhirVersion": "R4",
+          "status": "STU",
+          "url": "https://hl7.eu/fhir/base/StructureDefinition-Patient-eu.html",
+          "baseResource": "Patient",
+          "description": "Core Patient profile for the European context. When ips-pat-1 invariant is satisfied, complies with IPS patient profile.",
+          "coverage": "full",
+          "resourceCount": 167
+        },
+        {
+          "profileId": "practitioner-eu-core",
+          "name": "Practitioner (EU core)",
+          "igName": "HL7 Europe Base and Core",
+          "igPackage": "hl7.fhir.eu.base#0.1.0",
+          "fhirVersion": "R4",
+          "status": "STU",
+          "url": "https://hl7.eu/fhir/base/StructureDefinition-Practitioner-eu.html",
+          "baseResource": "Practitioner",
+          "description": "Core Practitioner profile for the European context with common constraints.",
+          "coverage": "none",
+          "resourceCount": 0
+        }
+      ]
+    },
+    {
+      "categoryId": "hospital-discharge",
+      "name": "Hospital Discharge Reports",
+      "description": "Structured hospital discharge summaries including diagnoses, procedures, care plan, and follow-up",
+      "ehdsDeadline": "2031-03",
+      "ehdsGroup": 2,
+      "status": "partial",
+      "totalResources": 167,
+      "profileCount": 3,
+      "profiles": [
+        {
+          "profileId": "composition-hdr-eu",
+          "name": "Composition (EU HDR)",
+          "igName": "HL7 Europe Hospital Discharge Report",
+          "igPackage": "hl7.fhir.eu.hdr#1.0.0-ci-build",
+          "fhirVersion": "R4",
+          "status": "Ballot",
+          "url": "https://build.fhir.org/ig/hl7-eu/hdr/",
+          "baseResource": "Composition",
+          "description": "Hospital discharge report composition with structured sections for diagnoses, procedures, care plan.",
+          "coverage": "none",
+          "resourceCount": 0
+        },
+        {
+          "profileId": "encounter-hdr-eu",
+          "name": "Encounter (EU HDR)",
+          "igName": "HL7 Europe Hospital Discharge Report",
+          "igPackage": "hl7.fhir.eu.hdr#1.0.0-ci-build",
+          "fhirVersion": "R4",
+          "status": "Ballot",
+          "url": "https://build.fhir.org/ig/hl7-eu/hdr/",
+          "baseResource": "Encounter",
+          "description": "Inpatient encounter forming the basis of a hospital discharge report.",
+          "coverage": "none",
+          "resourceCount": 0
+        },
+        {
+          "profileId": "patient-eu-core",
+          "name": "Patient (EU core)",
+          "igName": "HL7 Europe Base and Core",
+          "igPackage": "hl7.fhir.eu.base#0.1.0",
+          "fhirVersion": "R4",
+          "status": "STU",
+          "url": "https://hl7.eu/fhir/base/StructureDefinition-Patient-eu.html",
+          "baseResource": "Patient",
+          "description": "Core Patient profile for the European context. When ips-pat-1 invariant is satisfied, complies with IPS patient profile.",
+          "coverage": "full",
+          "resourceCount": 167
+        }
+      ]
+    },
+    {
+      "categoryId": "laboratory-results",
+      "name": "Laboratory Results",
+      "description": "Standardised laboratory reports including in-vitro diagnostics, clinical biochemistry, haematology, microbiology",
+      "ehdsDeadline": "2031-03",
+      "ehdsGroup": 2,
+      "status": "partial",
+      "totalResources": 37880,
+      "profileCount": 4,
+      "profiles": [
+        {
+          "profileId": "bundle-lab-report-eu",
+          "name": "Bundle Lab Report (EU)",
+          "igName": "HL7 Europe Laboratory Report",
+          "igPackage": "hl7.fhir.eu.laboratory#0.1.1",
+          "fhirVersion": "R4",
+          "status": "STU",
+          "url": "https://hl7.eu/fhir/laboratory/StructureDefinition-Bundle-eu-lab.html",
+          "baseResource": "Bundle",
+          "description": "Document Bundle containing a complete EU laboratory report with Composition and DiagnosticReport.",
+          "coverage": "none",
+          "resourceCount": 0
+        },
+        {
+          "profileId": "diagnostic-report-lab-eu",
+          "name": "DiagnosticReport (EU Lab)",
+          "igName": "HL7 Europe Laboratory Report",
+          "igPackage": "hl7.fhir.eu.laboratory#0.1.1",
+          "fhirVersion": "R4",
+          "status": "STU",
+          "url": "https://hl7.eu/fhir/laboratory/StructureDefinition-DiagnosticReport-eu-lab.html",
+          "baseResource": "DiagnosticReport",
+          "description": "European laboratory report as DiagnosticReport with structured Observations.",
+          "coverage": "none",
+          "resourceCount": 0
+        },
+        {
+          "profileId": "observation-results-lab-eu",
+          "name": "Observation Results (EU Lab)",
+          "igName": "HL7 Europe Laboratory Report",
+          "igPackage": "hl7.fhir.eu.laboratory#0.1.1",
+          "fhirVersion": "R4",
+          "status": "STU",
+          "url": "https://hl7.eu/fhir/laboratory/StructureDefinition-Observation-resultslab-eu-lab.html",
+          "baseResource": "Observation",
+          "description": "Laboratory result observation with LOINC/NPU coding and specimen reference.",
+          "coverage": "partial",
+          "resourceCount": 37713
+        },
+        {
+          "profileId": "patient-eu-core",
+          "name": "Patient (EU core)",
+          "igName": "HL7 Europe Base and Core",
+          "igPackage": "hl7.fhir.eu.base#0.1.0",
+          "fhirVersion": "R4",
+          "status": "STU",
+          "url": "https://hl7.eu/fhir/base/StructureDefinition-Patient-eu.html",
+          "baseResource": "Patient",
+          "description": "Core Patient profile for the European context. When ips-pat-1 invariant is satisfied, complies with IPS patient profile.",
+          "coverage": "full",
+          "resourceCount": 167
+        }
+      ]
+    },
+    {
+      "categoryId": "medical-imaging",
+      "name": "Medical Images / Reports",
+      "description": "Medical imaging studies and diagnostic reports including DICOM references",
+      "ehdsDeadline": "2031-03",
+      "ehdsGroup": 2,
+      "status": "none",
+      "totalResources": 0,
+      "profileCount": 1,
+      "profiles": [
+        {
+          "profileId": "imaging-study-eu",
+          "name": "ImagingStudy (EU)",
+          "igName": "HL7 Europe Imaging Study Report",
+          "igPackage": "hl7.fhir.eu.imaging",
+          "fhirVersion": "R5",
+          "status": "Ballot",
+          "url": "https://build.fhir.org/ig/hl7-eu/imaging/",
+          "baseResource": "ImagingStudy",
+          "description": "European imaging study report with DICOM references and diagnostic interpretation.",
+          "coverage": "none",
+          "resourceCount": 0
+        }
+      ]
+    },
+    {
+      "categoryId": "rare-disease",
+      "name": "Rare Disease Registration",
+      "description": "European Reference Networks (ERN) rare disease patient registries",
+      "ehdsDeadline": "TBD",
+      "ehdsGroup": 3,
+      "status": "none",
+      "totalResources": 0,
+      "profileCount": 0,
+      "profiles": []
+    }
+  ],
+  "summary": {
+    "totalCategories": 6,
+    "totalProfiles": 13,
+    "coveredProfiles": 5,
+    "coveragePercent": 38,
+    "resourceCounts": {
+      "Patient": 167,
+      "Encounter": 5461,
+      "Observation": 37713,
+      "MedicationRequest": 3895,
+      "Procedure": 8534,
+      "Condition": 2421
+    }
+  }
+}

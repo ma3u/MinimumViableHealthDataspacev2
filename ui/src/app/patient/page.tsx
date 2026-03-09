@@ -1,5 +1,6 @@
 "use client";
 
+import { fetchApi } from "@/lib/api";
 import { useEffect, useState } from "react";
 
 interface PatientListItem {
@@ -55,7 +56,7 @@ export default function PatientPage() {
 
   // Load patient list + cohort stats on mount
   useEffect(() => {
-    fetch("/api/patient")
+    fetchApi("/api/patient")
       .then((r) => r.json())
       .then((d) => {
         setPatients(d.patients ?? []);
@@ -69,7 +70,7 @@ export default function PatientPage() {
   useEffect(() => {
     if (!selected) return;
     setLoading(true);
-    fetch(`/api/patient?patientId=${encodeURIComponent(selected)}`)
+    fetchApi(`/api/patient?patientId=${encodeURIComponent(selected)}`)
       .then((r) => r.json())
       .then((d) => {
         setTimeline(d.timeline ?? []);

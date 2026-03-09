@@ -1,0 +1,268 @@
+{
+  "summary": {
+    "persons": 167,
+    "conditions": 2421,
+    "drugs": 3895,
+    "measurements": 34203,
+    "procedures": 8534,
+    "visits": 5461
+  },
+  "topConditions": [
+    {
+      "label": "Medication review due (situation)",
+      "count": 513
+    },
+    {
+      "label": "Stress (finding)",
+      "count": 180
+    },
+    {
+      "label": "Full-time employment (finding)",
+      "count": 176
+    },
+    {
+      "label": "Gingivitis (disorder)",
+      "count": 130
+    },
+    {
+      "label": "Part-time employment (finding)",
+      "count": 117
+    },
+    {
+      "label": "Limited social contact (finding)",
+      "count": 68
+    },
+    {
+      "label": "Social isolation (finding)",
+      "count": 66
+    },
+    {
+      "label": "Not in labor force (finding)",
+      "count": 62
+    },
+    {
+      "label": "Viral sinusitis (disorder)",
+      "count": 60
+    },
+    {
+      "label": "Dental caries",
+      "count": 48
+    },
+    {
+      "label": "Victim of intimate partner abuse (finding)",
+      "count": 45
+    },
+    {
+      "label": "Acute viral pharyngitis (disorder)",
+      "count": 39
+    },
+    {
+      "label": "Reports of violence in the environment (finding)",
+      "count": 37
+    },
+    {
+      "label": "Body mass index 30+ - obesity (finding)",
+      "count": 31
+    },
+    {
+      "label": "Received higher education (finding)",
+      "count": 31
+    }
+  ],
+  "topDrugs": [
+    {
+      "label": "",
+      "count": 1107
+    },
+    {
+      "label": "Hydrochlorothiazide 25 MG Oral Tablet",
+      "count": 501
+    },
+    {
+      "label": "amLODIPine 2.5 MG Oral Tablet",
+      "count": 484
+    },
+    {
+      "label": "lisinopril 10 MG Oral Tablet",
+      "count": 311
+    },
+    {
+      "label": "insulin isophane, human 70 UNT/ML / insulin, regular, human 30 UNT/ML Injectable Suspension [Humulin]",
+      "count": 247
+    },
+    {
+      "label": "Abuse-Deterrent 12 HR Oxycodone Hydrochloride 10 MG Extended Release Oral Tablet [Oxycontin]",
+      "count": 188
+    },
+    {
+      "label": "tramadol hydrochloride 50 MG Oral Tablet",
+      "count": 178
+    },
+    {
+      "label": "72 HR Fentanyl 0.025 MG/HR Transdermal System",
+      "count": 90
+    },
+    {
+      "label": "Acetaminophen 325 MG / Oxycodone Hydrochloride 10 MG Oral Tablet [Percocet]",
+      "count": 74
+    },
+    {
+      "label": "Alendronic acid 10 MG Oral Tablet",
+      "count": 70
+    },
+    {
+      "label": "Simvastatin 10 MG Oral Tablet",
+      "count": 53
+    },
+    {
+      "label": "Acetaminophen 300 MG / Hydrocodone Bitartrate 5 MG Oral Tablet",
+      "count": 42
+    },
+    {
+      "label": "Acetaminophen 325 MG Oral Tablet [Tylenol]",
+      "count": 36
+    },
+    {
+      "label": "albuterol 0.83 MG/ML Inhalation Solution",
+      "count": 32
+    },
+    {
+      "label": "Acetaminophen 325 MG Oral Tablet",
+      "count": 30
+    }
+  ],
+  "topMeasurements": [
+    {
+      "label": "Pain severity - 0-10 verbal numeric rating [Score] - Reported",
+      "count": 1936
+    },
+    {
+      "label": "Blood pressure panel with all children optional",
+      "count": 1200
+    },
+    {
+      "label": "Body Weight",
+      "count": 1035
+    },
+    {
+      "label": "Heart rate",
+      "count": 981
+    },
+    {
+      "label": "Respiratory rate",
+      "count": 981
+    },
+    {
+      "label": "Body Height",
+      "count": 975
+    },
+    {
+      "label": "Weight difference [Mass difference] --pre dialysis - post dialysis",
+      "count": 953
+    },
+    {
+      "label": "Body mass index (BMI) [Ratio]",
+      "count": 878
+    },
+    {
+      "label": "Glomerular filtration rate/1.73 sq M.predicted [Volume Rate/Area] in Serum or Plasma by Creatinine-based formula (MDRD)",
+      "count": 655
+    },
+    {
+      "label": "Creatinine [Mass/volume] in Blood",
+      "count": 555
+    },
+    {
+      "label": "Carbon dioxide, total [Moles/volume] in Blood",
+      "count": 555
+    },
+    {
+      "label": "Urea nitrogen [Mass/volume] in Blood",
+      "count": 555
+    },
+    {
+      "label": "Potassium [Moles/volume] in Blood",
+      "count": 555
+    },
+    {
+      "label": "Chloride [Moles/volume] in Blood",
+      "count": 555
+    },
+    {
+      "label": "Sodium [Moles/volume] in Blood",
+      "count": 555
+    }
+  ],
+  "topProcedures": [
+    {
+      "label": "Renal dialysis (procedure)",
+      "count": 953
+    },
+    {
+      "label": "Assessment of health and social care needs (procedure)",
+      "count": 672
+    },
+    {
+      "label": "Depression screening (procedure)",
+      "count": 574
+    },
+    {
+      "label": "Depression screening using Patient Health Questionnaire Two-Item score (procedure)",
+      "count": 523
+    },
+    {
+      "label": "Medication Reconciliation (procedure)",
+      "count": 513
+    },
+    {
+      "label": "Patient referral for dental care (procedure)",
+      "count": 413
+    },
+    {
+      "label": "Assessment of substance use (procedure)",
+      "count": 386
+    },
+    {
+      "label": "Assessment of anxiety (procedure)",
+      "count": 370
+    },
+    {
+      "label": "Hospice care (regime/therapy)",
+      "count": 314
+    },
+    {
+      "label": "Screening for domestic abuse (procedure)",
+      "count": 198
+    },
+    {
+      "label": "Assessment using Alcohol Use Disorders Identification Test - Consumption (procedure)",
+      "count": 180
+    },
+    {
+      "label": "Nursing care/supplementary surveillance (regime/therapy)",
+      "count": 180
+    },
+    {
+      "label": "Screening for drug abuse (procedure)",
+      "count": 171
+    },
+    {
+      "label": "Auscultation of the fetal heart",
+      "count": 159
+    },
+    {
+      "label": "Evaluation of uterine fundal height",
+      "count": 159
+    }
+  ],
+  "genderBreakdown": [
+    {
+      "gender": "Female",
+      "count": 92
+    },
+    {
+      "gender": "Male",
+      "count": 75
+    }
+  ]
+}

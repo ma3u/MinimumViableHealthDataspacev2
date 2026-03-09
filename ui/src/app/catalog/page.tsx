@@ -1,5 +1,6 @@
 "use client";
 
+import { fetchApi } from "@/lib/api";
 import { useEffect, useState } from "react";
 import { ChevronDown, ChevronUp, ExternalLink } from "lucide-react";
 
@@ -43,7 +44,7 @@ export default function CatalogPage() {
   const [expanded, setExpanded] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch("/api/catalog")
+    fetchApi("/api/catalog")
       .then((r) => r.json())
       .then((d) => {
         setDatasets(d);

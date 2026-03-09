@@ -1,5 +1,6 @@
 "use client";
 
+import { fetchApi } from "@/lib/api";
 import { useEffect, useState } from "react";
 import {
   Activity,
@@ -117,7 +118,7 @@ export default function AnalyticsPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch("/api/analytics")
+    fetchApi("/api/analytics")
       .then((r) => r.json())
       .then((d) => {
         setData(d);

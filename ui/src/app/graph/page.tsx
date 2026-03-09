@@ -1,5 +1,6 @@
 "use client";
 
+import { fetchApi } from "@/lib/api";
 import { useEffect, useRef, useState, useCallback } from "react";
 import dynamic from "next/dynamic";
 import { X } from "lucide-react";
@@ -66,7 +67,7 @@ export default function GraphPage() {
   const [dims, setDims] = useState({ width: 800, height: 600 });
 
   useEffect(() => {
-    fetch("/api/graph")
+    fetchApi("/api/graph")
       .then((r) => r.json())
       .then((d) => {
         setData(d);

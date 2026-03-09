@@ -1,5 +1,6 @@
 "use client";
 
+import { fetchApi } from "@/lib/api";
 import { useEffect, useState } from "react";
 import { ShieldCheck, AlertCircle } from "lucide-react";
 
@@ -41,7 +42,7 @@ export default function CompliancePage() {
 
   // Load dropdown options from graph on mount
   useEffect(() => {
-    fetch("/api/compliance")
+    fetchApi("/api/compliance")
       .then((r) => r.json())
       .then((d) => {
         setConsumers(d.consumers ?? []);
@@ -56,7 +57,7 @@ export default function CompliancePage() {
   const check = async () => {
     if (!consumerId || !datasetId) return;
     setLoading(true);
-    const r = await fetch(
+    const r = await fetchApi(
       `/api/compliance?consumerId=${encodeURIComponent(
         consumerId,
       )}&datasetId=${encodeURIComponent(datasetId)}`,

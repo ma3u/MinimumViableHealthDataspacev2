@@ -1,0 +1,20 @@
+{
+  "consumers": [
+    {
+      "id": "did:web:bayer.com:research",
+      "name": "Bayer Research (CRO)",
+      "type": "CRO"
+    },
+    {
+      "id": "did:web:bayer.com:research",
+      "name": "Bayer Research (CRO)",
+      "type": "CRO"
+    }
+  ],
+  "datasets": [
+    {
+      "id": "dataset:synthea-fhir-r4-mvd",
+      "title": "Synthea Synthetic FHIR R4 Patient Cohort"
+    }
+  ]
+}

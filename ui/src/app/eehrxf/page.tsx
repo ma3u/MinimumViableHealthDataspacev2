@@ -1,5 +1,6 @@
 "use client";
 
+import { fetchApi } from "@/lib/api";
 import { useEffect, useState } from "react";
 import {
   ShieldCheck,
@@ -242,7 +243,7 @@ export default function EEHRxFPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch("/api/eehrxf")
+    fetchApi("/api/eehrxf")
       .then((r) => r.json())
       .then((d) => {
         setData(d);

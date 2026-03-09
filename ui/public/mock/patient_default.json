@@ -1,0 +1,1735 @@
+{
+  "id": "14b9ebcd-e969-3704-476b-c5897c3c8d8a",
+  "data": {
+    "timeline": [
+      {
+        "fhirType": "Encounter",
+        "fhirId": "a5548af3-2321-6884-476e-08c6ccbe58ee",
+        "date": "1971-03-18T17:22:09+01:00",
+        "display": null,
+        "omopType": "OMOPVisitOccurrence",
+        "omopId": "omop-visit-a5548af3-2321-6884-476e-08c6ccbe58ee"
+      },
+      {
+        "fhirType": "Condition",
+        "fhirId": "01d557c5-3f49-3e47-715a-1d93b669324c",
+        "date": "1971-03-18T17:22:09+01:00",
+        "display": "Medication review due (situation)",
+        "omopType": "OMOPConditionOccurrence",
+        "omopId": "omop-cond-01d557c5-3f49-3e47-715a-1d93b669324c"
+      },
+      {
+        "fhirType": "Encounter",
+        "fhirId": "cba5a734-60a5-ec01-6973-1b742a49094c",
+        "date": "1972-03-16T17:22:09+01:00",
+        "display": null,
+        "omopType": "OMOPVisitOccurrence",
+        "omopId": "omop-visit-cba5a734-60a5-ec01-6973-1b742a49094c"
+      },
+      {
+        "fhirType": "Observation",
+        "fhirId": "5fba73e2-4fbd-9d42-3c0e-5e899784a504",
+        "date": "1972-03-16T17:22:09+01:00",
+        "display": "Body Height",
+        "omopType": "OMOPMeasurement",
+        "omopId": "omop-meas-5fba73e2-4fbd-9d42-3c0e-5e899784a504"
+      },
+      {
+        "fhirType": "Observation",
+        "fhirId": "b91d3fdd-cc95-579d-99e8-9bd914652807",
+        "date": "1972-03-16T17:22:09+01:00",
+        "display": "Pain severity - 0-10 verbal numeric rating [Score] - Reported",
+        "omopType": "OMOPMeasurement",
+        "omopId": "omop-meas-b91d3fdd-cc95-579d-99e8-9bd914652807"
+      },
+      {
+        "fhirType": "Observation",
+        "fhirId": "aa1e7bcf-6ab8-e6e6-611b-cc1c3eda24e0",
+        "date": "1972-03-16T17:22:09+01:00",
+        "display": "Body Weight",
+        "omopType": "OMOPMeasurement",
+        "omopId": "omop-meas-aa1e7bcf-6ab8-e6e6-611b-cc1c3eda24e0"
+      },
+      {
+        "fhirType": "Observation",
+        "fhirId": "61c38c9b-0d2d-43a3-e657-294b025068a1",
+        "date": "1972-03-16T17:22:09+01:00",
+        "display": "Weight-for-length Per age and sex",
+        "omopType": "OMOPMeasurement",
+        "omopId": "omop-meas-61c38c9b-0d2d-43a3-e657-294b025068a1"
+      },
+      {
+        "fhirType": "Observation",
+        "fhirId": "d6a558e8-5993-fd57-cb51-555a91966707",
+        "date": "1972-03-16T17:22:09+01:00",
+        "display": "Head Occipital-frontal circumference Percentile",
+        "omopType": "OMOPMeasurement",
+        "omopId": "omop-meas-d6a558e8-5993-fd57-cb51-555a91966707"
+      },
+      {
+        "fhirType": "Observation",
+        "fhirId": "88f9682b-9f5b-68d5-939e-f55ae3a4aea0",
+        "date": "1972-03-16T17:22:09+01:00",
+        "display": "Head Occipital-frontal circumference",
+        "omopType": "OMOPMeasurement",
+        "omopId": "omop-meas-88f9682b-9f5b-68d5-939e-f55ae3a4aea0"
+      },
+      {
+        "fhirType": "Observation",
+        "fhirId": "7f3b794d-e07b-1c15-b3a3-e2b52542fac5",
+        "date": "1972-03-16T17:22:09+01:00",
+        "display": "Body mass index (BMI) [Ratio]",
+        "omopType": "OMOPMeasurement",
+        "omopId": "omop-meas-7f3b794d-e07b-1c15-b3a3-e2b52542fac5"
+      },
+      {
+        "fhirType": "Observation",
+        "fhirId": "1c875f8d-2c5b-d34b-238f-acb30897f0c7",
+        "date": "1972-03-16T17:22:09+01:00",
+        "display": "Body mass index (BMI) [Percentile] Per age and sex",
+        "omopType": "OMOPMeasurement",
+        "omopId": "omop-meas-1c875f8d-2c5b-d34b-238f-acb30897f0c7"
+      },
+      {
+        "fhirType": "Observation",
+        "fhirId": "4735a020-cf21-059e-e814-ae69a3c3c930",
+        "date": "1972-03-16T17:22:09+01:00",
+        "display": "Blood pressure panel with all children optional",
+        "omopType": "OMOPMeasurement",
+        "omopId": "omop-meas-4735a020-cf21-059e-e814-ae69a3c3c930"
+      },
+      {
+        "fhirType": "Observation",
+        "fhirId": "0a23cd34-c208-6f8c-7977-5a46aeb0a9d2",
+        "date": "1972-03-16T17:22:09+01:00",
+        "display": "Heart rate",
+        "omopType": "OMOPMeasurement",
+        "omopId": "omop-meas-0a23cd34-c208-6f8c-7977-5a46aeb0a9d2"
+      },
+      {
+        "fhirType": "Observation",
+        "fhirId": "3af33be7-af17-7d0d-e437-7e4418614cf6",
+        "date": "1972-03-16T17:22:09+01:00",
+        "display": "Respiratory rate",
+        "omopType": "OMOPMeasurement",
+        "omopId": "omop-meas-3af33be7-af17-7d0d-e437-7e4418614cf6"
+      },
+      {
+        "fhirType": "Observation",
+        "fhirId": "3c9b6c13-d0a3-af94-e441-9f25d68ec240",
+        "date": "1972-03-16T17:22:09+01:00",
+        "display": "Tobacco smoking status",
+        "omopType": null,
+        "omopId": null
+      },
+      {
+        "fhirType": "Procedure",
+        "fhirId": "5f1f5fd6-34ef-19eb-e2e1-53dd2057d7bd",
+        "date": "1972-03-16T17:22:09+01:00",
+        "display": "Medication Reconciliation (procedure)",
+        "omopType": "OMOPProcedureOccurrence",
+        "omopId": "omop-proc-5f1f5fd6-34ef-19eb-e2e1-53dd2057d7bd"
+      },
+      {
+        "fhirType": "Encounter",
+        "fhirId": "2b294cd8-6fff-7637-2b93-9e713a021f7f",
+        "date": "1972-09-14T17:22:09+01:00",
+        "display": null,
+        "omopType": "OMOPVisitOccurrence",
+        "omopId": "omop-visit-2b294cd8-6fff-7637-2b93-9e713a021f7f"
+      },
+      {
+        "fhirType": "Condition",
+        "fhirId": "0481ac8e-77a4-ab46-6847-fa8a76a5c107",
+        "date": "1972-09-14T17:22:09+01:00",
+        "display": "Medication review due (situation)",
+        "omopType": "OMOPConditionOccurrence",
+        "omopId": "omop-cond-0481ac8e-77a4-ab46-6847-fa8a76a5c107"
+      },
+      {
+        "fhirType": "Observation",
+        "fhirId": "1ef7ea57-4e7e-58e8-1267-c2243f24ebd6",
+        "date": "1972-09-14T17:22:09+01:00",
+        "display": "Body Height",
+        "omopType": "OMOPMeasurement",
+        "omopId": "omop-meas-1ef7ea57-4e7e-58e8-1267-c2243f24ebd6"
+      },
+      {
+        "fhirType": "Observation",
+        "fhirId": "94577ece-1dd8-8574-7174-40cc779a54e2",
+        "date": "1972-09-14T17:22:09+01:00",
+        "display": "Pain severity - 0-10 verbal numeric rating [Score] - Reported",
+        "omopType": "OMOPMeasurement",
+        "omopId": "omop-meas-94577ece-1dd8-8574-7174-40cc779a54e2"
+      },
+      {
+        "fhirType": "Observation",
+        "fhirId": "860c47a6-f5bb-2132-e15c-de47c0688d41",
+        "date": "1972-09-14T17:22:09+01:00",
+        "display": "Body Weight",
+        "omopType": "OMOPMeasurement",
+        "omopId": "omop-meas-860c47a6-f5bb-2132-e15c-de47c0688d41"
+      },
+      {
+        "fhirType": "Observation",
+        "fhirId": "70498caa-398c-042c-efbf-11919ec7f972",
+        "date": "1972-09-14T17:22:09+01:00",
+        "display": "Weight-for-length Per age and sex",
+        "omopType": "OMOPMeasurement",
+        "omopId": "omop-meas-70498caa-398c-042c-efbf-11919ec7f972"
+      },
+      {
+        "fhirType": "Observation",
+        "fhirId": "5099004e-e174-b0a3-6d65-29dec716f640",
+        "date": "1972-09-14T17:22:09+01:00",
+        "display": "Head Occipital-frontal circumference Percentile",
+        "omopType": "OMOPMeasurement",
+        "omopId": "omop-meas-5099004e-e174-b0a3-6d65-29dec716f640"
+      },
+      {
+        "fhirType": "Observation",
+        "fhirId": "01f0bdd9-6da6-afb7-d6a0-77151bdb9e97",
+        "date": "1972-09-14T17:22:09+01:00",
+        "display": "Head Occipital-frontal circumference",
+        "omopType": "OMOPMeasurement",
+        "omopId": "omop-meas-01f0bdd9-6da6-afb7-d6a0-77151bdb9e97"
+      },
+      {
+        "fhirType": "Observation",
+        "fhirId": "7a6500ec-6a65-b376-79d9-5d7bccbfe723",
+        "date": "1972-09-14T17:22:09+01:00",
+        "display": "Body mass index (BMI) [Ratio]",
+        "omopType": "OMOPMeasurement",
+        "omopId": "omop-meas-7a6500ec-6a65-b376-79d9-5d7bccbfe723"
+      },
+      {
+        "fhirType": "Observation",
+        "fhirId": "30854261-ac03-5514-8d60-70b5efc15036",
+        "date": "1972-09-14T17:22:09+01:00",
+        "display": "Body mass index (BMI) [Percentile] Per age and sex",
+        "omopType": "OMOPMeasurement",
+        "omopId": "omop-meas-30854261-ac03-5514-8d60-70b5efc15036"
+      },
+      {
+        "fhirType": "Observation",
+        "fhirId": "24e5cc19-ec28-f78a-a007-d2ac2743d74c",
+        "date": "1972-09-14T17:22:09+01:00",
+        "display": "Blood pressure panel with all children optional",
+        "omopType": "OMOPMeasurement",
+        "omopId": "omop-meas-24e5cc19-ec28-f78a-a007-d2ac2743d74c"
+      },
+      {
+        "fhirType": "Observation",
+        "fhirId": "f8f1faab-add7-1ffa-4b3a-106eabb0770c",
+        "date": "1972-09-14T17:22:09+01:00",
+        "display": "Heart rate",
+        "omopType": "OMOPMeasurement",
+        "omopId": "omop-meas-f8f1faab-add7-1ffa-4b3a-106eabb0770c"
+      },
+      {
+        "fhirType": "Observation",
+        "fhirId": "a4f1062f-56ad-d328-cdc2-439bba93d09f",
+        "date": "1972-09-14T17:22:09+01:00",
+        "display": "Respiratory rate",
+        "omopType": "OMOPMeasurement",
+        "omopId": "omop-meas-a4f1062f-56ad-d328-cdc2-439bba93d09f"
+      },
+      {
+        "fhirType": "Observation",
+        "fhirId": "b5e2619c-fe0e-c5f9-a4d6-6d4eb290356e",
+        "date": "1972-09-14T17:22:09+01:00",
+        "display": "Tobacco smoking status",
+        "omopType": null,
+        "omopId": null
+      },
+      {
+        "fhirType": "Procedure",
+        "fhirId": "0a9777fb-11c7-5ac7-e0bd-742f6aa9e205",
+        "date": "1972-09-14T17:22:09+01:00",
+        "display": "Patient referral for dental care (procedure)",
+        "omopType": "OMOPProcedureOccurrence",
+        "omopId": "omop-proc-0a9777fb-11c7-5ac7-e0bd-742f6aa9e205"
+      },
+      {
+        "fhirType": "Encounter",
+        "fhirId": "b523862c-8dd2-381e-89e7-36028de5daef",
+        "date": "1972-09-21T17:22:09+01:00",
+        "display": null,
+        "omopType": "OMOPVisitOccurrence",
+        "omopId": "omop-visit-b523862c-8dd2-381e-89e7-36028de5daef"
+      },
+      {
+        "fhirType": "Procedure",
+        "fhirId": "a847b885-8fa7-ba76-2c50-febf1e3c6069",
+        "date": "1972-09-21T17:22:09+01:00",
+        "display": "periodic oral evaluation  established patient",
+        "omopType": "OMOPProcedureOccurrence",
+        "omopId": "omop-proc-a847b885-8fa7-ba76-2c50-febf1e3c6069"
+      },
+      {
+        "fhirType": "Encounter",
+        "fhirId": "4303d720-7402-d91a-befe-168e9a22453f",
+        "date": "1973-03-15T17:22:09+01:00",
+        "display": null,
+        "omopType": "OMOPVisitOccurrence",
+        "omopId": "omop-visit-4303d720-7402-d91a-befe-168e9a22453f"
+      },
+      {
+        "fhirType": "Observation",
+        "fhirId": "2a16c9e8-2f99-a809-d9f5-51297ddf4565",
+        "date": "1973-03-15T17:22:09+01:00",
+        "display": "Body Height",
+        "omopType": "OMOPMeasurement",
+        "omopId": "omop-meas-2a16c9e8-2f99-a809-d9f5-51297ddf4565"
+      },
+      {
+        "fhirType": "Observation",
+        "fhirId": "80656585-3a0f-80b0-3441-c00d3e5a9fc1",
+        "date": "1973-03-15T17:22:09+01:00",
+        "display": "Pain severity - 0-10 verbal numeric rating [Score] - Reported",
+        "omopType": "OMOPMeasurement",
+        "omopId": "omop-meas-80656585-3a0f-80b0-3441-c00d3e5a9fc1"
+      },
+      {
+        "fhirType": "Observation",
+        "fhirId": "760df791-0112-e677-42f1-c97705086e8f",
+        "date": "1973-03-15T17:22:09+01:00",
+        "display": "Body Weight",
+        "omopType": "OMOPMeasurement",
+        "omopId": "omop-meas-760df791-0112-e677-42f1-c97705086e8f"
+      },
+      {
+        "fhirType": "Observation",
+        "fhirId": "979eab1f-b628-2b87-23c9-a29f59f75129",
+        "date": "1973-03-15T17:22:09+01:00",
+        "display": "Weight-for-length Per age and sex",
+        "omopType": "OMOPMeasurement",
+        "omopId": "omop-meas-979eab1f-b628-2b87-23c9-a29f59f75129"
+      },
+      {
+        "fhirType": "Observation",
+        "fhirId": "0828aecb-8dcd-ebe2-e8de-f7e65fcebe86",
+        "date": "1973-03-15T17:22:09+01:00",
+        "display": "Head Occipital-frontal circumference Percentile",
+        "omopType": "OMOPMeasurement",
+        "omopId": "omop-meas-0828aecb-8dcd-ebe2-e8de-f7e65fcebe86"
+      },
+      {
+        "fhirType": "Observation",
+        "fhirId": "f10f174d-c297-0579-4ad3-fc2ffab0c549",
+        "date": "1973-03-15T17:22:09+01:00",
+        "display": "Head Occipital-frontal circumference",
+        "omopType": "OMOPMeasurement",
+        "omopId": "omop-meas-f10f174d-c297-0579-4ad3-fc2ffab0c549"
+      },
+      {
+        "fhirType": "Observation",
+        "fhirId": "31511c10-1aa3-5b3b-3c28-099337e03067",
+        "date": "1973-03-15T17:22:09+01:00",
+        "display": "Body mass index (BMI) [Ratio]",
+        "omopType": "OMOPMeasurement",
+        "omopId": "omop-meas-31511c10-1aa3-5b3b-3c28-099337e03067"
+      },
+      {
+        "fhirType": "Observation",
+        "fhirId": "c36308ff-f5b3-444e-e825-194b5f91d20c",
+        "date": "1973-03-15T17:22:09+01:00",
+        "display": "Body mass index (BMI) [Percentile] Per age and sex",
+        "omopType": "OMOPMeasurement",
+        "omopId": "omop-meas-c36308ff-f5b3-444e-e825-194b5f91d20c"
+      },
+      {
+        "fhirType": "Observation",
+        "fhirId": "040d256e-3e1a-7220-3554-5826871f43c0",
+        "date": "1973-03-15T17:22:09+01:00",
+        "display": "Blood pressure panel with all children optional",
+        "omopType": "OMOPMeasurement",
+        "omopId": "omop-meas-040d256e-3e1a-7220-3554-5826871f43c0"
+      },
+      {
+        "fhirType": "Observation",
+        "fhirId": "7a8317e7-5b31-c721-ba2b-d439175e5bbc",
+        "date": "1973-03-15T17:22:09+01:00",
+        "display": "Heart rate",
+        "omopType": "OMOPMeasurement",
+        "omopId": "omop-meas-7a8317e7-5b31-c721-ba2b-d439175e5bbc"
+      },
+      {
+        "fhirType": "Observation",
+        "fhirId": "46f41b9d-fdf9-2c52-6642-bc1d2d8dd11e",
+        "date": "1973-03-15T17:22:09+01:00",
+        "display": "Respiratory rate",
+        "omopType": "OMOPMeasurement",
+        "omopId": "omop-meas-46f41b9d-fdf9-2c52-6642-bc1d2d8dd11e"
+      },
+      {
+        "fhirType": "Observation",
+        "fhirId": "f6ec2eb7-f794-066a-af5d-54667cc05bcf",
+        "date": "1973-03-15T17:22:09+01:00",
+        "display": "Tobacco smoking status",
+        "omopType": null,
+        "omopId": null
+      },
+      {
+        "fhirType": "Encounter",
+        "fhirId": "5e76b220-a9e2-5fe1-c029-38e77772f566",
+        "date": "1974-03-21T17:22:09+01:00",
+        "display": null,
+        "omopType": "OMOPVisitOccurrence",
+        "omopId": "omop-visit-5e76b220-a9e2-5fe1-c029-38e77772f566"
+      },
+      {
+        "fhirType": "Observation",
+        "fhirId": "554c5156-12fa-276a-b791-c0513b33ffa7",
+        "date": "1974-03-21T17:22:09+01:00",
+        "display": "Heart rate",
+        "omopType": "OMOPMeasurement",
+        "omopId": "omop-meas-554c5156-12fa-276a-b791-c0513b33ffa7"
+      },
+      {
+        "fhirType": "Observation",
+        "fhirId": "a6d00299-e7c1-ec33-c79d-03c641f82712",
+        "date": "1974-03-21T17:22:09+01:00",
+        "display": "Tobacco smoking status",
+        "omopType": null,
+        "omopId": null
+      },
+      {
+        "fhirType": "Observation",
+        "fhirId": "f0a30139-c1d3-c7f2-d7d3-613cdb50c7b3",
+        "date": "1974-03-21T17:22:09+01:00",
+        "display": "Respiratory rate",
+        "omopType": "OMOPMeasurement",
+        "omopId": "omop-meas-f0a30139-c1d3-c7f2-d7d3-613cdb50c7b3"
+      },
+      {
+        "fhirType": "Observation",
+        "fhirId": "35bc6f2a-245a-beca-9d3c-8a624af7d721",
+        "date": "1974-03-21T17:22:09+01:00",
+        "display": "Body Height",
+        "omopType": "OMOPMeasurement",
+        "omopId": "omop-meas-35bc6f2a-245a-beca-9d3c-8a624af7d721"
+      },
+      {
+        "fhirType": "Observation",
+        "fhirId": "e241e9c1-7269-577e-f82c-4b82c0e3b700",
+        "date": "1974-03-21T17:22:09+01:00",
+        "display": "Pain severity - 0-10 verbal numeric rating [Score] - Reported",
+        "omopType": "OMOPMeasurement",
+        "omopId": "omop-meas-e241e9c1-7269-577e-f82c-4b82c0e3b700"
+      },
+      {
+        "fhirType": "Observation",
+        "fhirId": "74ff7c5c-9bf3-483c-9583-33c6637c2abb",
+        "date": "1974-03-21T17:22:09+01:00",
+        "display": "Body Weight",
+        "omopType": "OMOPMeasurement",
+        "omopId": "omop-meas-74ff7c5c-9bf3-483c-9583-33c6637c2abb"
+      },
+      {
+        "fhirType": "Observation",
+        "fhirId": "6eebcff4-334d-614d-f0a6-f37cb36558dd",
+        "date": "1974-03-21T17:22:09+01:00",
+        "display": "Body mass index (BMI) [Ratio]",
+        "omopType": "OMOPMeasurement",
+        "omopId": "omop-meas-6eebcff4-334d-614d-f0a6-f37cb36558dd"
+      },
+      {
+        "fhirType": "Observation",
+        "fhirId": "7dac9c1c-b8dd-a85a-7841-32088c87b8ef",
+        "date": "1974-03-21T17:22:09+01:00",
+        "display": "Body mass index (BMI) [Percentile] Per age and sex",
+        "omopType": "OMOPMeasurement",
+        "omopId": "omop-meas-7dac9c1c-b8dd-a85a-7841-32088c87b8ef"
+      },
+      {
+        "fhirType": "Observation",
+        "fhirId": "70b5c920-a0fd-8d90-66f0-8e031f4ad2ae",
+        "date": "1974-03-21T17:22:09+01:00",
+        "display": "Blood pressure panel with all children optional",
+        "omopType": "OMOPMeasurement",
+        "omopId": "omop-meas-70b5c920-a0fd-8d90-66f0-8e031f4ad2ae"
+      },
+      {
+        "fhirType": "Encounter",
+        "fhirId": "4a9dab4a-78de-df28-9b07-9449d9175cf4",
+        "date": "1975-03-27T17:22:09+01:00",
+        "display": null,
+        "omopType": "OMOPVisitOccurrence",
+        "omopId": "omop-visit-4a9dab4a-78de-df28-9b07-9449d9175cf4"
+      },
+      {
+        "fhirType": "Observation",
+        "fhirId": "abea952f-020a-6c23-76c4-bd7586dde83d",
+        "date": "1975-03-27T17:22:09+01:00",
+        "display": "Tobacco smoking status",
+        "omopType": null,
+        "omopId": null
+      },
+      {
+        "fhirType": "Observation",
+        "fhirId": "07240e1b-43e3-3dba-6a0f-54dbb70d54c6",
+        "date": "1975-03-27T17:22:09+01:00",
+        "display": "Platelet mean volume [Entitic volume] in Blood by Automated count",
+        "omopType": "OMOPMeasurement",
+        "omopId": "omop-meas-07240e1b-43e3-3dba-6a0f-54dbb70d54c6"
+      },
+      {
+        "fhirType": "Observation",
+        "fhirId": "dfa505e3-5bb8-7a24-e404-c8d325f9173c",
+        "date": "1975-03-27T17:22:09+01:00",
+        "display": "Platelet distribution width [Entitic volume] in Blood by Automated count",
+        "omopType": "OMOPMeasurement",
+        "omopId": "omop-meas-dfa505e3-5bb8-7a24-e404-c8d325f9173c"
+      },
+      {
+        "fhirType": "Observation",
+        "fhirId": "88dbec64-260e-6f6d-6c64-12093a9944e5",
+        "date": "1975-03-27T17:22:09+01:00",
+        "display": "Platelets [#/volume] in Blood by Automated count",
+        "omopType": "OMOPMeasurement",
+        "omopId": "omop-meas-88dbec64-260e-6f6d-6c64-12093a9944e5"
+      },
+      {
+        "fhirType": "Observation",
+        "fhirId": "f79b3947-f20c-fcdb-9886-6b5fc5b5e909",
+        "date": "1975-03-27T17:22:09+01:00",
+        "display": "Erythrocyte distribution width [Entitic volume] by Automated count",
+        "omopType": "OMOPMeasurement",
+        "omopId": "omop-meas-f79b3947-f20c-fcdb-9886-6b5fc5b5e909"
+      },
+      {
+        "fhirType": "Observation",
+        "fhirId": "4f42e66a-4f5a-b883-ae6c-c69c32e58b2d",
+        "date": "1975-03-27T17:22:09+01:00",
+        "display": "MCHC [Mass/volume] by Automated count",
+        "omopType": "OMOPMeasurement",
+        "omopId": "omop-meas-4f42e66a-4f5a-b883-ae6c-c69c32e58b2d"
+      },
+      {
+        "fhirType": "Observation",
+        "fhirId": "07db7e34-a14d-4497-5d84-82afd3a1589d",
+        "date": "1975-03-27T17:22:09+01:00",
+        "display": "MCH [Entitic mass] by Automated count",
+        "omopType": "OMOPMeasurement",
+        "omopId": "omop-meas-07db7e34-a14d-4497-5d84-82afd3a1589d"
+      },
+      {
+        "fhirType": "Observation",
+        "fhirId": "5354e1b8-fc37-7aca-ea1f-8d43f552c4e7",
+        "date": "1975-03-27T17:22:09+01:00",
+        "display": "MCV [Entitic volume] by Automated count",
+        "omopType": "OMOPMeasurement",
+        "omopId": "omop-meas-5354e1b8-fc37-7aca-ea1f-8d43f552c4e7"
+      },
+      {
+        "fhirType": "Observation",
+        "fhirId": "47ef6363-247e-ac89-fd77-5a9dfe39315f",
+        "date": "1975-03-27T17:22:09+01:00",
+        "display": "Hematocrit [Volume Fraction] of Blood by Automated count",
+        "omopType": "OMOPMeasurement",
+        "omopId": "omop-meas-47ef6363-247e-ac89-fd77-5a9dfe39315f"
+      },
+      {
+        "fhirType": "Observation",
+        "fhirId": "f27a0470-a448-af1b-6d56-d2656f51fde5",
+        "date": "1975-03-27T17:22:09+01:00",
+        "display": "Hemoglobin [Mass/volume] in Blood",
+        "omopType": "OMOPMeasurement",
+        "omopId": "omop-meas-f27a0470-a448-af1b-6d56-d2656f51fde5"
+      },
+      {
+        "fhirType": "Observation",
+        "fhirId": "1cc72e9b-0f69-34e0-43d6-ecc41a9ad980",
+        "date": "1975-03-27T17:22:09+01:00",
+        "display": "Erythrocytes [#/volume] in Blood by Automated count",
+        "omopType": "OMOPMeasurement",
+        "omopId": "omop-meas-1cc72e9b-0f69-34e0-43d6-ecc41a9ad980"
+      },
+      {
+        "fhirType": "Observation",
+        "fhirId": "45ef788c-4c21-214f-14ea-12fffd9ecf93",
+        "date": "1975-03-27T17:22:09+01:00",
+        "display": "Leukocytes [#/volume] in Blood by Automated count",
+        "omopType": "OMOPMeasurement",
+        "omopId": "omop-meas-45ef788c-4c21-214f-14ea-12fffd9ecf93"
+      },
+      {
+        "fhirType": "Observation",
+        "fhirId": "4efbb31a-6b6d-a35d-85fb-b7821d1c76ac",
+        "date": "1975-03-27T17:22:09+01:00",
+        "display": "Respiratory rate",
+        "omopType": "OMOPMeasurement",
+        "omopId": "omop-meas-4efbb31a-6b6d-a35d-85fb-b7821d1c76ac"
+      },
+      {
+        "fhirType": "Observation",
+        "fhirId": "87adc963-5ed9-7e14-7d1a-f66232f70273",
+        "date": "1975-03-27T17:22:09+01:00",
+        "display": "Heart rate",
+        "omopType": "OMOPMeasurement",
+        "omopId": "omop-meas-87adc963-5ed9-7e14-7d1a-f66232f70273"
+      },
+      {
+        "fhirType": "Observation",
+        "fhirId": "7b037933-02f4-bc26-e9f8-6840c1a384ff",
+        "date": "1975-03-27T17:22:09+01:00",
+        "display": "Blood pressure panel with all children optional",
+        "omopType": "OMOPMeasurement",
+        "omopId": "omop-meas-7b037933-02f4-bc26-e9f8-6840c1a384ff"
+      },
+      {
+        "fhirType": "Observation",
+        "fhirId": "29373b35-7dbd-46de-92d1-fcf72b57b439",
+        "date": "1975-03-27T17:22:09+01:00",
+        "display": "Body mass index (BMI) [Percentile] Per age and sex",
+        "omopType": "OMOPMeasurement",
+        "omopId": "omop-meas-29373b35-7dbd-46de-92d1-fcf72b57b439"
+      },
+      {
+        "fhirType": "Observation",
+        "fhirId": "3f17e086-98a6-1697-cb17-16aa2ea1e21d",
+        "date": "1975-03-27T17:22:09+01:00",
+        "display": "Body mass index (BMI) [Ratio]",
+        "omopType": "OMOPMeasurement",
+        "omopId": "omop-meas-3f17e086-98a6-1697-cb17-16aa2ea1e21d"
+      },
+      {
+        "fhirType": "Observation",
+        "fhirId": "dffbe8f8-8fcb-0073-11fe-ca466fa978c2",
+        "date": "1975-03-27T17:22:09+01:00",
+        "display": "Body Weight",
+        "omopType": "OMOPMeasurement",
+        "omopId": "omop-meas-dffbe8f8-8fcb-0073-11fe-ca466fa978c2"
+      },
+      {
+        "fhirType": "Observation",
+        "fhirId": "3064fb8e-2090-d3f3-6b31-40eca4fd1f34",
+        "date": "1975-03-27T17:22:09+01:00",
+        "display": "Pain severity - 0-10 verbal numeric rating [Score] - Reported",
+        "omopType": "OMOPMeasurement",
+        "omopId": "omop-meas-3064fb8e-2090-d3f3-6b31-40eca4fd1f34"
+      },
+      {
+        "fhirType": "Observation",
+        "fhirId": "4f46acf8-db14-9560-ec46-4c62036756fd",
+        "date": "1975-03-27T17:22:09+01:00",
+        "display": "Body Height",
+        "omopType": "OMOPMeasurement",
+        "omopId": "omop-meas-4f46acf8-db14-9560-ec46-4c62036756fd"
+      },
+      {
+        "fhirType": "Encounter",
+        "fhirId": "ff28cdbb-8bec-b3b5-b3bd-8701fd5f5265",
+        "date": "1976-04-01T17:22:09+01:00",
+        "display": null,
+        "omopType": "OMOPVisitOccurrence",
+        "omopId": "omop-visit-ff28cdbb-8bec-b3b5-b3bd-8701fd5f5265"
+      },
+      {
+        "fhirType": "Observation",
+        "fhirId": "1b44678d-91b7-6a9b-081d-0e0d8203980d",
+        "date": "1976-04-01T17:22:09+01:00",
+        "display": "Tobacco smoking status",
+        "omopType": null,
+        "omopId": null
+      },
+      {
+        "fhirType": "Observation",
+        "fhirId": "520a5d64-7096-cb9d-8825-aaa4b16e857a",
+        "date": "1976-04-01T17:22:09+01:00",
+        "display": "Respiratory rate",
+        "omopType": "OMOPMeasurement",
+        "omopId": "omop-meas-520a5d64-7096-cb9d-8825-aaa4b16e857a"
+      },
+      {
+        "fhirType": "Observation",
+        "fhirId": "63717a00-f79d-b5f2-ab20-334624ad3693",
+        "date": "1976-04-01T17:22:09+01:00",
+        "display": "Heart rate",
+        "omopType": "OMOPMeasurement",
+        "omopId": "omop-meas-63717a00-f79d-b5f2-ab20-334624ad3693"
+      },
+      {
+        "fhirType": "Observation",
+        "fhirId": "c92f395e-9314-cd8b-5277-931cc5c20f55",
+        "date": "1976-04-01T17:22:09+01:00",
+        "display": "Blood pressure panel with all children optional",
+        "omopType": "OMOPMeasurement",
+        "omopId": "omop-meas-c92f395e-9314-cd8b-5277-931cc5c20f55"
+      },
+      {
+        "fhirType": "Observation",
+        "fhirId": "6b2e4e15-32b7-25b1-bfc0-5b272bf69d8e",
+        "date": "1976-04-01T17:22:09+01:00",
+        "display": "Body mass index (BMI) [Percentile] Per age and sex",
+        "omopType": "OMOPMeasurement",
+        "omopId": "omop-meas-6b2e4e15-32b7-25b1-bfc0-5b272bf69d8e"
+      },
+      {
+        "fhirType": "Observation",
+        "fhirId": "a078b0b5-a5bd-8887-e714-b5b25913a040",
+        "date": "1976-04-01T17:22:09+01:00",
+        "display": "Body mass index (BMI) [Ratio]",
+        "omopType": "OMOPMeasurement",
+        "omopId": "omop-meas-a078b0b5-a5bd-8887-e714-b5b25913a040"
+      },
+      {
+        "fhirType": "Observation",
+        "fhirId": "613c37f7-af32-be55-da12-f2e992e2820a",
+        "date": "1976-04-01T17:22:09+01:00",
+        "display": "Body Weight",
+        "omopType": "OMOPMeasurement",
+        "omopId": "omop-meas-613c37f7-af32-be55-da12-f2e992e2820a"
+      },
+      {
+        "fhirType": "Observation",
+        "fhirId": "5f3f4228-5f0b-2eac-13bd-3fa160a2071e",
+        "date": "1976-04-01T17:22:09+01:00",
+        "display": "Pain severity - 0-10 verbal numeric rating [Score] - Reported",
+        "omopType": "OMOPMeasurement",
+        "omopId": "omop-meas-5f3f4228-5f0b-2eac-13bd-3fa160a2071e"
+      },
+      {
+        "fhirType": "Observation",
+        "fhirId": "b1f8f3e9-e9c5-d801-f11f-647d1180e53a",
+        "date": "1976-04-01T17:22:09+01:00",
+        "display": "Body Height",
+        "omopType": "OMOPMeasurement",
+        "omopId": "omop-meas-b1f8f3e9-e9c5-d801-f11f-647d1180e53a"
+      },
+      {
+        "fhirType": "Encounter",
+        "fhirId": "b8d15fb0-a3ee-109c-9e26-179f964a23f6",
+        "date": "1976-04-12T05:22:09+01:00",
+        "display": null,
+        "omopType": "OMOPVisitOccurrence",
+        "omopId": "omop-visit-b8d15fb0-a3ee-109c-9e26-179f964a23f6"
+      },
+      {
+        "fhirType": "Condition",
+        "fhirId": "7f3a2f17-9467-7ccd-0a72-cf8176b6c32c",
+        "date": "1976-04-12T05:22:09+01:00",
+        "display": "Acute bacterial sinusitis (disorder)",
+        "omopType": "OMOPConditionOccurrence",
+        "omopId": "omop-cond-7f3a2f17-9467-7ccd-0a72-cf8176b6c32c"
+      },
+      {
+        "fhirType": "Encounter",
+        "fhirId": "cab5662e-6208-c46f-1387-973bcad2c5b4",
+        "date": "1976-05-25T05:22:09+01:00",
+        "display": null,
+        "omopType": "OMOPVisitOccurrence",
+        "omopId": "omop-visit-cab5662e-6208-c46f-1387-973bcad2c5b4"
+      },
+      {
+        "fhirType": "Condition",
+        "fhirId": "9cff0b28-3aa1-7481-e9c4-16623aa20f17",
+        "date": "1976-05-25T05:22:09+01:00",
+        "display": "Chronic sinusitis (disorder)",
+        "omopType": "OMOPConditionOccurrence",
+        "omopId": "omop-cond-9cff0b28-3aa1-7481-e9c4-16623aa20f17"
+      },
+      {
+        "fhirType": "Encounter",
+        "fhirId": "2d90e271-64b0-6134-edc4-47bbdbfb3a46",
+        "date": "1977-04-07T17:22:09+01:00",
+        "display": null,
+        "omopType": "OMOPVisitOccurrence",
+        "omopId": "omop-visit-2d90e271-64b0-6134-edc4-47bbdbfb3a46"
+      },
+      {
+        "fhirType": "Observation",
+        "fhirId": "5ef5f308-3a60-e807-e7a3-56d9d513c198",
+        "date": "1977-04-07T17:22:09+01:00",
+        "display": "Tobacco smoking status",
+        "omopType": null,
+        "omopId": null
+      },
+      {
+        "fhirType": "Observation",
+        "fhirId": "6ad89c06-9361-d136-a835-34fe59397e06",
+        "date": "1977-04-07T17:22:09+01:00",
+        "display": "Respiratory rate",
+        "omopType": "OMOPMeasurement",
+        "omopId": "omop-meas-6ad89c06-9361-d136-a835-34fe59397e06"
+      },
+      {
+        "fhirType": "Observation",
+        "fhirId": "b453be0a-0ea6-ebdd-f1c7-12fcd9c6ec8c",
+        "date": "1977-04-07T17:22:09+01:00",
+        "display": "Heart rate",
+        "omopType": "OMOPMeasurement",
+        "omopId": "omop-meas-b453be0a-0ea6-ebdd-f1c7-12fcd9c6ec8c"
+      },
+      {
+        "fhirType": "Observation",
+        "fhirId": "45ad2d83-a3d8-6735-b52d-d33ac6f1b067",
+        "date": "1977-04-07T17:22:09+01:00",
+        "display": "Blood pressure panel with all children optional",
+        "omopType": "OMOPMeasurement",
+        "omopId": "omop-meas-45ad2d83-a3d8-6735-b52d-d33ac6f1b067"
+      },
+      {
+        "fhirType": "Observation",
+        "fhirId": "53b15089-a81b-563d-7eaf-6e5d50cc6a3d",
+        "date": "1977-04-07T17:22:09+01:00",
+        "display": "Body mass index (BMI) [Percentile] Per age and sex",
+        "omopType": "OMOPMeasurement",
+        "omopId": "omop-meas-53b15089-a81b-563d-7eaf-6e5d50cc6a3d"
+      },
+      {
+        "fhirType": "Observation",
+        "fhirId": "0c00c23b-773c-18ac-3d93-124d87949fd2",
+        "date": "1977-04-07T17:22:09+01:00",
+        "display": "Body mass index (BMI) [Ratio]",
+        "omopType": "OMOPMeasurement",
+        "omopId": "omop-meas-0c00c23b-773c-18ac-3d93-124d87949fd2"
+      },
+      {
+        "fhirType": "Observation",
+        "fhirId": "2366008d-b49b-c2d7-8145-3d8358920ead",
+        "date": "1977-04-07T17:22:09+01:00",
+        "display": "Body Weight",
+        "omopType": "OMOPMeasurement",
+        "omopId": "omop-meas-2366008d-b49b-c2d7-8145-3d8358920ead"
+      },
+      {
+        "fhirType": "Observation",
+        "fhirId": "d98c1eb4-6f59-9af2-aead-22252ed91314",
+        "date": "1977-04-07T17:22:09+01:00",
+        "display": "Pain severity - 0-10 verbal numeric rating [Score] - Reported",
+        "omopType": "OMOPMeasurement",
+        "omopId": "omop-meas-d98c1eb4-6f59-9af2-aead-22252ed91314"
+      },
+      {
+        "fhirType": "Observation",
+        "fhirId": "006372f7-6ff8-e880-898f-03c662637ddc",
+        "date": "1977-04-07T17:22:09+01:00",
+        "display": "Body Height",
+        "omopType": "OMOPMeasurement",
+        "omopId": "omop-meas-006372f7-6ff8-e880-898f-03c662637ddc"
+      },
+      {
+        "fhirType": "Procedure",
+        "fhirId": "654ba49a-3d25-10d3-31b1-bf8a558b02ff",
+        "date": "1977-04-07T17:22:09+01:00",
+        "display": "Patient referral for dental care (procedure)",
+        "omopType": "OMOPProcedureOccurrence",
+        "omopId": "omop-proc-654ba49a-3d25-10d3-31b1-bf8a558b02ff"
+      },
+      {
+        "fhirType": "Encounter",
+        "fhirId": "8fcfa8ba-d5c6-89c3-4920-5257bb4f902c",
+        "date": "1977-04-14T17:22:09+01:00",
+        "display": null,
+        "omopType": "OMOPVisitOccurrence",
+        "omopId": "omop-visit-8fcfa8ba-d5c6-89c3-4920-5257bb4f902c"
+      },
+      {
+        "fhirType": "Procedure",
+        "fhirId": "094f4e71-d507-0278-a3c3-f00eef07ddda",
+        "date": "1977-04-14T17:22:09+01:00",
+        "display": "topical application of fluoride  excluding varnish",
+        "omopType": "OMOPProcedureOccurrence",
+        "omopId": "omop-proc-094f4e71-d507-0278-a3c3-f00eef07ddda"
+      },
+      {
+        "fhirType": "Encounter",
+        "fhirId": "df6320bd-6562-3b0a-79de-d504bc53539f",
+        "date": "1978-04-13T17:22:09+01:00",
+        "display": null,
+        "omopType": "OMOPVisitOccurrence",
+        "omopId": "omop-visit-df6320bd-6562-3b0a-79de-d504bc53539f"
+      },
+      {
+        "fhirType": "Observation",
+        "fhirId": "8c33c13c-32e5-6dcc-f686-fd70b6016243",
+        "date": "1978-04-13T17:22:09+01:00",
+        "display": "Tobacco smoking status",
+        "omopType": null,
+        "omopId": null
+      },
+      {
+        "fhirType": "Observation",
+        "fhirId": "0903634d-45a6-e336-c480-1b8fef2932bd",
+        "date": "1978-04-13T17:22:09+01:00",
+        "display": "Respiratory rate",
+        "omopType": "OMOPMeasurement",
+        "omopId": "omop-meas-0903634d-45a6-e336-c480-1b8fef2932bd"
+      },
+      {
+        "fhirType": "Observation",
+        "fhirId": "09ddc3ac-a80c-3507-31eb-870032fbf9f1",
+        "date": "1978-04-13T17:22:09+01:00",
+        "display": "Heart rate",
+        "omopType": "OMOPMeasurement",
+        "omopId": "omop-meas-09ddc3ac-a80c-3507-31eb-870032fbf9f1"
+      },
+      {
+        "fhirType": "Observation",
+        "fhirId": "4e439fff-1561-86b4-86da-3feb86a1c60f",
+        "date": "1978-04-13T17:22:09+01:00",
+        "display": "Blood pressure panel with all children optional",
+        "omopType": "OMOPMeasurement",
+        "omopId": "omop-meas-4e439fff-1561-86b4-86da-3feb86a1c60f"
+      },
+      {
+        "fhirType": "Observation",
+        "fhirId": "5fe67ac7-8bb7-4ce4-a698-8fae108d9a8b",
+        "date": "1978-04-13T17:22:09+01:00",
+        "display": "Body mass index (BMI) [Percentile] Per age and sex",
+        "omopType": "OMOPMeasurement",
+        "omopId": "omop-meas-5fe67ac7-8bb7-4ce4-a698-8fae108d9a8b"
+      },
+      {
+        "fhirType": "Observation",
+        "fhirId": "311242e5-5232-934a-e560-c7dc26c45cad",
+        "date": "1978-04-13T17:22:09+01:00",
+        "display": "Body mass index (BMI) [Ratio]",
+        "omopType": "OMOPMeasurement",
+        "omopId": "omop-meas-311242e5-5232-934a-e560-c7dc26c45cad"
+      },
+      {
+        "fhirType": "Observation",
+        "fhirId": "aa701d25-2759-7fbb-ad48-8e2c25dd0902",
+        "date": "1978-04-13T17:22:09+01:00",
+        "display": "Body Weight",
+        "omopType": "OMOPMeasurement",
+        "omopId": "omop-meas-aa701d25-2759-7fbb-ad48-8e2c25dd0902"
+      },
+      {
+        "fhirType": "Observation",
+        "fhirId": "b9100f78-71a3-fa92-4e02-22ee6763ec63",
+        "date": "1978-04-13T17:22:09+01:00",
+        "display": "Pain severity - 0-10 verbal numeric rating [Score] - Reported",
+        "omopType": "OMOPMeasurement",
+        "omopId": "omop-meas-b9100f78-71a3-fa92-4e02-22ee6763ec63"
+      },
+      {
+        "fhirType": "Observation",
+        "fhirId": "9c962315-46f4-1af3-52fc-2b3b5455be07",
+        "date": "1978-04-13T17:22:09+01:00",
+        "display": "Body Height",
+        "omopType": "OMOPMeasurement",
+        "omopId": "omop-meas-9c962315-46f4-1af3-52fc-2b3b5455be07"
+      },
+      {
+        "fhirType": "Encounter",
+        "fhirId": "83eb6018-5855-2902-663b-644f5632da5b",
+        "date": "1979-04-19T17:22:09+01:00",
+        "display": null,
+        "omopType": "OMOPVisitOccurrence",
+        "omopId": "omop-visit-83eb6018-5855-2902-663b-644f5632da5b"
+      },
+      {
+        "fhirType": "Observation",
+        "fhirId": "69f7bbd1-a500-d743-05fa-dbe32797b2dc",
+        "date": "1979-04-19T17:22:09+01:00",
+        "display": "Tobacco smoking status",
+        "omopType": null,
+        "omopId": null
+      },
+      {
+        "fhirType": "Observation",
+        "fhirId": "82ab9c19-a5b1-35b1-b1c1-67ce193c90a5",
+        "date": "1979-04-19T17:22:09+01:00",
+        "display": "Respiratory rate",
+        "omopType": "OMOPMeasurement",
+        "omopId": "omop-meas-82ab9c19-a5b1-35b1-b1c1-67ce193c90a5"
+      },
+      {
+        "fhirType": "Observation",
+        "fhirId": "9425724e-7f15-8771-8725-e489a32d5dd8",
+        "date": "1979-04-19T17:22:09+01:00",
+        "display": "Heart rate",
+        "omopType": "OMOPMeasurement",
+        "omopId": "omop-meas-9425724e-7f15-8771-8725-e489a32d5dd8"
+      },
+      {
+        "fhirType": "Observation",
+        "fhirId": "866310e4-5066-3604-c08d-8cae7af82bf2",
+        "date": "1979-04-19T17:22:09+01:00",
+        "display": "Blood pressure panel with all children optional",
+        "omopType": "OMOPMeasurement",
+        "omopId": "omop-meas-866310e4-5066-3604-c08d-8cae7af82bf2"
+      },
+      {
+        "fhirType": "Observation",
+        "fhirId": "bf45304a-c1b1-72cf-7ad6-e69d63a08b3d",
+        "date": "1979-04-19T17:22:09+01:00",
+        "display": "Body mass index (BMI) [Percentile] Per age and sex",
+        "omopType": "OMOPMeasurement",
+        "omopId": "omop-meas-bf45304a-c1b1-72cf-7ad6-e69d63a08b3d"
+      },
+      {
+        "fhirType": "Observation",
+        "fhirId": "9e564d8c-fb8c-f0dc-65cf-9f4484f7d148",
+        "date": "1979-04-19T17:22:09+01:00",
+        "display": "Body mass index (BMI) [Ratio]",
+        "omopType": "OMOPMeasurement",
+        "omopId": "omop-meas-9e564d8c-fb8c-f0dc-65cf-9f4484f7d148"
+      },
+      {
+        "fhirType": "Observation",
+        "fhirId": "60f0e068-cfaf-0084-50bb-f5e0ed986102",
+        "date": "1979-04-19T17:22:09+01:00",
+        "display": "Body Weight",
+        "omopType": "OMOPMeasurement",
+        "omopId": "omop-meas-60f0e068-cfaf-0084-50bb-f5e0ed986102"
+      },
+      {
+        "fhirType": "Observation",
+        "fhirId": "ee77db8e-b86e-8cb6-fc36-d08db94e5c05",
+        "date": "1979-04-19T17:22:09+01:00",
+        "display": "Pain severity - 0-10 verbal numeric rating [Score] - Reported",
+        "omopType": "OMOPMeasurement",
+        "omopId": "omop-meas-ee77db8e-b86e-8cb6-fc36-d08db94e5c05"
+      },
+      {
+        "fhirType": "Observation",
+        "fhirId": "1b83f5fe-8b1f-2be7-4e5b-aa2cc0033ba0",
+        "date": "1979-04-19T17:22:09+01:00",
+        "display": "Body Height",
+        "omopType": "OMOPMeasurement",
+        "omopId": "omop-meas-1b83f5fe-8b1f-2be7-4e5b-aa2cc0033ba0"
+      },
+      {
+        "fhirType": "Procedure",
+        "fhirId": "1798d14e-6be0-b2aa-51a4-ff18e81e2e52",
+        "date": "1979-04-19T17:22:09+01:00",
+        "display": "Medication Reconciliation (procedure)",
+        "omopType": "OMOPProcedureOccurrence",
+        "omopId": "omop-proc-1798d14e-6be0-b2aa-51a4-ff18e81e2e52"
+      },
+      {
+        "fhirType": "Encounter",
+        "fhirId": "eef4ba65-ba55-9f90-81dc-b58acf2aa376",
+        "date": "1979-10-06T11:22:09+01:00",
+        "display": null,
+        "omopType": "OMOPVisitOccurrence",
+        "omopId": "omop-visit-eef4ba65-ba55-9f90-81dc-b58acf2aa376"
+      },
+      {
+        "fhirType": "Condition",
+        "fhirId": "bb7757d0-2dca-4095-9609-4be49a7e05e9",
+        "date": "1979-10-06T11:22:09+01:00",
+        "display": "Viral sinusitis (disorder)",
+        "omopType": "OMOPConditionOccurrence",
+        "omopId": "omop-cond-bb7757d0-2dca-4095-9609-4be49a7e05e9"
+      },
+      {
+        "fhirType": "Encounter",
+        "fhirId": "41cd4986-8e6a-e972-ba17-64f550608079",
+        "date": "1980-04-24T18:22:09+02:00",
+        "display": null,
+        "omopType": "OMOPVisitOccurrence",
+        "omopId": "omop-visit-41cd4986-8e6a-e972-ba17-64f550608079"
+      },
+      {
+        "fhirType": "Condition",
+        "fhirId": "90530a67-ad34-89b7-8fd8-e36ff675c351",
+        "date": "1980-04-24T18:22:09+02:00",
+        "display": "Medication review due (situation)",
+        "omopType": "OMOPConditionOccurrence",
+        "omopId": "omop-cond-90530a67-ad34-89b7-8fd8-e36ff675c351"
+      },
+      {
+        "fhirType": "Observation",
+        "fhirId": "3cc61638-f16d-9228-0d80-f933676944b8",
+        "date": "1980-04-24T18:22:09+02:00",
+        "display": "Tobacco smoking status",
+        "omopType": null,
+        "omopId": null
+      },
+      {
+        "fhirType": "Observation",
+        "fhirId": "25c6d2da-85a7-e667-f54b-0f73954f47f2",
+        "date": "1980-04-24T18:22:09+02:00",
+        "display": "Platelet mean volume [Entitic volume] in Blood by Automated count",
+        "omopType": "OMOPMeasurement",
+        "omopId": "omop-meas-25c6d2da-85a7-e667-f54b-0f73954f47f2"
+      },
+      {
+        "fhirType": "Observation",
+        "fhirId": "5a7d82ee-4c2f-b022-8c1e-66f07d78e2d0",
+        "date": "1980-04-24T18:22:09+02:00",
+        "display": "Platelet distribution width [Entitic volume] in Blood by Automated count",
+        "omopType": "OMOPMeasurement",
+        "omopId": "omop-meas-5a7d82ee-4c2f-b022-8c1e-66f07d78e2d0"
+      },
+      {
+        "fhirType": "Observation",
+        "fhirId": "0061306c-5bb1-d46d-2feb-2201f3900e6b",
+        "date": "1980-04-24T18:22:09+02:00",
+        "display": "Platelets [#/volume] in Blood by Automated count",
+        "omopType": "OMOPMeasurement",
+        "omopId": "omop-meas-0061306c-5bb1-d46d-2feb-2201f3900e6b"
+      },
+      {
+        "fhirType": "Observation",
+        "fhirId": "4b1c2a49-bc3d-49aa-1c68-ebd7ff7d9d61",
+        "date": "1980-04-24T18:22:09+02:00",
+        "display": "Erythrocyte distribution width [Entitic volume] by Automated count",
+        "omopType": "OMOPMeasurement",
+        "omopId": "omop-meas-4b1c2a49-bc3d-49aa-1c68-ebd7ff7d9d61"
+      },
+      {
+        "fhirType": "Observation",
+        "fhirId": "2be633b2-29bc-3f27-f1e7-994ebe5972a2",
+        "date": "1980-04-24T18:22:09+02:00",
+        "display": "MCHC [Mass/volume] by Automated count",
+        "omopType": "OMOPMeasurement",
+        "omopId": "omop-meas-2be633b2-29bc-3f27-f1e7-994ebe5972a2"
+      },
+      {
+        "fhirType": "Observation",
+        "fhirId": "3532f491-bbbf-ba82-91ed-1488ef4ffdf0",
+        "date": "1980-04-24T18:22:09+02:00",
+        "display": "MCH [Entitic mass] by Automated count",
+        "omopType": "OMOPMeasurement",
+        "omopId": "omop-meas-3532f491-bbbf-ba82-91ed-1488ef4ffdf0"
+      },
+      {
+        "fhirType": "Observation",
+        "fhirId": "5ac33ed4-d0d4-639c-2d0a-c893287d523e",
+        "date": "1980-04-24T18:22:09+02:00",
+        "display": "MCV [Entitic volume] by Automated count",
+        "omopType": "OMOPMeasurement",
+        "omopId": "omop-meas-5ac33ed4-d0d4-639c-2d0a-c893287d523e"
+      },
+      {
+        "fhirType": "Observation",
+        "fhirId": "5fb19f7b-dcd5-f8bf-c91c-499270ad4bc6",
+        "date": "1980-04-24T18:22:09+02:00",
+        "display": "Hematocrit [Volume Fraction] of Blood by Automated count",
+        "omopType": "OMOPMeasurement",
+        "omopId": "omop-meas-5fb19f7b-dcd5-f8bf-c91c-499270ad4bc6"
+      },
+      {
+        "fhirType": "Observation",
+        "fhirId": "eae80f2e-7e70-abe1-623e-4c50a4eb7503",
+        "date": "1980-04-24T18:22:09+02:00",
+        "display": "Hemoglobin [Mass/volume] in Blood",
+        "omopType": "OMOPMeasurement",
+        "omopId": "omop-meas-eae80f2e-7e70-abe1-623e-4c50a4eb7503"
+      },
+      {
+        "fhirType": "Observation",
+        "fhirId": "7df66400-73f9-fb2d-3661-182ba1a52d01",
+        "date": "1980-04-24T18:22:09+02:00",
+        "display": "Erythrocytes [#/volume] in Blood by Automated count",
+        "omopType": "OMOPMeasurement",
+        "omopId": "omop-meas-7df66400-73f9-fb2d-3661-182ba1a52d01"
+      },
+      {
+        "fhirType": "Observation",
+        "fhirId": "98737679-c250-4239-ad1f-08a818a44e96",
+        "date": "1980-04-24T18:22:09+02:00",
+        "display": "Leukocytes [#/volume] in Blood by Automated count",
+        "omopType": "OMOPMeasurement",
+        "omopId": "omop-meas-98737679-c250-4239-ad1f-08a818a44e96"
+      },
+      {
+        "fhirType": "Observation",
+        "fhirId": "f4264e2a-dff6-968f-6149-803482960f7e",
+        "date": "1980-04-24T18:22:09+02:00",
+        "display": "Respiratory rate",
+        "omopType": "OMOPMeasurement",
+        "omopId": "omop-meas-f4264e2a-dff6-968f-6149-803482960f7e"
+      },
+      {
+        "fhirType": "Observation",
+        "fhirId": "bd3c6bec-88e9-4f7f-b985-da65483aa49f",
+        "date": "1980-04-24T18:22:09+02:00",
+        "display": "Heart rate",
+        "omopType": "OMOPMeasurement",
+        "omopId": "omop-meas-bd3c6bec-88e9-4f7f-b985-da65483aa49f"
+      },
+      {
+        "fhirType": "Observation",
+        "fhirId": "3e459137-253d-4227-b84a-38598787eaf4",
+        "date": "1980-04-24T18:22:09+02:00",
+        "display": "Blood pressure panel with all children optional",
+        "omopType": "OMOPMeasurement",
+        "omopId": "omop-meas-3e459137-253d-4227-b84a-38598787eaf4"
+      },
+      {
+        "fhirType": "Observation",
+        "fhirId": "350ecbdb-7a61-a778-e534-fc94c3f7e063",
+        "date": "1980-04-24T18:22:09+02:00",
+        "display": "Body mass index (BMI) [Percentile] Per age and sex",
+        "omopType": "OMOPMeasurement",
+        "omopId": "omop-meas-350ecbdb-7a61-a778-e534-fc94c3f7e063"
+      },
+      {
+        "fhirType": "Observation",
+        "fhirId": "94ebe0be-66f7-aad0-a480-909f1df76179",
+        "date": "1980-04-24T18:22:09+02:00",
+        "display": "Body mass index (BMI) [Ratio]",
+        "omopType": "OMOPMeasurement",
+        "omopId": "omop-meas-94ebe0be-66f7-aad0-a480-909f1df76179"
+      },
+      {
+        "fhirType": "Observation",
+        "fhirId": "20e47384-ea86-87ab-4488-898bb3b52805",
+        "date": "1980-04-24T18:22:09+02:00",
+        "display": "Body Weight",
+        "omopType": "OMOPMeasurement",
+        "omopId": "omop-meas-20e47384-ea86-87ab-4488-898bb3b52805"
+      },
+      {
+        "fhirType": "Observation",
+        "fhirId": "1c4e70de-456a-2149-8a4c-3ad967527aaf",
+        "date": "1980-04-24T18:22:09+02:00",
+        "display": "Pain severity - 0-10 verbal numeric rating [Score] - Reported",
+        "omopType": "OMOPMeasurement",
+        "omopId": "omop-meas-1c4e70de-456a-2149-8a4c-3ad967527aaf"
+      },
+      {
+        "fhirType": "Observation",
+        "fhirId": "4fc655ee-894b-14e2-3ae5-649f7eb6156a",
+        "date": "1980-04-24T18:22:09+02:00",
+        "display": "Body Height",
+        "omopType": "OMOPMeasurement",
+        "omopId": "omop-meas-4fc655ee-894b-14e2-3ae5-649f7eb6156a"
+      },
+      {
+        "fhirType": "Procedure",
+        "fhirId": "688de261-743c-e357-8a61-c7f063118dec",
+        "date": "1980-04-24T18:22:09+02:00",
+        "display": "Medication Reconciliation (procedure)",
+        "omopType": "OMOPProcedureOccurrence",
+        "omopId": "omop-proc-688de261-743c-e357-8a61-c7f063118dec"
+      },
+      {
+        "fhirType": "Procedure",
+        "fhirId": "931648b3-159e-d772-d236-c1ef4cb43060",
+        "date": "1980-04-24T18:22:09+02:00",
+        "display": "Patient referral for dental care (procedure)",
+        "omopType": "OMOPProcedureOccurrence",
+        "omopId": "omop-proc-931648b3-159e-d772-d236-c1ef4cb43060"
+      },
+      {
+        "fhirType": "Encounter",
+        "fhirId": "e08b2f51-f4f2-ac4b-1ee8-ee527bef384e",
+        "date": "1980-05-01T18:22:09+02:00",
+        "display": null,
+        "omopType": "OMOPVisitOccurrence",
+        "omopId": "omop-visit-e08b2f51-f4f2-ac4b-1ee8-ee527bef384e"
+      },
+      {
+        "fhirType": "Condition",
+        "fhirId": "ae9dad8a-6168-6659-c6fb-097e07d0b67b",
+        "date": "1980-05-01T18:22:09+02:00",
+        "display": "Tooth eruption disorder",
+        "omopType": "OMOPConditionOccurrence",
+        "omopId": "omop-cond-ae9dad8a-6168-6659-c6fb-097e07d0b67b"
+      },
+      {
+        "fhirType": "Procedure",
+        "fhirId": "0d580587-996d-23aa-afac-8bd1f14e9470",
+        "date": "1980-05-01T18:22:09+02:00",
+        "display": "topical application of fluoride  excluding varnish",
+        "omopType": "OMOPProcedureOccurrence",
+        "omopId": "omop-proc-0d580587-996d-23aa-afac-8bd1f14e9470"
+      },
+      {
+        "fhirType": "Encounter",
+        "fhirId": "c17cebf8-3319-0b61-a781-9f9d24d5c0a3",
+        "date": "1980-08-17T18:22:09+02:00",
+        "display": null,
+        "omopType": "OMOPVisitOccurrence",
+        "omopId": "omop-visit-c17cebf8-3319-0b61-a781-9f9d24d5c0a3"
+      },
+      {
+        "fhirType": "Condition",
+        "fhirId": "7785798c-341b-e208-267f-d4cf25658fa7",
+        "date": "1980-08-17T18:22:09+02:00",
+        "display": "History of single seizure (situation)",
+        "omopType": "OMOPConditionOccurrence",
+        "omopId": "omop-cond-7785798c-341b-e208-267f-d4cf25658fa7"
+      },
+      {
+        "fhirType": "Condition",
+        "fhirId": "24efe75a-e331-0a70-a4e0-ca4dc1fc8b3e",
+        "date": "1980-08-17T18:22:09+02:00",
+        "display": "Seizure disorder",
+        "omopType": "OMOPConditionOccurrence",
+        "omopId": "omop-cond-24efe75a-e331-0a70-a4e0-ca4dc1fc8b3e"
+      },
+      {
+        "fhirType": "Procedure",
+        "fhirId": "1ee9d5c1-cb0e-2091-4f3d-0178462c7686",
+        "date": "1980-08-17T18:22:09+02:00",
+        "display": "Electroencephalogram (procedure)",
+        "omopType": "OMOPProcedureOccurrence",
+        "omopId": "omop-proc-1ee9d5c1-cb0e-2091-4f3d-0178462c7686"
+      },
+      {
+        "fhirType": "Condition",
+        "fhirId": "e17f3b1a-3924-c96e-15a4-d3f9ec17c8cb",
+        "date": "1980-08-17T20:36:42+02:00",
+        "display": "Epilepsy",
+        "omopType": "OMOPConditionOccurrence",
+        "omopId": "omop-cond-e17f3b1a-3924-c96e-15a4-d3f9ec17c8cb"
+      },
+      {
+        "fhirType": "MedicationRequest",
+        "fhirId": "5df47b90-f7b7-9a13-38c1-5b6dd618afa9",
+        "date": "1980-08-17T20:36:42+02:00",
+        "display": "Diazepam 5 MG Oral Tablet",
+        "omopType": "OMOPDrugExposure",
+        "omopId": "omop-drug-5df47b90-f7b7-9a13-38c1-5b6dd618afa9"
+      },
+      {
+        "fhirType": "Encounter",
+        "fhirId": "e1bf9b2f-6926-d974-cc8f-af8ecdb551d7",
+        "date": "1980-12-04T19:36:42+01:00",
+        "display": null,
+        "omopType": "OMOPVisitOccurrence",
+        "omopId": "omop-visit-e1bf9b2f-6926-d974-cc8f-af8ecdb551d7"
+      },
+      {
+        "fhirType": "Procedure",
+        "fhirId": "782b40b7-cf31-7d80-517b-2ad55748b664",
+        "date": "1980-12-04T19:36:42+01:00",
+        "display": "Electroencephalogram (procedure)",
+        "omopType": "OMOPProcedureOccurrence",
+        "omopId": "omop-proc-782b40b7-cf31-7d80-517b-2ad55748b664"
+      },
+      {
+        "fhirType": "MedicationRequest",
+        "fhirId": "1037a547-b4e1-154f-a1d0-c3743addfd9a",
+        "date": "1980-12-04T21:22:18+01:00",
+        "display": "clonazePAM 0.25 MG Oral Tablet",
+        "omopType": "OMOPDrugExposure",
+        "omopId": "omop-drug-1037a547-b4e1-154f-a1d0-c3743addfd9a"
+      },
+      {
+        "fhirType": "Encounter",
+        "fhirId": "e0361057-f284-db6d-9845-cfc87fd07219",
+        "date": "1981-04-30T18:22:09+02:00",
+        "display": null,
+        "omopType": "OMOPVisitOccurrence",
+        "omopId": "omop-visit-e0361057-f284-db6d-9845-cfc87fd07219"
+      },
+      {
+        "fhirType": "Condition",
+        "fhirId": "b746f6fe-f878-fc67-5c59-d0c14a587980",
+        "date": "1981-04-30T18:22:09+02:00",
+        "display": "Medication review due (situation)",
+        "omopType": "OMOPConditionOccurrence",
+        "omopId": "omop-cond-b746f6fe-f878-fc67-5c59-d0c14a587980"
+      },
+      {
+        "fhirType": "Observation",
+        "fhirId": "e9ccb16c-b6b7-9036-c8f9-7e9791f4fcdf",
+        "date": "1981-04-30T18:22:09+02:00",
+        "display": "Tobacco smoking status",
+        "omopType": null,
+        "omopId": null
+      },
+      {
+        "fhirType": "Observation",
+        "fhirId": "ba163070-3062-0efb-eefa-56c30c3552c5",
+        "date": "1981-04-30T18:22:09+02:00",
+        "display": "Respiratory rate",
+        "omopType": "OMOPMeasurement",
+        "omopId": "omop-meas-ba163070-3062-0efb-eefa-56c30c3552c5"
+      },
+      {
+        "fhirType": "Observation",
+        "fhirId": "f7cfe25c-5cb5-7a40-3efd-acf4af4bfeb4",
+        "date": "1981-04-30T18:22:09+02:00",
+        "display": "Heart rate",
+        "omopType": "OMOPMeasurement",
+        "omopId": "omop-meas-f7cfe25c-5cb5-7a40-3efd-acf4af4bfeb4"
+      },
+      {
+        "fhirType": "Observation",
+        "fhirId": "7b538aaa-a8fe-6ee0-851e-4a4062df8fb5",
+        "date": "1981-04-30T18:22:09+02:00",
+        "display": "Blood pressure panel with all children optional",
+        "omopType": "OMOPMeasurement",
+        "omopId": "omop-meas-7b538aaa-a8fe-6ee0-851e-4a4062df8fb5"
+      },
+      {
+        "fhirType": "Observation",
+        "fhirId": "48fb0036-65bf-4b8d-5b4e-b5397092ed78",
+        "date": "1981-04-30T18:22:09+02:00",
+        "display": "Body mass index (BMI) [Percentile] Per age and sex",
+        "omopType": "OMOPMeasurement",
+        "omopId": "omop-meas-48fb0036-65bf-4b8d-5b4e-b5397092ed78"
+      },
+      {
+        "fhirType": "Observation",
+        "fhirId": "844a73ca-15ff-2970-f5e6-3e2a11eb3174",
+        "date": "1981-04-30T18:22:09+02:00",
+        "display": "Body mass index (BMI) [Ratio]",
+        "omopType": "OMOPMeasurement",
+        "omopId": "omop-meas-844a73ca-15ff-2970-f5e6-3e2a11eb3174"
+      },
+      {
+        "fhirType": "Observation",
+        "fhirId": "76710d9c-199d-81a5-f396-190a09f1ab88",
+        "date": "1981-04-30T18:22:09+02:00",
+        "display": "Body Weight",
+        "omopType": "OMOPMeasurement",
+        "omopId": "omop-meas-76710d9c-199d-81a5-f396-190a09f1ab88"
+      },
+      {
+        "fhirType": "Observation",
+        "fhirId": "4975a270-42ff-cb3f-7eb7-ba8a04ad6f0a",
+        "date": "1981-04-30T18:22:09+02:00",
+        "display": "Pain severity - 0-10 verbal numeric rating [Score] - Reported",
+        "omopType": "OMOPMeasurement",
+        "omopId": "omop-meas-4975a270-42ff-cb3f-7eb7-ba8a04ad6f0a"
+      },
+      {
+        "fhirType": "Observation",
+        "fhirId": "6fa54ee3-8380-4027-5da0-8d976731e21a",
+        "date": "1981-04-30T18:22:09+02:00",
+        "display": "Body Height",
+        "omopType": "OMOPMeasurement",
+        "omopId": "omop-meas-6fa54ee3-8380-4027-5da0-8d976731e21a"
+      },
+      {
+        "fhirType": "MedicationRequest",
+        "fhirId": "26e667dc-4be4-cb93-7623-36a571e3ea9f",
+        "date": "1981-04-30T18:22:09+02:00",
+        "display": "carbamazepine 20 MG/ML Oral Suspension [Tegretol]",
+        "omopType": "OMOPDrugExposure",
+        "omopId": "omop-drug-26e667dc-4be4-cb93-7623-36a571e3ea9f"
+      },
+      {
+        "fhirType": "Procedure",
+        "fhirId": "2cc1756e-493c-5bf3-cd4b-689078061abc",
+        "date": "1981-04-30T18:22:09+02:00",
+        "display": "Depression screening (procedure)",
+        "omopType": "OMOPProcedureOccurrence",
+        "omopId": "omop-proc-2cc1756e-493c-5bf3-cd4b-689078061abc"
+      },
+      {
+        "fhirType": "Procedure",
+        "fhirId": "ef0d4add-272d-3066-a504-491ee99b40e1",
+        "date": "1981-04-30T18:22:09+02:00",
+        "display": "Medication Reconciliation (procedure)",
+        "omopType": "OMOPProcedureOccurrence",
+        "omopId": "omop-proc-ef0d4add-272d-3066-a504-491ee99b40e1"
+      },
+      {
+        "fhirType": "Procedure",
+        "fhirId": "b13cbdff-2490-9f05-45f4-51a9a9516e55",
+        "date": "1981-04-30T18:35:05+02:00",
+        "display": "Depression screening using Patient Health Questionnaire Nine Item score (procedure)",
+        "omopType": "OMOPProcedureOccurrence",
+        "omopId": "omop-proc-b13cbdff-2490-9f05-45f4-51a9a9516e55"
+      },
+      {
+        "fhirType": "Observation",
+        "fhirId": "ff7bc9c9-4bd2-c452-74c0-37516b6dfc5c",
+        "date": "1981-04-30T19:01:06+02:00",
+        "display": "Patient Health Questionnaire-9: Modified for Teens total score [Reported.PHQ.Teen]",
+        "omopType": null,
+        "omopId": null
+      },
+      {
+        "fhirType": "Procedure",
+        "fhirId": "14e222ae-1ebb-7816-f07c-759d0abfbfe9",
+        "date": "1981-04-30T19:01:06+02:00",
+        "display": "Assessment of substance use (procedure)",
+        "omopType": "OMOPProcedureOccurrence",
+        "omopId": "omop-proc-14e222ae-1ebb-7816-f07c-759d0abfbfe9"
+      },
+      {
+        "fhirType": "Procedure",
+        "fhirId": "506e4d57-755d-460c-29db-0029c496ab1a",
+        "date": "1981-04-30T19:12:12+02:00",
+        "display": "Assessment using Car, Relax, Alone, Forget, Friends, Trouble Screening Test (procedure)",
+        "omopType": "OMOPProcedureOccurrence",
+        "omopId": "omop-proc-506e4d57-755d-460c-29db-0029c496ab1a"
+      },
+      {
+        "fhirType": "Condition",
+        "fhirId": "e6d97043-e75b-c677-e4f5-1436b38935f5",
+        "date": "1981-04-30T19:23:05+02:00",
+        "display": "Risk activity involvement (finding)",
+        "omopType": "OMOPConditionOccurrence",
+        "omopId": "omop-cond-e6d97043-e75b-c677-e4f5-1436b38935f5"
+      },
+      {
+        "fhirType": "Procedure",
+        "fhirId": "b515a176-7526-3915-f6a3-235dbfdc5e7f",
+        "date": "1981-04-30T19:23:05+02:00",
+        "display": "Health risks education (procedure)",
+        "omopType": "OMOPProcedureOccurrence",
+        "omopId": "omop-proc-b515a176-7526-3915-f6a3-235dbfdc5e7f"
+      },
+      {
+        "fhirType": "Encounter",
+        "fhirId": "478fa5b7-75e9-ceaa-042f-778ea9c465e9",
+        "date": "1981-05-08T18:22:09+02:00",
+        "display": null,
+        "omopType": "OMOPVisitOccurrence",
+        "omopId": "omop-visit-478fa5b7-75e9-ceaa-042f-778ea9c465e9"
+      },
+      {
+        "fhirType": "Condition",
+        "fhirId": "4db1e05c-37cd-871d-1d58-a639020b638e",
+        "date": "1981-05-08T18:22:09+02:00",
+        "display": "Sprain of ankle",
+        "omopType": "OMOPConditionOccurrence",
+        "omopId": "omop-cond-4db1e05c-37cd-871d-1d58-a639020b638e"
+      },
+      {
+        "fhirType": "Condition",
+        "fhirId": "31808a1b-b73a-fee9-7f3b-e1c276bfa7a6",
+        "date": "1981-05-08T18:22:09+02:00",
+        "display": "Sprain (morphologic abnormality)",
+        "omopType": "OMOPConditionOccurrence",
+        "omopId": "omop-cond-31808a1b-b73a-fee9-7f3b-e1c276bfa7a6"
+      },
+      {
+        "fhirType": "MedicationRequest",
+        "fhirId": "be729677-6e33-6f8a-d772-de18883f94d9",
+        "date": "1981-05-08T18:22:09+02:00",
+        "display": "Acetaminophen 325 MG Oral Tablet",
+        "omopType": "OMOPDrugExposure",
+        "omopId": "omop-drug-be729677-6e33-6f8a-d772-de18883f94d9"
+      },
+      {
+        "fhirType": "Encounter",
+        "fhirId": "b52b3f9a-9cfa-fbce-2483-bd4dfcb1aef4",
+        "date": "1981-09-03T18:22:09+02:00",
+        "display": null,
+        "omopType": "OMOPVisitOccurrence",
+        "omopId": "omop-visit-b52b3f9a-9cfa-fbce-2483-bd4dfcb1aef4"
+      },
+      {
+        "fhirType": "Procedure",
+        "fhirId": "1419ca0e-75f4-a071-9ec0-d21e096c9297",
+        "date": "1981-09-03T18:22:09+02:00",
+        "display": "Development of individualized plan of care (procedure)",
+        "omopType": "OMOPProcedureOccurrence",
+        "omopId": "omop-proc-1419ca0e-75f4-a071-9ec0-d21e096c9297"
+      },
+      {
+        "fhirType": "Procedure",
+        "fhirId": "4e46518e-249c-1e00-5b3c-b7ec453e7507",
+        "date": "1981-09-03T18:22:09+02:00",
+        "display": "Hospice care (regime/therapy)",
+        "omopType": "OMOPProcedureOccurrence",
+        "omopId": "omop-proc-4e46518e-249c-1e00-5b3c-b7ec453e7507"
+      },
+      {
+        "fhirType": "Procedure",
+        "fhirId": "91b6c3d7-9d24-0cfb-8cfd-b6cdcfcc4bc1",
+        "date": "1981-09-03T18:22:09+02:00",
+        "display": "Initial patient assessment (procedure)",
+        "omopType": "OMOPProcedureOccurrence",
+        "omopId": "omop-proc-91b6c3d7-9d24-0cfb-8cfd-b6cdcfcc4bc1"
+      },
+      {
+        "fhirType": "Procedure",
+        "fhirId": "72de95e2-8766-7d21-eaa8-138a5fec6f58",
+        "date": "1981-09-03T18:22:09+02:00",
+        "display": "Notifications (procedure)",
+        "omopType": "OMOPProcedureOccurrence",
+        "omopId": "omop-proc-72de95e2-8766-7d21-eaa8-138a5fec6f58"
+      },
+      {
+        "fhirType": "Procedure",
+        "fhirId": "e9c8602c-be5c-3204-1008-6c2dd04581a3",
+        "date": "1981-09-03T18:22:09+02:00",
+        "display": "Certification procedure (procedure)",
+        "omopType": "OMOPProcedureOccurrence",
+        "omopId": "omop-proc-e9c8602c-be5c-3204-1008-6c2dd04581a3"
+      },
+      {
+        "fhirType": "Procedure",
+        "fhirId": "294b74e8-1d29-63f3-d80a-8cd5b4278894",
+        "date": "1981-09-04T18:22:09+02:00",
+        "display": "Hospice care (regime/therapy)",
+        "omopType": "OMOPProcedureOccurrence",
+        "omopId": "omop-proc-294b74e8-1d29-63f3-d80a-8cd5b4278894"
+      },
+      {
+        "fhirType": "Procedure",
+        "fhirId": "f4006d28-fd2b-d900-83e1-be53d6bd16b2",
+        "date": "1981-09-05T18:22:09+02:00",
+        "display": "Hospice care (regime/therapy)",
+        "omopType": "OMOPProcedureOccurrence",
+        "omopId": "omop-proc-f4006d28-fd2b-d900-83e1-be53d6bd16b2"
+      },
+      {
+        "fhirType": "Procedure",
+        "fhirId": "b0c65f8e-f005-d820-7f9e-b155e5325e29",
+        "date": "1981-09-06T18:22:09+02:00",
+        "display": "Hospice care (regime/therapy)",
+        "omopType": "OMOPProcedureOccurrence",
+        "omopId": "omop-proc-b0c65f8e-f005-d820-7f9e-b155e5325e29"
+      },
+      {
+        "fhirType": "Procedure",
+        "fhirId": "03a45948-5e3f-70b7-468d-1bd8becd1874",
+        "date": "1981-09-07T18:22:09+02:00",
+        "display": "Hospice care (regime/therapy)",
+        "omopType": "OMOPProcedureOccurrence",
+        "omopId": "omop-proc-03a45948-5e3f-70b7-468d-1bd8becd1874"
+      },
+      {
+        "fhirType": "Procedure",
+        "fhirId": "e9134fb0-f48a-01c7-587a-c7b7f538d576",
+        "date": "1981-09-08T18:22:09+02:00",
+        "display": "Hospice care (regime/therapy)",
+        "omopType": "OMOPProcedureOccurrence",
+        "omopId": "omop-proc-e9134fb0-f48a-01c7-587a-c7b7f538d576"
+      },
+      {
+        "fhirType": "Procedure",
+        "fhirId": "21252c0c-39d3-ed96-a6b0-6784cd2011be",
+        "date": "1981-09-09T18:22:09+02:00",
+        "display": "Hospice care (regime/therapy)",
+        "omopType": "OMOPProcedureOccurrence",
+        "omopId": "omop-proc-21252c0c-39d3-ed96-a6b0-6784cd2011be"
+      },
+      {
+        "fhirType": "Procedure",
+        "fhirId": "79645e6f-f271-638f-47e2-649b8749ed0c",
+        "date": "1981-09-10T18:22:09+02:00",
+        "display": "Hospice care (regime/therapy)",
+        "omopType": "OMOPProcedureOccurrence",
+        "omopId": "omop-proc-79645e6f-f271-638f-47e2-649b8749ed0c"
+      },
+      {
+        "fhirType": "Procedure",
+        "fhirId": "3f0db093-c655-6958-e3c6-d5ab31b20d10",
+        "date": "1981-09-11T18:22:09+02:00",
+        "display": "Hospice care (regime/therapy)",
+        "omopType": "OMOPProcedureOccurrence",
+        "omopId": "omop-proc-3f0db093-c655-6958-e3c6-d5ab31b20d10"
+      },
+      {
+        "fhirType": "Procedure",
+        "fhirId": "d77ca00d-32b1-9bbf-b388-0165cfc3b074",
+        "date": "1981-09-12T18:22:09+02:00",
+        "display": "Hospice care (regime/therapy)",
+        "omopType": "OMOPProcedureOccurrence",
+        "omopId": "omop-proc-d77ca00d-32b1-9bbf-b388-0165cfc3b074"
+      },
+      {
+        "fhirType": "Procedure",
+        "fhirId": "59daf828-a17f-f310-e611-27c56ac8ee39",
+        "date": "1981-09-13T18:22:09+02:00",
+        "display": "Hospice care (regime/therapy)",
+        "omopType": "OMOPProcedureOccurrence",
+        "omopId": "omop-proc-59daf828-a17f-f310-e611-27c56ac8ee39"
+      },
+      {
+        "fhirType": "Procedure",
+        "fhirId": "fe9c065e-806d-73c3-80f7-36b51ba2d775",
+        "date": "1981-09-14T18:22:09+02:00",
+        "display": "Hospice care (regime/therapy)",
+        "omopType": "OMOPProcedureOccurrence",
+        "omopId": "omop-proc-fe9c065e-806d-73c3-80f7-36b51ba2d775"
+      },
+      {
+        "fhirType": "Procedure",
+        "fhirId": "c4d01be4-6d2e-8e41-0313-1e14f6cd1078",
+        "date": "1981-09-15T18:22:09+02:00",
+        "display": "Hospice care (regime/therapy)",
+        "omopType": "OMOPProcedureOccurrence",
+        "omopId": "omop-proc-c4d01be4-6d2e-8e41-0313-1e14f6cd1078"
+      },
+      {
+        "fhirType": "Procedure",
+        "fhirId": "6bf7c264-03b6-4782-6fb1-75865613e410",
+        "date": "1981-09-16T18:22:09+02:00",
+        "display": "Hospice care (regime/therapy)",
+        "omopType": "OMOPProcedureOccurrence",
+        "omopId": "omop-proc-6bf7c264-03b6-4782-6fb1-75865613e410"
+      },
+      {
+        "fhirType": "Procedure",
+        "fhirId": "268907ee-4024-c7f6-c7b6-2b843a81c708",
+        "date": "1981-09-17T18:22:09+02:00",
+        "display": "Hospice care (regime/therapy)",
+        "omopType": "OMOPProcedureOccurrence",
+        "omopId": "omop-proc-268907ee-4024-c7f6-c7b6-2b843a81c708"
+      },
+      {
+        "fhirType": "Procedure",
+        "fhirId": "ad76e2aa-fd3a-7279-a843-e1dd181c10f0",
+        "date": "1981-09-18T18:22:09+02:00",
+        "display": "Hospice care (regime/therapy)",
+        "omopType": "OMOPProcedureOccurrence",
+        "omopId": "omop-proc-ad76e2aa-fd3a-7279-a843-e1dd181c10f0"
+      },
+      {
+        "fhirType": "Procedure",
+        "fhirId": "f2b32146-8841-a1ee-9789-b73cc1a2ac76",
+        "date": "1981-09-19T18:22:09+02:00",
+        "display": "Hospice care (regime/therapy)",
+        "omopType": "OMOPProcedureOccurrence",
+        "omopId": "omop-proc-f2b32146-8841-a1ee-9789-b73cc1a2ac76"
+      },
+      {
+        "fhirType": "Procedure",
+        "fhirId": "209cc314-c1a9-a1cc-ff6e-a82c3692ffcd",
+        "date": "1981-09-20T18:22:09+02:00",
+        "display": "Hospice care (regime/therapy)",
+        "omopType": "OMOPProcedureOccurrence",
+        "omopId": "omop-proc-209cc314-c1a9-a1cc-ff6e-a82c3692ffcd"
+      },
+      {
+        "fhirType": "Procedure",
+        "fhirId": "0ac680ab-aba5-fcc5-27f5-ceced3654fe7",
+        "date": "1981-09-21T18:22:09+02:00",
+        "display": "Hospice care (regime/therapy)",
+        "omopType": "OMOPProcedureOccurrence",
+        "omopId": "omop-proc-0ac680ab-aba5-fcc5-27f5-ceced3654fe7"
+      },
+      {
+        "fhirType": "Procedure",
+        "fhirId": "a2e704ba-be02-01c8-a7cd-8e26e293e293",
+        "date": "1981-09-22T18:22:09+02:00",
+        "display": "Hospice care (regime/therapy)",
+        "omopType": "OMOPProcedureOccurrence",
+        "omopId": "omop-proc-a2e704ba-be02-01c8-a7cd-8e26e293e293"
+      },
+      {
+        "fhirType": "Procedure",
+        "fhirId": "4b066c60-ea3b-dfcb-0f7c-7c81944f09dd",
+        "date": "1981-09-23T18:22:09+02:00",
+        "display": "Hospice care (regime/therapy)",
+        "omopType": "OMOPProcedureOccurrence",
+        "omopId": "omop-proc-4b066c60-ea3b-dfcb-0f7c-7c81944f09dd"
+      },
+      {
+        "fhirType": "Procedure",
+        "fhirId": "4792f8bb-d24f-39cb-2a4e-0132b2dc01b4",
+        "date": "1981-09-24T18:22:09+02:00",
+        "display": "Hospice care (regime/therapy)",
+        "omopType": "OMOPProcedureOccurrence",
+        "omopId": "omop-proc-4792f8bb-d24f-39cb-2a4e-0132b2dc01b4"
+      },
+      {
+        "fhirType": "Encounter",
+        "fhirId": "5216c5bf-e5c6-7710-e37e-9984255183cd",
+        "date": "1981-10-01T17:22:09+01:00",
+        "display": null,
+        "omopType": "OMOPVisitOccurrence",
+        "omopId": "omop-visit-5216c5bf-e5c6-7710-e37e-9984255183cd"
+      },
+      {
+        "fhirType": "Observation",
+        "fhirId": "73db7566-a3c4-787c-7b7b-558f82833d27",
+        "date": "1981-10-01T17:22:09+01:00",
+        "display": "Cause of Death [US Standard Certificate of Death]",
+        "omopType": null,
+        "omopId": null
+      }
+    ]
+  }
+}
