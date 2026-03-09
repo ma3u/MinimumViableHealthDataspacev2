@@ -6,7 +6,7 @@
 [![Next.js 14](https://img.shields.io/badge/Next.js-14-black?logo=next.js&logoColor=white)](https://nextjs.org/)
 [![Eclipse EDC](https://img.shields.io/badge/Eclipse-EDC--V-blue)](https://eclipse-edc.github.io/docs/)
 [![EHDS Compliant](https://img.shields.io/badge/EHDS-Compliant-0ea5e9)](https://health.ec.europa.eu/ehealth-digital-health-and-care/european-health-data-space_en)
-[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit)](https://pre-commit.com/)
 
 > **An open-source, EHDS-compliant health data space demo** combining Eclipse EDC-V, DCore, CFM,
@@ -311,4 +311,4 @@ schema change rules, and the PR checklist.
 
 ## License
 
-[MIT](LICENSE) © 2024 ma3u
+[Apache 2.0](LICENSE) © 2024 ma3u
