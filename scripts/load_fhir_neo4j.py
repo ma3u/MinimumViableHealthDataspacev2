@@ -37,7 +37,7 @@ SET p.name      = row.name,
     p.city      = row.city,
     p.state     = row.state
 WITH p, row WHERE row.datasetId <> ''
-MATCH (hd:HealthDataset {id: row.datasetId})
+MATCH (hd:HealthDataset {datasetId: row.datasetId})
 MERGE (p)-[:FROM_DATASET]->(hd)
 """
 

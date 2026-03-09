@@ -55,7 +55,7 @@ MERGE (dp:DataProduct {productId: 'product-synthea-fhir-r4-2026'})
 
 MERGE (clinic)-[:OFFERS]->(dp);
 
-MATCH (ds:HealthDataset {id: 'dataset:synthea-fhir-r4-mvd'})
+MATCH (ds:HealthDataset {datasetId: 'dataset:synthea-fhir-r4-mvd'})
 MATCH (dp:DataProduct {productId: 'product-synthea-fhir-r4-2026'})
 MERGE (dp)-[:DESCRIBED_BY]->(ds);
 
@@ -144,7 +144,7 @@ MERGE (approval:HDABApproval {approvalId: 'hdab-synthea-bfarm-2026-001'})
 MATCH (app:AccessApplication {applicationId: 'app-synthea-bfarm-2026-001'})
 MATCH (approval:HDABApproval {approvalId: 'hdab-synthea-bfarm-2026-001'})
 MATCH (contract:Contract {contractId: 'contract-ehds-53-synthea-2026'})
-MATCH (ds:HealthDataset {id: 'dataset:synthea-fhir-r4-mvd'})
+MATCH (ds:HealthDataset {datasetId: 'dataset:synthea-fhir-r4-mvd'})
 MERGE (approval)-[:APPROVES]->(app)
 MERGE (approval)-[:APPROVED]->(contract)
 MERGE (approval)-[:GRANTS_ACCESS_TO]->(ds);

@@ -15,9 +15,14 @@ CREATE INDEX access_application_status IF NOT EXISTS FOR (aa:AccessApplication) 
 CREATE CONSTRAINT hdab_approval_id IF NOT EXISTS FOR (ha:HDABApproval) REQUIRE ha.approvalId IS UNIQUE;
 
 // ============================================================
-// Layer 2: HealthDCAT-AP Metadata
+// Layer 2: HealthDCAT-AP Metadata (W3C HealthDCAT-AP vocabulary)
+// See: https://healthdcat-ap.github.io/
 // ============================================================
+CREATE CONSTRAINT catalog_id IF NOT EXISTS FOR (cat:Catalog) REQUIRE cat.catalogId IS UNIQUE;
 CREATE CONSTRAINT dataset_id IF NOT EXISTS FOR (hd:HealthDataset) REQUIRE hd.datasetId IS UNIQUE;
+CREATE CONSTRAINT distribution_id IF NOT EXISTS FOR (d:Distribution) REQUIRE d.distributionId IS UNIQUE;
+CREATE CONSTRAINT contact_point_id IF NOT EXISTS FOR (cp:ContactPoint) REQUIRE cp.contactId IS UNIQUE;
+CREATE CONSTRAINT organization_id IF NOT EXISTS FOR (org:Organization) REQUIRE org.organizationId IS UNIQUE;
 
 // ============================================================
 // Layer 2b: EEHRxF Profile Metadata

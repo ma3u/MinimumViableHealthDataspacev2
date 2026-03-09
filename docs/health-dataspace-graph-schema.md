@@ -224,26 +224,78 @@ CREATE CONSTRAINT hdab_approval_id IF NOT EXISTS FOR (ha:HDABApproval) REQUIRE h
 
 ## 3. Layer 2: HealthDCAT-AP Metadata
 
+Layer 2 implements the [W3C HealthDCAT-AP](https://healthdcat-ap.github.io/) vocabulary — an application profile of [DCAT-AP 3.0](https://semiceu.github.io/DCAT-AP/releases/3.0.0/) extending [W3C DCAT 3](https://www.w3.org/TR/vocab-dcat-3/) with health-domain extensions required by the EHDS Regulation.
+
 ### 3.1 Node Labels
 
-#### `HealthDataset`
+#### `Catalog`
 
-A dataset described using HealthDCAT-AP (W3C DCAT + health extensions).
+A catalog of datasets, following `dcat:Catalog`.
 
 **Properties:**
 
-- `datasetId: String!` — URI identifier
-- `title: String!`
-- `description: String`
-- `publisher: String` — Organization URI
-- `issued: Date` — Publication date
-- `modified: Date` — Last modification
-- `temporalCoverage: String` — ISO 8601 period (e.g., `2020-01/2023-12`)
-- `spatialCoverage: String` — Geographic coverage (ISO 3166)
-- `language: String[]` — ISO 639-1 language codes
-- `healthSensitivity: String` — HealthDCAT-AP sensitivity classification
-- `permittedPurpose: String[]` — EHDS Article 53 purposes
-- `legalBasis: String` — GDPR legal basis
+- `catalogId: String!` — URI identifier (`dct:identifier`)
+- `title: String!` — Catalog name (`dct:title`)
+- `description: String` — Catalog description (`dct:description`)
+- `license: String` — License URI (`dct:license`)
+- `homepage: String` — Homepage URL (`foaf:homepage`)
+- `createdAt: DateTime`
+- `modifiedAt: DateTime`
+
+**Indexes:**
+
+```cypher
+CREATE CONSTRAINT catalog_id IF NOT EXISTS FOR (cat:Catalog) REQUIRE cat.catalogId IS UNIQUE;
+```
+
+---
+
+#### `HealthDataset`
+
+A dataset described using HealthDCAT-AP (`healthdcatap:Dataset` extending `dcat:Dataset`).
+
+**Properties (DCAT-AP mandatory):**
+
+- `datasetId: String!` — URI identifier (`dct:identifier`)
+- `title: String!` — Dataset name (`dct:title`)
+- `description: String` — Dataset description (`dct:description`)
+- `issued: Date` — Publication date (`dct:issued`)
+- `modified: Date` — Last modification (`dct:modified`)
+- `language: String[]` — ISO 639-1 language codes (`dct:language`)
+- `themes: String[]` — EuroVoc theme URIs (`dcat:theme`)
+
+**Properties (DCAT-AP recommended):**
+
+- `dctSpatial: String` — Geographic coverage ISO 3166 (`dct:spatial`)
+- `dctTemporalStart: Date` — Temporal coverage start (`dcat:startDate` within `dct:temporal`)
+- `dctTemporalEnd: Date` — Temporal coverage end (`dcat:endDate` within `dct:temporal`)
+- `conformsTo: String` — Standard URI (`dct:conformsTo`, e.g., `http://hl7.org/fhir/R4`)
+- `landingPage: String` — Landing page URL (`dcat:landingPage`)
+
+**Properties (HealthDCAT-AP health extensions):**
+
+- `hdcatapDatasetType: String` — Dataset type (`healthdcatap:datasetType`, e.g., `SyntheticData`, `ClinicalTrial`, `Registry`)
+- `hdcatapPersonalData: Boolean` — Contains personal data (`healthdcatap:personalData`)
+- `hdcatapSensitiveData: Boolean` — Contains sensitive data (`healthdcatap:sensitiveData`)
+- `hdcatapLegalBasisForAccess: String` — EHDS article reference (`healthdcatap:legalBasisForAccess`)
+- `hdcatapPurpose: String` — Permitted purpose description (`healthdcatap:purpose`)
+- `hdcatapPopulationCoverage: String` — Population description (`healthdcatap:populationCoverage`)
+- `hdcatapNumberOfRecords: Long` — Total record count (`healthdcatap:numberOfRecords`)
+- `hdcatapNumberOfUniqueIndividuals: Long` — Unique individual count (`healthdcatap:numberOfUniqueIndividuals`)
+- `hdcatapHealthCategory: String[]` — EEHRxF priority categories (`healthdcatap:healthCategory`)
+- `hdcatapHealthTheme: String[]` — MeSH / ICD-10 / SNOMED URIs (`healthdcatap:healthTheme`)
+- `hdcatapMinTypicalAge: Integer` — Minimum typical age (`healthdcatap:minTypicalAge`)
+- `hdcatapMaxTypicalAge: Integer` — Maximum typical age (`healthdcatap:maxTypicalAge`)
+- `hdcatapPublisherType: String` — Publisher role (`healthdcatap:publisherType`, e.g., `DataHolder`, `HDAB`, `Researcher`)
+
+**Properties (provenance):**
+
+- `source: String` — Source URL
+- `generator: String` — Data generator tool
+- `fhirVersion: String` — FHIR version (e.g., `R4`)
+- `omopCdmVersion: String` — OMOP CDM version (e.g., `5.4`)
+- `createdAt: DateTime`
+- `modifiedAt: DateTime`
 
 **Indexes:**
 
@@ -255,25 +307,84 @@ CREATE CONSTRAINT dataset_id IF NOT EXISTS FOR (hd:HealthDataset) REQUIRE hd.dat
 
 #### `Distribution`
 
-A specific representation/format of a dataset (FHIR Bundle, OMOP export, etc.).
+A specific representation/format of a dataset (`dcat:Distribution`).
 
 **Properties:**
 
-- `distributionId: String!`
-- `format: String!` — MIME type (e.g., `application/fhir+json`, `text/csv`)
-- `accessUrl: String` — DSP access endpoint
-- `byteSize: Long`
-- `checksum: String` — SHA-256 hash
-- `conformsTo: String` — Standard URI (e.g., `http://hl7.org/fhir/R4`)
+- `distributionId: String!` — URI identifier (`dct:identifier`)
+- `title: String` — Distribution name (`dct:title`)
+- `format: String!` — MIME type (`dcat:mediaType`, e.g., `application/fhir+json`, `text/csv`)
+- `accessUrl: String` — DSP access endpoint (`dcat:accessURL`)
+- `accessService: String` — Service description (`dcat:accessService`)
+- `byteSize: Long` — Size in bytes (`dcat:byteSize`)
+- `checksum: String` — SHA-256 hash (`spdx:checksum`)
+- `conformsTo: String` — Standard URI (`dct:conformsTo`, e.g., `http://hl7.org/fhir/R4`)
+- `description: String` — Distribution description (`dct:description`)
+- `createdAt: DateTime`
+
+**Indexes:**
+
+```cypher
+CREATE CONSTRAINT distribution_id IF NOT EXISTS FOR (d:Distribution) REQUIRE d.distributionId IS UNIQUE;
+```
+
+---
+
+#### `ContactPoint`
+
+Contact information for a dataset (`vcard:ContactPoint`).
+
+**Properties:**
+
+- `contactId: String!` — URI identifier
+- `name: String` — Contact name (`vcard:fn`)
+- `email: String` — Contact email (`vcard:hasEmail`)
+- `url: String` — Contact URL (`vcard:hasURL`)
+- `role: String` — Contact role (e.g., `DataSteward`, `DPO`)
+
+**Indexes:**
+
+```cypher
+CREATE CONSTRAINT contact_point_id IF NOT EXISTS FOR (cp:ContactPoint) REQUIRE cp.contactId IS UNIQUE;
+```
+
+---
+
+#### `Organization`
+
+An organization that publishes or owns datasets (`foaf:Organization`).
+
+**Properties:**
+
+- `organizationId: String!` — URI identifier
+- `name: String!` — Organization name (`foaf:name`)
+- `jurisdiction: String` — ISO 3166 country code
+- `ehdsRole: String` — EHDS role (`DataHolder`, `HDAB`, `Researcher`)
+- `createdAt: DateTime`
+
+**Indexes:**
+
+```cypher
+CREATE CONSTRAINT organization_id IF NOT EXISTS FOR (org:Organization) REQUIRE org.organizationId IS UNIQUE;
+```
 
 ---
 
 ### 3.2 Relationships
 
 ```cypher
+// Catalog structure
+(:Organization)-[:PUBLISHES]->(:Catalog)
+(:Catalog)-[:HAS_DATASET]->(:HealthDataset)
+(:Organization)-[:OWNS_DATASET]->(:HealthDataset)
+
+// Dataset metadata
 (:DataProduct)-[:DESCRIBED_BY]->(:HealthDataset)
 (:HealthDataset)-[:HAS_DISTRIBUTION]->(:Distribution)
 (:HealthDataset)-[:PUBLISHED_BY]->(:Participant)
+(:HealthDataset)-[:HAS_CONTACT_POINT]->(:ContactPoint)
+(:HealthDataset)-[:HAS_THEME]->(:EEHRxFCategory)
+(:HealthDataset)-[:SUBJECT_TO_PURPOSE]->(:EhdsPurpose)
 ```
 
 ---
@@ -914,8 +1025,12 @@ CREATE CONSTRAINT participant_id IF NOT EXISTS FOR (p:Participant) REQUIRE p.par
 CREATE CONSTRAINT product_id IF NOT EXISTS FOR (dp:DataProduct) REQUIRE dp.productId IS UNIQUE;
 CREATE CONSTRAINT contract_id IF NOT EXISTS FOR (c:Contract) REQUIRE c.contractId IS UNIQUE;
 
-// Layer 2
+// Layer 2 (HealthDCAT-AP)
+CREATE CONSTRAINT catalog_id IF NOT EXISTS FOR (cat:Catalog) REQUIRE cat.catalogId IS UNIQUE;
 CREATE CONSTRAINT dataset_id IF NOT EXISTS FOR (hd:HealthDataset) REQUIRE hd.datasetId IS UNIQUE;
+CREATE CONSTRAINT distribution_id IF NOT EXISTS FOR (d:Distribution) REQUIRE d.distributionId IS UNIQUE;
+CREATE CONSTRAINT contact_point_id IF NOT EXISTS FOR (cp:ContactPoint) REQUIRE cp.contactId IS UNIQUE;
+CREATE CONSTRAINT organization_id IF NOT EXISTS FOR (org:Organization) REQUIRE org.organizationId IS UNIQUE;
 
 // Layer 3 FHIR
 CREATE CONSTRAINT patient_id IF NOT EXISTS FOR (p:Patient) REQUIRE p.resourceId IS UNIQUE;
@@ -1136,11 +1251,12 @@ ORDER BY approval.validUntil ASC
 This schema provides a **production-ready, layered Neo4j data model** for health dataspaces that:
 
 ✅ Integrates **FHIR clinical exchange** and **OMOP research analytics**
-✅ Supports **HealthDCAT-AP metadata discovery** across HDABs
+✅ Supports **HealthDCAT-AP metadata discovery** across HDABs (formal W3C vocabulary)
 ✅ Enables **dataspace marketplace operations** with DSP contracts
 ✅ Preserves **bidirectional traceability** between all layers
 ✅ Leverages **SNOMED CT / LOINC / ICD-10 / RxNorm** as semantic backbone
 ✅ Follows **Neo4j best practices** for labels, relationships, and indexes
+✅ Supports **JSON-LD serialization** for DSP Federated Catalog interoperability
 
 **Next Steps:**
 

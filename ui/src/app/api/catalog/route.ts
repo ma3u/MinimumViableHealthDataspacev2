@@ -24,8 +24,8 @@ export async function GET() {
             coalesce(p.name, p.id)    AS publisher,
             d.theme                   AS theme,
             d.hdcatapDatasetType      AS datasetType,
-            d.hdcatapLegalBasis       AS legalBasis,
-            coalesce(d.hdcatapRecordCount, d.statPatients) AS recordCount`,
+            d.hdcatapLegalBasisForAccess AS legalBasis,
+            coalesce(d.hdcatapNumberOfRecords, d.statPatients) AS recordCount`,
   );
 
   return NextResponse.json(rows);

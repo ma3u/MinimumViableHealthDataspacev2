@@ -213,7 +213,7 @@ The Synthea cohort loaded in Phase 3b needs a corresponding **Layer 2** catalog 
 
 - `neo4j/register-fhir-dataset-hdcatap.cypher` — creates/updates the `HealthDataset` node with full HealthDCAT-AP properties (title, description, publisher, temporal coverage, spatial coverage, themes, access conditions)
 - Links the dataset to all 127 `Patient` nodes via `FROM_DATASET`
-- Registers a `DataDistribution` node (Bolt + REST endpoints) so EDC-V can reference the access URL
+- Registers `Distribution` nodes (Bolt + REST + DCore HTTP endpoints) so EDC-V can reference the access URL
 - Adds EHDS purpose restriction annotation (Article 53 permitted purposes)
 
 ### Phase 3d: README and UI Completeness Hardening ✅
@@ -242,7 +242,7 @@ With the Synthea FHIR dataset registered in HealthDCAT-AP (Phase 3c), Phase 3e w
 **DSP Marketplace Cypher (`neo4j/register-dsp-marketplace.cypher`):**
 
 - MERGEs three Participants: `Charité Berlin` (CLINIC), `Bayer Research` (CRO), `BfArM` (HDAB)
-- Creates `DataProduct {productId: 'product-synthea-fhir-r4-2026'}` → `[:DESCRIBED_BY]` → `HealthDataset {id: 'dataset:synthea-fhir-r4-mvd'}`
+- Creates `DataProduct {productId: 'product-synthea-fhir-r4-2026'}` → `[:DESCRIBED_BY]` → `HealthDataset {datasetId: 'dataset:synthea-fhir-r4-mvd'}`
 - Creates `OdrlPolicy` with EHDS Art.53 `researchPurpose` permission and re-identification `prohibition`
 - Creates `Contract` → `[:GOVERNS]` → DataProduct
 - Creates `AccessApplication` (status: `APPROVED`) and `HDABApproval` with relationships:
@@ -707,6 +707,360 @@ jobs:
 
 ---
 
+## Architecture Decisions
+
+### ADR-1: PostgreSQL vs Neo4j Data Storage Split
+
+**Status:** Accepted
+**Date:** 2025-07-24
+**Context:** The JAD stack introduces PostgreSQL 17 with 7 databases for EDC-V/CFM operational state. The existing Neo4j 5 instance stores all 5 layers of the health knowledge graph (~57K nodes). We need a clear boundary for which data belongs where.
+
+#### Decision
+
+**PostgreSQL** stores transactional, state-machine-driven data managed by EDC-V/CFM/Keycloak internal schemas. **Neo4j** stores the relationship-rich health knowledge graph, metadata catalog, and ontology backbone. Layer 1 (marketplace) is **dual-write**: EDC-V is the source of truth in PostgreSQL; Neo4j holds a read-only event-sourced projection for graph queries and visualization.
+
+#### Storage Assignment
+
+| Data Domain                     | PostgreSQL Database           | Neo4j Layer        | Rationale                                                                                                    |
+| ------------------------------- | ----------------------------- | ------------------ | ------------------------------------------------------------------------------------------------------------ |
+| **EDC-V Contract Negotiations** | `controlplane` (auto-schema)  | Layer 1 projection | State machine with ACID transitions; Neo4j mirrors final states for graph traversal                          |
+| **EDC-V Asset Registrations**   | `controlplane` (auto-schema)  | —                  | Lightweight JSON pointers to data addresses; no graph value                                                  |
+| **EDC-V Transfer Processes**    | `controlplane` (auto-schema)  | Layer 1 projection | DPS state machine; audit events projected to Neo4j `(:TransferProcess)`                                      |
+| **EDC-V Policy Definitions**    | `controlplane` (auto-schema)  | —                  | ODRL JSON stored relationally; `(:OdrlPolicy)` in Neo4j is read-only summary                                 |
+| **DCore Transfer State**        | `dataplane` (auto-schema)     | —                  | Ephemeral transfer tokens managed by DCore Rust                                                              |
+| **DCP Credentials**             | `identityhub` (auto-schema)   | —                  | W3C VC JSON-LD documents; IdentityHub manages lifecycle                                                      |
+| **VC Issuance Records**         | `issuerservice` (auto-schema) | —                  | StatusList2021 entries, issuance audit log                                                                   |
+| **Keycloak Users/Roles**        | `keycloak` (Keycloak schema)  | —                  | OAuth2/OIDC state; Keycloak owns the schema                                                                  |
+| **CFM Tenants/Provisions**      | `cfm` (CFM schema)            | —                  | Multi-tenant lifecycle; CFM owns the schema                                                                  |
+| **Redline Operator State**      | `redlinedb` (Redline schema)  | —                  | Operator dashboard preferences, audit views                                                                  |
+| **HealthDCAT-AP Catalog**       | —                             | Layer 2            | Linked data with relationships (Dataset→Distribution→Participant); graph queries essential                   |
+| **EEHRxF Profiles**             | —                             | Layer 2b           | Profile→Category→Resource chains; graph traversal pattern                                                    |
+| **FHIR Clinical Data**          | —                             | Layer 3            | Patient journeys are inherently graph-shaped; multi-hop traversals (Patient→Condition→SNOMED→IS_A hierarchy) |
+| **OMOP CDM Data**               | —                             | Layer 4            | Cohort queries traverse Person→Condition→Measurement→Visit chains; bidirectional FHIR↔OMOP links            |
+| **Ontology Backbone**           | —                             | Layer 5            | SNOMED IS_A hierarchies, LOINC component trees, RxNorm ingredient graphs — pure graph traversal              |
+| **HDAB Approval Chains**        | —                             | Layer 1            | Participant→Application→Approval→Contract→DataProduct traversal; graph query pattern                         |
+
+#### Event Projection: EDC-V PostgreSQL → Neo4j Layer 1
+
+The EDC-V control plane manages assets, contracts, and transfers as internal state machines in PostgreSQL. To enable rich graph queries (e.g., "show all contracts for a participant with their approval chains"), we project completed events into Neo4j:
+
+```
+┌─────────────────────┐    NATS JetStream     ┌──────────────────────┐
+│  EDC-V Control Plane │ ──── events ────────▶ │  Neo4j Event Sink    │
+│  (PostgreSQL truth)  │    contract.agreed     │  (Projection service)│
+│                      │    transfer.completed  │  MERGE (:Contract)   │
+│                      │    transfer.started    │  MERGE (:Transfer)   │
+└─────────────────────┘                        └──────────────────────┘
+```
+
+**Implementation:** A lightweight Node.js service subscribes to NATS JetStream topics (`edc.contract.*`, `edc.transfer.*`) and projects completed state transitions into Neo4j Layer 1 nodes. This provides:
+
+- **Consistency:** EDC-V PostgreSQL is always the source of truth for active state machines
+- **Query richness:** Neo4j enables cross-layer graph queries spanning contracts → datasets → patients → ontologies
+- **Decoupling:** Neo4j failure doesn't block EDC-V operations
+
+#### Consequences
+
+- EDC-V/CFM databases are opaque — we never write directly to their PostgreSQL schemas
+- All Neo4j Layer 1 data is eventually consistent (seconds delay via NATS)
+- The Neo4j `(:Contract)`, `(:Participant)`, `(:DataProduct)` nodes in Layer 1 become read-only projections once EDC-V is live (Phase 4)
+- Pre-Phase 4 demo data (current synthetic marketplace chain) remains valid for standalone demos
+
+---
+
+### ADR-2: EDC Data Plane Architecture
+
+**Status:** Accepted
+**Date:** 2025-07-24
+**Context:** The current `docker-compose.jad.yml` configures a single generic DCore HTTP data plane. Phase 4 requires data planes that can serve FHIR clinical data and OMOP analytics from Neo4j. DCore data planes register their capabilities with the EDC-V control plane via DPS (Data Plane Signaling), and the control plane's DataPlaneSelectorService routes transfers to the appropriate plane.
+
+#### Decision
+
+Deploy **two DCore data plane instances** plus a **Neo4j Query Proxy** backend service. The proxy translates HTTP requests into Neo4j Cypher queries and serializes results in the appropriate format (FHIR Bundle JSON or OMOP CSV/JSON).
+
+#### Data Plane Topology
+
+```
+                    ┌────────────────────────────────────────────┐
+                    │         EDC-V Control Plane                 │
+                    │   DataPlaneSelectorService (DPS)            │
+                    │   Routes by: transferType + dataAddress     │
+                    └──────┬─────────────────────┬───────────────┘
+                           │                     │
+              ┌────────────┴──────┐    ┌────────┴──────────────┐
+              │ DCore Data Plane  │    │ DCore Data Plane      │
+              │ "fhir-http"       │    │ "omop-http"           │
+              │ ───────────────── │    │ ───────────────────── │
+              │ Source: HttpData  │    │ Source: HttpData       │
+              │ Dest: HttpData    │    │ Dest: HttpData         │
+              │ Transfer: PUSH    │    │ Transfer: PULL         │
+              │ Port: 11002       │    │ Port: 11012            │
+              └────────┬──────────┘    └────────┬──────────────┘
+                       │                        │
+              ┌────────┴────────────────────────┴──────────────┐
+              │           Neo4j Query Proxy                     │
+              │  (Node.js / Express — new service)              │
+              │  ────────────────────────────────               │
+              │  GET /fhir/Patient/{id}/$everything              │
+              │  POST /fhir/Bundle (cohort query)               │
+              │  POST /omop/cohort (OMOP aggregate query)       │
+              │  GET /catalog/datasets (HealthDCAT-AP metadata) │
+              │  Port: 9090                                     │
+              └────────────────────┬───────────────────────────┘
+                                   │ Bolt
+              ┌────────────────────┴───────────────────────────┐
+              │              Neo4j 5 Community                  │
+              │  Layers 1-5: Health Knowledge Graph             │
+              │  Port: 7687 (Bolt) / 7474 (HTTP)               │
+              └────────────────────────────────────────────────┘
+```
+
+#### Data Plane Specifications
+
+| Property                 | fhir-http Data Plane                                                 | omop-http Data Plane                                                 |
+| ------------------------ | -------------------------------------------------------------------- | -------------------------------------------------------------------- |
+| **Container**            | `ghcr.io/metaform/jad/dataplane:latest`                              | `ghcr.io/metaform/jad/dataplane:latest`                              |
+| **Instance Name**        | `dataplane-fhir`                                                     | `dataplane-omop`                                                     |
+| **DPS Registration**     | `sourceType=HttpData, destType=HttpData, transferType=HttpData-PUSH` | `sourceType=HttpData, destType=HttpData, transferType=HttpData-PULL` |
+| **Public Port**          | 11002                                                                | 11012                                                                |
+| **PostgreSQL DB**        | `dataplane` (shared)                                                 | `dataplane_omop` (new)                                               |
+| **Asset Data Address**   | `http://neo4j-proxy:9090/fhir/...`                                   | `http://neo4j-proxy:9090/omop/...`                                   |
+| **Content-Type (out)**   | `application/fhir+json`                                              | `application/json` or `text/csv`                                     |
+| **Use Case**             | CRO receives FHIR R4 patient bundles                                 | CRO runs OMOP CDM cohort analytics                                   |
+| **Transfer Pattern**     | Provider pushes FHIR Bundle to consumer endpoint                     | Consumer pulls query results from provider                           |
+| **Contract Enforcement** | EHDS Art. 53 purpose + temporal limit                                | Aggregation-only queries + k-anonymity                               |
+
+#### Neo4j Query Proxy Service
+
+A new lightweight Node.js/Express service that acts as the backend for DCore data addresses:
+
+| Endpoint                         | Method | Description                                               | Neo4j Query                                   |
+| -------------------------------- | ------ | --------------------------------------------------------- | --------------------------------------------- |
+| `/fhir/Patient/{id}/$everything` | GET    | Patient-level FHIR Bundle (all resources for one patient) | Multi-match Cypher across all Layer 3 nodes   |
+| `/fhir/Bundle`                   | POST   | Cohort FHIR Bundle (patients matching criteria)           | Parameterized Cypher with cohort filters      |
+| `/omop/cohort`                   | POST   | OMOP CDM aggregate query (count, stats by concept)        | OMOP Layer 4 aggregation Cypher               |
+| `/omop/person/{id}/timeline`     | GET    | Single person clinical timeline                           | Person→Visit→Condition/Measurement chain      |
+| `/catalog/datasets`              | GET    | HealthDCAT-AP dataset listing (JSON-LD)                   | Layer 2 HealthDataset + Distribution nodes    |
+| `/catalog/datasets/{id}`         | GET    | Single dataset metadata (JSON-LD)                         | Specific HealthDataset with all relationships |
+
+**Security:** The proxy only accepts requests from the DCore data plane containers (Docker network isolation). It does NOT perform authorization — that is handled by the EDC-V control plane's contract enforcement before the transfer reaches the data plane.
+
+#### EDC-V Asset Registration (Phase 4a)
+
+Three asset types will be registered on the Clinic's EDC-V control plane:
+
+```json
+[
+  {
+    "assetId": "asset-fhir-cohort-synthea-2026",
+    "properties": {
+      "name": "Synthea FHIR R4 Patient Cohort",
+      "contenttype": "application/fhir+json",
+      "type": "FhirCohort",
+      "version": "1.0"
+    },
+    "dataAddress": {
+      "type": "HttpData",
+      "baseUrl": "http://neo4j-proxy:9090/fhir/Bundle",
+      "proxyMethod": true,
+      "proxyBody": true
+    }
+  },
+  {
+    "assetId": "asset-omop-analytics-synthea-2026",
+    "properties": {
+      "name": "Synthea OMOP CDM Analytics",
+      "contenttype": "application/json",
+      "type": "OmopAnalytics",
+      "version": "1.0"
+    },
+    "dataAddress": {
+      "type": "HttpData",
+      "baseUrl": "http://neo4j-proxy:9090/omop/cohort",
+      "proxyMethod": true,
+      "proxyBody": true
+    }
+  },
+  {
+    "assetId": "asset-catalog-healthdcatap-2026",
+    "properties": {
+      "name": "HealthDCAT-AP Federated Catalog",
+      "contenttype": "application/ld+json",
+      "type": "HealthDcatApCatalog",
+      "version": "3.0"
+    },
+    "dataAddress": {
+      "type": "HttpData",
+      "baseUrl": "http://neo4j-proxy:9090/catalog/datasets"
+    }
+  }
+]
+```
+
+#### Docker Compose Changes
+
+New services to add to `docker-compose.jad.yml`:
+
+1. **`dataplane-omop`** — Second DCore instance for OMOP queries (clone of `dataplane` with different ports and DB)
+2. **`neo4j-proxy`** — Node.js/Express service bridging DCore ↔ Neo4j
+3. **`dataplane_omop` PostgreSQL database** — Add to `jad/init-postgres.sql`
+
+Rename existing `dataplane` → `dataplane-fhir` for clarity.
+
+#### Consequences
+
+- Two data planes provide clear separation of concerns (clinical vs analytics)
+- The proxy service is the single integration point between EDC-V and Neo4j
+- DCore data planes remain generic HTTP proxies — no custom health logic in Rust
+- The proxy can be extended for future data plane types (e.g., DICOM imaging, genomics VCF)
+- k-anonymity enforcement happens in the proxy's OMOP query execution layer
+
+---
+
+### ADR-3: W3C HealthDCAT-AP Alignment (Replacing Generic DCAT)
+
+**Status:** Accepted
+**Date:** 2025-07-24
+**Context:** The current implementation uses `HealthDataset` nodes with custom `hdcatap*`-prefixed properties that approximate HealthDCAT-AP but don't formally follow the [W3C HealthDCAT-AP specification](https://healthdcat-ap.github.io/) vocabulary. The EHDS Regulation mandates HealthDCAT-AP as the metadata standard for health dataset discovery across Health Data Access Bodies. Phase 7c TCK tests (Section 2) will validate HealthDCAT-AP schema compliance.
+
+#### HealthDCAT-AP Specification Overview
+
+**HealthDCAT-AP** is an application profile of [DCAT-AP](https://semiceu.github.io/DCAT-AP/releases/3.0.0/) (the EU Data Catalogue Application Profile), which itself extends [W3C DCAT 3](https://www.w3.org/TR/vocab-dcat-3/). The class hierarchy is:
+
+```
+W3C DCAT 3 (generic dataset catalog vocabulary)
+  └─ DCAT-AP 3.0 (EU public sector application profile)
+      └─ HealthDCAT-AP 1.0 (EHDS health domain extension)
+          ├─ Mandatory DCAT-AP properties (title, description, publisher, theme)
+          ├─ Recommended DCAT-AP properties (contactPoint, distribution, temporal, spatial)
+          └─ Health-specific extensions:
+              ├─ healthdcatap:healthCategory (EEHRxF priority category)
+              ├─ healthdcatap:healthTheme (MeSH / ICD-10 / SNOMED concept)
+              ├─ healthdcatap:minTypicalAge / maxTypicalAge
+              ├─ healthdcatap:numberOfRecords / numberOfUniqueIndividuals
+              ├─ healthdcatap:populationCoverage (geographic / disease)
+              ├─ healthdcatap:publisherType (DataHolder / HDAB / Researcher)
+              └─ healthdcatap:legalBasisForAccess (EHDS Article reference)
+```
+
+#### Property Mapping: Current → HealthDCAT-AP
+
+The following table maps our current Neo4j `HealthDataset` properties to the formal HealthDCAT-AP/DCAT-AP vocabulary:
+
+| Current Property                   | HealthDCAT-AP Property                   | DCAT-AP Property    | Namespace     | Cardinality | Change                                                              |
+| ---------------------------------- | ---------------------------------------- | ------------------- | ------------- | ----------- | ------------------------------------------------------------------- |
+| `id` → `datasetId`                 | —                                        | `dct:identifier`    | Dublin Core   | 1..1        | Rename `id` → `dctIdentifier`                                       |
+| `title`                            | —                                        | `dct:title`         | Dublin Core   | 1..n        | Keep (already compliant)                                            |
+| `description`                      | —                                        | `dct:description`   | Dublin Core   | 1..n        | Keep (already compliant)                                            |
+| — (missing)                        | —                                        | `dct:publisher`     | Dublin Core   | 1..1        | Add as relationship `PUBLISHED_BY` → `(:Organization)`              |
+| — (missing)                        | —                                        | `dcat:theme`        | DCAT          | 1..n        | Add `themes: String[]` (EuroVoc URIs)                               |
+| — (missing)                        | —                                        | `dcat:contactPoint` | DCAT          | 1..n        | Add `contactPoint: String` (vCard URI)                              |
+| `issued`                           | —                                        | `dct:issued`        | Dublin Core   | 0..1        | Keep (already compliant)                                            |
+| — (missing)                        | —                                        | `dct:modified`      | Dublin Core   | 0..1        | Add `modified: Date`                                                |
+| `language`                         | —                                        | `dct:language`      | Dublin Core   | 0..n        | Keep (already compliant)                                            |
+| `hdcatapSpatialCoverage`           | —                                        | `dct:spatial`       | Dublin Core   | 0..n        | Rename → `dctSpatial`                                               |
+| `hdcatapTemporalCoverageStart/End` | —                                        | `dct:temporal`      | Dublin Core   | 0..1        | Rename → `dctTemporalStart` / `dctTemporalEnd`                      |
+| — (missing)                        | —                                        | `dcat:distribution` | DCAT          | 0..n        | Already exists as `HAS_DISTRIBUTION` relationship                   |
+| `hdcatapDatasetType`               | `healthdcatap:datasetType`               | —                   | HealthDCAT-AP | 0..1        | Rename → `hdcatapDatasetType` (already correct)                     |
+| `hdcatapPersonalData`              | `healthdcatap:personalData`              | —                   | HealthDCAT-AP | 0..1        | Keep                                                                |
+| `hdcatapSensitiveData`             | `healthdcatap:sensitiveData`             | —                   | HealthDCAT-AP | 0..1        | Keep                                                                |
+| `hdcatapLegalBasis`                | `healthdcatap:legalBasisForAccess`       | —                   | HealthDCAT-AP | 0..n        | Rename → `hdcatapLegalBasisForAccess`                               |
+| `hdcatapPurpose`                   | `healthdcatap:purpose`                   | —                   | HealthDCAT-AP | 0..n        | Keep                                                                |
+| `hdcatapPopulation`                | `healthdcatap:populationCoverage`        | —                   | HealthDCAT-AP | 0..1        | Rename → `hdcatapPopulationCoverage`                                |
+| `hdcatapRecordCount`               | `healthdcatap:numberOfRecords`           | —                   | HealthDCAT-AP | 0..1        | Rename → `hdcatapNumberOfRecords`                                   |
+| — (missing)                        | `healthdcatap:numberOfUniqueIndividuals` | —                   | HealthDCAT-AP | 0..1        | Add `hdcatapNumberOfUniqueIndividuals: Long`                        |
+| — (missing)                        | `healthdcatap:healthCategory`            | —                   | HealthDCAT-AP | 0..n        | Add `hdcatapHealthCategory: String[]` (EEHRxF categories)           |
+| — (missing)                        | `healthdcatap:healthTheme`               | —                   | HealthDCAT-AP | 0..n        | Add `hdcatapHealthTheme: String[]` (MeSH / ICD-10 / SNOMED URIs)    |
+| — (missing)                        | `healthdcatap:minTypicalAge`             | —                   | HealthDCAT-AP | 0..1        | Add `hdcatapMinTypicalAge: Integer`                                 |
+| — (missing)                        | `healthdcatap:maxTypicalAge`             | —                   | HealthDCAT-AP | 0..1        | Add `hdcatapMaxTypicalAge: Integer`                                 |
+| — (missing)                        | `healthdcatap:publisherType`             | —                   | HealthDCAT-AP | 0..1        | Add `hdcatapPublisherType: String` (DataHolder / HDAB / Researcher) |
+
+#### Node Label Changes
+
+| Current Label      | New Label       | Rationale                                                              |
+| ------------------ | --------------- | ---------------------------------------------------------------------- |
+| `HealthDataset`    | `HealthDataset` | Keep — consistent with HealthDCAT-AP `healthdcatap:Dataset`            |
+| `DataDistribution` | `Distribution`  | Rename — DCAT standard uses `dcat:Distribution` not `DataDistribution` |
+| `Organization`     | `Organization`  | Keep — DCAT uses `foaf:Organization`                                   |
+| `DataCatalog`      | `Catalog`       | Rename — DCAT standard uses `dcat:Catalog`                             |
+| — (missing)        | `ContactPoint`  | Add — DCAT requires `vcard:ContactPoint` for dataset contact info      |
+| `EhdsPurpose`      | `EhdsPurpose`   | Keep — EHDS-specific, not part of DCAT                                 |
+
+#### Relationship Changes
+
+| Current                                                     | New                                                      | Rationale                                                    |
+| ----------------------------------------------------------- | -------------------------------------------------------- | ------------------------------------------------------------ |
+| `(:DataCatalog)-[:HAS_DATASET]->(:HealthDataset)`           | `(:Catalog)-[:HAS_DATASET]->(:HealthDataset)`            | Align label                                                  |
+| `(:HealthDataset)-[:HAS_DISTRIBUTION]->(:DataDistribution)` | `(:HealthDataset)-[:HAS_DISTRIBUTION]->(:Distribution)`  | Align label                                                  |
+| `(:Organization)-[:PUBLISHES]->(:DataCatalog)`              | `(:Organization)-[:PUBLISHES]->(:Catalog)`               | Align label                                                  |
+| — (missing)                                                 | `(:HealthDataset)-[:HAS_CONTACT_POINT]->(:ContactPoint)` | DCAT recommended property                                    |
+| — (missing)                                                 | `(:HealthDataset)-[:HAS_THEME]->(:EEHRxFCategory)`       | Link HealthDCAT-AP `healthCategory` to existing EEHRxF nodes |
+
+#### JSON-LD Serialization (for Federated Catalog)
+
+The Neo4j Query Proxy (from ADR-2) must serialize `HealthDataset` nodes as valid HealthDCAT-AP JSON-LD for the DSP Federated Catalog protocol:
+
+```json
+{
+  "@context": {
+    "dcat": "http://www.w3.org/ns/dcat#",
+    "dct": "http://purl.org/dc/terms/",
+    "healthdcatap": "http://healthdcat-ap.eu/ns#",
+    "foaf": "http://xmlns.com/foaf/0.1/",
+    "vcard": "http://www.w3.org/2006/vcard/ns#"
+  },
+  "@type": "dcat:Dataset",
+  "dct:identifier": "dataset:synthea-fhir-r4-mvd",
+  "dct:title": "Synthea Synthetic FHIR R4 Patient Cohort",
+  "dct:description": "Synthetic longitudinal patient records...",
+  "dct:publisher": {
+    "@type": "foaf:Organization",
+    "foaf:name": "Health MVD Operator"
+  },
+  "dcat:theme": ["http://eurovoc.europa.eu/4810"],
+  "dct:spatial": "http://publications.europa.eu/resource/authority/country/USA",
+  "dct:temporal": {
+    "dcat:startDate": "1920-01-01",
+    "dcat:endDate": "2025-12-31"
+  },
+  "healthdcatap:datasetType": "SyntheticData",
+  "healthdcatap:personalData": false,
+  "healthdcatap:healthCategory": ["patient-summary", "laboratory-results"],
+  "healthdcatap:numberOfRecords": 167,
+  "healthdcatap:numberOfUniqueIndividuals": 167,
+  "healthdcatap:minTypicalAge": 0,
+  "healthdcatap:maxTypicalAge": 105,
+  "healthdcatap:legalBasisForAccess": "EHDS Article 53 Secondary Use",
+  "dcat:distribution": [
+    {
+      "@type": "dcat:Distribution",
+      "dct:title": "Neo4j Bolt Protocol",
+      "dcat:accessURL": "bolt://localhost:7687",
+      "dcat:mediaType": "application/x-neo4j-bolt",
+      "dct:conformsTo": "http://hl7.org/fhir/R4"
+    }
+  ]
+}
+```
+
+#### Migration Steps
+
+1. **Graph schema update:** Rename `DataDistribution` → `Distribution`, `DataCatalog` → `Catalog` in `init-schema.cypher` and `health-dataspace-graph-schema.md`
+2. **Property migration:** Update `register-fhir-dataset-hdcatap.cypher` to use formal HealthDCAT-AP property names and add missing mandatory properties
+3. **Add `ContactPoint` node** to schema with `name`, `email`, `url` properties
+4. **Add `HAS_THEME` relationship** from `HealthDataset` to `EEHRxFCategory` nodes (reusing existing Phase 3h nodes)
+5. **Neo4j proxy:** Implement JSON-LD serialization in the `/catalog/datasets` endpoint
+6. **UI update:** Update the `/catalog` view to display new HealthDCAT-AP properties
+
+#### Consequences
+
+- HealthDCAT-AP compliance enables federated catalog interoperability with other EHDS pilot datasets
+- The JSON-LD serialization is required by the DSP Catalog Protocol for cross-HDAB discovery
+- Existing Cypher queries referencing `DataDistribution` or `DataCatalog` must be updated
+- Phase 7c EHDS compliance tests (HealthDCAT-AP Schema Compliance) will validate the new vocabulary
+
+---
+
 ## Target Architecture
 
 ```
@@ -732,28 +1086,32 @@ jobs:
     │   EDC-V Clinic  │           │   EDC-V CRO     │
     │  Control Plane  │           │  Control Plane  │
     │  (DSP + DCP)    │           │  (DSP + DCP)    │
-    └────────┬────────┘           └────────┬────────┘
-             │                              │
-    ┌────────┴────────┐           ┌────────┴─────────┐
-    │  DCore Rust     │           │  DCore Rust      │
-    │  Data Plane     │           │  Data Plane      │
-    │  (FHIR HTTP)    │           │  (Query HTTP)    │
-    └────────┬────────┘           └────────┴─────────┘
-             │                              │
-    ┌────────┴──────────────────────────────┴─────────┐
-    │              HDAB (Intermediary)                  │
-    │  EDC-V Control Plane + Federated Catalog         │
-    │  HealthDCAT-AP Metadata · Contract Enforcement   │
-    └────────────────────┬────────────────────────────┘
-                         │
-    ┌────────────────────┴────────────────────────────┐
-    │           Neo4j Health Knowledge Graph            │
-    │  Layer 1: Marketplace (DSP Contracts)            │
-    │  Layer 2: HealthDCAT-AP (Metadata)               │
-    │  Layer 3: FHIR Clinical Graph (Patient Data)     │
-    │  Layer 4: OMOP Research (Secondary Use)           │
-    │  Layer 5: Ontology Backbone (SNOMED/LOINC/ICD)   │
-    └──────────────────────────────────────────────────┘
+    └───┬────────┬────┘           └────────┬────────┘
+        │        │                         │
+ ┌──────┴──┐ ┌──┴─────────┐    ┌──────────┴─────────┐
+ │ DCore   │ │ DCore      │    │  DCore Rust        │
+ │ fhir-   │ │ omop-      │    │  Data Plane (CRO)  │
+ │ http    │ │ http       │    │  (Query HTTP)      │
+ │ (PUSH)  │ │ (PULL)     │    └────────────────────┘
+ └────┬────┘ └─────┬──────┘
+      │            │
+ ┌────┴────────────┴──────┐     ┌─────────────────────────┐
+ │  Neo4j Query Proxy     │     │  PostgreSQL 17           │
+ │  (Node.js/Express)     │     │  ─────────────────       │
+ │  /fhir/* → Cypher      │     │  controlplane (EDC-V)    │
+ │  /omop/* → Cypher      │     │  identityhub (DCP)       │
+ │  /catalog/* → JSON-LD  │     │  issuerservice (VC)      │
+ │  Port: 9090            │     │  dataplane (DCore state)  │
+ └──────────┬─────────────┘     │  keycloak (OAuth2)       │
+            │ Bolt              │  cfm (Tenant/Provision)  │
+ ┌──────────┴─────────────┐     └─────────────────────────┘
+ │     Neo4j 5 Community  │
+ │  L1: Marketplace (DSP Contract Projections)       │
+ │  L2: HealthDCAT-AP Catalog (W3C vocabulary)       │
+ │  L3: FHIR Clinical Graph (Patient Data)           │
+ │  L4: OMOP Research (Secondary Use Analytics)      │
+ │  L5: Ontology Backbone (SNOMED/LOINC/ICD/RxNorm)  │
+ └────────────────────────────────────────────────────┘
 ```
 
 ---
@@ -764,11 +1122,13 @@ When complete, the Health MVD v2 will demonstrate:
 
 1. **End-to-end EHDS compliance** — From participant onboarding (DCP credentials) through contract negotiation (DSP policies) to data access (SPE-enforced queries)
 2. **Cloud-native multi-tenancy** — CFM managing multiple EDC-V instances for clinics, CROs, and HDABs on shared infrastructure
-3. **Disaggregated data planes** — DCore Rust HTTP planes independently handling FHIR transfers and query results
-4. **Federated knowledge graphs** — Cross-HDAB analytics without centralizing patient data
-5. **Production-grade schema** — The 5-layer Neo4j health graph model working with real FHIR/OMOP data
-6. **Protocol conformance** — DSP 2025-1 TCK passing (140+ test cases), DCP v1.0 compliance verified, EHDS-specific tests validating Article 53 enforcement
-7. **Unified portal experience** — Single Next.js 14 app serving participant onboarding (Aruba pattern), data sharing (Fraunhofer pattern), operator admin (Redline pattern), and health knowledge graph exploration
+3. **Disaggregated data planes** — Purpose-built DCore Rust HTTP planes: FHIR PUSH for clinical bundles, OMOP PULL for analytics queries, routed via DPS
+4. **Dual-store architecture** — PostgreSQL for EDC-V/CFM transactional state, Neo4j for relationship-rich health knowledge graph, with NATS event projection bridging Layer 1
+5. **HealthDCAT-AP compliance** — Formal W3C HealthDCAT-AP vocabulary for dataset metadata, enabling federated catalog interoperability across HDABs via JSON-LD serialization
+6. **Federated knowledge graphs** — Cross-HDAB analytics without centralizing patient data
+7. **Production-grade schema** — The 5-layer Neo4j health graph model working with real FHIR/OMOP data
+8. **Protocol conformance** — DSP 2025-1 TCK passing (140+ test cases), DCP v1.0 compliance verified, EHDS-specific tests validating Article 53 enforcement
+9. **Unified portal experience** — Single Next.js 14 app serving participant onboarding (Aruba pattern), data sharing (Fraunhofer pattern), operator admin (Redline pattern), and health knowledge graph exploration
 
 The [JAD demo](https://github.com/Metaform/jad) provides the cloud-provider reference for EDC-V + CFM. The Health MVD v2 extends this with the **domain-specific health knowledge layer** — the piece that makes a generic dataspace into a health dataspace.
 
