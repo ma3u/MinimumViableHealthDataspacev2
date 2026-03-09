@@ -1,0 +1,14 @@
+# =============================================================================
+# CFM Keycloak Agent Configuration
+# =============================================================================
+# Docker Compose equivalent of K8s keycloak-agent-config ConfigMap.
+# =============================================================================
+
+cfm:
+  keycloak:
+    url: http://keycloak:8080
+    realm: edcv
+    client-id: provisioner
+    client-secret: provisioner-secret
+  nats:
+    url: nats://nats:4222

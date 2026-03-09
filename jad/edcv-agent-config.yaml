@@ -1,0 +1,16 @@
+# =============================================================================
+# CFM EDC-V Agent Configuration
+# =============================================================================
+# Docker Compose equivalent of K8s edcv-agent-config ConfigMap.
+# =============================================================================
+
+cfm:
+  controlplane:
+    management-url: http://controlplane:8081/api/mgmt
+  keycloak:
+    url: http://keycloak:8080
+    realm: edcv
+    client-id: provisioner
+    client-secret: provisioner-secret
+  nats:
+    url: nats://nats:4222

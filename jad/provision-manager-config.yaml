@@ -1,0 +1,37 @@
+# =============================================================================
+# CFM Provision Manager Configuration
+# =============================================================================
+# Docker Compose equivalent of K8s provision-manager-config ConfigMap.
+# =============================================================================
+
+spring:
+  datasource:
+    url: jdbc:postgresql://postgres:5432/cfm
+    username: cfm
+    password: cfm
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+
+server:
+  port: 8080
+
+cfm:
+  keycloak:
+    url: http://keycloak:8080
+    realm: edcv
+    client-id: provisioner
+    client-secret: provisioner-secret
+  controlplane:
+    url: http://controlplane:8081
+  identityhub:
+    url: http://identityhub:7081
+  issuerservice:
+    url: http://issuerservice:10013
+  vault:
+    url: http://vault:8200
+    token: root
+  nats:
+    url: nats://nats:4222

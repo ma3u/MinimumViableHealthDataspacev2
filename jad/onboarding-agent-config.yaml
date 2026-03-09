@@ -1,0 +1,24 @@
+# =============================================================================
+# CFM Onboarding Agent Configuration
+# =============================================================================
+# Docker Compose equivalent of K8s onboarding-agent-config ConfigMap.
+# =============================================================================
+
+cfm:
+  controlplane:
+    management-url: http://controlplane:8081/api/mgmt
+  identityhub:
+    url: http://identityhub:7081/api/identity
+    credentials-url: http://identityhub:7082/api/credentials
+  issuerservice:
+    admin-url: http://issuerservice:10013/api/admin
+  keycloak:
+    url: http://keycloak:8080
+    realm: edcv
+    client-id: provisioner
+    client-secret: provisioner-secret
+  vault:
+    url: http://vault:8200
+    token: root
+  nats:
+    url: nats://nats:4222

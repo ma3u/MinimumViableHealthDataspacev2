@@ -1,0 +1,19 @@
+# =============================================================================
+# CFM Registration Agent Configuration
+# =============================================================================
+# Docker Compose equivalent of K8s registration-agent-config ConfigMap.
+# =============================================================================
+
+cfm:
+  identityhub:
+    url: http://identityhub:7081/api/identity
+    credentials-url: http://identityhub:7082/api/credentials
+  issuerservice:
+    admin-url: http://issuerservice:10013/api/admin
+  keycloak:
+    url: http://keycloak:8080
+    realm: edcv
+    client-id: provisioner
+    client-secret: provisioner-secret
+  nats:
+    url: nats://nats:4222

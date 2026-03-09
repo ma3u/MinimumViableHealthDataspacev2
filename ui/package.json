@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "generate:api": "../scripts/generate-api-types.sh"
   },
   "dependencies": {
     "lucide-react": "^0.378.0",

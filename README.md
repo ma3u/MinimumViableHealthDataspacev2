@@ -1,9 +1,6 @@
 # Minimum Viable Health Dataspace v2
 
-[![EHDS Compliant](https://img.shields.io/badge/EHDS-Compliant-0ea5e9)](https://health.ec.europa.eu/ehealth-digital-health-and-care/european-health-data-space_en) [![FHIR R4](https://img.shields.io/badge/FHIR-R4-orange)](https://hl7.org/fhir/R4/) [![OMOP CDM](https://img.shields.io/badge/OMOP-CDM%20v5.4-yellow)](https://ohdsi.github.io/CommonDataModel/) [![EEHRxF](https://img.shields.io/badge/EEHRxF-HL7%20Europe-148F77)](https://hl7.eu/fhir/) [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
-[![Neo4j 5](https://img.shields.io/badge/Neo4j-5%20Community-008CC1?logo=neo4j&logoColor=white)](https://neo4j.com/) [![Next.js 14](https://img.shields.io/badge/Next.js-14-black?logo=next.js&logoColor=white)](https://nextjs.org/) [![Eclipse EDC](https://img.shields.io/badge/Eclipse-EDC--V-blue)](https://eclipse-edc.github.io/docs/)
-[![DSP Dataspace Protocol 2025-1](https://img.shields.io/badge/DSP-Dataspace%20Protocol%202025--1-6366f1)](https://docs.internationaldataspaces.org/ids-knowledgebase/v/dataspace-protocol) [![DCP Decentralized Claims Protocol v1.0](https://img.shields.io/badge/DCP-Decentralized%20Claims%20Protocol%20v1.0-7c3aed)](https://projects.eclipse.org/projects/technology.dataspace-dcp/releases/1.0.0) [![DPS](https://img.shields.io/badge/DPS-Data%20Plane%20Signaling-0891b2)](https://projects.eclipse.org/proposals/eclipse-data-plane-core)
-[![SIMPL](https://img.shields.io/badge/SIMPL-EU%20Cloud%20Federation-e11d48)](https://simpl-programme.eu/)
+[![EHDS Compliant](https://img.shields.io/badge/EHDS-Compliant-0ea5e9)](https://health.ec.europa.eu/ehealth-digital-health-and-care/european-health-data-space_en) [![FHIR R4](https://img.shields.io/badge/FHIR-R4-orange)](https://hl7.org/fhir/R4/) [![OMOP CDM](https://img.shields.io/badge/OMOP-CDM%20v5.4-yellow)](https://ohdsi.github.io/CommonDataModel/) [![EEHRxF](https://img.shields.io/badge/EEHRxF-HL7%20Europe-148F77)](https://hl7.eu/fhir/) [![Neo4j 5](https://img.shields.io/badge/Neo4j-5%20Community-008CC1?logo=neo4j&logoColor=white)](https://neo4j.com/) [![Next.js 14](https://img.shields.io/badge/Next.js-14-black?logo=next.js&logoColor=white)](https://nextjs.org/) [![Eclipse EDC](https://img.shields.io/badge/Eclipse-EDC--V-blue)](https://eclipse-edc.github.io/docs/) [![DSP Dataspace Protocol 2025-1](https://img.shields.io/badge/DSP-Dataspace%20Protocol%202025--1-6366f1)](https://docs.internationaldataspaces.org/ids-knowledgebase/v/dataspace-protocol) [![DCP Decentralized Claims Protocol v1.0](https://img.shields.io/badge/DCP-Decentralized%20Claims%20Protocol%20v1.0-7c3aed)](https://projects.eclipse.org/projects/technology.dataspace-dcp/releases/1.0.0) [![DPS](https://img.shields.io/badge/DPS-Data%20Plane%20Signaling-0891b2)](https://projects.eclipse.org/proposals/eclipse-data-plane-core) [![SIMPL](https://img.shields.io/badge/SIMPL-EU%20Cloud%20Federation-e11d48)](https://simpl-programme.eu/) [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 
 **An open-source, EHDS-compliant health data space demo** combining Eclipse EDC-V, DCore, CFM, HealthDCAT-AP, FHIR R4, OMOP CDM v5.4, and Neo4j 5 into a unified 5-layer knowledge graph. Synthetic patient journeys are navigable through a Next.js UI with compliance chain inspection, OMOP research analytics, and an interactive graph explorer.
 
@@ -254,6 +251,41 @@ pre-commit run --all-files
 
 The UI driver (`ui/src/lib/neo4j.ts`) is configured with `{ disableLosslessIntegers: true }`. By default the JavaScript Neo4j driver wraps 64-bit integers as `{ low, high }` objects; this flag converts them to native JavaScript numbers so stat card values render correctly instead of showing `[object Object]`.
 
+### JAD Stack (EDC-V + CFM + DCore)
+
+The full dataspace connector stack is defined in `docker-compose.jad.yml` using container images from the [JAD (Joint Architecture Demo)](https://github.com/Metaform/jad). This runs 16 services including EDC-V Control Plane, DCore Data Plane, IdentityHub (DCP v1.0), IssuerService, Keycloak, Vault, NATS, and CFM agents.
+
+```bash
+# Start full JAD stack (+ Neo4j from base compose)
+./scripts/bootstrap-jad.sh
+
+# Or manually with docker compose
+docker compose -f docker-compose.yml -f docker-compose.jad.yml up -d
+
+# Check status
+./scripts/bootstrap-jad.sh --status
+
+# Tear down
+./scripts/bootstrap-jad.sh --down
+```
+
+Service endpoints after startup:
+
+| Service           | URL                       | Credentials       |
+| ----------------- | ------------------------- | ----------------- |
+| Traefik Dashboard | http://localhost:8090     | —                 |
+| Keycloak Admin    | http://keycloak.localhost | admin / admin     |
+| Vault UI          | http://vault.localhost    | token: root       |
+| Control Plane     | http://cp.localhost       | OAuth2 (Keycloak) |
+| Data Plane        | http://dp.localhost       | OAuth2 (Keycloak) |
+| Identity Hub      | http://ih.localhost       | OAuth2 (Keycloak) |
+| Issuer Service    | http://issuer.localhost   | OAuth2 (Keycloak) |
+| Tenant Manager    | http://tm.localhost       | OAuth2 (Keycloak) |
+| Provision Manager | http://pm.localhost       | OAuth2 (Keycloak) |
+| NATS Monitor      | http://localhost:8222     | —                 |
+
+Configuration files are in the `jad/` directory. OpenAPI specs are in `jad/openapi/`.
+
 ---
 
 ## Documentation
@@ -275,6 +307,8 @@ onwards will introduce live Eclipse EDC-V connector instances and real patient d
 | Phase | Description                                                                                     | Status      |
 | ----- | ----------------------------------------------------------------------------------------------- | ----------- |
 | 1     | Environment setup — Neo4j 5, Docker Compose, Next.js scaffold, pre-commit hooks                 | ✅ Complete |
+| 1c    | JAD Docker Compose — full EDC-V + CFM + DCore stack with bootstrap script                       | ✅ Complete |
+| 1d    | OpenAPI TypeScript client generation — type-safe API clients for all JAD services               | ✅ Complete |
 | 2     | Graph schema + seed data for all 5 layers, APOC/n10s plugins, GraSS colour style                | ✅ Complete |
 | 3     | Graph Explorer UI — force-directed 5-layer graph via `react-force-graph-2d`                     | ✅ Complete |
 | 3a    | HealthDCAT-AP Catalogue view — dataset cards with publisher, license, and distribution info     | ✅ Complete |

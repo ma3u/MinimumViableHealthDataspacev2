@@ -1,0 +1,551 @@
+# =============================================================================
+# Health Dataspace v2 — JAD Infrastructure (Docker Compose Development Profile)
+# =============================================================================
+# This extends the base docker-compose.yml with the full JAD (Joint Architecture
+# Demo) stack: EDC-V + CFM + DCore services for local development without KinD.
+#
+# Usage:
+#   docker compose -f docker-compose.yml -f docker-compose.jad.yml up -d
+#
+# Or via the bootstrap script:
+#   ./scripts/bootstrap-jad.sh
+#
+# Services:
+#   Infrastructure (k8s/base equivalent):
+#     - postgres       (PostgreSQL 17 — multi-database for all services)
+#     - vault          (HashiCorp Vault — secret management)
+#     - keycloak       (Keycloak — OAuth2/OIDC identity provider)
+#     - nats           (NATS JetStream — async messaging)
+#   Application (k8s/apps equivalent):
+#     - controlplane   (EDC-V virtualized control plane)
+#     - dataplane      (DCore HTTP data plane)
+#     - identityhub    (DCP v1.0 credential storage & presentation)
+#     - issuerservice  (Verifiable Credential issuance)
+#     - tenant-manager (CFM tenant lifecycle management)
+#     - provision-manager (CFM automated resource provisioning)
+#     - cfm-agents     (CFM background provisioning agents)
+#   Routing:
+#     - traefik        (API Gateway — replaces K8s Gateway API)
+#
+# All services use *.localhost hostnames via Traefik for parity with KinD setup.
+# See: https://github.com/Metaform/jad
+# =============================================================================
+
+services:
+  # ---------------------------------------------------------------------------
+  # Traefik — API Gateway (replaces KinD Gateway API + Traefik Helm chart)
+  # ---------------------------------------------------------------------------
+  traefik:
+    image: traefik:v3.4
+    container_name: health-dataspace-traefik
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--log.level=INFO"
+      - "--accesslog=true"
+      - "--accesslog.format=json"
+    ports:
+      - "80:80" # HTTP entry point (*.localhost routing)
+      - "8090:8080" # Traefik dashboard
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - edcv
+    restart: unless-stopped
+
+  # ---------------------------------------------------------------------------
+  # PostgreSQL — Multi-database server for all EDC-V/CFM services
+  # ---------------------------------------------------------------------------
+  # Databases: controlplane (cp/cp), identityhub (ih/ih), issuerservice (issuer/issuer),
+  #            dataplane (dp/dp), keycloak (kc/kc), cfm (cfm/cfm), redlinedb (redline/redline)
+  # ---------------------------------------------------------------------------
+  postgres:
+    image: postgres:17.7-alpine
+    container_name: health-dataspace-postgres
+    environment:
+      POSTGRES_DB: controlplane
+      POSTGRES_USER: cp
+      POSTGRES_PASSWORD: cp
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./jad/init-postgres.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    ports:
+      - "5432:5432"
+    networks:
+      - edcv
+    labels:
+      - "traefik.enable=true"
+      - "traefik.tcp.routers.postgres.rule=HostSNI(`postgres.localhost`)"
+      - "traefik.tcp.services.postgres.loadbalancer.server.port=5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U cp -d controlplane"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  # ---------------------------------------------------------------------------
+  # HashiCorp Vault — Secret management (dev mode)
+  # ---------------------------------------------------------------------------
+  vault:
+    image: hashicorp/vault:latest
+    container_name: health-dataspace-vault
+    environment:
+      VAULT_DEV_ROOT_TOKEN_ID: "root"
+      VAULT_DEV_LISTEN_ADDRESS: "0.0.0.0:8200"
+    cap_add:
+      - IPC_LOCK
+    ports:
+      - "8200:8200"
+    networks:
+      - edcv
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.vault.rule=Host(`vault.localhost`)"
+      - "traefik.http.services.vault.loadbalancer.server.port=8200"
+    healthcheck:
+      test: ["CMD", "vault", "status"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  # ---------------------------------------------------------------------------
+  # Keycloak — OAuth2/OIDC identity provider
+  # ---------------------------------------------------------------------------
+  keycloak:
+    image: quay.io/keycloak/keycloak:latest
+    container_name: health-dataspace-keycloak
+    command:
+      - "start-dev"
+      - "--health-enabled=true"
+      - "--import-realm"
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+      KC_HTTP_ENABLED: "true"
+      KC_HOSTNAME: "http://keycloak.localhost"
+      KC_HOSTNAME_STRICT: "false"
+      KC_HOSTNAME_URL: "http://keycloak.localhost"
+      KC_PROXY: edge
+      KC_HEALTH_ENABLED: "true"
+      KC_METRICS_ENABLED: "true"
+      KC_LOG_LEVEL: INFO
+      KC_DB: postgres
+      POSTGRES_DB: keycloak
+      KC_DB_URL: "jdbc:postgresql://postgres:5432/keycloak"
+      KC_DB_USERNAME: kc
+      KC_DB_PASSWORD: kc
+    volumes:
+      - ./jad/keycloak-realm.json:/opt/keycloak/data/import/edcv-realm.json:ro
+    ports:
+      - "8080:8080" # Keycloak web UI + API
+      - "9000:9000" # Health endpoint
+    networks:
+      - edcv
+    depends_on:
+      postgres:
+        condition: service_healthy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.keycloak.rule=Host(`keycloak.localhost`)"
+      - "traefik.http.services.keycloak.loadbalancer.server.port=8080"
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "exec 3<>/dev/tcp/127.0.0.1/9000;echo -e 'GET /health/ready HTTP/1.1\r\nhost: localhost\r\n\r\n' >&3;grep -q '200' <&3",
+        ]
+      interval: 10s
+      timeout: 10s
+      retries: 15
+      start_period: 30s
+    restart: unless-stopped
+
+  # ---------------------------------------------------------------------------
+  # NATS — JetStream messaging bus
+  # ---------------------------------------------------------------------------
+  nats:
+    image: nats:latest
+    container_name: health-dataspace-nats
+    command: ["-c", "/etc/nats/nats.conf"]
+    volumes:
+      - ./jad/nats.conf:/etc/nats/nats.conf:ro
+      - nats_data:/tmp/jetstream
+    ports:
+      - "4222:4222" # Client connections
+      - "8222:8222" # Monitoring
+    networks:
+      - edcv
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.nats.rule=Host(`nats.localhost`)"
+      - "traefik.http.services.nats.loadbalancer.server.port=4222"
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "wget -q --spider http://127.0.0.1:8222/healthz || exit 1",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  # ---------------------------------------------------------------------------
+  # Vault Bootstrap Job — Initializes JWT auth, secrets engine, policies
+  # ---------------------------------------------------------------------------
+  vault-bootstrap:
+    image: hashicorp/vault:latest
+    container_name: health-dataspace-vault-bootstrap
+    environment:
+      VAULT_ADDR: "http://vault:8200"
+      VAULT_TOKEN: "root"
+    entrypoint: ["/bin/sh", "/scripts/bootstrap-vault.sh"]
+    volumes:
+      - ./jad/bootstrap-vault.sh:/scripts/bootstrap-vault.sh:ro
+    networks:
+      - edcv
+    depends_on:
+      vault:
+        condition: service_healthy
+      keycloak:
+        condition: service_healthy
+
+  # ---------------------------------------------------------------------------
+  # EDC-V Control Plane — DSP protocol + management APIs
+  # ---------------------------------------------------------------------------
+  controlplane:
+    image: ghcr.io/metaform/jad/controlplane:latest
+    container_name: health-dataspace-controlplane
+    environment:
+      # Base config
+      edc.hostname: "controlplane"
+      edc.vault.hashicorp.url: "http://vault:8200"
+      edc.vault.hashicorp.token: "root"
+      edc.participant.id: "did:web:connector"
+      edc.iam.did.web.use.https: "false"
+      edc.iam.credential.revocation.mimetype: "application/json"
+      # Web config
+      web.http.port: "8080"
+      web.http.path: "/api"
+      web.http.protocol.port: "8082"
+      web.http.protocol.path: "/api/dsp"
+      web.http.management.port: "8081"
+      web.http.management.path: "/api/mgmt"
+      web.http.control.port: "8083"
+      web.http.control.path: "/api/control"
+      # NATS
+      edc.nats.cn.subscriber.url: "nats://nats:4222"
+      edc.nats.cn.subscriber.autocreate: "true"
+      edc.nats.cn.publisher.url: "nats://nats:4222"
+      edc.nats.tp.subscriber.url: "nats://nats:4222"
+      edc.nats.tp.subscriber.autocreate: "true"
+      edc.nats.tp.publisher.url: "nats://nats:4222"
+      # Database
+      edc.datasource.default.url: "jdbc:postgresql://postgres:5432/controlplane"
+      edc.datasource.default.user: "cp"
+      edc.datasource.default.password: "cp"
+      edc.sql.schema.autocreate: "true"
+      edc.encryption.aes.key.alias: "aes-key-alias"
+      # OAuth2 / Keycloak
+      edc.iam.oauth2.issuer: "http://keycloak:8080/realms/edcv"
+      edc.iam.oauth2.jwks.url: "http://keycloak:8080/realms/edcv/protocol/openid-connect/certs"
+      # DCP scopes
+      edc.iam.dcp.scopes.membership.id: "membership-scope"
+      edc.iam.dcp.scopes.membership.type: "DEFAULT"
+      edc.iam.dcp.scopes.membership.value: "org.eclipse.edc.vc.type:MembershipCredential:read"
+      # Trusted issuers
+      edc.iam.trusted-issuer.issuer.id: "did:web:issuerservice%3A10016:issuer"
+    ports:
+      - "11003:8081" # Management API (external port from planning doc)
+    networks:
+      - edcv
+    depends_on:
+      postgres:
+        condition: service_healthy
+      vault:
+        condition: service_healthy
+      nats:
+        condition: service_healthy
+      keycloak:
+        condition: service_healthy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.controlplane.rule=Host(`cp.localhost`)"
+      - "traefik.http.services.controlplane.loadbalancer.server.port=8081"
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "wget -q --spider http://127.0.0.1:8080/api/check/readiness || exit 1",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 15
+      start_period: 30s
+    restart: unless-stopped
+
+  # ---------------------------------------------------------------------------
+  # DCore Data Plane — HTTP data transfer (Data Plane Signaling)
+  # ---------------------------------------------------------------------------
+  dataplane:
+    image: ghcr.io/metaform/jad/dataplane:latest
+    container_name: health-dataspace-dataplane
+    environment:
+      edc.hostname: "dataplane"
+      edc.transfer.proxy.token.verifier.publickey.alias: "dataplane-private"
+      edc.transfer.proxy.token.signer.privatekey.alias: "dataplane-public"
+      edc.dpf.selector.url: "http://controlplane:8083/api/control/v1/dataplanes"
+      # Web config
+      web.http.port: "8080"
+      web.http.path: "/api"
+      web.http.control.port: "8083"
+      web.http.control.path: "/api/control"
+      web.http.public.port: "11002"
+      web.http.public.path: "/api/public"
+      web.http.certs.port: "8186"
+      web.http.certs.path: "/api/data"
+      # Vault
+      edc.vault.hashicorp.url: "http://vault:8200"
+      edc.vault.hashicorp.token: "root"
+      # Database
+      edc.datasource.default.url: "jdbc:postgresql://postgres:5432/dataplane"
+      edc.datasource.default.user: "dp"
+      edc.datasource.default.password: "dp"
+      edc.sql.schema.autocreate: "true"
+    ports:
+      - "11002:11002" # Public data transfer port
+    networks:
+      - edcv
+    depends_on:
+      postgres:
+        condition: service_healthy
+      vault:
+        condition: service_healthy
+      controlplane:
+        condition: service_healthy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.dataplane-public.rule=Host(`dp.localhost`) && PathPrefix(`/public`)"
+      - "traefik.http.routers.dataplane-public.middlewares=strip-public"
+      - "traefik.http.middlewares.strip-public.stripprefix.prefixes=/public"
+      - "traefik.http.services.dataplane-public.loadbalancer.server.port=11002"
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "wget -q --spider http://127.0.0.1:8080/api/check/readiness || exit 1",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 15
+      start_period: 30s
+    restart: unless-stopped
+
+  # ---------------------------------------------------------------------------
+  # IdentityHub — DCP v1.0 credential storage & presentation
+  # ---------------------------------------------------------------------------
+  identityhub:
+    image: ghcr.io/metaform/jad/identity-hub:latest
+    container_name: health-dataspace-identityhub
+    env_file:
+      - ./jad/identityhub.env
+    ports:
+      - "11005:7081" # Identity API (external port from planning doc)
+    networks:
+      - edcv
+    depends_on:
+      postgres:
+        condition: service_healthy
+      vault:
+        condition: service_healthy
+      keycloak:
+        condition: service_healthy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.identityhub-cs.rule=Host(`ih.localhost`) && PathPrefix(`/cs`)"
+      - "traefik.http.routers.identityhub-cs.middlewares=strip-cs"
+      - "traefik.http.middlewares.strip-cs.stripprefix.prefixes=/cs"
+      - "traefik.http.services.identityhub-cs.loadbalancer.server.port=7081"
+      - "traefik.http.routers.identityhub-did.rule=Host(`ih.localhost`) && PathPrefix(`/.well-known`)"
+      - "traefik.http.services.identityhub-did.loadbalancer.server.port=7083"
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "wget -q --spider http://127.0.0.1:7080/api/check/readiness || exit 1",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 15
+      start_period: 30s
+    restart: unless-stopped
+
+  # ---------------------------------------------------------------------------
+  # IssuerService — Verifiable Credential issuance (trust anchor)
+  # ---------------------------------------------------------------------------
+  issuerservice:
+    image: ghcr.io/metaform/jad/issuerservice:latest
+    container_name: health-dataspace-issuerservice
+    env_file:
+      - ./jad/issuerservice.env
+    ports:
+      - "10013:10013" # Issuer Admin API
+    networks:
+      - edcv
+    depends_on:
+      postgres:
+        condition: service_healthy
+      vault:
+        condition: service_healthy
+      keycloak:
+        condition: service_healthy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.issuer-admin.rule=Host(`issuer.localhost`) && PathPrefix(`/admin`)"
+      - "traefik.http.routers.issuer-admin.middlewares=strip-admin"
+      - "traefik.http.middlewares.strip-admin.stripprefix.prefixes=/admin"
+      - "traefik.http.services.issuer-admin.loadbalancer.server.port=10013"
+      - "traefik.http.routers.issuer-cs.rule=Host(`issuer.localhost`) && PathPrefix(`/cs`)"
+      - "traefik.http.routers.issuer-cs.middlewares=strip-issuer-cs"
+      - "traefik.http.middlewares.strip-issuer-cs.stripprefix.prefixes=/cs"
+      - "traefik.http.services.issuer-cs.loadbalancer.server.port=10015"
+      - "traefik.http.routers.issuer-did.rule=Host(`issuer.localhost`) && PathPrefix(`/`)"
+      - "traefik.http.services.issuer-did.loadbalancer.server.port=10016"
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "wget -q --spider http://127.0.0.1:10010/api/check/readiness || exit 1",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 15
+      start_period: 30s
+    restart: unless-stopped
+
+  # ---------------------------------------------------------------------------
+  # CFM Tenant Manager — Multi-tenant participant lifecycle
+  # ---------------------------------------------------------------------------
+  tenant-manager:
+    image: ghcr.io/eclipse-cfm/cfm/tmanager:latest
+    container_name: health-dataspace-tenant-manager
+    volumes:
+      - ./jad/tenant-manager-config.yaml:/etc/appname/application.yaml:ro
+    ports:
+      - "11006:8080" # Tenant Manager API
+    networks:
+      - edcv
+    depends_on:
+      postgres:
+        condition: service_healthy
+      keycloak:
+        condition: service_healthy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.tenant-manager.rule=Host(`tm.localhost`)"
+      - "traefik.http.services.tenant-manager.loadbalancer.server.port=8080"
+    restart: unless-stopped
+
+  # ---------------------------------------------------------------------------
+  # CFM Provision Manager — Automated resource provisioning
+  # ---------------------------------------------------------------------------
+  provision-manager:
+    image: ghcr.io/eclipse-cfm/cfm/pmanager:latest
+    container_name: health-dataspace-provision-manager
+    volumes:
+      - ./jad/provision-manager-config.yaml:/etc/appname/application.yaml:ro
+    ports:
+      - "11007:8080" # Provision Manager API
+    networks:
+      - edcv
+    depends_on:
+      postgres:
+        condition: service_healthy
+      keycloak:
+        condition: service_healthy
+      controlplane:
+        condition: service_healthy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.provision-manager.rule=Host(`pm.localhost`)"
+      - "traefik.http.services.provision-manager.loadbalancer.server.port=8080"
+    restart: unless-stopped
+
+  # ---------------------------------------------------------------------------
+  # CFM Agents — Background provisioning agents (Keycloak, EDC-V, Registration, Onboarding)
+  # ---------------------------------------------------------------------------
+  cfm-agents:
+    image: ghcr.io/eclipse-cfm/cfm/kcagent:latest
+    container_name: health-dataspace-cfm-keycloak-agent
+    volumes:
+      - ./jad/keycloak-agent-config.yaml:/etc/appname/application.yaml:ro
+    networks:
+      - edcv
+    depends_on:
+      keycloak:
+        condition: service_healthy
+      tenant-manager:
+        condition: service_started
+    restart: unless-stopped
+
+  cfm-edcv-agent:
+    image: ghcr.io/eclipse-cfm/cfm/edcvagent:latest
+    container_name: health-dataspace-cfm-edcv-agent
+    volumes:
+      - ./jad/edcv-agent-config.yaml:/etc/appname/application.yaml:ro
+    networks:
+      - edcv
+    depends_on:
+      controlplane:
+        condition: service_healthy
+      tenant-manager:
+        condition: service_started
+    restart: unless-stopped
+
+  cfm-registration-agent:
+    image: ghcr.io/eclipse-cfm/cfm/regagent:latest
+    container_name: health-dataspace-cfm-registration-agent
+    volumes:
+      - ./jad/registration-agent-config.yaml:/etc/appname/application.yaml:ro
+    networks:
+      - edcv
+    depends_on:
+      identityhub:
+        condition: service_healthy
+      issuerservice:
+        condition: service_healthy
+      tenant-manager:
+        condition: service_started
+    restart: unless-stopped
+
+  cfm-onboarding-agent:
+    image: ghcr.io/eclipse-cfm/cfm/obagent:latest
+    container_name: health-dataspace-cfm-onboarding-agent
+    volumes:
+      - ./jad/onboarding-agent-config.yaml:/etc/appname/application.yaml:ro
+    networks:
+      - edcv
+    depends_on:
+      controlplane:
+        condition: service_healthy
+      identityhub:
+        condition: service_healthy
+      issuerservice:
+        condition: service_healthy
+      tenant-manager:
+        condition: service_started
+    restart: unless-stopped
+
+networks:
+  edcv:
+    name: health-dataspace-edcv
+    driver: bridge
+
+volumes:
+  postgres_data:
+  nats_data:

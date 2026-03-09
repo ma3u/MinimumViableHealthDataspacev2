@@ -36,7 +36,7 @@ All three core specifications are now final or near-final:
 
 | Phase  | Title                                                  | Status         | Notes                                                                                            |
 | ------ | ------------------------------------------------------ | -------------- | ------------------------------------------------------------------------------------------------ |
-| **1**  | Infrastructure Migration (EDC-V + DCore + CFM)         | 🔲 Not started | Highest priority for full dataspace functionality                                                |
+| **1**  | Infrastructure Migration (EDC-V + DCore + CFM)         | � In progress  | Phase 1c complete: docker-compose.jad.yml + configs + bootstrap script + OpenAPI client setup    |
 | **2**  | Identity and Trust (DCP v1.0 + Verifiable Credentials) | 🔲 Not started | Depends on Phase 1                                                                               |
 | **3**  | Health Knowledge Graph Layer — Schema & Synthetic Data | ✅ Complete    | 5-layer Neo4j schema, EHDS HDAB chain, style sheet                                               |
 | **3b** | Real FHIR Data Pipeline (Synthea → Neo4j → OMOP)       | ✅ Complete    | 127 patients · 3,031 encounters · 1,045 conditions · 19,195 observations · 2,232 drug Rxes       |

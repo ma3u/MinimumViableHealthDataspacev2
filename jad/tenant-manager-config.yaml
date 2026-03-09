@@ -1,0 +1,28 @@
+# =============================================================================
+# CFM Tenant Manager Configuration
+# =============================================================================
+# Docker Compose equivalent of K8s tenant-manager-config ConfigMap.
+# =============================================================================
+
+spring:
+  datasource:
+    url: jdbc:postgresql://postgres:5432/cfm
+    username: cfm
+    password: cfm
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+
+server:
+  port: 8080
+
+cfm:
+  keycloak:
+    url: http://keycloak:8080
+    realm: edcv
+    client-id: provisioner
+    client-secret: provisioner-secret
+  nats:
+    url: nats://nats:4222
