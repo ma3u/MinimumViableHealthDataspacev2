@@ -43,6 +43,7 @@ All three core specifications are now final or near-final:
 | **3c** | HealthDCAT-AP Metadata Registration for FHIR Dataset   | ✅ Complete    | Synthea cohort registered as HealthDCAT-AP catalog entry; 2 distributions + EHDS Art 53 purpose  |
 | **3d** | README + UI completeness hardening                     | ✅ Complete    | README step order fixed; catalog UI shows datasetType/legalBasis/recordCount                     |
 | **3e** | DSP Marketplace Registration + Compliance Chain        | ✅ Complete    | Layer 1 DataProduct/Contract/HDABApproval wired to Synthea dataset; compliance UI live dropdowns |
+| **3f** | OMOP Research Analytics View                           | ✅ Complete    | Layer 4 cohort dashboard: top conditions/drugs/measurements, gender breakdown, stat cards        |
 | **4**  | Dataspace Integration (EDC-V ↔ Neo4j data assets)     | 🔲 Not started | Depends on Phases 1, 2, 3c                                                                       |
 | **5**  | Federated Queries & GraphRAG                           | 🔲 Not started | Depends on Phase 4                                                                               |
 | **6a** | Graph Explorer UI (Next.js → Neo4j Bolt)               | ✅ Complete    | Four views; runs at localhost:3000                                                               |
@@ -172,6 +173,25 @@ With the Synthea FHIR dataset registered in HealthDCAT-AP (Phase 3c), Phase 3e w
 - Shows consumer name + participantId, dataset title + id
 - Result table adds `Contract` column alongside Application / Approval / EHDS Article
 
+### Phase 3f: OMOP Research Analytics View ✅
+
+With five Neo4j OMOP CDM layers populated (Phase 3b), Phase 3f adds a cohort-level research analytics view demonstrating EHDS Article 53 secondary use.
+
+**Analytics API (`ui/src/app/api/analytics/route.ts`):**
+
+- Queries five OMOP node types in parallel: `OMOPPerson`, `OMOPConditionOccurrence`, `OMOPDrugExposure`, `OMOPMeasurement`, `OMOPVisitOccurrence`
+- Returns summary counts, top-15 conditions/drugs/measurements by occurrence, and gender breakdown
+- Uses `Promise.all` for parallel Neo4j queries
+
+**Analytics UI (`ui/src/app/analytics/page.tsx`):**
+
+- Five stat cards (patients, conditions, drugs, measurements, visits)
+- Gender distribution breakdown with percentages
+- Three horizontal bar chart sections: Top Conditions, Top Drug Exposures, Top Measurements
+- Colour-coded by graph layer: Layer 3 (teal) for conditions, Layer 4 (purple) for drugs, Layer 5 (orange) for measurements
+
+**Navigation:** Added `/analytics` (OMOP Analytics) as fifth nav item with `BarChart2` icon.
+
 ### Phase 4: Dataspace Integration
 
 12. Wire the Neo4j health graph into the EDC-V data plane:
@@ -201,12 +221,13 @@ With the Synthea FHIR dataset registered in HealthDCAT-AP (Phase 3c), Phase 3e w
 
 Deployed as a standalone Next.js 14 web app connecting directly to Neo4j Bolt — no EDC-V dependency, immediately useful for demos and stakeholder review.
 
-| View            | Path          | Description                                       |
-| --------------- | ------------- | ------------------------------------------------- |
-| Graph Explorer  | `/graph`      | Force-directed graph of all 5 architecture layers |
-| Dataset Catalog | `/catalog`    | HealthDCAT-AP metadata browser                    |
-| EHDS Compliance | `/compliance` | HDAB approval chain validator (Articles 45–52)    |
-| Patient Journey | `/patient`    | FHIR R4 → OMOP CDM event timeline                 |
+| View            | Path          | Description                                        |
+| --------------- | ------------- | -------------------------------------------------- |
+| Graph Explorer  | `/graph`      | Force-directed graph of all 5 architecture layers  |
+| Dataset Catalog | `/catalog`    | HealthDCAT-AP metadata browser                     |
+| EHDS Compliance | `/compliance` | HDAB approval chain validator (Articles 45–52)     |
+| Patient Journey | `/patient`    | FHIR R4 → OMOP CDM event timeline                  |
+| OMOP Analytics  | `/analytics`  | Cohort-level OMOP CDM research analytics dashboard |
 
 ### Phase 6b: Full Participant Portal
 

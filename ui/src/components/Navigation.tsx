@@ -2,13 +2,14 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Network, BookOpen, ShieldCheck, User } from "lucide-react";
+import { Network, BookOpen, ShieldCheck, User, BarChart2 } from "lucide-react";
 
 const links = [
   { href: "/graph", label: "Graph Explorer", icon: Network },
   { href: "/catalog", label: "Dataset Catalog", icon: BookOpen },
   { href: "/compliance", label: "EHDS Compliance", icon: ShieldCheck },
   { href: "/patient", label: "Patient Journey", icon: User },
+  { href: "/analytics", label: "OMOP Analytics", icon: BarChart2 },
 ];
 
 export default function Navigation() {

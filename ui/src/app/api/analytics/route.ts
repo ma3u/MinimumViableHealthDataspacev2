@@ -1,0 +1,69 @@
+import { NextResponse } from "next/server";
+import { runQuery } from "@/lib/neo4j";
+
+export async function GET() {
+  const [summary, topConditions, topDrugs, topMeasurements, genderBreakdown] =
+    await Promise.all([
+      runQuery<{
+        persons: number;
+        conditions: number;
+        drugs: number;
+        measurements: number;
+        visits: number;
+      }>(
+        `MATCH (op:OMOPPerson)
+         WITH count(op) AS persons
+         MATCH (oc:OMOPConditionOccurrence)
+         WITH persons, count(oc) AS conditions
+         MATCH (od:OMOPDrugExposure)
+         WITH persons, conditions, count(od) AS drugs
+         MATCH (om:OMOPMeasurement)
+         WITH persons, conditions, drugs, count(om) AS measurements
+         MATCH (ov:OMOPVisitOccurrence)
+         RETURN persons, conditions, drugs, measurements, count(ov) AS visits`,
+      ),
+
+      runQuery<{ label: string; count: number }>(
+        `MATCH (oc:OMOPConditionOccurrence)
+         RETURN oc.name AS label, count(oc) AS count
+         ORDER BY count DESC LIMIT 15`,
+      ),
+
+      runQuery<{ label: string; count: number }>(
+        `MATCH (od:OMOPDrugExposure)
+         RETURN od.name AS label, count(od) AS count
+         ORDER BY count DESC LIMIT 15`,
+      ),
+
+      runQuery<{ label: string; count: number }>(
+        `MATCH (om:OMOPMeasurement)
+         RETURN om.name AS label, count(om) AS count
+         ORDER BY count DESC LIMIT 15`,
+      ),
+
+      runQuery<{ gender: string; count: number }>(
+        `MATCH (op:OMOPPerson)
+         RETURN CASE op.genderConceptId
+                  WHEN 8507 THEN 'Male'
+                  WHEN 8532 THEN 'Female'
+                  ELSE 'Unknown'
+                END AS gender,
+                count(op) AS count
+         ORDER BY count DESC`,
+      ),
+    ]);
+
+  return NextResponse.json({
+    summary: summary[0] ?? {
+      persons: 0,
+      conditions: 0,
+      drugs: 0,
+      measurements: 0,
+      visits: 0,
+    },
+    topConditions,
+    topDrugs,
+    topMeasurements,
+    genderBreakdown,
+  });
+}
