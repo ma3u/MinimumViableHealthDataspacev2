@@ -123,6 +123,29 @@ MERGE (r:RxNormConcept {code: row.code})
 MERGE (m)-[:CODED_BY]->(r)
 """
 
+UPSERT_PROCEDURES = """
+UNWIND $rows AS row
+MERGE (pr:Procedure {id: row.id})
+SET pr.name            = row.name,
+    pr.performedStart  = row.performedStart,
+    pr.performedEnd    = row.performedEnd,
+    pr.code            = row.code,
+    pr.display         = row.display,
+    pr.system          = row.system,
+    pr.status          = row.status
+WITH pr, row WHERE row.patientId <> ''
+MATCH (p:Patient {id: row.patientId})
+MERGE (p)-[:HAS_PROCEDURE]->(pr)
+"""
+
+LINK_PROCEDURES_SNOMED = """
+UNWIND $rows AS row
+MATCH (pr:Procedure {id: row.id})
+MERGE (s:SnomedConcept {code: row.code})
+  ON CREATE SET s.name = row.display, s.description = row.display
+MERGE (pr)-[:CODED_BY]->(s)
+"""
+
 
 # ── Bundle parser ─────────────────────────────────────────────────────────────
 
@@ -144,8 +167,8 @@ def parse_bundle(bundle_path: str, dataset_id: str):
             patient_id = r["id"]
             break
 
-    patients, encounters, conditions, observations, medications = [], [], [], [], []
-    snomed_rows, loinc_rows, rxnorm_rows = [], [], []
+    patients, encounters, conditions, observations, medications, procedures = [], [], [], [], [], []
+    snomed_rows, loinc_rows, rxnorm_rows, proc_snomed_rows = [], [], [], []
 
     for entry in entries:
         r = entry.get("resource", {})
@@ -246,11 +269,36 @@ def parse_bundle(bundle_path: str, dataset_id: str):
             if code and "rxnorm" in system.lower():
                 rxnorm_rows.append({"id": mid, "code": code, "display": display})
 
+        elif rtype == "Procedure" and patient_id:
+            prid = r["id"]
+            codings = r.get("code", {}).get("coding", [])
+            code = codings[0].get("code", "") if codings else ""
+            display = (
+                codings[0].get("display", r.get("code", {}).get("text", ""))
+                if codings else ""
+            )
+            system = codings[0].get("system", "") if codings else ""
+            period = r.get("performedPeriod") or {}
+            performed_start = period.get("start", r.get("performedDateTime", ""))
+            performed_end = period.get("end", "")
+            row = {
+                "id": prid, "name": display or prid,
+                "performedStart": performed_start,
+                "performedEnd": performed_end,
+                "code": code, "display": display, "system": system,
+                "status": r.get("status", ""),
+                "patientId": patient_id,
+            }
+            procedures.append(row)
+            if code and "snomed" in system.lower():
+                proc_snomed_rows.append({"id": prid, "code": code, "display": display})
+
     return {
         "patients": patients, "encounters": encounters,
         "conditions": conditions, "snomed_rows": snomed_rows,
         "observations": observations, "loinc_rows": loinc_rows,
         "medications": medications, "rxnorm_rows": rxnorm_rows,
+        "procedures": procedures, "proc_snomed_rows": proc_snomed_rows,
     }
 
 
@@ -282,6 +330,13 @@ def load_bundle(session, bundle_path: str, dataset_id: str, stats: dict):
                     tx.run(LINK_MEDICATIONS_RXNORM, rows=data["rxnorm_rows"])
                 stats["MedicationRequest"] = (
                     stats.get("MedicationRequest", 0) + len(data["medications"])
+                )
+            if data["procedures"]:
+                tx.run(UPSERT_PROCEDURES, rows=data["procedures"])
+                if data["proc_snomed_rows"]:
+                    tx.run(LINK_PROCEDURES_SNOMED, rows=data["proc_snomed_rows"])
+                stats["Procedure"] = (
+                    stats.get("Procedure", 0) + len(data["procedures"])
                 )
             tx.commit()
     except Exception as e:

@@ -67,13 +67,13 @@ The schema below shows the node labels and relationship types as rendered by Neo
 The Next.js 14 app is served at <http://localhost:3000> and provides five purpose-built views,
 each backed by a dedicated API route that queries Neo4j directly over Bolt.
 
-| View             | Route         | Description                                                                                           |
-| ---------------- | ------------- | ----------------------------------------------------------------------------------------------------- |
-| Graph Explorer   | `/graph`      | Force-directed graph of all 5 layers; click a node to highlight its neighbourhood and view details.   |
-| Data Catalogue   | `/catalog`    | HealthDCAT-AP dataset cards with publisher, license, temporal coverage, and expandable detail panels. |
-| Compliance Chain | `/compliance` | Trace a DSP contract from DataProduct → OdrlPolicy → Contract → HDABApproval in one query.            |
-| Patient Journey  | `/patient`    | Time-ordered FHIR R4 timeline (encounters, conditions, medications) alongside the OMOP CDM mapping.   |
-| OMOP Analytics   | `/analytics`  | Cohort-level stat cards (patients, conditions, drugs), gender breakdown, and top-15 bar charts.       |
+| View             | Route         | Description                                                                                                     |
+| ---------------- | ------------- | --------------------------------------------------------------------------------------------------------------- |
+| Graph Explorer   | `/graph`      | Force-directed graph of all 5 layers; click a node to highlight its neighbourhood and view details.             |
+| Data Catalogue   | `/catalog`    | HealthDCAT-AP dataset cards with publisher, license, temporal coverage, and expandable detail panels.           |
+| Compliance Chain | `/compliance` | Trace a DSP contract from DataProduct → OdrlPolicy → Contract → HDABApproval in one query.                      |
+| Patient Journey  | `/patient`    | Time-ordered FHIR R4 timeline (encounters, conditions, medications, procedures) alongside the OMOP CDM mapping. |
+| OMOP Analytics   | `/analytics`  | Cohort-level stat cards (patients, conditions, drugs, procedures), gender breakdown, and top-15 bar charts.     |
 
 ---
 
@@ -275,6 +275,7 @@ onwards will introduce live Eclipse EDC-V connector instances and real patient d
 | 3d    | Graph node selection — white-ring highlight, dim neighbours, blue edge-type labels at midpoint | ✅ Complete |
 | 3e    | DSP Marketplace registration — full Layer 1 EDC governance chain wired to dataset              | ✅ Complete |
 | 3f    | OMOP Research Analytics dashboard — cohort stat cards, gender breakdown, top-15 bar charts     | ✅ Complete |
+| 3g    | Procedure pipeline — 8,534 FHIR Procedures → OMOPProcedureOccurrence; Analytics home card      | ✅ Complete |
 | 4     | Eclipse EDC-V connector integration — live DSP negotiation with a running connector instance   | 🔲 Planned  |
 | 5     | Real Synthea data pipeline, IDS-G compliance audit, multi-participant scenario                 | 🔲 Planned  |
 
@@ -311,4 +312,4 @@ schema change rules, and the PR checklist.
 
 ## License
 
-[Apache 2.0](LICENSE) © 2024 ma3u
+[Apache 2.0](LICENSE) © 2026 Matthias Buchhorn-Roth

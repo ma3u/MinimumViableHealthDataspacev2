@@ -32,6 +32,8 @@ CREATE INDEX observation_category IF NOT EXISTS FOR (o:Observation) ON (o.catego
 CREATE CONSTRAINT medication_request_id IF NOT EXISTS FOR (mr:MedicationRequest) REQUIRE mr.resourceId IS UNIQUE;
 CREATE INDEX medication_code IF NOT EXISTS FOR (mr:MedicationRequest) ON (mr.medicationCode);
 CREATE CONSTRAINT encounter_id IF NOT EXISTS FOR (e:Encounter) REQUIRE e.resourceId IS UNIQUE;
+CREATE CONSTRAINT procedure_id IF NOT EXISTS FOR (pr:Procedure) REQUIRE pr.resourceId IS UNIQUE;
+CREATE INDEX procedure_code IF NOT EXISTS FOR (pr:Procedure) ON (pr.code);
 
 // ============================================================
 // Layer 4: OMOP Research Analytics
@@ -41,6 +43,8 @@ CREATE CONSTRAINT omop_condition_occurrence_id IF NOT EXISTS FOR (oco:OMOPCondit
 CREATE INDEX omop_condition_concept IF NOT EXISTS FOR (oco:OMOPConditionOccurrence) ON (oco.conditionConceptId);
 CREATE CONSTRAINT omop_measurement_id IF NOT EXISTS FOR (om:OMOPMeasurement) REQUIRE om.measurementId IS UNIQUE;
 CREATE INDEX omop_measurement_concept IF NOT EXISTS FOR (om:OMOPMeasurement) ON (om.measurementConceptId);
+CREATE CONSTRAINT omop_procedure_occurrence_id IF NOT EXISTS FOR (opo:OMOPProcedureOccurrence) REQUIRE opo.procedureOccurrenceId IS UNIQUE;
+CREATE INDEX omop_procedure_concept IF NOT EXISTS FOR (opo:OMOPProcedureOccurrence) ON (opo.procedureConceptId);
 
 // ============================================================
 // Layer 5: Clinical Ontology Backbone

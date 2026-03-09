@@ -15,6 +15,7 @@ interface CohortStats {
   conditions: number;
   observations: number;
   medications: number;
+  procedures: number;
 }
 
 interface TimelineEntry {
@@ -31,6 +32,7 @@ const FHIR_COLORS: Record<string, string> = {
   Condition: "#148F77",
   Observation: "#1E8449",
   MedicationRequest: "#CA6F1E",
+  Procedure: "#7D3C98",
 };
 
 function StatBadge({ label, value }: { label: string; value?: number }) {
@@ -87,12 +89,13 @@ export default function PatientPage() {
 
       {/* Cohort stats */}
       {stats && (
-        <div className="grid grid-cols-5 gap-2 mb-8">
+        <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 mb-8">
           <StatBadge label="Patients" value={stats.patients} />
           <StatBadge label="Encounters" value={stats.encounters} />
           <StatBadge label="Conditions" value={stats.conditions} />
           <StatBadge label="Observations" value={stats.observations} />
           <StatBadge label="Medications" value={stats.medications} />
+          <StatBadge label="Procedures" value={stats.procedures} />
         </div>
       )}
 

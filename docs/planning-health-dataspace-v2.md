@@ -44,6 +44,7 @@ All three core specifications are now final or near-final:
 | **3d** | README + UI completeness hardening                     | ✅ Complete    | README step order fixed; catalog UI shows datasetType/legalBasis/recordCount                     |
 | **3e** | DSP Marketplace Registration + Compliance Chain        | ✅ Complete    | Layer 1 DataProduct/Contract/HDABApproval wired to Synthea dataset; compliance UI live dropdowns |
 | **3f** | OMOP Research Analytics View                           | ✅ Complete    | Layer 4 cohort dashboard: top conditions/drugs/measurements, gender breakdown, stat cards        |
+| **3g** | Procedure Pipeline + UI Polish                         | ✅ Complete    | 8,534 Procedure → OMOPProcedureOccurrence; Analytics card on home; 6-stat patient page           |
 | **4**  | Dataspace Integration (EDC-V ↔ Neo4j data assets)     | 🔲 Not started | Depends on Phases 1, 2, 3c                                                                       |
 | **5**  | Federated Queries & GraphRAG                           | 🔲 Not started | Depends on Phase 4                                                                               |
 | **6a** | Graph Explorer UI (Next.js → Neo4j Bolt)               | ✅ Complete    | Four views; runs at localhost:3000                                                               |
@@ -191,6 +192,48 @@ With five Neo4j OMOP CDM layers populated (Phase 3b), Phase 3f adds a cohort-lev
 - Colour-coded by graph layer: Layer 3 (teal) for conditions, Layer 4 (purple) for drugs, Layer 5 (orange) for measurements
 
 **Navigation:** Added `/analytics` (OMOP Analytics) as fifth nav item with `BarChart2` icon.
+
+### Phase 3g: Procedure Pipeline + UI Polish ✅
+
+Synthea generates ~43 Procedure resources per patient (96% SNOMED CT, 4% ADA CDT) that were previously dropped during FHIR ingestion. Phase 3g closes this gap across the full pipeline.
+
+**FHIR Loader (`scripts/load_fhir_neo4j.py`):**
+
+- Added `UPSERT_PROCEDURES` and `LINK_PROCEDURES_SNOMED` bulk Cypher templates
+- Parses Procedure resources: id, code, display, system, performedStart, performedEnd, status
+- Creates `(:Patient)-[:HAS_PROCEDURE]->(:Procedure)` and `(:Procedure)-[:CODED_BY]->(:SnomedConcept)` relationships
+- Result: 8,534 Procedure nodes upserted from 66 bundles
+
+**Schema (`neo4j/init-schema.cypher`):**
+
+- `CREATE CONSTRAINT procedure_id` (uniqueness)
+- `CREATE INDEX procedure_code` (lookup)
+- `CREATE CONSTRAINT omop_procedure_occurrence_id` (uniqueness)
+- `CREATE INDEX omop_procedure_concept` (lookup)
+
+**OMOP Transform (`neo4j/fhir-to-omop-transform.cypher`):**
+
+- Section 6: `(:Procedure) → (:OMOPProcedureOccurrence)` with `(:OMOPPerson)-[:HAS_PROCEDURE_OCCURRENCE]->` relationships
+- SNOMED vocabulary bridge: `(:OMOPProcedureOccurrence)-[:CODED_BY]->(:SnomedConcept)` — 7,768 links
+- Result: 8,534 OMOPProcedureOccurrence nodes created
+
+**UI Changes:**
+
+- Home page: Added Analytics card (5th navigation tile)
+- Graph explorer: Added Procedure (Layer 3) and OMOPProcedureOccurrence (Layer 4) to force-directed graph
+- Analytics dashboard: Added Procedures stat card + Top Procedures bar chart; grid changed to 6-column
+- Patient journey: Added Procedures stat badge (6 badges); Procedure events in timeline with purple (#7D3C98) colour
+
+**Updated Node Counts:**
+
+| FHIR Layer (3)    | Count     | OMOP Layer (4)              | Count     |
+| ----------------- | --------- | --------------------------- | --------- |
+| Patient           | 167       | OMOPPerson                  | 167       |
+| Encounter         | 5,461     | OMOPVisitOccurrence         | 5,461     |
+| Condition         | 2,421     | OMOPConditionOccurrence     | 2,421     |
+| Observation       | 37,713    | OMOPMeasurement             | 34,203    |
+| MedicationRequest | 3,895     | OMOPDrugExposure            | 3,895     |
+| **Procedure**     | **8,534** | **OMOPProcedureOccurrence** | **8,534** |
 
 ### Phase 4: Dataspace Integration
 

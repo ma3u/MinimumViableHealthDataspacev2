@@ -8,6 +8,7 @@ import {
   Users,
   Calendar,
   BarChart2,
+  Scissors,
 } from "lucide-react";
 
 interface AnalyticsData {
@@ -16,11 +17,13 @@ interface AnalyticsData {
     conditions: number;
     drugs: number;
     measurements: number;
+    procedures: number;
     visits: number;
   };
   topConditions: { label: string; count: number }[];
   topDrugs: { label: string; count: number }[];
   topMeasurements: { label: string; count: number }[];
+  topProcedures: { label: string; count: number }[];
   genderBreakdown: { gender: string; count: number }[];
 }
 
@@ -28,6 +31,7 @@ const LAYER_COLORS = {
   condition: "bg-layer3",
   drug: "bg-layer4",
   measurement: "bg-layer5",
+  procedure: "bg-layer1",
   neutral: "bg-layer2",
 };
 
@@ -147,6 +151,12 @@ export default function AnalyticsPage() {
       color: "text-layer4",
     },
     {
+      label: "Procedures",
+      value: summary?.procedures,
+      icon: Scissors,
+      color: "text-layer1",
+    },
+    {
       label: "Measurements",
       value: summary?.measurements,
       icon: FlaskConical,
@@ -178,7 +188,7 @@ export default function AnalyticsPage() {
       )}
 
       {/* Stat cards */}
-      <div className="grid grid-cols-5 gap-3 mb-8">
+      <div className="grid grid-cols-3 sm:grid-cols-6 gap-3 mb-8">
         {statCards.map(({ label, value, icon: Icon, color }) => (
           <div
             key={label}
@@ -248,6 +258,13 @@ export default function AnalyticsPage() {
           icon={FlaskConical}
           data={data?.topMeasurements ?? []}
           colorClass={LAYER_COLORS.measurement}
+          loading={loading}
+        />
+        <BarSection
+          title="Top Procedures (OMOPProcedureOccurrence)"
+          icon={Scissors}
+          data={data?.topProcedures ?? []}
+          colorClass={LAYER_COLORS.procedure}
           loading={loading}
         />
       </div>

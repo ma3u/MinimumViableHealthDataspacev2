@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Network, BookOpen, ShieldCheck, User } from "lucide-react";
+import { Network, BookOpen, ShieldCheck, User, BarChart2 } from "lucide-react";
 
 const cards = [
   {
@@ -29,6 +29,13 @@ const cards = [
     label: "Patient Journey",
     desc: "FHIR R4 → OMOP CDM timeline per patient",
     color: "border-layer3 hover:bg-layer3/10",
+  },
+  {
+    href: "/analytics",
+    icon: BarChart2,
+    label: "OMOP Analytics",
+    desc: "Cohort-level OMOP CDM research analytics dashboard",
+    color: "border-layer4 hover:bg-layer4/10",
   },
 ];
 

@@ -115,7 +115,28 @@ MATCH (m)-[:MAPPED_TO]->(od:OMOPDrugExposure)
 MERGE (od)-[:CODED_BY]->(rxn)
 RETURN count(rxn) AS rxnorm_links_on_omop_drug_exposures;
 
-// ── 6. Summary ───────────────────────────────────────────────────────────────
+// ── 6. OMOPProcedureOccurrence from Procedure ───────────────────────────────
+
+MATCH (p:Patient)-[:HAS_PROCEDURE]->(pr:Procedure)
+MATCH (p)-[:MAPPED_TO]->(op:OMOPPerson)
+WHERE NOT (pr)-[:MAPPED_TO]->(:OMOPProcedureOccurrence)
+MERGE (opo:OMOPProcedureOccurrence {id: 'omop-proc-' + pr.id})
+SET opo.name                    = coalesce(pr.display, pr.name, pr.id),
+    opo.procedureDate           = coalesce(left(pr.performedStart, 10), ''),
+    opo.procedureSourceValue    = pr.code,
+    opo.procedureConceptId      = 0,
+    opo.personId                = op.id
+MERGE (pr)-[:MAPPED_TO]->(opo)
+MERGE (op)-[:HAS_PROCEDURE_OCCURRENCE]->(opo)
+RETURN count(opo) AS omop_procedure_occurrences_created;
+
+// Link OMOPProcedureOccurrence → SnomedConcept (vocabulary bridge)
+MATCH (pr:Procedure)-[:CODED_BY]->(sc:SnomedConcept)
+MATCH (pr)-[:MAPPED_TO]->(opo:OMOPProcedureOccurrence)
+MERGE (opo)-[:CODED_BY]->(sc)
+RETURN count(sc) AS snomed_links_on_omop_procedures;
+
+// ── 7. Summary ───────────────────────────────────────────────────────────────
 
 MATCH (n)
 WHERE n:OMOPPerson
@@ -123,5 +144,6 @@ WHERE n:OMOPPerson
    OR n:OMOPConditionOccurrence
    OR n:OMOPMeasurement
    OR n:OMOPDrugExposure
+   OR n:OMOPProcedureOccurrence
 RETURN labels(n)[0] AS omopLayer, count(n) AS total
 ORDER BY omopLayer;

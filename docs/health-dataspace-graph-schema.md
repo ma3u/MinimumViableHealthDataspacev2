@@ -570,6 +570,21 @@ Maps to OMOP `drug_exposure` table.
 
 ---
 
+#### `OMOPProcedureOccurrence`
+
+Maps to OMOP `procedure_occurrence` table.
+
+**Properties:**
+
+- `id: String!`
+- `name: String` — Display name of the procedure
+- `procedureDate: String` — Date the procedure was performed (YYYY-MM-DD)
+- `procedureSourceValue: String` — Source code (SNOMED CT or ADA CDT)
+- `procedureConceptId: Long` — OMOP standard concept ID (0 = unmapped)
+- `personId: String` — Reference to OMOPPerson
+
+---
+
 #### `OMOPVisitOccurrence`
 
 Maps to OMOP `visit_occurrence` table.
@@ -602,6 +617,7 @@ Maps to OMOP `visit_occurrence` table.
 (:OMOPPerson)-[:HAS_CONDITION_OCCURRENCE]->(:OMOPConditionOccurrence)
 (:OMOPPerson)-[:HAS_MEASUREMENT]->(:OMOPMeasurement)
 (:OMOPPerson)-[:HAS_DRUG_EXPOSURE]->(:OMOPDrugExposure)
+(:OMOPPerson)-[:HAS_PROCEDURE_OCCURRENCE]->(:OMOPProcedureOccurrence)
 (:OMOPPerson)-[:HAS_VISIT_OCCURRENCE]->(:OMOPVisitOccurrence)
 
 (:OMOPConditionOccurrence)-[:DURING_VISIT]->(:OMOPVisitOccurrence)
@@ -620,6 +636,7 @@ These relationships preserve bidirectional traceability and transformation prove
 (:Condition)-[:MAPPED_TO]->(:OMOPConditionOccurrence)
 (:Observation)-[:MAPPED_TO {observationType}]->(:OMOPMeasurement)
 (:MedicationRequest)-[:MAPPED_TO]->(:OMOPDrugExposure)
+(:Procedure)-[:MAPPED_TO]->(:OMOPProcedureOccurrence)
 (:Encounter)-[:MAPPED_TO]->(:OMOPVisitOccurrence)
 
 // Properties on MAPPED_TO relationship:

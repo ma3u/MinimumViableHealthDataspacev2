@@ -16,11 +16,13 @@ const LABEL_LAYER: Record<string, number> = {
   Condition: 3,
   Observation: 3,
   MedicationRequest: 3,
+  Procedure: 3,
   OMOPPerson: 4,
   OMOPVisitOccurrence: 4,
   OMOPConditionOccurrence: 4,
   OMOPMeasurement: 4,
   OMOPDrugExposure: 4,
+  OMOPProcedureOccurrence: 4,
   SnomedConcept: 5,
   LoincCode: 5,
   ICD10Code: 5,
@@ -72,7 +74,7 @@ export async function GET() {
   }>(
     `UNWIND $ids AS eid
      MATCH (p) WHERE elementId(p) = eid
-     MATCH (p)-[:HAS_ENCOUNTER|HAS_CONDITION|HAS_OBSERVATION|HAS_MEDICATION]->(e)
+     MATCH (p)-[:HAS_ENCOUNTER|HAS_CONDITION|HAS_OBSERVATION|HAS_MEDICATION|HAS_PROCEDURE]->(e)
      RETURN elementId(e) AS id, labels(e) AS labels,
             coalesce(e.display, e.name, e.code, elementId(e)) AS name
      LIMIT 40`,
