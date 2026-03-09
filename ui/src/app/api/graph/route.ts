@@ -5,6 +5,7 @@ import { runQuery } from "@/lib/neo4j";
 const LABEL_LAYER: Record<string, number> = {
   Participant: 1,
   DataProduct: 1,
+  OdrlPolicy: 1,
   Contract: 1,
   AccessApplication: 1,
   HDABApproval: 1,
@@ -35,26 +36,110 @@ const LAYER_COLORS: Record<number, string> = {
 };
 
 export async function GET() {
-  const nodeRows = await runQuery<{
+  // ── Step 1: curated node collection ────────────────────────────────────────
+  // L1 + L2: fetch everything (these are small sets)
+  const coreNodes = await runQuery<{
     id: string;
     labels: string[];
     name: string;
   }>(
-    `MATCH (n) RETURN elementId(n) AS id, labels(n) AS labels,
-     coalesce(n.name, n.id, elementId(n)) AS name LIMIT 300`,
+    `MATCH (n)
+     WHERE n:Participant OR n:DataProduct OR n:OdrlPolicy OR n:Contract
+        OR n:AccessApplication OR n:HDABApproval
+        OR n:HealthDataset OR n:Distribution
+     RETURN elementId(n) AS id, labels(n) AS labels,
+            coalesce(n.name, n.title, n.participantId, n.productId, n.id, elementId(n)) AS name`,
   );
 
+  // L3: 8 representative patients
+  const patientNodes = await runQuery<{
+    id: string;
+    labels: string[];
+    name: string;
+  }>(
+    `MATCH (p:Patient)
+     RETURN elementId(p) AS id, labels(p) AS labels,
+            coalesce(p.name, p.id, elementId(p)) AS name
+     ORDER BY p.name LIMIT 8`,
+  );
+
+  // L3: FHIR clinical events for those 8 patients (≤5 events each = ≤40)
+  const patientEIds = patientNodes.map((p) => p.id);
+  const fhirNodes = await runQuery<{
+    id: string;
+    labels: string[];
+    name: string;
+  }>(
+    `UNWIND $ids AS eid
+     MATCH (p) WHERE elementId(p) = eid
+     MATCH (p)-[:HAS_ENCOUNTER|HAS_CONDITION|HAS_OBSERVATION|HAS_MEDICATION]->(e)
+     RETURN elementId(e) AS id, labels(e) AS labels,
+            coalesce(e.display, e.name, e.code, elementId(e)) AS name
+     LIMIT 40`,
+    { ids: patientEIds },
+  );
+
+  // L4: OMOP nodes mapped from those FHIR events
+  const fhirEIds = fhirNodes.map((e) => e.id);
+  const omopNodes = await runQuery<{
+    id: string;
+    labels: string[];
+    name: string;
+  }>(
+    `UNWIND $ids AS eid
+     MATCH (fhir) WHERE elementId(fhir) = eid
+     MATCH (fhir)-[:MAPPED_TO]->(omop)
+     RETURN elementId(omop) AS id, labels(omop) AS labels,
+            coalesce(omop.name, omop.id, elementId(omop)) AS name
+     LIMIT 40`,
+    { ids: fhirEIds },
+  );
+
+  // L5: ontology codes linked to those FHIR events
+  const ontologyNodes = await runQuery<{
+    id: string;
+    labels: string[];
+    name: string;
+  }>(
+    `UNWIND $ids AS eid
+     MATCH (fhir) WHERE elementId(fhir) = eid
+     MATCH (fhir)-[:CODED_BY]->(ont)
+     RETURN elementId(ont) AS id, labels(ont) AS labels,
+            coalesce(ont.display, ont.code, ont.id, elementId(ont)) AS name
+     LIMIT 30`,
+    { ids: fhirEIds },
+  );
+
+  // ── Step 2: deduplicate nodes ───────────────────────────────────────────────
+  const allRaw = [
+    ...coreNodes,
+    ...patientNodes,
+    ...fhirNodes,
+    ...omopNodes,
+    ...ontologyNodes,
+  ];
+  const nodeMap = new Map<string, (typeof allRaw)[0]>();
+  for (const n of allRaw) nodeMap.set(n.id, n);
+  const uniqueNodes = Array.from(nodeMap.values());
+  const nodeIdSet = new Set(uniqueNodes.map((n) => n.id));
+  const nodeIds = Array.from(nodeIdSet);
+
+  // ── Step 3: fetch ONLY edges where both endpoints are in the node set ───────
   const relRows = await runQuery<{
     source: string;
     target: string;
     type: string;
   }>(
-    `MATCH (a)-[r]->(b) RETURN elementId(a) AS source,
-     elementId(b) AS target, type(r) AS type LIMIT 600`,
+    `MATCH (a)-[r]->(b)
+     WHERE elementId(a) IN $ids AND elementId(b) IN $ids
+     RETURN DISTINCT elementId(a) AS source, elementId(b) AS target, type(r) AS type`,
+    { ids: nodeIds },
   );
 
-  const nodes = nodeRows.map((r) => {
-    const layer = r.labels.map((l) => LABEL_LAYER[l]).find(Boolean) ?? 0;
+  // ── Step 4: build response ──────────────────────────────────────────────────
+  const nodes = uniqueNodes.map((r) => {
+    const layer =
+      r.labels.map((l: string) => LABEL_LAYER[l]).find(Boolean) ?? 0;
     return {
       id: r.id,
       name: r.name,
@@ -64,11 +149,5 @@ export async function GET() {
     };
   });
 
-  const links = relRows.map((r) => ({
-    source: r.source,
-    target: r.target,
-    type: r.type,
-  }));
-
-  return NextResponse.json({ nodes, links });
+  return NextResponse.json({ nodes, links: relRows });
 }

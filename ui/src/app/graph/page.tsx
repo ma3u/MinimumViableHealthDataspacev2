@@ -77,16 +77,24 @@ export default function GraphPage() {
   }, []);
 
   const paintNode = useCallback(
-    (node: GraphNode, ctx: CanvasRenderingContext2D) => {
-      const r = 6;
+    (node: GraphNode, ctx: CanvasRenderingContext2D, globalScale: number) => {
+      const r = Math.max(4, 8 / Math.sqrt(globalScale));
       ctx.beginPath();
       ctx.arc(node.x ?? 0, node.y ?? 0, r, 0, 2 * Math.PI);
       ctx.fillStyle = node.color ?? "#888";
       ctx.fill();
-      ctx.font = "4px sans-serif";
-      ctx.fillStyle = "#e5e7eb";
-      ctx.textAlign = "center";
-      ctx.fillText(node.name, node.x ?? 0, (node.y ?? 0) + r + 4);
+      // Only draw labels when zoomed in enough to read them
+      if (globalScale >= 0.6) {
+        const fontSize = Math.max(3, 10 / globalScale);
+        ctx.font = `${fontSize}px sans-serif`;
+        ctx.fillStyle = "#d1d5db";
+        ctx.textAlign = "center";
+        ctx.fillText(
+          node.name.length > 24 ? node.name.slice(0, 22) + "…" : node.name,
+          node.x ?? 0,
+          (node.y ?? 0) + r + fontSize * 1.2,
+        );
+      }
     },
     [],
   );
@@ -145,6 +153,10 @@ export default function GraphPage() {
             linkLabel="type"
             onNodeClick={(n) => setSelectedNode(n as unknown as GraphNode)}
             backgroundColor="#030712"
+            d3AlphaDecay={0.02}
+            d3VelocityDecay={0.3}
+            cooldownTicks={200}
+            nodeRelSize={6}
           />
         )}
       </div>
