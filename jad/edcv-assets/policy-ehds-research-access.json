@@ -1,0 +1,58 @@
+{
+  "@context": {
+    "edc": "https://w3id.org/edc/v0.0.1/ns/",
+    "odrl": "http://www.w3.org/ns/odrl/2/"
+  },
+  "@type": "edc:PolicyDefinition",
+  "@id": "policy-ehds-research-access",
+  "edc:policy": {
+    "@type": "odrl:Set",
+    "odrl:permission": [
+      {
+        "odrl:action": { "@id": "odrl:use" },
+        "odrl:constraint": [
+          {
+            "odrl:leftOperand": { "@id": "edc:purpose" },
+            "odrl:operator": { "@id": "odrl:isAnyOf" },
+            "odrl:rightOperand": [
+              "EHDS Article 53(1)(a) — public health surveillance",
+              "EHDS Article 53(1)(c) — scientific research",
+              "EHDS Article 53(1)(d) — education and teaching",
+              "EHDS Article 53(1)(e) — official statistics"
+            ]
+          },
+          {
+            "odrl:leftOperand": { "@id": "edc:inForceDate" },
+            "odrl:operator": { "@id": "odrl:lteq" },
+            "odrl:rightOperand": {
+              "@value": "contractAgreement+90d",
+              "@type": "edc:duration"
+            }
+          }
+        ],
+        "odrl:duty": [
+          {
+            "odrl:action": { "@id": "edc:anonymize" },
+            "odrl:constraint": [
+              {
+                "odrl:leftOperand": { "@id": "edc:kAnonymity" },
+                "odrl:operator": { "@id": "odrl:gteq" },
+                "odrl:rightOperand": 5
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "odrl:prohibition": [
+      {
+        "odrl:action": { "@id": "edc:reIdentify" },
+        "odrl:assignee": { "@id": "odrl:assignee" }
+      },
+      {
+        "odrl:action": { "@id": "odrl:commercialize" },
+        "odrl:assignee": { "@id": "odrl:assignee" }
+      }
+    ]
+  }
+}

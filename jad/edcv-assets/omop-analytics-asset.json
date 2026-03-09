@@ -1,0 +1,36 @@
+{
+  "@context": {
+    "edc": "https://w3id.org/edc/v0.0.1/ns/",
+    "dcat": "http://www.w3.org/ns/dcat#",
+    "dct": "http://purl.org/dc/terms/",
+    "odrl": "http://www.w3.org/ns/odrl/2/",
+    "healthdcatap": "http://healthdcat-ap.eu/ns#"
+  },
+  "@type": "edc:Asset",
+  "@id": "asset-omop-analytics-synthea-2026",
+  "edc:properties": {
+    "edc:name": "Synthea OMOP CDM Analytics",
+    "edc:description": "OMOP CDM v5.4 research analytics view of the Synthea patient cohort. Provides aggregate cohort queries (condition counts, drug exposures, measurement distributions, procedure frequencies) with k-anonymity enforcement. Results served as JSON or CSV.",
+    "edc:contenttype": "application/json",
+    "edc:type": "OmopAnalytics",
+    "edc:version": "1.0",
+    "dct:conformsTo": "https://ohdsi.github.io/CommonDataModel/cdm54.html",
+    "healthdcatap:datasetType": "SyntheticData",
+    "healthdcatap:healthCategory": ["patient-summary", "laboratory-results"],
+    "healthdcatap:numberOfRecords": 167,
+    "healthdcatap:numberOfUniqueIndividuals": 167,
+    "healthdcatap:purpose": [
+      "EHDS Article 53(1)(a) — public health surveillance",
+      "EHDS Article 53(1)(c) — scientific research"
+    ]
+  },
+  "edc:dataAddress": {
+    "@type": "edc:DataAddress",
+    "edc:type": "HttpData",
+    "edc:baseUrl": "http://neo4j-proxy:9090/omop/cohort",
+    "edc:proxyMethod": true,
+    "edc:proxyBody": true,
+    "edc:proxyPath": true,
+    "edc:contentType": "application/json"
+  }
+}

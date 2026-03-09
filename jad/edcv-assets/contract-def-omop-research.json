@@ -1,0 +1,15 @@
+{
+  "@context": {
+    "edc": "https://w3id.org/edc/v0.0.1/ns/"
+  },
+  "@type": "edc:ContractDefinition",
+  "@id": "contract-def-omop-research",
+  "edc:accessPolicyId": "policy-ehds-research-access",
+  "edc:contractPolicyId": "policy-ehds-research-access",
+  "edc:assetsSelector": {
+    "@type": "edc:Criterion",
+    "edc:operandLeft": "edc:type",
+    "edc:operator": "=",
+    "edc:operandRight": "OmopAnalytics"
+  }
+}

@@ -9,6 +9,7 @@
 - [Implementation Roadmap](#implementation-roadmap)
   - [Phase 1: Infrastructure Migration (JAD-Based)](#phase-1-infrastructure-migration-jad-based)
     - [1e: ADR-2 Implementation — Dual Data Planes + Neo4j Query Proxy ✅](#1e-adr-2-implementation--dual-data-planes--neo4j-query-proxy-)
+    - [1f: Phase 4a Prep — EDC-V Asset Registration + Vault Keys ✅](#1f-phase-4a-prep--edc-v-asset-registration--vault-keys-)
   - [Phase 2: Identity and Trust (DCP v1.0)](#phase-2-identity-and-trust-dcp-v10)
   - [Phase 3: Health Knowledge Graph Layer ✅](#phase-3-health-knowledge-graph-layer-)
   - [Phase 3b: Real FHIR Data Pipeline ✅](#phase-3b-real-fhir-data-pipeline-)
@@ -69,7 +70,7 @@ All three core specifications are now final or near-final:
 
 | Phase  | Title                                                  | Status         | Notes                                                                                            |
 | ------ | ------------------------------------------------------ | -------------- | ------------------------------------------------------------------------------------------------ |
-| **1**  | Infrastructure Migration (EDC-V + DCore + CFM)         | 🏗️ In progress | 1c+1d+1e complete; ADR-1/2/3 accepted+implemented; 1a (KinD) + 1b (tenant config) pending        |
+| **1**  | Infrastructure Migration (EDC-V + DCore + CFM)         | 🏗️ In progress | 1c+1d+1e+1f complete; ADR-1/2/3 accepted+implemented; 1a (KinD) + 1b (tenant config) pending     |
 | **2**  | Identity and Trust (DCP v1.0 + Verifiable Credentials) | 🔲 Not started | Depends on Phase 1                                                                               |
 | **3**  | Health Knowledge Graph Layer — Schema & Synthetic Data | ✅ Complete    | 5-layer Neo4j schema, EHDS HDAB chain, style sheet                                               |
 | **3b** | Real FHIR Data Pipeline (Synthea → Neo4j → OMOP)       | ✅ Complete    | 127 patients · 3,031 encounters · 1,045 conditions · 19,195 observations · 2,232 drug Rxes       |
@@ -79,7 +80,7 @@ All three core specifications are now final or near-final:
 | **3f** | OMOP Research Analytics View                           | ✅ Complete    | Layer 4 cohort dashboard: top conditions/drugs/measurements, gender breakdown, stat cards        |
 | **3g** | Procedure Pipeline + UI Polish                         | ✅ Complete    | 8,534 Procedure → OMOPProcedureOccurrence; Analytics card on home; 6-stat patient page           |
 | **3h** | EEHRxF FHIR Profile Alignment                          | ✅ Complete    | EEHRxF category/profile nodes; gap analysis UI; EHDS priority coverage                           |
-| **4**  | Dataspace Integration (EDC-V ↔ Neo4j data assets)     | 🔲 Not started | Depends on Phases 1, 2, 3c                                                                       |
+| **4**  | Dataspace Integration (EDC-V ↔ Neo4j data assets)     | 🔲 Not started | Depends on Phases 1, 2, 3c; 4a asset payloads prepared                                           |
 | **5**  | Federated Queries & GraphRAG                           | 🔲 Not started | Depends on Phase 4                                                                               |
 | **6a** | Graph Explorer UI (Next.js → Neo4j Bolt)               | ✅ Complete    | Four views; runs at localhost:3000                                                               |
 | **6b** | Full Participant Portal (Aruba + Fraunhofer + Redline) | 🔲 Not started | Depends on Phases 1–4                                                                            |
@@ -165,6 +166,26 @@ Phase 1 bootstraps the full EDC-V + DCore + CFM stack using the [JAD (Joint Arch
     - 6 endpoints: FHIR `$everything` + cohort, OMOP cohort + timeline, HealthDCAT-AP catalog listing + detail
     - JSON-LD serialization with HealthDCAT-AP `@context` for catalog endpoints
     - Health check at `/health` verifying Neo4j connectivity
+
+#### 1f: Phase 4a Prep — EDC-V Asset Registration + Vault Keys ✅
+
+14. Created `jad/edcv-assets/` directory with EDC-V Management API payloads:
+    - **FHIR Cohort Asset** (`fhir-cohort-asset.json`) — `HttpData` data address pointing to `neo4j-proxy:9090/fhir/Bundle`, content type `application/fhir+json`
+    - **OMOP Analytics Asset** (`omop-analytics-asset.json`) — `HttpData` data address pointing to `neo4j-proxy:9090/omop/cohort`, content type `application/json`
+    - **HealthDCAT-AP Catalog Asset** (`healthdcatap-catalog-asset.json`) — `HttpData` data address pointing to `neo4j-proxy:9090/catalog/datasets`, content type `application/ld+json`
+15. Created **EHDS research access policy** (`policy-ehds-research-access.json`):
+    - ODRL permission: `use` with EHDS Article 53 purpose constraint (research, public health, education, statistics)
+    - 90-day temporal access limit from contract agreement date
+    - k-anonymity ≥ 5 duty for all cohort queries
+    - Prohibitions: re-identification, commercialization
+16. Created **contract definitions** binding FHIR and OMOP assets to the EHDS research policy
+17. Updated `jad/bootstrap-vault.sh` with RSA key pairs for both data planes:
+    - `dataplane-fhir-public/private` — DPS token signing/verification for FHIR transfers
+    - `dataplane-omop-public/private` — DPS token signing/verification for OMOP transfers
+18. Updated `scripts/bootstrap-jad.sh`:
+    - Phase 4 starts `dataplane-fhir` + `dataplane-omop` (was generic `dataplane`)
+    - Phase 4b starts `neo4j-proxy` with health check
+    - Updated service endpoints listing and port pre-flight checks
 
 ### Phase 2: Identity and Trust (DCP v1.0)
 

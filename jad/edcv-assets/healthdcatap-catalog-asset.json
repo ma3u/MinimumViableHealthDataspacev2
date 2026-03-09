@@ -1,0 +1,26 @@
+{
+  "@context": {
+    "edc": "https://w3id.org/edc/v0.0.1/ns/",
+    "dcat": "http://www.w3.org/ns/dcat#",
+    "dct": "http://purl.org/dc/terms/",
+    "odrl": "http://www.w3.org/ns/odrl/2/",
+    "healthdcatap": "http://healthdcat-ap.eu/ns#"
+  },
+  "@type": "edc:Asset",
+  "@id": "asset-catalog-healthdcatap-2026",
+  "edc:properties": {
+    "edc:name": "HealthDCAT-AP Federated Catalog",
+    "edc:description": "HealthDCAT-AP v1.0 compliant dataset catalog exposing metadata for all health datasets in the knowledge graph. Serves JSON-LD with W3C DCAT-AP 3.0 + HealthDCAT-AP extensions for federated catalog discovery across Health Data Access Bodies.",
+    "edc:contenttype": "application/ld+json",
+    "edc:type": "HealthDcatApCatalog",
+    "edc:version": "3.0",
+    "dct:conformsTo": "https://healthdcat-ap.github.io/"
+  },
+  "edc:dataAddress": {
+    "@type": "edc:DataAddress",
+    "edc:type": "HttpData",
+    "edc:baseUrl": "http://neo4j-proxy:9090/catalog/datasets",
+    "edc:proxyPath": true,
+    "edc:contentType": "application/ld+json"
+  }
+}

@@ -89,7 +89,7 @@ preflight() {
   fi
 
   # Check port availability
-  local ports=(80 4222 5432 8080 8090 8200 8222 10013 11002 11003 11005 11006 11007)
+  local ports=(80 4222 5432 8080 8090 8200 8222 9090 10013 11002 11003 11005 11006 11007 11012)
   local busy_ports=()
   for port in "${ports[@]}"; do
     if lsof -iTCP:"$port" -sTCP:LISTEN -t &> /dev/null; then
@@ -139,11 +139,18 @@ start_stack() {
   ok "Traefik gateway started"
 
   log "=== Phase 4: Starting EDC-V / DCore application services ==="
-  docker compose $COMPOSE_FILES up -d controlplane dataplane identityhub issuerservice
+  docker compose $COMPOSE_FILES up -d controlplane dataplane-fhir dataplane-omop identityhub issuerservice
 
   wait_for_service "Control Plane" "http://localhost:11003/api/mgmt/check/readiness" 30 5
+  wait_for_service "Data Plane FHIR" "http://localhost:11002/api/check/readiness" 30 5
+  wait_for_service "Data Plane OMOP" "http://localhost:11012/api/check/readiness" 30 5
   wait_for_service "Identity Hub" "http://localhost:11005/api/identity/check/readiness" 30 5
   ok "EDC-V / DCore services are healthy"
+
+  log "=== Phase 4b: Starting Neo4j Query Proxy ==="
+  docker compose $COMPOSE_FILES up -d neo4j-proxy
+  wait_for_service "Neo4j Query Proxy" "http://localhost:9090/health" 15 3
+  ok "Neo4j Query Proxy is healthy"
 
   log "=== Phase 5: Starting CFM services ==="
   docker compose $COMPOSE_FILES up -d tenant-manager provision-manager
@@ -171,7 +178,9 @@ show_status() {
   echo "  Vault UI:            http://vault.localhost      (token: root)"
   echo "  NATS Monitor:        http://localhost:8222"
   echo "  Control Plane Mgmt:  http://cp.localhost        (port 11003 direct)"
-  echo "  Data Plane Public:   http://dp.localhost        (port 11002 direct)"
+  echo "  Data Plane FHIR:     http://dp-fhir.localhost   (port 11002 direct)"
+  echo "  Data Plane OMOP:     http://dp-omop.localhost   (port 11012 direct)"
+  echo "  Neo4j Query Proxy:   http://proxy.localhost     (port 9090 direct)"
   echo "  Identity Hub:        http://ih.localhost        (port 11005 direct)"
   echo "  Issuer Service:      http://issuer.localhost    (port 10013 direct)"
   echo "  Tenant Manager:      http://tm.localhost        (port 11006 direct)"

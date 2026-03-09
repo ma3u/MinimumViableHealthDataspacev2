@@ -105,4 +105,48 @@ vault write secret/data/aes-key-alias -<<EOF || { echo "Failed to create AES key
 }
 EOF
 
+# ---------------------------------------------------------------------------
+# Data Plane Token Signing Keys (ADR-2: Dual Data Planes)
+# ---------------------------------------------------------------------------
+# Each DCore data plane needs a key pair for signing/verifying data-plane
+# access tokens (DPS protocol). The control plane uses these to issue
+# short-lived tokens that the data plane verifies before streaming data.
+# ---------------------------------------------------------------------------
+
+echo "=== Provisioning data plane token keys ==="
+
+# FHIR data plane key pair (PUSH transfers — clinical FHIR R4 bundles)
+vault write secret/data/dataplane-fhir-public -<<EOF || { echo "Failed to create FHIR DP public key"; exit 1; }
+{
+    "data": {
+        "content": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAr5VwPLNLfGYX1pHBJVOCFjGvPLBhCxACPiWkz5XJRVXaPWrSRKLGS8MEcZfcL1EZ+EEnFTHYIOQdpM0OxEb7QaGmBQ9RLMF8VKwKeOkL8CkUxDfVBn9jWYE4GdVKl1LGyFfJYh8M0pXqVvAVjBRbKCfEIQc/qNm3BmGpGXpM2wFE6MJz2Uvm7vReK9W3Q1huEHW0U8TrVjSt6NbKvH5qLKD0wpbKF1dR7FPafQ1Bp+a1h0GkTHWU2pvNO+1F6nNS9G3OdWw0BH1aLqjbDGBZ5A1Z9PSqj5nDALqiHn5B+1u3dHi8F5GFj6t6W3PZ3Kv0TmmZP2HFHNvKCRjPHwwIDAQAB"
+    }
+}
+EOF
+
+vault write secret/data/dataplane-fhir-private -<<EOF || { echo "Failed to create FHIR DP private key"; exit 1; }
+{
+    "data": {
+        "content": "MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCvlXA8s0t8ZhfWkcElU4IWMa88sGELEAI+JaTPlaLVFdpr+dK0ot5LwwRxl9wvURn4QScVMdgg5B2kzQ7ERvtBoaYFL1EswXxUrAp46QvwKRTEN9UGf2NZgTgZ1UqXUsLIV8liHwzSleptcBWMFFsoJ8QhBz+o2bcGYakZekzbAUTownPZS+bu9F4r1bdDWG4QdbRTxOtWNK3o1sq8fmosoNTClsoXV1HsZ9p9DUGn5rWHQaRMdZTam807UXqc1L0bc51bDQEfVouqNsMYFnkDVn09KqPmcMAuqIefkH7W7d0eLwXkYWPq3pbc9ncq/ROaZk/YcUc28oJGM8fDAgMBAAECggEAFSEQ7m9FMX6iC0p1JGnWPzDeF94YqD8MYcjKOIMnF0wR"
+    }
+}
+EOF
+
+# OMOP data plane key pair (PULL transfers — OMOP CDM analytics)
+vault write secret/data/dataplane-omop-public -<<EOF || { echo "Failed to create OMOP DP public key"; exit 1; }
+{
+    "data": {
+        "content": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA0zFP3jTdGKf8bdhVv7+F43L8JBDxYQOnNv1Ql1JRHnDQkOS0a7GEPn3FZ1Ud0AQPVZ5X7i1J3n3x8d5QlKUzj7XEmhgmR7ey5TGm+FaWOr/pOj3gFJ2Y4WcQ2nL0tJr1z7sJ3HrJQHFfB0G7GqY1wZmQ2YAVW4pW1w6e39eZfNB2H7d+hxGRqIRStF3fcNlYh0FExavYJm5V0Q2RaNcipK7B8M1w5PyVY9fQ2f1GmM2jBC3VQM0v9e0jZX9cAEpH+tO3fR3Ht6a8xYWIQ0aMGPiJf1m9sUfKjWL76cXjj6Lg7SHKE7hBpfLN0PEmz5AYHYjj8P4Y1GrNJIxQIDAQAB"
+    }
+}
+EOF
+
+vault write secret/data/dataplane-omop-private -<<EOF || { echo "Failed to create OMOP DP private key"; exit 1; }
+{
+    "data": {
+        "content": "MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQDTMU/eNN0Yp/xt2FW/v4Xjcvwk0PFhA6c2/VCXU1EecNCQ5LRrsYQ+fcVnVR3QBA9Vnlfv7UneffHx3lCUpTOPtcSaGCZHt7LlMab4VpY6v+k6PeAUnZjhZxDacvS0mvXPuwnceslAcV8HQbsapjXBmZDZgBVbilbXDp7f15l80HYft36HEZGohFK0Xd9w2ViHQUTFq9gmblXRDZFo1yKkrsHwzXDk/JVj19DZ/UaYzaMELdVAzS/17SNlf1wASkf607d9Hce3przFhYhDRowY+Il/Wb2xR8qNYvvpxeOPouDtIcoTuEGl8s3Q8SbPkBgdiOPw/hjUas0kjFAgMBAAECggEAVyLPvBz1Xf8S2vRnfPdB"
+    }
+}
+EOF
+
 echo "=== Vault bootstrap completed successfully! ==="
