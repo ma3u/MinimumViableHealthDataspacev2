@@ -1,5 +1,12 @@
 import Link from "next/link";
-import { Network, BookOpen, ShieldCheck, User, BarChart2 } from "lucide-react";
+import {
+  Network,
+  BookOpen,
+  ShieldCheck,
+  User,
+  BarChart2,
+  Layers,
+} from "lucide-react";
 
 const cards = [
   {
@@ -37,6 +44,13 @@ const cards = [
     desc: "Cohort-level OMOP CDM research analytics dashboard",
     color: "border-layer4 hover:bg-layer4/10",
   },
+  {
+    href: "/eehrxf",
+    icon: Layers,
+    label: "EEHRxF Profiles",
+    desc: "EU FHIR profile alignment & EHDS priority coverage gap analysis",
+    color: "border-layer2 hover:bg-layer2/10",
+  },
 ];
 
 export default function Home() {
@@ -46,7 +60,7 @@ export default function Home() {
       <p className="text-gray-400 mb-10">
         EHDS-compliant demo — EDC-V · DCore · CFM · Neo4j · FHIR R4 · OMOP CDM
       </p>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {cards.map(({ href, icon: Icon, label, desc, color }) => (
           <Link
             key={href}

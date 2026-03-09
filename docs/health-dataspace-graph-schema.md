@@ -278,6 +278,67 @@ A specific representation/format of a dataset (FHIR Bundle, OMOP export, etc.).
 
 ---
 
+### 3.3 EEHRxF Profile Metadata
+
+The [European Electronic Health Record Exchange Format (EEHRxF)](https://digital-strategy.ec.europa.eu/en/library/recommendation-european-electronic-health-record-exchange-format) defines 6 priority categories for cross-border health data exchange under the [EHDS Regulation](https://health.ec.europa.eu/ehealth-digital-health-and-care/european-health-data-space_en). [HL7 Europe](https://hl7.eu/fhir/) publishes FHIR R4 Implementation Guides implementing these categories.
+
+#### `EEHRxFCategory`
+
+An EHDS priority category for electronic health data exchange.
+
+**Properties:**
+
+- `categoryId: String!` — Kebab-case identifier (e.g., `patient-summary`)
+- `name: String!` — Human-readable name
+- `description: String` — Category scope
+- `ehdsDeadline: String` — EHDS implementation deadline (e.g., `2029-03`)
+- `ehdsGroup: Integer` — Rollout group (1 = 2029, 2 = 2031, 3 = TBD)
+- `status: String` — Current status (`available`, `partial`, `gap`)
+
+**Indexes:**
+
+```cypher
+CREATE CONSTRAINT eehrxf_category_id IF NOT EXISTS FOR (c:EEHRxFCategory) REQUIRE c.categoryId IS UNIQUE;
+```
+
+#### `EEHRxFProfile`
+
+An HL7 Europe FHIR profile implementing part of the EEHRxF specification.
+
+**Properties:**
+
+- `profileId: String!` — Kebab-case identifier (e.g., `patient-eu-core`)
+- `name: String!` — Profile display name (e.g., `Patient (EU core)`)
+- `igName: String!` — Parent IG name (e.g., `HL7 Europe Base and Core`)
+- `igPackage: String` — FHIR package ID (e.g., `hl7.fhir.eu.base#0.1.0`)
+- `fhirVersion: String` — Target FHIR version (`R4` or `R5`)
+- `status: String` — Maturity status (`STU`, `Ballot`, `Draft`)
+- `url: String` — Canonical URL of the StructureDefinition
+- `baseResource: String` — FHIR resource type this profile constrains (e.g., `Patient`)
+- `description: String` — Profile purpose
+- `coverage: String` — Current data coverage status (`full`, `partial`, `none`)
+
+**Indexes:**
+
+```cypher
+CREATE CONSTRAINT eehrxf_profile_id IF NOT EXISTS FOR (p:EEHRxFProfile) REQUIRE p.profileId IS UNIQUE;
+CREATE INDEX eehrxf_profile_base IF NOT EXISTS FOR (p:EEHRxFProfile) ON (p.baseResource);
+```
+
+#### EEHRxF Relationships
+
+```cypher
+(:EEHRxFProfile)-[:PART_OF_CATEGORY]->(:EEHRxFCategory)
+(:EEHRxFProfile)-[:PROFILES_RESOURCE {count: Integer, coverage: String}]->(fhirNode)
+(:EEHRxFProfile)-[:DEPENDS_ON]->(:EEHRxFProfile)
+```
+
+- `PART_OF_CATEGORY` — Links a profile to its EHDS priority category
+- `PROFILES_RESOURCE` — Links a profile to a representative FHIR node of the matching resource type; `count` holds the number of matching resources, `coverage` indicates `full`/`partial`/`none`
+- `DEPENDS_ON` — Inter-profile dependency (e.g., Lab Report depends on Base Patient)
+
+---
+
 ## 4. Layer 3: FHIR Clinical Knowledge Graph
 
 ### 4.1 Core FHIR Node Labels

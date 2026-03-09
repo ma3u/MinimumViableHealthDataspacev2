@@ -20,6 +20,13 @@ CREATE CONSTRAINT hdab_approval_id IF NOT EXISTS FOR (ha:HDABApproval) REQUIRE h
 CREATE CONSTRAINT dataset_id IF NOT EXISTS FOR (hd:HealthDataset) REQUIRE hd.datasetId IS UNIQUE;
 
 // ============================================================
+// Layer 2b: EEHRxF Profile Metadata
+// ============================================================
+CREATE CONSTRAINT eehrxf_category_id IF NOT EXISTS FOR (c:EEHRxFCategory) REQUIRE c.categoryId IS UNIQUE;
+CREATE CONSTRAINT eehrxf_profile_id IF NOT EXISTS FOR (p:EEHRxFProfile) REQUIRE p.profileId IS UNIQUE;
+CREATE INDEX eehrxf_profile_base IF NOT EXISTS FOR (p:EEHRxFProfile) ON (p.baseResource);
+
+// ============================================================
 // Layer 3: FHIR Clinical Knowledge Graph
 // ============================================================
 CREATE CONSTRAINT patient_id IF NOT EXISTS FOR (p:Patient) REQUIRE p.resourceId IS UNIQUE;

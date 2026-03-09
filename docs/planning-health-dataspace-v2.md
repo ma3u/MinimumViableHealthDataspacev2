@@ -45,6 +45,7 @@ All three core specifications are now final or near-final:
 | **3e** | DSP Marketplace Registration + Compliance Chain        | ✅ Complete    | Layer 1 DataProduct/Contract/HDABApproval wired to Synthea dataset; compliance UI live dropdowns |
 | **3f** | OMOP Research Analytics View                           | ✅ Complete    | Layer 4 cohort dashboard: top conditions/drugs/measurements, gender breakdown, stat cards        |
 | **3g** | Procedure Pipeline + UI Polish                         | ✅ Complete    | 8,534 Procedure → OMOPProcedureOccurrence; Analytics card on home; 6-stat patient page           |
+| **3h** | EEHRxF FHIR Profile Alignment                          | ✅ Complete    | EEHRxF category/profile nodes; gap analysis UI; EHDS priority coverage                           |
 | **4**  | Dataspace Integration (EDC-V ↔ Neo4j data assets)     | 🔲 Not started | Depends on Phases 1, 2, 3c                                                                       |
 | **5**  | Federated Queries & GraphRAG                           | 🔲 Not started | Depends on Phase 4                                                                               |
 | **6a** | Graph Explorer UI (Next.js → Neo4j Bolt)               | ✅ Complete    | Four views; runs at localhost:3000                                                               |
@@ -234,6 +235,58 @@ Synthea generates ~43 Procedure resources per patient (96% SNOMED CT, 4% ADA CDT
 | Observation       | 37,713    | OMOPMeasurement             | 34,203    |
 | MedicationRequest | 3,895     | OMOPDrugExposure            | 3,895     |
 | **Procedure**     | **8,534** | **OMOPProcedureOccurrence** | **8,534** |
+
+### Phase 3h: EEHRxF FHIR Profile Alignment
+
+The **European Electronic Health Record Exchange Format (EEHRxF)** was established by [Commission Recommendation C(2019)800](https://digital-strategy.ec.europa.eu/en/library/recommendation-european-electronic-health-record-exchange-format) of 6 February 2019. The [EHDS Regulation](https://health.ec.europa.eu/ehealth-digital-health-and-care/european-health-data-space_en) (entered into force 26 March 2025) elevates EEHRxF as the standard exchange format for 6 priority categories of electronic health data, with phased rollout:
+
+| #   | Priority Category              | EHDS Deadline | Group |
+| --- | ------------------------------ | ------------- | ----- |
+| 1   | Patient Summaries              | March 2029    | 1     |
+| 2   | ePrescriptions / eDispensation | March 2029    | 1     |
+| 3   | Laboratory Results             | March 2031    | 2     |
+| 4   | Hospital Discharge Reports     | March 2031    | 2     |
+| 5   | Medical Images / Reports       | March 2031    | 2     |
+| 6   | Rare Disease Registration      | TBD           | 3     |
+
+**HL7 Europe** publishes FHIR R4 Implementation Guides that provide the technical specifications for EEHRxF, supported by the **Xt-EHR Joint Action** for EHDS alignment:
+
+| Implementation Guide               | Package                          | FHIR | Status  | URL                                           |
+| ---------------------------------- | -------------------------------- | ---- | ------- | --------------------------------------------- |
+| Base and Core Profiles             | `hl7.fhir.eu.base#0.1.0`         | R4   | STU 1.0 | https://hl7.eu/fhir/base/                     |
+| Laboratory Report                  | `hl7.fhir.eu.laboratory#0.1.1`   | R4   | STU 1.1 | https://hl7.eu/fhir/laboratory/               |
+| Hospital Discharge Report          | `hl7.fhir.eu.hdr#1.0.0-ci-build` | R4   | Ballot  | https://build.fhir.org/ig/hl7-eu/hdr/         |
+| Medication Prescription & Dispense | `hl7.fhir.eu.mpd`                | R4   | Ballot  | https://build.fhir.org/ig/hl7-eu/medications/ |
+| Imaging Study Report               | `hl7.fhir.eu.imaging`            | R5   | Ballot  | https://build.fhir.org/ig/hl7-eu/imaging/     |
+| Extensions                         | `hl7.fhir.eu.extensions#0.1.0`   | R4   | STU 1.2 | https://hl7.eu/fhir/extensions/               |
+
+**Implementation scope:** Phase 3h adds `EEHRxFProfile` and `EEHRxFCategory` nodes to the knowledge graph, maps them to existing FHIR resources, and provides a gap analysis showing which priority categories the current Synthea data partially or fully covers.
+
+**Graph Schema Additions:**
+
+- `EEHRxFCategory` — EHDS priority category (Patient Summary, Lab Results, etc.)
+- `EEHRxFProfile` — HL7 Europe FHIR profile (PatientEuCore, DiagnosticReportLabEu, etc.)
+- `(:EEHRxFProfile)-[:PART_OF_CATEGORY]->(:EEHRxFCategory)` — profile → category
+- `(:EEHRxFProfile)-[:PROFILES_RESOURCE]->(resource)` — profile → FHIR resource type in graph
+
+**Cypher Script (`neo4j/register-eehrxf-profiles.cypher`):**
+
+- Creates 6 EEHRxFCategory nodes (one per EHDS priority)
+- Creates EEHRxFProfile nodes for the 14 key HL7 Europe profiles across all published IGs
+- Maps profiles to existing FHIR resource types via `PROFILES_RESOURCE` relationships
+- Calculates coverage status per category based on available FHIR data
+
+**EEHRxF API (`ui/src/app/api/eehrxf/route.ts`):**
+
+- Returns all categories with profile coverage (profiles, matched resource counts, coverage %)
+- Returns individual profile details with gap analysis (required vs present fields)
+
+**EEHRxF UI (`ui/src/app/eehrxf/page.tsx`):**
+
+- Priority category cards with EHDS deadline badges and coverage indicators
+- Profile-level detail showing which FHIR resources match each EU profile
+- EHDS implementation timeline visualization (2025 → 2031)
+- Gap analysis highlighting missing resources (e.g., DiagnosticReport, ImagingStudy)
 
 ### Phase 4: Dataspace Integration
 

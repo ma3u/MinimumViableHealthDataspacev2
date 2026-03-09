@@ -6,6 +6,7 @@
 [![Next.js 14](https://img.shields.io/badge/Next.js-14-black?logo=next.js&logoColor=white)](https://nextjs.org/)
 [![Eclipse EDC](https://img.shields.io/badge/Eclipse-EDC--V-blue)](https://eclipse-edc.github.io/docs/)
 [![EHDS Compliant](https://img.shields.io/badge/EHDS-Compliant-0ea5e9)](https://health.ec.europa.eu/ehealth-digital-health-and-care/european-health-data-space_en)
+[![EEHRxF](https://img.shields.io/badge/EEHRxF-HL7%20Europe-148F77)](https://hl7.eu/fhir/)
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit)](https://pre-commit.com/)
 
@@ -35,8 +36,13 @@ requiring any cloud infrastructure or real patient records.
   cohort-level analytics without leaving Neo4j.
 - **Biomedical Ontology Layer** — SNOMED CT, ICD-10-CM, RxNorm, LOINC, and CPT-4 concept nodes
   link clinical events to standardised terminologies via `CODED_BY` edges.
-- **Interactive UI** — A Next.js 14 app provides five purpose-built views: graph explorer,
-  HealthDCAT-AP catalogue, DSP compliance chain, patient timeline, and OMOP analytics dashboard.
+- **EEHRxF Profile Alignment** — EEHRxFCategory and EEHRxFProfile nodes map the six EHDS
+  priority categories (Patient Summary, ePrescription, Laboratory Results, Hospital Discharge,
+  Medical Imaging, Rare Disease) to HL7 Europe FHIR Implementation Guides, with dynamic coverage
+  scores computed against the loaded FHIR data.
+- **Interactive UI** — A Next.js 14 app provides six purpose-built views: graph explorer,
+  HealthDCAT-AP catalogue, DSP compliance chain, patient timeline, OMOP analytics dashboard,
+  and EEHRxF profile alignment.
 
 ---
 
@@ -64,7 +70,7 @@ The schema below shows the node labels and relationship types as rendered by Neo
 
 ## UI Views
 
-The Next.js 14 app is served at <http://localhost:3000> and provides five purpose-built views,
+The Next.js 14 app is served at <http://localhost:3000> and provides six purpose-built views,
 each backed by a dedicated API route that queries Neo4j directly over Bolt.
 
 | View             | Route         | Description                                                                                                     |
@@ -74,6 +80,7 @@ each backed by a dedicated API route that queries Neo4j directly over Bolt.
 | Compliance Chain | `/compliance` | Trace a DSP contract from DataProduct → OdrlPolicy → Contract → HDABApproval in one query.                      |
 | Patient Journey  | `/patient`    | Time-ordered FHIR R4 timeline (encounters, conditions, medications, procedures) alongside the OMOP CDM mapping. |
 | OMOP Analytics   | `/analytics`  | Cohort-level stat cards (patients, conditions, drugs, procedures), gender breakdown, and top-15 bar charts.     |
+| EEHRxF Profiles  | `/eehrxf`     | EU FHIR profile alignment with EHDS priority category coverage, HL7 Europe IG inventory, and gap analysis.      |
 
 ---
 
@@ -100,7 +107,8 @@ MinimumViableHealthDataspacev2/
 ├── neo4j/
 │   ├── init-schema.cypher        # Neo4j constraints and indexes
 │   ├── seed-data.cypher          # L1–L5 seed data (Synthea-derived)
-│   └── register-dsp-marketplace.cypher   # Phase 3e: DSP marketplace chain
+│   ├── register-dsp-marketplace.cypher   # Phase 3e: DSP marketplace chain
+│   └── register-eehrxf-profiles.cypher   # Phase 3h: EEHRxF profile alignment
 ├── scripts/                      # Utility and data-prep scripts
 └── ui/                           # Next.js 14 application
     └── src/app/
@@ -108,7 +116,8 @@ MinimumViableHealthDataspacev2/
         ├── catalog/              # HealthDCAT-AP Catalogue
         ├── compliance/           # Compliance Chain Inspector
         ├── patient/              # Patient Journey
-        └── analytics/            # OMOP Analytics Dashboard
+        ├── analytics/            # OMOP Analytics Dashboard
+        └── eehrxf/               # EEHRxF Profile Alignment
 ```
 
 ---
@@ -191,7 +200,19 @@ cat neo4j/register-dsp-marketplace.cypher | \
   cypher-shell -u neo4j -p healthdataspace
 ```
 
-### Step 7 — Install UI Dependencies
+### Step 7 — Register EEHRxF Profile Alignment
+
+This script creates EEHRxFCategory and EEHRxFProfile nodes representing the six EHDS priority
+categories and their corresponding HL7 Europe FHIR Implementation Guide profiles. Coverage
+scores are computed dynamically against the loaded FHIR resources.
+
+```bash
+cat neo4j/register-eehrxf-profiles.cypher | \
+  docker exec -i health-dataspace-neo4j \
+  cypher-shell -u neo4j -p healthdataspace
+```
+
+### Step 8 — Install UI Dependencies
 
 The UI is a standard Next.js 14 application in the `ui/` directory. It connects to Neo4j over
 Bolt using the credentials from `.env.local` (matching the local container defaults). Install
@@ -204,7 +225,7 @@ cd ui && npm install
 > **Note:** A `.env.local.example` is provided. Copy it to `.env.local` if you need to customise
 > the Neo4j connection URL or credentials.
 
-### Step 8 — Start the UI
+### Step 9 — Start the UI
 
 Start the development server. Hot-reload is enabled, so any UI changes are reflected immediately
 without restarting Neo4j or reloading data.
@@ -213,7 +234,7 @@ without restarting Neo4j or reloading data.
 npm run dev
 ```
 
-Open <http://localhost:3000> in your browser. The home page links to all five views.
+Open <http://localhost:3000> in your browser. The home page links to all six views.
 
 ![Graph Explorer UI](docs/images/ui-screenshot.png)
 
@@ -264,20 +285,21 @@ Detailed reference documents live in the `docs/` directory:
 The project follows a phased roadmap. Phases 1–3f implement the full local demo stack; Phase 4
 onwards will introduce live Eclipse EDC-V connector instances and real patient data pipelines.
 
-| Phase | Description                                                                                    | Status      |
-| ----- | ---------------------------------------------------------------------------------------------- | ----------- |
-| 1     | Environment setup — Neo4j 5, Docker Compose, Next.js scaffold, pre-commit hooks                | ✅ Complete |
-| 2     | Graph schema + seed data for all 5 layers, APOC/n10s plugins, GraSS colour style               | ✅ Complete |
-| 3     | Graph Explorer UI — force-directed 5-layer graph via `react-force-graph-2d`                    | ✅ Complete |
-| 3a    | HealthDCAT-AP Catalogue view — dataset cards with publisher, license, and distribution info    | ✅ Complete |
-| 3b    | Compliance Chain Inspector — ODRL policy + HDABApproval trace                                  | ✅ Complete |
-| 3c    | Patient Journey view — FHIR R4 timeline with OMOP CDM mapping sidebar                          | ✅ Complete |
-| 3d    | Graph node selection — white-ring highlight, dim neighbours, blue edge-type labels at midpoint | ✅ Complete |
-| 3e    | DSP Marketplace registration — full Layer 1 EDC governance chain wired to dataset              | ✅ Complete |
-| 3f    | OMOP Research Analytics dashboard — cohort stat cards, gender breakdown, top-15 bar charts     | ✅ Complete |
-| 3g    | Procedure pipeline — 8,534 FHIR Procedures → OMOPProcedureOccurrence; Analytics home card      | ✅ Complete |
-| 4     | Eclipse EDC-V connector integration — live DSP negotiation with a running connector instance   | 🔲 Planned  |
-| 5     | Real Synthea data pipeline, IDS-G compliance audit, multi-participant scenario                 | 🔲 Planned  |
+| Phase | Description                                                                                     | Status      |
+| ----- | ----------------------------------------------------------------------------------------------- | ----------- |
+| 1     | Environment setup — Neo4j 5, Docker Compose, Next.js scaffold, pre-commit hooks                 | ✅ Complete |
+| 2     | Graph schema + seed data for all 5 layers, APOC/n10s plugins, GraSS colour style                | ✅ Complete |
+| 3     | Graph Explorer UI — force-directed 5-layer graph via `react-force-graph-2d`                     | ✅ Complete |
+| 3a    | HealthDCAT-AP Catalogue view — dataset cards with publisher, license, and distribution info     | ✅ Complete |
+| 3b    | Compliance Chain Inspector — ODRL policy + HDABApproval trace                                   | ✅ Complete |
+| 3c    | Patient Journey view — FHIR R4 timeline with OMOP CDM mapping sidebar                           | ✅ Complete |
+| 3d    | Graph node selection — white-ring highlight, dim neighbours, blue edge-type labels at midpoint  | ✅ Complete |
+| 3e    | DSP Marketplace registration — full Layer 1 EDC governance chain wired to dataset               | ✅ Complete |
+| 3f    | OMOP Research Analytics dashboard — cohort stat cards, gender breakdown, top-15 bar charts      | ✅ Complete |
+| 3g    | Procedure pipeline — 8,534 FHIR Procedures → OMOPProcedureOccurrence; Analytics home card       | ✅ Complete |
+| 3h    | EEHRxF FHIR profile alignment — EU priority categories, HL7 Europe IG profiles, gap analysis UI | ✅ Complete |
+| 4     | Eclipse EDC-V connector integration — live DSP negotiation with a running connector instance    | 🔲 Planned  |
+| 5     | Real Synthea data pipeline, IDS-G compliance audit, multi-participant scenario                  | 🔲 Planned  |
 
 ---
 
