@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { runQuery } from "@/lib/neo4j";
 
+export const dynamic = "force-dynamic";
+
 interface Credential {
   credentialId: string;
   credentialType: string;

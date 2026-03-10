@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 
+export const dynamic = "force-dynamic";
+
 const PROXY_URL = process.env.NEO4J_PROXY_URL ?? "http://localhost:9090";
 
 export async function GET() {

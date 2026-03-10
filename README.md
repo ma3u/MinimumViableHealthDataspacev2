@@ -302,6 +302,41 @@ Service endpoints after startup:
 
 Configuration files are in the `jad/` directory. OpenAPI specs are in `jad/openapi/`. EDC-V asset registration payloads (Phase 4a) are in `jad/edcv-assets/`.
 
+### All Docker Service Endpoints
+
+Complete list of all services and their direct `localhost` port mappings when the full stack
+(base + JAD + UI) is running in Docker / OrbStack:
+
+| Service                 | Port(s)                       | URL / Endpoint         | Description                                               |
+| ----------------------- | ----------------------------- | ---------------------- | --------------------------------------------------------- |
+| **Graph Explorer UI**   | 3000                          | http://localhost:3000  | Next.js 14 app — graph, catalogue, analytics views        |
+| **Neo4j Browser**       | 7474                          | http://localhost:7474  | Neo4j Browser (primary instance, `neo4j/healthdataspace`) |
+| **Neo4j Bolt**          | 7687                          | bolt://localhost:7687  | Bolt driver endpoint (primary instance)                   |
+| **Neo4j SPE-2 Browser** | 7475                          | http://localhost:7475  | Neo4j Browser (second participant)                        |
+| **Neo4j SPE-2 Bolt**    | 7688                          | bolt://localhost:7688  | Bolt driver endpoint (second participant)                 |
+| **Neo4j Query Proxy**   | 9090                          | http://localhost:9090  | DCore ↔ Neo4j bridge (NLQ + federated queries)           |
+| **Traefik Proxy**       | 80                            | http://localhost       | Reverse proxy — routes `*.localhost` domains              |
+| **Traefik Dashboard**   | 8090                          | http://localhost:8090  | Traefik admin dashboard                                   |
+| **Keycloak**            | 8080, 9000                    | http://localhost:8080  | IAM / OAuth2 provider (`admin/admin`)                     |
+| **Vault**               | 8200                          | http://localhost:8200  | HashiCorp Vault (token: `root`)                           |
+| **Control Plane**       | 11003                         | http://localhost:11003 | EDC-V Management API (DSP + DCP)                          |
+| **Data Plane FHIR**     | 11002                         | http://localhost:11002 | DCore Data Plane — FHIR PUSH                              |
+| **Data Plane OMOP**     | 11012                         | http://localhost:11012 | DCore Data Plane — OMOP PULL                              |
+| **Identity Hub**        | 11005                         | http://localhost:11005 | DCP v1.0 Decentralized Claims                             |
+| **Issuer Service**      | 10013                         | http://localhost:10013 | Verifiable Credential issuer                              |
+| **Tenant Manager**      | 11006                         | http://localhost:11006 | Multi-tenant management API                               |
+| **Provision Manager**   | 11007                         | http://localhost:11007 | Resource provisioning API                                 |
+| **NATS**                | 4222 (client), 8222 (monitor) | http://localhost:8222  | Message bus — monitoring dashboard                        |
+| **PostgreSQL**          | 5432                          | localhost:5432         | Shared database (8 schemas)                               |
+| CFM EDC-V Agent         | —                             | internal               | Connector Framework Module agent                          |
+| CFM Keycloak Agent      | —                             | internal               | Keycloak integration agent                                |
+| CFM Onboarding Agent    | —                             | internal               | Participant onboarding agent                              |
+| CFM Registration Agent  | —                             | internal               | Service registration agent                                |
+
+> **Note:** Inside Docker, services communicate using Docker DNS names (e.g. `bolt://neo4j:7687`).
+> The `localhost` ports above are the host-mapped ports for external access from your browser or
+> development tools.
+
 ---
 
 ## Documentation
@@ -317,8 +352,9 @@ Detailed reference documents live in the `docs/` directory:
 
 ## Implementation Status
 
-The project follows a phased roadmap. Phases 1–3f implement the full local demo stack; Phase 4
-onwards will introduce live Eclipse EDC-V connector instances and real patient data pipelines.
+The project follows a phased roadmap. Phases 1–5 implement the full local demo stack with
+live DSP contract negotiation and federated queries; Phase 6b onwards will add participant
+portal UIs and protocol compliance testing.
 
 | Phase | Description                                                                                     | Status      |
 | ----- | ----------------------------------------------------------------------------------------------- | ----------- |
@@ -327,18 +363,26 @@ onwards will introduce live Eclipse EDC-V connector instances and real patient d
 | 1d    | OpenAPI TypeScript client generation — type-safe API clients for all JAD services               | ✅ Complete |
 | 1e    | ADR-2 Implementation — dual data planes (FHIR PUSH + OMOP PULL) + Neo4j Query Proxy             | ✅ Complete |
 | 1f    | Phase 4a prep — EDC-V asset/policy/contract registration payloads + Vault dual-DP key bootstrap | ✅ Complete |
-| 2     | Graph schema + seed data for all 5 layers, APOC/n10s plugins, GraSS colour style                | ✅ Complete |
-| 3     | Graph Explorer UI — force-directed 5-layer graph via `react-force-graph-2d`                     | ✅ Complete |
-| 3a    | HealthDCAT-AP Catalogue view — dataset cards with publisher, license, and distribution info     | ✅ Complete |
-| 3b    | Compliance Chain Inspector — ODRL policy + HDABApproval trace                                   | ✅ Complete |
-| 3c    | Patient Journey view — FHIR R4 timeline with OMOP CDM mapping sidebar                           | ✅ Complete |
-| 3d    | Graph node selection — white-ring highlight, dim neighbours, blue edge-type labels at midpoint  | ✅ Complete |
+| 2     | Identity and Trust — DID:web for 3 tenants, Ed25519 keys, all activated (ADR-7)                 | ✅ Complete |
+| 2b    | EHDS credential types — 3 credential defs on IssuerService, 5 VC nodes in Neo4j, DCP scopes     | ✅ Complete |
+| 3     | Graph schema + seed data for all 5 layers, APOC/n10s plugins, GraSS colour style                | ✅ Complete |
+| 3a    | Graph Explorer UI — force-directed 5-layer graph via `react-force-graph-2d`                     | ✅ Complete |
+| 3b    | HealthDCAT-AP Catalogue view — dataset cards with publisher, license, and distribution info     | ✅ Complete |
+| 3c    | Compliance Chain Inspector — ODRL policy + HDABApproval trace                                   | ✅ Complete |
+| 3d    | Patient Journey view — FHIR R4 timeline with OMOP CDM mapping sidebar                           | ✅ Complete |
 | 3e    | DSP Marketplace registration — full Layer 1 EDC governance chain wired to dataset               | ✅ Complete |
 | 3f    | OMOP Research Analytics dashboard — cohort stat cards, gender breakdown, top-15 bar charts      | ✅ Complete |
 | 3g    | Procedure pipeline — 8,534 FHIR Procedures → OMOPProcedureOccurrence; Analytics home card       | ✅ Complete |
 | 3h    | EEHRxF FHIR profile alignment — EU priority categories, HL7 Europe IG profiles, gap analysis UI | ✅ Complete |
-| 4     | Eclipse EDC-V connector integration — live DSP negotiation with a running connector instance    | 🔲 Planned  |
-| 5     | Real Synthea data pipeline, IDS-G compliance audit, multi-participant scenario                  | 🔲 Planned  |
+| 4     | Dataspace Integration — DSP contract negotiation, federated catalog, DCore data transfer        | ✅ Complete |
+| 4a    | Data asset registration — 4 assets on Clinic EDC-V, ODRL policies, contract definitions         | ✅ Complete |
+| 4b    | Contract negotiation — 3 FINALIZED negotiations, transfer STARTED (CRO → Clinic)                | ✅ Complete |
+| 4c    | Federated Catalog — 4 datasets discoverable via DSP, HDAB contract FINALIZED                    | ✅ Complete |
+| 4d    | Data Plane Transfer — 100 FHIR patients + 2 HealthDCAT-AP datasets via DCore                    | ✅ Complete |
+| 5     | Federated Queries — Neo4j SPE-2, federated dispatch, k-anonymity, Text2Cypher NLQ               | ✅ Complete |
+| 6a    | Graph Explorer UI — 7 views + Docker `graph-explorer` container + GitHub Pages static export    | ✅ Complete |
+| 6b    | Unified Participant Portal — onboarding, data sharing, operator dashboard                       | 🔲 Planned  |
+| 7     | TCK DCP & DSP Compliance Verification — protocol conformance testing                            | 🔲 Planned  |
 
 ---
 

@@ -149,7 +149,7 @@ All three core specifications are now final or near-final:
 | **3h** | EEHRxF FHIR Profile Alignment                          | ✅ Complete    | EEHRxF category/profile nodes; gap analysis UI; EHDS priority coverage                                                                                                                                                                                                                             |
 | **4**  | Dataspace Integration (EDC-V ↔ Neo4j data assets)     | ✅ Complete    | 4a ✅ (assets + policies + contracts); 4b ✅ (3 FINALIZED negotiations + transfer STARTED — ADR-7); 4c ✅ (Federated Catalog: 4 datasets discoverable, HDAB contract FINALIZED); 4d ✅ (Data Plane Transfer: CRO←100 FHIR patients, HDAB←2 HealthDCAT-AP datasets via DCore; audit trail in Neo4j) |
 | **5**  | Federated Queries & GraphRAG                           | ✅ Complete    | 5a ✅ (Neo4j SPE-2: 37 patients, 2,076 encounters, 33 OMOP persons + HealthDCAT-AP + EEHRxF); 5b ✅ (federated query dispatch + k-anonymity); 5c ✅ (Text2Cypher NLQ: 9 templates + optional LLM); 5d ✅ (UI `/query` page — 7th view)                                                             |
-| **6a** | Graph Explorer UI (Next.js → Neo4j Bolt)               | ✅ Complete    | Seven views (graph, catalog, compliance, patient, analytics, eehrxf, query/NLQ); runs at localhost:3000                                                                                                                                                                                            |
+| **6a** | Graph Explorer UI (Next.js → Neo4j Bolt)               | ✅ Complete    | Seven views (graph, catalog, compliance, patient, analytics, eehrxf, query/NLQ); Docker `graph-explorer` container on port 3000; GitHub Pages static export                                                                                                                                        |
 | **6b** | Full Participant Portal (Aruba + Fraunhofer + Redline) | 🔲 Not started | Depends on Phases 1–4                                                                                                                                                                                                                                                                              |
 | **7**  | TCK DCP & DSP Compliance Verification                  | 🔲 Not started | Protocol conformance testing; depends on Phases 1–2                                                                                                                                                                                                                                                |
 
@@ -730,7 +730,24 @@ Deployed as a standalone Next.js 14 web app connecting directly to Neo4j Bolt �
 | EHDS Compliance | `/compliance` | HDAB approval chain validator (Articles 45–52)             |
 | Patient Journey | `/patient`    | FHIR R4 → OMOP CDM event timeline                          |
 | OMOP Analytics  | `/analytics`  | Cohort-level OMOP CDM research analytics dashboard         |
+| EEHRxF Profiles | `/eehrxf`     | EU FHIR profile alignment + gap analysis                   |
 | NLQ / Federated | `/query`      | Natural language → Cypher query with federated SPE support |
+
+**Docker Deployment:**
+
+The UI runs as the `graph-explorer` Docker service (container: `health-dataspace-ui`) defined in `docker-compose.yml`:
+
+- Multi-stage Dockerfile (`ui/Dockerfile`): `node:20-alpine` base → deps → builder → runner
+- Next.js `output: "standalone"` for minimal production image (no `node_modules` copy)
+- All 9 API routes use `export const dynamic = "force-dynamic"` to prevent build-time prerendering (Neo4j is unavailable inside the Docker build container)
+- Environment: `NEO4J_URI=bolt://neo4j:7687` (Docker DNS), `NEO4J_USER`, `NEO4J_PASSWORD`
+- Exposed on port 3000; depends on `neo4j` service
+
+**GitHub Pages Deployment:**
+
+A GitHub Actions workflow (`.github/workflows/pages.yml`) builds the UI as a static export (`output: "export"`) and deploys to GitHub Pages. The `basePath` is set dynamically when `GITHUB_ACTIONS` is detected. API routes are excluded during static build (renamed/disabled) since they require a live Neo4j connection.
+
+Live static demo: https://ma3u.github.io/MinimumViableHealthDataspacev2/
 
 ### Phase 6b: Unified Participant Portal (Next.js)
 

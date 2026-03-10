@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { runQuery } from "@/lib/neo4j";
 
+export const dynamic = "force-dynamic";
+
 // Map Neo4j node labels → layer index (1-5) for colour assignment
 const LABEL_LAYER: Record<string, number> = {
   Participant: 1,
