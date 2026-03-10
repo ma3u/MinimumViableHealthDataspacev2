@@ -45,6 +45,60 @@ function getSession(): Session {
 const app = express();
 app.use(express.json());
 
+// ---- Audit Logging --------------------------------------------------------
+
+/**
+ * Records a data access event in Neo4j for EHDS compliance auditing.
+ * Creates (:TransferEvent)-[:ACCESSED]->(:HealthDataset) and
+ * (:TransferEvent)-[:REQUESTED_BY]->(:Organization) relationships.
+ * Fire-and-forget: errors are logged but do not block the response.
+ */
+async function logTransferEvent(
+  endpoint: string,
+  method: string,
+  participantHint: string | undefined,
+  statusCode: number,
+  resultCount: number | undefined,
+): Promise<void> {
+  const session = getSession();
+  try {
+    await session.run(
+      `
+      CREATE (te:TransferEvent {
+        eventId: randomUUID(),
+        timestamp: datetime(),
+        endpoint: $endpoint,
+        method: $method,
+        participant: $participant,
+        statusCode: $statusCode,
+        resultCount: $resultCount
+      })
+      WITH te
+      // Link to the dataset if identifiable from the endpoint
+      OPTIONAL MATCH (ds:HealthDataset)
+        WHERE $endpoint CONTAINS 'fhir' AND ds.title CONTAINS 'FHIR'
+           OR $endpoint CONTAINS 'omop' AND ds.title CONTAINS 'OMOP'
+           OR $endpoint CONTAINS 'catalog' AND ds.title CONTAINS 'Catalog'
+      FOREACH (_ IN CASE WHEN ds IS NOT NULL THEN [1] ELSE [] END |
+        MERGE (te)-[:ACCESSED]->(ds)
+      )
+      RETURN te.eventId AS eventId
+      `,
+      {
+        endpoint,
+        method,
+        participant: participantHint ?? "unknown",
+        statusCode: neo4j.int(statusCode),
+        resultCount: resultCount != null ? neo4j.int(resultCount) : null,
+      },
+    );
+  } catch (err) {
+    console.error("[neo4j-proxy] Audit log failed:", err);
+  } finally {
+    await session.close();
+  }
+}
+
 // ---- Health check ---------------------------------------------------------
 
 app.get("/health", async (_req: Request, res: Response) => {
@@ -57,6 +111,76 @@ app.get("/health", async (_req: Request, res: Response) => {
 });
 
 // ---- FHIR Endpoints -------------------------------------------------------
+
+/**
+ * GET /fhir/Patient
+ * Returns a FHIR R4 Bundle (searchset) of all patients.
+ * Supports optional query params: ?_count=N&gender=male|female&name=...
+ * This is the base route called by the DCore data plane for the
+ * "fhir-patient-everything" asset (baseUrl ends at /fhir/Patient).
+ */
+app.get(
+  "/fhir/Patient",
+  async (req: Request, res: Response, next: NextFunction) => {
+    const session = getSession();
+    try {
+      const count = Math.min(Number(req.query._count) || 100, 1000);
+      const gender = req.query.gender as string | undefined;
+      const name = req.query.name as string | undefined;
+
+      let cypher = "MATCH (p:Patient)";
+      const params: Record<string, any> = { limit: neo4j.int(count) };
+      const filters: string[] = [];
+
+      if (gender) {
+        filters.push("p.gender = $gender");
+        params.gender = gender;
+      }
+      if (name) {
+        filters.push(
+          "(p.firstName CONTAINS $name OR p.lastName CONTAINS $name)",
+        );
+        params.name = name;
+      }
+      if (filters.length > 0) {
+        cypher += `\nWHERE ${filters.join(" AND ")}`;
+      }
+      cypher += `\nRETURN p ORDER BY p.fhirId LIMIT $limit`;
+
+      const result = await session.run(cypher, params);
+
+      const entries = result.records.map((r) => {
+        const props = r.get("p").properties;
+        return {
+          fullUrl: `Patient/${props.fhirId}`,
+          resource: { resourceType: "Patient", ...props },
+        };
+      });
+
+      const bundle = {
+        resourceType: "Bundle",
+        type: "searchset",
+        total: entries.length,
+        entry: entries,
+      };
+
+      res.setHeader("Content-Type", "application/fhir+json");
+      res.json(bundle);
+      // Fire-and-forget audit log
+      logTransferEvent(
+        "/fhir/Patient",
+        "GET",
+        req.headers["x-participant"] as string,
+        200,
+        entries.length,
+      );
+    } catch (err) {
+      next(err);
+    } finally {
+      await session.close();
+    }
+  },
+);
 
 /**
  * GET /fhir/Patient/:id/$everything
@@ -139,6 +263,13 @@ app.get(
 
       res.setHeader("Content-Type", "application/fhir+json");
       res.json(bundle);
+      logTransferEvent(
+        `/fhir/Patient/${patientId}/$everything`,
+        "GET",
+        req.headers["x-participant"] as string,
+        200,
+        entries.length,
+      );
     } catch (err) {
       next(err);
     } finally {
@@ -193,6 +324,13 @@ app.post(
         total: entries.length,
         entry: entries,
       });
+      logTransferEvent(
+        "/fhir/Bundle",
+        "POST",
+        req.headers["x-participant"] as string,
+        200,
+        entries.length,
+      );
     } catch (err) {
       next(err);
     } finally {
@@ -262,6 +400,13 @@ app.post(
         cohort: rows,
         total: rows.reduce((sum, r) => sum + r.count, 0),
       });
+      logTransferEvent(
+        "/omop/cohort",
+        "POST",
+        req.headers["x-participant"] as string,
+        200,
+        rows.length,
+      );
     } catch (err) {
       next(err);
     } finally {
@@ -332,6 +477,13 @@ app.get(
         .sort((a, b) => String(a.date).localeCompare(String(b.date)));
 
       res.json({ person, timeline: events });
+      logTransferEvent(
+        `/omop/person/${personId}/timeline`,
+        "GET",
+        req.headers["x-participant"] as string,
+        200,
+        events.length,
+      );
     } catch (err) {
       next(err);
     } finally {
@@ -348,7 +500,7 @@ app.get(
  */
 app.get(
   "/catalog/datasets",
-  async (_req: Request, res: Response, next: NextFunction) => {
+  async (req: Request, res: Response, next: NextFunction) => {
     const session = getSession();
     try {
       const result = await session.run(`
@@ -437,6 +589,13 @@ app.get(
 
       res.setHeader("Content-Type", "application/ld+json");
       res.json(catalog);
+      logTransferEvent(
+        "/catalog/datasets",
+        "GET",
+        req.headers["x-participant"] as string,
+        200,
+        datasets.length,
+      );
     } catch (err) {
       next(err);
     } finally {
@@ -541,6 +700,13 @@ app.get(
 
       res.setHeader("Content-Type", "application/ld+json");
       res.json(dataset);
+      logTransferEvent(
+        `/catalog/datasets/${datasetId}`,
+        "GET",
+        req.headers["x-participant"] as string,
+        200,
+        1,
+      );
     } catch (err) {
       next(err);
     } finally {
@@ -579,6 +745,7 @@ async function main() {
     console.log(`[neo4j-proxy] Listening on port ${PORT}`);
     console.log(`[neo4j-proxy] Endpoints:`);
     console.log(`  GET  /health`);
+    console.log(`  GET  /fhir/Patient`);
     console.log(`  GET  /fhir/Patient/:id/$everything`);
     console.log(`  POST /fhir/Bundle`);
     console.log(`  POST /omop/cohort`);

@@ -135,23 +135,23 @@ All three core specifications are now final or near-final:
 
 ## Implementation Progress
 
-| Phase  | Title                                                  | Status         | Notes                                                                                                                                                                                       |
-| ------ | ------------------------------------------------------ | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **1**  | Infrastructure Migration (EDC-V + DCore + CFM)         | ✅ Complete    | 1a–1f all complete; 18 services healthy; 3 tenants + 9 VPAs provisioned; data assets registered; ADR-1–6 accepted                                                                           |
-| **2**  | Identity and Trust (DCP v1.0 + Verifiable Credentials) | 🏗️ In progress | 2a complete (DID:web for 3 tenants, Ed25519 keys, all activated — ADR-7); 2b–2c pending                                                                                                     |
-| **3**  | Health Knowledge Graph Layer — Schema & Synthetic Data | ✅ Complete    | 5-layer Neo4j schema, EHDS HDAB chain, style sheet                                                                                                                                          |
-| **3b** | Real FHIR Data Pipeline (Synthea → Neo4j → OMOP)       | ✅ Complete    | 167 patients · 5,461 encounters · 2,421 conditions · 37,713 observations · 3,895 drug Rxes · 8,534 procedures                                                                               |
-| **3c** | HealthDCAT-AP Metadata Registration for FHIR Dataset   | ✅ Complete    | Synthea cohort registered as HealthDCAT-AP catalog entry; 2 distributions + EHDS Art 53 purpose                                                                                             |
-| **3d** | README + UI completeness hardening                     | ✅ Complete    | README step order fixed; catalog UI shows datasetType/legalBasis/recordCount                                                                                                                |
-| **3e** | DSP Marketplace Registration + Compliance Chain        | ✅ Complete    | Layer 1 DataProduct/Contract/HDABApproval wired to Synthea dataset; compliance UI live dropdowns                                                                                            |
-| **3f** | OMOP Research Analytics View                           | ✅ Complete    | Layer 4 cohort dashboard: top conditions/drugs/measurements, gender breakdown, stat cards                                                                                                   |
-| **3g** | Procedure Pipeline + UI Polish                         | ✅ Complete    | 8,534 Procedure → OMOPProcedureOccurrence; Analytics card on home; 6-stat patient page                                                                                                      |
-| **3h** | EEHRxF FHIR Profile Alignment                          | ✅ Complete    | EEHRxF category/profile nodes; gap analysis UI; EHDS priority coverage                                                                                                                      |
-| **4**  | Dataspace Integration (EDC-V ↔ Neo4j data assets)     | 🏗️ In progress | 4a ✅ (assets + policies + contracts); 4b ✅ (3 FINALIZED negotiations + transfer STARTED — ADR-7); 4c ✅ (Federated Catalog: 4 datasets discoverable, HDAB contract FINALIZED); 4d pending |
-| **5**  | Federated Queries & GraphRAG                           | 🔲 Not started | Depends on Phase 4                                                                                                                                                                          |
-| **6a** | Graph Explorer UI (Next.js → Neo4j Bolt)               | ✅ Complete    | Six views (graph, catalog, compliance, patient, analytics, eehrxf); runs at localhost:3000                                                                                                  |
-| **6b** | Full Participant Portal (Aruba + Fraunhofer + Redline) | 🔲 Not started | Depends on Phases 1–4                                                                                                                                                                       |
-| **7**  | TCK DCP & DSP Compliance Verification                  | 🔲 Not started | Protocol conformance testing; depends on Phases 1–2                                                                                                                                         |
+| Phase  | Title                                                  | Status         | Notes                                                                                                                                                                                                                                                                                              |
+| ------ | ------------------------------------------------------ | -------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **1**  | Infrastructure Migration (EDC-V + DCore + CFM)         | ✅ Complete    | 1a–1f all complete; 18 services healthy; 3 tenants + 9 VPAs provisioned; data assets registered; ADR-1–6 accepted                                                                                                                                                                                  |
+| **2**  | Identity and Trust (DCP v1.0 + Verifiable Credentials) | 🏗️ In progress | 2a complete (DID:web for 3 tenants, Ed25519 keys, all activated — ADR-7); 2b–2c pending                                                                                                                                                                                                            |
+| **3**  | Health Knowledge Graph Layer — Schema & Synthetic Data | ✅ Complete    | 5-layer Neo4j schema, EHDS HDAB chain, style sheet                                                                                                                                                                                                                                                 |
+| **3b** | Real FHIR Data Pipeline (Synthea → Neo4j → OMOP)       | ✅ Complete    | 167 patients · 5,461 encounters · 2,421 conditions · 37,713 observations · 3,895 drug Rxes · 8,534 procedures                                                                                                                                                                                      |
+| **3c** | HealthDCAT-AP Metadata Registration for FHIR Dataset   | ✅ Complete    | Synthea cohort registered as HealthDCAT-AP catalog entry; 2 distributions + EHDS Art 53 purpose                                                                                                                                                                                                    |
+| **3d** | README + UI completeness hardening                     | ✅ Complete    | README step order fixed; catalog UI shows datasetType/legalBasis/recordCount                                                                                                                                                                                                                       |
+| **3e** | DSP Marketplace Registration + Compliance Chain        | ✅ Complete    | Layer 1 DataProduct/Contract/HDABApproval wired to Synthea dataset; compliance UI live dropdowns                                                                                                                                                                                                   |
+| **3f** | OMOP Research Analytics View                           | ✅ Complete    | Layer 4 cohort dashboard: top conditions/drugs/measurements, gender breakdown, stat cards                                                                                                                                                                                                          |
+| **3g** | Procedure Pipeline + UI Polish                         | ✅ Complete    | 8,534 Procedure → OMOPProcedureOccurrence; Analytics card on home; 6-stat patient page                                                                                                                                                                                                             |
+| **3h** | EEHRxF FHIR Profile Alignment                          | ✅ Complete    | EEHRxF category/profile nodes; gap analysis UI; EHDS priority coverage                                                                                                                                                                                                                             |
+| **4**  | Dataspace Integration (EDC-V ↔ Neo4j data assets)     | 🏗️ In progress | 4a ✅ (assets + policies + contracts); 4b ✅ (3 FINALIZED negotiations + transfer STARTED — ADR-7); 4c ✅ (Federated Catalog: 4 datasets discoverable, HDAB contract FINALIZED); 4d ✅ (Data Plane Transfer: CRO←100 FHIR patients, HDAB←2 HealthDCAT-AP datasets via DCore; audit trail in Neo4j) |
+| **5**  | Federated Queries & GraphRAG                           | 🔲 Not started | Depends on Phase 4                                                                                                                                                                                                                                                                                 |
+| **6a** | Graph Explorer UI (Next.js → Neo4j Bolt)               | ✅ Complete    | Six views (graph, catalog, compliance, patient, analytics, eehrxf); runs at localhost:3000                                                                                                                                                                                                         |
+| **6b** | Full Participant Portal (Aruba + Fraunhofer + Redline) | 🔲 Not started | Depends on Phases 1–4                                                                                                                                                                                                                                                                              |
+| **7**  | TCK DCP & DSP Compliance Verification                  | 🔲 Not started | Protocol conformance testing; depends on Phases 1–2                                                                                                                                                                                                                                                |
 
 ---
 
@@ -592,18 +592,31 @@ Phase 4 wires the Neo4j health knowledge graph into the live EDC-V data plane, e
 > 3. `omop-cohort-statistics` — OMOP CDM Cohort Statistics (Neo4j Layer 4)
 > 4. `healthdcatap-catalog` — HealthDCAT-AP Dataset Catalog JSON-LD (Neo4j Layer 2)
 
-#### 4d: Data Plane Transfer via DCore
+#### 4d: Data Plane Transfer via DCore ✅
 
-18. Configure DCore Rust data plane for FHIR transfer:
-    - HTTP push/pull transfer types for FHIR Bundle JSON streaming
-    - Data Plane Signaling (DPS) for control plane → data plane coordination
-    - Transfer audit log: `(:TransferProcess)-[:ACCESSED]->(asset)` stored in Neo4j
-19. Implement query result proxying:
-    - CRO sends parameterized Cypher query via DCore HTTP endpoint
-    - DCore enforces contract-scoped access (only permitted OMOP aggregation queries)
-    - Query results streamed back through DCore with transfer completion signaling
+18. ~~Configure DCore Rust data plane for FHIR transfer:~~
+    - HTTP pull transfer with Ed25519 JWT bearer tokens (Endpoint Data References)
+    - Data Plane Signaling (DPS) coordination between control plane and data plane
+    - Transfer audit log: `(:TransferEvent)-[:ACCESSED]->(HealthDataset)` stored in Neo4j
+19. ~~Implement query result proxying:~~
+    - DCore data plane proxies requests to Neo4j Query Proxy (port 9090)
+    - Neo4j Query Proxy translates HTTP → Cypher, returns FHIR R4 / HealthDCAT-AP JSON-LD
+    - Query parameters (`_count`, `gender`, `name`) proxied through data plane
+    - Added `GET /fhir/Patient` search route to neo4j-proxy for data plane base URL
 
-**Deliverables:** Neo4j assets registered in EDC-V ✅; DSP contract negotiation working end-to-end ✅; Federated Catalog exposing HealthDCAT-AP metadata via DSP ✅; DCore handling FHIR transfers with audit trail.
+**Phase 4d Results:**
+
+| Metric                  | Value                                                          |
+| ----------------------- | -------------------------------------------------------------- |
+| FHIR patients via DCore | 100 (CRO Bayer → data plane → neo4j-proxy → Neo4j)             |
+| HealthDCAT-AP datasets  | 2 (HDAB BfArM → data plane → neo4j-proxy → Neo4j)              |
+| Auth mechanism          | Ed25519 JWT (kid=`dataplane-fhir-private`, alg=`Ed25519`)      |
+| Data flow               | Consumer → DCore Data Plane → Neo4j Query Proxy → Neo4j KG     |
+| Audit events in Neo4j   | TransferEvent nodes with timestamp, endpoint, resultCount      |
+| Query param proxying    | ✅ `_count`, `gender`, `name` forwarded via `proxyQueryParams` |
+| Automation script       | `jad/seed-data-transfer.sh`                                    |
+
+**Deliverables:** Neo4j assets registered in EDC-V ✅; DSP contract negotiation working end-to-end ✅; Federated Catalog exposing HealthDCAT-AP metadata via DSP ✅; DCore handling FHIR + catalog transfers with audit trail ✅.
 
 > **Root Causes Discovered (Phase 4b):**
 >
@@ -611,6 +624,10 @@ Phase 4 wires the Neo4j health knowledge graph into the live EDC-V data plane, e
 > 2. Participant contexts must be ACTIVATED (state=300) for DID document serving; CFM creates them as CREATED (200)
 > 3. Protocol string must be `dataspace-protocol-http:2025-1` (with version suffix), not `dataspace-protocol-http`
 > 4. Data plane hostname must match docker-compose service name (`dataplane-fhir`, not `dataplane`)
+
+> **Root Cause Discovered (Phase 4d):**
+>
+> 5. Neo4j Query Proxy lacked a `GET /fhir/Patient` base route — the data plane's `baseUrl` pointed to `/fhir/Patient` but only `/fhir/Patient/:id/$everything` existed. Added search route returning FHIR R4 searchset Bundle.
 
 ### Phase 5: Federated Queries and GraphRAG
 
