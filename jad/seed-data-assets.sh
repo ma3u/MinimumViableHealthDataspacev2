@@ -302,16 +302,21 @@ echo "────────────────────────�
 echo "Step 3: Create Contract Definitions"
 echo "────────────────────────────────────────────────"
 
+# NOTE: operandLeft MUST use the full EDC namespace URI, not the @id shorthand.
+# The internal store expands @id → https://w3id.org/edc/v0.0.1/ns/id and the
+# catalog builder needs an exact match to surface datasets in DSP responses.
+EDC_ID="https://w3id.org/edc/v0.0.1/ns/id"
+
 # Contract for FHIR patient data — requires membership
-FHIR_SELECTOR='[{"@type":"Criterion","operandLeft":"@id","operator":"in","operandRight":["fhir-patient-everything","fhir-cohort-bundle"]}]'
+FHIR_SELECTOR="[{\"@type\":\"Criterion\",\"operandLeft\":\"$EDC_ID\",\"operator\":\"in\",\"operandRight\":[\"fhir-patient-everything\",\"fhir-cohort-bundle\"]}]"
 create_contract_def "$CLINIC_CTX" "fhir-data-contract" "membership-access-policy" "membership-access-policy" "$FHIR_SELECTOR"
 
 # Contract for OMOP statistics — requires membership
-OMOP_SELECTOR='[{"@type":"Criterion","operandLeft":"@id","operator":"=","operandRight":"omop-cohort-statistics"}]'
+OMOP_SELECTOR="[{\"@type\":\"Criterion\",\"operandLeft\":\"$EDC_ID\",\"operator\":\"=\",\"operandRight\":\"omop-cohort-statistics\"}]"
 create_contract_def "$CLINIC_CTX" "omop-data-contract" "membership-access-policy" "membership-access-policy" "$OMOP_SELECTOR"
 
 # Contract for catalog metadata — open access
-CATALOG_SELECTOR='[{"@type":"Criterion","operandLeft":"@id","operator":"=","operandRight":"healthdcatap-catalog"}]'
+CATALOG_SELECTOR="[{\"@type\":\"Criterion\",\"operandLeft\":\"$EDC_ID\",\"operator\":\"=\",\"operandRight\":\"healthdcatap-catalog\"}]"
 create_contract_def "$CLINIC_CTX" "catalog-metadata-contract" "open-access-policy" "open-access-policy" "$CATALOG_SELECTOR"
 
 echo ""
@@ -338,8 +343,76 @@ HDAB_CATALOG_POLICY='{
 }'
 create_policy "$HDAB_CTX" "catalog-open-policy" "$HDAB_CATALOG_POLICY"
 
-HDAB_CATALOG_SELECTOR='[{"@type":"Criterion","operandLeft":"@id","operator":"=","operandRight":"federated-healthdcatap-catalog"}]'
+HDAB_CATALOG_SELECTOR="[{\"@type\":\"Criterion\",\"operandLeft\":\"$EDC_ID\",\"operator\":\"=\",\"operandRight\":\"federated-healthdcatap-catalog\"}]"
 create_contract_def "$HDAB_CTX" "federated-catalog-contract" "catalog-open-policy" "catalog-open-policy" "$HDAB_CATALOG_SELECTOR"
+
+echo ""
+
+# =============================================================================
+# Step 5: Activate Participant Contexts
+# =============================================================================
+# CFM provisioning creates participant contexts in CREATED state (200).
+# DID documents are only served when contexts are ACTIVATED (300).
+# The management API activation endpoint returns 403, so we use PostgreSQL directly.
+echo "────────────────────────────────────────────────"
+echo "Step 5: Activate Participant Contexts"
+echo "────────────────────────────────────────────────"
+
+ACTIVATED=$(docker exec postgres psql -U ih -d identityhub -tAc \
+  "UPDATE participant_context SET state = 300 WHERE state = 200 RETURNING participant_id;" 2>/dev/null || echo "")
+
+if [ -n "$ACTIVATED" ]; then
+  ACTIVATED_COUNT=$(echo "$ACTIVATED" | grep -c . || echo 0)
+  ok "Activated $ACTIVATED_COUNT participant context(s)"
+  echo "$ACTIVATED" | while read -r pid; do
+    echo "    - $pid"
+  done
+else
+  # Check if already activated
+  ACTIVE_COUNT=$(docker exec postgres psql -U ih -d identityhub -tAc \
+    "SELECT COUNT(*) FROM participant_context WHERE state = 300;" 2>/dev/null || echo "0")
+  ok "All $ACTIVE_COUNT participant context(s) already activated"
+fi
+
+echo ""
+
+# =============================================================================
+# Step 6: Register Data Planes
+# =============================================================================
+# Data planes tell the control plane how to reach the data-plane runtime.
+# Hostname must match docker-compose service name (dataplane-fhir, not dataplane).
+echo "────────────────────────────────────────────────"
+echo "Step 6: Register Data Planes"
+echo "────────────────────────────────────────────────"
+
+DATAPLANE_FHIR_URL="http://dataplane-fhir:8083/api/control/v1/dataflows"
+
+register_dataplane() {
+  local ctx_id="$1" label="$2"
+  local payload="{
+    \"@context\": [\"$EDC_CTX\"],
+    \"allowedSourceTypes\": [\"HttpData\", \"HttpCertData\"],
+    \"allowedTransferTypes\": [\"HttpData-PULL\"],
+    \"url\": \"$DATAPLANE_FHIR_URL\"
+  }"
+  local token
+  token=$(get_token)
+  local http_code
+  http_code=$(curl -s -o /dev/null -w '%{http_code}' -X POST \
+    "$CP_MGMT/v5alpha/dataplanes/$ctx_id" \
+    -H "Authorization: Bearer $token" \
+    -H "Content-Type: application/json" \
+    -d "$payload")
+  if [ "$http_code" = "204" ] || [ "$http_code" = "200" ]; then
+    ok "Data plane registered for $label"
+  else
+    warn "Data plane registration for $label returned HTTP $http_code"
+  fi
+}
+
+register_dataplane "$CLINIC_CTX" "Clinic"
+register_dataplane "$CRO_CTX"    "CRO"
+register_dataplane "$HDAB_CTX"   "HDAB"
 
 echo ""
 

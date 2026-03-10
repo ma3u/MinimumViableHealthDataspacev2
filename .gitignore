@@ -44,8 +44,7 @@ docker-compose.override.yml
 vendor/
 
 # Connector — custom EDC connector build artifacts
-connector/.gradle/
-connector/*/build/
+connector/
 
 # Synthea — generated patient data (never commit)
 neo4j/import/fhir/*.json
