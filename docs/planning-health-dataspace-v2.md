@@ -147,9 +147,9 @@ All three core specifications are now final or near-final:
 | **3f** | OMOP Research Analytics View                           | ✅ Complete    | Layer 4 cohort dashboard: top conditions/drugs/measurements, gender breakdown, stat cards                                                                                                                                                                                                          |
 | **3g** | Procedure Pipeline + UI Polish                         | ✅ Complete    | 8,534 Procedure → OMOPProcedureOccurrence; Analytics card on home; 6-stat patient page                                                                                                                                                                                                             |
 | **3h** | EEHRxF FHIR Profile Alignment                          | ✅ Complete    | EEHRxF category/profile nodes; gap analysis UI; EHDS priority coverage                                                                                                                                                                                                                             |
-| **4**  | Dataspace Integration (EDC-V ↔ Neo4j data assets)     | 🏗️ In progress | 4a ✅ (assets + policies + contracts); 4b ✅ (3 FINALIZED negotiations + transfer STARTED — ADR-7); 4c ✅ (Federated Catalog: 4 datasets discoverable, HDAB contract FINALIZED); 4d ✅ (Data Plane Transfer: CRO←100 FHIR patients, HDAB←2 HealthDCAT-AP datasets via DCore; audit trail in Neo4j) |
-| **5**  | Federated Queries & GraphRAG                           | 🔲 Not started | Depends on Phase 4                                                                                                                                                                                                                                                                                 |
-| **6a** | Graph Explorer UI (Next.js → Neo4j Bolt)               | ✅ Complete    | Six views (graph, catalog, compliance, patient, analytics, eehrxf); runs at localhost:3000                                                                                                                                                                                                         |
+| **4**  | Dataspace Integration (EDC-V ↔ Neo4j data assets)     | ✅ Complete    | 4a ✅ (assets + policies + contracts); 4b ✅ (3 FINALIZED negotiations + transfer STARTED — ADR-7); 4c ✅ (Federated Catalog: 4 datasets discoverable, HDAB contract FINALIZED); 4d ✅ (Data Plane Transfer: CRO←100 FHIR patients, HDAB←2 HealthDCAT-AP datasets via DCore; audit trail in Neo4j) |
+| **5**  | Federated Queries & GraphRAG                           | ✅ Complete    | 5a ✅ (Neo4j SPE-2: 34 patients, 1,876 encounters); 5b ✅ (federated query dispatch + k-anonymity); 5c ✅ (Text2Cypher NLQ: 9 templates + optional LLM); 5d ✅ (UI `/query` page — 7th view)                                                                                                       |
+| **6a** | Graph Explorer UI (Next.js → Neo4j Bolt)               | ✅ Complete    | Seven views (graph, catalog, compliance, patient, analytics, eehrxf, query/NLQ); runs at localhost:3000                                                                                                                                                                                            |
 | **6b** | Full Participant Portal (Aruba + Fraunhofer + Redline) | 🔲 Not started | Depends on Phases 1–4                                                                                                                                                                                                                                                                              |
 | **7**  | TCK DCP & DSP Compliance Verification                  | 🔲 Not started | Protocol conformance testing; depends on Phases 1–2                                                                                                                                                                                                                                                |
 
@@ -525,7 +525,7 @@ The **European Electronic Health Record Exchange Format (EEHRxF)** was establish
 - EHDS implementation timeline visualization (2025 → 2031)
 - Gap analysis highlighting missing resources (e.g., DiagnosticReport, ImagingStudy)
 
-### Phase 4: Dataspace Integration (EDC-V ↔ Neo4j) 🏗️
+### Phase 4: Dataspace Integration (EDC-V ↔ Neo4j) ✅
 
 Phase 4 wires the Neo4j health knowledge graph into the live EDC-V data plane, enabling full DSP contract negotiation and credentialed data access.
 
@@ -629,27 +629,90 @@ Phase 4 wires the Neo4j health knowledge graph into the live EDC-V data plane, e
 >
 > 5. Neo4j Query Proxy lacked a `GET /fhir/Patient` base route — the data plane's `baseUrl` pointed to `/fhir/Patient` but only `/fhir/Patient/:id/$everything` existed. Added search route returning FHIR R4 searchset Bundle.
 
-### Phase 5: Federated Queries and GraphRAG
+### Phase 5: Federated Queries and GraphRAG ✅
 
-15. Deploy two separate Neo4j instances (simulating two HDAB SPEs)
-16. Configure **Neo4j Composite Database** for federated Cypher queries across both instances
-17. Implement **Privacy-Preserving Multiparty Query** layer using SMPC protocols
-18. Add **GraphRAG interface** for natural language querying of patient journeys:
-    - Neo4j Text2Cypher for natural language → Cypher translation
-    - Vector embeddings for semantic search across clinical narratives
-    - Structured + unstructured retrieval for comprehensive patient context
+Implements application-layer federation across multiple Neo4j Secure Processing Environments (SPEs) and a natural language query (Text2Cypher) interface — using Neo4j Community Edition without Composite Database.
+
+#### 5a: Second Neo4j SPE ✅
+
+- Added `neo4j-spe2` Docker service (ports 7475/7688, `federated` profile)
+- Independent data partition: 34 patients, 1,876 encounters, 958 conditions
+- Seeded via `scripts/seed-spe2.sh` with `--start-index 33` (second half of Synthea bundles)
+- OMOP CDM transform applied: 29 OMOP persons, 1,876 visits, 958 condition occurrences
+
+#### 5b: Federated Query Dispatch ✅
+
+Application-layer federation in `neo4j-proxy` (simulates Composite Database on Community Edition):
+
+| Endpoint                | Method | Description                                                                                                                              |
+| ----------------------- | ------ | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| `POST /federated/query` | POST   | Dispatches read-only Cypher to all SPEs in parallel; merges results with `_source` labels; supports k-anonymity filtering (`minK` param) |
+| `GET /federated/stats`  | GET    | Aggregate statistics across all SPEs (patients, encounters, conditions, observations, top conditions, gender breakdown)                  |
+
+**Privacy features:**
+
+- Write operation blocking (safety check before dispatch)
+- k-anonymity filtering: results with counts below `minK` threshold are suppressed
+- Per-SPE breakdown + totals for transparency
+
+#### 5c: Natural Language Query (Text2Cypher) ✅
+
+| Endpoint             | Method | Description                                       |
+| -------------------- | ------ | ------------------------------------------------- |
+| `POST /nlq`          | POST   | Natural language → Cypher translation + execution |
+| `GET /nlq/templates` | GET    | List available query templates + LLM status       |
+
+**Query resolution pipeline:**
+
+1. **Template matching** — 9 built-in templates with regex pattern matching:
+   - `patient_count`, `patient_by_gender`, `top_conditions`, `top_medications`
+   - `patient_journey`, `condition_prevalence`, `encounters_by_type`
+   - `omop_cohort_stats`, `age_distribution`
+2. **LLM fallback** — optional OpenAI API or Ollama for free-form questions:
+   - Full 5-layer graph schema context provided to LLM
+   - Safety validation on generated Cypher (blocks write operations)
+3. **Federated mode** — `federated: true` dispatches to all SPEs
+
+#### 5d: NLQ Explorer UI ✅
+
+New `/query` page in the Next.js UI (7th view):
+
+| Feature                | Description                                      |
+| ---------------------- | ------------------------------------------------ |
+| Natural language input | Free-text question with example question chips   |
+| Federated toggle       | One-click federated mode across all SPEs         |
+| Result table           | Dynamic columns from query results               |
+| Method badge           | Shows template match vs. LLM generation          |
+| Cypher inspector       | Toggle to view generated Cypher query            |
+| SPE overview           | Per-SPE data counts (patients, encounters, etc.) |
+| Query history          | Recent queries with one-click replay             |
+
+**Federated stats header** shows live SPE count + total patients/encounters/conditions.
+
+#### Infrastructure Summary
+
+| Component      | SPE-1 (Primary)          | SPE-2 (Federated)             |
+| -------------- | ------------------------ | ----------------------------- |
+| Container      | `health-dataspace-neo4j` | `health-dataspace-neo4j-spe2` |
+| Bolt port      | 7687                     | 7688                          |
+| Browser port   | 7474                     | 7475                          |
+| Patients       | 167                      | 34                            |
+| Encounters     | 5,461                    | 1,876                         |
+| OMOP Persons   | 167                      | 29                            |
+| Docker profile | (default)                | `federated`                   |
 
 ### Phase 6a: Graph Explorer UI ✅
 
 Deployed as a standalone Next.js 14 web app connecting directly to Neo4j Bolt — no EDC-V dependency, immediately useful for demos and stakeholder review.
 
-| View            | Path          | Description                                        |
-| --------------- | ------------- | -------------------------------------------------- |
-| Graph Explorer  | `/graph`      | Force-directed graph of all 5 architecture layers  |
-| Dataset Catalog | `/catalog`    | HealthDCAT-AP metadata browser                     |
-| EHDS Compliance | `/compliance` | HDAB approval chain validator (Articles 45–52)     |
-| Patient Journey | `/patient`    | FHIR R4 → OMOP CDM event timeline                  |
-| OMOP Analytics  | `/analytics`  | Cohort-level OMOP CDM research analytics dashboard |
+| View            | Path          | Description                                                |
+| --------------- | ------------- | ---------------------------------------------------------- |
+| Graph Explorer  | `/graph`      | Force-directed graph of all 5 architecture layers          |
+| Dataset Catalog | `/catalog`    | HealthDCAT-AP metadata browser                             |
+| EHDS Compliance | `/compliance` | HDAB approval chain validator (Articles 45–52)             |
+| Patient Journey | `/patient`    | FHIR R4 → OMOP CDM event timeline                          |
+| OMOP Analytics  | `/analytics`  | Cohort-level OMOP CDM research analytics dashboard         |
+| NLQ / Federated | `/query`      | Natural language → Cypher query with federated SPE support |
 
 ### Phase 6b: Unified Participant Portal (Next.js)
 

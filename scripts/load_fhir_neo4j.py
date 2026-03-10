@@ -359,7 +359,16 @@ def main():
     parser.add_argument("--password", default="healthdataspace")
     parser.add_argument("--dataset-id", default="urn:uuid:riverside:dataset:diab-001",
                         help="HealthDataset id to link patients to")
+    parser.add_argument("--start-index", type=int, default=0,
+                        help="Start loading from this bundle index (0-based)")
+    parser.add_argument("--end-index", type=int, default=None,
+                        help="Stop loading at this bundle index (exclusive)")
     args = parser.parse_args()
+
+    # Override from environment variables (for scripted use)
+    uri = os.environ.get("NEO4J_URI", args.uri)
+    user = os.environ.get("NEO4J_USER", args.user)
+    password = os.environ.get("NEO4J_PASSWORD", args.password)
 
     bundles = sorted(glob.glob(os.path.join(args.dir, "*.json")))
     if not bundles:
@@ -368,13 +377,16 @@ def main():
             "Run scripts/generate-synthea.sh first."
         )
 
+    # Apply index range for federated/partial loading
+    bundles = bundles[args.start_index:args.end_index]
+
     print("=== Phase 3b: Load FHIR Bundles → Neo4j ===")
-    print(f"Bundles   : {len(bundles)}")
-    print(f"Neo4j URI : {args.uri}")
+    print(f"Bundles   : {len(bundles)} (index {args.start_index}–{args.end_index or 'end'})")
+    print(f"Neo4j URI : {uri}")
     print(f"Dataset   : {args.dataset_id}")
     print("")
 
-    driver = GraphDatabase.driver(args.uri, auth=(args.user, args.password))
+    driver = GraphDatabase.driver(uri, auth=(user, password))
     stats: dict = {}
 
     with driver.session() as session:

@@ -1,0 +1,36 @@
+{
+  "speCount": 2,
+  "totals": {
+    "patients": 200,
+    "encounters": 7465,
+    "conditions": 3457,
+    "observations": 53765
+  },
+  "aggregatedConditions": [
+    { "name": "Medication review due (situation)", "count": 723 },
+    { "name": "Stress (finding)", "count": 253 },
+    { "name": "Full-time employment (finding)", "count": 250 },
+    { "name": "Gingivitis (disorder)", "count": 187 },
+    { "name": "Part-time employment (finding)", "count": 161 }
+  ],
+  "aggregatedGenders": [
+    { "gender": "female", "count": 105 },
+    { "gender": "male", "count": 95 }
+  ],
+  "spes": [
+    {
+      "label": "SPE-1",
+      "patients": 167,
+      "encounters": 5461,
+      "conditions": 2444,
+      "observations": 42099
+    },
+    {
+      "label": "SPE-2",
+      "patients": 34,
+      "encounters": 1876,
+      "conditions": 958,
+      "observations": 11666
+    }
+  ]
+}

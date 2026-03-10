@@ -16,6 +16,28 @@ services:
       - ./neo4j/import:/var/lib/neo4j/import
       - ./neo4j/plugins:/plugins
 
+  # Second Neo4j instance — simulates a second Secure Processing Environment (SPE)
+  # for federated query testing (Phase 5). Runs a disjoint patient subset from a
+  # different geographic region (e.g., New York vs Massachusetts).
+  neo4j-spe2:
+    image: neo4j:5-community
+    container_name: health-dataspace-neo4j-spe2
+    ports:
+      - "7475:7474" # Browser UI (offset from primary)
+      - "7688:7687" # Bolt protocol (offset from primary)
+    environment:
+      NEO4J_AUTH: neo4j/healthdataspace
+      NEO4J_PLUGINS: '["apoc", "n10s"]'
+      NEO4J_server_memory_heap_initial__size: 256m
+      NEO4J_server_memory_heap_max__size: 512m
+    volumes:
+      - neo4j_spe2_data:/data
+      - neo4j_spe2_logs:/logs
+      - ./neo4j/import:/var/lib/neo4j/import
+      - ./neo4j/plugins:/plugins
+    profiles:
+      - federated
+
   graph-explorer:
     build:
       context: ./ui
@@ -33,3 +55,5 @@ services:
 volumes:
   neo4j_data:
   neo4j_logs:
+  neo4j_spe2_data:
+  neo4j_spe2_logs:

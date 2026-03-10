@@ -1,0 +1,50 @@
+{
+  "templates": [
+    {
+      "name": "patient_count",
+      "description": "Count total patients",
+      "examplePatterns": ["how many patients"]
+    },
+    {
+      "name": "patient_by_gender",
+      "description": "Patient count by gender",
+      "examplePatterns": ["patients by gender"]
+    },
+    {
+      "name": "top_conditions",
+      "description": "Most common conditions",
+      "examplePatterns": ["top conditions"]
+    },
+    {
+      "name": "top_medications",
+      "description": "Most prescribed medications",
+      "examplePatterns": ["top medications"]
+    },
+    {
+      "name": "patient_journey",
+      "description": "Patient journey with encounters",
+      "examplePatterns": ["patient journey"]
+    },
+    {
+      "name": "condition_prevalence",
+      "description": "Prevalence of a specific condition",
+      "examplePatterns": ["prevalence of diabetes"]
+    },
+    {
+      "name": "encounters_by_type",
+      "description": "Encounters grouped by type",
+      "examplePatterns": ["encounters by type"]
+    },
+    {
+      "name": "omop_cohort_stats",
+      "description": "OMOP CDM cohort statistics",
+      "examplePatterns": ["omop stats"]
+    },
+    {
+      "name": "age_distribution",
+      "description": "Patient age distribution",
+      "examplePatterns": ["age distribution"]
+    }
+  ],
+  "llmAvailable": false
+}

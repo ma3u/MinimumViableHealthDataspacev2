@@ -17,6 +17,9 @@ export async function fetchApi(
       mockPath = "/mock/patient_default.json";
     else if (endpoint === "/api/analytics") mockPath = "/mock/analytics.json";
     else if (endpoint === "/api/eehrxf") mockPath = "/mock/eehrxf.json";
+    else if (endpoint === "/api/nlq") mockPath = "/mock/nlq_templates.json";
+    else if (endpoint === "/api/federated")
+      mockPath = "/mock/federated_stats.json";
 
     // Simulate small latency to make it feel natural
     await new Promise((resolve) => setTimeout(resolve, 300));
