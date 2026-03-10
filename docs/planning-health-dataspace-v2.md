@@ -135,23 +135,23 @@ All three core specifications are now final or near-final:
 
 ## Implementation Progress
 
-| Phase  | Title                                                  | Status         | Notes                                                                                                             |
-| ------ | ------------------------------------------------------ | -------------- | ----------------------------------------------------------------------------------------------------------------- |
-| **1**  | Infrastructure Migration (EDC-V + DCore + CFM)         | ✅ Complete    | 1a–1f all complete; 18 services healthy; 3 tenants + 9 VPAs provisioned; data assets registered; ADR-1–6 accepted |
-| **2**  | Identity and Trust (DCP v1.0 + Verifiable Credentials) | 🏗️ In progress | 2a complete (DID:web for 3 tenants, Ed25519 keys, all activated — ADR-7); 2b–2c pending                           |
-| **3**  | Health Knowledge Graph Layer — Schema & Synthetic Data | ✅ Complete    | 5-layer Neo4j schema, EHDS HDAB chain, style sheet                                                                |
-| **3b** | Real FHIR Data Pipeline (Synthea → Neo4j → OMOP)       | ✅ Complete    | 167 patients · 5,461 encounters · 2,421 conditions · 37,713 observations · 3,895 drug Rxes · 8,534 procedures     |
-| **3c** | HealthDCAT-AP Metadata Registration for FHIR Dataset   | ✅ Complete    | Synthea cohort registered as HealthDCAT-AP catalog entry; 2 distributions + EHDS Art 53 purpose                   |
-| **3d** | README + UI completeness hardening                     | ✅ Complete    | README step order fixed; catalog UI shows datasetType/legalBasis/recordCount                                      |
-| **3e** | DSP Marketplace Registration + Compliance Chain        | ✅ Complete    | Layer 1 DataProduct/Contract/HDABApproval wired to Synthea dataset; compliance UI live dropdowns                  |
-| **3f** | OMOP Research Analytics View                           | ✅ Complete    | Layer 4 cohort dashboard: top conditions/drugs/measurements, gender breakdown, stat cards                         |
-| **3g** | Procedure Pipeline + UI Polish                         | ✅ Complete    | 8,534 Procedure → OMOPProcedureOccurrence; Analytics card on home; 6-stat patient page                            |
-| **3h** | EEHRxF FHIR Profile Alignment                          | ✅ Complete    | EEHRxF category/profile nodes; gap analysis UI; EHDS priority coverage                                            |
-| **4**  | Dataspace Integration (EDC-V ↔ Neo4j data assets)     | 🏗️ In progress | 4a ✅ (assets + policies + contracts); 4b ✅ (3 FINALIZED negotiations + transfer STARTED — ADR-7); 4c–4d pending |
-| **5**  | Federated Queries & GraphRAG                           | 🔲 Not started | Depends on Phase 4                                                                                                |
-| **6a** | Graph Explorer UI (Next.js → Neo4j Bolt)               | ✅ Complete    | Six views (graph, catalog, compliance, patient, analytics, eehrxf); runs at localhost:3000                        |
-| **6b** | Full Participant Portal (Aruba + Fraunhofer + Redline) | 🔲 Not started | Depends on Phases 1–4                                                                                             |
-| **7**  | TCK DCP & DSP Compliance Verification                  | 🔲 Not started | Protocol conformance testing; depends on Phases 1–2                                                               |
+| Phase  | Title                                                  | Status         | Notes                                                                                                                                                                                       |
+| ------ | ------------------------------------------------------ | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **1**  | Infrastructure Migration (EDC-V + DCore + CFM)         | ✅ Complete    | 1a–1f all complete; 18 services healthy; 3 tenants + 9 VPAs provisioned; data assets registered; ADR-1–6 accepted                                                                           |
+| **2**  | Identity and Trust (DCP v1.0 + Verifiable Credentials) | 🏗️ In progress | 2a complete (DID:web for 3 tenants, Ed25519 keys, all activated — ADR-7); 2b–2c pending                                                                                                     |
+| **3**  | Health Knowledge Graph Layer — Schema & Synthetic Data | ✅ Complete    | 5-layer Neo4j schema, EHDS HDAB chain, style sheet                                                                                                                                          |
+| **3b** | Real FHIR Data Pipeline (Synthea → Neo4j → OMOP)       | ✅ Complete    | 167 patients · 5,461 encounters · 2,421 conditions · 37,713 observations · 3,895 drug Rxes · 8,534 procedures                                                                               |
+| **3c** | HealthDCAT-AP Metadata Registration for FHIR Dataset   | ✅ Complete    | Synthea cohort registered as HealthDCAT-AP catalog entry; 2 distributions + EHDS Art 53 purpose                                                                                             |
+| **3d** | README + UI completeness hardening                     | ✅ Complete    | README step order fixed; catalog UI shows datasetType/legalBasis/recordCount                                                                                                                |
+| **3e** | DSP Marketplace Registration + Compliance Chain        | ✅ Complete    | Layer 1 DataProduct/Contract/HDABApproval wired to Synthea dataset; compliance UI live dropdowns                                                                                            |
+| **3f** | OMOP Research Analytics View                           | ✅ Complete    | Layer 4 cohort dashboard: top conditions/drugs/measurements, gender breakdown, stat cards                                                                                                   |
+| **3g** | Procedure Pipeline + UI Polish                         | ✅ Complete    | 8,534 Procedure → OMOPProcedureOccurrence; Analytics card on home; 6-stat patient page                                                                                                      |
+| **3h** | EEHRxF FHIR Profile Alignment                          | ✅ Complete    | EEHRxF category/profile nodes; gap analysis UI; EHDS priority coverage                                                                                                                      |
+| **4**  | Dataspace Integration (EDC-V ↔ Neo4j data assets)     | 🏗️ In progress | 4a ✅ (assets + policies + contracts); 4b ✅ (3 FINALIZED negotiations + transfer STARTED — ADR-7); 4c ✅ (Federated Catalog: 4 datasets discoverable, HDAB contract FINALIZED); 4d pending |
+| **5**  | Federated Queries & GraphRAG                           | 🔲 Not started | Depends on Phase 4                                                                                                                                                                          |
+| **6a** | Graph Explorer UI (Next.js → Neo4j Bolt)               | ✅ Complete    | Six views (graph, catalog, compliance, patient, analytics, eehrxf); runs at localhost:3000                                                                                                  |
+| **6b** | Full Participant Portal (Aruba + Fraunhofer + Redline) | 🔲 Not started | Depends on Phases 1–4                                                                                                                                                                       |
+| **7**  | TCK DCP & DSP Compliance Verification                  | 🔲 Not started | Protocol conformance testing; depends on Phases 1–2                                                                                                                                         |
 
 ---
 
@@ -564,15 +564,33 @@ Phase 4 wires the Neo4j health knowledge graph into the live EDC-V data plane, e
 4. HDAB operator catalog visibility check
 5. Final state verification
 
-#### 4c: Federated Catalog with HealthDCAT-AP
+#### 4c: Federated Catalog with HealthDCAT-AP ✅
 
-16. Configure HDAB's EDC-V **Federated Catalog** extension:
-    - Clinic publishes HealthDCAT-AP dataset descriptions to HDAB catalog
-    - CRO discovers available cohorts via DSP catalog request protocol
-    - CFM orchestrates catalog federation across multiple HDAB instances
+16. ~~Configure HDAB's EDC-V **Federated Catalog** extension:~~
+    - ✅ Clinic publishes HealthDCAT-AP dataset descriptions to DSP catalog (4 assets)
+    - ✅ CRO discovers available cohorts via DSP catalog request protocol (4 datasets)
+    - ✅ HDAB discovers available datasets via DSP catalog request protocol (4 datasets)
+    - ✅ HDAB negotiates contract for `healthdcatap-catalog` metadata asset → FINALIZED
+    - ✅ HDAB initiates HttpData-PULL transfer for catalog metadata → STARTED
+    - Automation script: `jad/seed-federated-catalog.sh`
 17. Expose Federated Catalog via the `/catalog` UI view (extending Phase 6a):
     - Live catalog queries via EDC-V DSP API (replacing mock data in production mode)
     - Show dataset provenance: publisher participant + access conditions + credential requirements
+
+> **Federated Catalog Results (Phase 4c):**
+>
+> | Consumer       | Provider       | Discovery  | Negotiation                                                                       | Transfer                |
+> | -------------- | -------------- | ---------- | --------------------------------------------------------------------------------- | ----------------------- |
+> | CRO Bayer      | Clinic Charité | 4 datasets | 3 FINALIZED (fhir-patient-everything, fhir-cohort-bundle, omop-cohort-statistics) | 1 STARTED               |
+> | HDAB BfArM     | Clinic Charité | 4 datasets | 1 FINALIZED (healthdcatap-catalog)                                                | 1 STARTED               |
+> | Clinic Charité | (provider)     | —          | 4 FINALIZED (provider-side)                                                       | 2 STARTED + 2 REQUESTED |
+>
+> **Discoverable Assets via DSP 2025-1:**
+>
+> 1. `fhir-patient-everything` — FHIR R4 Patient/$everything (Neo4j Layer 3)
+> 2. `fhir-cohort-bundle` — FHIR R4 Cohort Search Bundle (Neo4j Layer 3)
+> 3. `omop-cohort-statistics` — OMOP CDM Cohort Statistics (Neo4j Layer 4)
+> 4. `healthdcatap-catalog` — HealthDCAT-AP Dataset Catalog JSON-LD (Neo4j Layer 2)
 
 #### 4d: Data Plane Transfer via DCore
 
@@ -585,7 +603,7 @@ Phase 4 wires the Neo4j health knowledge graph into the live EDC-V data plane, e
     - DCore enforces contract-scoped access (only permitted OMOP aggregation queries)
     - Query results streamed back through DCore with transfer completion signaling
 
-**Deliverables:** Neo4j assets registered in EDC-V ✅; DSP contract negotiation working end-to-end ✅; Federated Catalog exposing HealthDCAT-AP metadata; DCore handling FHIR transfers with audit trail.
+**Deliverables:** Neo4j assets registered in EDC-V ✅; DSP contract negotiation working end-to-end ✅; Federated Catalog exposing HealthDCAT-AP metadata via DSP ✅; DCore handling FHIR transfers with audit trail.
 
 > **Root Causes Discovered (Phase 4b):**
 >
@@ -1640,13 +1658,14 @@ CRO (Consumer)                    Clinic (Provider)
 
 **Proven Working State (as of Phase 4b):**
 
-| Metric                                             | Count             |
-| -------------------------------------------------- | ----------------- |
-| FINALIZED negotiations (CRO→Clinic)                | 3                 |
-| TERMINATED negotiations (protocol errors, pre-fix) | 2                 |
-| Transfer processes STARTED                         | 1                 |
-| Transfer processes REQUESTED                       | 2                 |
-| Clinic provider-side negotiations                  | 3 (all FINALIZED) |
+| Metric                                             | Count                                   |
+| -------------------------------------------------- | --------------------------------------- |
+| FINALIZED negotiations (CRO→Clinic)                | 3                                       |
+| FINALIZED negotiations (HDAB→Clinic)               | 1 (healthdcatap-catalog)                |
+| TERMINATED negotiations (protocol errors, pre-fix) | 2                                       |
+| Transfer processes STARTED                         | 2 (fhir-patient + healthdcatap-catalog) |
+| Transfer processes REQUESTED                       | 2                                       |
+| Clinic provider-side negotiations                  | 4 (all FINALIZED)                       |
 
 **API Endpoints Used:**
 
@@ -1670,7 +1689,7 @@ The HDAB (BfArM) has visibility into the dataspace as an operator. In future pha
 2. **Policy Enforcement** — Validate EHDS Article 53 compliance before contract agreements
 3. **Audit Trail** — Monitor all contract negotiations and transfers across the dataspace
 
-Currently, the HDAB participant context is provisioned and activated (`did:web:identityhub%3A7083:hdab-bfarm`, state=300) but does not yet have its own contract negotiations. HDAB oversight functionality is planned for Phase 4c (Federated Catalog) and Phase 6b (Operator Dashboard).
+Currently, the HDAB participant context is provisioned and activated (`did:web:identityhub%3A7083:hdab-bfarm`, state=300) and has successfully negotiated a contract for the `healthdcatap-catalog` asset (Phase 4c). HDAB can discover all 4 datasets from Clinic via DSP catalog request and has an active HttpData-PULL transfer for catalog metadata. Further HDAB oversight functionality is planned for Phase 6b (Operator Dashboard).
 
 #### Consequences
 
