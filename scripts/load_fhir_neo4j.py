@@ -10,7 +10,7 @@ Usage:
                                         [--uri bolt://localhost:7687] \
                                         [--user neo4j] \
                                         [--password healthdataspace] \
-                                        [--dataset-id urn:uuid:charite:dataset:diab-001]
+                                        [--dataset-id urn:uuid:riverside:dataset:diab-001]
 """
 
 import argparse
@@ -357,7 +357,7 @@ def main():
     parser.add_argument("--uri", default="bolt://localhost:7687")
     parser.add_argument("--user", default="neo4j")
     parser.add_argument("--password", default="healthdataspace")
-    parser.add_argument("--dataset-id", default="urn:uuid:charite:dataset:diab-001",
+    parser.add_argument("--dataset-id", default="urn:uuid:riverside:dataset:diab-001",
                         help="HealthDataset id to link patients to")
     args = parser.parse_args()
 

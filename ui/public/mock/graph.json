@@ -2,21 +2,21 @@
   "nodes": [
     {
       "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:5",
-      "name": "Charité Berlin (CLINIC)",
+      "name": "Riverside General (CLINIC)",
       "label": "Participant",
       "layer": 1,
       "color": "#2471A3"
     },
     {
       "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:6",
-      "name": "Bayer Research (CRO)",
+      "name": "TrialCorp Research (CRO)",
       "label": "Participant",
       "layer": 1,
       "color": "#2471A3"
     },
     {
       "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:7",
-      "name": "BfArM (HDAB)",
+      "name": "HealthGov (HDAB)",
       "label": "Participant",
       "layer": 1,
       "color": "#2471A3"
@@ -30,21 +30,21 @@
     },
     {
       "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:9",
-      "name": "EHDS Contract (Bayer↔Charité)",
+      "name": "EHDS Contract (TrialCorp↔Riverside)",
       "label": "Contract",
       "layer": 1,
       "color": "#2471A3"
     },
     {
       "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:10",
-      "name": "Access App bfarm-2025-001",
+      "name": "Access App healthgov-2025-001",
       "label": "AccessApplication",
       "layer": 1,
       "color": "#2471A3"
     },
     {
       "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:11",
-      "name": "HDAB Approval bfarm-2025-001",
+      "name": "HDAB Approval healthgov-2025-001",
       "label": "HDABApproval",
       "layer": 1,
       "color": "#2471A3"
@@ -107,7 +107,7 @@
     },
     {
       "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33183",
-      "name": "BfArM HDAB Approval — Synthea Cohort 2026",
+      "name": "HealthGov HDAB Approval — Synthea Cohort 2026",
       "label": "HDABApproval",
       "layer": 1,
       "color": "#2471A3"

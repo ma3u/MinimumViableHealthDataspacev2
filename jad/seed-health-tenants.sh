@@ -6,9 +6,9 @@
 # participant profiles that trigger automated provisioning via CFM agents.
 #
 # Tenants:
-#   1. Clinic (clinic-charité)  — FHIR R4 data provider
-#   2. CRO   (cro-bayer)       — OMOP research data consumer
-#   3. HDAB  (hdab-bfarm)      — HealthDCAT-AP catalog operator
+#   1. Clinic (clinic-riverside)  — FHIR R4 data provider
+#   2. CRO   (cro-trialcorp)       — OMOP research data consumer
+#   3. HDAB  (hdab-healthgov)      — HealthDCAT-AP catalog operator
 #
 # Prerequisites:
 #   - All JAD services running (docker-compose.jad.yml)
@@ -182,13 +182,13 @@ echo ""
 
 # --- Tenant 1: Clinic (Data Provider) ---
 echo "────────────────────────────────────────────────"
-echo "Tenant 1/3: Clinic Charité (Data Provider)"
+echo "Tenant 1/3: Clinic Riverside (Data Provider)"
 echo "────────────────────────────────────────────────"
-create_tenant "Clinic Charité" '{"properties": {"displayName": "Clinic Charité", "role": "provider", "organization": "Charité — Universitätsmedizin Berlin", "ehdsParticipantType": "data-holder"}}'
+create_tenant "Clinic Riverside" '{"properties": {"displayName": "Clinic Riverside", "role": "provider", "organization": "Riverside General Hospital", "ehdsParticipantType": "data-holder"}}'
 
 CLINIC_TENANT_ID="$TENANT_ID"
 
-deploy_participant "$CLINIC_TENANT_ID" "Clinic Charité" "clinic-charite" \
+deploy_participant "$CLINIC_TENANT_ID" "Clinic Riverside" "clinic-riverside" \
   "{\"$PROFILE_ID\": [\"provider\"]}"
 
 CLINIC_PARTICIPANT_ID="$PARTICIPANT_ID"
@@ -197,13 +197,13 @@ echo ""
 
 # --- Tenant 2: CRO (Data Consumer) ---
 echo "────────────────────────────────────────────────"
-echo "Tenant 2/3: CRO Bayer (Data Consumer)"
+echo "Tenant 2/3: CRO TrialCorp (Data Consumer)"
 echo "────────────────────────────────────────────────"
-create_tenant "CRO Bayer" '{"properties": {"displayName": "CRO Bayer", "role": "consumer", "organization": "Bayer AG — Clinical Research", "ehdsParticipantType": "data-user"}}'
+create_tenant "CRO TrialCorp" '{"properties": {"displayName": "CRO TrialCorp", "role": "consumer", "organization": "TrialCorp AG — Clinical Research", "ehdsParticipantType": "data-user"}}'
 
 CRO_TENANT_ID="$TENANT_ID"
 
-deploy_participant "$CRO_TENANT_ID" "CRO Bayer" "cro-bayer" \
+deploy_participant "$CRO_TENANT_ID" "CRO TrialCorp" "cro-trialcorp" \
   "{\"$PROFILE_ID\": [\"consumer\"]}"
 
 CRO_PARTICIPANT_ID="$PARTICIPANT_ID"
@@ -212,13 +212,13 @@ echo ""
 
 # --- Tenant 3: HDAB (Health Data Access Body) ---
 echo "────────────────────────────────────────────────"
-echo "Tenant 3/3: HDAB BfArM (Catalog Operator)"
+echo "Tenant 3/3: HDAB HealthGov (Catalog Operator)"
 echo "────────────────────────────────────────────────"
-create_tenant "HDAB BfArM" '{"properties": {"displayName": "HDAB BfArM", "role": "operator", "organization": "Bundesinstitut für Arzneimittel und Medizinprodukte", "ehdsParticipantType": "health-data-access-body"}}'
+create_tenant "HDAB HealthGov" '{"properties": {"displayName": "HDAB HealthGov", "role": "operator", "organization": "HealthGov Data Access Authority", "ehdsParticipantType": "health-data-access-body"}}'
 
 HDAB_TENANT_ID="$TENANT_ID"
 
-deploy_participant "$HDAB_TENANT_ID" "HDAB BfArM" "hdab-bfarm" \
+deploy_participant "$HDAB_TENANT_ID" "HDAB HealthGov" "hdab-healthgov" \
   "{\"$PROFILE_ID\": [\"operator\"]}"
 
 HDAB_PARTICIPANT_ID="$PARTICIPANT_ID"
@@ -232,9 +232,9 @@ echo "════════════════════════�
 echo ""
 
 FAILED=0
-wait_for_active "$CLINIC_TENANT_ID" "$CLINIC_PARTICIPANT_ID" "Clinic Charité" 180 || FAILED=1
-wait_for_active "$CRO_TENANT_ID" "$CRO_PARTICIPANT_ID" "CRO Bayer" 180 || FAILED=1
-wait_for_active "$HDAB_TENANT_ID" "$HDAB_PARTICIPANT_ID" "HDAB BfArM" 180 || FAILED=1
+wait_for_active "$CLINIC_TENANT_ID" "$CLINIC_PARTICIPANT_ID" "Clinic Riverside" 180 || FAILED=1
+wait_for_active "$CRO_TENANT_ID" "$CRO_PARTICIPANT_ID" "CRO TrialCorp" 180 || FAILED=1
+wait_for_active "$HDAB_TENANT_ID" "$HDAB_PARTICIPANT_ID" "HDAB HealthGov" 180 || FAILED=1
 
 echo ""
 
@@ -244,14 +244,14 @@ echo "Phase 1b Summary"
 echo "════════════════════════════════════════════════"
 echo ""
 echo "Tenants created:"
-echo "  Clinic Charité : $CLINIC_TENANT_ID"
-echo "  CRO Bayer      : $CRO_TENANT_ID"
-echo "  HDAB BfArM     : $HDAB_TENANT_ID"
+echo "  Clinic Riverside : $CLINIC_TENANT_ID"
+echo "  CRO TrialCorp      : $CRO_TENANT_ID"
+echo "  HDAB HealthGov     : $HDAB_TENANT_ID"
 echo ""
 echo "Participant DIDs:"
-echo "  Clinic: ${DID_BASE}:clinic-charite"
-echo "  CRO:    ${DID_BASE}:cro-bayer"
-echo "  HDAB:   ${DID_BASE}:hdab-bfarm"
+echo "  Clinic: ${DID_BASE}:clinic-riverside"
+echo "  CRO:    ${DID_BASE}:cro-trialcorp"
+echo "  HDAB:   ${DID_BASE}:hdab-healthgov"
 echo ""
 
 if [ "$FAILED" -eq 0 ]; then

@@ -1,13 +1,13 @@
 {
   "consumers": [
     {
-      "id": "did:web:bayer.com:research",
-      "name": "Bayer Research (CRO)",
+      "id": "did:web:trialcorp.example:research",
+      "name": "TrialCorp Research (CRO)",
       "type": "CRO"
     },
     {
-      "id": "did:web:bayer.com:research",
-      "name": "Bayer Research (CRO)",
+      "id": "did:web:trialcorp.example:research",
+      "name": "TrialCorp Research (CRO)",
       "type": "CRO"
     }
   ],

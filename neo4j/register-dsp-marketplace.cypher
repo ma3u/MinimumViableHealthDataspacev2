@@ -18,25 +18,25 @@
 // ---------------------------------------------------------------------------
 // 1. Ensure the three core participants exist (reuse from synthetic data or create)
 // ---------------------------------------------------------------------------
-MERGE (clinic:Participant {participantId: 'did:web:charite.de:participant'})
-  ON CREATE SET clinic.name           = 'Charité Berlin (CLINIC)',
-               clinic.legalName       = 'Charité Universitätsmedizin Berlin',
+MERGE (clinic:Participant {participantId: 'did:web:riverside.example:participant'})
+  ON CREATE SET clinic.name           = 'Riverside General (CLINIC)',
+               clinic.legalName       = 'Riverside General Hospital',
                clinic.participantType = 'CLINIC',
                clinic.jurisdiction    = 'DE',
                clinic.createdAt       = datetime()
   ON MATCH  SET clinic.lastSeenAt     = datetime();
 
-MERGE (cro:Participant {participantId: 'did:web:bayer.com:research'})
-  ON CREATE SET cro.name           = 'Bayer Research (CRO)',
-               cro.legalName       = 'Bayer AG Clinical Research',
+MERGE (cro:Participant {participantId: 'did:web:trialcorp.example:research'})
+  ON CREATE SET cro.name           = 'TrialCorp Research (CRO)',
+               cro.legalName       = 'TrialCorp AG Clinical Research',
                cro.participantType = 'CRO',
                cro.jurisdiction    = 'DE',
                cro.createdAt       = datetime()
   ON MATCH  SET cro.lastSeenAt     = datetime();
 
-MERGE (hdab:Participant {participantId: 'did:web:bfarm.de:hdab'})
-  ON CREATE SET hdab.name           = 'BfArM (HDAB)',
-               hdab.legalName       = 'BfArM Health Data Access Body',
+MERGE (hdab:Participant {participantId: 'did:web:healthgov.example:hdab'})
+  ON CREATE SET hdab.name           = 'HealthGov (HDAB)',
+               hdab.legalName       = 'HealthGov Data Access Authority',
                hdab.participantType = 'HDAB',
                hdab.jurisdiction    = 'DE',
                hdab.createdAt       = datetime()
@@ -92,8 +92,8 @@ MERGE (contract:Contract {contractId: 'contract-ehds-53-synthea-2026'})
 
 MATCH (dp:DataProduct {productId: 'product-synthea-fhir-r4-2026'})
 MATCH (contract:Contract {contractId: 'contract-ehds-53-synthea-2026'})
-MATCH (clinic:Participant {participantId: 'did:web:charite.de:participant'})
-MATCH (cro:Participant {participantId: 'did:web:bayer.com:research'})
+MATCH (clinic:Participant {participantId: 'did:web:riverside.example:participant'})
+MATCH (cro:Participant {participantId: 'did:web:trialcorp.example:research'})
 MERGE (contract)-[:GOVERNS]->(dp)
 MERGE (contract)-[:PROVIDER]->(clinic)
 MERGE (contract)-[:CONSUMER]->(cro)
@@ -102,22 +102,22 @@ MERGE (cro)-[:CONSUMES]->(dp);
 // ---------------------------------------------------------------------------
 // 5. Access Application (CRO → HDAB)
 // ---------------------------------------------------------------------------
-MERGE (app:AccessApplication {applicationId: 'app-synthea-bfarm-2026-001'})
+MERGE (app:AccessApplication {applicationId: 'app-synthea-healthgov-2026-001'})
   ON CREATE SET
     app.name                     = 'Synthea Cohort Access Request 2026-001',
     app.requestedPurpose         = 'SCIENTIFIC_RESEARCH',
     app.submittedAt              = datetime('2026-01-05T09:00:00'),
     app.status                   = 'APPROVED',
     app.justification            = 'Secondary use of synthetic FHIR R4 cohort for ML model training and epidemiological analysis. No PHI involved.',
-    app.ethicsCommitteeRef       = 'EC-BfArM-2025-0042',
+    app.ethicsCommitteeRef       = 'EC-HealthGov-2025-0042',
     app.dataMinimisationStatement= 'Synthetic data only; no re-identification risk.',
     app.createdAt                = datetime()
   ON MATCH  SET app.lastSeenAt   = datetime();
 
-MATCH (cro:Participant {participantId: 'did:web:bayer.com:research'})
-MATCH (hdab:Participant {participantId: 'did:web:bfarm.de:hdab'})
+MATCH (cro:Participant {participantId: 'did:web:trialcorp.example:research'})
+MATCH (hdab:Participant {participantId: 'did:web:healthgov.example:hdab'})
 MATCH (dp:DataProduct {productId: 'product-synthea-fhir-r4-2026'})
-MATCH (app:AccessApplication {applicationId: 'app-synthea-bfarm-2026-001'})
+MATCH (app:AccessApplication {applicationId: 'app-synthea-healthgov-2026-001'})
 MERGE (cro)-[:SUBMITTED]->(app)
 MERGE (app)-[:REQUESTS_ACCESS_TO]->(dp)
 MERGE (hdab)-[:REVIEWED]->(app);
@@ -126,9 +126,9 @@ MERGE (hdab)-[:REVIEWED]->(app);
 // 6. HDAB Approval — with GRANTS_ACCESS_TO pointing at the HealthDataset
 //    (this is the relationship that the compliance checker traverses)
 // ---------------------------------------------------------------------------
-MERGE (approval:HDABApproval {approvalId: 'hdab-synthea-bfarm-2026-001'})
+MERGE (approval:HDABApproval {approvalId: 'hdab-synthea-healthgov-2026-001'})
   ON CREATE SET
-    approval.name             = 'BfArM HDAB Approval — Synthea Cohort 2026',
+    approval.name             = 'HealthGov HDAB Approval — Synthea Cohort 2026',
     approval.approvedAt       = datetime('2026-01-20T14:30:00'),
     approval.validUntil       = datetime('2027-01-20T23:59:59'),
     approval.permittedPurpose = 'SCIENTIFIC_RESEARCH',
@@ -136,13 +136,13 @@ MERGE (approval:HDABApproval {approvalId: 'hdab-synthea-bfarm-2026-001'})
     approval.ehdsArticle      = 'EHDS_Art_53',
     approval.conditions       = ['Synthetic data only — no re-identification possible',
                                  'Results must be aggregated before export',
-                                 'Quarterly usage reports to BfArM'],
-    approval.hdabOfficer      = 'Dr. Anna Müller (BfArM Data Access Board)',
+                                 'Quarterly usage reports to HealthGov'],
+    approval.hdabOfficer      = 'Dr. Anna Müller (HealthGov Data Access Board)',
     approval.createdAt        = datetime()
   ON MATCH  SET approval.lastSeenAt = datetime();
 
-MATCH (app:AccessApplication {applicationId: 'app-synthea-bfarm-2026-001'})
-MATCH (approval:HDABApproval {approvalId: 'hdab-synthea-bfarm-2026-001'})
+MATCH (app:AccessApplication {applicationId: 'app-synthea-healthgov-2026-001'})
+MATCH (approval:HDABApproval {approvalId: 'hdab-synthea-healthgov-2026-001'})
 MATCH (contract:Contract {contractId: 'contract-ehds-53-synthea-2026'})
 MATCH (ds:HealthDataset {datasetId: 'dataset:synthea-fhir-r4-mvd'})
 MERGE (approval)-[:APPROVES]->(app)
@@ -152,7 +152,7 @@ MERGE (approval)-[:GRANTS_ACCESS_TO]->(ds);
 // ---------------------------------------------------------------------------
 // 7. Report
 // ---------------------------------------------------------------------------
-MATCH (cro:Participant {participantId: 'did:web:bayer.com:research'})
+MATCH (cro:Participant {participantId: 'did:web:trialcorp.example:research'})
 MATCH (cro)-[:SUBMITTED]->(app:AccessApplication)
 MATCH (approval:HDABApproval)-[:APPROVES]->(app)
 MATCH (approval)-[:GRANTS_ACCESS_TO]->(ds:HealthDataset)

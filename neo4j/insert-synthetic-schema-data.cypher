@@ -46,21 +46,21 @@ MERGE (rxMetformin:RxNormConcept {rxcui: '860975'})
 // LAYER 1: DATASPACE MARKETPLACE METADATA
 // ==============================================================================
 // Dataspace Participants
-MERGE (clinic:Participant {participantId: 'did:web:charite.de:participant'})
-  SET clinic.name = 'Charité Berlin (CLINIC)',
-      clinic.legalName = 'Charité Universitätsmedizin Berlin',
+MERGE (clinic:Participant {participantId: 'did:web:riverside.example:participant'})
+  SET clinic.name = 'Riverside General (CLINIC)',
+      clinic.legalName = 'Riverside General Hospital',
       clinic.participantType = 'CLINIC',
       clinic.jurisdiction = 'DE'
 
-MERGE (cro:Participant {participantId: 'did:web:bayer.com:research'})
-  SET cro.name = 'Bayer Research (CRO)',
-      cro.legalName = 'Bayer AG Clinical Research',
+MERGE (cro:Participant {participantId: 'did:web:trialcorp.example:research'})
+  SET cro.name = 'TrialCorp Research (CRO)',
+      cro.legalName = 'TrialCorp AG Clinical Research',
       cro.participantType = 'CRO',
       cro.jurisdiction = 'DE'
 
-MERGE (hdab:Participant {participantId: 'did:web:bfarm.de:hdab'})
-  SET hdab.name = 'BfArM (HDAB)',
-      hdab.legalName = 'BfArM Health Data Access Body',
+MERGE (hdab:Participant {participantId: 'did:web:healthgov.example:hdab'})
+  SET hdab.name = 'HealthGov (HDAB)',
+      hdab.legalName = 'HealthGov Data Access Authority',
       hdab.participantType = 'HDAB',
       hdab.jurisdiction = 'DE'
 
@@ -73,8 +73,8 @@ MERGE (dp:DataProduct {productId: 'product-diab-cohort-2025'})
 MERGE (clinic)-[:OFFERS]->(dp)
 
 // Contract enforcing usage
-MERGE (contract:Contract {contractId: 'contract-ehds-53-bayer-charite-001'})
-  SET contract.name = 'EHDS Contract (Bayer↔Charité)',
+MERGE (contract:Contract {contractId: 'contract-ehds-53-trialcorp-riverside-001'})
+  SET contract.name = 'EHDS Contract (TrialCorp↔Riverside)',
       contract.agreementDate = datetime(),
       contract.validUntil = datetime() + duration({years: 1}),
       contract.usagePurpose = 'SCIENTIFIC_RESEARCH',
@@ -85,30 +85,30 @@ MERGE (contract)-[:CONSUMER {participantId: cro.participantId}]->(cro)
 MERGE (cro)-[:CONSUMES]->(dp)
 
 // EHDS Governance: HDAB Access Application and Approval Chain (Articles 45-52)
-// Step 1: CRO submits an access application to BfArM HDAB
-MERGE (app:AccessApplication {applicationId: 'app-bfarm-2025-001'})
-  SET app.name = 'Access App bfarm-2025-001',
+// Step 1: CRO submits an access application to HealthGov HDAB
+MERGE (app:AccessApplication {applicationId: 'app-healthgov-2025-001'})
+  SET app.name = 'Access App healthgov-2025-001',
       app.applicantId = cro.participantId,
-      app.datasetId = 'urn:uuid:charite:dataset:diab-001',
+      app.datasetId = 'urn:uuid:riverside:dataset:diab-001',
       app.requestedPurpose = 'SCIENTIFIC_RESEARCH',
       app.submittedAt = datetime('2025-01-10T09:00:00'),
       app.status = 'APPROVED',
       app.justification = 'Phase II clinical trial for novel antidiabetic compound. Requires historical HbA1c and comorbidity data for study arm stratification.',
-      app.ethicsCommitteeRef = 'EC-BfArM-2024-1138',
+      app.ethicsCommitteeRef = 'EC-HealthGov-2024-1138',
       app.dataMinimisationStatement = 'Only pseudonymized cohort-level data required; no individual re-identification attempted.'
 MERGE (cro)-[:SUBMITTED]->(app)
 MERGE (app)-[:REQUESTS_ACCESS_TO]->(dp)
 MERGE (hdab)-[:REVIEWED]->(app)
 
-// Step 2: BfArM HDAB issues formal approval decision
-MERGE (approval:HDABApproval {approvalId: 'hdab-decision-bfarm-2025-001'})
-  SET approval.name = 'HDAB Approval bfarm-2025-001',
+// Step 2: HealthGov HDAB issues formal approval decision
+MERGE (approval:HDABApproval {approvalId: 'hdab-decision-healthgov-2025-001'})
+  SET approval.name = 'HDAB Approval healthgov-2025-001',
       approval.applicationId = app.applicationId,
       approval.approvedAt = datetime('2025-02-03T14:30:00'),
       approval.validUntil = datetime('2026-02-03T23:59:59'),
       approval.permittedPurpose = 'SCIENTIFIC_RESEARCH',
-      approval.conditions = ['No re-identification', 'Results must be aggregated before export', 'Quarterly usage reports to BfArM'],
-      approval.hdabOfficer = 'Dr. Anna Müller (BfArM Data Access Board)',
+      approval.conditions = ['No re-identification', 'Results must be aggregated before export', 'Quarterly usage reports to HealthGov'],
+      approval.hdabOfficer = 'Dr. Anna Müller (HealthGov Data Access Board)',
       approval.legalBasisArticle = 'EHDS_Art_46'
 MERGE (approval)-[:APPROVES]->(app)
 MERGE (approval)-[:APPROVED {permittedPurpose: 'SCIENTIFIC_RESEARCH'}]->(contract)
@@ -117,7 +117,7 @@ MERGE (approval)-[:APPROVED {permittedPurpose: 'SCIENTIFIC_RESEARCH'}]->(contrac
 // LAYER 2: HEALTHDCAT-AP METADATA
 // ==============================================================================
 // HealthDCAT Dataset Definition
-MERGE (dataset:HealthDataset {datasetId: 'urn:uuid:charite:dataset:diab-001'})
+MERGE (dataset:HealthDataset {datasetId: 'urn:uuid:riverside:dataset:diab-001'})
   SET dataset.name = 'T2D Patient Journey Dataset',
       dataset.title = 'Synthetic Type 2 Diabetes Patient Journey',
       dataset.healthSensitivity = 'PSEUDONYMIZED',

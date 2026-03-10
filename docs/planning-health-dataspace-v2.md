@@ -179,9 +179,9 @@ Phase 1 bootstraps the full EDC-V + DCore + CFM stack using the [JAD (Joint Arch
 #### 1b: Health-Specific Tenant Configuration ✅
 
 4. Configure three tenant profiles via CFM Tenant Manager API:
-   - **Clinic Charité** (`clinic-charite`) — data provider publishing FHIR R4 patient data ✅
-   - **CRO Bayer** (`cro-bayer`) — data consumer requesting OMOP research queries ✅
-   - **HDAB BfArM** (`hdab-bfarm`) — intermediary operating HealthDCAT-AP catalog + SPE ✅
+   - **Clinic Riverside** (`clinic-riverside`) — data provider publishing FHIR R4 patient data ✅
+   - **CRO TrialCorp** (`cro-trialcorp`) — data consumer requesting OMOP research queries ✅
+   - **HDAB HealthGov** (`hdab-healthgov`) — intermediary operating HealthDCAT-AP catalog + SPE ✅
 5. Configure CFM Provision Manager to automatically provision per-tenant: ✅
    - EDC-V control plane instance (participant-scoped DSP endpoint)
    - DCore data plane instance (FHIR HTTP transfer + query result streaming)
@@ -263,9 +263,9 @@ Phase 2 implements the full DCP v1.0 credential lifecycle using JAD's IdentityHu
 #### 2a: DID:web and Verifiable Credential Setup
 
 5. Configure **DID:web** identifiers for each tenant (auto-provisioned by CFM in Phase 1):
-   - `did:web:clinic-charite.localhost` → Clinic's IdentityHub
-   - `did:web:cro-bayer.localhost` → CRO's IdentityHub
-   - `did:web:hdab-bfarm.localhost` → HDAB's IdentityHub
+   - `did:web:clinic-riverside.localhost` → Clinic's IdentityHub
+   - `did:web:cro-trialcorp.localhost` → CRO's IdentityHub
+   - `did:web:hdab-healthgov.localhost` → HDAB's IdentityHub
 6. Configure the **IssuerService** as the trust anchor (simulating an EHDS-recognized authority):
    - Define credential schemas for `MembershipCredential` (dataspace membership attestation)
    - Configure Keycloak realm roles mapping to credential issuance policies
@@ -377,7 +377,7 @@ With the Synthea FHIR dataset registered in HealthDCAT-AP (Phase 3c), Phase 3e w
 
 **DSP Marketplace Cypher (`neo4j/register-dsp-marketplace.cypher`):**
 
-- MERGEs three Participants: `Charité Berlin` (CLINIC), `Bayer Research` (CRO), `BfArM` (HDAB)
+- MERGEs three Participants: `Riverside General` (CLINIC), `TrialCorp Research` (CRO), `HealthGov` (HDAB)
 - Creates `DataProduct {productId: 'product-synthea-fhir-r4-2026'}` → `[:DESCRIBED_BY]` → `HealthDataset {datasetId: 'dataset:synthea-fhir-r4-mvd'}`
 - Creates `OdrlPolicy` with EHDS Art.53 `researchPurpose` permission and re-identification `prohibition`
 - Creates `Contract` → `[:GOVERNS]` → DataProduct
@@ -708,8 +708,8 @@ git clone https://github.com/International-Data-Spaces-Association/ids-specifica
 cd ids-specification/tck
 
 # Configure TCK to target our deployment
-export DSP_CONNECTOR_URL=https://clinic-charite.localhost/api/dsp
-export DSP_CATALOG_URL=https://hdab-bfarm.localhost/api/dsp/catalog
+export DSP_CONNECTOR_URL=https://clinic-riverside.localhost/api/dsp
+export DSP_CATALOG_URL=https://hdab-healthgov.localhost/api/dsp/catalog
 
 # Run full TCK suite
 ./gradlew test
@@ -743,14 +743,14 @@ The [DCP v1.0 specification](https://projects.eclipse.org/projects/technology.da
 cd tests/dcp-compliance
 
 # DID resolution
-curl -s https://clinic-charite.localhost/.well-known/did.json | jq '.verificationMethod'
+curl -s https://clinic-riverside.localhost/.well-known/did.json | jq '.verificationMethod'
 
 # SI Token validation
-npm run test:si-token -- --issuer=did:web:clinic-charite.localhost
+npm run test:si-token -- --issuer=did:web:clinic-riverside.localhost
 
 # Full presentation exchange
-npm run test:presentation -- --verifier=did:web:cro-bayer.localhost \
-  --holder=did:web:clinic-charite.localhost \
+npm run test:presentation -- --verifier=did:web:cro-trialcorp.localhost \
+  --holder=did:web:clinic-riverside.localhost \
   --credential-type=EHDSParticipantCredential
 ```
 

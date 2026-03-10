@@ -2,10 +2,10 @@
   "compliant": true,
   "chain": [
     {
-      "consumer": "did:web:bayer.com:research",
-      "applicationId": "app-synthea-bfarm-2026-001",
+      "consumer": "did:web:trialcorp.example:research",
+      "applicationId": "app-synthea-healthgov-2026-001",
       "applicationStatus": "APPROVED",
-      "approvalId": "hdab-synthea-bfarm-2026-001",
+      "approvalId": "hdab-synthea-healthgov-2026-001",
       "approvalStatus": "APPROVED",
       "ehdsArticle": "EHDS_Art_53",
       "dataset": "dataset:synthea-fhir-r4-mvd",
