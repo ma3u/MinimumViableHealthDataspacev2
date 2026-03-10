@@ -46,14 +46,31 @@ services:
     ports:
       - "3000:3000"
     environment:
+      HOSTNAME: "0.0.0.0"
       NEO4J_URI: bolt://neo4j:7687
       NEO4J_USER: neo4j
       NEO4J_PASSWORD: healthdataspace
+      # Keycloak SSO (Phase 2c)
+      NEXTAUTH_URL: http://localhost:3000
+      NEXTAUTH_SECRET: health-dataspace-dev-secret-change-in-prod
+      KEYCLOAK_CLIENT_ID: health-dataspace-ui
+      KEYCLOAK_CLIENT_SECRET: health-dataspace-ui-secret
+      KEYCLOAK_ISSUER: http://keycloak:8080/realms/edcv
+      KEYCLOAK_PUBLIC_URL: http://localhost:8080/realms/edcv
+      NEXT_PUBLIC_KEYCLOAK_PUBLIC_URL: http://localhost:8080/realms/edcv
+      NEXT_PUBLIC_KEYCLOAK_CLIENT_ID: health-dataspace-ui
     depends_on:
       - neo4j
+    networks:
+      - default
+      - health-dataspace-edcv
 
 volumes:
   neo4j_data:
   neo4j_logs:
   neo4j_spe2_data:
   neo4j_spe2_logs:
+
+networks:
+  health-dataspace-edcv:
+    external: true

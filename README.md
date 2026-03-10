@@ -365,6 +365,7 @@ portal UIs and protocol compliance testing.
 | 1f    | Phase 4a prep — EDC-V asset/policy/contract registration payloads + Vault dual-DP key bootstrap | ✅ Complete |
 | 2     | Identity and Trust — DID:web for 3 tenants, Ed25519 keys, all activated (ADR-7)                 | ✅ Complete |
 | 2b    | EHDS credential types — 3 credential defs on IssuerService, 5 VC nodes in Neo4j, DCP scopes     | ✅ Complete |
+| 2c    | Keycloak SSO — PKCE client, 3 roles, 3 demo users, NextAuth.js, role-based middleware           | ✅ Complete |
 | 3     | Graph schema + seed data for all 5 layers, APOC/n10s plugins, GraSS colour style                | ✅ Complete |
 | 3a    | Graph Explorer UI — force-directed 5-layer graph via `react-force-graph-2d`                     | ✅ Complete |
 | 3b    | HealthDCAT-AP Catalogue view — dataset cards with publisher, license, and distribution info     | ✅ Complete |

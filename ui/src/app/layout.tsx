@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import Navigation from "@/components/Navigation";
+import AuthProvider from "@/components/AuthProvider";
 
 export const metadata: Metadata = {
   title: "Health Dataspace Explorer",
@@ -15,8 +16,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="min-h-screen flex flex-col">
-        <Navigation />
-        <main className="flex-1">{children}</main>
+        <AuthProvider>
+          <Navigation />
+          <main className="flex-1">{children}</main>
+        </AuthProvider>
       </body>
     </html>
   );

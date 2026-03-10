@@ -10,6 +10,7 @@ import {
   BarChart2,
   Search,
 } from "lucide-react";
+import UserMenu from "./UserMenu";
 
 const links = [
   { href: "/graph", label: "Graph Explorer", icon: Network },
@@ -41,6 +42,9 @@ export default function Navigation() {
           {label}
         </Link>
       ))}
+      <div className="ml-auto">
+        <UserMenu />
+      </div>
     </nav>
   );
 }

@@ -138,7 +138,7 @@ All three core specifications are now final or near-final:
 | Phase  | Title                                                  | Status         | Notes                                                                                                                                                                                                                                                                                              |
 | ------ | ------------------------------------------------------ | -------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **1**  | Infrastructure Migration (EDC-V + DCore + CFM)         | ✅ Complete    | 1a–1f all complete; 18 services healthy; 3 tenants + 9 VPAs provisioned; data assets registered; ADR-1–6 accepted                                                                                                                                                                                  |
-| **2**  | Identity and Trust (DCP v1.0 + Verifiable Credentials) | 🏗️ In progress | 2a ✅ (DID:web for 3 tenants, Ed25519 keys, all activated — ADR-7); 2b ✅ (3 EHDS credential defs on IssuerService, 5 VC nodes in Neo4j, DCP scopes configured, Compliance UI with trust chain); 2c pending                                                                                        |
+| **2**  | Identity and Trust (DCP v1.0 + Verifiable Credentials) | ✅ Complete    | 2a ✅ (DID:web for 3 tenants, Ed25519 keys, all activated — ADR-7); 2b ✅ (3 EHDS credential defs on IssuerService, 5 VC nodes in Neo4j, DCP scopes configured, Compliance UI with trust chain); 2c ✅ (Keycloak SSO: PKCE client, 3 roles, 3 demo users, NextAuth.js, role-based middleware)      |
 | **3**  | Health Knowledge Graph Layer — Schema & Synthetic Data | ✅ Complete    | 5-layer Neo4j schema, EHDS HDAB chain, style sheet                                                                                                                                                                                                                                                 |
 | **3b** | Real FHIR Data Pipeline (Synthea → Neo4j → OMOP)       | ✅ Complete    | 167 patients · 5,461 encounters · 2,421 conditions · 37,713 observations · 3,895 drug Rxes · 8,534 procedures                                                                                                                                                                                      |
 | **3c** | HealthDCAT-AP Metadata Registration for FHIR Dataset   | ✅ Complete    | Synthea cohort registered as HealthDCAT-AP catalog entry; 2 distributions + EHDS Art 53 purpose                                                                                                                                                                                                    |
@@ -313,16 +313,22 @@ Phase 2 implements the full DCP v1.0 credential lifecycle using JAD's IdentityHu
     - Show trust chain: IssuerService → IdentityHub → Credential Presentation → Policy Evaluation
     - DCP trust chain visualization diagram in Compliance page
 
-#### 2c: Keycloak SSO Integration
+#### 2c: Keycloak SSO Integration ✅
 
-11. Configure **Keycloak** for unified authentication across all portals:
-    - Single realm `health-dataspace` with client registrations for Next.js UI and EDC-V Admin API
+11. Configure **Keycloak** for unified authentication across all portals: ✅
+    - Extended existing `edcv` realm with SSO client `health-dataspace-ui` (confidential + PKCE S256)
     - PKCE authorization code flow for browser-based login (follows Aruba portal's pattern)
-    - Service account flow for backend-to-backend API calls (Next.js API routes → EDC-V)
+    - Service account flow for backend-to-backend API calls (existing `admin` + `provisioner` clients)
     - Role mapping: `EDC_ADMIN` (operator), `EDC_USER_PARTICIPANT` (clinic/CRO user), `HDAB_AUTHORITY` (regulator)
-12. Integrate **NextAuth.js** with Keycloak provider in the Next.js app:
-    - Session management with JWT tokens containing EDC-V participant context
-    - Role-based route protection: `/admin/*` requires `EDC_ADMIN`, `/onboarding` requires authenticated, `/compliance` requires `HDAB_AUTHORITY`
+    - Demo users: `edcadmin`, `clinicuser`, `regulator` with respective roles
+    - Provisioning script: `scripts/provision-keycloak-sso.sh` (idempotent)
+12. Integrate **NextAuth.js** with Keycloak provider in the Next.js app: ✅
+    - NextAuth.js v4 with custom OAuth provider (split endpoints: browser→localhost:8080, server→keycloak:8080)
+    - JWT sessions with realm_access roles from Keycloak tokens
+    - Role-based route protection via Next.js middleware: `/admin/*` → `EDC_ADMIN`, `/compliance` → `HDAB_AUTHORITY`
+    - UserMenu component in navigation showing session, roles, sign-in/sign-out
+    - Custom sign-in page (`/auth/signin`) and unauthorized page (`/auth/unauthorized`)
+    - UI container connected to `health-dataspace-edcv` Docker network for server-side Keycloak access
 
 **Deliverables:** DID:web identifiers for all participants; EHDS-specific VCs issued and stored; credential presentation integrated into DSP negotiation; Keycloak SSO protecting all UI views.
 
