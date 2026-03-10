@@ -1,0 +1,255 @@
+# ---------------------------------------------------------------------------
+# Protocol Compliance — Health Dataspace v2
+# ---------------------------------------------------------------------------
+# Runs DSP 2025-1 TCK, DCP v1.0, and EHDS domain compliance tests.
+#
+# Triggers:
+#   - Push to main
+#   - Weekly Monday 6am UTC
+#   - Manual dispatch
+# ---------------------------------------------------------------------------
+name: Protocol Compliance
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "scripts/run-*.sh"
+      - "docker-compose.jad.yml"
+      - "neo4j/**"
+      - ".github/workflows/compliance.yml"
+  schedule:
+    - cron: "0 6 * * 1" # Weekly Monday 6am UTC
+  workflow_dispatch:
+
+env:
+  REPORT_DIR: test-results
+
+jobs:
+  # -----------------------------------------------------------------------
+  # DSP 2025-1 Technology Compatibility Kit
+  # -----------------------------------------------------------------------
+  dsp-tck:
+    name: DSP 2025-1 TCK
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Start JAD infrastructure
+        run: |
+          docker compose -f docker-compose.jad.yml up -d --wait --timeout 120
+        env:
+          COMPOSE_PROJECT_NAME: health-dataspace
+
+      - name: Wait for services
+        run: |
+          echo "Waiting for Control Plane..."
+          for i in $(seq 1 30); do
+            if curl -sf http://localhost:11003/api/check/readiness >/dev/null 2>&1; then
+              echo "Control Plane ready"
+              break
+            fi
+            sleep 5
+          done
+
+      - name: Run DSP TCK
+        run: |
+          chmod +x scripts/run-dsp-tck.sh
+          REPORT_DIR=${{ env.REPORT_DIR }}/dsp-tck \
+          KEYCLOAK_URL=http://localhost:8080 \
+          EDC_MANAGEMENT_URL=http://localhost:11003/api/mgmt \
+            ./scripts/run-dsp-tck.sh
+        continue-on-error: true
+
+      - name: Upload TCK results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: dsp-tck-results
+          path: test-results/dsp-tck/
+          retention-days: 30
+
+      - name: Stop infrastructure
+        if: always()
+        run: docker compose -f docker-compose.jad.yml down -v
+
+  # -----------------------------------------------------------------------
+  # DCP v1.0 Compliance
+  # -----------------------------------------------------------------------
+  dcp-compliance:
+    name: DCP v1.0 Compliance
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Start JAD infrastructure
+        run: |
+          docker compose -f docker-compose.jad.yml up -d --wait --timeout 120
+        env:
+          COMPOSE_PROJECT_NAME: health-dataspace
+
+      - name: Wait for services
+        run: |
+          echo "Waiting for IdentityHub..."
+          for i in $(seq 1 30); do
+            if curl -sf http://localhost:11005/api/identity >/dev/null 2>&1; then
+              echo "IdentityHub ready"
+              break
+            fi
+            sleep 5
+          done
+
+      - name: Run DCP compliance suite
+        run: |
+          chmod +x scripts/run-dcp-tests.sh
+          REPORT_DIR=${{ env.REPORT_DIR }}/dcp \
+          KEYCLOAK_URL=http://localhost:8080 \
+          EDC_IDENTITY_URL=http://localhost:11005/api/identity \
+          EDC_ISSUER_URL=http://localhost:10013/api/admin \
+          EDC_MANAGEMENT_URL=http://localhost:11003/api/mgmt \
+            ./scripts/run-dcp-tests.sh
+        continue-on-error: true
+
+      - name: Upload DCP results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: dcp-compliance-results
+          path: test-results/dcp/
+          retention-days: 30
+
+      - name: Stop infrastructure
+        if: always()
+        run: docker compose -f docker-compose.jad.yml down -v
+
+  # -----------------------------------------------------------------------
+  # EHDS Health Domain
+  # -----------------------------------------------------------------------
+  ehds-compliance:
+    name: EHDS Health Domain
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Start full stack (JAD + Neo4j)
+        run: |
+          docker compose up -d --wait --timeout 60
+          docker compose -f docker-compose.jad.yml up -d --wait --timeout 120
+        env:
+          COMPOSE_PROJECT_NAME: health-dataspace
+
+      - name: Wait for Neo4j
+        run: |
+          echo "Waiting for Neo4j..."
+          for i in $(seq 1 30); do
+            if curl -sf http://localhost:7474 >/dev/null 2>&1; then
+              echo "Neo4j ready"
+              break
+            fi
+            sleep 5
+          done
+
+      - name: Initialize Neo4j schema
+        run: |
+          cat neo4j/init-schema.cypher | docker exec -i health-dataspace-neo4j \
+            cypher-shell -u neo4j -p healthdataspace || true
+
+      - name: Run EHDS compliance tests
+        run: |
+          chmod +x scripts/run-ehds-tests.sh
+          REPORT_DIR=${{ env.REPORT_DIR }}/ehds \
+          NEO4J_URL=http://localhost:7474 \
+          KEYCLOAK_URL=http://localhost:8080 \
+          EDC_MANAGEMENT_URL=http://localhost:11003/api/mgmt \
+            ./scripts/run-ehds-tests.sh
+        continue-on-error: true
+
+      - name: Upload EHDS results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ehds-compliance-results
+          path: test-results/ehds/
+          retention-days: 30
+
+      - name: Stop infrastructure
+        if: always()
+        run: |
+          docker compose -f docker-compose.jad.yml down -v
+          docker compose down -v
+
+  # -----------------------------------------------------------------------
+  # Aggregate Results
+  # -----------------------------------------------------------------------
+  compliance-report:
+    name: Compliance Report
+    runs-on: ubuntu-latest
+    needs: [dsp-tck, dcp-compliance, ehds-compliance]
+    if: always()
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: test-results/
+
+      - name: Generate compliance summary
+        run: |
+          echo "# Compliance Report — $(date -u +%Y-%m-%d)" > compliance-report.md
+          echo "" >> compliance-report.md
+          echo "| Suite | Status |" >> compliance-report.md
+          echo "| ----- | ------ |" >> compliance-report.md
+
+          for suite in dsp-tck-results dcp-compliance-results ehds-compliance-results; do
+            if [ -d "test-results/${suite}" ]; then
+              latest=$(ls -t test-results/${suite}/*.json 2>/dev/null | head -1) || true
+              if [ -n "$latest" ]; then
+                passed=$(jq '.summary.passed // 0' "$latest")
+                failed=$(jq '.summary.failed // 0' "$latest")
+                total=$(jq '.summary.total // 0' "$latest")
+                status="✅ ${passed}/${total} passed"
+                if [ "$failed" -gt 0 ]; then
+                  status="❌ ${failed} failed / ${total} total"
+                fi
+              else
+                status="⚠️ No results"
+              fi
+            else
+              status="⏭️ Not run"
+            fi
+            echo "| ${suite} | ${status} |" >> compliance-report.md
+          done
+
+          cat compliance-report.md
+
+      - name: Upload compliance report
+        uses: actions/upload-artifact@v4
+        with:
+          name: compliance-report
+          path: compliance-report.md
+          retention-days: 90

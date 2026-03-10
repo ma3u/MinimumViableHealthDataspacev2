@@ -10,6 +10,8 @@ export async function fetchApi(
     if (endpoint === "/api/catalog") mockPath = "/mock/catalog.json";
     else if (endpoint === "/api/graph") mockPath = "/mock/graph.json";
     else if (endpoint === "/api/compliance") mockPath = "/mock/compliance.json";
+    else if (endpoint === "/api/compliance/tck")
+      mockPath = "/mock/compliance_tck.json";
     else if (endpoint.startsWith("/api/compliance?"))
       mockPath = "/mock/compliance_check.json";
     else if (endpoint === "/api/patient") mockPath = "/mock/patient.json";

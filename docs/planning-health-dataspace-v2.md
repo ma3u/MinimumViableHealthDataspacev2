@@ -46,11 +46,11 @@
       - [6b-2: Data Sharing \& Discovery Portal (from Fraunhofer)](#6b-2-data-sharing--discovery-portal-from-fraunhofer)
       - [6b-3: Operator Dashboard (from Redline)](#6b-3-operator-dashboard-from-redline)
       - [Updated Navigation Structure](#updated-navigation-structure)
-    - [Phase 7: TCK DCP \& DSP Compliance Verification](#phase-7-tck-dcp--dsp-compliance-verification)
-      - [7a: DSP 2025-1 Technology Compatibility Kit](#7a-dsp-2025-1-technology-compatibility-kit)
-      - [7b: DCP v1.0 Compliance Tests](#7b-dcp-v10-compliance-tests)
-      - [7c: EHDS Health-Domain Compliance Tests](#7c-ehds-health-domain-compliance-tests)
-      - [7d: Automated CI/CD Compliance Pipeline](#7d-automated-cicd-compliance-pipeline)
+    - [Phase 7: TCK DCP \& DSP Compliance Verification ✅](#phase-7-tck-dcp--dsp-compliance-verification-)
+      - [7a: DSP 2025-1 Technology Compatibility Kit ✅](#7a-dsp-2025-1-technology-compatibility-kit-)
+      - [7b: DCP v1.0 Compliance Tests ✅](#7b-dcp-v10-compliance-tests-)
+      - [7c: EHDS Health-Domain Compliance Tests ✅](#7c-ehds-health-domain-compliance-tests-)
+      - [7d: Automated CI/CD Compliance Pipeline ✅](#7d-automated-cicd-compliance-pipeline-)
   - [Architecture Decisions](#architecture-decisions)
     - [ADR-1: PostgreSQL vs Neo4j Data Storage Split](#adr-1-postgresql-vs-neo4j-data-storage-split)
       - [Decision](#decision)
@@ -140,23 +140,23 @@ All three core specifications are now final or near-final:
 
 ## Implementation Progress
 
-| Phase  | Title                                                  | Status         | Notes                                                                                                                                                                                                                                                                                                                                                                                    |
-| ------ | ------------------------------------------------------ | -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **1**  | Infrastructure Migration (EDC-V + DCore + CFM)         | ✅ Complete    | 1a–1f all complete; 18 services healthy; 3 tenants + 9 VPAs provisioned; data assets registered; ADR-1–6 accepted                                                                                                                                                                                                                                                                        |
-| **2**  | Identity and Trust (DCP v1.0 + Verifiable Credentials) | ✅ Complete    | 2a ✅ (DID:web for 3 tenants, Ed25519 keys, all activated — ADR-7); 2b ✅ (3 EHDS credential defs on IssuerService, 5 VC nodes in Neo4j, DCP scopes configured, Compliance UI with trust chain); 2c ✅ (Keycloak SSO: PKCE client, 3 roles, 3 demo users, NextAuth.js, role-based middleware)                                                                                            |
-| **3**  | Health Knowledge Graph Layer — Schema & Synthetic Data | ✅ Complete    | 5-layer Neo4j schema, EHDS HDAB chain, style sheet                                                                                                                                                                                                                                                                                                                                       |
-| **3b** | Real FHIR Data Pipeline (Synthea → Neo4j → OMOP)       | ✅ Complete    | 167 patients · 5,461 encounters · 2,421 conditions · 37,713 observations · 3,895 drug Rxes · 8,534 procedures                                                                                                                                                                                                                                                                            |
-| **3c** | HealthDCAT-AP Metadata Registration for FHIR Dataset   | ✅ Complete    | Synthea cohort registered as HealthDCAT-AP catalog entry; 2 distributions + EHDS Art 53 purpose                                                                                                                                                                                                                                                                                          |
-| **3d** | README + UI completeness hardening                     | ✅ Complete    | README step order fixed; catalog UI shows datasetType/legalBasis/recordCount                                                                                                                                                                                                                                                                                                             |
-| **3e** | DSP Marketplace Registration + Compliance Chain        | ✅ Complete    | Layer 1 DataProduct/Contract/HDABApproval wired to Synthea dataset; compliance UI live dropdowns                                                                                                                                                                                                                                                                                         |
-| **3f** | OMOP Research Analytics View                           | ✅ Complete    | Layer 4 cohort dashboard: top conditions/drugs/measurements, gender breakdown, stat cards                                                                                                                                                                                                                                                                                                |
-| **3g** | Procedure Pipeline + UI Polish                         | ✅ Complete    | 8,534 Procedure → OMOPProcedureOccurrence; Analytics card on home; 6-stat patient page                                                                                                                                                                                                                                                                                                   |
-| **3h** | EEHRxF FHIR Profile Alignment                          | ✅ Complete    | EEHRxF category/profile nodes; gap analysis UI; EHDS priority coverage                                                                                                                                                                                                                                                                                                                   |
-| **4**  | Dataspace Integration (EDC-V ↔ Neo4j data assets)     | ✅ Complete    | 4a ✅ (assets + policies + contracts); 4b ✅ (3 FINALIZED negotiations + transfer STARTED — ADR-7); 4c ✅ (Federated Catalog: 4 datasets discoverable, HDAB contract FINALIZED); 4d ✅ (Data Plane Transfer: CRO←100 FHIR patients, HDAB←2 HealthDCAT-AP datasets via DCore; audit trail in Neo4j)                                                                                       |
-| **5**  | Federated Queries & GraphRAG                           | ✅ Complete    | 5a ✅ (Neo4j SPE-2: 37 patients, 2,076 encounters, 33 OMOP persons + HealthDCAT-AP + EEHRxF); 5b ✅ (federated query dispatch + k-anonymity); 5c ✅ (Text2Cypher NLQ: 9 templates + optional LLM); 5d ✅ (UI `/query` page — 7th view)                                                                                                                                                   |
-| **6a** | Graph Explorer UI (Next.js → Neo4j Bolt)               | ✅ Complete    | Seven views (graph, catalog, compliance, patient, analytics, eehrxf, query/NLQ); Docker `graph-explorer` container on port 3000; GitHub Pages static export                                                                                                                                                                                                                              |
-| **6b** | Full Participant Portal (Aruba + Fraunhofer + Redline) | ✅ Complete    | 6b-1 ✅ (Onboarding: /onboarding, /onboarding/status, /credentials, /settings + 3 API routes); 6b-2 ✅ (Data Exchange: /data/share, /data/discover, /data/transfer, /negotiate + 5 API routes); 6b-3 ✅ (Admin: /admin, /admin/tenants, /admin/policies, /admin/audit + 3 API routes); Navigation dropdowns + middleware auth for all portal routes; 7 mock JSON files for static export |
-| **7**  | TCK DCP & DSP Compliance Verification                  | 🔲 Not started | Protocol conformance testing; depends on Phases 1–2                                                                                                                                                                                                                                                                                                                                      |
+| Phase  | Title                                                  | Status      | Notes                                                                                                                                                                                                                                                                                                                                                                                    |
+| ------ | ------------------------------------------------------ | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **1**  | Infrastructure Migration (EDC-V + DCore + CFM)         | ✅ Complete | 1a–1f all complete; 18 services healthy; 3 tenants + 9 VPAs provisioned; data assets registered; ADR-1–6 accepted                                                                                                                                                                                                                                                                        |
+| **2**  | Identity and Trust (DCP v1.0 + Verifiable Credentials) | ✅ Complete | 2a ✅ (DID:web for 3 tenants, Ed25519 keys, all activated — ADR-7); 2b ✅ (3 EHDS credential defs on IssuerService, 5 VC nodes in Neo4j, DCP scopes configured, Compliance UI with trust chain); 2c ✅ (Keycloak SSO: PKCE client, 3 roles, 3 demo users, NextAuth.js, role-based middleware)                                                                                            |
+| **3**  | Health Knowledge Graph Layer — Schema & Synthetic Data | ✅ Complete | 5-layer Neo4j schema, EHDS HDAB chain, style sheet                                                                                                                                                                                                                                                                                                                                       |
+| **3b** | Real FHIR Data Pipeline (Synthea → Neo4j → OMOP)       | ✅ Complete | 167 patients · 5,461 encounters · 2,421 conditions · 37,713 observations · 3,895 drug Rxes · 8,534 procedures                                                                                                                                                                                                                                                                            |
+| **3c** | HealthDCAT-AP Metadata Registration for FHIR Dataset   | ✅ Complete | Synthea cohort registered as HealthDCAT-AP catalog entry; 2 distributions + EHDS Art 53 purpose                                                                                                                                                                                                                                                                                          |
+| **3d** | README + UI completeness hardening                     | ✅ Complete | README step order fixed; catalog UI shows datasetType/legalBasis/recordCount                                                                                                                                                                                                                                                                                                             |
+| **3e** | DSP Marketplace Registration + Compliance Chain        | ✅ Complete | Layer 1 DataProduct/Contract/HDABApproval wired to Synthea dataset; compliance UI live dropdowns                                                                                                                                                                                                                                                                                         |
+| **3f** | OMOP Research Analytics View                           | ✅ Complete | Layer 4 cohort dashboard: top conditions/drugs/measurements, gender breakdown, stat cards                                                                                                                                                                                                                                                                                                |
+| **3g** | Procedure Pipeline + UI Polish                         | ✅ Complete | 8,534 Procedure → OMOPProcedureOccurrence; Analytics card on home; 6-stat patient page                                                                                                                                                                                                                                                                                                   |
+| **3h** | EEHRxF FHIR Profile Alignment                          | ✅ Complete | EEHRxF category/profile nodes; gap analysis UI; EHDS priority coverage                                                                                                                                                                                                                                                                                                                   |
+| **4**  | Dataspace Integration (EDC-V ↔ Neo4j data assets)     | ✅ Complete | 4a ✅ (assets + policies + contracts); 4b ✅ (3 FINALIZED negotiations + transfer STARTED — ADR-7); 4c ✅ (Federated Catalog: 4 datasets discoverable, HDAB contract FINALIZED); 4d ✅ (Data Plane Transfer: CRO←100 FHIR patients, HDAB←2 HealthDCAT-AP datasets via DCore; audit trail in Neo4j)                                                                                       |
+| **5**  | Federated Queries & GraphRAG                           | ✅ Complete | 5a ✅ (Neo4j SPE-2: 37 patients, 2,076 encounters, 33 OMOP persons + HealthDCAT-AP + EEHRxF); 5b ✅ (federated query dispatch + k-anonymity); 5c ✅ (Text2Cypher NLQ: 9 templates + optional LLM); 5d ✅ (UI `/query` page — 7th view)                                                                                                                                                   |
+| **6a** | Graph Explorer UI (Next.js → Neo4j Bolt)               | ✅ Complete | Seven views (graph, catalog, compliance, patient, analytics, eehrxf, query/NLQ); Docker `graph-explorer` container on port 3000; GitHub Pages static export                                                                                                                                                                                                                              |
+| **6b** | Full Participant Portal (Aruba + Fraunhofer + Redline) | ✅ Complete | 6b-1 ✅ (Onboarding: /onboarding, /onboarding/status, /credentials, /settings + 3 API routes); 6b-2 ✅ (Data Exchange: /data/share, /data/discover, /data/transfer, /negotiate + 5 API routes); 6b-3 ✅ (Admin: /admin, /admin/tenants, /admin/policies, /admin/audit + 3 API routes); Navigation dropdowns + middleware auth for all portal routes; 7 mock JSON files for static export |
+| **7**  | TCK DCP & DSP Compliance Verification                  | ✅ Complete | 7a ✅ (DSP 2025-1 TCK: `run-dsp-tck.sh` — 7 test categories, 30+ tests); 7b ✅ (DCP v1.0: `run-dcp-tests.sh` — 5 categories); 7c ✅ (EHDS domain: `run-ehds-tests.sh` — 5 categories); 7d ✅ (CI/CD: `compliance.yml` workflow, orchestrator `run-compliance.sh`, `/compliance/tck` dashboard UI with live + mock data)                                                                  |
 
 ---
 
@@ -851,11 +851,11 @@ Ported from Fraunhofer's Angular + EDC Data Dashboard into Next.js:
 
 **Deliverables:** 10 new Next.js routes implementing Aruba onboarding + Fraunhofer data sharing + Redline operator dashboard; Keycloak SSO protecting all views; EDC-V/CFM/IdentityHub APIs accessible via typed TypeScript clients.
 
-### Phase 7: TCK DCP & DSP Compliance Verification
+### Phase 7: TCK DCP & DSP Compliance Verification ✅
 
 Phase 7 validates that the Health Dataspace v2 deployment is **protocol-conformant** using the official Technology Compatibility Kits and custom EHDS-specific test suites. This phase runs after Phases 1–2 provide a working EDC-V + DCP stack.
 
-#### 7a: DSP 2025-1 Technology Compatibility Kit
+#### 7a: DSP 2025-1 Technology Compatibility Kit ✅
 
 The [DSP 2025-1 specification](https://internationaldataspaces.org/dataspace-protocol-nears-first-official-release/) includes a **TCK with 140+ test cases** that both EDC and TNO connectors have passed. We run these against our health dataspace deployment:
 
@@ -890,7 +890,7 @@ export DSP_CATALOG_URL=https://hdab-healthgov.localhost/api/dsp/catalog
 ./gradlew test
 ```
 
-#### 7b: DCP v1.0 Compliance Tests
+#### 7b: DCP v1.0 Compliance Tests ✅
 
 The [DCP v1.0 specification](https://projects.eclipse.org/projects/technology.dataspace-dcp/releases/1.0.0) defines credential presentation and issuance protocols. We verify compliance of IdentityHub and IssuerService:
 
@@ -929,7 +929,7 @@ npm run test:presentation -- --verifier=did:web:cro-trialcorp.localhost \
   --credential-type=EHDSParticipantCredential
 ```
 
-#### 7c: EHDS Health-Domain Compliance Tests
+#### 7c: EHDS Health-Domain Compliance Tests ✅
 
 Custom test suite verifying health-specific requirements not covered by generic DSP/DCP TCKs:
 
@@ -950,7 +950,7 @@ Custom test suite verifying health-specific requirements not covered by generic 
    - Vocabulary mappings correct: SNOMED → condition_concept_id, LOINC → measurement_concept_id
    - No orphaned OMOP entities (every OMOPPerson links to at least one clinical event)
 
-#### 7d: Automated CI/CD Compliance Pipeline
+#### 7d: Automated CI/CD Compliance Pipeline ✅
 
 5. Add compliance verification to GitHub Actions:
 

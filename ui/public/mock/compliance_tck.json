@@ -1,0 +1,184 @@
+{
+  "timestamp": "2025-01-15T10:00:00Z",
+  "summary": { "total": 20, "passed": 18, "failed": 1, "skipped": 1 },
+  "suites": {
+    "DSP": {
+      "passed": 5,
+      "total": 6,
+      "results": [
+        {
+          "id": "DSP-1.1",
+          "category": "Schema Compliance",
+          "suite": "DSP",
+          "name": "Control Plane Readiness",
+          "status": "pass",
+          "detail": "GET /api/check/readiness → 200"
+        },
+        {
+          "id": "DSP-1.2",
+          "category": "Schema Compliance",
+          "suite": "DSP",
+          "name": "Control Plane Liveness",
+          "status": "pass",
+          "detail": "GET /api/check/liveness → 200"
+        },
+        {
+          "id": "DSP-2.1",
+          "category": "Catalog Protocol",
+          "suite": "DSP",
+          "name": "Catalog query — test-clinic",
+          "status": "pass",
+          "detail": "Catalog response type: dcat:Catalog"
+        },
+        {
+          "id": "DSP-2.2",
+          "category": "Catalog Protocol",
+          "suite": "DSP",
+          "name": "Catalog query — clinic-charite",
+          "status": "pass",
+          "detail": "Catalog response type: dcat:Catalog"
+        },
+        {
+          "id": "DSP-2.3",
+          "category": "Catalog Protocol",
+          "suite": "DSP",
+          "name": "Catalog query — cro-bayer",
+          "status": "pass",
+          "detail": "Catalog response type: dcat:Catalog"
+        },
+        {
+          "id": "DSP-2.4",
+          "category": "Catalog Protocol",
+          "suite": "DSP",
+          "name": "Catalog query — hdab-bfarm",
+          "status": "skip",
+          "detail": "HDAB does not host datasets"
+        }
+      ]
+    },
+    "DCP": {
+      "passed": 7,
+      "total": 8,
+      "results": [
+        {
+          "id": "DCP-1.1",
+          "category": "DID Resolution",
+          "suite": "DCP",
+          "name": "IdentityHub reachable",
+          "status": "pass",
+          "detail": "IdentityHub responded"
+        },
+        {
+          "id": "DCP-2.1",
+          "category": "Key Pair Management",
+          "suite": "DCP",
+          "name": "Key pairs — test-clinic",
+          "status": "pass",
+          "detail": "1 key pair(s) found"
+        },
+        {
+          "id": "DCP-2.2",
+          "category": "Key Pair Management",
+          "suite": "DCP",
+          "name": "Key pairs — clinic-charite",
+          "status": "pass",
+          "detail": "1 key pair(s) found"
+        },
+        {
+          "id": "DCP-2.3",
+          "category": "Key Pair Management",
+          "suite": "DCP",
+          "name": "Key pairs — cro-bayer",
+          "status": "pass",
+          "detail": "1 key pair(s) found"
+        },
+        {
+          "id": "DCP-2.4",
+          "category": "Key Pair Management",
+          "suite": "DCP",
+          "name": "Key pairs — hdab-bfarm",
+          "status": "pass",
+          "detail": "1 key pair(s) found"
+        },
+        {
+          "id": "DCP-3.1",
+          "category": "Issuer Service",
+          "suite": "DCP",
+          "name": "IssuerService reachable",
+          "status": "pass",
+          "detail": "IssuerService responded"
+        },
+        {
+          "id": "DCP-3.2",
+          "category": "Issuer Service",
+          "suite": "DCP",
+          "name": "EHDS credential definitions",
+          "status": "pass",
+          "detail": "2 credential definitions found"
+        },
+        {
+          "id": "DCP-3.3",
+          "category": "Issuer Service",
+          "suite": "DCP",
+          "name": "Issuer DID configured",
+          "status": "fail",
+          "detail": "Issuer DID not found in credential definitions"
+        }
+      ]
+    },
+    "EHDS": {
+      "passed": 6,
+      "total": 6,
+      "results": [
+        {
+          "id": "EHDS-1.1",
+          "category": "HealthDCAT-AP",
+          "suite": "EHDS",
+          "name": "HealthDataset nodes present",
+          "status": "pass",
+          "detail": "3 HealthDataset node(s)"
+        },
+        {
+          "id": "EHDS-2.1",
+          "category": "EEHRxF Profiles",
+          "suite": "EHDS",
+          "name": "EEHRxF profiles present",
+          "status": "pass",
+          "detail": "6 EEHRxF profile(s)"
+        },
+        {
+          "id": "EHDS-3.1",
+          "category": "OMOP CDM",
+          "suite": "EHDS",
+          "name": "OMOP Person nodes present",
+          "status": "pass",
+          "detail": "167 OMOPPerson node(s)"
+        },
+        {
+          "id": "EHDS-4.1",
+          "category": "Article 53 Enforcement",
+          "suite": "EHDS",
+          "name": "HDAB approval chains",
+          "status": "pass",
+          "detail": "3 approval chain(s)"
+        },
+        {
+          "id": "EHDS-5.1",
+          "category": "Verifiable Credentials",
+          "suite": "EHDS",
+          "name": "VC nodes in graph",
+          "status": "pass",
+          "detail": "8 VerifiableCredential node(s)"
+        },
+        {
+          "id": "EHDS-6.1",
+          "category": "Knowledge Graph",
+          "suite": "EHDS",
+          "name": "Total graph nodes",
+          "status": "pass",
+          "detail": "58,000+ total nodes"
+        }
+      ]
+    }
+  }
+}
