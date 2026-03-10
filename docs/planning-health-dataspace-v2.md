@@ -82,6 +82,11 @@
       - [Images Produced](#images-produced)
       - [Configuration Alignment](#configuration-alignment)
       - [Consequences](#consequences-4)
+    - [ADR-6: GHCR Image Publishing (Public Container Registry)](#adr-6-ghcr-image-publishing-public-container-registry)
+      - [Decision](#decision-4)
+      - [Image Registry](#image-registry)
+      - [Naming Convention](#naming-convention)
+      - [Consequences](#consequences-5)
   - [Target Architecture](#target-architecture)
   - [What This Proves](#what-this-proves)
   - [Implementation Dependencies](#implementation-dependencies)
@@ -122,23 +127,23 @@ All three core specifications are now final or near-final:
 
 ## Implementation Progress
 
-| Phase  | Title                                                  | Status         | Notes                                                                                            |
-| ------ | ------------------------------------------------------ | -------------- | ------------------------------------------------------------------------------------------------ |
-| **1**  | Infrastructure Migration (EDC-V + DCore + CFM)         | 🏗️ In progress | 1c+1d+1e+1f complete; ADR-1/2/3 accepted+implemented; 1a (KinD) + 1b (tenant config) pending     |
-| **2**  | Identity and Trust (DCP v1.0 + Verifiable Credentials) | 🔲 Not started | Depends on Phase 1                                                                               |
-| **3**  | Health Knowledge Graph Layer — Schema & Synthetic Data | ✅ Complete    | 5-layer Neo4j schema, EHDS HDAB chain, style sheet                                               |
-| **3b** | Real FHIR Data Pipeline (Synthea → Neo4j → OMOP)       | ✅ Complete    | 127 patients · 3,031 encounters · 1,045 conditions · 19,195 observations · 2,232 drug Rxes       |
-| **3c** | HealthDCAT-AP Metadata Registration for FHIR Dataset   | ✅ Complete    | Synthea cohort registered as HealthDCAT-AP catalog entry; 2 distributions + EHDS Art 53 purpose  |
-| **3d** | README + UI completeness hardening                     | ✅ Complete    | README step order fixed; catalog UI shows datasetType/legalBasis/recordCount                     |
-| **3e** | DSP Marketplace Registration + Compliance Chain        | ✅ Complete    | Layer 1 DataProduct/Contract/HDABApproval wired to Synthea dataset; compliance UI live dropdowns |
-| **3f** | OMOP Research Analytics View                           | ✅ Complete    | Layer 4 cohort dashboard: top conditions/drugs/measurements, gender breakdown, stat cards        |
-| **3g** | Procedure Pipeline + UI Polish                         | ✅ Complete    | 8,534 Procedure → OMOPProcedureOccurrence; Analytics card on home; 6-stat patient page           |
-| **3h** | EEHRxF FHIR Profile Alignment                          | ✅ Complete    | EEHRxF category/profile nodes; gap analysis UI; EHDS priority coverage                           |
-| **4**  | Dataspace Integration (EDC-V ↔ Neo4j data assets)     | 🔲 Not started | Depends on Phases 1, 2, 3c; 4a asset payloads prepared                                           |
-| **5**  | Federated Queries & GraphRAG                           | 🔲 Not started | Depends on Phase 4                                                                               |
-| **6a** | Graph Explorer UI (Next.js → Neo4j Bolt)               | ✅ Complete    | Four views; runs at localhost:3000                                                               |
-| **6b** | Full Participant Portal (Aruba + Fraunhofer + Redline) | 🔲 Not started | Depends on Phases 1–4                                                                            |
-| **7**  | TCK DCP & DSP Compliance Verification                  | 🔲 Not started | Protocol conformance testing; depends on Phases 1–2                                              |
+| Phase  | Title                                                  | Status         | Notes                                                                                                                    |
+| ------ | ------------------------------------------------------ | -------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| **1**  | Infrastructure Migration (EDC-V + DCore + CFM)         | 🏗️ In progress | 1a deployed via Docker Compose (18 services healthy); 1c+1d+1e+1f complete; ADR-1–6 accepted; 1b (tenant config) pending |
+| **2**  | Identity and Trust (DCP v1.0 + Verifiable Credentials) | 🏗️ In progress | IssuerService + IdentityHub running; seed tenant + attestation/credential defs created; DID:web pending                  |
+| **3**  | Health Knowledge Graph Layer — Schema & Synthetic Data | ✅ Complete    | 5-layer Neo4j schema, EHDS HDAB chain, style sheet                                                                       |
+| **3b** | Real FHIR Data Pipeline (Synthea → Neo4j → OMOP)       | ✅ Complete    | 127 patients · 3,031 encounters · 1,045 conditions · 19,195 observations · 2,232 drug Rxes                               |
+| **3c** | HealthDCAT-AP Metadata Registration for FHIR Dataset   | ✅ Complete    | Synthea cohort registered as HealthDCAT-AP catalog entry; 2 distributions + EHDS Art 53 purpose                          |
+| **3d** | README + UI completeness hardening                     | ✅ Complete    | README step order fixed; catalog UI shows datasetType/legalBasis/recordCount                                             |
+| **3e** | DSP Marketplace Registration + Compliance Chain        | ✅ Complete    | Layer 1 DataProduct/Contract/HDABApproval wired to Synthea dataset; compliance UI live dropdowns                         |
+| **3f** | OMOP Research Analytics View                           | ✅ Complete    | Layer 4 cohort dashboard: top conditions/drugs/measurements, gender breakdown, stat cards                                |
+| **3g** | Procedure Pipeline + UI Polish                         | ✅ Complete    | 8,534 Procedure → OMOPProcedureOccurrence; Analytics card on home; 6-stat patient page                                   |
+| **3h** | EEHRxF FHIR Profile Alignment                          | ✅ Complete    | EEHRxF category/profile nodes; gap analysis UI; EHDS priority coverage                                                   |
+| **4**  | Dataspace Integration (EDC-V ↔ Neo4j data assets)     | 🔲 Not started | Depends on Phases 1, 2, 3c; 4a asset payloads prepared                                                                   |
+| **5**  | Federated Queries & GraphRAG                           | 🔲 Not started | Depends on Phase 4                                                                                                       |
+| **6a** | Graph Explorer UI (Next.js → Neo4j Bolt)               | ✅ Complete    | Four views; runs at localhost:3000                                                                                       |
+| **6b** | Full Participant Portal (Aruba + Fraunhofer + Redline) | 🔲 Not started | Depends on Phases 1–4                                                                                                    |
+| **7**  | TCK DCP & DSP Compliance Verification                  | 🔲 Not started | Protocol conformance testing; depends on Phases 1–2                                                                      |
 
 ---
 
@@ -148,22 +153,28 @@ All three core specifications are now final or near-final:
 
 Phase 1 bootstraps the full EDC-V + DCore + CFM stack using the [JAD (Joint Architecture Demo)](https://github.com/Metaform/jad) as the reference deployment. JAD provides pre-built container images, Kubernetes manifests, and automated end-to-end tests — we adapt its infrastructure to serve the health dataspace domain.
 
-#### 1a: JAD Local Deployment
+#### 1a: JAD Local Deployment ✅
 
-1. Set up **KinD** (Kubernetes in Docker) cluster with Traefik Gateway API ingress as per JAD's `deployment/kind/` manifests
-2. Deploy JAD's 11 core services from pre-built **GHCR images** (`ghcr.io/metaform/jad/*`):
+1. ~~Set up **KinD** (Kubernetes in Docker) cluster~~ → Deployed via **Docker Compose** (`docker-compose.jad.yml`) with all 18 services healthy, eliminating KinD dependency
+2. Deploy JAD's 11 core services from **GHCR images** (`ghcr.io/ma3u/health-dataspace/*`, see ADR-6):
    - `controlplane` — EDC-V virtualized control plane (DSP + admin APIs)
-   - `dataplane` — DCore HTTP data plane (Data Plane Signaling)
+   - `dataplane-fhir` / `dataplane-omop` — DCore HTTP data planes (ADR-2: dual data planes)
    - `identityhub` — DCP v1.0 credential storage and presentation
    - `issuerservice` — Verifiable Credential issuance (trust anchor)
    - `keycloak` — OAuth2/OIDC identity provider (PKCE flows)
-   - `vault` — HashiCorp Vault for secret management
-   - `postgres` — Persistent storage for EDC-V state
-   - `nats` — Event messaging bus
-   - `cfm-tenant-manager` — Multi-tenant participant lifecycle
-   - `cfm-provision-manager` — Automated resource provisioning
-   - `cfm-agents` — Background provisioning agents
-3. Validate deployment with JAD's **Bruno API collection** (interactive testing) and automated smoke tests
+   - `vault` — HashiCorp Vault for secret management (dev mode, HTTP)
+   - `postgres` — Persistent storage for EDC-V state (7 databases)
+   - `nats` — Event messaging bus (alpine image for healthcheck)
+   - `tenant-manager` — Multi-tenant participant lifecycle (CFM)
+   - `provision-manager` — Automated resource provisioning (CFM)
+   - `cfm-agents` (4) — Keycloak, EDC-V, Registration, Onboarding agents
+   - `neo4j-proxy` — Bridges DCore data planes ↔ Neo4j graph (ADR-2)
+   - `traefik` — Reverse proxy / API gateway
+3. Seed data initialized via `jad/seed-jad.sh`:
+   - IssuerService: tenant `did:web:issuerservice%3A10016:issuer`, Membership + Manufacturer attestation/credential definitions
+   - TenantManager: Cell + Dataspace Profile (deployed)
+   - ProvisionManager: 5 ActivityDefinitions + OrchestrationDefinition (deploy + dispose workflows)
+4. Validate deployment with JAD's **Bruno API collection** (interactive testing) — pending
 
 #### 1b: Health-Specific Tenant Configuration
 
@@ -1329,18 +1340,18 @@ unset JAVA_TOOL_OPTIONS
 
 #### Images Produced
 
-| Image                                       | Source     | Size    | Service                        |
-| ------------------------------------------- | ---------- | ------- | ------------------------------ |
-| `ghcr.io/metaform/jad/controlplane:latest`  | JAD (Java) | ~283 MB | EDC-V control plane            |
-| `ghcr.io/metaform/jad/dataplane:latest`     | JAD (Java) | ~274 MB | DCore data plane (FHIR + OMOP) |
-| `ghcr.io/metaform/jad/identity-hub:latest`  | JAD (Java) | ~275 MB | DCP v1.0 identity hub          |
-| `ghcr.io/metaform/jad/issuerservice:latest` | JAD (Java) | ~231 MB | VC issuance service            |
-| `ghcr.io/eclipse-cfm/cfm/tmanager:latest`   | CFM (Go)   | ~18 MB  | Tenant lifecycle manager       |
-| `ghcr.io/eclipse-cfm/cfm/pmanager:latest`   | CFM (Go)   | ~19 MB  | Provision manager              |
-| `ghcr.io/eclipse-cfm/cfm/kcagent:latest`    | CFM (Go)   | ~25 MB  | Keycloak provisioning agent    |
-| `ghcr.io/eclipse-cfm/cfm/edcvagent:latest`  | CFM (Go)   | ~25 MB  | EDC-V provisioning agent       |
-| `ghcr.io/eclipse-cfm/cfm/regagent:latest`   | CFM (Go)   | ~20 MB  | Registration agent             |
-| `ghcr.io/eclipse-cfm/cfm/obagent:latest`    | CFM (Go)   | ~20 MB  | Onboarding agent               |
+| Image (local build tag)                     | Published as (ADR-6)                                     | Source     | Size    | Service                        |
+| ------------------------------------------- | -------------------------------------------------------- | ---------- | ------- | ------------------------------ |
+| `ghcr.io/metaform/jad/controlplane:latest`  | `ghcr.io/ma3u/health-dataspace/jad-controlplane:latest`  | JAD (Java) | ~283 MB | EDC-V control plane            |
+| `ghcr.io/metaform/jad/dataplane:latest`     | `ghcr.io/ma3u/health-dataspace/jad-dataplane:latest`     | JAD (Java) | ~274 MB | DCore data plane (FHIR + OMOP) |
+| `ghcr.io/metaform/jad/identity-hub:latest`  | `ghcr.io/ma3u/health-dataspace/jad-identity-hub:latest`  | JAD (Java) | ~275 MB | DCP v1.0 identity hub          |
+| `ghcr.io/metaform/jad/issuerservice:latest` | `ghcr.io/ma3u/health-dataspace/jad-issuerservice:latest` | JAD (Java) | ~231 MB | VC issuance service            |
+| `ghcr.io/eclipse-cfm/cfm/tmanager:latest`   | `ghcr.io/ma3u/health-dataspace/cfm-tmanager:latest`      | CFM (Go)   | ~18 MB  | Tenant lifecycle manager       |
+| `ghcr.io/eclipse-cfm/cfm/pmanager:latest`   | `ghcr.io/ma3u/health-dataspace/cfm-pmanager:latest`      | CFM (Go)   | ~19 MB  | Provision manager              |
+| `ghcr.io/eclipse-cfm/cfm/kcagent:latest`    | `ghcr.io/ma3u/health-dataspace/cfm-kcagent:latest`       | CFM (Go)   | ~25 MB  | Keycloak provisioning agent    |
+| `ghcr.io/eclipse-cfm/cfm/edcvagent:latest`  | `ghcr.io/ma3u/health-dataspace/cfm-edcvagent:latest`     | CFM (Go)   | ~25 MB  | EDC-V provisioning agent       |
+| `ghcr.io/eclipse-cfm/cfm/regagent:latest`   | `ghcr.io/ma3u/health-dataspace/cfm-regagent:latest`      | CFM (Go)   | ~20 MB  | Registration agent             |
+| `ghcr.io/eclipse-cfm/cfm/obagent:latest`    | `ghcr.io/ma3u/health-dataspace/cfm-obagent:latest`       | CFM (Go)   | ~20 MB  | Onboarding agent               |
 
 #### Configuration Alignment
 
@@ -1355,7 +1366,70 @@ All environment variables and config files were aligned with the JAD K8s referen
 - **Positive:** Full JAD reference architecture running locally — EDC-V Virtual Connector with multi-tenant CFM management plane, exactly as designed by the JAD project. All 11 services replicate the K8s deployment without KinD.
 - **Trade-off:** JAD uses EDC 0.16.0-SNAPSHOT from Sonatype snapshots — not a released version. API may change. Mitigated by pinning to the cloned commit hash.
 - **Fallback:** The `connector/` directory contains a simpler EDC 0.13.0 build from Maven Central releases. It can be used if JAD upstream breaks, but lacks Virtual Connector capabilities.
-- **Image naming:** Images use the official upstream GHCR-style tags (not custom `health-dataspace/*` prefix) to match `docker-compose.jad.yml` without changes. `pull_policy: never` prevents pull attempts.
+- **Image naming:** Source builds produce upstream GHCR-style tags locally. ADR-6 re-tags and publishes them to `ghcr.io/ma3u/health-dataspace/*` for public pull access.
+
+---
+
+### ADR-6: GHCR Image Publishing (Public Container Registry)
+
+**Status:** Accepted
+**Date:** 2026-03-10
+**Context:** ADR-5 builds all 11 images from source, but the resulting images are only available on the builder's machine. Other contributors and CI pipelines must either repeat the ~10-minute build or have images published to a shared registry. The upstream GHCR repos (`ghcr.io/metaform/jad/*` and `ghcr.io/eclipse-cfm/cfm/*`) require authentication and are not publicly pullable.
+
+#### Decision
+
+Publish all source-built images to the project's own GHCR namespace at `ghcr.io/ma3u/health-dataspace/*`. Each package is linked to the `MinimumViableHealthDataspacev2` repository so visibility inherits from the repo (public). The `docker-compose.jad.yml` references the published images directly — no `pull_policy: never` needed.
+
+Source builds (ADR-5) remain the authoritative way to produce new images. After building, images are re-tagged and pushed:
+
+```bash
+# Re-tag (after source build per ADR-5)
+for svc in controlplane dataplane identity-hub issuerservice; do
+  docker tag "ghcr.io/metaform/jad/${svc}:latest" "ghcr.io/ma3u/health-dataspace/jad-${svc}:latest"
+done
+for svc in tmanager pmanager kcagent edcvagent regagent obagent; do
+  docker tag "ghcr.io/eclipse-cfm/cfm/${svc}:latest" "ghcr.io/ma3u/health-dataspace/cfm-${svc}:latest"
+done
+docker tag "health-dataspace/neo4j-proxy:latest" "ghcr.io/ma3u/health-dataspace/neo4j-proxy:latest"
+
+# Push (requires gh auth refresh -s write:packages)
+gh auth token | docker login ghcr.io -u ma3u --password-stdin
+for img in $(docker images --format '{{.Repository}}:{{.Tag}}' | grep 'ma3u/health-dataspace' | sort); do
+  docker push "$img"
+done
+```
+
+#### Image Registry
+
+| Published Image                                          | Source Image                                | Size    |
+| -------------------------------------------------------- | ------------------------------------------- | ------- |
+| `ghcr.io/ma3u/health-dataspace/jad-controlplane:latest`  | `ghcr.io/metaform/jad/controlplane:latest`  | ~283 MB |
+| `ghcr.io/ma3u/health-dataspace/jad-dataplane:latest`     | `ghcr.io/metaform/jad/dataplane:latest`     | ~274 MB |
+| `ghcr.io/ma3u/health-dataspace/jad-identity-hub:latest`  | `ghcr.io/metaform/jad/identity-hub:latest`  | ~275 MB |
+| `ghcr.io/ma3u/health-dataspace/jad-issuerservice:latest` | `ghcr.io/metaform/jad/issuerservice:latest` | ~231 MB |
+| `ghcr.io/ma3u/health-dataspace/cfm-tmanager:latest`      | `ghcr.io/eclipse-cfm/cfm/tmanager:latest`   | ~18 MB  |
+| `ghcr.io/ma3u/health-dataspace/cfm-pmanager:latest`      | `ghcr.io/eclipse-cfm/cfm/pmanager:latest`   | ~19 MB  |
+| `ghcr.io/ma3u/health-dataspace/cfm-kcagent:latest`       | `ghcr.io/eclipse-cfm/cfm/kcagent:latest`    | ~25 MB  |
+| `ghcr.io/ma3u/health-dataspace/cfm-edcvagent:latest`     | `ghcr.io/eclipse-cfm/cfm/edcvagent:latest`  | ~25 MB  |
+| `ghcr.io/ma3u/health-dataspace/cfm-regagent:latest`      | `ghcr.io/eclipse-cfm/cfm/regagent:latest`   | ~20 MB  |
+| `ghcr.io/ma3u/health-dataspace/cfm-obagent:latest`       | `ghcr.io/eclipse-cfm/cfm/obagent:latest`    | ~20 MB  |
+| `ghcr.io/ma3u/health-dataspace/neo4j-proxy:latest`       | `health-dataspace/neo4j-proxy:latest`       | ~149 MB |
+
+#### Naming Convention
+
+`ghcr.io/ma3u/health-dataspace/{origin}-{service}:latest`
+
+- **`jad-*`** — Java images built from `vendor/jad/` (EDC-V 0.16.0-SNAPSHOT)
+- **`cfm-*`** — Go images built from `vendor/cfm/` (CFM management plane)
+- **`neo4j-proxy`** — Node.js image built from `services/neo4j-proxy/`
+
+#### Consequences
+
+- **Positive:** Contributors and CI can `docker compose -f docker-compose.jad.yml pull` without building from source. Total pull size ~1.1 GB.
+- **Positive:** No more `pull_policy: never` — standard Docker Compose workflow works out of the box.
+- **Trade-off:** Images must be re-pushed after each source rebuild. No automated CI pipeline yet (future work).
+- **Trade-off:** Images are re-distributions of Eclipse/Metaform open source builds. License compliance maintained via source attribution in ADR-5.
+- **Dependency:** Packages must be linked to the `MinimumViableHealthDataspacev2` repository and visibility set to "inherit from repo" (public) via GitHub UI.
 
 ---
 

@@ -224,8 +224,7 @@ services:
   # EDC-V Control Plane — DSP protocol + management APIs
   # ---------------------------------------------------------------------------
   controlplane:
-    image: ghcr.io/metaform/jad/controlplane:latest
-    pull_policy: never
+    image: ghcr.io/ma3u/health-dataspace/jad-controlplane:latest
     container_name: health-dataspace-controlplane
     environment:
       # Base config
@@ -306,8 +305,7 @@ services:
   # Pushes FHIR Bundle JSON to consumer endpoints via Neo4j Query Proxy.
   # ---------------------------------------------------------------------------
   dataplane-fhir:
-    image: ghcr.io/metaform/jad/dataplane:latest
-    pull_policy: never
+    image: ghcr.io/ma3u/health-dataspace/jad-dataplane:latest
     container_name: health-dataspace-dataplane-fhir
     environment:
       edc.hostname: "dataplane-fhir"
@@ -372,8 +370,7 @@ services:
   # Consumer pulls query results from provider via Neo4j Query Proxy.
   # ---------------------------------------------------------------------------
   dataplane-omop:
-    image: ghcr.io/metaform/jad/dataplane:latest
-    pull_policy: never
+    image: ghcr.io/ma3u/health-dataspace/jad-dataplane:latest
     container_name: health-dataspace-dataplane-omop
     environment:
       edc.hostname: "dataplane-omop"
@@ -442,7 +439,7 @@ services:
     build:
       context: ./services/neo4j-proxy
       dockerfile: Dockerfile
-    image: health-dataspace/neo4j-proxy:latest
+    image: ghcr.io/ma3u/health-dataspace/neo4j-proxy:latest
     container_name: health-dataspace-neo4j-proxy
     environment:
       NODE_ENV: "production"
@@ -475,8 +472,7 @@ services:
   # IdentityHub — DCP v1.0 credential storage & presentation
   # ---------------------------------------------------------------------------
   identityhub:
-    image: ghcr.io/metaform/jad/identity-hub:latest
-    pull_policy: never
+    image: ghcr.io/ma3u/health-dataspace/jad-identity-hub:latest
     container_name: health-dataspace-identityhub
     env_file:
       - ./jad/identityhub.env
@@ -515,8 +511,7 @@ services:
   # IssuerService — Verifiable Credential issuance (trust anchor)
   # ---------------------------------------------------------------------------
   issuerservice:
-    image: ghcr.io/metaform/jad/issuerservice:latest
-    pull_policy: never
+    image: ghcr.io/ma3u/health-dataspace/jad-issuerservice:latest
     container_name: health-dataspace-issuerservice
     env_file:
       - ./jad/issuerservice.env
@@ -559,8 +554,7 @@ services:
   # CFM Tenant Manager — Multi-tenant participant lifecycle
   # ---------------------------------------------------------------------------
   tenant-manager:
-    image: ghcr.io/eclipse-cfm/cfm/tmanager:latest
-    pull_policy: never
+    image: ghcr.io/ma3u/health-dataspace/cfm-tmanager:latest
     container_name: health-dataspace-tenant-manager
     volumes:
       - ./jad/tenant-manager-config.yaml:/etc/appname/tm.env:ro
@@ -583,8 +577,7 @@ services:
   # CFM Provision Manager — Automated resource provisioning
   # ---------------------------------------------------------------------------
   provision-manager:
-    image: ghcr.io/eclipse-cfm/cfm/pmanager:latest
-    pull_policy: never
+    image: ghcr.io/ma3u/health-dataspace/cfm-pmanager:latest
     container_name: health-dataspace-provision-manager
     volumes:
       - ./jad/provision-manager-config.yaml:/etc/appname/pm.env:ro
@@ -609,8 +602,7 @@ services:
   # CFM Agents — Background provisioning agents (Keycloak, EDC-V, Registration, Onboarding)
   # ---------------------------------------------------------------------------
   cfm-agents:
-    image: ghcr.io/eclipse-cfm/cfm/kcagent:latest
-    pull_policy: never
+    image: ghcr.io/ma3u/health-dataspace/cfm-kcagent:latest
     container_name: health-dataspace-cfm-keycloak-agent
     volumes:
       - ./jad/keycloak-agent-config.yaml:/etc/appname/kcagent.env:ro
@@ -624,8 +616,7 @@ services:
     restart: unless-stopped
 
   cfm-edcv-agent:
-    image: ghcr.io/eclipse-cfm/cfm/edcvagent:latest
-    pull_policy: never
+    image: ghcr.io/ma3u/health-dataspace/cfm-edcvagent:latest
     container_name: health-dataspace-cfm-edcv-agent
     volumes:
       - ./jad/edcv-agent-config.yaml:/etc/appname/edcvagent.env:ro
@@ -639,8 +630,7 @@ services:
     restart: unless-stopped
 
   cfm-registration-agent:
-    image: ghcr.io/eclipse-cfm/cfm/regagent:latest
-    pull_policy: never
+    image: ghcr.io/ma3u/health-dataspace/cfm-regagent:latest
     container_name: health-dataspace-cfm-registration-agent
     volumes:
       - ./jad/registration-agent-config.yaml:/etc/appname/regagent.env:ro
@@ -656,8 +646,7 @@ services:
     restart: unless-stopped
 
   cfm-onboarding-agent:
-    image: ghcr.io/eclipse-cfm/cfm/obagent:latest
-    pull_policy: never
+    image: ghcr.io/ma3u/health-dataspace/cfm-obagent:latest
     container_name: health-dataspace-cfm-onboarding-agent
     volumes:
       - ./jad/onboarding-agent-config.yaml:/etc/appname/obagent.env:ro
