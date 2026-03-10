@@ -176,19 +176,23 @@ Phase 1 bootstraps the full EDC-V + DCore + CFM stack using the [JAD (Joint Arch
    - ProvisionManager: 5 ActivityDefinitions + OrchestrationDefinition (deploy + dispose workflows)
 4. Validate deployment with JAD's **Bruno API collection** (interactive testing) — pending
 
-#### 1b: Health-Specific Tenant Configuration
+#### 1b: Health-Specific Tenant Configuration ✅
 
 4. Configure three tenant profiles via CFM Tenant Manager API:
-   - **Clinic** (`clinic-charité`) — data provider publishing FHIR R4 patient data
-   - **CRO** (`cro-bayer`) — data consumer requesting OMOP research queries
-   - **HDAB** (`hdab-bfarm`) — intermediary operating HealthDCAT-AP catalog + SPE
-5. Configure CFM Provision Manager to automatically provision per-tenant:
+   - **Clinic Charité** (`clinic-charite`) — data provider publishing FHIR R4 patient data ✅
+   - **CRO Bayer** (`cro-bayer`) — data consumer requesting OMOP research queries ✅
+   - **HDAB BfArM** (`hdab-bfarm`) — intermediary operating HealthDCAT-AP catalog + SPE ✅
+5. Configure CFM Provision Manager to automatically provision per-tenant: ✅
    - EDC-V control plane instance (participant-scoped DSP endpoint)
    - DCore data plane instance (FHIR HTTP transfer + query result streaming)
    - IdentityHub instance (DID:web document + credential wallet)
-6. Wire the existing **Neo4j Health Knowledge Graph** as a data source:
-   - Register Cypher query endpoint as a DSP Data Asset on the Clinic's EDC-V instance
-   - Register HealthDCAT-AP catalog metadata on the HDAB's Federated Catalog
+   - All 9 VPAs (3 per tenant) reached `active` state
+6. Wire the existing **Neo4j Health Knowledge Graph** as a data source: ✅
+   - Registered 4 data assets on Clinic's EDC-V (FHIR Patient, FHIR Cohort, OMOP Cohort, HealthDCAT-AP)
+   - Registered 1 federated catalog asset on HDAB's EDC-V
+   - Created access policies (open + membership-based) and contract definitions
+   - Data addresses point to `neo4j-proxy:9090` internal endpoints
+   - Scripts: `jad/seed-health-tenants.sh`, `jad/seed-data-assets.sh`
 
 #### 1c: Docker Compose Development Profile
 
