@@ -87,6 +87,14 @@
       - [Image Registry](#image-registry)
       - [Naming Convention](#naming-convention)
       - [Consequences](#consequences-5)
+    - [ADR-7: DID:web Resolution Architecture and DSP Contract Negotiation](#adr-7-didweb-resolution-architecture-and-dsp-contract-negotiation)
+      - [DID:web Method and IdentityHub](#didweb-method-and-identityhub)
+      - [DID Document Structure](#did-document-structure)
+      - [DID Resolution Architecture](#did-resolution-architecture)
+      - [Participant Activation Requirement](#participant-activation-requirement)
+      - [Contract Negotiation Flow: CRO → Clinic](#contract-negotiation-flow-cro--clinic)
+      - [HDAB Operator Oversight](#hdab-operator-oversight)
+      - [Consequences](#consequences-6)
   - [Target Architecture](#target-architecture)
   - [What This Proves](#what-this-proves)
   - [Implementation Dependencies](#implementation-dependencies)
@@ -127,23 +135,23 @@ All three core specifications are now final or near-final:
 
 ## Implementation Progress
 
-| Phase  | Title                                                  | Status         | Notes                                                                                                                                |
-| ------ | ------------------------------------------------------ | -------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| **1**  | Infrastructure Migration (EDC-V + DCore + CFM)         | ✅ Complete    | 1a–1f all complete; 18 services healthy; 3 tenants + 9 VPAs provisioned; data assets registered; ADR-1–6 accepted                    |
-| **2**  | Identity and Trust (DCP v1.0 + Verifiable Credentials) | 🏗️ In progress | IssuerService + IdentityHub running; seed tenant + attestation/credential defs created; DID:web pending                              |
-| **3**  | Health Knowledge Graph Layer — Schema & Synthetic Data | ✅ Complete    | 5-layer Neo4j schema, EHDS HDAB chain, style sheet                                                                                   |
-| **3b** | Real FHIR Data Pipeline (Synthea → Neo4j → OMOP)       | ✅ Complete    | 167 patients · 5,461 encounters · 2,421 conditions · 37,713 observations · 3,895 drug Rxes · 8,534 procedures                        |
-| **3c** | HealthDCAT-AP Metadata Registration for FHIR Dataset   | ✅ Complete    | Synthea cohort registered as HealthDCAT-AP catalog entry; 2 distributions + EHDS Art 53 purpose                                      |
-| **3d** | README + UI completeness hardening                     | ✅ Complete    | README step order fixed; catalog UI shows datasetType/legalBasis/recordCount                                                         |
-| **3e** | DSP Marketplace Registration + Compliance Chain        | ✅ Complete    | Layer 1 DataProduct/Contract/HDABApproval wired to Synthea dataset; compliance UI live dropdowns                                     |
-| **3f** | OMOP Research Analytics View                           | ✅ Complete    | Layer 4 cohort dashboard: top conditions/drugs/measurements, gender breakdown, stat cards                                            |
-| **3g** | Procedure Pipeline + UI Polish                         | ✅ Complete    | 8,534 Procedure → OMOPProcedureOccurrence; Analytics card on home; 6-stat patient page                                               |
-| **3h** | EEHRxF FHIR Profile Alignment                          | ✅ Complete    | EEHRxF category/profile nodes; gap analysis UI; EHDS priority coverage                                                               |
-| **4**  | Dataspace Integration (EDC-V ↔ Neo4j data assets)     | 🏗️ In progress | 4a complete (assets + policies + contracts + data planes); 4b complete (DSP negotiation FINALIZED + transfer STARTED); 4c–4d pending |
-| **5**  | Federated Queries & GraphRAG                           | 🔲 Not started | Depends on Phase 4                                                                                                                   |
-| **6a** | Graph Explorer UI (Next.js → Neo4j Bolt)               | ✅ Complete    | Six views (graph, catalog, compliance, patient, analytics, eehrxf); runs at localhost:3000                                           |
-| **6b** | Full Participant Portal (Aruba + Fraunhofer + Redline) | 🔲 Not started | Depends on Phases 1–4                                                                                                                |
-| **7**  | TCK DCP & DSP Compliance Verification                  | 🔲 Not started | Protocol conformance testing; depends on Phases 1–2                                                                                  |
+| Phase  | Title                                                  | Status         | Notes                                                                                                             |
+| ------ | ------------------------------------------------------ | -------------- | ----------------------------------------------------------------------------------------------------------------- |
+| **1**  | Infrastructure Migration (EDC-V + DCore + CFM)         | ✅ Complete    | 1a–1f all complete; 18 services healthy; 3 tenants + 9 VPAs provisioned; data assets registered; ADR-1–6 accepted |
+| **2**  | Identity and Trust (DCP v1.0 + Verifiable Credentials) | 🏗️ In progress | 2a complete (DID:web for 3 tenants, Ed25519 keys, all activated — ADR-7); 2b–2c pending                           |
+| **3**  | Health Knowledge Graph Layer — Schema & Synthetic Data | ✅ Complete    | 5-layer Neo4j schema, EHDS HDAB chain, style sheet                                                                |
+| **3b** | Real FHIR Data Pipeline (Synthea → Neo4j → OMOP)       | ✅ Complete    | 167 patients · 5,461 encounters · 2,421 conditions · 37,713 observations · 3,895 drug Rxes · 8,534 procedures     |
+| **3c** | HealthDCAT-AP Metadata Registration for FHIR Dataset   | ✅ Complete    | Synthea cohort registered as HealthDCAT-AP catalog entry; 2 distributions + EHDS Art 53 purpose                   |
+| **3d** | README + UI completeness hardening                     | ✅ Complete    | README step order fixed; catalog UI shows datasetType/legalBasis/recordCount                                      |
+| **3e** | DSP Marketplace Registration + Compliance Chain        | ✅ Complete    | Layer 1 DataProduct/Contract/HDABApproval wired to Synthea dataset; compliance UI live dropdowns                  |
+| **3f** | OMOP Research Analytics View                           | ✅ Complete    | Layer 4 cohort dashboard: top conditions/drugs/measurements, gender breakdown, stat cards                         |
+| **3g** | Procedure Pipeline + UI Polish                         | ✅ Complete    | 8,534 Procedure → OMOPProcedureOccurrence; Analytics card on home; 6-stat patient page                            |
+| **3h** | EEHRxF FHIR Profile Alignment                          | ✅ Complete    | EEHRxF category/profile nodes; gap analysis UI; EHDS priority coverage                                            |
+| **4**  | Dataspace Integration (EDC-V ↔ Neo4j data assets)     | 🏗️ In progress | 4a ✅ (assets + policies + contracts); 4b ✅ (3 FINALIZED negotiations + transfer STARTED — ADR-7); 4c–4d pending |
+| **5**  | Federated Queries & GraphRAG                           | 🔲 Not started | Depends on Phase 4                                                                                                |
+| **6a** | Graph Explorer UI (Next.js → Neo4j Bolt)               | ✅ Complete    | Six views (graph, catalog, compliance, patient, analytics, eehrxf); runs at localhost:3000                        |
+| **6b** | Full Participant Portal (Aruba + Fraunhofer + Redline) | 🔲 Not started | Depends on Phases 1–4                                                                                             |
+| **7**  | TCK DCP & DSP Compliance Verification                  | 🔲 Not started | Protocol conformance testing; depends on Phases 1–2                                                               |
 
 ---
 
@@ -260,19 +268,22 @@ Phase 1 bootstraps the full EDC-V + DCore + CFM stack using the [JAD (Joint Arch
 
 Phase 2 implements the full DCP v1.0 credential lifecycle using JAD's IdentityHub and IssuerService, then adds EHDS-specific credential types.
 
-#### 2a: DID:web and Verifiable Credential Setup
+#### 2a: DID:web and Verifiable Credential Setup ✅
 
-5. Configure **DID:web** identifiers for each tenant (auto-provisioned by CFM in Phase 1):
-   - `did:web:clinic-riverside.localhost` → Clinic's IdentityHub
-   - `did:web:cro-trialcorp.localhost` → CRO's IdentityHub
-   - `did:web:hdab-healthgov.localhost` → HDAB's IdentityHub
+5. **DID:web** identifiers auto-provisioned by CFM for each tenant (see ADR-7 for full architecture):
+   - `did:web:identityhub%3A7083:clinic-charite` → Clinic Charité (provider, ctxId `d0b1e14e...`)
+   - `did:web:identityhub%3A7083:cro-bayer` → CRO Bayer (consumer, ctxId `4e300dff...`)
+   - `did:web:identityhub%3A7083:hdab-bfarm` → HDAB BfArM (operator, ctxId `9ce6ec7e...`)
+   - Each DID document includes Ed25519 verification key, CredentialService endpoint, and DSP ProtocolEndpoint
+   - DID documents served at `http://identityhub:7083/{participant-path}/did.json` (Docker-internal)
+   - All 4 participant contexts ACTIVATED (state=300)
 6. Configure the **IssuerService** as the trust anchor (simulating an EHDS-recognized authority):
    - Define credential schemas for `MembershipCredential` (dataspace membership attestation)
    - Configure Keycloak realm roles mapping to credential issuance policies
    - Set up credential revocation list (StatusList2021)
 7. Implement the DCP **Credential Issuance** flow:
    - Participant registers via onboarding portal → CFM creates tenant → IssuerService issues `MembershipCredential`
-   - IdentityHub stores issued credentials and exposes DID document at `.well-known/did.json`
+   - IdentityHub stores issued credentials and exposes DID document at `/{participant-path}/did.json` on port 7083
 
 #### 2b: EHDS-Specific Credential Types
 
@@ -532,14 +543,26 @@ Phase 4 wires the Neo4j health knowledge graph into the live EDC-V data plane, e
 
 #### 4b: Contract Negotiation Flow ✅
 
-14. Implement end-to-end DSP contract negotiation:
-    - CRO discovers FHIR Cohort Asset via HDAB Federated Catalog
-    - CRO initiates `ContractNegotiation` request with `DataProcessingPurposeCredential` presentation
-    - HDAB validates EHDS compliance (credential verification + policy evaluation via CEL)
-    - Contract agreed → `TransferProcess` initiated → DCore data plane provisions query endpoint
-15. Capture contract lifecycle events in Neo4j provenance graph:
+14. Implement end-to-end DSP contract negotiation (see ADR-7 for full architecture):
+    - CRO discovers FHIR Cohort Asset via DSP catalog request to Clinic's control plane
+    - CRO initiates `ContractNegotiation` request against `fhir-patient-everything` asset
+    - Contract FINALIZED → `TransferProcess` initiated with `HttpData-PULL` transfer type → state STARTED
+15. **Executed contract negotiation results (CRO Bayer → Clinic Charité):**
+    - 3 FINALIZED negotiations with contract agreement IDs assigned
+    - 1 transfer process in STARTED state (data plane endpoint provisioned)
+    - 2 earlier TERMINATED negotiations (protocol errors before root cause fixes — see notes below)
+    - Clinic provider-side: 3 matching FINALIZED negotiations confirming bilateral agreement
+16. Capture contract lifecycle events in Neo4j provenance graph (Phase 4d):
     - `(:Contract)-[:NEGOTIATED_BY]->(:Participant)` with timestamps
     - `(:TransferProcess)-[:GOVERNED_BY]->(:Contract)` linking data flows to legal basis
+
+**Automation Script:** `jad/seed-contract-negotiation.sh` — idempotent script performing:
+
+1. Data plane registration for CRO participant
+2. Catalog discovery (CRO → Clinic)
+3. Contract negotiation + transfer initiation loop
+4. HDAB operator catalog visibility check
+5. Final state verification
 
 #### 4c: Federated Catalog with HealthDCAT-AP
 
@@ -1442,6 +1465,221 @@ done
 - **Trade-off:** Images must be re-pushed after each source rebuild. No automated CI pipeline yet (future work).
 - **Trade-off:** Images are re-distributions of Eclipse/Metaform open source builds. License compliance maintained via source attribution in ADR-5.
 - **Dependency:** Packages must be linked to the `MinimumViableHealthDataspacev2` repository and visibility set to "inherit from repo" (public) via GitHub UI.
+
+---
+
+### ADR-7: DID:web Resolution Architecture and DSP Contract Negotiation
+
+**Status:** Accepted
+**Date:** 2026-07-08
+**Context:** Phase 4b required a working end-to-end DSP contract negotiation flow between three EHDS participants (Clinic, CRO, HDAB). This demanded functional DID:web resolution, correct DSP 2025-1 protocol usage, and participant activation — none of which were documented as a coherent architecture. This ADR captures the proven, working DID resolution and contract negotiation architecture.
+
+#### DID:web Method and IdentityHub
+
+Each participant in the dataspace has a **W3C DID:web** identifier served by the shared IdentityHub service. The CFM Provision Manager generates Ed25519 key pairs and DID documents during tenant onboarding.
+
+**DID Format:**
+
+```
+did:web:identityhub%3A7083:{participant-path}
+```
+
+The `%3A7083` is the URL-encoded port (`:7083`) of the IdentityHub DID serving endpoint within the Docker network. The `{participant-path}` maps to the slug chosen during tenant creation.
+
+**Registered Participants:**
+
+| Participant    | DID                                         | Context ID                         | Role                               |
+| -------------- | ------------------------------------------- | ---------------------------------- | ---------------------------------- |
+| Clinic Charité | `did:web:identityhub%3A7083:clinic-charite` | `d0b1e14e6faa47aca9c2932a5e22885b` | Data Holder (provider)             |
+| CRO Bayer      | `did:web:identityhub%3A7083:cro-bayer`      | `4e300dff7d62415e9c409351bb2fe17a` | Data User (consumer)               |
+| HDAB BfArM     | `did:web:identityhub%3A7083:hdab-bfarm`     | `9ce6ec7ea12a4c6f957774c3783a988c` | Health Data Access Body (operator) |
+
+#### DID Document Structure
+
+Each DID document follows the [W3C DID Core v1](https://www.w3.org/TR/did-core/) specification:
+
+```json
+{
+  "id": "did:web:identityhub%3A7083:clinic-charite",
+  "@context": ["https://www.w3.org/ns/did/v1"],
+  "service": [
+    {
+      "id": "d0b1e14e...-credentialservice",
+      "type": "CredentialService",
+      "serviceEndpoint": "http://identityhub:7082/api/credentials/v1/participants/{ctxId}"
+    },
+    {
+      "id": "d0b1e14e...-dsp",
+      "type": "ProtocolEndpoint",
+      "serviceEndpoint": "http://controlplane:8082/api/dsp/{ctxId}/2025-1"
+    }
+  ],
+  "verificationMethod": [
+    {
+      "id": "did:web:identityhub%3A7083:clinic-charite#key1",
+      "type": "JsonWebKey2020",
+      "controller": "did:web:identityhub%3A7083:clinic-charite",
+      "publicKeyJwk": {
+        "kty": "OKP",
+        "crv": "Ed25519",
+        "x": "mUG0ISkU50pQW3tWGh5pjz4LjU-29VzDGMH3RIsoBEE"
+      }
+    }
+  ]
+}
+```
+
+**Service Endpoints:**
+
+- **CredentialService** — DCP credential presentation endpoint at IdentityHub port 7082
+- **ProtocolEndpoint** — DSP 2025-1 protocol endpoint at Control Plane port 8082, scoped by participant context ID and protocol version
+
+**Verification Method:**
+
+- Algorithm: **Ed25519** (Curve25519 Edwards form)
+- Key format: **JsonWebKey2020** with JWK `kty: OKP, crv: Ed25519`
+- Each participant receives a unique Ed25519 key pair generated by CFM during provisioning
+
+#### DID Resolution Architecture
+
+```
+┌─────────────────────────────────────────────────────────┐
+│              DID Resolution (Docker Network)            │
+│                                                         │
+│  Consumer (CRO)                                         │
+│    │                                                    │
+│    │ 1. Parse DID: did:web:identityhub%3A7083:clinic-charite
+│    │    → host=identityhub:7083, path=/clinic-charite   │
+│    │                                                    │
+│    ▼                                                    │
+│  IdentityHub :7083  ──── GET /clinic-charite/did.json   │
+│    │                                                    │
+│    │ 2. Returns DID Document with:                      │
+│    │    - ProtocolEndpoint → controlplane:8082/api/dsp/ │
+│    │    - CredentialService → identityhub:7082/api/cred/│
+│    │    - Ed25519 verification key                      │
+│    │                                                    │
+│    ▼                                                    │
+│  Control Plane :8082  ──── DSP 2025-1 Protocol          │
+│    (catalog, negotiation, transfer)                     │
+└─────────────────────────────────────────────────────────┘
+```
+
+**IdentityHub Port Map:**
+
+| Port | Purpose                                   | Host Mapping    |
+| ---- | ----------------------------------------- | --------------- |
+| 7080 | Readiness probe                           | —               |
+| 7081 | Identity API (participant management)     | localhost:11005 |
+| 7082 | Credential Service (DCP presentations)    | —               |
+| 7083 | DID Document Serving (`/{path}/did.json`) | Internal only   |
+| 7084 | Secure Token Service (STS)                | —               |
+
+> **Important:** Port 7083 (DID serving) is Docker-internal only. External DID resolution uses Traefik routing: `Host('ih.localhost') && PathPrefix('/.well-known')` → port 7083.
+
+#### Participant Activation Requirement
+
+CFM creates participant contexts in **CREATED** state (200). DID documents are only served and DSP endpoints only function when participants are in **ACTIVATED** state (300).
+
+```
+CREATED (200)  ──── activation ────▶  ACTIVATED (300)
+  │                                       │
+  │ DID doc: ✗ not served                 │ DID doc: ✓ served
+  │ DSP:     ✗ no protocol endpoint       │ DSP:     ✓ full protocol support
+  │ Catalog: ✗ cannot discover assets     │ Catalog: ✓ assets discoverable
+```
+
+**Activation method:** The EDC-V Management API `PUT /api/mgmt/v1alpha/participants/{ctxId}/activate` endpoint is the intended mechanism, but currently returns HTTP 403 in the JAD deployment. Workaround: direct PostgreSQL update on the `participant_context` table.
+
+#### Contract Negotiation Flow: CRO → Clinic
+
+The complete DSP contract negotiation follows the [DSP 2025-1](https://docs.internationaldataspaces.org/ids-knowledgebase/dataspace-protocol) specification:
+
+```
+CRO (Consumer)                    Clinic (Provider)
+     │                                  │
+     │  Step 1: Catalog Discovery       │
+     │  POST /catalog (v1alpha)         │
+     │  {counterPartyDid: clinic DID}   │
+     │ ────────────────────────────────▶│
+     │                                  │
+     │  ◀─── DCAT Catalog response ─── │
+     │  (datasets + offers + policies)  │
+     │                                  │
+     │  Step 2: Contract Negotiation    │
+     │  POST /contractnegotiations      │
+     │  (v5alpha)                       │
+     │  {                               │
+     │    protocol: "dataspace-protocol- │
+     │      http:2025-1",               │
+     │    counterPartyAddress:          │
+     │      controlplane:8082/api/dsp/  │
+     │      {clinicCtxId}/2025-1,       │
+     │    offer: {offerId, assetId,     │
+     │            policy from catalog}  │
+     │  }                               │
+     │ ────────────────────────────────▶│
+     │                                  │
+     │  ◀─── FINALIZED ────────────── │
+     │  (contractAgreementId assigned)  │
+     │                                  │
+     │  Step 3: Transfer Process        │
+     │  POST /transferprocesses         │
+     │  (v5alpha)                       │
+     │  {                               │
+     │    contractId: agreementId,      │
+     │    assetId: "fhir-patient-       │
+     │      everything",                │
+     │    transferType: "HttpData-PULL" │
+     │  }                               │
+     │ ────────────────────────────────▶│
+     │                                  │
+     │  ◀─── STARTED ─────────────── │
+     │  (data plane endpoint available) │
+```
+
+**Proven Working State (as of Phase 4b):**
+
+| Metric                                             | Count             |
+| -------------------------------------------------- | ----------------- |
+| FINALIZED negotiations (CRO→Clinic)                | 3                 |
+| TERMINATED negotiations (protocol errors, pre-fix) | 2                 |
+| Transfer processes STARTED                         | 1                 |
+| Transfer processes REQUESTED                       | 2                 |
+| Clinic provider-side negotiations                  | 3 (all FINALIZED) |
+
+**API Endpoints Used:**
+
+| Step      | API            | Version | Path                                                               |
+| --------- | -------------- | ------- | ------------------------------------------------------------------ |
+| Catalog   | Management API | v1alpha | `POST /api/mgmt/v1alpha/participants/{ctxId}/catalog`              |
+| Negotiate | Management API | v5alpha | `POST /api/mgmt/v5alpha/participants/{ctxId}/contractnegotiations` |
+| Transfer  | Management API | v5alpha | `POST /api/mgmt/v5alpha/participants/{ctxId}/transferprocesses`    |
+
+**Required `@context`:**
+
+```json
+["https://w3id.org/edc/connector/management/v2"]
+```
+
+#### HDAB Operator Oversight
+
+The HDAB (BfArM) has visibility into the dataspace as an operator. In future phases, the HDAB will:
+
+1. **Federated Catalog** — Aggregate dataset descriptions from all data holders (Phase 4c)
+2. **Policy Enforcement** — Validate EHDS Article 53 compliance before contract agreements
+3. **Audit Trail** — Monitor all contract negotiations and transfers across the dataspace
+
+Currently, the HDAB participant context is provisioned and activated (`did:web:identityhub%3A7083:hdab-bfarm`, state=300) but does not yet have its own contract negotiations. HDAB oversight functionality is planned for Phase 4c (Federated Catalog) and Phase 6b (Operator Dashboard).
+
+#### Consequences
+
+- **Positive:** Full end-to-end DSP 2025-1 contract negotiation proven working between CRO and Clinic with 3 FINALIZED agreements
+- **Positive:** DID:web resolution architecture documented with exact port mappings, DID document structure, and service endpoints
+- **Positive:** Four root causes identified and resolved (see Phase 4 notes): URI format, activation state, protocol version suffix, data plane hostname
+- **Trade-off:** DID documents use Docker-internal hostnames (`identityhub:7083`), limiting resolution to within the Docker network. Production deployments would use proper domain names
+- **Trade-off:** Participant activation requires direct PostgreSQL workaround due to Management API returning 403
+- **Dependency:** Transfer completion (STARTED → COMPLETED) depends on Phase 4d (DCore data plane transfer configuration)
 
 ---
 
