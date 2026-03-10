@@ -131,7 +131,8 @@ services:
       KC_BOOTSTRAP_ADMIN_USERNAME: admin
       KC_BOOTSTRAP_ADMIN_PASSWORD: admin
       KC_HTTP_ENABLED: "true"
-      # Use Docker-internal hostname so token 'iss' claim matches EDC services' expected issuer
+      # Use Docker-internal hostname so token 'iss' claim matches EDC services' expected issuer.
+      # Browser access: add "127.0.0.1 keycloak" to /etc/hosts, then open http://keycloak:8080
       KC_HOSTNAME: "http://keycloak:8080"
       KC_HOSTNAME_STRICT: "false"
       KC_PROXY: edge
