@@ -1,0 +1,42 @@
+{
+  "policies": [
+    {
+      "participantId": "163c5399fed04a2c828abcca68a583eb",
+      "participantName": "test-clinic",
+      "@id": "policy-open-access",
+      "@type": "PolicyDefinition",
+      "policy": {
+        "@type": "odrl:Set",
+        "odrl:permission": [
+          {
+            "odrl:action": "use",
+            "odrl:constraint": []
+          }
+        ]
+      },
+      "createdAt": 1719400000000
+    },
+    {
+      "participantId": "d0b1e14e6faa47aca9c2932a5e22885b",
+      "participantName": "clinic-charite",
+      "@id": "policy-ehds-research",
+      "@type": "PolicyDefinition",
+      "policy": {
+        "@type": "odrl:Set",
+        "odrl:permission": [
+          {
+            "odrl:action": "use",
+            "odrl:constraint": [
+              {
+                "odrl:leftOperand": "purpose",
+                "odrl:operator": "eq",
+                "odrl:rightOperand": "scientific-research"
+              }
+            ]
+          }
+        ]
+      },
+      "createdAt": 1719450000000
+    }
+  ]
+}

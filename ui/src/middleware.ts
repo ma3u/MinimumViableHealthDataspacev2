@@ -2,13 +2,17 @@ import { withAuth } from "next-auth/middleware";
 import { NextResponse } from "next/server";
 
 /**
- * Role-based route protection middleware (Phase 2c).
+ * Role-based route protection middleware (Phase 2c + 6b).
  *
- * Route rules (from planning doc):
- *   /admin/*     → requires EDC_ADMIN
- *   /compliance  → requires HDAB_AUTHORITY
- *   /onboarding  → requires authenticated (any role)
- *   All other UI routes → public (no auth required)
+ * Route rules:
+ *   /admin/*       → requires EDC_ADMIN
+ *   /compliance    → requires HDAB_AUTHORITY or EDC_ADMIN
+ *   /onboarding/*  → requires authenticated (any role)
+ *   /credentials   → requires authenticated (any role)
+ *   /settings      → requires authenticated (any role)
+ *   /data/*        → requires authenticated (any role)
+ *   /negotiate     → requires authenticated (any role)
+ *   All other UI   → public (no auth required)
  *
  * API routes (/api/*) are excluded — they handle auth internally.
  */
@@ -39,7 +43,15 @@ export default withAuth(
         const { pathname } = req.nextUrl;
 
         // Protected routes require authentication
-        const protectedPaths = ["/admin", "/compliance", "/onboarding"];
+        const protectedPaths = [
+          "/admin",
+          "/compliance",
+          "/onboarding",
+          "/credentials",
+          "/settings",
+          "/data",
+          "/negotiate",
+        ];
         const isProtected = protectedPaths.some((p) => pathname.startsWith(p));
 
         if (isProtected) {
@@ -55,5 +67,13 @@ export default withAuth(
 
 export const config = {
   // Only run middleware on UI routes, not API routes or static files
-  matcher: ["/admin/:path*", "/compliance/:path*", "/onboarding/:path*"],
+  matcher: [
+    "/admin/:path*",
+    "/compliance/:path*",
+    "/onboarding/:path*",
+    "/credentials/:path*",
+    "/settings/:path*",
+    "/data/:path*",
+    "/negotiate/:path*",
+  ],
 };

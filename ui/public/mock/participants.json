@@ -1,0 +1,30 @@
+[
+  {
+    "@type": "ParticipantContext",
+    "participantId": "163c5399fed04a2c828abcca68a583eb",
+    "state": "CREATED",
+    "did": "did:web:identityhub%3A7083:test-clinic",
+    "apiTokenAlias": "test-clinic"
+  },
+  {
+    "@type": "ParticipantContext",
+    "participantId": "d0b1e14e6faa47aca9c2932a5e22885b",
+    "state": "CREATED",
+    "did": "did:web:identityhub%3A7083:clinic-charite",
+    "apiTokenAlias": "clinic-charite"
+  },
+  {
+    "@type": "ParticipantContext",
+    "participantId": "4e300dff7d62415e9c409351bb2fe17a",
+    "state": "CREATED",
+    "did": "did:web:identityhub%3A7083:cro-bayer",
+    "apiTokenAlias": "cro-bayer"
+  },
+  {
+    "@type": "ParticipantContext",
+    "participantId": "9ce6ec7ea12a4c6f957774c3783a988c",
+    "state": "CREATED",
+    "did": "did:web:identityhub%3A7083:hdab-bfarm",
+    "apiTokenAlias": "hdab-bfarm"
+  }
+]

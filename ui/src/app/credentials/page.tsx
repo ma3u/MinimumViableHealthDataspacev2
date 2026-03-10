@@ -1,0 +1,285 @@
+"use client";
+
+import { fetchApi } from "@/lib/api";
+import { useEffect, useState } from "react";
+import {
+  ChevronDown,
+  ChevronUp,
+  Loader2,
+  ShieldCheck,
+  FileKey2,
+  Send,
+} from "lucide-react";
+
+interface VC {
+  id: string;
+  type: string;
+  issuer: string;
+  subject: string;
+  issuanceDate: string;
+  expirationDate?: string;
+  status: string;
+  claims: Record<string, string>;
+}
+
+interface ParticipantCtx {
+  "@id": string;
+  identity: string;
+  state: string;
+}
+
+export default function CredentialsPage() {
+  const [credentials, setCredentials] = useState<VC[]>([]);
+  const [participants, setParticipants] = useState<ParticipantCtx[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [expanded, setExpanded] = useState<string | null>(null);
+  const [requesting, setRequesting] = useState(false);
+  const [requestResult, setRequestResult] = useState<string | null>(null);
+
+  // Request form
+  const [reqParticipant, setReqParticipant] = useState("");
+  const [reqType, setReqType] = useState("EHDSParticipantCredential");
+
+  useEffect(() => {
+    Promise.all([
+      fetchApi("/api/credentials").then((r) => r.json()),
+      fetchApi("/api/participants").then((r) => r.json()),
+    ])
+      .then(([creds, ctx]) => {
+        setCredentials(Array.isArray(creds) ? creds : creds.credentials || []);
+        const list = ctx.participants || [];
+        setParticipants(list);
+        if (list.length > 0) setReqParticipant(list[0]["@id"]);
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
+  }, []);
+
+  const handleRequest = async () => {
+    if (!reqParticipant) return;
+    setRequesting(true);
+    setRequestResult(null);
+
+    try {
+      const res = await fetchApi("/api/credentials/request", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          participantContextId: reqParticipant,
+          credentialType: reqType,
+        }),
+      });
+
+      if (res.ok) {
+        setRequestResult("Credential request submitted successfully");
+        // Refresh credentials list
+        const updated = await fetchApi("/api/credentials");
+        const data = await updated.json();
+        setCredentials(Array.isArray(data) ? data : data.credentials || []);
+      } else {
+        const err = await res.json();
+        setRequestResult(`Error: ${err.error || "Request failed"}`);
+      }
+    } catch {
+      setRequestResult("Error: Failed to submit request");
+    } finally {
+      setRequesting(false);
+    }
+  };
+
+  return (
+    <div className="max-w-5xl mx-auto px-6 py-10">
+      <h1 className="text-2xl font-bold mb-1">Verifiable Credentials</h1>
+      <p className="text-gray-400 text-sm mb-8">
+        EHDS participant credentials — issued via IssuerService, stored in
+        IdentityHub
+      </p>
+
+      {/* Request new credential */}
+      <div className="border border-gray-700 rounded-xl p-5 mb-8">
+        <div className="flex items-center gap-2 mb-4">
+          <Send size={18} className="text-layer2" />
+          <h2 className="font-semibold text-sm">Request Credential</h2>
+        </div>
+        <div className="grid sm:grid-cols-3 gap-3 items-end">
+          <div>
+            <label className="text-xs text-gray-500 mb-1 block">
+              Participant Context
+            </label>
+            <select
+              value={reqParticipant}
+              onChange={(e) => setReqParticipant(e.target.value)}
+              className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded text-sm"
+            >
+              {participants.map((p) => (
+                <option key={p["@id"]} value={p["@id"]}>
+                  {p.identity?.replace("did:web:", "").replace(/%3A/g, ":") ||
+                    p["@id"].slice(0, 16)}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="text-xs text-gray-500 mb-1 block">
+              Credential Type
+            </label>
+            <select
+              value={reqType}
+              onChange={(e) => setReqType(e.target.value)}
+              className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded text-sm"
+            >
+              <option value="EHDSParticipantCredential">
+                EHDS Participant Credential
+              </option>
+              <option value="GaiaXComplianceCredential">
+                Gaia-X Compliance Credential
+              </option>
+              <option value="DataProcessingAgreement">
+                Data Processing Agreement
+              </option>
+            </select>
+          </div>
+
+          <button
+            onClick={handleRequest}
+            disabled={requesting || !reqParticipant}
+            className="flex items-center justify-center gap-2 px-4 py-2 bg-layer2 text-white rounded text-sm font-medium hover:bg-layer2/90 disabled:opacity-50"
+          >
+            {requesting ? (
+              <Loader2 size={14} className="animate-spin" />
+            ) : (
+              <FileKey2 size={14} />
+            )}
+            Request
+          </button>
+        </div>
+
+        {requestResult && (
+          <p
+            className={`mt-3 text-xs ${
+              requestResult.startsWith("Error")
+                ? "text-red-400"
+                : "text-green-400"
+            }`}
+          >
+            {requestResult}
+          </p>
+        )}
+      </div>
+
+      {/* Credential list */}
+      {loading ? (
+        <div className="flex items-center gap-2 text-gray-500">
+          <Loader2 size={16} className="animate-spin" />
+          Loading credentials…
+        </div>
+      ) : credentials.length === 0 ? (
+        <div className="text-center py-12">
+          <ShieldCheck size={40} className="text-gray-600 mx-auto mb-4" />
+          <p className="text-gray-400">No credentials found in Neo4j</p>
+          <p className="text-gray-600 text-xs mt-1">
+            Register a participant and request credentials above
+          </p>
+        </div>
+      ) : (
+        <div className="grid gap-3">
+          {credentials.map((vc) => {
+            const isOpen = expanded === vc.id;
+            return (
+              <div
+                key={vc.id}
+                className={`border rounded-xl transition-colors ${
+                  isOpen
+                    ? "border-layer2 bg-gray-900/60"
+                    : "border-gray-700 hover:border-layer2"
+                }`}
+              >
+                <button
+                  className="w-full text-left p-4"
+                  onClick={() => setExpanded(isOpen ? null : vc.id)}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <ShieldCheck
+                        size={18}
+                        className={
+                          vc.status === "Active"
+                            ? "text-green-400"
+                            : "text-gray-500"
+                        }
+                      />
+                      <div>
+                        <p className="font-medium text-sm text-gray-200">
+                          {vc.type}
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          {vc.subject?.slice(0, 40)}… · Issued:{" "}
+                          {vc.issuanceDate?.split("T")[0]}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span
+                        className={`text-xs px-2 py-0.5 rounded-full ${
+                          vc.status === "Active"
+                            ? "bg-green-900/40 text-green-400"
+                            : "bg-gray-700 text-gray-400"
+                        }`}
+                      >
+                        {vc.status}
+                      </span>
+                      {isOpen ? (
+                        <ChevronUp size={16} className="text-gray-500" />
+                      ) : (
+                        <ChevronDown size={16} className="text-gray-500" />
+                      )}
+                    </div>
+                  </div>
+                </button>
+
+                {isOpen && (
+                  <div className="px-4 pb-4 space-y-1.5 border-t border-gray-700 pt-3">
+                    <div className="flex gap-3 text-xs">
+                      <span className="text-gray-500 w-28">ID</span>
+                      <span className="text-gray-300 font-mono break-all">
+                        {vc.id}
+                      </span>
+                    </div>
+                    <div className="flex gap-3 text-xs">
+                      <span className="text-gray-500 w-28">Issuer</span>
+                      <span className="text-gray-300 font-mono break-all">
+                        {vc.issuer}
+                      </span>
+                    </div>
+                    <div className="flex gap-3 text-xs">
+                      <span className="text-gray-500 w-28">Subject</span>
+                      <span className="text-gray-300 font-mono break-all">
+                        {vc.subject}
+                      </span>
+                    </div>
+                    {vc.expirationDate && (
+                      <div className="flex gap-3 text-xs">
+                        <span className="text-gray-500 w-28">Expires</span>
+                        <span className="text-gray-300">
+                          {vc.expirationDate}
+                        </span>
+                      </div>
+                    )}
+                    {vc.claims &&
+                      Object.entries(vc.claims).map(([k, v]) => (
+                        <div key={k} className="flex gap-3 text-xs">
+                          <span className="text-gray-500 w-28">{k}</span>
+                          <span className="text-gray-300">{String(v)}</span>
+                        </div>
+                      ))}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}

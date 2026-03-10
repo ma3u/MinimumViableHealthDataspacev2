@@ -1,0 +1,49 @@
+{
+  "type": "all",
+  "summary": {
+    "transfers": 2,
+    "negotiations": 2,
+    "credentials": 1
+  },
+  "transfers": [
+    {
+      "id": "transfer-001",
+      "state": "COMPLETED",
+      "assetId": "asset-fhir-bundle-001",
+      "contractId": "agreement-001",
+      "timestamp": "2024-06-27T14:15:00Z"
+    },
+    {
+      "id": "transfer-002",
+      "state": "STARTED",
+      "assetId": "asset-omop-cohort-diabetes",
+      "contractId": "agreement-001",
+      "timestamp": "2024-06-28T10:30:00Z"
+    }
+  ],
+  "negotiations": [
+    {
+      "id": "neg-001",
+      "state": "FINALIZED",
+      "counterPartyId": "did:web:identityhub%3A7083:clinic-charite",
+      "agreementId": "agreement-001",
+      "timestamp": "2024-06-27T14:00:00Z"
+    },
+    {
+      "id": "neg-002",
+      "state": "REQUESTED",
+      "counterPartyId": "did:web:identityhub%3A7083:test-clinic",
+      "agreementId": null,
+      "timestamp": "2024-06-28T10:00:00Z"
+    }
+  ],
+  "credentials": [
+    {
+      "id": "vc-membership-001",
+      "type": "MembershipCredential",
+      "holder": "did:web:identityhub%3A7083:clinic-charite",
+      "issuanceDate": "2024-06-01T00:00:00Z",
+      "state": "ISSUED"
+    }
+  ]
+}

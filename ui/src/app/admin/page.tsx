@@ -1,0 +1,153 @@
+"use client";
+
+import { fetchApi } from "@/lib/api";
+import { useEffect, useState } from "react";
+import {
+  Building2,
+  FileKey2,
+  Loader2,
+  ScrollText,
+  ShieldCheck,
+  Users,
+} from "lucide-react";
+import Link from "next/link";
+
+interface Summary {
+  totalTenants: number;
+  totalParticipants: number;
+  byRole: Record<string, number>;
+}
+
+export default function AdminDashboard() {
+  const [summary, setSummary] = useState<Summary | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchApi("/api/admin/tenants")
+      .then((r) => r.json())
+      .then((d) => {
+        setSummary(d.summary || null);
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
+  }, []);
+
+  const cards = [
+    {
+      href: "/admin/tenants",
+      label: "Tenants",
+      value: summary?.totalTenants ?? "—",
+      icon: Building2,
+      color: "text-blue-400",
+    },
+    {
+      href: "/admin/tenants",
+      label: "Participants",
+      value: summary?.totalParticipants ?? "—",
+      icon: Users,
+      color: "text-green-400",
+    },
+    {
+      href: "/admin/policies",
+      label: "Policies",
+      icon: ShieldCheck,
+      value: "—",
+      color: "text-purple-400",
+    },
+    {
+      href: "/admin/audit",
+      label: "Audit Log",
+      icon: ScrollText,
+      value: "→",
+      color: "text-yellow-400",
+    },
+  ];
+
+  return (
+    <div className="max-w-5xl mx-auto px-6 py-10">
+      <h1 className="text-2xl font-bold mb-1">Operator Dashboard</h1>
+      <p className="text-gray-400 text-sm mb-8">
+        EHDS Health Data Access Body — dataspace administration
+      </p>
+
+      {loading ? (
+        <div className="flex items-center gap-2 text-gray-500">
+          <Loader2 size={16} className="animate-spin" />
+          Loading dashboard…
+        </div>
+      ) : (
+        <>
+          {/* Stat cards */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+            {cards.map((c) => (
+              <Link
+                key={c.label}
+                href={c.href}
+                className="p-4 border border-gray-700 rounded-xl hover:border-layer2 transition-colors"
+              >
+                <c.icon size={20} className={c.color + " mb-2"} />
+                <p className="text-2xl font-bold">{c.value}</p>
+                <p className="text-xs text-gray-500">{c.label}</p>
+              </Link>
+            ))}
+          </div>
+
+          {/* Role breakdown */}
+          {summary?.byRole && Object.keys(summary.byRole).length > 0 && (
+            <div className="border border-gray-700 rounded-xl p-5 mb-8">
+              <h2 className="font-semibold text-sm mb-4 flex items-center gap-2">
+                <FileKey2 size={16} className="text-layer2" />
+                Participants by EHDS Role
+              </h2>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                {Object.entries(summary.byRole).map(([role, count]) => (
+                  <div
+                    key={role}
+                    className="p-3 rounded-lg bg-gray-800/50 border border-gray-700"
+                  >
+                    <p className="text-lg font-bold">{count}</p>
+                    <p className="text-xs text-gray-400">{role}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Quick links */}
+          <div className="grid md:grid-cols-3 gap-4">
+            <Link
+              href="/admin/tenants"
+              className="p-4 border border-gray-700 rounded-xl hover:border-layer2 transition-colors"
+            >
+              <Building2 size={18} className="text-layer2 mb-2" />
+              <h3 className="font-semibold text-sm mb-1">Manage Tenants</h3>
+              <p className="text-xs text-gray-500">
+                View and manage registered participants
+              </p>
+            </Link>
+            <Link
+              href="/admin/policies"
+              className="p-4 border border-gray-700 rounded-xl hover:border-layer2 transition-colors"
+            >
+              <ShieldCheck size={18} className="text-layer2 mb-2" />
+              <h3 className="font-semibold text-sm mb-1">Policy Definitions</h3>
+              <p className="text-xs text-gray-500">
+                View and create ODRL policies
+              </p>
+            </Link>
+            <Link
+              href="/admin/audit"
+              className="p-4 border border-gray-700 rounded-xl hover:border-layer2 transition-colors"
+            >
+              <ScrollText size={18} className="text-layer2 mb-2" />
+              <h3 className="font-semibold text-sm mb-1">Audit & Provenance</h3>
+              <p className="text-xs text-gray-500">
+                Query the Neo4j provenance graph
+              </p>
+            </Link>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}

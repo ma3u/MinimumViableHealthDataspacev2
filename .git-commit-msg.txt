@@ -1,0 +1,22 @@
+feat(6b): Unified Participant Portal - onboarding, data sharing, operator dashboard
+
+Phase 6b consolidates Aruba onboarding, Fraunhofer data sharing, and
+Redline operator dashboard reference implementations into the existing
+Next.js 14 UI.
+
+6b-1 Onboarding: /onboarding, /onboarding/status, /credentials, /settings
+  API: /api/participants, /api/participants/me, /api/credentials/request
+
+6b-2 Data Exchange: /data/share, /data/discover, /data/transfer, /negotiate
+  API: /api/assets, /api/negotiations, /api/transfers (+ [id] routes)
+
+6b-3 Operator Dashboard: /admin, /admin/tenants, /admin/policies, /admin/audit
+  API: /api/admin/tenants, /api/admin/policies, /api/admin/audit
+
+Infrastructure:
+- EDC client updated for v5alpha multi-tenant + Docker-internal URLs
+- 9 new env vars in docker-compose.yml for EDC/CFM connectivity
+- Navigation.tsx: dropdown menus for portal groups
+- middleware.ts: auth protection for /data, /negotiate, /credentials, /settings
+- 7 mock JSON files for GitHub Pages static export
+- api.ts: mock path mappings for all new endpoints

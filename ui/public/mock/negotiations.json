@@ -1,0 +1,20 @@
+[
+  {
+    "@type": "ContractNegotiation",
+    "@id": "neg-001",
+    "state": "FINALIZED",
+    "counterPartyAddress": "http://provider-dsp:8082/api/dsp",
+    "counterPartyId": "did:web:identityhub%3A7083:clinic-charite",
+    "contractAgreementId": "agreement-001",
+    "createdAt": 1719500000000
+  },
+  {
+    "@type": "ContractNegotiation",
+    "@id": "neg-002",
+    "state": "REQUESTED",
+    "counterPartyAddress": "http://provider-dsp:8082/api/dsp",
+    "counterPartyId": "did:web:identityhub%3A7083:test-clinic",
+    "contractAgreementId": null,
+    "createdAt": 1719600000000
+  }
+]

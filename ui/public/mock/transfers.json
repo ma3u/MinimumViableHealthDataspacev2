@@ -1,0 +1,22 @@
+[
+  {
+    "@type": "TransferProcess",
+    "@id": "transfer-001",
+    "state": "COMPLETED",
+    "type": "CONSUMER",
+    "assetId": "asset-fhir-bundle-001",
+    "contractId": "agreement-001",
+    "counterPartyAddress": "http://provider-dsp:8082/api/dsp",
+    "createdAt": 1719500500000
+  },
+  {
+    "@type": "TransferProcess",
+    "@id": "transfer-002",
+    "state": "STARTED",
+    "type": "CONSUMER",
+    "assetId": "asset-omop-cohort-diabetes",
+    "contractId": "agreement-001",
+    "counterPartyAddress": "http://provider-dsp:8082/api/dsp",
+    "createdAt": 1719601000000
+  }
+]

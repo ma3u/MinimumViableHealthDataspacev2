@@ -353,8 +353,9 @@ Detailed reference documents live in the `docs/` directory:
 ## Implementation Status
 
 The project follows a phased roadmap. Phases 1–5 implement the full local demo stack with
-live DSP contract negotiation and federated queries; Phase 6b onwards will add participant
-portal UIs and protocol compliance testing.
+live DSP contract negotiation and federated queries; Phase 6b adds the unified participant
+portal with onboarding, data sharing, and operator dashboard; Phase 7 will add protocol
+compliance testing.
 
 | Phase | Description                                                                                     | Status      |
 | ----- | ----------------------------------------------------------------------------------------------- | ----------- |
@@ -382,7 +383,7 @@ portal UIs and protocol compliance testing.
 | 4d    | Data Plane Transfer — 100 FHIR patients + 2 HealthDCAT-AP datasets via DCore                    | ✅ Complete |
 | 5     | Federated Queries — Neo4j SPE-2, federated dispatch, k-anonymity, Text2Cypher NLQ               | ✅ Complete |
 | 6a    | Graph Explorer UI — 7 views + Docker `graph-explorer` container + GitHub Pages static export    | ✅ Complete |
-| 6b    | Unified Participant Portal — onboarding, data sharing, operator dashboard                       | 🔲 Planned  |
+| 6b    | Unified Participant Portal — 12 pages, 11 API routes, dropdown nav, auth middleware             | ✅ Complete |
 | 7     | TCK DCP & DSP Compliance Verification — protocol conformance testing                            | 🔲 Planned  |
 
 ---

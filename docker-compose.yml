@@ -59,6 +59,15 @@ services:
       KEYCLOAK_PUBLIC_URL: http://localhost:8080/realms/edcv
       NEXT_PUBLIC_KEYCLOAK_PUBLIC_URL: http://localhost:8080/realms/edcv
       NEXT_PUBLIC_KEYCLOAK_CLIENT_ID: health-dataspace-ui
+      # EDC-V / CFM APIs (Phase 6b — Docker-internal hostnames)
+      EDC_MANAGEMENT_URL: http://health-dataspace-controlplane:8081/api/mgmt
+      EDC_IDENTITY_URL: http://health-dataspace-identityhub:7081/api/identity
+      EDC_ISSUER_URL: http://health-dataspace-issuerservice:10013/api/admin
+      EDC_TENANT_URL: http://health-dataspace-tenant-manager:8080/api
+      EDC_PROVISION_URL: http://health-dataspace-provision-manager:8080/api
+      EDC_SERVICE_CLIENT_ID: admin
+      EDC_SERVICE_CLIENT_SECRET: edc-v-admin-secret
+      KEYCLOAK_INTERNAL_URL: http://keycloak:8080
     depends_on:
       - neo4j
     networks:

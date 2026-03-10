@@ -8,11 +8,14 @@
  * Usage:
  *   import { edcClient } from '@/lib/edc/client';
  *
- *   // List all assets
- *   const assets = await edcClient.management('/v3/assets/request', 'POST', {});
+ *   // List all assets for a participant
+ *   const assets = await edcClient.management(
+ *     '/v5alpha/participants/{ctxId}/assets/request', 'POST',
+ *     { '@context': [EDC_CONTEXT], '@type': 'QuerySpec' }
+ *   );
  *
- *   // Get catalogs
- *   const catalog = await edcClient.management('/v3/catalog/request', 'POST', body);
+ *   // List tenants
+ *   const tenants = await edcClient.tenant('/v1alpha1/tenants');
  *
  * Types are generated from JAD OpenAPI specs via:
  *   npm run generate:api
@@ -23,25 +26,41 @@
 // ---------------------------------------------------------------------------
 // Configuration — base URLs for each API (Docker Compose defaults)
 // ---------------------------------------------------------------------------
+
+/**
+ * Server-side env vars (no NEXT_PUBLIC_ prefix) use Docker-internal hostnames.
+ * The NEXT_PUBLIC_ fallbacks use Traefik *.localhost for client-side/dev use.
+ */
 const API_ENDPOINTS = {
-  /** EDC-V Management API (Control Plane) */
+  /** EDC-V Management API (Control Plane — port 8081) */
   management:
+    process.env.EDC_MANAGEMENT_URL ||
     process.env.NEXT_PUBLIC_EDC_MANAGEMENT_URL ||
-    "http://cp.localhost/api/mgmt",
-  /** DCP Identity API (IdentityHub) */
+    "http://health-dataspace-controlplane:8081/api/mgmt",
+  /** DCP Identity API (IdentityHub — port 7081) */
   identity:
+    process.env.EDC_IDENTITY_URL ||
     process.env.NEXT_PUBLIC_EDC_IDENTITY_URL ||
-    "http://ih.localhost/api/identity",
-  /** Issuer Admin API (IssuerService) */
+    "http://health-dataspace-identityhub:7081/api/identity",
+  /** Issuer Admin API (IssuerService — port 10013) */
   issuer:
+    process.env.EDC_ISSUER_URL ||
     process.env.NEXT_PUBLIC_EDC_ISSUER_URL ||
-    "http://issuer.localhost/api/admin",
+    "http://health-dataspace-issuerservice:10013/api/admin",
   /** CFM Tenant Manager API */
-  tenant: process.env.NEXT_PUBLIC_CFM_TENANT_URL || "http://tm.localhost/api",
+  tenant:
+    process.env.EDC_TENANT_URL ||
+    process.env.NEXT_PUBLIC_CFM_TENANT_URL ||
+    "http://health-dataspace-tenant-manager:8080/api",
   /** CFM Provision Manager API */
   provision:
-    process.env.NEXT_PUBLIC_CFM_PROVISION_URL || "http://pm.localhost/api",
+    process.env.EDC_PROVISION_URL ||
+    process.env.NEXT_PUBLIC_CFM_PROVISION_URL ||
+    "http://health-dataspace-provision-manager:8080/api",
 } as const;
+
+/** JSON-LD context required by EDC Management API v5alpha */
+export const EDC_CONTEXT = "https://w3id.org/edc/connector/management/v2";
 
 type ApiName = keyof typeof API_ENDPOINTS;
 
@@ -67,11 +86,18 @@ async function getAccessToken(): Promise<string> {
   }
 
   const keycloakUrl =
-    process.env.NEXT_PUBLIC_KEYCLOAK_URL || "http://keycloak.localhost";
+    process.env.KEYCLOAK_INTERNAL_URL ||
+    process.env.NEXT_PUBLIC_KEYCLOAK_URL ||
+    "http://keycloak:8080";
   const realm = process.env.NEXT_PUBLIC_KEYCLOAK_REALM || "edcv";
-  const clientId = process.env.NEXT_PUBLIC_KEYCLOAK_CLIENT_ID || "admin";
+  const clientId =
+    process.env.EDC_SERVICE_CLIENT_ID ||
+    process.env.NEXT_PUBLIC_KEYCLOAK_CLIENT_ID ||
+    "admin";
   const clientSecret =
-    process.env.NEXT_PUBLIC_KEYCLOAK_CLIENT_SECRET || "edc-v-admin-secret";
+    process.env.EDC_SERVICE_CLIENT_SECRET ||
+    process.env.NEXT_PUBLIC_KEYCLOAK_CLIENT_SECRET ||
+    "edc-v-admin-secret";
 
   const tokenUrl = `${keycloakUrl}/realms/${realm}/protocol/openid-connect/token`;
 

@@ -22,6 +22,21 @@ export async function fetchApi(
       mockPath = "/mock/federated_stats.json";
     else if (endpoint === "/api/credentials")
       mockPath = "/mock/credentials.json";
+    else if (endpoint === "/api/participants")
+      mockPath = "/mock/participants.json";
+    else if (endpoint === "/api/participants/me")
+      mockPath = "/mock/participants_me.json";
+    else if (endpoint === "/api/assets") mockPath = "/mock/assets.json";
+    else if (endpoint.startsWith("/api/negotiations"))
+      mockPath = "/mock/negotiations.json";
+    else if (endpoint.startsWith("/api/transfers"))
+      mockPath = "/mock/transfers.json";
+    else if (endpoint === "/api/admin/tenants")
+      mockPath = "/mock/admin_tenants.json";
+    else if (endpoint === "/api/admin/policies")
+      mockPath = "/mock/admin_policies.json";
+    else if (endpoint.startsWith("/api/admin/audit"))
+      mockPath = "/mock/admin_audit.json";
 
     // Simulate small latency to make it feel natural
     await new Promise((resolve) => setTimeout(resolve, 300));

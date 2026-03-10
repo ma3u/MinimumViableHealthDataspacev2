@@ -1,0 +1,72 @@
+{
+  "tenants": [
+    {
+      "id": "test-clinic-id",
+      "version": 1,
+      "properties": {
+        "displayName": "Test Clinic",
+        "role": "provider",
+        "ehdsParticipantType": "data-holder",
+        "organization": "Test Clinic GmbH"
+      },
+      "participantProfiles": [
+        {
+          "participantContextId": "163c5399fed04a2c828abcca68a583eb",
+          "did": "did:web:identityhub%3A7083:test-clinic",
+          "state": "CREATED"
+        }
+      ]
+    },
+    {
+      "id": "clinic-charite-id",
+      "version": 1,
+      "properties": {
+        "displayName": "Clinic Charité",
+        "role": "provider",
+        "ehdsParticipantType": "data-holder",
+        "organization": "Charité – Universitätsmedizin Berlin"
+      },
+      "participantProfiles": [
+        {
+          "participantContextId": "d0b1e14e6faa47aca9c2932a5e22885b",
+          "did": "did:web:identityhub%3A7083:clinic-charite",
+          "state": "CREATED"
+        }
+      ]
+    },
+    {
+      "id": "cro-bayer-id",
+      "version": 1,
+      "properties": {
+        "displayName": "CRO Bayer",
+        "role": "consumer",
+        "ehdsParticipantType": "data-user",
+        "organization": "Bayer AG"
+      },
+      "participantProfiles": [
+        {
+          "participantContextId": "4e300dff7d62415e9c409351bb2fe17a",
+          "did": "did:web:identityhub%3A7083:cro-bayer",
+          "state": "CREATED"
+        }
+      ]
+    },
+    {
+      "id": "hdab-bfarm-id",
+      "version": 1,
+      "properties": {
+        "displayName": "HDAB BfArM",
+        "role": "operator",
+        "ehdsParticipantType": "health-data-access-body",
+        "organization": "Bundesinstitut für Arzneimittel und Medizinprodukte"
+      },
+      "participantProfiles": [
+        {
+          "participantContextId": "9ce6ec7ea12a4c6f957774c3783a988c",
+          "did": "did:web:identityhub%3A7083:hdab-bfarm",
+          "state": "CREATED"
+        }
+      ]
+    }
+  ]
+}
