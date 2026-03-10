@@ -18,6 +18,8 @@ import {
   Settings,
   LayoutDashboard,
   ChevronDown,
+  Menu,
+  Heart,
 } from "lucide-react";
 import UserMenu from "./UserMenu";
 import { useState, useRef, useEffect } from "react";
@@ -25,23 +27,30 @@ import { useState, useRef, useEffect } from "react";
 interface NavLink {
   href: string;
   label: string;
-  icon: React.ComponentType<{ size?: number }>;
+  icon: React.ComponentType<any>;
 }
 
 interface NavGroup {
   label: string;
-  icon: React.ComponentType<{ size?: number }>;
+  icon: React.ComponentType<any>;
   links: NavLink[];
 }
 
 const mainLinks: NavLink[] = [
   { href: "/graph", label: "Graph Explorer", icon: Network },
   { href: "/catalog", label: "Dataset Catalog", icon: BookOpen },
-  { href: "/compliance", label: "EHDS Compliance", icon: ShieldCheck },
-  { href: "/compliance/tck", label: "Protocol TCK", icon: ShieldCheck },
   { href: "/patient", label: "Patient Journey", icon: User },
-  { href: "/analytics", label: "OMOP Analytics", icon: BarChart2 },
+  { href: "/analytics", label: "Analytics", icon: BarChart2 },
   { href: "/query", label: "NLQ / Federated", icon: Search },
+];
+
+const complianceLinks: NavLink[] = [
+  { href: "/compliance", label: "EHDS Approval", icon: ShieldCheck },
+  { href: "/compliance/tck", label: "Protocol TCK", icon: ShieldCheck },
+];
+
+const additionalLinks: NavLink[] = [
+  { href: "/eehrxf", label: "EEHRxF Profiles", icon: Heart },
 ];
 
 const portalGroups: NavGroup[] = [
@@ -134,6 +143,88 @@ function NavDropdown({ group }: { group: NavGroup }) {
   );
 }
 
+function MoreMenu() {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  const pathname = usePathname();
+
+  const allMoreLinks = [...complianceLinks, ...additionalLinks];
+  const isActive = allMoreLinks.some((l) => pathname?.startsWith(l.href));
+
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, []);
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        onClick={() => setOpen(!open)}
+        className={`flex items-center gap-1 px-2 py-1.5 rounded transition-colors ${
+          isActive
+            ? "text-layer1"
+            : "text-gray-400 hover:text-gray-100 hover:bg-gray-800"
+        }`}
+        title="More pages"
+      >
+        <Menu size={16} />
+      </button>
+      {open && (
+        <div className="absolute top-full right-0 mt-1 py-1 bg-gray-800 border border-gray-700 rounded-lg shadow-xl z-50 min-w-[200px]">
+          {/* Compliance section */}
+          <div className="px-2 py-1.5 border-b border-gray-700">
+            <div className="text-xs font-semibold text-gray-500 uppercase px-1 mb-1">
+              Compliance
+            </div>
+            {complianceLinks.map((l) => (
+              <Link
+                key={l.href}
+                href={l.href}
+                onClick={() => setOpen(false)}
+                className={`flex items-center gap-2 px-3 py-1.5 text-sm rounded transition-colors ${
+                  pathname?.startsWith(l.href)
+                    ? "text-layer2 bg-gray-700/50"
+                    : "text-gray-300 hover:bg-gray-700"
+                }`}
+              >
+                <l.icon size={14} />
+                {l.label}
+              </Link>
+            ))}
+          </div>
+
+          {/* Additional section */}
+          <div className="px-2 py-1.5">
+            <div className="text-xs font-semibold text-gray-500 uppercase px-1 mb-1">
+              Additional
+            </div>
+            {additionalLinks.map((l) => (
+              <Link
+                key={l.href}
+                href={l.href}
+                onClick={() => setOpen(false)}
+                className={`flex items-center gap-2 px-3 py-1.5 text-sm rounded transition-colors ${
+                  pathname?.startsWith(l.href)
+                    ? "text-layer2 bg-gray-700/50"
+                    : "text-gray-300 hover:bg-gray-700"
+                }`}
+              >
+                <l.icon size={14} />
+                {l.label}
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function Navigation() {
   const pathname = usePathname();
   return (
@@ -159,6 +250,7 @@ export default function Navigation() {
       {portalGroups.map((g) => (
         <NavDropdown key={g.label} group={g} />
       ))}
+      <MoreMenu />
       <div className="ml-auto">
         <UserMenu />
       </div>
