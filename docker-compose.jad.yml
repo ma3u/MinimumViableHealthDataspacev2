@@ -267,6 +267,19 @@ services:
       edc.iam.dcp.scopes.manufacturer.type: "POLICY"
       edc.iam.dcp.scopes.manufacturer.value: "org.eclipse.edc.vc.type:ManufacturerCredential:read"
       edc.iam.dcp.scopes.manufacturer.prefix-mapping: "ManufacturerCredential"
+      # EHDS credential scopes (Phase 2b)
+      edc.iam.dcp.scopes.ehds-participant.id: "ehds-participant-scope"
+      edc.iam.dcp.scopes.ehds-participant.type: "POLICY"
+      edc.iam.dcp.scopes.ehds-participant.value: "org.eclipse.edc.vc.type:EHDSParticipantCredential:read"
+      edc.iam.dcp.scopes.ehds-participant.prefix-mapping: "EHDSParticipantCredential"
+      edc.iam.dcp.scopes.data-processing-purpose.id: "data-processing-purpose-scope"
+      edc.iam.dcp.scopes.data-processing-purpose.type: "POLICY"
+      edc.iam.dcp.scopes.data-processing-purpose.value: "org.eclipse.edc.vc.type:DataProcessingPurposeCredential:read"
+      edc.iam.dcp.scopes.data-processing-purpose.prefix-mapping: "DataProcessingPurposeCredential"
+      edc.iam.dcp.scopes.data-quality-label.id: "data-quality-label-scope"
+      edc.iam.dcp.scopes.data-quality-label.type: "POLICY"
+      edc.iam.dcp.scopes.data-quality-label.value: "org.eclipse.edc.vc.type:DataQualityLabelCredential:read"
+      edc.iam.dcp.scopes.data-quality-label.prefix-mapping: "DataQualityLabelCredential"
       # Trusted issuers
       edc.iam.trusted-issuer.issuer.id: "did:web:issuerservice%3A10016:issuer"
     ports:

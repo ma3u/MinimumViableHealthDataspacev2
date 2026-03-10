@@ -2,7 +2,7 @@
 
 import { fetchApi } from "@/lib/api";
 import { useEffect, useState } from "react";
-import { ShieldCheck, AlertCircle } from "lucide-react";
+import { ShieldCheck, AlertCircle, BadgeCheck, Key } from "lucide-react";
 
 interface Consumer {
   id: string;
@@ -31,27 +31,50 @@ interface Result {
   chain: ChainEntry[];
 }
 
+interface Credential {
+  credentialId: string;
+  credentialType: string;
+  subjectDid: string;
+  issuerDid: string;
+  status: string;
+  participantRole: string | null;
+  holderName: string | null;
+  holderType: string | null;
+  issuedAt: string;
+  expiresAt: string;
+  purpose: string | null;
+  datasetId: string | null;
+  completeness: number | null;
+  conformance: number | null;
+  timeliness: number | null;
+}
+
 export default function CompliancePage() {
   const [consumers, setConsumers] = useState<Consumer[]>([]);
   const [datasets, setDatasets] = useState<DatasetOption[]>([]);
   const [consumerId, setConsumerId] = useState("");
   const [datasetId, setDatasetId] = useState("");
   const [result, setResult] = useState<Result | null>(null);
+  const [credentials, setCredentials] = useState<Credential[]>([]);
   const [loading, setLoading] = useState(false);
   const [optionsLoading, setOptionsLoading] = useState(true);
 
-  // Load dropdown options from graph on mount
+  // Load dropdown options and credentials on mount
   useEffect(() => {
-    fetchApi("/api/compliance")
-      .then((r) => r.json())
-      .then((d) => {
-        setConsumers(d.consumers ?? []);
-        setDatasets(d.datasets ?? []);
-        if ((d.consumers ?? []).length > 0) setConsumerId(d.consumers[0].id);
-        if ((d.datasets ?? []).length > 0) setDatasetId(d.datasets[0].id);
-        setOptionsLoading(false);
-      })
-      .catch(() => setOptionsLoading(false));
+    Promise.all([
+      fetchApi("/api/compliance")
+        .then((r) => r.json())
+        .then((d) => {
+          setConsumers(d.consumers ?? []);
+          setDatasets(d.datasets ?? []);
+          if ((d.consumers ?? []).length > 0) setConsumerId(d.consumers[0].id);
+          if ((d.datasets ?? []).length > 0) setDatasetId(d.datasets[0].id);
+        }),
+      fetchApi("/api/credentials")
+        .then((r) => r.json())
+        .then((d) => setCredentials(d.credentials ?? []))
+        .catch(() => {}),
+    ]).finally(() => setOptionsLoading(false));
   }, []);
 
   const check = async () => {
@@ -200,6 +223,153 @@ export default function CompliancePage() {
           )}
         </div>
       )}
+
+      {/* ── Verifiable Credentials Trust Section ── */}
+      <div className="mt-12 border-t border-gray-700 pt-8">
+        <div className="flex items-center gap-2 mb-1">
+          <Key size={18} className="text-layer1" />
+          <h2 className="text-xl font-bold">EHDS Verifiable Credentials</h2>
+        </div>
+        <p className="text-gray-400 text-sm mb-6">
+          DCP credential definitions registered on IssuerService — presented
+          during DSP negotiation
+        </p>
+
+        {credentials.length === 0 ? (
+          <div className="text-gray-500 text-sm">
+            {optionsLoading ? "Loading…" : "No credentials found in graph."}
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {credentials.map((vc) => (
+              <div
+                key={vc.credentialId}
+                className="rounded-lg border border-gray-700 bg-gray-800/50 p-4"
+              >
+                <div className="flex items-start justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    <BadgeCheck
+                      size={16}
+                      className={
+                        vc.status === "active"
+                          ? "text-green-400"
+                          : "text-red-400"
+                      }
+                    />
+                    <span className="font-semibold text-sm">
+                      {vc.credentialType}
+                    </span>
+                    {vc.participantRole && (
+                      <span className="text-xs px-2 py-0.5 rounded bg-layer5/20 text-layer5">
+                        {vc.participantRole}
+                      </span>
+                    )}
+                  </div>
+                  <span
+                    className={`text-xs font-medium px-2 py-0.5 rounded ${
+                      vc.status === "active"
+                        ? "bg-green-900/40 text-green-400"
+                        : "bg-red-900/40 text-red-400"
+                    }`}
+                  >
+                    {vc.status}
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs text-gray-400">
+                  <div>
+                    <span className="text-gray-500">Holder:</span>{" "}
+                    {vc.holderName ?? "—"}
+                    {vc.holderType && (
+                      <span className="text-gray-600"> [{vc.holderType}]</span>
+                    )}
+                  </div>
+                  <div>
+                    <span className="text-gray-500">Subject:</span>{" "}
+                    <span className="font-mono">
+                      {vc.subjectDid?.replace(
+                        /did:web:identityhub%3A7083:/,
+                        "",
+                      )}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-gray-500">Issuer:</span>{" "}
+                    <span className="font-mono">
+                      {vc.issuerDid?.replace(
+                        /did:web:issuerservice%3A10016:/,
+                        "",
+                      )}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-gray-500">Format:</span> VC1_0_JWT
+                  </div>
+
+                  {/* Type-specific details */}
+                  {vc.purpose && (
+                    <div className="col-span-2">
+                      <span className="text-gray-500">Purpose:</span>{" "}
+                      {vc.purpose}
+                    </div>
+                  )}
+                  {vc.datasetId && (
+                    <div className="col-span-2">
+                      <span className="text-gray-500">Dataset:</span>{" "}
+                      <span className="font-mono">{vc.datasetId}</span>
+                    </div>
+                  )}
+                  {vc.completeness != null && (
+                    <div className="col-span-2 mt-1">
+                      <span className="text-gray-500">Quality:</span>{" "}
+                      Completeness{" "}
+                      <span className="text-green-400">
+                        {(vc.completeness * 100).toFixed(0)}%
+                      </span>
+                      {" · "}Conformance{" "}
+                      <span className="text-green-400">
+                        {((vc.conformance ?? 0) * 100).toFixed(0)}%
+                      </span>
+                      {" · "}Timeliness{" "}
+                      <span className="text-green-400">
+                        {((vc.timeliness ?? 0) * 100).toFixed(0)}%
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Trust chain diagram */}
+        <div className="mt-6 rounded-lg border border-gray-700 bg-gray-900/50 p-4">
+          <h3 className="text-sm font-semibold mb-3 text-gray-300">
+            DCP Trust Chain — Credential Presentation Flow
+          </h3>
+          <div className="flex items-center gap-2 text-xs text-gray-400 flex-wrap">
+            <span className="px-2 py-1 rounded bg-layer1/20 text-layer1 font-medium">
+              IssuerService
+            </span>
+            <span>→ signs VC →</span>
+            <span className="px-2 py-1 rounded bg-layer2/20 text-layer2 font-medium">
+              IdentityHub
+            </span>
+            <span>→ stores →</span>
+            <span className="px-2 py-1 rounded bg-layer3/20 text-layer3 font-medium">
+              DCP Presentation
+            </span>
+            <span>→ verifies →</span>
+            <span className="px-2 py-1 rounded bg-layer5/20 text-layer5 font-medium">
+              Policy Engine
+            </span>
+            <span>→ evaluates →</span>
+            <span className="px-2 py-1 rounded bg-green-900/40 text-green-400 font-medium">
+              ✓ Access Granted
+            </span>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
