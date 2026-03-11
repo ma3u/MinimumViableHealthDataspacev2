@@ -42,12 +42,35 @@ export default function CredentialsPage() {
 
   useEffect(() => {
     Promise.all([
-      fetchApi("/api/credentials").then((r) => r.json()),
-      fetchApi("/api/participants").then((r) => r.json()),
+      fetchApi("/api/credentials").then((r) => (r.ok ? r.json() : { credentials: [] })),
+      fetchApi("/api/participants").then((r) => (r.ok ? r.json() : [])),
     ])
       .then(([creds, ctx]) => {
-        setCredentials(Array.isArray(creds) ? creds : creds.credentials || []);
-        const list = ctx.participants || [];
+        // API returns { credentials: [...] } with Neo4j field names — map to UI shape
+        const raw: any[] = Array.isArray(creds) ? creds : creds.credentials || [];
+        setCredentials(
+          raw.map((c: any) => ({
+            id: c.credentialId ?? c.id ?? "",
+            type: c.credentialType ?? c.type ?? "",
+            issuer: c.issuerDid ?? c.issuer ?? "",
+            subject: c.subjectDid ?? c.subject ?? "",
+            issuanceDate: c.issuedAt ?? c.issuanceDate ?? "",
+            expirationDate: c.expiresAt ?? c.expirationDate,
+            status: (c.status ?? "unknown").replace(/^\w/, (ch: string) => ch.toUpperCase()),
+            claims: {
+              ...(c.holderName ? { holder: c.holderName } : {}),
+              ...(c.holderType ? { type: c.holderType } : {}),
+              ...(c.participantRole ? { role: c.participantRole } : {}),
+              ...(c.purpose ? { purpose: c.purpose } : {}),
+              ...(c.datasetId ? { dataset: c.datasetId } : {}),
+              ...(c.completeness != null ? { completeness: String(c.completeness) } : {}),
+              ...(c.conformance != null ? { conformance: String(c.conformance) } : {}),
+              ...(c.timeliness != null ? { timeliness: String(c.timeliness) } : {}),
+            },
+          })),
+        );
+        // API returns flat array [...] — handle both array and { participants: [...] }
+        const list: ParticipantCtx[] = Array.isArray(ctx) ? ctx : ctx.participants || [];
         setParticipants(list);
         if (list.length > 0) setReqParticipant(list[0]["@id"]);
         setLoading(false);
@@ -75,7 +98,28 @@ export default function CredentialsPage() {
         // Refresh credentials list
         const updated = await fetchApi("/api/credentials");
         const data = await updated.json();
-        setCredentials(Array.isArray(data) ? data : data.credentials || []);
+        const raw: any[] = Array.isArray(data) ? data : data.credentials || [];
+        setCredentials(
+          raw.map((c: any) => ({
+            id: c.credentialId ?? c.id ?? "",
+            type: c.credentialType ?? c.type ?? "",
+            issuer: c.issuerDid ?? c.issuer ?? "",
+            subject: c.subjectDid ?? c.subject ?? "",
+            issuanceDate: c.issuedAt ?? c.issuanceDate ?? "",
+            expirationDate: c.expiresAt ?? c.expirationDate,
+            status: (c.status ?? "unknown").replace(/^\w/, (ch: string) => ch.toUpperCase()),
+            claims: {
+              ...(c.holderName ? { holder: c.holderName } : {}),
+              ...(c.holderType ? { type: c.holderType } : {}),
+              ...(c.participantRole ? { role: c.participantRole } : {}),
+              ...(c.purpose ? { purpose: c.purpose } : {}),
+              ...(c.datasetId ? { dataset: c.datasetId } : {}),
+              ...(c.completeness != null ? { completeness: String(c.completeness) } : {}),
+              ...(c.conformance != null ? { conformance: String(c.conformance) } : {}),
+              ...(c.timeliness != null ? { timeliness: String(c.timeliness) } : {}),
+            },
+          })),
+        );
       } else {
         const err = await res.json();
         setRequestResult(`Error: ${err.error || "Request failed"}`);
