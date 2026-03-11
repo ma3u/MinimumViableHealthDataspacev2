@@ -240,6 +240,14 @@ npm run dev
 
 Open <http://localhost:3000> in your browser. The home page links to all six views.
 
+To access the protected **Portal** views (which simulate dataspace participation, policy management, and onboarding), use any of the following pre-configured Keycloak test accounts:
+
+| Username     | Password     | Persona / Role                                    |
+| ------------ | ------------ | ------------------------------------------------- |
+| `edcadmin`   | `edcadmin`   | Dataspace Administrator (`EDC_ADMIN`)             |
+| `clinicuser` | `clinicuser` | Hospital Participant (`EDC_USER_PARTICIPANT`)     |
+| `regulator`  | `regulator`  | Health Data Access Body / HDAB (`HDAB_AUTHORITY`) |
+
 ![Graph Explorer UI](docs/images/ui-screenshot.png)
 
 ---
