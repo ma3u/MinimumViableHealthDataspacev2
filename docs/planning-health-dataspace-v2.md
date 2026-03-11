@@ -55,6 +55,11 @@
       - [8a: UI API Route Coverage ✅](#8a-ui-api-route-coverage-)
       - [8b: Component + Library Coverage ✅](#8b-component--library-coverage-)
       - [8c: CI/CD Test Pipeline ✅](#8c-cicd-test-pipeline-)
+    - [Phase 9: Documentation & Navigation Restructuring ✅](#phase-9-documentation--navigation-restructuring-)
+      - [9a: Documentation Site ✅](#9a-documentation-site-)
+      - [9b: Navigation Restructuring ✅](#9b-navigation-restructuring-)
+      - [9c: Home Page Refresh ✅](#9c-home-page-refresh-)
+      - [9d: GitHub Pages Static Export ✅](#9d-github-pages-static-export-)
   - [Architecture Decisions](#architecture-decisions)
     - [ADR-1: PostgreSQL vs Neo4j Data Storage Split](#adr-1-postgresql-vs-neo4j-data-storage-split)
       - [Decision](#decision)
@@ -167,6 +172,8 @@ All three core specifications are now final or near-final:
 | **6a** | Graph Explorer UI (Next.js → Neo4j Bolt)               | ✅ Complete | Seven views (graph, catalog, compliance, patient, analytics, eehrxf, query/NLQ); Docker `graph-explorer` container on port 3000; GitHub Pages static export                                                                                                                                                                                                                              |
 | **6b** | Full Participant Portal (Aruba + Fraunhofer + Redline) | ✅ Complete | 6b-1 ✅ (Onboarding: /onboarding, /onboarding/status, /credentials, /settings + 3 API routes); 6b-2 ✅ (Data Exchange: /data/share, /data/discover, /data/transfer, /negotiate + 5 API routes); 6b-3 ✅ (Admin: /admin, /admin/tenants, /admin/policies, /admin/audit + 3 API routes); Navigation dropdowns + middleware auth for all portal routes; 7 mock JSON files for static export |
 | **7**  | TCK DCP & DSP Compliance Verification                  | ✅ Complete | 7a ✅ (DSP 2025-1 TCK: `run-dsp-tck.sh` — 7 test categories, 30+ tests); 7b ✅ (DCP v1.0: `run-dcp-tests.sh` — 5 categories); 7c ✅ (EHDS domain: `run-ehds-tests.sh` — 5 categories); 7d ✅ (CI/CD: `compliance.yml` workflow, orchestrator `run-compliance.sh`, `/compliance/tck` dashboard UI with live + mock data)                                                                  |
+| **8**  | Test Coverage Expansion + CI/CD                        | ✅ Complete | 8a ✅ (10 new API route test files, ~85% API coverage); 8b ✅ (UserMenu, fetchApi, Navigation component tests); 8c ✅ (GitHub Actions test.yml, coverage reports, 104 total tests)                                                                                                                                                                                                       |
+| **9**  | Documentation & Navigation Restructuring               | ✅ Complete | 9a ✅ (4 doc pages: landing, user guide, developer, architecture + 8 Mermaid diagrams); 9b ✅ (Nav restructured: 5 dropdown clusters — Explore, Governance, Exchange, Portal, Docs); 9c ✅ (Home page refresh: 2-section card layout); 9d ✅ (Static export compatible, mermaid@11)                                                                                                      |
 
 ---
 
@@ -1066,6 +1073,54 @@ Created `.github/workflows/test.yml` triggered on every push and PR:
 - **Coverage summaries** written to GitHub Actions job summary for quick review
 
 **Deliverables:** 94 passing UI tests + 10 proxy tests = 104 total; coverage reports in `docs/test-coverage-report.md` and CI HTML artifacts; automated test runs on every push via GitHub Actions.
+
+### Phase 9: Documentation & Navigation Restructuring ✅
+
+Phase 9 adds comprehensive user (business) and developer documentation published to GitHub Pages, restructures the app navigation into logical clusters, and embeds interactive Mermaid architecture diagrams throughout the documentation.
+
+#### 9a: Documentation Site ✅
+
+Created in-app documentation under `/docs` with three sub-pages:
+
+- **`/docs`** — Landing page with section cards (User Guide, Developer Guide, Architecture), quick links, and project overview
+- **`/docs/user-guide`** — Business user guide covering all application views (Graph Explorer, Dataset Catalog, Patient Journey, OMOP Analytics, EEHRxF Profiles), EHDS compliance workflow, data exchange portal, and administration
+- **`/docs/developer`** — Technical documentation with: tech stack overview, quick start guide, project structure, Neo4j graph schema, API reference table (9 routes), testing setup (Vitest + Playwright), CI/CD pipeline, ADR summaries (1–7), and coding conventions
+- **`/docs/architecture`** — Interactive Mermaid diagrams:
+  1. Five-layer knowledge graph architecture
+  2. End-to-end data flow pipeline (Synthea → FHIR → Neo4j → OMOP → Analytics)
+  3. Deployment topology (Docker services + GitHub Pages)
+  4. DSP contract negotiation sequence with EHDS compliance
+  5. DCP identity and trust framework
+
+**Component:** `MermaidDiagram.tsx` — Client-side Mermaid.js renderer with dark theme, error handling, and figure captions.
+
+#### 9b: Navigation Restructuring ✅
+
+Reorganised navigation from a mix of flat links + overflow menu into 5 logical dropdown clusters:
+
+| Before                                                    | After                                                            |
+| --------------------------------------------------------- | ---------------------------------------------------------------- |
+| 5 flat mainLinks + 3 portalGroup dropdowns + MoreMenu (3) | 5 dropdown clusters with all links grouped                       |
+| Graph, Catalog, Patient, Analytics, NLQ (flat)            | **Explore** (6): Graph, Catalog, Patient, Analytics, NLQ, EEHRxF |
+| Compliance + EEHRxF hidden in overflow MoreMenu           | **Governance** (3): EHDS Approval, Protocol TCK, Credentials     |
+| Onboarding / Data Exchange / Admin as separate dropdowns  | **Exchange** (4): Share, Discover, Negotiate, Transfer           |
+| —                                                         | **Portal** (5): Onboarding, Admin, Tenants, Policies, Settings   |
+| —                                                         | **Docs** (4): Overview, User Guide, Developer, Architecture      |
+
+#### 9c: Home Page Refresh ✅
+
+Updated the home page card layout into two sections:
+
+- **Explore** (5 cards): Graph Explorer, Dataset Catalog, Patient Journey, OMOP Analytics, EEHRxF Profiles — 3-column grid
+- **Govern · Exchange · Manage** (4 cards): Governance, Data Exchange, Portal Admin, Documentation — 4-column grid
+
+Brand title "Health Dataspace" now links to home page.
+
+#### 9d: GitHub Pages Static Export ✅
+
+All documentation pages use `"use client"` with client-side Mermaid rendering — fully compatible with Next.js static export (`output: "export"`). No server-side features or API routes required. Mermaid.js installed as npm dependency (`mermaid@^11`).
+
+**Deliverables:** 4 documentation pages (landing, user guide, developer, architecture); 8 interactive Mermaid diagrams; `MermaidDiagram` component; navigation restructured into 5 clusters; home page refreshed with 2-section layout; all compatible with GitHub Pages static export.
 
 ---
 

@@ -37,7 +37,7 @@ jobs:
           static_site_generator: next
 
       - name: Disable API routes for static export
-        run: mv src/app/api src/api_disabled || true
+        run: mv src/app/api /tmp/api_disabled || true
 
       - name: Install dependencies
         run: npm ci

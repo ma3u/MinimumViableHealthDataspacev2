@@ -52,18 +52,19 @@ describe("Navigation Component", () => {
 
   it("should render all main navigation links", () => {
     render(<Navigation />);
-    expect(screen.getByText("Graph Explorer")).toBeInTheDocument();
-    expect(screen.getByText("Dataset Catalog")).toBeInTheDocument();
-    expect(screen.getByText("Patient Journey")).toBeInTheDocument();
-    expect(screen.getByText("Analytics")).toBeInTheDocument();
-    expect(screen.getByText("NLQ / Federated")).toBeInTheDocument();
+    // All links are now inside dropdown groups
+    expect(screen.getByText("Explore")).toBeInTheDocument();
+    expect(screen.getByText("Governance")).toBeInTheDocument();
+    expect(screen.getByText("Exchange")).toBeInTheDocument();
+    expect(screen.getByText("Portal")).toBeInTheDocument();
+    expect(screen.getByText("Docs")).toBeInTheDocument();
   });
 
   it("should render dropdown group labels", () => {
     render(<Navigation />);
-    expect(screen.getByText("Onboarding")).toBeInTheDocument();
-    expect(screen.getByText("Data Exchange")).toBeInTheDocument();
-    expect(screen.getByText("Admin")).toBeInTheDocument();
+    expect(screen.getByText("Explore")).toBeInTheDocument();
+    expect(screen.getByText("Exchange")).toBeInTheDocument();
+    expect(screen.getByText("Portal")).toBeInTheDocument();
   });
 
   it("should render the UserMenu", () => {
@@ -71,35 +72,29 @@ describe("Navigation Component", () => {
     expect(screen.getByTestId("user-menu")).toBeInTheDocument();
   });
 
-  it("should highlight the active link based on current pathname", () => {
+  it("should highlight the active group based on current pathname", () => {
     mockPathname.mockReturnValue("/graph");
     render(<Navigation />);
 
-    const graphLink = screen.getByText("Graph Explorer").closest("a");
-    expect(graphLink?.className).toContain("bg-layer1");
+    const exploreButton = screen.getByText("Explore").closest("button");
+    expect(exploreButton?.className).toContain("bg-layer1");
 
-    const catalogLink = screen.getByText("Dataset Catalog").closest("a");
-    expect(catalogLink?.className).not.toContain("bg-layer1");
+    const governanceButton = screen.getByText("Governance").closest("button");
+    expect(governanceButton?.className).not.toContain("bg-layer1");
   });
 
-  it("should highlight catalog link when on /catalog path", () => {
-    mockPathname.mockReturnValue("/catalog");
+  it("should highlight governance group when on /compliance path", () => {
+    mockPathname.mockReturnValue("/compliance");
     render(<Navigation />);
 
-    const catalogLink = screen.getByText("Dataset Catalog").closest("a");
-    expect(catalogLink?.className).toContain("bg-layer1");
+    const governanceButton = screen.getByText("Governance").closest("button");
+    expect(governanceButton?.className).toContain("bg-layer1");
   });
 
-  it("should have correct href attributes on links", () => {
+  it("should have correct href on brand link", () => {
     render(<Navigation />);
 
-    const graphLink = screen.getByText("Graph Explorer").closest("a");
-    expect(graphLink).toHaveAttribute("href", "/graph");
-
-    const catalogLink = screen.getByText("Dataset Catalog").closest("a");
-    expect(catalogLink).toHaveAttribute("href", "/catalog");
-
-    const patientLink = screen.getByText("Patient Journey").closest("a");
-    expect(patientLink).toHaveAttribute("href", "/patient");
+    const brandLink = screen.getByText("Health Dataspace").closest("a");
+    expect(brandLink).toHaveAttribute("href", "/");
   });
 });

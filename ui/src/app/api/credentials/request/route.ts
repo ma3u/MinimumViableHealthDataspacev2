@@ -32,10 +32,12 @@ export async function POST(req: NextRequest) {
 
     // Find the matching credential definition
     const matchingDef = Array.isArray(credDefs)
-      ? credDefs.find(
-          (d: Record<string, unknown>) =>
-            d.credentialType === credentialType || d.type === credentialType,
-        )
+      ? credDefs.find((d: unknown) => {
+          const def = d as Record<string, unknown>;
+          return (
+            def.credentialType === credentialType || def.type === credentialType
+          );
+        })
       : null;
 
     if (!matchingDef) {
@@ -43,9 +45,10 @@ export async function POST(req: NextRequest) {
         {
           error: `No credential definition found for type: ${credentialType}`,
           availableTypes: Array.isArray(credDefs)
-            ? credDefs.map(
-                (d: Record<string, unknown>) => d.credentialType || d.type,
-              )
+            ? credDefs.map((d: unknown) => {
+                const def = d as Record<string, unknown>;
+                return def.credentialType || def.type;
+              })
             : [],
         },
         { status: 404 },

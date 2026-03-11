@@ -1,7 +1,7 @@
 "use client";
 
 import { fetchApi } from "@/lib/api";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import {
   ArrowRightLeft,
@@ -26,6 +26,21 @@ interface ParticipantCtx {
 }
 
 export default function DataTransferPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex items-center gap-2 text-gray-500 p-10">
+          <Loader2 size={16} className="animate-spin" />
+          Loading…
+        </div>
+      }
+    >
+      <DataTransferContent />
+    </Suspense>
+  );
+}
+
+function DataTransferContent() {
   const searchParams = useSearchParams();
   const preselectedCtx = searchParams.get("participantId") || "";
   const contractId = searchParams.get("contractId") || "";

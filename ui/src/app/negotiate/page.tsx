@@ -1,7 +1,7 @@
 "use client";
 
 import { fetchApi } from "@/lib/api";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import {
   FileSignature,
@@ -26,6 +26,21 @@ interface Negotiation {
 }
 
 export default function NegotiatePage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex items-center gap-2 text-gray-500 p-10">
+          <Loader2 size={16} className="animate-spin" />
+          Loading…
+        </div>
+      }
+    >
+      <NegotiateContent />
+    </Suspense>
+  );
+}
+
+function NegotiateContent() {
   const searchParams = useSearchParams();
   const preAssetId = searchParams.get("assetId") || "";
   const preProviderId = searchParams.get("providerId") || "";
