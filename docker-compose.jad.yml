@@ -304,7 +304,7 @@ services:
       test:
         [
           "CMD-SHELL",
-          "wget -q --spider http://127.0.0.1:8080/api/check/readiness || exit 1",
+          "wget -q --spider http://127.0.0.1:8080/api/check/health || exit 1",
         ]
       interval: 10s
       timeout: 5s
@@ -369,7 +369,7 @@ services:
       test:
         [
           "CMD-SHELL",
-          "wget -q --spider http://127.0.0.1:8080/api/check/readiness || exit 1",
+          "wget -q --spider http://127.0.0.1:8080/api/check/health || exit 1",
         ]
       interval: 10s
       timeout: 5s
@@ -434,7 +434,7 @@ services:
       test:
         [
           "CMD-SHELL",
-          "wget -q --spider http://127.0.0.1:8080/api/check/readiness || exit 1",
+          "wget -q --spider http://127.0.0.1:8080/api/check/health || exit 1",
         ]
       interval: 10s
       timeout: 5s
@@ -517,7 +517,7 @@ services:
       test:
         [
           "CMD-SHELL",
-          "wget -q --spider http://127.0.0.1:7080/api/check/readiness || exit 1",
+          "wget -q --spider http://127.0.0.1:7080/api/check/health || exit 1",
         ]
       interval: 10s
       timeout: 5s
@@ -560,7 +560,7 @@ services:
       test:
         [
           "CMD-SHELL",
-          "wget -q --spider http://127.0.0.1:10010/api/check/readiness || exit 1",
+          "wget -q --spider http://127.0.0.1:10010/api/check/health || exit 1",
         ]
       interval: 10s
       timeout: 5s
