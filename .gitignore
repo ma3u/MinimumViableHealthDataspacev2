@@ -54,3 +54,11 @@ neo4j/metadata/*.json
 scripts/synthea-with-dependencies.jar
 scripts/output/
 output/
+
+# Test coverage & reports (generated)
+coverage/
+ui/coverage/
+services/neo4j-proxy/coverage/
+ui/test-results/
+ui/playwright-report/
+test-results/

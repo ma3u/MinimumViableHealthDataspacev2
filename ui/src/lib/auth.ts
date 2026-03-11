@@ -18,19 +18,18 @@ export const authOptions: NextAuthOptions = {
       name: "Keycloak",
       type: "oauth",
       // Explicit endpoint split: browser-facing for authorization, Docker-internal for server-side
+      issuer: keycloakIssuer,
+      clientId: process.env.KEYCLOAK_CLIENT_ID!,
+      clientSecret: process.env.KEYCLOAK_CLIENT_SECRET!,
       authorization: {
         url: `${keycloakPublicUrl}/protocol/openid-connect/auth`,
         params: { scope: "openid profile email" },
       },
       token: `${keycloakIssuer}/protocol/openid-connect/token`,
       userinfo: `${keycloakIssuer}/protocol/openid-connect/userinfo`,
-      issuer: keycloakIssuer,
       jwks_endpoint: `${keycloakIssuer}/protocol/openid-connect/certs`,
-      clientId: process.env.KEYCLOAK_CLIENT_ID!,
-      clientSecret: process.env.KEYCLOAK_CLIENT_SECRET!,
       checks: ["pkce", "state"],
-      idToken: true,
-      profile(profile) {
+      profile(profile: any) {
         return {
           id: profile.sub,
           name: profile.name ?? profile.preferred_username,
@@ -38,7 +37,7 @@ export const authOptions: NextAuthOptions = {
           image: null,
         };
       },
-    },
+    } as any,
   ],
 
   callbacks: {

@@ -68,6 +68,9 @@ function getSpeDrivers(): Array<{ label: string; driver: Driver }> {
 const app = express();
 app.use(express.json());
 
+// Export app for testing (supertest)
+export { app };
+
 // ---- Audit Logging --------------------------------------------------------
 
 /**
@@ -1545,7 +1548,14 @@ async function main() {
   });
 }
 
-main().catch((err) => {
-  console.error("[neo4j-proxy] Fatal:", err);
-  process.exit(1);
-});
+// Only auto-start when run directly (not imported for testing)
+const isMainModule =
+  typeof process.env.VITEST === "undefined" && process.env.NODE_ENV !== "test";
+if (isMainModule) {
+  main().catch((err) => {
+    console.error("[neo4j-proxy] Fatal:", err);
+    process.exit(1);
+  });
+}
+
+export { main };

@@ -51,6 +51,10 @@
       - [7b: DCP v1.0 Compliance Tests ✅](#7b-dcp-v10-compliance-tests-)
       - [7c: EHDS Health-Domain Compliance Tests ✅](#7c-ehds-health-domain-compliance-tests-)
       - [7d: Automated CI/CD Compliance Pipeline ✅](#7d-automated-cicd-compliance-pipeline-)
+    - [Phase 8: Test Coverage Expansion + CI/CD ✅](#phase-8-test-coverage-expansion--cicd-)
+      - [8a: UI API Route Coverage ✅](#8a-ui-api-route-coverage-)
+      - [8b: Component + Library Coverage ✅](#8b-component--library-coverage-)
+      - [8c: CI/CD Test Pipeline ✅](#8c-cicd-test-pipeline-)
   - [Architecture Decisions](#architecture-decisions)
     - [ADR-1: PostgreSQL vs Neo4j Data Storage Split](#adr-1-postgresql-vs-neo4j-data-storage-split)
       - [Decision](#decision)
@@ -100,6 +104,12 @@
       - [Contract Negotiation Flow: CRO → Clinic](#contract-negotiation-flow-cro--clinic)
       - [HDAB Operator Oversight](#hdab-operator-oversight)
       - [Consequences](#consequences-6)
+    - [ADR-8: Comprehensive Testing Strategy (Vitest + Playwright + Supertest)](#adr-8-comprehensive-testing-strategy-vitest--playwright--supertest)
+      - [Decision {#decision-8}](#decision-decision-8)
+      - [Alternatives Considered {#alternatives-considered-8}](#alternatives-considered-alternatives-considered-8)
+      - [Rationale {#rationale-8}](#rationale-rationale-8)
+      - [Test Architecture {#test-architecture}](#test-architecture-test-architecture)
+      - [Consequences {#consequences-7}](#consequences-consequences-7)
   - [Target Architecture](#target-architecture)
   - [What This Proves](#what-this-proves)
   - [Implementation Dependencies](#implementation-dependencies)
@@ -1016,6 +1026,47 @@ jobs:
 
 **Deliverables:** DSP 2025-1 TCK passing for all 3 participants; DCP v1.0 compliance verified for IdentityHub + IssuerService; EHDS-specific tests validating Article 53 enforcement + HealthDCAT-AP + EEHRxF; automated weekly CI compliance runs.
 
+### Phase 8: Test Coverage Expansion + CI/CD ✅
+
+Phase 8 expands the initial test scaffolding (ADR-8) into comprehensive coverage across all API routes, library modules, and UI components. It also establishes automated CI/CD test runs on every commit.
+
+#### 8a: UI API Route Coverage ✅
+
+Added integration tests for all untested API routes (10 new test files, 45+ tests):
+
+- **Neo4j-backed routes:** `patient`, `credentials`, `analytics`, `compliance`, `eehrxf` — test both happy-path and empty-data scenarios using `vi.mock("@/lib/neo4j")`
+- **EDC-backed routes:** `participants`, `assets`, `admin/tenants`, `admin/policies` — test GET (list/aggregate), POST (validation + creation), and 502 error handling using `vi.mock("@/lib/edc")`
+- **Proxy routes:** `federated`, `nlq` — test proxy forwarding and upstream failure handling using `vi.fn()` on global `fetch`
+
+**Coverage results:** 10 of 16 API routes at 100% statement coverage. Overall API route coverage lifted from ~25% to ~85%.
+
+#### 8b: Component + Library Coverage ✅
+
+- **UserMenu:** 7 tests covering loading/unauthenticated/authenticated states, dropdown toggle, role badges, sign-in/sign-out actions
+- **fetchApi:** 9 tests covering normal mode (direct fetch) and static export mode (mock JSON routing for catalog, graph, patient, analytics, credentials, participants)
+- **Navigation:** 7 tests (from Phase 7 ADR-8) covering nav links, active highlighting, dropdown groups
+
+**Overall UI coverage improvement:**
+
+| Metric | Before | After  | Change    |
+| ------ | ------ | ------ | --------- |
+| Stmts  | 10.50% | 24.64% | **+134%** |
+| Branch | 6.55%  | 13.64% | **+108%** |
+| Funcs  | 7.10%  | 14.46% | **+104%** |
+| Lines  | 10.23% | 24.28% | **+137%** |
+| Tests  | 40     | 94     | **+135%** |
+
+#### 8c: CI/CD Test Pipeline ✅
+
+Created `.github/workflows/test.yml` triggered on every push and PR:
+
+- **`ui-tests` job:** Installs UI dependencies, runs Vitest with coverage, uploads HTML coverage artifacts
+- **`proxy-tests` job:** Installs proxy dependencies, runs Vitest with coverage, uploads artifacts
+- **`lint` job:** Runs ESLint (`next lint`) on UI code
+- **Coverage summaries** written to GitHub Actions job summary for quick review
+
+**Deliverables:** 94 passing UI tests + 10 proxy tests = 104 total; coverage reports in `docs/test-coverage-report.md` and CI HTML artifacts; automated test runs on every push via GitHub Actions.
+
 ---
 
 ## Architecture Decisions
@@ -1833,6 +1884,123 @@ Currently, the HDAB participant context is provisioned and activated (`did:web:i
 - **Trade-off:** DID documents use Docker-internal hostnames (`identityhub:7083`), limiting resolution to within the Docker network. Production deployments would use proper domain names
 - **Trade-off:** Participant activation requires direct PostgreSQL workaround due to Management API returning 403
 - **Dependency:** Transfer completion (STARTED → COMPLETED) depends on Phase 4d (DCore data plane transfer configuration)
+
+---
+
+### ADR-8: Comprehensive Testing Strategy (Vitest + Playwright + Supertest)
+
+**Status:** Accepted
+**Date:** 2026-03-11
+**Context:** The Health Dataspace v2 has grown to 22 Next.js pages, 15+ API routes, a Neo4j Query Proxy (Express/Node.js) service, and multiple integration points (Neo4j, Keycloak, EDC-V/CFM). Through Phases 1–7, all validation was manual (curl scripts, browser testing, seed scripts). As the project approaches production readiness, automated testing is essential for regression prevention, CI/CD confidence, and contributor onboarding.
+
+The testing landscape for Next.js 14 (App Router) with TypeScript has several mature options. This ADR evaluates alternatives and selects the optimal combination for this project's architecture.
+
+#### Decision {#decision-8}
+
+Adopt a **three-tier testing strategy** using:
+
+1. **Vitest** — Unit and integration tests for API routes, library modules, and React components
+2. **Playwright** — End-to-end browser tests for critical user journeys
+3. **Supertest** — HTTP integration tests for the Neo4j Query Proxy (Express)
+
+#### Alternatives Considered {#alternatives-considered-8}
+
+| Framework                     | Category           | Pros                                                                                                     | Cons                                                                                                              | Verdict                                                          |
+| ----------------------------- | ------------------ | -------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------- |
+| **Vitest**                    | Unit / Integration | Native ESM + TypeScript, Vite-based (fast), Jest-compatible API, first-class mocking, workspace support  | Newer ecosystem than Jest                                                                                         | **Selected** — best DX for modern TypeScript                     |
+| **Jest**                      | Unit / Integration | Largest ecosystem, widely documented, mature                                                             | Slow ESM support, requires `ts-jest` or SWC transform, CJS-first architecture                                     | Rejected — Vitest is faster and natively supports ESM/TypeScript |
+| **Playwright**                | E2E Browser        | Microsoft-backed, multi-browser (Chromium/Firefox/WebKit), auto-wait, trace viewer, built-in test runner | Heavier than Cypress for simple tests                                                                             | **Selected** — superior multi-browser support and reliability    |
+| **Cypress**                   | E2E Browser        | Beautiful GUI, time-travel debugging, large community                                                    | Single-browser execution, no native multi-tab, slower CI runs, limited network interception for server components | Rejected — Playwright is faster in CI and supports all browsers  |
+| **Supertest**                 | HTTP API           | Lightweight, Express-native, chain assertions, no server boot needed                                     | Only for Express/HTTP, no browser                                                                                 | **Selected** — perfect fit for Neo4j Query Proxy                 |
+| **Testing Library**           | Component          | Framework-agnostic, accessibility-first queries, works with Vitest                                       | —                                                                                                                 | **Selected** — used with Vitest for React component tests        |
+| **MSW (Mock Service Worker)** | Mocking            | Network-level request interception, works in both Node and browser                                       | Additional dependency                                                                                             | **Selected** — used for mocking Neo4j and EDC-V in tests         |
+
+#### Rationale {#rationale-8}
+
+1. **Vitest over Jest:** The project uses TypeScript with ESM (`"module": "esnext"` in tsconfig). Vitest runs TypeScript natively without transpilation config. Jest requires `ts-jest` or `@swc/jest` and struggles with ESM imports. Vitest's watch mode is 10-20× faster due to Vite's module graph.
+
+2. **Playwright over Cypress:** The UI runs in Docker containers and CI environments. Playwright's headless multi-browser testing is faster in CI (parallel browser contexts vs. Cypress's serial execution). Playwright's `@playwright/test` runner includes built-in fixtures, auto-retries, and trace recording. Cypress's commercial dashboard features are not needed.
+
+3. **Supertest for Express:** The `neo4j-proxy` is a standalone Express service with 12+ endpoints. Supertest allows testing Express apps without starting an HTTP server, ideal for unit-testing route handlers with mocked Neo4j drivers.
+
+4. **Testing Library + MSW:** React Testing Library with `@testing-library/react` provides accessibility-first component queries. MSW intercepts fetch calls at the network level, enabling realistic API mocking without modifying application code.
+
+#### Test Architecture {#test-architecture}
+
+```
+ui/
+├── vitest.config.ts              # Vitest configuration
+├── __tests__/
+│   ├── unit/                     # Pure function + component tests
+│   │   ├── lib/
+│   │   │   ├── neo4j.test.ts     # Neo4j driver wrapper
+│   │   │   └── edc-client.test.ts # EDC API client
+│   │   └── components/
+│   │       ├── Navigation.test.tsx
+│   │       └── UserMenu.test.tsx
+│   ├── api/                      # API route integration tests
+│   │   ├── catalog.test.ts       # GET /api/catalog
+│   │   ├── graph.test.ts         # GET /api/graph
+│   │   ├── negotiations.test.ts  # GET/POST /api/negotiations
+│   │   └── transfers.test.ts     # GET/POST /api/transfers
+│   └── e2e/                      # Playwright browser tests
+│       ├── home.spec.ts          # Landing page navigation
+│       ├── catalog.spec.ts       # Dataset catalog browsing
+│       ├── graph.spec.ts         # Graph explorer interaction
+│       └── patient.spec.ts       # Patient journey timeline
+│
+services/neo4j-proxy/
+├── vitest.config.ts              # Separate Vitest config
+└── __tests__/
+    ├── health.test.ts            # GET /health
+    ├── fhir-patient.test.ts      # GET /fhir/Patient
+    ├── omop-cohort.test.ts       # POST /omop/cohort
+    └── catalog.test.ts           # GET /catalog/datasets
+```
+
+**Coverage targets:**
+
+| Layer            | Target           | Rationale                                      |
+| ---------------- | ---------------- | ---------------------------------------------- |
+| API routes       | 90%+             | Critical data paths between UI and Neo4j/EDC-V |
+| Library modules  | 85%+             | Shared utilities (neo4j.ts, edc/client.ts)     |
+| React components | 70%+             | Key interaction patterns (navigation, filters) |
+| E2E journeys     | 5 critical paths | Smoke tests for deployment validation          |
+| Neo4j proxy      | 90%+             | Standalone service, full route coverage        |
+
+**CI Integration:**
+
+```yaml
+# .github/workflows/test.yml
+name: Test Suite
+on: [push, pull_request]
+jobs:
+  unit-integration:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - run: cd ui && npm ci && npx vitest run --coverage
+      - run: cd services/neo4j-proxy && npm ci && npx vitest run --coverage
+  e2e:
+    runs-on: ubuntu-latest
+    needs: unit-integration
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker compose up -d neo4j
+      - run: cd ui && npm ci && npx playwright install && npx playwright test
+```
+
+#### Consequences {#consequences-7}
+
+- **Positive:** Fast feedback loop — Vitest runs in <2s for unit tests, enabling TDD workflow
+- **Positive:** Comprehensive coverage across all three tiers (unit → integration → E2E)
+- **Positive:** CI-friendly — all tools support headless execution and JUnit/JSON reporters
+- **Positive:** MSW mocking enables testing API routes without live Neo4j/EDC-V dependencies
+- **Trade-off:** Three test frameworks to maintain (Vitest + Playwright + Supertest) vs. a single-framework approach. Mitigated by clear separation: Vitest for fast tests, Playwright for browser tests, Supertest for Express routes.
+- **Trade-off:** Playwright E2E tests are slower (~30s per test) and require Docker services. Run only in CI and manually, not in watch mode.
+- **Dependency:** MSW v2 requires ESM-compatible test setup (satisfied by Vitest)
 
 ---
 

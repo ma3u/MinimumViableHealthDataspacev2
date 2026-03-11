@@ -1,0 +1,144 @@
+# ---------------------------------------------------------------------------
+# Test Suite — Health Dataspace v2
+# ---------------------------------------------------------------------------
+# Runs unit tests and API integration tests with coverage reporting
+# for the Next.js UI and the Neo4j Query Proxy service.
+#
+# All tests use vi.mock() — NO live Neo4j, EDC-V, or Keycloak needed.
+# E2E tests (Playwright) are excluded; they require a running stack.
+#
+# Triggers:
+#   - Push to any branch
+#   - Pull request to main
+#   - Manual dispatch
+# ---------------------------------------------------------------------------
+name: Test Suite
+
+on:
+  push:
+    branches: ["*"]
+    paths:
+      - "ui/**"
+      - "services/neo4j-proxy/**"
+      - ".github/workflows/test.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "ui/**"
+      - "services/neo4j-proxy/**"
+  workflow_dispatch:
+
+env:
+  NODE_VERSION: "20"
+
+jobs:
+  # -----------------------------------------------------------------------
+  # UI Unit + API Integration Tests (Vitest)
+  # -----------------------------------------------------------------------
+  ui-tests:
+    name: UI Tests (Vitest)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./ui
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: ./ui/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests with coverage
+        run: npx vitest run --coverage --reporter=verbose --reporter=json --outputFile=test-results.json
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ui-coverage
+          path: |
+            ui/coverage/
+            ui/test-results.json
+          retention-days: 30
+
+      - name: Coverage summary
+        if: always()
+        run: |
+          echo "## UI Test Coverage" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          npx vitest run --coverage 2>&1 | grep -A 50 "^-.*-$" | head -60 >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+
+  # -----------------------------------------------------------------------
+  # Neo4j Query Proxy Tests (Vitest)
+  # -----------------------------------------------------------------------
+  proxy-tests:
+    name: Neo4j Proxy Tests (Vitest)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./services/neo4j-proxy
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: ./services/neo4j-proxy/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests with coverage
+        run: npx vitest run --coverage --reporter=verbose --reporter=json --outputFile=test-results.json
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: proxy-coverage
+          path: |
+            services/neo4j-proxy/coverage/
+            services/neo4j-proxy/test-results.json
+          retention-days: 30
+
+      - name: Coverage summary
+        if: always()
+        run: |
+          echo "## Neo4j Proxy Test Coverage" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          npx vitest run --coverage 2>&1 | grep -A 10 "^-.*-$" | head -20 >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+
+  # -----------------------------------------------------------------------
+  # Lint Check
+  # -----------------------------------------------------------------------
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./ui
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: ./ui/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run ESLint
+        run: npm run lint

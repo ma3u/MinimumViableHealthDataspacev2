@@ -30,9 +30,9 @@ echo "Keycloak is ready!"
 vault auth enable jwt || true
 
 # Configure JWT auth (using Keycloak as JWT backend)
-# NOTE: In docker-compose, services communicate via container names, but
-# the bound_issuer must match what Keycloak puts in the token "iss" claim.
-# Keycloak uses KC_HOSTNAME for the iss claim, which is http://keycloak.localhost
+# NOTE: In docker-compose, services communicate via container names.
+# The bound_issuer must match what Keycloak puts in the token "iss" claim.
+# KC_HOSTNAME=http://keycloak:8080, so iss = http://keycloak:8080/realms/edcv
 vault write auth/jwt/config \
     jwks_url="http://keycloak:8080/realms/edcv/protocol/openid-connect/certs" \
     default_role="participant" || { echo "Failed to configure JWT auth"; exit 1; }
@@ -63,7 +63,7 @@ vault write auth/jwt/role/participant -<<EOF || { echo "Failed to create JWT rol
 {
     "role_type": "jwt",
     "user_claim": "participant_context_id",
-    "bound_issuer": "http://keycloak.localhost/realms/edcv",
+    "bound_issuer": "http://keycloak:8080/realms/edcv",
     "bound_claims": {
         "role": "participant"
     },
@@ -87,7 +87,7 @@ vault write auth/jwt/role/provisioner -<<EOF || { echo "Failed to create provisi
 {
     "role_type": "jwt",
     "user_claim": "azp",
-    "bound_issuer": "http://keycloak.localhost/realms/edcv",
+    "bound_issuer": "http://keycloak:8080/realms/edcv",
     "bound_claims": {
         "role": "provisioner"
     },
