@@ -20,8 +20,8 @@ test.describe("Graph Explorer", () => {
   test("should load the graph page", async ({ page }) => {
     await page.goto("/graph");
     await expect(page).toHaveURL(/\/graph/);
-    // Navigation should be present
-    await expect(page.locator("text=Graph Explorer").first()).toBeVisible();
+    // Graph page has a sidebar with "Layers" heading
+    await expect(page.locator("text=Layers").first()).toBeVisible();
   });
 });
 
@@ -46,12 +46,16 @@ test.describe("Navigation", () => {
     await page.goto("/graph");
     await expect(page.locator("text=Health Dataspace").first()).toBeVisible();
 
-    // Click Dataset Catalog link
-    await page.locator("a[href='/catalog']").first().click();
+    // Navigate to catalog via nav dropdown
+    const nav = page.locator("nav");
+    const explore = nav.getByRole("button", { name: /Explore/i });
+    await explore.click();
+    await nav.getByRole("link", { name: /Dataset Catalog/ }).click();
     await expect(page).toHaveURL(/\/catalog/);
 
-    // Click Patient Journey link
-    await page.locator("a[href='/patient']").first().click();
+    // Navigate to patient via nav dropdown
+    await explore.click();
+    await nav.getByRole("link", { name: /Patient Journey/ }).click();
     await expect(page).toHaveURL(/\/patient/);
   });
 });
