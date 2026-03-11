@@ -55,7 +55,7 @@
       - [8a: UI API Route Coverage ✅](#8a-ui-api-route-coverage-)
       - [8b: Component + Library Coverage ✅](#8b-component--library-coverage-)
       - [8c: CI/CD Test Pipeline ✅](#8c-cicd-test-pipeline-)
-    - [Phase 9: Documentation & Navigation Restructuring ✅](#phase-9-documentation--navigation-restructuring-)
+    - [Phase 9: Documentation \& Navigation Restructuring ✅](#phase-9-documentation--navigation-restructuring-)
       - [9a: Documentation Site ✅](#9a-documentation-site-)
       - [9b: Navigation Restructuring ✅](#9b-navigation-restructuring-)
       - [9c: Home Page Refresh ✅](#9c-home-page-refresh-)
@@ -172,7 +172,7 @@ All three core specifications are now final or near-final:
 | **6a** | Graph Explorer UI (Next.js → Neo4j Bolt)               | ✅ Complete | Seven views (graph, catalog, compliance, patient, analytics, eehrxf, query/NLQ); Docker `graph-explorer` container on port 3000; GitHub Pages static export                                                                                                                                                                                                                              |
 | **6b** | Full Participant Portal (Aruba + Fraunhofer + Redline) | ✅ Complete | 6b-1 ✅ (Onboarding: /onboarding, /onboarding/status, /credentials, /settings + 3 API routes); 6b-2 ✅ (Data Exchange: /data/share, /data/discover, /data/transfer, /negotiate + 5 API routes); 6b-3 ✅ (Admin: /admin, /admin/tenants, /admin/policies, /admin/audit + 3 API routes); Navigation dropdowns + middleware auth for all portal routes; 7 mock JSON files for static export |
 | **7**  | TCK DCP & DSP Compliance Verification                  | ✅ Complete | 7a ✅ (DSP 2025-1 TCK: `run-dsp-tck.sh` — 7 test categories, 30+ tests); 7b ✅ (DCP v1.0: `run-dcp-tests.sh` — 5 categories); 7c ✅ (EHDS domain: `run-ehds-tests.sh` — 5 categories); 7d ✅ (CI/CD: `compliance.yml` workflow, orchestrator `run-compliance.sh`, `/compliance/tck` dashboard UI with live + mock data)                                                                  |
-| **8**  | Test Coverage Expansion + CI/CD                        | ✅ Complete | 8a ✅ (10 new API route test files, ~85% API coverage); 8b ✅ (UserMenu, fetchApi, Navigation component tests); 8c ✅ (GitHub Actions test.yml, coverage reports, 104 total tests)                                                                                                                                                                                                       |
+| **8**  | Test Coverage Expansion + CI/CD                        | ✅ Complete | 8a ✅ (10 new API route test files, ~85% API coverage); 8b ✅ (UserMenu, fetchApi, Navigation + 6 page-level component suites); 8c ✅ (GitHub Actions test.yml, coverage reports, **247 unit tests + 31 E2E = 278 total**)                                                                                                                                                               |
 | **9**  | Documentation & Navigation Restructuring               | ✅ Complete | 9a ✅ (4 doc pages: landing, user guide, developer, architecture + 8 Mermaid diagrams); 9b ✅ (Nav restructured: 5 dropdown clusters — Explore, Governance, Exchange, Portal, Docs); 9c ✅ (Home page refresh: 2-section card layout); 9d ✅ (Static export compatible, mermaid@11)                                                                                                      |
 
 ---
@@ -204,7 +204,7 @@ Phase 1 bootstraps the full EDC-V + DCore + CFM stack using the [JAD (Joint Arch
    - IssuerService: tenant `did:web:issuerservice%3A10016:issuer`, Membership + Manufacturer attestation/credential definitions
    - TenantManager: Cell + Dataspace Profile (deployed)
    - ProvisionManager: 5 ActivityDefinitions + OrchestrationDefinition (deploy + dispose workflows)
-4. Validate deployment with JAD's **Bruno API collection** (interactive testing) — pending
+4. ~~Validate deployment with JAD's Bruno API collection (interactive testing)~~ → Superseded by automated TCK compliance tests (Phase 7) and 247-test CI suite (Phase 8)
 
 #### 1b: Health-Specific Tenant Configuration ✅
 
@@ -1055,13 +1055,13 @@ Added integration tests for all untested API routes (10 new test files, 45+ test
 
 **Overall UI coverage improvement:**
 
-| Metric | Before | After  | Change    |
-| ------ | ------ | ------ | --------- |
-| Stmts  | 10.50% | 24.64% | **+134%** |
-| Branch | 6.55%  | 13.64% | **+108%** |
-| Funcs  | 7.10%  | 14.46% | **+104%** |
-| Lines  | 10.23% | 24.28% | **+137%** |
-| Tests  | 40     | 94     | **+135%** |
+| Metric | Before | Phase 8 | Current | Change    |
+| ------ | ------ | ------- | ------- | --------- |
+| Stmts  | 10.50% | 24.64%  | 71.76%  | **+583%** |
+| Branch | 6.55%  | 13.64%  | 51.15%  | **+681%** |
+| Funcs  | 7.10%  | 14.46%  | 67.16%  | **+846%** |
+| Lines  | 10.23% | 24.28%  | 72.10%  | **+605%** |
+| Tests  | 40     | 94      | 247     | **+518%** |
 
 #### 8c: CI/CD Test Pipeline ✅
 
@@ -1072,7 +1072,7 @@ Created `.github/workflows/test.yml` triggered on every push and PR:
 - **`lint` job:** Runs ESLint (`next lint`) on UI code
 - **Coverage summaries** written to GitHub Actions job summary for quick review
 
-**Deliverables:** 94 passing UI tests + 10 proxy tests = 104 total; coverage reports in `docs/test-coverage-report.md` and CI HTML artifacts; automated test runs on every push via GitHub Actions.
+**Deliverables:** 247 passing UI tests + 31 Playwright E2E tests = 278 total; 71.76% statement coverage; coverage reports in `docs/test-report.md` and CI HTML artifacts; automated test runs on every push via GitHub Actions.
 
 ### Phase 9: Documentation & Navigation Restructuring ✅
 

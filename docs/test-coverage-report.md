@@ -1,7 +1,7 @@
 # Test Coverage Report — Health Dataspace v2
 
-**Date:** 2025-07-06
-**Framework:** Vitest 4.0.18 + @vitest/coverage-v8
+**Date:** 2026-03-11
+**Framework:** Vitest 3.x + @vitest/coverage-v8
 **Test Runner:** Node.js 22, jsdom environment
 
 ---
@@ -10,20 +10,21 @@
 
 | Component       | Test Files | Tests   | Stmts % | Branch % | Funcs % | Lines % |
 | --------------- | ---------- | ------- | ------- | -------- | ------- | ------- |
-| **UI**          | 27         | 128     | 34.05   | 18.87    | 20.75   | 33.84   |
+| **UI**          | 35         | 247     | 71.76   | 51.15    | 67.16   | 72.10   |
 | **Neo4j Proxy** | 1          | 10      | 27.95   | 26.63    | 16.66   | 28.84   |
-| **Total**       | **28**     | **138** | —       | —        | —       | —       |
+| **E2E**         | 4          | 31      | —       | —        | —       | —       |
+| **Total**       | **40**     | **288** | —       | —        | —       | —       |
 
-### Baseline → Phase 8 → Phase 9 (UI)
+### Baseline → Phase 8 → Phase 9 → Current (UI)
 
-| Metric   | Baseline (40 tests) | Phase 8 (94 tests) | Phase 9 (128 tests) | Total Improvement |
-| -------- | ------------------- | ------------------ | ------------------- | ----------------- |
-| Stmts %  | 10.50               | 24.64              | **34.05**           | **+224%**         |
-| Branch % | 6.55                | 13.64              | **18.87**           | **+188%**         |
-| Funcs %  | 7.10                | 14.46              | **20.75**           | **+192%**         |
-| Lines %  | 10.23               | 24.28              | **33.84**           | **+231%**         |
-| Tests    | 40                  | 94                 | **128**             | **+220%**         |
-| Files    | 8                   | 19                 | **27**              | **+238%**         |
+| Metric   | Baseline (40 tests) | Phase 8 (94 tests) | Phase 9 (128 tests) | Current (247 tests) | Total Improvement |
+| -------- | ------------------- | ------------------ | ------------------- | ------------------- | ----------------- |
+| Stmts %  | 10.50               | 24.64              | 34.05               | **71.76**           | **+583%**         |
+| Branch % | 6.55                | 13.64              | 18.87               | **51.15**           | **+681%**         |
+| Funcs %  | 7.10                | 14.46              | 20.75               | **67.16**           | **+846%**         |
+| Lines %  | 10.23               | 24.28              | 33.84               | **72.10**           | **+605%**         |
+| Tests    | 40                  | 94                 | 128                 | **247**             | **+518%**         |
+| Files    | 8                   | 19                 | 27                  | **35**              | **+338%**         |
 
 ---
 
@@ -130,10 +131,18 @@ cd services/neo4j-proxy && open coverage/index.html
 | `UserMenu.tsx`     | 75%    | 44%    | 77.77% | Auth states + dropdown           |
 | `AuthProvider.tsx` | 100%   | 100%   | 100%   | SessionProvider wrapper (tested) |
 
-### Page Components (all 0% — client-side rendering)
+### Page Components
 
-Not covered by unit tests. These are complex React components with `useState`/`useEffect` hooks
-that fetch data from API routes. They are covered by E2E tests (Playwright) instead.
+All 6 major page components now have dedicated unit test suites with >85% coverage (except Graph at ~29% due to canvas rendering):
+
+| Page        | Stmts  | Branch | Tests | Notes                                        |
+| ----------- | ------ | ------ | ----- | -------------------------------------------- |
+| `catalog`   | 90.9%  | —      | 4     | Filter, expand, legal basis, error           |
+| `patient`   | 96.55% | —      | 4     | Stats, selector, timeline, error             |
+| `negotiate` | 89.83% | —      | 8     | Participants, form, states, submit, error    |
+| `query`     | 91.66% | —      | 8     | Federated, templates, SPE, toggle, submit    |
+| `settings`  | 87.5%  | —      | 7     | Empty state, profiles, save, multi-tenant    |
+| `graph`     | 28.94% | —      | 5     | Canvas-based ForceGraph limits jsdom testing |
 
 ---
 
@@ -208,8 +217,9 @@ Test runs are automated via GitHub Actions (`.github/workflows/test.yml`):
 
 - **Trigger:** Every push to any branch, every PR to main
 - **Jobs:**
-  - `ui-tests` — Runs all 128 UI tests with coverage
+  - `ui-tests` — Runs all 247 UI tests with coverage
   - `proxy-tests` — Runs all 10 proxy tests with coverage
+  - `e2e-tests` — Runs all 31 Playwright E2E tests
   - `lint` — ESLint check on UI code (0 errors, ≤25 warnings)
 - **Artifacts:** Coverage HTML reports uploaded for 30 days
 - **Summary:** Coverage tables written to GitHub job summary
@@ -218,9 +228,9 @@ Test runs are automated via GitHub Actions (`.github/workflows/test.yml`):
 
 ## Remaining Coverage Gaps
 
-| Area                   | Priority | Effort | Notes                                     |
-| ---------------------- | -------- | ------ | ----------------------------------------- |
-| Page components (13)   | Low      | High   | Complex client-side; E2E covers these     |
-| `admin/audit/route.ts` | Low      | Medium | 136-line audit route                      |
-| `middleware.ts`        | Low      | Medium | NextAuth middleware, complex to unit-test |
-| `auth/[...nextauth]`   | Low      | Low    | 8-line NextAuth handler re-export         |
+| Area                   | Priority | Effort | Notes                                                  |
+| ---------------------- | -------- | ------ | ------------------------------------------------------ |
+| `graph/page.tsx`       | Low      | High   | Canvas-based ForceGraph; only ~29% reachable via jsdom |
+| `admin/audit/route.ts` | Low      | Medium | 136-line audit route                                   |
+| `middleware.ts`        | Low      | Medium | NextAuth middleware, complex to unit-test              |
+| `auth/[...nextauth]`   | Low      | Low    | 8-line NextAuth handler re-export                      |

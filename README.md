@@ -1,6 +1,6 @@
 # Minimum Viable Health Dataspace v2
 
-[![CI Tests](https://github.com/ma3u/MinimumViableHealthDataspacev2/actions/workflows/test.yml/badge.svg)](https://github.com/ma3u/MinimumViableHealthDataspacev2/actions/workflows/test.yml) [![Coverage 66%](https://img.shields.io/badge/coverage-66%25-yellowgreen)](docs/test-report.md) [![212 Tests](https://img.shields.io/badge/tests-212%20passed-brightgreen)](docs/test-report.md) [![Playwright 31](https://img.shields.io/badge/E2E-31%20passed-brightgreen)](docs/test-report.md)
+[![CI Tests](https://github.com/ma3u/MinimumViableHealthDataspacev2/actions/workflows/test.yml/badge.svg)](https://github.com/ma3u/MinimumViableHealthDataspacev2/actions/workflows/test.yml) [![Coverage 72%](https://img.shields.io/badge/coverage-72%25-green)](docs/test-report.md) [![247 Tests](https://img.shields.io/badge/tests-247%20passed-brightgreen)](docs/test-report.md) [![Playwright 31](https://img.shields.io/badge/E2E-31%20passed-brightgreen)](docs/test-report.md)
 
 [![EHDS Compliant](https://img.shields.io/badge/EHDS-Compliant-0ea5e9)](https://health.ec.europa.eu/ehealth-digital-health-and-care/european-health-data-space_en) [![FHIR R4](https://img.shields.io/badge/FHIR-R4-orange)](https://hl7.org/fhir/R4/) [![OMOP CDM](https://img.shields.io/badge/OMOP-CDM%20v5.4-yellow)](https://ohdsi.github.io/CommonDataModel/) [![EEHRxF](https://img.shields.io/badge/EEHRxF-HL7%20Europe-148F77)](https://hl7.eu/fhir/) [![Neo4j 5](https://img.shields.io/badge/Neo4j-5%20Community-008CC1?logo=neo4j&logoColor=white)](https://neo4j.com/) [![Next.js 14](https://img.shields.io/badge/Next.js-14-black?logo=next.js&logoColor=white)](https://nextjs.org/) [![Eclipse EDC](https://img.shields.io/badge/Eclipse-EDC--V-blue)](https://eclipse-edc.github.io/docs/) [![DSP Dataspace Protocol 2025-1](https://img.shields.io/badge/DSP-Dataspace%20Protocol%202025--1-6366f1)](https://docs.internationaldataspaces.org/ids-knowledgebase/v/dataspace-protocol) [![DCP Decentralized Claims Protocol v1.0](https://img.shields.io/badge/DCP-Decentralized%20Claims%20Protocol%20v1.0-7c3aed)](https://projects.eclipse.org/projects/technology.dataspace-dcp/releases/1.0.0) [![DPS](https://img.shields.io/badge/DPS-Data%20Plane%20Signaling-0891b2)](https://projects.eclipse.org/proposals/eclipse-data-plane-core) [![SIMPL](https://img.shields.io/badge/SIMPL-EU%20Cloud%20Federation-e11d48)](https://simpl-programme.eu/) [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 
@@ -251,11 +251,11 @@ See the full **[Test Report](docs/test-report.md)** for detailed metrics and inv
 
 | Suite      | Framework    |   Tests |  Files | Status      |
 | ---------- | ------------ | ------: | -----: | ----------- |
-| Unit + API | Vitest + RTL |     212 |     35 | ✅ All pass |
+| Unit + API | Vitest + RTL |     247 |     35 | ✅ All pass |
 | E2E        | Playwright   |      31 |      4 | ✅ All pass |
-| **Total**  |              | **243** | **39** | ✅          |
+| **Total**  |              | **278** | **39** | ✅          |
 
-**Code coverage** (v8): 66.3% statements · 43.2% branches · 58.4% functions · 66.5% lines
+**Code coverage** (v8): 71.76% statements · 51.15% branches · 67.16% functions · 72.10% lines
 
 ```bash
 # Run unit tests
@@ -382,7 +382,7 @@ available online at **[ma3u.github.io/MinimumViableHealthDataspacev2/docs](https
 | ------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------- |
 | [docs/planning-health-dataspace-v2.md](docs/planning-health-dataspace-v2.md)   | 7-phase implementation roadmap covering EDC-V, DCore, CFM, and Neo4j integration steps.  |
 | [docs/health-dataspace-graph-schema.md](docs/health-dataspace-graph-schema.md) | Full 5-layer Neo4j graph schema: node labels, property keys, indexes, and relationships. |
-| [docs/test-report.md](docs/test-report.md)                                     | Test suite metrics, coverage data, and test inventory (243 tests across 39 files).       |
+| [docs/test-report.md](docs/test-report.md)                                     | Test suite metrics, coverage data, and test inventory (278 tests across 39 files).       |
 | [.github/workflows/test.yml](.github/workflows/test.yml)                       | CI pipeline — lint, unit tests with coverage, Playwright E2E tests.                      |
 | [jad/openapi/](jad/openapi/)                                                   | OpenAPI specs for all JAD services (Management, Identity, Issuer APIs).                  |
 
