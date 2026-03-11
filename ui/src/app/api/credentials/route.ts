@@ -42,7 +42,7 @@ export async function GET() {
             vc.completeness     AS completeness,
             vc.conformance      AS conformance,
             vc.timeliness       AS timeliness
-     ORDER BY vc.credentialType, vc.subjectDid`,
+     ORDER BY vc.subjectDid, vc.credentialType`,
   );
 
   return NextResponse.json({ credentials });

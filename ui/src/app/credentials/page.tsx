@@ -9,6 +9,7 @@ import {
   ShieldCheck,
   FileKey2,
   Send,
+  Trash2,
 } from "lucide-react";
 
 interface VC {
@@ -44,6 +45,7 @@ export default function CredentialsPage() {
   const [expanded, setExpanded] = useState<string | null>(null);
   const [requesting, setRequesting] = useState(false);
   const [requestResult, setRequestResult] = useState<string | null>(null);
+  const [removingId, setRemovingId] = useState<string | null>(null);
 
   // Request form
   const [reqParticipant, setReqParticipant] = useState("");
@@ -168,6 +170,28 @@ export default function CredentialsPage() {
       setRequestResult("Error: Failed to submit request");
     } finally {
       setRequesting(false);
+    }
+  };
+
+  const handleRemove = async (credentialId: string) => {
+    if (!confirm("Remove this credential? This cannot be undone.")) return;
+    setRemovingId(credentialId);
+    try {
+      const res = await fetchApi(
+        `/api/credentials/${encodeURIComponent(credentialId)}`,
+        { method: "DELETE" },
+      );
+      if (res.ok) {
+        setCredentials((prev) => prev.filter((c) => c.id !== credentialId));
+        if (expanded === credentialId) setExpanded(null);
+      } else {
+        const err = await res.json();
+        alert(err.error || "Failed to remove credential");
+      }
+    } catch {
+      alert("Failed to remove credential");
+    } finally {
+      setRemovingId(null);
     }
   };
 
@@ -374,6 +398,23 @@ export default function CredentialsPage() {
                           <span className="text-gray-300">{String(v)}</span>
                         </div>
                       ))}
+                    <div className="pt-3 mt-2 border-t border-gray-700 flex justify-end">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleRemove(vc.id);
+                        }}
+                        disabled={removingId === vc.id}
+                        className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-red-400 border border-red-800 rounded hover:bg-red-900/30 disabled:opacity-50 transition-colors"
+                      >
+                        {removingId === vc.id ? (
+                          <Loader2 size={12} className="animate-spin" />
+                        ) : (
+                          <Trash2 size={12} />
+                        )}
+                        Remove
+                      </button>
+                    </div>
                   </div>
                 )}
               </div>

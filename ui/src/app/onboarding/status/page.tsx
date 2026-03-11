@@ -116,18 +116,51 @@ function OnboardingStatusContent() {
   );
 
   useEffect(() => {
-    fetchApi("/api/participants")
-      .then((r) => r.json())
-      .then((d) => {
-        const list = d.participants || [];
+    const load = async () => {
+      try {
+        // Fetch all participant contexts from EDC-V
+        const ctxRes = await fetchApi("/api/participants");
+        const ctxData = await ctxRes.json();
+        let list: ParticipantContext[] = Array.isArray(ctxData)
+          ? ctxData
+          : ctxData.participants || [];
+
+        // If tenantId is provided, filter to only contexts belonging to that tenant
+        if (tenantId && list.length > 0) {
+          try {
+            const meRes = await fetchApi("/api/participants/me");
+            const meData = await meRes.json();
+            const tenants = Array.isArray(meData) ? meData : meData.tenants || [];
+            const tenant = tenants.find(
+              (t: { id: string }) => t.id === tenantId,
+            );
+            if (tenant?.participantProfiles?.length) {
+              const tenantDids = new Set(
+                tenant.participantProfiles.map(
+                  (p: { identifier: string }) => p.identifier,
+                ),
+              );
+              list = list.filter(
+                (ctx) => tenantDids.has(ctx.identity),
+              );
+            }
+          } catch {
+            // If /me fails, show all contexts (no filtering)
+          }
+        }
+
         setParticipants(list);
         if (list.length > 0) {
           setSelectedCtx(list[0]);
         }
+      } catch {
+        // fetch failed
+      } finally {
         setLoading(false);
-      })
-      .catch(() => setLoading(false));
-  }, []);
+      }
+    };
+    load();
+  }, [tenantId]);
 
   return (
     <div className="max-w-4xl mx-auto px-6 py-10">
