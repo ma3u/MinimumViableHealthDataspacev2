@@ -3,6 +3,7 @@
  */
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 
 const mockFetchApi = vi.fn();
 vi.mock("@/lib/api", () => ({
@@ -200,8 +201,36 @@ describe("SettingsPage", () => {
     mockFetchApi.mockReset();
   });
 
+  const fullTenant = {
+    id: "tenant-abc-123",
+    version: 1,
+    properties: {
+      displayName: "SPE-1 Hospital",
+      organization: "University Medical Center",
+      ehdsParticipantType: "data-holder",
+      role: "data-holder",
+    },
+    participantProfiles: [
+      {
+        dataspaceProfileId: "dp-1",
+        participantContextId: "ctx-abcdef123456",
+        tenantId: "tenant-abc-123",
+      },
+    ],
+  };
+
+  const secondTenant = {
+    id: "tenant-xyz-789",
+    version: 1,
+    properties: {
+      displayName: "SPE-2 Research Lab",
+      organization: "Research Institute",
+      ehdsParticipantType: "data-user",
+    },
+    participantProfiles: [],
+  };
+
   it("renders heading", async () => {
-    // Settings page uses early return when loading — heading only shows after data loads
     mockFetchApi.mockReturnValue(mockResponse({ tenants: [] }));
     render(<SettingsPage />);
     await waitFor(() => {
@@ -216,21 +245,89 @@ describe("SettingsPage", () => {
   });
 
   it("renders settings after loading", async () => {
-    mockFetchApi.mockReturnValue(
-      mockResponse({
-        tenants: [
-          {
-            id: "t1",
-            version: 1,
-            properties: { displayName: "SPE-1 Hospital", role: "data-holder" },
-            participantProfiles: [],
-          },
-        ],
-      }),
-    );
+    mockFetchApi.mockReturnValue(mockResponse({ tenants: [fullTenant] }));
     render(<SettingsPage />);
     await waitFor(() => {
       expect(screen.getByText(/SPE-1 Hospital/)).toBeInTheDocument();
+    });
+  });
+
+  it("shows empty state with registration link when no tenants", async () => {
+    mockFetchApi.mockReturnValue(mockResponse({ tenants: [] }));
+    render(<SettingsPage />);
+    await waitFor(() => {
+      expect(
+        screen.getByText("No participant profile found"),
+      ).toBeInTheDocument();
+    });
+    const regLink = screen.getByText("Register first →");
+    expect(regLink).toBeInTheDocument();
+    expect(regLink.closest("a")).toHaveAttribute("href", "/onboarding");
+  });
+
+  it("renders profile details with organization and EHDS role", async () => {
+    mockFetchApi.mockReturnValue(mockResponse({ tenants: [fullTenant] }));
+    render(<SettingsPage />);
+    await waitFor(() => {
+      expect(screen.getByText("SPE-1 Hospital")).toBeInTheDocument();
+    });
+    expect(screen.getByText("University Medical Center")).toBeInTheDocument();
+    expect(screen.getByText("data-holder")).toBeInTheDocument();
+    expect(screen.getByText("tenant-abc-123")).toBeInTheDocument();
+    expect(screen.getByText("Profile")).toBeInTheDocument();
+  });
+
+  it("renders dataspace profiles section", async () => {
+    mockFetchApi.mockReturnValue(mockResponse({ tenants: [fullTenant] }));
+    render(<SettingsPage />);
+    await waitFor(() => {
+      expect(screen.getByText("Dataspace Profiles")).toBeInTheDocument();
+    });
+    expect(screen.getByText("dp-1")).toBeInTheDocument();
+    expect(screen.getByText(/ctx-abcdef12/)).toBeInTheDocument();
+  });
+
+  it("shows no dataspace profiles message when empty", async () => {
+    const tenantNoProfiles = { ...fullTenant, participantProfiles: [] };
+    mockFetchApi.mockReturnValue(mockResponse({ tenants: [tenantNoProfiles] }));
+    render(<SettingsPage />);
+    await waitFor(() => {
+      expect(
+        screen.getByText("No dataspace profiles linked yet."),
+      ).toBeInTheDocument();
+    });
+  });
+
+  it("renders save button and shows saved feedback", async () => {
+    const user = userEvent.setup();
+    mockFetchApi.mockReturnValue(mockResponse({ tenants: [fullTenant] }));
+    render(<SettingsPage />);
+    await waitFor(() => {
+      expect(screen.getByText("Save Changes")).toBeInTheDocument();
+    });
+    await user.click(screen.getByText("Save Changes"));
+    expect(screen.getByText("Saved")).toBeInTheDocument();
+  });
+
+  it("renders tenant selector when multiple tenants", async () => {
+    mockFetchApi.mockReturnValue(
+      mockResponse({ tenants: [fullTenant, secondTenant] }),
+    );
+    render(<SettingsPage />);
+    await waitFor(() => {
+      expect(screen.getByText("Active Profile")).toBeInTheDocument();
+    });
+    // Both tenant names should be in the selector
+    const select = screen.getByRole("combobox");
+    expect(select).toBeInTheDocument();
+  });
+
+  it("handles fetch error gracefully", async () => {
+    mockFetchApi.mockReturnValue(Promise.reject(new Error("fail")));
+    render(<SettingsPage />);
+    await waitFor(() => {
+      // Should show empty state (no crash), heading renders
+      expect(screen.getByText("Participant Settings")).toBeInTheDocument();
     });
   });
 });

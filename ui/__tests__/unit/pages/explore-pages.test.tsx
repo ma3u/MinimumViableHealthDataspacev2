@@ -35,6 +35,8 @@ vi.mock("next/dynamic", () => ({
   },
 }));
 
+import userEvent from "@testing-library/user-event";
+
 import GraphPage from "@/app/graph/page";
 import CatalogPage from "@/app/catalog/page";
 import PatientPage from "@/app/patient/page";
@@ -44,6 +46,36 @@ import EehrxfPage from "@/app/eehrxf/page";
 function mockResponse(data: unknown) {
   return Promise.resolve({ json: () => Promise.resolve(data), ok: true });
 }
+
+const sampleGraphData = {
+  nodes: [
+    {
+      id: "n1",
+      name: "DataProduct-A",
+      label: "DataProduct",
+      layer: 1,
+      color: "#2471A3",
+    },
+    {
+      id: "n2",
+      name: "Dataset-B",
+      label: "Dataset",
+      layer: 2,
+      color: "#148F77",
+    },
+    {
+      id: "n3",
+      name: "Patient-C",
+      label: "Patient",
+      layer: 3,
+      color: "#1E8449",
+    },
+  ],
+  links: [
+    { source: "n1", target: "n2", type: "DESCRIBES" },
+    { source: "n2", target: "n3", type: "CONTAINS" },
+  ],
+};
 
 describe("GraphPage", () => {
   beforeEach(() => {
@@ -67,6 +99,52 @@ describe("GraphPage", () => {
     render(<GraphPage />);
     await waitFor(() => {
       expect(screen.getByText(/0 nodes/)).toBeInTheDocument();
+    });
+  });
+
+  it("displays all five layer labels in the sidebar", () => {
+    mockFetchApi.mockReturnValue(new Promise(() => {}));
+    render(<GraphPage />);
+    expect(screen.getByText("L1 Marketplace")).toBeInTheDocument();
+    expect(screen.getByText("L2 HealthDCAT-AP")).toBeInTheDocument();
+    expect(screen.getByText("L3 FHIR R4")).toBeInTheDocument();
+    expect(screen.getByText("L4 OMOP CDM")).toBeInTheDocument();
+    expect(screen.getByText("L5 Ontology")).toBeInTheDocument();
+  });
+
+  it("shows node and edge counts after data loads", async () => {
+    mockFetchApi.mockReturnValue(mockResponse(sampleGraphData));
+    render(<GraphPage />);
+    await waitFor(() => {
+      expect(screen.getByText(/3 nodes/)).toBeInTheDocument();
+      expect(screen.getByText(/2 edges/)).toBeInTheDocument();
+    });
+  });
+
+  it("shows hint text when no node is selected", async () => {
+    mockFetchApi.mockReturnValue(mockResponse(sampleGraphData));
+    render(<GraphPage />);
+    await waitFor(() => {
+      expect(
+        screen.getByText(/Click a node to see details/),
+      ).toBeInTheDocument();
+    });
+  });
+
+  it("handles fetch error gracefully", async () => {
+    mockFetchApi.mockReturnValue(Promise.reject(new Error("Network error")));
+    render(<GraphPage />);
+    // After error, loading stops and ForceGraph renders (with empty data)
+    await waitFor(() => {
+      expect(screen.getByTestId("force-graph")).toBeInTheDocument();
+    });
+  });
+
+  it("renders ForceGraph component after loading", async () => {
+    mockFetchApi.mockReturnValue(mockResponse(sampleGraphData));
+    render(<GraphPage />);
+    await waitFor(() => {
+      expect(screen.getByTestId("force-graph")).toBeInTheDocument();
     });
   });
 });
@@ -124,6 +202,113 @@ describe("CatalogPage", () => {
       expect(screen.getByText("No datasets found.")).toBeInTheDocument();
     });
   });
+
+  it("filters datasets by title", async () => {
+    const user = userEvent.setup();
+    mockFetchApi.mockReturnValue(
+      mockResponse([
+        {
+          id: "ds1",
+          title: "FHIR Cohort",
+          description: "",
+          publisher: "SPE-1",
+          theme: "",
+          datasetType: "",
+          legalBasis: "",
+          recordCount: 10,
+          license: "",
+          conformsTo: "",
+        },
+        {
+          id: "ds2",
+          title: "OMOP Analysis",
+          description: "",
+          publisher: "SPE-2",
+          theme: "",
+          datasetType: "",
+          legalBasis: "",
+          recordCount: 5,
+          license: "",
+          conformsTo: "",
+        },
+      ]),
+    );
+    render(<CatalogPage />);
+    await waitFor(() =>
+      expect(screen.getByText("FHIR Cohort")).toBeInTheDocument(),
+    );
+    // Both visible initially
+    expect(screen.getByText("OMOP Analysis")).toBeInTheDocument();
+    // Type filter
+    const filterInput = screen.getByPlaceholderText(/Filter by title/);
+    await user.type(filterInput, "FHIR");
+    // After filter, only FHIR dataset should be visible
+    expect(screen.getByText("FHIR Cohort")).toBeInTheDocument();
+    expect(screen.queryByText("OMOP Analysis")).not.toBeInTheDocument();
+  });
+
+  it("expands dataset to show detail panel", async () => {
+    const user = userEvent.setup();
+    mockFetchApi.mockReturnValue(
+      mockResponse([
+        {
+          id: "ds1",
+          title: "Test Dataset",
+          description: "Desc",
+          publisher: "Pub",
+          theme: "Health",
+          datasetType: "FHIR",
+          legalBasis: "EHDS-Art53-SecondaryUse",
+          recordCount: 42,
+          license: "CC-BY",
+          conformsTo: "https://example.com/spec",
+        },
+      ]),
+    );
+    render(<CatalogPage />);
+    await waitFor(() =>
+      expect(screen.getByText("Test Dataset")).toBeInTheDocument(),
+    );
+    // Click to expand
+    await user.click(screen.getByText("Test Dataset"));
+    // Detail panel should show HealthDCAT-AP Metadata heading
+    await waitFor(() => {
+      expect(screen.getByText("HealthDCAT-AP Metadata")).toBeInTheDocument();
+    });
+    // Detail row values
+    expect(screen.getByText("View specification")).toBeInTheDocument();
+  });
+
+  it("renders legal basis label", async () => {
+    mockFetchApi.mockReturnValue(
+      mockResponse([
+        {
+          id: "ds1",
+          title: "DS",
+          description: "",
+          publisher: "",
+          theme: "",
+          datasetType: "",
+          legalBasis: "EHDS-Art53-SecondaryUse",
+          recordCount: 0,
+          license: "",
+          conformsTo: "",
+        },
+      ]),
+    );
+    render(<CatalogPage />);
+    await waitFor(() => {
+      expect(screen.getByText(/EHDS Art\. 53/)).toBeInTheDocument();
+    });
+  });
+
+  it("handles fetch error", async () => {
+    mockFetchApi.mockReturnValue(Promise.reject(new Error("fail")));
+    render(<CatalogPage />);
+    await waitFor(() => {
+      expect(screen.getByText("No datasets found.")).toBeInTheDocument();
+    });
+  });
 });
 
 describe("PatientPage", () => {
@@ -144,30 +329,98 @@ describe("PatientPage", () => {
     expect(screen.getByText(/Loading/)).toBeInTheDocument();
   });
 
+  const patientData = {
+    patients: [
+      { id: "p1", name: "John Doe", gender: "male", birthDate: "1990-01-01" },
+      {
+        id: "p2",
+        name: "Jane Smith",
+        gender: "female",
+        birthDate: "1985-06-15",
+      },
+    ],
+    stats: {
+      patients: 2,
+      encounters: 5,
+      conditions: 3,
+      observations: 10,
+      medications: 2,
+      procedures: 1,
+    },
+  };
+
   it("renders stats after loading", async () => {
-    mockFetchApi.mockReturnValue(
-      mockResponse({
-        patients: [
-          {
-            id: "p1",
-            name: "John Doe",
-            gender: "male",
-            birthDate: "1990-01-01",
-          },
-        ],
-        stats: {
-          patients: 1,
-          encounters: 5,
-          conditions: 3,
-          observations: 10,
-          medications: 2,
-          procedures: 1,
-        },
-      }),
-    );
+    mockFetchApi.mockReturnValue(mockResponse(patientData));
     render(<PatientPage />);
     await waitFor(() => {
       expect(screen.getByText(/John Doe/)).toBeInTheDocument();
+    });
+  });
+
+  it("displays stat badges with cohort stats", async () => {
+    mockFetchApi.mockReturnValue(mockResponse(patientData));
+    render(<PatientPage />);
+    await waitFor(() => {
+      expect(screen.getByText("5")).toBeInTheDocument(); // encounters (unique value)
+    });
+    expect(screen.getByText("3")).toBeInTheDocument(); // conditions
+    expect(screen.getByText("10")).toBeInTheDocument(); // observations
+  });
+
+  it("renders patient selector with all patients", async () => {
+    mockFetchApi.mockReturnValue(mockResponse(patientData));
+    render(<PatientPage />);
+    await waitFor(() => {
+      expect(screen.getByText(/John Doe/)).toBeInTheDocument();
+      expect(screen.getByText(/Jane Smith/)).toBeInTheDocument();
+    });
+  });
+
+  it("selects patient and loads timeline", async () => {
+    const user = userEvent.setup();
+    // Initial load returns patient list
+    mockFetchApi.mockReturnValue(mockResponse(patientData));
+    render(<PatientPage />);
+    await waitFor(() =>
+      expect(screen.getByText(/select patient/)).toBeInTheDocument(),
+    );
+    // Now set up mock for patient timeline call
+    mockFetchApi.mockReturnValue(
+      mockResponse({
+        patient: {
+          id: "p1",
+          name: "John Doe",
+          gender: "male",
+          birthDate: "1990-01-01",
+        },
+        timeline: [
+          {
+            date: "2024-01-15",
+            fhirType: "Encounter",
+            fhirId: "enc-1",
+            display: "Office visit",
+            omopType: "Visit",
+            omopId: "v-1",
+          },
+        ],
+      }),
+    );
+    // Select patient using the <select> element
+    const select = screen.getByRole("combobox");
+    await user.selectOptions(select, "p1");
+    await waitFor(() => {
+      expect(mockFetchApi).toHaveBeenCalledWith(
+        expect.stringContaining("patientId=p1"),
+      );
+    });
+  });
+
+  it("handles fetch error gracefully", async () => {
+    mockFetchApi.mockReturnValue(Promise.reject(new Error("network error")));
+    render(<PatientPage />);
+    await waitFor(() => {
+      // Should not crash; finishes loading
+      expect(screen.queryByText(/Loading/)).not.toBeInTheDocument();
     });
   });
 });

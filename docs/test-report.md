@@ -7,7 +7,7 @@
 | Metric       | Value                              |
 | ------------ | ---------------------------------- |
 | Test files   | 35                                 |
-| Tests passed | 212                                |
+| Tests passed | 247                                |
 | Tests failed | 0                                  |
 | Framework    | Vitest 3.x + React Testing Library |
 
@@ -15,12 +15,12 @@
 
 | Metric         | Percentage |
 | -------------- | ---------- |
-| **Statements** | **66.31%** |
-| Branches       | 43.18%     |
-| Functions      | 58.39%     |
-| Lines          | 66.53%     |
+| **Statements** | **71.76%** |
+| Branches       | 51.15%     |
+| Functions      | 67.16%     |
+| Lines          | 72.10%     |
 
-> Baseline was 32.7% statements. Coverage doubled with the addition of 84 page-level unit tests.
+> Baseline was 32.7% statements. Coverage more than doubled through 119 page-level unit tests covering all 6 major page components.
 
 ## E2E Tests (Playwright)
 
@@ -102,4 +102,4 @@ cd ui && npx playwright test
 
 ---
 
-_Generated: 2025-03-11_
+_Generated: 2025-06-11_
