@@ -72,12 +72,12 @@ export default function NlqPage() {
   useEffect(() => {
     // Load templates and federated stats on mount
     fetchApi("/api/nlq")
-      .then((r) => r.json())
-      .then((d) => setTemplates(d.templates ?? []))
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => setTemplates(d?.templates ?? []))
       .catch(() => {});
     fetchApi("/api/federated")
-      .then((r) => r.json())
-      .then((d) => setStats(d))
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => { if (d?.totals) setStats(d); })
       .catch(() => {});
   }, []);
 
@@ -135,7 +135,7 @@ export default function NlqPage() {
                 Ask questions about the Health Dataspace knowledge graph
               </p>
             </div>
-            {stats && (
+            {stats?.totals && (
               <div className="flex gap-6 text-sm">
                 <div className="text-center">
                   <div className="text-lg font-semibold text-blue-400">
