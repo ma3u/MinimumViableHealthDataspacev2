@@ -85,5 +85,84 @@ describe("/api/participants", () => {
       const data = await response.json();
       expect(data.error).toContain("cells");
     });
+
+    it("should return 503 when no dataspace profiles found", async () => {
+      mockTenant
+        .mockResolvedValueOnce([{ id: "cell-1" }]) // cells
+        .mockResolvedValueOnce([]); // profiles — empty
+
+      const req = new NextRequest("http://localhost:3000/api/participants", {
+        method: "POST",
+        body: JSON.stringify({
+          displayName: "Test Clinic",
+          role: "data_holder",
+        }),
+      });
+      const response = await POST(req);
+      expect(response.status).toBe(503);
+      const data = await response.json();
+      expect(data.error).toContain("profiles");
+    });
+
+    it("should create tenant + participant and return 201", async () => {
+      mockTenant
+        .mockResolvedValueOnce([{ id: "cell-1" }]) // cells
+        .mockResolvedValueOnce([{ id: "profile-1" }]) // profiles
+        .mockResolvedValueOnce({ id: "tenant-abc" }) // create tenant
+        .mockResolvedValueOnce({ id: "participant-xyz" }); // create participant
+
+      const req = new NextRequest("http://localhost:3000/api/participants", {
+        method: "POST",
+        body: JSON.stringify({
+          displayName: "Test Clinic",
+          organization: "Test Org",
+          role: "data_holder",
+          ehdsParticipantType: "data_holder",
+        }),
+      });
+      const response = await POST(req);
+      const data = await response.json();
+
+      expect(response.status).toBe(201);
+      expect(data.tenantId).toBe("tenant-abc");
+      expect(data.participantId).toBe("participant-xyz");
+      expect(data.displayName).toBe("Test Clinic");
+      expect(data.status).toBe("provisioning");
+
+      // Verify tenant creation call
+      expect(mockTenant).toHaveBeenCalledWith(
+        "/v1alpha1/tenants",
+        "POST",
+        expect.objectContaining({
+          properties: expect.objectContaining({
+            displayName: "Test Clinic",
+            organization: "Test Org",
+          }),
+        }),
+      );
+
+      // Verify participant profile creation call
+      expect(mockTenant).toHaveBeenCalledWith(
+        "/v1alpha1/tenants/tenant-abc/participant-profiles",
+        "POST",
+        { cellId: "cell-1", dataspaceProfileId: "profile-1" },
+      );
+    });
+
+    it("should return 502 when tenant creation fails", async () => {
+      mockTenant.mockRejectedValue(new Error("Service unavailable"));
+
+      const req = new NextRequest("http://localhost:3000/api/participants", {
+        method: "POST",
+        body: JSON.stringify({
+          displayName: "Test Clinic",
+          role: "data_holder",
+        }),
+      });
+      const response = await POST(req);
+      expect(response.status).toBe(502);
+      const data = await response.json();
+      expect(data.error).toContain("Failed to create participant");
+    });
   });
 });

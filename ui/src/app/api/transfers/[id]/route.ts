@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { edcClient, EDC_CONTEXT } from "@/lib/edc";
+import { edcClient } from "@/lib/edc";
 
 export const dynamic = "force-dynamic";
 

@@ -1,3 +1,41 @@
+/** Static-export mock path mapping — keyed by exact endpoint or prefix */
+const STATIC_MOCK_MAP: Record<string, string> = {
+  "/api/catalog": "/mock/catalog.json",
+  "/api/graph": "/mock/graph.json",
+  "/api/compliance": "/mock/compliance.json",
+  "/api/compliance/tck": "/mock/compliance_tck.json",
+  "/api/patient": "/mock/patient.json",
+  "/api/analytics": "/mock/analytics.json",
+  "/api/eehrxf": "/mock/eehrxf.json",
+  "/api/nlq": "/mock/nlq_templates.json",
+  "/api/federated": "/mock/federated_stats.json",
+  "/api/credentials": "/mock/credentials.json",
+  "/api/participants": "/mock/participants.json",
+  "/api/participants/me": "/mock/participants_me.json",
+  "/api/assets": "/mock/assets.json",
+  "/api/admin/tenants": "/mock/admin_tenants.json",
+  "/api/admin/policies": "/mock/admin_policies.json",
+};
+
+/** Prefix-based mock paths — matched via startsWith (checked after exact) */
+const STATIC_MOCK_PREFIX: [string, string][] = [
+  ["/api/compliance?", "/mock/compliance_check.json"],
+  ["/api/patient?", "/mock/patient_default.json"],
+  ["/api/negotiations", "/mock/negotiations.json"],
+  ["/api/transfers", "/mock/transfers.json"],
+  ["/api/admin/audit", "/mock/admin_audit.json"],
+];
+
+function resolveMockPath(endpoint: string): string {
+  const exact = STATIC_MOCK_MAP[endpoint];
+  if (exact) return exact;
+
+  for (const [prefix, path] of STATIC_MOCK_PREFIX) {
+    if (endpoint.startsWith(prefix)) return path;
+  }
+  return endpoint; // fallback: pass through unchanged
+}
+
 export async function fetchApi(
   endpoint: string,
   init?: RequestInit,
@@ -6,40 +44,7 @@ export async function fetchApi(
   const basePath = isStatic ? "/MinimumViableHealthDataspacev2" : "";
 
   if (isStatic) {
-    let mockPath = endpoint;
-    if (endpoint === "/api/catalog") mockPath = "/mock/catalog.json";
-    else if (endpoint === "/api/graph") mockPath = "/mock/graph.json";
-    else if (endpoint === "/api/compliance") mockPath = "/mock/compliance.json";
-    else if (endpoint === "/api/compliance/tck")
-      mockPath = "/mock/compliance_tck.json";
-    else if (endpoint.startsWith("/api/compliance?"))
-      mockPath = "/mock/compliance_check.json";
-    else if (endpoint === "/api/patient") mockPath = "/mock/patient.json";
-    else if (endpoint.startsWith("/api/patient?"))
-      mockPath = "/mock/patient_default.json";
-    else if (endpoint === "/api/analytics") mockPath = "/mock/analytics.json";
-    else if (endpoint === "/api/eehrxf") mockPath = "/mock/eehrxf.json";
-    else if (endpoint === "/api/nlq") mockPath = "/mock/nlq_templates.json";
-    else if (endpoint === "/api/federated")
-      mockPath = "/mock/federated_stats.json";
-    else if (endpoint === "/api/credentials")
-      mockPath = "/mock/credentials.json";
-    else if (endpoint === "/api/participants")
-      mockPath = "/mock/participants.json";
-    else if (endpoint === "/api/participants/me")
-      mockPath = "/mock/participants_me.json";
-    else if (endpoint === "/api/assets") mockPath = "/mock/assets.json";
-    else if (endpoint.startsWith("/api/negotiations"))
-      mockPath = "/mock/negotiations.json";
-    else if (endpoint.startsWith("/api/transfers"))
-      mockPath = "/mock/transfers.json";
-    else if (endpoint === "/api/admin/tenants")
-      mockPath = "/mock/admin_tenants.json";
-    else if (endpoint === "/api/admin/policies")
-      mockPath = "/mock/admin_policies.json";
-    else if (endpoint.startsWith("/api/admin/audit"))
-      mockPath = "/mock/admin_audit.json";
-
+    const mockPath = resolveMockPath(endpoint);
     // Simulate small latency to make it feel natural
     await new Promise((resolve) => setTimeout(resolve, 300));
     return fetch(basePath + mockPath, init);
