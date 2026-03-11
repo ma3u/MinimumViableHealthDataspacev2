@@ -8,8 +8,21 @@ import { type NextAuthOptions } from "next-auth";
  *   - Browser-side (authorization redirect): KEYCLOAK_PUBLIC_URL → http://localhost:8080/realms/edcv
  */
 
-const keycloakIssuer = process.env.KEYCLOAK_ISSUER!; // Docker-internal: http://keycloak:8080/realms/edcv
-const keycloakPublicUrl = process.env.KEYCLOAK_PUBLIC_URL!; // Browser-facing: http://localhost:8080/realms/edcv
+/**
+ * Keycloak URL split (Docker hostname mismatch):
+ *   - KEYCLOAK_ISSUER: reachable from the Next.js server (localhost or Docker-internal)
+ *   - KEYCLOAK_PUBLIC_URL: reachable from the browser (always localhost)
+ *
+ * Keycloak sets its `iss` claim to its KC_HOSTNAME (e.g. http://keycloak:8080).
+ * When Next.js runs on the host, `issuer` validation would fail because the
+ * server-side URL (localhost:8080) ≠ the Docker-internal `iss` claim.
+ * Fix: omit `issuer` from the provider so NextAuth skips OIDC discovery and
+ * issuer validation. All endpoints are specified explicitly below.
+ */
+const keycloakServerUrl =
+  process.env.KEYCLOAK_ISSUER ?? "http://localhost:8080/realms/edcv";
+const keycloakPublicUrl =
+  process.env.KEYCLOAK_PUBLIC_URL ?? "http://localhost:8080/realms/edcv";
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -17,17 +30,19 @@ export const authOptions: NextAuthOptions = {
       id: "keycloak",
       name: "Keycloak",
       type: "oauth",
-      // Explicit endpoint split: browser-facing for authorization, Docker-internal for server-side
-      issuer: keycloakIssuer,
+      // NOTE: `issuer` is intentionally omitted — see comment above.
+      // All endpoints are specified explicitly to avoid Docker hostname mismatch.
       clientId: process.env.KEYCLOAK_CLIENT_ID!,
       clientSecret: process.env.KEYCLOAK_CLIENT_SECRET!,
       authorization: {
         url: `${keycloakPublicUrl}/protocol/openid-connect/auth`,
         params: { scope: "openid profile email" },
       },
-      token: `${keycloakIssuer}/protocol/openid-connect/token`,
-      userinfo: `${keycloakIssuer}/protocol/openid-connect/userinfo`,
-      jwks_endpoint: `${keycloakIssuer}/protocol/openid-connect/certs`,
+      token: `${keycloakServerUrl}/protocol/openid-connect/token`,
+      userinfo: `${keycloakServerUrl}/protocol/openid-connect/userinfo`,
+      jwks_endpoint: `${keycloakServerUrl}/protocol/openid-connect/certs`,
+      // Skip ID-token iss validation (Docker hostname ≠ localhost)
+      idToken: false,
       checks: ["pkce", "state"],
       profile(profile: any) {
         return {

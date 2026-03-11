@@ -51,5 +51,35 @@ describe("lib/auth", () => {
       expect(authOptions.callbacks?.jwt).toBeDefined();
       expect(authOptions.callbacks?.session).toBeDefined();
     });
+
+    it("should NOT have issuer set (Docker hostname mismatch fix)", () => {
+      const provider = authOptions.providers[0] as Record<string, unknown>;
+      // issuer must be omitted to prevent NextAuth from validating the
+      // Docker-internal iss claim (keycloak:8080) against the host URL
+      expect(provider.issuer).toBeUndefined();
+    });
+
+    it("should have idToken disabled (skip iss claim validation)", () => {
+      const provider = authOptions.providers[0] as Record<string, unknown>;
+      expect(provider.idToken).toBe(false);
+    });
+
+    it("should have explicit OIDC endpoints (no auto-discovery)", () => {
+      const provider = authOptions.providers[0] as Record<string, unknown>;
+      expect(provider.authorization).toBeDefined();
+      expect(provider.token).toBeDefined();
+      expect(provider.userinfo).toBeDefined();
+      expect(provider.jwks_endpoint).toBeDefined();
+    });
+
+    it("should use PKCE and state checks", () => {
+      const provider = authOptions.providers[0] as Record<string, unknown>;
+      expect(provider.checks).toContain("pkce");
+      expect(provider.checks).toContain("state");
+    });
+
+    it("should set session maxAge to 8 hours", () => {
+      expect(authOptions.session?.maxAge).toBe(8 * 60 * 60);
+    });
   });
 });

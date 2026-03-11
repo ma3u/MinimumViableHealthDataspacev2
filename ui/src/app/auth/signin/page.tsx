@@ -24,8 +24,12 @@ function SignInContent() {
         {error && (
           <div className="bg-red-900/50 border border-red-700 rounded p-3 mb-4 text-sm text-red-300">
             {error === "OAuthCallback"
-              ? "Authentication failed. Please try again."
-              : `Error: ${error}`}
+              ? "Authentication callback failed. Keycloak may be unreachable or misconfigured."
+              : error === "Callback"
+                ? "OAuth callback error — check that Keycloak is running and the redirect URI is registered."
+                : error === "OAuthSignin"
+                  ? "Could not start sign-in flow. Is Keycloak running on port 8080?"
+                  : `Error: ${error}`}
           </div>
         )}
 
