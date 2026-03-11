@@ -7,9 +7,9 @@ export const dynamic = "force-dynamic";
  * GET /api/compliance/tck
  *
  * Returns a combined compliance scorecard by:
- *  1. Probing EDC Management API health endpoints (DSP layer)
- *  2. Probing IdentityHub / IssuerService (DCP layer)
- *  3. Running Neo4j graph-integrity queries (EHDS layer)
+ *  1. Fetching DSP + DCP results from neo4j-proxy /tck endpoint
+ *     (runs inside Docker network with correct auth context)
+ *  2. Running Neo4j graph-integrity queries directly (EHDS layer)
  */
 
 interface TestResult {
@@ -21,154 +21,60 @@ interface TestResult {
   detail: string;
 }
 
-const EDC_MGMT =
-  process.env.EDC_MANAGEMENT_URL ??
-  "http://health-dataspace-controlplane:8081/api/mgmt";
-const IDENTITY_URL =
-  process.env.EDC_IDENTITY_URL ??
-  "http://health-dataspace-identityhub:7081/api/identity";
-const ISSUER_URL =
-  process.env.EDC_ISSUER_URL ??
-  "http://health-dataspace-issuerservice:10013/api/admin";
-
-const PARTICIPANTS = [
-  "test-clinic",
-  "clinic-charite",
-  "cro-bayer",
-  "hdab-bfarm",
-];
-
-async function probe(url: string, init?: RequestInit): Promise<boolean> {
-  try {
-    const res = await fetch(url, {
-      ...init,
-      signal: AbortSignal.timeout(5000),
-    });
-    return res.ok;
-  } catch {
-    return false;
-  }
-}
-
-async function probeJson<T>(
-  url: string,
-  init?: RequestInit,
-): Promise<T | null> {
-  try {
-    const res = await fetch(url, {
-      ...init,
-      signal: AbortSignal.timeout(5000),
-    });
-    if (!res.ok) return null;
-    return (await res.json()) as T;
-  } catch {
-    return null;
-  }
-}
+const NEO4J_PROXY_URL =
+  process.env.NEO4J_PROXY_URL ?? "http://localhost:9090";
 
 export async function GET() {
   const results: TestResult[] = [];
   const timestamp = new Date().toISOString();
 
-  // ── DSP Suite ────────────────────────────────────────────────────
-  // DSP-1: Readiness
-  const readiness = await probe(
-    `${EDC_MGMT.replace("/api/mgmt", "")}/api/check/readiness`,
-  );
-  results.push({
-    id: "DSP-1.1",
-    category: "Schema Compliance",
-    suite: "DSP",
-    name: "Control Plane Readiness",
-    status: readiness ? "pass" : "fail",
-    detail: readiness
-      ? "GET /api/check/readiness → 200"
-      : "Control plane not reachable",
-  });
-
-  // DSP-2: Liveness
-  const liveness = await probe(
-    `${EDC_MGMT.replace("/api/mgmt", "")}/api/check/liveness`,
-  );
-  results.push({
-    id: "DSP-1.2",
-    category: "Schema Compliance",
-    suite: "DSP",
-    name: "Control Plane Liveness",
-    status: liveness ? "pass" : "fail",
-    detail: liveness
-      ? "GET /api/check/liveness → 200"
-      : "Liveness probe failed",
-  });
-
-  // DSP-3: Catalog per participant
-  for (const ctx of PARTICIPANTS) {
-    const body = JSON.stringify({
-      "@context": ["https://w3id.org/edc/connector/management/v2"],
-      "@type": "QuerySpec",
+  // ── DSP + DCP Suites (via neo4j-proxy running inside Docker) ─────
+  try {
+    const proxyRes = await fetch(`${NEO4J_PROXY_URL}/tck`, {
+      signal: AbortSignal.timeout(30000),
     });
-    const data = await probeJson<{ "@type"?: string }>(
-      `${EDC_MGMT}/v5alpha/participants/${ctx}/catalog/request`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body,
-      },
-    );
+    if (proxyRes.ok) {
+      const proxyData = (await proxyRes.json()) as {
+        results: TestResult[];
+      };
+      results.push(...proxyData.results);
+    } else {
+      // Proxy returned an error — add error entries for DSP + DCP
+      results.push({
+        id: "DSP-ERR",
+        category: "Schema Compliance",
+        suite: "DSP",
+        name: "DSP proxy check",
+        status: "fail",
+        detail: `neo4j-proxy /tck returned ${proxyRes.status}`,
+      });
+      results.push({
+        id: "DCP-ERR",
+        category: "DID Resolution",
+        suite: "DCP",
+        name: "DCP proxy check",
+        status: "fail",
+        detail: `neo4j-proxy /tck returned ${proxyRes.status}`,
+      });
+    }
+  } catch (err) {
     results.push({
-      id: `DSP-2.${PARTICIPANTS.indexOf(ctx) + 1}`,
-      category: "Catalog Protocol",
+      id: "DSP-ERR",
+      category: "Schema Compliance",
       suite: "DSP",
-      name: `Catalog query — ${ctx}`,
-      status: data ? "pass" : "fail",
-      detail: data
-        ? `Catalog response type: ${data["@type"] ?? "ok"}`
-        : "Catalog request failed",
+      name: "DSP proxy connectivity",
+      status: "fail",
+      detail: `neo4j-proxy unreachable: ${err instanceof Error ? err.message : String(err)}`,
     });
-  }
-
-  // ── DCP Suite ────────────────────────────────────────────────────
-  // DCP-1: IdentityHub health
-  const ihHealth = await probe(IDENTITY_URL);
-  results.push({
-    id: "DCP-1.1",
-    category: "DID Resolution",
-    suite: "DCP",
-    name: "IdentityHub reachable",
-    status: ihHealth ? "pass" : "fail",
-    detail: ihHealth ? "IdentityHub responded" : "IdentityHub unreachable",
-  });
-
-  // DCP-2: Key pairs per participant
-  for (const ctx of PARTICIPANTS) {
-    const data = await probeJson<unknown[]>(
-      `${IDENTITY_URL}/v1alpha/participants/${ctx}/keypairs`,
-    );
-    const hasPairs = Array.isArray(data) && data.length > 0;
     results.push({
-      id: `DCP-2.${PARTICIPANTS.indexOf(ctx) + 1}`,
-      category: "Key Pair Management",
+      id: "DCP-ERR",
+      category: "DID Resolution",
       suite: "DCP",
-      name: `Key pairs — ${ctx}`,
-      status: hasPairs ? "pass" : "fail",
-      detail: hasPairs ? `${data!.length} key pair(s) found` : "No key pairs",
+      name: "DCP proxy connectivity",
+      status: "fail",
+      detail: `neo4j-proxy unreachable: ${err instanceof Error ? err.message : String(err)}`,
     });
   }
-
-  // DCP-3: IssuerService health
-  const issuerHealth = await probe(
-    `${ISSUER_URL}/v1alpha/credentialdefinitions`,
-  );
-  results.push({
-    id: "DCP-3.1",
-    category: "Issuer Service",
-    suite: "DCP",
-    name: "IssuerService reachable",
-    status: issuerHealth ? "pass" : "fail",
-    detail: issuerHealth
-      ? "IssuerService responded"
-      : "IssuerService unreachable",
-  });
 
   // ── EHDS Suite ───────────────────────────────────────────────────
   try {

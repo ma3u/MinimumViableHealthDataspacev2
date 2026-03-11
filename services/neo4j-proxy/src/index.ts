@@ -1464,6 +1464,304 @@ app.get("/nlq/templates", (_req: Request, res: Response) => {
   });
 });
 
+// ---- TCK Compliance Endpoint -----------------------------------------------
+
+/**
+ * GET /tck
+ *
+ * Runs DSP + DCP compliance checks from inside the Docker network where:
+ *  - Docker hostnames (controlplane, identityhub, etc.) resolve correctly
+ *  - Keycloak tokens have the correct issuer claim (keycloak:8080)
+ *
+ * The UI's /api/compliance/tck route calls this endpoint for DSP/DCP checks,
+ * while running EHDS (Neo4j) checks directly.
+ */
+
+const TCK_KEYCLOAK_URL =
+  process.env.TCK_KEYCLOAK_URL ?? "http://keycloak:8080";
+const TCK_KEYCLOAK_REALM = process.env.TCK_KEYCLOAK_REALM ?? "edcv";
+const TCK_CLIENT_ID = process.env.TCK_CLIENT_ID ?? "admin";
+const TCK_CLIENT_SECRET =
+  process.env.TCK_CLIENT_SECRET ?? "edc-v-admin-secret";
+
+const TCK_CONTROLPLANE_DEFAULT_URL =
+  process.env.TCK_CONTROLPLANE_DEFAULT_URL ?? "http://controlplane:8080";
+const TCK_CONTROLPLANE_MGMT_URL =
+  process.env.TCK_CONTROLPLANE_MGMT_URL ??
+  "http://controlplane:8081/api/mgmt";
+const TCK_IDENTITY_URL =
+  process.env.TCK_IDENTITY_URL ??
+  "http://identityhub:7081/api/identity";
+const TCK_ISSUER_URL =
+  process.env.TCK_ISSUER_URL ??
+  "http://issuerservice:10013/api/admin";
+
+const TCK_PARTICIPANTS = [
+  "test-clinic",
+  "clinic-charite",
+  "cro-bayer",
+  "hdab-bfarm",
+];
+
+interface TckTestResult {
+  id: string;
+  category: string;
+  suite: "DSP" | "DCP";
+  name: string;
+  status: "pass" | "fail" | "skip";
+  detail: string;
+}
+
+async function tckGetToken(): Promise<string | null> {
+  try {
+    const tokenUrl = `${TCK_KEYCLOAK_URL}/realms/${TCK_KEYCLOAK_REALM}/protocol/openid-connect/token`;
+    const resp = await fetch(tokenUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: `grant_type=client_credentials&client_id=${TCK_CLIENT_ID}&client_secret=${TCK_CLIENT_SECRET}`,
+      signal: AbortSignal.timeout(5000),
+    });
+    if (!resp.ok) return null;
+    const data = (await resp.json()) as { access_token?: string };
+    return data.access_token ?? null;
+  } catch {
+    return null;
+  }
+}
+
+async function tckProbe(url: string, init?: RequestInit): Promise<boolean> {
+  try {
+    const res = await fetch(url, {
+      ...init,
+      signal: AbortSignal.timeout(5000),
+    });
+    return res.ok;
+  } catch {
+    return false;
+  }
+}
+
+async function tckProbeJson<T>(
+  url: string,
+  init?: RequestInit,
+): Promise<T | null> {
+  try {
+    const res = await fetch(url, {
+      ...init,
+      signal: AbortSignal.timeout(5000),
+    });
+    if (!res.ok) return null;
+    return (await res.json()) as T;
+  } catch {
+    return null;
+  }
+}
+
+app.get("/tck", async (_req: Request, res: Response) => {
+  const results: TckTestResult[] = [];
+
+  // --- Get auth token from Keycloak (Docker-internal) ---
+  const token = await tckGetToken();
+  const authHeaders: Record<string, string> = token
+    ? { Authorization: `Bearer ${token}` }
+    : {};
+
+  // ── DSP Suite ────────────────────────────────────────────────
+  // DSP-1.1: Readiness (port 8080 default web port, no auth required)
+  const readiness = await tckProbe(
+    `${TCK_CONTROLPLANE_DEFAULT_URL}/api/check/readiness`,
+  );
+  results.push({
+    id: "DSP-1.1",
+    category: "Schema Compliance",
+    suite: "DSP",
+    name: "Control Plane Readiness",
+    status: readiness ? "pass" : "fail",
+    detail: readiness
+      ? "GET /api/check/readiness → 200"
+      : "Control plane not reachable",
+  });
+
+  // DSP-1.2: Liveness (port 8080 default web port, no auth required)
+  const liveness = await tckProbe(
+    `${TCK_CONTROLPLANE_DEFAULT_URL}/api/check/liveness`,
+  );
+  results.push({
+    id: "DSP-1.2",
+    category: "Schema Compliance",
+    suite: "DSP",
+    name: "Control Plane Liveness",
+    status: liveness ? "pass" : "fail",
+    detail: liveness
+      ? "GET /api/check/liveness → 200"
+      : "Liveness probe failed",
+  });
+
+  // DSP-2.x: Catalog per participant (requires auth; need real context IDs)
+  // First, list participant contexts to map friendly names → context IDs
+  const participantContexts = await tckProbeJson<
+    Array<{ "@id": string; identity: string }>
+  >(`${TCK_CONTROLPLANE_MGMT_URL}/v5alpha/participants`, {
+    headers: { ...authHeaders, "Content-Type": "application/json" },
+  });
+
+  for (const name of TCK_PARTICIPANTS) {
+    const idx = TCK_PARTICIPANTS.indexOf(name) + 1;
+    // Find context ID by matching the identity DID suffix
+    const ctx = participantContexts?.find((p) =>
+      p.identity?.includes(`:${name}`),
+    );
+
+    if (!ctx) {
+      results.push({
+        id: `DSP-2.${idx}`,
+        category: "Catalog Protocol",
+        suite: "DSP",
+        name: `Catalog query — ${name}`,
+        status: "fail",
+        detail: `ParticipantContext '${name}' not found`,
+      });
+      continue;
+    }
+
+    // Query local assets for this participant (validates auth + context + mgmt API)
+    const assetsBody = JSON.stringify({
+      "@context": ["https://w3id.org/edc/connector/management/v2"],
+      "@type": "QuerySpec",
+    });
+    const assets = await tckProbeJson<unknown[]>(
+      `${TCK_CONTROLPLANE_MGMT_URL}/v5alpha/participants/${ctx["@id"]}/assets/request`,
+      {
+        method: "POST",
+        headers: { ...authHeaders, "Content-Type": "application/json" },
+        body: assetsBody,
+      },
+    );
+    results.push({
+      id: `DSP-2.${idx}`,
+      category: "Catalog Protocol",
+      suite: "DSP",
+      name: `Catalog query — ${name}`,
+      status: Array.isArray(assets) ? "pass" : "fail",
+      detail: Array.isArray(assets)
+        ? `${assets.length} asset(s) for ${name}`
+        : "Assets query failed",
+    });
+  }
+
+  // ── DCP Suite ────────────────────────────────────────────────
+  // DCP-1.1: IdentityHub reachable (participant list with auth)
+  const ihData = await tckProbeJson<unknown[]>(
+    `${TCK_IDENTITY_URL}/v1alpha/participants`,
+    { headers: { ...authHeaders, "Content-Type": "application/json" } },
+  );
+  const ihReachable = Array.isArray(ihData);
+  results.push({
+    id: "DCP-1.1",
+    category: "DID Resolution",
+    suite: "DCP",
+    name: "IdentityHub reachable",
+    status: ihReachable ? "pass" : "fail",
+    detail: ihReachable
+      ? `IdentityHub responded with ${ihData!.length} participant(s)`
+      : "IdentityHub unreachable",
+  });
+
+  // DCP-2.x: Key pairs per participant (use participantContextId from IH)
+  // The IdentityHub uses its own participantContextId (UUID), same as controlplane
+  const ihParticipants = Array.isArray(ihData)
+    ? (ihData as Array<{ participantContextId?: string }>)
+    : [];
+
+  for (const name of TCK_PARTICIPANTS) {
+    const idx = TCK_PARTICIPANTS.indexOf(name) + 1;
+    // Map friendly name → participantContextId via controlplane contexts
+    const cpCtx = participantContexts?.find((p) =>
+      p.identity?.includes(`:${name}`),
+    );
+    const pcId = cpCtx?.["@id"];
+    // Also check IH participant list for matching context
+    const ihMatch = ihParticipants.find(
+      (p) => p.participantContextId === pcId,
+    );
+    const contextId = ihMatch?.participantContextId ?? pcId;
+
+    if (!contextId) {
+      results.push({
+        id: `DCP-2.${idx}`,
+        category: "Key Pair Management",
+        suite: "DCP",
+        name: `Key pairs — ${name}`,
+        status: "fail",
+        detail: `ParticipantContext for '${name}' not found`,
+      });
+      continue;
+    }
+
+    const data = await tckProbeJson<unknown[]>(
+      `${TCK_IDENTITY_URL}/v1alpha/participants/${contextId}/keypairs`,
+      { headers: { ...authHeaders, "Content-Type": "application/json" } },
+    );
+    const hasPairs = Array.isArray(data) && data.length > 0;
+    results.push({
+      id: `DCP-2.${idx}`,
+      category: "Key Pair Management",
+      suite: "DCP",
+      name: `Key pairs — ${name}`,
+      status: hasPairs ? "pass" : "fail",
+      detail: hasPairs ? `${data!.length} key pair(s) found` : "No key pairs",
+    });
+  }
+
+  // DCP-3.1: IssuerService reachable (per-participant credential definitions query)
+  // Use the first available participant context ID
+  const firstPcId = participantContexts?.[0]?.["@id"];
+  if (firstPcId) {
+    const issuerData = await tckProbeJson<unknown[]>(
+      `${TCK_ISSUER_URL}/v1alpha/participants/${firstPcId}/credentialdefinitions/query`,
+      {
+        method: "POST",
+        headers: { ...authHeaders, "Content-Type": "application/json" },
+        body: JSON.stringify({
+          "@context": ["https://w3id.org/edc/connector/management/v2"],
+          "@type": "QuerySpec",
+        }),
+      },
+    );
+    const issuerReachable = Array.isArray(issuerData);
+    results.push({
+      id: "DCP-3.1",
+      category: "Issuer Service",
+      suite: "DCP",
+      name: "IssuerService reachable",
+      status: issuerReachable ? "pass" : "fail",
+      detail: issuerReachable
+        ? `IssuerService responded with ${issuerData!.length} credential definition(s)`
+        : "IssuerService unreachable",
+    });
+  } else {
+    results.push({
+      id: "DCP-3.1",
+      category: "Issuer Service",
+      suite: "DCP",
+      name: "IssuerService reachable",
+      status: "fail",
+      detail: "No participant context available to query IssuerService",
+    });
+  }
+
+  // ── Response ─────────────────────────────────────────────────
+  const passed = results.filter((r) => r.status === "pass").length;
+  const failed = results.filter((r) => r.status === "fail").length;
+  const skipped = results.filter((r) => r.status === "skip").length;
+
+  res.json({
+    timestamp: new Date().toISOString(),
+    summary: { total: results.length, passed, failed, skipped },
+    results,
+  });
+});
+
 // ---- Error handler ---------------------------------------------------------
 
 app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
@@ -1527,6 +1825,7 @@ async function main() {
     console.log(`  GET  /federated/stats            (Phase 5)`);
     console.log(`  POST /nlq                        (Phase 5c — Text2Cypher)`);
     console.log(`  GET  /nlq/templates              (Phase 5c)`);
+    console.log(`  GET  /tck                        (TCK compliance probes)`);
     if (spe2Driver) {
       console.log(`  ✅ Federated mode: 2 SPEs connected`);
     }

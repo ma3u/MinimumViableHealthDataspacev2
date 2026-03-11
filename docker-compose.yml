@@ -68,6 +68,8 @@ services:
       EDC_SERVICE_CLIENT_ID: admin
       EDC_SERVICE_CLIENT_SECRET: edc-v-admin-secret
       KEYCLOAK_INTERNAL_URL: http://keycloak:8080
+      # neo4j-proxy TCK compliance endpoint (Docker-internal)
+      NEO4J_PROXY_URL: http://neo4j-proxy:9090
     depends_on:
       - neo4j
     networks:
