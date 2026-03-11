@@ -432,6 +432,110 @@ compliance testing.
 | 6b    | Unified Participant Portal — 12 pages, 11 API routes, dropdown nav, auth middleware             | ✅ Complete |
 | 7     | TCK DCP & DSP Compliance Verification — protocol conformance testing                            | 🔲 Planned  |
 
+### Container Inventory
+
+The full stack comprises **22 containers** across two Docker Compose files. Containers are
+grouped by startup tier — Docker Compose launches each tier in parallel once all dependencies
+in the previous tier report healthy. The `neo4j-spe2` and `jad-seed` containers only start
+when their respective profiles (`federated`, `seed`) are explicitly activated.
+
+![ORB K8s cluster with all Minimum Viable Health Dataspace V2](image-1.png)
+
+```
+Tier 0 ──► Tier 1 ──► Tier 2 ──► Tier 3 ──► Tier 4
+```
+
+#### Tier 0 — Infrastructure Foundations (no dependencies, start first)
+
+| #   | Service        | Container Name                | Compose File             | Port(s)    | Description                                                                                                                                       |
+| --- | -------------- | ----------------------------- | ------------------------ | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | `neo4j`        | `health-dataspace-neo4j`      | `docker-compose.yml`     | 7474, 7687 | Neo4j 5 Community — primary graph database with APOC + n10s plugins. Stores the 5-layer knowledge graph.                                          |
+| 2   | `postgres`     | `health-dataspace-postgres`   | `docker-compose.jad.yml` | 5432       | PostgreSQL 17 — multi-database server (8 schemas: controlplane, identityhub, issuerservice, dataplane, dataplane_omop, keycloak, cfm, redlinedb). |
+| 3   | `vault`        | `health-dataspace-vault`      | `docker-compose.jad.yml` | 8200       | HashiCorp Vault (dev mode) — secret management for signing keys, AES keys, and data plane token keys.                                             |
+| 4   | `nats`         | `health-dataspace-nats`       | `docker-compose.jad.yml` | 4222, 8222 | NATS JetStream — async messaging bus for contract negotiation and transfer process state machine events.                                          |
+| 5   | `traefik`      | `health-dataspace-traefik`    | `docker-compose.jad.yml` | 80, 8090   | Traefik v3 reverse proxy — routes `*.localhost` domains to internal services; replaces K8s Gateway API.                                           |
+| 6   | `neo4j-spe2` ¹ | `health-dataspace-neo4j-spe2` | `docker-compose.yml`     | 7475, 7688 | Neo4j 5 Community — second Secure Processing Environment for federated query testing (Phase 5).                                                   |
+
+> ¹ Only starts with `--profile federated`.
+
+#### Tier 1 — Core Identity & UI (depend on Tier 0)
+
+| #   | Service          | Container Name              | Compose File             | Port(s)    | Dependencies | Description                                                                                                       |
+| --- | ---------------- | --------------------------- | ------------------------ | ---------- | ------------ | ----------------------------------------------------------------------------------------------------------------- |
+| 7   | `keycloak`       | `health-dataspace-keycloak` | `docker-compose.jad.yml` | 8080, 9000 | `postgres`   | Keycloak — OAuth2/OIDC identity provider. Hosts `edcv` realm with 3 demo users, PKCE client, and role mappings.   |
+| 8   | `graph-explorer` | `health-dataspace-ui`       | `docker-compose.yml`     | 3000       | `neo4j`      | Next.js 14 UI — Graph Explorer, Catalogue, Analytics, Portal views. Connects to Neo4j (Bolt) and Keycloak (OIDC). |
+
+#### Tier 2 — EDC-V Core + Identity Services (depend on Tier 0 + 1)
+
+| #   | Service           | Container Name                     | Compose File             | Port(s) | Dependencies                            | Description                                                                                                                              |
+| --- | ----------------- | ---------------------------------- | ------------------------ | ------- | --------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| 9   | `vault-bootstrap` | `health-dataspace-vault-bootstrap` | `docker-compose.jad.yml` | —       | `vault`, `keycloak`                     | Init job (runs once, then exits) — configures JWT auth backend, secrets engine, policies, and signing keys in Vault.                     |
+| 10  | `controlplane`    | `health-dataspace-controlplane`    | `docker-compose.jad.yml` | 11003   | `postgres`, `vault`, `nats`, `keycloak` | EDC-V Control Plane — DSP protocol engine, management API, contract negotiation state machine, ODRL policy evaluation.                   |
+| 11  | `identityhub`     | `health-dataspace-identityhub`     | `docker-compose.jad.yml` | 11005   | `postgres`, `vault`, `keycloak`         | DCP v1.0 Identity Hub — stores Verifiable Credentials, handles DID resolution, and credential presentation requests.                     |
+| 12  | `issuerservice`   | `health-dataspace-issuerservice`   | `docker-compose.jad.yml` | 10013   | `postgres`, `vault`, `keycloak`         | Verifiable Credential Issuer — trust anchor that issues MembershipCredential, EHDSParticipantCredential, and DataQualityLabelCredential. |
+| 13  | `tenant-manager`  | `health-dataspace-tenant-manager`  | `docker-compose.jad.yml` | 11006   | `postgres`, `keycloak`                  | CFM Tenant Manager — multi-tenant participant lifecycle (create, activate, deactivate dataspace tenants).                                |
+
+#### Tier 3 — Data Planes, Proxy, Provisioning & CFM Agents (depend on Tier 2)
+
+| #   | Service                  | Container Name                            | Compose File             | Port(s) | Dependencies                                                     | Description                                                                                                                                            |
+| --- | ------------------------ | ----------------------------------------- | ------------------------ | ------- | ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 14  | `dataplane-fhir`         | `health-dataspace-dataplane-fhir`         | `docker-compose.jad.yml` | 11002   | `postgres`, `vault`, `controlplane`                              | DCore Data Plane (FHIR PUSH) — transfers FHIR R4 Bundle JSON to consumer endpoints via HttpData-PUSH protocol.                                         |
+| 15  | `dataplane-omop`         | `health-dataspace-dataplane-omop`         | `docker-compose.jad.yml` | 11012   | `postgres`, `vault`, `controlplane`                              | DCore Data Plane (OMOP PULL) — serves OMOP CDM aggregate query results via HttpData-PULL protocol.                                                     |
+| 16  | `neo4j-proxy`            | `health-dataspace-neo4j-proxy`            | `docker-compose.jad.yml` | 9090    | `controlplane`                                                   | Node.js/Express bridge — translates DCore HTTP requests into Cypher queries; serialises results as FHIR JSON, OMOP JSON/CSV, or HealthDCAT-AP JSON-LD. |
+| 17  | `provision-manager`      | `health-dataspace-provision-manager`      | `docker-compose.jad.yml` | 11007   | `postgres`, `keycloak`, `controlplane`                           | CFM Provision Manager — automated resource provisioning for new tenants (Vault keys, DB schemas, EDC-V registrations).                                 |
+| 18  | `cfm-agents`             | `health-dataspace-cfm-keycloak-agent`     | `docker-compose.jad.yml` | —       | `keycloak`, `tenant-manager`                                     | CFM Keycloak Agent — watches tenant events and provisions Keycloak client registrations and role mappings.                                             |
+| 19  | `cfm-edcv-agent`         | `health-dataspace-cfm-edcv-agent`         | `docker-compose.jad.yml` | —       | `controlplane`, `tenant-manager`                                 | CFM EDC-V Agent — provisions connector resources (data plane selectors, asset definitions) for new tenants.                                            |
+| 20  | `cfm-registration-agent` | `health-dataspace-cfm-registration-agent` | `docker-compose.jad.yml` | —       | `identityhub`, `issuerservice`, `tenant-manager`                 | CFM Registration Agent — registers DID documents and requests Verifiable Credentials from IssuerService for new tenants.                               |
+| 21  | `cfm-onboarding-agent`   | `health-dataspace-cfm-onboarding-agent`   | `docker-compose.jad.yml` | —       | `controlplane`, `identityhub`, `issuerservice`, `tenant-manager` | CFM Onboarding Agent — orchestrates the full onboarding sequence: DID creation → VC issuance → connector setup → catalog entry.                        |
+
+#### Tier 4 — Seed Job (runs once after all services are ready)
+
+| #   | Service      | Container Name              | Compose File             | Port(s) | Dependencies                                                                          | Description                                                                                                                                    |
+| --- | ------------ | --------------------------- | ------------------------ | ------- | ------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| 22  | `jad-seed` ² | `health-dataspace-jad-seed` | `docker-compose.jad.yml` | —       | `controlplane`, `identityhub`, `issuerservice`, `tenant-manager`, `provision-manager` | One-shot seed job — initialises IssuerService credential definitions, creates demo tenants, and triggers provisioning. Exits after completion. |
+
+> ² Only starts with `--profile seed`.
+
+#### Dependency Graph
+
+```
+                    ┌─────────┐
+                    │  neo4j  │
+                    └────┬────┘
+                         │
+                ┌────────▼────────┐
+                │  graph-explorer  │
+                └─────────────────┘
+
+┌──────────┐  ┌──────────┐  ┌──────┐  ┌─────────┐
+│ postgres │  │  vault   │  │ nats │  │ traefik │
+└────┬─────┘  └────┬─────┘  └──┬───┘  └─────────┘
+     │             │            │
+     ├─────────────┼────────────┤
+     │             │            │
+     ▼             ▼            │
+┌──────────┐  ┌──────────────┐  │
+│ keycloak │  │vault-bootstrap│ │
+└────┬─────┘  └──────────────┘  │
+     │                          │
+     ├──────────────────────────┤
+     │                          │
+     ▼                          ▼
+┌──────────────┐  ┌──────────────┐  ┌──────────────┐  ┌────────────────┐
+│ controlplane │  │ identityhub  │  │issuerservice │  │ tenant-manager │
+└──────┬───────┘  └──────┬───────┘  └──────┬───────┘  └───────┬────────┘
+       │                 │                 │                   │
+       ├─────────────────┼─────────────────┼───────────────────┤
+       │                 │                 │                   │
+       ▼                 ▼                 ▼                   ▼
+┌───────────────┐ ┌───────────────┐ ┌───────────┐ ┌─────────────────────┐
+│dataplane-fhir │ │dataplane-omop │ │neo4j-proxy│ │ provision-manager   │
+└───────────────┘ └───────────────┘ └───────────┘ └─────────────────────┘
+                                                  ┌─────────────────────┐
+                                                  │ cfm-agents (×4)     │
+                                                  └─────────────────────┘
+```
+
 ---
 
 ## Contributing
