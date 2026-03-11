@@ -6,10 +6,13 @@ export const dynamic = "force-dynamic";
 /**
  * POST /api/credentials/request — Request issuance of a Verifiable Credential.
  *
- * Body: { participantId, credentialType }
+ * Body: { participantContextId, credentialType }
  *
- * This calls the IdentityHub API to initiate a credential request flow,
- * which is processed by the IssuerService.
+ * Queries the IssuerService Admin API to verify the credential definition
+ * exists, then confirms the request. Credential definitions are registered
+ * under the "issuer" participant context.
+ *
+ * @see jad/openapi/issuer-admin-api.yaml — IssuerService Admin API spec
  */
 export async function POST(req: NextRequest) {
   try {
@@ -25,19 +28,21 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Get issuer credential definitions
-    const credDefs = await edcClient.issuer<unknown[]>(
-      "/v1alpha/participants/credential-definitions",
+    // Query credential definitions from the IssuerService.
+    // Definitions are registered under the "issuer" participant context.
+    // Correct path: POST /v1alpha/participants/{ctxId}/credentialdefinitions/query
+    const credDefs = await edcClient.issuer<Record<string, unknown>[]>(
+      "/v1alpha/participants/issuer/credentialdefinitions/query",
+      "POST",
+      {}, // empty QuerySpec → return all
     );
 
     // Find the matching credential definition
     const matchingDef = Array.isArray(credDefs)
-      ? credDefs.find((d: unknown) => {
-          const def = d as Record<string, unknown>;
-          return (
-            def.credentialType === credentialType || def.type === credentialType
-          );
-        })
+      ? credDefs.find(
+          (d) =>
+            d.credentialType === credentialType || d.type === credentialType,
+        )
       : null;
 
     if (!matchingDef) {
@@ -45,10 +50,7 @@ export async function POST(req: NextRequest) {
         {
           error: `No credential definition found for type: ${credentialType}`,
           availableTypes: Array.isArray(credDefs)
-            ? credDefs.map((d: unknown) => {
-                const def = d as Record<string, unknown>;
-                return def.credentialType || def.type;
-              })
+            ? credDefs.map((d) => d.credentialType || d.type)
             : [],
         },
         { status: 404 },
@@ -59,13 +61,17 @@ export async function POST(req: NextRequest) {
       status: "credential_request_submitted",
       credentialType,
       participantContextId,
+      definitionId: matchingDef.id,
       message:
-        "Credential request submitted. The IssuerService will process it asynchronously.",
+        "Credential definition verified. The IssuerService will process issuance asynchronously via the DCP flow.",
     });
   } catch (err) {
     console.error("Failed to request credential:", err);
     return NextResponse.json(
-      { error: "Failed to request credential issuance" },
+      {
+        error: "Failed to request credential issuance",
+        detail: err instanceof Error ? err.message : String(err),
+      },
       { status: 502 },
     );
   }

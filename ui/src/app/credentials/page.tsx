@@ -28,9 +28,18 @@ interface ParticipantCtx {
   state: string;
 }
 
+interface CredentialDef {
+  id: string;
+  credentialType: string;
+  format: string;
+  attestations: string[];
+  validity: number;
+}
+
 export default function CredentialsPage() {
   const [credentials, setCredentials] = useState<VC[]>([]);
   const [participants, setParticipants] = useState<ParticipantCtx[]>([]);
+  const [credentialDefs, setCredentialDefs] = useState<CredentialDef[]>([]);
   const [loading, setLoading] = useState(true);
   const [expanded, setExpanded] = useState<string | null>(null);
   const [requesting, setRequesting] = useState(false);
@@ -38,16 +47,23 @@ export default function CredentialsPage() {
 
   // Request form
   const [reqParticipant, setReqParticipant] = useState("");
-  const [reqType, setReqType] = useState("EHDSParticipantCredential");
+  const [reqType, setReqType] = useState("");
 
   useEffect(() => {
     Promise.all([
-      fetchApi("/api/credentials").then((r) => (r.ok ? r.json() : { credentials: [] })),
+      fetchApi("/api/credentials").then((r) =>
+        r.ok ? r.json() : { credentials: [] },
+      ),
       fetchApi("/api/participants").then((r) => (r.ok ? r.json() : [])),
+      fetchApi("/api/credentials/definitions").then((r) =>
+        r.ok ? r.json() : { definitions: [] },
+      ),
     ])
-      .then(([creds, ctx]) => {
+      .then(([creds, ctx, defs]) => {
         // API returns { credentials: [...] } with Neo4j field names — map to UI shape
-        const raw: any[] = Array.isArray(creds) ? creds : creds.credentials || [];
+        const raw: any[] = Array.isArray(creds)
+          ? creds
+          : creds.credentials || [];
         setCredentials(
           raw.map((c: any) => ({
             id: c.credentialId ?? c.id ?? "",
@@ -56,23 +72,39 @@ export default function CredentialsPage() {
             subject: c.subjectDid ?? c.subject ?? "",
             issuanceDate: c.issuedAt ?? c.issuanceDate ?? "",
             expirationDate: c.expiresAt ?? c.expirationDate,
-            status: (c.status ?? "unknown").replace(/^\w/, (ch: string) => ch.toUpperCase()),
+            status: (c.status ?? "unknown").replace(/^\w/, (ch: string) =>
+              ch.toUpperCase(),
+            ),
             claims: {
               ...(c.holderName ? { holder: c.holderName } : {}),
               ...(c.holderType ? { type: c.holderType } : {}),
               ...(c.participantRole ? { role: c.participantRole } : {}),
               ...(c.purpose ? { purpose: c.purpose } : {}),
               ...(c.datasetId ? { dataset: c.datasetId } : {}),
-              ...(c.completeness != null ? { completeness: String(c.completeness) } : {}),
-              ...(c.conformance != null ? { conformance: String(c.conformance) } : {}),
-              ...(c.timeliness != null ? { timeliness: String(c.timeliness) } : {}),
+              ...(c.completeness != null
+                ? { completeness: String(c.completeness) }
+                : {}),
+              ...(c.conformance != null
+                ? { conformance: String(c.conformance) }
+                : {}),
+              ...(c.timeliness != null
+                ? { timeliness: String(c.timeliness) }
+                : {}),
             },
           })),
         );
         // API returns flat array [...] — handle both array and { participants: [...] }
-        const list: ParticipantCtx[] = Array.isArray(ctx) ? ctx : ctx.participants || [];
+        const list: ParticipantCtx[] = Array.isArray(ctx)
+          ? ctx
+          : ctx.participants || [];
         setParticipants(list);
         if (list.length > 0) setReqParticipant(list[0]["@id"]);
+        // Load credential definitions from IssuerService
+        const defList: CredentialDef[] = Array.isArray(defs)
+          ? defs
+          : defs.definitions || [];
+        setCredentialDefs(defList);
+        if (defList.length > 0) setReqType(defList[0].credentialType);
         setLoading(false);
       })
       .catch(() => setLoading(false));
@@ -107,16 +139,24 @@ export default function CredentialsPage() {
             subject: c.subjectDid ?? c.subject ?? "",
             issuanceDate: c.issuedAt ?? c.issuanceDate ?? "",
             expirationDate: c.expiresAt ?? c.expirationDate,
-            status: (c.status ?? "unknown").replace(/^\w/, (ch: string) => ch.toUpperCase()),
+            status: (c.status ?? "unknown").replace(/^\w/, (ch: string) =>
+              ch.toUpperCase(),
+            ),
             claims: {
               ...(c.holderName ? { holder: c.holderName } : {}),
               ...(c.holderType ? { type: c.holderType } : {}),
               ...(c.participantRole ? { role: c.participantRole } : {}),
               ...(c.purpose ? { purpose: c.purpose } : {}),
               ...(c.datasetId ? { dataset: c.datasetId } : {}),
-              ...(c.completeness != null ? { completeness: String(c.completeness) } : {}),
-              ...(c.conformance != null ? { conformance: String(c.conformance) } : {}),
-              ...(c.timeliness != null ? { timeliness: String(c.timeliness) } : {}),
+              ...(c.completeness != null
+                ? { completeness: String(c.completeness) }
+                : {}),
+              ...(c.conformance != null
+                ? { conformance: String(c.conformance) }
+                : {}),
+              ...(c.timeliness != null
+                ? { timeliness: String(c.timeliness) }
+                : {}),
             },
           })),
         );
@@ -141,10 +181,17 @@ export default function CredentialsPage() {
 
       {/* Request new credential */}
       <div className="border border-gray-700 rounded-xl p-5 mb-8">
-        <div className="flex items-center gap-2 mb-4">
+        <div className="flex items-center gap-2 mb-2">
           <Send size={18} className="text-layer2" />
           <h2 className="font-semibold text-sm">Request Credential</h2>
         </div>
+        <p className="text-xs text-gray-500 mb-4">
+          Request a Verifiable Credential (VC) from the IssuerService for a
+          participant. VCs prove identity, compliance, and data-access
+          authorization in the EHDS dataspace. They are stored in the
+          participant&apos;s IdentityHub and presented during
+          connector-to-connector negotiations.
+        </p>
         <div className="grid sm:grid-cols-3 gap-3 items-end">
           <div>
             <label className="text-xs text-gray-500 mb-1 block">
@@ -173,15 +220,25 @@ export default function CredentialsPage() {
               onChange={(e) => setReqType(e.target.value)}
               className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded text-sm"
             >
-              <option value="EHDSParticipantCredential">
-                EHDS Participant Credential
-              </option>
-              <option value="GaiaXComplianceCredential">
-                Gaia-X Compliance Credential
-              </option>
-              <option value="DataProcessingAgreement">
-                Data Processing Agreement
-              </option>
+              {credentialDefs.length > 0 ? (
+                credentialDefs.map((d) => (
+                  <option key={d.id} value={d.credentialType}>
+                    {d.credentialType.replace(/([A-Z])/g, " $1").trim()}
+                  </option>
+                ))
+              ) : (
+                <>
+                  <option value="EHDSParticipantCredential">
+                    EHDS Participant Credential
+                  </option>
+                  <option value="DataProcessingPurposeCredential">
+                    Data Processing Purpose Credential
+                  </option>
+                  <option value="DataQualityLabelCredential">
+                    Data Quality Label Credential
+                  </option>
+                </>
+              )}
             </select>
           </div>
 
