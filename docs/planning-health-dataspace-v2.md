@@ -12,11 +12,11 @@
     - [Phase 1: Infrastructure Migration (JAD-Based) ✅](#phase-1-infrastructure-migration-jad-based-)
       - [1a: JAD Local Deployment ✅](#1a-jad-local-deployment-)
       - [1b: Health-Specific Tenant Configuration ✅](#1b-health-specific-tenant-configuration-)
-      - [1c: Docker Compose Development Profile](#1c-docker-compose-development-profile)
-      - [1d: OpenAPI TypeScript Client Generation](#1d-openapi-typescript-client-generation)
+      - [1c: Docker Compose Development Profile ✅](#1c-docker-compose-development-profile-)
+      - [1d: OpenAPI TypeScript Client Generation ✅](#1d-openapi-typescript-client-generation-)
       - [1e: ADR-2 Implementation — Dual Data Planes + Neo4j Query Proxy ✅](#1e-adr-2-implementation--dual-data-planes--neo4j-query-proxy-)
       - [1f: Phase 4a Prep — EDC-V Asset Registration + Vault Keys ✅](#1f-phase-4a-prep--edc-v-asset-registration--vault-keys-)
-    - [Phase 2: Identity and Trust (DCP v1.0)](#phase-2-identity-and-trust-dcp-v10)
+    - [Phase 2: Identity and Trust (DCP v1.0) ✅](#phase-2-identity-and-trust-dcp-v10-)
       - [2a: DID:web and Verifiable Credential Setup ✅](#2a-didweb-and-verifiable-credential-setup-)
       - [2b: EHDS-Specific Credential Types ✅](#2b-ehds-specific-credential-types-)
       - [2c: Keycloak SSO Integration ✅](#2c-keycloak-sso-integration-)
@@ -40,12 +40,12 @@
       - [5d: NLQ Explorer UI ✅](#5d-nlq-explorer-ui-)
       - [Infrastructure Summary](#infrastructure-summary)
     - [Phase 6a: Graph Explorer UI ✅](#phase-6a-graph-explorer-ui-)
-    - [Phase 6b: Unified Participant Portal (Next.js)](#phase-6b-unified-participant-portal-nextjs)
-      - [Technology Decision: Next.js 14 as Unified Frontend](#technology-decision-nextjs-14-as-unified-frontend)
-      - [6b-1: Participant Onboarding Portal (from Aruba)](#6b-1-participant-onboarding-portal-from-aruba)
-      - [6b-2: Data Sharing \& Discovery Portal (from Fraunhofer)](#6b-2-data-sharing--discovery-portal-from-fraunhofer)
-      - [6b-3: Operator Dashboard (from Redline)](#6b-3-operator-dashboard-from-redline)
-      - [Updated Navigation Structure](#updated-navigation-structure)
+    - [Phase 6b: Unified Participant Portal (Next.js) ✅](#phase-6b-unified-participant-portal-nextjs-)
+      - [Technology Decision: Next.js 14 as Unified Frontend ✅](#technology-decision-nextjs-14-as-unified-frontend-)
+      - [6b-1: Participant Onboarding Portal (from Aruba) ✅](#6b-1-participant-onboarding-portal-from-aruba-)
+      - [6b-2: Data Sharing \& Discovery Portal (from Fraunhofer) ✅](#6b-2-data-sharing--discovery-portal-from-fraunhofer-)
+      - [6b-3: Operator Dashboard (from Redline) ✅](#6b-3-operator-dashboard-from-redline-)
+      - [Updated Navigation Structure ✅](#updated-navigation-structure-)
     - [Phase 7: TCK DCP \& DSP Compliance Verification ✅](#phase-7-tck-dcp--dsp-compliance-verification-)
       - [7a: DSP 2025-1 Technology Compatibility Kit ✅](#7a-dsp-2025-1-technology-compatibility-kit-)
       - [7b: DCP v1.0 Compliance Tests ✅](#7b-dcp-v10-compliance-tests-)
@@ -172,7 +172,7 @@ All three core specifications are now final or near-final:
 | **6a** | Graph Explorer UI (Next.js → Neo4j Bolt)               | ✅ Complete | Seven views (graph, catalog, compliance, patient, analytics, eehrxf, query/NLQ); Docker `graph-explorer` container on port 3000; GitHub Pages static export                                                                                                                                                                                                                              |
 | **6b** | Full Participant Portal (Aruba + Fraunhofer + Redline) | ✅ Complete | 6b-1 ✅ (Onboarding: /onboarding, /onboarding/status, /credentials, /settings + 3 API routes); 6b-2 ✅ (Data Exchange: /data/share, /data/discover, /data/transfer, /negotiate + 5 API routes); 6b-3 ✅ (Admin: /admin, /admin/tenants, /admin/policies, /admin/audit + 3 API routes); Navigation dropdowns + middleware auth for all portal routes; 7 mock JSON files for static export |
 | **7**  | TCK DCP & DSP Compliance Verification                  | ✅ Complete | 7a ✅ (DSP 2025-1 TCK: `run-dsp-tck.sh` — 7 test categories, 30+ tests); 7b ✅ (DCP v1.0: `run-dcp-tests.sh` — 5 categories); 7c ✅ (EHDS domain: `run-ehds-tests.sh` — 5 categories); 7d ✅ (CI/CD: `compliance.yml` workflow, orchestrator `run-compliance.sh`, `/compliance/tck` dashboard UI with live + mock data)                                                                  |
-| **8**  | Test Coverage Expansion + CI/CD                        | ✅ Complete | 8a ✅ (10 new API route test files, ~85% API coverage); 8b ✅ (UserMenu, fetchApi, Navigation + 6 page-level component suites); 8c ✅ (GitHub Actions test.yml, coverage reports, **247 unit tests + 31 E2E = 278 total**)                                                                                                                                                               |
+| **8**  | Test Coverage Expansion + CI/CD                        | ✅ Complete | 8a ✅ (10 new API route test files, ~85% API coverage); 8b ✅ (UserMenu, fetchApi, Navigation + 6 page-level component suites); 8c ✅ (GitHub Actions test.yml, coverage reports, **260 unit tests + 31 E2E = 291 total**)                                                                                                                                                               |
 | **9**  | Documentation & Navigation Restructuring               | ✅ Complete | 9a ✅ (4 doc pages: landing, user guide, developer, architecture + 8 Mermaid diagrams); 9b ✅ (Nav restructured: 5 dropdown clusters — Explore, Governance, Exchange, Portal, Docs); 9c ✅ (Home page refresh: 2-section card layout); 9d ✅ (Static export compatible, mermaid@11)                                                                                                      |
 
 ---
@@ -224,7 +224,7 @@ Phase 1 bootstraps the full EDC-V + DCore + CFM stack using the [JAD (Joint Arch
    - Data addresses point to `neo4j-proxy:9090` internal endpoints
    - Scripts: `jad/seed-health-tenants.sh`, `jad/seed-data-assets.sh`
 
-#### 1c: Docker Compose Development Profile
+#### 1c: Docker Compose Development Profile ✅
 
 7. Create `docker-compose.jad.yml` extending the existing `docker-compose.yml`:
    - Adds JAD services alongside Neo4j for **local development without KinD**
@@ -239,7 +239,7 @@ Phase 1 bootstraps the full EDC-V + DCore + CFM stack using the [JAD (Joint Arch
    - Runs Neo4j schema initialization + Synthea data load
    - Validates end-to-end with JAD's E2E test suite
 
-#### 1d: OpenAPI TypeScript Client Generation
+#### 1d: OpenAPI TypeScript Client Generation ✅
 
 9. Generate typed TypeScript API clients from JAD's OpenAPI specifications:
    - **EDC-V Admin API** — participant management, data asset registration, policy CRUD
@@ -286,7 +286,7 @@ Phase 1 bootstraps the full EDC-V + DCore + CFM stack using the [JAD (Joint Arch
     - Phase 4b starts `neo4j-proxy` with health check
     - Updated service endpoints listing and port pre-flight checks
 
-### Phase 2: Identity and Trust (DCP v1.0)
+### Phase 2: Identity and Trust (DCP v1.0) ✅
 
 Phase 2 implements the full DCP v1.0 credential lifecycle using JAD's IdentityHub and IssuerService, then adds EHDS-specific credential types.
 
@@ -777,11 +777,11 @@ A GitHub Actions workflow (`.github/workflows/pages.yml`) builds the UI as a sta
 
 Live static demo: https://ma3u.github.io/MinimumViableHealthDataspacev2/
 
-### Phase 6b: Unified Participant Portal (Next.js)
+### Phase 6b: Unified Participant Portal (Next.js) ✅
 
 Phase 6b consolidates the onboarding and management functionality from three reference implementations — [Aruba Participant Portal](https://github.com/Aruba-it-S-p-A/edc-public-participant-portal) (Angular 20), [Fraunhofer End-User API](https://github.com/FraunhoferISST/End-User-API) (Angular + daisyUI), and [Dataspace Builder Redline](https://dataspacebuilder.github.io/website/docs/components/redline) — into the existing **Next.js 14** application. This avoids running three separate frontend stacks and leverages the 6 views already built in Phase 6a.
 
-#### Technology Decision: Next.js 14 as Unified Frontend
+#### Technology Decision: Next.js 14 as Unified Frontend ✅
 
 | Criteria             | Next.js 14 (existing)             | Angular 20 (Aruba/Fraunhofer) | Decision                           |
 | -------------------- | --------------------------------- | ----------------------------- | ---------------------------------- |
@@ -795,7 +795,7 @@ Phase 6b consolidates the onboarding and management functionality from three ref
 
 **Decision:** Remain on Next.js 14. Port the Aruba and Fraunhofer Angular UIs into Next.js pages, reusing their REST API patterns, Tailwind CSS layouts, and Keycloak authentication flow.
 
-#### 6b-1: Participant Onboarding Portal (from Aruba)
+#### 6b-1: Participant Onboarding Portal (from Aruba) ✅
 
 Ported from Aruba's Angular self-registration flow into Next.js:
 
@@ -816,7 +816,7 @@ Ported from Aruba's Angular self-registration flow into Next.js:
 
 **Keycloak integration:** Follows Aruba's PKCE pattern via NextAuth.js Keycloak provider. Registration creates both a Keycloak user and a CFM tenant. Roles `EDC_ADMIN` and `EDC_USER_PARTICIPANT` gate access.
 
-#### 6b-2: Data Sharing & Discovery Portal (from Fraunhofer)
+#### 6b-2: Data Sharing & Discovery Portal (from Fraunhofer) ✅
 
 Ported from Fraunhofer's Angular + EDC Data Dashboard into Next.js:
 
@@ -838,7 +838,7 @@ Ported from Fraunhofer's Angular + EDC Data Dashboard into Next.js:
 
 **EDC client integration:** Uses the OpenAPI-generated TypeScript clients from Phase 1d (`ui/src/lib/edc/`) rather than Fraunhofer's `edc-connector-client` npm package, ensuring consistent typing with the exact JAD API version.
 
-#### 6b-3: Operator Dashboard (from Redline)
+#### 6b-3: Operator Dashboard (from Redline) ✅
 
 | New Route         | Source                     | Description                                   |
 | ----------------- | -------------------------- | --------------------------------------------- |
@@ -849,7 +849,7 @@ Ported from Fraunhofer's Angular + EDC Data Dashboard into Next.js:
 
 **Role requirement:** All `/admin/*` routes require `EDC_ADMIN` role in Keycloak JWT.
 
-#### Updated Navigation Structure
+#### Updated Navigation Structure ✅
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
