@@ -131,9 +131,9 @@ services:
       KC_BOOTSTRAP_ADMIN_USERNAME: admin
       KC_BOOTSTRAP_ADMIN_PASSWORD: admin
       KC_HTTP_ENABLED: "true"
-      # Use Docker-internal hostname so token 'iss' claim matches EDC services' expected issuer.
-      # Browser access: add "127.0.0.1 keycloak" to /etc/hosts, then open http://keycloak:8080
-      KC_HOSTNAME: "http://keycloak:8080"
+      # Use localhost so browser-facing URLs (login form actions, redirects) are reachable.
+      # Docker-internal services still reach Keycloak via Docker DNS (keycloak:8080).
+      KC_HOSTNAME: "http://localhost:8080"
       KC_HOSTNAME_STRICT: "false"
       KC_PROXY: edge
       KC_HEALTH_ENABLED: "true"
@@ -257,8 +257,8 @@ services:
       edc.datasource.default.password: "cp"
       edc.sql.schema.autocreate: "true"
       edc.encryption.aes.key.alias: "aes-key-alias"
-      # OAuth2 / Keycloak
-      edc.iam.oauth2.issuer: "http://keycloak:8080/realms/edcv"
+      # OAuth2 / Keycloak — issuer must match KC_HOSTNAME (iss claim in tokens)
+      edc.iam.oauth2.issuer: "http://localhost:8080/realms/edcv"
       edc.iam.oauth2.jwks.url: "http://keycloak:8080/realms/edcv/protocol/openid-connect/certs"
       # DCP scopes
       edc.iam.dcp.scopes.membership.id: "membership-scope"
