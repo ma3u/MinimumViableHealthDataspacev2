@@ -6,9 +6,10 @@
 # via the ControlPlane Management API.
 #
 # Assets created:
-#   Clinic (provider): FHIR Patient, FHIR Cohort Bundle, HealthDCAT-AP Catalog
-#   CRO    (consumer): (none — consumers discover via catalog)
-#   HDAB   (operator): HealthDCAT-AP Catalog (federated)
+#   Test-Clinic (provider): FHIR Patient Search, FHIR Observation Bundle
+#   Clinic      (provider): FHIR Patient, FHIR Cohort Bundle, OMOP Stats, HealthDCAT-AP Catalog
+#   CRO         (consumer): Research Data Request, OMOP Analytics Query
+#   HDAB        (operator): HealthDCAT-AP Catalog (federated)
 #
 # Prerequisites:
 #   - All JAD services running
@@ -190,10 +191,7 @@ tenants = json.load(sys.stdin)
 for t in tenants:
     name = t['properties'].get('displayName', '')
     role = t['properties'].get('role', '')
-    if 'Test' in name:
-        continue
     tid = t['id']
-    # Omit for now — just print basic info
     print(f'{name}|{role}|{tid}')
 ")
 
@@ -212,18 +210,60 @@ for p in profiles:
             break
 ")
   echo "  $name ($role): ctx=$ctx_id"
-  case "$role" in
-    provider) CLINIC_CTX="$ctx_id" ;;
-    consumer) CRO_CTX="$ctx_id" ;;
-    operator) HDAB_CTX="$ctx_id" ;;
+  # Map by name+role (Test Clinic and Clinic Charité are both providers)
+  case "$name" in
+    "Test Clinic"*) TEST_CLINIC_CTX="$ctx_id" ;;
+    *) case "$role" in
+         provider) CLINIC_CTX="$ctx_id" ;;
+         consumer) CRO_CTX="$ctx_id" ;;
+         operator) HDAB_CTX="$ctx_id" ;;
+       esac ;;
   esac
 done <<< "$TENANT_DATA"
 
 echo ""
 echo "Participant Context IDs:"
-echo "  Clinic:  $CLINIC_CTX"
+echo "  Test Clinic: $TEST_CLINIC_CTX"
+echo "  Clinic:      $CLINIC_CTX"
 echo "  CRO:     $CRO_CTX"
 echo "  HDAB:    $HDAB_CTX"
+echo ""
+
+# =============================================================================
+# Step 0: Create Data Assets on Test Clinic (Provider)
+# =============================================================================
+echo "────────────────────────────────────────────────"
+echo "Step 0: Register Data Assets on Test Clinic"
+echo "────────────────────────────────────────────────"
+
+create_asset "$TEST_CLINIC_CTX" "fhir-patient-search" \
+  "FHIR Patient Search" \
+  "Search FHIR R4 patients by demographics and conditions. Maps to Neo4j Patient nodes." \
+  "application/fhir+json" \
+  "{\"@type\":\"DataAddress\",\"type\":\"HttpData\",\"baseUrl\":\"$NEO4J_PROXY_URL/fhir/Patient\",\"proxyPath\":\"true\",\"proxyQueryParams\":\"true\"}"
+
+create_asset "$TEST_CLINIC_CTX" "fhir-observation-bundle" \
+  "FHIR Observation Bundle" \
+  "FHIR R4 Observation resources including vitals and lab results. Supports LOINC coded queries." \
+  "application/fhir+json" \
+  "{\"@type\":\"DataAddress\",\"type\":\"HttpData\",\"baseUrl\":\"$NEO4J_PROXY_URL/fhir/Observation\",\"proxyPath\":\"true\",\"proxyQueryParams\":\"true\"}"
+
+TEST_CLINIC_POLICY='{
+  "@type": "Set",
+  "permission": [{
+    "action": "use",
+    "constraint": []
+  }]
+}'
+create_policy "$TEST_CLINIC_CTX" "open-fhir-access-policy" "$TEST_CLINIC_POLICY"
+
+EDC_ID="https://w3id.org/edc/v0.0.1/ns/id"
+TC_SELECTOR="[{\"@type\":\"Criterion\",\"operandLeft\":\"$EDC_ID\",\"operator\":\"=\",\"operandRight\":\"fhir-patient-search\"}]"
+create_contract_def "$TEST_CLINIC_CTX" "cd-fhir-patient" "open-fhir-access-policy" "open-fhir-access-policy" "$TC_SELECTOR"
+
+TC_OBS_SELECTOR="[{\"@type\":\"Criterion\",\"operandLeft\":\"$EDC_ID\",\"operator\":\"=\",\"operandRight\":\"fhir-observation-bundle\"}]"
+create_contract_def "$TEST_CLINIC_CTX" "cd-fhir-observation" "open-fhir-access-policy" "open-fhir-access-policy" "$TC_OBS_SELECTOR"
+
 echo ""
 
 # =============================================================================
@@ -322,6 +362,42 @@ create_contract_def "$CLINIC_CTX" "catalog-metadata-contract" "open-access-polic
 echo ""
 
 # =============================================================================
+# Step 3b: Create Data Assets on CRO (Consumer)
+# =============================================================================
+echo "────────────────────────────────────────────────"
+echo "Step 3b: Register Data Assets on CRO"
+echo "────────────────────────────────────────────────"
+
+create_asset "$CRO_CTX" "research-data-request" \
+  "Research Data Request" \
+  "Submit clinical research data requests for EHDS-approved studies." \
+  "application/json" \
+  "{\"@type\":\"DataAddress\",\"type\":\"HttpData\",\"baseUrl\":\"$NEO4J_PROXY_URL/api/research/request\",\"proxyPath\":\"true\",\"proxyQueryParams\":\"true\"}"
+
+create_asset "$CRO_CTX" "omop-analytics-query" \
+  "OMOP Analytics Query" \
+  "Execute OMOP CDM analytics queries over federated clinical datasets." \
+  "application/json" \
+  "{\"@type\":\"DataAddress\",\"type\":\"HttpData\",\"baseUrl\":\"$NEO4J_PROXY_URL/api/omop/query\",\"proxyPath\":\"true\",\"proxyQueryParams\":\"true\"}"
+
+CRO_POLICY='{
+  "@type": "Set",
+  "permission": [{
+    "action": "use",
+    "constraint": []
+  }]
+}'
+create_policy "$CRO_CTX" "research-access-policy" "$CRO_POLICY"
+
+CRO_RESEARCH_SELECTOR="[{\"@type\":\"Criterion\",\"operandLeft\":\"$EDC_ID\",\"operator\":\"=\",\"operandRight\":\"research-data-request\"}]"
+create_contract_def "$CRO_CTX" "cd-research-data" "research-access-policy" "research-access-policy" "$CRO_RESEARCH_SELECTOR"
+
+CRO_OMOP_SELECTOR="[{\"@type\":\"Criterion\",\"operandLeft\":\"$EDC_ID\",\"operator\":\"=\",\"operandRight\":\"omop-analytics-query\"}]"
+create_contract_def "$CRO_CTX" "cd-omop-analytics" "research-access-policy" "research-access-policy" "$CRO_OMOP_SELECTOR"
+
+echo ""
+
+# =============================================================================
 # Step 4: Register Catalog Asset on HDAB (Operator)
 # =============================================================================
 echo "────────────────────────────────────────────────"
@@ -410,6 +486,7 @@ register_dataplane() {
   fi
 }
 
+register_dataplane "$TEST_CLINIC_CTX" "Test Clinic"
 register_dataplane "$CLINIC_CTX" "Clinic"
 register_dataplane "$CRO_CTX"    "CRO"
 register_dataplane "$HDAB_CTX"   "HDAB"
@@ -423,29 +500,41 @@ echo "════════════════════════�
 echo "Data Asset Registration Summary"
 echo "════════════════════════════════════════════════"
 echo ""
+echo "Test Clinic ($TEST_CLINIC_CTX):"
+echo "  Assets:    fhir-patient-search, fhir-observation-bundle"
+echo "  Policies:  open-fhir-access-policy"
+echo "  Contracts: cd-fhir-patient, cd-fhir-observation"
+echo ""
 echo "Clinic ($CLINIC_CTX):"
 echo "  Assets:    fhir-patient-everything, fhir-cohort-bundle, omop-cohort-statistics, healthdcatap-catalog"
 echo "  Policies:  open-access-policy, membership-access-policy"
 echo "  Contracts: fhir-data-contract, omop-data-contract, catalog-metadata-contract"
+echo ""
+echo "CRO ($CRO_CTX):"
+echo "  Assets:    research-data-request, omop-analytics-query"
+echo "  Policies:  research-access-policy"
+echo "  Contracts: cd-research-data, cd-omop-analytics"
 echo ""
 echo "HDAB ($HDAB_CTX):"
 echo "  Assets:    federated-healthdcatap-catalog"
 echo "  Policies:  catalog-open-policy"
 echo "  Contracts: federated-catalog-contract"
 echo ""
-echo "CRO ($CRO_CTX): Consumer — no assets registered (discovers via catalog)"
-echo ""
 
 # Verify
 echo "Verifying assets..."
+TC_ASSETS=$(mgmt_call POST "v5alpha/participants/$TEST_CLINIC_CTX/assets/request" "{\"@context\":[\"$EDC_CTX\"],\"@type\":\"QuerySpec\",\"filterExpression\":[]}" | python3 -c "import json,sys; print(len(json.load(sys.stdin)))")
 CLINIC_ASSETS=$(mgmt_call POST "v5alpha/participants/$CLINIC_CTX/assets/request" "{\"@context\":[\"$EDC_CTX\"],\"@type\":\"QuerySpec\",\"filterExpression\":[]}" | python3 -c "import json,sys; print(len(json.load(sys.stdin)))")
+CRO_ASSETS=$(mgmt_call POST "v5alpha/participants/$CRO_CTX/assets/request" "{\"@context\":[\"$EDC_CTX\"],\"@type\":\"QuerySpec\",\"filterExpression\":[]}" | python3 -c "import json,sys; print(len(json.load(sys.stdin)))")
 HDAB_ASSETS=$(mgmt_call POST "v5alpha/participants/$HDAB_CTX/assets/request" "{\"@context\":[\"$EDC_CTX\"],\"@type\":\"QuerySpec\",\"filterExpression\":[]}" | python3 -c "import json,sys; print(len(json.load(sys.stdin)))")
 
-echo "  Clinic assets: $CLINIC_ASSETS"
-echo "  HDAB assets:   $HDAB_ASSETS"
+echo "  Test Clinic assets: $TC_ASSETS"
+echo "  Clinic assets:      $CLINIC_ASSETS"
+echo "  CRO assets:         $CRO_ASSETS"
+echo "  HDAB assets:        $HDAB_ASSETS"
 
-if [ "$CLINIC_ASSETS" -ge 4 ] && [ "$HDAB_ASSETS" -ge 1 ]; then
+if [ "$TC_ASSETS" -ge 2 ] && [ "$CLINIC_ASSETS" -ge 4 ] && [ "$CRO_ASSETS" -ge 2 ] && [ "$HDAB_ASSETS" -ge 1 ]; then
   ok "All data assets registered successfully!"
 else
-  warn "Expected 4 Clinic assets and 1 HDAB asset"
+  warn "Expected 2 Test Clinic, 4 Clinic, 2 CRO, and 1 HDAB assets"
 fi

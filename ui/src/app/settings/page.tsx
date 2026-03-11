@@ -23,9 +23,10 @@ export default function SettingsPage() {
 
   useEffect(() => {
     fetchApi("/api/participants/me")
-      .then((r) => r.json())
+      .then((r) => (r.ok ? r.json() : []))
       .then((d) => {
-        const list = d.tenants || [];
+        // /api/participants/me returns flat array or { tenants: [...] }
+        const list = Array.isArray(d) ? d : d.tenants || [];
         setTenants(list);
         if (list.length > 0) setSelected(list[0]);
         setLoading(false);

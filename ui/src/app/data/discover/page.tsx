@@ -33,9 +33,10 @@ export default function DataDiscoverPage() {
 
   useEffect(() => {
     fetchApi("/api/assets")
-      .then((r) => r.json())
+      .then((r) => (r.ok ? r.json() : []))
       .then((d) => {
-        setGroups(d.participants || []);
+        // /api/assets returns flat array of {participantId, identity, assets[]} or { participants: [...] }
+        setGroups(Array.isArray(d) ? d : d.participants || []);
         setLoading(false);
       })
       .catch(() => setLoading(false));

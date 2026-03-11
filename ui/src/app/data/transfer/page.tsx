@@ -59,9 +59,10 @@ function DataTransferContent() {
 
   useEffect(() => {
     fetchApi("/api/participants")
-      .then((r) => r.json())
+      .then((r) => (r.ok ? r.json() : []))
       .then((d) => {
-        const list = d.participants || [];
+        // /api/participants returns flat array or { participants: [...] }
+        const list: ParticipantCtx[] = Array.isArray(d) ? d : d.participants || [];
         setParticipants(list);
         if (!selectedCtx && list.length > 0) {
           setSelectedCtx(list[0]["@id"]);
@@ -75,9 +76,10 @@ function DataTransferContent() {
     if (!selectedCtx) return;
     setLoading(true);
     fetchApi(`/api/transfers?participantId=${selectedCtx}`)
-      .then((r) => r.json())
+      .then((r) => (r.ok ? r.json() : []))
       .then((d) => {
-        setTransfers(Array.isArray(d.transfers) ? d.transfers : []);
+        // /api/transfers returns flat array or { transfers: [...] }
+        setTransfers(Array.isArray(d) ? d : d.transfers || []);
         setLoading(false);
       })
       .catch(() => setLoading(false));
@@ -108,7 +110,7 @@ function DataTransferContent() {
           `/api/transfers?participantId=${selectedCtx}`,
         );
         const ud = await updated.json();
-        setTransfers(Array.isArray(ud.transfers) ? ud.transfers : []);
+        setTransfers(Array.isArray(ud) ? ud : ud.transfers || []);
       } else {
         const err = await res.json();
         setResult(`Error: ${err.error || "Initiation failed"}`);

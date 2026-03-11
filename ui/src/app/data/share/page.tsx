@@ -45,24 +45,22 @@ export default function DataSharePage() {
 
   useEffect(() => {
     Promise.all([
-      fetchApi("/api/participants").then((r) => r.json()),
-      fetchApi("/api/assets").then((r) => r.json()),
+      fetchApi("/api/participants").then((r) => (r.ok ? r.json() : [])),
+      fetchApi("/api/assets").then((r) => (r.ok ? r.json() : [])),
     ])
       .then(([ctx, assetData]) => {
-        const list = ctx.participants || [];
+        // /api/participants returns flat array or { participants: [...] }
+        const list: ParticipantCtx[] = Array.isArray(ctx) ? ctx : ctx.participants || [];
         setParticipants(list);
         if (list.length > 0) setSelectedCtx(list[0]["@id"]);
 
-        // Flatten all participant assets
+        // /api/assets returns flat array of {participantId, identity, assets[]} or { participants: [...] }
+        const groups = Array.isArray(assetData) ? assetData : assetData.participants || [];
         const allAssets: Asset[] = [];
-        if (assetData.participants) {
-          for (const p of assetData.participants) {
-            if (Array.isArray(p.assets)) {
-              allAssets.push(...p.assets);
-            }
+        for (const p of groups) {
+          if (Array.isArray(p.assets)) {
+            allAssets.push(...p.assets);
           }
-        } else if (Array.isArray(assetData.assets)) {
-          allAssets.push(...assetData.assets);
         }
         setAssets(allAssets);
         setLoading(false);

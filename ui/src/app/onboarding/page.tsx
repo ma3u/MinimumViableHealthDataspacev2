@@ -62,9 +62,10 @@ export default function OnboardingPage() {
 
   useEffect(() => {
     fetchApi("/api/participants/me")
-      .then((r) => r.json())
+      .then((r) => (r.ok ? r.json() : []))
       .then((d) => {
-        setTenants(d.tenants || []);
+        // /api/participants/me returns flat array or { tenants: [...] }
+        setTenants(Array.isArray(d) ? d : d.tenants || []);
         setLoading(false);
       })
       .catch(() => setLoading(false));

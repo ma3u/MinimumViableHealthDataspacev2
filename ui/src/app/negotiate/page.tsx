@@ -61,9 +61,10 @@ function NegotiateContent() {
 
   useEffect(() => {
     fetchApi("/api/participants")
-      .then((r) => r.json())
+      .then((r) => (r.ok ? r.json() : []))
       .then((d) => {
-        const list = d.participants || [];
+        // /api/participants returns flat array or { participants: [...] }
+        const list: ParticipantCtx[] = Array.isArray(d) ? d : d.participants || [];
         setParticipants(list);
         // Default to first consumer-like context
         if (list.length > 0) {
@@ -78,9 +79,10 @@ function NegotiateContent() {
     if (!selectedCtx) return;
     setLoading(true);
     fetchApi(`/api/negotiations?participantId=${selectedCtx}`)
-      .then((r) => r.json())
+      .then((r) => (r.ok ? r.json() : []))
       .then((d) => {
-        setNegotiations(Array.isArray(d.negotiations) ? d.negotiations : []);
+        // /api/negotiations returns flat array or { negotiations: [...] }
+        setNegotiations(Array.isArray(d) ? d : d.negotiations || []);
         setLoading(false);
       })
       .catch(() => setLoading(false));
@@ -113,7 +115,7 @@ function NegotiateContent() {
           `/api/negotiations?participantId=${selectedCtx}`,
         );
         const ud = await updated.json();
-        setNegotiations(Array.isArray(ud.negotiations) ? ud.negotiations : []);
+        setNegotiations(Array.isArray(ud) ? ud : ud.negotiations || []);
       } else {
         const err = await res.json();
         setResult(`Error: ${err.error || "Negotiation failed"}`);

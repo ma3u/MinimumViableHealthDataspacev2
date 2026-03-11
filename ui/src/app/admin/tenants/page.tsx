@@ -35,10 +35,10 @@ export default function AdminTenantsPage() {
 
   useEffect(() => {
     fetchApi("/api/admin/tenants")
-      .then((r) => r.json())
-      .then((d) => {
-        setTenants(d.tenants || []);
-        setParticipants(d.participants || []);
+      .then((r) => (r.ok ? r.json() : {} as Record<string, unknown>))
+      .then((d: Record<string, unknown>) => {
+        setTenants((d.tenants as Tenant[]) || []);
+        setParticipants((d.participants as Participant[]) || []);
         setLoading(false);
       })
       .catch(() => setLoading(false));

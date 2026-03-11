@@ -24,9 +24,9 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     fetchApi("/api/admin/tenants")
-      .then((r) => r.json())
-      .then((d) => {
-        setSummary(d.summary || null);
+      .then((r) => (r.ok ? r.json() : {} as Record<string, unknown>))
+      .then((d: Record<string, unknown>) => {
+        setSummary((d.summary as Summary) || null);
         setLoading(false);
       })
       .catch(() => setLoading(false));

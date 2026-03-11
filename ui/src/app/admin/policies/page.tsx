@@ -18,9 +18,9 @@ export default function AdminPoliciesPage() {
 
   useEffect(() => {
     fetchApi("/api/admin/policies")
-      .then((r) => r.json())
-      .then((d) => {
-        setGroups(d.participants || []);
+      .then((r) => (r.ok ? r.json() : {} as Record<string, unknown>))
+      .then((d: Record<string, unknown>) => {
+        setGroups((d.participants as typeof groups) || []);
         setLoading(false);
       })
       .catch(() => setLoading(false));
