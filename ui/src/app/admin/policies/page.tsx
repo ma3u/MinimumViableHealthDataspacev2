@@ -374,7 +374,14 @@ export default function AdminPoliciesPage() {
           (err as { error?: string }).error || `HTTP ${res.status}`,
         );
       }
-      setFormMsg({ type: "ok", text: "Policy created successfully." });
+      const result = await res.json().catch(() => ({}));
+      const isOffline = (result as { offline?: boolean }).offline;
+      setFormMsg({
+        type: "ok",
+        text: isOffline
+          ? "Policy saved to local Neo4j registry (EDC-V management API is offline)"
+          : "Policy created successfully.",
+      });
       loadPolicies();
     } catch (e) {
       setFormMsg({
