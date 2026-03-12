@@ -18,10 +18,18 @@ export async function GET() {
       }[]
     >("/v1alpha1/tenants");
 
-    // Fetch participant contexts from EDC-V
-    const participants = await edcClient.management<
-      { "@id": string; identity: string; state: string }[]
-    >("/v5alpha/participants");
+    // Fetch participant contexts from EDC-V (may fail if auth is unavailable)
+    let participants: { "@id": string; identity: string; state: string }[] = [];
+    try {
+      participants = await edcClient.management<
+        { "@id": string; identity: string; state: string }[]
+      >("/v5alpha/participants");
+    } catch (err) {
+      console.warn(
+        "Could not fetch participants (auth may be unavailable):",
+        err,
+      );
+    }
 
     // Enrich tenants with participant profiles
     const enriched = await Promise.all(
