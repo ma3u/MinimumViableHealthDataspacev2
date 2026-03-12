@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 export const dynamic = "force-dynamic";
 
 const NEO4J_URL =
-  process.env.NEO4J_BOLT_URL || "bolt://health-dataspace-neo4j:7687";
+  process.env.NEO4J_URI || process.env.NEO4J_BOLT_URL || "bolt://localhost:7687";
 const NEO4J_USER = process.env.NEO4J_USER || "neo4j";
 const NEO4J_PASSWORD = process.env.NEO4J_PASSWORD || "healthdataspace";
 
@@ -139,6 +139,7 @@ export async function GET(request: NextRequest) {
          OPTIONAL MATCH (provider:Participant {participantId: t.providerDid})
          OPTIONAL MATCH (t)-[:TRANSFERS]->(a)
          OPTIONAL MATCH (al:DataAccessLog)-[:VIA_TRANSFER]->(t)
+         WITH t, consumer, provider, a, count(al) AS logCount
          RETURN t {
            .*,
            consumerName:             consumer.name,
@@ -150,9 +151,9 @@ export async function GET(request: NextRequest) {
            providerComplianceName:   provider.complianceOfficerName,
            providerComplianceEmail:  provider.complianceOfficerEmail,
            asset:                    coalesce(a.name, a.title),
-           accessLogCount:           count(al)
+           accessLogCount:           logCount
          } AS transfer
-         ORDER BY t.timestamp DESC
+         ORDER BY transfer.timestamp DESC
          LIMIT $limit`,
         { limit },
       );
@@ -170,6 +171,7 @@ export async function GET(request: NextRequest) {
          OPTIONAL MATCH (provider:Participant {participantId: n.providerDid})
          OPTIONAL MATCH (n)-[:FOR_ASSET]->(a)
          OPTIONAL MATCH (al:DataAccessLog)-[:UNDER_CONTRACT]->(n)
+         WITH n, consumer, provider, a, count(al) AS logCount
          RETURN n {
            .*,
            consumerName:             consumer.name,
@@ -183,9 +185,9 @@ export async function GET(request: NextRequest) {
            providerComplianceEmail:  provider.complianceOfficerEmail,
            providerEdcEndpoint:      provider.edcEndpoint,
            asset:                    coalesce(a.name, a.title),
-           accessLogCount:           count(al)
+           accessLogCount:           logCount
          } AS negotiation
-         ORDER BY n.timestamp DESC
+         ORDER BY negotiation.timestamp DESC
          LIMIT $limit`,
         { limit },
       );
