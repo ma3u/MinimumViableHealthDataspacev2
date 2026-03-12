@@ -15,6 +15,7 @@ services:
       - neo4j_logs:/logs
       - ./neo4j/import:/var/lib/neo4j/import
       - ./neo4j/plugins:/plugins
+    restart: unless-stopped
 
   # Second Neo4j instance — simulates a second Secure Processing Environment (SPE)
   # for federated query testing (Phase 5). Runs a disjoint patient subset from a
@@ -75,6 +76,7 @@ services:
     networks:
       - default
       - health-dataspace-edcv
+    restart: unless-stopped
 
 volumes:
   neo4j_data:

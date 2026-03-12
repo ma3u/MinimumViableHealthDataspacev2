@@ -202,7 +202,10 @@ services:
     restart: unless-stopped
 
   # ---------------------------------------------------------------------------
-  # Vault Bootstrap Job — Initializes JWT auth, secrets engine, policies
+  # Vault Bootstrap Sidecar — Initializes JWT auth, secrets engine, policies
+  # Stays alive so Docker restarts it after an OrbStack/daemon crash.
+  # Since Vault dev mode uses in-memory storage, secrets are lost on restart.
+  # This sidecar re-runs the idempotent bootstrap on every container start.
   # ---------------------------------------------------------------------------
   vault-bootstrap:
     image: hashicorp/vault:latest
@@ -210,7 +213,12 @@ services:
     environment:
       VAULT_ADDR: "http://vault:8200"
       VAULT_TOKEN: "root"
-    entrypoint: ["/bin/sh", "/scripts/bootstrap-vault.sh"]
+    entrypoint:
+      [
+        "/bin/sh",
+        "-c",
+        "sh /scripts/bootstrap-vault.sh && echo 'Sidecar sleeping — will re-bootstrap on next restart' && sleep infinity",
+      ]
     volumes:
       - ./jad/bootstrap-vault.sh:/scripts/bootstrap-vault.sh:ro
     networks:
@@ -220,6 +228,7 @@ services:
         condition: service_healthy
       keycloak:
         condition: service_healthy
+    restart: unless-stopped
 
   # ---------------------------------------------------------------------------
   # EDC-V Control Plane — DSP protocol + management APIs

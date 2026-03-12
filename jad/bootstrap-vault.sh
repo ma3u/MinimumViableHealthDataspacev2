@@ -26,8 +26,8 @@ until wget -q --spider http://keycloak:8080/realms/edcv/.well-known/openid-confi
 done
 echo "Keycloak is ready!"
 
-# Enable JWT auth method
-vault auth enable jwt || true
+# Enable JWT auth method (idempotent — ignore "already in use")
+vault auth enable jwt 2>/dev/null || echo "JWT auth already enabled, continuing..."
 
 # Configure JWT auth (using Keycloak as JWT backend)
 # NOTE: In docker-compose, services communicate via container names.
@@ -37,8 +37,8 @@ vault write auth/jwt/config \
     jwks_url="http://keycloak:8080/realms/edcv/protocol/openid-connect/certs" \
     default_role="participant" || { echo "Failed to configure JWT auth"; exit 1; }
 
-# Create KV v2 secrets engine for participants
-vault secrets enable -path=participants -version=2 kv || { echo "Failed to enable secrets engine"; exit 1; }
+# Create KV v2 secrets engine for participants (idempotent — ignore "already in use")
+vault secrets enable -path=participants -version=2 kv 2>/dev/null || echo "Secrets engine already enabled, continuing..."
 
 # Get accessor for entity aliases
 ACCESSOR=$(vault auth list | grep 'jwt/' | awk '{print $3}')
