@@ -1,7 +1,8 @@
 "use client";
 
 import { fetchApi } from "@/lib/api";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import {
   Building2,
   CheckCircle2,
@@ -294,8 +295,14 @@ function OnboardingSteps({ tenant }: { tenant: Tenant }) {
 // ---------------------------------------------------------------------------
 // Expandable participant card
 // ---------------------------------------------------------------------------
-function ParticipantCard({ tenant }: { tenant: Tenant }) {
-  const [expanded, setExpanded] = useState(false);
+function ParticipantCard({
+  tenant,
+  defaultExpanded = false,
+}: {
+  tenant: Tenant;
+  defaultExpanded?: boolean;
+}) {
+  const [expanded, setExpanded] = useState(defaultExpanded);
 
   const name = tenant.properties.displayName || tenant.id;
   const org = tenant.properties.organization || name;
@@ -475,9 +482,11 @@ function EhdsRequirements() {
 }
 
 // ---------------------------------------------------------------------------
-// Main page
+// Main page (inner — uses useSearchParams, must be wrapped in Suspense)
 // ---------------------------------------------------------------------------
-export default function OnboardingPage() {
+function OnboardingContent() {
+  const searchParams = useSearchParams();
+  const highlightTenantId = searchParams.get("tenantId");
   const [tenants, setTenants] = useState<Tenant[]>([]);
   const [loading, setLoading] = useState(true);
   const [step, setStep] = useState<RegistrationStep>("form");
@@ -552,7 +561,7 @@ export default function OnboardingPage() {
           </h2>
           <div className="grid gap-3">
             {tenants.map((t) => (
-              <ParticipantCard key={t.id} tenant={t} />
+              <ParticipantCard key={t.id} tenant={t} defaultExpanded={t.id === highlightTenantId} />
             ))}
           </div>
           <p className="text-xs text-gray-600 mt-3">
@@ -680,5 +689,16 @@ export default function OnboardingPage() {
       {/* EHDS + NDA requirements accordion */}
       <EhdsRequirements />
     </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Default export — wraps content in Suspense (required for useSearchParams)
+// ---------------------------------------------------------------------------
+export default function OnboardingPage() {
+  return (
+    <Suspense fallback={null}>
+      <OnboardingContent />
+    </Suspense>
   );
 }
