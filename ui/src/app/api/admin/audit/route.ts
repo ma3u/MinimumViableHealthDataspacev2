@@ -72,8 +72,8 @@ export async function GET(request: NextRequest) {
       const transfers = await runCypher(
         `MATCH (t:DataTransfer)
          OPTIONAL MATCH (t)-[:TRANSFERRED_BY]->(p:Participant)
-         OPTIONAL MATCH (t)-[:TRANSFERS]->(a:DataAsset)
-         RETURN t { .*, participant: p.name, asset: a.name } AS transfer
+         OPTIONAL MATCH (t)-[:TRANSFERS]->(a)
+         RETURN t { .*, participant: p.name, asset: coalesce(a.name, a.title) } AS transfer
          ORDER BY t.timestamp DESC
          LIMIT $limit`,
         { limit },
@@ -86,8 +86,8 @@ export async function GET(request: NextRequest) {
       const negotiations = await runCypher(
         `MATCH (n:ContractNegotiation)
          OPTIONAL MATCH (n)-[:NEGOTIATED_BY]->(p:Participant)
-         OPTIONAL MATCH (n)-[:FOR_ASSET]->(a:DataAsset)
-         RETURN n { .*, participant: p.name, asset: a.name } AS negotiation
+         OPTIONAL MATCH (n)-[:FOR_ASSET]->(a)
+         RETURN n { .*, participant: p.name, asset: coalesce(a.name, a.title) } AS negotiation
          ORDER BY n.timestamp DESC
          LIMIT $limit`,
         { limit },
@@ -99,9 +99,9 @@ export async function GET(request: NextRequest) {
     if (type === "all" || type === "credentials") {
       const credentials = await runCypher(
         `MATCH (vc:VerifiableCredential)
-         OPTIONAL MATCH (vc)-[:ISSUED_TO]->(p:Participant)
+         OPTIONAL MATCH (p:Participant)-[:HOLDS_CREDENTIAL]->(vc)
          RETURN vc { .*, participant: p.name } AS credential
-         ORDER BY vc.issuanceDate DESC
+         ORDER BY vc.issuedAt DESC
          LIMIT $limit`,
         { limit },
       );
@@ -114,7 +114,7 @@ export async function GET(request: NextRequest) {
       const stats = await runCypher(
         `MATCH (n)
          WHERE n:DataTransfer OR n:ContractNegotiation OR n:VerifiableCredential
-           OR n:Participant OR n:DataAsset
+           OR n:Participant OR n:DataAsset OR n:HealthDataset
          RETURN labels(n)[0] AS label, count(n) AS count
          ORDER BY count DESC`,
       );

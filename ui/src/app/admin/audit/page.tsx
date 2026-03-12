@@ -122,13 +122,21 @@ export default function AdminAuditPage() {
                             className="border-b border-gray-800 hover:bg-gray-800/50"
                           >
                             <td className="py-2 px-2 text-gray-300">
-                              {(t.participant as string) || "—"}
+                              {(t.participant as string) ||
+                                (t.consumerDid as string)
+                                  ?.replace("did:web:", "")
+                                  .replace(/%3A/g, ":") ||
+                                "—"}
                             </td>
                             <td className="py-2 px-2 text-gray-300">
-                              {(t.asset as string) || "—"}
+                              {(t.asset as string) ||
+                                (t.assetId as string) ||
+                                "—"}
                             </td>
                             <td className="py-2 px-2 text-gray-500">
-                              {(t.timestamp as string) || "—"}
+                              {(t.timestamp as string)?.slice(0, 10) ||
+                                (t.transferDate as string) ||
+                                "—"}
                             </td>
                           </tr>
                         ))}
@@ -168,13 +176,21 @@ export default function AdminAuditPage() {
                             className="border-b border-gray-800 hover:bg-gray-800/50"
                           >
                             <td className="py-2 px-2 text-gray-300">
-                              {(n.participant as string) || "—"}
+                              {(n.participant as string) ||
+                                (n.consumerDid as string)
+                                  ?.replace("did:web:", "")
+                                  .replace(/%3A/g, ":") ||
+                                "—"}
                             </td>
                             <td className="py-2 px-2 text-gray-300">
-                              {(n.asset as string) || "—"}
+                              {(n.asset as string) ||
+                                (n.assetId as string) ||
+                                "—"}
                             </td>
                             <td className="py-2 px-2 text-gray-500">
-                              {(n.timestamp as string) || "—"}
+                              {(n.timestamp as string)?.slice(0, 10) ||
+                                (n.negotiationDate as string) ||
+                                "—"}
                             </td>
                           </tr>
                         ))}
@@ -214,13 +230,21 @@ export default function AdminAuditPage() {
                             className="border-b border-gray-800 hover:bg-gray-800/50"
                           >
                             <td className="py-2 px-2 text-gray-300">
-                              {(c.participant as string) || "—"}
+                              {(c.participant as string) ||
+                                (c.subjectDid as string)
+                                  ?.replace("did:web:", "")
+                                  .replace(/%3A/g, ":") ||
+                                "—"}
                             </td>
                             <td className="py-2 px-2 text-gray-300">
-                              {(c.type as string) || "—"}
+                              {(c.credentialType as string) ||
+                                (c.type as string) ||
+                                "—"}
                             </td>
                             <td className="py-2 px-2 text-gray-500">
-                              {(c.issuanceDate as string) || "—"}
+                              {(c.issuedAt as string)?.slice(0, 10) ||
+                                (c.issuanceDate as string) ||
+                                "—"}
                             </td>
                           </tr>
                         ))}
