@@ -210,7 +210,7 @@ for p in profiles:
             break
 ")
   echo "  $name ($role): ctx=$ctx_id"
-  # Map by name+role (Test Clinic and Clinic Charité are both providers)
+  # Map by name+role (Test Clinic and Clinic AlphaKlinik Berlin are both providers)
   case "$name" in
     "Test Clinic"*) TEST_CLINIC_CTX="$ctx_id" ;;
     *) case "$role" in

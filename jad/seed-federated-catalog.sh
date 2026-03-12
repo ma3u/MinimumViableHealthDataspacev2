@@ -30,9 +30,9 @@ CRO_CTX="4e300dff7d62415e9c409351bb2fe17a"
 HDAB_CTX="9ce6ec7ea12a4c6f957774c3783a988c"
 
 # DIDs
-CLINIC_DID="did:web:identityhub%3A7083:clinic-charite"
-CRO_DID="did:web:identityhub%3A7083:cro-bayer"
-HDAB_DID="did:web:identityhub%3A7083:hdab-bfarm"
+CLINIC_DID="did:web:identityhub%3A7083:clinic-alphaklinik"
+CRO_DID="did:web:identityhub%3A7083:cro-pharmaco"
+HDAB_DID="did:web:identityhub%3A7083:hdab-medreg"
 
 # EDC-V Management API context
 EDC_CTX='["https://w3id.org/edc/connector/management/v2"]'

@@ -48,3 +48,29 @@ pre-commit run --all-files
 - No patient data or credentials in the repository.
 - Default Neo4j credentials (`neo4j/healthdataspace`) are for local dev only.
 - Production credentials must use `.env` files (excluded via `.gitignore`).
+
+## Trademark Policy
+
+All demo participant names must use fictional organisations only — no real company,
+hospital, regulatory-agency, or research-institute trademarks are permitted.
+
+**Approved fictional participants:**
+
+| Role | Fictional Name | Country | Domain slug |
+|------|----------------|---------|-------------|
+| DATA_HOLDER (Clinic) | AlphaKlinik Berlin | DE | alpha-klinik.de |
+| DATA_USER (CRO/Pharma) | PharmaCo Research AG | DE | pharmaco.de |
+| HDAB (Authority) | MedReg DE | DE | medreg.de |
+| DATA_HOLDER (Clinic) | Limburg Medical Centre | NL | lmc.nl |
+| HDAB (Research) | Institut de Recherche Santé | FR | irs.fr |
+
+**Forbidden trademarks:** Charité, Bayer, BfArM, Zuyderland, INSERM, and any other
+real organisation names. If a new participant is needed, invent a fictional name and
+add it to this table.
+
+**DID conventions for fictional participants:**
+- `did:web:alpha-klinik.de:participant`
+- `did:web:pharmaco.de:research`
+- `did:web:medreg.de:hdab`
+- `did:web:lmc.nl:clinic`
+- `did:web:irs.fr:hdab`

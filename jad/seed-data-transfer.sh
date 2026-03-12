@@ -3,8 +3,8 @@
 # seed-data-transfer.sh — Phase 4d: Data Plane Transfer via DCore
 # =============================================================================
 # Demonstrates end-to-end data retrieval through the DCore data plane:
-#   1. CRO Bayer retrieves FHIR Patient data via data plane (EDR token)
-#   2. HDAB BfArM retrieves HealthDCAT-AP catalog via data plane
+#   1. CRO PharmaCo Research AG retrieves FHIR Patient data via data plane (EDR token)
+#   2. HDAB MedReg DE retrieves HealthDCAT-AP catalog via data plane
 #   3. Verifies audit logging in Neo4j (TransferEvent nodes)
 #
 # The data plane proxies requests to the Neo4j Query Proxy, which translates
@@ -112,7 +112,7 @@ echo "$ACTIVE_TRANSFERS" | while IFS='|' read -r asset type tpid; do
 done
 
 # -- Step 2: CRO retrieves FHIR Patient data via data plane ------------------
-header "Step 2 — CRO Bayer: Retrieve FHIR Patient Data"
+header "Step 2 — CRO PharmaCo Research AG: Retrieve FHIR Patient Data"
 
 step "Extracting EDR (Endpoint Data Reference) for fhir-patient-everything..."
 FHIR_TOKEN=$(get_edr_token "fhir-patient-everything" "CONSUMER")
@@ -144,7 +144,7 @@ FHIR_FULL_TOTAL=$(echo "$FHIR_FULL" | python3 -c "import json,sys; print(json.lo
 ok "Full response: ${FHIR_FULL_TOTAL} patients returned"
 
 # -- Step 3: HDAB retrieves HealthDCAT-AP catalog via data plane --------------
-header "Step 3 — HDAB BfArM: Retrieve HealthDCAT-AP Catalog"
+header "Step 3 — HDAB MedReg DE: Retrieve HealthDCAT-AP Catalog"
 
 step "Extracting EDR for healthdcatap-catalog..."
 CATALOG_TOKEN=$(get_edr_token "healthdcatap-catalog" "CONSUMER")
@@ -205,10 +205,10 @@ echo "  ┌───────────────────────
 echo "  │  Data Plane Transfer via DCore — Phase 4d Complete      │"
 echo "  ├─────────────────────────────────────────────────────────┤"
 echo "  │                                                         │"
-echo "  │  ✓ CRO Bayer retrieved ${FHIR_FULL_TOTAL} FHIR patients via DCore     │"
+echo "  │  ✓ CRO PharmaCo Research AG retrieved ${FHIR_FULL_TOTAL} FHIR patients via DCore     │"
 echo "  │  ✓ Query params proxied through data plane (_count=5)   │"
 if [ -n "$CATALOG_TOKEN" ]; then
-echo "  │  ✓ HDAB BfArM retrieved ${CATALOG_DS_COUNT} HealthDCAT-AP datasets     │"
+echo "  │  ✓ HDAB MedReg DE retrieved ${CATALOG_DS_COUNT} HealthDCAT-AP datasets     │"
 fi
 echo "  │  ✓ ${AUDIT_COUNT} audit events recorded in Neo4j               │"
 echo "  │  ✓ Ed25519 JWT bearer tokens validated by data plane    │"

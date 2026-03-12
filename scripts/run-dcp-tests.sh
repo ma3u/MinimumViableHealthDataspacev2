@@ -31,7 +31,7 @@ CLIENT_SECRET="${EDC_CLIENT_SECRET:-edc-v-admin-secret}"
 REPORT_DIR="${REPORT_DIR:-test-results/dcp}"
 
 # Participant DIDs (from Phase 2a provisioning)
-PARTICIPANT_CONTEXTS=("test-clinic" "clinic-charite" "cro-bayer" "hdab-bfarm")
+PARTICIPANT_CONTEXTS=("test-clinic" "clinic-alphaklinik" "cro-pharmaco" "hdab-medreg")
 
 # Counters
 TOTAL=0

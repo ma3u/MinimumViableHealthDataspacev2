@@ -34,9 +34,9 @@ KC_HOST="${KC_HOST:-http://keycloak:8080}"
 ISSUER_HOST="${ISSUER_HOST:-http://issuerservice}"
 
 # Participant DIDs (for reference)
-CLINIC_DID="did:web:identityhub%3A7083:clinic-charite"
-CRO_DID="did:web:identityhub%3A7083:cro-bayer"
-HDAB_DID="did:web:identityhub%3A7083:hdab-bfarm"
+CLINIC_DID="did:web:identityhub%3A7083:clinic-alphaklinik"
+CRO_DID="did:web:identityhub%3A7083:cro-pharmaco"
+HDAB_DID="did:web:identityhub%3A7083:hdab-medreg"
 
 ok()   { echo "  ✓ $1"; }
 fail() { echo "  ✗ $1"; exit 1; }
@@ -152,7 +152,7 @@ echo "    │                 │ ←──────────────�
 echo "    └─────────────────┘    VC1_0_JWT (EdDSA signed)    └─────────────────┘"
 echo ""
 echo "  DSP Negotiation with Verifiable Presentations:"
-echo "    CRO Bayer presents: EHDSParticipantCredential + DataProcessingPurposeCredential"
+echo "    CRO PharmaCo Research AG presents: EHDSParticipantCredential + DataProcessingPurposeCredential"
 echo "    → Clinic's controlplane validates VP via IdentityHub"
 echo "    → Policy engine evaluates EHDS data permit conditions"
 echo "    → Contract agreement includes credential-backed trust chain"

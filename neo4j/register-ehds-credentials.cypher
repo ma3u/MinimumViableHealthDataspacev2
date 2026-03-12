@@ -16,15 +16,15 @@
 CREATE CONSTRAINT vc_id IF NOT EXISTS FOR (vc:VerifiableCredential) REQUIRE vc.credentialId IS UNIQUE;
 CREATE INDEX vc_type IF NOT EXISTS FOR (vc:VerifiableCredential) ON (vc.credentialType);
 
-// ── 2. EHDSParticipantCredential — Clinic Charité (DataHolder) ───────────────
-MERGE (vc:VerifiableCredential {credentialId: 'vc:ehds-participant:clinic-charite'})
+// ── 2. EHDSParticipantCredential — Clinic AlphaKlinik Berlin (DataHolder) ───────────────
+MERGE (vc:VerifiableCredential {credentialId: 'vc:ehds-participant:clinic-alphaklinik'})
 SET vc.credentialType    = 'EHDSParticipantCredential',
     vc.issuerDid         = 'did:web:issuerservice%3A10016:issuer',
-    vc.subjectDid        = 'did:web:identityhub%3A7083:clinic-charite',
+    vc.subjectDid        = 'did:web:identityhub%3A7083:clinic-alphaklinik',
     vc.format            = 'VC1_0_JWT',
     vc.status            = 'active',
-    vc.hdabId            = 'hdab:bfarm-de',
-    vc.hdabName          = 'Bundesinstitut für Arzneimittel und Medizinprodukte (BfArM)',
+    vc.hdabId            = 'hdab:medreg-de',
+    vc.hdabName          = 'National Medicines Regulatory Authority (MedReg DE)',
     vc.participantRole   = 'DataHolder',
     vc.registrationDate  = date('2025-01-15'),
     vc.jurisdiction      = 'DE',
@@ -32,15 +32,15 @@ SET vc.credentialType    = 'EHDSParticipantCredential',
     vc.issuedAt          = datetime(),
     vc.expiresAt         = datetime() + duration('P365D');
 
-// ── 3. EHDSParticipantCredential — CRO Bayer (DataUser) ─────────────────────
-MERGE (vc:VerifiableCredential {credentialId: 'vc:ehds-participant:cro-bayer'})
+// ── 3. EHDSParticipantCredential — CRO PharmaCo Research AG (DataUser) ─────────────────────
+MERGE (vc:VerifiableCredential {credentialId: 'vc:ehds-participant:cro-pharmaco'})
 SET vc.credentialType    = 'EHDSParticipantCredential',
     vc.issuerDid         = 'did:web:issuerservice%3A10016:issuer',
-    vc.subjectDid        = 'did:web:identityhub%3A7083:cro-bayer',
+    vc.subjectDid        = 'did:web:identityhub%3A7083:cro-pharmaco',
     vc.format            = 'VC1_0_JWT',
     vc.status            = 'active',
-    vc.hdabId            = 'hdab:bfarm-de',
-    vc.hdabName          = 'Bundesinstitut für Arzneimittel und Medizinprodukte (BfArM)',
+    vc.hdabId            = 'hdab:medreg-de',
+    vc.hdabName          = 'National Medicines Regulatory Authority (MedReg DE)',
     vc.participantRole   = 'DataUser',
     vc.registrationDate  = date('2025-02-01'),
     vc.jurisdiction      = 'DE',
@@ -48,15 +48,15 @@ SET vc.credentialType    = 'EHDSParticipantCredential',
     vc.issuedAt          = datetime(),
     vc.expiresAt         = datetime() + duration('P365D');
 
-// ── 4. EHDSParticipantCredential — HDAB BfArM (Authority) ───────────────────
-MERGE (vc:VerifiableCredential {credentialId: 'vc:ehds-participant:hdab-bfarm'})
+// ── 4. EHDSParticipantCredential — HDAB MedReg DE (Authority) ───────────────────
+MERGE (vc:VerifiableCredential {credentialId: 'vc:ehds-participant:hdab-medreg'})
 SET vc.credentialType    = 'EHDSParticipantCredential',
     vc.issuerDid         = 'did:web:issuerservice%3A10016:issuer',
-    vc.subjectDid        = 'did:web:identityhub%3A7083:hdab-bfarm',
+    vc.subjectDid        = 'did:web:identityhub%3A7083:hdab-medreg',
     vc.format            = 'VC1_0_JWT',
     vc.status            = 'active',
-    vc.hdabId            = 'hdab:bfarm-de',
-    vc.hdabName          = 'Bundesinstitut für Arzneimittel und Medizinprodukte (BfArM)',
+    vc.hdabId            = 'hdab:medreg-de',
+    vc.hdabName          = 'National Medicines Regulatory Authority (MedReg DE)',
     vc.participantRole   = 'HealthDataAccessBody',
     vc.registrationDate  = date('2024-06-01'),
     vc.jurisdiction      = 'DE',
@@ -64,27 +64,27 @@ SET vc.credentialType    = 'EHDSParticipantCredential',
     vc.issuedAt          = datetime(),
     vc.expiresAt         = datetime() + duration('P365D');
 
-// ── 5. DataProcessingPurposeCredential — CRO Bayer ──────────────────────────
-MERGE (vc:VerifiableCredential {credentialId: 'vc:data-processing-purpose:cro-bayer'})
+// ── 5. DataProcessingPurposeCredential — CRO PharmaCo Research AG ──────────────────────────
+MERGE (vc:VerifiableCredential {credentialId: 'vc:data-processing-purpose:cro-pharmaco'})
 SET vc.credentialType    = 'DataProcessingPurposeCredential',
     vc.issuerDid         = 'did:web:issuerservice%3A10016:issuer',
-    vc.subjectDid        = 'did:web:identityhub%3A7083:cro-bayer',
+    vc.subjectDid        = 'did:web:identityhub%3A7083:cro-pharmaco',
     vc.format            = 'VC1_0_JWT',
     vc.status            = 'active',
     vc.purpose           = 'Scientific research on therapeutic outcomes',
     vc.ehdsArticle       = 'Article 53',
     vc.permittedUses     = 'scientific-research,statistics,public-health-monitoring,education,ai-training',
     vc.prohibitedUses    = 're-identification,commercial-exploitation,insurance-decisions,advertising',
-    vc.approvalId        = 'hdab-approval-charite-diab',
+    vc.approvalId        = 'hdab-approval-alpha-klinik-diab',
     vc.validUntil        = date('2026-06-30'),
     vc.issuedAt          = datetime(),
     vc.expiresAt         = datetime() + duration('P90D');
 
-// ── 6. DataQualityLabelCredential — Clinic Charité ──────────────────────────
-MERGE (vc:VerifiableCredential {credentialId: 'vc:data-quality-label:clinic-charite'})
+// ── 6. DataQualityLabelCredential — Clinic AlphaKlinik Berlin ──────────────────────────
+MERGE (vc:VerifiableCredential {credentialId: 'vc:data-quality-label:clinic-alphaklinik'})
 SET vc.credentialType    = 'DataQualityLabelCredential',
     vc.issuerDid         = 'did:web:issuerservice%3A10016:issuer',
-    vc.subjectDid        = 'did:web:identityhub%3A7083:clinic-charite',
+    vc.subjectDid        = 'did:web:identityhub%3A7083:clinic-alphaklinik',
     vc.format            = 'VC1_0_JWT',
     vc.status            = 'active',
     vc.datasetId         = 'dataset:synthea-fhir-r4-mvd',
@@ -93,7 +93,7 @@ SET vc.credentialType    = 'DataQualityLabelCredential',
     vc.timeliness        = 0.98,
     vc.eehrxfCoverage    = 'partial',
     vc.assessmentDate    = date('2025-07-24'),
-    vc.assessor          = 'BfArM Quality Assessment Unit',
+    vc.assessor          = 'MedReg DE Quality Assessment Unit',
     vc.issuedAt          = datetime(),
     vc.expiresAt         = datetime() + duration('P180D');
 
@@ -103,30 +103,30 @@ SET vc.credentialType    = 'DataQualityLabelCredential',
 MATCH (p:Participant)
 WHERE p.participantType = 'CLINIC'
 MATCH (vc:VerifiableCredential)
-WHERE vc.subjectDid CONTAINS 'clinic-charite'
+WHERE vc.subjectDid CONTAINS 'clinic-alphaklinik'
 MERGE (p)-[:HOLDS_CREDENTIAL]->(vc);
 
 MATCH (p:Participant)
 WHERE p.participantType = 'CRO'
 MATCH (vc:VerifiableCredential)
-WHERE vc.subjectDid CONTAINS 'cro-bayer'
+WHERE vc.subjectDid CONTAINS 'cro-pharmaco'
 MERGE (p)-[:HOLDS_CREDENTIAL]->(vc);
 
 MATCH (p:Participant)
 WHERE p.participantType = 'HDAB'
 MATCH (vc:VerifiableCredential)
-WHERE vc.subjectDid CONTAINS 'hdab-bfarm'
+WHERE vc.subjectDid CONTAINS 'hdab-medreg'
 MERGE (p)-[:HOLDS_CREDENTIAL]->(vc);
 
 // ── 8. Link DataQualityLabelCredential to HealthDataset ──────────────────────
-MATCH (vc:VerifiableCredential {credentialId: 'vc:data-quality-label:clinic-charite'})
+MATCH (vc:VerifiableCredential {credentialId: 'vc:data-quality-label:clinic-alphaklinik'})
 MATCH (ds:HealthDataset {datasetId: 'dataset:synthea-fhir-r4-mvd'})
 MERGE (vc)-[:ATTESTS_QUALITY]->(ds);
 
 // ── 9. Link DataProcessingPurposeCredential to HDABApproval ──────────────────
-MATCH (vc:VerifiableCredential {credentialId: 'vc:data-processing-purpose:cro-bayer'})
+MATCH (vc:VerifiableCredential {credentialId: 'vc:data-processing-purpose:cro-pharmaco'})
 OPTIONAL MATCH (ha:HDABApproval)
-WHERE ha.approvalId CONTAINS 'charite'
+WHERE ha.approvalId CONTAINS 'alpha-klinik'
 WITH vc, ha WHERE ha IS NOT NULL
 MERGE (vc)-[:AUTHORIZED_BY]->(ha);
 

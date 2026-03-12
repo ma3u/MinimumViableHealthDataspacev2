@@ -63,26 +63,26 @@ const CONTACT_DB: Record<
     dpoName: "Dr. Anna Müller",
     dpoEmail: "dpo@test-clinic.de",
   },
-  "Clinic Charité": {
-    address: "Charitéplatz 1, 10117 Berlin, Germany",
-    email: "forschung@charite.de",
-    website: "https://www.charite.de",
+  "AlphaKlinik Berlin": {
+    address: "Gesundheitsplatz 1, 10117 Berlin, Germany",
+    email: "forschung@alpha-klinik.de",
+    website: "https://www.alpha-klinik.de",
     dpoName: "Prof. Dr. Klaus Weber",
-    dpoEmail: "datenschutz@charite.de",
+    dpoEmail: "datenschutz@alpha-klinik.de",
   },
-  "CRO Bayer": {
-    address: "Kaiser-Wilhelm-Allee 1, 51373 Leverkusen, Germany",
-    email: "clinical-research@bayer.com",
-    website: "https://www.bayer.com/en/pharma/clinical-research",
+  "CRO PharmaCo Research AG": {
+    address: "Industriestraße 42, 51373 Leverkusen, Germany",
+    email: "clinical-research@pharmaco.de",
+    website: "https://www.pharmaco.de/research",
     dpoName: "Dr. Sandra Koch",
-    dpoEmail: "data-protection@bayer.com",
+    dpoEmail: "data-protection@pharmaco.de",
   },
-  "HDAB BfArM": {
-    address: "Kurt-Georg-Kiesinger-Allee 3, 53175 Bonn, Germany",
-    email: "info@bfarm.de",
-    website: "https://www.bfarm.de",
+  "HDAB MedReg DE": {
+    address: "Regulierungsallee 3, 53175 Bonn, Germany",
+    email: "info@medreg.de",
+    website: "https://www.medreg.de",
     dpoName: "Dr. Frank Bauer",
-    dpoEmail: "datenschutz@bfarm.de",
+    dpoEmail: "datenschutz@medreg.de",
   },
 };
 
@@ -629,7 +629,7 @@ function OnboardingContent() {
                 required
                 value={organization}
                 onChange={(e) => setOrganization(e.target.value)}
-                placeholder="e.g. Charité – Universitätsmedizin Berlin"
+                placeholder="e.g. AlphaKlinik Berlin University Hospital"
                 className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded text-sm outline-none focus:border-layer2"
               />
             </div>

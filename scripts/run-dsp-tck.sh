@@ -30,7 +30,7 @@ CLIENT_SECRET="${EDC_CLIENT_SECRET:-edc-v-admin-secret}"
 REPORT_DIR="${REPORT_DIR:-test-results/dsp-tck}"
 
 # Participant contexts from Phase 1
-PARTICIPANTS=("test-clinic" "clinic-charite" "cro-bayer" "hdab-bfarm")
+PARTICIPANTS=("test-clinic" "clinic-alphaklinik" "cro-pharmaco" "hdab-medreg")
 
 # Counters
 TOTAL=0
@@ -163,7 +163,7 @@ run_catalog_tests() {
   # 1.4 — Federated Catalog query
   local test_id="CAT-1.4"
   local resp
-  resp=$(mgmt_post "/v5alpha/participants/hdab-bfarm/federatedcatalog/request" \
+  resp=$(mgmt_post "/v5alpha/participants/hdab-medreg/federatedcatalog/request" \
     '{"@context":["https://w3id.org/edc/connector/management/v2"],"@type":"QuerySpec"}' 2>/dev/null) || resp=""
 
   if [ -n "$resp" ] && echo "$resp" | jq -e 'length > 0' >/dev/null 2>&1; then
@@ -273,13 +273,13 @@ run_negotiation_tests() {
   # 3.2 — Verify negotiation states include FINALIZED
   local test_id="NEG-3.2"
   local resp
-  resp=$(mgmt_post "/v5alpha/participants/cro-bayer/contractnegotiations/request" \
+  resp=$(mgmt_post "/v5alpha/participants/cro-pharmaco/contractnegotiations/request" \
     '{"@context":["https://w3id.org/edc/connector/management/v2"],"@type":"QuerySpec"}' 2>/dev/null) || resp=""
 
   if [ -n "$resp" ] && echo "$resp" | jq -e '[.[] | select(.state == "FINALIZED")] | length > 0' >/dev/null 2>&1; then
     local count
     count=$(echo "$resp" | jq '[.[] | select(.state == "FINALIZED")] | length')
-    pass "$test_id: ${count} FINALIZED negotiations (CRO Bayer)"
+    pass "$test_id: ${count} FINALIZED negotiations (CRO PharmaCo Research AG)"
     record_result "$test_id" "negotiation" "passed" "${count} FINALIZED"
   elif [ -n "$resp" ] && echo "$resp" | jq -e 'length > 0' >/dev/null 2>&1; then
     local states
@@ -298,7 +298,7 @@ run_negotiation_tests() {
 
   if [ -n "$neg_id" ]; then
     local agreement
-    agreement=$(mgmt_get "/v5alpha/participants/cro-bayer/contractnegotiations/${neg_id}/agreement" 2>/dev/null) || agreement=""
+    agreement=$(mgmt_get "/v5alpha/participants/cro-pharmaco/contractnegotiations/${neg_id}/agreement" 2>/dev/null) || agreement=""
 
     if [ -n "$agreement" ] && echo "$agreement" | jq -e '.["@id"]' >/dev/null 2>&1; then
       pass "$test_id: Contract agreement has @id field"
@@ -365,7 +365,7 @@ run_transfer_tests() {
   # 4.2 — Verify transfer includes STARTED or COMPLETED state
   local test_id="XFER-4.2"
   local resp
-  resp=$(mgmt_post "/v5alpha/participants/cro-bayer/transferprocesses/request" \
+  resp=$(mgmt_post "/v5alpha/participants/cro-pharmaco/transferprocesses/request" \
     '{"@context":["https://w3id.org/edc/connector/management/v2"],"@type":"QuerySpec"}' 2>/dev/null) || resp=""
 
   if [ -n "$resp" ] && echo "$resp" | jq -e '[.[] | select(.state == "STARTED" or .state == "COMPLETED")] | length > 0' >/dev/null 2>&1; then
