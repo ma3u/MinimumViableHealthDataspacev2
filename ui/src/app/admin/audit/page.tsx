@@ -12,16 +12,27 @@ import {
   X,
   Download,
   Globe,
+  Mail,
+  ChevronDown,
+  ChevronRight,
+  ArrowRight,
+  ArrowLeft,
+  Database,
+  Eye,
 } from "lucide-react";
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
-type AuditType = "all" | "transfers" | "negotiations" | "credentials";
+type AuditType = "all" | "transfers" | "negotiations" | "credentials" | "accesslogs";
 
 interface Participant {
   did: string;
   name: string;
   country: string;
+  complianceOfficerName?: string;
+  complianceOfficerEmail?: string;
+  complianceOfficerPhone?: string;
+  edcEndpoint?: string;
 }
 
 interface AuditFilters {
@@ -41,9 +52,13 @@ interface TransferRow {
   consumerDid?: string;
   consumerName?: string;
   consumerCountryCode?: string;
+  consumerComplianceName?: string;
+  consumerComplianceEmail?: string;
   providerDid?: string;
   providerName?: string;
   providerCountryCode?: string;
+  providerComplianceName?: string;
+  providerComplianceEmail?: string;
   asset?: string;
   assetId?: string;
   protocol?: string;
@@ -52,6 +67,15 @@ interface TransferRow {
   policyId?: string;
   contentHash?: string;
   errorMessage?: string;
+  // enriched fields
+  direction?: string;        // "OUTGOING" | "INCOMING"
+  purposeOfSharing?: string;
+  legalBasis?: string;
+  edcProviderEndpoint?: string;
+  edcConsumerEndpoint?: string;
+  edcTransferId?: string;
+  accessCount?: number;
+  accessLogCount?: number;
 }
 
 interface NegotiationRow {
@@ -62,15 +86,31 @@ interface NegotiationRow {
   consumerDid?: string;
   consumerName?: string;
   consumerCountryCode?: string;
+  consumerComplianceName?: string;
+  consumerComplianceEmail?: string;
+  consumerEdcEndpoint?: string;
   providerDid?: string;
   providerName?: string;
   providerCountryCode?: string;
+  providerComplianceName?: string;
+  providerComplianceEmail?: string;
+  providerEdcEndpoint?: string;
   asset?: string;
   assetId?: string;
   crossBorder?: boolean;
   policyId?: string;
   contentHash?: string;
   contractId?: string;
+  // policy details
+  policyPurpose?: string;
+  policyLegalBasis?: string;
+  policyPermittedUses?: string;
+  policyProhibitedUses?: string;
+  policyDataMinimisation?: string;
+  policyRetentionDays?: number;
+  accessCount?: number;
+  accessLogCount?: number;
+  lastAccessAt?: string;
 }
 
 interface CredentialRow {
@@ -82,13 +122,39 @@ interface CredentialRow {
   subjectDid?: string;
 }
 
+interface AccessLogRow {
+  id?: string;
+  contractId?: string;
+  transferId?: string;
+  consumerDid?: string;
+  consumerName?: string;
+  consumerCountry?: string;
+  providerDid?: string;
+  providerName?: string;
+  providerCountry?: string;
+  assetId?: string;
+  accessedAt?: string;
+  accessType?: string; // "INITIAL_TRANSFER" | "QUERY"
+  bytesAccessed?: number;
+  purpose?: string;
+}
+
 interface AuditData {
   type: string;
   limit: number;
   transfers?: TransferRow[];
   negotiations?: NegotiationRow[];
   credentials?: CredentialRow[];
-  summary?: { nodeCounts: Record<string, number> };
+  accesslogs?: AccessLogRow[];
+  summary?: {
+    nodeCounts: Record<string, number>;
+    accessByConsumer?: {
+      consumerName: string;
+      totalAccesses: number;
+      totalBytes: number;
+      lastAccess: string;
+    }[];
+  };
 }
 
 // ── Constants ─────────────────────────────────────────────────────────────────
@@ -98,6 +164,7 @@ const TABS: { key: AuditType; label: string; icon: typeof ScrollText }[] = [
   { key: "transfers", label: "Transfers", icon: ArrowRightLeft },
   { key: "negotiations", label: "Negotiations", icon: FileSignature },
   { key: "credentials", label: "Credentials", icon: ShieldCheck },
+  { key: "accesslogs", label: "Access Logs", icon: Eye },
 ];
 
 const TRANSFER_STATUSES = ["COMPLETED", "IN_PROGRESS", "ERROR"];
@@ -153,6 +220,46 @@ function formatBytes(b?: number) {
   if (b >= 1_048_576) return `${(b / 1_048_576).toFixed(1)} MB`;
   if (b >= 1024) return `${(b / 1024).toFixed(0)} KB`;
   return `${b} B`;
+}
+
+function directionBadge(direction?: string) {
+  if (!direction) return null;
+  if (direction === "OUTGOING")
+    return (
+      <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-teal-900 text-teal-300">
+        <ArrowRight size={9} /> OUT
+      </span>
+    );
+  return (
+    <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-green-900 text-green-300">
+      <ArrowLeft size={9} /> IN
+    </span>
+  );
+}
+
+function accessTypeBadge(t?: string) {
+  if (!t) return <span className="text-gray-500">—</span>;
+  const cls = t === "INITIAL_TRANSFER"
+    ? "bg-blue-900 text-blue-300"
+    : "bg-purple-900 text-purple-300";
+  return (
+    <span className={`inline-block px-1.5 py-0.5 rounded text-[10px] font-semibold uppercase ${cls}`}>
+      {t === "INITIAL_TRANSFER" ? "Transfer" : "Query"}
+    </span>
+  );
+}
+
+function ComplianceButton({ name, email }: { name?: string; email?: string }) {
+  if (!email) return null;
+  return (
+    <a
+      href={`mailto:${email}?subject=Data Access Restriction Request`}
+      title={`Contact compliance officer: ${name ?? email}`}
+      className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] bg-orange-900/60 text-orange-300 hover:bg-orange-800 transition-colors"
+    >
+      <Mail size={9} /> {name ?? email}
+    </a>
+  );
 }
 
 function displayName(name?: string, did?: string, country?: string) {
@@ -322,6 +429,7 @@ export default function AdminAuditPage() {
   const [data, setData] = useState<AuditData | null>(null);
   const [loading, setLoading] = useState(true);
   const [participants, setParticipants] = useState<Participant[]>([]);
+  const [expandedNeg, setExpandedNeg] = useState<Set<string>>(new Set());
 
   // Load participant list once for filter dropdowns
   useEffect(() => {
@@ -412,17 +520,54 @@ export default function AdminAuditPage() {
         <>
           {/* Overview summary cards */}
           {activeTab === "all" && data.summary?.nodeCounts && (
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
-              {Object.entries(data.summary.nodeCounts).map(([label, count]) => (
-                <div
-                  key={label}
-                  className="p-3 border border-gray-700 rounded-lg"
-                >
-                  <p className="text-xl font-bold">{count}</p>
-                  <p className="text-xs text-gray-500">{label}</p>
-                </div>
-              ))}
-            </div>
+            <>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+                {Object.entries(data.summary.nodeCounts).map(([label, count]) => (
+                  <div key={label} className="p-3 border border-gray-700 rounded-lg">
+                    <p className="text-xl font-bold">{count}</p>
+                    <p className="text-xs text-gray-500">{label}</p>
+                  </div>
+                ))}
+              </div>
+
+              {/* Access by consumer */}
+              {(data.summary.accessByConsumer?.length ?? 0) > 0 && (
+                <section className="mb-8">
+                  <h2 className="font-semibold text-sm mb-3 flex items-center gap-2">
+                    <Database size={14} className="text-layer2" />
+                    Access Activity by Consumer
+                  </h2>
+                  <div className="overflow-auto">
+                    <table className="w-full text-xs">
+                      <thead>
+                        <tr className="text-gray-500 border-b border-gray-700">
+                          <th className="text-left py-2 px-2">Consumer</th>
+                          <th className="text-left py-2 px-2">Total Accesses</th>
+                          <th className="text-left py-2 px-2">Data Transferred</th>
+                          <th className="text-left py-2 px-2">Last Access</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {data.summary.accessByConsumer!.map((row, i) => (
+                          <tr key={i} className="border-b border-gray-800 hover:bg-gray-800/50">
+                            <td className="py-2 px-2 text-gray-300">{row.consumerName ?? "—"}</td>
+                            <td className="py-2 px-2">
+                              <span className="inline-block px-1.5 py-0.5 rounded bg-teal-900 text-teal-300 text-[10px] font-semibold">
+                                {row.totalAccesses}×
+                              </span>
+                            </td>
+                            <td className="py-2 px-2 text-gray-400">{formatBytes(row.totalBytes)}</td>
+                            <td className="py-2 px-2 text-gray-500">
+                              {row.lastAccess ? row.lastAccess.slice(0, 10) : "—"}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </section>
+              )}
+            </>
           )}
 
           {/* ── Transfers ──────────────────────────────────────────────── */}
@@ -438,10 +583,7 @@ export default function AdminAuditPage() {
                     <button
                       onClick={() =>
                         exportCSV(
-                          data.transfers as unknown as Record<
-                            string,
-                            unknown
-                          >[],
+                          data.transfers as unknown as Record<string, unknown>[],
                           "transfers.csv",
                         )
                       }
@@ -458,15 +600,17 @@ export default function AdminAuditPage() {
                     <table className="w-full text-xs">
                       <thead>
                         <tr className="text-gray-500 border-b border-gray-700">
+                          <th className="text-left py-2 px-2">Dir</th>
                           <th className="text-left py-2 px-2">Consumer</th>
                           <th className="text-left py-2 px-2">Provider</th>
                           <th className="text-left py-2 px-2">Asset</th>
+                          <th className="text-left py-2 px-2">Purpose</th>
                           <th className="text-left py-2 px-2">Status</th>
                           <th className="text-left py-2 px-2">Date</th>
-                          <th className="text-left py-2 px-2">Protocol</th>
                           <th className="text-left py-2 px-2">Size</th>
+                          <th className="text-left py-2 px-2">Accesses</th>
+                          <th className="text-left py-2 px-2">EDC Source</th>
                           <th className="text-left py-2 px-2">EHDS</th>
-                          <th className="text-left py-2 px-2">Hash</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -475,45 +619,54 @@ export default function AdminAuditPage() {
                             key={i}
                             className="border-b border-gray-800 hover:bg-gray-800/50"
                           >
-                            <td className="py-2 px-2 text-gray-300">
-                              {displayName(
-                                t.consumerName,
-                                t.consumerDid,
-                                t.consumerCountryCode,
-                              )}
+                            <td className="py-2 px-2">{directionBadge(t.direction)}</td>
+                            <td className="py-2 px-2">
+                              <div className="text-gray-300">
+                                {displayName(t.consumerName, t.consumerDid, t.consumerCountryCode)}
+                              </div>
+                              <div className="mt-0.5">
+                                <ComplianceButton name={t.consumerComplianceName} email={t.consumerComplianceEmail} />
+                              </div>
                             </td>
-                            <td className="py-2 px-2 text-gray-300">
-                              {displayName(
-                                t.providerName,
-                                t.providerDid,
-                                t.providerCountryCode,
-                              )}
+                            <td className="py-2 px-2">
+                              <div className="text-gray-300">
+                                {displayName(t.providerName, t.providerDid, t.providerCountryCode)}
+                              </div>
+                              <div className="mt-0.5">
+                                <ComplianceButton name={t.providerComplianceName} email={t.providerComplianceEmail} />
+                              </div>
                             </td>
                             <td className="py-2 px-2 text-gray-400">
                               {t.asset || t.assetId || "—"}
                             </td>
+                            <td className="py-2 px-2 text-gray-400 max-w-[140px] truncate" title={t.purposeOfSharing}>
+                              {t.purposeOfSharing || "—"}
+                            </td>
                             <td className="py-2 px-2">
                               {statusBadge(t.status)}
                               {t.errorMessage && (
-                                <span
-                                  title={String(t.errorMessage)}
-                                  className="ml-1 text-red-400 cursor-help"
-                                >
-                                  ⚠
+                                <span title={String(t.errorMessage)} className="ml-1 text-red-400 cursor-help">⚠</span>
+                              )}
+                            </td>
+                            <td className="py-2 px-2 text-gray-500">
+                              {(t.timestamp || t.transferDate || "—").slice(0, 10)}
+                            </td>
+                            <td className="py-2 px-2 text-gray-500">{formatBytes(t.byteSize)}</td>
+                            <td className="py-2 px-2">
+                              {t.accessLogCount != null && t.accessLogCount > 0 ? (
+                                <span className="inline-block px-1.5 py-0.5 rounded bg-teal-900 text-teal-300 text-[10px] font-semibold">
+                                  {t.accessLogCount}×
                                 </span>
+                              ) : (
+                                <span className="text-gray-600">—</span>
                               )}
                             </td>
-                            <td className="py-2 px-2 text-gray-500">
-                              {(t.timestamp || t.transferDate || "—").slice(
-                                0,
-                                10,
-                              )}
-                            </td>
-                            <td className="py-2 px-2 text-gray-500">
-                              {t.protocol || "—"}
-                            </td>
-                            <td className="py-2 px-2 text-gray-500">
-                              {formatBytes(t.byteSize)}
+                            <td className="py-2 px-2">
+                              {t.edcProviderEndpoint ? (
+                                <span title={t.edcProviderEndpoint} className="font-mono text-gray-500 text-[10px] truncate max-w-[100px] block cursor-help">
+                                  {t.edcProviderEndpoint.replace(/^https?:\/\//, "")}
+                                </span>
+                              ) : "—"}
                             </td>
                             <td className="py-2 px-2">
                               {t.crossBorder ? (
@@ -524,9 +677,6 @@ export default function AdminAuditPage() {
                               ) : (
                                 ehdsArticle(t.policyId)
                               )}
-                            </td>
-                            <td className="py-2 px-2">
-                              {shortHash(t.contentHash)}
                             </td>
                           </tr>
                         ))}
@@ -550,10 +700,7 @@ export default function AdminAuditPage() {
                     <button
                       onClick={() =>
                         exportCSV(
-                          data.negotiations as unknown as Record<
-                            string,
-                            unknown
-                          >[],
+                          data.negotiations as unknown as Record<string, unknown>[],
                           "negotiations.csv",
                         )
                       }
@@ -564,75 +711,133 @@ export default function AdminAuditPage() {
                   )}
                 </div>
                 {data.negotiations.length === 0 ? (
-                  <p className="text-gray-500 text-sm">
-                    No negotiations recorded
-                  </p>
+                  <p className="text-gray-500 text-sm">No negotiations recorded</p>
                 ) : (
                   <div className="overflow-auto">
                     <table className="w-full text-xs">
                       <thead>
                         <tr className="text-gray-500 border-b border-gray-700">
+                          <th className="text-left py-2 px-2 w-5"></th>
                           <th className="text-left py-2 px-2">Consumer</th>
                           <th className="text-left py-2 px-2">Provider</th>
                           <th className="text-left py-2 px-2">Asset</th>
                           <th className="text-left py-2 px-2">Status</th>
                           <th className="text-left py-2 px-2">Date</th>
+                          <th className="text-left py-2 px-2">Accesses</th>
                           <th className="text-left py-2 px-2">EHDS</th>
-                          <th className="text-left py-2 px-2">Contract ID</th>
-                          <th className="text-left py-2 px-2">Hash</th>
                         </tr>
                       </thead>
                       <tbody>
-                        {data.negotiations.map((n, i) => (
-                          <tr
-                            key={i}
-                            className="border-b border-gray-800 hover:bg-gray-800/50"
-                          >
-                            <td className="py-2 px-2 text-gray-300">
-                              {displayName(
-                                n.consumerName,
-                                n.consumerDid,
-                                n.consumerCountryCode,
+                        {data.negotiations.map((n) => {
+                          const rowKey = n.id || n.contractId || String(Math.random());
+                          const isOpen = expandedNeg.has(rowKey);
+                          return (
+                            <>
+                              <tr
+                                key={rowKey}
+                                className="border-b border-gray-800 hover:bg-gray-800/40 cursor-pointer"
+                                onClick={() =>
+                                  setExpandedNeg((prev) => {
+                                    const next = new Set(prev);
+                                    isOpen ? next.delete(rowKey) : next.add(rowKey);
+                                    return next;
+                                  })
+                                }
+                              >
+                                <td className="py-2 px-2 text-gray-500">
+                                  {isOpen ? <ChevronDown size={11} /> : <ChevronRight size={11} />}
+                                </td>
+                                <td className="py-2 px-2">
+                                  <div className="text-gray-300">
+                                    {displayName(n.consumerName, n.consumerDid, n.consumerCountryCode)}
+                                  </div>
+                                  <div className="mt-0.5">
+                                    <ComplianceButton name={n.consumerComplianceName} email={n.consumerComplianceEmail} />
+                                  </div>
+                                </td>
+                                <td className="py-2 px-2">
+                                  <div className="text-gray-300">
+                                    {displayName(n.providerName, n.providerDid, n.providerCountryCode)}
+                                  </div>
+                                  <div className="mt-0.5">
+                                    <ComplianceButton name={n.providerComplianceName} email={n.providerComplianceEmail} />
+                                  </div>
+                                </td>
+                                <td className="py-2 px-2 text-gray-400">{n.asset || n.assetId || "—"}</td>
+                                <td className="py-2 px-2">{statusBadge(n.status)}</td>
+                                <td className="py-2 px-2 text-gray-500">
+                                  {(n.timestamp || n.negotiationDate || "—").slice(0, 10)}
+                                </td>
+                                <td className="py-2 px-2">
+                                  {n.accessLogCount != null && n.accessLogCount > 0 ? (
+                                    <span className="inline-block px-1.5 py-0.5 rounded bg-teal-900 text-teal-300 text-[10px] font-semibold">
+                                      {n.accessLogCount}×
+                                    </span>
+                                  ) : (
+                                    <span className="text-gray-600">—</span>
+                                  )}
+                                </td>
+                                <td className="py-2 px-2">
+                                  {n.crossBorder ? (
+                                    <span className="flex items-center gap-0.5 text-orange-400">
+                                      <Globe size={10} />
+                                      {ehdsArticle(n.policyId)}
+                                    </span>
+                                  ) : (
+                                    ehdsArticle(n.policyId)
+                                  )}
+                                </td>
+                              </tr>
+
+                              {/* Expanded policy card */}
+                              {isOpen && (
+                                <tr key={`${rowKey}-detail`} className="border-b border-gray-700 bg-gray-900/60">
+                                  <td colSpan={8} className="px-6 py-4">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                      {/* Policy details */}
+                                      <div className="border border-gray-700 rounded-lg p-3">
+                                        <p className="text-[10px] font-semibold text-gray-500 uppercase mb-2">Policy Details</p>
+                                        <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
+                                          <span className="text-gray-500">Purpose</span>
+                                          <span className="text-gray-300">{n.policyPurpose ?? "—"}</span>
+                                          <span className="text-gray-500">Legal Basis</span>
+                                          <span className="text-gray-300">{n.policyLegalBasis ?? "—"}</span>
+                                          <span className="text-gray-500">Permitted</span>
+                                          <span className="text-gray-300">{n.policyPermittedUses ?? "—"}</span>
+                                          <span className="text-gray-500">Prohibited</span>
+                                          <span className="text-red-400">{n.policyProhibitedUses ?? "—"}</span>
+                                          <span className="text-gray-500">Data Minimisation</span>
+                                          <span className="text-gray-300">{n.policyDataMinimisation ?? "—"}</span>
+                                          <span className="text-gray-500">Retention</span>
+                                          <span className="text-gray-300">
+                                            {n.policyRetentionDays ? `${n.policyRetentionDays} days` : "—"}
+                                          </span>
+                                          <span className="text-gray-500">Total Accesses</span>
+                                          <span className="text-teal-300 font-semibold">{n.accessCount ?? 0}×</span>
+                                          <span className="text-gray-500">Last Access</span>
+                                          <span className="text-gray-300">{n.lastAccessAt ? n.lastAccessAt.slice(0, 10) : "—"}</span>
+                                        </div>
+                                      </div>
+
+                                      {/* EDC endpoints + contract ID */}
+                                      <div className="border border-gray-700 rounded-lg p-3">
+                                        <p className="text-[10px] font-semibold text-gray-500 uppercase mb-2">EDC Endpoints &amp; Contract</p>
+                                        <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
+                                          <span className="text-gray-500">Consumer EDC</span>
+                                          <span className="font-mono text-gray-400 break-all">{n.consumerEdcEndpoint ?? "—"}</span>
+                                          <span className="text-gray-500">Provider EDC</span>
+                                          <span className="font-mono text-gray-400 break-all">{n.providerEdcEndpoint ?? "—"}</span>
+                                          <span className="text-gray-500">Contract ID</span>
+                                          <span className="font-mono text-gray-500">{n.contractId ?? "—"}</span>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </td>
+                                </tr>
                               )}
-                            </td>
-                            <td className="py-2 px-2 text-gray-300">
-                              {displayName(
-                                n.providerName,
-                                n.providerDid,
-                                n.providerCountryCode,
-                              )}
-                            </td>
-                            <td className="py-2 px-2 text-gray-400">
-                              {n.asset || n.assetId || "—"}
-                            </td>
-                            <td className="py-2 px-2">
-                              {statusBadge(n.status)}
-                            </td>
-                            <td className="py-2 px-2 text-gray-500">
-                              {(
-                                n.timestamp ||
-                                n.negotiationDate ||
-                                "—"
-                              ).slice(0, 10)}
-                            </td>
-                            <td className="py-2 px-2">
-                              {n.crossBorder ? (
-                                <span className="flex items-center gap-0.5 text-orange-400">
-                                  <Globe size={10} />
-                                  {ehdsArticle(n.policyId)}
-                                </span>
-                              ) : (
-                                ehdsArticle(n.policyId)
-                              )}
-                            </td>
-                            <td className="py-2 px-2 font-mono text-gray-500">
-                              {n.contractId || "—"}
-                            </td>
-                            <td className="py-2 px-2">
-                              {shortHash(n.contentHash)}
-                            </td>
-                          </tr>
-                        ))}
+                            </>
+                          );
+                        })}
                       </tbody>
                     </table>
                   </div>
@@ -692,6 +897,65 @@ export default function AdminAuditPage() {
                 )}
               </section>
             )}
+          {/* ── Access Logs ────────────────────────────────────────────── */}
+          {activeTab === "accesslogs" && (
+            <section className="mb-8">
+              <h2 className="font-semibold text-sm mb-3 flex items-center gap-2">
+                <Eye size={14} className="text-layer2" />
+                Data Access Logs ({data.accesslogs?.length ?? 0})
+              </h2>
+              {!data.accesslogs || data.accesslogs.length === 0 ? (
+                <p className="text-gray-500 text-sm">No access logs recorded</p>
+              ) : (
+                <div className="overflow-auto">
+                  <table className="w-full text-xs">
+                    <thead>
+                      <tr className="text-gray-500 border-b border-gray-700">
+                        <th className="text-left py-2 px-2">Consumer</th>
+                        <th className="text-left py-2 px-2">Provider</th>
+                        <th className="text-left py-2 px-2">Asset</th>
+                        <th className="text-left py-2 px-2">Type</th>
+                        <th className="text-left py-2 px-2">Purpose</th>
+                        <th className="text-left py-2 px-2">Accessed At</th>
+                        <th className="text-left py-2 px-2">Bytes</th>
+                        <th className="text-left py-2 px-2">Contract</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {data.accesslogs.map((a, i) => (
+                        <tr key={i} className="border-b border-gray-800 hover:bg-gray-800/50">
+                          <td className="py-2 px-2 text-gray-300">
+                            {a.consumerName ?? a.consumerDid ?? "—"}
+                            {a.consumerCountry && (
+                              <span className="text-gray-500"> ({a.consumerCountry})</span>
+                            )}
+                          </td>
+                          <td className="py-2 px-2 text-gray-300">
+                            {a.providerName ?? a.providerDid ?? "—"}
+                            {a.providerCountry && (
+                              <span className="text-gray-500"> ({a.providerCountry})</span>
+                            )}
+                          </td>
+                          <td className="py-2 px-2 text-gray-400">{a.assetId ?? "—"}</td>
+                          <td className="py-2 px-2">{accessTypeBadge(a.accessType)}</td>
+                          <td className="py-2 px-2 text-gray-400 max-w-[140px] truncate" title={a.purpose}>
+                            {a.purpose ?? "—"}
+                          </td>
+                          <td className="py-2 px-2 text-gray-500">
+                            {a.accessedAt ? a.accessedAt.slice(0, 10) : "—"}
+                          </td>
+                          <td className="py-2 px-2 text-gray-500">{formatBytes(a.bytesAccessed)}</td>
+                          <td className="py-2 px-2 font-mono text-gray-600 text-[10px]">
+                            {a.contractId ? a.contractId.slice(0, 12) + "…" : "—"}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </section>
+          )}
         </>
       )}
     </div>

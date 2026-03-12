@@ -75,7 +75,7 @@ async function runCypher(
  * GET /api/admin/audit — Query the provenance & audit graph from Neo4j.
  *
  * Query params:
- *   type         – "all" | "transfers" | "negotiations" | "credentials" | "participants"
+ *   type         – "all" | "transfers" | "negotiations" | "credentials" | "accesslogs" | "participants"
  *   limit        – max rows (default 50, max 200)
  *   status       – filter by status string
  *   dateFrom     – ISO date lower bound on timestamp  (YYYY-MM-DD)
@@ -83,6 +83,7 @@ async function runCypher(
  *   consumerDid  – exact DID of consumer participant
  *   providerDid  – exact DID of provider participant
  *   crossBorder  – "true" | "false" | "" (all)
+ *   contractId   – (accesslogs only) filter by contract ID
  */
 export async function GET(request: NextRequest) {
   const sp = request.nextUrl.searchParams;
@@ -98,19 +99,29 @@ export async function GET(request: NextRequest) {
   };
 
   try {
-    // ── Participants list for filter dropdowns ────────────────────────────
+    // ── Participants list (includes compliance officer + EDC endpoint) ────
     if (type === "participants") {
       const rows = await runCypher(
         `MATCH (p:Participant)
-         RETURN p.participantId AS did, p.name AS name, p.country AS country
+         RETURN p.participantId           AS did,
+                p.name                    AS name,
+                p.country                 AS country,
+                p.complianceOfficerName   AS complianceOfficerName,
+                p.complianceOfficerEmail  AS complianceOfficerEmail,
+                p.complianceOfficerPhone  AS complianceOfficerPhone,
+                p.edcEndpoint             AS edcEndpoint
          ORDER BY p.name ASC`,
       );
       const participants =
         rows[0]?.data?.map(
-          (r: { row: [string, string, string] }) => ({
+          (r: { row: [string, string, string, string, string, string, string] }) => ({
             did: r.row[0],
             name: r.row[1],
             country: r.row[2],
+            complianceOfficerName: r.row[3],
+            complianceOfficerEmail: r.row[4],
+            complianceOfficerPhone: r.row[5],
+            edcEndpoint: r.row[6],
           }),
         ) || [];
       return NextResponse.json({ participants });
@@ -127,13 +138,19 @@ export async function GET(request: NextRequest) {
          OPTIONAL MATCH (consumer:Participant {participantId: t.consumerDid})
          OPTIONAL MATCH (provider:Participant {participantId: t.providerDid})
          OPTIONAL MATCH (t)-[:TRANSFERS]->(a)
+         OPTIONAL MATCH (al:DataAccessLog)-[:VIA_TRANSFER]->(t)
          RETURN t {
            .*,
-           consumerName: consumer.name,
-           consumerCountryCode: consumer.country,
-           providerName: provider.name,
-           providerCountryCode: provider.country,
-           asset: coalesce(a.name, a.title)
+           consumerName:             consumer.name,
+           consumerCountryCode:      consumer.country,
+           consumerComplianceName:   consumer.complianceOfficerName,
+           consumerComplianceEmail:  consumer.complianceOfficerEmail,
+           providerName:             provider.name,
+           providerCountryCode:      provider.country,
+           providerComplianceName:   provider.complianceOfficerName,
+           providerComplianceEmail:  provider.complianceOfficerEmail,
+           asset:                    coalesce(a.name, a.title),
+           accessLogCount:           count(al)
          } AS transfer
          ORDER BY t.timestamp DESC
          LIMIT $limit`,
@@ -152,13 +169,21 @@ export async function GET(request: NextRequest) {
          OPTIONAL MATCH (consumer:Participant {participantId: n.consumerDid})
          OPTIONAL MATCH (provider:Participant {participantId: n.providerDid})
          OPTIONAL MATCH (n)-[:FOR_ASSET]->(a)
+         OPTIONAL MATCH (al:DataAccessLog)-[:UNDER_CONTRACT]->(n)
          RETURN n {
            .*,
-           consumerName: consumer.name,
-           consumerCountryCode: consumer.country,
-           providerName: provider.name,
-           providerCountryCode: provider.country,
-           asset: coalesce(a.name, a.title)
+           consumerName:             consumer.name,
+           consumerCountryCode:      consumer.country,
+           consumerComplianceName:   consumer.complianceOfficerName,
+           consumerComplianceEmail:  consumer.complianceOfficerEmail,
+           consumerEdcEndpoint:      consumer.edcEndpoint,
+           providerName:             provider.name,
+           providerCountryCode:      provider.country,
+           providerComplianceName:   provider.complianceOfficerName,
+           providerComplianceEmail:  provider.complianceOfficerEmail,
+           providerEdcEndpoint:      provider.edcEndpoint,
+           asset:                    coalesce(a.name, a.title),
+           accessLogCount:           count(al)
          } AS negotiation
          ORDER BY n.timestamp DESC
          LIMIT $limit`,
@@ -166,6 +191,34 @@ export async function GET(request: NextRequest) {
       );
       results.negotiations =
         negotiations[0]?.data?.map((r: { row: unknown[] }) => r.row[0]) || [];
+    }
+
+    // ── Access Logs ───────────────────────────────────────────────────────
+    if (type === "accesslogs") {
+      const safe = (v: string) => v.replace(/'/g, "\\'");
+      const consumerFilter = filters.consumerDid
+        ? `AND a.consumerDid = '${safe(filters.consumerDid)}'` : "";
+      const contractFilter = sp.get("contractId")
+        ? `AND a.contractId = '${safe(sp.get("contractId")!)}'` : "";
+      const logs = await runCypher(
+        `MATCH (a:DataAccessLog)
+         WHERE 1=1 ${consumerFilter} ${contractFilter}
+         OPTIONAL MATCH (consumer:Participant {participantId: a.consumerDid})
+         OPTIONAL MATCH (provider:Participant {participantId: a.providerDid})
+         RETURN a {
+           .*,
+           consumerName:    consumer.name,
+           consumerCountry: consumer.country,
+           providerName:    provider.name,
+           providerCountry: provider.country
+         } AS log
+         ORDER BY a.accessedAt DESC
+         LIMIT $limit`,
+        { limit },
+      );
+      results.accesslogs =
+        logs[0]?.data?.map((r: { row: unknown[] }) => r.row[0]) || [];
+      return NextResponse.json({ type, limit, ...results });
     }
 
     // ── Verifiable Credentials ────────────────────────────────────────────
@@ -187,9 +240,18 @@ export async function GET(request: NextRequest) {
       const stats = await runCypher(
         `MATCH (n)
          WHERE n:DataTransfer OR n:ContractNegotiation OR n:VerifiableCredential
-           OR n:Participant OR n:DataAsset OR n:HealthDataset
+           OR n:Participant OR n:DataAsset OR n:HealthDataset OR n:DataAccessLog
          RETURN labels(n)[0] AS label, count(n) AS count
          ORDER BY count DESC`,
+      );
+      const accessStats = await runCypher(
+        `MATCH (a:DataAccessLog)
+         OPTIONAL MATCH (consumer:Participant {participantId: a.consumerDid})
+         RETURN consumer.name          AS consumerName,
+                count(a)               AS totalAccesses,
+                sum(a.bytesAccessed)   AS totalBytes,
+                max(a.accessedAt)      AS lastAccess
+         ORDER BY totalAccesses DESC`,
       );
       results.summary = {
         nodeCounts:
@@ -200,6 +262,15 @@ export async function GET(request: NextRequest) {
             },
             {} as Record<string, number>,
           ) || {},
+        accessByConsumer:
+          accessStats[0]?.data?.map(
+            (r: { row: [string, number, number, string] }) => ({
+              consumerName: r.row[0],
+              totalAccesses: r.row[1],
+              totalBytes: r.row[2],
+              lastAccess: r.row[3],
+            }),
+          ) || [],
       };
     }
 
