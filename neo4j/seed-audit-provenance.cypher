@@ -11,30 +11,30 @@ CREATE INDEX transfer_status     IF NOT EXISTS FOR (t:DataTransfer)          ON 
 CREATE INDEX negotiation_status  IF NOT EXISTS FOR (n:ContractNegotiation)   ON (n.status);
 
 // ── 2. Ensure Participant nodes for the demo tenants ─────────────────────────
-MERGE (p_alpha-klinik:Participant {participantId: "did:web:alpha-klinik.de:participant"})
-  SET p_alpha-klinik.name            = "AlphaKlinik Berlin Berlin (CLINIC)",
-      p_alpha-klinik.participantType = "CLINIC",
-      p_alpha-klinik.country         = "DE";
+MERGE (p_alphaklinik:Participant {participantId: "did:web:alpha-klinik.de:participant"})
+  SET p_alphaklinik.name            = "AlphaKlinik Berlin",
+      p_alphaklinik.participantType = "CLINIC",
+      p_alphaklinik.country         = "DE";
 
-MERGE (p_bayer:Participant {participantId: "did:web:pharmaco.de:research"})
-  SET p_bayer.name              = "Bayer Research (CRO)",
-      p_bayer.participantType   = "CRO",
-      p_bayer.country           = "DE";
+MERGE (p_pharmaco:Participant {participantId: "did:web:pharmaco.de:research"})
+  SET p_pharmaco.name              = "PharmaCo Research AG",
+      p_pharmaco.participantType   = "CRO",
+      p_pharmaco.country           = "DE";
 
-MERGE (p_bfarm:Participant {participantId: "did:web:medreg.de:hdab"})
-  SET p_bfarm.name              = "MedReg DE (HDAB)",
-      p_bfarm.participantType   = "HDAB",
-      p_bfarm.country           = "DE";
+MERGE (p_medreg:Participant {participantId: "did:web:medreg.de:hdab"})
+  SET p_medreg.name              = "MedReg DE",
+      p_medreg.participantType   = "HDAB",
+      p_medreg.country           = "DE";
 
-MERGE (p_zuyderland:Participant {participantId: "did:web:lmc.nl:clinic"})
-  SET p_zuyderland.name            = "Limburg Medical Centre (NL)",
-      p_zuyderland.participantType = "CLINIC",
-      p_zuyderland.country         = "NL";
+MERGE (p_lmc:Participant {participantId: "did:web:lmc.nl:clinic"})
+  SET p_lmc.name            = "Limburg Medical Centre",
+      p_lmc.participantType = "CLINIC",
+      p_lmc.country         = "NL";
 
-MERGE (p_inserm:Participant {participantId: "did:web:irs.fr:hdab"})
-  SET p_inserm.name            = "Institut de Recherche Santé (HDAB-FR)",
-      p_inserm.participantType = "HDAB",
-      p_inserm.country         = "FR";
+MERGE (p_irs:Participant {participantId: "did:web:irs.fr:hdab"})
+  SET p_irs.name            = "Institut de Recherche Sant\u00e9",
+      p_irs.participantType = "HDAB",
+      p_irs.country         = "FR";
 
 // ── 3. Ensure HealthDataset/DataAsset nodes used in transfers ─────────────────
 MERGE (ds_t2d:HealthDataset {id: "dataset:synthea-fhir-r4-mvd"})
@@ -60,7 +60,7 @@ MERGE (n1:ContractNegotiation {id: "neg-001"})
       n1.providerCountry     = "DE",
       n1.crossBorder         = false,
       n1.policyId            = "policy:ehds-research-use",
-      n1.assetId             = "dataset:synthea-fhir-r4-mvd";
+      n1.assetId             = "dataset:synthea-fhir-r4-mvd"
 WITH n1
 MATCH (consumer:Participant {participantId: "did:web:pharmaco.de:research"})
 MATCH (provider:Participant {participantId: "did:web:alpha-klinik.de:participant"})
@@ -81,7 +81,7 @@ MERGE (n2:ContractNegotiation {id: "neg-002"})
       n2.providerCountry     = "DE",
       n2.crossBorder         = false,
       n2.policyId            = "policy:ehds-research-use",
-      n2.assetId             = "dataset:omop-cdm-v54-analytics";
+      n2.assetId             = "dataset:omop-cdm-v54-analytics"
 WITH n2
 MATCH (consumer:Participant {participantId: "did:web:pharmaco.de:research"})
 MATCH (provider:Participant {participantId: "did:web:alpha-klinik.de:participant"})
@@ -102,7 +102,7 @@ MERGE (n3:ContractNegotiation {id: "neg-003"})
       n3.providerCountry     = "NL",
       n3.crossBorder         = true,
       n3.policyId            = "policy:ehds-cross-border",
-      n3.assetId             = "dataset:prostate-cancer-registry";
+      n3.assetId             = "dataset:prostate-cancer-registry"
 WITH n3
 MATCH (consumer:Participant {participantId: "did:web:medreg.de:hdab"})
 MATCH (provider:Participant {participantId: "did:web:lmc.nl:clinic"})
@@ -124,7 +124,7 @@ MERGE (n4:ContractNegotiation {id: "neg-004"})
       n4.crossBorder         = true,
       n4.terminatedReason    = "Policy mismatch: usage purpose not permitted",
       n4.policyId            = "policy:ehds-research-use",
-      n4.assetId             = "dataset:omop-cdm-v54-analytics";
+      n4.assetId             = "dataset:omop-cdm-v54-analytics"
 WITH n4
 MATCH (consumer:Participant {participantId: "did:web:irs.fr:hdab"})
 MATCH (provider:Participant {participantId: "did:web:pharmaco.de:research"})
@@ -145,7 +145,7 @@ MERGE (n5:ContractNegotiation {id: "neg-005"})
       n5.providerCountry     = "DE",
       n5.crossBorder         = true,
       n5.policyId            = "policy:ehds-cross-border",
-      n5.assetId             = "dataset:synthea-fhir-r4-mvd";
+      n5.assetId             = "dataset:synthea-fhir-r4-mvd"
 WITH n5
 MATCH (consumer:Participant {participantId: "did:web:lmc.nl:clinic"})
 MATCH (provider:Participant {participantId: "did:web:alpha-klinik.de:participant"})
@@ -169,7 +169,7 @@ MERGE (t1:DataTransfer {id: "trn-001"})
       t1.crossBorder         = false,
       t1.protocol            = "HTTP-PUSH",
       t1.byteSize            = 14827392,
-      t1.assetId             = "dataset:synthea-fhir-r4-mvd";
+      t1.assetId             = "dataset:synthea-fhir-r4-mvd"
 WITH t1
 MATCH (consumer:Participant {participantId: "did:web:pharmaco.de:research"})
 MATCH (provider:Participant {participantId: "did:web:alpha-klinik.de:participant"})
@@ -191,7 +191,7 @@ MERGE (t2:DataTransfer {id: "trn-002"})
       t2.crossBorder         = false,
       t2.protocol            = "HTTP-PULL",
       t2.byteSize            = 43102208,
-      t2.assetId             = "dataset:omop-cdm-v54-analytics";
+      t2.assetId             = "dataset:omop-cdm-v54-analytics"
 WITH t2
 MATCH (consumer:Participant {participantId: "did:web:pharmaco.de:research"})
 MATCH (provider:Participant {participantId: "did:web:alpha-klinik.de:participant"})
@@ -213,7 +213,7 @@ MERGE (t3:DataTransfer {id: "trn-003"})
       t3.crossBorder         = true,
       t3.protocol            = "HTTP-PUSH",
       t3.byteSize            = 9876543,
-      t3.assetId             = "dataset:prostate-cancer-registry";
+      t3.assetId             = "dataset:prostate-cancer-registry"
 WITH t3
 MATCH (consumer:Participant {participantId: "did:web:medreg.de:hdab"})
 MATCH (provider:Participant {participantId: "did:web:lmc.nl:clinic"})
@@ -235,7 +235,7 @@ MERGE (t4:DataTransfer {id: "trn-004"})
       t4.crossBorder         = true,
       t4.protocol            = "HTTP-PULL",
       t4.byteSize            = NULL,
-      t4.assetId             = "dataset:synthea-fhir-r4-mvd";
+      t4.assetId             = "dataset:synthea-fhir-r4-mvd"
 WITH t4
 MATCH (consumer:Participant {participantId: "did:web:lmc.nl:clinic"})
 MATCH (provider:Participant {participantId: "did:web:alpha-klinik.de:participant"})
@@ -258,7 +258,7 @@ MERGE (t5:DataTransfer {id: "trn-005"})
       t5.protocol            = "HTTP-PUSH",
       t5.errorMessage        = "Data integrity check failed: SHA-256 mismatch",
       t5.byteSize            = 0,
-      t5.assetId             = "dataset:synthea-fhir-r4-mvd";
+      t5.assetId             = "dataset:synthea-fhir-r4-mvd"
 WITH t5
 MATCH (consumer:Participant {participantId: "did:web:irs.fr:hdab"})
 MATCH (provider:Participant {participantId: "did:web:alpha-klinik.de:participant"})
