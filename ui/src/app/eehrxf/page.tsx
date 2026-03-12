@@ -13,6 +13,7 @@ import {
   ChevronRight,
   Layers,
 } from "lucide-react";
+import PageIntro from "@/components/PageIntro";
 
 interface EEHRxFProfile {
   profileId: string;
@@ -258,14 +259,19 @@ export default function EEHRxFPage() {
   return (
     <div className="max-w-5xl mx-auto px-6 py-10">
       {/* Header */}
-      <div className="flex items-center gap-2 mb-1">
-        <Layers size={20} className="text-layer2" />
-        <h1 className="text-2xl font-bold">EEHRxF Profile Alignment</h1>
-      </div>
-      <p className="text-gray-400 text-sm mb-8">
-        European Electronic Health Record Exchange Format — HL7 Europe FHIR R4
-        Implementation Guides mapped to current graph data
-      </p>
+      <PageIntro
+        title="EEHRxF Profile Alignment"
+        icon={Layers}
+        description="European Electronic Health Record Exchange Format — HL7 Europe FHIR R4 Implementation Guides mapped to current graph data. Verify how well your FHIR resources conform to the mandatory EEHRxF profiles required by the EHDS regulation."
+        prevStep={{ href: "/query", label: "Natural Language Query" }}
+        nextStep={{ href: "/compliance", label: "EHDS Compliance" }}
+        infoText="EEHRxF defines 10 priority categories of electronic health data that must be interoperable across EU member states. Each profile is matched against FHIR resources in your graph to show alignment status."
+        docLink={{
+          href: "https://www.ehds2pilot.eu/",
+          label: "EHDS2 Pilot — EEHRxF",
+          external: true,
+        }}
+      />
 
       {error && (
         <div className="mb-6 p-3 rounded bg-red-900/20 border border-red-700 text-red-400 text-sm">

@@ -22,6 +22,7 @@ import {
   FileText,
   Code2,
   Layers,
+  ScrollText,
 } from "lucide-react";
 import UserMenu from "./UserMenu";
 import { useState, useRef, useEffect } from "react";
@@ -38,7 +39,17 @@ interface NavGroup {
   links: NavLink[];
 }
 
-/* ── Cluster 1: Explore ── */
+/* ── Cluster 1: Get Started ── */
+const getStartedGroup: NavGroup = {
+  label: "Get Started",
+  icon: UserPlus,
+  links: [
+    { href: "/onboarding", label: "Onboarding", icon: UserPlus },
+    { href: "/settings", label: "Settings", icon: Settings },
+  ],
+};
+
+/* ── Cluster 2: Explore ── */
 const exploreGroup: NavGroup = {
   label: "Explore",
   icon: Network,
@@ -52,7 +63,7 @@ const exploreGroup: NavGroup = {
   ],
 };
 
-/* ── Cluster 2: Governance ── */
+/* ── Cluster 3: Governance ── */
 const governanceGroup: NavGroup = {
   label: "Governance",
   icon: ShieldCheck,
@@ -63,7 +74,7 @@ const governanceGroup: NavGroup = {
   ],
 };
 
-/* ── Cluster 3: Exchange ── */
+/* ── Cluster 4: Exchange ── */
 const exchangeGroup: NavGroup = {
   label: "Exchange",
   icon: ArrowRightLeft,
@@ -75,20 +86,19 @@ const exchangeGroup: NavGroup = {
   ],
 };
 
-/* ── Cluster 4: Portal ── */
-const portalGroup: NavGroup = {
-  label: "Portal",
+/* ── Cluster 5: Manage ── */
+const manageGroup: NavGroup = {
+  label: "Manage",
   icon: LayoutDashboard,
   links: [
-    { href: "/onboarding", label: "Onboarding", icon: UserPlus },
-    { href: "/admin", label: "Admin Dashboard", icon: LayoutDashboard },
+    { href: "/admin", label: "Operator Dashboard", icon: LayoutDashboard },
     { href: "/admin/tenants", label: "Tenants", icon: User },
     { href: "/admin/policies", label: "Policies", icon: ShieldCheck },
-    { href: "/settings", label: "Settings", icon: Settings },
+    { href: "/admin/audit", label: "Audit & Provenance", icon: ScrollText },
   ],
 };
 
-/* ── Cluster 5: Docs ── */
+/* ── Cluster 6: Docs ── */
 const docsGroup: NavGroup = {
   label: "Docs",
   icon: FileText,
@@ -101,10 +111,11 @@ const docsGroup: NavGroup = {
 };
 
 const navGroups: NavGroup[] = [
+  getStartedGroup,
   exploreGroup,
   governanceGroup,
   exchangeGroup,
-  portalGroup,
+  manageGroup,
   docsGroup,
 ];
 
@@ -166,7 +177,7 @@ function NavDropdown({ group }: { group: NavGroup }) {
 }
 
 export default function Navigation() {
-  const pathname = usePathname();
+  const _pathname = usePathname();
   return (
     <nav className="flex items-center gap-1 px-4 py-2 bg-gray-900 border-b border-gray-700">
       <Link

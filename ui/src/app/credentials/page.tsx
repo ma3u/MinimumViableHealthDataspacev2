@@ -2,6 +2,7 @@
 
 import { fetchApi } from "@/lib/api";
 import { useEffect, useState } from "react";
+import PageIntro from "@/components/PageIntro";
 import {
   ChevronDown,
   ChevronUp,
@@ -197,11 +198,15 @@ export default function CredentialsPage() {
 
   return (
     <div className="max-w-5xl mx-auto px-6 py-10">
-      <h1 className="text-2xl font-bold mb-1">Verifiable Credentials</h1>
-      <p className="text-gray-400 text-sm mb-8">
-        EHDS participant credentials — issued via IssuerService, stored in
-        IdentityHub
-      </p>
+      <PageIntro
+        title="Verifiable Credentials"
+        icon={FileKey2}
+        description="Request and manage EHDS participant credentials issued via the IssuerService and stored in the IdentityHub. Verifiable Credentials prove identity, compliance status, and data-access authorisation within the dataspace."
+        prevStep={{ href: "/compliance/tck", label: "Protocol TCK" }}
+        nextStep={{ href: "/data/share", label: "Share Data" }}
+        infoText="VCs follow the W3C Verifiable Credentials standard. They are cryptographically signed by the IssuerService and can be verified by any participant using the holder's DID:web identity."
+        docLink={{ href: "/docs/architecture", label: "Architecture Docs" }}
+      />
 
       {/* Request new credential */}
       <div className="border border-gray-700 rounded-xl p-5 mb-8">

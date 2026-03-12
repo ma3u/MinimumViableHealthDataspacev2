@@ -77,7 +77,9 @@ export default function NlqPage() {
       .catch(() => {});
     fetchApi("/api/federated")
       .then((r) => (r.ok ? r.json() : null))
-      .then((d) => { if (d?.totals) setStats(d); })
+      .then((d) => {
+        if (d?.totals) setStats(d);
+      })
       .catch(() => {});
   }, []);
 
@@ -127,13 +129,33 @@ export default function NlqPage() {
         <div className="max-w-6xl mx-auto px-6 py-5">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-xl font-semibold flex items-center gap-2">
+              <div className="flex items-center gap-2 mb-1">
                 <Search size={20} className="text-blue-400" />
-                Natural Language Query
-              </h1>
+                <h1 className="text-xl font-semibold">
+                  Natural Language Query
+                </h1>
+              </div>
               <p className="text-sm text-gray-500 mt-1">
-                Ask questions about the Health Dataspace knowledge graph
+                Ask questions about the Health Dataspace knowledge graph in
+                plain language. The query engine translates your question into
+                Cypher and returns structured results from all five graph
+                layers.
               </p>
+              <div className="flex items-center gap-4 text-xs text-gray-600 mt-2">
+                <a
+                  href="/analytics"
+                  className="hover:text-gray-400 transition-colors"
+                >
+                  ← OMOP Analytics
+                </a>
+                <span>|</span>
+                <a
+                  href="/eehrxf"
+                  className="hover:text-gray-400 transition-colors"
+                >
+                  EEHRxF Profiles →
+                </a>
+              </div>
             </div>
             {stats?.totals && (
               <div className="flex gap-6 text-sm">

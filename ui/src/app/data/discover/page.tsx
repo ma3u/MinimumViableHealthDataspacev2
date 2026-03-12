@@ -2,6 +2,7 @@
 
 import { fetchApi } from "@/lib/api";
 import { useEffect, useState } from "react";
+import PageIntro from "@/components/PageIntro";
 import {
   Loader2,
   Search,
@@ -66,10 +67,15 @@ export default function DataDiscoverPage() {
 
   return (
     <div className="max-w-5xl mx-auto px-6 py-10">
-      <h1 className="text-2xl font-bold mb-1">Discover Data</h1>
-      <p className="text-gray-400 text-sm mb-6">
-        Browse available data assets across all dataspace participants
-      </p>
+      <PageIntro
+        title="Discover Data"
+        icon={Search}
+        description="Browse available data assets across all dataspace participants. Search by name, description, or ID to find datasets published by data holders, then initiate a contract negotiation to request access."
+        prevStep={{ href: "/data/share", label: "Share Data" }}
+        nextStep={{ href: "/negotiate", label: "Negotiate Contract" }}
+        infoText="Assets shown here are fetched from the EDC-V federated catalog. Each asset includes its ODRL policy — review it before negotiating access."
+        docLink={{ href: "/docs/user-guide", label: "User Guide" }}
+      />
 
       {/* Search bar */}
       <div className="relative mb-6">

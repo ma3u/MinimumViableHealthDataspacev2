@@ -2,7 +2,8 @@
 
 import { fetchApi } from "@/lib/api";
 import { useEffect, useState } from "react";
-import { ChevronDown, ChevronUp, ExternalLink } from "lucide-react";
+import { ChevronDown, ChevronUp, ExternalLink, Database } from "lucide-react";
+import PageIntro from "@/components/PageIntro";
 
 interface Dataset {
   id: string;
@@ -63,10 +64,19 @@ export default function CatalogPage() {
 
   return (
     <div className="max-w-5xl mx-auto px-6 py-10">
-      <h1 className="text-2xl font-bold mb-1">Dataset Catalog</h1>
-      <p className="text-gray-400 text-sm mb-6">
-        HealthDCAT-AP metadata — EHDS secondary-use datasets
-      </p>
+      <PageIntro
+        title="Dataset Catalog"
+        icon={Database}
+        description="Browse HealthDCAT-AP metadata for all EHDS secondary-use datasets registered in the dataspace. Each entry describes the data holder, legal basis, FHIR profiles, and access conditions."
+        prevStep={{ href: "/graph", label: "Graph Explorer" }}
+        nextStep={{ href: "/data/discover", label: "Discover Data" }}
+        infoText="Datasets are registered using the HealthDCAT-AP standard (DCAT 3 profile for health data). Use the search to filter by title, theme, or description before requesting access."
+        docLink={{
+          href: "https://ehds2pilot.eu/healthdcat-ap/",
+          label: "HealthDCAT-AP Specification",
+          external: true,
+        }}
+      />
 
       <input
         type="search"

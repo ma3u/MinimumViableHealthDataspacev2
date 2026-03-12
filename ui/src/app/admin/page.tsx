@@ -5,12 +5,14 @@ import { useEffect, useState } from "react";
 import {
   Building2,
   FileKey2,
+  LayoutDashboard,
   Loader2,
   ScrollText,
   ShieldCheck,
   Users,
 } from "lucide-react";
 import Link from "next/link";
+import PageIntro from "@/components/PageIntro";
 
 interface Summary {
   totalTenants: number;
@@ -24,7 +26,7 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     fetchApi("/api/admin/tenants")
-      .then((r) => (r.ok ? r.json() : {} as Record<string, unknown>))
+      .then((r) => (r.ok ? r.json() : ({} as Record<string, unknown>)))
       .then((d: Record<string, unknown>) => {
         setSummary((d.summary as Summary) || null);
         setLoading(false);
@@ -65,10 +67,15 @@ export default function AdminDashboard() {
 
   return (
     <div className="max-w-5xl mx-auto px-6 py-10">
-      <h1 className="text-2xl font-bold mb-1">Operator Dashboard</h1>
-      <p className="text-gray-400 text-sm mb-8">
-        EHDS Health Data Access Body — dataspace administration
-      </p>
+      <PageIntro
+        title="Operator Dashboard"
+        icon={LayoutDashboard}
+        description="EHDS Health Data Access Body administration overview. Monitor registered tenants, active policies, issued credentials, and recent audit events at a glance. Click any card to drill into detail."
+        prevStep={{ href: "/data/transfer", label: "Data Transfers" }}
+        nextStep={{ href: "/admin/tenants", label: "Manage Tenants" }}
+        infoText="This dashboard aggregates key metrics from the tenant-manager, EDC-V control plane, IssuerService, and Neo4j provenance graph. Use the admin sub-pages for full management capabilities."
+        docLink={{ href: "/docs/user-guide", label: "User Guide" }}
+      />
 
       {loading ? (
         <div className="flex items-center gap-2 text-gray-500">

@@ -3,7 +3,9 @@ import { NextRequest, NextResponse } from "next/server";
 export const dynamic = "force-dynamic";
 
 const NEO4J_URL =
-  process.env.NEO4J_URI || process.env.NEO4J_BOLT_URL || "bolt://localhost:7687";
+  process.env.NEO4J_URI ||
+  process.env.NEO4J_BOLT_URL ||
+  "bolt://localhost:7687";
 const NEO4J_USER = process.env.NEO4J_USER || "neo4j";
 const NEO4J_PASSWORD = process.env.NEO4J_PASSWORD || "healthdataspace";
 
@@ -114,7 +116,9 @@ export async function GET(request: NextRequest) {
       );
       const participants =
         rows[0]?.data?.map(
-          (r: { row: [string, string, string, string, string, string, string] }) => ({
+          (r: {
+            row: [string, string, string, string, string, string, string];
+          }) => ({
             did: r.row[0],
             name: r.row[1],
             country: r.row[2],
@@ -199,9 +203,11 @@ export async function GET(request: NextRequest) {
     if (type === "accesslogs") {
       const safe = (v: string) => v.replace(/'/g, "\\'");
       const consumerFilter = filters.consumerDid
-        ? `AND a.consumerDid = '${safe(filters.consumerDid)}'` : "";
+        ? `AND a.consumerDid = '${safe(filters.consumerDid)}'`
+        : "";
       const contractFilter = sp.get("contractId")
-        ? `AND a.contractId = '${safe(sp.get("contractId")!)}'` : "";
+        ? `AND a.contractId = '${safe(sp.get("contractId")!)}'`
+        : "";
       const logs = await runCypher(
         `MATCH (a:DataAccessLog)
          WHERE 1=1 ${consumerFilter} ${contractFilter}

@@ -10,6 +10,7 @@ import {
   Loader2,
   XCircle,
 } from "lucide-react";
+import PageIntro from "@/components/PageIntro";
 
 interface Transfer {
   "@id": string;
@@ -62,7 +63,9 @@ function DataTransferContent() {
       .then((r) => (r.ok ? r.json() : []))
       .then((d) => {
         // /api/participants returns flat array or { participants: [...] }
-        const list: ParticipantCtx[] = Array.isArray(d) ? d : d.participants || [];
+        const list: ParticipantCtx[] = Array.isArray(d)
+          ? d
+          : d.participants || [];
         setParticipants(list);
         if (!selectedCtx && list.length > 0) {
           setSelectedCtx(list[0]["@id"]);
@@ -133,10 +136,15 @@ function DataTransferContent() {
 
   return (
     <div className="max-w-5xl mx-auto px-6 py-10">
-      <h1 className="text-2xl font-bold mb-1">Data Transfers</h1>
-      <p className="text-gray-400 text-sm mb-6">
-        Monitor and initiate EDC-V data transfers (HttpData-PULL)
-      </p>
+      <PageIntro
+        title="Data Transfers"
+        icon={ArrowRightLeft}
+        description="Monitor and initiate EDC-V data transfers using HttpData-PULL. Once a contract is agreed, start a transfer process to pull FHIR or OMOP data from the provider's data plane into your environment."
+        prevStep={{ href: "/negotiate", label: "Contract Negotiation" }}
+        nextStep={{ href: "/admin", label: "Operator Dashboard" }}
+        infoText="Transfers follow the DSP transfer process state machine (REQUESTED → STARTED → COMPLETED). The data plane uses HTTP endpoints secured by EDC-V access tokens."
+        docLink={{ href: "/docs/developer", label: "Developer Guide" }}
+      />
 
       {/* Participant selector */}
       <div className="mb-6">

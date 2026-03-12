@@ -20,10 +20,16 @@ import {
   Database,
   Eye,
 } from "lucide-react";
+import PageIntro from "@/components/PageIntro";
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
-type AuditType = "all" | "transfers" | "negotiations" | "credentials" | "accesslogs";
+type AuditType =
+  | "all"
+  | "transfers"
+  | "negotiations"
+  | "credentials"
+  | "accesslogs";
 
 interface Participant {
   did: string;
@@ -68,7 +74,7 @@ interface TransferRow {
   contentHash?: string;
   errorMessage?: string;
   // enriched fields
-  direction?: string;        // "OUTGOING" | "INCOMING"
+  direction?: string; // "OUTGOING" | "INCOMING"
   purposeOfSharing?: string;
   legalBasis?: string;
   edcProviderEndpoint?: string;
@@ -239,11 +245,14 @@ function directionBadge(direction?: string) {
 
 function accessTypeBadge(t?: string) {
   if (!t) return <span className="text-gray-500">—</span>;
-  const cls = t === "INITIAL_TRANSFER"
-    ? "bg-blue-900 text-blue-300"
-    : "bg-purple-900 text-purple-300";
+  const cls =
+    t === "INITIAL_TRANSFER"
+      ? "bg-blue-900 text-blue-300"
+      : "bg-purple-900 text-purple-300";
   return (
-    <span className={`inline-block px-1.5 py-0.5 rounded text-[10px] font-semibold uppercase ${cls}`}>
+    <span
+      className={`inline-block px-1.5 py-0.5 rounded text-[10px] font-semibold uppercase ${cls}`}
+    >
       {t === "INITIAL_TRANSFER" ? "Transfer" : "Query"}
     </span>
   );
@@ -273,9 +282,7 @@ function exportCSV(rows: Record<string, unknown>[], filename: string) {
   const keys = Object.keys(rows[0]);
   const header = keys.join(",");
   const body = rows
-    .map((r) =>
-      keys.map((k) => JSON.stringify(r[k] ?? "")).join(","),
-    )
+    .map((r) => keys.map((k) => JSON.stringify(r[k] ?? "")).join(","))
     .join("\n");
   const blob = new Blob([`${header}\n${body}`], { type: "text/csv" });
   const a = document.createElement("a");
@@ -468,13 +475,15 @@ export default function AdminAuditPage() {
   return (
     <div className="max-w-6xl mx-auto px-6 py-10">
       <div className="flex items-start justify-between mb-1">
-        <div>
-          <h1 className="text-2xl font-bold">Audit & Provenance</h1>
-          <p className="text-gray-400 text-sm mt-1">
-            Neo4j provenance graph — EHDS Art. 32 / GDPR Art. 30 compliant
-            audit trail with SHA-256 hash chaining
-          </p>
-        </div>
+        <PageIntro
+          title="Audit & Provenance"
+          icon={ScrollText}
+          description="Neo4j provenance graph providing a complete, tamper-evident audit trail compliant with EHDS Art. 32 and GDPR Art. 30. Every data transfer, contract negotiation, credential issuance, and access log is recorded with SHA-256 hash chaining."
+          prevStep={{ href: "/admin/policies", label: "Policy Definitions" }}
+          nextStep={{ href: "/settings", label: "Settings" }}
+          infoText="Audit entries are stored as linked nodes in Neo4j, forming an immutable chain. Use the tabs to filter by event type and the export button to download records for regulatory reporting."
+          docLink={{ href: "/docs/architecture", label: "Architecture Docs" }}
+        />
       </div>
 
       {/* Tabs */}
@@ -522,12 +531,17 @@ export default function AdminAuditPage() {
           {activeTab === "all" && data.summary?.nodeCounts && (
             <>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-                {Object.entries(data.summary.nodeCounts).map(([label, count]) => (
-                  <div key={label} className="p-3 border border-gray-700 rounded-lg">
-                    <p className="text-xl font-bold">{count}</p>
-                    <p className="text-xs text-gray-500">{label}</p>
-                  </div>
-                ))}
+                {Object.entries(data.summary.nodeCounts).map(
+                  ([label, count]) => (
+                    <div
+                      key={label}
+                      className="p-3 border border-gray-700 rounded-lg"
+                    >
+                      <p className="text-xl font-bold">{count}</p>
+                      <p className="text-xs text-gray-500">{label}</p>
+                    </div>
+                  ),
+                )}
               </div>
 
               {/* Access by consumer */}
@@ -542,23 +556,36 @@ export default function AdminAuditPage() {
                       <thead>
                         <tr className="text-gray-500 border-b border-gray-700">
                           <th className="text-left py-2 px-2">Consumer</th>
-                          <th className="text-left py-2 px-2">Total Accesses</th>
-                          <th className="text-left py-2 px-2">Data Transferred</th>
+                          <th className="text-left py-2 px-2">
+                            Total Accesses
+                          </th>
+                          <th className="text-left py-2 px-2">
+                            Data Transferred
+                          </th>
                           <th className="text-left py-2 px-2">Last Access</th>
                         </tr>
                       </thead>
                       <tbody>
                         {data.summary.accessByConsumer!.map((row, i) => (
-                          <tr key={i} className="border-b border-gray-800 hover:bg-gray-800/50">
-                            <td className="py-2 px-2 text-gray-300">{row.consumerName ?? "—"}</td>
+                          <tr
+                            key={i}
+                            className="border-b border-gray-800 hover:bg-gray-800/50"
+                          >
+                            <td className="py-2 px-2 text-gray-300">
+                              {row.consumerName ?? "—"}
+                            </td>
                             <td className="py-2 px-2">
                               <span className="inline-block px-1.5 py-0.5 rounded bg-teal-900 text-teal-300 text-[10px] font-semibold">
                                 {row.totalAccesses}×
                               </span>
                             </td>
-                            <td className="py-2 px-2 text-gray-400">{formatBytes(row.totalBytes)}</td>
+                            <td className="py-2 px-2 text-gray-400">
+                              {formatBytes(row.totalBytes)}
+                            </td>
                             <td className="py-2 px-2 text-gray-500">
-                              {row.lastAccess ? row.lastAccess.slice(0, 10) : "—"}
+                              {row.lastAccess
+                                ? row.lastAccess.slice(0, 10)
+                                : "—"}
                             </td>
                           </tr>
                         ))}
@@ -583,7 +610,10 @@ export default function AdminAuditPage() {
                     <button
                       onClick={() =>
                         exportCSV(
-                          data.transfers as unknown as Record<string, unknown>[],
+                          data.transfers as unknown as Record<
+                            string,
+                            unknown
+                          >[],
                           "transfers.csv",
                         )
                       }
@@ -619,41 +649,71 @@ export default function AdminAuditPage() {
                             key={i}
                             className="border-b border-gray-800 hover:bg-gray-800/50"
                           >
-                            <td className="py-2 px-2">{directionBadge(t.direction)}</td>
+                            <td className="py-2 px-2">
+                              {directionBadge(t.direction)}
+                            </td>
                             <td className="py-2 px-2">
                               <div className="text-gray-300">
-                                {displayName(t.consumerName, t.consumerDid, t.consumerCountryCode)}
+                                {displayName(
+                                  t.consumerName,
+                                  t.consumerDid,
+                                  t.consumerCountryCode,
+                                )}
                               </div>
                               <div className="mt-0.5">
-                                <ComplianceButton name={t.consumerComplianceName} email={t.consumerComplianceEmail} />
+                                <ComplianceButton
+                                  name={t.consumerComplianceName}
+                                  email={t.consumerComplianceEmail}
+                                />
                               </div>
                             </td>
                             <td className="py-2 px-2">
                               <div className="text-gray-300">
-                                {displayName(t.providerName, t.providerDid, t.providerCountryCode)}
+                                {displayName(
+                                  t.providerName,
+                                  t.providerDid,
+                                  t.providerCountryCode,
+                                )}
                               </div>
                               <div className="mt-0.5">
-                                <ComplianceButton name={t.providerComplianceName} email={t.providerComplianceEmail} />
+                                <ComplianceButton
+                                  name={t.providerComplianceName}
+                                  email={t.providerComplianceEmail}
+                                />
                               </div>
                             </td>
                             <td className="py-2 px-2 text-gray-400">
                               {t.asset || t.assetId || "—"}
                             </td>
-                            <td className="py-2 px-2 text-gray-400 max-w-[140px] truncate" title={t.purposeOfSharing}>
+                            <td
+                              className="py-2 px-2 text-gray-400 max-w-[140px] truncate"
+                              title={t.purposeOfSharing}
+                            >
                               {t.purposeOfSharing || "—"}
                             </td>
                             <td className="py-2 px-2">
                               {statusBadge(t.status)}
                               {t.errorMessage && (
-                                <span title={String(t.errorMessage)} className="ml-1 text-red-400 cursor-help">⚠</span>
+                                <span
+                                  title={String(t.errorMessage)}
+                                  className="ml-1 text-red-400 cursor-help"
+                                >
+                                  ⚠
+                                </span>
                               )}
                             </td>
                             <td className="py-2 px-2 text-gray-500">
-                              {(t.timestamp || t.transferDate || "—").slice(0, 10)}
+                              {(t.timestamp || t.transferDate || "—").slice(
+                                0,
+                                10,
+                              )}
                             </td>
-                            <td className="py-2 px-2 text-gray-500">{formatBytes(t.byteSize)}</td>
+                            <td className="py-2 px-2 text-gray-500">
+                              {formatBytes(t.byteSize)}
+                            </td>
                             <td className="py-2 px-2">
-                              {t.accessLogCount != null && t.accessLogCount > 0 ? (
+                              {t.accessLogCount != null &&
+                              t.accessLogCount > 0 ? (
                                 <span className="inline-block px-1.5 py-0.5 rounded bg-teal-900 text-teal-300 text-[10px] font-semibold">
                                   {t.accessLogCount}×
                                 </span>
@@ -663,10 +723,18 @@ export default function AdminAuditPage() {
                             </td>
                             <td className="py-2 px-2">
                               {t.edcProviderEndpoint ? (
-                                <span title={t.edcProviderEndpoint} className="font-mono text-gray-500 text-[10px] truncate max-w-[100px] block cursor-help">
-                                  {t.edcProviderEndpoint.replace(/^https?:\/\//, "")}
+                                <span
+                                  title={t.edcProviderEndpoint}
+                                  className="font-mono text-gray-500 text-[10px] truncate max-w-[100px] block cursor-help"
+                                >
+                                  {t.edcProviderEndpoint.replace(
+                                    /^https?:\/\//,
+                                    "",
+                                  )}
                                 </span>
-                              ) : "—"}
+                              ) : (
+                                "—"
+                              )}
                             </td>
                             <td className="py-2 px-2">
                               {t.crossBorder ? (
@@ -700,7 +768,10 @@ export default function AdminAuditPage() {
                     <button
                       onClick={() =>
                         exportCSV(
-                          data.negotiations as unknown as Record<string, unknown>[],
+                          data.negotiations as unknown as Record<
+                            string,
+                            unknown
+                          >[],
                           "negotiations.csv",
                         )
                       }
@@ -711,7 +782,9 @@ export default function AdminAuditPage() {
                   )}
                 </div>
                 {data.negotiations.length === 0 ? (
-                  <p className="text-gray-500 text-sm">No negotiations recorded</p>
+                  <p className="text-gray-500 text-sm">
+                    No negotiations recorded
+                  </p>
                 ) : (
                   <div className="overflow-auto">
                     <table className="w-full text-xs">
@@ -729,7 +802,8 @@ export default function AdminAuditPage() {
                       </thead>
                       <tbody>
                         {data.negotiations.map((n) => {
-                          const rowKey = n.id || n.contractId || String(Math.random());
+                          const rowKey =
+                            n.id || n.contractId || String(Math.random());
                           const isOpen = expandedNeg.has(rowKey);
                           return (
                             <>
@@ -739,37 +813,66 @@ export default function AdminAuditPage() {
                                 onClick={() =>
                                   setExpandedNeg((prev) => {
                                     const next = new Set(prev);
-                                    isOpen ? next.delete(rowKey) : next.add(rowKey);
+                                    isOpen
+                                      ? next.delete(rowKey)
+                                      : next.add(rowKey);
                                     return next;
                                   })
                                 }
                               >
                                 <td className="py-2 px-2 text-gray-500">
-                                  {isOpen ? <ChevronDown size={11} /> : <ChevronRight size={11} />}
+                                  {isOpen ? (
+                                    <ChevronDown size={11} />
+                                  ) : (
+                                    <ChevronRight size={11} />
+                                  )}
                                 </td>
                                 <td className="py-2 px-2">
                                   <div className="text-gray-300">
-                                    {displayName(n.consumerName, n.consumerDid, n.consumerCountryCode)}
+                                    {displayName(
+                                      n.consumerName,
+                                      n.consumerDid,
+                                      n.consumerCountryCode,
+                                    )}
                                   </div>
                                   <div className="mt-0.5">
-                                    <ComplianceButton name={n.consumerComplianceName} email={n.consumerComplianceEmail} />
+                                    <ComplianceButton
+                                      name={n.consumerComplianceName}
+                                      email={n.consumerComplianceEmail}
+                                    />
                                   </div>
                                 </td>
                                 <td className="py-2 px-2">
                                   <div className="text-gray-300">
-                                    {displayName(n.providerName, n.providerDid, n.providerCountryCode)}
+                                    {displayName(
+                                      n.providerName,
+                                      n.providerDid,
+                                      n.providerCountryCode,
+                                    )}
                                   </div>
                                   <div className="mt-0.5">
-                                    <ComplianceButton name={n.providerComplianceName} email={n.providerComplianceEmail} />
+                                    <ComplianceButton
+                                      name={n.providerComplianceName}
+                                      email={n.providerComplianceEmail}
+                                    />
                                   </div>
                                 </td>
-                                <td className="py-2 px-2 text-gray-400">{n.asset || n.assetId || "—"}</td>
-                                <td className="py-2 px-2">{statusBadge(n.status)}</td>
+                                <td className="py-2 px-2 text-gray-400">
+                                  {n.asset || n.assetId || "—"}
+                                </td>
+                                <td className="py-2 px-2">
+                                  {statusBadge(n.status)}
+                                </td>
                                 <td className="py-2 px-2 text-gray-500">
-                                  {(n.timestamp || n.negotiationDate || "—").slice(0, 10)}
+                                  {(
+                                    n.timestamp ||
+                                    n.negotiationDate ||
+                                    "—"
+                                  ).slice(0, 10)}
                                 </td>
                                 <td className="py-2 px-2">
-                                  {n.accessLogCount != null && n.accessLogCount > 0 ? (
+                                  {n.accessLogCount != null &&
+                                  n.accessLogCount > 0 ? (
                                     <span className="inline-block px-1.5 py-0.5 rounded bg-teal-900 text-teal-300 text-[10px] font-semibold">
                                       {n.accessLogCount}×
                                     </span>
@@ -791,44 +894,97 @@ export default function AdminAuditPage() {
 
                               {/* Expanded policy card */}
                               {isOpen && (
-                                <tr key={`${rowKey}-detail`} className="border-b border-gray-700 bg-gray-900/60">
+                                <tr
+                                  key={`${rowKey}-detail`}
+                                  className="border-b border-gray-700 bg-gray-900/60"
+                                >
                                   <td colSpan={8} className="px-6 py-4">
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                       {/* Policy details */}
                                       <div className="border border-gray-700 rounded-lg p-3">
-                                        <p className="text-[10px] font-semibold text-gray-500 uppercase mb-2">Policy Details</p>
+                                        <p className="text-[10px] font-semibold text-gray-500 uppercase mb-2">
+                                          Policy Details
+                                        </p>
                                         <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
-                                          <span className="text-gray-500">Purpose</span>
-                                          <span className="text-gray-300">{n.policyPurpose ?? "—"}</span>
-                                          <span className="text-gray-500">Legal Basis</span>
-                                          <span className="text-gray-300">{n.policyLegalBasis ?? "—"}</span>
-                                          <span className="text-gray-500">Permitted</span>
-                                          <span className="text-gray-300">{n.policyPermittedUses ?? "—"}</span>
-                                          <span className="text-gray-500">Prohibited</span>
-                                          <span className="text-red-400">{n.policyProhibitedUses ?? "—"}</span>
-                                          <span className="text-gray-500">Data Minimisation</span>
-                                          <span className="text-gray-300">{n.policyDataMinimisation ?? "—"}</span>
-                                          <span className="text-gray-500">Retention</span>
-                                          <span className="text-gray-300">
-                                            {n.policyRetentionDays ? `${n.policyRetentionDays} days` : "—"}
+                                          <span className="text-gray-500">
+                                            Purpose
                                           </span>
-                                          <span className="text-gray-500">Total Accesses</span>
-                                          <span className="text-teal-300 font-semibold">{n.accessCount ?? 0}×</span>
-                                          <span className="text-gray-500">Last Access</span>
-                                          <span className="text-gray-300">{n.lastAccessAt ? n.lastAccessAt.slice(0, 10) : "—"}</span>
+                                          <span className="text-gray-300">
+                                            {n.policyPurpose ?? "—"}
+                                          </span>
+                                          <span className="text-gray-500">
+                                            Legal Basis
+                                          </span>
+                                          <span className="text-gray-300">
+                                            {n.policyLegalBasis ?? "—"}
+                                          </span>
+                                          <span className="text-gray-500">
+                                            Permitted
+                                          </span>
+                                          <span className="text-gray-300">
+                                            {n.policyPermittedUses ?? "—"}
+                                          </span>
+                                          <span className="text-gray-500">
+                                            Prohibited
+                                          </span>
+                                          <span className="text-red-400">
+                                            {n.policyProhibitedUses ?? "—"}
+                                          </span>
+                                          <span className="text-gray-500">
+                                            Data Minimisation
+                                          </span>
+                                          <span className="text-gray-300">
+                                            {n.policyDataMinimisation ?? "—"}
+                                          </span>
+                                          <span className="text-gray-500">
+                                            Retention
+                                          </span>
+                                          <span className="text-gray-300">
+                                            {n.policyRetentionDays
+                                              ? `${n.policyRetentionDays} days`
+                                              : "—"}
+                                          </span>
+                                          <span className="text-gray-500">
+                                            Total Accesses
+                                          </span>
+                                          <span className="text-teal-300 font-semibold">
+                                            {n.accessCount ?? 0}×
+                                          </span>
+                                          <span className="text-gray-500">
+                                            Last Access
+                                          </span>
+                                          <span className="text-gray-300">
+                                            {n.lastAccessAt
+                                              ? n.lastAccessAt.slice(0, 10)
+                                              : "—"}
+                                          </span>
                                         </div>
                                       </div>
 
                                       {/* EDC endpoints + contract ID */}
                                       <div className="border border-gray-700 rounded-lg p-3">
-                                        <p className="text-[10px] font-semibold text-gray-500 uppercase mb-2">EDC Endpoints &amp; Contract</p>
+                                        <p className="text-[10px] font-semibold text-gray-500 uppercase mb-2">
+                                          EDC Endpoints &amp; Contract
+                                        </p>
                                         <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
-                                          <span className="text-gray-500">Consumer EDC</span>
-                                          <span className="font-mono text-gray-400 break-all">{n.consumerEdcEndpoint ?? "—"}</span>
-                                          <span className="text-gray-500">Provider EDC</span>
-                                          <span className="font-mono text-gray-400 break-all">{n.providerEdcEndpoint ?? "—"}</span>
-                                          <span className="text-gray-500">Contract ID</span>
-                                          <span className="font-mono text-gray-500">{n.contractId ?? "—"}</span>
+                                          <span className="text-gray-500">
+                                            Consumer EDC
+                                          </span>
+                                          <span className="font-mono text-gray-400 break-all">
+                                            {n.consumerEdcEndpoint ?? "—"}
+                                          </span>
+                                          <span className="text-gray-500">
+                                            Provider EDC
+                                          </span>
+                                          <span className="font-mono text-gray-400 break-all">
+                                            {n.providerEdcEndpoint ?? "—"}
+                                          </span>
+                                          <span className="text-gray-500">
+                                            Contract ID
+                                          </span>
+                                          <span className="font-mono text-gray-500">
+                                            {n.contractId ?? "—"}
+                                          </span>
                                         </div>
                                       </div>
                                     </div>
@@ -923,30 +1079,50 @@ export default function AdminAuditPage() {
                     </thead>
                     <tbody>
                       {data.accesslogs.map((a, i) => (
-                        <tr key={i} className="border-b border-gray-800 hover:bg-gray-800/50">
+                        <tr
+                          key={i}
+                          className="border-b border-gray-800 hover:bg-gray-800/50"
+                        >
                           <td className="py-2 px-2 text-gray-300">
                             {a.consumerName ?? a.consumerDid ?? "—"}
                             {a.consumerCountry && (
-                              <span className="text-gray-500"> ({a.consumerCountry})</span>
+                              <span className="text-gray-500">
+                                {" "}
+                                ({a.consumerCountry})
+                              </span>
                             )}
                           </td>
                           <td className="py-2 px-2 text-gray-300">
                             {a.providerName ?? a.providerDid ?? "—"}
                             {a.providerCountry && (
-                              <span className="text-gray-500"> ({a.providerCountry})</span>
+                              <span className="text-gray-500">
+                                {" "}
+                                ({a.providerCountry})
+                              </span>
                             )}
                           </td>
-                          <td className="py-2 px-2 text-gray-400">{a.assetId ?? "—"}</td>
-                          <td className="py-2 px-2">{accessTypeBadge(a.accessType)}</td>
-                          <td className="py-2 px-2 text-gray-400 max-w-[140px] truncate" title={a.purpose}>
+                          <td className="py-2 px-2 text-gray-400">
+                            {a.assetId ?? "—"}
+                          </td>
+                          <td className="py-2 px-2">
+                            {accessTypeBadge(a.accessType)}
+                          </td>
+                          <td
+                            className="py-2 px-2 text-gray-400 max-w-[140px] truncate"
+                            title={a.purpose}
+                          >
                             {a.purpose ?? "—"}
                           </td>
                           <td className="py-2 px-2 text-gray-500">
                             {a.accessedAt ? a.accessedAt.slice(0, 10) : "—"}
                           </td>
-                          <td className="py-2 px-2 text-gray-500">{formatBytes(a.bytesAccessed)}</td>
+                          <td className="py-2 px-2 text-gray-500">
+                            {formatBytes(a.bytesAccessed)}
+                          </td>
                           <td className="py-2 px-2 font-mono text-gray-600 text-[10px]">
-                            {a.contractId ? a.contractId.slice(0, 12) + "…" : "—"}
+                            {a.contractId
+                              ? a.contractId.slice(0, 12) + "…"
+                              : "—"}
                           </td>
                         </tr>
                       ))}
@@ -961,4 +1137,3 @@ export default function AdminAuditPage() {
     </div>
   );
 }
-

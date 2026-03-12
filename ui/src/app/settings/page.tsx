@@ -3,6 +3,7 @@
 import { fetchApi } from "@/lib/api";
 import { useEffect, useState } from "react";
 import { Loader2, Settings2, Save, CheckCircle2 } from "lucide-react";
+import PageIntro from "@/components/PageIntro";
 
 interface Tenant {
   id: string;
@@ -54,10 +55,14 @@ export default function SettingsPage() {
 
   return (
     <div className="max-w-3xl mx-auto px-6 py-10">
-      <h1 className="text-2xl font-bold mb-1">Participant Settings</h1>
-      <p className="text-gray-400 text-sm mb-8">
-        Manage your participant profile and preferences
-      </p>
+      <PageIntro
+        title="Participant Settings"
+        icon={Settings2}
+        description="Manage your participant profile and preferences. Update display name, contact details, and notification settings for your registered dataspace identity."
+        prevStep={{ href: "/admin/audit", label: "Audit & Provenance" }}
+        infoText="Changes are saved to the tenant-manager API and reflected across all dataspace interactions. Your DID:web identity and credentials remain unchanged."
+        docLink={{ href: "/docs/user-guide", label: "User Guide" }}
+      />
 
       {tenants.length === 0 ? (
         <div className="text-center py-12">

@@ -10,6 +10,7 @@ import {
   ShieldCheck,
   X,
 } from "lucide-react";
+import PageIntro from "@/components/PageIntro";
 
 /* ── Types ────────────────────────────────────────────────────── */
 
@@ -398,8 +399,20 @@ export default function AdminPoliciesPage() {
   return (
     <div className="max-w-5xl mx-auto px-6 py-10">
       {/* Header */}
-      <div className="flex items-center justify-between mb-1">
-        <h1 className="text-2xl font-bold">Policy Definitions</h1>
+      <div className="flex items-center justify-between mb-6">
+        <PageIntro
+          title="Policy Definitions"
+          icon={ShieldCheck}
+          description="Manage ODRL policies across all participant contexts under EHDS Regulation (EU) 2025/327. Policies define the conditions for data access — including legal basis, purpose limitation, and retention periods."
+          prevStep={{ href: "/admin/tenants", label: "Tenant Management" }}
+          nextStep={{ href: "/admin/audit", label: "Audit & Provenance" }}
+          infoText="Each policy is defined using the ODRL vocabulary and attached to contract definitions. Use the templates below to create common EHDS-compliant policies quickly."
+          docLink={{
+            href: "https://www.w3.org/TR/odrl-model/",
+            label: "ODRL Specification (W3C)",
+            external: true,
+          }}
+        />
         <button
           onClick={() => {
             setShowForm((v) => !v);
@@ -418,10 +431,6 @@ export default function AdminPoliciesPage() {
           )}
         </button>
       </div>
-      <p className="text-gray-400 text-sm mb-6">
-        ODRL policies across all participant contexts — EHDS Regulation (EU)
-        2025/327
-      </p>
 
       {/* ── Create Form ──────────────────────────────────────────── */}
       {showForm && (

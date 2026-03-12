@@ -11,6 +11,7 @@ import {
   XCircle,
   ArrowRight,
 } from "lucide-react";
+import PageIntro from "@/components/PageIntro";
 
 interface ParticipantCtx {
   "@id": string;
@@ -64,7 +65,9 @@ function NegotiateContent() {
       .then((r) => (r.ok ? r.json() : []))
       .then((d) => {
         // /api/participants returns flat array or { participants: [...] }
-        const list: ParticipantCtx[] = Array.isArray(d) ? d : d.participants || [];
+        const list: ParticipantCtx[] = Array.isArray(d)
+          ? d
+          : d.participants || [];
         setParticipants(list);
         // Default to first consumer-like context
         if (list.length > 0) {
@@ -138,10 +141,19 @@ function NegotiateContent() {
 
   return (
     <div className="max-w-5xl mx-auto px-6 py-10">
-      <h1 className="text-2xl font-bold mb-1">Contract Negotiation</h1>
-      <p className="text-gray-400 text-sm mb-6">
-        Negotiate data access contracts via DSP protocol (ODRL policies)
-      </p>
+      <PageIntro
+        title="Contract Negotiation"
+        icon={FileSignature}
+        description="Negotiate data access contracts via the Dataspace Protocol using ODRL policies. Select a consumer participant, choose a dataset, and initiate a contract negotiation request that the data holder can accept or reject."
+        prevStep={{ href: "/data/discover", label: "Discover Data" }}
+        nextStep={{ href: "/data/transfer", label: "Data Transfer" }}
+        infoText="Contract negotiations follow the DSP negotiation state machine (REQUESTED → AGREED → FINALIZED). Both parties must hold valid EHDS credentials for the negotiation to succeed."
+        docLink={{
+          href: "https://docs.internationaldataspaces.org/ids-knowledgebase/dataspace-protocol",
+          label: "DSP Specification",
+          external: true,
+        }}
+      />
 
       {/* Participant selector */}
       <div className="mb-6">

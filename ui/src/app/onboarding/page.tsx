@@ -18,6 +18,7 @@ import {
   ShieldCheck,
   UserPlus,
 } from "lucide-react";
+import PageIntro from "@/components/PageIntro";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -543,10 +544,14 @@ function OnboardingContent() {
 
   return (
     <div className="max-w-4xl mx-auto px-6 py-10">
-      <h1 className="text-2xl font-bold mb-1">Participant Onboarding</h1>
-      <p className="text-gray-400 text-sm mb-8">
-        Register your organisation in the EHDS Health Dataspace
-      </p>
+      <PageIntro
+        title="Participant Onboarding"
+        icon={UserPlus}
+        description="Register your organisation as a participant in the European Health Data Space. Each participant receives a DID identity, Verifiable Credentials, and a dataspace profile to enable trusted data sharing."
+        nextStep={{ href: "/catalog", label: "Explore Datasets" }}
+        infoText="After onboarding, your organisation can share or consume health data under EHDS Regulation (EU) 2025/327. The registration creates a tenant, participant context, and DID:web identity."
+        docLink={{ href: "/docs/user-guide", label: "Read the User Guide" }}
+      />
 
       {/* Registered participants */}
       {loading ? (
@@ -561,7 +566,11 @@ function OnboardingContent() {
           </h2>
           <div className="grid gap-3">
             {tenants.map((t) => (
-              <ParticipantCard key={t.id} tenant={t} defaultExpanded={t.id === highlightTenantId} />
+              <ParticipantCard
+                key={t.id}
+                tenant={t}
+                defaultExpanded={t.id === highlightTenantId}
+              />
             ))}
           </div>
           <p className="text-xs text-gray-600 mt-3">

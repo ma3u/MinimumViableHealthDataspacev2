@@ -3,6 +3,7 @@
 import { fetchApi } from "@/lib/api";
 import { useEffect, useState } from "react";
 import { ShieldCheck, AlertCircle, BadgeCheck, Key } from "lucide-react";
+import PageIntro from "@/components/PageIntro";
 
 interface Consumer {
   id: string;
@@ -92,10 +93,15 @@ export default function CompliancePage() {
 
   return (
     <div className="max-w-2xl mx-auto px-6 py-10">
-      <h1 className="text-2xl font-bold mb-1">EHDS Compliance Checker</h1>
-      <p className="text-gray-400 text-sm mb-8">
-        Validate HDAB approval chain — Articles 45–53
-      </p>
+      <PageIntro
+        title="EHDS Compliance Checker"
+        icon={ShieldCheck}
+        description="Validate the HDAB approval chain for data access permits under EHDS Articles 45–53. Select a consumer and dataset to check whether all required Verifiable Credentials and HDAB approvals are in place."
+        prevStep={{ href: "/eehrxf", label: "EEHRxF Profiles" }}
+        nextStep={{ href: "/compliance/tck", label: "Protocol TCK" }}
+        infoText="The checker verifies DID:web identities, EHDS credentials, and the complete approval chain in Neo4j. A green result means the participant meets all regulatory requirements for secondary-use data access."
+        docLink={{ href: "/docs/architecture", label: "Architecture Docs" }}
+      />
 
       <div className="flex flex-col gap-3 mb-6">
         <label className="text-sm text-gray-400">

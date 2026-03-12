@@ -11,6 +11,7 @@ import {
   BarChart2,
   Scissors,
 } from "lucide-react";
+import PageIntro from "@/components/PageIntro";
 
 interface AnalyticsData {
   summary: {
@@ -173,14 +174,19 @@ export default function AnalyticsPage() {
 
   return (
     <div className="max-w-5xl mx-auto px-6 py-10">
-      <div className="flex items-center gap-2 mb-1">
-        <BarChart2 size={20} className="text-layer4" />
-        <h1 className="text-2xl font-bold">OMOP Research Analytics</h1>
-      </div>
-      <p className="text-gray-400 text-sm mb-8">
-        Layer 4 — OMOP CDM cohort statistics from 127-patient Synthea dataset
-        (EHDS Art. 53 secondary use)
-      </p>
+      <PageIntro
+        title="OMOP Research Analytics"
+        icon={BarChart2}
+        description="Layer 4 — OMOP CDM cohort statistics from the Synthea-generated dataset, supporting EHDS Art. 53 secondary-use research. View aggregate counts for persons, conditions, drugs, measurements, and procedures."
+        prevStep={{ href: "/patient", label: "Patient Journey" }}
+        nextStep={{ href: "/query", label: "Natural Language Query" }}
+        infoText="Analytics are computed from OMOP CDM nodes in Neo4j. The OMOP Common Data Model standardises clinical data across institutions, enabling federated cohort analysis without moving patient-level data."
+        docLink={{
+          href: "https://ohdsi.github.io/CommonDataModel/",
+          label: "OMOP CDM Documentation",
+          external: true,
+        }}
+      />
 
       {error && (
         <div className="mb-6 p-3 rounded bg-red-900/20 border border-red-700 text-red-400 text-sm">

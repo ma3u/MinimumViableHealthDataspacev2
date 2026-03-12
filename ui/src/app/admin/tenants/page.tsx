@@ -2,6 +2,7 @@
 
 import { fetchApi } from "@/lib/api";
 import { useEffect, useState } from "react";
+import PageIntro from "@/components/PageIntro";
 import {
   Building2,
   ChevronDown,
@@ -35,7 +36,7 @@ export default function AdminTenantsPage() {
 
   useEffect(() => {
     fetchApi("/api/admin/tenants")
-      .then((r) => (r.ok ? r.json() : {} as Record<string, unknown>))
+      .then((r) => (r.ok ? r.json() : ({} as Record<string, unknown>)))
       .then((d: Record<string, unknown>) => {
         setTenants((d.tenants as Tenant[]) || []);
         setParticipants((d.participants as Participant[]) || []);
@@ -46,10 +47,15 @@ export default function AdminTenantsPage() {
 
   return (
     <div className="max-w-5xl mx-auto px-6 py-10">
-      <h1 className="text-2xl font-bold mb-1">Tenant Management</h1>
-      <p className="text-gray-400 text-sm mb-6">
-        All registered organizations and their participant profiles
-      </p>
+      <PageIntro
+        title="Tenant Management"
+        icon={Building2}
+        description="View and manage all registered organisations and their participant profiles. Each tenant represents an EHDS participant with one or more dataspace contexts for data sharing and consumption."
+        prevStep={{ href: "/admin", label: "Operator Dashboard" }}
+        nextStep={{ href: "/admin/policies", label: "Policy Definitions" }}
+        infoText="Tenants are created during onboarding via the tenant-manager API. Each participant context maps to a DID:web identity and contains EDC-V connector credentials for secure data exchange."
+        docLink={{ href: "/docs/developer", label: "Developer Guide" }}
+      />
 
       {/* Summary */}
       {!loading && (

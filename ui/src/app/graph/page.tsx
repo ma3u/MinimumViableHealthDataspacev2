@@ -224,6 +224,22 @@ export default function GraphPage() {
       {/* Sidebar */}
       <aside className="w-56 shrink-0 bg-gray-900 border-r border-gray-700 p-4 flex flex-col gap-4 overflow-y-auto">
         <div>
+          <h2 className="text-sm font-bold mb-1">Graph Explorer</h2>
+          <p className="text-xs text-gray-500 mb-3">
+            Interactive 5-layer knowledge graph showing all dataspace entities
+            and their relationships. Click nodes to inspect, drag to rearrange.
+          </p>
+          <div className="flex gap-2 text-xs text-gray-600 mb-3">
+            <a href="/catalog" className="hover:text-gray-400">
+              ← Catalog
+            </a>
+            <span>|</span>
+            <a href="/patient" className="hover:text-gray-400">
+              Patient →
+            </a>
+          </div>
+        </div>
+        <div>
           <h2 className="text-xs font-semibold uppercase text-gray-500 mb-2">
             Layers
           </h2>

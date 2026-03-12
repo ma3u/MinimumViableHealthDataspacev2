@@ -10,6 +10,7 @@ import {
   ChevronDown,
   ChevronUp,
 } from "lucide-react";
+import PageIntro from "@/components/PageIntro";
 
 interface ParticipantCtx {
   "@id": string;
@@ -50,12 +51,16 @@ export default function DataSharePage() {
     ])
       .then(([ctx, assetData]) => {
         // /api/participants returns flat array or { participants: [...] }
-        const list: ParticipantCtx[] = Array.isArray(ctx) ? ctx : ctx.participants || [];
+        const list: ParticipantCtx[] = Array.isArray(ctx)
+          ? ctx
+          : ctx.participants || [];
         setParticipants(list);
         if (list.length > 0) setSelectedCtx(list[0]["@id"]);
 
         // /api/assets returns flat array of {participantId, identity, assets[]} or { participants: [...] }
-        const groups = Array.isArray(assetData) ? assetData : assetData.participants || [];
+        const groups = Array.isArray(assetData)
+          ? assetData
+          : assetData.participants || [];
         const allAssets: Asset[] = [];
         for (const p of groups) {
           if (Array.isArray(p.assets)) {
@@ -110,10 +115,15 @@ export default function DataSharePage() {
 
   return (
     <div className="max-w-5xl mx-auto px-6 py-10">
-      <h1 className="text-2xl font-bold mb-1">Share Data</h1>
-      <p className="text-gray-400 text-sm mb-6">
-        Register data assets for sharing in the EHDS dataspace
-      </p>
+      <PageIntro
+        title="Share Data"
+        icon={Upload}
+        description="Register data assets for sharing in the EHDS dataspace. Define FHIR or OMOP datasets with their access policies, then publish them so other participants can discover and negotiate access."
+        prevStep={{ href: "/credentials", label: "Verifiable Credentials" }}
+        nextStep={{ href: "/data/discover", label: "Discover Data" }}
+        infoText="Each data asset is registered via the EDC-V management API with an ODRL policy. The asset becomes visible in the federated catalog once published."
+        docLink={{ href: "/docs/developer", label: "Developer Guide" }}
+      />
 
       {/* Tabs */}
       <div className="flex gap-1 mb-6 border-b border-gray-700">

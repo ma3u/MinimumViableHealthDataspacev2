@@ -11,6 +11,7 @@ import {
   ExternalLink,
 } from "lucide-react";
 import Link from "next/link";
+import PageIntro from "@/components/PageIntro";
 
 /* ── Types ─────────────────────────────────────────────────────── */
 
@@ -175,9 +176,19 @@ export default function ComplianceTckPage() {
     <div className="max-w-4xl mx-auto px-6 py-10">
       {/* Header */}
       <div className="flex items-center justify-between mb-1">
-        <h1 className="text-2xl font-bold text-white">
-          Protocol Compliance Dashboard
-        </h1>
+        <PageIntro
+          title="Protocol Compliance Dashboard"
+          icon={ShieldCheck}
+          description="Run the DSP 2025-1 and DCP v1.0 Technology Compatibility Kit against your connectors. This dashboard validates that your EDC-V deployment correctly implements the Dataspace Protocol and Decentralized Claims Protocol."
+          prevStep={{ href: "/compliance", label: "EHDS Compliance" }}
+          nextStep={{ href: "/credentials", label: "Verifiable Credentials" }}
+          infoText="The TCK executes protocol-level tests covering catalog, negotiation, transfer, and identity resolution. Results indicate whether your connectors are interoperable with other EHDS participants."
+          docLink={{
+            href: "https://docs.internationaldataspaces.org/ids-knowledgebase/dataspace-protocol",
+            label: "Dataspace Protocol Spec",
+            external: true,
+          }}
+        />
         <button
           onClick={load}
           disabled={loading}
@@ -187,9 +198,6 @@ export default function ComplianceTckPage() {
           {loading ? "Running…" : "Re-run"}
         </button>
       </div>
-      <p className="text-gray-400 text-sm mb-2">
-        DSP 2025-1 · DCP v1.0 · EHDS Regulation 2025/327
-      </p>
       <div className="flex items-center gap-3 mb-8 text-xs text-gray-500">
         <Link
           href="/compliance"
