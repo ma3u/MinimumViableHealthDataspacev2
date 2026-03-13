@@ -4,15 +4,113 @@ import { edcClient } from "@/lib/edc";
 export const dynamic = "force-dynamic";
 
 /**
- * GET /api/participants — List all participant contexts (EDC-V Management API).
- * Used by admin dashboard and onboarding status pages.
+ * Approved fictional participants — display names by DID slug.
+ * Slug = last path segment of the participant's DID
+ * (e.g. "did:web:identityhub%3A7083:alpha-klinik" → "alpha-klinik").
+ * Used as fallback when the CFM Tenant Manager is unavailable.
+ */
+const SLUG_DISPLAY_NAMES: Record<
+  string,
+  { displayName: string; org: string; role: string }
+> = {
+  "alpha-klinik": {
+    displayName: "AlphaKlinik Berlin",
+    org: "AlphaKlinik Berlin",
+    role: "DATA_HOLDER",
+  },
+  lmc: {
+    displayName: "Limburg Medical Centre",
+    org: "Limburg Medical Centre",
+    role: "DATA_HOLDER",
+  },
+  pharmaco: {
+    displayName: "PharmaCo Research AG",
+    org: "PharmaCo Research AG",
+    role: "DATA_USER",
+  },
+  medreg: { displayName: "MedReg DE", org: "MedReg DE", role: "HDAB" },
+  irs: {
+    displayName: "Institut de Recherche Santé",
+    org: "Institut de Recherche Santé",
+    role: "HDAB",
+  },
+};
+
+/** Extract DID slug from a participantId DID string. */
+function didSlug(did: string): string {
+  return decodeURIComponent(did).split(":").pop()?.toLowerCase() ?? "";
+}
+
+interface EdcParticipant {
+  "@id": string;
+  participantId?: string;
+  identity?: string;
+  [key: string]: unknown;
+}
+
+interface CfmTenant {
+  id: string;
+  properties?: {
+    displayName?: string;
+    organization?: string;
+    role?: string;
+    participantDid?: string;
+    [key: string]: unknown;
+  };
+  [key: string]: unknown;
+}
+
+/**
+ * GET /api/participants — List all participant contexts (EDC-V Management API)
+ * enriched with human-readable display names from CFM Tenant Manager.
  */
 export async function GET() {
   try {
-    const participants = await edcClient.management<unknown[]>(
+    const participants = await edcClient.management<EdcParticipant[]>(
       "/v5alpha/participants",
     );
-    return NextResponse.json(participants);
+
+    // Attempt to fetch CFM tenants for display names — non-blocking
+    const tenantMap: Record<string, string> = {};
+    try {
+      const tenants = await edcClient.tenant<CfmTenant[]>("/v1alpha1/tenants");
+      if (Array.isArray(tenants)) {
+        for (const t of tenants) {
+          const dn = t.properties?.displayName;
+          if (!dn) continue;
+          // Match by DID slug stored in properties
+          const did = t.properties?.participantDid ?? "";
+          const slug = did ? didSlug(did) : "";
+          if (slug) tenantMap[slug] = dn;
+          // Also index by lowercase displayName slug for looser matching
+          const dnSlug = dn
+            .toLowerCase()
+            .replace(/\s+/g, "-")
+            .replace(/[^a-z0-9-]/g, "");
+          tenantMap[dnSlug] = dn;
+        }
+      }
+    } catch {
+      // CFM may be down — fall back to static map below
+    }
+
+    // Enrich each participant with a displayName
+    const enriched = (Array.isArray(participants) ? participants : []).map(
+      (p) => {
+        const did = p.participantId ?? p.identity ?? "";
+        const slug = did ? didSlug(did) : "";
+        const staticEntry = SLUG_DISPLAY_NAMES[slug];
+        const displayName =
+          tenantMap[slug] ||
+          staticEntry?.displayName ||
+          slug ||
+          p["@id"].slice(0, 12);
+        const role = staticEntry?.role ?? "";
+        return { ...p, displayName, role, identity: did };
+      },
+    );
+
+    return NextResponse.json(enriched);
   } catch (err) {
     console.error("Failed to list participants:", err);
     return NextResponse.json(

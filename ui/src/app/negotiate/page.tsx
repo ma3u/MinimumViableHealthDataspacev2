@@ -19,6 +19,9 @@ import PageIntro from "@/components/PageIntro";
 interface ParticipantCtx {
   "@id": string;
   identity: string;
+  participantId?: string;
+  displayName?: string;
+  role?: string;
 }
 
 interface CatalogOffer {
@@ -260,12 +263,11 @@ function NegotiateContent() {
   }
 
   function displayId(p: ParticipantCtx) {
+    if (p.displayName) return p.displayName;
+    const did = p.participantId ?? p.identity ?? "";
     return (
-      p.identity
-        ?.replace("did:web:", "")
-        .replace(/%3A/g, ":")
-        .split(":")
-        .pop() || p["@id"].slice(0, 12)
+      did.replace("did:web:", "").replace(/%3A/gi, ":").split(":").pop() ||
+      p["@id"].slice(0, 12)
     );
   }
 
@@ -297,7 +299,8 @@ function NegotiateContent() {
         >
           {participants.map((p) => (
             <option key={p["@id"]} value={p["@id"]}>
-              {displayId(p)} ({p["@id"].slice(0, 8)}…)
+              {displayId(p)}
+              {p.role ? ` [${p.role}]` : ""} ({p["@id"].slice(0, 8)}…)
             </option>
           ))}
         </select>
