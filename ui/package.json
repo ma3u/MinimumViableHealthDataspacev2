@@ -3,7 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "clean": "rm -rf .next",
     "dev": "next dev",
+    "dev:clean": "npm run clean && next dev",
+    "predev": "rm -rf .next/cache/webpack",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
