@@ -10,6 +10,9 @@ import {
   Clock,
   XCircle,
   ArrowRight,
+  Search,
+  AlertCircle,
+  BookOpen,
 } from "lucide-react";
 import PageIntro from "@/components/PageIntro";
 
@@ -18,12 +21,60 @@ interface ParticipantCtx {
   identity: string;
 }
 
+interface CatalogOffer {
+  assetId: string;
+  offerId: string;
+  assignerDid: string;
+  name?: string;
+  description?: string;
+  contentType?: string;
+}
+
 interface Negotiation {
   "@id": string;
   "edc:state"?: string;
   "edc:contractAgreementId"?: string;
   "edc:counterPartyId"?: string;
   [key: string]: unknown;
+}
+
+/** Parse ODRL offers from a DCAT catalog response (handles multiple JSON-LD shapes) */
+function parseOffers(catalog: Record<string, unknown>): CatalogOffer[] {
+  const offers: CatalogOffer[] = [];
+  let datasets = catalog["dataset"] ?? catalog["dcat:dataset"] ?? [];
+  if (!Array.isArray(datasets)) datasets = [datasets];
+
+  for (const ds of datasets as Record<string, unknown>[]) {
+    const assetId = (ds["@id"] ?? ds["id"] ?? "") as string;
+    const name = (ds["name"] ?? ds["dct:title"] ?? ds["title"] ?? "") as string;
+    const description = (ds["description"] ??
+      ds["dct:description"] ??
+      "") as string;
+    const contentType = (ds["contenttype"] ?? "") as string;
+
+    let policies = ds["hasPolicy"] ?? ds["odrl:hasPolicy"] ?? [];
+    if (!Array.isArray(policies)) policies = [policies];
+
+    for (const p of policies as Record<string, unknown>[]) {
+      const offerId = (p["@id"] ?? "") as string;
+      const assigner = p["assigner"] ?? p["odrl:assigner"] ?? "";
+      const assignerDid =
+        typeof assigner === "object"
+          ? ((assigner as Record<string, unknown>)["@id"] as string) ?? ""
+          : (assigner as string);
+      if (assetId && offerId) {
+        offers.push({
+          assetId,
+          offerId,
+          assignerDid,
+          name,
+          description,
+          contentType,
+        });
+      }
+    }
+  }
+  return offers;
 }
 
 export default function NegotiatePage() {
@@ -45,18 +96,25 @@ function NegotiateContent() {
   const searchParams = useSearchParams();
   const preAssetId = searchParams.get("assetId") || "";
   const preProviderId = searchParams.get("providerId") || "";
+  const preProviderDid = searchParams.get("providerDid") || "";
 
   const [participants, setParticipants] = useState<ParticipantCtx[]>([]);
   const [negotiations, setNegotiations] = useState<Negotiation[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedCtx, setSelectedCtx] = useState("");
 
-  // Negotiation form
+  // Step 1 — Catalog discovery
+  const [providerCtxId, setProviderCtxId] = useState(preProviderId);
+  const [providerDid, setProviderDid] = useState(preProviderDid);
+  const [dspBase, setDspBase] = useState("http://controlplane:8082/api/dsp");
+  const [catalogLoading, setCatalogLoading] = useState(false);
+  const [catalogError, setCatalogError] = useState<string | null>(null);
+  const [offers, setOffers] = useState<CatalogOffer[]>([]);
+  const [selectedOffer, setSelectedOffer] = useState<CatalogOffer | null>(null);
+
+  // Step 2 — Negotiation form (populated from selected offer)
   const [assetId, setAssetId] = useState(preAssetId);
-  const [providerDsp, setProviderDsp] = useState(
-    "http://health-dataspace-controlplane:8084/api/dsp",
-  );
-  const [providerId, setProviderId] = useState(preProviderId);
+  const [offerId, setOfferId] = useState("");
   const [initiating, setInitiating] = useState(false);
   const [result, setResult] = useState<string | null>(null);
 
@@ -64,33 +122,88 @@ function NegotiateContent() {
     fetchApi("/api/participants")
       .then((r) => (r.ok ? r.json() : []))
       .then((d) => {
-        // /api/participants returns flat array or { participants: [...] }
         const list: ParticipantCtx[] = Array.isArray(d)
           ? d
-          : d.participants || [];
+          : d.participants ?? [];
         setParticipants(list);
-        // Default to first consumer-like context
-        if (list.length > 0) {
-          setSelectedCtx(list[0]["@id"]);
-        }
+        if (list.length > 0) setSelectedCtx(list[0]["@id"]);
       })
       .catch(() => {});
   }, []);
 
-  // Load negotiations when participant changes
   useEffect(() => {
     if (!selectedCtx) return;
     setLoading(true);
     fetchApi(`/api/negotiations?participantId=${selectedCtx}`)
       .then((r) => (r.ok ? r.json() : []))
       .then((d) => {
-        // /api/negotiations returns flat array or { negotiations: [...] }
-        setNegotiations(Array.isArray(d) ? d : d.negotiations || []);
+        setNegotiations(Array.isArray(d) ? d : d.negotiations ?? []);
         setLoading(false);
       })
       .catch(() => setLoading(false));
   }, [selectedCtx]);
 
+  useEffect(() => {
+    if (preAssetId && offers.length > 0) {
+      const match = offers.find((o) => o.assetId === preAssetId);
+      if (match) selectOffer(match);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [offers]);
+
+  /** Step 1: DCP catalog discovery via v1alpha participants/{ctxId}/catalog */
+  const handleDiscoverCatalog = async () => {
+    if (!selectedCtx || (!providerDid && !providerCtxId)) return;
+    setCatalogLoading(true);
+    setCatalogError(null);
+    setOffers([]);
+    setSelectedOffer(null);
+
+    const did =
+      providerDid ||
+      `did:web:identityhub%3A7083:${providerCtxId
+        .toLowerCase()
+        .replace(/\s+/g, "-")}`;
+
+    try {
+      const res = await fetchApi(
+        `/api/negotiations?participantId=${selectedCtx}&catalog=true&providerDid=${encodeURIComponent(
+          did,
+        )}`,
+      );
+      const data = await res.json();
+
+      if (!res.ok) {
+        const errData = data as Record<string, unknown>;
+        setCatalogError(
+          (errData.detail as string) ||
+            (errData.error as string) ||
+            "Failed to fetch catalog",
+        );
+        return;
+      }
+
+      const parsed = parseOffers(data as Record<string, unknown>);
+      setOffers(parsed);
+      if (parsed.length === 0) {
+        setCatalogError(
+          "No datasets with offers found. Ensure the provider has contract definitions and active participant contexts (VPAs in ACTIVE state).",
+        );
+      }
+    } catch {
+      setCatalogError("Network error fetching catalog");
+    } finally {
+      setCatalogLoading(false);
+    }
+  };
+
+  function selectOffer(o: CatalogOffer) {
+    setSelectedOffer(o);
+    setAssetId(o.assetId);
+    setOfferId(o.offerId);
+  }
+
+  /** Step 2: Submit DSP ContractRequest with real offer ID */
   const handleNegotiate = async (e: React.FormEvent) => {
     e.preventDefault();
     setInitiating(true);
@@ -103,25 +216,32 @@ function NegotiateContent() {
         body: JSON.stringify({
           participantId: selectedCtx,
           assetId,
-          counterPartyAddress: providerDsp,
-          counterPartyId: providerId,
+          counterPartyAddress: dspBase,
+          counterPartyId: providerCtxId,
+          providerDid: selectedOffer?.assignerDid || providerDid,
+          offerId,
         }),
       });
 
       if (res.ok) {
-        const data = await res.json();
+        const data = (await res.json()) as Record<string, unknown>;
         setResult(
           `Negotiation initiated: ${data["@id"] || JSON.stringify(data)}`,
         );
-        // Refresh
         const updated = await fetchApi(
           `/api/negotiations?participantId=${selectedCtx}`,
         );
         const ud = await updated.json();
-        setNegotiations(Array.isArray(ud) ? ud : ud.negotiations || []);
+        setNegotiations(Array.isArray(ud) ? ud : ud.negotiations ?? []);
       } else {
-        const err = await res.json();
-        setResult(`Error: ${err.error || "Negotiation failed"}`);
+        const err = (await res.json()) as Record<string, unknown>;
+        setResult(
+          `Error: ${
+            (err.detail as string) ||
+            (err.error as string) ||
+            "Negotiation failed"
+          }`,
+        );
       }
     } catch {
       setResult("Error: Failed to initiate negotiation");
@@ -139,6 +259,16 @@ function NegotiateContent() {
     return <Clock size={16} className="text-yellow-400" />;
   }
 
+  function displayId(p: ParticipantCtx) {
+    return (
+      p.identity
+        ?.replace("did:web:", "")
+        .replace(/%3A/g, ":")
+        .split(":")
+        .pop() || p["@id"].slice(0, 12)
+    );
+  }
+
   return (
     <div className="max-w-5xl mx-auto px-6 py-10">
       <PageIntro
@@ -147,7 +277,7 @@ function NegotiateContent() {
         description="Negotiate data access contracts via the Dataspace Protocol using ODRL policies. Select a consumer participant, choose a dataset, and initiate a contract negotiation request that the data holder can accept or reject."
         prevStep={{ href: "/data/discover", label: "Discover Data" }}
         nextStep={{ href: "/data/transfer", label: "Data Transfer" }}
-        infoText="Contract negotiations follow the DSP negotiation state machine (REQUESTED → AGREED → FINALIZED). Both parties must hold valid EHDS credentials for the negotiation to succeed."
+        infoText="DSP contract negotiation requires two steps: (1) discover the provider catalog to get a valid ODRL offer @id, (2) submit a ContractRequest with protocol dataspace-protocol-http:2025-1. Both parties need active EHDS credentials."
         docLink={{
           href: "https://docs.internationaldataspaces.org/ids-knowledgebase/dataspace-protocol",
           label: "DSP Specification",
@@ -155,7 +285,7 @@ function NegotiateContent() {
         }}
       />
 
-      {/* Participant selector */}
+      {/* Consumer context selector */}
       <div className="mb-6">
         <label className="text-xs text-gray-500 mb-1 block">
           Your Participant Context (consumer)
@@ -167,19 +297,152 @@ function NegotiateContent() {
         >
           {participants.map((p) => (
             <option key={p["@id"]} value={p["@id"]}>
-              {p.identity?.replace("did:web:", "").replace(/%3A/g, ":") ||
-                p["@id"].slice(0, 16)}
+              {displayId(p)} ({p["@id"].slice(0, 8)}…)
             </option>
           ))}
         </select>
       </div>
 
-      {/* Negotiate form */}
-      <div className="border border-gray-700 rounded-xl p-5 mb-8">
-        <div className="flex items-center gap-2 mb-4">
-          <FileSignature size={18} className="text-layer2" />
-          <h2 className="font-semibold text-sm">Initiate Negotiation</h2>
+      {/* ── Step 1: Catalog discovery ── */}
+      <div className="border border-gray-700 rounded-xl p-5 mb-5">
+        <div className="flex items-center gap-2 mb-1">
+          <Search size={16} className="text-layer2" />
+          <h2 className="font-semibold text-sm">
+            Step 1 — Discover Provider Catalog
+          </h2>
         </div>
+        <p className="text-xs text-gray-500 mb-4">
+          Fetch the provider&apos;s DCAT catalog via DCP (
+          <code className="text-gray-400">v1alpha/participants/catalog</code>)
+          to discover available datasets and their ODRL offer @ids.
+        </p>
+
+        <div className="grid sm:grid-cols-3 gap-3 mb-3">
+          <div>
+            <label className="text-xs text-gray-500 mb-1 block">
+              Provider Participant ID
+            </label>
+            <input
+              type="text"
+              value={providerCtxId}
+              onChange={(e) => setProviderCtxId(e.target.value)}
+              placeholder="UUID of provider ctx"
+              className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded text-sm outline-none focus:border-layer2"
+            />
+          </div>
+          <div>
+            <label className="text-xs text-gray-500 mb-1 block">
+              Provider DID
+            </label>
+            <input
+              type="text"
+              value={providerDid}
+              onChange={(e) => setProviderDid(e.target.value)}
+              placeholder="did:web:…"
+              className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded text-sm outline-none focus:border-layer2"
+            />
+          </div>
+          <div>
+            <label className="text-xs text-gray-500 mb-1 block">
+              DSP Base URL{" "}
+              <span className="text-gray-600">(Docker-internal)</span>
+            </label>
+            <input
+              type="text"
+              value={dspBase}
+              onChange={(e) => setDspBase(e.target.value)}
+              className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded text-sm outline-none focus:border-layer2"
+            />
+          </div>
+        </div>
+
+        <button
+          type="button"
+          disabled={
+            catalogLoading || !selectedCtx || (!providerDid && !providerCtxId)
+          }
+          onClick={handleDiscoverCatalog}
+          className="flex items-center gap-2 px-4 py-2 bg-gray-700 text-white rounded text-sm font-medium hover:bg-gray-600 disabled:opacity-50"
+        >
+          {catalogLoading ? (
+            <Loader2 size={14} className="animate-spin" />
+          ) : (
+            <BookOpen size={14} />
+          )}
+          Discover Offers
+        </button>
+
+        {catalogError && (
+          <div className="mt-3 p-3 rounded bg-red-900/30 border border-red-700 text-red-300 text-xs flex gap-2">
+            <AlertCircle size={14} className="shrink-0 mt-0.5" />
+            <span>{catalogError}</span>
+          </div>
+        )}
+
+        {offers.length > 0 && (
+          <div className="mt-4 space-y-2">
+            <p className="text-xs text-gray-400 mb-2">
+              {offers.length} offer(s) found — select one to negotiate:
+            </p>
+            {offers.map((o) => (
+              <button
+                key={o.offerId}
+                type="button"
+                onClick={() => selectOffer(o)}
+                className={`w-full text-left p-3 rounded-lg border text-sm transition-colors ${
+                  selectedOffer?.offerId === o.offerId
+                    ? "border-layer2 bg-layer2/10"
+                    : "border-gray-700 hover:border-gray-500 bg-gray-800/50"
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <span className="font-medium text-gray-200">
+                    {o.name || o.assetId}
+                  </span>
+                  {selectedOffer?.offerId === o.offerId && (
+                    <CheckCircle2 size={14} className="text-layer2" />
+                  )}
+                </div>
+                {o.description && (
+                  <p className="text-xs text-gray-500 mt-0.5 truncate">
+                    {o.description}
+                  </p>
+                )}
+                <div className="flex gap-4 mt-1 flex-wrap">
+                  <span className="text-xs text-gray-600">
+                    Asset: <code className="text-gray-400">{o.assetId}</code>
+                  </span>
+                  {o.contentType && (
+                    <span className="text-xs text-gray-600">
+                      {o.contentType}
+                    </span>
+                  )}
+                </div>
+                <p className="text-xs text-gray-600 mt-0.5 truncate">
+                  Offer:{" "}
+                  <code className="text-gray-500">
+                    {o.offerId.slice(0, 72)}
+                  </code>
+                </p>
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* ── Step 2: Negotiation ── */}
+      <div className="border border-gray-700 rounded-xl p-5 mb-8">
+        <div className="flex items-center gap-2 mb-1">
+          <FileSignature size={18} className="text-layer2" />
+          <h2 className="font-semibold text-sm">
+            Step 2 — Initiate Negotiation
+          </h2>
+        </div>
+        <p className="text-xs text-gray-500 mb-4">
+          Submit a DSP <code className="text-gray-400">ContractRequest</code>{" "}
+          with the selected ODRL offer. Protocol:{" "}
+          <code className="text-gray-400">dataspace-protocol-http:2025-1</code>
+        </p>
 
         {result && (
           <div
@@ -190,6 +453,16 @@ function NegotiateContent() {
             }`}
           >
             {result}
+          </div>
+        )}
+
+        {!selectedOffer && (
+          <div className="mb-4 p-3 rounded bg-yellow-900/20 border border-yellow-700/40 text-yellow-400 text-xs flex gap-2">
+            <AlertCircle size={14} className="shrink-0 mt-0.5" />
+            <span>
+              Complete Step 1 first — a valid ODRL offer @id is required for DSP
+              contract negotiation.
+            </span>
           </div>
         )}
 
@@ -204,39 +477,28 @@ function NegotiateContent() {
                 required
                 value={assetId}
                 onChange={(e) => setAssetId(e.target.value)}
-                placeholder="e.g. fhir-patient-everything"
+                placeholder="Populated from Step 1"
                 className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded text-sm outline-none focus:border-layer2"
               />
             </div>
             <div>
               <label className="text-xs text-gray-500 mb-1 block">
-                Provider Participant ID
+                ODRL Offer ID{" "}
+                <span className="text-yellow-500 text-xs">(from catalog)</span>
               </label>
               <input
                 type="text"
                 required
-                value={providerId}
-                onChange={(e) => setProviderId(e.target.value)}
-                placeholder="Context ID of the provider"
+                value={offerId}
+                onChange={(e) => setOfferId(e.target.value)}
+                placeholder="Populated from Step 1"
                 className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded text-sm outline-none focus:border-layer2"
               />
             </div>
           </div>
-          <div>
-            <label className="text-xs text-gray-500 mb-1 block">
-              Provider DSP Endpoint
-            </label>
-            <input
-              type="url"
-              required
-              value={providerDsp}
-              onChange={(e) => setProviderDsp(e.target.value)}
-              className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded text-sm outline-none focus:border-layer2"
-            />
-          </div>
           <button
             type="submit"
-            disabled={initiating}
+            disabled={initiating || !offerId}
             className="flex items-center gap-2 px-4 py-2 bg-layer2 text-white rounded text-sm font-medium hover:bg-layer2/90 disabled:opacity-50"
           >
             {initiating ? (
@@ -249,7 +511,7 @@ function NegotiateContent() {
         </form>
       </div>
 
-      {/* Negotiation list */}
+      {/* Negotiation history */}
       <h2 className="font-semibold text-sm mb-3">Negotiation History</h2>
       {loading ? (
         <div className="flex items-center gap-2 text-gray-500">
