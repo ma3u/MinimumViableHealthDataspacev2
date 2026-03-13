@@ -2,7 +2,7 @@
 
 import { fetchApi } from "@/lib/api";
 import { useEffect, useState, type ElementType } from "react";
-import { Loader2, Settings2, Save, CheckCircle2, AlertCircle, User, Globe, Phone, Mail, MapPin } from "lucide-react";
+import { Loader2, Settings2, Save, CheckCircle2, AlertCircle, User, Globe, Phone, Mail, MapPin, ShieldCheck, ShieldOff, RefreshCw, ExternalLink } from "lucide-react";
 import PageIntro from "@/components/PageIntro";
 
 interface VPA {
@@ -34,6 +34,23 @@ interface Tenant {
   participantProfiles: ParticipantProfile[];
 }
 
+interface VerifiableCredential {
+  id?: string;
+  type?: string[];
+  issuer?: string;
+  issuanceDate?: string;
+  expirationDate?: string;
+  credentialSubject?: Record<string, unknown>;
+}
+
+interface CredentialContext {
+  profileId: string;
+  participantContextId: string | null;
+  did?: string;
+  credentials: VerifiableCredential[];
+  error?: string;
+}
+
 export default function SettingsPage() {
   const [tenants, setTenants] = useState<Tenant[]>([]);
   const [loading, setLoading] = useState(true);
@@ -41,6 +58,8 @@ export default function SettingsPage() {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [saveError, setSaveError] = useState("");
+  const [credentials, setCredentials] = useState<CredentialContext[]>([]);
+  const [credsLoading, setCredsLoading] = useState(false);
 
   // Editable contact field state — seeded from tenant properties
   const [form, setForm] = useState({
@@ -51,6 +70,7 @@ export default function SettingsPage() {
     phone: "",
     address: "",
     city: "",
+    postalCode: "",
     country: "",
     website: "",
   });
@@ -64,6 +84,7 @@ export default function SettingsPage() {
         if (list.length > 0) {
           setSelected(list[0]);
           seedForm(list[0]);
+          loadCredentials(list[0].id);
         }
         setLoading(false);
       })
@@ -80,6 +101,7 @@ export default function SettingsPage() {
       phone: p.phone || "",
       address: p.address || "",
       city: p.city || "",
+      postalCode: p.postalCode || "",
       country: p.country || "",
       website: p.website || "",
     });
@@ -88,9 +110,25 @@ export default function SettingsPage() {
   function handleSelect(id: string) {
     const t = tenants.find((t) => t.id === id) || null;
     setSelected(t);
-    if (t) seedForm(t);
+    if (t) {
+      seedForm(t);
+      loadCredentials(t.id);
+    }
     setSaved(false);
     setSaveError("");
+  }
+
+  async function loadCredentials(tenantId: string) {
+    setCredsLoading(true);
+    try {
+      const res = await fetchApi(`/api/participants/${tenantId}/credentials`);
+      const data = res.ok ? await res.json() : [];
+      setCredentials(Array.isArray(data) ? data : []);
+    } catch {
+      setCredentials([]);
+    } finally {
+      setCredsLoading(false);
+    }
   }
 
   async function handleSave() {
@@ -211,6 +249,7 @@ export default function SettingsPage() {
                     { key: "website", label: "Website", icon: Globe, placeholder: "https://", type: "url" },
                     { key: "address", label: "Street Address", icon: MapPin, placeholder: "Street & number" },
                     { key: "city", label: "City", icon: MapPin, placeholder: "Berlin" },
+                    { key: "postalCode", label: "Postal Code", icon: MapPin, placeholder: "10117" },
                     { key: "country", label: "Country", icon: Globe, placeholder: "DE" },
                   ] as { key: keyof typeof form; label: string; icon: ElementType; placeholder: string; type?: string }[]).map(
                     ({ key, label, icon: Icon, placeholder, type }) => (
@@ -232,7 +271,7 @@ export default function SettingsPage() {
                 </div>
               </div>
 
-              {/* Dataspace Profiles (read-only, corrected field mapping) */}
+              {/* Dataspace Profiles */}
               <div className="p-6">
                 <h2 className="font-semibold mb-3">Dataspace Profiles</h2>
                 {selected.participantProfiles?.length > 0 ? (
@@ -241,21 +280,36 @@ export default function SettingsPage() {
                       const ctxId =
                         pp.properties?.["cfm.vpa.state"]?.participantContextId ||
                         "—";
-                      const did = pp.identifier || "—";
-                      const activeVpas = pp.vpas?.filter((v) => v.state !== "disposed") || [];
+                      const did = pp.identifier
+                        ? decodeURIComponent(pp.identifier)
+                        : "—";
+                      const allDisposed =
+                        pp.vpas?.length &&
+                        pp.vpas.every((v) => v.state === "disposed");
+                      const hasError = pp.error && !allDisposed;
+                      const activeVpas =
+                        pp.vpas?.filter((v) => v.state === "active") || [];
                       return (
                         <div
                           key={pp.id || i}
                           className={`p-3 rounded-lg border text-xs space-y-1.5 ${
-                            pp.error
+                            hasError
                               ? "bg-red-950/30 border-red-800/50"
+                              : allDisposed
+                              ? "bg-yellow-950/20 border-yellow-800/40"
                               : "bg-gray-800/50 border-gray-700"
                           }`}
                         >
-                          {pp.error && (
-                            <div className="flex items-center gap-1 text-red-400 mb-1">
+                          {hasError && (
+                            <div className="flex items-center gap-1.5 text-red-400 mb-1">
                               <AlertCircle size={12} />
-                              <span>VPA provisioning incomplete</span>
+                              <span>Provisioning failed</span>
+                            </div>
+                          )}
+                          {allDisposed && (
+                            <div className="flex items-center gap-1.5 text-yellow-500 mb-1">
+                              <AlertCircle size={12} />
+                              <span>VPAs disposed — re-run <code className="font-mono bg-yellow-900/30 px-1 rounded">seed-health-tenants.sh</code> to re-provision</span>
                             </div>
                           )}
                           <div className="flex gap-2">
@@ -264,14 +318,12 @@ export default function SettingsPage() {
                           </div>
                           <div className="flex gap-2">
                             <span className="text-gray-500 w-32 shrink-0">DID</span>
-                            <span className="text-gray-300 font-mono break-all">
-                              {decodeURIComponent(did)}
-                            </span>
+                            <span className="text-gray-300 font-mono break-all">{did}</span>
                           </div>
                           <div className="flex gap-2">
                             <span className="text-gray-500 w-32 shrink-0">Participant Ctx</span>
                             <span className="text-gray-300 font-mono">
-                              {ctxId !== "—" ? ctxId.slice(0, 16) + "…" : "—"}
+                              {ctxId !== "—" ? ctxId : <span className="text-gray-600">none</span>}
                             </span>
                           </div>
                           {activeVpas.length > 0 && (
@@ -288,6 +340,106 @@ export default function SettingsPage() {
                   </div>
                 ) : (
                   <p className="text-gray-500 text-sm">No dataspace profiles linked yet.</p>
+                )}
+              </div>
+
+              {/* Digital Credentials (VCs) */}
+              <div className="p-6">
+                <div className="flex items-center justify-between mb-3">
+                  <h2 className="font-semibold flex items-center gap-2">
+                    <ShieldCheck size={16} className="text-layer2" />
+                    Digital Credentials
+                  </h2>
+                  <button
+                    onClick={() => selected && loadCredentials(selected.id)}
+                    disabled={credsLoading}
+                    className="text-xs text-gray-500 hover:text-gray-300 flex items-center gap-1 disabled:opacity-40"
+                  >
+                    <RefreshCw size={11} className={credsLoading ? "animate-spin" : ""} />
+                    Refresh
+                  </button>
+                </div>
+
+                {credsLoading ? (
+                  <div className="flex items-center gap-2 text-gray-500 text-sm">
+                    <Loader2 size={13} className="animate-spin" />
+                    Fetching credentials…
+                  </div>
+                ) : credentials.length === 0 || credentials.every((c) => c.credentials.length === 0) ? (
+                  <div className="rounded-lg bg-gray-800/40 border border-gray-700 p-4 text-sm">
+                    <div className="flex items-center gap-2 text-yellow-500 mb-2">
+                      <ShieldOff size={14} />
+                      <span className="font-medium">No credentials issued yet</span>
+                    </div>
+                    <p className="text-gray-500 text-xs leading-relaxed">
+                      Verifiable Credentials (EHDS-compliant VCs) are issued by the HDAB after participant
+                      onboarding via the IdentityHub. To issue credentials, run:
+                    </p>
+                    <code className="mt-2 block text-xs text-green-400/80 bg-gray-900 rounded px-3 py-2">
+                      bash jad/issue-ehds-credentials.sh
+                    </code>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {credentials.flatMap((ctx) =>
+                      ctx.credentials.map((vc, i) => {
+                        const types = (vc.type || []).filter(
+                          (t) => t !== "VerifiableCredential",
+                        );
+                        const expired =
+                          vc.expirationDate &&
+                          new Date(vc.expirationDate) < new Date();
+                        return (
+                          <div
+                            key={`${ctx.profileId}-${i}`}
+                            className={`p-3 rounded-lg border text-xs space-y-1.5 ${
+                              expired
+                                ? "bg-red-950/30 border-red-800/50"
+                                : "bg-green-950/20 border-green-800/40"
+                            }`}
+                          >
+                            <div className="flex items-center gap-1.5 mb-1">
+                              {expired ? (
+                                <ShieldOff size={12} className="text-red-400" />
+                              ) : (
+                                <ShieldCheck size={12} className="text-green-400" />
+                              )}
+                              <span className={expired ? "text-red-400" : "text-green-400"}>
+                                {types.join(", ") || "VerifiableCredential"}
+                              </span>
+                              {expired && <span className="text-red-500 ml-auto">EXPIRED</span>}
+                            </div>
+                            <div className="flex gap-2">
+                              <span className="text-gray-500 w-28 shrink-0">Issuer</span>
+                              <span className="text-gray-300 font-mono break-all">{vc.issuer || "—"}</span>
+                            </div>
+                            <div className="flex gap-2">
+                              <span className="text-gray-500 w-28 shrink-0">Issued</span>
+                              <span className="text-gray-300">
+                                {vc.issuanceDate
+                                  ? new Date(vc.issuanceDate).toLocaleDateString()
+                                  : "—"}
+                              </span>
+                            </div>
+                            {vc.expirationDate && (
+                              <div className="flex gap-2">
+                                <span className="text-gray-500 w-28 shrink-0">Expires</span>
+                                <span className={expired ? "text-red-400" : "text-gray-300"}>
+                                  {new Date(vc.expirationDate).toLocaleDateString()}
+                                </span>
+                              </div>
+                            )}
+                            {vc.id && (
+                              <div className="flex gap-2">
+                                <span className="text-gray-500 w-28 shrink-0">Credential ID</span>
+                                <span className="text-gray-400 font-mono text-[10px] break-all">{vc.id}</span>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })
+                    )}
+                  </div>
                 )}
               </div>
 

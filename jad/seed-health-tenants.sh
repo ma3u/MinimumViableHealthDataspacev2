@@ -186,7 +186,7 @@ echo ""
 echo "────────────────────────────────────────────────"
 echo "Tenant 1/5: AlphaKlinik Berlin (Data Provider)"
 echo "────────────────────────────────────────────────"
-create_tenant "AlphaKlinik Berlin" '{"properties": {"displayName": "AlphaKlinik Berlin", "role": "provider", "organization": "AlphaKlinik Berlin — Universitätsklinikum", "ehdsParticipantType": "data-holder", "country": "DE"}}'
+create_tenant "AlphaKlinik Berlin" '{"properties": {"displayName": "AlphaKlinik Berlin", "role": "provider", "organization": "AlphaKlinik Berlin — Universitätsklinikum", "ehdsParticipantType": "data-holder", "contactPerson": "Dr. Sophie Richter", "email": "data-office@alpha-klinik.de", "phone": "+49 30 4501-0", "website": "https://alpha-klinik.de", "address": "Augustenburger Platz 1", "city": "Berlin", "country": "DE", "postalCode": "13353"}}'
 
 ALPHA_KLINIK_TENANT_ID="$TENANT_ID"
 
@@ -201,7 +201,7 @@ echo ""
 echo "────────────────────────────────────────────────"
 echo "Tenant 2/5: PharmaCo Research AG (Data Consumer)"
 echo "────────────────────────────────────────────────"
-create_tenant "PharmaCo Research AG" '{"properties": {"displayName": "PharmaCo Research AG", "role": "consumer", "organization": "PharmaCo Research AG — Clinical Trials Division", "ehdsParticipantType": "data-user", "country": "DE"}}'
+create_tenant "PharmaCo Research AG" '{"properties": {"displayName": "PharmaCo Research AG", "role": "consumer", "organization": "PharmaCo Research AG — Clinical Trials Division", "ehdsParticipantType": "data-user", "contactPerson": "Dr. Klaus Berger", "email": "research-data@pharmaco.de", "phone": "+49 69 8100-0", "website": "https://pharmaco.de", "address": "Industriepark Hoechst G879", "city": "Frankfurt am Main", "country": "DE", "postalCode": "65926"}}'
 
 PHARMACO_TENANT_ID="$TENANT_ID"
 
@@ -216,7 +216,7 @@ echo ""
 echo "────────────────────────────────────────────────"
 echo "Tenant 3/5: MedReg DE (Catalog Operator)"
 echo "────────────────────────────────────────────────"
-create_tenant "MedReg DE" '{"properties": {"displayName": "MedReg DE", "role": "operator", "organization": "MedReg DE — Health Data Access Body", "ehdsParticipantType": "health-data-access-body", "country": "DE"}}'
+create_tenant "MedReg DE" '{"properties": {"displayName": "MedReg DE", "role": "operator", "organization": "MedReg DE — Health Data Access Body", "ehdsParticipantType": "health-data-access-body", "contactPerson": "Anke Hoffmann", "email": "contact@medreg.de", "phone": "+49 228 3080-0", "website": "https://medreg.de", "address": "Friedrich-Ebert-Allee 38", "city": "Bonn", "country": "DE", "postalCode": "53113"}}'
 
 MEDREG_TENANT_ID="$TENANT_ID"
 
@@ -231,7 +231,7 @@ echo ""
 echo "────────────────────────────────────────────────"
 echo "Tenant 4/5: Limburg Medical Centre (Data Provider)"
 echo "────────────────────────────────────────────────"
-create_tenant "Limburg Medical Centre" '{"properties": {"displayName": "Limburg Medical Centre", "role": "provider", "organization": "Limburg Medical Centre — Academic Hospital", "ehdsParticipantType": "data-holder", "country": "NL"}}'
+create_tenant "Limburg Medical Centre" '{"properties": {"displayName": "Limburg Medical Centre", "role": "provider", "organization": "Limburg Medical Centre — Academic Hospital", "ehdsParticipantType": "data-holder", "contactPerson": "Dr. Jan van der Berg", "email": "dataaccess@lmc.nl", "phone": "+31 77 320 5555", "website": "https://lmc.nl", "address": "Tegelseweg 210", "city": "Venlo", "country": "NL", "postalCode": "5912 BL"}}'
 
 LMC_TENANT_ID="$TENANT_ID"
 
@@ -246,7 +246,7 @@ echo ""
 echo "────────────────────────────────────────────────"
 echo "Tenant 5/5: Institut de Recherche Santé (Research HDAB)"
 echo "────────────────────────────────────────────────"
-create_tenant "Institut de Recherche Santé" '{"properties": {"displayName": "Institut de Recherche Santé", "role": "operator", "organization": "Institut de Recherche Santé — Research HDAB", "ehdsParticipantType": "health-data-access-body", "country": "FR"}}'
+create_tenant "Institut de Recherche Santé" '{"properties": {"displayName": "Institut de Recherche Santé", "role": "operator", "organization": "Institut de Recherche Santé — Research HDAB", "ehdsParticipantType": "health-data-access-body", "contactPerson": "Prof. Marie Leblanc", "email": "data@irs.fr", "phone": "+33 1 44 23 60 00", "website": "https://irs.fr", "address": "101 rue de Tolbiac", "city": "Paris", "country": "FR", "postalCode": "75013"}}' 
 
 IRS_TENANT_ID="$TENANT_ID"
 
