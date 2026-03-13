@@ -2,14 +2,14 @@
 # =============================================================================
 # seed-contract-negotiation.sh — Phase 4b: Contract Negotiation & Data Transfer
 # =============================================================================
-# Demonstrates CRO TrialCorp requesting Clinic Riverside's health data through
+# Demonstrates PharmaCo Research AG requesting AlphaKlinik Berlin's health data through
 # the EDC-V dataspace connector, following EHDS Article 33 secondary use flow.
 #
 # Flow:
 #   1. Register data planes for all participants
-#   2. CRO discovers Clinic's catalog via DSP protocol
+#   2. PharmaCo discovers AlphaKlinik's catalog via DSP protocol
 #   3. For each dataset: negotiate contract → wait for FINALIZED → pull data
-#   4. HDAB discovers Clinic's catalog (operator oversight)
+#   4. MedReg discovers AlphaKlinik's catalog (operator oversight)
 #   5. Verify all negotiations and transfers
 #
 # Key learnings (root causes discovered during Phase 4b):
@@ -35,17 +35,17 @@ KC_URL="${KC_URL:-http://localhost:8080}"
 KC_REALM="edcv"
 
 # Participant context IDs (from TenantManager provisioning)
-CLINIC_CTX="d0b1e14e6faa47aca9c2932a5e22885b"
-CRO_CTX="4e300dff7d62415e9c409351bb2fe17a"
-HDAB_CTX="9ce6ec7ea12a4c6f957774c3783a988c"
+LMC_CTX="d0b1e14e6faa47aca9c2932a5e22885b"
+PHARMACO_CTX="4e300dff7d62415e9c409351bb2fe17a"
+MEDREG_CTX="9ce6ec7ea12a4c6f957774c3783a988c"
 
 # DIDs (did:web with Docker-internal identityhub hostname)
-CLINIC_DID="did:web:identityhub%3A7083:clinic-alphaklinik"
-CRO_DID="did:web:identityhub%3A7083:cro-pharmaco"
-HDAB_DID="did:web:identityhub%3A7083:hdab-medreg"
+LMC_DID="did:web:identityhub%3A7083:alpha-klinik"
+PHARMACO_DID="did:web:identityhub%3A7083:pharmaco"
+MEDREG_DID="did:web:identityhub%3A7083:medreg"
 
 # DSP endpoints (Docker-internal controlplane address)
-CLINIC_DSP="http://controlplane:8082/api/dsp/$CLINIC_CTX/2025-1"
+LMC_DSP="http://controlplane:8082/api/dsp/$LMC_CTX/2025-1"
 
 # Data plane (Docker-internal)
 DATAPLANE_FHIR_URL="http://dataplane-fhir:8083/api/control/v1/dataflows"
@@ -152,20 +152,20 @@ register_dataplane() {
   fi
 }
 
-register_dataplane "$CLINIC_CTX" "Clinic"
-register_dataplane "$CRO_CTX"    "CRO"
-register_dataplane "$HDAB_CTX"   "HDAB"
+register_dataplane "$LMC_CTX" "AlphaKlinik Berlin"
+register_dataplane "$PHARMACO_CTX"    "PharmaCo Research AG"
+register_dataplane "$MEDREG_CTX"   "MedReg DE"
 echo ""
 
 # =============================================================================
-# Step 2: CRO discovers Clinic's catalog
+# Step 2: PharmaCo discovers AlphaKlinik's catalog
 # =============================================================================
 echo "────────────────────────────────────────────────"
-echo "Step 2: CRO discovers Clinic's catalog via DSP"
+echo "Step 2: PharmaCo discovers AlphaKlinik's catalog via DSP"
 echo "────────────────────────────────────────────────"
 
-CATALOG=$(mgmt_call POST "v1alpha/participants/$CRO_CTX/catalog" \
-  "{\"counterPartyDid\":\"$CLINIC_DID\"}")
+CATALOG=$(mgmt_call POST "v1alpha/participants/$PHARMACO_CTX/catalog" \
+  "{\"counterPartyDid\":\"$LMC_DID\"}")
 
 # Parse datasets and offers
 OFFERS=$(echo "$CATALOG" | python3 -c "
@@ -215,15 +215,15 @@ echo "$OFFERS" | while IFS='|' read -r asset_id offer_id; do
   echo "    Initiating contract negotiation..."
 
   # --- 3a: Negotiate contract ---
-  NEG_RESPONSE=$(mgmt_call POST "v5alpha/participants/$CRO_CTX/contractnegotiations" "{
+  NEG_RESPONSE=$(mgmt_call POST "v5alpha/participants/$PHARMACO_CTX/contractnegotiations" "{
     \"@context\": [\"$EDC_CTX\"],
     \"@type\": \"ContractRequest\",
-    \"counterPartyAddress\": \"$CLINIC_DSP\",
+    \"counterPartyAddress\": \"$LMC_DSP\",
     \"protocol\": \"$DSP_PROTOCOL\",
     \"policy\": {
       \"@type\": \"Offer\",
       \"@id\": \"$offer_id\",
-      \"assigner\": \"$CLINIC_DID\",
+      \"assigner\": \"$LMC_DID\",
       \"target\": \"$asset_id\"
     }
   }")
@@ -246,7 +246,7 @@ print(d.get('@id', ''))
   # --- 3b: Poll until FINALIZED ---
   echo -n "    Waiting for FINALIZED..."
   FINAL_STATE=$(poll_state \
-    "v5alpha/participants/$CRO_CTX/contractnegotiations/$NEG_ID" \
+    "v5alpha/participants/$PHARMACO_CTX/contractnegotiations/$NEG_ID" \
     "FINALIZED" "$asset_id")
 
   if [ "$FINAL_STATE" != "FINALIZED" ]; then
@@ -257,7 +257,7 @@ print(d.get('@id', ''))
   echo " ✅"
 
   # --- 3c: Extract agreement ID ---
-  AGREEMENT_ID=$(mgmt_call GET "v5alpha/participants/$CRO_CTX/contractnegotiations/$NEG_ID" \
+  AGREEMENT_ID=$(mgmt_call GET "v5alpha/participants/$PHARMACO_CTX/contractnegotiations/$NEG_ID" \
     | python3 -c "
 import json, sys
 d = json.load(sys.stdin)
@@ -268,10 +268,10 @@ print(d.get('contractAgreementId', ''))
 
   # --- 3d: Initiate HttpData-PULL transfer ---
   echo "    Initiating data transfer (HttpData-PULL)..."
-  TP_RESPONSE=$(mgmt_call POST "v5alpha/participants/$CRO_CTX/transferprocesses" "{
+  TP_RESPONSE=$(mgmt_call POST "v5alpha/participants/$PHARMACO_CTX/transferprocesses" "{
     \"@context\": [\"$EDC_CTX\"],
     \"@type\": \"TransferRequest\",
-    \"counterPartyAddress\": \"$CLINIC_DSP\",
+    \"counterPartyAddress\": \"$LMC_DSP\",
     \"protocol\": \"$DSP_PROTOCOL\",
     \"contractId\": \"$AGREEMENT_ID\",
     \"assetId\": \"$asset_id\",
@@ -298,7 +298,7 @@ print(d.get('@id', ''))
   # --- 3e: Poll until STARTED ---
   echo -n "    Waiting for STARTED..."
   TP_STATE=$(poll_state \
-    "v5alpha/participants/$CRO_CTX/transferprocesses/$TP_ID" \
+    "v5alpha/participants/$PHARMACO_CTX/transferprocesses/$TP_ID" \
     "STARTED" "$asset_id")
 
   if [ "$TP_STATE" = "STARTED" ]; then
@@ -313,16 +313,16 @@ done
 echo ""
 
 # =============================================================================
-# Step 4: HDAB discovers Clinic's catalog (operator oversight)
+# Step 4: MedReg discovers AlphaKlinik's catalog (operator oversight)
 # =============================================================================
 echo "────────────────────────────────────────────────"
-echo "Step 4: HDAB discovers Clinic's catalog (operator)"
+echo "Step 4: MedReg discovers AlphaKlinik's catalog (operator)"
 echo "────────────────────────────────────────────────"
 
-HDAB_CATALOG=$(mgmt_call POST "v1alpha/participants/$HDAB_CTX/catalog" \
-  "{\"counterPartyDid\":\"$CLINIC_DID\"}")
+MEDREG_CATALOG=$(mgmt_call POST "v1alpha/participants/$MEDREG_CTX/catalog" \
+  "{\"counterPartyDid\":\"$LMC_DID\"}")
 
-HDAB_DATASETS=$(echo "$HDAB_CATALOG" | python3 -c "
+MEDREG_DATASETS=$(echo "$MEDREG_CATALOG" | python3 -c "
 import json, sys
 d = json.load(sys.stdin)
 datasets = d.get('dataset', d.get('dcat:dataset', []))
@@ -330,7 +330,7 @@ if isinstance(datasets, dict): datasets = [datasets]
 print(len(datasets))
 " 2>/dev/null || echo "0")
 
-echo "  HDAB sees $HDAB_DATASETS dataset(s) from Clinic"
+echo "  MedReg sees $MEDREG_DATASETS dataset(s) from Clinic"
 ok "Operator catalog discovery verified"
 echo ""
 
@@ -341,8 +341,8 @@ echo "────────────────────────�
 echo "Step 5: Verify Contract Negotiations & Transfers"
 echo "────────────────────────────────────────────────"
 
-# CRO negotiations
-CRO_NEG_COUNT=$(mgmt_call POST "v5alpha/participants/$CRO_CTX/contractnegotiations/request" \
+# PharmaCo negotiations
+PHARMACO_NEG_COUNT=$(mgmt_call POST "v5alpha/participants/$PHARMACO_CTX/contractnegotiations/request" \
   "{\"@context\":[\"$EDC_CTX\"],\"@type\":\"QuerySpec\"}" \
   | python3 -c "
 import json, sys
@@ -357,10 +357,10 @@ for n in items:
     print(f'    {nid}... {state} agreement={aid}...')
 " 2>/dev/null || echo "?/?")
 
-echo "  CRO negotiations (FINALIZED/total): $CRO_NEG_COUNT"
+echo "  PharmaCo negotiations (FINALIZED/total): $PHARMACO_NEG_COUNT"
 
-# CRO transfers
-CRO_TP_COUNT=$(mgmt_call POST "v5alpha/participants/$CRO_CTX/transferprocesses/request" \
+# PharmaCo transfers
+PHARMACO_TP_COUNT=$(mgmt_call POST "v5alpha/participants/$PHARMACO_CTX/transferprocesses/request" \
   "{\"@context\":[\"$EDC_CTX\"],\"@type\":\"QuerySpec\"}" \
   | python3 -c "
 import json, sys
@@ -375,10 +375,10 @@ for t in items:
     print(f'    {tid}... {state} asset={asset}')
 " 2>/dev/null || echo "?/?")
 
-echo "  CRO transfers (STARTED/total): $CRO_TP_COUNT"
+echo "  PharmaCo transfers (STARTED/total): $PHARMACO_TP_COUNT"
 
 # Clinic (provider side)
-CLINIC_NEG_COUNT=$(mgmt_call POST "v5alpha/participants/$CLINIC_CTX/contractnegotiations/request" \
+LMC_NEG_COUNT=$(mgmt_call POST "v5alpha/participants/$LMC_CTX/contractnegotiations/request" \
   "{\"@context\":[\"$EDC_CTX\"],\"@type\":\"QuerySpec\"}" \
   | python3 -c "
 import json, sys
@@ -387,19 +387,19 @@ items = data if isinstance(data, list) else []
 print(len(items))
 " 2>/dev/null || echo "0")
 
-echo "  Clinic has $CLINIC_NEG_COUNT contract negotiation(s) (provider side)"
+echo "  AlphaKlinik has $LMC_NEG_COUNT contract negotiation(s) (provider side)"
 
 echo ""
 echo "════════════════════════════════════════════════"
 echo "Phase 4b Summary"
 echo "════════════════════════════════════════════════"
 echo ""
-echo "  CRO TrialCorp → Clinic Riverside:"
+echo "  PharmaCo Research AG → AlphaKlinik Berlin:"
 echo "    Catalog datasets:   $DATASET_COUNT"
-echo "    Negotiations:       $CRO_NEG_COUNT (FINALIZED/total)"
-echo "    Transfers:          $CRO_TP_COUNT (STARTED/total)"
+echo "    Negotiations:       $PHARMACO_NEG_COUNT (FINALIZED/total)"
+echo "    Transfers:          $PHARMACO_TP_COUNT (STARTED/total)"
 echo ""
-echo "  HDAB HealthGov → Clinic Riverside:"
-echo "    Catalog datasets:   $HDAB_DATASETS"
+echo "  MedReg DE → AlphaKlinik Berlin:"
+echo "    Catalog datasets:   $MEDREG_DATASETS"
 echo ""
 ok "Phase 4b: Contract Negotiation & Data Transfer complete"

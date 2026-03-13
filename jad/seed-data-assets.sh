@@ -5,11 +5,12 @@
 # Registers Neo4j-backed data assets on each participant's EDC-V instance
 # via the ControlPlane Management API.
 #
-# Assets created:
-#   Test-Clinic (provider): FHIR Patient Search, FHIR Observation Bundle
-#   Clinic      (provider): FHIR Patient, FHIR Cohort Bundle, OMOP Stats, HealthDCAT-AP Catalog
-#   CRO         (consumer): Research Data Request, OMOP Analytics Query
-#   HDAB        (operator): HealthDCAT-AP Catalog (federated)
+# Assets created (all fictional participants — see .github/copilot-instructions.md):
+#   AlphaKlinik Berlin          (provider): FHIR Patient Search, FHIR Observation Bundle
+#   Limburg Medical Centre      (provider): FHIR Patient, FHIR Cohort Bundle, OMOP Stats, HealthDCAT-AP Catalog
+#   PharmaCo Research AG        (consumer): Research Data Request, OMOP Analytics Query
+#   MedReg DE                   (operator): HealthDCAT-AP Catalog (federated)
+#   Institut de Recherche Santé (operator): Research Catalog (federated)
 #
 # Prerequisites:
 #   - All JAD services running
@@ -210,92 +211,93 @@ for p in profiles:
             break
 ")
   echo "  $name ($role): ctx=$ctx_id"
-  # Map by name+role (Test Clinic and Clinic AlphaKlinik Berlin are both providers)
+  # Map by display name to context ID
   case "$name" in
-    "Test Clinic"*) TEST_CLINIC_CTX="$ctx_id" ;;
-    *) case "$role" in
-         provider) CLINIC_CTX="$ctx_id" ;;
-         consumer) CRO_CTX="$ctx_id" ;;
-         operator) HDAB_CTX="$ctx_id" ;;
-       esac ;;
+    "AlphaKlinik Berlin"*)              ALPHA_KLINIK_CTX="$ctx_id" ;;
+    "Limburg Medical Centre"*)          LMC_CTX="$ctx_id" ;;
+    "PharmaCo Research AG"*)            PHARMACO_CTX="$ctx_id" ;;
+    "MedReg DE"*)                       MEDREG_CTX="$ctx_id" ;;
+    "Institut de Recherche Santé"*|"Institut de Recherche"*) IRS_CTX="$ctx_id" ;;
+    *) warn "Unknown tenant: $name (role=$role)" ;;
   esac
 done <<< "$TENANT_DATA"
 
 echo ""
 echo "Participant Context IDs:"
-echo "  Test Clinic: $TEST_CLINIC_CTX"
-echo "  Clinic:      $CLINIC_CTX"
-echo "  CRO:     $CRO_CTX"
-echo "  HDAB:    $HDAB_CTX"
+echo "  AlphaKlinik Berlin:          $ALPHA_KLINIK_CTX"
+echo "  Limburg Medical Centre:      $LMC_CTX"
+echo "  PharmaCo Research AG:        $PHARMACO_CTX"
+echo "  MedReg DE:                   $MEDREG_CTX"
+echo "  Institut de Recherche Santé: $IRS_CTX"
 echo ""
 
 # =============================================================================
-# Step 0: Create Data Assets on Test Clinic (Provider)
+# Step 0: Create Data Assets on AlphaKlinik Berlin (Provider)
 # =============================================================================
 echo "────────────────────────────────────────────────"
-echo "Step 0: Register Data Assets on Test Clinic"
+echo "Step 0: Register Data Assets on AlphaKlinik Berlin"
 echo "────────────────────────────────────────────────"
 
-create_asset "$TEST_CLINIC_CTX" "fhir-patient-search" \
+create_asset "$ALPHA_KLINIK_CTX" "fhir-patient-search" \
   "FHIR Patient Search" \
   "Search FHIR R4 patients by demographics and conditions. Maps to Neo4j Patient nodes." \
   "application/fhir+json" \
   "{\"@type\":\"DataAddress\",\"type\":\"HttpData\",\"baseUrl\":\"$NEO4J_PROXY_URL/fhir/Patient\",\"proxyPath\":\"true\",\"proxyQueryParams\":\"true\"}"
 
-create_asset "$TEST_CLINIC_CTX" "fhir-observation-bundle" \
+create_asset "$ALPHA_KLINIK_CTX" "fhir-observation-bundle" \
   "FHIR Observation Bundle" \
   "FHIR R4 Observation resources including vitals and lab results. Supports LOINC coded queries." \
   "application/fhir+json" \
   "{\"@type\":\"DataAddress\",\"type\":\"HttpData\",\"baseUrl\":\"$NEO4J_PROXY_URL/fhir/Observation\",\"proxyPath\":\"true\",\"proxyQueryParams\":\"true\"}"
 
-TEST_CLINIC_POLICY='{
+AK_POLICY='{
   "@type": "Set",
   "permission": [{
     "action": "use",
     "constraint": []
   }]
 }'
-create_policy "$TEST_CLINIC_CTX" "open-fhir-access-policy" "$TEST_CLINIC_POLICY"
+create_policy "$ALPHA_KLINIK_CTX" "open-fhir-access-policy" "$AK_POLICY"
 
 EDC_ID="https://w3id.org/edc/v0.0.1/ns/id"
 TC_SELECTOR="[{\"@type\":\"Criterion\",\"operandLeft\":\"$EDC_ID\",\"operator\":\"=\",\"operandRight\":\"fhir-patient-search\"}]"
-create_contract_def "$TEST_CLINIC_CTX" "cd-fhir-patient" "open-fhir-access-policy" "open-fhir-access-policy" "$TC_SELECTOR"
+create_contract_def "$ALPHA_KLINIK_CTX" "cd-fhir-patient" "open-fhir-access-policy" "open-fhir-access-policy" "$TC_SELECTOR"
 
 TC_OBS_SELECTOR="[{\"@type\":\"Criterion\",\"operandLeft\":\"$EDC_ID\",\"operator\":\"=\",\"operandRight\":\"fhir-observation-bundle\"}]"
-create_contract_def "$TEST_CLINIC_CTX" "cd-fhir-observation" "open-fhir-access-policy" "open-fhir-access-policy" "$TC_OBS_SELECTOR"
+create_contract_def "$ALPHA_KLINIK_CTX" "cd-fhir-observation" "open-fhir-access-policy" "open-fhir-access-policy" "$TC_OBS_SELECTOR"
 
 echo ""
 
 # =============================================================================
-# Step 1: Create Data Assets on Clinic (Provider)
+# Step 1: Create Data Assets on Limburg Medical Centre (Provider)
 # =============================================================================
 echo "────────────────────────────────────────────────"
-echo "Step 1: Register Data Assets on Clinic"
+echo "Step 1: Register Data Assets on Limburg Medical Centre"
 echo "────────────────────────────────────────────────"
 
 # Asset 1: FHIR Patient $everything
-create_asset "$CLINIC_CTX" "fhir-patient-everything" \
+create_asset "$LMC_CTX" "fhir-patient-everything" \
   "FHIR Patient Everything" \
   "Complete FHIR R4 patient record including encounters, conditions, observations, procedures, and medications. Retrieved via \$everything operation from the Neo4j health knowledge graph." \
   "application/fhir+json" \
   "{\"@type\":\"DataAddress\",\"type\":\"HttpData\",\"baseUrl\":\"$NEO4J_PROXY_URL/fhir/Patient\",\"proxyPath\":\"true\",\"proxyQueryParams\":\"true\"}"
 
 # Asset 2: FHIR Cohort Bundle
-create_asset "$CLINIC_CTX" "fhir-cohort-bundle" \
+create_asset "$LMC_CTX" "fhir-cohort-bundle" \
   "FHIR Cohort Search Bundle" \
   "FHIR R4 Bundle of patients matching cohort criteria (gender, age, condition). Supports secondary use research queries per EHDS Article 33." \
   "application/fhir+json" \
   "{\"@type\":\"DataAddress\",\"type\":\"HttpData\",\"baseUrl\":\"$NEO4J_PROXY_URL/fhir/Bundle\",\"proxyBody\":\"true\",\"method\":\"POST\"}"
 
 # Asset 3: OMOP Cohort Statistics
-create_asset "$CLINIC_CTX" "omop-cohort-statistics" \
+create_asset "$LMC_CTX" "omop-cohort-statistics" \
   "OMOP CDM Cohort Statistics" \
   "Aggregate cohort statistics from OMOP Common Data Model. Supports grouping by gender, age decade, or condition concept." \
   "application/json" \
   "{\"@type\":\"DataAddress\",\"type\":\"HttpData\",\"baseUrl\":\"$NEO4J_PROXY_URL/omop/cohort\",\"proxyBody\":\"true\",\"method\":\"POST\"}"
 
 # Asset 4: HealthDCAT-AP Catalog
-create_asset "$CLINIC_CTX" "healthdcatap-catalog" \
+create_asset "$LMC_CTX" "healthdcatap-catalog" \
   "HealthDCAT-AP Dataset Catalog" \
   "HealthDCAT-AP compliant dataset catalog entries as JSON-LD. Supports EHDS metadata requirements for health data discoverability." \
   "application/ld+json" \
@@ -330,8 +332,8 @@ MEMBERSHIP_POLICY='{
   }]
 }'
 
-create_policy "$CLINIC_CTX" "open-access-policy" "$OPEN_POLICY"
-create_policy "$CLINIC_CTX" "membership-access-policy" "$MEMBERSHIP_POLICY"
+create_policy "$LMC_CTX" "open-access-policy" "$OPEN_POLICY"
+create_policy "$LMC_CTX" "membership-access-policy" "$MEMBERSHIP_POLICY"
 
 echo ""
 
@@ -349,78 +351,78 @@ EDC_ID="https://w3id.org/edc/v0.0.1/ns/id"
 
 # Contract for FHIR patient data — requires membership
 FHIR_SELECTOR="[{\"@type\":\"Criterion\",\"operandLeft\":\"$EDC_ID\",\"operator\":\"in\",\"operandRight\":[\"fhir-patient-everything\",\"fhir-cohort-bundle\"]}]"
-create_contract_def "$CLINIC_CTX" "fhir-data-contract" "membership-access-policy" "membership-access-policy" "$FHIR_SELECTOR"
+create_contract_def "$LMC_CTX" "fhir-data-contract" "membership-access-policy" "membership-access-policy" "$FHIR_SELECTOR"
 
 # Contract for OMOP statistics — requires membership
 OMOP_SELECTOR="[{\"@type\":\"Criterion\",\"operandLeft\":\"$EDC_ID\",\"operator\":\"=\",\"operandRight\":\"omop-cohort-statistics\"}]"
-create_contract_def "$CLINIC_CTX" "omop-data-contract" "membership-access-policy" "membership-access-policy" "$OMOP_SELECTOR"
+create_contract_def "$LMC_CTX" "omop-data-contract" "membership-access-policy" "membership-access-policy" "$OMOP_SELECTOR"
 
 # Contract for catalog metadata — open access
 CATALOG_SELECTOR="[{\"@type\":\"Criterion\",\"operandLeft\":\"$EDC_ID\",\"operator\":\"=\",\"operandRight\":\"healthdcatap-catalog\"}]"
-create_contract_def "$CLINIC_CTX" "catalog-metadata-contract" "open-access-policy" "open-access-policy" "$CATALOG_SELECTOR"
+create_contract_def "$LMC_CTX" "catalog-metadata-contract" "open-access-policy" "open-access-policy" "$CATALOG_SELECTOR"
 
 echo ""
 
 # =============================================================================
-# Step 3b: Create Data Assets on CRO (Consumer)
+# Step 3b: Create Data Assets on PharmaCo Research AG (Consumer)
 # =============================================================================
 echo "────────────────────────────────────────────────"
-echo "Step 3b: Register Data Assets on CRO"
+echo "Step 3b: Register Data Assets on PharmaCo Research AG"
 echo "────────────────────────────────────────────────"
 
-create_asset "$CRO_CTX" "research-data-request" \
+create_asset "$PHARMACO_CTX" "research-data-request" \
   "Research Data Request" \
   "Submit clinical research data requests for EHDS-approved studies." \
   "application/json" \
   "{\"@type\":\"DataAddress\",\"type\":\"HttpData\",\"baseUrl\":\"$NEO4J_PROXY_URL/api/research/request\",\"proxyPath\":\"true\",\"proxyQueryParams\":\"true\"}"
 
-create_asset "$CRO_CTX" "omop-analytics-query" \
+create_asset "$PHARMACO_CTX" "omop-analytics-query" \
   "OMOP Analytics Query" \
   "Execute OMOP CDM analytics queries over federated clinical datasets." \
   "application/json" \
   "{\"@type\":\"DataAddress\",\"type\":\"HttpData\",\"baseUrl\":\"$NEO4J_PROXY_URL/api/omop/query\",\"proxyPath\":\"true\",\"proxyQueryParams\":\"true\"}"
 
-CRO_POLICY='{
+PHARMACO_POLICY='{
   "@type": "Set",
   "permission": [{
     "action": "use",
     "constraint": []
   }]
 }'
-create_policy "$CRO_CTX" "research-access-policy" "$CRO_POLICY"
+create_policy "$PHARMACO_CTX" "research-access-policy" "$PHARMACO_POLICY"
 
-CRO_RESEARCH_SELECTOR="[{\"@type\":\"Criterion\",\"operandLeft\":\"$EDC_ID\",\"operator\":\"=\",\"operandRight\":\"research-data-request\"}]"
-create_contract_def "$CRO_CTX" "cd-research-data" "research-access-policy" "research-access-policy" "$CRO_RESEARCH_SELECTOR"
+PHARMACO_RESEARCH_SELECTOR="[{\"@type\":\"Criterion\",\"operandLeft\":\"$EDC_ID\",\"operator\":\"=\",\"operandRight\":\"research-data-request\"}]"
+create_contract_def "$PHARMACO_CTX" "cd-research-data" "research-access-policy" "research-access-policy" "$PHARMACO_RESEARCH_SELECTOR"
 
-CRO_OMOP_SELECTOR="[{\"@type\":\"Criterion\",\"operandLeft\":\"$EDC_ID\",\"operator\":\"=\",\"operandRight\":\"omop-analytics-query\"}]"
-create_contract_def "$CRO_CTX" "cd-omop-analytics" "research-access-policy" "research-access-policy" "$CRO_OMOP_SELECTOR"
+PHARMACO_OMOP_SELECTOR="[{\"@type\":\"Criterion\",\"operandLeft\":\"$EDC_ID\",\"operator\":\"=\",\"operandRight\":\"omop-analytics-query\"}]"
+create_contract_def "$PHARMACO_CTX" "cd-omop-analytics" "research-access-policy" "research-access-policy" "$PHARMACO_OMOP_SELECTOR"
 
 echo ""
 
 # =============================================================================
-# Step 4: Register Catalog Asset on HDAB (Operator)
+# Step 4: Register Catalog Asset on MedReg DE (Operator)
 # =============================================================================
 echo "────────────────────────────────────────────────"
-echo "Step 4: Register Catalog on HDAB"
+echo "Step 4: Register Catalog on MedReg DE"
 echo "────────────────────────────────────────────────"
 
-create_asset "$HDAB_CTX" "federated-healthdcatap-catalog" \
+create_asset "$MEDREG_CTX" "federated-healthdcatap-catalog" \
   "Federated HealthDCAT-AP Catalog" \
-  "Aggregated HealthDCAT-AP catalog from all health dataspace participants. Serves as the central metadata registry for the HDAB." \
+  "Aggregated HealthDCAT-AP catalog from all health dataspace participants. Serves as the central metadata registry for MedReg DE." \
   "application/ld+json" \
   "{\"@type\":\"DataAddress\",\"type\":\"HttpData\",\"baseUrl\":\"$NEO4J_PROXY_URL/catalog/datasets\"}"
 
-HDAB_CATALOG_POLICY='{
+MEDREG_CATALOG_POLICY='{
   "@type": "Set",
   "permission": [{
     "action": "use",
     "constraint": []
   }]
 }'
-create_policy "$HDAB_CTX" "catalog-open-policy" "$HDAB_CATALOG_POLICY"
+create_policy "$MEDREG_CTX" "catalog-open-policy" "$MEDREG_CATALOG_POLICY"
 
-HDAB_CATALOG_SELECTOR="[{\"@type\":\"Criterion\",\"operandLeft\":\"$EDC_ID\",\"operator\":\"=\",\"operandRight\":\"federated-healthdcatap-catalog\"}]"
-create_contract_def "$HDAB_CTX" "federated-catalog-contract" "catalog-open-policy" "catalog-open-policy" "$HDAB_CATALOG_SELECTOR"
+MEDREG_CATALOG_SELECTOR="[{\"@type\":\"Criterion\",\"operandLeft\":\"$EDC_ID\",\"operator\":\"=\",\"operandRight\":\"federated-healthdcatap-catalog\"}]"
+create_contract_def "$MEDREG_CTX" "federated-catalog-contract" "catalog-open-policy" "catalog-open-policy" "$MEDREG_CATALOG_SELECTOR"
 
 echo ""
 
@@ -486,10 +488,10 @@ register_dataplane() {
   fi
 }
 
-register_dataplane "$TEST_CLINIC_CTX" "Test Clinic"
-register_dataplane "$CLINIC_CTX" "Clinic"
-register_dataplane "$CRO_CTX"    "CRO"
-register_dataplane "$HDAB_CTX"   "HDAB"
+register_dataplane "$ALPHA_KLINIK_CTX" "AlphaKlinik Berlin"
+register_dataplane "$LMC_CTX" "Limburg Medical Centre"
+register_dataplane "$PHARMACO_CTX"    "PharmaCo Research AG"
+register_dataplane "$MEDREG_CTX"   "MedReg DE"
 
 echo ""
 
@@ -500,22 +502,22 @@ echo "════════════════════════�
 echo "Data Asset Registration Summary"
 echo "════════════════════════════════════════════════"
 echo ""
-echo "Test Clinic ($TEST_CLINIC_CTX):"
+echo "AlphaKlinik Berlin ($ALPHA_KLINIK_CTX):"
 echo "  Assets:    fhir-patient-search, fhir-observation-bundle"
 echo "  Policies:  open-fhir-access-policy"
 echo "  Contracts: cd-fhir-patient, cd-fhir-observation"
 echo ""
-echo "Clinic ($CLINIC_CTX):"
+echo "Limburg MC ($LMC_CTX):"
 echo "  Assets:    fhir-patient-everything, fhir-cohort-bundle, omop-cohort-statistics, healthdcatap-catalog"
 echo "  Policies:  open-access-policy, membership-access-policy"
 echo "  Contracts: fhir-data-contract, omop-data-contract, catalog-metadata-contract"
 echo ""
-echo "CRO ($CRO_CTX):"
+echo "PharmaCo ($PHARMACO_CTX):"
 echo "  Assets:    research-data-request, omop-analytics-query"
 echo "  Policies:  research-access-policy"
 echo "  Contracts: cd-research-data, cd-omop-analytics"
 echo ""
-echo "HDAB ($HDAB_CTX):"
+echo "MedReg DE ($MEDREG_CTX):"
 echo "  Assets:    federated-healthdcatap-catalog"
 echo "  Policies:  catalog-open-policy"
 echo "  Contracts: federated-catalog-contract"
@@ -523,18 +525,18 @@ echo ""
 
 # Verify
 echo "Verifying assets..."
-TC_ASSETS=$(mgmt_call POST "v5alpha/participants/$TEST_CLINIC_CTX/assets/request" "{\"@context\":[\"$EDC_CTX\"],\"@type\":\"QuerySpec\",\"filterExpression\":[]}" | python3 -c "import json,sys; print(len(json.load(sys.stdin)))")
-CLINIC_ASSETS=$(mgmt_call POST "v5alpha/participants/$CLINIC_CTX/assets/request" "{\"@context\":[\"$EDC_CTX\"],\"@type\":\"QuerySpec\",\"filterExpression\":[]}" | python3 -c "import json,sys; print(len(json.load(sys.stdin)))")
-CRO_ASSETS=$(mgmt_call POST "v5alpha/participants/$CRO_CTX/assets/request" "{\"@context\":[\"$EDC_CTX\"],\"@type\":\"QuerySpec\",\"filterExpression\":[]}" | python3 -c "import json,sys; print(len(json.load(sys.stdin)))")
-HDAB_ASSETS=$(mgmt_call POST "v5alpha/participants/$HDAB_CTX/assets/request" "{\"@context\":[\"$EDC_CTX\"],\"@type\":\"QuerySpec\",\"filterExpression\":[]}" | python3 -c "import json,sys; print(len(json.load(sys.stdin)))")
+AK_ASSETS=$(mgmt_call POST "v5alpha/participants/$ALPHA_KLINIK_CTX/assets/request" "{\"@context\":[\"$EDC_CTX\"],\"@type\":\"QuerySpec\",\"filterExpression\":[]}" | python3 -c "import json,sys; print(len(json.load(sys.stdin)))")
+LMC_ASSETS=$(mgmt_call POST "v5alpha/participants/$LMC_CTX/assets/request" "{\"@context\":[\"$EDC_CTX\"],\"@type\":\"QuerySpec\",\"filterExpression\":[]}" | python3 -c "import json,sys; print(len(json.load(sys.stdin)))")
+PHARMACO_ASSETS=$(mgmt_call POST "v5alpha/participants/$PHARMACO_CTX/assets/request" "{\"@context\":[\"$EDC_CTX\"],\"@type\":\"QuerySpec\",\"filterExpression\":[]}" | python3 -c "import json,sys; print(len(json.load(sys.stdin)))")
+MEDREG_ASSETS=$(mgmt_call POST "v5alpha/participants/$MEDREG_CTX/assets/request" "{\"@context\":[\"$EDC_CTX\"],\"@type\":\"QuerySpec\",\"filterExpression\":[]}" | python3 -c "import json,sys; print(len(json.load(sys.stdin)))")
 
-echo "  Test Clinic assets: $TC_ASSETS"
-echo "  Clinic assets:      $CLINIC_ASSETS"
-echo "  CRO assets:         $CRO_ASSETS"
-echo "  HDAB assets:        $HDAB_ASSETS"
+echo "  AlphaKlinik Berlin assets: $AK_ASSETS"
+echo "  Limburg MC assets:         $LMC_ASSETS"
+echo "  PharmaCo assets:           $PHARMACO_ASSETS"
+echo "  MedReg DE assets:          $MEDREG_ASSETS"
 
-if [ "$TC_ASSETS" -ge 2 ] && [ "$CLINIC_ASSETS" -ge 4 ] && [ "$CRO_ASSETS" -ge 2 ] && [ "$HDAB_ASSETS" -ge 1 ]; then
+if [ "$AK_ASSETS" -ge 2 ] && [ "$LMC_ASSETS" -ge 4 ] && [ "$PHARMACO_ASSETS" -ge 2 ] && [ "$MEDREG_ASSETS" -ge 1 ]; then
   ok "All data assets registered successfully!"
 else
-  warn "Expected 2 Test Clinic, 4 Clinic, 2 CRO, and 1 HDAB assets"
+  warn "Expected 2 AlphaKlinik, 4 Limburg MC, 2 PharmaCo, and 1 MedReg assets"
 fi

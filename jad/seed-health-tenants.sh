@@ -2,13 +2,15 @@
 # =============================================================================
 # Phase 1b: Health-Specific Tenant Configuration
 # =============================================================================
-# Creates 3 health-domain tenants via CFM TenantManager and deploys
+# Creates 5 health-domain tenants via CFM TenantManager and deploys
 # participant profiles that trigger automated provisioning via CFM agents.
 #
-# Tenants:
-#   1. Clinic (clinic-riverside)  — FHIR R4 data provider
-#   2. CRO   (cro-trialcorp)       — OMOP research data consumer
-#   3. HDAB  (hdab-healthgov)      — HealthDCAT-AP catalog operator
+# Tenants (all fictional — see .github/copilot-instructions.md):
+#   1. AlphaKlinik Berlin   (alpha-klinik)  — FHIR R4 data provider (DE)
+#   2. PharmaCo Research AG  (pharmaco)      — OMOP research data consumer (DE)
+#   3. MedReg DE             (medreg)        — HealthDCAT-AP catalog operator (DE)
+#   4. Limburg Medical Centre (lmc)          — FHIR R4 data provider (NL)
+#   5. Institut de Recherche Santé (irs)     — Research HDAB (FR)
 #
 # Prerequisites:
 #   - All JAD services running (docker-compose.jad.yml)
@@ -180,48 +182,78 @@ echo "  Profile ID: $PROFILE_ID"
 echo "  DID Base:   $DID_BASE"
 echo ""
 
-# --- Tenant 1: Clinic (Data Provider) ---
+# --- Tenant 1: AlphaKlinik Berlin (Data Provider / DE) ---
 echo "────────────────────────────────────────────────"
-echo "Tenant 1/3: Clinic Riverside (Data Provider)"
+echo "Tenant 1/5: AlphaKlinik Berlin (Data Provider)"
 echo "────────────────────────────────────────────────"
-create_tenant "Clinic Riverside" '{"properties": {"displayName": "Clinic Riverside", "role": "provider", "organization": "Riverside General Hospital", "ehdsParticipantType": "data-holder"}}'
+create_tenant "AlphaKlinik Berlin" '{"properties": {"displayName": "AlphaKlinik Berlin", "role": "provider", "organization": "AlphaKlinik Berlin — Universitätsklinikum", "ehdsParticipantType": "data-holder", "country": "DE"}}'
 
-CLINIC_TENANT_ID="$TENANT_ID"
+ALPHA_KLINIK_TENANT_ID="$TENANT_ID"
 
-deploy_participant "$CLINIC_TENANT_ID" "Clinic Riverside" "clinic-riverside" \
+deploy_participant "$ALPHA_KLINIK_TENANT_ID" "AlphaKlinik Berlin" "alpha-klinik" \
   "{\"$PROFILE_ID\": [\"provider\"]}"
 
-CLINIC_PARTICIPANT_ID="$PARTICIPANT_ID"
+ALPHA_KLINIK_PARTICIPANT_ID="$PARTICIPANT_ID"
 
 echo ""
 
-# --- Tenant 2: CRO (Data Consumer) ---
+# --- Tenant 2: PharmaCo Research AG (Data Consumer / DE) ---
 echo "────────────────────────────────────────────────"
-echo "Tenant 2/3: CRO TrialCorp (Data Consumer)"
+echo "Tenant 2/5: PharmaCo Research AG (Data Consumer)"
 echo "────────────────────────────────────────────────"
-create_tenant "CRO TrialCorp" '{"properties": {"displayName": "CRO TrialCorp", "role": "consumer", "organization": "TrialCorp AG — Clinical Research", "ehdsParticipantType": "data-user"}}'
+create_tenant "PharmaCo Research AG" '{"properties": {"displayName": "PharmaCo Research AG", "role": "consumer", "organization": "PharmaCo Research AG — Clinical Trials Division", "ehdsParticipantType": "data-user", "country": "DE"}}'
 
-CRO_TENANT_ID="$TENANT_ID"
+PHARMACO_TENANT_ID="$TENANT_ID"
 
-deploy_participant "$CRO_TENANT_ID" "CRO TrialCorp" "cro-trialcorp" \
+deploy_participant "$PHARMACO_TENANT_ID" "PharmaCo Research AG" "pharmaco" \
   "{\"$PROFILE_ID\": [\"consumer\"]}"
 
-CRO_PARTICIPANT_ID="$PARTICIPANT_ID"
+PHARMACO_PARTICIPANT_ID="$PARTICIPANT_ID"
 
 echo ""
 
-# --- Tenant 3: HDAB (Health Data Access Body) ---
+# --- Tenant 3: MedReg DE (Health Data Access Body / DE) ---
 echo "────────────────────────────────────────────────"
-echo "Tenant 3/3: HDAB HealthGov (Catalog Operator)"
+echo "Tenant 3/5: MedReg DE (Catalog Operator)"
 echo "────────────────────────────────────────────────"
-create_tenant "HDAB HealthGov" '{"properties": {"displayName": "HDAB HealthGov", "role": "operator", "organization": "HealthGov Data Access Authority", "ehdsParticipantType": "health-data-access-body"}}'
+create_tenant "MedReg DE" '{"properties": {"displayName": "MedReg DE", "role": "operator", "organization": "MedReg DE — Health Data Access Body", "ehdsParticipantType": "health-data-access-body", "country": "DE"}}'
 
-HDAB_TENANT_ID="$TENANT_ID"
+MEDREG_TENANT_ID="$TENANT_ID"
 
-deploy_participant "$HDAB_TENANT_ID" "HDAB HealthGov" "hdab-healthgov" \
+deploy_participant "$MEDREG_TENANT_ID" "MedReg DE" "medreg" \
   "{\"$PROFILE_ID\": [\"operator\"]}"
 
-HDAB_PARTICIPANT_ID="$PARTICIPANT_ID"
+MEDREG_PARTICIPANT_ID="$PARTICIPANT_ID"
+
+echo ""
+
+# --- Tenant 4: Limburg Medical Centre (Data Provider / NL) ---
+echo "────────────────────────────────────────────────"
+echo "Tenant 4/5: Limburg Medical Centre (Data Provider)"
+echo "────────────────────────────────────────────────"
+create_tenant "Limburg Medical Centre" '{"properties": {"displayName": "Limburg Medical Centre", "role": "provider", "organization": "Limburg Medical Centre — Academic Hospital", "ehdsParticipantType": "data-holder", "country": "NL"}}'
+
+LMC_TENANT_ID="$TENANT_ID"
+
+deploy_participant "$LMC_TENANT_ID" "Limburg Medical Centre" "lmc" \
+  "{\"$PROFILE_ID\": [\"provider\"]}"
+
+LMC_PARTICIPANT_ID="$PARTICIPANT_ID"
+
+echo ""
+
+# --- Tenant 5: Institut de Recherche Santé (Research HDAB / FR) ---
+echo "────────────────────────────────────────────────"
+echo "Tenant 5/5: Institut de Recherche Santé (Research HDAB)"
+echo "────────────────────────────────────────────────"
+create_tenant "Institut de Recherche Santé" '{"properties": {"displayName": "Institut de Recherche Santé", "role": "operator", "organization": "Institut de Recherche Santé — Research HDAB", "ehdsParticipantType": "health-data-access-body", "country": "FR"}}'
+
+IRS_TENANT_ID="$TENANT_ID"
+
+deploy_participant "$IRS_TENANT_ID" "Institut de Recherche Santé" "irs" \
+  "{\"$PROFILE_ID\": [\"operator\"]}"
+
+IRS_PARTICIPANT_ID="$PARTICIPANT_ID"
 
 echo ""
 
@@ -232,9 +264,11 @@ echo "════════════════════════�
 echo ""
 
 FAILED=0
-wait_for_active "$CLINIC_TENANT_ID" "$CLINIC_PARTICIPANT_ID" "Clinic Riverside" 180 || FAILED=1
-wait_for_active "$CRO_TENANT_ID" "$CRO_PARTICIPANT_ID" "CRO TrialCorp" 180 || FAILED=1
-wait_for_active "$HDAB_TENANT_ID" "$HDAB_PARTICIPANT_ID" "HDAB HealthGov" 180 || FAILED=1
+wait_for_active "$ALPHA_KLINIK_TENANT_ID" "$ALPHA_KLINIK_PARTICIPANT_ID" "AlphaKlinik Berlin" 180 || FAILED=1
+wait_for_active "$PHARMACO_TENANT_ID" "$PHARMACO_PARTICIPANT_ID" "PharmaCo Research AG" 180 || FAILED=1
+wait_for_active "$MEDREG_TENANT_ID" "$MEDREG_PARTICIPANT_ID" "MedReg DE" 180 || FAILED=1
+wait_for_active "$LMC_TENANT_ID" "$LMC_PARTICIPANT_ID" "Limburg Medical Centre" 180 || FAILED=1
+wait_for_active "$IRS_TENANT_ID" "$IRS_PARTICIPANT_ID" "Institut de Recherche Santé" 180 || FAILED=1
 
 echo ""
 
@@ -244,22 +278,26 @@ echo "Phase 1b Summary"
 echo "════════════════════════════════════════════════"
 echo ""
 echo "Tenants created:"
-echo "  Clinic Riverside : $CLINIC_TENANT_ID"
-echo "  CRO TrialCorp      : $CRO_TENANT_ID"
-echo "  HDAB HealthGov     : $HDAB_TENANT_ID"
+echo "  AlphaKlinik Berlin         : $ALPHA_KLINIK_TENANT_ID"
+echo "  PharmaCo Research AG       : $PHARMACO_TENANT_ID"
+echo "  MedReg DE                  : $MEDREG_TENANT_ID"
+echo "  Limburg Medical Centre     : $LMC_TENANT_ID"
+echo "  Institut de Recherche Santé: $IRS_TENANT_ID"
 echo ""
 echo "Participant DIDs:"
-echo "  Clinic: ${DID_BASE}:clinic-riverside"
-echo "  CRO:    ${DID_BASE}:cro-trialcorp"
-echo "  HDAB:   ${DID_BASE}:hdab-healthgov"
+echo "  AlphaKlinik: ${DID_BASE}:alpha-klinik"
+echo "  PharmaCo:    ${DID_BASE}:pharmaco"
+echo "  MedReg:      ${DID_BASE}:medreg"
+echo "  Limburg MC:  ${DID_BASE}:lmc"
+echo "  IRS:         ${DID_BASE}:irs"
 echo ""
 
 if [ "$FAILED" -eq 0 ]; then
-  ok "All 3 tenants provisioned successfully!"
+  ok "All 5 tenants provisioned successfully!"
   echo ""
   echo "Next steps:"
-  echo "  1. Register NEO4J data assets on Clinic's EDC-V instance"
-  echo "  2. Register HealthDCAT-AP catalog on HDAB's Federated Catalog"
+  echo "  1. Register NEO4J data assets on AlphaKlinik Berlin's EDC-V instance"
+  echo "  2. Register HealthDCAT-AP catalog on MedReg DE's Federated Catalog"
   echo "  3. Issue Verifiable Credentials (Phase 2b)"
 else
   warn "Some tenants did not reach ACTIVE state — check agent logs:"
