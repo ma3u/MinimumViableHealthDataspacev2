@@ -107,9 +107,12 @@ function NegotiateContent() {
   const [selectedCtx, setSelectedCtx] = useState("");
 
   // Step 1 — Catalog discovery
+  const [selectedProviderCtx, setSelectedProviderCtx] = useState(
+    preProviderId || "",
+  );
   const [providerCtxId, setProviderCtxId] = useState(preProviderId);
   const [providerDid, setProviderDid] = useState(preProviderDid);
-  const [dspBase, setDspBase] = useState("http://controlplane:8082/api/dsp");
+  const [dspBase] = useState("http://controlplane:8082/api/dsp");
   const [catalogLoading, setCatalogLoading] = useState(false);
   const [catalogError, setCatalogError] = useState<string | null>(null);
   const [offers, setOffers] = useState<CatalogOffer[]>([]);
@@ -130,8 +133,17 @@ function NegotiateContent() {
           : d.participants ?? [];
         setParticipants(list);
         if (list.length > 0) setSelectedCtx(list[0]["@id"]);
+        // Pre-select first non-consumer as provider
+        if (list.length > 1 && !preProviderId) {
+          const first = list[0];
+          setSelectedProviderCtx(first["@id"]);
+          setProviderCtxId(first["@id"]);
+          const did = first.participantId ?? first.identity ?? "";
+          setProviderDid(did);
+        }
       })
       .catch(() => {});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -279,7 +291,7 @@ function NegotiateContent() {
         description="Negotiate data access contracts via the Dataspace Protocol using ODRL policies. Select a consumer participant, choose a dataset, and initiate a contract negotiation request that the data holder can accept or reject."
         prevStep={{ href: "/data/discover", label: "Discover Data" }}
         nextStep={{ href: "/data/transfer", label: "Data Transfer" }}
-        infoText="DSP contract negotiation requires two steps: (1) discover the provider catalog to get a valid ODRL offer @id, (2) submit a ContractRequest with protocol dataspace-protocol-http:2025-1. Both parties need active EHDS credentials."
+        infoText="Two steps: (1) choose a data provider and click Discover Offers to see what datasets are available; (2) select a dataset and click Start Negotiation to request access."
         docLink={{
           href: "https://docs.internationaldataspaces.org/ids-knowledgebase/dataspace-protocol",
           label: "DSP Specification",
@@ -290,7 +302,7 @@ function NegotiateContent() {
       {/* Consumer context selector */}
       <div className="mb-6">
         <label className="text-xs text-gray-500 mb-1 block">
-          Your Participant Context (consumer)
+          Requesting as (your participant)
         </label>
         <select
           value={selectedCtx}
@@ -311,59 +323,51 @@ function NegotiateContent() {
         <div className="flex items-center gap-2 mb-1">
           <Search size={16} className="text-layer2" />
           <h2 className="font-semibold text-sm">
-            Step 1 — Discover Provider Catalog
+            Step 1 — Choose Data Provider
           </h2>
         </div>
         <p className="text-xs text-gray-500 mb-4">
-          Fetch the provider&apos;s DCAT catalog via DCP (
-          <code className="text-gray-400">v1alpha/participants/catalog</code>)
-          to discover available datasets and their ODRL offer @ids.
+          Choose a data provider below — the catalog will be fetched
+          automatically.
         </p>
 
-        <div className="grid sm:grid-cols-3 gap-3 mb-3">
-          <div>
-            <label className="text-xs text-gray-500 mb-1 block">
-              Provider Participant ID
-            </label>
-            <input
-              type="text"
-              value={providerCtxId}
-              onChange={(e) => setProviderCtxId(e.target.value)}
-              placeholder="UUID of provider ctx"
-              className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded text-sm outline-none focus:border-layer2"
-            />
-          </div>
-          <div>
-            <label className="text-xs text-gray-500 mb-1 block">
-              Provider DID
-            </label>
-            <input
-              type="text"
-              value={providerDid}
-              onChange={(e) => setProviderDid(e.target.value)}
-              placeholder="did:web:…"
-              className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded text-sm outline-none focus:border-layer2"
-            />
-          </div>
-          <div>
-            <label className="text-xs text-gray-500 mb-1 block">
-              DSP Base URL{" "}
-              <span className="text-gray-600">(Docker-internal)</span>
-            </label>
-            <input
-              type="text"
-              value={dspBase}
-              onChange={(e) => setDspBase(e.target.value)}
-              className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded text-sm outline-none focus:border-layer2"
-            />
-          </div>
+        <div className="mb-4">
+          <label className="text-xs text-gray-500 mb-1 block">
+            Data Provider
+          </label>
+          <select
+            value={selectedProviderCtx}
+            onChange={(e) => {
+              const chosen = participants.find(
+                (p) => p["@id"] === e.target.value,
+              );
+              if (!chosen) return;
+              setSelectedProviderCtx(chosen["@id"]);
+              setProviderCtxId(chosen["@id"]);
+              setProviderDid(chosen.participantId ?? chosen.identity ?? "");
+              // Reset previous catalog results when provider changes
+              setOffers([]);
+              setSelectedOffer(null);
+              setCatalogError(null);
+            }}
+            className="w-full max-w-md px-3 py-2 bg-gray-800 border border-gray-600 rounded text-sm"
+            disabled={participants.length === 0}
+          >
+            {participants.length === 0 && (
+              <option value="">Loading participants…</option>
+            )}
+            {participants.map((p) => (
+              <option key={p["@id"]} value={p["@id"]}>
+                {displayId(p)}
+                {p.role ? ` [${p.role}]` : ""}
+              </option>
+            ))}
+          </select>
         </div>
 
         <button
           type="button"
-          disabled={
-            catalogLoading || !selectedCtx || (!providerDid && !providerCtxId)
-          }
+          disabled={catalogLoading || !selectedCtx || !selectedProviderCtx}
           onClick={handleDiscoverCatalog}
           className="flex items-center gap-2 px-4 py-2 bg-gray-700 text-white rounded text-sm font-medium hover:bg-gray-600 disabled:opacity-50"
         >
