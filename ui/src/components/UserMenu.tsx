@@ -11,8 +11,18 @@ const roleBadge: Record<string, string> = {
   HDAB_AUTHORITY: "bg-amber-700 text-amber-100",
 };
 
+/** Mock session used in the static GitHub Pages demo */
+const DEMO_SESSION = {
+  user: { name: "edcadmin", email: "edcadmin@alpha-klinik.de" },
+  roles: ["EDC_ADMIN"],
+};
+
+const IS_STATIC = process.env.NEXT_PUBLIC_STATIC_EXPORT === "true";
+
 export default function UserMenu() {
-  const { data: session, status } = useSession();
+  const { data: liveSession, status: liveStatus } = useSession();
+  const session = IS_STATIC ? DEMO_SESSION : liveSession;
+  const status = IS_STATIC ? "authenticated" : liveStatus;
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -39,7 +49,7 @@ export default function UserMenu() {
   if (!session) {
     return (
       <button
-        onClick={() => signIn("keycloak")}
+        onClick={() => !IS_STATIC && signIn("keycloak")}
         className="flex items-center gap-1.5 px-3 py-1.5 rounded text-sm text-gray-400 hover:text-gray-100 hover:bg-gray-800 transition-colors"
       >
         <LogIn size={15} />
@@ -48,7 +58,7 @@ export default function UserMenu() {
     );
   }
 
-  const displayRoles = (session.roles ?? []).filter(
+  const displayRoles = ((session as typeof DEMO_SESSION).roles ?? []).filter(
     (r: string) => r in roleBadge,
   );
 
@@ -58,9 +68,10 @@ export default function UserMenu() {
         onClick={() => setOpen(!open)}
         className="flex items-center gap-1.5 px-3 py-1.5 rounded text-sm text-gray-300 hover:text-gray-100 hover:bg-gray-800 transition-colors"
       >
-        <Shield size={15} />
+        <Shield size={15} className={IS_STATIC ? "text-amber-400" : ""} />
         <span className="max-w-[120px] truncate">
           {session.user?.name ?? session.user?.email ?? "User"}
+          {IS_STATIC && <span className="ml-1 text-[10px] text-amber-400">(Demo)</span>}
         </span>
       </button>
 
@@ -69,6 +80,11 @@ export default function UserMenu() {
           <div className="p-3 border-b border-gray-700">
             <p className="text-sm text-white font-medium truncate">
               {session.user?.name}
+              {IS_STATIC && (
+                <span className="ml-2 text-[10px] text-amber-400 font-normal">
+                  demo
+                </span>
+              )}
             </p>
             <p className="text-xs text-gray-400 truncate">
               {session.user?.email}
@@ -97,6 +113,7 @@ export default function UserMenu() {
             <button
               onClick={() => {
                 setOpen(false);
+                if (IS_STATIC) return; // no-op in demo mode
                 // Build Keycloak end-session URL to fully logout
                 const keycloakPublicUrl =
                   process.env.NEXT_PUBLIC_KEYCLOAK_PUBLIC_URL;
@@ -113,7 +130,7 @@ export default function UserMenu() {
               className="flex items-center gap-2 w-full px-3 py-2 text-sm text-red-400 hover:bg-gray-700 rounded transition-colors"
             >
               <LogOut size={14} />
-              Sign out
+              {IS_STATIC ? "Sign out (disabled in demo)" : "Sign out"}
             </button>
           </div>
         </div>
