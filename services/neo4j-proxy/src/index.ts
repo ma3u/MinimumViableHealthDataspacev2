@@ -1497,10 +1497,11 @@ const TCK_ISSUER_URL =
   "http://issuerservice:10013/api/admin";
 
 const TCK_PARTICIPANTS = [
-  "test-clinic",
-  "clinic-charite",
-  "cro-bayer",
-  "hdab-bfarm",
+  "alpha-klinik",
+  "pharmaco-research",
+  "medreg-de",
+  "limburg-mc",
+  "irs-fr",
 ];
 
 interface TckTestResult {

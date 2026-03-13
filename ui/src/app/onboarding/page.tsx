@@ -24,10 +24,12 @@ import PageIntro from "@/components/PageIntro";
 // Types
 // ---------------------------------------------------------------------------
 interface ParticipantProfile {
-  dataspaceProfileId: string;
+  dataspaceProfileId?: string;
   participantContextId: string;
-  tenantId: string;
+  tenantId?: string;
   identifier?: string;
+  did?: string;
+  state?: string;
 }
 
 interface Tenant {
@@ -57,13 +59,6 @@ const CONTACT_DB: Record<
     dpoEmail: string;
   }
 > = {
-  "Test Clinic": {
-    address: "Teststraße 1, 10115 Berlin, Germany",
-    email: "admin@test-clinic.de",
-    website: "https://test-clinic.example.de",
-    dpoName: "Dr. Anna Müller",
-    dpoEmail: "dpo@test-clinic.de",
-  },
   "AlphaKlinik Berlin": {
     address: "Gesundheitsplatz 1, 10117 Berlin, Germany",
     email: "forschung@alpha-klinik.de",
@@ -71,19 +66,33 @@ const CONTACT_DB: Record<
     dpoName: "Prof. Dr. Klaus Weber",
     dpoEmail: "datenschutz@alpha-klinik.de",
   },
-  "CRO PharmaCo Research AG": {
+  "PharmaCo Research AG": {
     address: "Industriestraße 42, 51373 Leverkusen, Germany",
     email: "clinical-research@pharmaco.de",
     website: "https://www.pharmaco.de/research",
     dpoName: "Dr. Sandra Koch",
     dpoEmail: "data-protection@pharmaco.de",
   },
-  "HDAB MedReg DE": {
+  "MedReg DE": {
     address: "Regulierungsallee 3, 53175 Bonn, Germany",
     email: "info@medreg.de",
     website: "https://www.medreg.de",
     dpoName: "Dr. Frank Bauer",
     dpoEmail: "datenschutz@medreg.de",
+  },
+  "Limburg Medical Centre": {
+    address: "Postbus 5500, 6202 AZ Maastricht, Netherlands",
+    email: "research@lmc.nl",
+    website: "https://www.lmc.nl",
+    dpoName: "Dr. Jan de Vries",
+    dpoEmail: "privacy@lmc.nl",
+  },
+  "Institut de Recherche Santé": {
+    address: "12 Rue de la Santé, 75014 Paris, France",
+    email: "contact@irs.fr",
+    website: "https://www.irs.fr",
+    dpoName: "Dr. Marie Dupont",
+    dpoEmail: "dpo@irs.fr",
   },
 };
 
@@ -151,8 +160,14 @@ const EHDS_ROLES = [
 function deriveStatus(tenant: Tenant): "active" | "provisioning" | "pending" {
   const profiles = tenant.participantProfiles || [];
   if (profiles.length === 0) return "pending";
-  if (profiles.some((p) => p.identifier && p.identifier !== "null"))
-    return "active";
+  // Check both live EDC-V format (identifier) and mock format (did + state)
+  const hasIdentity = profiles.some(
+    (p) =>
+      (p.identifier && p.identifier !== "null") ||
+      (p.did && p.did !== "null") ||
+      p.state === "ACTIVATED"
+  );
+  if (hasIdentity) return "active";
   return "provisioning";
 }
 
@@ -203,7 +218,11 @@ function StatusBadge({
 function OnboardingSteps({ tenant }: { tenant: Tenant }) {
   const profiles = tenant.participantProfiles || [];
   const hasProfile = profiles.length > 0;
-  const hasDid = profiles.some((p) => p.identifier && p.identifier !== "null");
+  const hasDid = profiles.some(
+    (p) =>
+      (p.identifier && p.identifier !== "null") ||
+      (p.did && p.did !== "null")
+  );
   const status = deriveStatus(tenant);
 
   const steps = [
@@ -282,8 +301,8 @@ function OnboardingSteps({ tenant }: { tenant: Tenant }) {
         <div className="mt-1 space-y-1 border-t border-gray-700/50 pt-3">
           {profiles.map((p, i) => (
             <div key={i} className="text-xs text-gray-500 font-mono truncate">
-              {p.identifier
-                ? `DID: ${p.identifier}`
+              {p.identifier || p.did
+                ? `DID: ${p.identifier || p.did}`
                 : `Profile: ${p.participantContextId || p.dataspaceProfileId}`}
             </div>
           ))}

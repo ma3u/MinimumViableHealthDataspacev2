@@ -1,8 +1,8 @@
 {
   "assets": [
     {
-      "participantId": "163c5399fed04a2c828abcca68a583eb",
-      "participantName": "test-clinic",
+      "participantId": "a1b2c3d4e5f647a0b1c2d3e4f5a6b7c8",
+      "participantName": "alpha-klinik",
       "@id": "asset-fhir-bundle-001",
       "@type": "Asset",
       "properties": {
@@ -14,12 +14,12 @@
       "dataAddress": {
         "@type": "DataAddress",
         "type": "HttpData",
-        "baseUrl": "https://fhir-server.example.com/Patient"
+        "baseUrl": "https://fhir-server.alpha-klinik.de/Patient"
       }
     },
     {
-      "participantId": "d0b1e14e6faa47aca9c2932a5e22885b",
-      "participantName": "clinic-charite",
+      "participantId": "a1b2c3d4e5f647a0b1c2d3e4f5a6b7c8",
+      "participantName": "alpha-klinik",
       "@id": "asset-omop-cohort-diabetes",
       "@type": "Asset",
       "properties": {
@@ -31,12 +31,12 @@
       "dataAddress": {
         "@type": "DataAddress",
         "type": "HttpData",
-        "baseUrl": "https://omop.charite.de/cohort/t2d"
+        "baseUrl": "https://omop.alpha-klinik.de/cohort/t2d"
       }
     },
     {
-      "participantId": "d0b1e14e6faa47aca9c2932a5e22885b",
-      "participantName": "clinic-charite",
+      "participantId": "d4e5f6a7b8c950d1e2f3a4b5c6d7e8f9",
+      "participantName": "limburg-mc",
       "@id": "asset-ehr-exchange-format",
       "@type": "Asset",
       "properties": {
@@ -48,7 +48,7 @@
       "dataAddress": {
         "@type": "DataAddress",
         "type": "HttpData",
-        "baseUrl": "https://eehrxf.charite.de/exchange"
+        "baseUrl": "https://eehrxf.lmc.nl/exchange"
       }
     }
   ]

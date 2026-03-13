@@ -1,9 +1,9 @@
 {
   "type": "all",
   "summary": {
-    "transfers": 2,
-    "negotiations": 2,
-    "credentials": 1
+    "transfers": 3,
+    "negotiations": 5,
+    "credentials": 5
   },
   "transfers": [
     {
@@ -15,33 +15,89 @@
     },
     {
       "id": "transfer-002",
-      "state": "STARTED",
+      "state": "COMPLETED",
       "assetId": "asset-omop-cohort-diabetes",
       "contractId": "agreement-001",
       "timestamp": "2024-06-28T10:30:00Z"
+    },
+    {
+      "id": "transfer-003",
+      "state": "STARTED",
+      "assetId": "asset-ehr-exchange-format",
+      "contractId": "agreement-002",
+      "timestamp": "2024-06-29T09:00:00Z"
     }
   ],
   "negotiations": [
     {
       "id": "neg-001",
       "state": "FINALIZED",
-      "counterPartyId": "did:web:identityhub%3A7083:clinic-charite",
+      "counterPartyId": "did:web:alpha-klinik.de:participant",
       "agreementId": "agreement-001",
       "timestamp": "2024-06-27T14:00:00Z"
     },
     {
       "id": "neg-002",
-      "state": "REQUESTED",
-      "counterPartyId": "did:web:identityhub%3A7083:test-clinic",
-      "agreementId": null,
+      "state": "FINALIZED",
+      "counterPartyId": "did:web:lmc.nl:clinic",
+      "agreementId": "agreement-002",
       "timestamp": "2024-06-28T10:00:00Z"
+    },
+    {
+      "id": "neg-003",
+      "state": "FINALIZED",
+      "counterPartyId": "did:web:pharmaco.de:research",
+      "agreementId": "agreement-003",
+      "timestamp": "2024-06-29T09:00:00Z"
+    },
+    {
+      "id": "neg-004",
+      "state": "FINALIZED",
+      "counterPartyId": "did:web:medreg.de:hdab",
+      "agreementId": "agreement-004",
+      "timestamp": "2024-06-30T11:00:00Z"
+    },
+    {
+      "id": "neg-005",
+      "state": "FINALIZED",
+      "counterPartyId": "did:web:irs.fr:hdab",
+      "agreementId": "agreement-005",
+      "timestamp": "2024-07-01T08:00:00Z"
     }
   ],
   "credentials": [
     {
       "id": "vc-membership-001",
       "type": "MembershipCredential",
-      "holder": "did:web:identityhub%3A7083:clinic-charite",
+      "holder": "did:web:alpha-klinik.de:participant",
+      "issuanceDate": "2024-06-01T00:00:00Z",
+      "state": "ISSUED"
+    },
+    {
+      "id": "vc-membership-002",
+      "type": "MembershipCredential",
+      "holder": "did:web:pharmaco.de:research",
+      "issuanceDate": "2024-06-01T00:00:00Z",
+      "state": "ISSUED"
+    },
+    {
+      "id": "vc-membership-003",
+      "type": "MembershipCredential",
+      "holder": "did:web:medreg.de:hdab",
+      "issuanceDate": "2024-06-01T00:00:00Z",
+      "state": "ISSUED"
+    },
+    {
+      "id": "vc-membership-004",
+      "type": "MembershipCredential",
+      "holder": "did:web:lmc.nl:clinic",
+      "issuanceDate": "2024-06-01T00:00:00Z",
+      "state": "ISSUED"
+    },
+    {
+      "id": "vc-membership-005",
+      "type": "MembershipCredential",
+      "holder": "did:web:irs.fr:hdab",
       "issuanceDate": "2024-06-01T00:00:00Z",
       "state": "ISSUED"
     }

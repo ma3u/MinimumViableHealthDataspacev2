@@ -1,6 +1,11 @@
 {
   "timestamp": "2025-01-15T10:00:00Z",
-  "summary": { "total": 20, "passed": 18, "failed": 1, "skipped": 1 },
+  "summary": {
+    "total": 20,
+    "passed": 18,
+    "failed": 1,
+    "skipped": 1
+  },
   "suites": {
     "DSP": {
       "passed": 5,
@@ -26,7 +31,7 @@
           "id": "DSP-2.1",
           "category": "Catalog Protocol",
           "suite": "DSP",
-          "name": "Catalog query — test-clinic",
+          "name": "Catalog query — alpha-klinik",
           "status": "pass",
           "detail": "Catalog response type: dcat:Catalog"
         },
@@ -34,7 +39,7 @@
           "id": "DSP-2.2",
           "category": "Catalog Protocol",
           "suite": "DSP",
-          "name": "Catalog query — clinic-charite",
+          "name": "Catalog query — limburg-mc",
           "status": "pass",
           "detail": "Catalog response type: dcat:Catalog"
         },
@@ -42,7 +47,7 @@
           "id": "DSP-2.3",
           "category": "Catalog Protocol",
           "suite": "DSP",
-          "name": "Catalog query — cro-bayer",
+          "name": "Catalog query — pharmaco-research",
           "status": "pass",
           "detail": "Catalog response type: dcat:Catalog"
         },
@@ -50,7 +55,7 @@
           "id": "DSP-2.4",
           "category": "Catalog Protocol",
           "suite": "DSP",
-          "name": "Catalog query — hdab-bfarm",
+          "name": "Catalog query — medreg-de",
           "status": "skip",
           "detail": "HDAB does not host datasets"
         }
@@ -72,7 +77,7 @@
           "id": "DCP-2.1",
           "category": "Key Pair Management",
           "suite": "DCP",
-          "name": "Key pairs — test-clinic",
+          "name": "Key pairs — alpha-klinik",
           "status": "pass",
           "detail": "1 key pair(s) found"
         },
@@ -80,7 +85,7 @@
           "id": "DCP-2.2",
           "category": "Key Pair Management",
           "suite": "DCP",
-          "name": "Key pairs — clinic-charite",
+          "name": "Key pairs — pharmaco-research",
           "status": "pass",
           "detail": "1 key pair(s) found"
         },
@@ -88,7 +93,7 @@
           "id": "DCP-2.3",
           "category": "Key Pair Management",
           "suite": "DCP",
-          "name": "Key pairs — cro-bayer",
+          "name": "Key pairs — medreg-de",
           "status": "pass",
           "detail": "1 key pair(s) found"
         },
@@ -96,7 +101,7 @@
           "id": "DCP-2.4",
           "category": "Key Pair Management",
           "suite": "DCP",
-          "name": "Key pairs — hdab-bfarm",
+          "name": "Key pairs — limburg-mc",
           "status": "pass",
           "detail": "1 key pair(s) found"
         },

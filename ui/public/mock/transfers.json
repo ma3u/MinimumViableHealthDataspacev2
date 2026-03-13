@@ -12,11 +12,21 @@
   {
     "@type": "TransferProcess",
     "@id": "transfer-002",
-    "state": "STARTED",
+    "state": "COMPLETED",
     "type": "CONSUMER",
     "assetId": "asset-omop-cohort-diabetes",
     "contractId": "agreement-001",
     "counterPartyAddress": "http://provider-dsp:8082/api/dsp",
     "createdAt": 1719601000000
+  },
+  {
+    "@type": "TransferProcess",
+    "@id": "transfer-003",
+    "state": "STARTED",
+    "type": "CONSUMER",
+    "assetId": "asset-ehr-exchange-format",
+    "contractId": "agreement-002",
+    "counterPartyAddress": "http://provider-dsp:8082/api/dsp",
+    "createdAt": 1719700500000
   }
 ]

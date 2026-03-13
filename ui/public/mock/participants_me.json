@@ -1,70 +1,92 @@
 {
   "tenants": [
     {
-      "id": "test-clinic-id",
+      "id": "alpha-klinik-id",
       "version": 1,
       "properties": {
-        "displayName": "Test Clinic",
+        "displayName": "AlphaKlinik Berlin",
         "role": "provider",
         "ehdsParticipantType": "data-holder",
-        "organization": "Test Clinic GmbH"
+        "organization": "AlphaKlinik Berlin GmbH",
+        "country": "DE"
       },
       "participantProfiles": [
         {
-          "participantContextId": "163c5399fed04a2c828abcca68a583eb",
-          "did": "did:web:identityhub%3A7083:test-clinic",
-          "state": "CREATED"
+          "participantContextId": "a1b2c3d4e5f647a0b1c2d3e4f5a6b7c8",
+          "did": "did:web:alpha-klinik.de:participant",
+          "state": "ACTIVATED"
         }
       ]
     },
     {
-      "id": "clinic-charite-id",
+      "id": "pharmaco-research-id",
       "version": 1,
       "properties": {
-        "displayName": "Clinic Charité",
-        "role": "provider",
-        "ehdsParticipantType": "data-holder",
-        "organization": "Charité – Universitätsmedizin Berlin"
-      },
-      "participantProfiles": [
-        {
-          "participantContextId": "d0b1e14e6faa47aca9c2932a5e22885b",
-          "did": "did:web:identityhub%3A7083:clinic-charite",
-          "state": "CREATED"
-        }
-      ]
-    },
-    {
-      "id": "cro-bayer-id",
-      "version": 1,
-      "properties": {
-        "displayName": "CRO Bayer",
+        "displayName": "PharmaCo Research AG",
         "role": "consumer",
         "ehdsParticipantType": "data-user",
-        "organization": "Bayer AG"
+        "organization": "PharmaCo Research AG",
+        "country": "DE"
       },
       "participantProfiles": [
         {
-          "participantContextId": "4e300dff7d62415e9c409351bb2fe17a",
-          "did": "did:web:identityhub%3A7083:cro-bayer",
-          "state": "CREATED"
+          "participantContextId": "b2c3d4e5f6a748b1c2d3e4f5a6b7c8d9",
+          "did": "did:web:pharmaco.de:research",
+          "state": "ACTIVATED"
         }
       ]
     },
     {
-      "id": "hdab-bfarm-id",
+      "id": "medreg-de-id",
       "version": 1,
       "properties": {
-        "displayName": "HDAB BfArM",
+        "displayName": "MedReg DE",
         "role": "operator",
         "ehdsParticipantType": "health-data-access-body",
-        "organization": "Bundesinstitut für Arzneimittel und Medizinprodukte"
+        "organization": "MedReg DE — National Medicines Regulatory Authority",
+        "country": "DE"
       },
       "participantProfiles": [
         {
-          "participantContextId": "9ce6ec7ea12a4c6f957774c3783a988c",
-          "did": "did:web:identityhub%3A7083:hdab-bfarm",
-          "state": "CREATED"
+          "participantContextId": "c3d4e5f6a7b849c1d2e3f4a5b6c7d8e9",
+          "did": "did:web:medreg.de:hdab",
+          "state": "ACTIVATED"
+        }
+      ]
+    },
+    {
+      "id": "limburg-mc-id",
+      "version": 1,
+      "properties": {
+        "displayName": "Limburg Medical Centre",
+        "role": "provider",
+        "ehdsParticipantType": "data-holder",
+        "organization": "Limburg Medical Centre",
+        "country": "NL"
+      },
+      "participantProfiles": [
+        {
+          "participantContextId": "d4e5f6a7b8c950d1e2f3a4b5c6d7e8f9",
+          "did": "did:web:lmc.nl:clinic",
+          "state": "ACTIVATED"
+        }
+      ]
+    },
+    {
+      "id": "irs-fr-id",
+      "version": 1,
+      "properties": {
+        "displayName": "Institut de Recherche Santé",
+        "role": "operator",
+        "ehdsParticipantType": "health-data-access-body",
+        "organization": "Institut de Recherche Santé",
+        "country": "FR"
+      },
+      "participantProfiles": [
+        {
+          "participantContextId": "e5f6a7b8c9d051e2f3a4b5c6d7e8f9a0",
+          "did": "did:web:irs.fr:hdab",
+          "state": "ACTIVATED"
         }
       ]
     }

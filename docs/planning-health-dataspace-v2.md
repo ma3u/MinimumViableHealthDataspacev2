@@ -293,9 +293,11 @@ Phase 2 implements the full DCP v1.0 credential lifecycle using JAD's IdentityHu
 #### 2a: DID:web and Verifiable Credential Setup ✅
 
 5. **DID:web** identifiers auto-provisioned by CFM for each tenant (see ADR-7 for full architecture):
-   - `did:web:identityhub%3A7083:clinic-charite` → Clinic Charité (provider, ctxId `d0b1e14e...`)
-   - `did:web:identityhub%3A7083:cro-bayer` → CRO Bayer (consumer, ctxId `4e300dff...`)
-   - `did:web:identityhub%3A7083:hdab-bfarm` → HDAB BfArM (operator, ctxId `9ce6ec7e...`)
+   - `did:web:alpha-klinik.de:participant` → AlphaKlinik Berlin (provider)
+   - `did:web:pharmaco.de:research` → PharmaCo Research AG (consumer)
+   - `did:web:medreg.de:hdab` → MedReg DE (operator)
+   - `did:web:lmc.nl:clinic` → Limburg Medical Centre (provider)
+   - `did:web:irs.fr:hdab` → Institut de Recherche Santé (operator)
    - Each DID document includes Ed25519 verification key, CredentialService endpoint, and DSP ProtocolEndpoint
    - DID documents served at `http://identityhub:7083/{participant-path}/did.json` (Docker-internal)
    - All 4 participant contexts ACTIVATED (state=300)
@@ -318,11 +320,11 @@ Phase 2 implements the full DCP v1.0 credential lifecycle using JAD's IdentityHu
      - `ehds-membership-attestation` → `data-processing-purpose-credential-def` (90-day validity)
      - `ehds-manufacturer-attestation` (type: manufacturer) → `data-quality-label-credential-def` (180-day validity)
    - **Neo4j Layer 1b:** 5 `VerifiableCredential` nodes on SPE-1 via `neo4j/register-ehds-credentials.cypher`:
-     - `vc:ehds-participant:clinic-charite` (DataHolder) → HOLDS_CREDENTIAL → Clinic Charité
-     - `vc:ehds-participant:cro-bayer` (DataUser) → HOLDS_CREDENTIAL → CRO Bayer
-     - `vc:ehds-participant:hdab-bfarm` (HealthDataAccessBody) → HOLDS_CREDENTIAL → HDAB BfArM
-     - `vc:data-processing-purpose:cro-bayer` (Art 53 research) → HOLDS_CREDENTIAL → CRO Bayer
-     - `vc:data-quality-label:clinic-charite` (95%/92%/98%) → ATTESTS_QUALITY → HealthDataset
+     - `vc:ehds-participant:alpha-klinik` (DataHolder) → HOLDS_CREDENTIAL → AlphaKlinik Berlin
+     - `vc:ehds-participant:pharmaco-research` (DataUser) → HOLDS_CREDENTIAL → PharmaCo Research AG
+     - `vc:ehds-participant:medreg-de` (HealthDataAccessBody) → HOLDS_CREDENTIAL → MedReg DE
+     - `vc:data-processing-purpose:pharmaco-research` (Art 53 research) → HOLDS_CREDENTIAL → PharmaCo Research AG
+     - `vc:data-quality-label:alpha-klinik` (95%/92%/98%) → ATTESTS_QUALITY → HealthDataset
    - **DCP scopes:** 3 EHDS credential scopes added to controlplane via `docker-compose.jad.yml`
    - **Note:** IssuerService only supports compiled-in attestation types (`membership`, `manufacturer`). EHDS credentials are mapped to these. Credential issuance is DCP-protocol only (via IdentityHub CredentialRequestMessage during DSP negotiation), not admin API.
 9. Implement DCP **Credential Presentation** during DSP contract negotiation: ✅ (infrastructure ready)
@@ -589,7 +591,7 @@ Phase 4 wires the Neo4j health knowledge graph into the live EDC-V data plane, e
     - CRO discovers FHIR Cohort Asset via DSP catalog request to Clinic's control plane
     - CRO initiates `ContractNegotiation` request against `fhir-patient-everything` asset
     - Contract FINALIZED → `TransferProcess` initiated with `HttpData-PULL` transfer type → state STARTED
-15. **Executed contract negotiation results (CRO Bayer → Clinic Charité):**
+15. **Executed contract negotiation results (PharmaCo Research AG → AlphaKlinik Berlin):**
     - 3 FINALIZED negotiations with contract agreement IDs assigned
     - 1 transfer process in STARTED state (data plane endpoint provisioned)
     - 2 earlier TERMINATED negotiations (protocol errors before root cause fixes — see notes below)
