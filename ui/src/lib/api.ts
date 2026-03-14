@@ -23,6 +23,7 @@ const STATIC_MOCK_PREFIX: [string, string][] = [
   ["/api/patient?", "/mock/patient_default.json"],
   ["/api/negotiations", "/mock/negotiations.json"],
   ["/api/transfers", "/mock/transfers.json"],
+  ["/api/tasks", "/mock/tasks.json"],
   ["/api/admin/audit", "/mock/admin_audit.json"],
 ];
 

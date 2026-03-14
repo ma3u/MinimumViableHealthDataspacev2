@@ -23,6 +23,7 @@ import {
   Code2,
   Layers,
   ScrollText,
+  ClipboardList,
 } from "lucide-react";
 import UserMenu from "./UserMenu";
 import { useState, useRef, useEffect } from "react";
@@ -82,6 +83,7 @@ const exchangeGroup: NavGroup = {
     { href: "/data/share", label: "Share Data", icon: Upload },
     { href: "/data/discover", label: "Discover", icon: Database },
     { href: "/negotiate", label: "Negotiate", icon: FileSignature },
+    { href: "/tasks", label: "Tasks", icon: ClipboardList },
     { href: "/data/transfer", label: "Transfer", icon: ArrowRightLeft },
   ],
 };

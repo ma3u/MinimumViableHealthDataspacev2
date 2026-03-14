@@ -1,0 +1,88 @@
+{
+  "tasks": [
+    {
+      "id": "neg-patient-001",
+      "type": "negotiation",
+      "participant": "PharmaCo Research AG",
+      "participantId": "d6201c5b-0000-0000-0000-000000000000",
+      "asset": "Fhir Patient Search",
+      "assetId": "fhir-patient-search",
+      "state": "FINALIZED",
+      "counterParty": "AlphaKlinik Berlin",
+      "timestamp": 1773505604439,
+      "contractId": "agreement-patient-001"
+    },
+    {
+      "id": "neg-observation-001",
+      "type": "negotiation",
+      "participant": "PharmaCo Research AG",
+      "participantId": "d6201c5b-0000-0000-0000-000000000000",
+      "asset": "Fhir Observation Bundle",
+      "assetId": "fhir-observation-bundle",
+      "state": "FINALIZED",
+      "counterParty": "AlphaKlinik Berlin",
+      "timestamp": 1773505695984,
+      "contractId": "agreement-observation-001"
+    },
+    {
+      "id": "neg-cohort-001",
+      "type": "negotiation",
+      "participant": "PharmaCo Research AG",
+      "participantId": "d6201c5b-0000-0000-0000-000000000000",
+      "asset": "Fhir Cohort Bundle",
+      "assetId": "fhir-cohort-bundle",
+      "state": "FINALIZED",
+      "counterParty": "Limburg Medical Centre",
+      "timestamp": 1773505700000,
+      "contractId": "agreement-cohort-001"
+    },
+    {
+      "id": "transfer-patient-001",
+      "type": "transfer",
+      "participant": "PharmaCo Research AG",
+      "participantId": "d6201c5b-0000-0000-0000-000000000000",
+      "asset": "Fhir Patient Search",
+      "assetId": "fhir-patient-search",
+      "state": "STARTED",
+      "counterParty": "AlphaKlinik Berlin",
+      "timestamp": 1773505610000,
+      "contractId": "agreement-patient-001",
+      "transferType": "HttpData-PULL",
+      "edrAvailable": true
+    },
+    {
+      "id": "transfer-observation-001",
+      "type": "transfer",
+      "participant": "PharmaCo Research AG",
+      "participantId": "d6201c5b-0000-0000-0000-000000000000",
+      "asset": "Fhir Observation Bundle",
+      "assetId": "fhir-observation-bundle",
+      "state": "STARTED",
+      "counterParty": "AlphaKlinik Berlin",
+      "timestamp": 1773505710000,
+      "contractId": "agreement-observation-001",
+      "transferType": "HttpData-PULL",
+      "edrAvailable": true
+    },
+    {
+      "id": "transfer-cohort-001",
+      "type": "transfer",
+      "participant": "PharmaCo Research AG",
+      "participantId": "d6201c5b-0000-0000-0000-000000000000",
+      "asset": "Fhir Cohort Bundle",
+      "assetId": "fhir-cohort-bundle",
+      "state": "REQUESTED",
+      "counterParty": "Limburg Medical Centre",
+      "timestamp": 1773505720000,
+      "contractId": "agreement-cohort-001",
+      "transferType": "HttpData-PULL",
+      "edrAvailable": false
+    }
+  ],
+  "counts": {
+    "total": 6,
+    "negotiations": 3,
+    "transfers": 3,
+    "active": 3
+  }
+}

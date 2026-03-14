@@ -60,6 +60,11 @@
       - [9b: Navigation Restructuring ✅](#9b-navigation-restructuring-)
       - [9c: Home Page Refresh ✅](#9c-home-page-refresh-)
       - [9d: GitHub Pages Static Export ✅](#9d-github-pages-static-export-)
+    - [Phase 10: Tasks Dashboard \& DPS Integration 🚧](#phase-10-tasks-dashboard--dps-integration-)
+      - [10a: Tasks API Route ✅](#10a-tasks-api-route-)
+      - [10b: Tasks Page ✅](#10b-tasks-page-)
+      - [10c: Navigation Update ✅](#10c-navigation-update-)
+      - [10d: Static Export \& Mock Data ✅](#10d-static-export--mock-data-)
   - [Architecture Decisions](#architecture-decisions)
     - [ADR-1: PostgreSQL vs Neo4j Data Storage Split](#adr-1-postgresql-vs-neo4j-data-storage-split)
       - [Decision](#decision)
@@ -120,8 +125,8 @@
       - [IssuanceProcess State Machine](#issuanceprocess-state-machine)
       - [Solution Architecture](#solution-architecture)
       - [Files Changed](#files-changed)
-      - [Verification](#verification-adr9)
-      - [Consequences](#consequences-8)
+      - [Verification {#verification-adr9}](#verification-verification-adr9)
+      - [Consequences {#consequences-8}](#consequences-consequences-8)
   - [Target Architecture](#target-architecture)
   - [What This Proves](#what-this-proves)
   - [Implementation Dependencies](#implementation-dependencies)
@@ -181,6 +186,7 @@ All three core specifications are now final or near-final:
 | **7**  | TCK DCP & DSP Compliance Verification                  | ✅ Complete | 7a ✅ (DSP 2025-1 TCK: `run-dsp-tck.sh` — 7 test categories, 30+ tests); 7b ✅ (DCP v1.0: `run-dcp-tests.sh` — 5 categories); 7c ✅ (EHDS domain: `run-ehds-tests.sh` — 5 categories); 7d ✅ (CI/CD: `compliance.yml` workflow, orchestrator `run-compliance.sh`, `/compliance/tck` dashboard UI with live + mock data)                                                                  |
 | **8**  | Test Coverage Expansion + CI/CD                        | ✅ Complete | 8a ✅ (10 new API route test files, ~85% API coverage); 8b ✅ (UserMenu, fetchApi, Navigation + 6 page-level component suites); 8c ✅ (GitHub Actions test.yml, coverage reports, **260 unit tests + 31 E2E = 291 total**)                                                                                                                                                               |
 | **9**  | Documentation & Navigation Restructuring               | ✅ Complete | 9a ✅ (4 doc pages: landing, user guide, developer, architecture + 8 Mermaid diagrams); 9b ✅ (Nav restructured: 5 dropdown clusters — Explore, Governance, Exchange, Portal, Docs); 9c ✅ (Home page refresh: 2-section card layout); 9d ✅ (Static export compatible, mermaid@11)                                                                                                      |
+| **10** | Tasks Dashboard & DPS Integration                      | 🚧 Active   | 10a ✅ (`/api/tasks` route — aggregates negotiations + transfers across all participant contexts); 10b ✅ (`/tasks` page — DSP pipeline steppers, filter tabs, summary cards, 15s auto-refresh); 10c ✅ (Navigation: Tasks link added to Exchange cluster with `ClipboardList` icon); 10d ✅ (Mock data: `tasks.json` + static export mapping in `api.ts`)                               |
 
 ---
 
@@ -1130,6 +1136,58 @@ Brand title "Health Dataspace" now links to home page.
 All documentation pages use `"use client"` with client-side Mermaid rendering — fully compatible with Next.js static export (`output: "export"`). No server-side features or API routes required. Mermaid.js installed as npm dependency (`mermaid@^11`).
 
 **Deliverables:** 4 documentation pages (landing, user guide, developer, architecture); 8 interactive Mermaid diagrams; `MermaidDiagram` component; navigation restructured into 5 clusters; home page refreshed with 2-section layout; all compatible with GitHub Pages static export.
+
+---
+
+### Phase 10: Tasks Dashboard & DPS Integration 🚧
+
+Phase 10 adds a unified Tasks dashboard that aggregates contract negotiations and transfer processes across all participant contexts into a single view. The implementation aligns with the EDC Data Plane Signaling (DPS) framework, exposing real-time state progressions for both the DSP Contract Negotiation and Transfer Process state machines.
+
+**Key DPS concepts reflected in the UI:**
+
+- **DSP Contract Negotiation** state machine: `REQUESTED → OFFERED → ACCEPTED → AGREED → VERIFIED → FINALIZED` (or `TERMINATED` at any point)
+- **DSP Transfer Process** state machine: `REQUESTED → STARTED → SUSPENDED → COMPLETED` (or `TERMINATED` at any point)
+- **Endpoint Data Reference (EDR):** When a transfer reaches `STARTED`, the Control Plane signals the selected Data Plane via the DPS control URL (`/api/control/v1/dataflows`). The Data Plane generates an EDR containing a JWT bearer token and endpoint URL, stored in `contentDataAddress`. The Tasks UI shows EDR availability as a visual indicator.
+- **Data Plane topology:** Two disaggregated DCore data planes — `dataplane-fhir` (HttpData-PUSH, FHIR R4) and `dataplane-omop` (HttpData-PULL, OMOP CDM) — selected by `DataPlaneSelectorService` based on `allowedTransferTypes`.
+
+#### 10a: Tasks API Route ✅
+
+Server-side aggregation route (`/api/tasks`) that queries all registered participant contexts and returns a unified task list:
+
+- **Endpoint:** `GET /api/tasks`
+- Lists all participants via `GET /v5alpha/participants`
+- For each participant context, fetches negotiations (`POST .../contractnegotiations/request`) and transfers (`POST .../transferprocesses/request`) in parallel
+- Maps raw EDC objects to unified `Task` type with human-readable names (`didToName`), asset labels (`assetLabel`), and DPS metadata
+- For transfers in `STARTED` state, checks `contentDataAddress` for EDR availability (indicates Data Plane has processed the DPS `START` signal)
+- Returns `{ tasks: Task[], counts: { total, negotiations, transfers, active } }`
+- Includes mock data fallback for static export compatibility
+
+#### 10b: Tasks Page ✅
+
+Client-side dashboard (`/tasks`) with DSP-aligned pipeline visualisation:
+
+- **Summary cards:** Total / Active / Negotiations / Transfers count badges
+- **Filter tabs:** All / Active / Negotiations / Transfers with live counts
+- **DSP Pipeline Stepper:** `StatePipeline` component renders each task's state as a visual stepper with animated progress indicator for active states, green checkmarks for completed states, and red X for terminated states
+- **Task cards:** Asset name, type badge, transfer type tag (`HttpData-PULL`), participant → counter-party flow, timestamp, contract agreement ID, and EDR availability indicator for started transfers
+- **Deep links:** Each task card links to the relevant detail page (`/negotiate` or `/data/transfer`)
+- **Auto-refresh:** 15-second polling interval for live state updates
+
+#### 10c: Navigation Update ✅
+
+Added Tasks entry to the Exchange navigation cluster:
+
+- `ClipboardList` icon with `/tasks` route
+- Positioned between Negotiate and Transfer for logical workflow: Share → Discover → Negotiate → **Tasks** → Transfer
+- Active state detection via `pathname.startsWith("/tasks")`
+
+#### 10d: Static Export & Mock Data ✅
+
+- Created `ui/public/mock/tasks.json` — mock aggregated task list mirroring the API response shape (6 tasks: 3 negotiations + 3 transfers with varied states)
+- Added `/api/tasks` prefix mapping in `STATIC_MOCK_PREFIX` (`ui/src/lib/api.ts`)
+- GitHub Pages deployment renders mock data when `NEXT_PUBLIC_STATIC_EXPORT=true`
+
+**Deliverables:** `/api/tasks` server-side route with DPS-aware aggregation; `/tasks` client-side dashboard with DSP pipeline steppers; Navigation updated with Tasks link; mock data for static export; all aligned with EDC Data Plane Signaling specification.
 
 ---
 
