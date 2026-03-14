@@ -4,6 +4,32 @@ import { edcClient, EDC_CONTEXT } from "@/lib/edc";
 export const dynamic = "force-dynamic";
 
 /**
+ * Normalise an asset object returned by the EDC-V v5alpha Management API.
+ *
+ * v5alpha nests properties under a `properties` sub-object:
+ *   { properties: { name, description, contenttype, ... } }
+ *
+ * Older EDC versions (v3) used `edc:name`, `edc:description`, etc. at the top
+ * level.  Many UI components still read the `edc:*` form, so we promote both
+ * plain *and* `edc:*` fields for maximum compatibility.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function normaliseAsset(raw: any): Record<string, unknown> {
+  const props = raw?.properties ?? {};
+  return {
+    ...raw,
+    // Plain names (preferred going forward)
+    name: props.name ?? raw["edc:name"] ?? raw["@id"],
+    description: props.description ?? raw["edc:description"] ?? "",
+    contenttype: props.contenttype ?? raw["edc:contenttype"] ?? "",
+    // Legacy edc:* names (consumed by existing pages)
+    "edc:name": props.name ?? raw["edc:name"] ?? raw["@id"],
+    "edc:description": props.description ?? raw["edc:description"] ?? "",
+    "edc:contenttype": props.contenttype ?? raw["edc:contenttype"] ?? "",
+  };
+}
+
+/**
  * GET /api/assets — List data assets for a participant context.
  * Query param: ?participantId=<ctx_id>
  *
@@ -17,27 +43,32 @@ export async function GET(req: NextRequest) {
   try {
     if (participantId) {
       // List assets for a specific participant
-      const assets = await edcClient.management<unknown[]>(
+      const assets = await edcClient.management<Record<string, unknown>[]>(
         `/v5alpha/participants/${participantId}/assets/request`,
         "POST",
         { "@context": [EDC_CONTEXT], "@type": "QuerySpec" },
       );
-      return NextResponse.json(assets);
+      return NextResponse.json((assets ?? []).map(normaliseAsset));
     }
 
     // List all participant contexts, then aggregate assets
     const participants = await edcClient.management<
-      { "@id": string; identity: string }[]
+      { "@id": string; identity: string; state?: string }[]
     >("/v5alpha/participants");
+
+    // Only include ACTIVATED participants — skip stale CREATED contexts
+    const active = (Array.isArray(participants) ? participants : []).filter(
+      (p) => (p.state ?? "ACTIVATED") === "ACTIVATED",
+    );
 
     const allAssets: {
       participantId: string;
       identity: string;
-      assets: unknown[];
+      assets: Record<string, unknown>[];
     }[] = [];
-    for (const p of participants) {
+    for (const p of active) {
       try {
-        const assets = await edcClient.management<unknown[]>(
+        const assets = await edcClient.management<Record<string, unknown>[]>(
           `/v5alpha/participants/${p["@id"]}/assets/request`,
           "POST",
           { "@context": [EDC_CONTEXT], "@type": "QuerySpec" },
@@ -45,7 +76,7 @@ export async function GET(req: NextRequest) {
         allAssets.push({
           participantId: p["@id"],
           identity: p.identity,
-          assets: assets || [],
+          assets: (assets ?? []).map(normaliseAsset),
         });
       } catch {
         allAssets.push({

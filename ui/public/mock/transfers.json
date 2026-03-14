@@ -1,32 +1,32 @@
 [
   {
     "@type": "TransferProcess",
-    "@id": "transfer-001",
-    "state": "COMPLETED",
-    "type": "CONSUMER",
-    "assetId": "asset-fhir-bundle-001",
-    "contractId": "agreement-001",
-    "counterPartyAddress": "http://provider-dsp:8082/api/dsp",
-    "createdAt": 1719500500000
-  },
-  {
-    "@type": "TransferProcess",
-    "@id": "transfer-002",
-    "state": "COMPLETED",
-    "type": "CONSUMER",
-    "assetId": "asset-omop-cohort-diabetes",
-    "contractId": "agreement-001",
-    "counterPartyAddress": "http://provider-dsp:8082/api/dsp",
-    "createdAt": 1719601000000
-  },
-  {
-    "@type": "TransferProcess",
-    "@id": "transfer-003",
+    "@id": "transfer-patient-001",
     "state": "STARTED",
+    "stateTimestamp": 1773505610000,
     "type": "CONSUMER",
-    "assetId": "asset-ehr-exchange-format",
-    "contractId": "agreement-002",
-    "counterPartyAddress": "http://provider-dsp:8082/api/dsp",
-    "createdAt": 1719700500000
+    "assetId": "fhir-patient-search",
+    "contractId": "agreement-patient-001",
+    "transferType": "HttpData-PULL"
+  },
+  {
+    "@type": "TransferProcess",
+    "@id": "transfer-observation-001",
+    "state": "STARTED",
+    "stateTimestamp": 1773505710000,
+    "type": "CONSUMER",
+    "assetId": "fhir-observation-bundle",
+    "contractId": "agreement-observation-001",
+    "transferType": "HttpData-PULL"
+  },
+  {
+    "@type": "TransferProcess",
+    "@id": "transfer-cohort-001",
+    "state": "REQUESTED",
+    "stateTimestamp": 1773505720000,
+    "type": "CONSUMER",
+    "assetId": "fhir-cohort-bundle",
+    "contractId": "agreement-cohort-001",
+    "transferType": "HttpData-PULL"
   }
 ]

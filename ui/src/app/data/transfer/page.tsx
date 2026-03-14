@@ -14,11 +14,24 @@ import PageIntro from "@/components/PageIntro";
 
 interface Transfer {
   "@id": string;
-  "edc:type"?: string;
+  state?: string;
   "edc:state"?: string;
+  type?: string;
+  "edc:type"?: string;
+  stateTimestamp?: number;
   "edc:stateTimestamp"?: number;
+  contractId?: string;
   "edc:contractId"?: string;
+  transferType?: string;
+  assetId?: string;
   [key: string]: unknown;
+}
+
+/** Read a transfer field that may be edc:-prefixed or unprefixed */
+function tpField(t: Transfer, field: string): string {
+  return ((t as Record<string, unknown>)[field] ??
+    (t as Record<string, unknown>)[`edc:${field}`] ??
+    "") as string;
 }
 
 interface ParticipantCtx {
@@ -252,35 +265,42 @@ function DataTransferContent() {
         <p className="text-gray-500 text-sm">No transfers found</p>
       ) : (
         <div className="grid gap-2">
-          {transfers.map((t) => (
-            <div
-              key={t["@id"]}
-              className="flex items-center gap-3 p-3 border border-gray-700 rounded-lg"
-            >
-              {stateIcon((t["edc:state"] as string) || "")}
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-gray-200 truncate">
-                  {t["@id"]}
-                </p>
-                <p className="text-xs text-gray-500">
-                  Contract:{" "}
-                  {(t["edc:contractId"] as string)?.slice(0, 16) || "—"} · Type:{" "}
-                  {(t["edc:type"] as string) || "HttpData-PULL"}
-                </p>
-              </div>
-              <span
-                className={`text-xs px-2 py-0.5 rounded-full ${
-                  (t["edc:state"] as string)?.includes("COMPLETED")
-                    ? "bg-green-900/40 text-green-400"
-                    : (t["edc:state"] as string)?.includes("ERROR")
-                      ? "bg-red-900/40 text-red-400"
-                      : "bg-yellow-900/40 text-yellow-400"
-                }`}
+          {transfers.map((t) => {
+            const state = tpField(t, "state");
+            const contractId = tpField(t, "contractId");
+            const transferType =
+              tpField(t, "transferType") ||
+              tpField(t, "type") ||
+              "HttpData-PULL";
+            return (
+              <div
+                key={t["@id"]}
+                className="flex items-center gap-3 p-3 border border-gray-700 rounded-lg"
               >
-                {(t["edc:state"] as string) || "UNKNOWN"}
-              </span>
-            </div>
-          ))}
+                {stateIcon(state)}
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-gray-200 truncate">
+                    {t["@id"]}
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    Contract: {contractId?.slice(0, 16) || "—"} · Type:{" "}
+                    {transferType}
+                  </p>
+                </div>
+                <span
+                  className={`text-xs px-2 py-0.5 rounded-full ${
+                    state.includes("COMPLETED")
+                      ? "bg-green-900/40 text-green-400"
+                      : state.includes("ERROR")
+                        ? "bg-red-900/40 text-red-400"
+                        : "bg-yellow-900/40 text-yellow-400"
+                  }`}
+                >
+                  {state || "UNKNOWN"}
+                </span>
+              </div>
+            );
+          })}
         </div>
       )}
     </div>

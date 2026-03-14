@@ -23,6 +23,15 @@ interface Asset {
   "edc:name"?: string;
   "edc:description"?: string;
   "edc:contenttype"?: string;
+  name?: string;
+  description?: string;
+  contenttype?: string;
+  properties?: {
+    name?: string;
+    description?: string;
+    contenttype?: string;
+    [key: string]: unknown;
+  };
   [key: string]: unknown;
 }
 
@@ -180,18 +189,33 @@ export default function DataSharePage() {
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="font-medium text-sm text-layer2">
-                          {a["edc:name"] || a["@id"]}
+                          {a.name ||
+                            a["edc:name"] ||
+                            a.properties?.name ||
+                            a["@id"]}
                         </p>
-                        {a["edc:description"] && (
+                        {(a.description ||
+                          a["edc:description"] ||
+                          a.properties?.description) && (
                           <p className="text-xs text-gray-500 mt-0.5 line-clamp-1">
-                            {a["edc:description"] as string}
+                            {
+                              (a.description ||
+                                a["edc:description"] ||
+                                a.properties?.description) as string
+                            }
                           </p>
                         )}
                       </div>
                       <div className="flex items-center gap-2">
-                        {a["edc:contenttype"] && (
+                        {(a.contenttype ||
+                          a["edc:contenttype"] ||
+                          a.properties?.contenttype) && (
                           <span className="text-xs bg-gray-700 text-gray-300 px-2 py-0.5 rounded-full">
-                            {a["edc:contenttype"] as string}
+                            {
+                              (a.contenttype ||
+                                a["edc:contenttype"] ||
+                                a.properties?.contenttype) as string
+                            }
                           </span>
                         )}
                         {isOpen ? (

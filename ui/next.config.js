@@ -1,10 +1,14 @@
 /** @type {import('next').NextConfig} */
 const isStaticExport = !!process.env.GITHUB_ACTIONS;
+const isDocker = !!process.env.DOCKER_BUILD;
 
 const nextConfig = {
-  // Only set output for CI static export; omit for local dev so Next.js
-  // uses its default server mode and avoids stale-chunk 404 errors.
-  ...(isStaticExport && { output: "export" }),
+  // Static export for GitHub Pages, standalone for Docker, default for dev
+  ...(isStaticExport
+    ? { output: "export" }
+    : isDocker
+      ? { output: "standalone" }
+      : {}),
   ...(isStaticExport && {
     basePath: "/MinimumViableHealthDataspacev2",
   }),

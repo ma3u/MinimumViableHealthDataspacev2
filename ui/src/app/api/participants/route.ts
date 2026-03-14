@@ -94,9 +94,16 @@ export async function GET() {
       // CFM may be down — fall back to static map below
     }
 
-    // Enrich each participant with a displayName
-    const enriched = (Array.isArray(participants) ? participants : []).map(
-      (p) => {
+    // Enrich each participant with a displayName — skip stale CREATED contexts
+    const enriched = (Array.isArray(participants) ? participants : [])
+      .filter((p) => {
+        // Only show ACTIVATED participants in the UI
+        const state = (p as Record<string, unknown>).state as
+          | string
+          | undefined;
+        return state === "ACTIVATED";
+      })
+      .map((p) => {
         const did = p.participantId ?? p.identity ?? "";
         const slug = did ? didSlug(did) : "";
         const staticEntry = SLUG_DISPLAY_NAMES[slug];
@@ -106,9 +113,15 @@ export async function GET() {
           slug ||
           p["@id"].slice(0, 12);
         const role = staticEntry?.role ?? "";
-        return { ...p, displayName, role, identity: did };
-      },
-    );
+        return {
+          ...p,
+          participantId: p["@id"],
+          displayName,
+          role,
+          slug,
+          identity: did,
+        };
+      });
 
     return NextResponse.json(enriched);
   } catch (err) {

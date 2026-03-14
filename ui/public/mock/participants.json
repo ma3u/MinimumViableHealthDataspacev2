@@ -1,37 +1,52 @@
 [
   {
     "@type": "ParticipantContext",
+    "@id": "a1b2c3d4e5f647a0b1c2d3e4f5a6b7c8",
+    "identity": "did:web:alpha-klinik.de:participant",
+    "state": "ACTIVATED",
     "participantId": "a1b2c3d4e5f647a0b1c2d3e4f5a6b7c8",
-    "state": "ACTIVATED",
-    "did": "did:web:alpha-klinik.de:participant",
-    "apiTokenAlias": "alpha-klinik"
+    "displayName": "AlphaKlinik Berlin",
+    "role": "DATA_HOLDER",
+    "slug": "alpha-klinik"
   },
   {
     "@type": "ParticipantContext",
+    "@id": "b2c3d4e5f6a748b1c2d3e4f5a6b7c8d9",
+    "identity": "did:web:pharmaco.de:research",
+    "state": "ACTIVATED",
     "participantId": "b2c3d4e5f6a748b1c2d3e4f5a6b7c8d9",
-    "state": "ACTIVATED",
-    "did": "did:web:pharmaco.de:research",
-    "apiTokenAlias": "pharmaco-research"
+    "displayName": "PharmaCo Research AG",
+    "role": "DATA_USER",
+    "slug": "pharmaco"
   },
   {
     "@type": "ParticipantContext",
+    "@id": "c3d4e5f6a7b849c1d2e3f4a5b6c7d8e9",
+    "identity": "did:web:medreg.de:hdab",
+    "state": "ACTIVATED",
     "participantId": "c3d4e5f6a7b849c1d2e3f4a5b6c7d8e9",
-    "state": "ACTIVATED",
-    "did": "did:web:medreg.de:hdab",
-    "apiTokenAlias": "medreg-de"
+    "displayName": "MedReg DE",
+    "role": "HDAB",
+    "slug": "medreg"
   },
   {
     "@type": "ParticipantContext",
+    "@id": "d4e5f6a7b8c950d1e2f3a4b5c6d7e8f9",
+    "identity": "did:web:lmc.nl:clinic",
+    "state": "ACTIVATED",
     "participantId": "d4e5f6a7b8c950d1e2f3a4b5c6d7e8f9",
-    "state": "ACTIVATED",
-    "did": "did:web:lmc.nl:clinic",
-    "apiTokenAlias": "limburg-mc"
+    "displayName": "Limburg Medical Centre",
+    "role": "DATA_HOLDER",
+    "slug": "lmc"
   },
   {
     "@type": "ParticipantContext",
-    "participantId": "e5f6a7b8c9d051e2f3a4b5c6d7e8f9a0",
+    "@id": "e5f6a7b8c9d051e2f3a4b5c6d7e8f9a0",
+    "identity": "did:web:irs.fr:hdab",
     "state": "ACTIVATED",
-    "did": "did:web:irs.fr:hdab",
-    "apiTokenAlias": "irs-fr"
+    "participantId": "e5f6a7b8c9d051e2f3a4b5c6d7e8f9a0",
+    "displayName": "Institut de Recherche Santé",
+    "role": "HDAB",
+    "slug": "irs"
   }
 ]

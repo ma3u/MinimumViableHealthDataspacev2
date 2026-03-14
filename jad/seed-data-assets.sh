@@ -183,44 +183,42 @@ echo "Phase 1b (cont.): Register Data Assets on EDC-V"
 echo "================================================"
 echo ""
 
-TM_HOST="${TM_HOST:-http://localhost:11006}"
-
-echo "Discovering participant context IDs from TenantManager..."
-TENANT_DATA=$(curl -sf "$TM_HOST/api/v1alpha1/tenants" | python3 -c "
+# Discover context ID directly from EDC-V management API by DID slug.
+# TenantManager is NOT used here: old tenants can carry stale context IDs from
+# previous provisioning runs, causing assets to be registered against wrong contexts.
+discover_ctx_edcv() {
+  local slug="$1"
+  curl -sf -H "Authorization: Bearer $(get_token)" "$CP_MGMT/v5alpha/participants" \
+    | python3 -c "
 import json, sys
-tenants = json.load(sys.stdin)
-for t in tenants:
-    name = t['properties'].get('displayName', '')
-    role = t['properties'].get('role', '')
-    tid = t['id']
-    print(f'{name}|{role}|{tid}')
-")
+slug = '$slug'
+participants = json.load(sys.stdin)
+if isinstance(participants, dict):
+    participants = [participants]
+for p in participants:
+    identity = p.get('identity', '')
+    pid = p.get('participantId', identity)
+    ctx = p.get('@id', '')
+    if slug in identity or slug in pid:
+        print(ctx)
+        sys.exit(0)
+print('')
+"
+}
 
-# For each tenant, get the participant context ID
-declare -A CTX_IDS
-while IFS='|' read -r name role tid; do
-  ctx_id=$(curl -sf "$TM_HOST/api/v1alpha1/tenants/$tid/participant-profiles" | python3 -c "
-import json, sys
-profiles = json.load(sys.stdin)
-for p in profiles:
-    if not p.get('error', False):
-        state = p.get('properties', {}).get('cfm.vpa.state', {})
-        ctx = state.get('participantContextId', '')
-        if ctx:
-            print(ctx)
-            break
-")
-  echo "  $name ($role): ctx=$ctx_id"
-  # Map by display name to context ID
-  case "$name" in
-    "AlphaKlinik Berlin"*)              ALPHA_KLINIK_CTX="$ctx_id" ;;
-    "Limburg Medical Centre"*)          LMC_CTX="$ctx_id" ;;
-    "PharmaCo Research AG"*)            PHARMACO_CTX="$ctx_id" ;;
-    "MedReg DE"*)                       MEDREG_CTX="$ctx_id" ;;
-    "Institut de Recherche Santé"*|"Institut de Recherche"*) IRS_CTX="$ctx_id" ;;
-    *) warn "Unknown tenant: $name (role=$role)" ;;
-  esac
-done <<< "$TENANT_DATA"
+echo "Discovering participant context IDs from EDC-V management API..."
+ALPHA_KLINIK_CTX=$(discover_ctx_edcv "alpha-klinik")
+LMC_CTX=$(discover_ctx_edcv "lmc")
+PHARMACO_CTX=$(discover_ctx_edcv "pharmaco")
+MEDREG_CTX=$(discover_ctx_edcv "medreg")
+IRS_CTX=$(discover_ctx_edcv "irs")
+
+[ -n "$ALPHA_KLINIK_CTX" ] || { warn "AlphaKlinik context not found in EDC-V"; }
+[ -n "$LMC_CTX" ]          || { warn "LMC context not found in EDC-V"; }
+[ -n "$PHARMACO_CTX" ]     || { warn "PharmaCo context not found in EDC-V"; }
+[ -n "$MEDREG_CTX" ]       || { warn "MedReg context not found in EDC-V"; }
+[ -n "$IRS_CTX" ]          || { warn "IRS context not found in EDC-V"; }
+
 
 echo ""
 echo "Participant Context IDs:"
@@ -436,8 +434,8 @@ echo "────────────────────────�
 echo "Step 5: Activate Participant Contexts"
 echo "────────────────────────────────────────────────"
 
-ACTIVATED=$(docker exec postgres psql -U ih -d identityhub -tAc \
-  "UPDATE participant_context SET state = 300 WHERE state = 200 RETURNING participant_id;" 2>/dev/null || echo "")
+ACTIVATED=$(docker exec health-dataspace-postgres psql -U ih -d identityhub -tAc \
+  "UPDATE participant_context SET state = 300 WHERE state = 200 RETURNING participant_context_id;" 2>/dev/null || echo "")
 
 if [ -n "$ACTIVATED" ]; then
   ACTIVATED_COUNT=$(echo "$ACTIVATED" | grep -c . || echo 0)
@@ -447,7 +445,7 @@ if [ -n "$ACTIVATED" ]; then
   done
 else
   # Check if already activated
-  ACTIVE_COUNT=$(docker exec postgres psql -U ih -d identityhub -tAc \
+  ACTIVE_COUNT=$(docker exec health-dataspace-postgres psql -U ih -d identityhub -tAc \
     "SELECT COUNT(*) FROM participant_context WHERE state = 300;" 2>/dev/null || echo "0")
   ok "All $ACTIVE_COUNT participant context(s) already activated"
 fi

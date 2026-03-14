@@ -59,7 +59,7 @@ export async function POST(req: NextRequest) {
       "@context": [EDC_CONTEXT],
       "@type": "TransferRequest",
       counterPartyAddress,
-      protocol: "dataspace-protocol-http",
+      protocol: "dataspace-protocol-http:2025-1",
       contractId,
       assetId: assetId || "",
       transferType: transferType || "HttpData-PULL",

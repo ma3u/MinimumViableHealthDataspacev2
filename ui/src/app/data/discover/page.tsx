@@ -17,7 +17,30 @@ interface Asset {
   "edc:name"?: string;
   "edc:description"?: string;
   "edc:contenttype"?: string;
+  name?: string;
+  description?: string;
+  contenttype?: string;
+  properties?: {
+    name?: string;
+    description?: string;
+    contenttype?: string;
+    [key: string]: unknown;
+  };
   [key: string]: unknown;
+}
+
+/** Resolve an asset field checking normalised, edc:*, and properties.* locations. */
+function assetField(
+  a: Asset,
+  field: "name" | "description" | "contenttype",
+): string {
+  return (
+    ((a[field] as string) ||
+      (a[`edc:${field}`] as string) ||
+      a.properties?.[field] ||
+      (field === "name" ? a["@id"] : "")) ??
+    ""
+  );
 }
 
 interface ParticipantAssets {
@@ -53,16 +76,14 @@ export default function DataDiscoverPage() {
   );
 
   const visible = filter
-    ? allAssets.filter(
-        (a) =>
-          (a["edc:name"] as string)
-            ?.toLowerCase()
-            .includes(filter.toLowerCase()) ||
-          (a["edc:description"] as string)
-            ?.toLowerCase()
-            .includes(filter.toLowerCase()) ||
-          a["@id"]?.toLowerCase().includes(filter.toLowerCase()),
-      )
+    ? allAssets.filter((a) => {
+        const q = filter.toLowerCase();
+        return (
+          assetField(a, "name").toLowerCase().includes(q) ||
+          assetField(a, "description").toLowerCase().includes(q) ||
+          a["@id"]?.toLowerCase().includes(q)
+        );
+      })
     : allAssets;
 
   return (
@@ -144,11 +165,11 @@ export default function DataDiscoverPage() {
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex-1 min-w-0">
                       <h2 className="font-semibold text-sm text-layer2">
-                        {(a["edc:name"] as string) || a["@id"]}
+                        {assetField(a, "name")}
                       </h2>
-                      {a["edc:description"] && (
+                      {assetField(a, "description") && (
                         <p className="text-xs text-gray-400 mt-0.5 line-clamp-2">
-                          {a["edc:description"] as string}
+                          {assetField(a, "description")}
                         </p>
                       )}
                       <p className="text-xs text-gray-600 mt-1">
@@ -160,9 +181,9 @@ export default function DataDiscoverPage() {
                       </p>
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
-                      {a["edc:contenttype"] && (
+                      {assetField(a, "contenttype") && (
                         <span className="text-xs bg-gray-700 text-gray-300 px-2 py-0.5 rounded-full">
-                          {a["edc:contenttype"] as string}
+                          {assetField(a, "contenttype")}
                         </span>
                       )}
                       {isOpen ? (

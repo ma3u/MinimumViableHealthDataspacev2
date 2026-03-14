@@ -148,6 +148,9 @@ export async function POST(req: NextRequest) {
         "@type": "Offer",
         assigner,
         target: assetId,
+        // EDC-V requires non-empty permission array; omit prohibition/obligation
+        // (empty arrays fail validation; non-empty ones cause policy mismatch)
+        permission: [{ action: "use" }],
       },
     };
 

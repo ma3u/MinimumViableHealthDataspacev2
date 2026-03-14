@@ -35,10 +35,21 @@ interface CatalogOffer {
 
 interface Negotiation {
   "@id": string;
+  state?: string;
   "edc:state"?: string;
+  contractAgreementId?: string;
   "edc:contractAgreementId"?: string;
+  counterPartyId?: string;
   "edc:counterPartyId"?: string;
+  assetId?: string;
   [key: string]: unknown;
+}
+
+/** Read a negotiation field that may be edc:-prefixed or unprefixed */
+function negField(n: Negotiation, field: string): string {
+  return ((n as Record<string, unknown>)[field] ??
+    (n as Record<string, unknown>)[`edc:${field}`] ??
+    "") as string;
 }
 
 /** Parse ODRL offers from a DCAT catalog response (handles multiple JSON-LD shapes) */
@@ -530,20 +541,21 @@ function NegotiateContent() {
       ) : (
         <div className="grid gap-2">
           {negotiations.map((n) => {
-            const agreementId = n["edc:contractAgreementId"] as string;
+            const agreementId = negField(n, "contractAgreementId");
+            const state = negField(n, "state");
+            const counterParty = negField(n, "counterPartyId");
             return (
               <div
                 key={n["@id"]}
                 className="flex items-center gap-3 p-3 border border-gray-700 rounded-lg"
               >
-                {stateIcon((n["edc:state"] as string) || "")}
+                {stateIcon(state)}
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-gray-200 truncate">
                     {n["@id"]}
                   </p>
                   <p className="text-xs text-gray-500">
-                    Counter-party:{" "}
-                    {(n["edc:counterPartyId"] as string)?.slice(0, 20) || "—"}
+                    Counter-party: {counterParty?.slice(0, 20) || "—"}
                     {agreementId &&
                       ` · Agreement: ${agreementId.slice(0, 16)}…`}
                   </p>
@@ -551,14 +563,14 @@ function NegotiateContent() {
                 <div className="flex items-center gap-2 shrink-0">
                   <span
                     className={`text-xs px-2 py-0.5 rounded-full ${
-                      ((n["edc:state"] as string) || "").includes("FINALIZED")
+                      state.includes("FINALIZED")
                         ? "bg-green-900/40 text-green-400"
-                        : ((n["edc:state"] as string) || "").includes("ERROR")
+                        : state.includes("ERROR")
                           ? "bg-red-900/40 text-red-400"
                           : "bg-yellow-900/40 text-yellow-400"
                     }`}
                   >
-                    {(n["edc:state"] as string) || "UNKNOWN"}
+                    {state || "UNKNOWN"}
                   </span>
                   {agreementId && (
                     <a

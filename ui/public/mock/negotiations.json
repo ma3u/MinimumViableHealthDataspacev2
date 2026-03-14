@@ -1,47 +1,38 @@
 [
   {
     "@type": "ContractNegotiation",
-    "@id": "neg-001",
+    "@id": "neg-patient-001",
+    "type": "CONSUMER",
+    "protocol": "dataspace-protocol-http:2025-1",
     "state": "FINALIZED",
-    "counterPartyAddress": "http://provider-dsp:8082/api/dsp",
     "counterPartyId": "did:web:alpha-klinik.de:participant",
-    "contractAgreementId": "agreement-001",
-    "createdAt": 1719500000000
+    "counterPartyAddress": "https://alpha-klinik.de/dsp/2025-1",
+    "assetId": "fhir-patient-search",
+    "contractAgreementId": "agreement-patient-001",
+    "createdAt": 1773505604439
   },
   {
     "@type": "ContractNegotiation",
-    "@id": "neg-002",
+    "@id": "neg-observation-001",
+    "type": "CONSUMER",
+    "protocol": "dataspace-protocol-http:2025-1",
     "state": "FINALIZED",
-    "counterPartyAddress": "http://provider-dsp:8082/api/dsp",
+    "counterPartyId": "did:web:alpha-klinik.de:participant",
+    "counterPartyAddress": "https://alpha-klinik.de/dsp/2025-1",
+    "assetId": "fhir-observation-bundle",
+    "contractAgreementId": "agreement-observation-001",
+    "createdAt": 1773505695984
+  },
+  {
+    "@type": "ContractNegotiation",
+    "@id": "neg-cohort-001",
+    "type": "CONSUMER",
+    "protocol": "dataspace-protocol-http:2025-1",
+    "state": "FINALIZED",
     "counterPartyId": "did:web:lmc.nl:clinic",
-    "contractAgreementId": "agreement-002",
-    "createdAt": 1719600000000
-  },
-  {
-    "@type": "ContractNegotiation",
-    "@id": "neg-003",
-    "state": "FINALIZED",
-    "counterPartyAddress": "http://provider-dsp:8082/api/dsp",
-    "counterPartyId": "did:web:pharmaco.de:research",
-    "contractAgreementId": "agreement-003",
-    "createdAt": 1719700000000
-  },
-  {
-    "@type": "ContractNegotiation",
-    "@id": "neg-004",
-    "state": "FINALIZED",
-    "counterPartyAddress": "http://hdab-dsp:8082/api/dsp",
-    "counterPartyId": "did:web:medreg.de:hdab",
-    "contractAgreementId": "agreement-004",
-    "createdAt": 1719800000000
-  },
-  {
-    "@type": "ContractNegotiation",
-    "@id": "neg-005",
-    "state": "FINALIZED",
-    "counterPartyAddress": "http://hdab-dsp:8082/api/dsp",
-    "counterPartyId": "did:web:irs.fr:hdab",
-    "contractAgreementId": "agreement-005",
-    "createdAt": 1719900000000
+    "counterPartyAddress": "https://lmc.nl/dsp/2025-1",
+    "assetId": "fhir-cohort-bundle",
+    "contractAgreementId": "agreement-cohort-001",
+    "createdAt": 1773505700000
   }
 ]

@@ -18,14 +18,16 @@
 #   - Data plane hostname MUST match docker-compose service name (dataplane-fhir)
 #   - Catalog uses v1alpha API; negotiation/transfer use v5alpha API
 #   - operandLeft in contract defs: "https://w3id.org/edc/v0.0.1/ns/id" (not "@id")
-#   - Participant contexts must be ACTIVATED (state=300) for DID serving
+#   - Participant contexts must be ACTIVATED (state=200) for DID serving
 #
 # Prerequisites:
 #   - All JAD services running (docker compose up)
 #   - seed-jad.sh completed (tenants + VPAs)
 #   - seed-data-assets.sh completed (assets + policies + contracts)
 # =============================================================================
-set -euo pipefail
+set -uo pipefail
+# Note: -e removed intentionally — transfer failures (data plane key issues) should
+# not abort the entire script; negotiations still succeed and provide demo data.
 
 # =============================================================================
 # Configuration
@@ -88,10 +90,13 @@ participants = json.load(sys.stdin)
 if isinstance(participants, dict):
     participants = [participants]
 for p in participants:
-    pid = p.get('participantId', p.get('@id', ''))
+    # 'identity' field holds the DID (e.g. did:web:identityhub%3A7083:alpha-klinik)
+    # 'participantId' is absent in this API version; fall back to '@id' (UUID)
+    identity = p.get('identity', '')
+    pid = p.get('participantId', identity)
     ctx = p.get('@id', '')
-    # Match the slug anywhere in the participantId (URL-encoded colon is %3A)
-    if slug in pid:
+    # Match the slug anywhere in the identity DID or participantId
+    if slug in identity or slug in pid:
         print(ctx)
         sys.exit(0)
 print('')  # not found
@@ -229,7 +234,7 @@ fi
 CATALOG=$(mgmt_call POST "v1alpha/participants/$PHARMACO_CTX/catalog" \
   "{\"counterPartyDid\":\"$ALPHAKLINIK_DID\"}")
 
-# Parse datasets and offers
+# Parse datasets, offers, and permission arrays from catalog
 OFFERS=$(echo "$CATALOG" | python3 -c "
 import json, sys
 d = json.load(sys.stdin)
@@ -241,7 +246,9 @@ for ds in datasets:
     if isinstance(policies, dict): policies = [policies]
     for p in policies:
         offer_id = p.get('@id', '')
-        print(f'{asset_id}|{offer_id}')
+        # Extract permission array as compact JSON (pipe-delimited with asset/offer)
+        perms = json.dumps(p.get('permission', [{'action': 'use'}]))
+        print(f'{asset_id}|{offer_id}|{perms}')
 ")
 
 DATASET_COUNT=$(echo "$OFFERS" | grep -c '|' || echo 0)
@@ -253,7 +260,7 @@ fi
 
 echo ""
 echo "  Available datasets:"
-echo "$OFFERS" | while IFS='|' read -r asset_id offer_id; do
+echo "$OFFERS" | while IFS='|' read -r asset_id offer_id _perms; do
   echo "    - $asset_id"
   echo "      Offer: ${offer_id:0:60}..."
 done
@@ -271,12 +278,19 @@ NEGOTIATED=0
 TRANSFERRED=0
 FAILED=0
 
-echo "$OFFERS" | while IFS='|' read -r asset_id offer_id; do
+echo "$OFFERS" | while IFS='|' read -r asset_id offer_id perms_json; do
   echo ""
   echo "  [$asset_id]"
   echo "    Initiating contract negotiation..."
 
+  # Ensure permission JSON is valid; default to [{"action":"use"}]
+  if [ -z "$perms_json" ] || [ "$perms_json" = "[]" ]; then
+    perms_json='[{"action":"use"}]'
+  fi
+
   # --- 3a: Negotiate contract ---
+  # EDC-V ContractRequest: include permission only — omit prohibition/obligation
+  # (empty arrays fail validation; non-empty arrays cause policy mismatch)
   NEG_RESPONSE=$(mgmt_call POST "v5alpha/participants/$PHARMACO_CTX/contractnegotiations" "{
     \"@context\": [\"$EDC_CTX\"],
     \"@type\": \"ContractRequest\",
@@ -286,7 +300,8 @@ echo "$OFFERS" | while IFS='|' read -r asset_id offer_id; do
       \"@type\": \"Offer\",
       \"@id\": \"$offer_id\",
       \"assigner\": \"$ALPHAKLINIK_DID\",
-      \"target\": \"$asset_id\"
+      \"target\": \"$asset_id\",
+      \"permission\": $perms_json
     }
   }")
 
