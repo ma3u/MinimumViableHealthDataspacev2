@@ -149,7 +149,8 @@ function NegotiateContent() {
           const first = list[0];
           setSelectedProviderCtx(first["@id"]);
           setProviderCtxId(first["@id"]);
-          const did = first.participantId ?? first.identity ?? "";
+          // identity holds the real DID; participantId is the UUID context ID
+          const did = first.identity ?? "";
           setProviderDid(did);
         }
       })
@@ -355,7 +356,8 @@ function NegotiateContent() {
               if (!chosen) return;
               setSelectedProviderCtx(chosen["@id"]);
               setProviderCtxId(chosen["@id"]);
-              setProviderDid(chosen.participantId ?? chosen.identity ?? "");
+              // identity holds the real DID; participantId is the UUID context ID
+              setProviderDid(chosen.identity ?? "");
               // Reset previous catalog results when provider changes
               setOffers([]);
               setSelectedOffer(null);
