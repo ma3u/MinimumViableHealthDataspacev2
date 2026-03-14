@@ -52,6 +52,24 @@ function negField(n: Negotiation, field: string): string {
     "") as string;
 }
 
+/** Resolve a DID to a short human-readable name */
+function didToName(did: string): string {
+  const slug = decodeURIComponent(did).split(":").pop()?.toLowerCase() ?? "";
+  const names: Record<string, string> = {
+    "alpha-klinik": "AlphaKlinik Berlin",
+    pharmaco: "PharmaCo Research AG",
+    medreg: "MedReg DE",
+    lmc: "Limburg Medical Centre",
+    irs: "Institut de Recherche Santé",
+  };
+  return names[slug] || slug || did.slice(0, 16);
+}
+
+/** Pretty-print an asset ID as a title */
+function assetLabel(id: string): string {
+  return id.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
 /** Parse ODRL offers from a DCAT catalog response (handles multiple JSON-LD shapes) */
 function parseOffers(catalog: Record<string, unknown>): CatalogOffer[] {
   const offers: CatalogOffer[] = [];
@@ -324,7 +342,7 @@ function NegotiateContent() {
           {participants.map((p) => (
             <option key={p["@id"]} value={p["@id"]}>
               {displayId(p)}
-              {p.role ? ` [${p.role}]` : ""} ({p["@id"].slice(0, 8)}…)
+              {p.role ? ` [${p.role}]` : ""}
             </option>
           ))}
         </select>
@@ -369,12 +387,14 @@ function NegotiateContent() {
             {participants.length === 0 && (
               <option value="">Loading participants…</option>
             )}
-            {participants.map((p) => (
-              <option key={p["@id"]} value={p["@id"]}>
-                {displayId(p)}
-                {p.role ? ` [${p.role}]` : ""}
-              </option>
-            ))}
+            {participants
+              .filter((p) => p["@id"] !== selectedCtx)
+              .map((p) => (
+                <option key={p["@id"]} value={p["@id"]}>
+                  {displayId(p)}
+                  {p.role ? ` [${p.role}]` : ""}
+                </option>
+              ))}
           </select>
         </div>
 
@@ -417,33 +437,24 @@ function NegotiateContent() {
               >
                 <div className="flex items-center justify-between">
                   <span className="font-medium text-gray-200">
-                    {o.name || o.assetId}
+                    {o.name || assetLabel(o.assetId)}
                   </span>
-                  {selectedOffer?.offerId === o.offerId && (
-                    <CheckCircle2 size={14} className="text-layer2" />
-                  )}
+                  <div className="flex items-center gap-2">
+                    {o.contentType && (
+                      <span className="text-[10px] px-1.5 py-0.5 rounded bg-gray-700 text-gray-400">
+                        {o.contentType}
+                      </span>
+                    )}
+                    {selectedOffer?.offerId === o.offerId && (
+                      <CheckCircle2 size={14} className="text-layer2" />
+                    )}
+                  </div>
                 </div>
                 {o.description && (
                   <p className="text-xs text-gray-500 mt-0.5 truncate">
                     {o.description}
                   </p>
                 )}
-                <div className="flex gap-4 mt-1 flex-wrap">
-                  <span className="text-xs text-gray-600">
-                    Asset: <code className="text-gray-400">{o.assetId}</code>
-                  </span>
-                  {o.contentType && (
-                    <span className="text-xs text-gray-600">
-                      {o.contentType}
-                    </span>
-                  )}
-                </div>
-                <p className="text-xs text-gray-600 mt-0.5 truncate">
-                  Offer:{" "}
-                  <code className="text-gray-500">
-                    {o.offerId.slice(0, 72)}
-                  </code>
-                </p>
               </button>
             ))}
           </div>
@@ -480,42 +491,29 @@ function NegotiateContent() {
           <div className="mb-4 p-3 rounded bg-yellow-900/20 border border-yellow-700/40 text-yellow-400 text-xs flex gap-2">
             <AlertCircle size={14} className="shrink-0 mt-0.5" />
             <span>
-              Complete Step 1 first — a valid ODRL offer @id is required for DSP
-              contract negotiation.
+              Complete Step 1 first — select a dataset offer above to negotiate.
             </span>
           </div>
         )}
 
-        <form onSubmit={handleNegotiate} className="space-y-3">
-          <div className="grid sm:grid-cols-2 gap-3">
-            <div>
-              <label className="text-xs text-gray-500 mb-1 block">
-                Asset ID
-              </label>
-              <input
-                type="text"
-                required
-                value={assetId}
-                onChange={(e) => setAssetId(e.target.value)}
-                placeholder="Populated from Step 1"
-                className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded text-sm outline-none focus:border-layer2"
-              />
-            </div>
-            <div>
-              <label className="text-xs text-gray-500 mb-1 block">
-                ODRL Offer ID{" "}
-                <span className="text-yellow-500 text-xs">(from catalog)</span>
-              </label>
-              <input
-                type="text"
-                required
-                value={offerId}
-                onChange={(e) => setOfferId(e.target.value)}
-                placeholder="Populated from Step 1"
-                className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded text-sm outline-none focus:border-layer2"
-              />
-            </div>
+        {selectedOffer && (
+          <div className="mb-4 p-3 rounded bg-gray-800/60 border border-gray-700 text-sm">
+            <span className="text-gray-400">Selected:</span>{" "}
+            <span className="text-gray-200 font-medium">
+              {selectedOffer.name || assetLabel(selectedOffer.assetId)}
+            </span>
+            {selectedOffer.contentType && (
+              <span className="ml-2 text-[10px] px-1.5 py-0.5 rounded bg-gray-700 text-gray-400">
+                {selectedOffer.contentType}
+              </span>
+            )}
           </div>
+        )}
+
+        <form onSubmit={handleNegotiate} className="space-y-3">
+          {/* Hidden fields — populated automatically from Step 1 */}
+          <input type="hidden" value={assetId} />
+          <input type="hidden" value={offerId} />
           <button
             type="submit"
             disabled={initiating || !offerId}
@@ -554,12 +552,13 @@ function NegotiateContent() {
                 {stateIcon(state)}
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-gray-200 truncate">
-                    {n["@id"]}
+                    {n.assetId
+                      ? assetLabel(n.assetId as string)
+                      : n["@id"].slice(0, 12)}
                   </p>
                   <p className="text-xs text-gray-500">
-                    Counter-party: {counterParty?.slice(0, 20) || "—"}
-                    {agreementId &&
-                      ` · Agreement: ${agreementId.slice(0, 16)}…`}
+                    Provider: {counterParty ? didToName(counterParty) : "—"}
+                    {state === "FINALIZED" && " · Agreement ready"}
                   </p>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
