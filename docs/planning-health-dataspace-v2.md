@@ -115,6 +115,13 @@
       - [Rationale {#rationale-8}](#rationale-rationale-8)
       - [Test Architecture {#test-architecture}](#test-architecture-test-architecture)
       - [Consequences {#consequences-7}](#consequences-consequences-7)
+    - [ADR-9: IssuerService DCP Credential Issuance — Root Cause and Permanent Fix](#adr-9-issuerservice-dcp-credential-issuance--root-cause-and-permanent-fix)
+      - [Root Cause Analysis](#root-cause-analysis)
+      - [IssuanceProcess State Machine](#issuanceprocess-state-machine)
+      - [Solution Architecture](#solution-architecture)
+      - [Files Changed](#files-changed)
+      - [Verification](#verification-adr9)
+      - [Consequences](#consequences-8)
   - [Target Architecture](#target-architecture)
   - [What This Proves](#what-this-proves)
   - [Implementation Dependencies](#implementation-dependencies)
@@ -158,7 +165,7 @@ All three core specifications are now final or near-final:
 | Phase  | Title                                                  | Status      | Notes                                                                                                                                                                                                                                                                                                                                                                                    |
 | ------ | ------------------------------------------------------ | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **1**  | Infrastructure Migration (EDC-V + DCore + CFM)         | ✅ Complete | 1a–1f all complete; 18 services healthy; 3 tenants + 9 VPAs provisioned; data assets registered; ADR-1–6 accepted                                                                                                                                                                                                                                                                        |
-| **2**  | Identity and Trust (DCP v1.0 + Verifiable Credentials) | ✅ Complete | 2a ✅ (DID:web for 3 tenants, Ed25519 keys, all activated — ADR-7); 2b ✅ (3 EHDS credential defs on IssuerService, 5 VC nodes in Neo4j, DCP scopes configured, Compliance UI with trust chain); 2c ✅ (Keycloak SSO: PKCE client, 3 roles, 3 demo users, NextAuth.js, role-based middleware)                                                                                            |
+| **2**  | Identity and Trust (DCP v1.0 + Verifiable Credentials) | ✅ Complete | 2a ✅ (DID:web for 3 tenants, Ed25519 keys, all activated — ADR-7; IssuerService credential issuance fully working — ADR-9); 2b ✅ (3 EHDS credential defs on IssuerService, 5 VC nodes in Neo4j, DCP scopes configured, Compliance UI with trust chain, 15 VCs delivered to IdentityHub); 2c ✅ (Keycloak SSO: PKCE client, 3 roles, 3 demo users, NextAuth.js, role-based middleware)  |
 | **3**  | Health Knowledge Graph Layer — Schema & Synthetic Data | ✅ Complete | 5-layer Neo4j schema, EHDS HDAB chain, style sheet                                                                                                                                                                                                                                                                                                                                       |
 | **3b** | Real FHIR Data Pipeline (Synthea → Neo4j → OMOP)       | ✅ Complete | 167 patients · 5,461 encounters · 2,421 conditions · 37,713 observations · 3,895 drug Rxes · 8,534 procedures                                                                                                                                                                                                                                                                            |
 | **3c** | HealthDCAT-AP Metadata Registration for FHIR Dataset   | ✅ Complete | Synthea cohort registered as HealthDCAT-AP catalog entry; 2 distributions + EHDS Art 53 purpose                                                                                                                                                                                                                                                                                          |
@@ -2058,6 +2065,199 @@ jobs:
 - **Trade-off:** Three test frameworks to maintain (Vitest + Playwright + Supertest) vs. a single-framework approach. Mitigated by clear separation: Vitest for fast tests, Playwright for browser tests, Supertest for Express routes.
 - **Trade-off:** Playwright E2E tests are slower (~30s per test) and require Docker services. Run only in CI and manually, not in watch mode.
 - **Dependency:** MSW v2 requires ESM-compatible test setup (satisfied by Vitest)
+
+---
+
+### ADR-9: IssuerService DCP Credential Issuance — Root Cause and Permanent Fix
+
+**Status:** Accepted
+**Date:** 2026-07-12
+**Context:** After completing Phase 2b (EHDS credential definitions), the DCP credential issuance flow from IssuerService to IdentityHub was failing silently. The `seed-jad.sh` script created the issuer participant, attestation definitions, and credential definitions, and `seed-ehds-credentials.sh` triggered credential requests — but all 11 issuance processes ended in ERRORED state (300) with the IssuerService unable to sign credentials. This ADR documents the root cause analysis and permanent fix.
+
+#### Root Cause Analysis
+
+The failure had **two independent causes** that both had to be resolved:
+
+**1. Vault Path Mismatch (Key Not Found)**
+
+The `seed-jad.sh` script stores the issuer's EdDSA private key in the **`participants/` KV v2 mount** (the participant-scoped mount authenticated via Keycloak JWT):
+
+```
+participants/data/issuer/did:web:issuerservice%3A10016:issuer#key-1
+```
+
+However, the IssuerService's global vault configuration (`issuerservice.env`) reads from the **`secret/` KV v2 mount** using the root token:
+
+```properties
+edc.vault.hashicorp.url=http://vault:8200
+edc.vault.hashicorp.token=root-token
+edc.vault.hashicorp.api.secret.path=/v1/secret/data/
+```
+
+The key existed in the wrong mount. The IssuerService could never find it.
+
+**2. Incomplete Participant Activation (Missing DB Records)**
+
+The participant creation API (`POST /api/identity/v1alpha/participants`) creates a `participant_context` record in state 100 (CREATED) but does **not** complete the full activation lifecycle. Specifically:
+
+- **0 `keypair_resource` records** — The key-to-vault-alias mapping was never created
+- **0 `did_resources` records** — The DID document was never registered
+- **`participant_context` stuck at state 100** — Never advanced to 300 (ACTIVATED)
+
+Without these records, the IssuerService's `IssuanceProcessManager` state machine could not:
+
+- Look up the signing key alias to read from Vault
+- Serve the DID document at `did:web:issuerservice%3A10016:issuer`
+- Complete the credential delivery to IdentityHub
+
+#### IssuanceProcess State Machine
+
+The EDC-V 0.16.0-SNAPSHOT `IssuanceProcessManager` (from `IssuanceCoreExtension`) runs a `StateMachineManager` with the following states:
+
+| State Code | Name      | Behavior                                                   |
+| ---------- | --------- | ---------------------------------------------------------- |
+| **100**    | APPROVED  | Processable — state machine picks up and attempts delivery |
+| **200**    | DELIVERED | Terminal success — credential delivered to IdentityHub     |
+| **300**    | ERRORED   | Terminal failure — max retries exhausted                   |
+
+Configuration:
+
+- `edc.issuer.issuance.state-machine.iteration-wait-millis=1000` (1s polling)
+- `edc.issuer.issuance.state-machine.batch-size=20`
+
+The state machine processes APPROVED (100) entries in batches, signs the credential using the Vault-stored private key, delivers the VC to the holder's IdentityHub `CredentialService` endpoint, and moves the process to DELIVERED (200). If signing or delivery fails, retries accumulate until the process moves to ERRORED (300).
+
+#### Solution Architecture
+
+The permanent fix uses a **static EdDSA key pair** stored in both Vault mounts at initialization time, combined with an idempotent SQL fixup that completes the issuer's identity records.
+
+**Static Key (Ed25519):**
+
+```json
+{
+  "kty": "OKP",
+  "d": "6DBtzJz3DjNAiM2P2RlzOsAQs-ramVeAUVnocd6F__Y",
+  "crv": "Ed25519",
+  "kid": "did:web:issuerservice%3A10016:issuer#key-1",
+  "x": "I8dt08pwP4nQPv4MacRU5u5KsroVa3ESkWmyQEDn36A"
+}
+```
+
+**Fix Flow (executed by `scripts/bootstrap-jad.sh`):**
+
+```
+bootstrap-vault.sh                    seed-jad.sh
+      │                                    │
+      │ 1. Store EdDSA private key         │ 3. Create issuer participant
+      │    in secret/ mount                │    with explicit publicKeyJwk
+      │    (vault write secret/data/...)   │
+      │                                    │ 4. Sync key to participants/
+      │ 2. Store AES + RSA keys            │    mount via Vault HTTP API
+      │    (existing)                      │
+      └────────────────────────────────────┘
+                      │
+         seed-issuer-identity.sql
+                      │
+              5. Insert keypair_resource
+                 (key_id → vault alias)
+              6. Insert did_resources
+                 (DID document with public key)
+              7. Activate participant_context
+                 (state 100 → 300)
+                      │
+              8. Restart IssuerService
+                 (picks up new identity)
+                      │
+              9. State machine processes
+                 APPROVED → DELIVERED
+```
+
+#### Files Changed
+
+| File                           | Purpose                          | Key Changes                                                                                                        |
+| ------------------------------ | -------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| `jad/bootstrap-vault.sh`       | Vault initialization             | Added EdDSA private key storage in `secret/` mount after AES key section                                           |
+| `jad/seed-jad.sh`              | Issuer participant + credentials | Changed from `keyGeneratorParams` to explicit `publicKeyJwk`; added Step 2b for Vault key sync to both mounts      |
+| `jad/seed-issuer-identity.sql` | **New** — Idempotent SQL fixup   | Inserts `keypair_resource` + `did_resources`, activates `participant_context` to state 300                         |
+| `scripts/bootstrap-jad.sh`     | Orchestration script             | Added `seed_and_fix()` function (Phases 7-8), `--seed` CLI option, DB wait + SQL execution + IssuerService restart |
+
+**`bootstrap-vault.sh` — EdDSA Key Storage:**
+
+```bash
+# Store issuer EdDSA private key in secret/ mount
+vault kv put "secret/did:web:issuerservice%3A10016:issuer#key-1" \
+  content='{"kty":"OKP","d":"...","crv":"Ed25519","kid":"...","x":"..."}'
+```
+
+**`seed-jad.sh` — Explicit Public Key:**
+
+```json
+{
+  "publicKeyJwk": {
+    "kty": "OKP",
+    "crv": "Ed25519",
+    "kid": "did:web:issuerservice%3A10016:issuer#key-1",
+    "x": "I8dt08pwP4nQPv4MacRU5u5KsroVa3ESkWmyQEDn36A"
+  },
+  "type": "JsonWebKey2020",
+  "usage": ["sign_credentials", "sign_token", "sign_presentation"]
+}
+```
+
+**`seed-issuer-identity.sql` — Key Operations:**
+
+```sql
+-- 1. keypair_resource: links DID key ID to Vault alias
+INSERT INTO keypair_resource (id, participant_context_id, timestamp, key_id,
+    serialized_public_key, private_key_alias, is_default_pair, state, ...)
+VALUES ('issuer-keypair-1', 'issuer', ...,
+    'did:web:issuerservice%3A10016:issuer#key-1', '{public JWK}',
+    'did:web:issuerservice%3A10016:issuer#key-1', true, 200)
+ON CONFLICT (id) DO UPDATE SET ...;
+
+-- 2. did_resources: publishes DID document
+INSERT INTO did_resources (did, state, did_document, participant_context_id)
+VALUES ('did:web:issuerservice%3A10016:issuer', 300, '{DID document}', 'issuer')
+ON CONFLICT (did) DO UPDATE SET ...;
+
+-- 3. Activate participant context
+UPDATE participant_context SET state = 300
+WHERE participant_context_id = 'issuer' AND state < 300;
+```
+
+#### Verification {#verification-adr9}
+
+After the fix, the complete DCP credential issuance flow works end-to-end:
+
+| Metric                                                       | Value    |
+| ------------------------------------------------------------ | -------- |
+| Issuance processes (DELIVERED)                               | 15 of 15 |
+| Credentials in IdentityHub (`vc_state=-100`)                 | 15       |
+| Holder credential requests (COMPLETED, state=400)            | 15       |
+| DID document served at `issuerservice:10016/issuer/did.json` | ✓        |
+| Issuer participant state (ACTIVATED=300)                     | ✓        |
+| keypair_resource state (ACTIVE=200)                          | ✓        |
+| did_resources state (PUBLISHED=300)                          | ✓        |
+
+**IssuerService Admin API (port 10013):**
+
+All admin endpoints are participant-scoped:
+
+```
+POST /api/admin/v1alpha/participants/{participantContextId}/issuanceprocesses/query
+POST /api/admin/v1alpha/participants/{participantContextId}/attestations/query
+POST /api/admin/v1alpha/participants/{participantContextId}/credentialdefinitions/query
+```
+
+#### Consequences {#consequences-8}
+
+- **Positive:** All 15 DCP credentials successfully issued and delivered to IdentityHub — end-to-end credential issuance proven working
+- **Positive:** Static EdDSA key ensures deterministic, reproducible initialization — no dependency on runtime key generation timing
+- **Positive:** SQL fixup is fully idempotent — safe to run on fresh stacks and existing deployments
+- **Positive:** `bootstrap-jad.sh --seed` enables re-running just the seed and fix phases without full stack restart
+- **Trade-off:** Static key means all deployments share the same issuer key pair. Production deployments must generate unique keys and update both Vault mounts and the SQL fixup accordingly
+- **Trade-off:** Direct SQL manipulation bypasses the EDC-V participant lifecycle API. If the API is fixed upstream (to complete keypair_resource + did_resources creation), the SQL fixup can be removed
+- **Dependency:** Requires IssuerService restart after SQL fixup to pick up the new identity records (the state machine does not hot-reload participant identity)
 
 ---
 

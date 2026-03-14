@@ -163,6 +163,57 @@ start_stack() {
 }
 
 # ---------------------------------------------------------------------------
+# Seed and fix IssuerService identity (post-startup)
+# ---------------------------------------------------------------------------
+seed_and_fix() {
+  cd "$PROJECT_DIR"
+
+  log "=== Phase 7: Running JAD seed ==="
+  docker compose $COMPOSE_FILES run --rm jad-seed || {
+    warn "JAD seed may have partially failed — continuing with identity fixup"
+  }
+  ok "JAD seed complete"
+
+  log "=== Phase 8: IssuerService identity fixup ==="
+  log "Applying issuer keypair, DID, and activation records..."
+
+  # Wait for IssuerService tables to be available (Flyway migrations)
+  local max_attempts=10
+  for i in $(seq 1 "$max_attempts"); do
+    if docker exec health-dataspace-postgres psql -U issuer -d issuerservice \
+      -c "SELECT 1 FROM participant_context LIMIT 1" > /dev/null 2>&1; then
+      break
+    fi
+    if [ "$i" -eq "$max_attempts" ]; then
+      error "IssuerService DB not ready after $max_attempts attempts"
+      return 1
+    fi
+    sleep 3
+  done
+
+  docker exec -i health-dataspace-postgres psql -U issuer -d issuerservice \
+    < "$PROJECT_DIR/jad/seed-issuer-identity.sql" && \
+    ok "IssuerService identity fixup applied" || \
+    error "IssuerService identity fixup failed"
+
+  # Restart IssuerService to pick up the new identity records
+  log "Restarting IssuerService to activate identity..."
+  docker restart health-dataspace-issuerservice
+  sleep 5
+  wait_for_service "IssuerService" "http://localhost:10013/api/check/readiness" 15 3 || \
+    wait_for_service "IssuerService (direct)" "http://localhost:10013/api/version" 15 3 || true
+  ok "IssuerService restarted with identity records"
+
+  # Verify DID document is served
+  if docker exec health-dataspace-issuerservice \
+    wget -qO- "http://localhost:10016/issuer/did.json" 2>/dev/null | grep -q "verificationMethod"; then
+    ok "IssuerService DID document verified ✓"
+  else
+    warn "DID document not yet available — may need manual verification"
+  fi
+}
+
+# ---------------------------------------------------------------------------
 # Show status
 # ---------------------------------------------------------------------------
 show_status() {
@@ -224,20 +275,26 @@ main() {
       preflight
       pull_images
       ;;
+    --seed)
+      seed_and_fix
+      ok "Seed and identity fixup complete"
+      ;;
     --help|-h)
-      echo "Usage: $0 [--down|--reset|--status|--pull|--help]"
+      echo "Usage: $0 [--down|--reset|--status|--pull|--seed|--help]"
       echo ""
       echo "  (no args)   Start full JAD stack with health checks"
       echo "  --down      Stop all services"
       echo "  --reset     Stop all services and remove volumes"
       echo "  --status    Show service status and endpoints"
       echo "  --pull      Pull latest images"
+      echo "  --seed      Re-run JAD seed and issuer identity fixup"
       echo "  --help      Show this help"
       ;;
     *)
       preflight
       pull_images
       start_stack
+      seed_and_fix
       show_status
       ok "JAD stack is ready! 🚀"
       ;;

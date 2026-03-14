@@ -169,9 +169,14 @@ curl -sf -X POST "$ISSUER_HOST:10015/api/identity/v1alpha/participants" \
     "key": {
       "keyId": "did:web:issuerservice%3A10016:issuer#key-1",
       "privateKeyAlias": "did:web:issuerservice%3A10016:issuer#key-1",
-      "keyGeneratorParams": {
-        "algorithm": "EdDSA"
-      }
+      "publicKeyJwk": {
+        "kty": "OKP",
+        "crv": "Ed25519",
+        "kid": "did:web:issuerservice%3A10016:issuer#key-1",
+        "x": "I8dt08pwP4nQPv4MacRU5u5KsroVa3ESkWmyQEDn36A"
+      },
+      "type": "JsonWebKey2020",
+      "usage": ["sign_credentials", "sign_token", "sign_presentation"]
     },
     "additionalProperties": {
       "edc.vault.hashicorp.config": {
@@ -190,6 +195,47 @@ curl -sf -X POST "$ISSUER_HOST:10015/api/identity/v1alpha/participants" \
   }'
 echo ""
 echo "✓ Issuer tenant created"
+
+# ---------------------------------------------------------------------------
+# Step 2b: Sync Issuer EdDSA Key to Both Vault Mounts
+# ---------------------------------------------------------------------------
+# The participant vault (participants/issuer/) stores the per-participant key,
+# while the global vault (secret/) is used by the IssuanceProcessManager for
+# signing. Ensure the static EdDSA private key exists in BOTH mounts.
+# bootstrap-vault.sh pre-stores it in secret/, and here we ensure the
+# participants/ mount also has it for consistency.
+# ---------------------------------------------------------------------------
+echo ""
+echo "========================================================"
+echo "  Step 2b: Sync Issuer Signing Key to Vault"
+echo "========================================================"
+
+VAULT_HOST="${VAULT_HOST:-http://vault:8200}"
+VAULT_TOKEN="${VAULT_TOKEN:-root}"
+ISSUER_KEY_ALIAS="did:web:issuerservice%3A10016:issuer#key-1"
+ISSUER_PRIVATE_JWK='{"kty":"OKP","d":"6DBtzJz3DjNAiM2P2RlzOsAQs-ramVeAUVnocd6F__Y","crv":"Ed25519","kid":"did:web:issuerservice%3A10016:issuer#key-1","x":"I8dt08pwP4nQPv4MacRU5u5KsroVa3ESkWmyQEDn36A"}'
+
+# Store in participants/issuer/ mount (for participant-scoped vault access)
+curl -sf -X POST "$VAULT_HOST/v1/participants/data/issuer/$ISSUER_KEY_ALIAS" \
+  -H "X-Vault-Token: $VAULT_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d "{\"data\":{\"content\":\"$ISSUER_PRIVATE_JWK\"}}" > /dev/null 2>&1 \
+  && echo "✓ Key synced to participants/issuer/ mount" \
+  || echo "⚠ Failed to sync key to participants/ mount (non-critical)"
+
+# Verify key exists in secret/ mount (should be pre-stored by bootstrap-vault.sh)
+if curl -sf -H "X-Vault-Token: $VAULT_TOKEN" \
+  "$VAULT_HOST/v1/secret/data/$ISSUER_KEY_ALIAS" > /dev/null 2>&1; then
+  echo "✓ Key verified in secret/ mount"
+else
+  echo "⚠ Key not found in secret/ mount — storing now"
+  curl -sf -X POST "$VAULT_HOST/v1/secret/data/$ISSUER_KEY_ALIAS" \
+    -H "X-Vault-Token: $VAULT_TOKEN" \
+    -H "Content-Type: application/json" \
+    -d "{\"data\":{\"content\":\"$ISSUER_PRIVATE_JWK\"}}" > /dev/null 2>&1 \
+    && echo "✓ Key stored in secret/ mount" \
+    || echo "✗ Failed to store key in secret/ mount"
+fi
 
 echo ""
 echo "========================================================"

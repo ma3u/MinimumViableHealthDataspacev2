@@ -106,6 +106,31 @@ vault write secret/data/aes-key-alias -<<EOF || { echo "Failed to create AES key
 EOF
 
 # ---------------------------------------------------------------------------
+# IssuerService EdDSA Signing Key (DCP Credential Issuance)
+# ---------------------------------------------------------------------------
+# The IssuerService runtime resolves private keys from the global Vault
+# config (secret/ mount with root token), NOT from the per-participant
+# vault (participants/ mount with Keycloak JWT auth). This static EdDSA
+# key must be stored here so the IssuanceProcessManager can sign VC1_0_JWT
+# credentials. The matching public key is published in the DID document
+# at did:web:issuerservice%3A10016:issuer#key-1.
+#
+# See: ADR-7 (DID:web Resolution Architecture) in docs/planning-health-dataspace-v2.md
+# ---------------------------------------------------------------------------
+
+echo "=== Provisioning IssuerService signing key ==="
+
+vault write "secret/data/did:web:issuerservice%3A10016:issuer#key-1" -<<'ISSUER_KEY_EOF' || { echo "Failed to store issuer EdDSA key in secret/ mount"; exit 1; }
+{
+    "data": {
+        "content": "{\"kty\":\"OKP\",\"d\":\"6DBtzJz3DjNAiM2P2RlzOsAQs-ramVeAUVnocd6F__Y\",\"crv\":\"Ed25519\",\"kid\":\"did:web:issuerservice%3A10016:issuer#key-1\",\"x\":\"I8dt08pwP4nQPv4MacRU5u5KsroVa3ESkWmyQEDn36A\"}"
+    }
+}
+ISSUER_KEY_EOF
+
+echo "✓ IssuerService EdDSA signing key stored in secret/ mount"
+
+# ---------------------------------------------------------------------------
 # Data Plane Token Signing Keys (ADR-2: Dual Data Planes)
 # ---------------------------------------------------------------------------
 # Each DCore data plane needs a key pair for signing/verifying data-plane
