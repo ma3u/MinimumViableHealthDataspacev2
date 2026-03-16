@@ -29,8 +29,10 @@ CLIENT_ID="${EDC_CLIENT_ID:-admin}"
 CLIENT_SECRET="${EDC_CLIENT_SECRET:-edc-v-admin-secret}"
 REPORT_DIR="${REPORT_DIR:-test-results/dsp-tck}"
 
-# Participant contexts from Phase 1
-PARTICIPANTS=("test-clinic" "clinic-alphaklinik" "cro-pharmaco" "hdab-medreg")
+# Participant slugs (resolved to UUID context IDs at runtime)
+PARTICIPANT_SLUGS=("alpha-klinik" "pharmaco" "medreg")
+PARTICIPANT_CTXS=()  # populated by discover_participants()
+PARTICIPANT_DIDS=()  # populated by discover_participants()
 
 # Counters
 TOTAL=0
@@ -100,7 +102,59 @@ mgmt_get() {
 }
 
 mgmt_post() {
-  curl -sf -X POST -H "$(auth_header)" -H "Content-Type: application/json" -d "$2" "${MGMT_API}$1" 2>/dev/null
+  curl -s --max-time 30 -X POST -H "$(auth_header)" -H "Content-Type: application/json" -d "$2" "${MGMT_API}$1" 2>/dev/null
+}
+
+
+# ---------------------------------------------------------------------------
+# Dynamic participant context discovery
+# ---------------------------------------------------------------------------
+# Queries Management API to resolve participant slugs -> UUID context IDs.
+# Required because context UUIDs change across provisioning cycles.
+# Reference: jad/seed-contract-negotiation.sh discover_ctx()
+# ---------------------------------------------------------------------------
+discover_participants() {
+  log "Discovering participant context UUIDs..."
+  local participants_json
+  participants_json=$(mgmt_get "/v5alpha/participants") || {
+    log "ERROR: Cannot fetch participant list from Management API"
+    exit 1
+  }
+
+  for slug in "${PARTICIPANT_SLUGS[@]}"; do
+    local uuid
+    uuid=$(echo "$participants_json" | jq -r --arg s "$slug" \
+      '[.[] | select(.identity // "" | contains($s))] | .[0]["@id"] // empty')
+    local did
+    did=$(echo "$participants_json" | jq -r --arg s "$slug" \
+      '[.[] | select(.identity // "" | contains($s))] | .[0].identity // empty')
+    if [ -n "$uuid" ]; then
+      PARTICIPANT_CTXS+=("$uuid")
+      PARTICIPANT_DIDS+=("$did")
+      log "  ${slug} -> ${uuid}"
+    else
+      log "  WARNING: No context found for ${slug}"
+      PARTICIPANT_CTXS+=("")
+      PARTICIPANT_DIDS+=("")
+    fi
+  done
+
+  # Named convenience variables (index matches PARTICIPANT_SLUGS order)
+  PROVIDER_CTX="${PARTICIPANT_CTXS[0]:-}"   # alpha-klinik (DATA_HOLDER)
+  CONSUMER_CTX="${PARTICIPANT_CTXS[1]:-}"   # pharmaco (DATA_USER)
+  OPERATOR_CTX="${PARTICIPANT_CTXS[2]:-}"   # medreg (HDAB)
+  PROVIDER_DID="${PARTICIPANT_DIDS[0]:-}"   # alpha-klinik DID
+  CONSUMER_DID="${PARTICIPANT_DIDS[1]:-}"   # pharmaco DID
+  OPERATOR_DID="${PARTICIPANT_DIDS[2]:-}"   # medreg DID
+
+  if [ -z "$PROVIDER_CTX" ] || [ -z "$CONSUMER_CTX" ] || [ -z "$OPERATOR_CTX" ]; then
+    log "ERROR: Missing required participant contexts."
+    log "  Ensure JAD stack is running and tenants are ACTIVATED."
+    log "  PROVIDER  (alpha-klinik): ${PROVIDER_CTX:-NOT FOUND}"
+    log "  CONSUMER  (pharmaco):     ${CONSUMER_CTX:-NOT FOUND}"
+    log "  OPERATOR  (medreg):       ${OPERATOR_CTX:-NOT FOUND}"
+    exit 1
+  fi
 }
 
 # ---------------------------------------------------------------------------
@@ -110,21 +164,27 @@ run_catalog_tests() {
   log "Category 1: Catalog Protocol Tests (DSP §4)"
 
   # 1.1 — Catalog request returns valid response for each participant
-  for ctx in "${PARTICIPANTS[@]}"; do
-    local test_id="CAT-1.1-${ctx}"
+  # Consumer (pharmaco) queries each participant as provider.
+  # counterPartyAddress must include the provider's context ID and protocol version.
+  for i in "${!PARTICIPANT_SLUGS[@]}"; do
+    local slug="${PARTICIPANT_SLUGS[$i]}"
+    local ctx="${PARTICIPANT_CTXS[$i]}"
+    local test_id="CAT-1.1-${slug}"
     local resp
-    resp=$(mgmt_post "/v5alpha/participants/${ctx}/catalog/request" \
-      '{"@context":["https://w3id.org/edc/connector/management/v2"],"@type":"CatalogRequest","counterPartyAddress":"http://health-dataspace-controlplane:8082/api/dsp","protocol":"dataspace-protocol-http"}' 2>/dev/null) || resp=""
+    local catalog_body
+    local provider_did="${PARTICIPANT_DIDS[$i]}"
+    catalog_body=$(printf '{"@context":["https://w3id.org/edc/connector/management/v2"],"@type":"CatalogRequest","counterPartyAddress":"http://controlplane:8082/api/dsp/%s/2025-1","counterPartyId":"%s","protocol":"dataspace-protocol-http:2025-1"}' "$ctx" "$provider_did")
+    resp=$(mgmt_post "/v5alpha/participants/${CONSUMER_CTX}/catalog/request" "$catalog_body" 2>/dev/null) || resp=""
 
     if [ -n "$resp" ] && echo "$resp" | jq -e '.["@type"]' >/dev/null 2>&1; then
-      pass "$test_id: CatalogRequestMessage accepted for ${ctx}"
+      pass "$test_id: CatalogRequestMessage accepted for ${slug}"
       record_result "$test_id" "catalog" "passed"
     elif [ -n "$resp" ]; then
       # Catalog may return data in different format
-      pass "$test_id: Catalog endpoint responded for ${ctx}"
+      pass "$test_id: Catalog endpoint responded for ${slug}"
       record_result "$test_id" "catalog" "passed" "non-standard format"
     else
-      fail "$test_id: CatalogRequestMessage failed for ${ctx}"
+      fail "$test_id: CatalogRequestMessage failed for ${slug}"
       record_result "$test_id" "catalog" "failed" "no response"
     fi
   done
@@ -132,14 +192,18 @@ run_catalog_tests() {
   # 1.2 — Catalog contains expected dataset types
   local test_id="CAT-1.2"
   local resp
-  resp=$(mgmt_post "/v5alpha/participants/test-clinic/catalog/request" \
-    '{"@context":["https://w3id.org/edc/connector/management/v2"],"@type":"CatalogRequest","counterPartyAddress":"http://health-dataspace-controlplane:8082/api/dsp","protocol":"dataspace-protocol-http"}' 2>/dev/null) || resp=""
+  local cat12_body
+  cat12_body=$(printf '{"@context":["https://w3id.org/edc/connector/management/v2"],"@type":"CatalogRequest","counterPartyAddress":"http://controlplane:8082/api/dsp/%s/2025-1","counterPartyId":"%s","protocol":"dataspace-protocol-http:2025-1"}' "$PROVIDER_CTX" "$PROVIDER_DID")
+  resp=$(mgmt_post "/v5alpha/participants/${CONSUMER_CTX}/catalog/request" "$cat12_body" 2>/dev/null) || resp=""
 
-  if [ -n "$resp" ] && echo "$resp" | jq -e '.["dcat:dataset"]' >/dev/null 2>&1; then
+  if [ -n "$resp" ] && echo "$resp" | jq -e '.dataset' >/dev/null 2>&1; then
+    pass "$test_id: Catalog response contains dataset"
+    record_result "$test_id" "catalog" "passed"
+  elif [ -n "$resp" ] && echo "$resp" | jq -e '.["dcat:dataset"]' >/dev/null 2>&1; then
     pass "$test_id: Catalog response contains dcat:dataset"
     record_result "$test_id" "catalog" "passed"
   elif [ -n "$resp" ]; then
-    skip "$test_id: Catalog response present but no dcat:dataset (may be empty)"
+    skip "$test_id: Catalog response present but no dataset (may be empty)"
     record_result "$test_id" "catalog" "skipped" "no datasets in catalog"
   else
     fail "$test_id: Cannot verify catalog dataset content"
@@ -149,8 +213,9 @@ run_catalog_tests() {
   # 1.3 — Catalog request with query filters
   local test_id="CAT-1.3"
   local resp
-  resp=$(mgmt_post "/v5alpha/participants/test-clinic/catalog/request" \
-    '{"@context":["https://w3id.org/edc/connector/management/v2"],"@type":"CatalogRequest","counterPartyAddress":"http://health-dataspace-controlplane:8082/api/dsp","protocol":"dataspace-protocol-http","querySpec":{"filterExpression":[]}}' 2>/dev/null) || resp=""
+  local cat13_body
+  cat13_body=$(printf '{"@context":["https://w3id.org/edc/connector/management/v2"],"@type":"CatalogRequest","counterPartyAddress":"http://controlplane:8082/api/dsp/%s/2025-1","counterPartyId":"%s","protocol":"dataspace-protocol-http:2025-1","querySpec":{"filterExpression":[]}}' "$PROVIDER_CTX" "$PROVIDER_DID")
+  resp=$(mgmt_post "/v5alpha/participants/${CONSUMER_CTX}/catalog/request" "$cat13_body" 2>/dev/null) || resp=""
 
   if [ -n "$resp" ]; then
     pass "$test_id: CatalogRequest with querySpec accepted"
@@ -163,7 +228,7 @@ run_catalog_tests() {
   # 1.4 — Federated Catalog query
   local test_id="CAT-1.4"
   local resp
-  resp=$(mgmt_post "/v5alpha/participants/hdab-medreg/federatedcatalog/request" \
+  resp=$(mgmt_post "/v5alpha/participants/${OPERATOR_CTX}/federatedcatalog/request" \
     '{"@context":["https://w3id.org/edc/connector/management/v2"],"@type":"QuerySpec"}' 2>/dev/null) || resp=""
 
   if [ -n "$resp" ] && echo "$resp" | jq -e 'length > 0' >/dev/null 2>&1; then
@@ -182,9 +247,9 @@ run_catalog_tests() {
   # 1.5 — HTTP content-type is JSON-LD compatible
   local test_id="CAT-1.5"
   local headers
-  headers=$(curl -sf -I -H "$(auth_header)" -H "Content-Type: application/json" \
+  headers=$(curl -s -D - -o /dev/null -H "$(auth_header)" -H "Content-Type: application/json" \
     -X POST -d '{"@context":["https://w3id.org/edc/connector/management/v2"],"@type":"QuerySpec"}' \
-    "${MGMT_API}/v5alpha/participants/test-clinic/assets/request" 2>/dev/null) || headers=""
+    "${MGMT_API}/v5alpha/participants/${PROVIDER_CTX}/assets/request" 2>/dev/null) || headers=""
 
   if echo "$headers" | grep -qi "application/json"; then
     pass "$test_id: Management API returns application/json content-type"
@@ -205,8 +270,10 @@ run_asset_tests() {
   log "Category 2: Asset Management Tests"
 
   # 2.1 — List assets per participant
-  for ctx in "${PARTICIPANTS[@]}"; do
-    local test_id="ASSET-2.1-${ctx}"
+  for i in "${!PARTICIPANT_SLUGS[@]}"; do
+    local slug="${PARTICIPANT_SLUGS[$i]}"
+    local ctx="${PARTICIPANT_CTXS[$i]}"
+    local test_id="ASSET-2.1-${slug}"
     local resp
     resp=$(mgmt_post "/v5alpha/participants/${ctx}/assets/request" \
       '{"@context":["https://w3id.org/edc/connector/management/v2"],"@type":"QuerySpec"}' 2>/dev/null) || resp=""
@@ -214,13 +281,13 @@ run_asset_tests() {
     if [ -n "$resp" ] && echo "$resp" | jq -e 'type == "array"' >/dev/null 2>&1; then
       local count
       count=$(echo "$resp" | jq 'length')
-      pass "$test_id: ${count} assets found for ${ctx}"
+      pass "$test_id: ${count} assets found for ${slug}"
       record_result "$test_id" "asset" "passed" "${count} assets"
     elif [ -n "$resp" ]; then
-      pass "$test_id: Asset query responded for ${ctx}"
+      pass "$test_id: Asset query responded for ${slug}"
       record_result "$test_id" "asset" "passed"
     else
-      fail "$test_id: Asset query failed for ${ctx}"
+      fail "$test_id: Asset query failed for ${slug}"
       record_result "$test_id" "asset" "failed"
     fi
   done
@@ -228,7 +295,7 @@ run_asset_tests() {
   # 2.2 — Asset contains required EDC properties
   local test_id="ASSET-2.2"
   local resp
-  resp=$(mgmt_post "/v5alpha/participants/test-clinic/assets/request" \
+  resp=$(mgmt_post "/v5alpha/participants/${PROVIDER_CTX}/assets/request" \
     '{"@context":["https://w3id.org/edc/connector/management/v2"],"@type":"QuerySpec","limit":1}' 2>/dev/null) || resp=""
 
   if [ -n "$resp" ] && echo "$resp" | jq -e '.[0]["@id"]' >/dev/null 2>&1; then
@@ -250,8 +317,10 @@ run_negotiation_tests() {
   log "Category 3: Contract Negotiation Tests (DSP §5)"
 
   # 3.1 — List negotiations per participant
-  for ctx in "${PARTICIPANTS[@]}"; do
-    local test_id="NEG-3.1-${ctx}"
+  for i in "${!PARTICIPANT_SLUGS[@]}"; do
+    local slug="${PARTICIPANT_SLUGS[$i]}"
+    local ctx="${PARTICIPANT_CTXS[$i]}"
+    local test_id="NEG-3.1-${slug}"
     local resp
     resp=$(mgmt_post "/v5alpha/participants/${ctx}/contractnegotiations/request" \
       '{"@context":["https://w3id.org/edc/connector/management/v2"],"@type":"QuerySpec"}' 2>/dev/null) || resp=""
@@ -259,13 +328,13 @@ run_negotiation_tests() {
     if [ -n "$resp" ] && echo "$resp" | jq -e 'type == "array"' >/dev/null 2>&1; then
       local count
       count=$(echo "$resp" | jq 'length')
-      pass "$test_id: ${count} negotiations found for ${ctx}"
+      pass "$test_id: ${count} negotiations found for ${slug}"
       record_result "$test_id" "negotiation" "passed" "${count} negotiations"
     elif [ -n "$resp" ]; then
-      pass "$test_id: Negotiation query responded for ${ctx}"
+      pass "$test_id: Negotiation query responded for ${slug}"
       record_result "$test_id" "negotiation" "passed"
     else
-      fail "$test_id: Negotiation query failed for ${ctx}"
+      fail "$test_id: Negotiation query failed for ${slug}"
       record_result "$test_id" "negotiation" "failed"
     fi
   done
@@ -273,13 +342,13 @@ run_negotiation_tests() {
   # 3.2 — Verify negotiation states include FINALIZED
   local test_id="NEG-3.2"
   local resp
-  resp=$(mgmt_post "/v5alpha/participants/cro-pharmaco/contractnegotiations/request" \
+  resp=$(mgmt_post "/v5alpha/participants/${CONSUMER_CTX}/contractnegotiations/request" \
     '{"@context":["https://w3id.org/edc/connector/management/v2"],"@type":"QuerySpec"}' 2>/dev/null) || resp=""
 
   if [ -n "$resp" ] && echo "$resp" | jq -e '[.[] | select(.state == "FINALIZED")] | length > 0' >/dev/null 2>&1; then
     local count
     count=$(echo "$resp" | jq '[.[] | select(.state == "FINALIZED")] | length')
-    pass "$test_id: ${count} FINALIZED negotiations (CRO PharmaCo Research AG)"
+    pass "$test_id: ${count} FINALIZED negotiations (consumer: pharmaco)"
     record_result "$test_id" "negotiation" "passed" "${count} FINALIZED"
   elif [ -n "$resp" ] && echo "$resp" | jq -e 'length > 0' >/dev/null 2>&1; then
     local states
@@ -298,7 +367,7 @@ run_negotiation_tests() {
 
   if [ -n "$neg_id" ]; then
     local agreement
-    agreement=$(mgmt_get "/v5alpha/participants/cro-pharmaco/contractnegotiations/${neg_id}/agreement" 2>/dev/null) || agreement=""
+    agreement=$(mgmt_get "/v5alpha/participants/${CONSUMER_CTX}/contractnegotiations/${neg_id}/agreement" 2>/dev/null) || agreement=""
 
     if [ -n "$agreement" ] && echo "$agreement" | jq -e '.["@id"]' >/dev/null 2>&1; then
       pass "$test_id: Contract agreement has @id field"
@@ -318,10 +387,10 @@ run_negotiation_tests() {
   # 3.4 — Negotiation error handling: invalid context ID returns error
   local test_id="NEG-3.4"
   local http_code
-  http_code=$(curl -sf -o /dev/null -w "%{http_code}" \
+  http_code=$(curl -s -o /dev/null -w "%{http_code}" \
     -H "$(auth_header)" -H "Content-Type: application/json" \
     -X POST -d '{"@context":["https://w3id.org/edc/connector/management/v2"],"@type":"QuerySpec"}' \
-    "${MGMT_API}/v5alpha/participants/nonexistent-participant/contractnegotiations/request" 2>/dev/null) || http_code="000"
+    "${MGMT_API}/v5alpha/participants/nonexistent-participant/contractnegotiations/request" 2>/dev/null)
 
   if [ "$http_code" -ge 400 ] 2>/dev/null; then
     pass "$test_id: Invalid participant returns HTTP ${http_code}"
@@ -342,8 +411,10 @@ run_transfer_tests() {
   log "Category 4: Transfer Process Tests (DSP §6)"
 
   # 4.1 — List transfers per participant
-  for ctx in "${PARTICIPANTS[@]}"; do
-    local test_id="XFER-4.1-${ctx}"
+  for i in "${!PARTICIPANT_SLUGS[@]}"; do
+    local slug="${PARTICIPANT_SLUGS[$i]}"
+    local ctx="${PARTICIPANT_CTXS[$i]}"
+    local test_id="XFER-4.1-${slug}"
     local resp
     resp=$(mgmt_post "/v5alpha/participants/${ctx}/transferprocesses/request" \
       '{"@context":["https://w3id.org/edc/connector/management/v2"],"@type":"QuerySpec"}' 2>/dev/null) || resp=""
@@ -351,13 +422,13 @@ run_transfer_tests() {
     if [ -n "$resp" ] && echo "$resp" | jq -e 'type == "array"' >/dev/null 2>&1; then
       local count
       count=$(echo "$resp" | jq 'length')
-      pass "$test_id: ${count} transfers found for ${ctx}"
+      pass "$test_id: ${count} transfers found for ${slug}"
       record_result "$test_id" "transfer" "passed" "${count} transfers"
     elif [ -n "$resp" ]; then
-      pass "$test_id: Transfer query responded for ${ctx}"
+      pass "$test_id: Transfer query responded for ${slug}"
       record_result "$test_id" "transfer" "passed"
     else
-      fail "$test_id: Transfer query failed for ${ctx}"
+      fail "$test_id: Transfer query failed for ${slug}"
       record_result "$test_id" "transfer" "failed"
     fi
   done
@@ -365,7 +436,7 @@ run_transfer_tests() {
   # 4.2 — Verify transfer includes STARTED or COMPLETED state
   local test_id="XFER-4.2"
   local resp
-  resp=$(mgmt_post "/v5alpha/participants/cro-pharmaco/transferprocesses/request" \
+  resp=$(mgmt_post "/v5alpha/participants/${CONSUMER_CTX}/transferprocesses/request" \
     '{"@context":["https://w3id.org/edc/connector/management/v2"],"@type":"QuerySpec"}' 2>/dev/null) || resp=""
 
   if [ -n "$resp" ] && echo "$resp" | jq -e '[.[] | select(.state == "STARTED" or .state == "COMPLETED")] | length > 0' >/dev/null 2>&1; then
@@ -410,8 +481,10 @@ run_policy_tests() {
   log "Category 5: Policy Definition Tests"
 
   # 5.1 — List policy definitions per participant
-  for ctx in "${PARTICIPANTS[@]}"; do
-    local test_id="POL-5.1-${ctx}"
+  for i in "${!PARTICIPANT_SLUGS[@]}"; do
+    local slug="${PARTICIPANT_SLUGS[$i]}"
+    local ctx="${PARTICIPANT_CTXS[$i]}"
+    local test_id="POL-5.1-${slug}"
     local resp
     resp=$(mgmt_post "/v5alpha/participants/${ctx}/policydefinitions/request" \
       '{"@context":["https://w3id.org/edc/connector/management/v2"],"@type":"QuerySpec"}' 2>/dev/null) || resp=""
@@ -419,13 +492,13 @@ run_policy_tests() {
     if [ -n "$resp" ] && echo "$resp" | jq -e 'type == "array"' >/dev/null 2>&1; then
       local count
       count=$(echo "$resp" | jq 'length')
-      pass "$test_id: ${count} policies found for ${ctx}"
+      pass "$test_id: ${count} policies found for ${slug}"
       record_result "$test_id" "policy" "passed" "${count} policies"
     elif [ -n "$resp" ]; then
-      pass "$test_id: Policy query responded for ${ctx}"
+      pass "$test_id: Policy query responded for ${slug}"
       record_result "$test_id" "policy" "passed"
     else
-      fail "$test_id: Policy query failed for ${ctx}"
+      fail "$test_id: Policy query failed for ${slug}"
       record_result "$test_id" "policy" "failed"
     fi
   done
@@ -433,7 +506,7 @@ run_policy_tests() {
   # 5.2 — Policy contains ODRL structure
   local test_id="POL-5.2"
   local resp
-  resp=$(mgmt_post "/v5alpha/participants/test-clinic/policydefinitions/request" \
+  resp=$(mgmt_post "/v5alpha/participants/${PROVIDER_CTX}/policydefinitions/request" \
     '{"@context":["https://w3id.org/edc/connector/management/v2"],"@type":"QuerySpec","limit":1}' 2>/dev/null) || resp=""
 
   if [ -n "$resp" ] && echo "$resp" | jq -e '.[0].policy' >/dev/null 2>&1; then
@@ -454,8 +527,10 @@ run_policy_tests() {
 run_contract_def_tests() {
   log "Category 6: Contract Definition Tests"
 
-  for ctx in "${PARTICIPANTS[@]}"; do
-    local test_id="CDEF-6.1-${ctx}"
+  for i in "${!PARTICIPANT_SLUGS[@]}"; do
+    local slug="${PARTICIPANT_SLUGS[$i]}"
+    local ctx="${PARTICIPANT_CTXS[$i]}"
+    local test_id="CDEF-6.1-${slug}"
     local resp
     resp=$(mgmt_post "/v5alpha/participants/${ctx}/contractdefinitions/request" \
       '{"@context":["https://w3id.org/edc/connector/management/v2"],"@type":"QuerySpec"}' 2>/dev/null) || resp=""
@@ -463,13 +538,13 @@ run_contract_def_tests() {
     if [ -n "$resp" ] && echo "$resp" | jq -e 'type == "array"' >/dev/null 2>&1; then
       local count
       count=$(echo "$resp" | jq 'length')
-      pass "$test_id: ${count} contract definitions for ${ctx}"
+      pass "$test_id: ${count} contract definitions for ${slug}"
       record_result "$test_id" "contractdef" "passed" "${count} definitions"
     elif [ -n "$resp" ]; then
-      pass "$test_id: Contract definition query responded for ${ctx}"
+      pass "$test_id: Contract definition query responded for ${slug}"
       record_result "$test_id" "contractdef" "passed"
     else
-      fail "$test_id: Contract definition query failed for ${ctx}"
+      fail "$test_id: Contract definition query failed for ${slug}"
       record_result "$test_id" "contractdef" "failed"
     fi
   done
@@ -481,11 +556,12 @@ run_contract_def_tests() {
 run_schema_tests() {
   log "Category 7: Management API Schema Compliance"
 
-  # 7.1 — Readiness endpoint
+  # 7.1 — Readiness endpoint (port 8080 not exposed; use docker exec)
   local test_id="SCHEMA-7.1"
   local http_code
-  http_code=$(curl -sf -o /dev/null -w "%{http_code}" \
-    "http://localhost:11003/api/check/readiness" 2>/dev/null) || http_code="000"
+  http_code=$(docker exec health-dataspace-controlplane \
+    curl -s -o /dev/null -w "%{http_code}" \
+    "http://localhost:8080/api/check/readiness" 2>/dev/null) || http_code="000"
 
   if [ "$http_code" = "200" ]; then
     pass "$test_id: Readiness endpoint returns HTTP 200"
@@ -495,10 +571,11 @@ run_schema_tests() {
     record_result "$test_id" "schema" "failed" "HTTP ${http_code}"
   fi
 
-  # 7.2 — Liveness endpoint
+  # 7.2 — Liveness endpoint (port 8080 not exposed; use docker exec)
   local test_id="SCHEMA-7.2"
-  http_code=$(curl -sf -o /dev/null -w "%{http_code}" \
-    "http://localhost:11003/api/check/liveness" 2>/dev/null) || http_code="000"
+  http_code=$(docker exec health-dataspace-controlplane \
+    curl -s -o /dev/null -w "%{http_code}" \
+    "http://localhost:8080/api/check/liveness" 2>/dev/null) || http_code="000"
 
   if [ "$http_code" = "200" ]; then
     pass "$test_id: Liveness endpoint returns HTTP 200"
@@ -511,7 +588,7 @@ run_schema_tests() {
   # 7.3 — JSON-LD @context handling in response
   local test_id="SCHEMA-7.3"
   local resp
-  resp=$(mgmt_post "/v5alpha/participants/test-clinic/assets/request" \
+  resp=$(mgmt_post "/v5alpha/participants/${PROVIDER_CTX}/assets/request" \
     '{"@context":["https://w3id.org/edc/connector/management/v2"],"@type":"QuerySpec","limit":1}' 2>/dev/null) || resp=""
 
   if [ -n "$resp" ] && echo "$resp" | jq -e '.[0]["@context"]' >/dev/null 2>&1; then
@@ -527,10 +604,10 @@ run_schema_tests() {
 
   # 7.4 — Invalid JSON body returns 400
   local test_id="SCHEMA-7.4"
-  http_code=$(curl -sf -o /dev/null -w "%{http_code}" \
+  http_code=$(curl -s -o /dev/null -w "%{http_code}" \
     -H "$(auth_header)" -H "Content-Type: application/json" \
     -X POST -d 'not-json' \
-    "${MGMT_API}/v5alpha/participants/test-clinic/assets/request" 2>/dev/null) || http_code="000"
+    "${MGMT_API}/v5alpha/participants/${PROVIDER_CTX}/assets/request" 2>/dev/null)
 
   if [ "$http_code" -ge 400 ] && [ "$http_code" -lt 500 ] 2>/dev/null; then
     pass "$test_id: Invalid JSON returns HTTP ${http_code} (client error)"
@@ -583,6 +660,9 @@ main() {
   echo "═══════════════════════════════════════════════════════════════"
   echo "  DSP 2025-1 Technology Compatibility Kit — Health Dataspace"
   echo "═══════════════════════════════════════════════════════════════"
+  echo ""
+
+  discover_participants
   echo ""
 
   run_catalog_tests

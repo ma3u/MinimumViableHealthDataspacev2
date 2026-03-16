@@ -30,6 +30,7 @@ REALM="${KEYCLOAK_REALM:-edcv}"
 CLIENT_ID="${EDC_CLIENT_ID:-admin}"
 CLIENT_SECRET="${EDC_CLIENT_SECRET:-edc-v-admin-secret}"
 REPORT_DIR="${REPORT_DIR:-test-results/ehds}"
+PROVIDER_CTX=""  # populated by discover_participants()
 
 TOTAL=0
 PASSED=0
@@ -94,6 +95,41 @@ mgmt_post() {
   curl -sf -X POST -H "$(auth_header)" -H "Content-Type: application/json" -d "$2" "${MGMT_API}$1" 2>/dev/null
 }
 
+
+# ---------------------------------------------------------------------------
+# Dynamic participant context discovery
+# ---------------------------------------------------------------------------
+discover_participants() {
+  log "Discovering participant context UUIDs..."
+  local participants_json
+  participants_json=$(curl -sf -H "$(auth_header)" \
+    "${MGMT_API}/v5alpha/participants") || {
+    log "ERROR: Cannot fetch participant list from Management API"
+    exit 1
+  }
+
+  for slug in "alpha-klinik" "pharmaco" "medreg"; do
+    local uuid
+    uuid=$(echo "$participants_json" | jq -r --arg s "$slug" \
+      '[.[] | select(.identity // "" | contains($s))] | .[0]["@id"] // empty')
+    if [ -n "$uuid" ]; then
+      log "  ${slug} -> ${uuid}"
+      case "$slug" in
+        alpha-klinik) PROVIDER_CTX="$uuid" ;;
+        pharmaco)     CONSUMER_CTX="$uuid" ;;
+        medreg)       OPERATOR_CTX="$uuid" ;;
+      esac
+    else
+      log "  WARNING: No context found for ${slug}"
+    fi
+  done
+
+  if [ -z "${PROVIDER_CTX:-}" ]; then
+    log "ERROR: Cannot discover provider context (alpha-klinik). Using fallback."
+    PROVIDER_CTX="alpha-klinik"
+  fi
+}
+
 # ---------------------------------------------------------------------------
 # Category 1: EHDS Article 53 Purpose Enforcement
 # ---------------------------------------------------------------------------
@@ -103,7 +139,7 @@ run_article53_tests() {
   # 1.1 — EHDS purpose constraints exist in policy definitions
   local test_id="ART53-1.1"
   local resp
-  resp=$(mgmt_post "/v5alpha/participants/test-clinic/policydefinitions/request" \
+  resp=$(mgmt_post "/v5alpha/participants/${PROVIDER_CTX}/policydefinitions/request" \
     '{"@context":["https://w3id.org/edc/connector/management/v2"],"@type":"QuerySpec"}' 2>/dev/null) || resp=""
 
   if [ -n "$resp" ] && echo "$resp" | jq -e 'length > 0' >/dev/null 2>&1; then
@@ -677,6 +713,9 @@ main() {
   echo "═══════════════════════════════════════════════════════════════"
   echo "  EHDS Health-Domain Compliance Tests — Health Dataspace"
   echo "═══════════════════════════════════════════════════════════════"
+  echo ""
+
+  discover_participants
   echo ""
 
   run_article53_tests

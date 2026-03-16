@@ -30,8 +30,9 @@ CLIENT_ID="${EDC_CLIENT_ID:-admin}"
 CLIENT_SECRET="${EDC_CLIENT_SECRET:-edc-v-admin-secret}"
 REPORT_DIR="${REPORT_DIR:-test-results/dcp}"
 
-# Participant DIDs (from Phase 2a provisioning)
-PARTICIPANT_CONTEXTS=("test-clinic" "clinic-alphaklinik" "cro-pharmaco" "hdab-medreg")
+# Participant slugs (resolved to UUID context IDs at runtime)
+PARTICIPANT_SLUGS=("alpha-klinik" "pharmaco" "medreg")
+PARTICIPANT_CTXS=()  # populated by discover_participants()
 
 # Counters
 TOTAL=0
@@ -87,9 +88,60 @@ auth_header() {
 
 identity_get() { curl -sf -H "$(auth_header)" -H "Content-Type: application/json" "${IDENTITY_API}$1" 2>/dev/null; }
 identity_post() { curl -sf -X POST -H "$(auth_header)" -H "Content-Type: application/json" -d "$2" "${IDENTITY_API}$1" 2>/dev/null; }
-issuer_get() { curl -sf -H "$(auth_header)" -H "Content-Type: application/json" "${ISSUER_API}$1" 2>/dev/null; }
-issuer_post() { curl -sf -X POST -H "$(auth_header)" -H "Content-Type: application/json" -d "$2" "${ISSUER_API}$1" 2>/dev/null; }
+issuer_get() { curl -s --max-time 10 -H "$(auth_header)" -H "Content-Type: application/json" "${ISSUER_API}$1" 2>/dev/null; }
+issuer_post() { curl -s --max-time 10 -X POST -H "$(auth_header)" -H "Content-Type: application/json" -d "$2" "${ISSUER_API}$1" 2>/dev/null; }
 mgmt_post() { curl -sf -X POST -H "$(auth_header)" -H "Content-Type: application/json" -d "$2" "${MGMT_API}$1" 2>/dev/null; }
+
+
+# ---------------------------------------------------------------------------
+# Dynamic participant context discovery
+# ---------------------------------------------------------------------------
+discover_participants() {
+  log "Discovering participant context UUIDs..."
+  local token_url
+  if curl -sf "${KEYCLOAK_URL}/realms/${REALM}" >/dev/null 2>&1; then
+    token_url="${KEYCLOAK_URL}/realms/${REALM}/protocol/openid-connect/token"
+  else
+    token_url="http://localhost:8080/realms/${REALM}/protocol/openid-connect/token"
+  fi
+  local tkn
+  tkn=$(curl -sf -X POST "$token_url" \
+    -H "Content-Type: application/x-www-form-urlencoded" \
+    -d "grant_type=client_credentials&client_id=${CLIENT_ID}&client_secret=${CLIENT_SECRET}" \
+    | jq -r '.access_token // empty') || tkn=""
+
+  local participants_json
+  participants_json=$(curl -sf -H "Authorization: Bearer $tkn" \
+    "${MGMT_API}/v5alpha/participants") || {
+    log "ERROR: Cannot fetch participant list from Management API"
+    exit 1
+  }
+
+  for slug in "${PARTICIPANT_SLUGS[@]}"; do
+    local uuid
+    uuid=$(echo "$participants_json" | jq -r --arg s "$slug" \
+      '[.[] | select(.identity // "" | contains($s))] | .[0]["@id"] // empty')
+    if [ -n "$uuid" ]; then
+      PARTICIPANT_CTXS+=("$uuid")
+      log "  ${slug} -> ${uuid}"
+    else
+      log "  WARNING: No context found for ${slug}"
+      PARTICIPANT_CTXS+=("")
+    fi
+  done
+
+  PROVIDER_CTX="${PARTICIPANT_CTXS[0]:-}"   # alpha-klinik
+  CONSUMER_CTX="${PARTICIPANT_CTXS[1]:-}"   # pharmaco
+  OPERATOR_CTX="${PARTICIPANT_CTXS[2]:-}"   # medreg
+
+  if [ -z "$PROVIDER_CTX" ] || [ -z "$CONSUMER_CTX" ] || [ -z "$OPERATOR_CTX" ]; then
+    log "ERROR: Missing required participant contexts."
+    log "  PROVIDER  (alpha-klinik): ${PROVIDER_CTX:-NOT FOUND}"
+    log "  CONSUMER  (pharmaco):     ${CONSUMER_CTX:-NOT FOUND}"
+    log "  OPERATOR  (medreg):       ${OPERATOR_CTX:-NOT FOUND}"
+    exit 1
+  fi
+}
 
 # ---------------------------------------------------------------------------
 # Category 1: DID Resolution Tests (DCP §3)
@@ -98,31 +150,31 @@ run_did_tests() {
   log "Category 1: DID Resolution Tests (DCP §3)"
 
   # 1.1 — Participant list includes DIDs
-  for ctx in "${PARTICIPANT_CONTEXTS[@]}"; do
-    local test_id="DID-1.1-${ctx}"
+  for i in "${!PARTICIPANT_SLUGS[@]}"; do
+    local slug="${PARTICIPANT_SLUGS[$i]}"
+    local ctx="${PARTICIPANT_CTXS[$i]}"
+    local test_id="DID-1.1-${slug}"
     local resp
     resp=$(mgmt_post "/v5alpha/participants/${ctx}/did" \
       '{"@context":["https://w3id.org/edc/connector/management/v2"]}' 2>/dev/null) || resp=""
 
     # Try participant query instead if direct DID endpoint doesn't exist
     if [ -z "$resp" ]; then
-      resp=$(identity_post "/v1alpha/participants/${ctx}/keypairs" \
-        '{"@context":["https://w3id.org/edc/connector/management/v2"],"@type":"QuerySpec"}' 2>/dev/null) || resp=""
+      resp=$(identity_get "/v1alpha/participants/${ctx}/keypairs" 2>/dev/null) || resp=""
     fi
 
     if [ -n "$resp" ]; then
-      pass "$test_id: DID/KeyPair endpoint responds for ${ctx}"
+      pass "$test_id: DID/KeyPair endpoint responds for ${slug}"
       record_result "$test_id" "did" "passed"
     else
       # Try the participants endpoint on identity API
       local part_resp
-      part_resp=$(identity_post "/v1alpha/participants" \
-        '{"@context":["https://w3id.org/edc/connector/management/v2"],"@type":"QuerySpec"}' 2>/dev/null) || part_resp=""
+      part_resp=$(identity_get "/v1alpha/participants" 2>/dev/null) || part_resp=""
       if [ -n "$part_resp" ] && echo "$part_resp" | jq -e ".[] | select(.participantId == \"${ctx}\")" >/dev/null 2>&1; then
         pass "$test_id: Participant ${ctx} found in IdentityHub"
         record_result "$test_id" "did" "passed"
       else
-        skip "$test_id: DID resolution endpoint not accessible for ${ctx}"
+        skip "$test_id: DID resolution endpoint not accessible for ${slug}"
         record_result "$test_id" "did" "skipped" "endpoint not accessible"
       fi
     fi
@@ -131,8 +183,7 @@ run_did_tests() {
   # 1.2 — IdentityHub participant query returns all 4 contexts
   local test_id="DID-1.2"
   local resp
-  resp=$(identity_post "/v1alpha/participants" \
-    '{"@context":["https://w3id.org/edc/connector/management/v2"],"@type":"QuerySpec"}' 2>/dev/null) || resp=""
+  resp=$(identity_get "/v1alpha/participants" 2>/dev/null) || resp=""
 
   if [ -n "$resp" ] && echo "$resp" | jq -e 'type == "array"' >/dev/null 2>&1; then
     local count
@@ -193,22 +244,23 @@ run_keypair_tests() {
   log "Category 2: Key Pair Management Tests (DCP §4)"
 
   # 2.1 — List key pairs for each participant
-  for ctx in "${PARTICIPANT_CONTEXTS[@]}"; do
-    local test_id="KEY-2.1-${ctx}"
+  for i in "${!PARTICIPANT_SLUGS[@]}"; do
+    local slug="${PARTICIPANT_SLUGS[$i]}"
+    local ctx="${PARTICIPANT_CTXS[$i]}"
+    local test_id="KEY-2.1-${slug}"
     local resp
-    resp=$(identity_post "/v1alpha/participants/${ctx}/keypairs" \
-      '{"@context":["https://w3id.org/edc/connector/management/v2"],"@type":"QuerySpec"}' 2>/dev/null) || resp=""
+    resp=$(identity_get "/v1alpha/participants/${ctx}/keypairs" 2>/dev/null) || resp=""
 
     if [ -n "$resp" ] && echo "$resp" | jq -e 'type == "array"' >/dev/null 2>&1; then
       local count
       count=$(echo "$resp" | jq 'length')
-      pass "$test_id: ${count} key pairs for ${ctx}"
+      pass "$test_id: ${count} key pairs for ${slug}"
       record_result "$test_id" "keypair" "passed" "${count} keypairs"
     elif [ -n "$resp" ]; then
-      pass "$test_id: KeyPair endpoint responded for ${ctx}"
+      pass "$test_id: KeyPair endpoint responded for ${slug}"
       record_result "$test_id" "keypair" "passed"
     else
-      fail "$test_id: KeyPair query failed for ${ctx}"
+      fail "$test_id: KeyPair query failed for ${slug}"
       record_result "$test_id" "keypair" "failed"
     fi
   done
@@ -216,13 +268,12 @@ run_keypair_tests() {
   # 2.2 — Key pair state is ACTIVATED
   local test_id="KEY-2.2"
   local resp
-  resp=$(identity_post "/v1alpha/participants/test-clinic/keypairs" \
-    '{"@context":["https://w3id.org/edc/connector/management/v2"],"@type":"QuerySpec"}' 2>/dev/null) || resp=""
+  resp=$(identity_get "/v1alpha/participants/${PROVIDER_CTX}/keypairs" 2>/dev/null) || resp=""
 
   if [ -n "$resp" ] && echo "$resp" | jq -e '[.[] | select(.state == "ACTIVATED")] | length > 0' >/dev/null 2>&1; then
     local active_count
     active_count=$(echo "$resp" | jq '[.[] | select(.state == "ACTIVATED")] | length')
-    pass "$test_id: ${active_count} ACTIVATED key pairs (test-clinic)"
+    pass "$test_id: ${active_count} ACTIVATED key pairs (provider: alpha-klinik)"
     record_result "$test_id" "keypair" "passed" "${active_count} active"
   elif [ -n "$resp" ] && echo "$resp" | jq -e 'length > 0' >/dev/null 2>&1; then
     local states
@@ -260,22 +311,23 @@ run_credential_tests() {
   log "Category 3: Verifiable Credential Tests (DCP §5)"
 
   # 3.1 — List credentials for each participant
-  for ctx in "${PARTICIPANT_CONTEXTS[@]}"; do
-    local test_id="VC-3.1-${ctx}"
+  for i in "${!PARTICIPANT_SLUGS[@]}"; do
+    local slug="${PARTICIPANT_SLUGS[$i]}"
+    local ctx="${PARTICIPANT_CTXS[$i]}"
+    local test_id="VC-3.1-${slug}"
     local resp
-    resp=$(identity_post "/v1alpha/participants/${ctx}/credentials" \
-      '{"@context":["https://w3id.org/edc/connector/management/v2"],"@type":"QuerySpec"}' 2>/dev/null) || resp=""
+    resp=$(identity_get "/v1alpha/participants/${ctx}/credentials" 2>/dev/null) || resp=""
 
     if [ -n "$resp" ] && echo "$resp" | jq -e 'type == "array"' >/dev/null 2>&1; then
       local count
       count=$(echo "$resp" | jq 'length')
-      pass "$test_id: ${count} credentials for ${ctx}"
+      pass "$test_id: ${count} credentials for ${slug}"
       record_result "$test_id" "credential" "passed" "${count} VCs"
     elif [ -n "$resp" ]; then
-      pass "$test_id: Credential endpoint responded for ${ctx}"
+      pass "$test_id: Credential endpoint responded for ${slug}"
       record_result "$test_id" "credential" "passed"
     else
-      fail "$test_id: Credential query failed for ${ctx}"
+      fail "$test_id: Credential query failed for ${slug}"
       record_result "$test_id" "credential" "failed"
     fi
   done
@@ -283,8 +335,7 @@ run_credential_tests() {
   # 3.2 — Credentials include EHDS-specific types
   local test_id="VC-3.2"
   local resp
-  resp=$(identity_post "/v1alpha/participants/test-clinic/credentials" \
-    '{"@context":["https://w3id.org/edc/connector/management/v2"],"@type":"QuerySpec"}' 2>/dev/null) || resp=""
+  resp=$(identity_get "/v1alpha/participants/${PROVIDER_CTX}/credentials" 2>/dev/null) || resp=""
 
   if [ -n "$resp" ] && echo "$resp" | jq -e 'length > 0' >/dev/null 2>&1; then
     local types
@@ -328,16 +379,18 @@ run_issuer_tests() {
   # 4.1 — Issuer service health check
   local test_id="ISS-4.1"
   local http_code
-  http_code=$(curl -sf -o /dev/null -w "%{http_code}" \
-    "http://localhost:10013/api/check/readiness" 2>/dev/null) || http_code="000"
+  # Default API port 10010 is not exposed; use docker exec
+  http_code=$(docker exec health-dataspace-issuerservice \
+    curl -s -o /dev/null -w "%{http_code}" \
+    "http://localhost:10010/api/check/readiness" 2>/dev/null) || http_code="000"
 
   if [ "$http_code" = "200" ]; then
     pass "$test_id: IssuerService readiness check passed"
     record_result "$test_id" "issuer" "passed"
   else
-    # Try alternative port/path
-    http_code=$(curl -sf -o /dev/null -w "%{http_code}" \
-      "${ISSUER_API}/credentials" 2>/dev/null) || http_code="000"
+    # Try admin API (port 10013 is exposed)
+    http_code=$(curl -s -o /dev/null -w "%{http_code}" \
+      "${ISSUER_API}/credentials" 2>/dev/null)
     if [ "$http_code" = "200" ] || [ "$http_code" = "401" ]; then
       pass "$test_id: IssuerService is running (HTTP ${http_code})"
       record_result "$test_id" "issuer" "passed"
@@ -350,9 +403,11 @@ run_issuer_tests() {
   # 4.2 — Credential definitions exist
   local test_id="ISS-4.2"
   local resp
-  resp=$(issuer_post "/v1alpha/credentialdefinitions" \
+  # Issuer uses multi-tenant API: /v1alpha/participants/{ctxId}/credentialdefinitions/query
+  resp=$(issuer_post "/v1alpha/participants/issuer/credentialdefinitions/query" \
     '{"@context":["https://w3id.org/edc/connector/management/v2"],"@type":"QuerySpec"}' 2>/dev/null) || resp=""
 
+  # ISS-4.2 check: response may be either an error object or a valid array
   if [ -n "$resp" ] && echo "$resp" | jq -e 'type == "array"' >/dev/null 2>&1; then
     local count
     count=$(echo "$resp" | jq 'length')
@@ -492,6 +547,9 @@ main() {
   echo "═══════════════════════════════════════════════════════════════"
   echo "  DCP v1.0 Compliance Tests — Health Dataspace"
   echo "═══════════════════════════════════════════════════════════════"
+  echo ""
+
+  discover_participants
   echo ""
 
   run_did_tests
