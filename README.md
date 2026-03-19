@@ -456,157 +456,256 @@ All 12 phases are **✅ Complete** — from infrastructure migration through EDC
 | 11    | EDC Components — Per-Participant Topology & Info Layer    | ✅ Complete |
 | 12    | API QuerySpec Fix & EHDS Policy Seeding                  | ✅ Complete |
 
-#### Phase 1 — Infrastructure Migration (EDC-V + DCore + CFM)
+### Phase 1 — Infrastructure Migration
 
-Replaced the monolithic Minimum Viable Dataspace (MVD) reference with a production-grade
-Eclipse stack: EDC-V control plane, DCore Rust data planes, and CFM multi-tenant management.
-Deployed the full JAD (Joint Applicant Deployment) via `docker-compose.jad.yml` with 18
-Docker services, including PostgreSQL 17 (8 isolated schemas), HashiCorp Vault, NATS
-JetStream, Keycloak, and Traefik reverse proxy. Provisioned three EHDS tenant profiles —
-AlphaKlinik Berlin (DATA_HOLDER), PharmaCo Research AG (DATA_USER), and MedReg DE (HDAB) —
-each with their own participant context and Virtual Participant Addresses (VPAs). Designed a
-dual data plane architecture (ADR-2): `dataplane-fhir` for HttpData-PUSH clinical transfers
-and `dataplane-omop` for HttpData-PULL analytics queries routed through a Neo4j Query Proxy.
-Generated TypeScript API clients from OpenAPI specs for all JAD management, identity, and
-issuer endpoints. Bootstrapped Vault with per-participant Ed25519 signing keys, AES
-encryption keys, and STS client secrets.
+**Background:** The European Health Data Space (EHDS) requires that hospitals, research
+organisations, and regulators exchange health data through standardised "dataspace connectors"
+rather than point-to-point integrations. The Eclipse reference implementation provides these
+connectors as open-source building blocks — but they ship as dozens of separate services that
+must be wired together. Our starting point was a simplified demo ("Minimum Viable Dataspace")
+that was too limited for realistic health scenarios.
 
-#### Phase 2 — Identity & Trust (DCP v1.0 + Verifiable Credentials)
+**What we built:** We replaced the simplified demo with a production-grade deployment of 18
+interconnected services, all orchestrated through Docker containers. This includes the
+connector control plane (EDC-V) that manages data sharing agreements, two specialised data
+transfer engines (DCore) — one for clinical patient data, one for research analytics — and a
+multi-tenant management layer (CFM) that allows multiple organisations to share the
+infrastructure. We also set up a secret vault for cryptographic keys, a message broker for
+internal event communication, and a reverse proxy for routing web traffic. Three fictional
+organisations were configured as initial participants: a hospital (AlphaKlinik Berlin), a
+pharmaceutical company (PharmaCo Research AG), and a health data authority (MedReg DE).
 
-Established decentralised identity following the DCP v1.0 specification. Created `did:web`
-identifiers for all five fictional participants (AlphaKlinik Berlin, PharmaCo Research AG,
-MedReg DE, Limburg Medical Centre, Institut de Recherche Santé) with Ed25519 key pairs
-stored in Vault. Configured the IssuerService with three EHDS credential type definitions —
-`EHDSParticipantCredential`, `DataProcessingPurposeCredential`, and
-`DataQualityLabelCredential` — and issued 15 Verifiable Credentials (3 per participant)
-stored in each participant's IdentityHub. Deployed Keycloak as the OAuth2/OIDC identity
-provider with PKCE authorization code flow, three demo roles (`edcadmin`, `clinicuser`,
-`regulator`), three demo users, and a pre-configured realm. Integrated Keycloak with the
-Next.js UI via NextAuth.js for session-based authentication across all views.
+**Components developed:** `docker-compose.jad.yml` (18-service deployment), Neo4j Query Proxy
+(REST-to-graph bridge), Vault bootstrap scripts, TypeScript API client libraries.
 
-#### Phase 3 — Health Knowledge Graph (Schema, FHIR Pipeline, EEHRxF)
+### Phase 2 — Identity & Trust
 
-Built the five-layer Neo4j knowledge graph that underpins the entire dataspace. Layer 1
-(Marketplace) models the DSP approval chain; Layer 2 (HealthDCAT-AP) stores dataset catalog
-metadata; Layer 3 (FHIR R4) holds clinical data; Layer 4 (OMOP CDM) provides the research
-analytics model; Layer 5 (Ontology) contains SNOMED CT and LOINC hierarchies linked via
-`IS_A` relationships. Generated 167 synthetic patients with Synthea, producing 58,000+
-clinical events (encounters, conditions, observations, medications, procedures). Transformed
-FHIR resources into OMOP CDM entities with bidirectional `MAPPED_TO` links. Registered two
-HealthDCAT-AP datasets with distributions and EHDS Article 53 legal basis. Mapped 8,534
-procedures across the patient population. Aligned FHIR resources with the six EEHRxF priority
-categories (Patient Summary, ePrescription, Laboratory, Medical Imaging, Discharge Reports,
-Rare Diseases) referencing 14 HL7 Europe profiles.
+**Background:** Before organisations can exchange health data, they need to prove who they are
+and what they are authorised to do. The EHDS regulation requires machine-verifiable digital
+credentials — similar to how a passport proves your identity at a border. The Decentralised
+Claims Protocol (DCP) defines how dataspace participants present these credentials to each
+other without relying on a single central authority.
 
-#### Phase 4 — Dataspace Integration (DSP Negotiation + DCore Transfer)
+**What we built:** We gave each of the five fictional organisations a digital identity
+(DID:web) — essentially a globally unique identifier with associated cryptographic keys stored
+securely in the vault. We then set up a credential issuer (like a digital passport office)
+that creates three types of EHDS certificates: one proving the organisation is a legitimate
+dataspace participant, one stating their data processing purpose, and one attesting their data
+quality. Each organisation received all three credentials (15 total), stored in their personal
+credential wallet (IdentityHub). For human users, we deployed a single sign-on system
+(Keycloak) with three demo accounts: an administrator, a clinic user, and a regulator — each
+with appropriate access rights.
 
-Demonstrated end-to-end DSP-compliant data exchange between participants. Registered four
-data assets on the AlphaKlinik Clinic EDC-V control plane (FHIR patient bundles, OMOP
-cohorts, HealthDCAT-AP catalogs). Executed three contract negotiations through the full DSP
-state machine (`REQUESTED → OFFERED → ACCEPTED → AGREED → VERIFIED → FINALIZED`). Populated
-the HDAB federated catalog with all four datasets discoverable via DSP catalog queries.
-Completed DCore data plane transfers: 100 FHIR patients pulled via `dataplane-fhir`
-(HttpData-PUSH) and 2 HealthDCAT-AP datasets via `dataplane-omop` (HttpData-PULL), all
-authenticated with Ed25519 JWT bearer tokens. Projected completed contract and transfer
-events into Neo4j Layer 1 for audit trail and graph-based provenance queries.
+**Components developed:** DID:web identity documents for 5 participants, IssuerService
+credential definitions, 15 Verifiable Credentials, Keycloak realm with SSO integration,
+NextAuth.js session management in the UI.
 
-#### Phase 5 — Federated Queries & GraphRAG (Text2Cypher NLQ)
+### Phase 3 — Health Knowledge Graph
 
-Added cross-SPE federation and natural language querying to support multi-site research.
-Deployed a second Neo4j Secure Processing Environment (`neo4j-spe2`) with an independent data
-partition (37 patients, 25,000+ clinical events). Built application-layer federation in the
-Neo4j Proxy — dispatching read-only Cypher to all SPEs in parallel, merging results with
-source labels, and supporting k-anonymity filtering (`minK` threshold suppression).
-Implemented a Text2Cypher natural language query pipeline with three resolution tiers:
-template matching (9 built-in patterns), optional LLM fallback (OpenAI/Ollama), and federated
-dispatch mode. Created the NLQ Explorer UI (`/query`) with free-text input, federated toggle,
-dynamic result tables, method badges (template vs. LLM), Cypher inspector, SPE overview, and
-query history.
+**Background:** Health data exists in many formats and standards — hospitals use FHIR for
+clinical records, researchers use OMOP for analytics, and data catalogs use HealthDCAT-AP for
+metadata. To make all of this searchable, linkable, and meaningful, we needed a unified data
+model that connects patients to conditions to medications to research concepts — all in one
+place.
 
-#### Phase 6 — Graph Explorer UI + Participant Portal (19 Pages)
+**What we built:** We created a five-layer knowledge graph in Neo4j that connects all the
+pieces. Layer 1 tracks the marketplace (who agreed to share what, under which contract).
+Layer 2 holds the dataset catalog (what data is available, who published it, under which legal
+basis). Layer 3 stores clinical patient data in FHIR format. Layer 4 mirrors that same data in
+the OMOP research format, linked back to the FHIR originals. Layer 5 contains medical
+vocabularies (SNOMED for diagnoses, LOINC for lab tests) so the system understands that
+"diabetes mellitus type 2" and concept code 44054006 are the same thing. We generated 167
+realistic synthetic patients (58,000+ clinical events) using the Synthea patient simulator and
+loaded them through the entire pipeline. We also mapped all clinical data to the six EU
+priority health record categories (patient summaries, prescriptions, lab results, imaging,
+discharge reports, rare diseases).
 
-Delivered a unified Next.js 14 web application covering exploration, governance, onboarding,
-data sharing, and operations. Phase 6a built seven explorer views: Graph Explorer (force-
-directed 5-layer visualisation), Dataset Catalog (HealthDCAT-AP browser), EHDS Compliance
-(HDAB approval chain validator), Patient Journey (FHIR→OMOP timeline), OMOP Analytics
-(cohort-level dashboard), EEHRxF Profiles (gap analysis), and NLQ/Federated query. Phase 6b
-ported three reference Angular UIs into Next.js: Aruba participant onboarding (self-
-registration, credential management), Fraunhofer data sharing (asset publishing, catalog
-discovery, contract negotiation wizard, transfer monitoring), and Redline operator dashboard
-(tenant management, policy editor, audit log). Added Keycloak role-based access control to all
-portal routes. Deployed as a Docker service (`graph-explorer`) and as a static export to
-GitHub Pages.
+**Components developed:** 5-layer Neo4j graph schema, Synthea data generation pipeline,
+FHIR-to-OMOP transformation scripts, HealthDCAT-AP catalog registration, EEHRxF profile
+alignment (14 HL7 Europe profiles across 6 categories).
 
-#### Phase 7 — TCK DCP & DSP Compliance Verification
+### Phase 4 — Dataspace Integration
 
-Validated protocol conformance using official Technology Compatibility Kits and custom test
-suites. Ran the DSP 2025-1 TCK (140+ test cases) against all three participant connectors,
-covering catalog protocol, contract negotiation lifecycle, transfer process, and message
-schema validation. Verified DCP v1.0 compliance for IdentityHub and IssuerService: DID
-resolution, Self-Issued Identity Token generation/validation, credential presentation
-exchange, and credential issuance with StatusList2021 revocation. Created a custom EHDS health
-domain test suite covering Article 53 purpose enforcement (accepted/rejected negotiations
-based on credential presence), HealthDCAT-AP v3.0 schema compliance, EEHRxF FHIR profile
-validation, and OMOP CDM transformation integrity. Automated all tests in a GitHub Actions
-CI/CD pipeline with weekly scheduled runs.
+**Background:** With infrastructure, identities, and data in place, we needed to demonstrate
+the core value proposition: one organisation requesting data from another through a
+standardised, auditable process — not by emailing files, but through the Dataspace Protocol
+(DSP) that governs contract negotiation and data transfer.
 
-#### Phase 8 — Test Coverage (291 Tests — 260 Unit + 31 E2E)
+**What we built:** We registered four datasets on the hospital's connector (patient records,
+research cohorts, and catalog entries). The pharmaceutical company then initiated three formal
+data sharing requests, each progressing through a six-step negotiation process (request →
+offer → accept → agree → verify → finalise). After contracts were signed, actual data flowed
+through the transfer engines: 100 patient records via the clinical data plane, and 2 catalog
+datasets via the analytics data plane. Every step was cryptographically authenticated and
+logged. All completed contracts and transfers were recorded in the knowledge graph for full
+audit trail and provenance tracking.
 
-Expanded test coverage from initial scaffolding to comprehensive quality assurance. Added
-integration tests for all API routes using Vitest with mocked Neo4j and EDC clients — covering
-happy-path responses, empty-data scenarios, POST validation, and 502 error handling. Tested UI
-components (UserMenu states, fetchApi routing, Navigation highlighting). Lifted overall
-statement coverage from 10.5% to 71.76% (+583%). Created `.github/workflows/test.yml` for
-automated CI: unit tests with coverage, ESLint linting, and Playwright E2E tests on every push
-and pull request. Coverage reports published as CI artifacts and documented in
-`docs/test-report.md`.
+**Components developed:** Data asset registration scripts, contract negotiation seed scripts,
+federated catalog population, DCore data plane transfer configuration, Neo4j audit trail
+projection.
 
-#### Phase 9 — Documentation & Navigation Restructuring
+### Phase 5 — Federated Queries & Natural Language Search
 
-Made the project accessible to both business stakeholders and developers. Created four in-app
-documentation pages: landing page with section cards, user guide covering all application
-views and EHDS workflows, developer guide with tech stack, API reference, testing setup, and
-ADR summaries, and architecture page with interactive Mermaid diagrams (5-layer graph, data
-flow pipeline, deployment topology, DSP negotiation sequence, DCP trust framework).
-Reorganised navigation from flat links and overflow menus into five logical dropdown clusters:
-Explore, Governance, Exchange, Portal, and Docs. Refreshed the home page with a two-section
-card layout. All pages use client-side Mermaid rendering, fully compatible with Next.js static
-export for GitHub Pages deployment.
+**Background:** In a real health dataspace, patient data stays at each hospital —
+researchers query across sites without the data ever leaving. This "federated" approach
+protects patient privacy while enabling large-scale research. Additionally, not all users know
+database query languages, so we needed a plain-English search interface.
 
-#### Phase 10 — Tasks Dashboard & DPS Integration
+**What we built:** We added a second independent database (simulating a second hospital site)
+with its own 37 patients and 25,000+ clinical events. A federation layer sends the same
+question to both sites simultaneously, merges the results, and labels which results came from
+which site. Built-in privacy protection suppresses any result group with too few patients
+(k-anonymity) to prevent re-identification. On top of this, we built a natural language query
+system: users type questions like "How many patients have diabetes?" and the system
+automatically translates this into a database query. It first tries 9 built-in question
+templates; if none match, it can optionally use an AI language model for free-form questions.
 
-Built a unified operational view for monitoring contract negotiations and transfer processes.
-The `/api/tasks` route queries all registered participant contexts in parallel, mapping raw
-EDC objects to a unified task type with human-readable participant names, asset labels, and DPS
-metadata. For transfers in `STARTED` state, it checks `contentDataAddress` for Endpoint Data
-Reference availability — indicating the Data Plane has processed the DPS START signal. The
-`/tasks` UI renders DSP pipeline steppers showing each task's position in the state machine
-(animated for active states, green checkmarks for completed, red X for terminated). Features
-include summary cards, filter tabs, auto-refresh polling, and deep links to negotiation/
-transfer detail pages.
+**Components developed:** Second Neo4j instance (SPE-2), federated query dispatcher in the
+Neo4j Proxy, k-anonymity filter, Text2Cypher translation pipeline (9 templates + LLM
+fallback), NLQ Explorer UI page.
 
-#### Phase 11 — EDC Components Topology & Info Layer
+### Phase 6 — Web Application & Participant Portal
 
-Enhanced the `/admin/components` page to reflect the decentralised architecture where each
-participant operates their own connector stack. Added info overlays (ⓘ) on all 18 component
-types explaining their role, protocol implementation, ports, dependencies, and health source.
-Restructured the view with a Layer ↔ Participant toggle: the participant view groups
-components by owner (Control Plane, Data Planes, IdentityHub, Keycloak, Vault, Tenant
-Manager per participant). Added critical service indicators with severity escalation — red
-(unhealthy/exited), yellow (starting/high resource), green (healthy), grey (unknown) — and a
-degraded-participant summary banner with quick-navigation links.
+**Background:** All the back-end services from Phases 1–5 are powerful but invisible to end
+users. We needed a web application where hospital staff, researchers, regulators, and
+administrators can actually see and interact with the dataspace — browsing datasets,
+exploring patient journeys, managing data sharing agreements, and onboarding new organisations.
 
-#### Phase 12 — API QuerySpec Fix & EHDS Policy Seeding
+**What we built:** A unified web application with 19 pages organised into five areas.
+**Explore** lets users visually browse the knowledge graph, search the dataset catalog,
+follow individual patient timelines, view research analytics dashboards, check EU profile
+compliance, and run natural language queries. **Governance** shows the EHDS approval chain
+and protocol compliance status. **Exchange** enables publishing datasets, discovering data
+from other organisations, negotiating sharing agreements, and monitoring transfers.
+**Portal** handles new organisation registration, credential management, and system
+administration (tenant management, policy editing, audit logs). **Docs** provides user
+guides, developer documentation, and interactive architecture diagrams. The application runs
+both as a Docker container connected to live data and as a static demo site on GitHub Pages.
 
-Resolved a critical EDC-V Management API compatibility issue: `POST .../request` list
-endpoints returned empty results when the `QuerySpec` body omitted `filterExpression`. The
-EDC-V query engine treats a missing field as "match nothing" rather than "no filter". Fixed by
-adding `"filterExpression": []` to all QuerySpec objects across 6 API routes (policies, assets,
-tasks, negotiations, transfers). Created `jad/seed-ehds-policies.sh` to dynamically discover
-participant context IDs and seed 14 EHDS-specific ODRL policy definitions across all five
-participants — covering research access, cross-border access, public health, AI training,
-regulatory, and open catalog scenarios. Replaced the card grid for participants in the Layer
-View with a consistent table layout.
+**Components developed:** 19 Next.js pages (7 explorer views + 4 onboarding pages + 4 data
+exchange pages + 4 admin pages), Keycloak role-based access control, GitHub Pages deployment.
+
+### Phase 7 — Protocol Compliance Testing
+
+**Background:** An EHDS-compliant dataspace must pass official conformance tests to ensure
+interoperability — similar to how medical devices must pass certification before use. The
+Dataspace Protocol (DSP) and Decentralised Claims Protocol (DCP) each publish official test
+kits that every connector must pass. Beyond protocol tests, we also needed health-domain
+specific validation.
+
+**What we built:** We ran three compliance test suites. The DSP Technology Compatibility Kit
+(140+ test cases) verified that catalog queries, contract negotiations, and data transfers all
+follow the official message formats and state transitions. The DCP compliance suite confirmed
+that each organisation's identity documents resolve correctly, credentials are valid, and
+presentations are accepted by other participants. A custom EHDS health domain suite tested
+that access requests without proper purpose credentials are rejected (per EHDS Article 53),
+that the dataset catalog meets the HealthDCAT-AP standard, that transferred patient data
+conforms to EU health record profiles, and that clinical-to-research data transformations are
+correct. All tests run automatically every week via GitHub Actions.
+
+**Components developed:** DSP TCK runner script, DCP compliance test suite, EHDS health
+domain test suite (Article 53 enforcement, HealthDCAT-AP validation, EEHRxF conformance, OMOP
+integrity checks), GitHub Actions compliance pipeline.
+
+### Phase 8 — Automated Testing
+
+**Background:** As the project grew to 19 pages, 16 API endpoints, and multiple library
+modules, manual testing became impractical. Automated tests catch regressions early — if a
+change to one part of the system accidentally breaks another, the tests flag it before the
+code reaches production.
+
+**What we built:** We wrote 291 automated tests covering the entire application. Unit tests
+check that each API endpoint returns the correct data and handles errors gracefully. Component
+tests verify that UI elements (login menu, navigation, data tables) display and behave
+correctly. End-to-end tests simulate a real user clicking through the application in a browser.
+Overall code coverage rose from 10% to 72%. Every time code is pushed to the repository,
+GitHub Actions automatically runs all tests and reports any failures — no manual intervention
+needed.
+
+**Components developed:** 260 unit/integration tests (Vitest), 31 end-to-end browser tests
+(Playwright), GitHub Actions CI pipeline, coverage reporting.
+
+### Phase 9 — Documentation & Navigation
+
+**Background:** A project this complex needs clear documentation for two audiences: business
+stakeholders who want to understand what the system does and why, and developers who need to
+set it up, extend it, or troubleshoot it. The application's navigation also needed restructuring
+as it had grown from 7 pages to 19.
+
+**What we built:** Four in-app documentation pages: an overview landing page, a user guide
+explaining every application view and EHDS workflow, a developer guide covering setup
+instructions, API reference, and architectural decisions, and an architecture page with five
+interactive diagrams showing the data model, data flow, deployment topology, contract
+negotiation process, and trust framework. We reorganised the navigation bar from a flat list
+into five clearly labelled dropdown menus: Explore, Governance, Exchange, Portal, and Docs.
+The home page was refreshed with a card-based layout that gives newcomers an immediate
+overview. All documentation works both in the live application and on the static GitHub Pages
+demo.
+
+**Components developed:** 4 documentation pages, Mermaid diagram renderer component, 5
+interactive architecture diagrams, restructured navigation (5 dropdown clusters), updated home
+page.
+
+### Phase 10 — Tasks Dashboard
+
+**Background:** In a running dataspace, operators need to monitor what is happening across all
+participants — which data sharing agreements are being negotiated, which transfers are in
+progress, and whether anything has failed. Without a centralised view, an operator would need
+to check each participant's connector separately.
+
+**What we built:** A Tasks dashboard that aggregates all active contract negotiations and data
+transfers from every participant into a single page. Each task shows its current position in
+the workflow as a visual step indicator — for example, a contract negotiation progresses
+through "Requested → Offered → Accepted → Agreed → Verified → Finalised" with the current step
+highlighted. Transfer tasks additionally show whether the data plane has started delivering
+data. The dashboard includes summary cards (total tasks, active tasks, negotiations,
+transfers), filter tabs, automatic refresh every 15 seconds, and direct links to view the
+details of any individual task.
+
+**Components developed:** Tasks API route (server-side aggregation across all participant
+contexts), Tasks dashboard page with pipeline step indicators, auto-refresh polling, mock data
+for the static demo.
+
+### Phase 11 — System Topology View
+
+**Background:** In a decentralised dataspace, each organisation runs its own set of services
+(connector, credential wallet, data planes, etc.). An operator needs to see at a glance which
+services belong to which organisation, whether they are healthy, and what each service does.
+The existing admin page showed all services in a flat list without organisational context.
+
+**What we built:** A per-participant topology view on the admin page that groups services by
+the organisation they belong to — for example, AlphaKlinik Berlin's section shows its
+connector, data planes, credential wallet, authentication service, and vault, each with a
+health indicator (green = healthy, yellow = warning, red = critical). An info button on each
+service card explains in plain language what the service does, which protocol it implements,
+and what it depends on. A summary banner at the top alerts operators when any organisation has
+degraded services. Users can toggle between the original layer-based view (services grouped by
+type) and the new participant-based view.
+
+**Components developed:** Per-participant topology API route, component info catalog (18
+service descriptions), health severity indicators, degraded-participant alert banner,
+Layer/Participant view toggle, mock data for static demo.
+
+### Phase 12 — Data Query Fix & Policy Seeding
+
+**Background:** Two practical issues needed resolution before the demo was complete. First,
+listing data (policies, assets, negotiations, transfers) in the UI returned empty results due
+to a subtle API compatibility issue. Second, we needed realistic EHDS access policies assigned
+to each organisation — defining who is allowed to request what kind of data and for which
+purpose.
+
+**What we built:** We fixed the empty-results bug across all six affected API endpoints — the
+connector expected a specific "no filter" signal that our code wasn't sending, causing it to
+match zero records. We then created a seeding script that automatically detects all registered
+organisations and assigns them purpose-specific data access policies. For example, the hospital
+receives policies allowing research access and cross-border data sharing; the pharmaceutical
+company receives research and AI training policies; the regulators receive policies for
+regulatory review, public health statistics, and open catalog access — 14 policies total across
+5 organisations. Finally, the participant list in the admin layer view was converted from cards
+to a cleaner table layout.
+
+**Components developed:** QuerySpec fix across 6 API routes, EHDS policy seeding script (14
+policies for 5 participants), Layer View participant table.
 
 For detailed sub-task breakdowns, ADR references, and implementation notes, see the full **[Implementation Roadmap](docs/planning-health-dataspace-v2.md#implementation-progress)**.
 
