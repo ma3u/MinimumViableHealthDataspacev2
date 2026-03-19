@@ -60,11 +60,20 @@
       - [9b: Navigation Restructuring ✅](#9b-navigation-restructuring-)
       - [9c: Home Page Refresh ✅](#9c-home-page-refresh-)
       - [9d: GitHub Pages Static Export ✅](#9d-github-pages-static-export-)
-    - [Phase 10: Tasks Dashboard \& DPS Integration 🚧](#phase-10-tasks-dashboard--dps-integration-)
+    - [Phase 10: Tasks Dashboard \& DPS Integration ✅](#phase-10-tasks-dashboard--dps-integration-)
       - [10a: Tasks API Route ✅](#10a-tasks-api-route-)
       - [10b: Tasks Page ✅](#10b-tasks-page-)
       - [10c: Navigation Update ✅](#10c-navigation-update-)
       - [10d: Static Export \& Mock Data ✅](#10d-static-export--mock-data-)
+    - [Phase 11: EDC Components — Per-Participant Topology \& Info Layer ✅](#phase-11-edc-components--per-participant-topology--info-layer-)
+      - [11a: Component Info Tooltips](#11a-component-info-tooltips)
+      - [11b: Per-Participant Component Topology](#11b-per-participant-component-topology)
+      - [11c: Critical Service \& Participant Indicators](#11c-critical-service--participant-indicators)
+      - [11d: Static Export \& Mock Data](#11d-static-export--mock-data)
+    - [Phase 12: API QuerySpec Fix \& EHDS Policy Seeding ✅](#phase-12-api-queryspec-fix--ehds-policy-seeding-)
+      - [12a: QuerySpec `filterExpression` Fix ✅](#12a-queryspec-filterexpression-fix-)
+      - [12b: EHDS Policy Seeding Script ✅](#12b-ehds-policy-seeding-script-)
+      - [12c: Layer View Participants as Table ✅](#12c-layer-view-participants-as-table-)
   - [Architecture Decisions](#architecture-decisions)
     - [ADR-1: PostgreSQL vs Neo4j Data Storage Split](#adr-1-postgresql-vs-neo4j-data-storage-split)
       - [Decision](#decision)
@@ -167,26 +176,28 @@ All three core specifications are now final or near-final:
 
 ## Implementation Progress
 
-| Phase  | Title                                                  | Status      | Notes                                                                                                                                                                                                                                                                                                                                                                                    |
-| ------ | ------------------------------------------------------ | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **1**  | Infrastructure Migration (EDC-V + DCore + CFM)         | ✅ Complete | 1a–1f all complete; 18 services healthy; 3 tenants + 9 VPAs provisioned; data assets registered; ADR-1–6 accepted                                                                                                                                                                                                                                                                        |
-| **2**  | Identity and Trust (DCP v1.0 + Verifiable Credentials) | ✅ Complete | 2a ✅ (DID:web for 3 tenants, Ed25519 keys, all activated — ADR-7; IssuerService credential issuance fully working — ADR-9); 2b ✅ (3 EHDS credential defs on IssuerService, 5 VC nodes in Neo4j, DCP scopes configured, Compliance UI with trust chain, 15 VCs delivered to IdentityHub); 2c ✅ (Keycloak SSO: PKCE client, 3 roles, 3 demo users, NextAuth.js, role-based middleware)  |
-| **3**  | Health Knowledge Graph Layer — Schema & Synthetic Data | ✅ Complete | 5-layer Neo4j schema, EHDS HDAB chain, style sheet                                                                                                                                                                                                                                                                                                                                       |
-| **3b** | Real FHIR Data Pipeline (Synthea → Neo4j → OMOP)       | ✅ Complete | 167 patients · 5,461 encounters · 2,421 conditions · 37,713 observations · 3,895 drug Rxes · 8,534 procedures                                                                                                                                                                                                                                                                            |
-| **3c** | HealthDCAT-AP Metadata Registration for FHIR Dataset   | ✅ Complete | Synthea cohort registered as HealthDCAT-AP catalog entry; 2 distributions + EHDS Art 53 purpose                                                                                                                                                                                                                                                                                          |
-| **3d** | README + UI completeness hardening                     | ✅ Complete | README step order fixed; catalog UI shows datasetType/legalBasis/recordCount                                                                                                                                                                                                                                                                                                             |
-| **3e** | DSP Marketplace Registration + Compliance Chain        | ✅ Complete | Layer 1 DataProduct/Contract/HDABApproval wired to Synthea dataset; compliance UI live dropdowns                                                                                                                                                                                                                                                                                         |
-| **3f** | OMOP Research Analytics View                           | ✅ Complete | Layer 4 cohort dashboard: top conditions/drugs/measurements, gender breakdown, stat cards                                                                                                                                                                                                                                                                                                |
-| **3g** | Procedure Pipeline + UI Polish                         | ✅ Complete | 8,534 Procedure → OMOPProcedureOccurrence; Analytics card on home; 6-stat patient page                                                                                                                                                                                                                                                                                                   |
-| **3h** | EEHRxF FHIR Profile Alignment                          | ✅ Complete | EEHRxF category/profile nodes; gap analysis UI; EHDS priority coverage                                                                                                                                                                                                                                                                                                                   |
-| **4**  | Dataspace Integration (EDC-V ↔ Neo4j data assets)     | ✅ Complete | 4a ✅ (assets + policies + contracts); 4b ✅ (3 FINALIZED negotiations + transfer STARTED — ADR-7); 4c ✅ (Federated Catalog: 4 datasets discoverable, HDAB contract FINALIZED); 4d ✅ (Data Plane Transfer: CRO←100 FHIR patients, HDAB←2 HealthDCAT-AP datasets via DCore; audit trail in Neo4j)                                                                                       |
-| **5**  | Federated Queries & GraphRAG                           | ✅ Complete | 5a ✅ (Neo4j SPE-2: 37 patients, 2,076 encounters, 33 OMOP persons + HealthDCAT-AP + EEHRxF); 5b ✅ (federated query dispatch + k-anonymity); 5c ✅ (Text2Cypher NLQ: 9 templates + optional LLM); 5d ✅ (UI `/query` page — 7th view)                                                                                                                                                   |
-| **6a** | Graph Explorer UI (Next.js → Neo4j Bolt)               | ✅ Complete | Seven views (graph, catalog, compliance, patient, analytics, eehrxf, query/NLQ); Docker `graph-explorer` container on port 3000; GitHub Pages static export                                                                                                                                                                                                                              |
-| **6b** | Full Participant Portal (Aruba + Fraunhofer + Redline) | ✅ Complete | 6b-1 ✅ (Onboarding: /onboarding, /onboarding/status, /credentials, /settings + 3 API routes); 6b-2 ✅ (Data Exchange: /data/share, /data/discover, /data/transfer, /negotiate + 5 API routes); 6b-3 ✅ (Admin: /admin, /admin/tenants, /admin/policies, /admin/audit + 3 API routes); Navigation dropdowns + middleware auth for all portal routes; 7 mock JSON files for static export |
-| **7**  | TCK DCP & DSP Compliance Verification                  | ✅ Complete | 7a ✅ (DSP 2025-1 TCK: `run-dsp-tck.sh` — 7 test categories, 30+ tests); 7b ✅ (DCP v1.0: `run-dcp-tests.sh` — 5 categories); 7c ✅ (EHDS domain: `run-ehds-tests.sh` — 5 categories); 7d ✅ (CI/CD: `compliance.yml` workflow, orchestrator `run-compliance.sh`, `/compliance/tck` dashboard UI with live + mock data)                                                                  |
-| **8**  | Test Coverage Expansion + CI/CD                        | ✅ Complete | 8a ✅ (10 new API route test files, ~85% API coverage); 8b ✅ (UserMenu, fetchApi, Navigation + 6 page-level component suites); 8c ✅ (GitHub Actions test.yml, coverage reports, **260 unit tests + 31 E2E = 291 total**)                                                                                                                                                               |
-| **9**  | Documentation & Navigation Restructuring               | ✅ Complete | 9a ✅ (4 doc pages: landing, user guide, developer, architecture + 8 Mermaid diagrams); 9b ✅ (Nav restructured: 5 dropdown clusters — Explore, Governance, Exchange, Portal, Docs); 9c ✅ (Home page refresh: 2-section card layout); 9d ✅ (Static export compatible, mermaid@11)                                                                                                      |
-| **10** | Tasks Dashboard & DPS Integration                      | 🚧 Active   | 10a ✅ (`/api/tasks` route — aggregates negotiations + transfers across all participant contexts); 10b ✅ (`/tasks` page — DSP pipeline steppers, filter tabs, summary cards, 15s auto-refresh); 10c ✅ (Navigation: Tasks link added to Exchange cluster with `ClipboardList` icon); 10d ✅ (Mock data: `tasks.json` + static export mapping in `api.ts`)                               |
+| Phase  | Title                                                  | Status      | Notes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| ------ | ------------------------------------------------------ | ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **1**  | Infrastructure Migration (EDC-V + DCore + CFM)         | ✅ Complete | 1a–1f all complete; 18 services healthy; 3 tenants + 9 VPAs provisioned; data assets registered; ADR-1–6 accepted                                                                                                                                                                                                                                                                                                                                                                                                                |
+| **2**  | Identity and Trust (DCP v1.0 + Verifiable Credentials) | ✅ Complete | 2a ✅ (DID:web for 3 tenants, Ed25519 keys, all activated — ADR-7; IssuerService credential issuance fully working — ADR-9); 2b ✅ (3 EHDS credential defs on IssuerService, 5 VC nodes in Neo4j, DCP scopes configured, Compliance UI with trust chain, 15 VCs delivered to IdentityHub); 2c ✅ (Keycloak SSO: PKCE client, 3 roles, 3 demo users, NextAuth.js, role-based middleware)                                                                                                                                          |
+| **3**  | Health Knowledge Graph Layer — Schema & Synthetic Data | ✅ Complete | 5-layer Neo4j schema, EHDS HDAB chain, style sheet                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| **3b** | Real FHIR Data Pipeline (Synthea → Neo4j → OMOP)       | ✅ Complete | 167 patients · 5,461 encounters · 2,421 conditions · 37,713 observations · 3,895 drug Rxes · 8,534 procedures                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| **3c** | HealthDCAT-AP Metadata Registration for FHIR Dataset   | ✅ Complete | Synthea cohort registered as HealthDCAT-AP catalog entry; 2 distributions + EHDS Art 53 purpose                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| **3d** | README + UI completeness hardening                     | ✅ Complete | README step order fixed; catalog UI shows datasetType/legalBasis/recordCount                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| **3e** | DSP Marketplace Registration + Compliance Chain        | ✅ Complete | Layer 1 DataProduct/Contract/HDABApproval wired to Synthea dataset; compliance UI live dropdowns                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| **3f** | OMOP Research Analytics View                           | ✅ Complete | Layer 4 cohort dashboard: top conditions/drugs/measurements, gender breakdown, stat cards                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| **3g** | Procedure Pipeline + UI Polish                         | ✅ Complete | 8,534 Procedure → OMOPProcedureOccurrence; Analytics card on home; 6-stat patient page                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| **3h** | EEHRxF FHIR Profile Alignment                          | ✅ Complete | EEHRxF category/profile nodes; gap analysis UI; EHDS priority coverage                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| **4**  | Dataspace Integration (EDC-V ↔ Neo4j data assets)     | ✅ Complete | 4a ✅ (assets + policies + contracts); 4b ✅ (3 FINALIZED negotiations + transfer STARTED — ADR-7); 4c ✅ (Federated Catalog: 4 datasets discoverable, HDAB contract FINALIZED); 4d ✅ (Data Plane Transfer: CRO←100 FHIR patients, HDAB←2 HealthDCAT-AP datasets via DCore; audit trail in Neo4j)                                                                                                                                                                                                                               |
+| **5**  | Federated Queries & GraphRAG                           | ✅ Complete | 5a ✅ (Neo4j SPE-2: 37 patients, 2,076 encounters, 33 OMOP persons + HealthDCAT-AP + EEHRxF); 5b ✅ (federated query dispatch + k-anonymity); 5c ✅ (Text2Cypher NLQ: 9 templates + optional LLM); 5d ✅ (UI `/query` page — 7th view)                                                                                                                                                                                                                                                                                           |
+| **6a** | Graph Explorer UI (Next.js → Neo4j Bolt)               | ✅ Complete | Seven views (graph, catalog, compliance, patient, analytics, eehrxf, query/NLQ); Docker `graph-explorer` container on port 3000; GitHub Pages static export                                                                                                                                                                                                                                                                                                                                                                      |
+| **6b** | Full Participant Portal (Aruba + Fraunhofer + Redline) | ✅ Complete | 6b-1 ✅ (Onboarding: /onboarding, /onboarding/status, /credentials, /settings + 3 API routes); 6b-2 ✅ (Data Exchange: /data/share, /data/discover, /data/transfer, /negotiate + 5 API routes); 6b-3 ✅ (Admin: /admin, /admin/tenants, /admin/policies, /admin/audit + 3 API routes); Navigation dropdowns + middleware auth for all portal routes; 7 mock JSON files for static export                                                                                                                                         |
+| **7**  | TCK DCP & DSP Compliance Verification                  | ✅ Complete | 7a ✅ (DSP 2025-1 TCK: `run-dsp-tck.sh` — 7 test categories, 30+ tests); 7b ✅ (DCP v1.0: `run-dcp-tests.sh` — 5 categories); 7c ✅ (EHDS domain: `run-ehds-tests.sh` — 5 categories); 7d ✅ (CI/CD: `compliance.yml` workflow, orchestrator `run-compliance.sh`, `/compliance/tck` dashboard UI with live + mock data)                                                                                                                                                                                                          |
+| **8**  | Test Coverage Expansion + CI/CD                        | ✅ Complete | 8a ✅ (10 new API route test files, ~85% API coverage); 8b ✅ (UserMenu, fetchApi, Navigation + 6 page-level component suites); 8c ✅ (GitHub Actions test.yml, coverage reports, **260 unit tests + 31 E2E = 291 total**)                                                                                                                                                                                                                                                                                                       |
+| **9**  | Documentation & Navigation Restructuring               | ✅ Complete | 9a ✅ (4 doc pages: landing, user guide, developer, architecture + 8 Mermaid diagrams); 9b ✅ (Nav restructured: 5 dropdown clusters — Explore, Governance, Exchange, Portal, Docs); 9c ✅ (Home page refresh: 2-section card layout); 9d ✅ (Static export compatible, mermaid@11)                                                                                                                                                                                                                                              |
+| **10** | Tasks Dashboard & DPS Integration                      | ✅ Complete | 10a ✅ (`/api/tasks` route — aggregates negotiations + transfers across all participant contexts); 10b ✅ (`/tasks` page — DSP pipeline steppers, filter tabs, summary cards, 15s auto-refresh); 10c ✅ (Navigation: Tasks link added to Exchange cluster with `ClipboardList` icon); 10d ✅ (Mock data: `tasks.json` + static export mapping in `api.ts`)                                                                                                                                                                       |
+| **11** | EDC Components — Per-Participant Topology & Info Layer | ✅ Complete | 11a ✅ (Component Info: `component-info.ts` — 21 `ComponentMeta` entries with description/protocol/ports/deps/health; `InfoPopover` on all rows); 11b ✅ (Topology: `/api/admin/components/topology` route — per-participant aggregation; Participant View with expandable `ParticipantTopologySection` + Layer↔Participant toggle); 11c ✅ (Severity: `SEVERITY_STYLES` + `SeverityDot` + `CriticalBanner` — worst-of rollup, auto-expand degraded); 11d ✅ (Mock: `admin_components_topology.json` + `STATIC_MOCK_MAP` entry) |
+| **12** | API QuerySpec Fix & EHDS Policy Seeding                | ✅ Complete | 12a ✅ (`filterExpression:[]` fix across 6 API routes — policies, assets, tasks, negotiations, transfers); 12b ✅ (`jad/seed-ehds-policies.sh` — 14 EHDS ODRL policies seeded across 5 participants: AK:3, LMC:4, PC:2, MR:3, IRS:2); 12c ✅ (Layer View participants as table layout)                                                                                                                                                                                                                                           |
 
 ---
 
@@ -1139,7 +1150,7 @@ All documentation pages use `"use client"` with client-side Mermaid rendering �
 
 ---
 
-### Phase 10: Tasks Dashboard & DPS Integration 🚧
+### Phase 10: Tasks Dashboard & DPS Integration ✅
 
 Phase 10 adds a unified Tasks dashboard that aggregates contract negotiations and transfer processes across all participant contexts into a single view. The implementation aligns with the EDC Data Plane Signaling (DPS) framework, exposing real-time state progressions for both the DSP Contract Negotiation and Transfer Process state machines.
 
@@ -1188,6 +1199,226 @@ Added Tasks entry to the Exchange navigation cluster:
 - GitHub Pages deployment renders mock data when `NEXT_PUBLIC_STATIC_EXPORT=true`
 
 **Deliverables:** `/api/tasks` server-side route with DPS-aware aggregation; `/tasks` client-side dashboard with DSP pipeline steppers; Navigation updated with Tasks link; mock data for static export; all aligned with EDC Data Plane Signaling specification.
+
+---
+
+### Phase 11: EDC Components — Per-Participant Topology & Info Layer ✅
+
+Phase 11 enhances the `/admin/components` page to present a **per-participant
+component topology view** that reflects the decentralized architecture of an
+Eclipse Dataspace — where each participant operates their own stack of
+connector services. Each component receives an **info overlay** explaining its
+role in the dataspace protocol stack, and **critical service indicators**
+highlight unhealthy or degraded participants at a glance.
+
+**Motivation:** In a real EHDS dataspace every data holder, data user and HDAB
+runs their own IdentityHub, Control Plane, Data Plane(s) and CFM agents. The
+current view groups services by architectural layer, but does not show _which_
+services belong to _which_ participant. Operators need to see the full
+decentralised stack per participant — including liveness — at a single glance.
+
+#### 11a: Component Info Tooltips
+
+Add an ⓘ info button to every component card. Clicking it opens an overlay /
+popover with:
+
+| Field             | Content                                                                    |
+| ----------------- | -------------------------------------------------------------------------- |
+| **What**          | One-sentence description of the service's role                             |
+| **Protocol**      | Which DSP / DCP / DPS spec it implements                                   |
+| **Ports**         | Exposed port(s) and protocol (HTTP / Bolt / AMQP / gRPC)                   |
+| **Depends on**    | Direct upstream dependencies (e.g. Control Plane → PostgreSQL, Vault)      |
+| **Health source** | How health is determined (Docker healthcheck, TCP probe, /health endpoint) |
+
+**Component description catalog** (static map rendered client-side):
+
+| Component              | Description                                                                                                                                                                                              |
+| ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Control Plane**      | Central management API for the EDC connector. Hosts the DSP (Dataspace Protocol) endpoints for catalog queries, contract negotiation, and transfer process state machines. Persists state in PostgreSQL. |
+| **Data Plane FHIR**    | DCore-based data plane for FHIR R4 clinical data. Implements HttpData-PUSH transfer type. Selected by DataPlaneSelectorService when `allowedTransferTypes` matches `HttpData-PUSH`.                      |
+| **Data Plane OMOP**    | DCore-based data plane for OMOP CDM research analytics. Implements HttpData-PULL transfer type. Proxies Cypher queries through Neo4j Proxy.                                                              |
+| **IdentityHub**        | DCP v1.0 credential storage and presentation service. Stores W3C Verifiable Credentials. Creates Verifiable Presentations for DSP protocol handshake authentication.                                     |
+| **IssuerService**      | Trust anchor for Verifiable Credential issuance. Issues EHDSParticipantCredential, DataProcessingPurposeCredential, and DataQualityLabelCredential with StatusList2021 revocation.                       |
+| **Keycloak**           | OAuth2 / OIDC identity provider. Manages user authentication, SSO sessions, and client credential grants for service-to-service communication.                                                           |
+| **Vault**              | HashiCorp Vault for secret management. Stores signing keys, STS client secrets, and transfer tokens. Provides transit engine for key operations.                                                         |
+| **PostgreSQL**         | Shared relational database with isolated schemas: controlplane, dataplane, identityhub, issuerservice, keycloak, cfm, redlinedb. Each service auto-migrates its own schema.                              |
+| **NATS**               | JetStream messaging broker. Carries EDC-V internal events (contract state changes, transfer signals) and CFM provisioning workflow messages.                                                             |
+| **Neo4j**              | 5-layer health knowledge graph (Marketplace, HealthDCAT-AP, FHIR, OMOP, Ontology). Stores ~57K nodes; serves Bolt queries and browser UI.                                                                |
+| **Neo4j Proxy**        | HTTP-to-Cypher bridge. Translates REST API calls from the OMOP Data Plane into Cypher queries against Neo4j. Enables pull-based OMOP data transfer.                                                      |
+| **Traefik**            | Reverse proxy / API gateway. Routes external traffic to internal services via path-based routing. Provides TLS termination and load balancing.                                                           |
+| **Tenant Manager**     | CFM multi-tenant lifecycle manager. Creates tenants, deploys dataspace profiles, provisions VPAs (Virtual Participant Addresses).                                                                        |
+| **Provision Manager**  | CFM automated provisioning engine. Orchestrates the sequence of agents (Keycloak → EDC-V → Registration → Onboarding) to bring a participant to ACTIVE state.                                            |
+| **Keycloak Agent**     | CFM agent that provisions Keycloak realms, clients, and service accounts for new participants.                                                                                                           |
+| **EDC-V Agent**        | CFM agent that creates participant contexts in the EDC-V Control Plane.                                                                                                                                  |
+| **Registration Agent** | CFM agent that registers Verifiable Credentials with the IssuerService for new participants.                                                                                                             |
+| **Onboarding Agent**   | CFM orchestration agent that chains the full onboarding sequence: DID creation → credential issuance → participant context → catalog registration.                                                       |
+
+**Implementation:**
+
+- Add `COMPONENT_INFO: Record<string, ComponentMeta>` static map in a new
+  `ui/src/lib/edc/component-info.ts` module
+- Render an `<InfoButton />` component on each card; clicking opens a Tailwind
+  popover positioned to the right of the card
+- On mobile, the popover renders as a bottom-sheet modal
+
+#### 11b: Per-Participant Component Topology
+
+Restructure the main view to show each participant as an expandable section
+containing **their own** component sub-cards. The layout reflects the
+decentralized principle: every participant in a real dataspace runs their own
+connector stack.
+
+**Per-participant component layout:**
+
+```
+┌── AlphaKlinik Berlin (DATA_HOLDER) ──────────────────────────────────────┐
+│                                                                          │
+│  ┌─ Control Plane ─┐  ┌─ Data Plane ──┐  ┌─ IdentityHub ─┐            │
+│  │ ● healthy       │  │   FHIR  OMOP  │  │ ● healthy     │            │
+│  │ CPU 2.1%        │  │ ● healthy ●   │  │ 3 VCs stored  │            │
+│  │ MEM 245 MB      │  │ CPU 0.8%      │  └───────────────┘            │
+│  └─────────────────┘  └───────────────┘                                │
+│                                                                          │
+│  ┌─ Keycloak ──────┐  ┌─ Vault ───────┐  ┌─ Tenant Mgr ─┐            │
+│  │ ● healthy       │  │ ● sealed:no   │  │ State: ACTIVE │            │
+│  │ Realm: alpha    │  │ 4 signing keys│  │ 3 VPAs        │            │
+│  └─────────────────┘  └───────────────┘  └───────────────┘            │
+│                                                                          │
+└──────────────────────────────────────────────────────────────────────────┘
+```
+
+**Data source mapping:**
+
+| Component per participant | API endpoint                                                   | Data extracted           |
+| ------------------------- | -------------------------------------------------------------- | ------------------------ |
+| Control Plane             | `GET /v5alpha/participants/{ctx}/management/v3/assets`         | Asset count, health      |
+| Data Plane(s)             | Docker stats for `dataplane-fhir`, `dataplane-omop`            | CPU, MEM, health         |
+| IdentityHub               | `GET /v5alpha/participants/{ctx}/identity/v1alpha/credentials` | VC count, types          |
+| Keycloak                  | Docker stats for `keycloak` + realm info via admin API         | Realm name, client count |
+| Vault                     | Docker stats for `vault` + `/v1/sys/health`                    | Seal status, key count   |
+| Tenant Manager            | `GET /v1alpha1/tenants/{id}/profiles`                          | VPA count, state         |
+
+**Implementation:**
+
+- New API route: `GET /api/admin/components/topology` — aggregates per-participant
+  component data by iterating over registered participants and fetching their
+  component state in parallel
+- Toggle button on `/admin/components` page: **"Layer view"** (current) vs
+  **"Participant view"** (new topology)
+- Each participant section is collapsible; default expanded for unhealthy ones
+- Component cards reuse existing `ComponentCard` with an added `<InfoButton />`
+
+#### 11c: Critical Service & Participant Indicators
+
+Add visual escalation for degraded or unreachable services:
+
+| Severity        | Condition                                               | Visual indicator                               |
+| --------------- | ------------------------------------------------------- | ---------------------------------------------- |
+| 🔴 **Critical** | Container health = `unhealthy` or exited                | Red border + pulsing dot on participant header |
+| 🟡 **Warning**  | Container health = `starting` or CPU > 80% or MEM > 90% | Yellow border + warning icon                   |
+| 🟢 **Healthy**  | Container health = `healthy` and metrics normal         | Green dot (default)                            |
+| ⚫ **Unknown**  | Docker socket unavailable or no health check configured | Gray dot with `?` badge                        |
+
+**Critical participant rollup:**
+
+- A participant is marked critical if **any** of their core components
+  (Control Plane, IdentityHub, or Data Plane) is critical
+- A summary banner at the top shows: `"2 of 5 participants degraded"` with
+  direct links to the affected participant sections
+- On the Layer view, critical component cards are sorted to the top within
+  their layer group
+
+**Implementation:**
+
+- Add `severity` field to `ComponentInfo` type (computed from Docker health +
+  metrics thresholds)
+- Add `participantHealth` computed property to the topology API response
+- Render `<CriticalBanner />` above the component grid when any participant is
+  degraded
+- Critical participants in the grid have a red left-border accent and sort
+  to the top
+
+#### 11d: Static Export & Mock Data
+
+- Create `ui/public/mock/admin_components_topology.json` — mock topology
+  response with 5 participants, each with 6 component sub-cards (mixed
+  healthy / warning / critical states)
+- Extend `COMPONENT_INFO` map with mock descriptions for all 18 Docker
+  services
+- Add `/api/admin/components/topology` to `STATIC_MOCK_PREFIX` in
+  `ui/src/lib/api.ts`
+
+**Deliverables:**
+
+- ⓘ info overlays for all 18 component types with protocol/port/dependency
+  metadata
+- Per-participant topology view showing decentralized component ownership
+- Critical service indicators with severity escalation (critical / warning /
+  healthy / unknown)
+- Degraded-participant summary banner with quick-navigation links
+- Layer view ↔ Participant view toggle
+- Mock data for GitHub Pages static export
+
+---
+
+### Phase 12: API QuerySpec Fix & EHDS Policy Seeding ✅
+
+Phase 12 resolves a critical EDC-V Management API compatibility issue affecting
+all `POST .../request` list endpoints, and seeds the full set of EHDS ODRL
+policies required for secondary-use data access scenarios.
+
+#### 12a: QuerySpec `filterExpression` Fix ✅
+
+**Problem:** EDC-V's `POST .../request` endpoints (policies, assets, negotiations,
+transfers) return empty `[]` when the `QuerySpec` body omits the `filterExpression`
+field — even though an empty filter should mean "return all". This caused the UI
+to show 0 results for policies, assets, negotiations, and transfers despite data
+being present in the control plane.
+
+**Root cause:** EDC-V's query engine treats a missing `filterExpression` property
+differently from an empty array `[]`. With `filterExpression` absent, the query
+matches nothing; with `"filterExpression": []`, it matches everything (no filter).
+
+**Fix:** Added `"filterExpression": []` to all `QuerySpec` objects across 6 UI API
+routes:
+
+- `ui/src/app/api/admin/policies/route.ts` (2 call sites)
+- `ui/src/app/api/assets/route.ts` (2 call sites)
+- `ui/src/app/api/tasks/route.ts` (2 call sites)
+- `ui/src/app/api/negotiations/route.ts` (1 call site)
+- `ui/src/app/api/transfers/route.ts` (1 call site)
+
+#### 12b: EHDS Policy Seeding Script ✅
+
+Created `jad/seed-ehds-policies.sh` — a standalone script that discovers current
+participant context IDs dynamically and creates EHDS-specific ODRL policy
+definitions via the EDC-V Management API.
+
+**Policy assignments by participant:**
+
+| Participant                 | Role        | Policies | Policy IDs                                                                                                         |
+| --------------------------- | ----------- | -------- | ------------------------------------------------------------------------------------------------------------------ |
+| AlphaKlinik Berlin          | DATA_HOLDER | 3        | `ehds-open-fhir-access`, `ehds-research-access-ak`, `ehds-crossborder-access-ak`                                   |
+| Limburg Medical Centre      | DATA_HOLDER | 4        | `ehds-open-catalog-access`, `ehds-research-access-lmc`, `ehds-public-health-access`, `ehds-crossborder-access-lmc` |
+| PharmaCo Research AG        | DATA_USER   | 2        | `ehds-research-access-pc`, `ehds-ai-training-access-pc`                                                            |
+| MedReg DE                   | HDAB        | 3        | `ehds-regulatory-access-mr`, `ehds-statistics-access-mr`, `ehds-catalog-open-mr`                                   |
+| Institut de Recherche Santé | HDAB        | 2        | `ehds-research-access-irs`, `ehds-statistics-access-irs`                                                           |
+
+**Note:** All policies currently use open ODRL constraints (`"constraint": []`).
+Custom EHDS leftOperands (`purpose`, `patientConsent`) require EDC-V policy scope
+bindings which are not yet configured. EHDS Article semantics are encoded in the
+policy IDs. Purpose-based enforcement is planned for Phase 2 of policy scope
+configuration.
+
+#### 12c: Layer View Participants as Table ✅
+
+Replaced the card grid layout for participants in the Layer View of
+`/admin/components` with a table matching the component table style. Columns:
+Participant (name + org), Role (color-coded badge), DID, State, Profiles.
+
+**Deliverables:** All EDC-V list queries return data correctly; 14 EHDS policies
+seeded across 5 participants; Layer View participants rendered as a consistent
+table layout.
 
 ---
 
