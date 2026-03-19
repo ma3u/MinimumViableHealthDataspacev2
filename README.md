@@ -4,6 +4,39 @@
 
 [![EHDS Compliant](https://img.shields.io/badge/EHDS-Compliant-0ea5e9)](https://health.ec.europa.eu/ehealth-digital-health-and-care/european-health-data-space_en) [![FHIR R4](https://img.shields.io/badge/FHIR-R4-orange)](https://hl7.org/fhir/R4/) [![OMOP CDM](https://img.shields.io/badge/OMOP-CDM%20v5.4-yellow)](https://ohdsi.github.io/CommonDataModel/) [![EEHRxF](https://img.shields.io/badge/EEHRxF-HL7%20Europe-148F77)](https://hl7.eu/fhir/) [![Neo4j 5](https://img.shields.io/badge/Neo4j-5%20Community-008CC1?logo=neo4j&logoColor=white)](https://neo4j.com/) [![Next.js 14](https://img.shields.io/badge/Next.js-14-black?logo=next.js&logoColor=white)](https://nextjs.org/) [![Eclipse EDC](https://img.shields.io/badge/Eclipse-EDC--V-blue)](https://eclipse-edc.github.io/docs/) [![DSP Dataspace Protocol 2025-1](https://img.shields.io/badge/DSP-Dataspace%20Protocol%202025--1-6366f1)](https://docs.internationaldataspaces.org/ids-knowledgebase/v/dataspace-protocol) [![DCP Decentralized Claims Protocol v1.0](https://img.shields.io/badge/DCP-Decentralized%20Claims%20Protocol%20v1.0-7c3aed)](https://projects.eclipse.org/projects/technology.dataspace-dcp/releases/1.0.0) [![DPS](https://img.shields.io/badge/DPS-Data%20Plane%20Signaling-0891b2)](https://projects.eclipse.org/proposals/eclipse-data-plane-core) [![SIMPL](https://img.shields.io/badge/SIMPL-EU%20Cloud%20Federation-e11d48)](https://simpl-programme.eu/) [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 
+## Table of Contents
+
+- [Why This Project Exists](#why-this-project-exists)
+- [What It Does](#what-it-does)
+- [Architecture](#architecture)
+- [UI Views](#ui-views)
+- [Project Structure](#project-structure)
+- [Quick Start](#quick-start)
+  - [Step 1 — Prerequisites](#step-1--prerequisites)
+  - [Step 2 — Clone](#step-2--clone)
+  - [Step 3 — Start Neo4j](#step-3--start-neo4j)
+  - [Step 4 — Initialise Schema](#step-4--initialise-schema)
+  - [Step 5 — Load Seed Data](#step-5--load-seed-data)
+  - [Step 6 — Register DSP Marketplace Chain](#step-6--register-dsp-marketplace-chain)
+  - [Step 7 — Register EEHRxF Profile Alignment](#step-7--register-eehrxf-profile-alignment)
+  - [Step 8 — Install UI Dependencies](#step-8--install-ui-dependencies)
+  - [Step 9 — Start the UI](#step-9--start-the-ui)
+- [Testing](#testing)
+- [Development](#development)
+  - [Run pre-commit checks](#run-pre-commit-checks)
+  - [Neo4j driver note](#neo4j-driver-note)
+  - [JAD Stack (EDC-V + CFM + DCore)](#jad-stack-edc-v--cfm--dcore)
+  - [All Docker Service Endpoints](#all-docker-service-endpoints)
+- [Documentation](#documentation)
+- [Implementation Status](#implementation-status)
+  - [Container Inventory](#container-inventory)
+- [Contributing](#contributing)
+- [Background](#background)
+- [Security](#security)
+- [License](#license)
+
+---
+
 ## Why This Project Exists
 
 The [European Health Data Space (EHDS)](https://health.ec.europa.eu/ehealth-digital-health-and-care/european-health-data-space_en) regulation creates a legal framework for sharing health data across the EU, but turning that regulation into running software is an unsolved integration challenge. A hospital in Berlin that wants to share de-identified patient cohorts with a pharmaceutical researcher in Amsterdam needs to navigate five layers of technology: dataspace governance contracts, standardised metadata catalogues, clinical data formats, research-grade analytics schemas, and biomedical terminologies. Today, no single reference implementation shows how these layers connect end-to-end.
