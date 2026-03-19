@@ -6,34 +6,42 @@
 
 ## Table of Contents
 
-- [Why This Project Exists](#why-this-project-exists)
-- [What It Does](#what-it-does)
-- [Architecture](#architecture)
-- [UI Views](#ui-views)
-- [Project Structure](#project-structure)
-- [Quick Start](#quick-start)
-  - [Step 1 — Prerequisites](#step-1--prerequisites)
-  - [Step 2 — Clone](#step-2--clone)
-  - [Step 3 — Start Neo4j](#step-3--start-neo4j)
-  - [Step 4 — Initialise Schema](#step-4--initialise-schema)
-  - [Step 5 — Load Seed Data](#step-5--load-seed-data)
-  - [Step 6 — Register DSP Marketplace Chain](#step-6--register-dsp-marketplace-chain)
-  - [Step 7 — Register EEHRxF Profile Alignment](#step-7--register-eehrxf-profile-alignment)
-  - [Step 8 — Install UI Dependencies](#step-8--install-ui-dependencies)
-  - [Step 9 — Start the UI](#step-9--start-the-ui)
-- [Testing](#testing)
-- [Development](#development)
-  - [Run pre-commit checks](#run-pre-commit-checks)
-  - [Neo4j driver note](#neo4j-driver-note)
-  - [JAD Stack (EDC-V + CFM + DCore)](#jad-stack-edc-v--cfm--dcore)
-  - [All Docker Service Endpoints](#all-docker-service-endpoints)
-- [Documentation](#documentation)
-- [Implementation Status](#implementation-status)
-  - [Container Inventory](#container-inventory)
-- [Contributing](#contributing)
-- [Background](#background)
-- [Security](#security)
-- [License](#license)
+- [Minimum Viable Health Dataspace v2](#minimum-viable-health-dataspace-v2)
+  - [Table of Contents](#table-of-contents)
+  - [Why This Project Exists](#why-this-project-exists)
+  - [What It Does](#what-it-does)
+  - [Architecture](#architecture)
+  - [UI Views](#ui-views)
+  - [Project Structure](#project-structure)
+  - [Quick Start](#quick-start)
+    - [Step 1 — Prerequisites](#step-1--prerequisites)
+    - [Step 2 — Clone](#step-2--clone)
+    - [Step 3 — Start Neo4j](#step-3--start-neo4j)
+    - [Step 4 — Initialise Schema](#step-4--initialise-schema)
+    - [Step 5 — Load Seed Data](#step-5--load-seed-data)
+    - [Step 6 — Register DSP Marketplace Chain](#step-6--register-dsp-marketplace-chain)
+    - [Step 7 — Register EEHRxF Profile Alignment](#step-7--register-eehrxf-profile-alignment)
+    - [Step 8 — Install UI Dependencies](#step-8--install-ui-dependencies)
+    - [Step 9 — Start the UI](#step-9--start-the-ui)
+  - [Testing](#testing)
+  - [Development](#development)
+    - [Run pre-commit checks](#run-pre-commit-checks)
+    - [Neo4j driver note](#neo4j-driver-note)
+    - [JAD Stack (EDC-V + CFM + DCore)](#jad-stack-edc-v--cfm--dcore)
+    - [All Docker Service Endpoints](#all-docker-service-endpoints)
+  - [Documentation](#documentation)
+  - [Implementation Status](#implementation-status)
+    - [Container Inventory](#container-inventory)
+      - [Tier 0 — Infrastructure Foundations (no dependencies, start first)](#tier-0--infrastructure-foundations-no-dependencies-start-first)
+      - [Tier 1 — Core Identity \& UI (depend on Tier 0)](#tier-1--core-identity--ui-depend-on-tier-0)
+      - [Tier 2 — EDC-V Core + Identity Services (depend on Tier 0 + 1)](#tier-2--edc-v-core--identity-services-depend-on-tier-0--1)
+      - [Tier 3 — Data Planes, Proxy, Provisioning \& CFM Agents (depend on Tier 2)](#tier-3--data-planes-proxy-provisioning--cfm-agents-depend-on-tier-2)
+      - [Tier 4 — Seed Job (runs once after all services are ready)](#tier-4--seed-job-runs-once-after-all-services-are-ready)
+      - [Dependency Graph](#dependency-graph)
+  - [Contributing](#contributing)
+  - [Background](#background)
+  - [Security](#security)
+  - [License](#license)
 
 ---
 
@@ -431,39 +439,24 @@ available online at **[ma3u.github.io/MinimumViableHealthDataspacev2/docs](https
 
 ## Implementation Status
 
-The project follows a phased roadmap. Phases 1–5 implement the full local demo stack with
-live DSP contract negotiation and federated queries; Phase 6b adds the unified participant
-portal with onboarding, data sharing, and operator dashboard; Phase 7 will add protocol
-compliance testing.
+All 12 phases are **✅ Complete** — from infrastructure migration through EDC-V topology and EHDS policy seeding.
 
-| Phase | Description                                                                                     | Status      |
-| ----- | ----------------------------------------------------------------------------------------------- | ----------- |
-| 1     | Environment setup — Neo4j 5, Docker Compose, Next.js scaffold, pre-commit hooks                 | ✅ Complete |
-| 1c    | JAD Docker Compose — full EDC-V + CFM + DCore stack with bootstrap script                       | ✅ Complete |
-| 1d    | OpenAPI TypeScript client generation — type-safe API clients for all JAD services               | ✅ Complete |
-| 1e    | ADR-2 Implementation — dual data planes (FHIR PUSH + OMOP PULL) + Neo4j Query Proxy             | ✅ Complete |
-| 1f    | Phase 4a prep — EDC-V asset/policy/contract registration payloads + Vault dual-DP key bootstrap | ✅ Complete |
-| 2     | Identity and Trust — DID:web for 3 tenants, Ed25519 keys, all activated (ADR-7)                 | ✅ Complete |
-| 2b    | EHDS credential types — 3 credential defs on IssuerService, 5 VC nodes in Neo4j, DCP scopes     | ✅ Complete |
-| 2c    | Keycloak SSO — PKCE client, 3 roles, 3 demo users, NextAuth.js, role-based middleware           | ✅ Complete |
-| 3     | Graph schema + seed data for all 5 layers, APOC/n10s plugins, GraSS colour style                | ✅ Complete |
-| 3a    | Graph Explorer UI — force-directed 5-layer graph via `react-force-graph-2d`                     | ✅ Complete |
-| 3b    | HealthDCAT-AP Catalogue view — dataset cards with publisher, license, and distribution info     | ✅ Complete |
-| 3c    | Compliance Chain Inspector — ODRL policy + HDABApproval trace                                   | ✅ Complete |
-| 3d    | Patient Journey view — FHIR R4 timeline with OMOP CDM mapping sidebar                           | ✅ Complete |
-| 3e    | DSP Marketplace registration — full Layer 1 EDC governance chain wired to dataset               | ✅ Complete |
-| 3f    | OMOP Research Analytics dashboard — cohort stat cards, gender breakdown, top-15 bar charts      | ✅ Complete |
-| 3g    | Procedure pipeline — 8,534 FHIR Procedures → OMOPProcedureOccurrence; Analytics home card       | ✅ Complete |
-| 3h    | EEHRxF FHIR profile alignment — EU priority categories, HL7 Europe IG profiles, gap analysis UI | ✅ Complete |
-| 4     | Dataspace Integration — DSP contract negotiation, federated catalog, DCore data transfer        | ✅ Complete |
-| 4a    | Data asset registration — 4 assets on Clinic EDC-V, ODRL policies, contract definitions         | ✅ Complete |
-| 4b    | Contract negotiation — 3 FINALIZED negotiations, transfer STARTED (CRO → Clinic)                | ✅ Complete |
-| 4c    | Federated Catalog — 4 datasets discoverable via DSP, HDAB contract FINALIZED                    | ✅ Complete |
-| 4d    | Data Plane Transfer — 100 FHIR patients + 2 HealthDCAT-AP datasets via DCore                    | ✅ Complete |
-| 5     | Federated Queries — Neo4j SPE-2, federated dispatch, k-anonymity, Text2Cypher NLQ               | ✅ Complete |
-| 6a    | Graph Explorer UI — 7 views + Docker `graph-explorer` container + GitHub Pages static export    | ✅ Complete |
-| 6b    | Unified Participant Portal — 12 pages, 11 API routes, dropdown nav, auth middleware             | ✅ Complete |
-| 7     | TCK DCP & DSP Compliance Verification — protocol conformance testing                            | 🔲 Planned  |
+| Phase | Description                                              | Status      |
+| ----- | -------------------------------------------------------- | ----------- |
+| 1     | Infrastructure Migration (EDC-V + DCore + CFM)           | ✅ Complete |
+| 2     | Identity & Trust (DCP v1.0 + Verifiable Credentials)     | ✅ Complete |
+| 3     | Health Knowledge Graph — Schema, FHIR Pipeline, EEHRxF   | ✅ Complete |
+| 4     | Dataspace Integration (DSP negotiation + DCore transfer) | ✅ Complete |
+| 5     | Federated Queries & GraphRAG (Text2Cypher NLQ)           | ✅ Complete |
+| 6     | Graph Explorer UI + Participant Portal (19 pages)        | ✅ Complete |
+| 7     | TCK DCP & DSP Compliance Verification                    | ✅ Complete |
+| 8     | Test Coverage (291 tests — 260 unit + 31 E2E)            | ✅ Complete |
+| 9     | Documentation & Navigation Restructuring                 | ✅ Complete |
+| 10    | Tasks Dashboard & DPS Integration                        | ✅ Complete |
+| 11    | EDC Components — Per-Participant Topology & Info Layer    | ✅ Complete |
+| 12    | API QuerySpec Fix & EHDS Policy Seeding                  | ✅ Complete |
+
+For detailed sub-task breakdowns, ADR references, and implementation notes, see the full **[Implementation Roadmap](docs/planning-health-dataspace-v2.md#implementation-progress)**.
 
 ### Container Inventory
 
