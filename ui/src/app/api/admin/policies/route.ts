@@ -48,7 +48,7 @@ export async function GET(request: NextRequest) {
       const policies = await edcClient.management(
         `/v5alpha/participants/${participantId}/policydefinitions/request`,
         "POST",
-        { "@context": [EDC_CONTEXT], "@type": "QuerySpec" },
+        { "@context": [EDC_CONTEXT], "@type": "QuerySpec", "filterExpression": [] },
       );
       return NextResponse.json({ participantId, policies, source: "edc" });
     }
@@ -63,7 +63,7 @@ export async function GET(request: NextRequest) {
           const policies = await edcClient.management(
             `/v5alpha/participants/${p["@id"]}/policydefinitions/request`,
             "POST",
-            { "@context": [EDC_CONTEXT], "@type": "QuerySpec" },
+            { "@context": [EDC_CONTEXT], "@type": "QuerySpec", "filterExpression": [] },
           );
           return {
             participantId: p["@id"],

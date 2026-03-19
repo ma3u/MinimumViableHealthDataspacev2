@@ -53,12 +53,29 @@ discover_ids() {
   fi
 }
 
-# --- Create a tenant ---
+# --- Create a tenant (idempotent — skip if displayName already exists) ---
 # Usage: create_tenant <display_name> <properties_json>
 # Returns: tenant ID (via TENANT_ID variable)
 create_tenant() {
   local name="$1"
   local props="$2"
+
+  # Check if tenant already exists by displayName
+  local existing
+  existing=$(curl -sf "$TM_HOST/api/v1alpha1/tenants" 2>/dev/null | python3 -c "
+import json, sys
+tenants = json.load(sys.stdin)
+for t in tenants:
+    if t.get('properties', {}).get('displayName') == '$name':
+        print(t['id'])
+        break
+" 2>/dev/null || true)
+
+  if [ -n "$existing" ]; then
+    TENANT_ID="$existing"
+    ok "Tenant '$name' already exists: $TENANT_ID (skipped)"
+    return 0
+  fi
 
   echo "Creating tenant: $name ..."
   local response
@@ -71,7 +88,7 @@ create_tenant() {
   ok "Tenant '$name' created: $TENANT_ID"
 }
 
-# --- Deploy a participant profile on a tenant ---
+# --- Deploy a participant profile on a tenant (idempotent — skip if already deployed) ---
 # Usage: deploy_participant <tenant_id> <display_name> <did_suffix> <roles_json>
 # Returns: participant profile ID (via PARTICIPANT_ID variable)
 deploy_participant() {
@@ -81,6 +98,23 @@ deploy_participant() {
   local roles_json="$4"
 
   local identifier="${DID_BASE}:${did_suffix}"
+
+  # Check if participant profile already exists for this tenant
+  local existing
+  existing=$(curl -sf "$TM_HOST/api/v1alpha1/tenants/${tenant_id}/participant-profiles" 2>/dev/null | python3 -c "
+import json, sys
+profiles = json.load(sys.stdin)
+for p in profiles:
+    if p.get('identifier') == '$identifier':
+        print(p['id'])
+        break
+" 2>/dev/null || true)
+
+  if [ -n "$existing" ]; then
+    PARTICIPANT_ID="$existing"
+    ok "Participant '$name' already deployed: $PARTICIPANT_ID (skipped)"
+    return 0
+  fi
 
   echo "Deploying participant '$name' (DID: $identifier) ..."
   local payload

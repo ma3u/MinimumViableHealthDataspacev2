@@ -74,6 +74,12 @@
       - [12a: QuerySpec `filterExpression` Fix ✅](#12a-queryspec-filterexpression-fix-)
       - [12b: EHDS Policy Seeding Script ✅](#12b-ehds-policy-seeding-script-)
       - [12c: Layer View Participants as Table ✅](#12c-layer-view-participants-as-table-)
+    - [Phase 13: Operational Hardening \& Persistent Task Management ✅](#phase-13-operational-hardening--persistent-task-management-)
+      - [13a: Seed Script Dynamic Discovery ✅](#13a-seed-script-dynamic-discovery-)
+      - [13b: TCK QuerySpec Compliance ✅](#13b-tck-queryspec-compliance-)
+      - [13c: EHDS Compliance Checker Fallback ✅](#13c-ehds-compliance-checker-fallback-)
+      - [13d: Persistent Task Management (PostgreSQL) ✅](#13d-persistent-task-management-postgresql-)
+      - [13e: Seed Orchestration Guide](#13e-seed-orchestration-guide)
   - [Architecture Decisions](#architecture-decisions)
     - [ADR-1: PostgreSQL vs Neo4j Data Storage Split](#adr-1-postgresql-vs-neo4j-data-storage-split)
       - [Decision](#decision)
@@ -198,6 +204,7 @@ All three core specifications are now final or near-final:
 | **10** | Tasks Dashboard & DPS Integration                      | ✅ Complete | 10a ✅ (`/api/tasks` route — aggregates negotiations + transfers across all participant contexts); 10b ✅ (`/tasks` page — DSP pipeline steppers, filter tabs, summary cards, 15s auto-refresh); 10c ✅ (Navigation: Tasks link added to Exchange cluster with `ClipboardList` icon); 10d ✅ (Mock data: `tasks.json` + static export mapping in `api.ts`)                                                                                                                                                                       |
 | **11** | EDC Components — Per-Participant Topology & Info Layer | ✅ Complete | 11a ✅ (Component Info: `component-info.ts` — 21 `ComponentMeta` entries with description/protocol/ports/deps/health; `InfoPopover` on all rows); 11b ✅ (Topology: `/api/admin/components/topology` route — per-participant aggregation; Participant View with expandable `ParticipantTopologySection` + Layer↔Participant toggle); 11c ✅ (Severity: `SEVERITY_STYLES` + `SeverityDot` + `CriticalBanner` — worst-of rollup, auto-expand degraded); 11d ✅ (Mock: `admin_components_topology.json` + `STATIC_MOCK_MAP` entry) |
 | **12** | API QuerySpec Fix & EHDS Policy Seeding                | ✅ Complete | 12a ✅ (`filterExpression:[]` fix across 6 API routes — policies, assets, tasks, negotiations, transfers); 12b ✅ (`jad/seed-ehds-policies.sh` — 14 EHDS ODRL policies seeded across 5 participants: AK:3, LMC:4, PC:2, MR:3, IRS:2); 12c ✅ (Layer View participants as table layout)                                                                                                                                                                                                                                           |
+| **13** | Operational Hardening & Persistent Task Management     | ✅ Complete | 13a ✅ (seed-federated-catalog.sh: dynamic discovery replacing hardcoded UUIDs/DIDs); 13b ✅ (TCK `filterExpression:[]` fix for assets + IssuerService QuerySpec in neo4j-proxy); 13c ✅ (Compliance checker dropdown: EDC-V participant fallback + HealthDataset fallback); 13d ✅ (Persistent tasks: PostgreSQL `taskdb` + neo4j-proxy `/tasks` endpoints + UI sync/fallback); 13e (Seed orchestration guide documenting correct run order for all 8 seed scripts) |
 
 ---
 
@@ -1419,6 +1426,127 @@ Participant (name + org), Role (color-coded badge), DID, State, Profiles.
 **Deliverables:** All EDC-V list queries return data correctly; 14 EHDS policies
 seeded across 5 participants; Layer View participants rendered as a consistent
 table layout.
+
+### Phase 13: Operational Hardening & Persistent Task Management ✅
+
+Phase 13 resolves runtime issues discovered during live deployment testing —
+empty dropdowns, stale references in seed scripts, missing QuerySpec fields in
+TCK probes, and the lack of persistent task history. All fixes ensure the
+system is fully operational after running the seed scripts in sequence.
+
+#### 13a: Seed Script Dynamic Discovery ✅
+
+**Problem:** `jad/seed-federated-catalog.sh` contained hardcoded participant
+context UUIDs (`d0b1e14e6faa47aca9c2932a5e22885b`, etc.) and stale DID slugs
+(`clinic-alphaklinik`, `cro-pharmaco`, `hdab-medreg`) that no longer match the
+current EDC-V provisioned contexts.
+
+**Fix:** Replaced all hardcoded values with dynamic `discover_ctx()` and
+`discover_did()` functions that query the EDC-V Management API at runtime,
+matching the pattern already established in `seed-data-assets.sh`.
+
+**Files changed:** `jad/seed-federated-catalog.sh`
+
+#### 13b: TCK QuerySpec Compliance ✅
+
+**Problem:** The TCK compliance endpoint in `neo4j-proxy` omitted
+`filterExpression: []` from two QuerySpec bodies — the assets query and the
+IssuerService credential definitions query — causing empty results when EDC-V
+strictly requires the field.
+
+**Fix:** Added `"filterExpression": []` to both QuerySpec objects in the TCK
+handler.
+
+**Files changed:** `services/neo4j-proxy/src/index.ts` (2 locations in TCK
+handler)
+
+#### 13c: EHDS Compliance Checker Fallback ✅
+
+**Problem:** The compliance checker dropdown on `/compliance` only populated
+consumers from Neo4j `Participant` nodes with `AccessApplication` relationships.
+When no HDAB approval chain exists yet (pre-seed), the dropdown was empty and
+users had to guess participant IDs.
+
+**Fix:** Added a two-tier fallback in `/api/compliance/route.ts`:
+1. **Consumer dropdown:** When Neo4j returns no approved consumers, falls back to
+   all ACTIVATED EDC-V participant contexts with display-name mapping.
+2. **Dataset dropdown:** When no HDAB-approved datasets exist, falls back to all
+   `HealthDataset` nodes in Neo4j.
+
+**Files changed:** `ui/src/app/api/compliance/route.ts`
+
+#### 13d: Persistent Task Management (PostgreSQL) ✅
+
+**Problem:** Tasks (contract negotiations + data transfers) existed only in
+EDC-V's in-memory API responses — no historical persistence, no visibility when
+EDC-V is unavailable, and task data lost on container restart.
+
+**Design:** Decentralized task persistence on the provider/consumer side using a
+dedicated PostgreSQL database (`taskdb`), with the neo4j-proxy acting as the
+persistence broker.
+
+**Implementation:**
+
+| Component | Change |
+|---|---|
+| `jad/init-postgres.sql` | Added `taskdb` database, `taskuser` user, `tasks` table with indexes on `participant_id`, `type`, `state` |
+| `services/neo4j-proxy/package.json` | Added `pg` (^8.16.0) and `@types/pg` (^8.11.6) dependencies |
+| `services/neo4j-proxy/src/index.ts` | Added `POST /tasks/sync` (upsert from EDC-V) and `GET /tasks` (retrieve with optional participant filter) endpoints; auto-creates table on first use via `ensureTaskTable()` |
+| `ui/src/app/api/tasks/route.ts` | Added sync step: after aggregating live tasks from EDC-V, POSTs them to neo4j-proxy `/tasks/sync`; error handler falls back to neo4j-proxy `/tasks` when EDC-V is unavailable |
+
+**Task table schema:**
+```sql
+CREATE TABLE tasks (
+  id TEXT PRIMARY KEY,
+  type TEXT NOT NULL,          -- 'negotiation' | 'transfer'
+  participant TEXT NOT NULL,
+  participant_id TEXT NOT NULL,
+  asset TEXT,
+  asset_id TEXT,
+  state TEXT NOT NULL,
+  counter_party TEXT,
+  timestamp_ms BIGINT,
+  contract_id TEXT,
+  transfer_type TEXT,
+  edr_available BOOLEAN DEFAULT FALSE,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+```
+
+**Files changed:** `jad/init-postgres.sql`, `services/neo4j-proxy/package.json`,
+`services/neo4j-proxy/src/index.ts`, `ui/src/app/api/tasks/route.ts`
+
+#### 13e: Seed Orchestration Guide
+
+The full seed sequence required to populate a fresh deployment:
+
+| Order | Script | Purpose | Prerequisites |
+|-------|--------|---------|---------------|
+| 1 | `jad/seed-jad.sh` | IssuerService tenant, Cell, Dataspace Profile, ActivityDefinitions | Docker stack healthy |
+| 2 | `jad/seed-health-tenants.sh` | 5 participant tenants via CFM Tenant Manager | seed-jad.sh complete |
+| 3 | `jad/seed-ehds-credentials.sh` | EHDS credential definitions on IssuerService | Tenants provisioned |
+| 4 | `jad/seed-data-assets.sh` | Assets, policies, contracts; context activation; data plane registration | Tenants ACTIVATED |
+| 5 | `jad/seed-ehds-policies.sh` | 14 EHDS ODRL policies across 5 participants | Contexts activated |
+| 6 | `jad/seed-contract-negotiation.sh` | Contract negotiations (CRO→Clinic, HDAB→Clinic) | Assets + policies exist |
+| 7 | `jad/seed-data-transfer.sh` | Data transfers (FHIR + HealthDCAT-AP) | Negotiations FINALIZED |
+| 8 | `jad/seed-federated-catalog.sh` | Federated catalog discovery across participants | Assets registered |
+| 9 | `jad/issue-ehds-credentials.sh` | VC issuance to participant IdentityHubs | Credential defs exist |
+
+**Quick start:**
+```bash
+# Full seed sequence (run from project root)
+for script in seed-jad.sh seed-health-tenants.sh seed-ehds-credentials.sh \
+  seed-data-assets.sh seed-ehds-policies.sh seed-contract-negotiation.sh \
+  seed-data-transfer.sh seed-federated-catalog.sh issue-ehds-credentials.sh; do
+  echo "=== Running $script ==="
+  bash "jad/$script"
+done
+```
+
+**Deliverables:** Dynamic seed discovery (no hardcoded UUIDs); TCK probes
+compliant; compliance checker usable pre-seed; persistent task history in
+PostgreSQL; documented seed orchestration order.
 
 ---
 

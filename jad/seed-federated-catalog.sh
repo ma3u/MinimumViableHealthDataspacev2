@@ -24,16 +24,6 @@ REALM="edcv"
 CLIENT_ID="admin"
 CLIENT_SECRET="edc-v-admin-secret"
 
-# Participant context IDs
-CLINIC_CTX="d0b1e14e6faa47aca9c2932a5e22885b"
-CRO_CTX="4e300dff7d62415e9c409351bb2fe17a"
-HDAB_CTX="9ce6ec7ea12a4c6f957774c3783a988c"
-
-# DIDs
-CLINIC_DID="did:web:identityhub%3A7083:clinic-alphaklinik"
-CRO_DID="did:web:identityhub%3A7083:cro-pharmaco"
-HDAB_DID="did:web:identityhub%3A7083:hdab-medreg"
-
 # EDC-V Management API context
 EDC_CTX='["https://w3id.org/edc/connector/management/v2"]'
 
@@ -91,11 +81,71 @@ check_negotiation_state() {
     -H "Content-Type: application/json"
 }
 
+# --- Dynamic Participant Context Discovery ---
+# Matches the pattern used in seed-data-assets.sh — no hardcoded UUIDs or DIDs.
+discover_ctx() {
+  local slug="$1"
+  curl -sf -H "Authorization: Bearer $(get_token)" "${MGMT_URL}/api/mgmt/v5alpha/participants" \
+    | python3 -c "
+import json, sys
+slug = '$slug'
+participants = json.load(sys.stdin)
+if isinstance(participants, dict):
+    participants = [participants]
+for p in participants:
+    identity = p.get('identity', '')
+    pid = p.get('participantId', identity)
+    ctx = p.get('@id', '')
+    if slug in identity or slug in pid:
+        print(ctx)
+        sys.exit(0)
+print('')
+"
+}
+
+discover_did() {
+  local slug="$1"
+  curl -sf -H "Authorization: Bearer $(get_token)" "${MGMT_URL}/api/mgmt/v5alpha/participants" \
+    | python3 -c "
+import json, sys
+slug = '$slug'
+participants = json.load(sys.stdin)
+if isinstance(participants, dict):
+    participants = [participants]
+for p in participants:
+    identity = p.get('identity', '')
+    pid = p.get('participantId', identity)
+    if slug in identity or slug in pid:
+        print(identity or pid)
+        sys.exit(0)
+print('')
+"
+}
+
 # =============================================================================
 echo ""
 echo "╔══════════════════════════════════════════════════════════════╗"
 echo "║   Phase 4c: Federated Catalog with HealthDCAT-AP           ║"
 echo "╚══════════════════════════════════════════════════════════════╝"
+echo ""
+
+# --- Discover participant context IDs and DIDs dynamically ---
+echo "Discovering participant contexts from EDC-V management API..."
+CLINIC_CTX=$(discover_ctx "alpha-klinik")
+CRO_CTX=$(discover_ctx "pharmaco")
+HDAB_CTX=$(discover_ctx "medreg")
+
+CLINIC_DID=$(discover_did "alpha-klinik")
+CRO_DID=$(discover_did "pharmaco")
+HDAB_DID=$(discover_did "medreg")
+
+[ -n "$CLINIC_CTX" ] || { echo "ERROR: AlphaKlinik context not found"; exit 1; }
+[ -n "$CRO_CTX" ]    || { echo "ERROR: PharmaCo context not found"; exit 1; }
+[ -n "$HDAB_CTX" ]   || { echo "ERROR: MedReg context not found"; exit 1; }
+
+echo "  AlphaKlinik CTX: $CLINIC_CTX  DID: $CLINIC_DID"
+echo "  PharmaCo    CTX: $CRO_CTX  DID: $CRO_DID"
+echo "  MedReg      CTX: $HDAB_CTX  DID: $HDAB_DID"
 echo ""
 
 # -- Step 1: CRO discovers Clinic catalog ------------------------------------

@@ -1,10 +1,11 @@
 "use client";
 
 import { fetchApi } from "@/lib/api";
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import {
   ArrowRightLeft,
   CheckCircle2,
+  ChevronDown,
   Circle,
   ClipboardList,
   FileSignature,
@@ -12,6 +13,7 @@ import {
   Key,
   Loader2,
   RefreshCw,
+  Users,
   XCircle,
 } from "lucide-react";
 import PageIntro from "@/components/PageIntro";
@@ -105,6 +107,36 @@ function stateIndex(state: string, states: readonly string[]): number {
   if (s.includes("TERMINATED") || s.includes("ERROR")) return -1;
   return states.findIndex((ds) => s.includes(ds));
 }
+
+/* ── DSP State Machine Actions ── */
+
+/**
+ * Available actions per DSP state — maps current state to the next valid
+ * transition(s) a participant can invoke.
+ *
+ * See IDS Dataspace Protocol 2025-1:
+ *   Negotiations: Consumer/Provider interaction protocol
+ *   Transfers:    Data Plane Signaling (DPS) lifecycle
+ */
+const NEGOTIATION_ACTIONS: Record<string, { label: string; color: string }[]> =
+  {
+    REQUESTED: [{ label: "Offer", color: "text-blue-400" }],
+    OFFERED: [{ label: "Accept", color: "text-blue-400" }],
+    ACCEPTED: [{ label: "Agree", color: "text-blue-400" }],
+    AGREED: [{ label: "Verify", color: "text-blue-400" }],
+    VERIFIED: [{ label: "Finalize", color: "text-green-400" }],
+    FINALIZED: [],
+  };
+
+const TRANSFER_ACTIONS: Record<string, { label: string; color: string }[]> = {
+  REQUESTED: [{ label: "Start", color: "text-blue-400" }],
+  STARTED: [
+    { label: "Suspend", color: "text-orange-400" },
+    { label: "Complete", color: "text-green-400" },
+  ],
+  SUSPENDED: [{ label: "Resume", color: "text-blue-400" }],
+  COMPLETED: [],
+};
 
 /* ── Pipeline Stepper Component ── */
 
@@ -216,6 +248,8 @@ function TasksContent() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [filter, setFilter] = useState<FilterType>("all");
+  const [selectedParticipant, setSelectedParticipant] = useState<string>("all");
+  const [participantDropdownOpen, setParticipantDropdownOpen] = useState(false);
 
   const loadTasks = async (isRefresh = false) => {
     if (isRefresh) setRefreshing(true);
@@ -253,7 +287,18 @@ function TasksContent() {
     active: 0,
   };
 
+  // Unique participants for the filter dropdown
+  const uniqueParticipants = useMemo(() => {
+    const map = new Map<string, string>();
+    tasks.forEach((t) => map.set(t.participantId, t.participant));
+    return Array.from(map.entries()).sort((a, b) => a[1].localeCompare(b[1]));
+  }, [tasks]);
+
   const filteredTasks = tasks.filter((t) => {
+    // Participant filter
+    if (selectedParticipant !== "all" && t.participantId !== selectedParticipant)
+      return false;
+    // Type/status filter
     if (filter === "all") return true;
     if (filter === "negotiation") return t.type === "negotiation";
     if (filter === "transfer") return t.type === "transfer";
@@ -264,11 +309,34 @@ function TasksContent() {
     return true;
   });
 
+  // Recompute counts after participant filter
+  const filteredCounts = useMemo(() => {
+    const pTasks =
+      selectedParticipant === "all"
+        ? tasks
+        : tasks.filter((t) => t.participantId === selectedParticipant);
+    return {
+      total: pTasks.length,
+      negotiations: pTasks.filter((t) => t.type === "negotiation").length,
+      transfers: pTasks.filter((t) => t.type === "transfer").length,
+      active: pTasks.filter(
+        (t) =>
+          !["FINALIZED", "COMPLETED", "TERMINATED", "ERROR"].includes(
+            t.state?.toUpperCase() || "",
+          ),
+      ).length,
+    };
+  }, [tasks, selectedParticipant]);
+
   const filters: { key: FilterType; label: string; count: number }[] = [
-    { key: "all", label: "All", count: counts.total },
-    { key: "active", label: "Active", count: counts.active },
-    { key: "negotiation", label: "Negotiations", count: counts.negotiations },
-    { key: "transfer", label: "Transfers", count: counts.transfers },
+    { key: "all", label: "All", count: filteredCounts.total },
+    { key: "active", label: "Active", count: filteredCounts.active },
+    {
+      key: "negotiation",
+      label: "Negotiations",
+      count: filteredCounts.negotiations,
+    },
+    { key: "transfer", label: "Transfers", count: filteredCounts.transfers },
   ];
 
   return (
@@ -290,22 +358,22 @@ function TasksContent() {
         {[
           {
             label: "Total Tasks",
-            value: counts.total,
+            value: filteredCounts.total,
             color: "text-gray-200",
           },
           {
             label: "Active",
-            value: counts.active,
+            value: filteredCounts.active,
             color: "text-yellow-400",
           },
           {
             label: "Negotiations",
-            value: counts.negotiations,
+            value: filteredCounts.negotiations,
             color: "text-blue-400",
           },
           {
             label: "Transfers",
-            value: counts.transfers,
+            value: filteredCounts.transfers,
             color: "text-purple-400",
           },
         ].map((card) => (
@@ -319,10 +387,73 @@ function TasksContent() {
         ))}
       </div>
 
-      {/* Filter tabs + Refresh */}
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-1">
-          <Filter size={14} className="text-gray-500 mr-1" />
+      {/* Participant filter + Type filter tabs + Refresh */}
+      <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
+          {/* Participant dropdown */}
+          <div className="relative">
+            <button
+              onClick={() =>
+                setParticipantDropdownOpen(!participantDropdownOpen)
+              }
+              className={`flex items-center gap-1.5 px-3 py-1 text-xs rounded-full border transition-colors ${
+                selectedParticipant !== "all"
+                  ? "border-layer2 bg-layer2/20 text-layer2"
+                  : "border-gray-700 text-gray-400 hover:text-gray-200 hover:border-gray-500"
+              }`}
+            >
+              <Users size={12} />
+              {selectedParticipant === "all"
+                ? "All Participants"
+                : uniqueParticipants.find(
+                    ([id]) => id === selectedParticipant,
+                  )?.[1] || "Unknown"}
+              <ChevronDown size={10} />
+            </button>
+            {participantDropdownOpen && (
+              <div className="absolute z-20 mt-1 bg-gray-800 border border-gray-700 rounded-lg shadow-xl py-1 min-w-[200px]">
+                <button
+                  onClick={() => {
+                    setSelectedParticipant("all");
+                    setParticipantDropdownOpen(false);
+                  }}
+                  className={`w-full text-left px-3 py-1.5 text-xs hover:bg-gray-700 ${
+                    selectedParticipant === "all"
+                      ? "text-layer2"
+                      : "text-gray-300"
+                  }`}
+                >
+                  All Participants ({counts.total})
+                </button>
+                {uniqueParticipants.map(([id, name]) => {
+                  const pCount = tasks.filter(
+                    (t) => t.participantId === id,
+                  ).length;
+                  return (
+                    <button
+                      key={id}
+                      onClick={() => {
+                        setSelectedParticipant(id);
+                        setParticipantDropdownOpen(false);
+                      }}
+                      className={`w-full text-left px-3 py-1.5 text-xs hover:bg-gray-700 ${
+                        selectedParticipant === id
+                          ? "text-layer2"
+                          : "text-gray-300"
+                      }`}
+                    >
+                      {name}{" "}
+                      <span className="text-gray-500">({pCount})</span>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          {/* Type/status filter tabs */}
+          <div className="flex items-center gap-1">
+            <Filter size={14} className="text-gray-500 mr-1" />
           {filters.map((f) => (
             <button
               key={f.key}
@@ -337,6 +468,7 @@ function TasksContent() {
               <span className="ml-1 opacity-60">{f.count}</span>
             </button>
           ))}
+          </div>
         </div>
         <button
           onClick={() => loadTasks(true)}
@@ -436,6 +568,29 @@ function TasksContent() {
 
                 {/* Pipeline */}
                 <StatePipeline state={task.state} states={states} />
+
+                {/* DSP Actions — available state transitions */}
+                {(() => {
+                  const actions = isNeg
+                    ? NEGOTIATION_ACTIONS[task.state]
+                    : TRANSFER_ACTIONS[task.state];
+                  if (!actions || actions.length === 0) return null;
+                  return (
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-[10px] text-gray-600">
+                        Actions:
+                      </span>
+                      {actions.map((action) => (
+                        <span
+                          key={action.label}
+                          className={`text-[10px] px-2 py-0.5 rounded-full bg-layer2/10 border border-layer2/30 ${action.color}`}
+                        >
+                          {action.label}
+                        </span>
+                      ))}
+                    </div>
+                  );
+                })()}
 
                 {/* Metadata row */}
                 <div className="flex items-center gap-4 text-[11px] text-gray-500 flex-wrap">

@@ -14,8 +14,15 @@ interface Credential {
   holderType: string | null;
   issuedAt: string;
   expiresAt: string;
-  // Type-specific fields
+  // Membership fields
+  membership: string | null;
+  membershipType: string | null;
+  // EHDS fields
+  jurisdiction: string | null;
+  ehdsArticle: string | null;
+  // DataProcessingPurpose fields
   purpose: string | null;
+  // DataQualityLabel fields
   datasetId: string | null;
   completeness: number | null;
   conformance: number | null;
@@ -37,12 +44,16 @@ export async function GET() {
             p.participantType   AS holderType,
             toString(vc.issuedAt)  AS issuedAt,
             toString(vc.expiresAt) AS expiresAt,
+            vc.membership       AS membership,
+            vc.membershipType   AS membershipType,
+            vc.jurisdiction     AS jurisdiction,
+            vc.ehdsArticle      AS ehdsArticle,
             vc.purpose          AS purpose,
             vc.datasetId        AS datasetId,
             vc.completeness     AS completeness,
             vc.conformance      AS conformance,
             vc.timeliness       AS timeliness
-     ORDER BY vc.subjectDid, vc.credentialType`,
+     ORDER BY p.name, vc.credentialType`,
   );
 
   return NextResponse.json({ credentials });

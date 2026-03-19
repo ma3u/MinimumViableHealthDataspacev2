@@ -37,13 +37,13 @@ MERGE (p_irs:Participant {participantId: "did:web:irs.fr:hdab"})
       p_irs.country         = "FR";
 
 // ── 3. Ensure HealthDataset/DataAsset nodes used in transfers ─────────────────
-MERGE (ds_t2d:HealthDataset {id: "dataset:synthea-fhir-r4-mvd"})
+MERGE (ds_t2d:HealthDataset {datasetId: "dataset:synthea-fhir-r4-mvd"})
   SET ds_t2d.name = "T2D Patient Journey Dataset (FHIR R4)";
 
-MERGE (ds_omop:HealthDataset {id: "dataset:omop-cdm-v54-analytics"})
+MERGE (ds_omop:HealthDataset {datasetId: "dataset:omop-cdm-v54-analytics"})
   SET ds_omop.name = "OMOP CDM v5.4 Analytics Cohort";
 
-MERGE (ds_pca:HealthDataset {id: "dataset:prostate-cancer-registry"})
+MERGE (ds_pca:HealthDataset {datasetId: "dataset:prostate-cancer-registry"})
   SET ds_pca.name = "Prostate Cancer Registry 2024";
 
 // ── 4. Contract Negotiations ──────────────────────────────────────────────────
@@ -64,7 +64,7 @@ MERGE (n1:ContractNegotiation {id: "neg-001"})
 WITH n1
 MATCH (consumer:Participant {participantId: "did:web:pharmaco.de:research"})
 MATCH (provider:Participant {participantId: "did:web:alpha-klinik.de:participant"})
-MATCH (asset:HealthDataset  {id: "dataset:synthea-fhir-r4-mvd"})
+MATCH (asset:HealthDataset  {datasetId: "dataset:synthea-fhir-r4-mvd"})
 MERGE (n1)-[:NEGOTIATED_BY]->(consumer)
 MERGE (n1)-[:OFFERED_BY]->(provider)
 MERGE (n1)-[:FOR_ASSET]->(asset);
@@ -85,7 +85,7 @@ MERGE (n2:ContractNegotiation {id: "neg-002"})
 WITH n2
 MATCH (consumer:Participant {participantId: "did:web:pharmaco.de:research"})
 MATCH (provider:Participant {participantId: "did:web:alpha-klinik.de:participant"})
-MATCH (asset:HealthDataset  {id: "dataset:omop-cdm-v54-analytics"})
+MATCH (asset:HealthDataset  {datasetId: "dataset:omop-cdm-v54-analytics"})
 MERGE (n2)-[:NEGOTIATED_BY]->(consumer)
 MERGE (n2)-[:OFFERED_BY]->(provider)
 MERGE (n2)-[:FOR_ASSET]->(asset);
@@ -106,7 +106,7 @@ MERGE (n3:ContractNegotiation {id: "neg-003"})
 WITH n3
 MATCH (consumer:Participant {participantId: "did:web:medreg.de:hdab"})
 MATCH (provider:Participant {participantId: "did:web:lmc.nl:clinic"})
-MATCH (asset:HealthDataset  {id: "dataset:prostate-cancer-registry"})
+MATCH (asset:HealthDataset  {datasetId: "dataset:prostate-cancer-registry"})
 MERGE (n3)-[:NEGOTIATED_BY]->(consumer)
 MERGE (n3)-[:OFFERED_BY]->(provider)
 MERGE (n3)-[:FOR_ASSET]->(asset);
@@ -128,7 +128,7 @@ MERGE (n4:ContractNegotiation {id: "neg-004"})
 WITH n4
 MATCH (consumer:Participant {participantId: "did:web:irs.fr:hdab"})
 MATCH (provider:Participant {participantId: "did:web:pharmaco.de:research"})
-MATCH (asset:HealthDataset  {id: "dataset:omop-cdm-v54-analytics"})
+MATCH (asset:HealthDataset  {datasetId: "dataset:omop-cdm-v54-analytics"})
 MERGE (n4)-[:NEGOTIATED_BY]->(consumer)
 MERGE (n4)-[:OFFERED_BY]->(provider)
 MERGE (n4)-[:FOR_ASSET]->(asset);
@@ -149,7 +149,7 @@ MERGE (n5:ContractNegotiation {id: "neg-005"})
 WITH n5
 MATCH (consumer:Participant {participantId: "did:web:lmc.nl:clinic"})
 MATCH (provider:Participant {participantId: "did:web:alpha-klinik.de:participant"})
-MATCH (asset:HealthDataset  {id: "dataset:synthea-fhir-r4-mvd"})
+MATCH (asset:HealthDataset  {datasetId: "dataset:synthea-fhir-r4-mvd"})
 MERGE (n5)-[:NEGOTIATED_BY]->(consumer)
 MERGE (n5)-[:OFFERED_BY]->(provider)
 MERGE (n5)-[:FOR_ASSET]->(asset);
@@ -173,7 +173,7 @@ MERGE (t1:DataTransfer {id: "trn-001"})
 WITH t1
 MATCH (consumer:Participant {participantId: "did:web:pharmaco.de:research"})
 MATCH (provider:Participant {participantId: "did:web:alpha-klinik.de:participant"})
-MATCH (asset:HealthDataset  {id: "dataset:synthea-fhir-r4-mvd"})
+MATCH (asset:HealthDataset  {datasetId: "dataset:synthea-fhir-r4-mvd"})
 MERGE (t1)-[:TRANSFERRED_BY]->(consumer)
 MERGE (t1)-[:PROVIDED_BY]->(provider)
 MERGE (t1)-[:TRANSFERS]->(asset);
@@ -195,7 +195,7 @@ MERGE (t2:DataTransfer {id: "trn-002"})
 WITH t2
 MATCH (consumer:Participant {participantId: "did:web:pharmaco.de:research"})
 MATCH (provider:Participant {participantId: "did:web:alpha-klinik.de:participant"})
-MATCH (asset:HealthDataset  {id: "dataset:omop-cdm-v54-analytics"})
+MATCH (asset:HealthDataset  {datasetId: "dataset:omop-cdm-v54-analytics"})
 MERGE (t2)-[:TRANSFERRED_BY]->(consumer)
 MERGE (t2)-[:PROVIDED_BY]->(provider)
 MERGE (t2)-[:TRANSFERS]->(asset);
@@ -217,7 +217,7 @@ MERGE (t3:DataTransfer {id: "trn-003"})
 WITH t3
 MATCH (consumer:Participant {participantId: "did:web:medreg.de:hdab"})
 MATCH (provider:Participant {participantId: "did:web:lmc.nl:clinic"})
-MATCH (asset:HealthDataset  {id: "dataset:prostate-cancer-registry"})
+MATCH (asset:HealthDataset  {datasetId: "dataset:prostate-cancer-registry"})
 MERGE (t3)-[:TRANSFERRED_BY]->(consumer)
 MERGE (t3)-[:PROVIDED_BY]->(provider)
 MERGE (t3)-[:TRANSFERS]->(asset);
@@ -239,7 +239,7 @@ MERGE (t4:DataTransfer {id: "trn-004"})
 WITH t4
 MATCH (consumer:Participant {participantId: "did:web:lmc.nl:clinic"})
 MATCH (provider:Participant {participantId: "did:web:alpha-klinik.de:participant"})
-MATCH (asset:HealthDataset  {id: "dataset:synthea-fhir-r4-mvd"})
+MATCH (asset:HealthDataset  {datasetId: "dataset:synthea-fhir-r4-mvd"})
 MERGE (t4)-[:TRANSFERRED_BY]->(consumer)
 MERGE (t4)-[:PROVIDED_BY]->(provider)
 MERGE (t4)-[:TRANSFERS]->(asset);
@@ -262,7 +262,7 @@ MERGE (t5:DataTransfer {id: "trn-005"})
 WITH t5
 MATCH (consumer:Participant {participantId: "did:web:irs.fr:hdab"})
 MATCH (provider:Participant {participantId: "did:web:alpha-klinik.de:participant"})
-MATCH (asset:HealthDataset  {id: "dataset:synthea-fhir-r4-mvd"})
+MATCH (asset:HealthDataset  {datasetId: "dataset:synthea-fhir-r4-mvd"})
 MERGE (t5)-[:TRANSFERRED_BY]->(consumer)
 MERGE (t5)-[:PROVIDED_BY]->(provider)
 MERGE (t5)-[:TRANSFERS]->(asset);

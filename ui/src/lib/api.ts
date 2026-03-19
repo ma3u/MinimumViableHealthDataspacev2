@@ -15,6 +15,8 @@ const STATIC_MOCK_MAP: Record<string, string> = {
   "/api/assets": "/mock/assets.json",
   "/api/admin/tenants": "/mock/admin_tenants.json",
   "/api/admin/policies": "/mock/admin_policies.json",
+  "/api/admin/components": "/mock/admin_components.json",
+  "/api/admin/components/topology": "/mock/admin_components_topology.json",
 };
 
 /** Prefix-based mock paths — matched via startsWith (checked after exact) */

@@ -14,11 +14,13 @@
   },
   "dependencies": {
     "express": "^4.21.2",
-    "neo4j-driver": "^5.28.1"
+    "neo4j-driver": "^5.28.1",
+    "pg": "^8.16.0"
   },
   "devDependencies": {
     "@types/express": "^5.0.2",
     "@types/node": "^22.15.0",
+    "@types/pg": "^8.11.6",
     "@types/supertest": "^7.2.0",
     "@vitest/coverage-v8": "^4.0.18",
     "supertest": "^7.2.2",

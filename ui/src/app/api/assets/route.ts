@@ -46,7 +46,7 @@ export async function GET(req: NextRequest) {
       const assets = await edcClient.management<Record<string, unknown>[]>(
         `/v5alpha/participants/${participantId}/assets/request`,
         "POST",
-        { "@context": [EDC_CONTEXT], "@type": "QuerySpec" },
+        { "@context": [EDC_CONTEXT], "@type": "QuerySpec", "filterExpression": [] },
       );
       return NextResponse.json((assets ?? []).map(normaliseAsset));
     }
@@ -71,7 +71,7 @@ export async function GET(req: NextRequest) {
         const assets = await edcClient.management<Record<string, unknown>[]>(
           `/v5alpha/participants/${p["@id"]}/assets/request`,
           "POST",
-          { "@context": [EDC_CONTEXT], "@type": "QuerySpec" },
+          { "@context": [EDC_CONTEXT], "@type": "QuerySpec", "filterExpression": [] },
         );
         allAssets.push({
           participantId: p["@id"],

@@ -108,11 +108,15 @@ EOF
 # ---------------------------------------------------------------------------
 # IssuerService EdDSA Signing Key (DCP Credential Issuance)
 # ---------------------------------------------------------------------------
-# The IssuerService runtime resolves private keys from the global Vault
-# config (secret/ mount with root token), NOT from the per-participant
-# vault (participants/ mount with Keycloak JWT auth). This static EdDSA
-# key must be stored here so the IssuanceProcessManager can sign VC1_0_JWT
-# credentials. The matching public key is published in the DID document
+# The IssuerService runtime resolves private keys from the per-participant
+# vault (participants/ mount) using its participant_context_id ("issuer")
+# as the key path prefix. The EDC Vault client URL-encodes the key alias
+# before making HTTP requests, so the alias
+#   did:web:issuerservice%3A10016:issuer#key-1
+# becomes the vault path:
+#   participants/data/issuer/did%3Aweb%3Aissuerservice%253A10016%3Aissuer%23key-1
+#
+# The matching public key is published in the DID document
 # at did:web:issuerservice%3A10016:issuer#key-1.
 #
 # See: ADR-7 (DID:web Resolution Architecture) in docs/planning-health-dataspace-v2.md
@@ -120,15 +124,13 @@ EOF
 
 echo "=== Provisioning IssuerService signing key ==="
 
-vault write "secret/data/did:web:issuerservice%3A10016:issuer#key-1" -<<'ISSUER_KEY_EOF' || { echo "Failed to store issuer EdDSA key in secret/ mount"; exit 1; }
-{
-    "data": {
-        "content": "{\"kty\":\"OKP\",\"d\":\"6DBtzJz3DjNAiM2P2RlzOsAQs-ramVeAUVnocd6F__Y\",\"crv\":\"Ed25519\",\"kid\":\"did:web:issuerservice%3A10016:issuer#key-1\",\"x\":\"I8dt08pwP4nQPv4MacRU5u5KsroVa3ESkWmyQEDn36A\"}"
-    }
-}
-ISSUER_KEY_EOF
+ISSUER_KEY_JWK='{"kty":"OKP","d":"6DBtzJz3DjNAiM2P2RlzOsAQs-ramVeAUVnocd6F__Y","crv":"Ed25519","kid":"did:web:issuerservice%3A10016:issuer#key-1","x":"I8dt08pwP4nQPv4MacRU5u5KsroVa3ESkWmyQEDn36A"}'
 
-echo "✓ IssuerService EdDSA signing key stored in secret/ mount"
+vault kv put 'participants/issuer/did%3Aweb%3Aissuerservice%253A10016%3Aissuer%23key-1' \
+  content="$ISSUER_KEY_JWK" \
+  || { echo "Failed to store issuer EdDSA key in participants/ mount"; exit 1; }
+
+echo "✓ IssuerService EdDSA signing key stored in participants/ mount (path: issuer/<url-encoded-alias>)"
 
 # ---------------------------------------------------------------------------
 # Data Plane Token Signing Keys (ADR-2: Dual Data Planes)

@@ -19,6 +19,7 @@ import {
   LayoutDashboard,
   ChevronDown,
   Heart,
+  Activity,
   FileText,
   Code2,
   Layers,
@@ -94,6 +95,7 @@ const manageGroup: NavGroup = {
   icon: LayoutDashboard,
   links: [
     { href: "/admin", label: "Operator Dashboard", icon: LayoutDashboard },
+    { href: "/admin/components", label: "EDC Components", icon: Activity },
     { href: "/admin/tenants", label: "Tenants", icon: User },
     { href: "/admin/policies", label: "Policies", icon: ShieldCheck },
     { href: "/admin/audit", label: "Audit & Provenance", icon: ScrollText },

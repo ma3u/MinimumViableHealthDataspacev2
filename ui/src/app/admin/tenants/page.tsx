@@ -4,22 +4,48 @@ import { fetchApi } from "@/lib/api";
 import { useEffect, useState } from "react";
 import PageIntro from "@/components/PageIntro";
 import {
+  AlertTriangle,
   Building2,
   ChevronDown,
   ChevronUp,
+  Circle,
   Loader2,
   Users,
 } from "lucide-react";
+
+interface VPA {
+  id: string;
+  state: string;
+  type: string;
+  cellId: string;
+}
+
+interface ProfileProperties {
+  "cfm.vpa.state"?: {
+    participantContextId?: string;
+    credentialRequest?: string;
+    holderPid?: string;
+  };
+  displayName?: string;
+  [key: string]: unknown;
+}
+
+interface ParticipantProfile {
+  id: string;
+  version: number;
+  identifier: string; // DID
+  tenantId: string;
+  participantRoles: Record<string, string[]>;
+  vpas: VPA[];
+  properties: ProfileProperties;
+  error?: boolean;
+}
 
 interface Tenant {
   id: string;
   version: number;
   properties: Record<string, string>;
-  participantProfiles: {
-    dataspaceProfileId: string;
-    participantContextId: string;
-    tenantId: string;
-  }[];
+  participantProfiles: ParticipantProfile[];
 }
 
 interface Participant {
@@ -151,43 +177,137 @@ export default function AdminTenantsPage() {
                     {t.participantProfiles?.length > 0 && (
                       <div>
                         <h3 className="text-xs font-medium text-gray-500 mb-2">
-                          Participant Profiles
+                          Dataspace Profiles
                         </h3>
                         {t.participantProfiles.map((pp, i) => {
-                          const ctx = participants.find(
-                            (p) => p["@id"] === pp.participantContextId,
-                          );
+                          const ctxId =
+                            pp.properties?.["cfm.vpa.state"]?.participantContextId;
+                          const ctx = ctxId
+                            ? participants.find((p) => p["@id"] === ctxId)
+                            : undefined;
+                          const roles = Object.values(
+                            pp.participantRoles || {},
+                          ).flat();
+                          const allDisposed =
+                            pp.vpas?.length > 0 &&
+                            pp.vpas.every((v) => v.state === "disposed");
+                          const allActive =
+                            pp.vpas?.length > 0 &&
+                            pp.vpas.every((v) => v.state === "active");
+
                           return (
                             <div
                               key={i}
-                              className="p-2 rounded bg-gray-800/50 border border-gray-700 text-xs space-y-1 mb-2"
+                              className={`p-3 rounded-lg border text-xs space-y-2 mb-2 ${
+                                pp.error
+                                  ? "border-yellow-700/60 bg-yellow-900/10"
+                                  : "border-gray-700 bg-gray-800/50"
+                              }`}
                             >
-                              <div>
-                                <span className="text-gray-500">
-                                  Context ID:{" "}
-                                </span>
-                                <span className="text-gray-300 font-mono">
-                                  {pp.participantContextId?.slice(0, 16)}…
-                                </span>
+                              {/* VPA status banner */}
+                              {allDisposed && (
+                                <div className="flex items-center gap-1.5 text-yellow-400 text-[11px]">
+                                  <AlertTriangle size={12} />
+                                  VPAs disposed — re-run{" "}
+                                  <code className="bg-yellow-900/40 px-1 rounded text-yellow-300">
+                                    seed-health-tenants.sh
+                                  </code>{" "}
+                                  to re-provision
+                                </div>
+                              )}
+
+                              {/* Profile ID + DID */}
+                              <div className="grid grid-cols-2 gap-x-4 gap-y-1">
+                                <div>
+                                  <span className="text-gray-500">
+                                    Profile ID{" "}
+                                  </span>
+                                  <span className="text-gray-300 font-mono">
+                                    {pp.id}
+                                  </span>
+                                </div>
+                                <div>
+                                  <span className="text-gray-500">
+                                    DID{" "}
+                                  </span>
+                                  <span className="text-gray-300 font-mono break-all">
+                                    {pp.identifier
+                                      ? decodeURIComponent(pp.identifier)
+                                      : "—"}
+                                  </span>
+                                </div>
+                                <div>
+                                  <span className="text-gray-500">
+                                    Participant Ctx{" "}
+                                  </span>
+                                  <span className="text-gray-300 font-mono">
+                                    {ctxId || "—"}
+                                  </span>
+                                </div>
+                                <div>
+                                  <span className="text-gray-500">
+                                    Roles{" "}
+                                  </span>
+                                  <span className="text-gray-300">
+                                    {roles.length > 0 ? roles.join(", ") : "—"}
+                                  </span>
+                                </div>
                               </div>
-                              <div>
-                                <span className="text-gray-500">DID: </span>
-                                <span className="text-gray-300 font-mono">
-                                  {ctx?.identity || "—"}
-                                </span>
-                              </div>
-                              <div>
-                                <span className="text-gray-500">State: </span>
-                                <span
-                                  className={`font-medium ${
-                                    ctx?.state === "CREATED"
-                                      ? "text-green-400"
-                                      : "text-yellow-400"
-                                  }`}
-                                >
-                                  {ctx?.state || "—"}
-                                </span>
-                              </div>
+
+                              {/* Participant context state */}
+                              {ctx && (
+                                <div>
+                                  <span className="text-gray-500">
+                                    Participant State:{" "}
+                                  </span>
+                                  <span
+                                    className={`font-medium ${
+                                      ctx.state === "ACTIVE"
+                                        ? "text-green-400"
+                                        : ctx.state === "CREATED"
+                                          ? "text-blue-400"
+                                          : "text-yellow-400"
+                                    }`}
+                                  >
+                                    {ctx.state}
+                                  </span>
+                                </div>
+                              )}
+
+                              {/* VPA list */}
+                              {pp.vpas?.length > 0 && (
+                                <div className="flex flex-wrap gap-2 pt-1">
+                                  {pp.vpas.map((v) => (
+                                    <span
+                                      key={v.id}
+                                      className={`flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] ${
+                                        v.state === "active"
+                                          ? "bg-green-900/30 text-green-400"
+                                          : v.state === "disposed"
+                                            ? "bg-gray-700/50 text-gray-500"
+                                            : v.state === "provisioning"
+                                              ? "bg-blue-900/30 text-blue-400"
+                                              : "bg-yellow-900/30 text-yellow-400"
+                                      }`}
+                                    >
+                                      <Circle
+                                        size={6}
+                                        className={
+                                          v.state === "active"
+                                            ? "fill-green-400"
+                                            : v.state === "disposed"
+                                              ? "fill-gray-500"
+                                              : "fill-yellow-400"
+                                        }
+                                      />
+                                      {v.type.replace("cfm.", "")}{" "}
+                                      <span className="opacity-70">
+                                        {v.state}
+                                      </span>
+                                    </span>
+                                  ))}
+                                </div>
+                              )}
                             </div>
                           );
                         })}

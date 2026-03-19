@@ -31,6 +31,18 @@
     - [All Docker Service Endpoints](#all-docker-service-endpoints)
   - [Documentation](#documentation)
   - [Implementation Status](#implementation-status)
+    - [Phase 1 — Infrastructure Migration](#phase-1--infrastructure-migration)
+    - [Phase 2 — Identity \& Trust](#phase-2--identity--trust)
+    - [Phase 3 — Health Knowledge Graph](#phase-3--health-knowledge-graph)
+    - [Phase 4 — Dataspace Integration](#phase-4--dataspace-integration)
+    - [Phase 5 — Federated Queries \& Natural Language Search](#phase-5--federated-queries--natural-language-search)
+    - [Phase 6 — Web Application \& Participant Portal](#phase-6--web-application--participant-portal)
+    - [Phase 7 — Protocol Compliance Testing](#phase-7--protocol-compliance-testing)
+    - [Phase 8 — Automated Testing](#phase-8--automated-testing)
+    - [Phase 9 — Documentation \& Navigation](#phase-9--documentation--navigation)
+    - [Phase 10 — Tasks Dashboard](#phase-10--tasks-dashboard)
+    - [Phase 11 — System Topology View](#phase-11--system-topology-view)
+    - [Phase 12 — Data Query Fix \& Policy Seeding](#phase-12--data-query-fix--policy-seeding)
     - [Container Inventory](#container-inventory)
       - [Tier 0 — Infrastructure Foundations (no dependencies, start first)](#tier-0--infrastructure-foundations-no-dependencies-start-first)
       - [Tier 1 — Core Identity \& UI (depend on Tier 0)](#tier-1--core-identity--ui-depend-on-tier-0)
@@ -443,18 +455,18 @@ All 12 phases are **✅ Complete** — from infrastructure migration through EDC
 
 | Phase | Description                                              | Status      |
 | ----- | -------------------------------------------------------- | ----------- |
-| 1     | Infrastructure Migration (EDC-V + DCore + CFM)           | ✅ Complete |
-| 2     | Identity & Trust (DCP v1.0 + Verifiable Credentials)     | ✅ Complete |
-| 3     | Health Knowledge Graph — Schema, FHIR Pipeline, EEHRxF   | ✅ Complete |
-| 4     | Dataspace Integration (DSP negotiation + DCore transfer) | ✅ Complete |
-| 5     | Federated Queries & GraphRAG (Text2Cypher NLQ)           | ✅ Complete |
-| 6     | Graph Explorer UI + Participant Portal (19 pages)        | ✅ Complete |
-| 7     | TCK DCP & DSP Compliance Verification                    | ✅ Complete |
-| 8     | Test Coverage (291 tests — 260 unit + 31 E2E)            | ✅ Complete |
-| 9     | Documentation & Navigation Restructuring                 | ✅ Complete |
-| 10    | Tasks Dashboard & DPS Integration                        | ✅ Complete |
-| 11    | EDC Components — Per-Participant Topology & Info Layer    | ✅ Complete |
-| 12    | API QuerySpec Fix & EHDS Policy Seeding                  | ✅ Complete |
+| 1     | Infrastructure Migration (EDC-V + DCore + CFM)           | ✅ |
+| 2     | Identity & Trust (DCP v1.0 + Verifiable Credentials)     | ✅ |
+| 3     | Health Knowledge Graph — Schema, FHIR Pipeline, EEHRxF   | ✅ |
+| 4     | Dataspace Integration (DSP negotiation + DCore transfer) | ✅ |
+| 5     | Federated Queries & GraphRAG (Text2Cypher NLQ)           | ✅ |
+| 6     | Graph Explorer UI + Participant Portal (19 pages)        | ✅ |
+| 7     | TCK DCP & DSP Compliance Verification                    | ✅ |
+| 8     | Test Coverage (291 tests — 260 unit + 31 E2E)            | ✅ |
+| 9     | Documentation & Navigation Restructuring                 | ✅ |
+| 10    | Tasks Dashboard & DPS Integration                        | ✅ |
+| 11    | EDC Components — Per-Participant Topology & Info Layer    | ✅ |
+| 12    | API QuerySpec Fix & EHDS Policy Seeding                  | ✅ |
 
 ### Phase 1 — Infrastructure Migration
 

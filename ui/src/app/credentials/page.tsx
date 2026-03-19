@@ -82,6 +82,10 @@ export default function CredentialsPage() {
               ...(c.holderName ? { holder: c.holderName } : {}),
               ...(c.holderType ? { type: c.holderType } : {}),
               ...(c.participantRole ? { role: c.participantRole } : {}),
+              ...(c.membership ? { membership: c.membership } : {}),
+              ...(c.membershipType ? { membershipType: c.membershipType } : {}),
+              ...(c.jurisdiction ? { jurisdiction: c.jurisdiction } : {}),
+              ...(c.ehdsArticle ? { ehdsArticle: c.ehdsArticle } : {}),
               ...(c.purpose ? { purpose: c.purpose } : {}),
               ...(c.datasetId ? { dataset: c.datasetId } : {}),
               ...(c.completeness != null
@@ -149,6 +153,10 @@ export default function CredentialsPage() {
               ...(c.holderName ? { holder: c.holderName } : {}),
               ...(c.holderType ? { type: c.holderType } : {}),
               ...(c.participantRole ? { role: c.participantRole } : {}),
+              ...(c.membership ? { membership: c.membership } : {}),
+              ...(c.membershipType ? { membershipType: c.membershipType } : {}),
+              ...(c.jurisdiction ? { jurisdiction: c.jurisdiction } : {}),
+              ...(c.ehdsArticle ? { ehdsArticle: c.ehdsArticle } : {}),
               ...(c.purpose ? { purpose: c.purpose } : {}),
               ...(c.datasetId ? { dataset: c.datasetId } : {}),
               ...(c.completeness != null

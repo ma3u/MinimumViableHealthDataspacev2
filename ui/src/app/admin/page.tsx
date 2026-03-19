@@ -3,6 +3,7 @@
 import { fetchApi } from "@/lib/api";
 import { useEffect, useState } from "react";
 import {
+  Activity,
   Building2,
   FileKey2,
   LayoutDashboard,
@@ -22,16 +23,35 @@ interface Summary {
 
 export default function AdminDashboard() {
   const [summary, setSummary] = useState<Summary | null>(null);
+  const [policyCount, setPolicyCount] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchApi("/api/admin/tenants")
-      .then((r) => (r.ok ? r.json() : ({} as Record<string, unknown>)))
-      .then((d: Record<string, unknown>) => {
-        setSummary((d.summary as Summary) || null);
-        setLoading(false);
-      })
-      .catch(() => setLoading(false));
+    Promise.all([
+      fetchApi("/api/admin/tenants")
+        .then((r) => (r.ok ? r.json() : ({} as Record<string, unknown>)))
+        .then((d: Record<string, unknown>) => {
+          setSummary((d.summary as Summary) || null);
+        }),
+      fetchApi("/api/admin/policies")
+        .then((r) => (r.ok ? r.json() : null))
+        .then((d: Record<string, unknown> | null) => {
+          if (!d) return;
+          // EDC-V returns { participants: [{ policies: [...] }, ...] }
+          if (Array.isArray(d.participants)) {
+            const total = (d.participants as { policies?: unknown[] }[]).reduce(
+              (sum, p) => sum + (Array.isArray(p.policies) ? p.policies.length : 0),
+              0,
+            );
+            setPolicyCount(total);
+          } else if (Array.isArray(d.policies)) {
+            // Neo4j fallback returns { policies: [...] }
+            setPolicyCount(d.policies.length);
+          }
+        }),
+    ])
+      .catch(() => {})
+      .finally(() => setLoading(false));
   }, []);
 
   const cards = [
@@ -53,7 +73,7 @@ export default function AdminDashboard() {
       href: "/admin/policies",
       label: "Policies",
       icon: ShieldCheck,
-      value: "—",
+      value: policyCount ?? "—",
       color: "text-purple-400",
     },
     {
@@ -121,7 +141,17 @@ export default function AdminDashboard() {
           )}
 
           {/* Quick links */}
-          <div className="grid md:grid-cols-3 gap-4">
+          <div className="grid md:grid-cols-4 gap-4">
+            <Link
+              href="/admin/components"
+              className="p-4 border border-gray-700 rounded-xl hover:border-layer2 transition-colors"
+            >
+              <Activity size={18} className="text-layer2 mb-2" />
+              <h3 className="font-semibold text-sm mb-1">EDC Components</h3>
+              <p className="text-xs text-gray-500">
+                Health, CPU &amp; memory per service
+              </p>
+            </Link>
             <Link
               href="/admin/tenants"
               className="p-4 border border-gray-700 rounded-xl hover:border-layer2 transition-colors"

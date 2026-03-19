@@ -1,7 +1,24 @@
 import { NextResponse } from "next/server";
 import { runQuery } from "@/lib/neo4j";
+import { edcClient } from "@/lib/edc";
 
 export const dynamic = "force-dynamic";
+
+/**
+ * Approved fictional participants — DID slug → display info.
+ * Used as fallback when no Participant nodes exist in Neo4j.
+ */
+const SLUG_DISPLAY: Record<string, { name: string; type: string }> = {
+  "alpha-klinik": { name: "AlphaKlinik Berlin", type: "DATA_HOLDER" },
+  pharmaco: { name: "PharmaCo Research AG", type: "DATA_USER" },
+  medreg: { name: "MedReg DE", type: "HDAB" },
+  lmc: { name: "Limburg Medical Centre", type: "DATA_HOLDER" },
+  irs: { name: "Institut de Recherche Santé", type: "HDAB" },
+};
+
+function didSlug(did: string): string {
+  return decodeURIComponent(did).split(":").pop()?.toLowerCase() ?? "";
+}
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
@@ -25,7 +42,50 @@ export async function GET(req: Request) {
          ORDER BY ds.title`,
       ),
     ]);
-    return NextResponse.json({ consumers, datasets });
+
+    // If Neo4j has no consumers, fall back to EDC-V activated participants
+    let finalConsumers = consumers;
+    if (consumers.length === 0) {
+      try {
+        const participants = await edcClient.management<
+          { "@id": string; identity?: string; state?: string }[]
+        >("/v5alpha/participants");
+        const active = (Array.isArray(participants) ? participants : []).filter(
+          (p) => (p.state ?? "ACTIVATED") === "ACTIVATED",
+        );
+        finalConsumers = active.map((p) => {
+          const did = p.identity ?? p["@id"];
+          const slug = didSlug(did);
+          const info = SLUG_DISPLAY[slug];
+          return {
+            id: p["@id"],
+            name: info?.name ?? slug ?? p["@id"].slice(0, 12),
+            type: info?.type ?? "PARTICIPANT",
+          };
+        });
+      } catch {
+        // EDC-V also unavailable — keep empty
+      }
+    }
+
+    // If Neo4j has no datasets, provide discoverable HealthDatasets
+    let finalDatasets = datasets;
+    if (datasets.length === 0) {
+      const graphDatasets = await runQuery<{ id: string; title: string }>(
+        `MATCH (ds:HealthDataset)
+         RETURN coalesce(ds.id, ds.datasetId) AS id,
+                coalesce(ds.title, ds.name)   AS title
+         ORDER BY ds.title`,
+      );
+      if (graphDatasets.length > 0) {
+        finalDatasets = graphDatasets;
+      }
+    }
+
+    return NextResponse.json({
+      consumers: finalConsumers,
+      datasets: finalDatasets,
+    });
   }
 
   // Check mode: walk the EHDS approval chain for the given consumer + dataset

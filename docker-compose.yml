@@ -73,6 +73,10 @@ services:
       NEO4J_PROXY_URL: http://neo4j-proxy:9090
     depends_on:
       - neo4j
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    group_add:
+      - "0"   # root group — read-only Docker socket for component metrics
     networks:
       - default
       - health-dataspace-edcv

@@ -84,7 +84,7 @@ export async function GET(req: NextRequest) {
     const negotiations = await edcClient.management<unknown[]>(
       `/v5alpha/participants/${participantId}/contractnegotiations/request`,
       "POST",
-      { "@context": [EDC_CONTEXT], "@type": "QuerySpec" },
+      { "@context": [EDC_CONTEXT], "@type": "QuerySpec", "filterExpression": [] },
     );
     return NextResponse.json(negotiations);
   } catch (err) {

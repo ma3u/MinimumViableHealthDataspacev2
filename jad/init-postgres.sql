@@ -48,3 +48,35 @@ CREATE USER redline WITH PASSWORD 'redline';
 GRANT ALL PRIVILEGES ON DATABASE redlinedb TO redline;
 \c redlinedb
 GRANT ALL ON SCHEMA public TO redline;
+
+-- =============================================================================
+-- Task Management Database (Phase 13)
+-- =============================================================================
+-- Persistent decentralised task storage for negotiations and transfers.
+-- Each participant stores their own task state on the provider/consumer side.
+CREATE DATABASE taskdb;
+CREATE USER taskuser WITH PASSWORD 'taskuser';
+GRANT ALL PRIVILEGES ON DATABASE taskdb TO taskuser;
+\c taskdb
+GRANT ALL ON SCHEMA public TO taskuser;
+
+CREATE TABLE IF NOT EXISTS tasks (
+  id              TEXT PRIMARY KEY,           -- EDC-V negotiation or transfer ID
+  type            TEXT NOT NULL CHECK (type IN ('negotiation', 'transfer')),
+  participant     TEXT NOT NULL,              -- human-readable participant name
+  participant_id  TEXT NOT NULL,              -- UUID context ID
+  asset           TEXT NOT NULL DEFAULT '',   -- human-readable asset name
+  asset_id        TEXT NOT NULL DEFAULT '',   -- raw asset ID
+  state           TEXT NOT NULL DEFAULT 'REQUESTED',
+  counter_party   TEXT NOT NULL DEFAULT '',   -- human-readable counter-party name
+  timestamp_ms    BIGINT NOT NULL DEFAULT 0,  -- last state update (epoch millis)
+  contract_id     TEXT,                       -- contract agreement ID (if available)
+  transfer_type   TEXT,                       -- e.g. HttpData-PULL
+  edr_available   BOOLEAN DEFAULT FALSE,      -- DPS: Endpoint Data Reference available
+  created_at      TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at      TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_tasks_participant_id ON tasks(participant_id);
+CREATE INDEX IF NOT EXISTS idx_tasks_type ON tasks(type);
+CREATE INDEX IF NOT EXISTS idx_tasks_state ON tasks(state);

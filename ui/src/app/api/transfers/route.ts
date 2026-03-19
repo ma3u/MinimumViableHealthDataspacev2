@@ -22,7 +22,7 @@ export async function GET(req: NextRequest) {
     const transfers = await edcClient.management<unknown[]>(
       `/v5alpha/participants/${participantId}/transferprocesses/request`,
       "POST",
-      { "@context": [EDC_CONTEXT], "@type": "QuerySpec" },
+      { "@context": [EDC_CONTEXT], "@type": "QuerySpec", "filterExpression": [] },
     );
     return NextResponse.json(transfers);
   } catch (err) {

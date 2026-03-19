@@ -95,14 +95,14 @@ export async function GET() {
             .management<Record<string, unknown>[]>(
               `/v5alpha/participants/${ctxId}/contractnegotiations/request`,
               "POST",
-              { "@context": [EDC_CONTEXT], "@type": "QuerySpec" },
+              { "@context": [EDC_CONTEXT], "@type": "QuerySpec", "filterExpression": [] },
             )
             .catch(() => []),
           edcClient
             .management<Record<string, unknown>[]>(
               `/v5alpha/participants/${ctxId}/transferprocesses/request`,
               "POST",
-              { "@context": [EDC_CONTEXT], "@type": "QuerySpec" },
+              { "@context": [EDC_CONTEXT], "@type": "QuerySpec", "filterExpression": [] },
             )
             .catch(() => []),
         ]);
@@ -189,7 +189,35 @@ export async function GET() {
     // 3. Sort by timestamp descending (newest first)
     tasks.sort((a, b) => b.timestamp - a.timestamp);
 
-    // 4. Compute counts
+    // 4. Sync tasks to persistent storage (neo4j-proxy → PostgreSQL)
+    const NEO4J_PROXY = process.env.NEO4J_PROXY_URL ?? "http://localhost:9090";
+    try {
+      await fetch(`${NEO4J_PROXY}/tasks/sync`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          tasks: tasks.map((t) => ({
+            id: t.id,
+            type: t.type,
+            participant: t.participant,
+            participant_id: t.participantId,
+            asset: t.asset,
+            asset_id: t.assetId,
+            state: t.state,
+            counter_party: t.counterParty,
+            timestamp_ms: t.timestamp,
+            contract_id: t.contractId ?? null,
+            transfer_type: t.transferType ?? null,
+            edr_available: t.edrAvailable ?? false,
+          })),
+        }),
+        signal: AbortSignal.timeout(5000),
+      });
+    } catch {
+      // Sync best-effort — don't fail the request
+    }
+
+    // 5. Compute counts
     const active = tasks.filter(
       (t) =>
         !["FINALIZED", "COMPLETED", "TERMINATED", "ERROR"].includes(
@@ -207,7 +235,22 @@ export async function GET() {
       },
     });
   } catch (err) {
-    console.error("Failed to aggregate tasks:", err);
+    console.error("Failed to aggregate tasks from EDC-V:", err);
+
+    // Fall back to persistent task storage (PostgreSQL via neo4j-proxy)
+    const NEO4J_PROXY = process.env.NEO4J_PROXY_URL ?? "http://localhost:9090";
+    try {
+      const fallbackRes = await fetch(`${NEO4J_PROXY}/tasks`, {
+        signal: AbortSignal.timeout(5000),
+      });
+      if (fallbackRes.ok) {
+        const data = await fallbackRes.json();
+        return NextResponse.json(data);
+      }
+    } catch {
+      // Both EDC-V and persistent storage unavailable
+    }
+
     return NextResponse.json(
       {
         error: "Failed to aggregate tasks",
