@@ -1,103 +1,335 @@
 {
   "tenants": [
     {
-      "id": "alpha-klinik-id",
-      "version": 1,
+      "id": "092cfcc9-c4ad-4136-9cb0-4e1ff4b702a9",
+      "version": 0,
       "properties": {
+        "address": "Augustenburger Platz 1",
+        "city": "Berlin",
+        "contactPerson": "Dr. Sophie Richter",
+        "country": "DE",
         "displayName": "AlphaKlinik Berlin",
-        "role": "provider",
         "ehdsParticipantType": "data-holder",
-        "organization": "AlphaKlinik Berlin GmbH",
-        "country": "DE"
+        "email": "data-office@alpha-klinik.de",
+        "organization": "AlphaKlinik Berlin — Universitätsklinikum",
+        "phone": "+49 30 4501-0",
+        "postalCode": "13353",
+        "role": "provider",
+        "website": "https://alpha-klinik.de"
       },
       "participantProfiles": [
         {
-          "participantContextId": "a1b2c3d4e5f647a0b1c2d3e4f5a6b7c8",
-          "did": "did:web:alpha-klinik.de:participant",
-          "state": "ACTIVATED"
+          "id": "c30e1335-a56c-45b5-80a4-42424d4d3716",
+          "version": 0,
+          "identifier": "did:web:identityhub%3A7083:alpha-klinik",
+          "tenantId": "092cfcc9-c4ad-4136-9cb0-4e1ff4b702a9",
+          "participantRoles": {
+            "8bd2aa17-ef81-4c60-9a55-481843c2023d": ["provider"]
+          },
+          "vpas": [
+            {
+              "id": "617da89f-a59f-4211-b234-d6eb50bb6d04",
+              "version": 0,
+              "state": "active",
+              "stateTimestamp": "2026-03-19T07:25:36.432363689Z",
+              "type": "cfm.connector",
+              "cellId": "b152c28a-7d91-49f9-b2c0-23a0e923db48"
+            },
+            {
+              "id": "0255f451-91a3-4375-b6c8-83237f3468f9",
+              "version": 0,
+              "state": "active",
+              "stateTimestamp": "2026-03-19T07:25:36.43236423Z",
+              "type": "cfm.credentialservice",
+              "cellId": "b152c28a-7d91-49f9-b2c0-23a0e923db48"
+            },
+            {
+              "id": "7e8fc19f-ffb0-4107-9d7b-78dad2f274ea",
+              "version": 0,
+              "state": "active",
+              "stateTimestamp": "2026-03-19T07:25:36.432364772Z",
+              "type": "cfm.dataplane",
+              "cellId": "b152c28a-7d91-49f9-b2c0-23a0e923db48"
+            }
+          ],
+          "properties": {
+            "cfm.vpa.state": {
+              "credentialRequest": "http://identityhub:7081/v1alpha/participants/86c3de62968647dfb428d8a08f4cde8d/credentials/request/deefbf65-e2c0-46b3-a761-a5f18c7f7700",
+              "holderPid": "deefbf65-e2c0-46b3-a761-a5f18c7f7700",
+              "participantContextId": "86c3de62968647dfb428d8a08f4cde8d"
+            },
+            "displayName": "AlphaKlinik Berlin",
+            "type": "alpha-klinik"
+          },
+          "error": false
         }
       ]
     },
     {
-      "id": "pharmaco-research-id",
-      "version": 1,
+      "id": "10c8951e-bae5-4c2f-84d5-3eabf8d23f5d",
+      "version": 0,
       "properties": {
+        "address": "Industriepark Hoechst G879",
+        "city": "Frankfurt am Main",
+        "contactPerson": "Dr. Klaus Berger",
+        "country": "DE",
         "displayName": "PharmaCo Research AG",
-        "role": "consumer",
         "ehdsParticipantType": "data-user",
-        "organization": "PharmaCo Research AG",
-        "country": "DE"
+        "email": "research-data@pharmaco.de",
+        "organization": "PharmaCo Research AG — Clinical Trials Division",
+        "phone": "+49 69 8100-0",
+        "postalCode": "65926",
+        "role": "consumer",
+        "website": "https://pharmaco.de"
       },
       "participantProfiles": [
         {
-          "participantContextId": "b2c3d4e5f6a748b1c2d3e4f5a6b7c8d9",
-          "did": "did:web:pharmaco.de:research",
-          "state": "ACTIVATED"
+          "id": "17bc30db-cfc0-4b85-97f8-ca5a869d3e19",
+          "version": 0,
+          "identifier": "did:web:identityhub%3A7083:pharmaco",
+          "tenantId": "10c8951e-bae5-4c2f-84d5-3eabf8d23f5d",
+          "participantRoles": {
+            "8bd2aa17-ef81-4c60-9a55-481843c2023d": ["consumer"]
+          },
+          "vpas": [
+            {
+              "id": "9950b4e2-ddc2-405d-b88e-26644f21799c",
+              "version": 0,
+              "state": "active",
+              "stateTimestamp": "2026-03-19T07:25:53.040975223Z",
+              "type": "cfm.connector",
+              "cellId": "b152c28a-7d91-49f9-b2c0-23a0e923db48"
+            },
+            {
+              "id": "d9323182-18ad-45fa-bba1-2e2c081ff87c",
+              "version": 0,
+              "state": "active",
+              "stateTimestamp": "2026-03-19T07:25:53.040975806Z",
+              "type": "cfm.credentialservice",
+              "cellId": "b152c28a-7d91-49f9-b2c0-23a0e923db48"
+            },
+            {
+              "id": "4785b399-65a5-4d44-a7d3-44de85b0d7e4",
+              "version": 0,
+              "state": "active",
+              "stateTimestamp": "2026-03-19T07:25:53.040976056Z",
+              "type": "cfm.dataplane",
+              "cellId": "b152c28a-7d91-49f9-b2c0-23a0e923db48"
+            }
+          ],
+          "properties": {
+            "cfm.vpa.state": {
+              "credentialRequest": "http://identityhub:7081/v1alpha/participants/c19ace5df59740c0a4a489e5cc3f4ab6/credentials/request/02627726-740c-42a9-8f2d-83eb08b96237",
+              "holderPid": "02627726-740c-42a9-8f2d-83eb08b96237",
+              "participantContextId": "c19ace5df59740c0a4a489e5cc3f4ab6"
+            },
+            "displayName": "PharmaCo Research AG",
+            "type": "pharmaco"
+          },
+          "error": false
         }
       ]
     },
     {
-      "id": "medreg-de-id",
-      "version": 1,
+      "id": "1a73f1db-39b4-4316-aabc-2807f9410be5",
+      "version": 0,
       "properties": {
+        "address": "Friedrich-Ebert-Allee 38",
+        "city": "Bonn",
+        "contactPerson": "Anke Hoffmann",
+        "country": "DE",
         "displayName": "MedReg DE",
-        "role": "operator",
         "ehdsParticipantType": "health-data-access-body",
-        "organization": "MedReg DE — National Medicines Regulatory Authority",
-        "country": "DE"
+        "email": "contact@medreg.de",
+        "organization": "MedReg DE — Health Data Access Body",
+        "phone": "+49 228 3080-0",
+        "postalCode": "53113",
+        "role": "operator",
+        "website": "https://medreg.de"
       },
       "participantProfiles": [
         {
-          "participantContextId": "c3d4e5f6a7b849c1d2e3f4a5b6c7d8e9",
-          "did": "did:web:medreg.de:hdab",
-          "state": "ACTIVATED"
+          "id": "3cde5560-375b-48cd-b7a6-ae800f14c6d2",
+          "version": 0,
+          "identifier": "did:web:identityhub%3A7083:medreg",
+          "tenantId": "1a73f1db-39b4-4316-aabc-2807f9410be5",
+          "participantRoles": {
+            "8bd2aa17-ef81-4c60-9a55-481843c2023d": ["operator"]
+          },
+          "vpas": [
+            {
+              "id": "38ad4ab6-f984-4067-8ce7-5811d1c4ad7c",
+              "version": 0,
+              "state": "active",
+              "stateTimestamp": "2026-03-19T07:25:53.065615805Z",
+              "type": "cfm.connector",
+              "cellId": "b152c28a-7d91-49f9-b2c0-23a0e923db48"
+            },
+            {
+              "id": "27c1acbe-4575-4c9b-9d4e-bea41e580f72",
+              "version": 0,
+              "state": "active",
+              "stateTimestamp": "2026-03-19T07:25:53.065617096Z",
+              "type": "cfm.credentialservice",
+              "cellId": "b152c28a-7d91-49f9-b2c0-23a0e923db48"
+            },
+            {
+              "id": "437f6e73-2f2a-44f1-be1b-aa4d977bfff1",
+              "version": 0,
+              "state": "active",
+              "stateTimestamp": "2026-03-19T07:25:53.065617596Z",
+              "type": "cfm.dataplane",
+              "cellId": "b152c28a-7d91-49f9-b2c0-23a0e923db48"
+            }
+          ],
+          "properties": {
+            "cfm.vpa.state": {
+              "credentialRequest": "http://identityhub:7081/v1alpha/participants/910a9b58575544f498a9ea24ddb50b84/credentials/request/ac3282b2-3fc0-4372-83b0-53388f6316ce",
+              "holderPid": "ac3282b2-3fc0-4372-83b0-53388f6316ce",
+              "participantContextId": "910a9b58575544f498a9ea24ddb50b84"
+            },
+            "displayName": "MedReg DE",
+            "type": "medreg"
+          },
+          "error": false
         }
       ]
     },
     {
-      "id": "limburg-mc-id",
-      "version": 1,
+      "id": "7ecc95be-e1aa-42a0-a161-1c447a7b6d63",
+      "version": 0,
       "properties": {
+        "address": "Tegelseweg 210",
+        "city": "Venlo",
+        "contactPerson": "Dr. Jan van der Berg",
+        "country": "NL",
         "displayName": "Limburg Medical Centre",
-        "role": "provider",
         "ehdsParticipantType": "data-holder",
-        "organization": "Limburg Medical Centre",
-        "country": "NL"
+        "email": "dataaccess@lmc.nl",
+        "organization": "Limburg Medical Centre — Academic Hospital",
+        "phone": "+31 77 320 5555",
+        "postalCode": "5912 BL",
+        "role": "provider",
+        "website": "https://lmc.nl"
       },
       "participantProfiles": [
         {
-          "participantContextId": "d4e5f6a7b8c950d1e2f3a4b5c6d7e8f9",
-          "did": "did:web:lmc.nl:clinic",
-          "state": "ACTIVATED"
+          "id": "e09c78e0-8fca-48a6-a8c1-e86ae802923c",
+          "version": 0,
+          "identifier": "did:web:identityhub%3A7083:lmc",
+          "tenantId": "7ecc95be-e1aa-42a0-a161-1c447a7b6d63",
+          "participantRoles": {
+            "8bd2aa17-ef81-4c60-9a55-481843c2023d": ["provider"]
+          },
+          "vpas": [
+            {
+              "id": "a172420a-61dc-4f49-a410-6e884404e911",
+              "version": 0,
+              "state": "active",
+              "stateTimestamp": "2026-03-19T07:25:53.085659936Z",
+              "type": "cfm.connector",
+              "cellId": "b152c28a-7d91-49f9-b2c0-23a0e923db48"
+            },
+            {
+              "id": "affa0191-665e-449e-9b76-78611efea7de",
+              "version": 0,
+              "state": "active",
+              "stateTimestamp": "2026-03-19T07:25:53.085660269Z",
+              "type": "cfm.credentialservice",
+              "cellId": "b152c28a-7d91-49f9-b2c0-23a0e923db48"
+            },
+            {
+              "id": "84955108-fddd-4d1e-b17a-481e12e70f97",
+              "version": 0,
+              "state": "active",
+              "stateTimestamp": "2026-03-19T07:25:53.085660394Z",
+              "type": "cfm.dataplane",
+              "cellId": "b152c28a-7d91-49f9-b2c0-23a0e923db48"
+            }
+          ],
+          "properties": {
+            "cfm.vpa.state": {
+              "credentialRequest": "http://identityhub:7081/v1alpha/participants/a068819fca5a479983253994ef7337a9/credentials/request/ecfa4e9f-efc9-42c5-8415-43d4fc180c3a",
+              "holderPid": "ecfa4e9f-efc9-42c5-8415-43d4fc180c3a",
+              "participantContextId": "a068819fca5a479983253994ef7337a9"
+            },
+            "displayName": "Limburg Medical Centre",
+            "type": "lmc"
+          },
+          "error": false
         }
       ]
     },
     {
-      "id": "irs-fr-id",
-      "version": 1,
+      "id": "886d2ee6-cf22-4b39-9d31-97cd68a767dc",
+      "version": 0,
       "properties": {
+        "address": "101 rue de Tolbiac",
+        "city": "Paris",
+        "contactPerson": "Prof. Marie Leblanc",
+        "country": "FR",
         "displayName": "Institut de Recherche Santé",
-        "role": "operator",
         "ehdsParticipantType": "health-data-access-body",
-        "organization": "Institut de Recherche Santé",
-        "country": "FR"
+        "email": "data@irs.fr",
+        "organization": "Institut de Recherche Santé — Research HDAB",
+        "phone": "+33 1 44 23 60 00",
+        "postalCode": "75013",
+        "role": "operator",
+        "website": "https://irs.fr"
       },
       "participantProfiles": [
         {
-          "participantContextId": "e5f6a7b8c9d051e2f3a4b5c6d7e8f9a0",
-          "did": "did:web:irs.fr:hdab",
-          "state": "ACTIVATED"
+          "id": "889634e7-f04a-4d41-bf04-be0670ea4e09",
+          "version": 0,
+          "identifier": "did:web:identityhub%3A7083:irs",
+          "tenantId": "886d2ee6-cf22-4b39-9d31-97cd68a767dc",
+          "participantRoles": {
+            "8bd2aa17-ef81-4c60-9a55-481843c2023d": ["operator"]
+          },
+          "vpas": [
+            {
+              "id": "94117f79-f840-457d-9d90-60d99b803a15",
+              "version": 0,
+              "state": "active",
+              "stateTimestamp": "2026-03-19T07:25:53.110871225Z",
+              "type": "cfm.connector",
+              "cellId": "b152c28a-7d91-49f9-b2c0-23a0e923db48"
+            },
+            {
+              "id": "947bc527-0133-49d1-8cfb-0637b0093e94",
+              "version": 0,
+              "state": "active",
+              "stateTimestamp": "2026-03-19T07:25:53.110871767Z",
+              "type": "cfm.credentialservice",
+              "cellId": "b152c28a-7d91-49f9-b2c0-23a0e923db48"
+            },
+            {
+              "id": "9b2f0b51-4453-4201-b294-b9bab882e707",
+              "version": 0,
+              "state": "active",
+              "stateTimestamp": "2026-03-19T07:25:53.110871892Z",
+              "type": "cfm.dataplane",
+              "cellId": "b152c28a-7d91-49f9-b2c0-23a0e923db48"
+            }
+          ],
+          "properties": {
+            "cfm.vpa.state": {
+              "credentialRequest": "http://identityhub:7081/v1alpha/participants/04024a2a4b484c70b211f033a459056b/credentials/request/5ea25895-a1e9-4cc8-8848-605a7a72c4d3",
+              "holderPid": "5ea25895-a1e9-4cc8-8848-605a7a72c4d3",
+              "participantContextId": "04024a2a4b484c70b211f033a459056b"
+            },
+            "displayName": "Institut de Recherche Santé",
+            "type": "irs"
+          },
+          "error": false
         }
       ]
     }
   ],
+  "participants": [],
   "summary": {
     "totalTenants": 5,
-    "totalParticipants": 5,
-    "byRole": {
-      "provider": 2,
-      "consumer": 1,
-      "operator": 2
-    }
+    "totalParticipants": 0,
+    "byRole": { "provider": 2, "consumer": 1, "operator": 2 }
   }
 }

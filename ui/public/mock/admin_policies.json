@@ -1,42 +1,306 @@
 {
-  "policies": [
+  "participants": [
     {
-      "participantId": "c9c953d7-6c94-4fcd-9127-0eae25c65a36",
-      "participantName": "alpha-klinik",
-      "@id": "policy-open-access",
-      "@type": "PolicyDefinition",
-      "policy": {
-        "@type": "odrl:Set",
-        "odrl:permission": [
-          {
-            "odrl:action": "use",
-            "odrl:constraint": []
-          }
-        ]
-      },
-      "createdAt": 1719400000000
-    },
-    {
-      "participantId": "a068819fca5a479983253994ef7337a9",
-      "participantName": "lmc",
-      "@id": "policy-ehds-research",
-      "@type": "PolicyDefinition",
-      "policy": {
-        "@type": "odrl:Set",
-        "odrl:permission": [
-          {
-            "odrl:action": "use",
-            "odrl:constraint": [
+      "participantId": "did:web:alpha-klinik.de:participant",
+      "identity": "did:web:alpha-klinik.de:participant",
+      "policies": [
+        {
+          "@id": "policy-ehds-art53-synthetic-2026",
+          "@type": "edc:PolicyDefinition",
+          "edc:policy": {
+            "@type": "odrl:Set",
+            "odrl:permission": [
               {
-                "odrl:leftOperand": "purpose",
-                "odrl:operator": "eq",
-                "odrl:rightOperand": "scientific-research"
+                "odrl:action": {
+                  "@id": "odrl:use"
+                },
+                "odrl:constraint": [
+                  {
+                    "odrl:leftOperand": {
+                      "@id": "edc:purpose"
+                    },
+                    "odrl:operator": {
+                      "@id": "odrl:isAnyOf"
+                    },
+                    "odrl:rightOperand": [
+                      "scientific-research",
+                      "statistics",
+                      "policy-support",
+                      "education",
+                      "ai-training"
+                    ]
+                  },
+                  {
+                    "odrl:leftOperand": {
+                      "@id": "edc:legalBasis"
+                    },
+                    "odrl:operator": {
+                      "@id": "odrl:eq"
+                    },
+                    "odrl:rightOperand": "EHDS Art. 53"
+                  },
+                  {
+                    "odrl:leftOperand": {
+                      "@id": "edc:retentionPeriod"
+                    },
+                    "odrl:operator": {
+                      "@id": "odrl:lteq"
+                    },
+                    "odrl:rightOperand": "P730D"
+                  }
+                ]
+              }
+            ],
+            "odrl:prohibition": [
+              {
+                "odrl:action": {
+                  "@id": "odrl:use"
+                },
+                "odrl:constraint": [
+                  {
+                    "odrl:leftOperand": {
+                      "@id": "edc:purpose"
+                    },
+                    "odrl:operator": {
+                      "@id": "odrl:isAnyOf"
+                    },
+                    "odrl:rightOperand": [
+                      "re-identification",
+                      "commercial-exploitation-without-approval"
+                    ]
+                  }
+                ]
               }
             ]
-          }
-        ]
-      },
-      "createdAt": 1719450000000
+          },
+          "edc:createdAt": "2026-03-08T22:18:12.049Z"
+        }
+      ]
+    },
+    {
+      "participantId": "did:web:pharmaco.de:research",
+      "identity": "did:web:pharmaco.de:research",
+      "policies": [
+        {
+          "@id": "policy-ehds-research-use-53c",
+          "@type": "edc:PolicyDefinition",
+          "edc:policy": {
+            "@type": "odrl:Set",
+            "odrl:permission": [
+              {
+                "odrl:action": {
+                  "@id": "odrl:use"
+                },
+                "odrl:constraint": [
+                  {
+                    "odrl:leftOperand": {
+                      "@id": "edc:purpose"
+                    },
+                    "odrl:operator": {
+                      "@id": "odrl:isAnyOf"
+                    },
+                    "odrl:rightOperand": [
+                      "pharmacovigilance",
+                      "drug-safety",
+                      "statistics",
+                      "scientific-research"
+                    ]
+                  },
+                  {
+                    "odrl:leftOperand": {
+                      "@id": "edc:legalBasis"
+                    },
+                    "odrl:operator": {
+                      "@id": "odrl:eq"
+                    },
+                    "odrl:rightOperand": "EHDS Art. 53(c)"
+                  },
+                  {
+                    "odrl:leftOperand": {
+                      "@id": "edc:retentionPeriod"
+                    },
+                    "odrl:operator": {
+                      "@id": "odrl:lteq"
+                    },
+                    "odrl:rightOperand": "P365D"
+                  }
+                ]
+              }
+            ],
+            "odrl:prohibition": [
+              {
+                "odrl:action": {
+                  "@id": "odrl:use"
+                },
+                "odrl:constraint": [
+                  {
+                    "odrl:leftOperand": {
+                      "@id": "edc:purpose"
+                    },
+                    "odrl:operator": {
+                      "@id": "odrl:isAnyOf"
+                    },
+                    "odrl:rightOperand": [
+                      "re-identification",
+                      "commercial-sale",
+                      "insurance-decisions",
+                      "advertising"
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          "edc:createdAt": "2026-01-15T09:12:00Z"
+        }
+      ]
+    },
+    {
+      "participantId": "did:web:lmc.nl:clinic",
+      "identity": "did:web:lmc.nl:clinic",
+      "policies": [
+        {
+          "@id": "policy-ehds-cross-border-art7",
+          "@type": "edc:PolicyDefinition",
+          "edc:policy": {
+            "@type": "odrl:Set",
+            "odrl:permission": [
+              {
+                "odrl:action": {
+                  "@id": "odrl:use"
+                },
+                "odrl:constraint": [
+                  {
+                    "odrl:leftOperand": {
+                      "@id": "edc:purpose"
+                    },
+                    "odrl:operator": {
+                      "@id": "odrl:isAnyOf"
+                    },
+                    "odrl:rightOperand": [
+                      "clinical-care-integration",
+                      "statistics",
+                      "scientific-research"
+                    ]
+                  },
+                  {
+                    "odrl:leftOperand": {
+                      "@id": "edc:legalBasis"
+                    },
+                    "odrl:operator": {
+                      "@id": "odrl:eq"
+                    },
+                    "odrl:rightOperand": "EHDS Art. 7"
+                  },
+                  {
+                    "odrl:leftOperand": {
+                      "@id": "edc:retentionPeriod"
+                    },
+                    "odrl:operator": {
+                      "@id": "odrl:lteq"
+                    },
+                    "odrl:rightOperand": "P180D"
+                  }
+                ]
+              }
+            ],
+            "odrl:prohibition": [
+              {
+                "odrl:action": {
+                  "@id": "odrl:use"
+                },
+                "odrl:constraint": [
+                  {
+                    "odrl:leftOperand": {
+                      "@id": "edc:purpose"
+                    },
+                    "odrl:operator": {
+                      "@id": "odrl:isAnyOf"
+                    },
+                    "odrl:rightOperand": [
+                      "re-identification",
+                      "commercial-exploitation",
+                      "insurance-decisions"
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          "edc:createdAt": "2026-02-04T08:30:00Z"
+        }
+      ]
+    },
+    {
+      "participantId": "did:web:medreg.de:hdab",
+      "identity": "did:web:medreg.de:hdab",
+      "policies": [
+        {
+          "@id": "policy-hdab-regulatory-access",
+          "@type": "edc:PolicyDefinition",
+          "edc:policy": {
+            "@type": "odrl:Set",
+            "odrl:permission": [
+              {
+                "odrl:action": {
+                  "@id": "odrl:use"
+                },
+                "odrl:constraint": [
+                  {
+                    "odrl:leftOperand": {
+                      "@id": "edc:purpose"
+                    },
+                    "odrl:operator": {
+                      "@id": "odrl:isAnyOf"
+                    },
+                    "odrl:rightOperand": [
+                      "regulatory-review",
+                      "public-health-monitoring",
+                      "statistics"
+                    ]
+                  },
+                  {
+                    "odrl:leftOperand": {
+                      "@id": "edc:legalBasis"
+                    },
+                    "odrl:operator": {
+                      "@id": "odrl:eq"
+                    },
+                    "odrl:rightOperand": "EHDS Art. 36"
+                  }
+                ]
+              }
+            ],
+            "odrl:prohibition": [
+              {
+                "odrl:action": {
+                  "@id": "odrl:use"
+                },
+                "odrl:constraint": [
+                  {
+                    "odrl:leftOperand": {
+                      "@id": "edc:purpose"
+                    },
+                    "odrl:operator": {
+                      "@id": "odrl:isAnyOf"
+                    },
+                    "odrl:rightOperand": [
+                      "re-identification",
+                      "commercial-exploitation"
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          "edc:createdAt": "2025-12-01T09:00:00Z"
+        }
+      ]
+    },
+    {
+      "participantId": "did:web:irs.fr:hdab",
+      "identity": "did:web:irs.fr:hdab",
+      "policies": []
     }
   ]
 }
