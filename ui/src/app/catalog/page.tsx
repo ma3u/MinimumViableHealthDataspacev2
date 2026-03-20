@@ -1,8 +1,16 @@
 "use client";
 
 import { fetchApi } from "@/lib/api";
-import { useEffect, useState } from "react";
-import { ChevronDown, ChevronUp, ExternalLink, Database } from "lucide-react";
+import { Suspense, useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import {
+  ChevronDown,
+  ChevronUp,
+  ExternalLink,
+  Database,
+  Network,
+  Loader2,
+} from "lucide-react";
 import PageIntro from "@/components/PageIntro";
 
 interface Dataset {
@@ -39,9 +47,25 @@ function DetailRow({
 }
 
 export default function CatalogPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex items-center gap-2 text-gray-500 p-10">
+          <Loader2 size={16} className="animate-spin" />
+          Loading…
+        </div>
+      }
+    >
+      <CatalogContent />
+    </Suspense>
+  );
+}
+
+function CatalogContent() {
   const [datasets, setDatasets] = useState<Dataset[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState("");
+  const searchParams = useSearchParams();
+  const [filter, setFilter] = useState(searchParams.get("search") ?? "");
   const [expanded, setExpanded] = useState<string | null>(null);
 
   useEffect(() => {
@@ -186,18 +210,30 @@ export default function CatalogPage() {
                       <DetailRow label="License" value={d.license} />
                       <DetailRow label="Conforms To" value={d.conformsTo} />
                     </div>
-                    {d.conformsTo && (
+                    <div className="flex flex-wrap gap-3 mt-3">
                       <a
-                        href={d.conformsTo}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="mt-3 inline-flex items-center gap-1 text-xs text-layer2 hover:underline"
+                        href={`/graph?highlight=${encodeURIComponent(
+                          d.title || d.id,
+                        )}`}
+                        className="inline-flex items-center gap-1 text-xs text-layer2 hover:underline"
                         onClick={(e) => e.stopPropagation()}
                       >
-                        <ExternalLink size={11} />
-                        View specification
+                        <Network size={11} />
+                        View in Graph
                       </a>
-                    )}
+                      {d.conformsTo && (
+                        <a
+                          href={d.conformsTo}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 text-xs text-gray-400 hover:underline"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <ExternalLink size={11} />
+                          View specification
+                        </a>
+                      )}
+                    </div>
                   </div>
                 )}
               </div>

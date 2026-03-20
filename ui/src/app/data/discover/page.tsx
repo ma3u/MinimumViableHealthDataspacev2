@@ -1,7 +1,8 @@
 "use client";
 
 import { fetchApi } from "@/lib/api";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import PageIntro from "@/components/PageIntro";
 import {
   Loader2,
@@ -10,6 +11,7 @@ import {
   ChevronDown,
   ChevronUp,
   FileSignature,
+  Network,
 } from "lucide-react";
 
 interface Asset {
@@ -50,9 +52,25 @@ interface ParticipantAssets {
 }
 
 export default function DataDiscoverPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex items-center gap-2 text-gray-500 p-10">
+          <Loader2 size={16} className="animate-spin" />
+          Loading…
+        </div>
+      }
+    >
+      <DataDiscoverContent />
+    </Suspense>
+  );
+}
+
+function DataDiscoverContent() {
   const [groups, setGroups] = useState<ParticipantAssets[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState("");
+  const searchParams = useSearchParams();
+  const [filter, setFilter] = useState(searchParams.get("search") ?? "");
   const [expanded, setExpanded] = useState<string | null>(null);
 
   useEffect(() => {
@@ -200,13 +218,24 @@ export default function DataDiscoverPage() {
                     <pre className="text-xs text-gray-400 overflow-auto max-h-48 mb-3">
                       {JSON.stringify(a, null, 2)}
                     </pre>
-                    <a
-                      href={`/negotiate?assetId=${a["@id"]}&providerId=${a._participantId}`}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-layer2 text-white rounded text-xs font-medium hover:bg-layer2/90"
-                    >
-                      <FileSignature size={14} />
-                      Negotiate Access
-                    </a>
+                    <div className="flex flex-wrap gap-3">
+                      <a
+                        href={`/negotiate?assetId=${a["@id"]}&providerId=${a._participantId}`}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-layer2 text-white rounded text-xs font-medium hover:bg-layer2/90"
+                      >
+                        <FileSignature size={14} />
+                        Negotiate Access
+                      </a>
+                      <a
+                        href={`/graph?highlight=${encodeURIComponent(
+                          assetField(a, "name"),
+                        )}`}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-gray-600 text-gray-300 rounded text-xs font-medium hover:border-layer2 hover:text-layer2 transition-colors"
+                      >
+                        <Network size={14} />
+                        View in Graph
+                      </a>
+                    </div>
                   </div>
                 )}
               </div>

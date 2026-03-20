@@ -1,9 +1,10 @@
 "use client";
 
 import { fetchApi } from "@/lib/api";
-import { useEffect, useRef, useState, useCallback } from "react";
+import { Suspense, useEffect, useRef, useState, useCallback } from "react";
+import { useSearchParams } from "next/navigation";
 import dynamic from "next/dynamic";
-import { X } from "lucide-react";
+import { X, BookOpen, Database, Activity, Loader2 } from "lucide-react";
 
 // react-force-graph-2d requires browser APIs — load client-side only
 const ForceGraph2D = dynamic(() => import("react-force-graph-2d"), {
@@ -59,12 +60,29 @@ function nodeId(n: string | GraphNode): string {
 }
 
 export default function GraphPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex items-center justify-center h-[calc(100vh-44px)] text-gray-500">
+          <Loader2 size={16} className="animate-spin mr-2" />
+          Loading graph…
+        </div>
+      }
+    >
+      <GraphContent />
+    </Suspense>
+  );
+}
+
+function GraphContent() {
   const [data, setData] = useState<GraphData>({ nodes: [], links: [] });
   const [selectedNode, setSelectedNode] = useState<GraphNode | null>(null);
   const [neighbours, setNeighbours] = useState<Neighbour[]>([]);
   const [loading, setLoading] = useState(true);
   const containerRef = useRef<HTMLDivElement>(null);
   const [dims, setDims] = useState({ width: 800, height: 600 });
+  const searchParams = useSearchParams();
+  const highlightParam = searchParams.get("highlight");
 
   useEffect(() => {
     fetchApi("/api/graph")
@@ -75,6 +93,16 @@ export default function GraphPage() {
       })
       .catch(() => setLoading(false));
   }, []);
+
+  // Auto-select node matching ?highlight= query param
+  useEffect(() => {
+    if (!highlightParam || data.nodes.length === 0) return;
+    const q = highlightParam.toLowerCase();
+    const match = data.nodes.find(
+      (n) => n.id.toLowerCase().includes(q) || n.name.toLowerCase().includes(q),
+    );
+    if (match) setSelectedNode(match);
+  }, [highlightParam, data.nodes]);
 
   useEffect(() => {
     const update = () => {
@@ -229,13 +257,27 @@ export default function GraphPage() {
             Interactive 5-layer knowledge graph showing all dataspace entities
             and their relationships. Click nodes to inspect, drag to rearrange.
           </p>
-          <div className="flex gap-2 text-xs text-gray-600 mb-3">
-            <a href="/catalog" className="hover:text-gray-400">
-              ← Catalog
+          <div className="flex flex-col gap-1.5 text-xs mb-3">
+            <a
+              href="/catalog"
+              className="flex items-center gap-1.5 text-gray-500 hover:text-layer2 transition-colors"
+            >
+              <BookOpen size={12} />
+              Dataset Catalog
             </a>
-            <span>|</span>
-            <a href="/patient" className="hover:text-gray-400">
-              Patient →
+            <a
+              href="/data/discover"
+              className="flex items-center gap-1.5 text-gray-500 hover:text-layer2 transition-colors"
+            >
+              <Database size={12} />
+              Discover FHIR Assets
+            </a>
+            <a
+              href="/patient"
+              className="flex items-center gap-1.5 text-gray-500 hover:text-layer2 transition-colors"
+            >
+              <Activity size={12} />
+              Patient Journey
             </a>
           </div>
         </div>
@@ -290,6 +332,40 @@ export default function GraphPage() {
               </div>
               <div className="text-gray-600 text-xs mt-1 break-all leading-tight">
                 {selectedNode.id}
+              </div>
+              {/* Contextual links based on layer */}
+              <div className="flex flex-wrap gap-2 mt-2">
+                {selectedNode.layer === 2 && (
+                  <a
+                    href={`/catalog?search=${encodeURIComponent(
+                      selectedNode.name,
+                    )}`}
+                    className="inline-flex items-center gap-1 text-xs text-layer2 hover:underline"
+                  >
+                    <BookOpen size={10} />
+                    View in Catalog
+                  </a>
+                )}
+                {selectedNode.layer === 3 && (
+                  <a
+                    href={`/data/discover?search=${encodeURIComponent(
+                      selectedNode.name,
+                    )}`}
+                    className="inline-flex items-center gap-1 text-xs text-green-400 hover:underline"
+                  >
+                    <Database size={10} />
+                    View FHIR Asset
+                  </a>
+                )}
+                {(selectedNode.layer === 3 || selectedNode.layer === 4) && (
+                  <a
+                    href={`/patient`}
+                    className="inline-flex items-center gap-1 text-xs text-orange-400 hover:underline"
+                  >
+                    <Activity size={10} />
+                    Patient Journey
+                  </a>
+                )}
               </div>
             </div>
 

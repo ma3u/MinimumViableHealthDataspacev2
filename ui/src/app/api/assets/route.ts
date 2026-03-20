@@ -1,7 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { edcClient, EDC_CONTEXT } from "@/lib/edc";
+import { promises as fs } from "fs";
+import path from "path";
 
 export const dynamic = "force-dynamic";
+
+interface ParticipantAssets {
+  participantId: string;
+  identity: string;
+  assets: Record<string, unknown>[];
+}
 
 /**
  * Normalise an asset object returned by the EDC-V v5alpha Management API.
@@ -29,6 +37,17 @@ function normaliseAsset(raw: any): Record<string, unknown> {
   };
 }
 
+/** Load demo assets from the bundled mock JSON file. */
+async function loadMockAssets(): Promise<ParticipantAssets[]> {
+  try {
+    const mockPath = path.join(process.cwd(), "public", "mock", "assets.json");
+    const raw = await fs.readFile(mockPath, "utf-8");
+    return JSON.parse(raw) as ParticipantAssets[];
+  } catch {
+    return [];
+  }
+}
+
 /**
  * GET /api/assets — List data assets for a participant context.
  * Query param: ?participantId=<ctx_id>
@@ -46,7 +65,11 @@ export async function GET(req: NextRequest) {
       const assets = await edcClient.management<Record<string, unknown>[]>(
         `/v5alpha/participants/${participantId}/assets/request`,
         "POST",
-        { "@context": [EDC_CONTEXT], "@type": "QuerySpec", "filterExpression": [] },
+        {
+          "@context": [EDC_CONTEXT],
+          "@type": "QuerySpec",
+          filterExpression: [],
+        },
       );
       return NextResponse.json((assets ?? []).map(normaliseAsset));
     }
@@ -61,17 +84,17 @@ export async function GET(req: NextRequest) {
       (p) => (p.state ?? "ACTIVATED") === "ACTIVATED",
     );
 
-    const allAssets: {
-      participantId: string;
-      identity: string;
-      assets: Record<string, unknown>[];
-    }[] = [];
+    const allAssets: ParticipantAssets[] = [];
     for (const p of active) {
       try {
         const assets = await edcClient.management<Record<string, unknown>[]>(
           `/v5alpha/participants/${p["@id"]}/assets/request`,
           "POST",
-          { "@context": [EDC_CONTEXT], "@type": "QuerySpec", "filterExpression": [] },
+          {
+            "@context": [EDC_CONTEXT],
+            "@type": "QuerySpec",
+            filterExpression: [],
+          },
         );
         allAssets.push({
           participantId: p["@id"],
@@ -87,13 +110,30 @@ export async function GET(req: NextRequest) {
       }
     }
 
+    // Merge with demo assets so the discover page is always demonstrable
+    const mockAssets = await loadMockAssets();
+    const realIdentities = new Set(allAssets.map((a) => a.identity));
+    for (const mock of mockAssets) {
+      if (realIdentities.has(mock.identity)) {
+        // Merge mock assets into existing participant, dedup by @id
+        const real = allAssets.find((a) => a.identity === mock.identity)!;
+        const existingIds = new Set(real.assets.map((a) => a["@id"] as string));
+        for (const ma of mock.assets) {
+          if (!existingIds.has(ma["@id"] as string)) {
+            real.assets.push(ma);
+          }
+        }
+      } else {
+        allAssets.push(mock);
+      }
+    }
+
     return NextResponse.json(allAssets);
   } catch (err) {
-    console.error("Failed to list assets:", err);
-    return NextResponse.json(
-      { error: "Failed to list assets" },
-      { status: 502 },
-    );
+    console.warn("Controlplane assets unavailable, using demo data:", err);
+    // Fall back to mock data entirely
+    const mockAssets = await loadMockAssets();
+    return NextResponse.json(mockAssets);
   }
 }
 

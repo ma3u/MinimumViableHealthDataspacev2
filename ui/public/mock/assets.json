@@ -32,6 +32,51 @@
         "edc:name": "FHIR Observation Bundle",
         "edc:description": "FHIR R4 Observation resources including vitals and lab results.",
         "edc:contenttype": "application/fhir+json"
+      },
+      {
+        "@id": "fhir-care-plan",
+        "@type": "Asset",
+        "properties": {
+          "name": "FHIR Care Plan Registry",
+          "description": "Structured CarePlan resources for chronic disease management with treatment goals and care team assignments.",
+          "contenttype": "application/fhir+json"
+        },
+        "name": "FHIR Care Plan Registry",
+        "description": "Structured CarePlan resources for chronic disease management with treatment goals and care team assignments.",
+        "contenttype": "application/fhir+json",
+        "edc:name": "FHIR Care Plan Registry",
+        "edc:description": "Structured CarePlan resources for chronic disease management with treatment goals and care team assignments.",
+        "edc:contenttype": "application/fhir+json"
+      },
+      {
+        "@id": "fhir-allergy-intolerance",
+        "@type": "Asset",
+        "properties": {
+          "name": "FHIR AllergyIntolerance Registry",
+          "description": "AllergyIntolerance resources documenting drug allergies, food intolerances, and environmental sensitivities.",
+          "contenttype": "application/fhir+json"
+        },
+        "name": "FHIR AllergyIntolerance Registry",
+        "description": "AllergyIntolerance resources documenting drug allergies, food intolerances, and environmental sensitivities.",
+        "contenttype": "application/fhir+json",
+        "edc:name": "FHIR AllergyIntolerance Registry",
+        "edc:description": "AllergyIntolerance resources documenting drug allergies, food intolerances, and environmental sensitivities.",
+        "edc:contenttype": "application/fhir+json"
+      },
+      {
+        "@id": "fhir-procedure-bundle",
+        "@type": "Asset",
+        "properties": {
+          "name": "FHIR Procedure Bundle",
+          "description": "Procedure resources documenting surgical interventions, diagnostic procedures, and therapeutic treatments.",
+          "contenttype": "application/fhir+json"
+        },
+        "name": "FHIR Procedure Bundle",
+        "description": "Procedure resources documenting surgical interventions, diagnostic procedures, and therapeutic treatments.",
+        "contenttype": "application/fhir+json",
+        "edc:name": "FHIR Procedure Bundle",
+        "edc:description": "Procedure resources documenting surgical interventions, diagnostic procedures, and therapeutic treatments.",
+        "edc:contenttype": "application/fhir+json"
       }
     ]
   },
@@ -48,7 +93,10 @@
           "contenttype": "application/fhir+json"
         },
         "name": "FHIR Patient Everything",
+        "description": "FHIR $everything operation for Limburg Medical Centre patients.",
+        "contenttype": "application/fhir+json",
         "edc:name": "FHIR Patient Everything",
+        "edc:description": "FHIR $everything operation for Limburg Medical Centre patients.",
         "edc:contenttype": "application/fhir+json"
       },
       {
@@ -60,7 +108,70 @@
           "contenttype": "application/fhir+json"
         },
         "name": "FHIR Cohort Bundle",
+        "description": "Pre-built cohort bundles for epidemiological research queries.",
+        "contenttype": "application/fhir+json",
         "edc:name": "FHIR Cohort Bundle",
+        "edc:description": "Pre-built cohort bundles for epidemiological research queries.",
+        "edc:contenttype": "application/fhir+json"
+      },
+      {
+        "@id": "fhir-encounter-history",
+        "@type": "Asset",
+        "properties": {
+          "name": "FHIR Encounter History",
+          "description": "Longitudinal encounter records including emergency, inpatient, outpatient, and ambulatory visits.",
+          "contenttype": "application/fhir+json"
+        },
+        "name": "FHIR Encounter History",
+        "description": "Longitudinal encounter records including emergency, inpatient, outpatient, and ambulatory visits.",
+        "contenttype": "application/fhir+json",
+        "edc:name": "FHIR Encounter History",
+        "edc:description": "Longitudinal encounter records including emergency, inpatient, outpatient, and ambulatory visits.",
+        "edc:contenttype": "application/fhir+json"
+      },
+      {
+        "@id": "fhir-diagnostic-report",
+        "@type": "Asset",
+        "properties": {
+          "name": "FHIR Diagnostic Reports",
+          "description": "Diagnostic report resources including radiology, pathology, and laboratory reports.",
+          "contenttype": "application/fhir+json"
+        },
+        "name": "FHIR Diagnostic Reports",
+        "description": "Diagnostic report resources including radiology, pathology, and laboratory reports.",
+        "contenttype": "application/fhir+json",
+        "edc:name": "FHIR Diagnostic Reports",
+        "edc:description": "Diagnostic report resources including radiology, pathology, and laboratory reports.",
+        "edc:contenttype": "application/fhir+json"
+      },
+      {
+        "@id": "fhir-condition-list",
+        "@type": "Asset",
+        "properties": {
+          "name": "FHIR Condition Problem List",
+          "description": "Active and resolved condition resources mapped to SNOMED CT and ICD-10 codes.",
+          "contenttype": "application/fhir+json"
+        },
+        "name": "FHIR Condition Problem List",
+        "description": "Active and resolved condition resources mapped to SNOMED CT and ICD-10 codes.",
+        "contenttype": "application/fhir+json",
+        "edc:name": "FHIR Condition Problem List",
+        "edc:description": "Active and resolved condition resources mapped to SNOMED CT and ICD-10 codes.",
+        "edc:contenttype": "application/fhir+json"
+      },
+      {
+        "@id": "fhir-immunization-record",
+        "@type": "Asset",
+        "properties": {
+          "name": "FHIR Immunization Records",
+          "description": "Immunization resources including COVID-19, influenza, and childhood vaccination records.",
+          "contenttype": "application/fhir+json"
+        },
+        "name": "FHIR Immunization Records",
+        "description": "Immunization resources including COVID-19, influenza, and childhood vaccination records.",
+        "contenttype": "application/fhir+json",
+        "edc:name": "FHIR Immunization Records",
+        "edc:description": "Immunization resources including COVID-19, influenza, and childhood vaccination records.",
         "edc:contenttype": "application/fhir+json"
       },
       {
@@ -72,7 +183,10 @@
           "contenttype": "application/json"
         },
         "name": "OMOP Cohort Statistics",
+        "description": "Aggregated OMOP CDM cohort statistics from OHDSI tools.",
+        "contenttype": "application/json",
         "edc:name": "OMOP Cohort Statistics",
+        "edc:description": "Aggregated OMOP CDM cohort statistics from OHDSI tools.",
         "edc:contenttype": "application/json"
       },
       {
@@ -84,7 +198,10 @@
           "contenttype": "application/ld+json"
         },
         "name": "HealthDCAT-AP Catalog",
+        "description": "HealthDCAT-AP metadata catalog for LMC datasets.",
+        "contenttype": "application/ld+json",
         "edc:name": "HealthDCAT-AP Catalog",
+        "edc:description": "HealthDCAT-AP metadata catalog for LMC datasets.",
         "edc:contenttype": "application/ld+json"
       }
     ]
@@ -102,7 +219,10 @@
           "contenttype": "application/json"
         },
         "name": "Research Data Request",
+        "description": "Submit EHDS-compliant data permit requests for secondary use research.",
+        "contenttype": "application/json",
         "edc:name": "Research Data Request",
+        "edc:description": "Submit EHDS-compliant data permit requests for secondary use research.",
         "edc:contenttype": "application/json"
       },
       {
@@ -114,8 +234,41 @@
           "contenttype": "application/json"
         },
         "name": "OMOP Analytics Query",
+        "description": "Execute OMOP CDM analytics queries across federated datasets.",
+        "contenttype": "application/json",
         "edc:name": "OMOP Analytics Query",
+        "edc:description": "Execute OMOP CDM analytics queries across federated datasets.",
         "edc:contenttype": "application/json"
+      },
+      {
+        "@id": "fhir-medication-request",
+        "@type": "Asset",
+        "properties": {
+          "name": "FHIR Medication Request Dataset",
+          "description": "MedicationRequest resources covering prescriptions, dosage instructions, and drug interaction alerts.",
+          "contenttype": "application/fhir+json"
+        },
+        "name": "FHIR Medication Request Dataset",
+        "description": "MedicationRequest resources covering prescriptions, dosage instructions, and drug interaction alerts.",
+        "contenttype": "application/fhir+json",
+        "edc:name": "FHIR Medication Request Dataset",
+        "edc:description": "MedicationRequest resources covering prescriptions, dosage instructions, and drug interaction alerts.",
+        "edc:contenttype": "application/fhir+json"
+      },
+      {
+        "@id": "meddra-v27-adverse-events",
+        "@type": "Asset",
+        "properties": {
+          "name": "MedDRA v27.0 Adverse Event Classification",
+          "description": "MedDRA v27.0 adverse event terminology mapped to FHIR R4 AdverseEvent resources for pharmacovigilance signal detection.",
+          "contenttype": "application/fhir+json"
+        },
+        "name": "MedDRA v27.0 Adverse Event Classification",
+        "description": "MedDRA v27.0 adverse event terminology mapped to FHIR R4 AdverseEvent resources for pharmacovigilance signal detection.",
+        "contenttype": "application/fhir+json",
+        "edc:name": "MedDRA v27.0 Adverse Event Classification",
+        "edc:description": "MedDRA v27.0 adverse event terminology mapped to FHIR R4 AdverseEvent resources for pharmacovigilance signal detection.",
+        "edc:contenttype": "application/fhir+json"
       }
     ]
   },
@@ -132,8 +285,62 @@
           "contenttype": "application/ld+json"
         },
         "name": "Federated HealthDCAT-AP Catalog",
+        "description": "Federated metadata catalog aggregating HealthDCAT-AP entries across the dataspace.",
+        "contenttype": "application/ld+json",
         "edc:name": "Federated HealthDCAT-AP Catalog",
+        "edc:description": "Federated metadata catalog aggregating HealthDCAT-AP entries across the dataspace.",
         "edc:contenttype": "application/ld+json"
+      }
+    ]
+  },
+  {
+    "participantId": "e5f6a7b8c9d051e2f3a4b5c6d7e8f9a0",
+    "identity": "did:web:irs.fr:hdab",
+    "assets": [
+      {
+        "@id": "fhir-medication-request",
+        "@type": "Asset",
+        "properties": {
+          "name": "FHIR Medication Request Dataset",
+          "description": "MedicationRequest resources from Institut de Recherche Santé covering French national prescriptions.",
+          "contenttype": "application/fhir+json"
+        },
+        "name": "FHIR Medication Request Dataset",
+        "description": "MedicationRequest resources from Institut de Recherche Santé covering French national prescriptions.",
+        "contenttype": "application/fhir+json",
+        "edc:name": "FHIR Medication Request Dataset",
+        "edc:description": "MedicationRequest resources from Institut de Recherche Santé covering French national prescriptions.",
+        "edc:contenttype": "application/fhir+json"
+      },
+      {
+        "@id": "fhir-diagnostic-report",
+        "@type": "Asset",
+        "properties": {
+          "name": "FHIR Diagnostic Reports",
+          "description": "Diagnostic report resources from French hospital network.",
+          "contenttype": "application/fhir+json"
+        },
+        "name": "FHIR Diagnostic Reports",
+        "description": "Diagnostic report resources from French hospital network.",
+        "contenttype": "application/fhir+json",
+        "edc:name": "FHIR Diagnostic Reports",
+        "edc:description": "Diagnostic report resources from French hospital network.",
+        "edc:contenttype": "application/fhir+json"
+      },
+      {
+        "@id": "clinical-trial-phases",
+        "@type": "Asset",
+        "properties": {
+          "name": "Clinical Trial Phases I–IV Metadata",
+          "description": "Multi-phase clinical trial metadata with EudraCT numbers, endpoints, and FHIR R4 ResearchStudy mappings.",
+          "contenttype": "application/fhir+json"
+        },
+        "name": "Clinical Trial Phases I–IV Metadata",
+        "description": "Multi-phase clinical trial metadata with EudraCT numbers, endpoints, and FHIR R4 ResearchStudy mappings.",
+        "contenttype": "application/fhir+json",
+        "edc:name": "Clinical Trial Phases I–IV Metadata",
+        "edc:description": "Multi-phase clinical trial metadata with EudraCT numbers, endpoints, and FHIR R4 ResearchStudy mappings.",
+        "edc:contenttype": "application/fhir+json"
       }
     ]
   }

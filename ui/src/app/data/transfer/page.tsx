@@ -17,6 +17,7 @@ import {
   RefreshCw,
   X,
   XCircle,
+  Network,
 } from "lucide-react";
 import PageIntro from "@/components/PageIntro";
 
@@ -447,6 +448,14 @@ function FhirViewerPanel({
           )}
         </div>
         <div className="flex items-center gap-2">
+          <a
+            href={`/graph?highlight=${encodeURIComponent(
+              aId ? assetLabel(aId as string) : "FHIR",
+            )}`}
+            className="flex items-center gap-1 text-[11px] text-green-400 hover:text-green-300 transition-colors"
+          >
+            View in Graph <Network size={10} />
+          </a>
           <a
             href="https://fire.ly/fhir-tools/fhir-viewer/"
             target="_blank"
