@@ -1,7 +1,25 @@
 import { NextRequest, NextResponse } from "next/server";
 import { edcClient, EDC_CONTEXT } from "@/lib/edc";
+import { promises as fs } from "fs";
+import path from "path";
 
 export const dynamic = "force-dynamic";
+
+/** Load demo negotiations from the bundled mock JSON file. */
+async function loadMockNegotiations(): Promise<unknown[]> {
+  try {
+    const mockPath = path.join(
+      process.cwd(),
+      "public",
+      "mock",
+      "negotiations.json",
+    );
+    const raw = await fs.readFile(mockPath, "utf-8");
+    return JSON.parse(raw) as unknown[];
+  } catch {
+    return [];
+  }
+}
 
 /**
  * DSP protocol version required by EDC-V (must include version suffix)
@@ -80,20 +98,34 @@ export async function GET(req: NextRequest) {
     }
   }
 
+  let realNegotiations: unknown[] = [];
   try {
-    const negotiations = await edcClient.management<unknown[]>(
+    realNegotiations = await edcClient.management<unknown[]>(
       `/v5alpha/participants/${participantId}/contractnegotiations/request`,
       "POST",
-      { "@context": [EDC_CONTEXT], "@type": "QuerySpec", "filterExpression": [] },
+      { "@context": [EDC_CONTEXT], "@type": "QuerySpec", filterExpression: [] },
     );
-    return NextResponse.json(negotiations);
+    if (!Array.isArray(realNegotiations)) {
+      realNegotiations = [];
+    }
   } catch (err) {
-    console.error("Failed to list negotiations:", err);
-    return NextResponse.json(
-      { error: "Failed to list negotiations" },
-      { status: 502 },
+    console.warn(
+      "Controlplane negotiation list unavailable, using demo data:",
+      err,
     );
   }
+
+  // Merge with demo negotiations so the full workflow is always demonstrable
+  const mockNegotiations = await loadMockNegotiations();
+  const realIds = new Set(
+    realNegotiations.map((n) => (n as Record<string, unknown>)["@id"]),
+  );
+  const deduped = mockNegotiations.filter(
+    (m) => !realIds.has((m as Record<string, unknown>)["@id"]),
+  );
+  const merged = [...realNegotiations, ...deduped];
+
+  return NextResponse.json(merged);
 }
 
 export async function POST(req: NextRequest) {

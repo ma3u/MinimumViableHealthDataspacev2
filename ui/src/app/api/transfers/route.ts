@@ -1,10 +1,29 @@
 import { NextRequest, NextResponse } from "next/server";
 import { edcClient, EDC_CONTEXT } from "@/lib/edc";
+import { promises as fs } from "fs";
+import path from "path";
 
 export const dynamic = "force-dynamic";
 
+/** Load demo transfers from the bundled mock JSON file. */
+async function loadMockTransfers(): Promise<unknown[]> {
+  try {
+    const mockPath = path.join(
+      process.cwd(),
+      "public",
+      "mock",
+      "transfers.json",
+    );
+    const raw = await fs.readFile(mockPath, "utf-8");
+    return JSON.parse(raw) as unknown[];
+  } catch {
+    return [];
+  }
+}
+
 /**
  * GET /api/transfers?participantId=<id> — List transfers for participant.
+ * Returns real transfers from the controlplane merged with demo data.
  * POST /api/transfers — Initiate a data transfer.
  */
 
@@ -18,20 +37,34 @@ export async function GET(req: NextRequest) {
     );
   }
 
+  let realTransfers: unknown[] = [];
   try {
-    const transfers = await edcClient.management<unknown[]>(
+    realTransfers = await edcClient.management<unknown[]>(
       `/v5alpha/participants/${participantId}/transferprocesses/request`,
       "POST",
-      { "@context": [EDC_CONTEXT], "@type": "QuerySpec", "filterExpression": [] },
+      { "@context": [EDC_CONTEXT], "@type": "QuerySpec", filterExpression: [] },
     );
-    return NextResponse.json(transfers);
+    if (!Array.isArray(realTransfers)) {
+      realTransfers = [];
+    }
   } catch (err) {
-    console.error("Failed to list transfers:", err);
-    return NextResponse.json(
-      { error: "Failed to list transfers" },
-      { status: 502 },
+    console.warn(
+      "Controlplane transfer list unavailable, using demo data:",
+      err,
     );
   }
+
+  // Merge with demo transfers so the FHIR viewer is always demonstrable
+  const mockTransfers = await loadMockTransfers();
+  const realIds = new Set(
+    realTransfers.map((t) => (t as Record<string, unknown>)["@id"]),
+  );
+  const deduped = mockTransfers.filter(
+    (m) => !realIds.has((m as Record<string, unknown>)["@id"]),
+  );
+  const merged = [...realTransfers, ...deduped];
+
+  return NextResponse.json(merged);
 }
 
 export async function POST(req: NextRequest) {
