@@ -80,6 +80,22 @@
       - [13c: EHDS Compliance Checker Fallback ✅](#13c-ehds-compliance-checker-fallback-)
       - [13d: Persistent Task Management (PostgreSQL) ✅](#13d-persistent-task-management-postgresql-)
       - [13e: Seed Orchestration Guide](#13e-seed-orchestration-guide)
+    - [Phase 14: End-to-End Testing \& Demonstration Verification ✅](#phase-14-end-to-end-testing--demonstration-verification-)
+      - [E2E Test Plan](#e2e-test-plan)
+        - [A. Infrastructure Verification](#a-infrastructure-verification)
+        - [B. Dataspace State Verification](#b-dataspace-state-verification)
+        - [C. API Route Verification (Next.js Backend)](#c-api-route-verification-nextjs-backend)
+        - [D. UI Page Verification](#d-ui-page-verification)
+      - [Implementation](#implementation)
+    - [Phase 15: Mock Fallback \& Graph Deep-Linking ✅](#phase-15-mock-fallback--graph-deep-linking-)
+      - [15a — Mock Fallback for APIs](#15a--mock-fallback-for-apis)
+      - [15b — Graph ↔ Page Deep-Linking](#15b--graph--page-deep-linking)
+      - [15c — Additional Datasets](#15c--additional-datasets)
+      - [15d — Suspense Boundary Fixes](#15d--suspense-boundary-fixes)
+    - [Phase 16: HealthDCAT-AP Display \& Editor Integration ✅](#phase-16-healthdcat-ap-display--editor-integration-)
+      - [16a — Discover Page: Dual Data Source \& Keyword Search](#16a--discover-page-dual-data-source--keyword-search)
+      - [16b — Graph Deep-Link Date Stripping](#16b--graph-deep-link-date-stripping)
+      - [16c — HealthDCAT-AP Editor](#16c--healthdcat-ap-editor)
   - [Architecture Decisions](#architecture-decisions)
     - [ADR-1: PostgreSQL vs Neo4j Data Storage Split](#adr-1-postgresql-vs-neo4j-data-storage-split)
       - [Decision](#decision)
@@ -1685,6 +1701,130 @@ Each page must render with meaningful content (not empty states):
 **Deliverables:** E2E test script; README quickstart for full JAD stack;
 unified seed-all.sh pipeline; bootstrap-jad.sh integration; all 3 data
 plane/catalog bugs fixed and verified.
+
+---
+
+### Phase 15: Mock Fallback & Graph Deep-Linking ✅
+
+**Goal:** Make all pages fully demonstrable without live EDC-V/Neo4j
+backends by implementing mock data fallback, and add bidirectional
+deep-linking between the Graph Explorer and Catalog/Discover/Transfer pages.
+
+**Completed:** 2025-07 (commit `584cc33`)
+
+#### 15a — Mock Fallback for APIs
+
+- **Catalog API** (`/api/catalog`): Added `loadMockCatalog()` — reads
+  `public/mock/catalog.json`, merges with live Neo4j results, deduplicates
+  by `id`. Catalog page always shows 17+ entries even without Neo4j.
+- **Assets API** (`/api/assets`): Added `loadMockAssets()` — reads
+  `public/mock/assets.json`, merges with live EDC results using
+  identity-based comparison, deduplicates by `@id`. Assets grouped across
+  5 fictional participants (21 assets).
+- **Mock data files:** `ui/public/mock/catalog.json` (17 entries),
+  `ui/public/mock/assets.json` (21 assets across 5 participants).
+
+#### 15b — Graph ↔ Page Deep-Linking
+
+- **Graph → Catalog:** L2 (HealthDCAT-AP) nodes link to
+  `/catalog?search=<title>`.
+- **Graph → Discover:** L3 (FHIR) nodes link to
+  `/data/discover?search=<keyword>` with date-suffix stripping
+  (`Encounter 1980-08-17` → `Encounter`).
+- **Graph → Transfer:** L1 (Marketplace) nodes link to
+  `/data/transfer?search=<label>`.
+- **Catalog → Graph:** Each catalog card has a "View in Graph" link →
+  `/graph?highlight=<title>`.
+- **Discover → Graph:** Each HealthDCAT-AP card links to
+  `/graph?highlight=<title>`.
+
+#### 15c — Additional Datasets
+
+- **MedDRA v27.0** — Medical Dictionary for Regulatory Activities
+  terminology dataset added to catalog and assets.
+- **Clinical Trial Phases I–IV** — Clinical trial phase classification
+  dataset added to catalog and assets.
+
+#### 15d — Suspense Boundary Fixes
+
+- Wrapped `useSearchParams()` calls on catalog, discover, and graph pages
+  with `<Suspense>` boundaries to prevent Next.js static-generation errors.
+
+**Deliverables:** Mock fallback for catalog + assets APIs; bidirectional
+graph deep-linking; 2 new datasets; Suspense fixes; E2E 69/69 passing.
+
+---
+
+### Phase 16: HealthDCAT-AP Display & Editor Integration ✅
+
+**Goal:** Make HealthDCAT-AP metadata visible on the Discover page,
+improve search matching for cross-page deep-links, and integrate a
+full-featured HealthDCAT-AP metadata editor.
+
+#### 16a — Discover Page: Dual Data Source & Keyword Search
+
+The Discover page (`/data/discover`) previously only fetched EDC assets
+from `/api/assets`. HealthDCAT-AP catalog entries were invisible.
+
+**Changes:**
+
+- **Dual data source:** Fetches both `/api/assets` AND `/api/catalog`
+  via `Promise.all`. Page now shows EDC assets and HealthDCAT-AP entries.
+- **Tab system:** "All" | "EDC Assets" | "HealthDCAT-AP" tabs with live
+  counts. Users can filter by data source type.
+- **Keyword-based search:** Replaced exact substring matching with
+  `keywordMatch()` — splits query into words, filters date patterns
+  (`\d{4}-\d{2}…`), matches if ANY keyword appears. Fixes deep-link
+  searches like "Encounter 1980-08-17" → matches "Encounter" keyword.
+- **HealthDCAT-AP cards:** Purple-themed cards with BookOpen icon,
+  publisher, theme badge, expandable detail panel showing license, legal
+  basis, conformsTo link, and record count. Action buttons: "View in
+  Catalog" and "View in Graph".
+- **Updated stats bar:** Shows "N participants · N EDC assets ·
+  N HealthDCAT-AP datasets · N matching".
+
+#### 16b — Graph Deep-Link Date Stripping
+
+L3 (FHIR) node deep-links to Discover now strip date suffixes using
+`label.replace(/\s+\d{4}-\d{2}.*$/, "")` — so "Encounter 1980-08-17"
+becomes "Encounter" in the search parameter.
+
+#### 16c — HealthDCAT-AP Editor
+
+New page at `/catalog/editor` providing a form-based editor for creating
+and editing HealthDCAT-AP metadata entries.
+
+**Features:**
+
+- **Browse tab:** Lists all existing catalog entries with edit/delete
+  actions. Purple-themed cards show title, description, publisher, theme,
+  dataset type, and record count.
+- **Create/Edit tab:** Full form with 4 fieldset sections:
+  - _DCAT-AP Mandatory:_ title, description, publisher, theme, language
+  - _DCAT-AP Recommended:_ conformsTo, spatial coverage, license
+  - _HealthDCAT-AP Extensions:_ dataset type, publisher type, legal basis,
+    purpose, population coverage, health category, personal/sensitive data
+    checkboxes
+  - _Statistics:_ record count, unique individuals, min/max typical age
+- **API support:** POST `/api/catalog` creates/updates entries in Neo4j
+  (with mock JSON fallback). DELETE `/api/catalog?id=<id>` removes entries.
+- **Deep-link support:** `?edit=<id>` opens an entry directly in edit mode.
+- **Navigation:** Added to Explore group as "DCAT-AP Editor" (Edit3 icon)
+  between "Dataset Catalog" and "Patient Journey".
+
+**Files modified:**
+
+- `ui/src/app/data/discover/page.tsx` — Major rewrite (dual fetch, tabs,
+  keyword search, catalog cards)
+- `ui/src/app/graph/page.tsx` — L3 deep-link date stripping
+- `ui/src/app/api/catalog/route.ts` — Added POST and DELETE handlers
+- `ui/src/app/catalog/editor/page.tsx` — New DCAT-AP Editor page
+- `ui/src/components/Navigation.tsx` — Added DCAT-AP Editor link + Edit3
+  icon import
+
+**Deliverables:** HealthDCAT-AP metadata visible on Discover page; keyword
+search for cross-page deep-links; tab-based data source filtering; full
+DCAT-AP Editor with CRUD operations; Neo4j + mock JSON dual-write support.
 
 ---
 

@@ -119,6 +119,7 @@ const TIMEOUT = 15_000;
 const PUBLIC_ROUTES = [
   { route: "/graph", label: "Graph Explorer" },
   { route: "/catalog", label: "Dataset Catalog" },
+  { route: "/catalog/editor", label: "DCAT-AP Editor" },
   { route: "/patient", label: "Patient Journey" },
   { route: "/analytics", label: "OMOP Analytics" },
   { route: "/eehrxf", label: "EEHRxF Alignment" },
@@ -278,9 +279,7 @@ test.describe("Regression — previously fixed crashes", () => {
     await loginAsEdcAdmin(page);
   });
 
-  test("Onboarding status: page renders without JS crash", async ({
-    page,
-  }) => {
+  test("Onboarding status: page renders without JS crash", async ({ page }) => {
     const errors = attachErrorCollectors(page);
     await page.goto("/onboarding/status");
     await page.waitForLoadState("networkidle", { timeout: TIMEOUT });
@@ -306,7 +305,10 @@ test.describe("Regression — previously fixed crashes", () => {
 
     // The participant list must render as a list (even if empty) — not throw
     const crashIndicators = errors.jsExceptions.filter(
-      (e) => e.includes("Cannot read") || e.includes("is not a function") || e.includes(".map"),
+      (e) =>
+        e.includes("Cannot read") ||
+        e.includes("is not a function") ||
+        e.includes(".map"),
     );
     expect(
       crashIndicators,
@@ -379,9 +381,11 @@ test.describe("Regression — previously fixed crashes", () => {
     await expect(page.locator("h1").first()).toBeVisible({ timeout: TIMEOUT });
 
     // Open the request form if a trigger button exists
-    const addBtn = page.locator(
-      'button:has-text("Request Credential"), button:has-text("New Credential")',
-    ).first();
+    const addBtn = page
+      .locator(
+        'button:has-text("Request Credential"), button:has-text("New Credential")',
+      )
+      .first();
     const addBtnVisible = await addBtn.isVisible();
     if (addBtnVisible) {
       await addBtn.click({ timeout: 5000 });
@@ -390,7 +394,10 @@ test.describe("Regression — previously fixed crashes", () => {
 
     // No TypeError crash (the old d.map() bug)
     const crashIndicators = errors.jsExceptions.filter(
-      (e) => e.includes("Cannot read") || e.includes("is not a function") || e.includes(".map"),
+      (e) =>
+        e.includes("Cannot read") ||
+        e.includes("is not a function") ||
+        e.includes(".map"),
     );
     expect(
       crashIndicators,

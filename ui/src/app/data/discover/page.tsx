@@ -8,10 +8,12 @@ import {
   Loader2,
   Search,
   Database,
+  BookOpen,
   ChevronDown,
   ChevronUp,
   FileSignature,
   Network,
+  ExternalLink,
 } from "lucide-react";
 
 interface Asset {
@@ -51,6 +53,32 @@ interface ParticipantAssets {
   assets: Asset[];
 }
 
+interface CatalogEntry {
+  id: string;
+  title: string;
+  description: string;
+  license: string;
+  conformsTo: string;
+  publisher: string;
+  theme: string;
+  datasetType: string;
+  legalBasis: string;
+  recordCount: number;
+}
+
+type Tab = "all" | "assets" | "catalog";
+
+/** Keyword-based matching: every non-date keyword in the query must appear in the text. */
+function keywordMatch(text: string, query: string): boolean {
+  const words = query
+    .toLowerCase()
+    .split(/[\s,;]+/)
+    .filter((w) => w.length >= 2 && !/^\d{4}-\d{2}/.test(w));
+  if (words.length === 0) return true;
+  const lc = text.toLowerCase();
+  return words.some((w) => lc.includes(w));
+}
+
 export default function DataDiscoverPage() {
   return (
     <Suspense
@@ -68,20 +96,28 @@ export default function DataDiscoverPage() {
 
 function DataDiscoverContent() {
   const [groups, setGroups] = useState<ParticipantAssets[]>([]);
+  const [catalog, setCatalog] = useState<CatalogEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const searchParams = useSearchParams();
   const [filter, setFilter] = useState(searchParams.get("search") ?? "");
   const [expanded, setExpanded] = useState<string | null>(null);
+  const [tab, setTab] = useState<Tab>("all");
 
   useEffect(() => {
-    fetchApi("/api/assets")
-      .then((r) => (r.ok ? r.json() : []))
-      .then((d) => {
-        // /api/assets returns flat array of {participantId, identity, assets[]} or { participants: [...] }
-        setGroups(Array.isArray(d) ? d : d.participants || []);
-        setLoading(false);
-      })
-      .catch(() => setLoading(false));
+    Promise.all([
+      fetchApi("/api/assets")
+        .then((r) => (r.ok ? r.json() : []))
+        .catch(() => []),
+      fetchApi("/api/catalog")
+        .then((r) => (r.ok ? r.json() : []))
+        .catch(() => []),
+    ]).then(([assetData, catalogData]) => {
+      setGroups(
+        Array.isArray(assetData) ? assetData : assetData.participants || [],
+      );
+      setCatalog(Array.isArray(catalogData) ? catalogData : []);
+      setLoading(false);
+    });
   }, []);
 
   // Flatten all assets for filtering
@@ -93,42 +129,90 @@ function DataDiscoverContent() {
     })),
   );
 
-  const visible = filter
-    ? allAssets.filter((a) => {
-        const q = filter.toLowerCase();
-        return (
-          assetField(a, "name").toLowerCase().includes(q) ||
-          assetField(a, "description").toLowerCase().includes(q) ||
-          a["@id"]?.toLowerCase().includes(q)
-        );
-      })
+  const visibleAssets = filter
+    ? allAssets.filter(
+        (a) =>
+          keywordMatch(assetField(a, "name"), filter) ||
+          keywordMatch(assetField(a, "description"), filter) ||
+          keywordMatch(a["@id"] ?? "", filter),
+      )
     : allAssets;
+
+  const visibleCatalog = filter
+    ? catalog.filter(
+        (c) =>
+          keywordMatch(c.title ?? "", filter) ||
+          keywordMatch(c.description ?? "", filter) ||
+          keywordMatch(c.theme ?? "", filter) ||
+          keywordMatch(c.publisher ?? "", filter),
+      )
+    : catalog;
+
+  const showAssets = tab === "all" || tab === "assets";
+  const showCatalog = tab === "all" || tab === "catalog";
+  const totalMatching =
+    (showAssets ? visibleAssets.length : 0) +
+    (showCatalog ? visibleCatalog.length : 0);
 
   return (
     <div className="max-w-5xl mx-auto px-6 py-10">
       <PageIntro
         title="Discover Data"
         icon={Search}
-        description="Browse available data assets across all dataspace participants. Search by name, description, or ID to find datasets published by data holders, then initiate a contract negotiation to request access."
+        description="Browse available data assets and HealthDCAT-AP datasets across all dataspace participants. Search by name, description, theme, or FHIR resource type to find datasets, then negotiate access."
         prevStep={{ href: "/data/share", label: "Share Data" }}
         nextStep={{ href: "/negotiate", label: "Negotiate Contract" }}
-        infoText="Assets shown here are fetched from the EDC-V federated catalog. Each asset includes its ODRL policy — review it before negotiating access."
+        infoText="EDC assets come from the federated catalog; HealthDCAT-AP entries describe datasets using the European health metadata standard. Search uses keyword matching — each word is matched independently."
         docLink={{ href: "/docs/user-guide", label: "User Guide" }}
       />
 
       {/* Search bar */}
-      <div className="relative mb-6">
+      <div className="relative mb-4">
         <Search
           size={16}
           className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500"
         />
         <input
           type="search"
-          placeholder="Search assets by name, description or ID…"
+          placeholder="Search by name, theme, FHIR type, publisher…"
           value={filter}
           onChange={(e) => setFilter(e.target.value)}
           className="w-full pl-10 pr-3 py-2 bg-gray-800 border border-gray-600 rounded text-sm outline-none focus:border-layer2"
         />
+      </div>
+
+      {/* Tabs */}
+      <div className="flex gap-1 mb-4 border-b border-gray-700">
+        {(
+          [
+            { key: "all", label: "All" },
+            { key: "assets", label: "EDC Assets" },
+            { key: "catalog", label: "HealthDCAT-AP" },
+          ] as { key: Tab; label: string }[]
+        ).map((t) => (
+          <button
+            key={t.key}
+            onClick={() => setTab(t.key)}
+            className={`px-4 py-2 text-xs font-medium border-b-2 -mb-px transition-colors ${
+              tab === t.key
+                ? "border-layer2 text-layer2"
+                : "border-transparent text-gray-500 hover:text-gray-300"
+            }`}
+          >
+            {t.label}
+            {!loading && (
+              <span className="ml-1 text-gray-600">
+                (
+                {t.key === "all"
+                  ? totalMatching
+                  : t.key === "assets"
+                    ? visibleAssets.length
+                    : visibleCatalog.length}
+                )
+              </span>
+            )}
+          </button>
+        ))}
       </div>
 
       {/* Stats bar */}
@@ -138,13 +222,13 @@ function DataDiscoverContent() {
             {groups.length} participant{groups.length !== 1 ? "s" : ""}
           </span>
           <span>·</span>
-          <span>
-            {allAssets.length} asset{allAssets.length !== 1 ? "s" : ""}
-          </span>
+          <span>{allAssets.length} EDC assets</span>
+          <span>·</span>
+          <span>{catalog.length} HealthDCAT-AP datasets</span>
           {filter && (
             <>
               <span>·</span>
-              <span>{visible.length} matching</span>
+              <span>{totalMatching} matching</span>
             </>
           )}
         </div>
@@ -155,92 +239,257 @@ function DataDiscoverContent() {
           <Loader2 size={16} className="animate-spin" />
           Querying federated catalog…
         </div>
-      ) : visible.length === 0 ? (
+      ) : totalMatching === 0 ? (
         <div className="text-center py-12">
           <Database size={40} className="text-gray-600 mx-auto mb-4" />
           <p className="text-gray-400">
-            {filter ? "No assets match your search" : "No assets available"}
+            {filter ? "No datasets match your search" : "No datasets available"}
           </p>
         </div>
       ) : (
-        <div className="grid gap-3">
-          {visible.map((a) => {
-            const id = a["@id"] || String(Math.random());
-            const isOpen = expanded === id;
-            return (
-              <div
-                key={id}
-                className={`border rounded-xl transition-colors ${
-                  isOpen
-                    ? "border-layer2 bg-gray-900/60"
-                    : "border-gray-700 hover:border-layer2"
-                }`}
-              >
-                <button
-                  className="w-full text-left p-4"
-                  onClick={() => setExpanded(isOpen ? null : id)}
-                >
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex-1 min-w-0">
-                      <h2 className="font-semibold text-sm text-layer2">
-                        {assetField(a, "name")}
-                      </h2>
-                      {assetField(a, "description") && (
-                        <p className="text-xs text-gray-400 mt-0.5 line-clamp-2">
-                          {assetField(a, "description")}
-                        </p>
-                      )}
-                      <p className="text-xs text-gray-600 mt-1">
-                        Provider:{" "}
-                        {a._identity
-                          ?.replace("did:web:", "")
-                          .replace(/%3A/g, ":") ||
-                          a._participantId?.slice(0, 12)}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-2 shrink-0">
-                      {assetField(a, "contenttype") && (
-                        <span className="text-xs bg-gray-700 text-gray-300 px-2 py-0.5 rounded-full">
-                          {assetField(a, "contenttype")}
-                        </span>
-                      )}
-                      {isOpen ? (
-                        <ChevronUp size={16} className="text-gray-500" />
-                      ) : (
-                        <ChevronDown size={16} className="text-gray-500" />
-                      )}
-                    </div>
-                  </div>
-                </button>
+        <div className="space-y-6">
+          {/* HealthDCAT-AP Catalog Section */}
+          {showCatalog && visibleCatalog.length > 0 && (
+            <div>
+              {tab === "all" && (
+                <h2 className="text-xs font-semibold uppercase text-gray-500 mb-3 flex items-center gap-1.5">
+                  <BookOpen size={12} />
+                  HealthDCAT-AP Datasets ({visibleCatalog.length})
+                </h2>
+              )}
+              <div className="grid gap-3">
+                {visibleCatalog.map((c) => {
+                  const isOpen = expanded === c.id;
+                  return (
+                    <div
+                      key={c.id}
+                      className={`border rounded-xl transition-colors ${
+                        isOpen
+                          ? "border-purple-500 bg-gray-900/60"
+                          : "border-gray-700 hover:border-purple-500"
+                      }`}
+                    >
+                      <button
+                        className="w-full text-left p-4"
+                        onClick={() => setExpanded(isOpen ? null : c.id)}
+                      >
+                        <div className="flex items-start justify-between gap-4">
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2">
+                              <BookOpen
+                                size={14}
+                                className="text-purple-400 shrink-0"
+                              />
+                              <h3 className="font-semibold text-sm text-purple-300">
+                                {c.title}
+                              </h3>
+                            </div>
+                            {c.description && (
+                              <p className="text-xs text-gray-400 mt-0.5 ml-5 line-clamp-2">
+                                {c.description}
+                              </p>
+                            )}
+                            <div className="flex flex-wrap gap-2 mt-1.5 ml-5">
+                              {c.publisher && (
+                                <span className="text-xs text-gray-600">
+                                  {c.publisher}
+                                </span>
+                              )}
+                              {c.theme && (
+                                <span className="text-xs bg-purple-900/40 text-purple-300 px-1.5 py-0.5 rounded">
+                                  {c.theme}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2 shrink-0">
+                            {c.datasetType && (
+                              <span className="text-xs bg-gray-700 text-gray-300 px-2 py-0.5 rounded-full">
+                                {c.datasetType}
+                              </span>
+                            )}
+                            {isOpen ? (
+                              <ChevronUp size={16} className="text-gray-500" />
+                            ) : (
+                              <ChevronDown
+                                size={16}
+                                className="text-gray-500"
+                              />
+                            )}
+                          </div>
+                        </div>
+                      </button>
 
-                {isOpen && (
-                  <div className="px-4 pb-4 border-t border-gray-700 pt-3">
-                    <pre className="text-xs text-gray-400 overflow-auto max-h-48 mb-3">
-                      {JSON.stringify(a, null, 2)}
-                    </pre>
-                    <div className="flex flex-wrap gap-3">
-                      <a
-                        href={`/negotiate?assetId=${a["@id"]}&providerId=${a._participantId}`}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-layer2 text-white rounded text-xs font-medium hover:bg-layer2/90"
-                      >
-                        <FileSignature size={14} />
-                        Negotiate Access
-                      </a>
-                      <a
-                        href={`/graph?highlight=${encodeURIComponent(
-                          assetField(a, "name"),
-                        )}`}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-gray-600 text-gray-300 rounded text-xs font-medium hover:border-layer2 hover:text-layer2 transition-colors"
-                      >
-                        <Network size={14} />
-                        View in Graph
-                      </a>
+                      {isOpen && (
+                        <div className="px-4 pb-4 border-t border-gray-700 pt-3">
+                          <div className="grid grid-cols-2 gap-x-6 gap-y-1.5 mb-3">
+                            {c.license && (
+                              <div className="text-xs">
+                                <span className="text-gray-500">License:</span>{" "}
+                                <span className="text-gray-300">
+                                  {c.license}
+                                </span>
+                              </div>
+                            )}
+                            {c.legalBasis && (
+                              <div className="text-xs">
+                                <span className="text-gray-500">
+                                  Legal Basis:
+                                </span>{" "}
+                                <span className="text-gray-300">
+                                  {c.legalBasis}
+                                </span>
+                              </div>
+                            )}
+                            {c.conformsTo && (
+                              <div className="text-xs">
+                                <span className="text-gray-500">
+                                  Conforms To:
+                                </span>{" "}
+                                <a
+                                  href={c.conformsTo}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-purple-400 hover:underline inline-flex items-center gap-0.5"
+                                >
+                                  {c.conformsTo
+                                    .replace(/^https?:\/\//, "")
+                                    .slice(0, 40)}
+                                  <ExternalLink size={10} />
+                                </a>
+                              </div>
+                            )}
+                            {c.recordCount != null && (
+                              <div className="text-xs">
+                                <span className="text-gray-500">Records:</span>{" "}
+                                <span className="text-gray-300">
+                                  {c.recordCount.toLocaleString()}
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                          <div className="flex flex-wrap gap-3">
+                            <a
+                              href={`/catalog?search=${encodeURIComponent(
+                                c.title,
+                              )}`}
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-purple-600 text-white rounded text-xs font-medium hover:bg-purple-500"
+                            >
+                              <BookOpen size={14} />
+                              View in Catalog
+                            </a>
+                            <a
+                              href={`/graph?highlight=${encodeURIComponent(
+                                c.title,
+                              )}`}
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-gray-600 text-gray-300 rounded text-xs font-medium hover:border-purple-500 hover:text-purple-300 transition-colors"
+                            >
+                              <Network size={14} />
+                              View in Graph
+                            </a>
+                          </div>
+                        </div>
+                      )}
                     </div>
-                  </div>
-                )}
+                  );
+                })}
               </div>
-            );
-          })}
+            </div>
+          )}
+
+          {/* EDC Assets Section */}
+          {showAssets && visibleAssets.length > 0 && (
+            <div>
+              {tab === "all" && (
+                <h2 className="text-xs font-semibold uppercase text-gray-500 mb-3 flex items-center gap-1.5">
+                  <Database size={12} />
+                  EDC Data Assets ({visibleAssets.length})
+                </h2>
+              )}
+              <div className="grid gap-3">
+                {visibleAssets.map((a) => {
+                  const id = a["@id"] || String(Math.random());
+                  const isOpen = expanded === id;
+                  return (
+                    <div
+                      key={id}
+                      className={`border rounded-xl transition-colors ${
+                        isOpen
+                          ? "border-layer2 bg-gray-900/60"
+                          : "border-gray-700 hover:border-layer2"
+                      }`}
+                    >
+                      <button
+                        className="w-full text-left p-4"
+                        onClick={() => setExpanded(isOpen ? null : id)}
+                      >
+                        <div className="flex items-start justify-between gap-4">
+                          <div className="flex-1 min-w-0">
+                            <h3 className="font-semibold text-sm text-layer2">
+                              {assetField(a, "name")}
+                            </h3>
+                            {assetField(a, "description") && (
+                              <p className="text-xs text-gray-400 mt-0.5 line-clamp-2">
+                                {assetField(a, "description")}
+                              </p>
+                            )}
+                            <p className="text-xs text-gray-600 mt-1">
+                              Provider:{" "}
+                              {a._identity
+                                ?.replace("did:web:", "")
+                                .replace(/%3A/g, ":") ||
+                                a._participantId?.slice(0, 12)}
+                            </p>
+                          </div>
+                          <div className="flex items-center gap-2 shrink-0">
+                            {assetField(a, "contenttype") && (
+                              <span className="text-xs bg-gray-700 text-gray-300 px-2 py-0.5 rounded-full">
+                                {assetField(a, "contenttype")}
+                              </span>
+                            )}
+                            {isOpen ? (
+                              <ChevronUp size={16} className="text-gray-500" />
+                            ) : (
+                              <ChevronDown
+                                size={16}
+                                className="text-gray-500"
+                              />
+                            )}
+                          </div>
+                        </div>
+                      </button>
+
+                      {isOpen && (
+                        <div className="px-4 pb-4 border-t border-gray-700 pt-3">
+                          <pre className="text-xs text-gray-400 overflow-auto max-h-48 mb-3">
+                            {JSON.stringify(a, null, 2)}
+                          </pre>
+                          <div className="flex flex-wrap gap-3">
+                            <a
+                              href={`/negotiate?assetId=${a["@id"]}&providerId=${a._participantId}`}
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-layer2 text-white rounded text-xs font-medium hover:bg-layer2/90"
+                            >
+                              <FileSignature size={14} />
+                              Negotiate Access
+                            </a>
+                            <a
+                              href={`/graph?highlight=${encodeURIComponent(
+                                assetField(a, "name"),
+                              )}`}
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-gray-600 text-gray-300 rounded text-xs font-medium hover:border-layer2 hover:text-layer2 transition-colors"
+                            >
+                              <Network size={14} />
+                              View in Graph
+                            </a>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>

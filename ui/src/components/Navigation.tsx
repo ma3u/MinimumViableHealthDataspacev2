@@ -25,6 +25,7 @@ import {
   Layers,
   ScrollText,
   ClipboardList,
+  Edit3,
 } from "lucide-react";
 import UserMenu from "./UserMenu";
 import { useState, useRef, useEffect } from "react";
@@ -58,6 +59,7 @@ const exploreGroup: NavGroup = {
   links: [
     { href: "/graph", label: "Graph Explorer", icon: Network },
     { href: "/catalog", label: "Dataset Catalog", icon: BookOpen },
+    { href: "/catalog/editor", label: "DCAT-AP Editor", icon: Edit3 },
     { href: "/patient", label: "Patient Journey", icon: User },
     { href: "/analytics", label: "OMOP Analytics", icon: BarChart2 },
     { href: "/query", label: "NLQ / Federated", icon: Search },

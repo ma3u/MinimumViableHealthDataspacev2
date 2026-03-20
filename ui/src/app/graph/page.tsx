@@ -349,7 +349,8 @@ function GraphContent() {
                 {selectedNode.layer === 3 && (
                   <a
                     href={`/data/discover?search=${encodeURIComponent(
-                      selectedNode.name,
+                      selectedNode.label?.replace(/\s+\d{4}-\d{2}.*$/, "") ??
+                        selectedNode.name.replace(/\s+\d{4}-\d{2}.*$/, ""),
                     )}`}
                     className="inline-flex items-center gap-1 text-xs text-green-400 hover:underline"
                   >
