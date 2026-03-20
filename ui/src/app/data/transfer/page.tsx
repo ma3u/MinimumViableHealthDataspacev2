@@ -1,16 +1,21 @@
 "use client";
 
 import { fetchApi } from "@/lib/api";
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import {
   ArrowRightLeft,
   CheckCircle2,
+  ChevronDown,
+  ChevronRight,
   Circle,
-  Clock,
+  Copy,
+  ExternalLink,
+  FileJson2,
   Loader2,
   Play,
   RefreshCw,
+  X,
   XCircle,
 } from "lucide-react";
 import PageIntro from "@/components/PageIntro";
@@ -107,8 +112,9 @@ function stateColor(state: DspState) {
 function stateBg(state: DspState) {
   const s = state?.toUpperCase() || "";
   if (s.includes("COMPLETED")) return "bg-green-900/40 text-green-400";
-  if (s.includes("TERMINATED") || s.includes("ERROR"))
+  if (s.includes("TERMINATED") || s.includes("ERROR")) {
     return "bg-red-900/40 text-red-400";
+  }
   if (s.includes("STARTED")) return "bg-blue-900/40 text-blue-400";
   if (s.includes("SUSPENDED")) return "bg-orange-900/40 text-orange-400";
   return "bg-yellow-900/40 text-yellow-400";
@@ -190,6 +196,407 @@ function DspPipeline({ state }: { state: DspState }) {
   );
 }
 
+/* ── FHIR Bundle Types ── */
+
+interface FhirBundleEntry {
+  fullUrl?: string;
+  resource: { resourceType: string; id?: string; [key: string]: unknown };
+  search?: { mode?: string };
+}
+
+interface FhirBundle {
+  resourceType: "Bundle";
+  id?: string;
+  type: string;
+  total: number;
+  meta?: { lastUpdated?: string };
+  link?: { relation: string; url: string }[];
+  entry?: FhirBundleEntry[];
+}
+
+interface DataPayload {
+  resourceType: string;
+  type: string;
+  total: number;
+  containedResourceTypes?: string[];
+  link?: { relation: string; url: string }[];
+  provider?: string;
+  transferredAt?: string;
+  sizeBytes?: number;
+}
+
+/* ── FHIR Resource colors ── */
+const FHIR_RESOURCE_COLORS: Record<string, string> = {
+  Patient: "bg-blue-900/50 text-blue-300 border-blue-700",
+  Observation: "bg-purple-900/50 text-purple-300 border-purple-700",
+  Condition: "bg-orange-900/50 text-orange-300 border-orange-700",
+  Encounter: "bg-emerald-900/50 text-emerald-300 border-emerald-700",
+  MedicationRequest: "bg-pink-900/50 text-pink-300 border-pink-700",
+  DiagnosticReport: "bg-indigo-900/50 text-indigo-300 border-indigo-700",
+  Immunization: "bg-teal-900/50 text-teal-300 border-teal-700",
+  AllergyIntolerance: "bg-red-900/50 text-red-300 border-red-700",
+  Procedure: "bg-cyan-900/50 text-cyan-300 border-cyan-700",
+  CarePlan: "bg-lime-900/50 text-lime-300 border-lime-700",
+};
+
+function fhirColor(type: string): string {
+  return (
+    FHIR_RESOURCE_COLORS[type] || "bg-gray-800 text-gray-300 border-gray-600"
+  );
+}
+
+/* ── Collapsible JSON Tree ── */
+
+function JsonNode({ data, depth = 0 }: { data: unknown; depth?: number }) {
+  const [collapsed, setCollapsed] = useState(depth > 1);
+
+  if (data === null || data === undefined) {
+    return <span className="text-gray-500">null</span>;
+  }
+  if (typeof data === "boolean") {
+    return <span className="text-yellow-400">{String(data)}</span>;
+  }
+  if (typeof data === "number") {
+    return <span className="text-cyan-400">{data}</span>;
+  }
+  if (typeof data === "string") {
+    return <span className="text-green-400">&quot;{data}&quot;</span>;
+  }
+
+  if (Array.isArray(data)) {
+    if (data.length === 0) return <span className="text-gray-500">[]</span>;
+    return (
+      <span>
+        <button
+          onClick={() => setCollapsed(!collapsed)}
+          className="text-gray-400 hover:text-gray-200 inline-flex items-center"
+        >
+          {collapsed ? <ChevronRight size={12} /> : <ChevronDown size={12} />}
+          <span className="text-gray-500 text-xs ml-0.5">[{data.length}]</span>
+        </button>
+        {!collapsed && (
+          <div className="ml-4 border-l border-gray-700 pl-2">
+            {data.map((item, i) => (
+              <div key={i}>
+                <span className="text-gray-600 text-xs mr-1">{i}:</span>
+                <JsonNode data={item} depth={depth + 1} />
+              </div>
+            ))}
+          </div>
+        )}
+      </span>
+    );
+  }
+
+  if (typeof data === "object") {
+    const entries = Object.entries(data as Record<string, unknown>);
+    if (entries.length === 0) {
+      return <span className="text-gray-500">{"{}"}</span>;
+    }
+    return (
+      <span>
+        <button
+          onClick={() => setCollapsed(!collapsed)}
+          className="text-gray-400 hover:text-gray-200 inline-flex items-center"
+        >
+          {collapsed ? <ChevronRight size={12} /> : <ChevronDown size={12} />}
+          <span className="text-gray-500 text-xs ml-0.5">
+            {"{"}
+            {entries.length}
+            {"}"}
+          </span>
+        </button>
+        {!collapsed && (
+          <div className="ml-4 border-l border-gray-700 pl-2">
+            {entries.map(([key, val]) => (
+              <div key={key}>
+                <span className="text-blue-300">{key}</span>
+                <span className="text-gray-500">: </span>
+                <JsonNode data={val} depth={depth + 1} />
+              </div>
+            ))}
+          </div>
+        )}
+      </span>
+    );
+  }
+
+  return <span>{String(data)}</span>;
+}
+
+/* ── FHIR Resource Card ── */
+
+function FhirResourceCard({ entry }: { entry: FhirBundleEntry }) {
+  const [expanded, setExpanded] = useState(false);
+  const r = entry.resource;
+  const type = r.resourceType;
+
+  // Build summary line based on resource type
+  let summary = "";
+  if (type === "Patient") {
+    const name = (r.name as Array<{ given?: string[]; family?: string }>)?.[0];
+    summary = name
+      ? `${name.given?.[0] || ""} ${name.family || ""}`.trim()
+      : r.id || "";
+  } else if (type === "Observation") {
+    const code = (r.code as { text?: string })?.text || "";
+    const val = r.valueQuantity as
+      | { value?: number; unit?: string }
+      | undefined;
+    summary = val ? `${code}: ${val.value} ${val.unit}` : code;
+  } else if (type === "Condition") {
+    summary = (r.code as { text?: string })?.text || "";
+  } else if (type === "MedicationRequest") {
+    summary = (r.medicationCodeableConcept as { text?: string })?.text || "";
+  } else if (type === "Encounter") {
+    const cls = r.class as { display?: string } | undefined;
+    summary = `${cls?.display || "visit"} — ${r.status}`;
+  } else if (type === "DiagnosticReport") {
+    summary = (r.code as { text?: string })?.text || "";
+  } else if (type === "CarePlan") {
+    summary = (r.title as string) || "";
+  } else if (type === "Immunization") {
+    summary = (r.vaccineCode as { text?: string })?.text || "";
+  } else if (type === "AllergyIntolerance") {
+    summary = (r.code as { text?: string })?.text || "";
+  } else if (type === "Procedure") {
+    summary = (r.code as { text?: string })?.text || "";
+  } else {
+    summary = r.id || "";
+  }
+
+  return (
+    <div className="border border-gray-700 rounded-lg overflow-hidden">
+      <button
+        onClick={() => setExpanded(!expanded)}
+        className="w-full flex items-center gap-2 px-3 py-2 text-left hover:bg-gray-800/50 transition-colors"
+      >
+        {expanded ? (
+          <ChevronDown size={12} className="text-gray-400" />
+        ) : (
+          <ChevronRight size={12} className="text-gray-400" />
+        )}
+        <span
+          className={`text-[10px] px-1.5 py-0.5 rounded border ${fhirColor(
+            type,
+          )}`}
+        >
+          {type}
+        </span>
+        <span className="text-xs text-gray-300 truncate flex-1">{summary}</span>
+        <span className="text-[10px] text-gray-600">{r.id}</span>
+      </button>
+      {expanded && (
+        <div className="px-3 pb-3 pt-1 bg-gray-900/50 font-mono text-xs overflow-x-auto max-h-64 overflow-y-auto">
+          <JsonNode data={r} depth={0} />
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ── FHIR Viewer Panel ── */
+
+function FhirViewerPanel({
+  transfer,
+  bundle,
+  onClose,
+}: {
+  transfer: Transfer;
+  bundle: FhirBundle | null;
+  onClose: () => void;
+}) {
+  const [viewMode, setViewMode] = useState<"resources" | "json">("resources");
+  const [copied, setCopied] = useState(false);
+  const payload = transfer.dataPayload as DataPayload | undefined;
+  const aId =
+    transfer.assetId || f(transfer as Record<string, unknown>, "assetId");
+
+  const resourceCounts = useMemo(() => {
+    if (!bundle?.entry) return {};
+    const counts: Record<string, number> = {};
+    bundle.entry.forEach((e) => {
+      const rt = e.resource.resourceType;
+      counts[rt] = (counts[rt] || 0) + 1;
+    });
+    return counts;
+  }, [bundle]);
+
+  const copyJson = useCallback(() => {
+    const data = bundle || payload;
+    if (data) {
+      navigator.clipboard.writeText(JSON.stringify(data, null, 2));
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  }, [bundle, payload]);
+
+  return (
+    <div className="border border-layer2/50 rounded-xl overflow-hidden bg-gray-900/80 mt-3">
+      {/* Header */}
+      <div className="flex items-center justify-between px-4 py-3 bg-layer2/10 border-b border-layer2/30">
+        <div className="flex items-center gap-2">
+          <FileJson2 size={16} className="text-layer2" />
+          <span className="text-sm font-medium text-gray-200">
+            FHIR Data — {aId ? assetLabel(aId as string) : "Bundle"}
+          </span>
+          {payload?.provider && (
+            <span className="text-[10px] px-1.5 py-0.5 rounded bg-gray-700 text-gray-400">
+              from {payload.provider}
+            </span>
+          )}
+        </div>
+        <div className="flex items-center gap-2">
+          <a
+            href="https://fire.ly/fhir-tools/fhir-viewer/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-1 text-[11px] text-layer2 hover:text-layer2/80 transition-colors"
+          >
+            Open FHIR Viewer <ExternalLink size={10} />
+          </a>
+          <button
+            onClick={onClose}
+            className="text-gray-500 hover:text-gray-300"
+          >
+            <X size={16} />
+          </button>
+        </div>
+      </div>
+
+      {/* Summary stats */}
+      <div className="px-4 py-3 border-b border-gray-700 grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div>
+          <div className="text-[10px] text-gray-500 uppercase tracking-wide">
+            Total Resources
+          </div>
+          <div className="text-lg font-semibold text-gray-200">
+            {bundle?.entry?.length ?? payload?.total ?? "—"}
+          </div>
+        </div>
+        <div>
+          <div className="text-[10px] text-gray-500 uppercase tracking-wide">
+            Resource Types
+          </div>
+          <div className="text-lg font-semibold text-gray-200">
+            {Object.keys(resourceCounts).length ||
+              payload?.containedResourceTypes?.length ||
+              "—"}
+          </div>
+        </div>
+        <div>
+          <div className="text-[10px] text-gray-500 uppercase tracking-wide">
+            Transferred
+          </div>
+          <div className="text-sm text-gray-300">
+            {payload?.transferredAt
+              ? new Date(payload.transferredAt).toLocaleString(undefined, {
+                  dateStyle: "short",
+                  timeStyle: "short",
+                })
+              : "—"}
+          </div>
+        </div>
+        <div>
+          <div className="text-[10px] text-gray-500 uppercase tracking-wide">
+            Size
+          </div>
+          <div className="text-sm text-gray-300">
+            {payload?.sizeBytes
+              ? `${(payload.sizeBytes / 1024).toFixed(0)} KB`
+              : "—"}
+          </div>
+        </div>
+      </div>
+
+      {/* Resource type pills */}
+      {(Object.keys(resourceCounts).length > 0 ||
+        (payload?.containedResourceTypes?.length ?? 0) > 0) && (
+        <div className="px-4 py-2 border-b border-gray-700 flex flex-wrap gap-1.5">
+          {Object.keys(resourceCounts).length > 0
+            ? Object.entries(resourceCounts).map(([type, count]) => (
+                <span
+                  key={type}
+                  className={`text-[10px] px-2 py-0.5 rounded-full border ${fhirColor(
+                    type,
+                  )}`}
+                >
+                  {type} ({count})
+                </span>
+              ))
+            : payload?.containedResourceTypes?.map((type) => (
+                <span
+                  key={type}
+                  className={`text-[10px] px-2 py-0.5 rounded-full border ${fhirColor(
+                    type,
+                  )}`}
+                >
+                  {type}
+                </span>
+              ))}
+        </div>
+      )}
+
+      {/* View mode tabs & actions */}
+      <div className="px-4 py-2 border-b border-gray-700 flex items-center justify-between">
+        <div className="flex gap-1">
+          <button
+            onClick={() => setViewMode("resources")}
+            className={`text-xs px-2.5 py-1 rounded ${
+              viewMode === "resources"
+                ? "bg-layer2/20 text-layer2"
+                : "text-gray-400 hover:text-gray-200"
+            }`}
+          >
+            Resources
+          </button>
+          <button
+            onClick={() => setViewMode("json")}
+            className={`text-xs px-2.5 py-1 rounded ${
+              viewMode === "json"
+                ? "bg-layer2/20 text-layer2"
+                : "text-gray-400 hover:text-gray-200"
+            }`}
+          >
+            Raw JSON
+          </button>
+        </div>
+        <button
+          onClick={copyJson}
+          className="flex items-center gap-1 text-[11px] text-gray-400 hover:text-gray-200"
+        >
+          <Copy size={10} />
+          {copied ? "Copied!" : "Copy"}
+        </button>
+      </div>
+
+      {/* Content */}
+      <div className="max-h-[500px] overflow-y-auto">
+        {viewMode === "resources" && bundle?.entry ? (
+          <div className="p-3 space-y-1.5">
+            {bundle.entry.map((entry, i) => (
+              <FhirResourceCard key={entry.resource.id || i} entry={entry} />
+            ))}
+          </div>
+        ) : viewMode === "resources" && !bundle?.entry ? (
+          <div className="p-6 text-center text-sm text-gray-500">
+            <FileJson2 size={24} className="mx-auto mb-2 text-gray-600" />
+            <p>Full FHIR Bundle data not available for this transfer.</p>
+            <p className="text-xs mt-1">
+              Transfer metadata: {payload?.total ?? 0} resources (
+              {payload?.containedResourceTypes?.join(", ") || "unknown"})
+            </p>
+          </div>
+        ) : (
+          <pre className="p-4 font-mono text-xs text-gray-300 overflow-x-auto">
+            {JSON.stringify(bundle || payload, null, 2)}
+          </pre>
+        )}
+      </div>
+    </div>
+  );
+}
+
 /* ── Main Page ── */
 
 export default function DataTransferPage() {
@@ -223,6 +630,16 @@ function DataTransferContent() {
   const [selectedAgreement, setSelectedAgreement] = useState(preContractId);
   const [result, setResult] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
+
+  // FHIR viewer
+  const [viewingTransferId, setViewingTransferId] = useState<string | null>(
+    null,
+  );
+  const [fhirBundles, setFhirBundles] = useState<Record<
+    string,
+    FhirBundle
+  > | null>(null);
+  const [loadingFhir, setLoadingFhir] = useState(false);
 
   useEffect(() => {
     fetchApi("/api/participants")
@@ -331,6 +748,32 @@ function DataTransferContent() {
     transfers.some(
       (t) => f(t as Record<string, unknown>, "contractId") === agrId,
     );
+
+  // Load FHIR bundles on demand
+  const openFhirViewer = async (transferId: string) => {
+    if (viewingTransferId === transferId) {
+      setViewingTransferId(null);
+      return;
+    }
+    setViewingTransferId(transferId);
+    if (!fhirBundles) {
+      setLoadingFhir(true);
+      try {
+        const basePath =
+          process.env.NEXT_PUBLIC_STATIC_EXPORT === "true"
+            ? process.env.NEXT_PUBLIC_BASE_PATH ||
+              "/MinimumViableHealthDataspacev2"
+            : "";
+        const res = await fetch(`${basePath}/mock/fhir_bundles.json`);
+        if (res.ok) {
+          setFhirBundles(await res.json());
+        }
+      } catch {
+        /* ignore */
+      }
+      setLoadingFhir(false);
+    }
+  };
 
   return (
     <div className="max-w-5xl mx-auto px-6 py-10">
@@ -503,11 +946,18 @@ function DataTransferContent() {
               (t.stateTimestamp as number) ||
               (t["edc:stateTimestamp"] as number) ||
               0;
+            const isCompleted = state?.toUpperCase().includes("COMPLETED");
+            const isViewing = viewingTransferId === t["@id"];
+            const bundle = fhirBundles?.[aId as string] ?? null;
 
             return (
               <div
                 key={t["@id"]}
-                className="p-4 border border-gray-700 rounded-xl space-y-3"
+                className={`p-4 border rounded-xl space-y-3 transition-colors ${
+                  isViewing
+                    ? "border-layer2/50 bg-gray-800/30"
+                    : "border-gray-700"
+                }`}
               >
                 {/* Header row */}
                 <div className="flex items-center justify-between">
@@ -520,13 +970,28 @@ function DataTransferContent() {
                       {transferType}
                     </span>
                   </div>
-                  <span
-                    className={`text-xs px-2 py-0.5 rounded-full ${stateBg(
-                      state,
-                    )}`}
-                  >
-                    {state || "UNKNOWN"}
-                  </span>
+                  <div className="flex items-center gap-2">
+                    {isCompleted && (
+                      <button
+                        onClick={() => openFhirViewer(t["@id"])}
+                        className={`flex items-center gap-1 text-xs px-2 py-1 rounded transition-colors ${
+                          isViewing
+                            ? "bg-layer2/20 text-layer2"
+                            : "bg-green-900/30 text-green-400 hover:bg-green-900/50"
+                        }`}
+                      >
+                        <FileJson2 size={12} />
+                        {isViewing ? "Hide FHIR" : "View FHIR"}
+                      </button>
+                    )}
+                    <span
+                      className={`text-xs px-2 py-0.5 rounded-full ${stateBg(
+                        state,
+                      )}`}
+                    >
+                      {state || "UNKNOWN"}
+                    </span>
+                  </div>
                 </div>
 
                 {/* DSP Pipeline visualization */}
@@ -544,7 +1009,28 @@ function DataTransferContent() {
                     </span>
                   )}
                   <span>Process: {t["@id"].slice(0, 8)}…</span>
+                  {isCompleted && (t.dataPayload as DataPayload)?.total && (
+                    <span className="text-green-500">
+                      {(t.dataPayload as DataPayload).total} resources
+                      transferred
+                    </span>
+                  )}
                 </div>
+
+                {/* FHIR Viewer panel (expanded) */}
+                {isViewing &&
+                  (loadingFhir ? (
+                    <div className="flex items-center gap-2 text-gray-500 py-4 justify-center">
+                      <Loader2 size={14} className="animate-spin" />
+                      Loading FHIR data…
+                    </div>
+                  ) : (
+                    <FhirViewerPanel
+                      transfer={t}
+                      bundle={bundle}
+                      onClose={() => setViewingTransferId(null)}
+                    />
+                  ))}
               </div>
             );
           })}

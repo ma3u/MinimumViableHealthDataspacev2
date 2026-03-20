@@ -9,6 +9,7 @@ import {
   ArrowRightLeft,
   FileText,
   LayoutDashboard,
+  Github,
 } from "lucide-react";
 
 const exploreCards = [
@@ -83,7 +84,18 @@ const actionCards = [
 export default function Home() {
   return (
     <div className="max-w-5xl mx-auto px-6 py-16">
-      <h1 className="text-3xl font-bold mb-2">Health Dataspace v2</h1>
+      <div className="flex items-center gap-3 mb-2">
+        <h1 className="text-3xl font-bold">Health Dataspace v2</h1>
+        <a
+          href="https://github.com/ma3u/MinimumViableHealthDataspacev2"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-gray-400 hover:text-white transition-colors"
+          aria-label="GitHub Repository"
+        >
+          <Github size={24} />
+        </a>
+      </div>
       <p className="text-gray-400 mb-10">
         EHDS-compliant demo — EDC-V · DCore · CFM · Neo4j · FHIR R4 · OMOP CDM
       </p>

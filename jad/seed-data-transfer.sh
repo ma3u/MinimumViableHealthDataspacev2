@@ -197,7 +197,29 @@ for row in data['results'][0]['data']:
     print(f\"  [{r[2][:19]}] {r[1]:4s} {r[0]:30s} → {r[3]} results (participant: {r[4]})\")
 "
 
-# -- Step 5: Summary ----------------------------------------------------------
+# -- Step 5: Seed UI mock data (100 transfers + FHIR bundles) ----------------
+header "Step 5 — Seed UI Mock Data (100 Transfers + FHIR Bundles)"
+
+SCRIPTS_DIR="$(cd "$(dirname "$0")/.." && pwd)/scripts"
+UI_MOCK_DIR="$(cd "$(dirname "$0")/.." && pwd)/ui/public/mock"
+
+if [ -f "$SCRIPTS_DIR/generate-transfer-mocks.py" ]; then
+  step "Generating 100 transfer mock entries..."
+  python3 "$SCRIPTS_DIR/generate-transfer-mocks.py"
+  ok "Written ${UI_MOCK_DIR}/transfers.json and negotiations.json"
+else
+  step "Skipping mock transfer generation (scripts/generate-transfer-mocks.py not found)"
+fi
+
+if [ -f "$SCRIPTS_DIR/generate-fhir-bundles.py" ]; then
+  step "Generating FHIR R4 bundle samples (12 asset types)..."
+  python3 "$SCRIPTS_DIR/generate-fhir-bundles.py"
+  ok "Written ${UI_MOCK_DIR}/fhir_bundles.json"
+else
+  step "Skipping FHIR bundle generation (scripts/generate-fhir-bundles.py not found)"
+fi
+
+# -- Step 6: Summary ----------------------------------------------------------
 header "Phase 4d Results Summary"
 
 echo ""
@@ -212,6 +234,7 @@ echo "  │  ✓ HDAB MedReg DE retrieved ${CATALOG_DS_COUNT} HealthDCAT-AP data
 fi
 echo "  │  ✓ ${AUDIT_COUNT} audit events recorded in Neo4j               │"
 echo "  │  ✓ Ed25519 JWT bearer tokens validated by data plane    │"
+echo "  │  ✓ 100 UI transfer mocks + 12 FHIR bundle samples      │"
 echo "  │                                                         │"
 echo "  │  Data Flow:                                             │"
 echo "  │  Consumer → Data Plane (EDR token)                      │"

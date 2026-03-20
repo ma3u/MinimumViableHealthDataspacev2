@@ -1,32 +1,2462 @@
 [
   {
     "@type": "TransferProcess",
-    "@id": "transfer-patient-001",
+    "@id": "transfer-fhir-diagnostic-report-065",
     "state": "STARTED",
-    "stateTimestamp": 1773505610000,
+    "stateTimestamp": 1774032780000,
     "type": "CONSUMER",
-    "assetId": "fhir-patient-search",
-    "contractId": "agreement-patient-001",
-    "transferType": "HttpData-PULL"
+    "assetId": "fhir-diagnostic-report",
+    "contractId": "agreement-fhir-diagnostic-report-065",
+    "transferType": "HttpData-PULL",
+    "counterPartyId": "did:web:lmc.nl:clinic",
+    "counterPartyAddress": "https://lmc.nl/dsp/2025-1"
   },
   {
     "@type": "TransferProcess",
-    "@id": "transfer-observation-001",
-    "state": "STARTED",
-    "stateTimestamp": 1773505710000,
+    "@id": "transfer-fhir-encounter-history-067",
+    "state": "COMPLETED",
+    "stateTimestamp": 1774032720000,
     "type": "CONSUMER",
-    "assetId": "fhir-observation-bundle",
-    "contractId": "agreement-observation-001",
-    "transferType": "HttpData-PULL"
+    "assetId": "fhir-encounter-history",
+    "contractId": "agreement-fhir-encounter-history-067",
+    "transferType": "HttpData-PULL",
+    "counterPartyId": "did:web:alpha-klinik.de:participant",
+    "counterPartyAddress": "https://alpha-klinik.de/dsp/2025-1",
+    "dataPayload": {
+      "resourceType": "Bundle",
+      "type": "searchset",
+      "total": 133,
+      "containedResourceTypes": ["Encounter", "Location", "Practitioner"],
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://alpha-klinik.de/fhir/Encounter?_count=133"
+        }
+      ],
+      "provider": "AlphaKlinik Berlin",
+      "transferredAt": "2026-03-20T19:52:00Z",
+      "sizeBytes": 359366
+    }
   },
   {
     "@type": "TransferProcess",
-    "@id": "transfer-cohort-001",
-    "state": "REQUESTED",
-    "stateTimestamp": 1773505720000,
+    "@id": "transfer-fhir-care-plan-040",
+    "state": "COMPLETED",
+    "stateTimestamp": 1774032180000,
+    "type": "CONSUMER",
+    "assetId": "fhir-care-plan",
+    "contractId": "agreement-fhir-care-plan-040",
+    "transferType": "HttpData-PULL",
+    "counterPartyId": "did:web:alpha-klinik.de:participant",
+    "counterPartyAddress": "https://alpha-klinik.de/dsp/2025-1",
+    "dataPayload": {
+      "resourceType": "Bundle",
+      "type": "searchset",
+      "total": 163,
+      "containedResourceTypes": ["CarePlan", "Goal", "Condition"],
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://alpha-klinik.de/fhir/CarePlan?_count=163"
+        }
+      ],
+      "provider": "AlphaKlinik Berlin",
+      "transferredAt": "2026-03-20T19:43:00Z",
+      "sizeBytes": 306603
+    }
+  },
+  {
+    "@type": "TransferProcess",
+    "@id": "transfer-fhir-condition-list-052",
+    "state": "COMPLETED",
+    "stateTimestamp": 1774031700000,
+    "type": "CONSUMER",
+    "assetId": "fhir-condition-list",
+    "contractId": "agreement-fhir-condition-list-052",
+    "transferType": "HttpData-PULL",
+    "counterPartyId": "did:web:lmc.nl:clinic",
+    "counterPartyAddress": "https://lmc.nl/dsp/2025-1",
+    "dataPayload": {
+      "resourceType": "Bundle",
+      "type": "searchset",
+      "total": 216,
+      "containedResourceTypes": ["Condition"],
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://lmc.nl/fhir/Condition?_count=216"
+        }
+      ],
+      "provider": "Limburg Medical Centre",
+      "transferredAt": "2026-03-20T19:35:00Z",
+      "sizeBytes": 647136
+    }
+  },
+  {
+    "@type": "TransferProcess",
+    "@id": "transfer-fhir-diagnostic-report-061",
+    "state": "COMPLETED",
+    "stateTimestamp": 1774031460000,
+    "type": "CONSUMER",
+    "assetId": "fhir-diagnostic-report",
+    "contractId": "agreement-fhir-diagnostic-report-061",
+    "transferType": "HttpData-PULL",
+    "counterPartyId": "did:web:lmc.nl:clinic",
+    "counterPartyAddress": "https://lmc.nl/dsp/2025-1",
+    "dataPayload": {
+      "resourceType": "Bundle",
+      "type": "searchset",
+      "total": 55,
+      "containedResourceTypes": ["DiagnosticReport", "Observation", "Specimen"],
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://lmc.nl/fhir/DiagnosticReport?_count=55"
+        }
+      ],
+      "provider": "Limburg Medical Centre",
+      "transferredAt": "2026-03-20T19:31:00Z",
+      "sizeBytes": 159115
+    }
+  },
+  {
+    "@type": "TransferProcess",
+    "@id": "transfer-fhir-allergy-intolerance-038",
+    "state": "COMPLETED",
+    "stateTimestamp": 1774030740000,
+    "type": "CONSUMER",
+    "assetId": "fhir-allergy-intolerance",
+    "contractId": "agreement-fhir-allergy-intolerance-038",
+    "transferType": "HttpData-PULL",
+    "counterPartyId": "did:web:alpha-klinik.de:participant",
+    "counterPartyAddress": "https://alpha-klinik.de/dsp/2025-1",
+    "dataPayload": {
+      "resourceType": "Bundle",
+      "type": "searchset",
+      "total": 27,
+      "containedResourceTypes": ["AllergyIntolerance"],
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://alpha-klinik.de/fhir/AllergyIntolerance?_count=27"
+        }
+      ],
+      "provider": "AlphaKlinik Berlin",
+      "transferredAt": "2026-03-20T19:19:00Z",
+      "sizeBytes": 36450
+    }
+  },
+  {
+    "@type": "TransferProcess",
+    "@id": "transfer-fhir-cohort-bundle-001",
+    "state": "COMPLETED",
+    "stateTimestamp": 1774030260000,
     "type": "CONSUMER",
     "assetId": "fhir-cohort-bundle",
-    "contractId": "agreement-cohort-001",
-    "transferType": "HttpData-PULL"
+    "contractId": "agreement-fhir-cohort-bundle-001",
+    "transferType": "HttpData-PULL",
+    "counterPartyId": "did:web:lmc.nl:clinic",
+    "counterPartyAddress": "https://lmc.nl/dsp/2025-1",
+    "dataPayload": {
+      "resourceType": "Bundle",
+      "type": "searchset",
+      "total": 128,
+      "containedResourceTypes": ["Patient", "Condition", "Observation"],
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://lmc.nl/fhir/Patient?_count=128"
+        }
+      ],
+      "provider": "Limburg Medical Centre",
+      "transferredAt": "2026-03-20T19:11:00Z",
+      "sizeBytes": 309760
+    }
+  },
+  {
+    "@type": "TransferProcess",
+    "@id": "transfer-fhir-encounter-history-066",
+    "state": "COMPLETED",
+    "stateTimestamp": 1774030260000,
+    "type": "CONSUMER",
+    "assetId": "fhir-encounter-history",
+    "contractId": "agreement-fhir-encounter-history-066",
+    "transferType": "HttpData-PULL",
+    "counterPartyId": "did:web:alpha-klinik.de:participant",
+    "counterPartyAddress": "https://alpha-klinik.de/dsp/2025-1",
+    "dataPayload": {
+      "resourceType": "Bundle",
+      "type": "searchset",
+      "total": 177,
+      "containedResourceTypes": ["Encounter", "Location", "Practitioner"],
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://alpha-klinik.de/fhir/Encounter?_count=177"
+        }
+      ],
+      "provider": "AlphaKlinik Berlin",
+      "transferredAt": "2026-03-20T19:11:00Z",
+      "sizeBytes": 145494
+    }
+  },
+  {
+    "@type": "TransferProcess",
+    "@id": "transfer-fhir-immunization-record-024",
+    "state": "TERMINATED",
+    "stateTimestamp": 1774030020000,
+    "type": "CONSUMER",
+    "assetId": "fhir-immunization-record",
+    "contractId": "agreement-fhir-immunization-record-024",
+    "transferType": "HttpData-PULL",
+    "counterPartyId": "did:web:lmc.nl:clinic",
+    "counterPartyAddress": "https://lmc.nl/dsp/2025-1"
+  },
+  {
+    "@type": "TransferProcess",
+    "@id": "transfer-fhir-medication-request-084",
+    "state": "STARTED",
+    "stateTimestamp": 1774030020000,
+    "type": "CONSUMER",
+    "assetId": "fhir-medication-request",
+    "contractId": "agreement-fhir-medication-request-084",
+    "transferType": "HttpData-PULL",
+    "counterPartyId": "did:web:alpha-klinik.de:participant",
+    "counterPartyAddress": "https://alpha-klinik.de/dsp/2025-1"
+  },
+  {
+    "@type": "TransferProcess",
+    "@id": "transfer-fhir-diagnostic-report-070",
+    "state": "COMPLETED",
+    "stateTimestamp": 1774029120000,
+    "type": "CONSUMER",
+    "assetId": "fhir-diagnostic-report",
+    "contractId": "agreement-fhir-diagnostic-report-070",
+    "transferType": "HttpData-PULL",
+    "counterPartyId": "did:web:lmc.nl:clinic",
+    "counterPartyAddress": "https://lmc.nl/dsp/2025-1",
+    "dataPayload": {
+      "resourceType": "Bundle",
+      "type": "searchset",
+      "total": 71,
+      "containedResourceTypes": ["DiagnosticReport", "Observation", "Specimen"],
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://lmc.nl/fhir/DiagnosticReport?_count=71"
+        }
+      ],
+      "provider": "Limburg Medical Centre",
+      "transferredAt": "2026-03-20T18:52:00Z",
+      "sizeBytes": 279456
+    }
+  },
+  {
+    "@type": "TransferProcess",
+    "@id": "transfer-fhir-cohort-bundle-085",
+    "state": "TERMINATED",
+    "stateTimestamp": 1774028160000,
+    "type": "CONSUMER",
+    "assetId": "fhir-cohort-bundle",
+    "contractId": "agreement-fhir-cohort-bundle-085",
+    "transferType": "HttpData-PULL",
+    "counterPartyId": "did:web:lmc.nl:clinic",
+    "counterPartyAddress": "https://lmc.nl/dsp/2025-1"
+  },
+  {
+    "@type": "TransferProcess",
+    "@id": "transfer-fhir-procedure-bundle-059",
+    "state": "COMPLETED",
+    "stateTimestamp": 1774027800000,
+    "type": "CONSUMER",
+    "assetId": "fhir-procedure-bundle",
+    "contractId": "agreement-fhir-procedure-bundle-059",
+    "transferType": "HttpData-PULL",
+    "counterPartyId": "did:web:lmc.nl:clinic",
+    "counterPartyAddress": "https://lmc.nl/dsp/2025-1",
+    "dataPayload": {
+      "resourceType": "Bundle",
+      "type": "searchset",
+      "total": 146,
+      "containedResourceTypes": ["Procedure", "Encounter"],
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://lmc.nl/fhir/Procedure?_count=146"
+        }
+      ],
+      "provider": "Limburg Medical Centre",
+      "transferredAt": "2026-03-20T18:30:00Z",
+      "sizeBytes": 296672
+    }
+  },
+  {
+    "@type": "TransferProcess",
+    "@id": "transfer-fhir-procedure-bundle-005",
+    "state": "COMPLETED",
+    "stateTimestamp": 1774026600000,
+    "type": "CONSUMER",
+    "assetId": "fhir-procedure-bundle",
+    "contractId": "agreement-fhir-procedure-bundle-005",
+    "transferType": "HttpData-PULL",
+    "counterPartyId": "did:web:alpha-klinik.de:participant",
+    "counterPartyAddress": "https://alpha-klinik.de/dsp/2025-1",
+    "dataPayload": {
+      "resourceType": "Bundle",
+      "type": "searchset",
+      "total": 17,
+      "containedResourceTypes": ["Procedure", "Encounter"],
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://alpha-klinik.de/fhir/Procedure?_count=17"
+        }
+      ],
+      "provider": "AlphaKlinik Berlin",
+      "transferredAt": "2026-03-20T18:10:00Z",
+      "sizeBytes": 40392
+    }
+  },
+  {
+    "@type": "TransferProcess",
+    "@id": "transfer-fhir-allergy-intolerance-080",
+    "state": "COMPLETED",
+    "stateTimestamp": 1774026360000,
+    "type": "CONSUMER",
+    "assetId": "fhir-allergy-intolerance",
+    "contractId": "agreement-fhir-allergy-intolerance-080",
+    "transferType": "HttpData-PULL",
+    "counterPartyId": "did:web:alpha-klinik.de:participant",
+    "counterPartyAddress": "https://alpha-klinik.de/dsp/2025-1",
+    "dataPayload": {
+      "resourceType": "Bundle",
+      "type": "searchset",
+      "total": 145,
+      "containedResourceTypes": ["AllergyIntolerance"],
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://alpha-klinik.de/fhir/AllergyIntolerance?_count=145"
+        }
+      ],
+      "provider": "AlphaKlinik Berlin",
+      "transferredAt": "2026-03-20T18:06:00Z",
+      "sizeBytes": 509675
+    }
+  },
+  {
+    "@type": "TransferProcess",
+    "@id": "transfer-fhir-encounter-history-089",
+    "state": "COMPLETED",
+    "stateTimestamp": 1774026360000,
+    "type": "CONSUMER",
+    "assetId": "fhir-encounter-history",
+    "contractId": "agreement-fhir-encounter-history-089",
+    "transferType": "HttpData-PULL",
+    "counterPartyId": "did:web:alpha-klinik.de:participant",
+    "counterPartyAddress": "https://alpha-klinik.de/dsp/2025-1",
+    "dataPayload": {
+      "resourceType": "Bundle",
+      "type": "searchset",
+      "total": 177,
+      "containedResourceTypes": ["Encounter", "Location", "Practitioner"],
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://alpha-klinik.de/fhir/Encounter?_count=177"
+        }
+      ],
+      "provider": "AlphaKlinik Berlin",
+      "transferredAt": "2026-03-20T18:06:00Z",
+      "sizeBytes": 596313
+    }
+  },
+  {
+    "@type": "TransferProcess",
+    "@id": "transfer-fhir-patient-everything-088",
+    "state": "COMPLETED",
+    "stateTimestamp": 1774025520000,
+    "type": "CONSUMER",
+    "assetId": "fhir-patient-everything",
+    "contractId": "agreement-fhir-patient-everything-088",
+    "transferType": "HttpData-PULL",
+    "counterPartyId": "did:web:lmc.nl:clinic",
+    "counterPartyAddress": "https://lmc.nl/dsp/2025-1",
+    "dataPayload": {
+      "resourceType": "Bundle",
+      "type": "searchset",
+      "total": 7,
+      "containedResourceTypes": [
+        "Patient",
+        "Encounter",
+        "Condition",
+        "Observation",
+        "MedicationRequest",
+        "Procedure",
+        "AllergyIntolerance",
+        "Immunization",
+        "DiagnosticReport"
+      ],
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://lmc.nl/fhir/Patient?_count=7"
+        }
+      ],
+      "provider": "Limburg Medical Centre",
+      "transferredAt": "2026-03-20T17:52:00Z",
+      "sizeBytes": 14539
+    }
+  },
+  {
+    "@type": "TransferProcess",
+    "@id": "transfer-fhir-observation-bundle-090",
+    "state": "COMPLETED",
+    "stateTimestamp": 1774024740000,
+    "type": "CONSUMER",
+    "assetId": "fhir-observation-bundle",
+    "contractId": "agreement-fhir-observation-bundle-090",
+    "transferType": "HttpData-PULL",
+    "counterPartyId": "did:web:lmc.nl:clinic",
+    "counterPartyAddress": "https://lmc.nl/dsp/2025-1",
+    "dataPayload": {
+      "resourceType": "Bundle",
+      "type": "searchset",
+      "total": 201,
+      "containedResourceTypes": ["Observation"],
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://lmc.nl/fhir/Observation?_count=201"
+        }
+      ],
+      "provider": "Limburg Medical Centre",
+      "transferredAt": "2026-03-20T17:39:00Z",
+      "sizeBytes": 194568
+    }
+  },
+  {
+    "@type": "TransferProcess",
+    "@id": "transfer-fhir-patient-everything-086",
+    "state": "COMPLETED",
+    "stateTimestamp": 1774024620000,
+    "type": "CONSUMER",
+    "assetId": "fhir-patient-everything",
+    "contractId": "agreement-fhir-patient-everything-086",
+    "transferType": "HttpData-PULL",
+    "counterPartyId": "did:web:lmc.nl:clinic",
+    "counterPartyAddress": "https://lmc.nl/dsp/2025-1",
+    "dataPayload": {
+      "resourceType": "Bundle",
+      "type": "searchset",
+      "total": 243,
+      "containedResourceTypes": [
+        "Patient",
+        "Encounter",
+        "Condition",
+        "Observation",
+        "MedicationRequest",
+        "Procedure",
+        "AllergyIntolerance",
+        "Immunization",
+        "DiagnosticReport"
+      ],
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://lmc.nl/fhir/Patient?_count=243"
+        }
+      ],
+      "provider": "Limburg Medical Centre",
+      "transferredAt": "2026-03-20T17:37:00Z",
+      "sizeBytes": 411156
+    }
+  },
+  {
+    "@type": "TransferProcess",
+    "@id": "transfer-fhir-care-plan-043",
+    "state": "COMPLETED",
+    "stateTimestamp": 1774024440000,
+    "type": "CONSUMER",
+    "assetId": "fhir-care-plan",
+    "contractId": "agreement-fhir-care-plan-043",
+    "transferType": "HttpData-PULL",
+    "counterPartyId": "did:web:alpha-klinik.de:participant",
+    "counterPartyAddress": "https://alpha-klinik.de/dsp/2025-1",
+    "dataPayload": {
+      "resourceType": "Bundle",
+      "type": "searchset",
+      "total": 3,
+      "containedResourceTypes": ["CarePlan", "Goal", "Condition"],
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://alpha-klinik.de/fhir/CarePlan?_count=3"
+        }
+      ],
+      "provider": "AlphaKlinik Berlin",
+      "transferredAt": "2026-03-20T17:34:00Z",
+      "sizeBytes": 3774
+    }
+  },
+  {
+    "@type": "TransferProcess",
+    "@id": "transfer-fhir-cohort-bundle-099",
+    "state": "COMPLETED",
+    "stateTimestamp": 1774024080000,
+    "type": "CONSUMER",
+    "assetId": "fhir-cohort-bundle",
+    "contractId": "agreement-fhir-cohort-bundle-099",
+    "transferType": "HttpData-PULL",
+    "counterPartyId": "did:web:lmc.nl:clinic",
+    "counterPartyAddress": "https://lmc.nl/dsp/2025-1",
+    "dataPayload": {
+      "resourceType": "Bundle",
+      "type": "searchset",
+      "total": 195,
+      "containedResourceTypes": ["Patient", "Condition", "Observation"],
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://lmc.nl/fhir/Patient?_count=195"
+        }
+      ],
+      "provider": "Limburg Medical Centre",
+      "transferredAt": "2026-03-20T17:28:00Z",
+      "sizeBytes": 347880
+    }
+  },
+  {
+    "@type": "TransferProcess",
+    "@id": "transfer-fhir-medication-request-058",
+    "state": "COMPLETED",
+    "stateTimestamp": 1774024020000,
+    "type": "CONSUMER",
+    "assetId": "fhir-medication-request",
+    "contractId": "agreement-fhir-medication-request-058",
+    "transferType": "HttpData-PULL",
+    "counterPartyId": "did:web:alpha-klinik.de:participant",
+    "counterPartyAddress": "https://alpha-klinik.de/dsp/2025-1",
+    "dataPayload": {
+      "resourceType": "Bundle",
+      "type": "searchset",
+      "total": 33,
+      "containedResourceTypes": ["MedicationRequest", "Medication"],
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://alpha-klinik.de/fhir/MedicationRequest?_count=33"
+        }
+      ],
+      "provider": "AlphaKlinik Berlin",
+      "transferredAt": "2026-03-20T17:27:00Z",
+      "sizeBytes": 52305
+    }
+  },
+  {
+    "@type": "TransferProcess",
+    "@id": "transfer-fhir-allergy-intolerance-006",
+    "state": "COMPLETED",
+    "stateTimestamp": 1774023960000,
+    "type": "CONSUMER",
+    "assetId": "fhir-allergy-intolerance",
+    "contractId": "agreement-fhir-allergy-intolerance-006",
+    "transferType": "HttpData-PULL",
+    "counterPartyId": "did:web:alpha-klinik.de:participant",
+    "counterPartyAddress": "https://alpha-klinik.de/dsp/2025-1",
+    "dataPayload": {
+      "resourceType": "Bundle",
+      "type": "searchset",
+      "total": 221,
+      "containedResourceTypes": ["AllergyIntolerance"],
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://alpha-klinik.de/fhir/AllergyIntolerance?_count=221"
+        }
+      ],
+      "provider": "AlphaKlinik Berlin",
+      "transferredAt": "2026-03-20T17:26:00Z",
+      "sizeBytes": 187187
+    }
+  },
+  {
+    "@type": "TransferProcess",
+    "@id": "transfer-fhir-condition-list-037",
+    "state": "TERMINATED",
+    "stateTimestamp": 1774023360000,
+    "type": "CONSUMER",
+    "assetId": "fhir-condition-list",
+    "contractId": "agreement-fhir-condition-list-037",
+    "transferType": "HttpData-PULL",
+    "counterPartyId": "did:web:alpha-klinik.de:participant",
+    "counterPartyAddress": "https://alpha-klinik.de/dsp/2025-1"
+  },
+  {
+    "@type": "TransferProcess",
+    "@id": "transfer-fhir-condition-list-018",
+    "state": "REQUESTED",
+    "stateTimestamp": 1774023120000,
+    "type": "CONSUMER",
+    "assetId": "fhir-condition-list",
+    "contractId": "agreement-fhir-condition-list-018",
+    "transferType": "HttpData-PULL",
+    "counterPartyId": "did:web:lmc.nl:clinic",
+    "counterPartyAddress": "https://lmc.nl/dsp/2025-1"
+  },
+  {
+    "@type": "TransferProcess",
+    "@id": "transfer-fhir-condition-list-077",
+    "state": "COMPLETED",
+    "stateTimestamp": 1774023060000,
+    "type": "CONSUMER",
+    "assetId": "fhir-condition-list",
+    "contractId": "agreement-fhir-condition-list-077",
+    "transferType": "HttpData-PULL",
+    "counterPartyId": "did:web:lmc.nl:clinic",
+    "counterPartyAddress": "https://lmc.nl/dsp/2025-1",
+    "dataPayload": {
+      "resourceType": "Bundle",
+      "type": "searchset",
+      "total": 192,
+      "containedResourceTypes": ["Condition"],
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://lmc.nl/fhir/Condition?_count=192"
+        }
+      ],
+      "provider": "Limburg Medical Centre",
+      "transferredAt": "2026-03-20T17:11:00Z",
+      "sizeBytes": 731328
+    }
+  },
+  {
+    "@type": "TransferProcess",
+    "@id": "transfer-fhir-cohort-bundle-022",
+    "state": "COMPLETED",
+    "stateTimestamp": 1774022940000,
+    "type": "CONSUMER",
+    "assetId": "fhir-cohort-bundle",
+    "contractId": "agreement-fhir-cohort-bundle-022",
+    "transferType": "HttpData-PULL",
+    "counterPartyId": "did:web:lmc.nl:clinic",
+    "counterPartyAddress": "https://lmc.nl/dsp/2025-1",
+    "dataPayload": {
+      "resourceType": "Bundle",
+      "type": "searchset",
+      "total": 115,
+      "containedResourceTypes": ["Patient", "Condition", "Observation"],
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://lmc.nl/fhir/Patient?_count=115"
+        }
+      ],
+      "provider": "Limburg Medical Centre",
+      "transferredAt": "2026-03-20T17:09:00Z",
+      "sizeBytes": 158010
+    }
+  },
+  {
+    "@type": "TransferProcess",
+    "@id": "transfer-fhir-observation-bundle-012",
+    "state": "COMPLETED",
+    "stateTimestamp": 1774022700000,
+    "type": "CONSUMER",
+    "assetId": "fhir-observation-bundle",
+    "contractId": "agreement-fhir-observation-bundle-012",
+    "transferType": "HttpData-PULL",
+    "counterPartyId": "did:web:lmc.nl:clinic",
+    "counterPartyAddress": "https://lmc.nl/dsp/2025-1",
+    "dataPayload": {
+      "resourceType": "Bundle",
+      "type": "searchset",
+      "total": 197,
+      "containedResourceTypes": ["Observation"],
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://lmc.nl/fhir/Observation?_count=197"
+        }
+      ],
+      "provider": "Limburg Medical Centre",
+      "transferredAt": "2026-03-20T17:05:00Z",
+      "sizeBytes": 259055
+    }
+  },
+  {
+    "@type": "TransferProcess",
+    "@id": "transfer-fhir-allergy-intolerance-098",
+    "state": "COMPLETED",
+    "stateTimestamp": 1774021740000,
+    "type": "CONSUMER",
+    "assetId": "fhir-allergy-intolerance",
+    "contractId": "agreement-fhir-allergy-intolerance-098",
+    "transferType": "HttpData-PULL",
+    "counterPartyId": "did:web:alpha-klinik.de:participant",
+    "counterPartyAddress": "https://alpha-klinik.de/dsp/2025-1",
+    "dataPayload": {
+      "resourceType": "Bundle",
+      "type": "searchset",
+      "total": 243,
+      "containedResourceTypes": ["AllergyIntolerance"],
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://alpha-klinik.de/fhir/AllergyIntolerance?_count=243"
+        }
+      ],
+      "provider": "AlphaKlinik Berlin",
+      "transferredAt": "2026-03-20T16:49:00Z",
+      "sizeBytes": 384426
+    }
+  },
+  {
+    "@type": "TransferProcess",
+    "@id": "transfer-fhir-immunization-record-030",
+    "state": "COMPLETED",
+    "stateTimestamp": 1774021200000,
+    "type": "CONSUMER",
+    "assetId": "fhir-immunization-record",
+    "contractId": "agreement-fhir-immunization-record-030",
+    "transferType": "HttpData-PULL",
+    "counterPartyId": "did:web:lmc.nl:clinic",
+    "counterPartyAddress": "https://lmc.nl/dsp/2025-1",
+    "dataPayload": {
+      "resourceType": "Bundle",
+      "type": "searchset",
+      "total": 21,
+      "containedResourceTypes": ["Immunization", "Patient"],
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://lmc.nl/fhir/Immunization?_count=21"
+        }
+      ],
+      "provider": "Limburg Medical Centre",
+      "transferredAt": "2026-03-20T16:40:00Z",
+      "sizeBytes": 32781
+    }
+  },
+  {
+    "@type": "TransferProcess",
+    "@id": "transfer-fhir-diagnostic-report-008",
+    "state": "COMPLETED",
+    "stateTimestamp": 1774020720000,
+    "type": "CONSUMER",
+    "assetId": "fhir-diagnostic-report",
+    "contractId": "agreement-fhir-diagnostic-report-008",
+    "transferType": "HttpData-PULL",
+    "counterPartyId": "did:web:alpha-klinik.de:participant",
+    "counterPartyAddress": "https://alpha-klinik.de/dsp/2025-1",
+    "dataPayload": {
+      "resourceType": "Bundle",
+      "type": "searchset",
+      "total": 196,
+      "containedResourceTypes": ["DiagnosticReport", "Observation", "Specimen"],
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://alpha-klinik.de/fhir/DiagnosticReport?_count=196"
+        }
+      ],
+      "provider": "AlphaKlinik Berlin",
+      "transferredAt": "2026-03-20T16:32:00Z",
+      "sizeBytes": 300076
+    }
+  },
+  {
+    "@type": "TransferProcess",
+    "@id": "transfer-fhir-immunization-record-010",
+    "state": "COMPLETED",
+    "stateTimestamp": 1774020000000,
+    "type": "CONSUMER",
+    "assetId": "fhir-immunization-record",
+    "contractId": "agreement-fhir-immunization-record-010",
+    "transferType": "HttpData-PULL",
+    "counterPartyId": "did:web:lmc.nl:clinic",
+    "counterPartyAddress": "https://lmc.nl/dsp/2025-1",
+    "dataPayload": {
+      "resourceType": "Bundle",
+      "type": "searchset",
+      "total": 5,
+      "containedResourceTypes": ["Immunization", "Patient"],
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://lmc.nl/fhir/Immunization?_count=5"
+        }
+      ],
+      "provider": "Limburg Medical Centre",
+      "transferredAt": "2026-03-20T16:20:00Z",
+      "sizeBytes": 6290
+    }
+  },
+  {
+    "@type": "TransferProcess",
+    "@id": "transfer-fhir-patient-search-064",
+    "state": "COMPLETED",
+    "stateTimestamp": 1774019160000,
+    "type": "CONSUMER",
+    "assetId": "fhir-patient-search",
+    "contractId": "agreement-fhir-patient-search-064",
+    "transferType": "HttpData-PULL",
+    "counterPartyId": "did:web:alpha-klinik.de:participant",
+    "counterPartyAddress": "https://alpha-klinik.de/dsp/2025-1",
+    "dataPayload": {
+      "resourceType": "Bundle",
+      "type": "searchset",
+      "total": 157,
+      "containedResourceTypes": ["Patient"],
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://alpha-klinik.de/fhir/Patient?_count=157"
+        }
+      ],
+      "provider": "AlphaKlinik Berlin",
+      "transferredAt": "2026-03-20T16:06:00Z",
+      "sizeBytes": 619679
+    }
+  },
+  {
+    "@type": "TransferProcess",
+    "@id": "transfer-fhir-medication-request-020",
+    "state": "COMPLETED",
+    "stateTimestamp": 1774018680000,
+    "type": "CONSUMER",
+    "assetId": "fhir-medication-request",
+    "contractId": "agreement-fhir-medication-request-020",
+    "transferType": "HttpData-PULL",
+    "counterPartyId": "did:web:alpha-klinik.de:participant",
+    "counterPartyAddress": "https://alpha-klinik.de/dsp/2025-1",
+    "dataPayload": {
+      "resourceType": "Bundle",
+      "type": "searchset",
+      "total": 222,
+      "containedResourceTypes": ["MedicationRequest", "Medication"],
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://alpha-klinik.de/fhir/MedicationRequest?_count=222"
+        }
+      ],
+      "provider": "AlphaKlinik Berlin",
+      "transferredAt": "2026-03-20T15:58:00Z",
+      "sizeBytes": 840492
+    }
+  },
+  {
+    "@type": "TransferProcess",
+    "@id": "transfer-fhir-medication-request-079",
+    "state": "STARTED",
+    "stateTimestamp": 1774018680000,
+    "type": "CONSUMER",
+    "assetId": "fhir-medication-request",
+    "contractId": "agreement-fhir-medication-request-079",
+    "transferType": "HttpData-PULL",
+    "counterPartyId": "did:web:alpha-klinik.de:participant",
+    "counterPartyAddress": "https://alpha-klinik.de/dsp/2025-1"
+  },
+  {
+    "@type": "TransferProcess",
+    "@id": "transfer-fhir-observation-bundle-081",
+    "state": "COMPLETED",
+    "stateTimestamp": 1774018320000,
+    "type": "CONSUMER",
+    "assetId": "fhir-observation-bundle",
+    "contractId": "agreement-fhir-observation-bundle-081",
+    "transferType": "HttpData-PULL",
+    "counterPartyId": "did:web:lmc.nl:clinic",
+    "counterPartyAddress": "https://lmc.nl/dsp/2025-1",
+    "dataPayload": {
+      "resourceType": "Bundle",
+      "type": "searchset",
+      "total": 47,
+      "containedResourceTypes": ["Observation"],
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://lmc.nl/fhir/Observation?_count=47"
+        }
+      ],
+      "provider": "Limburg Medical Centre",
+      "transferredAt": "2026-03-20T15:52:00Z",
+      "sizeBytes": 47235
+    }
+  },
+  {
+    "@type": "TransferProcess",
+    "@id": "transfer-fhir-immunization-record-068",
+    "state": "COMPLETED",
+    "stateTimestamp": 1774018020000,
+    "type": "CONSUMER",
+    "assetId": "fhir-immunization-record",
+    "contractId": "agreement-fhir-immunization-record-068",
+    "transferType": "HttpData-PULL",
+    "counterPartyId": "did:web:lmc.nl:clinic",
+    "counterPartyAddress": "https://lmc.nl/dsp/2025-1",
+    "dataPayload": {
+      "resourceType": "Bundle",
+      "type": "searchset",
+      "total": 35,
+      "containedResourceTypes": ["Immunization", "Patient"],
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://lmc.nl/fhir/Immunization?_count=35"
+        }
+      ],
+      "provider": "Limburg Medical Centre",
+      "transferredAt": "2026-03-20T15:47:00Z",
+      "sizeBytes": 94605
+    }
+  },
+  {
+    "@type": "TransferProcess",
+    "@id": "transfer-fhir-encounter-history-082",
+    "state": "COMPLETED",
+    "stateTimestamp": 1774017900000,
+    "type": "CONSUMER",
+    "assetId": "fhir-encounter-history",
+    "contractId": "agreement-fhir-encounter-history-082",
+    "transferType": "HttpData-PULL",
+    "counterPartyId": "did:web:lmc.nl:clinic",
+    "counterPartyAddress": "https://lmc.nl/dsp/2025-1",
+    "dataPayload": {
+      "resourceType": "Bundle",
+      "type": "searchset",
+      "total": 84,
+      "containedResourceTypes": ["Encounter", "Location", "Practitioner"],
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://lmc.nl/fhir/Encounter?_count=84"
+        }
+      ],
+      "provider": "Limburg Medical Centre",
+      "transferredAt": "2026-03-20T15:45:00Z",
+      "sizeBytes": 183288
+    }
+  },
+  {
+    "@type": "TransferProcess",
+    "@id": "transfer-fhir-procedure-bundle-071",
+    "state": "COMPLETED",
+    "stateTimestamp": 1774017000000,
+    "type": "CONSUMER",
+    "assetId": "fhir-procedure-bundle",
+    "contractId": "agreement-fhir-procedure-bundle-071",
+    "transferType": "HttpData-PULL",
+    "counterPartyId": "did:web:alpha-klinik.de:participant",
+    "counterPartyAddress": "https://alpha-klinik.de/dsp/2025-1",
+    "dataPayload": {
+      "resourceType": "Bundle",
+      "type": "searchset",
+      "total": 20,
+      "containedResourceTypes": ["Procedure", "Encounter"],
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://alpha-klinik.de/fhir/Procedure?_count=20"
+        }
+      ],
+      "provider": "AlphaKlinik Berlin",
+      "transferredAt": "2026-03-20T15:30:00Z",
+      "sizeBytes": 74440
+    }
+  },
+  {
+    "@type": "TransferProcess",
+    "@id": "transfer-fhir-diagnostic-report-078",
+    "state": "COMPLETED",
+    "stateTimestamp": 1774016760000,
+    "type": "CONSUMER",
+    "assetId": "fhir-diagnostic-report",
+    "contractId": "agreement-fhir-diagnostic-report-078",
+    "transferType": "HttpData-PULL",
+    "counterPartyId": "did:web:alpha-klinik.de:participant",
+    "counterPartyAddress": "https://alpha-klinik.de/dsp/2025-1",
+    "dataPayload": {
+      "resourceType": "Bundle",
+      "type": "searchset",
+      "total": 125,
+      "containedResourceTypes": ["DiagnosticReport", "Observation", "Specimen"],
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://alpha-klinik.de/fhir/DiagnosticReport?_count=125"
+        }
+      ],
+      "provider": "AlphaKlinik Berlin",
+      "transferredAt": "2026-03-20T15:26:00Z",
+      "sizeBytes": 114750
+    }
+  },
+  {
+    "@type": "TransferProcess",
+    "@id": "transfer-fhir-allergy-intolerance-094",
+    "state": "COMPLETED",
+    "stateTimestamp": 1774016760000,
+    "type": "CONSUMER",
+    "assetId": "fhir-allergy-intolerance",
+    "contractId": "agreement-fhir-allergy-intolerance-094",
+    "transferType": "HttpData-PULL",
+    "counterPartyId": "did:web:alpha-klinik.de:participant",
+    "counterPartyAddress": "https://alpha-klinik.de/dsp/2025-1",
+    "dataPayload": {
+      "resourceType": "Bundle",
+      "type": "searchset",
+      "total": 212,
+      "containedResourceTypes": ["AllergyIntolerance"],
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://alpha-klinik.de/fhir/AllergyIntolerance?_count=212"
+        }
+      ],
+      "provider": "AlphaKlinik Berlin",
+      "transferredAt": "2026-03-20T15:26:00Z",
+      "sizeBytes": 804328
+    }
+  },
+  {
+    "@type": "TransferProcess",
+    "@id": "transfer-fhir-patient-search-056",
+    "state": "COMPLETED",
+    "stateTimestamp": 1774016460000,
+    "type": "CONSUMER",
+    "assetId": "fhir-patient-search",
+    "contractId": "agreement-fhir-patient-search-056",
+    "transferType": "HttpData-PULL",
+    "counterPartyId": "did:web:alpha-klinik.de:participant",
+    "counterPartyAddress": "https://alpha-klinik.de/dsp/2025-1",
+    "dataPayload": {
+      "resourceType": "Bundle",
+      "type": "searchset",
+      "total": 18,
+      "containedResourceTypes": ["Patient"],
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://alpha-klinik.de/fhir/Patient?_count=18"
+        }
+      ],
+      "provider": "AlphaKlinik Berlin",
+      "transferredAt": "2026-03-20T15:21:00Z",
+      "sizeBytes": 63360
+    }
+  },
+  {
+    "@type": "TransferProcess",
+    "@id": "transfer-fhir-condition-list-027",
+    "state": "STARTED",
+    "stateTimestamp": 1774015980000,
+    "type": "CONSUMER",
+    "assetId": "fhir-condition-list",
+    "contractId": "agreement-fhir-condition-list-027",
+    "transferType": "HttpData-PULL",
+    "counterPartyId": "did:web:lmc.nl:clinic",
+    "counterPartyAddress": "https://lmc.nl/dsp/2025-1"
+  },
+  {
+    "@type": "TransferProcess",
+    "@id": "transfer-fhir-encounter-history-075",
+    "state": "COMPLETED",
+    "stateTimestamp": 1774015800000,
+    "type": "CONSUMER",
+    "assetId": "fhir-encounter-history",
+    "contractId": "agreement-fhir-encounter-history-075",
+    "transferType": "HttpData-PULL",
+    "counterPartyId": "did:web:alpha-klinik.de:participant",
+    "counterPartyAddress": "https://alpha-klinik.de/dsp/2025-1",
+    "dataPayload": {
+      "resourceType": "Bundle",
+      "type": "searchset",
+      "total": 100,
+      "containedResourceTypes": ["Encounter", "Location", "Practitioner"],
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://alpha-klinik.de/fhir/Encounter?_count=100"
+        }
+      ],
+      "provider": "AlphaKlinik Berlin",
+      "transferredAt": "2026-03-20T15:10:00Z",
+      "sizeBytes": 395300
+    }
+  },
+  {
+    "@type": "TransferProcess",
+    "@id": "transfer-fhir-allergy-intolerance-032",
+    "state": "COMPLETED",
+    "stateTimestamp": 1774015740000,
+    "type": "CONSUMER",
+    "assetId": "fhir-allergy-intolerance",
+    "contractId": "agreement-fhir-allergy-intolerance-032",
+    "transferType": "HttpData-PULL",
+    "counterPartyId": "did:web:alpha-klinik.de:participant",
+    "counterPartyAddress": "https://alpha-klinik.de/dsp/2025-1",
+    "dataPayload": {
+      "resourceType": "Bundle",
+      "type": "searchset",
+      "total": 169,
+      "containedResourceTypes": ["AllergyIntolerance"],
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://alpha-klinik.de/fhir/AllergyIntolerance?_count=169"
+        }
+      ],
+      "provider": "AlphaKlinik Berlin",
+      "transferredAt": "2026-03-20T15:09:00Z",
+      "sizeBytes": 539110
+    }
+  },
+  {
+    "@type": "TransferProcess",
+    "@id": "transfer-fhir-patient-search-048",
+    "state": "COMPLETED",
+    "stateTimestamp": 1774015260000,
+    "type": "CONSUMER",
+    "assetId": "fhir-patient-search",
+    "contractId": "agreement-fhir-patient-search-048",
+    "transferType": "HttpData-PULL",
+    "counterPartyId": "did:web:alpha-klinik.de:participant",
+    "counterPartyAddress": "https://alpha-klinik.de/dsp/2025-1",
+    "dataPayload": {
+      "resourceType": "Bundle",
+      "type": "searchset",
+      "total": 206,
+      "containedResourceTypes": ["Patient"],
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://alpha-klinik.de/fhir/Patient?_count=206"
+        }
+      ],
+      "provider": "AlphaKlinik Berlin",
+      "transferredAt": "2026-03-20T15:01:00Z",
+      "sizeBytes": 729858
+    }
+  },
+  {
+    "@type": "TransferProcess",
+    "@id": "transfer-fhir-observation-bundle-025",
+    "state": "STARTED",
+    "stateTimestamp": 1774014960000,
+    "type": "CONSUMER",
+    "assetId": "fhir-observation-bundle",
+    "contractId": "agreement-fhir-observation-bundle-025",
+    "transferType": "HttpData-PULL",
+    "counterPartyId": "did:web:alpha-klinik.de:participant",
+    "counterPartyAddress": "https://alpha-klinik.de/dsp/2025-1"
+  },
+  {
+    "@type": "TransferProcess",
+    "@id": "transfer-fhir-allergy-intolerance-031",
+    "state": "COMPLETED",
+    "stateTimestamp": 1774014780000,
+    "type": "CONSUMER",
+    "assetId": "fhir-allergy-intolerance",
+    "contractId": "agreement-fhir-allergy-intolerance-031",
+    "transferType": "HttpData-PULL",
+    "counterPartyId": "did:web:alpha-klinik.de:participant",
+    "counterPartyAddress": "https://alpha-klinik.de/dsp/2025-1",
+    "dataPayload": {
+      "resourceType": "Bundle",
+      "type": "searchset",
+      "total": 31,
+      "containedResourceTypes": ["AllergyIntolerance"],
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://alpha-klinik.de/fhir/AllergyIntolerance?_count=31"
+        }
+      ],
+      "provider": "AlphaKlinik Berlin",
+      "transferredAt": "2026-03-20T14:53:00Z",
+      "sizeBytes": 97123
+    }
+  },
+  {
+    "@type": "TransferProcess",
+    "@id": "transfer-fhir-procedure-bundle-021",
+    "state": "COMPLETED",
+    "stateTimestamp": 1774014720000,
+    "type": "CONSUMER",
+    "assetId": "fhir-procedure-bundle",
+    "contractId": "agreement-fhir-procedure-bundle-021",
+    "transferType": "HttpData-PULL",
+    "counterPartyId": "did:web:alpha-klinik.de:participant",
+    "counterPartyAddress": "https://alpha-klinik.de/dsp/2025-1",
+    "dataPayload": {
+      "resourceType": "Bundle",
+      "type": "searchset",
+      "total": 187,
+      "containedResourceTypes": ["Procedure", "Encounter"],
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://alpha-klinik.de/fhir/Procedure?_count=187"
+        }
+      ],
+      "provider": "AlphaKlinik Berlin",
+      "transferredAt": "2026-03-20T14:52:00Z",
+      "sizeBytes": 409343
+    }
+  },
+  {
+    "@type": "TransferProcess",
+    "@id": "transfer-fhir-cohort-bundle-014",
+    "state": "COMPLETED",
+    "stateTimestamp": 1774014480000,
+    "type": "CONSUMER",
+    "assetId": "fhir-cohort-bundle",
+    "contractId": "agreement-fhir-cohort-bundle-014",
+    "transferType": "HttpData-PULL",
+    "counterPartyId": "did:web:lmc.nl:clinic",
+    "counterPartyAddress": "https://lmc.nl/dsp/2025-1",
+    "dataPayload": {
+      "resourceType": "Bundle",
+      "type": "searchset",
+      "total": 172,
+      "containedResourceTypes": ["Patient", "Condition", "Observation"],
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://lmc.nl/fhir/Patient?_count=172"
+        }
+      ],
+      "provider": "Limburg Medical Centre",
+      "transferredAt": "2026-03-20T14:48:00Z",
+      "sizeBytes": 595292
+    }
+  },
+  {
+    "@type": "TransferProcess",
+    "@id": "transfer-fhir-patient-everything-073",
+    "state": "COMPLETED",
+    "stateTimestamp": 1774013520000,
+    "type": "CONSUMER",
+    "assetId": "fhir-patient-everything",
+    "contractId": "agreement-fhir-patient-everything-073",
+    "transferType": "HttpData-PULL",
+    "counterPartyId": "did:web:lmc.nl:clinic",
+    "counterPartyAddress": "https://lmc.nl/dsp/2025-1",
+    "dataPayload": {
+      "resourceType": "Bundle",
+      "type": "searchset",
+      "total": 178,
+      "containedResourceTypes": [
+        "Patient",
+        "Encounter",
+        "Condition",
+        "Observation",
+        "MedicationRequest",
+        "Procedure",
+        "AllergyIntolerance",
+        "Immunization",
+        "DiagnosticReport"
+      ],
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://lmc.nl/fhir/Patient?_count=178"
+        }
+      ],
+      "provider": "Limburg Medical Centre",
+      "transferredAt": "2026-03-20T14:32:00Z",
+      "sizeBytes": 253650
+    }
+  },
+  {
+    "@type": "TransferProcess",
+    "@id": "transfer-fhir-condition-list-049",
+    "state": "COMPLETED",
+    "stateTimestamp": 1774013460000,
+    "type": "CONSUMER",
+    "assetId": "fhir-condition-list",
+    "contractId": "agreement-fhir-condition-list-049",
+    "transferType": "HttpData-PULL",
+    "counterPartyId": "did:web:alpha-klinik.de:participant",
+    "counterPartyAddress": "https://alpha-klinik.de/dsp/2025-1",
+    "dataPayload": {
+      "resourceType": "Bundle",
+      "type": "searchset",
+      "total": 224,
+      "containedResourceTypes": ["Condition"],
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://alpha-klinik.de/fhir/Condition?_count=224"
+        }
+      ],
+      "provider": "AlphaKlinik Berlin",
+      "transferredAt": "2026-03-20T14:31:00Z",
+      "sizeBytes": 214592
+    }
+  },
+  {
+    "@type": "TransferProcess",
+    "@id": "transfer-fhir-care-plan-044",
+    "state": "COMPLETED",
+    "stateTimestamp": 1774012680000,
+    "type": "CONSUMER",
+    "assetId": "fhir-care-plan",
+    "contractId": "agreement-fhir-care-plan-044",
+    "transferType": "HttpData-PULL",
+    "counterPartyId": "did:web:alpha-klinik.de:participant",
+    "counterPartyAddress": "https://alpha-klinik.de/dsp/2025-1",
+    "dataPayload": {
+      "resourceType": "Bundle",
+      "type": "searchset",
+      "total": 150,
+      "containedResourceTypes": ["CarePlan", "Goal", "Condition"],
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://alpha-klinik.de/fhir/CarePlan?_count=150"
+        }
+      ],
+      "provider": "AlphaKlinik Berlin",
+      "transferredAt": "2026-03-20T14:18:00Z",
+      "sizeBytes": 459450
+    }
+  },
+  {
+    "@type": "TransferProcess",
+    "@id": "transfer-fhir-care-plan-003",
+    "state": "REQUESTED",
+    "stateTimestamp": 1774012200000,
+    "type": "CONSUMER",
+    "assetId": "fhir-care-plan",
+    "contractId": "agreement-fhir-care-plan-003",
+    "transferType": "HttpData-PULL",
+    "counterPartyId": "did:web:alpha-klinik.de:participant",
+    "counterPartyAddress": "https://alpha-klinik.de/dsp/2025-1"
+  },
+  {
+    "@type": "TransferProcess",
+    "@id": "transfer-fhir-cohort-bundle-046",
+    "state": "COMPLETED",
+    "stateTimestamp": 1774011720000,
+    "type": "CONSUMER",
+    "assetId": "fhir-cohort-bundle",
+    "contractId": "agreement-fhir-cohort-bundle-046",
+    "transferType": "HttpData-PULL",
+    "counterPartyId": "did:web:lmc.nl:clinic",
+    "counterPartyAddress": "https://lmc.nl/dsp/2025-1",
+    "dataPayload": {
+      "resourceType": "Bundle",
+      "type": "searchset",
+      "total": 200,
+      "containedResourceTypes": ["Patient", "Condition", "Observation"],
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://lmc.nl/fhir/Patient?_count=200"
+        }
+      ],
+      "provider": "Limburg Medical Centre",
+      "transferredAt": "2026-03-20T14:02:00Z",
+      "sizeBytes": 618600
+    }
+  },
+  {
+    "@type": "TransferProcess",
+    "@id": "transfer-fhir-cohort-bundle-050",
+    "state": "COMPLETED",
+    "stateTimestamp": 1774011480000,
+    "type": "CONSUMER",
+    "assetId": "fhir-cohort-bundle",
+    "contractId": "agreement-fhir-cohort-bundle-050",
+    "transferType": "HttpData-PULL",
+    "counterPartyId": "did:web:lmc.nl:clinic",
+    "counterPartyAddress": "https://lmc.nl/dsp/2025-1",
+    "dataPayload": {
+      "resourceType": "Bundle",
+      "type": "searchset",
+      "total": 79,
+      "containedResourceTypes": ["Patient", "Condition", "Observation"],
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://lmc.nl/fhir/Patient?_count=79"
+        }
+      ],
+      "provider": "Limburg Medical Centre",
+      "transferredAt": "2026-03-20T13:58:00Z",
+      "sizeBytes": 136828
+    }
+  },
+  {
+    "@type": "TransferProcess",
+    "@id": "transfer-fhir-cohort-bundle-017",
+    "state": "COMPLETED",
+    "stateTimestamp": 1774010280000,
+    "type": "CONSUMER",
+    "assetId": "fhir-cohort-bundle",
+    "contractId": "agreement-fhir-cohort-bundle-017",
+    "transferType": "HttpData-PULL",
+    "counterPartyId": "did:web:lmc.nl:clinic",
+    "counterPartyAddress": "https://lmc.nl/dsp/2025-1",
+    "dataPayload": {
+      "resourceType": "Bundle",
+      "type": "searchset",
+      "total": 19,
+      "containedResourceTypes": ["Patient", "Condition", "Observation"],
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://lmc.nl/fhir/Patient?_count=19"
+        }
+      ],
+      "provider": "Limburg Medical Centre",
+      "transferredAt": "2026-03-20T13:38:00Z",
+      "sizeBytes": 55195
+    }
+  },
+  {
+    "@type": "TransferProcess",
+    "@id": "transfer-fhir-observation-bundle-074",
+    "state": "REQUESTED",
+    "stateTimestamp": 1774010280000,
+    "type": "CONSUMER",
+    "assetId": "fhir-observation-bundle",
+    "contractId": "agreement-fhir-observation-bundle-074",
+    "transferType": "HttpData-PULL",
+    "counterPartyId": "did:web:lmc.nl:clinic",
+    "counterPartyAddress": "https://lmc.nl/dsp/2025-1"
+  },
+  {
+    "@type": "TransferProcess",
+    "@id": "transfer-fhir-patient-search-051",
+    "state": "TERMINATED",
+    "stateTimestamp": 1774010160000,
+    "type": "CONSUMER",
+    "assetId": "fhir-patient-search",
+    "contractId": "agreement-fhir-patient-search-051",
+    "transferType": "HttpData-PULL",
+    "counterPartyId": "did:web:alpha-klinik.de:participant",
+    "counterPartyAddress": "https://alpha-klinik.de/dsp/2025-1"
+  },
+  {
+    "@type": "TransferProcess",
+    "@id": "transfer-fhir-cohort-bundle-072",
+    "state": "TERMINATED",
+    "stateTimestamp": 1774009620000,
+    "type": "CONSUMER",
+    "assetId": "fhir-cohort-bundle",
+    "contractId": "agreement-fhir-cohort-bundle-072",
+    "transferType": "HttpData-PULL",
+    "counterPartyId": "did:web:lmc.nl:clinic",
+    "counterPartyAddress": "https://lmc.nl/dsp/2025-1"
+  },
+  {
+    "@type": "TransferProcess",
+    "@id": "transfer-fhir-procedure-bundle-034",
+    "state": "COMPLETED",
+    "stateTimestamp": 1774009380000,
+    "type": "CONSUMER",
+    "assetId": "fhir-procedure-bundle",
+    "contractId": "agreement-fhir-procedure-bundle-034",
+    "transferType": "HttpData-PULL",
+    "counterPartyId": "did:web:lmc.nl:clinic",
+    "counterPartyAddress": "https://lmc.nl/dsp/2025-1",
+    "dataPayload": {
+      "resourceType": "Bundle",
+      "type": "searchset",
+      "total": 238,
+      "containedResourceTypes": ["Procedure", "Encounter"],
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://lmc.nl/fhir/Procedure?_count=238"
+        }
+      ],
+      "provider": "Limburg Medical Centre",
+      "transferredAt": "2026-03-20T13:23:00Z",
+      "sizeBytes": 923202
+    }
+  },
+  {
+    "@type": "TransferProcess",
+    "@id": "transfer-fhir-observation-bundle-054",
+    "state": "COMPLETED",
+    "stateTimestamp": 1774009260000,
+    "type": "CONSUMER",
+    "assetId": "fhir-observation-bundle",
+    "contractId": "agreement-fhir-observation-bundle-054",
+    "transferType": "HttpData-PULL",
+    "counterPartyId": "did:web:lmc.nl:clinic",
+    "counterPartyAddress": "https://lmc.nl/dsp/2025-1",
+    "dataPayload": {
+      "resourceType": "Bundle",
+      "type": "searchset",
+      "total": 112,
+      "containedResourceTypes": ["Observation"],
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://lmc.nl/fhir/Observation?_count=112"
+        }
+      ],
+      "provider": "Limburg Medical Centre",
+      "transferredAt": "2026-03-20T13:21:00Z",
+      "sizeBytes": 367696
+    }
+  },
+  {
+    "@type": "TransferProcess",
+    "@id": "transfer-fhir-encounter-history-045",
+    "state": "COMPLETED",
+    "stateTimestamp": 1774008900000,
+    "type": "CONSUMER",
+    "assetId": "fhir-encounter-history",
+    "contractId": "agreement-fhir-encounter-history-045",
+    "transferType": "HttpData-PULL",
+    "counterPartyId": "did:web:alpha-klinik.de:participant",
+    "counterPartyAddress": "https://alpha-klinik.de/dsp/2025-1",
+    "dataPayload": {
+      "resourceType": "Bundle",
+      "type": "searchset",
+      "total": 94,
+      "containedResourceTypes": ["Encounter", "Location", "Practitioner"],
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://alpha-klinik.de/fhir/Encounter?_count=94"
+        }
+      ],
+      "provider": "AlphaKlinik Berlin",
+      "transferredAt": "2026-03-20T13:15:00Z",
+      "sizeBytes": 90522
+    }
+  },
+  {
+    "@type": "TransferProcess",
+    "@id": "transfer-fhir-allergy-intolerance-057",
+    "state": "COMPLETED",
+    "stateTimestamp": 1774008420000,
+    "type": "CONSUMER",
+    "assetId": "fhir-allergy-intolerance",
+    "contractId": "agreement-fhir-allergy-intolerance-057",
+    "transferType": "HttpData-PULL",
+    "counterPartyId": "did:web:alpha-klinik.de:participant",
+    "counterPartyAddress": "https://alpha-klinik.de/dsp/2025-1",
+    "dataPayload": {
+      "resourceType": "Bundle",
+      "type": "searchset",
+      "total": 130,
+      "containedResourceTypes": ["AllergyIntolerance"],
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://alpha-klinik.de/fhir/AllergyIntolerance?_count=130"
+        }
+      ],
+      "provider": "AlphaKlinik Berlin",
+      "transferredAt": "2026-03-20T13:07:00Z",
+      "sizeBytes": 268580
+    }
+  },
+  {
+    "@type": "TransferProcess",
+    "@id": "transfer-fhir-immunization-record-060",
+    "state": "COMPLETED",
+    "stateTimestamp": 1774007580000,
+    "type": "CONSUMER",
+    "assetId": "fhir-immunization-record",
+    "contractId": "agreement-fhir-immunization-record-060",
+    "transferType": "HttpData-PULL",
+    "counterPartyId": "did:web:lmc.nl:clinic",
+    "counterPartyAddress": "https://lmc.nl/dsp/2025-1",
+    "dataPayload": {
+      "resourceType": "Bundle",
+      "type": "searchset",
+      "total": 54,
+      "containedResourceTypes": ["Immunization", "Patient"],
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://lmc.nl/fhir/Immunization?_count=54"
+        }
+      ],
+      "provider": "Limburg Medical Centre",
+      "transferredAt": "2026-03-20T12:53:00Z",
+      "sizeBytes": 138240
+    }
+  },
+  {
+    "@type": "TransferProcess",
+    "@id": "transfer-fhir-care-plan-062",
+    "state": "COMPLETED",
+    "stateTimestamp": 1774007400000,
+    "type": "CONSUMER",
+    "assetId": "fhir-care-plan",
+    "contractId": "agreement-fhir-care-plan-062",
+    "transferType": "HttpData-PULL",
+    "counterPartyId": "did:web:alpha-klinik.de:participant",
+    "counterPartyAddress": "https://alpha-klinik.de/dsp/2025-1",
+    "dataPayload": {
+      "resourceType": "Bundle",
+      "type": "searchset",
+      "total": 132,
+      "containedResourceTypes": ["CarePlan", "Goal", "Condition"],
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://alpha-klinik.de/fhir/CarePlan?_count=132"
+        }
+      ],
+      "provider": "AlphaKlinik Berlin",
+      "transferredAt": "2026-03-20T12:50:00Z",
+      "sizeBytes": 464508
+    }
+  },
+  {
+    "@type": "TransferProcess",
+    "@id": "transfer-fhir-medication-request-095",
+    "state": "COMPLETED",
+    "stateTimestamp": 1774007100000,
+    "type": "CONSUMER",
+    "assetId": "fhir-medication-request",
+    "contractId": "agreement-fhir-medication-request-095",
+    "transferType": "HttpData-PULL",
+    "counterPartyId": "did:web:alpha-klinik.de:participant",
+    "counterPartyAddress": "https://alpha-klinik.de/dsp/2025-1",
+    "dataPayload": {
+      "resourceType": "Bundle",
+      "type": "searchset",
+      "total": 226,
+      "containedResourceTypes": ["MedicationRequest", "Medication"],
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://alpha-klinik.de/fhir/MedicationRequest?_count=226"
+        }
+      ],
+      "provider": "AlphaKlinik Berlin",
+      "transferredAt": "2026-03-20T12:45:00Z",
+      "sizeBytes": 597996
+    }
+  },
+  {
+    "@type": "TransferProcess",
+    "@id": "transfer-fhir-observation-bundle-039",
+    "state": "STARTED",
+    "stateTimestamp": 1774006680000,
+    "type": "CONSUMER",
+    "assetId": "fhir-observation-bundle",
+    "contractId": "agreement-fhir-observation-bundle-039",
+    "transferType": "HttpData-PULL",
+    "counterPartyId": "did:web:alpha-klinik.de:participant",
+    "counterPartyAddress": "https://alpha-klinik.de/dsp/2025-1"
+  },
+  {
+    "@type": "TransferProcess",
+    "@id": "transfer-fhir-procedure-bundle-013",
+    "state": "COMPLETED",
+    "stateTimestamp": 1774006260000,
+    "type": "CONSUMER",
+    "assetId": "fhir-procedure-bundle",
+    "contractId": "agreement-fhir-procedure-bundle-013",
+    "transferType": "HttpData-PULL",
+    "counterPartyId": "did:web:lmc.nl:clinic",
+    "counterPartyAddress": "https://lmc.nl/dsp/2025-1",
+    "dataPayload": {
+      "resourceType": "Bundle",
+      "type": "searchset",
+      "total": 136,
+      "containedResourceTypes": ["Procedure", "Encounter"],
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://lmc.nl/fhir/Procedure?_count=136"
+        }
+      ],
+      "provider": "Limburg Medical Centre",
+      "transferredAt": "2026-03-20T12:31:00Z",
+      "sizeBytes": 446624
+    }
+  },
+  {
+    "@type": "TransferProcess",
+    "@id": "transfer-fhir-diagnostic-report-097",
+    "state": "REQUESTED",
+    "stateTimestamp": 1774005840000,
+    "type": "CONSUMER",
+    "assetId": "fhir-diagnostic-report",
+    "contractId": "agreement-fhir-diagnostic-report-097",
+    "transferType": "HttpData-PULL",
+    "counterPartyId": "did:web:alpha-klinik.de:participant",
+    "counterPartyAddress": "https://alpha-klinik.de/dsp/2025-1"
+  },
+  {
+    "@type": "TransferProcess",
+    "@id": "transfer-fhir-observation-bundle-055",
+    "state": "COMPLETED",
+    "stateTimestamp": 1774005600000,
+    "type": "CONSUMER",
+    "assetId": "fhir-observation-bundle",
+    "contractId": "agreement-fhir-observation-bundle-055",
+    "transferType": "HttpData-PULL",
+    "counterPartyId": "did:web:lmc.nl:clinic",
+    "counterPartyAddress": "https://lmc.nl/dsp/2025-1",
+    "dataPayload": {
+      "resourceType": "Bundle",
+      "type": "searchset",
+      "total": 12,
+      "containedResourceTypes": ["Observation"],
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://lmc.nl/fhir/Observation?_count=12"
+        }
+      ],
+      "provider": "Limburg Medical Centre",
+      "transferredAt": "2026-03-20T12:20:00Z",
+      "sizeBytes": 44436
+    }
+  },
+  {
+    "@type": "TransferProcess",
+    "@id": "transfer-fhir-patient-everything-023",
+    "state": "COMPLETED",
+    "stateTimestamp": 1774005300000,
+    "type": "CONSUMER",
+    "assetId": "fhir-patient-everything",
+    "contractId": "agreement-fhir-patient-everything-023",
+    "transferType": "HttpData-PULL",
+    "counterPartyId": "did:web:lmc.nl:clinic",
+    "counterPartyAddress": "https://lmc.nl/dsp/2025-1",
+    "dataPayload": {
+      "resourceType": "Bundle",
+      "type": "searchset",
+      "total": 224,
+      "containedResourceTypes": [
+        "Patient",
+        "Encounter",
+        "Condition",
+        "Observation",
+        "MedicationRequest",
+        "Procedure",
+        "AllergyIntolerance",
+        "Immunization",
+        "DiagnosticReport"
+      ],
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://lmc.nl/fhir/Patient?_count=224"
+        }
+      ],
+      "provider": "Limburg Medical Centre",
+      "transferredAt": "2026-03-20T12:15:00Z",
+      "sizeBytes": 248192
+    }
+  },
+  {
+    "@type": "TransferProcess",
+    "@id": "transfer-fhir-diagnostic-report-015",
+    "state": "COMPLETED",
+    "stateTimestamp": 1774005180000,
+    "type": "CONSUMER",
+    "assetId": "fhir-diagnostic-report",
+    "contractId": "agreement-fhir-diagnostic-report-015",
+    "transferType": "HttpData-PULL",
+    "counterPartyId": "did:web:lmc.nl:clinic",
+    "counterPartyAddress": "https://lmc.nl/dsp/2025-1",
+    "dataPayload": {
+      "resourceType": "Bundle",
+      "type": "searchset",
+      "total": 58,
+      "containedResourceTypes": ["DiagnosticReport", "Observation", "Specimen"],
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://lmc.nl/fhir/DiagnosticReport?_count=58"
+        }
+      ],
+      "provider": "Limburg Medical Centre",
+      "transferredAt": "2026-03-20T12:13:00Z",
+      "sizeBytes": 61596
+    }
+  },
+  {
+    "@type": "TransferProcess",
+    "@id": "transfer-fhir-patient-everything-002",
+    "state": "COMPLETED",
+    "stateTimestamp": 1774005120000,
+    "type": "CONSUMER",
+    "assetId": "fhir-patient-everything",
+    "contractId": "agreement-fhir-patient-everything-002",
+    "transferType": "HttpData-PULL",
+    "counterPartyId": "did:web:lmc.nl:clinic",
+    "counterPartyAddress": "https://lmc.nl/dsp/2025-1",
+    "dataPayload": {
+      "resourceType": "Bundle",
+      "type": "searchset",
+      "total": 191,
+      "containedResourceTypes": [
+        "Patient",
+        "Encounter",
+        "Condition",
+        "Observation",
+        "MedicationRequest",
+        "Procedure",
+        "AllergyIntolerance",
+        "Immunization",
+        "DiagnosticReport"
+      ],
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://lmc.nl/fhir/Patient?_count=191"
+        }
+      ],
+      "provider": "Limburg Medical Centre",
+      "transferredAt": "2026-03-20T12:12:00Z",
+      "sizeBytes": 591909
+    }
+  },
+  {
+    "@type": "TransferProcess",
+    "@id": "transfer-fhir-condition-list-011",
+    "state": "COMPLETED",
+    "stateTimestamp": 1774004760000,
+    "type": "CONSUMER",
+    "assetId": "fhir-condition-list",
+    "contractId": "agreement-fhir-condition-list-011",
+    "transferType": "HttpData-PULL",
+    "counterPartyId": "did:web:alpha-klinik.de:participant",
+    "counterPartyAddress": "https://alpha-klinik.de/dsp/2025-1",
+    "dataPayload": {
+      "resourceType": "Bundle",
+      "type": "searchset",
+      "total": 225,
+      "containedResourceTypes": ["Condition"],
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://alpha-klinik.de/fhir/Condition?_count=225"
+        }
+      ],
+      "provider": "AlphaKlinik Berlin",
+      "transferredAt": "2026-03-20T12:06:00Z",
+      "sizeBytes": 702675
+    }
+  },
+  {
+    "@type": "TransferProcess",
+    "@id": "transfer-fhir-condition-list-033",
+    "state": "COMPLETED",
+    "stateTimestamp": 1774004640000,
+    "type": "CONSUMER",
+    "assetId": "fhir-condition-list",
+    "contractId": "agreement-fhir-condition-list-033",
+    "transferType": "HttpData-PULL",
+    "counterPartyId": "did:web:alpha-klinik.de:participant",
+    "counterPartyAddress": "https://alpha-klinik.de/dsp/2025-1",
+    "dataPayload": {
+      "resourceType": "Bundle",
+      "type": "searchset",
+      "total": 68,
+      "containedResourceTypes": ["Condition"],
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://alpha-klinik.de/fhir/Condition?_count=68"
+        }
+      ],
+      "provider": "AlphaKlinik Berlin",
+      "transferredAt": "2026-03-20T12:04:00Z",
+      "sizeBytes": 164628
+    }
+  },
+  {
+    "@type": "TransferProcess",
+    "@id": "transfer-fhir-observation-bundle-063",
+    "state": "COMPLETED",
+    "stateTimestamp": 1774003800000,
+    "type": "CONSUMER",
+    "assetId": "fhir-observation-bundle",
+    "contractId": "agreement-fhir-observation-bundle-063",
+    "transferType": "HttpData-PULL",
+    "counterPartyId": "did:web:alpha-klinik.de:participant",
+    "counterPartyAddress": "https://alpha-klinik.de/dsp/2025-1",
+    "dataPayload": {
+      "resourceType": "Bundle",
+      "type": "searchset",
+      "total": 207,
+      "containedResourceTypes": ["Observation"],
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://alpha-klinik.de/fhir/Observation?_count=207"
+        }
+      ],
+      "provider": "AlphaKlinik Berlin",
+      "transferredAt": "2026-03-20T11:50:00Z",
+      "sizeBytes": 334305
+    }
+  },
+  {
+    "@type": "TransferProcess",
+    "@id": "transfer-fhir-patient-everything-028",
+    "state": "COMPLETED",
+    "stateTimestamp": 1774003320000,
+    "type": "CONSUMER",
+    "assetId": "fhir-patient-everything",
+    "contractId": "agreement-fhir-patient-everything-028",
+    "transferType": "HttpData-PULL",
+    "counterPartyId": "did:web:lmc.nl:clinic",
+    "counterPartyAddress": "https://lmc.nl/dsp/2025-1",
+    "dataPayload": {
+      "resourceType": "Bundle",
+      "type": "searchset",
+      "total": 248,
+      "containedResourceTypes": [
+        "Patient",
+        "Encounter",
+        "Condition",
+        "Observation",
+        "MedicationRequest",
+        "Procedure",
+        "AllergyIntolerance",
+        "Immunization",
+        "DiagnosticReport"
+      ],
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://lmc.nl/fhir/Patient?_count=248"
+        }
+      ],
+      "provider": "Limburg Medical Centre",
+      "transferredAt": "2026-03-20T11:42:00Z",
+      "sizeBytes": 257672
+    }
+  },
+  {
+    "@type": "TransferProcess",
+    "@id": "transfer-fhir-cohort-bundle-019",
+    "state": "COMPLETED",
+    "stateTimestamp": 1774001640000,
+    "type": "CONSUMER",
+    "assetId": "fhir-cohort-bundle",
+    "contractId": "agreement-fhir-cohort-bundle-019",
+    "transferType": "HttpData-PULL",
+    "counterPartyId": "did:web:lmc.nl:clinic",
+    "counterPartyAddress": "https://lmc.nl/dsp/2025-1",
+    "dataPayload": {
+      "resourceType": "Bundle",
+      "type": "searchset",
+      "total": 25,
+      "containedResourceTypes": ["Patient", "Condition", "Observation"],
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://lmc.nl/fhir/Patient?_count=25"
+        }
+      ],
+      "provider": "Limburg Medical Centre",
+      "transferredAt": "2026-03-20T11:14:00Z",
+      "sizeBytes": 29925
+    }
+  },
+  {
+    "@type": "TransferProcess",
+    "@id": "transfer-fhir-patient-search-053",
+    "state": "COMPLETED",
+    "stateTimestamp": 1774000920000,
+    "type": "CONSUMER",
+    "assetId": "fhir-patient-search",
+    "contractId": "agreement-fhir-patient-search-053",
+    "transferType": "HttpData-PULL",
+    "counterPartyId": "did:web:alpha-klinik.de:participant",
+    "counterPartyAddress": "https://alpha-klinik.de/dsp/2025-1",
+    "dataPayload": {
+      "resourceType": "Bundle",
+      "type": "searchset",
+      "total": 149,
+      "containedResourceTypes": ["Patient"],
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://alpha-klinik.de/fhir/Patient?_count=149"
+        }
+      ],
+      "provider": "AlphaKlinik Berlin",
+      "transferredAt": "2026-03-20T11:02:00Z",
+      "sizeBytes": 281163
+    }
+  },
+  {
+    "@type": "TransferProcess",
+    "@id": "transfer-fhir-care-plan-093",
+    "state": "COMPLETED",
+    "stateTimestamp": 1774000800000,
+    "type": "CONSUMER",
+    "assetId": "fhir-care-plan",
+    "contractId": "agreement-fhir-care-plan-093",
+    "transferType": "HttpData-PULL",
+    "counterPartyId": "did:web:alpha-klinik.de:participant",
+    "counterPartyAddress": "https://alpha-klinik.de/dsp/2025-1",
+    "dataPayload": {
+      "resourceType": "Bundle",
+      "type": "searchset",
+      "total": 188,
+      "containedResourceTypes": ["CarePlan", "Goal", "Condition"],
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://alpha-klinik.de/fhir/CarePlan?_count=188"
+        }
+      ],
+      "provider": "AlphaKlinik Berlin",
+      "transferredAt": "2026-03-20T11:00:00Z",
+      "sizeBytes": 552156
+    }
+  },
+  {
+    "@type": "TransferProcess",
+    "@id": "transfer-fhir-care-plan-087",
+    "state": "COMPLETED",
+    "stateTimestamp": 1774000260000,
+    "type": "CONSUMER",
+    "assetId": "fhir-care-plan",
+    "contractId": "agreement-fhir-care-plan-087",
+    "transferType": "HttpData-PULL",
+    "counterPartyId": "did:web:alpha-klinik.de:participant",
+    "counterPartyAddress": "https://alpha-klinik.de/dsp/2025-1",
+    "dataPayload": {
+      "resourceType": "Bundle",
+      "type": "searchset",
+      "total": 156,
+      "containedResourceTypes": ["CarePlan", "Goal", "Condition"],
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://alpha-klinik.de/fhir/CarePlan?_count=156"
+        }
+      ],
+      "provider": "AlphaKlinik Berlin",
+      "transferredAt": "2026-03-20T10:51:00Z",
+      "sizeBytes": 512772
+    }
+  },
+  {
+    "@type": "TransferProcess",
+    "@id": "transfer-fhir-cohort-bundle-026",
+    "state": "COMPLETED",
+    "stateTimestamp": 1774000080000,
+    "type": "CONSUMER",
+    "assetId": "fhir-cohort-bundle",
+    "contractId": "agreement-fhir-cohort-bundle-026",
+    "transferType": "HttpData-PULL",
+    "counterPartyId": "did:web:lmc.nl:clinic",
+    "counterPartyAddress": "https://lmc.nl/dsp/2025-1",
+    "dataPayload": {
+      "resourceType": "Bundle",
+      "type": "searchset",
+      "total": 98,
+      "containedResourceTypes": ["Patient", "Condition", "Observation"],
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://lmc.nl/fhir/Patient?_count=98"
+        }
+      ],
+      "provider": "Limburg Medical Centre",
+      "transferredAt": "2026-03-20T10:48:00Z",
+      "sizeBytes": 79184
+    }
+  },
+  {
+    "@type": "TransferProcess",
+    "@id": "transfer-fhir-allergy-intolerance-047",
+    "state": "COMPLETED",
+    "stateTimestamp": 1773999960000,
+    "type": "CONSUMER",
+    "assetId": "fhir-allergy-intolerance",
+    "contractId": "agreement-fhir-allergy-intolerance-047",
+    "transferType": "HttpData-PULL",
+    "counterPartyId": "did:web:alpha-klinik.de:participant",
+    "counterPartyAddress": "https://alpha-klinik.de/dsp/2025-1",
+    "dataPayload": {
+      "resourceType": "Bundle",
+      "type": "searchset",
+      "total": 250,
+      "containedResourceTypes": ["AllergyIntolerance"],
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://alpha-klinik.de/fhir/AllergyIntolerance?_count=250"
+        }
+      ],
+      "provider": "AlphaKlinik Berlin",
+      "transferredAt": "2026-03-20T10:46:00Z",
+      "sizeBytes": 381250
+    }
+  },
+  {
+    "@type": "TransferProcess",
+    "@id": "transfer-fhir-diagnostic-report-069",
+    "state": "REQUESTED",
+    "stateTimestamp": 1773999720000,
+    "type": "CONSUMER",
+    "assetId": "fhir-diagnostic-report",
+    "contractId": "agreement-fhir-diagnostic-report-069",
+    "transferType": "HttpData-PULL",
+    "counterPartyId": "did:web:lmc.nl:clinic",
+    "counterPartyAddress": "https://lmc.nl/dsp/2025-1"
+  },
+  {
+    "@type": "TransferProcess",
+    "@id": "transfer-fhir-observation-bundle-009",
+    "state": "COMPLETED",
+    "stateTimestamp": 1773999360000,
+    "type": "CONSUMER",
+    "assetId": "fhir-observation-bundle",
+    "contractId": "agreement-fhir-observation-bundle-009",
+    "transferType": "HttpData-PULL",
+    "counterPartyId": "did:web:lmc.nl:clinic",
+    "counterPartyAddress": "https://lmc.nl/dsp/2025-1",
+    "dataPayload": {
+      "resourceType": "Bundle",
+      "type": "searchset",
+      "total": 96,
+      "containedResourceTypes": ["Observation"],
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://lmc.nl/fhir/Observation?_count=96"
+        }
+      ],
+      "provider": "Limburg Medical Centre",
+      "transferredAt": "2026-03-20T10:36:00Z",
+      "sizeBytes": 376608
+    }
+  },
+  {
+    "@type": "TransferProcess",
+    "@id": "transfer-fhir-patient-search-042",
+    "state": "COMPLETED",
+    "stateTimestamp": 1773997980000,
+    "type": "CONSUMER",
+    "assetId": "fhir-patient-search",
+    "contractId": "agreement-fhir-patient-search-042",
+    "transferType": "HttpData-PULL",
+    "counterPartyId": "did:web:alpha-klinik.de:participant",
+    "counterPartyAddress": "https://alpha-klinik.de/dsp/2025-1",
+    "dataPayload": {
+      "resourceType": "Bundle",
+      "type": "searchset",
+      "total": 164,
+      "containedResourceTypes": ["Patient"],
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://alpha-klinik.de/fhir/Patient?_count=164"
+        }
+      ],
+      "provider": "AlphaKlinik Berlin",
+      "transferredAt": "2026-03-20T10:13:00Z",
+      "sizeBytes": 307008
+    }
+  },
+  {
+    "@type": "TransferProcess",
+    "@id": "transfer-fhir-procedure-bundle-007",
+    "state": "COMPLETED",
+    "stateTimestamp": 1773996840000,
+    "type": "CONSUMER",
+    "assetId": "fhir-procedure-bundle",
+    "contractId": "agreement-fhir-procedure-bundle-007",
+    "transferType": "HttpData-PULL",
+    "counterPartyId": "did:web:lmc.nl:clinic",
+    "counterPartyAddress": "https://lmc.nl/dsp/2025-1",
+    "dataPayload": {
+      "resourceType": "Bundle",
+      "type": "searchset",
+      "total": 76,
+      "containedResourceTypes": ["Procedure", "Encounter"],
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://lmc.nl/fhir/Procedure?_count=76"
+        }
+      ],
+      "provider": "Limburg Medical Centre",
+      "transferredAt": "2026-03-20T09:54:00Z",
+      "sizeBytes": 196080
+    }
+  },
+  {
+    "@type": "TransferProcess",
+    "@id": "transfer-fhir-patient-search-092",
+    "state": "COMPLETED",
+    "stateTimestamp": 1773996480000,
+    "type": "CONSUMER",
+    "assetId": "fhir-patient-search",
+    "contractId": "agreement-fhir-patient-search-092",
+    "transferType": "HttpData-PULL",
+    "counterPartyId": "did:web:lmc.nl:clinic",
+    "counterPartyAddress": "https://lmc.nl/dsp/2025-1",
+    "dataPayload": {
+      "resourceType": "Bundle",
+      "type": "searchset",
+      "total": 111,
+      "containedResourceTypes": ["Patient"],
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://lmc.nl/fhir/Patient?_count=111"
+        }
+      ],
+      "provider": "Limburg Medical Centre",
+      "transferredAt": "2026-03-20T09:48:00Z",
+      "sizeBytes": 253413
+    }
+  },
+  {
+    "@type": "TransferProcess",
+    "@id": "transfer-fhir-diagnostic-report-041",
+    "state": "COMPLETED",
+    "stateTimestamp": 1773995640000,
+    "type": "CONSUMER",
+    "assetId": "fhir-diagnostic-report",
+    "contractId": "agreement-fhir-diagnostic-report-041",
+    "transferType": "HttpData-PULL",
+    "counterPartyId": "did:web:lmc.nl:clinic",
+    "counterPartyAddress": "https://lmc.nl/dsp/2025-1",
+    "dataPayload": {
+      "resourceType": "Bundle",
+      "type": "searchset",
+      "total": 163,
+      "containedResourceTypes": ["DiagnosticReport", "Observation", "Specimen"],
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://lmc.nl/fhir/DiagnosticReport?_count=163"
+        }
+      ],
+      "provider": "Limburg Medical Centre",
+      "transferredAt": "2026-03-20T09:34:00Z",
+      "sizeBytes": 413042
+    }
+  },
+  {
+    "@type": "TransferProcess",
+    "@id": "transfer-fhir-condition-list-083",
+    "state": "COMPLETED",
+    "stateTimestamp": 1773994980000,
+    "type": "CONSUMER",
+    "assetId": "fhir-condition-list",
+    "contractId": "agreement-fhir-condition-list-083",
+    "transferType": "HttpData-PULL",
+    "counterPartyId": "did:web:lmc.nl:clinic",
+    "counterPartyAddress": "https://lmc.nl/dsp/2025-1",
+    "dataPayload": {
+      "resourceType": "Bundle",
+      "type": "searchset",
+      "total": 121,
+      "containedResourceTypes": ["Condition"],
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://lmc.nl/fhir/Condition?_count=121"
+        }
+      ],
+      "provider": "Limburg Medical Centre",
+      "transferredAt": "2026-03-20T09:23:00Z",
+      "sizeBytes": 106359
+    }
+  },
+  {
+    "@type": "TransferProcess",
+    "@id": "transfer-fhir-patient-search-035",
+    "state": "COMPLETED",
+    "stateTimestamp": 1773994500000,
+    "type": "CONSUMER",
+    "assetId": "fhir-patient-search",
+    "contractId": "agreement-fhir-patient-search-035",
+    "transferType": "HttpData-PULL",
+    "counterPartyId": "did:web:lmc.nl:clinic",
+    "counterPartyAddress": "https://lmc.nl/dsp/2025-1",
+    "dataPayload": {
+      "resourceType": "Bundle",
+      "type": "searchset",
+      "total": 138,
+      "containedResourceTypes": ["Patient"],
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://lmc.nl/fhir/Patient?_count=138"
+        }
+      ],
+      "provider": "Limburg Medical Centre",
+      "transferredAt": "2026-03-20T09:15:00Z",
+      "sizeBytes": 230874
+    }
+  },
+  {
+    "@type": "TransferProcess",
+    "@id": "transfer-fhir-condition-list-036",
+    "state": "COMPLETED",
+    "stateTimestamp": 1773994200000,
+    "type": "CONSUMER",
+    "assetId": "fhir-condition-list",
+    "contractId": "agreement-fhir-condition-list-036",
+    "transferType": "HttpData-PULL",
+    "counterPartyId": "did:web:alpha-klinik.de:participant",
+    "counterPartyAddress": "https://alpha-klinik.de/dsp/2025-1",
+    "dataPayload": {
+      "resourceType": "Bundle",
+      "type": "searchset",
+      "total": 226,
+      "containedResourceTypes": ["Condition"],
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://alpha-klinik.de/fhir/Condition?_count=226"
+        }
+      ],
+      "provider": "AlphaKlinik Berlin",
+      "transferredAt": "2026-03-20T09:10:00Z",
+      "sizeBytes": 406800
+    }
+  },
+  {
+    "@type": "TransferProcess",
+    "@id": "transfer-fhir-immunization-record-091",
+    "state": "STARTED",
+    "stateTimestamp": 1773994200000,
+    "type": "CONSUMER",
+    "assetId": "fhir-immunization-record",
+    "contractId": "agreement-fhir-immunization-record-091",
+    "transferType": "HttpData-PULL",
+    "counterPartyId": "did:web:lmc.nl:clinic",
+    "counterPartyAddress": "https://lmc.nl/dsp/2025-1"
+  },
+  {
+    "@type": "TransferProcess",
+    "@id": "transfer-fhir-care-plan-029",
+    "state": "STARTED",
+    "stateTimestamp": 1773993060000,
+    "type": "CONSUMER",
+    "assetId": "fhir-care-plan",
+    "contractId": "agreement-fhir-care-plan-029",
+    "transferType": "HttpData-PULL",
+    "counterPartyId": "did:web:alpha-klinik.de:participant",
+    "counterPartyAddress": "https://alpha-klinik.de/dsp/2025-1"
+  },
+  {
+    "@type": "TransferProcess",
+    "@id": "transfer-fhir-immunization-record-004",
+    "state": "COMPLETED",
+    "stateTimestamp": 1773992880000,
+    "type": "CONSUMER",
+    "assetId": "fhir-immunization-record",
+    "contractId": "agreement-fhir-immunization-record-004",
+    "transferType": "HttpData-PULL",
+    "counterPartyId": "did:web:lmc.nl:clinic",
+    "counterPartyAddress": "https://lmc.nl/dsp/2025-1",
+    "dataPayload": {
+      "resourceType": "Bundle",
+      "type": "searchset",
+      "total": 221,
+      "containedResourceTypes": ["Immunization", "Patient"],
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://lmc.nl/fhir/Immunization?_count=221"
+        }
+      ],
+      "provider": "Limburg Medical Centre",
+      "transferredAt": "2026-03-20T08:48:00Z",
+      "sizeBytes": 276029
+    }
+  },
+  {
+    "@type": "TransferProcess",
+    "@id": "transfer-fhir-diagnostic-report-096",
+    "state": "COMPLETED",
+    "stateTimestamp": 1773991740000,
+    "type": "CONSUMER",
+    "assetId": "fhir-diagnostic-report",
+    "contractId": "agreement-fhir-diagnostic-report-096",
+    "transferType": "HttpData-PULL",
+    "counterPartyId": "did:web:lmc.nl:clinic",
+    "counterPartyAddress": "https://lmc.nl/dsp/2025-1",
+    "dataPayload": {
+      "resourceType": "Bundle",
+      "type": "searchset",
+      "total": 127,
+      "containedResourceTypes": ["DiagnosticReport", "Observation", "Specimen"],
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://lmc.nl/fhir/DiagnosticReport?_count=127"
+        }
+      ],
+      "provider": "Limburg Medical Centre",
+      "transferredAt": "2026-03-20T08:29:00Z",
+      "sizeBytes": 270637
+    }
+  },
+  {
+    "@type": "TransferProcess",
+    "@id": "transfer-fhir-procedure-bundle-100",
+    "state": "STARTED",
+    "stateTimestamp": 1773991020000,
+    "type": "CONSUMER",
+    "assetId": "fhir-procedure-bundle",
+    "contractId": "agreement-fhir-procedure-bundle-100",
+    "transferType": "HttpData-PULL",
+    "counterPartyId": "did:web:lmc.nl:clinic",
+    "counterPartyAddress": "https://lmc.nl/dsp/2025-1"
+  },
+  {
+    "@type": "TransferProcess",
+    "@id": "transfer-fhir-patient-search-016",
+    "state": "COMPLETED",
+    "stateTimestamp": 1773990420000,
+    "type": "CONSUMER",
+    "assetId": "fhir-patient-search",
+    "contractId": "agreement-fhir-patient-search-016",
+    "transferType": "HttpData-PULL",
+    "counterPartyId": "did:web:alpha-klinik.de:participant",
+    "counterPartyAddress": "https://alpha-klinik.de/dsp/2025-1",
+    "dataPayload": {
+      "resourceType": "Bundle",
+      "type": "searchset",
+      "total": 19,
+      "containedResourceTypes": ["Patient"],
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://alpha-klinik.de/fhir/Patient?_count=19"
+        }
+      ],
+      "provider": "AlphaKlinik Berlin",
+      "transferredAt": "2026-03-20T08:07:00Z",
+      "sizeBytes": 70281
+    }
+  },
+  {
+    "@type": "TransferProcess",
+    "@id": "transfer-fhir-allergy-intolerance-076",
+    "state": "STARTED",
+    "stateTimestamp": 1773990360000,
+    "type": "CONSUMER",
+    "assetId": "fhir-allergy-intolerance",
+    "contractId": "agreement-fhir-allergy-intolerance-076",
+    "transferType": "HttpData-PULL",
+    "counterPartyId": "did:web:alpha-klinik.de:participant",
+    "counterPartyAddress": "https://alpha-klinik.de/dsp/2025-1"
   }
 ]

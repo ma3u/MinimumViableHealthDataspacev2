@@ -1,0 +1,6825 @@
+{
+  "fhir-patient-search": {
+    "resourceType": "Bundle",
+    "id": "bundle-82640",
+    "meta": {
+      "lastUpdated": "2026-03-20T14:56:00Z"
+    },
+    "type": "searchset",
+    "total": 10,
+    "link": [
+      {
+        "relation": "self",
+        "url": "https://alpha-klinik.de/fhir/Patient"
+      }
+    ],
+    "entry": [
+      {
+        "fullUrl": "urn:uuid:patient-0001",
+        "resource": {
+          "resourceType": "Patient",
+          "id": "patient-0001",
+          "meta": {
+            "profile": ["http://hl7.org/fhir/StructureDefinition/Patient"]
+          },
+          "text": {
+            "status": "generated",
+            "div": "<div xmlns='http://www.w3.org/1999/xhtml'>Hans Hoffmann</div>"
+          },
+          "identifier": [
+            {
+              "system": "http://alpha-klinik.de/fhir/patient-id",
+              "value": "patient-0001"
+            }
+          ],
+          "name": [
+            {
+              "use": "official",
+              "family": "Hoffmann",
+              "given": ["Hans"]
+            }
+          ],
+          "gender": "male",
+          "birthDate": "1945-07-09",
+          "address": [
+            {
+              "city": "Berlin",
+              "country": "DE"
+            }
+          ]
+        },
+        "search": {
+          "mode": "match"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:patient-0002",
+        "resource": {
+          "resourceType": "Patient",
+          "id": "patient-0002",
+          "meta": {
+            "profile": ["http://hl7.org/fhir/StructureDefinition/Patient"]
+          },
+          "text": {
+            "status": "generated",
+            "div": "<div xmlns='http://www.w3.org/1999/xhtml'>Margot Richter</div>"
+          },
+          "identifier": [
+            {
+              "system": "http://alpha-klinik.de/fhir/patient-id",
+              "value": "patient-0002"
+            }
+          ],
+          "name": [
+            {
+              "use": "official",
+              "family": "Richter",
+              "given": ["Margot"]
+            }
+          ],
+          "gender": "female",
+          "birthDate": "1961-01-06",
+          "address": [
+            {
+              "city": "Munich",
+              "country": "NL"
+            }
+          ]
+        },
+        "search": {
+          "mode": "match"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:patient-0003",
+        "resource": {
+          "resourceType": "Patient",
+          "id": "patient-0003",
+          "meta": {
+            "profile": ["http://hl7.org/fhir/StructureDefinition/Patient"]
+          },
+          "text": {
+            "status": "generated",
+            "div": "<div xmlns='http://www.w3.org/1999/xhtml'>Dieter Richter</div>"
+          },
+          "identifier": [
+            {
+              "system": "http://alpha-klinik.de/fhir/patient-id",
+              "value": "patient-0003"
+            }
+          ],
+          "name": [
+            {
+              "use": "official",
+              "family": "Richter",
+              "given": ["Dieter"]
+            }
+          ],
+          "gender": "male",
+          "birthDate": "1984-04-06",
+          "address": [
+            {
+              "city": "Berlin",
+              "country": "NL"
+            }
+          ]
+        },
+        "search": {
+          "mode": "match"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:patient-0004",
+        "resource": {
+          "resourceType": "Patient",
+          "id": "patient-0004",
+          "meta": {
+            "profile": ["http://hl7.org/fhir/StructureDefinition/Patient"]
+          },
+          "text": {
+            "status": "generated",
+            "div": "<div xmlns='http://www.w3.org/1999/xhtml'>Maria Wolf</div>"
+          },
+          "identifier": [
+            {
+              "system": "http://alpha-klinik.de/fhir/patient-id",
+              "value": "patient-0004"
+            }
+          ],
+          "name": [
+            {
+              "use": "official",
+              "family": "Wolf",
+              "given": ["Maria"]
+            }
+          ],
+          "gender": "female",
+          "birthDate": "1944-01-11",
+          "address": [
+            {
+              "city": "Rotterdam",
+              "country": "NL"
+            }
+          ]
+        },
+        "search": {
+          "mode": "match"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:patient-0005",
+        "resource": {
+          "resourceType": "Patient",
+          "id": "patient-0005",
+          "meta": {
+            "profile": ["http://hl7.org/fhir/StructureDefinition/Patient"]
+          },
+          "text": {
+            "status": "generated",
+            "div": "<div xmlns='http://www.w3.org/1999/xhtml'>Jan Schmidt</div>"
+          },
+          "identifier": [
+            {
+              "system": "http://alpha-klinik.de/fhir/patient-id",
+              "value": "patient-0005"
+            }
+          ],
+          "name": [
+            {
+              "use": "official",
+              "family": "Schmidt",
+              "given": ["Jan"]
+            }
+          ],
+          "gender": "male",
+          "birthDate": "1945-11-05",
+          "address": [
+            {
+              "city": "Munich",
+              "country": "DE"
+            }
+          ]
+        },
+        "search": {
+          "mode": "match"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:patient-0006",
+        "resource": {
+          "resourceType": "Patient",
+          "id": "patient-0006",
+          "meta": {
+            "profile": ["http://hl7.org/fhir/StructureDefinition/Patient"]
+          },
+          "text": {
+            "status": "generated",
+            "div": "<div xmlns='http://www.w3.org/1999/xhtml'>Friedrich Neumann</div>"
+          },
+          "identifier": [
+            {
+              "system": "http://alpha-klinik.de/fhir/patient-id",
+              "value": "patient-0006"
+            }
+          ],
+          "name": [
+            {
+              "use": "official",
+              "family": "Neumann",
+              "given": ["Friedrich"]
+            }
+          ],
+          "gender": "male",
+          "birthDate": "1976-08-09",
+          "address": [
+            {
+              "city": "Maastricht",
+              "country": "DE"
+            }
+          ]
+        },
+        "search": {
+          "mode": "match"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:patient-0007",
+        "resource": {
+          "resourceType": "Patient",
+          "id": "patient-0007",
+          "meta": {
+            "profile": ["http://hl7.org/fhir/StructureDefinition/Patient"]
+          },
+          "text": {
+            "status": "generated",
+            "div": "<div xmlns='http://www.w3.org/1999/xhtml'>Friedrich Richter</div>"
+          },
+          "identifier": [
+            {
+              "system": "http://alpha-klinik.de/fhir/patient-id",
+              "value": "patient-0007"
+            }
+          ],
+          "name": [
+            {
+              "use": "official",
+              "family": "Richter",
+              "given": ["Friedrich"]
+            }
+          ],
+          "gender": "male",
+          "birthDate": "1973-08-07",
+          "address": [
+            {
+              "city": "Amsterdam",
+              "country": "NL"
+            }
+          ]
+        },
+        "search": {
+          "mode": "match"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:patient-0008",
+        "resource": {
+          "resourceType": "Patient",
+          "id": "patient-0008",
+          "meta": {
+            "profile": ["http://hl7.org/fhir/StructureDefinition/Patient"]
+          },
+          "text": {
+            "status": "generated",
+            "div": "<div xmlns='http://www.w3.org/1999/xhtml'>Erika Wolf</div>"
+          },
+          "identifier": [
+            {
+              "system": "http://alpha-klinik.de/fhir/patient-id",
+              "value": "patient-0008"
+            }
+          ],
+          "name": [
+            {
+              "use": "official",
+              "family": "Wolf",
+              "given": ["Erika"]
+            }
+          ],
+          "gender": "female",
+          "birthDate": "1997-11-17",
+          "address": [
+            {
+              "city": "Maastricht",
+              "country": "NL"
+            }
+          ]
+        },
+        "search": {
+          "mode": "match"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:patient-0009",
+        "resource": {
+          "resourceType": "Patient",
+          "id": "patient-0009",
+          "meta": {
+            "profile": ["http://hl7.org/fhir/StructureDefinition/Patient"]
+          },
+          "text": {
+            "status": "generated",
+            "div": "<div xmlns='http://www.w3.org/1999/xhtml'>Helga Neumann</div>"
+          },
+          "identifier": [
+            {
+              "system": "http://alpha-klinik.de/fhir/patient-id",
+              "value": "patient-0009"
+            }
+          ],
+          "name": [
+            {
+              "use": "official",
+              "family": "Neumann",
+              "given": ["Helga"]
+            }
+          ],
+          "gender": "female",
+          "birthDate": "1963-09-02",
+          "address": [
+            {
+              "city": "Rotterdam",
+              "country": "DE"
+            }
+          ]
+        },
+        "search": {
+          "mode": "match"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:patient-0010",
+        "resource": {
+          "resourceType": "Patient",
+          "id": "patient-0010",
+          "meta": {
+            "profile": ["http://hl7.org/fhir/StructureDefinition/Patient"]
+          },
+          "text": {
+            "status": "generated",
+            "div": "<div xmlns='http://www.w3.org/1999/xhtml'>Maria Braun</div>"
+          },
+          "identifier": [
+            {
+              "system": "http://alpha-klinik.de/fhir/patient-id",
+              "value": "patient-0010"
+            }
+          ],
+          "name": [
+            {
+              "use": "official",
+              "family": "Braun",
+              "given": ["Maria"]
+            }
+          ],
+          "gender": "female",
+          "birthDate": "1982-05-06",
+          "address": [
+            {
+              "city": "Hamburg",
+              "country": "NL"
+            }
+          ]
+        },
+        "search": {
+          "mode": "match"
+        }
+      }
+    ]
+  },
+  "fhir-observation-bundle": {
+    "resourceType": "Bundle",
+    "id": "bundle-97614",
+    "meta": {
+      "lastUpdated": "2026-03-20T08:22:00Z"
+    },
+    "type": "searchset",
+    "total": 15,
+    "link": [
+      {
+        "relation": "self",
+        "url": "https://alpha-klinik.de/fhir/Patient"
+      }
+    ],
+    "entry": [
+      {
+        "fullUrl": "urn:uuid:obs-0001",
+        "resource": {
+          "resourceType": "Observation",
+          "id": "obs-0001",
+          "meta": {
+            "profile": ["http://hl7.org/fhir/StructureDefinition/vitalsigns"]
+          },
+          "status": "final",
+          "category": [
+            {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                  "code": "vital-signs",
+                  "display": "Vital Signs"
+                }
+              ]
+            }
+          ],
+          "code": {
+            "coding": [
+              {
+                "system": "http://loinc.org",
+                "code": "33914-3",
+                "display": "eGFR"
+              }
+            ],
+            "text": "eGFR"
+          },
+          "subject": {
+            "reference": "Patient/patient-0003"
+          },
+          "effectiveDateTime": "2026-03-19T16:01:00Z",
+          "valueQuantity": {
+            "value": 71.1,
+            "unit": "mL/min/{1.73_m2}",
+            "system": "http://unitsofmeasure.org",
+            "code": "mL/min/{1.73_m2}"
+          }
+        },
+        "search": {
+          "mode": "match"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:obs-0002",
+        "resource": {
+          "resourceType": "Observation",
+          "id": "obs-0002",
+          "meta": {
+            "profile": ["http://hl7.org/fhir/StructureDefinition/vitalsigns"]
+          },
+          "status": "final",
+          "category": [
+            {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                  "code": "vital-signs",
+                  "display": "Vital Signs"
+                }
+              ]
+            }
+          ],
+          "code": {
+            "coding": [
+              {
+                "system": "http://loinc.org",
+                "code": "718-7",
+                "display": "Hemoglobin [Mass/volume]"
+              }
+            ],
+            "text": "Hemoglobin [Mass/volume]"
+          },
+          "subject": {
+            "reference": "Patient/patient-0007"
+          },
+          "effectiveDateTime": "2026-03-12T06:57:00Z",
+          "valueQuantity": {
+            "value": 10.7,
+            "unit": "g/dL",
+            "system": "http://unitsofmeasure.org",
+            "code": "g/dL"
+          }
+        },
+        "search": {
+          "mode": "match"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:obs-0003",
+        "resource": {
+          "resourceType": "Observation",
+          "id": "obs-0003",
+          "meta": {
+            "profile": ["http://hl7.org/fhir/StructureDefinition/vitalsigns"]
+          },
+          "status": "final",
+          "category": [
+            {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                  "code": "vital-signs",
+                  "display": "Vital Signs"
+                }
+              ]
+            }
+          ],
+          "code": {
+            "coding": [
+              {
+                "system": "http://loinc.org",
+                "code": "8462-4",
+                "display": "Diastolic blood pressure"
+              }
+            ],
+            "text": "Diastolic blood pressure"
+          },
+          "subject": {
+            "reference": "Patient/patient-0012"
+          },
+          "effectiveDateTime": "2026-03-17T07:40:00Z",
+          "valueQuantity": {
+            "value": 80.3,
+            "unit": "mmHg",
+            "system": "http://unitsofmeasure.org",
+            "code": "mmHg"
+          }
+        },
+        "search": {
+          "mode": "match"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:obs-0004",
+        "resource": {
+          "resourceType": "Observation",
+          "id": "obs-0004",
+          "meta": {
+            "profile": ["http://hl7.org/fhir/StructureDefinition/vitalsigns"]
+          },
+          "status": "final",
+          "category": [
+            {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                  "code": "vital-signs",
+                  "display": "Vital Signs"
+                }
+              ]
+            }
+          ],
+          "code": {
+            "coding": [
+              {
+                "system": "http://loinc.org",
+                "code": "4548-4",
+                "display": "Hemoglobin A1c"
+              }
+            ],
+            "text": "Hemoglobin A1c"
+          },
+          "subject": {
+            "reference": "Patient/patient-0010"
+          },
+          "effectiveDateTime": "2026-03-08T21:11:00Z",
+          "valueQuantity": {
+            "value": 11.7,
+            "unit": "%",
+            "system": "http://unitsofmeasure.org",
+            "code": "%"
+          }
+        },
+        "search": {
+          "mode": "match"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:obs-0005",
+        "resource": {
+          "resourceType": "Observation",
+          "id": "obs-0005",
+          "meta": {
+            "profile": ["http://hl7.org/fhir/StructureDefinition/vitalsigns"]
+          },
+          "status": "final",
+          "category": [
+            {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                  "code": "vital-signs",
+                  "display": "Vital Signs"
+                }
+              ]
+            }
+          ],
+          "code": {
+            "coding": [
+              {
+                "system": "http://loinc.org",
+                "code": "6690-2",
+                "display": "Leukocytes [#/volume]"
+              }
+            ],
+            "text": "Leukocytes [#/volume]"
+          },
+          "subject": {
+            "reference": "Patient/patient-0005"
+          },
+          "effectiveDateTime": "2026-03-15T07:00:00Z",
+          "valueQuantity": {
+            "value": 7.3,
+            "unit": "10*3/uL",
+            "system": "http://unitsofmeasure.org",
+            "code": "10*3/uL"
+          }
+        },
+        "search": {
+          "mode": "match"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:obs-0006",
+        "resource": {
+          "resourceType": "Observation",
+          "id": "obs-0006",
+          "meta": {
+            "profile": ["http://hl7.org/fhir/StructureDefinition/vitalsigns"]
+          },
+          "status": "final",
+          "category": [
+            {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                  "code": "vital-signs",
+                  "display": "Vital Signs"
+                }
+              ]
+            }
+          ],
+          "code": {
+            "coding": [
+              {
+                "system": "http://loinc.org",
+                "code": "4548-4",
+                "display": "Hemoglobin A1c"
+              }
+            ],
+            "text": "Hemoglobin A1c"
+          },
+          "subject": {
+            "reference": "Patient/patient-0005"
+          },
+          "effectiveDateTime": "2026-03-09T17:43:00Z",
+          "valueQuantity": {
+            "value": 5.9,
+            "unit": "%",
+            "system": "http://unitsofmeasure.org",
+            "code": "%"
+          }
+        },
+        "search": {
+          "mode": "match"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:obs-0007",
+        "resource": {
+          "resourceType": "Observation",
+          "id": "obs-0007",
+          "meta": {
+            "profile": ["http://hl7.org/fhir/StructureDefinition/vitalsigns"]
+          },
+          "status": "final",
+          "category": [
+            {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                  "code": "vital-signs",
+                  "display": "Vital Signs"
+                }
+              ]
+            }
+          ],
+          "code": {
+            "coding": [
+              {
+                "system": "http://loinc.org",
+                "code": "2339-0",
+                "display": "Glucose [Mass/volume] in Blood"
+              }
+            ],
+            "text": "Glucose [Mass/volume] in Blood"
+          },
+          "subject": {
+            "reference": "Patient/patient-0009"
+          },
+          "effectiveDateTime": "2026-03-01T09:39:00Z",
+          "valueQuantity": {
+            "value": 214.1,
+            "unit": "mg/dL",
+            "system": "http://unitsofmeasure.org",
+            "code": "mg/dL"
+          }
+        },
+        "search": {
+          "mode": "match"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:obs-0008",
+        "resource": {
+          "resourceType": "Observation",
+          "id": "obs-0008",
+          "meta": {
+            "profile": ["http://hl7.org/fhir/StructureDefinition/vitalsigns"]
+          },
+          "status": "final",
+          "category": [
+            {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                  "code": "vital-signs",
+                  "display": "Vital Signs"
+                }
+              ]
+            }
+          ],
+          "code": {
+            "coding": [
+              {
+                "system": "http://loinc.org",
+                "code": "6690-2",
+                "display": "Leukocytes [#/volume]"
+              }
+            ],
+            "text": "Leukocytes [#/volume]"
+          },
+          "subject": {
+            "reference": "Patient/patient-0003"
+          },
+          "effectiveDateTime": "2026-03-03T08:27:00Z",
+          "valueQuantity": {
+            "value": 6.5,
+            "unit": "10*3/uL",
+            "system": "http://unitsofmeasure.org",
+            "code": "10*3/uL"
+          }
+        },
+        "search": {
+          "mode": "match"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:obs-0009",
+        "resource": {
+          "resourceType": "Observation",
+          "id": "obs-0009",
+          "meta": {
+            "profile": ["http://hl7.org/fhir/StructureDefinition/vitalsigns"]
+          },
+          "status": "final",
+          "category": [
+            {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                  "code": "vital-signs",
+                  "display": "Vital Signs"
+                }
+              ]
+            }
+          ],
+          "code": {
+            "coding": [
+              {
+                "system": "http://loinc.org",
+                "code": "6690-2",
+                "display": "Leukocytes [#/volume]"
+              }
+            ],
+            "text": "Leukocytes [#/volume]"
+          },
+          "subject": {
+            "reference": "Patient/patient-0001"
+          },
+          "effectiveDateTime": "2026-03-18T18:01:00Z",
+          "valueQuantity": {
+            "value": 6.7,
+            "unit": "10*3/uL",
+            "system": "http://unitsofmeasure.org",
+            "code": "10*3/uL"
+          }
+        },
+        "search": {
+          "mode": "match"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:obs-0010",
+        "resource": {
+          "resourceType": "Observation",
+          "id": "obs-0010",
+          "meta": {
+            "profile": ["http://hl7.org/fhir/StructureDefinition/vitalsigns"]
+          },
+          "status": "final",
+          "category": [
+            {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                  "code": "vital-signs",
+                  "display": "Vital Signs"
+                }
+              ]
+            }
+          ],
+          "code": {
+            "coding": [
+              {
+                "system": "http://loinc.org",
+                "code": "2085-9",
+                "display": "HDL Cholesterol"
+              }
+            ],
+            "text": "HDL Cholesterol"
+          },
+          "subject": {
+            "reference": "Patient/patient-0011"
+          },
+          "effectiveDateTime": "2026-03-02T16:26:00Z",
+          "valueQuantity": {
+            "value": 87.3,
+            "unit": "mg/dL",
+            "system": "http://unitsofmeasure.org",
+            "code": "mg/dL"
+          }
+        },
+        "search": {
+          "mode": "match"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:obs-0011",
+        "resource": {
+          "resourceType": "Observation",
+          "id": "obs-0011",
+          "meta": {
+            "profile": ["http://hl7.org/fhir/StructureDefinition/vitalsigns"]
+          },
+          "status": "final",
+          "category": [
+            {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                  "code": "vital-signs",
+                  "display": "Vital Signs"
+                }
+              ]
+            }
+          ],
+          "code": {
+            "coding": [
+              {
+                "system": "http://loinc.org",
+                "code": "8310-5",
+                "display": "Body temperature"
+              }
+            ],
+            "text": "Body temperature"
+          },
+          "subject": {
+            "reference": "Patient/patient-0012"
+          },
+          "effectiveDateTime": "2026-03-06T19:04:00Z",
+          "valueQuantity": {
+            "value": 37.6,
+            "unit": "Cel",
+            "system": "http://unitsofmeasure.org",
+            "code": "Cel"
+          }
+        },
+        "search": {
+          "mode": "match"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:obs-0012",
+        "resource": {
+          "resourceType": "Observation",
+          "id": "obs-0012",
+          "meta": {
+            "profile": ["http://hl7.org/fhir/StructureDefinition/vitalsigns"]
+          },
+          "status": "final",
+          "category": [
+            {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                  "code": "vital-signs",
+                  "display": "Vital Signs"
+                }
+              ]
+            }
+          ],
+          "code": {
+            "coding": [
+              {
+                "system": "http://loinc.org",
+                "code": "2089-1",
+                "display": "LDL Cholesterol"
+              }
+            ],
+            "text": "LDL Cholesterol"
+          },
+          "subject": {
+            "reference": "Patient/patient-0005"
+          },
+          "effectiveDateTime": "2026-03-03T07:48:00Z",
+          "valueQuantity": {
+            "value": 167.0,
+            "unit": "mg/dL",
+            "system": "http://unitsofmeasure.org",
+            "code": "mg/dL"
+          }
+        },
+        "search": {
+          "mode": "match"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:obs-0013",
+        "resource": {
+          "resourceType": "Observation",
+          "id": "obs-0013",
+          "meta": {
+            "profile": ["http://hl7.org/fhir/StructureDefinition/vitalsigns"]
+          },
+          "status": "final",
+          "category": [
+            {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                  "code": "vital-signs",
+                  "display": "Vital Signs"
+                }
+              ]
+            }
+          ],
+          "code": {
+            "coding": [
+              {
+                "system": "http://loinc.org",
+                "code": "2339-0",
+                "display": "Glucose [Mass/volume] in Blood"
+              }
+            ],
+            "text": "Glucose [Mass/volume] in Blood"
+          },
+          "subject": {
+            "reference": "Patient/patient-0017"
+          },
+          "effectiveDateTime": "2026-03-05T15:49:00Z",
+          "valueQuantity": {
+            "value": 191.3,
+            "unit": "mg/dL",
+            "system": "http://unitsofmeasure.org",
+            "code": "mg/dL"
+          }
+        },
+        "search": {
+          "mode": "match"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:obs-0014",
+        "resource": {
+          "resourceType": "Observation",
+          "id": "obs-0014",
+          "meta": {
+            "profile": ["http://hl7.org/fhir/StructureDefinition/vitalsigns"]
+          },
+          "status": "final",
+          "category": [
+            {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                  "code": "vital-signs",
+                  "display": "Vital Signs"
+                }
+              ]
+            }
+          ],
+          "code": {
+            "coding": [
+              {
+                "system": "http://loinc.org",
+                "code": "2089-1",
+                "display": "LDL Cholesterol"
+              }
+            ],
+            "text": "LDL Cholesterol"
+          },
+          "subject": {
+            "reference": "Patient/patient-0013"
+          },
+          "effectiveDateTime": "2026-03-11T22:07:00Z",
+          "valueQuantity": {
+            "value": 80.2,
+            "unit": "mg/dL",
+            "system": "http://unitsofmeasure.org",
+            "code": "mg/dL"
+          }
+        },
+        "search": {
+          "mode": "match"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:obs-0015",
+        "resource": {
+          "resourceType": "Observation",
+          "id": "obs-0015",
+          "meta": {
+            "profile": ["http://hl7.org/fhir/StructureDefinition/vitalsigns"]
+          },
+          "status": "final",
+          "category": [
+            {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                  "code": "vital-signs",
+                  "display": "Vital Signs"
+                }
+              ]
+            }
+          ],
+          "code": {
+            "coding": [
+              {
+                "system": "http://loinc.org",
+                "code": "718-7",
+                "display": "Hemoglobin [Mass/volume]"
+              }
+            ],
+            "text": "Hemoglobin [Mass/volume]"
+          },
+          "subject": {
+            "reference": "Patient/patient-0006"
+          },
+          "effectiveDateTime": "2026-03-02T10:29:00Z",
+          "valueQuantity": {
+            "value": 13.1,
+            "unit": "g/dL",
+            "system": "http://unitsofmeasure.org",
+            "code": "g/dL"
+          }
+        },
+        "search": {
+          "mode": "match"
+        }
+      }
+    ]
+  },
+  "fhir-patient-everything": {
+    "resourceType": "Bundle",
+    "id": "bundle-75117",
+    "meta": {
+      "lastUpdated": "2026-03-20T18:10:00Z"
+    },
+    "type": "searchset",
+    "total": 40,
+    "link": [
+      {
+        "relation": "self",
+        "url": "https://alpha-klinik.de/fhir/Patient"
+      }
+    ],
+    "entry": [
+      {
+        "fullUrl": "urn:uuid:patient-0001",
+        "resource": {
+          "resourceType": "Patient",
+          "id": "patient-0001",
+          "meta": {
+            "profile": ["http://hl7.org/fhir/StructureDefinition/Patient"]
+          },
+          "text": {
+            "status": "generated",
+            "div": "<div xmlns='http://www.w3.org/1999/xhtml'>Lotte Schwarz</div>"
+          },
+          "identifier": [
+            {
+              "system": "http://alpha-klinik.de/fhir/patient-id",
+              "value": "patient-0001"
+            }
+          ],
+          "name": [
+            {
+              "use": "official",
+              "family": "Schwarz",
+              "given": ["Lotte"]
+            }
+          ],
+          "gender": "female",
+          "birthDate": "1959-07-26",
+          "address": [
+            {
+              "city": "Berlin",
+              "country": "DE"
+            }
+          ]
+        },
+        "search": {
+          "mode": "match"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:enc-0001",
+        "resource": {
+          "resourceType": "Encounter",
+          "id": "enc-0001",
+          "status": "finished",
+          "class": {
+            "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+            "code": "IMP",
+            "display": "emergency"
+          },
+          "subject": {
+            "reference": "Patient/patient-0001"
+          },
+          "period": {
+            "start": "2026-03-17T13:00:00Z",
+            "end": "2026-03-18T23:00:00Z"
+          }
+        },
+        "search": {
+          "mode": "include"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:cond-0001-0",
+        "resource": {
+          "resourceType": "Condition",
+          "id": "cond-0001-0",
+          "meta": {
+            "profile": ["http://hl7.org/fhir/StructureDefinition/Condition"]
+          },
+          "clinicalStatus": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+                "code": "active"
+              }
+            ]
+          },
+          "verificationStatus": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+                "code": "confirmed"
+              }
+            ]
+          },
+          "category": [
+            {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+                  "code": "encounter-diagnosis"
+                }
+              ]
+            }
+          ],
+          "code": {
+            "coding": [
+              {
+                "system": "http://snomed.info/sct",
+                "code": "38341003",
+                "display": "Hypertensive disorder"
+              }
+            ],
+            "text": "Hypertensive disorder"
+          },
+          "subject": {
+            "reference": "Patient/patient-0001"
+          },
+          "onsetDateTime": "2019-10-21"
+        },
+        "search": {
+          "mode": "include"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:obs-0001-0",
+        "resource": {
+          "resourceType": "Observation",
+          "id": "obs-0001-0",
+          "meta": {
+            "profile": ["http://hl7.org/fhir/StructureDefinition/vitalsigns"]
+          },
+          "status": "final",
+          "category": [
+            {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                  "code": "vital-signs",
+                  "display": "Vital Signs"
+                }
+              ]
+            }
+          ],
+          "code": {
+            "coding": [
+              {
+                "system": "http://loinc.org",
+                "code": "33914-3",
+                "display": "eGFR"
+              }
+            ],
+            "text": "eGFR"
+          },
+          "subject": {
+            "reference": "Patient/patient-0001"
+          },
+          "effectiveDateTime": "2026-03-19T16:05:00Z",
+          "valueQuantity": {
+            "value": 63.2,
+            "unit": "mL/min/{1.73_m2}",
+            "system": "http://unitsofmeasure.org",
+            "code": "mL/min/{1.73_m2}"
+          }
+        },
+        "search": {
+          "mode": "include"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:cond-0001-1",
+        "resource": {
+          "resourceType": "Condition",
+          "id": "cond-0001-1",
+          "meta": {
+            "profile": ["http://hl7.org/fhir/StructureDefinition/Condition"]
+          },
+          "clinicalStatus": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+                "code": "active"
+              }
+            ]
+          },
+          "verificationStatus": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+                "code": "confirmed"
+              }
+            ]
+          },
+          "category": [
+            {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+                  "code": "encounter-diagnosis"
+                }
+              ]
+            }
+          ],
+          "code": {
+            "coding": [
+              {
+                "system": "http://snomed.info/sct",
+                "code": "73211009",
+                "display": "Diabetes mellitus"
+              }
+            ],
+            "text": "Diabetes mellitus"
+          },
+          "subject": {
+            "reference": "Patient/patient-0001"
+          },
+          "onsetDateTime": "2020-03-30"
+        },
+        "search": {
+          "mode": "include"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:obs-0001-1",
+        "resource": {
+          "resourceType": "Observation",
+          "id": "obs-0001-1",
+          "meta": {
+            "profile": ["http://hl7.org/fhir/StructureDefinition/vitalsigns"]
+          },
+          "status": "final",
+          "category": [
+            {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                  "code": "vital-signs",
+                  "display": "Vital Signs"
+                }
+              ]
+            }
+          ],
+          "code": {
+            "coding": [
+              {
+                "system": "http://loinc.org",
+                "code": "8462-4",
+                "display": "Diastolic blood pressure"
+              }
+            ],
+            "text": "Diastolic blood pressure"
+          },
+          "subject": {
+            "reference": "Patient/patient-0001"
+          },
+          "effectiveDateTime": "2026-03-11T14:25:00Z",
+          "valueQuantity": {
+            "value": 70.2,
+            "unit": "mmHg",
+            "system": "http://unitsofmeasure.org",
+            "code": "mmHg"
+          }
+        },
+        "search": {
+          "mode": "include"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:med-0001",
+        "resource": {
+          "resourceType": "MedicationRequest",
+          "id": "med-0001",
+          "status": "active",
+          "intent": "order",
+          "medicationCodeableConcept": {
+            "coding": [
+              {
+                "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+                "code": "860975",
+                "display": "Metformin hydrochloride 500 MG Oral Tablet"
+              }
+            ],
+            "text": "Metformin hydrochloride 500 MG Oral Tablet"
+          },
+          "subject": {
+            "reference": "Patient/patient-0001"
+          },
+          "authoredOn": "2026-03-17",
+          "dosageInstruction": [
+            {
+              "text": "Once daily",
+              "timing": {
+                "repeat": {
+                  "frequency": 1,
+                  "period": 1,
+                  "periodUnit": "d"
+                }
+              }
+            }
+          ]
+        },
+        "search": {
+          "mode": "include"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:imm-0001",
+        "resource": {
+          "resourceType": "Immunization",
+          "id": "imm-0001",
+          "status": "completed",
+          "vaccineCode": {
+            "coding": [
+              {
+                "system": "http://hl7.org/fhir/sid/cvx",
+                "code": "113",
+                "display": "Td (adult) preservative free"
+              }
+            ],
+            "text": "Td (adult) preservative free"
+          },
+          "patient": {
+            "reference": "Patient/patient-0001"
+          },
+          "occurrenceDateTime": "2025-05-12"
+        },
+        "search": {
+          "mode": "include"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:patient-0002",
+        "resource": {
+          "resourceType": "Patient",
+          "id": "patient-0002",
+          "meta": {
+            "profile": ["http://hl7.org/fhir/StructureDefinition/Patient"]
+          },
+          "text": {
+            "status": "generated",
+            "div": "<div xmlns='http://www.w3.org/1999/xhtml'>Erika Becker</div>"
+          },
+          "identifier": [
+            {
+              "system": "http://alpha-klinik.de/fhir/patient-id",
+              "value": "patient-0002"
+            }
+          ],
+          "name": [
+            {
+              "use": "official",
+              "family": "Becker",
+              "given": ["Erika"]
+            }
+          ],
+          "gender": "female",
+          "birthDate": "1957-10-08",
+          "address": [
+            {
+              "city": "Berlin",
+              "country": "NL"
+            }
+          ]
+        },
+        "search": {
+          "mode": "match"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:enc-0002",
+        "resource": {
+          "resourceType": "Encounter",
+          "id": "enc-0002",
+          "status": "finished",
+          "class": {
+            "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+            "code": "EMER",
+            "display": "ambulatory"
+          },
+          "subject": {
+            "reference": "Patient/patient-0002"
+          },
+          "period": {
+            "start": "2026-03-03T13:00:00Z",
+            "end": "2026-03-05T01:00:00Z"
+          }
+        },
+        "search": {
+          "mode": "include"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:cond-0002-0",
+        "resource": {
+          "resourceType": "Condition",
+          "id": "cond-0002-0",
+          "meta": {
+            "profile": ["http://hl7.org/fhir/StructureDefinition/Condition"]
+          },
+          "clinicalStatus": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+                "code": "active"
+              }
+            ]
+          },
+          "verificationStatus": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+                "code": "confirmed"
+              }
+            ]
+          },
+          "category": [
+            {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+                  "code": "encounter-diagnosis"
+                }
+              ]
+            }
+          ],
+          "code": {
+            "coding": [
+              {
+                "system": "http://snomed.info/sct",
+                "code": "431855005",
+                "display": "Chronic kidney disease stage 1"
+              }
+            ],
+            "text": "Chronic kidney disease stage 1"
+          },
+          "subject": {
+            "reference": "Patient/patient-0002"
+          },
+          "onsetDateTime": "2020-05-26"
+        },
+        "search": {
+          "mode": "include"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:obs-0002-0",
+        "resource": {
+          "resourceType": "Observation",
+          "id": "obs-0002-0",
+          "meta": {
+            "profile": ["http://hl7.org/fhir/StructureDefinition/vitalsigns"]
+          },
+          "status": "final",
+          "category": [
+            {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                  "code": "vital-signs",
+                  "display": "Vital Signs"
+                }
+              ]
+            }
+          ],
+          "code": {
+            "coding": [
+              {
+                "system": "http://loinc.org",
+                "code": "33914-3",
+                "display": "eGFR"
+              }
+            ],
+            "text": "eGFR"
+          },
+          "subject": {
+            "reference": "Patient/patient-0002"
+          },
+          "effectiveDateTime": "2026-03-01T14:45:00Z",
+          "valueQuantity": {
+            "value": 65.9,
+            "unit": "mL/min/{1.73_m2}",
+            "system": "http://unitsofmeasure.org",
+            "code": "mL/min/{1.73_m2}"
+          }
+        },
+        "search": {
+          "mode": "include"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:cond-0002-1",
+        "resource": {
+          "resourceType": "Condition",
+          "id": "cond-0002-1",
+          "meta": {
+            "profile": ["http://hl7.org/fhir/StructureDefinition/Condition"]
+          },
+          "clinicalStatus": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+                "code": "active"
+              }
+            ]
+          },
+          "verificationStatus": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+                "code": "confirmed"
+              }
+            ]
+          },
+          "category": [
+            {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+                  "code": "encounter-diagnosis"
+                }
+              ]
+            }
+          ],
+          "code": {
+            "coding": [
+              {
+                "system": "http://snomed.info/sct",
+                "code": "59621000",
+                "display": "Essential hypertension"
+              }
+            ],
+            "text": "Essential hypertension"
+          },
+          "subject": {
+            "reference": "Patient/patient-0002"
+          },
+          "onsetDateTime": "2016-03-13"
+        },
+        "search": {
+          "mode": "include"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:obs-0002-1",
+        "resource": {
+          "resourceType": "Observation",
+          "id": "obs-0002-1",
+          "meta": {
+            "profile": ["http://hl7.org/fhir/StructureDefinition/vitalsigns"]
+          },
+          "status": "final",
+          "category": [
+            {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                  "code": "vital-signs",
+                  "display": "Vital Signs"
+                }
+              ]
+            }
+          ],
+          "code": {
+            "coding": [
+              {
+                "system": "http://loinc.org",
+                "code": "4548-4",
+                "display": "Hemoglobin A1c"
+              }
+            ],
+            "text": "Hemoglobin A1c"
+          },
+          "subject": {
+            "reference": "Patient/patient-0002"
+          },
+          "effectiveDateTime": "2026-03-08T22:59:00Z",
+          "valueQuantity": {
+            "value": 7.1,
+            "unit": "%",
+            "system": "http://unitsofmeasure.org",
+            "code": "%"
+          }
+        },
+        "search": {
+          "mode": "include"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:med-0002",
+        "resource": {
+          "resourceType": "MedicationRequest",
+          "id": "med-0002",
+          "status": "active",
+          "intent": "order",
+          "medicationCodeableConcept": {
+            "coding": [
+              {
+                "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+                "code": "197361",
+                "display": "Amlodipine 5 MG Oral Tablet"
+              }
+            ],
+            "text": "Amlodipine 5 MG Oral Tablet"
+          },
+          "subject": {
+            "reference": "Patient/patient-0002"
+          },
+          "authoredOn": "2026-03-20",
+          "dosageInstruction": [
+            {
+              "text": "Three times daily",
+              "timing": {
+                "repeat": {
+                  "frequency": 1,
+                  "period": 1,
+                  "periodUnit": "d"
+                }
+              }
+            }
+          ]
+        },
+        "search": {
+          "mode": "include"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:imm-0002",
+        "resource": {
+          "resourceType": "Immunization",
+          "id": "imm-0002",
+          "status": "completed",
+          "vaccineCode": {
+            "coding": [
+              {
+                "system": "http://hl7.org/fhir/sid/cvx",
+                "code": "113",
+                "display": "Td (adult) preservative free"
+              }
+            ],
+            "text": "Td (adult) preservative free"
+          },
+          "patient": {
+            "reference": "Patient/patient-0002"
+          },
+          "occurrenceDateTime": "2024-03-19"
+        },
+        "search": {
+          "mode": "include"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:patient-0003",
+        "resource": {
+          "resourceType": "Patient",
+          "id": "patient-0003",
+          "meta": {
+            "profile": ["http://hl7.org/fhir/StructureDefinition/Patient"]
+          },
+          "text": {
+            "status": "generated",
+            "div": "<div xmlns='http://www.w3.org/1999/xhtml'>Gerhard Richter</div>"
+          },
+          "identifier": [
+            {
+              "system": "http://alpha-klinik.de/fhir/patient-id",
+              "value": "patient-0003"
+            }
+          ],
+          "name": [
+            {
+              "use": "official",
+              "family": "Richter",
+              "given": ["Gerhard"]
+            }
+          ],
+          "gender": "male",
+          "birthDate": "1984-10-04",
+          "address": [
+            {
+              "city": "Rotterdam",
+              "country": "DE"
+            }
+          ]
+        },
+        "search": {
+          "mode": "match"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:enc-0003",
+        "resource": {
+          "resourceType": "Encounter",
+          "id": "enc-0003",
+          "status": "in-progress",
+          "class": {
+            "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+            "code": "IMP",
+            "display": "inpatient"
+          },
+          "subject": {
+            "reference": "Patient/patient-0003"
+          },
+          "period": {
+            "start": "2026-03-12T15:00:00Z",
+            "end": "2026-03-13T15:00:00Z"
+          }
+        },
+        "search": {
+          "mode": "include"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:cond-0003-0",
+        "resource": {
+          "resourceType": "Condition",
+          "id": "cond-0003-0",
+          "meta": {
+            "profile": ["http://hl7.org/fhir/StructureDefinition/Condition"]
+          },
+          "clinicalStatus": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+                "code": "active"
+              }
+            ]
+          },
+          "verificationStatus": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+                "code": "confirmed"
+              }
+            ]
+          },
+          "category": [
+            {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+                  "code": "encounter-diagnosis"
+                }
+              ]
+            }
+          ],
+          "code": {
+            "coding": [
+              {
+                "system": "http://snomed.info/sct",
+                "code": "40055000",
+                "display": "Chronic sinusitis"
+              }
+            ],
+            "text": "Chronic sinusitis"
+          },
+          "subject": {
+            "reference": "Patient/patient-0003"
+          },
+          "onsetDateTime": "2017-04-13"
+        },
+        "search": {
+          "mode": "include"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:obs-0003-0",
+        "resource": {
+          "resourceType": "Observation",
+          "id": "obs-0003-0",
+          "meta": {
+            "profile": ["http://hl7.org/fhir/StructureDefinition/vitalsigns"]
+          },
+          "status": "final",
+          "category": [
+            {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                  "code": "vital-signs",
+                  "display": "Vital Signs"
+                }
+              ]
+            }
+          ],
+          "code": {
+            "coding": [
+              {
+                "system": "http://loinc.org",
+                "code": "4548-4",
+                "display": "Hemoglobin A1c"
+              }
+            ],
+            "text": "Hemoglobin A1c"
+          },
+          "subject": {
+            "reference": "Patient/patient-0003"
+          },
+          "effectiveDateTime": "2026-03-07T11:24:00Z",
+          "valueQuantity": {
+            "value": 7.1,
+            "unit": "%",
+            "system": "http://unitsofmeasure.org",
+            "code": "%"
+          }
+        },
+        "search": {
+          "mode": "include"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:cond-0003-1",
+        "resource": {
+          "resourceType": "Condition",
+          "id": "cond-0003-1",
+          "meta": {
+            "profile": ["http://hl7.org/fhir/StructureDefinition/Condition"]
+          },
+          "clinicalStatus": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+                "code": "active"
+              }
+            ]
+          },
+          "verificationStatus": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+                "code": "confirmed"
+              }
+            ]
+          },
+          "category": [
+            {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+                  "code": "encounter-diagnosis"
+                }
+              ]
+            }
+          ],
+          "code": {
+            "coding": [
+              {
+                "system": "http://snomed.info/sct",
+                "code": "44054006",
+                "display": "Diabetes mellitus type 2"
+              }
+            ],
+            "text": "Diabetes mellitus type 2"
+          },
+          "subject": {
+            "reference": "Patient/patient-0003"
+          },
+          "onsetDateTime": "2016-06-25"
+        },
+        "search": {
+          "mode": "include"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:obs-0003-1",
+        "resource": {
+          "resourceType": "Observation",
+          "id": "obs-0003-1",
+          "meta": {
+            "profile": ["http://hl7.org/fhir/StructureDefinition/vitalsigns"]
+          },
+          "status": "final",
+          "category": [
+            {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                  "code": "vital-signs",
+                  "display": "Vital Signs"
+                }
+              ]
+            }
+          ],
+          "code": {
+            "coding": [
+              {
+                "system": "http://loinc.org",
+                "code": "2339-0",
+                "display": "Glucose [Mass/volume] in Blood"
+              }
+            ],
+            "text": "Glucose [Mass/volume] in Blood"
+          },
+          "subject": {
+            "reference": "Patient/patient-0003"
+          },
+          "effectiveDateTime": "2026-03-09T11:54:00Z",
+          "valueQuantity": {
+            "value": 153.2,
+            "unit": "mg/dL",
+            "system": "http://unitsofmeasure.org",
+            "code": "mg/dL"
+          }
+        },
+        "search": {
+          "mode": "include"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:med-0003",
+        "resource": {
+          "resourceType": "MedicationRequest",
+          "id": "med-0003",
+          "status": "active",
+          "intent": "order",
+          "medicationCodeableConcept": {
+            "coding": [
+              {
+                "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+                "code": "198211",
+                "display": "Aspirin 81 MG Oral Tablet"
+              }
+            ],
+            "text": "Aspirin 81 MG Oral Tablet"
+          },
+          "subject": {
+            "reference": "Patient/patient-0003"
+          },
+          "authoredOn": "2026-03-12",
+          "dosageInstruction": [
+            {
+              "text": "Once daily",
+              "timing": {
+                "repeat": {
+                  "frequency": 2,
+                  "period": 1,
+                  "periodUnit": "d"
+                }
+              }
+            }
+          ]
+        },
+        "search": {
+          "mode": "include"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:imm-0003",
+        "resource": {
+          "resourceType": "Immunization",
+          "id": "imm-0003",
+          "status": "completed",
+          "vaccineCode": {
+            "coding": [
+              {
+                "system": "http://hl7.org/fhir/sid/cvx",
+                "code": "08",
+                "display": "Hepatitis B vaccine"
+              }
+            ],
+            "text": "Hepatitis B vaccine"
+          },
+          "patient": {
+            "reference": "Patient/patient-0003"
+          },
+          "occurrenceDateTime": "2025-03-06"
+        },
+        "search": {
+          "mode": "include"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:patient-0004",
+        "resource": {
+          "resourceType": "Patient",
+          "id": "patient-0004",
+          "meta": {
+            "profile": ["http://hl7.org/fhir/StructureDefinition/Patient"]
+          },
+          "text": {
+            "status": "generated",
+            "div": "<div xmlns='http://www.w3.org/1999/xhtml'>Helga Richter</div>"
+          },
+          "identifier": [
+            {
+              "system": "http://alpha-klinik.de/fhir/patient-id",
+              "value": "patient-0004"
+            }
+          ],
+          "name": [
+            {
+              "use": "official",
+              "family": "Richter",
+              "given": ["Helga"]
+            }
+          ],
+          "gender": "female",
+          "birthDate": "1943-07-02",
+          "address": [
+            {
+              "city": "Amsterdam",
+              "country": "NL"
+            }
+          ]
+        },
+        "search": {
+          "mode": "match"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:enc-0004",
+        "resource": {
+          "resourceType": "Encounter",
+          "id": "enc-0004",
+          "status": "in-progress",
+          "class": {
+            "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+            "code": "AMB",
+            "display": "emergency"
+          },
+          "subject": {
+            "reference": "Patient/patient-0004"
+          },
+          "period": {
+            "start": "2026-03-10T09:00:00Z",
+            "end": "2026-03-11T15:00:00Z"
+          }
+        },
+        "search": {
+          "mode": "include"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:cond-0004-0",
+        "resource": {
+          "resourceType": "Condition",
+          "id": "cond-0004-0",
+          "meta": {
+            "profile": ["http://hl7.org/fhir/StructureDefinition/Condition"]
+          },
+          "clinicalStatus": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+                "code": "active"
+              }
+            ]
+          },
+          "verificationStatus": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+                "code": "confirmed"
+              }
+            ]
+          },
+          "category": [
+            {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+                  "code": "encounter-diagnosis"
+                }
+              ]
+            }
+          ],
+          "code": {
+            "coding": [
+              {
+                "system": "http://snomed.info/sct",
+                "code": "431855005",
+                "display": "Chronic kidney disease stage 1"
+              }
+            ],
+            "text": "Chronic kidney disease stage 1"
+          },
+          "subject": {
+            "reference": "Patient/patient-0004"
+          },
+          "onsetDateTime": "2022-12-09"
+        },
+        "search": {
+          "mode": "include"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:obs-0004-0",
+        "resource": {
+          "resourceType": "Observation",
+          "id": "obs-0004-0",
+          "meta": {
+            "profile": ["http://hl7.org/fhir/StructureDefinition/vitalsigns"]
+          },
+          "status": "final",
+          "category": [
+            {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                  "code": "vital-signs",
+                  "display": "Vital Signs"
+                }
+              ]
+            }
+          ],
+          "code": {
+            "coding": [
+              {
+                "system": "http://loinc.org",
+                "code": "4548-4",
+                "display": "Hemoglobin A1c"
+              }
+            ],
+            "text": "Hemoglobin A1c"
+          },
+          "subject": {
+            "reference": "Patient/patient-0004"
+          },
+          "effectiveDateTime": "2026-03-12T13:44:00Z",
+          "valueQuantity": {
+            "value": 8.7,
+            "unit": "%",
+            "system": "http://unitsofmeasure.org",
+            "code": "%"
+          }
+        },
+        "search": {
+          "mode": "include"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:cond-0004-1",
+        "resource": {
+          "resourceType": "Condition",
+          "id": "cond-0004-1",
+          "meta": {
+            "profile": ["http://hl7.org/fhir/StructureDefinition/Condition"]
+          },
+          "clinicalStatus": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+                "code": "active"
+              }
+            ]
+          },
+          "verificationStatus": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+                "code": "confirmed"
+              }
+            ]
+          },
+          "category": [
+            {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+                  "code": "encounter-diagnosis"
+                }
+              ]
+            }
+          ],
+          "code": {
+            "coding": [
+              {
+                "system": "http://snomed.info/sct",
+                "code": "431855005",
+                "display": "Chronic kidney disease stage 1"
+              }
+            ],
+            "text": "Chronic kidney disease stage 1"
+          },
+          "subject": {
+            "reference": "Patient/patient-0004"
+          },
+          "onsetDateTime": "2020-04-20"
+        },
+        "search": {
+          "mode": "include"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:obs-0004-1",
+        "resource": {
+          "resourceType": "Observation",
+          "id": "obs-0004-1",
+          "meta": {
+            "profile": ["http://hl7.org/fhir/StructureDefinition/vitalsigns"]
+          },
+          "status": "final",
+          "category": [
+            {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                  "code": "vital-signs",
+                  "display": "Vital Signs"
+                }
+              ]
+            }
+          ],
+          "code": {
+            "coding": [
+              {
+                "system": "http://loinc.org",
+                "code": "718-7",
+                "display": "Hemoglobin [Mass/volume]"
+              }
+            ],
+            "text": "Hemoglobin [Mass/volume]"
+          },
+          "subject": {
+            "reference": "Patient/patient-0004"
+          },
+          "effectiveDateTime": "2026-03-09T16:03:00Z",
+          "valueQuantity": {
+            "value": 17.2,
+            "unit": "g/dL",
+            "system": "http://unitsofmeasure.org",
+            "code": "g/dL"
+          }
+        },
+        "search": {
+          "mode": "include"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:med-0004",
+        "resource": {
+          "resourceType": "MedicationRequest",
+          "id": "med-0004",
+          "status": "active",
+          "intent": "order",
+          "medicationCodeableConcept": {
+            "coding": [
+              {
+                "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+                "code": "197361",
+                "display": "Amlodipine 5 MG Oral Tablet"
+              }
+            ],
+            "text": "Amlodipine 5 MG Oral Tablet"
+          },
+          "subject": {
+            "reference": "Patient/patient-0004"
+          },
+          "authoredOn": "2026-03-04",
+          "dosageInstruction": [
+            {
+              "text": "Once daily",
+              "timing": {
+                "repeat": {
+                  "frequency": 2,
+                  "period": 1,
+                  "periodUnit": "d"
+                }
+              }
+            }
+          ]
+        },
+        "search": {
+          "mode": "include"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:imm-0004",
+        "resource": {
+          "resourceType": "Immunization",
+          "id": "imm-0004",
+          "status": "completed",
+          "vaccineCode": {
+            "coding": [
+              {
+                "system": "http://hl7.org/fhir/sid/cvx",
+                "code": "33",
+                "display": "Pneumococcal polysaccharide vaccine"
+              }
+            ],
+            "text": "Pneumococcal polysaccharide vaccine"
+          },
+          "patient": {
+            "reference": "Patient/patient-0004"
+          },
+          "occurrenceDateTime": "2025-07-20"
+        },
+        "search": {
+          "mode": "include"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:patient-0005",
+        "resource": {
+          "resourceType": "Patient",
+          "id": "patient-0005",
+          "meta": {
+            "profile": ["http://hl7.org/fhir/StructureDefinition/Patient"]
+          },
+          "text": {
+            "status": "generated",
+            "div": "<div xmlns='http://www.w3.org/1999/xhtml'>Gerhard Schmidt</div>"
+          },
+          "identifier": [
+            {
+              "system": "http://alpha-klinik.de/fhir/patient-id",
+              "value": "patient-0005"
+            }
+          ],
+          "name": [
+            {
+              "use": "official",
+              "family": "Schmidt",
+              "given": ["Gerhard"]
+            }
+          ],
+          "gender": "male",
+          "birthDate": "1970-09-05",
+          "address": [
+            {
+              "city": "Hamburg",
+              "country": "NL"
+            }
+          ]
+        },
+        "search": {
+          "mode": "match"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:enc-0005",
+        "resource": {
+          "resourceType": "Encounter",
+          "id": "enc-0005",
+          "status": "in-progress",
+          "class": {
+            "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+            "code": "EMER",
+            "display": "emergency"
+          },
+          "subject": {
+            "reference": "Patient/patient-0005"
+          },
+          "period": {
+            "start": "2026-03-08T17:00:00Z",
+            "end": "2026-03-08T20:00:00Z"
+          }
+        },
+        "search": {
+          "mode": "include"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:cond-0005-0",
+        "resource": {
+          "resourceType": "Condition",
+          "id": "cond-0005-0",
+          "meta": {
+            "profile": ["http://hl7.org/fhir/StructureDefinition/Condition"]
+          },
+          "clinicalStatus": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+                "code": "active"
+              }
+            ]
+          },
+          "verificationStatus": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+                "code": "confirmed"
+              }
+            ]
+          },
+          "category": [
+            {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+                  "code": "encounter-diagnosis"
+                }
+              ]
+            }
+          ],
+          "code": {
+            "coding": [
+              {
+                "system": "http://snomed.info/sct",
+                "code": "73211009",
+                "display": "Diabetes mellitus"
+              }
+            ],
+            "text": "Diabetes mellitus"
+          },
+          "subject": {
+            "reference": "Patient/patient-0005"
+          },
+          "onsetDateTime": "2018-01-03"
+        },
+        "search": {
+          "mode": "include"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:obs-0005-0",
+        "resource": {
+          "resourceType": "Observation",
+          "id": "obs-0005-0",
+          "meta": {
+            "profile": ["http://hl7.org/fhir/StructureDefinition/vitalsigns"]
+          },
+          "status": "final",
+          "category": [
+            {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                  "code": "vital-signs",
+                  "display": "Vital Signs"
+                }
+              ]
+            }
+          ],
+          "code": {
+            "coding": [
+              {
+                "system": "http://loinc.org",
+                "code": "718-7",
+                "display": "Hemoglobin [Mass/volume]"
+              }
+            ],
+            "text": "Hemoglobin [Mass/volume]"
+          },
+          "subject": {
+            "reference": "Patient/patient-0005"
+          },
+          "effectiveDateTime": "2026-03-01T16:46:00Z",
+          "valueQuantity": {
+            "value": 17.2,
+            "unit": "g/dL",
+            "system": "http://unitsofmeasure.org",
+            "code": "g/dL"
+          }
+        },
+        "search": {
+          "mode": "include"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:cond-0005-1",
+        "resource": {
+          "resourceType": "Condition",
+          "id": "cond-0005-1",
+          "meta": {
+            "profile": ["http://hl7.org/fhir/StructureDefinition/Condition"]
+          },
+          "clinicalStatus": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+                "code": "active"
+              }
+            ]
+          },
+          "verificationStatus": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+                "code": "confirmed"
+              }
+            ]
+          },
+          "category": [
+            {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+                  "code": "encounter-diagnosis"
+                }
+              ]
+            }
+          ],
+          "code": {
+            "coding": [
+              {
+                "system": "http://snomed.info/sct",
+                "code": "53741008",
+                "display": "Coronary arteriosclerosis"
+              }
+            ],
+            "text": "Coronary arteriosclerosis"
+          },
+          "subject": {
+            "reference": "Patient/patient-0005"
+          },
+          "onsetDateTime": "2023-05-15"
+        },
+        "search": {
+          "mode": "include"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:obs-0005-1",
+        "resource": {
+          "resourceType": "Observation",
+          "id": "obs-0005-1",
+          "meta": {
+            "profile": ["http://hl7.org/fhir/StructureDefinition/vitalsigns"]
+          },
+          "status": "final",
+          "category": [
+            {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                  "code": "vital-signs",
+                  "display": "Vital Signs"
+                }
+              ]
+            }
+          ],
+          "code": {
+            "coding": [
+              {
+                "system": "http://loinc.org",
+                "code": "33914-3",
+                "display": "eGFR"
+              }
+            ],
+            "text": "eGFR"
+          },
+          "subject": {
+            "reference": "Patient/patient-0005"
+          },
+          "effectiveDateTime": "2026-03-09T15:10:00Z",
+          "valueQuantity": {
+            "value": 109.9,
+            "unit": "mL/min/{1.73_m2}",
+            "system": "http://unitsofmeasure.org",
+            "code": "mL/min/{1.73_m2}"
+          }
+        },
+        "search": {
+          "mode": "include"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:med-0005",
+        "resource": {
+          "resourceType": "MedicationRequest",
+          "id": "med-0005",
+          "status": "active",
+          "intent": "order",
+          "medicationCodeableConcept": {
+            "coding": [
+              {
+                "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+                "code": "198211",
+                "display": "Aspirin 81 MG Oral Tablet"
+              }
+            ],
+            "text": "Aspirin 81 MG Oral Tablet"
+          },
+          "subject": {
+            "reference": "Patient/patient-0005"
+          },
+          "authoredOn": "2026-03-12",
+          "dosageInstruction": [
+            {
+              "text": "Twice daily",
+              "timing": {
+                "repeat": {
+                  "frequency": 1,
+                  "period": 1,
+                  "periodUnit": "d"
+                }
+              }
+            }
+          ]
+        },
+        "search": {
+          "mode": "include"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:imm-0005",
+        "resource": {
+          "resourceType": "Immunization",
+          "id": "imm-0005",
+          "status": "completed",
+          "vaccineCode": {
+            "coding": [
+              {
+                "system": "http://hl7.org/fhir/sid/cvx",
+                "code": "113",
+                "display": "Td (adult) preservative free"
+              }
+            ],
+            "text": "Td (adult) preservative free"
+          },
+          "patient": {
+            "reference": "Patient/patient-0005"
+          },
+          "occurrenceDateTime": "2025-11-19"
+        },
+        "search": {
+          "mode": "include"
+        }
+      }
+    ]
+  },
+  "fhir-cohort-bundle": {
+    "resourceType": "Bundle",
+    "id": "bundle-65164",
+    "meta": {
+      "lastUpdated": "2026-03-20T16:23:00Z"
+    },
+    "type": "searchset",
+    "total": 40,
+    "link": [
+      {
+        "relation": "self",
+        "url": "https://alpha-klinik.de/fhir/Patient"
+      }
+    ],
+    "entry": [
+      {
+        "fullUrl": "urn:uuid:patient-0001",
+        "resource": {
+          "resourceType": "Patient",
+          "id": "patient-0001",
+          "meta": {
+            "profile": ["http://hl7.org/fhir/StructureDefinition/Patient"]
+          },
+          "text": {
+            "status": "generated",
+            "div": "<div xmlns='http://www.w3.org/1999/xhtml'>Anna Schmidt</div>"
+          },
+          "identifier": [
+            {
+              "system": "http://alpha-klinik.de/fhir/patient-id",
+              "value": "patient-0001"
+            }
+          ],
+          "name": [
+            {
+              "use": "official",
+              "family": "Schmidt",
+              "given": ["Anna"]
+            }
+          ],
+          "gender": "female",
+          "birthDate": "1957-09-06",
+          "address": [
+            {
+              "city": "Rotterdam",
+              "country": "DE"
+            }
+          ]
+        },
+        "search": {
+          "mode": "match"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:enc-0001",
+        "resource": {
+          "resourceType": "Encounter",
+          "id": "enc-0001",
+          "status": "finished",
+          "class": {
+            "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+            "code": "IMP",
+            "display": "emergency"
+          },
+          "subject": {
+            "reference": "Patient/patient-0001"
+          },
+          "period": {
+            "start": "2026-03-10T15:00:00Z",
+            "end": "2026-03-11T21:00:00Z"
+          }
+        },
+        "search": {
+          "mode": "include"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:cond-0001-0",
+        "resource": {
+          "resourceType": "Condition",
+          "id": "cond-0001-0",
+          "meta": {
+            "profile": ["http://hl7.org/fhir/StructureDefinition/Condition"]
+          },
+          "clinicalStatus": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+                "code": "active"
+              }
+            ]
+          },
+          "verificationStatus": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+                "code": "confirmed"
+              }
+            ]
+          },
+          "category": [
+            {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+                  "code": "encounter-diagnosis"
+                }
+              ]
+            }
+          ],
+          "code": {
+            "coding": [
+              {
+                "system": "http://snomed.info/sct",
+                "code": "38341003",
+                "display": "Hypertensive disorder"
+              }
+            ],
+            "text": "Hypertensive disorder"
+          },
+          "subject": {
+            "reference": "Patient/patient-0001"
+          },
+          "onsetDateTime": "2024-10-06"
+        },
+        "search": {
+          "mode": "include"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:obs-0001-0",
+        "resource": {
+          "resourceType": "Observation",
+          "id": "obs-0001-0",
+          "meta": {
+            "profile": ["http://hl7.org/fhir/StructureDefinition/vitalsigns"]
+          },
+          "status": "final",
+          "category": [
+            {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                  "code": "vital-signs",
+                  "display": "Vital Signs"
+                }
+              ]
+            }
+          ],
+          "code": {
+            "coding": [
+              {
+                "system": "http://loinc.org",
+                "code": "4548-4",
+                "display": "Hemoglobin A1c"
+              }
+            ],
+            "text": "Hemoglobin A1c"
+          },
+          "subject": {
+            "reference": "Patient/patient-0001"
+          },
+          "effectiveDateTime": "2026-03-18T14:51:00Z",
+          "valueQuantity": {
+            "value": 9.1,
+            "unit": "%",
+            "system": "http://unitsofmeasure.org",
+            "code": "%"
+          }
+        },
+        "search": {
+          "mode": "include"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:cond-0001-1",
+        "resource": {
+          "resourceType": "Condition",
+          "id": "cond-0001-1",
+          "meta": {
+            "profile": ["http://hl7.org/fhir/StructureDefinition/Condition"]
+          },
+          "clinicalStatus": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+                "code": "active"
+              }
+            ]
+          },
+          "verificationStatus": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+                "code": "confirmed"
+              }
+            ]
+          },
+          "category": [
+            {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+                  "code": "encounter-diagnosis"
+                }
+              ]
+            }
+          ],
+          "code": {
+            "coding": [
+              {
+                "system": "http://snomed.info/sct",
+                "code": "40055000",
+                "display": "Chronic sinusitis"
+              }
+            ],
+            "text": "Chronic sinusitis"
+          },
+          "subject": {
+            "reference": "Patient/patient-0001"
+          },
+          "onsetDateTime": "2020-01-31"
+        },
+        "search": {
+          "mode": "include"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:obs-0001-1",
+        "resource": {
+          "resourceType": "Observation",
+          "id": "obs-0001-1",
+          "meta": {
+            "profile": ["http://hl7.org/fhir/StructureDefinition/vitalsigns"]
+          },
+          "status": "final",
+          "category": [
+            {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                  "code": "vital-signs",
+                  "display": "Vital Signs"
+                }
+              ]
+            }
+          ],
+          "code": {
+            "coding": [
+              {
+                "system": "http://loinc.org",
+                "code": "8867-4",
+                "display": "Heart rate"
+              }
+            ],
+            "text": "Heart rate"
+          },
+          "subject": {
+            "reference": "Patient/patient-0001"
+          },
+          "effectiveDateTime": "2026-03-13T19:51:00Z",
+          "valueQuantity": {
+            "value": 90.0,
+            "unit": "/min",
+            "system": "http://unitsofmeasure.org",
+            "code": "/min"
+          }
+        },
+        "search": {
+          "mode": "include"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:med-0001",
+        "resource": {
+          "resourceType": "MedicationRequest",
+          "id": "med-0001",
+          "status": "active",
+          "intent": "order",
+          "medicationCodeableConcept": {
+            "coding": [
+              {
+                "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+                "code": "835829",
+                "display": "Insulin Glargine 100 UNT/ML Injectable Solution"
+              }
+            ],
+            "text": "Insulin Glargine 100 UNT/ML Injectable Solution"
+          },
+          "subject": {
+            "reference": "Patient/patient-0001"
+          },
+          "authoredOn": "2026-03-04",
+          "dosageInstruction": [
+            {
+              "text": "Once daily",
+              "timing": {
+                "repeat": {
+                  "frequency": 3,
+                  "period": 1,
+                  "periodUnit": "d"
+                }
+              }
+            }
+          ]
+        },
+        "search": {
+          "mode": "include"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:imm-0001",
+        "resource": {
+          "resourceType": "Immunization",
+          "id": "imm-0001",
+          "status": "completed",
+          "vaccineCode": {
+            "coding": [
+              {
+                "system": "http://hl7.org/fhir/sid/cvx",
+                "code": "33",
+                "display": "Pneumococcal polysaccharide vaccine"
+              }
+            ],
+            "text": "Pneumococcal polysaccharide vaccine"
+          },
+          "patient": {
+            "reference": "Patient/patient-0001"
+          },
+          "occurrenceDateTime": "2024-02-02"
+        },
+        "search": {
+          "mode": "include"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:patient-0002",
+        "resource": {
+          "resourceType": "Patient",
+          "id": "patient-0002",
+          "meta": {
+            "profile": ["http://hl7.org/fhir/StructureDefinition/Patient"]
+          },
+          "text": {
+            "status": "generated",
+            "div": "<div xmlns='http://www.w3.org/1999/xhtml'>Heinrich Klein</div>"
+          },
+          "identifier": [
+            {
+              "system": "http://alpha-klinik.de/fhir/patient-id",
+              "value": "patient-0002"
+            }
+          ],
+          "name": [
+            {
+              "use": "official",
+              "family": "Klein",
+              "given": ["Heinrich"]
+            }
+          ],
+          "gender": "male",
+          "birthDate": "1949-08-05",
+          "address": [
+            {
+              "city": "Munich",
+              "country": "DE"
+            }
+          ]
+        },
+        "search": {
+          "mode": "match"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:enc-0002",
+        "resource": {
+          "resourceType": "Encounter",
+          "id": "enc-0002",
+          "status": "finished",
+          "class": {
+            "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+            "code": "AMB",
+            "display": "inpatient"
+          },
+          "subject": {
+            "reference": "Patient/patient-0002"
+          },
+          "period": {
+            "start": "2026-03-08T08:00:00Z",
+            "end": "2026-03-09T00:00:00Z"
+          }
+        },
+        "search": {
+          "mode": "include"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:cond-0002-0",
+        "resource": {
+          "resourceType": "Condition",
+          "id": "cond-0002-0",
+          "meta": {
+            "profile": ["http://hl7.org/fhir/StructureDefinition/Condition"]
+          },
+          "clinicalStatus": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+                "code": "active"
+              }
+            ]
+          },
+          "verificationStatus": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+                "code": "confirmed"
+              }
+            ]
+          },
+          "category": [
+            {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+                  "code": "encounter-diagnosis"
+                }
+              ]
+            }
+          ],
+          "code": {
+            "coding": [
+              {
+                "system": "http://snomed.info/sct",
+                "code": "44054006",
+                "display": "Diabetes mellitus type 2"
+              }
+            ],
+            "text": "Diabetes mellitus type 2"
+          },
+          "subject": {
+            "reference": "Patient/patient-0002"
+          },
+          "onsetDateTime": "2025-10-19"
+        },
+        "search": {
+          "mode": "include"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:obs-0002-0",
+        "resource": {
+          "resourceType": "Observation",
+          "id": "obs-0002-0",
+          "meta": {
+            "profile": ["http://hl7.org/fhir/StructureDefinition/vitalsigns"]
+          },
+          "status": "final",
+          "category": [
+            {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                  "code": "vital-signs",
+                  "display": "Vital Signs"
+                }
+              ]
+            }
+          ],
+          "code": {
+            "coding": [
+              {
+                "system": "http://loinc.org",
+                "code": "2339-0",
+                "display": "Glucose [Mass/volume] in Blood"
+              }
+            ],
+            "text": "Glucose [Mass/volume] in Blood"
+          },
+          "subject": {
+            "reference": "Patient/patient-0002"
+          },
+          "effectiveDateTime": "2026-03-18T06:02:00Z",
+          "valueQuantity": {
+            "value": 219.2,
+            "unit": "mg/dL",
+            "system": "http://unitsofmeasure.org",
+            "code": "mg/dL"
+          }
+        },
+        "search": {
+          "mode": "include"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:cond-0002-1",
+        "resource": {
+          "resourceType": "Condition",
+          "id": "cond-0002-1",
+          "meta": {
+            "profile": ["http://hl7.org/fhir/StructureDefinition/Condition"]
+          },
+          "clinicalStatus": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+                "code": "active"
+              }
+            ]
+          },
+          "verificationStatus": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+                "code": "confirmed"
+              }
+            ]
+          },
+          "category": [
+            {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+                  "code": "encounter-diagnosis"
+                }
+              ]
+            }
+          ],
+          "code": {
+            "coding": [
+              {
+                "system": "http://snomed.info/sct",
+                "code": "40055000",
+                "display": "Chronic sinusitis"
+              }
+            ],
+            "text": "Chronic sinusitis"
+          },
+          "subject": {
+            "reference": "Patient/patient-0002"
+          },
+          "onsetDateTime": "2017-09-22"
+        },
+        "search": {
+          "mode": "include"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:obs-0002-1",
+        "resource": {
+          "resourceType": "Observation",
+          "id": "obs-0002-1",
+          "meta": {
+            "profile": ["http://hl7.org/fhir/StructureDefinition/vitalsigns"]
+          },
+          "status": "final",
+          "category": [
+            {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                  "code": "vital-signs",
+                  "display": "Vital Signs"
+                }
+              ]
+            }
+          ],
+          "code": {
+            "coding": [
+              {
+                "system": "http://loinc.org",
+                "code": "2339-0",
+                "display": "Glucose [Mass/volume] in Blood"
+              }
+            ],
+            "text": "Glucose [Mass/volume] in Blood"
+          },
+          "subject": {
+            "reference": "Patient/patient-0002"
+          },
+          "effectiveDateTime": "2026-03-06T15:07:00Z",
+          "valueQuantity": {
+            "value": 229.2,
+            "unit": "mg/dL",
+            "system": "http://unitsofmeasure.org",
+            "code": "mg/dL"
+          }
+        },
+        "search": {
+          "mode": "include"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:med-0002",
+        "resource": {
+          "resourceType": "MedicationRequest",
+          "id": "med-0002",
+          "status": "active",
+          "intent": "order",
+          "medicationCodeableConcept": {
+            "coding": [
+              {
+                "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+                "code": "259255",
+                "display": "Atorvastatin 20 MG Oral Tablet"
+              }
+            ],
+            "text": "Atorvastatin 20 MG Oral Tablet"
+          },
+          "subject": {
+            "reference": "Patient/patient-0002"
+          },
+          "authoredOn": "2026-03-11",
+          "dosageInstruction": [
+            {
+              "text": "Once daily",
+              "timing": {
+                "repeat": {
+                  "frequency": 3,
+                  "period": 1,
+                  "periodUnit": "d"
+                }
+              }
+            }
+          ]
+        },
+        "search": {
+          "mode": "include"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:imm-0002",
+        "resource": {
+          "resourceType": "Immunization",
+          "id": "imm-0002",
+          "status": "completed",
+          "vaccineCode": {
+            "coding": [
+              {
+                "system": "http://hl7.org/fhir/sid/cvx",
+                "code": "08",
+                "display": "Hepatitis B vaccine"
+              }
+            ],
+            "text": "Hepatitis B vaccine"
+          },
+          "patient": {
+            "reference": "Patient/patient-0002"
+          },
+          "occurrenceDateTime": "2024-11-27"
+        },
+        "search": {
+          "mode": "include"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:patient-0003",
+        "resource": {
+          "resourceType": "Patient",
+          "id": "patient-0003",
+          "meta": {
+            "profile": ["http://hl7.org/fhir/StructureDefinition/Patient"]
+          },
+          "text": {
+            "status": "generated",
+            "div": "<div xmlns='http://www.w3.org/1999/xhtml'>Sophie Schwarz</div>"
+          },
+          "identifier": [
+            {
+              "system": "http://alpha-klinik.de/fhir/patient-id",
+              "value": "patient-0003"
+            }
+          ],
+          "name": [
+            {
+              "use": "official",
+              "family": "Schwarz",
+              "given": ["Sophie"]
+            }
+          ],
+          "gender": "female",
+          "birthDate": "1954-07-08",
+          "address": [
+            {
+              "city": "Amsterdam",
+              "country": "NL"
+            }
+          ]
+        },
+        "search": {
+          "mode": "match"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:enc-0003",
+        "resource": {
+          "resourceType": "Encounter",
+          "id": "enc-0003",
+          "status": "in-progress",
+          "class": {
+            "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+            "code": "AMB",
+            "display": "inpatient"
+          },
+          "subject": {
+            "reference": "Patient/patient-0003"
+          },
+          "period": {
+            "start": "2026-03-13T16:00:00Z",
+            "end": "2026-03-14T05:00:00Z"
+          }
+        },
+        "search": {
+          "mode": "include"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:cond-0003-0",
+        "resource": {
+          "resourceType": "Condition",
+          "id": "cond-0003-0",
+          "meta": {
+            "profile": ["http://hl7.org/fhir/StructureDefinition/Condition"]
+          },
+          "clinicalStatus": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+                "code": "active"
+              }
+            ]
+          },
+          "verificationStatus": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+                "code": "confirmed"
+              }
+            ]
+          },
+          "category": [
+            {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+                  "code": "encounter-diagnosis"
+                }
+              ]
+            }
+          ],
+          "code": {
+            "coding": [
+              {
+                "system": "http://snomed.info/sct",
+                "code": "44054006",
+                "display": "Diabetes mellitus type 2"
+              }
+            ],
+            "text": "Diabetes mellitus type 2"
+          },
+          "subject": {
+            "reference": "Patient/patient-0003"
+          },
+          "onsetDateTime": "2022-09-15"
+        },
+        "search": {
+          "mode": "include"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:obs-0003-0",
+        "resource": {
+          "resourceType": "Observation",
+          "id": "obs-0003-0",
+          "meta": {
+            "profile": ["http://hl7.org/fhir/StructureDefinition/vitalsigns"]
+          },
+          "status": "final",
+          "category": [
+            {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                  "code": "vital-signs",
+                  "display": "Vital Signs"
+                }
+              ]
+            }
+          ],
+          "code": {
+            "coding": [
+              {
+                "system": "http://loinc.org",
+                "code": "8480-6",
+                "display": "Systolic blood pressure"
+              }
+            ],
+            "text": "Systolic blood pressure"
+          },
+          "subject": {
+            "reference": "Patient/patient-0003"
+          },
+          "effectiveDateTime": "2026-03-04T10:07:00Z",
+          "valueQuantity": {
+            "value": 138.1,
+            "unit": "mmHg",
+            "system": "http://unitsofmeasure.org",
+            "code": "mmHg"
+          }
+        },
+        "search": {
+          "mode": "include"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:cond-0003-1",
+        "resource": {
+          "resourceType": "Condition",
+          "id": "cond-0003-1",
+          "meta": {
+            "profile": ["http://hl7.org/fhir/StructureDefinition/Condition"]
+          },
+          "clinicalStatus": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+                "code": "active"
+              }
+            ]
+          },
+          "verificationStatus": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+                "code": "confirmed"
+              }
+            ]
+          },
+          "category": [
+            {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+                  "code": "encounter-diagnosis"
+                }
+              ]
+            }
+          ],
+          "code": {
+            "coding": [
+              {
+                "system": "http://snomed.info/sct",
+                "code": "431855005",
+                "display": "Chronic kidney disease stage 1"
+              }
+            ],
+            "text": "Chronic kidney disease stage 1"
+          },
+          "subject": {
+            "reference": "Patient/patient-0003"
+          },
+          "onsetDateTime": "2016-04-02"
+        },
+        "search": {
+          "mode": "include"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:obs-0003-1",
+        "resource": {
+          "resourceType": "Observation",
+          "id": "obs-0003-1",
+          "meta": {
+            "profile": ["http://hl7.org/fhir/StructureDefinition/vitalsigns"]
+          },
+          "status": "final",
+          "category": [
+            {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                  "code": "vital-signs",
+                  "display": "Vital Signs"
+                }
+              ]
+            }
+          ],
+          "code": {
+            "coding": [
+              {
+                "system": "http://loinc.org",
+                "code": "2089-1",
+                "display": "LDL Cholesterol"
+              }
+            ],
+            "text": "LDL Cholesterol"
+          },
+          "subject": {
+            "reference": "Patient/patient-0003"
+          },
+          "effectiveDateTime": "2026-03-01T20:33:00Z",
+          "valueQuantity": {
+            "value": 148.3,
+            "unit": "mg/dL",
+            "system": "http://unitsofmeasure.org",
+            "code": "mg/dL"
+          }
+        },
+        "search": {
+          "mode": "include"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:med-0003",
+        "resource": {
+          "resourceType": "MedicationRequest",
+          "id": "med-0003",
+          "status": "active",
+          "intent": "order",
+          "medicationCodeableConcept": {
+            "coding": [
+              {
+                "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+                "code": "313782",
+                "display": "Omeprazole 20 MG Delayed Release Oral Capsule"
+              }
+            ],
+            "text": "Omeprazole 20 MG Delayed Release Oral Capsule"
+          },
+          "subject": {
+            "reference": "Patient/patient-0003"
+          },
+          "authoredOn": "2026-03-10",
+          "dosageInstruction": [
+            {
+              "text": "Twice daily",
+              "timing": {
+                "repeat": {
+                  "frequency": 1,
+                  "period": 1,
+                  "periodUnit": "d"
+                }
+              }
+            }
+          ]
+        },
+        "search": {
+          "mode": "include"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:imm-0003",
+        "resource": {
+          "resourceType": "Immunization",
+          "id": "imm-0003",
+          "status": "completed",
+          "vaccineCode": {
+            "coding": [
+              {
+                "system": "http://hl7.org/fhir/sid/cvx",
+                "code": "33",
+                "display": "Pneumococcal polysaccharide vaccine"
+              }
+            ],
+            "text": "Pneumococcal polysaccharide vaccine"
+          },
+          "patient": {
+            "reference": "Patient/patient-0003"
+          },
+          "occurrenceDateTime": "2025-10-15"
+        },
+        "search": {
+          "mode": "include"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:patient-0004",
+        "resource": {
+          "resourceType": "Patient",
+          "id": "patient-0004",
+          "meta": {
+            "profile": ["http://hl7.org/fhir/StructureDefinition/Patient"]
+          },
+          "text": {
+            "status": "generated",
+            "div": "<div xmlns='http://www.w3.org/1999/xhtml'>Jan Fischer</div>"
+          },
+          "identifier": [
+            {
+              "system": "http://alpha-klinik.de/fhir/patient-id",
+              "value": "patient-0004"
+            }
+          ],
+          "name": [
+            {
+              "use": "official",
+              "family": "Fischer",
+              "given": ["Jan"]
+            }
+          ],
+          "gender": "male",
+          "birthDate": "1977-11-11",
+          "address": [
+            {
+              "city": "Rotterdam",
+              "country": "DE"
+            }
+          ]
+        },
+        "search": {
+          "mode": "match"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:enc-0004",
+        "resource": {
+          "resourceType": "Encounter",
+          "id": "enc-0004",
+          "status": "in-progress",
+          "class": {
+            "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+            "code": "AMB",
+            "display": "inpatient"
+          },
+          "subject": {
+            "reference": "Patient/patient-0004"
+          },
+          "period": {
+            "start": "2026-03-07T14:00:00Z",
+            "end": "2026-03-08T02:00:00Z"
+          }
+        },
+        "search": {
+          "mode": "include"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:cond-0004-0",
+        "resource": {
+          "resourceType": "Condition",
+          "id": "cond-0004-0",
+          "meta": {
+            "profile": ["http://hl7.org/fhir/StructureDefinition/Condition"]
+          },
+          "clinicalStatus": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+                "code": "active"
+              }
+            ]
+          },
+          "verificationStatus": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+                "code": "confirmed"
+              }
+            ]
+          },
+          "category": [
+            {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+                  "code": "encounter-diagnosis"
+                }
+              ]
+            }
+          ],
+          "code": {
+            "coding": [
+              {
+                "system": "http://snomed.info/sct",
+                "code": "195662009",
+                "display": "Acute viral pharyngitis"
+              }
+            ],
+            "text": "Acute viral pharyngitis"
+          },
+          "subject": {
+            "reference": "Patient/patient-0004"
+          },
+          "onsetDateTime": "2016-05-16"
+        },
+        "search": {
+          "mode": "include"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:obs-0004-0",
+        "resource": {
+          "resourceType": "Observation",
+          "id": "obs-0004-0",
+          "meta": {
+            "profile": ["http://hl7.org/fhir/StructureDefinition/vitalsigns"]
+          },
+          "status": "final",
+          "category": [
+            {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                  "code": "vital-signs",
+                  "display": "Vital Signs"
+                }
+              ]
+            }
+          ],
+          "code": {
+            "coding": [
+              {
+                "system": "http://loinc.org",
+                "code": "8310-5",
+                "display": "Body temperature"
+              }
+            ],
+            "text": "Body temperature"
+          },
+          "subject": {
+            "reference": "Patient/patient-0004"
+          },
+          "effectiveDateTime": "2026-03-03T16:02:00Z",
+          "valueQuantity": {
+            "value": 36.4,
+            "unit": "Cel",
+            "system": "http://unitsofmeasure.org",
+            "code": "Cel"
+          }
+        },
+        "search": {
+          "mode": "include"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:cond-0004-1",
+        "resource": {
+          "resourceType": "Condition",
+          "id": "cond-0004-1",
+          "meta": {
+            "profile": ["http://hl7.org/fhir/StructureDefinition/Condition"]
+          },
+          "clinicalStatus": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+                "code": "active"
+              }
+            ]
+          },
+          "verificationStatus": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+                "code": "confirmed"
+              }
+            ]
+          },
+          "category": [
+            {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+                  "code": "encounter-diagnosis"
+                }
+              ]
+            }
+          ],
+          "code": {
+            "coding": [
+              {
+                "system": "http://snomed.info/sct",
+                "code": "38341003",
+                "display": "Hypertensive disorder"
+              }
+            ],
+            "text": "Hypertensive disorder"
+          },
+          "subject": {
+            "reference": "Patient/patient-0004"
+          },
+          "onsetDateTime": "2024-04-12"
+        },
+        "search": {
+          "mode": "include"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:obs-0004-1",
+        "resource": {
+          "resourceType": "Observation",
+          "id": "obs-0004-1",
+          "meta": {
+            "profile": ["http://hl7.org/fhir/StructureDefinition/vitalsigns"]
+          },
+          "status": "final",
+          "category": [
+            {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                  "code": "vital-signs",
+                  "display": "Vital Signs"
+                }
+              ]
+            }
+          ],
+          "code": {
+            "coding": [
+              {
+                "system": "http://loinc.org",
+                "code": "8462-4",
+                "display": "Diastolic blood pressure"
+              }
+            ],
+            "text": "Diastolic blood pressure"
+          },
+          "subject": {
+            "reference": "Patient/patient-0004"
+          },
+          "effectiveDateTime": "2026-03-07T18:03:00Z",
+          "valueQuantity": {
+            "value": 82.9,
+            "unit": "mmHg",
+            "system": "http://unitsofmeasure.org",
+            "code": "mmHg"
+          }
+        },
+        "search": {
+          "mode": "include"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:med-0004",
+        "resource": {
+          "resourceType": "MedicationRequest",
+          "id": "med-0004",
+          "status": "active",
+          "intent": "order",
+          "medicationCodeableConcept": {
+            "coding": [
+              {
+                "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+                "code": "860975",
+                "display": "Metformin hydrochloride 500 MG Oral Tablet"
+              }
+            ],
+            "text": "Metformin hydrochloride 500 MG Oral Tablet"
+          },
+          "subject": {
+            "reference": "Patient/patient-0004"
+          },
+          "authoredOn": "2026-03-05",
+          "dosageInstruction": [
+            {
+              "text": "Once daily",
+              "timing": {
+                "repeat": {
+                  "frequency": 2,
+                  "period": 1,
+                  "periodUnit": "d"
+                }
+              }
+            }
+          ]
+        },
+        "search": {
+          "mode": "include"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:imm-0004",
+        "resource": {
+          "resourceType": "Immunization",
+          "id": "imm-0004",
+          "status": "completed",
+          "vaccineCode": {
+            "coding": [
+              {
+                "system": "http://hl7.org/fhir/sid/cvx",
+                "code": "08",
+                "display": "Hepatitis B vaccine"
+              }
+            ],
+            "text": "Hepatitis B vaccine"
+          },
+          "patient": {
+            "reference": "Patient/patient-0004"
+          },
+          "occurrenceDateTime": "2025-07-18"
+        },
+        "search": {
+          "mode": "include"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:patient-0005",
+        "resource": {
+          "resourceType": "Patient",
+          "id": "patient-0005",
+          "meta": {
+            "profile": ["http://hl7.org/fhir/StructureDefinition/Patient"]
+          },
+          "text": {
+            "status": "generated",
+            "div": "<div xmlns='http://www.w3.org/1999/xhtml'>Hans Klein</div>"
+          },
+          "identifier": [
+            {
+              "system": "http://alpha-klinik.de/fhir/patient-id",
+              "value": "patient-0005"
+            }
+          ],
+          "name": [
+            {
+              "use": "official",
+              "family": "Klein",
+              "given": ["Hans"]
+            }
+          ],
+          "gender": "male",
+          "birthDate": "1968-04-27",
+          "address": [
+            {
+              "city": "Munich",
+              "country": "DE"
+            }
+          ]
+        },
+        "search": {
+          "mode": "match"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:enc-0005",
+        "resource": {
+          "resourceType": "Encounter",
+          "id": "enc-0005",
+          "status": "finished",
+          "class": {
+            "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+            "code": "AMB",
+            "display": "emergency"
+          },
+          "subject": {
+            "reference": "Patient/patient-0005"
+          },
+          "period": {
+            "start": "2026-03-14T13:00:00Z",
+            "end": "2026-03-16T08:00:00Z"
+          }
+        },
+        "search": {
+          "mode": "include"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:cond-0005-0",
+        "resource": {
+          "resourceType": "Condition",
+          "id": "cond-0005-0",
+          "meta": {
+            "profile": ["http://hl7.org/fhir/StructureDefinition/Condition"]
+          },
+          "clinicalStatus": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+                "code": "active"
+              }
+            ]
+          },
+          "verificationStatus": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+                "code": "confirmed"
+              }
+            ]
+          },
+          "category": [
+            {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+                  "code": "encounter-diagnosis"
+                }
+              ]
+            }
+          ],
+          "code": {
+            "coding": [
+              {
+                "system": "http://snomed.info/sct",
+                "code": "44054006",
+                "display": "Diabetes mellitus type 2"
+              }
+            ],
+            "text": "Diabetes mellitus type 2"
+          },
+          "subject": {
+            "reference": "Patient/patient-0005"
+          },
+          "onsetDateTime": "2022-08-26"
+        },
+        "search": {
+          "mode": "include"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:obs-0005-0",
+        "resource": {
+          "resourceType": "Observation",
+          "id": "obs-0005-0",
+          "meta": {
+            "profile": ["http://hl7.org/fhir/StructureDefinition/vitalsigns"]
+          },
+          "status": "final",
+          "category": [
+            {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                  "code": "vital-signs",
+                  "display": "Vital Signs"
+                }
+              ]
+            }
+          ],
+          "code": {
+            "coding": [
+              {
+                "system": "http://loinc.org",
+                "code": "2089-1",
+                "display": "LDL Cholesterol"
+              }
+            ],
+            "text": "LDL Cholesterol"
+          },
+          "subject": {
+            "reference": "Patient/patient-0005"
+          },
+          "effectiveDateTime": "2026-03-12T13:52:00Z",
+          "valueQuantity": {
+            "value": 167.1,
+            "unit": "mg/dL",
+            "system": "http://unitsofmeasure.org",
+            "code": "mg/dL"
+          }
+        },
+        "search": {
+          "mode": "include"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:cond-0005-1",
+        "resource": {
+          "resourceType": "Condition",
+          "id": "cond-0005-1",
+          "meta": {
+            "profile": ["http://hl7.org/fhir/StructureDefinition/Condition"]
+          },
+          "clinicalStatus": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+                "code": "active"
+              }
+            ]
+          },
+          "verificationStatus": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+                "code": "confirmed"
+              }
+            ]
+          },
+          "category": [
+            {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+                  "code": "encounter-diagnosis"
+                }
+              ]
+            }
+          ],
+          "code": {
+            "coding": [
+              {
+                "system": "http://snomed.info/sct",
+                "code": "44054006",
+                "display": "Diabetes mellitus type 2"
+              }
+            ],
+            "text": "Diabetes mellitus type 2"
+          },
+          "subject": {
+            "reference": "Patient/patient-0005"
+          },
+          "onsetDateTime": "2025-04-09"
+        },
+        "search": {
+          "mode": "include"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:obs-0005-1",
+        "resource": {
+          "resourceType": "Observation",
+          "id": "obs-0005-1",
+          "meta": {
+            "profile": ["http://hl7.org/fhir/StructureDefinition/vitalsigns"]
+          },
+          "status": "final",
+          "category": [
+            {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                  "code": "vital-signs",
+                  "display": "Vital Signs"
+                }
+              ]
+            }
+          ],
+          "code": {
+            "coding": [
+              {
+                "system": "http://loinc.org",
+                "code": "6690-2",
+                "display": "Leukocytes [#/volume]"
+              }
+            ],
+            "text": "Leukocytes [#/volume]"
+          },
+          "subject": {
+            "reference": "Patient/patient-0005"
+          },
+          "effectiveDateTime": "2026-03-08T15:15:00Z",
+          "valueQuantity": {
+            "value": 4.0,
+            "unit": "10*3/uL",
+            "system": "http://unitsofmeasure.org",
+            "code": "10*3/uL"
+          }
+        },
+        "search": {
+          "mode": "include"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:med-0005",
+        "resource": {
+          "resourceType": "MedicationRequest",
+          "id": "med-0005",
+          "status": "active",
+          "intent": "order",
+          "medicationCodeableConcept": {
+            "coding": [
+              {
+                "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+                "code": "197361",
+                "display": "Amlodipine 5 MG Oral Tablet"
+              }
+            ],
+            "text": "Amlodipine 5 MG Oral Tablet"
+          },
+          "subject": {
+            "reference": "Patient/patient-0005"
+          },
+          "authoredOn": "2026-03-18",
+          "dosageInstruction": [
+            {
+              "text": "Once daily",
+              "timing": {
+                "repeat": {
+                  "frequency": 3,
+                  "period": 1,
+                  "periodUnit": "d"
+                }
+              }
+            }
+          ]
+        },
+        "search": {
+          "mode": "include"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:imm-0005",
+        "resource": {
+          "resourceType": "Immunization",
+          "id": "imm-0005",
+          "status": "completed",
+          "vaccineCode": {
+            "coding": [
+              {
+                "system": "http://hl7.org/fhir/sid/cvx",
+                "code": "113",
+                "display": "Td (adult) preservative free"
+              }
+            ],
+            "text": "Td (adult) preservative free"
+          },
+          "patient": {
+            "reference": "Patient/patient-0005"
+          },
+          "occurrenceDateTime": "2025-03-08"
+        },
+        "search": {
+          "mode": "include"
+        }
+      }
+    ]
+  },
+  "fhir-condition-list": {
+    "resourceType": "Bundle",
+    "id": "bundle-73028",
+    "meta": {
+      "lastUpdated": "2026-03-20T12:41:00Z"
+    },
+    "type": "searchset",
+    "total": 12,
+    "link": [
+      {
+        "relation": "self",
+        "url": "https://alpha-klinik.de/fhir/Patient"
+      }
+    ],
+    "entry": [
+      {
+        "fullUrl": "urn:uuid:cond-0001",
+        "resource": {
+          "resourceType": "Condition",
+          "id": "cond-0001",
+          "meta": {
+            "profile": ["http://hl7.org/fhir/StructureDefinition/Condition"]
+          },
+          "clinicalStatus": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+                "code": "active"
+              }
+            ]
+          },
+          "verificationStatus": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+                "code": "confirmed"
+              }
+            ]
+          },
+          "category": [
+            {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+                  "code": "encounter-diagnosis"
+                }
+              ]
+            }
+          ],
+          "code": {
+            "coding": [
+              {
+                "system": "http://snomed.info/sct",
+                "code": "698754002",
+                "display": "Chronic pain"
+              }
+            ],
+            "text": "Chronic pain"
+          },
+          "subject": {
+            "reference": "Patient/patient-0012"
+          },
+          "onsetDateTime": "2024-06-17"
+        },
+        "search": {
+          "mode": "match"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:cond-0002",
+        "resource": {
+          "resourceType": "Condition",
+          "id": "cond-0002",
+          "meta": {
+            "profile": ["http://hl7.org/fhir/StructureDefinition/Condition"]
+          },
+          "clinicalStatus": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+                "code": "active"
+              }
+            ]
+          },
+          "verificationStatus": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+                "code": "confirmed"
+              }
+            ]
+          },
+          "category": [
+            {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+                  "code": "encounter-diagnosis"
+                }
+              ]
+            }
+          ],
+          "code": {
+            "coding": [
+              {
+                "system": "http://snomed.info/sct",
+                "code": "44054006",
+                "display": "Diabetes mellitus type 2"
+              }
+            ],
+            "text": "Diabetes mellitus type 2"
+          },
+          "subject": {
+            "reference": "Patient/patient-0014"
+          },
+          "onsetDateTime": "2019-03-01"
+        },
+        "search": {
+          "mode": "match"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:cond-0003",
+        "resource": {
+          "resourceType": "Condition",
+          "id": "cond-0003",
+          "meta": {
+            "profile": ["http://hl7.org/fhir/StructureDefinition/Condition"]
+          },
+          "clinicalStatus": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+                "code": "active"
+              }
+            ]
+          },
+          "verificationStatus": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+                "code": "confirmed"
+              }
+            ]
+          },
+          "category": [
+            {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+                  "code": "encounter-diagnosis"
+                }
+              ]
+            }
+          ],
+          "code": {
+            "coding": [
+              {
+                "system": "http://snomed.info/sct",
+                "code": "185086009",
+                "display": "Chronic obstructive bronchitis"
+              }
+            ],
+            "text": "Chronic obstructive bronchitis"
+          },
+          "subject": {
+            "reference": "Patient/patient-0010"
+          },
+          "onsetDateTime": "2022-05-29"
+        },
+        "search": {
+          "mode": "match"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:cond-0004",
+        "resource": {
+          "resourceType": "Condition",
+          "id": "cond-0004",
+          "meta": {
+            "profile": ["http://hl7.org/fhir/StructureDefinition/Condition"]
+          },
+          "clinicalStatus": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+                "code": "active"
+              }
+            ]
+          },
+          "verificationStatus": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+                "code": "confirmed"
+              }
+            ]
+          },
+          "category": [
+            {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+                  "code": "encounter-diagnosis"
+                }
+              ]
+            }
+          ],
+          "code": {
+            "coding": [
+              {
+                "system": "http://snomed.info/sct",
+                "code": "185086009",
+                "display": "Chronic obstructive bronchitis"
+              }
+            ],
+            "text": "Chronic obstructive bronchitis"
+          },
+          "subject": {
+            "reference": "Patient/patient-0001"
+          },
+          "onsetDateTime": "2020-03-29"
+        },
+        "search": {
+          "mode": "match"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:cond-0005",
+        "resource": {
+          "resourceType": "Condition",
+          "id": "cond-0005",
+          "meta": {
+            "profile": ["http://hl7.org/fhir/StructureDefinition/Condition"]
+          },
+          "clinicalStatus": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+                "code": "active"
+              }
+            ]
+          },
+          "verificationStatus": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+                "code": "confirmed"
+              }
+            ]
+          },
+          "category": [
+            {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+                  "code": "encounter-diagnosis"
+                }
+              ]
+            }
+          ],
+          "code": {
+            "coding": [
+              {
+                "system": "http://snomed.info/sct",
+                "code": "698754002",
+                "display": "Chronic pain"
+              }
+            ],
+            "text": "Chronic pain"
+          },
+          "subject": {
+            "reference": "Patient/patient-0001"
+          },
+          "onsetDateTime": "2022-08-16"
+        },
+        "search": {
+          "mode": "match"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:cond-0006",
+        "resource": {
+          "resourceType": "Condition",
+          "id": "cond-0006",
+          "meta": {
+            "profile": ["http://hl7.org/fhir/StructureDefinition/Condition"]
+          },
+          "clinicalStatus": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+                "code": "active"
+              }
+            ]
+          },
+          "verificationStatus": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+                "code": "confirmed"
+              }
+            ]
+          },
+          "category": [
+            {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+                  "code": "encounter-diagnosis"
+                }
+              ]
+            }
+          ],
+          "code": {
+            "coding": [
+              {
+                "system": "http://snomed.info/sct",
+                "code": "53741008",
+                "display": "Coronary arteriosclerosis"
+              }
+            ],
+            "text": "Coronary arteriosclerosis"
+          },
+          "subject": {
+            "reference": "Patient/patient-0003"
+          },
+          "onsetDateTime": "2017-11-07"
+        },
+        "search": {
+          "mode": "match"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:cond-0007",
+        "resource": {
+          "resourceType": "Condition",
+          "id": "cond-0007",
+          "meta": {
+            "profile": ["http://hl7.org/fhir/StructureDefinition/Condition"]
+          },
+          "clinicalStatus": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+                "code": "active"
+              }
+            ]
+          },
+          "verificationStatus": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+                "code": "confirmed"
+              }
+            ]
+          },
+          "category": [
+            {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+                  "code": "encounter-diagnosis"
+                }
+              ]
+            }
+          ],
+          "code": {
+            "coding": [
+              {
+                "system": "http://snomed.info/sct",
+                "code": "59621000",
+                "display": "Essential hypertension"
+              }
+            ],
+            "text": "Essential hypertension"
+          },
+          "subject": {
+            "reference": "Patient/patient-0006"
+          },
+          "onsetDateTime": "2022-04-09"
+        },
+        "search": {
+          "mode": "match"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:cond-0008",
+        "resource": {
+          "resourceType": "Condition",
+          "id": "cond-0008",
+          "meta": {
+            "profile": ["http://hl7.org/fhir/StructureDefinition/Condition"]
+          },
+          "clinicalStatus": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+                "code": "active"
+              }
+            ]
+          },
+          "verificationStatus": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+                "code": "confirmed"
+              }
+            ]
+          },
+          "category": [
+            {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+                  "code": "encounter-diagnosis"
+                }
+              ]
+            }
+          ],
+          "code": {
+            "coding": [
+              {
+                "system": "http://snomed.info/sct",
+                "code": "38341003",
+                "display": "Hypertensive disorder"
+              }
+            ],
+            "text": "Hypertensive disorder"
+          },
+          "subject": {
+            "reference": "Patient/patient-0015"
+          },
+          "onsetDateTime": "2017-09-11"
+        },
+        "search": {
+          "mode": "match"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:cond-0009",
+        "resource": {
+          "resourceType": "Condition",
+          "id": "cond-0009",
+          "meta": {
+            "profile": ["http://hl7.org/fhir/StructureDefinition/Condition"]
+          },
+          "clinicalStatus": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+                "code": "active"
+              }
+            ]
+          },
+          "verificationStatus": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+                "code": "confirmed"
+              }
+            ]
+          },
+          "category": [
+            {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+                  "code": "encounter-diagnosis"
+                }
+              ]
+            }
+          ],
+          "code": {
+            "coding": [
+              {
+                "system": "http://snomed.info/sct",
+                "code": "230690007",
+                "display": "Cerebrovascular accident"
+              }
+            ],
+            "text": "Cerebrovascular accident"
+          },
+          "subject": {
+            "reference": "Patient/patient-0020"
+          },
+          "onsetDateTime": "2019-12-07"
+        },
+        "search": {
+          "mode": "match"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:cond-0010",
+        "resource": {
+          "resourceType": "Condition",
+          "id": "cond-0010",
+          "meta": {
+            "profile": ["http://hl7.org/fhir/StructureDefinition/Condition"]
+          },
+          "clinicalStatus": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+                "code": "active"
+              }
+            ]
+          },
+          "verificationStatus": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+                "code": "confirmed"
+              }
+            ]
+          },
+          "category": [
+            {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+                  "code": "encounter-diagnosis"
+                }
+              ]
+            }
+          ],
+          "code": {
+            "coding": [
+              {
+                "system": "http://snomed.info/sct",
+                "code": "53741008",
+                "display": "Coronary arteriosclerosis"
+              }
+            ],
+            "text": "Coronary arteriosclerosis"
+          },
+          "subject": {
+            "reference": "Patient/patient-0007"
+          },
+          "onsetDateTime": "2018-10-20"
+        },
+        "search": {
+          "mode": "match"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:cond-0011",
+        "resource": {
+          "resourceType": "Condition",
+          "id": "cond-0011",
+          "meta": {
+            "profile": ["http://hl7.org/fhir/StructureDefinition/Condition"]
+          },
+          "clinicalStatus": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+                "code": "active"
+              }
+            ]
+          },
+          "verificationStatus": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+                "code": "confirmed"
+              }
+            ]
+          },
+          "category": [
+            {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+                  "code": "encounter-diagnosis"
+                }
+              ]
+            }
+          ],
+          "code": {
+            "coding": [
+              {
+                "system": "http://snomed.info/sct",
+                "code": "40055000",
+                "display": "Chronic sinusitis"
+              }
+            ],
+            "text": "Chronic sinusitis"
+          },
+          "subject": {
+            "reference": "Patient/patient-0003"
+          },
+          "onsetDateTime": "2023-08-14"
+        },
+        "search": {
+          "mode": "match"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:cond-0012",
+        "resource": {
+          "resourceType": "Condition",
+          "id": "cond-0012",
+          "meta": {
+            "profile": ["http://hl7.org/fhir/StructureDefinition/Condition"]
+          },
+          "clinicalStatus": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+                "code": "active"
+              }
+            ]
+          },
+          "verificationStatus": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+                "code": "confirmed"
+              }
+            ]
+          },
+          "category": [
+            {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+                  "code": "encounter-diagnosis"
+                }
+              ]
+            }
+          ],
+          "code": {
+            "coding": [
+              {
+                "system": "http://snomed.info/sct",
+                "code": "53741008",
+                "display": "Coronary arteriosclerosis"
+              }
+            ],
+            "text": "Coronary arteriosclerosis"
+          },
+          "subject": {
+            "reference": "Patient/patient-0012"
+          },
+          "onsetDateTime": "2017-03-13"
+        },
+        "search": {
+          "mode": "match"
+        }
+      }
+    ]
+  },
+  "fhir-medication-request": {
+    "resourceType": "Bundle",
+    "id": "bundle-37480",
+    "meta": {
+      "lastUpdated": "2026-03-20T11:58:00Z"
+    },
+    "type": "searchset",
+    "total": 10,
+    "link": [
+      {
+        "relation": "self",
+        "url": "https://alpha-klinik.de/fhir/Patient"
+      }
+    ],
+    "entry": [
+      {
+        "fullUrl": "urn:uuid:med-0001",
+        "resource": {
+          "resourceType": "MedicationRequest",
+          "id": "med-0001",
+          "status": "active",
+          "intent": "order",
+          "medicationCodeableConcept": {
+            "coding": [
+              {
+                "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+                "code": "197361",
+                "display": "Amlodipine 5 MG Oral Tablet"
+              }
+            ],
+            "text": "Amlodipine 5 MG Oral Tablet"
+          },
+          "subject": {
+            "reference": "Patient/patient-0018"
+          },
+          "authoredOn": "2026-03-13",
+          "dosageInstruction": [
+            {
+              "text": "Once daily",
+              "timing": {
+                "repeat": {
+                  "frequency": 2,
+                  "period": 1,
+                  "periodUnit": "d"
+                }
+              }
+            }
+          ]
+        },
+        "search": {
+          "mode": "match"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:med-0002",
+        "resource": {
+          "resourceType": "MedicationRequest",
+          "id": "med-0002",
+          "status": "active",
+          "intent": "order",
+          "medicationCodeableConcept": {
+            "coding": [
+              {
+                "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+                "code": "197361",
+                "display": "Amlodipine 5 MG Oral Tablet"
+              }
+            ],
+            "text": "Amlodipine 5 MG Oral Tablet"
+          },
+          "subject": {
+            "reference": "Patient/patient-0001"
+          },
+          "authoredOn": "2026-03-07",
+          "dosageInstruction": [
+            {
+              "text": "Twice daily",
+              "timing": {
+                "repeat": {
+                  "frequency": 1,
+                  "period": 1,
+                  "periodUnit": "d"
+                }
+              }
+            }
+          ]
+        },
+        "search": {
+          "mode": "match"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:med-0003",
+        "resource": {
+          "resourceType": "MedicationRequest",
+          "id": "med-0003",
+          "status": "active",
+          "intent": "order",
+          "medicationCodeableConcept": {
+            "coding": [
+              {
+                "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+                "code": "197361",
+                "display": "Amlodipine 5 MG Oral Tablet"
+              }
+            ],
+            "text": "Amlodipine 5 MG Oral Tablet"
+          },
+          "subject": {
+            "reference": "Patient/patient-0004"
+          },
+          "authoredOn": "2026-03-20",
+          "dosageInstruction": [
+            {
+              "text": "Once daily",
+              "timing": {
+                "repeat": {
+                  "frequency": 2,
+                  "period": 1,
+                  "periodUnit": "d"
+                }
+              }
+            }
+          ]
+        },
+        "search": {
+          "mode": "match"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:med-0004",
+        "resource": {
+          "resourceType": "MedicationRequest",
+          "id": "med-0004",
+          "status": "active",
+          "intent": "order",
+          "medicationCodeableConcept": {
+            "coding": [
+              {
+                "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+                "code": "314076",
+                "display": "Lisinopril 10 MG Oral Tablet"
+              }
+            ],
+            "text": "Lisinopril 10 MG Oral Tablet"
+          },
+          "subject": {
+            "reference": "Patient/patient-0004"
+          },
+          "authoredOn": "2026-03-12",
+          "dosageInstruction": [
+            {
+              "text": "Once daily",
+              "timing": {
+                "repeat": {
+                  "frequency": 2,
+                  "period": 1,
+                  "periodUnit": "d"
+                }
+              }
+            }
+          ]
+        },
+        "search": {
+          "mode": "match"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:med-0005",
+        "resource": {
+          "resourceType": "MedicationRequest",
+          "id": "med-0005",
+          "status": "active",
+          "intent": "order",
+          "medicationCodeableConcept": {
+            "coding": [
+              {
+                "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+                "code": "197361",
+                "display": "Amlodipine 5 MG Oral Tablet"
+              }
+            ],
+            "text": "Amlodipine 5 MG Oral Tablet"
+          },
+          "subject": {
+            "reference": "Patient/patient-0012"
+          },
+          "authoredOn": "2026-03-09",
+          "dosageInstruction": [
+            {
+              "text": "Twice daily",
+              "timing": {
+                "repeat": {
+                  "frequency": 1,
+                  "period": 1,
+                  "periodUnit": "d"
+                }
+              }
+            }
+          ]
+        },
+        "search": {
+          "mode": "match"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:med-0006",
+        "resource": {
+          "resourceType": "MedicationRequest",
+          "id": "med-0006",
+          "status": "active",
+          "intent": "order",
+          "medicationCodeableConcept": {
+            "coding": [
+              {
+                "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+                "code": "259255",
+                "display": "Atorvastatin 20 MG Oral Tablet"
+              }
+            ],
+            "text": "Atorvastatin 20 MG Oral Tablet"
+          },
+          "subject": {
+            "reference": "Patient/patient-0020"
+          },
+          "authoredOn": "2026-03-17",
+          "dosageInstruction": [
+            {
+              "text": "Three times daily",
+              "timing": {
+                "repeat": {
+                  "frequency": 1,
+                  "period": 1,
+                  "periodUnit": "d"
+                }
+              }
+            }
+          ]
+        },
+        "search": {
+          "mode": "match"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:med-0007",
+        "resource": {
+          "resourceType": "MedicationRequest",
+          "id": "med-0007",
+          "status": "active",
+          "intent": "order",
+          "medicationCodeableConcept": {
+            "coding": [
+              {
+                "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+                "code": "314076",
+                "display": "Lisinopril 10 MG Oral Tablet"
+              }
+            ],
+            "text": "Lisinopril 10 MG Oral Tablet"
+          },
+          "subject": {
+            "reference": "Patient/patient-0018"
+          },
+          "authoredOn": "2026-03-11",
+          "dosageInstruction": [
+            {
+              "text": "Twice daily",
+              "timing": {
+                "repeat": {
+                  "frequency": 3,
+                  "period": 1,
+                  "periodUnit": "d"
+                }
+              }
+            }
+          ]
+        },
+        "search": {
+          "mode": "match"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:med-0008",
+        "resource": {
+          "resourceType": "MedicationRequest",
+          "id": "med-0008",
+          "status": "active",
+          "intent": "order",
+          "medicationCodeableConcept": {
+            "coding": [
+              {
+                "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+                "code": "835829",
+                "display": "Insulin Glargine 100 UNT/ML Injectable Solution"
+              }
+            ],
+            "text": "Insulin Glargine 100 UNT/ML Injectable Solution"
+          },
+          "subject": {
+            "reference": "Patient/patient-0010"
+          },
+          "authoredOn": "2026-03-08",
+          "dosageInstruction": [
+            {
+              "text": "Once daily",
+              "timing": {
+                "repeat": {
+                  "frequency": 1,
+                  "period": 1,
+                  "periodUnit": "d"
+                }
+              }
+            }
+          ]
+        },
+        "search": {
+          "mode": "match"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:med-0009",
+        "resource": {
+          "resourceType": "MedicationRequest",
+          "id": "med-0009",
+          "status": "active",
+          "intent": "order",
+          "medicationCodeableConcept": {
+            "coding": [
+              {
+                "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+                "code": "314076",
+                "display": "Lisinopril 10 MG Oral Tablet"
+              }
+            ],
+            "text": "Lisinopril 10 MG Oral Tablet"
+          },
+          "subject": {
+            "reference": "Patient/patient-0004"
+          },
+          "authoredOn": "2026-03-15",
+          "dosageInstruction": [
+            {
+              "text": "Twice daily",
+              "timing": {
+                "repeat": {
+                  "frequency": 2,
+                  "period": 1,
+                  "periodUnit": "d"
+                }
+              }
+            }
+          ]
+        },
+        "search": {
+          "mode": "match"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:med-0010",
+        "resource": {
+          "resourceType": "MedicationRequest",
+          "id": "med-0010",
+          "status": "active",
+          "intent": "order",
+          "medicationCodeableConcept": {
+            "coding": [
+              {
+                "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+                "code": "197361",
+                "display": "Amlodipine 5 MG Oral Tablet"
+              }
+            ],
+            "text": "Amlodipine 5 MG Oral Tablet"
+          },
+          "subject": {
+            "reference": "Patient/patient-0006"
+          },
+          "authoredOn": "2026-03-13",
+          "dosageInstruction": [
+            {
+              "text": "Once daily",
+              "timing": {
+                "repeat": {
+                  "frequency": 2,
+                  "period": 1,
+                  "periodUnit": "d"
+                }
+              }
+            }
+          ]
+        },
+        "search": {
+          "mode": "match"
+        }
+      }
+    ]
+  },
+  "fhir-encounter-history": {
+    "resourceType": "Bundle",
+    "id": "bundle-63973",
+    "meta": {
+      "lastUpdated": "2026-03-20T20:46:00Z"
+    },
+    "type": "searchset",
+    "total": 10,
+    "link": [
+      {
+        "relation": "self",
+        "url": "https://alpha-klinik.de/fhir/Patient"
+      }
+    ],
+    "entry": [
+      {
+        "fullUrl": "urn:uuid:enc-0001",
+        "resource": {
+          "resourceType": "Encounter",
+          "id": "enc-0001",
+          "status": "finished",
+          "class": {
+            "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+            "code": "EMER",
+            "display": "inpatient"
+          },
+          "subject": {
+            "reference": "Patient/patient-0001"
+          },
+          "period": {
+            "start": "2026-03-14T10:00:00Z",
+            "end": "2026-03-14T16:00:00Z"
+          }
+        },
+        "search": {
+          "mode": "match"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:enc-0002",
+        "resource": {
+          "resourceType": "Encounter",
+          "id": "enc-0002",
+          "status": "finished",
+          "class": {
+            "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+            "code": "AMB",
+            "display": "ambulatory"
+          },
+          "subject": {
+            "reference": "Patient/patient-0014"
+          },
+          "period": {
+            "start": "2026-03-06T14:00:00Z",
+            "end": "2026-03-07T10:00:00Z"
+          }
+        },
+        "search": {
+          "mode": "match"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:enc-0003",
+        "resource": {
+          "resourceType": "Encounter",
+          "id": "enc-0003",
+          "status": "finished",
+          "class": {
+            "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+            "code": "EMER",
+            "display": "emergency"
+          },
+          "subject": {
+            "reference": "Patient/patient-0019"
+          },
+          "period": {
+            "start": "2026-03-13T12:00:00Z",
+            "end": "2026-03-15T01:00:00Z"
+          }
+        },
+        "search": {
+          "mode": "match"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:enc-0004",
+        "resource": {
+          "resourceType": "Encounter",
+          "id": "enc-0004",
+          "status": "in-progress",
+          "class": {
+            "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+            "code": "AMB",
+            "display": "emergency"
+          },
+          "subject": {
+            "reference": "Patient/patient-0018"
+          },
+          "period": {
+            "start": "2026-03-07T12:00:00Z",
+            "end": "2026-03-08T08:00:00Z"
+          }
+        },
+        "search": {
+          "mode": "match"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:enc-0005",
+        "resource": {
+          "resourceType": "Encounter",
+          "id": "enc-0005",
+          "status": "in-progress",
+          "class": {
+            "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+            "code": "AMB",
+            "display": "inpatient"
+          },
+          "subject": {
+            "reference": "Patient/patient-0005"
+          },
+          "period": {
+            "start": "2026-03-10T12:00:00Z",
+            "end": "2026-03-11T01:00:00Z"
+          }
+        },
+        "search": {
+          "mode": "match"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:enc-0006",
+        "resource": {
+          "resourceType": "Encounter",
+          "id": "enc-0006",
+          "status": "finished",
+          "class": {
+            "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+            "code": "EMER",
+            "display": "ambulatory"
+          },
+          "subject": {
+            "reference": "Patient/patient-0002"
+          },
+          "period": {
+            "start": "2026-03-14T09:00:00Z",
+            "end": "2026-03-14T19:00:00Z"
+          }
+        },
+        "search": {
+          "mode": "match"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:enc-0007",
+        "resource": {
+          "resourceType": "Encounter",
+          "id": "enc-0007",
+          "status": "finished",
+          "class": {
+            "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+            "code": "IMP",
+            "display": "emergency"
+          },
+          "subject": {
+            "reference": "Patient/patient-0018"
+          },
+          "period": {
+            "start": "2026-03-08T09:00:00Z",
+            "end": "2026-03-09T14:00:00Z"
+          }
+        },
+        "search": {
+          "mode": "match"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:enc-0008",
+        "resource": {
+          "resourceType": "Encounter",
+          "id": "enc-0008",
+          "status": "finished",
+          "class": {
+            "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+            "code": "AMB",
+            "display": "inpatient"
+          },
+          "subject": {
+            "reference": "Patient/patient-0014"
+          },
+          "period": {
+            "start": "2026-03-18T13:00:00Z",
+            "end": "2026-03-18T18:00:00Z"
+          }
+        },
+        "search": {
+          "mode": "match"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:enc-0009",
+        "resource": {
+          "resourceType": "Encounter",
+          "id": "enc-0009",
+          "status": "finished",
+          "class": {
+            "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+            "code": "AMB",
+            "display": "emergency"
+          },
+          "subject": {
+            "reference": "Patient/patient-0002"
+          },
+          "period": {
+            "start": "2026-03-18T12:00:00Z",
+            "end": "2026-03-20T09:00:00Z"
+          }
+        },
+        "search": {
+          "mode": "match"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:enc-0010",
+        "resource": {
+          "resourceType": "Encounter",
+          "id": "enc-0010",
+          "status": "finished",
+          "class": {
+            "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+            "code": "EMER",
+            "display": "ambulatory"
+          },
+          "subject": {
+            "reference": "Patient/patient-0002"
+          },
+          "period": {
+            "start": "2026-03-05T18:00:00Z",
+            "end": "2026-03-07T04:00:00Z"
+          }
+        },
+        "search": {
+          "mode": "match"
+        }
+      }
+    ]
+  },
+  "fhir-diagnostic-report": {
+    "resourceType": "Bundle",
+    "id": "bundle-69512",
+    "meta": {
+      "lastUpdated": "2026-03-20T18:15:00Z"
+    },
+    "type": "searchset",
+    "total": 8,
+    "link": [
+      {
+        "relation": "self",
+        "url": "https://alpha-klinik.de/fhir/Patient"
+      }
+    ],
+    "entry": [
+      {
+        "fullUrl": "urn:uuid:dr-0001",
+        "resource": {
+          "resourceType": "DiagnosticReport",
+          "id": "dr-0001",
+          "status": "final",
+          "category": [
+            {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/v2-0074",
+                  "code": "LAB",
+                  "display": "Laboratory"
+                }
+              ]
+            }
+          ],
+          "code": {
+            "coding": [
+              {
+                "system": "http://loinc.org",
+                "code": "58410-2",
+                "display": "Complete blood count (CBC)"
+              }
+            ],
+            "text": "Complete Blood Count"
+          },
+          "subject": {
+            "reference": "Patient/patient-0016"
+          },
+          "effectiveDateTime": "2026-03-20T14:00:00Z",
+          "conclusion": "Low hemoglobin"
+        },
+        "search": {
+          "mode": "match"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:dr-0002",
+        "resource": {
+          "resourceType": "DiagnosticReport",
+          "id": "dr-0002",
+          "status": "final",
+          "category": [
+            {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/v2-0074",
+                  "code": "LAB",
+                  "display": "Laboratory"
+                }
+              ]
+            }
+          ],
+          "code": {
+            "coding": [
+              {
+                "system": "http://loinc.org",
+                "code": "58410-2",
+                "display": "Complete blood count (CBC)"
+              }
+            ],
+            "text": "Complete Blood Count"
+          },
+          "subject": {
+            "reference": "Patient/patient-0006"
+          },
+          "effectiveDateTime": "2026-03-13T14:00:00Z",
+          "conclusion": "All values within normal range"
+        },
+        "search": {
+          "mode": "match"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:dr-0003",
+        "resource": {
+          "resourceType": "DiagnosticReport",
+          "id": "dr-0003",
+          "status": "final",
+          "category": [
+            {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/v2-0074",
+                  "code": "LAB",
+                  "display": "Laboratory"
+                }
+              ]
+            }
+          ],
+          "code": {
+            "coding": [
+              {
+                "system": "http://loinc.org",
+                "code": "58410-2",
+                "display": "Complete blood count (CBC)"
+              }
+            ],
+            "text": "Complete Blood Count"
+          },
+          "subject": {
+            "reference": "Patient/patient-0003"
+          },
+          "effectiveDateTime": "2026-03-02T11:00:00Z",
+          "conclusion": "Elevated WBC count"
+        },
+        "search": {
+          "mode": "match"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:dr-0004",
+        "resource": {
+          "resourceType": "DiagnosticReport",
+          "id": "dr-0004",
+          "status": "final",
+          "category": [
+            {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/v2-0074",
+                  "code": "LAB",
+                  "display": "Laboratory"
+                }
+              ]
+            }
+          ],
+          "code": {
+            "coding": [
+              {
+                "system": "http://loinc.org",
+                "code": "58410-2",
+                "display": "Complete blood count (CBC)"
+              }
+            ],
+            "text": "Complete Blood Count"
+          },
+          "subject": {
+            "reference": "Patient/patient-0005"
+          },
+          "effectiveDateTime": "2026-03-19T12:00:00Z",
+          "conclusion": "Low hemoglobin"
+        },
+        "search": {
+          "mode": "match"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:dr-0005",
+        "resource": {
+          "resourceType": "DiagnosticReport",
+          "id": "dr-0005",
+          "status": "final",
+          "category": [
+            {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/v2-0074",
+                  "code": "LAB",
+                  "display": "Laboratory"
+                }
+              ]
+            }
+          ],
+          "code": {
+            "coding": [
+              {
+                "system": "http://loinc.org",
+                "code": "58410-2",
+                "display": "Complete blood count (CBC)"
+              }
+            ],
+            "text": "Complete Blood Count"
+          },
+          "subject": {
+            "reference": "Patient/patient-0017"
+          },
+          "effectiveDateTime": "2026-03-14T12:00:00Z",
+          "conclusion": "Low hemoglobin"
+        },
+        "search": {
+          "mode": "match"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:dr-0006",
+        "resource": {
+          "resourceType": "DiagnosticReport",
+          "id": "dr-0006",
+          "status": "final",
+          "category": [
+            {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/v2-0074",
+                  "code": "LAB",
+                  "display": "Laboratory"
+                }
+              ]
+            }
+          ],
+          "code": {
+            "coding": [
+              {
+                "system": "http://loinc.org",
+                "code": "58410-2",
+                "display": "Complete blood count (CBC)"
+              }
+            ],
+            "text": "Complete Blood Count"
+          },
+          "subject": {
+            "reference": "Patient/patient-0014"
+          },
+          "effectiveDateTime": "2026-03-06T16:00:00Z",
+          "conclusion": "All values within normal range"
+        },
+        "search": {
+          "mode": "match"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:dr-0007",
+        "resource": {
+          "resourceType": "DiagnosticReport",
+          "id": "dr-0007",
+          "status": "final",
+          "category": [
+            {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/v2-0074",
+                  "code": "LAB",
+                  "display": "Laboratory"
+                }
+              ]
+            }
+          ],
+          "code": {
+            "coding": [
+              {
+                "system": "http://loinc.org",
+                "code": "58410-2",
+                "display": "Complete blood count (CBC)"
+              }
+            ],
+            "text": "Complete Blood Count"
+          },
+          "subject": {
+            "reference": "Patient/patient-0001"
+          },
+          "effectiveDateTime": "2026-03-19T17:00:00Z",
+          "conclusion": "Elevated WBC count"
+        },
+        "search": {
+          "mode": "match"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:dr-0008",
+        "resource": {
+          "resourceType": "DiagnosticReport",
+          "id": "dr-0008",
+          "status": "final",
+          "category": [
+            {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/v2-0074",
+                  "code": "LAB",
+                  "display": "Laboratory"
+                }
+              ]
+            }
+          ],
+          "code": {
+            "coding": [
+              {
+                "system": "http://loinc.org",
+                "code": "58410-2",
+                "display": "Complete blood count (CBC)"
+              }
+            ],
+            "text": "Complete Blood Count"
+          },
+          "subject": {
+            "reference": "Patient/patient-0017"
+          },
+          "effectiveDateTime": "2026-03-20T18:00:00Z",
+          "conclusion": "All values within normal range"
+        },
+        "search": {
+          "mode": "match"
+        }
+      }
+    ]
+  },
+  "fhir-immunization-record": {
+    "resourceType": "Bundle",
+    "id": "bundle-33226",
+    "meta": {
+      "lastUpdated": "2026-03-20T09:42:00Z"
+    },
+    "type": "searchset",
+    "total": 8,
+    "link": [
+      {
+        "relation": "self",
+        "url": "https://alpha-klinik.de/fhir/Patient"
+      }
+    ],
+    "entry": [
+      {
+        "fullUrl": "urn:uuid:imm-0001",
+        "resource": {
+          "resourceType": "Immunization",
+          "id": "imm-0001",
+          "status": "completed",
+          "vaccineCode": {
+            "coding": [
+              {
+                "system": "http://hl7.org/fhir/sid/cvx",
+                "code": "33",
+                "display": "Pneumococcal polysaccharide vaccine"
+              }
+            ],
+            "text": "Pneumococcal polysaccharide vaccine"
+          },
+          "patient": {
+            "reference": "Patient/patient-0018"
+          },
+          "occurrenceDateTime": "2025-11-02"
+        },
+        "search": {
+          "mode": "match"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:imm-0002",
+        "resource": {
+          "resourceType": "Immunization",
+          "id": "imm-0002",
+          "status": "completed",
+          "vaccineCode": {
+            "coding": [
+              {
+                "system": "http://hl7.org/fhir/sid/cvx",
+                "code": "207",
+                "display": "SARS-COV-2 (COVID-19) vaccine, mRNA"
+              }
+            ],
+            "text": "SARS-COV-2 (COVID-19) vaccine, mRNA"
+          },
+          "patient": {
+            "reference": "Patient/patient-0012"
+          },
+          "occurrenceDateTime": "2024-08-13"
+        },
+        "search": {
+          "mode": "match"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:imm-0003",
+        "resource": {
+          "resourceType": "Immunization",
+          "id": "imm-0003",
+          "status": "completed",
+          "vaccineCode": {
+            "coding": [
+              {
+                "system": "http://hl7.org/fhir/sid/cvx",
+                "code": "207",
+                "display": "SARS-COV-2 (COVID-19) vaccine, mRNA"
+              }
+            ],
+            "text": "SARS-COV-2 (COVID-19) vaccine, mRNA"
+          },
+          "patient": {
+            "reference": "Patient/patient-0012"
+          },
+          "occurrenceDateTime": "2024-05-30"
+        },
+        "search": {
+          "mode": "match"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:imm-0004",
+        "resource": {
+          "resourceType": "Immunization",
+          "id": "imm-0004",
+          "status": "completed",
+          "vaccineCode": {
+            "coding": [
+              {
+                "system": "http://hl7.org/fhir/sid/cvx",
+                "code": "113",
+                "display": "Td (adult) preservative free"
+              }
+            ],
+            "text": "Td (adult) preservative free"
+          },
+          "patient": {
+            "reference": "Patient/patient-0019"
+          },
+          "occurrenceDateTime": "2024-02-04"
+        },
+        "search": {
+          "mode": "match"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:imm-0005",
+        "resource": {
+          "resourceType": "Immunization",
+          "id": "imm-0005",
+          "status": "completed",
+          "vaccineCode": {
+            "coding": [
+              {
+                "system": "http://hl7.org/fhir/sid/cvx",
+                "code": "140",
+                "display": "Influenza, seasonal, injectable"
+              }
+            ],
+            "text": "Influenza, seasonal, injectable"
+          },
+          "patient": {
+            "reference": "Patient/patient-0011"
+          },
+          "occurrenceDateTime": "2025-06-12"
+        },
+        "search": {
+          "mode": "match"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:imm-0006",
+        "resource": {
+          "resourceType": "Immunization",
+          "id": "imm-0006",
+          "status": "completed",
+          "vaccineCode": {
+            "coding": [
+              {
+                "system": "http://hl7.org/fhir/sid/cvx",
+                "code": "207",
+                "display": "SARS-COV-2 (COVID-19) vaccine, mRNA"
+              }
+            ],
+            "text": "SARS-COV-2 (COVID-19) vaccine, mRNA"
+          },
+          "patient": {
+            "reference": "Patient/patient-0002"
+          },
+          "occurrenceDateTime": "2025-10-10"
+        },
+        "search": {
+          "mode": "match"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:imm-0007",
+        "resource": {
+          "resourceType": "Immunization",
+          "id": "imm-0007",
+          "status": "completed",
+          "vaccineCode": {
+            "coding": [
+              {
+                "system": "http://hl7.org/fhir/sid/cvx",
+                "code": "08",
+                "display": "Hepatitis B vaccine"
+              }
+            ],
+            "text": "Hepatitis B vaccine"
+          },
+          "patient": {
+            "reference": "Patient/patient-0019"
+          },
+          "occurrenceDateTime": "2024-07-18"
+        },
+        "search": {
+          "mode": "match"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:imm-0008",
+        "resource": {
+          "resourceType": "Immunization",
+          "id": "imm-0008",
+          "status": "completed",
+          "vaccineCode": {
+            "coding": [
+              {
+                "system": "http://hl7.org/fhir/sid/cvx",
+                "code": "33",
+                "display": "Pneumococcal polysaccharide vaccine"
+              }
+            ],
+            "text": "Pneumococcal polysaccharide vaccine"
+          },
+          "patient": {
+            "reference": "Patient/patient-0012"
+          },
+          "occurrenceDateTime": "2024-01-23"
+        },
+        "search": {
+          "mode": "match"
+        }
+      }
+    ]
+  },
+  "fhir-allergy-intolerance": {
+    "resourceType": "Bundle",
+    "id": "bundle-33128",
+    "meta": {
+      "lastUpdated": "2026-03-20T11:06:00Z"
+    },
+    "type": "searchset",
+    "total": 6,
+    "link": [
+      {
+        "relation": "self",
+        "url": "https://alpha-klinik.de/fhir/Patient"
+      }
+    ],
+    "entry": [
+      {
+        "fullUrl": "urn:uuid:allergy-0001",
+        "resource": {
+          "resourceType": "AllergyIntolerance",
+          "id": "allergy-0001",
+          "clinicalStatus": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/allergyintolerance-clinical",
+                "code": "active"
+              }
+            ]
+          },
+          "type": "allergy",
+          "category": ["medication"],
+          "criticality": "low",
+          "code": {
+            "coding": [
+              {
+                "system": "http://snomed.info/sct",
+                "code": "387207008",
+                "display": "Ibuprofen"
+              }
+            ],
+            "text": "Ibuprofen"
+          },
+          "patient": {
+            "reference": "Patient/patient-0020"
+          },
+          "reaction": [
+            {
+              "manifestation": [
+                {
+                  "coding": [
+                    {
+                      "display": "Hives"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "search": {
+          "mode": "match"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:allergy-0002",
+        "resource": {
+          "resourceType": "AllergyIntolerance",
+          "id": "allergy-0002",
+          "clinicalStatus": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/allergyintolerance-clinical",
+                "code": "active"
+              }
+            ]
+          },
+          "type": "allergy",
+          "category": ["medication"],
+          "criticality": "low",
+          "code": {
+            "coding": [
+              {
+                "system": "http://snomed.info/sct",
+                "code": "2670",
+                "display": "Codeine"
+              }
+            ],
+            "text": "Codeine"
+          },
+          "patient": {
+            "reference": "Patient/patient-0019"
+          },
+          "reaction": [
+            {
+              "manifestation": [
+                {
+                  "coding": [
+                    {
+                      "display": "Nausea"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "search": {
+          "mode": "match"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:allergy-0003",
+        "resource": {
+          "resourceType": "AllergyIntolerance",
+          "id": "allergy-0003",
+          "clinicalStatus": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/allergyintolerance-clinical",
+                "code": "active"
+              }
+            ]
+          },
+          "type": "allergy",
+          "category": ["medication"],
+          "criticality": "high",
+          "code": {
+            "coding": [
+              {
+                "system": "http://snomed.info/sct",
+                "code": "387207008",
+                "display": "Ibuprofen"
+              }
+            ],
+            "text": "Ibuprofen"
+          },
+          "patient": {
+            "reference": "Patient/patient-0017"
+          },
+          "reaction": [
+            {
+              "manifestation": [
+                {
+                  "coding": [
+                    {
+                      "display": "Hives"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "search": {
+          "mode": "match"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:allergy-0004",
+        "resource": {
+          "resourceType": "AllergyIntolerance",
+          "id": "allergy-0004",
+          "clinicalStatus": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/allergyintolerance-clinical",
+                "code": "active"
+              }
+            ]
+          },
+          "type": "allergy",
+          "category": ["medication"],
+          "criticality": "high",
+          "code": {
+            "coding": [
+              {
+                "system": "http://snomed.info/sct",
+                "code": "7980",
+                "display": "Penicillin G"
+              }
+            ],
+            "text": "Penicillin G"
+          },
+          "patient": {
+            "reference": "Patient/patient-0017"
+          },
+          "reaction": [
+            {
+              "manifestation": [
+                {
+                  "coding": [
+                    {
+                      "display": "Anaphylaxis"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "search": {
+          "mode": "match"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:allergy-0005",
+        "resource": {
+          "resourceType": "AllergyIntolerance",
+          "id": "allergy-0005",
+          "clinicalStatus": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/allergyintolerance-clinical",
+                "code": "active"
+              }
+            ]
+          },
+          "type": "allergy",
+          "category": ["medication"],
+          "criticality": "high",
+          "code": {
+            "coding": [
+              {
+                "system": "http://snomed.info/sct",
+                "code": "1191",
+                "display": "Aspirin"
+              }
+            ],
+            "text": "Aspirin"
+          },
+          "patient": {
+            "reference": "Patient/patient-0011"
+          },
+          "reaction": [
+            {
+              "manifestation": [
+                {
+                  "coding": [
+                    {
+                      "display": "Bronchospasm"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "search": {
+          "mode": "match"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:allergy-0006",
+        "resource": {
+          "resourceType": "AllergyIntolerance",
+          "id": "allergy-0006",
+          "clinicalStatus": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/allergyintolerance-clinical",
+                "code": "active"
+              }
+            ]
+          },
+          "type": "allergy",
+          "category": ["medication"],
+          "criticality": "high",
+          "code": {
+            "coding": [
+              {
+                "system": "http://snomed.info/sct",
+                "code": "1191",
+                "display": "Aspirin"
+              }
+            ],
+            "text": "Aspirin"
+          },
+          "patient": {
+            "reference": "Patient/patient-0009"
+          },
+          "reaction": [
+            {
+              "manifestation": [
+                {
+                  "coding": [
+                    {
+                      "display": "Bronchospasm"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "search": {
+          "mode": "match"
+        }
+      }
+    ]
+  },
+  "fhir-procedure-bundle": {
+    "resourceType": "Bundle",
+    "id": "bundle-71915",
+    "meta": {
+      "lastUpdated": "2026-03-20T14:20:00Z"
+    },
+    "type": "searchset",
+    "total": 8,
+    "link": [
+      {
+        "relation": "self",
+        "url": "https://alpha-klinik.de/fhir/Patient"
+      }
+    ],
+    "entry": [
+      {
+        "fullUrl": "urn:uuid:proc-0001",
+        "resource": {
+          "resourceType": "Procedure",
+          "id": "proc-0001",
+          "status": "completed",
+          "code": {
+            "coding": [
+              {
+                "system": "http://snomed.info/sct",
+                "code": "73761001",
+                "display": "Colonoscopy"
+              }
+            ],
+            "text": "Colonoscopy"
+          },
+          "subject": {
+            "reference": "Patient/patient-0002"
+          },
+          "performedDateTime": "2026-03-17T10:00:00Z"
+        },
+        "search": {
+          "mode": "match"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:proc-0002",
+        "resource": {
+          "resourceType": "Procedure",
+          "id": "proc-0002",
+          "status": "completed",
+          "code": {
+            "coding": [
+              {
+                "system": "http://snomed.info/sct",
+                "code": "430193006",
+                "display": "Medication reconciliation"
+              }
+            ],
+            "text": "Medication reconciliation"
+          },
+          "subject": {
+            "reference": "Patient/patient-0012"
+          },
+          "performedDateTime": "2026-03-05T10:00:00Z"
+        },
+        "search": {
+          "mode": "match"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:proc-0003",
+        "resource": {
+          "resourceType": "Procedure",
+          "id": "proc-0003",
+          "status": "completed",
+          "code": {
+            "coding": [
+              {
+                "system": "http://snomed.info/sct",
+                "code": "73761001",
+                "display": "Colonoscopy"
+              }
+            ],
+            "text": "Colonoscopy"
+          },
+          "subject": {
+            "reference": "Patient/patient-0006"
+          },
+          "performedDateTime": "2026-03-13T10:00:00Z"
+        },
+        "search": {
+          "mode": "match"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:proc-0004",
+        "resource": {
+          "resourceType": "Procedure",
+          "id": "proc-0004",
+          "status": "completed",
+          "code": {
+            "coding": [
+              {
+                "system": "http://snomed.info/sct",
+                "code": "76601001",
+                "display": "Intramuscular injection"
+              }
+            ],
+            "text": "Intramuscular injection"
+          },
+          "subject": {
+            "reference": "Patient/patient-0018"
+          },
+          "performedDateTime": "2026-03-17T18:00:00Z"
+        },
+        "search": {
+          "mode": "match"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:proc-0005",
+        "resource": {
+          "resourceType": "Procedure",
+          "id": "proc-0005",
+          "status": "completed",
+          "code": {
+            "coding": [
+              {
+                "system": "http://snomed.info/sct",
+                "code": "40701008",
+                "display": "Echocardiography"
+              }
+            ],
+            "text": "Echocardiography"
+          },
+          "subject": {
+            "reference": "Patient/patient-0006"
+          },
+          "performedDateTime": "2026-03-16T16:00:00Z"
+        },
+        "search": {
+          "mode": "match"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:proc-0006",
+        "resource": {
+          "resourceType": "Procedure",
+          "id": "proc-0006",
+          "status": "completed",
+          "code": {
+            "coding": [
+              {
+                "system": "http://snomed.info/sct",
+                "code": "710824005",
+                "display": "Assessment of health and social care needs"
+              }
+            ],
+            "text": "Assessment of health and social care needs"
+          },
+          "subject": {
+            "reference": "Patient/patient-0001"
+          },
+          "performedDateTime": "2026-03-05T12:00:00Z"
+        },
+        "search": {
+          "mode": "match"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:proc-0007",
+        "resource": {
+          "resourceType": "Procedure",
+          "id": "proc-0007",
+          "status": "completed",
+          "code": {
+            "coding": [
+              {
+                "system": "http://snomed.info/sct",
+                "code": "73761001",
+                "display": "Colonoscopy"
+              }
+            ],
+            "text": "Colonoscopy"
+          },
+          "subject": {
+            "reference": "Patient/patient-0012"
+          },
+          "performedDateTime": "2026-03-17T18:00:00Z"
+        },
+        "search": {
+          "mode": "match"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:proc-0008",
+        "resource": {
+          "resourceType": "Procedure",
+          "id": "proc-0008",
+          "status": "completed",
+          "code": {
+            "coding": [
+              {
+                "system": "http://snomed.info/sct",
+                "code": "76601001",
+                "display": "Intramuscular injection"
+              }
+            ],
+            "text": "Intramuscular injection"
+          },
+          "subject": {
+            "reference": "Patient/patient-0015"
+          },
+          "performedDateTime": "2026-03-03T14:00:00Z"
+        },
+        "search": {
+          "mode": "match"
+        }
+      }
+    ]
+  },
+  "fhir-care-plan": {
+    "resourceType": "Bundle",
+    "id": "bundle-87148",
+    "meta": {
+      "lastUpdated": "2026-03-20T19:21:00Z"
+    },
+    "type": "searchset",
+    "total": 5,
+    "link": [
+      {
+        "relation": "self",
+        "url": "https://alpha-klinik.de/fhir/Patient"
+      }
+    ],
+    "entry": [
+      {
+        "fullUrl": "urn:uuid:cp-0001",
+        "resource": {
+          "resourceType": "CarePlan",
+          "id": "cp-0001",
+          "status": "active",
+          "intent": "plan",
+          "title": "Chronic Pain Management",
+          "subject": {
+            "reference": "Patient/patient-0002"
+          },
+          "period": {
+            "start": "2026-01-01",
+            "end": "2026-12-31"
+          },
+          "activity": [
+            {
+              "detail": {
+                "status": "in-progress",
+                "description": "Monthly lab work"
+              }
+            }
+          ]
+        },
+        "search": {
+          "mode": "match"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:cp-0002",
+        "resource": {
+          "resourceType": "CarePlan",
+          "id": "cp-0002",
+          "status": "active",
+          "intent": "plan",
+          "title": "Post-Surgery Recovery",
+          "subject": {
+            "reference": "Patient/patient-0003"
+          },
+          "period": {
+            "start": "2026-01-01",
+            "end": "2026-12-31"
+          },
+          "activity": [
+            {
+              "detail": {
+                "status": "in-progress",
+                "description": "Monthly lab work"
+              }
+            }
+          ]
+        },
+        "search": {
+          "mode": "match"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:cp-0003",
+        "resource": {
+          "resourceType": "CarePlan",
+          "id": "cp-0003",
+          "status": "active",
+          "intent": "plan",
+          "title": "Diabetes Management Plan",
+          "subject": {
+            "reference": "Patient/patient-0015"
+          },
+          "period": {
+            "start": "2026-01-01",
+            "end": "2026-12-31"
+          },
+          "activity": [
+            {
+              "detail": {
+                "status": "in-progress",
+                "description": "Monitor blood glucose daily"
+              }
+            }
+          ]
+        },
+        "search": {
+          "mode": "match"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:cp-0004",
+        "resource": {
+          "resourceType": "CarePlan",
+          "id": "cp-0004",
+          "status": "active",
+          "intent": "plan",
+          "title": "Post-Surgery Recovery",
+          "subject": {
+            "reference": "Patient/patient-0002"
+          },
+          "period": {
+            "start": "2026-01-01",
+            "end": "2026-12-31"
+          },
+          "activity": [
+            {
+              "detail": {
+                "status": "in-progress",
+                "description": "Physical therapy 3x/week"
+              }
+            }
+          ]
+        },
+        "search": {
+          "mode": "match"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:cp-0005",
+        "resource": {
+          "resourceType": "CarePlan",
+          "id": "cp-0005",
+          "status": "active",
+          "intent": "plan",
+          "title": "Hypertension Care Plan",
+          "subject": {
+            "reference": "Patient/patient-0011"
+          },
+          "period": {
+            "start": "2026-01-01",
+            "end": "2026-12-31"
+          },
+          "activity": [
+            {
+              "detail": {
+                "status": "in-progress",
+                "description": "Monthly lab work"
+              }
+            }
+          ]
+        },
+        "search": {
+          "mode": "match"
+        }
+      }
+    ]
+  }
+}
