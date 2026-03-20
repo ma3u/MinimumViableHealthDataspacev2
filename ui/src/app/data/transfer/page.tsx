@@ -651,9 +651,13 @@ function DataTransferContent() {
         setParticipants(list);
         if (!selectedCtx && list.length > 0) {
           setSelectedCtx(list[0]["@id"]);
+        } else if (list.length === 0) {
+          setLoading(false);
         }
       })
-      .catch(() => {});
+      .catch(() => {
+        setLoading(false);
+      });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

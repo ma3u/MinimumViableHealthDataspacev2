@@ -7,9 +7,17 @@ import {
   BarChart2,
   Layers,
   ArrowRightLeft,
+  FileJson2,
   FileText,
   LayoutDashboard,
   Github,
+  Search,
+  Handshake,
+  UserPlus,
+  MessageSquare,
+  ClipboardList,
+  Settings,
+  Award,
 } from "lucide-react";
 
 const exploreCards = [
@@ -48,35 +56,94 @@ const exploreCards = [
     desc: "EU FHIR profile alignment & EHDS priority coverage gap analysis",
     color: "border-layer2 hover:bg-layer2/10",
   },
+  {
+    href: "/query",
+    icon: MessageSquare,
+    label: "Natural Language Query",
+    desc: "Federated Cypher queries via natural language interface",
+    color: "border-layer1 hover:bg-layer1/10",
+  },
 ];
 
-const actionCards = [
+const exchangeCards = [
+  {
+    href: "/data/share",
+    icon: ArrowRightLeft,
+    label: "Share Data",
+    desc: "Publish and register health data assets for the dataspace",
+    color: "border-layer1 hover:bg-layer1/10",
+  },
+  {
+    href: "/data/discover",
+    icon: Search,
+    label: "Discover Data",
+    desc: "Search the federated catalog for available datasets",
+    color: "border-layer2 hover:bg-layer2/10",
+  },
+  {
+    href: "/negotiate",
+    icon: Handshake,
+    label: "Contract Negotiation",
+    desc: "Negotiate data usage contracts with providers via DSP",
+    color: "border-layer3 hover:bg-layer3/10",
+  },
+  {
+    href: "/data/transfer",
+    icon: FileJson2,
+    label: "Data Transfer & FHIR Viewer",
+    desc: "Transfer FHIR/OMOP data and inspect FHIR R4 bundles",
+    color: "border-layer4 hover:bg-layer4/10",
+  },
+  {
+    href: "/tasks",
+    icon: ClipboardList,
+    label: "EHDS Tasks",
+    desc: "Track data access permit tasks and approval workflows",
+    color: "border-layer5 hover:bg-layer5/10",
+  },
+];
+
+const governCards = [
   {
     href: "/compliance",
     icon: ShieldCheck,
-    label: "Governance",
+    label: "Governance & Compliance",
     desc: "EHDS compliance, data permits, and protocol conformance testing",
     color: "border-layer5 hover:bg-layer5/10",
   },
   {
-    href: "/data/share",
-    icon: ArrowRightLeft,
-    label: "Data Exchange",
-    desc: "Share, discover, negotiate, and transfer health data between participants",
+    href: "/credentials",
+    icon: Award,
+    label: "Verifiable Credentials",
+    desc: "Manage MembershipCredential, EHDS participant, and data permits",
     color: "border-layer1 hover:bg-layer1/10",
+  },
+  {
+    href: "/onboarding",
+    icon: UserPlus,
+    label: "Onboarding",
+    desc: "Register new participants and generate DID identities",
+    color: "border-layer2 hover:bg-layer2/10",
+  },
+  {
+    href: "/settings",
+    icon: Settings,
+    label: "Settings",
+    desc: "Participant profile, connector endpoints, and credentials",
+    color: "border-layer3 hover:bg-layer3/10",
   },
   {
     href: "/admin",
     icon: LayoutDashboard,
     label: "Portal Admin",
-    desc: "Onboarding, tenant management, policies, and audit logs",
+    desc: "Tenant management, policies, component topology, and audit logs",
     color: "border-layer4 hover:bg-layer4/10",
   },
   {
     href: "/docs",
     icon: FileText,
     label: "Documentation",
-    desc: "User guides, developer docs, and architecture diagrams",
+    desc: "User guide, developer docs, and architecture reference",
     color: "border-layer3 hover:bg-layer3/10",
   },
 ];
@@ -120,12 +187,32 @@ export default function Home() {
         ))}
       </div>
 
-      {/* Actions section */}
+      {/* Exchange section */}
       <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">
-        Govern · Exchange · Manage
+        Exchange · Transfer · Negotiate
       </h2>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {actionCards.map(({ href, icon: Icon, label, desc, color }) => (
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-10">
+        {exchangeCards.map(({ href, icon: Icon, label, desc, color }) => (
+          <Link
+            key={href}
+            href={href}
+            className={`border rounded-xl p-5 transition-colors ${color}`}
+          >
+            <div className="flex items-center gap-2 mb-2">
+              <Icon size={20} />
+              <span className="font-semibold">{label}</span>
+            </div>
+            <p className="text-sm text-gray-400">{desc}</p>
+          </Link>
+        ))}
+      </div>
+
+      {/* Govern & Manage section */}
+      <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">
+        Govern · Manage · Docs
+      </h2>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {governCards.map(({ href, icon: Icon, label, desc, color }) => (
           <Link
             key={href}
             href={href}
