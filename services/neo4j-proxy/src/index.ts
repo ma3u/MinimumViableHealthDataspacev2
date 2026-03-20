@@ -1613,8 +1613,11 @@ app.get("/tasks", async (req: Request, res: Response) => {
       tasks,
       counts: {
         total: tasks.length,
-        negotiations: tasks.filter((t: { type: string }) => t.type === "negotiation").length,
-        transfers: tasks.filter((t: { type: string }) => t.type === "transfer").length,
+        negotiations: tasks.filter(
+          (t: { type: string }) => t.type === "negotiation",
+        ).length,
+        transfers: tasks.filter((t: { type: string }) => t.type === "transfer")
+          .length,
         active,
       },
     });
@@ -1641,32 +1644,21 @@ app.get("/tasks", async (req: Request, res: Response) => {
  * while running EHDS (Neo4j) checks directly.
  */
 
-const TCK_KEYCLOAK_URL =
-  process.env.TCK_KEYCLOAK_URL ?? "http://keycloak:8080";
+const TCK_KEYCLOAK_URL = process.env.TCK_KEYCLOAK_URL ?? "http://keycloak:8080";
 const TCK_KEYCLOAK_REALM = process.env.TCK_KEYCLOAK_REALM ?? "edcv";
 const TCK_CLIENT_ID = process.env.TCK_CLIENT_ID ?? "admin";
-const TCK_CLIENT_SECRET =
-  process.env.TCK_CLIENT_SECRET ?? "edc-v-admin-secret";
+const TCK_CLIENT_SECRET = process.env.TCK_CLIENT_SECRET ?? "edc-v-admin-secret";
 
 const TCK_CONTROLPLANE_DEFAULT_URL =
   process.env.TCK_CONTROLPLANE_DEFAULT_URL ?? "http://controlplane:8080";
 const TCK_CONTROLPLANE_MGMT_URL =
-  process.env.TCK_CONTROLPLANE_MGMT_URL ??
-  "http://controlplane:8081/api/mgmt";
+  process.env.TCK_CONTROLPLANE_MGMT_URL ?? "http://controlplane:8081/api/mgmt";
 const TCK_IDENTITY_URL =
-  process.env.TCK_IDENTITY_URL ??
-  "http://identityhub:7081/api/identity";
+  process.env.TCK_IDENTITY_URL ?? "http://identityhub:7081/api/identity";
 const TCK_ISSUER_URL =
-  process.env.TCK_ISSUER_URL ??
-  "http://issuerservice:10013/api/admin";
+  process.env.TCK_ISSUER_URL ?? "http://issuerservice:10013/api/admin";
 
-const TCK_PARTICIPANTS = [
-  "alpha-klinik",
-  "pharmaco",
-  "medreg",
-  "lmc",
-  "irs",
-];
+const TCK_PARTICIPANTS = ["alpha-klinik", "pharmaco", "medreg", "lmc", "irs"];
 
 interface TckTestResult {
   id: string;
@@ -1773,8 +1765,8 @@ app.get("/tck", async (_req: Request, res: Response) => {
   for (const name of TCK_PARTICIPANTS) {
     const idx = TCK_PARTICIPANTS.indexOf(name) + 1;
     // Find context ID by matching the identity DID suffix
-    const ctx = participantContexts?.find((p) =>
-      p.identity?.includes(`:${name}`),
+    const ctx = participantContexts?.find(
+      (p) => p.identity?.includes(`:${name}`),
     );
 
     if (!ctx) {
@@ -1793,7 +1785,7 @@ app.get("/tck", async (_req: Request, res: Response) => {
     const assetsBody = JSON.stringify({
       "@context": ["https://w3id.org/edc/connector/management/v2"],
       "@type": "QuerySpec",
-      "filterExpression": [],
+      filterExpression: [],
     });
     const assets = await tckProbeJson<unknown[]>(
       `${TCK_CONTROLPLANE_MGMT_URL}/v5alpha/participants/${ctx["@id"]}/assets/request`,
@@ -1836,23 +1828,22 @@ app.get("/tck", async (_req: Request, res: Response) => {
   // DCP-2.x: Key pairs per participant (use participantContextId from IH)
   // The IdentityHub uses its own participantContextId (UUID), same as controlplane
   const ihParticipants = Array.isArray(ihData)
-    ? (ihData as Array<{ participantContextId?: string }>)
+    ? (ihData as Array<{ participantContextId?: string; did?: string }>)
     : [];
 
   for (const name of TCK_PARTICIPANTS) {
     const idx = TCK_PARTICIPANTS.indexOf(name) + 1;
-    // Map friendly name → participantContextId via controlplane contexts
-    const cpCtx = participantContexts?.find((p) =>
-      p.identity?.includes(`:${name}`),
-    );
-    const pcId = cpCtx?.["@id"];
-    // Also check IH participant list for matching context
-    const ihMatch = ihParticipants.find(
-      (p) => p.participantContextId === pcId,
-    );
-    const contextId = ihMatch?.participantContextId ?? pcId;
+    // Match IH participant by DID suffix (CP and IH may have different context IDs)
+    const ihMatch = ihParticipants.find((p) => p.did?.includes(`:${name}`));
+    const contextId = ihMatch?.participantContextId;
 
-    if (!contextId) {
+    // Fall back to Control Plane context ID if IH match not found
+    const cpCtx = participantContexts?.find(
+      (p) => p.identity?.includes(`:${name}`),
+    );
+    const finalContextId = contextId ?? cpCtx?.["@id"];
+
+    if (!finalContextId) {
       results.push({
         id: `DCP-2.${idx}`,
         category: "Key Pair Management",
@@ -1865,7 +1856,7 @@ app.get("/tck", async (_req: Request, res: Response) => {
     }
 
     const data = await tckProbeJson<unknown[]>(
-      `${TCK_IDENTITY_URL}/v1alpha/participants/${contextId}/keypairs`,
+      `${TCK_IDENTITY_URL}/v1alpha/participants/${finalContextId}/keypairs`,
       { headers: { ...authHeaders, "Content-Type": "application/json" } },
     );
     const hasPairs = Array.isArray(data) && data.length > 0;
@@ -1891,7 +1882,7 @@ app.get("/tck", async (_req: Request, res: Response) => {
         body: JSON.stringify({
           "@context": ["https://w3id.org/edc/connector/management/v2"],
           "@type": "QuerySpec",
-          "filterExpression": [],
+          filterExpression: [],
         }),
       },
     );
@@ -1903,7 +1894,9 @@ app.get("/tck", async (_req: Request, res: Response) => {
       name: "IssuerService reachable",
       status: issuerReachable ? "pass" : "fail",
       detail: issuerReachable
-        ? `IssuerService responded with ${issuerData!.length} credential definition(s)`
+        ? `IssuerService responded with ${
+            issuerData!.length
+          } credential definition(s)`
         : "IssuerService unreachable",
     });
   } else {

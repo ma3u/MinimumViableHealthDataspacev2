@@ -214,6 +214,23 @@ seed_and_fix() {
 }
 
 # ---------------------------------------------------------------------------
+# Run full seed pipeline (health tenants, credentials, policies, assets, etc.)
+# ---------------------------------------------------------------------------
+seed_dataspace() {
+  cd "$PROJECT_DIR"
+
+  log "=== Phase 9: Seeding dataspace (tenants, credentials, policies, assets, negotiations) ==="
+
+  if [ -f "$PROJECT_DIR/jad/seed-all.sh" ]; then
+    bash "$PROJECT_DIR/jad/seed-all.sh" && \
+      ok "Dataspace seed pipeline complete" || \
+      warn "Dataspace seed pipeline had warnings — check output above"
+  else
+    warn "jad/seed-all.sh not found — skipping dataspace seeding"
+  fi
+}
+
+# ---------------------------------------------------------------------------
 # Show status
 # ---------------------------------------------------------------------------
 show_status() {
@@ -277,6 +294,7 @@ main() {
       ;;
     --seed)
       seed_and_fix
+      seed_dataspace
       ok "Seed and identity fixup complete"
       ;;
     --help|-h)
@@ -287,7 +305,7 @@ main() {
       echo "  --reset     Stop all services and remove volumes"
       echo "  --status    Show service status and endpoints"
       echo "  --pull      Pull latest images"
-      echo "  --seed      Re-run JAD seed and issuer identity fixup"
+      echo "  --seed      Re-run JAD seed, identity fixup, and dataspace seeding"
       echo "  --help      Show this help"
       ;;
     *)
@@ -295,6 +313,7 @@ main() {
       pull_images
       start_stack
       seed_and_fix
+      seed_dataspace
       show_status
       ok "JAD stack is ready! 🚀"
       ;;

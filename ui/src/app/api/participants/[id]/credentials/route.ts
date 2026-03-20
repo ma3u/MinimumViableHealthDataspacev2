@@ -24,6 +24,41 @@ interface VerifiableCredential {
   credentialStatus?: { type: string; status: string };
 }
 
+/** Raw IH credential resource — the actual VC is nested deeper */
+interface IHCredentialResource {
+  id?: string;
+  state?: number;
+  verifiableCredential?: {
+    credential?: {
+      id?: string;
+      type?: string[];
+      issuer?: { id?: string };
+      issuanceDate?: string;
+      expirationDate?: string;
+      credentialSubject?: Array<Record<string, unknown>>;
+      credentialStatus?: Array<{ type?: string; statusPurpose?: string }>;
+    };
+  };
+}
+
+function toVC(r: IHCredentialResource): VerifiableCredential {
+  const c = r.verifiableCredential?.credential;
+  return {
+    id: c?.id ?? r.id,
+    type: c?.type,
+    issuer: c?.issuer?.id,
+    issuanceDate: c?.issuanceDate,
+    expirationDate: c?.expirationDate,
+    credentialSubject: c?.credentialSubject?.[0],
+    credentialStatus: c?.credentialStatus?.[0]
+      ? {
+          type: c.credentialStatus[0].type ?? "",
+          status: c.credentialStatus[0].statusPurpose ?? "",
+        }
+      : undefined,
+  };
+}
+
 /**
  * GET /api/participants/[id]/credentials
  * Fetches verifiable credentials from IdentityHub for every participant
@@ -37,10 +72,6 @@ export async function GET(
     const profiles = await edcClient.tenant<ParticipantProfile[]>(
       `/v1alpha1/tenants/${params.id}/participant-profiles`,
     );
-
-    const IH_BASE =
-      process.env.EDC_IDENTITYHUB_URL ||
-      "http://localhost:11005";
 
     const results = await Promise.all(
       profiles.map(async (pp) => {
@@ -60,24 +91,24 @@ export async function GET(
         }
 
         try {
-          const res = await fetch(
-            `${IH_BASE}/v1alpha/participants/${ctxId}/credentials`,
-            { headers: { "Content-Type": "application/json" } },
+          const data = await edcClient.identity<IHCredentialResource[]>(
+            `/v1alpha/participants/${ctxId}/credentials`,
           );
-          const data: VerifiableCredential[] = res.ok ? await res.json() : [];
+          const vcs = Array.isArray(data) ? data.map(toVC) : [];
           return {
             profileId: pp.id,
             participantContextId: ctxId,
             did,
-            credentials: Array.isArray(data) ? data : [],
+            credentials: vcs,
           };
-        } catch {
+        } catch (err) {
+          const msg = err instanceof Error ? err.message : String(err);
           return {
             profileId: pp.id,
             participantContextId: ctxId,
             did,
             credentials: [],
-            error: "IdentityHub unreachable",
+            error: msg,
           };
         }
       }),

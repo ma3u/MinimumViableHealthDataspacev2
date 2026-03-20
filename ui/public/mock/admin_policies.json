@@ -1,8 +1,8 @@
 {
   "policies": [
     {
-      "participantId": "163c5399fed04a2c828abcca68a583eb",
-      "participantName": "test-clinic",
+      "participantId": "c9c953d7-6c94-4fcd-9127-0eae25c65a36",
+      "participantName": "alpha-klinik",
       "@id": "policy-open-access",
       "@type": "PolicyDefinition",
       "policy": {
@@ -17,8 +17,8 @@
       "createdAt": 1719400000000
     },
     {
-      "participantId": "d0b1e14e6faa47aca9c2932a5e22885b",
-      "participantName": "clinic-charite",
+      "participantId": "a068819fca5a479983253994ef7337a9",
+      "participantName": "lmc",
       "@id": "policy-ehds-research",
       "@type": "PolicyDefinition",
       "policy": {

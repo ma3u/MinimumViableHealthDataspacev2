@@ -204,7 +204,7 @@ All three core specifications are now final or near-final:
 | **10** | Tasks Dashboard & DPS Integration                      | ✅ Complete | 10a ✅ (`/api/tasks` route — aggregates negotiations + transfers across all participant contexts); 10b ✅ (`/tasks` page — DSP pipeline steppers, filter tabs, summary cards, 15s auto-refresh); 10c ✅ (Navigation: Tasks link added to Exchange cluster with `ClipboardList` icon); 10d ✅ (Mock data: `tasks.json` + static export mapping in `api.ts`)                                                                                                                                                                       |
 | **11** | EDC Components — Per-Participant Topology & Info Layer | ✅ Complete | 11a ✅ (Component Info: `component-info.ts` — 21 `ComponentMeta` entries with description/protocol/ports/deps/health; `InfoPopover` on all rows); 11b ✅ (Topology: `/api/admin/components/topology` route — per-participant aggregation; Participant View with expandable `ParticipantTopologySection` + Layer↔Participant toggle); 11c ✅ (Severity: `SEVERITY_STYLES` + `SeverityDot` + `CriticalBanner` — worst-of rollup, auto-expand degraded); 11d ✅ (Mock: `admin_components_topology.json` + `STATIC_MOCK_MAP` entry) |
 | **12** | API QuerySpec Fix & EHDS Policy Seeding                | ✅ Complete | 12a ✅ (`filterExpression:[]` fix across 6 API routes — policies, assets, tasks, negotiations, transfers); 12b ✅ (`jad/seed-ehds-policies.sh` — 14 EHDS ODRL policies seeded across 5 participants: AK:3, LMC:4, PC:2, MR:3, IRS:2); 12c ✅ (Layer View participants as table layout)                                                                                                                                                                                                                                           |
-| **13** | Operational Hardening & Persistent Task Management     | ✅ Complete | 13a ✅ (seed-federated-catalog.sh: dynamic discovery replacing hardcoded UUIDs/DIDs); 13b ✅ (TCK `filterExpression:[]` fix for assets + IssuerService QuerySpec in neo4j-proxy); 13c ✅ (Compliance checker dropdown: EDC-V participant fallback + HealthDataset fallback); 13d ✅ (Persistent tasks: PostgreSQL `taskdb` + neo4j-proxy `/tasks` endpoints + UI sync/fallback); 13e (Seed orchestration guide documenting correct run order for all 8 seed scripts) |
+| **13** | Operational Hardening & Persistent Task Management     | ✅ Complete | 13a ✅ (seed-federated-catalog.sh: dynamic discovery replacing hardcoded UUIDs/DIDs); 13b ✅ (TCK `filterExpression:[]` fix for assets + IssuerService QuerySpec in neo4j-proxy); 13c ✅ (Compliance checker dropdown: EDC-V participant fallback + HealthDataset fallback); 13d ✅ (Persistent tasks: PostgreSQL `taskdb` + neo4j-proxy `/tasks` endpoints + UI sync/fallback); 13e (Seed orchestration guide documenting correct run order for all 8 seed scripts)                                                             |
 
 ---
 
@@ -1468,6 +1468,7 @@ When no HDAB approval chain exists yet (pre-seed), the dropdown was empty and
 users had to guess participant IDs.
 
 **Fix:** Added a two-tier fallback in `/api/compliance/route.ts`:
+
 1. **Consumer dropdown:** When Neo4j returns no approved consumers, falls back to
    all ACTIVATED EDC-V participant contexts with display-name mapping.
 2. **Dataset dropdown:** When no HDAB-approved datasets exist, falls back to all
@@ -1487,14 +1488,15 @@ persistence broker.
 
 **Implementation:**
 
-| Component | Change |
-|---|---|
-| `jad/init-postgres.sql` | Added `taskdb` database, `taskuser` user, `tasks` table with indexes on `participant_id`, `type`, `state` |
-| `services/neo4j-proxy/package.json` | Added `pg` (^8.16.0) and `@types/pg` (^8.11.6) dependencies |
-| `services/neo4j-proxy/src/index.ts` | Added `POST /tasks/sync` (upsert from EDC-V) and `GET /tasks` (retrieve with optional participant filter) endpoints; auto-creates table on first use via `ensureTaskTable()` |
-| `ui/src/app/api/tasks/route.ts` | Added sync step: after aggregating live tasks from EDC-V, POSTs them to neo4j-proxy `/tasks/sync`; error handler falls back to neo4j-proxy `/tasks` when EDC-V is unavailable |
+| Component                           | Change                                                                                                                                                                        |
+| ----------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `jad/init-postgres.sql`             | Added `taskdb` database, `taskuser` user, `tasks` table with indexes on `participant_id`, `type`, `state`                                                                     |
+| `services/neo4j-proxy/package.json` | Added `pg` (^8.16.0) and `@types/pg` (^8.11.6) dependencies                                                                                                                   |
+| `services/neo4j-proxy/src/index.ts` | Added `POST /tasks/sync` (upsert from EDC-V) and `GET /tasks` (retrieve with optional participant filter) endpoints; auto-creates table on first use via `ensureTaskTable()`  |
+| `ui/src/app/api/tasks/route.ts`     | Added sync step: after aggregating live tasks from EDC-V, POSTs them to neo4j-proxy `/tasks/sync`; error handler falls back to neo4j-proxy `/tasks` when EDC-V is unavailable |
 
 **Task table schema:**
+
 ```sql
 CREATE TABLE tasks (
   id TEXT PRIMARY KEY,
@@ -1521,19 +1523,20 @@ CREATE TABLE tasks (
 
 The full seed sequence required to populate a fresh deployment:
 
-| Order | Script | Purpose | Prerequisites |
-|-------|--------|---------|---------------|
-| 1 | `jad/seed-jad.sh` | IssuerService tenant, Cell, Dataspace Profile, ActivityDefinitions | Docker stack healthy |
-| 2 | `jad/seed-health-tenants.sh` | 5 participant tenants via CFM Tenant Manager | seed-jad.sh complete |
-| 3 | `jad/seed-ehds-credentials.sh` | EHDS credential definitions on IssuerService | Tenants provisioned |
-| 4 | `jad/seed-data-assets.sh` | Assets, policies, contracts; context activation; data plane registration | Tenants ACTIVATED |
-| 5 | `jad/seed-ehds-policies.sh` | 14 EHDS ODRL policies across 5 participants | Contexts activated |
-| 6 | `jad/seed-contract-negotiation.sh` | Contract negotiations (CRO→Clinic, HDAB→Clinic) | Assets + policies exist |
-| 7 | `jad/seed-data-transfer.sh` | Data transfers (FHIR + HealthDCAT-AP) | Negotiations FINALIZED |
-| 8 | `jad/seed-federated-catalog.sh` | Federated catalog discovery across participants | Assets registered |
-| 9 | `jad/issue-ehds-credentials.sh` | VC issuance to participant IdentityHubs | Credential defs exist |
+| Order | Script                             | Purpose                                                                  | Prerequisites           |
+| ----- | ---------------------------------- | ------------------------------------------------------------------------ | ----------------------- |
+| 1     | `jad/seed-jad.sh`                  | IssuerService tenant, Cell, Dataspace Profile, ActivityDefinitions       | Docker stack healthy    |
+| 2     | `jad/seed-health-tenants.sh`       | 5 participant tenants via CFM Tenant Manager                             | seed-jad.sh complete    |
+| 3     | `jad/seed-ehds-credentials.sh`     | EHDS credential definitions on IssuerService                             | Tenants provisioned     |
+| 4     | `jad/seed-data-assets.sh`          | Assets, policies, contracts; context activation; data plane registration | Tenants ACTIVATED       |
+| 5     | `jad/seed-ehds-policies.sh`        | 14 EHDS ODRL policies across 5 participants                              | Contexts activated      |
+| 6     | `jad/seed-contract-negotiation.sh` | Contract negotiations (CRO→Clinic, HDAB→Clinic)                          | Assets + policies exist |
+| 7     | `jad/seed-data-transfer.sh`        | Data transfers (FHIR + HealthDCAT-AP)                                    | Negotiations FINALIZED  |
+| 8     | `jad/seed-federated-catalog.sh`    | Federated catalog discovery across participants                          | Assets registered       |
+| 9     | `jad/issue-ehds-credentials.sh`    | VC issuance to participant IdentityHubs                                  | Credential defs exist   |
 
 **Quick start:**
+
 ```bash
 # Full seed sequence (run from project root)
 for script in seed-jad.sh seed-health-tenants.sh seed-ehds-credentials.sh \
@@ -1547,6 +1550,141 @@ done
 **Deliverables:** Dynamic seed discovery (no hardcoded UUIDs); TCK probes
 compliant; compliance checker usable pre-seed; persistent task history in
 PostgreSQL; documented seed orchestration order.
+
+---
+
+### Phase 14: End-to-End Testing & Demonstration Verification ✅
+
+**Goal:** Verify the full dataspace works end-to-end on localhost, with every UI
+page showing enough live data to demonstrate the EHDS dataspace functionality.
+
+**Context:** With all infrastructure fixed (data plane key aliases, federated
+catalog LMC targeting, transfer counterparty addresses), the full seed
+pipeline runs successfully. This phase adds automated verification that all
+services, API routes, and UI pages function correctly with real data.
+
+#### E2E Test Plan
+
+##### A. Infrastructure Verification
+
+| Check                         | Command / Endpoint                                  | Expected                  |
+| ----------------------------- | --------------------------------------------------- | ------------------------- |
+| All Docker containers healthy | `docker compose ps`                                 | 19+ services Up (healthy) |
+| PostgreSQL reachable          | `psql -U cp -d controlplane`                        | Connection OK             |
+| Neo4j reachable               | bolt://localhost:7687                               | Schema loaded             |
+| Vault unsealed                | http://localhost:8200/v1/sys/health                 | `{"sealed":false}`        |
+| Keycloak realm                | http://localhost:8080/realms/edcv                   | Realm JSON returned       |
+| NATS connected                | http://localhost:8222/connz                         | Active connections        |
+| Control Plane ready           | http://localhost:11003/api/mgmt/check/readiness     | 200 OK                    |
+| Data Plane FHIR ready         | http://localhost:11002/api/check/readiness          | 200 OK                    |
+| Data Plane OMOP ready         | http://localhost:11012/api/check/readiness          | 200 OK                    |
+| Identity Hub ready            | http://localhost:11005/api/identity/check/readiness | 200 OK                    |
+| Issuer Service ready          | http://localhost:10013/api/check/readiness          | 200 OK                    |
+| Neo4j Query Proxy             | http://localhost:9090/health                        | `{"status":"UP"}`         |
+
+##### B. Dataspace State Verification
+
+| Check                           | Query / API                             | Expected                                 |
+| ------------------------------- | --------------------------------------- | ---------------------------------------- |
+| 5 participant contexts          | CP mgmt API                             | alpha-klinik, lmc, pharmaco, medreg, irs |
+| All contexts ACTIVATED          | `edc_participant_context.state = 200`   | 5 rows                                   |
+| 10 Verifiable Credentials       | IssuerService API                       | EHDS + DPP credentials                   |
+| 9 data assets registered        | `edc_asset` table                       | 9 rows across 4 participants             |
+| ODRL policies created           | `edc_policydefinitions` table           | Policies for all participants            |
+| Contract negotiations FINALIZED | `edc_contract_negotiation.state = 1200` | ≥6 FINALIZED                             |
+| Transfers in STARTED state      | `edc_transfer_process.state = 600`      | ≥4 STARTED                               |
+| DID documents served            | identityhub:7083/{participant}/did.json | Valid DID JSON                           |
+| Data plane instances registered | `edc_data_plane_instance`               | Entries for all contexts                 |
+
+##### C. API Route Verification (Next.js Backend)
+
+| Route                          | Method | Expected Response                 |
+| ------------------------------ | ------ | --------------------------------- |
+| `/api/graph`                   | GET    | Neo4j node/relationship data      |
+| `/api/catalog`                 | GET    | Dataset catalog entries           |
+| `/api/patient`                 | GET    | Synthetic FHIR patient records    |
+| `/api/analytics`               | GET    | OMOP CDM analytics data           |
+| `/api/eehrxf`                  | GET    | EEHRxF profile alignment scores   |
+| `/api/compliance`              | GET    | Compliance check results          |
+| `/api/compliance/tck`          | GET    | TCK probe status                  |
+| `/api/participants`            | GET    | Participant list (5 participants) |
+| `/api/credentials`             | GET    | Credential status                 |
+| `/api/credentials/definitions` | GET    | Credential type definitions       |
+| `/api/negotiations`            | GET    | Contract negotiation list         |
+| `/api/transfers`               | GET    | Transfer process list             |
+| `/api/assets`                  | GET    | Data asset list                   |
+| `/api/admin/tenants`           | GET    | Tenant management data            |
+| `/api/admin/policies`          | GET    | ODRL policy list                  |
+| `/api/admin/components`        | GET    | Component topology                |
+| `/api/admin/audit`             | GET    | Audit log entries                 |
+| `/api/tasks`                   | GET    | Task dashboard data               |
+| `/api/federated`               | GET    | Federated catalog data            |
+
+##### D. UI Page Verification
+
+Each page must render with meaningful content (not empty states):
+
+| Page             | URL                 | Key Content Expected                     |
+| ---------------- | ------------------- | ---------------------------------------- |
+| Home             | `/`                 | Dashboard cards with live statistics     |
+| Graph Explorer   | `/graph`            | Interactive Neo4j graph visualization    |
+| Catalog          | `/catalog`          | Dataset cards (≥4 datasets)              |
+| Patient Journey  | `/patient`          | Synthetic patient records with FHIR data |
+| Analytics        | `/analytics`        | OMOP CDM charts and statistics           |
+| EEHRxF Profiles  | `/eehrxf`           | 6 EEHRxF categories with coverage scores |
+| Compliance       | `/compliance`       | EHDS compliance checklist                |
+| TCK Results      | `/compliance/tck`   | DCP/DSP protocol test results            |
+| Data Discovery   | `/data/discover`    | Discoverable datasets from catalog       |
+| Data Sharing     | `/data/share`       | Data sharing configuration               |
+| Data Transfer    | `/data/transfer`    | Active transfer processes                |
+| Negotiations     | `/negotiate`        | Contract negotiation list (≥6 rows)      |
+| Credentials      | `/credentials`      | Verifiable credential status             |
+| Onboarding       | `/onboarding`       | Participant onboarding flow              |
+| Tasks            | `/tasks`            | Task list with DPS state                 |
+| Query            | `/query`            | Natural language query interface         |
+| Admin Dashboard  | `/admin`            | System overview with stats               |
+| Admin Tenants    | `/admin/tenants`    | 5 health tenants                         |
+| Admin Policies   | `/admin/policies`   | ODRL policy definitions                  |
+| Admin Components | `/admin/components` | Service topology diagram                 |
+| Admin Audit      | `/admin/audit`      | Audit trail entries                      |
+| Settings         | `/settings`         | User preferences                         |
+| Docs             | `/docs`             | Documentation hub                        |
+
+#### Implementation
+
+**Script:** `scripts/run-e2e-tests.sh` — Bash-based E2E test runner that:
+
+1. Verifies all Docker services are healthy
+2. Checks dataspace state in PostgreSQL
+3. Tests all API routes return non-empty 200 responses
+4. Verifies key data counts (participants, assets, negotiations, transfers)
+
+**Discovered Bugs Fixed (during Phase 14):**
+
+1. **Data plane key alias swap** — `docker-compose.jad.yml` had
+   `edc.transfer.proxy.token.signer.privatekey.alias` pointing to the
+   public key and vice versa for both dataplane-fhir and dataplane-omop.
+   Transfers were stuck at REQUESTING because the data plane couldn't sign
+   tokens. Fixed by swapping the aliases.
+
+2. **Federated catalog wrong provider** — `seed-federated-catalog.sh` was
+   querying AlphaKlinik's catalog for `healthdcatap-catalog`, but that
+   asset belongs to LMC. The null offer ID caused a JSON-LD parsing error.
+   Fixed by targeting LMC's catalog instead.
+
+3. **Transfer counterparty address** — After fixing the negotiation target
+   to LMC, the transfer initiation still used AlphaKlinik's DSP endpoint
+   as `counterPartyAddress`. The provider couldn't find the agreement
+   because it was negotiated with a different participant. Fixed by using
+   `LMC_CTX` in the transfer request.
+
+4. **Unified seed pipeline** — Created `jad/seed-all.sh` to orchestrate
+   all 7 seed scripts in correct dependency order. Integrated into
+   `scripts/bootstrap-jad.sh` as Phase 9.
+
+**Deliverables:** E2E test script; README quickstart for full JAD stack;
+unified seed-all.sh pipeline; bootstrap-jad.sh integration; all 3 data
+plane/catalog bugs fixed and verified.
 
 ---
 

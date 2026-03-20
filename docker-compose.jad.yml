@@ -333,8 +333,8 @@ services:
     environment:
       edc.hostname: "dataplane-fhir"
       edc.participant.id: "did:web:connector"
-      edc.transfer.proxy.token.verifier.publickey.alias: "dataplane-fhir-private"
-      edc.transfer.proxy.token.signer.privatekey.alias: "dataplane-fhir-public"
+      edc.transfer.proxy.token.verifier.publickey.alias: "dataplane-fhir-public"
+      edc.transfer.proxy.token.signer.privatekey.alias: "dataplane-fhir-private"
       edc.dpf.selector.url: "http://controlplane:8083/api/control/v1/dataplanes"
       # DPS registration — PUSH transfer for FHIR bundles
       edc.dataplane.selector.fhir.sourcetype: "HttpData"
@@ -398,8 +398,8 @@ services:
     environment:
       edc.hostname: "dataplane-omop"
       edc.participant.id: "did:web:connector"
-      edc.transfer.proxy.token.verifier.publickey.alias: "dataplane-omop-private"
-      edc.transfer.proxy.token.signer.privatekey.alias: "dataplane-omop-public"
+      edc.transfer.proxy.token.verifier.publickey.alias: "dataplane-omop-public"
+      edc.transfer.proxy.token.signer.privatekey.alias: "dataplane-omop-private"
       edc.dpf.selector.url: "http://controlplane:8083/api/control/v1/dataplanes"
       # DPS registration — PULL transfer for OMOP analytics
       edc.dataplane.selector.omop.sourcetype: "HttpData"

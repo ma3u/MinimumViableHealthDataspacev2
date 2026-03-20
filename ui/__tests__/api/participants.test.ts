@@ -29,7 +29,7 @@ describe("/api/participants", () => {
     it("should list all participant contexts", async () => {
       const mockParticipants = [
         { "@id": "ctx-1", identity: "did:web:spe-1" },
-        { "@id": "ctx-2", identity: "did:web:cro-bayer" },
+        { "@id": "ctx-2", identity: "did:web:pharmaco" },
       ];
       mockManagement.mockResolvedValue(mockParticipants);
 

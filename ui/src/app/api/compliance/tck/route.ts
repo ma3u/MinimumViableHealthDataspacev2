@@ -21,8 +21,7 @@ interface TestResult {
   detail: string;
 }
 
-const NEO4J_PROXY_URL =
-  process.env.NEO4J_PROXY_URL ?? "http://localhost:9090";
+const NEO4J_PROXY_URL = process.env.NEO4J_PROXY_URL ?? "http://localhost:9090";
 
 export async function GET() {
   const results: TestResult[] = [];
@@ -31,6 +30,7 @@ export async function GET() {
   // ── DSP + DCP Suites (via neo4j-proxy running inside Docker) ─────
   try {
     const proxyRes = await fetch(`${NEO4J_PROXY_URL}/tck`, {
+      cache: "no-store",
       signal: AbortSignal.timeout(30000),
     });
     if (proxyRes.ok) {
@@ -64,7 +64,9 @@ export async function GET() {
       suite: "DSP",
       name: "DSP proxy connectivity",
       status: "fail",
-      detail: `neo4j-proxy unreachable: ${err instanceof Error ? err.message : String(err)}`,
+      detail: `neo4j-proxy unreachable: ${
+        err instanceof Error ? err.message : String(err)
+      }`,
     });
     results.push({
       id: "DCP-ERR",
@@ -72,7 +74,9 @@ export async function GET() {
       suite: "DCP",
       name: "DCP proxy connectivity",
       status: "fail",
-      detail: `neo4j-proxy unreachable: ${err instanceof Error ? err.message : String(err)}`,
+      detail: `neo4j-proxy unreachable: ${
+        err instanceof Error ? err.message : String(err)
+      }`,
     });
   }
 

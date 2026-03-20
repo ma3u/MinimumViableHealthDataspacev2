@@ -132,27 +132,31 @@ echo ""
 # --- Discover participant context IDs and DIDs dynamically ---
 echo "Discovering participant contexts from EDC-V management API..."
 CLINIC_CTX=$(discover_ctx "alpha-klinik")
+LMC_CTX=$(discover_ctx "lmc")
 CRO_CTX=$(discover_ctx "pharmaco")
 HDAB_CTX=$(discover_ctx "medreg")
 
 CLINIC_DID=$(discover_did "alpha-klinik")
+LMC_DID=$(discover_did "lmc")
 CRO_DID=$(discover_did "pharmaco")
 HDAB_DID=$(discover_did "medreg")
 
 [ -n "$CLINIC_CTX" ] || { echo "ERROR: AlphaKlinik context not found"; exit 1; }
+[ -n "$LMC_CTX" ]    || { echo "ERROR: LMC context not found"; exit 1; }
 [ -n "$CRO_CTX" ]    || { echo "ERROR: PharmaCo context not found"; exit 1; }
 [ -n "$HDAB_CTX" ]   || { echo "ERROR: MedReg context not found"; exit 1; }
 
 echo "  AlphaKlinik CTX: $CLINIC_CTX  DID: $CLINIC_DID"
+echo "  LMC         CTX: $LMC_CTX  DID: $LMC_DID"
 echo "  PharmaCo    CTX: $CRO_CTX  DID: $CRO_DID"
 echo "  MedReg      CTX: $HDAB_CTX  DID: $HDAB_DID"
 echo ""
 
-# -- Step 1: CRO discovers Clinic catalog ------------------------------------
-echo "━━━ Step 1: CRO discovers Clinic catalog via DSP 2025-1 ━━━"
+# -- Step 1: CRO discovers AlphaKlinik catalog -------------------------------
+echo "━━━ Step 1: CRO discovers AlphaKlinik catalog via DSP 2025-1 ━━━"
 CRO_CATALOG=$(catalog_request "$CRO_CTX" "$CLINIC_DID")
 CRO_DS_COUNT=$(echo "$CRO_CATALOG" | python3 -c "import json,sys; print(len(json.load(sys.stdin).get('dataset',[])))")
-echo "  CRO discovered ${CRO_DS_COUNT} datasets from Clinic"
+echo "  CRO discovered ${CRO_DS_COUNT} datasets from AlphaKlinik"
 echo "$CRO_CATALOG" | python3 -c "
 import json,sys
 data=json.load(sys.stdin)
@@ -160,11 +164,11 @@ for d in data.get('dataset',[]):
     print(f'    - {d[\"@id\"]:30s} {d.get(\"edc:name\",\"?\")}')" || true
 echo ""
 
-# -- Step 2: HDAB discovers Clinic catalog ------------------------------------
-echo "━━━ Step 2: HDAB discovers Clinic catalog via DSP 2025-1 ━━━"
-HDAB_CATALOG=$(catalog_request "$HDAB_CTX" "$CLINIC_DID")
+# -- Step 2: HDAB discovers LMC catalog (HealthDCAT-AP is on LMC) ------------
+echo "━━━ Step 2: HDAB discovers LMC catalog via DSP 2025-1 ━━━"
+HDAB_CATALOG=$(catalog_request "$HDAB_CTX" "$LMC_DID")
 HDAB_DS_COUNT=$(echo "$HDAB_CATALOG" | python3 -c "import json,sys; print(len(json.load(sys.stdin).get('dataset',[])))")
-echo "  HDAB discovered ${HDAB_DS_COUNT} datasets from Clinic"
+echo "  HDAB discovered ${HDAB_DS_COUNT} datasets from LMC"
 echo "$HDAB_CATALOG" | python3 -c "
 import json,sys
 data=json.load(sys.stdin)
@@ -189,7 +193,7 @@ echo ""
 
 # -- Step 4: HDAB negotiates contract for catalog metadata --------------------
 echo "━━━ Step 4: HDAB negotiates catalog metadata contract ━━━"
-NEG_RESULT=$(negotiate_contract "$HDAB_CTX" "$CLINIC_CTX" "$CLINIC_DID" "$CATALOG_OFFER_ID" "healthdcatap-catalog")
+NEG_RESULT=$(negotiate_contract "$HDAB_CTX" "$LMC_CTX" "$LMC_DID" "$CATALOG_OFFER_ID" "healthdcatap-catalog")
 NEG_ID=$(echo "$NEG_RESULT" | python3 -c "import json,sys; print(json.load(sys.stdin).get('@id','?'))")
 echo "  Negotiation initiated: ${NEG_ID}"
 echo ""
@@ -227,7 +231,7 @@ if [ "${STATE:-}" = "FINALIZED" ]; then
       \"@context\": ${EDC_CTX},
       \"@type\": \"TransferRequest\",
       \"protocol\": \"dataspace-protocol-http:2025-1\",
-      \"counterPartyAddress\": \"http://controlplane:8082/api/dsp/${CLINIC_CTX}/2025-1\",
+      \"counterPartyAddress\": \"http://controlplane:8082/api/dsp/${LMC_CTX}/2025-1\",
       \"contractId\": \"${AGREEMENT_ID}\",
       \"assetId\": \"healthdcatap-catalog\",
       \"transferType\": \"HttpData-PULL\",

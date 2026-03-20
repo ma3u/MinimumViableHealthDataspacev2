@@ -22,7 +22,7 @@ describe("GET /api/compliance", () => {
   describe("list mode (no consumerId/datasetId)", () => {
     it("should return consumers and datasets dropdown data", async () => {
       const mockConsumers = [
-        { id: "cro-bayer", name: "CRO Bayer", type: "CRO" },
+        { id: "pharmaco", name: "PharmaCo Research AG", type: "DATA_USER" },
       ];
       const mockDatasets = [{ id: "ds-001", title: "FHIR Cohort Alpha" }];
 
@@ -56,7 +56,7 @@ describe("GET /api/compliance", () => {
     it("should return compliant when approval chain exists", async () => {
       const mockRows = [
         {
-          consumer: "cro-bayer",
+          consumer: "pharmaco",
           applicationId: "app-001",
           applicationStatus: "approved",
           approvalId: "approval-001",
@@ -70,7 +70,7 @@ describe("GET /api/compliance", () => {
       mockRunQuery.mockResolvedValue(mockRows);
 
       const req = new Request(
-        "http://localhost:3000/api/compliance?consumerId=cro-bayer&datasetId=ds-001",
+        "http://localhost:3000/api/compliance?consumerId=pharmaco&datasetId=ds-001",
       );
       const response = await GET(req);
       const data = await response.json();

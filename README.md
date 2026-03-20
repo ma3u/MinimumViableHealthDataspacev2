@@ -23,6 +23,13 @@
     - [Step 7 — Register EEHRxF Profile Alignment](#step-7--register-eehrxf-profile-alignment)
     - [Step 8 — Install UI Dependencies](#step-8--install-ui-dependencies)
     - [Step 9 — Start the UI](#step-9--start-the-ui)
+  - [Quick Start — Full Dataspace (JAD Stack)](#quick-start--full-dataspace-jad-stack)
+    - [Prerequisites](#prerequisites)
+    - [One-Command Start](#one-command-start)
+    - [Verify Services](#verify-services)
+    - [Start the UI](#start-the-ui)
+    - [Run Seeding Separately](#run-seeding-separately)
+    - [Tear Down](#tear-down)
   - [Testing](#testing)
   - [Development](#development)
     - [Run pre-commit checks](#run-pre-commit-checks)
@@ -189,7 +196,7 @@ UI — no cloud account or external services required.
 
 Make sure the following tools are installed and available on your `$PATH`:
 
-- **Docker Desktop ≥ 24** — runs the Neo4j 5 container with APOC and n10s plugins.
+- **OrbStack** (or Docker Desktop ≥ 24) — runs the Neo4j 5 container with APOC and n10s plugins.
 - **Node.js ≥ 20 with npm** — required to run the Next.js UI.
 - **Git** — to clone the repository.
 
@@ -302,6 +309,95 @@ To access the protected **Portal** views (which simulate dataspace participation
 | `regulator`  | `regulator`  | Health Data Access Body / HDAB (`HDAB_AUTHORITY`) |
 
 ![Graph Explorer UI](docs/images/ui-screenshot.png)
+
+---
+
+## Quick Start — Full Dataspace (JAD Stack)
+
+The full EHDS-compliant dataspace runs 19+ services locally using the
+[JAD (Joint Architecture Demo)](https://github.com/Metaform/jad) container images.
+This brings up EDC-V, DCore, CFM, IdentityHub, IssuerService, Keycloak, Vault, NATS,
+and all supporting infrastructure.
+
+### Prerequisites
+
+- **OrbStack** (or Docker Desktop ≥ 24) with **≥ 8 GB RAM** allocated
+- **Ports available:** 80, 4222, 5432, 7474, 7687, 8080, 8090, 8200, 8222, 9090,
+  10013, 11002, 11003, 11005, 11006, 11007, 11012
+- **Node.js ≥ 20** (for the UI)
+- **Python 3** (for seed script parsing)
+
+### One-Command Start
+
+The bootstrap script handles image pulls, startup ordering, health checks, identity
+provisioning, and full dataspace seeding:
+
+```bash
+git clone https://github.com/ma3u/MinimumViableHealthDataspacev2.git
+cd MinimumViableHealthDataspacev2
+./scripts/bootstrap-jad.sh
+```
+
+This takes approximately 5–10 minutes on first run (image pulls). Subsequent runs are
+faster. When complete, all services are healthy and the dataspace is seeded with:
+
+- **5 participants** — AlphaKlinik Berlin, Limburg Medical Centre, PharmaCo Research AG,
+  MedReg DE, Institut de Recherche Santé
+- **10 Verifiable Credentials** (EHDSParticipantCredential, DataProcessingPurposeCredential)
+- **9 data assets** (FHIR R4, OMOP CDM, HealthDCAT-AP)
+- **Contract negotiations** — PharmaCo↔AlphaKlinik (FHIR data), MedReg↔LMC (catalog metadata)
+- **Active data transfers** via DCore data planes
+
+### Verify Services
+
+```bash
+./scripts/bootstrap-jad.sh --status
+```
+
+### Start the UI
+
+```bash
+cd ui && npm install && npm run dev
+```
+
+Open <http://localhost:3000>. Log in with `edcadmin` / `edcadmin` (admin),
+`clinicuser` / `clinicuser` (hospital), or `regulator` / `regulator` (HDAB).
+
+### Run Seeding Separately
+
+If the stack is already running, you can re-seed without restarting:
+
+```bash
+# Full seed pipeline
+./jad/seed-all.sh
+
+# Resume from a specific step (e.g. step 5 = negotiations)
+./jad/seed-all.sh --from 5
+
+# Run only one step
+./jad/seed-all.sh --only 3
+```
+
+Seed steps: (1) health tenants, (2) EHDS credentials, (3) ODRL policies,
+(4) data assets, (5) contract negotiations, (6) federated catalog, (7) data transfers.
+
+### Verify Deployment (E2E Tests)
+
+After bootstrap completes, run the end-to-end test suite to verify all
+infrastructure, dataspace state, and API routes:
+
+```bash
+./scripts/run-e2e-tests.sh
+```
+
+Expected result: **41 PASS**, 0 FAIL (1 WARN for Issuer DID is expected).
+
+### Tear Down
+
+```bash
+./scripts/bootstrap-jad.sh --down     # Stop all services
+./scripts/bootstrap-jad.sh --reset    # Stop + remove volumes (full reset)
+```
 
 ---
 
@@ -453,20 +549,20 @@ available online at **[ma3u.github.io/MinimumViableHealthDataspacev2/docs](https
 
 All 12 phases are **✅ Complete** — from infrastructure migration through EDC-V topology and EHDS policy seeding.
 
-| Phase | Description                                              | Status      |
-| ----- | -------------------------------------------------------- | ----------- |
-| 1     | Infrastructure Migration (EDC-V + DCore + CFM)           | ✅ |
-| 2     | Identity & Trust (DCP v1.0 + Verifiable Credentials)     | ✅ |
-| 3     | Health Knowledge Graph — Schema, FHIR Pipeline, EEHRxF   | ✅ |
-| 4     | Dataspace Integration (DSP negotiation + DCore transfer) | ✅ |
-| 5     | Federated Queries & GraphRAG (Text2Cypher NLQ)           | ✅ |
-| 6     | Graph Explorer UI + Participant Portal (19 pages)        | ✅ |
-| 7     | TCK DCP & DSP Compliance Verification                    | ✅ |
-| 8     | Test Coverage (291 tests — 260 unit + 31 E2E)            | ✅ |
-| 9     | Documentation & Navigation Restructuring                 | ✅ |
-| 10    | Tasks Dashboard & DPS Integration                        | ✅ |
-| 11    | EDC Components — Per-Participant Topology & Info Layer    | ✅ |
-| 12    | API QuerySpec Fix & EHDS Policy Seeding                  | ✅ |
+| Phase | Description                                              | Status |
+| ----- | -------------------------------------------------------- | ------ |
+| 1     | Infrastructure Migration (EDC-V + DCore + CFM)           | ✅     |
+| 2     | Identity & Trust (DCP v1.0 + Verifiable Credentials)     | ✅     |
+| 3     | Health Knowledge Graph — Schema, FHIR Pipeline, EEHRxF   | ✅     |
+| 4     | Dataspace Integration (DSP negotiation + DCore transfer) | ✅     |
+| 5     | Federated Queries & GraphRAG (Text2Cypher NLQ)           | ✅     |
+| 6     | Graph Explorer UI + Participant Portal (19 pages)        | ✅     |
+| 7     | TCK DCP & DSP Compliance Verification                    | ✅     |
+| 8     | Test Coverage (291 tests — 260 unit + 31 E2E)            | ✅     |
+| 9     | Documentation & Navigation Restructuring                 | ✅     |
+| 10    | Tasks Dashboard & DPS Integration                        | ✅     |
+| 11    | EDC Components — Per-Participant Topology & Info Layer   | ✅     |
+| 12    | API QuerySpec Fix & EHDS Policy Seeding                  | ✅     |
 
 ### Phase 1 — Infrastructure Migration
 
@@ -514,11 +610,10 @@ NextAuth.js session management in the UI.
 
 ### Phase 3 — Health Knowledge Graph
 
-**Background:** Health data exists in many formats and standards — hospitals use FHIR for
+**Background:** Health data exists in many formats and standards: hospitals use FHIR for
 clinical records, researchers use OMOP for analytics, and data catalogs use HealthDCAT-AP for
 metadata. To make all of this searchable, linkable, and meaningful, we needed a unified data
-model that connects patients to conditions to medications to research concepts — all in one
-place.
+model that connects patients to conditions to medications to research concepts, all in one place.
 
 **What we built:** We created a five-layer knowledge graph in Neo4j that connects all the
 pieces. Layer 1 tracks the marketplace (who agreed to share what, under which contract).
