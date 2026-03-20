@@ -51,13 +51,15 @@ test.describe("Navigation Dropdowns", () => {
     await expect(nav.getByRole("link", { name: /Transfer/ })).toBeVisible();
   });
 
-  test("Portal dropdown contains expected links", async ({ page }) => {
+  test("Manage dropdown contains expected links", async ({ page }) => {
     const nav = page.locator("nav");
-    const trigger = nav.getByRole("button", { name: /Portal/i });
+    const trigger = nav.getByRole("button", { name: /Manage/i });
     await trigger.click();
-    await expect(nav.getByRole("link", { name: /Dashboard/ })).toBeVisible();
-    await expect(nav.getByRole("link", { name: /Onboarding/ })).toBeVisible();
-    await expect(nav.getByRole("link", { name: /Settings/ })).toBeVisible();
+    await expect(
+      nav.getByRole("link", { name: /Operator Dashboard/ }),
+    ).toBeVisible();
+    await expect(nav.getByRole("link", { name: /Policies/ })).toBeVisible();
+    await expect(nav.getByRole("link", { name: /Audit/ })).toBeVisible();
   });
 
   test("Docs dropdown contains expected links", async ({ page }) => {
