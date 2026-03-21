@@ -21,7 +21,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
-COMPOSE_FILES="-f docker-compose.yml -f docker-compose.jad.yml"
+COMPOSE_FILES="-f docker-compose.yml -f docker-compose.jad.yml -f docker-compose.live.yml"
 
 # Colors for output
 RED='\033[0;31m'
@@ -46,8 +46,12 @@ wait_for_service() {
 
   log "Waiting for $service at $url ..."
   for i in $(seq 1 "$max_attempts"); do
-    if curl -sf "$url" > /dev/null 2>&1; then
-      ok "$service is healthy (attempt $i/$max_attempts)"
+    # Accept any HTTP response (including 401/403) as proof the service is up.
+    # curl -sf fails on 4xx, so use --write-out to check for a valid HTTP code.
+    local http_code
+    http_code=$(curl -s -o /dev/null -w "%{http_code}" "$url" 2>/dev/null || echo "000")
+    if [ "$http_code" != "000" ]; then
+      ok "$service is healthy (attempt $i/$max_attempts, HTTP $http_code)"
       return 0
     fi
     sleep "$interval"
@@ -88,12 +92,20 @@ preflight() {
     warn "Docker has ${mem_gb}GB RAM. Recommended: 8GB+ for the full JAD stack."
   fi
 
-  # Check port availability
+  # Check port availability (skip ports owned by Docker/OrbStack — our own stack)
   local ports=(80 4222 5432 8080 8090 8200 8222 9090 10013 11002 11003 11005 11006 11007 11012)
   local busy_ports=()
   for port in "${ports[@]}"; do
-    if lsof -iTCP:"$port" -sTCP:LISTEN -t &> /dev/null; then
-      busy_ports+=("$port")
+    local pid
+    pid=$(lsof -iTCP:"$port" -sTCP:LISTEN -t 2>/dev/null || true)
+    pid=$(echo "$pid" | head -1)
+    if [ -n "$pid" ]; then
+      # Check if owned by Docker (our own stack) — skip if so
+      local cmd
+      cmd=$(ps -p "$pid" -o comm= 2>/dev/null || echo "")
+      if [[ "$cmd" != *"com.docker"* && "$cmd" != *"orbstack"* && "$cmd" != *"vpnkit"* ]]; then
+        busy_ports+=("$port")
+      fi
     fi
   done
   if [ ${#busy_ports[@]} -gt 0 ]; then
@@ -120,6 +132,10 @@ pull_images() {
 start_stack() {
   cd "$PROJECT_DIR"
 
+  # Clean up any orphaned containers from previous runs to avoid name conflicts
+  log "Cleaning up orphaned containers..."
+  docker compose $COMPOSE_FILES down --remove-orphans 2>/dev/null || true
+
   log "=== Phase 1: Starting infrastructure services ==="
   docker compose $COMPOSE_FILES up -d postgres vault keycloak nats
 
@@ -131,8 +147,21 @@ start_stack() {
   ok "Infrastructure services are healthy"
 
   log "=== Phase 2: Running Vault bootstrap ==="
-  docker compose $COMPOSE_FILES up vault-bootstrap
-  ok "Vault bootstrap complete"
+  docker compose $COMPOSE_FILES up -d vault-bootstrap
+  # vault-bootstrap is a sidecar (sleep infinity) — wait for its success log
+  log "Waiting for Vault bootstrap to complete..."
+  for i in $(seq 1 60); do
+    if docker logs health-dataspace-vault-bootstrap 2>&1 | grep -q "Vault bootstrap completed successfully"; then
+      ok "Vault bootstrap complete"
+      break
+    fi
+    if [ "$i" -eq 60 ]; then
+      error "Vault bootstrap did not complete within 60s"
+      docker logs health-dataspace-vault-bootstrap --tail 20 2>&1
+      exit 1
+    fi
+    sleep 2
+  done
 
   log "=== Phase 3: Starting Traefik gateway ==="
   docker compose $COMPOSE_FILES up -d traefik
@@ -160,6 +189,10 @@ start_stack() {
   log "=== Phase 6: Starting Neo4j (from base compose) ==="
   docker compose $COMPOSE_FILES up -d neo4j
   ok "Neo4j started"
+
+  log "=== Phase 6b: Building and starting Live UI (port 3003) ==="
+  docker compose $COMPOSE_FILES up -d --build graph-explorer
+  ok "Live UI started on http://localhost:3003"
 }
 
 # ---------------------------------------------------------------------------
@@ -241,6 +274,7 @@ show_status() {
   echo ""
   log "=== Service Endpoints ==="
   echo "  Neo4j Browser:       http://localhost:7474"
+  echo "  Live UI:             http://localhost:3003  (production build)"
   echo "  Traefik Dashboard:   http://localhost:8090"
   echo "  Keycloak Admin:      http://keycloak.localhost  (admin/admin)"
   echo "  Vault UI:            http://vault.localhost      (token: root)"

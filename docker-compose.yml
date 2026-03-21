@@ -79,7 +79,7 @@ services:
       - "0" # root group — read-only Docker socket for component metrics
     networks:
       - default
-      - health-dataspace-edcv
+      - edcv
     restart: unless-stopped
 
 volumes:
@@ -89,5 +89,6 @@ volumes:
   neo4j_spe2_logs:
 
 networks:
-  health-dataspace-edcv:
-    external: true
+  edcv:
+    name: health-dataspace-edcv
+    driver: bridge
