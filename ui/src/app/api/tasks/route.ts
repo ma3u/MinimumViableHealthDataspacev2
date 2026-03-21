@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import { edcClient, EDC_CONTEXT } from "@/lib/edc";
+import { promises as fs } from "fs";
+import path from "path";
 
 export const dynamic = "force-dynamic";
 
@@ -95,14 +97,22 @@ export async function GET() {
             .management<Record<string, unknown>[]>(
               `/v5alpha/participants/${ctxId}/contractnegotiations/request`,
               "POST",
-              { "@context": [EDC_CONTEXT], "@type": "QuerySpec", "filterExpression": [] },
+              {
+                "@context": [EDC_CONTEXT],
+                "@type": "QuerySpec",
+                filterExpression: [],
+              },
             )
             .catch(() => []),
           edcClient
             .management<Record<string, unknown>[]>(
               `/v5alpha/participants/${ctxId}/transferprocesses/request`,
               "POST",
-              { "@context": [EDC_CONTEXT], "@type": "QuerySpec", "filterExpression": [] },
+              {
+                "@context": [EDC_CONTEXT],
+                "@type": "QuerySpec",
+                filterExpression: [],
+              },
             )
             .catch(() => []),
         ]);
@@ -249,6 +259,17 @@ export async function GET() {
       }
     } catch {
       // Both EDC-V and persistent storage unavailable
+    }
+
+    // Fall back to bundled mock data so the UI works offline
+    try {
+      const mockPath = path.join(process.cwd(), "public", "mock", "tasks.json");
+      const raw = await fs.readFile(mockPath, "utf-8");
+      const mock = JSON.parse(raw);
+      console.warn("EDC-V offline — serving mock tasks");
+      return NextResponse.json(mock);
+    } catch {
+      // Mock file not available either
     }
 
     return NextResponse.json(

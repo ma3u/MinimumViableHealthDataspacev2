@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { edcClient } from "@/lib/edc";
+import { promises as fs } from "fs";
+import path from "path";
 
 export const dynamic = "force-dynamic";
 
@@ -126,6 +128,23 @@ export async function GET() {
     return NextResponse.json(enriched);
   } catch (err) {
     console.error("Failed to list participants:", err);
+
+    // Fall back to bundled mock data so the UI works offline
+    try {
+      const mockPath = path.join(
+        process.cwd(),
+        "public",
+        "mock",
+        "participants.json",
+      );
+      const raw = await fs.readFile(mockPath, "utf-8");
+      const mock = JSON.parse(raw);
+      console.warn("EDC-V offline — serving mock participants");
+      return NextResponse.json(mock);
+    } catch {
+      // Mock file not available either
+    }
+
     return NextResponse.json(
       { error: "Failed to list participants" },
       { status: 502 },

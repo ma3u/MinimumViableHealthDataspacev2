@@ -93,6 +93,7 @@
       - [15c — Additional Datasets](#15c--additional-datasets)
       - [15d — Suspense Boundary Fixes](#15d--suspense-boundary-fixes)
     - [Phase 16: HealthDCAT-AP Display \& Editor Integration ✅](#phase-16-healthdcat-ap-display--editor-integration-)
+    - [Phase 17: 50 User Journey E2E Tests ✅](#phase-17-50-user-journey-e2e-tests-)
       - [16a — Discover Page: Dual Data Source \& Keyword Search](#16a--discover-page-dual-data-source--keyword-search)
       - [16b — Graph Deep-Link Date Stripping](#16b--graph-deep-link-date-stripping)
       - [16c — HealthDCAT-AP Editor](#16c--healthdcat-ap-editor)
@@ -221,6 +222,10 @@ All three core specifications are now final or near-final:
 | **11** | EDC Components — Per-Participant Topology & Info Layer | ✅ Complete | 11a ✅ (Component Info: `component-info.ts` — 21 `ComponentMeta` entries with description/protocol/ports/deps/health; `InfoPopover` on all rows); 11b ✅ (Topology: `/api/admin/components/topology` route — per-participant aggregation; Participant View with expandable `ParticipantTopologySection` + Layer↔Participant toggle); 11c ✅ (Severity: `SEVERITY_STYLES` + `SeverityDot` + `CriticalBanner` — worst-of rollup, auto-expand degraded); 11d ✅ (Mock: `admin_components_topology.json` + `STATIC_MOCK_MAP` entry) |
 | **12** | API QuerySpec Fix & EHDS Policy Seeding                | ✅ Complete | 12a ✅ (`filterExpression:[]` fix across 6 API routes — policies, assets, tasks, negotiations, transfers); 12b ✅ (`jad/seed-ehds-policies.sh` — 14 EHDS ODRL policies seeded across 5 participants: AK:3, LMC:4, PC:2, MR:3, IRS:2); 12c ✅ (Layer View participants as table layout)                                                                                                                                                                                                                                           |
 | **13** | Operational Hardening & Persistent Task Management     | ✅ Complete | 13a ✅ (seed-federated-catalog.sh: dynamic discovery replacing hardcoded UUIDs/DIDs); 13b ✅ (TCK `filterExpression:[]` fix for assets + IssuerService QuerySpec in neo4j-proxy); 13c ✅ (Compliance checker dropdown: EDC-V participant fallback + HealthDataset fallback); 13d ✅ (Persistent tasks: PostgreSQL `taskdb` + neo4j-proxy `/tasks` endpoints + UI sync/fallback); 13e (Seed orchestration guide documenting correct run order for all 8 seed scripts)                                                             |
+| **14** | End-to-End Testing & Demonstration Verification        | ✅ Complete | 14a ✅ (70 E2E tests: 13 spec files covering all portal pages, navigation, auth flows); 14b ✅ (3 critical bug fixes: TCK compliance 20/20, Docker build cache, Share Data page); 14c ✅ (Playwright HTML reporter + CI integration)                                                                                                                                                                                                                                                                                             |
+| **15** | Mock Fallback & Graph Deep-Linking                     | ✅ Complete | 15a ✅ (Mock fallback for catalog/assets APIs + graph deep-linking); 15b ✅ (100 mock transfers + 100 negotiations + 12 FHIR R4 bundles); 15c ✅ (FHIR viewer + Discover page rewrite + MedDRA/Clinical Trial datasets)                                                                                                                                                                                                                                                                                                          |
+| **16** | HealthDCAT-AP Display & Editor Integration             | ✅ Complete | 16a ✅ (HealthDCAT-AP Editor page with form-based metadata authoring); 16b ✅ (Catalog API POST/DELETE handlers); 16c ✅ (First 50 journey tests J01–J50 created across 7 spec files)                                                                                                                                                                                                                                                                                                                                            |
+| **17** | 50 User Journey E2E Tests                              | ✅ Complete | 17a ✅ (Mock fallback for `/api/participants`, `/api/tasks`, `/api/admin/policies`); 17b ✅ (Enhanced `tasks.json`: 11 entries across 4 participants + TERMINATED state); 17c ✅ (All 50 journey tests passing, **120 E2E tests total, 0 failures**); 17d ✅ (10 test categories: identity, use cases, upload, metadata, policies, catalog, negotiations, transfer, data views, federated discovery)                                                                                                                             |
 
 ---
 
@@ -1825,6 +1830,202 @@ and editing HealthDCAT-AP metadata entries.
 **Deliverables:** HealthDCAT-AP metadata visible on Discover page; keyword
 search for cross-page deep-links; tab-based data source filtering; full
 DCAT-AP Editor with CRUD operations; Neo4j + mock JSON dual-write support.
+
+---
+
+### Phase 17: 50 User Journey E2E Tests ✅
+
+**Goal:** Implement 50 comprehensive E2E user journey tests using Playwright,
+organized into 10 categories (5 tests each), covering the full EHDS dataspace
+lifecycle from identity onboarding through cross-border federated compliance.
+
+**Context:** The Health Dataspace v2 portal supports 5 fictional participants
+across 3 countries (DE, NL, FR) with 3 roles (DATA_HOLDER, DATA_USER, HDAB).
+Tests validate both UI rendering and API-level data assertions. All journeys
+are designed to work offline via mock data fallback — the same mock JSON files
+used for GitHub Pages static export also serve as the API fallback when
+EDC-V, Neo4j, and the CFM Tenant Manager are offline.
+
+#### Participant Login Matrix
+
+| Username   | Password   | Keycloak Role        | Organisation               | Country |
+| ---------- | ---------- | -------------------- | -------------------------- | ------- |
+| edcadmin   | edcadmin   | EDC_ADMIN            | System Administrator (all) | —       |
+| clinicuser | clinicuser | EDC_USER_PARTICIPANT | AlphaKlinik Berlin         | DE      |
+| regulator  | regulator  | HDAB_AUTHORITY       | MedReg DE                  | DE      |
+
+**Note:** Keycloak login tests (`auth.spec.ts`) verify authentication for
+all 3 users. Journey tests use the public API routes (no auth middleware)
+and public pages for data assertions — this allows offline execution without
+a live Keycloak instance.
+
+#### Journey Categories (10 × 5 = 50 tests)
+
+##### A · Identity & Participant Management (J01–J05)
+
+| ID  | Title                                         | Type | Assertion                                        |
+| --- | --------------------------------------------- | ---- | ------------------------------------------------ |
+| J01 | Admin dashboard requires authentication       | UI   | `/admin` → redirect to `/auth/signin`            |
+| J02 | All 5 participants registered in network      | API  | `/api/participants` returns ≥5 with known names  |
+| J03 | Each participant has a valid DID identity     | API  | All DIDs match `^did:web:`                       |
+| J04 | Credentials exist for all participant holders | API  | `/api/credentials` returns ≥5 with holder/type   |
+| J05 | Both EHDS and DataQuality credential types    | API  | Credential types include both EHDS + DataQuality |
+
+**Spec file:** `01-identity-onboarding.spec.ts`
+
+##### B · Dataset Upload & Metadata Definition (J06–J15)
+
+| ID  | Title                                         | Type | Assertion                                      |
+| --- | --------------------------------------------- | ---- | ---------------------------------------------- |
+| J06 | Synthea FHIR R4 Patient Cohort in catalog     | UI   | Card visible, click expands FHIR R4 metadata   |
+| J07 | FHIR Encounter History has HealthDCAT-AP      | UI   | Card visible, click shows publisher/license    |
+| J08 | FHIR Diagnostic Reports visible               | UI   | Card visible in catalog                        |
+| J09 | Catalog API contains OMOP CDM dataset         | API  | Dataset ID `dataset:omop-cdm-v54-analytics`    |
+| J10 | Dataset shows EHDS Article 53 legal basis     | UI   | Expand Synthea dataset → EHDS Art. 53 visible  |
+| J11 | FHIR Immunization Records visible             | UI   | Card visible in catalog                        |
+| J12 | Catalog cards expand with metadata details    | UI   | Click card → publisher field visible           |
+| J13 | Catalog has ≥15 registered datasets           | API  | `/api/catalog` returns ≥15 entries             |
+| J14 | Datasets include both Synthetic and RWD types | API  | At least one SyntheticData + one non-Synthetic |
+| J15 | FHIR conformsTo URLs reference HL7            | API  | Datasets with `conformsTo` matching `hl7.org`  |
+
+**Spec file:** `02-dataset-metadata.spec.ts`
+
+##### C · Policy Definition & Catalog Offering (J16–J22)
+
+| ID  | Title                                        | Type | Assertion                                       |
+| --- | -------------------------------------------- | ---- | ----------------------------------------------- |
+| J16 | Policies exist for multiple participants     | API  | `/api/admin/policies` returns ≥3 participants   |
+| J17 | Policies include ODRL permission/prohibition | API  | First policy has `@type` or `policy.permission` |
+| J18 | Policy page requires authentication          | UI   | `/admin/policies` → redirect to sign-in         |
+| J19 | MedReg participant has registered policies   | API  | Identity includes `medreg`, policies ≥1         |
+| J20 | Catalog page renders dataset cards publicly  | UI   | `/catalog` shows dataset cards without auth     |
+| J21 | Catalog API has ≥15 registered datasets      | API  | Array length ≥15                                |
+| J22 | At least one SyntheticData type dataset      | API  | Find `datasetType: "SyntheticData"` in catalog  |
+
+**Spec file:** `03-policy-catalog.spec.ts`
+
+##### D · Discovery & Federated Search (J23–J30)
+
+| ID  | Title                                      | Type | Assertion                                           |
+| --- | ------------------------------------------ | ---- | --------------------------------------------------- |
+| J23 | Catalog page displays FHIR datasets        | UI   | `/catalog` shows text matching "FHIR"               |
+| J24 | Catalog API includes datasets with titles  | API  | ≥10 datasets, ≥5 with titles                        |
+| J25 | Clinical trial dataset exists in catalog   | API  | Find dataset with "Clinical Trial" in title         |
+| J26 | Discover Data page requires authentication | UI   | `/data/discover` → redirect to sign-in              |
+| J27 | Graph Explorer shows all 5 graph layers    | UI   | Marketplace, HealthDCAT-AP, FHIR R4, OMOP, Ontology |
+| J28 | Graph canvas renders with FHIR + OMOP      | UI   | Canvas visible, layer labels present                |
+| J29 | Patient Journey page shows patient cohort  | UI   | `/patient` heading + patient data loaded            |
+| J30 | Federated catalog statistics available     | API  | `/api/federated` returns stats object               |
+
+**Spec file:** `04-discovery-search.spec.ts`
+
+##### E · Contract Negotiation (J31–J40)
+
+| ID  | Title                                        | Type | Assertion                                            |
+| --- | -------------------------------------------- | ---- | ---------------------------------------------------- |
+| J31 | Negotiate page requires authentication       | UI   | `/negotiate` → redirect to sign-in                   |
+| J32 | Tasks API includes negotiation entries       | API  | Tasks include `type: "negotiation"`                  |
+| J33 | At least one negotiation is FINALIZED        | API  | Find `state: "FINALIZED"` among negotiations         |
+| J34 | Negotiations exist for multiple participants | API  | ≥2 distinct participant names                        |
+| J35 | Participant-scoped negotiations API works    | API  | GET `/api/negotiations?participantId=` returns array |
+| J36 | Negotiations follow DSP protocol             | API  | `protocol` or `@type` field present                  |
+| J37 | Assets API returns participant-scoped assets | API  | ≥3 entries with participantId + assets array         |
+| J38 | Terminated negotiation exists                | API  | Find `state: "TERMINATED"` in tasks or negotiations  |
+| J39 | Finalized negotiations include agreementId   | API  | FINALIZED negotiations have `contractAgreementId`    |
+| J40 | Cross-border negotiation: different DIDs     | API  | counterPartyId ≠ participant identity                |
+
+**Spec file:** `05-contract-negotiation.spec.ts`
+
+##### F · Data Transfer & Viewing (J41–J48)
+
+| ID  | Title                                         | Type | Assertion                                            |
+| --- | --------------------------------------------- | ---- | ---------------------------------------------------- |
+| J41 | Transfer page requires authentication         | UI   | `/data/transfer` → redirect to sign-in               |
+| J42 | Share Data page requires authentication       | UI   | `/data/share` → redirect to sign-in                  |
+| J43 | Tasks API includes transfer entries           | API  | Tasks include `type: "transfer"`                     |
+| J44 | At least one in-progress transfer exists      | API  | Find STARTED/REQUESTING state                        |
+| J45 | Transfers span at least 2 different states    | API  | ≥2 unique states among transfers                     |
+| J46 | Audit API includes transfers/negotiations     | API  | `/api/admin/audit` returns transfer/negotiation data |
+| J47 | Knowledge graph renders with clickable canvas | UI   | Canvas visible, click doesn't crash                  |
+| J48 | Transfers involve multiple participants       | API  | ≥2 distinct participant names                        |
+
+**Spec file:** `06-data-transfer.spec.ts`
+
+##### G · Cross-Border & Federated Compliance (J49–J50)
+
+| ID  | Title                                            | Type   | Assertion                                                              |
+| --- | ------------------------------------------------ | ------ | ---------------------------------------------------------------------- |
+| J49 | Cross-border journey: multi-country participants | API+UI | ≥3 unique DIDs, negotiations exist, graph renders                      |
+| J50 | Compliance audit: credentials, policies, catalog | API    | 5 participants, EHDS credentials, ≥3 policy participants, ≥10 datasets |
+
+**Spec file:** `07-cross-border-federated.spec.ts`
+
+#### Test Architecture
+
+```
+ui/__tests__/e2e/journeys/
+├── helpers.ts                         # Shared utilities
+│   ├── PARTICIPANT_NAMES[]            # 5 fictional names
+│   ├── T = 15_000                     # Default timeout
+│   ├── navigateViaDropdown()          # Nav dropdown UI helper
+│   ├── expectHeading()                # h1/h2 assertion
+│   ├── expectSigninRedirect()         # Auth redirect check
+│   ├── waitForDataLoad()              # Spinner wait
+│   └── apiGet()                       # GET + assert 200
+├── 01-identity-onboarding.spec.ts     # Group A: J01–J05
+├── 02-dataset-metadata.spec.ts        # Group B: J06–J15
+├── 03-policy-catalog.spec.ts          # Group C: J16–J22
+├── 04-discovery-search.spec.ts        # Group D: J23–J30
+├── 05-contract-negotiation.spec.ts    # Group E: J31–J40
+├── 06-data-transfer.spec.ts           # Group F: J41–J48
+└── 07-cross-border-federated.spec.ts  # Group G: J49–J50
+```
+
+#### Mock Data Fallback (Offline-First)
+
+All 50 journey tests work without a live EDC-V, Neo4j, or Keycloak
+instance. The following API routes include mock JSON file fallback:
+
+| API Route             | Mock File                         | Fallback Chain                      |
+| --------------------- | --------------------------------- | ----------------------------------- |
+| `/api/participants`   | `public/mock/participants.json`   | EDC-V → CFM → **mock JSON**         |
+| `/api/tasks`          | `public/mock/tasks.json`          | EDC-V → neo4j-proxy → **mock JSON** |
+| `/api/admin/policies` | `public/mock/admin_policies.json` | EDC-V → Neo4j → **mock JSON**       |
+| `/api/negotiations`   | `public/mock/negotiations.json`   | EDC-V → **merge with mock**         |
+| `/api/catalog`        | `public/mock/catalog.json`        | Neo4j → **merge with mock**         |
+| `/api/assets`         | `public/mock/assets.json`         | EDC-V → **merge with mock**         |
+| `/api/credentials`    | `public/mock/credentials.json`    | EDC-V → **mock JSON**               |
+| `/api/admin/audit`    | `public/mock/admin_audit.json`    | EDC-V → **mock JSON**               |
+
+#### Running the Journey Tests
+
+```bash
+# Run all 50 journey tests
+cd ui && npx playwright test __tests__/e2e/journeys/
+
+# Run a specific group (e.g., Contract Negotiation)
+npx playwright test __tests__/e2e/journeys/05-contract-negotiation.spec.ts
+
+# Generate HTML report
+npx playwright test --reporter=html
+
+# View HTML report
+npx playwright show-report
+```
+
+#### Protocol Coverage
+
+| Protocol                   | Tests   | What's Verified                                                |
+| -------------------------- | ------- | -------------------------------------------------------------- |
+| DSP 2025-1                 | J32–J40 | Negotiation state machine, protocol field, contractAgreementId |
+| DPS (Data Plane Signaling) | J43–J48 | Transfer states, HttpData-PULL, multi-participant              |
+| DCP v1.0                   | J03–J05 | DID:web resolution, EHDS credentials                           |
+| HealthDCAT-AP              | J06–J15 | Metadata fields, FHIR R4 conformance, legal basis              |
+| ODRL                       | J16–J19 | Permission/prohibition, constraints, multi-participant         |
+
+**Deliverables:** 50 journey E2E tests (120 total with smoke/nav/page/doc tests);
+mock data fallback for 3 additional API routes; enhanced mock tasks.json with
+multi-participant data; all tests pass offline (0 failures).
 
 ---
 

@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { edcClient, EDC_CONTEXT } from "@/lib/edc";
+import { promises as fs } from "fs";
+import path from "path";
 
 export const dynamic = "force-dynamic";
 
@@ -48,7 +50,11 @@ export async function GET(request: NextRequest) {
       const policies = await edcClient.management(
         `/v5alpha/participants/${participantId}/policydefinitions/request`,
         "POST",
-        { "@context": [EDC_CONTEXT], "@type": "QuerySpec", "filterExpression": [] },
+        {
+          "@context": [EDC_CONTEXT],
+          "@type": "QuerySpec",
+          filterExpression: [],
+        },
       );
       return NextResponse.json({ participantId, policies, source: "edc" });
     }
@@ -63,7 +69,11 @@ export async function GET(request: NextRequest) {
           const policies = await edcClient.management(
             `/v5alpha/participants/${p["@id"]}/policydefinitions/request`,
             "POST",
-            { "@context": [EDC_CONTEXT], "@type": "QuerySpec", "filterExpression": [] },
+            {
+              "@context": [EDC_CONTEXT],
+              "@type": "QuerySpec",
+              filterExpression: [],
+            },
           );
           return {
             participantId: p["@id"],
@@ -98,6 +108,22 @@ export async function GET(request: NextRequest) {
         rows[0]?.data?.map((r: { row: unknown[] }) => r.row[0]) || [];
       return NextResponse.json({ policies, source: "neo4j", offline: true });
     } catch (neo4jErr) {
+      // Fall back to bundled mock data so the UI works offline
+      try {
+        const mockPath = path.join(
+          process.cwd(),
+          "public",
+          "mock",
+          "admin_policies.json",
+        );
+        const raw = await fs.readFile(mockPath, "utf-8");
+        const mock = JSON.parse(raw);
+        console.warn("EDC-V + Neo4j offline — serving mock policies");
+        return NextResponse.json(mock);
+      } catch {
+        // Mock file not available either
+      }
+
       return NextResponse.json(
         { error: "Failed to list policies", detail: String(neo4jErr) },
         { status: 502 },
