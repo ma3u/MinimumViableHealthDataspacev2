@@ -1,7 +1,7 @@
 "use client";
 
 import { fetchApi } from "@/lib/api";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   Loader2,
   Upload,
@@ -9,6 +9,10 @@ import {
   CheckCircle2,
   ChevronDown,
   ChevronUp,
+  ChevronRight,
+  FileJson2,
+  Copy,
+  Network,
 } from "lucide-react";
 import PageIntro from "@/components/PageIntro";
 
@@ -36,6 +40,270 @@ interface Asset {
 }
 
 type Tab = "existing" | "create";
+
+/* ── Collapsible JSON Tree (syntax-highlighted) ── */
+
+function JsonNode({ data, depth = 0 }: { data: unknown; depth?: number }) {
+  const [collapsed, setCollapsed] = useState(depth > 1);
+
+  if (data === null || data === undefined)
+    return <span className="text-gray-500">null</span>;
+  if (typeof data === "boolean")
+    return <span className="text-yellow-400">{String(data)}</span>;
+  if (typeof data === "number")
+    return <span className="text-cyan-400">{data}</span>;
+  if (typeof data === "string")
+    return <span className="text-green-400">&quot;{data}&quot;</span>;
+
+  if (Array.isArray(data)) {
+    if (data.length === 0) return <span className="text-gray-500">[]</span>;
+    return (
+      <span>
+        <button
+          onClick={() => setCollapsed(!collapsed)}
+          className="text-gray-400 hover:text-gray-200 inline-flex items-center"
+        >
+          {collapsed ? <ChevronRight size={12} /> : <ChevronDown size={12} />}
+          <span className="text-gray-500 text-xs ml-0.5">[{data.length}]</span>
+        </button>
+        {!collapsed && (
+          <div className="ml-4 border-l border-gray-700 pl-2">
+            {data.map((item, i) => (
+              <div key={i}>
+                <span className="text-gray-600 text-xs mr-1">{i}:</span>
+                <JsonNode data={item} depth={depth + 1} />
+              </div>
+            ))}
+          </div>
+        )}
+      </span>
+    );
+  }
+
+  if (typeof data === "object") {
+    const entries = Object.entries(data as Record<string, unknown>);
+    if (entries.length === 0)
+      return <span className="text-gray-500">{"{}"}</span>;
+    return (
+      <span>
+        <button
+          onClick={() => setCollapsed(!collapsed)}
+          className="text-gray-400 hover:text-gray-200 inline-flex items-center"
+        >
+          {collapsed ? <ChevronRight size={12} /> : <ChevronDown size={12} />}
+          <span className="text-gray-500 text-xs ml-0.5">
+            {"{"}
+            {entries.length}
+            {"}"}
+          </span>
+        </button>
+        {!collapsed && (
+          <div className="ml-4 border-l border-gray-700 pl-2">
+            {entries.map(([key, val]) => (
+              <div key={key}>
+                <span className="text-blue-300">{key}</span>
+                <span className="text-gray-500">: </span>
+                <JsonNode data={val} depth={depth + 1} />
+              </div>
+            ))}
+          </div>
+        )}
+      </span>
+    );
+  }
+
+  return <span>{String(data)}</span>;
+}
+
+/* ── Asset Detail Panel ── */
+
+function AssetDetailPanel({ asset }: { asset: Asset }) {
+  const [viewMode, setViewMode] = useState<"details" | "json">("details");
+  const [copied, setCopied] = useState(false);
+
+  const name =
+    asset.name || asset["edc:name"] || asset.properties?.name || asset["@id"];
+  const desc =
+    asset.description ||
+    asset["edc:description"] ||
+    asset.properties?.description;
+  const ct =
+    asset.contenttype ||
+    asset["edc:contenttype"] ||
+    asset.properties?.contenttype;
+
+  const copyJson = useCallback(() => {
+    navigator.clipboard.writeText(JSON.stringify(asset, null, 2));
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  }, [asset]);
+
+  // Collect extra properties (skip already-displayed ones)
+  const skipKeys = new Set([
+    "@id",
+    "@type",
+    "name",
+    "description",
+    "contenttype",
+    "edc:name",
+    "edc:description",
+    "edc:contenttype",
+    "properties",
+  ]);
+  const extraEntries = Object.entries(asset).filter(([k]) => !skipKeys.has(k));
+  const propEntries = asset.properties
+    ? Object.entries(asset.properties).filter(
+        ([k]) => !["name", "description", "contenttype"].includes(k),
+      )
+    : [];
+
+  return (
+    <div className="border-t border-layer2/30 bg-gray-900/80">
+      {/* Header */}
+      <div className="flex items-center justify-between px-4 py-2 bg-layer2/10 border-b border-layer2/30">
+        <div className="flex items-center gap-2">
+          <FileJson2 size={14} className="text-layer2" />
+          <span className="text-xs font-medium text-gray-300">
+            Asset Details — {name}
+          </span>
+        </div>
+        <div className="flex items-center gap-2">
+          <a
+            href={`/graph?highlight=${encodeURIComponent(String(name))}`}
+            className="flex items-center gap-1 text-[11px] text-green-400 hover:text-green-300 transition-colors"
+          >
+            View in Graph <Network size={10} />
+          </a>
+        </div>
+      </div>
+
+      {/* Summary metadata */}
+      <div className="px-4 py-3 border-b border-gray-700 grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div>
+          <div className="text-[10px] text-gray-500 uppercase tracking-wide">
+            Asset ID
+          </div>
+          <div className="text-sm text-gray-200 font-mono truncate">
+            {asset["@id"]}
+          </div>
+        </div>
+        <div>
+          <div className="text-[10px] text-gray-500 uppercase tracking-wide">
+            Type
+          </div>
+          <div className="text-sm text-gray-200">
+            {String(asset["@type"] || "Asset")}
+          </div>
+        </div>
+        <div>
+          <div className="text-[10px] text-gray-500 uppercase tracking-wide">
+            Content Type
+          </div>
+          <div className="text-sm text-gray-200">{ct || "—"}</div>
+        </div>
+        <div>
+          <div className="text-[10px] text-gray-500 uppercase tracking-wide">
+            Properties
+          </div>
+          <div className="text-sm text-gray-200">
+            {Object.keys(asset.properties || {}).length} fields
+          </div>
+        </div>
+      </div>
+
+      {/* Description */}
+      {desc && (
+        <div className="px-4 py-2 border-b border-gray-700">
+          <div className="text-[10px] text-gray-500 uppercase tracking-wide mb-1">
+            Description
+          </div>
+          <p className="text-xs text-gray-300">{desc as string}</p>
+        </div>
+      )}
+
+      {/* View mode tabs & copy */}
+      <div className="px-4 py-2 border-b border-gray-700 flex items-center justify-between">
+        <div className="flex gap-1">
+          <button
+            onClick={() => setViewMode("details")}
+            className={`text-xs px-2.5 py-1 rounded ${
+              viewMode === "details"
+                ? "bg-layer2/20 text-layer2"
+                : "text-gray-400 hover:text-gray-200"
+            }`}
+          >
+            Details
+          </button>
+          <button
+            onClick={() => setViewMode("json")}
+            className={`text-xs px-2.5 py-1 rounded ${
+              viewMode === "json"
+                ? "bg-layer2/20 text-layer2"
+                : "text-gray-400 hover:text-gray-200"
+            }`}
+          >
+            Raw JSON
+          </button>
+        </div>
+        <button
+          onClick={copyJson}
+          className="flex items-center gap-1 text-[11px] text-gray-400 hover:text-gray-200"
+        >
+          <Copy size={10} />
+          {copied ? "Copied!" : "Copy"}
+        </button>
+      </div>
+
+      {/* Content */}
+      <div className="max-h-[400px] overflow-y-auto">
+        {viewMode === "details" ? (
+          <div className="p-4 space-y-3">
+            {/* Extra top-level properties */}
+            {extraEntries.length > 0 && (
+              <div>
+                <div className="text-[10px] text-gray-500 uppercase tracking-wide mb-1.5">
+                  EDC Metadata
+                </div>
+                <div className="space-y-1 font-mono text-xs">
+                  {extraEntries.map(([k, v]) => (
+                    <div key={k} className="flex gap-2">
+                      <span className="text-blue-300 shrink-0">{k}:</span>
+                      <span className="text-green-400 truncate">
+                        {typeof v === "string" ? v : JSON.stringify(v)}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+            {/* Nested properties */}
+            {propEntries.length > 0 && (
+              <div>
+                <div className="text-[10px] text-gray-500 uppercase tracking-wide mb-1.5">
+                  Properties
+                </div>
+                <div className="space-y-1 font-mono text-xs">
+                  {propEntries.map(([k, v]) => (
+                    <div key={k} className="flex gap-2">
+                      <span className="text-blue-300 shrink-0">{k}:</span>
+                      <span className="text-green-400 truncate">
+                        {typeof v === "string" ? v : JSON.stringify(v)}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="p-4 font-mono text-xs">
+            <JsonNode data={asset} depth={0} />
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
 
 export default function DataSharePage() {
   const [tab, setTab] = useState<Tab>("existing");
@@ -226,13 +494,7 @@ export default function DataSharePage() {
                       </div>
                     </div>
                   </button>
-                  {isOpen && (
-                    <div className="px-4 pb-4 border-t border-gray-700 pt-3">
-                      <pre className="text-xs text-gray-400 overflow-auto max-h-60">
-                        {JSON.stringify(a, null, 2)}
-                      </pre>
-                    </div>
-                  )}
+                  {isOpen && <AssetDetailPanel asset={a} />}
                 </div>
               );
             })}
