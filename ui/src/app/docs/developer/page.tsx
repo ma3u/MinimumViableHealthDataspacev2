@@ -437,10 +437,10 @@ npm run lint       # ESLint checks`}</pre>
             <h4 className="font-semibold text-sm mb-2">Unit Tests (Vitest)</h4>
             <ul className="text-gray-400 text-xs space-y-1">
               <li>
-                <strong>128 tests</strong> across 27 files
+                <strong>275 tests</strong> across 35 files
               </li>
               <li>
-                <strong>34% statement coverage</strong>
+                <strong>72% statement coverage</strong>
               </li>
               <li>MSW for API mocking</li>
               <li>Testing Library for component tests</li>
@@ -454,9 +454,17 @@ npm run test:coverage  # With coverage`}</pre>
               E2E Tests (Playwright)
             </h4>
             <ul className="text-gray-400 text-xs space-y-1">
-              <li>Browser-level integration tests</li>
-              <li>Multi-browser support</li>
-              <li>Visual regression capable</li>
+              <li>
+                <strong>70 tests</strong> across 6 spec files
+              </li>
+              <li>Screenshots captured for every test</li>
+              <li>Traces &amp; video on retries</li>
+              <li>
+                HTML report:{" "}
+                <code className="text-indigo-400">
+                  open playwright-report/index.html
+                </code>
+              </li>
             </ul>
             <pre className="text-xs text-gray-500 mt-2 bg-gray-900 p-2 rounded">{`npm run test:e2e       # Headless
 npm run test:e2e:ui    # Interactive UI`}</pre>

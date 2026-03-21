@@ -1,6 +1,6 @@
 # Minimum Viable Health Dataspace v2
 
-[![GitHub](https://img.shields.io/badge/GitHub-Repository-181717?logo=github&logoColor=white)](https://github.com/ma3u/MinimumViableHealthDataspacev2) [![CI Tests](https://github.com/ma3u/MinimumViableHealthDataspacev2/actions/workflows/test.yml/badge.svg)](https://github.com/ma3u/MinimumViableHealthDataspacev2/actions/workflows/test.yml) [![Coverage 72%](https://img.shields.io/badge/coverage-72%25-green)](docs/test-report.md) [![247 Tests](https://img.shields.io/badge/tests-247%20passed-brightgreen)](docs/test-report.md) [![Playwright 31](https://img.shields.io/badge/E2E-31%20passed-brightgreen)](docs/test-report.md)
+[![GitHub](https://img.shields.io/badge/GitHub-Repository-181717?logo=github&logoColor=white)](https://github.com/ma3u/MinimumViableHealthDataspacev2) [![CI Tests](https://github.com/ma3u/MinimumViableHealthDataspacev2/actions/workflows/test.yml/badge.svg)](https://github.com/ma3u/MinimumViableHealthDataspacev2/actions/workflows/test.yml) [![Coverage 72%](https://img.shields.io/badge/coverage-72%25-green)](docs/test-report.md) [![290 Tests](https://img.shields.io/badge/tests-290%20passed-brightgreen)](docs/test-report.md) [![Playwright 70](https://img.shields.io/badge/E2E-70%20passed-brightgreen)](docs/test-report.md)
 
 [![EHDS Compliant](https://img.shields.io/badge/EHDS-Compliant-0ea5e9)](https://health.ec.europa.eu/ehealth-digital-health-and-care/european-health-data-space_en) [![FHIR R4](https://img.shields.io/badge/FHIR-R4-orange)](https://hl7.org/fhir/R4/) [![OMOP CDM](https://img.shields.io/badge/OMOP-CDM%20v5.4-yellow)](https://ohdsi.github.io/CommonDataModel/) [![EEHRxF](https://img.shields.io/badge/EEHRxF-HL7%20Europe-148F77)](https://hl7.eu/fhir/) [![Neo4j 5](https://img.shields.io/badge/Neo4j-5%20Community-008CC1?logo=neo4j&logoColor=white)](https://neo4j.com/) [![Next.js 14](https://img.shields.io/badge/Next.js-14-black?logo=next.js&logoColor=white)](https://nextjs.org/) [![Eclipse EDC](https://img.shields.io/badge/Eclipse-EDC--V-blue)](https://eclipse-edc.github.io/docs/) [![DSP Dataspace Protocol 2025-1](https://img.shields.io/badge/DSP-Dataspace%20Protocol%202025--1-6366f1)](https://docs.internationaldataspaces.org/ids-knowledgebase/v/dataspace-protocol) [![DCP Decentralized Claims Protocol v1.0](https://img.shields.io/badge/DCP-Decentralized%20Claims%20Protocol%20v1.0-7c3aed)](https://projects.eclipse.org/projects/technology.dataspace-dcp/releases/1.0.0) [![DPS](https://img.shields.io/badge/DPS-Data%20Plane%20Signaling-0891b2)](https://projects.eclipse.org/proposals/eclipse-data-plane-core) [![SIMPL](https://img.shields.io/badge/SIMPL-EU%20Cloud%20Federation-e11d48)](https://simpl-programme.eu/) [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 
@@ -390,7 +390,7 @@ infrastructure, dataspace state, and API routes:
 ./scripts/run-e2e-tests.sh
 ```
 
-Expected result: **41 PASS**, 0 FAIL (1 WARN for Issuer DID is expected).
+Expected result: **70 PASS**, 0 FAIL (Keycloak auth tests require SSO and are skipped in static mode).
 
 ### Tear Down
 
@@ -408,9 +408,9 @@ See the full **[Test Report](docs/test-report.md)** for detailed metrics and inv
 
 | Suite      | Framework    |   Tests |  Files | Status      |
 | ---------- | ------------ | ------: | -----: | ----------- |
-| Unit + API | Vitest + RTL |     247 |     35 | ✅ All pass |
-| E2E        | Playwright   |      31 |      4 | ✅ All pass |
-| **Total**  |              | **278** | **39** | ✅          |
+| Unit + API | Vitest + RTL |     275 |     35 | ✅ All pass |
+| E2E        | Playwright   |      70 |      6 | ✅ All pass |
+| **Total**  |              | **345** | **41** | ✅          |
 
 **Code coverage** (v8): 71.76% statements · 51.15% branches · 67.16% functions · 72.10% lines
 
@@ -430,6 +430,16 @@ npx playwright test
 
 CI runs on every push and PR via [`.github/workflows/test.yml`](.github/workflows/test.yml).
 Coverage reports and Playwright HTML reports are uploaded as GitHub Actions artifacts.
+
+**Playwright HTML Report:** After running E2E tests, open the interactive report with screenshots of every page:
+
+```bash
+open ui/playwright-report/index.html    # macOS
+# or: npx playwright show-report       # cross-platform
+```
+
+The report includes a screenshot for every test (captured automatically), traces on retries,
+and video recordings when tests are retried — making visual regression and debugging easy.
 
 ---
 

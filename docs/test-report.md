@@ -175,8 +175,18 @@
 | Metric       | Value     |
 | ------------ | --------- |
 | Spec files   | 6         |
-| Tests passed | 69 passed |
+| Tests passed | 70 passed |
 | Tests failed | 0 failed  |
+
+**HTML Report with Screenshots:** After running E2E tests, open the interactive report:
+
+```bash
+open ui/playwright-report/index.html    # macOS
+npx playwright show-report              # cross-platform
+```
+
+Every test captures a screenshot automatically. Retried tests include traces and video recordings.
+The HTML report is also uploaded as a GitHub Actions artifact on CI runs.
 
 ## Test Inventory
 
