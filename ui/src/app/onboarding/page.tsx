@@ -165,7 +165,7 @@ function deriveStatus(tenant: Tenant): "active" | "provisioning" | "pending" {
     (p) =>
       (p.identifier && p.identifier !== "null") ||
       (p.did && p.did !== "null") ||
-      p.state === "ACTIVATED"
+      p.state === "ACTIVATED",
   );
   if (hasIdentity) return "active";
   return "provisioning";
@@ -220,8 +220,7 @@ function OnboardingSteps({ tenant }: { tenant: Tenant }) {
   const hasProfile = profiles.length > 0;
   const hasDid = profiles.some(
     (p) =>
-      (p.identifier && p.identifier !== "null") ||
-      (p.did && p.did !== "null")
+      (p.identifier && p.identifier !== "null") || (p.did && p.did !== "null"),
   );
   const status = deriveStatus(tenant);
 

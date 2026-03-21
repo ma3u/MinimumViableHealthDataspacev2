@@ -53,18 +53,27 @@ describe("lib/auth", () => {
     });
 
     it("should have issuer set to Keycloak public URL", () => {
-      const provider = authOptions.providers[0] as Record<string, unknown>;
+      const provider = authOptions.providers[0] as unknown as Record<
+        string,
+        unknown
+      >;
       expect(provider.issuer).toBeDefined();
       expect(typeof provider.issuer).toBe("string");
     });
 
     it("should have idToken enabled", () => {
-      const provider = authOptions.providers[0] as Record<string, unknown>;
+      const provider = authOptions.providers[0] as unknown as Record<
+        string,
+        unknown
+      >;
       expect(provider.idToken).toBe(true);
     });
 
     it("should have explicit OIDC endpoints (no auto-discovery)", () => {
-      const provider = authOptions.providers[0] as Record<string, unknown>;
+      const provider = authOptions.providers[0] as unknown as Record<
+        string,
+        unknown
+      >;
       expect(provider.authorization).toBeDefined();
       expect(provider.token).toBeDefined();
       expect(provider.userinfo).toBeDefined();
@@ -72,7 +81,10 @@ describe("lib/auth", () => {
     });
 
     it("should use PKCE and state checks", () => {
-      const provider = authOptions.providers[0] as Record<string, unknown>;
+      const provider = authOptions.providers[0] as unknown as Record<
+        string,
+        unknown
+      >;
       expect(provider.checks).toContain("pkce");
       expect(provider.checks).toContain("state");
     });

@@ -71,7 +71,9 @@ export default function UserMenu() {
         <Shield size={15} className={IS_STATIC ? "text-amber-400" : ""} />
         <span className="max-w-[120px] truncate">
           {session.user?.name ?? session.user?.email ?? "User"}
-          {IS_STATIC && <span className="ml-1 text-[10px] text-amber-400">(Demo)</span>}
+          {IS_STATIC && (
+            <span className="ml-1 text-[10px] text-amber-400">(Demo)</span>
+          )}
         </span>
       </button>
 

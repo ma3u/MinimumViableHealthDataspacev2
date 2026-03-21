@@ -1,6 +1,6 @@
 # Minimum Viable Health Dataspace v2
 
-[![GitHub](https://img.shields.io/badge/GitHub-Repository-181717?logo=github&logoColor=white)](https://github.com/ma3u/MinimumViableHealthDataspacev2) [![CI Tests](https://github.com/ma3u/MinimumViableHealthDataspacev2/actions/workflows/test.yml/badge.svg)](https://github.com/ma3u/MinimumViableHealthDataspacev2/actions/workflows/test.yml) [![Coverage 72%](https://img.shields.io/badge/coverage-72%25-green)](docs/test-report.md) [![290 Tests](https://img.shields.io/badge/tests-290%20passed-brightgreen)](docs/test-report.md) [![Playwright 70](https://img.shields.io/badge/E2E-70%20passed-brightgreen)](docs/test-report.md)
+[![GitHub](https://img.shields.io/badge/GitHub-Repository-181717?logo=github&logoColor=white)](https://github.com/ma3u/MinimumViableHealthDataspacev2) [![CI Tests](https://github.com/ma3u/MinimumViableHealthDataspacev2/actions/workflows/test.yml/badge.svg)](https://github.com/ma3u/MinimumViableHealthDataspacev2/actions/workflows/test.yml) [![Coverage 94%](https://img.shields.io/badge/coverage-94%25-brightgreen)](docs/test-coverage-report.md) [![1490 Tests](https://img.shields.io/badge/tests-1490%20passed-brightgreen)](docs/test-coverage-report.md) [![Playwright 102](https://img.shields.io/badge/E2E-102%20passed-brightgreen)](docs/test-coverage-report.md)
 
 [![EHDS Compliant](https://img.shields.io/badge/EHDS-Compliant-0ea5e9)](https://health.ec.europa.eu/ehealth-digital-health-and-care/european-health-data-space_en) [![FHIR R4](https://img.shields.io/badge/FHIR-R4-orange)](https://hl7.org/fhir/R4/) [![OMOP CDM](https://img.shields.io/badge/OMOP-CDM%20v5.4-yellow)](https://ohdsi.github.io/CommonDataModel/) [![EEHRxF](https://img.shields.io/badge/EEHRxF-HL7%20Europe-148F77)](https://hl7.eu/fhir/) [![Neo4j 5](https://img.shields.io/badge/Neo4j-5%20Community-008CC1?logo=neo4j&logoColor=white)](https://neo4j.com/) [![Next.js 14](https://img.shields.io/badge/Next.js-14-black?logo=next.js&logoColor=white)](https://nextjs.org/) [![Eclipse EDC](https://img.shields.io/badge/Eclipse-EDC--V-blue)](https://eclipse-edc.github.io/docs/) [![DSP Dataspace Protocol 2025-1](https://img.shields.io/badge/DSP-Dataspace%20Protocol%202025--1-6366f1)](https://docs.internationaldataspaces.org/ids-knowledgebase/v/dataspace-protocol) [![DCP Decentralized Claims Protocol v1.0](https://img.shields.io/badge/DCP-Decentralized%20Claims%20Protocol%20v1.0-7c3aed)](https://projects.eclipse.org/projects/technology.dataspace-dcp/releases/1.0.0) [![DPS](https://img.shields.io/badge/DPS-Data%20Plane%20Signaling-0891b2)](https://projects.eclipse.org/proposals/eclipse-data-plane-core) [![SIMPL](https://img.shields.io/badge/SIMPL-EU%20Cloud%20Federation-e11d48)](https://simpl-programme.eu/) [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 
@@ -145,6 +145,7 @@ MinimumViableHealthDataspacev2/
 ├── README.md
 ├── docker-compose.yml            # Neo4j 5 with APOC + n10s plugins
 ├── docker-compose.jad.yml        # JAD stack: 19 EDC-V/CFM/DCore services
+├── docker-compose.live.yml       # Live-mode UI override (port 3003)
 ├── LICENSE
 ├── docs/
 │   ├── planning-health-dataspace-v2.md   # 7-phase implementation roadmap
@@ -356,12 +357,33 @@ faster. When complete, all services are healthy and the dataspace is seeded with
 
 ### Start the UI
 
+**Option A — Development mode** (hot reload, ideal for code changes):
+
 ```bash
 cd ui && npm install && npm run dev
 ```
 
 Open <http://localhost:3000>. Log in with `edcadmin` / `edcadmin` (admin),
 `clinicuser` / `clinicuser` (hospital), or `regulator` / `regulator` (HDAB).
+
+**Option B — Live Docker container** (production build connected to JAD cluster):
+
+```bash
+docker compose -f docker-compose.yml \
+               -f docker-compose.jad.yml \
+               -f docker-compose.live.yml \
+               up -d --build graph-explorer
+```
+
+Open <http://localhost:3003>. This runs the production-built UI inside Docker,
+connected to the live Neo4j, Keycloak, and EDC-V services in the cluster.
+
+| Port | Mode   | Compose Files                                  | Description                 |
+| ---- | ------ | ---------------------------------------------- | --------------------------- |
+| 3000 | Static | `docker-compose.yml` only                      | Mock/static data, no JAD    |
+| 3003 | Live   | `docker-compose.yml` + `jad` + `live` overlays | Full JAD cluster, live data |
+
+> **Rebuild after code changes:** > `docker compose -f docker-compose.yml -f docker-compose.jad.yml -f docker-compose.live.yml up -d --build graph-explorer`
 
 ### Run Seeding Separately
 
@@ -390,7 +412,7 @@ infrastructure, dataspace state, and API routes:
 ./scripts/run-e2e-tests.sh
 ```
 
-Expected result: **70 PASS**, 0 FAIL (Keycloak auth tests require SSO and are skipped in static mode).
+Expected result: **102 PASS**, 0 FAIL (Keycloak auth tests require SSO and are skipped in static mode).
 
 ### Tear Down
 
@@ -404,15 +426,15 @@ Expected result: **70 PASS**, 0 FAIL (Keycloak auth tests require SSO and are sk
 ## Testing
 
 The project has comprehensive test coverage across unit, API-route, and end-to-end tests.
-See the full **[Test Report](docs/test-report.md)** for detailed metrics and inventory.
+See the full **[Test Coverage Report](docs/test-coverage-report.md)** for detailed metrics and inventory.
 
-| Suite      | Framework    |   Tests |  Files | Status      |
-| ---------- | ------------ | ------: | -----: | ----------- |
-| Unit + API | Vitest + RTL |     275 |     35 | ✅ All pass |
-| E2E        | Playwright   |      70 |      6 | ✅ All pass |
-| **Total**  |              | **345** | **41** | ✅          |
+| Suite      | Framework    |     Tests |  Files | Status      |
+| ---------- | ------------ | --------: | -----: | ----------- |
+| Unit + API | Vitest + RTL |     1,490 |     78 | ✅ All pass |
+| E2E        | Playwright   |       102 |     14 | ✅ All pass |
+| **Total**  |              | **1,592** | **92** | ✅          |
 
-**Code coverage** (v8): 71.76% statements · 51.15% branches · 67.16% functions · 72.10% lines
+**Code coverage** (v8): 93.78% statements · 81.65% branches · 89.57% functions · 94.73% lines
 
 ```bash
 # Run unit tests
@@ -510,7 +532,8 @@ Complete list of all services and their direct `localhost` port mappings when th
 
 | Service                 | Port(s)                       | URL / Endpoint         | Description                                               |
 | ----------------------- | ----------------------------- | ---------------------- | --------------------------------------------------------- |
-| **Graph Explorer UI**   | 3000                          | http://localhost:3000  | Next.js 14 app — graph, catalogue, analytics views        |
+| **Graph Explorer UI**   | 3000                          | http://localhost:3000  | Next.js 14 app — mock/static mode (base compose only)     |
+| **Graph Explorer Live** | 3003                          | http://localhost:3003  | Next.js 14 app — live mode with JAD cluster data          |
 | **Neo4j Browser**       | 7474                          | http://localhost:7474  | Neo4j Browser (primary instance, `neo4j/healthdataspace`) |
 | **Neo4j Bolt**          | 7687                          | bolt://localhost:7687  | Bolt driver endpoint (primary instance)                   |
 | **Neo4j SPE-2 Browser** | 7475                          | http://localhost:7475  | Neo4j Browser (second participant)                        |
@@ -549,7 +572,8 @@ available online at **[ma3u.github.io/MinimumViableHealthDataspacev2/docs](https
 | ------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------- |
 | [docs/planning-health-dataspace-v2.md](docs/planning-health-dataspace-v2.md)   | 7-phase implementation roadmap covering EDC-V, DCore, CFM, and Neo4j integration steps.  |
 | [docs/health-dataspace-graph-schema.md](docs/health-dataspace-graph-schema.md) | Full 5-layer Neo4j graph schema: node labels, property keys, indexes, and relationships. |
-| [docs/test-report.md](docs/test-report.md)                                     | Test suite metrics, coverage data, and test inventory (278 tests across 39 files).       |
+| [docs/test-report.md](docs/test-report.md)                                     | Integration test report (DSP TCK, DCP compliance, EHDS health-domain).                   |
+| [docs/test-coverage-report.md](docs/test-coverage-report.md)                   | Unit test coverage report (1,490 tests, 94% statement coverage across 78 files).         |
 | [.github/workflows/test.yml](.github/workflows/test.yml)                       | CI pipeline — lint, unit tests with coverage, Playwright E2E tests.                      |
 | [jad/openapi/](jad/openapi/)                                                   | OpenAPI specs for all JAD services (Management, Identity, Issuer APIs).                  |
 
@@ -568,7 +592,7 @@ All 12 phases are **✅ Complete** — from infrastructure migration through EDC
 | 5     | Federated Queries & GraphRAG (Text2Cypher NLQ)           | ✅     |
 | 6     | Graph Explorer UI + Participant Portal (19 pages)        | ✅     |
 | 7     | TCK DCP & DSP Compliance Verification                    | ✅     |
-| 8     | Test Coverage (291 tests — 260 unit + 31 E2E)            | ✅     |
+| 8     | Test Coverage (1,490 unit + 102 E2E tests, 94% coverage) | ✅     |
 | 9     | Documentation & Navigation Restructuring                 | ✅     |
 | 10    | Tasks Dashboard & DPS Integration                        | ✅     |
 | 11    | EDC Components — Per-Participant Topology & Info Layer   | ✅     |
@@ -731,16 +755,18 @@ modules, manual testing became impractical. Automated tests catch regressions ea
 change to one part of the system accidentally breaks another, the tests flag it before the
 code reaches production.
 
-**What we built:** We wrote 291 automated tests covering the entire application. Unit tests
-check that each API endpoint returns the correct data and handles errors gracefully. Component
-tests verify that UI elements (login menu, navigation, data tables) display and behave
-correctly. End-to-end tests simulate a real user clicking through the application in a browser.
-Overall code coverage rose from 10% to 72%. Every time code is pushed to the repository,
+**What we built:** We wrote 1,490 automated unit/integration tests and 102 end-to-end browser
+tests covering the entire application. Unit tests check that each API endpoint returns the
+correct data and handles errors gracefully. Component tests verify that UI elements (login
+menu, navigation, data tables) display and behave correctly. End-to-end tests simulate a real
+user clicking through the application in a browser. Overall code coverage rose from 10% to
+94%. Every time code is pushed to the repository,
 GitHub Actions automatically runs all tests and reports any failures — no manual intervention
 needed.
 
-**Components developed:** 260 unit/integration tests (Vitest), 31 end-to-end browser tests
-(Playwright), GitHub Actions CI pipeline, coverage reporting.
+**Components developed:** 1,490 unit/integration tests (Vitest), 102 end-to-end browser tests
+(Playwright), GitHub Actions CI pipeline, coverage reporting, GitHub Pages test report
+publishing.
 
 ### Phase 9 — Documentation & Navigation
 
@@ -851,13 +877,14 @@ Tier 0 ──► Tier 1 ──► Tier 2 ──► Tier 3 ──► Tier 4
 | 6   | `neo4j-spe2` ¹ | `health-dataspace-neo4j-spe2` | `docker-compose.yml`     | 7475, 7688 | Neo4j 5 Community — second Secure Processing Environment for federated query testing (Phase 5).                                                   |
 
 > ¹ Only starts with `--profile federated`.
+> ³ Port 3003 is exposed when using the `docker-compose.live.yml` overlay for live JAD cluster data.
 
 #### Tier 1 — Core Identity & UI (depend on Tier 0)
 
-| #   | Service          | Container Name              | Compose File             | Port(s)    | Dependencies | Description                                                                                                       |
-| --- | ---------------- | --------------------------- | ------------------------ | ---------- | ------------ | ----------------------------------------------------------------------------------------------------------------- |
-| 7   | `keycloak`       | `health-dataspace-keycloak` | `docker-compose.jad.yml` | 8080, 9000 | `postgres`   | Keycloak — OAuth2/OIDC identity provider. Hosts `edcv` realm with 3 demo users, PKCE client, and role mappings.   |
-| 8   | `graph-explorer` | `health-dataspace-ui`       | `docker-compose.yml`     | 3000       | `neo4j`      | Next.js 14 UI — Graph Explorer, Catalogue, Analytics, Portal views. Connects to Neo4j (Bolt) and Keycloak (OIDC). |
+| #   | Service          | Container Name              | Compose File             | Port(s)      | Dependencies | Description                                                                                                                                                        |
+| --- | ---------------- | --------------------------- | ------------------------ | ------------ | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 7   | `keycloak`       | `health-dataspace-keycloak` | `docker-compose.jad.yml` | 8080, 9000   | `postgres`   | Keycloak — OAuth2/OIDC identity provider. Hosts `edcv` realm with 3 demo users, PKCE client, and role mappings.                                                    |
+| 8   | `graph-explorer` | `health-dataspace-ui`       | `docker-compose.yml`     | 3000, 3003 ³ | `neo4j`      | Next.js 14 UI — Graph Explorer, Catalogue, Analytics, Portal views. Connects to Neo4j (Bolt) and Keycloak (OIDC). Port 3003 via `docker-compose.live.yml` overlay. |
 
 #### Tier 2 — EDC-V Core + Identity Services (depend on Tier 0 + 1)
 

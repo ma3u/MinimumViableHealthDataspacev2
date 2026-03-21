@@ -85,7 +85,9 @@ function calcCpuPercent(stats: DockerStats): number {
 
 function calcMemMB(stats: DockerStats): number {
   const cache = stats.memory_stats.stats?.cache || 0;
-  return Math.round(((stats.memory_stats.usage - cache) / 1024 / 1024) * 10) / 10;
+  return (
+    Math.round(((stats.memory_stats.usage - cache) / 1024 / 1024) * 10) / 10
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -128,27 +130,87 @@ interface InfraComponent extends ParticipantComponent {
 // ---------------------------------------------------------------------------
 
 const PARTICIPANT_SERVICES = [
-  { name: "Control Plane", container: "health-dataspace-controlplane", core: true },
-  { name: "Data Plane FHIR", container: "health-dataspace-dataplane-fhir", core: true },
-  { name: "Data Plane OMOP", container: "health-dataspace-dataplane-omop", core: true },
-  { name: "Identity Hub", container: "health-dataspace-identityhub", core: true },
-  { name: "Issuer Service", container: "health-dataspace-issuerservice", core: false },
+  {
+    name: "Control Plane",
+    container: "health-dataspace-controlplane",
+    core: true,
+  },
+  {
+    name: "Data Plane FHIR",
+    container: "health-dataspace-dataplane-fhir",
+    core: true,
+  },
+  {
+    name: "Data Plane OMOP",
+    container: "health-dataspace-dataplane-omop",
+    core: true,
+  },
+  {
+    name: "Identity Hub",
+    container: "health-dataspace-identityhub",
+    core: true,
+  },
+  {
+    name: "Issuer Service",
+    container: "health-dataspace-issuerservice",
+    core: false,
+  },
   { name: "Keycloak", container: "health-dataspace-keycloak", core: false },
   { name: "Vault", container: "health-dataspace-vault", core: false },
 ];
 
 const INFRA_SERVICES = [
-  { name: "PostgreSQL", container: "health-dataspace-postgres", layer: "infrastructure" },
+  {
+    name: "PostgreSQL",
+    container: "health-dataspace-postgres",
+    layer: "infrastructure",
+  },
   { name: "NATS", container: "health-dataspace-nats", layer: "infrastructure" },
-  { name: "Neo4j", container: "health-dataspace-neo4j", layer: "infrastructure" },
-  { name: "Neo4j Proxy", container: "health-dataspace-neo4j-proxy", layer: "infrastructure" },
-  { name: "Traefik", container: "health-dataspace-traefik", layer: "infrastructure" },
-  { name: "Tenant Manager", container: "health-dataspace-tenant-manager", layer: "cfm" },
-  { name: "Provision Manager", container: "health-dataspace-provision-manager", layer: "cfm" },
-  { name: "EDC-V Agent", container: "health-dataspace-cfm-edcv-agent", layer: "cfm" },
-  { name: "Keycloak Agent", container: "health-dataspace-cfm-keycloak-agent", layer: "cfm" },
-  { name: "Registration Agent", container: "health-dataspace-cfm-registration-agent", layer: "cfm" },
-  { name: "Onboarding Agent", container: "health-dataspace-cfm-onboarding-agent", layer: "cfm" },
+  {
+    name: "Neo4j",
+    container: "health-dataspace-neo4j",
+    layer: "infrastructure",
+  },
+  {
+    name: "Neo4j Proxy",
+    container: "health-dataspace-neo4j-proxy",
+    layer: "infrastructure",
+  },
+  {
+    name: "Traefik",
+    container: "health-dataspace-traefik",
+    layer: "infrastructure",
+  },
+  {
+    name: "Tenant Manager",
+    container: "health-dataspace-tenant-manager",
+    layer: "cfm",
+  },
+  {
+    name: "Provision Manager",
+    container: "health-dataspace-provision-manager",
+    layer: "cfm",
+  },
+  {
+    name: "EDC-V Agent",
+    container: "health-dataspace-cfm-edcv-agent",
+    layer: "cfm",
+  },
+  {
+    name: "Keycloak Agent",
+    container: "health-dataspace-cfm-keycloak-agent",
+    layer: "cfm",
+  },
+  {
+    name: "Registration Agent",
+    container: "health-dataspace-cfm-registration-agent",
+    layer: "cfm",
+  },
+  {
+    name: "Onboarding Agent",
+    container: "health-dataspace-cfm-onboarding-agent",
+    layer: "cfm",
+  },
   { name: "UI", container: "health-dataspace-ui", layer: "infrastructure" },
 ];
 
@@ -195,7 +257,8 @@ async function resolveContainer(
   const c = containers.find((c) =>
     c.Names.some((n) => n === `/${containerName}`),
   );
-  if (!c) return { status: "stopped", cpu: 0, memMB: 0, memLimitMB: 0, uptime: "—" };
+  if (!c)
+    return { status: "stopped", cpu: 0, memMB: 0, memLimitMB: 0, uptime: "—" };
 
   let status = "running";
   let uptime = "—";
@@ -220,8 +283,7 @@ async function resolveContainer(
     );
     cpu = Math.round(calcCpuPercent(stats) * 100) / 100;
     memMB = calcMemMB(stats);
-    memLimitMB =
-      Math.round((stats.memory_stats.limit / 1024 / 1024) * 10) / 10;
+    memLimitMB = Math.round((stats.memory_stats.limit / 1024 / 1024) * 10) / 10;
   } catch {
     /* ignore */
   }
@@ -250,9 +312,10 @@ export async function GET() {
   // ── Fetch participant data from CFM ──
   const participantTopologies: ParticipantTopology[] = [];
   try {
-    const tenants = await edcClient.tenant<
-      { id: string; version: number; properties: Record<string, string> }[]
-    >("/v1alpha1/tenants");
+    const tenants =
+      await edcClient.tenant<
+        { id: string; version: number; properties: Record<string, string> }[]
+      >("/v1alpha1/tenants");
 
     let edcParticipants: { "@id": string; identity: string; state: string }[] =
       [];
@@ -281,9 +344,9 @@ export async function GET() {
     for (const t of tenants) {
       let profiles: { participantContextId?: string }[] = [];
       try {
-        profiles = await edcClient.tenant<
-          { participantContextId?: string }[]
-        >(`/v1alpha1/tenants/${t.id}/participant-profiles`);
+        profiles = await edcClient.tenant<{ participantContextId?: string }[]>(
+          `/v1alpha1/tenants/${t.id}/participant-profiles`,
+        );
       } catch {
         /* no profiles */
       }
@@ -320,8 +383,8 @@ export async function GET() {
       );
 
       // Participant-level health = worst of core components
-      const coreComponents = components.filter((_, i) =>
-        PARTICIPANT_SERVICES[i].core,
+      const coreComponents = components.filter(
+        (_, i) => PARTICIPANT_SERVICES[i].core,
       );
       const health = worstSeverity(coreComponents.map((c) => c.severity));
 
@@ -329,8 +392,7 @@ export async function GET() {
         id: t.id,
         displayName: t.properties?.displayName || t.id,
         organization: t.properties?.organization || "—",
-        role:
-          t.properties?.ehdsParticipantType || t.properties?.role || "—",
+        role: t.properties?.ehdsParticipantType || t.properties?.role || "—",
         did: ctx?.identity || t.properties?.did || "—",
         state: ctx?.state || "—",
         health,
@@ -376,7 +438,9 @@ export async function GET() {
   }
 
   // Sort infra by layer then name
-  infraComponents.sort((a, b) => a.layer.localeCompare(b.layer) || a.name.localeCompare(b.name));
+  infraComponents.sort(
+    (a, b) => a.layer.localeCompare(b.layer) || a.name.localeCompare(b.name),
+  );
 
   // Sort participants: critical first, then by name
   const severityOrder = { critical: 0, warning: 1, unknown: 2, healthy: 3 };

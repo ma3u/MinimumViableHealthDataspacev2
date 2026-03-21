@@ -58,7 +58,7 @@ const graphSchemaDiagram = `erDiagram
 const cicdDiagram = `graph LR
   subgraph "Developer Workflow"
     DEV[Local Dev<br/>npm run dev]
-    TEST[Vitest<br/>128 tests]
+    TEST[Vitest<br/>1490 tests]
     LINT[ESLint<br/>Pre-commit]
   end
 
@@ -257,7 +257,7 @@ python scripts/load_fhir_neo4j.py`}</pre>
 npm install
 npm run dev        # → http://localhost:3000
 
-npm run test       # Run 128 unit tests
+npm run test       # Run 1490 unit tests
 npm run lint       # ESLint checks`}</pre>
           </div>
         </div>
@@ -437,13 +437,21 @@ npm run lint       # ESLint checks`}</pre>
             <h4 className="font-semibold text-sm mb-2">Unit Tests (Vitest)</h4>
             <ul className="text-gray-400 text-xs space-y-1">
               <li>
-                <strong>275 tests</strong> across 35 files
+                <strong>1,490 tests</strong> across 78 files
               </li>
               <li>
-                <strong>72% statement coverage</strong>
+                <strong>94% statement coverage</strong> / 95% lines
               </li>
               <li>MSW for API mocking</li>
               <li>Testing Library for component tests</li>
+              <li>
+                <a
+                  href="/MinimumViableHealthDataspacev2/test-reports/"
+                  className="text-indigo-400 hover:text-indigo-300"
+                >
+                  View Test Report →
+                </a>
+              </li>
             </ul>
             <pre className="text-xs text-gray-500 mt-2 bg-gray-900 p-2 rounded">{`npm run test           # Run once
 npm run test:watch     # Watch mode
@@ -455,7 +463,7 @@ npm run test:coverage  # With coverage`}</pre>
             </h4>
             <ul className="text-gray-400 text-xs space-y-1">
               <li>
-                <strong>70 tests</strong> across 6 spec files
+                <strong>102 tests</strong> across 14 spec files
               </li>
               <li>Screenshots captured for every test</li>
               <li>Traces &amp; video on retries</li>

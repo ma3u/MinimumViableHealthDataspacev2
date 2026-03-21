@@ -16,7 +16,10 @@ export async function PATCH(
     const { properties } = body as { properties: Record<string, string> };
 
     if (!properties || typeof properties !== "object") {
-      return NextResponse.json({ error: "Missing properties" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Missing properties" },
+        { status: 400 },
+      );
     }
 
     const result = await edcClient.tenant(

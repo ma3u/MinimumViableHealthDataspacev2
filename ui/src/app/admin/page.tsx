@@ -40,7 +40,8 @@ export default function AdminDashboard() {
           // EDC-V returns { participants: [{ policies: [...] }, ...] }
           if (Array.isArray(d.participants)) {
             const total = (d.participants as { policies?: unknown[] }[]).reduce(
-              (sum, p) => sum + (Array.isArray(p.policies) ? p.policies.length : 0),
+              (sum, p) =>
+                sum + (Array.isArray(p.policies) ? p.policies.length : 0),
               0,
             );
             setPolicyCount(total);

@@ -45,26 +45,106 @@ interface ServiceMapping {
 }
 
 const SERVICE_MAP: ServiceMapping[] = [
-  { container: "health-dataspace-controlplane", component: "Control Plane", layer: "edc-core" },
-  { container: "health-dataspace-dataplane-fhir", component: "Data Plane FHIR", layer: "edc-core" },
-  { container: "health-dataspace-dataplane-omop", component: "Data Plane OMOP", layer: "edc-core" },
-  { container: "health-dataspace-identityhub", component: "Identity Hub", layer: "identity" },
-  { container: "health-dataspace-issuerservice", component: "Issuer Service", layer: "identity" },
-  { container: "health-dataspace-keycloak", component: "Keycloak", layer: "identity" },
-  { container: "health-dataspace-vault", component: "Vault", layer: "identity" },
-  { container: "health-dataspace-vault-bootstrap", component: "Vault Bootstrap", layer: "identity" },
-  { container: "health-dataspace-tenant-manager", component: "Tenant Manager", layer: "cfm" },
-  { container: "health-dataspace-provision-manager", component: "Provision Manager", layer: "cfm" },
-  { container: "health-dataspace-cfm-edcv-agent", component: "EDC-V Agent", layer: "cfm" },
-  { container: "health-dataspace-cfm-keycloak-agent", component: "Keycloak Agent", layer: "cfm" },
-  { container: "health-dataspace-cfm-onboarding-agent", component: "Onboarding Agent", layer: "cfm" },
-  { container: "health-dataspace-cfm-registration-agent", component: "Registration Agent", layer: "cfm" },
-  { container: "health-dataspace-postgres", component: "PostgreSQL", layer: "infrastructure" },
-  { container: "health-dataspace-nats", component: "NATS", layer: "infrastructure" },
-  { container: "health-dataspace-neo4j", component: "Neo4j", layer: "infrastructure" },
-  { container: "health-dataspace-neo4j-proxy", component: "Neo4j Proxy", layer: "infrastructure" },
-  { container: "health-dataspace-traefik", component: "Traefik", layer: "infrastructure" },
-  { container: "health-dataspace-ui", component: "UI", layer: "infrastructure" },
+  {
+    container: "health-dataspace-controlplane",
+    component: "Control Plane",
+    layer: "edc-core",
+  },
+  {
+    container: "health-dataspace-dataplane-fhir",
+    component: "Data Plane FHIR",
+    layer: "edc-core",
+  },
+  {
+    container: "health-dataspace-dataplane-omop",
+    component: "Data Plane OMOP",
+    layer: "edc-core",
+  },
+  {
+    container: "health-dataspace-identityhub",
+    component: "Identity Hub",
+    layer: "identity",
+  },
+  {
+    container: "health-dataspace-issuerservice",
+    component: "Issuer Service",
+    layer: "identity",
+  },
+  {
+    container: "health-dataspace-keycloak",
+    component: "Keycloak",
+    layer: "identity",
+  },
+  {
+    container: "health-dataspace-vault",
+    component: "Vault",
+    layer: "identity",
+  },
+  {
+    container: "health-dataspace-vault-bootstrap",
+    component: "Vault Bootstrap",
+    layer: "identity",
+  },
+  {
+    container: "health-dataspace-tenant-manager",
+    component: "Tenant Manager",
+    layer: "cfm",
+  },
+  {
+    container: "health-dataspace-provision-manager",
+    component: "Provision Manager",
+    layer: "cfm",
+  },
+  {
+    container: "health-dataspace-cfm-edcv-agent",
+    component: "EDC-V Agent",
+    layer: "cfm",
+  },
+  {
+    container: "health-dataspace-cfm-keycloak-agent",
+    component: "Keycloak Agent",
+    layer: "cfm",
+  },
+  {
+    container: "health-dataspace-cfm-onboarding-agent",
+    component: "Onboarding Agent",
+    layer: "cfm",
+  },
+  {
+    container: "health-dataspace-cfm-registration-agent",
+    component: "Registration Agent",
+    layer: "cfm",
+  },
+  {
+    container: "health-dataspace-postgres",
+    component: "PostgreSQL",
+    layer: "infrastructure",
+  },
+  {
+    container: "health-dataspace-nats",
+    component: "NATS",
+    layer: "infrastructure",
+  },
+  {
+    container: "health-dataspace-neo4j",
+    component: "Neo4j",
+    layer: "infrastructure",
+  },
+  {
+    container: "health-dataspace-neo4j-proxy",
+    component: "Neo4j Proxy",
+    layer: "infrastructure",
+  },
+  {
+    container: "health-dataspace-traefik",
+    component: "Traefik",
+    layer: "infrastructure",
+  },
+  {
+    container: "health-dataspace-ui",
+    component: "UI",
+    layer: "infrastructure",
+  },
 ];
 
 // ---------------------------------------------------------------------------
@@ -119,7 +199,11 @@ function calcCpuPercent(stats: DockerStats): number {
   return 0;
 }
 
-function calcMemUsage(stats: DockerStats): { usedMB: number; limitMB: number; percent: number } {
+function calcMemUsage(stats: DockerStats): {
+  usedMB: number;
+  limitMB: number;
+  percent: number;
+} {
   const cache = stats.memory_stats.stats?.cache || 0;
   const used = stats.memory_stats.usage - cache;
   const limit = stats.memory_stats.limit;
@@ -195,14 +279,17 @@ export async function GET() {
             `/containers/${container.Id}/json`,
           );
           if (inspect.State.Health?.Status) {
-            healthStatus = inspect.State.Health.Status as ComponentInfo["status"];
+            healthStatus = inspect.State.Health
+              .Status as ComponentInfo["status"];
           }
           const started = new Date(inspect.State.StartedAt);
           const diffMs = Date.now() - started.getTime();
           const hours = Math.floor(diffMs / 3600000);
           const mins = Math.floor((diffMs % 3600000) / 60000);
           uptime = hours > 0 ? `${hours}h ${mins}m` : `${mins}m`;
-        } catch { /* ignore inspect failures */ }
+        } catch {
+          /* ignore inspect failures */
+        }
 
         // Get stats (one-shot, non-streaming)
         let cpu = 0;
@@ -213,7 +300,9 @@ export async function GET() {
           );
           cpu = Math.round(calcCpuPercent(stats) * 100) / 100;
           mem = calcMemUsage(stats);
-        } catch { /* ignore stats failures */ }
+        } catch {
+          /* ignore stats failures */
+        }
 
         components.push({ ...svc, status: healthStatus, uptime, cpu, mem });
       }),
@@ -233,16 +322,20 @@ export async function GET() {
 
   // 2) Fetch participant data from CFM
   try {
-    const tenants = await edcClient.tenant<
-      { id: string; version: number; properties: Record<string, string> }[]
-    >("/v1alpha1/tenants");
+    const tenants =
+      await edcClient.tenant<
+        { id: string; version: number; properties: Record<string, string> }[]
+      >("/v1alpha1/tenants");
 
-    let edcParticipants: { "@id": string; identity: string; state: string }[] = [];
+    let edcParticipants: { "@id": string; identity: string; state: string }[] =
+      [];
     try {
       edcParticipants = await edcClient.management<
         { "@id": string; identity: string; state: string }[]
       >("/v5alpha/participants");
-    } catch { /* auth may be unavailable */ }
+    } catch {
+      /* auth may be unavailable */
+    }
 
     for (const t of tenants) {
       let profiles: unknown[] = [];
@@ -250,7 +343,9 @@ export async function GET() {
         profiles = await edcClient.tenant<unknown[]>(
           `/v1alpha1/tenants/${t.id}/participant-profiles`,
         );
-      } catch { /* no profiles */ }
+      } catch {
+        /* no profiles */
+      }
 
       // Find matching EDC participant context
       const ctxId = (profiles as { participantContextId?: string }[])?.[0]

@@ -181,7 +181,8 @@ export default function AdminTenantsPage() {
                         </h3>
                         {t.participantProfiles.map((pp, i) => {
                           const ctxId =
-                            pp.properties?.["cfm.vpa.state"]?.participantContextId;
+                            pp.properties?.["cfm.vpa.state"]
+                              ?.participantContextId;
                           const ctx = ctxId
                             ? participants.find((p) => p["@id"] === ctxId)
                             : undefined;
@@ -227,9 +228,7 @@ export default function AdminTenantsPage() {
                                   </span>
                                 </div>
                                 <div>
-                                  <span className="text-gray-500">
-                                    DID{" "}
-                                  </span>
+                                  <span className="text-gray-500">DID </span>
                                   <span className="text-gray-300 font-mono break-all">
                                     {pp.identifier
                                       ? decodeURIComponent(pp.identifier)
@@ -245,9 +244,7 @@ export default function AdminTenantsPage() {
                                   </span>
                                 </div>
                                 <div>
-                                  <span className="text-gray-500">
-                                    Roles{" "}
-                                  </span>
+                                  <span className="text-gray-500">Roles </span>
                                   <span className="text-gray-300">
                                     {roles.length > 0 ? roles.join(", ") : "—"}
                                   </span>

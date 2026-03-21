@@ -12,8 +12,7 @@
 #
 # Port mapping:
 #   3000 — static UI (docker-compose.yml alone, local neo4j, mock data)
-#   3001 — live UI   (this override + jad stack, real EDC/Keycloak/neo4j)
-#   3003 — dev UI    (npx next dev from ui/, live cluster, hot reload)
+#   3003 — live UI   (this override + jad stack, real EDC/Keycloak/neo4j)
 #
 # Rebuild image after code changes:
 #   docker compose -f docker-compose.yml \
@@ -25,6 +24,6 @@
 services:
   graph-explorer:
     ports:
-      - "3001:3000"
+      - "3003:3000"
     environment:
-      NEXTAUTH_URL: http://localhost:3001
+      NEXTAUTH_URL: http://localhost:3003

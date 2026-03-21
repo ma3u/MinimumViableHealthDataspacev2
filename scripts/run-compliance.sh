@@ -70,9 +70,8 @@ mkdir -p "$(dirname "$SUMMARY_FILE")"
   echo "  \"overallResult\": \"$([ $OVERALL_EXIT -eq 0 ] && echo "PASSED" || echo "FAILED")\","
   echo "  \"reports\": {"
 
-  local first_report=true
+  first_report=true
   for dir in dsp-tck dcp ehds; do
-    local latest
     latest=$(ls -t "${REPORT_DIR}/${dir}/"*.json 2>/dev/null | head -1) || latest=""
     if [ -n "$latest" ]; then
       if [ "$first_report" = true ]; then first_report=false; else echo ","; fi

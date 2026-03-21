@@ -2,7 +2,7 @@
 # See https://pre-commit.com/hooks.html for more hooks
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.5.0
+    rev: v5.0.0
     hooks:
       - id: trailing-whitespace
       - id: end-of-file-fixer
@@ -13,6 +13,26 @@ repos:
         args: ["--maxkb=5000"]
       - id: check-merge-conflict
       - id: detect-private-key
+      - id: check-case-conflict
+      - id: check-symlinks
+      - id: check-executables-have-shebangs
+      - id: check-shebang-scripts-are-executable
+      - id: no-commit-to-branch
+        args: ["--branch", "main"]
+
+  # Shell script linting
+  - repo: https://github.com/shellcheck-py/shellcheck-py
+    rev: v0.11.0.1
+    hooks:
+      - id: shellcheck
+        args: ["--severity=error"]
+        exclude: ^jad/openapi/
+
+  # Dockerfile linting
+  - repo: https://github.com/hadolint/hadolint
+    rev: v2.14.0
+    hooks:
+      - id: hadolint-docker
 
   # Flexible linter/formatter suitable for Markdown, JS, TS, YAML, and JSON.
   - repo: https://github.com/pre-commit/mirrors-prettier
@@ -24,6 +44,16 @@ repos:
         additional_dependencies:
           - prettier@3.1.0
 
+  # TypeScript type-checking — catches type errors in source files before commit
+  - repo: local
+    hooks:
+      - id: tsc-ui
+        name: TypeScript (UI)
+        language: system
+        entry: bash -c 'cd ui && npx tsc --noEmit --project tsconfig.build.json'
+        files: ^ui/src/.*\.(ts|tsx)$
+        pass_filenames: false
+
   # ESLint — catches type errors and code-quality issues pre-push
   - repo: local
     hooks:
@@ -33,3 +63,14 @@ repos:
         entry: bash -c 'cd ui && npx next lint --max-warnings 55'
         files: ^ui/src/.*\.(ts|tsx)$
         pass_filenames: false
+
+  # Unit tests — ensure tests pass before commit
+  - repo: local
+    hooks:
+      - id: vitest-ui
+        name: Vitest (UI)
+        language: system
+        entry: bash -c 'cd ui && npx vitest run --bail 1'
+        files: ^ui/(src|__tests__)/.*\.(ts|tsx)$
+        pass_filenames: false
+        stages: [pre-push]

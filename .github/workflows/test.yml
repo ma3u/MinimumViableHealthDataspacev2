@@ -1,11 +1,11 @@
 # ---------------------------------------------------------------------------
 # Test Suite — Health Dataspace v2
 # ---------------------------------------------------------------------------
-# Runs unit tests and API integration tests with coverage reporting
-# for the Next.js UI and the Neo4j Query Proxy service.
+# Runs unit tests, API integration tests, lint, and E2E tests for the
+# Next.js UI and the Neo4j Query Proxy service.
 #
-# All tests use vi.mock() — NO live Neo4j, EDC-V, or Keycloak needed.
-# E2E tests (Playwright) are excluded; they require a running stack.
+# Unit/API tests use vi.mock() — NO live Neo4j, EDC-V, or Keycloak needed.
+# E2E tests (Playwright) build the Next.js app and run against it.
 #
 # Triggers:
 #   - Push to any branch
@@ -165,6 +165,11 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
+
+      - name: Build application
+        run: npm run build
+        env:
+          NEXT_PUBLIC_STATIC_EXPORT: "false"
 
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium

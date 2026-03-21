@@ -1,30 +1,30 @@
 # Test Coverage Report — Health Dataspace v2
 
-**Date:** 2026-03-11
-**Framework:** Vitest 3.x + @vitest/coverage-v8
-**Test Runner:** Node.js 22, jsdom environment
+**Date:** 2026-03-21
+**Framework:** Vitest 4.x + @vitest/coverage-v8
+**Test Runner:** Node.js 20, jsdom environment
 
 ---
 
 ## Summary
 
-| Component       | Test Files | Tests   | Stmts % | Branch % | Funcs % | Lines % |
-| --------------- | ---------- | ------- | ------- | -------- | ------- | ------- |
-| **UI**          | 35         | 247     | 71.76   | 51.15    | 67.16   | 72.10   |
-| **Neo4j Proxy** | 1          | 10      | 27.95   | 26.63    | 16.66   | 28.84   |
-| **E2E**         | 4          | 31      | —       | —        | —       | —       |
-| **Total**       | **40**     | **288** | —       | —        | —       | —       |
+| Component       | Test Files | Tests     | Stmts % | Branch % | Funcs % | Lines % |
+| --------------- | ---------- | --------- | ------- | -------- | ------- | ------- |
+| **UI**          | 78         | 1,490     | 93.78   | 81.65    | 89.57   | 94.73   |
+| **Neo4j Proxy** | 1          | 10        | 27.95   | 26.63    | 16.66   | 28.84   |
+| **E2E**         | 14         | 102       | —       | —        | —       | —       |
+| **Total**       | **93**     | **1,602** | —       | —        | —       | —       |
 
-### Baseline → Phase 8 → Phase 9 → Current (UI)
+### Coverage Progression (UI)
 
-| Metric   | Baseline (40 tests) | Phase 8 (94 tests) | Phase 9 (128 tests) | Current (247 tests) | Total Improvement |
-| -------- | ------------------- | ------------------ | ------------------- | ------------------- | ----------------- |
-| Stmts %  | 10.50               | 24.64              | 34.05               | **71.76**           | **+583%**         |
-| Branch % | 6.55                | 13.64              | 18.87               | **51.15**           | **+681%**         |
-| Funcs %  | 7.10                | 14.46              | 20.75               | **67.16**           | **+846%**         |
-| Lines %  | 10.23               | 24.28              | 33.84               | **72.10**           | **+605%**         |
-| Tests    | 40                  | 94                 | 128                 | **247**             | **+518%**         |
-| Files    | 8                   | 19                 | 27                  | **35**              | **+338%**         |
+| Metric   | Baseline (40) | Phase 8 (94) | Phase 9 (128) | Phase 12 (247) | Current (1,391) | Total Improvement |
+| -------- | ------------- | ------------ | ------------- | -------------- | --------------- | ----------------- |
+| Stmts %  | 10.50         | 24.64        | 34.05         | 71.76          | **93.78**       | **+793%**         |
+| Branch % | 6.55          | 13.64        | 18.87         | 51.15          | **81.65**       | **+1147%**        |
+| Funcs %  | 7.10          | 14.46        | 20.75         | 67.16          | **89.57**       | **+1162%**        |
+| Lines %  | 10.23         | 24.28        | 33.84         | 72.10          | **94.73**       | **+826%**         |
+| Tests    | 40            | 94           | 128           | 247            | **1,490**       | **+3625%**        |
+| Files    | 8             | 19           | 27            | 35             | **78**          | **+875%**         |
 
 ---
 
@@ -217,28 +217,32 @@ Test runs are automated via GitHub Actions (`.github/workflows/test.yml`):
 
 - **Trigger:** Every push to any branch, every PR to main
 - **Jobs:**
-  - `ui-tests` — Runs all 247 UI tests with coverage
+  - `ui-tests` — Runs all 1,490 UI tests with coverage
   - `proxy-tests` — Runs all 10 proxy tests with coverage
-  - `e2e-tests` — Runs all 31 Playwright E2E tests
-  - `lint` — ESLint check on UI code (0 errors, ≤25 warnings)
+  - `e2e-tests` — Runs 102 Playwright E2E tests (main branch + manual)
+  - `lint` — ESLint check on UI code
 - **Artifacts:** Coverage HTML reports uploaded for 30 days
 - **Summary:** Coverage tables written to GitHub job summary
+- **GitHub Pages:** Test reports published at
+  [`/test-reports/`](https://ma3u.github.io/MinimumViableHealthDataspacev2/test-reports/)
 
 ---
 
 ## Remaining Coverage Gaps
 
-| Area                   | Priority | Effort | Notes                                                  |
-| ---------------------- | -------- | ------ | ------------------------------------------------------ |
-| `graph/page.tsx`       | Low      | High   | Canvas-based ForceGraph; only ~29% reachable via jsdom |
-| `admin/audit/route.ts` | Low      | Medium | 136-line audit route                                   |
-| `middleware.ts`        | Low      | Medium | NextAuth middleware, complex to unit-test              |
-| `auth/[...nextauth]`   | Low      | Low    | 8-line NextAuth handler re-export                      |
+All source files are at or above 80% statement coverage. The remaining
+improvement areas are branch coverage:
+
+| Area                   | Stmts | Branch | Notes                                  |
+| ---------------------- | ----- | ------ | -------------------------------------- |
+| `auth/[...nextauth]`   | —     | —      | 8-line NextAuth handler re-export      |
+| Neo4j Proxy `index.ts` | 28%   | 27%    | Needs live Neo4j for integration paths |
 
 ---
 
 ## Related Reports
 
+- [Test Report (GitHub Pages)](https://ma3u.github.io/MinimumViableHealthDataspacev2/test-reports/) — live test results and coverage
 - [Test Report](test-report.md) — integration, unit/API and E2E test results
 - [Planning & Roadmap](planning-health-dataspace-v2.md) — 5-phase implementation roadmap
 - [Graph Schema](health-dataspace-graph-schema.md) — 5-layer Neo4j graph schema

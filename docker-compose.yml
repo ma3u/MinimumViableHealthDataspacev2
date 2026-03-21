@@ -76,7 +76,7 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     group_add:
-      - "0"   # root group — read-only Docker socket for component metrics
+      - "0" # root group — read-only Docker socket for component metrics
     networks:
       - default
       - health-dataspace-edcv

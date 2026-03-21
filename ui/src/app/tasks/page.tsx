@@ -296,7 +296,10 @@ function TasksContent() {
 
   const filteredTasks = tasks.filter((t) => {
     // Participant filter
-    if (selectedParticipant !== "all" && t.participantId !== selectedParticipant)
+    if (
+      selectedParticipant !== "all" &&
+      t.participantId !== selectedParticipant
+    )
       return false;
     // Type/status filter
     if (filter === "all") return true;
@@ -442,8 +445,7 @@ function TasksContent() {
                           : "text-gray-300"
                       }`}
                     >
-                      {name}{" "}
-                      <span className="text-gray-500">({pCount})</span>
+                      {name} <span className="text-gray-500">({pCount})</span>
                     </button>
                   );
                 })}
@@ -454,20 +456,20 @@ function TasksContent() {
           {/* Type/status filter tabs */}
           <div className="flex items-center gap-1">
             <Filter size={14} className="text-gray-500 mr-1" />
-          {filters.map((f) => (
-            <button
-              key={f.key}
-              onClick={() => setFilter(f.key)}
-              className={`px-3 py-1 text-xs rounded-full border transition-colors ${
-                filter === f.key
-                  ? "border-layer2 bg-layer2/20 text-layer2"
-                  : "border-gray-700 text-gray-400 hover:text-gray-200 hover:border-gray-500"
-              }`}
-            >
-              {f.label}
-              <span className="ml-1 opacity-60">{f.count}</span>
-            </button>
-          ))}
+            {filters.map((f) => (
+              <button
+                key={f.key}
+                onClick={() => setFilter(f.key)}
+                className={`px-3 py-1 text-xs rounded-full border transition-colors ${
+                  filter === f.key
+                    ? "border-layer2 bg-layer2/20 text-layer2"
+                    : "border-gray-700 text-gray-400 hover:text-gray-200 hover:border-gray-500"
+                }`}
+              >
+                {f.label}
+                <span className="ml-1 opacity-60">{f.count}</span>
+              </button>
+            ))}
           </div>
         </div>
         <button

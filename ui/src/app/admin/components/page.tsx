@@ -1,10 +1,7 @@
 "use client";
 
 import { fetchApi } from "@/lib/api";
-import {
-  COMPONENT_INFO,
-  type ComponentMeta,
-} from "@/lib/edc/component-info";
+import { COMPONENT_INFO, type ComponentMeta } from "@/lib/edc/component-info";
 import { useCallback, useEffect, useRef, useState } from "react";
 import PageIntro from "@/components/PageIntro";
 import {
@@ -208,9 +205,7 @@ function Sparkline({
   const points = data.map((v, i) => {
     const x = (i / (data.length - 1)) * width;
     const y =
-      height -
-      (Math.min(v, effectiveMax) / effectiveMax) * (height - 2) -
-      1;
+      height - (Math.min(v, effectiveMax) / effectiveMax) * (height - 2) - 1;
     return `${x},${y}`;
   });
 
@@ -235,7 +230,9 @@ function StatusBadge({ status }: { status: string }) {
   return (
     <span className="flex items-center gap-1.5">
       <span
-        className={`w-2 h-2 rounded-full ${STATUS_COLORS[status] || STATUS_COLORS.unknown}`}
+        className={`w-2 h-2 rounded-full ${
+          STATUS_COLORS[status] || STATUS_COLORS.unknown
+        }`}
       />
       <span className="text-xs capitalize">{status}</span>
     </span>
@@ -303,9 +300,7 @@ function InfoPopover({ name }: { name: string }) {
               </span>
               <span className="text-gray-500">Depends on</span>
               <span className="text-gray-300">
-                {meta.dependsOn.length > 0
-                  ? meta.dependsOn.join(", ")
-                  : "None"}
+                {meta.dependsOn.length > 0 ? meta.dependsOn.join(", ") : "None"}
               </span>
               <span className="text-gray-500">Health</span>
               <span className="text-gray-300">{meta.healthSource}</span>
@@ -508,9 +503,7 @@ function CriticalBanner({
 }) {
   if (degraded === 0) return null;
   const names = participants
-    .filter(
-      (p) => p.health === "critical" || p.health === "warning",
-    )
+    .filter((p) => p.health === "critical" || p.health === "warning")
     .map((p) => p.displayName);
 
   return (
@@ -604,8 +597,7 @@ export default function AdminComponentsPage() {
     snapshot?.components.filter((c) => c.status === "healthy").length || 0;
   const runningCount =
     snapshot?.components.filter((c) => c.status === "running").length || 0;
-  const totalCpu =
-    snapshot?.components.reduce((s, c) => s + c.cpu, 0) || 0;
+  const totalCpu = snapshot?.components.reduce((s, c) => s + c.cpu, 0) || 0;
   const totalMem =
     snapshot?.components.reduce((s, c) => s + c.mem.usedMB, 0) || 0;
 
@@ -683,9 +675,7 @@ export default function AdminComponentsPage() {
           {/* Stats summary for participant view */}
           {viewMode === "participant" && topology && (
             <>
-              <span>
-                {topology.summary.totalParticipants} participants
-              </span>
+              <span>{topology.summary.totalParticipants} participants</span>
               <span>·</span>
               <span>{topology.summary.totalInfra} infra services</span>
               {topology.summary.degradedParticipants > 0 && (
@@ -715,10 +705,7 @@ export default function AdminComponentsPage() {
             disabled={refreshing}
             className="flex items-center gap-1.5 px-3 py-1.5 text-xs border border-gray-700 rounded-lg hover:border-layer2 transition-colors disabled:opacity-50"
           >
-            <RefreshCw
-              size={12}
-              className={refreshing ? "animate-spin" : ""}
-            />
+            <RefreshCw size={12} className={refreshing ? "animate-spin" : ""} />
             Refresh
           </button>
         </div>
@@ -835,7 +822,10 @@ export default function AdminComponentsPage() {
                         </td>
                         <td className="py-2.5 px-3">
                           <span
-                            className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${ROLE_COLORS[p.role] || "bg-gray-500/20 text-gray-400"}`}
+                            className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${
+                              ROLE_COLORS[p.role] ||
+                              "bg-gray-500/20 text-gray-400"
+                            }`}
                           >
                             {p.role}
                           </span>
@@ -845,7 +835,11 @@ export default function AdminComponentsPage() {
                         </td>
                         <td className="py-2.5 px-3">
                           <span
-                            className={`text-xs font-medium ${p.state === "CREATED" ? "text-green-400" : "text-yellow-400"}`}
+                            className={`text-xs font-medium ${
+                              p.state === "CREATED"
+                                ? "text-green-400"
+                                : "text-yellow-400"
+                            }`}
                           >
                             {p.state}
                           </span>
@@ -906,9 +900,7 @@ export default function AdminComponentsPage() {
                         <ComponentRow
                           key={comp.container}
                           comp={comp}
-                          history={
-                            historyRef.current.get(comp.container) || []
-                          }
+                          history={historyRef.current.get(comp.container) || []}
                         />
                       ))}
                     </tbody>

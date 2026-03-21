@@ -280,7 +280,7 @@ echo ""
 echo "────────────────────────────────────────────────"
 echo "Tenant 5/5: Institut de Recherche Santé (Research HDAB)"
 echo "────────────────────────────────────────────────"
-create_tenant "Institut de Recherche Santé" '{"properties": {"displayName": "Institut de Recherche Santé", "role": "operator", "organization": "Institut de Recherche Santé — Research HDAB", "ehdsParticipantType": "health-data-access-body", "contactPerson": "Prof. Marie Leblanc", "email": "data@irs.fr", "phone": "+33 1 44 23 60 00", "website": "https://irs.fr", "address": "101 rue de Tolbiac", "city": "Paris", "country": "FR", "postalCode": "75013"}}' 
+create_tenant "Institut de Recherche Santé" '{"properties": {"displayName": "Institut de Recherche Santé", "role": "operator", "organization": "Institut de Recherche Santé — Research HDAB", "ehdsParticipantType": "health-data-access-body", "contactPerson": "Prof. Marie Leblanc", "email": "data@irs.fr", "phone": "+33 1 44 23 60 00", "website": "https://irs.fr", "address": "101 rue de Tolbiac", "city": "Paris", "country": "FR", "postalCode": "75013"}}'
 
 IRS_TENANT_ID="$TENANT_ID"
 

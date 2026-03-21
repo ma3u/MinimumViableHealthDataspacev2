@@ -1,0 +1,300 @@
+/**
+ * Comprehensive tests for the Graph Explorer page.
+ *
+ * Covers: heading, loading state, data rendering, sidebar legend,
+ * navigation links, API errors, empty state, layer labels, and node counts.
+ */
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import { render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+
+// ── Mocks ────────────────────────────────────────────────────────────
+const mockFetchApi = vi.fn();
+vi.mock("@/lib/api", () => ({
+  fetchApi: (...args: unknown[]) => mockFetchApi(...args),
+}));
+
+vi.mock("next/link", () => ({
+  default: ({
+    href,
+    children,
+    ...props
+  }: {
+    href: string;
+    children: React.ReactNode;
+  }) => (
+    <a href={href} {...props}>
+      {children}
+    </a>
+  ),
+}));
+
+// Mock next/dynamic so ForceGraph2D renders a simple stub
+vi.mock("next/dynamic", () => ({
+  default: () => {
+    const Stub = (props: Record<string, unknown>) => (
+      <div data-testid="force-graph">ForceGraph</div>
+    );
+    Stub.displayName = "DynamicForceGraph";
+    return Stub;
+  },
+}));
+
+import GraphPage from "@/app/graph/page";
+
+// ── Helpers ──────────────────────────────────────────────────────────
+function mockResponse(data: unknown) {
+  return Promise.resolve({ json: () => Promise.resolve(data), ok: true });
+}
+
+const sampleGraphData = {
+  nodes: [
+    {
+      id: "n1",
+      name: "DataProduct-A",
+      label: "DataProduct",
+      layer: 1,
+      color: "#2471A3",
+    },
+    {
+      id: "n2",
+      name: "Dataset-B",
+      label: "Dataset",
+      layer: 2,
+      color: "#148F77",
+    },
+    {
+      id: "n3",
+      name: "Patient-C",
+      label: "Patient",
+      layer: 3,
+      color: "#1E8449",
+    },
+    {
+      id: "n4",
+      name: "Condition-D",
+      label: "Condition",
+      layer: 4,
+      color: "#CA6F1E",
+    },
+    {
+      id: "n5",
+      name: "SNOMED-E",
+      label: "Concept",
+      layer: 5,
+      color: "#7D3C98",
+    },
+  ],
+  links: [
+    { source: "n1", target: "n2", type: "DESCRIBES" },
+    { source: "n2", target: "n3", type: "CONTAINS" },
+    { source: "n3", target: "n4", type: "HAS_CONDITION" },
+    { source: "n4", target: "n5", type: "MAPS_TO" },
+  ],
+};
+
+// ── Tests ────────────────────────────────────────────────────────────
+describe("GraphPage", () => {
+  beforeEach(() => {
+    mockFetchApi.mockReset();
+  });
+
+  // 1. Renders page heading/title
+  it("renders the Graph Explorer heading", () => {
+    mockFetchApi.mockReturnValue(new Promise(() => {}));
+    render(<GraphPage />);
+    expect(screen.getByText("Graph Explorer")).toBeInTheDocument();
+  });
+
+  it("renders the description paragraph", () => {
+    mockFetchApi.mockReturnValue(new Promise(() => {}));
+    render(<GraphPage />);
+    expect(
+      screen.getByText(/Interactive 5-layer knowledge graph/),
+    ).toBeInTheDocument();
+  });
+
+  // 2. Shows loading state
+  it("shows 'Connecting to Neo4j…' while data is loading", () => {
+    mockFetchApi.mockReturnValue(new Promise(() => {}));
+    render(<GraphPage />);
+    expect(screen.getByText(/Connecting to Neo4j/)).toBeInTheDocument();
+  });
+
+  it("does not render ForceGraph while loading", () => {
+    mockFetchApi.mockReturnValue(new Promise(() => {}));
+    render(<GraphPage />);
+    expect(screen.queryByTestId("force-graph")).not.toBeInTheDocument();
+  });
+
+  // 3. Loads and renders graph data
+  it("renders ForceGraph component after data loads", async () => {
+    mockFetchApi.mockReturnValue(mockResponse(sampleGraphData));
+    render(<GraphPage />);
+    await waitFor(() => {
+      expect(screen.getByTestId("force-graph")).toBeInTheDocument();
+    });
+  });
+
+  it("shows node and edge counts after data loads", async () => {
+    mockFetchApi.mockReturnValue(mockResponse(sampleGraphData));
+    render(<GraphPage />);
+    await waitFor(() => {
+      expect(screen.getByText(/5 nodes/)).toBeInTheDocument();
+      expect(screen.getByText(/4 edges/)).toBeInTheDocument();
+    });
+  });
+
+  it("calls fetchApi with /api/graph", () => {
+    mockFetchApi.mockReturnValue(new Promise(() => {}));
+    render(<GraphPage />);
+    expect(mockFetchApi).toHaveBeenCalledWith("/api/graph");
+  });
+
+  // 4. Shows sidebar with layer legend
+  it("renders the Layers heading in the sidebar", () => {
+    mockFetchApi.mockReturnValue(new Promise(() => {}));
+    render(<GraphPage />);
+    expect(screen.getByText("Layers")).toBeInTheDocument();
+  });
+
+  // 5. Shows navigation links in sidebar
+  it("renders Dataset Catalog link pointing to /catalog", () => {
+    mockFetchApi.mockReturnValue(new Promise(() => {}));
+    render(<GraphPage />);
+    const link = screen.getByText("Dataset Catalog");
+    expect(link).toBeInTheDocument();
+    expect(link.closest("a")).toHaveAttribute("href", "/catalog");
+  });
+
+  it("renders Discover FHIR Assets link pointing to /data/discover", () => {
+    mockFetchApi.mockReturnValue(new Promise(() => {}));
+    render(<GraphPage />);
+    const link = screen.getByText("Discover FHIR Assets");
+    expect(link).toBeInTheDocument();
+    expect(link.closest("a")).toHaveAttribute("href", "/data/discover");
+  });
+
+  it("renders Patient Journey link pointing to /patient", () => {
+    mockFetchApi.mockReturnValue(new Promise(() => {}));
+    render(<GraphPage />);
+    const link = screen.getByText("Patient Journey");
+    expect(link).toBeInTheDocument();
+    expect(link.closest("a")).toHaveAttribute("href", "/patient");
+  });
+
+  // 6. Handles API errors
+  it("handles fetch rejection gracefully and still renders ForceGraph", async () => {
+    mockFetchApi.mockReturnValue(Promise.reject(new Error("Network error")));
+    render(<GraphPage />);
+    await waitFor(() => {
+      expect(screen.getByTestId("force-graph")).toBeInTheDocument();
+    });
+  });
+
+  it("shows 0 nodes · 0 edges after a fetch error", async () => {
+    mockFetchApi.mockReturnValue(Promise.reject(new Error("500")));
+    render(<GraphPage />);
+    await waitFor(() => {
+      expect(screen.getByText(/0 nodes/)).toBeInTheDocument();
+      expect(screen.getByText(/0 edges/)).toBeInTheDocument();
+    });
+  });
+
+  // 7. Shows empty state when no nodes
+  it("shows 0 nodes · 0 edges when API returns empty data", async () => {
+    mockFetchApi.mockReturnValue(mockResponse({ nodes: [], links: [] }));
+    render(<GraphPage />);
+    await waitFor(() => {
+      expect(screen.getByText(/0 nodes/)).toBeInTheDocument();
+      expect(screen.getByText(/0 edges/)).toBeInTheDocument();
+    });
+  });
+
+  it("shows hint text when no node is selected", async () => {
+    mockFetchApi.mockReturnValue(mockResponse(sampleGraphData));
+    render(<GraphPage />);
+    await waitFor(() => {
+      expect(
+        screen.getByText(/Click a node to see details/),
+      ).toBeInTheDocument();
+    });
+  });
+
+  // 8. Layer filter/legend items
+  it("displays L1 Marketplace layer label", () => {
+    mockFetchApi.mockReturnValue(new Promise(() => {}));
+    render(<GraphPage />);
+    expect(screen.getByText("L1 Marketplace")).toBeInTheDocument();
+  });
+
+  it("displays L2 HealthDCAT-AP layer label", () => {
+    mockFetchApi.mockReturnValue(new Promise(() => {}));
+    render(<GraphPage />);
+    expect(screen.getByText("L2 HealthDCAT-AP")).toBeInTheDocument();
+  });
+
+  it("displays L3 FHIR R4 layer label", () => {
+    mockFetchApi.mockReturnValue(new Promise(() => {}));
+    render(<GraphPage />);
+    expect(screen.getByText("L3 FHIR R4")).toBeInTheDocument();
+  });
+
+  it("displays L4 OMOP CDM layer label", () => {
+    mockFetchApi.mockReturnValue(new Promise(() => {}));
+    render(<GraphPage />);
+    expect(screen.getByText("L4 OMOP CDM")).toBeInTheDocument();
+  });
+
+  it("displays L5 Ontology layer label", () => {
+    mockFetchApi.mockReturnValue(new Promise(() => {}));
+    render(<GraphPage />);
+    expect(screen.getByText("L5 Ontology")).toBeInTheDocument();
+  });
+
+  it("renders all five layer labels together", () => {
+    mockFetchApi.mockReturnValue(new Promise(() => {}));
+    render(<GraphPage />);
+    const labels = [
+      "L1 Marketplace",
+      "L2 HealthDCAT-AP",
+      "L3 FHIR R4",
+      "L4 OMOP CDM",
+      "L5 Ontology",
+    ];
+    for (const label of labels) {
+      expect(screen.getByText(label)).toBeInTheDocument();
+    }
+  });
+
+  // Loading disappears after data arrives
+  it("removes loading indicator after data loads", async () => {
+    mockFetchApi.mockReturnValue(mockResponse(sampleGraphData));
+    render(<GraphPage />);
+    await waitFor(() => {
+      expect(screen.queryByText(/Connecting to Neo4j/)).not.toBeInTheDocument();
+    });
+  });
+
+  // Sidebar renders with single-node data
+  it("updates counts with single node response", async () => {
+    const oneNodeData = {
+      nodes: [
+        {
+          id: "x1",
+          name: "Only Node",
+          label: "Thing",
+          layer: 1,
+          color: "#2471A3",
+        },
+      ],
+      links: [],
+    };
+    mockFetchApi.mockReturnValue(mockResponse(oneNodeData));
+    render(<GraphPage />);
+    await waitFor(() => {
+      expect(screen.getByText(/1 nodes/)).toBeInTheDocument();
+      expect(screen.getByText(/0 edges/)).toBeInTheDocument();
+    });
+  });
+});

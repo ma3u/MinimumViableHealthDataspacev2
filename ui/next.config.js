@@ -1,5 +1,8 @@
 /** @type {import('next').NextConfig} */
-const isStaticExport = !!process.env.GITHUB_ACTIONS;
+const isStaticExport =
+  process.env.NEXT_PUBLIC_STATIC_EXPORT === "true" ||
+  (!!process.env.GITHUB_ACTIONS &&
+    process.env.NEXT_PUBLIC_STATIC_EXPORT !== "false");
 const isDocker = !!process.env.DOCKER_BUILD;
 
 const nextConfig = {
