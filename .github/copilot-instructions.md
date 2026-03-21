@@ -88,7 +88,6 @@ Configured in `.pre-commit-config.yaml`. Install with
 | check-symlinks                       | Verify symlinks point to valid targets        |
 | check-executables-have-shebangs      | Ensure executables have shebangs              |
 | check-shebang-scripts-are-executable | Ensure shebanged scripts are +x               |
-| no-commit-to-branch                  | Block direct commits to `main`                |
 | shellcheck                           | Lint shell scripts (error severity)           |
 | hadolint-docker                      | Lint Dockerfiles                              |
 | prettier                             | Format MD, YAML, JSON, TS, TSX                |
@@ -103,8 +102,6 @@ Configured in `.pre-commit-config.yaml`. Install with
 
 **Key notes:**
 
-- `no-commit-to-branch` blocks direct commits to `main` — use feature
-  branches and PRs.
 - `tsc-ui` uses `tsconfig.build.json` (excludes test files) to avoid
   false positives from Vitest type patterns.
 - To skip a hook temporarily: `SKIP=hook-id git commit -m "msg"`
