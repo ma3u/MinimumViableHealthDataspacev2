@@ -158,25 +158,26 @@
 
 ## Unit & API Tests (Vitest)
 
-| Metric       | Value                         |
-| ------------ | ----------------------------- |
-| Tests passed | 275                           |
-| Tests failed | 15                            |
-| Summary      | 15 failed \| 275 passed (290) |
+| Metric       | Value                        |
+| ------------ | ---------------------------- |
+| Test files   | 37                           |
+| Tests passed | 289                          |
+| Tests failed | 0                            |
+| Summary      | 0 failed \| 289 passed (289) |
 
 ### Coverage (v8)
 
-```
-
-```
+See [Test Coverage Report](test-coverage-report.md) for detailed per-file coverage.
 
 ## E2E Tests (Playwright)
 
-| Metric       | Value     |
-| ------------ | --------- |
-| Spec files   | 6         |
-| Tests passed | 70 passed |
-| Tests failed | 0 failed  |
+| Metric       | Value      |
+| ------------ | ---------- |
+| Spec files   | 13         |
+| Tests passed | 120 passed |
+| Tests failed | 0 failed   |
+
+Spec files include 6 core specs plus 7 user-journey specs in `__tests__/e2e/journeys/`.
 
 **HTML Report with Screenshots:** After running E2E tests, open the interactive report:
 
@@ -234,15 +235,30 @@ The HTML report is also uploaded as a GitHub Actions artifact on CI runs.
 
 ### E2E Tests
 
-| File                                   |
-| -------------------------------------- |
-| `__tests__/e2e/auth.spec.ts`           |
-| `__tests__/e2e/browser-errors.spec.ts` |
-| `__tests__/e2e/docs.spec.ts`           |
-| `__tests__/e2e/navigation.spec.ts`     |
-| `__tests__/e2e/pages.spec.ts`          |
-| `__tests__/e2e/smoke.spec.ts`          |
+| File                                                       |
+| ---------------------------------------------------------- |
+| `__tests__/e2e/auth.spec.ts`                               |
+| `__tests__/e2e/browser-errors.spec.ts`                     |
+| `__tests__/e2e/docs.spec.ts`                               |
+| `__tests__/e2e/navigation.spec.ts`                         |
+| `__tests__/e2e/pages.spec.ts`                              |
+| `__tests__/e2e/smoke.spec.ts`                              |
+| `__tests__/e2e/journeys/01-identity-onboarding.spec.ts`    |
+| `__tests__/e2e/journeys/02-dataset-metadata.spec.ts`       |
+| `__tests__/e2e/journeys/03-policy-catalog.spec.ts`         |
+| `__tests__/e2e/journeys/04-discovery-search.spec.ts`       |
+| `__tests__/e2e/journeys/05-contract-negotiation.spec.ts`   |
+| `__tests__/e2e/journeys/06-data-transfer.spec.ts`          |
+| `__tests__/e2e/journeys/07-cross-border-federated.spec.ts` |
 
 ---
 
-_Generated: 2026-03-14 15:42:50 UTC_
+## Related Reports
+
+- [Test Coverage Report](test-coverage-report.md) — per-file statement, branch, function and line coverage
+- [Planning & Roadmap](planning-health-dataspace-v2.md) — 5-phase implementation roadmap
+- [Graph Schema](health-dataspace-graph-schema.md) — 5-layer Neo4j graph schema
+
+---
+
+_Updated: 2025-07-13 — 37 test files, 289 unit/API tests, 120 E2E tests, 0 failures_

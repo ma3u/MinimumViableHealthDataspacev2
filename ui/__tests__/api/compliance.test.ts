@@ -9,6 +9,13 @@ vi.mock("@/lib/neo4j", () => ({
   runQuery: vi.fn(),
 }));
 
+// Mock edcClient — compliance route uses it as consumer fallback
+vi.mock("@/lib/edc", () => ({
+  edcClient: {
+    management: vi.fn().mockRejectedValue(new Error("EDC offline")),
+  },
+}));
+
 import { runQuery } from "@/lib/neo4j";
 import { GET } from "@/app/api/compliance/route";
 
@@ -40,7 +47,10 @@ describe("GET /api/compliance", () => {
     });
 
     it("should handle empty consumers and datasets", async () => {
-      mockRunQuery.mockResolvedValueOnce([]).mockResolvedValueOnce([]);
+      mockRunQuery
+        .mockResolvedValueOnce([]) // consumers query
+        .mockResolvedValueOnce([]) // datasets query
+        .mockResolvedValueOnce([]); // dataset fallback (HealthDataset nodes)
 
       const req = new Request("http://localhost:3000/api/compliance");
       const response = await GET(req);

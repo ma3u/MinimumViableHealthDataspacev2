@@ -14,6 +14,18 @@ vi.mock("@/lib/edc", () => ({
   EDC_CONTEXT: "https://w3id.org/edc/connector/management/v2",
 }));
 
+// Mock fs to prevent fallback to bundled participants.json
+vi.mock("fs", () => ({
+  default: {
+    promises: {
+      readFile: vi.fn().mockRejectedValue(new Error("mock fs disabled")),
+    },
+  },
+  promises: {
+    readFile: vi.fn().mockRejectedValue(new Error("mock fs disabled")),
+  },
+}));
+
 import { edcClient } from "@/lib/edc";
 import { GET, POST } from "@/app/api/participants/route";
 
@@ -28,8 +40,8 @@ describe("/api/participants", () => {
   describe("GET", () => {
     it("should list all participant contexts", async () => {
       const mockParticipants = [
-        { "@id": "ctx-1", identity: "did:web:spe-1" },
-        { "@id": "ctx-2", identity: "did:web:pharmaco" },
+        { "@id": "ctx-1", identity: "did:web:spe-1", state: "ACTIVATED" },
+        { "@id": "ctx-2", identity: "did:web:pharmaco", state: "ACTIVATED" },
       ];
       mockManagement.mockResolvedValue(mockParticipants);
 

@@ -52,16 +52,15 @@ describe("lib/auth", () => {
       expect(authOptions.callbacks?.session).toBeDefined();
     });
 
-    it("should NOT have issuer set (Docker hostname mismatch fix)", () => {
+    it("should have issuer set to Keycloak public URL", () => {
       const provider = authOptions.providers[0] as Record<string, unknown>;
-      // issuer must be omitted to prevent NextAuth from validating the
-      // Docker-internal iss claim (keycloak:8080) against the host URL
-      expect(provider.issuer).toBeUndefined();
+      expect(provider.issuer).toBeDefined();
+      expect(typeof provider.issuer).toBe("string");
     });
 
-    it("should have idToken disabled (skip iss claim validation)", () => {
+    it("should have idToken enabled", () => {
       const provider = authOptions.providers[0] as Record<string, unknown>;
-      expect(provider.idToken).toBe(false);
+      expect(provider.idToken).toBe(true);
     });
 
     it("should have explicit OIDC endpoints (no auto-discovery)", () => {

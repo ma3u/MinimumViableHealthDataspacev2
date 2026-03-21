@@ -13,6 +13,18 @@ vi.mock("@/lib/edc", () => ({
   EDC_CONTEXT: "https://w3id.org/edc/connector/management/v2",
 }));
 
+// Mock fs to prevent fallback to bundled admin_policies.json
+vi.mock("fs", () => ({
+  default: {
+    promises: {
+      readFile: vi.fn().mockRejectedValue(new Error("mock fs disabled")),
+    },
+  },
+  promises: {
+    readFile: vi.fn().mockRejectedValue(new Error("mock fs disabled")),
+  },
+}));
+
 import { edcClient } from "@/lib/edc";
 import { GET, POST } from "@/app/api/admin/policies/route";
 

@@ -53,10 +53,11 @@ describe("Navigation Component", () => {
   it("should render all main navigation links", () => {
     render(<Navigation />);
     // All links are now inside dropdown groups
+    expect(screen.getByText("Get Started")).toBeInTheDocument();
     expect(screen.getByText("Explore")).toBeInTheDocument();
     expect(screen.getByText("Governance")).toBeInTheDocument();
     expect(screen.getByText("Exchange")).toBeInTheDocument();
-    expect(screen.getByText("Portal")).toBeInTheDocument();
+    expect(screen.getByText("Manage")).toBeInTheDocument();
     expect(screen.getByText("Docs")).toBeInTheDocument();
   });
 
@@ -64,7 +65,7 @@ describe("Navigation Component", () => {
     render(<Navigation />);
     expect(screen.getByText("Explore")).toBeInTheDocument();
     expect(screen.getByText("Exchange")).toBeInTheDocument();
-    expect(screen.getByText("Portal")).toBeInTheDocument();
+    expect(screen.getByText("Manage")).toBeInTheDocument();
   });
 
   it("should render the UserMenu", () => {

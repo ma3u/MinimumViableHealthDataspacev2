@@ -276,7 +276,7 @@ describe("CatalogPage", () => {
       expect(screen.getByText("HealthDCAT-AP Metadata")).toBeInTheDocument();
     });
     // Detail row values
-    expect(screen.getByText("View specification")).toBeInTheDocument();
+    expect(screen.getByText("HealthDCAT-AP Spec")).toBeInTheDocument();
   });
 
   it("renders legal basis label", async () => {

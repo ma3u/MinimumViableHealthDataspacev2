@@ -13,6 +13,18 @@ vi.mock("@/lib/edc", () => ({
   EDC_CONTEXT: "https://w3id.org/edc/connector/management/v2",
 }));
 
+// Mock fs to prevent loadMockAssets from reading bundled JSON
+vi.mock("fs", () => ({
+  default: {
+    promises: {
+      readFile: vi.fn().mockRejectedValue(new Error("mock fs disabled")),
+    },
+  },
+  promises: {
+    readFile: vi.fn().mockRejectedValue(new Error("mock fs disabled")),
+  },
+}));
+
 import { edcClient } from "@/lib/edc";
 import { GET, POST } from "@/app/api/assets/route";
 
@@ -25,7 +37,12 @@ describe("/api/assets", () => {
 
   describe("GET", () => {
     it("should list assets for a specific participant", async () => {
-      const mockAssets = [{ "@id": "asset-1", name: "FHIR Cohort" }];
+      const mockAssets = [
+        {
+          "@id": "asset-1",
+          properties: { name: "FHIR Cohort" },
+        },
+      ];
       mockManagement.mockResolvedValue(mockAssets);
 
       const req = new NextRequest(
@@ -35,7 +52,10 @@ describe("/api/assets", () => {
       const data = await response.json();
 
       expect(response.status).toBe(200);
-      expect(data).toEqual(mockAssets);
+      expect(data).toHaveLength(1);
+      expect(data[0]).toEqual(
+        expect.objectContaining({ "@id": "asset-1", name: "FHIR Cohort" }),
+      );
       expect(mockManagement).toHaveBeenCalledWith(
         "/v5alpha/participants/spe-1/assets/request",
         "POST",
@@ -57,13 +77,16 @@ describe("/api/assets", () => {
       expect(data[0].participantId).toBe("ctx-1");
     });
 
-    it("should return 502 when EDC API fails", async () => {
+    it("should return 200 with empty array when EDC fails (graceful degradation)", async () => {
       mockManagement.mockRejectedValue(new Error("Connection refused"));
 
       const req = new NextRequest("http://localhost:3000/api/assets");
       const response = await GET(req);
 
-      expect(response.status).toBe(502);
+      // Route gracefully degrades — returns mock data (empty because fs is mocked)
+      expect(response.status).toBe(200);
+      const data = await response.json();
+      expect(Array.isArray(data)).toBe(true);
     });
   });
 

@@ -25,6 +25,11 @@ vi.mock("next/link", () => ({
   ),
 }));
 
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ replace: vi.fn(), push: vi.fn() }),
+  useSearchParams: () => new URLSearchParams(),
+}));
+
 import AdminDashboard from "@/app/admin/page";
 import AuditPage from "@/app/admin/audit/page";
 import PoliciesPage from "@/app/admin/policies/page";
@@ -180,19 +185,10 @@ describe("OnboardingStatusPage", () => {
     mockFetchApi.mockReset();
   });
 
-  it("renders heading", async () => {
-    mockFetchApi.mockReturnValue(mockResponse({ participants: [] }));
+  it("renders without crashing (redirects to /onboarding)", () => {
     render(<OnboardingStatusPage />);
-    await waitFor(() => {
-      expect(screen.getByText("Onboarding Status")).toBeInTheDocument();
-    });
-  });
-
-  it("shows loading state", () => {
-    mockFetchApi.mockReturnValue(new Promise(() => {}));
-    render(<OnboardingStatusPage />);
-    // Suspense or inner component shows loading text
-    expect(screen.getByText(/Loading/)).toBeInTheDocument();
+    // Page now just renders a Redirector inside Suspense — no visible content
+    expect(document.body).toBeInTheDocument();
   });
 });
 
@@ -212,8 +208,8 @@ describe("SettingsPage", () => {
     },
     participantProfiles: [
       {
-        dataspaceProfileId: "dp-1",
-        participantContextId: "ctx-abcdef123456",
+        id: "dp-1",
+        identifier: "did:web:spe1:participant",
         tenantId: "tenant-abc-123",
       },
     ],
@@ -271,10 +267,13 @@ describe("SettingsPage", () => {
     await waitFor(() => {
       expect(screen.getByText("SPE-1 Hospital")).toBeInTheDocument();
     });
-    expect(screen.getByText("University Medical Center")).toBeInTheDocument();
+    // Organization is in an editable form input
+    expect(
+      screen.getByDisplayValue("University Medical Center"),
+    ).toBeInTheDocument();
     expect(screen.getByText("data-holder")).toBeInTheDocument();
     expect(screen.getByText("tenant-abc-123")).toBeInTheDocument();
-    expect(screen.getByText("Profile")).toBeInTheDocument();
+    expect(screen.getByText("Identity")).toBeInTheDocument();
   });
 
   it("renders dataspace profiles section", async () => {
@@ -283,8 +282,8 @@ describe("SettingsPage", () => {
     await waitFor(() => {
       expect(screen.getByText("Dataspace Profiles")).toBeInTheDocument();
     });
-    expect(screen.getByText("dp-1")).toBeInTheDocument();
-    expect(screen.getByText(/ctx-abcdef12/)).toBeInTheDocument();
+    // Profile ID is rendered in the dataspace profiles section
+    expect(screen.getByText(/dp-1/)).toBeInTheDocument();
   });
 
   it("shows no dataspace profiles message when empty", async () => {

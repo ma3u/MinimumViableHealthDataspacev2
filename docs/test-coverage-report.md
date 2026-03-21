@@ -234,3 +234,11 @@ Test runs are automated via GitHub Actions (`.github/workflows/test.yml`):
 | `admin/audit/route.ts` | Low      | Medium | 136-line audit route                                   |
 | `middleware.ts`        | Low      | Medium | NextAuth middleware, complex to unit-test              |
 | `auth/[...nextauth]`   | Low      | Low    | 8-line NextAuth handler re-export                      |
+
+---
+
+## Related Reports
+
+- [Test Report](test-report.md) — integration, unit/API and E2E test results
+- [Planning & Roadmap](planning-health-dataspace-v2.md) — 5-phase implementation roadmap
+- [Graph Schema](health-dataspace-graph-schema.md) — 5-layer Neo4j graph schema

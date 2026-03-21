@@ -12,6 +12,18 @@ vi.mock("@/lib/edc", () => ({
   EDC_CONTEXT: "https://w3id.org/edc/connector/management/v2",
 }));
 
+// Mock fs to prevent loadMockTransfers from reading bundled JSON
+vi.mock("fs", () => ({
+  default: {
+    promises: {
+      readFile: vi.fn().mockRejectedValue(new Error("mock fs disabled")),
+    },
+  },
+  promises: {
+    readFile: vi.fn().mockRejectedValue(new Error("mock fs disabled")),
+  },
+}));
+
 import { edcClient } from "@/lib/edc";
 import { GET, POST } from "@/app/api/transfers/route";
 
@@ -54,7 +66,7 @@ describe("/api/transfers", () => {
       );
     });
 
-    it("should return 502 when EDC API fails", async () => {
+    it("should return 200 with empty array when EDC fails (graceful degradation)", async () => {
       mockManagement.mockRejectedValue(new Error("Timeout"));
 
       const req = new NextRequest(
@@ -62,7 +74,10 @@ describe("/api/transfers", () => {
       );
       const response = await GET(req);
 
-      expect(response.status).toBe(502);
+      // Route gracefully degrades — returns mock data (empty because fs is mocked)
+      expect(response.status).toBe(200);
+      const data = await response.json();
+      expect(Array.isArray(data)).toBe(true);
     });
   });
 
@@ -105,7 +120,7 @@ describe("/api/transfers", () => {
           "@type": "TransferRequest",
           contractId: "contract-123",
           counterPartyAddress: "http://counter.party:8081/api/dsp",
-          protocol: "dataspace-protocol-http",
+          protocol: "dataspace-protocol-http:2025-1",
           transferType: "HttpData-PULL",
           dataDestination: expect.objectContaining({
             "@type": "DataAddress",
@@ -152,7 +167,7 @@ describe("/api/transfers", () => {
 
       expect(response.status).toBe(502);
       const data = await response.json();
-      expect(data.error).toContain("Failed to initiate");
+      expect(data.error).toBe("API error");
     });
   });
 });

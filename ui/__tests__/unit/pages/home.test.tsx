@@ -44,8 +44,7 @@ describe("Home Page", () => {
 
   it("renders action section cards", () => {
     render(<Home />);
-    expect(screen.getByText("Governance")).toBeInTheDocument();
-    expect(screen.getByText("Data Exchange")).toBeInTheDocument();
+    expect(screen.getByText("Governance & Compliance")).toBeInTheDocument();
     expect(screen.getByText("Portal Admin")).toBeInTheDocument();
     expect(screen.getByText("Documentation")).toBeInTheDocument();
   });
@@ -68,14 +67,9 @@ describe("Home Page", () => {
 
   it("renders correct links for action cards", () => {
     render(<Home />);
-    expect(screen.getByText("Governance").closest("a")).toHaveAttribute(
-      "href",
-      "/compliance",
-    );
-    expect(screen.getByText("Data Exchange").closest("a")).toHaveAttribute(
-      "href",
-      "/data/share",
-    );
+    expect(
+      screen.getByText("Governance & Compliance").closest("a"),
+    ).toHaveAttribute("href", "/compliance");
     expect(screen.getByText("Documentation").closest("a")).toHaveAttribute(
       "href",
       "/docs",
@@ -85,6 +79,6 @@ describe("Home Page", () => {
   it("renders section headings", () => {
     render(<Home />);
     expect(screen.getByText("Explore")).toBeInTheDocument();
-    expect(screen.getByText("Govern · Exchange · Manage")).toBeInTheDocument();
+    expect(screen.getByText("Govern · Manage · Docs")).toBeInTheDocument();
   });
 });

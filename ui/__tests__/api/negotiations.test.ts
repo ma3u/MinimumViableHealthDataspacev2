@@ -12,6 +12,18 @@ vi.mock("@/lib/edc", () => ({
   EDC_CONTEXT: "https://w3id.org/edc/connector/management/v2",
 }));
 
+// Mock fs to prevent loadMockNegotiations from reading bundled JSON
+vi.mock("fs", () => ({
+  default: {
+    promises: {
+      readFile: vi.fn().mockRejectedValue(new Error("mock fs disabled")),
+    },
+  },
+  promises: {
+    readFile: vi.fn().mockRejectedValue(new Error("mock fs disabled")),
+  },
+}));
+
 import { edcClient } from "@/lib/edc";
 import { GET, POST } from "@/app/api/negotiations/route";
 
@@ -54,7 +66,7 @@ describe("/api/negotiations", () => {
       );
     });
 
-    it("should return 502 when EDC management API fails", async () => {
+    it("should return 200 with empty array when EDC fails (graceful degradation)", async () => {
       mockManagement.mockRejectedValue(new Error("Connection refused"));
 
       const req = new NextRequest(
@@ -62,9 +74,10 @@ describe("/api/negotiations", () => {
       );
       const response = await GET(req);
 
-      expect(response.status).toBe(502);
+      // Route gracefully degrades — returns mock data (empty because fs is mocked)
+      expect(response.status).toBe(200);
       const data = await response.json();
-      expect(data.error).toContain("Failed to list negotiations");
+      expect(Array.isArray(data)).toBe(true);
     });
   });
 
@@ -105,8 +118,8 @@ describe("/api/negotiations", () => {
         "POST",
         expect.objectContaining({
           "@type": "ContractRequest",
-          counterPartyAddress: "http://counter.party:8081/api/dsp",
-          protocol: "dataspace-protocol-http",
+          counterPartyAddress: "http://counter.party:8081/api/dsp/spe-2/2025-1",
+          protocol: "dataspace-protocol-http:2025-1",
         }),
       );
     });
@@ -120,6 +133,7 @@ describe("/api/negotiations", () => {
           participantId: "spe-1",
           counterPartyAddress: "http://counter.party:8081/api/dsp",
           assetId: "asset-1",
+          offerId: "offer-1",
         }),
       });
       const response = await POST(req);

@@ -10,6 +10,18 @@ vi.mock("@/lib/neo4j", () => ({
   runQuery: vi.fn(),
 }));
 
+// Mock fs to prevent loadMockCatalog from reading bundled JSON
+vi.mock("fs", () => ({
+  default: {
+    promises: {
+      readFile: vi.fn().mockRejectedValue(new Error("mock fs disabled")),
+    },
+  },
+  promises: {
+    readFile: vi.fn().mockRejectedValue(new Error("mock fs disabled")),
+  },
+}));
+
 import { runQuery } from "@/lib/neo4j";
 import { GET } from "@/app/api/catalog/route";
 
