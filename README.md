@@ -340,7 +340,8 @@ cd MinimumViableHealthDataspacev2
 ```
 
 This takes approximately 5–10 minutes on first run (image pulls). Subsequent runs are
-faster. When complete, all services are healthy and the dataspace is seeded with:
+faster. When complete, all 20 services are healthy, the live UI is running on
+<http://localhost:3003>, and the dataspace is seeded with:
 
 - **5 participants** — AlphaKlinik Berlin, Limburg Medical Centre, PharmaCo Research AG,
   MedReg DE, Institut de Recherche Santé
@@ -368,6 +369,9 @@ Open <http://localhost:3000>. Log in with `edcadmin` / `edcadmin` (admin),
 
 **Option B — Live Docker container** (production build connected to JAD cluster):
 
+The bootstrap script (`./scripts/bootstrap-jad.sh`) automatically builds and starts
+the live UI on port 3003. To rebuild manually after code changes:
+
 ```bash
 docker compose -f docker-compose.yml \
                -f docker-compose.jad.yml \
@@ -383,7 +387,7 @@ connected to the live Neo4j, Keycloak, and EDC-V services in the cluster.
 | 3000 | Static | `docker-compose.yml` only                      | Mock/static data, no JAD    |
 | 3003 | Live   | `docker-compose.yml` + `jad` + `live` overlays | Full JAD cluster, live data |
 
-> **Rebuild after code changes:** > `docker compose -f docker-compose.yml -f docker-compose.jad.yml -f docker-compose.live.yml up -d --build graph-explorer`
+> **Rebuild after UI code changes:** > `docker compose -f docker-compose.yml -f docker-compose.jad.yml -f docker-compose.live.yml up -d --build graph-explorer`
 
 ### Run Seeding Separately
 
@@ -402,6 +406,28 @@ If the stack is already running, you can re-seed without restarting:
 
 Seed steps: (1) health tenants, (2) EHDS credentials, (3) ODRL policies,
 (4) data assets, (5) contract negotiations, (6) federated catalog, (7) data transfers.
+
+### Bootstrap Phases
+
+The bootstrap script (`./scripts/bootstrap-jad.sh`) orchestrates startup in the
+correct dependency order with health checks at each phase:
+
+| Phase | Services                                                                    | Health Check                           |
+| ----- | --------------------------------------------------------------------------- | -------------------------------------- |
+| 1     | PostgreSQL, Vault, Keycloak, NATS                                           | HTTP readiness / health endpoints      |
+| 2     | vault-bootstrap (sidecar)                                                   | Log polling for success message        |
+| 3     | Traefik reverse proxy                                                       | —                                      |
+| 4     | Control Plane, Data Plane FHIR, Data Plane OMOP, IdentityHub, IssuerService | Management API readiness (accepts 401) |
+| 4b    | Neo4j Query Proxy                                                           | `/health` endpoint                     |
+| 5     | Tenant Manager, Provision Manager, 4× CFM agents                            | —                                      |
+| 6     | Neo4j                                                                       | —                                      |
+| 6b    | Graph Explorer Live UI (port 3003)                                          | Docker build + start                   |
+| 7     | JAD seed (jad-seed container)                                               | Exit code                              |
+| 8     | IssuerService identity fixup (SQL + restart)                                | DID document verification              |
+| 9     | Dataspace seeding (seed-all.sh: 7 phases)                                   | Exit code                              |
+
+The script is **idempotent** — safe to re-run on an existing stack. It performs
+`docker compose down --remove-orphans` at the start to clean up stale containers.
 
 ### Verify Deployment (E2E Tests)
 
