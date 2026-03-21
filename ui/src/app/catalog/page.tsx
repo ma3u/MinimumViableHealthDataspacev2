@@ -10,6 +10,7 @@ import {
   Database,
   Network,
   Loader2,
+  Edit3,
 } from "lucide-react";
 import PageIntro from "@/components/PageIntro";
 
@@ -221,16 +222,36 @@ function CatalogContent() {
                         <Network size={11} />
                         View in Graph
                       </a>
-                      {d.conformsTo && (
+                      <a
+                        href="https://ehds.healthdataportal.eu/editor2/"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 text-xs text-green-400 hover:underline"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <Edit3 size={11} />
+                        Open in EHDS DCAT-AP Editor
+                      </a>
+                      <a
+                        href="https://healthdataeu.pages.code.europa.eu/healthdcat-ap/releases/release-6/index.html"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 text-xs text-gray-400 hover:underline"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <ExternalLink size={11} />
+                        HealthDCAT-AP Spec
+                      </a>
+                      {d.conformsTo?.includes("fhir") && (
                         <a
-                          href={d.conformsTo}
+                          href="https://hl7.org/fhir/R4/"
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1 text-xs text-gray-400 hover:underline"
+                          className="inline-flex items-center gap-1 text-xs text-orange-400 hover:underline"
                           onClick={(e) => e.stopPropagation()}
                         >
                           <ExternalLink size={11} />
-                          View specification
+                          FHIR R4 Spec
                         </a>
                       )}
                     </div>

@@ -80,6 +80,8 @@ function GraphContent() {
   const [neighbours, setNeighbours] = useState<Neighbour[]>([]);
   const [loading, setLoading] = useState(true);
   const containerRef = useRef<HTMLDivElement>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const fgRef = useRef<any>(null);
   const [dims, setDims] = useState({ width: 800, height: 600 });
   const searchParams = useSearchParams();
   const highlightParam = searchParams.get("highlight");
@@ -94,14 +96,23 @@ function GraphContent() {
       .catch(() => setLoading(false));
   }, []);
 
-  // Auto-select node matching ?highlight= query param
+  // Auto-select node matching ?highlight= query param and center on it
   useEffect(() => {
     if (!highlightParam || data.nodes.length === 0) return;
     const q = highlightParam.toLowerCase();
     const match = data.nodes.find(
       (n) => n.id.toLowerCase().includes(q) || n.name.toLowerCase().includes(q),
     );
-    if (match) setSelectedNode(match);
+    if (match) {
+      setSelectedNode(match);
+      // Wait for force-graph to settle, then center + zoom on the node
+      setTimeout(() => {
+        if (fgRef.current && match.x != null && match.y != null) {
+          fgRef.current.centerAt(match.x, match.y, 800);
+          fgRef.current.zoom(3, 800);
+        }
+      }, 500);
+    }
   }, [highlightParam, data.nodes]);
 
   useEffect(() => {
@@ -420,6 +431,7 @@ function GraphContent() {
           </div>
         ) : (
           <ForceGraph2D
+            ref={fgRef}
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             graphData={data as any}
             width={dims.width}
