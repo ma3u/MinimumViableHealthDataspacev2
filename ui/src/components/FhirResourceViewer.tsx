@@ -362,6 +362,15 @@ export default function FhirResourceViewer({
         )}
       </div>
 
+      {/* Synthetic data notice */}
+      <div className="px-4 py-2 bg-amber-950/60 border-b border-amber-700/50 flex items-center gap-2 text-xs text-amber-300">
+        <AlertTriangle size={12} className="shrink-0" />
+        <span>
+          <strong>Synthea Synthetic Data</strong> — algorithmically generated
+          patients, not real individuals. No pseudonymisation required.
+        </span>
+      </div>
+
       {/* Bundle info bar */}
       <div className="px-4 py-2 border-b border-gray-700 flex flex-wrap gap-4 text-xs text-gray-500">
         <span>

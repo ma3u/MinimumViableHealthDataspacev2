@@ -1,0 +1,30 @@
+# =============================================================================
+# Health Dataspace v2 — UI Live Mode Override
+# =============================================================================
+# Overrides the graph-explorer service to run on port 3001 with live JAD
+# cluster data instead of the static-only port 3000.
+#
+# Usage (start live UI alongside the full JAD stack):
+#   docker compose -f docker-compose.yml \
+#                  -f docker-compose.jad.yml \
+#                  -f docker-compose.live.yml \
+#                  up -d graph-explorer neo4j
+#
+# Port mapping:
+#   3000 — static UI (docker-compose.yml alone, local neo4j, mock data)
+#   3001 — live UI   (this override + jad stack, real EDC/Keycloak/neo4j)
+#   3003 — dev UI    (npx next dev from ui/, live cluster, hot reload)
+#
+# Rebuild image after code changes:
+#   docker compose -f docker-compose.yml \
+#                  -f docker-compose.jad.yml \
+#                  -f docker-compose.live.yml \
+#                  up -d --build graph-explorer
+# =============================================================================
+
+services:
+  graph-explorer:
+    ports:
+      - "3001:3000"
+    environment:
+      NEXTAUTH_URL: http://localhost:3001
