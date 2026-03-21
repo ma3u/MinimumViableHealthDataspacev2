@@ -636,9 +636,18 @@ function DataTransferContent() {
 
   // Initiate form
   const [initiating, setInitiating] = useState(false);
-  const [selectedAgreement, setSelectedAgreement] = useState(preContractId);
+  const [selectedAgreements, setSelectedAgreements] = useState<Set<string>>(
+    preContractId ? new Set([preContractId]) : new Set(),
+  );
   const [result, setResult] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
+
+  // Agreement list pagination
+  const [showAllAgreements, setShowAllAgreements] = useState(false);
+  const AGREEMENTS_PAGE_SIZE = 25;
+
+  // Transfer status filter
+  const [statusFilter, setStatusFilter] = useState<string>("ALL");
 
   // FHIR viewer
   const [viewingTransferId, setViewingTransferId] = useState<string | null>(
@@ -719,41 +728,62 @@ function DataTransferContent() {
 
   const handleInitiate = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedAgreement) return;
+    if (selectedAgreements.size === 0) return;
     setInitiating(true);
     setResult(null);
 
-    const agr = agreements.find((a) => a["@id"] === selectedAgreement);
-    const assetId = agr ? f(agr as Record<string, unknown>, "assetId") : "";
-    const counterPartyAddress =
-      (agr as Record<string, unknown>)?.counterPartyAddress ||
-      "http://controlplane:8082/api/dsp";
+    const results: string[] = [];
+    for (const agrId of Array.from(selectedAgreements)) {
+      const agr = agreements.find((a) => a["@id"] === agrId);
+      const assetId = agr ? f(agr as Record<string, unknown>, "assetId") : "";
+      const counterPartyAddress =
+        (agr as Record<string, unknown>)?.counterPartyAddress ||
+        "http://controlplane:8082/api/dsp";
 
-    try {
-      const res = await fetchApi("/api/transfers", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          participantId: selectedCtx,
-          contractId: selectedAgreement,
-          assetId,
-          counterPartyAddress,
-        }),
-      });
+      try {
+        const res = await fetchApi("/api/transfers", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            participantId: selectedCtx,
+            contractId: agrId,
+            assetId,
+            counterPartyAddress,
+          }),
+        });
 
-      if (res.ok) {
-        const data = await res.json();
-        setResult(`Transfer started for ${assetLabel(assetId || data["@id"])}`);
-        await refreshTransfers();
-      } else {
-        const err = await res.json();
-        setResult(`Error: ${err.detail || err.error || "Initiation failed"}`);
+        if (res.ok) {
+          results.push(assetLabel(assetId || agrId.slice(0, 12)));
+        } else {
+          const err = await res.json().catch(() => ({}));
+          const detail =
+            (err as Record<string, string>).detail ||
+            (err as Record<string, string>).error ||
+            `HTTP ${res.status}`;
+          results.push(
+            `Error: ${assetLabel(assetId || agrId.slice(0, 12))} — ${detail}`,
+          );
+        }
+      } catch {
+        results.push(
+          `Error: ${assetLabel(assetId || agrId.slice(0, 12))} — Network error`,
+        );
       }
-    } catch {
-      setResult("Error: Failed to initiate transfer");
-    } finally {
-      setInitiating(false);
     }
+
+    const errors = results.filter((r) => r.startsWith("Error"));
+    if (errors.length === 0) {
+      setResult(
+        results.length === 1
+          ? `Transfer started for ${results[0]}`
+          : `${results.length} transfers started successfully`,
+      );
+    } else {
+      setResult(errors.join("\n"));
+    }
+    await refreshTransfers();
+    setSelectedAgreements(new Set());
+    setInitiating(false);
   };
 
   // Check which agreements already have transfers
@@ -761,6 +791,49 @@ function DataTransferContent() {
     transfers.some(
       (t) => f(t as Record<string, unknown>, "contractId") === agrId,
     );
+
+  // Multi-select helpers
+  const toggleAgreement = (agrId: string) => {
+    setSelectedAgreements((prev) => {
+      const next = new Set(prev);
+      if (next.has(agrId)) next.delete(agrId);
+      else next.add(agrId);
+      return next;
+    });
+  };
+
+  const toggleAll = () => {
+    if (selectedAgreements.size === agreements.length) {
+      setSelectedAgreements(new Set());
+    } else {
+      setSelectedAgreements(new Set(agreements.map((a) => a["@id"])));
+    }
+  };
+
+  // Agreement pagination
+  const visibleAgreements = showAllAgreements
+    ? agreements
+    : agreements.slice(0, AGREEMENTS_PAGE_SIZE);
+  const hasMoreAgreements = agreements.length > AGREEMENTS_PAGE_SIZE;
+
+  // Transfer status filter
+  const transferStatuses = useMemo(() => {
+    const states = new Set<string>();
+    transfers.forEach((t) => {
+      const s = f(t as Record<string, unknown>, "state")?.toUpperCase();
+      if (s) states.add(s);
+    });
+    return ["ALL", ...Array.from(states).sort()];
+  }, [transfers]);
+
+  const filteredTransfers =
+    statusFilter === "ALL"
+      ? transfers
+      : transfers.filter(
+          (t) =>
+            f(t as Record<string, unknown>, "state")?.toUpperCase() ===
+            statusFilter,
+        );
 
   // Load FHIR bundles on demand
   const openFhirViewer = async (transferId: string) => {
@@ -838,7 +911,7 @@ function DataTransferContent() {
 
         {result && (
           <div
-            className={`mb-4 p-3 rounded text-sm ${
+            className={`mb-4 p-3 rounded text-sm whitespace-pre-line ${
               result.startsWith("Error")
                 ? "bg-red-900/40 border border-red-700 text-red-300"
                 : "bg-green-900/40 border border-green-700 text-green-300"
@@ -860,8 +933,19 @@ function DataTransferContent() {
 
         {agreements.length > 0 && (
           <form onSubmit={handleInitiate} className="space-y-3">
+            {/* Select All */}
+            <label className="flex items-center gap-2 px-3 py-2 text-xs text-gray-400 cursor-pointer hover:text-gray-200">
+              <input
+                type="checkbox"
+                checked={selectedAgreements.size === agreements.length}
+                onChange={toggleAll}
+                className="accent-layer2"
+              />
+              Select All ({agreements.length})
+            </label>
+
             <div className="space-y-2">
-              {agreements.map((agr) => {
+              {visibleAgreements.map((agr) => {
                 const agrId = agr["@id"];
                 const aId = f(agr as Record<string, unknown>, "assetId");
                 const cp = f(agr as Record<string, unknown>, "counterPartyId");
@@ -871,17 +955,15 @@ function DataTransferContent() {
                   <label
                     key={agrId}
                     className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${
-                      selectedAgreement === agrId
+                      selectedAgreements.has(agrId)
                         ? "border-layer2 bg-layer2/10"
                         : "border-gray-700 hover:border-gray-500 bg-gray-800/50"
                     } ${hasTransfer ? "opacity-60" : ""}`}
                   >
                     <input
-                      type="radio"
-                      name="agreement"
-                      value={agrId}
-                      checked={selectedAgreement === agrId}
-                      onChange={() => setSelectedAgreement(agrId)}
+                      type="checkbox"
+                      checked={selectedAgreements.has(agrId)}
+                      onChange={() => toggleAgreement(agrId)}
                       className="accent-layer2"
                     />
                     <div className="flex-1 min-w-0">
@@ -904,9 +986,30 @@ function DataTransferContent() {
                 );
               })}
             </div>
+
+            {/* Show more / Show less */}
+            {hasMoreAgreements && (
+              <button
+                type="button"
+                onClick={() => setShowAllAgreements(!showAllAgreements)}
+                className="flex items-center gap-1 text-xs text-layer2 hover:text-layer2/80"
+              >
+                {showAllAgreements ? (
+                  <>
+                    <ChevronDown size={12} /> Show less
+                  </>
+                ) : (
+                  <>
+                    <ChevronRight size={12} /> Show{" "}
+                    {agreements.length - AGREEMENTS_PAGE_SIZE} more
+                  </>
+                )}
+              </button>
+            )}
+
             <button
               type="submit"
-              disabled={initiating || !selectedAgreement}
+              disabled={initiating || selectedAgreements.size === 0}
               className="flex items-center gap-2 px-4 py-2 bg-layer2 text-white rounded text-sm font-medium hover:bg-layer2/90 disabled:opacity-50"
             >
               {initiating ? (
@@ -914,7 +1017,9 @@ function DataTransferContent() {
               ) : (
                 <ArrowRightLeft size={14} />
               )}
-              Start Transfer
+              {selectedAgreements.size > 1
+                ? `Start ${selectedAgreements.size} Transfers`
+                : "Start Transfer"}
             </button>
           </form>
         )}
@@ -938,18 +1043,51 @@ function DataTransferContent() {
         </button>
       </div>
 
+      {/* Status filter */}
+      {transfers.length > 0 && (
+        <div className="flex flex-wrap gap-1.5 mb-4">
+          {transferStatuses.map((s) => {
+            const count =
+              s === "ALL"
+                ? transfers.length
+                : transfers.filter(
+                    (t) =>
+                      f(
+                        t as Record<string, unknown>,
+                        "state",
+                      )?.toUpperCase() === s,
+                  ).length;
+            return (
+              <button
+                key={s}
+                onClick={() => setStatusFilter(s)}
+                className={`text-xs px-2.5 py-1 rounded-full transition-colors ${
+                  statusFilter === s
+                    ? "bg-layer2/20 text-layer2 border border-layer2/40"
+                    : "bg-gray-800 text-gray-400 border border-gray-700 hover:border-gray-500"
+                }`}
+              >
+                {s} ({count})
+              </button>
+            );
+          })}
+        </div>
+      )}
+
       {loading ? (
         <div className="flex items-center gap-2 text-gray-500">
           <Loader2 size={16} className="animate-spin" />
           Loading transfers…
         </div>
-      ) : transfers.length === 0 ? (
+      ) : filteredTransfers.length === 0 ? (
         <p className="text-gray-500 text-sm">
-          No transfer processes yet. Start one from an agreed contract above.
+          {transfers.length === 0
+            ? "No transfer processes yet. Start one from an agreed contract above."
+            : `No transfers matching "${statusFilter}".`}
         </p>
       ) : (
         <div className="grid gap-3">
-          {transfers.map((t) => {
+          {filteredTransfers.map((t) => {
             const state = f(t as Record<string, unknown>, "state");
             const aId = t.assetId || f(t as Record<string, unknown>, "assetId");
             const transferType =
@@ -984,19 +1122,17 @@ function DataTransferContent() {
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
-                    {isCompleted && (
-                      <button
-                        onClick={() => openFhirViewer(t["@id"])}
-                        className={`flex items-center gap-1 text-xs px-2 py-1 rounded transition-colors ${
-                          isViewing
-                            ? "bg-layer2/20 text-layer2"
-                            : "bg-green-900/30 text-green-400 hover:bg-green-900/50"
-                        }`}
-                      >
-                        <FileJson2 size={12} />
-                        {isViewing ? "Hide FHIR" : "View FHIR"}
-                      </button>
-                    )}
+                    <button
+                      onClick={() => openFhirViewer(t["@id"])}
+                      className={`flex items-center gap-1 text-xs px-2 py-1 rounded transition-colors ${
+                        isViewing
+                          ? "bg-layer2/20 text-layer2"
+                          : "bg-green-900/30 text-green-400 hover:bg-green-900/50"
+                      }`}
+                    >
+                      <FileJson2 size={12} />
+                      {isViewing ? "Hide FHIR" : "View FHIR"}
+                    </button>
                     <span
                       className={`text-xs px-2 py-0.5 rounded-full ${stateBg(
                         state,

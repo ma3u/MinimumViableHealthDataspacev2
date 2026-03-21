@@ -111,9 +111,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(result, { status: 201 });
   } catch (err) {
     console.error("Failed to initiate transfer:", err);
-    return NextResponse.json(
-      { error: "Failed to initiate data transfer" },
-      { status: 502 },
-    );
+    const detail =
+      err instanceof Error ? err.message : "Failed to initiate data transfer";
+    return NextResponse.json({ error: detail }, { status: 502 });
   }
 }
