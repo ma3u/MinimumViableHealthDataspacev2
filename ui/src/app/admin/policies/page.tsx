@@ -11,6 +11,7 @@ import {
   X,
 } from "lucide-react";
 import PageIntro from "@/components/PageIntro";
+import OdrlJsonHighlighter from "@/components/OdrlJsonHighlighter";
 
 /* ── Types ────────────────────────────────────────────────────── */
 
@@ -510,13 +511,10 @@ export default function AdminPoliciesPage() {
             <summary className="cursor-pointer text-xs text-gray-500 hover:text-gray-300">
               Preview ODRL policy JSON
             </summary>
-            <pre className="mt-2 p-3 rounded-lg bg-gray-800/50 border border-gray-700 text-xs text-gray-400 overflow-auto max-h-60">
-              {JSON.stringify(
-                tpl.build({ duration: selectedDuration }),
-                null,
-                2,
-              )}
-            </pre>
+            <OdrlJsonHighlighter
+              data={tpl.build({ duration: selectedDuration })}
+              className="mt-2 p-3 rounded-lg bg-gray-800/50 border border-gray-700 max-h-60"
+            />
           </details>
 
           {/* Submit */}
@@ -658,9 +656,10 @@ export default function AdminPoliciesPage() {
                                 <summary className="cursor-pointer text-xs text-gray-500 hover:text-gray-300">
                                   View full ODRL JSON
                                 </summary>
-                                <pre className="mt-2 text-xs text-gray-400 overflow-auto max-h-48">
-                                  {JSON.stringify(p, null, 2)}
-                                </pre>
+                                <OdrlJsonHighlighter
+                                  data={p}
+                                  className="mt-2 max-h-48"
+                                />
                               </details>
                             </div>
                           );

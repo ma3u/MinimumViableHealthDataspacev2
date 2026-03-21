@@ -11,8 +11,12 @@ import {
   Network,
   Loader2,
   Edit3,
+  Download,
+  GitBranch,
+  X,
 } from "lucide-react";
 import PageIntro from "@/components/PageIntro";
+import MermaidDiagram from "@/components/MermaidDiagram";
 
 interface Dataset {
   id: string;
@@ -30,6 +34,85 @@ interface Dataset {
 const LEGAL_BASIS_LABELS: Record<string, string> = {
   "EHDS-Art53-SecondaryUse": "EHDS Art. 53",
 };
+
+/** Generate a Mermaid ER diagram for a HealthDCAT-AP dataset entry. */
+function buildDcatApDiagram(d: Dataset): string {
+  const lines = [
+    "erDiagram",
+    `    HealthDataset {`,
+    `        string id "${d.id}"`,
+    `        string title "${d.title}"`,
+    `        string publisher "${d.publisher || "—"}"`,
+    `        string theme "${d.theme || "—"}"`,
+    `        string license "${d.license || "—"}"`,
+    `        string legalBasis "${d.legalBasis || "—"}"`,
+    `        string conformsTo "${d.conformsTo || "—"}"`,
+    `        string datasetType "${d.datasetType || "—"}"`,
+    `        int recordCount "${d.recordCount ?? "—"}"`,
+    `    }`,
+  ];
+  if (d.publisher) {
+    lines.push(
+      `    Publisher {`,
+      `        string name "${d.publisher}"`,
+      `    }`,
+    );
+    lines.push(`    Publisher ||--o{ HealthDataset : "publishes"`);
+  }
+  if (d.conformsTo?.includes("fhir")) {
+    lines.push(
+      `    FHIRProfile {`,
+      `        string version "R4"`,
+      `        string spec "${d.conformsTo}"`,
+      `    }`,
+    );
+    lines.push(`    HealthDataset ||--|| FHIRProfile : "conformsTo"`);
+  }
+  if (d.legalBasis) {
+    lines.push(
+      `    LegalBasis {`,
+      `        string article "${d.legalBasis}"`,
+      `    }`,
+    );
+    lines.push(`    HealthDataset ||--|| LegalBasis : "legalBasisForAccess"`);
+  }
+  if (d.theme) {
+    lines.push(`    Theme {`, `        string label "${d.theme}"`, `    }`);
+    lines.push(`    HealthDataset }o--|| Theme : "theme"`);
+  }
+  lines.push(
+    `    Catalog {`,
+    `        string standard "HealthDCAT-AP"`,
+    `    }`,
+  );
+  lines.push(`    Catalog ||--o{ HealthDataset : "dcatDataset"`);
+  return lines.join("\n");
+}
+
+/** Build a JSON-LD representation of a dataset following HealthDCAT-AP / DCAT 3. */
+function buildDcatApJsonLd(d: Dataset): object {
+  return {
+    "@context": {
+      dcat: "http://www.w3.org/ns/dcat#",
+      dct: "http://purl.org/dc/terms/",
+      healthdcatap: "https://healthdcat-ap.github.io/ns#",
+      foaf: "http://xmlns.com/foaf/0.1/",
+    },
+    "@type": "dcat:Dataset",
+    "@id": d.id,
+    "dct:title": d.title,
+    "dct:description": d.description,
+    "dct:license": d.license,
+    "dct:conformsTo": d.conformsTo,
+    "dct:publisher": d.publisher
+      ? { "@type": "foaf:Organization", "foaf:name": d.publisher }
+      : undefined,
+    "dcat:theme": d.theme,
+    "healthdcatap:datasetType": d.datasetType,
+    "healthdcatap:legalBasisForAccess": d.legalBasis,
+    "healthdcatap:numberOfRecords": d.recordCount,
+  };
+}
 
 function DetailRow({
   label,
@@ -68,15 +151,43 @@ function CatalogContent() {
   const searchParams = useSearchParams();
   const [filter, setFilter] = useState(searchParams.get("search") ?? "");
   const [expanded, setExpanded] = useState<string | null>(null);
+  const [diagramDataset, setDiagramDataset] = useState<Dataset | null>(null);
+
+  const downloadDcatAp = (d: Dataset) => {
+    const jsonLd = buildDcatApJsonLd(d);
+    const blob = new Blob([JSON.stringify(jsonLd, null, 2)], {
+      type: "application/ld+json",
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${d.id.replace(/[^a-z0-9-]/gi, "_")}.jsonld`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
 
   useEffect(() => {
     fetchApi("/api/catalog")
       .then((r) => r.json())
       .then((d) => {
-        setDatasets(d);
-        setLoading(false);
+        const arr = Array.isArray(d) ? d : d.datasets || d.catalog || [];
+        if (arr.length > 0) {
+          setDatasets(arr);
+          setLoading(false);
+        } else {
+          throw new Error("empty");
+        }
       })
-      .catch(() => setLoading(false));
+      .catch(() => {
+        // Fallback: load mock catalog directly
+        fetch("/mock/catalog.json")
+          .then((r) => r.json())
+          .then((d) => setDatasets(Array.isArray(d) ? d : []))
+          .catch(() => {
+            /* exhausted */
+          })
+          .finally(() => setLoading(false));
+      });
   }, []);
 
   const visible = datasets.filter(
@@ -212,6 +323,26 @@ function CatalogContent() {
                       <DetailRow label="Conforms To" value={d.conformsTo} />
                     </div>
                     <div className="flex flex-wrap gap-3 mt-3">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setDiagramDataset(d);
+                        }}
+                        className="inline-flex items-center gap-1 text-xs text-purple-400 hover:underline"
+                      >
+                        <GitBranch size={11} />
+                        Show Data Model
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          downloadDcatAp(d);
+                        }}
+                        className="inline-flex items-center gap-1 text-xs text-cyan-400 hover:underline"
+                      >
+                        <Download size={11} />
+                        Download DCAT-AP
+                      </button>
                       <a
                         href={`/graph?highlight=${encodeURIComponent(
                           d.title || d.id,
@@ -260,6 +391,38 @@ function CatalogContent() {
               </div>
             );
           })}
+        </div>
+      )}
+
+      {/* Data model diagram modal */}
+      {diagramDataset && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm"
+          onClick={() => setDiagramDataset(null)}
+        >
+          <div
+            className="bg-gray-900 border border-gray-700 rounded-2xl w-full max-w-3xl max-h-[85vh] overflow-y-auto mx-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between px-5 py-3 border-b border-gray-700">
+              <h2 className="font-semibold text-sm text-layer2">
+                <GitBranch size={14} className="inline mr-1.5" />
+                HealthDCAT-AP Data Model — {diagramDataset.title}
+              </h2>
+              <button
+                onClick={() => setDiagramDataset(null)}
+                className="text-gray-400 hover:text-white"
+              >
+                <X size={18} />
+              </button>
+            </div>
+            <div className="p-5">
+              <MermaidDiagram
+                chart={buildDcatApDiagram(diagramDataset)}
+                caption={`HealthDCAT-AP entity-relationship model for "${diagramDataset.title}"`}
+              />
+            </div>
+          </div>
         </div>
       )}
     </div>

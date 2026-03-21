@@ -2,7 +2,21 @@
 
 import { fetchApi } from "@/lib/api";
 import { useEffect, useState, type ElementType } from "react";
-import { Loader2, Settings2, Save, CheckCircle2, AlertCircle, User, Globe, Phone, Mail, MapPin, ShieldCheck, ShieldOff, RefreshCw, ExternalLink } from "lucide-react";
+import {
+  Loader2,
+  Settings2,
+  Save,
+  CheckCircle2,
+  AlertCircle,
+  User,
+  Globe,
+  Phone,
+  Mail,
+  MapPin,
+  ShieldCheck,
+  ShieldOff,
+  RefreshCw,
+} from "lucide-react";
 import PageIntro from "@/components/PageIntro";
 
 interface VPA {
@@ -89,6 +103,7 @@ export default function SettingsPage() {
         setLoading(false);
       })
       .catch(() => setLoading(false));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   function seedForm(t: Tenant) {
@@ -123,11 +138,80 @@ export default function SettingsPage() {
     try {
       const res = await fetchApi(`/api/participants/${tenantId}/credentials`);
       const data = res.ok ? await res.json() : [];
-      setCredentials(Array.isArray(data) ? data : []);
+      const arr = Array.isArray(data) ? data : [];
+      if (
+        arr.length > 0 &&
+        arr.some((c: CredentialContext) => c.credentials?.length > 0)
+      ) {
+        setCredentials(arr);
+        return;
+      }
+      // Fallback: load from global credentials endpoint and match by tenant DID
+      await loadCredentialsFallback(tenantId);
     } catch {
-      setCredentials([]);
+      await loadCredentialsFallback(tenantId).catch(() => setCredentials([]));
     } finally {
       setCredsLoading(false);
+    }
+  }
+
+  async function loadCredentialsFallback(tenantId: string) {
+    try {
+      const res = await fetchApi("/api/credentials");
+      if (!res.ok) {
+        setCredentials([]);
+        return;
+      }
+      const raw = await res.json();
+      const allCreds = raw.credentials || raw || [];
+      if (!Array.isArray(allCreds)) {
+        setCredentials([]);
+        return;
+      }
+      // Resolve DIDs for this tenant
+      const tenant = tenants.find((t) => t.id === tenantId);
+      const dids = new Set(
+        (tenant?.participantProfiles || [])
+          .map((pp) => {
+            const id = pp.identifier
+              ? decodeURIComponent(pp.identifier)
+              : undefined;
+            const d = (pp as unknown as { did?: string }).did;
+            return id || d;
+          })
+          .filter(Boolean),
+      );
+      const matched = allCreds.filter(
+        (c: { subjectDid?: string }) => c.subjectDid && dids.has(c.subjectDid),
+      );
+      if (matched.length > 0) {
+        setCredentials([
+          {
+            profileId: "mock-fallback",
+            participantContextId: null,
+            credentials: matched.map(
+              (c: {
+                credentialId?: string;
+                credentialType?: string;
+                issuerDid?: string;
+                issuedAt?: string;
+                expiresAt?: string;
+              }) => ({
+                id: c.credentialId,
+                type: c.credentialType ? [c.credentialType] : [],
+                issuer: c.issuerDid,
+                issuanceDate: c.issuedAt,
+                expirationDate: c.expiresAt,
+                credentialSubject: c as unknown as Record<string, unknown>,
+              }),
+            ),
+          },
+        ]);
+      } else {
+        setCredentials([]);
+      }
+    } catch {
+      setCredentials([]);
     }
   }
 
@@ -147,8 +231,8 @@ export default function SettingsPage() {
         prev.map((t) =>
           t.id === selected.id
             ? { ...t, properties: { ...t.properties, ...form } }
-            : t
-        )
+            : t,
+        ),
       );
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
@@ -193,7 +277,9 @@ export default function SettingsPage() {
         <>
           {/* Tenant selector */}
           <div className="mb-6">
-            <label className="block text-sm text-gray-400 mb-1">Active Profile</label>
+            <label className="block text-sm text-gray-400 mb-1">
+              Active Profile
+            </label>
             <select
               value={selected?.id || ""}
               onChange={(e) => handleSelect(e.target.value)}
@@ -209,7 +295,6 @@ export default function SettingsPage() {
 
           {selected && (
             <div className="border border-gray-700 rounded-xl divide-y divide-gray-700">
-
               {/* Identity (read-only) */}
               <div className="p-6">
                 <h2 className="font-semibold mb-4 flex items-center gap-2">
@@ -221,7 +306,8 @@ export default function SettingsPage() {
                     <label className="text-xs text-gray-500">EHDS Role</label>
                     <p className="text-sm font-medium text-gray-200 mt-0.5">
                       {selected.properties.ehdsParticipantType ||
-                        selected.properties.role || "—"}
+                        selected.properties.role ||
+                        "—"}
                     </p>
                   </div>
                   <div>
@@ -240,34 +326,95 @@ export default function SettingsPage() {
                   Profile &amp; Contact Details
                 </h2>
                 <div className="grid gap-4 sm:grid-cols-2">
-                  {([
-                    { key: "displayName", label: "Display Name", icon: User, placeholder: "e.g. AlphaKlinik Berlin" },
-                    { key: "organization", label: "Organisation", icon: Settings2, placeholder: "Legal entity name" },
-                    { key: "contactPerson", label: "Contact Person", icon: User, placeholder: "Full name" },
-                    { key: "email", label: "Email", icon: Mail, placeholder: "contact@example.de", type: "email" },
-                    { key: "phone", label: "Phone", icon: Phone, placeholder: "+49 30 …", type: "tel" },
-                    { key: "website", label: "Website", icon: Globe, placeholder: "https://", type: "url" },
-                    { key: "address", label: "Street Address", icon: MapPin, placeholder: "Street & number" },
-                    { key: "city", label: "City", icon: MapPin, placeholder: "Berlin" },
-                    { key: "postalCode", label: "Postal Code", icon: MapPin, placeholder: "10117" },
-                    { key: "country", label: "Country", icon: Globe, placeholder: "DE" },
-                  ] as { key: keyof typeof form; label: string; icon: ElementType; placeholder: string; type?: string }[]).map(
-                    ({ key, label, icon: Icon, placeholder, type }) => (
-                      <div key={key}>
-                        <label className="text-xs text-gray-500 flex items-center gap-1 mb-1">
-                          <Icon size={11} />
-                          {label}
-                        </label>
-                        <input
-                          type={type || "text"}
-                          value={form[key]}
-                          onChange={(e) => setForm((f) => ({ ...f, [key]: e.target.value }))}
-                          placeholder={placeholder}
-                          className="w-full px-3 py-1.5 bg-gray-800 border border-gray-600 rounded text-sm text-gray-200 placeholder-gray-600 focus:outline-none focus:border-layer2"
-                        />
-                      </div>
-                    )
-                  )}
+                  {(
+                    [
+                      {
+                        key: "displayName",
+                        label: "Display Name",
+                        icon: User,
+                        placeholder: "e.g. AlphaKlinik Berlin",
+                      },
+                      {
+                        key: "organization",
+                        label: "Organisation",
+                        icon: Settings2,
+                        placeholder: "Legal entity name",
+                      },
+                      {
+                        key: "contactPerson",
+                        label: "Contact Person",
+                        icon: User,
+                        placeholder: "Full name",
+                      },
+                      {
+                        key: "email",
+                        label: "Email",
+                        icon: Mail,
+                        placeholder: "contact@example.de",
+                        type: "email",
+                      },
+                      {
+                        key: "phone",
+                        label: "Phone",
+                        icon: Phone,
+                        placeholder: "+49 30 …",
+                        type: "tel",
+                      },
+                      {
+                        key: "website",
+                        label: "Website",
+                        icon: Globe,
+                        placeholder: "https://",
+                        type: "url",
+                      },
+                      {
+                        key: "address",
+                        label: "Street Address",
+                        icon: MapPin,
+                        placeholder: "Street & number",
+                      },
+                      {
+                        key: "city",
+                        label: "City",
+                        icon: MapPin,
+                        placeholder: "Berlin",
+                      },
+                      {
+                        key: "postalCode",
+                        label: "Postal Code",
+                        icon: MapPin,
+                        placeholder: "10117",
+                      },
+                      {
+                        key: "country",
+                        label: "Country",
+                        icon: Globe,
+                        placeholder: "DE",
+                      },
+                    ] as {
+                      key: keyof typeof form;
+                      label: string;
+                      icon: ElementType;
+                      placeholder: string;
+                      type?: string;
+                    }[]
+                  ).map(({ key, label, icon: Icon, placeholder, type }) => (
+                    <div key={key}>
+                      <label className="text-xs text-gray-500 flex items-center gap-1 mb-1">
+                        <Icon size={11} />
+                        {label}
+                      </label>
+                      <input
+                        type={type || "text"}
+                        value={form[key]}
+                        onChange={(e) =>
+                          setForm((f) => ({ ...f, [key]: e.target.value }))
+                        }
+                        placeholder={placeholder}
+                        className="w-full px-3 py-1.5 bg-gray-800 border border-gray-600 rounded text-sm text-gray-200 placeholder-gray-600 focus:outline-none focus:border-layer2"
+                      />
+                    </div>
+                  ))}
                 </div>
               </div>
 
@@ -278,8 +425,8 @@ export default function SettingsPage() {
                   <div className="space-y-3">
                     {selected.participantProfiles.map((pp, i) => {
                       const ctxId =
-                        pp.properties?.["cfm.vpa.state"]?.participantContextId ||
-                        "—";
+                        pp.properties?.["cfm.vpa.state"]
+                          ?.participantContextId || "—";
                       const did = pp.identifier
                         ? decodeURIComponent(pp.identifier)
                         : "—";
@@ -296,8 +443,8 @@ export default function SettingsPage() {
                             hasError
                               ? "bg-red-950/30 border-red-800/50"
                               : allDisposed
-                              ? "bg-yellow-950/20 border-yellow-800/40"
-                              : "bg-gray-800/50 border-gray-700"
+                                ? "bg-yellow-950/20 border-yellow-800/40"
+                                : "bg-gray-800/50 border-gray-700"
                           }`}
                         >
                           {hasError && (
@@ -309,28 +456,52 @@ export default function SettingsPage() {
                           {allDisposed && (
                             <div className="flex items-center gap-1.5 text-yellow-500 mb-1">
                               <AlertCircle size={12} />
-                              <span>VPAs disposed — re-run <code className="font-mono bg-yellow-900/30 px-1 rounded">seed-health-tenants.sh</code> to re-provision</span>
+                              <span>
+                                VPAs disposed — re-run{" "}
+                                <code className="font-mono bg-yellow-900/30 px-1 rounded">
+                                  seed-health-tenants.sh
+                                </code>{" "}
+                                to re-provision
+                              </span>
                             </div>
                           )}
                           <div className="flex gap-2">
-                            <span className="text-gray-500 w-32 shrink-0">Profile ID</span>
-                            <span className="text-gray-300 font-mono break-all">{pp.id}</span>
+                            <span className="text-gray-500 w-32 shrink-0">
+                              Profile ID
+                            </span>
+                            <span className="text-gray-300 font-mono break-all">
+                              {pp.id}
+                            </span>
                           </div>
                           <div className="flex gap-2">
-                            <span className="text-gray-500 w-32 shrink-0">DID</span>
-                            <span className="text-gray-300 font-mono break-all">{did}</span>
+                            <span className="text-gray-500 w-32 shrink-0">
+                              DID
+                            </span>
+                            <span className="text-gray-300 font-mono break-all">
+                              {did}
+                            </span>
                           </div>
                           <div className="flex gap-2">
-                            <span className="text-gray-500 w-32 shrink-0">Participant Ctx</span>
+                            <span className="text-gray-500 w-32 shrink-0">
+                              Participant Ctx
+                            </span>
                             <span className="text-gray-300 font-mono">
-                              {ctxId !== "—" ? ctxId : <span className="text-gray-600">none</span>}
+                              {ctxId !== "—" ? (
+                                ctxId
+                              ) : (
+                                <span className="text-gray-600">none</span>
+                              )}
                             </span>
                           </div>
                           {activeVpas.length > 0 && (
                             <div className="flex gap-2">
-                              <span className="text-gray-500 w-32 shrink-0">Active VPAs</span>
+                              <span className="text-gray-500 w-32 shrink-0">
+                                Active VPAs
+                              </span>
                               <span className="text-green-400">
-                                {activeVpas.map((v) => v.type.replace("cfm.", "")).join(", ")}
+                                {activeVpas
+                                  .map((v) => v.type.replace("cfm.", ""))
+                                  .join(", ")}
                               </span>
                             </div>
                           )}
@@ -339,7 +510,9 @@ export default function SettingsPage() {
                     })}
                   </div>
                 ) : (
-                  <p className="text-gray-500 text-sm">No dataspace profiles linked yet.</p>
+                  <p className="text-gray-500 text-sm">
+                    No dataspace profiles linked yet.
+                  </p>
                 )}
               </div>
 
@@ -355,7 +528,10 @@ export default function SettingsPage() {
                     disabled={credsLoading}
                     className="text-xs text-gray-500 hover:text-gray-300 flex items-center gap-1 disabled:opacity-40"
                   >
-                    <RefreshCw size={11} className={credsLoading ? "animate-spin" : ""} />
+                    <RefreshCw
+                      size={11}
+                      className={credsLoading ? "animate-spin" : ""}
+                    />
                     Refresh
                   </button>
                 </div>
@@ -365,15 +541,19 @@ export default function SettingsPage() {
                     <Loader2 size={13} className="animate-spin" />
                     Fetching credentials…
                   </div>
-                ) : credentials.length === 0 || credentials.every((c) => c.credentials.length === 0) ? (
+                ) : credentials.length === 0 ||
+                  credentials.every((c) => c.credentials.length === 0) ? (
                   <div className="rounded-lg bg-gray-800/40 border border-gray-700 p-4 text-sm">
                     <div className="flex items-center gap-2 text-yellow-500 mb-2">
                       <ShieldOff size={14} />
-                      <span className="font-medium">No credentials issued yet</span>
+                      <span className="font-medium">
+                        No credentials issued yet
+                      </span>
                     </div>
                     <p className="text-gray-500 text-xs leading-relaxed">
-                      Verifiable Credentials (EHDS-compliant VCs) are issued by the HDAB after participant
-                      onboarding via the IdentityHub. To issue credentials, run:
+                      Verifiable Credentials (EHDS-compliant VCs) are issued by
+                      the HDAB after participant onboarding via the IdentityHub.
+                      To issue credentials, run:
                     </p>
                     <code className="mt-2 block text-xs text-green-400/80 bg-gray-900 rounded px-3 py-2">
                       bash jad/issue-ehds-credentials.sh
@@ -402,42 +582,73 @@ export default function SettingsPage() {
                               {expired ? (
                                 <ShieldOff size={12} className="text-red-400" />
                               ) : (
-                                <ShieldCheck size={12} className="text-green-400" />
+                                <ShieldCheck
+                                  size={12}
+                                  className="text-green-400"
+                                />
                               )}
-                              <span className={expired ? "text-red-400" : "text-green-400"}>
+                              <span
+                                className={
+                                  expired ? "text-red-400" : "text-green-400"
+                                }
+                              >
                                 {types.join(", ") || "VerifiableCredential"}
                               </span>
-                              {expired && <span className="text-red-500 ml-auto">EXPIRED</span>}
+                              {expired && (
+                                <span className="text-red-500 ml-auto">
+                                  EXPIRED
+                                </span>
+                              )}
                             </div>
                             <div className="flex gap-2">
-                              <span className="text-gray-500 w-28 shrink-0">Issuer</span>
-                              <span className="text-gray-300 font-mono break-all">{vc.issuer || "—"}</span>
+                              <span className="text-gray-500 w-28 shrink-0">
+                                Issuer
+                              </span>
+                              <span className="text-gray-300 font-mono break-all">
+                                {vc.issuer || "—"}
+                              </span>
                             </div>
                             <div className="flex gap-2">
-                              <span className="text-gray-500 w-28 shrink-0">Issued</span>
+                              <span className="text-gray-500 w-28 shrink-0">
+                                Issued
+                              </span>
                               <span className="text-gray-300">
                                 {vc.issuanceDate
-                                  ? new Date(vc.issuanceDate).toLocaleDateString()
+                                  ? new Date(
+                                      vc.issuanceDate,
+                                    ).toLocaleDateString()
                                   : "—"}
                               </span>
                             </div>
                             {vc.expirationDate && (
                               <div className="flex gap-2">
-                                <span className="text-gray-500 w-28 shrink-0">Expires</span>
-                                <span className={expired ? "text-red-400" : "text-gray-300"}>
-                                  {new Date(vc.expirationDate).toLocaleDateString()}
+                                <span className="text-gray-500 w-28 shrink-0">
+                                  Expires
+                                </span>
+                                <span
+                                  className={
+                                    expired ? "text-red-400" : "text-gray-300"
+                                  }
+                                >
+                                  {new Date(
+                                    vc.expirationDate,
+                                  ).toLocaleDateString()}
                                 </span>
                               </div>
                             )}
                             {vc.id && (
                               <div className="flex gap-2">
-                                <span className="text-gray-500 w-28 shrink-0">Credential ID</span>
-                                <span className="text-gray-400 font-mono text-[10px] break-all">{vc.id}</span>
+                                <span className="text-gray-500 w-28 shrink-0">
+                                  Credential ID
+                                </span>
+                                <span className="text-gray-400 font-mono text-[10px] break-all">
+                                  {vc.id}
+                                </span>
                               </div>
                             )}
                           </div>
                         );
-                      })
+                      }),
                     )}
                   </div>
                 )}
@@ -451,20 +662,32 @@ export default function SettingsPage() {
                   className="flex items-center gap-2 px-4 py-2 bg-layer2 text-white rounded-lg text-sm font-medium hover:bg-layer2/90 disabled:opacity-50"
                 >
                   {saving ? (
-                    <><Loader2 size={16} className="animate-spin" />Saving…</>
+                    <>
+                      <Loader2 size={16} className="animate-spin" />
+                      Saving…
+                    </>
                   ) : saved ? (
-                    <><CheckCircle2 size={16} />Saved</>
+                    <>
+                      <CheckCircle2 size={16} />
+                      Saved
+                    </>
                   ) : (
-                    <><Save size={16} />Save Changes</>
+                    <>
+                      <Save size={16} />
+                      Save Changes
+                    </>
                   )}
                 </button>
                 {saveError && (
                   <span className="text-xs text-red-400 flex items-center gap-1">
-                    <AlertCircle size={12} />{saveError}
+                    <AlertCircle size={12} />
+                    {saveError}
                   </span>
                 )}
                 {saved && !saveError && (
-                  <span className="text-xs text-green-500">Profile saved successfully.</span>
+                  <span className="text-xs text-green-500">
+                    Profile saved successfully.
+                  </span>
                 )}
               </div>
             </div>

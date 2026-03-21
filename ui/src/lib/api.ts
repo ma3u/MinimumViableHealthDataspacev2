@@ -27,6 +27,7 @@ const STATIC_MOCK_PREFIX: [string, string][] = [
   ["/api/transfers", "/mock/transfers.json"],
   ["/api/tasks", "/mock/tasks.json"],
   ["/api/admin/audit", "/mock/admin_audit.json"],
+  ["/api/participants/", "/mock/credentials.json"],
 ];
 
 function resolveMockPath(endpoint: string): string {

@@ -13,8 +13,10 @@ import {
   FileJson2,
   Copy,
   Network,
+  Activity,
 } from "lucide-react";
 import PageIntro from "@/components/PageIntro";
+import FhirResourceViewer from "@/components/FhirResourceViewer";
 
 interface ParticipantCtx {
   "@id": string;
@@ -46,14 +48,18 @@ type Tab = "existing" | "create";
 function JsonNode({ data, depth = 0 }: { data: unknown; depth?: number }) {
   const [collapsed, setCollapsed] = useState(depth > 1);
 
-  if (data === null || data === undefined)
+  if (data === null || data === undefined) {
     return <span className="text-gray-500">null</span>;
-  if (typeof data === "boolean")
+  }
+  if (typeof data === "boolean") {
     return <span className="text-yellow-400">{String(data)}</span>;
-  if (typeof data === "number")
+  }
+  if (typeof data === "number") {
     return <span className="text-cyan-400">{data}</span>;
-  if (typeof data === "string")
+  }
+  if (typeof data === "string") {
     return <span className="text-green-400">&quot;{data}&quot;</span>;
+  }
 
   if (Array.isArray(data)) {
     if (data.length === 0) return <span className="text-gray-500">[]</span>;
@@ -82,8 +88,9 @@ function JsonNode({ data, depth = 0 }: { data: unknown; depth?: number }) {
 
   if (typeof data === "object") {
     const entries = Object.entries(data as Record<string, unknown>);
-    if (entries.length === 0)
+    if (entries.length === 0) {
       return <span className="text-gray-500">{"{}"}</span>;
+    }
     return (
       <span>
         <button
@@ -118,8 +125,13 @@ function JsonNode({ data, depth = 0 }: { data: unknown; depth?: number }) {
 /* ── Asset Detail Panel ── */
 
 function AssetDetailPanel({ asset }: { asset: Asset }) {
-  const [viewMode, setViewMode] = useState<"details" | "json">("details");
+  const [viewMode, setViewMode] = useState<"details" | "json" | "fhir">(
+    "details",
+  );
   const [copied, setCopied] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [fhirBundle, setFhirBundle] = useState<any>(null);
+  const [fhirLoading, setFhirLoading] = useState(false);
 
   const name =
     asset.name || asset["edc:name"] || asset.properties?.name || asset["@id"];
@@ -131,6 +143,37 @@ function AssetDetailPanel({ asset }: { asset: Asset }) {
     asset.contenttype ||
     asset["edc:contenttype"] ||
     asset.properties?.contenttype;
+
+  const isFhir = String(ct ?? "").includes("fhir");
+
+  // Load FHIR bundle when switching to fhir tab
+  const loadFhirBundle = useCallback(async () => {
+    if (fhirBundle || fhirLoading) return;
+    setFhirLoading(true);
+    try {
+      // Try to match asset ID to a known FHIR bundle key
+      const assetId = String(asset["@id"] ?? "");
+      const bundleKey =
+        assetId || name?.toString().toLowerCase().replace(/\s+/g, "-");
+      const res = await fetch("/mock/fhir_bundles.json");
+      if (res.ok) {
+        const bundles = await res.json();
+        // Try exact match, then prefix match
+        const bundle =
+          bundles[bundleKey] ??
+          bundles[assetId.replace(/^asset:/, "")] ??
+          Object.values(bundles).find(
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            (b: any) => b?.resourceType === "Bundle",
+          );
+        if (bundle) setFhirBundle(bundle);
+      }
+    } catch {
+      /* ignore — FHIR data unavailable */
+    } finally {
+      setFhirLoading(false);
+    }
+  }, [fhirBundle, fhirLoading, asset, name]);
 
   const copyJson = useCallback(() => {
     navigator.clipboard.writeText(JSON.stringify(asset, null, 2));
@@ -244,6 +287,22 @@ function AssetDetailPanel({ asset }: { asset: Asset }) {
           >
             Raw JSON
           </button>
+          {isFhir && (
+            <button
+              onClick={() => {
+                setViewMode("fhir");
+                loadFhirBundle();
+              }}
+              className={`text-xs px-2.5 py-1 rounded inline-flex items-center gap-1 ${
+                viewMode === "fhir"
+                  ? "bg-green-900/30 text-green-400"
+                  : "text-gray-400 hover:text-gray-200"
+              }`}
+            >
+              <Activity size={10} />
+              FHIR Viewer
+            </button>
+          )}
         </div>
         <button
           onClick={copyJson}
@@ -255,8 +314,26 @@ function AssetDetailPanel({ asset }: { asset: Asset }) {
       </div>
 
       {/* Content */}
-      <div className="max-h-[400px] overflow-y-auto">
-        {viewMode === "details" ? (
+      <div className="max-h-[500px] overflow-y-auto">
+        {viewMode === "fhir" ? (
+          <div className="p-4">
+            {fhirLoading ? (
+              <div className="flex items-center gap-2 text-gray-500 py-6 justify-center">
+                <Loader2 size={14} className="animate-spin" />
+                Loading FHIR bundle…
+              </div>
+            ) : fhirBundle ? (
+              <FhirResourceViewer
+                bundle={fhirBundle}
+                title={`FHIR Resources — ${name}`}
+              />
+            ) : (
+              <p className="text-gray-500 text-xs text-center py-6">
+                No FHIR bundle data available for this asset.
+              </p>
+            )}
+          </div>
+        ) : viewMode === "details" ? (
           <div className="p-4 space-y-3">
             {/* Extra top-level properties */}
             {extraEntries.length > 0 && (
