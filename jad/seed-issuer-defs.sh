@@ -77,10 +77,10 @@ create_def "attestations" "manufacturer-attestation-def-1" \
   '{"attestationType":"manufacturer","configuration":{},"id":"manufacturer-attestation-def-1"}'
 
 create_def "attestations" "ehds-membership-attestation" \
-  '{"attestationType":"membership","configuration":{},"id":"ehds-membership-attestation"}'
+  '{"attestationType":"ehds-participant","configuration":{},"id":"ehds-membership-attestation"}'
 
 create_def "attestations" "ehds-manufacturer-attestation" \
-  '{"attestationType":"manufacturer","configuration":{},"id":"ehds-manufacturer-attestation"}'
+  '{"attestationType":"ehds-quality","configuration":{},"id":"ehds-manufacturer-attestation"}'
 
 # ── Credential Definitions ───────────────────────────────────────────────
 echo ""

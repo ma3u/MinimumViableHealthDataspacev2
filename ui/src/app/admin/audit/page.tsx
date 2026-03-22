@@ -1,7 +1,7 @@
 "use client";
 
 import { fetchApi } from "@/lib/api";
-import { useEffect, useState, useCallback } from "react";
+import { Fragment, useEffect, useState, useCallback } from "react";
 import {
   Loader2,
   ScrollText,
@@ -801,14 +801,12 @@ export default function AdminAuditPage() {
                         </tr>
                       </thead>
                       <tbody>
-                        {data.negotiations.map((n) => {
-                          const rowKey =
-                            n.id || n.contractId || String(Math.random());
+                        {data.negotiations.map((n, nIdx) => {
+                          const rowKey = n.id || n.contractId || `neg-${nIdx}`;
                           const isOpen = expandedNeg.has(rowKey);
                           return (
-                            <>
+                            <Fragment key={rowKey}>
                               <tr
-                                key={rowKey}
                                 className="border-b border-gray-800 hover:bg-gray-800/40 cursor-pointer"
                                 onClick={() =>
                                   setExpandedNeg((prev) => {
@@ -894,10 +892,7 @@ export default function AdminAuditPage() {
 
                               {/* Expanded policy card */}
                               {isOpen && (
-                                <tr
-                                  key={`${rowKey}-detail`}
-                                  className="border-b border-gray-700 bg-gray-900/60"
-                                >
+                                <tr className="border-b border-gray-700 bg-gray-900/60">
                                   <td colSpan={8} className="px-6 py-4">
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                       {/* Policy details */}
@@ -991,7 +986,7 @@ export default function AdminAuditPage() {
                                   </td>
                                 </tr>
                               )}
-                            </>
+                            </Fragment>
                           );
                         })}
                       </tbody>

@@ -427,19 +427,21 @@ echo ""
 # =============================================================================
 # Step 5: Activate Participant Contexts
 # =============================================================================
-# CFM provisioning creates participant contexts in CREATED state (200).
-# DID documents are only served when contexts are ACTIVATED (300).
+# CFM provisioning creates participant contexts in CREATED state.
+# DID documents are only served when contexts are ACTIVATED.
 # The management API activation endpoint returns 403, so we use PostgreSQL directly.
+# IH uses state 300=ACTIVATED, CP uses state 200=ACTIVATED.
 echo "────────────────────────────────────────────────"
 echo "Step 5: Activate Participant Contexts"
 echo "────────────────────────────────────────────────"
 
+# IdentityHub: state 200 → 300 (ACTIVATED)
 ACTIVATED=$(docker exec health-dataspace-postgres psql -U ih -d identityhub -tAc \
   "UPDATE participant_context SET state = 300 WHERE state = 200 RETURNING participant_context_id;" 2>/dev/null || echo "")
 
 if [ -n "$ACTIVATED" ]; then
   ACTIVATED_COUNT=$(echo "$ACTIVATED" | grep -c . || echo 0)
-  ok "Activated $ACTIVATED_COUNT participant context(s)"
+  ok "Activated $ACTIVATED_COUNT participant context(s) in IdentityHub"
   echo "$ACTIVATED" | while read -r pid; do
     echo "    - $pid"
   done
@@ -447,7 +449,20 @@ else
   # Check if already activated
   ACTIVE_COUNT=$(docker exec health-dataspace-postgres psql -U ih -d identityhub -tAc \
     "SELECT COUNT(*) FROM participant_context WHERE state = 300;" 2>/dev/null || echo "0")
-  ok "All $ACTIVE_COUNT participant context(s) already activated"
+  ok "All $ACTIVE_COUNT participant context(s) already activated in IdentityHub"
+fi
+
+# ControlPlane: state 100 → 200 (ACTIVATED)
+CP_ACTIVATED=$(docker exec health-dataspace-postgres psql -U cp -d controlplane -tAc \
+  "UPDATE participant_context SET state = 200 WHERE state = 100 RETURNING participant_context_id;" 2>/dev/null || echo "")
+
+if [ -n "$CP_ACTIVATED" ]; then
+  CP_COUNT=$(echo "$CP_ACTIVATED" | grep -c . || echo 0)
+  ok "Activated $CP_COUNT participant context(s) in ControlPlane"
+else
+  CP_ACTIVE=$(docker exec health-dataspace-postgres psql -U cp -d controlplane -tAc \
+    "SELECT COUNT(*) FROM participant_context WHERE state = 200;" 2>/dev/null || echo "0")
+  ok "All $CP_ACTIVE participant context(s) already activated in ControlPlane"
 fi
 
 echo ""

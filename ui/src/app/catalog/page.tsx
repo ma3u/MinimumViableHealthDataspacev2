@@ -228,11 +228,11 @@ function CatalogContent() {
         <p className="text-gray-500">No datasets found.</p>
       ) : (
         <div className="grid gap-4">
-          {visible.map((d) => {
+          {visible.map((d, idx) => {
             const isOpen = expanded === d.id;
             return (
               <div
-                key={d.id}
+                key={d.id ?? `dataset-${idx}`}
                 className={`border rounded-xl transition-colors ${
                   isOpen
                     ? "border-layer2 bg-gray-900/60"

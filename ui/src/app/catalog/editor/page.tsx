@@ -428,9 +428,9 @@ function EditorContent() {
             </p>
           ) : (
             <div className="grid gap-3">
-              {datasets.map((d) => (
+              {datasets.map((d, idx) => (
                 <div
-                  key={d.id}
+                  key={d.id ?? `entry-${idx}`}
                   className="border border-gray-700 rounded-xl p-4 hover:border-purple-500/50 transition-colors group"
                 >
                   <div className="flex items-start justify-between gap-3">

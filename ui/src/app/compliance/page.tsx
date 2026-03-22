@@ -117,8 +117,8 @@ export default function CompliancePage() {
               className="mt-1 w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded text-sm outline-none focus:border-layer5 block"
             >
               <option value="">— select consumer —</option>
-              {consumers.map((c) => (
-                <option key={c.id} value={c.id}>
+              {consumers.map((c, idx) => (
+                <option key={`${c.id}-${idx}`} value={c.id}>
                   {c.name} [{c.type}]
                 </option>
               ))}
@@ -147,8 +147,8 @@ export default function CompliancePage() {
               className="mt-1 w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded text-sm outline-none focus:border-layer5 block"
             >
               <option value="">— select dataset —</option>
-              {datasets.map((d) => (
-                <option key={d.id} value={d.id}>
+              {datasets.map((d, idx) => (
+                <option key={`${d.id}-${idx}`} value={d.id}>
                   {d.title}
                 </option>
               ))}

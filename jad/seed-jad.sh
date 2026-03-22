@@ -369,26 +369,6 @@ PROFILE_RESPONSE=$(curl -s -X POST "$TM_HOST/api/v1alpha1/dataspace-profiles" \
           "format": "VC1_0_JWT",
           "id": "manufacturer-credential-def",
           "role": "manufacturer"
-        },
-        {
-          "type": "EHDSParticipantCredential",
-          "issuer": "did:web:issuerservice%3A10016:issuer",
-          "format": "VC1_0_JWT",
-          "id": "ehds-participant-credential-def"
-        },
-        {
-          "type": "DataProcessingPurposeCredential",
-          "issuer": "did:web:issuerservice%3A10016:issuer",
-          "format": "VC1_0_JWT",
-          "id": "data-processing-purpose-credential-def",
-          "role": "data-user"
-        },
-        {
-          "type": "DataQualityLabelCredential",
-          "issuer": "did:web:issuerservice%3A10016:issuer",
-          "format": "VC1_0_JWT",
-          "id": "data-quality-label-credential-def",
-          "role": "data-holder"
         }
       ]
     }

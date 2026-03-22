@@ -109,6 +109,7 @@ async function getAccessToken(): Promise<string> {
       client_id: clientId,
       client_secret: clientSecret,
     }),
+    cache: "no-store",
   });
 
   if (!response.ok) {
@@ -178,6 +179,7 @@ async function apiRequest<T = unknown>(
     headers,
     body: body ? JSON.stringify(body) : undefined,
     signal: options.signal,
+    cache: "no-store",
   });
 
   if (!response.ok) {

@@ -54,6 +54,7 @@ async function runCypher(
 
   const res = await fetch(txUrl, {
     method: "POST",
+    cache: "no-store",
     headers: {
       "Content-Type": "application/json",
       Authorization:

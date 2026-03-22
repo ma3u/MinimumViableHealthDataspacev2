@@ -33,6 +33,8 @@ const IGNORED_CONSOLE_PATTERNS = [
   // 502/503 from backend services — covered by the API-health tests below
   /the server responded with a status of 50[0-9]/i,
   /Failed to load resource.*50[0-9]/i,
+  // Third-party lib (react-force-graph-2d) doesn't use forwardRef; benign
+  /Function components cannot be given refs/,
 ];
 
 const IGNORED_REQUEST_PATTERNS = [

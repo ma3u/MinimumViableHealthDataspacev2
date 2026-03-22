@@ -407,12 +407,13 @@ function DataDiscoverContent() {
                 </h2>
               )}
               <div className="grid gap-3">
-                {visibleAssets.map((a) => {
-                  const id = a["@id"] || String(Math.random());
+                {visibleAssets.map((a, idx) => {
+                  const id = a["@id"] || `asset-${idx}`;
+                  const uniqueKey = `${a._participantId ?? idx}-${id}`;
                   const isOpen = expanded === id;
                   return (
                     <div
-                      key={id}
+                      key={uniqueKey}
                       className={`border rounded-xl transition-colors ${
                         isOpen
                           ? "border-layer2 bg-gray-900/60"
