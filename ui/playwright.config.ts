@@ -34,6 +34,7 @@ export default defineConfig({
     {
       name: "chromium",
       use: { ...devices["Desktop Chrome"] },
+      testIgnore: /13-live-data-validation/,
     },
     {
       name: "live",
