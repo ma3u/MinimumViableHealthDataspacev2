@@ -67,6 +67,9 @@ export async function GET(req: NextRequest) {
   return NextResponse.json(merged);
 }
 
+/** Mock agreement IDs follow pattern: agreement-fhir-<type>-<NNN> */
+const MOCK_AGREEMENT_RE = /^agreement-fhir-[\w-]+-\d{3}$/;
+
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
@@ -85,6 +88,26 @@ export async function POST(req: NextRequest) {
             "participantId, contractId, and counterPartyAddress are required",
         },
         { status: 400 },
+      );
+    }
+
+    // Demo-mode: if the contractId is a mock agreement, simulate a
+    // successful transfer instead of hitting the real controlplane.
+    if (MOCK_AGREEMENT_RE.test(contractId)) {
+      return NextResponse.json(
+        {
+          "@type": "TransferProcess",
+          "@id": `transfer-demo-${Date.now()}`,
+          state: "REQUESTED",
+          stateTimestamp: Date.now(),
+          type: "CONSUMER",
+          contractId,
+          assetId: assetId || "",
+          transferType: transferType || "HttpData-PULL",
+          counterPartyAddress,
+          _demo: true,
+        },
+        { status: 201 },
       );
     }
 

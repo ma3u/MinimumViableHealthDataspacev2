@@ -170,8 +170,8 @@ describe("Keycloak realm configuration", () => {
   describe("users", () => {
     const users = realm.users;
 
-    it("should have exactly 3 health dataspace users", () => {
-      expect(users).toHaveLength(3);
+    it("should have exactly 4 health dataspace users", () => {
+      expect(users).toHaveLength(4);
     });
 
     it("edcadmin user should have EDC_ADMIN role", () => {
@@ -193,6 +193,16 @@ describe("Keycloak realm configuration", () => {
       expect(user).toBeDefined();
       expect(user.enabled).toBe(true);
       expect(user.email).toBe("clinic@health-dataspace.local");
+      expect(user.realmRoles).toContain("EDC_USER_PARTICIPANT");
+    });
+
+    it("researcher should have EDC_USER_PARTICIPANT role", () => {
+      const user = users.find(
+        (u: { username: string }) => u.username === "researcher",
+      );
+      expect(user).toBeDefined();
+      expect(user.enabled).toBe(true);
+      expect(user.email).toBe("researcher@pharmaco.de");
       expect(user.realmRoles).toContain("EDC_USER_PARTICIPANT");
     });
 

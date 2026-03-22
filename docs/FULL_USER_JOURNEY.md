@@ -35,8 +35,9 @@ states, and Decentralised Claims Protocol (DCP v1.0) operations.
 
 | Persona          | User         | Role                   | Organisation            | DID                                   |
 | ---------------- | ------------ | ---------------------- | ----------------------- | ------------------------------------- |
+| Portal Admin     | `edcadmin`   | `EDC_ADMIN`            | Dataspace Operator      | _(system-level, no DID)_              |
 | Data Holder      | `clinicuser` | `EDC_USER_PARTICIPANT` | AlphaKlinik Berlin (DE) | `did:web:alpha-klinik.de:participant` |
-| Data User        | `edcadmin`   | `EDC_ADMIN`            | PharmaCo Research AG    | `did:web:pharmaco.de:research`        |
+| Data User        | `researcher` | `EDC_USER_PARTICIPANT` | PharmaCo Research AG    | `did:web:pharmaco.de:research`        |
 | HDAB (Authority) | `regulator`  | `HDAB_AUTHORITY`       | MedReg DE               | `did:web:medreg.de:hdab`              |
 
 All passwords match the username (local dev only).
@@ -57,7 +58,7 @@ sequenceDiagram
     autonumber
     participant OP as Operator<br/>(edcadmin)
     participant DH as Data Holder<br/>(clinicuser)
-    participant DU as Data User<br/>(edcadmin)
+    participant DU as Data User<br/>(researcher)
     participant HDAB as HDAB<br/>(regulator)
     participant KC as Keycloak
     participant CP as EDC-V<br/>Control Plane
@@ -111,7 +112,7 @@ sequenceDiagram
     rect rgb(30, 41, 59)
     Note over DU,CP: Step 4 — Request Access (Art. 48, DSP §7.1 Negotiation)
     DU->>KC: Authenticate (OIDC)
-    KC-->>DU: Access token (EDC_ADMIN)
+    KC-->>DU: Access token (EDC_USER_PARTICIPANT)
     DU->>UI: Navigate to /negotiate
     DU->>CP: GET contract offers
     CP-->>DU: Available offers
@@ -293,7 +294,7 @@ sequenceDiagram
 
 | Field          | Value                                  |
 | -------------- | -------------------------------------- |
-| **Actor**      | Data User (`edcadmin`)                 |
+| **Actor**      | Data User (`researcher`)               |
 | **EHDS Ref**   | Art. 47 — Data Access Application      |
 | **DSP Ref**    | DSP §5 — Catalog Protocol              |
 | **UI Pages**   | `/catalog`, `/data/discover`, `/graph` |
@@ -338,7 +339,7 @@ sequenceDiagram
 
 | Field          | Value                                                         |
 | -------------- | ------------------------------------------------------------- |
-| **Actor**      | Data User (`edcadmin`)                                        |
+| **Actor**      | Data User (`researcher`)                                      |
 | **EHDS Ref**   | Art. 48 — Data Permit                                         |
 | **DSP Ref**    | DSP §7.1 — Contract Negotiation Protocol                      |
 | **UI Page**    | `/negotiate`                                                  |
@@ -386,13 +387,13 @@ sequenceDiagram
 
 ### Step 5 — Contract Negotiation & Approval
 
-| Field          | Value                                                                  |
-| -------------- | ---------------------------------------------------------------------- |
-| **Actors**     | Data User (`edcadmin`), Data Holder (`clinicuser`), HDAB (`regulator`) |
-| **EHDS Ref**   | Art. 49 — HDAB decision on data permit                                 |
-| **DSP Ref**    | DSP §7.1 — Contract Negotiation lifecycle                              |
-| **UI Pages**   | `/negotiate`, `/admin/policies`, `/compliance`                         |
-| **API Routes** | `GET /api/negotiations`, `GET /api/tasks`                              |
+| Field          | Value                                                                    |
+| -------------- | ------------------------------------------------------------------------ |
+| **Actors**     | Data User (`researcher`), Data Holder (`clinicuser`), HDAB (`regulator`) |
+| **EHDS Ref**   | Art. 49 — HDAB decision on data permit                                   |
+| **DSP Ref**    | DSP §7.1 — Contract Negotiation lifecycle                                |
+| **UI Pages**   | `/negotiate`, `/admin/policies`, `/compliance`                           |
+| **API Routes** | `GET /api/negotiations`, `GET /api/tasks`                                |
 
 **Flow — Multi-User Interaction:**
 
@@ -427,7 +428,7 @@ sequenceDiagram
 
 | Field          | Value                                                          |
 | -------------- | -------------------------------------------------------------- |
-| **Actor**      | Data User (`edcadmin`)                                         |
+| **Actor**      | Data User (`researcher`)                                       |
 | **EHDS Ref**   | Art. 50 — Secure Processing Environment                        |
 | **DSP Ref**    | DSP §8 — Transfer Process Protocol                             |
 | **UI Pages**   | `/data/transfer`, `/data/share`, `/graph`                      |
@@ -477,7 +478,7 @@ sequenceDiagram
 
 | Field          | Value                                                                              |
 | -------------- | ---------------------------------------------------------------------------------- |
-| **Actor**      | Data User (`edcadmin`), HDAB (`regulator`)                                         |
+| **Actor**      | Data User (`researcher`), HDAB (`regulator`)                                       |
 | **EHDS Ref**   | Art. 52 — Fees & cost recovery; Art. 53 — Secondary-use categories                 |
 | **UI Pages**   | `/analytics`, `/patient`, `/compliance`, `/eehrxf`                                 |
 | **API Routes** | `GET /api/analytics`, `GET /api/patient`, `GET /api/compliance`, `GET /api/eehrxf` |

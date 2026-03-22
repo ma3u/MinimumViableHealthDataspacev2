@@ -82,7 +82,7 @@ export async function skipIfNeo4jDown(page: Page) {
 export async function skipIfKeycloakDown() {
   try {
     const res = await fetch(
-      "http://localhost:8080/realms/EDCV/.well-known/openid-configuration",
+      "http://localhost:8080/realms/edcv/.well-known/openid-configuration",
       { signal: AbortSignal.timeout(3_000) },
     );
     if (!res.ok) test.skip(true, "Keycloak unavailable");

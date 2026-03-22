@@ -321,6 +321,21 @@
         }
       ],
       "realmRoles": ["HDAB_AUTHORITY"]
+    },
+    {
+      "username": "researcher",
+      "enabled": true,
+      "email": "researcher@pharmaco.de",
+      "firstName": "Research",
+      "lastName": "Analyst",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "researcher",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["EDC_USER_PARTICIPANT"]
     }
   ],
   "groups": [],

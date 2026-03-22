@@ -3,7 +3,7 @@ import { test, expect } from "@playwright/test";
 async function isKeycloakUp(): Promise<boolean> {
   try {
     const res = await fetch(
-      "http://localhost:8080/realms/EDCV/.well-known/openid-configuration",
+      "http://localhost:8080/realms/edcv/.well-known/openid-configuration",
       { signal: AbortSignal.timeout(3_000) },
     );
     return res.ok;
