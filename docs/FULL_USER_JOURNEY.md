@@ -67,7 +67,6 @@ sequenceDiagram
     participant NEO as Neo4j
     participant UI as UI<br/>(Next.js)
 
-    rect rgb(30, 41, 59)
     Note over OP,IH: Step 0 — Participant Onboarding (Art. 33, DCP §4)
     OP->>KC: Authenticate (OIDC)
     KC-->>OP: Access token (EDC_ADMIN)
@@ -77,9 +76,7 @@ sequenceDiagram
     CP->>IH: Issue MembershipCredential
     CP->>IH: Issue EHDSParticipantCredential
     CP-->>OP: Participants registered ✓
-    end
 
-    rect rgb(30, 41, 59)
     Note over DH,NEO: Step 1 — Create Metadata (Art. 45, HealthDCAT-AP 3.0)
     DH->>KC: Authenticate (OIDC)
     KC-->>DH: Access token (EDC_USER_PARTICIPANT)
@@ -88,17 +85,13 @@ sequenceDiagram
     CP->>NEO: Store dataset catalog entry
     NEO-->>CP: Dataset ID
     CP-->>DH: Asset registered ✓
-    end
 
-    rect rgb(30, 41, 59)
     Note over DH,CP: Step 2 — Publish with Policies (Art. 46, ODRL 2.2)
     DH->>CP: Create ODRL access policy
     DH->>CP: Create ODRL usage policy
     DH->>CP: Create contract definition (asset + policies)
     CP-->>DH: Catalog offering published ✓
-    end
 
-    rect rgb(30, 41, 59)
     Note over DU,NEO: Step 3 — Discover Assets (Art. 47, DSP §5 Catalog)
     DU->>UI: Browse /catalog (public)
     UI->>CP: GET /api/catalog
@@ -107,9 +100,7 @@ sequenceDiagram
     UI->>NEO: GET /api/graph
     NEO-->>UI: Nodes & relationships
     DU->>UI: Search /data/discover (federated)
-    end
 
-    rect rgb(30, 41, 59)
     Note over DU,CP: Step 4 — Request Access (Art. 48, DSP §7.1 Negotiation)
     DU->>KC: Authenticate (OIDC)
     KC-->>DU: Access token (EDC_USER_PARTICIPANT)
@@ -118,9 +109,7 @@ sequenceDiagram
     CP-->>DU: Available offers
     DU->>CP: POST ContractRequestMessage
     CP-->>DU: State: REQUESTED
-    end
 
-    rect rgb(30, 41, 59)
     Note over DH,HDAB: Step 5 — Negotiation & Approval (Art. 49, DSP §7.1)
     CP->>DH: Notify: new request
     DH->>CP: ContractOfferMessage
@@ -133,9 +122,7 @@ sequenceDiagram
     CP->>DU: ContractAgreementMessage
     CP-->>DU: State: FINALIZED (contractAgreementId)
     Note right of CP: Rejected → TERMINATED
-    end
 
-    rect rgb(30, 41, 59)
     Note over DU,NEO: Step 6 — Data Transfer (Art. 50, DSP §8 Transfer)
     DU->>UI: Navigate to /data/transfer
     DU->>CP: TransferRequestMessage (agreementId)
@@ -147,9 +134,7 @@ sequenceDiagram
     DU->>CP: TransferCompletionMessage
     CP-->>DU: State: COMPLETED
     CP->>NEO: Log audit event
-    end
 
-    rect rgb(30, 41, 59)
     Note over DU,NEO: Step 7 — Analytics & Compliance (Art. 52–53)
     DU->>UI: View /analytics (OMOP cohort stats)
     UI->>NEO: GET /api/analytics
@@ -162,7 +147,6 @@ sequenceDiagram
     HDAB->>UI: Review /compliance (audit chain)
     UI->>NEO: GET /api/admin/audit
     NEO-->>UI: Audit trail
-    end
 ```
 
 ---

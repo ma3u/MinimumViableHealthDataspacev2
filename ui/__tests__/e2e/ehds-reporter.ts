@@ -29,6 +29,8 @@ interface JourneyStep {
   endpoints: string[];
   uiPages: string[];
   actor: string;
+  /** Anchor fragment in FULL_USER_JOURNEY.md (without #) */
+  docAnchor: string;
   /** Test ID prefix patterns that belong to this step */
   testPatterns: RegExp[];
 }
@@ -38,6 +40,8 @@ const DSP_BASE =
   "https://eclipse-dataspace-protocol-base.github.io/DataspaceProtocol/2025-1-err1";
 const DCP_BASE =
   "https://eclipse-dataspace-dcp.github.io/decentralized-claims-protocol/v1.0.1";
+const DOCS_BASE =
+  "https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docs/FULL_USER_JOURNEY.md";
 
 const JOURNEY_STEPS: JourneyStep[] = [
   {
@@ -50,6 +54,7 @@ const JOURNEY_STEPS: JourneyStep[] = [
     endpoints: ["/api/participants", "/api/credentials"],
     uiPages: ["/onboarding", "/credentials"],
     actor: "Portal Admin (edcadmin)",
+    docAnchor: "step-0--participant-onboarding",
     testPatterns: [/^A ·/, /J0[1-5]\b/],
   },
   {
@@ -62,6 +67,7 @@ const JOURNEY_STEPS: JourneyStep[] = [
     endpoints: ["/api/assets", "/api/catalog"],
     uiPages: ["/data/share", "/catalog"],
     actor: "Data Holder (clinicuser)",
+    docAnchor: "step-1--data-provider-creates-metadata",
     testPatterns: [/^B ·/, /J(0[6-9]|1[0-5])\b/],
   },
   {
@@ -74,6 +80,7 @@ const JOURNEY_STEPS: JourneyStep[] = [
     endpoints: ["/api/admin/policies", "/api/catalog"],
     uiPages: ["/admin/policies", "/catalog"],
     actor: "Data Holder (clinicuser)",
+    docAnchor: "step-2--publish-with-access--usage-policies",
     testPatterns: [/^C ·/, /J(1[6-9]|2[0-2])\b/],
   },
   {
@@ -86,6 +93,7 @@ const JOURNEY_STEPS: JourneyStep[] = [
     endpoints: ["/api/catalog", "/api/graph", "/api/patient", "/api/analytics"],
     uiPages: ["/catalog", "/graph", "/patient", "/analytics"],
     actor: "Data User (researcher)",
+    docAnchor: "step-3--consumer-discovers-assets",
     testPatterns: [/^D ·/, /J(2[3-9]|30)\b/, /^K ·/, /J8[2-9]\b/, /J9[01]\b/],
   },
   {
@@ -98,6 +106,7 @@ const JOURNEY_STEPS: JourneyStep[] = [
     endpoints: ["/api/negotiations", "/api/tasks", "/api/assets"],
     uiPages: ["/negotiate"],
     actor: "Data User (researcher)",
+    docAnchor: "step-4--request-access-to-datasets",
     testPatterns: [/^E ·/, /J(3[1-9]|40)\b/, /J9[2569]\b/],
   },
   {
@@ -110,6 +119,7 @@ const JOURNEY_STEPS: JourneyStep[] = [
     endpoints: ["/api/negotiations", "/api/tasks"],
     uiPages: ["/negotiate", "/compliance"],
     actor: "Data User + HDAB (regulator)",
+    docAnchor: "step-5--contract-negotiation--approval",
     testPatterns: [/^G ·/, /J(49|50)\b/],
   },
   {
@@ -122,6 +132,7 @@ const JOURNEY_STEPS: JourneyStep[] = [
     endpoints: ["/api/transfers", "/api/tasks", "/api/admin/audit"],
     uiPages: ["/data/transfer", "/data/share", "/graph"],
     actor: "Data User (researcher)",
+    docAnchor: "step-6--data-transfer--access",
     testPatterns: [
       /^F ·/,
       /J4[1-8]\b/,
@@ -146,6 +157,7 @@ const JOURNEY_STEPS: JourneyStep[] = [
     ],
     uiPages: ["/analytics", "/patient", "/compliance", "/eehrxf"],
     actor: "Data User (researcher) + HDAB (regulator)",
+    docAnchor: "step-7--analytics--compliance",
     testPatterns: [
       /^H ·/,
       /J5[6-9]\b/,
@@ -329,6 +341,14 @@ class EhdsReporter implements Reporter {
         </div>
 
         <div class="step-refs">
+          <div class="ref-group">
+            <span class="ref-label">Docs:</span>
+            <a href="${DOCS_BASE}#${
+              step.docAnchor
+            }" target="_blank" rel="noopener">Step ${step.id} — ${escapeHtml(
+              step.title,
+            )} &#x2197;</a>
+          </div>
           <div class="ref-group">
             <span class="ref-label">EHDS:</span>
             <a href="${
