@@ -70,17 +70,16 @@ jobs:
         env:
           NEXT_PUBLIC_STATIC_EXPORT: "true"
 
-      - name: Copy test reports and E2E report to output
+      - name: Copy test reports to output (CI-generated)
         run: |
-          mkdir -p out/test-reports
+          mkdir -p out/test-reports out/ci-e2e-report
           # Vitest coverage
           cp -r coverage/ out/test-reports/coverage/ 2>/dev/null || true
           cp test-results.json out/test-reports/ 2>/dev/null || true
-          # Playwright HTML report — committed in public/e2e-report/ (includes
-          # live project results from localhost:3003 JAD stack). CI only runs
-          # chromium so we merge CI screenshots without overwriting the
-          # committed index.html or ehds-journey.html.
-          cp -rn playwright-report/* out/e2e-report/ 2>/dev/null || true
+          # CI Playwright report goes to ci-e2e-report/ (chromium-only).
+          # The committed public/e2e-report/ (live + chromium from JAD stack)
+          # is already in out/e2e-report/ via Next.js static export.
+          cp -r playwright-report/* out/ci-e2e-report/ 2>/dev/null || true
           # Generate comprehensive test report dashboard
           node ../scripts/generate-test-report-page.js . out/test-reports || echo "Report generation skipped"
 
