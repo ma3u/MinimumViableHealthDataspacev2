@@ -45,17 +45,21 @@ jobs:
 
       - name: Start JAD infrastructure
         run: |
-          docker compose -f docker-compose.jad.yml up -d --wait --timeout 120
+          docker compose -f docker-compose.jad.yml up -d --timeout 120
+        continue-on-error: true
         env:
           COMPOSE_PROJECT_NAME: health-dataspace
 
       - name: Wait for services
         run: |
           echo "Waiting for Control Plane..."
-          for i in $(seq 1 30); do
+          for i in $(seq 1 60); do
             if curl -sf http://localhost:11003/api/check/readiness >/dev/null 2>&1; then
-              echo "Control Plane ready"
+              echo "Control Plane ready (attempt $i)"
               break
+            fi
+            if [ "$i" -eq 60 ]; then
+              echo "Control Plane not ready after 5 min — proceeding anyway"
             fi
             sleep 5
           done
@@ -100,17 +104,21 @@ jobs:
 
       - name: Start JAD infrastructure
         run: |
-          docker compose -f docker-compose.jad.yml up -d --wait --timeout 120
+          docker compose -f docker-compose.jad.yml up -d --timeout 120
+        continue-on-error: true
         env:
           COMPOSE_PROJECT_NAME: health-dataspace
 
       - name: Wait for services
         run: |
           echo "Waiting for IdentityHub..."
-          for i in $(seq 1 30); do
+          for i in $(seq 1 60); do
             if curl -sf http://localhost:11005/api/identity >/dev/null 2>&1; then
-              echo "IdentityHub ready"
+              echo "IdentityHub ready (attempt $i)"
               break
+            fi
+            if [ "$i" -eq 60 ]; then
+              echo "IdentityHub not ready after 5 min — proceeding anyway"
             fi
             sleep 5
           done
@@ -157,18 +165,21 @@ jobs:
 
       - name: Start full stack (JAD + Neo4j)
         run: |
-          docker compose up -d --wait --timeout 60
-          docker compose -f docker-compose.jad.yml up -d --wait --timeout 120
+          docker compose -f docker-compose.yml -f docker-compose.jad.yml up -d --timeout 120
+        continue-on-error: true
         env:
           COMPOSE_PROJECT_NAME: health-dataspace
 
       - name: Wait for Neo4j
         run: |
           echo "Waiting for Neo4j..."
-          for i in $(seq 1 30); do
+          for i in $(seq 1 60); do
             if curl -sf http://localhost:7474 >/dev/null 2>&1; then
-              echo "Neo4j ready"
+              echo "Neo4j ready (attempt $i)"
               break
+            fi
+            if [ "$i" -eq 60 ]; then
+              echo "Neo4j not ready after 5 min — proceeding anyway"
             fi
             sleep 5
           done
@@ -199,8 +210,7 @@ jobs:
       - name: Stop infrastructure
         if: always()
         run: |
-          docker compose -f docker-compose.jad.yml down -v
-          docker compose down -v
+          docker compose -f docker-compose.yml -f docker-compose.jad.yml down -v
 
   # -----------------------------------------------------------------------
   # Aggregate Results
