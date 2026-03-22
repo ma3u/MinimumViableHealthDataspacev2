@@ -251,7 +251,14 @@ beforeEach(() => {
   mockTenant.mockImplementation((path: string) => {
     if (path === "/v1alpha1/tenants") return Promise.resolve(MOCK_TENANTS);
     if (path.includes("/participant-profiles"))
-      return Promise.resolve([{ participantContextId: "ctx-alpha" }]);
+      return Promise.resolve([
+        {
+          identifier: "did:web:alpha-klinik.de:participant",
+          properties: {
+            "cfm.vpa.state": { participantContextId: "ctx-alpha" },
+          },
+        },
+      ]);
     return Promise.resolve([]);
   });
   mockManagement.mockResolvedValue(MOCK_EDC_PARTICIPANTS);
@@ -587,6 +594,15 @@ describe("participant data from edcClient", () => {
       if (path === "/v1alpha1/tenants") return Promise.resolve(MOCK_TENANTS);
       if (path.includes("t1/participant-profiles"))
         return Promise.reject(new Error("timeout"));
+      if (path.includes("/participant-profiles"))
+        return Promise.resolve([
+          {
+            identifier: "did:web:alpha-klinik.de:participant",
+            properties: {
+              "cfm.vpa.state": { participantContextId: "ctx-alpha" },
+            },
+          },
+        ]);
       return Promise.resolve([]);
     });
     setupDockerAvailable(CONTAINERS);

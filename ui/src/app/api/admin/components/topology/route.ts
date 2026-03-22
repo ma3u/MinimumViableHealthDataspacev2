@@ -342,16 +342,23 @@ export async function GET() {
     }
 
     for (const t of tenants) {
-      let profiles: { participantContextId?: string }[] = [];
+      let profiles: {
+        identifier?: string;
+        properties?: {
+          "cfm.vpa.state"?: { participantContextId?: string };
+          [k: string]: unknown;
+        };
+      }[] = [];
       try {
-        profiles = await edcClient.tenant<{ participantContextId?: string }[]>(
+        profiles = await edcClient.tenant<typeof profiles>(
           `/v1alpha1/tenants/${t.id}/participant-profiles`,
         );
       } catch {
         /* no profiles */
       }
 
-      const ctxId = profiles?.[0]?.participantContextId;
+      const ctxId =
+        profiles?.[0]?.properties?.["cfm.vpa.state"]?.participantContextId;
       const ctx = edcParticipants.find((p) => p["@id"] === ctxId);
 
       // Build per-participant component list
@@ -393,7 +400,11 @@ export async function GET() {
         displayName: t.properties?.displayName || t.id,
         organization: t.properties?.organization || "—",
         role: t.properties?.ehdsParticipantType || t.properties?.role || "—",
-        did: ctx?.identity || t.properties?.did || "—",
+        did:
+          ctx?.identity ||
+          profiles?.[0]?.identifier ||
+          t.properties?.did ||
+          "—",
         state: ctx?.state || "—",
         health,
         components,
