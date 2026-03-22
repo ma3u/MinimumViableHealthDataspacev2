@@ -78,57 +78,8 @@ jobs:
           cp test-results.json out/test-reports/ 2>/dev/null || true
           # Playwright HTML report
           cp -r playwright-report/* out/e2e-report/ 2>/dev/null || true
-          # Generate test report index
-          node -e "
-          const fs = require('fs');
-          const r = JSON.parse(fs.readFileSync('test-results.json','utf8'));
-          const cov = (() => { try { return JSON.parse(fs.readFileSync('coverage/coverage-summary.json','utf8')); } catch { return null; } })();
-          const total = cov?.total || {};
-          const passed = r.numPassedTests || 0;
-          const failed = r.numFailedTests || 0;
-          const files = r.numPassedTestSuites || 0;
-          const html = \`<!DOCTYPE html>
-          <html lang='en'><head><meta charset='utf-8'/>
-          <title>Test Report — Health Dataspace v2</title>
-          <style>
-          body{font-family:system-ui,-apple-system,sans-serif;max-width:900px;margin:2rem auto;padding:0 1rem;color:#e2e8f0;background:#0f172a}
-          h1{color:#818cf8}h2{color:#a5b4fc;margin-top:2rem}
-          table{border-collapse:collapse;width:100%;margin:1rem 0}
-          th,td{border:1px solid #334155;padding:0.5rem 1rem;text-align:left}
-          th{background:#1e293b;color:#94a3b8}
-          .pass{color:#4ade80}.fail{color:#f87171}.warn{color:#fbbf24}
-          a{color:#818cf8}
-          .badge{display:inline-block;padding:0.25rem 0.75rem;border-radius:9999px;font-weight:600;font-size:0.875rem}
-          .badge-green{background:#064e3b;color:#4ade80}.badge-red{background:#450a0a;color:#f87171}
-          .badge-blue{background:#1e1b4b;color:#818cf8}
-          </style></head><body>
-          <h1>Test Report — Health Dataspace v2</h1>
-          <p>Generated: \${new Date().toISOString().split('T')[0]}</p>
-          <h2>Summary</h2>
-          <table><tr><th>Metric</th><th>Value</th></tr>
-          <tr><td>Test Files</td><td>\${files}</td></tr>
-          <tr><td>Tests Passed</td><td class='pass'>\${passed}</td></tr>
-          <tr><td>Tests Failed</td><td class='\${failed>0?\"fail\":\"pass\"}'>\${failed}</td></tr>
-          <tr><td>Statements</td><td>\${total.statements?.pct ?? '—'}%</td></tr>
-          <tr><td>Branches</td><td>\${total.branches?.pct ?? '—'}%</td></tr>
-          <tr><td>Functions</td><td>\${total.functions?.pct ?? '—'}%</td></tr>
-          <tr><td>Lines</td><td>\${total.lines?.pct ?? '—'}%</td></tr>
-          </table>
-          <h2>Reports</h2>
-          <ul>
-          <li><a href='coverage/index.html'>Detailed Coverage Report →</a></li>
-          <li><a href='../e2e-report/'>Playwright E2E Report →</a></li>
-          <li><a href='../e2e-report/ehds-journey.html'>EHDS Journey Report →</a></li>
-          </ul>
-          <h2>Links</h2>
-          <ul>
-          <li><a href='https://github.com/ma3u/MinimumViableHealthDataspacev2/actions/workflows/test.yml'>CI Test Suite</a></li>
-          <li><a href='../docs/developer'>Developer Guide</a></li>
-          </ul>
-          </body></html>\`;
-          fs.writeFileSync('out/test-reports/index.html', html);
-          console.log('Test report: ' + passed + ' passed, ' + failed + ' failed, ' + files + ' files');
-          " 2>/dev/null || echo "Report generation skipped"
+          # Generate comprehensive test report dashboard
+          node ../scripts/generate-test-report-page.js . out/test-reports || echo "Report generation skipped"
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
