@@ -1,5 +1,7 @@
 import { test, expect } from "@playwright/test";
 
+const isCI = !!process.env.CI;
+
 const users = [
   { username: "edcadmin", password: "edcadmin", role: "EDC_ADMIN" },
   {
@@ -11,6 +13,8 @@ const users = [
 ];
 
 test.describe("Portal Login flow with all users", () => {
+  test.skip(isCI, "Requires live Keycloak");
+
   for (const user of users) {
     test(`should successfully login as ${user.username} and reach portal`, async ({
       page,

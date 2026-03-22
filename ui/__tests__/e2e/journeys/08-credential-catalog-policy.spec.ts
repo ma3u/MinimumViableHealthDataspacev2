@@ -11,6 +11,8 @@
 import { test, expect } from "@playwright/test";
 import { T, expectHeading, waitForDataLoad, apiGet } from "./helpers";
 
+const isCI = !!process.env.CI;
+
 test.describe("H · Credential Display, Catalog Resilience & Policy Rendering", () => {
   /* ── J50: Settings credential redirect (not authenticated) ─── */
   test("J50 — Settings page redirects unauthenticated users", async ({
@@ -80,6 +82,7 @@ test.describe("H · Credential Display, Catalog Resilience & Policy Rendering", 
   test("J54 — Credentials API returns EHDS credentials for participants", async ({
     page,
   }) => {
+    test.skip(isCI, "Requires live EDC-V / IdentityHub");
     const data = await apiGet(page, "/api/credentials");
     const creds = data.credentials || data;
     expect(Array.isArray(creds)).toBe(true);

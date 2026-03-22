@@ -10,6 +10,8 @@
 import { test, expect } from "@playwright/test";
 import { PARTICIPANT_NAMES, T, expectSigninRedirect, apiGet } from "./helpers";
 
+const isCI = !!process.env.CI;
+
 test.describe("A · Identity & Participant Management", () => {
   /* ── J01: Admin dashboard is protected (auth middleware) ──── */
   test("J01 — Admin dashboard requires authentication", async ({ page }) => {
@@ -49,6 +51,7 @@ test.describe("A · Identity & Participant Management", () => {
   test("J04 — Credentials exist for all participant holders", async ({
     page,
   }) => {
+    test.skip(isCI, "Requires live EDC-V / IdentityHub");
     const data = await apiGet(page, "/api/credentials");
     const creds = data.credentials || data;
     expect(Array.isArray(creds)).toBe(true);
@@ -65,6 +68,7 @@ test.describe("A · Identity & Participant Management", () => {
   test("J05 — Both EHDS and DataQuality credential types exist", async ({
     page,
   }) => {
+    test.skip(isCI, "Requires live EDC-V / IdentityHub");
     const data = await apiGet(page, "/api/credentials");
     const creds = data.credentials || data;
     const types = new Set(

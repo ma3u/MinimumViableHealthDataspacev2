@@ -6,6 +6,8 @@
  */
 import { test, expect } from "@playwright/test";
 
+const isCI = !!process.env.CI;
+
 test.describe("Home Page", () => {
   test("should load and show the brand name", async ({ page }) => {
     await page.goto("/");
@@ -18,6 +20,8 @@ test.describe("Home Page", () => {
 
 test.describe("Graph Explorer", () => {
   test("should load the graph page", async ({ page }) => {
+    test.skip(isCI, "Requires live Neo4j");
+
     await page.goto("/graph");
     await expect(page).toHaveURL(/\/graph/);
     // Graph page has a sidebar with "Layers" heading
@@ -43,6 +47,8 @@ test.describe("Patient Journey", () => {
 
 test.describe("Navigation", () => {
   test("should navigate between pages", async ({ page }) => {
+    test.skip(isCI, "Requires live Neo4j");
+
     await page.goto("/graph");
     await expect(page.locator("text=Health Dataspace").first()).toBeVisible();
 

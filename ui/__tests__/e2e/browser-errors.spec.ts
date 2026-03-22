@@ -9,6 +9,8 @@
  */
 import { test, expect, Page } from "@playwright/test";
 
+const isCI = !!process.env.CI;
+
 /* ── Error collecting helpers ─────────────────────────────────── */
 
 interface PageErrors {
@@ -134,6 +136,9 @@ const PUBLIC_ROUTES = [
 test.describe("Public Pages — zero browser errors", () => {
   for (const { route, label } of PUBLIC_ROUTES) {
     test(`${label} (${route})`, async ({ page }) => {
+      if (isCI && route === "/graph") {
+        test.skip(true, "Requires live Neo4j");
+      }
       const errors = attachErrorCollectors(page);
       await page.goto(route);
       // Wait for first meaningful element so rendering is fully attempted
@@ -161,6 +166,8 @@ const PROTECTED_ROUTES = [
 ];
 
 test.describe("Protected Pages — zero browser errors after login", () => {
+  test.skip(isCI, "Requires live Keycloak");
+
   // Log in once per worker, then navigate directly to each route
   test.beforeEach(async ({ page }) => {
     await loginAsEdcAdmin(page);
@@ -254,6 +261,8 @@ test.describe("Static Asset Integrity", () => {
   test("No 404 requests on Credentials page load (authenticated)", async ({
     page,
   }) => {
+    test.skip(isCI, "Requires live Keycloak");
+
     await loginAsEdcAdmin(page);
     const missing404: string[] = [];
     page.on("response", (response) => {
@@ -277,6 +286,8 @@ test.describe("Static Asset Integrity", () => {
 /* ── Regression: known past bugs ─────────────────────────────── */
 
 test.describe("Regression — previously fixed crashes", () => {
+  test.skip(isCI, "Requires live Keycloak");
+
   test.beforeEach(async ({ page }) => {
     await loginAsEdcAdmin(page);
   });

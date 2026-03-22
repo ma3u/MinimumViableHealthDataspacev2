@@ -17,6 +17,8 @@ import {
   apiGet,
 } from "./helpers";
 
+const isCI = !!process.env.CI;
+
 test.describe("D · Discovery & Federated Search", () => {
   /* ── J23: Search catalog by keyword "FHIR" ───────────────── */
   test("J23 — Catalog page displays FHIR datasets", async ({ page }) => {
@@ -61,6 +63,7 @@ test.describe("D · Discovery & Federated Search", () => {
 
   /* ── J27: Graph Explorer renders layer sidebar ───────────── */
   test("J27 — Graph Explorer shows all 5 graph layers", async ({ page }) => {
+    test.skip(isCI, "Requires live Neo4j");
     await page.goto("/graph");
 
     await expect(page.getByText("Layers").first()).toBeVisible({ timeout: T });
@@ -81,6 +84,8 @@ test.describe("D · Discovery & Federated Search", () => {
   test("J28 — Graph canvas renders and includes FHIR R4 + OMOP CDM", async ({
     page,
   }) => {
+    test.skip(isCI, "Requires live Neo4j");
+
     await page.goto("/graph");
     await expect(page.getByText("Layers").first()).toBeVisible({ timeout: T });
 
