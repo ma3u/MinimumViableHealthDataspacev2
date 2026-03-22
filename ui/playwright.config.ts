@@ -10,7 +10,11 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
   workers: process.env.CI ? 1 : undefined,
-  reporter: [["html", { open: "never" }], ["./__tests__/e2e/ehds-reporter.ts"]],
+  reporter: [
+    ["html", { open: "never" }],
+    ["./__tests__/e2e/ehds-reporter.ts"],
+    ...(process.env.CI ? [["line"] as ["line"]] : []),
+  ],
   timeout: 30_000,
 
   use: {

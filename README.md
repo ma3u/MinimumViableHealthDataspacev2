@@ -523,11 +523,12 @@ Coverage reports and Playwright HTML reports are uploaded as GitHub Actions arti
 
 **Published Reports (GitHub Pages):**
 
-| Report                | URL                                                                                  |
-| --------------------- | ------------------------------------------------------------------------------------ |
-| Unit Test Coverage    | [test-reports/](https://ma3u.github.io/MinimumViableHealthDataspacev2/test-reports/) |
-| Playwright E2E Report | [e2e-report/](https://ma3u.github.io/MinimumViableHealthDataspacev2/e2e-report/)     |
-| EHDS User Journey     | [docs/FULL_USER_JOURNEY.md](docs/FULL_USER_JOURNEY.md)                               |
+| Report                | URL                                                                                                                |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| Unit Test Coverage    | [test-reports/](https://ma3u.github.io/MinimumViableHealthDataspacev2/test-reports/)                               |
+| Playwright E2E Report | [e2e-report/](https://ma3u.github.io/MinimumViableHealthDataspacev2/e2e-report/)                                   |
+| EHDS Journey Report   | [e2e-report/ehds-journey.html](https://ma3u.github.io/MinimumViableHealthDataspacev2/e2e-report/ehds-journey.html) |
+| EHDS User Journey     | [docs/FULL_USER_JOURNEY.md](docs/FULL_USER_JOURNEY.md)                                                             |
 
 **Playwright HTML Report:** After running E2E tests locally, open the interactive report:
 
