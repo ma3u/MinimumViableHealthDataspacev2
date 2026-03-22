@@ -288,8 +288,9 @@ npm packages once:
 cd ui && npm install
 ```
 
-> **Note:** A `.env.local.example` is provided. Copy it to `.env.local` if you need to customise
-> the Neo4j connection URL or credentials.
+`npm install` automatically creates `ui/.env.local` from `.env.example` on first run
+(with a random `NEXTAUTH_SECRET`). No manual copy step is needed. To customise Neo4j
+or Keycloak connection settings, edit `ui/.env.local` directly.
 
 ### Step 9 — Start the UI
 

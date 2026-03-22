@@ -71,15 +71,18 @@ CLIENT_PAYLOAD='{
   "fullScopeAllowed": true,
   "redirectUris": [
     "http://localhost:3000/api/auth/callback/keycloak",
-    "http://localhost:3000/*"
+    "http://localhost:3000/*",
+    "http://localhost:3003/api/auth/callback/keycloak",
+    "http://localhost:3003/*"
   ],
   "webOrigins": [
     "http://localhost:3000",
+    "http://localhost:3003",
     "+"
   ],
   "attributes": {
     "pkce.code.challenge.method": "S256",
-    "post.logout.redirect.uris": "http://localhost:3000/*"
+    "post.logout.redirect.uris": "http://localhost:3000/*##http://localhost:3003/*"
   },
   "defaultClientScopes": ["openid", "profile", "email"],
   "protocolMappers": [
