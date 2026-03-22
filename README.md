@@ -528,17 +528,57 @@ Coverage reports and Playwright HTML reports are uploaded as GitHub Actions arti
 | Unit Test Coverage    | [test-reports/](https://ma3u.github.io/MinimumViableHealthDataspacev2/test-reports/)                               |
 | Playwright E2E Report | [e2e-report/](https://ma3u.github.io/MinimumViableHealthDataspacev2/e2e-report/)                                   |
 | EHDS Journey Report   | [e2e-report/ehds-journey.html](https://ma3u.github.io/MinimumViableHealthDataspacev2/e2e-report/ehds-journey.html) |
+| CI E2E Report         | [ci-e2e-report/](https://ma3u.github.io/MinimumViableHealthDataspacev2/ci-e2e-report/)                             |
 | EHDS User Journey     | [docs/FULL_USER_JOURNEY.md](docs/FULL_USER_JOURNEY.md)                                                             |
 
-**Playwright HTML Report:** After running E2E tests locally, open the interactive report:
+> **Note:** `test-reports/` and `ci-e2e-report/` are generated during CI only
+> (by `pages.yml`). The committed `e2e-report/` in `ui/public/` is the source
+> of truth for the live Playwright report — it includes results from both
+> chromium and live (JAD stack) test projects.
+
+**Generating the E2E Report Locally:**
+
+The Playwright report (including the EHDS Journey Report) is generated
+automatically when you run E2E tests. To produce a report that includes
+live JAD stack tests:
 
 ```bash
-open ui/playwright-report/index.html    # macOS
-# or: npx playwright show-report       # cross-platform
+# 1. Start the full JAD stack (includes live UI on :3003)
+./scripts/bootstrap-jad.sh
+
+# 2. Run both chromium (mock) and live (JAD) E2E test projects
+cd ui
+PLAYWRIGHT_BASE_URL=http://localhost:3003 npx playwright test --project=chromium --project=live
+
+# 3. View the report locally
+open playwright-report/index.html          # interactive Playwright report
+open playwright-report/ehds-journey.html   # EHDS journey report
+```
+
+**Publishing to GitHub Pages:**
+
+To update the committed E2E report that appears on GitHub Pages:
+
+```bash
+# Copy the local report to the committed public/ folder
+rm -rf ui/public/e2e-report
+cp -r ui/playwright-report ui/public/e2e-report
+
+# Commit and push — pages.yml will deploy it
+git add ui/public/e2e-report
+git commit -m "Update E2E report from local JAD stack run"
+git push
 ```
 
 The report includes a screenshot for every test (captured automatically), traces on retries,
 and video recordings when tests are retried — making visual regression and debugging easy.
+
+**GitHub Pages Deployment:** The site is deployed by
+[`.github/workflows/pages.yml`](.github/workflows/pages.yml) using the
+"GitHub Actions" source (not "Deploy from a branch"). The repo Pages settings
+must use **Source: GitHub Actions** — if switched to "Deploy from a branch",
+a built-in Jekyll workflow will overwrite the Next.js static export with
+the rendered README.md.
 
 ---
 
