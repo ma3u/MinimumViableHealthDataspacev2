@@ -64,6 +64,12 @@ interface HistoryEntry {
   mem: number;
 }
 
+interface PeakEntry {
+  maxCpu: number;
+  maxMemMB: number;
+  since: number;
+}
+
 // ---------------------------------------------------------------------------
 // Types — Topology view (new API)
 // ---------------------------------------------------------------------------
@@ -407,10 +413,59 @@ function TopoComponentCard({ comp }: { comp: TopoComponent }) {
 // Participant Topology Section (expandable)
 // ---------------------------------------------------------------------------
 
+// ---------------------------------------------------------------------------
+// Resource summary helper
+// ---------------------------------------------------------------------------
+
+function ResourceSummary({
+  components,
+  peaks,
+  label,
+}: {
+  components: TopoComponent[];
+  peaks: Map<string, PeakEntry>;
+  label?: string;
+}) {
+  const totalCpu = components.reduce((s, c) => s + c.cpu, 0);
+  const totalMem = components.reduce((s, c) => s + c.memMB, 0);
+  const peakCpu = components.reduce(
+    (s, c) => s + (peaks.get(c.container)?.maxCpu ?? c.cpu),
+    0,
+  );
+  const peakMem = components.reduce(
+    (s, c) => s + (peaks.get(c.container)?.maxMemMB ?? c.memMB),
+    0,
+  );
+  const fmtMem = (mb: number) =>
+    mb > 1024 ? `${(mb / 1024).toFixed(1)} GB` : `${Math.round(mb)} MB`;
+
+  return (
+    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[10px] text-gray-500">
+      {label && <span className="text-gray-600">{label}</span>}
+      <span>
+        <Cpu size={9} className="inline mr-0.5 text-blue-400" />
+        {totalCpu.toFixed(1)}% now
+      </span>
+      <span className="text-blue-400/70" title="Peak CPU (session)">
+        ↑ {peakCpu.toFixed(1)}% peak
+      </span>
+      <span>
+        <HardDrive size={9} className="inline mr-0.5 text-purple-400" />
+        {fmtMem(totalMem)} now
+      </span>
+      <span className="text-purple-400/70" title="Peak Memory (session)">
+        ↑ {fmtMem(peakMem)} peak
+      </span>
+    </div>
+  );
+}
+
 function ParticipantTopologySection({
   participant,
+  peaks,
 }: {
   participant: TopoParticipant;
+  peaks: Map<string, PeakEntry>;
 }) {
   const [expanded, setExpanded] = useState(
     participant.health === "critical" || participant.health === "warning",
@@ -435,12 +490,15 @@ function ParticipantTopologySection({
         )}
         <SeverityDot severity={participant.health} />
         <div className="flex-1 min-w-0">
-          <span className="font-semibold text-sm text-gray-200">
-            {participant.displayName}
-          </span>
-          <span className="text-xs text-gray-500 ml-2">
-            {participant.organization}
-          </span>
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="font-semibold text-sm text-gray-200">
+              {participant.displayName}
+            </span>
+            <span className="text-xs text-gray-500">
+              {participant.organization}
+            </span>
+          </div>
+          <ResourceSummary components={participant.components} peaks={peaks} />
         </div>
         <span
           className={`text-[10px] font-medium px-2 py-0.5 rounded-full shrink-0 ${roleClass}`}
@@ -531,6 +589,8 @@ export default function AdminComponentsPage() {
 
   // Topology view state
   const [topology, setTopology] = useState<TopologyData | null>(null);
+  const peaksRef = useRef<Map<string, PeakEntry>>(new Map());
+  const [_peakV, setPeakV] = useState(0);
 
   // Shared state
   const [viewMode, setViewMode] = useState<ViewMode>("participant");
@@ -562,6 +622,28 @@ export default function AdminComponentsPage() {
           if (!res.ok) return;
           const data: TopologyData = await res.json();
           setTopology(data);
+
+          // Track peak CPU / Memory per container
+          const now = Date.now();
+          const cutoff = now - 24 * 60 * 60 * 1000;
+          const allComps = [
+            ...data.participants.flatMap((p) => p.components),
+            ...data.infrastructure,
+          ];
+          for (const c of allComps) {
+            const prev = peaksRef.current.get(c.container);
+            if (!prev || prev.since < cutoff) {
+              peaksRef.current.set(c.container, {
+                maxCpu: c.cpu,
+                maxMemMB: c.memMB,
+                since: now,
+              });
+            } else {
+              prev.maxCpu = Math.max(prev.maxCpu, c.cpu);
+              prev.maxMemMB = Math.max(prev.maxMemMB, c.memMB);
+            }
+          }
+          setPeakV((v) => v + 1);
         }
       } catch (err) {
         console.error("Failed to fetch components:", err);
@@ -739,20 +821,30 @@ export default function AdminComponentsPage() {
                 </span>
               </h2>
               {topology.participants.map((p) => (
-                <ParticipantTopologySection key={p.id} participant={p} />
+                <ParticipantTopologySection
+                  key={p.id}
+                  participant={p}
+                  peaks={peaksRef.current}
+                />
               ))}
             </div>
 
             {/* Shared infrastructure */}
             {topology.infrastructure.length > 0 && (
               <div className="mb-8">
-                <h2 className="font-semibold text-sm flex items-center gap-2 text-gray-300 mb-3">
-                  <HardDrive size={16} className="text-yellow-400" />
-                  Shared Infrastructure &amp; CFM
-                  <span className="text-xs font-normal text-gray-500">
-                    ({topology.infrastructure.length})
-                  </span>
-                </h2>
+                <div className="flex items-start justify-between mb-3 flex-wrap gap-2">
+                  <h2 className="font-semibold text-sm flex items-center gap-2 text-gray-300">
+                    <HardDrive size={16} className="text-yellow-400" />
+                    Shared Infrastructure &amp; CFM
+                    <span className="text-xs font-normal text-gray-500">
+                      ({topology.infrastructure.length})
+                    </span>
+                  </h2>
+                  <ResourceSummary
+                    components={topology.infrastructure}
+                    peaks={peaksRef.current}
+                  />
+                </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
                   {topology.infrastructure.map((c) => (
                     <TopoComponentCard key={c.container} comp={c} />
