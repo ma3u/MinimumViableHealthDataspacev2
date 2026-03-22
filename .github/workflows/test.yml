@@ -179,6 +179,8 @@ jobs:
         env:
           CI: true
           NEXT_PUBLIC_STATIC_EXPORT: "false"
+          NEXTAUTH_SECRET: ci-test-secret-not-for-production
+          NEXTAUTH_URL: http://localhost:3000
 
       - name: Upload Playwright report
         uses: actions/upload-artifact@v4

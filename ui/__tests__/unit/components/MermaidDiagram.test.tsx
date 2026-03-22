@@ -4,12 +4,15 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 
-// Mock the mermaid library
-const mockRender = vi.fn();
+// Mock the mermaid library — vi.hoisted ensures the reference is available
+// when vi.mock's factory runs (vi.mock is hoisted above normal declarations)
+const { mockRender } = vi.hoisted(() => ({
+  mockRender: vi.fn(),
+}));
 vi.mock("mermaid", () => ({
   default: {
     initialize: vi.fn(),
-    render: (...args: unknown[]) => mockRender(...args),
+    render: mockRender,
   },
 }));
 
