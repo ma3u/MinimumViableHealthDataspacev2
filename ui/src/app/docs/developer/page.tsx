@@ -4,6 +4,10 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import MermaidDiagram from "@/components/MermaidDiagram";
 
+const PAGES_BASE = "/MinimumViableHealthDataspacev2";
+const basePath =
+  process.env.NEXT_PUBLIC_STATIC_EXPORT === "true" ? PAGES_BASE : "";
+
 const techStackDiagram = `graph TB
   subgraph "Frontend"
     NEXT["Next.js 14<br/>React 18"]
@@ -451,11 +455,16 @@ npm run lint       # ESLint checks`}</pre>
               <li>Testing Library for component tests</li>
               <li>
                 <a
-                  href="/MinimumViableHealthDataspacev2/test-reports/"
+                  href={`https://ma3u.github.io${PAGES_BASE}/test-reports/`}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="text-indigo-400 hover:text-indigo-300"
                 >
                   View Test Report →
                 </a>
+                <span className="text-gray-600 text-[10px] ml-1">
+                  (CI only)
+                </span>
               </li>
             </ul>
             <pre className="text-xs text-gray-500 mt-2 bg-gray-900 p-2 rounded">{`npm run test           # Run once
@@ -474,10 +483,18 @@ npm run test:coverage  # With coverage`}</pre>
               <li>Traces &amp; video on retries</li>
               <li>
                 <a
-                  href="/MinimumViableHealthDataspacev2/e2e-report/"
+                  href={`${basePath}/e2e-report/`}
                   className="text-indigo-400 hover:text-indigo-300"
                 >
-                  View E2E Report →
+                  Playwright Report →
+                </a>
+              </li>
+              <li>
+                <a
+                  href={`${basePath}/e2e-report/ehds-journey.html`}
+                  className="text-indigo-400 hover:text-indigo-300"
+                >
+                  EHDS Journey Report →
                 </a>
               </li>
             </ul>
