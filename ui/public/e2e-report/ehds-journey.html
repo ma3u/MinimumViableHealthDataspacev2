@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>EHDS E2E Journey Report — Health Dataspace v2</title>
+<style>
+  :root { --bg: #0f172a; --card: #1e293b; --border: #334155; --text: #e2e8f0;
+          --muted: #94a3b8; --pass: #4ade80; --fail: #f87171; --skip: #fbbf24;
+          --accent: #818cf8; --link: #60a5fa; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg);
+         color: var(--text); max-width: 1100px; margin: 0 auto; padding: 2rem 1rem; }
+  h1 { color: var(--accent); margin-bottom: 0.25rem; font-size: 1.5rem; }
+  h2 { color: var(--accent); margin-top: 2rem; margin-bottom: 1rem; font-size: 1.15rem; }
+  h3 { font-size: 1rem; }
+  a { color: var(--link); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  code { background: #0f172a; padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.8rem; color: var(--muted); }
+  .subtitle { color: var(--muted); margin-bottom: 1.5rem; font-size: 0.9rem; }
+
+  /* Summary bar */
+  .summary { display: flex; gap: 1.5rem; flex-wrap: wrap; margin-bottom: 2rem;
+             padding: 1rem 1.25rem; background: var(--card); border-radius: 12px;
+             border: 1px solid var(--border); align-items: center; }
+  .summary-item { text-align: center; }
+  .summary-item .label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.08em;
+                          color: var(--muted); }
+  .summary-item .value { font-size: 1.5rem; font-weight: 700; }
+  .summary-item .value.pass { color: var(--pass); }
+  .summary-item .value.fail { color: var(--fail); }
+  .summary-item .value.skip { color: var(--skip); }
+  .overall { font-size: 1rem; font-weight: 700; padding: 0.35rem 1rem;
+             border-radius: 9999px; }
+  .overall.pass { background: #064e3b; color: var(--pass); }
+  .overall.fail { background: #450a0a; color: var(--fail); }
+
+  /* Tested against */
+  .tested-against { background: var(--card); padding: 0.75rem 1.25rem; border-radius: 8px;
+                     border: 1px solid var(--border); margin-bottom: 2rem;
+                     font-size: 0.85rem; color: var(--muted); }
+  .tested-against strong { color: var(--text); }
+
+  /* Step cards */
+  .step-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+               padding: 1rem 1.25rem; margin-bottom: 1rem; }
+  .step-card.fail-card { border-left: 4px solid var(--fail); }
+  .step-card.pass-card { border-left: 4px solid var(--pass); }
+  .step-card.skip-card { border-left: 4px solid var(--skip); }
+  .step-header { display: flex; gap: 0.75rem; align-items: flex-start; margin-bottom: 0.75rem; }
+  .step-status { font-size: 1.25rem; }
+  .step-meta { display: flex; gap: 1rem; margin-top: 0.25rem; font-size: 0.8rem; color: var(--muted); }
+  .actor { font-style: italic; }
+
+  .step-refs, .step-endpoints, .step-pages { font-size: 0.8rem; margin-bottom: 0.4rem;
+                                              display: flex; flex-wrap: wrap; gap: 0.4rem;
+                                              align-items: center; }
+  .ref-label { color: var(--muted); font-weight: 600; min-width: 5rem; }
+  .ref-group { display: flex; gap: 0.3rem; align-items: center; }
+
+  .test-list { margin-top: 0.75rem; }
+  .test-list summary { cursor: pointer; color: var(--muted); font-size: 0.8rem;
+                        padding: 0.25rem 0; }
+  .test-list ul { list-style: none; padding-left: 0.5rem; margin-top: 0.4rem; }
+  .test-list li { font-size: 0.8rem; padding: 0.2rem 0; border-bottom: 1px solid #1e293b; }
+  .duration { color: #475569; font-size: 0.7rem; margin-left: 0.5rem; }
+  .error-detail { display: block; margin-top: 0.25rem; font-size: 0.7rem;
+                   color: var(--fail); background: #1c1917; padding: 0.3rem 0.5rem;
+                   border-radius: 4px; white-space: pre-wrap; word-break: break-all; }
+
+  /* Spec overview */
+  .spec-table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 0.85rem; }
+  .spec-table th, .spec-table td { border: 1px solid var(--border); padding: 0.4rem 0.75rem;
+                                    text-align: left; }
+  .spec-table th { background: var(--card); color: var(--muted); }
+
+  /* Quick-nav pills */
+  .nav-pills { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 1.5rem; }
+  .nav-pill { font-size: 0.75rem; padding: 0.25rem 0.75rem; border-radius: 9999px;
+              border: 1px solid var(--border); color: var(--muted); cursor: pointer;
+              background: transparent; transition: all 0.15s; text-decoration: none; }
+  .nav-pill:hover { border-color: var(--accent); color: var(--accent); text-decoration: none; }
+  .nav-pill.pass-pill { border-color: #065f46; color: var(--pass); }
+  .nav-pill.fail-pill { border-color: #7f1d1d; color: var(--fail); }
+  .nav-pill.skip-pill { border-color: #78350f; color: var(--skip); }
+
+  .footer { margin-top: 3rem; padding-top: 1rem; border-top: 1px solid var(--border);
+            font-size: 0.75rem; color: var(--muted); }
+  .footer a { color: var(--link); }
+</style>
+</head>
+<body>
+
+<h1>EHDS E2E Journey Report</h1>
+<p class="subtitle">Health Dataspace v2 — European Health Data Space Compliance Testing</p>
+
+<div class="tested-against">
+  <strong>Tested against:</strong> <code>http://localhost:3003</code>
+  &nbsp;|&nbsp; 2026-03-22 21:44:18 UTC
+  &nbsp;|&nbsp; Duration: 110.3s
+</div>
+
+<div class="summary">
+  <div class="overall pass">PASSED</div>
+  <div class="summary-item"><div class="label">Total</div><div class="value">352</div></div>
+  <div class="summary-item"><div class="label">Passed</div><div class="value pass">352</div></div>
+  <div class="summary-item"><div class="label">Failed</div><div class="value fail">0</div></div>
+  <div class="summary-item"><div class="label">Skipped</div><div class="value skip">0</div></div>
+</div>
+
+<h2>Quick Navigation</h2>
+<div class="nav-pills">
+  <a href="#step-0" class="nav-pill pass-pill">Step 0: Participant Onboarding</a>
+  <a href="#step-1" class="nav-pill pass-pill">Step 1: Data Provider Creates Metadata</a>
+  <a href="#step-2" class="nav-pill pass-pill">Step 2: Publish with Access &amp; Usage Policies</a>
+  <a href="#step-3" class="nav-pill pass-pill">Step 3: Consumer Discovers Assets</a>
+  <a href="#step-4" class="nav-pill pass-pill">Step 4: Request Access to Datasets</a>
+  <a href="#step-5" class="nav-pill pass-pill">Step 5: Contract Negotiation &amp; Approval</a>
+  <a href="#step-6" class="nav-pill pass-pill">Step 6: Data Transfer &amp; Access</a>
+  <a href="#step-7" class="nav-pill pass-pill">Step 7: Analytics &amp; Compliance</a>
+  <a href="#infra" class="nav-pill pass-pill">Infrastructure</a>
+  <a href="index.html" class="nav-pill">Playwright HTML Report &rarr;</a>
+</div>
+
+<h2>EHDS Journey Steps</h2>
+
+
+      <div id="step-0" class="step-card pass-card">
+        <div class="step-header">
+          <div class="step-status">&#x2705;</div>
+          <div class="step-info">
+            <h3>Step 0 — Participant Onboarding</h3>
+            <div class="step-meta">
+              <span class="actor">Portal Admin (edcadmin)</span>
+              <span class="counts">10 passed, 0 failed, 0 skipped</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="step-refs">
+          <div class="ref-group">
+            <span class="ref-label">Docs:</span>
+            <a href="https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docs/FULL_USER_JOURNEY.md#step-0--participant-onboarding" target="_blank" rel="noopener">Step 0 — Participant Onboarding &#x2197;</a>
+          </div>
+          <div class="ref-group">
+            <span class="ref-label">EHDS:</span>
+            <a href="https://health.ec.europa.eu/ehealth-digital-health-and-care/certification-ehr-systems_en" target="_blank" rel="noopener">Art. 33 — Health Data Access Body &#x2197;</a>
+          </div>
+          <div class="ref-group">
+            <span class="ref-label">Protocol:</span>
+            <a href="https://eclipse-dataspace-dcp.github.io/decentralized-claims-protocol/v1.0.1/#participant-agents" target="_blank" rel="noopener">DCP §4 — Participant Registration &#x2197;</a>
+          </div>
+        </div>
+
+        <div class="step-endpoints">
+          <span class="ref-label">Endpoints:</span>
+          <code><a href="http://localhost:3003/api/participants" target="_blank">/api/participants</a></code> <code><a href="http://localhost:3003/api/credentials" target="_blank">/api/credentials</a></code>
+        </div>
+
+        <div class="step-pages">
+          <span class="ref-label">UI Pages:</span>
+          <code><a href="http://localhost:3003/onboarding" target="_blank">/onboarding</a></code> <code><a href="http://localhost:3003/credentials" target="_blank">/credentials</a></code>
+        </div>
+
+        <details class="test-list">
+          <summary>10 tests</summary>
+          <ul><li><span class="pass">&#x2705;</span> J01 — Admin dashboard requires authentication <span class="duration">90ms</span></li>
+<li><span class="pass">&#x2705;</span> J02 — All 5 participants registered in the network <span class="duration">53ms</span></li>
+<li><span class="pass">&#x2705;</span> J03 — Each participant has a valid DID identity <span class="duration">55ms</span></li>
+<li><span class="pass">&#x2705;</span> J04 — Credentials exist for all participant holders <span class="duration">97ms</span></li>
+<li><span class="pass">&#x2705;</span> J05 — Both EHDS and DataQuality credential types exist <span class="duration">90ms</span></li>
+<li><span class="pass">&#x2705;</span> J01 — Admin dashboard requires authentication <span class="duration">98ms</span></li>
+<li><span class="pass">&#x2705;</span> J02 — All 5 participants registered in the network <span class="duration">53ms</span></li>
+<li><span class="pass">&#x2705;</span> J03 — Each participant has a valid DID identity <span class="duration">55ms</span></li>
+<li><span class="pass">&#x2705;</span> J04 — Credentials exist for all participant holders <span class="duration">116ms</span></li>
+<li><span class="pass">&#x2705;</span> J05 — Both EHDS and DataQuality credential types exist <span class="duration">100ms</span></li></ul>
+        </details>
+      </div>
+
+      <div id="step-1" class="step-card pass-card">
+        <div class="step-header">
+          <div class="step-status">&#x2705;</div>
+          <div class="step-info">
+            <h3>Step 1 — Data Provider Creates Metadata</h3>
+            <div class="step-meta">
+              <span class="actor">Data Holder (clinicuser)</span>
+              <span class="counts">20 passed, 0 failed, 0 skipped</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="step-refs">
+          <div class="ref-group">
+            <span class="ref-label">Docs:</span>
+            <a href="https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docs/FULL_USER_JOURNEY.md#step-1--data-provider-creates-metadata" target="_blank" rel="noopener">Step 1 — Data Provider Creates Metadata &#x2197;</a>
+          </div>
+          <div class="ref-group">
+            <span class="ref-label">EHDS:</span>
+            <a href="https://health.ec.europa.eu/ehealth-digital-health-and-care/reuse-health-data_en" target="_blank" rel="noopener">Art. 45 — Dataset Description &#x2197;</a>
+          </div>
+          <div class="ref-group">
+            <span class="ref-label">Protocol:</span>
+            <a href="https://eclipse-dataspace-protocol-base.github.io/DataspaceProtocol/2025-1-err1/#catalog-protocol" target="_blank" rel="noopener">HealthDCAT-AP 3.0 &#x2197;</a>
+          </div>
+        </div>
+
+        <div class="step-endpoints">
+          <span class="ref-label">Endpoints:</span>
+          <code><a href="http://localhost:3003/api/assets" target="_blank">/api/assets</a></code> <code><a href="http://localhost:3003/api/catalog" target="_blank">/api/catalog</a></code>
+        </div>
+
+        <div class="step-pages">
+          <span class="ref-label">UI Pages:</span>
+          <code><a href="http://localhost:3003/data/share" target="_blank">/data/share</a></code> <code><a href="http://localhost:3003/catalog" target="_blank">/catalog</a></code>
+        </div>
+
+        <details class="test-list">
+          <summary>20 tests</summary>
+          <ul><li><span class="pass">&#x2705;</span> J06 — Synthea FHIR R4 Patient Cohort appears in catalog <span class="duration">135ms</span></li>
+<li><span class="pass">&#x2705;</span> J07 — FHIR Encounter History has HealthDCAT-AP metadata <span class="duration">150ms</span></li>
+<li><span class="pass">&#x2705;</span> J08 — FHIR Diagnostic Reports dataset visible in catalog <span class="duration">103ms</span></li>
+<li><span class="pass">&#x2705;</span> J09 — Catalog API contains OMOP CDM dataset entry <span class="duration">46ms</span></li>
+<li><span class="pass">&#x2705;</span> J10 — Dataset shows EHDS Article 53 legal basis <span class="duration">154ms</span></li>
+<li><span class="pass">&#x2705;</span> J11 — FHIR Immunization Records visible in catalog <span class="duration">112ms</span></li>
+<li><span class="pass">&#x2705;</span> J12 — FHIR Care Plan Registry appears in catalog <span class="duration">144ms</span></li>
+<li><span class="pass">&#x2705;</span> J13 — MedDRA v27 Adverse Event Classification in catalog <span class="duration">140ms</span></li>
+<li><span class="pass">&#x2705;</span> J14 — Clinical Trial Phases I–IV metadata in catalog <span class="duration">150ms</span></li>
+<li><span class="pass">&#x2705;</span> J15 — FHIR AllergyIntolerance Registry with FHIR R4 conformance <span class="duration">143ms</span></li>
+<li><span class="pass">&#x2705;</span> J06 — Synthea FHIR R4 Patient Cohort appears in catalog <span class="duration">144ms</span></li>
+<li><span class="pass">&#x2705;</span> J07 — FHIR Encounter History has HealthDCAT-AP metadata <span class="duration">139ms</span></li>
+<li><span class="pass">&#x2705;</span> J08 — FHIR Diagnostic Reports dataset visible in catalog <span class="duration">106ms</span></li>
+<li><span class="pass">&#x2705;</span> J09 — Catalog API contains OMOP CDM dataset entry <span class="duration">52ms</span></li>
+<li><span class="pass">&#x2705;</span> J10 — Dataset shows EHDS Article 53 legal basis <span class="duration">159ms</span></li>
+<li><span class="pass">&#x2705;</span> J11 — FHIR Immunization Records visible in catalog <span class="duration">114ms</span></li>
+<li><span class="pass">&#x2705;</span> J12 — FHIR Care Plan Registry appears in catalog <span class="duration">146ms</span></li>
+<li><span class="pass">&#x2705;</span> J13 — MedDRA v27 Adverse Event Classification in catalog <span class="duration">147ms</span></li>
+<li><span class="pass">&#x2705;</span> J14 — Clinical Trial Phases I–IV metadata in catalog <span class="duration">149ms</span></li>
+<li><span class="pass">&#x2705;</span> J15 — FHIR AllergyIntolerance Registry with FHIR R4 conformance <span class="duration">148ms</span></li></ul>
+        </details>
+      </div>
+
+      <div id="step-2" class="step-card pass-card">
+        <div class="step-header">
+          <div class="step-status">&#x2705;</div>
+          <div class="step-info">
+            <h3>Step 2 — Publish with Access &amp; Usage Policies</h3>
+            <div class="step-meta">
+              <span class="actor">Data Holder (clinicuser)</span>
+              <span class="counts">14 passed, 0 failed, 0 skipped</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="step-refs">
+          <div class="ref-group">
+            <span class="ref-label">Docs:</span>
+            <a href="https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docs/FULL_USER_JOURNEY.md#step-2--publish-with-access--usage-policies" target="_blank" rel="noopener">Step 2 — Publish with Access &amp; Usage Policies &#x2197;</a>
+          </div>
+          <div class="ref-group">
+            <span class="ref-label">EHDS:</span>
+            <a href="https://health.ec.europa.eu/ehealth-digital-health-and-care/reuse-health-data_en" target="_blank" rel="noopener">Art. 46 — Data Permit Conditions &#x2197;</a>
+          </div>
+          <div class="ref-group">
+            <span class="ref-label">Protocol:</span>
+            <a href="https://eclipse-dataspace-protocol-base.github.io/DataspaceProtocol/2025-1-err1/#contract-negotiation-protocol" target="_blank" rel="noopener">ODRL 2.2 &#x2197;</a>
+          </div>
+        </div>
+
+        <div class="step-endpoints">
+          <span class="ref-label">Endpoints:</span>
+          <code><a href="http://localhost:3003/api/admin/policies" target="_blank">/api/admin/policies</a></code> <code><a href="http://localhost:3003/api/catalog" target="_blank">/api/catalog</a></code>
+        </div>
+
+        <div class="step-pages">
+          <span class="ref-label">UI Pages:</span>
+          <code><a href="http://localhost:3003/admin/policies" target="_blank">/admin/policies</a></code> <code><a href="http://localhost:3003/catalog" target="_blank">/catalog</a></code>
+        </div>
+
+        <details class="test-list">
+          <summary>14 tests</summary>
+          <ul><li><span class="pass">&#x2705;</span> J16 — Policies exist for multiple participants <span class="duration">77ms</span></li>
+<li><span class="pass">&#x2705;</span> J17 — Policies include ODRL permission and prohibition fields <span class="duration">60ms</span></li>
+<li><span class="pass">&#x2705;</span> J18 — Policy page requires authentication <span class="duration">99ms</span></li>
+<li><span class="pass">&#x2705;</span> J19 — MedReg participant has registered policies <span class="duration">52ms</span></li>
+<li><span class="pass">&#x2705;</span> J20 — Catalog page renders dataset cards publicly <span class="duration">113ms</span></li>
+<li><span class="pass">&#x2705;</span> J21 — Catalog API has at least 15 registered datasets <span class="duration">49ms</span></li>
+<li><span class="pass">&#x2705;</span> J22 — At least one catalog dataset is SyntheticData type <span class="duration">52ms</span></li>
+<li><span class="pass">&#x2705;</span> J16 — Policies exist for multiple participants <span class="duration">82ms</span></li>
+<li><span class="pass">&#x2705;</span> J17 — Policies include ODRL permission and prohibition fields <span class="duration">68ms</span></li>
+<li><span class="pass">&#x2705;</span> J18 — Policy page requires authentication <span class="duration">90ms</span></li>
+<li><span class="pass">&#x2705;</span> J19 — MedReg participant has registered policies <span class="duration">70ms</span></li>
+<li><span class="pass">&#x2705;</span> J20 — Catalog page renders dataset cards publicly <span class="duration">118ms</span></li>
+<li><span class="pass">&#x2705;</span> J21 — Catalog API has at least 15 registered datasets <span class="duration">51ms</span></li>
+<li><span class="pass">&#x2705;</span> J22 — At least one catalog dataset is SyntheticData type <span class="duration">46ms</span></li></ul>
+        </details>
+      </div>
+
+      <div id="step-3" class="step-card pass-card">
+        <div class="step-header">
+          <div class="step-status">&#x2705;</div>
+          <div class="step-info">
+            <h3>Step 3 — Consumer Discovers Assets</h3>
+            <div class="step-meta">
+              <span class="actor">Data User (researcher)</span>
+              <span class="counts">36 passed, 0 failed, 0 skipped</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="step-refs">
+          <div class="ref-group">
+            <span class="ref-label">Docs:</span>
+            <a href="https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docs/FULL_USER_JOURNEY.md#step-3--consumer-discovers-assets" target="_blank" rel="noopener">Step 3 — Consumer Discovers Assets &#x2197;</a>
+          </div>
+          <div class="ref-group">
+            <span class="ref-label">EHDS:</span>
+            <a href="https://health.ec.europa.eu/ehealth-digital-health-and-care/reuse-health-data_en" target="_blank" rel="noopener">Art. 47 — Data Access Application &#x2197;</a>
+          </div>
+          <div class="ref-group">
+            <span class="ref-label">Protocol:</span>
+            <a href="https://eclipse-dataspace-protocol-base.github.io/DataspaceProtocol/2025-1-err1/#catalog-protocol" target="_blank" rel="noopener">DSP §5 — Catalog Protocol &#x2197;</a>
+          </div>
+        </div>
+
+        <div class="step-endpoints">
+          <span class="ref-label">Endpoints:</span>
+          <code><a href="http://localhost:3003/api/catalog" target="_blank">/api/catalog</a></code> <code><a href="http://localhost:3003/api/graph" target="_blank">/api/graph</a></code> <code><a href="http://localhost:3003/api/patient" target="_blank">/api/patient</a></code> <code><a href="http://localhost:3003/api/analytics" target="_blank">/api/analytics</a></code>
+        </div>
+
+        <div class="step-pages">
+          <span class="ref-label">UI Pages:</span>
+          <code><a href="http://localhost:3003/catalog" target="_blank">/catalog</a></code> <code><a href="http://localhost:3003/graph" target="_blank">/graph</a></code> <code><a href="http://localhost:3003/patient" target="_blank">/patient</a></code> <code><a href="http://localhost:3003/analytics" target="_blank">/analytics</a></code>
+        </div>
+
+        <details class="test-list">
+          <summary>36 tests</summary>
+          <ul><li><span class="pass">&#x2705;</span> J23 — Catalog page displays FHIR datasets <span class="duration">111ms</span></li>
+<li><span class="pass">&#x2705;</span> J24 — Catalog API includes datasets with various types <span class="duration">48ms</span></li>
+<li><span class="pass">&#x2705;</span> J25 — Clinical trial dataset exists in catalog API <span class="duration">48ms</span></li>
+<li><span class="pass">&#x2705;</span> J26 — Discover Data page requires authentication <span class="duration">91ms</span></li>
+<li><span class="pass">&#x2705;</span> J27 — Graph Explorer shows all 5 graph layers <span class="duration">156ms</span></li>
+<li><span class="pass">&#x2705;</span> J28 — Graph canvas renders and includes FHIR R4 + OMOP CDM <span class="duration">501ms</span></li>
+<li><span class="pass">&#x2705;</span> J29 — Patient Journey page shows patient cohort <span class="duration">110ms</span></li>
+<li><span class="pass">&#x2705;</span> J30 — OMOP Research Analytics page renders <span class="duration">296ms</span></li>
+<li><span class="pass">&#x2705;</span> J82 — Catalog page has a search filter input <span class="duration">112ms</span></li>
+<li><span class="pass">&#x2705;</span> J83 — Typing in search filter narrows the displayed datasets <span class="duration">1133ms</span></li>
+<li><span class="pass">&#x2705;</span> J84 — Expanded dataset card shows publisher information <span class="duration">135ms</span></li>
+<li><span class="pass">&#x2705;</span> J85 — Expanded dataset card shows legal basis <span class="duration">145ms</span></li>
+<li><span class="pass">&#x2705;</span> J86 — Expanded dataset shows HealthDCAT-AP Metadata heading <span class="duration">145ms</span></li>
+<li><span class="pass">&#x2705;</span> J87 — Expanded dataset has Show Data Model action <span class="duration">137ms</span></li>
+<li><span class="pass">&#x2705;</span> J88 — Expanded dataset has Download DCAT-AP action <span class="duration">138ms</span></li>
+<li><span class="pass">&#x2705;</span> J89 — Catalog API datasets include title and publisher <span class="duration">54ms</span></li>
+<li><span class="pass">&#x2705;</span> J90 — Catalog datasets include datasetType classification <span class="duration">46ms</span></li>
+<li><span class="pass">&#x2705;</span> J91 — Catalog page description references HealthDCAT-AP <span class="duration">121ms</span></li>
+<li><span class="pass">&#x2705;</span> J23 — Catalog page displays FHIR datasets <span class="duration">119ms</span></li>
+<li><span class="pass">&#x2705;</span> J24 — Catalog API includes datasets with various types <span class="duration">49ms</span></li>
+<li><span class="pass">&#x2705;</span> J25 — Clinical trial dataset exists in catalog API <span class="duration">48ms</span></li>
+<li><span class="pass">&#x2705;</span> J26 — Discover Data page requires authentication <span class="duration">108ms</span></li>
+<li><span class="pass">&#x2705;</span> J27 — Graph Explorer shows all 5 graph layers <span class="duration">147ms</span></li>
+<li><span class="pass">&#x2705;</span> J28 — Graph canvas renders and includes FHIR R4 + OMOP CDM <span class="duration">547ms</span></li>
+<li><span class="pass">&#x2705;</span> J29 — Patient Journey page shows patient cohort <span class="duration">111ms</span></li>
+<li><span class="pass">&#x2705;</span> J30 — OMOP Research Analytics page renders <span class="duration">116ms</span></li>
+<li><span class="pass">&#x2705;</span> J82 — Catalog page has a search filter input <span class="duration">100ms</span></li>
+<li><span class="pass">&#x2705;</span> J83 — Typing in search filter narrows the displayed datasets <span class="duration">1130ms</span></li>
+<li><span class="pass">&#x2705;</span> J84 — Expanded dataset card shows publisher information <span class="duration">127ms</span></li>
+<li><span class="pass">&#x2705;</span> J85 — Expanded dataset card shows legal basis <span class="duration">142ms</span></li>
+<li><span class="pass">&#x2705;</span> J86 — Expanded dataset shows HealthDCAT-AP Metadata heading <span class="duration">147ms</span></li>
+<li><span class="pass">&#x2705;</span> J87 — Expanded dataset has Show Data Model action <span class="duration">153ms</span></li>
+<li><span class="pass">&#x2705;</span> J88 — Expanded dataset has Download DCAT-AP action <span class="duration">137ms</span></li>
+<li><span class="pass">&#x2705;</span> J89 — Catalog API datasets include title and publisher <span class="duration">47ms</span></li>
+<li><span class="pass">&#x2705;</span> J90 — Catalog datasets include datasetType classification <span class="duration">47ms</span></li>
+<li><span class="pass">&#x2705;</span> J91 — Catalog page description references HealthDCAT-AP <span class="duration">113ms</span></li></ul>
+        </details>
+      </div>
+
+      <div id="step-4" class="step-card pass-card">
+        <div class="step-header">
+          <div class="step-status">&#x2705;</div>
+          <div class="step-info">
+            <h3>Step 4 — Request Access to Datasets</h3>
+            <div class="step-meta">
+              <span class="actor">Data User (researcher)</span>
+              <span class="counts">28 passed, 0 failed, 0 skipped</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="step-refs">
+          <div class="ref-group">
+            <span class="ref-label">Docs:</span>
+            <a href="https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docs/FULL_USER_JOURNEY.md#step-4--request-access-to-datasets" target="_blank" rel="noopener">Step 4 — Request Access to Datasets &#x2197;</a>
+          </div>
+          <div class="ref-group">
+            <span class="ref-label">EHDS:</span>
+            <a href="https://health.ec.europa.eu/ehealth-digital-health-and-care/reuse-health-data_en" target="_blank" rel="noopener">Art. 48 — Data Permit &#x2197;</a>
+          </div>
+          <div class="ref-group">
+            <span class="ref-label">Protocol:</span>
+            <a href="https://eclipse-dataspace-protocol-base.github.io/DataspaceProtocol/2025-1-err1/#contract-negotiation-protocol" target="_blank" rel="noopener">DSP §7.1 — Contract Negotiation &#x2197;</a>
+          </div>
+        </div>
+
+        <div class="step-endpoints">
+          <span class="ref-label">Endpoints:</span>
+          <code><a href="http://localhost:3003/api/negotiations" target="_blank">/api/negotiations</a></code> <code><a href="http://localhost:3003/api/tasks" target="_blank">/api/tasks</a></code> <code><a href="http://localhost:3003/api/assets" target="_blank">/api/assets</a></code>
+        </div>
+
+        <div class="step-pages">
+          <span class="ref-label">UI Pages:</span>
+          <code><a href="http://localhost:3003/negotiate" target="_blank">/negotiate</a></code>
+        </div>
+
+        <details class="test-list">
+          <summary>28 tests</summary>
+          <ul><li><span class="pass">&#x2705;</span> J31 — Negotiate page requires authentication <span class="duration">149ms</span></li>
+<li><span class="pass">&#x2705;</span> J32 — Tasks API includes negotiation entries <span class="duration">60ms</span></li>
+<li><span class="pass">&#x2705;</span> J33 — At least one negotiation is FINALIZED <span class="duration">63ms</span></li>
+<li><span class="pass">&#x2705;</span> J34 — Negotiations exist for multiple participants <span class="duration">65ms</span></li>
+<li><span class="pass">&#x2705;</span> J35 — Participant-scoped negotiations API works <span class="duration">55ms</span></li>
+<li><span class="pass">&#x2705;</span> J36 — Negotiations follow DSP protocol <span class="duration">55ms</span></li>
+<li><span class="pass">&#x2705;</span> J37 — Assets API returns assets for multiple participants <span class="duration">63ms</span></li>
+<li><span class="pass">&#x2705;</span> J38 — Terminated negotiation exists in task list or per-participant <span class="duration">64ms</span></li>
+<li><span class="pass">&#x2705;</span> J39 — Finalized negotiations include contractAgreementId <span class="duration">64ms</span></li>
+<li><span class="pass">&#x2705;</span> J40 — Cross-border negotiation involves different DID domains <span class="duration">55ms</span></li>
+<li><span class="pass">&#x2705;</span> J92 — Negotiations have DSP protocol, state, and counterPartyId <span class="duration">75ms</span></li>
+<li><span class="pass">&#x2705;</span> J95 — Finalized negotiations have corresponding transfer processes <span class="duration">63ms</span></li>
+<li><span class="pass">&#x2705;</span> J96 — Assets API returns entries with name, contenttype, and description <span class="duration">65ms</span></li>
+<li><span class="pass">&#x2705;</span> J99 — Negotiations reference multiple counterparty DIDs <span class="duration">67ms</span></li>
+<li><span class="pass">&#x2705;</span> J31 — Negotiate page requires authentication <span class="duration">92ms</span></li>
+<li><span class="pass">&#x2705;</span> J32 — Tasks API includes negotiation entries <span class="duration">82ms</span></li>
+<li><span class="pass">&#x2705;</span> J33 — At least one negotiation is FINALIZED <span class="duration">60ms</span></li>
+<li><span class="pass">&#x2705;</span> J34 — Negotiations exist for multiple participants <span class="duration">55ms</span></li>
+<li><span class="pass">&#x2705;</span> J35 — Participant-scoped negotiations API works <span class="duration">55ms</span></li>
+<li><span class="pass">&#x2705;</span> J36 — Negotiations follow DSP protocol <span class="duration">55ms</span></li>
+<li><span class="pass">&#x2705;</span> J37 — Assets API returns assets for multiple participants <span class="duration">59ms</span></li>
+<li><span class="pass">&#x2705;</span> J38 — Terminated negotiation exists in task list or per-participant <span class="duration">60ms</span></li>
+<li><span class="pass">&#x2705;</span> J39 — Finalized negotiations include contractAgreementId <span class="duration">63ms</span></li>
+<li><span class="pass">&#x2705;</span> J40 — Cross-border negotiation involves different DID domains <span class="duration">56ms</span></li>
+<li><span class="pass">&#x2705;</span> J92 — Negotiations have DSP protocol, state, and counterPartyId <span class="duration">80ms</span></li>
+<li><span class="pass">&#x2705;</span> J95 — Finalized negotiations have corresponding transfer processes <span class="duration">53ms</span></li>
+<li><span class="pass">&#x2705;</span> J96 — Assets API returns entries with name, contenttype, and description <span class="duration">68ms</span></li>
+<li><span class="pass">&#x2705;</span> J99 — Negotiations reference multiple counterparty DIDs <span class="duration">59ms</span></li></ul>
+        </details>
+      </div>
+
+      <div id="step-5" class="step-card pass-card">
+        <div class="step-header">
+          <div class="step-status">&#x2705;</div>
+          <div class="step-info">
+            <h3>Step 5 — Contract Negotiation &amp; Approval</h3>
+            <div class="step-meta">
+              <span class="actor">Data User + HDAB (regulator)</span>
+              <span class="counts">4 passed, 0 failed, 0 skipped</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="step-refs">
+          <div class="ref-group">
+            <span class="ref-label">Docs:</span>
+            <a href="https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docs/FULL_USER_JOURNEY.md#step-5--contract-negotiation--approval" target="_blank" rel="noopener">Step 5 — Contract Negotiation &amp; Approval &#x2197;</a>
+          </div>
+          <div class="ref-group">
+            <span class="ref-label">EHDS:</span>
+            <a href="https://health.ec.europa.eu/ehealth-digital-health-and-care/reuse-health-data_en" target="_blank" rel="noopener">Art. 49 — HDAB Decision &#x2197;</a>
+          </div>
+          <div class="ref-group">
+            <span class="ref-label">Protocol:</span>
+            <a href="https://eclipse-dataspace-protocol-base.github.io/DataspaceProtocol/2025-1-err1/#contract-negotiation-protocol" target="_blank" rel="noopener">DSP §7.1 — Negotiation Lifecycle &#x2197;</a>
+          </div>
+        </div>
+
+        <div class="step-endpoints">
+          <span class="ref-label">Endpoints:</span>
+          <code><a href="http://localhost:3003/api/negotiations" target="_blank">/api/negotiations</a></code> <code><a href="http://localhost:3003/api/tasks" target="_blank">/api/tasks</a></code>
+        </div>
+
+        <div class="step-pages">
+          <span class="ref-label">UI Pages:</span>
+          <code><a href="http://localhost:3003/negotiate" target="_blank">/negotiate</a></code> <code><a href="http://localhost:3003/compliance" target="_blank">/compliance</a></code>
+        </div>
+
+        <details class="test-list">
+          <summary>4 tests</summary>
+          <ul><li><span class="pass">&#x2705;</span> J49 — Cross-border journey: multi-country participants, negotiations, graph <span class="duration">589ms</span></li>
+<li><span class="pass">&#x2705;</span> J50 — Compliance audit: credentials, policies, catalog, audit log <span class="duration">236ms</span></li>
+<li><span class="pass">&#x2705;</span> J49 — Cross-border journey: multi-country participants, negotiations, graph <span class="duration">575ms</span></li>
+<li><span class="pass">&#x2705;</span> J50 — Compliance audit: credentials, policies, catalog, audit log <span class="duration">227ms</span></li></ul>
+        </details>
+      </div>
+
+      <div id="step-6" class="step-card pass-card">
+        <div class="step-header">
+          <div class="step-status">&#x2705;</div>
+          <div class="step-info">
+            <h3>Step 6 — Data Transfer &amp; Access</h3>
+            <div class="step-meta">
+              <span class="actor">Data User (researcher)</span>
+              <span class="counts">28 passed, 0 failed, 0 skipped</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="step-refs">
+          <div class="ref-group">
+            <span class="ref-label">Docs:</span>
+            <a href="https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docs/FULL_USER_JOURNEY.md#step-6--data-transfer--access" target="_blank" rel="noopener">Step 6 — Data Transfer &amp; Access &#x2197;</a>
+          </div>
+          <div class="ref-group">
+            <span class="ref-label">EHDS:</span>
+            <a href="https://health.ec.europa.eu/ehealth-digital-health-and-care/reuse-health-data_en" target="_blank" rel="noopener">Art. 50 — Secure Processing Environment &#x2197;</a>
+          </div>
+          <div class="ref-group">
+            <span class="ref-label">Protocol:</span>
+            <a href="https://eclipse-dataspace-protocol-base.github.io/DataspaceProtocol/2025-1-err1/#transfer-process-protocol" target="_blank" rel="noopener">DSP §8 — Transfer Process Protocol &#x2197;</a>
+          </div>
+        </div>
+
+        <div class="step-endpoints">
+          <span class="ref-label">Endpoints:</span>
+          <code><a href="http://localhost:3003/api/transfers" target="_blank">/api/transfers</a></code> <code><a href="http://localhost:3003/api/tasks" target="_blank">/api/tasks</a></code> <code><a href="http://localhost:3003/api/admin/audit" target="_blank">/api/admin/audit</a></code>
+        </div>
+
+        <div class="step-pages">
+          <span class="ref-label">UI Pages:</span>
+          <code><a href="http://localhost:3003/data/transfer" target="_blank">/data/transfer</a></code> <code><a href="http://localhost:3003/data/share" target="_blank">/data/share</a></code> <code><a href="http://localhost:3003/graph" target="_blank">/graph</a></code>
+        </div>
+
+        <details class="test-list">
+          <summary>28 tests</summary>
+          <ul><li><span class="pass">&#x2705;</span> J41 — Transfer page requires authentication <span class="duration">97ms</span></li>
+<li><span class="pass">&#x2705;</span> J42 — Share Data page requires authentication <span class="duration">88ms</span></li>
+<li><span class="pass">&#x2705;</span> J43 — Tasks API includes transfer entries <span class="duration">70ms</span></li>
+<li><span class="pass">&#x2705;</span> J44 — At least one in-progress transfer exists <span class="duration">63ms</span></li>
+<li><span class="pass">&#x2705;</span> J45 — Transfers span at least 2 different states <span class="duration">64ms</span></li>
+<li><span class="pass">&#x2705;</span> J46 — Audit API includes transfers and negotiations <span class="duration">106ms</span></li>
+<li><span class="pass">&#x2705;</span> J47 — Knowledge graph renders with clickable canvas <span class="duration">2533ms</span></li>
+<li><span class="pass">&#x2705;</span> J48 — Transfers involve multiple participants <span class="duration">85ms</span></li>
+<li><span class="pass">&#x2705;</span> J93 — Transfer API includes REQUESTED, STARTED, COMPLETED, and TERMINATED states <span class="duration">64ms</span></li>
+<li><span class="pass">&#x2705;</span> J94 — Transfer entries have contractId linking to negotiations <span class="duration">61ms</span></li>
+<li><span class="pass">&#x2705;</span> J97 — Share Data page redirects unauthenticated users <span class="duration">89ms</span></li>
+<li><span class="pass">&#x2705;</span> J98 — Transfers use HttpData-PULL transfer type <span class="duration">65ms</span></li>
+<li><span class="pass">&#x2705;</span> J100 — Transfer entries include stateTimestamp <span class="duration">55ms</span></li>
+<li><span class="pass">&#x2705;</span> J101 — Discover Data page requires authentication <span class="duration">108ms</span></li>
+<li><span class="pass">&#x2705;</span> J41 — Transfer page requires authentication <span class="duration">96ms</span></li>
+<li><span class="pass">&#x2705;</span> J42 — Share Data page requires authentication <span class="duration">97ms</span></li>
+<li><span class="pass">&#x2705;</span> J43 — Tasks API includes transfer entries <span class="duration">79ms</span></li>
+<li><span class="pass">&#x2705;</span> J44 — At least one in-progress transfer exists <span class="duration">62ms</span></li>
+<li><span class="pass">&#x2705;</span> J45 — Transfers span at least 2 different states <span class="duration">63ms</span></li>
+<li><span class="pass">&#x2705;</span> J46 — Audit API includes transfers and negotiations <span class="duration">114ms</span></li>
+<li><span class="pass">&#x2705;</span> J47 — Knowledge graph renders with clickable canvas <span class="duration">2545ms</span></li>
+<li><span class="pass">&#x2705;</span> J48 — Transfers involve multiple participants <span class="duration">83ms</span></li>
+<li><span class="pass">&#x2705;</span> J93 — Transfer API includes REQUESTED, STARTED, COMPLETED, and TERMINATED states <span class="duration">63ms</span></li>
+<li><span class="pass">&#x2705;</span> J94 — Transfer entries have contractId linking to negotiations <span class="duration">57ms</span></li>
+<li><span class="pass">&#x2705;</span> J97 — Share Data page redirects unauthenticated users <span class="duration">94ms</span></li>
+<li><span class="pass">&#x2705;</span> J98 — Transfers use HttpData-PULL transfer type <span class="duration">61ms</span></li>
+<li><span class="pass">&#x2705;</span> J100 — Transfer entries include stateTimestamp <span class="duration">59ms</span></li>
+<li><span class="pass">&#x2705;</span> J101 — Discover Data page requires authentication <span class="duration">91ms</span></li></ul>
+        </details>
+      </div>
+
+      <div id="step-7" class="step-card pass-card">
+        <div class="step-header">
+          <div class="step-status">&#x2705;</div>
+          <div class="step-info">
+            <h3>Step 7 — Analytics &amp; Compliance</h3>
+            <div class="step-meta">
+              <span class="actor">Data User (researcher) + HDAB (regulator)</span>
+              <span class="counts">52 passed, 0 failed, 0 skipped</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="step-refs">
+          <div class="ref-group">
+            <span class="ref-label">Docs:</span>
+            <a href="https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docs/FULL_USER_JOURNEY.md#step-7--analytics--compliance" target="_blank" rel="noopener">Step 7 — Analytics &amp; Compliance &#x2197;</a>
+          </div>
+          <div class="ref-group">
+            <span class="ref-label">EHDS:</span>
+            <a href="https://health.ec.europa.eu/ehealth-digital-health-and-care/reuse-health-data_en" target="_blank" rel="noopener">Art. 52–53 — Fees &amp; Secondary-Use Categories &#x2197;</a>
+          </div>
+          <div class="ref-group">
+            <span class="ref-label">Protocol:</span>
+            <a href="https://health.ec.europa.eu/ehealth-digital-health-and-care/certification-ehr-systems_en" target="_blank" rel="noopener">EEHRxF — HL7 Europe FHIR IG &#x2197;</a>
+          </div>
+        </div>
+
+        <div class="step-endpoints">
+          <span class="ref-label">Endpoints:</span>
+          <code><a href="http://localhost:3003/api/analytics" target="_blank">/api/analytics</a></code> <code><a href="http://localhost:3003/api/patient" target="_blank">/api/patient</a></code> <code><a href="http://localhost:3003/api/compliance" target="_blank">/api/compliance</a></code> <code><a href="http://localhost:3003/api/eehrxf" target="_blank">/api/eehrxf</a></code>
+        </div>
+
+        <div class="step-pages">
+          <span class="ref-label">UI Pages:</span>
+          <code><a href="http://localhost:3003/analytics" target="_blank">/analytics</a></code> <code><a href="http://localhost:3003/patient" target="_blank">/patient</a></code> <code><a href="http://localhost:3003/compliance" target="_blank">/compliance</a></code> <code><a href="http://localhost:3003/eehrxf" target="_blank">/eehrxf</a></code>
+        </div>
+
+        <details class="test-list">
+          <summary>52 tests</summary>
+          <ul><li><span class="pass">&#x2705;</span> J56 — Settings page redirects unauthenticated users <span class="duration">95ms</span></li>
+<li><span class="pass">&#x2705;</span> J57 — Catalog page renders dataset cards (mock fallback) <span class="duration">118ms</span></li>
+<li><span class="pass">&#x2705;</span> J58 — Catalog API returns a populated array <span class="duration">48ms</span></li>
+<li><span class="pass">&#x2705;</span> J59 — Policy API returns ODRL-structured policies <span class="duration">69ms</span></li>
+<li><span class="pass">&#x2705;</span> J60 — Credentials API returns EHDS credentials for participants <span class="duration">92ms</span></li>
+<li><span class="pass">&#x2705;</span> J61 — Catalog dataset cards expand to show metadata <span class="duration">121ms</span></li>
+<li><span class="pass">&#x2705;</span> J62 — Analytics page renders all 6 OMOP stat cards <span class="duration">108ms</span></li>
+<li><span class="pass">&#x2705;</span> J63 — Analytics page renders Top Conditions and Top Drug Exposures sections <span class="duration">99ms</span></li>
+<li><span class="pass">&#x2705;</span> J64 — Analytics page renders Gender Distribution section <span class="duration">2116ms</span></li>
+<li><span class="pass">&#x2705;</span> J65 — Analytics stat card values are numeric or loading <span class="duration">117ms</span></li>
+<li><span class="pass">&#x2705;</span> J66 — Patient Journey page shows 6 cohort stat badges <span class="duration">161ms</span></li>
+<li><span class="pass">&#x2705;</span> J67 — Patient Journey page renders patient selector dropdown <span class="duration">89ms</span></li>
+<li><span class="pass">&#x2705;</span> J68 — Patient Journey page describes FHIR R4 clinical events <span class="duration">97ms</span></li>
+<li><span class="pass">&#x2705;</span> J69 — Analytics page has Patient Journey and NL Query nav links <span class="duration">98ms</span></li>
+<li><span class="pass">&#x2705;</span> J70 — Patient Journey page has Catalog and Analytics nav links <span class="duration">103ms</span></li>
+<li><span class="pass">&#x2705;</span> J71 — Analytics page description references OMOP CDM and Synthea <span class="duration">111ms</span></li>
+<li><span class="pass">&#x2705;</span> J72 — EEHRxF page shows Priority Categories and EU Profiles stats <span class="duration">118ms</span></li>
+<li><span class="pass">&#x2705;</span> J73 — EEHRxF page shows Overall Coverage stat <span class="duration">113ms</span></li>
+<li><span class="pass">&#x2705;</span> J74 — EEHRxF page renders EHDS Implementation Timeline <span class="duration">111ms</span></li>
+<li><span class="pass">&#x2705;</span> J75 — EEHRxF categories have Available/Partial/Gap badges <span class="duration">158ms</span></li>
+<li><span class="pass">&#x2705;</span> J76 — EEHRxF page shows References section with regulation links <span class="duration">105ms</span></li>
+<li><span class="pass">&#x2705;</span> J77 — EEHRxF page description mentions HL7 Europe FHIR R4 <span class="duration">113ms</span></li>
+<li><span class="pass">&#x2705;</span> J78 — Compliance page requires authentication <span class="duration">94ms</span></li>
+<li><span class="pass">&#x2705;</span> J79 — Compliance validation API is reachable <span class="duration">108ms</span></li>
+<li><span class="pass">&#x2705;</span> J80 — EEHRxF page has NL Query and Compliance nav links <span class="duration">114ms</span></li>
+<li><span class="pass">&#x2705;</span> J81 — EEHRxF page shows Profiles with Data stat <span class="duration">106ms</span></li>
+<li><span class="pass">&#x2705;</span> J56 — Settings page redirects unauthenticated users <span class="duration">100ms</span></li>
+<li><span class="pass">&#x2705;</span> J57 — Catalog page renders dataset cards (mock fallback) <span class="duration">110ms</span></li>
+<li><span class="pass">&#x2705;</span> J58 — Catalog API returns a populated array <span class="duration">48ms</span></li>
+<li><span class="pass">&#x2705;</span> J59 — Policy API returns ODRL-structured policies <span class="duration">56ms</span></li>
+<li><span class="pass">&#x2705;</span> J60 — Credentials API returns EHDS credentials for participants <span class="duration">149ms</span></li>
+<li><span class="pass">&#x2705;</span> J61 — Catalog dataset cards expand to show metadata <span class="duration">158ms</span></li>
+<li><span class="pass">&#x2705;</span> J62 — Analytics page renders all 6 OMOP stat cards <span class="duration">107ms</span></li>
+<li><span class="pass">&#x2705;</span> J63 — Analytics page renders Top Conditions and Top Drug Exposures sections <span class="duration">106ms</span></li>
+<li><span class="pass">&#x2705;</span> J64 — Analytics page renders Gender Distribution section <span class="duration">2115ms</span></li>
+<li><span class="pass">&#x2705;</span> J65 — Analytics stat card values are numeric or loading <span class="duration">119ms</span></li>
+<li><span class="pass">&#x2705;</span> J66 — Patient Journey page shows 6 cohort stat badges <span class="duration">203ms</span></li>
+<li><span class="pass">&#x2705;</span> J67 — Patient Journey page renders patient selector dropdown <span class="duration">97ms</span></li>
+<li><span class="pass">&#x2705;</span> J68 — Patient Journey page describes FHIR R4 clinical events <span class="duration">97ms</span></li>
+<li><span class="pass">&#x2705;</span> J69 — Analytics page has Patient Journey and NL Query nav links <span class="duration">99ms</span></li>
+<li><span class="pass">&#x2705;</span> J70 — Patient Journey page has Catalog and Analytics nav links <span class="duration">94ms</span></li>
+<li><span class="pass">&#x2705;</span> J71 — Analytics page description references OMOP CDM and Synthea <span class="duration">100ms</span></li>
+<li><span class="pass">&#x2705;</span> J72 — EEHRxF page shows Priority Categories and EU Profiles stats <span class="duration">112ms</span></li>
+<li><span class="pass">&#x2705;</span> J73 — EEHRxF page shows Overall Coverage stat <span class="duration">121ms</span></li>
+<li><span class="pass">&#x2705;</span> J74 — EEHRxF page renders EHDS Implementation Timeline <span class="duration">113ms</span></li>
+<li><span class="pass">&#x2705;</span> J75 — EEHRxF categories have Available/Partial/Gap badges <span class="duration">171ms</span></li>
+<li><span class="pass">&#x2705;</span> J76 — EEHRxF page shows References section with regulation links <span class="duration">115ms</span></li>
+<li><span class="pass">&#x2705;</span> J77 — EEHRxF page description mentions HL7 Europe FHIR R4 <span class="duration">99ms</span></li>
+<li><span class="pass">&#x2705;</span> J78 — Compliance page requires authentication <span class="duration">106ms</span></li>
+<li><span class="pass">&#x2705;</span> J79 — Compliance validation API is reachable <span class="duration">90ms</span></li>
+<li><span class="pass">&#x2705;</span> J80 — EEHRxF page has NL Query and Compliance nav links <span class="duration">100ms</span></li>
+<li><span class="pass">&#x2705;</span> J81 — EEHRxF page shows Profiles with Data stat <span class="duration">112ms</span></li></ul>
+        </details>
+      </div>
+
+<div id="infra">
+<h2>Infrastructure & Browser Health</h2>
+<div class="step-card pass-card">
+  <div class="step-header">
+    <div class="step-status">&#x2705;</div>
+    <div class="step-info">
+      <h3>Infrastructure & Browser Health</h3>
+      <div class="step-meta">
+        <span class="counts">160 passed, 0 failed, 0 skipped</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="step-endpoints">
+    <span class="ref-label">Scope:</span>
+    <span>All public + protected routes, API routes</span>
+  </div>
+
+  <details class="test-list">
+    <summary>160 tests</summary>
+    <ul><li><span class="pass">&#x2705;</span> should successfully login as edcadmin and reach portal <span class="duration">427ms</span></li>
+<li><span class="pass">&#x2705;</span> should successfully login as clinicuser and reach portal <span class="duration">336ms</span></li>
+<li><span class="pass">&#x2705;</span> should successfully login as regulator and reach portal <span class="duration">550ms</span></li>
+<li><span class="pass">&#x2705;</span> Graph Explorer (/graph) <span class="duration">736ms</span></li>
+<li><span class="pass">&#x2705;</span> Dataset Catalog (/catalog) <span class="duration">640ms</span></li>
+<li><span class="pass">&#x2705;</span> DCAT-AP Editor (/catalog/editor) <span class="duration">632ms</span></li>
+<li><span class="pass">&#x2705;</span> Patient Journey (/patient) <span class="duration">601ms</span></li>
+<li><span class="pass">&#x2705;</span> OMOP Analytics (/analytics) <span class="duration">625ms</span></li>
+<li><span class="pass">&#x2705;</span> EEHRxF Alignment (/eehrxf) <span class="duration">619ms</span></li>
+<li><span class="pass">&#x2705;</span> Docs Overview (/docs) <span class="duration">636ms</span></li>
+<li><span class="pass">&#x2705;</span> Docs Architecture (/docs/architecture) <span class="duration">714ms</span></li>
+<li><span class="pass">&#x2705;</span> Docs Developer (/docs/developer) <span class="duration">699ms</span></li>
+<li><span class="pass">&#x2705;</span> Docs User Guide (/docs/user-guide) <span class="duration">684ms</span></li>
+<li><span class="pass">&#x2705;</span> Onboarding (/onboarding) <span class="duration">1418ms</span></li>
+<li><span class="pass">&#x2705;</span> Onboarding Status (/onboarding/status) <span class="duration">1431ms</span></li>
+<li><span class="pass">&#x2705;</span> Credentials (/credentials) <span class="duration">1453ms</span></li>
+<li><span class="pass">&#x2705;</span> Compliance (/compliance) <span class="duration">1405ms</span></li>
+<li><span class="pass">&#x2705;</span> TCK Tests (/compliance/tck) <span class="duration">1438ms</span></li>
+<li><span class="pass">&#x2705;</span> Admin Dashboard (/admin) <span class="duration">1445ms</span></li>
+<li><span class="pass">&#x2705;</span> Audit &amp; Provenance (/admin/audit) <span class="duration">1458ms</span></li>
+<li><span class="pass">&#x2705;</span> Policy Definitions (/admin/policies) <span class="duration">1431ms</span></li>
+<li><span class="pass">&#x2705;</span> Discover Data (/data/discover) <span class="duration">1430ms</span></li>
+<li><span class="pass">&#x2705;</span> Contract Negotiation (/negotiate) <span class="duration">1405ms</span></li>
+<li><span class="pass">&#x2705;</span> Settings (/settings) <span class="duration">1412ms</span></li>
+<li><span class="pass">&#x2705;</span> GET /api/graph <span class="duration">52ms</span></li>
+<li><span class="pass">&#x2705;</span> GET /api/catalog <span class="duration">5ms</span></li>
+<li><span class="pass">&#x2705;</span> GET /api/patient <span class="duration">4ms</span></li>
+<li><span class="pass">&#x2705;</span> GET /api/analytics <span class="duration">7ms</span></li>
+<li><span class="pass">&#x2705;</span> GET /api/admin/policies <span class="duration">24ms</span></li>
+<li><span class="pass">&#x2705;</span> GET /api/admin/audit <span class="duration">17ms</span></li>
+<li><span class="pass">&#x2705;</span> GET /api/participants <span class="duration">7ms</span></li>
+<li><span class="pass">&#x2705;</span> No 404 requests on Graph Explorer load <span class="duration">673ms</span></li>
+<li><span class="pass">&#x2705;</span> No 404 requests on Credentials page load (authenticated) <span class="duration">886ms</span></li>
+<li><span class="pass">&#x2705;</span> Onboarding status: page renders without JS crash <span class="duration">931ms</span></li>
+<li><span class="pass">&#x2705;</span> Onboarding status: 'No participant contexts' only appears when backend is down, not as a code bug <span class="duration">866ms</span></li>
+<li><span class="pass">&#x2705;</span> Audit page: credentials table shows values not all dashes <span class="duration">2436ms</span></li>
+<li><span class="pass">&#x2705;</span> Policy Definitions page: renders without crash <span class="duration">881ms</span></li>
+<li><span class="pass">&#x2705;</span> Policy Definitions page: Create Policy button is present <span class="duration">884ms</span></li>
+<li><span class="pass">&#x2705;</span> Credentials page: request form renders without JS crash <span class="duration">889ms</span></li>
+<li><span class="pass">&#x2705;</span> Developer Guide contains Technology Stack section <span class="duration">211ms</span></li>
+<li><span class="pass">&#x2705;</span> Architecture page contains Mermaid diagram <span class="duration">229ms</span></li>
+<li><span class="pass">&#x2705;</span> Docs overview links to sub-pages <span class="duration">107ms</span></li>
+<li><span class="pass">&#x2705;</span> page has correct title tag <span class="duration">98ms</span></li>
+<li><span class="pass">&#x2705;</span> mobile viewport still renders navigation <span class="duration">87ms</span></li>
+<li><span class="pass">&#x2705;</span> Explore dropdown contains expected links <span class="duration">163ms</span></li>
+<li><span class="pass">&#x2705;</span> Governance dropdown contains expected links <span class="duration">134ms</span></li>
+<li><span class="pass">&#x2705;</span> Exchange dropdown contains expected links <span class="duration">133ms</span></li>
+<li><span class="pass">&#x2705;</span> Manage dropdown contains expected links <span class="duration">136ms</span></li>
+<li><span class="pass">&#x2705;</span> Docs dropdown contains expected links <span class="duration">139ms</span></li>
+<li><span class="pass">&#x2705;</span> Graph Explorer renders layer sidebar <span class="duration">110ms</span></li>
+<li><span class="pass">&#x2705;</span> Dataset Catalog renders heading <span class="duration">102ms</span></li>
+<li><span class="pass">&#x2705;</span> Patient Journey renders heading <span class="duration">98ms</span></li>
+<li><span class="pass">&#x2705;</span> OMOP Analytics renders heading <span class="duration">99ms</span></li>
+<li><span class="pass">&#x2705;</span> EEHRxF Profile Alignment renders heading <span class="duration">102ms</span></li>
+<li><span class="pass">&#x2705;</span> Compliance redirects unauthenticated users <span class="duration">99ms</span></li>
+<li><span class="pass">&#x2705;</span> Credentials redirects unauthenticated users <span class="duration">96ms</span></li>
+<li><span class="pass">&#x2705;</span> Discover Data redirects unauthenticated users <span class="duration">97ms</span></li>
+<li><span class="pass">&#x2705;</span> Contract Negotiation redirects unauthenticated users <span class="duration">91ms</span></li>
+<li><span class="pass">&#x2705;</span> Admin Dashboard redirects unauthenticated users <span class="duration">94ms</span></li>
+<li><span class="pass">&#x2705;</span> Onboarding redirects unauthenticated users <span class="duration">96ms</span></li>
+<li><span class="pass">&#x2705;</span> Settings redirects unauthenticated users <span class="duration">89ms</span></li>
+<li><span class="pass">&#x2705;</span> Docs overview renders heading <span class="duration">102ms</span></li>
+<li><span class="pass">&#x2705;</span> Architecture page renders heading <span class="duration">223ms</span></li>
+<li><span class="pass">&#x2705;</span> Developer Guide renders heading <span class="duration">212ms</span></li>
+<li><span class="pass">&#x2705;</span> User Guide renders heading <span class="duration">229ms</span></li>
+<li><span class="pass">&#x2705;</span> should load and show the brand name <span class="duration">98ms</span></li>
+<li><span class="pass">&#x2705;</span> should load the graph page <span class="duration">148ms</span></li>
+<li><span class="pass">&#x2705;</span> should load the catalog page <span class="duration">112ms</span></li>
+<li><span class="pass">&#x2705;</span> should load the patient page <span class="duration">93ms</span></li>
+<li><span class="pass">&#x2705;</span> should navigate between pages <span class="duration">416ms</span></li>
+<li><span class="pass">&#x2705;</span> should successfully login as edcadmin and reach portal <span class="duration">369ms</span></li>
+<li><span class="pass">&#x2705;</span> should successfully login as clinicuser and reach portal <span class="duration">309ms</span></li>
+<li><span class="pass">&#x2705;</span> should successfully login as regulator and reach portal <span class="duration">297ms</span></li>
+<li><span class="pass">&#x2705;</span> Graph Explorer (/graph) <span class="duration">711ms</span></li>
+<li><span class="pass">&#x2705;</span> Dataset Catalog (/catalog) <span class="duration">614ms</span></li>
+<li><span class="pass">&#x2705;</span> DCAT-AP Editor (/catalog/editor) <span class="duration">619ms</span></li>
+<li><span class="pass">&#x2705;</span> Patient Journey (/patient) <span class="duration">601ms</span></li>
+<li><span class="pass">&#x2705;</span> OMOP Analytics (/analytics) <span class="duration">601ms</span></li>
+<li><span class="pass">&#x2705;</span> EEHRxF Alignment (/eehrxf) <span class="duration">610ms</span></li>
+<li><span class="pass">&#x2705;</span> Docs Overview (/docs) <span class="duration">636ms</span></li>
+<li><span class="pass">&#x2705;</span> Docs Architecture (/docs/architecture) <span class="duration">726ms</span></li>
+<li><span class="pass">&#x2705;</span> Docs Developer (/docs/developer) <span class="duration">671ms</span></li>
+<li><span class="pass">&#x2705;</span> Docs User Guide (/docs/user-guide) <span class="duration">700ms</span></li>
+<li><span class="pass">&#x2705;</span> Onboarding (/onboarding) <span class="duration">1417ms</span></li>
+<li><span class="pass">&#x2705;</span> Onboarding Status (/onboarding/status) <span class="duration">1398ms</span></li>
+<li><span class="pass">&#x2705;</span> Credentials (/credentials) <span class="duration">1501ms</span></li>
+<li><span class="pass">&#x2705;</span> Compliance (/compliance) <span class="duration">1433ms</span></li>
+<li><span class="pass">&#x2705;</span> TCK Tests (/compliance/tck) <span class="duration">1403ms</span></li>
+<li><span class="pass">&#x2705;</span> Admin Dashboard (/admin) <span class="duration">1510ms</span></li>
+<li><span class="pass">&#x2705;</span> Audit &amp; Provenance (/admin/audit) <span class="duration">1455ms</span></li>
+<li><span class="pass">&#x2705;</span> Policy Definitions (/admin/policies) <span class="duration">1399ms</span></li>
+<li><span class="pass">&#x2705;</span> Discover Data (/data/discover) <span class="duration">1440ms</span></li>
+<li><span class="pass">&#x2705;</span> Contract Negotiation (/negotiate) <span class="duration">1427ms</span></li>
+<li><span class="pass">&#x2705;</span> Settings (/settings) <span class="duration">1425ms</span></li>
+<li><span class="pass">&#x2705;</span> GET /api/graph <span class="duration">51ms</span></li>
+<li><span class="pass">&#x2705;</span> GET /api/catalog <span class="duration">6ms</span></li>
+<li><span class="pass">&#x2705;</span> GET /api/patient <span class="duration">4ms</span></li>
+<li><span class="pass">&#x2705;</span> GET /api/analytics <span class="duration">5ms</span></li>
+<li><span class="pass">&#x2705;</span> GET /api/admin/policies <span class="duration">27ms</span></li>
+<li><span class="pass">&#x2705;</span> GET /api/admin/audit <span class="duration">20ms</span></li>
+<li><span class="pass">&#x2705;</span> GET /api/participants <span class="duration">7ms</span></li>
+<li><span class="pass">&#x2705;</span> No 404 requests on Graph Explorer load <span class="duration">668ms</span></li>
+<li><span class="pass">&#x2705;</span> No 404 requests on Credentials page load (authenticated) <span class="duration">872ms</span></li>
+<li><span class="pass">&#x2705;</span> Onboarding status: page renders without JS crash <span class="duration">877ms</span></li>
+<li><span class="pass">&#x2705;</span> Onboarding status: 'No participant contexts' only appears when backend is down, not as a code bug <span class="duration">879ms</span></li>
+<li><span class="pass">&#x2705;</span> Audit page: credentials table shows values not all dashes <span class="duration">2447ms</span></li>
+<li><span class="pass">&#x2705;</span> Policy Definitions page: renders without crash <span class="duration">898ms</span></li>
+<li><span class="pass">&#x2705;</span> Policy Definitions page: Create Policy button is present <span class="duration">903ms</span></li>
+<li><span class="pass">&#x2705;</span> Credentials page: request form renders without JS crash <span class="duration">904ms</span></li>
+<li><span class="pass">&#x2705;</span> Developer Guide contains Technology Stack section <span class="duration">204ms</span></li>
+<li><span class="pass">&#x2705;</span> Architecture page contains Mermaid diagram <span class="duration">224ms</span></li>
+<li><span class="pass">&#x2705;</span> Docs overview links to sub-pages <span class="duration">97ms</span></li>
+<li><span class="pass">&#x2705;</span> page has correct title tag <span class="duration">105ms</span></li>
+<li><span class="pass">&#x2705;</span> mobile viewport still renders navigation <span class="duration">87ms</span></li>
+<li><span class="pass">&#x2705;</span> J102 — Participants API returns 5 real participants from IdentityHub <span class="duration">49ms</span></li>
+<li><span class="pass">&#x2705;</span> J103 — All participants have IdentityHub DID identities <span class="duration">48ms</span></li>
+<li><span class="pass">&#x2705;</span> J104 — Credentials API returns EHDS VCs from Neo4j <span class="duration">94ms</span></li>
+<li><span class="pass">&#x2705;</span> J105 — Graph API returns nodes and relationships from Neo4j <span class="duration">143ms</span></li>
+<li><span class="pass">&#x2705;</span> J106 — Graph Explorer page renders with Neo4j data <span class="duration">165ms</span></li>
+<li><span class="pass">&#x2705;</span> J107 — Catalog API returns datasets from Neo4j <span class="duration">102ms</span></li>
+<li><span class="pass">&#x2705;</span> J108 — Catalog page renders dataset entries <span class="duration">111ms</span></li>
+<li><span class="pass">&#x2705;</span> J109 — Patient API returns at least 1 patient from Neo4j <span class="duration">91ms</span></li>
+<li><span class="pass">&#x2705;</span> J110 — Analytics API returns summary from Neo4j OMOP layer <span class="duration">98ms</span></li>
+<li><span class="pass">&#x2705;</span> J111 — Patient Journey page renders timeline <span class="duration">94ms</span></li>
+<li><span class="pass">&#x2705;</span> J112 — Analytics page renders stat cards <span class="duration">103ms</span></li>
+<li><span class="pass">&#x2705;</span> J113 — EEHRxF API returns 6 priority categories <span class="duration">96ms</span></li>
+<li><span class="pass">&#x2705;</span> J114 — Compliance API returns consumers and datasets <span class="duration">98ms</span></li>
+<li><span class="pass">&#x2705;</span> J115 — Negotiations API returns data for a participant <span class="duration">49ms</span></li>
+<li><span class="pass">&#x2705;</span> J116 — Transfers API returns data for a participant <span class="duration">48ms</span></li>
+<li><span class="pass">&#x2705;</span> J117 — Keycloak OIDC discovery endpoint is reachable <span class="duration">7ms</span></li>
+<li><span class="pass">&#x2705;</span> J118 — Login as edcadmin reaches onboarding page <span class="duration">327ms</span></li>
+<li><span class="pass">&#x2705;</span> J119 — Login as clinicuser reaches data sharing page <span class="duration">285ms</span></li>
+<li><span class="pass">&#x2705;</span> J120 — Login as researcher reaches discovery page <span class="duration">281ms</span></li>
+<li><span class="pass">&#x2705;</span> J121 — Login as regulator reaches compliance page <span class="duration">298ms</span></li>
+<li><span class="pass">&#x2705;</span> Explore dropdown contains expected links <span class="duration">130ms</span></li>
+<li><span class="pass">&#x2705;</span> Governance dropdown contains expected links <span class="duration">134ms</span></li>
+<li><span class="pass">&#x2705;</span> Exchange dropdown contains expected links <span class="duration">133ms</span></li>
+<li><span class="pass">&#x2705;</span> Manage dropdown contains expected links <span class="duration">131ms</span></li>
+<li><span class="pass">&#x2705;</span> Docs dropdown contains expected links <span class="duration">134ms</span></li>
+<li><span class="pass">&#x2705;</span> Graph Explorer renders layer sidebar <span class="duration">97ms</span></li>
+<li><span class="pass">&#x2705;</span> Dataset Catalog renders heading <span class="duration">102ms</span></li>
+<li><span class="pass">&#x2705;</span> Patient Journey renders heading <span class="duration">98ms</span></li>
+<li><span class="pass">&#x2705;</span> OMOP Analytics renders heading <span class="duration">105ms</span></li>
+<li><span class="pass">&#x2705;</span> EEHRxF Profile Alignment renders heading <span class="duration">101ms</span></li>
+<li><span class="pass">&#x2705;</span> Compliance redirects unauthenticated users <span class="duration">92ms</span></li>
+<li><span class="pass">&#x2705;</span> Credentials redirects unauthenticated users <span class="duration">109ms</span></li>
+<li><span class="pass">&#x2705;</span> Discover Data redirects unauthenticated users <span class="duration">85ms</span></li>
+<li><span class="pass">&#x2705;</span> Contract Negotiation redirects unauthenticated users <span class="duration">89ms</span></li>
+<li><span class="pass">&#x2705;</span> Admin Dashboard redirects unauthenticated users <span class="duration">113ms</span></li>
+<li><span class="pass">&#x2705;</span> Onboarding redirects unauthenticated users <span class="duration">88ms</span></li>
+<li><span class="pass">&#x2705;</span> Settings redirects unauthenticated users <span class="duration">90ms</span></li>
+<li><span class="pass">&#x2705;</span> Docs overview renders heading <span class="duration">100ms</span></li>
+<li><span class="pass">&#x2705;</span> Architecture page renders heading <span class="duration">220ms</span></li>
+<li><span class="pass">&#x2705;</span> Developer Guide renders heading <span class="duration">195ms</span></li>
+<li><span class="pass">&#x2705;</span> User Guide renders heading <span class="duration">169ms</span></li>
+<li><span class="pass">&#x2705;</span> should load and show the brand name <span class="duration">114ms</span></li>
+<li><span class="pass">&#x2705;</span> should load the graph page <span class="duration">148ms</span></li>
+<li><span class="pass">&#x2705;</span> should load the catalog page <span class="duration">109ms</span></li>
+<li><span class="pass">&#x2705;</span> should load the patient page <span class="duration">92ms</span></li>
+<li><span class="pass">&#x2705;</span> should navigate between pages <span class="duration">412ms</span></li></ul>
+  </details>
+</div>
+</div>
+
+<h2>Specification & Regulation References</h2>
+<table class="spec-table">
+<tr><th>Step</th><th>EHDS Article</th><th>Protocol</th><th>Tested Endpoints</th><th>Status</th></tr>
+<tr>
+  <td>0. Participant Onboarding</td>
+  <td><a href="https://health.ec.europa.eu/ehealth-digital-health-and-care/certification-ehr-systems_en" target="_blank">Art. 33 — Health Data Access Body</a></td>
+  <td><a href="https://eclipse-dataspace-dcp.github.io/decentralized-claims-protocol/v1.0.1/#participant-agents" target="_blank">DCP §4 — Participant Registration</a></td>
+  <td><code>/api/participants</code> <code>/api/credentials</code></td>
+  <td>&#x2705; 10/10</td>
+</tr>
+<tr>
+  <td>1. Data Provider Creates Metadata</td>
+  <td><a href="https://health.ec.europa.eu/ehealth-digital-health-and-care/reuse-health-data_en" target="_blank">Art. 45 — Dataset Description</a></td>
+  <td><a href="https://eclipse-dataspace-protocol-base.github.io/DataspaceProtocol/2025-1-err1/#catalog-protocol" target="_blank">HealthDCAT-AP 3.0</a></td>
+  <td><code>/api/assets</code> <code>/api/catalog</code></td>
+  <td>&#x2705; 20/20</td>
+</tr>
+<tr>
+  <td>2. Publish with Access &amp; Usage Policies</td>
+  <td><a href="https://health.ec.europa.eu/ehealth-digital-health-and-care/reuse-health-data_en" target="_blank">Art. 46 — Data Permit Conditions</a></td>
+  <td><a href="https://eclipse-dataspace-protocol-base.github.io/DataspaceProtocol/2025-1-err1/#contract-negotiation-protocol" target="_blank">ODRL 2.2</a></td>
+  <td><code>/api/admin/policies</code> <code>/api/catalog</code></td>
+  <td>&#x2705; 14/14</td>
+</tr>
+<tr>
+  <td>3. Consumer Discovers Assets</td>
+  <td><a href="https://health.ec.europa.eu/ehealth-digital-health-and-care/reuse-health-data_en" target="_blank">Art. 47 — Data Access Application</a></td>
+  <td><a href="https://eclipse-dataspace-protocol-base.github.io/DataspaceProtocol/2025-1-err1/#catalog-protocol" target="_blank">DSP §5 — Catalog Protocol</a></td>
+  <td><code>/api/catalog</code> <code>/api/graph</code> <code>/api/patient</code> <code>/api/analytics</code></td>
+  <td>&#x2705; 36/36</td>
+</tr>
+<tr>
+  <td>4. Request Access to Datasets</td>
+  <td><a href="https://health.ec.europa.eu/ehealth-digital-health-and-care/reuse-health-data_en" target="_blank">Art. 48 — Data Permit</a></td>
+  <td><a href="https://eclipse-dataspace-protocol-base.github.io/DataspaceProtocol/2025-1-err1/#contract-negotiation-protocol" target="_blank">DSP §7.1 — Contract Negotiation</a></td>
+  <td><code>/api/negotiations</code> <code>/api/tasks</code> <code>/api/assets</code></td>
+  <td>&#x2705; 28/28</td>
+</tr>
+<tr>
+  <td>5. Contract Negotiation &amp; Approval</td>
+  <td><a href="https://health.ec.europa.eu/ehealth-digital-health-and-care/reuse-health-data_en" target="_blank">Art. 49 — HDAB Decision</a></td>
+  <td><a href="https://eclipse-dataspace-protocol-base.github.io/DataspaceProtocol/2025-1-err1/#contract-negotiation-protocol" target="_blank">DSP §7.1 — Negotiation Lifecycle</a></td>
+  <td><code>/api/negotiations</code> <code>/api/tasks</code></td>
+  <td>&#x2705; 4/4</td>
+</tr>
+<tr>
+  <td>6. Data Transfer &amp; Access</td>
+  <td><a href="https://health.ec.europa.eu/ehealth-digital-health-and-care/reuse-health-data_en" target="_blank">Art. 50 — Secure Processing Environment</a></td>
+  <td><a href="https://eclipse-dataspace-protocol-base.github.io/DataspaceProtocol/2025-1-err1/#transfer-process-protocol" target="_blank">DSP §8 — Transfer Process Protocol</a></td>
+  <td><code>/api/transfers</code> <code>/api/tasks</code> <code>/api/admin/audit</code></td>
+  <td>&#x2705; 28/28</td>
+</tr>
+<tr>
+  <td>7. Analytics &amp; Compliance</td>
+  <td><a href="https://health.ec.europa.eu/ehealth-digital-health-and-care/reuse-health-data_en" target="_blank">Art. 52–53 — Fees &amp; Secondary-Use Categories</a></td>
+  <td><a href="https://health.ec.europa.eu/ehealth-digital-health-and-care/certification-ehr-systems_en" target="_blank">EEHRxF — HL7 Europe FHIR IG</a></td>
+  <td><code>/api/analytics</code> <code>/api/patient</code> <code>/api/compliance</code> <code>/api/eehrxf</code></td>
+  <td>&#x2705; 52/52</td>
+</tr>
+</table>
+
+<div class="footer">
+  <p>
+    <a href="index.html">Playwright HTML Report</a> |
+    <a href="https://health.ec.europa.eu/ehealth-digital-health-and-care/reuse-health-data_en" target="_blank">EHDS Regulation (Reuse)</a> |
+    <a href="https://health.ec.europa.eu/ehealth-digital-health-and-care/certification-ehr-systems_en" target="_blank">EHDS Certification</a> |
+    <a href="https://eclipse-dataspace-protocol-base.github.io/DataspaceProtocol/2025-1-err1/" target="_blank">Dataspace Protocol 2025-1</a> |
+    <a href="https://eclipse-dataspace-dcp.github.io/decentralized-claims-protocol/v1.0.1/" target="_blank">DCP v1.0.1</a>
+  </p>
+  <p>Generated by EHDS Journey Reporter &mdash; 2026-03-22T21:44:18.214Z</p>
+</div>
+
+</body>
+</html>

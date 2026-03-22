@@ -72,12 +72,15 @@ jobs:
 
       - name: Copy test reports and E2E report to output
         run: |
-          mkdir -p out/test-reports out/e2e-report
+          mkdir -p out/test-reports
           # Vitest coverage
           cp -r coverage/ out/test-reports/coverage/ 2>/dev/null || true
           cp test-results.json out/test-reports/ 2>/dev/null || true
-          # Playwright HTML report
-          cp -r playwright-report/* out/e2e-report/ 2>/dev/null || true
+          # Playwright HTML report — committed in public/e2e-report/ (includes
+          # live project results from localhost:3003 JAD stack). CI only runs
+          # chromium so we merge CI screenshots without overwriting the
+          # committed index.html or ehds-journey.html.
+          cp -rn playwright-report/* out/e2e-report/ 2>/dev/null || true
           # Generate comprehensive test report dashboard
           node ../scripts/generate-test-report-page.js . out/test-reports || echo "Report generation skipped"
 
