@@ -1,21 +1,25 @@
 /**
  * Journey Group H — Credential Display, Catalog Resilience & Policy Rendering
  *
- * J50: Settings page credentials load via mock fallback
- * J51: Catalog page always renders ≥1 dataset even when API is unavailable
- * J52: Catalog API returns a non-empty array
- * J53: ODRL policy JSON is syntax-highlighted (coloured spans)
- * J54: Credentials API returns EHDS credentials for all participants
- * J55: Catalog page dataset cards are expandable
+ * J56: Settings page credentials load via mock fallback
+ * J57: Catalog page always renders ≥1 dataset even when API is unavailable
+ * J58: Catalog API returns a non-empty array
+ * J59: ODRL policy JSON is syntax-highlighted (coloured spans)
+ * J60: Credentials API returns EHDS credentials for all participants
+ * J61: Catalog page dataset cards are expandable
  */
 import { test, expect } from "@playwright/test";
-import { T, expectHeading, waitForDataLoad, apiGet } from "./helpers";
-
-const isCI = !!process.env.CI;
+import {
+  T,
+  expectHeading,
+  waitForDataLoad,
+  apiGet,
+  skipIfNeo4jDown,
+} from "./helpers";
 
 test.describe("H · Credential Display, Catalog Resilience & Policy Rendering", () => {
-  /* ── J50: Settings credential redirect (not authenticated) ─── */
-  test("J50 — Settings page redirects unauthenticated users", async ({
+  /* ── J56: Settings credential redirect (not authenticated) ─── */
+  test("J56 — Settings page redirects unauthenticated users", async ({
     page,
   }) => {
     await page.goto("/settings");
@@ -23,8 +27,8 @@ test.describe("H · Credential Display, Catalog Resilience & Policy Rendering", 
     await expect(page).toHaveURL(/signin/, { timeout: T });
   });
 
-  /* ── J51: Catalog page reliably shows datasets ───────────── */
-  test("J51 — Catalog page renders dataset cards (mock fallback)", async ({
+  /* ── J57: Catalog page reliably shows datasets ───────────── */
+  test("J57 — Catalog page renders dataset cards (mock fallback)", async ({
     page,
   }) => {
     await page.goto("/catalog");
@@ -39,8 +43,8 @@ test.describe("H · Credential Display, Catalog Resilience & Policy Rendering", 
     await expect(page.getByText("No datasets found.")).not.toBeVisible();
   });
 
-  /* ── J52: Catalog API returns non-empty array ────────────── */
-  test("J52 — Catalog API returns a populated array", async ({ page }) => {
+  /* ── J58: Catalog API returns non-empty array ────────────── */
+  test("J58 — Catalog API returns a populated array", async ({ page }) => {
     const datasets = await apiGet(page, "/api/catalog");
     expect(Array.isArray(datasets)).toBe(true);
     expect(datasets.length).toBeGreaterThanOrEqual(1);
@@ -51,8 +55,8 @@ test.describe("H · Credential Display, Catalog Resilience & Policy Rendering", 
     }
   });
 
-  /* ── J53: ODRL policy JSON has syntax-highlighted spans ──── */
-  test("J53 — Policy API returns ODRL-structured policies", async ({
+  /* ── J59: ODRL policy JSON has syntax-highlighted spans ──── */
+  test("J59 — Policy API returns ODRL-structured policies", async ({
     page,
   }) => {
     const data = await apiGet(page, "/api/admin/policies");
@@ -78,11 +82,11 @@ test.describe("H · Credential Display, Catalog Resilience & Policy Rendering", 
     ).toBeTruthy();
   });
 
-  /* ── J54: Credentials API returns EHDS credentials ──────── */
-  test("J54 — Credentials API returns EHDS credentials for participants", async ({
+  /* ── J60: Credentials API returns EHDS credentials ──────── */
+  test("J60 — Credentials API returns EHDS credentials for participants", async ({
     page,
   }) => {
-    test.skip(isCI, "Requires live EDC-V / IdentityHub");
+    await skipIfNeo4jDown(page);
     const data = await apiGet(page, "/api/credentials");
     const creds = data.credentials || data;
     expect(Array.isArray(creds)).toBe(true);
@@ -96,8 +100,8 @@ test.describe("H · Credential Display, Catalog Resilience & Policy Rendering", 
     }
   });
 
-  /* ── J55: Catalog dataset cards are expandable ─────────── */
-  test("J55 — Catalog dataset cards expand to show metadata", async ({
+  /* ── J61: Catalog dataset cards are expandable ─────────── */
+  test("J61 — Catalog dataset cards expand to show metadata", async ({
     page,
   }) => {
     await page.goto("/catalog");

@@ -134,9 +134,9 @@ describe("GraphPage", () => {
   it("handles fetch error gracefully", async () => {
     mockFetchApi.mockReturnValue(Promise.reject(new Error("Network error")));
     render(<GraphPage />);
-    // After error, loading stops and ForceGraph renders (with empty data)
+    // After error, loading stops and error message renders
     await waitFor(() => {
-      expect(screen.getByTestId("force-graph")).toBeInTheDocument();
+      expect(screen.getByText(/Neo4j unavailable/)).toBeInTheDocument();
     });
   });
 

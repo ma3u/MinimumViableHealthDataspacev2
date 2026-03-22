@@ -14,9 +14,8 @@ import {
   expectSigninRedirect,
   waitForDataLoad,
   apiGet,
+  skipIfNeo4jDown,
 } from "./helpers";
-
-const isCI = !!process.env.CI;
 
 test.describe("F · Data Transfer & Viewing", () => {
   /* ── J41: Transfer page is protected ─────────────────────── */
@@ -72,7 +71,7 @@ test.describe("F · Data Transfer & Viewing", () => {
   test("J46 — Audit API includes transfers and negotiations", async ({
     page,
   }) => {
-    test.skip(isCI, "Requires live EDC-V");
+    await skipIfNeo4jDown(page);
     const audit = await apiGet(page, "/api/admin/audit");
     // Audit should have some transfer or negotiation data
     const hasTransfers =
@@ -86,7 +85,7 @@ test.describe("F · Data Transfer & Viewing", () => {
   test("J47 — Knowledge graph renders with clickable canvas", async ({
     page,
   }) => {
-    test.skip(isCI, "Requires live Neo4j");
+    await skipIfNeo4jDown(page);
 
     await page.goto("/graph");
     await expect(page.getByText("Layers").first()).toBeVisible({ timeout: T });

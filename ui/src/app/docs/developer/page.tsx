@@ -129,6 +129,11 @@ export default function DeveloperGuidePage() {
             </a>
           </li>
           <li>
+            <a href="#user-journey" className="hover:text-indigo-300">
+              EHDS User Journey
+            </a>
+          </li>
+          <li>
             <a href="#cicd" className="hover:text-indigo-300">
               CI/CD Pipeline
             </a>
@@ -463,20 +468,39 @@ npm run test:coverage  # With coverage`}</pre>
             </h4>
             <ul className="text-gray-400 text-xs space-y-1">
               <li>
-                <strong>102 tests</strong> across 14 spec files
+                <strong>166 tests</strong> across 18 spec files
               </li>
               <li>Screenshots captured for every test</li>
               <li>Traces &amp; video on retries</li>
               <li>
-                HTML report:{" "}
-                <code className="text-indigo-400">
-                  open playwright-report/index.html
-                </code>
+                <a
+                  href="/MinimumViableHealthDataspacev2/e2e-report/"
+                  className="text-indigo-400 hover:text-indigo-300"
+                >
+                  View E2E Report →
+                </a>
               </li>
             </ul>
             <pre className="text-xs text-gray-500 mt-2 bg-gray-900 p-2 rounded">{`npm run test:e2e       # Headless
 npm run test:e2e:ui    # Interactive UI`}</pre>
           </div>
+        </div>
+        <div className="mt-4 border border-gray-700 rounded-lg p-4">
+          <h4 className="font-semibold text-sm mb-2" id="user-journey">
+            EHDS User Journey
+          </h4>
+          <p className="text-gray-400 text-xs mb-2">
+            The full 8-step EHDS secondary-use journey is documented with
+            sequence diagrams, persona mappings, and E2E test coverage:
+          </p>
+          <a
+            href="https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docs/FULL_USER_JOURNEY.md"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-indigo-400 hover:text-indigo-300 text-xs underline"
+          >
+            View Full User Journey →
+          </a>
         </div>
       </section>
 
@@ -628,6 +652,14 @@ npm run test:e2e:ui    # Interactive UI`}</pre>
           >
             Architecture Diagrams
           </Link>
+          <a
+            href="https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docs/FULL_USER_JOURNEY.md"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-sm text-indigo-400 hover:text-indigo-300 underline"
+          >
+            EHDS User Journey
+          </a>
           <a
             href="https://github.com/ma3u/MinimumViableHealthDataspacev2"
             target="_blank"

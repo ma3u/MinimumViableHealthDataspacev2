@@ -39,10 +39,29 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Run tests with coverage
+      - name: Run unit tests with coverage
         run: npx vitest run --coverage --reporter=json --outputFile=test-results.json
         continue-on-error: true
 
+      # --- Playwright E2E Report ---
+      - name: Build for E2E tests
+        run: npx next build
+        env:
+          NEXT_PUBLIC_STATIC_EXPORT: "false"
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Run Playwright E2E tests
+        run: npx playwright test --reporter=html,json
+        continue-on-error: true
+        env:
+          CI: true
+          NEXT_PUBLIC_STATIC_EXPORT: "false"
+          NEXTAUTH_SECRET: ci-test-secret-not-for-production
+          NEXTAUTH_URL: http://localhost:3000
+
+      # --- Static Export for Pages ---
       - name: Disable API routes for static export
         run: mv src/app/api /tmp/api_disabled || true
 
@@ -51,11 +70,15 @@ jobs:
         env:
           NEXT_PUBLIC_STATIC_EXPORT: "true"
 
-      - name: Copy test reports to output
+      - name: Copy test reports and E2E report to output
         run: |
-          mkdir -p out/test-reports
+          mkdir -p out/test-reports out/e2e-report
+          # Vitest coverage
           cp -r coverage/ out/test-reports/coverage/ 2>/dev/null || true
           cp test-results.json out/test-reports/ 2>/dev/null || true
+          # Playwright HTML report
+          cp -r playwright-report/* out/e2e-report/ 2>/dev/null || true
+          # Generate test report index
           node -e "
           const fs = require('fs');
           const r = JSON.parse(fs.readFileSync('test-results.json','utf8'));
@@ -91,12 +114,16 @@ jobs:
           <tr><td>Functions</td><td>\${total.functions?.pct ?? '—'}%</td></tr>
           <tr><td>Lines</td><td>\${total.lines?.pct ?? '—'}%</td></tr>
           </table>
-          <h2>Coverage Report</h2>
-          <p><a href='coverage/index.html'>View detailed coverage report →</a></p>
+          <h2>Reports</h2>
+          <ul>
+          <li><a href='coverage/index.html'>Detailed Coverage Report →</a></li>
+          <li><a href='../e2e-report/index.html'>Playwright E2E Report →</a></li>
+          <li><a href='../docs/user-journeys'>EHDS User Journey →</a></li>
+          </ul>
           <h2>Links</h2>
           <ul>
           <li><a href='https://github.com/ma3u/MinimumViableHealthDataspacev2/actions/workflows/test.yml'>CI Test Suite</a></li>
-          <li><a href='../docs/developer'>Developer Manual</a></li>
+          <li><a href='../docs/developer'>Developer Guide</a></li>
           </ul>
           </body></html>\`;
           fs.writeFileSync('out/test-reports/index.html', html);

@@ -79,6 +79,7 @@ function GraphContent() {
   const [selectedNode, setSelectedNode] = useState<GraphNode | null>(null);
   const [neighbours, setNeighbours] = useState<Neighbour[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const fgRef = useRef<any>(null);
@@ -88,12 +89,22 @@ function GraphContent() {
 
   useEffect(() => {
     fetchApi("/api/graph")
-      .then((r) => r.json())
+      .then((r) => {
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        return r.json();
+      })
       .then((d) => {
-        setData(d);
+        if (d && Array.isArray(d.nodes) && Array.isArray(d.links)) {
+          setData(d);
+        } else {
+          setError("Neo4j unavailable — graph data could not be loaded.");
+        }
         setLoading(false);
       })
-      .catch(() => setLoading(false));
+      .catch(() => {
+        setError("Neo4j unavailable — graph data could not be loaded.");
+        setLoading(false);
+      });
   }, []);
 
   // Auto-select node matching ?highlight= query param and center on it
@@ -428,6 +439,10 @@ function GraphContent() {
         {loading ? (
           <div className="flex items-center justify-center h-full text-gray-500">
             Connecting to Neo4j…
+          </div>
+        ) : error ? (
+          <div className="flex items-center justify-center h-full text-gray-500">
+            {error}
           </div>
         ) : (
           <ForceGraph2D

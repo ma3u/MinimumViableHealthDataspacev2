@@ -1,6 +1,6 @@
 # Minimum Viable Health Dataspace v2
 
-[![GitHub](https://img.shields.io/badge/GitHub-Repository-181717?logo=github&logoColor=white)](https://github.com/ma3u/MinimumViableHealthDataspacev2) [![CI Tests](https://github.com/ma3u/MinimumViableHealthDataspacev2/actions/workflows/test.yml/badge.svg)](https://github.com/ma3u/MinimumViableHealthDataspacev2/actions/workflows/test.yml) [![Coverage 94%](https://img.shields.io/badge/coverage-94%25-brightgreen)](docs/test-coverage-report.md) [![1490 Tests](https://img.shields.io/badge/tests-1490%20passed-brightgreen)](docs/test-coverage-report.md) [![Playwright 126](https://img.shields.io/badge/E2E-126%20passed-brightgreen)](docs/test-coverage-report.md)
+[![GitHub](https://img.shields.io/badge/GitHub-Repository-181717?logo=github&logoColor=white)](https://github.com/ma3u/MinimumViableHealthDataspacev2) [![CI Tests](https://github.com/ma3u/MinimumViableHealthDataspacev2/actions/workflows/test.yml/badge.svg)](https://github.com/ma3u/MinimumViableHealthDataspacev2/actions/workflows/test.yml) [![Coverage 94%](https://img.shields.io/badge/coverage-94%25-brightgreen)](docs/test-coverage-report.md) [![1490 Tests](https://img.shields.io/badge/tests-1490%20passed-brightgreen)](docs/test-coverage-report.md) [![Playwright 166](https://img.shields.io/badge/E2E-166%20passed-brightgreen)](docs/test-coverage-report.md)
 
 [![EHDS Compliant](https://img.shields.io/badge/EHDS-Compliant-0ea5e9)](https://health.ec.europa.eu/ehealth-digital-health-and-care/european-health-data-space_en) [![FHIR R4](https://img.shields.io/badge/FHIR-R4-orange)](https://hl7.org/fhir/R4/) [![OMOP CDM](https://img.shields.io/badge/OMOP-CDM%20v5.4-yellow)](https://ohdsi.github.io/CommonDataModel/) [![EEHRxF](https://img.shields.io/badge/EEHRxF-HL7%20Europe-148F77)](https://hl7.eu/fhir/) [![Neo4j 5](https://img.shields.io/badge/Neo4j-5%20Community-008CC1?logo=neo4j&logoColor=white)](https://neo4j.com/) [![Next.js 14](https://img.shields.io/badge/Next.js-14-black?logo=next.js&logoColor=white)](https://nextjs.org/) [![Eclipse EDC](https://img.shields.io/badge/Eclipse-EDC--V-blue)](https://eclipse-edc.github.io/docs/) [![DSP Dataspace Protocol 2025-1](https://img.shields.io/badge/DSP-Dataspace%20Protocol%202025--1-6366f1)](https://docs.internationaldataspaces.org/ids-knowledgebase/v/dataspace-protocol) [![DCP Decentralized Claims Protocol v1.0](https://img.shields.io/badge/DCP-Decentralized%20Claims%20Protocol%20v1.0-7c3aed)](https://projects.eclipse.org/projects/technology.dataspace-dcp/releases/1.0.0) [![DPS](https://img.shields.io/badge/DPS-Data%20Plane%20Signaling-0891b2)](https://projects.eclipse.org/proposals/eclipse-data-plane-core) [![SIMPL](https://img.shields.io/badge/SIMPL-EU%20Cloud%20Federation-e11d48)](https://simpl-programme.eu/) [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 
@@ -480,7 +480,7 @@ infrastructure, dataspace state, and API routes:
 ./scripts/run-e2e-tests.sh
 ```
 
-Expected result: **126 PASS**, 0 FAIL (Keycloak auth tests require SSO and are skipped in static mode).
+Expected result: **166 PASS**, 0 FAIL (Keycloak auth tests require SSO and are skipped in static mode).
 
 ### Tear Down
 
@@ -499,8 +499,8 @@ See the full **[Test Coverage Report](docs/test-coverage-report.md)** for detail
 | Suite      | Framework    |     Tests |  Files | Status      |
 | ---------- | ------------ | --------: | -----: | ----------- |
 | Unit + API | Vitest + RTL |     1,490 |     78 | ✅ All pass |
-| E2E        | Playwright   |       126 |     14 | ✅ All pass |
-| **Total**  |              | **1,616** | **92** | ✅          |
+| E2E        | Playwright   |       166 |     18 | ✅ All pass |
+| **Total**  |              | **1,656** | **96** | ✅          |
 
 **Code coverage** (v8): 93.78% statements · 81.65% branches · 89.57% functions · 94.73% lines
 
@@ -521,7 +521,15 @@ npx playwright test
 CI runs on every push and PR via [`.github/workflows/test.yml`](.github/workflows/test.yml).
 Coverage reports and Playwright HTML reports are uploaded as GitHub Actions artifacts.
 
-**Playwright HTML Report:** After running E2E tests, open the interactive report with screenshots of every page:
+**Published Reports (GitHub Pages):**
+
+| Report                | URL                                                                                  |
+| --------------------- | ------------------------------------------------------------------------------------ |
+| Unit Test Coverage    | [test-reports/](https://ma3u.github.io/MinimumViableHealthDataspacev2/test-reports/) |
+| Playwright E2E Report | [e2e-report/](https://ma3u.github.io/MinimumViableHealthDataspacev2/e2e-report/)     |
+| EHDS User Journey     | [docs/FULL_USER_JOURNEY.md](docs/FULL_USER_JOURNEY.md)                               |
+
+**Playwright HTML Report:** After running E2E tests locally, open the interactive report:
 
 ```bash
 open ui/playwright-report/index.html    # macOS
@@ -642,6 +650,7 @@ available online at **[ma3u.github.io/MinimumViableHealthDataspacev2/docs](https
 | [docs/health-dataspace-graph-schema.md](docs/health-dataspace-graph-schema.md) | Full 5-layer Neo4j graph schema: node labels, property keys, indexes, and relationships. |
 | [docs/test-report.md](docs/test-report.md)                                     | Integration test report (DSP TCK, DCP compliance, EHDS health-domain).                   |
 | [docs/test-coverage-report.md](docs/test-coverage-report.md)                   | Unit test coverage report (1,490 tests, 94% statement coverage across 78 files).         |
+| [docs/FULL_USER_JOURNEY.md](docs/FULL_USER_JOURNEY.md)                         | Full EHDS user journey — 8 steps from onboarding to analytics with sequence diagram.     |
 | [.github/workflows/test.yml](.github/workflows/test.yml)                       | CI pipeline — lint, unit tests with coverage, Playwright E2E tests.                      |
 | [jad/openapi/](jad/openapi/)                                                   | OpenAPI specs for all JAD services (Management, Identity, Issuer APIs).                  |
 
@@ -660,7 +669,7 @@ All 12 phases are **✅ Complete** — from infrastructure migration through EDC
 | 5     | Federated Queries & GraphRAG (Text2Cypher NLQ)           | ✅     |
 | 6     | Graph Explorer UI + Participant Portal (19 pages)        | ✅     |
 | 7     | TCK DCP & DSP Compliance Verification                    | ✅     |
-| 8     | Test Coverage (1,490 unit + 126 E2E tests, 94% coverage) | ✅     |
+| 8     | Test Coverage (1,490 unit + 166 E2E tests, 94% coverage) | ✅     |
 | 9     | Documentation & Navigation Restructuring                 | ✅     |
 | 10    | Tasks Dashboard & DPS Integration                        | ✅     |
 | 11    | EDC Components — Per-Participant Topology & Info Layer   | ✅     |
@@ -823,7 +832,7 @@ modules, manual testing became impractical. Automated tests catch regressions ea
 change to one part of the system accidentally breaks another, the tests flag it before the
 code reaches production.
 
-**What we built:** We wrote 1,490 automated unit/integration tests and 126 end-to-end browser
+**What we built:** We wrote 1,490 automated unit/integration tests and 166 end-to-end browser
 tests covering the entire application. Unit tests check that each API endpoint returns the
 correct data and handles errors gracefully. Component tests verify that UI elements (login
 menu, navigation, data tables) display and behave correctly. End-to-end tests simulate a real
@@ -832,7 +841,7 @@ user clicking through the application in a browser. Overall code coverage rose f
 GitHub Actions automatically runs all tests and reports any failures — no manual intervention
 needed.
 
-**Components developed:** 1,490 unit/integration tests (Vitest), 126 end-to-end browser tests
+**Components developed:** 1,490 unit/integration tests (Vitest), 166 end-to-end browser tests
 (Playwright), GitHub Actions CI pipeline, coverage reporting, GitHub Pages test report
 publishing.
 

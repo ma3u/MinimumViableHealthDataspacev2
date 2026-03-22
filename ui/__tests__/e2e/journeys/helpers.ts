@@ -9,7 +9,7 @@
  * Journey tests use PUBLIC pages for UI assertions and /api/* routes
  * for data-level assertions (API routes have no auth middleware).
  */
-import { type Page, expect } from "@playwright/test";
+import { type Page, expect, test } from "@playwright/test";
 
 /* ── Participant display names (stable across live & mock) ───── */
 
@@ -64,4 +64,29 @@ export async function apiGet(page: Page, path: string) {
   const response = await page.request.get(path);
   expect(response.ok()).toBe(true);
   return response.json();
+}
+
+/* ── Service-availability checks ─────────────────────────────── */
+
+/** Skip the current test if Neo4j is unreachable (API returns non-200). */
+export async function skipIfNeo4jDown(page: Page) {
+  try {
+    const res = await page.request.get("/api/graph", { timeout: 5_000 });
+    if (!res.ok()) test.skip(true, "Neo4j unavailable");
+  } catch {
+    test.skip(true, "Neo4j unavailable");
+  }
+}
+
+/** Skip the current test if Keycloak is unreachable. */
+export async function skipIfKeycloakDown() {
+  try {
+    const res = await fetch(
+      "http://localhost:8080/realms/EDCV/.well-known/openid-configuration",
+      { signal: AbortSignal.timeout(3_000) },
+    );
+    if (!res.ok) test.skip(true, "Keycloak unavailable");
+  } catch {
+    test.skip(true, "Keycloak unavailable");
+  }
 }

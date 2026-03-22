@@ -4,9 +4,16 @@
  * These tests are designed to work against the running Docker stack
  * OR against `npm run dev` via the webServer config in playwright.config.ts.
  */
-import { test, expect } from "@playwright/test";
+import { test, expect, Page } from "@playwright/test";
 
-const isCI = !!process.env.CI;
+async function isNeo4jUp(page: Page): Promise<boolean> {
+  try {
+    const res = await page.request.get("/api/graph", { timeout: 5_000 });
+    return res.ok();
+  } catch {
+    return false;
+  }
+}
 
 test.describe("Home Page", () => {
   test("should load and show the brand name", async ({ page }) => {
@@ -20,7 +27,7 @@ test.describe("Home Page", () => {
 
 test.describe("Graph Explorer", () => {
   test("should load the graph page", async ({ page }) => {
-    test.skip(isCI, "Requires live Neo4j");
+    test.skip(!(await isNeo4jUp(page)), "Neo4j unavailable");
 
     await page.goto("/graph");
     await expect(page).toHaveURL(/\/graph/);
@@ -47,7 +54,7 @@ test.describe("Patient Journey", () => {
 
 test.describe("Navigation", () => {
   test("should navigate between pages", async ({ page }) => {
-    test.skip(isCI, "Requires live Neo4j");
+    test.skip(!(await isNeo4jUp(page)), "Neo4j unavailable");
 
     await page.goto("/graph");
     await expect(page.locator("text=Health Dataspace").first()).toBeVisible();

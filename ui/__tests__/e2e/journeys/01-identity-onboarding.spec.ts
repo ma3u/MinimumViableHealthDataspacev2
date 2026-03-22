@@ -8,9 +8,13 @@
  * so identity tests use /api/* routes for data assertions.
  */
 import { test, expect } from "@playwright/test";
-import { PARTICIPANT_NAMES, T, expectSigninRedirect, apiGet } from "./helpers";
-
-const isCI = !!process.env.CI;
+import {
+  PARTICIPANT_NAMES,
+  T,
+  expectSigninRedirect,
+  apiGet,
+  skipIfNeo4jDown,
+} from "./helpers";
 
 test.describe("A · Identity & Participant Management", () => {
   /* ── J01: Admin dashboard is protected (auth middleware) ──── */
@@ -51,7 +55,7 @@ test.describe("A · Identity & Participant Management", () => {
   test("J04 — Credentials exist for all participant holders", async ({
     page,
   }) => {
-    test.skip(isCI, "Requires live EDC-V / IdentityHub");
+    await skipIfNeo4jDown(page);
     const data = await apiGet(page, "/api/credentials");
     const creds = data.credentials || data;
     expect(Array.isArray(creds)).toBe(true);
@@ -68,7 +72,7 @@ test.describe("A · Identity & Participant Management", () => {
   test("J05 — Both EHDS and DataQuality credential types exist", async ({
     page,
   }) => {
-    test.skip(isCI, "Requires live EDC-V / IdentityHub");
+    await skipIfNeo4jDown(page);
     const data = await apiGet(page, "/api/credentials");
     const creds = data.credentials || data;
     const types = new Set(

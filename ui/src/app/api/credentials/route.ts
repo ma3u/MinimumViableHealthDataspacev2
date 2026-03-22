@@ -30,8 +30,9 @@ interface Credential {
 }
 
 export async function GET() {
-  const credentials = await runQuery<Credential>(
-    `MATCH (vc:VerifiableCredential)
+  try {
+    const credentials = await runQuery<Credential>(
+      `MATCH (vc:VerifiableCredential)
      OPTIONAL MATCH (p:Participant)-[:HOLDS_CREDENTIAL]->(vc)
      OPTIONAL MATCH (vc)-[:ATTESTS_QUALITY]->(ds:HealthDataset)
      RETURN vc.credentialId     AS credentialId,
@@ -54,7 +55,11 @@ export async function GET() {
             vc.conformance      AS conformance,
             vc.timeliness       AS timeliness
      ORDER BY p.name, vc.credentialType`,
-  );
+    );
 
-  return NextResponse.json({ credentials });
+    return NextResponse.json({ credentials });
+  } catch (err) {
+    console.error("GET /api/credentials error:", err);
+    return NextResponse.json({ error: "Neo4j unavailable" }, { status: 502 });
+  }
 }

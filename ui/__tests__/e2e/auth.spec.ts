@@ -1,6 +1,16 @@
 import { test, expect } from "@playwright/test";
 
-const isCI = !!process.env.CI;
+async function isKeycloakUp(): Promise<boolean> {
+  try {
+    const res = await fetch(
+      "http://localhost:8080/realms/EDCV/.well-known/openid-configuration",
+      { signal: AbortSignal.timeout(3_000) },
+    );
+    return res.ok;
+  } catch {
+    return false;
+  }
+}
 
 const users = [
   { username: "edcadmin", password: "edcadmin", role: "EDC_ADMIN" },
@@ -13,12 +23,11 @@ const users = [
 ];
 
 test.describe("Portal Login flow with all users", () => {
-  test.skip(isCI, "Requires live Keycloak");
-
   for (const user of users) {
     test(`should successfully login as ${user.username} and reach portal`, async ({
       page,
     }) => {
+      test.skip(!(await isKeycloakUp()), "Keycloak unavailable");
       // 1. Go to a protected route directly to trigger NextAuth login flow
       await page.goto("/onboarding");
 

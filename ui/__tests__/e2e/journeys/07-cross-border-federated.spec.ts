@@ -15,16 +15,15 @@ import {
   expectSigninRedirect,
   waitForDataLoad,
   apiGet,
+  skipIfNeo4jDown,
 } from "./helpers";
-
-const isCI = !!process.env.CI;
 
 test.describe("G · Cross-Border & Federated Compliance", () => {
   /* ── J49: Full cross-border data exchange journey ────────── */
   test("J49 — Cross-border journey: multi-country participants, negotiations, graph", async ({
     page,
   }) => {
-    test.skip(isCI, "Requires live EDC-V and Neo4j");
+    await skipIfNeo4jDown(page);
 
     // Step 1: Verify participants from multiple countries via API
     const participantsData = await apiGet(page, "/api/participants");
@@ -62,7 +61,7 @@ test.describe("G · Cross-Border & Federated Compliance", () => {
   test("J50 — Compliance audit: credentials, policies, catalog, audit log", async ({
     page,
   }) => {
-    test.skip(isCI, "Requires live EDC-V / IdentityHub"); // Step 1: All 5 participants registered
+    await skipIfNeo4jDown(page); // Step 1: All 5 participants registered
     const participantsData = await apiGet(page, "/api/participants");
     const participants = Array.isArray(participantsData)
       ? participantsData

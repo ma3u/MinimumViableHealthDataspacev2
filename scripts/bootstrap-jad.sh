@@ -7,10 +7,11 @@
 # docker-compose depends_on alone may not guarantee.
 #
 # Usage:
-#   ./scripts/bootstrap-jad.sh          # Start full stack
-#   ./scripts/bootstrap-jad.sh --down   # Tear down everything
-#   ./scripts/bootstrap-jad.sh --reset  # Tear down + remove volumes
-#   ./scripts/bootstrap-jad.sh --status # Show service status
+#   ./scripts/bootstrap-jad.sh             # Start full stack
+#   ./scripts/bootstrap-jad.sh --ui-only   # Rebuild & restart UI only (fast)
+#   ./scripts/bootstrap-jad.sh --down      # Tear down everything
+#   ./scripts/bootstrap-jad.sh --reset     # Tear down + remove volumes
+#   ./scripts/bootstrap-jad.sh --status    # Show service status
 #
 # Prerequisites:
 #   - Docker Engine 24+ with Compose V2
@@ -340,8 +341,14 @@ main() {
       seed_dataspace
       ok "Seed and identity fixup complete"
       ;;
+    --ui-only)
+      log "Rebuilding and restarting UI only (no infrastructure teardown)..."
+      cd "$PROJECT_DIR"
+      docker compose $COMPOSE_FILES up -d --build graph-explorer
+      ok "Live UI rebuilt and started on http://localhost:3003"
+      ;;
     --help|-h)
-      echo "Usage: $0 [--down|--reset|--status|--pull|--seed|--help]"
+      echo "Usage: $0 [--down|--reset|--status|--pull|--seed|--ui-only|--help]"
       echo ""
       echo "  (no args)   Start full JAD stack with health checks"
       echo "  --down      Stop all services"
@@ -349,6 +356,7 @@ main() {
       echo "  --status    Show service status and endpoints"
       echo "  --pull      Pull latest images"
       echo "  --seed      Re-run JAD seed, identity fixup, and dataspace seeding"
+      echo "  --ui-only   Rebuild and restart the UI container only (fast, no downtime for infra)"
       echo "  --help      Show this help"
       ;;
     *)

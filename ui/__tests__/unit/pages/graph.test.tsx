@@ -184,20 +184,19 @@ describe("GraphPage", () => {
   });
 
   // 6. Handles API errors
-  it("handles fetch rejection gracefully and still renders ForceGraph", async () => {
+  it("handles fetch rejection gracefully and shows error message", async () => {
     mockFetchApi.mockReturnValue(Promise.reject(new Error("Network error")));
     render(<GraphPage />);
     await waitFor(() => {
-      expect(screen.getByTestId("force-graph")).toBeInTheDocument();
+      expect(screen.getByText(/Neo4j unavailable/)).toBeInTheDocument();
     });
   });
 
-  it("shows 0 nodes · 0 edges after a fetch error", async () => {
+  it("shows error message after a fetch error", async () => {
     mockFetchApi.mockReturnValue(Promise.reject(new Error("500")));
     render(<GraphPage />);
     await waitFor(() => {
-      expect(screen.getByText(/0 nodes/)).toBeInTheDocument();
-      expect(screen.getByText(/0 edges/)).toBeInTheDocument();
+      expect(screen.getByText(/Neo4j unavailable/)).toBeInTheDocument();
     });
   });
 
