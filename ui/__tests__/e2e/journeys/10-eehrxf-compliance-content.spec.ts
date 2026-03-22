@@ -65,6 +65,7 @@ test.describe("J · EEHRxF Profile & Compliance Content", () => {
   test("J75 — EEHRxF categories have Available/Partial/Gap badges", async ({
     page,
   }) => {
+    await skipIfNeo4jDown(page);
     await page.goto("/eehrxf");
     await expectHeading(page, "EEHRxF Profile Alignment");
     await waitForDataLoad(page);

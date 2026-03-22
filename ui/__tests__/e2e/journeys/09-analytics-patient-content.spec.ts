@@ -9,7 +9,7 @@
  * fallback when Neo4j is unavailable.
  */
 import { test, expect } from "@playwright/test";
-import { T, expectHeading, waitForDataLoad } from "./helpers";
+import { T, expectHeading, waitForDataLoad, skipIfNeo4jDown } from "./helpers";
 
 test.describe("I · Analytics & Patient Content Verification", () => {
   /* ── J62: Analytics page shows 6 stat cards ────────────── */
@@ -92,6 +92,7 @@ test.describe("I · Analytics & Patient Content Verification", () => {
   test("J66 — Patient Journey page shows 6 cohort stat badges", async ({
     page,
   }) => {
+    await skipIfNeo4jDown(page);
     await page.goto("/patient");
     await expectHeading(page, "Patient Journey");
     await waitForDataLoad(page);
