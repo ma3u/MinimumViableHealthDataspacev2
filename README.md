@@ -395,7 +395,15 @@ connected to the live Neo4j, Keycloak, and EDC-V services in the cluster.
 If the stack is already running, you can re-seed without restarting:
 
 ```bash
-# Full seed pipeline
+# Re-run the full bootstrap seed pipeline (identity fixup + definitions + dataspace)
+./scripts/bootstrap-jad.sh --seed
+
+# Or run individual seed phases:
+
+# 1. Seed IssuerService credential definitions (idempotent, runs from host)
+./jad/seed-issuer-defs.sh
+
+# 2. Full dataspace seed pipeline (tenants → credentials → policies → assets → …)
 ./jad/seed-all.sh
 
 # Resume from a specific step (e.g. step 5 = negotiations)
@@ -405,7 +413,12 @@ If the stack is already running, you can re-seed without restarting:
 ./jad/seed-all.sh --only 3
 ```
 
-Seed steps: (1) health tenants, (2) EHDS credentials, (3) ODRL policies,
+**Seed dependency order:** IssuerService definitions must exist _before_
+running `seed-all.sh`, because the CFM onboarding agent needs credential
+definitions to issue Verifiable Credentials during tenant onboarding.
+The bootstrap script handles this automatically.
+
+Seed-all steps: (1) health tenants, (2) EHDS credentials, (3) ODRL policies,
 (4) data assets, (5) contract negotiations, (6) federated catalog, (7) data transfers.
 
 ### Bootstrap Phases
@@ -423,12 +436,40 @@ correct dependency order with health checks at each phase:
 | 5     | Tenant Manager, Provision Manager, 4× CFM agents                            | —                                      |
 | 6     | Neo4j                                                                       | —                                      |
 | 6b    | Graph Explorer Live UI (port 3003)                                          | Docker build + start                   |
-| 7     | JAD seed (jad-seed container)                                               | Exit code                              |
-| 8     | IssuerService identity fixup (SQL + restart)                                | DID document verification              |
-| 9     | Dataspace seeding (seed-all.sh: 7 phases)                                   | Exit code                              |
+| 7     | JAD seed (jad-seed container) — best-effort                                 | Exit code (non-fatal)                  |
+| 8     | IssuerService identity fixup (SQL → restart → DID verification)             | DID document check                     |
+| 8b    | IssuerService attestation + credential definitions (`seed-issuer-defs.sh`)  | HTTP 200/409 per definition            |
+| 9     | Dataspace seeding (`seed-all.sh`: 7 phases)                                 | Exit code                              |
 
 The script is **idempotent** — safe to re-run on an existing stack. It performs
 `docker compose down --remove-orphans` at the start to clean up stale containers.
+
+### Troubleshooting Seeding
+
+If participants don't appear in the UI or EDC-V API after bootstrap:
+
+1. **Check IssuerService credential definitions exist:**
+
+   ```bash
+   docker exec health-dataspace-postgres psql -U issuer -d issuerservice \
+     -c "SELECT id, credential_type FROM credential_definitions;"
+   ```
+
+   If empty, run: `./jad/seed-issuer-defs.sh`
+
+2. **Check participant contexts in EDC-V:**
+
+   ```bash
+   curl -s http://localhost:11003/api/mgmt/v5alpha/participants | python3 -m json.tool
+   ```
+
+   If empty, participants haven't been onboarded yet — re-run `./jad/seed-all.sh --only 1`.
+
+3. **Re-run full seed pipeline:**
+
+   ```bash
+   ./scripts/bootstrap-jad.sh --seed
+   ```
 
 ### Verify Deployment (E2E Tests)
 

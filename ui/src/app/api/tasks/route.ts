@@ -76,10 +76,8 @@ export async function GET() {
     );
 
     if (!Array.isArray(participants) || participants.length === 0) {
-      return NextResponse.json({
-        tasks: [],
-        counts: { total: 0, negotiations: 0, transfers: 0, active: 0 },
-      });
+      // No participant contexts in EDC-V — fall through to mock data
+      throw new Error("No participant contexts in EDC-V");
     }
 
     const tasks: Task[] = [];

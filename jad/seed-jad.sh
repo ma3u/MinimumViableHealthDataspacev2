@@ -150,8 +150,8 @@ if [ -z "$PROVISIONER_TOKEN" ]; then
 fi
 echo "✓ Got provisioner token"
 
-# Create issuer tenant
-curl -sf -X POST "$ISSUER_HOST:10015/api/identity/v1alpha/participants" \
+# Create issuer tenant (idempotent — 409 means already exists)
+STEP2_STATUS=$(curl -s -o /dev/null -w "%{http_code}" -X POST "$ISSUER_HOST:10015/api/identity/v1alpha/participants" \
   -H "Authorization: Bearer $PROVISIONER_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -192,9 +192,13 @@ curl -sf -X POST "$ISSUER_HOST:10015/api/identity/v1alpha/participants" \
         }
       }
     }
-  }'
-echo ""
-echo "✓ Issuer tenant created"
+  }' 2>/dev/null) || STEP2_STATUS="000"
+
+case "$STEP2_STATUS" in
+  200|201|204) echo "✓ Issuer tenant created" ;;
+  409)         echo "✓ Issuer tenant already exists — continuing" ;;
+  *)           echo "⚠ Issuer tenant creation returned HTTP $STEP2_STATUS — continuing" ;;
+esac
 
 # ---------------------------------------------------------------------------
 # Step 2b: Sync Issuer EdDSA Key to Both Vault Mounts

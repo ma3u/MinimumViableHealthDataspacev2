@@ -244,6 +244,15 @@ seed_and_fix() {
   else
     warn "DID document not yet available — may need manual verification"
   fi
+
+  log "=== Phase 8b: Seeding IssuerService credential definitions ==="
+  if [ -f "$PROJECT_DIR/jad/seed-issuer-defs.sh" ]; then
+    bash "$PROJECT_DIR/jad/seed-issuer-defs.sh" && \
+      ok "IssuerService attestation + credential definitions seeded" || \
+      warn "IssuerService definition seeding had warnings — check output above"
+  else
+    warn "jad/seed-issuer-defs.sh not found — skipping credential definitions"
+  fi
 }
 
 # ---------------------------------------------------------------------------

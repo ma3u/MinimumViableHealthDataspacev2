@@ -201,15 +201,21 @@ describe("/api/participants – extra coverage", () => {
 
   // ── Non-array participants response ────────────────────────────────────
 
-  it("GET handles non-array management response", async () => {
+  it("GET falls through to mock when management returns non-array", async () => {
     mockManagement.mockResolvedValue(null);
     mockTenant.mockRejectedValue(new Error("down"));
+    mockReadFile.mockResolvedValue(
+      JSON.stringify([
+        { "@id": "mock-1", displayName: "MockClinic", role: "DATA_HOLDER" },
+      ]),
+    );
 
     const res = await GET();
     const data = await res.json();
 
     expect(res.status).toBe(200);
-    expect(data).toEqual([]);
+    expect(data).toHaveLength(1);
+    expect(data[0].displayName).toBe("MockClinic");
   });
 
   // ── Mock-file fallback success (lines 141-143) ─────────────────────────

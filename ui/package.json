@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "postinstall": "bash scripts/setup-env.sh",
+    "postinstall": "sh scripts/setup-env.sh",
     "clean": "rm -rf .next",
     "dev": "next dev",
     "dev:clean": "npm run clean && next dev",
