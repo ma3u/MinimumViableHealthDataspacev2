@@ -1,306 +1,362 @@
 {
   "participants": [
     {
-      "participantId": "did:web:alpha-klinik.de:participant",
-      "identity": "did:web:alpha-klinik.de:participant",
+      "participantId": "24be78bf13fc4873b503844d908fcbd2",
+      "identity": "did:web:identityhub%3A7083:alpha-klinik",
       "policies": [
         {
-          "@id": "policy-ehds-art53-synthetic-2026",
-          "@type": "edc:PolicyDefinition",
-          "edc:policy": {
-            "@type": "odrl:Set",
-            "odrl:permission": [
+          "@id": "ehds-open-fhir-access",
+          "@type": "PolicyDefinition",
+          "createdAt": 1774142046232,
+          "policy": {
+            "@id": "8d2e47ae-3a87-457f-b6a4-920ccec6983a",
+            "@type": "Set",
+            "permission": [
               {
-                "odrl:action": {
-                  "@id": "odrl:use"
-                },
-                "odrl:constraint": [
-                  {
-                    "odrl:leftOperand": {
-                      "@id": "edc:purpose"
-                    },
-                    "odrl:operator": {
-                      "@id": "odrl:isAnyOf"
-                    },
-                    "odrl:rightOperand": [
-                      "scientific-research",
-                      "statistics",
-                      "policy-support",
-                      "education",
-                      "ai-training"
-                    ]
-                  },
-                  {
-                    "odrl:leftOperand": {
-                      "@id": "edc:legalBasis"
-                    },
-                    "odrl:operator": {
-                      "@id": "odrl:eq"
-                    },
-                    "odrl:rightOperand": "EHDS Art. 53"
-                  },
-                  {
-                    "odrl:leftOperand": {
-                      "@id": "edc:retentionPeriod"
-                    },
-                    "odrl:operator": {
-                      "@id": "odrl:lteq"
-                    },
-                    "odrl:rightOperand": "P730D"
-                  }
-                ]
+                "action": "use"
               }
             ],
-            "odrl:prohibition": [
-              {
-                "odrl:action": {
-                  "@id": "odrl:use"
-                },
-                "odrl:constraint": [
-                  {
-                    "odrl:leftOperand": {
-                      "@id": "edc:purpose"
-                    },
-                    "odrl:operator": {
-                      "@id": "odrl:isAnyOf"
-                    },
-                    "odrl:rightOperand": [
-                      "re-identification",
-                      "commercial-exploitation-without-approval"
-                    ]
-                  }
-                ]
-              }
-            ]
+            "prohibition": [],
+            "obligation": []
           },
-          "edc:createdAt": "2026-03-08T22:18:12.049Z"
+          "@context": ["https://w3id.org/edc/connector/management/v2"]
+        },
+        {
+          "@id": "ehds-research-access-ak",
+          "@type": "PolicyDefinition",
+          "createdAt": 1774142046344,
+          "policy": {
+            "@id": "1c557097-34a6-4718-8431-790bbcc38f23",
+            "@type": "Set",
+            "permission": [
+              {
+                "action": "use"
+              }
+            ],
+            "prohibition": [],
+            "obligation": []
+          },
+          "@context": ["https://w3id.org/edc/connector/management/v2"]
+        },
+        {
+          "@id": "ehds-crossborder-access-ak",
+          "@type": "PolicyDefinition",
+          "createdAt": 1774142046442,
+          "policy": {
+            "@id": "d16d022d-7d9b-4bec-b943-d48b2e204f20",
+            "@type": "Set",
+            "permission": [
+              {
+                "action": "use"
+              }
+            ],
+            "prohibition": [],
+            "obligation": []
+          },
+          "@context": ["https://w3id.org/edc/connector/management/v2"]
+        },
+        {
+          "@id": "open-fhir-access-policy",
+          "@type": "PolicyDefinition",
+          "createdAt": 1774142048691,
+          "policy": {
+            "@id": "877ea3b4-e74b-45d0-9f53-d532b461e85e",
+            "@type": "Set",
+            "permission": [
+              {
+                "action": "use"
+              }
+            ],
+            "prohibition": [],
+            "obligation": []
+          },
+          "@context": ["https://w3id.org/edc/connector/management/v2"]
         }
-      ]
+      ],
+      "source": "edc"
     },
     {
-      "participantId": "did:web:pharmaco.de:research",
-      "identity": "did:web:pharmaco.de:research",
+      "participantId": "772f6576b2a6472cb2e373dabc928517",
+      "identity": "did:web:identityhub%3A7083:pharmaco",
       "policies": [
         {
-          "@id": "policy-ehds-research-use-53c",
-          "@type": "edc:PolicyDefinition",
-          "edc:policy": {
-            "@type": "odrl:Set",
-            "odrl:permission": [
+          "@id": "ehds-research-access-pc",
+          "@type": "PolicyDefinition",
+          "createdAt": 1774142047026,
+          "policy": {
+            "@id": "2b007c6d-5995-4aac-be64-5d0fa9d2ed70",
+            "@type": "Set",
+            "permission": [
               {
-                "odrl:action": {
-                  "@id": "odrl:use"
-                },
-                "odrl:constraint": [
-                  {
-                    "odrl:leftOperand": {
-                      "@id": "edc:purpose"
-                    },
-                    "odrl:operator": {
-                      "@id": "odrl:isAnyOf"
-                    },
-                    "odrl:rightOperand": [
-                      "pharmacovigilance",
-                      "drug-safety",
-                      "statistics",
-                      "scientific-research"
-                    ]
-                  },
-                  {
-                    "odrl:leftOperand": {
-                      "@id": "edc:legalBasis"
-                    },
-                    "odrl:operator": {
-                      "@id": "odrl:eq"
-                    },
-                    "odrl:rightOperand": "EHDS Art. 53(c)"
-                  },
-                  {
-                    "odrl:leftOperand": {
-                      "@id": "edc:retentionPeriod"
-                    },
-                    "odrl:operator": {
-                      "@id": "odrl:lteq"
-                    },
-                    "odrl:rightOperand": "P365D"
-                  }
-                ]
+                "action": "use"
               }
             ],
-            "odrl:prohibition": [
-              {
-                "odrl:action": {
-                  "@id": "odrl:use"
-                },
-                "odrl:constraint": [
-                  {
-                    "odrl:leftOperand": {
-                      "@id": "edc:purpose"
-                    },
-                    "odrl:operator": {
-                      "@id": "odrl:isAnyOf"
-                    },
-                    "odrl:rightOperand": [
-                      "re-identification",
-                      "commercial-sale",
-                      "insurance-decisions",
-                      "advertising"
-                    ]
-                  }
-                ]
-              }
-            ]
+            "prohibition": [],
+            "obligation": []
           },
-          "edc:createdAt": "2026-01-15T09:12:00Z"
+          "@context": ["https://w3id.org/edc/connector/management/v2"]
+        },
+        {
+          "@id": "ehds-ai-training-access-pc",
+          "@type": "PolicyDefinition",
+          "createdAt": 1774142047136,
+          "policy": {
+            "@id": "325b2dd5-b5f3-4fec-a674-01ae31630954",
+            "@type": "Set",
+            "permission": [
+              {
+                "action": "use"
+              }
+            ],
+            "prohibition": [],
+            "obligation": []
+          },
+          "@context": ["https://w3id.org/edc/connector/management/v2"]
+        },
+        {
+          "@id": "research-access-policy",
+          "@type": "PolicyDefinition",
+          "createdAt": 1774142051088,
+          "policy": {
+            "@id": "1ec750de-ae14-4d8d-a737-d7f23e920b81",
+            "@type": "Set",
+            "permission": [
+              {
+                "action": "use"
+              }
+            ],
+            "prohibition": [],
+            "obligation": []
+          },
+          "@context": ["https://w3id.org/edc/connector/management/v2"]
         }
-      ]
+      ],
+      "source": "edc"
     },
     {
-      "participantId": "did:web:lmc.nl:clinic",
-      "identity": "did:web:lmc.nl:clinic",
+      "participantId": "14b071f958e941cfbe04ebb339ef4375",
+      "identity": "did:web:identityhub%3A7083:medreg",
       "policies": [
         {
-          "@id": "policy-ehds-cross-border-art7",
-          "@type": "edc:PolicyDefinition",
-          "edc:policy": {
-            "@type": "odrl:Set",
-            "odrl:permission": [
+          "@id": "ehds-regulatory-access-mr",
+          "@type": "PolicyDefinition",
+          "createdAt": 1774142047235,
+          "policy": {
+            "@id": "fbe2ab27-118c-435f-b3f8-da69c060d25d",
+            "@type": "Set",
+            "permission": [
               {
-                "odrl:action": {
-                  "@id": "odrl:use"
-                },
-                "odrl:constraint": [
-                  {
-                    "odrl:leftOperand": {
-                      "@id": "edc:purpose"
-                    },
-                    "odrl:operator": {
-                      "@id": "odrl:isAnyOf"
-                    },
-                    "odrl:rightOperand": [
-                      "clinical-care-integration",
-                      "statistics",
-                      "scientific-research"
-                    ]
-                  },
-                  {
-                    "odrl:leftOperand": {
-                      "@id": "edc:legalBasis"
-                    },
-                    "odrl:operator": {
-                      "@id": "odrl:eq"
-                    },
-                    "odrl:rightOperand": "EHDS Art. 7"
-                  },
-                  {
-                    "odrl:leftOperand": {
-                      "@id": "edc:retentionPeriod"
-                    },
-                    "odrl:operator": {
-                      "@id": "odrl:lteq"
-                    },
-                    "odrl:rightOperand": "P180D"
-                  }
-                ]
+                "action": "use"
               }
             ],
-            "odrl:prohibition": [
-              {
-                "odrl:action": {
-                  "@id": "odrl:use"
-                },
-                "odrl:constraint": [
-                  {
-                    "odrl:leftOperand": {
-                      "@id": "edc:purpose"
-                    },
-                    "odrl:operator": {
-                      "@id": "odrl:isAnyOf"
-                    },
-                    "odrl:rightOperand": [
-                      "re-identification",
-                      "commercial-exploitation",
-                      "insurance-decisions"
-                    ]
-                  }
-                ]
-              }
-            ]
+            "prohibition": [],
+            "obligation": []
           },
-          "edc:createdAt": "2026-02-04T08:30:00Z"
+          "@context": ["https://w3id.org/edc/connector/management/v2"]
+        },
+        {
+          "@id": "ehds-statistics-access-mr",
+          "@type": "PolicyDefinition",
+          "createdAt": 1774142047328,
+          "policy": {
+            "@id": "21dfc0fe-557b-48da-9c0e-c47f1825a5b8",
+            "@type": "Set",
+            "permission": [
+              {
+                "action": "use"
+              }
+            ],
+            "prohibition": [],
+            "obligation": []
+          },
+          "@context": ["https://w3id.org/edc/connector/management/v2"]
+        },
+        {
+          "@id": "ehds-catalog-open-mr",
+          "@type": "PolicyDefinition",
+          "createdAt": 1774142047424,
+          "policy": {
+            "@id": "f0f47ece-7da1-43d7-bcb2-5df2be34ac28",
+            "@type": "Set",
+            "permission": [
+              {
+                "action": "use"
+              }
+            ],
+            "prohibition": [],
+            "obligation": []
+          },
+          "@context": ["https://w3id.org/edc/connector/management/v2"]
+        },
+        {
+          "@id": "catalog-open-policy",
+          "@type": "PolicyDefinition",
+          "createdAt": 1774142051689,
+          "policy": {
+            "@id": "c9a0520a-c942-4df7-be9a-c85ef5da3443",
+            "@type": "Set",
+            "permission": [
+              {
+                "action": "use"
+              }
+            ],
+            "prohibition": [],
+            "obligation": []
+          },
+          "@context": ["https://w3id.org/edc/connector/management/v2"]
         }
-      ]
+      ],
+      "source": "edc"
     },
     {
-      "participantId": "did:web:medreg.de:hdab",
-      "identity": "did:web:medreg.de:hdab",
+      "participantId": "c6ac1eb17d3342e29c726589ad85bace",
+      "identity": "did:web:identityhub%3A7083:lmc",
       "policies": [
         {
-          "@id": "policy-hdab-regulatory-access",
-          "@type": "edc:PolicyDefinition",
-          "edc:policy": {
-            "@type": "odrl:Set",
-            "odrl:permission": [
+          "@id": "ehds-open-catalog-access",
+          "@type": "PolicyDefinition",
+          "createdAt": 1774142046536,
+          "policy": {
+            "@id": "6a9b1706-c93b-43c4-88d3-36abd81e6370",
+            "@type": "Set",
+            "permission": [
               {
-                "odrl:action": {
-                  "@id": "odrl:use"
-                },
-                "odrl:constraint": [
-                  {
-                    "odrl:leftOperand": {
-                      "@id": "edc:purpose"
-                    },
-                    "odrl:operator": {
-                      "@id": "odrl:isAnyOf"
-                    },
-                    "odrl:rightOperand": [
-                      "regulatory-review",
-                      "public-health-monitoring",
-                      "statistics"
-                    ]
-                  },
-                  {
-                    "odrl:leftOperand": {
-                      "@id": "edc:legalBasis"
-                    },
-                    "odrl:operator": {
-                      "@id": "odrl:eq"
-                    },
-                    "odrl:rightOperand": "EHDS Art. 36"
-                  }
-                ]
+                "action": "use"
               }
             ],
-            "odrl:prohibition": [
-              {
-                "odrl:action": {
-                  "@id": "odrl:use"
-                },
-                "odrl:constraint": [
-                  {
-                    "odrl:leftOperand": {
-                      "@id": "edc:purpose"
-                    },
-                    "odrl:operator": {
-                      "@id": "odrl:isAnyOf"
-                    },
-                    "odrl:rightOperand": [
-                      "re-identification",
-                      "commercial-exploitation"
-                    ]
-                  }
-                ]
-              }
-            ]
+            "prohibition": [],
+            "obligation": []
           },
-          "edc:createdAt": "2025-12-01T09:00:00Z"
+          "@context": ["https://w3id.org/edc/connector/management/v2"]
+        },
+        {
+          "@id": "ehds-research-access-lmc",
+          "@type": "PolicyDefinition",
+          "createdAt": 1774142046634,
+          "policy": {
+            "@id": "18dece61-aca4-45d4-a484-21cda0baa091",
+            "@type": "Set",
+            "permission": [
+              {
+                "action": "use"
+              }
+            ],
+            "prohibition": [],
+            "obligation": []
+          },
+          "@context": ["https://w3id.org/edc/connector/management/v2"]
+        },
+        {
+          "@id": "ehds-public-health-access",
+          "@type": "PolicyDefinition",
+          "createdAt": 1774142046826,
+          "policy": {
+            "@id": "630f9d3e-f1be-4c10-8f3a-5ebb275b54ff",
+            "@type": "Set",
+            "permission": [
+              {
+                "action": "use"
+              }
+            ],
+            "prohibition": [],
+            "obligation": []
+          },
+          "@context": ["https://w3id.org/edc/connector/management/v2"]
+        },
+        {
+          "@id": "ehds-crossborder-access-lmc",
+          "@type": "PolicyDefinition",
+          "createdAt": 1774142046927,
+          "policy": {
+            "@id": "b268c6db-2256-41af-b341-f162bae76f67",
+            "@type": "Set",
+            "permission": [
+              {
+                "action": "use"
+              }
+            ],
+            "prohibition": [],
+            "obligation": []
+          },
+          "@context": ["https://w3id.org/edc/connector/management/v2"]
+        },
+        {
+          "@id": "open-access-policy",
+          "@type": "PolicyDefinition",
+          "createdAt": 1774142049957,
+          "policy": {
+            "@id": "3598c5af-22ca-4557-8b6d-c39b147447e7",
+            "@type": "Set",
+            "permission": [
+              {
+                "action": "use"
+              }
+            ],
+            "prohibition": [],
+            "obligation": []
+          },
+          "@context": ["https://w3id.org/edc/connector/management/v2"]
+        },
+        {
+          "@id": "membership-access-policy",
+          "@type": "PolicyDefinition",
+          "createdAt": 1774142050084,
+          "policy": {
+            "@id": "807b82df-1d26-495e-9ffc-f99d839e456f",
+            "@type": "Set",
+            "permission": [
+              {
+                "action": "use"
+              }
+            ],
+            "prohibition": [],
+            "obligation": []
+          },
+          "@context": ["https://w3id.org/edc/connector/management/v2"]
         }
-      ]
+      ],
+      "source": "edc"
     },
     {
-      "participantId": "did:web:irs.fr:hdab",
-      "identity": "did:web:irs.fr:hdab",
-      "policies": []
+      "participantId": "09f8face6982493d82c9c997079c2b4e",
+      "identity": "did:web:identityhub%3A7083:irs",
+      "policies": [
+        {
+          "@id": "ehds-research-access-irs",
+          "@type": "PolicyDefinition",
+          "createdAt": 1774142047523,
+          "policy": {
+            "@id": "6fca34d1-2fec-44d3-9ca6-7279838b7aef",
+            "@type": "Set",
+            "permission": [
+              {
+                "action": "use"
+              }
+            ],
+            "prohibition": [],
+            "obligation": []
+          },
+          "@context": ["https://w3id.org/edc/connector/management/v2"]
+        },
+        {
+          "@id": "ehds-statistics-access-irs",
+          "@type": "PolicyDefinition",
+          "createdAt": 1774142047619,
+          "policy": {
+            "@id": "50f62510-de5c-40c2-b49c-786114aa7144",
+            "@type": "Set",
+            "permission": [
+              {
+                "action": "use"
+              }
+            ],
+            "prohibition": [],
+            "obligation": []
+          },
+          "@context": ["https://w3id.org/edc/connector/management/v2"]
+        }
+      ],
+      "source": "edc"
     }
   ]
 }

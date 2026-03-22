@@ -1,7 +1,7 @@
 {
   "tenants": [
     {
-      "id": "092cfcc9-c4ad-4136-9cb0-4e1ff4b702a9",
+      "id": "b12c0cbe-3823-4e01-b367-de1855eff252",
       "version": 0,
       "properties": {
         "address": "Augustenburger Platz 1",
@@ -19,44 +19,44 @@
       },
       "participantProfiles": [
         {
-          "id": "c30e1335-a56c-45b5-80a4-42424d4d3716",
+          "id": "50a45786-0d95-4852-ba78-be816533c1dc",
           "version": 0,
           "identifier": "did:web:identityhub%3A7083:alpha-klinik",
-          "tenantId": "092cfcc9-c4ad-4136-9cb0-4e1ff4b702a9",
+          "tenantId": "b12c0cbe-3823-4e01-b367-de1855eff252",
           "participantRoles": {
-            "8bd2aa17-ef81-4c60-9a55-481843c2023d": ["provider"]
+            "a0fa03eb-d95f-4db3-be2c-6764483b38ff": ["provider"]
           },
           "vpas": [
             {
-              "id": "617da89f-a59f-4211-b234-d6eb50bb6d04",
+              "id": "cf8907e7-6aa8-4383-89fe-01c3604d2306",
               "version": 0,
               "state": "active",
-              "stateTimestamp": "2026-03-19T07:25:36.432363689Z",
+              "stateTimestamp": "2026-03-22T01:13:45.276118581Z",
               "type": "cfm.connector",
-              "cellId": "b152c28a-7d91-49f9-b2c0-23a0e923db48"
+              "cellId": "e3daa679-c189-423e-9448-310dccfafe1c"
             },
             {
-              "id": "0255f451-91a3-4375-b6c8-83237f3468f9",
+              "id": "db9e3251-b5d9-4e47-9419-950a07d45231",
               "version": 0,
               "state": "active",
-              "stateTimestamp": "2026-03-19T07:25:36.43236423Z",
+              "stateTimestamp": "2026-03-22T01:13:45.276119122Z",
               "type": "cfm.credentialservice",
-              "cellId": "b152c28a-7d91-49f9-b2c0-23a0e923db48"
+              "cellId": "e3daa679-c189-423e-9448-310dccfafe1c"
             },
             {
-              "id": "7e8fc19f-ffb0-4107-9d7b-78dad2f274ea",
+              "id": "a415e52f-8160-4067-a7a8-6bc96ec25500",
               "version": 0,
               "state": "active",
-              "stateTimestamp": "2026-03-19T07:25:36.432364772Z",
+              "stateTimestamp": "2026-03-22T01:13:45.276119331Z",
               "type": "cfm.dataplane",
-              "cellId": "b152c28a-7d91-49f9-b2c0-23a0e923db48"
+              "cellId": "e3daa679-c189-423e-9448-310dccfafe1c"
             }
           ],
           "properties": {
             "cfm.vpa.state": {
-              "credentialRequest": "http://identityhub:7081/v1alpha/participants/86c3de62968647dfb428d8a08f4cde8d/credentials/request/deefbf65-e2c0-46b3-a761-a5f18c7f7700",
-              "holderPid": "deefbf65-e2c0-46b3-a761-a5f18c7f7700",
-              "participantContextId": "86c3de62968647dfb428d8a08f4cde8d"
+              "credentialRequest": "http://identityhub:7081/v1alpha/participants/24be78bf13fc4873b503844d908fcbd2/credentials/request/44c9ac53-2ea1-43ad-af68-24fe50cebb2a",
+              "holderPid": "44c9ac53-2ea1-43ad-af68-24fe50cebb2a",
+              "participantContextId": "24be78bf13fc4873b503844d908fcbd2"
             },
             "displayName": "AlphaKlinik Berlin",
             "type": "alpha-klinik"
@@ -66,7 +66,7 @@
       ]
     },
     {
-      "id": "10c8951e-bae5-4c2f-84d5-3eabf8d23f5d",
+      "id": "d790c1f8-a0f1-4138-868a-0877a7e635a2",
       "version": 0,
       "properties": {
         "address": "Industriepark Hoechst G879",
@@ -84,44 +84,44 @@
       },
       "participantProfiles": [
         {
-          "id": "17bc30db-cfc0-4b85-97f8-ca5a869d3e19",
+          "id": "6463ae95-d09f-47e9-ab07-bb9fe6306448",
           "version": 0,
           "identifier": "did:web:identityhub%3A7083:pharmaco",
-          "tenantId": "10c8951e-bae5-4c2f-84d5-3eabf8d23f5d",
+          "tenantId": "d790c1f8-a0f1-4138-868a-0877a7e635a2",
           "participantRoles": {
-            "8bd2aa17-ef81-4c60-9a55-481843c2023d": ["consumer"]
+            "a0fa03eb-d95f-4db3-be2c-6764483b38ff": ["consumer"]
           },
           "vpas": [
             {
-              "id": "9950b4e2-ddc2-405d-b88e-26644f21799c",
+              "id": "a83db9f5-85c8-454d-83d5-0a858bb5852e",
               "version": 0,
               "state": "active",
-              "stateTimestamp": "2026-03-19T07:25:53.040975223Z",
+              "stateTimestamp": "2026-03-22T01:13:45.498380279Z",
               "type": "cfm.connector",
-              "cellId": "b152c28a-7d91-49f9-b2c0-23a0e923db48"
+              "cellId": "e3daa679-c189-423e-9448-310dccfafe1c"
             },
             {
-              "id": "d9323182-18ad-45fa-bba1-2e2c081ff87c",
+              "id": "ac4fa80d-9808-42ad-ae2e-5a2a0561061c",
               "version": 0,
               "state": "active",
-              "stateTimestamp": "2026-03-19T07:25:53.040975806Z",
+              "stateTimestamp": "2026-03-22T01:13:45.498380779Z",
               "type": "cfm.credentialservice",
-              "cellId": "b152c28a-7d91-49f9-b2c0-23a0e923db48"
+              "cellId": "e3daa679-c189-423e-9448-310dccfafe1c"
             },
             {
-              "id": "4785b399-65a5-4d44-a7d3-44de85b0d7e4",
+              "id": "eeca5764-e19e-46c7-89bc-2dd5b6b76144",
               "version": 0,
               "state": "active",
-              "stateTimestamp": "2026-03-19T07:25:53.040976056Z",
+              "stateTimestamp": "2026-03-22T01:13:45.498380988Z",
               "type": "cfm.dataplane",
-              "cellId": "b152c28a-7d91-49f9-b2c0-23a0e923db48"
+              "cellId": "e3daa679-c189-423e-9448-310dccfafe1c"
             }
           ],
           "properties": {
             "cfm.vpa.state": {
-              "credentialRequest": "http://identityhub:7081/v1alpha/participants/c19ace5df59740c0a4a489e5cc3f4ab6/credentials/request/02627726-740c-42a9-8f2d-83eb08b96237",
-              "holderPid": "02627726-740c-42a9-8f2d-83eb08b96237",
-              "participantContextId": "c19ace5df59740c0a4a489e5cc3f4ab6"
+              "credentialRequest": "http://identityhub:7081/v1alpha/participants/772f6576b2a6472cb2e373dabc928517/credentials/request/a150fe0c-5e8f-46ca-8f2e-328fe44bc509",
+              "holderPid": "a150fe0c-5e8f-46ca-8f2e-328fe44bc509",
+              "participantContextId": "772f6576b2a6472cb2e373dabc928517"
             },
             "displayName": "PharmaCo Research AG",
             "type": "pharmaco"
@@ -131,7 +131,7 @@
       ]
     },
     {
-      "id": "1a73f1db-39b4-4316-aabc-2807f9410be5",
+      "id": "015085e9-6689-416f-8ae3-399fde0b3231",
       "version": 0,
       "properties": {
         "address": "Friedrich-Ebert-Allee 38",
@@ -149,44 +149,44 @@
       },
       "participantProfiles": [
         {
-          "id": "3cde5560-375b-48cd-b7a6-ae800f14c6d2",
+          "id": "02bf08fd-1f3e-4ac3-bbf9-0d76b48a46b6",
           "version": 0,
           "identifier": "did:web:identityhub%3A7083:medreg",
-          "tenantId": "1a73f1db-39b4-4316-aabc-2807f9410be5",
+          "tenantId": "015085e9-6689-416f-8ae3-399fde0b3231",
           "participantRoles": {
-            "8bd2aa17-ef81-4c60-9a55-481843c2023d": ["operator"]
+            "a0fa03eb-d95f-4db3-be2c-6764483b38ff": ["operator"]
           },
           "vpas": [
             {
-              "id": "38ad4ab6-f984-4067-8ce7-5811d1c4ad7c",
+              "id": "89c8a9fd-5840-4cca-b814-fde672f3f167",
               "version": 0,
               "state": "active",
-              "stateTimestamp": "2026-03-19T07:25:53.065615805Z",
+              "stateTimestamp": "2026-03-22T01:13:45.71000828Z",
               "type": "cfm.connector",
-              "cellId": "b152c28a-7d91-49f9-b2c0-23a0e923db48"
+              "cellId": "e3daa679-c189-423e-9448-310dccfafe1c"
             },
             {
-              "id": "27c1acbe-4575-4c9b-9d4e-bea41e580f72",
+              "id": "2430e995-cb7a-4cdc-aa99-d9586a76d8c5",
               "version": 0,
               "state": "active",
-              "stateTimestamp": "2026-03-19T07:25:53.065617096Z",
+              "stateTimestamp": "2026-03-22T01:13:45.71002053Z",
               "type": "cfm.credentialservice",
-              "cellId": "b152c28a-7d91-49f9-b2c0-23a0e923db48"
+              "cellId": "e3daa679-c189-423e-9448-310dccfafe1c"
             },
             {
-              "id": "437f6e73-2f2a-44f1-be1b-aa4d977bfff1",
+              "id": "7cb15052-0f51-4231-86ac-049fb3ddb08b",
               "version": 0,
               "state": "active",
-              "stateTimestamp": "2026-03-19T07:25:53.065617596Z",
+              "stateTimestamp": "2026-03-22T01:13:45.710021572Z",
               "type": "cfm.dataplane",
-              "cellId": "b152c28a-7d91-49f9-b2c0-23a0e923db48"
+              "cellId": "e3daa679-c189-423e-9448-310dccfafe1c"
             }
           ],
           "properties": {
             "cfm.vpa.state": {
-              "credentialRequest": "http://identityhub:7081/v1alpha/participants/910a9b58575544f498a9ea24ddb50b84/credentials/request/ac3282b2-3fc0-4372-83b0-53388f6316ce",
-              "holderPid": "ac3282b2-3fc0-4372-83b0-53388f6316ce",
-              "participantContextId": "910a9b58575544f498a9ea24ddb50b84"
+              "credentialRequest": "http://identityhub:7081/v1alpha/participants/14b071f958e941cfbe04ebb339ef4375/credentials/request/9f59ea18-5f48-4cb2-9aec-64bd13a63ca9",
+              "holderPid": "9f59ea18-5f48-4cb2-9aec-64bd13a63ca9",
+              "participantContextId": "14b071f958e941cfbe04ebb339ef4375"
             },
             "displayName": "MedReg DE",
             "type": "medreg"
@@ -196,7 +196,7 @@
       ]
     },
     {
-      "id": "7ecc95be-e1aa-42a0-a161-1c447a7b6d63",
+      "id": "1ff4740a-e208-4023-a71f-2bfbc045c278",
       "version": 0,
       "properties": {
         "address": "Tegelseweg 210",
@@ -214,44 +214,44 @@
       },
       "participantProfiles": [
         {
-          "id": "e09c78e0-8fca-48a6-a8c1-e86ae802923c",
+          "id": "f60039f1-1f28-46c2-b091-3428f0d61448",
           "version": 0,
           "identifier": "did:web:identityhub%3A7083:lmc",
-          "tenantId": "7ecc95be-e1aa-42a0-a161-1c447a7b6d63",
+          "tenantId": "1ff4740a-e208-4023-a71f-2bfbc045c278",
           "participantRoles": {
-            "8bd2aa17-ef81-4c60-9a55-481843c2023d": ["provider"]
+            "a0fa03eb-d95f-4db3-be2c-6764483b38ff": ["provider"]
           },
           "vpas": [
             {
-              "id": "a172420a-61dc-4f49-a410-6e884404e911",
+              "id": "b92fa12c-0c18-4e06-9fd5-dbc3c814427a",
               "version": 0,
               "state": "active",
-              "stateTimestamp": "2026-03-19T07:25:53.085659936Z",
+              "stateTimestamp": "2026-03-22T01:13:45.917505477Z",
               "type": "cfm.connector",
-              "cellId": "b152c28a-7d91-49f9-b2c0-23a0e923db48"
+              "cellId": "e3daa679-c189-423e-9448-310dccfafe1c"
             },
             {
-              "id": "affa0191-665e-449e-9b76-78611efea7de",
+              "id": "3ba189d9-ccc9-49da-9216-6928fd85831b",
               "version": 0,
               "state": "active",
-              "stateTimestamp": "2026-03-19T07:25:53.085660269Z",
+              "stateTimestamp": "2026-03-22T01:13:45.917505768Z",
               "type": "cfm.credentialservice",
-              "cellId": "b152c28a-7d91-49f9-b2c0-23a0e923db48"
+              "cellId": "e3daa679-c189-423e-9448-310dccfafe1c"
             },
             {
-              "id": "84955108-fddd-4d1e-b17a-481e12e70f97",
+              "id": "7c3a24ff-6711-4adb-9900-09e83a9abee5",
               "version": 0,
               "state": "active",
-              "stateTimestamp": "2026-03-19T07:25:53.085660394Z",
+              "stateTimestamp": "2026-03-22T01:13:45.917505893Z",
               "type": "cfm.dataplane",
-              "cellId": "b152c28a-7d91-49f9-b2c0-23a0e923db48"
+              "cellId": "e3daa679-c189-423e-9448-310dccfafe1c"
             }
           ],
           "properties": {
             "cfm.vpa.state": {
-              "credentialRequest": "http://identityhub:7081/v1alpha/participants/a068819fca5a479983253994ef7337a9/credentials/request/ecfa4e9f-efc9-42c5-8415-43d4fc180c3a",
-              "holderPid": "ecfa4e9f-efc9-42c5-8415-43d4fc180c3a",
-              "participantContextId": "a068819fca5a479983253994ef7337a9"
+              "credentialRequest": "http://identityhub:7081/v1alpha/participants/c6ac1eb17d3342e29c726589ad85bace/credentials/request/7d5cd911-91e6-4b07-85f8-fbf39a8c7c3e",
+              "holderPid": "7d5cd911-91e6-4b07-85f8-fbf39a8c7c3e",
+              "participantContextId": "c6ac1eb17d3342e29c726589ad85bace"
             },
             "displayName": "Limburg Medical Centre",
             "type": "lmc"
@@ -261,7 +261,7 @@
       ]
     },
     {
-      "id": "886d2ee6-cf22-4b39-9d31-97cd68a767dc",
+      "id": "b7f3fa0e-badd-479c-be33-7dd539a18986",
       "version": 0,
       "properties": {
         "address": "101 rue de Tolbiac",
@@ -279,44 +279,44 @@
       },
       "participantProfiles": [
         {
-          "id": "889634e7-f04a-4d41-bf04-be0670ea4e09",
+          "id": "a169062c-df10-4dff-abae-d9a7d4749f82",
           "version": 0,
           "identifier": "did:web:identityhub%3A7083:irs",
-          "tenantId": "886d2ee6-cf22-4b39-9d31-97cd68a767dc",
+          "tenantId": "b7f3fa0e-badd-479c-be33-7dd539a18986",
           "participantRoles": {
-            "8bd2aa17-ef81-4c60-9a55-481843c2023d": ["operator"]
+            "a0fa03eb-d95f-4db3-be2c-6764483b38ff": ["operator"]
           },
           "vpas": [
             {
-              "id": "94117f79-f840-457d-9d90-60d99b803a15",
+              "id": "d5caa728-fc96-4a81-bf22-23b911353793",
               "version": 0,
               "state": "active",
-              "stateTimestamp": "2026-03-19T07:25:53.110871225Z",
+              "stateTimestamp": "2026-03-22T01:13:46.127420222Z",
               "type": "cfm.connector",
-              "cellId": "b152c28a-7d91-49f9-b2c0-23a0e923db48"
+              "cellId": "e3daa679-c189-423e-9448-310dccfafe1c"
             },
             {
-              "id": "947bc527-0133-49d1-8cfb-0637b0093e94",
+              "id": "5a9ac5b5-7934-46e3-b5ef-e317f7fe1780",
               "version": 0,
               "state": "active",
-              "stateTimestamp": "2026-03-19T07:25:53.110871767Z",
+              "stateTimestamp": "2026-03-22T01:13:46.127420764Z",
               "type": "cfm.credentialservice",
-              "cellId": "b152c28a-7d91-49f9-b2c0-23a0e923db48"
+              "cellId": "e3daa679-c189-423e-9448-310dccfafe1c"
             },
             {
-              "id": "9b2f0b51-4453-4201-b294-b9bab882e707",
+              "id": "1ee52256-e8af-4537-8680-8e2b33405116",
               "version": 0,
               "state": "active",
-              "stateTimestamp": "2026-03-19T07:25:53.110871892Z",
+              "stateTimestamp": "2026-03-22T01:13:46.127420931Z",
               "type": "cfm.dataplane",
-              "cellId": "b152c28a-7d91-49f9-b2c0-23a0e923db48"
+              "cellId": "e3daa679-c189-423e-9448-310dccfafe1c"
             }
           ],
           "properties": {
             "cfm.vpa.state": {
-              "credentialRequest": "http://identityhub:7081/v1alpha/participants/04024a2a4b484c70b211f033a459056b/credentials/request/5ea25895-a1e9-4cc8-8848-605a7a72c4d3",
-              "holderPid": "5ea25895-a1e9-4cc8-8848-605a7a72c4d3",
-              "participantContextId": "04024a2a4b484c70b211f033a459056b"
+              "credentialRequest": "http://identityhub:7081/v1alpha/participants/09f8face6982493d82c9c997079c2b4e/credentials/request/e3371048-c0f8-41d2-b9b4-2d98b16c3c5b",
+              "holderPid": "e3371048-c0f8-41d2-b9b4-2d98b16c3c5b",
+              "participantContextId": "09f8face6982493d82c9c997079c2b4e"
             },
             "displayName": "Institut de Recherche Santé",
             "type": "irs"
@@ -326,10 +326,55 @@
       ]
     }
   ],
-  "participants": [],
+  "participants": [
+    {
+      "@type": "ParticipantContext",
+      "@id": "24be78bf13fc4873b503844d908fcbd2",
+      "identity": "did:web:identityhub%3A7083:alpha-klinik",
+      "properties": {},
+      "state": "ACTIVATED",
+      "@context": ["https://w3id.org/edc/connector/management/v2"]
+    },
+    {
+      "@type": "ParticipantContext",
+      "@id": "772f6576b2a6472cb2e373dabc928517",
+      "identity": "did:web:identityhub%3A7083:pharmaco",
+      "properties": {},
+      "state": "ACTIVATED",
+      "@context": ["https://w3id.org/edc/connector/management/v2"]
+    },
+    {
+      "@type": "ParticipantContext",
+      "@id": "14b071f958e941cfbe04ebb339ef4375",
+      "identity": "did:web:identityhub%3A7083:medreg",
+      "properties": {},
+      "state": "ACTIVATED",
+      "@context": ["https://w3id.org/edc/connector/management/v2"]
+    },
+    {
+      "@type": "ParticipantContext",
+      "@id": "c6ac1eb17d3342e29c726589ad85bace",
+      "identity": "did:web:identityhub%3A7083:lmc",
+      "properties": {},
+      "state": "ACTIVATED",
+      "@context": ["https://w3id.org/edc/connector/management/v2"]
+    },
+    {
+      "@type": "ParticipantContext",
+      "@id": "09f8face6982493d82c9c997079c2b4e",
+      "identity": "did:web:identityhub%3A7083:irs",
+      "properties": {},
+      "state": "ACTIVATED",
+      "@context": ["https://w3id.org/edc/connector/management/v2"]
+    }
+  ],
   "summary": {
     "totalTenants": 5,
-    "totalParticipants": 0,
-    "byRole": { "provider": 2, "consumer": 1, "operator": 2 }
+    "totalParticipants": 5,
+    "byRole": {
+      "provider": 2,
+      "consumer": 1,
+      "operator": 2
+    }
   }
 }

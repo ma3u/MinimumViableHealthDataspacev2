@@ -1,214 +1,312 @@
 {
-  "timestamp": "2026-03-18T10:00:00.000Z",
-  "dockerAvailable": false,
+  "timestamp": "2026-03-22T20:58:55.602Z",
+  "dockerAvailable": true,
   "components": [
     {
       "container": "health-dataspace-controlplane",
       "component": "Control Plane",
       "layer": "edc-core",
       "status": "healthy",
-      "uptime": "12h 30m",
-      "cpu": 0.96,
-      "mem": { "usedMB": 224.5, "limitMB": 12012, "percent": 1.87 }
+      "uptime": "3h 26m",
+      "cpu": 0.76,
+      "mem": {
+        "usedMB": 264.8,
+        "limitMB": 16030.8,
+        "percent": 1.7
+      }
     },
     {
       "container": "health-dataspace-dataplane-fhir",
       "component": "Data Plane FHIR",
       "layer": "edc-core",
       "status": "healthy",
-      "uptime": "12h 30m",
-      "cpu": 0.55,
-      "mem": { "usedMB": 159.3, "limitMB": 12012, "percent": 1.33 }
+      "uptime": "3h 26m",
+      "cpu": 0.41,
+      "mem": {
+        "usedMB": 162.3,
+        "limitMB": 16030.8,
+        "percent": 1
+      }
     },
     {
       "container": "health-dataspace-dataplane-omop",
       "component": "Data Plane OMOP",
       "layer": "edc-core",
       "status": "healthy",
-      "uptime": "12h 30m",
-      "cpu": 0.31,
-      "mem": { "usedMB": 166.6, "limitMB": 12012, "percent": 1.39 }
+      "uptime": "3h 26m",
+      "cpu": 0.36,
+      "mem": {
+        "usedMB": 160.5,
+        "limitMB": 16030.8,
+        "percent": 1
+      }
     },
     {
       "container": "health-dataspace-identityhub",
       "component": "Identity Hub",
       "layer": "identity",
       "status": "healthy",
-      "uptime": "12h 30m",
-      "cpu": 0.44,
-      "mem": { "usedMB": 159.5, "limitMB": 12012, "percent": 1.33 }
+      "uptime": "3h 26m",
+      "cpu": 0.14,
+      "mem": {
+        "usedMB": 173.9,
+        "limitMB": 16030.8,
+        "percent": 1.1
+      }
     },
     {
       "container": "health-dataspace-issuerservice",
       "component": "Issuer Service",
       "layer": "identity",
       "status": "healthy",
-      "uptime": "12h 30m",
-      "cpu": 0.3,
-      "mem": { "usedMB": 195.8, "limitMB": 12012, "percent": 1.63 }
+      "uptime": "3h 26m",
+      "cpu": 0.12,
+      "mem": {
+        "usedMB": 188.9,
+        "limitMB": 16030.8,
+        "percent": 1.2
+      }
     },
     {
       "container": "health-dataspace-keycloak",
       "component": "Keycloak",
       "layer": "identity",
       "status": "healthy",
-      "uptime": "12h 30m",
-      "cpu": 0.21,
-      "mem": { "usedMB": 589.8, "limitMB": 12012, "percent": 4.91 }
+      "uptime": "3h 26m",
+      "cpu": 0.12,
+      "mem": {
+        "usedMB": 696.6,
+        "limitMB": 16030.8,
+        "percent": 4.3
+      }
     },
     {
       "container": "health-dataspace-vault",
       "component": "Vault",
       "layer": "identity",
       "status": "healthy",
-      "uptime": "12h 30m",
-      "cpu": 0.53,
-      "mem": { "usedMB": 77.7, "limitMB": 12012, "percent": 0.65 }
+      "uptime": "3h 26m",
+      "cpu": 2.26,
+      "mem": {
+        "usedMB": 226.7,
+        "limitMB": 16030.8,
+        "percent": 1.4
+      }
     },
     {
       "container": "health-dataspace-vault-bootstrap",
       "component": "Vault Bootstrap",
       "layer": "identity",
       "status": "running",
-      "uptime": "12h 30m",
-      "cpu": 0.0,
-      "mem": { "usedMB": 0.05, "limitMB": 12012, "percent": 0.0 }
-    },
-    {
-      "container": "health-dataspace-tenant-manager",
-      "component": "Tenant Manager",
-      "layer": "cfm",
-      "status": "running",
-      "uptime": "12h 30m",
-      "cpu": 0.06,
-      "mem": { "usedMB": 18.1, "limitMB": 12012, "percent": 0.15 }
-    },
-    {
-      "container": "health-dataspace-provision-manager",
-      "component": "Provision Manager",
-      "layer": "cfm",
-      "status": "running",
-      "uptime": "12h 30m",
-      "cpu": 0.07,
-      "mem": { "usedMB": 17.1, "limitMB": 12012, "percent": 0.14 }
+      "uptime": "3h 26m",
+      "cpu": 0,
+      "mem": {
+        "usedMB": 0,
+        "limitMB": 16030.8,
+        "percent": 0
+      }
     },
     {
       "container": "health-dataspace-cfm-edcv-agent",
       "component": "EDC-V Agent",
       "layer": "cfm",
       "status": "running",
-      "uptime": "12h 30m",
-      "cpu": 0.04,
-      "mem": { "usedMB": 6.6, "limitMB": 12012, "percent": 0.05 }
+      "uptime": "3h 26m",
+      "cpu": 0.02,
+      "mem": {
+        "usedMB": 7.3,
+        "limitMB": 16030.8,
+        "percent": 0
+      }
     },
     {
       "container": "health-dataspace-cfm-keycloak-agent",
       "component": "Keycloak Agent",
       "layer": "cfm",
       "status": "running",
-      "uptime": "12h 30m",
-      "cpu": 0.05,
-      "mem": { "usedMB": 6.9, "limitMB": 12012, "percent": 0.06 }
+      "uptime": "3h 26m",
+      "cpu": 0.03,
+      "mem": {
+        "usedMB": 11.1,
+        "limitMB": 16030.8,
+        "percent": 0.1
+      }
     },
     {
       "container": "health-dataspace-cfm-onboarding-agent",
       "component": "Onboarding Agent",
       "layer": "cfm",
       "status": "running",
-      "uptime": "12h 30m",
-      "cpu": 0.42,
-      "mem": { "usedMB": 8.8, "limitMB": 12012, "percent": 0.07 }
+      "uptime": "3h 26m",
+      "cpu": 0.03,
+      "mem": {
+        "usedMB": 17.2,
+        "limitMB": 16030.8,
+        "percent": 0.1
+      }
+    },
+    {
+      "container": "health-dataspace-provision-manager",
+      "component": "Provision Manager",
+      "layer": "cfm",
+      "status": "running",
+      "uptime": "3h 26m",
+      "cpu": 0.02,
+      "mem": {
+        "usedMB": 20.1,
+        "limitMB": 16030.8,
+        "percent": 0.1
+      }
     },
     {
       "container": "health-dataspace-cfm-registration-agent",
       "component": "Registration Agent",
       "layer": "cfm",
       "status": "running",
-      "uptime": "12h 30m",
-      "cpu": 0.04,
-      "mem": { "usedMB": 5.0, "limitMB": 12012, "percent": 0.04 }
+      "uptime": "3h 26m",
+      "cpu": 0.03,
+      "mem": {
+        "usedMB": 17.2,
+        "limitMB": 16030.8,
+        "percent": 0.1
+      }
     },
     {
-      "container": "health-dataspace-postgres",
-      "component": "PostgreSQL",
-      "layer": "infrastructure",
-      "status": "healthy",
-      "uptime": "12h 30m",
-      "cpu": 2.23,
-      "mem": { "usedMB": 61.3, "limitMB": 12012, "percent": 0.51 }
+      "container": "health-dataspace-tenant-manager",
+      "component": "Tenant Manager",
+      "layer": "cfm",
+      "status": "running",
+      "uptime": "3h 26m",
+      "cpu": 0.04,
+      "mem": {
+        "usedMB": 24.9,
+        "limitMB": 16030.8,
+        "percent": 0.2
+      }
     },
     {
       "container": "health-dataspace-nats",
       "component": "NATS",
       "layer": "infrastructure",
       "status": "healthy",
-      "uptime": "12h 30m",
-      "cpu": 1.75,
-      "mem": { "usedMB": 23.6, "limitMB": 12012, "percent": 0.2 }
+      "uptime": "3h 26m",
+      "cpu": 1.77,
+      "mem": {
+        "usedMB": 27.8,
+        "limitMB": 16030.8,
+        "percent": 0.2
+      }
     },
     {
       "container": "health-dataspace-neo4j",
       "component": "Neo4j",
       "layer": "infrastructure",
       "status": "running",
-      "uptime": "12h 30m",
-      "cpu": 0.92,
-      "mem": { "usedMB": 1017.0, "limitMB": 12012, "percent": 8.47 }
+      "uptime": "3h 26m",
+      "cpu": 0.45,
+      "mem": {
+        "usedMB": 1132.6,
+        "limitMB": 16030.8,
+        "percent": 7.1
+      }
     },
     {
       "container": "health-dataspace-neo4j-proxy",
       "component": "Neo4j Proxy",
       "layer": "infrastructure",
       "status": "healthy",
-      "uptime": "12h 30m",
-      "cpu": 0.0,
-      "mem": { "usedMB": 24.3, "limitMB": 12012, "percent": 0.2 }
+      "uptime": "3h 26m",
+      "cpu": 0,
+      "mem": {
+        "usedMB": 27.4,
+        "limitMB": 16030.8,
+        "percent": 0.2
+      }
+    },
+    {
+      "container": "health-dataspace-postgres",
+      "component": "PostgreSQL",
+      "layer": "infrastructure",
+      "status": "healthy",
+      "uptime": "3h 26m",
+      "cpu": 2.58,
+      "mem": {
+        "usedMB": 93.8,
+        "limitMB": 16030.8,
+        "percent": 0.6
+      }
     },
     {
       "container": "health-dataspace-traefik",
       "component": "Traefik",
       "layer": "infrastructure",
       "status": "running",
-      "uptime": "12h 30m",
-      "cpu": 0.0,
-      "mem": { "usedMB": 30.4, "limitMB": 12012, "percent": 0.25 }
+      "uptime": "3h 26m",
+      "cpu": 0.05,
+      "mem": {
+        "usedMB": 36,
+        "limitMB": 16030.8,
+        "percent": 0.2
+      }
     },
     {
       "container": "health-dataspace-ui",
       "component": "UI",
       "layer": "infrastructure",
       "status": "running",
-      "uptime": "12h 30m",
-      "cpu": 0.0,
-      "mem": { "usedMB": 48.5, "limitMB": 12012, "percent": 0.4 }
+      "uptime": "3h 26m",
+      "cpu": 0.64,
+      "mem": {
+        "usedMB": 99.6,
+        "limitMB": 16030.8,
+        "percent": 0.6
+      }
     }
   ],
   "participants": [
     {
-      "id": "alpha-klinik-tenant",
+      "id": "b12c0cbe-3823-4e01-b367-de1855eff252",
       "displayName": "AlphaKlinik Berlin",
-      "organization": "AlphaKlinik Berlin",
-      "role": "DATA_HOLDER",
-      "did": "did:web:alpha-klinik.de:participant",
-      "state": "CREATED",
+      "organization": "AlphaKlinik Berlin — Universitätsklinikum",
+      "role": "data-holder",
+      "did": "—",
+      "state": "—",
       "profileCount": 1
     },
     {
-      "id": "pharmaco-tenant",
+      "id": "d790c1f8-a0f1-4138-868a-0877a7e635a2",
       "displayName": "PharmaCo Research AG",
-      "organization": "PharmaCo Research AG",
-      "role": "DATA_USER",
-      "did": "did:web:pharmaco.de:research",
-      "state": "CREATED",
+      "organization": "PharmaCo Research AG — Clinical Trials Division",
+      "role": "data-user",
+      "did": "—",
+      "state": "—",
       "profileCount": 1
     },
     {
-      "id": "medreg-tenant",
+      "id": "015085e9-6689-416f-8ae3-399fde0b3231",
       "displayName": "MedReg DE",
-      "organization": "MedReg DE",
-      "role": "HDAB",
-      "did": "did:web:medreg.de:hdab",
-      "state": "CREATED",
+      "organization": "MedReg DE — Health Data Access Body",
+      "role": "health-data-access-body",
+      "did": "—",
+      "state": "—",
+      "profileCount": 1
+    },
+    {
+      "id": "1ff4740a-e208-4023-a71f-2bfbc045c278",
+      "displayName": "Limburg Medical Centre",
+      "organization": "Limburg Medical Centre — Academic Hospital",
+      "role": "data-holder",
+      "did": "—",
+      "state": "—",
+      "profileCount": 1
+    },
+    {
+      "id": "b7f3fa0e-badd-479c-be33-7dd539a18986",
+      "displayName": "Institut de Recherche Santé",
+      "organization": "Institut de Recherche Santé — Research HDAB",
+      "role": "health-data-access-body",
+      "did": "—",
+      "state": "—",
       "profileCount": 1
     }
   ]

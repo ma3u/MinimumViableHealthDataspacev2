@@ -13,8 +13,20 @@
   ],
   "datasets": [
     {
-      "id": "dataset:synthea-fhir-r4-mvd",
+      "id": "Synthea Synthetic FHIR R4 Patient Cohort",
       "title": "Synthea Synthetic FHIR R4 Patient Cohort"
+    },
+    {
+      "id": "Synthetic Type 2 Diabetes Patient Journey",
+      "title": "Synthetic Type 2 Diabetes Patient Journey"
+    },
+    {
+      "id": "dataset-4:00dc0fb2-d2c4-4e4b-87d0-88a983ba3532:83",
+      "title": "OMOP CDM v5.4 Analytics Cohort"
+    },
+    {
+      "id": "dataset-4:00dc0fb2-d2c4-4e4b-87d0-88a983ba3532:84",
+      "title": "Prostate Cancer Registry 2024"
     }
   ]
 }

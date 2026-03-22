@@ -1,139 +1,41 @@
 {
-  "timestamp": "2025-01-15T10:00:00Z",
+  "timestamp": "2026-03-22T20:59:00.598Z",
   "summary": {
-    "total": 20,
-    "passed": 18,
-    "failed": 1,
-    "skipped": 1
+    "total": 8,
+    "passed": 5,
+    "failed": 3,
+    "skipped": 0
   },
   "suites": {
     "DSP": {
-      "passed": 5,
-      "total": 6,
       "results": [
         {
-          "id": "DSP-1.1",
+          "id": "DSP-ERR",
           "category": "Schema Compliance",
           "suite": "DSP",
-          "name": "Control Plane Readiness",
-          "status": "pass",
-          "detail": "GET /api/check/readiness → 200"
-        },
-        {
-          "id": "DSP-1.2",
-          "category": "Schema Compliance",
-          "suite": "DSP",
-          "name": "Control Plane Liveness",
-          "status": "pass",
-          "detail": "GET /api/check/liveness → 200"
-        },
-        {
-          "id": "DSP-2.1",
-          "category": "Catalog Protocol",
-          "suite": "DSP",
-          "name": "Catalog query — alpha-klinik",
-          "status": "pass",
-          "detail": "Catalog response type: dcat:Catalog"
-        },
-        {
-          "id": "DSP-2.2",
-          "category": "Catalog Protocol",
-          "suite": "DSP",
-          "name": "Catalog query — limburg-mc",
-          "status": "pass",
-          "detail": "Catalog response type: dcat:Catalog"
-        },
-        {
-          "id": "DSP-2.3",
-          "category": "Catalog Protocol",
-          "suite": "DSP",
-          "name": "Catalog query — pharmaco-research",
-          "status": "pass",
-          "detail": "Catalog response type: dcat:Catalog"
-        },
-        {
-          "id": "DSP-2.4",
-          "category": "Catalog Protocol",
-          "suite": "DSP",
-          "name": "Catalog query — medreg-de",
-          "status": "skip",
-          "detail": "HDAB does not host datasets"
+          "name": "DSP proxy check",
+          "status": "fail",
+          "detail": "neo4j-proxy /tck returned 404"
         }
-      ]
+      ],
+      "passed": 0,
+      "total": 1
     },
     "DCP": {
-      "passed": 7,
-      "total": 8,
       "results": [
         {
-          "id": "DCP-1.1",
+          "id": "DCP-ERR",
           "category": "DID Resolution",
           "suite": "DCP",
-          "name": "IdentityHub reachable",
-          "status": "pass",
-          "detail": "IdentityHub responded"
-        },
-        {
-          "id": "DCP-2.1",
-          "category": "Key Pair Management",
-          "suite": "DCP",
-          "name": "Key pairs — alpha-klinik",
-          "status": "pass",
-          "detail": "1 key pair(s) found"
-        },
-        {
-          "id": "DCP-2.2",
-          "category": "Key Pair Management",
-          "suite": "DCP",
-          "name": "Key pairs — pharmaco-research",
-          "status": "pass",
-          "detail": "1 key pair(s) found"
-        },
-        {
-          "id": "DCP-2.3",
-          "category": "Key Pair Management",
-          "suite": "DCP",
-          "name": "Key pairs — medreg-de",
-          "status": "pass",
-          "detail": "1 key pair(s) found"
-        },
-        {
-          "id": "DCP-2.4",
-          "category": "Key Pair Management",
-          "suite": "DCP",
-          "name": "Key pairs — limburg-mc",
-          "status": "pass",
-          "detail": "1 key pair(s) found"
-        },
-        {
-          "id": "DCP-3.1",
-          "category": "Issuer Service",
-          "suite": "DCP",
-          "name": "IssuerService reachable",
-          "status": "pass",
-          "detail": "IssuerService responded"
-        },
-        {
-          "id": "DCP-3.2",
-          "category": "Issuer Service",
-          "suite": "DCP",
-          "name": "EHDS credential definitions",
-          "status": "pass",
-          "detail": "2 credential definitions found"
-        },
-        {
-          "id": "DCP-3.3",
-          "category": "Issuer Service",
-          "suite": "DCP",
-          "name": "Issuer DID configured",
+          "name": "DCP proxy check",
           "status": "fail",
-          "detail": "Issuer DID not found in credential definitions"
+          "detail": "neo4j-proxy /tck returned 404"
         }
-      ]
+      ],
+      "passed": 0,
+      "total": 1
     },
     "EHDS": {
-      "passed": 6,
-      "total": 6,
       "results": [
         {
           "id": "EHDS-1.1",
@@ -141,7 +43,7 @@
           "suite": "EHDS",
           "name": "HealthDataset nodes present",
           "status": "pass",
-          "detail": "3 HealthDataset node(s)"
+          "detail": "4 HealthDataset node(s)"
         },
         {
           "id": "EHDS-2.1",
@@ -149,7 +51,7 @@
           "suite": "EHDS",
           "name": "EEHRxF profiles present",
           "status": "pass",
-          "detail": "6 EEHRxF profile(s)"
+          "detail": "12 EEHRxF profile(s)"
         },
         {
           "id": "EHDS-3.1",
@@ -157,7 +59,7 @@
           "suite": "EHDS",
           "name": "OMOP Person nodes present",
           "status": "pass",
-          "detail": "167 OMOPPerson node(s)"
+          "detail": "1 OMOPPerson node(s)"
         },
         {
           "id": "EHDS-4.1",
@@ -165,7 +67,7 @@
           "suite": "EHDS",
           "name": "HDAB approval chains",
           "status": "pass",
-          "detail": "3 approval chain(s)"
+          "detail": "1 approval chain(s)"
         },
         {
           "id": "EHDS-5.1",
@@ -173,17 +75,19 @@
           "suite": "EHDS",
           "name": "VC nodes in graph",
           "status": "pass",
-          "detail": "8 VerifiableCredential node(s)"
+          "detail": "13 VerifiableCredential node(s)"
         },
         {
           "id": "EHDS-6.1",
           "category": "Knowledge Graph",
           "suite": "EHDS",
           "name": "Total graph nodes",
-          "status": "pass",
-          "detail": "58,000+ total nodes"
+          "status": "fail",
+          "detail": "95 total nodes"
         }
-      ]
+      ],
+      "passed": 5,
+      "total": 6
     }
   }
 }

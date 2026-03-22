@@ -1,5 +1,68 @@
 [
   {
+    "@id": "84de305c-4e3b-4c84-924d-4f935fb24f84",
+    "@type": "TransferProcess",
+    "state": "STARTED",
+    "stateTimestamp": 1774142056365,
+    "type": "PROVIDER",
+    "callbackAddresses": [],
+    "correlationId": "2ddb5fc2-2478-44e5-bac6-6e0b9236005e",
+    "assetId": "fhir-patient-search",
+    "contractId": "d8aba283-5386-4bd7-994f-f9527785f37e",
+    "transferType": "HttpData-PULL",
+    "dataplaneMetadata": {
+      "@type": "DataplaneMetadata"
+    },
+    "@context": ["https://w3id.org/edc/connector/management/v2"]
+  },
+  {
+    "@id": "f58a04eb-ade5-4bde-8038-a1d8546456ea",
+    "@type": "TransferProcess",
+    "state": "TERMINATED",
+    "stateTimestamp": 1774157222036,
+    "type": "PROVIDER",
+    "callbackAddresses": [],
+    "correlationId": "4eedcc39-ed94-4a1e-91c9-63c5a35825e0",
+    "assetId": "fhir-observation-bundle",
+    "contractId": "87d86602-5229-4b30-9b73-c83c3b9b9259",
+    "transferType": "HttpData-PULL",
+    "errorDetail": "[{\"@value\":\"E2E test: verifying multiple transfer states\"}]",
+    "dataplaneMetadata": {
+      "@type": "DataplaneMetadata"
+    },
+    "@context": ["https://w3id.org/edc/connector/management/v2"]
+  },
+  {
+    "@id": "ecff9b3c-b56e-41ca-88ef-1a5ff850b620",
+    "@type": "TransferProcess",
+    "state": "REQUESTING",
+    "stateTimestamp": 1774201623278,
+    "type": "CONSUMER",
+    "callbackAddresses": [],
+    "assetId": "fhir-patient-search",
+    "contractId": "d8aba283-5386-4bd7-994f-f9527785f37e",
+    "transferType": "HttpData-PULL",
+    "dataplaneMetadata": {
+      "@type": "DataplaneMetadata"
+    },
+    "@context": ["https://w3id.org/edc/connector/management/v2"]
+  },
+  {
+    "@id": "4c185fd2-62af-4589-9377-0dc162ba2761",
+    "@type": "TransferProcess",
+    "state": "REQUESTING",
+    "stateTimestamp": 1774201623287,
+    "type": "CONSUMER",
+    "callbackAddresses": [],
+    "assetId": "fhir-observation-bundle",
+    "contractId": "87d86602-5229-4b30-9b73-c83c3b9b9259",
+    "transferType": "HttpData-PULL",
+    "dataplaneMetadata": {
+      "@type": "DataplaneMetadata"
+    },
+    "@context": ["https://w3id.org/edc/connector/management/v2"]
+  },
+  {
     "@type": "TransferProcess",
     "@id": "transfer-fhir-diagnostic-report-065",
     "state": "STARTED",

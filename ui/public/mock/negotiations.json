@@ -1,6 +1,36 @@
 [
   {
     "@type": "ContractNegotiation",
+    "@id": "9af272f8-aa69-4f39-9b26-abbae1845eda",
+    "type": "PROVIDER",
+    "protocol": "dataspace-protocol-http:2025-1",
+    "state": "FINALIZED",
+    "counterPartyId": "did:web:identityhub%3A7083:pharmaco",
+    "counterPartyAddress": "http://controlplane:8082/api/dsp/772f6576b2a6472cb2e373dabc928517/2025-1",
+    "callbackAddresses": [],
+    "createdAt": 1774142053694,
+    "assetId": "fhir-patient-search",
+    "contractAgreementId": "d8aba283-5386-4bd7-994f-f9527785f37e",
+    "correlationId": "0d6bfe34-9222-4fa0-8a5d-3d53264643a7",
+    "@context": ["https://w3id.org/edc/connector/management/v2"]
+  },
+  {
+    "@type": "ContractNegotiation",
+    "@id": "54704ddc-5486-427c-a2e7-e750ece7d22b",
+    "type": "PROVIDER",
+    "protocol": "dataspace-protocol-http:2025-1",
+    "state": "FINALIZED",
+    "counterPartyId": "did:web:identityhub%3A7083:pharmaco",
+    "counterPartyAddress": "http://controlplane:8082/api/dsp/772f6576b2a6472cb2e373dabc928517/2025-1",
+    "callbackAddresses": [],
+    "createdAt": 1774142058274,
+    "assetId": "fhir-observation-bundle",
+    "contractAgreementId": "87d86602-5229-4b30-9b73-c83c3b9b9259",
+    "correlationId": "82a5d73d-43aa-4455-b7f3-fc8ae6bdfc08",
+    "@context": ["https://w3id.org/edc/connector/management/v2"]
+  },
+  {
+    "@type": "ContractNegotiation",
     "@id": "neg-fhir-cohort-bundle-001",
     "type": "CONSUMER",
     "protocol": "dataspace-protocol-http:2025-1",

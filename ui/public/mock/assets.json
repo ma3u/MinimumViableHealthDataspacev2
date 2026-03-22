@@ -1,5 +1,255 @@
 [
   {
+    "participantId": "24be78bf13fc4873b503844d908fcbd2",
+    "identity": "did:web:identityhub%3A7083:alpha-klinik",
+    "assets": [
+      {
+        "@id": "fhir-patient-search",
+        "@type": "Asset",
+        "properties": {
+          "version": "1.0.0",
+          "name": "FHIR Patient Search",
+          "description": "Search FHIR R4 patients by demographics and conditions. Maps to Neo4j Patient nodes.",
+          "id": "fhir-patient-search",
+          "contenttype": "application/fhir+json"
+        },
+        "dataAddress": {
+          "@type": "DataAddress",
+          "proxyPath": "true",
+          "type": "HttpData",
+          "proxyQueryParams": "true",
+          "baseUrl": "http://neo4j-proxy:9090/fhir/Patient"
+        },
+        "@context": ["https://w3id.org/edc/connector/management/v2"],
+        "name": "FHIR Patient Search",
+        "description": "Search FHIR R4 patients by demographics and conditions. Maps to Neo4j Patient nodes.",
+        "contenttype": "application/fhir+json",
+        "edc:name": "FHIR Patient Search",
+        "edc:description": "Search FHIR R4 patients by demographics and conditions. Maps to Neo4j Patient nodes.",
+        "edc:contenttype": "application/fhir+json"
+      },
+      {
+        "@id": "fhir-observation-bundle",
+        "@type": "Asset",
+        "properties": {
+          "version": "1.0.0",
+          "name": "FHIR Observation Bundle",
+          "description": "FHIR R4 Observation resources including vitals and lab results. Supports LOINC coded queries.",
+          "id": "fhir-observation-bundle",
+          "contenttype": "application/fhir+json"
+        },
+        "dataAddress": {
+          "@type": "DataAddress",
+          "proxyPath": "true",
+          "type": "HttpData",
+          "proxyQueryParams": "true",
+          "baseUrl": "http://neo4j-proxy:9090/fhir/Observation"
+        },
+        "@context": ["https://w3id.org/edc/connector/management/v2"],
+        "name": "FHIR Observation Bundle",
+        "description": "FHIR R4 Observation resources including vitals and lab results. Supports LOINC coded queries.",
+        "contenttype": "application/fhir+json",
+        "edc:name": "FHIR Observation Bundle",
+        "edc:description": "FHIR R4 Observation resources including vitals and lab results. Supports LOINC coded queries.",
+        "edc:contenttype": "application/fhir+json"
+      }
+    ]
+  },
+  {
+    "participantId": "772f6576b2a6472cb2e373dabc928517",
+    "identity": "did:web:identityhub%3A7083:pharmaco",
+    "assets": [
+      {
+        "@id": "research-data-request",
+        "@type": "Asset",
+        "properties": {
+          "version": "1.0.0",
+          "name": "Research Data Request",
+          "description": "Submit clinical research data requests for EHDS-approved studies.",
+          "id": "research-data-request",
+          "contenttype": "application/json"
+        },
+        "dataAddress": {
+          "@type": "DataAddress",
+          "proxyPath": "true",
+          "type": "HttpData",
+          "proxyQueryParams": "true",
+          "baseUrl": "http://neo4j-proxy:9090/api/research/request"
+        },
+        "@context": ["https://w3id.org/edc/connector/management/v2"],
+        "name": "Research Data Request",
+        "description": "Submit clinical research data requests for EHDS-approved studies.",
+        "contenttype": "application/json",
+        "edc:name": "Research Data Request",
+        "edc:description": "Submit clinical research data requests for EHDS-approved studies.",
+        "edc:contenttype": "application/json"
+      },
+      {
+        "@id": "omop-analytics-query",
+        "@type": "Asset",
+        "properties": {
+          "version": "1.0.0",
+          "name": "OMOP Analytics Query",
+          "description": "Execute OMOP CDM analytics queries over federated clinical datasets.",
+          "id": "omop-analytics-query",
+          "contenttype": "application/json"
+        },
+        "dataAddress": {
+          "@type": "DataAddress",
+          "proxyPath": "true",
+          "type": "HttpData",
+          "proxyQueryParams": "true",
+          "baseUrl": "http://neo4j-proxy:9090/api/omop/query"
+        },
+        "@context": ["https://w3id.org/edc/connector/management/v2"],
+        "name": "OMOP Analytics Query",
+        "description": "Execute OMOP CDM analytics queries over federated clinical datasets.",
+        "contenttype": "application/json",
+        "edc:name": "OMOP Analytics Query",
+        "edc:description": "Execute OMOP CDM analytics queries over federated clinical datasets.",
+        "edc:contenttype": "application/json"
+      }
+    ]
+  },
+  {
+    "participantId": "14b071f958e941cfbe04ebb339ef4375",
+    "identity": "did:web:identityhub%3A7083:medreg",
+    "assets": [
+      {
+        "@id": "federated-healthdcatap-catalog",
+        "@type": "Asset",
+        "properties": {
+          "version": "1.0.0",
+          "name": "Federated HealthDCAT-AP Catalog",
+          "description": "Aggregated HealthDCAT-AP catalog from all health dataspace participants. Serves as the central metadata registry for MedReg DE.",
+          "id": "federated-healthdcatap-catalog",
+          "contenttype": "application/ld+json"
+        },
+        "dataAddress": {
+          "@type": "DataAddress",
+          "type": "HttpData",
+          "baseUrl": "http://neo4j-proxy:9090/catalog/datasets"
+        },
+        "@context": ["https://w3id.org/edc/connector/management/v2"],
+        "name": "Federated HealthDCAT-AP Catalog",
+        "description": "Aggregated HealthDCAT-AP catalog from all health dataspace participants. Serves as the central metadata registry for MedReg DE.",
+        "contenttype": "application/ld+json",
+        "edc:name": "Federated HealthDCAT-AP Catalog",
+        "edc:description": "Aggregated HealthDCAT-AP catalog from all health dataspace participants. Serves as the central metadata registry for MedReg DE.",
+        "edc:contenttype": "application/ld+json"
+      }
+    ]
+  },
+  {
+    "participantId": "c6ac1eb17d3342e29c726589ad85bace",
+    "identity": "did:web:identityhub%3A7083:lmc",
+    "assets": [
+      {
+        "@id": "fhir-patient-everything",
+        "@type": "Asset",
+        "properties": {
+          "version": "1.0.0",
+          "name": "FHIR Patient Everything",
+          "description": "Complete FHIR R4 patient record including encounters, conditions, observations, procedures, and medications. Retrieved via $everything operation from the Neo4j health knowledge graph.",
+          "id": "fhir-patient-everything",
+          "contenttype": "application/fhir+json"
+        },
+        "dataAddress": {
+          "@type": "DataAddress",
+          "proxyPath": "true",
+          "type": "HttpData",
+          "proxyQueryParams": "true",
+          "baseUrl": "http://neo4j-proxy:9090/fhir/Patient"
+        },
+        "@context": ["https://w3id.org/edc/connector/management/v2"],
+        "name": "FHIR Patient Everything",
+        "description": "Complete FHIR R4 patient record including encounters, conditions, observations, procedures, and medications. Retrieved via $everything operation from the Neo4j health knowledge graph.",
+        "contenttype": "application/fhir+json",
+        "edc:name": "FHIR Patient Everything",
+        "edc:description": "Complete FHIR R4 patient record including encounters, conditions, observations, procedures, and medications. Retrieved via $everything operation from the Neo4j health knowledge graph.",
+        "edc:contenttype": "application/fhir+json"
+      },
+      {
+        "@id": "fhir-cohort-bundle",
+        "@type": "Asset",
+        "properties": {
+          "version": "1.0.0",
+          "name": "FHIR Cohort Search Bundle",
+          "description": "FHIR R4 Bundle of patients matching cohort criteria (gender, age, condition). Supports secondary use research queries per EHDS Article 33.",
+          "id": "fhir-cohort-bundle",
+          "contenttype": "application/fhir+json"
+        },
+        "dataAddress": {
+          "@type": "DataAddress",
+          "method": "POST",
+          "type": "HttpData",
+          "proxyBody": "true",
+          "baseUrl": "http://neo4j-proxy:9090/fhir/Bundle"
+        },
+        "@context": ["https://w3id.org/edc/connector/management/v2"],
+        "name": "FHIR Cohort Search Bundle",
+        "description": "FHIR R4 Bundle of patients matching cohort criteria (gender, age, condition). Supports secondary use research queries per EHDS Article 33.",
+        "contenttype": "application/fhir+json",
+        "edc:name": "FHIR Cohort Search Bundle",
+        "edc:description": "FHIR R4 Bundle of patients matching cohort criteria (gender, age, condition). Supports secondary use research queries per EHDS Article 33.",
+        "edc:contenttype": "application/fhir+json"
+      },
+      {
+        "@id": "omop-cohort-statistics",
+        "@type": "Asset",
+        "properties": {
+          "version": "1.0.0",
+          "name": "OMOP CDM Cohort Statistics",
+          "description": "Aggregate cohort statistics from OMOP Common Data Model. Supports grouping by gender, age decade, or condition concept.",
+          "id": "omop-cohort-statistics",
+          "contenttype": "application/json"
+        },
+        "dataAddress": {
+          "@type": "DataAddress",
+          "method": "POST",
+          "type": "HttpData",
+          "proxyBody": "true",
+          "baseUrl": "http://neo4j-proxy:9090/omop/cohort"
+        },
+        "@context": ["https://w3id.org/edc/connector/management/v2"],
+        "name": "OMOP CDM Cohort Statistics",
+        "description": "Aggregate cohort statistics from OMOP Common Data Model. Supports grouping by gender, age decade, or condition concept.",
+        "contenttype": "application/json",
+        "edc:name": "OMOP CDM Cohort Statistics",
+        "edc:description": "Aggregate cohort statistics from OMOP Common Data Model. Supports grouping by gender, age decade, or condition concept.",
+        "edc:contenttype": "application/json"
+      },
+      {
+        "@id": "healthdcatap-catalog",
+        "@type": "Asset",
+        "properties": {
+          "version": "1.0.0",
+          "name": "HealthDCAT-AP Dataset Catalog",
+          "description": "HealthDCAT-AP compliant dataset catalog entries as JSON-LD. Supports EHDS metadata requirements for health data discoverability.",
+          "id": "healthdcatap-catalog",
+          "contenttype": "application/ld+json"
+        },
+        "dataAddress": {
+          "@type": "DataAddress",
+          "type": "HttpData",
+          "baseUrl": "http://neo4j-proxy:9090/catalog/datasets"
+        },
+        "@context": ["https://w3id.org/edc/connector/management/v2"],
+        "name": "HealthDCAT-AP Dataset Catalog",
+        "description": "HealthDCAT-AP compliant dataset catalog entries as JSON-LD. Supports EHDS metadata requirements for health data discoverability.",
+        "contenttype": "application/ld+json",
+        "edc:name": "HealthDCAT-AP Dataset Catalog",
+        "edc:description": "HealthDCAT-AP compliant dataset catalog entries as JSON-LD. Supports EHDS metadata requirements for health data discoverability.",
+        "edc:contenttype": "application/ld+json"
+      }
+    ]
+  },
+  {
+    "participantId": "09f8face6982493d82c9c997079c2b4e",
+    "identity": "did:web:identityhub%3A7083:irs",
+    "assets": []
+  },
+  {
     "participantId": "a1b2c3d4e5f647a0b1c2d3e4f5a6b7c8",
     "identity": "did:web:alpha-klinik.de:participant",
     "assets": [
