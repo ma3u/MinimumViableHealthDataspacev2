@@ -21,22 +21,29 @@ describe("GET /api/graph", () => {
   });
 
   it("should return nodes and links with layer colors", async () => {
-    // The handler makes 6 queries:
-    // 1. coreNodes (L1+L2), 2. patientNodes (L3), 3. fhirNodes (L3 events),
-    // 4. omopNodes (L4), 5. ontologyNodes (L5), 6. relationships
+    // The handler makes 8 queries:
+    // 1. coreNodes (L1), 2. metadataNodes (L2), 3. credentialNodes (L5 VCs),
+    // 4. patientNodes (L3), 5. fhirNodes (L3 events),
+    // 6. omopNodes (L4), 7. ontologyNodes (L5 codes), 8. relationships
     mockRunQuery
       .mockResolvedValueOnce([
-        // L1+L2: coreNodes
+        // L1: coreNodes
         {
           id: "n1",
           labels: ["Participant"],
           name: "SPE-1",
         },
+      ])
+      .mockResolvedValueOnce([
+        // L2: metadataNodes
         {
           id: "n2",
           labels: ["HealthDataset"],
           name: "FHIR Cohort",
         },
+      ])
+      .mockResolvedValueOnce([
+        // L5: credentialNodes
       ])
       .mockResolvedValueOnce([
         // L3: patientNodes
@@ -112,6 +119,8 @@ describe("GET /api/graph", () => {
 
     mockRunQuery
       .mockResolvedValueOnce([duplicateNode]) // coreNodes
+      .mockResolvedValueOnce([]) // metadataNodes
+      .mockResolvedValueOnce([]) // credentialNodes
       .mockResolvedValueOnce([duplicateNode]) // patientNodes (duplicate)
       .mockResolvedValueOnce([]) // fhirNodes
       .mockResolvedValueOnce([]) // omopNodes
@@ -135,11 +144,11 @@ describe("GET /api/graph", () => {
     expect(data.links).toEqual([]);
   });
 
-  it("should make exactly 6 Neo4j queries", async () => {
+  it("should make exactly 8 Neo4j queries", async () => {
     mockRunQuery.mockResolvedValue([]);
 
     await GET();
 
-    expect(mockRunQuery).toHaveBeenCalledTimes(6);
+    expect(mockRunQuery).toHaveBeenCalledTimes(8);
   });
 });

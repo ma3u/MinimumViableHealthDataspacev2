@@ -5,30 +5,44 @@ export const dynamic = "force-dynamic";
 
 // Map Neo4j node labels → layer index (1-5) for colour assignment
 const LABEL_LAYER: Record<string, number> = {
+  // L1: Dataspace Marketplace
   Participant: 1,
   DataProduct: 1,
   OdrlPolicy: 1,
   Contract: 1,
   AccessApplication: 1,
   HDABApproval: 1,
+  ContractNegotiation: 1,
+  DataTransfer: 1,
+  Catalog: 1,
+  Organization: 1,
+  // L2: HealthDCAT-AP Metadata
   HealthDataset: 2,
   Distribution: 2,
+  ContactPoint: 2,
+  EhdsPurpose: 2,
+  EEHRxFProfile: 2,
+  EEHRxFCategory: 2,
+  // L3: FHIR Clinical
   Patient: 3,
   Encounter: 3,
   Condition: 3,
   Observation: 3,
   MedicationRequest: 3,
   Procedure: 3,
+  // L4: OMOP Analytics
   OMOPPerson: 4,
   OMOPVisitOccurrence: 4,
   OMOPConditionOccurrence: 4,
   OMOPMeasurement: 4,
   OMOPDrugExposure: 4,
   OMOPProcedureOccurrence: 4,
+  // L5: Ontology + Credentials
   SnomedConcept: 5,
   LoincCode: 5,
   ICD10Code: 5,
   RxNormConcept: 5,
+  VerifiableCredential: 5,
 };
 
 const LAYER_COLORS: Record<number, string> = {
@@ -42,7 +56,7 @@ const LAYER_COLORS: Record<number, string> = {
 export async function GET() {
   try {
     // ── Step 1: curated node collection ────────────────────────────────────────
-    // L1 + L2: fetch everything (these are small sets)
+    // L1: Marketplace + DCP + EHDS governance
     const coreNodes = await runQuery<{
       id: string;
       labels: string[];
@@ -51,9 +65,36 @@ export async function GET() {
       `MATCH (n)
      WHERE n:Participant OR n:DataProduct OR n:OdrlPolicy OR n:Contract
         OR n:AccessApplication OR n:HDABApproval
-        OR n:HealthDataset OR n:Distribution
+        OR n:ContractNegotiation OR n:DataTransfer
+        OR n:Catalog OR n:Organization
      RETURN elementId(n) AS id, labels(n) AS labels,
-            coalesce(n.name, n.title, n.participantId, n.productId, n.id, elementId(n)) AS name`,
+            coalesce(n.name, n.title, n.participantId, n.productId,
+                     n.negotiationId, n.transferId, n.id, elementId(n)) AS name`,
+    );
+
+    // L2: HealthDCAT-AP metadata + EEHRxF profiles
+    const metadataNodes = await runQuery<{
+      id: string;
+      labels: string[];
+      name: string;
+    }>(
+      `MATCH (n)
+     WHERE n:HealthDataset OR n:Distribution OR n:ContactPoint
+        OR n:EhdsPurpose OR n:EEHRxFProfile OR n:EEHRxFCategory
+     RETURN elementId(n) AS id, labels(n) AS labels,
+            coalesce(n.name, n.title, n.profileName, n.categoryName,
+                     n.id, elementId(n)) AS name`,
+    );
+
+    // L5: Verifiable Credentials (trust layer)
+    const credentialNodes = await runQuery<{
+      id: string;
+      labels: string[];
+      name: string;
+    }>(
+      `MATCH (n:VerifiableCredential)
+     RETURN elementId(n) AS id, labels(n) AS labels,
+            coalesce(n.name, n.credentialType, n.type, n.id, elementId(n)) AS name`,
     );
 
     // L3: 8 representative patients
@@ -77,7 +118,7 @@ export async function GET() {
     }>(
       `UNWIND $ids AS eid
      MATCH (p) WHERE elementId(p) = eid
-     MATCH (p)-[:HAS_ENCOUNTER|HAS_CONDITION|HAS_OBSERVATION|HAS_MEDICATION|HAS_PROCEDURE]->(e)
+     MATCH (p)-[:HAS_ENCOUNTER|HAS_CONDITION|HAS_OBSERVATION|HAS_MEDICATION|HAS_MEDICATION_REQUEST|HAS_PROCEDURE]->(e)
      RETURN elementId(e) AS id, labels(e) AS labels,
             coalesce(e.display, e.name, e.code, elementId(e)) AS name
      LIMIT 40`,
@@ -118,6 +159,8 @@ export async function GET() {
     // ── Step 2: deduplicate nodes ───────────────────────────────────────────────
     const allRaw = [
       ...coreNodes,
+      ...metadataNodes,
+      ...credentialNodes,
       ...patientNodes,
       ...fhirNodes,
       ...omopNodes,
