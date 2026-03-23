@@ -508,69 +508,187 @@ MERGE (p8)-[:MAPPED_TO]->(op8)
 
 // ── Re-bind JAD participants ──
 MERGE (alpha:Participant {participantId: 'did:web:alpha-klinik.de:participant'})
+  SET alpha.name = 'AlphaKlinik Berlin'
+WITH alpha
 MERGE (pharmaco:Participant {participantId: 'did:web:pharmaco.de:research'})
+  SET pharmaco.name = 'PharmaCo Research AG'
+WITH alpha, pharmaco
 MERGE (medreg:Participant {participantId: 'did:web:medreg.de:hdab'})
+  SET medreg.name = 'MedReg DE'
+WITH alpha, pharmaco, medreg
 MERGE (lmc:Participant {participantId: 'did:web:lmc.nl:clinic'})
+  SET lmc.name = 'Limburg Medical Centre'
+WITH alpha, pharmaco, medreg, lmc
 MERGE (irs:Participant {participantId: 'did:web:irs.fr:hdab'})
-
-// ── Re-bind data products ──
+  SET irs.name = 'Institut de Recherche Santé'
+WITH alpha, pharmaco, medreg, lmc, irs
 MERGE (t2dProduct:DataProduct {productId: 'product-diab-cohort-2025'})
+WITH alpha, pharmaco, medreg, lmc, irs, t2dProduct
 MERGE (syntheaProduct:DataProduct {productId: 'product-synthea-fhir-r4-2026'})
-
-// ── Re-bind datasets ──
+WITH alpha, pharmaco, medreg, lmc, irs, t2dProduct, syntheaProduct
 MERGE (dsFhir:HealthDataset {datasetId: 'dataset:synthea-fhir-r4-mvd'})
+WITH alpha, pharmaco, medreg, lmc, irs, t2dProduct, syntheaProduct, dsFhir
 MERGE (dsOmop:HealthDataset {datasetId: 'dataset:omop-cdm-v54-analytics'})
+WITH alpha, pharmaco, medreg, lmc, irs, t2dProduct, syntheaProduct, dsFhir, dsOmop
 MERGE (dsPca:HealthDataset {datasetId: 'dataset:prostate-cancer-registry'})
+WITH alpha, pharmaco, medreg, lmc, irs, t2dProduct, syntheaProduct, dsFhir, dsOmop, dsPca
 MERGE (dsT2d:HealthDataset {datasetId: 'urn:uuid:riverside:dataset:diab-001'})
-
-// ── Data Providers: clinics that OFFER products and PUBLISH datasets ──
+WITH alpha, pharmaco, medreg, lmc, irs, t2dProduct, syntheaProduct, dsFhir, dsOmop, dsPca, dsT2d
 MERGE (alpha)-[:OFFERS]->(syntheaProduct)
 MERGE (alpha)-[:OFFERS]->(t2dProduct)
 MERGE (lmc)-[:OFFERS]->(syntheaProduct)
 MERGE (dsFhir)-[:PUBLISHED_BY]->(alpha)
 MERGE (dsOmop)-[:PUBLISHED_BY]->(alpha)
 MERGE (dsPca)-[:PUBLISHED_BY]->(lmc)
-
-// ── Data Consumers: CROs/Pharma that CONSUMES products ──
 MERGE (pharmaco)-[:CONSUMES]->(t2dProduct)
 MERGE (pharmaco)-[:CONSUMES]->(syntheaProduct)
 MERGE (irs)-[:CONSUMES]->(syntheaProduct)
-
-// ── Governance: HDABs that govern/review ──
 MERGE (medreg)-[:GOVERNS]->(dsPca)
-MERGE (medreg)-[:GOVERNS]->(dsOmop)
+MERGE (medreg)-[:GOVERNS]->(dsOmop);
 
-// ── Name ContractNegotiation nodes ──
+// ── Create ContractNegotiation nodes (idempotent for JAD + standalone use) ──
 ;
-MATCH (cn:ContractNegotiation {id: 'neg-001'})
-  SET cn.name = 'AlphaKlinik → PharmaCo (FHIR)';
-MATCH (cn:ContractNegotiation {id: 'neg-002'})
-  SET cn.name = 'AlphaKlinik → PharmaCo (OMOP)';
-MATCH (cn:ContractNegotiation {id: 'neg-003'})
-  SET cn.name = 'LMC → MedReg (Prostate)';
-MATCH (cn:ContractNegotiation {id: 'neg-004'})
-  SET cn.name = 'PharmaCo → IRS (Terminated)';
-MATCH (cn:ContractNegotiation {id: 'neg-005'})
-  SET cn.name = 'AlphaKlinik → LMC (In Progress)';
+MERGE (cn:ContractNegotiation {id: 'neg-001'})
+  SET cn.name = 'AlphaKlinik → PharmaCo (FHIR)', cn.status = 'FINALIZED';
+MERGE (cn:ContractNegotiation {id: 'neg-002'})
+  SET cn.name = 'AlphaKlinik → PharmaCo (OMOP)', cn.status = 'FINALIZED';
+MERGE (cn:ContractNegotiation {id: 'neg-003'})
+  SET cn.name = 'LMC → MedReg (Prostate)', cn.status = 'AGREED';
+MERGE (cn:ContractNegotiation {id: 'neg-004'})
+  SET cn.name = 'PharmaCo → IRS (Terminated)', cn.status = 'TERMINATED';
+MERGE (cn:ContractNegotiation {id: 'neg-005'})
+  SET cn.name = 'AlphaKlinik → LMC (In Progress)', cn.status = 'REQUESTED';
 
-// ── Name DataTransfer nodes ──
+// ── FOR_ASSET: link negotiations to datasets ──
+MATCH (cn:ContractNegotiation {id: 'neg-001'})
+MATCH (d:HealthDataset {datasetId: 'dataset:synthea-fhir-r4-mvd'})
+MERGE (cn)-[:FOR_ASSET]->(d);
+MATCH (cn:ContractNegotiation {id: 'neg-002'})
+MATCH (d:HealthDataset {datasetId: 'dataset:omop-cdm-v54-analytics'})
+MERGE (cn)-[:FOR_ASSET]->(d);
+MATCH (cn:ContractNegotiation {id: 'neg-003'})
+MATCH (d:HealthDataset {datasetId: 'dataset:prostate-cancer-registry'})
+MERGE (cn)-[:FOR_ASSET]->(d);
+MATCH (cn:ContractNegotiation {id: 'neg-004'})
+MATCH (d:HealthDataset {datasetId: 'dataset:omop-cdm-v54-analytics'})
+MERGE (cn)-[:FOR_ASSET]->(d);
+MATCH (cn:ContractNegotiation {id: 'neg-005'})
+MATCH (d:HealthDataset {datasetId: 'dataset:synthea-fhir-r4-mvd'})
+MERGE (cn)-[:FOR_ASSET]->(d);
+
+// ── Connect original ContractNegotiations to Provider + Consumer ──
+// neg-001: AlphaKlinik → PharmaCo (FHIR)
+MATCH (cn:ContractNegotiation {id: 'neg-001'})
+MATCH (prov:Participant {participantId: 'did:web:alpha-klinik.de:participant'})
+MATCH (cons:Participant {participantId: 'did:web:pharmaco.de:research'})
+MERGE (cn)-[:NEGOTIATED_BY]->(prov)
+MERGE (cn)-[:INITIATED_BY]->(cons);
+// neg-002: AlphaKlinik → PharmaCo (OMOP)
+MATCH (cn:ContractNegotiation {id: 'neg-002'})
+MATCH (prov:Participant {participantId: 'did:web:alpha-klinik.de:participant'})
+MATCH (cons:Participant {participantId: 'did:web:pharmaco.de:research'})
+MERGE (cn)-[:NEGOTIATED_BY]->(prov)
+MERGE (cn)-[:INITIATED_BY]->(cons);
+// neg-003: LMC → MedReg (Prostate)
+MATCH (cn:ContractNegotiation {id: 'neg-003'})
+MATCH (prov:Participant {participantId: 'did:web:lmc.nl:clinic'})
+MATCH (cons:Participant {participantId: 'did:web:medreg.de:hdab'})
+MERGE (cn)-[:NEGOTIATED_BY]->(prov)
+MERGE (cn)-[:INITIATED_BY]->(cons);
+// neg-004: PharmaCo → IRS (Terminated)
+MATCH (cn:ContractNegotiation {id: 'neg-004'})
+MATCH (prov:Participant {participantId: 'did:web:pharmaco.de:research'})
+MATCH (cons:Participant {participantId: 'did:web:irs.fr:hdab'})
+MERGE (cn)-[:NEGOTIATED_BY]->(prov)
+MERGE (cn)-[:INITIATED_BY]->(cons);
+// neg-005: AlphaKlinik → LMC (In Progress)
+MATCH (cn:ContractNegotiation {id: 'neg-005'})
+MATCH (prov:Participant {participantId: 'did:web:alpha-klinik.de:participant'})
+MATCH (cons:Participant {participantId: 'did:web:lmc.nl:clinic'})
+MERGE (cn)-[:NEGOTIATED_BY]->(prov)
+MERGE (cn)-[:INITIATED_BY]->(cons);
+
+// ── Create DataTransfer nodes (idempotent for JAD + standalone use) ──
+MERGE (dt:DataTransfer {id: 'trn-001'})
+  SET dt.name = 'FHIR Push → PharmaCo ✓', dt.status = 'COMPLETED';
+MERGE (dt:DataTransfer {id: 'trn-002'})
+  SET dt.name = 'OMOP Pull → PharmaCo ✓', dt.status = 'COMPLETED';
+MERGE (dt:DataTransfer {id: 'trn-003'})
+  SET dt.name = 'PCA Push → MedReg ✓', dt.status = 'COMPLETED';
+MERGE (dt:DataTransfer {id: 'trn-004'})
+  SET dt.name = 'FHIR Pull → LMC (Active)', dt.status = 'STARTED';
+MERGE (dt:DataTransfer {id: 'trn-005'})
+  SET dt.name = 'FHIR Push → IRS (Error)', dt.status = 'ERROR';
+
+// ── TRANSFERS: link transfers to datasets ──
 MATCH (dt:DataTransfer {id: 'trn-001'})
-  SET dt.name = 'FHIR Push → PharmaCo ✓';
+MATCH (d:HealthDataset {datasetId: 'dataset:synthea-fhir-r4-mvd'})
+MERGE (dt)-[:TRANSFERS]->(d);
 MATCH (dt:DataTransfer {id: 'trn-002'})
-  SET dt.name = 'OMOP Pull → PharmaCo ✓';
+MATCH (d:HealthDataset {datasetId: 'dataset:omop-cdm-v54-analytics'})
+MERGE (dt)-[:TRANSFERS]->(d);
 MATCH (dt:DataTransfer {id: 'trn-003'})
-  SET dt.name = 'PCA Push → MedReg ✓';
+MATCH (d:HealthDataset {datasetId: 'dataset:prostate-cancer-registry'})
+MERGE (dt)-[:TRANSFERS]->(d);
 MATCH (dt:DataTransfer {id: 'trn-004'})
-  SET dt.name = 'FHIR Pull → LMC (Active)';
+MATCH (d:HealthDataset {datasetId: 'dataset:synthea-fhir-r4-mvd'})
+MERGE (dt)-[:TRANSFERS]->(d);
 MATCH (dt:DataTransfer {id: 'trn-005'})
-  SET dt.name = 'FHIR Push → IRS (Error)';
+MATCH (d:HealthDataset {datasetId: 'dataset:synthea-fhir-r4-mvd'})
+MERGE (dt)-[:TRANSFERS]->(d);
+
+// ── Connect original DataTransfers to Providers + Consumers ──
+// trn-001: FHIR Push → PharmaCo (AlphaKlinik → PharmaCo)
+MATCH (dt:DataTransfer {id: 'trn-001'})
+MATCH (prov:Participant {participantId: 'did:web:alpha-klinik.de:participant'})
+MATCH (cons:Participant {participantId: 'did:web:pharmaco.de:research'})
+MERGE (dt)-[:FROM_PROVIDER]->(prov)
+MERGE (dt)-[:TO_CONSUMER]->(cons);
+// trn-002: OMOP Pull → PharmaCo (AlphaKlinik → PharmaCo)
+MATCH (dt:DataTransfer {id: 'trn-002'})
+MATCH (prov:Participant {participantId: 'did:web:alpha-klinik.de:participant'})
+MATCH (cons:Participant {participantId: 'did:web:pharmaco.de:research'})
+MERGE (dt)-[:FROM_PROVIDER]->(prov)
+MERGE (dt)-[:TO_CONSUMER]->(cons);
+// trn-003: PCA Push → MedReg (LMC → MedReg)
+MATCH (dt:DataTransfer {id: 'trn-003'})
+MATCH (prov:Participant {participantId: 'did:web:lmc.nl:clinic'})
+MATCH (cons:Participant {participantId: 'did:web:medreg.de:hdab'})
+MERGE (dt)-[:FROM_PROVIDER]->(prov)
+MERGE (dt)-[:TO_CONSUMER]->(cons);
+// trn-004: FHIR Pull → LMC (AlphaKlinik → LMC)
+MATCH (dt:DataTransfer {id: 'trn-004'})
+MATCH (prov:Participant {participantId: 'did:web:alpha-klinik.de:participant'})
+MATCH (cons:Participant {participantId: 'did:web:lmc.nl:clinic'})
+MERGE (dt)-[:FROM_PROVIDER]->(prov)
+MERGE (dt)-[:TO_CONSUMER]->(cons);
+// trn-005: FHIR Push → IRS (AlphaKlinik → IRS)
+MATCH (dt:DataTransfer {id: 'trn-005'})
+MATCH (prov:Participant {participantId: 'did:web:alpha-klinik.de:participant'})
+MATCH (cons:Participant {participantId: 'did:web:irs.fr:hdab'})
+MERGE (dt)-[:FROM_PROVIDER]->(prov)
+MERGE (dt)-[:TO_CONSUMER]->(cons);
 
 // ── Link patients to provider participants (data provenance) ──
 MERGE (riverside:Participant {participantId: 'did:web:riverside.example:participant'})
+  SET riverside.name = 'Riverside General (CLINIC)', riverside.role = 'DATA_HOLDER'
 MERGE (dsT2d:HealthDataset {datasetId: 'urn:uuid:riverside:dataset:diab-001'})
 MERGE (alpha2:Participant {participantId: 'did:web:alpha-klinik.de:participant'})
 MERGE (dsT2d)-[:PUBLISHED_BY]->(riverside)
 MERGE (dsT2d)-[:PROVIDED_BY]->(alpha2);
+
+// ── Governance for remaining datasets ──
+MATCH (d:HealthDataset {datasetId: 'urn:uuid:riverside:dataset:diab-001'})
+MATCH (h:Participant {participantId: 'did:web:medreg.de:hdab'})
+MERGE (h)-[:GOVERNS]->(d);
+MATCH (d:HealthDataset {datasetId: 'dataset:synthea-fhir-r4-mvd'})
+MATCH (h:Participant {participantId: 'did:web:medreg.de:hdab'})
+MERGE (h)-[:GOVERNS]->(d);
+
+// ── Set Synthea dataset title ──
+MATCH (d:HealthDataset {datasetId: 'dataset:synthea-fhir-r4-mvd'})
+SET d.title = 'Synthea Synthetic FHIR R4 Patient Cohort'
+WITH d WHERE d.title IS NOT NULL RETURN count(d);
 
 // ── Fix dataset metadata for OMOP + Prostate ──
 MATCH (d:HealthDataset {datasetId: 'dataset:omop-cdm-v54-analytics'})

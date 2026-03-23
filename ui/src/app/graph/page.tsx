@@ -178,7 +178,7 @@ function GraphContent() {
     (node: GraphNode, ctx: CanvasRenderingContext2D, globalScale: number) => {
       const isSelected = selectedNode?.id === node.id;
       const isConnected = connectedIds.has(node.id);
-      const r = Math.max(4, 8 / Math.sqrt(globalScale));
+      const r = Math.max(2, 6 / Math.sqrt(globalScale));
 
       // Dim unrelated nodes when something is selected
       const alpha = selectedNode && !isSelected && !isConnected ? 0.2 : 1.0;
@@ -198,7 +198,7 @@ function GraphContent() {
       ctx.fillStyle = node.color ?? "#888";
       ctx.fill();
 
-      if (globalScale >= 0.6 || isSelected || isConnected) {
+      if (globalScale >= 1.5 || isSelected || isConnected) {
         const fontSize = Math.max(3, 10 / globalScale);
         ctx.font = `${isSelected ? "bold " : ""}${fontSize}px sans-serif`;
         ctx.fillStyle = isSelected
@@ -474,10 +474,11 @@ function GraphContent() {
             onNodeClick={handleNodeClick}
             onBackgroundClick={handleBackgroundClick}
             backgroundColor="#030712"
-            d3AlphaDecay={0.02}
-            d3VelocityDecay={0.3}
-            cooldownTicks={200}
-            nodeRelSize={6}
+            d3AlphaDecay={0.04}
+            d3VelocityDecay={0.4}
+            cooldownTicks={150}
+            warmupTicks={50}
+            nodeRelSize={4}
           />
         )}
       </div>

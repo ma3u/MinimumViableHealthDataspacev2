@@ -838,22 +838,22 @@ describe("GraphPage", () => {
 
     it("passes d3AlphaDecay", async () => {
       const props = await renderAndGetForceGraphProps();
-      expect(props.d3AlphaDecay).toBe(0.02);
+      expect(props.d3AlphaDecay).toBe(0.04);
     });
 
     it("passes d3VelocityDecay", async () => {
       const props = await renderAndGetForceGraphProps();
-      expect(props.d3VelocityDecay).toBe(0.3);
+      expect(props.d3VelocityDecay).toBe(0.4);
     });
 
     it("passes cooldownTicks", async () => {
       const props = await renderAndGetForceGraphProps();
-      expect(props.cooldownTicks).toBe(200);
+      expect(props.cooldownTicks).toBe(150);
     });
 
     it("passes nodeRelSize", async () => {
       const props = await renderAndGetForceGraphProps();
-      expect(props.nodeRelSize).toBe(6);
+      expect(props.nodeRelSize).toBe(4);
     });
   });
 
@@ -920,7 +920,7 @@ describe("GraphPage", () => {
       expect(ctx.fill).toHaveBeenCalled();
     });
 
-    it("paintNode renders text label when zoom scale >= 0.6", async () => {
+    it("paintNode renders text label when zoom scale >= 1.5", async () => {
       const props = await renderAndGetForceGraphProps();
       const paintNode = props.nodeCanvasObject as (
         node: object,
@@ -929,7 +929,7 @@ describe("GraphPage", () => {
       ) => void;
       const ctx = createMockCtx();
       const node = { ...sampleGraphData.nodes[0], x: 100, y: 200 };
-      paintNode(node, ctx, 1);
+      paintNode(node, ctx, 2);
       expect(ctx.fillText).toHaveBeenCalledWith(
         expect.any(String),
         100,
@@ -937,7 +937,7 @@ describe("GraphPage", () => {
       );
     });
 
-    it("paintNode does not render text label when zoomed out below 0.6", async () => {
+    it("paintNode does not render text label when zoomed out below 1.5", async () => {
       // When no node is selected and no connected nodes, low zoom hides text
       const props = await renderAndGetForceGraphProps();
       const paintNode = props.nodeCanvasObject as (
@@ -947,7 +947,7 @@ describe("GraphPage", () => {
       ) => void;
       const ctx = createMockCtx();
       const node = { ...sampleGraphData.nodes[0], x: 100, y: 200 };
-      paintNode(node, ctx, 0.3);
+      paintNode(node, ctx, 1);
       // fillText should not be called for text label (only fill for the circle)
       expect(ctx.fillText).not.toHaveBeenCalled();
     });
@@ -1081,7 +1081,7 @@ describe("GraphPage", () => {
         x: 0,
         y: 0,
       };
-      paintNode(longNameNode, ctx, 1);
+      paintNode(longNameNode, ctx, 2);
       // Check that fillText was called with a truncated string
       expect(ctx.fillText).toHaveBeenCalledWith(
         expect.stringContaining("…"),

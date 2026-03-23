@@ -21,64 +21,21 @@ describe("GET /api/graph", () => {
   });
 
   it("should return nodes and links with layer colors", async () => {
-    // The handler makes 8 queries:
-    // 1. coreNodes (L1), 2. metadataNodes (L2), 3. credentialNodes (L5 VCs),
-    // 4. patientNodes (L3), 5. fhirNodes (L3 events),
-    // 6. omopNodes (L4), 7. ontologyNodes (L5 codes), 8. relationships
+    // The handler makes 2 queries: 1. allNodes, 2. relationships
     mockRunQuery
       .mockResolvedValueOnce([
-        // L1: coreNodes
-        {
-          id: "n1",
-          labels: ["Participant"],
-          name: "SPE-1",
-        },
-      ])
-      .mockResolvedValueOnce([
-        // L2: metadataNodes
-        {
-          id: "n2",
-          labels: ["HealthDataset"],
-          name: "FHIR Cohort",
-        },
-      ])
-      .mockResolvedValueOnce([
-        // L5: credentialNodes
-      ])
-      .mockResolvedValueOnce([
-        // L3: patientNodes
-        {
-          id: "n3",
-          labels: ["Patient"],
-          name: "Patient-001",
-        },
-      ])
-      .mockResolvedValueOnce([
-        // L3: fhirNodes (clinical events)
-        {
-          id: "n4",
-          labels: ["Condition"],
-          name: "Diabetes",
-        },
-      ])
-      .mockResolvedValueOnce([
-        // L4: omopNodes
+        { id: "n1", labels: ["Participant"], name: "SPE-1" },
+        { id: "n2", labels: ["HealthDataset"], name: "FHIR Cohort" },
+        { id: "n3", labels: ["Patient"], name: "Patient-001" },
+        { id: "n4", labels: ["Condition"], name: "Diabetes" },
         {
           id: "n5",
           labels: ["OMOPConditionOccurrence"],
           name: "OMOP-Diabetes",
         },
+        { id: "n6", labels: ["SnomedConcept"], name: "SNOMED:73211009" },
       ])
       .mockResolvedValueOnce([
-        // L5: ontologyNodes
-        {
-          id: "n6",
-          labels: ["SnomedConcept"],
-          name: "SNOMED:73211009",
-        },
-      ])
-      .mockResolvedValueOnce([
-        // Relationships
         { source: "n1", target: "n2", type: "PUBLISHES" },
         { source: "n3", target: "n4", type: "HAS_CONDITION" },
         { source: "n4", target: "n5", type: "MAPPED_TO" },
@@ -110,31 +67,7 @@ describe("GET /api/graph", () => {
     expect(patientNode.color).toBe("#1E8449"); // Layer 3 color
   });
 
-  it("should deduplicate nodes across layers", async () => {
-    const duplicateNode = {
-      id: "dup-1",
-      labels: ["Patient"],
-      name: "Duplicate",
-    };
-
-    mockRunQuery
-      .mockResolvedValueOnce([duplicateNode]) // coreNodes
-      .mockResolvedValueOnce([]) // metadataNodes
-      .mockResolvedValueOnce([]) // credentialNodes
-      .mockResolvedValueOnce([duplicateNode]) // patientNodes (duplicate)
-      .mockResolvedValueOnce([]) // fhirNodes
-      .mockResolvedValueOnce([]) // omopNodes
-      .mockResolvedValueOnce([]) // ontologyNodes
-      .mockResolvedValueOnce([]); // relationships
-
-    const response = await GET();
-    const data = await response.json();
-
-    // Should only appear once despite being returned in two queries
-    expect(data.nodes).toHaveLength(1);
-  });
-
-  it("should return empty graph when no data exists", async () => {
+  it("should handle empty graph gracefully", async () => {
     mockRunQuery.mockResolvedValue([]);
 
     const response = await GET();
@@ -144,11 +77,23 @@ describe("GET /api/graph", () => {
     expect(data.links).toEqual([]);
   });
 
-  it("should make exactly 8 Neo4j queries", async () => {
+  it("should make exactly 2 Neo4j queries", async () => {
     mockRunQuery.mockResolvedValue([]);
 
     await GET();
 
-    expect(mockRunQuery).toHaveBeenCalledTimes(8);
+    expect(mockRunQuery).toHaveBeenCalledTimes(2);
+  });
+
+  it("should pass known labels to the node query", async () => {
+    mockRunQuery.mockResolvedValue([]);
+
+    await GET();
+
+    const firstCallArgs = mockRunQuery.mock.calls[0];
+    expect(firstCallArgs[1]).toHaveProperty("knownLabels");
+    expect(firstCallArgs[1]!.knownLabels).toContain("Patient");
+    expect(firstCallArgs[1]!.knownLabels).toContain("HealthDataset");
+    expect(firstCallArgs[1]!.knownLabels).toContain("SnomedConcept");
   });
 });
