@@ -572,6 +572,31 @@ MERGE (alpha2:Participant {participantId: 'did:web:alpha-klinik.de:participant'}
 MERGE (dsT2d)-[:PUBLISHED_BY]->(riverside)
 MERGE (dsT2d)-[:PROVIDED_BY]->(alpha2);
 
+// ── Fix dataset metadata for OMOP + Prostate ──
+MATCH (d:HealthDataset {datasetId: 'dataset:omop-cdm-v54-analytics'})
+SET d.title = 'OMOP CDM v5.4 Analytics Warehouse',
+    d.description = 'OMOP CDM v5.4 analytics warehouse with standardized clinical data from FHIR R4.',
+    d.license = 'CC-BY-SA-4.0',
+    d.conformsTo = 'https://ohdsi.github.io/CommonDataModel/cdm54.html',
+    d.theme = 'Clinical Research',
+    d.hdcatapDatasetType = 'AnalyticsData',
+    d.hdcatapLegalBasisForAccess = 'EHDS Article 53 Secondary Use',
+    d.hdcatapNumberOfRecords = 49657;
+MATCH (d:HealthDataset {datasetId: 'dataset:prostate-cancer-registry'})
+SET d.title = 'Prostate Cancer Multi-Centre Registry',
+    d.description = 'Federated registry of prostate cancer outcomes with TNM staging and Gleason scores in FHIR R4.',
+    d.license = 'CC-BY-NC-4.0',
+    d.conformsTo = 'http://hl7.org/fhir/R4',
+    d.theme = 'Oncology',
+    d.hdcatapDatasetType = 'RegistryData',
+    d.hdcatapLegalBasisForAccess = 'EHDS Article 53 Secondary Use',
+    d.hdcatapNumberOfRecords = 8234;
+
+// ── Link Synthea dataset to its DataProduct ──
+MATCH (dp:DataProduct {productId: 'product-synthea-fhir-r4-2026'})
+MATCH (ds:HealthDataset {datasetId: 'dataset:synthea-fhir-r4-mvd'})
+MERGE (ds)-[:DESCRIBED_BY]->(dp);
+
 // ==============================================================================
 // End of participant/data relationship enrichment
 // ==============================================================================

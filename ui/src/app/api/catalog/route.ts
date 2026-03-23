@@ -16,6 +16,10 @@ interface CatalogRow {
   datasetType: string;
   legalBasis: string;
   recordCount: number;
+  providers: string[];
+  consumers: string[];
+  fhirResources: string[];
+  transfers: string[];
 }
 
 /** Load demo catalog entries from the bundled mock JSON file. */
@@ -34,17 +38,28 @@ export async function GET() {
   try {
     realRows = await runQuery<CatalogRow>(
       `MATCH (d:HealthDataset)
-       OPTIONAL MATCH (p)-[:PUBLISHES|OWNS_DATASET]->(d)
-       RETURN d.id                      AS id,
+       OPTIONAL MATCH (d)-[:PUBLISHED_BY]->(pub:Participant)
+       OPTIONAL MATCH (dp)-[:DESCRIBED_BY]->(d)
+       OPTIONAL MATCH (d)-[:DESCRIBED_BY]->(dp2:DataProduct)
+       WITH d, pub, coalesce(dp, dp2) AS product
+       OPTIONAL MATCH (product)<-[:OFFERS]-(prov:Participant)
+       OPTIONAL MATCH (product)<-[:CONSUMES]-(cons:Participant)
+       OPTIONAL MATCH (fhir:Patient)-[:FROM_DATASET]->(d)
+       OPTIONAL MATCH (dt:DataTransfer)-[:TRANSFERS]->(d)
+       RETURN coalesce(d.id, d.datasetId)  AS id,
               d.title                   AS title,
               d.description             AS description,
               d.license                 AS license,
               d.conformsTo              AS conformsTo,
-              coalesce(p.name, p.id)    AS publisher,
+              coalesce(pub.name, pub.participantId) AS publisher,
               d.theme                   AS theme,
               d.hdcatapDatasetType      AS datasetType,
               d.hdcatapLegalBasisForAccess AS legalBasis,
-              coalesce(d.hdcatapNumberOfRecords, d.statPatients) AS recordCount`,
+              coalesce(d.hdcatapNumberOfRecords, d.statPatients) AS recordCount,
+              collect(DISTINCT prov.name) AS providers,
+              collect(DISTINCT cons.name) AS consumers,
+              collect(DISTINCT fhir.name) AS fhirResources,
+              collect(DISTINCT dt.name)   AS transfers`,
     );
   } catch (err) {
     console.warn("Neo4j catalog query unavailable, using demo data:", err);
@@ -152,6 +167,10 @@ export async function POST(request: NextRequest) {
       datasetType: rest.datasetType ?? "",
       legalBasis: rest.legalBasis ?? "",
       recordCount: rest.recordCount ?? 0,
+      providers: publisher ? [publisher] : [],
+      consumers: [],
+      fhirResources: [],
+      transfers: [],
     };
 
     const idx = catalog.findIndex((c) => c.id === id);

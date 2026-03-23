@@ -29,6 +29,10 @@ interface Dataset {
   datasetType: string;
   legalBasis: string;
   recordCount: number;
+  providers?: string[];
+  consumers?: string[];
+  fhirResources?: string[];
+  transfers?: string[];
 }
 
 const LEGAL_BASIS_LABELS: Record<string, string> = {
@@ -292,6 +296,55 @@ function CatalogContent() {
                     )}
                     {d.license && <span>License: {d.license}</span>}
                   </div>
+
+                  {/* Provider / Consumer / FHIR badges */}
+                  {((d.providers && d.providers.length > 0) ||
+                    (d.consumers && d.consumers.length > 0) ||
+                    (d.fhirResources && d.fhirResources.length > 0)) && (
+                    <div className="mt-2 flex flex-wrap gap-3 text-xs">
+                      {d.providers && d.providers.length > 0 && (
+                        <div className="flex items-center gap-1">
+                          <span className="text-blue-400 font-medium">
+                            Providers:
+                          </span>
+                          {d.providers.map((p) => (
+                            <span
+                              key={p}
+                              className="bg-blue-900/40 text-blue-300 px-1.5 py-0.5 rounded"
+                            >
+                              {p}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                      {d.consumers && d.consumers.length > 0 && (
+                        <div className="flex items-center gap-1">
+                          <span className="text-orange-400 font-medium">
+                            Consumers:
+                          </span>
+                          {d.consumers.map((c) => (
+                            <span
+                              key={c}
+                              className="bg-orange-900/40 text-orange-300 px-1.5 py-0.5 rounded"
+                            >
+                              {c}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                      {d.fhirResources && d.fhirResources.length > 0 && (
+                        <div className="flex items-center gap-1">
+                          <span className="text-green-400 font-medium">
+                            FHIR:
+                          </span>
+                          <span className="bg-green-900/40 text-green-300 px-1.5 py-0.5 rounded">
+                            {d.fhirResources.length} Patient
+                            {d.fhirResources.length !== 1 ? "s" : ""}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </button>
 
                 {/* Expanded detail panel */}
@@ -305,6 +358,34 @@ function CatalogContent() {
                       <DetailRow label="Title" value={d.title} />
                       <DetailRow label="Description" value={d.description} />
                       <DetailRow label="Publisher" value={d.publisher} />
+                      <DetailRow
+                        label="Data Providers"
+                        value={
+                          d.providers?.length ? d.providers.join(", ") : null
+                        }
+                      />
+                      <DetailRow
+                        label="Data Consumers"
+                        value={
+                          d.consumers?.length ? d.consumers.join(", ") : null
+                        }
+                      />
+                      <DetailRow
+                        label="FHIR Patients"
+                        value={
+                          d.fhirResources?.length
+                            ? `${
+                                d.fhirResources.length
+                              } linked (${d.fhirResources.join(", ")})`
+                            : null
+                        }
+                      />
+                      <DetailRow
+                        label="Data Transfers"
+                        value={
+                          d.transfers?.length ? d.transfers.join(", ") : null
+                        }
+                      />
                       <DetailRow label="Dataset Type" value={d.datasetType} />
                       <DetailRow
                         label="Legal Basis"
