@@ -425,42 +425,31 @@ function TopoComponentCard({ comp }: { comp: TopoComponent }) {
 
 function ResourceSummary({
   components,
-  peaks,
   label,
 }: {
   components: TopoComponent[];
-  peaks: Map<string, PeakEntry>;
+  peaks?: Map<string, PeakEntry>;
   label?: string;
 }) {
   const totalCpu = components.reduce((s, c) => s + c.cpu, 0);
   const totalMem = components.reduce((s, c) => s + c.memMB, 0);
-  const peakCpu = components.reduce(
-    (s, c) => s + (peaks.get(c.container)?.maxCpu ?? c.cpu),
-    0,
-  );
-  const peakMem = components.reduce(
-    (s, c) => s + (peaks.get(c.container)?.maxMemMB ?? c.memMB),
-    0,
-  );
   const fmtMem = (mb: number) =>
     mb > 1024 ? `${(mb / 1024).toFixed(1)} GB` : `${Math.round(mb)} MB`;
 
   return (
-    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[10px] text-gray-500">
-      {label && <span className="text-gray-600">{label}</span>}
-      <span>
-        <Cpu size={9} className="inline mr-0.5 text-blue-400" />
-        {totalCpu.toFixed(1)}% now
+    <div className="flex items-center gap-x-4 text-xs text-gray-400">
+      {label && <span className="text-gray-600 mr-1">{label}</span>}
+      <span className="flex items-center gap-1 tabular-nums">
+        <Cpu size={10} className="text-blue-400" />
+        <span className="text-gray-300 font-medium">
+          CPU {totalCpu.toFixed(1)}%
+        </span>
       </span>
-      <span className="text-blue-400/70" title="Peak CPU (session)">
-        ↑ {peakCpu.toFixed(1)}% peak
-      </span>
-      <span>
-        <HardDrive size={9} className="inline mr-0.5 text-purple-400" />
-        {fmtMem(totalMem)} now
-      </span>
-      <span className="text-purple-400/70" title="Peak Memory (session)">
-        ↑ {fmtMem(peakMem)} peak
+      <span className="flex items-center gap-1 tabular-nums">
+        <HardDrive size={10} className="text-purple-400" />
+        <span className="text-gray-300 font-medium">
+          MEM {fmtMem(totalMem)}
+        </span>
       </span>
     </div>
   );
