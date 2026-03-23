@@ -15,6 +15,16 @@ const nextConfig = {
   ...(isStaticExport && {
     basePath: "/MinimumViableHealthDataspacev2",
   }),
+  // Serve static HTML reports that live in public/ subdirectories
+  // (rewrites are not supported with output: "export")
+  ...(!isStaticExport && {
+    async rewrites() {
+      return [
+        { source: "/e2e-report", destination: "/e2e-report/index.html" },
+        { source: "/test-reports", destination: "/test-reports/index.html" },
+      ];
+    },
+  }),
   images: {
     unoptimized: true,
   },
