@@ -140,6 +140,15 @@ function GraphContent() {
     return () => window.removeEventListener("resize", update);
   }, []);
 
+  // ESC key deselects the current node → full graph restored
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setSelectedNode(null);
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, []);
+
   // Build neighbour list whenever selection changes
   useEffect(() => {
     if (!selectedNode) {
@@ -267,6 +276,11 @@ function GraphContent() {
   const handleNodeClick = useCallback((n: object) => {
     const node = n as GraphNode;
     setSelectedNode((prev) => (prev?.id === node.id ? null : node));
+  }, []);
+
+  // Click on empty canvas background → deselect, show full graph
+  const handleBackgroundClick = useCallback(() => {
+    setSelectedNode(null);
   }, []);
 
   return (
@@ -458,6 +472,7 @@ function GraphContent() {
             linkCanvasObject={paintLink as any}
             linkCanvasObjectMode={() => "replace"}
             onNodeClick={handleNodeClick}
+            onBackgroundClick={handleBackgroundClick}
             backgroundColor="#030712"
             d3AlphaDecay={0.02}
             d3VelocityDecay={0.3}

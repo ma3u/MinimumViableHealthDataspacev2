@@ -598,5 +598,55 @@ MATCH (ds:HealthDataset {datasetId: 'dataset:synthea-fhir-r4-mvd'})
 MERGE (ds)-[:DESCRIBED_BY]->(dp);
 
 // ==============================================================================
+// CROSS-LAYER RELATIONSHIP FIX: connect disconnected nodes
+// ==============================================================================
+
+// ── Delete orphan unlabeled nodes (empty artifact from broken MERGEs) ──
+MATCH (n) WHERE labels(n) = [] DETACH DELETE n;
+
+// ── Connect VerifiableCredentials to their subject Participants ──
+MATCH (vc:VerifiableCredential), (p:Participant)
+WHERE (vc.subjectDid CONTAINS 'clinic-alphaklinik' AND p.name = 'AlphaKlinik Berlin')
+   OR (vc.subjectDid CONTAINS 'cro-pharmaco' AND p.name = 'PharmaCo Research AG')
+   OR (vc.subjectDid CONTAINS 'hdab-medreg' AND p.name = 'MedReg DE')
+   OR (vc.subjectDid CONTAINS 'clinic-lmc' AND p.name = 'Limburg Medical Centre')
+   OR (vc.subjectDid CONTAINS 'hdab-irs' AND p.name = 'Institut de Recherche Santé')
+MERGE (vc)-[:ISSUED_TO]->(p);
+
+// ── Connect Catalog to HealthDatasets ──
+MATCH (cat:Catalog), (d:HealthDataset)
+MERGE (cat)-[:LISTS]->(d);
+
+// ── Connect Organization → Catalog ──
+MATCH (org:Organization {name: 'Health MVD Operator'}), (cat:Catalog)
+MERGE (org)-[:OPERATES]->(cat);
+
+// ── Connect ContactPoint to T2D dataset ──
+MATCH (cp:ContactPoint {name: 'Health MVD Data Steward'})
+MATCH (d:HealthDataset {datasetId: 'urn:uuid:riverside:dataset:diab-001'})
+MERGE (d)-[:HAS_CONTACT_POINT]->(cp);
+
+// ── Connect EhdsPurpose to all datasets ──
+MATCH (ep:EhdsPurpose), (d:HealthDataset)
+MERGE (d)-[:SUBJECT_TO_PURPOSE]->(ep);
+
+// ── Connect PractitionerRole profile to Patient Summaries category ──
+MATCH (p:EEHRxFProfile {name: 'PractitionerRole (EU core)'})
+MATCH (c:EEHRxFCategory {name: 'Patient Summaries'})
+MERGE (p)-[:PART_OF_CATEGORY]->(c);
+
+// ── Connect Rare Disease Registration to Prostate Cancer dataset ──
+MATCH (c:EEHRxFCategory {name: 'Rare Disease Registration'})
+MATCH (d:HealthDataset {datasetId: 'dataset:prostate-cancer-registry'})
+MERGE (d)-[:HAS_THEME]->(c);
+
+// ── Connect datasets → EEHRxF profiles via CONFORMS_TO ──
+MATCH (d:HealthDataset)
+WHERE d.datasetId IN ['urn:uuid:riverside:dataset:diab-001', 'dataset:synthea-fhir-r4-mvd']
+MATCH (p:EEHRxFProfile)
+WHERE p.baseResource IN ['Patient', 'Encounter', 'Observation', 'MedicationRequest']
+MERGE (d)-[:CONFORMS_TO]->(p);
+
+// ==============================================================================
 // End of participant/data relationship enrichment
 // ==============================================================================
