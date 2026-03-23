@@ -111,6 +111,12 @@ interface TopologyData {
     degradedParticipants: number;
     totalInfra: number;
   };
+  clusterMetrics?: {
+    currentCpu: number;
+    currentMemMB: number;
+    last24h: { peakCpu: number; peakMemMB: number; samples: number };
+    prev24h: { peakCpu: number; peakMemMB: number; samples: number };
+  };
 }
 
 type ViewMode = "layer" | "participant";
@@ -460,6 +466,111 @@ function ResourceSummary({
   );
 }
 
+// ---------------------------------------------------------------------------
+// Trend arrow — compares current window to previous window
+// ---------------------------------------------------------------------------
+
+function TrendArrow({
+  current,
+  previous,
+  hasPrevData,
+}: {
+  current: number;
+  previous: number;
+  hasPrevData: boolean;
+}) {
+  if (!hasPrevData) return <span className="text-gray-600">—</span>;
+  const delta = current - previous;
+  const pct =
+    previous > 0 ? Math.round((delta / previous) * 100) : delta > 0 ? 100 : 0;
+  if (Math.abs(pct) < 3) return <span title="Stable vs yesterday">→</span>;
+  if (delta > 0)
+    return (
+      <span className="text-red-400" title={`+${pct}% vs yesterday`}>
+        ↑
+      </span>
+    );
+  return (
+    <span className="text-green-400" title={`${pct}% vs yesterday`}>
+      ↓
+    </span>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Cluster Resource Banner — 24h peaks with day-over-day trend
+// ---------------------------------------------------------------------------
+
+function ClusterResourceBanner({
+  metrics,
+}: {
+  metrics: NonNullable<TopologyData["clusterMetrics"]>;
+}) {
+  const fmtMem = (mb: number) =>
+    mb > 1024 ? `${(mb / 1024).toFixed(1)} GB` : `${Math.round(mb)} MB`;
+  const hasPrev = metrics.prev24h.samples > 0;
+
+  return (
+    <div className="flex flex-wrap items-center gap-x-6 gap-y-2 border border-gray-700 rounded-xl px-4 py-3 mb-6 bg-gray-900/40">
+      <div className="flex items-center gap-2 text-xs text-gray-400">
+        <Activity size={14} className="text-layer2 shrink-0" />
+        <span className="font-medium text-gray-300">Cluster</span>
+      </div>
+
+      {/* Current */}
+      <div className="flex items-center gap-1.5 text-xs">
+        <Cpu size={11} className="text-blue-400" />
+        <span className="text-gray-300 tabular-nums">
+          {metrics.currentCpu.toFixed(1)}%
+        </span>
+        <span className="text-gray-600">now</span>
+      </div>
+      <div className="flex items-center gap-1.5 text-xs">
+        <HardDrive size={11} className="text-purple-400" />
+        <span className="text-gray-300 tabular-nums">
+          {fmtMem(metrics.currentMemMB)}
+        </span>
+        <span className="text-gray-600">now</span>
+      </div>
+
+      <span className="text-gray-700">│</span>
+
+      {/* 24h peaks */}
+      <div className="flex items-center gap-1 text-xs">
+        <TrendArrow
+          current={metrics.last24h.peakCpu}
+          previous={metrics.prev24h.peakCpu}
+          hasPrevData={hasPrev}
+        />
+        <span className="text-blue-400 tabular-nums font-medium">
+          CPU {metrics.last24h.peakCpu.toFixed(1)}%
+        </span>
+        <span className="text-gray-600">peak 24h</span>
+      </div>
+      <div className="flex items-center gap-1 text-xs">
+        <TrendArrow
+          current={metrics.last24h.peakMemMB}
+          previous={metrics.prev24h.peakMemMB}
+          hasPrevData={hasPrev}
+        />
+        <span className="text-purple-400 tabular-nums font-medium">
+          MEM {fmtMem(metrics.last24h.peakMemMB)}
+        </span>
+        <span className="text-gray-600">peak 24h</span>
+      </div>
+
+      {metrics.last24h.samples > 0 && (
+        <span
+          className="text-[10px] text-gray-600"
+          title="Number of data points collected in the last 24h"
+        >
+          ({metrics.last24h.samples} samples)
+        </span>
+      )}
+    </div>
+  );
+}
+
 function ParticipantTopologySection({
   participant,
   peaks,
@@ -804,6 +915,11 @@ export default function AdminComponentsPage() {
            ═══════════════════════════════════════════════════════════════ */
         topology && (
           <>
+            {/* Cluster resource banner */}
+            {topology.clusterMetrics && (
+              <ClusterResourceBanner metrics={topology.clusterMetrics} />
+            )}
+
             {/* Critical banner */}
             <CriticalBanner
               degraded={topology.summary.degradedParticipants}

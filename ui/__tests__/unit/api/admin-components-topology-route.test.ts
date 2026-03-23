@@ -319,6 +319,29 @@ describe("GET /api/admin/components/topology — Docker available", () => {
     expect(data.summary.totalInfra).toBeGreaterThanOrEqual(1);
   });
 
+  it("includes clusterMetrics with peaks and trend data", async () => {
+    setupDockerAvailable(CONTAINERS);
+    const res = await GET();
+    const data = await res.json();
+    expect(data.clusterMetrics).toBeDefined();
+    expect(data.clusterMetrics.currentCpu).toBeGreaterThanOrEqual(0);
+    expect(data.clusterMetrics.currentMemMB).toBeGreaterThanOrEqual(0);
+    expect(data.clusterMetrics.last24h).toEqual(
+      expect.objectContaining({
+        peakCpu: expect.any(Number),
+        peakMemMB: expect.any(Number),
+        samples: expect.any(Number),
+      }),
+    );
+    expect(data.clusterMetrics.prev24h).toEqual(
+      expect.objectContaining({
+        peakCpu: expect.any(Number),
+        peakMemMB: expect.any(Number),
+        samples: expect.any(Number),
+      }),
+    );
+  });
+
   it("includes a timestamp", async () => {
     setupDockerAvailable(CONTAINERS);
     const res = await GET();

@@ -122,6 +122,51 @@ interface InfraComponent extends ParticipantComponent {
 }
 
 // ---------------------------------------------------------------------------
+// Server-side metrics history (in-memory, survives across requests)
+// Records aggregate cluster CPU/Memory every time the endpoint is called.
+// Used to compute 24h peaks and day-over-day trend arrows.
+// ---------------------------------------------------------------------------
+
+interface MetricsSnapshot {
+  ts: number; // epoch ms
+  totalCpu: number; // sum of all container CPU %
+  totalMemMB: number; // sum of all container memory MB
+}
+
+const metricsHistory: MetricsSnapshot[] = [];
+const MAX_HISTORY_AGE_MS = 48 * 60 * 60 * 1000; // keep 48h for day-over-day
+
+function recordMetrics(totalCpu: number, totalMemMB: number) {
+  const now = Date.now();
+  metricsHistory.push({ ts: now, totalCpu, totalMemMB });
+  // Evict entries older than 48h
+  const cutoff = now - MAX_HISTORY_AGE_MS;
+  while (metricsHistory.length > 0 && metricsHistory[0].ts < cutoff) {
+    metricsHistory.shift();
+  }
+}
+
+interface PeakWindow {
+  peakCpu: number;
+  peakMemMB: number;
+  samples: number;
+}
+
+function computePeakWindow(fromMs: number, toMs: number): PeakWindow {
+  let peakCpu = 0;
+  let peakMemMB = 0;
+  let samples = 0;
+  for (const s of metricsHistory) {
+    if (s.ts >= fromMs && s.ts < toMs) {
+      peakCpu = Math.max(peakCpu, s.totalCpu);
+      peakMemMB = Math.max(peakMemMB, s.totalMemMB);
+      samples++;
+    }
+  }
+  return { peakCpu, peakMemMB, samples };
+}
+
+// ---------------------------------------------------------------------------
 // Per-participant service template
 // In the current demo all participants share the same set of containers.
 // In production each participant would have isolated containers.
@@ -466,6 +511,35 @@ export async function GET() {
     (p) => p.health === "critical" || p.health === "warning",
   ).length;
 
+  // ── Cluster-wide metrics: record + compute peaks ──
+  const allComponents = [
+    ...participantTopologies.flatMap((p) => p.components),
+    ...infraComponents,
+  ];
+  // Deduplicate by container name (participants share containers)
+  const uniqueByContainer = new Map<string, { cpu: number; memMB: number }>();
+  for (const c of allComponents) {
+    if (!uniqueByContainer.has(c.container)) {
+      uniqueByContainer.set(c.container, { cpu: c.cpu, memMB: c.memMB });
+    }
+  }
+  const clusterCpu = Array.from(uniqueByContainer.values()).reduce(
+    (s, c) => s + c.cpu,
+    0,
+  );
+  const clusterMemMB = Array.from(uniqueByContainer.values()).reduce(
+    (s, c) => s + c.memMB,
+    0,
+  );
+
+  // Record this snapshot
+  recordMetrics(clusterCpu, clusterMemMB);
+
+  // Compute 24h peaks and previous-24h peaks for trend comparison
+  const now = Date.now();
+  const last24h = computePeakWindow(now - 24 * 3600_000, now);
+  const prev24h = computePeakWindow(now - 48 * 3600_000, now - 24 * 3600_000);
+
   return NextResponse.json({
     timestamp: new Date().toISOString(),
     dockerAvailable,
@@ -475,6 +549,20 @@ export async function GET() {
       totalParticipants: participantTopologies.length,
       degradedParticipants: degradedCount,
       totalInfra: infraComponents.length,
+    },
+    clusterMetrics: {
+      currentCpu: Math.round(clusterCpu * 100) / 100,
+      currentMemMB: Math.round(clusterMemMB * 10) / 10,
+      last24h: {
+        peakCpu: Math.round(last24h.peakCpu * 100) / 100,
+        peakMemMB: Math.round(last24h.peakMemMB * 10) / 10,
+        samples: last24h.samples,
+      },
+      prev24h: {
+        peakCpu: Math.round(prev24h.peakCpu * 100) / 100,
+        peakMemMB: Math.round(prev24h.peakMemMB * 10) / 10,
+        samples: prev24h.samples,
+      },
     },
   });
 }

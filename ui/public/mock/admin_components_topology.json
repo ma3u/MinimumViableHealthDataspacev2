@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-03-22T22:33:10.768Z",
+  "timestamp": "2026-03-23T06:22:21.086Z",
   "dockerAvailable": true,
   "participants": [
     {
@@ -16,63 +16,63 @@
           "container": "health-dataspace-controlplane",
           "status": "healthy",
           "severity": "healthy",
-          "cpu": 0.66,
-          "memMB": 272.1,
-          "uptime": "5h 0m"
+          "cpu": 0.76,
+          "memMB": 268.2,
+          "uptime": "12h 49m"
         },
         {
           "name": "Data Plane FHIR",
           "container": "health-dataspace-dataplane-fhir",
           "status": "healthy",
           "severity": "healthy",
-          "cpu": 0.39,
-          "memMB": 166.4,
-          "uptime": "5h 0m"
+          "cpu": 0.53,
+          "memMB": 166.6,
+          "uptime": "12h 49m"
         },
         {
           "name": "Data Plane OMOP",
           "container": "health-dataspace-dataplane-omop",
           "status": "healthy",
           "severity": "healthy",
-          "cpu": 0.19,
-          "memMB": 160.2,
-          "uptime": "5h 0m"
+          "cpu": 0.23,
+          "memMB": 160.7,
+          "uptime": "12h 49m"
         },
         {
           "name": "Identity Hub",
           "container": "health-dataspace-identityhub",
           "status": "healthy",
           "severity": "healthy",
-          "cpu": 0.1,
-          "memMB": 174.8,
-          "uptime": "5h 0m"
+          "cpu": 0.11,
+          "memMB": 195.7,
+          "uptime": "12h 49m"
         },
         {
           "name": "Issuer Service",
           "container": "health-dataspace-issuerservice",
           "status": "healthy",
           "severity": "healthy",
-          "cpu": 0.18,
-          "memMB": 202.9,
-          "uptime": "5h 0m"
+          "cpu": 1.25,
+          "memMB": 192.6,
+          "uptime": "12h 49m"
         },
         {
           "name": "Keycloak",
           "container": "health-dataspace-keycloak",
           "status": "healthy",
           "severity": "healthy",
-          "cpu": 0.13,
-          "memMB": 745.4,
-          "uptime": "5h 0m"
+          "cpu": 0.12,
+          "memMB": 743.6,
+          "uptime": "12h 49m"
         },
         {
           "name": "Vault",
           "container": "health-dataspace-vault",
           "status": "healthy",
           "severity": "healthy",
-          "cpu": 0.33,
-          "memMB": 212.8,
-          "uptime": "5h 0m"
+          "cpu": 4.97,
+          "memMB": 232,
+          "uptime": "12h 49m"
         }
       ]
     },
@@ -90,63 +90,63 @@
           "container": "health-dataspace-controlplane",
           "status": "healthy",
           "severity": "healthy",
-          "cpu": 0.66,
-          "memMB": 272.1,
-          "uptime": "5h 0m"
+          "cpu": 0.76,
+          "memMB": 268.2,
+          "uptime": "12h 49m"
         },
         {
           "name": "Data Plane FHIR",
           "container": "health-dataspace-dataplane-fhir",
           "status": "healthy",
           "severity": "healthy",
-          "cpu": 0.39,
-          "memMB": 166.4,
-          "uptime": "5h 0m"
+          "cpu": 0.53,
+          "memMB": 166.6,
+          "uptime": "12h 49m"
         },
         {
           "name": "Data Plane OMOP",
           "container": "health-dataspace-dataplane-omop",
           "status": "healthy",
           "severity": "healthy",
-          "cpu": 0.19,
-          "memMB": 160.2,
-          "uptime": "5h 0m"
+          "cpu": 0.23,
+          "memMB": 160.7,
+          "uptime": "12h 49m"
         },
         {
           "name": "Identity Hub",
           "container": "health-dataspace-identityhub",
           "status": "healthy",
           "severity": "healthy",
-          "cpu": 0.1,
-          "memMB": 174.8,
-          "uptime": "5h 0m"
+          "cpu": 0.11,
+          "memMB": 195.7,
+          "uptime": "12h 49m"
         },
         {
           "name": "Issuer Service",
           "container": "health-dataspace-issuerservice",
           "status": "healthy",
           "severity": "healthy",
-          "cpu": 0.18,
-          "memMB": 202.9,
-          "uptime": "5h 0m"
+          "cpu": 1.25,
+          "memMB": 192.6,
+          "uptime": "12h 49m"
         },
         {
           "name": "Keycloak",
           "container": "health-dataspace-keycloak",
           "status": "healthy",
           "severity": "healthy",
-          "cpu": 0.13,
-          "memMB": 745.4,
-          "uptime": "5h 0m"
+          "cpu": 0.12,
+          "memMB": 743.6,
+          "uptime": "12h 49m"
         },
         {
           "name": "Vault",
           "container": "health-dataspace-vault",
           "status": "healthy",
           "severity": "healthy",
-          "cpu": 0.33,
-          "memMB": 212.8,
-          "uptime": "5h 0m"
+          "cpu": 4.97,
+          "memMB": 232,
+          "uptime": "12h 49m"
         }
       ]
     },
@@ -164,63 +164,63 @@
           "container": "health-dataspace-controlplane",
           "status": "healthy",
           "severity": "healthy",
-          "cpu": 0.66,
-          "memMB": 272.1,
-          "uptime": "5h 0m"
+          "cpu": 0.76,
+          "memMB": 268.2,
+          "uptime": "12h 49m"
         },
         {
           "name": "Data Plane FHIR",
           "container": "health-dataspace-dataplane-fhir",
           "status": "healthy",
           "severity": "healthy",
-          "cpu": 0.39,
-          "memMB": 166.4,
-          "uptime": "5h 0m"
+          "cpu": 0.53,
+          "memMB": 166.6,
+          "uptime": "12h 49m"
         },
         {
           "name": "Data Plane OMOP",
           "container": "health-dataspace-dataplane-omop",
           "status": "healthy",
           "severity": "healthy",
-          "cpu": 0.19,
-          "memMB": 160.2,
-          "uptime": "5h 0m"
+          "cpu": 0.23,
+          "memMB": 160.7,
+          "uptime": "12h 49m"
         },
         {
           "name": "Identity Hub",
           "container": "health-dataspace-identityhub",
           "status": "healthy",
           "severity": "healthy",
-          "cpu": 0.1,
-          "memMB": 174.8,
-          "uptime": "5h 0m"
+          "cpu": 0.11,
+          "memMB": 195.7,
+          "uptime": "12h 49m"
         },
         {
           "name": "Issuer Service",
           "container": "health-dataspace-issuerservice",
           "status": "healthy",
           "severity": "healthy",
-          "cpu": 0.18,
-          "memMB": 202.9,
-          "uptime": "5h 0m"
+          "cpu": 1.25,
+          "memMB": 192.6,
+          "uptime": "12h 49m"
         },
         {
           "name": "Keycloak",
           "container": "health-dataspace-keycloak",
           "status": "healthy",
           "severity": "healthy",
-          "cpu": 0.13,
-          "memMB": 745.4,
-          "uptime": "5h 0m"
+          "cpu": 0.12,
+          "memMB": 743.6,
+          "uptime": "12h 49m"
         },
         {
           "name": "Vault",
           "container": "health-dataspace-vault",
           "status": "healthy",
           "severity": "healthy",
-          "cpu": 0.33,
-          "memMB": 212.8,
-          "uptime": "5h 0m"
+          "cpu": 4.97,
+          "memMB": 232,
+          "uptime": "12h 49m"
         }
       ]
     },
@@ -238,63 +238,63 @@
           "container": "health-dataspace-controlplane",
           "status": "healthy",
           "severity": "healthy",
-          "cpu": 0.66,
-          "memMB": 272.1,
-          "uptime": "5h 0m"
+          "cpu": 0.76,
+          "memMB": 268.2,
+          "uptime": "12h 49m"
         },
         {
           "name": "Data Plane FHIR",
           "container": "health-dataspace-dataplane-fhir",
           "status": "healthy",
           "severity": "healthy",
-          "cpu": 0.39,
-          "memMB": 166.4,
-          "uptime": "5h 0m"
+          "cpu": 0.53,
+          "memMB": 166.6,
+          "uptime": "12h 49m"
         },
         {
           "name": "Data Plane OMOP",
           "container": "health-dataspace-dataplane-omop",
           "status": "healthy",
           "severity": "healthy",
-          "cpu": 0.19,
-          "memMB": 160.2,
-          "uptime": "5h 0m"
+          "cpu": 0.23,
+          "memMB": 160.7,
+          "uptime": "12h 49m"
         },
         {
           "name": "Identity Hub",
           "container": "health-dataspace-identityhub",
           "status": "healthy",
           "severity": "healthy",
-          "cpu": 0.1,
-          "memMB": 174.8,
-          "uptime": "5h 0m"
+          "cpu": 0.11,
+          "memMB": 195.7,
+          "uptime": "12h 49m"
         },
         {
           "name": "Issuer Service",
           "container": "health-dataspace-issuerservice",
           "status": "healthy",
           "severity": "healthy",
-          "cpu": 0.18,
-          "memMB": 202.9,
-          "uptime": "5h 0m"
+          "cpu": 1.25,
+          "memMB": 192.6,
+          "uptime": "12h 49m"
         },
         {
           "name": "Keycloak",
           "container": "health-dataspace-keycloak",
           "status": "healthy",
           "severity": "healthy",
-          "cpu": 0.13,
-          "memMB": 745.4,
-          "uptime": "5h 0m"
+          "cpu": 0.12,
+          "memMB": 743.6,
+          "uptime": "12h 49m"
         },
         {
           "name": "Vault",
           "container": "health-dataspace-vault",
           "status": "healthy",
           "severity": "healthy",
-          "cpu": 0.33,
-          "memMB": 212.8,
-          "uptime": "5h 0m"
+          "cpu": 4.97,
+          "memMB": 232,
+          "uptime": "12h 49m"
         }
       ]
     },
@@ -312,63 +312,63 @@
           "container": "health-dataspace-controlplane",
           "status": "healthy",
           "severity": "healthy",
-          "cpu": 0.66,
-          "memMB": 272.1,
-          "uptime": "5h 0m"
+          "cpu": 0.76,
+          "memMB": 268.2,
+          "uptime": "12h 49m"
         },
         {
           "name": "Data Plane FHIR",
           "container": "health-dataspace-dataplane-fhir",
           "status": "healthy",
           "severity": "healthy",
-          "cpu": 0.39,
-          "memMB": 166.4,
-          "uptime": "5h 0m"
+          "cpu": 0.53,
+          "memMB": 166.6,
+          "uptime": "12h 49m"
         },
         {
           "name": "Data Plane OMOP",
           "container": "health-dataspace-dataplane-omop",
           "status": "healthy",
           "severity": "healthy",
-          "cpu": 0.19,
-          "memMB": 160.2,
-          "uptime": "5h 0m"
+          "cpu": 0.23,
+          "memMB": 160.7,
+          "uptime": "12h 49m"
         },
         {
           "name": "Identity Hub",
           "container": "health-dataspace-identityhub",
           "status": "healthy",
           "severity": "healthy",
-          "cpu": 0.1,
-          "memMB": 174.8,
-          "uptime": "5h 0m"
+          "cpu": 0.11,
+          "memMB": 195.7,
+          "uptime": "12h 49m"
         },
         {
           "name": "Issuer Service",
           "container": "health-dataspace-issuerservice",
           "status": "healthy",
           "severity": "healthy",
-          "cpu": 0.18,
-          "memMB": 202.9,
-          "uptime": "5h 0m"
+          "cpu": 1.25,
+          "memMB": 192.6,
+          "uptime": "12h 49m"
         },
         {
           "name": "Keycloak",
           "container": "health-dataspace-keycloak",
           "status": "healthy",
           "severity": "healthy",
-          "cpu": 0.13,
-          "memMB": 745.4,
-          "uptime": "5h 0m"
+          "cpu": 0.12,
+          "memMB": 743.6,
+          "uptime": "12h 49m"
         },
         {
           "name": "Vault",
           "container": "health-dataspace-vault",
           "status": "healthy",
           "severity": "healthy",
-          "cpu": 0.33,
-          "memMB": 212.8,
-          "uptime": "5h 0m"
+          "cpu": 4.97,
+          "memMB": 232,
+          "uptime": "12h 49m"
         }
       ]
     }
@@ -380,9 +380,9 @@
       "layer": "cfm",
       "status": "running",
       "severity": "healthy",
-      "cpu": 0.04,
-      "memMB": 7,
-      "uptime": "5h 0m"
+      "cpu": 0.05,
+      "memMB": 20.1,
+      "uptime": "12h 49m"
     },
     {
       "name": "Keycloak Agent",
@@ -390,9 +390,9 @@
       "layer": "cfm",
       "status": "running",
       "severity": "healthy",
-      "cpu": 0.03,
-      "memMB": 10.8,
-      "uptime": "5h 0m"
+      "cpu": 0.11,
+      "memMB": 20.9,
+      "uptime": "12h 49m"
     },
     {
       "name": "Onboarding Agent",
@@ -400,9 +400,9 @@
       "layer": "cfm",
       "status": "running",
       "severity": "healthy",
-      "cpu": 0.03,
-      "memMB": 17.1,
-      "uptime": "5h 0m"
+      "cpu": 0.1,
+      "memMB": 17.4,
+      "uptime": "12h 49m"
     },
     {
       "name": "Provision Manager",
@@ -410,9 +410,9 @@
       "layer": "cfm",
       "status": "running",
       "severity": "healthy",
-      "cpu": 0.02,
-      "memMB": 21.3,
-      "uptime": "5h 0m"
+      "cpu": 0.03,
+      "memMB": 19,
+      "uptime": "12h 49m"
     },
     {
       "name": "Registration Agent",
@@ -420,9 +420,9 @@
       "layer": "cfm",
       "status": "running",
       "severity": "healthy",
-      "cpu": 0.06,
-      "memMB": 14.1,
-      "uptime": "5h 0m"
+      "cpu": 0.04,
+      "memMB": 7,
+      "uptime": "12h 49m"
     },
     {
       "name": "Tenant Manager",
@@ -430,9 +430,9 @@
       "layer": "cfm",
       "status": "running",
       "severity": "healthy",
-      "cpu": 0.1,
-      "memMB": 25.3,
-      "uptime": "5h 0m"
+      "cpu": 0.04,
+      "memMB": 25.1,
+      "uptime": "12h 49m"
     },
     {
       "name": "NATS",
@@ -440,9 +440,9 @@
       "layer": "infrastructure",
       "status": "healthy",
       "severity": "healthy",
-      "cpu": 0.97,
-      "memMB": 21,
-      "uptime": "5h 0m"
+      "cpu": 0.86,
+      "memMB": 21.8,
+      "uptime": "12h 49m"
     },
     {
       "name": "Neo4j",
@@ -450,9 +450,9 @@
       "layer": "infrastructure",
       "status": "running",
       "severity": "healthy",
-      "cpu": 0.5,
-      "memMB": 1136.7,
-      "uptime": "5h 0m"
+      "cpu": 0.44,
+      "memMB": 1113.1,
+      "uptime": "12h 49m"
     },
     {
       "name": "Neo4j Proxy",
@@ -461,8 +461,8 @@
       "status": "healthy",
       "severity": "healthy",
       "cpu": 0,
-      "memMB": 26.2,
-      "uptime": "5h 0m"
+      "memMB": 26.1,
+      "uptime": "12h 49m"
     },
     {
       "name": "PostgreSQL",
@@ -470,9 +470,9 @@
       "layer": "infrastructure",
       "status": "healthy",
       "severity": "healthy",
-      "cpu": 0.76,
-      "memMB": 86.6,
-      "uptime": "5h 0m"
+      "cpu": 1.77,
+      "memMB": 90.9,
+      "uptime": "12h 49m"
     },
     {
       "name": "Traefik",
@@ -480,9 +480,9 @@
       "layer": "infrastructure",
       "status": "running",
       "severity": "healthy",
-      "cpu": 0.05,
-      "memMB": 93.2,
-      "uptime": "5h 0m"
+      "cpu": 0,
+      "memMB": 127.6,
+      "uptime": "12h 49m"
     },
     {
       "name": "UI",
@@ -490,8 +490,8 @@
       "layer": "infrastructure",
       "status": "running",
       "severity": "healthy",
-      "cpu": 0.21,
-      "memMB": 24.9,
+      "cpu": 0.47,
+      "memMB": 25.2,
       "uptime": "0m"
     }
   ],
@@ -499,5 +499,19 @@
     "totalParticipants": 5,
     "degradedParticipants": 0,
     "totalInfra": 12
+  },
+  "clusterMetrics": {
+    "currentCpu": 11.88,
+    "currentMemMB": 3473.6,
+    "last24h": {
+      "peakCpu": 17.03,
+      "peakMemMB": 3468.3,
+      "samples": 4
+    },
+    "prev24h": {
+      "peakCpu": 0,
+      "peakMemMB": 0,
+      "samples": 0
+    }
   }
 }
