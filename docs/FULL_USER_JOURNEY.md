@@ -16,6 +16,7 @@
    - [Step 5 — Contract Negotiation & Approval](#step-5--contract-negotiation--approval)
    - [Step 6 — Data Transfer & Access](#step-6--data-transfer--access)
    - [Step 7 — Analytics & Compliance](#step-7--analytics--compliance)
+   - [Step 8 — Trust Center & Pseudonym Resolution](#step-8--trust-center--pseudonym-resolution)
 4. [Cross-Border Federation (Art. 51)](#cross-border-federation-art-51)
 5. [EHDS Regulation Mapping](#ehds-regulation-mapping)
 6. [E2E Test Summary](#e2e-test-summary)
@@ -519,6 +520,104 @@ sequenceDiagram
 
 ---
 
+### Step 8 — Trust Center & Pseudonym Resolution
+
+| Field        | Value                                                                    |
+| ------------ | ------------------------------------------------------------------------ |
+| **Actors**   | HDAB (`regulator`), Data Holder (`clinicuser`), Data User (`researcher`) |
+| **EHDS Ref** | Art. 50 — Secure Processing Environment; Art. 51 — Cross-Border          |
+| **Concept**  | Federated pseudonym resolution under HDAB governance                     |
+| **UI Pages** | `/compliance`, `/graph`                                                  |
+| **Status**   | 🔲 Planned                                                               |
+
+**Context — Why a Trust Center?**
+
+In the EHDS secondary-use model, the distrusted party is the **data
+user** (researcher / CRO), not the data providers. Providers publishing
+patient data to the same Secure Processing Environment (SPE) are already
+under HDAB governance and do not need Privacy-Preserving Multi-party
+Query (PPMQ) to shield them from each other. Instead, the critical
+missing piece is a **Trust Center** that performs cross-provider
+pseudonym resolution — enabling longitudinal patient linkage across
+multiple data holders without revealing real patient identities to the
+researcher.
+
+This insight was contributed by **Thomas Berlage (Fraunhofer FIT)** in
+community discussion on the
+[LinkedIn article](https://www.linkedin.com/pulse/european-health-dataspaces-digital-twins-journey-fhir-buchhorn-roth-8t51c/),
+noting that the German **RKI** (Robert Koch Institute) is designated as
+the national trust center, and that the **MII** (Medical Informatics
+Initiative) community is evaluating integration of a simple pseudonym
+resolution protocol with their brokerage service.
+
+**Flow:**
+
+1. **HDAB establishes Trust Center** — The Health Data Access Body
+   designates or operates a Trust Center service under its authority.
+   The Trust Center maintains pseudonym mapping keys but never stores
+   plain-text patient identifiers.
+
+2. **Provider-specific pseudonyms** — Each Data Holder (e.g.,
+   AlphaKlinik, Limburg Medical Centre) pseudonymises patient records
+   using their own local key before publishing data into the SPE.
+   Different providers assign different pseudonyms to the same patient.
+
+3. **Cross-provider resolution** — During query planning (not during
+   data access), the Trust Center maps provider-specific pseudonyms to
+   a shared **research pseudonym**, enabling longitudinal linkage:
+
+```
+   AlphaKlinik:  PSN-AK-00742  ──┐
+                                   ├──▶ Trust Center ──▶ RPSN-DE-1138
+   Limburg MC:   PSN-LMC-09451 ──┘
+```
+
+4. **SPE enforcement** — The Secure Processing Environment receives
+   linked data under research pseudonyms. TEE (Trusted Execution
+   Environment) hardware attestation ensures only approved analytical
+   code executes inside the SPE. Only **anonymised, aggregate results**
+   leave the SPE — individual-level data never reaches the researcher.
+
+5. **Audit & revocation** — All pseudonym resolution requests are
+   logged. The HDAB can revoke a research pseudonym mapping at any time,
+   rendering previous linkages unlinkable.
+
+**Security Model:**
+
+| Threat                       | Mitigation                                 |
+| ---------------------------- | ------------------------------------------ |
+| Researcher accesses raw data | SPE + TEE enforce aggregate-only output    |
+| Provider re-identification   | Provider-specific pseudonyms (local key)   |
+| Cross-provider linkage leak  | Trust Center operates under HDAB authority |
+| Trust Center collusion       | Stateless or key-split design; audit trail |
+| Pseudonym reversal           | One-way mapping; revocable by HDAB         |
+
+**Graph Model (planned):**
+
+```cypher
+(:TrustCenter {name, operatedBy, status})
+  -[:GOVERNED_BY]->(:HDABApproval)
+  -[:RESOLVES_PSEUDONYMS_FOR]->(:HealthDataset)
+
+(:ResearchPseudonym {rpsn})
+  -[:LINKED_FROM]->(:ProviderPseudonym {psn, provider})
+  -[:USED_IN]->(:SPESession {attestation, approvedCode})
+```
+
+**Implementation Notes:**
+
+- The Trust Center is **not** a central patient registry — it never
+  stores or receives clear-text identifiers.
+- Resolution occurs only during **query planning**, not during data
+  retrieval. The researcher never directly interacts with the
+  Trust Center.
+- The protocol can be stateless (deterministic pseudonym derivation)
+  or key-managed (stored mapping with revocation).
+- Fraunhofer FIT has implemented a simple protocol and is evaluating
+  integration with the MII brokerage service.
+
+---
+
 ## Cross-Border Federation (Art. 51)
 
 The journey supports cross-border data exchange with participants in
@@ -537,23 +636,26 @@ Cross-border negotiations require:
 - DID resolution across national trust domains
 - Mutual credential recognition (EHDSParticipantCredential)
 - HDAB approval from both origin and destination countries
+- **Trust Center coordination** — Cross-border pseudonym resolution
+  requires mutual recognition between national trust centers
+  (e.g., RKI in Germany) under HealthDCAT-AP federation agreements
 
 ---
 
 ## EHDS Regulation Mapping
 
-| Article | Title                    | Journey Step | Implementation Status |
-| ------- | ------------------------ | ------------ | --------------------- |
-| Art. 33 | Health Data Access Body  | Step 0       | ✅ Implemented        |
-| Art. 45 | Dataset Description      | Step 1       | ✅ Implemented        |
-| Art. 46 | Data Permit Conditions   | Step 2       | ✅ Implemented        |
-| Art. 47 | Data Access Application  | Step 3       | ✅ Implemented        |
-| Art. 48 | Data Permit              | Step 4       | ✅ Implemented        |
-| Art. 49 | HDAB Decision            | Step 5       | ✅ Implemented        |
-| Art. 50 | Secure Processing Env    | Step 6       | ⚠️ Partial (mock SPE) |
-| Art. 51 | Cross-Border Exchange    | Step 6–7     | ✅ Implemented        |
-| Art. 52 | Fees & Cost Recovery     | Step 7       | ⚠️ Not yet modelled   |
-| Art. 53 | Secondary-Use Categories | Step 1, 7    | ✅ Implemented        |
+| Article | Title                    | Journey Step | Implementation Status                              |
+| ------- | ------------------------ | ------------ | -------------------------------------------------- |
+| Art. 33 | Health Data Access Body  | Step 0       | ✅ Implemented                                     |
+| Art. 45 | Dataset Description      | Step 1       | ✅ Implemented                                     |
+| Art. 46 | Data Permit Conditions   | Step 2       | ✅ Implemented                                     |
+| Art. 47 | Data Access Application  | Step 3       | ✅ Implemented                                     |
+| Art. 48 | Data Permit              | Step 4       | ✅ Implemented                                     |
+| Art. 49 | HDAB Decision            | Step 5       | ✅ Implemented                                     |
+| Art. 50 | Secure Processing Env    | Step 6, 8    | ⚠️ Partial (mock SPE; Trust Center planned)        |
+| Art. 51 | Cross-Border Exchange    | Step 6–8     | ✅ Implemented (Trust Center cross-border planned) |
+| Art. 52 | Fees & Cost Recovery     | Step 7       | ⚠️ Not yet modelled                                |
+| Art. 53 | Secondary-Use Categories | Step 1, 7    | ✅ Implemented                                     |
 
 ---
 
@@ -635,5 +737,5 @@ open playwright-report/index.html
 
 ---
 
-_Updated: 2026-03-22 — 166 E2E tests, 1490 unit tests, 12 user journey
-specs_
+_Updated: 2025-07-25 — 166 E2E tests, 1492 unit tests, 12 user journey
+specs, Step 8 Trust Center planned_

@@ -110,6 +110,11 @@
       - [Mock Data Fallback (Offline-First)](#mock-data-fallback-offline-first)
       - [Running the Journey Tests](#running-the-journey-tests)
       - [Protocol Coverage](#protocol-coverage)
+    - [Phase 18: Trust Center \& Federated Pseudonym Resolution 🔲](#phase-18-trust-center--federated-pseudonym-resolution-)
+      - [18a: Trust Center Graph Schema \& Neo4j Model 🔲](#18a-trust-center-graph-schema--neo4j-model-)
+      - [18b: Pseudonym Resolution Protocol 🔲](#18b-pseudonym-resolution-protocol-)
+      - [18c: SPE Security Model Refinement 🔲](#18c-spe-security-model-refinement-)
+      - [18d: Trust Center UI \& Compliance Dashboard 🔲](#18d-trust-center-ui--compliance-dashboard-)
   - [Architecture Decisions](#architecture-decisions)
     - [ADR-1: PostgreSQL vs Neo4j Data Storage Split](#adr-1-postgresql-vs-neo4j-data-storage-split)
       - [Decision](#decision)
@@ -239,6 +244,7 @@ All three core specifications are now final or near-final:
 | **15** | Mock Fallback & Graph Deep-Linking                     | ✅ Complete | 15a ✅ (Mock fallback for catalog/assets APIs + graph deep-linking); 15b ✅ (100 mock transfers + 100 negotiations + 12 FHIR R4 bundles); 15c ✅ (FHIR viewer + Discover page rewrite + MedDRA/Clinical Trial datasets)                                                                                                                                                                                                                                                                                                          |
 | **16** | HealthDCAT-AP Display & Editor Integration             | ✅ Complete | 16a ✅ (HealthDCAT-AP Editor page with form-based metadata authoring); 16b ✅ (Catalog API POST/DELETE handlers); 16c ✅ (First 50 journey tests J01–J50 created across 7 spec files)                                                                                                                                                                                                                                                                                                                                            |
 | **17** | 50 User Journey E2E Tests                              | ✅ Complete | 17a ✅ (Mock fallback for `/api/participants`, `/api/tasks`, `/api/admin/policies`); 17b ✅ (Enhanced `tasks.json`: 11 entries across 4 participants + TERMINATED state); 17c ✅ (All 50 journey tests passing, **120 E2E tests total, 0 failures**); 17d ✅ (10 test categories: identity, use cases, upload, metadata, policies, catalog, negotiations, transfer, data views, federated discovery)                                                                                                                             |
+| **18** | Trust Center & Federated Pseudonym Resolution          | 🔲 Planned  | Community feedback from Thomas Berlage (Fraunhofer FIT): Trust Center for cross-provider pseudonym resolution under HDAB governance; SPE security model refinement; TEE attestation; cross-border trust center mutual recognition. Sub-phases: 18a (graph schema), 18b (resolution protocol), 18c (SPE refinement), 18d (UI + compliance dashboard)                                                                                                                                                                              |
 
 ---
 
@@ -2039,6 +2045,129 @@ npx playwright show-report
 **Deliverables:** 50 journey E2E tests (120 total with smoke/nav/page/doc tests);
 mock data fallback for 3 additional API routes; enhanced mock tasks.json with
 multi-participant data; all tests pass offline (0 failures).
+
+---
+
+### Phase 18: Trust Center & Federated Pseudonym Resolution 🔲
+
+**Goal:** Implement a Trust Center service for cross-provider pseudonym
+resolution, enabling longitudinal patient linkage across multiple data
+holders without revealing real patient identities — the critical missing
+piece for EHDS Art. 50 Secure Processing Environment compliance.
+
+**Context — Community Feedback:**
+
+This phase is inspired by community feedback from **Thomas Berlage
+(Fraunhofer FIT)** on the project's
+[LinkedIn article](https://www.linkedin.com/pulse/european-health-dataspaces-digital-twins-journey-fhir-buchhorn-roth-8t51c/).
+Key insights:
+
+- **PPMQ solves the wrong threat model** — In EHDS secondary use, the
+  distrusted party is the researcher/CRO, not the data providers. Providers
+  publishing to the same SPE are already under HDAB governance.
+- **Trust Center is the missing piece** — A federated identity mediation
+  layer under HDAB authority that maps provider-specific pseudonyms to
+  shared research pseudonyms for longitudinal patient linkage.
+- **SPE security model** — Trust is established through the HDAB governance
+  chain + TEE hardware attestation, not through cryptographic MPC protocols.
+- **German precedent** — RKI (Robert Koch Institute) is designated as the
+  national trust center; the MII (Medical Informatics Initiative) community
+  is evaluating integration with their brokerage service.
+
+#### 18a: Trust Center Graph Schema & Neo4j Model 🔲
+
+1. Add Trust Center node type to the 5-layer graph schema:
+
+```cypher
+-- Layer 1 extensions for Trust Center
+CREATE CONSTRAINT trust_center_name IF NOT EXISTS
+  FOR (tc:TrustCenter) REQUIRE tc.name IS UNIQUE;
+
+MERGE (tc:TrustCenter {
+  name: "RKI Trust Center DE",
+  operatedBy: "Robert Koch Institute",
+  country: "DE",
+  status: "active",
+  protocol: "deterministic-pseudonym-v1"
+})
+```
+
+2. Model pseudonym resolution relationships:
+
+   - `(:TrustCenter)-[:GOVERNED_BY]->(:HDABApproval)`
+   - `(:TrustCenter)-[:RESOLVES_PSEUDONYMS_FOR]->(:HealthDataset)`
+   - `(:ResearchPseudonym)-[:LINKED_FROM]->(:ProviderPseudonym)`
+   - `(:ResearchPseudonym)-[:USED_IN]->(:SPESession)`
+
+3. Update `health-dataspace-graph-schema.md` with Layer 1 Trust Center
+   extensions.
+
+4. Add seed data for 2 Trust Centers (DE: RKI, NL: RIVM) in
+   `scripts/generate-graph-seed.py`.
+
+#### 18b: Pseudonym Resolution Protocol 🔲
+
+1. Design the pseudonym resolution API on the Neo4j Query Proxy:
+
+   - `POST /trust-center/resolve` — Map provider pseudonyms → research
+     pseudonym (HDAB-authenticated only)
+   - `GET /trust-center/audit` — Resolution audit log
+   - `DELETE /trust-center/revoke/{rpsn}` — Revoke a research pseudonym
+
+2. Implement two resolution modes:
+
+   - **Stateless** — Deterministic HMAC-based derivation (provider PSN +
+     Trust Center key → research PSN). Fast, no storage, but irrevocable.
+   - **Key-managed** — Stored mapping with per-dataset revocation. Requires
+     PostgreSQL table but supports HDAB-initiated unlinkability.
+
+3. Enforce access control: only HDAB-authority-scoped tokens can invoke
+   resolution. Data Users never interact with the Trust Center directly.
+
+#### 18c: SPE Security Model Refinement 🔲
+
+1. Replace mock SPE with a TEE attestation model:
+
+   - `(:SPESession {attestation, approvedCodeHash, createdAt})`
+   - SPE sessions are created by the HDAB, not the researcher.
+   - Approved analytical code is hashed and attested before execution.
+
+2. Enforce aggregate-only output policy:
+
+   - Results leaving the SPE must pass k-anonymity threshold (k ≥ 5).
+   - Individual-level data never exits the SPE boundary.
+
+3. Add SPE session audit trail to the compliance dashboard.
+
+#### 18d: Trust Center UI & Compliance Dashboard 🔲
+
+1. Add Trust Center section to `/compliance` page:
+
+   - Trust Center status and governance chain
+   - Active research pseudonym count
+   - Resolution audit log (HDAB view only)
+
+2. Add Trust Center nodes to the graph explorer (Layer 1):
+
+   - Visual: Trust Center → HDAB → HealthDataset relationships
+   - Clickable nodes with pseudonym resolution statistics
+
+3. Update Cross-Border Federation view:
+   - Show trust center mutual recognition status per country pair
+   - Cross-border pseudonym resolution flow diagram
+
+**Deliverables:** Trust Center graph schema + seed data; pseudonym
+resolution API (stateless + key-managed modes); SPE attestation model;
+compliance dashboard Trust Center section; cross-border trust center
+mutual recognition.
+
+**References:**
+
+- Thomas Berlage (Fraunhofer FIT) — LinkedIn community discussion
+- RKI as designated German trust center
+- MII brokerage service integration evaluation
+- EHDS Regulation Art. 50 (Secure Processing Environment)
+- EHDS Regulation Art. 51 (Cross-Border Data Exchange)
 
 ---
 
