@@ -125,23 +125,26 @@ export async function GET() {
       { ids: patientEIds },
     );
 
-    // L4: OMOP nodes mapped from those FHIR events
+    // L4: OMOP nodes — persons mapped from patients + clinical events from FHIR
     const fhirEIds = fhirNodes.map((e) => e.id);
     const omopNodes = await runQuery<{
       id: string;
       labels: string[];
       name: string;
     }>(
-      `UNWIND $ids AS eid
-     MATCH (fhir) WHERE elementId(fhir) = eid
-     MATCH (fhir)-[:MAPPED_TO]->(omop)
-     RETURN elementId(omop) AS id, labels(omop) AS labels,
-            coalesce(omop.name, omop.id, elementId(omop)) AS name
-     LIMIT 40`,
-      { ids: fhirEIds },
+      `UNWIND $patIds AS pid
+     MATCH (p) WHERE elementId(p) = pid
+     MATCH (p)-[:MAPPED_TO]->(op:OMOPPerson)
+     OPTIONAL MATCH (op)-[:HAS_VISIT_OCCURRENCE|HAS_CONDITION_OCCURRENCE|HAS_MEASUREMENT|HAS_DRUG_EXPOSURE]->(child)
+     WITH collect(op {.*, id: elementId(op), labels: labels(op)}) +
+          collect(child {.*, id: elementId(child), labels: labels(child)}) AS rows
+     UNWIND rows AS r
+     RETURN DISTINCT r.id AS id, r.labels AS labels,
+            coalesce(r.name, r.id, '') AS name`,
+      { patIds: patientEIds },
     );
 
-    // L5: ontology codes linked to those FHIR events
+    // L5: ontology codes linked to FHIR events + parent concepts (IS_A)
     const ontologyNodes = await runQuery<{
       id: string;
       labels: string[];
@@ -150,9 +153,12 @@ export async function GET() {
       `UNWIND $ids AS eid
      MATCH (fhir) WHERE elementId(fhir) = eid
      MATCH (fhir)-[:CODED_BY]->(ont)
-     RETURN elementId(ont) AS id, labels(ont) AS labels,
-            coalesce(ont.display, ont.code, ont.id, elementId(ont)) AS name
-     LIMIT 30`,
+     OPTIONAL MATCH (ont)-[:IS_A]->(parent)
+     WITH collect(ont) + collect(parent) AS all
+     UNWIND all AS o
+     WITH DISTINCT o WHERE o IS NOT NULL
+     RETURN elementId(o) AS id, labels(o) AS labels,
+            coalesce(o.display, o.name, o.code, o.id, elementId(o)) AS name`,
       { ids: fhirEIds },
     );
 
