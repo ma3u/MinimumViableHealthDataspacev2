@@ -53,9 +53,32 @@ const LAYER_COLORS: Record<number, string> = {
   5: "#7D3C98",
 };
 
-export async function GET() {
+const PAGE_SIZE_DEFAULT = 200;
+const PAGE_SIZE_MAX = 500;
+
+export async function GET(req: Request) {
   try {
-    // ── Single query: fetch ALL nodes with their primary label ───────────────
+    const { searchParams } = new URL(req.url);
+    const page = Math.max(0, parseInt(searchParams.get("page") ?? "0", 10));
+    const limit = Math.min(
+      PAGE_SIZE_MAX,
+      Math.max(
+        1,
+        parseInt(searchParams.get("limit") ?? String(PAGE_SIZE_DEFAULT), 10),
+      ),
+    );
+    const skip = page * limit;
+
+    // ── Count total known nodes (cheap, cached by Neo4j) ────────────────────
+    const countRows = await runQuery<{ total: number }>(
+      `MATCH (n)
+       WHERE any(l IN labels(n) WHERE l IN $knownLabels)
+       RETURN count(n) AS total`,
+      { knownLabels: Object.keys(LABEL_LAYER) },
+    );
+    const total = countRows[0]?.total ?? 0;
+
+    // ── Paginated node fetch ─────────────────────────────────────────────────
     const allNodes = await runQuery<{
       id: string;
       labels: string[];
@@ -68,14 +91,16 @@ export async function GET() {
                        n.categoryName, n.credentialType,
                        n.participantId, n.productId,
                        n.negotiationId, n.transferId,
-                       n.code, n.id, elementId(n)) AS name`,
-      { knownLabels: Object.keys(LABEL_LAYER) },
+                       n.code, n.id, elementId(n)) AS name
+       ORDER BY elementId(n)
+       SKIP $skip LIMIT $limit`,
+      { knownLabels: Object.keys(LABEL_LAYER), skip, limit },
     );
 
     const nodeIdSet = new Set(allNodes.map((n) => n.id));
     const nodeIds = Array.from(nodeIdSet);
 
-    // ── Fetch ALL edges between known nodes ─────────────────────────────────
+    // ── Fetch edges between nodes on this page only ──────────────────────────
     const relRows = await runQuery<{
       source: string;
       target: string;
@@ -87,7 +112,7 @@ export async function GET() {
       { ids: nodeIds },
     );
 
-    // ── Build response ──────────────────────────────────────────────────────
+    // ── Build response ───────────────────────────────────────────────────────
     const nodes = allNodes.map((r) => {
       const layer =
         r.labels.map((l: string) => LABEL_LAYER[l]).find(Boolean) ?? 0;
@@ -100,7 +125,17 @@ export async function GET() {
       };
     });
 
-    return NextResponse.json({ nodes, links: relRows });
+    return NextResponse.json({
+      nodes,
+      links: relRows,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+        hasMore: skip + limit < total,
+      },
+    });
   } catch (err) {
     console.error("GET /api/graph error:", err);
     return NextResponse.json({ error: "Neo4j unavailable" }, { status: 502 });

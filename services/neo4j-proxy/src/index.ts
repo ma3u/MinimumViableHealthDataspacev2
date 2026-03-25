@@ -19,6 +19,7 @@ import express, {
 } from "express";
 import neo4j, { type Driver, type Session } from "neo4j-driver";
 import pg from "pg";
+import rateLimit from "express-rate-limit";
 
 // ---------------------------------------------------------------------------
 // Configuration
@@ -33,6 +34,11 @@ const NEO4J_PASSWORD = process.env.NEO4J_PASSWORD ?? "healthdataspace";
 const NEO4J_SPE2_URI = process.env.NEO4J_SPE2_URI;
 const NEO4J_SPE2_USER = process.env.NEO4J_SPE2_USER ?? NEO4J_USER;
 const NEO4J_SPE2_PASSWORD = process.env.NEO4J_SPE2_PASSWORD ?? NEO4J_PASSWORD;
+
+// GDPR / EHDS: k-anonymity minimum cohort size for federated queries.
+// Callers may request a HIGHER threshold via the request body, but never lower.
+// Set to 0 to disable enforcement (not recommended for production).
+const MIN_COHORT_SIZE = parseInt(process.env.MIN_COHORT_SIZE ?? "5", 10);
 
 // Phase 5c: Optional LLM endpoint for Text2Cypher
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
@@ -68,6 +74,39 @@ function getSpeDrivers(): Array<{ label: string; driver: Driver }> {
 
 const app = express();
 app.use(express.json());
+
+// ---------------------------------------------------------------------------
+// Rate Limiting (Fix #3 — P0 production blocker)
+// Prevents a single participant from exhausting the proxy under load.
+// Limits are configurable via env vars for K8s deployment.
+// ---------------------------------------------------------------------------
+
+const RATE_LIMIT_WINDOW_MS = parseInt(
+  process.env.RATE_LIMIT_WINDOW_MS ?? "60000",
+  10,
+); // 1 minute
+
+/** General limit: 100 requests per minute per IP */
+const generalLimiter = rateLimit({
+  windowMs: RATE_LIMIT_WINDOW_MS,
+  max: parseInt(process.env.RATE_LIMIT_MAX ?? "100", 10),
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "Too many requests — please retry after 60 seconds." },
+});
+
+/** Strict limit for expensive query endpoints: 20 requests per minute per IP */
+const heavyLimiter = rateLimit({
+  windowMs: RATE_LIMIT_WINDOW_MS,
+  max: parseInt(process.env.RATE_LIMIT_HEAVY_MAX ?? "20", 10),
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    error: "Query rate limit exceeded — max 20 analytical requests per minute.",
+  },
+});
+
+app.use(generalLimiter);
 
 // Export app for testing (supertest)
 export { app };
@@ -375,6 +414,7 @@ app.post(
  */
 app.post(
   "/omop/cohort",
+  heavyLimiter,
   async (req: Request, res: Response, next: NextFunction) => {
     const session = getSession();
     try {
@@ -758,9 +798,13 @@ app.get(
  */
 app.post(
   "/federated/query",
+  heavyLimiter,
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { cypher, params = {}, minK = 0 } = req.body;
+      // Callers may request stricter k-anonymity but never below the server minimum
+      const requestedMinK = req.body.minK ?? MIN_COHORT_SIZE;
+      const { cypher, params = {} } = req.body;
+      const minK = Math.max(requestedMinK, MIN_COHORT_SIZE);
 
       if (!cypher || typeof cypher !== "string") {
         res.status(400).json({ error: "Missing 'cypher' in request body" });
@@ -855,6 +899,7 @@ app.post(
         totalRows,
         filtered,
         speCount: spes.length,
+        minKApplied: minK,
       });
 
       logTransferEvent(

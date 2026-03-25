@@ -1,0 +1,272 @@
+# k8s/probes.yaml
+# Kubernetes readiness and liveness probe definitions for all 19 services.
+#
+# Usage: copy the relevant probe block into your Deployment spec under
+#   spec.template.spec.containers[0]
+#
+# WAF Reliability pillar — P0 fix: without these, K8s cannot detect unhealthy
+# pods and will keep routing traffic to them or fail to restart them.
+# --------------------------------------------------------------------------
+
+# ── neo4j-proxy ─────────────────────────────────────────────────────────────
+# name: neo4j-proxy
+probes:
+  neo4j-proxy:
+    readinessProbe:
+      httpGet:
+        path: /health
+        port: 9090
+      initialDelaySeconds: 10
+      periodSeconds: 10
+      failureThreshold: 3
+    livenessProbe:
+      httpGet:
+        path: /health
+        port: 9090
+      initialDelaySeconds: 30
+      periodSeconds: 20
+      failureThreshold: 3
+
+  # ── ui (Next.js) ────────────────────────────────────────────────────────────
+  ui:
+    readinessProbe:
+      httpGet:
+        path: /api/health
+        port: 3000
+      initialDelaySeconds: 15
+      periodSeconds: 10
+      failureThreshold: 3
+    livenessProbe:
+      httpGet:
+        path: /api/health
+        port: 3000
+      initialDelaySeconds: 30
+      periodSeconds: 20
+      failureThreshold: 3
+
+  # ── neo4j ───────────────────────────────────────────────────────────────────
+  neo4j:
+    readinessProbe:
+      tcpSocket:
+        port: 7687
+      initialDelaySeconds: 30
+      periodSeconds: 15
+      failureThreshold: 5
+    livenessProbe:
+      tcpSocket:
+        port: 7687
+      initialDelaySeconds: 60
+      periodSeconds: 30
+      failureThreshold: 3
+
+  # ── postgres ─────────────────────────────────────────────────────────────────
+  postgres:
+    readinessProbe:
+      exec:
+        command: ["pg_isready", "-U", "cp", "-d", "controlplane"]
+      initialDelaySeconds: 10
+      periodSeconds: 10
+      failureThreshold: 5
+    livenessProbe:
+      exec:
+        command: ["pg_isready", "-U", "cp", "-d", "controlplane"]
+      initialDelaySeconds: 30
+      periodSeconds: 30
+      failureThreshold: 3
+
+  # ── vault ────────────────────────────────────────────────────────────────────
+  vault:
+    readinessProbe:
+      httpGet:
+        path: /v1/sys/health?standbyok=true
+        port: 8200
+      initialDelaySeconds: 10
+      periodSeconds: 10
+      failureThreshold: 3
+    livenessProbe:
+      httpGet:
+        path: /v1/sys/health?standbyok=true
+        port: 8200
+      initialDelaySeconds: 30
+      periodSeconds: 20
+      failureThreshold: 3
+
+  # ── keycloak ─────────────────────────────────────────────────────────────────
+  keycloak:
+    readinessProbe:
+      httpGet:
+        path: /health/ready
+        port: 9000
+      initialDelaySeconds: 30
+      periodSeconds: 15
+      failureThreshold: 5
+    livenessProbe:
+      httpGet:
+        path: /health/live
+        port: 9000
+      initialDelaySeconds: 60
+      periodSeconds: 30
+      failureThreshold: 3
+
+  # ── nats ─────────────────────────────────────────────────────────────────────
+  nats:
+    readinessProbe:
+      httpGet:
+        path: /healthz
+        port: 8222
+      initialDelaySeconds: 5
+      periodSeconds: 10
+      failureThreshold: 3
+    livenessProbe:
+      httpGet:
+        path: /healthz
+        port: 8222
+      initialDelaySeconds: 15
+      periodSeconds: 20
+      failureThreshold: 3
+
+  # ── controlplane (EDC-V) ─────────────────────────────────────────────────────
+  controlplane:
+    readinessProbe:
+      httpGet:
+        path: /api/check/health
+        port: 8080
+      initialDelaySeconds: 30
+      periodSeconds: 15
+      failureThreshold: 5
+    livenessProbe:
+      httpGet:
+        path: /api/check/liveness
+        port: 8080
+      initialDelaySeconds: 60
+      periodSeconds: 30
+      failureThreshold: 3
+
+  # ── dataplane-fhir ───────────────────────────────────────────────────────────
+  dataplane-fhir:
+    readinessProbe:
+      httpGet:
+        path: /api/check/health
+        port: 8080
+      initialDelaySeconds: 20
+      periodSeconds: 15
+      failureThreshold: 5
+    livenessProbe:
+      httpGet:
+        path: /api/check/liveness
+        port: 8080
+      initialDelaySeconds: 40
+      periodSeconds: 30
+      failureThreshold: 3
+
+  # ── dataplane-omop ───────────────────────────────────────────────────────────
+  dataplane-omop:
+    readinessProbe:
+      httpGet:
+        path: /api/check/health
+        port: 8080
+      initialDelaySeconds: 20
+      periodSeconds: 15
+      failureThreshold: 5
+    livenessProbe:
+      httpGet:
+        path: /api/check/liveness
+        port: 8080
+      initialDelaySeconds: 40
+      periodSeconds: 30
+      failureThreshold: 3
+
+  # ── identityhub ──────────────────────────────────────────────────────────────
+  identityhub:
+    readinessProbe:
+      httpGet:
+        path: /api/check/health
+        port: 7081
+      initialDelaySeconds: 20
+      periodSeconds: 15
+      failureThreshold: 5
+    livenessProbe:
+      httpGet:
+        path: /api/check/liveness
+        port: 7081
+      initialDelaySeconds: 40
+      periodSeconds: 30
+      failureThreshold: 3
+
+  # ── issuerservice ────────────────────────────────────────────────────────────
+  issuerservice:
+    readinessProbe:
+      httpGet:
+        path: /api/check/health
+        port: 8080
+      initialDelaySeconds: 20
+      periodSeconds: 15
+      failureThreshold: 5
+    livenessProbe:
+      httpGet:
+        path: /api/check/liveness
+        port: 8080
+      initialDelaySeconds: 40
+      periodSeconds: 30
+      failureThreshold: 3
+
+  # ── tenant-manager ───────────────────────────────────────────────────────────
+  tenant-manager:
+    readinessProbe:
+      httpGet:
+        path: /api/check/health
+        port: 8080
+      initialDelaySeconds: 20
+      periodSeconds: 15
+      failureThreshold: 5
+    livenessProbe:
+      httpGet:
+        path: /api/check/liveness
+        port: 8080
+      initialDelaySeconds: 40
+      periodSeconds: 30
+      failureThreshold: 3
+
+  # ── provision-manager ────────────────────────────────────────────────────────
+  provision-manager:
+    readinessProbe:
+      httpGet:
+        path: /api/check/health
+        port: 8080
+      initialDelaySeconds: 20
+      periodSeconds: 15
+      failureThreshold: 5
+    livenessProbe:
+      httpGet:
+        path: /api/check/liveness
+        port: 8080
+      initialDelaySeconds: 40
+      periodSeconds: 30
+      failureThreshold: 3
+
+  # ── cfm agents (registration, edcv, keycloak, onboarding) ───────────────────
+  # CFM agents are background workers with no HTTP port — use process check
+  cfm-agent:
+    livenessProbe:
+      exec:
+        command: ["pgrep", "-f", "java"]
+      initialDelaySeconds: 30
+      periodSeconds: 30
+      failureThreshold: 3
+
+  # ── traefik ──────────────────────────────────────────────────────────────────
+  traefik:
+    readinessProbe:
+      httpGet:
+        path: /ping
+        port: 8080
+      initialDelaySeconds: 5
+      periodSeconds: 10
+      failureThreshold: 3
+    livenessProbe:
+      httpGet:
+        path: /ping
+        port: 8080
+      initialDelaySeconds: 15
+      periodSeconds: 20
+      failureThreshold: 3

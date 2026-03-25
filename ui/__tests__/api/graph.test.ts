@@ -15,14 +15,22 @@ import { GET } from "@/app/api/graph/route";
 
 const mockRunQuery = vi.mocked(runQuery);
 
+/** Build a mock Request with optional pagination query params */
+function makeRequest(params: Record<string, string> = {}): Request {
+  const url = new URL("http://localhost/api/graph");
+  Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
+  return new Request(url.toString());
+}
+
 describe("GET /api/graph", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
   it("should return nodes and links with layer colors", async () => {
-    // The handler makes 2 queries: 1. allNodes, 2. relationships
+    // Handler now makes 3 queries: count, paginated nodes, relationships
     mockRunQuery
+      .mockResolvedValueOnce([{ total: 6 }]) // count query
       .mockResolvedValueOnce([
         { id: "n1", labels: ["Participant"], name: "SPE-1" },
         { id: "n2", labels: ["HealthDataset"], name: "FHIR Cohort" },
@@ -42,12 +50,17 @@ describe("GET /api/graph", () => {
         { source: "n4", target: "n6", type: "CODED_BY" },
       ]);
 
-    const response = await GET();
+    const response = await GET(makeRequest());
     const data = await response.json();
 
     expect(response.status).toBe(200);
     expect(data.nodes).toHaveLength(6);
     expect(data.links).toHaveLength(4);
+
+    // Check pagination metadata is present
+    expect(data.pagination).toBeDefined();
+    expect(data.pagination.page).toBe(0);
+    expect(data.pagination.total).toBe(6);
 
     // Check layer colors are assigned correctly
     const participantNode = data.nodes.find(
@@ -68,32 +81,54 @@ describe("GET /api/graph", () => {
   });
 
   it("should handle empty graph gracefully", async () => {
-    mockRunQuery.mockResolvedValue([]);
+    mockRunQuery.mockResolvedValueOnce([{ total: 0 }]).mockResolvedValue([]);
 
-    const response = await GET();
+    const response = await GET(makeRequest());
     const data = await response.json();
 
     expect(data.nodes).toEqual([]);
     expect(data.links).toEqual([]);
+    expect(data.pagination.total).toBe(0);
+    expect(data.pagination.hasMore).toBe(false);
   });
 
-  it("should make exactly 2 Neo4j queries", async () => {
-    mockRunQuery.mockResolvedValue([]);
+  it("should make exactly 3 Neo4j queries (count + nodes + edges)", async () => {
+    mockRunQuery.mockResolvedValueOnce([{ total: 0 }]).mockResolvedValue([]);
 
-    await GET();
+    await GET(makeRequest());
 
-    expect(mockRunQuery).toHaveBeenCalledTimes(2);
+    expect(mockRunQuery).toHaveBeenCalledTimes(3);
+  });
+
+  it("should respect page and limit query params", async () => {
+    mockRunQuery
+      .mockResolvedValueOnce([{ total: 500 }])
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([]);
+
+    const response = await GET(makeRequest({ page: "2", limit: "50" }));
+    const data = await response.json();
+
+    expect(data.pagination.page).toBe(2);
+    expect(data.pagination.limit).toBe(50);
+    expect(data.pagination.total).toBe(500);
+    expect(data.pagination.totalPages).toBe(10);
+    expect(data.pagination.hasMore).toBe(true);
+
+    // Verify SKIP was passed correctly (page=2, limit=50 → skip=100)
+    const nodeQueryArgs = mockRunQuery.mock.calls[1];
+    expect(nodeQueryArgs[1]).toMatchObject({ skip: 100, limit: 50 });
   });
 
   it("should pass known labels to the node query", async () => {
-    mockRunQuery.mockResolvedValue([]);
+    mockRunQuery.mockResolvedValueOnce([{ total: 0 }]).mockResolvedValue([]);
 
-    await GET();
+    await GET(makeRequest());
 
-    const firstCallArgs = mockRunQuery.mock.calls[0];
-    expect(firstCallArgs[1]).toHaveProperty("knownLabels");
-    expect(firstCallArgs[1]!.knownLabels).toContain("Patient");
-    expect(firstCallArgs[1]!.knownLabels).toContain("HealthDataset");
-    expect(firstCallArgs[1]!.knownLabels).toContain("SnomedConcept");
+    const nodeQueryArgs = mockRunQuery.mock.calls[1];
+    expect(nodeQueryArgs[1]).toHaveProperty("knownLabels");
+    expect(nodeQueryArgs[1]!.knownLabels).toContain("Patient");
+    expect(nodeQueryArgs[1]!.knownLabels).toContain("HealthDataset");
+    expect(nodeQueryArgs[1]!.knownLabels).toContain("SnomedConcept");
   });
 });

@@ -1,0 +1,63 @@
+# docker-compose.vault-persistent.yml
+# ─────────────────────────────────────────────────────────────────────────────
+# Vault Persistent Storage Override (P0 fix — WAF Reliability + Security)
+#
+# Problem: The default docker-compose.jad.yml runs Vault in dev mode with
+# in-memory storage. Any container restart (OrbStack crash, Docker daemon
+# update, host reboot) wipes ALL secrets. This forces a full re-bootstrap.
+#
+# This override switches Vault to file-based storage with a persistent volume.
+# Secrets survive restarts. The unseal key and root token are written to
+# ./vault/init.json on first start — back this file up securely.
+#
+# Usage:
+#   docker compose \
+#     -f docker-compose.yml \
+#     -f docker-compose.jad.yml \
+#     -f docker-compose.vault-persistent.yml \
+#     up -d
+#
+# First-time setup:
+#   1. Start the stack with this override
+#   2. Run: ./scripts/vault-init.sh   (generates unseal key + root token)
+#   3. Back up ./vault/init.json to a secure location
+#   4. Re-run bootstrap: ./scripts/bootstrap-jad.sh
+#
+# After a restart, Vault will be sealed. Unseal with:
+#   ./scripts/vault-unseal.sh
+# ─────────────────────────────────────────────────────────────────────────────
+
+services:
+  vault:
+    # Override: replace dev-mode env vars with a config file
+    environment:
+      VAULT_ADDR: "http://127.0.0.1:8200"
+      # Remove dev-mode token — authentication is now via unseal key
+      VAULT_DEV_ROOT_TOKEN_ID: ""
+      VAULT_DEV_LISTEN_ADDRESS: ""
+    command:
+      - "vault"
+      - "server"
+      - "-config=/vault/config/vault.hcl"
+    volumes:
+      - vault_data:/vault/data
+      - ./vault/config:/vault/config:ro
+    cap_add:
+      - IPC_LOCK
+
+  vault-bootstrap:
+    # Bootstrap now waits for Vault to be unsealed (not just started)
+    entrypoint:
+      [
+        "/bin/sh",
+        "-c",
+        "sh /scripts/vault-init-or-unseal.sh && sh /scripts/bootstrap-vault.sh && echo 'Bootstrap complete — sidecar sleeping' && sleep infinity",
+      ]
+    volumes:
+      - ./jad/bootstrap-vault.sh:/scripts/bootstrap-vault.sh:ro
+      - ./scripts/vault-init-or-unseal.sh:/scripts/vault-init-or-unseal.sh:ro
+      - ./vault/init.json:/vault/init.json
+
+volumes:
+  vault_data:
+    driver: local
