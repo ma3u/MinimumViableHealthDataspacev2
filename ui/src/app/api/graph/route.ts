@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import neo4j from "neo4j-driver";
 import { runQuery } from "@/lib/neo4j";
 
 export const dynamic = "force-dynamic";
@@ -94,7 +95,11 @@ export async function GET(req: Request) {
                        n.code, n.id, elementId(n)) AS name
        ORDER BY elementId(n)
        SKIP $skip LIMIT $limit`,
-      { knownLabels: Object.keys(LABEL_LAYER), skip, limit },
+      {
+        knownLabels: Object.keys(LABEL_LAYER),
+        skip: neo4j.int(skip),
+        limit: neo4j.int(limit),
+      },
     );
 
     const nodeIdSet = new Set(allNodes.map((n) => n.id));
