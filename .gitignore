@@ -63,3 +63,4 @@ ui/test-results/
 ui/playwright-report/
 test-results/
 load-tests/results/*.json
+vault/init.json
