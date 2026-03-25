@@ -62,3 +62,4 @@ services/neo4j-proxy/coverage/
 ui/test-results/
 ui/playwright-report/
 test-results/
+load-tests/results/*.json
