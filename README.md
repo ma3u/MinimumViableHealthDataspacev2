@@ -166,10 +166,14 @@ MinimumViableHealthDataspacev2/
 │   ├── init-postgres.sql         # 8-database PostgreSQL init
 │   └── *.yaml / *.env            # Per-service configuration files
 ├── neo4j/
-│   ├── init-schema.cypher        # Neo4j constraints and indexes
-│   ├── seed-data.cypher          # L1–L5 seed data (Synthea-derived)
-│   ├── register-dsp-marketplace.cypher   # Phase 3e: DSP marketplace chain
-│   └── register-eehrxf-profiles.cypher   # Phase 3h: EEHRxF profile alignment
+│   ├── init-schema.cypher                 # Neo4j constraints and indexes
+│   ├── insert-synthetic-schema-data.cypher # L1–L5 seed data (Synthea-derived)
+│   ├── register-dsp-marketplace.cypher    # Phase 3e: DSP marketplace chain
+│   ├── register-eehrxf-profiles.cypher    # Phase 3h: EEHRxF profile alignment
+│   ├── register-ehds-credentials.cypher   # Phase 4: EHDS verifiable credentials
+│   ├── register-fhir-dataset-hdcatap.cypher # Phase 3: HealthDCAT-AP catalogue
+│   ├── fhir-to-omop-transform.cypher      # FHIR → OMOP CDM mapping
+│   └── seed-audit-provenance.cypher       # Audit trail seed data
 ├── services/
 │   └── neo4j-proxy/              # DCore ↔ Neo4j bridge (TypeScript/Express)
 │       ├── src/index.ts          # 6 endpoints: FHIR, OMOP, HealthDCAT-AP
@@ -246,7 +250,7 @@ codes (Layer 5). The HealthDCAT-AP catalogue entry (Layer 2) referencing the dat
 created here.
 
 ```bash
-cat neo4j/seed-data.cypher | \
+cat neo4j/insert-synthetic-schema-data.cypher | \
   docker exec -i health-dataspace-neo4j \
   cypher-shell -u neo4j -p healthdataspace
 ```
