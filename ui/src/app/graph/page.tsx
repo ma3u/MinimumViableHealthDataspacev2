@@ -19,10 +19,11 @@ interface GraphNode {
   color: string;
   x?: number;
   y?: number;
+  fx?: number; // fixed position — skips physics for pre-laid-out nodes
+  fy?: number;
 }
 
 interface GraphLink {
-  // after force-graph resolves string IDs these become node objects
   source: string | GraphNode;
   target: string | GraphNode;
   type: string;
@@ -55,6 +56,79 @@ const LAYER_COLORS: Record<number, string> = {
   5: "#7D3C98",
 };
 
+// Ring radii per layer — pre-positions nodes so physics simulation is skipped
+const LAYER_RADII: Record<number, number> = {
+  1: 120,
+  2: 240,
+  3: 420,
+  4: 600,
+  5: 780,
+};
+
+/** Assign ring position to a node based on its layer and index within that layer */
+function assignPosition(
+  node: GraphNode,
+  indexInLayer: number,
+  totalInLayer: number,
+): GraphNode {
+  const r = LAYER_RADII[node.layer] ?? 500;
+  const angle = (2 * Math.PI * indexInLayer) / Math.max(totalInLayer, 1);
+  return { ...node, fx: r * Math.cos(angle), fy: r * Math.sin(angle) };
+}
+
+/** Merge a new page of nodes/links into existing graph data with ring positions */
+function mergePages(
+  existing: GraphData,
+  newNodes: GraphNode[],
+  newLinks: GraphLink[],
+): GraphData {
+  const existingIds = new Set(existing.nodes.map((n) => n.id));
+
+  // Count existing nodes per layer to continue the angle offset
+  const layerCounts: Record<number, number> = {};
+  for (const n of existing.nodes) {
+    layerCounts[n.layer] = (layerCounts[n.layer] ?? 0) + 1;
+  }
+
+  // Estimate total per layer from new batch (rough, good enough for positioning)
+  const newByLayer: Record<number, GraphNode[]> = {};
+  for (const n of newNodes) {
+    if (!existingIds.has(n.id)) {
+      (newByLayer[n.layer] ??= []).push(n);
+    }
+  }
+
+  const positioned: GraphNode[] = [];
+  for (const [layerStr, batch] of Object.entries(newByLayer)) {
+    const layer = Number(layerStr);
+    const startIdx = layerCounts[layer] ?? 0;
+    const total = startIdx + batch.length;
+    batch.forEach((n, i) => {
+      positioned.push(assignPosition(n, startIdx + i, total));
+    });
+  }
+
+  const existingLinkKeys = new Set(
+    existing.links.map(
+      (l) =>
+        `${typeof l.source === "string" ? l.source : l.source.id}→${
+          typeof l.target === "string" ? l.target : l.target.id
+        }`,
+    ),
+  );
+  const deduped = newLinks.filter((l) => {
+    const key = `${typeof l.source === "string" ? l.source : l.source.id}→${
+      typeof l.target === "string" ? l.target : l.target.id
+    }`;
+    return !existingLinkKeys.has(key);
+  });
+
+  return {
+    nodes: [...existing.nodes, ...positioned],
+    links: [...existing.links, ...deduped],
+  };
+}
+
 function nodeId(n: string | GraphNode): string {
   return typeof n === "string" ? n : n.id;
 }
@@ -80,6 +154,8 @@ function GraphContent() {
   const [neighbours, setNeighbours] = useState<Neighbour[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [loadedNodes, setLoadedNodes] = useState(0);
+  const [totalNodes, setTotalNodes] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const fgRef = useRef<any>(null);
@@ -87,27 +163,60 @@ function GraphContent() {
   const searchParams = useSearchParams();
   const highlightParam = searchParams.get("highlight");
 
+  // Progressive loading: fetch page 0 first to show graph immediately,
+  // then stream remaining pages silently in the background.
   useEffect(() => {
-    fetchApi("/api/graph")
-      .then((r) => {
-        if (!r.ok) throw new Error(`HTTP ${r.status}`);
-        return r.json();
-      })
-      .then((d) => {
-        if (d && Array.isArray(d.nodes) && Array.isArray(d.links)) {
-          setData(d);
-        } else {
-          setError("Neo4j unavailable — graph data could not be loaded.");
+    const PAGE_LIMIT = 200;
+    let cancelled = false;
+
+    async function loadPage(page: number): Promise<boolean> {
+      const r = await fetchApi(`/api/graph?page=${page}&limit=${PAGE_LIMIT}`);
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      const d = await r.json();
+      if (cancelled) return false;
+
+      if (!Array.isArray(d.nodes) || !Array.isArray(d.links)) {
+        throw new Error("Unexpected response shape");
+      }
+
+      setTotalNodes(d.pagination?.total ?? d.nodes.length);
+      setData((prev) => mergePages(prev, d.nodes, d.links));
+      setLoadedNodes((n) => n + d.nodes.length);
+
+      return d.pagination?.hasMore ?? false;
+    }
+
+    (async () => {
+      try {
+        // Page 0 — show graph immediately
+        const hasMore = await loadPage(0);
+        setLoading(false);
+
+        if (!hasMore) return;
+
+        // Remaining pages — stream silently without blocking the UI
+        let page = 1;
+        while (!cancelled) {
+          const more = await loadPage(page);
+          if (!more) break;
+          page++;
+          // Small yield between pages so the UI stays responsive
+          await new Promise((r) => setTimeout(r, 50));
         }
-        setLoading(false);
-      })
-      .catch(() => {
-        setError("Neo4j unavailable — graph data could not be loaded.");
-        setLoading(false);
-      });
+      } catch {
+        if (!cancelled) {
+          setError("Neo4j unavailable — graph data could not be loaded.");
+          setLoading(false);
+        }
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
-  // Auto-select node matching ?highlight= query param and center on it
+  // Auto-select node matching ?highlight= param
   useEffect(() => {
     if (!highlightParam || data.nodes.length === 0) return;
     const q = highlightParam.toLowerCase();
@@ -116,7 +225,6 @@ function GraphContent() {
     );
     if (match) {
       setSelectedNode(match);
-      // Wait for force-graph to settle, then center + zoom on the node
       setTimeout(() => {
         if (fgRef.current && match.x != null && match.y != null) {
           fgRef.current.centerAt(match.x, match.y, 800);
@@ -140,7 +248,6 @@ function GraphContent() {
     return () => window.removeEventListener("resize", update);
   }, []);
 
-  // ESC key deselects the current node → full graph restored
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") setSelectedNode(null);
@@ -149,7 +256,6 @@ function GraphContent() {
     return () => window.removeEventListener("keydown", onKeyDown);
   }, []);
 
-  // Build neighbour list whenever selection changes
   useEffect(() => {
     if (!selectedNode) {
       setNeighbours([]);
@@ -171,7 +277,6 @@ function GraphContent() {
     setNeighbours(nbrs);
   }, [selectedNode, data.links, data.nodes]);
 
-  // Set of IDs connected to selected node — for highlighting
   const connectedIds = new Set(neighbours.map((nb) => nb.node.id));
 
   const paintNode = useCallback(
@@ -179,12 +284,9 @@ function GraphContent() {
       const isSelected = selectedNode?.id === node.id;
       const isConnected = connectedIds.has(node.id);
       const r = Math.max(2, 6 / Math.sqrt(globalScale));
-
-      // Dim unrelated nodes when something is selected
       const alpha = selectedNode && !isSelected && !isConnected ? 0.2 : 1.0;
 
       if (isSelected) {
-        // White ring around selected node
         ctx.beginPath();
         ctx.arc(node.x ?? 0, node.y ?? 0, r + 3, 0, 2 * Math.PI);
         ctx.strokeStyle = "rgba(255,255,255,0.9)";
@@ -227,22 +329,18 @@ function GraphContent() {
         selectedNode &&
         (srcId === selectedNode.id || tgtId === selectedNode.id);
 
-      const color = isAdjacent ? "#93c5fd" : "#374151";
-      const width = isAdjacent ? 1.5 : 0.8;
-
       const src = link.source as GraphNode;
       const tgt = link.target as GraphNode;
       if (src.x == null || tgt.x == null) return;
 
-      ctx.strokeStyle = color;
-      ctx.lineWidth = width / globalScale;
+      ctx.strokeStyle = isAdjacent ? "#93c5fd" : "#374151";
+      ctx.lineWidth = (isAdjacent ? 1.5 : 0.8) / globalScale;
       ctx.globalAlpha = isAdjacent ? 1.0 : selectedNode ? 0.15 : 0.7;
       ctx.beginPath();
       ctx.moveTo(src.x, src.y ?? 0);
       ctx.lineTo(tgt.x, tgt.y ?? 0);
       ctx.stroke();
 
-      // Draw relationship type label on adjacent edges
       if (isAdjacent && selectedNode) {
         const mx = (src.x + tgt.x) / 2;
         const my = ((src.y ?? 0) + (tgt.y ?? 0)) / 2;
@@ -251,8 +349,6 @@ function GraphContent() {
         ctx.fillStyle = "#93c5fd";
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
-
-        // White background pill for readability
         const tw = ctx.measureText(link.type).width;
         ctx.globalAlpha = 0.75;
         ctx.fillStyle = "#0f172a";
@@ -278,10 +374,11 @@ function GraphContent() {
     setSelectedNode((prev) => (prev?.id === node.id ? null : node));
   }, []);
 
-  // Click on empty canvas background → deselect, show full graph
   const handleBackgroundClick = useCallback(() => {
     setSelectedNode(null);
   }, []);
+
+  const isStreaming = loadedNodes > 0 && loadedNodes < totalNodes;
 
   return (
     <div className="flex h-[calc(100vh-44px)]">
@@ -290,8 +387,8 @@ function GraphContent() {
         <div>
           <h2 className="text-sm font-bold mb-1">Graph Explorer</h2>
           <p className="text-xs text-gray-500 mb-3">
-            Interactive 5-layer knowledge graph showing all dataspace entities
-            and their relationships. Click nodes to inspect, drag to rearrange.
+            Interactive 5-layer knowledge graph. Click nodes to inspect, drag to
+            rearrange.
           </p>
           <div className="flex flex-col gap-1.5 text-xs mb-3">
             <a
@@ -317,6 +414,7 @@ function GraphContent() {
             </a>
           </div>
         </div>
+
         <div>
           <h2 className="text-xs font-semibold uppercase text-gray-500 mb-2">
             Layers
@@ -332,11 +430,27 @@ function GraphContent() {
           ))}
         </div>
 
+        {/* Node / loading counters */}
         <div className="text-xs text-gray-500">
           {data.nodes.length} nodes · {data.links.length} edges
         </div>
 
-        {!selectedNode && (
+        {isStreaming && (
+          <div className="flex flex-col gap-1">
+            <div className="flex items-center gap-1.5 text-xs text-gray-500">
+              <Loader2 size={10} className="animate-spin shrink-0" />
+              Loading {loadedNodes} / {totalNodes}
+            </div>
+            <div className="h-1 bg-gray-800 rounded-full overflow-hidden">
+              <div
+                className="h-full bg-blue-600 rounded-full transition-all duration-300"
+                style={{ width: `${(loadedNodes / totalNodes) * 100}%` }}
+              />
+            </div>
+          </div>
+        )}
+
+        {!selectedNode && !isStreaming && data.nodes.length > 0 && (
           <p className="text-xs text-gray-600 italic">
             Click a node to see details and relationships.
           </p>
@@ -344,7 +458,6 @@ function GraphContent() {
 
         {selectedNode && (
           <div className="flex flex-col gap-3">
-            {/* Node header */}
             <div className="border border-gray-600 rounded-lg p-3 bg-gray-800/60">
               <div className="flex items-start justify-between gap-1 mb-1">
                 <span
@@ -369,7 +482,6 @@ function GraphContent() {
               <div className="text-gray-600 text-xs mt-1 break-all leading-tight">
                 {selectedNode.id}
               </div>
-              {/* Contextual links based on layer */}
               <div className="flex flex-wrap gap-2 mt-2">
                 {selectedNode.layer === 2 && (
                   <a
@@ -396,7 +508,7 @@ function GraphContent() {
                 )}
                 {(selectedNode.layer === 3 || selectedNode.layer === 4) && (
                   <a
-                    href={`/patient`}
+                    href="/patient"
                     className="inline-flex items-center gap-1 text-xs text-orange-400 hover:underline"
                   >
                     <Activity size={10} />
@@ -406,7 +518,6 @@ function GraphContent() {
               </div>
             </div>
 
-            {/* Relationships */}
             {neighbours.length > 0 && (
               <div>
                 <h3 className="text-xs font-semibold uppercase text-gray-500 mb-2">
@@ -449,9 +560,10 @@ function GraphContent() {
       </aside>
 
       {/* Graph canvas */}
-      <div ref={containerRef} className="flex-1 bg-gray-950">
+      <div ref={containerRef} className="flex-1 bg-gray-950 relative">
         {loading ? (
           <div className="flex items-center justify-center h-full text-gray-500">
+            <Loader2 size={14} className="animate-spin mr-2" />
             Connecting to Neo4j…
           </div>
         ) : error ? (
@@ -474,10 +586,11 @@ function GraphContent() {
             onNodeClick={handleNodeClick}
             onBackgroundClick={handleBackgroundClick}
             backgroundColor="#030712"
-            d3AlphaDecay={0.04}
-            d3VelocityDecay={0.4}
-            cooldownTicks={150}
-            warmupTicks={50}
+            // Nodes have pre-assigned fx/fy ring positions — skip physics wait
+            d3AlphaDecay={1}
+            d3VelocityDecay={1}
+            cooldownTicks={0}
+            warmupTicks={0}
             nodeRelSize={4}
           />
         )}
