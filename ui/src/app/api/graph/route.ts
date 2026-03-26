@@ -16,6 +16,11 @@ const LABEL_LAYER: Record<string, number> = {
   DataTransfer: 1,
   Catalog: 1,
   Organization: 1,
+  // L1 Phase 18: Trust Center (EHDS Art. 50/51)
+  TrustCenter: 1,
+  SPESession: 1,
+  ResearchPseudonym: 1,
+  ProviderPseudonym: 1,
   // L2: HealthDCAT-AP Metadata
   HealthDataset: 2,
   Distribution: 2,
@@ -69,6 +74,9 @@ const GOVERNANCE_LABELS = [
   "EhdsPurpose",
   "Catalogue",
   "Organization",
+  // Phase 18: Trust Center nodes (EHDS Art. 50/51)
+  "TrustCenter",
+  "SPESession",
 ];
 
 function toNode(r: { id: string; labels: string[]; name: string }) {
@@ -85,6 +93,7 @@ function toNode(r: { id: string; labels: string[]; name: string }) {
 
 // Researcher overview — curated ~200 nodes that answer the key questions:
 //   "What datasets exist?"  "Who approved them?"  "What conditions are covered?"
+//   "Which Trust Centers govern pseudonym resolution?" (Phase 18)
 export async function GET() {
   try {
     const [
@@ -95,7 +104,7 @@ export async function GET() {
       loincNodes,
       rxnormNodes,
     ] = await Promise.all([
-      // L1/L2: All governance + catalog nodes
+      // L1/L2: All governance + catalog nodes (includes TrustCenter + SPESession via GOVERNANCE_LABELS)
       runQuery<{ id: string; labels: string[]; name: string }>(
         `MATCH (n) WHERE any(l IN labels(n) WHERE l IN $labels)
            RETURN elementId(n) AS id, labels(n) AS labels,

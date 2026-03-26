@@ -8,6 +8,7 @@ import {
   Activity,
   BookOpen,
   Database,
+  Lock,
   Loader2,
   MousePointerClick,
   X,
@@ -495,6 +496,16 @@ function GraphContent() {
                     className="inline-flex items-center gap-1 text-xs text-orange-400 hover:underline"
                   >
                     <Database size={10} /> Analytics
+                  </a>
+                )}
+                {(selected.label === "TrustCenter" ||
+                  selected.label === "SPESession" ||
+                  selected.label === "ResearchPseudonym") && (
+                  <a
+                    href="/compliance#trust-center"
+                    className="inline-flex items-center gap-1 text-xs text-blue-400 hover:underline"
+                  >
+                    <Lock size={10} /> Trust Center
                   </a>
                 )}
               </div>

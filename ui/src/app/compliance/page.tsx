@@ -418,7 +418,7 @@ export default function CompliancePage() {
       </div>
 
       {/* ── Phase 18: Trust Center Section ── */}
-      <div className="mt-12 border-t border-gray-700 pt-8">
+      <div id="trust-center" className="mt-12 border-t border-gray-700 pt-8">
         <div className="flex items-center gap-2 mb-1">
           <Lock size={18} className="text-layer1" />
           <h2 className="text-xl font-bold">
