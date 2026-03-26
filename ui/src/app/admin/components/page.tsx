@@ -7,12 +7,14 @@ import PageIntro from "@/components/PageIntro";
 import {
   Activity,
   AlertTriangle,
+  BarChart2,
   ChevronDown,
   ChevronRight,
   Cpu,
   HardDrive,
   Info,
   Loader2,
+  Network,
   RefreshCw,
   Server,
   Shield,
@@ -678,6 +680,282 @@ function CriticalBanner({
 }
 
 // ---------------------------------------------------------------------------
+// Cost Estimator — StackIT server mapping + per-participant breakdown
+// ---------------------------------------------------------------------------
+
+// StackIT-equivalent node definitions (STACKIT Compute Engine, Frankfurt DC)
+// Prices in EUR/month, based on European sovereign cloud rates (GDPR-ready).
+const STACKIT_NODES = [
+  {
+    id: "neo4j",
+    label: "Graph DB (Neo4j)",
+    flavor: "4 vCPU / 8 GB RAM",
+    eur: 48,
+    components: ["Neo4j", "Neo4j Proxy"],
+    note: "Handles 5 300+ nodes across FHIR, OMOP, SNOMED, ICD-10, LOINC layers",
+  },
+  {
+    id: "datastore",
+    label: "Data Store (PostgreSQL + NATS)",
+    flavor: "2 vCPU / 4 GB RAM",
+    eur: 28,
+    components: ["PostgreSQL", "NATS"],
+    note: "Metadata for all 19 JAD services + async event bus",
+  },
+  {
+    id: "identity",
+    label: "Identity & Secrets",
+    flavor: "2 vCPU / 4 GB RAM",
+    eur: 28,
+    components: ["Keycloak", "Vault", "Traefik"],
+    note: "OIDC/PKCE SSO, secrets management, TLS termination",
+  },
+  {
+    id: "cfm",
+    label: "CFM Platform",
+    flavor: "2 vCPU / 4 GB RAM",
+    eur: 28,
+    components: [
+      "Tenant Manager",
+      "Provision Manager",
+      "EDC-V Agent",
+      "Keycloak Agent",
+      "Onboarding Agent",
+      "Registration Agent",
+    ],
+    note: "Connector Fabric Manager orchestrates participant onboarding & provisioning",
+  },
+  {
+    id: "ui",
+    label: "UI / API Gateway",
+    flavor: "1 vCPU / 2 GB RAM",
+    eur: 14,
+    components: ["UI"],
+    note: "Next.js frontend + Neo4j proxy API bridge",
+  },
+];
+
+// Per-participant allocation: 2 GB RAM target (StackIT smallest compute tier)
+const PER_PARTICIPANT_COMPUTE_EUR = 13; // 1 vCPU / 2 GB → ~€13/month
+const PER_PARTICIPANT_STORAGE_GB = 2; // base allocation per participant
+const HEALTH_DATA_STORAGE_GB = 10; // additional for DATA_HOLDER role (avg)
+const STORAGE_EUR_PER_GB = 0.08; // StackIT block storage €0.08/GB/month
+
+// Network: Control Plane ↔ Data Plane (DSP negotiation + transfer receipts)
+const CP_DP_TRAFFIC_MB = 300; // ~300 MB/month per participant (DSP messages + audit)
+const NETWORK_EUR_PER_GB = 0.09; // StackIT egress €0.09/GB
+
+// Log injection: participant audit logs → centralised SIEM/Loki
+const LOG_INJECTION_MB = 150; // ~150 MB/month per participant (EHDS Article 50 audit trail)
+const LOG_EUR_PER_GB = 0.75; // log ingestion/storage (ELK/Loki service ~€0.75/GB)
+
+const SHARED_EUR = STACKIT_NODES.reduce((s, n) => s + n.eur, 0);
+
+function perParticipantEur(isDataHolder: boolean) {
+  const storage =
+    (PER_PARTICIPANT_STORAGE_GB + (isDataHolder ? HEALTH_DATA_STORAGE_GB : 0)) *
+    STORAGE_EUR_PER_GB;
+  const network = (CP_DP_TRAFFIC_MB / 1024) * NETWORK_EUR_PER_GB;
+  const logs = (LOG_INJECTION_MB / 1024) * LOG_EUR_PER_GB;
+  return PER_PARTICIPANT_COMPUTE_EUR + storage + network + logs;
+}
+
+const PER_USER_EUR = Math.round(perParticipantEur(false) * 100) / 100;
+const PER_DATA_HOLDER_EUR = Math.round(perParticipantEur(true) * 100) / 100;
+
+function CostEstimatorPanel({
+  participantCount,
+}: {
+  participantCount: number;
+}) {
+  const [count, setCount] = useState(participantCount);
+  // assume 60 % data holders, 40 % data users (typical EHDS mix)
+  const dataHolders = Math.round(count * 0.6);
+  const dataUsers = count - dataHolders;
+  const participantCost =
+    dataHolders * PER_DATA_HOLDER_EUR + dataUsers * PER_USER_EUR;
+  const total = SHARED_EUR + participantCost;
+  const perParticipant = count > 0 ? total / count : 0;
+
+  const networkTotal = (count * CP_DP_TRAFFIC_MB) / 1024; // GB/month total
+  const logTotal = (count * LOG_INJECTION_MB) / 1024; // GB/month total
+
+  return (
+    <div className="border border-gray-700 rounded-xl p-5 mt-10 space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between flex-wrap gap-3">
+        <h2 className="font-semibold text-sm flex items-center gap-2 text-gray-300">
+          <BarChart2 size={16} className="text-emerald-400" />
+          Monthly Cost Estimate — STACKIT (Frankfurt)
+        </h2>
+        <div className="flex items-center gap-3 text-xs text-gray-400">
+          <label className="flex items-center gap-2">
+            <Users size={13} />
+            Participants:
+            <input
+              type="range"
+              min={1}
+              max={200}
+              value={count}
+              onChange={(e) => setCount(Number(e.target.value))}
+              className="w-28 accent-emerald-500"
+            />
+            <span className="font-mono font-semibold text-gray-200 w-6 text-right">
+              {count}
+            </span>
+          </label>
+        </div>
+      </div>
+
+      {/* StackIT node grid */}
+      <div>
+        <p className="text-[11px] text-gray-500 mb-2 uppercase tracking-wide">
+          Shared Infrastructure (fixed)
+        </p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-2">
+          {STACKIT_NODES.map((n) => (
+            <div
+              key={n.id}
+              className="border border-gray-700 rounded-lg p-3 bg-gray-900/40"
+            >
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-xs font-medium text-gray-200">
+                  {n.label}
+                </span>
+                <span className="text-xs font-mono text-emerald-400">
+                  €{n.eur}/mo
+                </span>
+              </div>
+              <p className="text-[10px] text-gray-500 font-mono mb-1.5">
+                {n.flavor}
+              </p>
+              <div className="flex flex-wrap gap-1">
+                {n.components.map((c) => (
+                  <span
+                    key={c}
+                    className="text-[9px] px-1.5 py-0.5 rounded bg-gray-800 text-gray-400"
+                  >
+                    {c}
+                  </span>
+                ))}
+              </div>
+              <p className="text-[9px] text-gray-600 mt-1.5 leading-relaxed">
+                {n.note}
+              </p>
+            </div>
+          ))}
+        </div>
+        <p className="text-xs text-gray-500 mt-2 text-right">
+          Shared fixed:{" "}
+          <span className="font-mono text-gray-300">€{SHARED_EUR}/mo</span>
+        </p>
+      </div>
+
+      {/* Per-participant breakdown */}
+      <div>
+        <p className="text-[11px] text-gray-500 mb-2 uppercase tracking-wide">
+          Per-Participant Cost (2 GB allocation)
+        </p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 text-xs">
+          <div className="border border-gray-700 rounded-lg p-3 bg-gray-900/40">
+            <div className="text-gray-500 mb-0.5">Compute</div>
+            <div className="font-mono text-gray-200">
+              €{PER_PARTICIPANT_COMPUTE_EUR}/mo
+            </div>
+            <div className="text-[10px] text-gray-600 mt-1">
+              1 vCPU / 2 GB — Control Plane + Identity Hub + Issuer Service
+            </div>
+          </div>
+          <div className="border border-gray-700 rounded-lg p-3 bg-gray-900/40">
+            <div className="text-gray-500 mb-0.5">Storage</div>
+            <div className="font-mono text-gray-200">
+              €{(PER_PARTICIPANT_STORAGE_GB * STORAGE_EUR_PER_GB).toFixed(2)}{" "}
+              <span className="text-gray-500 text-[10px]">
+                (+€{(HEALTH_DATA_STORAGE_GB * STORAGE_EUR_PER_GB).toFixed(2)}{" "}
+                data holders)
+              </span>
+            </div>
+            <div className="text-[10px] text-gray-600 mt-1">
+              {PER_PARTICIPANT_STORAGE_GB} GB base · {HEALTH_DATA_STORAGE_GB} GB
+              health records · €{STORAGE_EUR_PER_GB}/GB/mo
+            </div>
+          </div>
+          <div className="border border-gray-700 rounded-lg p-3 bg-gray-900/40">
+            <div className="flex items-center gap-1 text-gray-500 mb-0.5">
+              <Network size={11} />
+              CP↔DP Network
+            </div>
+            <div className="font-mono text-gray-200">
+              €{((CP_DP_TRAFFIC_MB / 1024) * NETWORK_EUR_PER_GB).toFixed(3)}/mo
+            </div>
+            <div className="text-[10px] text-gray-600 mt-1">
+              {CP_DP_TRAFFIC_MB} MB/mo per participant (DSP negotiation +
+              transfer receipts + audit) · €{NETWORK_EUR_PER_GB}/GB egress
+            </div>
+          </div>
+          <div className="border border-gray-700 rounded-lg p-3 bg-gray-900/40">
+            <div className="text-gray-500 mb-0.5">Log Injection</div>
+            <div className="font-mono text-gray-200">
+              €{((LOG_INJECTION_MB / 1024) * LOG_EUR_PER_GB).toFixed(3)}/mo
+            </div>
+            <div className="text-[10px] text-gray-600 mt-1">
+              {LOG_INJECTION_MB} MB/mo EHDS Article 50 audit trail → SIEM/Loki ·
+              €{LOG_EUR_PER_GB}/GB
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Totals */}
+      <div className="border border-gray-700 rounded-xl p-4 bg-gray-900/60">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
+          <div>
+            <div className="text-[10px] text-gray-500 mb-1">Shared fixed</div>
+            <div className="font-mono text-lg font-semibold text-gray-200">
+              €{SHARED_EUR}
+            </div>
+          </div>
+          <div>
+            <div className="text-[10px] text-gray-500 mb-1">
+              {count} × participants
+            </div>
+            <div className="font-mono text-lg font-semibold text-gray-200">
+              €{participantCost.toFixed(0)}
+            </div>
+          </div>
+          <div>
+            <div className="text-[10px] text-gray-500 mb-1">
+              Network ({(networkTotal + logTotal).toFixed(1)} GB/mo)
+            </div>
+            <div className="font-mono text-lg font-semibold text-gray-200">
+              €
+              {(
+                networkTotal * NETWORK_EUR_PER_GB +
+                logTotal * LOG_EUR_PER_GB
+              ).toFixed(1)}
+            </div>
+          </div>
+          <div className="border-l border-gray-700">
+            <div className="text-[10px] text-gray-500 mb-1">Total / month</div>
+            <div className="font-mono text-xl font-bold text-emerald-400">
+              €{total.toFixed(0)}
+            </div>
+            <div className="text-[10px] text-gray-500 mt-0.5">
+              €{perParticipant.toFixed(2)}/participant
+            </div>
+          </div>
+        </div>
+        <p className="text-[9px] text-gray-600 mt-3 text-center">
+          Assumes 60 % DATA_HOLDER / 40 % DATA_USER mix · STACKIT Frankfurt ·
+          prices excl. VAT · does not include Kubernetes management fee or
+          premium support
+        </p>
+      </div>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
 // Page Component
 // ---------------------------------------------------------------------------
 
@@ -1116,6 +1394,15 @@ export default function AdminComponentsPage() {
           )}
         </>
       )}
+
+      {/* Cost estimator — always visible, seeded with current participant count */}
+      <CostEstimatorPanel
+        participantCount={
+          viewMode === "participant"
+            ? topology?.summary.totalParticipants ?? 5
+            : snapshot?.participants.length ?? 5
+        }
+      />
 
       {/* Timestamp */}
       {timestamp && (
