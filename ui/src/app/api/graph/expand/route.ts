@@ -1,56 +1,17 @@
 import { NextResponse } from "next/server";
 import neo4j from "neo4j-driver";
 import { runQuery } from "@/lib/neo4j";
+import {
+  LABEL_LAYER,
+  LAYER_COLORS,
+  NODE_ROLE_COLORS,
+  LABEL_GROUP,
+} from "@/lib/graph-constants";
 
 export const dynamic = "force-dynamic";
 
 // How many neighbours to return per expand click
 const NEIGHBOUR_LIMIT = 50;
-
-const LABEL_LAYER: Record<string, number> = {
-  Participant: 1,
-  DataProduct: 1,
-  OdrlPolicy: 1,
-  Contract: 1,
-  AccessApplication: 1,
-  HDABApproval: 1,
-  ContractNegotiation: 1,
-  DataTransfer: 1,
-  Catalog: 1,
-  Organization: 1,
-  HealthDataset: 2,
-  Distribution: 2,
-  ContactPoint: 2,
-  EhdsPurpose: 2,
-  EEHRxFProfile: 2,
-  EEHRxFCategory: 2,
-  Patient: 3,
-  Encounter: 3,
-  Condition: 3,
-  Observation: 3,
-  MedicationRequest: 3,
-  Procedure: 3,
-  OMOPPerson: 4,
-  OMOPVisitOccurrence: 4,
-  OMOPConditionOccurrence: 4,
-  OMOPMeasurement: 4,
-  OMOPDrugExposure: 4,
-  OMOPProcedureOccurrence: 4,
-  SnomedConcept: 5,
-  LoincCode: 5,
-  ICD10Code: 5,
-  RxNormConcept: 5,
-  VerifiableCredential: 5,
-  TransferEvent: 5,
-};
-
-const LAYER_COLORS: Record<number, string> = {
-  1: "#2471A3",
-  2: "#148F77",
-  3: "#1E8449",
-  4: "#CA6F1E",
-  5: "#7D3C98",
-};
 
 // Smarter neighbour limit per label type — avoid flooding the graph with
 // 37k Observations when clicking a Patient
@@ -65,12 +26,31 @@ const LABEL_LIMIT: Record<string, number> = {
   OMOPDrugExposure: 15,
 };
 
+function toExpandNode(r: { nId: string; nLabels: string[]; nName: string }) {
+  const label = r.nLabels[0] ?? "Node";
+  const layer = r.nLabels.map((l) => LABEL_LAYER[l]).find(Boolean) ?? 0;
+  const color = NODE_ROLE_COLORS[label] ?? LAYER_COLORS[layer] ?? "#888";
+  const group = LABEL_GROUP[label] ?? "other";
+  return {
+    id: r.nId,
+    name: r.nName,
+    label,
+    layer,
+    color,
+    group,
+    expandable: true,
+  };
+}
+
 /**
  * GET /api/graph/expand?id=<elementId>
  *
  * Returns the immediate neighbours of a node plus the edges connecting them.
  * Nodes the client already has (existingIds) are included in the edge list
  * but not duplicated in the node list.
+ *
+ * Role-specific colors (Participant=amber, TrustCenter=violet, etc.) are
+ * applied so expanded nodes match the main overview palette.
  */
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
@@ -142,17 +122,7 @@ export async function GET(req: Request) {
       return labelCounts[lbl] <= cap;
     });
 
-    const nodes = filtered.map((r) => {
-      const layer = r.nLabels.map((l) => LABEL_LAYER[l]).find(Boolean) ?? 0;
-      return {
-        id: r.nId,
-        name: r.nName,
-        label: r.nLabels[0] ?? "Node",
-        layer,
-        color: LAYER_COLORS[layer] ?? "#888",
-        expandable: true,
-      };
-    });
+    const nodes = filtered.map(toExpandNode);
 
     // Edges: from the source node to each new neighbour
     const links = filtered.map((r) => ({

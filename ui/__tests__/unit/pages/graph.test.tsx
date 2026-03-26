@@ -103,14 +103,14 @@ describe("GraphPage", () => {
   it("renders the Graph Explorer heading", () => {
     mockFetchApi.mockReturnValue(new Promise(() => {}));
     render(<GraphPage />);
-    expect(screen.getByText("Graph Explorer")).toBeInTheDocument();
+    expect(screen.getByText("Knowledge Graph")).toBeInTheDocument();
   });
 
   it("renders the description paragraph", () => {
     mockFetchApi.mockReturnValue(new Promise(() => {}));
     render(<GraphPage />);
     expect(
-      screen.getByText(/Interactive 5-layer knowledge graph/),
+      screen.getByText(/5-layer EHDS health dataspace/),
     ).toBeInTheDocument();
   });
 
@@ -118,7 +118,9 @@ describe("GraphPage", () => {
   it("shows 'Connecting to Neo4j…' while data is loading", () => {
     mockFetchApi.mockReturnValue(new Promise(() => {}));
     render(<GraphPage />);
-    expect(screen.getByText(/Connecting to Neo4j/)).toBeInTheDocument();
+    expect(
+      screen.getByText(/Building researcher overview/),
+    ).toBeInTheDocument();
   });
 
   it("does not render ForceGraph while loading", () => {
@@ -167,12 +169,12 @@ describe("GraphPage", () => {
     expect(link.closest("a")).toHaveAttribute("href", "/catalog");
   });
 
-  it("renders Discover FHIR Assets link pointing to /data/discover", () => {
+  it("renders Validate graph link pointing to /api/graph/validate", () => {
     mockFetchApi.mockReturnValue(new Promise(() => {}));
     render(<GraphPage />);
-    const link = screen.getByText("Discover FHIR Assets");
+    const link = screen.getByText("Validate graph");
     expect(link).toBeInTheDocument();
-    expect(link.closest("a")).toHaveAttribute("href", "/data/discover");
+    expect(link.closest("a")).toHaveAttribute("href", "/api/graph/validate");
   });
 
   it("renders Patient Journey link pointing to /patient", () => {
@@ -214,17 +216,15 @@ describe("GraphPage", () => {
     mockFetchApi.mockReturnValue(mockResponse(sampleGraphData));
     render(<GraphPage />);
     await waitFor(() => {
-      expect(
-        screen.getByText(/Click a node to see details/),
-      ).toBeInTheDocument();
+      expect(screen.getByText(/Click a node to inspect/)).toBeInTheDocument();
     });
   });
 
   // 8. Layer filter/legend items
-  it("displays L1 Marketplace layer label", () => {
+  it("displays L1 Governance layer label", () => {
     mockFetchApi.mockReturnValue(new Promise(() => {}));
     render(<GraphPage />);
-    expect(screen.getByText("L1 Marketplace")).toBeInTheDocument();
+    expect(screen.getByText("L1 Governance")).toBeInTheDocument();
   });
 
   it("displays L2 HealthDCAT-AP layer label", () => {
@@ -255,7 +255,7 @@ describe("GraphPage", () => {
     mockFetchApi.mockReturnValue(new Promise(() => {}));
     render(<GraphPage />);
     const labels = [
-      "L1 Marketplace",
+      "L1 Governance",
       "L2 HealthDCAT-AP",
       "L3 FHIR R4",
       "L4 OMOP CDM",

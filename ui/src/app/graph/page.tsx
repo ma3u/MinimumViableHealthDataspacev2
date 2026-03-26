@@ -6,13 +6,24 @@ import { useSearchParams } from "next/navigation";
 import dynamic from "next/dynamic";
 import {
   Activity,
+  BarChart2,
   BookOpen,
   Database,
   Lock,
   Loader2,
   MousePointerClick,
+  ShieldCheck,
+  Users,
   X,
 } from "lucide-react";
+import type { LucideProps } from "lucide-react";
+import {
+  FILTER_PRESETS,
+  LAYER_COLORS,
+  LAYER_LABELS,
+  NODE_ROLE_COLORS,
+  type FilterPresetId,
+} from "@/lib/graph-constants";
 
 const ForceGraph2D = dynamic(() => import("react-force-graph-2d"), {
   ssr: false,
@@ -26,6 +37,7 @@ interface GraphNode {
   label: string;
   layer: number;
   color: string;
+  group?: string;
   expandable?: boolean;
   expanded?: boolean;
   x?: number;
@@ -47,20 +59,45 @@ interface GraphData {
 
 // ── Constants ────────────────────────────────────────────────────────────────
 
-const LAYER_LABELS: Record<number, string> = {
-  1: "L1 Governance",
-  2: "L2 HealthDCAT-AP",
-  3: "L3 FHIR R4",
-  4: "L4 OMOP CDM",
-  5: "L5 Ontology",
-};
+// Role-specific color legend entries (shown below layer legend)
+const ROLE_LEGEND: Array<{
+  label: string;
+  color: string;
+  description: string;
+}> = [
+  {
+    label: "Participant",
+    color: NODE_ROLE_COLORS.Participant,
+    description: "Data holder / researcher",
+  },
+  {
+    label: "TrustCenter",
+    color: NODE_ROLE_COLORS.TrustCenter,
+    description: "EHDS Art. 50 pseudonym authority",
+  },
+  {
+    label: "HDABApproval",
+    color: NODE_ROLE_COLORS.HDABApproval,
+    description: "HDAB access decision",
+  },
+  {
+    label: "SPESession",
+    color: NODE_ROLE_COLORS.SPESession,
+    description: "Active TEE processing session",
+  },
+];
 
-const LAYER_COLORS: Record<number, string> = {
-  1: "#2471A3",
-  2: "#148F77",
-  3: "#1E8449",
-  4: "#CA6F1E",
-  5: "#7D3C98",
+// Icon map for filter presets
+type LucideIcon = React.ForwardRefExoticComponent<
+  Omit<LucideProps, "ref"> & React.RefAttributes<SVGSVGElement>
+>;
+const PRESET_ICONS: Record<string, LucideIcon> = {
+  Users,
+  Lock,
+  ShieldCheck,
+  BookOpen,
+  Activity,
+  BarChart2,
 };
 
 // Concentric ring radii — nodes pre-positioned so physics is skipped
@@ -144,6 +181,8 @@ function GraphContent() {
   const [neighbours, setNeighbours] = useState<
     { dir: "in" | "out"; type: string; node: GraphNode }[]
   >([]);
+  // Active researcher filter preset — null = show all
+  const [activeFilter, setActiveFilter] = useState<FilterPresetId | null>(null);
 
   const containerRef = useRef<HTMLDivElement>(null);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -274,6 +313,11 @@ function GraphContent() {
   // ── Canvas painters ───────────────────────────────────────────────────────
   const connectedIds = new Set(neighbours.map((nb) => nb.node.id));
 
+  // Active filter preset labels set (null = no filter)
+  const filterLabelSet: Set<string> | null = activeFilter
+    ? new Set(FILTER_PRESETS.find((p) => p.id === activeFilter)?.labels ?? [])
+    : null;
+
   const paintNode = useCallback(
     (n: object, ctx: CanvasRenderingContext2D, gs: number) => {
       const node = n as GraphNode;
@@ -281,7 +325,11 @@ function GraphContent() {
       const isConn = connectedIds.has(node.id);
       const isExpanding = expanding === node.id;
       const isExpanded = node.expanded;
-      const dim = !!selected && !isSel && !isConn;
+      // Dim: by selection context OR by active filter (non-matching labels)
+      const filteredOut = filterLabelSet
+        ? !filterLabelSet.has(node.label)
+        : false;
+      const dim = filteredOut || (!!selected && !isSel && !isConn);
       const r = Math.max(2, 6 / Math.sqrt(gs));
       const x = node.x ?? 0,
         y = node.y ?? 0;
@@ -339,7 +387,7 @@ function GraphContent() {
       ctx.globalAlpha = 1;
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [selected, connectedIds, expanding],
+    [selected, connectedIds, expanding, filterLabelSet],
   );
 
   const paintLink = useCallback(
@@ -351,7 +399,11 @@ function GraphContent() {
       const isAdj =
         selected &&
         (nId(link.source) === selected.id || nId(link.target) === selected.id);
-      ctx.globalAlpha = isAdj ? 1 : selected ? 0.1 : 0.55;
+      // Dim link if either endpoint is filtered out
+      const filteredOut =
+        filterLabelSet &&
+        (!filterLabelSet.has(s.label) || !filterLabelSet.has(t.label));
+      ctx.globalAlpha = filteredOut ? 0.05 : isAdj ? 1 : selected ? 0.1 : 0.55;
       ctx.strokeStyle = isAdj ? "#60a5fa" : "#374151";
       ctx.lineWidth = (isAdj ? 1.5 : 0.7) / gs;
       ctx.beginPath();
@@ -376,21 +428,21 @@ function GraphContent() {
       ctx.globalAlpha = 1;
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [selected],
+    [selected, filterLabelSet],
   );
 
   // ── Render ────────────────────────────────────────────────────────────────
   return (
     <div className="flex h-[calc(100vh-44px)]">
       {/* Sidebar */}
-      <aside className="flex w-56 shrink-0 flex-col gap-4 overflow-y-auto border-r border-gray-700 bg-gray-900 p-4">
+      <aside className="flex w-64 shrink-0 flex-col gap-4 overflow-y-auto border-r border-gray-700 bg-gray-900 p-4">
         <div>
           <h2 className="mb-1 text-sm font-bold">Knowledge Graph</h2>
-          <p className="mb-3 text-xs text-gray-500">
-            Researcher view. Click a node to inspect. Click again to expand its
-            connections.
+          <p className="mb-2 text-xs text-gray-500">
+            5-layer EHDS health dataspace — {data.nodes.length} nodes ·{" "}
+            {data.links.length} edges
           </p>
-          <div className="mb-3 flex flex-col gap-1.5 text-xs">
+          <div className="flex flex-col gap-1 text-xs">
             <a
               href="/catalog"
               className="flex items-center gap-1.5 text-gray-500 hover:text-teal-400 transition-colors"
@@ -409,7 +461,51 @@ function GraphContent() {
             >
               <Database size={11} /> OMOP Analytics
             </a>
+            <a
+              href="/api/graph/validate"
+              target="_blank"
+              className="flex items-center gap-1.5 text-gray-500 hover:text-yellow-400 transition-colors"
+            >
+              <ShieldCheck size={11} /> Validate graph
+            </a>
           </div>
+        </div>
+
+        {/* Researcher filter presets */}
+        <div>
+          <p className="mb-2 text-xs font-semibold uppercase text-gray-500">
+            Filter by question
+          </p>
+          <div className="flex flex-col gap-1">
+            {FILTER_PRESETS.map((preset) => {
+              const Icon = PRESET_ICONS[preset.icon] ?? BookOpen;
+              const isActive = activeFilter === preset.id;
+              return (
+                <button
+                  key={preset.id}
+                  onClick={() =>
+                    setActiveFilter((prev) =>
+                      prev === preset.id ? null : (preset.id as FilterPresetId),
+                    )
+                  }
+                  title={preset.description}
+                  className={`flex items-center gap-2 rounded px-2 py-1.5 text-left text-xs transition-colors ${
+                    isActive
+                      ? "bg-blue-900/60 text-blue-200 border border-blue-700"
+                      : "text-gray-400 hover:bg-gray-800 hover:text-gray-200 border border-transparent"
+                  }`}
+                >
+                  <Icon size={11} />
+                  <span className="leading-tight">{preset.label}</span>
+                </button>
+              );
+            })}
+          </div>
+          {activeFilter && (
+            <p className="mt-1.5 text-xs text-gray-600">
+              {FILTER_PRESETS.find((p) => p.id === activeFilter)?.description}
+            </p>
+          )}
         </div>
 
         {/* Layer legend */}
@@ -428,9 +524,23 @@ function GraphContent() {
           ))}
         </div>
 
-        {/* Stats */}
-        <div className="text-xs text-gray-600">
-          {data.nodes.length} nodes · {data.links.length} edges loaded
+        {/* Role-specific color legend */}
+        <div>
+          <p className="mb-2 text-xs font-semibold uppercase text-gray-500">
+            Special roles
+          </p>
+          {ROLE_LEGEND.map(({ label, color, description }) => (
+            <div key={label} className="mb-1.5 flex items-start gap-2 text-xs">
+              <span
+                className="mt-0.5 h-2.5 w-2.5 shrink-0 rounded-full"
+                style={{ background: color }}
+              />
+              <div>
+                <div className="font-medium text-gray-300">{label}</div>
+                <div className="text-gray-600">{description}</div>
+              </div>
+            </div>
+          ))}
         </div>
 
         {/* Hint */}
@@ -440,7 +550,7 @@ function GraphContent() {
               size={11}
               className="mt-0.5 shrink-0 text-blue-500"
             />
-            Click a node to explore. Click again to expand its neighbours.
+            Click a node to inspect. Click again to expand neighbours.
           </div>
         )}
 
