@@ -2,8 +2,39 @@
 
 import { fetchApi } from "@/lib/api";
 import { useEffect, useState } from "react";
-import { ShieldCheck, AlertCircle, BadgeCheck, Key } from "lucide-react";
+import {
+  ShieldCheck,
+  AlertCircle,
+  BadgeCheck,
+  Key,
+  Globe,
+  Lock,
+} from "lucide-react";
 import PageIntro from "@/components/PageIntro";
+
+interface TrustCenter {
+  name: string;
+  operatedBy: string;
+  country: string;
+  status: string;
+  protocol: string;
+  did: string;
+  hdabApprovalId: string | null;
+  hdabApprovalStatus: string | null;
+  datasetCount: number;
+  recognisedCountries: string[];
+  activeRpsnCount: number;
+}
+
+interface SpeSession {
+  sessionId: string;
+  studyId: string;
+  status: string;
+  createdBy: string;
+  createdAt: string;
+  kAnonymityThreshold: number;
+  outputPolicy: string;
+}
 
 interface Consumer {
   id: string;
@@ -57,10 +88,12 @@ export default function CompliancePage() {
   const [datasetId, setDatasetId] = useState("");
   const [result, setResult] = useState<Result | null>(null);
   const [credentials, setCredentials] = useState<Credential[]>([]);
+  const [trustCenters, setTrustCenters] = useState<TrustCenter[]>([]);
+  const [speSessions, setSpeSessions] = useState<SpeSession[]>([]);
   const [loading, setLoading] = useState(false);
   const [optionsLoading, setOptionsLoading] = useState(true);
 
-  // Load dropdown options and credentials on mount
+  // Load dropdown options, credentials, and trust centers on mount
   useEffect(() => {
     Promise.all([
       fetchApi("/api/compliance")
@@ -74,6 +107,13 @@ export default function CompliancePage() {
       fetchApi("/api/credentials")
         .then((r) => r.json())
         .then((d) => setCredentials(d.credentials ?? []))
+        .catch(() => {}),
+      fetchApi("/api/trust-center")
+        .then((r) => r.json())
+        .then((d) => {
+          setTrustCenters(d.trustCenters ?? []);
+          setSpeSessions(d.speSessions ?? []);
+        })
         .catch(() => {}),
     ]).finally(() => setOptionsLoading(false));
   }, []);
@@ -373,6 +413,213 @@ export default function CompliancePage() {
             <span className="px-2 py-1 rounded bg-green-900/40 text-green-400 font-medium">
               ✓ Access Granted
             </span>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Phase 18: Trust Center Section ── */}
+      <div className="mt-12 border-t border-gray-700 pt-8">
+        <div className="flex items-center gap-2 mb-1">
+          <Lock size={18} className="text-layer1" />
+          <h2 className="text-xl font-bold">
+            Trust Center — Pseudonym Resolution
+          </h2>
+        </div>
+        <p className="text-gray-400 text-sm mb-6">
+          EHDS Art. 50/51 — HDAB-designated trust centers enabling
+          cross-provider longitudinal patient linkage without exposing real
+          identities to researchers. Provider pseudonyms are resolved to
+          research pseudonyms inside the Secure Processing Environment only.
+        </p>
+
+        {optionsLoading ? (
+          <div className="text-gray-500 text-sm">Loading trust centers…</div>
+        ) : trustCenters.length === 0 ? (
+          <div className="text-gray-500 text-sm">
+            No trust centers found. Run{" "}
+            <code className="font-mono text-xs bg-gray-800 px-1 py-0.5 rounded">
+              neo4j/seed-trust-center.cypher
+            </code>{" "}
+            to seed demo data.
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {trustCenters.map((tc) => (
+              <div
+                key={tc.name}
+                data-testid="trust-center-card"
+                className="rounded-lg border border-gray-700 bg-gray-800/50 p-4"
+              >
+                <div className="flex items-start justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <Globe size={16} className="text-layer1" />
+                    <span className="font-semibold text-sm">{tc.name}</span>
+                    <span className="text-xs px-2 py-0.5 rounded bg-gray-700 text-gray-300">
+                      {tc.country}
+                    </span>
+                  </div>
+                  <span
+                    className={`text-xs font-medium px-2 py-0.5 rounded ${
+                      tc.status === "active"
+                        ? "bg-green-900/40 text-green-400"
+                        : "bg-red-900/40 text-red-400"
+                    }`}
+                  >
+                    {tc.status}
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs text-gray-400 mb-3">
+                  <div>
+                    <span className="text-gray-500">Operated by:</span>{" "}
+                    {tc.operatedBy}
+                  </div>
+                  <div>
+                    <span className="text-gray-500">Protocol:</span>{" "}
+                    {tc.protocol}
+                  </div>
+                  <div className="col-span-2">
+                    <span className="text-gray-500">DID:</span>{" "}
+                    <span className="font-mono">{tc.did}</span>
+                  </div>
+                  {tc.hdabApprovalId && (
+                    <div>
+                      <span className="text-gray-500">HDAB Approval:</span>{" "}
+                      <span className="font-mono">{tc.hdabApprovalId}</span>{" "}
+                      <span
+                        className={
+                          tc.hdabApprovalStatus === "approved"
+                            ? "text-green-400"
+                            : "text-yellow-400"
+                        }
+                      >
+                        [{tc.hdabApprovalStatus}]
+                      </span>
+                    </div>
+                  )}
+                  <div>
+                    <span className="text-gray-500">Datasets covered:</span>{" "}
+                    {tc.datasetCount}
+                  </div>
+                  <div>
+                    <span className="text-gray-500">Active RPSNs:</span>{" "}
+                    <span className="text-green-400">{tc.activeRpsnCount}</span>
+                  </div>
+                  {tc.recognisedCountries.length > 0 && (
+                    <div className="col-span-2">
+                      <span className="text-gray-500">
+                        Mutual recognition (EHDS Art. 51):
+                      </span>{" "}
+                      {tc.recognisedCountries.join(", ")}
+                    </div>
+                  )}
+                </div>
+
+                {/* Cross-border pseudonym resolution flow */}
+                <div className="rounded bg-gray-900/60 p-3 text-xs text-gray-400 flex items-center gap-2 flex-wrap">
+                  <span className="px-2 py-1 rounded bg-layer1/20 text-layer1 font-medium">
+                    Provider PSN
+                  </span>
+                  <span>→ HDAB-auth resolve →</span>
+                  <span className="px-2 py-1 rounded bg-layer5/20 text-layer5 font-medium">
+                    {tc.name}
+                  </span>
+                  <span>→ RPSN →</span>
+                  <span className="px-2 py-1 rounded bg-layer3/20 text-layer3 font-medium">
+                    SPE (TEE)
+                  </span>
+                  <span>→ aggregate-only →</span>
+                  <span className="px-2 py-1 rounded bg-green-900/40 text-green-400 font-medium">
+                    Researcher
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* SPE Sessions */}
+        {speSessions.length > 0 && (
+          <div className="mt-6">
+            <h3 className="text-sm font-semibold mb-3 text-gray-300">
+              Active SPE Sessions (TEE-Attested)
+            </h3>
+            <table className="text-xs w-full border-collapse">
+              <thead>
+                <tr className="text-gray-500 border-b border-gray-700">
+                  <th className="text-left pb-1">Session ID</th>
+                  <th className="text-left pb-1">Study</th>
+                  <th className="text-left pb-1">Status</th>
+                  <th className="text-left pb-1">k-anon</th>
+                  <th className="text-left pb-1">Output Policy</th>
+                  <th className="text-left pb-1">Created by</th>
+                </tr>
+              </thead>
+              <tbody>
+                {speSessions.map((s) => (
+                  <tr
+                    key={s.sessionId}
+                    className="border-b border-gray-800"
+                    data-testid="spe-session-row"
+                  >
+                    <td className="py-1 pr-2 font-mono text-gray-300">
+                      {s.sessionId}
+                    </td>
+                    <td className="py-1 pr-2">{s.studyId}</td>
+                    <td className="py-1 pr-2">
+                      <span
+                        className={
+                          s.status === "active"
+                            ? "text-green-400"
+                            : "text-gray-400"
+                        }
+                      >
+                        {s.status}
+                      </span>
+                    </td>
+                    <td className="py-1 pr-2">≥ {s.kAnonymityThreshold}</td>
+                    <td className="py-1 pr-2">{s.outputPolicy}</td>
+                    <td className="py-1 font-mono text-gray-500">
+                      {s.createdBy?.split(":").pop()}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        {/* Security model summary */}
+        <div className="mt-6 rounded-lg border border-gray-700 bg-gray-900/50 p-4">
+          <h3 className="text-sm font-semibold mb-3 text-gray-300">
+            Security Model — Threat Mitigations
+          </h3>
+          <div className="space-y-1 text-xs text-gray-400">
+            {[
+              [
+                "Researcher accesses raw data",
+                "SPE + TEE enforce aggregate-only output (k ≥ 5)",
+              ],
+              [
+                "Provider re-identification",
+                "Provider-specific pseudonyms (local key per provider)",
+              ],
+              [
+                "Cross-provider linkage leak",
+                "Trust Center under HDAB authority only",
+              ],
+              [
+                "Trust Center collusion",
+                "Stateless or key-split design; full audit trail",
+              ],
+              ["Pseudonym reversal", "One-way HMAC mapping; revocable by HDAB"],
+            ].map(([threat, mitigation]) => (
+              <div key={threat} className="flex gap-2">
+                <span className="text-red-400 shrink-0">⚠</span>
+                <span className="text-gray-500 shrink-0 w-56">{threat}</span>
+                <span className="text-green-400">{mitigation}</span>
+              </div>
+            ))}
           </div>
         </div>
       </div>

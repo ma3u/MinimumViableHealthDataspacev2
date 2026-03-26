@@ -142,14 +142,44 @@ const MULTI_CHAIN_RESULT = {
   ],
 };
 
-/** Sets up fetchApi to serve options + credentials on mount */
+const TRUST_CENTERS = [
+  {
+    name: "RKI Trust Center DE",
+    operatedBy: "Robert Koch Institute",
+    country: "DE",
+    status: "active",
+    protocol: "deterministic-pseudonym-v1",
+    did: "did:web:rki.de:trustcenter",
+    hdabApprovalId: "hdab-approval-001",
+    hdabApprovalStatus: "approved",
+    datasetCount: 3,
+    recognisedCountries: ["NL"],
+    activeRpsnCount: 1,
+  },
+];
+
+const SPE_SESSIONS = [
+  {
+    sessionId: "spe-session-001",
+    studyId: "study-diabetes-de-nl-2025",
+    status: "active",
+    createdBy: "did:web:medreg.de:hdab",
+    createdAt: "2025-03-15T09:00:00Z",
+    kAnonymityThreshold: 5,
+    outputPolicy: "aggregate-only",
+  },
+];
+
+/** Sets up fetchApi to serve options + credentials + trust centers on mount */
 function setupMountMocks(
   options = OPTIONS_RESPONSE,
   credentials = CREDENTIALS,
+  trustCenterData = { trustCenters: TRUST_CENTERS, speSessions: SPE_SESSIONS },
 ) {
   mockFetchApi.mockImplementation((url: string) => {
     if (url === "/api/compliance") return mockResponse(options);
     if (url === "/api/credentials") return mockResponse({ credentials });
+    if (url === "/api/trust-center") return mockResponse(trustCenterData);
     return mockResponse({});
   });
 }
@@ -623,7 +653,9 @@ describe("CompliancePage", () => {
       render(<CompliancePage />);
 
       await waitFor(() => {
-        expect(screen.getByText("active")).toBeInTheDocument();
+        // Multiple "active" elements may appear (credential + trust center badges)
+        const activeElements = screen.getAllByText("active");
+        expect(activeElements.length).toBeGreaterThan(0);
       });
     });
 
@@ -811,6 +843,184 @@ describe("CompliancePage", () => {
 
       expect(screen.queryByText(/Compliant/)).not.toBeInTheDocument();
       expect(screen.queryByText(/Non-compliant/)).not.toBeInTheDocument();
+    });
+  });
+
+  // ─── Phase 18: Trust Center Section ──────────────────────────────
+  describe("Trust Center section (Phase 18)", () => {
+    it("fetches /api/trust-center on mount", () => {
+      mockFetchApi.mockReturnValue(new Promise(() => {}));
+      render(<CompliancePage />);
+      expect(mockFetchApi).toHaveBeenCalledWith("/api/trust-center");
+    });
+
+    it("renders Trust Center section heading", async () => {
+      setupMountMocks();
+      render(<CompliancePage />);
+
+      await waitFor(() => {
+        expect(
+          screen.getByText(/Trust Center.*Pseudonym Resolution/i),
+        ).toBeInTheDocument();
+      });
+    });
+
+    it("renders trust center cards with name and country", async () => {
+      setupMountMocks();
+      render(<CompliancePage />);
+
+      await waitFor(() => {
+        // The trust center name appears in both the card header and flow diagram — use getAllByText
+        const nameElements = screen.getAllByText("RKI Trust Center DE");
+        expect(nameElements.length).toBeGreaterThan(0);
+      });
+    });
+
+    it("shows trust center status badge", async () => {
+      setupMountMocks();
+      render(<CompliancePage />);
+
+      await waitFor(() => {
+        const cards = screen.getAllByTestId("trust-center-card");
+        expect(cards.length).toBeGreaterThan(0);
+        expect(within(cards[0]).getByText("active")).toBeInTheDocument();
+      });
+    });
+
+    it("shows operated-by and protocol fields", async () => {
+      setupMountMocks();
+      render(<CompliancePage />);
+
+      await waitFor(() => {
+        expect(screen.getByText("Robert Koch Institute")).toBeInTheDocument();
+        expect(
+          screen.getByText("deterministic-pseudonym-v1"),
+        ).toBeInTheDocument();
+      });
+    });
+
+    it("shows HDAB approval info when present", async () => {
+      setupMountMocks();
+      render(<CompliancePage />);
+
+      await waitFor(() => {
+        expect(screen.getByText("hdab-approval-001")).toBeInTheDocument();
+        expect(screen.getByText("[approved]")).toBeInTheDocument();
+      });
+    });
+
+    it("shows active RPSN count", async () => {
+      setupMountMocks();
+      render(<CompliancePage />);
+
+      await waitFor(() => {
+        // activeRpsnCount = 1 from TRUST_CENTERS fixture
+        expect(screen.getByText("1")).toBeInTheDocument();
+      });
+    });
+
+    it("shows cross-border mutual recognition countries", async () => {
+      setupMountMocks();
+      render(<CompliancePage />);
+
+      await waitFor(() => {
+        expect(
+          screen.getByText(/Mutual recognition.*EHDS Art. 51/i),
+        ).toBeInTheDocument();
+        expect(screen.getByText(/NL/)).toBeInTheDocument();
+      });
+    });
+
+    it("renders SPE session table when sessions exist", async () => {
+      setupMountMocks();
+      render(<CompliancePage />);
+
+      await waitFor(() => {
+        expect(screen.getByText(/Active SPE Sessions/i)).toBeInTheDocument();
+        const rows = screen.getAllByTestId("spe-session-row");
+        expect(rows.length).toBe(1);
+      });
+    });
+
+    it("renders SPE session with k-anonymity threshold", async () => {
+      setupMountMocks();
+      render(<CompliancePage />);
+
+      await waitFor(() => {
+        // "≥ 5" appears in both the session table row AND the security model text
+        const kAnonElements = screen.getAllByText(/≥ 5/);
+        expect(kAnonElements.length).toBeGreaterThan(0);
+        expect(screen.getByText("aggregate-only")).toBeInTheDocument();
+      });
+    });
+
+    it("shows security model threat mitigations", async () => {
+      setupMountMocks();
+      render(<CompliancePage />);
+
+      await waitFor(() => {
+        expect(
+          screen.getByText(/Security Model.*Threat Mitigations/i),
+        ).toBeInTheDocument();
+        expect(
+          screen.getByText(/Researcher accesses raw data/i),
+        ).toBeInTheDocument();
+        expect(screen.getByText(/Trust Center collusion/i)).toBeInTheDocument();
+      });
+    });
+
+    it("shows fallback message when no trust centers in graph", async () => {
+      setupMountMocks(OPTIONS_RESPONSE, CREDENTIALS, {
+        trustCenters: [],
+        speSessions: [],
+      });
+      render(<CompliancePage />);
+
+      await waitFor(() => {
+        expect(screen.getByText(/No trust centers found/i)).toBeInTheDocument();
+        expect(
+          screen.getByText(/seed-trust-center.cypher/i),
+        ).toBeInTheDocument();
+      });
+    });
+
+    it("does not render SPE session table when no sessions", async () => {
+      setupMountMocks(OPTIONS_RESPONSE, CREDENTIALS, {
+        trustCenters: TRUST_CENTERS,
+        speSessions: [],
+      });
+      render(<CompliancePage />);
+
+      await waitFor(() => {
+        // tc.name appears in both card header and flow diagram
+        const nameElements = screen.getAllByText("RKI Trust Center DE");
+        expect(nameElements.length).toBeGreaterThan(0);
+      });
+
+      expect(
+        screen.queryByText(/Active SPE Sessions/i),
+      ).not.toBeInTheDocument();
+    });
+
+    it("handles trust center API failure gracefully", async () => {
+      mockFetchApi.mockImplementation((url: string) => {
+        if (url === "/api/compliance") return mockResponse(OPTIONS_RESPONSE);
+        if (url === "/api/credentials")
+          return mockResponse({ credentials: CREDENTIALS });
+        if (url === "/api/trust-center")
+          return Promise.reject(new Error("Network error"));
+        return mockResponse({});
+      });
+
+      render(<CompliancePage />);
+
+      await waitFor(() => {
+        // Page still renders without trust center data
+        expect(screen.getByText("EHDS Compliance Checker")).toBeInTheDocument();
+      });
+
+      // No crash, no trust center cards
+      expect(screen.queryByTestId("trust-center-card")).not.toBeInTheDocument();
     });
   });
 });

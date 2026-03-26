@@ -73,3 +73,30 @@ CREATE CONSTRAINT vc_id IF NOT EXISTS FOR (vc:VerifiableCredential) REQUIRE vc.c
 CREATE INDEX vc_type IF NOT EXISTS FOR (vc:VerifiableCredential) ON (vc.credentialType);
 CREATE INDEX vc_subject IF NOT EXISTS FOR (vc:VerifiableCredential) ON (vc.subjectDid);
 CREATE INDEX vc_status IF NOT EXISTS FOR (vc:VerifiableCredential) ON (vc.status);
+
+// ============================================================
+// Phase 18: Trust Center & Federated Pseudonym Resolution
+// EHDS Art. 50 (Secure Processing Environment) + Art. 51 (Cross-Border)
+// ============================================================
+
+// Trust Center nodes — operated by national HDAB-designated authorities
+CREATE CONSTRAINT trust_center_name IF NOT EXISTS FOR (tc:TrustCenter) REQUIRE tc.name IS UNIQUE;
+CREATE INDEX trust_center_country IF NOT EXISTS FOR (tc:TrustCenter) ON (tc.country);
+CREATE INDEX trust_center_status IF NOT EXISTS FOR (tc:TrustCenter) ON (tc.status);
+
+// Provider Pseudonyms — per-provider opaque patient identifiers
+// Never shared with researchers; only the Trust Center maps them
+CREATE CONSTRAINT provider_psn_id IF NOT EXISTS FOR (pp:ProviderPseudonym) REQUIRE pp.psnId IS UNIQUE;
+CREATE INDEX provider_psn_provider IF NOT EXISTS FOR (pp:ProviderPseudonym) ON (pp.providerId);
+
+// Research Pseudonyms — cross-provider research identifiers issued by Trust Center
+// Only visible within the SPE; never returned to the data user
+CREATE CONSTRAINT research_psn_id IF NOT EXISTS FOR (rp:ResearchPseudonym) REQUIRE rp.rpsnId IS UNIQUE;
+CREATE INDEX research_psn_study IF NOT EXISTS FOR (rp:ResearchPseudonym) ON (rp.studyId);
+CREATE INDEX research_psn_revoked IF NOT EXISTS FOR (rp:ResearchPseudonym) ON (rp.revoked);
+
+// SPE Sessions — TEE-attested Secure Processing Environment sessions
+// Sessions are created by the HDAB, not the researcher
+CREATE CONSTRAINT spe_session_id IF NOT EXISTS FOR (ss:SPESession) REQUIRE ss.sessionId IS UNIQUE;
+CREATE INDEX spe_session_status IF NOT EXISTS FOR (ss:SPESession) ON (ss.status);
+CREATE INDEX spe_session_study IF NOT EXISTS FOR (ss:SPESession) ON (ss.studyId);
