@@ -24,6 +24,9 @@ vi.mock("neo4j-driver", () => ({
       basic: vi.fn(),
     },
     int: vi.fn((n: number) => n),
+    integer: {
+      toNumber: (v: any) => (typeof v === "number" ? v : Number(v)),
+    },
   },
 }));
 
@@ -242,6 +245,222 @@ describe("Neo4j Proxy API", () => {
       expect(res.body.templates[0]).toHaveProperty("name");
       expect(res.body.templates[0]).toHaveProperty("description");
       expect(res.body).toHaveProperty("llmAvailable");
+    });
+  });
+
+  // ── Trust Center (Phase 18) ──────────────────────────────────────────────
+  describe("GET /trust-center", () => {
+    it("should return a list of trust centers", async () => {
+      mockRun.mockResolvedValue({
+        records: [
+          {
+            get: vi.fn((key: string) => {
+              const data: Record<string, any> = {
+                name: "RKI Trust Center DE",
+                operatedBy: "Robert Koch Institute",
+                country: "DE",
+                status: "active",
+                protocol: "deterministic-pseudonym-v1",
+                createdAt: "2026-01-01T00:00:00Z",
+                hdabName: "MedReg DE",
+                hdabDid: "did:web:medreg.de:hdab",
+                datasetCount: 3,
+                sampleDatasets: ["dataset:cardiac-outcomes-eu-2025"],
+              };
+              return data[key];
+            }),
+          },
+        ],
+      });
+
+      const res = await request.get("/trust-center");
+
+      expect(res.status).toBe(200);
+      expect(res.body).toHaveProperty("trustCenters");
+      expect(res.body.trustCenters).toHaveLength(1);
+      expect(res.body.trustCenters[0].name).toBe("RKI Trust Center DE");
+      expect(res.body.trustCenters[0].country).toBe("DE");
+      expect(res.body.trustCenters[0].status).toBe("active");
+    });
+  });
+
+  describe("POST /trust-center/resolve", () => {
+    it("should reject requests with fewer than 2 pseudonyms", async () => {
+      const res = await request
+        .post("/trust-center/resolve")
+        .send({
+          trustCenter: "RKI Trust Center DE",
+          providerPseudonyms: ["PSN-AK-00742"],
+        });
+
+      expect(res.status).toBe(400);
+      expect(res.body.error).toContain("2 PSNs");
+    });
+
+    it("should reject requests without trust center name", async () => {
+      const res = await request
+        .post("/trust-center/resolve")
+        .send({
+          providerPseudonyms: ["PSN-AK-00742", "PSN-LMC-09451"],
+        });
+
+      expect(res.status).toBe(400);
+    });
+
+    it("should return 404 for unknown trust center", async () => {
+      mockRun.mockResolvedValue({ records: [] });
+
+      const res = await request
+        .post("/trust-center/resolve")
+        .send({
+          trustCenter: "Nonexistent TC",
+          providerPseudonyms: ["PSN-A", "PSN-B"],
+        });
+
+      expect(res.status).toBe(404);
+    });
+
+    it("should resolve pseudonyms in stateless mode", async () => {
+      // First call: trust center check returns a result
+      mockRun
+        .mockResolvedValueOnce({
+          records: [{ get: vi.fn(() => ({ properties: {} })) }],
+        })
+        // Second call: persist mapping
+        .mockResolvedValueOnce({ records: [] })
+        // Third call: audit log
+        .mockResolvedValueOnce({ records: [] });
+
+      const res = await request
+        .post("/trust-center/resolve")
+        .send({
+          trustCenter: "RKI Trust Center DE",
+          providerPseudonyms: ["PSN-AK-00742", "PSN-LMC-09451"],
+          mode: "stateless",
+        });
+
+      expect(res.status).toBe(200);
+      expect(res.body).toHaveProperty("researchPseudonym");
+      expect(res.body.researchPseudonym).toMatch(/^RPSN-/);
+      expect(res.body.mode).toBe("stateless");
+      expect(res.body.linkedPseudonyms).toBe(2);
+    });
+
+    it("should produce deterministic RPSN for same inputs in stateless mode", async () => {
+      const psns = ["PSN-AK-00742", "PSN-LMC-09451"];
+
+      // Two resolve calls with same inputs
+      for (let i = 0; i < 2; i++) {
+        mockRun
+          .mockResolvedValueOnce({
+            records: [{ get: vi.fn(() => ({ properties: {} })) }],
+          })
+          .mockResolvedValueOnce({ records: [] })
+          .mockResolvedValueOnce({ records: [] });
+      }
+
+      const res1 = await request
+        .post("/trust-center/resolve")
+        .send({ trustCenter: "RKI", providerPseudonyms: psns, mode: "stateless" });
+      const res2 = await request
+        .post("/trust-center/resolve")
+        .send({ trustCenter: "RKI", providerPseudonyms: psns, mode: "stateless" });
+
+      expect(res1.body.researchPseudonym).toBe(res2.body.researchPseudonym);
+    });
+  });
+
+  describe("DELETE /trust-center/revoke/:rpsn", () => {
+    it("should revoke an existing research pseudonym", async () => {
+      mockRun
+        .mockResolvedValueOnce({
+          records: [
+            {
+              get: vi.fn((key: string) => {
+                if (key === "rpsn") return "RPSN-DE-1138";
+                if (key === "status") return "revoked";
+              }),
+            },
+          ],
+        })
+        // audit log
+        .mockResolvedValueOnce({ records: [] });
+
+      const res = await request.delete("/trust-center/revoke/RPSN-DE-1138");
+
+      expect(res.status).toBe(200);
+      expect(res.body.rpsn).toBe("RPSN-DE-1138");
+      expect(res.body.status).toBe("revoked");
+    });
+
+    it("should return 404 for unknown RPSN", async () => {
+      mockRun.mockResolvedValue({ records: [] });
+
+      const res = await request.delete("/trust-center/revoke/RPSN-UNKNOWN");
+
+      expect(res.status).toBe(404);
+    });
+  });
+
+  describe("GET /trust-center/audit", () => {
+    it("should return audit entries", async () => {
+      mockRun.mockResolvedValue({
+        records: [
+          {
+            get: vi.fn((key: string) => {
+              const data: Record<string, any> = {
+                rpsn: "RPSN-DE-1138",
+                status: "active",
+                mode: "stateless",
+                createdAt: "2026-03-15T10:00:00Z",
+                trustCenter: "RKI Trust Center DE",
+                providerPsns: ["PSN-AK-00742", "PSN-LMC-09451"],
+              };
+              return data[key];
+            }),
+          },
+        ],
+      });
+
+      const res = await request.get("/trust-center/audit");
+
+      expect(res.status).toBe(200);
+      expect(res.body).toHaveProperty("entries");
+      expect(res.body.entries).toHaveLength(1);
+      expect(res.body.entries[0].rpsn).toBe("RPSN-DE-1138");
+    });
+  });
+
+  describe("GET /trust-center/spe-sessions", () => {
+    it("should return SPE sessions with attestation info", async () => {
+      mockRun.mockResolvedValue({
+        records: [
+          {
+            get: vi.fn((key: string) => {
+              const data: Record<string, any> = {
+                sessionId: "spe-session-001",
+                status: "active",
+                approvedCodeHash: "sha256:a1b2c3d4e5f6",
+                attestationType: "sgx-v3.1",
+                kAnonymityThreshold: 5,
+                createdAt: "2026-03-15T10:00:00Z",
+                createdBy: "MedReg DE",
+                pseudonymCount: 2,
+              };
+              return data[key];
+            }),
+          },
+        ],
+      });
+
+      const res = await request.get("/trust-center/spe-sessions");
+
+      expect(res.status).toBe(200);
+      expect(res.body).toHaveProperty("sessions");
+      expect(res.body.sessions).toHaveLength(1);
+      expect(res.body.sessions[0].sessionId).toBe("spe-session-001");
+      expect(res.body.sessions[0].attestationType).toBe("sgx-v3.1");
+      expect(res.body.sessions[0].kAnonymityThreshold).toBe(5);
     });
   });
 });

@@ -2,7 +2,16 @@
 
 import { fetchApi } from "@/lib/api";
 import { useEffect, useState } from "react";
-import { ShieldCheck, AlertCircle, BadgeCheck, Key } from "lucide-react";
+import {
+  ShieldCheck,
+  AlertCircle,
+  BadgeCheck,
+  Key,
+  Building2,
+  Link2,
+  Shield,
+  Server,
+} from "lucide-react";
 import PageIntro from "@/components/PageIntro";
 
 interface Consumer {
@@ -50,6 +59,37 @@ interface Credential {
   timeliness: number | null;
 }
 
+interface TrustCenter {
+  name: string;
+  operatedBy: string;
+  country: string;
+  status: string;
+  protocol: string;
+  createdAt: string;
+  hdab: { name: string; did: string };
+  datasetCount: number;
+}
+
+interface SPESessionInfo {
+  sessionId: string;
+  status: string;
+  approvedCodeHash: string;
+  attestationType: string;
+  kAnonymityThreshold: number | null;
+  createdAt: string;
+  createdBy: string;
+  pseudonymCount: number;
+}
+
+interface AuditEntry {
+  rpsn: string;
+  status: string;
+  mode: string;
+  createdAt: string;
+  trustCenter: string;
+  providerPseudonyms: string[];
+}
+
 export default function CompliancePage() {
   const [consumers, setConsumers] = useState<Consumer[]>([]);
   const [datasets, setDatasets] = useState<DatasetOption[]>([]);
@@ -57,6 +97,9 @@ export default function CompliancePage() {
   const [datasetId, setDatasetId] = useState("");
   const [result, setResult] = useState<Result | null>(null);
   const [credentials, setCredentials] = useState<Credential[]>([]);
+  const [trustCenters, setTrustCenters] = useState<TrustCenter[]>([]);
+  const [speSessions, setSpeSessions] = useState<SPESessionInfo[]>([]);
+  const [auditEntries, setAuditEntries] = useState<AuditEntry[]>([]);
   const [loading, setLoading] = useState(false);
   const [optionsLoading, setOptionsLoading] = useState(true);
 
@@ -74,6 +117,18 @@ export default function CompliancePage() {
       fetchApi("/api/credentials")
         .then((r) => r.json())
         .then((d) => setCredentials(d.credentials ?? []))
+        .catch(() => {}),
+      fetchApi("/api/trust-center")
+        .then((r) => r.json())
+        .then((d) => setTrustCenters(d.trustCenters ?? []))
+        .catch(() => {}),
+      fetchApi("/api/trust-center/spe-sessions")
+        .then((r) => r.json())
+        .then((d) => setSpeSessions(d.sessions ?? []))
+        .catch(() => {}),
+      fetchApi("/api/trust-center/audit?limit=10")
+        .then((r) => r.json())
+        .then((d) => setAuditEntries(d.entries ?? []))
         .catch(() => {}),
     ]).finally(() => setOptionsLoading(false));
   }, []);
@@ -375,6 +430,237 @@ export default function CompliancePage() {
             </span>
           </div>
         </div>
+      </div>
+
+      {/* ── Trust Center Section (Phase 18 — EHDS Art. 50/51) ── */}
+      <div className="mt-12 border-t border-gray-700 pt-8">
+        <div className="flex items-center gap-2 mb-1">
+          <Building2 size={18} className="text-layer1" />
+          <h2 className="text-xl font-bold">
+            Trust Centers — Pseudonym Resolution
+          </h2>
+        </div>
+        <p className="text-gray-400 text-sm mb-6">
+          EHDS Art. 50/51 — Federated pseudonym resolution under HDAB
+          governance. Trust Centers map provider-specific pseudonyms to shared
+          research pseudonyms for cross-provider longitudinal linkage.
+        </p>
+
+        {trustCenters.length === 0 ? (
+          <div className="text-gray-500 text-sm">
+            {optionsLoading
+              ? "Loading..."
+              : "No Trust Centers found in graph."}
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {trustCenters.map((tc) => (
+              <div
+                key={tc.name}
+                className="rounded-lg border border-gray-700 bg-gray-800/50 p-4"
+              >
+                <div className="flex items-start justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    <Shield
+                      size={16}
+                      className={
+                        tc.status === "active"
+                          ? "text-green-400"
+                          : "text-red-400"
+                      }
+                    />
+                    <span className="font-semibold text-sm">{tc.name}</span>
+                    <span className="text-xs px-2 py-0.5 rounded bg-layer1/20 text-layer1">
+                      {tc.country}
+                    </span>
+                  </div>
+                  <span
+                    className={`text-xs font-medium px-2 py-0.5 rounded ${
+                      tc.status === "active"
+                        ? "bg-green-900/40 text-green-400"
+                        : "bg-red-900/40 text-red-400"
+                    }`}
+                  >
+                    {tc.status}
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs text-gray-400">
+                  <div>
+                    <span className="text-gray-500">Operated by:</span>{" "}
+                    {tc.operatedBy}
+                  </div>
+                  <div>
+                    <span className="text-gray-500">Protocol:</span>{" "}
+                    <span className="font-mono">{tc.protocol}</span>
+                  </div>
+                  <div>
+                    <span className="text-gray-500">HDAB:</span>{" "}
+                    {tc.hdab?.name ?? "—"}
+                  </div>
+                  <div>
+                    <span className="text-gray-500">Datasets linked:</span>{" "}
+                    {tc.datasetCount}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Pseudonym Resolution Flow Diagram */}
+        <div className="mt-6 rounded-lg border border-gray-700 bg-gray-900/50 p-4">
+          <h3 className="text-sm font-semibold mb-3 text-gray-300">
+            Cross-Provider Pseudonym Resolution Flow
+          </h3>
+          <div className="flex items-center gap-2 text-xs text-gray-400 flex-wrap">
+            <span className="px-2 py-1 rounded bg-layer3/20 text-layer3 font-medium">
+              Provider A (PSN-A)
+            </span>
+            <span>→</span>
+            <span className="px-2 py-1 rounded bg-layer3/20 text-layer3 font-medium">
+              Provider B (PSN-B)
+            </span>
+            <span>→</span>
+            <span className="px-2 py-1 rounded bg-layer1/20 text-layer1 font-medium">
+              Trust Center
+            </span>
+            <span>→ resolves →</span>
+            <span className="px-2 py-1 rounded bg-layer5/20 text-layer5 font-medium">
+              RPSN (Research PSN)
+            </span>
+            <span>→</span>
+            <span className="px-2 py-1 rounded bg-layer4/20 text-layer4 font-medium">
+              SPE (TEE)
+            </span>
+            <span>→</span>
+            <span className="px-2 py-1 rounded bg-green-900/40 text-green-400 font-medium">
+              Aggregate Only
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* ── SPE Sessions (Phase 18c) ── */}
+      <div className="mt-12 border-t border-gray-700 pt-8">
+        <div className="flex items-center gap-2 mb-1">
+          <Server size={18} className="text-layer4" />
+          <h2 className="text-xl font-bold">
+            Secure Processing Environment Sessions
+          </h2>
+        </div>
+        <p className="text-gray-400 text-sm mb-6">
+          TEE-attested SPE sessions enforce aggregate-only output (k-anonymity
+          ≥ 5). Sessions are created by the HDAB, not the researcher.
+        </p>
+
+        {speSessions.length === 0 ? (
+          <div className="text-gray-500 text-sm">
+            {optionsLoading ? "Loading..." : "No SPE sessions found."}
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {speSessions.map((ss) => (
+              <div
+                key={ss.sessionId}
+                className="rounded-lg border border-gray-700 bg-gray-800/50 p-3"
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    <span className="font-mono text-sm font-semibold">
+                      {ss.sessionId}
+                    </span>
+                    <span className="text-xs px-2 py-0.5 rounded bg-layer4/20 text-layer4">
+                      {ss.attestationType}
+                    </span>
+                  </div>
+                  <span
+                    className={`text-xs font-medium px-2 py-0.5 rounded ${
+                      ss.status === "active"
+                        ? "bg-green-900/40 text-green-400"
+                        : ss.status === "completed"
+                          ? "bg-blue-900/40 text-blue-400"
+                          : "bg-red-900/40 text-red-400"
+                    }`}
+                  >
+                    {ss.status}
+                  </span>
+                </div>
+                <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs text-gray-400">
+                  <div>
+                    <span className="text-gray-500">Code hash:</span>{" "}
+                    <span className="font-mono">{ss.approvedCodeHash}</span>
+                  </div>
+                  <div>
+                    <span className="text-gray-500">k-anonymity:</span>{" "}
+                    ≥ {ss.kAnonymityThreshold ?? 5}
+                  </div>
+                  <div>
+                    <span className="text-gray-500">Created by:</span>{" "}
+                    {ss.createdBy ?? "—"}
+                  </div>
+                  <div>
+                    <span className="text-gray-500">Research PSNs:</span>{" "}
+                    {ss.pseudonymCount}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* ── Pseudonym Audit Log ── */}
+      <div className="mt-12 border-t border-gray-700 pt-8">
+        <div className="flex items-center gap-2 mb-1">
+          <Link2 size={18} className="text-layer2" />
+          <h2 className="text-xl font-bold">Pseudonym Resolution Audit Log</h2>
+        </div>
+        <p className="text-gray-400 text-sm mb-6">
+          Recent pseudonym resolution events — all requests are logged for HDAB
+          audit trail.
+        </p>
+
+        {auditEntries.length === 0 ? (
+          <div className="text-gray-500 text-sm">
+            {optionsLoading ? "Loading..." : "No resolution events yet."}
+          </div>
+        ) : (
+          <table className="text-xs w-full border-collapse">
+            <thead>
+              <tr className="text-gray-500 border-b border-gray-700">
+                <th className="text-left pb-1">RPSN</th>
+                <th className="text-left pb-1">Status</th>
+                <th className="text-left pb-1">Mode</th>
+                <th className="text-left pb-1">Trust Center</th>
+                <th className="text-left pb-1">Linked PSNs</th>
+              </tr>
+            </thead>
+            <tbody>
+              {auditEntries.map((e) => (
+                <tr key={e.rpsn} className="border-b border-gray-800">
+                  <td className="py-1 pr-2 font-mono">{e.rpsn}</td>
+                  <td className="py-1 pr-2">
+                    <span
+                      className={
+                        e.status === "active"
+                          ? "text-green-400"
+                          : "text-red-400"
+                      }
+                    >
+                      {e.status}
+                    </span>
+                  </td>
+                  <td className="py-1 pr-2">{e.mode ?? "—"}</td>
+                  <td className="py-1 pr-2">{e.trustCenter}</td>
+                  <td className="py-1 font-mono text-gray-400">
+                    {e.providerPseudonyms?.length ?? 0}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
       </div>
     </div>
   );

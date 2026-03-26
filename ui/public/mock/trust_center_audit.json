@@ -1,0 +1,29 @@
+{
+  "total": 3,
+  "entries": [
+    {
+      "rpsn": "RPSN-DE-1138",
+      "status": "active",
+      "mode": "stateless",
+      "createdAt": "2026-03-15T10:00:00Z",
+      "trustCenter": "RKI Trust Center DE",
+      "providerPseudonyms": ["PSN-AK-00742", "PSN-LMC-09451"]
+    },
+    {
+      "rpsn": "RPSN-DE-2047",
+      "status": "active",
+      "mode": "stateless",
+      "createdAt": "2026-03-15T10:00:00Z",
+      "trustCenter": "RKI Trust Center DE",
+      "providerPseudonyms": ["PSN-AK-01203", "PSN-HUH-05512"]
+    },
+    {
+      "rpsn": "RPSN-NL-0891",
+      "status": "active",
+      "mode": "key-managed",
+      "createdAt": "2026-03-15T10:00:00Z",
+      "trustCenter": "RIVM Trust Center NL",
+      "providerPseudonyms": ["PSN-LMC-03221", "PSN-CHL-07744"]
+    }
+  ]
+}

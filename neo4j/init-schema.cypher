@@ -67,6 +67,17 @@ CREATE CONSTRAINT icd10_code IF NOT EXISTS FOR (icd:ICD10Code) REQUIRE icd.code 
 CREATE CONSTRAINT rxnorm_rxcui IF NOT EXISTS FOR (rx:RxNormConcept) REQUIRE rx.rxcui IS UNIQUE;
 
 // ============================================================
+// Layer 1c: Trust Center — Federated Pseudonym Resolution
+// (EHDS Art. 50/51 — Phase 18)
+// ============================================================
+CREATE CONSTRAINT trust_center_name IF NOT EXISTS FOR (tc:TrustCenter) REQUIRE tc.name IS UNIQUE;
+CREATE CONSTRAINT research_pseudonym_rpsn IF NOT EXISTS FOR (rp:ResearchPseudonym) REQUIRE rp.rpsn IS UNIQUE;
+CREATE CONSTRAINT provider_pseudonym_psn IF NOT EXISTS FOR (pp:ProviderPseudonym) REQUIRE pp.psn IS UNIQUE;
+CREATE INDEX provider_pseudonym_provider IF NOT EXISTS FOR (pp:ProviderPseudonym) ON (pp.provider);
+CREATE CONSTRAINT spe_session_id IF NOT EXISTS FOR (ss:SPESession) REQUIRE ss.sessionId IS UNIQUE;
+CREATE INDEX spe_session_status IF NOT EXISTS FOR (ss:SPESession) ON (ss.status);
+
+// ============================================================
 // Layer 1b: Verifiable Credentials (DCP v1.0 + EHDS)
 // ============================================================
 CREATE CONSTRAINT vc_id IF NOT EXISTS FOR (vc:VerifiableCredential) REQUIRE vc.credentialId IS UNIQUE;

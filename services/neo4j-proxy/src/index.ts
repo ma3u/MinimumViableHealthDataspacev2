@@ -17,6 +17,7 @@ import express, {
   type Response,
   type NextFunction,
 } from "express";
+import crypto from "crypto";
 import neo4j, { type Driver, type Session } from "neo4j-driver";
 import pg from "pg";
 import rateLimit from "express-rate-limit";
@@ -39,6 +40,12 @@ const NEO4J_SPE2_PASSWORD = process.env.NEO4J_SPE2_PASSWORD ?? NEO4J_PASSWORD;
 // Callers may request a HIGHER threshold via the request body, but never lower.
 // Set to 0 to disable enforcement (not recommended for production).
 const MIN_COHORT_SIZE = parseInt(process.env.MIN_COHORT_SIZE ?? "5", 10);
+
+// Phase 18: Trust Center pseudonym resolution
+// HMAC key for stateless deterministic pseudonym derivation.
+// In production this MUST come from a secure vault (e.g. HashiCorp Vault).
+const TRUST_CENTER_HMAC_KEY =
+  process.env.TRUST_CENTER_HMAC_KEY ?? "mvhds-dev-trust-center-key-change-me";
 
 // Phase 5c: Optional LLM endpoint for Text2Cypher
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
@@ -1350,6 +1357,321 @@ ${GRAPH_SCHEMA_CONTEXT}`;
 
   return null;
 }
+
+// ===========================================================================
+// Phase 18: Trust Center — Federated Pseudonym Resolution (EHDS Art. 50/51)
+// ===========================================================================
+
+/**
+ * GET /trust-center
+ * List all registered Trust Centers with their governance relationships.
+ */
+app.get(
+  "/trust-center",
+  async (_req: Request, res: Response, next: NextFunction) => {
+    const session = getSession();
+    try {
+      const result = await session.run(`
+        MATCH (tc:TrustCenter)
+        OPTIONAL MATCH (tc)-[:GOVERNED_BY]->(hdab:Participant)
+        OPTIONAL MATCH (tc)-[:RESOLVES_PSEUDONYMS_FOR]->(ds:HealthDataset)
+        WITH tc, hdab,
+             count(DISTINCT ds) AS datasetCount,
+             collect(DISTINCT ds.datasetId)[..5] AS sampleDatasets
+        RETURN tc.name AS name,
+               tc.operatedBy AS operatedBy,
+               tc.country AS country,
+               tc.status AS status,
+               tc.protocol AS protocol,
+               tc.createdAt AS createdAt,
+               hdab.name AS hdabName,
+               hdab.participantId AS hdabDid,
+               datasetCount,
+               sampleDatasets
+        ORDER BY tc.country
+      `);
+
+      const trustCenters = result.records.map((r) => ({
+        name: r.get("name"),
+        operatedBy: r.get("operatedBy"),
+        country: r.get("country"),
+        status: r.get("status"),
+        protocol: r.get("protocol"),
+        createdAt: r.get("createdAt"),
+        hdab: { name: r.get("hdabName"), did: r.get("hdabDid") },
+        datasetCount: neo4j.integer.toNumber(r.get("datasetCount")),
+        sampleDatasets: r.get("sampleDatasets"),
+      }));
+
+      res.json({ trustCenters });
+    } catch (err) {
+      next(err);
+    } finally {
+      await session.close();
+    }
+  },
+);
+
+/**
+ * POST /trust-center/resolve
+ * Map provider-specific pseudonyms to a shared research pseudonym.
+ *
+ * Body: {
+ *   trustCenter: string,          // Trust Center name
+ *   providerPseudonyms: string[], // Provider-specific PSNs to link
+ *   mode?: "stateless" | "key-managed"  // Resolution mode (default: stateless)
+ * }
+ *
+ * Security: In production, only HDAB-authority-scoped tokens may call this.
+ * Data users NEVER interact with the Trust Center directly.
+ */
+app.post(
+  "/trust-center/resolve",
+  heavyLimiter,
+  async (req: Request, res: Response, next: NextFunction) => {
+    const session = getSession();
+    try {
+      const {
+        trustCenter,
+        providerPseudonyms,
+        mode = "stateless",
+      } = req.body;
+
+      if (
+        !trustCenter ||
+        !Array.isArray(providerPseudonyms) ||
+        providerPseudonyms.length < 2
+      ) {
+        res.status(400).json({
+          error:
+            "Provide 'trustCenter' (string) and 'providerPseudonyms' (array of ≥2 PSNs)",
+        });
+        return;
+      }
+
+      // Verify trust center exists and is active
+      const tcCheck = await session.run(
+        `MATCH (tc:TrustCenter {name: $name, status: 'active'}) RETURN tc`,
+        { name: trustCenter },
+      );
+      if (tcCheck.records.length === 0) {
+        res.status(404).json({ error: `Trust Center '${trustCenter}' not found or inactive` });
+        return;
+      }
+
+      let rpsn: string;
+
+      if (mode === "stateless") {
+        // Deterministic HMAC-based derivation: HMAC(key, sorted PSNs joined)
+        const sorted = [...providerPseudonyms].sort();
+        const hmac = crypto.createHmac("sha256", TRUST_CENTER_HMAC_KEY);
+        hmac.update(sorted.join("|"));
+        const hash = hmac.digest("hex").substring(0, 12);
+        rpsn = `RPSN-${hash.toUpperCase()}`;
+      } else {
+        // Key-managed: generate a random research pseudonym
+        rpsn = `RPSN-${crypto.randomBytes(6).toString("hex").toUpperCase()}`;
+      }
+
+      // Persist the mapping in Neo4j
+      await session.run(
+        `
+        MERGE (rp:ResearchPseudonym {rpsn: $rpsn})
+        ON CREATE SET rp.status = 'active',
+                      rp.mode = $mode,
+                      rp.createdAt = datetime()
+        WITH rp
+        MATCH (tc:TrustCenter {name: $trustCenter})
+        MERGE (rp)-[:RESOLVED_BY]->(tc)
+        WITH rp
+        UNWIND $psns AS psn
+        MERGE (pp:ProviderPseudonym {psn: psn})
+        ON CREATE SET pp.status = 'active'
+        MERGE (rp)-[:LINKED_FROM]->(pp)
+        `,
+        { rpsn, mode, trustCenter, psns: providerPseudonyms },
+      );
+
+      // Audit log
+      logTransferEvent(
+        "/trust-center/resolve",
+        "POST",
+        req.headers["x-participant"] as string,
+        200,
+        providerPseudonyms.length,
+      );
+
+      res.json({
+        researchPseudonym: rpsn,
+        mode,
+        trustCenter,
+        linkedPseudonyms: providerPseudonyms.length,
+      });
+    } catch (err) {
+      next(err);
+    } finally {
+      await session.close();
+    }
+  },
+);
+
+/**
+ * GET /trust-center/audit
+ * Resolution audit log — returns recent pseudonym resolution events.
+ * Query params: ?limit=50&trustCenter=...
+ */
+app.get(
+  "/trust-center/audit",
+  async (req: Request, res: Response, next: NextFunction) => {
+    const session = getSession();
+    try {
+      const limit = Math.min(
+        parseInt((req.query.limit as string) ?? "50", 10),
+        200,
+      );
+      const tcFilter = req.query.trustCenter as string | undefined;
+
+      const cypher = `
+        MATCH (rp:ResearchPseudonym)-[:RESOLVED_BY]->(tc:TrustCenter)
+        ${tcFilter ? "WHERE tc.name = $tcFilter" : ""}
+        OPTIONAL MATCH (rp)-[:LINKED_FROM]->(pp:ProviderPseudonym)
+        WITH rp, tc, collect(pp.psn) AS providerPsns
+        RETURN rp.rpsn AS rpsn,
+               rp.status AS status,
+               rp.mode AS mode,
+               rp.createdAt AS createdAt,
+               tc.name AS trustCenter,
+               providerPsns
+        ORDER BY rp.createdAt DESC
+        LIMIT $limit
+      `;
+
+      const result = await session.run(cypher, {
+        limit: neo4j.int(limit),
+        ...(tcFilter ? { tcFilter } : {}),
+      });
+
+      const entries = result.records.map((r) => ({
+        rpsn: r.get("rpsn"),
+        status: r.get("status"),
+        mode: r.get("mode"),
+        createdAt: r.get("createdAt"),
+        trustCenter: r.get("trustCenter"),
+        providerPseudonyms: r.get("providerPsns"),
+      }));
+
+      res.json({ total: entries.length, entries });
+    } catch (err) {
+      next(err);
+    } finally {
+      await session.close();
+    }
+  },
+);
+
+/**
+ * DELETE /trust-center/revoke/:rpsn
+ * Revoke a research pseudonym — renders previous linkages unlinkable.
+ * Only HDAB-authority-scoped tokens should be able to invoke this.
+ */
+app.delete(
+  "/trust-center/revoke/:rpsn",
+  async (req: Request, res: Response, next: NextFunction) => {
+    const session = getSession();
+    try {
+      const { rpsn } = req.params;
+
+      const result = await session.run(
+        `
+        MATCH (rp:ResearchPseudonym {rpsn: $rpsn})
+        SET rp.status = 'revoked',
+            rp.revokedAt = datetime()
+        WITH rp
+        OPTIONAL MATCH (rp)-[r:LINKED_FROM]->(pp:ProviderPseudonym)
+        DELETE r
+        RETURN rp.rpsn AS rpsn, rp.status AS status
+        `,
+        { rpsn },
+      );
+
+      if (result.records.length === 0) {
+        res
+          .status(404)
+          .json({ error: `Research pseudonym '${rpsn}' not found` });
+        return;
+      }
+
+      logTransferEvent(
+        `/trust-center/revoke/${rpsn}`,
+        "DELETE",
+        req.headers["x-participant"] as string,
+        200,
+        1,
+      );
+
+      res.json({
+        rpsn,
+        status: "revoked",
+        message: "Research pseudonym revoked — linkages removed",
+      });
+    } catch (err) {
+      next(err);
+    } finally {
+      await session.close();
+    }
+  },
+);
+
+/**
+ * GET /trust-center/spe-sessions
+ * List SPE sessions with attestation details.
+ */
+app.get(
+  "/trust-center/spe-sessions",
+  async (_req: Request, res: Response, next: NextFunction) => {
+    const session = getSession();
+    try {
+      const result = await session.run(`
+        MATCH (ss:SPESession)
+        OPTIONAL MATCH (ss)<-[:CREATED_BY]-(hdab:Participant)
+        OPTIONAL MATCH (rp:ResearchPseudonym)-[:USED_IN]->(ss)
+        WITH ss, hdab, count(rp) AS pseudonymCount
+        RETURN ss.sessionId AS sessionId,
+               ss.status AS status,
+               ss.approvedCodeHash AS approvedCodeHash,
+               ss.attestationType AS attestationType,
+               ss.kAnonymityThreshold AS kAnonymityThreshold,
+               ss.createdAt AS createdAt,
+               hdab.name AS createdBy,
+               pseudonymCount
+        ORDER BY ss.createdAt DESC
+      `);
+
+      const sessions = result.records.map((r) => ({
+        sessionId: r.get("sessionId"),
+        status: r.get("status"),
+        approvedCodeHash: r.get("approvedCodeHash"),
+        attestationType: r.get("attestationType"),
+        kAnonymityThreshold: r.get("kAnonymityThreshold")
+          ? neo4j.integer.toNumber(r.get("kAnonymityThreshold"))
+          : null,
+        createdAt: r.get("createdAt"),
+        createdBy: r.get("createdBy"),
+        pseudonymCount: neo4j.integer.toNumber(r.get("pseudonymCount")),
+      }));
+
+      res.json({ sessions });
+    } catch (err) {
+      next(err);
+    } finally {
+      await session.close();
+    }
+  },
+);
+
+// ===========================================================================
+// Phase 5c: Natural Language Query (Text2Cypher)
+// ===========================================================================
 
 /**
  * POST /nlq

@@ -801,6 +801,115 @@ for pname, pdid, prole in EXTRA_PARTICIPANTS:
         """)
         node_count += 1
 
+# ── L1c: Trust Centers — Federated Pseudonym Resolution (Phase 18) ────────
+
+emit("// ═══ Trust Centers (EHDS Art. 50/51 — Phase 18) ═══")
+
+TRUST_CENTERS = [
+    ("RKI Trust Center DE", "Robert Koch Institute", "DE", "deterministic-pseudonym-v1", "did:web:medreg.de:hdab"),
+    ("RIVM Trust Center NL", "RIVM (Rijksinstituut voor Volksgezondheid en Milieu)", "NL", "key-managed-v1", "did:web:medreg.de:hdab"),
+]
+
+for tc_name, operated_by, country, protocol, hdab_did in TRUST_CENTERS:
+    safe_name = esc(tc_name)
+    safe_op = esc(operated_by)
+    emit(f"""
+        MERGE (tc:TrustCenter {{name: '{safe_name}'}})
+        SET tc.operatedBy = '{safe_op}',
+            tc.country = '{country}',
+            tc.status = 'active',
+            tc.protocol = '{protocol}',
+            tc.createdAt = '2026-01-01T00:00:00Z'
+    """)
+    node_count += 1
+
+    # GOVERNED_BY → HDABApproval (link to nearest HDAB participant)
+    emit(f"""
+        MATCH (tc:TrustCenter {{name: '{safe_name}'}})
+        MATCH (hdab:Participant {{participantId: '{hdab_did}'}})
+        MERGE (tc)-[:GOVERNED_BY]->(hdab)
+    """)
+
+    # RESOLVES_PSEUDONYMS_FOR → HealthDatasets in the same country
+    emit(f"""
+        MATCH (tc:TrustCenter {{name: '{safe_name}'}})
+        MATCH (d:HealthDataset)
+          WHERE d.title CONTAINS '{country}' OR d.title CONTAINS '{country.lower()}'
+        MERGE (tc)-[:RESOLVES_PSEUDONYMS_FOR]->(d)
+    """)
+
+# Sample SPE Sessions
+emit("// ═══ SPE Sessions (Phase 18c) ═══")
+
+SPE_SESSIONS = [
+    ("spe-session-001", "active",   "sha256:a1b2c3d4e5f6", "sgx-v3.1", "did:web:medreg.de:hdab"),
+    ("spe-session-002", "completed","sha256:f6e5d4c3b2a1", "sgx-v3.1", "did:web:medreg.de:hdab"),
+    ("spe-session-003", "active",   "sha256:1a2b3c4d5e6f", "sev-snp-v1","did:web:irs.fr:hdab"),
+]
+
+for sess_id, status, code_hash, attestation, hdab_did in SPE_SESSIONS:
+    emit(f"""
+        MERGE (ss:SPESession {{sessionId: '{sess_id}'}})
+        SET ss.status = '{status}',
+            ss.approvedCodeHash = '{code_hash}',
+            ss.attestationType = '{attestation}',
+            ss.kAnonymityThreshold = 5,
+            ss.createdAt = '2026-03-{random.randint(1,26):02d}T{random.randint(0,23):02d}:00:00Z'
+    """)
+    node_count += 1
+
+    emit(f"""
+        MATCH (ss:SPESession {{sessionId: '{sess_id}'}})
+        MATCH (hdab:Participant {{participantId: '{hdab_did}'}})
+        MERGE (ss)-[:CREATED_BY]->(hdab)
+    """)
+
+# Sample Provider Pseudonyms and Research Pseudonyms
+emit("// ═══ Provider Pseudonyms + Research Pseudonyms (Phase 18) ═══")
+
+PSEUDONYM_MAPPINGS = [
+    # (rpsn, provider_psns: [(psn, provider)], trust_center, spe_session)
+    ("RPSN-DE-1138", [("PSN-AK-00742", "AlphaKlinik Berlin"), ("PSN-LMC-09451", "Limburg Medical Centre")], "RKI Trust Center DE", "spe-session-001"),
+    ("RPSN-DE-2047", [("PSN-AK-01203", "AlphaKlinik Berlin"), ("PSN-HUH-05512", "Helsinki University Hospital")], "RKI Trust Center DE", "spe-session-001"),
+    ("RPSN-NL-0891", [("PSN-LMC-03221", "Limburg Medical Centre"), ("PSN-CHL-07744", "Centro Hospitalar Lisboa")], "RIVM Trust Center NL", "spe-session-003"),
+]
+
+for rpsn, provider_psns, tc_name, sess_id in PSEUDONYM_MAPPINGS:
+    safe_tc = esc(tc_name)
+    emit(f"""
+        MERGE (rp:ResearchPseudonym {{rpsn: '{rpsn}'}})
+        SET rp.status = 'active',
+            rp.createdAt = '2026-03-15T10:00:00Z'
+    """)
+    node_count += 1
+
+    for psn, provider in provider_psns:
+        safe_prov = esc(provider)
+        emit(f"""
+            MERGE (pp:ProviderPseudonym {{psn: '{psn}'}})
+            SET pp.provider = '{safe_prov}',
+                pp.status = 'active'
+            WITH pp
+            MATCH (rp:ResearchPseudonym {{rpsn: '{rpsn}'}})
+            MERGE (rp)-[:LINKED_FROM]->(pp)
+        """)
+        node_count += 1
+
+    # RESOLVED_BY → TrustCenter
+    emit(f"""
+        MATCH (rp:ResearchPseudonym {{rpsn: '{rpsn}'}})
+        MATCH (tc:TrustCenter {{name: '{safe_tc}'}})
+        MERGE (rp)-[:RESOLVED_BY]->(tc)
+    """)
+
+    # USED_IN → SPESession
+    emit(f"""
+        MATCH (rp:ResearchPseudonym {{rpsn: '{rpsn}'}})
+        MATCH (ss:SPESession {{sessionId: '{sess_id}'}})
+        MERGE (rp)-[:USED_IN]->(ss)
+    """)
+
+
 # ── PUBLISHED_BY + GOVERNS (must run AFTER participants are created) ────────
 emit("// ═══ PUBLISHED_BY + GOVERNS for extra datasets ═══")
 for ds_id, _, _, _, _, _, _ in EXTRA_DATASETS:

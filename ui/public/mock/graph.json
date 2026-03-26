@@ -811,6 +811,38 @@
       "label": "LoincCode",
       "layer": 5,
       "color": "#7D3C98"
+    },
+    {
+      "id": "tc-rki-de",
+      "name": "RKI Trust Center DE",
+      "label": "TrustCenter",
+      "layer": 1,
+      "color": "#2471A3",
+      "expandable": true
+    },
+    {
+      "id": "tc-rivm-nl",
+      "name": "RIVM Trust Center NL",
+      "label": "TrustCenter",
+      "layer": 1,
+      "color": "#2471A3",
+      "expandable": true
+    },
+    {
+      "id": "spe-session-001",
+      "name": "SPE Session 001 (sgx-v3.1)",
+      "label": "SPESession",
+      "layer": 1,
+      "color": "#2471A3",
+      "expandable": true
+    },
+    {
+      "id": "rpsn-de-1138",
+      "name": "RPSN-DE-1138",
+      "label": "ResearchPseudonym",
+      "layer": 1,
+      "color": "#2471A3",
+      "expandable": true
     }
   ],
   "links": [
@@ -1533,6 +1565,21 @@
       "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2238",
       "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2239",
       "type": "CODED_BY"
+    },
+    {
+      "source": "tc-rki-de",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:7",
+      "type": "GOVERNED_BY"
+    },
+    {
+      "source": "rpsn-de-1138",
+      "target": "tc-rki-de",
+      "type": "RESOLVED_BY"
+    },
+    {
+      "source": "rpsn-de-1138",
+      "target": "spe-session-001",
+      "type": "USED_IN"
     }
   ]
 }

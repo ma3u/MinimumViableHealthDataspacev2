@@ -1,0 +1,34 @@
+{
+  "sessions": [
+    {
+      "sessionId": "spe-session-001",
+      "status": "active",
+      "approvedCodeHash": "sha256:a1b2c3d4e5f6",
+      "attestationType": "sgx-v3.1",
+      "kAnonymityThreshold": 5,
+      "createdAt": "2026-03-15T10:00:00Z",
+      "createdBy": "MedReg DE",
+      "pseudonymCount": 2
+    },
+    {
+      "sessionId": "spe-session-002",
+      "status": "completed",
+      "approvedCodeHash": "sha256:f6e5d4c3b2a1",
+      "attestationType": "sgx-v3.1",
+      "kAnonymityThreshold": 5,
+      "createdAt": "2026-03-12T08:00:00Z",
+      "createdBy": "MedReg DE",
+      "pseudonymCount": 1
+    },
+    {
+      "sessionId": "spe-session-003",
+      "status": "active",
+      "approvedCodeHash": "sha256:1a2b3c4d5e6f",
+      "attestationType": "sev-snp-v1",
+      "kAnonymityThreshold": 5,
+      "createdAt": "2026-03-20T14:00:00Z",
+      "createdBy": "Institut de Recherche Santé",
+      "pseudonymCount": 1
+    }
+  ]
+}

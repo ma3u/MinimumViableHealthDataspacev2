@@ -1,0 +1,26 @@
+{
+  "trustCenters": [
+    {
+      "name": "RKI Trust Center DE",
+      "operatedBy": "Robert Koch Institute",
+      "country": "DE",
+      "status": "active",
+      "protocol": "deterministic-pseudonym-v1",
+      "createdAt": "2026-01-01T00:00:00Z",
+      "hdab": { "name": "MedReg DE", "did": "did:web:medreg.de:hdab" },
+      "datasetCount": 4,
+      "sampleDatasets": ["dataset:cardiac-outcomes-eu-2025", "dataset:geriatric-falls-de-2024"]
+    },
+    {
+      "name": "RIVM Trust Center NL",
+      "operatedBy": "RIVM (Rijksinstituut voor Volksgezondheid en Milieu)",
+      "country": "NL",
+      "status": "active",
+      "protocol": "key-managed-v1",
+      "createdAt": "2026-01-01T00:00:00Z",
+      "hdab": { "name": "MedReg DE", "did": "did:web:medreg.de:hdab" },
+      "datasetCount": 2,
+      "sampleDatasets": ["dataset:lung-cancer-screening-nl"]
+    }
+  ]
+}

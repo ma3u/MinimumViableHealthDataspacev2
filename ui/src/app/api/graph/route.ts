@@ -16,6 +16,11 @@ const LABEL_LAYER: Record<string, number> = {
   DataTransfer: 1,
   Catalog: 1,
   Organization: 1,
+  // L1c: Trust Center (Phase 18)
+  TrustCenter: 1,
+  ResearchPseudonym: 1,
+  ProviderPseudonym: 1,
+  SPESession: 1,
   // L2: HealthDCAT-AP Metadata
   HealthDataset: 2,
   Distribution: 2,
@@ -69,6 +74,10 @@ const GOVERNANCE_LABELS = [
   "EhdsPurpose",
   "Catalogue",
   "Organization",
+  "TrustCenter",
+  "ResearchPseudonym",
+  "ProviderPseudonym",
+  "SPESession",
 ];
 
 function toNode(r: { id: string; labels: string[]; name: string }) {

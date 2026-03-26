@@ -17,6 +17,8 @@ const STATIC_MOCK_MAP: Record<string, string> = {
   "/api/admin/policies": "/mock/admin_policies.json",
   "/api/admin/components": "/mock/admin_components.json",
   "/api/admin/components/topology": "/mock/admin_components_topology.json",
+  "/api/trust-center": "/mock/trust_center.json",
+  "/api/trust-center/spe-sessions": "/mock/trust_center_spe_sessions.json",
 };
 
 /** Prefix-based mock paths — matched via startsWith (checked after exact) */
@@ -28,6 +30,7 @@ const STATIC_MOCK_PREFIX: [string, string][] = [
   ["/api/tasks", "/mock/tasks.json"],
   ["/api/admin/audit", "/mock/admin_audit.json"],
   ["/api/participants/", "/mock/credentials.json"],
+  ["/api/trust-center/audit", "/mock/trust_center_audit.json"],
 ];
 
 function resolveMockPath(endpoint: string): string {
