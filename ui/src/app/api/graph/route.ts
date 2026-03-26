@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import neo4j from "neo4j-driver";
 import { runQuery } from "@/lib/neo4j";
 
 export const dynamic = "force-dynamic";
@@ -54,59 +53,111 @@ const LAYER_COLORS: Record<number, string> = {
   5: "#7D3C98",
 };
 
-const PAGE_SIZE_DEFAULT = 200;
-const PAGE_SIZE_MAX = 500;
+// Governance + catalog labels — always included in overview
+const GOVERNANCE_LABELS = [
+  "Participant",
+  "DataProduct",
+  "OdrlPolicy",
+  "Contract",
+  "HDABApproval",
+  "ContractNegotiation",
+  "HealthDataset",
+  "Distribution",
+  "EEHRxFProfile",
+  "VerifiableCredential",
+  "TransferEvent",
+  "EhdsPurpose",
+  "Catalogue",
+  "Organization",
+];
 
-export async function GET(req: Request) {
+function toNode(r: { id: string; labels: string[]; name: string }) {
+  const layer = r.labels.map((l) => LABEL_LAYER[l]).find(Boolean) ?? 0;
+  return {
+    id: r.id,
+    name: r.name,
+    label: r.labels[0] ?? "Node",
+    layer,
+    color: LAYER_COLORS[layer] ?? "#888",
+    expandable: true,
+  };
+}
+
+// Researcher overview — curated ~200 nodes that answer the key questions:
+//   "What datasets exist?"  "Who approved them?"  "What conditions are covered?"
+export async function GET() {
   try {
-    const { searchParams } = new URL(req.url);
-    const page = Math.max(0, parseInt(searchParams.get("page") ?? "0", 10));
-    const limit = Math.min(
-      PAGE_SIZE_MAX,
-      Math.max(
-        1,
-        parseInt(searchParams.get("limit") ?? String(PAGE_SIZE_DEFAULT), 10),
+    const [
+      govNodes,
+      patientNodes,
+      conditionNodes,
+      snomedNodes,
+      loincNodes,
+      rxnormNodes,
+    ] = await Promise.all([
+      // L1/L2: All governance + catalog nodes
+      runQuery<{ id: string; labels: string[]; name: string }>(
+        `MATCH (n) WHERE any(l IN labels(n) WHERE l IN $labels)
+           RETURN elementId(n) AS id, labels(n) AS labels,
+                  coalesce(n.name, n.title, n.display, n.participantId,
+                           n.productId, n.credentialType, n.code, n.id, elementId(n)) AS name`,
+        { labels: GOVERNANCE_LABELS },
       ),
-    );
-    const skip = page * limit;
+      // Top 20 patients by condition count (richest research records)
+      runQuery<{ id: string; labels: string[]; name: string }>(
+        `MATCH (p:Patient)-[:HAS_CONDITION]->(:Condition)
+           WITH p, count(*) AS cnt ORDER BY cnt DESC LIMIT 20
+           RETURN elementId(p) AS id, labels(p) AS labels,
+                  coalesce(p.name, p.id, elementId(p)) AS name`,
+        {},
+      ),
+      // Top 50 conditions by patient frequency
+      runQuery<{ id: string; labels: string[]; name: string }>(
+        `MATCH (c:Condition)<-[:HAS_CONDITION]-(:Patient)
+           WITH c, count(*) AS freq ORDER BY freq DESC LIMIT 50
+           RETURN elementId(c) AS id, labels(c) AS labels,
+                  coalesce(c.code, c.name, c.display, elementId(c)) AS name`,
+        {},
+      ),
+      // Top 30 SNOMED concepts by relationship degree
+      runQuery<{ id: string; labels: string[]; name: string }>(
+        `MATCH (s:SnomedConcept)
+           WITH s, count{(s)-[]-()} AS deg ORDER BY deg DESC LIMIT 30
+           RETURN elementId(s) AS id, labels(s) AS labels,
+                  coalesce(s.display, s.code, elementId(s)) AS name`,
+        {},
+      ),
+      // Top 20 LOINC codes by degree
+      runQuery<{ id: string; labels: string[]; name: string }>(
+        `MATCH (l:LoincCode)
+           WITH l, count{(l)-[]-()} AS deg ORDER BY deg DESC LIMIT 20
+           RETURN elementId(l) AS id, labels(l) AS labels,
+                  coalesce(l.display, l.code, elementId(l)) AS name`,
+        {},
+      ),
+      // Top 20 RxNorm drug concepts by degree
+      runQuery<{ id: string; labels: string[]; name: string }>(
+        `MATCH (r:RxNormConcept)
+           WITH r, count{(r)-[]-()} AS deg ORDER BY deg DESC LIMIT 20
+           RETURN elementId(r) AS id, labels(r) AS labels,
+                  coalesce(r.display, r.name, r.code, elementId(r)) AS name`,
+        {},
+      ),
+    ]);
 
-    // ── Count total known nodes (cheap, cached by Neo4j) ────────────────────
-    const countRows = await runQuery<{ total: number }>(
-      `MATCH (n)
-       WHERE any(l IN labels(n) WHERE l IN $knownLabels)
-       RETURN count(n) AS total`,
-      { knownLabels: Object.keys(LABEL_LAYER) },
-    );
-    const total = countRows[0]?.total ?? 0;
+    const seen = new Set<string>();
+    const nodes = [
+      ...govNodes,
+      ...patientNodes,
+      ...conditionNodes,
+      ...snomedNodes,
+      ...loincNodes,
+      ...rxnormNodes,
+    ]
+      .filter((r) => (seen.has(r.id) ? false : seen.add(r.id) && true))
+      .map(toNode);
 
-    // ── Paginated node fetch ─────────────────────────────────────────────────
-    const allNodes = await runQuery<{
-      id: string;
-      labels: string[];
-      name: string;
-    }>(
-      `MATCH (n)
-       WHERE any(l IN labels(n) WHERE l IN $knownLabels)
-       RETURN elementId(n) AS id, labels(n) AS labels,
-              coalesce(n.name, n.title, n.display, n.profileName,
-                       n.categoryName, n.credentialType,
-                       n.participantId, n.productId,
-                       n.negotiationId, n.transferId,
-                       n.code, n.id, elementId(n)) AS name
-       ORDER BY elementId(n)
-       SKIP $skip LIMIT $limit`,
-      {
-        knownLabels: Object.keys(LABEL_LAYER),
-        skip: neo4j.int(skip),
-        limit: neo4j.int(limit),
-      },
-    );
-
-    const nodeIdSet = new Set(allNodes.map((n) => n.id));
-    const nodeIds = Array.from(nodeIdSet);
-
-    // ── Fetch edges between nodes on this page only ──────────────────────────
-    const relRows = await runQuery<{
+    const links = await runQuery<{
       source: string;
       target: string;
       type: string;
@@ -114,33 +165,10 @@ export async function GET(req: Request) {
       `MATCH (a)-[r]->(b)
        WHERE elementId(a) IN $ids AND elementId(b) IN $ids
        RETURN DISTINCT elementId(a) AS source, elementId(b) AS target, type(r) AS type`,
-      { ids: nodeIds },
+      { ids: nodes.map((n) => n.id) },
     );
 
-    // ── Build response ───────────────────────────────────────────────────────
-    const nodes = allNodes.map((r) => {
-      const layer =
-        r.labels.map((l: string) => LABEL_LAYER[l]).find(Boolean) ?? 0;
-      return {
-        id: r.id,
-        name: r.name,
-        label: r.labels[0] ?? "Node",
-        layer,
-        color: LAYER_COLORS[layer] ?? "#888",
-      };
-    });
-
-    return NextResponse.json({
-      nodes,
-      links: relRows,
-      pagination: {
-        page,
-        limit,
-        total,
-        totalPages: Math.ceil(total / limit),
-        hasMore: skip + limit < total,
-      },
-    });
+    return NextResponse.json({ nodes, links });
   } catch (err) {
     console.error("GET /api/graph error:", err);
     return NextResponse.json({ error: "Neo4j unavailable" }, { status: 502 });
