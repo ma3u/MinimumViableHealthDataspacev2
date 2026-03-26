@@ -110,7 +110,7 @@
       - [Mock Data Fallback (Offline-First)](#mock-data-fallback-offline-first)
       - [Running the Journey Tests](#running-the-journey-tests)
       - [Protocol Coverage](#protocol-coverage)
-    - [Phase 18: Trust Center \& Federated Pseudonym Resolution 🔲](#phase-18-trust-center--federated-pseudonym-resolution-)
+    - [Phase 18: Trust Center \& Federated Pseudonym Resolution ✅](#phase-18-trust-center--federated-pseudonym-resolution-)
       - [18a: Trust Center Graph Schema \& Neo4j Model 🔲](#18a-trust-center-graph-schema--neo4j-model-)
       - [18b: Pseudonym Resolution Protocol 🔲](#18b-pseudonym-resolution-protocol-)
       - [18c: SPE Security Model Refinement 🔲](#18c-spe-security-model-refinement-)
@@ -2048,7 +2048,7 @@ multi-participant data; all tests pass offline (0 failures).
 
 ---
 
-### Phase 18: Trust Center & Federated Pseudonym Resolution 🔲
+### Phase 18: Trust Center & Federated Pseudonym Resolution ✅
 
 **Goal:** Implement a Trust Center service for cross-provider pseudonym
 resolution, enabling longitudinal patient linkage across multiple data
@@ -2074,7 +2074,7 @@ Key insights:
   national trust center; the MII (Medical Informatics Initiative) community
   is evaluating integration with their brokerage service.
 
-#### 18a: Trust Center Graph Schema & Neo4j Model 🔲
+#### 18a: Trust Center Graph Schema & Neo4j Model ✅
 
 1. Add Trust Center node type to the 5-layer graph schema:
 
@@ -2105,7 +2105,7 @@ MERGE (tc:TrustCenter {
 4. Add seed data for 2 Trust Centers (DE: RKI, NL: RIVM) in
    `scripts/generate-graph-seed.py`.
 
-#### 18b: Pseudonym Resolution Protocol 🔲
+#### 18b: Pseudonym Resolution Protocol ✅
 
 1. Design the pseudonym resolution API on the Neo4j Query Proxy:
 
@@ -2124,7 +2124,7 @@ MERGE (tc:TrustCenter {
 3. Enforce access control: only HDAB-authority-scoped tokens can invoke
    resolution. Data Users never interact with the Trust Center directly.
 
-#### 18c: SPE Security Model Refinement 🔲
+#### 18c: SPE Security Model Refinement ✅
 
 1. Replace mock SPE with a TEE attestation model:
 
@@ -2139,7 +2139,7 @@ MERGE (tc:TrustCenter {
 
 3. Add SPE session audit trail to the compliance dashboard.
 
-#### 18d: Trust Center UI & Compliance Dashboard 🔲
+#### 18d: Trust Center UI & Compliance Dashboard ✅
 
 1. Add Trust Center section to `/compliance` page:
 
