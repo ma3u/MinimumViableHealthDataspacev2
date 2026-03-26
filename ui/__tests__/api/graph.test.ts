@@ -2,6 +2,8 @@
  * API route tests for GET /api/graph
  *
  * Tests the 5-layer graph API handler by mocking the Neo4j runQuery function.
+ * The route makes 6 parallel node queries (gov, patient, condition, snomed,
+ * loinc, rxnorm) + 1 link query = 7 total runQuery calls.
  */
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
@@ -15,11 +17,34 @@ import { GET } from "@/app/api/graph/route";
 
 const mockRunQuery = vi.mocked(runQuery);
 
-/** Build a mock Request with optional pagination query params */
-function makeRequest(params: Record<string, string> = {}): Request {
-  const url = new URL("http://localhost/api/graph");
-  Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
-  return new Request(url.toString());
+/** Helper to set up mock returns for all 7 queries */
+function mockGraphQueries(opts?: {
+  govNodes?: any[];
+  patientNodes?: any[];
+  conditionNodes?: any[];
+  snomedNodes?: any[];
+  loincNodes?: any[];
+  rxnormNodes?: any[];
+  links?: any[];
+}) {
+  const {
+    govNodes = [],
+    patientNodes = [],
+    conditionNodes = [],
+    snomedNodes = [],
+    loincNodes = [],
+    rxnormNodes = [],
+    links = [],
+  } = opts ?? {};
+
+  mockRunQuery
+    .mockResolvedValueOnce(govNodes) // L1/L2 governance nodes
+    .mockResolvedValueOnce(patientNodes) // Top patients
+    .mockResolvedValueOnce(conditionNodes) // Top conditions
+    .mockResolvedValueOnce(snomedNodes) // Top SNOMED
+    .mockResolvedValueOnce(loincNodes) // Top LOINC
+    .mockResolvedValueOnce(rxnormNodes) // Top RxNorm
+    .mockResolvedValueOnce(links); // Relationships
 }
 
 describe("GET /api/graph", () => {
@@ -28,39 +53,34 @@ describe("GET /api/graph", () => {
   });
 
   it("should return nodes and links with layer colors", async () => {
-    // Handler now makes 3 queries: count, paginated nodes, relationships
-    mockRunQuery
-      .mockResolvedValueOnce([{ total: 6 }]) // count query
-      .mockResolvedValueOnce([
+    mockGraphQueries({
+      govNodes: [
         { id: "n1", labels: ["Participant"], name: "SPE-1" },
         { id: "n2", labels: ["HealthDataset"], name: "FHIR Cohort" },
+      ],
+      patientNodes: [
         { id: "n3", labels: ["Patient"], name: "Patient-001" },
+      ],
+      conditionNodes: [
         { id: "n4", labels: ["Condition"], name: "Diabetes" },
-        {
-          id: "n5",
-          labels: ["OMOPConditionOccurrence"],
-          name: "OMOP-Diabetes",
-        },
+      ],
+      snomedNodes: [
         { id: "n6", labels: ["SnomedConcept"], name: "SNOMED:73211009" },
-      ])
-      .mockResolvedValueOnce([
+      ],
+      loincNodes: [],
+      rxnormNodes: [],
+      links: [
         { source: "n1", target: "n2", type: "PUBLISHES" },
         { source: "n3", target: "n4", type: "HAS_CONDITION" },
-        { source: "n4", target: "n5", type: "MAPPED_TO" },
-        { source: "n4", target: "n6", type: "CODED_BY" },
-      ]);
+      ],
+    });
 
-    const response = await GET(makeRequest());
+    const response = await GET();
     const data = await response.json();
 
     expect(response.status).toBe(200);
-    expect(data.nodes).toHaveLength(6);
-    expect(data.links).toHaveLength(4);
-
-    // Check pagination metadata is present
-    expect(data.pagination).toBeDefined();
-    expect(data.pagination.page).toBe(0);
-    expect(data.pagination.total).toBe(6);
+    expect(data.nodes).toHaveLength(5);
+    expect(data.links).toHaveLength(2);
 
     // Check layer colors are assigned correctly
     const participantNode = data.nodes.find(
@@ -81,54 +101,87 @@ describe("GET /api/graph", () => {
   });
 
   it("should handle empty graph gracefully", async () => {
-    mockRunQuery.mockResolvedValueOnce([{ total: 0 }]).mockResolvedValue([]);
+    mockGraphQueries();
 
-    const response = await GET(makeRequest());
+    const response = await GET();
     const data = await response.json();
 
     expect(data.nodes).toEqual([]);
     expect(data.links).toEqual([]);
-    expect(data.pagination.total).toBe(0);
-    expect(data.pagination.hasMore).toBe(false);
   });
 
-  it("should make exactly 3 Neo4j queries (count + nodes + edges)", async () => {
-    mockRunQuery.mockResolvedValueOnce([{ total: 0 }]).mockResolvedValue([]);
+  it("should make exactly 7 Neo4j queries (6 node groups + 1 links)", async () => {
+    mockGraphQueries();
 
-    await GET(makeRequest());
+    await GET();
 
-    expect(mockRunQuery).toHaveBeenCalledTimes(3);
+    expect(mockRunQuery).toHaveBeenCalledTimes(7);
   });
 
-  it("should respect page and limit query params", async () => {
-    mockRunQuery
-      .mockResolvedValueOnce([{ total: 500 }])
-      .mockResolvedValueOnce([])
-      .mockResolvedValueOnce([]);
+  it("should pass governance labels to the first query", async () => {
+    mockGraphQueries();
 
-    const response = await GET(makeRequest({ page: "2", limit: "50" }));
+    await GET();
+
+    // First call is the governance node query with labels param
+    const govQueryArgs = mockRunQuery.mock.calls[0];
+    expect(govQueryArgs[1]).toHaveProperty("labels");
+    expect(govQueryArgs[1]!.labels).toContain("Participant");
+    expect(govQueryArgs[1]!.labels).toContain("HealthDataset");
+    expect(govQueryArgs[1]!.labels).toContain("VerifiableCredential");
+    // Phase 18: Trust Center labels
+    expect(govQueryArgs[1]!.labels).toContain("TrustCenter");
+    expect(govQueryArgs[1]!.labels).toContain("ResearchPseudonym");
+    expect(govQueryArgs[1]!.labels).toContain("ProviderPseudonym");
+    expect(govQueryArgs[1]!.labels).toContain("SPESession");
+  });
+
+  it("should deduplicate nodes across query groups", async () => {
+    // Same node ID returned by two different queries
+    mockGraphQueries({
+      govNodes: [
+        { id: "n1", labels: ["Participant"], name: "SPE-1" },
+      ],
+      patientNodes: [
+        { id: "n1", labels: ["Participant"], name: "SPE-1" }, // duplicate
+        { id: "n2", labels: ["Patient"], name: "Patient-001" },
+      ],
+    });
+
+    const response = await GET();
     const data = await response.json();
 
-    expect(data.pagination.page).toBe(2);
-    expect(data.pagination.limit).toBe(50);
-    expect(data.pagination.total).toBe(500);
-    expect(data.pagination.totalPages).toBe(10);
-    expect(data.pagination.hasMore).toBe(true);
-
-    // Verify SKIP was passed correctly (page=2, limit=50 → skip=100)
-    const nodeQueryArgs = mockRunQuery.mock.calls[1];
-    expect(nodeQueryArgs[1]).toMatchObject({ skip: 100, limit: 50 });
+    expect(data.nodes).toHaveLength(2); // deduplicated
   });
 
-  it("should pass known labels to the node query", async () => {
-    mockRunQuery.mockResolvedValueOnce([{ total: 0 }]).mockResolvedValue([]);
+  it("should assign layer 1 color to Trust Center nodes", async () => {
+    mockGraphQueries({
+      govNodes: [
+        { id: "tc1", labels: ["TrustCenter"], name: "RKI Trust Center DE" },
+        { id: "rp1", labels: ["ResearchPseudonym"], name: "RPSN-DE-1138" },
+        { id: "ss1", labels: ["SPESession"], name: "spe-session-001" },
+      ],
+      links: [
+        { source: "rp1", target: "tc1", type: "RESOLVED_BY" },
+      ],
+    });
 
-    await GET(makeRequest());
+    const response = await GET();
+    const data = await response.json();
 
-    const nodeQueryArgs = mockRunQuery.mock.calls[1];
-    expect(nodeQueryArgs[1]).toHaveProperty("knownLabels");
-    expect(nodeQueryArgs[1]!.knownLabels).toContain("Patient");
-    expect(nodeQueryArgs[1]!.knownLabels).toContain("HealthDataset");
-    expect(nodeQueryArgs[1]!.knownLabels).toContain("SnomedConcept");
+    const tcNode = data.nodes.find((n: any) => n.label === "TrustCenter");
+    expect(tcNode).toBeDefined();
+    expect(tcNode.layer).toBe(1);
+    expect(tcNode.color).toBe("#2471A3"); // Layer 1 governance color
+
+    const rpNode = data.nodes.find(
+      (n: any) => n.label === "ResearchPseudonym",
+    );
+    expect(rpNode).toBeDefined();
+    expect(rpNode.layer).toBe(1);
+
+    const ssNode = data.nodes.find((n: any) => n.label === "SPESession");
+    expect(ssNode).toBeDefined();
+    expect(ssNode.layer).toBe(1);
   });
 });
