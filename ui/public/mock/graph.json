@@ -829,6 +829,14 @@
       "expandable": true
     },
     {
+      "id": "fraunhofer-fit",
+      "name": "Fraunhofer FIT",
+      "label": "Participant",
+      "layer": 1,
+      "color": "#2471A3",
+      "expandable": true
+    },
+    {
       "id": "spe-session-001",
       "name": "SPE Session 001 (sgx-v3.1)",
       "label": "SPESession",
@@ -1580,6 +1588,11 @@
       "source": "rpsn-de-1138",
       "target": "spe-session-001",
       "type": "USED_IN"
+    },
+    {
+      "source": "fraunhofer-fit",
+      "target": "tc-rki-de",
+      "type": "CONTRIBUTES_PROTOCOL_TO"
     }
   ]
 }

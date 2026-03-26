@@ -771,6 +771,7 @@ EXTRA_PARTICIPANTS = [
     ("Polskie Centrum Zdrowia",      "did:web:pcz.pl:clinic",          "DATA_HOLDER"),
     ("European Medicines Agency",    "did:web:ema.europa.eu:authority", "HDAB"),
     ("ECDC Stockholm",               "did:web:ecdc.europa.eu:hdab",    "HDAB"),
+    ("Fraunhofer FIT",               "did:web:fit.fraunhofer.de:research", "TECHNOLOGY_PARTNER"),
 ]
 
 for pname, pdid, prole in EXTRA_PARTICIPANTS:
@@ -837,6 +838,15 @@ for tc_name, operated_by, country, protocol, hdab_did in TRUST_CENTERS:
           WHERE d.title CONTAINS '{country}' OR d.title CONTAINS '{country.lower()}'
         MERGE (tc)-[:RESOLVES_PSEUDONYMS_FOR]->(d)
     """)
+
+# Fraunhofer FIT — contributed the pseudonym resolution protocol design
+# (community feedback from Thomas Berlage, see issue #1)
+emit("// ═══ Fraunhofer FIT → Trust Center protocol contribution ═══")
+emit("""
+    MATCH (fit:Participant {participantId: 'did:web:fit.fraunhofer.de:research'})
+    MATCH (tc:TrustCenter {name: 'RKI Trust Center DE'})
+    MERGE (fit)-[:CONTRIBUTES_PROTOCOL_TO]->(tc)
+""")
 
 # Sample SPE Sessions
 emit("// ═══ SPE Sessions (Phase 18c) ═══")
