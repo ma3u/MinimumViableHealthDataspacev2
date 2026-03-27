@@ -85,6 +85,8 @@ export const NODE_ROLE_COLORS: Record<string, string> = {
   TrustCenter: "#8E44AD", // violet — HDAB-designated pseudonym authority
   HDABApproval: "#C0392B", // red    — approval authority
   SPESession: "#D4AC0D", // gold   — active secure processing sessions
+  PatientConsent: "#0E9F9F", // teal   — GDPR Art. 15-22 patient consent nodes
+  ResearchInsight: "#1ABC9C", // mint   — personalised research findings
 };
 
 /** Human-readable layer labels for the legend. */
@@ -306,6 +308,81 @@ export const FILTER_PRESETS = [
 
 export type FilterPresetId = (typeof FILTER_PRESETS)[number]["id"];
 
+// ── Patient / Citizen filter presets ──────────────────────────────────────────
+
+/**
+ * Patient-specific filter questions shown when the "Patient / Citizen" persona
+ * is active. Mirrors FILTER_PRESETS but answers GDPR Art. 15-22 / EHDS Ch. II
+ * questions from the patient's perspective.
+ */
+export const PATIENT_FILTER_PRESETS = [
+  {
+    id: "patient-data-usage",
+    icon: "Eye",
+    label: "Who is using my data?",
+    description:
+      "GDPR Art. 15 — shows your consented research programs, the pseudonym chain, and the studies that have received access to your data",
+    labels: [
+      "PatientConsent",
+      "DataProduct",
+      "ResearchPseudonym",
+      "SPESession",
+      "Participant",
+      "HDABApproval",
+    ],
+  },
+  {
+    id: "patient-research-programs",
+    icon: "FlaskConical",
+    label: "Which research program is interesting for me?",
+    description:
+      "EHDS Art. 10 — open research programs matched to your conditions, plus personalised insights from completed studies",
+    labels: [
+      "DataProduct",
+      "HealthDataset",
+      "ResearchInsight",
+      "PatientConsent",
+      "EhdsPurpose",
+      "Participant",
+    ],
+  },
+  {
+    id: "patient-my-data",
+    icon: "Heart",
+    label: "Show my data",
+    description:
+      "EHDS Art. 3 / GDPR Art. 15 — your full FHIR R4 clinical record: encounters, conditions, medications, observations and procedures",
+    labels: [
+      "Patient",
+      "Encounter",
+      "Condition",
+      "MedicationRequest",
+      "Observation",
+      "Procedure",
+      "OMOPPerson",
+    ],
+  },
+  {
+    id: "patient-risks",
+    icon: "Activity",
+    label: "Show health interests and risks",
+    description:
+      "Your active conditions with SNOMED/ICD-10 coding, personalised research insights, and risk-relevant ontology connections",
+    labels: [
+      "Patient",
+      "Condition",
+      "ResearchInsight",
+      "SnomedConcept",
+      "ICD10Code",
+      "MedicationRequest",
+      "RxNormConcept",
+    ],
+  },
+] as const;
+
+export type PatientFilterPresetId =
+  (typeof PATIENT_FILTER_PRESETS)[number]["id"];
+
 // ── Persona views ─────────────────────────────────────────────────────────────
 
 /**
@@ -451,10 +528,11 @@ export const PERSONA_VIEWS = [
     label: "Patient / Citizen",
     role: "PATIENT",
     ehdsArticle: "Art. 3–12",
-    question: "What health data do I have? What research am I contributing to?",
+    question:
+      "What health data do I have? Who is using it? What research can I join?",
     description:
-      "EHDS Chapter II / GDPR Art. 15 — my own health records, conditions, medications, consented research programs and insights",
-    focusLabels: ["Patient", "Condition", "MedicationRequest"],
+      "EHDS Chapter II / GDPR Art. 15-22 — my own health records, conditions, medications, consented research programs and personalised insights",
+    focusLabels: ["Patient", "Condition", "PatientConsent"],
     labels: [
       "Patient",
       "Encounter",
@@ -465,6 +543,9 @@ export const PERSONA_VIEWS = [
       "OMOPPerson",
       "ResearchPseudonym",
       "SPESession",
+      "PatientConsent",
+      "ResearchInsight",
+      "DataProduct",
     ],
   },
 ] as const;
