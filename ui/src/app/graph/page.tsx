@@ -191,6 +191,11 @@ export default function GraphPage() {
 }
 
 function GraphContent() {
+  // Read URL params first so they can seed initial state
+  const searchParams = useSearchParams();
+  const highlightId = searchParams.get("highlight");
+  const urlPersona = searchParams.get("persona") as PersonaId | null;
+
   const [data, setData] = useState<GraphData>({ nodes: [], links: [] });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -204,15 +209,15 @@ function GraphContent() {
   const [activeFilter, setActiveFilter] = useState<
     FilterPresetId | PatientFilterPresetId | null
   >(null);
-  // Active persona view — determines which subgraph is fetched from the API
-  const [activePersona, setActivePersona] = useState<PersonaId>("default");
+  // Active persona view — seed from URL ?persona= so deep-links land on the right view
+  const [activePersona, setActivePersona] = useState<PersonaId>(
+    urlPersona ?? "default",
+  );
 
   const containerRef = useRef<HTMLDivElement>(null);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const fgRef = useRef<any>(null);
   const [dims, setDims] = useState({ width: 800, height: 600 });
-  const searchParams = useSearchParams();
-  const highlightId = searchParams.get("highlight");
 
   // ── Load graph (re-fetches when persona changes) ──────────────────────────
   useEffect(() => {
