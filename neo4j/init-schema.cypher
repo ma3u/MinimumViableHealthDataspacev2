@@ -75,6 +75,18 @@ CREATE INDEX vc_subject IF NOT EXISTS FOR (vc:VerifiableCredential) ON (vc.subje
 CREATE INDEX vc_status IF NOT EXISTS FOR (vc:VerifiableCredential) ON (vc.status);
 
 // ============================================================
+// Phase 20: Patient Portal — GDPR Art. 15-22 / EHDS Chapter II
+// Patient consent for research (EHDS Art. 10), insights
+// ============================================================
+CREATE CONSTRAINT patient_consent_id IF NOT EXISTS FOR (pc:PatientConsent) REQUIRE pc.consentId IS UNIQUE;
+CREATE INDEX patient_consent_patient IF NOT EXISTS FOR (pc:PatientConsent) ON (pc.patientId);
+CREATE INDEX patient_consent_study IF NOT EXISTS FOR (pc:PatientConsent) ON (pc.studyId);
+CREATE INDEX patient_consent_revoked IF NOT EXISTS FOR (pc:PatientConsent) ON (pc.revoked);
+
+CREATE CONSTRAINT research_insight_id IF NOT EXISTS FOR (ri:ResearchInsight) REQUIRE ri.insightId IS UNIQUE;
+CREATE INDEX research_insight_study IF NOT EXISTS FOR (ri:ResearchInsight) ON (ri.studyId);
+
+// ============================================================
 // Phase 18: Trust Center & Federated Pseudonym Resolution
 // EHDS Art. 50 (Secure Processing Environment) + Art. 51 (Cross-Border)
 // ============================================================

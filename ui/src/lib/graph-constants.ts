@@ -26,6 +26,9 @@ export const LABEL_LAYER: Record<string, number> = {
   SPESession: 1,
   ResearchPseudonym: 1,
   ProviderPseudonym: 1,
+  // L1 Phase 20: Patient Portal (EHDS Chapter II / GDPR Art. 15-22)
+  PatientConsent: 1,
+  ResearchInsight: 1,
   // L2: HealthDCAT-AP Metadata
   HealthDataset: 2,
   Distribution: 2,
@@ -440,6 +443,28 @@ export const PERSONA_VIEWS = [
       "Participant",
       "DataProduct",
       "Contract",
+    ],
+  },
+  {
+    id: "patient",
+    icon: "Heart",
+    label: "Patient / Citizen",
+    role: "PATIENT",
+    ehdsArticle: "Art. 3–12",
+    question: "What health data do I have? What research am I contributing to?",
+    description:
+      "EHDS Chapter II / GDPR Art. 15 — my own health records, conditions, medications, consented research programs and insights",
+    focusLabels: ["Patient", "Condition", "MedicationRequest"],
+    labels: [
+      "Patient",
+      "Encounter",
+      "Condition",
+      "Observation",
+      "MedicationRequest",
+      "Procedure",
+      "OMOPPerson",
+      "ResearchPseudonym",
+      "SPESession",
     ],
   },
 ] as const;

@@ -8,6 +8,7 @@ repos:
       - id: end-of-file-fixer
       - id: check-yaml
         exclude: ^jad/openapi/
+        args: ["--allow-multiple-documents"]
       - id: check-json
       - id: check-added-large-files
         args: ["--maxkb=5000"]

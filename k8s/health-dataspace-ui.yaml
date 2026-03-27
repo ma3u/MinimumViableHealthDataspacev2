@@ -1,0 +1,158 @@
+# Health Dataspace UI — OrbStack Kubernetes Deployment
+#
+# Deploys the Next.js UI with Phase 19/20 (role-aware nav + patient portal)
+# to the local OrbStack k8s cluster.
+#
+# Deploy:
+#   docker build --platform linux/amd64 -t health-dataspace-ui:latest ./ui
+#   kubectl apply -f k8s/health-dataspace-ui.yaml
+#
+# Access:
+#   http://health-dataspace.orbstack.local  (via OrbStack ingress)
+#   or: kubectl -n health-dataspace port-forward svc/health-dataspace-ui 3002:3000
+#       → http://localhost:3002
+#
+# Neo4j must be reachable from the cluster. The Docker Compose neo4j container
+# is accessible from OrbStack k8s pods via host.docker.internal (or the bridge IP).
+
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: health-dataspace
+  labels:
+    app.kubernetes.io/part-of: health-dataspace-v2
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: health-dataspace-config
+  namespace: health-dataspace
+data:
+  # Neo4j — connect to the Docker Compose instance via OrbStack bridge
+  NEO4J_URI: "bolt://host.docker.internal:7687"
+  NEO4J_USER: "neo4j"
+  # Keycloak — connect to Docker Compose Keycloak if running, else skip auth
+  KEYCLOAK_ISSUER: "http://host.docker.internal:8080/realms/EDCV"
+  KEYCLOAK_PUBLIC_URL: "http://keycloak.localhost/realms/EDCV"
+  KEYCLOAK_CLIENT_ID: "ui"
+  NEXT_PUBLIC_KEYCLOAK_PUBLIC_URL: "http://keycloak.localhost/realms/EDCV"
+  NEXT_PUBLIC_KEYCLOAK_CLIENT_ID: "ui"
+  # EDC-V APIs (via Traefik if JAD stack running, otherwise skip)
+  EDC_MANAGEMENT_URL: "http://host.docker.internal:8080"
+  IDENTITYHUB_URL: "http://host.docker.internal:7081"
+  ISSUER_SERVICE_URL: "http://host.docker.internal:8080"
+  TENANT_MANAGER_URL: "http://host.docker.internal:8081"
+  PROVISION_MANAGER_URL: "http://host.docker.internal:8082"
+  NEO4J_PROXY_URL: "http://host.docker.internal:9090"
+  NEXTAUTH_URL: "http://health-dataspace.orbstack.local"
+  NEXT_PUBLIC_STATIC_EXPORT: "false"
+  NODE_ENV: "production"
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: health-dataspace-secrets
+  namespace: health-dataspace
+type: Opaque
+stringData:
+  # Default dev credentials — override in production
+  NEO4J_PASSWORD: "healthdataspace"
+  KEYCLOAK_CLIENT_SECRET: "ui-secret"
+  NEXTAUTH_SECRET: "health-dataspace-local-dev-secret-change-in-production"
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: health-dataspace-ui
+  namespace: health-dataspace
+  labels:
+    app: health-dataspace-ui
+    version: phase20
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: health-dataspace-ui
+  template:
+    metadata:
+      labels:
+        app: health-dataspace-ui
+    spec:
+      containers:
+        - name: ui
+          image: health-dataspace-ui:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 3000
+              name: http
+          envFrom:
+            - configMapRef:
+                name: health-dataspace-config
+            - secretRef:
+                name: health-dataspace-secrets
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "256Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: 3000
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: 3000
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            failureThreshold: 3
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: health-dataspace-ui
+  namespace: health-dataspace
+  labels:
+    app: health-dataspace-ui
+spec:
+  selector:
+    app: health-dataspace-ui
+  ports:
+    - name: http
+      port: 3000
+      targetPort: 3000
+  type: ClusterIP
+
+---
+# OrbStack Ingress — provides http://health-dataspace.orbstack.local
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: health-dataspace-ui
+  namespace: health-dataspace
+  annotations:
+    # OrbStack uses its own ingress controller that handles .orbstack.local domains
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
+spec:
+  rules:
+    - host: health-dataspace.orbstack.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: health-dataspace-ui
+                port:
+                  number: 3000
