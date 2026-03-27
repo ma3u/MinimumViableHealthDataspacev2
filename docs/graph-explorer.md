@@ -2,8 +2,11 @@
 
 The Knowledge Graph Explorer (`/graph`) visualises the 5-layer EHDS health
 dataspace as a force-directed concentric ring layout. This document explains
-the structure, colour system, researcher filter presets, validation rules, and
-the embedding trade-off analysis.
+the structure, colour system, persona-specific views, researcher filter
+presets, validation rules, and the embedding trade-off analysis.
+
+See also: [docs/persona-journeys.md](./persona-journeys.md) — per-persona
+journey maps with entry points and EHDS article references.
 
 ---
 
@@ -104,6 +107,51 @@ real identities to researchers.
 (:ResearchPseudonym)-[:LINKED_FROM]->(:ProviderPseudonym)
 (:ResearchPseudonym)-[:USED_IN]->(:SPESession)
 ```
+
+---
+
+## Persona Views — "View as…"
+
+The sidebar **"View as"** panel lets users switch the fetched subgraph
+based on their role. Each persona runs a different Cypher query that
+surfaces what that actor most needs to see.
+
+### API usage
+
+```
+GET /api/graph                       → default researcher overview
+GET /api/graph?persona=trust-center  → Trust Center operator view
+GET /api/graph?persona=hospital      → Hospital / Data Holder view
+GET /api/graph?persona=researcher    → Researcher / Data User view
+GET /api/graph?persona=edc-admin     → EDC Admin operator view
+GET /api/graph?persona=hdab          → HDAB Authority view
+```
+
+Each response includes `{ nodes, links, persona, question }`.
+
+### Persona summary
+
+| Persona                    | Role           | Primary question                                   | Focus nodes                                             |
+| -------------------------- | -------------- | -------------------------------------------------- | ------------------------------------------------------- |
+| **Researcher overview**    | ALL            | What does the full dataspace look like?            | All 5 layers                                            |
+| **Trust Center operator**  | HDAB           | Which data flows am I resolving pseudonyms for?    | TrustCenter · SPESession · ResearchPseudonym            |
+| **Hospital / Data Holder** | DATA_HOLDER    | Who has approved access to my data?                | Participant · HealthDataset · Contract · HDABApproval   |
+| **Researcher / Data User** | DATA_USER      | What datasets match my study?                      | HealthDataset · OMOPPerson · SnomedConcept · SPESession |
+| **EDC Admin**              | EDC_ADMIN      | Who are my participants? What contracts are live?  | Participant · DataProduct · Contract · TransferEvent    |
+| **HDAB Authority**         | HDAB_AUTHORITY | What approvals are pending? Is the chain complete? | HDABApproval · VerifiableCredential · TrustCenter       |
+
+### Persona color cues
+
+Switching persona does **not** change node colors — role colors are stable:
+
+- **Participant** (amber `#E67E22`) — always the key actors, regardless of persona
+- **TrustCenter** (violet `#8E44AD`) — visible in trust-center and HDAB views
+- **HDABApproval** (red `#C0392B`) — prominent in hospital and HDAB views
+- **SPESession** (gold `#D4AC0D`) — visible in trust-center and researcher views
+
+The "View as" selection changes _which nodes are fetched_, while the
+filter presets change _which fetched nodes are highlighted_. They can be
+combined: e.g. "Hospital" persona + "Dataset catalog" filter.
 
 ---
 

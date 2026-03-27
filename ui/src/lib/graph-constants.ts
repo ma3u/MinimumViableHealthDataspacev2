@@ -302,3 +302,146 @@ export const FILTER_PRESETS = [
 ] as const;
 
 export type FilterPresetId = (typeof FILTER_PRESETS)[number]["id"];
+
+// ── Persona views ─────────────────────────────────────────────────────────────
+
+/**
+ * Persona-specific graph views — each answers the single most important
+ * question a participant type has when they open the graph explorer.
+ *
+ * The `labels` array is used both for client-side dimming (same as filter
+ * presets) and for server-side subgraph selection (?persona= query param).
+ * The `focusLabels` are the "hero nodes" shown at full size at the center.
+ */
+export const PERSONA_VIEWS = [
+  {
+    id: "default",
+    icon: "Eye",
+    label: "Researcher overview",
+    role: "ALL",
+    ehdsArticle: null as string | null,
+    question: "What does the full 5-layer health dataspace look like?",
+    description:
+      "Curated ~200-node overview: participants, datasets, top conditions, ontology",
+    focusLabels: [
+      "Participant",
+      "HealthDataset",
+      "DataProduct",
+      "Condition",
+      "SnomedConcept",
+    ],
+    labels: [] as string[], // empty = show all
+  },
+  {
+    id: "trust-center",
+    icon: "Lock",
+    label: "Trust Center operator",
+    role: "HDAB",
+    ehdsArticle: "Art. 50/51",
+    question: "Which data flows am I resolving pseudonyms for?",
+    description:
+      "EHDS Art. 50/51 — active SPE sessions, research pseudonyms, governed datasets, cross-border recognition",
+    focusLabels: ["TrustCenter", "SPESession", "ResearchPseudonym"],
+    labels: [
+      "TrustCenter",
+      "SPESession",
+      "ResearchPseudonym",
+      "ProviderPseudonym",
+      "HDABApproval",
+      "HealthDataset",
+      "Participant",
+    ],
+  },
+  {
+    id: "hospital",
+    icon: "Building2",
+    label: "Hospital / Data Holder",
+    role: "DATA_HOLDER",
+    ehdsArticle: "Art. 33–37",
+    question: "Who has approved access to my data? What contracts are active?",
+    description:
+      "EHDS Art. 33 — your datasets, active contracts, approved access applications, verifiable credentials",
+    focusLabels: ["Participant", "HealthDataset", "Contract"],
+    labels: [
+      "Participant",
+      "Organization",
+      "HealthDataset",
+      "Distribution",
+      "DataProduct",
+      "Contract",
+      "HDABApproval",
+      "VerifiableCredential",
+      "AccessApplication",
+      "EEHRxFProfile",
+    ],
+  },
+  {
+    id: "researcher",
+    icon: "FlaskConical",
+    label: "Researcher / Data User",
+    role: "DATA_USER",
+    ehdsArticle: "Art. 46–49",
+    question: "What datasets match my study? What analytics can I run?",
+    description:
+      "EHDS Art. 46 — available datasets, OMOP cohort, pseudonym chain, EEHRxF profiles, clinical conditions",
+    focusLabels: ["HealthDataset", "OMOPPerson", "ResearchPseudonym"],
+    labels: [
+      "HealthDataset",
+      "Distribution",
+      "DataProduct",
+      "EEHRxFProfile",
+      "EhdsPurpose",
+      "OMOPPerson",
+      "OMOPConditionOccurrence",
+      "OMOPMeasurement",
+      "SnomedConcept",
+      "ResearchPseudonym",
+      "SPESession",
+    ],
+  },
+  {
+    id: "edc-admin",
+    icon: "Settings",
+    label: "EDC / Dataspace Admin",
+    role: "EDC_ADMIN",
+    ehdsArticle: "Art. 33",
+    question: "Who are my participants? What contracts and transfers are live?",
+    description:
+      "Operator view — all participants, active data products, contract negotiations, transfer events",
+    focusLabels: ["Participant", "Contract", "DataTransfer"],
+    labels: [
+      "Participant",
+      "Organization",
+      "DataProduct",
+      "OdrlPolicy",
+      "Contract",
+      "ContractNegotiation",
+      "DataTransfer",
+      "TransferEvent",
+      "VerifiableCredential",
+    ],
+  },
+  {
+    id: "hdab",
+    icon: "Scale",
+    label: "HDAB Authority",
+    role: "HDAB_AUTHORITY",
+    ehdsArticle: "Art. 45–53",
+    question: "What approvals are pending? Is the governance chain complete?",
+    description:
+      "EHDS Art. 45 — all access applications, HDAB approval decisions, verifiable credentials, trust center governance",
+    focusLabels: ["HDABApproval", "TrustCenter", "VerifiableCredential"],
+    labels: [
+      "HDABApproval",
+      "AccessApplication",
+      "VerifiableCredential",
+      "TrustCenter",
+      "SPESession",
+      "Participant",
+      "DataProduct",
+      "Contract",
+    ],
+  },
+] as const;
+
+export type PersonaId = (typeof PERSONA_VIEWS)[number]["id"];

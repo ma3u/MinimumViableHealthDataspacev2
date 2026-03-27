@@ -8,10 +8,15 @@ import {
   Activity,
   BarChart2,
   BookOpen,
+  Building2,
   Database,
+  Eye,
+  FlaskConical,
   Lock,
   Loader2,
   MousePointerClick,
+  Scale,
+  Settings,
   ShieldCheck,
   Users,
   X,
@@ -22,7 +27,9 @@ import {
   LAYER_COLORS,
   LAYER_LABELS,
   NODE_ROLE_COLORS,
+  PERSONA_VIEWS,
   type FilterPresetId,
+  type PersonaId,
 } from "@/lib/graph-constants";
 
 const ForceGraph2D = dynamic(() => import("react-force-graph-2d"), {
@@ -92,12 +99,19 @@ type LucideIcon = React.ForwardRefExoticComponent<
   Omit<LucideProps, "ref"> & React.RefAttributes<SVGSVGElement>
 >;
 const PRESET_ICONS: Record<string, LucideIcon> = {
+  // filter preset icons
   Users,
   Lock,
   ShieldCheck,
   BookOpen,
   Activity,
   BarChart2,
+  // persona icons
+  Eye,
+  Building2,
+  FlaskConical,
+  Settings,
+  Scale,
 };
 
 // Concentric ring radii — nodes pre-positioned so physics is skipped
@@ -183,6 +197,8 @@ function GraphContent() {
   >([]);
   // Active researcher filter preset — null = show all
   const [activeFilter, setActiveFilter] = useState<FilterPresetId | null>(null);
+  // Active persona view — determines which subgraph is fetched from the API
+  const [activePersona, setActivePersona] = useState<PersonaId>("default");
 
   const containerRef = useRef<HTMLDivElement>(null);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -191,9 +207,17 @@ function GraphContent() {
   const searchParams = useSearchParams();
   const highlightId = searchParams.get("highlight");
 
-  // ── Initial researcher overview load ──────────────────────────────────────
+  // ── Load graph (re-fetches when persona changes) ──────────────────────────
   useEffect(() => {
-    fetchApi("/api/graph")
+    setLoading(true);
+    setError(null);
+    setSelected(null);
+    setExpandedIds(new Set());
+    const url =
+      activePersona === "default"
+        ? "/api/graph"
+        : `/api/graph?persona=${activePersona}`;
+    fetchApi(url)
       .then((r) => r.json())
       .then((d) => {
         if (!Array.isArray(d.nodes)) throw new Error("Bad response");
@@ -204,7 +228,7 @@ function GraphContent() {
         setError("Neo4j unavailable — graph could not be loaded.");
         setLoading(false);
       });
-  }, []);
+  }, [activePersona]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Auto-highlight from URL param ─────────────────────────────────────────
   useEffect(() => {
@@ -469,6 +493,51 @@ function GraphContent() {
               <ShieldCheck size={11} /> Validate graph
             </a>
           </div>
+        </div>
+
+        {/* Persona selector — changes the fetched subgraph */}
+        <div>
+          <p className="mb-2 text-xs font-semibold uppercase text-gray-500">
+            View as
+          </p>
+          <div className="flex flex-col gap-1">
+            {PERSONA_VIEWS.map((persona) => {
+              const Icon = PRESET_ICONS[persona.icon] ?? Eye;
+              const isActive = activePersona === persona.id;
+              return (
+                <button
+                  key={persona.id}
+                  onClick={() => {
+                    setActivePersona(persona.id as PersonaId);
+                    setActiveFilter(null);
+                  }}
+                  title={persona.description}
+                  className={`flex items-start gap-2 rounded px-2 py-1.5 text-left text-xs transition-colors ${
+                    isActive
+                      ? "border border-amber-700 bg-amber-900/30 text-amber-200"
+                      : "border border-transparent text-gray-400 hover:bg-gray-800 hover:text-gray-200"
+                  }`}
+                >
+                  <Icon size={11} className="mt-0.5 shrink-0" />
+                  <div>
+                    <div className="font-medium leading-tight">
+                      {persona.label}
+                    </div>
+                    {persona.ehdsArticle && (
+                      <div className="text-gray-600">{persona.ehdsArticle}</div>
+                    )}
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+          {activePersona !== "default" && (
+            <p className="mt-1.5 text-xs italic text-gray-500">
+              &ldquo;
+              {PERSONA_VIEWS.find((p) => p.id === activePersona)?.question}
+              &rdquo;
+            </p>
+          )}
         </div>
 
         {/* Researcher filter presets */}
