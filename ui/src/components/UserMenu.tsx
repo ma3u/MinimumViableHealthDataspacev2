@@ -1,10 +1,11 @@
 "use client";
 
 import { useSession, signIn, signOut } from "next-auth/react";
-import { LogIn, LogOut, Network, Shield, User } from "lucide-react";
+import { LogIn, LogOut, Network, Shield, User, Users } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import {
   ROLE_LABELS,
+  DEMO_PERSONAS,
   deriveParticipantType,
   derivePersonaId,
 } from "@/lib/auth";
@@ -17,6 +18,7 @@ const ROLE_BADGE: Record<string, string> = {
   DATA_HOLDER: "bg-blue-600/80 text-blue-100",
   DATA_USER: "bg-green-700/80 text-green-100",
   TRUST_CENTER_OPERATOR: "bg-violet-700/80 text-violet-100",
+  PATIENT: "bg-teal-700/80 text-teal-100",
 };
 
 /** Dropdown border accent per primary role. */
@@ -27,6 +29,7 @@ const ROLE_ACCENT: Record<string, string> = {
   DATA_USER: "border-green-600",
   TRUST_CENTER_OPERATOR: "border-violet-600",
   EDC_USER_PARTICIPANT: "border-blue-700",
+  PATIENT: "border-teal-600",
 };
 
 /** Shield icon colour per primary role. */
@@ -37,6 +40,7 @@ const ROLE_SHIELD: Record<string, string> = {
   DATA_USER: "text-green-400",
   TRUST_CENTER_OPERATOR: "text-violet-400",
   EDC_USER_PARTICIPANT: "text-gray-400",
+  PATIENT: "text-teal-400",
 };
 
 /** Mock session used in the static GitHub Pages demo. */
@@ -74,8 +78,24 @@ const PERSONA_GRAPH_LABELS: Record<string, string> = {
   researcher: "Available datasets and OMOP analytics",
   hdab: "Approval chains and credentials",
   "trust-center": "Pseudonym chains and SPE sessions",
+  patient: "My health records and research consents",
   default: "Full 5-layer dataspace overview",
 };
+
+/** Switch to a demo persona — signs out current session then signs in with hint. */
+function switchPersona(
+  username: string,
+  personaId: string,
+  onClose: () => void,
+) {
+  onClose();
+  signOut({ redirect: false }).then(() => {
+    signIn("keycloak", {
+      callbackUrl: `/graph?persona=${personaId}`,
+      login_hint: username,
+    });
+  });
+}
 
 export default function UserMenu() {
   const { data: liveSession, status: liveStatus } = useSession();
@@ -208,8 +228,72 @@ export default function UserMenu() {
             </a>
           </div>
 
+          {/* Demo persona switcher */}
+          {!IS_STATIC && (
+            <div className="border-t border-gray-700">
+              <div className="px-3 pt-2 pb-1 flex items-center gap-1.5">
+                <Users size={11} className="text-gray-500" />
+                <span className="text-[10px] text-gray-500 uppercase tracking-wide font-semibold">
+                  Switch user
+                </span>
+              </div>
+              <div className="px-2 pb-2 space-y-0.5">
+                {DEMO_PERSONAS.map((persona) => {
+                  const isActive = persona.username === username;
+                  const primaryRole = [...persona.roles].find((r) =>
+                    [
+                      "EDC_ADMIN",
+                      "HDAB_AUTHORITY",
+                      "DATA_HOLDER",
+                      "DATA_USER",
+                      "PATIENT",
+                    ].includes(r),
+                  );
+                  return (
+                    <button
+                      key={persona.username}
+                      disabled={isActive}
+                      onClick={() =>
+                        switchPersona(persona.username, persona.personaId, () =>
+                          setOpen(false),
+                        )
+                      }
+                      className={`flex items-center gap-2 w-full px-2 py-1.5 rounded text-left transition-colors ${
+                        isActive
+                          ? "bg-gray-700/50 cursor-default"
+                          : "hover:bg-gray-700 cursor-pointer"
+                      }`}
+                    >
+                      <span
+                        className={`inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded font-medium shrink-0 ${
+                          ROLE_BADGE[primaryRole ?? ""] ??
+                          "bg-gray-600 text-gray-200"
+                        }`}
+                      >
+                        <Shield size={8} />
+                        {ROLE_LABELS[primaryRole ?? ""] ?? primaryRole}
+                      </span>
+                      <span
+                        className={`font-mono text-xs truncate ${
+                          isActive ? "text-white" : "text-gray-300"
+                        }`}
+                      >
+                        {persona.username}
+                      </span>
+                      {isActive && (
+                        <span className="ml-auto text-[9px] text-gray-500 shrink-0">
+                          active
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
           {/* Sign out */}
-          <div className="p-2">
+          <div className="p-2 border-t border-gray-700">
             <button
               onClick={() => {
                 setOpen(false);
