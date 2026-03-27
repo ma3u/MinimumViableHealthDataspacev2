@@ -27,6 +27,8 @@ import {
   ScrollText,
   ClipboardList,
   Edit3,
+  Lightbulb,
+  FlaskConical,
 } from "lucide-react";
 import UserMenu from "./UserMenu";
 import { useState, useRef, useEffect } from "react";
@@ -173,6 +175,40 @@ const exchangeGroup: NavGroup = {
   ],
 };
 
+// ── Cluster 4b: My Health (PATIENT role) ─────────────────────────────────────
+// EHDS Chapter II Art. 3-12 / GDPR Art. 15-22 — patient primary-use rights
+const myHealthGroup: NavGroup = {
+  label: "My Health",
+  icon: Heart,
+  roles: ["PATIENT", "EDC_ADMIN"],
+  links: [
+    {
+      href: "/patient",
+      label: "My Health Records",
+      icon: User,
+      roles: ["PATIENT", "EDC_ADMIN"],
+    },
+    {
+      href: "/patient/profile",
+      label: "Health Profile & Risks",
+      icon: Heart,
+      roles: ["PATIENT", "EDC_ADMIN"],
+    },
+    {
+      href: "/patient/research",
+      label: "Research Programs",
+      icon: FlaskConical,
+      roles: ["PATIENT", "EDC_ADMIN"],
+    },
+    {
+      href: "/patient/insights",
+      label: "Research Insights",
+      icon: Lightbulb,
+      roles: ["PATIENT", "EDC_ADMIN"],
+    },
+  ],
+};
+
 // ── Cluster 5: Manage ─────────────────────────────────────────────────────────
 const manageGroup: NavGroup = {
   label: "Manage",
@@ -227,6 +263,7 @@ const docsGroup: NavGroup = {
 const ALL_NAV_GROUPS: NavGroup[] = [
   getStartedGroup,
   exploreGroup,
+  myHealthGroup,
   governanceGroup,
   exchangeGroup,
   manageGroup,

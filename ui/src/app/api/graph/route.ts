@@ -305,6 +305,67 @@ async function buildHdabGraph() {
   return sortAndDedup([...govNodes, ...tcNodes, ...vcNodes]);
 }
 
+/** Patient: own FHIR data + conditions + research pseudonym chain (EHDS Art. 3-12) */
+async function buildPatientGraph() {
+  const [patientNodes, conditionNodes, omopNodes, speNodes] = await Promise.all(
+    [
+      // Top 20 patients with richest records (GDPR Art. 15 — access own data)
+      runQuery<{ id: string; labels: string[]; name: string }>(
+        `MATCH (p:Patient)-[:HAS_CONDITION]->(:Condition)
+         WITH p, count(*) AS cnt ORDER BY cnt DESC LIMIT 20
+         RETURN elementId(p) AS id, labels(p) AS labels,
+                coalesce(p.name, p.id, elementId(p)) AS name`,
+        {},
+      ),
+      // Their top conditions
+      runQuery<{ id: string; labels: string[]; name: string }>(
+        `MATCH (c:Condition)<-[:HAS_CONDITION]-(:Patient)
+         WITH c, count(*) AS freq ORDER BY freq DESC LIMIT 30
+         RETURN elementId(c) AS id, labels(c) AS labels,
+                coalesce(c.code, c.display, elementId(c)) AS name`,
+        {},
+      ),
+      // OMOP CDM mapping (pseudonymised research representation)
+      runQuery<{ id: string; labels: string[]; name: string }>(
+        `MATCH (op:OMOPPerson)
+         RETURN elementId(op) AS id, labels(op) AS labels,
+                coalesce(toString(op.personId), elementId(op)) AS name
+         LIMIT 15
+         UNION
+         MATCH (oc:OMOPConditionOccurrence)
+         RETURN elementId(oc) AS id, labels(oc) AS labels,
+                coalesce(toString(oc.conditionConceptId), elementId(oc)) AS name
+         LIMIT 20`,
+        {},
+      ),
+      // Research pseudonyms and SPE sessions (EHDS Art. 10 — consent for secondary use)
+      runQuery<{ id: string; labels: string[]; name: string }>(
+        `MATCH (rp:ResearchPseudonym {revoked: false})
+         RETURN elementId(rp) AS id, labels(rp) AS labels,
+                coalesce(rp.studyId, rp.rpsnId, elementId(rp)) AS name
+         LIMIT 10
+         UNION
+         MATCH (ss:SPESession)
+         RETURN elementId(ss) AS id, labels(ss) AS labels,
+                coalesce(ss.studyId, ss.sessionId, elementId(ss)) AS name
+         LIMIT 5
+         UNION
+         MATCH (pc:PatientConsent {revoked: false})
+         RETURN elementId(pc) AS id, labels(pc) AS labels,
+                coalesce(pc.studyId, pc.consentId, elementId(pc)) AS name
+         LIMIT 10`,
+        {},
+      ),
+    ],
+  );
+  return sortAndDedup([
+    ...patientNodes,
+    ...conditionNodes,
+    ...omopNodes,
+    ...speNodes,
+  ]);
+}
+
 // ── Default overview (unchanged from before) ─────────────────────────────────
 
 async function buildDefaultGraph() {
@@ -408,6 +469,9 @@ export async function GET(req: Request) {
         break;
       case "hdab":
         nodes = await buildHdabGraph();
+        break;
+      case "patient":
+        nodes = await buildPatientGraph();
         break;
       default:
         nodes = await buildDefaultGraph();

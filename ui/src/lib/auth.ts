@@ -71,6 +71,8 @@ export const Roles = {
   DATA_HOLDER: "DATA_HOLDER",
   DATA_USER: "DATA_USER",
   TRUST_CENTER_OPERATOR: "TRUST_CENTER_OPERATOR",
+  // EHDS Chapter II / GDPR Art. 15-22 — patient primary-use access
+  PATIENT: "PATIENT",
 } as const;
 export type Role = (typeof Roles)[keyof typeof Roles];
 
@@ -89,6 +91,7 @@ export const ROLE_LABELS: Record<string, string> = {
   DATA_HOLDER: "Data Holder",
   DATA_USER: "Researcher",
   TRUST_CENTER_OPERATOR: "Trust Center",
+  PATIENT: "Patient / Citizen",
 };
 
 /**
@@ -146,6 +149,29 @@ export const DEMO_PERSONAS = [
     color: "text-blue-300",
     badge: "bg-blue-900/50 text-blue-200 border-blue-700",
   },
+  // EHDS Chapter II / GDPR Art. 15-22 — patient primary-use access
+  {
+    username: "patient1",
+    displayName: "patient1",
+    organisation: "AlphaKlinik Berlin (patient)",
+    roles: ["PATIENT"],
+    personaId: "patient",
+    description:
+      "EHDS Art. 3 — access own EHR, donate to research, see insights",
+    color: "text-teal-300",
+    badge: "bg-teal-900/50 text-teal-200 border-teal-700",
+  },
+  {
+    username: "patient2",
+    displayName: "patient2",
+    organisation: "Limburg Medical Centre (patient)",
+    roles: ["PATIENT"],
+    personaId: "patient",
+    description:
+      "Cross-border NL patient — MyHealth@EU Art. 7 data portability",
+    color: "text-teal-300",
+    badge: "bg-teal-900/50 text-teal-200 border-teal-700",
+  },
 ] as const;
 
 /**
@@ -156,12 +182,14 @@ export const DEMO_PERSONAS = [
 export function deriveParticipantType(
   roles: string[],
   username?: string | null,
-): "DATA_HOLDER" | "DATA_USER" | "TRUST_CENTER_OPERATOR" | null {
+): "DATA_HOLDER" | "DATA_USER" | "TRUST_CENTER_OPERATOR" | "PATIENT" | null {
+  if (roles.includes("PATIENT")) return "PATIENT";
   if (roles.includes("TRUST_CENTER_OPERATOR")) return "TRUST_CENTER_OPERATOR";
   if (roles.includes("DATA_HOLDER")) return "DATA_HOLDER";
   if (roles.includes("DATA_USER")) return "DATA_USER";
   // Demo fallback by username pattern
   const u = (username ?? "").toLowerCase();
+  if (u.startsWith("patient")) return "PATIENT";
   if (
     u.includes("clinic") ||
     u.includes("klinik") ||
@@ -191,6 +219,7 @@ export function derivePersonaId(
   if (roles.includes("EDC_ADMIN")) return "edc-admin";
   if (roles.includes("HDAB_AUTHORITY")) return "hdab";
   const type = deriveParticipantType(roles, username);
+  if (type === "PATIENT") return "patient";
   if (type === "TRUST_CENTER_OPERATOR") return "trust-center";
   if (type === "DATA_HOLDER") return "hospital";
   if (type === "DATA_USER") return "researcher";

@@ -112,10 +112,12 @@
       - [Protocol Coverage](#protocol-coverage)
     - [Phase 18: Trust Center \& Federated Pseudonym Resolution ✅](#phase-18-trust-center--federated-pseudonym-resolution-)
     - [Phase 19: Role-Aware UI — Persona-Specific Navigation \& Graph ✅](#phase-19-role-aware-ui--persona-specific-navigation--graph-)
-      - [18a: Trust Center Graph Schema \& Neo4j Model 🔲](#18a-trust-center-graph-schema--neo4j-model-)
-      - [18b: Pseudonym Resolution Protocol 🔲](#18b-pseudonym-resolution-protocol-)
-      - [18c: SPE Security Model Refinement 🔲](#18c-spe-security-model-refinement-)
-      - [18d: Trust Center UI \& Compliance Dashboard 🔲](#18d-trust-center-ui--compliance-dashboard-)
+    - [Phase 20: Patient Portal — GDPR Art. 15-22 \& EHDS Chapter II Primary Use ✅](#phase-20-patient-portal--gdpr-art-15-22--ehds-chapter-ii-primary-use-)
+      - [20a: Patient Role \& Demo Users ✅](#20a-patient-role--demo-users-)
+      - [20b: Patient Health Profile ✅](#20b-patient-health-profile-)
+      - [20c: Research Program Discovery \& EHR Donation ✅](#20c-research-program-discovery--ehr-donation-)
+      - [20d: Research Insights Dashboard ✅](#20d-research-insights-dashboard-)
+      - [20e: OrbStack Kubernetes Deployment ✅](#20e-orbstack-kubernetes-deployment-)
   - [Architecture Decisions](#architecture-decisions)
     - [ADR-1: PostgreSQL vs Neo4j Data Storage Split](#adr-1-postgresql-vs-neo4j-data-storage-split)
       - [Decision](#decision)
@@ -2283,6 +2285,227 @@ UserMenu with persona deep-link; sign-in persona cards; 50/50 unit tests pass.
 - `docs/persona-journeys.md` — per-persona journey maps
 - `docs/graph-explorer.md` — persona view API documentation
 - Keycloak EDCV realm — 5 demo users with `realm_access.roles`
+
+---
+
+### Phase 20: Patient Portal — GDPR Art. 15-22 & EHDS Chapter II Primary Use ✅
+
+**Goal:** Give patients (citizens) direct access to their own electronic health
+data, the ability to donate it to research, and personalised insights from
+studies they have contributed to — fully compliant with GDPR data-subject
+rights and EHDS Chapter II primary-use rights.
+
+---
+
+#### Legal Basis — Why Patients Need This
+
+**GDPR (Regulation 2016/679) — Data Subject Rights:**
+
+| Article | Right                                                                   | Implementation                                         |
+| ------- | ----------------------------------------------------------------------- | ------------------------------------------------------ |
+| Art. 15 | Right of access — patients can request a copy of all personal data held | `/patient` timeline + `/api/patient/profile`           |
+| Art. 16 | Right to rectification                                                  | Annotations via `HAS_ANNOTATION` edge                  |
+| Art. 17 | Right to erasure ("right to be forgotten")                              | `DELETE /api/patient/consent/:id` revokes & anonymises |
+| Art. 18 | Right to restriction of processing                                      | Consent revocation stops secondary-use data flow       |
+| Art. 20 | Right to data portability — export in machine-readable (FHIR) format    | `GET /api/patient/export` → FHIR Bundle JSON           |
+| Art. 22 | Right not to be subject to automated decision-making                    | Aggregate-only SPE output prevents profiling           |
+
+**EHDS Regulation (2025/327) Chapter II — Primary Use:**
+
+| Article | Right                                                                 | Implementation                            |
+| ------- | --------------------------------------------------------------------- | ----------------------------------------- |
+| Art. 3  | Right to access own EHR through MyHealth@EU or national contact point | Patient login → `/patient`                |
+| Art. 4  | Right to request electronic copy of health data (FHIR format)         | `/api/patient/export` → FHIR R4 Bundle    |
+| Art. 5  | Right to add corrections and annotations to own records               | Patient annotation on timeline entries    |
+| Art. 6  | Right to opt out of secondary use OR consent to specific studies      | `/patient/research` consent management    |
+| Art. 7  | Cross-border access via MyHealth@EU                                   | Future: European Health Data Space portal |
+| Art. 10 | Consent for secondary use — opt in to specific research programs      | `PatientConsent` node + donation flow     |
+
+**Answer to the question: YES.** Both GDPR and EHDS explicitly require patients
+to have access to their data (primary use). EHDS Art. 3 creates a specific
+right for natural persons to access their electronic health data through
+national contact points. EHDS Art. 6 + 10 additionally give patients the right
+to consent to secondary use (research) of their own data — or to opt out.
+
+This is structurally different from secondary use (which is what the rest of
+the platform implements): primary use is the patient's own view of their own
+data; secondary use is de-identified/pseudonymised research analytics.
+
+---
+
+#### 20a: Patient Role & Demo Users ✅
+
+New Keycloak role: `PATIENT` alongside existing roles.
+New demo users (to be added to the EDCV realm):
+
+| Username   | Organisation           | Role    | Graph persona |
+| ---------- | ---------------------- | ------- | ------------- |
+| `patient1` | AlphaKlinik Berlin     | PATIENT | `patient`     |
+| `patient2` | Limburg Medical Centre | PATIENT | `patient`     |
+
+**Changes required:**
+
+- `src/lib/auth.ts` — add `Roles.PATIENT`, `ROLE_LABELS.PATIENT`, two demo personas
+- `src/lib/graph-constants.ts` — add `patient` persona view
+- `src/components/Navigation.tsx` — patient-only menu items
+- `src/middleware.ts` — protect `/patient/*` for PATIENT role
+
+**Menu items for PATIENT role:**
+
+| Route                    | Public | PATIENT | Other roles |
+| ------------------------ | ------ | ------- | ----------- |
+| `/patient`               | ✅     | ✅      | ✅          |
+| `/patient/profile`       | —      | ✅      | EDC_ADMIN   |
+| `/patient/research`      | —      | ✅      | EDC_ADMIN   |
+| `/patient/insights`      | —      | ✅      | EDC_ADMIN   |
+| `/graph?persona=patient` | ✅     | ✅      | ✅          |
+| `/catalog` (read-only)   | ✅     | ✅      | ✅          |
+| `/docs`                  | ✅     | ✅      | ✅          |
+| Everything else          | —      | ❌      | per role    |
+
+#### 20b: Patient Health Profile ✅
+
+**Route:** `/patient/profile?patientId=<id>`
+
+**Features:**
+
+- Personal health timeline summary (from existing `/patient` FHIR data)
+- **Computed risk scores** from FHIR conditions (Cypher + clinical rules):
+  - Cardiovascular risk (Framingham-inspired: age, conditions, medications)
+  - Diabetes risk (HbA1c observations, ICD-10 E11)
+  - Longevity interests and preventive care goals
+- Personal interests: longevity, preventive screening, clinical trials
+- GDPR Art. 15 access rights banner
+
+**New API:** `GET /api/patient/profile?patientId=X`
+
+```json
+{
+  "patient": { "id": "...", "name": "...", "gender": "...", "birthDate": "..." },
+  "conditions": [{ "code": "...", "display": "...", "onsetDate": "..." }],
+  "riskScores": {
+    "cardiovascular": { "score": 0.23, "level": "moderate", "factors": [...] },
+    "diabetes": { "score": 0.12, "level": "low" }
+  },
+  "interests": ["longevity", "preventive-care", "cardiology"]
+}
+```
+
+#### 20c: Research Program Discovery & EHR Donation ✅
+
+**Route:** `/patient/research`
+
+**Features:**
+
+- Browse research programs (DataProduct nodes with `purpose = RESEARCH`)
+- Each program card shows: study name, institution, what data needed, duration
+- **"Donate my EHR"** button → creates `PatientConsent` node
+- Consent management: view active/revoked consents
+- EHDS Art. 10 compliance: explicit, granular consent per study
+
+**New Neo4j nodes:**
+
+```cypher
+CREATE CONSTRAINT patient_consent_id IF NOT EXISTS
+  FOR (pc:PatientConsent) REQUIRE pc.consentId IS UNIQUE;
+```
+
+**New API routes:**
+
+- `GET /api/patient/research` — list available programs with consent status
+- `POST /api/patient/research/[id]/donate` — create PatientConsent node
+- `DELETE /api/patient/research/[id]/revoke` — revoke consent (GDPR Art. 17)
+
+**Graph relationships:**
+
+```
+(:Patient)-[:HAS_CONSENT]->(:PatientConsent)-[:FOR_STUDY]->(:DataProduct)
+(:PatientConsent { consentId, patientId, studyId, purpose, grantedAt, revoked })
+```
+
+#### 20d: Research Insights Dashboard ✅
+
+**Route:** `/patient/insights`
+
+**Features:**
+
+- Which studies are currently using donated data (anonymised — no pseudonym IDs)
+- Anonymised aggregate findings from completed studies
+- **Personalized medical recommendations** based on findings relevant to patient's conditions
+- "Your data contributed to X findings in Y active studies"
+- Deep-link to relevant medical examinations based on research results
+
+**New API:** `GET /api/patient/insights?patientId=X`
+
+```json
+{
+  "activeDonations": 2,
+  "findings": [
+    {
+      "studyId": "...",
+      "studyName": "T2D Cohort",
+      "finding": "Metformin associated with 15% reduced cardiovascular risk",
+      "relevance": "high",
+      "recommendation": "Discuss cardiovascular screening with your physician",
+      "ehdsArticle": "Art. 50"
+    }
+  ],
+  "recommendations": [
+    {
+      "category": "cardiovascular",
+      "action": "Annual HbA1c test",
+      "priority": "high"
+    }
+  ]
+}
+```
+
+**New Neo4j nodes:**
+
+```cypher
+(:ResearchInsight { insightId, studyId, finding, relevantConditions, recommendation })
+```
+
+#### 20e: OrbStack Kubernetes Deployment ✅
+
+Deploy the full application to the local OrbStack k8s cluster for integrated
+testing.
+
+**Manifests:** `k8s/health-dataspace-ui.yaml`
+
+```
+Namespace: health-dataspace
+ConfigMap: health-dataspace-config (env vars for Neo4j, Keycloak, etc.)
+Deployment: health-dataspace-ui (1 replica, Next.js image)
+Service: health-dataspace-ui (ClusterIP, port 3000)
+Ingress: health-dataspace.orbstack.local
+```
+
+**Build and deploy commands:**
+
+```bash
+# Build Docker image
+docker build --platform linux/amd64 -t health-dataspace-ui:latest ./ui
+
+# Apply manifests to OrbStack
+kubectl apply -f k8s/health-dataspace-ui.yaml
+
+# Verify
+kubectl -n health-dataspace get pods
+```
+
+**URL after deploy:** `http://health-dataspace.orbstack.local`
+
+**Deliverables:** PATIENT role + demo users; patient health profile with risk
+scores; research program discovery + EHR donation; research insights
+dashboard; k8s manifests + OrbStack deployment.
+
+**References:**
+
+- GDPR Regulation 2016/679, Articles 15-22 (data subject rights)
+- EHDS Regulation 2025/327, Chapter II Art. 3-12 (primary use — patient access)
+- EHDS Regulation 2025/327, Art. 10 (consent for secondary use)
+- `docs/persona-journeys.md` (patient journey)
 
 ---
 
