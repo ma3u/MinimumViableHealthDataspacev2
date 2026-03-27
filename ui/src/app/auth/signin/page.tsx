@@ -3,7 +3,22 @@
 import { signIn } from "next-auth/react";
 import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
-import { ShieldCheck } from "lucide-react";
+import { ShieldCheck, Shield } from "lucide-react";
+import { DEMO_PERSONAS, ROLE_LABELS } from "@/lib/auth";
+
+/** Error message mapping for common OAuth errors. */
+function oauthErrorMessage(error: string): string {
+  switch (error) {
+    case "OAuthCallback":
+      return "Authentication callback failed. Keycloak may be unreachable or misconfigured.";
+    case "Callback":
+      return "OAuth callback error — check that Keycloak is running and the redirect URI is registered.";
+    case "OAuthSignin":
+      return "Could not start sign-in flow. Is Keycloak running on port 8080?";
+    default:
+      return `Error: ${error}`;
+  }
+}
 
 function SignInContent() {
   const searchParams = useSearchParams();
@@ -11,25 +26,24 @@ function SignInContent() {
   const error = searchParams.get("error");
 
   return (
-    <div className="min-h-[60vh] flex items-center justify-center">
-      <div className="bg-gray-800 rounded-lg p-8 max-w-md w-full mx-4 text-center">
+    <div className="min-h-[60vh] flex flex-col items-center justify-center gap-8 py-10 px-4">
+      {/* ── Login card ── */}
+      <div className="bg-gray-800 rounded-lg p-8 max-w-md w-full text-center">
         <ShieldCheck size={48} className="mx-auto mb-4 text-layer1" />
         <h1 className="text-2xl font-bold text-white mb-2">
           Health Dataspace Login
         </h1>
         <p className="text-gray-400 mb-6">
           Sign in with your Keycloak account to access protected resources.
+          <br />
+          <span className="text-gray-500 text-xs mt-1 block">
+            Password = username (local dev only)
+          </span>
         </p>
 
         {error && (
           <div className="bg-red-900/50 border border-red-700 rounded p-3 mb-4 text-sm text-red-300">
-            {error === "OAuthCallback"
-              ? "Authentication callback failed. Keycloak may be unreachable or misconfigured."
-              : error === "Callback"
-                ? "OAuth callback error — check that Keycloak is running and the redirect URI is registered."
-                : error === "OAuthSignin"
-                  ? "Could not start sign-in flow. Is Keycloak running on port 8080?"
-                  : `Error: ${error}`}
+            {oauthErrorMessage(error)}
           </div>
         )}
 
@@ -44,6 +58,70 @@ function SignInContent() {
           EHDS-compliant authentication via Keycloak SSO
         </p>
       </div>
+
+      {/* ── Demo persona reference cards ── */}
+      <div className="w-full max-w-3xl">
+        <p className="text-xs text-gray-500 text-center mb-3 uppercase tracking-wide font-semibold">
+          Demo users — sign in as any of these to test role-specific views
+        </p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          {DEMO_PERSONAS.map((persona) => (
+            <button
+              key={persona.username}
+              onClick={() =>
+                signIn("keycloak", {
+                  callbackUrl: `/graph?persona=${persona.personaId}`,
+                })
+              }
+              className={`group text-left rounded-lg border p-3 bg-gray-800/60 hover:bg-gray-800 transition-colors ${
+                persona.badge.replace("text-", "border-").split(" ")[0]
+              }`}
+            >
+              {/* Username + org */}
+              <div className="flex items-start justify-between gap-2 mb-1.5">
+                <div>
+                  <div className="font-mono text-sm font-semibold text-white group-hover:text-blue-200 transition-colors">
+                    {persona.username}
+                  </div>
+                  <div className="text-xs text-gray-400">
+                    {persona.organisation}
+                  </div>
+                </div>
+              </div>
+              {/* Role badges */}
+              <div className="flex flex-wrap gap-1 mb-2">
+                {[...persona.roles]
+                  .filter(
+                    (r) =>
+                      r !== "EDC_USER_PARTICIPANT" ||
+                      persona.roles.length === 1,
+                  )
+                  .map((role) => (
+                    <span
+                      key={role}
+                      className={`inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded font-medium ${persona.badge}`}
+                    >
+                      <Shield size={8} />
+                      {ROLE_LABELS[role] ?? role}
+                    </span>
+                  ))}
+              </div>
+              {/* Description */}
+              <p className="text-xs text-gray-500 leading-tight">
+                {persona.description}
+              </p>
+              <p className="text-[10px] text-gray-600 mt-1.5">
+                → opens graph:{" "}
+                <span className="font-mono">{persona.personaId}</span>
+              </p>
+            </button>
+          ))}
+        </div>
+        <p className="text-[10px] text-gray-600 text-center mt-3">
+          Password = username &nbsp;·&nbsp; Keycloak realm: EDCV &nbsp;·&nbsp;
+          http://localhost:8080
+        </p>
+      </div>
     </div>
   );
 }
@@ -53,7 +131,7 @@ export default function SignInPage() {
     <Suspense
       fallback={
         <div className="min-h-[60vh] flex items-center justify-center">
-          <div className="text-gray-400">Loading...</div>
+          <div className="text-gray-400">Loading…</div>
         </div>
       }
     >

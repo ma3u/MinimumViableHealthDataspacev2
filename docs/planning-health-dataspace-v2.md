@@ -111,6 +111,7 @@
       - [Running the Journey Tests](#running-the-journey-tests)
       - [Protocol Coverage](#protocol-coverage)
     - [Phase 18: Trust Center \& Federated Pseudonym Resolution ✅](#phase-18-trust-center--federated-pseudonym-resolution-)
+    - [Phase 19: Role-Aware UI — Persona-Specific Navigation \& Graph ✅](#phase-19-role-aware-ui--persona-specific-navigation--graph-)
       - [18a: Trust Center Graph Schema \& Neo4j Model 🔲](#18a-trust-center-graph-schema--neo4j-model-)
       - [18b: Pseudonym Resolution Protocol 🔲](#18b-pseudonym-resolution-protocol-)
       - [18c: SPE Security Model Refinement 🔲](#18c-spe-security-model-refinement-)
@@ -2168,6 +2169,120 @@ mutual recognition.
 - MII brokerage service integration evaluation
 - EHDS Regulation Art. 50 (Secure Processing Environment)
 - EHDS Regulation Art. 51 (Cross-Border Data Exchange)
+
+---
+
+### Phase 19: Role-Aware UI — Persona-Specific Navigation & Graph ✅
+
+**Goal:** Every authenticated user sees only the navigation items, graph view,
+and login context relevant to their EHDS role. Makes switching between test
+personas fast and unambiguous.
+
+**Context:**
+The platform has 5 demo personas (edcadmin, clinicuser, lmcuser, researcher,
+regulator) but the navigation always showed every menu item. After adding
+6 persona-specific graph views (Phase 18d), the UX gap was clear: the
+"View as" selector in the graph sidebar required knowing the persona IDs,
+and the login page gave no guidance about which account does what.
+
+#### 19a: Role constants and persona-derivation helpers ✅
+
+New exports in `src/lib/auth.ts`:
+
+- `Roles.DATA_HOLDER`, `Roles.DATA_USER`, `Roles.TRUST_CENTER_OPERATOR` — new
+  sub-type constants alongside existing `EDC_ADMIN`, `EDC_USER_PARTICIPANT`,
+  `HDAB_AUTHORITY`
+- `ROLE_LABELS` — friendly display names (e.g. `EDC_ADMIN` → "Dataspace Admin")
+- `DEMO_PERSONAS` — 5 demo user cards with username, org, roles, graph persona
+  ID, and description
+- `deriveParticipantType(roles, username)` — returns `DATA_HOLDER`,
+  `DATA_USER`, `TRUST_CENTER_OPERATOR`, or `null`; checks explicit Keycloak
+  roles first, then falls back to username pattern matching for the demo stack
+- `derivePersonaId(roles, username)` — maps roles to graph persona ID
+  (`edc-admin`, `hospital`, `researcher`, `hdab`, `trust-center`, `default`)
+
+#### 19b: Enhanced UserMenu ✅
+
+`src/components/UserMenu.tsx`:
+
+- Nav bar chip shows username + role label badge (colour-coded per role)
+- Dropdown shows role badges with friendly label + shield icon
+- `displayRolesFor()` — hides `EDC_USER_PARTICIPANT` when a more specific
+  sub-type (`DATA_HOLDER`, `DATA_USER`) is present
+- **"My graph view"** deep-link in dropdown → `/graph?persona=<derived>`
+  with one-line description of what that view shows
+- Role-coloured border accent on dropdown panel
+- Shield icon colour matches role (red=admin, amber=HDAB, blue=holder,
+  green=researcher, violet=trust-center)
+
+#### 19c: Role-aware Navigation ✅
+
+`src/components/Navigation.tsx`:
+
+- Each `NavLink` and `NavGroup` now has an optional `roles?: string[] | "AUTH"`
+  field
+- `filterGroup()` removes groups/items the user's role doesn't allow
+- Anonymous users see: Explore (partial), Docs — all public items
+- Authenticated users additionally see: Get Started, Exchange (negotiate,
+  tasks, transfer)
+
+**Menu items per role:**
+
+| Route               | Public | AUTH | DATA_HOLDER | DATA_USER | HDAB | EDC_ADMIN |
+| ------------------- | ------ | ---- | ----------- | --------- | ---- | --------- |
+| `/graph`            | ✅     | ✅   | ✅          | ✅        | ✅   | ✅        |
+| `/catalog`          | ✅     | ✅   | ✅          | ✅        | ✅   | ✅        |
+| `/catalog/editor`   | —      | —    | ✅          | —         | —    | ✅        |
+| `/patient`          | ✅     | ✅   | ✅          | ✅        | ✅   | ✅        |
+| `/analytics`        | —      | —    | —           | ✅        | ✅   | ✅        |
+| `/query`            | —      | —    | —           | ✅        | ✅   | ✅        |
+| `/eehrxf`           | ✅     | ✅   | ✅          | ✅        | ✅   | ✅        |
+| `/compliance`       | —      | —    | —           | —         | ✅   | ✅        |
+| `/compliance/tck`   | —      | —    | —           | —         | ✅   | ✅        |
+| `/credentials`      | —      | ✅   | ✅          | ✅        | ✅   | ✅        |
+| `/data/share`       | —      | —    | ✅          | —         | —    | ✅        |
+| `/data/discover`    | —      | —    | —           | ✅        | ✅   | ✅        |
+| `/negotiate`        | —      | ✅   | ✅          | ✅        | —    | ✅        |
+| `/tasks`            | —      | ✅   | ✅          | ✅        | ✅   | ✅        |
+| `/data/transfer`    | —      | ✅   | ✅          | ✅        | ✅   | ✅        |
+| `/admin`            | —      | —    | —           | —         | —    | ✅        |
+| `/admin/components` | —      | —    | —           | —         | —    | ✅        |
+| `/admin/tenants`    | —      | —    | —           | —         | —    | ✅        |
+| `/admin/policies`   | —      | —    | —           | —         | ✅   | ✅        |
+| `/admin/audit`      | —      | —    | —           | —         | ✅   | ✅        |
+| `/onboarding`       | —      | ✅   | ✅          | ✅        | ✅   | ✅        |
+| `/settings`         | —      | ✅   | ✅          | ✅        | ✅   | ✅        |
+| `/docs`             | ✅     | ✅   | ✅          | ✅        | ✅   | ✅        |
+
+Notes:
+
+- `DATA_HOLDER` / `DATA_USER` are derived from `EDC_USER_PARTICIPANT` + username
+  pattern when explicit Keycloak sub-roles are absent (demo stack fallback)
+- Route protection (redirects) remain in `middleware.ts` as before
+
+#### 19d: Enhanced sign-in page with persona cards ✅
+
+`src/app/auth/signin/page.tsx`:
+
+- **Persona reference grid** below the Keycloak sign-in button
+- 5 cards (edcadmin, clinicuser, lmcuser, researcher, regulator) each showing:
+  - Keycloak username (mono font)
+  - Organisation name
+  - Role badge(s) with friendly label
+  - One-line role description
+  - Graph persona ID that will be opened after login
+- Clicking a card calls `signIn("keycloak", { callbackUrl: /graph?persona=X })`
+  so after authentication the user lands directly on their graph view
+- Footer note: password = username, realm = EDCV
+
+**Deliverables:** `auth.ts` role helpers; role-filtered Navigation; enhanced
+UserMenu with persona deep-link; sign-in persona cards; 50/50 unit tests pass.
+
+**References:**
+
+- `docs/persona-journeys.md` — per-persona journey maps
+- `docs/graph-explorer.md` — persona view API documentation
+- Keycloak EDCV realm — 5 demo users with `realm_access.roles`
 
 ---
 
