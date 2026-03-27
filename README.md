@@ -136,6 +136,73 @@ each backed by a dedicated API route that queries Neo4j directly over Bolt.
 
 ---
 
+## Demo Users & Roles
+
+The JAD stack comes with five pre-configured Keycloak demo users in the **EDCV realm**.
+Sign in at `http://localhost:3003/auth/signin` — password equals username in local dev.
+
+| Username     | Organisation           | EHDS Role      | Keycloak Role                         | Graph persona |
+| ------------ | ---------------------- | -------------- | ------------------------------------- | ------------- |
+| `edcadmin`   | Dataspace Operator     | Operator       | `EDC_ADMIN`                           | `edc-admin`   |
+| `clinicuser` | AlphaKlinik Berlin     | Data Holder    | `EDC_USER_PARTICIPANT`, `DATA_HOLDER` | `hospital`    |
+| `lmcuser`    | Limburg Medical Centre | Data Holder    | `EDC_USER_PARTICIPANT`, `DATA_HOLDER` | `hospital`    |
+| `researcher` | PharmaCo Research AG   | Researcher     | `EDC_USER_PARTICIPANT`, `DATA_USER`   | `researcher`  |
+| `regulator`  | MedReg DE              | HDAB Authority | `HDAB_AUTHORITY`                      | `hdab`        |
+
+> Trust Center operators (RKI/RIVM) use the `hdab` graph persona and the
+> `/compliance#trust-center` page.
+
+### Menu Items per Role
+
+Navigation is filtered by role — users only see items relevant to their function.
+
+| Route                           | Public | Authenticated | Data Holder | Researcher | HDAB | EDC Admin |
+| ------------------------------- | :----: | :-----------: | :---------: | :--------: | :--: | :-------: |
+| `/graph`                        |   ✅   |      ✅       |     ✅      |     ✅     |  ✅  |    ✅     |
+| `/catalog`                      |   ✅   |      ✅       |     ✅      |     ✅     |  ✅  |    ✅     |
+| `/catalog/editor`               |   —    |       —       |     ✅      |     —      |  —   |    ✅     |
+| `/patient`                      |   ✅   |      ✅       |     ✅      |     ✅     |  ✅  |    ✅     |
+| `/analytics`                    |   —    |       —       |      —      |     ✅     |  ✅  |    ✅     |
+| `/query` (NLQ)                  |   —    |       —       |      —      |     ✅     |  ✅  |    ✅     |
+| `/eehrxf`                       |   ✅   |      ✅       |     ✅      |     ✅     |  ✅  |    ✅     |
+| `/compliance`                   |   —    |       —       |      —      |     —      |  ✅  |    ✅     |
+| `/compliance/tck`               |   —    |       —       |      —      |     —      |  ✅  |    ✅     |
+| `/credentials`                  |   —    |      ✅       |     ✅      |     ✅     |  ✅  |    ✅     |
+| `/data/share`                   |   —    |       —       |     ✅      |     —      |  —   |    ✅     |
+| `/data/discover`                |   —    |       —       |      —      |     ✅     |  ✅  |    ✅     |
+| `/negotiate`                    |   —    |      ✅       |     ✅      |     ✅     |  —   |    ✅     |
+| `/tasks`                        |   —    |      ✅       |     ✅      |     ✅     |  ✅  |    ✅     |
+| `/data/transfer`                |   —    |      ✅       |     ✅      |     ✅     |  ✅  |    ✅     |
+| `/admin` + components + tenants |   —    |       —       |      —      |     —      |  —   |    ✅     |
+| `/admin/policies` + audit       |   —    |       —       |      —      |     —      |  ✅  |    ✅     |
+| `/onboarding`, `/settings`      |   —    |      ✅       |     ✅      |     ✅     |  ✅  |    ✅     |
+| `/docs`                         |   ✅   |      ✅       |     ✅      |     ✅     |  ✅  |    ✅     |
+
+### Graph Explorer — Persona Views
+
+After login, the **UserMenu → "My graph view"** deep-link and the in-graph
+**"View as"** panel redirect each user to their tailored subgraph:
+
+| Persona                | URL param               | Primary question                         | Focus nodes                                             |
+| ---------------------- | ----------------------- | ---------------------------------------- | ------------------------------------------------------- |
+| Default                | `?persona=default`      | What does the full dataspace look like?  | All 5 layers                                            |
+| Hospital / Data Holder | `?persona=hospital`     | Who has approved access to my data?      | Participant · HealthDataset · Contract · HDABApproval   |
+| Researcher / Data User | `?persona=researcher`   | What datasets match my study?            | HealthDataset · OMOPPerson · SnomedConcept · SPESession |
+| HDAB Authority         | `?persona=hdab`         | What approvals are pending?              | HDABApproval · VerifiableCredential · TrustCenter       |
+| Trust Center Operator  | `?persona=trust-center` | Which pseudonym flows am I running?      | TrustCenter · SPESession · ResearchPseudonym            |
+| EDC Admin              | `?persona=edc-admin`    | Who are my participants? What contracts? | Participant · DataProduct · Contract · TransferEvent    |
+
+**Node role colours** (stable across all persona views):
+
+| Node type      | Colour              | Role                                         |
+| -------------- | ------------------- | -------------------------------------------- |
+| `Participant`  | 🟠 Amber `#E67E22`  | Dataspace actors (data holders, researchers) |
+| `TrustCenter`  | 🟣 Violet `#8E44AD` | EHDS Art. 50 pseudonym authority             |
+| `HDABApproval` | 🔴 Red `#C0392B`    | HDAB access decisions                        |
+| `SPESession`   | 🟡 Gold `#D4AC0D`   | Active secure processing sessions            |
+
+---
+
 ## Project Structure
 
 The repository is intentionally minimal. Neo4j Cypher scripts in `neo4j/` build the graph in
