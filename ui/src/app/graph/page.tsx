@@ -12,6 +12,7 @@ import {
   Database,
   Eye,
   FlaskConical,
+  Heart,
   Lock,
   Loader2,
   MousePointerClick,
@@ -24,11 +25,13 @@ import {
 import type { LucideProps } from "lucide-react";
 import {
   FILTER_PRESETS,
+  PATIENT_FILTER_PRESETS,
   LAYER_COLORS,
   LAYER_LABELS,
   NODE_ROLE_COLORS,
   PERSONA_VIEWS,
   type FilterPresetId,
+  type PatientFilterPresetId,
   type PersonaId,
 } from "@/lib/graph-constants";
 
@@ -106,10 +109,12 @@ const PRESET_ICONS: Record<string, LucideIcon> = {
   BookOpen,
   Activity,
   BarChart2,
-  // persona icons
+  // patient filter preset icons
   Eye,
-  Building2,
   FlaskConical,
+  Heart,
+  // persona icons
+  Building2,
   Settings,
   Scale,
 };
@@ -195,8 +200,10 @@ function GraphContent() {
   const [neighbours, setNeighbours] = useState<
     { dir: "in" | "out"; type: string; node: GraphNode }[]
   >([]);
-  // Active researcher filter preset — null = show all
-  const [activeFilter, setActiveFilter] = useState<FilterPresetId | null>(null);
+  // Active filter preset — null = show all (covers both researcher and patient presets)
+  const [activeFilter, setActiveFilter] = useState<
+    FilterPresetId | PatientFilterPresetId | null
+  >(null);
   // Active persona view — determines which subgraph is fetched from the API
   const [activePersona, setActivePersona] = useState<PersonaId>("default");
 
@@ -337,9 +344,15 @@ function GraphContent() {
   // ── Canvas painters ───────────────────────────────────────────────────────
   const connectedIds = new Set(neighbours.map((nb) => nb.node.id));
 
-  // Active filter preset labels set (null = no filter)
+  // Active filter preset labels set (null = no filter) — searches both preset arrays
   const filterLabelSet: Set<string> | null = activeFilter
-    ? new Set(FILTER_PRESETS.find((p) => p.id === activeFilter)?.labels ?? [])
+    ? new Set(
+        (
+          [...FILTER_PRESETS, ...PATIENT_FILTER_PRESETS].find(
+            (p) => p.id === activeFilter,
+          ) as { labels: readonly string[] } | undefined
+        )?.labels ?? [],
+      )
     : null;
 
   const paintNode = useCallback(
@@ -540,13 +553,16 @@ function GraphContent() {
           )}
         </div>
 
-        {/* Researcher filter presets */}
+        {/* Filter presets — persona-aware */}
         <div>
           <p className="mb-2 text-xs font-semibold uppercase text-gray-500">
             Filter by question
           </p>
           <div className="flex flex-col gap-1">
-            {FILTER_PRESETS.map((preset) => {
+            {(activePersona === "patient"
+              ? PATIENT_FILTER_PRESETS
+              : FILTER_PRESETS
+            ).map((preset) => {
               const Icon = PRESET_ICONS[preset.icon] ?? BookOpen;
               const isActive = activeFilter === preset.id;
               return (
@@ -554,15 +570,26 @@ function GraphContent() {
                   key={preset.id}
                   onClick={() =>
                     setActiveFilter((prev) =>
-                      prev === preset.id ? null : (preset.id as FilterPresetId),
+                      prev === preset.id
+                        ? null
+                        : (preset.id as FilterPresetId & PatientFilterPresetId),
                     )
                   }
                   title={preset.description}
                   className={`flex items-center gap-2 rounded px-2 py-1.5 text-left text-xs transition-colors ${
                     isActive
-                      ? "bg-blue-900/60 text-blue-200 border border-blue-700"
+                      ? "bg-teal-900/60 text-teal-200 border border-teal-700"
                       : "text-gray-400 hover:bg-gray-800 hover:text-gray-200 border border-transparent"
                   }`}
+                  style={
+                    isActive && activePersona !== "patient"
+                      ? {
+                          background: "rgb(30 58 138 / 0.6)",
+                          color: "#bfdbfe",
+                          borderColor: "#1d4ed8",
+                        }
+                      : {}
+                  }
                 >
                   <Icon size={11} />
                   <span className="leading-tight">{preset.label}</span>
@@ -572,7 +599,11 @@ function GraphContent() {
           </div>
           {activeFilter && (
             <p className="mt-1.5 text-xs text-gray-600">
-              {FILTER_PRESETS.find((p) => p.id === activeFilter)?.description}
+              {
+                [...FILTER_PRESETS, ...PATIENT_FILTER_PRESETS].find(
+                  (p) => p.id === activeFilter,
+                )?.description
+              }
             </p>
           )}
         </div>
