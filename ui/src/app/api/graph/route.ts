@@ -185,16 +185,16 @@ async function buildResearcherGraph() {
         `MATCH (op:OMOPPerson)-[:HAS_CONDITION_OCCURRENCE]->(:OMOPConditionOccurrence)
          WITH op, count(*) AS cnt ORDER BY cnt DESC LIMIT 15
          RETURN elementId(op) AS id, labels(op) AS labels,
-                coalesce(toString(op.personId), elementId(op)) AS name
+                coalesce(op.name, toString(op.personId), elementId(op)) AS name
          UNION
          MATCH (oc:OMOPConditionOccurrence)<-[:HAS_CONDITION_OCCURRENCE]-(:OMOPPerson)
          WITH oc, count(*) AS freq ORDER BY freq DESC LIMIT 30
          RETURN elementId(oc) AS id, labels(oc) AS labels,
-                coalesce(toString(oc.conditionConceptId), elementId(oc)) AS name
+                coalesce(oc.name, toString(oc.conditionConceptId), elementId(oc)) AS name
          UNION
          MATCH (om:OMOPMeasurement)
          RETURN elementId(om) AS id, labels(om) AS labels,
-                coalesce(toString(om.measurementConceptId), elementId(om)) AS name
+                coalesce(om.name, toString(om.measurementConceptId), elementId(om)) AS name
          LIMIT 10`,
       ),
       runQuery<{ id: string; labels: string[]; name: string }>(
@@ -329,7 +329,7 @@ async function buildPatientGraph() {
       runQuery<{ id: string; labels: string[]; name: string }>(
         `MATCH (op:OMOPPerson)
          RETURN elementId(op) AS id, labels(op) AS labels,
-                coalesce(toString(op.personId), elementId(op)) AS name
+                coalesce(op.name, toString(op.personId), elementId(op)) AS name
          LIMIT 15`,
         {},
       ),
