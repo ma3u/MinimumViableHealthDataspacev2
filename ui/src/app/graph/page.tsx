@@ -3,6 +3,8 @@
 import { fetchApi } from "@/lib/api";
 import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import { useSession } from "next-auth/react";
+import { derivePersonaId } from "@/lib/auth";
 import dynamic from "next/dynamic";
 import {
   Activity,
@@ -203,6 +205,13 @@ function GraphContent() {
   const searchParams = useSearchParams();
   const highlightId = searchParams.get("highlight");
   const urlPersona = searchParams.get("persona") as PersonaId | null;
+
+  const { data: session } = useSession();
+  const sessionRoles: string[] =
+    (session as { roles?: string[] } | null)?.roles ?? [];
+  const sessionUsername: string =
+    session?.user?.name ?? session?.user?.email ?? "";
+  const sessionPersonaId = derivePersonaId(sessionRoles, sessionUsername);
 
   const [data, setData] = useState<GraphData>({ nodes: [], links: [] });
   const [loading, setLoading] = useState(true);
@@ -529,7 +538,15 @@ function GraphContent() {
             View as
           </p>
           <div className="flex flex-col gap-1">
-            {PERSONA_VIEWS.map((persona) => {
+            {(sessionRoles.includes("EDC_ADMIN")
+              ? PERSONA_VIEWS
+              : PERSONA_VIEWS.filter(
+                  (pv) =>
+                    pv.id === sessionPersonaId ||
+                    pv.id === "default" ||
+                    pv.id === activePersona,
+                )
+            ).map((persona) => {
               const Icon = PRESET_ICONS[persona.icon] ?? Eye;
               const isActive = activePersona === persona.id;
               return (
