@@ -82,9 +82,9 @@ const PERSONA_GRAPH_LABELS: Record<string, string> = {
   default: "Full 5-layer dataspace overview",
 };
 
-/** Switch to a demo persona — signs out current session then signs in with hint. */
+/** Switch to a demo persona — signs out current session then prompts for Keycloak login. */
 function switchPersona(
-  username: string,
+  _username: string,
   personaId: string,
   onClose: () => void,
 ) {
@@ -92,7 +92,6 @@ function switchPersona(
   signOut({ redirect: false }).then(() => {
     signIn("keycloak", {
       callbackUrl: `/graph?persona=${personaId}`,
-      login_hint: username,
     });
   });
 }
@@ -234,7 +233,7 @@ export default function UserMenu() {
               <div className="px-3 pt-2 pb-1 flex items-center gap-1.5">
                 <Users size={11} className="text-gray-500" />
                 <span className="text-[10px] text-gray-500 uppercase tracking-wide font-semibold">
-                  Switch user
+                  Returning users
                 </span>
               </div>
               <div className="px-2 pb-2 space-y-0.5">

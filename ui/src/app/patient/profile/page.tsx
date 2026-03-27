@@ -25,6 +25,7 @@ interface Profile {
   riskScores: { cardiovascular: RiskScore; diabetes: RiskScore };
   interests: string[];
   gdprRights: Record<string, string>;
+  totalConditionCount?: number;
 }
 
 interface PatientItem {
@@ -144,8 +145,8 @@ export default function PatientProfilePage() {
                 {profile.patient.birthDate || "—"}
               </div>
               <div>
-                <span className="text-gray-500">Conditions:</span>{" "}
-                {profile.conditions.length}
+                <span className="text-gray-500">Active Conditions:</span>{" "}
+                {profile.totalConditionCount ?? profile.conditions.length}
               </div>
               <div>
                 <span className="text-gray-500">Medications:</span>{" "}
