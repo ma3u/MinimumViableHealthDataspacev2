@@ -147,17 +147,25 @@ function mergeInto(
 ): GraphData {
   const existingIds = new Set(prev.nodes.map((n) => n.id));
 
-  // Count per layer to continue the angle offset for newly added nodes
+  // Count per layer for existing nodes (angle offset base)
   const layerCount: Record<number, number> = {};
-  for (const n of prev.nodes)
+  for (const n of prev.nodes) {
     layerCount[n.layer] = (layerCount[n.layer] ?? 0) + 1;
+  }
+
+  const incoming = newNodes.filter((n) => !existingIds.has(n.id));
+
+  // Pre-compute final total per layer so every node gets an even angular slot
+  const layerTotal: Record<number, number> = { ...layerCount };
+  for (const n of incoming) {
+    layerTotal[n.layer] = (layerTotal[n.layer] ?? 0) + 1;
+  }
 
   const toAdd: GraphNode[] = [];
-  for (const n of newNodes) {
-    if (existingIds.has(n.id)) continue;
+  for (const n of incoming) {
     const idx = layerCount[n.layer] ?? 0;
     layerCount[n.layer] = idx + 1;
-    toAdd.push({ ...n, ...ringPosition(n.layer, idx, idx + 1) });
+    toAdd.push({ ...n, ...ringPosition(n.layer, idx, layerTotal[n.layer]!) });
   }
 
   const existingLinkKeys = new Set(
@@ -235,6 +243,8 @@ function GraphContent() {
         if (!Array.isArray(d.nodes)) throw new Error("Bad response");
         setData(mergeInto({ nodes: [], links: [] }, d.nodes, d.links));
         setLoading(false);
+        // Auto-fit all nodes into view after data arrives
+        setTimeout(() => fgRef.current?.zoomToFit(400, 40), 150);
       })
       .catch(() => {
         setError("Neo4j unavailable — graph could not be loaded.");
@@ -414,8 +424,8 @@ function GraphContent() {
       ctx.fillStyle = node.color;
       ctx.fill();
 
-      // Label
-      if (gs >= 1.2 || isSel || isConn) {
+      // Label — always visible (font size formula keeps it ~9 screen-px regardless of zoom)
+      if (gs >= 0.1 || isSel || isConn) {
         const fs = Math.max(3, 9 / gs);
         ctx.font = `${isSel ? "bold " : ""}${fs}px sans-serif`;
         ctx.fillStyle = isSel ? "#fff" : isConn ? "#f3f4f6" : "#9ca3af";
