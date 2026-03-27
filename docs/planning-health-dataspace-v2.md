@@ -2509,6 +2509,101 @@ dashboard; k8s manifests + OrbStack deployment.
 
 ---
 
+### Phase 21: Graph UX, Risk Scoring & Persona Polish ✅
+
+**Goal:** Fix patient-facing graph rendering, elevate health risk scores with
+social determinants of health (SDOH), clarify the demo user experience,
+and enforce role-based graph VIEW AS filtering.
+
+#### 21a: Patient Graph — URL param seeds initial persona ✅
+
+`/graph?persona=patient` now pre-selects "Patient / Citizen" and loads the
+patient filter presets immediately. Previously `activePersona` was always
+initialised to `"default"` regardless of the URL parameter because
+`useSearchParams()` was called after the `useState` initialiser ran.
+
+**Fix:** Moved `useSearchParams()` to the top of `GraphContent()` so
+`urlPersona` is available to seed `useState<PersonaId>(urlPersona ?? "default")`.
+
+#### 21b: Patient Graph — ring distribution & label visibility ✅
+
+Three rendering bugs fixed:
+
+| Bug                              | Root cause                                                                        | Fix                                                                          |
+| -------------------------------- | --------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| Nodes crowd near one angle       | `mergeInto` passed `idx+1` as `total` to `ringPosition`; as idx grows, angle → 2π | Pre-compute `layerTotal` before placing any node                             |
+| Labels invisible at default zoom | Label draw gated on `gs >= 1.2`; fit-all zoom is typically `gs < 0.5`             | Lowered threshold to `gs >= 0.1` (formula `9/gs` keeps screen size constant) |
+| Graph not centred after load     | No `zoomToFit` call after data arrives                                            | `setTimeout(() => fgRef.current?.zoomToFit(400, 40), 150)`                   |
+
+#### 21c: Patient Graph — data consumers visible for "Who is using my data?" ✅
+
+`buildPatientGraph()` previously only returned FHIR/OMOP clinical nodes.
+`Participant`, `DataProduct`, and `HDABApproval` nodes were added so the
+"Who is using my data?" filter preset has named organisations to highlight.
+
+Condition display names fixed: `coalesce(c.code, c.display, ...)` →
+`coalesce(c.display, c.code, ...)` (was showing raw SNOMED codes).
+
+`OMOPConditionOccurrence` nodes removed from patient view (concept IDs
+meaningless to a citizen); `OMOPPerson` retained for OMOP graph link.
+
+#### 21d: OMOP node names — use .name property ✅
+
+`OMOPConditionOccurrence`, `OMOPPerson`, and `OMOPMeasurement` all carry a
+`.name` property (e.g. "Sprain of ankle", "T2D Occurrence (OMOP)") that was
+being ignored. Queries updated to `coalesce(oc.name, toString(oc.conditionConceptId), ...)`.
+
+#### 21e: Health risk scoring — SNOMED + SDOH factors ✅
+
+Previous scorer only matched ICD-9/10 codes; missed SNOMED codes and social
+determinants of health entirely, producing flat 10% scores for every patient.
+
+Updated scorer detects 11 risk signals including 5 SDOH factors:
+
+| Signal category            | Included factors                                                                                                          |
+| -------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| Clinical (ICD + SNOMED)    | Cardiovascular disease, diabetes, hypertension, atrial fibrillation, obesity, smoking                                     |
+| Social determinants (SDOH) | Chronic stress (+15%), social isolation (+10%), adverse life events / abuse (+12%), unemployment (+8%), depression (+10%) |
+| Multimorbidity burden      | ≥20 conditions +20%, ≥10 +15%, ≥5 +10%                                                                                    |
+
+Patient with SNOMED conditions 73595000 (stress), 706893006 (abuse),
+423315002 (social isolation), 73438004 (unemployment) now scores ~55%
+cardiovascular risk (High) instead of 10% (Low).
+
+`totalConditionCount` added as separate parallel query so "Active Conditions"
+shows the true total (e.g. 232) not the capped 20 shown in the table.
+
+#### 21f: UserMenu — "Returning users" + password-gated switching ✅
+
+- "Switch user" section renamed to **"Returning users"**
+- `login_hint` removed from `signIn()` call — Keycloak always prompts for
+  password when switching personas (prevents session hijacking in demos)
+
+#### 21g: Graph VIEW AS — role-filtered persona list ✅
+
+The "View as" panel now filters by the logged-in user's session:
+
+| Role                    | Visible personas            |
+| ----------------------- | --------------------------- |
+| `EDC_ADMIN`             | All 7 personas (unchanged)  |
+| `PATIENT`               | Patient / Citizen only      |
+| `DATA_HOLDER`           | Hospital / Data Holder only |
+| `DATA_USER`             | Researcher / Data User only |
+| `HDAB_AUTHORITY`        | HDAB Authority only         |
+| `TRUST_CENTER_OPERATOR` | Trust Center Operator only  |
+
+Session read via `useSession()` + `derivePersonaId()` from `@/lib/auth`.
+
+#### 21h: README demo users table updated ✅
+
+`README.md` **Demo Users & Roles** table updated with `patient1` and
+`patient2`, access-rights table updated with Patient column, Graph Explorer
+persona table updated with Patient / Citizen row + patient filter presets,
+node role colours table updated with `PatientConsent` (teal) and
+`ResearchInsight` (mint).
+
+---
+
 ## Architecture Decisions
 
 ### ADR-1: PostgreSQL vs Neo4j Data Storage Split
