@@ -305,10 +305,10 @@ async function buildHdabGraph() {
   return sortAndDedup([...govNodes, ...tcNodes, ...vcNodes]);
 }
 
-/** Patient: own FHIR data + conditions + research pseudonym chain (EHDS Art. 3-12) */
+/** Patient: own FHIR data + governance chain showing who uses it (EHDS Art. 3-12) */
 async function buildPatientGraph() {
-  const [patientNodes, conditionNodes, omopNodes, speNodes] = await Promise.all(
-    [
+  const [patientNodes, conditionNodes, omopNodes, speNodes, govNodes] =
+    await Promise.all([
       // Top 20 patients with richest records (GDPR Art. 15 — access own data)
       runQuery<{ id: string; labels: string[]; name: string }>(
         `MATCH (p:Patient)-[:HAS_CONDITION]->(:Condition)
@@ -317,28 +317,23 @@ async function buildPatientGraph() {
                 coalesce(p.name, p.id, elementId(p)) AS name`,
         {},
       ),
-      // Their top conditions
+      // Their top conditions — display name before code
       runQuery<{ id: string; labels: string[]; name: string }>(
         `MATCH (c:Condition)<-[:HAS_CONDITION]-(:Patient)
          WITH c, count(*) AS freq ORDER BY freq DESC LIMIT 30
          RETURN elementId(c) AS id, labels(c) AS labels,
-                coalesce(c.code, c.display, elementId(c)) AS name`,
+                coalesce(c.display, c.code, elementId(c)) AS name`,
         {},
       ),
-      // OMOP CDM mapping (pseudonymised research representation)
+      // OMOP CDM: persons only (condition occurrences use numeric IDs unhelpful to patients)
       runQuery<{ id: string; labels: string[]; name: string }>(
         `MATCH (op:OMOPPerson)
          RETURN elementId(op) AS id, labels(op) AS labels,
                 coalesce(toString(op.personId), elementId(op)) AS name
-         LIMIT 15
-         UNION
-         MATCH (oc:OMOPConditionOccurrence)
-         RETURN elementId(oc) AS id, labels(oc) AS labels,
-                coalesce(toString(oc.conditionConceptId), elementId(oc)) AS name
-         LIMIT 20`,
+         LIMIT 15`,
         {},
       ),
-      // Research pseudonyms and SPE sessions (EHDS Art. 10 — consent for secondary use)
+      // Research pseudonyms, SPE sessions, consents (EHDS Art. 10 secondary use)
       runQuery<{ id: string; labels: string[]; name: string }>(
         `MATCH (rp:ResearchPseudonym {revoked: false})
          RETURN elementId(rp) AS id, labels(rp) AS labels,
@@ -356,9 +351,27 @@ async function buildPatientGraph() {
          LIMIT 10`,
         {},
       ),
-    ],
-  );
+      // Data consumers — who has access to the data (GDPR Art. 15 transparency)
+      runQuery<{ id: string; labels: string[]; name: string }>(
+        `MATCH (p:Participant)
+         RETURN elementId(p) AS id, labels(p) AS labels,
+                coalesce(p.name, p.participantId, elementId(p)) AS name
+         ORDER BY p.name
+         UNION
+         MATCH (dp:DataProduct)
+         RETURN elementId(dp) AS id, labels(dp) AS labels,
+                coalesce(dp.name, dp.productId, elementId(dp)) AS name
+         LIMIT 15
+         UNION
+         MATCH (ha:HDABApproval)
+         RETURN elementId(ha) AS id, labels(ha) AS labels,
+                coalesce(ha.approvalId, elementId(ha)) AS name
+         LIMIT 10`,
+        {},
+      ),
+    ]);
   return sortAndDedup([
+    ...govNodes,
     ...patientNodes,
     ...conditionNodes,
     ...omopNodes,
