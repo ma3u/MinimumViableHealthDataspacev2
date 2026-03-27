@@ -138,68 +138,88 @@ each backed by a dedicated API route that queries Neo4j directly over Bolt.
 
 ## Demo Users & Roles
 
-The JAD stack comes with five pre-configured Keycloak demo users in the **EDCV realm**.
+The JAD stack comes with **seven** pre-configured Keycloak demo users in the **EDCV realm**.
 Sign in at `http://localhost:3003/auth/signin` — password equals username in local dev.
 
-| Username     | Organisation           | EHDS Role      | Keycloak Role                         | Graph persona |
-| ------------ | ---------------------- | -------------- | ------------------------------------- | ------------- |
-| `edcadmin`   | Dataspace Operator     | Operator       | `EDC_ADMIN`                           | `edc-admin`   |
-| `clinicuser` | AlphaKlinik Berlin     | Data Holder    | `EDC_USER_PARTICIPANT`, `DATA_HOLDER` | `hospital`    |
-| `lmcuser`    | Limburg Medical Centre | Data Holder    | `EDC_USER_PARTICIPANT`, `DATA_HOLDER` | `hospital`    |
-| `researcher` | PharmaCo Research AG   | Researcher     | `EDC_USER_PARTICIPANT`, `DATA_USER`   | `researcher`  |
-| `regulator`  | MedReg DE              | HDAB Authority | `HDAB_AUTHORITY`                      | `hdab`        |
+| Username     | Organisation           | EHDS Role         | Keycloak Role(s)                      | Graph persona |
+| ------------ | ---------------------- | ----------------- | ------------------------------------- | ------------- |
+| `edcadmin`   | Dataspace Operator     | Operator          | `EDC_ADMIN`                           | `edc-admin`   |
+| `clinicuser` | AlphaKlinik Berlin     | Data Holder       | `EDC_USER_PARTICIPANT`, `DATA_HOLDER` | `hospital`    |
+| `lmcuser`    | Limburg Medical Centre | Data Holder       | `EDC_USER_PARTICIPANT`, `DATA_HOLDER` | `hospital`    |
+| `researcher` | PharmaCo Research AG   | Researcher        | `EDC_USER_PARTICIPANT`, `DATA_USER`   | `researcher`  |
+| `regulator`  | MedReg DE              | HDAB Authority    | `HDAB_AUTHORITY`                      | `hdab`        |
+| `patient1`   | AlphaKlinik Berlin     | Patient / Citizen | `PATIENT`                             | `patient`     |
+| `patient2`   | Limburg Medical Centre | Patient / Citizen | `PATIENT`                             | `patient`     |
 
-> Trust Center operators (RKI/RIVM) use the `hdab` graph persona and the
-> `/compliance#trust-center` page.
+> **Returning users** (switching personas): the UserMenu **"Returning users"** section lets you
+> switch between demo accounts. Each switch redirects to Keycloak — you must enter the target
+> user's password. Trust Center operators use the `hdab` graph persona and
+> `/compliance#trust-center`.
 
 ### Menu Items per Role
 
 Navigation is filtered by role — users only see items relevant to their function.
 
-| Route                           | Public | Authenticated | Data Holder | Researcher | HDAB | EDC Admin |
-| ------------------------------- | :----: | :-----------: | :---------: | :--------: | :--: | :-------: |
-| `/graph`                        |   ✅   |      ✅       |     ✅      |     ✅     |  ✅  |    ✅     |
-| `/catalog`                      |   ✅   |      ✅       |     ✅      |     ✅     |  ✅  |    ✅     |
-| `/catalog/editor`               |   —    |       —       |     ✅      |     —      |  —   |    ✅     |
-| `/patient`                      |   ✅   |      ✅       |     ✅      |     ✅     |  ✅  |    ✅     |
-| `/analytics`                    |   —    |       —       |      —      |     ✅     |  ✅  |    ✅     |
-| `/query` (NLQ)                  |   —    |       —       |      —      |     ✅     |  ✅  |    ✅     |
-| `/eehrxf`                       |   ✅   |      ✅       |     ✅      |     ✅     |  ✅  |    ✅     |
-| `/compliance`                   |   —    |       —       |      —      |     —      |  ✅  |    ✅     |
-| `/compliance/tck`               |   —    |       —       |      —      |     —      |  ✅  |    ✅     |
-| `/credentials`                  |   —    |      ✅       |     ✅      |     ✅     |  ✅  |    ✅     |
-| `/data/share`                   |   —    |       —       |     ✅      |     —      |  —   |    ✅     |
-| `/data/discover`                |   —    |       —       |      —      |     ✅     |  ✅  |    ✅     |
-| `/negotiate`                    |   —    |      ✅       |     ✅      |     ✅     |  —   |    ✅     |
-| `/tasks`                        |   —    |      ✅       |     ✅      |     ✅     |  ✅  |    ✅     |
-| `/data/transfer`                |   —    |      ✅       |     ✅      |     ✅     |  ✅  |    ✅     |
-| `/admin` + components + tenants |   —    |       —       |      —      |     —      |  —   |    ✅     |
-| `/admin/policies` + audit       |   —    |       —       |      —      |     —      |  ✅  |    ✅     |
-| `/onboarding`, `/settings`      |   —    |      ✅       |     ✅      |     ✅     |  ✅  |    ✅     |
-| `/docs`                         |   ✅   |      ✅       |     ✅      |     ✅     |  ✅  |    ✅     |
+| Route                           | Public | Patient | Data Holder | Researcher | HDAB | EDC Admin |
+| ------------------------------- | :----: | :-----: | :---------: | :--------: | :--: | :-------: |
+| `/graph`                        |   ✅   |   ✅    |     ✅      |     ✅     |  ✅  |    ✅     |
+| `/graph?persona=patient`        |   —    |   ✅    |      —      |     —      |  —   |    ✅     |
+| `/catalog`                      |   ✅   |   ✅    |     ✅      |     ✅     |  ✅  |    ✅     |
+| `/catalog/editor`               |   —    |    —    |     ✅      |     —      |  —   |    ✅     |
+| `/patient`                      |   ✅   |   ✅    |     ✅      |     ✅     |  ✅  |    ✅     |
+| `/patient/profile`              |   —    |   ✅    |      —      |     —      |  —   |    ✅     |
+| `/patient/research`             |   —    |   ✅    |      —      |     —      |  —   |    ✅     |
+| `/patient/insights`             |   —    |   ✅    |      —      |     —      |  —   |    ✅     |
+| `/analytics`                    |   —    |    —    |      —      |     ✅     |  ✅  |    ✅     |
+| `/query` (NLQ)                  |   —    |    —    |      —      |     ✅     |  ✅  |    ✅     |
+| `/eehrxf`                       |   ✅   |    —    |     ✅      |     ✅     |  ✅  |    ✅     |
+| `/compliance`                   |   —    |    —    |      —      |     —      |  ✅  |    ✅     |
+| `/compliance/tck`               |   —    |    —    |      —      |     —      |  ✅  |    ✅     |
+| `/credentials`                  |   —    |    —    |     ✅      |     ✅     |  ✅  |    ✅     |
+| `/data/share`                   |   —    |    —    |     ✅      |     —      |  —   |    ✅     |
+| `/data/discover`                |   —    |    —    |      —      |     ✅     |  ✅  |    ✅     |
+| `/negotiate`                    |   —    |    —    |     ✅      |     ✅     |  —   |    ✅     |
+| `/tasks`                        |   —    |    —    |     ✅      |     ✅     |  ✅  |    ✅     |
+| `/data/transfer`                |   —    |    —    |     ✅      |     ✅     |  ✅  |    ✅     |
+| `/admin` + components + tenants |   —    |    —    |      —      |     —      |  —   |    ✅     |
+| `/admin/policies` + audit       |   —    |    —    |      —      |     —      |  ✅  |    ✅     |
+| `/onboarding`, `/settings`      |   —    |    —    |     ✅      |     ✅     |  ✅  |    ✅     |
+| `/docs`                         |   ✅   |   ✅    |     ✅      |     ✅     |  ✅  |    ✅     |
 
 ### Graph Explorer — Persona Views
 
 After login, the **UserMenu → "My graph view"** deep-link and the in-graph
 **"View as"** panel redirect each user to their tailored subgraph:
 
-| Persona                | URL param               | Primary question                         | Focus nodes                                             |
-| ---------------------- | ----------------------- | ---------------------------------------- | ------------------------------------------------------- |
-| Default                | `?persona=default`      | What does the full dataspace look like?  | All 5 layers                                            |
-| Hospital / Data Holder | `?persona=hospital`     | Who has approved access to my data?      | Participant · HealthDataset · Contract · HDABApproval   |
-| Researcher / Data User | `?persona=researcher`   | What datasets match my study?            | HealthDataset · OMOPPerson · SnomedConcept · SPESession |
-| HDAB Authority         | `?persona=hdab`         | What approvals are pending?              | HDABApproval · VerifiableCredential · TrustCenter       |
-| Trust Center Operator  | `?persona=trust-center` | Which pseudonym flows am I running?      | TrustCenter · SPESession · ResearchPseudonym            |
-| EDC Admin              | `?persona=edc-admin`    | Who are my participants? What contracts? | Participant · DataProduct · Contract · TransferEvent    |
+| Persona                | URL param               | Primary question                             | Focus nodes                                                      |
+| ---------------------- | ----------------------- | -------------------------------------------- | ---------------------------------------------------------------- |
+| Default                | `?persona=default`      | What does the full dataspace look like?      | All 5 layers                                                     |
+| Hospital / Data Holder | `?persona=hospital`     | Who has approved access to my data?          | Participant · HealthDataset · Contract · HDABApproval            |
+| Researcher / Data User | `?persona=researcher`   | What datasets match my study?                | HealthDataset · OMOPPerson · SnomedConcept · SPESession          |
+| HDAB Authority         | `?persona=hdab`         | What approvals are pending?                  | HDABApproval · VerifiableCredential · TrustCenter                |
+| Trust Center Operator  | `?persona=trust-center` | Which pseudonym flows am I running?          | TrustCenter · SPESession · ResearchPseudonym                     |
+| EDC Admin              | `?persona=edc-admin`    | Who are my participants? What contracts?     | Participant · DataProduct · Contract · TransferEvent             |
+| Patient / Citizen      | `?persona=patient`      | What health data do I have? Who is using it? | Patient · Condition · Participant · PatientConsent · DataProduct |
+
+**Patient question filters** (sidebar when `?persona=patient`):
+
+| Filter                           | Highlights                                                                                 |
+| -------------------------------- | ------------------------------------------------------------------------------------------ |
+| Who is using my data?            | PatientConsent · DataProduct · ResearchPseudonym · SPESession · Participant · HDABApproval |
+| Which research programme for me? | DataProduct · HealthDataset · ResearchInsight · PatientConsent · EhdsPurpose · Participant |
+| Show my data                     | Patient · Encounter · Condition · MedicationRequest · Observation · OMOPPerson             |
+| Show health interests and risks  | Patient · Condition · ResearchInsight · SnomedConcept · ICD10Code · MedicationRequest      |
 
 **Node role colours** (stable across all persona views):
 
-| Node type      | Colour              | Role                                         |
-| -------------- | ------------------- | -------------------------------------------- |
-| `Participant`  | 🟠 Amber `#E67E22`  | Dataspace actors (data holders, researchers) |
-| `TrustCenter`  | 🟣 Violet `#8E44AD` | EHDS Art. 50 pseudonym authority             |
-| `HDABApproval` | 🔴 Red `#C0392B`    | HDAB access decisions                        |
-| `SPESession`   | 🟡 Gold `#D4AC0D`   | Active secure processing sessions            |
+| Node type         | Colour              | Role                                             |
+| ----------------- | ------------------- | ------------------------------------------------ |
+| `Participant`     | 🟠 Amber `#E67E22`  | Dataspace actors (data holders, researchers)     |
+| `TrustCenter`     | 🟣 Violet `#8E44AD` | EHDS Art. 50 pseudonym authority                 |
+| `HDABApproval`    | 🔴 Red `#C0392B`    | HDAB access decisions                            |
+| `SPESession`      | 🟡 Gold `#D4AC0D`   | Active secure processing sessions                |
+| `PatientConsent`  | 🩵 Teal `#0E9F9F`   | Patient consent for secondary use (EHDS Art. 10) |
+| `ResearchInsight` | 🟢 Mint `#1ABC9C`   | Personalised insights from research studies      |
 
 ---
 
