@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowLeft, ExternalLink } from "lucide-react";
+import { ArrowLeft, ExternalLink, Shield } from "lucide-react";
 import MermaidDiagram from "@/components/MermaidDiagram";
 
 const LIVE_URL = "https://ma3u.github.io/MinimumViableHealthDataspacev2";
@@ -109,6 +109,277 @@ export default function UserGuidePage() {
         .
       </p>
 
+      {/* ── 0. Personas & Roles ── */}
+      <section className="mb-12">
+        <h2 className="text-2xl font-semibold mb-3">
+          Personas &amp; Roles — Who Uses What?
+        </h2>
+        <p className="text-gray-400 text-sm mb-4">
+          The platform adapts its navigation, graph view, and available actions
+          to the signed-in user&apos;s EHDS role. Sign in at{" "}
+          <code className="text-xs bg-gray-800 px-1 py-0.5 rounded">
+            /auth/signin
+          </code>{" "}
+          with any demo account — password equals username in local dev.
+        </p>
+
+        <ScreenshotCard
+          src="ehds-signin-persona-cards.png"
+          alt="EHDS Health Dataspace sign-in page showing five demo persona cards with role badges and graph persona IDs"
+          href={`${LIVE_URL}/auth/signin`}
+          title="Sign In — Demo Persona Cards"
+        >
+          <p className="text-gray-400 text-sm mb-3">
+            The sign-in page lists every demo account with its role badge,
+            organisation, and the graph persona view it will open after login.
+            Clicking a card calls Keycloak SSO and redirects directly to the
+            user&apos;s personalised graph.
+          </p>
+
+          {/* Demo users table */}
+          <div className="overflow-x-auto">
+            <table className="text-xs w-full border-collapse">
+              <thead>
+                <tr className="border-b border-gray-700 text-gray-500">
+                  <th className="text-left py-1.5 pr-3">Username</th>
+                  <th className="text-left py-1.5 pr-3">Organisation</th>
+                  <th className="text-left py-1.5 pr-3">Role</th>
+                  <th className="text-left py-1.5 pr-3">Graph view</th>
+                  <th className="text-left py-1.5">Primary question</th>
+                </tr>
+              </thead>
+              <tbody>
+                {[
+                  {
+                    user: "edcadmin",
+                    org: "Dataspace Operator",
+                    role: "EDC Admin",
+                    color: "text-red-400",
+                    graph: "edc-admin",
+                    q: "Who are my participants? What contracts are active?",
+                  },
+                  {
+                    user: "clinicuser",
+                    org: "AlphaKlinik Berlin",
+                    role: "Data Holder",
+                    color: "text-blue-400",
+                    graph: "hospital",
+                    q: "Who has approved access to my datasets?",
+                  },
+                  {
+                    user: "lmcuser",
+                    org: "Limburg Medical Centre",
+                    role: "Data Holder",
+                    color: "text-blue-400",
+                    graph: "hospital",
+                    q: "What contracts are active for my NL datasets?",
+                  },
+                  {
+                    user: "researcher",
+                    org: "PharmaCo Research AG",
+                    role: "Researcher",
+                    color: "text-green-400",
+                    graph: "researcher",
+                    q: "What datasets match my study protocol?",
+                  },
+                  {
+                    user: "regulator",
+                    org: "MedReg DE",
+                    role: "HDAB Authority",
+                    color: "text-amber-400",
+                    graph: "hdab",
+                    q: "What approvals are pending? Is the chain complete?",
+                  },
+                ].map((p) => (
+                  <tr key={p.user} className="border-b border-gray-800">
+                    <td className="py-1.5 pr-3 font-mono font-semibold text-white">
+                      {p.user}
+                    </td>
+                    <td className="py-1.5 pr-3 text-gray-400">{p.org}</td>
+                    <td className="py-1.5 pr-3">
+                      <span
+                        className={`inline-flex items-center gap-1 ${p.color} font-medium`}
+                      >
+                        <Shield size={10} />
+                        {p.role}
+                      </span>
+                    </td>
+                    <td className="py-1.5 pr-3 font-mono text-gray-400">
+                      {p.graph}
+                    </td>
+                    <td className="py-1.5 text-gray-500 italic">{p.q}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </ScreenshotCard>
+
+        {/* Menu items per role */}
+        <div className="mt-6 border border-gray-700 rounded-xl p-5">
+          <h3 className="text-lg font-semibold text-indigo-400 mb-3">
+            Menu Items per Role
+          </h3>
+          <p className="text-gray-400 text-sm mb-4">
+            Navigation is filtered by role — items not relevant to a user&apos;s
+            function are hidden entirely.
+          </p>
+          <div className="overflow-x-auto">
+            <table className="text-xs w-full border-collapse">
+              <thead>
+                <tr className="border-b border-gray-700 text-gray-500">
+                  <th className="text-left py-1.5 pr-2">Route</th>
+                  <th className="text-center py-1.5 px-2">Public</th>
+                  <th className="text-center py-1.5 px-2">
+                    <span className="text-blue-400">Data Holder</span>
+                  </th>
+                  <th className="text-center py-1.5 px-2">
+                    <span className="text-green-400">Researcher</span>
+                  </th>
+                  <th className="text-center py-1.5 px-2">
+                    <span className="text-amber-400">HDAB</span>
+                  </th>
+                  <th className="text-center py-1.5 px-2">
+                    <span className="text-red-400">EDC Admin</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {[
+                  ["/graph", "✅", "✅", "✅", "✅", "✅"],
+                  ["/catalog", "✅", "✅", "✅", "✅", "✅"],
+                  ["/catalog/editor", "—", "✅", "—", "—", "✅"],
+                  ["/patient", "✅", "✅", "✅", "✅", "✅"],
+                  ["/analytics", "—", "—", "✅", "✅", "✅"],
+                  ["/query (NLQ)", "—", "—", "✅", "✅", "✅"],
+                  ["/eehrxf", "✅", "✅", "✅", "✅", "✅"],
+                  ["/compliance", "—", "—", "—", "✅", "✅"],
+                  ["/data/share", "—", "✅", "—", "—", "✅"],
+                  ["/data/discover", "—", "—", "✅", "✅", "✅"],
+                  ["/negotiate", "—", "✅", "✅", "—", "✅"],
+                  ["/admin + /admin/*", "—", "—", "—", "—", "✅"],
+                  ["/admin/policies + audit", "—", "—", "—", "✅", "✅"],
+                  ["/docs", "✅", "✅", "✅", "✅", "✅"],
+                ].map(([route, pub, dh, re, hdab, admin]) => (
+                  <tr key={route} className="border-b border-gray-800/50">
+                    <td className="py-1 pr-2 font-mono text-gray-300">
+                      {route}
+                    </td>
+                    {[pub, dh, re, hdab, admin].map((v, i) => (
+                      <td
+                        key={i}
+                        className={`py-1 px-2 text-center ${
+                          v === "✅" ? "text-green-400" : "text-gray-700"
+                        }`}
+                      >
+                        {v}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* Persona graph views */}
+        <div className="mt-6 border border-gray-700 rounded-xl p-5">
+          <h3 className="text-lg font-semibold text-indigo-400 mb-3">
+            Graph Explorer — Persona Views
+          </h3>
+          <p className="text-gray-400 text-sm mb-4">
+            The <strong>&ldquo;View as&rdquo;</strong> panel in the graph
+            sidebar and the <strong>&ldquo;My graph view&rdquo;</strong> link in
+            the UserMenu dropdown load a role-specific subgraph that answers
+            each persona&apos;s primary question.
+          </p>
+          <div className="space-y-3">
+            {[
+              {
+                param: "?persona=hospital",
+                label: "Hospital / Data Holder",
+                color: "text-blue-400",
+                img: "graph-explorer-hospital-persona.png",
+                q: "Who has approved access to my datasets?",
+                nodes:
+                  "Participant · HealthDataset · Contract · HDABApproval · EEHRxFProfile",
+              },
+              {
+                param: "?persona=researcher",
+                label: "Researcher / Data User",
+                color: "text-green-400",
+                img: "graph-explorer-researcher-persona.png",
+                q: "What datasets match my study? What OMOP analytics can I run?",
+                nodes:
+                  "HealthDataset · OMOPPerson · SnomedConcept · SPESession",
+              },
+              {
+                param: "?persona=hdab",
+                label: "HDAB Authority",
+                color: "text-amber-400",
+                img: "graph-explorer-hdab-persona.png",
+                q: "What approvals are pending? Is the governance chain complete?",
+                nodes:
+                  "HDABApproval · VerifiableCredential · TrustCenter · AccessApplication",
+              },
+              {
+                param: "?persona=trust-center",
+                label: "Trust Center Operator",
+                color: "text-violet-400",
+                img: "graph-explorer-trust-center-persona.png",
+                q: "Which pseudonym resolution flows am I managing?",
+                nodes:
+                  "TrustCenter · SPESession · ResearchPseudonym · ProviderPseudonym",
+              },
+              {
+                param: "?persona=edc-admin",
+                label: "EDC Admin",
+                color: "text-red-400",
+                img: "graph-explorer-edc-admin-persona.png",
+                q: "Who are my participants? What contracts and transfers are live?",
+                nodes: "Participant · DataProduct · Contract · TransferEvent",
+              },
+            ].map((p) => (
+              <div
+                key={p.param}
+                className="border border-gray-700 rounded-lg overflow-hidden"
+              >
+                <a
+                  href={`${LIVE_URL}/graph${p.param}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block"
+                >
+                  <Image
+                    src={`/images/screenshots/${p.img}`}
+                    alt={`${p.label} graph view`}
+                    width={1440}
+                    height={900}
+                    className="w-full h-auto border-b border-gray-700"
+                  />
+                </a>
+                <div className="p-3">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className={`font-semibold text-sm ${p.color}`}>
+                      {p.label}
+                    </span>
+                    <code className="text-xs text-gray-500 font-mono">
+                      /graph{p.param}
+                    </code>
+                  </div>
+                  <p className="text-gray-400 text-xs italic mb-1">
+                    &ldquo;{p.q}&rdquo;
+                  </p>
+                  <p className="text-gray-600 text-xs">
+                    Focus nodes: {p.nodes}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* ── 1. Getting Started ── */}
       <section className="mb-12">
         <h2 className="text-2xl font-semibold mb-3">Getting Started</h2>
@@ -117,9 +388,11 @@ export default function UserGuidePage() {
           caption="User workflow overview"
         />
         <p className="text-gray-400 text-sm mt-3 mb-6">
-          After authenticating through Keycloak SSO, you can explore the
-          knowledge graph, browse datasets, review patient timelines, run
-          analytics, or check EHDS compliance status.
+          After authenticating through Keycloak SSO, you land on the graph view
+          personalised for your role. You can also browse datasets, review
+          patient timelines, run analytics, or check EHDS compliance. The{" "}
+          <strong>UserMenu</strong> (top-right) shows your role badge and a
+          &ldquo;My graph view&rdquo; shortcut to your persona graph.
         </p>
 
         <div className="space-y-6">

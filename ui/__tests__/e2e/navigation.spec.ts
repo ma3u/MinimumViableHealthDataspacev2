@@ -1,14 +1,15 @@
 /**
- * E2E tests — Navigation dropdown clusters and page routing.
+ * E2E tests — Navigation for unauthenticated users.
  *
- * Verifies the 5 NavGroup dropdowns open, contain expected links,
- * and navigate correctly. Dropdown links are scoped to the nav bar.
+ * With role-aware navigation (Phase 19), unauthenticated users only see
+ * public groups: Explore (partial) and Docs.
+ * Governance, Exchange, Manage, and Get Started require authentication.
  */
 import { test, expect } from "@playwright/test";
 
 const TIMEOUT = 15_000;
 
-test.describe("Navigation Dropdowns", () => {
+test.describe("Navigation — unauthenticated view", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/");
     await expect(page.locator("text=Health Dataspace").first()).toBeVisible({
@@ -16,7 +17,9 @@ test.describe("Navigation Dropdowns", () => {
     });
   });
 
-  test("Explore dropdown contains expected links", async ({ page }) => {
+  test("Explore dropdown is visible and contains public links", async ({
+    page,
+  }) => {
     const nav = page.locator("nav");
     const trigger = nav.getByRole("button", { name: /Explore/i });
     await trigger.click();
@@ -31,43 +34,49 @@ test.describe("Navigation Dropdowns", () => {
     ).toBeVisible();
   });
 
-  test("Governance dropdown contains expected links", async ({ page }) => {
-    const nav = page.locator("nav");
-    const trigger = nav.getByRole("button", { name: /Governance/i });
-    await trigger.click();
-    await expect(
-      nav.getByRole("link", { name: /EHDS Approval/ }),
-    ).toBeVisible();
-    await expect(nav.getByRole("link", { name: /Credentials/ })).toBeVisible();
-    await expect(nav.getByRole("link", { name: /Protocol TCK/ })).toBeVisible();
-  });
-
-  test("Exchange dropdown contains expected links", async ({ page }) => {
-    const nav = page.locator("nav");
-    const trigger = nav.getByRole("button", { name: /Exchange/i });
-    await trigger.click();
-    await expect(nav.getByRole("link", { name: /Discover/ })).toBeVisible();
-    await expect(nav.getByRole("link", { name: /Negotiate/ })).toBeVisible();
-    await expect(nav.getByRole("link", { name: /Transfer/ })).toBeVisible();
-  });
-
-  test("Manage dropdown contains expected links", async ({ page }) => {
-    const nav = page.locator("nav");
-    const trigger = nav.getByRole("button", { name: /Manage/i });
-    await trigger.click();
-    await expect(
-      nav.getByRole("link", { name: /Operator Dashboard/ }),
-    ).toBeVisible();
-    await expect(nav.getByRole("link", { name: /Policies/ })).toBeVisible();
-    await expect(nav.getByRole("link", { name: /Audit/ })).toBeVisible();
-  });
-
-  test("Docs dropdown contains expected links", async ({ page }) => {
+  test("Docs dropdown is visible for unauthenticated users", async ({
+    page,
+  }) => {
     const nav = page.locator("nav");
     const trigger = nav.getByRole("button", { name: /Docs/i });
     await trigger.click();
     await expect(nav.getByRole("link", { name: /Overview/ })).toBeVisible();
     await expect(nav.getByRole("link", { name: /Architecture/ })).toBeVisible();
     await expect(nav.getByRole("link", { name: /Developer/ })).toBeVisible();
+  });
+
+  test("Sign in button is visible when not authenticated", async ({ page }) => {
+    const nav = page.locator("nav");
+    await expect(nav.getByText("Sign in")).toBeVisible({ timeout: TIMEOUT });
+  });
+
+  test("Governance group is hidden from unauthenticated users", async ({
+    page,
+  }) => {
+    const nav = page.locator("nav");
+    // Governance requires HDAB_AUTHORITY or EDC_ADMIN
+    await expect(
+      nav.getByRole("button", { name: /Governance/i }),
+    ).not.toBeVisible();
+  });
+
+  test("Manage group is hidden from unauthenticated users", async ({
+    page,
+  }) => {
+    const nav = page.locator("nav");
+    // Manage requires EDC_ADMIN or HDAB_AUTHORITY
+    await expect(
+      nav.getByRole("button", { name: /Manage/i }),
+    ).not.toBeVisible();
+  });
+
+  test("Exchange group is hidden from unauthenticated users", async ({
+    page,
+  }) => {
+    const nav = page.locator("nav");
+    // Exchange requires AUTH
+    await expect(
+      nav.getByRole("button", { name: /Exchange/i }),
+    ).not.toBeVisible();
   });
 });
