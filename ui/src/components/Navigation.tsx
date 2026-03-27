@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useSession } from "next-auth/react";
 import {
   Network,
   BookOpen,
@@ -29,82 +30,189 @@ import {
 } from "lucide-react";
 import UserMenu from "./UserMenu";
 import { useState, useRef, useEffect } from "react";
+import { deriveParticipantType, derivePersonaId } from "@/lib/auth";
+import type { LucideProps } from "lucide-react";
 
+// ── Types ──────────────────────────────────────────────────────────────────────
+
+type LucideIcon = React.ForwardRefExoticComponent<
+  Omit<LucideProps, "ref"> & React.RefAttributes<SVGSVGElement>
+>;
+
+/**
+ * Which roles can see this nav item.
+ * undefined / empty → public (always visible).
+ * "AUTH"           → any authenticated user.
+ * string[]         → one of these role codes must be present.
+ */
 interface NavLink {
   href: string;
   label: string;
-  icon: React.ComponentType<any>;
+  icon: LucideIcon;
+  roles?: string[] | "AUTH";
 }
 
 interface NavGroup {
   label: string;
-  icon: React.ComponentType<any>;
+  icon: LucideIcon;
+  /** If set, group is hidden unless user has at least one of these roles. */
+  roles?: string[] | "AUTH";
   links: NavLink[];
 }
 
-/* ── Cluster 1: Get Started ── */
+// ── Cluster 1: Get Started ─────────────────────────────────────────────────────
 const getStartedGroup: NavGroup = {
   label: "Get Started",
   icon: UserPlus,
+  roles: "AUTH",
   links: [
-    { href: "/onboarding", label: "Onboarding", icon: UserPlus },
-    { href: "/settings", label: "Settings", icon: Settings },
+    { href: "/onboarding", label: "Onboarding", icon: UserPlus, roles: "AUTH" },
+    { href: "/settings", label: "Settings", icon: Settings, roles: "AUTH" },
   ],
 };
 
-/* ── Cluster 2: Explore ── */
+// ── Cluster 2: Explore ────────────────────────────────────────────────────────
+// Public + authenticated mix — shown to everyone but some items filtered
 const exploreGroup: NavGroup = {
   label: "Explore",
   icon: Network,
   links: [
     { href: "/graph", label: "Graph Explorer", icon: Network },
     { href: "/catalog", label: "Dataset Catalog", icon: BookOpen },
-    { href: "/catalog/editor", label: "DCAT-AP Editor", icon: Edit3 },
+    {
+      href: "/catalog/editor",
+      label: "DCAT-AP Editor",
+      icon: Edit3,
+      roles: ["EDC_ADMIN", "DATA_HOLDER", "EDC_USER_PARTICIPANT"],
+    },
     { href: "/patient", label: "Patient Journey", icon: User },
-    { href: "/analytics", label: "OMOP Analytics", icon: BarChart2 },
-    { href: "/query", label: "NLQ / Federated", icon: Search },
+    {
+      href: "/analytics",
+      label: "OMOP Analytics",
+      icon: BarChart2,
+      roles: [
+        "EDC_ADMIN",
+        "DATA_USER",
+        "HDAB_AUTHORITY",
+        "EDC_USER_PARTICIPANT",
+      ],
+    },
+    {
+      href: "/query",
+      label: "NLQ / Federated",
+      icon: Search,
+      roles: ["EDC_ADMIN", "DATA_USER", "HDAB_AUTHORITY"],
+    },
     { href: "/eehrxf", label: "EEHRxF Profiles", icon: Heart },
   ],
 };
 
-/* ── Cluster 3: Governance ── */
+// ── Cluster 3: Governance ─────────────────────────────────────────────────────
 const governanceGroup: NavGroup = {
   label: "Governance",
   icon: ShieldCheck,
+  roles: ["EDC_ADMIN", "HDAB_AUTHORITY"],
   links: [
-    { href: "/compliance", label: "EHDS Approval", icon: ShieldCheck },
-    { href: "/compliance/tck", label: "Protocol TCK", icon: ShieldCheck },
-    { href: "/credentials", label: "Credentials", icon: FileKey2 },
+    {
+      href: "/compliance",
+      label: "EHDS Approval",
+      icon: ShieldCheck,
+      roles: ["EDC_ADMIN", "HDAB_AUTHORITY"],
+    },
+    {
+      href: "/compliance/tck",
+      label: "Protocol TCK",
+      icon: ShieldCheck,
+      roles: ["EDC_ADMIN", "HDAB_AUTHORITY"],
+    },
+    {
+      href: "/credentials",
+      label: "Credentials",
+      icon: FileKey2,
+      roles: "AUTH",
+    },
   ],
 };
 
-/* ── Cluster 4: Exchange ── */
+// ── Cluster 4: Exchange ───────────────────────────────────────────────────────
 const exchangeGroup: NavGroup = {
   label: "Exchange",
   icon: ArrowRightLeft,
+  roles: "AUTH",
   links: [
-    { href: "/data/share", label: "Share Data", icon: Upload },
-    { href: "/data/discover", label: "Discover", icon: Database },
-    { href: "/negotiate", label: "Negotiate", icon: FileSignature },
-    { href: "/tasks", label: "Tasks", icon: ClipboardList },
-    { href: "/data/transfer", label: "Transfer", icon: ArrowRightLeft },
+    {
+      href: "/data/share",
+      label: "Share Data",
+      icon: Upload,
+      roles: ["EDC_ADMIN", "DATA_HOLDER", "EDC_USER_PARTICIPANT"],
+    },
+    {
+      href: "/data/discover",
+      label: "Discover",
+      icon: Database,
+      roles: ["EDC_ADMIN", "DATA_USER", "HDAB_AUTHORITY"],
+    },
+    {
+      href: "/negotiate",
+      label: "Negotiate",
+      icon: FileSignature,
+      roles: "AUTH",
+    },
+    {
+      href: "/tasks",
+      label: "Tasks",
+      icon: ClipboardList,
+      roles: "AUTH",
+    },
+    {
+      href: "/data/transfer",
+      label: "Transfer",
+      icon: ArrowRightLeft,
+      roles: "AUTH",
+    },
   ],
 };
 
-/* ── Cluster 5: Manage ── */
+// ── Cluster 5: Manage ─────────────────────────────────────────────────────────
 const manageGroup: NavGroup = {
   label: "Manage",
   icon: LayoutDashboard,
+  roles: ["EDC_ADMIN", "HDAB_AUTHORITY"],
   links: [
-    { href: "/admin", label: "Operator Dashboard", icon: LayoutDashboard },
-    { href: "/admin/components", label: "EDC Components", icon: Activity },
-    { href: "/admin/tenants", label: "Tenants", icon: User },
-    { href: "/admin/policies", label: "Policies", icon: ShieldCheck },
-    { href: "/admin/audit", label: "Audit & Provenance", icon: ScrollText },
+    {
+      href: "/admin",
+      label: "Operator Dashboard",
+      icon: LayoutDashboard,
+      roles: ["EDC_ADMIN"],
+    },
+    {
+      href: "/admin/components",
+      label: "EDC Components",
+      icon: Activity,
+      roles: ["EDC_ADMIN"],
+    },
+    {
+      href: "/admin/tenants",
+      label: "Tenants",
+      icon: User,
+      roles: ["EDC_ADMIN"],
+    },
+    {
+      href: "/admin/policies",
+      label: "Policies",
+      icon: ShieldCheck,
+      roles: ["EDC_ADMIN", "HDAB_AUTHORITY"],
+    },
+    {
+      href: "/admin/audit",
+      label: "Audit & Provenance",
+      icon: ScrollText,
+      roles: ["EDC_ADMIN", "HDAB_AUTHORITY"],
+    },
   ],
 };
 
-/* ── Cluster 6: Docs ── */
+// ── Cluster 6: Docs ───────────────────────────────────────────────────────────
 const docsGroup: NavGroup = {
   label: "Docs",
   icon: FileText,
@@ -116,7 +224,7 @@ const docsGroup: NavGroup = {
   ],
 };
 
-const navGroups: NavGroup[] = [
+const ALL_NAV_GROUPS: NavGroup[] = [
   getStartedGroup,
   exploreGroup,
   governanceGroup,
@@ -124,6 +232,35 @@ const navGroups: NavGroup[] = [
   manageGroup,
   docsGroup,
 ];
+
+// ── Role-filter helpers ────────────────────────────────────────────────────────
+
+function canSee(
+  itemRoles: string[] | "AUTH" | undefined,
+  userRoles: string[],
+  isAuthenticated: boolean,
+): boolean {
+  if (!itemRoles) return true; // public
+  if (itemRoles === "AUTH") return isAuthenticated;
+  // Include derived DATA_HOLDER / DATA_USER based on EDC_USER_PARTICIPANT presence
+  return itemRoles.some((r) => userRoles.includes(r));
+}
+
+/** Filters a group's links and the group itself based on the user's roles. */
+function filterGroup(
+  group: NavGroup,
+  userRoles: string[],
+  isAuthenticated: boolean,
+): NavGroup | null {
+  if (!canSee(group.roles, userRoles, isAuthenticated)) return null;
+  const visibleLinks = group.links.filter((l) =>
+    canSee(l.roles, userRoles, isAuthenticated),
+  );
+  if (visibleLinks.length === 0) return null;
+  return { ...group, links: visibleLinks };
+}
+
+// ── NavDropdown ───────────────────────────────────────────────────────────────
 
 function NavDropdown({ group }: { group: NavGroup }) {
   const [open, setOpen] = useState(false);
@@ -182,8 +319,29 @@ function NavDropdown({ group }: { group: NavGroup }) {
   );
 }
 
+// ── Navigation ────────────────────────────────────────────────────────────────
+
 export default function Navigation() {
-  const _pathname = usePathname();
+  const { data: session, status } = useSession();
+  const isAuthenticated = status === "authenticated" && !!session;
+
+  // Build the effective role list including derived sub-types
+  const baseRoles = (session as { roles?: string[] })?.roles ?? [];
+  const username = session?.user?.name ?? session?.user?.email ?? "";
+  const participantType = deriveParticipantType(baseRoles, username);
+  const _personaId = derivePersonaId(baseRoles, username);
+
+  // Augment roles with derived sub-type so filter helpers work
+  const effectiveRoles =
+    participantType && !baseRoles.includes(participantType)
+      ? [...baseRoles, participantType]
+      : baseRoles;
+
+  // Filter groups/items for the current user
+  const visibleGroups = ALL_NAV_GROUPS.map((g) =>
+    filterGroup(g, effectiveRoles, isAuthenticated),
+  ).filter((g): g is NavGroup => g !== null);
+
   return (
     <nav className="flex items-center gap-1 px-4 py-2 bg-gray-900 border-b border-gray-700">
       <Link
@@ -192,7 +350,7 @@ export default function Navigation() {
       >
         Health Dataspace
       </Link>
-      {navGroups.map((g) => (
+      {visibleGroups.map((g) => (
         <NavDropdown key={g.label} group={g} />
       ))}
       <div className="ml-auto">
