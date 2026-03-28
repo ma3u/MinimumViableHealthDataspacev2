@@ -20,7 +20,7 @@ vi.mock("next/navigation", () => ({
   useSearchParams: () => new URLSearchParams(),
 }));
 
-// Mock next-auth
+// Mock next-auth (client-side hooks)
 vi.mock("next-auth/react", () => ({
   useSession: () => ({
     data: {
@@ -32,4 +32,14 @@ vi.mock("next-auth/react", () => ({
   signIn: vi.fn(),
   signOut: vi.fn(),
   SessionProvider: ({ children }: { children: React.ReactNode }) => children,
+}));
+
+// Mock next-auth/next (server-side getServerSession used by API route guards).
+// Default: authenticated EDC_ADMIN session so API route tests exercise business
+// logic rather than the auth guard. Override per-test with vi.mocked().
+vi.mock("next-auth/next", () => ({
+  getServerSession: vi.fn().mockResolvedValue({
+    user: { name: "Test Admin", email: "admin@test.example" },
+    roles: ["EDC_ADMIN"],
+  }),
 }));
