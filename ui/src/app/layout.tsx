@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import Navigation from "@/components/Navigation";
+import DemoPasswordBanner from "@/components/DemoPasswordBanner";
 import AuthProvider from "@/components/AuthProvider";
 
 export const metadata: Metadata = {
@@ -18,6 +19,7 @@ export default function RootLayout({
       <body className="min-h-screen flex flex-col">
         <AuthProvider>
           <Navigation />
+          <DemoPasswordBanner />
           <main className="flex-1">{children}</main>
         </AuthProvider>
       </body>
