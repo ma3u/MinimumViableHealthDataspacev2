@@ -55,15 +55,15 @@
 
 ### IAM — Identity and Access Management
 
-| Control | Requirement                  | Demo Status | Gap / Mitigation                              |
-| ------- | ---------------------------- | ----------- | --------------------------------------------- |
-| IAM-01  | Authentication required      | ✅          | All protected routes require session          |
-| IAM-02  | Role-based access control    | ✅          | 7 Keycloak roles + middleware                 |
-| IAM-03  | Least privilege              | 🟡          | Role matrix implemented; no fine-grained ABAC |
-| IAM-04  | MFA for privileged accounts  | ⚠️          | Keycloak MFA not configured in demo           |
-| IAM-05  | Session management           | ✅          | NextAuth sessions + NEXTAUTH_SECRET           |
-| IAM-06  | Credential lifecycle         | ⚠️          | Demo credentials are static                   |
-| IAM-07  | Privileged access management | ⚠️          | Admin role via Keycloak only; no PAM system   |
+| Control | Requirement                  | Demo Status | Gap / Mitigation                                                                                                              |
+| ------- | ---------------------------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| IAM-01  | Authentication required      | ✅          | All routes (UI + API) require session; pentest D6 added getServerSession guards to all /api/admin/_ and /api/patient/_ routes |
+| IAM-02  | Role-based access control    | ✅          | 7 Keycloak roles + middleware                                                                                                 |
+| IAM-03  | Least privilege              | 🟡          | Role matrix implemented; no fine-grained ABAC                                                                                 |
+| IAM-04  | MFA for privileged accounts  | ⚠️          | Keycloak MFA not configured in demo                                                                                           |
+| IAM-05  | Session management           | ✅          | NextAuth sessions + NEXTAUTH_SECRET                                                                                           |
+| IAM-06  | Credential lifecycle         | ⚠️          | Demo credentials are static                                                                                                   |
+| IAM-07  | Privileged access management | ⚠️          | Admin role via Keycloak only; no PAM system                                                                                   |
 
 ### COS — Communication Security
 
@@ -108,15 +108,15 @@
 
 ### Demo Phase (implement now)
 
-| Priority | Control | Action                               | Issue              |
-| -------- | ------- | ------------------------------------ | ------------------ |
-| P0       | DEV-07  | Parameterised Cypher (D1)            | ✅ Done — Phase 23 |
-| P0       | DEV-03  | CSP + security headers (D2)          | ✅ Done — Phase 23 |
-| P0       | DEV-09  | Security E2E tests (D3)              | ✅ Done — Phase 23 |
-| P0       | DEV-05  | npm audit in CI (D4)                 | ✅ Done — Phase 23 |
-| P1       | DEV-08  | Add `detect-secrets` pre-commit hook | GitHub #4 — D5     |
-| P1       | DEV-10  | Create SECURITY.md + CVD policy      | GitHub #4 — D8     |
-| P1       | IAM-01  | Verify all API routes check auth     | GitHub #4 — D6     |
+| Priority | Control | Action                               | Issue                           |
+| -------- | ------- | ------------------------------------ | ------------------------------- |
+| P0       | DEV-07  | Parameterised Cypher (D1)            | ✅ Done — Phase 23              |
+| P0       | DEV-03  | CSP + security headers (D2)          | ✅ Done — Phase 23              |
+| P0       | DEV-09  | Security E2E tests (D3)              | ✅ Done — Phase 23              |
+| P0       | DEV-05  | npm audit in CI (D4)                 | ✅ Done — Phase 23              |
+| P1       | DEV-08  | Add `detect-secrets` pre-commit hook | GitHub #4 — D5                  |
+| P1       | DEV-10  | Create SECURITY.md + CVD policy      | GitHub #4 — D8                  |
+| P1       | IAM-01  | Verify all API routes check auth     | ✅ Done — Phase 24 (pentest D6) |
 
 ### Production Roadmap
 
@@ -152,5 +152,5 @@
 
 ---
 
-_Last updated: 2026-03-28 | Phase 23 — Demo Security Hardening_
+_Last updated: 2026-03-28 | Phase 24 — Pentest + API Auth Fix (D6)_
 _Next review: Before any production deployment or HDAB accreditation submission._
