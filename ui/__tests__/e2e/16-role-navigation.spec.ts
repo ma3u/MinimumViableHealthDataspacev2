@@ -37,9 +37,10 @@ test.describe("Sign-in — persona reference cards", () => {
 
   test("shows organisation names on persona cards", async ({ page }) => {
     await page.goto("/auth/signin");
-    await expect(page.getByText("AlphaKlinik Berlin")).toBeVisible({
-      timeout: T,
-    });
+    // exact: true avoids matching "AlphaKlinik Berlin (patient)" on the patient1 card
+    await expect(
+      page.getByText("AlphaKlinik Berlin", { exact: true }).first(),
+    ).toBeVisible({ timeout: T });
     await expect(page.getByText("PharmaCo Research AG")).toBeVisible({
       timeout: T,
     });
