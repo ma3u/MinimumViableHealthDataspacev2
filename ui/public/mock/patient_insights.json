@@ -1,0 +1,59 @@
+{
+  "activeDonations": 2,
+  "activeStudies": 1,
+  "donatedStudies": [
+    {
+      "studyId": "STUDY-CARDIO-2024",
+      "studyName": "European Cardiovascular Risk Study",
+      "grantedAt": "2024-03-10",
+      "status": "active",
+      "institution": "PharmaCo Research AG"
+    },
+    {
+      "studyId": "STUDY-DIAB-2023",
+      "studyName": "T2D Progression Biomarkers",
+      "grantedAt": "2023-11-15",
+      "status": "completed",
+      "institution": "Institut de Recherche Santé"
+    }
+  ],
+  "findings": [
+    {
+      "insightId": "INS-001",
+      "studyId": "STUDY-DIAB-2023",
+      "finding": "Patients with T2D and chronic stress show 23% faster HbA1c progression compared to matched controls.",
+      "relevantConditions": ["Diabetes mellitus type 2", "Stress (finding)"],
+      "recommendation": "Request HbA1c test every 3 months instead of every 6 months.",
+      "evidenceLevel": "moderate"
+    },
+    {
+      "insightId": "INS-002",
+      "studyId": "STUDY-CARDIO-2024",
+      "finding": "Patients with hypertension + obesity (BMI > 30) have 31% higher 10-year cardiovascular event probability.",
+      "relevantConditions": ["Hypertension", "Obesity"],
+      "recommendation": "Discuss statin therapy review with your cardiologist.",
+      "evidenceLevel": "strong"
+    }
+  ],
+  "recommendations": [
+    {
+      "category": "Monitoring",
+      "action": "Increase cardiovascular monitoring frequency to every 6 months.",
+      "priority": "high",
+      "basedOn": "T2D + Hypertension co-morbidity pattern (n=847 across EHDS SPEs)",
+      "ehdsArticle": "EHDS Art. 50 — aggregate SPE finding"
+    },
+    {
+      "category": "Lifestyle",
+      "action": "Enrol in a certified stress-management programme.",
+      "priority": "moderate",
+      "basedOn": "Stress biomarker correlation with HbA1c elevation (n=1,203)",
+      "ehdsArticle": "EHDS Art. 50 — aggregate SPE finding"
+    }
+  ],
+  "privacyNote": "All findings are aggregate results (k ≥ 5 participants per cohort). Your data contributed pseudonymously via the Trust Center under EHDS Art. 50 Secure Processing Environment protections.",
+  "ehdsArticles": {
+    "primaryAccess": "EHDS Art. 3 — patient electronic health record access rights",
+    "speProtection": "EHDS Art. 50 — Secure Processing Environment for secondary use"
+  }
+}

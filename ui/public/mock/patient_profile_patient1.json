@@ -1,0 +1,86 @@
+{
+  "patient": {
+    "id": "P1",
+    "name": "Anna Müller",
+    "gender": "female",
+    "birthDate": "1979-03-15"
+  },
+  "conditions": [
+    {
+      "code": "73211009",
+      "display": "Diabetes mellitus type 2",
+      "onsetDate": "2018-04-10"
+    },
+    {
+      "code": "38341003",
+      "display": "Hypertension",
+      "onsetDate": "2015-11-02"
+    },
+    {
+      "code": "73595000",
+      "display": "Stress (finding)",
+      "onsetDate": "2020-01-15"
+    },
+    {
+      "code": "E11.9",
+      "display": "T2D without complications",
+      "onsetDate": "2018-04-10"
+    },
+    {
+      "code": "414916001",
+      "display": "Obesity (BMI 31.2)",
+      "onsetDate": "2017-06-20"
+    },
+    {
+      "code": "271825005",
+      "display": "Respiratory distress",
+      "onsetDate": "2021-03-08"
+    },
+    {
+      "code": "40055000",
+      "display": "Chronic sinusitis",
+      "onsetDate": "2013-09-14"
+    },
+    { "code": "195967001", "display": "Asthma", "onsetDate": "2009-02-27" }
+  ],
+  "medications": [
+    { "code": "860975", "display": "Metformin 500 mg oral tablet" },
+    { "code": "197361", "display": "Lisinopril 10 mg oral tablet" },
+    { "code": "308460", "display": "Salbutamol 100 mcg inhaler" },
+    { "code": "209459", "display": "Atorvastatin 20 mg oral tablet" }
+  ],
+  "riskScores": {
+    "cardiovascular": {
+      "score": 0.42,
+      "level": "moderate",
+      "factors": [
+        "Hypertension",
+        "Type 2 Diabetes",
+        "Chronic stress",
+        "BMI 31.2"
+      ]
+    },
+    "diabetes": {
+      "score": 0.65,
+      "level": "high",
+      "factors": [
+        "Active T2D diagnosis",
+        "Obesity BMI 31.2",
+        "Elevated HbA1c trend"
+      ]
+    }
+  },
+  "interests": [
+    "longevity",
+    "nutrition",
+    "diabetes-management",
+    "stress-reduction"
+  ],
+  "gdprRights": {
+    "rightToAccess": "GDPR Art. 15 — request a copy of your electronic health record",
+    "rightToPortability": "GDPR Art. 20 — export your data in FHIR R4 format",
+    "rightToErasure": "GDPR Art. 17 — request deletion of non-mandatory records",
+    "ehdsAccess": "EHDS Art. 3 — access your EHR via the EU national contact point"
+  },
+  "totalConditionCount": 8
+}

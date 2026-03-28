@@ -2604,6 +2604,63 @@ node role colours table updated with `PatientConsent` (teal) and
 
 ---
 
+### Phase 22: Static Demo Personas for GitHub Pages ✅
+
+**Goal:** Generate no-login static pages for all 7 demo personas so the GitHub
+Pages deployment is a fully self-contained interactive demo. Each persona sees
+its own role-filtered navigation, data, and feature pages — without Keycloak or
+Neo4j.
+
+**Architecture:** A `localStorage`-backed persona store (`use-demo-persona.ts`)
+replaces `useSession()` in `Navigation` and `UserMenu` when
+`NEXT_PUBLIC_STATIC_EXPORT=true`. All data is served from `/mock/*.json` via
+the existing `fetchApi` static routing. A single static build supports all 7
+viewpoints via in-app persona switching.
+
+#### 22a: Patient mock data ✅
+
+Five new mock files in `ui/public/mock/`: `patient_profile_list.json` (P1 Anna
+Müller + P2 Jan de Vries), `patient_profile_patient1.json` (cardiovascular
+moderate / diabetes high), `patient_profile_patient2.json` (cardiovascular
+high / diabetes moderate — atrial fibrillation + CAD), `patient_insights.json`
+(EHDS Art. 50 SPE findings + 2 donated studies), `patient_research.json` (3
+programmes + EHDS Art. 10 consent records). P1 and P2 are deliberately distinct
+so E2E assertions can verify data differentiation.
+
+#### 22b: `fetchApi` — new routes + POST bypass ✅
+
+`api.ts`: added exact routes for `/api/patient/profile`, `/api/patient/insights`,
+`/api/patient/research`; prefix routes for `?patientId=P1` / `?patientId=P2`;
+non-GET bypass returns `{ ok: true, 200 }` so donate/revoke buttons work in demo.
+
+#### 22c: `use-demo-persona.ts` hook ✅
+
+`setDemoPersona(username)` writes localStorage + fires a module-level
+`EventTarget` for same-tab reactivity. `useDemoPersona()` reads on mount,
+listens for `change` / `storage` events, initialises with `edcadmin` fallback.
+
+#### 22d: Navigation + UserMenu — dynamic demo persona ✅
+
+`Navigation.tsx`: uses demo persona roles/auth when `IS_STATIC`. `UserMenu.tsx`:
+`DEMO_SESSION` constant removed; replaced with live `useDemoPersona()`.
+Persona switcher unified — static mode calls `setDemoPersona()` (no Keycloak),
+live mode calls Keycloak redirect as before.
+
+#### 22e: `/demo` persona hub page ✅
+
+`ui/src/app/demo/page.tsx`: 7 persona cards, each `onClick` sets localStorage +
+navigates to persona home (edcadmin → graph, researcher → analytics, regulator →
+compliance, patient → patient/profile, hospital → catalog).
+
+#### 22f: E2E tests for static GitHub Pages (J221–J260) ✅
+
+`ui/__tests__/e2e/journeys/19-static-github-pages.spec.ts` — 7 test groups:
+demo hub, per-persona nav groups, patient data (EHDS Art. 50/10), role pages,
+UserMenu switcher, broken image / link audit (10 pages), data completeness.
+Run with `PLAYWRIGHT_BASE_URL=https://ma3u.github.io/MinimumViableHealthDataspacev2`.
+
+---
+
 ## Architecture Decisions
 
 ### ADR-1: PostgreSQL vs Neo4j Data Storage Split
