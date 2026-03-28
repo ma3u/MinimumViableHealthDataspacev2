@@ -66,11 +66,12 @@ function toVC(r: IHCredentialResource): VerifiableCredential {
  */
 export async function GET(
   _req: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
+    const { id } = await params;
     const profiles = await edcClient.tenant<ParticipantProfile[]>(
-      `/v1alpha1/tenants/${params.id}/participant-profiles`,
+      `/v1alpha1/tenants/${id}/participant-profiles`,
     );
 
     const results = await Promise.all(
