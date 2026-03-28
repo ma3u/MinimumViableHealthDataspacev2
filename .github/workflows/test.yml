@@ -266,6 +266,53 @@ jobs:
             .
 
   # -----------------------------------------------------------------------
+  # Kubescape K8s Posture Scan (BSI C5 / NSA hardening guide)
+  # Scans k8s/ manifest files against CIS and NSA frameworks.
+  # Does NOT require a live cluster — static manifest analysis only.
+  # -----------------------------------------------------------------------
+  kubescape-scan:
+    name: Kubescape K8s Posture
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install kubescape
+        run: |
+          curl -s https://raw.githubusercontent.com/kubescape/kubescape/master/install.sh | /bin/bash
+          echo "$HOME/.kubescape/bin" >> "$GITHUB_PATH"
+
+      - name: Scan k8s manifests (NSA framework)
+        run: |
+          kubescape scan framework nsa \
+            --format json \
+            --output kubescape-nsa.json \
+            k8s/ 2>/dev/null || true
+
+      - name: Scan k8s manifests (CIS benchmark)
+        run: |
+          kubescape scan framework cis-v1.23-t1.0.1 \
+            --format json \
+            --output kubescape-cis.json \
+            k8s/ 2>/dev/null || true
+
+      - name: Kubescape summary
+        if: always()
+        run: |
+          echo "## Kubescape K8s Posture" >> $GITHUB_STEP_SUMMARY
+          kubescape scan framework nsa k8s/ --format pretty-printer 2>/dev/null \
+            | tail -30 >> $GITHUB_STEP_SUMMARY || true
+
+      - name: Upload kubescape reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: kubescape-reports
+          path: |
+            kubescape-nsa.json
+            kubescape-cis.json
+          retention-days: 30
+
+  # -----------------------------------------------------------------------
   # Lint Check
   # -----------------------------------------------------------------------
   lint:
