@@ -1,0 +1,105 @@
+{
+  "patient": {
+    "id": "P2",
+    "name": "Jan de Vries",
+    "gender": "male",
+    "birthDate": "1965-07-22"
+  },
+  "conditions": [
+    {
+      "code": "49436004",
+      "display": "Atrial fibrillation",
+      "onsetDate": "2019-08-03"
+    },
+    {
+      "code": "38341003",
+      "display": "Hypertension",
+      "onsetDate": "2010-05-17"
+    },
+    {
+      "code": "44054006",
+      "display": "Type 2 diabetes mellitus",
+      "onsetDate": "2022-01-11"
+    },
+    {
+      "code": "414916001",
+      "display": "Obesity (BMI 33.8)",
+      "onsetDate": "2016-03-22"
+    },
+    { "code": "77176002", "display": "Smoker", "onsetDate": "1985-01-01" },
+    {
+      "code": "53741008",
+      "display": "Coronary artery disease",
+      "onsetDate": "2020-11-30"
+    },
+    {
+      "code": "73211009",
+      "display": "Hypercholesterolaemia",
+      "onsetDate": "2014-07-09"
+    },
+    {
+      "code": "84114007",
+      "display": "Heart failure (stage B)",
+      "onsetDate": "2023-02-14"
+    },
+    {
+      "code": "195967001",
+      "display": "Chronic obstructive pulmonary disease",
+      "onsetDate": "2018-10-05"
+    },
+    {
+      "code": "271825005",
+      "display": "Sleep apnea",
+      "onsetDate": "2021-06-18"
+    },
+    {
+      "code": "73595000",
+      "display": "Work-related stress",
+      "onsetDate": "2017-04-01"
+    },
+    { "code": "40055000", "display": "Gout", "onsetDate": "2022-09-27" }
+  ],
+  "medications": [
+    { "code": "855332", "display": "Warfarin 5 mg oral tablet" },
+    { "code": "197361", "display": "Lisinopril 20 mg oral tablet" },
+    { "code": "308460", "display": "Bisoprolol 5 mg oral tablet" },
+    { "code": "209459", "display": "Atorvastatin 40 mg oral tablet" },
+    { "code": "860975", "display": "Metformin 1000 mg oral tablet" },
+    { "code": "1049502", "display": "Furosemide 40 mg oral tablet" }
+  ],
+  "riskScores": {
+    "cardiovascular": {
+      "score": 0.78,
+      "level": "high",
+      "factors": [
+        "Atrial fibrillation",
+        "Coronary artery disease",
+        "Heart failure stage B",
+        "Active smoker",
+        "Hypertension + T2D comorbidity"
+      ]
+    },
+    "diabetes": {
+      "score": 0.38,
+      "level": "moderate",
+      "factors": [
+        "Recent T2D onset (2022)",
+        "Obesity BMI 33.8",
+        "Managed with Metformin"
+      ]
+    }
+  },
+  "interests": [
+    "cardiology",
+    "research-participation",
+    "cross-border-portability",
+    "smoking-cessation"
+  ],
+  "gdprRights": {
+    "rightToAccess": "GDPR Art. 15 — request a copy of your electronic health record",
+    "rightToPortability": "GDPR Art. 20 — export your data in FHIR R4 format",
+    "rightToErasure": "GDPR Art. 17 — request deletion of non-mandatory records",
+    "ehdsAccess": "EHDS Art. 3 — access via NL national contact point · MyHealth@EU Art. 7 data portability"
+  },
+  "totalConditionCount": 12
+}

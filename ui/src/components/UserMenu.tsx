@@ -9,6 +9,7 @@ import {
   deriveParticipantType,
   derivePersonaId,
 } from "@/lib/auth";
+import { useDemoPersona, setDemoPersona } from "@/lib/use-demo-persona";
 
 /** Badge colours per role code (compact chip in nav bar and dropdown). */
 const ROLE_BADGE: Record<string, string> = {
@@ -41,12 +42,6 @@ const ROLE_SHIELD: Record<string, string> = {
   TRUST_CENTER_OPERATOR: "text-violet-400",
   EDC_USER_PARTICIPANT: "text-gray-400",
   PATIENT: "text-teal-400",
-};
-
-/** Mock session used in the static GitHub Pages demo. */
-const DEMO_SESSION = {
-  user: { name: "edcadmin", email: "edcadmin@alpha-klinik.de" },
-  roles: ["EDC_ADMIN"],
 };
 
 const IS_STATIC = process.env.NEXT_PUBLIC_STATIC_EXPORT === "true";
@@ -98,7 +93,18 @@ function switchPersona(
 
 export default function UserMenu() {
   const { data: liveSession, status: liveStatus } = useSession();
-  const session = IS_STATIC ? DEMO_SESSION : liveSession;
+  // Always call useDemoPersona — hook rules require unconditional calls.
+  const demoPersona = useDemoPersona();
+  const demoSession = IS_STATIC
+    ? {
+        user: {
+          name: demoPersona.username,
+          email: `${demoPersona.username}@demo.ehds.eu`,
+        },
+        roles: [...demoPersona.roles],
+      }
+    : null;
+  const session = IS_STATIC ? demoSession : liveSession;
   const status = IS_STATIC ? "authenticated" : liveStatus;
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -134,7 +140,7 @@ export default function UserMenu() {
     );
   }
 
-  const roles = (session as typeof DEMO_SESSION).roles ?? [];
+  const roles = (session as { roles?: string[] }).roles ?? [];
   const username = session.user?.name ?? session.user?.email ?? "";
   const shownRoles = displayRolesFor(roles);
   const primaryRole = shownRoles[0] ?? "EDC_USER_PARTICIPANT";
@@ -227,69 +233,72 @@ export default function UserMenu() {
             </a>
           </div>
 
-          {/* Demo persona switcher */}
-          {!IS_STATIC && (
-            <div className="border-t border-gray-700">
-              <div className="px-3 pt-2 pb-1 flex items-center gap-1.5">
-                <Users size={11} className="text-gray-500" />
-                <span className="text-[10px] text-gray-500 uppercase tracking-wide font-semibold">
-                  Returning users
-                </span>
-              </div>
-              <div className="px-2 pb-2 space-y-0.5">
-                {DEMO_PERSONAS.map((persona) => {
-                  const isActive = persona.username === username;
-                  const primaryRole = [...persona.roles].find((r) =>
-                    [
-                      "EDC_ADMIN",
-                      "HDAB_AUTHORITY",
-                      "DATA_HOLDER",
-                      "DATA_USER",
-                      "PATIENT",
-                    ].includes(r),
-                  );
-                  return (
-                    <button
-                      key={persona.username}
-                      disabled={isActive}
-                      onClick={() =>
+          {/* Persona switcher — Keycloak in live mode, localStorage in static demo */}
+          <div className="border-t border-gray-700">
+            <div className="px-3 pt-2 pb-1 flex items-center gap-1.5">
+              <Users size={11} className="text-gray-500" />
+              <span className="text-[10px] text-gray-500 uppercase tracking-wide font-semibold">
+                {IS_STATIC ? "Switch demo persona" : "Returning users"}
+              </span>
+            </div>
+            <div className="px-2 pb-2 space-y-0.5">
+              {DEMO_PERSONAS.map((persona) => {
+                const isActive = persona.username === username;
+                const primaryRole = [...persona.roles].find((r) =>
+                  [
+                    "EDC_ADMIN",
+                    "HDAB_AUTHORITY",
+                    "DATA_HOLDER",
+                    "DATA_USER",
+                    "PATIENT",
+                  ].includes(r),
+                );
+                return (
+                  <button
+                    key={persona.username}
+                    disabled={isActive}
+                    onClick={() => {
+                      if (IS_STATIC) {
+                        setDemoPersona(persona.username);
+                        setOpen(false);
+                      } else {
                         switchPersona(persona.username, persona.personaId, () =>
                           setOpen(false),
-                        )
+                        );
                       }
-                      className={`flex items-center gap-2 w-full px-2 py-1.5 rounded text-left transition-colors ${
-                        isActive
-                          ? "bg-gray-700/50 cursor-default"
-                          : "hover:bg-gray-700 cursor-pointer"
+                    }}
+                    className={`flex items-center gap-2 w-full px-2 py-1.5 rounded text-left transition-colors ${
+                      isActive
+                        ? "bg-gray-700/50 cursor-default"
+                        : "hover:bg-gray-700 cursor-pointer"
+                    }`}
+                  >
+                    <span
+                      className={`inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded font-medium shrink-0 ${
+                        ROLE_BADGE[primaryRole ?? ""] ??
+                        "bg-gray-600 text-gray-200"
                       }`}
                     >
-                      <span
-                        className={`inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded font-medium shrink-0 ${
-                          ROLE_BADGE[primaryRole ?? ""] ??
-                          "bg-gray-600 text-gray-200"
-                        }`}
-                      >
-                        <Shield size={8} />
-                        {ROLE_LABELS[primaryRole ?? ""] ?? primaryRole}
+                      <Shield size={8} />
+                      {ROLE_LABELS[primaryRole ?? ""] ?? primaryRole}
+                    </span>
+                    <span
+                      className={`font-mono text-xs truncate ${
+                        isActive ? "text-white" : "text-gray-300"
+                      }`}
+                    >
+                      {persona.username}
+                    </span>
+                    {isActive && (
+                      <span className="ml-auto text-[9px] text-gray-500 shrink-0">
+                        active
                       </span>
-                      <span
-                        className={`font-mono text-xs truncate ${
-                          isActive ? "text-white" : "text-gray-300"
-                        }`}
-                      >
-                        {persona.username}
-                      </span>
-                      {isActive && (
-                        <span className="ml-auto text-[9px] text-gray-500 shrink-0">
-                          active
-                        </span>
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
+                    )}
+                  </button>
+                );
+              })}
             </div>
-          )}
+          </div>
 
           {/* Sign out */}
           <div className="p-2 border-t border-gray-700">

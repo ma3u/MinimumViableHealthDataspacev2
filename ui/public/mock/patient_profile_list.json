@@ -1,0 +1,18 @@
+{
+  "patients": [
+    {
+      "id": "P1",
+      "name": "Anna Müller",
+      "gender": "female",
+      "birthDate": "1979-03-15",
+      "conditionCount": 8
+    },
+    {
+      "id": "P2",
+      "name": "Jan de Vries",
+      "gender": "male",
+      "birthDate": "1965-07-22",
+      "conditionCount": 12
+    }
+  ]
+}

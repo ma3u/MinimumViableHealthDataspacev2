@@ -33,7 +33,10 @@ import {
 import UserMenu from "./UserMenu";
 import { useState, useRef, useEffect } from "react";
 import { deriveParticipantType, derivePersonaId } from "@/lib/auth";
+import { useDemoPersona } from "@/lib/use-demo-persona";
 import type { LucideProps } from "lucide-react";
+
+const IS_STATIC = process.env.NEXT_PUBLIC_STATIC_EXPORT === "true";
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
@@ -360,11 +363,24 @@ function NavDropdown({ group }: { group: NavGroup }) {
 
 export default function Navigation() {
   const { data: session, status } = useSession();
-  const isAuthenticated = status === "authenticated" && !!session;
+  // Always call useDemoPersona — hook rules require unconditional calls.
+  // In live mode the return value is ignored.
+  const demoPersona = useDemoPersona();
 
-  // Build the effective role list including derived sub-types
-  const baseRoles = (session as { roles?: string[] })?.roles ?? [];
-  const username = session?.user?.name ?? session?.user?.email ?? "";
+  // In static demo mode, derive everything from the stored persona.
+  // In live mode, use the NextAuth session as before.
+  const isAuthenticated = IS_STATIC
+    ? true
+    : status === "authenticated" && !!session;
+
+  const baseRoles: string[] = IS_STATIC
+    ? [...demoPersona.roles]
+    : (session as { roles?: string[] })?.roles ?? [];
+
+  const username = IS_STATIC
+    ? demoPersona.username
+    : session?.user?.name ?? session?.user?.email ?? "";
+
   const participantType = deriveParticipantType(baseRoles, username);
   const _personaId = derivePersonaId(baseRoles, username);
 
