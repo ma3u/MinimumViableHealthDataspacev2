@@ -12,6 +12,12 @@ export const authOptions: NextAuthOptions = {
       name: "Keycloak",
       type: "oauth",
       version: "2.0",
+      // wellKnown must use the Docker-internal hostname so the server-side
+      // discovery fetch succeeds inside the container.  The public URL is kept
+      // as `issuer` so ID-token `iss` claim validation still passes (Keycloak
+      // embeds the public URL in every token regardless of how the server is
+      // reached).
+      wellKnown: `${keycloakServerUrl}/.well-known/openid-configuration`,
       issuer: keycloakPublicUrl,
       clientId: process.env.KEYCLOAK_CLIENT_ID || "ui",
       clientSecret: process.env.KEYCLOAK_CLIENT_SECRET || "ui-secret",
