@@ -113,6 +113,10 @@ const PERSONA_SPECS: PersonaSpec[] = [
 // ── S1: Demo hub page ──────────────────────────────────────────────────────────
 
 test.describe("S · Demo hub /demo", () => {
+  test.skip(
+    process.env.NEXT_PUBLIC_STATIC_EXPORT !== "true",
+    "Requires NEXT_PUBLIC_STATIC_EXPORT=true — run against the static build or GitHub Pages",
+  );
   test("J221 — /demo loads and shows 7 persona cards", async ({ page }) => {
     await page.goto("/demo");
     await expect(page.locator("h1")).toContainText(/demo persona selector/i, {
@@ -182,6 +186,10 @@ test.describe("S · Demo hub /demo", () => {
 // ── S2: Per-persona navigation ─────────────────────────────────────────────────
 
 test.describe("S · Per-persona navigation groups", () => {
+  test.skip(
+    process.env.NEXT_PUBLIC_STATIC_EXPORT !== "true",
+    "Requires NEXT_PUBLIC_STATIC_EXPORT=true — run against the static build or GitHub Pages",
+  );
   for (const spec of PERSONA_SPECS) {
     test(`J226-${spec.username} — ${spec.username} sees correct nav groups`, async ({
       page,
@@ -221,6 +229,10 @@ test.describe("S · Per-persona navigation groups", () => {
 // ── S3: Patient data pages ─────────────────────────────────────────────────────
 
 test.describe("S · Patient profile data", () => {
+  test.skip(
+    process.env.NEXT_PUBLIC_STATIC_EXPORT !== "true",
+    "Requires NEXT_PUBLIC_STATIC_EXPORT=true — run against the static build or GitHub Pages",
+  );
   test("J233 — /patient/profile loads and shows patient selector", async ({
     page,
   }) => {
@@ -294,6 +306,10 @@ test.describe("S · Patient profile data", () => {
 // ── S4: Role-specific pages load with data ─────────────────────────────────────
 
 test.describe("S · Role-specific pages have data", () => {
+  test.skip(
+    process.env.NEXT_PUBLIC_STATIC_EXPORT !== "true",
+    "Requires NEXT_PUBLIC_STATIC_EXPORT=true — run against the static build or GitHub Pages",
+  );
   test("J241 — edcadmin: /admin loads without auth error", async ({ page }) => {
     await page.goto("/admin");
     await setPersona(page, "edcadmin");
@@ -346,6 +362,10 @@ test.describe("S · Role-specific pages have data", () => {
 // ── S5: UserMenu persona switcher ─────────────────────────────────────────────
 
 test.describe("S · UserMenu demo persona switcher", () => {
+  test.skip(
+    process.env.NEXT_PUBLIC_STATIC_EXPORT !== "true",
+    "Requires NEXT_PUBLIC_STATIC_EXPORT=true — run against the static build or GitHub Pages",
+  );
   test("J246 — UserMenu shows 'Switch demo persona' section in static mode", async ({
     page,
   }) => {
@@ -403,6 +423,10 @@ test.describe("S · UserMenu demo persona switcher", () => {
 // ── S6: Broken link and broken image audit ─────────────────────────────────────
 
 test.describe("S · Broken link and image audit", () => {
+  test.skip(
+    process.env.NEXT_PUBLIC_STATIC_EXPORT !== "true",
+    "Requires NEXT_PUBLIC_STATIC_EXPORT=true — run against the static build or GitHub Pages",
+  );
   const AUDIT_PAGES = [
     { path: "/", username: "edcadmin" },
     { path: "/demo", username: "edcadmin" },
@@ -488,6 +512,10 @@ test.describe("S · Broken link and image audit", () => {
 // ── S7: Static demo — data differentiation ────────────────────────────────────
 
 test.describe("S · Static demo data completeness", () => {
+  test.skip(
+    process.env.NEXT_PUBLIC_STATIC_EXPORT !== "true",
+    "Requires NEXT_PUBLIC_STATIC_EXPORT=true — run against the static build or GitHub Pages",
+  );
   test("J257 — homepage shows 'Explore' and 'Exchange' section headings", async ({
     page,
   }) => {
