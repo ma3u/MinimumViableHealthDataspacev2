@@ -1,93 +1,55 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+EHDS regulation reference implementation: DSP Dataspace Protocol + FHIR R4 + OMOP CDM + biomedical
+ontologies unified in a Neo4j knowledge graph. 127 synthetic patients, 5300+ graph nodes.
 
-## What This Project Is
-
-A reference implementation of the **European Health Data Space (EHDS)** regulation. It demonstrates an end-to-end health data governance system combining DSP Dataspace Protocol, FHIR R4 clinical data, OMOP CDM analytics, and biomedical ontologies in a single Neo4j knowledge graph. Runs locally with 127 synthetic patients and 5300+ graph nodes.
-
-## Build & Development Commands
-
-### UI (Next.js 14)
+## Build Commands
 
 ```bash
+# UI (Next.js 14) — primary working area
 cd ui && npm install
-npm run dev          # http://localhost:3000
-npm run build        # production build
-npm run lint         # ESLint (max 55 warnings in CI)
-npx tsc --noEmit     # TypeScript type check
-```
+npm run dev            # http://localhost:3000
+npm run build          # production build
+npm run lint           # ESLint — CI threshold: max 55 warnings
+npx tsc --noEmit       # type-check (uses tsconfig.json)
+npx tsc --noEmit -p tsconfig.build.json  # pre-commit type-check (excludes tests)
 
-### Neo4j Query Proxy (Express + TypeScript)
+# Neo4j proxy (Express + TypeScript)
+cd services/neo4j-proxy && npm run dev   # port 9090
 
-```bash
-cd services/neo4j-proxy && npm install
-npm run dev          # dev with tsx watch
-npm run build        # TypeScript compilation
-```
-
-### Starting the Stack
-
-```bash
-# Minimal: Neo4j + UI only
+# Minimal stack: Neo4j + UI
 docker compose up -d
 cat neo4j/init-schema.cypher | docker exec -i health-dataspace-neo4j \
   cypher-shell -u neo4j -p healthdataspace
 cat neo4j/insert-synthetic-schema-data.cypher | docker exec -i health-dataspace-neo4j \
   cypher-shell -u neo4j -p healthdataspace
 
-# Full JAD stack (19 services, needs 8+ GB Docker RAM)
+# Full JAD stack (19 services — needs 8 GB Docker RAM)
 docker compose -f docker-compose.yml -f docker-compose.jad.yml up -d
 ./scripts/bootstrap-jad.sh
-./jad/seed-all.sh          # 7 sequential phases
-./jad/seed-all.sh --from 3 # resume from phase 3
-./jad/seed-all.sh --only 4 # run only phase 4
+./jad/seed-all.sh              # phases 1–7 (sequential, strict order)
+./jad/seed-all.sh --from 3     # resume from phase 3
 ```
-
-### Pre-commit Hooks
-
-```bash
-pre-commit install                            # install (once)
-pre-commit install --hook-type pre-push      # install pre-push hooks (once)
-pre-commit run --all-files                   # run manually
-SKIP=hook-id git commit -m "msg"            # skip a specific hook
-```
-
-Pre-commit runs: Prettier (MD/YAML/JSON/TS/TSX), shellcheck, hadolint, TypeScript type-check, ESLint.
-Pre-push runs: full Vitest suite (bail on first failure).
 
 ## Testing
 
-### Unit Tests (Vitest)
-
 ```bash
-cd ui && npm test                                         # run once
-npm run test:watch                                        # watch mode
-npm run test:coverage                                     # with v8 coverage
+cd ui
+npm test                          # Vitest unit (once)
+npm run test:watch                # Vitest watch
+npm run test:coverage             # v8 coverage
+npx vitest run __tests__/unit/components/Navigation.test.tsx  # single file
 
-# Run a single test file
-npx vitest run __tests__/unit/components/Navigation.test.tsx
+npm run test:e2e                  # Playwright (needs running UI + Neo4j)
+npm run test:e2e:ui               # Playwright interactive
+npx playwright test __tests__/e2e/journeys/19-static-github-pages.spec.ts
 
-cd services/neo4j-proxy && npm test                      # proxy tests
-```
+PLAYWRIGHT_BASE_URL=http://localhost:3003 npm run test:e2e  # against JAD stack
 
-### E2E Tests (Playwright)
-
-```bash
-cd ui && npm run test:e2e                                 # needs running UI + Neo4j
-npm run test:e2e:ui                                       # interactive UI mode
-npx playwright test __tests__/e2e/graph-explorer.spec.ts # single spec
-
-# Against live JAD stack
-PLAYWRIGHT_BASE_URL=http://localhost:3003 npm run test:e2e
-```
-
-### Compliance Tests
-
-```bash
-./scripts/run-dsp-tck.sh      # DSP 2025-1 TCK
-./scripts/run-dcp-tests.sh    # DCP v1.0 compliance
-./scripts/run-ehds-tests.sh   # EHDS domain tests
+# Compliance suites (run by CI weekly)
+./scripts/run-dsp-tck.sh          # DSP 2025-1 TCK
+./scripts/run-dcp-tests.sh        # DCP v1.0
+./scripts/run-ehds-tests.sh       # EHDS domain
 ```
 
 ## Architecture
@@ -95,100 +57,76 @@ PLAYWRIGHT_BASE_URL=http://localhost:3003 npm run test:e2e
 ### 5-Layer Neo4j Knowledge Graph
 
 ```
-Layer 1: Dataspace Marketplace  — DataProduct → OdrlPolicy → Contract → HDABApproval
-Layer 2: HealthDCAT-AP Metadata — Catalogue → Dataset → Distribution → DataService
-Layer 3: FHIR R4 Clinical       — Patient → Encounter → Condition → Observation → Medication
-Layer 4: OMOP CDM Analytics     — OMOPPerson → ConditionOccurrence → DrugExposure
-Layer 5: Biomedical Ontology    — SNOMED CT / ICD-10-CM / RxNorm / LOINC (CODED_BY edges)
+L1 Dataspace Marketplace  — Participant → DataProduct → OdrlPolicy → Contract → HDABApproval
+L2 HealthDCAT-AP Metadata — Catalogue → Dataset → Distribution → DataService
+L3 FHIR R4 Clinical       — Patient → Encounter → Condition → Observation → MedicationRequest
+L4 OMOP CDM Analytics     — OMOPPerson → ConditionOccurrence → DrugExposure → Measurement
+L5 Biomedical Ontology    — SnomedConcept / ICD10Code / RxNormConcept / LoincCode (CODED_BY)
 ```
 
-All cross-layer relationships form the connective tissue. Schema is in `neo4j/init-schema.cypher` (uses `IF NOT EXISTS` — safe to re-run).
+Schema: `neo4j/init-schema.cypher` — idempotent (`MERGE`/`IF NOT EXISTS`), safe to re-run.
 
-### Service Topology
+### Key Services
 
-| Component                   | Purpose                              | Port        |
-| --------------------------- | ------------------------------------ | ----------- |
-| Neo4j 5 Community           | Knowledge graph (Bolt + Browser)     | 7687 / 7474 |
-| `services/neo4j-proxy`      | Express bridge: DCore ↔ Neo4j       | 9090        |
-| UI (`ui/`)                  | Next.js 14 with 6 domain views       | 3000        |
-| EDC-V Control Plane         | DSP governance & contract management | via Traefik |
-| DCore Data Planes (×2)      | FHIR push + OMOP pull                | via Traefik |
-| CFM                         | Audit trail & compliance logging     | via Traefik |
-| IdentityHub + IssuerService | DID & Verifiable Credentials         | via Traefik |
-| Keycloak                    | OIDC with 6 role-based personas      | 80          |
-| Vault                       | Secret management (in-memory)        | 8200        |
-| NATS                        | Async event bus                      | 4222        |
-| PostgreSQL                  | Metadata for all JAD services        | 5432        |
+| Service           | Purpose                         | Port        |
+| ----------------- | ------------------------------- | ----------- |
+| Neo4j 5 Community | Knowledge graph                 | 7687 / 7474 |
+| neo4j-proxy       | Express bridge: DCore ↔ Neo4j  | 9090        |
+| UI                | Next.js 14                      | 3000        |
+| Keycloak          | OIDC (realm `edcv`, 7 personas) | 8080        |
+| Vault             | Secrets (in-memory)             | 8200        |
+| NATS              | Async event bus                 | 4222        |
+| PostgreSQL        | JAD service metadata            | 5432        |
 
-Traefik routes services via `*.localhost` hostnames.
+Traefik routes JAD services via `*.localhost` hostnames.
 
-### UI Views (`ui/src/app/`)
+## Key Directories
 
-| Route         | Purpose                                         |
-| ------------- | ----------------------------------------------- |
-| `/graph`      | Force-directed visualization of all 5 layers    |
-| `/catalog`    | HealthDCAT-AP dataset catalogue                 |
-| `/compliance` | DSP contract trace (DataProduct → HDABApproval) |
-| `/patient`    | FHIR R4 timeline + OMOP CDM mapping             |
-| `/analytics`  | OMOP cohort statistics and charts               |
-| `/eehrxf`     | EU FHIR profile alignment scores                |
-| `/admin`      | JAD service health and metrics                  |
-| `/onboarding` | Participant registration                        |
+```
+ui/src/app/             — Next.js 14 app router (16 pages, 36 API routes)
+ui/src/app/api/         — API routes — DISABLED in static export (workflow renames folder)
+ui/src/lib/             — auth.ts, api.ts, use-demo-persona.ts, graph-constants.ts
+ui/src/components/      — Navigation.tsx, UserMenu.tsx, shared UI components
+ui/__tests__/unit/      — Vitest tests (MSW mocks via __tests__/setup.ts)
+ui/__tests__/e2e/       — Playwright specs (journeys/ subdirectory)
+ui/public/mock/         — JSON fixtures served in NEXT_PUBLIC_STATIC_EXPORT=true mode
+neo4j/                  — init-schema.cypher, insert-synthetic-schema-data.cypher
+services/neo4j-proxy/   — Express FHIR/OMOP bridge
+docs/                   — Architecture docs, persona journeys, planning phases
+jad/                    — JAD stack seed scripts (phases 1–7)
+scripts/                — bootstrap-jad.sh, generate-synthea.sh, compliance runners
+k8s/                    — OrbStack / Kubernetes manifests
+```
 
-API routes in `ui/src/app/api/` (18 routes). These are **disabled** in GitHub Pages static export — the workflow renames the folder.
+## Coding Conventions
 
-### Neo4j Proxy Endpoints
+**Cypher:** Labels `PascalCase` · Relationships `UPPER_SNAKE_CASE` · Properties `camelCase` ·
+Always `MERGE`, never `CREATE` · Schema doc changes must mirror `neo4j/init-schema.cypher`
 
-`/fhir/Patient/{id}/$everything`, `/omop/cohort`, `/catalog/datasets` — bridges DCore data planes to Neo4j.
+**TypeScript:** Strict mode · `@/*` → `ui/src/*` · Unused vars prefixed `_` ·
+Unit tests in `ui/__tests__/unit/` · E2E tests in `ui/__tests__/e2e/journeys/`
 
-## Code Conventions
+**Bash scripts:** `set -euo pipefail` + quote all variables · shellcheck at error severity
 
-### Cypher
+**Fictional orgs only:** AlphaKlinik Berlin, PharmaCo Research AG, MedReg DE, Limburg Medical Centre,
+Institut de Recherche Santé. Never use real names (Charité, Bayer, BfArM, etc.).
 
-- Node labels: `PascalCase`
-- Relationship types: `UPPER_SNAKE_CASE`
-- Properties: `camelCase`
-- Always use idempotent `MERGE`, not `CREATE`
-- Schema changes in `.md` docs **must** be reflected in `neo4j/init-schema.cypher`
+## Top 5 Gotchas
 
-### TypeScript
+1. **Vault secrets lost on Docker restart** — Vault is in-memory only. Re-run
+   `./scripts/bootstrap-jad.sh` (idempotent) after any `docker compose down`.
 
-- Strict mode throughout; `@/*` alias maps to `ui/src/*`
-- Prefix unused variables with `_`
-- Test files: `*.test.ts(x)`, placed in `ui/__tests__/unit/` (Vitest) or `ui/__tests__/e2e/` (Playwright)
-- API mocks use MSW (Mock Service Worker) — see `ui/__tests__/setup.ts`
+2. **JAD seed phases are strictly ordered** — Phases 1–7 must run sequentially.
+   FHIR data must exist before OMOP transformation (phase 4 depends on phase 3).
 
-### Bash Scripts
+3. **Static export disables API routes** — GitHub Pages workflow runs
+   `mv src/app/api /tmp/api_disabled` before building. Never assume API routes work
+   in the static build; use `NEXT_PUBLIC_STATIC_EXPORT` guards and `ui/public/mock/*.json`.
 
-- Always use `set -euo pipefail` and quote all variables
-- shellcheck runs at error severity in pre-commit
+4. **Pre-commit Prettier auto-reformats staged files** — After prettier runs you must
+   `git add` the reformatted files before the commit succeeds. Pre-push runs full Vitest.
 
-## Key Pitfalls
-
-- **Vault secrets are in-memory**: lost on Docker restart. Re-run `./scripts/bootstrap-jad.sh` (idempotent).
-- **JAD seed order is strict**: phases 1–7 must run sequentially. FHIR data must exist before OMOP transformation.
-- **GitHub Pages static export disables API routes**: never assume API routes work in the static build.
-- **Port conflicts**: ports 80, 4222, 5432, 7474, 7687, 8080, 8200 must be free for the full JAD stack.
-- **`tsc-ui` uses `tsconfig.build.json`** (not `tsconfig.json`) to exclude test files from the pre-commit type check.
-
-## Integration Notes
-
-- **Keycloak realm**: `EDCV` with 6 role-based client scopes. Middleware at `ui/src/middleware.ts` enforces role-based route protection.
-- **Synthea** generates synthetic FHIR patients: `scripts/generate-synthea.sh`.
-- **DID conventions**: `did:web:alpha-klinik.de:participant`, `did:web:pharmaco.de:research`, `did:web:medreg.de:hdab`, etc.
-- **GitHub Pages**: `basePath` set dynamically in `next.config.js` inside the Actions workflow.
-- Default Neo4j credentials (`neo4j` / `healthdataspace`) are for local dev only.
-
-## Trademark Policy
-
-All demo participants must use **fictional organisations only**.
-
-| Role                 | Fictional Name              | DID                                   |
-| -------------------- | --------------------------- | ------------------------------------- |
-| DATA_HOLDER (Clinic) | AlphaKlinik Berlin          | `did:web:alpha-klinik.de:participant` |
-| DATA_USER (Pharma)   | PharmaCo Research AG        | `did:web:pharmaco.de:research`        |
-| HDAB (Authority)     | MedReg DE                   | `did:web:medreg.de:hdab`              |
-| DATA_HOLDER (Clinic) | Limburg Medical Centre      | `did:web:lmc.nl:clinic`               |
-| HDAB (Research)      | Institut de Recherche Santé | `did:web:irs.fr:hdab`                 |
-
-Forbidden: Charité, Bayer, BfArM, Zuyderland, INSERM, or any real organisation name. Add new fictional names to `copilot-instructions.md`.
+5. **Keycloak `wellKnown` vs `issuer` split** — In Docker, `KEYCLOAK_SERVER_URL` must use
+   the internal hostname (`http://keycloak:8080`) for token discovery; `KEYCLOAK_PUBLIC_URL`
+   uses `localhost:8080` for browser redirects. Mixing them causes `?error=keycloak` on sign-in.
+   See `ui/src/lib/auth.ts` `wellKnown` field.
