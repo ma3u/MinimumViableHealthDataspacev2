@@ -92,6 +92,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: ui
+          # Production: pin to registry digest, e.g. ghcr.io/ma3u/health-dataspace-ui@sha256:...
           image: health-dataspace-ui:latest
           imagePullPolicy: IfNotPresent
           # Container-level security context (KSV-0014 / DS-0002)
@@ -159,6 +160,50 @@ spec:
       port: 3000
       targetPort: 3000
   type: ClusterIP
+
+---
+# NetworkPolicy — deny-all + allow-list (kubescape NSA C-0013/C-0014 / BSI C5 COS-04)
+# Production: tighten cidrBlocks to specific ranges.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: health-dataspace-ui
+  namespace: health-dataspace
+spec:
+  podSelector:
+    matchLabels:
+      app: health-dataspace-ui
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    # Allow HTTP traffic from the ingress controller and port-forward
+    - ports:
+        - protocol: TCP
+          port: 3000
+  egress:
+    # Allow DNS resolution
+    - ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+    # Allow Keycloak (OIDC token exchange) — host.docker.internal:8080
+    - ports:
+        - protocol: TCP
+          port: 8080
+    # Allow Neo4j (bolt) — host.docker.internal:7687
+    - ports:
+        - protocol: TCP
+          port: 7687
+    # Allow Neo4j HTTP API — host.docker.internal:7474
+    - ports:
+        - protocol: TCP
+          port: 7474
+    # Allow neo4j-proxy — host.docker.internal:9090
+    - ports:
+        - protocol: TCP
+          port: 9090
 
 ---
 # OrbStack Ingress — provides http://health-dataspace.orbstack.local

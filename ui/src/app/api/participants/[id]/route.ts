@@ -9,9 +9,10 @@ export const dynamic = "force-dynamic";
  */
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
+    const { id } = await params;
     const body = await req.json();
     const { properties } = body as { properties: Record<string, string> };
 
@@ -22,11 +23,9 @@ export async function PATCH(
       );
     }
 
-    const result = await edcClient.tenant(
-      `/v1alpha1/tenants/${params.id}`,
-      "PATCH",
-      { properties },
-    );
+    const result = await edcClient.tenant(`/v1alpha1/tenants/${id}`, "PATCH", {
+      properties,
+    });
 
     return NextResponse.json(result ?? { ok: true });
   } catch (err) {

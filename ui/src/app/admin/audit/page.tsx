@@ -811,9 +811,11 @@ export default function AdminAuditPage() {
                                 onClick={() =>
                                   setExpandedNeg((prev) => {
                                     const next = new Set(prev);
-                                    isOpen
-                                      ? next.delete(rowKey)
-                                      : next.add(rowKey);
+                                    if (isOpen) {
+                                      next.delete(rowKey);
+                                    } else {
+                                      next.add(rowKey);
+                                    }
                                     return next;
                                   })
                                 }
