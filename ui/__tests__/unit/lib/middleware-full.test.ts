@@ -283,9 +283,9 @@ describe("middleware — authorized callback", () => {
 
 describe("middleware — config matcher", () => {
   // Re-import to get the config export
-  it("exports exactly 7 matcher patterns", async () => {
+  it("exports exactly 10 matcher patterns", async () => {
     const { config } = await import("@/middleware");
-    expect(config.matcher).toHaveLength(7);
+    expect(config.matcher).toHaveLength(10);
   });
 
   it("includes all protected route patterns", async () => {
@@ -298,6 +298,9 @@ describe("middleware — config matcher", () => {
       "/settings/:path*",
       "/data/:path*",
       "/negotiate/:path*",
+      "/patient/profile/:path*",
+      "/patient/research/:path*",
+      "/patient/insights/:path*",
     ];
     expect(config.matcher).toEqual(expected);
   });

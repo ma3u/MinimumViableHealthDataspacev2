@@ -288,8 +288,8 @@ describe("participant view (default)", () => {
     await waitFor(() => {
       expect(screen.getByText(/Shared Infrastructure/)).toBeInTheDocument();
     });
-    expect(screen.getByText("PostgreSQL")).toBeInTheDocument();
-    expect(screen.getByText("NATS")).toBeInTheDocument();
+    expect(screen.getAllByText("PostgreSQL")[0]).toBeInTheDocument();
+    expect(screen.getAllByText("NATS")[0]).toBeInTheDocument();
   });
 
   it("fetches topology endpoint on initial render", async () => {

@@ -91,7 +91,9 @@ describe("GraphPage", () => {
   it("shows loading state", () => {
     mockFetchApi.mockReturnValue(new Promise(() => {}));
     render(<GraphPage />);
-    expect(screen.getByText(/Connecting to Neo4j/)).toBeInTheDocument();
+    expect(
+      screen.getByText(/Building researcher overview/),
+    ).toBeInTheDocument();
   });
 
   it("renders graph after data loads", async () => {
@@ -105,7 +107,7 @@ describe("GraphPage", () => {
   it("displays all five layer labels in the sidebar", () => {
     mockFetchApi.mockReturnValue(new Promise(() => {}));
     render(<GraphPage />);
-    expect(screen.getByText("L1 Marketplace")).toBeInTheDocument();
+    expect(screen.getByText("L1 Governance")).toBeInTheDocument();
     expect(screen.getByText("L2 HealthDCAT-AP")).toBeInTheDocument();
     expect(screen.getByText("L3 FHIR R4")).toBeInTheDocument();
     expect(screen.getByText("L4 OMOP CDM")).toBeInTheDocument();
@@ -125,9 +127,7 @@ describe("GraphPage", () => {
     mockFetchApi.mockReturnValue(mockResponse(sampleGraphData));
     render(<GraphPage />);
     await waitFor(() => {
-      expect(
-        screen.getByText(/Click a node to see details/),
-      ).toBeInTheDocument();
+      expect(screen.getByText(/Click a node to inspect/)).toBeInTheDocument();
     });
   });
 

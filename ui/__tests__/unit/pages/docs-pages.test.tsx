@@ -108,6 +108,6 @@ describe("UserGuidePage", () => {
 
   it("renders feature sections", () => {
     render(<UserGuidePage />);
-    expect(screen.getByText(/Graph Explorer/)).toBeInTheDocument();
+    expect(screen.getAllByText(/Graph Explorer/)[0]).toBeInTheDocument();
   });
 });
