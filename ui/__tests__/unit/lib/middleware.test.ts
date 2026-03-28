@@ -52,14 +52,20 @@ describe("middleware config", () => {
   });
 
   it("should not match public routes like /graph or /catalog", () => {
-    const publicRoutes = ["/graph", "/catalog", "/patient", "/analytics"];
+    const publicRoutes = ["/graph", "/catalog", "/analytics"];
     for (const route of publicRoutes) {
       const matched = matcher.some((m: string) => m.startsWith(route));
       expect(matched, `${route} should not be in matcher`).toBe(false);
     }
   });
 
-  it("should have exactly 7 protected route patterns", () => {
-    expect(matcher).toHaveLength(7);
+  it("should protect /patient sub-routes (profile, research, insights)", () => {
+    expect(matcher).toContainEqual("/patient/profile/:path*");
+    expect(matcher).toContainEqual("/patient/research/:path*");
+    expect(matcher).toContainEqual("/patient/insights/:path*");
+  });
+
+  it("should have exactly 10 protected route patterns", () => {
+    expect(matcher).toHaveLength(10);
   });
 });
