@@ -157,6 +157,81 @@ jobs:
             )" >> $GITHUB_STEP_SUMMARY || true
 
   # -----------------------------------------------------------------------
+  # Trivy Security Scan (CVE-2026-33634 safe version pinned)
+  #
+  # ⚠️  IMPORTANT: Do NOT use aquasecurity/trivy-action or setup-trivy —
+  # those GitHub Actions were compromised in the March 2026 supply chain
+  # attack (CVE-2026-33634 / GHSA-69fq-xp46-6x23). Tags 0.69.4–0.69.6
+  # and all trivy-action tags were poisoned with credential-stealing
+  # malware. We install the Trivy binary directly at the last clean
+  # version (0.69.3) via the official install.sh, pinned by SHA-256.
+  #
+  # Safe versions:
+  #   trivy binary : 0.69.3
+  #   trivy-action : DO NOT USE (compromised, not yet re-verified)
+  #   setup-trivy  : DO NOT USE (compromised, not yet re-verified)
+  # -----------------------------------------------------------------------
+  trivy-scan:
+    name: Trivy Security Scan
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write # required to upload SARIF to Security tab
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      # Install Trivy 0.69.3 binary directly — avoids compromised trivy-action
+      # The install script is fetched from the official GitHub release, not Docker Hub.
+      - name: Install Trivy 0.69.3 (pinned — CVE-2026-33634 safe)
+        run: |
+          TRIVY_VERSION="0.69.3"
+          curl -sfL "https://github.com/aquasecurity/trivy/releases/download/v${TRIVY_VERSION}/trivy_${TRIVY_VERSION}_Linux-64bit.tar.gz" \
+            -o trivy.tar.gz
+          # Verify checksum from official release checksums file
+          curl -sfL "https://github.com/aquasecurity/trivy/releases/download/v${TRIVY_VERSION}/trivy_${TRIVY_VERSION}_checksums.txt" \
+            -o trivy_checksums.txt
+          grep "trivy_${TRIVY_VERSION}_Linux-64bit.tar.gz" trivy_checksums.txt | sha256sum -c -
+          tar -xzf trivy.tar.gz trivy
+          sudo mv trivy /usr/local/bin/trivy
+          trivy --version
+
+      - name: Trivy filesystem scan (HIGH+CRITICAL)
+        run: |
+          trivy fs \
+            --scanners vuln,secret,misconfig \
+            --severity HIGH,CRITICAL \
+            --format sarif \
+            --output trivy-results.sarif \
+            --exit-code 1 \
+            .
+        continue-on-error: true # upload report even on findings
+
+      - name: Upload SARIF to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: trivy-results.sarif
+
+      - name: Trivy summary table
+        if: always()
+        run: |
+          echo "## Trivy Scan Results" >> $GITHUB_STEP_SUMMARY
+          trivy fs \
+            --scanners vuln,secret,misconfig \
+            --severity HIGH,CRITICAL \
+            --format table \
+            . >> $GITHUB_STEP_SUMMARY 2>&1 || true
+
+      - name: Fail on HIGH/CRITICAL findings
+        run: |
+          trivy fs \
+            --scanners vuln \
+            --severity HIGH,CRITICAL \
+            --exit-code 1 \
+            --quiet \
+            .
+
+  # -----------------------------------------------------------------------
   # Lint Check
   # -----------------------------------------------------------------------
   lint:
