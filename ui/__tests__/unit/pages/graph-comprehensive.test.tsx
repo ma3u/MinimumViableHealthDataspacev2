@@ -150,24 +150,26 @@ describe("GraphPage", () => {
   // Existing basic tests (heading, loading, sidebar, layers, nav links)
   // ────────────────────────────────────────────────────────────────────
   describe("basic rendering", () => {
-    it("renders the Graph Explorer heading", () => {
+    it("renders the Knowledge Graph heading", () => {
       mockFetchApi.mockReturnValue(new Promise(() => {}));
       render(<GraphPage />);
-      expect(screen.getByText("Graph Explorer")).toBeInTheDocument();
+      expect(screen.getByText("Knowledge Graph")).toBeInTheDocument();
     });
 
     it("renders the description paragraph", () => {
       mockFetchApi.mockReturnValue(new Promise(() => {}));
       render(<GraphPage />);
       expect(
-        screen.getByText(/Interactive 5-layer knowledge graph/),
+        screen.getByText(/5-layer EHDS health dataspace/),
       ).toBeInTheDocument();
     });
 
-    it("shows 'Connecting to Neo4j…' while data is loading", () => {
+    it("shows 'Building researcher overview…' while data is loading", () => {
       mockFetchApi.mockReturnValue(new Promise(() => {}));
       render(<GraphPage />);
-      expect(screen.getByText(/Connecting to Neo4j/)).toBeInTheDocument();
+      expect(
+        screen.getByText(/Building researcher overview/),
+      ).toBeInTheDocument();
     });
 
     it("does not render ForceGraph while loading", () => {
@@ -189,7 +191,7 @@ describe("GraphPage", () => {
       render(<GraphPage />);
       await waitFor(() => {
         expect(
-          screen.queryByText(/Connecting to Neo4j/),
+          screen.queryByText(/Building researcher overview/),
         ).not.toBeInTheDocument();
       });
     });
@@ -224,7 +226,7 @@ describe("GraphPage", () => {
       mockFetchApi.mockReturnValue(new Promise(() => {}));
       render(<GraphPage />);
       for (const label of [
-        "L1 Marketplace",
+        "L1 Governance",
         "L2 HealthDCAT-AP",
         "L3 FHIR R4",
         "L4 OMOP CDM",
@@ -241,11 +243,11 @@ describe("GraphPage", () => {
       expect(link.closest("a")).toHaveAttribute("href", "/catalog");
     });
 
-    it("renders Discover FHIR Assets link pointing to /data/discover", () => {
+    it("renders OMOP Analytics link pointing to /analytics", () => {
       mockFetchApi.mockReturnValue(new Promise(() => {}));
       render(<GraphPage />);
-      const link = screen.getByText("Discover FHIR Assets");
-      expect(link.closest("a")).toHaveAttribute("href", "/data/discover");
+      const link = screen.getByText("OMOP Analytics");
+      expect(link.closest("a")).toHaveAttribute("href", "/analytics");
     });
 
     it("renders Patient Journey link pointing to /patient", () => {
@@ -294,9 +296,7 @@ describe("GraphPage", () => {
       mockFetchApi.mockReturnValue(mockResponse(sampleGraphData));
       render(<GraphPage />);
       await waitFor(() => {
-        expect(
-          screen.getByText(/Click a node to see details/),
-        ).toBeInTheDocument();
+        expect(screen.getByText(/Click a node to inspect/)).toBeInTheDocument();
       });
     });
 
@@ -307,7 +307,7 @@ describe("GraphPage", () => {
       });
       await waitFor(() => {
         expect(
-          screen.queryByText(/Click a node to see details/),
+          screen.queryByText(/Click a node to inspect/),
         ).not.toBeInTheDocument();
       });
     });
@@ -328,7 +328,11 @@ describe("GraphPage", () => {
       });
     });
 
-    it("deselects node when the same node is clicked again (toggle)", async () => {
+    it("keeps node selected on second click (triggers expand, not deselect)", async () => {
+      // Mock the expand API call so it doesn't fail
+      mockFetchApi
+        .mockReturnValueOnce(mockResponse(sampleGraphData)) // initial load
+        .mockReturnValueOnce(mockResponse({ nodes: [], links: [] })); // expand call
       const props = await renderAndGetForceGraphProps();
       const node = sampleGraphData.nodes[1];
       // First click — select
@@ -341,15 +345,17 @@ describe("GraphPage", () => {
       // Grab the latest onNodeClick (component re-rendered)
       const updatedProps =
         mockForceGraph.mock.calls[mockForceGraph.mock.calls.length - 1][0];
-      // Second click — deselect
+      // Second click — triggers expand, node stays selected
       act(() => {
         (updatedProps.onNodeClick as (n: object) => void)(node);
       });
+      // Node should remain selected (hint text should NOT appear)
       await waitFor(() => {
-        expect(
-          screen.getByText(/Click a node to see details/),
-        ).toBeInTheDocument();
+        expect(screen.getByText("Dataset-B")).toBeInTheDocument();
       });
+      expect(
+        screen.queryByText(/Click a node to inspect/),
+      ).not.toBeInTheDocument();
     });
 
     it("switches selection when a different node is clicked", async () => {
@@ -396,9 +402,7 @@ describe("GraphPage", () => {
       expect(closeBtn).toBeDefined();
       fireEvent.click(closeBtn!);
       await waitFor(() => {
-        expect(
-          screen.getByText(/Click a node to see details/),
-        ).toBeInTheDocument();
+        expect(screen.getByText(/Click a node to inspect/)).toBeInTheDocument();
       });
     });
   });
@@ -432,8 +436,8 @@ describe("GraphPage", () => {
       await waitFor(() => {
         expect(screen.getByText("DataProduct-A")).toBeInTheDocument();
         expect(screen.getByText("DataProduct")).toBeInTheDocument();
-        // L1 Marketplace appears both in the legend and in the detail card
-        const l1Elements = screen.getAllByText("L1 Marketplace");
+        // L1 Governance appears both in the legend and in the detail card
+        const l1Elements = screen.getAllByText("L1 Governance");
         expect(l1Elements.length).toBeGreaterThanOrEqual(2);
       });
     });
@@ -458,14 +462,14 @@ describe("GraphPage", () => {
   // Contextual links based on layer
   // ────────────────────────────────────────────────────────────────────
   describe("contextual links", () => {
-    it("shows 'View in Catalog' link for layer 2 node", async () => {
+    it("shows 'Catalog' link for layer 2 node", async () => {
       const props = await renderAndGetForceGraphProps();
       const node = sampleGraphData.nodes[1]; // Dataset-B, layer 2
       act(() => {
         (props.onNodeClick as (n: object) => void)(node);
       });
       await waitFor(() => {
-        const catalogLink = screen.getByText("View in Catalog");
+        const catalogLink = screen.getByText("Catalog");
         expect(catalogLink).toBeInTheDocument();
         expect(catalogLink.closest("a")).toHaveAttribute(
           "href",
@@ -474,7 +478,7 @@ describe("GraphPage", () => {
       });
     });
 
-    it("does not show 'View in Catalog' for non-layer-2 node", async () => {
+    it("does not show 'Catalog' link for non-layer-2 node", async () => {
       const props = await renderAndGetForceGraphProps();
       const node = sampleGraphData.nodes[0]; // layer 1
       act(() => {
@@ -483,48 +487,43 @@ describe("GraphPage", () => {
       await waitFor(() => {
         expect(screen.getByText("DataProduct-A")).toBeInTheDocument();
       });
-      expect(screen.queryByText("View in Catalog")).not.toBeInTheDocument();
+      expect(screen.queryByText("Catalog")).not.toBeInTheDocument();
     });
 
-    it("shows 'View FHIR Asset' link for layer 3 node", async () => {
+    it("shows 'Patient view' link for layer 3 node", async () => {
       const props = await renderAndGetForceGraphProps();
       const node = sampleGraphData.nodes[2]; // Patient-C, layer 3
       act(() => {
         (props.onNodeClick as (n: object) => void)(node);
       });
       await waitFor(() => {
-        const fhirLink = screen.getByText("View FHIR Asset");
-        expect(fhirLink).toBeInTheDocument();
-        expect(fhirLink.closest("a")).toHaveAttribute(
-          "href",
-          expect.stringContaining("/data/discover?search="),
-        );
+        const patientLink = screen.getByText("Patient view");
+        expect(patientLink).toBeInTheDocument();
+        expect(patientLink.closest("a")).toHaveAttribute("href", "/patient");
       });
     });
 
-    it("shows 'Patient Journey' link for layer 3 node", async () => {
+    it("shows 'Patient view' link for layer 3 node (detail card only)", async () => {
       const props = await renderAndGetForceGraphProps();
       const node = sampleGraphData.nodes[2]; // Patient-C, layer 3
       act(() => {
         (props.onNodeClick as (n: object) => void)(node);
       });
       await waitFor(() => {
-        // There's already a Patient Journey in sidebar — look for the one in the detail card
-        const journeyLinks = screen.getAllByText("Patient Journey");
-        // At least two: one in sidebar, one in detail card
-        expect(journeyLinks.length).toBeGreaterThanOrEqual(2);
+        // Sidebar has "Patient Journey", detail card has "Patient view"
+        expect(screen.getByText("Patient view")).toBeInTheDocument();
+        expect(screen.getByText("Patient Journey")).toBeInTheDocument();
       });
     });
 
-    it("shows 'Patient Journey' link for layer 4 node", async () => {
+    it("shows 'Patient view' link for layer 4 node", async () => {
       const props = await renderAndGetForceGraphProps();
       const node = sampleGraphData.nodes[3]; // Condition-D, layer 4
       act(() => {
         (props.onNodeClick as (n: object) => void)(node);
       });
       await waitFor(() => {
-        const journeyLinks = screen.getAllByText("Patient Journey");
-        expect(journeyLinks.length).toBeGreaterThanOrEqual(2);
+        expect(screen.getByText("Patient view")).toBeInTheDocument();
       });
     });
 
@@ -537,11 +536,10 @@ describe("GraphPage", () => {
       await waitFor(() => {
         expect(screen.getByText("DataProduct-A")).toBeInTheDocument();
       });
-      expect(screen.queryByText("View in Catalog")).not.toBeInTheDocument();
-      expect(screen.queryByText("View FHIR Asset")).not.toBeInTheDocument();
+      expect(screen.queryByText("Catalog")).not.toBeInTheDocument();
+      expect(screen.queryByText("Patient view")).not.toBeInTheDocument();
       // Only the sidebar Patient Journey link should exist
-      const journeyLinks = screen.getAllByText("Patient Journey");
-      expect(journeyLinks).toHaveLength(1);
+      expect(screen.getByText("Patient Journey")).toBeInTheDocument();
     });
 
     it("does not show contextual links for layer 5 node", async () => {
@@ -553,10 +551,9 @@ describe("GraphPage", () => {
       await waitFor(() => {
         expect(screen.getByText("SNOMED-E")).toBeInTheDocument();
       });
-      expect(screen.queryByText("View in Catalog")).not.toBeInTheDocument();
-      expect(screen.queryByText("View FHIR Asset")).not.toBeInTheDocument();
-      const journeyLinks = screen.getAllByText("Patient Journey");
-      expect(journeyLinks).toHaveLength(1);
+      expect(screen.queryByText("Catalog")).not.toBeInTheDocument();
+      expect(screen.queryByText("Patient view")).not.toBeInTheDocument();
+      expect(screen.getByText("Patient Journey")).toBeInTheDocument();
     });
   });
 
@@ -564,7 +561,7 @@ describe("GraphPage", () => {
   // Neighbour list
   // ────────────────────────────────────────────────────────────────────
   describe("neighbour list", () => {
-    it("shows relationships heading with count when node has neighbours", async () => {
+    it("shows connected heading with count when node has neighbours", async () => {
       const props = await renderAndGetForceGraphProps();
       // n2 (Dataset-B) has: n1→n2 (DESCRIBES) and n2→n3 (CONTAINS)
       const node = sampleGraphData.nodes[1];
@@ -572,7 +569,7 @@ describe("GraphPage", () => {
         (props.onNodeClick as (n: object) => void)(node);
       });
       await waitFor(() => {
-        expect(screen.getByText(/Relationships \(2\)/)).toBeInTheDocument();
+        expect(screen.getByText(/Connected \(2\)/)).toBeInTheDocument();
       });
     });
 
@@ -653,7 +650,7 @@ describe("GraphPage", () => {
       await waitFor(() => {
         expect(screen.getByText("Isolated")).toBeInTheDocument();
       });
-      expect(screen.queryByText(/Relationships/)).not.toBeInTheDocument();
+      expect(screen.queryByText(/Connected/)).not.toBeInTheDocument();
     });
   });
 
@@ -668,7 +665,7 @@ describe("GraphPage", () => {
         (props.onNodeClick as (n: object) => void)(node);
       });
       await waitFor(() => {
-        expect(screen.getByText(/Relationships/)).toBeInTheDocument();
+        expect(screen.getByText(/Connected/)).toBeInTheDocument();
       });
       // Click on the neighbour "Patient-C" button
       const neighbourButton = screen.getByText("Patient-C").closest("button");
@@ -749,9 +746,7 @@ describe("GraphPage", () => {
         expect(screen.getByTestId("force-graph")).toBeInTheDocument();
       });
       // Hint text should still be visible since nothing was selected
-      expect(
-        screen.getByText(/Click a node to see details/),
-      ).toBeInTheDocument();
+      expect(screen.getByText(/Click a node to inspect/)).toBeInTheDocument();
     });
 
     it("does nothing when highlight is null", async () => {
@@ -761,9 +756,7 @@ describe("GraphPage", () => {
       await waitFor(() => {
         expect(screen.getByTestId("force-graph")).toBeInTheDocument();
       });
-      expect(
-        screen.getByText(/Click a node to see details/),
-      ).toBeInTheDocument();
+      expect(screen.getByText(/Click a node to inspect/)).toBeInTheDocument();
     });
   });
 
@@ -838,17 +831,17 @@ describe("GraphPage", () => {
 
     it("passes d3AlphaDecay", async () => {
       const props = await renderAndGetForceGraphProps();
-      expect(props.d3AlphaDecay).toBe(0.04);
+      expect(props.d3AlphaDecay).toBe(1);
     });
 
     it("passes d3VelocityDecay", async () => {
       const props = await renderAndGetForceGraphProps();
-      expect(props.d3VelocityDecay).toBe(0.4);
+      expect(props.d3VelocityDecay).toBe(1);
     });
 
     it("passes cooldownTicks", async () => {
       const props = await renderAndGetForceGraphProps();
-      expect(props.cooldownTicks).toBe(150);
+      expect(props.cooldownTicks).toBe(0);
     });
 
     it("passes nodeRelSize", async () => {
@@ -871,6 +864,7 @@ describe("GraphPage", () => {
       fillText: vi.fn(),
       fillRect: vi.fn(),
       measureText: vi.fn().mockReturnValue({ width: 50 }),
+      setLineDash: vi.fn(),
       strokeStyle: "",
       fillStyle: "",
       lineWidth: 0,
@@ -894,6 +888,7 @@ describe("GraphPage", () => {
         fillText: vi.fn(),
         fillRect: vi.fn(),
         measureText: vi.fn().mockReturnValue({ width: 50 }),
+        setLineDash: vi.fn(),
         strokeStyle: "",
         fillStyle: "",
         lineWidth: 0,
@@ -937,8 +932,8 @@ describe("GraphPage", () => {
       );
     });
 
-    it("paintNode does not render text label when zoomed out below 1.5", async () => {
-      // When no node is selected and no connected nodes, low zoom hides text
+    it("paintNode does not render text label when gs is below 0.1", async () => {
+      // gs < 0.1 and node is not selected or connected → text hidden
       const props = await renderAndGetForceGraphProps();
       const paintNode = props.nodeCanvasObject as (
         node: object,
@@ -947,8 +942,8 @@ describe("GraphPage", () => {
       ) => void;
       const ctx = createMockCtx();
       const node = { ...sampleGraphData.nodes[0], x: 100, y: 200 };
-      paintNode(node, ctx, 1);
-      // fillText should not be called for text label (only fill for the circle)
+      paintNode(node, ctx, 0.05);
+      // fillText should not be called — gs(0.05) < 0.1 and node not selected/connected
       expect(ctx.fillText).not.toHaveBeenCalled();
     });
 
