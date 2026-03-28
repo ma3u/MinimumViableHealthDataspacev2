@@ -130,3 +130,9 @@ Institut de Recherche Santé. Never use real names (Charité, Bayer, BfArM, etc.
    the internal hostname (`http://keycloak:8080`) for token discovery; `KEYCLOAK_PUBLIC_URL`
    uses `localhost:8080` for browser redirects. Mixing them causes `?error=keycloak` on sign-in.
    See `ui/src/lib/auth.ts` `wellKnown` field.
+
+6. **Keycloak client must be confidential, not public** — `health-dataspace-ui` is configured
+   as `publicClient: false` with `secret: "health-dataspace-ui-secret"` in `jad/keycloak-realm.json`.
+   NextAuth always sends `client_secret` in the token exchange; if the Keycloak client is
+   `publicClient: true`, Keycloak rejects the secret and the callback fails with `?error=OAuthCallback`.
+   PKCE (`pkce.code.challenge.method: S256`) must NOT be set for confidential clients.

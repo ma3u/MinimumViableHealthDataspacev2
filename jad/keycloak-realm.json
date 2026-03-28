@@ -238,10 +238,11 @@
     {
       "clientId": "health-dataspace-ui",
       "name": "Health Dataspace UI",
-      "description": "Next.js UI client with PKCE authorization code flow for browser-based SSO",
+      "description": "Next.js UI client — confidential, Authorization Code Flow with client secret",
       "enabled": true,
       "protocol": "openid-connect",
-      "publicClient": true,
+      "publicClient": false,
+      "secret": "health-dataspace-ui-secret",
       "serviceAccountsEnabled": false,
       "standardFlowEnabled": true,
       "directAccessGrantsEnabled": true,
@@ -254,7 +255,6 @@
       ],
       "webOrigins": ["http://localhost:3000", "http://localhost:3003", "+"],
       "attributes": {
-        "pkce.code.challenge.method": "S256",
         "post.logout.redirect.uris": "http://localhost:3000/*##http://localhost:3003/*"
       },
       "protocolMappers": [
