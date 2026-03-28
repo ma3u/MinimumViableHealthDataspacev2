@@ -3,7 +3,7 @@
  *
  * Validates the keycloak-realm.json configuration matches what the auth.ts
  * provider expects:
- *   - Client "health-dataspace-ui" is public (PKCE, no secret required)
+ *   - Client "health-dataspace-ui" is confidential (client secret, no PKCE)
  *   - Default client scopes include "profile" and "email"
  *   - Three health dataspace users exist with correct roles
  *   - Redirect URIs match the NEXTAUTH_URL callback path
@@ -110,12 +110,12 @@ describe("Keycloak realm configuration", () => {
       expect(client).toBeDefined();
     });
 
-    it("should be a public client (PKCE, no secret)", () => {
-      expect(client.publicClient).toBe(true);
+    it("should be a confidential client (client secret, not public)", () => {
+      expect(client.publicClient).toBe(false);
     });
 
-    it("should NOT have a client secret (public client)", () => {
-      expect(client.secret).toBeUndefined();
+    it("should have a client secret configured", () => {
+      expect(client.secret).toBe("health-dataspace-ui-secret");
     });
 
     it("should have standard flow enabled (authorization code)", () => {
@@ -126,8 +126,8 @@ describe("Keycloak realm configuration", () => {
       expect(client.directAccessGrantsEnabled).toBe(true);
     });
 
-    it("should have PKCE S256 configured", () => {
-      expect(client.attributes?.["pkce.code.challenge.method"]).toBe("S256");
+    it("should NOT have PKCE configured (confidential client uses secret)", () => {
+      expect(client.attributes?.["pkce.code.challenge.method"]).toBeUndefined();
     });
 
     it("should have correct redirect URIs for NextAuth callback", () => {
