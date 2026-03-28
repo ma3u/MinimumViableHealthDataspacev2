@@ -45,9 +45,10 @@ test.describe("Sign-in — persona reference cards", () => {
       timeout: T,
     });
     await expect(page.getByText("MedReg DE")).toBeVisible({ timeout: T });
-    await expect(page.getByText("Limburg Medical Centre")).toBeVisible({
-      timeout: T,
-    });
+    // exact: true avoids matching "Limburg Medical Centre (patient)" on the patient2 card
+    await expect(
+      page.getByText("Limburg Medical Centre", { exact: true }).first(),
+    ).toBeVisible({ timeout: T });
   });
 
   test("shows role labels on persona cards", async ({ page }) => {
@@ -117,25 +118,20 @@ test.describe("Graph page — public access & persona selector", () => {
     await expect(page.getByText("View as")).toBeVisible({ timeout: T });
   });
 
-  test("shows all 6 persona options in sidebar", async ({ page }) => {
+  test("shows default persona option in sidebar (unauthenticated)", async ({
+    page,
+  }) => {
     await page.goto("/graph");
-    // "Researcher overview" appears in both the button and the loading text — use first
+    // Unauthenticated users see only the default "Researcher overview" persona.
+    // All 6 options are only visible to EDC_ADMIN sessions.
     await expect(page.getByText("Researcher overview").first()).toBeVisible({
       timeout: T,
     });
-    await expect(page.getByText("Trust Center operator").first()).toBeVisible({
-      timeout: T,
-    });
+  });
+
+  test("shows hospital persona option via URL param", async ({ page }) => {
+    await page.goto("/graph?persona=hospital");
     await expect(page.getByText("Hospital / Data Holder").first()).toBeVisible({
-      timeout: T,
-    });
-    await expect(page.getByText("Researcher / Data User").first()).toBeVisible({
-      timeout: T,
-    });
-    await expect(page.getByText("EDC / Dataspace Admin").first()).toBeVisible({
-      timeout: T,
-    });
-    await expect(page.getByText("HDAB Authority").first()).toBeVisible({
       timeout: T,
     });
   });
@@ -170,21 +166,23 @@ test.describe("Graph page — public access & persona selector", () => {
     await expect(page.getByText("Validate graph")).toBeVisible({ timeout: T });
   });
 
-  test("clicking hospital persona shows description", async ({ page }) => {
-    await page.goto("/graph");
-    await page.getByText("Hospital / Data Holder").click();
+  test("hospital persona shows description question", async ({ page }) => {
+    // Use ?persona=hospital so the hospital persona button is rendered in the sidebar
+    await page.goto("/graph?persona=hospital");
     await expect(
       page.getByText(/Who has approved access to my data/i),
     ).toBeVisible({ timeout: T });
   });
 
-  test("clicking HDAB persona shows EHDS article", async ({ page }) => {
-    await page.goto("/graph");
+  test("HDAB persona shows EHDS article badge", async ({ page }) => {
+    // Use ?persona=hdab so the HDAB persona button (with Art. 45–53) is rendered
+    await page.goto("/graph?persona=hdab");
     await expect(page.getByText("Art. 45–53")).toBeVisible({ timeout: T });
   });
 
-  test("trust center persona shows EHDS art 50/51", async ({ page }) => {
-    await page.goto("/graph");
+  test("trust center persona shows EHDS art 50/51 badge", async ({ page }) => {
+    // Use ?persona=trust-center so the Trust Center button (with Art. 50/51) is rendered
+    await page.goto("/graph?persona=trust-center");
     await expect(page.getByText("Art. 50/51")).toBeVisible({ timeout: T });
   });
 });
