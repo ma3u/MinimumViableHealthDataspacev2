@@ -1,7 +1,22 @@
+import { getServerSession } from "next-auth/next";
 import { NextRequest, NextResponse } from "next/server";
 import { edcClient, EDC_CONTEXT } from "@/lib/edc";
 import { promises as fs } from "fs";
 import path from "path";
+
+import { authOptions } from "@/lib/auth";
+
+async function requireAdmin(): Promise<NextResponse | null> {
+  const session = await getServerSession(authOptions);
+  const roles = (session as { roles?: string[] } | null)?.roles ?? [];
+  if (!session) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  if (!roles.includes("EDC_ADMIN")) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+  return null;
+}
 
 export const dynamic = "force-dynamic";
 
@@ -33,8 +48,9 @@ async function neo4jCypher(
   });
   if (!res.ok) throw new Error(`Neo4j HTTP API error: ${res.status}`);
   const data = await res.json();
-  if (data.errors?.length > 0)
+  if (data.errors?.length > 0) {
     throw new Error(`Cypher error: ${JSON.stringify(data.errors)}`);
+  }
   return data.results;
 }
 
@@ -43,6 +59,9 @@ async function neo4jCypher(
  * Attempts EDC-V management API first; falls back to Neo4j if offline.
  */
 export async function GET(request: NextRequest) {
+  const authError = await requireAdmin();
+  if (authError) return authError;
+
   const participantId = request.nextUrl.searchParams.get("participantId");
 
   try {
@@ -138,6 +157,9 @@ export async function GET(request: NextRequest) {
  * Attempts EDC-V first; on failure stores the policy in Neo4j as OdrlPolicy node.
  */
 export async function POST(request: NextRequest) {
+  const authError = await requireAdmin();
+  if (authError) return authError;
+
   try {
     const body = await request.json();
     const { participantId, policy } = body;

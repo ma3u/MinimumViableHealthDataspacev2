@@ -1,5 +1,8 @@
+import { getServerSession } from "next-auth/next";
 import { NextResponse } from "next/server";
 import { runQuery } from "@/lib/neo4j";
+
+import { authOptions } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
@@ -16,6 +19,15 @@ export const dynamic = "force-dynamic";
  *  - Personalised medical recommendations based on relevant findings
  */
 export async function GET(req: Request) {
+  const session = await getServerSession(authOptions);
+  const roles = (session as { roles?: string[] } | null)?.roles ?? [];
+  if (!session) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  if (!roles.includes("PATIENT") && !roles.includes("EDC_ADMIN")) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
   const { searchParams } = new URL(req.url);
   const patientId = searchParams.get("patientId");
 

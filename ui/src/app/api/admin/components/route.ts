@@ -1,6 +1,9 @@
+import { getServerSession } from "next-auth/next";
 import { NextResponse } from "next/server";
 import http from "node:http";
 import { edcClient } from "@/lib/edc";
+
+import { authOptions } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
@@ -243,6 +246,15 @@ interface ParticipantInfo {
 // ---------------------------------------------------------------------------
 
 export async function GET() {
+  const session = await getServerSession(authOptions);
+  const roles = (session as { roles?: string[] } | null)?.roles ?? [];
+  if (!session) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  if (!roles.includes("EDC_ADMIN")) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
   const components: ComponentInfo[] = [];
   const participants: ParticipantInfo[] = [];
   let dockerAvailable = false;

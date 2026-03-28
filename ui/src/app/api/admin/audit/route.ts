@@ -1,6 +1,22 @@
+import { getServerSession } from "next-auth/next";
 import { NextRequest, NextResponse } from "next/server";
 
+import { authOptions } from "@/lib/auth";
+
 export const dynamic = "force-dynamic";
+
+/** Require an authenticated session with EDC_ADMIN role (BSI C5 IAM-01 / OWASP A01). */
+async function requireAdmin(): Promise<NextResponse | null> {
+  const session = await getServerSession(authOptions);
+  const roles = (session as { roles?: string[] } | null)?.roles ?? [];
+  if (!session) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  if (!roles.includes("EDC_ADMIN")) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+  return null;
+}
 
 const NEO4J_URL =
   process.env.NEO4J_URI ||
@@ -51,8 +67,9 @@ function buildWhere(
     params.filterProviderDid = f.providerDid;
   }
   if (f.crossBorder === "true") conditions.push(`${alias}.crossBorder = true`);
-  if (f.crossBorder === "false")
+  if (f.crossBorder === "false") {
     conditions.push(`${alias}.crossBorder = false`);
+  }
 
   const clause =
     conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
@@ -109,6 +126,9 @@ async function runCypher(
  *   contractId   – (accesslogs only) filter by contract ID
  */
 export async function GET(request: NextRequest) {
+  const authError = await requireAdmin();
+  if (authError) return authError;
+
   const sp = request.nextUrl.searchParams;
   const type = sp.get("type") || "all";
   const limit = Math.min(parseInt(sp.get("limit") || "50", 10), 200);
