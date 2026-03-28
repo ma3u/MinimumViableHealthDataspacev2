@@ -119,6 +119,44 @@ jobs:
           echo '```' >> $GITHUB_STEP_SUMMARY
 
   # -----------------------------------------------------------------------
+  # Dependency Vulnerability Audit (BSI C5 DEV-05 / OWASP A06)
+  # -----------------------------------------------------------------------
+  dependency-audit:
+    name: Dependency Audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: ./ui/package-lock.json
+
+      - name: Audit UI dependencies
+        working-directory: ./ui
+        run: npm audit --audit-level=high
+
+      - name: Audit Neo4j proxy dependencies
+        working-directory: ./services/neo4j-proxy
+        # Use --omit=dev to audit only production dependencies for the proxy
+        run: npm audit --audit-level=high --omit=dev
+        continue-on-error: true
+
+      - name: Audit summary
+        if: always()
+        run: |
+          echo "## Dependency Audit" >> $GITHUB_STEP_SUMMARY
+          echo "| Package | Severity |" >> $GITHUB_STEP_SUMMARY
+          echo "| --- | --- |" >> $GITHUB_STEP_SUMMARY
+          cd ui && npm audit --json 2>/dev/null | \
+            node -e "const d=JSON.parse(require('fs').readFileSync('/dev/stdin','utf8'));
+            Object.values(d.vulnerabilities||{}).forEach(v=>
+              process.stdout.write('| '+v.name+' | '+v.severity+' |\n')
+            )" >> $GITHUB_STEP_SUMMARY || true
+
+  # -----------------------------------------------------------------------
   # Lint Check
   # -----------------------------------------------------------------------
   lint:
