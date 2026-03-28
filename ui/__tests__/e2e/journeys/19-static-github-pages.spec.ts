@@ -504,8 +504,12 @@ test.describe("S · Static demo data completeness", () => {
     page,
   }) => {
     await page.goto("/demo");
-    await expect(page.getByText(/EHDS Art\./i)).toBeVisible({ timeout: T });
-    await expect(page.getByText(/GDPR Art\./i)).toBeVisible({ timeout: T });
+    await expect(page.getByText(/EHDS Art\./i).first()).toBeVisible({
+      timeout: T,
+    });
+    await expect(page.getByText(/GDPR Art\./i).first()).toBeVisible({
+      timeout: T,
+    });
   });
 
   test("J259 — patient My Health nav group contains Profile, Insights, Research links", async ({
