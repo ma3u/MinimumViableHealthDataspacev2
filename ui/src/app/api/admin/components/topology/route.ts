@@ -1,6 +1,9 @@
+import { getServerSession } from "next-auth/next";
 import { NextResponse } from "next/server";
 import http from "node:http";
 import { edcClient } from "@/lib/edc";
+
+import { authOptions } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
@@ -269,8 +272,9 @@ function deriveSeverity(
   memMB: number,
   limitMB: number,
 ): Severity {
-  if (status === "unhealthy" || status === "stopped" || status === "exited")
+  if (status === "unhealthy" || status === "stopped" || status === "exited") {
     return "critical";
+  }
   if (status === "starting") return "warning";
   if (cpu > 80) return "warning";
   if (limitMB > 0 && memMB / limitMB > 0.9) return "warning";
@@ -302,8 +306,9 @@ async function resolveContainer(
   const c = containers.find((c) =>
     c.Names.some((n) => n === `/${containerName}`),
   );
-  if (!c)
+  if (!c) {
     return { status: "stopped", cpu: 0, memMB: 0, memLimitMB: 0, uptime: "—" };
+  }
 
   let status = "running";
   let uptime = "—";
@@ -341,6 +346,15 @@ async function resolveContainer(
 // ---------------------------------------------------------------------------
 
 export async function GET() {
+  const session = await getServerSession(authOptions);
+  const roles = (session as { roles?: string[] } | null)?.roles ?? [];
+  if (!session) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  if (!roles.includes("EDC_ADMIN")) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
   let dockerAvailable = false;
   let containers: DockerContainer[] = [];
 
