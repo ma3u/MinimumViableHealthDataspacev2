@@ -19,24 +19,44 @@ interface AuditFilters {
 }
 
 /**
- * Build a Cypher WHERE clause from the active filters.
+ * Build a parameterised Cypher WHERE clause from the active filters.
+ * All user-supplied values are passed as $params — never interpolated into
+ * the query string — to prevent Cypher injection (OWASP A03 / BSI C5 DEV-07).
  */
-function buildWhere(alias: string, f: AuditFilters): string {
-  const safe = (v: string) => v.replace(/\\/g, "\\\\").replace(/'/g, "\\'");
+function buildWhere(
+  alias: string,
+  f: AuditFilters,
+): { clause: string; params: Record<string, unknown> } {
   const conditions: string[] = [];
-  if (f.status) conditions.push(`${alias}.status = '${safe(f.status)}'`);
-  if (f.dateFrom)
-    conditions.push(`${alias}.timestamp >= '${safe(f.dateFrom)}'`);
-  if (f.dateTo)
-    conditions.push(`${alias}.timestamp <= '${safe(f.dateTo)}T23:59:59Z'`);
-  if (f.consumerDid)
-    conditions.push(`${alias}.consumerDid = '${safe(f.consumerDid)}'`);
-  if (f.providerDid)
-    conditions.push(`${alias}.providerDid = '${safe(f.providerDid)}'`);
+  const params: Record<string, unknown> = {};
+
+  if (f.status) {
+    conditions.push(`${alias}.status = $filterStatus`);
+    params.filterStatus = f.status;
+  }
+  if (f.dateFrom) {
+    conditions.push(`${alias}.timestamp >= $filterDateFrom`);
+    params.filterDateFrom = f.dateFrom;
+  }
+  if (f.dateTo) {
+    conditions.push(`${alias}.timestamp <= $filterDateTo`);
+    params.filterDateTo = f.dateTo + "T23:59:59Z";
+  }
+  if (f.consumerDid) {
+    conditions.push(`${alias}.consumerDid = $filterConsumerDid`);
+    params.filterConsumerDid = f.consumerDid;
+  }
+  if (f.providerDid) {
+    conditions.push(`${alias}.providerDid = $filterProviderDid`);
+    params.filterProviderDid = f.providerDid;
+  }
   if (f.crossBorder === "true") conditions.push(`${alias}.crossBorder = true`);
   if (f.crossBorder === "false")
     conditions.push(`${alias}.crossBorder = false`);
-  return conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
+
+  const clause =
+    conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
+  return { clause, params };
 }
 
 /**
@@ -136,7 +156,7 @@ export async function GET(request: NextRequest) {
 
     // ── Data Transfers ────────────────────────────────────────────────────
     if (type === "all" || type === "transfers") {
-      const where = buildWhere("t", filters);
+      const { clause: where, params: filterParams } = buildWhere("t", filters);
       const transfers = await runCypher(
         `MATCH (t:DataTransfer)
          ${where}
@@ -160,7 +180,7 @@ export async function GET(request: NextRequest) {
          } AS transfer
          ORDER BY transfer.timestamp DESC
          LIMIT $limit`,
-        { limit },
+        { limit, ...filterParams },
       );
       results.transfers =
         transfers[0]?.data?.map((r: { row: unknown[] }) => r.row[0]) || [];
@@ -168,7 +188,7 @@ export async function GET(request: NextRequest) {
 
     // ── Contract Negotiations ─────────────────────────────────────────────
     if (type === "all" || type === "negotiations") {
-      const where = buildWhere("n", filters);
+      const { clause: where, params: filterParams } = buildWhere("n", filters);
       const negotiations = await runCypher(
         `MATCH (n:ContractNegotiation)
          ${where}
@@ -194,7 +214,7 @@ export async function GET(request: NextRequest) {
          } AS negotiation
          ORDER BY negotiation.timestamp DESC
          LIMIT $limit`,
-        { limit },
+        { limit, ...filterParams },
       );
       results.negotiations =
         negotiations[0]?.data?.map((r: { row: unknown[] }) => r.row[0]) || [];
@@ -202,16 +222,22 @@ export async function GET(request: NextRequest) {
 
     // ── Access Logs ───────────────────────────────────────────────────────
     if (type === "accesslogs") {
-      const safe = (v: string) => v.replace(/'/g, "\\'");
-      const consumerFilter = filters.consumerDid
-        ? `AND a.consumerDid = '${safe(filters.consumerDid)}'`
-        : "";
-      const contractFilter = sp.get("contractId")
-        ? `AND a.contractId = '${safe(sp.get("contractId")!)}'`
-        : "";
+      const logParams: Record<string, unknown> = { limit };
+      const logConditions: string[] = [];
+      if (filters.consumerDid) {
+        logConditions.push("a.consumerDid = $filterConsumerDid");
+        logParams.filterConsumerDid = filters.consumerDid;
+      }
+      const contractId = sp.get("contractId");
+      if (contractId) {
+        logConditions.push("a.contractId = $filterContractId");
+        logParams.filterContractId = contractId;
+      }
+      const logWhere =
+        logConditions.length > 0 ? `WHERE ${logConditions.join(" AND ")}` : "";
       const logs = await runCypher(
         `MATCH (a:DataAccessLog)
-         WHERE 1=1 ${consumerFilter} ${contractFilter}
+         ${logWhere}
          OPTIONAL MATCH (consumer:Participant {participantId: a.consumerDid})
          OPTIONAL MATCH (provider:Participant {participantId: a.providerDid})
          RETURN a {
@@ -223,7 +249,7 @@ export async function GET(request: NextRequest) {
          } AS log
          ORDER BY a.accessedAt DESC
          LIMIT $limit`,
-        { limit },
+        logParams,
       );
       results.accesslogs =
         logs[0]?.data?.map((r: { row: unknown[] }) => r.row[0]) || [];

@@ -15,6 +15,52 @@ const nextConfig = {
   ...(isStaticExport && {
     basePath: "/MinimumViableHealthDataspacev2",
   }),
+  // Security headers (BSI C5 DEV-07 / OWASP A05) — skipped for static export
+  // because GitHub Pages serves pre-built HTML without a Next.js server.
+  ...(!isStaticExport && {
+    async headers() {
+      return [
+        {
+          source: "/(.*)",
+          headers: [
+            {
+              key: "X-Frame-Options",
+              value: "DENY",
+            },
+            {
+              key: "X-Content-Type-Options",
+              value: "nosniff",
+            },
+            {
+              key: "Referrer-Policy",
+              value: "strict-origin-when-cross-origin",
+            },
+            {
+              key: "Permissions-Policy",
+              value: "camera=(), microphone=(), geolocation=()",
+            },
+            {
+              key: "Content-Security-Policy",
+              value: [
+                "default-src 'self'",
+                // Next.js inline scripts (nonce-less dev mode)
+                "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+                "style-src 'self' 'unsafe-inline'",
+                "img-src 'self' data: blob:",
+                // Neo4j Browser, Keycloak (local dev only)
+                "connect-src 'self' http://localhost:7474 http://localhost:8080 ws://localhost:*",
+                "font-src 'self'",
+                "frame-src 'none'",
+                "object-src 'none'",
+                "base-uri 'self'",
+                "form-action 'self'",
+              ].join("; "),
+            },
+          ],
+        },
+      ];
+    },
+  }),
   // Serve static HTML reports that live in public/ subdirectories
   // (rewrites are not supported with output: "export")
   ...(!isStaticExport && {
