@@ -82,10 +82,24 @@ spec:
       labels:
         app: health-dataspace-ui
     spec:
+      # Pod-level security context (KSV-0118 / BSI C5 DEV-07)
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
       containers:
         - name: ui
           image: health-dataspace-ui:latest
           imagePullPolicy: IfNotPresent
+          # Container-level security context (KSV-0014 / DS-0002)
+          securityContext:
+            readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
           ports:
             - containerPort: 3000
               name: http
@@ -94,6 +108,13 @@ spec:
                 name: health-dataspace-config
             - secretRef:
                 name: health-dataspace-secrets
+          # Writable volumes required when readOnlyRootFilesystem=true
+          # Next.js standalone server writes to /tmp and .next/cache
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+            - name: next-cache
+              mountPath: /app/.next/cache
           resources:
             requests:
               cpu: "100m"
@@ -115,6 +136,12 @@ spec:
             initialDelaySeconds: 30
             periodSeconds: 30
             failureThreshold: 3
+      # emptyDir volumes to satisfy readOnlyRootFilesystem (KSV-0014)
+      volumes:
+        - name: tmp
+          emptyDir: {}
+        - name: next-cache
+          emptyDir: {}
 
 ---
 apiVersion: v1

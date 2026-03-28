@@ -119,6 +119,40 @@ jobs:
           echo '```' >> $GITHUB_STEP_SUMMARY
 
   # -----------------------------------------------------------------------
+  # Secret Scan — gitleaks (BSI C5 DEV-08)
+  # Scans git history and staged files for accidentally committed secrets.
+  # Uses the official gitleaks binary (not the GitHub Action, which pins
+  # to a specific version via SHA for supply-chain safety).
+  # -----------------------------------------------------------------------
+  secret-scan:
+    name: Secret Scan (gitleaks)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # full history needed for gitleaks --log-opts
+
+      - name: Install gitleaks
+        run: |
+          GITLEAKS_VERSION="8.27.2"
+          curl -sfL "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz" \
+            -o gitleaks.tar.gz
+          curl -sfL "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_checksums.txt" \
+            -o gitleaks_checksums.txt
+          grep "gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz" gitleaks_checksums.txt | sha256sum -c -
+          tar -xzf gitleaks.tar.gz gitleaks
+          sudo mv gitleaks /usr/local/bin/gitleaks
+
+      - name: Scan git history for secrets
+        run: gitleaks detect --source . --log-opts="HEAD" --exit-code 1
+
+      - name: Secret scan summary
+        if: always()
+        run: |
+          echo "## Secret Scan (gitleaks)" >> $GITHUB_STEP_SUMMARY
+          gitleaks detect --source . --log-opts="HEAD" --no-banner 2>&1 >> $GITHUB_STEP_SUMMARY || true
+
+  # -----------------------------------------------------------------------
   # Dependency Vulnerability Audit (BSI C5 DEV-05 / OWASP A06)
   # -----------------------------------------------------------------------
   dependency-audit:
