@@ -2225,39 +2225,47 @@ New exports in `src/lib/auth.ts`:
   field
 - `filterGroup()` removes groups/items the user's role doesn't allow
 - Anonymous users see: Explore (partial), Docs — all public items
-- Authenticated users additionally see: Get Started, Exchange (negotiate,
-  tasks, transfer)
+- Patients (citizens) see: Explore (public items), My Health, Docs — no
+  participant features (Get Started, Exchange, Governance, Manage)
+- Dataspace participants see role-specific items from all groups
 
 **Menu items per role:**
 
-| Route               | Public | AUTH | DATA_HOLDER | DATA_USER | HDAB | EDC_ADMIN |
-| ------------------- | ------ | ---- | ----------- | --------- | ---- | --------- |
-| `/graph`            | ✅     | ✅   | ✅          | ✅        | ✅   | ✅        |
-| `/catalog`          | ✅     | ✅   | ✅          | ✅        | ✅   | ✅        |
-| `/catalog/editor`   | —      | —    | ✅          | —         | —    | ✅        |
-| `/patient`          | ✅     | ✅   | ✅          | ✅        | ✅   | ✅        |
-| `/analytics`        | —      | —    | —           | ✅        | ✅   | ✅        |
-| `/query`            | —      | —    | —           | ✅        | ✅   | ✅        |
-| `/eehrxf`           | ✅     | ✅   | ✅          | ✅        | ✅   | ✅        |
-| `/compliance`       | —      | —    | —           | —         | ✅   | ✅        |
-| `/compliance/tck`   | —      | —    | —           | —         | ✅   | ✅        |
-| `/credentials`      | —      | ✅   | ✅          | ✅        | ✅   | ✅        |
-| `/data/share`       | —      | —    | ✅          | —         | —    | ✅        |
-| `/data/discover`    | —      | —    | —           | ✅        | ✅   | ✅        |
-| `/negotiate`        | —      | ✅   | ✅          | ✅        | —    | ✅        |
-| `/tasks`            | —      | ✅   | ✅          | ✅        | ✅   | ✅        |
-| `/data/transfer`    | —      | ✅   | ✅          | ✅        | ✅   | ✅        |
-| `/admin`            | —      | —    | —           | —         | —    | ✅        |
-| `/admin/components` | —      | —    | —           | —         | —    | ✅        |
-| `/admin/tenants`    | —      | —    | —           | —         | —    | ✅        |
-| `/admin/policies`   | —      | —    | —           | —         | ✅   | ✅        |
-| `/admin/audit`      | —      | —    | —           | —         | ✅   | ✅        |
-| `/onboarding`       | —      | ✅   | ✅          | ✅        | ✅   | ✅        |
-| `/settings`         | —      | ✅   | ✅          | ✅        | ✅   | ✅        |
-| `/docs`             | ✅     | ✅   | ✅          | ✅        | ✅   | ✅        |
+| Route                    | Public | PATIENT | DATA_HOLDER | DATA_USER | HDAB | EDC_ADMIN |
+| ------------------------ | ------ | ------- | ----------- | --------- | ---- | --------- |
+| `/graph`                 | ✅     | ✅      | ✅          | ✅        | ✅   | ✅        |
+| `/graph?persona=patient` | —      | ✅      | —           | —         | —    | —         |
+| `/catalog`               | ✅     | ✅      | ✅          | ✅        | ✅   | ✅        |
+| `/catalog/editor`        | —      | —       | ✅          | —         | —    | ✅        |
+| `/patient`               | ✅     | ✅      | ✅          | ✅        | ✅   | ✅        |
+| `/patient/profile`       | —      | ✅      | —           | —         | —    | —         |
+| `/patient/research`      | —      | ✅      | —           | —         | —    | —         |
+| `/patient/insights`      | —      | ✅      | —           | —         | —    | —         |
+| `/analytics`             | —      | —       | —           | ✅        | ✅   | ✅        |
+| `/query`                 | —      | —       | —           | ✅        | ✅   | ✅        |
+| `/eehrxf`                | ✅     | ✅      | ✅          | ✅        | ✅   | ✅        |
+| `/compliance`            | —      | —       | —           | —         | ✅   | ✅        |
+| `/compliance/tck`        | —      | —       | —           | —         | ✅   | ✅        |
+| `/credentials`           | —      | —       | ✅          | ✅        | ✅   | ✅        |
+| `/data/share`            | —      | —       | ✅          | —         | —    | ✅        |
+| `/data/discover`         | —      | —       | —           | ✅        | ✅   | ✅        |
+| `/negotiate`             | —      | —       | ✅          | ✅        | —    | ✅        |
+| `/tasks`                 | —      | —       | ✅          | ✅        | ✅   | ✅        |
+| `/data/transfer`         | —      | —       | ✅          | ✅        | ✅   | ✅        |
+| `/admin`                 | —      | —       | —           | —         | —    | ✅        |
+| `/admin/components`      | —      | —       | —           | —         | —    | ✅        |
+| `/admin/tenants`         | —      | —       | —           | —         | —    | ✅        |
+| `/admin/policies`        | —      | —       | —           | —         | ✅   | ✅        |
+| `/admin/audit`           | —      | —       | —           | —         | ✅   | ✅        |
+| `/onboarding`            | —      | —       | ✅          | ✅        | ✅   | ✅        |
+| `/settings`              | —      | —       | ✅          | ✅        | ✅   | ✅        |
+| `/docs`                  | ✅     | ✅      | ✅          | ✅        | ✅   | ✅        |
 
 Notes:
 
+- **Patients are citizens, not dataspace participants** — EHDS Chapter II
+  Art. 3-12 / GDPR Art. 15-22 gives them data-subject rights but not
+  participant capabilities (onboarding, data exchange, contract negotiation)
 - `DATA_HOLDER` / `DATA_USER` are derived from `EDC_USER_PARTICIPANT` + username
   pattern when explicit Keycloak sub-roles are absent (demo stack fallback)
 - Route protection (redirects) remain in `middleware.ts` as before
@@ -2355,9 +2363,9 @@ New demo users (to be added to the EDCV realm):
 | Route                    | Public | PATIENT | Other roles |
 | ------------------------ | ------ | ------- | ----------- |
 | `/patient`               | ✅     | ✅      | ✅          |
-| `/patient/profile`       | —      | ✅      | EDC_ADMIN   |
-| `/patient/research`      | —      | ✅      | EDC_ADMIN   |
-| `/patient/insights`      | —      | ✅      | EDC_ADMIN   |
+| `/patient/profile`       | —      | ✅      | —           |
+| `/patient/research`      | —      | ✅      | —           |
+| `/patient/insights`      | —      | ✅      | —           |
 | `/graph?persona=patient` | ✅     | ✅      | ✅          |
 | `/catalog` (read-only)   | ✅     | ✅      | ✅          |
 | `/docs`                  | ✅     | ✅      | ✅          |
@@ -2579,20 +2587,23 @@ shows the true total (e.g. 232) not the capped 20 shown in the table.
 - `login_hint` removed from `signIn()` call — Keycloak always prompts for
   password when switching personas (prevents session hijacking in demos)
 
-#### 21g: Graph VIEW AS — role-filtered persona list ✅
+#### 21g: Graph persona auto-derivation (VIEW AS removed) ✅
 
-The "View as" panel now filters by the logged-in user's session:
+The manual "View as" persona selector has been removed. The graph page now
+auto-derives the active persona from the user's session role via
+`derivePersonaId()` from `@/lib/auth`. URL override (`?persona=X`) still works
+for demos and direct links.
 
-| Role                    | Visible personas            |
-| ----------------------- | --------------------------- |
-| `EDC_ADMIN`             | All 7 personas (unchanged)  |
-| `PATIENT`               | Patient / Citizen only      |
-| `DATA_HOLDER`           | Hospital / Data Holder only |
-| `DATA_USER`             | Researcher / Data User only |
-| `HDAB_AUTHORITY`        | HDAB Authority only         |
-| `TRUST_CENTER_OPERATOR` | Trust Center Operator only  |
+| Role                    | Auto-derived persona |
+| ----------------------- | -------------------- |
+| `EDC_ADMIN`             | edc-admin            |
+| `PATIENT`               | patient              |
+| `DATA_HOLDER`           | hospital             |
+| `DATA_USER`             | researcher           |
+| `HDAB_AUTHORITY`        | hdab                 |
+| `TRUST_CENTER_OPERATOR` | trust-center         |
 
-Session read via `useSession()` + `derivePersonaId()` from `@/lib/auth`.
+A read-only persona indicator badge replaces the old selector panel.
 
 #### 21h: README demo users table updated ✅
 

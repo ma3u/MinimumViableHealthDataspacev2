@@ -66,13 +66,45 @@ interface NavGroup {
 }
 
 // ── Cluster 1: Get Started ─────────────────────────────────────────────────────
+// Patients are citizens, not dataspace participants — no onboarding or settings
 const getStartedGroup: NavGroup = {
   label: "Get Started",
   icon: UserPlus,
-  roles: "AUTH",
+  roles: [
+    "EDC_ADMIN",
+    "DATA_HOLDER",
+    "DATA_USER",
+    "HDAB_AUTHORITY",
+    "TRUST_CENTER_OPERATOR",
+    "EDC_USER_PARTICIPANT",
+  ],
   links: [
-    { href: "/onboarding", label: "Onboarding", icon: UserPlus, roles: "AUTH" },
-    { href: "/settings", label: "Settings", icon: Settings, roles: "AUTH" },
+    {
+      href: "/onboarding",
+      label: "Onboarding",
+      icon: UserPlus,
+      roles: [
+        "EDC_ADMIN",
+        "DATA_HOLDER",
+        "DATA_USER",
+        "HDAB_AUTHORITY",
+        "TRUST_CENTER_OPERATOR",
+        "EDC_USER_PARTICIPANT",
+      ],
+    },
+    {
+      href: "/settings",
+      label: "Settings",
+      icon: Settings,
+      roles: [
+        "EDC_ADMIN",
+        "DATA_HOLDER",
+        "DATA_USER",
+        "HDAB_AUTHORITY",
+        "TRUST_CENTER_OPERATOR",
+        "EDC_USER_PARTICIPANT",
+      ],
+    },
   ],
 };
 
@@ -134,16 +166,31 @@ const governanceGroup: NavGroup = {
       href: "/credentials",
       label: "Credentials",
       icon: FileKey2,
-      roles: "AUTH",
+      roles: [
+        "EDC_ADMIN",
+        "DATA_HOLDER",
+        "DATA_USER",
+        "HDAB_AUTHORITY",
+        "TRUST_CENTER_OPERATOR",
+        "EDC_USER_PARTICIPANT",
+      ],
     },
   ],
 };
 
 // ── Cluster 4: Exchange ───────────────────────────────────────────────────────
+// Patients are citizens, not active dataspace participants — no data exchange
 const exchangeGroup: NavGroup = {
   label: "Exchange",
   icon: ArrowRightLeft,
-  roles: "AUTH",
+  roles: [
+    "EDC_ADMIN",
+    "DATA_HOLDER",
+    "DATA_USER",
+    "HDAB_AUTHORITY",
+    "TRUST_CENTER_OPERATOR",
+    "EDC_USER_PARTICIPANT",
+  ],
   links: [
     {
       href: "/data/share",
@@ -161,53 +208,74 @@ const exchangeGroup: NavGroup = {
       href: "/negotiate",
       label: "Negotiate",
       icon: FileSignature,
-      roles: "AUTH",
+      roles: [
+        "EDC_ADMIN",
+        "DATA_HOLDER",
+        "DATA_USER",
+        "HDAB_AUTHORITY",
+        "TRUST_CENTER_OPERATOR",
+        "EDC_USER_PARTICIPANT",
+      ],
     },
     {
       href: "/tasks",
       label: "Tasks",
       icon: ClipboardList,
-      roles: "AUTH",
+      roles: [
+        "EDC_ADMIN",
+        "DATA_HOLDER",
+        "DATA_USER",
+        "HDAB_AUTHORITY",
+        "TRUST_CENTER_OPERATOR",
+        "EDC_USER_PARTICIPANT",
+      ],
     },
     {
       href: "/data/transfer",
       label: "Transfer",
       icon: ArrowRightLeft,
-      roles: "AUTH",
+      roles: [
+        "EDC_ADMIN",
+        "DATA_HOLDER",
+        "DATA_USER",
+        "HDAB_AUTHORITY",
+        "TRUST_CENTER_OPERATOR",
+        "EDC_USER_PARTICIPANT",
+      ],
     },
   ],
 };
 
-// ── Cluster 4b: My Health (PATIENT role) ─────────────────────────────────────
+// ── Cluster 4b: My Health (PATIENT role only) ────────────────────────────────
 // EHDS Chapter II Art. 3-12 / GDPR Art. 15-22 — patient primary-use rights
 const myHealthGroup: NavGroup = {
   label: "My Health",
   icon: Heart,
-  roles: ["PATIENT", "EDC_ADMIN"],
+  roles: ["PATIENT"],
   links: [
     {
       href: "/patient",
       label: "My Health Records",
       icon: User,
-      roles: ["PATIENT", "EDC_ADMIN"],
+      roles: ["PATIENT"],
     },
     {
       href: "/patient/profile",
       label: "Health Profile & Risks",
       icon: Heart,
-      roles: ["PATIENT", "EDC_ADMIN"],
+      roles: ["PATIENT"],
     },
     {
       href: "/patient/research",
       label: "Research Programs",
       icon: FlaskConical,
-      roles: ["PATIENT", "EDC_ADMIN"],
+      roles: ["PATIENT"],
     },
     {
       href: "/patient/insights",
       label: "Research Insights",
       icon: Lightbulb,
-      roles: ["PATIENT", "EDC_ADMIN"],
+      roles: ["PATIENT"],
     },
   ],
 };

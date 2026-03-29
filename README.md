@@ -159,20 +159,23 @@ Sign in at `http://localhost:3003/auth/signin` — password equals username in l
 ### Menu Items per Role
 
 Navigation is filtered by role — users only see items relevant to their function.
+Patients are **citizens**, not active dataspace participants (EHDS Chapter II Art. 3-12).
+They cannot onboard, exchange data, or access participant settings — only their personal
+health journey (My Health group), public pages, and documentation.
 
 | Route                           | Public | Patient | Data Holder | Researcher | HDAB | EDC Admin |
 | ------------------------------- | :----: | :-----: | :---------: | :--------: | :--: | :-------: |
 | `/graph`                        |   ✅   |   ✅    |     ✅      |     ✅     |  ✅  |    ✅     |
-| `/graph?persona=patient`        |   —    |   ✅    |      —      |     —      |  —   |    ✅     |
+| `/graph?persona=patient`        |   —    |   ✅    |      —      |     —      |  —   |     —     |
 | `/catalog`                      |   ✅   |   ✅    |     ✅      |     ✅     |  ✅  |    ✅     |
 | `/catalog/editor`               |   —    |    —    |     ✅      |     —      |  —   |    ✅     |
 | `/patient`                      |   ✅   |   ✅    |     ✅      |     ✅     |  ✅  |    ✅     |
-| `/patient/profile`              |   —    |   ✅    |      —      |     —      |  —   |    ✅     |
-| `/patient/research`             |   —    |   ✅    |      —      |     —      |  —   |    ✅     |
-| `/patient/insights`             |   —    |   ✅    |      —      |     —      |  —   |    ✅     |
+| `/patient/profile`              |   —    |   ✅    |      —      |     —      |  —   |     —     |
+| `/patient/research`             |   —    |   ✅    |      —      |     —      |  —   |     —     |
+| `/patient/insights`             |   —    |   ✅    |      —      |     —      |  —   |     —     |
 | `/analytics`                    |   —    |    —    |      —      |     ✅     |  ✅  |    ✅     |
 | `/query` (NLQ)                  |   —    |    —    |      —      |     ✅     |  ✅  |    ✅     |
-| `/eehrxf`                       |   ✅   |    —    |     ✅      |     ✅     |  ✅  |    ✅     |
+| `/eehrxf`                       |   ✅   |   ✅    |     ✅      |     ✅     |  ✅  |    ✅     |
 | `/compliance`                   |   —    |    —    |      —      |     —      |  ✅  |    ✅     |
 | `/compliance/tck`               |   —    |    —    |      —      |     —      |  ✅  |    ✅     |
 | `/credentials`                  |   —    |    —    |     ✅      |     ✅     |  ✅  |    ✅     |
