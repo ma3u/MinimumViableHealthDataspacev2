@@ -1,0 +1,20 @@
+{
+  "patients": [
+    {
+      "id": "14b9ebcd-e969-3704-476b-c5897c3c8d8a",
+      "name": "Aaron697 Columbus656 Kilback373",
+      "gender": "male",
+      "birthDate": "1969-04-10"
+    }
+  ],
+  "stats": {
+    "patients": 1,
+    "encounters": 32,
+    "conditions": 14,
+    "observations": 89,
+    "medications": 7,
+    "procedures": 4
+  },
+  "timeline": [],
+  "restricted": true
+}

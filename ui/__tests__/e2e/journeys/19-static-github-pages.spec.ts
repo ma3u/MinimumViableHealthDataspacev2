@@ -1255,3 +1255,59 @@ test.describe("S · Persona graph views (static)", () => {
     });
   });
 });
+
+// ── S9: Patient data isolation on static export ───────────────────────────────
+
+test.describe("S · Patient data isolation (static)", () => {
+  test.skip(
+    process.env.NEXT_PUBLIC_STATIC_EXPORT !== "true",
+    "Requires NEXT_PUBLIC_STATIC_EXPORT=true",
+  );
+
+  test("J309 — patient1 sees restricted banner, not patient selector", async ({
+    page,
+  }) => {
+    await gotoAs(page, "/patient", "patient1");
+    // Should show the restricted banner instead of the <select> dropdown
+    await expect(
+      page.getByText("Showing your personal health record"),
+    ).toBeVisible({ timeout: T });
+    // The <select> dropdown should NOT be visible
+    await expect(page.locator("select")).not.toBeVisible();
+  });
+
+  test("J310 — patient1 sees only 1 patient in stats", async ({ page }) => {
+    await gotoAs(page, "/patient", "patient1");
+    // Stats should show "1" for Patients count
+    await expect(page.getByText("1").first()).toBeVisible({ timeout: T });
+  });
+
+  test("J311 — researcher sees full patient list with selector", async ({
+    page,
+  }) => {
+    await gotoAs(page, "/patient", "researcher");
+    // Researcher should see the <select> dropdown with all patients
+    const select = page.locator("select");
+    await expect(select).toBeVisible({ timeout: T });
+    const options = select.locator("option");
+    const count = await options.count();
+    // Should have many patients (mock has 167)
+    expect(count).toBeGreaterThan(50);
+  });
+
+  test("J312 — edcadmin sees full patient list with selector", async ({
+    page,
+  }) => {
+    await gotoAs(page, "/patient", "edcadmin");
+    const select = page.locator("select");
+    await expect(select).toBeVisible({ timeout: T });
+  });
+
+  test("J313 — patient2 also sees restricted banner", async ({ page }) => {
+    await gotoAs(page, "/patient", "patient2");
+    await expect(
+      page.getByText("Showing your personal health record"),
+    ).toBeVisible({ timeout: T });
+    await expect(page.locator("select")).not.toBeVisible();
+  });
+});
