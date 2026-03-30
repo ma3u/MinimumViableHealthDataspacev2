@@ -5,6 +5,9 @@ import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { derivePersonaId } from "@/lib/auth";
+import { useDemoPersona } from "@/lib/use-demo-persona";
+
+const IS_STATIC = process.env.NEXT_PUBLIC_STATIC_EXPORT === "true";
 import dynamic from "next/dynamic";
 import {
   Activity,
@@ -286,10 +289,14 @@ function GraphContent() {
   const urlPersona = searchParams.get("persona") as PersonaId | null;
 
   const { data: session, status: sessionStatus } = useSession();
-  const sessionRoles: string[] =
-    (session as { roles?: string[] } | null)?.roles ?? [];
-  const sessionUsername: string =
-    session?.user?.name ?? session?.user?.email ?? "";
+  // Always call useDemoPersona — hook rules require unconditional calls
+  const demoPersona = useDemoPersona();
+  const sessionRoles: string[] = IS_STATIC
+    ? [...demoPersona.roles]
+    : (session as { roles?: string[] } | null)?.roles ?? [];
+  const sessionUsername: string = IS_STATIC
+    ? demoPersona.username
+    : session?.user?.name ?? session?.user?.email ?? "";
   const sessionPersonaId = derivePersonaId(sessionRoles, sessionUsername);
 
   const [data, setData] = useState<GraphData>({ nodes: [], links: [] });
@@ -336,7 +343,7 @@ function GraphContent() {
   // Wait for session to resolve before first load — avoids double-fetch
   // (default → real persona) that causes wrong center node name
   useEffect(() => {
-    if (sessionStatus === "loading") return;
+    if (!IS_STATIC && sessionStatus === "loading") return;
     setLoading(true);
     setError(null);
     setSelected(null);
