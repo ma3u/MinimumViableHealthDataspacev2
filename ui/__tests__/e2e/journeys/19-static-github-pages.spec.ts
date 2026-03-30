@@ -979,16 +979,16 @@ test.describe("S · Researcher — analytics & explore", () => {
     await expect(page.getByText("167")).toBeVisible({ timeout: T });
   });
 
-  test("J288 — researcher Explore shows OMOP Analytics and NLQ links", async ({
+  test("J288 — researcher My Researches shows Run Analytics and Query", async ({
     page,
   }) => {
     await gotoAs(page, "/", "researcher");
     const nav = page.locator("nav");
-    await nav.getByRole("button", { name: /explore/i }).click();
-    await expect(
-      nav.getByRole("link", { name: /omop analytics/i }),
-    ).toBeVisible({ timeout: T });
-    await expect(nav.getByRole("link", { name: /nlq|federated/i })).toBeVisible(
+    await nav.getByRole("button", { name: /my researches/i }).click();
+    await expect(nav.getByRole("link", { name: /run analytics/i })).toBeVisible(
+      { timeout: T },
+    );
+    await expect(nav.getByRole("link", { name: /query.*export/i })).toBeVisible(
       { timeout: T },
     );
   });
