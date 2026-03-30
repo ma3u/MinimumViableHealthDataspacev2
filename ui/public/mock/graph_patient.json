@@ -1,0 +1,868 @@
+{
+  "nodes": [
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113639",
+      "name": "",
+      "label": "Participant",
+      "layer": 1,
+      "color": "#F97316",
+      "group": "participant",
+      "sortKey": 0,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113607",
+      "name": "AlphaKlinik Berlin",
+      "label": "Participant",
+      "layer": 1,
+      "color": "#F97316",
+      "group": "participant",
+      "sortKey": 0,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113649",
+      "name": "HealthGov (HDAB)",
+      "label": "Participant",
+      "layer": 1,
+      "color": "#F97316",
+      "group": "participant",
+      "sortKey": 0,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113611",
+      "name": "Institut de Recherche Santé",
+      "label": "Participant",
+      "layer": 1,
+      "color": "#F97316",
+      "group": "participant",
+      "sortKey": 0,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113610",
+      "name": "Limburg Medical Centre",
+      "label": "Participant",
+      "layer": 1,
+      "color": "#F97316",
+      "group": "participant",
+      "sortKey": 0,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113609",
+      "name": "MedReg DE",
+      "label": "Participant",
+      "layer": 1,
+      "color": "#F97316",
+      "group": "participant",
+      "sortKey": 0,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113608",
+      "name": "PharmaCo Research AG",
+      "label": "Participant",
+      "layer": 1,
+      "color": "#F97316",
+      "group": "participant",
+      "sortKey": 0,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113647",
+      "name": "Riverside General (CLINIC)",
+      "label": "Participant",
+      "layer": 1,
+      "color": "#F97316",
+      "group": "participant",
+      "sortKey": 0,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113648",
+      "name": "TrialCorp Research (CRO)",
+      "label": "Participant",
+      "layer": 1,
+      "color": "#F97316",
+      "group": "participant",
+      "sortKey": 0,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33179",
+      "name": "Synthea FHIR R4 Patient Cohort (2026)",
+      "label": "DataProduct",
+      "layer": 1,
+      "color": "#94A3B8",
+      "group": "governance",
+      "sortKey": 2,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:8",
+      "name": "T2D Cohort 2020-2025",
+      "label": "DataProduct",
+      "layer": 1,
+      "color": "#94A3B8",
+      "group": "governance",
+      "sortKey": 2,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113652",
+      "name": "hdab-decision-healthgov-2025-001",
+      "label": "HDABApproval",
+      "layer": 1,
+      "color": "#EC4899",
+      "group": "governance",
+      "sortKey": 5,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:11",
+      "name": "hdab-decision-medreg-2025-001",
+      "label": "HDABApproval",
+      "layer": 1,
+      "color": "#EC4899",
+      "group": "governance",
+      "sortKey": 5,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33183",
+      "name": "hdab-synthea-medreg-2026-001",
+      "label": "HDABApproval",
+      "layer": 1,
+      "color": "#EC4899",
+      "group": "governance",
+      "sortKey": 5,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113717",
+      "name": "product-synthea-fhir-r4-2026",
+      "label": "PatientConsent",
+      "layer": 1,
+      "color": "#A855F7",
+      "group": "other",
+      "sortKey": 99,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113718",
+      "name": "product-synthea-fhir-r4-2026",
+      "label": "PatientConsent",
+      "layer": 1,
+      "color": "#A855F7",
+      "group": "other",
+      "sortKey": 99,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:3306",
+      "name": "Anisha16 Grayce293 Kuvalis369",
+      "label": "Patient",
+      "layer": 3,
+      "color": "#86EFAC",
+      "group": "clinical",
+      "sortKey": 0,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:12533",
+      "name": "Bettina657 Tomeka87 Swift555",
+      "label": "Patient",
+      "layer": 3,
+      "color": "#86EFAC",
+      "group": "clinical",
+      "sortKey": 0,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:13157",
+      "name": "Brett333 Waylon572 Lynch190",
+      "label": "Patient",
+      "layer": 3,
+      "color": "#86EFAC",
+      "group": "clinical",
+      "sortKey": 0,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:16907",
+      "name": "Chantay958 Lavera253 Toy286",
+      "label": "Patient",
+      "layer": 3,
+      "color": "#86EFAC",
+      "group": "clinical",
+      "sortKey": 0,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:17541",
+      "name": "Charlie254 Reginald96 Hirthe744",
+      "label": "Patient",
+      "layer": 3,
+      "color": "#86EFAC",
+      "group": "clinical",
+      "sortKey": 0,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:24588",
+      "name": "Denver542 Riley817 Schamberger479",
+      "label": "Patient",
+      "layer": 3,
+      "color": "#86EFAC",
+      "group": "clinical",
+      "sortKey": 0,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:25232",
+      "name": "Dinah304 Pfannerstill264",
+      "label": "Patient",
+      "layer": 3,
+      "color": "#86EFAC",
+      "group": "clinical",
+      "sortKey": 0,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:26103",
+      "name": "Dona966 Rochelle550 Muller251",
+      "label": "Patient",
+      "layer": 3,
+      "color": "#86EFAC",
+      "group": "clinical",
+      "sortKey": 0,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:37808",
+      "name": "Dottie687 Abshire638",
+      "label": "Patient",
+      "layer": 3,
+      "color": "#86EFAC",
+      "group": "clinical",
+      "sortKey": 0,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:38783",
+      "name": "Eloy929 Noble66 Larkin917",
+      "label": "Patient",
+      "layer": 3,
+      "color": "#86EFAC",
+      "group": "clinical",
+      "sortKey": 0,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:39535",
+      "name": "Elwood28 Jeromy156 Herzog843",
+      "label": "Patient",
+      "layer": 3,
+      "color": "#86EFAC",
+      "group": "clinical",
+      "sortKey": 0,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:42074",
+      "name": "Hayden835 Balistreri607",
+      "label": "Patient",
+      "layer": 3,
+      "color": "#86EFAC",
+      "group": "clinical",
+      "sortKey": 0,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:45114",
+      "name": "Jayson808 Williams176 Aufderhar910",
+      "label": "Patient",
+      "layer": 3,
+      "color": "#86EFAC",
+      "group": "clinical",
+      "sortKey": 0,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:47758",
+      "name": "Jerlene697 Haag279",
+      "label": "Patient",
+      "layer": 3,
+      "color": "#86EFAC",
+      "group": "clinical",
+      "sortKey": 0,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:49381",
+      "name": "Lauren941 Torphy630",
+      "label": "Patient",
+      "layer": 3,
+      "color": "#86EFAC",
+      "group": "clinical",
+      "sortKey": 0,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:54906",
+      "name": "Nelly786 Giselle809 Abernathy524",
+      "label": "Patient",
+      "layer": 3,
+      "color": "#86EFAC",
+      "group": "clinical",
+      "sortKey": 0,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:55997",
+      "name": "Odilia72 Londa304 Hamill307",
+      "label": "Patient",
+      "layer": 3,
+      "color": "#86EFAC",
+      "group": "clinical",
+      "sortKey": 0,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:57040",
+      "name": "Rebecka733 Faith802 Nader710",
+      "label": "Patient",
+      "layer": 3,
+      "color": "#86EFAC",
+      "group": "clinical",
+      "sortKey": 0,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:63397",
+      "name": "Theodore876 Leannon79",
+      "label": "Patient",
+      "layer": 3,
+      "color": "#86EFAC",
+      "group": "clinical",
+      "sortKey": 0,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:65636",
+      "name": "Walter473 Blake449 Eichmann909",
+      "label": "Patient",
+      "layer": 3,
+      "color": "#86EFAC",
+      "group": "clinical",
+      "sortKey": 0,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:17",
+      "name": "73211009",
+      "label": "Condition",
+      "layer": 3,
+      "color": "#86EFAC",
+      "group": "clinical",
+      "sortKey": 2,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2149",
+      "name": "Acute bacterial sinusitis (disorder)",
+      "label": "Condition",
+      "layer": 3,
+      "color": "#86EFAC",
+      "group": "clinical",
+      "sortKey": 2,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2152",
+      "name": "Chronic sinusitis (disorder)",
+      "label": "Condition",
+      "layer": 3,
+      "color": "#86EFAC",
+      "group": "clinical",
+      "sortKey": 2,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2712",
+      "name": "Concussion injury of brain (disorder)",
+      "label": "Condition",
+      "layer": 3,
+      "color": "#86EFAC",
+      "group": "clinical",
+      "sortKey": 2,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2674",
+      "name": "Concussion injury of brain (disorder)",
+      "label": "Condition",
+      "layer": 3,
+      "color": "#86EFAC",
+      "group": "clinical",
+      "sortKey": 2,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2676",
+      "name": "Concussion with no loss of consciousness",
+      "label": "Condition",
+      "layer": 3,
+      "color": "#86EFAC",
+      "group": "clinical",
+      "sortKey": 2,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2218",
+      "name": "Epilepsy",
+      "label": "Condition",
+      "layer": 3,
+      "color": "#86EFAC",
+      "group": "clinical",
+      "sortKey": 2,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2216",
+      "name": "History of single seizure (situation)",
+      "label": "Condition",
+      "layer": 3,
+      "color": "#86EFAC",
+      "group": "clinical",
+      "sortKey": 2,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2041",
+      "name": "Medication review due (situation)",
+      "label": "Condition",
+      "layer": 3,
+      "color": "#86EFAC",
+      "group": "clinical",
+      "sortKey": 2,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2226",
+      "name": "Medication review due (situation)",
+      "label": "Condition",
+      "layer": 3,
+      "color": "#86EFAC",
+      "group": "clinical",
+      "sortKey": 2,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2189",
+      "name": "Medication review due (situation)",
+      "label": "Condition",
+      "layer": 3,
+      "color": "#86EFAC",
+      "group": "clinical",
+      "sortKey": 2,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2069",
+      "name": "Medication review due (situation)",
+      "label": "Condition",
+      "layer": 3,
+      "color": "#86EFAC",
+      "group": "clinical",
+      "sortKey": 2,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2255",
+      "name": "Medication review due (situation)",
+      "label": "Condition",
+      "layer": 3,
+      "color": "#86EFAC",
+      "group": "clinical",
+      "sortKey": 2,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2443",
+      "name": "Medication review due (situation)",
+      "label": "Condition",
+      "layer": 3,
+      "color": "#86EFAC",
+      "group": "clinical",
+      "sortKey": 2,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2422",
+      "name": "Medication review due (situation)",
+      "label": "Condition",
+      "layer": 3,
+      "color": "#86EFAC",
+      "group": "clinical",
+      "sortKey": 2,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2384",
+      "name": "Medication review due (situation)",
+      "label": "Condition",
+      "layer": 3,
+      "color": "#86EFAC",
+      "group": "clinical",
+      "sortKey": 2,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2372",
+      "name": "Medication review due (situation)",
+      "label": "Condition",
+      "layer": 3,
+      "color": "#86EFAC",
+      "group": "clinical",
+      "sortKey": 2,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2360",
+      "name": "Medication review due (situation)",
+      "label": "Condition",
+      "layer": 3,
+      "color": "#86EFAC",
+      "group": "clinical",
+      "sortKey": 2,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2312",
+      "name": "Medication review due (situation)",
+      "label": "Condition",
+      "layer": 3,
+      "color": "#86EFAC",
+      "group": "clinical",
+      "sortKey": 2,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2278",
+      "name": "Medication review due (situation)",
+      "label": "Condition",
+      "layer": 3,
+      "color": "#86EFAC",
+      "group": "clinical",
+      "sortKey": 2,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2471",
+      "name": "Medication review due (situation)",
+      "label": "Condition",
+      "layer": 3,
+      "color": "#86EFAC",
+      "group": "clinical",
+      "sortKey": 2,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2690",
+      "name": "Medication review due (situation)",
+      "label": "Condition",
+      "layer": 3,
+      "color": "#86EFAC",
+      "group": "clinical",
+      "sortKey": 2,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2227",
+      "name": "Risk activity involvement (finding)",
+      "label": "Condition",
+      "layer": 3,
+      "color": "#86EFAC",
+      "group": "clinical",
+      "sortKey": 2,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2214",
+      "name": "Seizure disorder",
+      "label": "Condition",
+      "layer": 3,
+      "color": "#86EFAC",
+      "group": "clinical",
+      "sortKey": 2,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2243",
+      "name": "Sprain (morphologic abnormality)",
+      "label": "Condition",
+      "layer": 3,
+      "color": "#86EFAC",
+      "group": "clinical",
+      "sortKey": 2,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2245",
+      "name": "Sprain of ankle",
+      "label": "Condition",
+      "layer": 3,
+      "color": "#86EFAC",
+      "group": "clinical",
+      "sortKey": 2,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2436",
+      "name": "Streptococcal sore throat (disorder)",
+      "label": "Condition",
+      "layer": 3,
+      "color": "#86EFAC",
+      "group": "clinical",
+      "sortKey": 2,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2211",
+      "name": "Tooth eruption disorder",
+      "label": "Condition",
+      "layer": 3,
+      "color": "#86EFAC",
+      "group": "clinical",
+      "sortKey": 2,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2186",
+      "name": "Viral sinusitis (disorder)",
+      "label": "Condition",
+      "layer": 3,
+      "color": "#86EFAC",
+      "group": "clinical",
+      "sortKey": 2,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2407",
+      "name": "Viral sinusitis (disorder)",
+      "label": "Condition",
+      "layer": 3,
+      "color": "#86EFAC",
+      "group": "clinical",
+      "sortKey": 2,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:1032",
+      "name": "Adina377 Dolly486 Lang846",
+      "label": "OMOPPerson",
+      "layer": 4,
+      "color": "#A5B4FC",
+      "group": "analytics",
+      "sortKey": 0,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:1033",
+      "name": "Adrianna470 Smitham825",
+      "label": "OMOPPerson",
+      "layer": 4,
+      "color": "#A5B4FC",
+      "group": "analytics",
+      "sortKey": 0,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:1034",
+      "name": "Alda400 Walter473",
+      "label": "OMOPPerson",
+      "layer": 4,
+      "color": "#A5B4FC",
+      "group": "analytics",
+      "sortKey": 0,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:1035",
+      "name": "Aliza77 Anjanette878 Auer97",
+      "label": "OMOPPerson",
+      "layer": 4,
+      "color": "#A5B4FC",
+      "group": "analytics",
+      "sortKey": 0,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:1036",
+      "name": "Angelique249 Sherill945 Von197",
+      "label": "OMOPPerson",
+      "layer": 4,
+      "color": "#A5B4FC",
+      "group": "analytics",
+      "sortKey": 0,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:1037",
+      "name": "Ann985 Joni720 Pouros728",
+      "label": "OMOPPerson",
+      "layer": 4,
+      "color": "#A5B4FC",
+      "group": "analytics",
+      "sortKey": 0,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:1038",
+      "name": "Antonio44 José María211 Ruiz676",
+      "label": "OMOPPerson",
+      "layer": 4,
+      "color": "#A5B4FC",
+      "group": "analytics",
+      "sortKey": 0,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:1039",
+      "name": "Ashley34 Kemmer137",
+      "label": "OMOPPerson",
+      "layer": 4,
+      "color": "#A5B4FC",
+      "group": "analytics",
+      "sortKey": 0,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:1040",
+      "name": "Aubrey96 Kimberly627 Kautzer186",
+      "label": "OMOPPerson",
+      "layer": 4,
+      "color": "#A5B4FC",
+      "group": "analytics",
+      "sortKey": 0,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:1041",
+      "name": "Avery919 Jed345 Pouros728",
+      "label": "OMOPPerson",
+      "layer": 4,
+      "color": "#A5B4FC",
+      "group": "analytics",
+      "sortKey": 0,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:1042",
+      "name": "Berna338 Rufina863 Grady603",
+      "label": "OMOPPerson",
+      "layer": 4,
+      "color": "#A5B4FC",
+      "group": "analytics",
+      "sortKey": 0,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:1043",
+      "name": "Bernice532 Lourdes258 Hansen121",
+      "label": "OMOPPerson",
+      "layer": 4,
+      "color": "#A5B4FC",
+      "group": "analytics",
+      "sortKey": 0,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:1044",
+      "name": "Boyce638 Murazik203",
+      "label": "OMOPPerson",
+      "layer": 4,
+      "color": "#A5B4FC",
+      "group": "analytics",
+      "sortKey": 0,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:1045",
+      "name": "Brendon298 Xavier983 Herman763",
+      "label": "OMOPPerson",
+      "layer": 4,
+      "color": "#A5B4FC",
+      "group": "analytics",
+      "sortKey": 0,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:20",
+      "name": "OMOP Person 99001",
+      "label": "OMOPPerson",
+      "layer": 4,
+      "color": "#A5B4FC",
+      "group": "analytics",
+      "sortKey": 0,
+      "expandable": true
+    }
+  ],
+  "links": [
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113718",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33179",
+      "type": "FOR_STUDY"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113717",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33179",
+      "type": "FOR_STUDY"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113610",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33179",
+      "type": "OFFERS"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113611",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33179",
+      "type": "CONSUMES"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113607",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33179",
+      "type": "OFFERS"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113608",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33179",
+      "type": "CONSUMES"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113607",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:8",
+      "type": "OFFERS"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113608",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:8",
+      "type": "CONSUMES"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113648",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:8",
+      "type": "CONSUMES"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113647",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:8",
+      "type": "OFFERS"
+    }
+  ],
+  "persona": "patient",
+  "question": "What health data do I have? Who is using it? What research can I join?"
+}

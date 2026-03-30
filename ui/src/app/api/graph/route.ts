@@ -107,55 +107,68 @@ async function buildTrustCenterGraph() {
   return sortAndDedup([...tcNodes, ...speNodes, ...rpsnNodes, ...datasetNodes]);
 }
 
-/** Hospital / Data Holder: their datasets, active contracts, who has access */
+/** Hospital / Data Holder: their datasets, data products, active contracts, who has access */
 async function buildHospitalGraph() {
-  const [participantNodes, datasetNodes, contractNodes, credNodes] =
-    await Promise.all([
-      runQuery<{ id: string; labels: string[]; name: string }>(
-        `MATCH (p:Participant)
+  const [
+    participantNodes,
+    datasetNodes,
+    productNodes,
+    contractNodes,
+    credNodes,
+  ] = await Promise.all([
+    runQuery<{ id: string; labels: string[]; name: string }>(
+      `MATCH (p:Participant)
          RETURN elementId(p) AS id, labels(p) AS labels,
                 coalesce(p.name, p.participantId, elementId(p)) AS name
          ORDER BY p.name`,
-      ),
-      runQuery<{ id: string; labels: string[]; name: string }>(
-        `MATCH (ds:HealthDataset)
+    ),
+    runQuery<{ id: string; labels: string[]; name: string }>(
+      `MATCH (ds:HealthDataset)
          RETURN elementId(ds) AS id, labels(ds) AS labels,
                 coalesce(ds.title, ds.datasetId, elementId(ds)) AS name
          ORDER BY ds.title LIMIT 30
          UNION
          MATCH (d:Distribution)
          RETURN elementId(d) AS id, labels(d) AS labels,
-                coalesce(d.title, d.distributionId, elementId(d)) AS name
+                coalesce(d.name, d.title, d.format, d.distributionId, elementId(d)) AS name
          LIMIT 20
          UNION
          MATCH (ep:EEHRxFProfile)
          RETURN elementId(ep) AS id, labels(ep) AS labels,
                 coalesce(ep.title, ep.profileId, elementId(ep)) AS name
          LIMIT 15`,
-      ),
-      runQuery<{ id: string; labels: string[]; name: string }>(
-        `MATCH (c:Contract)
+    ),
+    // DataProduct — the offerings participants publish
+    runQuery<{ id: string; labels: string[]; name: string }>(
+      `MATCH (dp:DataProduct)
+         RETURN elementId(dp) AS id, labels(dp) AS labels,
+                coalesce(dp.name, dp.title, dp.productId, elementId(dp)) AS name
+         LIMIT 20`,
+    ),
+    runQuery<{ id: string; labels: string[]; name: string }>(
+      `MATCH (c:Contract)
          RETURN elementId(c) AS id, labels(c) AS labels,
-                coalesce(c.contractId, elementId(c)) AS name
+                coalesce(c.name, c.contractId, elementId(c)) AS name
          UNION
          MATCH (ha:HDABApproval)
          RETURN elementId(ha) AS id, labels(ha) AS labels,
-                coalesce(ha.approvalId, elementId(ha)) AS name
+                coalesce(ha.name, ha.approvalId, elementId(ha)) AS name
          UNION
          MATCH (aa:AccessApplication)
          RETURN elementId(aa) AS id, labels(aa) AS labels,
-                coalesce(aa.applicationId, elementId(aa)) AS name`,
-      ),
-      runQuery<{ id: string; labels: string[]; name: string }>(
-        `MATCH (vc:VerifiableCredential)
+                coalesce(aa.name, aa.applicationId, elementId(aa)) AS name`,
+    ),
+    runQuery<{ id: string; labels: string[]; name: string }>(
+      `MATCH (vc:VerifiableCredential)
          RETURN elementId(vc) AS id, labels(vc) AS labels,
                 coalesce(vc.credentialType, vc.credentialId, elementId(vc)) AS name
          ORDER BY vc.credentialType LIMIT 20`,
-      ),
-    ]);
+    ),
+  ]);
   return sortAndDedup([
     ...participantNodes,
     ...datasetNodes,
+    ...productNodes,
     ...contractNodes,
     ...credNodes,
   ]);
@@ -201,7 +214,7 @@ async function buildResearcherGraph() {
         `MATCH (c:Condition)<-[:HAS_CONDITION]-(:Patient)
          WITH c, count(*) AS freq ORDER BY freq DESC LIMIT 30
          RETURN elementId(c) AS id, labels(c) AS labels,
-                coalesce(c.code, c.display, elementId(c)) AS name`,
+                coalesce(c.display, c.name, c.code, elementId(c)) AS name`,
       ),
       runQuery<{ id: string; labels: string[]; name: string }>(
         `MATCH (s:SnomedConcept)
@@ -246,9 +259,11 @@ async function buildEdcAdminGraph() {
     `MATCH (n)
      WHERE any(l IN labels(n) WHERE l IN $labels)
      RETURN elementId(n) AS id, labels(n) AS labels,
-            coalesce(n.name, n.title, n.participantId, n.productId,
-                     n.contractId, n.credentialType, n.id, elementId(n)) AS name
-     ORDER BY labels(n)[0], coalesce(n.name, n.id)`,
+            coalesce(n.name, n.title, n.display, n.participantId, n.productId,
+                     n.contractId, n.credentialType, n.transferId,
+                     n.endpoint + ' ' + n.method, n.endpoint,
+                     n.eventId, n.id, elementId(n)) AS name
+     ORDER BY labels(n)[0], coalesce(n.name, n.display, n.id)`,
     {
       labels: [
         "Participant",
@@ -273,13 +288,14 @@ async function buildHdabGraph() {
       `MATCH (n)
        WHERE any(l IN labels(n) WHERE l IN $labels)
        RETURN elementId(n) AS id, labels(n) AS labels,
-              coalesce(n.name, n.approvalId, n.applicationId,
+              coalesce(n.name, n.display, n.title, n.approvalId, n.applicationId,
                        n.contractId, n.productId, n.participantId, elementId(n)) AS name
        ORDER BY labels(n)[0]`,
       {
         labels: [
           "HDABApproval",
           "AccessApplication",
+          "OdrlPolicy",
           "Participant",
           "DataProduct",
           "Contract",
@@ -394,8 +410,10 @@ async function buildDefaultGraph() {
       `MATCH (n) WHERE any(l IN labels(n) WHERE l IN $labels)
          RETURN elementId(n) AS id, labels(n) AS labels,
                 coalesce(n.name, n.title, n.display, n.participantId,
-                         n.productId, n.credentialType, n.code, n.id, elementId(n)) AS name
-         ORDER BY labels(n)[0], coalesce(n.name, n.id)`,
+                         n.productId, n.credentialType, n.transferId,
+                         n.endpoint + ' ' + n.method, n.endpoint,
+                         n.eventId, n.code, n.id, elementId(n)) AS name
+         ORDER BY labels(n)[0], coalesce(n.name, n.display, n.id)`,
       { labels: GOVERNANCE_LABELS },
     ),
     runQuery<{ id: string; labels: string[]; name: string }>(
@@ -409,7 +427,7 @@ async function buildDefaultGraph() {
       `MATCH (c:Condition)<-[:HAS_CONDITION]-(:Patient)
          WITH c, count(*) AS freq ORDER BY freq DESC LIMIT 50
          RETURN elementId(c) AS id, labels(c) AS labels,
-                coalesce(c.code, c.name, c.display, elementId(c)) AS name`,
+                coalesce(c.display, c.name, c.code, elementId(c)) AS name`,
       {},
     ),
     runQuery<{ id: string; labels: string[]; name: string }>(

@@ -24,6 +24,17 @@ const STATIC_MOCK_MAP: Record<string, string> = {
 
 /** Prefix-based mock paths — matched via startsWith (checked after exact, first match wins) */
 const STATIC_MOCK_PREFIX: [string, string][] = [
+  // Persona-specific graph views (checked before default /api/graph)
+  ["/api/graph?persona=patient", "/mock/graph_patient.json"],
+  ["/api/graph?persona=hospital", "/mock/graph_hospital.json"],
+  ["/api/graph?persona=researcher", "/mock/graph_researcher.json"],
+  ["/api/graph?persona=edc-admin", "/mock/graph_edc_admin.json"],
+  ["/api/graph?persona=hdab", "/mock/graph_hdab.json"],
+  ["/api/graph?persona=trust-center", "/mock/graph_trust_center.json"],
+  ["/api/graph?", "/mock/graph.json"],
+  // Graph node properties (return empty in static mode)
+  ["/api/graph/node?", "/mock/graph.json"],
+  ["/api/graph/expand?", "/mock/graph.json"],
   // Patient profile — specific patient IDs first
   ["/api/patient/profile?patientId=P1", "/mock/patient_profile_patient1.json"],
   ["/api/patient/profile?patientId=P2", "/mock/patient_profile_patient2.json"],

@@ -1,0 +1,603 @@
+{
+  "nodes": [
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113639",
+      "name": "",
+      "label": "Participant",
+      "layer": 1,
+      "color": "#F97316",
+      "group": "participant",
+      "sortKey": 0,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113607",
+      "name": "AlphaKlinik Berlin",
+      "label": "Participant",
+      "layer": 1,
+      "color": "#F97316",
+      "group": "participant",
+      "sortKey": 0,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113649",
+      "name": "HealthGov (HDAB)",
+      "label": "Participant",
+      "layer": 1,
+      "color": "#F97316",
+      "group": "participant",
+      "sortKey": 0,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113611",
+      "name": "Institut de Recherche Santé",
+      "label": "Participant",
+      "layer": 1,
+      "color": "#F97316",
+      "group": "participant",
+      "sortKey": 0,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113610",
+      "name": "Limburg Medical Centre",
+      "label": "Participant",
+      "layer": 1,
+      "color": "#F97316",
+      "group": "participant",
+      "sortKey": 0,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113609",
+      "name": "MedReg DE",
+      "label": "Participant",
+      "layer": 1,
+      "color": "#F97316",
+      "group": "participant",
+      "sortKey": 0,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113608",
+      "name": "PharmaCo Research AG",
+      "label": "Participant",
+      "layer": 1,
+      "color": "#F97316",
+      "group": "participant",
+      "sortKey": 0,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113647",
+      "name": "Riverside General (CLINIC)",
+      "label": "Participant",
+      "layer": 1,
+      "color": "#F97316",
+      "group": "participant",
+      "sortKey": 0,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113648",
+      "name": "TrialCorp Research (CRO)",
+      "label": "Participant",
+      "layer": 1,
+      "color": "#F97316",
+      "group": "participant",
+      "sortKey": 0,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33179",
+      "name": "Synthea FHIR R4 Patient Cohort (2026)",
+      "label": "DataProduct",
+      "layer": 1,
+      "color": "#94A3B8",
+      "group": "governance",
+      "sortKey": 2,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:8",
+      "name": "T2D Cohort 2020-2025",
+      "label": "DataProduct",
+      "layer": 1,
+      "color": "#94A3B8",
+      "group": "governance",
+      "sortKey": 2,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33180",
+      "name": "EHDS Art. 53 Secondary Use — Synthetic Data",
+      "label": "OdrlPolicy",
+      "layer": 1,
+      "color": "#94A3B8",
+      "group": "governance",
+      "sortKey": 3,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33181",
+      "name": "EHDS Art. 53 Synthetic Cohort Contract",
+      "label": "Contract",
+      "layer": 1,
+      "color": "#94A3B8",
+      "group": "governance",
+      "sortKey": 4,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:9",
+      "name": "EHDS Contract (PharmaCo Research AG↔AlphaKlinik Berlin)",
+      "label": "Contract",
+      "layer": 1,
+      "color": "#94A3B8",
+      "group": "governance",
+      "sortKey": 4,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113650",
+      "name": "EHDS Contract (TrialCorp↔Riverside)",
+      "label": "Contract",
+      "layer": 1,
+      "color": "#94A3B8",
+      "group": "governance",
+      "sortKey": 4,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113652",
+      "name": "HDAB Approval healthgov-2025-001",
+      "label": "HDABApproval",
+      "layer": 1,
+      "color": "#EC4899",
+      "group": "governance",
+      "sortKey": 5,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:11",
+      "name": "HDAB Approval medreg-2025-001",
+      "label": "HDABApproval",
+      "layer": 1,
+      "color": "#EC4899",
+      "group": "governance",
+      "sortKey": 5,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33183",
+      "name": "MedReg HDAB Approval — Synthea Cohort 2026",
+      "label": "HDABApproval",
+      "layer": 1,
+      "color": "#EC4899",
+      "group": "governance",
+      "sortKey": 5,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113651",
+      "name": "Access App healthgov-2025-001",
+      "label": "AccessApplication",
+      "layer": 1,
+      "color": "#94A3B8",
+      "group": "governance",
+      "sortKey": 6,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:10",
+      "name": "Access App medreg-2025-001",
+      "label": "AccessApplication",
+      "layer": 1,
+      "color": "#94A3B8",
+      "group": "governance",
+      "sortKey": 6,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33182",
+      "name": "Synthea Cohort Access Request 2026-001",
+      "label": "AccessApplication",
+      "layer": 1,
+      "color": "#94A3B8",
+      "group": "governance",
+      "sortKey": 6,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113589",
+      "name": "DataProcessingPurposeCredential",
+      "label": "VerifiableCredential",
+      "layer": 5,
+      "color": "#D4D4D8",
+      "group": "governance",
+      "sortKey": 4,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113631",
+      "name": "DataQualityLabelCredential",
+      "label": "VerifiableCredential",
+      "layer": 5,
+      "color": "#D4D4D8",
+      "group": "governance",
+      "sortKey": 4,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113632",
+      "name": "DataQualityLabelCredential",
+      "label": "VerifiableCredential",
+      "layer": 5,
+      "color": "#D4D4D8",
+      "group": "governance",
+      "sortKey": 4,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113586",
+      "name": "EHDSParticipantCredential",
+      "label": "VerifiableCredential",
+      "layer": 5,
+      "color": "#D4D4D8",
+      "group": "governance",
+      "sortKey": 4,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113587",
+      "name": "EHDSParticipantCredential",
+      "label": "VerifiableCredential",
+      "layer": 5,
+      "color": "#D4D4D8",
+      "group": "governance",
+      "sortKey": 4,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113588",
+      "name": "EHDSParticipantCredential",
+      "label": "VerifiableCredential",
+      "layer": 5,
+      "color": "#D4D4D8",
+      "group": "governance",
+      "sortKey": 4,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113629",
+      "name": "EHDSParticipantCredential",
+      "label": "VerifiableCredential",
+      "layer": 5,
+      "color": "#D4D4D8",
+      "group": "governance",
+      "sortKey": 4,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113630",
+      "name": "EHDSParticipantCredential",
+      "label": "VerifiableCredential",
+      "layer": 5,
+      "color": "#D4D4D8",
+      "group": "governance",
+      "sortKey": 4,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113624",
+      "name": "MembershipCredential",
+      "label": "VerifiableCredential",
+      "layer": 5,
+      "color": "#D4D4D8",
+      "group": "governance",
+      "sortKey": 4,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113625",
+      "name": "MembershipCredential",
+      "label": "VerifiableCredential",
+      "layer": 5,
+      "color": "#D4D4D8",
+      "group": "governance",
+      "sortKey": 4,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113626",
+      "name": "MembershipCredential",
+      "label": "VerifiableCredential",
+      "layer": 5,
+      "color": "#D4D4D8",
+      "group": "governance",
+      "sortKey": 4,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113627",
+      "name": "MembershipCredential",
+      "label": "VerifiableCredential",
+      "layer": 5,
+      "color": "#D4D4D8",
+      "group": "governance",
+      "sortKey": 4,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113628",
+      "name": "MembershipCredential",
+      "label": "VerifiableCredential",
+      "layer": 5,
+      "color": "#D4D4D8",
+      "group": "governance",
+      "sortKey": 4,
+      "expandable": true
+    }
+  ],
+  "links": [
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113631",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113607",
+      "type": "ISSUED_TO"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113586",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113607",
+      "type": "ISSUED_TO"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113624",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113607",
+      "type": "ISSUED_TO"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113628",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113611",
+      "type": "ISSUED_TO"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113630",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113611",
+      "type": "ISSUED_TO"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113627",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113610",
+      "type": "ISSUED_TO"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113629",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113610",
+      "type": "ISSUED_TO"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113632",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113610",
+      "type": "ISSUED_TO"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113626",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113609",
+      "type": "ISSUED_TO"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113588",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113609",
+      "type": "ISSUED_TO"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113625",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113608",
+      "type": "ISSUED_TO"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113587",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113608",
+      "type": "ISSUED_TO"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113589",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113608",
+      "type": "ISSUED_TO"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113650",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113647",
+      "type": "PROVIDER"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113650",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113648",
+      "type": "CONSUMER"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113610",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33179",
+      "type": "OFFERS"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113611",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33179",
+      "type": "CONSUMES"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113607",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33179",
+      "type": "OFFERS"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113608",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33179",
+      "type": "CONSUMES"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33182",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33179",
+      "type": "REQUESTS_ACCESS_TO"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33181",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33179",
+      "type": "GOVERNS"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113607",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:8",
+      "type": "OFFERS"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113608",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:8",
+      "type": "CONSUMES"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113651",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:8",
+      "type": "REQUESTS_ACCESS_TO"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113648",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:8",
+      "type": "CONSUMES"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113647",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:8",
+      "type": "OFFERS"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113650",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:8",
+      "type": "GOVERNS"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:10",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:8",
+      "type": "REQUESTS_ACCESS_TO"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:9",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:8",
+      "type": "GOVERNS"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33179",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33180",
+      "type": "GOVERNED_BY"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33183",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33181",
+      "type": "APPROVED"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:11",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:9",
+      "type": "APPROVED"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113652",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113650",
+      "type": "APPROVED"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113649",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113651",
+      "type": "REVIEWED"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113652",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113651",
+      "type": "APPROVES"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113648",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113651",
+      "type": "SUBMITTED"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:11",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:10",
+      "type": "APPROVES"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33183",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33182",
+      "type": "APPROVES"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113608",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113589",
+      "type": "HOLDS_CREDENTIAL"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113607",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113631",
+      "type": "HOLDS_CREDENTIAL"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113610",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113632",
+      "type": "HOLDS_CREDENTIAL"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113607",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113586",
+      "type": "HOLDS_CREDENTIAL"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113608",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113587",
+      "type": "HOLDS_CREDENTIAL"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113609",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113588",
+      "type": "HOLDS_CREDENTIAL"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113610",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113629",
+      "type": "HOLDS_CREDENTIAL"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113611",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113630",
+      "type": "HOLDS_CREDENTIAL"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113607",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113624",
+      "type": "HOLDS_CREDENTIAL"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113608",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113625",
+      "type": "HOLDS_CREDENTIAL"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113609",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113626",
+      "type": "HOLDS_CREDENTIAL"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113610",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113627",
+      "type": "HOLDS_CREDENTIAL"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113611",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113628",
+      "type": "HOLDS_CREDENTIAL"
+    }
+  ],
+  "persona": "hdab",
+  "question": "What approvals are pending? Which policies govern data use? Are contracts compliant?"
+}

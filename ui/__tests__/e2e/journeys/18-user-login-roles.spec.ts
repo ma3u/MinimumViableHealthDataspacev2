@@ -5,14 +5,14 @@
  *   - Successful login via Keycloak (username = password in local dev)
  *   - Role badge visible in nav after login
  *   - Navigation items match role-based access table (README.md)
- *   - Graph VIEW AS panel shows only the user's own persona
+ *   - Graph persona is auto-derived from user's session role
  *   - Patient graph filter presets visible for patient1/patient2
  *
  * Prerequisites: Keycloak running on localhost:8080 with all 7 users created.
  * Tests are skipped automatically when Keycloak is unreachable.
  *
  * Personas and roles (from README.md):
- *   edcadmin   → EDC_ADMIN              → edc-admin  → sees all VIEW AS options
+ *   edcadmin   → EDC_ADMIN              → edc-admin  → auto-selects admin persona
  *   clinicuser → DATA_HOLDER            → hospital   → sees Hospital view only
  *   lmcuser    → DATA_HOLDER            → hospital   → sees Hospital view only
  *   researcher → DATA_USER              → researcher → sees Researcher view only
@@ -21,7 +21,7 @@
  *   patient2   → PATIENT                → patient    → sees Patient/Citizen + patient filters
  */
 import { test, expect, type Page } from "@playwright/test";
-import { T, skipIfNeo4jDown, skipIfKeycloakDown } from "./helpers";
+import { T, skipIfNeo4jDown, skipIfKeycloakDown, loginAs } from "./helpers";
 
 // ── Demo user catalogue ────────────────────────────────────────────────────────
 
@@ -30,7 +30,7 @@ interface DemoUser {
   password: string;
   roleLabel: string; // badge text in nav
   personaId: string; // ?persona=<id>
-  personaLabel: string; // "View as" panel label
+  personaLabel: string; // persona indicator label in graph sidebar
   /** Routes that MUST be accessible (no redirect to signin) */
   accessibleRoutes: string[];
   /** Routes that must NOT be accessible (redirect to /auth) */
@@ -93,7 +93,7 @@ const DEMO_USERS: DemoUser[] = [
   {
     username: "patient1",
     password: "patient1",
-    roleLabel: "Patient",
+    roleLabel: "Patient / Citizen",
     personaId: "patient",
     personaLabel: "Patient / Citizen",
     accessibleRoutes: ["/graph", "/patient/profile", "/patient/insights"],
@@ -103,7 +103,7 @@ const DEMO_USERS: DemoUser[] = [
   {
     username: "patient2",
     password: "patient2",
-    roleLabel: "Patient",
+    roleLabel: "Patient / Citizen",
     personaId: "patient",
     personaLabel: "Patient / Citizen",
     accessibleRoutes: ["/graph", "/patient/profile", "/patient/insights"],
@@ -111,36 +111,6 @@ const DEMO_USERS: DemoUser[] = [
     patientFilters: true,
   },
 ];
-
-// ── Keycloak login helper ──────────────────────────────────────────────────────
-
-/**
- * Log in via the Keycloak OIDC flow.
- * Navigates to /graph which triggers the auth redirect, fills credentials,
- * and waits for the app to land back on the graph page.
- */
-async function loginAs(page: Page, username: string, password: string) {
-  // Trigger auth by visiting a protected page
-  await page.goto("/graph", { waitUntil: "domcontentloaded" });
-
-  // If already redirected to sign-in page, click Sign in
-  const signInBtn = page.getByRole("button", { name: /sign in/i });
-  if (await signInBtn.isVisible({ timeout: 3_000 }).catch(() => false)) {
-    await signInBtn.click();
-  }
-
-  // Wait for Keycloak login form
-  await expect(page.getByLabel(/username or email/i)).toBeVisible({
-    timeout: 15_000,
-  });
-
-  await page.getByLabel(/username or email/i).fill(username);
-  await page.getByLabel(/^password$/i).fill(password);
-  await page.getByRole("button", { name: /sign in/i }).click();
-
-  // Wait to land back on the app
-  await expect(page).toHaveURL(/localhost:3003/, { timeout: 20_000 });
-}
 
 /** Sign out by clicking the UserMenu and the sign-out button. */
 async function logout(page: Page) {
@@ -184,94 +154,58 @@ test.describe("R · Multi-User Login — Keycloak authentication", () => {
   }
 });
 
-// ── J190–J196: Graph VIEW AS shows only logged-in persona ─────────────────────
+// ── J190–J196: Graph persona auto-derived from login role ─────────────────────
 
-test.describe("R · Graph VIEW AS — role-filtered persona list", () => {
+test.describe("R · Graph persona — auto-derived from session role", () => {
   test.beforeEach(async () => {
     await skipIfKeycloakDown();
   });
 
-  test("J190 — edcadmin sees all persona views in VIEW AS panel", async ({
+  test("J190 — edcadmin graph shows EDC / Dataspace Admin persona", async ({
     page,
   }) => {
     await skipIfNeo4jDown(page);
     await loginAs(page, "edcadmin", "edcadmin");
     await page.goto("/graph");
-    await expect(page.getByText("View as", { exact: false })).toBeVisible({
-      timeout: T,
-    });
-
-    // Admin should see all personas
-    for (const label of [
-      "Hospital / Data Holder",
-      "Researcher / Data User",
-      "HDAB Authority",
-      "Patient / Citizen",
-      "EDC / Dataspace Admin",
-    ]) {
-      await expect(page.getByText(label, { exact: false })).toBeVisible({
-        timeout: T,
-      });
-    }
+    await expect(
+      page.getByText("EDC / Dataspace Admin", { exact: false }),
+    ).toBeVisible({ timeout: T });
     await logout(page);
   });
 
-  test("J191 — patient1 sees only Patient / Citizen in VIEW AS panel", async ({
+  test("J191 — patient1 graph shows Patient / Citizen persona", async ({
     page,
   }) => {
     await skipIfNeo4jDown(page);
     await loginAs(page, "patient1", "patient1");
-    await page.goto("/graph?persona=patient");
-
-    // Patient should see Patient / Citizen
+    await page.goto("/graph");
     await expect(
-      page.getByText("Patient / Citizen", { exact: false }),
+      page.getByText("Patient / Citizen", { exact: false }).first(),
     ).toBeVisible({ timeout: T });
-
-    // Patient should NOT see admin-only views
-    await expect(
-      page.getByText("EDC / Dataspace Admin", { exact: false }),
-    ).not.toBeVisible({ timeout: 3_000 });
-    await expect(
-      page.getByText("Hospital / Data Holder", { exact: false }),
-    ).not.toBeVisible({ timeout: 3_000 });
-
     await logout(page);
   });
 
-  test("J192 — clinicuser sees only Hospital / Data Holder in VIEW AS panel", async ({
+  test("J192 — clinicuser graph shows Hospital / Data Holder persona", async ({
     page,
   }) => {
     await skipIfNeo4jDown(page);
     await loginAs(page, "clinicuser", "clinicuser");
-    await page.goto("/graph?persona=hospital");
-
+    await page.goto("/graph");
     await expect(
       page.getByText("Hospital / Data Holder", { exact: false }),
     ).toBeVisible({ timeout: T });
-
-    await expect(
-      page.getByText("Patient / Citizen", { exact: false }),
-    ).not.toBeVisible({ timeout: 3_000 });
-
     await logout(page);
   });
 
-  test("J193 — researcher sees only Researcher / Data User in VIEW AS panel", async ({
+  test("J193 — researcher graph shows Researcher / Data User persona", async ({
     page,
   }) => {
     await skipIfNeo4jDown(page);
     await loginAs(page, "researcher", "researcher");
-    await page.goto("/graph?persona=researcher");
-
+    await page.goto("/graph");
     await expect(
       page.getByText("Researcher / Data User", { exact: false }),
     ).toBeVisible({ timeout: T });
-
-    await expect(
-      page.getByText("Patient / Citizen", { exact: false }),
-    ).not.toBeVisible({ timeout: 3_000 });
-
     await logout(page);
   });
 });
@@ -290,11 +224,10 @@ test.describe("R · Patient graph — deep-link + filter presets", () => {
     await loginAs(page, "patient1", "patient1");
     await page.goto("/graph?persona=patient");
 
-    // Persona button highlighted
-    const patientBtn = page.getByRole("button", {
-      name: /patient.*citizen/i,
-    });
-    await expect(patientBtn).toBeVisible({ timeout: T });
+    // Persona indicator visible in sidebar
+    await expect(
+      page.getByText("Patient / Citizen", { exact: false }).first(),
+    ).toBeVisible({ timeout: T });
 
     await logout(page);
   });
@@ -332,7 +265,7 @@ test.describe("R · Patient graph — deep-link + filter presets", () => {
     await page.goto("/graph?persona=patient");
 
     await expect(
-      page.getByText("Patient / Citizen", { exact: false }),
+      page.getByText("Patient / Citizen", { exact: false }).first(),
     ).toBeVisible({ timeout: T });
 
     await logout(page);
@@ -352,7 +285,7 @@ test.describe("R · Role-based navigation access", () => {
     // Should NOT redirect to auth
     await expect(page).not.toHaveURL(/signin/, { timeout: T });
     await expect(
-      page.getByText(/health profile/i).or(page.getByText(/risk/i)),
+      page.getByRole("heading", { name: /health profile/i }),
     ).toBeVisible({ timeout: T });
     await logout(page);
   });

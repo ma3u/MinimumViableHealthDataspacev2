@@ -74,7 +74,13 @@ export async function GET(req: Request) {
        WHERE elementId(src) = $nodeId
          AND any(l IN labels(nbr) WHERE l IN $knownLabels)
        RETURN elementId(nbr) AS nId, labels(nbr) AS nLabels,
-              coalesce(nbr.name, nbr.display, nbr.code, nbr.id, elementId(nbr)) AS nName,
+              coalesce(nbr.name, nbr.display, nbr.title, nbr.credentialType,
+                     nbr.studyId, nbr.transferId,
+                     nbr.endpoint + ' ' + nbr.method, nbr.endpoint,
+                     nbr.approvalId, nbr.applicationId,
+                     nbr.contractId, nbr.participantId, nbr.productId,
+                     nbr.sessionId, nbr.consentId, nbr.rpsnId, nbr.eventId,
+                     nbr.code, nbr.id, elementId(nbr)) AS nName,
               type(r) AS relType
        LIMIT $limit`,
       {
@@ -95,7 +101,13 @@ export async function GET(req: Request) {
        WHERE elementId(src) = $nodeId
          AND any(l IN labels(nbr) WHERE l IN $knownLabels)
        RETURN elementId(nbr) AS nId, labels(nbr) AS nLabels,
-              coalesce(nbr.name, nbr.display, nbr.code, nbr.id, elementId(nbr)) AS nName,
+              coalesce(nbr.name, nbr.display, nbr.title, nbr.credentialType,
+                     nbr.studyId, nbr.transferId,
+                     nbr.endpoint + ' ' + nbr.method, nbr.endpoint,
+                     nbr.approvalId, nbr.applicationId,
+                     nbr.contractId, nbr.participantId, nbr.productId,
+                     nbr.sessionId, nbr.consentId, nbr.rpsnId, nbr.eventId,
+                     nbr.code, nbr.id, elementId(nbr)) AS nName,
               type(r) AS relType
        LIMIT $limit`,
       {

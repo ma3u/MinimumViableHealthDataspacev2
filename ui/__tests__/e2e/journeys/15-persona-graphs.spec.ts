@@ -4,7 +4,7 @@
  * Each EHDS participant type sees a different subgraph answering their
  * primary question. Tests cover:
  *   J150–J154 — API: persona-specific subgraphs return correct node types
- *   J155–J159 — UI: persona selector renders and switches view
+ *   J155–J159 — API: node role colors and validation
  *   J160–J164 — Graph validation endpoint
  *   J165–J170 — Hospital / Data Holder journey (who uses my data?)
  *   J171–J175 — HDAB Authority journey (approval chain governance)
@@ -166,7 +166,7 @@ test.describe("O · Persona Graph Views — API", () => {
     }
   });
 
-  test("J158 — Participant nodes have amber role color in all personas", async ({
+  test("J158 — Participant nodes have orange-500 role color", async ({
     page,
   }) => {
     await skipIfNeo4jDown(page);
@@ -175,20 +175,20 @@ test.describe("O · Persona Graph Views — API", () => {
       (n: { label: string }) => n.label === "Participant",
     );
     for (const p of participants) {
-      // Amber #E67E22
-      expect(p.color).toBe("#E67E22");
+      // Orange-500 #F97316 (warm/vivid actor palette)
+      expect(p.color).toBe("#F97316");
     }
   });
 
-  test("J159 — TrustCenter nodes have violet role color", async ({ page }) => {
+  test("J159 — TrustCenter nodes have red-500 role color", async ({ page }) => {
     await skipIfNeo4jDown(page);
     const data = await apiGet(page, "/api/graph?persona=trust-center");
     const tcNodes = data.nodes.filter(
       (n: { label: string }) => n.label === "TrustCenter",
     );
     for (const tc of tcNodes) {
-      // Violet #8E44AD
-      expect(tc.color).toBe("#8E44AD");
+      // Red-500 #EF4444 (warm/vivid actor palette)
+      expect(tc.color).toBe("#EF4444");
     }
   });
 });
@@ -268,28 +268,28 @@ test.describe("O · Graph Validation", () => {
 // ── J165–J170: Hospital / Data Holder journey ─────────────────────────────────
 
 test.describe("O · Hospital / Data Holder Journey", () => {
-  test("J165 — Graph page renders persona selector", async ({ page }) => {
-    await page.goto("/graph");
-    await expect(page.getByText("View as")).toBeVisible({ timeout: T });
+  test("J165 — Graph page renders persona indicator for hospital via URL", async ({
+    page,
+  }) => {
+    await page.goto("/graph?persona=hospital");
     await expect(page.getByText("Hospital / Data Holder")).toBeVisible({
       timeout: T,
     });
   });
 
-  test("J166 — Hospital persona button is clickable and shows question", async ({
+  test("J166 — Hospital persona shows its guiding question", async ({
     page,
   }) => {
-    await page.goto("/graph");
-    await page.getByText("Hospital / Data Holder").click();
-    await expect(
-      page.getByText(/Who has approved access to my data/i),
-    ).toBeVisible({ timeout: T });
+    await page.goto("/graph?persona=hospital");
+    await expect(page.getByText(/What data do we offer/i)).toBeVisible({
+      timeout: T,
+    });
   });
 
-  test("J167 — Switching to hospital persona triggers graph reload", async ({
+  test("J167 — Hospital persona via URL triggers graph load", async ({
     page,
   }) => {
-    await page.goto("/graph");
+    await page.goto("/graph?persona=hospital");
     // Wait for initial load
     await page.waitForFunction(
       () => !document.querySelector('[class*="animate-spin"]'),
@@ -350,20 +350,19 @@ test.describe("O · Hospital / Data Holder Journey", () => {
 // ── J171–J175: HDAB Authority journey ────────────────────────────────────────
 
 test.describe("O · HDAB Authority Journey", () => {
-  test("J171 — Graph page shows HDAB Authority persona option", async ({
+  test("J171 — Graph page shows HDAB Authority persona via URL", async ({
     page,
   }) => {
-    await page.goto("/graph");
+    await page.goto("/graph?persona=hdab");
     await expect(page.getByText("HDAB Authority")).toBeVisible({ timeout: T });
     await expect(page.getByText("Art. 45–53")).toBeVisible({ timeout: T });
   });
 
-  test("J172 — HDAB persona shows governance question on click", async ({
-    page,
-  }) => {
-    await page.goto("/graph");
-    await page.getByText("HDAB Authority").click();
-    await expect(page.getByText(/What approvals are pending/i)).toBeVisible({
+  test("J172 — HDAB persona shows governance question", async ({ page }) => {
+    await page.goto("/graph?persona=hdab");
+    await expect(
+      page.getByText(/What approvals are pending/i).first(),
+    ).toBeVisible({
       timeout: T,
     });
   });
@@ -377,8 +376,8 @@ test.describe("O · HDAB Authority Journey", () => {
       (n: { label: string }) => n.label === "HDABApproval",
     );
     for (const a of approvals) {
-      // HDAB approvals should be red role color
-      expect(a.color).toBe("#C0392B");
+      // HDAB approvals use pink-500 (#EC4899) role color
+      expect(a.color).toBe("#EC4899");
     }
   });
 

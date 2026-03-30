@@ -255,7 +255,8 @@
       ],
       "webOrigins": ["http://localhost:3000", "http://localhost:3003", "+"],
       "attributes": {
-        "post.logout.redirect.uris": "http://localhost:3000/*##http://localhost:3003/*"
+        "post.logout.redirect.uris": "http://localhost:3000/*##http://localhost:3003/*",
+        "pkce.code.challenge.method": "S256"
       },
       "protocolMappers": [
         {

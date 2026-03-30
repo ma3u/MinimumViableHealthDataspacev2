@@ -69,7 +69,7 @@ describe("lib/auth", () => {
       expect(provider.idToken).toBe(true);
     });
 
-    it("should have explicit OIDC endpoints (no auto-discovery)", () => {
+    it("should have explicit OIDC endpoints (no wellKnown auto-discovery)", () => {
       const provider = authOptions.providers[0] as unknown as Record<
         string,
         unknown
@@ -78,6 +78,7 @@ describe("lib/auth", () => {
       expect(provider.token).toBeDefined();
       expect(provider.userinfo).toBeDefined();
       expect(provider.jwks_endpoint).toBeDefined();
+      expect(provider.wellKnown).toBeUndefined();
     });
 
     it("should use PKCE and state checks", () => {

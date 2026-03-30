@@ -6,7 +6,7 @@
  *
  * All tests use PUBLIC pages (no auth required):
  *   /auth/signin   — persona reference cards
- *   /graph         — public graph with persona selector
+ *   /graph         — public graph with role-derived persona
  *   /graph?persona=X — persona-specific subgraphs
  *   /docs/user-guide — user guide with role section
  */
@@ -107,29 +107,13 @@ test.describe("Sign-in — persona reference cards", () => {
 
 // ── Graph page public access ──────────────────────────────────────────────────
 
-test.describe("Graph page — public access & persona selector", () => {
+test.describe("Graph page — public access & persona indicator", () => {
   test("renders graph page without authentication", async ({ page }) => {
     await page.goto("/graph");
     await expect(page.getByText("Knowledge Graph")).toBeVisible({ timeout: T });
   });
 
-  test("shows View as persona selector", async ({ page }) => {
-    await page.goto("/graph");
-    await expect(page.getByText("View as")).toBeVisible({ timeout: T });
-  });
-
-  test("shows default persona option in sidebar (unauthenticated)", async ({
-    page,
-  }) => {
-    await page.goto("/graph");
-    // Unauthenticated users see only the default "Researcher overview" persona.
-    // All 6 options are only visible to EDC_ADMIN sessions.
-    await expect(page.getByText("Researcher overview").first()).toBeVisible({
-      timeout: T,
-    });
-  });
-
-  test("shows hospital persona option via URL param", async ({ page }) => {
+  test("shows persona indicator when persona set via URL", async ({ page }) => {
     await page.goto("/graph?persona=hospital");
     await expect(page.getByText("Hospital / Data Holder").first()).toBeVisible({
       timeout: T,
@@ -138,25 +122,31 @@ test.describe("Graph page — public access & persona selector", () => {
 
   test("shows layer legend with correct labels", async ({ page }) => {
     await page.goto("/graph");
-    await expect(page.getByText("L1 Governance")).toBeVisible({ timeout: T });
-    await expect(page.getByText("L2 HealthDCAT-AP")).toBeVisible({
+    await expect(page.getByText("Marketplace & Access")).toBeVisible({
       timeout: T,
     });
-    await expect(page.getByText("L3 FHIR R4")).toBeVisible({ timeout: T });
-    await expect(page.getByText("L4 OMOP CDM")).toBeVisible({ timeout: T });
-    await expect(page.getByText("L5 Ontology")).toBeVisible({ timeout: T });
+    await expect(page.getByText("Data Catalog")).toBeVisible({
+      timeout: T,
+    });
+    await expect(page.getByText("My Health Records")).toBeVisible({
+      timeout: T,
+    });
+    await expect(page.getByText("Research Data")).toBeVisible({ timeout: T });
+    await expect(page.getByText("Medical Terminology")).toBeVisible({
+      timeout: T,
+    });
   });
 
   test("shows role-specific color legend", async ({ page }) => {
     await page.goto("/graph");
-    await expect(page.getByText("Special roles")).toBeVisible({ timeout: T });
-    await expect(page.getByText("Participant").first()).toBeVisible({
+    await expect(page.getByText("Key actors")).toBeVisible({ timeout: T });
+    await expect(page.getByText("Organization").first()).toBeVisible({
       timeout: T,
     });
-    await expect(page.getByText("TrustCenter").first()).toBeVisible({
+    await expect(page.getByText("Privacy Service").first()).toBeVisible({
       timeout: T,
     });
-    await expect(page.getByText("HDABApproval").first()).toBeVisible({
+    await expect(page.getByText("Access Decision").first()).toBeVisible({
       timeout: T,
     });
   });
@@ -169,9 +159,9 @@ test.describe("Graph page — public access & persona selector", () => {
   test("hospital persona shows description question", async ({ page }) => {
     // Use ?persona=hospital so the hospital persona button is rendered in the sidebar
     await page.goto("/graph?persona=hospital");
-    await expect(
-      page.getByText(/Who has approved access to my data/i),
-    ).toBeVisible({ timeout: T });
+    await expect(page.getByText(/What data do we offer/i)).toBeVisible({
+      timeout: T,
+    });
   });
 
   test("HDAB persona shows EHDS article badge", async ({ page }) => {
@@ -249,25 +239,25 @@ test.describe("Persona graph API — /api/graph?persona=", () => {
     }
   });
 
-  test("Participant nodes always have amber role color", async ({ page }) => {
+  test("Participant nodes have orange-500 role color", async ({ page }) => {
     await skipIfNeo4jDown(page);
     const data = await apiGet(page, "/api/graph?persona=hospital");
     const participants = data.nodes.filter(
       (n: { label: string }) => n.label === "Participant",
     );
     for (const p of participants) {
-      expect(p.color).toBe("#E67E22");
+      expect(p.color).toBe("#F97316");
     }
   });
 
-  test("TrustCenter nodes always have violet role color", async ({ page }) => {
+  test("TrustCenter nodes have red-500 role color", async ({ page }) => {
     await skipIfNeo4jDown(page);
     const data = await apiGet(page, "/api/graph?persona=trust-center");
     const tcNodes = data.nodes.filter(
       (n: { label: string }) => n.label === "TrustCenter",
     );
     for (const tc of tcNodes) {
-      expect(tc.color).toBe("#8E44AD");
+      expect(tc.color).toBe("#EF4444");
     }
   });
 });

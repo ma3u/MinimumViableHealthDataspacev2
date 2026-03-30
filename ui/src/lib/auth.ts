@@ -1,45 +1,54 @@
 import { type NextAuthOptions } from "next-auth";
+import type { OAuthConfig } from "next-auth/providers/oauth";
 
 const keycloakServerUrl =
   process.env.KEYCLOAK_ISSUER ?? "http://keycloak:8080/realms/edcv";
 const keycloakPublicUrl =
   process.env.KEYCLOAK_PUBLIC_URL ?? "http://localhost:8080/realms/edcv";
 
+/**
+ * Custom Keycloak OIDC provider with split URLs (Docker-internal vs public).
+ *
+ * All server-side endpoints (token, userinfo, jwks) use the Docker-internal
+ * hostname (keycloak:8080). Browser-facing endpoints (authorization, issuer)
+ * use the public localhost URL.
+ *
+ * IMPORTANT: Do NOT set `wellKnown` — NextAuth v4 fetches the OIDC discovery
+ * document and uses its endpoint URLs, which contain `localhost:8080`. From
+ * inside the container, `localhost` resolves to the container itself (not the
+ * Keycloak container), causing ECONNREFUSED during token exchange.
+ *
+ * See CLAUDE.md Gotchas #5 and #6.
+ */
+const keycloakProvider: OAuthConfig<Record<string, unknown>> = {
+  id: "keycloak",
+  name: "Keycloak",
+  type: "oauth",
+  issuer: keycloakPublicUrl,
+  clientId: process.env.KEYCLOAK_CLIENT_ID || "health-dataspace-ui",
+  clientSecret:
+    process.env.KEYCLOAK_CLIENT_SECRET || "health-dataspace-ui-secret",
+  authorization: {
+    url: `${keycloakPublicUrl}/protocol/openid-connect/auth`,
+    params: { scope: "openid profile email" },
+  },
+  token: `${keycloakServerUrl}/protocol/openid-connect/token`,
+  userinfo: `${keycloakServerUrl}/protocol/openid-connect/userinfo`,
+  jwks_endpoint: `${keycloakServerUrl}/protocol/openid-connect/certs`,
+  idToken: true,
+  checks: ["pkce", "state"],
+  profile(profile) {
+    return {
+      id: profile.sub as string,
+      name: (profile.name ?? profile.preferred_username) as string,
+      email: profile.email as string,
+      image: null,
+    };
+  },
+};
+
 export const authOptions: NextAuthOptions = {
-  providers: [
-    {
-      id: "keycloak",
-      name: "Keycloak",
-      type: "oauth",
-      version: "2.0",
-      // wellKnown must use the Docker-internal hostname so the server-side
-      // discovery fetch succeeds inside the container.  The public URL is kept
-      // as `issuer` so ID-token `iss` claim validation still passes (Keycloak
-      // embeds the public URL in every token regardless of how the server is
-      // reached).
-      wellKnown: `${keycloakServerUrl}/.well-known/openid-configuration`,
-      issuer: keycloakPublicUrl,
-      clientId: process.env.KEYCLOAK_CLIENT_ID || "ui",
-      clientSecret: process.env.KEYCLOAK_CLIENT_SECRET || "ui-secret",
-      authorization: {
-        url: `${keycloakPublicUrl}/protocol/openid-connect/auth`,
-        params: { scope: "openid profile email" },
-      },
-      token: `${keycloakServerUrl}/protocol/openid-connect/token`,
-      userinfo: `${keycloakServerUrl}/protocol/openid-connect/userinfo`,
-      jwks_endpoint: `${keycloakServerUrl}/protocol/openid-connect/certs`,
-      idToken: true,
-      checks: ["pkce", "state"],
-      profile(profile: any) {
-        return {
-          id: profile.sub,
-          name: profile.name ?? profile.preferred_username,
-          email: profile.email,
-          image: null,
-        };
-      },
-    } as any,
-  ],
+  providers: [keycloakProvider],
   callbacks: {
     async jwt({ token, account, profile }) {
       if (account && profile) {
@@ -65,6 +74,7 @@ export const authOptions: NextAuthOptions = {
   },
   pages: { signIn: "/auth/signin" },
   session: { strategy: "jwt", maxAge: 8 * 60 * 60 },
+  debug: process.env.NEXTAUTH_DEBUG === "true",
   events: {},
 };
 

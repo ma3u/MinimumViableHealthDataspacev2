@@ -1,0 +1,37 @@
+{
+  "nodes": [
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113652",
+      "name": "hdab-decision-healthgov-2025-001",
+      "label": "HDABApproval",
+      "layer": 1,
+      "color": "#EC4899",
+      "group": "governance",
+      "sortKey": 5,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:11",
+      "name": "hdab-decision-medreg-2025-001",
+      "label": "HDABApproval",
+      "layer": 1,
+      "color": "#EC4899",
+      "group": "governance",
+      "sortKey": 5,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33183",
+      "name": "hdab-synthea-medreg-2026-001",
+      "label": "HDABApproval",
+      "layer": 1,
+      "color": "#EC4899",
+      "group": "governance",
+      "sortKey": 5,
+      "expandable": true
+    }
+  ],
+  "links": [],
+  "persona": "trust-center",
+  "question": "Which data flows am I resolving pseudonyms for?"
+}

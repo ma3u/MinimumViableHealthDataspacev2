@@ -88,7 +88,9 @@ test.describe("F · Data Transfer & Viewing", () => {
     await skipIfNeo4jDown(page);
 
     await page.goto("/graph");
-    await expect(page.getByText("Layers").first()).toBeVisible({ timeout: T });
+    await expect(page.getByText("Data layers").first()).toBeVisible({
+      timeout: T,
+    });
 
     const canvas = page.locator("canvas");
     await expect(canvas.first()).toBeVisible({ timeout: T });

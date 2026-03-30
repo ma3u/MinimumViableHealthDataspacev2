@@ -16,7 +16,6 @@ import {
   Database,
   FileSignature,
   ArrowRightLeft,
-  Settings,
   LayoutDashboard,
   ChevronDown,
   Heart,
@@ -62,57 +61,18 @@ interface NavGroup {
   icon: LucideIcon;
   /** If set, group is hidden unless user has at least one of these roles. */
   roles?: string[] | "AUTH";
+  /** If set, group is hidden when user has any of these roles (persona-specific menus replace it). */
+  hideForRoles?: string[];
   links: NavLink[];
 }
-
-// ── Cluster 1: Get Started ─────────────────────────────────────────────────────
-// Patients are citizens, not dataspace participants — no onboarding or settings
-const getStartedGroup: NavGroup = {
-  label: "Get Started",
-  icon: UserPlus,
-  roles: [
-    "EDC_ADMIN",
-    "DATA_HOLDER",
-    "DATA_USER",
-    "HDAB_AUTHORITY",
-    "TRUST_CENTER_OPERATOR",
-    "EDC_USER_PARTICIPANT",
-  ],
-  links: [
-    {
-      href: "/onboarding",
-      label: "Onboarding",
-      icon: UserPlus,
-      roles: [
-        "EDC_ADMIN",
-        "DATA_HOLDER",
-        "DATA_USER",
-        "HDAB_AUTHORITY",
-        "TRUST_CENTER_OPERATOR",
-        "EDC_USER_PARTICIPANT",
-      ],
-    },
-    {
-      href: "/settings",
-      label: "Settings",
-      icon: Settings,
-      roles: [
-        "EDC_ADMIN",
-        "DATA_HOLDER",
-        "DATA_USER",
-        "HDAB_AUTHORITY",
-        "TRUST_CENTER_OPERATOR",
-        "EDC_USER_PARTICIPANT",
-      ],
-    },
-  ],
-};
 
 // ── Cluster 2: Explore ────────────────────────────────────────────────────────
 // Public + authenticated mix — shown to everyone but some items filtered
 const exploreGroup: NavGroup = {
   label: "Explore",
   icon: Network,
+  // DATA_USER sees "My Researches" instead; PATIENT sees "My Health" instead
+  hideForRoles: ["DATA_USER", "PATIENT"],
   links: [
     { href: "/graph", label: "Graph Explorer", icon: Network },
     { href: "/catalog", label: "Dataset Catalog", icon: BookOpen },
@@ -127,18 +87,13 @@ const exploreGroup: NavGroup = {
       href: "/analytics",
       label: "OMOP Analytics",
       icon: BarChart2,
-      roles: [
-        "EDC_ADMIN",
-        "DATA_USER",
-        "HDAB_AUTHORITY",
-        "EDC_USER_PARTICIPANT",
-      ],
+      roles: ["EDC_ADMIN", "HDAB_AUTHORITY", "EDC_USER_PARTICIPANT"],
     },
     {
       href: "/query",
       label: "NLQ / Federated",
       icon: Search,
-      roles: ["EDC_ADMIN", "DATA_USER", "HDAB_AUTHORITY"],
+      roles: ["EDC_ADMIN", "HDAB_AUTHORITY"],
     },
     { href: "/eehrxf", label: "EEHRxF Profiles", icon: Heart },
   ],
@@ -186,7 +141,6 @@ const exchangeGroup: NavGroup = {
   roles: [
     "EDC_ADMIN",
     "DATA_HOLDER",
-    "DATA_USER",
     "HDAB_AUTHORITY",
     "TRUST_CENTER_OPERATOR",
     "EDC_USER_PARTICIPANT",
@@ -202,7 +156,7 @@ const exchangeGroup: NavGroup = {
       href: "/data/discover",
       label: "Discover",
       icon: Database,
-      roles: ["EDC_ADMIN", "DATA_USER", "HDAB_AUTHORITY"],
+      roles: ["EDC_ADMIN", "HDAB_AUTHORITY"],
     },
     {
       href: "/negotiate",
@@ -211,7 +165,6 @@ const exchangeGroup: NavGroup = {
       roles: [
         "EDC_ADMIN",
         "DATA_HOLDER",
-        "DATA_USER",
         "HDAB_AUTHORITY",
         "TRUST_CENTER_OPERATOR",
         "EDC_USER_PARTICIPANT",
@@ -224,7 +177,6 @@ const exchangeGroup: NavGroup = {
       roles: [
         "EDC_ADMIN",
         "DATA_HOLDER",
-        "DATA_USER",
         "HDAB_AUTHORITY",
         "TRUST_CENTER_OPERATOR",
         "EDC_USER_PARTICIPANT",
@@ -237,7 +189,6 @@ const exchangeGroup: NavGroup = {
       roles: [
         "EDC_ADMIN",
         "DATA_HOLDER",
-        "DATA_USER",
         "HDAB_AUTHORITY",
         "TRUST_CENTER_OPERATOR",
         "EDC_USER_PARTICIPANT",
@@ -246,7 +197,78 @@ const exchangeGroup: NavGroup = {
   ],
 };
 
-// ── Cluster 4b: My Health (PATIENT role only) ────────────────────────────────
+// ── Cluster 4b: My Researches (DATA_USER / researcher role) ─────────────────
+// EHDS Art. 46-49 — complete researcher workflow in daily-work order.
+// Merges explore + exchange + workflow steps into one logical menu.
+const myResearchesGroup: NavGroup = {
+  label: "My Researches",
+  icon: FlaskConical,
+  roles: ["DATA_USER"],
+  links: [
+    {
+      href: "/graph?persona=researcher",
+      label: "Research Overview",
+      icon: Network,
+      roles: ["DATA_USER"],
+    },
+    {
+      href: "/catalog",
+      label: "Browse Catalogs",
+      icon: BookOpen,
+      roles: ["DATA_USER"],
+    },
+    {
+      href: "/data/discover",
+      label: "Discover Datasets",
+      icon: Search,
+      roles: ["DATA_USER"],
+    },
+    {
+      href: "/negotiate",
+      label: "Request Access",
+      icon: FileSignature,
+      roles: ["DATA_USER"],
+    },
+    {
+      href: "/tasks",
+      label: "My Applications",
+      icon: ClipboardList,
+      roles: ["DATA_USER"],
+    },
+    {
+      href: "/data/transfer",
+      label: "Retrieve Data",
+      icon: ArrowRightLeft,
+      roles: ["DATA_USER"],
+    },
+    {
+      href: "/analytics",
+      label: "Run Analytics",
+      icon: BarChart2,
+      roles: ["DATA_USER"],
+    },
+    {
+      href: "/query",
+      label: "Query & Export",
+      icon: Database,
+      roles: ["DATA_USER"],
+    },
+    {
+      href: "/patient",
+      label: "Patient Journeys",
+      icon: User,
+      roles: ["DATA_USER"],
+    },
+    {
+      href: "/eehrxf",
+      label: "EEHRxF Profiles",
+      icon: Heart,
+      roles: ["DATA_USER"],
+    },
+  ],
+};
+
+// ── Cluster 4c: My Health (PATIENT role only) ────────────────────────────────
 // EHDS Chapter II Art. 3-12 / GDPR Art. 15-22 — patient primary-use rights
 const myHealthGroup: NavGroup = {
   label: "My Health",
@@ -286,6 +308,12 @@ const manageGroup: NavGroup = {
   icon: LayoutDashboard,
   roles: ["EDC_ADMIN", "HDAB_AUTHORITY"],
   links: [
+    {
+      href: "/onboarding",
+      label: "Onboarding",
+      icon: UserPlus,
+      roles: ["EDC_ADMIN"],
+    },
     {
       href: "/admin",
       label: "Operator Dashboard",
@@ -332,8 +360,8 @@ const docsGroup: NavGroup = {
 };
 
 const ALL_NAV_GROUPS: NavGroup[] = [
-  getStartedGroup,
   exploreGroup,
+  myResearchesGroup,
   myHealthGroup,
   governanceGroup,
   exchangeGroup,
@@ -361,6 +389,8 @@ function filterGroup(
   isAuthenticated: boolean,
 ): NavGroup | null {
   if (!canSee(group.roles, userRoles, isAuthenticated)) return null;
+  // Hide group when user has a role that gets a dedicated menu instead
+  if (group.hideForRoles?.some((r) => userRoles.includes(r))) return null;
   const visibleLinks = group.links.filter((l) =>
     canSee(l.roles, userRoles, isAuthenticated),
   );

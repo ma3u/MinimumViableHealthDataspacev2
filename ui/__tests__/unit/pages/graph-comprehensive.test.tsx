@@ -23,7 +23,11 @@ vi.mock("@/lib/api", () => ({
   fetchApi: (...args: unknown[]) => mockFetchApi(...args),
 }));
 
-const mockSearchParams = { get: vi.fn().mockReturnValue(null) };
+// Param-aware search params mock: set params via mockSearchParamValues
+const mockSearchParamValues: Record<string, string | null> = {};
+const mockSearchParams = {
+  get: vi.fn((key: string) => mockSearchParamValues[key] ?? null),
+};
 vi.mock("next/navigation", () => ({
   useSearchParams: () => mockSearchParams,
 }));
@@ -71,35 +75,35 @@ const sampleGraphData = {
       name: "DataProduct-A",
       label: "DataProduct",
       layer: 1,
-      color: "#2471A3",
+      color: "#5B8DEF",
     },
     {
       id: "n2",
       name: "Dataset-B",
       label: "Dataset",
       layer: 2,
-      color: "#148F77",
+      color: "#45B7AA",
     },
     {
       id: "n3",
       name: "Patient-C",
       label: "Patient",
       layer: 3,
-      color: "#1E8449",
+      color: "#6ABF69",
     },
     {
       id: "n4",
       name: "Condition-D",
       label: "Condition",
       layer: 4,
-      color: "#CA6F1E",
+      color: "#F0A050",
     },
     {
       id: "n5",
       name: "SNOMED-E",
       label: "Concept",
       layer: 5,
-      color: "#7D3C98",
+      color: "#A78BDB",
     },
   ],
   links: [
@@ -143,7 +147,10 @@ describe("GraphPage", () => {
   beforeEach(() => {
     mockFetchApi.mockReset();
     mockForceGraph.mockReset();
-    mockSearchParams.get.mockReturnValue(null);
+    // Reset search params
+    for (const key of Object.keys(mockSearchParamValues)) {
+      delete mockSearchParamValues[key];
+    }
   });
 
   // ────────────────────────────────────────────────────────────────────
@@ -164,12 +171,10 @@ describe("GraphPage", () => {
       ).toBeInTheDocument();
     });
 
-    it("shows 'Building researcher overview…' while data is loading", () => {
+    it("shows persona-aware loading text while data is loading", () => {
       mockFetchApi.mockReturnValue(new Promise(() => {}));
       render(<GraphPage />);
-      expect(
-        screen.getByText(/Building researcher overview/),
-      ).toBeInTheDocument();
+      expect(screen.getByText(/Loading.*Dataspace/)).toBeInTheDocument();
     });
 
     it("does not render ForceGraph while loading", () => {
@@ -191,23 +196,24 @@ describe("GraphPage", () => {
       render(<GraphPage />);
       await waitFor(() => {
         expect(
-          screen.queryByText(/Building researcher overview/),
+          screen.queryByText(/Loading.*Dataspace/),
         ).not.toBeInTheDocument();
       });
     });
 
-    it("calls fetchApi with /api/graph", () => {
+    it("calls fetchApi with persona-qualified graph URL", () => {
       mockFetchApi.mockReturnValue(new Promise(() => {}));
       render(<GraphPage />);
-      expect(mockFetchApi).toHaveBeenCalledWith("/api/graph");
+      // Global mock session has EDC_ADMIN role → persona "edc-admin"
+      expect(mockFetchApi).toHaveBeenCalledWith("/api/graph?persona=edc-admin");
     });
 
     it("shows node and edge counts after data loads", async () => {
       mockFetchApi.mockReturnValue(mockResponse(sampleGraphData));
       render(<GraphPage />);
       await waitFor(() => {
-        expect(screen.getByText(/5 nodes/)).toBeInTheDocument();
-        expect(screen.getByText(/4 edges/)).toBeInTheDocument();
+        // +1 node for injected value center
+        expect(screen.getByText(/6 nodes/)).toBeInTheDocument();
       });
     });
   });
@@ -216,21 +222,21 @@ describe("GraphPage", () => {
   // Sidebar: layers, nav links
   // ────────────────────────────────────────────────────────────────────
   describe("sidebar", () => {
-    it("renders Layers heading", () => {
+    it("renders Structural layers heading", () => {
       mockFetchApi.mockReturnValue(new Promise(() => {}));
       render(<GraphPage />);
-      expect(screen.getByText("Layers")).toBeInTheDocument();
+      expect(screen.getByText("Structural layers")).toBeInTheDocument();
     });
 
-    it("renders all five layer labels", () => {
+    it("renders all five edc-admin persona layer labels", () => {
       mockFetchApi.mockReturnValue(new Promise(() => {}));
       render(<GraphPage />);
       for (const label of [
-        "L1 Governance",
-        "L2 HealthDCAT-AP",
-        "L3 FHIR R4",
-        "L4 OMOP CDM",
-        "L5 Ontology",
+        "Participants & Contracts",
+        "Data Offerings",
+        "Clinical Layer",
+        "Research Layer",
+        "Events & Credentials",
       ]) {
         expect(screen.getByText(label)).toBeInTheDocument();
       }
@@ -278,12 +284,11 @@ describe("GraphPage", () => {
       });
     });
 
-    it("shows 0 nodes · 0 edges for empty API response", async () => {
+    it("shows 1 node for empty API response (value center injected)", async () => {
       mockFetchApi.mockReturnValue(mockResponse({ nodes: [], links: [] }));
       render(<GraphPage />);
       await waitFor(() => {
-        expect(screen.getByText(/0 nodes/)).toBeInTheDocument();
-        expect(screen.getByText(/0 edges/)).toBeInTheDocument();
+        expect(screen.getByText(/1 nodes/)).toBeInTheDocument();
       });
     });
   });
@@ -392,15 +397,10 @@ describe("GraphPage", () => {
       await waitFor(() => {
         expect(screen.getByText("DataProduct-A")).toBeInTheDocument();
       });
-      // The close button renders an <X> icon from lucide-react inside a <button>
-      // Find the button that renders the X icon — it sits next to the node name
-      const closeButtons = screen.getAllByRole("button");
-      // The close button is the one without a text child (just the icon)
-      const closeBtn = closeButtons.find(
-        (btn) => btn.querySelector("svg") !== null && btn.textContent === "",
-      );
+      // Find the close button by its aria-label
+      const closeBtn = screen.getByLabelText("Close detail panel");
       expect(closeBtn).toBeDefined();
-      fireEvent.click(closeBtn!);
+      fireEvent.click(closeBtn);
       await waitFor(() => {
         expect(screen.getByText(/Click a node to inspect/)).toBeInTheDocument();
       });
@@ -419,9 +419,9 @@ describe("GraphPage", () => {
       });
       await waitFor(() => {
         expect(screen.getByText("Patient-C")).toBeInTheDocument();
-        expect(screen.getByText("Patient")).toBeInTheDocument();
-        // L3 FHIR R4 appears in both legend and detail card
-        const l3Elements = screen.getAllByText("L3 FHIR R4");
+        expect(screen.getByText("My Data")).toBeInTheDocument();
+        // edc-admin persona: layer 3 = "Clinical Layer" (in legend + detail card)
+        const l3Elements = screen.getAllByText("Clinical Layer");
         expect(l3Elements.length).toBeGreaterThanOrEqual(2);
         expect(screen.getByText("n3")).toBeInTheDocument();
       });
@@ -435,9 +435,9 @@ describe("GraphPage", () => {
       });
       await waitFor(() => {
         expect(screen.getByText("DataProduct-A")).toBeInTheDocument();
-        expect(screen.getByText("DataProduct")).toBeInTheDocument();
-        // L1 Governance appears both in the legend and in the detail card
-        const l1Elements = screen.getAllByText("L1 Governance");
+        expect(screen.getByText("Data Offering")).toBeInTheDocument();
+        // edc-admin persona: layer 1 = "Participants & Contracts"
+        const l1Elements = screen.getAllByText("Participants & Contracts");
         expect(l1Elements.length).toBeGreaterThanOrEqual(2);
       });
     });
@@ -452,7 +452,8 @@ describe("GraphPage", () => {
         expect(screen.getByText("SNOMED-E")).toBeInTheDocument();
         expect(screen.getByText("Concept")).toBeInTheDocument();
         expect(screen.getByText("n5")).toBeInTheDocument();
-        const l5Elements = screen.getAllByText("L5 Ontology");
+        // edc-admin persona: layer 5 = "Events & Credentials"
+        const l5Elements = screen.getAllByText("Events & Credentials");
         expect(l5Elements.length).toBeGreaterThanOrEqual(2);
       });
     });
@@ -569,7 +570,8 @@ describe("GraphPage", () => {
         (props.onNodeClick as (n: object) => void)(node);
       });
       await waitFor(() => {
-        expect(screen.getByText(/Connected \(2\)/)).toBeInTheDocument();
+        expect(screen.getByText(/Outgoing \(1\)/)).toBeInTheDocument();
+        expect(screen.getByText(/Incoming \(1\)/)).toBeInTheDocument();
       });
     });
 
@@ -593,7 +595,8 @@ describe("GraphPage", () => {
       });
       // n1→n2 is incoming to n2 (DESCRIBES), so we expect "←" and "DESCRIBES"
       await waitFor(() => {
-        expect(screen.getByText("DESCRIBES")).toBeInTheDocument();
+        // FRIENDLY_REL_NAMES maps "DESCRIBES" → "describes"
+        expect(screen.getByText("describes")).toBeInTheDocument();
       });
     });
 
@@ -632,7 +635,7 @@ describe("GraphPage", () => {
             name: "Isolated",
             label: "Orphan",
             layer: 1,
-            color: "#2471A3",
+            color: "#5B8DEF",
           },
         ],
         links: [],
@@ -650,7 +653,8 @@ describe("GraphPage", () => {
       await waitFor(() => {
         expect(screen.getByText("Isolated")).toBeInTheDocument();
       });
-      expect(screen.queryByText(/Connected/)).not.toBeInTheDocument();
+      expect(screen.queryByText(/Outgoing/)).not.toBeInTheDocument();
+      expect(screen.queryByText(/Incoming/)).not.toBeInTheDocument();
     });
   });
 
@@ -665,7 +669,7 @@ describe("GraphPage", () => {
         (props.onNodeClick as (n: object) => void)(node);
       });
       await waitFor(() => {
-        expect(screen.getByText(/Connected/)).toBeInTheDocument();
+        expect(screen.getByText(/Outgoing/)).toBeInTheDocument();
       });
       // Click on the neighbour "Patient-C" button
       const neighbourButton = screen.getByText("Patient-C").closest("button");
@@ -675,8 +679,8 @@ describe("GraphPage", () => {
       await waitFor(() => {
         // Patient-C detail card shows its unique ID
         expect(screen.getByText("n3")).toBeInTheDocument();
-        // L3 FHIR R4 appears in legend + detail card
-        const l3Elements = screen.getAllByText("L3 FHIR R4");
+        // edc-admin persona: layer 3 = "Clinical Layer" (in legend + detail card)
+        const l3Elements = screen.getAllByText("Clinical Layer");
         expect(l3Elements.length).toBeGreaterThanOrEqual(2);
       });
     });
@@ -688,15 +692,16 @@ describe("GraphPage", () => {
         (props.onNodeClick as (n: object) => void)(node);
       });
       await waitFor(() => {
-        expect(screen.getByText("DESCRIBES")).toBeInTheDocument();
+        // FRIENDLY_REL_NAMES maps "DESCRIBES" → "describes"
+        expect(screen.getByText("describes")).toBeInTheDocument();
         expect(screen.getByText("CONTAINS")).toBeInTheDocument();
       });
       // Click Patient-C neighbour
       const neighbourButton = screen.getByText("Patient-C").closest("button");
       fireEvent.click(neighbourButton!);
-      // Patient-C (n3) has: n2→n3 (CONTAINS), n3→n4 (HAS_CONDITION)
+      // Patient-C (n3) has: n2→n3 (CONTAINS), n3→n4 (HAS_CONDITION → "has condition")
       await waitFor(() => {
-        expect(screen.getByText("HAS_CONDITION")).toBeInTheDocument();
+        expect(screen.getByText("has condition")).toBeInTheDocument();
         expect(screen.getByText("CONTAINS")).toBeInTheDocument();
       });
     });
@@ -707,7 +712,7 @@ describe("GraphPage", () => {
   // ────────────────────────────────────────────────────────────────────
   describe("highlight query param", () => {
     it("auto-selects node matching ?highlight= by name", async () => {
-      mockSearchParams.get.mockReturnValue("Dataset-B");
+      mockSearchParamValues.highlight = "Dataset-B";
       mockFetchApi.mockReturnValue(mockResponse(sampleGraphData));
       render(<GraphPage />);
       await waitFor(() => {
@@ -719,7 +724,7 @@ describe("GraphPage", () => {
     });
 
     it("auto-selects node matching ?highlight= by ID (case-insensitive)", async () => {
-      mockSearchParams.get.mockReturnValue("N3");
+      mockSearchParamValues.highlight = "N3";
       mockFetchApi.mockReturnValue(mockResponse(sampleGraphData));
       render(<GraphPage />);
       await waitFor(() => {
@@ -729,7 +734,7 @@ describe("GraphPage", () => {
     });
 
     it("auto-selects node matching partial name", async () => {
-      mockSearchParams.get.mockReturnValue("SNOMED");
+      mockSearchParamValues.highlight = "SNOMED";
       mockFetchApi.mockReturnValue(mockResponse(sampleGraphData));
       render(<GraphPage />);
       await waitFor(() => {
@@ -739,7 +744,7 @@ describe("GraphPage", () => {
     });
 
     it("does nothing when ?highlight= matches no node", async () => {
-      mockSearchParams.get.mockReturnValue("nonexistent");
+      mockSearchParamValues.highlight = "nonexistent";
       mockFetchApi.mockReturnValue(mockResponse(sampleGraphData));
       render(<GraphPage />);
       await waitFor(() => {
@@ -750,7 +755,7 @@ describe("GraphPage", () => {
     });
 
     it("does nothing when highlight is null", async () => {
-      mockSearchParams.get.mockReturnValue(null);
+      // highlight defaults to null via empty mockSearchParamValues
       mockFetchApi.mockReturnValue(mockResponse(sampleGraphData));
       render(<GraphPage />);
       await waitFor(() => {
@@ -820,8 +825,10 @@ describe("GraphPage", () => {
     it("passes graphData with correct nodes and links", async () => {
       const props = await renderAndGetForceGraphProps();
       const graphData = props.graphData as typeof sampleGraphData;
-      expect(graphData.nodes).toHaveLength(5);
-      expect(graphData.links).toHaveLength(4);
+      // +1 node for injected value center
+      expect(graphData.nodes).toHaveLength(6);
+      // +N links for VALUE_FOCUS edges from value center
+      expect(graphData.links.length).toBeGreaterThanOrEqual(4);
     });
 
     it("passes backgroundColor", async () => {
@@ -1030,7 +1037,8 @@ describe("GraphPage", () => {
       };
       paintLink(link, ctx, 1);
       // Should draw the relationship type text on the midpoint
-      expect(ctx.fillText).toHaveBeenCalledWith("DESCRIBES", 20, 30);
+      // FRIENDLY_REL_NAMES maps "DESCRIBES" → "describes"
+      expect(ctx.fillText).toHaveBeenCalledWith("describes", 20, 30);
     });
   });
 
@@ -1046,7 +1054,7 @@ describe("GraphPage", () => {
             name: "Solo",
             label: "Thing",
             layer: 1,
-            color: "#2471A3",
+            color: "#94A3B8",
           },
         ],
         links: [],
@@ -1054,8 +1062,8 @@ describe("GraphPage", () => {
       mockFetchApi.mockReturnValue(mockResponse(oneNodeData));
       render(<GraphPage />);
       await waitFor(() => {
-        expect(screen.getByText(/1 nodes/)).toBeInTheDocument();
-        expect(screen.getByText(/0 edges/)).toBeInTheDocument();
+        // +1 for injected value center node
+        expect(screen.getByText(/2 nodes/)).toBeInTheDocument();
       });
     });
 

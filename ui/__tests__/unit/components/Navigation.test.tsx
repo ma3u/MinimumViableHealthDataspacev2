@@ -108,7 +108,6 @@ describe("Navigation Component", () => {
   it("should render participant nav groups for EDC_ADMIN", () => {
     render(<Navigation />);
     const labels = visibleGroupLabels();
-    expect(labels).toContain("Get Started");
     expect(labels).toContain("Explore");
     expect(labels).toContain("Governance");
     expect(labels).toContain("Exchange");
@@ -116,6 +115,8 @@ describe("Navigation Component", () => {
     expect(labels).toContain("Docs");
     // My Health is PATIENT-only — admin does NOT see it
     expect(labels).not.toContain("My Health");
+    // Get Started was removed — Onboarding moved to Manage
+    expect(labels).not.toContain("Get Started");
   });
 
   it("should render the UserMenu", () => {
@@ -151,6 +152,12 @@ describe("Navigation Component", () => {
 
   // ── Dropdown links ──────────────────────────────────────────────────────
 
+  it("should show Onboarding inside Manage dropdown for EDC_ADMIN", async () => {
+    render(<Navigation />);
+    await openDropdown("Manage");
+    expect(screen.getByText("Onboarding")).toBeInTheDocument();
+  });
+
   it("should show Graph Explorer and Catalog inside Explore dropdown", async () => {
     render(<Navigation />);
     await openDropdown("Explore");
@@ -165,18 +172,13 @@ describe("Navigation Component", () => {
       setSession(["PATIENT"], "patient1");
     });
 
-    it("should show Explore, My Health, and Docs groups", () => {
+    it("should show My Health and Docs groups (not Explore)", () => {
       render(<Navigation />);
       const labels = visibleGroupLabels();
-      expect(labels).toContain("Explore");
+      // Patients see My Health instead of Explore (hideForRoles)
+      expect(labels).not.toContain("Explore");
       expect(labels).toContain("My Health");
       expect(labels).toContain("Docs");
-    });
-
-    it("should NOT show Get Started group", () => {
-      render(<Navigation />);
-      const labels = visibleGroupLabels();
-      expect(labels).not.toContain("Get Started");
     });
 
     it("should NOT show Exchange group", () => {
@@ -206,16 +208,10 @@ describe("Navigation Component", () => {
       expect(screen.getByText("Research Insights")).toBeInTheDocument();
     });
 
-    it("should show only public items in Explore dropdown", async () => {
+    it("should NOT show Explore for PATIENT (My Health replaces it)", () => {
       render(<Navigation />);
-      await openDropdown("Explore");
-      expect(screen.getByText("Graph Explorer")).toBeInTheDocument();
-      expect(screen.getByText("Dataset Catalog")).toBeInTheDocument();
-      expect(screen.getByText("Patient Journey")).toBeInTheDocument();
-      // Role-restricted items should NOT be visible
-      expect(screen.queryByText("DCAT-AP Editor")).not.toBeInTheDocument();
-      expect(screen.queryByText("OMOP Analytics")).not.toBeInTheDocument();
-      expect(screen.queryByText("NLQ / Federated")).not.toBeInTheDocument();
+      const labels = visibleGroupLabels();
+      expect(labels).not.toContain("Explore");
     });
   });
 
@@ -226,13 +222,13 @@ describe("Navigation Component", () => {
       setSession(["EDC_USER_PARTICIPANT", "DATA_HOLDER"], "clinicuser");
     });
 
-    it("should show Get Started, Explore, Exchange, and Docs", () => {
+    it("should show Explore, Exchange, and Docs", () => {
       render(<Navigation />);
       const labels = visibleGroupLabels();
-      expect(labels).toContain("Get Started");
       expect(labels).toContain("Explore");
       expect(labels).toContain("Exchange");
       expect(labels).toContain("Docs");
+      expect(labels).not.toContain("Get Started");
     });
 
     it("should NOT show Manage group", () => {
@@ -261,17 +257,25 @@ describe("Navigation Component", () => {
       setSession(["EDC_USER_PARTICIPANT", "DATA_USER"], "researcher");
     });
 
-    it("should show Explore with OMOP Analytics and NLQ", async () => {
+    it("should show My Researches with analytics and query workflow", async () => {
       render(<Navigation />);
-      await openDropdown("Explore");
-      expect(screen.getByText("OMOP Analytics")).toBeInTheDocument();
-      expect(screen.getByText("NLQ / Federated")).toBeInTheDocument();
+      await openDropdown("My Researches");
+      expect(screen.getByText("Run Analytics")).toBeInTheDocument();
+      expect(screen.getByText("Query & Export")).toBeInTheDocument();
+      expect(screen.getByText("Discover Datasets")).toBeInTheDocument();
+      expect(screen.getByText("Request Access")).toBeInTheDocument();
     });
 
     it("should NOT show Manage group", () => {
       render(<Navigation />);
       const labels = visibleGroupLabels();
       expect(labels).not.toContain("Manage");
+    });
+
+    it("should show My Researches group", () => {
+      render(<Navigation />);
+      const labels = visibleGroupLabels();
+      expect(labels).toContain("My Researches");
     });
   });
 
@@ -288,10 +292,13 @@ describe("Navigation Component", () => {
       expect(labels).toContain("Governance");
     });
 
-    it("should show Manage group (policies + audit)", () => {
+    it("should show Manage group (policies + audit) but NOT Onboarding", async () => {
       render(<Navigation />);
       const labels = visibleGroupLabels();
       expect(labels).toContain("Manage");
+      // Onboarding is admin-only within Manage
+      await openDropdown("Manage");
+      expect(screen.queryByText("Onboarding")).not.toBeInTheDocument();
     });
 
     it("should NOT show My Health group", () => {

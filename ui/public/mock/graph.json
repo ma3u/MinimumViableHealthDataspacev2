@@ -1,962 +1,2470 @@
 {
   "nodes": [
     {
-      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:5",
-      "name": "Riverside General (CLINIC)",
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113639",
+      "name": "",
       "label": "Participant",
       "layer": 1,
-      "color": "#2471A3"
+      "color": "#F97316",
+      "group": "participant",
+      "sortKey": 0,
+      "expandable": true
     },
     {
-      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:6",
-      "name": "TrialCorp Research (CRO)",
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113607",
+      "name": "AlphaKlinik Berlin",
       "label": "Participant",
       "layer": 1,
-      "color": "#2471A3"
+      "color": "#F97316",
+      "group": "participant",
+      "sortKey": 0,
+      "expandable": true
     },
     {
-      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:7",
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113649",
       "name": "HealthGov (HDAB)",
       "label": "Participant",
       "layer": 1,
-      "color": "#2471A3"
+      "color": "#F97316",
+      "group": "participant",
+      "sortKey": 0,
+      "expandable": true
     },
     {
-      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:8",
-      "name": "T2D Cohort 2020-2025",
-      "label": "DataProduct",
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113611",
+      "name": "Institut de Recherche Santé",
+      "label": "Participant",
       "layer": 1,
-      "color": "#2471A3"
+      "color": "#F97316",
+      "group": "participant",
+      "sortKey": 0,
+      "expandable": true
     },
     {
-      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:9",
-      "name": "EHDS Contract (TrialCorp↔Riverside)",
-      "label": "Contract",
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113610",
+      "name": "Limburg Medical Centre",
+      "label": "Participant",
       "layer": 1,
-      "color": "#2471A3"
+      "color": "#F97316",
+      "group": "participant",
+      "sortKey": 0,
+      "expandable": true
     },
     {
-      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:10",
-      "name": "Access App healthgov-2025-001",
-      "label": "AccessApplication",
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113609",
+      "name": "MedReg DE",
+      "label": "Participant",
       "layer": 1,
-      "color": "#2471A3"
+      "color": "#F97316",
+      "group": "participant",
+      "sortKey": 0,
+      "expandable": true
     },
     {
-      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:11",
-      "name": "HDAB Approval healthgov-2025-001",
-      "label": "HDABApproval",
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113608",
+      "name": "PharmaCo Research AG",
+      "label": "Participant",
       "layer": 1,
-      "color": "#2471A3"
+      "color": "#F97316",
+      "group": "participant",
+      "sortKey": 0,
+      "expandable": true
     },
     {
-      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:12",
-      "name": "T2D Patient Journey Dataset",
-      "label": "HealthDataset",
-      "layer": 2,
-      "color": "#148F77"
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113647",
+      "name": "Riverside General (CLINIC)",
+      "label": "Participant",
+      "layer": 1,
+      "color": "#F97316",
+      "group": "participant",
+      "sortKey": 0,
+      "expandable": true
     },
     {
-      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:13",
-      "name": "FHIR R4 Distribution",
-      "label": "Distribution",
-      "layer": 2,
-      "color": "#148F77"
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113648",
+      "name": "TrialCorp Research (CRO)",
+      "label": "Participant",
+      "layer": 1,
+      "color": "#F97316",
+      "group": "participant",
+      "sortKey": 0,
+      "expandable": true
     },
     {
-      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:14",
-      "name": "OMOP CDM Distribution",
-      "label": "Distribution",
-      "layer": 2,
-      "color": "#148F77"
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33165",
+      "name": "Health MVD Operator",
+      "label": "Organization",
+      "layer": 1,
+      "color": "#94A3B8",
+      "group": "participant",
+      "sortKey": 1,
+      "expandable": true
     },
     {
-      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33169",
-      "name": "Synthea Synthetic FHIR R4 Patient Cohort",
-      "label": "HealthDataset",
-      "layer": 2,
-      "color": "#148F77"
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113576",
+      "name": "Health MVD Operator",
+      "label": "Organization",
+      "layer": 1,
+      "color": "#94A3B8",
+      "group": "participant",
+      "sortKey": 1,
+      "expandable": true
     },
     {
       "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33179",
       "name": "Synthea FHIR R4 Patient Cohort (2026)",
       "label": "DataProduct",
       "layer": 1,
-      "color": "#2471A3"
+      "color": "#94A3B8",
+      "group": "governance",
+      "sortKey": 2,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:8",
+      "name": "T2D Cohort 2020-2025",
+      "label": "DataProduct",
+      "layer": 1,
+      "color": "#94A3B8",
+      "group": "governance",
+      "sortKey": 2,
+      "expandable": true
     },
     {
       "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33180",
       "name": "EHDS Art. 53 Secondary Use — Synthetic Data",
       "label": "OdrlPolicy",
       "layer": 1,
-      "color": "#2471A3"
+      "color": "#94A3B8",
+      "group": "governance",
+      "sortKey": 3,
+      "expandable": true
     },
     {
       "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33181",
       "name": "EHDS Art. 53 Synthetic Cohort Contract",
       "label": "Contract",
       "layer": 1,
-      "color": "#2471A3"
+      "color": "#94A3B8",
+      "group": "governance",
+      "sortKey": 4,
+      "expandable": true
     },
     {
-      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33182",
-      "name": "Synthea Cohort Access Request 2026-001",
-      "label": "AccessApplication",
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:9",
+      "name": "EHDS Contract (PharmaCo Research AG↔AlphaKlinik Berlin)",
+      "label": "Contract",
       "layer": 1,
-      "color": "#2471A3"
+      "color": "#94A3B8",
+      "group": "governance",
+      "sortKey": 4,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113650",
+      "name": "EHDS Contract (TrialCorp↔Riverside)",
+      "label": "Contract",
+      "layer": 1,
+      "color": "#94A3B8",
+      "group": "governance",
+      "sortKey": 4,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113652",
+      "name": "HDAB Approval healthgov-2025-001",
+      "label": "HDABApproval",
+      "layer": 1,
+      "color": "#EC4899",
+      "group": "governance",
+      "sortKey": 5,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:11",
+      "name": "HDAB Approval medreg-2025-001",
+      "label": "HDABApproval",
+      "layer": 1,
+      "color": "#EC4899",
+      "group": "governance",
+      "sortKey": 5,
+      "expandable": true
     },
     {
       "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33183",
-      "name": "HealthGov HDAB Approval — Synthea Cohort 2026",
+      "name": "MedReg HDAB Approval — Synthea Cohort 2026",
       "label": "HDABApproval",
       "layer": 1,
-      "color": "#2471A3"
+      "color": "#EC4899",
+      "group": "governance",
+      "sortKey": 5,
+      "expandable": true
     },
     {
-      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2039",
-      "name": "Aaron697 Columbus656 Kilback373",
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113616",
+      "name": "AlphaKlinik → LMC (In Progress)",
+      "label": "ContractNegotiation",
+      "layer": 1,
+      "color": "#94A3B8",
+      "group": "governance",
+      "sortKey": 7,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113612",
+      "name": "AlphaKlinik → PharmaCo (FHIR)",
+      "label": "ContractNegotiation",
+      "layer": 1,
+      "color": "#94A3B8",
+      "group": "governance",
+      "sortKey": 7,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113613",
+      "name": "AlphaKlinik → PharmaCo (OMOP)",
+      "label": "ContractNegotiation",
+      "layer": 1,
+      "color": "#94A3B8",
+      "group": "governance",
+      "sortKey": 7,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113614",
+      "name": "LMC → MedReg (Prostate)",
+      "label": "ContractNegotiation",
+      "layer": 1,
+      "color": "#94A3B8",
+      "group": "governance",
+      "sortKey": 7,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113615",
+      "name": "PharmaCo → IRS (Terminated)",
+      "label": "ContractNegotiation",
+      "layer": 1,
+      "color": "#94A3B8",
+      "group": "governance",
+      "sortKey": 7,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113595",
+      "name": "OMOP CDM v5.4 Analytics Cohort",
+      "label": "HealthDataset",
+      "layer": 2,
+      "color": "#7DD3C8",
+      "group": "dataset",
+      "sortKey": 0,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113715",
+      "name": "OMOP CDM v5.4 Analytics Warehouse",
+      "label": "HealthDataset",
+      "layer": 2,
+      "color": "#7DD3C8",
+      "group": "dataset",
+      "sortKey": 0,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113716",
+      "name": "Prostate Cancer Multi-Centre Registry",
+      "label": "HealthDataset",
+      "layer": 2,
+      "color": "#7DD3C8",
+      "group": "dataset",
+      "sortKey": 0,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113596",
+      "name": "Prostate Cancer Registry 2024",
+      "label": "HealthDataset",
+      "layer": 2,
+      "color": "#7DD3C8",
+      "group": "dataset",
+      "sortKey": 0,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113579",
+      "name": "Synthea Synthetic FHIR R4 Patient Cohort",
+      "label": "HealthDataset",
+      "layer": 2,
+      "color": "#7DD3C8",
+      "group": "dataset",
+      "sortKey": 0,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113638",
+      "name": "Synthetic Type 2 Diabetes Patient Journey",
+      "label": "HealthDataset",
+      "layer": 2,
+      "color": "#7DD3C8",
+      "group": "dataset",
+      "sortKey": 0,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:12",
+      "name": "T2D Patient Journey Dataset",
+      "label": "HealthDataset",
+      "layer": 2,
+      "color": "#7DD3C8",
+      "group": "dataset",
+      "sortKey": 0,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113653",
+      "name": "T2D Patient Journey Dataset",
+      "label": "HealthDataset",
+      "layer": 2,
+      "color": "#7DD3C8",
+      "group": "dataset",
+      "sortKey": 0,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33169",
+      "name": "T2D Patient Journey Dataset (FHIR R4)",
+      "label": "HealthDataset",
+      "layer": 2,
+      "color": "#7DD3C8",
+      "group": "dataset",
+      "sortKey": 0,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113584",
+      "name": "DCore FHIR HTTP Data Plane",
+      "label": "Distribution",
+      "layer": 2,
+      "color": "#7DD3C8",
+      "group": "dataset",
+      "sortKey": 1,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:13",
+      "name": "FHIR R4 Distribution",
+      "label": "Distribution",
+      "layer": 2,
+      "color": "#7DD3C8",
+      "group": "dataset",
+      "sortKey": 1,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113582",
+      "name": "Neo4j Bolt Protocol",
+      "label": "Distribution",
+      "layer": 2,
+      "color": "#7DD3C8",
+      "group": "dataset",
+      "sortKey": 1,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113583",
+      "name": "Neo4j HTTP REST API",
+      "label": "Distribution",
+      "layer": 2,
+      "color": "#7DD3C8",
+      "group": "dataset",
+      "sortKey": 1,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:14",
+      "name": "OMOP CDM Distribution",
+      "label": "Distribution",
+      "layer": 2,
+      "color": "#7DD3C8",
+      "group": "dataset",
+      "sortKey": 1,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33177",
+      "name": "purpose:ehds-art53",
+      "label": "EhdsPurpose",
+      "layer": 2,
+      "color": "#7DD3C8",
+      "group": "dataset",
+      "sortKey": 2,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113558",
+      "name": "Bundle Lab Report (EU)",
+      "label": "EEHRxFProfile",
+      "layer": 2,
+      "color": "#7DD3C8",
+      "group": "dataset",
+      "sortKey": 3,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113559",
+      "name": "Composition (EU HDR)",
+      "label": "EEHRxFProfile",
+      "layer": 2,
+      "color": "#7DD3C8",
+      "group": "dataset",
+      "sortKey": 3,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113556",
+      "name": "DiagnosticReport (EU Lab)",
+      "label": "EEHRxFProfile",
+      "layer": 2,
+      "color": "#7DD3C8",
+      "group": "dataset",
+      "sortKey": 3,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113560",
+      "name": "Encounter (EU HDR)",
+      "label": "EEHRxFProfile",
+      "layer": 2,
+      "color": "#7DD3C8",
+      "group": "dataset",
+      "sortKey": 3,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113563",
+      "name": "ImagingStudy (EU)",
+      "label": "EEHRxFProfile",
+      "layer": 2,
+      "color": "#7DD3C8",
+      "group": "dataset",
+      "sortKey": 3,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113562",
+      "name": "MedicationDispense (EU MPD)",
+      "label": "EEHRxFProfile",
+      "layer": 2,
+      "color": "#7DD3C8",
+      "group": "dataset",
+      "sortKey": 3,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113561",
+      "name": "MedicationRequest (EU MPD)",
+      "label": "EEHRxFProfile",
+      "layer": 2,
+      "color": "#7DD3C8",
+      "group": "dataset",
+      "sortKey": 3,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113557",
+      "name": "Observation Results (EU Lab)",
+      "label": "EEHRxFProfile",
+      "layer": 2,
+      "color": "#7DD3C8",
+      "group": "dataset",
+      "sortKey": 3,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113554",
+      "name": "Organization (EU core)",
+      "label": "EEHRxFProfile",
+      "layer": 2,
+      "color": "#7DD3C8",
+      "group": "dataset",
+      "sortKey": 3,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113552",
+      "name": "Patient (EU core)",
+      "label": "EEHRxFProfile",
+      "layer": 2,
+      "color": "#7DD3C8",
+      "group": "dataset",
+      "sortKey": 3,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113553",
+      "name": "Practitioner (EU core)",
+      "label": "EEHRxFProfile",
+      "layer": 2,
+      "color": "#7DD3C8",
+      "group": "dataset",
+      "sortKey": 3,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113555",
+      "name": "PractitionerRole (EU core)",
+      "label": "EEHRxFProfile",
+      "layer": 2,
+      "color": "#7DD3C8",
+      "group": "dataset",
+      "sortKey": 3,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:3306",
+      "name": "Anisha16 Grayce293 Kuvalis369",
       "label": "Patient",
       "layer": 3,
-      "color": "#1E8449"
+      "color": "#86EFAC",
+      "group": "clinical",
+      "sortKey": 0,
+      "expandable": true
     },
     {
-      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:25",
-      "name": "Adina377 Dolly486 Lang846",
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:12533",
+      "name": "Bettina657 Tomeka87 Swift555",
       "label": "Patient",
       "layer": 3,
-      "color": "#1E8449"
+      "color": "#86EFAC",
+      "group": "clinical",
+      "sortKey": 0,
+      "expandable": true
     },
     {
-      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2253",
-      "name": "Adolph80 Burt293 Bernhard322",
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:13157",
+      "name": "Brett333 Waylon572 Lynch190",
       "label": "Patient",
       "layer": 3,
-      "color": "#1E8449"
+      "color": "#86EFAC",
+      "group": "clinical",
+      "sortKey": 0,
+      "expandable": true
     },
     {
-      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2469",
-      "name": "Adolph80 Tracy345 Walker122",
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:16907",
+      "name": "Chantay958 Lavera253 Toy286",
       "label": "Patient",
       "layer": 3,
-      "color": "#1E8449"
+      "color": "#86EFAC",
+      "group": "clinical",
+      "sortKey": 0,
+      "expandable": true
     },
     {
-      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:38",
-      "name": "Adrianna470 Smitham825",
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:17541",
+      "name": "Charlie254 Reginald96 Hirthe744",
       "label": "Patient",
       "layer": 3,
-      "color": "#1E8449"
+      "color": "#86EFAC",
+      "group": "clinical",
+      "sortKey": 0,
+      "expandable": true
     },
     {
-      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2715",
-      "name": "Adriene242 Arleen939 Heathcote539",
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:24588",
+      "name": "Denver542 Riley817 Schamberger479",
       "label": "Patient",
       "layer": 3,
-      "color": "#1E8449"
+      "color": "#86EFAC",
+      "group": "clinical",
+      "sortKey": 0,
+      "expandable": true
     },
     {
-      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2991",
-      "name": "Akilah516 Leena55 Bauch723",
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:25232",
+      "name": "Dinah304 Pfannerstill264",
       "label": "Patient",
       "layer": 3,
-      "color": "#1E8449"
+      "color": "#86EFAC",
+      "group": "clinical",
+      "sortKey": 0,
+      "expandable": true
     },
     {
-      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:44",
-      "name": "Alda400 Walter473",
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:26103",
+      "name": "Dona966 Rochelle550 Muller251",
       "label": "Patient",
       "layer": 3,
-      "color": "#1E8449"
+      "color": "#86EFAC",
+      "group": "clinical",
+      "sortKey": 0,
+      "expandable": true
     },
     {
-      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2040",
-      "name": "Encounter 1971-03-18",
-      "label": "Encounter",
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:37808",
+      "name": "Dottie687 Abshire638",
+      "label": "Patient",
       "layer": 3,
-      "color": "#1E8449"
+      "color": "#86EFAC",
+      "group": "clinical",
+      "sortKey": 0,
+      "expandable": true
     },
     {
-      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2250",
-      "name": "Encounter 1981-10-01",
-      "label": "Encounter",
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:38783",
+      "name": "Eloy929 Noble66 Larkin917",
+      "label": "Patient",
       "layer": 3,
-      "color": "#1E8449"
+      "color": "#86EFAC",
+      "group": "clinical",
+      "sortKey": 0,
+      "expandable": true
     },
     {
-      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2249",
-      "name": "Encounter 1981-09-03",
-      "label": "Encounter",
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:39535",
+      "name": "Elwood28 Jeromy156 Herzog843",
+      "label": "Patient",
       "layer": 3,
-      "color": "#1E8449"
+      "color": "#86EFAC",
+      "group": "clinical",
+      "sortKey": 0,
+      "expandable": true
     },
     {
-      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2242",
-      "name": "Encounter 1981-05-08",
-      "label": "Encounter",
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:42074",
+      "name": "Hayden835 Balistreri607",
+      "label": "Patient",
       "layer": 3,
-      "color": "#1E8449"
+      "color": "#86EFAC",
+      "group": "clinical",
+      "sortKey": 0,
+      "expandable": true
     },
     {
-      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2225",
-      "name": "Encounter 1981-04-30",
-      "label": "Encounter",
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:45114",
+      "name": "Jayson808 Williams176 Aufderhar910",
+      "label": "Patient",
       "layer": 3,
-      "color": "#1E8449"
+      "color": "#86EFAC",
+      "group": "clinical",
+      "sortKey": 0,
+      "expandable": true
     },
     {
-      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2222",
-      "name": "Encounter 1980-12-04",
-      "label": "Encounter",
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:47758",
+      "name": "Jerlene697 Haag279",
+      "label": "Patient",
       "layer": 3,
-      "color": "#1E8449"
+      "color": "#86EFAC",
+      "group": "clinical",
+      "sortKey": 0,
+      "expandable": true
     },
     {
-      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2213",
-      "name": "Encounter 1980-08-17",
-      "label": "Encounter",
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:49381",
+      "name": "Lauren941 Torphy630",
+      "label": "Patient",
       "layer": 3,
-      "color": "#1E8449"
+      "color": "#86EFAC",
+      "group": "clinical",
+      "sortKey": 0,
+      "expandable": true
     },
     {
-      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2210",
-      "name": "Encounter 1980-05-01",
-      "label": "Encounter",
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:54906",
+      "name": "Nelly786 Giselle809 Abernathy524",
+      "label": "Patient",
       "layer": 3,
-      "color": "#1E8449"
+      "color": "#86EFAC",
+      "group": "clinical",
+      "sortKey": 0,
+      "expandable": true
     },
     {
-      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2188",
-      "name": "Encounter 1980-04-24",
-      "label": "Encounter",
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:55997",
+      "name": "Odilia72 Londa304 Hamill307",
+      "label": "Patient",
       "layer": 3,
-      "color": "#1E8449"
+      "color": "#86EFAC",
+      "group": "clinical",
+      "sortKey": 0,
+      "expandable": true
     },
     {
-      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2185",
-      "name": "Encounter 1979-10-06",
-      "label": "Encounter",
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:57040",
+      "name": "Rebecka733 Faith802 Nader710",
+      "label": "Patient",
       "layer": 3,
-      "color": "#1E8449"
+      "color": "#86EFAC",
+      "group": "clinical",
+      "sortKey": 0,
+      "expandable": true
     },
     {
-      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2175",
-      "name": "Encounter 1979-04-19",
-      "label": "Encounter",
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:63397",
+      "name": "Theodore876 Leannon79",
+      "label": "Patient",
       "layer": 3,
-      "color": "#1E8449"
+      "color": "#86EFAC",
+      "group": "clinical",
+      "sortKey": 0,
+      "expandable": true
     },
     {
-      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2165",
-      "name": "Encounter 1978-04-13",
-      "label": "Encounter",
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:65636",
+      "name": "Walter473 Blake449 Eichmann909",
+      "label": "Patient",
       "layer": 3,
-      "color": "#1E8449"
-    },
-    {
-      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2164",
-      "name": "Encounter 1977-04-14",
-      "label": "Encounter",
-      "layer": 3,
-      "color": "#1E8449"
-    },
-    {
-      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2154",
-      "name": "Encounter 1977-04-07",
-      "label": "Encounter",
-      "layer": 3,
-      "color": "#1E8449"
-    },
-    {
-      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2151",
-      "name": "Encounter 1976-05-25",
-      "label": "Encounter",
-      "layer": 3,
-      "color": "#1E8449"
-    },
-    {
-      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2148",
-      "name": "Encounter 1976-04-12",
-      "label": "Encounter",
-      "layer": 3,
-      "color": "#1E8449"
-    },
-    {
-      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2138",
-      "name": "Encounter 1976-04-01",
-      "label": "Encounter",
-      "layer": 3,
-      "color": "#1E8449"
-    },
-    {
-      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2106",
-      "name": "Encounter 1975-03-27",
-      "label": "Encounter",
-      "layer": 3,
-      "color": "#1E8449"
-    },
-    {
-      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2043",
-      "name": "Encounter 1972-03-16",
-      "label": "Encounter",
-      "layer": 3,
-      "color": "#1E8449"
-    },
-    {
-      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2068",
-      "name": "Encounter 1972-09-14",
-      "label": "Encounter",
-      "layer": 3,
-      "color": "#1E8449"
-    },
-    {
-      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2082",
-      "name": "Encounter 1972-09-21",
-      "label": "Encounter",
-      "layer": 3,
-      "color": "#1E8449"
-    },
-    {
-      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2083",
-      "name": "Encounter 1973-03-15",
-      "label": "Encounter",
-      "layer": 3,
-      "color": "#1E8449"
-    },
-    {
-      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2096",
-      "name": "Encounter 1974-03-21",
-      "label": "Encounter",
-      "layer": 3,
-      "color": "#1E8449"
-    },
-    {
-      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2041",
-      "name": "Medication review due (situation)",
-      "label": "Condition",
-      "layer": 3,
-      "color": "#1E8449"
-    },
-    {
-      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2245",
-      "name": "Sprain of ankle",
-      "label": "Condition",
-      "layer": 3,
-      "color": "#1E8449"
-    },
-    {
-      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2243",
-      "name": "Sprain (morphologic abnormality)",
-      "label": "Condition",
-      "layer": 3,
-      "color": "#1E8449"
-    },
-    {
-      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2227",
-      "name": "Risk activity involvement (finding)",
-      "label": "Condition",
-      "layer": 3,
-      "color": "#1E8449"
-    },
-    {
-      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2226",
-      "name": "Medication review due (situation)",
-      "label": "Condition",
-      "layer": 3,
-      "color": "#1E8449"
-    },
-    {
-      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2218",
-      "name": "Epilepsy",
-      "label": "Condition",
-      "layer": 3,
-      "color": "#1E8449"
-    },
-    {
-      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2216",
-      "name": "History of single seizure (situation)",
-      "label": "Condition",
-      "layer": 3,
-      "color": "#1E8449"
-    },
-    {
-      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2214",
-      "name": "Seizure disorder",
-      "label": "Condition",
-      "layer": 3,
-      "color": "#1E8449"
-    },
-    {
-      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2211",
-      "name": "Tooth eruption disorder",
-      "label": "Condition",
-      "layer": 3,
-      "color": "#1E8449"
-    },
-    {
-      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2189",
-      "name": "Medication review due (situation)",
-      "label": "Condition",
-      "layer": 3,
-      "color": "#1E8449"
-    },
-    {
-      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2186",
-      "name": "Viral sinusitis (disorder)",
-      "label": "Condition",
-      "layer": 3,
-      "color": "#1E8449"
-    },
-    {
-      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2152",
-      "name": "Chronic sinusitis (disorder)",
-      "label": "Condition",
-      "layer": 3,
-      "color": "#1E8449"
+      "color": "#86EFAC",
+      "group": "clinical",
+      "sortKey": 0,
+      "expandable": true
     },
     {
       "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2149",
       "name": "Acute bacterial sinusitis (disorder)",
       "label": "Condition",
       "layer": 3,
-      "color": "#1E8449"
+      "color": "#86EFAC",
+      "group": "clinical",
+      "sortKey": 2,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2661",
+      "name": "Acute bronchitis (disorder)",
+      "label": "Condition",
+      "layer": 3,
+      "color": "#86EFAC",
+      "group": "clinical",
+      "sortKey": 2,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2602",
+      "name": "Acute bronchitis (disorder)",
+      "label": "Condition",
+      "layer": 3,
+      "color": "#86EFAC",
+      "group": "clinical",
+      "sortKey": 2,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2152",
+      "name": "Chronic sinusitis (disorder)",
+      "label": "Condition",
+      "layer": 3,
+      "color": "#86EFAC",
+      "group": "clinical",
+      "sortKey": 2,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2717",
+      "name": "Chronic sinusitis (disorder)",
+      "label": "Condition",
+      "layer": 3,
+      "color": "#86EFAC",
+      "group": "clinical",
+      "sortKey": 2,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2712",
+      "name": "Concussion injury of brain (disorder)",
+      "label": "Condition",
+      "layer": 3,
+      "color": "#86EFAC",
+      "group": "clinical",
+      "sortKey": 2,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2674",
+      "name": "Concussion injury of brain (disorder)",
+      "label": "Condition",
+      "layer": 3,
+      "color": "#86EFAC",
+      "group": "clinical",
+      "sortKey": 2,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2676",
+      "name": "Concussion with no loss of consciousness",
+      "label": "Condition",
+      "layer": 3,
+      "color": "#86EFAC",
+      "group": "clinical",
+      "sortKey": 2,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2218",
+      "name": "Epilepsy",
+      "label": "Condition",
+      "layer": 3,
+      "color": "#86EFAC",
+      "group": "clinical",
+      "sortKey": 2,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2942",
+      "name": "Full-time employment (finding)",
+      "label": "Condition",
+      "layer": 3,
+      "color": "#86EFAC",
+      "group": "clinical",
+      "sortKey": 2,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2977",
+      "name": "Gingivitis (disorder)",
+      "label": "Condition",
+      "layer": 3,
+      "color": "#86EFAC",
+      "group": "clinical",
+      "sortKey": 2,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2926",
+      "name": "Gingivitis (disorder)",
+      "label": "Condition",
+      "layer": 3,
+      "color": "#86EFAC",
+      "group": "clinical",
+      "sortKey": 2,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2216",
+      "name": "History of single seizure (situation)",
+      "label": "Condition",
+      "layer": 3,
+      "color": "#86EFAC",
+      "group": "clinical",
+      "sortKey": 2,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2041",
+      "name": "Medication review due (situation)",
+      "label": "Condition",
+      "layer": 3,
+      "color": "#86EFAC",
+      "group": "clinical",
+      "sortKey": 2,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2226",
+      "name": "Medication review due (situation)",
+      "label": "Condition",
+      "layer": 3,
+      "color": "#86EFAC",
+      "group": "clinical",
+      "sortKey": 2,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2189",
+      "name": "Medication review due (situation)",
+      "label": "Condition",
+      "layer": 3,
+      "color": "#86EFAC",
+      "group": "clinical",
+      "sortKey": 2,
+      "expandable": true
     },
     {
       "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2069",
       "name": "Medication review due (situation)",
       "label": "Condition",
       "layer": 3,
-      "color": "#1E8449"
+      "color": "#86EFAC",
+      "group": "clinical",
+      "sortKey": 2,
+      "expandable": true
     },
     {
-      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2103",
-      "name": "Heart rate",
-      "label": "Observation",
-      "layer": 3,
-      "color": "#1E8449"
-    },
-    {
-      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2251",
-      "name": "Cause of Death [US Standard Certificate of Death]",
-      "label": "Observation",
-      "layer": 3,
-      "color": "#1E8449"
-    },
-    {
-      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2238",
-      "name": "Patient Health Questionnaire-9: Modified for Teens total score [Reported.PHQ.Teen]",
-      "label": "Observation",
-      "layer": 3,
-      "color": "#1E8449"
-    },
-    {
-      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:27031",
-      "name": "Visit 1971-03-18",
-      "label": "OMOPVisitOccurrence",
-      "layer": 4,
-      "color": "#CA6F1E"
-    },
-    {
-      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:27032",
-      "name": "Visit 1981-10-01",
-      "label": "OMOPVisitOccurrence",
-      "layer": 4,
-      "color": "#CA6F1E"
-    },
-    {
-      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:27033",
-      "name": "Visit 1981-09-03",
-      "label": "OMOPVisitOccurrence",
-      "layer": 4,
-      "color": "#CA6F1E"
-    },
-    {
-      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:27034",
-      "name": "Visit 1981-05-08",
-      "label": "OMOPVisitOccurrence",
-      "layer": 4,
-      "color": "#CA6F1E"
-    },
-    {
-      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:27035",
-      "name": "Visit 1981-04-30",
-      "label": "OMOPVisitOccurrence",
-      "layer": 4,
-      "color": "#CA6F1E"
-    },
-    {
-      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:27036",
-      "name": "Visit 1980-12-04",
-      "label": "OMOPVisitOccurrence",
-      "layer": 4,
-      "color": "#CA6F1E"
-    },
-    {
-      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:27037",
-      "name": "Visit 1980-08-17",
-      "label": "OMOPVisitOccurrence",
-      "layer": 4,
-      "color": "#CA6F1E"
-    },
-    {
-      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:27038",
-      "name": "Visit 1980-05-01",
-      "label": "OMOPVisitOccurrence",
-      "layer": 4,
-      "color": "#CA6F1E"
-    },
-    {
-      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:27039",
-      "name": "Visit 1980-04-24",
-      "label": "OMOPVisitOccurrence",
-      "layer": 4,
-      "color": "#CA6F1E"
-    },
-    {
-      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:27040",
-      "name": "Visit 1979-10-06",
-      "label": "OMOPVisitOccurrence",
-      "layer": 4,
-      "color": "#CA6F1E"
-    },
-    {
-      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:27041",
-      "name": "Visit 1979-04-19",
-      "label": "OMOPVisitOccurrence",
-      "layer": 4,
-      "color": "#CA6F1E"
-    },
-    {
-      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:27042",
-      "name": "Visit 1978-04-13",
-      "label": "OMOPVisitOccurrence",
-      "layer": 4,
-      "color": "#CA6F1E"
-    },
-    {
-      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:27043",
-      "name": "Visit 1977-04-14",
-      "label": "OMOPVisitOccurrence",
-      "layer": 4,
-      "color": "#CA6F1E"
-    },
-    {
-      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:27044",
-      "name": "Visit 1977-04-07",
-      "label": "OMOPVisitOccurrence",
-      "layer": 4,
-      "color": "#CA6F1E"
-    },
-    {
-      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:27045",
-      "name": "Visit 1976-05-25",
-      "label": "OMOPVisitOccurrence",
-      "layer": 4,
-      "color": "#CA6F1E"
-    },
-    {
-      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:27046",
-      "name": "Visit 1976-04-12",
-      "label": "OMOPVisitOccurrence",
-      "layer": 4,
-      "color": "#CA6F1E"
-    },
-    {
-      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:27047",
-      "name": "Visit 1976-04-01",
-      "label": "OMOPVisitOccurrence",
-      "layer": 4,
-      "color": "#CA6F1E"
-    },
-    {
-      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:27048",
-      "name": "Visit 1975-03-27",
-      "label": "OMOPVisitOccurrence",
-      "layer": 4,
-      "color": "#CA6F1E"
-    },
-    {
-      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:27049",
-      "name": "Visit 1972-03-16",
-      "label": "OMOPVisitOccurrence",
-      "layer": 4,
-      "color": "#CA6F1E"
-    },
-    {
-      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:27050",
-      "name": "Visit 1972-09-14",
-      "label": "OMOPVisitOccurrence",
-      "layer": 4,
-      "color": "#CA6F1E"
-    },
-    {
-      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:27051",
-      "name": "Visit 1972-09-21",
-      "label": "OMOPVisitOccurrence",
-      "layer": 4,
-      "color": "#CA6F1E"
-    },
-    {
-      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:27052",
-      "name": "Visit 1973-03-15",
-      "label": "OMOPVisitOccurrence",
-      "layer": 4,
-      "color": "#CA6F1E"
-    },
-    {
-      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:27053",
-      "name": "Visit 1974-03-21",
-      "label": "OMOPVisitOccurrence",
-      "layer": 4,
-      "color": "#CA6F1E"
-    },
-    {
-      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:29154",
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2255",
       "name": "Medication review due (situation)",
-      "label": "OMOPConditionOccurrence",
-      "layer": 4,
-      "color": "#CA6F1E"
+      "label": "Condition",
+      "layer": 3,
+      "color": "#86EFAC",
+      "group": "clinical",
+      "sortKey": 2,
+      "expandable": true
     },
     {
-      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:29155",
-      "name": "Sprain of ankle",
-      "label": "OMOPConditionOccurrence",
-      "layer": 4,
-      "color": "#CA6F1E"
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2443",
+      "name": "Medication review due (situation)",
+      "label": "Condition",
+      "layer": 3,
+      "color": "#86EFAC",
+      "group": "clinical",
+      "sortKey": 2,
+      "expandable": true
     },
     {
-      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:29156",
-      "name": "Sprain (morphologic abnormality)",
-      "label": "OMOPConditionOccurrence",
-      "layer": 4,
-      "color": "#CA6F1E"
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2422",
+      "name": "Medication review due (situation)",
+      "label": "Condition",
+      "layer": 3,
+      "color": "#86EFAC",
+      "group": "clinical",
+      "sortKey": 2,
+      "expandable": true
     },
     {
-      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:29157",
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2384",
+      "name": "Medication review due (situation)",
+      "label": "Condition",
+      "layer": 3,
+      "color": "#86EFAC",
+      "group": "clinical",
+      "sortKey": 2,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2372",
+      "name": "Medication review due (situation)",
+      "label": "Condition",
+      "layer": 3,
+      "color": "#86EFAC",
+      "group": "clinical",
+      "sortKey": 2,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2360",
+      "name": "Medication review due (situation)",
+      "label": "Condition",
+      "layer": 3,
+      "color": "#86EFAC",
+      "group": "clinical",
+      "sortKey": 2,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2312",
+      "name": "Medication review due (situation)",
+      "label": "Condition",
+      "layer": 3,
+      "color": "#86EFAC",
+      "group": "clinical",
+      "sortKey": 2,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2278",
+      "name": "Medication review due (situation)",
+      "label": "Condition",
+      "layer": 3,
+      "color": "#86EFAC",
+      "group": "clinical",
+      "sortKey": 2,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2471",
+      "name": "Medication review due (situation)",
+      "label": "Condition",
+      "layer": 3,
+      "color": "#86EFAC",
+      "group": "clinical",
+      "sortKey": 2,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2690",
+      "name": "Medication review due (situation)",
+      "label": "Condition",
+      "layer": 3,
+      "color": "#86EFAC",
+      "group": "clinical",
+      "sortKey": 2,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2634",
+      "name": "Medication review due (situation)",
+      "label": "Condition",
+      "layer": 3,
+      "color": "#86EFAC",
+      "group": "clinical",
+      "sortKey": 2,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2620",
+      "name": "Medication review due (situation)",
+      "label": "Condition",
+      "layer": 3,
+      "color": "#86EFAC",
+      "group": "clinical",
+      "sortKey": 2,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2505",
+      "name": "Medication review due (situation)",
+      "label": "Condition",
+      "layer": 3,
+      "color": "#86EFAC",
+      "group": "clinical",
+      "sortKey": 2,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2517",
+      "name": "Medication review due (situation)",
+      "label": "Condition",
+      "layer": 3,
+      "color": "#86EFAC",
+      "group": "clinical",
+      "sortKey": 2,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2941",
+      "name": "Medication review due (situation)",
+      "label": "Condition",
+      "layer": 3,
+      "color": "#86EFAC",
+      "group": "clinical",
+      "sortKey": 2,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2924",
+      "name": "Medication review due (situation)",
+      "label": "Condition",
+      "layer": 3,
+      "color": "#86EFAC",
+      "group": "clinical",
+      "sortKey": 2,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2908",
+      "name": "Medication review due (situation)",
+      "label": "Condition",
+      "layer": 3,
+      "color": "#86EFAC",
+      "group": "clinical",
+      "sortKey": 2,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2872",
+      "name": "Normal pregnancy",
+      "label": "Condition",
+      "layer": 3,
+      "color": "#86EFAC",
+      "group": "clinical",
+      "sortKey": 2,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2573",
+      "name": "Otitis media",
+      "label": "Condition",
+      "layer": 3,
+      "color": "#86EFAC",
+      "group": "clinical",
+      "sortKey": 2,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2976",
+      "name": "Part-time employment (finding)",
+      "label": "Condition",
+      "layer": 3,
+      "color": "#86EFAC",
+      "group": "clinical",
+      "sortKey": 2,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2925",
+      "name": "Part-time employment (finding)",
+      "label": "Condition",
+      "layer": 3,
+      "color": "#86EFAC",
+      "group": "clinical",
+      "sortKey": 2,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2897",
+      "name": "Preeclampsia",
+      "label": "Condition",
+      "layer": 3,
+      "color": "#86EFAC",
+      "group": "clinical",
+      "sortKey": 2,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2227",
       "name": "Risk activity involvement (finding)",
-      "label": "OMOPConditionOccurrence",
-      "layer": 4,
-      "color": "#CA6F1E"
+      "label": "Condition",
+      "layer": 3,
+      "color": "#86EFAC",
+      "group": "clinical",
+      "sortKey": 2,
+      "expandable": true
     },
     {
-      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:29158",
-      "name": "Medication review due (situation)",
-      "label": "OMOPConditionOccurrence",
-      "layer": 4,
-      "color": "#CA6F1E"
-    },
-    {
-      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:29159",
-      "name": "Epilepsy",
-      "label": "OMOPConditionOccurrence",
-      "layer": 4,
-      "color": "#CA6F1E"
-    },
-    {
-      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:29160",
-      "name": "History of single seizure (situation)",
-      "label": "OMOPConditionOccurrence",
-      "layer": 4,
-      "color": "#CA6F1E"
-    },
-    {
-      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:29161",
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2214",
       "name": "Seizure disorder",
-      "label": "OMOPConditionOccurrence",
-      "layer": 4,
-      "color": "#CA6F1E"
+      "label": "Condition",
+      "layer": 3,
+      "color": "#86EFAC",
+      "group": "clinical",
+      "sortKey": 2,
+      "expandable": true
     },
     {
-      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:29162",
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2243",
+      "name": "Sprain (morphologic abnormality)",
+      "label": "Condition",
+      "layer": 3,
+      "color": "#86EFAC",
+      "group": "clinical",
+      "sortKey": 2,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2245",
+      "name": "Sprain of ankle",
+      "label": "Condition",
+      "layer": 3,
+      "color": "#86EFAC",
+      "group": "clinical",
+      "sortKey": 2,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2436",
+      "name": "Streptococcal sore throat (disorder)",
+      "label": "Condition",
+      "layer": 3,
+      "color": "#86EFAC",
+      "group": "clinical",
+      "sortKey": 2,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2876",
+      "name": "Stress (finding)",
+      "label": "Condition",
+      "layer": 3,
+      "color": "#86EFAC",
+      "group": "clinical",
+      "sortKey": 2,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2211",
       "name": "Tooth eruption disorder",
-      "label": "OMOPConditionOccurrence",
-      "layer": 4,
-      "color": "#CA6F1E"
+      "label": "Condition",
+      "layer": 3,
+      "color": "#86EFAC",
+      "group": "clinical",
+      "sortKey": 2,
+      "expandable": true
     },
     {
-      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:29163",
-      "name": "Medication review due (situation)",
-      "label": "OMOPConditionOccurrence",
-      "layer": 4,
-      "color": "#CA6F1E"
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:17",
+      "name": "Type 2 Diabetes (FHIR)",
+      "label": "Condition",
+      "layer": 3,
+      "color": "#86EFAC",
+      "group": "clinical",
+      "sortKey": 2,
+      "expandable": true
     },
     {
-      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:29164",
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2186",
       "name": "Viral sinusitis (disorder)",
-      "label": "OMOPConditionOccurrence",
-      "layer": 4,
-      "color": "#CA6F1E"
+      "label": "Condition",
+      "layer": 3,
+      "color": "#86EFAC",
+      "group": "clinical",
+      "sortKey": 2,
+      "expandable": true
     },
     {
-      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:29165",
-      "name": "Chronic sinusitis (disorder)",
-      "label": "OMOPConditionOccurrence",
-      "layer": 4,
-      "color": "#CA6F1E"
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2407",
+      "name": "Viral sinusitis (disorder)",
+      "label": "Condition",
+      "layer": 3,
+      "color": "#86EFAC",
+      "group": "clinical",
+      "sortKey": 2,
+      "expandable": true
     },
     {
-      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:29166",
-      "name": "Acute bacterial sinusitis (disorder)",
-      "label": "OMOPConditionOccurrence",
-      "layer": 4,
-      "color": "#CA6F1E"
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2900",
+      "name": "Viral sinusitis (disorder)",
+      "label": "Condition",
+      "layer": 3,
+      "color": "#86EFAC",
+      "group": "clinical",
+      "sortKey": 2,
+      "expandable": true
     },
     {
-      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:29167",
-      "name": "Medication review due (situation)",
-      "label": "OMOPConditionOccurrence",
-      "layer": 4,
-      "color": "#CA6F1E"
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33228",
+      "name": "103697008",
+      "label": "SnomedConcept",
+      "layer": 5,
+      "color": "#D4D4D8",
+      "group": "ontology",
+      "sortKey": 0,
+      "expandable": true
     },
     {
-      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:30198",
-      "name": "Heart rate",
-      "label": "OMOPMeasurement",
-      "layer": 4,
-      "color": "#CA6F1E"
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2739",
+      "name": "160903007",
+      "label": "SnomedConcept",
+      "layer": 5,
+      "color": "#D4D4D8",
+      "group": "ontology",
+      "sortKey": 0,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2771",
+      "name": "160904001",
+      "label": "SnomedConcept",
+      "layer": 5,
+      "color": "#D4D4D8",
+      "group": "ontology",
+      "sortKey": 0,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33230",
+      "name": "171207006",
+      "label": "SnomedConcept",
+      "layer": 5,
+      "color": "#D4D4D8",
+      "group": "ontology",
+      "sortKey": 0,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:34932",
+      "name": "180256009",
+      "label": "SnomedConcept",
+      "layer": 5,
+      "color": "#D4D4D8",
+      "group": "ontology",
+      "sortKey": 0,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33422",
+      "name": "225158009",
+      "label": "SnomedConcept",
+      "layer": 5,
+      "color": "#D4D4D8",
+      "group": "ontology",
+      "sortKey": 0,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:34753",
+      "name": "265764009",
+      "label": "SnomedConcept",
+      "layer": 5,
+      "color": "#D4D4D8",
+      "group": "ontology",
+      "sortKey": 0,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33421",
+      "name": "274804006",
+      "label": "SnomedConcept",
+      "layer": 5,
+      "color": "#D4D4D8",
+      "group": "ontology",
+      "sortKey": 0,
+      "expandable": true
     },
     {
       "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2042",
       "name": "314529007",
       "label": "SnomedConcept",
       "layer": 5,
-      "color": "#7D3C98"
+      "color": "#D4D4D8",
+      "group": "ontology",
+      "sortKey": 0,
+      "expandable": true
     },
     {
-      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2246",
-      "name": "44465007",
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:36631",
+      "name": "371908008",
       "label": "SnomedConcept",
       "layer": 5,
-      "color": "#7D3C98"
+      "color": "#D4D4D8",
+      "group": "ontology",
+      "sortKey": 0,
+      "expandable": true
     },
     {
-      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2244",
-      "name": "384709000",
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33239",
+      "name": "385763009",
       "label": "SnomedConcept",
       "layer": 5,
-      "color": "#7D3C98"
+      "color": "#D4D4D8",
+      "group": "ontology",
+      "sortKey": 0,
+      "expandable": true
     },
     {
-      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2228",
-      "name": "160968000",
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:35526",
+      "name": "409023009",
       "label": "SnomedConcept",
       "layer": 5,
-      "color": "#7D3C98"
+      "color": "#D4D4D8",
+      "group": "ontology",
+      "sortKey": 0,
+      "expandable": true
     },
     {
-      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2219",
-      "name": "84757009",
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:35150",
+      "name": "410401003",
       "label": "SnomedConcept",
       "layer": 5,
-      "color": "#7D3C98"
+      "color": "#D4D4D8",
+      "group": "ontology",
+      "sortKey": 0,
+      "expandable": true
     },
     {
-      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2217",
-      "name": "703151001",
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2749",
+      "name": "422650009",
       "label": "SnomedConcept",
       "layer": 5,
-      "color": "#7D3C98"
+      "color": "#D4D4D8",
+      "group": "ontology",
+      "sortKey": 0,
+      "expandable": true
     },
     {
-      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2215",
-      "name": "128613002",
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2828",
+      "name": "423315002",
       "label": "SnomedConcept",
       "layer": 5,
-      "color": "#7D3C98"
+      "color": "#D4D4D8",
+      "group": "ontology",
+      "sortKey": 0,
+      "expandable": true
     },
     {
-      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2212",
-      "name": "234949000",
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33232",
+      "name": "428211000124100",
       "label": "SnomedConcept",
       "layer": 5,
-      "color": "#7D3C98"
+      "color": "#D4D4D8",
+      "group": "ontology",
+      "sortKey": 0,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33227",
+      "name": "430193006",
+      "label": "SnomedConcept",
+      "layer": 5,
+      "color": "#D4D4D8",
+      "group": "ontology",
+      "sortKey": 0,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:43759",
+      "name": "431182000",
+      "label": "SnomedConcept",
+      "layer": 5,
+      "color": "#D4D4D8",
+      "group": "ontology",
+      "sortKey": 0,
+      "expandable": true
     },
     {
       "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2187",
       "name": "444814009",
       "label": "SnomedConcept",
       "layer": 5,
-      "color": "#7D3C98"
+      "color": "#D4D4D8",
+      "group": "ontology",
+      "sortKey": 0,
+      "expandable": true
     },
     {
-      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2153",
-      "name": "40055000",
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33414",
+      "name": "454711000124102",
       "label": "SnomedConcept",
       "layer": 5,
-      "color": "#7D3C98"
+      "color": "#D4D4D8",
+      "group": "ontology",
+      "sortKey": 0,
+      "expandable": true
     },
     {
-      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2150",
-      "name": "75498004",
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2753",
+      "name": "66383009",
       "label": "SnomedConcept",
       "layer": 5,
-      "color": "#7D3C98"
+      "color": "#D4D4D8",
+      "group": "ontology",
+      "sortKey": 0,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33413",
+      "name": "710824005",
+      "label": "SnomedConcept",
+      "layer": 5,
+      "color": "#D4D4D8",
+      "group": "ontology",
+      "sortKey": 0,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33416",
+      "name": "710841007",
+      "label": "SnomedConcept",
+      "layer": 5,
+      "color": "#D4D4D8",
+      "group": "ontology",
+      "sortKey": 0,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33417",
+      "name": "713106006",
+      "label": "SnomedConcept",
+      "layer": 5,
+      "color": "#D4D4D8",
+      "group": "ontology",
+      "sortKey": 0,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33231",
+      "name": "715252007",
+      "label": "SnomedConcept",
+      "layer": 5,
+      "color": "#D4D4D8",
+      "group": "ontology",
+      "sortKey": 0,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2751",
+      "name": "73595000",
+      "label": "SnomedConcept",
+      "layer": 5,
+      "color": "#D4D4D8",
+      "group": "ontology",
+      "sortKey": 0,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:3386",
+      "name": "741062008",
+      "label": "SnomedConcept",
+      "layer": 5,
+      "color": "#D4D4D8",
+      "group": "ontology",
+      "sortKey": 0,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:34173",
+      "name": "762993000",
+      "label": "SnomedConcept",
+      "layer": 5,
+      "color": "#D4D4D8",
+      "group": "ontology",
+      "sortKey": 0,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33450",
+      "name": "763302001",
+      "label": "SnomedConcept",
+      "layer": 5,
+      "color": "#D4D4D8",
+      "group": "ontology",
+      "sortKey": 0,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33447",
+      "name": "866148006",
+      "label": "SnomedConcept",
+      "layer": 5,
+      "color": "#D4D4D8",
+      "group": "ontology",
+      "sortKey": 0,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:3050",
+      "name": "20565-8",
+      "label": "LoincCode",
+      "layer": 5,
+      "color": "#D4D4D8",
+      "group": "ontology",
+      "sortKey": 2,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:3048",
+      "name": "2069-3",
+      "label": "LoincCode",
+      "layer": 5,
+      "color": "#D4D4D8",
+      "group": "ontology",
+      "sortKey": 2,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:3036",
+      "name": "2339-0",
+      "label": "LoincCode",
+      "layer": 5,
+      "color": "#D4D4D8",
+      "group": "ontology",
+      "sortKey": 2,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:3425",
+      "name": "2514-8",
+      "label": "LoincCode",
+      "layer": 5,
+      "color": "#D4D4D8",
+      "group": "ontology",
+      "sortKey": 2,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2049",
+      "name": "29463-7",
+      "label": "LoincCode",
+      "layer": 5,
+      "color": "#D4D4D8",
+      "group": "ontology",
+      "sortKey": 2,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:3044",
+      "name": "2947-0",
+      "label": "LoincCode",
+      "layer": 5,
+      "color": "#D4D4D8",
+      "group": "ontology",
+      "sortKey": 2,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:3405",
+      "name": "33914-3",
+      "label": "LoincCode",
+      "layer": 5,
+      "color": "#D4D4D8",
+      "group": "ontology",
+      "sortKey": 2,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:3040",
+      "name": "38483-4",
+      "label": "LoincCode",
+      "layer": 5,
+      "color": "#D4D4D8",
+      "group": "ontology",
+      "sortKey": 2,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2057",
+      "name": "39156-5",
+      "label": "LoincCode",
+      "layer": 5,
+      "color": "#D4D4D8",
+      "group": "ontology",
+      "sortKey": 2,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:3042",
+      "name": "49765-1",
+      "label": "LoincCode",
+      "layer": 5,
+      "color": "#D4D4D8",
+      "group": "ontology",
+      "sortKey": 2,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:3429",
+      "name": "5803-2",
+      "label": "LoincCode",
+      "layer": 5,
+      "color": "#D4D4D8",
+      "group": "ontology",
+      "sortKey": 2,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:3427",
+      "name": "5811-5",
+      "label": "LoincCode",
+      "layer": 5,
+      "color": "#D4D4D8",
+      "group": "ontology",
+      "sortKey": 2,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:3046",
+      "name": "6298-4",
+      "label": "LoincCode",
+      "layer": 5,
+      "color": "#D4D4D8",
+      "group": "ontology",
+      "sortKey": 2,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:3038",
+      "name": "6299-2",
+      "label": "LoincCode",
+      "layer": 5,
+      "color": "#D4D4D8",
+      "group": "ontology",
+      "sortKey": 2,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2047",
+      "name": "72514-3",
+      "label": "LoincCode",
+      "layer": 5,
+      "color": "#D4D4D8",
+      "group": "ontology",
+      "sortKey": 2,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:14467",
+      "name": "74006-8",
+      "label": "LoincCode",
+      "layer": 5,
+      "color": "#D4D4D8",
+      "group": "ontology",
+      "sortKey": 2,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2045",
+      "name": "8302-2",
+      "label": "LoincCode",
+      "layer": 5,
+      "color": "#D4D4D8",
+      "group": "ontology",
+      "sortKey": 2,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2061",
+      "name": "85354-9",
+      "label": "LoincCode",
+      "layer": 5,
+      "color": "#D4D4D8",
+      "group": "ontology",
+      "sortKey": 2,
+      "expandable": true
     },
     {
       "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2063",
       "name": "8867-4",
       "label": "LoincCode",
       "layer": 5,
-      "color": "#7D3C98"
+      "color": "#D4D4D8",
+      "group": "ontology",
+      "sortKey": 2,
+      "expandable": true
     },
     {
-      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2252",
-      "name": "69453-9",
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2065",
+      "name": "9279-1",
       "label": "LoincCode",
       "layer": 5,
-      "color": "#7D3C98"
+      "color": "#D4D4D8",
+      "group": "ontology",
+      "sortKey": 2,
+      "expandable": true
     },
     {
-      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2239",
-      "name": "89204-2",
-      "label": "LoincCode",
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:16966",
+      "name": "24 HR Metformin hydrochloride 500 MG Extended Release Oral Tablet",
+      "label": "RxNormConcept",
       "layer": 5,
-      "color": "#7D3C98"
+      "color": "#D4D4D8",
+      "group": "ontology",
+      "sortKey": 3,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:23223",
+      "name": "24 HR tacrolimus 1 MG Extended Release Oral Tablet",
+      "label": "RxNormConcept",
+      "layer": 5,
+      "color": "#D4D4D8",
+      "group": "ontology",
+      "sortKey": 3,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:23581",
+      "name": "72 HR Fentanyl 0.025 MG/HR Transdermal System",
+      "label": "RxNormConcept",
+      "layer": 5,
+      "color": "#D4D4D8",
+      "group": "ontology",
+      "sortKey": 3,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:3378",
+      "name": "Abuse-Deterrent 12 HR Oxycodone Hydrochloride 10 MG Extended Release Oral Tablet [Oxycontin]",
+      "label": "RxNormConcept",
+      "layer": 5,
+      "color": "#D4D4D8",
+      "group": "ontology",
+      "sortKey": 3,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:40452",
+      "name": "Acetaminophen 300 MG / Codeine Phosphate 15 MG Oral Tablet",
+      "label": "RxNormConcept",
+      "layer": 5,
+      "color": "#D4D4D8",
+      "group": "ontology",
+      "sortKey": 3,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:13186",
+      "name": "Acetaminophen 300 MG / Hydrocodone Bitartrate 5 MG Oral Tablet",
+      "label": "RxNormConcept",
+      "layer": 5,
+      "color": "#D4D4D8",
+      "group": "ontology",
+      "sortKey": 3,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:48461",
+      "name": "Acetaminophen 325 MG / Oxycodone Hydrochloride 10 MG Oral Tablet [Percocet]",
+      "label": "RxNormConcept",
+      "layer": 5,
+      "color": "#D4D4D8",
+      "group": "ontology",
+      "sortKey": 3,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2248",
+      "name": "Acetaminophen 325 MG Oral Tablet",
+      "label": "RxNormConcept",
+      "layer": 5,
+      "color": "#D4D4D8",
+      "group": "ontology",
+      "sortKey": 3,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:13196",
+      "name": "Acetaminophen 325 MG Oral Tablet [Tylenol]",
+      "label": "RxNormConcept",
+      "layer": 5,
+      "color": "#D4D4D8",
+      "group": "ontology",
+      "sortKey": 3,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:12549",
+      "name": "albuterol 0.83 MG/ML Inhalation Solution",
+      "label": "RxNormConcept",
+      "layer": 5,
+      "color": "#D4D4D8",
+      "group": "ontology",
+      "sortKey": 3,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:16833",
+      "name": "Alendronic acid 10 MG Oral Tablet",
+      "label": "RxNormConcept",
+      "layer": 5,
+      "color": "#D4D4D8",
+      "group": "ontology",
+      "sortKey": 3,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:3382",
+      "name": "amLODIPine 2.5 MG Oral Tablet",
+      "label": "RxNormConcept",
+      "layer": 5,
+      "color": "#D4D4D8",
+      "group": "ontology",
+      "sortKey": 3,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:54576",
+      "name": "budesonide 0.125 MG/ML Inhalation Suspension",
+      "label": "RxNormConcept",
+      "layer": 5,
+      "color": "#D4D4D8",
+      "group": "ontology",
+      "sortKey": 3,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:40814",
+      "name": "Furosemide 40 MG Oral Tablet",
+      "label": "RxNormConcept",
+      "layer": 5,
+      "color": "#D4D4D8",
+      "group": "ontology",
+      "sortKey": 3,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2744",
+      "name": "Hydrochlorothiazide 25 MG Oral Tablet",
+      "label": "RxNormConcept",
+      "layer": 5,
+      "color": "#D4D4D8",
+      "group": "ontology",
+      "sortKey": 3,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:62656",
+      "name": "Ibuprofen 400 MG Oral Tablet [Ibu]",
+      "label": "RxNormConcept",
+      "layer": 5,
+      "color": "#D4D4D8",
+      "group": "ontology",
+      "sortKey": 3,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:3375",
+      "name": "insulin isophane, human 70 UNT/ML / insulin, regular, human 30 UNT/ML Injectable Suspension [Humulin]",
+      "label": "RxNormConcept",
+      "layer": 5,
+      "color": "#D4D4D8",
+      "group": "ontology",
+      "sortKey": 3,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:3023",
+      "name": "lisinopril 10 MG Oral Tablet",
+      "label": "RxNormConcept",
+      "layer": 5,
+      "color": "#D4D4D8",
+      "group": "ontology",
+      "sortKey": 3,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:41683",
+      "name": "Simvastatin 10 MG Oral Tablet",
+      "label": "RxNormConcept",
+      "layer": 5,
+      "color": "#D4D4D8",
+      "group": "ontology",
+      "sortKey": 3,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:3380",
+      "name": "tramadol hydrochloride 50 MG Oral Tablet",
+      "label": "RxNormConcept",
+      "layer": 5,
+      "color": "#D4D4D8",
+      "group": "ontology",
+      "sortKey": 3,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113589",
+      "name": "DataProcessingPurposeCredential",
+      "label": "VerifiableCredential",
+      "layer": 5,
+      "color": "#D4D4D8",
+      "group": "governance",
+      "sortKey": 4,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113631",
+      "name": "DataQualityLabelCredential",
+      "label": "VerifiableCredential",
+      "layer": 5,
+      "color": "#D4D4D8",
+      "group": "governance",
+      "sortKey": 4,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113632",
+      "name": "DataQualityLabelCredential",
+      "label": "VerifiableCredential",
+      "layer": 5,
+      "color": "#D4D4D8",
+      "group": "governance",
+      "sortKey": 4,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113586",
+      "name": "EHDSParticipantCredential",
+      "label": "VerifiableCredential",
+      "layer": 5,
+      "color": "#D4D4D8",
+      "group": "governance",
+      "sortKey": 4,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113587",
+      "name": "EHDSParticipantCredential",
+      "label": "VerifiableCredential",
+      "layer": 5,
+      "color": "#D4D4D8",
+      "group": "governance",
+      "sortKey": 4,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113588",
+      "name": "EHDSParticipantCredential",
+      "label": "VerifiableCredential",
+      "layer": 5,
+      "color": "#D4D4D8",
+      "group": "governance",
+      "sortKey": 4,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113629",
+      "name": "EHDSParticipantCredential",
+      "label": "VerifiableCredential",
+      "layer": 5,
+      "color": "#D4D4D8",
+      "group": "governance",
+      "sortKey": 4,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113630",
+      "name": "EHDSParticipantCredential",
+      "label": "VerifiableCredential",
+      "layer": 5,
+      "color": "#D4D4D8",
+      "group": "governance",
+      "sortKey": 4,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113624",
+      "name": "MembershipCredential",
+      "label": "VerifiableCredential",
+      "layer": 5,
+      "color": "#D4D4D8",
+      "group": "governance",
+      "sortKey": 4,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113625",
+      "name": "MembershipCredential",
+      "label": "VerifiableCredential",
+      "layer": 5,
+      "color": "#D4D4D8",
+      "group": "governance",
+      "sortKey": 4,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113626",
+      "name": "MembershipCredential",
+      "label": "VerifiableCredential",
+      "layer": 5,
+      "color": "#D4D4D8",
+      "group": "governance",
+      "sortKey": 4,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113627",
+      "name": "MembershipCredential",
+      "label": "VerifiableCredential",
+      "layer": 5,
+      "color": "#D4D4D8",
+      "group": "governance",
+      "sortKey": 4,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113628",
+      "name": "MembershipCredential",
+      "label": "VerifiableCredential",
+      "layer": 5,
+      "color": "#D4D4D8",
+      "group": "governance",
+      "sortKey": 4,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33170",
+      "name": "IRS federated stats query",
+      "label": "TransferEvent",
+      "layer": 5,
+      "color": "#D4D4D8",
+      "group": "ontology",
+      "sortKey": 5,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33178",
+      "name": "LMC browses dataset catalog",
+      "label": "TransferEvent",
+      "layer": 5,
+      "color": "#D4D4D8",
+      "group": "ontology",
+      "sortKey": 5,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33171",
+      "name": "LMC pulls patient bundle",
+      "label": "TransferEvent",
+      "layer": 5,
+      "color": "#D4D4D8",
+      "group": "ontology",
+      "sortKey": 5,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33176",
+      "name": "PharmaCo NLQ diabetes query",
+      "label": "TransferEvent",
+      "layer": 5,
+      "color": "#D4D4D8",
+      "group": "ontology",
+      "sortKey": 5,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33168",
+      "name": "PharmaCo queries OMOP cohort",
+      "label": "TransferEvent",
+      "layer": 5,
+      "color": "#D4D4D8",
+      "group": "ontology",
+      "sortKey": 5,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33167",
+      "name": "PharmaCo queries T2D patients",
+      "label": "TransferEvent",
+      "layer": 5,
+      "color": "#D4D4D8",
+      "group": "ontology",
+      "sortKey": 5,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33172",
+      "name": "PharmaCo SPE result push",
+      "label": "TransferEvent",
+      "layer": 5,
+      "color": "#D4D4D8",
+      "group": "ontology",
+      "sortKey": 5,
+      "expandable": true
+    },
+    {
+      "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33173",
+      "name": "Unauthorized access attempt",
+      "label": "TransferEvent",
+      "layer": 5,
+      "color": "#D4D4D8",
+      "group": "ontology",
+      "sortKey": 5,
+      "expandable": true
     }
   ],
   "links": [
     {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33181",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:5",
-      "type": "PROVIDER"
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33168",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113607",
+      "type": "PROVIDED_BY"
     },
     {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:12",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:5",
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33171",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113607",
+      "type": "PROVIDED_BY"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33170",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113607",
+      "type": "PROVIDED_BY"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33167",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113607",
+      "type": "PROVIDED_BY"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33176",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113607",
+      "type": "PROVIDED_BY"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33178",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113607",
+      "type": "PROVIDED_BY"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33173",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113607",
+      "type": "PROVIDED_BY"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33172",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113607",
+      "type": "REQUESTED_BY"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113631",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113607",
+      "type": "ISSUED_TO"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113586",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113607",
+      "type": "ISSUED_TO"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113624",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113607",
+      "type": "ISSUED_TO"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113653",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113607",
+      "type": "PROVIDED_BY"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113616",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113607",
+      "type": "NEGOTIATED_BY"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113613",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113607",
+      "type": "NEGOTIATED_BY"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113612",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113607",
+      "type": "NEGOTIATED_BY"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113715",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113607",
       "type": "PUBLISHED_BY"
     },
     {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:9",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:5",
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113579",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113607",
+      "type": "PUBLISHED_BY"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113616",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113607",
+      "type": "OFFERED_BY"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113613",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113607",
+      "type": "OFFERED_BY"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113612",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113607",
+      "type": "OFFERED_BY"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33170",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113611",
+      "type": "REQUESTED_BY"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113628",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113611",
+      "type": "ISSUED_TO"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113630",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113611",
+      "type": "ISSUED_TO"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113615",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113611",
+      "type": "INITIATED_BY"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113615",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113611",
+      "type": "NEGOTIATED_BY"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33171",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113610",
+      "type": "REQUESTED_BY"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33178",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113610",
+      "type": "REQUESTED_BY"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113627",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113610",
+      "type": "ISSUED_TO"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113629",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113610",
+      "type": "ISSUED_TO"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113632",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113610",
+      "type": "ISSUED_TO"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113616",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113610",
+      "type": "INITIATED_BY"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113614",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113610",
+      "type": "NEGOTIATED_BY"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113716",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113610",
+      "type": "PUBLISHED_BY"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113616",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113610",
+      "type": "NEGOTIATED_BY"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113614",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113610",
+      "type": "OFFERED_BY"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113626",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113609",
+      "type": "ISSUED_TO"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113588",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113609",
+      "type": "ISSUED_TO"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113614",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113609",
+      "type": "INITIATED_BY"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113614",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113609",
+      "type": "NEGOTIATED_BY"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33172",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113608",
+      "type": "PROVIDED_BY"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33176",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113608",
+      "type": "REQUESTED_BY"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33168",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113608",
+      "type": "REQUESTED_BY"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33167",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113608",
+      "type": "REQUESTED_BY"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113625",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113608",
+      "type": "ISSUED_TO"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113587",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113608",
+      "type": "ISSUED_TO"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113589",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113608",
+      "type": "ISSUED_TO"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113615",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113608",
+      "type": "NEGOTIATED_BY"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113613",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113608",
+      "type": "INITIATED_BY"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113612",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113608",
+      "type": "INITIATED_BY"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113615",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113608",
+      "type": "OFFERED_BY"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113613",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113608",
+      "type": "NEGOTIATED_BY"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113612",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113608",
+      "type": "NEGOTIATED_BY"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113650",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113647",
       "type": "PROVIDER"
     },
     {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33181",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:6",
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113653",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113647",
+      "type": "PUBLISHED_BY"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113650",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113648",
       "type": "CONSUMER"
     },
     {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:9",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:6",
-      "type": "CONSUMER"
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113579",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33179",
+      "type": "DESCRIBED_BY"
     },
     {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:10",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:8",
-      "type": "REQUESTS_ACCESS_TO"
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113610",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33179",
+      "type": "OFFERS"
     },
     {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:6",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:8",
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113611",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33179",
       "type": "CONSUMES"
     },
     {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:9",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:8",
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113607",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33179",
+      "type": "OFFERS"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113608",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33179",
+      "type": "CONSUMES"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33181",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33179",
       "type": "GOVERNS"
     },
     {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:5",
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113607",
       "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:8",
       "type": "OFFERS"
     },
     {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:11",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:9",
-      "type": "APPROVED"
-    },
-    {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:11",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:10",
-      "type": "APPROVES"
-    },
-    {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:7",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:10",
-      "type": "REVIEWED"
-    },
-    {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:6",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:10",
-      "type": "SUBMITTED"
-    },
-    {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:8",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:12",
-      "type": "DESCRIBED_BY"
-    },
-    {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:12",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:13",
-      "type": "HAS_DISTRIBUTION"
-    },
-    {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:12",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:14",
-      "type": "HAS_DISTRIBUTION"
-    },
-    {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33179",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33169",
-      "type": "DESCRIBED_BY"
-    },
-    {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2039",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33169",
-      "type": "FROM_DATASET"
-    },
-    {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2469",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33169",
-      "type": "FROM_DATASET"
-    },
-    {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:25",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33169",
-      "type": "FROM_DATASET"
-    },
-    {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2991",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33169",
-      "type": "FROM_DATASET"
-    },
-    {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2253",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33169",
-      "type": "FROM_DATASET"
-    },
-    {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:44",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33169",
-      "type": "FROM_DATASET"
-    },
-    {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:38",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33169",
-      "type": "FROM_DATASET"
-    },
-    {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2715",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33169",
-      "type": "FROM_DATASET"
-    },
-    {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33183",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33169",
-      "type": "GRANTS_ACCESS_TO"
-    },
-    {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33182",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33179",
-      "type": "REQUESTS_ACCESS_TO"
-    },
-    {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:6",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33179",
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113608",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:8",
       "type": "CONSUMES"
     },
     {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33181",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33179",
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113648",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:8",
+      "type": "CONSUMES"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113647",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:8",
+      "type": "OFFERS"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113650",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:8",
+      "type": "GOVERNS"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:9",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:8",
       "type": "GOVERNS"
     },
     {
@@ -965,433 +2473,503 @@
       "type": "GOVERNED_BY"
     },
     {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33170",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33181",
+      "type": "UNDER"
+    },
+    {
       "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33183",
       "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33181",
       "type": "APPROVED"
     },
     {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33167",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:9",
+      "type": "UNDER"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33171",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:9",
+      "type": "UNDER"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33172",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:9",
+      "type": "UNDER"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33168",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:9",
+      "type": "UNDER"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:11",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:9",
+      "type": "APPROVED"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113652",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113650",
+      "type": "APPROVED"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113579",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:11",
+      "type": "APPROVED_UNDER"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113579",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33183",
+      "type": "APPROVED_UNDER"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113615",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113595",
+      "type": "FOR_ASSET"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113613",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113595",
+      "type": "FOR_ASSET"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113615",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113715",
+      "type": "FOR_ASSET"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113613",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113715",
+      "type": "FOR_ASSET"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113609",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113715",
+      "type": "GOVERNS"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113614",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113716",
+      "type": "FOR_ASSET"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113609",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113716",
+      "type": "GOVERNS"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113632",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113596",
+      "type": "ATTESTS_QUALITY"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113614",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113596",
+      "type": "FOR_ASSET"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113609",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113579",
+      "type": "GOVERNS"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:17541",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113579",
+      "type": "FROM_DATASET"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:3306",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113579",
+      "type": "FROM_DATASET"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:26103",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113579",
+      "type": "FROM_DATASET"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:12533",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113579",
+      "type": "FROM_DATASET"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:24588",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113579",
+      "type": "FROM_DATASET"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:42074",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113579",
+      "type": "FROM_DATASET"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:57040",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113579",
+      "type": "FROM_DATASET"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:13157",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113579",
+      "type": "FROM_DATASET"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:25232",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113579",
+      "type": "FROM_DATASET"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:55997",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113579",
+      "type": "FROM_DATASET"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:45114",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113579",
+      "type": "FROM_DATASET"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:63397",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113579",
+      "type": "FROM_DATASET"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:65636",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113579",
+      "type": "FROM_DATASET"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:16907",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113579",
+      "type": "FROM_DATASET"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:39535",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113579",
+      "type": "FROM_DATASET"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:47758",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113579",
+      "type": "FROM_DATASET"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:38783",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113579",
+      "type": "FROM_DATASET"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:49381",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113579",
+      "type": "FROM_DATASET"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:54906",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113579",
+      "type": "FROM_DATASET"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:37808",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113579",
+      "type": "FROM_DATASET"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33171",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113579",
+      "type": "ACCESSED"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113631",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113579",
+      "type": "ATTESTS_QUALITY"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113612",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113579",
+      "type": "FOR_ASSET"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113616",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113579",
+      "type": "FOR_ASSET"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113608",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113638",
+      "type": "PUBLISHES"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33172",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:12",
+      "type": "ACCESSED"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33168",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:12",
+      "type": "ACCESSED"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33170",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:12",
+      "type": "ACCESSED"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33167",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:12",
+      "type": "ACCESSED"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:17",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:12",
+      "type": "FROM_DATASET"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:8",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:12",
+      "type": "DESCRIBED_BY"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113609",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113653",
+      "type": "GOVERNS"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:17",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113653",
+      "type": "FROM_DATASET"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:8",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113653",
+      "type": "DESCRIBED_BY"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33179",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33169",
+      "type": "DESCRIBED_BY"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:3306",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33169",
+      "type": "FROM_DATASET"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:25232",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33169",
+      "type": "FROM_DATASET"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:16907",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33169",
+      "type": "FROM_DATASET"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:13157",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33169",
+      "type": "FROM_DATASET"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:17541",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33169",
+      "type": "FROM_DATASET"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:24588",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33169",
+      "type": "FROM_DATASET"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:26103",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33169",
+      "type": "FROM_DATASET"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:12533",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33169",
+      "type": "FROM_DATASET"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113639",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33169",
+      "type": "PUBLISHES"
+    },
+    {
       "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33183",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33182",
-      "type": "APPROVES"
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33169",
+      "type": "GRANTS_ACCESS_TO"
     },
     {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:7",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33182",
-      "type": "REVIEWED"
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113612",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33169",
+      "type": "FOR_ASSET"
     },
     {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:6",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33182",
-      "type": "SUBMITTED"
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113616",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33169",
+      "type": "FOR_ASSET"
     },
     {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2039",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2040",
-      "type": "HAS_ENCOUNTER"
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113579",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113584",
+      "type": "HAS_DISTRIBUTION"
     },
     {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2039",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2250",
-      "type": "HAS_ENCOUNTER"
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113653",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:13",
+      "type": "HAS_DISTRIBUTION"
     },
     {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2039",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2249",
-      "type": "HAS_ENCOUNTER"
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:12",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:13",
+      "type": "HAS_DISTRIBUTION"
     },
     {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2039",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2242",
-      "type": "HAS_ENCOUNTER"
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113579",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113582",
+      "type": "HAS_DISTRIBUTION"
     },
     {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2039",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2225",
-      "type": "HAS_ENCOUNTER"
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113579",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113583",
+      "type": "HAS_DISTRIBUTION"
     },
     {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2039",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2222",
-      "type": "HAS_ENCOUNTER"
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113653",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:14",
+      "type": "HAS_DISTRIBUTION"
     },
     {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2039",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2213",
-      "type": "HAS_ENCOUNTER"
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:12",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:14",
+      "type": "HAS_DISTRIBUTION"
     },
     {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2039",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2210",
-      "type": "HAS_ENCOUNTER"
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:12",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33177",
+      "type": "SUBJECT_TO_PURPOSE"
     },
     {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2039",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2188",
-      "type": "HAS_ENCOUNTER"
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33169",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33177",
+      "type": "SUBJECT_TO_PURPOSE"
     },
     {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2039",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2185",
-      "type": "HAS_ENCOUNTER"
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113716",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33177",
+      "type": "SUBJECT_TO_PURPOSE"
     },
     {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2039",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2175",
-      "type": "HAS_ENCOUNTER"
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113638",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33177",
+      "type": "SUBJECT_TO_PURPOSE"
     },
     {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2039",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2165",
-      "type": "HAS_ENCOUNTER"
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113715",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33177",
+      "type": "SUBJECT_TO_PURPOSE"
     },
     {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2039",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2164",
-      "type": "HAS_ENCOUNTER"
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113579",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33177",
+      "type": "SUBJECT_TO_PURPOSE"
     },
     {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2039",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2154",
-      "type": "HAS_ENCOUNTER"
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113653",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33177",
+      "type": "SUBJECT_TO_PURPOSE"
     },
     {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2039",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2151",
-      "type": "HAS_ENCOUNTER"
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113595",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33177",
+      "type": "SUBJECT_TO_PURPOSE"
     },
     {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2039",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2148",
-      "type": "HAS_ENCOUNTER"
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113596",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33177",
+      "type": "SUBJECT_TO_PURPOSE"
     },
     {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2039",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2138",
-      "type": "HAS_ENCOUNTER"
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113579",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113560",
+      "type": "CONFORMS_TO"
     },
     {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2039",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2106",
-      "type": "HAS_ENCOUNTER"
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113653",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113560",
+      "type": "CONFORMS_TO"
     },
     {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2039",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2043",
-      "type": "HAS_ENCOUNTER"
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113579",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113561",
+      "type": "CONFORMS_TO"
     },
     {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2039",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2068",
-      "type": "HAS_ENCOUNTER"
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113653",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113561",
+      "type": "CONFORMS_TO"
     },
     {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2039",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2082",
-      "type": "HAS_ENCOUNTER"
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113653",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113557",
+      "type": "CONFORMS_TO"
     },
     {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2039",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2083",
-      "type": "HAS_ENCOUNTER"
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113579",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113557",
+      "type": "CONFORMS_TO"
     },
     {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2039",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2096",
-      "type": "HAS_ENCOUNTER"
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113653",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113552",
+      "type": "CONFORMS_TO"
     },
     {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2039",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2041",
-      "type": "HAS_CONDITION"
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113579",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113552",
+      "type": "CONFORMS_TO"
     },
     {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2039",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2245",
-      "type": "HAS_CONDITION"
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113561",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113552",
+      "type": "DEPENDS_ON"
     },
     {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2039",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2243",
-      "type": "HAS_CONDITION"
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113560",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113552",
+      "type": "DEPENDS_ON"
     },
     {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2039",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2227",
-      "type": "HAS_CONDITION"
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113559",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113552",
+      "type": "DEPENDS_ON"
     },
     {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2039",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2226",
-      "type": "HAS_CONDITION"
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113557",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113552",
+      "type": "DEPENDS_ON"
     },
     {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2039",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2218",
-      "type": "HAS_CONDITION"
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113556",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113552",
+      "type": "DEPENDS_ON"
     },
     {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2039",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2216",
-      "type": "HAS_CONDITION"
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113561",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113553",
+      "type": "DEPENDS_ON"
     },
     {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2039",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2214",
-      "type": "HAS_CONDITION"
-    },
-    {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2039",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2211",
-      "type": "HAS_CONDITION"
-    },
-    {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2039",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2189",
-      "type": "HAS_CONDITION"
-    },
-    {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2039",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2186",
-      "type": "HAS_CONDITION"
-    },
-    {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2039",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2152",
-      "type": "HAS_CONDITION"
-    },
-    {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2039",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2149",
-      "type": "HAS_CONDITION"
-    },
-    {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2039",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2069",
-      "type": "HAS_CONDITION"
-    },
-    {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2039",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2103",
-      "type": "HAS_OBSERVATION"
-    },
-    {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2039",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2251",
-      "type": "HAS_OBSERVATION"
-    },
-    {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2039",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2238",
-      "type": "HAS_OBSERVATION"
-    },
-    {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2040",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:27031",
-      "type": "MAPPED_TO"
-    },
-    {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2250",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:27032",
-      "type": "MAPPED_TO"
-    },
-    {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2249",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:27033",
-      "type": "MAPPED_TO"
-    },
-    {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2242",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:27034",
-      "type": "MAPPED_TO"
-    },
-    {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2225",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:27035",
-      "type": "MAPPED_TO"
-    },
-    {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2222",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:27036",
-      "type": "MAPPED_TO"
-    },
-    {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2213",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:27037",
-      "type": "MAPPED_TO"
-    },
-    {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2210",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:27038",
-      "type": "MAPPED_TO"
-    },
-    {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2188",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:27039",
-      "type": "MAPPED_TO"
-    },
-    {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2185",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:27040",
-      "type": "MAPPED_TO"
-    },
-    {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2175",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:27041",
-      "type": "MAPPED_TO"
-    },
-    {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2165",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:27042",
-      "type": "MAPPED_TO"
-    },
-    {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2164",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:27043",
-      "type": "MAPPED_TO"
-    },
-    {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2154",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:27044",
-      "type": "MAPPED_TO"
-    },
-    {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2151",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:27045",
-      "type": "MAPPED_TO"
-    },
-    {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2148",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:27046",
-      "type": "MAPPED_TO"
-    },
-    {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2138",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:27047",
-      "type": "MAPPED_TO"
-    },
-    {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2106",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:27048",
-      "type": "MAPPED_TO"
-    },
-    {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2043",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:27049",
-      "type": "MAPPED_TO"
-    },
-    {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2068",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:27050",
-      "type": "MAPPED_TO"
-    },
-    {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2082",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:27051",
-      "type": "MAPPED_TO"
-    },
-    {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2083",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:27052",
-      "type": "MAPPED_TO"
-    },
-    {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2096",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:27053",
-      "type": "MAPPED_TO"
-    },
-    {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2041",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:29154",
-      "type": "MAPPED_TO"
-    },
-    {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2245",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:29155",
-      "type": "MAPPED_TO"
-    },
-    {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2243",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:29156",
-      "type": "MAPPED_TO"
-    },
-    {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2227",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:29157",
-      "type": "MAPPED_TO"
-    },
-    {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2226",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:29158",
-      "type": "MAPPED_TO"
-    },
-    {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2218",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:29159",
-      "type": "MAPPED_TO"
-    },
-    {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2216",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:29160",
-      "type": "MAPPED_TO"
-    },
-    {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2214",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:29161",
-      "type": "MAPPED_TO"
-    },
-    {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2211",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:29162",
-      "type": "MAPPED_TO"
-    },
-    {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2189",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:29163",
-      "type": "MAPPED_TO"
-    },
-    {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2186",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:29164",
-      "type": "MAPPED_TO"
-    },
-    {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2152",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:29165",
-      "type": "MAPPED_TO"
-    },
-    {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2149",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:29166",
-      "type": "MAPPED_TO"
-    },
-    {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2069",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:29167",
-      "type": "MAPPED_TO"
-    },
-    {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2103",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:30198",
-      "type": "MAPPED_TO"
-    },
-    {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:29154",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2042",
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2942",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2739",
       "type": "CODED_BY"
     },
     {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:29158",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2042",
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2925",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2771",
       "type": "CODED_BY"
     },
     {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:29163",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2042",
-      "type": "CODED_BY"
-    },
-    {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:29167",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2042",
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2976",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2771",
       "type": "CODED_BY"
     },
     {
@@ -1415,73 +2993,88 @@
       "type": "CODED_BY"
     },
     {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:29155",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2246",
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2255",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2042",
       "type": "CODED_BY"
     },
     {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2245",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2246",
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2278",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2042",
       "type": "CODED_BY"
     },
     {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:29156",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2244",
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2312",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2042",
       "type": "CODED_BY"
     },
     {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2243",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2244",
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2360",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2042",
       "type": "CODED_BY"
     },
     {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:29157",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2228",
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2372",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2042",
       "type": "CODED_BY"
     },
     {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2227",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2228",
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2384",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2042",
       "type": "CODED_BY"
     },
     {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:29159",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2219",
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2422",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2042",
       "type": "CODED_BY"
     },
     {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2218",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2219",
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2443",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2042",
       "type": "CODED_BY"
     },
     {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:29160",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2217",
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2471",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2042",
       "type": "CODED_BY"
     },
     {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2216",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2217",
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2505",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2042",
       "type": "CODED_BY"
     },
     {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:29161",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2215",
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2517",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2042",
       "type": "CODED_BY"
     },
     {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2214",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2215",
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2620",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2042",
       "type": "CODED_BY"
     },
     {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:29162",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2212",
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2634",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2042",
       "type": "CODED_BY"
     },
     {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2211",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2212",
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2690",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2042",
+      "type": "CODED_BY"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2908",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2042",
+      "type": "CODED_BY"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2924",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2042",
+      "type": "CODED_BY"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2941",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2042",
       "type": "CODED_BY"
     },
     {
@@ -1490,49 +3083,96 @@
       "type": "CODED_BY"
     },
     {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:29164",
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2407",
       "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2187",
       "type": "CODED_BY"
     },
     {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:29165",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2153",
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2900",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2187",
       "type": "CODED_BY"
     },
     {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2152",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2153",
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2926",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2753",
       "type": "CODED_BY"
     },
     {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:29166",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2150",
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2977",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2753",
       "type": "CODED_BY"
     },
     {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2149",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2150",
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2876",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2751",
       "type": "CODED_BY"
     },
     {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:30198",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2063",
-      "type": "CODED_BY"
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113608",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113589",
+      "type": "HOLDS_CREDENTIAL"
     },
     {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2103",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2063",
-      "type": "CODED_BY"
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113607",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113631",
+      "type": "HOLDS_CREDENTIAL"
     },
     {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2251",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2252",
-      "type": "CODED_BY"
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113610",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113632",
+      "type": "HOLDS_CREDENTIAL"
     },
     {
-      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2238",
-      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:2239",
-      "type": "CODED_BY"
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113607",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113586",
+      "type": "HOLDS_CREDENTIAL"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113608",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113587",
+      "type": "HOLDS_CREDENTIAL"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113609",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113588",
+      "type": "HOLDS_CREDENTIAL"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113610",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113629",
+      "type": "HOLDS_CREDENTIAL"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113611",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113630",
+      "type": "HOLDS_CREDENTIAL"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113607",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113624",
+      "type": "HOLDS_CREDENTIAL"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113608",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113625",
+      "type": "HOLDS_CREDENTIAL"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113609",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113626",
+      "type": "HOLDS_CREDENTIAL"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113610",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113627",
+      "type": "HOLDS_CREDENTIAL"
+    },
+    {
+      "source": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113611",
+      "target": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113628",
+      "type": "HOLDS_CREDENTIAL"
     }
-  ]
+  ],
+  "persona": "default",
+  "question": "What does the full 5-layer health dataspace look like?"
 }

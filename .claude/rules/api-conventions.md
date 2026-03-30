@@ -75,15 +75,15 @@ GET  /catalog/datasets                — HealthDCAT-AP datasets from Neo4j
 
 Roles are injected into the JWT by the Keycloak callback in `ui/src/lib/auth.ts` and stored in the NextAuth session. Middleware enforces them at the route level.
 
-| Role                    | Access                                                       |
-| ----------------------- | ------------------------------------------------------------ |
-| `EDC_ADMIN`             | All routes including `/admin/*`                              |
-| `DATA_HOLDER`           | `/catalog`, `/data/share`, `/negotiate`                      |
-| `DATA_USER`             | `/analytics`, `/query`, `/data/discover`                     |
-| `HDAB_AUTHORITY`        | `/compliance`, `/admin/policies`                             |
-| `TRUST_CENTER_OPERATOR` | Trust Center graph views                                     |
-| `PATIENT`               | `/patient/profile`, `/patient/research`, `/patient/insights` |
-| `EDC_USER_PARTICIPANT`  | Base authenticated user (implied by all above)               |
+| Role                    | Nav Group     | Access / Graph Center                                                                                       |
+| ----------------------- | ------------- | ----------------------------------------------------------------------------------------------------------- |
+| `EDC_ADMIN`             | Manage        | All routes incl. `/admin/*` · Graph: "Manage Dataspace"                                                     |
+| `DATA_HOLDER`           | Exchange      | `/catalog`, `/data/share`, `/negotiate` · Graph: "Our Data Offerings"                                       |
+| `DATA_USER`             | My Researches | `/data/discover`, `/negotiate`, `/tasks`, `/data/transfer`, `/analytics`, `/query` · Graph: "My Researches" |
+| `HDAB_AUTHORITY`        | Governance    | `/compliance`, `/admin/policies` · Graph: "Govern the Dataspace"                                            |
+| `TRUST_CENTER_OPERATOR` | Governance    | Trust Center graph views · Graph: "Privacy Operations"                                                      |
+| `PATIENT`               | My Health     | `/patient/profile`, `/patient/research`, `/patient/insights` · Graph: "My Health"                           |
+| `EDC_USER_PARTICIPANT`  | Exchange      | Base authenticated user (implied by all above)                                                              |
 
 ## Data Models
 

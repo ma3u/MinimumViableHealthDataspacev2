@@ -65,14 +65,16 @@ test.describe("D · Discovery & Federated Search", () => {
     await skipIfNeo4jDown(page);
     await page.goto("/graph");
 
-    await expect(page.getByText("Layers").first()).toBeVisible({ timeout: T });
+    await expect(page.getByText("Data layers").first()).toBeVisible({
+      timeout: T,
+    });
 
     const layers = [
-      "Marketplace",
-      "HealthDCAT-AP",
-      "FHIR R4",
-      "OMOP CDM",
-      "Ontology",
+      "Marketplace & Access",
+      "Data Catalog",
+      "My Health Records",
+      "Research Data",
+      "Medical Terminology",
     ];
     for (const layer of layers) {
       await expect(page.getByText(layer).first()).toBeVisible({ timeout: T });
@@ -86,7 +88,9 @@ test.describe("D · Discovery & Federated Search", () => {
     await skipIfNeo4jDown(page);
 
     await page.goto("/graph");
-    await expect(page.getByText("Layers").first()).toBeVisible({ timeout: T });
+    await expect(page.getByText("Data layers").first()).toBeVisible({
+      timeout: T,
+    });
 
     const canvas = page.locator("canvas");
     await expect(canvas.first()).toBeVisible({ timeout: T });

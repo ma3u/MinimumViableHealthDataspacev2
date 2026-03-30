@@ -41,16 +41,16 @@ test.describe("Screenshot capture (run against localhost:3003)", () => {
     await shot(page, "ehds-health-dataspace-home-dashboard.png");
   });
 
-  test("graph-explorer-default", async ({ page }) => {
+  test("graph-explorer-neo4j", async ({ page }) => {
     await page.goto("/graph", { waitUntil: "networkidle" });
     await page.waitForTimeout(2000);
     await shot(page, "neo4j-health-dataspace-graph-explorer.png");
   });
 
-  test("graph-explorer-persona-selector", async ({ page }) => {
+  test("graph-explorer-default", async ({ page }) => {
     await page.goto("/graph", { waitUntil: "networkidle" });
     await page.waitForTimeout(1500);
-    await shot(page, "graph-explorer-persona-selector.png");
+    await shot(page, "graph-explorer-default.png");
   });
 
   test("graph-hospital-persona", async ({ page }) => {

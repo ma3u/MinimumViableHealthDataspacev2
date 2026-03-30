@@ -78,22 +78,22 @@ describe("GET /api/graph", () => {
     );
     expect(participantNode).toBeDefined();
     expect(participantNode.layer).toBe(1);
-    // Participant uses NODE_ROLE_COLORS override (#E67E22 amber), not base layer color
-    expect(participantNode.color).toBe("#E67E22");
+    // Participant uses NODE_ROLE_COLORS override (orange-500), not base layer color
+    expect(participantNode.color).toBe("#F97316");
 
     const datasetNode = data.nodes.find(
       (n: { label: string }) => n.label === "HealthDataset",
     );
     expect(datasetNode).toBeDefined();
     expect(datasetNode.layer).toBe(2);
-    expect(datasetNode.color).toBe("#148F77"); // Layer 2 color
+    expect(datasetNode.color).toBe("#7DD3C8"); // Layer 2 muted teal
 
     const patientNode = data.nodes.find(
       (n: { label: string }) => n.label === "Patient",
     );
     expect(patientNode).toBeDefined();
     expect(patientNode.layer).toBe(3);
-    expect(patientNode.color).toBe("#1E8449"); // Layer 3 color
+    expect(patientNode.color).toBe("#86EFAC"); // Layer 3 muted mint
   });
 
   it("should handle empty graph gracefully", async () => {

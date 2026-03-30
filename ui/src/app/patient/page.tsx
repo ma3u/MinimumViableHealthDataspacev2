@@ -55,6 +55,8 @@ export default function PatientPage() {
   const [selected, setSelected] = useState<string>("");
   const [timeline, setTimeline] = useState<TimelineEntry[]>([]);
   const [loading, setLoading] = useState(true);
+  // When true, the API returned restricted=true (PATIENT role — own record only)
+  const [restricted, setRestricted] = useState(false);
 
   // Load patient list + cohort stats on mount
   useEffect(() => {
@@ -63,6 +65,11 @@ export default function PatientPage() {
       .then((d) => {
         setPatients(d.patients ?? []);
         setStats(d.stats ?? null);
+        setRestricted(d.restricted === true);
+        // Auto-select the only patient when restricted (PATIENT role)
+        if (d.restricted && d.patients?.length === 1) {
+          setSelected(d.patients[0].id);
+        }
         setLoading(false);
       })
       .catch(() => setLoading(false));
@@ -107,18 +114,27 @@ export default function PatientPage() {
         </div>
       )}
 
-      <select
-        value={selected}
-        onChange={(e) => setSelected(e.target.value)}
-        className="mb-4 px-3 py-2 bg-gray-800 border border-gray-600 rounded text-sm outline-none focus:border-layer3 w-full"
-      >
-        <option value="">— select patient ({patients.length} loaded) —</option>
-        {patients.map((p) => (
-          <option key={p.id} value={p.id}>
-            {p.name ?? p.id}
+      {/* Patient selector — hidden for PATIENT role (they only see their own record) */}
+      {restricted ? (
+        <div className="mb-4 px-3 py-2 bg-teal-900/30 border border-teal-700/50 rounded text-sm text-teal-200">
+          Showing your personal health record (EHDS Art. 3 / GDPR Art. 15)
+        </div>
+      ) : (
+        <select
+          value={selected}
+          onChange={(e) => setSelected(e.target.value)}
+          className="mb-4 px-3 py-2 bg-gray-800 border border-gray-600 rounded text-sm outline-none focus:border-layer3 w-full"
+        >
+          <option value="">
+            — select patient ({patients.length} loaded) —
           </option>
-        ))}
-      </select>
+          {patients.map((p) => (
+            <option key={p.id} value={p.id}>
+              {p.name ?? p.id}
+            </option>
+          ))}
+        </select>
+      )}
 
       {/* Patient demographics */}
       {selectedPatient && (

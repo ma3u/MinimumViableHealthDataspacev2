@@ -156,18 +156,40 @@ Sign in at `http://localhost:3003/auth/signin` — password equals username in l
 > user's password. Trust Center operators use the `hdab` graph persona and
 > `/compliance#trust-center`.
 
-### Menu Items per Role
+### Navigation Groups per Role
 
-Navigation is filtered by role — users only see items relevant to their function.
-Patients are **citizens**, not active dataspace participants (EHDS Chapter II Art. 3-12).
-They cannot onboard, exchange data, or access participant settings — only their personal
-health journey (My Health group), public pages, and documentation.
+Each role sees a **single primary menu** tailored to their daily work. "Explore" is replaced
+by persona-specific menus for researchers (My Researches) and patients (My Health).
+
+| Role           | Primary Menu     | Graph Center         | EHDS Articles |
+| -------------- | ---------------- | -------------------- | ------------- |
+| Public         | Explore          | Health Dataspace     | —             |
+| Patient        | My Health        | My Health            | Art. 3-12     |
+| Data Holder    | Explore+Exchange | Our Data Offerings   | Art. 33-37    |
+| Researcher     | My Researches    | My Researches        | Art. 46-49    |
+| HDAB Authority | Governance       | Govern the Dataspace | Art. 45-53    |
+| Trust Center   | Governance       | Privacy Operations   | Art. 50-51    |
+| EDC Admin      | Manage           | Manage Dataspace     | Art. 33       |
+
+**Researcher workflow (My Researches menu — EHDS Art. 46-49):**
+
+| Step | Route            | Label             | EHDS Article | What happens                                         |
+| ---- | ---------------- | ----------------- | ------------ | ---------------------------------------------------- |
+| 1    | `/graph`         | Research Overview | —            | Knowledge graph with researcher focus                |
+| 2    | `/catalog`       | Browse Catalogs   | Art. 47      | HealthDCAT-AP dataset catalog                        |
+| 3    | `/data/discover` | Discover Datasets | Art. 47      | Federated search across participant catalogs         |
+| 4    | `/negotiate`     | Request Access    | Art. 48      | Submit access application with purpose + legal basis |
+| 5    | `/tasks`         | My Applications   | Art. 49      | Track HDAB approval status                           |
+| 6    | `/data/transfer` | Retrieve Data     | Art. 50      | Transfer approved data to Secure Processing Env      |
+| 7    | `/analytics`     | Run Analytics     | Art. 50/53   | OMOP cohort analytics in SPE                         |
+| 8    | `/query`         | Query & Export    | Art. 50      | NLQ/federated queries, export aggregate results only |
+
+**Menu items per role:**
 
 | Route                           | Public | Patient | Data Holder | Researcher | HDAB | EDC Admin |
 | ------------------------------- | :----: | :-----: | :---------: | :--------: | :--: | :-------: |
-| `/graph`                        |   ✅   |   ✅    |     ✅      |     ✅     |  ✅  |    ✅     |
-| `/graph?persona=patient`        |   —    |   ✅    |      —      |     —      |  —   |     —     |
-| `/catalog`                      |   ✅   |   ✅    |     ✅      |     ✅     |  ✅  |    ✅     |
+| `/graph`                        |   ✅   |    —    |     ✅      |     ✅     |  ✅  |    ✅     |
+| `/catalog`                      |   ✅   |    —    |     ✅      |     ✅     |  ✅  |    ✅     |
 | `/catalog/editor`               |   —    |    —    |     ✅      |     —      |  —   |    ✅     |
 | `/patient`                      |   ✅   |   ✅    |     ✅      |     ✅     |  ✅  |    ✅     |
 | `/patient/profile`              |   —    |   ✅    |      —      |     —      |  —   |     —     |
@@ -175,9 +197,8 @@ health journey (My Health group), public pages, and documentation.
 | `/patient/insights`             |   —    |   ✅    |      —      |     —      |  —   |     —     |
 | `/analytics`                    |   —    |    —    |      —      |     ✅     |  ✅  |    ✅     |
 | `/query` (NLQ)                  |   —    |    —    |      —      |     ✅     |  ✅  |    ✅     |
-| `/eehrxf`                       |   ✅   |   ✅    |     ✅      |     ✅     |  ✅  |    ✅     |
+| `/eehrxf`                       |   ✅   |    —    |     ✅      |     ✅     |  ✅  |    ✅     |
 | `/compliance`                   |   —    |    —    |      —      |     —      |  ✅  |    ✅     |
-| `/compliance/tck`               |   —    |    —    |      —      |     —      |  ✅  |    ✅     |
 | `/credentials`                  |   —    |    —    |     ✅      |     ✅     |  ✅  |    ✅     |
 | `/data/share`                   |   —    |    —    |     ✅      |     —      |  —   |    ✅     |
 | `/data/discover`                |   —    |    —    |      —      |     ✅     |  ✅  |    ✅     |
@@ -191,38 +212,38 @@ health journey (My Health group), public pages, and documentation.
 
 ### Graph Explorer — Persona Views
 
-After login, the **UserMenu → "My graph view"** deep-link and the in-graph
-**"View as"** panel redirect each user to their tailored subgraph:
+The graph center shows a **value-centric starting node** per persona, with nodes
+arranged in concentric rings by relevance (not by technical layer).
 
-| Persona                | URL param               | Primary question                             | Focus nodes                                                      |
-| ---------------------- | ----------------------- | -------------------------------------------- | ---------------------------------------------------------------- |
-| Default                | `?persona=default`      | What does the full dataspace look like?      | All 5 layers                                                     |
-| Hospital / Data Holder | `?persona=hospital`     | Who has approved access to my data?          | Participant · HealthDataset · Contract · HDABApproval            |
-| Researcher / Data User | `?persona=researcher`   | What datasets match my study?                | HealthDataset · OMOPPerson · SnomedConcept · SPESession          |
-| HDAB Authority         | `?persona=hdab`         | What approvals are pending?                  | HDABApproval · VerifiableCredential · TrustCenter                |
-| Trust Center Operator  | `?persona=trust-center` | Which pseudonym flows am I running?          | TrustCenter · SPESession · ResearchPseudonym                     |
-| EDC Admin              | `?persona=edc-admin`    | Who are my participants? What contracts?     | Participant · DataProduct · Contract · TransferEvent             |
-| Patient / Citizen      | `?persona=patient`      | What health data do I have? Who is using it? | Patient · Condition · Participant · PatientConsent · DataProduct |
+| Persona                | URL param               | Center node          | Primary question                                       |
+| ---------------------- | ----------------------- | -------------------- | ------------------------------------------------------ |
+| Default                | `?persona=default`      | Health Dataspace     | What does the full dataspace look like?                |
+| Hospital / Data Holder | `?persona=hospital`     | Our Data Offerings   | What data do we offer? Who is using it?                |
+| Researcher / Data User | `?persona=researcher`   | My Researches        | Which datasets can I use? How do I get access?         |
+| HDAB Authority         | `?persona=hdab`         | Govern the Dataspace | What approvals are pending? Which policies govern use? |
+| Trust Center Operator  | `?persona=trust-center` | Privacy Operations   | Which pseudonym flows am I running?                    |
+| EDC Admin              | `?persona=edc-admin`    | Manage Dataspace     | Who are my participants? What contracts are live?      |
+| Patient / Citizen      | `?persona=patient`      | My Health            | What health data do I have? Who is using it?           |
 
-**Patient question filters** (sidebar when `?persona=patient`):
+**Persona-specific filter presets** (sidebar questions per role):
 
-| Filter                           | Highlights                                                                                 |
-| -------------------------------- | ------------------------------------------------------------------------------------------ |
-| Who is using my data?            | PatientConsent · DataProduct · ResearchPseudonym · SPESession · Participant · HDABApproval |
-| Which research programme for me? | DataProduct · HealthDataset · ResearchInsight · PatientConsent · EhdsPurpose · Participant |
-| Show my data                     | Patient · Encounter · Condition · MedicationRequest · Observation · OMOPPerson             |
-| Show health interests and risks  | Patient · Condition · ResearchInsight · SnomedConcept · ICD10Code · MedicationRequest      |
+| Persona    | Filter questions                                                                                             |
+| ---------- | ------------------------------------------------------------------------------------------------------------ |
+| Patient    | Who is using my data? · Which research programme? · Show my data · Show health interests and risks           |
+| Researcher | Which datasets can I use? · How do I get access? · What analytics? · Clinical data? · Where is it processed? |
+| Hospital   | Which data do we offer? · Who is using our data? · What contracts? · Are we compliant? · Clinical data?      |
+| HDAB       | What approvals are pending? · Which policies? · What contracts? · Credentials valid? · Trust Center?         |
 
-**Node role colours** (stable across all persona views):
+**Node role colours** (warm/vivid accents — distinct from cool/muted layer colours):
 
 | Node type         | Colour              | Role                                             |
 | ----------------- | ------------------- | ------------------------------------------------ |
-| `Participant`     | 🟠 Amber `#E67E22`  | Dataspace actors (data holders, researchers)     |
-| `TrustCenter`     | 🟣 Violet `#8E44AD` | EHDS Art. 50 pseudonym authority                 |
-| `HDABApproval`    | 🔴 Red `#C0392B`    | HDAB access decisions                            |
-| `SPESession`      | 🟡 Gold `#D4AC0D`   | Active secure processing sessions                |
-| `PatientConsent`  | 🩵 Teal `#0E9F9F`   | Patient consent for secondary use (EHDS Art. 10) |
-| `ResearchInsight` | 🟢 Mint `#1ABC9C`   | Personalised insights from research studies      |
+| `Participant`     | 🟠 Orange `#F97316` | Dataspace actors (data holders, researchers)     |
+| `TrustCenter`     | 🔴 Red `#EF4444`    | EHDS Art. 50 pseudonym authority                 |
+| `HDABApproval`    | 🩷 Pink `#EC4899`   | HDAB access decisions                            |
+| `SPESession`      | 🟡 Amber `#F59E0B`  | Active secure processing sessions                |
+| `PatientConsent`  | 🟣 Purple `#A855F7` | Patient consent for secondary use (EHDS Art. 10) |
+| `ResearchInsight` | 🩵 Cyan `#06B6D4`   | Personalised insights from research studies      |
 
 ---
 
