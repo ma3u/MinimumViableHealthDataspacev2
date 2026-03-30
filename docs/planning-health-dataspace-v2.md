@@ -853,6 +853,37 @@ A GitHub Actions workflow (`.github/workflows/pages.yml`) builds the UI as a sta
 
 Live static demo: https://ma3u.github.io/MinimumViableHealthDataspacev2/
 
+#### Phase 6a-2: Graph Explorer UX Improvements ✅
+
+Value-centric, persona-driven graph redesign addressing usability feedback from stakeholder review.
+
+**Problems addressed:**
+
+1. Layer colors and role colors overlapped visually — users could not distinguish structural tiers from actor types
+2. Technical jargon (L1-L5, OMOP CDM, HDAB) alienated non-technical users
+3. Graph organized by technical layers, not by user value/purpose
+4. No hover tooltips — users had to click nodes to learn what they are
+5. Numeric SNOMED/ICD-10 codes (e.g. `160903007`) shown instead of human-readable names
+6. Double-click required to expand nodes — unintuitive
+7. Right detail panel cut off on smaller screens; no way to minimize panels
+
+**Changes implemented:**
+
+| Change                       | Files                            | Description                                                                                                                                                                              |
+| ---------------------------- | -------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Color palette split          | `graph-constants.ts`             | Layer colors → cool/muted pastel; Role colors → warm/vivid accents                                                                                                                       |
+| Persona-specific labels      | `graph-constants.ts`             | `PERSONA_LAYER_LABELS` per persona (e.g. patient: "My Health Records", "Who Uses My Data")                                                                                               |
+| Value-center node            | `graph-constants.ts`, `page.tsx` | Golden center node per persona: Patient→"My Health", Researcher→"My Study", Hospital→"My Data Offerings", HDAB→"Governance", EDC Admin→"My Dataspace", Trust Center→"Privacy Operations" |
+| Persona ring layout          | `graph-constants.ts`, `page.tsx` | `PERSONA_RING_ASSIGNMENT` positions nodes by relevance to user's role, not by technical layer                                                                                            |
+| Canvas hover tooltip         | `page.tsx`                       | Floating infobox on mouse-over showing node name, type, layer, and description                                                                                                           |
+| Human-readable names         | `route.ts`, `expand/route.ts`    | Cypher `coalesce()` order fixed: `display` before `code` for all ontology nodes                                                                                                          |
+| Single-click expand          | `page.tsx`                       | One click = select + expand + show detail panel (no double-click needed)                                                                                                                 |
+| Collapsible panels           | `page.tsx`                       | Left sidebar and right detail panel have minimize/expand toggles                                                                                                                         |
+| Friendly relationship labels | `page.tsx`                       | `FRIENDLY_REL_NAMES` map: `CODED_BY` → "coded as", `HAS_CONDITION` → "has condition", etc.                                                                                               |
+| Thicker VALUE_FOCUS lines    | `page.tsx`                       | Golden dashed lines from center node made 2.5x thicker and more visible                                                                                                                  |
+
+**Test coverage:** 1563 unit tests pass (82 files). E2E journey specs J001–J030 cover graph interactions.
+
 ### Phase 6b: Unified Participant Portal (Next.js) ✅
 
 Phase 6b consolidates the onboarding and management functionality from three reference implementations — [Aruba Participant Portal](https://github.com/Aruba-it-S-p-A/edc-public-participant-portal) (Angular 20), [Fraunhofer End-User API](https://github.com/FraunhoferISST/End-User-API) (Angular + daisyUI), and [Dataspace Builder Redline](https://dataspacebuilder.github.io/website/docs/components/redline) — into the existing **Next.js 14** application. This avoids running three separate frontend stacks and leverages the 6 views already built in Phase 6a.
@@ -2228,6 +2259,29 @@ New exports in `src/lib/auth.ts`:
 - Patients (citizens) see: Explore (public items), My Health, Docs — no
   participant features (Get Started, Exchange, Governance, Manage)
 - Dataspace participants see role-specific items from all groups
+
+**Navigation groups per role:**
+
+| Nav Group     | Roles                        | Graph Center         |
+| ------------- | ---------------------------- | -------------------- |
+| Explore       | Public (all)                 | Health Dataspace     |
+| My Researches | DATA_USER                    | My Researches        |
+| My Health     | PATIENT                      | My Health            |
+| Governance    | HDAB_AUTHORITY, TRUST_CENTER | Govern the Dataspace |
+| Exchange      | DATA_HOLDER, DATA_USER, all  | Our Data Offerings   |
+| Manage        | EDC_ADMIN, HDAB_AUTHORITY    | Manage Dataspace     |
+| Docs          | Public (all)                 | —                    |
+
+**EHDS researcher workflow (My Researches menu — Art. 46–49):**
+
+| Step | Route            | Label             | EHDS Article |
+| ---- | ---------------- | ----------------- | ------------ |
+| 1    | `/data/discover` | Discover Datasets | Art. 47      |
+| 2    | `/negotiate`     | Request Access    | Art. 48      |
+| 3    | `/tasks`         | My Applications   | Art. 49      |
+| 4    | `/data/transfer` | Retrieve Data     | Art. 50      |
+| 5    | `/analytics`     | Run Analytics     | Art. 50/53   |
+| 6    | `/query`         | Query & Export    | Art. 50      |
 
 **Menu items per role:**
 

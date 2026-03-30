@@ -11,6 +11,8 @@ import {
   BarChart2,
   BookOpen,
   Building2,
+  ChevronLeft,
+  ChevronRight,
   Database,
   Eye,
   FlaskConical,
@@ -18,6 +20,8 @@ import {
   Lock,
   Loader2,
   MousePointerClick,
+  PanelLeftClose,
+  PanelRightClose,
   Scale,
   Settings,
   ShieldCheck,
@@ -28,12 +32,25 @@ import type { LucideProps } from "lucide-react";
 import {
   FILTER_PRESETS,
   PATIENT_FILTER_PRESETS,
+  HOSPITAL_FILTER_PRESETS,
+  HDAB_FILTER_PRESETS,
+  RESEARCHER_FILTER_PRESETS,
   LAYER_COLORS,
   LAYER_LABELS,
+  LAYER_TOOLTIPS,
   NODE_ROLE_COLORS,
+  NODE_DISPLAY_NAMES,
+  NODE_TOOLTIPS,
   PERSONA_VIEWS,
+  PERSONA_LAYER_LABELS,
+  PERSONA_VALUE_NODES,
+  PERSONA_RING_ASSIGNMENT,
+  RING_RADII,
   type FilterPresetId,
   type PatientFilterPresetId,
+  type HospitalFilterPresetId,
+  type HdabFilterPresetId,
+  type ResearcherFilterPresetId,
   type PersonaId,
 } from "@/lib/graph-constants";
 
@@ -52,6 +69,7 @@ interface GraphNode {
   group?: string;
   expandable?: boolean;
   expanded?: boolean;
+  isValueCenter?: boolean;
   x?: number;
   y?: number;
   fx?: number;
@@ -71,33 +89,85 @@ interface GraphData {
 
 // ── Constants ────────────────────────────────────────────────────────────────
 
-// Role-specific color legend entries (shown below layer legend)
+// Role-specific color legend entries (warm/vivid — shown below structural layers)
 const ROLE_LEGEND: Array<{
   label: string;
   color: string;
   description: string;
+  tooltip: string;
 }> = [
   {
-    label: "Participant",
+    label: "Organization",
     color: NODE_ROLE_COLORS.Participant,
-    description: "Data holder / researcher",
+    description: "Hospital, researcher, or authority",
+    tooltip: "DSP Participant — a registered dataspace actor",
   },
   {
-    label: "TrustCenter",
+    label: "Privacy Service",
     color: NODE_ROLE_COLORS.TrustCenter,
-    description: "EHDS Art. 50 pseudonym authority",
+    description: "Manages pseudonyms for research",
+    tooltip: "EHDS Art. 50/51 — Trust Center pseudonym authority",
   },
   {
-    label: "HDABApproval",
+    label: "Access Decision",
     color: NODE_ROLE_COLORS.HDABApproval,
-    description: "HDAB access decision",
+    description: "Approval to use health data",
+    tooltip: "EHDS Art. 46 — HDAB access decision",
   },
   {
-    label: "SPESession",
+    label: "Secure Processing",
     color: NODE_ROLE_COLORS.SPESession,
-    description: "Active TEE processing session",
+    description: "Active data processing session",
+    tooltip: "EHDS Art. 50 — Secure Processing Environment",
+  },
+  {
+    label: "My Consent",
+    color: NODE_ROLE_COLORS.PatientConsent,
+    description: "Patient consent for data use",
+    tooltip: "GDPR Art. 15-22 — patient consent for secondary use",
   },
 ];
+
+// User-friendly relationship type names (replaces UPPER_SNAKE_CASE on links)
+const FRIENDLY_REL_NAMES: Record<string, string> = {
+  HAS_CONDITION: "has condition",
+  HAS_OBSERVATION: "has observation",
+  HAS_ENCOUNTER: "has encounter",
+  HAS_MEDICATION_REQUEST: "takes medication",
+  HAS_PROCEDURE: "had procedure",
+  CODED_BY: "coded as",
+  MAPS_TO: "maps to",
+  HAS_DISTRIBUTION: "available as",
+  HAS_CONTRACT: "under contract",
+  OFFERS: "offers",
+  GOVERNED_BY: "governed by",
+  APPROVED_BY: "approved by",
+  SUBJECT_TO: "subject to",
+  APPLIED_BY: "applied by",
+  DESCRIBES: "describes",
+  CONFORMS_TO: "conforms to",
+  COVERS: "covers",
+  UNDER: "under",
+  MANAGES: "manages",
+  RESOLVES_PSEUDONYMS_FOR: "resolves pseudonyms",
+  MUTUALLY_RECOGNISES: "recognises",
+  LINKED_FROM: "linked from",
+  USED_IN: "used in",
+  HAS_CONDITION_OCCURRENCE: "has condition",
+  HAS_MEASUREMENT: "has measurement",
+  HAS_DRUG_EXPOSURE: "takes drug",
+  HAS_PROCEDURE_OCCURRENCE: "had procedure",
+  HAS_VISIT_OCCURRENCE: "visited",
+  REQUESTED_BY: "requested by",
+  PROVIDED_BY: "provided by",
+  PART_OF: "part of",
+  ACCESSED: "accessed",
+  TRANSFERRED_BY: "transferred by",
+  TRANSFERS: "transfers",
+  FROM_PROVIDER: "from provider",
+  TO_CONSUMER: "to consumer",
+  VALUE_FOCUS: "focus",
+};
 
 // Icon map for filter presets
 type LucideIcon = React.ForwardRefExoticComponent<
@@ -121,23 +191,22 @@ const PRESET_ICONS: Record<string, LucideIcon> = {
   Scale,
 };
 
-// Concentric ring radii — nodes pre-positioned so physics is skipped
-const LAYER_RADII: Record<number, number> = {
-  1: 90,
-  2: 200,
-  3: 340,
-  4: 500,
-  5: 650,
-};
-
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
 function nId(n: string | GraphNode): string {
   return typeof n === "string" ? n : n.id;
 }
 
-function ringPosition(layer: number, idx: number, total: number) {
-  const r = LAYER_RADII[layer] ?? 400;
+/** Compute fixed position on a concentric ring, persona-aware. */
+function ringPosition(
+  label: string,
+  idx: number,
+  total: number,
+  persona: PersonaId,
+) {
+  const ring = PERSONA_RING_ASSIGNMENT[persona]?.[label] ?? 4; // fallback to outermost
+  const r = RING_RADII[ring] ?? 580;
+  if (r === 0) return { fx: 0, fy: 0 }; // value center
   const angle = (2 * Math.PI * idx) / Math.max(total, 1);
   return { fx: r * Math.cos(angle), fy: r * Math.sin(angle) };
 }
@@ -146,28 +215,38 @@ function mergeInto(
   prev: GraphData,
   newNodes: GraphNode[],
   newLinks: GraphLink[],
+  persona: PersonaId,
 ): GraphData {
   const existingIds = new Set(prev.nodes.map((n) => n.id));
 
-  // Count per layer for existing nodes (angle offset base)
-  const layerCount: Record<number, number> = {};
+  // Count per ring for existing nodes (angle offset base)
+  const ringCount: Record<number, number> = {};
   for (const n of prev.nodes) {
-    layerCount[n.layer] = (layerCount[n.layer] ?? 0) + 1;
+    const ring = PERSONA_RING_ASSIGNMENT[persona]?.[n.label] ?? 4;
+    ringCount[ring] = (ringCount[ring] ?? 0) + 1;
   }
 
   const incoming = newNodes.filter((n) => !existingIds.has(n.id));
 
-  // Pre-compute final total per layer so every node gets an even angular slot
-  const layerTotal: Record<number, number> = { ...layerCount };
+  // Pre-compute final total per ring so every node gets an even angular slot
+  const ringTotal: Record<number, number> = { ...ringCount };
   for (const n of incoming) {
-    layerTotal[n.layer] = (layerTotal[n.layer] ?? 0) + 1;
+    const ring = PERSONA_RING_ASSIGNMENT[persona]?.[n.label] ?? 4;
+    ringTotal[ring] = (ringTotal[ring] ?? 0) + 1;
   }
 
   const toAdd: GraphNode[] = [];
   for (const n of incoming) {
-    const idx = layerCount[n.layer] ?? 0;
-    layerCount[n.layer] = idx + 1;
-    toAdd.push({ ...n, ...ringPosition(n.layer, idx, layerTotal[n.layer]!) });
+    const ring = PERSONA_RING_ASSIGNMENT[persona]?.[n.label] ?? 4;
+    const idx = ringCount[ring] ?? 0;
+    ringCount[ring] = idx + 1;
+    toAdd.push({
+      ...n,
+      // Apply client-side color if missing from API/mock
+      color:
+        n.color || NODE_ROLE_COLORS[n.label] || LAYER_COLORS[n.layer] || "#888",
+      ...ringPosition(n.label, idx, ringTotal[ring]!, persona),
+    });
   }
 
   const existingLinkKeys = new Set(
@@ -206,7 +285,7 @@ function GraphContent() {
   const highlightId = searchParams.get("highlight");
   const urlPersona = searchParams.get("persona") as PersonaId | null;
 
-  const { data: session } = useSession();
+  const { data: session, status: sessionStatus } = useSession();
   const sessionRoles: string[] =
     (session as { roles?: string[] } | null)?.roles ?? [];
   const sessionUsername: string =
@@ -222,22 +301,42 @@ function GraphContent() {
   const [neighbours, setNeighbours] = useState<
     { dir: "in" | "out"; type: string; node: GraphNode }[]
   >([]);
+  // Node properties fetched from /api/graph/node for the selected node
+  const [nodeProps, setNodeProps] = useState<
+    Array<{ key: string; label: string; value: string }>
+  >([]);
+  const [propsLoading, setPropsLoading] = useState(false);
   // Active filter preset — null = show all (covers both researcher and patient presets)
   const [activeFilter, setActiveFilter] = useState<
-    FilterPresetId | PatientFilterPresetId | null
+    | FilterPresetId
+    | PatientFilterPresetId
+    | HospitalFilterPresetId
+    | HdabFilterPresetId
+    | ResearcherFilterPresetId
+    | null
   >(null);
-  // Active persona view — seed from URL ?persona= so deep-links land on the right view
-  const [activePersona, setActivePersona] = useState<PersonaId>(
-    urlPersona ?? "default",
-  );
+  // Active persona view — derived from session role; URL ?persona= overrides.
+  // Computed directly each render (not stale state) to avoid race conditions
+  // where the graph loads with "default" before the session resolves.
+  const derivedPersona = (sessionPersonaId || "default") as PersonaId;
+  const activePersona: PersonaId = urlPersona ?? derivedPersona;
 
   const containerRef = useRef<HTMLDivElement>(null);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const fgRef = useRef<any>(null);
   const [dims, setDims] = useState({ width: 800, height: 600 });
+  // Canvas hover tooltip state
+  const [hoveredNode, setHoveredNode] = useState<GraphNode | null>(null);
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  // Panel collapse state
+  const [leftCollapsed, setLeftCollapsed] = useState(false);
+  const [rightCollapsed, setRightCollapsed] = useState(false);
 
   // ── Load graph (re-fetches when persona changes) ──────────────────────────
+  // Wait for session to resolve before first load — avoids double-fetch
+  // (default → real persona) that causes wrong center node name
   useEffect(() => {
+    if (sessionStatus === "loading") return;
     setLoading(true);
     setError(null);
     setSelected(null);
@@ -250,7 +349,53 @@ function GraphContent() {
       .then((r) => r.json())
       .then((d) => {
         if (!Array.isArray(d.nodes)) throw new Error("Bad response");
-        setData(mergeInto({ nodes: [], links: [] }, d.nodes, d.links));
+
+        // Inject value-center node
+        const vc = PERSONA_VALUE_NODES[activePersona];
+        const valueCenterNode: GraphNode = {
+          id: vc.id,
+          name: vc.name,
+          label: "ValueCenter",
+          layer: 0,
+          color: NODE_ROLE_COLORS.ValueCenter ?? "#FBBF24",
+          group: "value-center",
+          expandable: false,
+          isValueCenter: true,
+        };
+
+        // Merge real nodes with persona-aware ring positioning
+        const graph = mergeInto(
+          { nodes: [], links: [] },
+          d.nodes,
+          d.links,
+          activePersona,
+        );
+
+        // Mark ALL initial nodes as expanded (up to 1000) — no dashed rings
+        const initialNodes = graph.nodes.map((n) => ({
+          ...n,
+          expanded: true,
+        }));
+        const initialIds = new Set(initialNodes.map((n) => n.id));
+
+        // Connect value center to ALL matching focus nodes (not capped)
+        const valueCenterLinks: GraphLink[] = [];
+        const focusLabelSet = new Set(vc.connectedLabels);
+        for (const n of initialNodes) {
+          if (focusLabelSet.has(n.label)) {
+            valueCenterLinks.push({
+              source: vc.id,
+              target: n.id,
+              type: "VALUE_FOCUS",
+            });
+          }
+        }
+
+        setExpandedIds(initialIds);
+        setData({
+          nodes: [{ ...valueCenterNode, fx: 0, fy: 0 }, ...initialNodes],
+          links: [...graph.links, ...valueCenterLinks],
+        });
         setLoading(false);
         // Auto-fit all nodes into view after data arrives
         setTimeout(() => fgRef.current?.zoomToFit(400, 40), 150);
@@ -259,7 +404,7 @@ function GraphContent() {
         setError("Neo4j unavailable — graph could not be loaded.");
         setLoading(false);
       });
-  }, [activePersona]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [activePersona, sessionStatus]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Auto-highlight from URL param ─────────────────────────────────────────
   useEffect(() => {
@@ -299,6 +444,62 @@ function GraphContent() {
     return () => window.removeEventListener("keydown", h);
   }, []);
 
+  // ── Mouse position for canvas hover tooltip ──────────────────────────────
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const handler = (e: MouseEvent) => {
+      const rect = el.getBoundingClientRect();
+      setMousePos({ x: e.clientX - rect.left, y: e.clientY - rect.top });
+    };
+    el.addEventListener("mousemove", handler);
+    return () => el.removeEventListener("mousemove", handler);
+  }, []);
+
+  // ── Auto-collapse left sidebar when right panel opens on narrow screens ──
+  useEffect(() => {
+    if (selected && containerRef.current) {
+      const totalWidth = window.innerWidth;
+      // If viewport is < 1024px, auto-collapse left sidebar to make room
+      if (totalWidth < 1024) {
+        setLeftCollapsed(true);
+      }
+    }
+  }, [!!selected]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // ── Recalculate canvas dims when panels open/close ─────────────────────
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (containerRef.current) {
+        setDims({
+          width: containerRef.current.clientWidth,
+          height: containerRef.current.clientHeight,
+        });
+      }
+    }, 50);
+    return () => clearTimeout(timer);
+  }, [!!selected, leftCollapsed, rightCollapsed]);
+
+  // ── Fetch node properties when selection changes ────────────────────────
+  useEffect(() => {
+    if (!selected || selected.isValueCenter) {
+      setNodeProps([]);
+      return;
+    }
+    setPropsLoading(true);
+    fetchApi(`/api/graph/node?id=${encodeURIComponent(selected.id)}`)
+      .then((r) => r.json())
+      .then((d) => {
+        if (Array.isArray(d.properties)) {
+          setNodeProps(d.properties);
+        } else {
+          setNodeProps([]);
+        }
+      })
+      .catch(() => setNodeProps([]))
+      .finally(() => setPropsLoading(false));
+  }, [selected]);
+
   // ── Neighbours list ───────────────────────────────────────────────────────
   useEffect(() => {
     if (!selected) return setNeighbours([]);
@@ -322,6 +523,7 @@ function GraphContent() {
   const expandNode = useCallback(
     async (node: GraphNode) => {
       if (expandedIds.has(node.id)) return; // already expanded
+      if (node.isValueCenter) return; // virtual node — no Neo4j expand
       setExpanding(node.id);
       try {
         const r = await fetchApi(
@@ -329,7 +531,7 @@ function GraphContent() {
         );
         const d = await r.json();
         if (!Array.isArray(d.nodes)) return;
-        setData((prev) => mergeInto(prev, d.nodes, d.links));
+        setData((prev) => mergeInto(prev, d.nodes, d.links, activePersona));
         setExpandedIds((prev) => new Set(Array.from(prev).concat(node.id)));
         // Mark node as expanded in place
         setData((prev) => ({
@@ -342,28 +544,51 @@ function GraphContent() {
         setExpanding(null);
       }
     },
-    [expandedIds],
+    [expandedIds, activePersona],
   );
 
   // ── Interaction handlers ──────────────────────────────────────────────────
   const handleNodeClick = useCallback(
     (raw: object) => {
       const node = raw as GraphNode;
-      if (selected?.id === node.id) {
-        // Second click = expand
+      setSelected(node);
+      // Clicking the value center clears any active filter to show all connections
+      if (node.isValueCenter) {
+        setActiveFilter(null);
+      }
+      // Centre camera
+      if (fgRef.current && node.x != null) {
+        fgRef.current.centerAt(node.x, node.y, 400);
+      }
+      // Auto-expand on single click if not yet expanded
+      if (!expandedIds.has(node.id) && !node.isValueCenter) {
         expandNode(node);
-      } else {
-        setSelected(node);
-        // Centre camera
-        if (fgRef.current && node.x != null) {
-          fgRef.current.centerAt(node.x, node.y, 400);
-        }
       }
     },
-    [selected, expandNode],
+    [expandedIds, expandNode],
   );
 
   const handleBgClick = useCallback(() => setSelected(null), []);
+
+  // ── Hover handler for canvas tooltip ─────────────────────────────────────
+  const handleNodeHover = useCallback((node: object | null) => {
+    setHoveredNode(node ? (node as GraphNode) : null);
+  }, []);
+
+  // ── Pointer area paint (hit detection for custom-painted nodes) ──────────
+  const paintPointerArea = useCallback(
+    (n: object, color: string, ctx: CanvasRenderingContext2D, gs: number) => {
+      const node = n as GraphNode;
+      const r = node.isValueCenter
+        ? Math.max(6, 18 / Math.sqrt(gs))
+        : Math.max(2, 6 / Math.sqrt(gs));
+      ctx.beginPath();
+      ctx.arc(node.x ?? 0, node.y ?? 0, r + 3, 0, 2 * Math.PI);
+      ctx.fillStyle = color;
+      ctx.fill();
+    },
+    [],
+  );
 
   // ── Canvas painters ───────────────────────────────────────────────────────
   const connectedIds = new Set(neighbours.map((nb) => nb.node.id));
@@ -372,9 +597,15 @@ function GraphContent() {
   const filterLabelSet: Set<string> | null = activeFilter
     ? new Set(
         (
-          [...FILTER_PRESETS, ...PATIENT_FILTER_PRESETS].find(
-            (p) => p.id === activeFilter,
-          ) as { labels: readonly string[] } | undefined
+          [
+            ...FILTER_PRESETS,
+            ...PATIENT_FILTER_PRESETS,
+            ...HOSPITAL_FILTER_PRESETS,
+            ...HDAB_FILTER_PRESETS,
+            ...RESEARCHER_FILTER_PRESETS,
+          ].find((p) => p.id === activeFilter) as
+            | { labels: readonly string[] }
+            | undefined
         )?.labels ?? [],
       )
     : null;
@@ -386,15 +617,56 @@ function GraphContent() {
       const isConn = connectedIds.has(node.id);
       const isExpanding = expanding === node.id;
       const isExpanded = node.expanded;
+      const isVC = node.isValueCenter;
       // Dim: by selection context OR by active filter (non-matching labels)
       const filteredOut = filterLabelSet
-        ? !filterLabelSet.has(node.label)
+        ? !filterLabelSet.has(node.label) && !isVC
         : false;
-      const dim = filteredOut || (!!selected && !isSel && !isConn);
-      const r = Math.max(2, 6 / Math.sqrt(gs));
+      const dim = filteredOut || (!!selected && !isSel && !isConn && !isVC);
       const x = node.x ?? 0,
         y = node.y ?? 0;
 
+      // Value center node — larger, gradient, always visible
+      if (isVC) {
+        const vcR = Math.max(6, 18 / Math.sqrt(gs));
+        ctx.globalAlpha = 1;
+
+        // Outer glow ring
+        ctx.beginPath();
+        ctx.arc(x, y, vcR + 4, 0, 2 * Math.PI);
+        ctx.strokeStyle = "rgba(251, 191, 36, 0.4)";
+        ctx.lineWidth = 2 / gs;
+        ctx.stroke();
+
+        // Gradient fill
+        const grad = ctx.createRadialGradient(x, y, 0, x, y, vcR);
+        grad.addColorStop(0, "#FBBF24");
+        grad.addColorStop(1, "#D97706");
+        ctx.beginPath();
+        ctx.arc(x, y, vcR, 0, 2 * Math.PI);
+        ctx.fillStyle = grad;
+        ctx.fill();
+
+        // Bold label
+        const fs = Math.max(5, 14 / gs);
+        ctx.font = `bold ${fs}px sans-serif`;
+        ctx.fillStyle = "#fff";
+        ctx.textAlign = "center";
+        ctx.fillText(node.name, x, y + vcR + fs * 1.3);
+
+        // Subtitle
+        const sfs = Math.max(3, 9 / gs);
+        ctx.font = `${sfs}px sans-serif`;
+        ctx.fillStyle = "#fbbf24";
+        ctx.fillText(
+          NODE_DISPLAY_NAMES[node.label] ?? "",
+          x,
+          y + vcR + fs * 1.3 + sfs * 1.4,
+        );
+        return;
+      }
+
+      const r = Math.max(2, 6 / Math.sqrt(gs));
       ctx.globalAlpha = dim ? 0.15 : 1;
 
       // Outer glow for selected
@@ -457,6 +729,7 @@ function GraphContent() {
       const s = link.source as GraphNode,
         t = link.target as GraphNode;
       if (s.x == null || t.x == null) return;
+      const isValueLink = link.type === "VALUE_FOCUS";
       const isAdj =
         selected &&
         (nId(link.source) === selected.id || nId(link.target) === selected.id);
@@ -464,6 +737,40 @@ function GraphContent() {
       const filteredOut =
         filterLabelSet &&
         (!filterLabelSet.has(s.label) || !filterLabelSet.has(t.label));
+      // Value focus links: golden dashed lines from center — dim when filter active
+      if (isValueLink) {
+        const filterActive = !!filterLabelSet;
+        ctx.globalAlpha = selected ? 0.08 : filterActive ? 0.08 : 0.5;
+        ctx.strokeStyle = "#FBBF24";
+        ctx.lineWidth = (filterActive ? 0.5 : 2.5) / gs;
+        ctx.setLineDash([6 / gs, 4 / gs]);
+        ctx.beginPath();
+        ctx.moveTo(s.x, s.y ?? 0);
+        ctx.lineTo(t.x, t.y ?? 0);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        // Label on golden line — hidden when filter active or node selected
+        if (!selected && !filterLabelSet && gs >= 0.3) {
+          const targetNode = t.isValueCenter ? s : t;
+          const typeLabel =
+            NODE_DISPLAY_NAMES[targetNode.label] ?? targetNode.label;
+          const mx = (s.x + t.x) / 2,
+            my = ((s.y ?? 0) + (t.y ?? 0)) / 2;
+          const fs = Math.max(3, 7 / gs);
+          ctx.font = `${fs}px sans-serif`;
+          const tw = ctx.measureText(typeLabel).width;
+          ctx.globalAlpha = 0.7;
+          ctx.fillStyle = "#0f172a";
+          ctx.fillRect(mx - tw / 2 - 2, my - fs / 2 - 1, tw + 4, fs + 2);
+          ctx.fillStyle = "#FBBF24";
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+          ctx.fillText(typeLabel, mx, my);
+          ctx.textBaseline = "alphabetic";
+        }
+        ctx.globalAlpha = 1;
+        return;
+      }
       ctx.globalAlpha = filteredOut ? 0.05 : isAdj ? 1 : selected ? 0.1 : 0.55;
       ctx.strokeStyle = isAdj ? "#60a5fa" : "#374151";
       ctx.lineWidth = (isAdj ? 1.5 : 0.7) / gs;
@@ -471,19 +778,25 @@ function GraphContent() {
       ctx.moveTo(s.x, s.y ?? 0);
       ctx.lineTo(t.x, t.y ?? 0);
       ctx.stroke();
-      if (isAdj && selected) {
+
+      // Relationship type label — shown on adjacent links or all visible when zoomed in
+      const showLabel = isAdj || (!selected && !filteredOut && gs >= 0.6);
+      if (showLabel) {
+        // User-friendly relationship label
+        const rawType = link.type;
+        const friendlyType = FRIENDLY_REL_NAMES[rawType] ?? rawType;
         const mx = (s.x + t.x) / 2,
           my = ((s.y ?? 0) + (t.y ?? 0)) / 2;
-        const fs = Math.max(3, 8 / gs);
+        const fs = Math.max(3, 7 / gs);
         ctx.font = `${fs}px sans-serif`;
-        const tw = ctx.measureText(link.type).width;
-        ctx.globalAlpha = 0.85;
+        const tw = ctx.measureText(friendlyType).width;
+        ctx.globalAlpha = isAdj ? 0.9 : 0.5;
         ctx.fillStyle = "#0f172a";
         ctx.fillRect(mx - tw / 2 - 2, my - fs / 2 - 1, tw + 4, fs + 2);
-        ctx.fillStyle = "#93c5fd";
+        ctx.fillStyle = isAdj ? "#93c5fd" : "#6b7280";
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
-        ctx.fillText(link.type, mx, my);
+        ctx.fillText(friendlyType, mx, my);
         ctx.textBaseline = "alphabetic";
       }
       ctx.globalAlpha = 1;
@@ -494,226 +807,372 @@ function GraphContent() {
 
   // ── Render ────────────────────────────────────────────────────────────────
   return (
-    <div className="flex h-[calc(100vh-44px)]">
-      {/* Sidebar */}
-      <aside className="flex w-64 shrink-0 flex-col gap-4 overflow-y-auto border-r border-gray-700 bg-gray-900 p-4">
-        <div>
-          <h2 className="mb-1 text-sm font-bold">Knowledge Graph</h2>
-          <p className="mb-2 text-xs text-gray-500">
-            5-layer EHDS health dataspace — {data.nodes.length} nodes ·{" "}
-            {data.links.length} edges
-          </p>
-          <div className="flex flex-col gap-1 text-xs">
-            <a
-              href="/catalog"
-              className="flex items-center gap-1.5 text-gray-500 hover:text-teal-400 transition-colors"
-            >
-              <BookOpen size={11} /> Dataset Catalog
-            </a>
-            <a
-              href="/patient"
-              className="flex items-center gap-1.5 text-gray-500 hover:text-teal-400 transition-colors"
-            >
-              <Activity size={11} /> Patient Journey
-            </a>
-            <a
-              href="/analytics"
-              className="flex items-center gap-1.5 text-gray-500 hover:text-teal-400 transition-colors"
-            >
-              <Database size={11} /> OMOP Analytics
-            </a>
-            <a
-              href="/api/graph/validate"
-              target="_blank"
-              className="flex items-center gap-1.5 text-gray-500 hover:text-yellow-400 transition-colors"
-            >
-              <ShieldCheck size={11} /> Validate graph
-            </a>
-          </div>
-        </div>
-
-        {/* Persona selector — changes the fetched subgraph */}
-        <div>
-          <p className="mb-2 text-xs font-semibold uppercase text-gray-500">
-            View as
-          </p>
-          <div className="flex flex-col gap-1">
-            {(sessionRoles.includes("EDC_ADMIN")
-              ? PERSONA_VIEWS
-              : PERSONA_VIEWS.filter(
-                  (pv) =>
-                    pv.id === sessionPersonaId ||
-                    pv.id === "default" ||
-                    pv.id === activePersona,
-                )
-            ).map((persona) => {
-              const Icon = PRESET_ICONS[persona.icon] ?? Eye;
-              const isActive = activePersona === persona.id;
-              return (
-                <button
-                  key={persona.id}
-                  onClick={() => {
-                    setActivePersona(persona.id as PersonaId);
-                    setActiveFilter(null);
-                  }}
-                  title={persona.description}
-                  className={`flex items-start gap-2 rounded px-2 py-1.5 text-left text-xs transition-colors ${
-                    isActive
-                      ? "border border-amber-700 bg-amber-900/30 text-amber-200"
-                      : "border border-transparent text-gray-400 hover:bg-gray-800 hover:text-gray-200"
-                  }`}
-                >
-                  <Icon size={11} className="mt-0.5 shrink-0" />
-                  <div>
-                    <div className="font-medium leading-tight">
-                      {persona.label}
-                    </div>
-                    {persona.ehdsArticle && (
-                      <div className="text-gray-600">{persona.ehdsArticle}</div>
-                    )}
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-          {activePersona !== "default" && (
-            <p className="mt-1.5 text-xs italic text-gray-500">
-              &ldquo;
-              {PERSONA_VIEWS.find((p) => p.id === activePersona)?.question}
-              &rdquo;
-            </p>
+    <div className="relative flex h-[calc(100vh-44px)]">
+      {/* Left sidebar — collapsible */}
+      <aside
+        className={`flex shrink-0 flex-col gap-4 overflow-y-auto border-r border-gray-700 bg-gray-900 transition-all duration-200 ${
+          leftCollapsed ? "w-10 p-1" : "w-64 p-4"
+        }`}
+      >
+        {/* Collapse/expand toggle */}
+        <button
+          onClick={() => setLeftCollapsed((v) => !v)}
+          className="flex items-center justify-center rounded p-1 text-gray-500 hover:text-gray-200 transition-colors"
+          title={leftCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+        >
+          {leftCollapsed ? (
+            <ChevronRight size={14} />
+          ) : (
+            <PanelLeftClose size={14} />
           )}
-        </div>
-
-        {/* Filter presets — persona-aware */}
-        <div>
-          <p className="mb-2 text-xs font-semibold uppercase text-gray-500">
-            Filter by question
-          </p>
-          <div className="flex flex-col gap-1">
-            {(activePersona === "patient"
-              ? PATIENT_FILTER_PRESETS
-              : FILTER_PRESETS
-            ).map((preset) => {
-              const Icon = PRESET_ICONS[preset.icon] ?? BookOpen;
-              const isActive = activeFilter === preset.id;
-              return (
-                <button
-                  key={preset.id}
-                  onClick={() =>
-                    setActiveFilter((prev) =>
-                      prev === preset.id
-                        ? null
-                        : (preset.id as FilterPresetId & PatientFilterPresetId),
-                    )
-                  }
-                  title={preset.description}
-                  className={`flex items-center gap-2 rounded px-2 py-1.5 text-left text-xs transition-colors ${
-                    isActive
-                      ? "bg-teal-900/60 text-teal-200 border border-teal-700"
-                      : "text-gray-400 hover:bg-gray-800 hover:text-gray-200 border border-transparent"
-                  }`}
-                  style={
-                    isActive && activePersona !== "patient"
-                      ? {
-                          background: "rgb(30 58 138 / 0.6)",
-                          color: "#bfdbfe",
-                          borderColor: "#1d4ed8",
-                        }
-                      : {}
-                  }
+        </button>
+        {leftCollapsed ? null : (
+          <>
+            <div>
+              <h2 className="mb-1 text-sm font-bold">Knowledge Graph</h2>
+              <p className="mb-2 text-xs text-gray-500">
+                5-layer EHDS health dataspace — {data.nodes.length} nodes ·{" "}
+                {data.links.length} edges
+              </p>
+              <div className="flex flex-col gap-1 text-xs">
+                <a
+                  href="/catalog"
+                  className="flex items-center gap-1.5 text-gray-500 hover:text-teal-400 transition-colors"
                 >
-                  <Icon size={11} />
-                  <span className="leading-tight">{preset.label}</span>
-                </button>
-              );
-            })}
-          </div>
-          {activeFilter && (
-            <p className="mt-1.5 text-xs text-gray-600">
-              {
-                [...FILTER_PRESETS, ...PATIENT_FILTER_PRESETS].find(
-                  (p) => p.id === activeFilter,
-                )?.description
-              }
-            </p>
-          )}
-        </div>
-
-        {/* Layer legend */}
-        <div>
-          <p className="mb-2 text-xs font-semibold uppercase text-gray-500">
-            Layers
-          </p>
-          {Object.entries(LAYER_LABELS).map(([k, v]) => (
-            <div key={k} className="mb-1 flex items-center gap-2 text-xs">
-              <span
-                className="h-2.5 w-2.5 shrink-0 rounded-full"
-                style={{ background: LAYER_COLORS[+k] }}
-              />
-              {v}
-            </div>
-          ))}
-        </div>
-
-        {/* Role-specific color legend */}
-        <div>
-          <p className="mb-2 text-xs font-semibold uppercase text-gray-500">
-            Special roles
-          </p>
-          {ROLE_LEGEND.map(({ label, color, description }) => (
-            <div key={label} className="mb-1.5 flex items-start gap-2 text-xs">
-              <span
-                className="mt-0.5 h-2.5 w-2.5 shrink-0 rounded-full"
-                style={{ background: color }}
-              />
-              <div>
-                <div className="font-medium text-gray-300">{label}</div>
-                <div className="text-gray-600">{description}</div>
+                  <BookOpen size={11} /> Dataset Catalog
+                </a>
+                <a
+                  href="/patient"
+                  className="flex items-center gap-1.5 text-gray-500 hover:text-teal-400 transition-colors"
+                >
+                  <Activity size={11} /> Patient Journey
+                </a>
+                <a
+                  href="/analytics"
+                  className="flex items-center gap-1.5 text-gray-500 hover:text-teal-400 transition-colors"
+                >
+                  <Database size={11} /> OMOP Analytics
+                </a>
+                <a
+                  href="/api/graph/validate"
+                  target="_blank"
+                  className="flex items-center gap-1.5 text-gray-500 hover:text-yellow-400 transition-colors"
+                >
+                  <ShieldCheck size={11} /> Validate graph
+                </a>
               </div>
             </div>
-          ))}
-        </div>
 
-        {/* Hint */}
-        {!selected && !loading && (
-          <div className="flex items-start gap-1.5 rounded-lg border border-gray-700 bg-gray-800/50 p-2 text-xs text-gray-500">
-            <MousePointerClick
-              size={11}
-              className="mt-0.5 shrink-0 text-blue-500"
-            />
-            Click a node to inspect. Click again to expand neighbours.
+            {/* Active persona indicator — auto-derived from user role */}
+            {activePersona !== "default" && (
+              <div className="rounded border border-gray-700 bg-gray-800/40 px-2 py-1.5">
+                {(() => {
+                  const pv = PERSONA_VIEWS.find((p) => p.id === activePersona);
+                  const Icon = pv ? PRESET_ICONS[pv.icon] ?? Eye : Eye;
+                  return (
+                    <>
+                      <div className="flex items-center gap-1.5 text-xs font-medium text-amber-200">
+                        <Icon size={11} />
+                        {pv?.label ?? activePersona}
+                      </div>
+                      {pv?.ehdsArticle && (
+                        <div className="text-[10px] text-gray-500 mt-0.5">
+                          {pv.ehdsArticle}
+                        </div>
+                      )}
+                      {pv?.question && (
+                        <p className="mt-1 text-xs italic text-gray-500">
+                          &ldquo;{pv.question}&rdquo;
+                        </p>
+                      )}
+                    </>
+                  );
+                })()}
+              </div>
+            )}
+
+            {/* Filter presets — persona-aware */}
+            <div>
+              <p className="mb-2 text-xs font-semibold uppercase text-gray-500">
+                Filter by question
+              </p>
+              <div className="flex flex-col gap-1">
+                {(activePersona === "patient"
+                  ? PATIENT_FILTER_PRESETS
+                  : activePersona === "hospital"
+                    ? HOSPITAL_FILTER_PRESETS
+                    : activePersona === "hdab"
+                      ? HDAB_FILTER_PRESETS
+                      : activePersona === "researcher"
+                        ? RESEARCHER_FILTER_PRESETS
+                        : FILTER_PRESETS
+                ).map((preset) => {
+                  const Icon = PRESET_ICONS[preset.icon] ?? BookOpen;
+                  const isActive = activeFilter === preset.id;
+                  return (
+                    <button
+                      key={preset.id}
+                      onClick={() =>
+                        setActiveFilter((prev) =>
+                          prev === preset.id
+                            ? null
+                            : (preset.id as FilterPresetId &
+                                PatientFilterPresetId &
+                                HospitalFilterPresetId &
+                                HdabFilterPresetId &
+                                ResearcherFilterPresetId),
+                        )
+                      }
+                      title={preset.description}
+                      className={`flex items-center gap-2 rounded px-2 py-1.5 text-left text-xs transition-colors ${
+                        isActive
+                          ? "bg-teal-900/60 text-teal-200 border border-teal-700"
+                          : "text-gray-400 hover:bg-gray-800 hover:text-gray-200 border border-transparent"
+                      }`}
+                      style={
+                        isActive && activePersona !== "patient"
+                          ? {
+                              background: "rgb(30 58 138 / 0.6)",
+                              color: "#bfdbfe",
+                              borderColor: "#1d4ed8",
+                            }
+                          : {}
+                      }
+                    >
+                      <Icon size={11} />
+                      <span className="leading-tight">{preset.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+              {activeFilter && (
+                <p className="mt-1.5 text-xs text-gray-600">
+                  {
+                    [
+                      ...FILTER_PRESETS,
+                      ...PATIENT_FILTER_PRESETS,
+                      ...HOSPITAL_FILTER_PRESETS,
+                      ...HDAB_FILTER_PRESETS,
+                      ...RESEARCHER_FILTER_PRESETS,
+                    ].find((p) => p.id === activeFilter)?.description
+                  }
+                </p>
+              )}
+            </div>
+
+            {/* Layer legend — persona-aware labels */}
+            <div>
+              <p className="mb-2 text-xs font-semibold uppercase text-gray-500">
+                Structural layers
+              </p>
+              {Object.entries(LAYER_LABELS)
+                .filter(([k]) => +k >= 1)
+                .map(([k, v]) => {
+                  const personaLabel =
+                    PERSONA_LAYER_LABELS[activePersona]?.[+k] ?? v;
+                  return (
+                    <div
+                      key={k}
+                      className="mb-1 flex items-center gap-2 text-xs cursor-help"
+                      title={LAYER_TOOLTIPS[+k]}
+                    >
+                      <span
+                        className="h-2.5 w-2.5 shrink-0 rounded-full"
+                        style={{ background: LAYER_COLORS[+k] }}
+                      />
+                      <span className="text-gray-300">{personaLabel}</span>
+                    </div>
+                  );
+                })}
+            </div>
+
+            {/* Node type color legend — warm/vivid accents */}
+            <div>
+              <p className="mb-2 text-xs font-semibold uppercase text-gray-500">
+                Key actors
+              </p>
+              {ROLE_LEGEND.map(({ label, color, description, tooltip }) => (
+                <div
+                  key={label}
+                  className="mb-1.5 flex items-start gap-2 text-xs cursor-help"
+                  title={tooltip}
+                >
+                  <span
+                    className="mt-0.5 h-2.5 w-2.5 shrink-0 rounded-full"
+                    style={{ background: color }}
+                  />
+                  <div>
+                    <div className="font-medium text-gray-300">{label}</div>
+                    <div className="text-gray-600">{description}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Hint */}
+            {!selected && !loading && (
+              <div className="flex items-start gap-1.5 rounded-lg border border-gray-700 bg-gray-800/50 p-2 text-xs text-gray-500">
+                <MousePointerClick
+                  size={11}
+                  className="mt-0.5 shrink-0 text-blue-500"
+                />
+                Click a node to inspect and expand its neighbours.
+              </div>
+            )}
+          </>
+        )}
+      </aside>
+
+      {/* Graph canvas */}
+      <div ref={containerRef} className="relative flex-1 bg-gray-950">
+        {loading ? (
+          <div className="flex h-full items-center justify-center text-gray-500">
+            <Loader2 size={14} className="mr-2 animate-spin" />
+            Loading {PERSONA_VALUE_NODES[activePersona]?.name ?? "graph"}…
+          </div>
+        ) : error ? (
+          <div className="flex h-full items-center justify-center text-gray-500">
+            {error}
+          </div>
+        ) : (
+          <ForceGraph2D
+            ref={fgRef}
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            graphData={data as any}
+            width={dims.width}
+            height={dims.height}
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            nodeCanvasObject={paintNode as any}
+            nodeCanvasObjectMode={() => "replace"}
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            linkCanvasObject={paintLink as any}
+            linkCanvasObjectMode={() => "replace"}
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            nodePointerAreaPaint={paintPointerArea as any}
+            onNodeClick={handleNodeClick}
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            onNodeHover={handleNodeHover as any}
+            onBackgroundClick={handleBgClick}
+            backgroundColor="#030712"
+            // Nodes have pre-assigned ring positions — physics not needed
+            d3AlphaDecay={1}
+            d3VelocityDecay={1}
+            cooldownTicks={0}
+            warmupTicks={0}
+            nodeRelSize={4}
+          />
+        )}
+
+        {/* Canvas hover tooltip */}
+        {hoveredNode && !selected && (
+          <div
+            className="pointer-events-none absolute z-50 max-w-xs rounded-lg border border-gray-600 bg-gray-900/95 px-3 py-2 shadow-xl backdrop-blur-sm"
+            style={{
+              left: Math.min(mousePos.x + 14, dims.width - 280),
+              top: Math.min(mousePos.y + 14, dims.height - 120),
+            }}
+          >
+            <div className="mb-1 flex items-center gap-2">
+              <span
+                className="h-2.5 w-2.5 shrink-0 rounded-full"
+                style={{ background: hoveredNode.color }}
+              />
+              <span className="truncate text-sm font-semibold text-white">
+                {hoveredNode.name}
+              </span>
+            </div>
+            <div className="mb-1 text-xs text-gray-400">
+              {NODE_DISPLAY_NAMES[hoveredNode.label] ?? hoveredNode.label}
+              {" · "}
+              {(PERSONA_LAYER_LABELS[activePersona] ?? LAYER_LABELS)[
+                hoveredNode.layer
+              ] ?? LAYER_LABELS[hoveredNode.layer]}
+            </div>
+            {NODE_TOOLTIPS[hoveredNode.label] && (
+              <p className="text-xs leading-relaxed text-gray-500">
+                {NODE_TOOLTIPS[hoveredNode.label]}
+              </p>
+            )}
           </div>
         )}
 
-        {/* Selected node panel */}
-        {selected && (
-          <div className="flex flex-col gap-3">
-            <div className="rounded-lg border border-gray-600 bg-gray-800/60 p-3">
-              <div className="mb-1 flex items-start justify-between gap-1">
-                <span
-                  className="text-xs font-bold leading-tight"
-                  style={{ color: selected.color }}
-                >
-                  {selected.name}
-                </span>
+        {/* Expanding spinner overlay */}
+        {expanding && (
+          <div className="pointer-events-none absolute bottom-4 right-4 flex items-center gap-2 rounded-full bg-gray-900/90 px-3 py-1.5 text-xs text-blue-300">
+            <Loader2 size={12} className="animate-spin" />
+            Loading neighbours…
+          </div>
+        )}
+      </div>
+
+      {/* ── Right-side detail panel (absolute overlay to avoid layout squeeze) */}
+      {selected && (
+        <aside
+          className={`absolute right-0 top-0 h-full overflow-y-auto border-l border-gray-700 bg-gray-900 animate-slide-in-right transition-all duration-200 z-40 shadow-2xl ${
+            rightCollapsed ? "w-10" : "w-80"
+          }`}
+        >
+          {/* Collapse/expand toggle */}
+          <button
+            onClick={() => setRightCollapsed((v) => !v)}
+            className="flex w-full items-center justify-center border-b border-gray-700 p-2 text-gray-500 hover:text-gray-200 transition-colors"
+            title={rightCollapsed ? "Expand panel" : "Collapse panel"}
+          >
+            {rightCollapsed ? (
+              <ChevronLeft size={14} />
+            ) : (
+              <PanelRightClose size={14} />
+            )}
+          </button>
+          {rightCollapsed ? null : (
+            <>
+              {/* Header */}
+              <div className="flex items-start justify-between gap-2 border-b border-gray-700 p-4">
+                <div className="min-w-0">
+                  <h3
+                    className="text-sm font-bold leading-tight truncate"
+                    style={{ color: selected.color }}
+                  >
+                    {selected.name}
+                  </h3>
+                  <div
+                    className="mt-1 flex items-center gap-1.5 cursor-help"
+                    title={NODE_TOOLTIPS[selected.label]}
+                  >
+                    <span
+                      className="h-2 w-2 shrink-0 rounded-full"
+                      style={{ background: selected.color }}
+                    />
+                    <span className="text-xs text-gray-400">
+                      {NODE_DISPLAY_NAMES[selected.label] ?? selected.label}
+                    </span>
+                  </div>
+                  <div
+                    className="mt-0.5 text-xs text-gray-600 cursor-help"
+                    title={LAYER_TOOLTIPS[selected.layer]}
+                  >
+                    {PERSONA_LAYER_LABELS[activePersona]?.[selected.layer] ??
+                      LAYER_LABELS[selected.layer]}
+                  </div>
+                </div>
                 <button
                   onClick={() => setSelected(null)}
-                  className="shrink-0 text-gray-500 hover:text-gray-200"
+                  className="shrink-0 mt-0.5 text-gray-500 hover:text-gray-200 transition-colors"
+                  aria-label="Close detail panel"
                 >
-                  <X size={12} />
+                  <X size={14} />
                 </button>
               </div>
-              <div className="text-xs text-gray-400">{selected.label}</div>
-              <div className="text-xs text-gray-500">
-                {LAYER_LABELS[selected.layer]}
-              </div>
-              <div className="mt-1 break-all text-xs leading-tight text-gray-700">
-                {selected.id}
+
+              {/* Node ID (collapsible) */}
+              <div className="px-4 py-2 border-b border-gray-700">
+                <p className="break-all text-[10px] leading-tight text-gray-700 font-mono">
+                  {selected.id}
+                </p>
               </div>
 
               {/* Deep links */}
-              <div className="mt-2 flex flex-wrap gap-2">
+              <div className="px-4 py-3 border-b border-gray-700 flex flex-wrap gap-2">
                 {selected.layer === 2 && (
                   <a
                     href={`/catalog?search=${encodeURIComponent(
@@ -752,119 +1211,165 @@ function GraphContent() {
                 )}
               </div>
 
-              {/* Expand button */}
-              {!expandedIds.has(selected.id) && (
-                <button
-                  onClick={() => expandNode(selected)}
-                  disabled={!!expanding}
-                  className="mt-3 flex w-full items-center justify-center gap-1.5 rounded border border-blue-700 bg-blue-900/40 py-1.5 text-xs text-blue-300 hover:bg-blue-900/70 disabled:opacity-50 transition-colors"
-                >
-                  {expanding === selected.id ? (
-                    <>
-                      <Loader2 size={11} className="animate-spin" /> Expanding…
-                    </>
+              {/* Node properties */}
+              {!selected.isValueCenter && (
+                <div className="px-4 py-3 border-b border-gray-700">
+                  {propsLoading ? (
+                    <div className="flex items-center gap-2 text-xs text-gray-500">
+                      <Loader2 size={10} className="animate-spin" />
+                      Loading details…
+                    </div>
+                  ) : nodeProps.length > 0 ? (
+                    <div className="flex flex-col gap-1.5">
+                      <p className="text-xs font-semibold uppercase text-gray-500 mb-0.5">
+                        Properties
+                      </p>
+                      {nodeProps.map((p) => (
+                        <div key={p.key} className="flex gap-2 text-xs">
+                          <span className="shrink-0 text-gray-500 min-w-[80px]">
+                            {p.label}
+                          </span>
+                          <span className="text-gray-300 break-all">
+                            {p.value.length > 120
+                              ? p.value.slice(0, 118) + "…"
+                              : p.value}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
                   ) : (
-                    <>
-                      <MousePointerClick size={11} /> Expand neighbours
-                    </>
-                  )}
-                </button>
-              )}
-              {expandedIds.has(selected.id) && (
-                <p className="mt-2 text-xs text-gray-600">
-                  ✓ Neighbours loaded ({neighbours.length} in view)
-                </p>
-              )}
-            </div>
-
-            {/* Neighbour list */}
-            {neighbours.length > 0 && (
-              <div>
-                <p className="mb-1.5 text-xs font-semibold uppercase text-gray-500">
-                  Connected ({neighbours.length})
-                </p>
-                <div className="flex flex-col gap-1">
-                  {neighbours.slice(0, 12).map((nb, i) => (
-                    <button
-                      key={i}
-                      onClick={() => setSelected(nb.node)}
-                      className="rounded border border-gray-700 bg-gray-800/40 px-2 py-1.5 text-left transition-colors hover:border-gray-500"
-                    >
-                      <div className="mb-0.5 flex items-center gap-1">
-                        <span className="font-mono text-xs font-semibold text-blue-400">
-                          {nb.dir === "out" ? "→" : "←"}
-                        </span>
-                        <span className="truncate font-mono text-xs text-blue-300">
-                          {nb.type}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <span
-                          className="h-2 w-2 shrink-0 rounded-full"
-                          style={{ background: nb.node.color }}
-                        />
-                        <span className="truncate text-xs text-gray-300">
-                          {nb.node.name}
-                        </span>
-                      </div>
-                    </button>
-                  ))}
-                  {neighbours.length > 12 && (
-                    <p className="text-xs text-gray-600 px-1">
-                      +{neighbours.length - 12} more — expand to see all
+                    <p className="text-xs text-gray-600 italic">
+                      No additional properties
                     </p>
                   )}
                 </div>
+              )}
+
+              {/* Expand button (hidden for value center) */}
+              <div className="px-4 py-3 border-b border-gray-700">
+                {selected.isValueCenter ? (
+                  <p className="text-xs text-amber-400/70 italic">
+                    {PERSONA_VALUE_NODES[activePersona]?.tooltip ??
+                      "Your starting point in the dataspace"}
+                  </p>
+                ) : !expandedIds.has(selected.id) ? (
+                  <button
+                    onClick={() => expandNode(selected)}
+                    disabled={!!expanding}
+                    className="flex w-full items-center justify-center gap-1.5 rounded border border-blue-700 bg-blue-900/40 py-2 text-xs text-blue-300 hover:bg-blue-900/70 disabled:opacity-50 transition-colors"
+                  >
+                    {expanding === selected.id ? (
+                      <>
+                        <Loader2 size={11} className="animate-spin" />{" "}
+                        Expanding…
+                      </>
+                    ) : (
+                      <>
+                        <MousePointerClick size={11} /> Expand neighbours
+                      </>
+                    )}
+                  </button>
+                ) : (
+                  <p className="text-xs text-gray-600">
+                    Neighbours loaded ({neighbours.length} connections)
+                  </p>
+                )}
               </div>
-            )}
-          </div>
-        )}
-      </aside>
 
-      {/* Graph canvas */}
-      <div ref={containerRef} className="relative flex-1 bg-gray-950">
-        {loading ? (
-          <div className="flex h-full items-center justify-center text-gray-500">
-            <Loader2 size={14} className="mr-2 animate-spin" />
-            Building researcher overview…
-          </div>
-        ) : error ? (
-          <div className="flex h-full items-center justify-center text-gray-500">
-            {error}
-          </div>
-        ) : (
-          <ForceGraph2D
-            ref={fgRef}
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            graphData={data as any}
-            width={dims.width}
-            height={dims.height}
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            nodeCanvasObject={paintNode as any}
-            nodeCanvasObjectMode={() => "replace"}
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            linkCanvasObject={paintLink as any}
-            linkCanvasObjectMode={() => "replace"}
-            onNodeClick={handleNodeClick}
-            onBackgroundClick={handleBgClick}
-            backgroundColor="#030712"
-            // Nodes have pre-assigned ring positions — physics not needed
-            d3AlphaDecay={1}
-            d3VelocityDecay={1}
-            cooldownTicks={0}
-            warmupTicks={0}
-            nodeRelSize={4}
-          />
-        )}
+              {/* Relationships */}
+              {neighbours.length > 0 && (
+                <div className="px-4 py-3">
+                  {/* Outgoing */}
+                  {neighbours.filter((nb) => nb.dir === "out").length > 0 && (
+                    <div className="mb-3">
+                      <p className="mb-1.5 text-xs font-semibold uppercase text-gray-500">
+                        Outgoing (
+                        {neighbours.filter((nb) => nb.dir === "out").length})
+                      </p>
+                      <div className="flex flex-col gap-1">
+                        {neighbours
+                          .filter((nb) => nb.dir === "out")
+                          .map((nb, i) => (
+                            <button
+                              key={`out-${i}`}
+                              onClick={() => setSelected(nb.node)}
+                              className="rounded border border-gray-700 bg-gray-800/40 px-2 py-1.5 text-left transition-colors hover:border-gray-500"
+                            >
+                              <div className="mb-0.5 flex items-center gap-1">
+                                <span className="font-mono text-xs font-semibold text-blue-400">
+                                  →
+                                </span>
+                                <span className="truncate font-mono text-xs text-blue-300">
+                                  {FRIENDLY_REL_NAMES[nb.type] ?? nb.type}
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-1">
+                                <span
+                                  className="h-2 w-2 shrink-0 rounded-full"
+                                  style={{ background: nb.node.color }}
+                                />
+                                <span className="truncate text-xs text-gray-300">
+                                  {nb.node.name}
+                                </span>
+                                <span className="ml-auto text-[10px] text-gray-600 shrink-0">
+                                  {NODE_DISPLAY_NAMES[nb.node.label] ??
+                                    nb.node.label}
+                                </span>
+                              </div>
+                            </button>
+                          ))}
+                      </div>
+                    </div>
+                  )}
 
-        {/* Expanding spinner overlay */}
-        {expanding && (
-          <div className="pointer-events-none absolute bottom-4 right-4 flex items-center gap-2 rounded-full bg-gray-900/90 px-3 py-1.5 text-xs text-blue-300">
-            <Loader2 size={12} className="animate-spin" />
-            Loading neighbours…
-          </div>
-        )}
-      </div>
+                  {/* Incoming */}
+                  {neighbours.filter((nb) => nb.dir === "in").length > 0 && (
+                    <div>
+                      <p className="mb-1.5 text-xs font-semibold uppercase text-gray-500">
+                        Incoming (
+                        {neighbours.filter((nb) => nb.dir === "in").length})
+                      </p>
+                      <div className="flex flex-col gap-1">
+                        {neighbours
+                          .filter((nb) => nb.dir === "in")
+                          .map((nb, i) => (
+                            <button
+                              key={`in-${i}`}
+                              onClick={() => setSelected(nb.node)}
+                              className="rounded border border-gray-700 bg-gray-800/40 px-2 py-1.5 text-left transition-colors hover:border-gray-500"
+                            >
+                              <div className="mb-0.5 flex items-center gap-1">
+                                <span className="font-mono text-xs font-semibold text-green-400">
+                                  ←
+                                </span>
+                                <span className="truncate font-mono text-xs text-green-300">
+                                  {FRIENDLY_REL_NAMES[nb.type] ?? nb.type}
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-1">
+                                <span
+                                  className="h-2 w-2 shrink-0 rounded-full"
+                                  style={{ background: nb.node.color }}
+                                />
+                                <span className="truncate text-xs text-gray-300">
+                                  {nb.node.name}
+                                </span>
+                                <span className="ml-auto text-[10px] text-gray-600 shrink-0">
+                                  {NODE_DISPLAY_NAMES[nb.node.label] ??
+                                    nb.node.label}
+                                </span>
+                              </div>
+                            </button>
+                          ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+            </>
+          )}
+        </aside>
+      )}
     </div>
   );
 }

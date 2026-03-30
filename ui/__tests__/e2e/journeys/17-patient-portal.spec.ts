@@ -9,21 +9,34 @@
  *   J186–J190 — /api/patient/insights (EHDS Art. 50 — findings)
  *   J191–J195 — Patient portal UI pages
  *   J196–J200 — Patient persona graph + navigation
+ *
+ * API tests (J176–J190) and UI tests (J191–J195) require Keycloak
+ * authentication as patient1 because the patient routes check session roles.
  */
 import { test, expect } from "@playwright/test";
-import { T, apiGet, skipIfNeo4jDown } from "./helpers";
+import {
+  T,
+  apiGet,
+  skipIfNeo4jDown,
+  skipIfKeycloakDown,
+  loginAs,
+} from "./helpers";
 
 // ── J176–J180: Patient profile API ───────────────────────────────────────────
 
 test.describe("P · Patient Profile — GDPR Art. 15 / EHDS Art. 3", () => {
-  test("J176 — /api/patient/profile lists patients", async ({ page }) => {
+  test.beforeEach(async ({ page }) => {
+    await skipIfKeycloakDown();
     await skipIfNeo4jDown(page);
+    await loginAs(page, "patient1", "patient1");
+  });
+
+  test("J176 — /api/patient/profile lists patients", async ({ page }) => {
     const data = await apiGet(page, "/api/patient/profile");
     expect(Array.isArray(data.patients)).toBe(true);
   });
 
   test("J177 — Patient list entries have required fields", async ({ page }) => {
-    await skipIfNeo4jDown(page);
     const data = await apiGet(page, "/api/patient/profile");
     if (data.patients.length > 0) {
       const p = data.patients[0];
@@ -34,7 +47,6 @@ test.describe("P · Patient Profile — GDPR Art. 15 / EHDS Art. 3", () => {
   });
 
   test("J178 — Patient profile returns risk scores", async ({ page }) => {
-    await skipIfNeo4jDown(page);
     const list = await apiGet(page, "/api/patient/profile");
     if (list.patients.length === 0) {
       test.skip(true, "No patients in graph");
@@ -54,7 +66,6 @@ test.describe("P · Patient Profile — GDPR Art. 15 / EHDS Art. 3", () => {
   });
 
   test("J179 — Profile includes GDPR rights metadata", async ({ page }) => {
-    await skipIfNeo4jDown(page);
     const list = await apiGet(page, "/api/patient/profile");
     if (list.patients.length === 0) {
       test.skip(true, "No patients");
@@ -71,7 +82,6 @@ test.describe("P · Patient Profile — GDPR Art. 15 / EHDS Art. 3", () => {
   });
 
   test("J180 — Profile includes conditions list", async ({ page }) => {
-    await skipIfNeo4jDown(page);
     const list = await apiGet(page, "/api/patient/profile");
     if (list.patients.length === 0) {
       test.skip(true, "No patients");
@@ -91,10 +101,15 @@ test.describe("P · Patient Profile — GDPR Art. 15 / EHDS Art. 3", () => {
 // ── J181–J185: Research program API ──────────────────────────────────────────
 
 test.describe("P · Research Programs — EHDS Art. 10 Consent", () => {
+  test.beforeEach(async ({ page }) => {
+    await skipIfKeycloakDown();
+    await skipIfNeo4jDown(page);
+    await loginAs(page, "patient1", "patient1");
+  });
+
   test("J181 — /api/patient/research returns programs array", async ({
     page,
   }) => {
-    await skipIfNeo4jDown(page);
     const data = await apiGet(page, "/api/patient/research");
     expect(Array.isArray(data.programs)).toBe(true);
     expect(typeof data.ehdsArticle).toBe("string");
@@ -102,7 +117,6 @@ test.describe("P · Research Programs — EHDS Art. 10 Consent", () => {
   });
 
   test("J182 — Programs have required fields", async ({ page }) => {
-    await skipIfNeo4jDown(page);
     const data = await apiGet(page, "/api/patient/research");
     if (data.programs.length > 0) {
       const prog = data.programs[0];
@@ -115,7 +129,6 @@ test.describe("P · Research Programs — EHDS Art. 10 Consent", () => {
   test("J183 — POST /api/patient/research registers consent", async ({
     page,
   }) => {
-    await skipIfNeo4jDown(page);
     const programs = await apiGet(page, "/api/patient/research");
     if (programs.programs.length === 0) {
       test.skip(true, "No programs available");
@@ -133,7 +146,6 @@ test.describe("P · Research Programs — EHDS Art. 10 Consent", () => {
   });
 
   test("J184 — GET with patientId returns consents array", async ({ page }) => {
-    await skipIfNeo4jDown(page);
     const data = await apiGet(
       page,
       "/api/patient/research?patientId=test-patient-e2e",
@@ -144,7 +156,6 @@ test.describe("P · Research Programs — EHDS Art. 10 Consent", () => {
   test("J185 — DELETE /api/patient/research revokes consent", async ({
     page,
   }) => {
-    await skipIfNeo4jDown(page);
     // First create a consent to revoke
     const programs = await apiGet(page, "/api/patient/research");
     if (programs.programs.length === 0) {
@@ -176,10 +187,15 @@ test.describe("P · Research Programs — EHDS Art. 10 Consent", () => {
 // ── J186–J190: Research insights API ─────────────────────────────────────────
 
 test.describe("P · Research Insights — EHDS Art. 50", () => {
+  test.beforeEach(async ({ page }) => {
+    await skipIfKeycloakDown();
+    await skipIfNeo4jDown(page);
+    await loginAs(page, "patient1", "patient1");
+  });
+
   test("J186 — /api/patient/insights returns insights structure", async ({
     page,
   }) => {
-    await skipIfNeo4jDown(page);
     const data = await apiGet(
       page,
       "/api/patient/insights?patientId=demo-patient-1",
@@ -192,7 +208,6 @@ test.describe("P · Research Insights — EHDS Art. 50", () => {
   test("J187 — Insights include privacy note about k-anonymity", async ({
     page,
   }) => {
-    await skipIfNeo4jDown(page);
     const data = await apiGet(
       page,
       "/api/patient/insights?patientId=demo-patient-1",
@@ -202,7 +217,6 @@ test.describe("P · Research Insights — EHDS Art. 50", () => {
   });
 
   test("J188 — Insights include EHDS article references", async ({ page }) => {
-    await skipIfNeo4jDown(page);
     const data = await apiGet(
       page,
       "/api/patient/insights?patientId=demo-patient-1",
@@ -213,7 +227,6 @@ test.describe("P · Research Insights — EHDS Art. 50", () => {
   });
 
   test("J189 — Findings have required fields", async ({ page }) => {
-    await skipIfNeo4jDown(page);
     const data = await apiGet(
       page,
       "/api/patient/insights?patientId=demo-patient-1",
@@ -229,7 +242,6 @@ test.describe("P · Research Insights — EHDS Art. 50", () => {
   test("J190 — Recommendations include priority and action", async ({
     page,
   }) => {
-    await skipIfNeo4jDown(page);
     const data = await apiGet(
       page,
       "/api/patient/insights?patientId=demo-patient-1",
@@ -245,6 +257,11 @@ test.describe("P · Research Insights — EHDS Art. 50", () => {
 // ── J191–J195: Patient portal UI pages ───────────────────────────────────────
 
 test.describe("P · Patient Portal UI", () => {
+  test.beforeEach(async ({ page }) => {
+    await skipIfKeycloakDown();
+    await loginAs(page, "patient1", "patient1");
+  });
+
   test("J191 — /patient/profile page renders", async ({ page }) => {
     await page.goto("/patient/profile");
     await expect(page.getByText(/Health Profile.*Risk/i).first()).toBeVisible({
@@ -301,10 +318,10 @@ test.describe("P · Patient Persona & Navigation", () => {
     }
   });
 
-  test("J197 — Graph persona selector shows Patient/Citizen option", async ({
+  test("J197 — Graph shows Patient/Citizen persona via URL", async ({
     page,
   }) => {
-    await page.goto("/graph");
+    await page.goto("/graph?persona=patient");
     await expect(page.getByText("Patient / Citizen").first()).toBeVisible({
       timeout: T,
     });
@@ -313,7 +330,7 @@ test.describe("P · Patient Persona & Navigation", () => {
   test("J198 — Patient persona shows EHDS Art. 3-12 article", async ({
     page,
   }) => {
-    await page.goto("/graph");
+    await page.goto("/graph?persona=patient");
     await expect(page.getByText("Art. 3–12").first()).toBeVisible({
       timeout: T,
     });

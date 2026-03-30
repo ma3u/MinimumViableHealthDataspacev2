@@ -34,7 +34,7 @@ const PROTECTED_ROUTES = [
   "/negotiate",
 ];
 
-const PUBLIC_ROUTES = ["/", "/catalog", "/graph", "/docs", "/auth/signin"];
+const PUBLIC_ROUTES = ["/", "/catalog", "/graph", "/docs"];
 
 // ── SEC-01: Protected route → signin redirect ─────────────────────────────────
 

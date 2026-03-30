@@ -112,3 +112,17 @@ CREATE INDEX research_psn_revoked IF NOT EXISTS FOR (rp:ResearchPseudonym) ON (r
 CREATE CONSTRAINT spe_session_id IF NOT EXISTS FOR (ss:SPESession) REQUIRE ss.sessionId IS UNIQUE;
 CREATE INDEX spe_session_status IF NOT EXISTS FOR (ss:SPESession) ON (ss.status);
 CREATE INDEX spe_session_study IF NOT EXISTS FOR (ss:SPESession) ON (ss.studyId);
+
+// ============================================================
+// Data Transfers & Transfer Events (DSP audit trail)
+// ============================================================
+
+// DataTransfer — contract-level bulk data transfer process
+CREATE CONSTRAINT data_transfer_id IF NOT EXISTS FOR (dt:DataTransfer) REQUIRE dt.id IS UNIQUE;
+CREATE INDEX data_transfer_status IF NOT EXISTS FOR (dt:DataTransfer) ON (dt.status);
+
+// TransferEvent — individual data access event (EHDS audit trail)
+CREATE CONSTRAINT transfer_event_id IF NOT EXISTS FOR (te:TransferEvent) REQUIRE te.eventId IS UNIQUE;
+CREATE INDEX transfer_event_timestamp IF NOT EXISTS FOR (te:TransferEvent) ON (te.timestamp);
+CREATE INDEX transfer_event_endpoint IF NOT EXISTS FOR (te:TransferEvent) ON (te.endpoint);
+CREATE INDEX transfer_event_participant IF NOT EXISTS FOR (te:TransferEvent) ON (te.participant);

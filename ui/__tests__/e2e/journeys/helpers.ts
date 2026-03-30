@@ -59,11 +59,34 @@ export async function waitForDataLoad(page: Page) {
   }
 }
 
-/** Helper to GET a JSON API route (no auth middleware on /api/*). */
+/** Helper to GET a JSON API route. */
 export async function apiGet(page: Page, path: string) {
   const response = await page.request.get(path);
   expect(response.ok()).toBe(true);
   return response.json();
+}
+
+/**
+ * Log in via the Keycloak OIDC flow (browser-based).
+ * After this call, `page.request` shares the authenticated session cookies.
+ */
+export async function loginAs(page: Page, username: string, password: string) {
+  await page.goto("/auth/signin", { waitUntil: "domcontentloaded" });
+  const keycloakBtn = page.getByRole("button", {
+    name: /sign in with keycloak/i,
+  });
+  await expect(keycloakBtn).toBeVisible({ timeout: T });
+  await keycloakBtn.click();
+
+  await expect(page.getByLabel(/username or email/i)).toBeVisible({
+    timeout: 15_000,
+  });
+  await page.getByLabel(/username or email/i).fill(username);
+  await page.locator("#password").fill(password);
+  await page.getByRole("button", { name: /sign in/i }).click();
+
+  // Wait to land back on the app
+  await expect(page).toHaveURL(/localhost/, { timeout: 20_000 });
 }
 
 /* ── Service-availability checks ─────────────────────────────── */

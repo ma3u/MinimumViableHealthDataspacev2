@@ -4,31 +4,31 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        // 5-layer architecture palette — mirrors health-dataspace-style.grass
+        // 5-layer architecture palette — distinct cool/muted gradient
         layer1: {
-          DEFAULT: "#2471A3",
-          light: "#AED6F1",
-          dark: "#1A5276",
+          DEFAULT: "#5B8DEF",
+          light: "#B3CCFA",
+          dark: "#3A5FA8",
         },
         layer2: {
-          DEFAULT: "#148F77",
-          light: "#76D7C4",
-          dark: "#0E6655",
+          DEFAULT: "#45B7AA",
+          light: "#8FD8CF",
+          dark: "#2E7E75",
         },
         layer3: {
-          DEFAULT: "#1E8449",
-          light: "#82E0AA",
-          dark: "#145A32",
+          DEFAULT: "#6ABF69",
+          light: "#A8DCA8",
+          dark: "#468646",
         },
         layer4: {
-          DEFAULT: "#CA6F1E",
-          light: "#F5CBA7",
-          dark: "#935116",
+          DEFAULT: "#F0A050",
+          light: "#F8D0A0",
+          dark: "#B07030",
         },
         layer5: {
-          DEFAULT: "#7D3C98",
-          light: "#D7BDE2",
-          dark: "#6C3483",
+          DEFAULT: "#A78BDB",
+          light: "#D0C0ED",
+          dark: "#7B5FB0",
         },
       },
     },

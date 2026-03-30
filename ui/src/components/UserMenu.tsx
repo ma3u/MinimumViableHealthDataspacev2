@@ -1,14 +1,9 @@
 "use client";
 
 import { useSession, signIn, signOut } from "next-auth/react";
-import { LogIn, LogOut, Network, Shield, User, Users } from "lucide-react";
+import { LogIn, LogOut, Settings, Shield, User, Users } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
-import {
-  ROLE_LABELS,
-  DEMO_PERSONAS,
-  deriveParticipantType,
-  derivePersonaId,
-} from "@/lib/auth";
+import { ROLE_LABELS, DEMO_PERSONAS, deriveParticipantType } from "@/lib/auth";
 import { useDemoPersona, setDemoPersona } from "@/lib/use-demo-persona";
 
 /** Badge colours per role code (compact chip in nav bar and dropdown). */
@@ -58,6 +53,7 @@ function displayRolesFor(roles: string[]): string[] {
       "DATA_HOLDER",
       "DATA_USER",
       "TRUST_CENTER_OPERATOR",
+      "PATIENT",
     ].includes(r),
   );
   if (specific.length === 0 && roles.includes("EDC_USER_PARTICIPANT")) {
@@ -66,28 +62,38 @@ function displayRolesFor(roles: string[]): string[] {
   return specific;
 }
 
-/** Short description of what this persona's graph view shows. */
-const PERSONA_GRAPH_LABELS: Record<string, string> = {
-  "edc-admin": "Participants, contracts and transfers",
-  hospital: "My datasets, approvals and contracts",
-  researcher: "Available datasets and OMOP analytics",
-  hdab: "Approval chains and credentials",
-  "trust-center": "Pseudonym chains and SPE sessions",
-  patient: "My health records and research consents",
-  default: "Full 5-layer dataspace overview",
-};
-
-/** Switch to a demo persona — signs out current session then prompts for Keycloak login. */
+/**
+ * Switch to a different Keycloak user.
+ * Must sign out from BOTH NextAuth AND Keycloak itself — otherwise Keycloak's
+ * SSO session cookie auto-authenticates the same user on the next signIn().
+ *
+ * After logout, redirects to NextAuth's signIn with login_hint so Keycloak
+ * pre-fills the username field for the target user.
+ */
 function switchPersona(
-  _username: string,
-  personaId: string,
+  username: string,
+  _personaId: string,
   onClose: () => void,
 ) {
   onClose();
+  const keycloakPublicUrl =
+    process.env.NEXT_PUBLIC_KEYCLOAK_PUBLIC_URL ??
+    "http://localhost:8080/realms/edcv";
+  const clientId =
+    process.env.NEXT_PUBLIC_KEYCLOAK_CLIENT_ID ?? "health-dataspace-ui";
+  // Store the target username so we can pass it as login_hint after logout
+  sessionStorage.setItem("switch_to_user", username);
+  // Re-show the demo password warning for the new user
+  sessionStorage.removeItem("demo-password-banner-dismissed");
+  // Sign out from NextAuth first, then redirect to Keycloak's logout endpoint.
+  // The post_logout_redirect_uri sends the user to /auth/switch which triggers
+  // a new sign-in with login_hint.
   signOut({ redirect: false }).then(() => {
-    signIn("keycloak", {
-      callbackUrl: `/graph?persona=${personaId}`,
-    });
+    const returnUrl = window.location.origin + "/auth/switch";
+    const logoutUrl = `${keycloakPublicUrl}/protocol/openid-connect/logout?post_logout_redirect_uri=${encodeURIComponent(
+      returnUrl,
+    )}&client_id=${clientId}`;
+    window.location.href = logoutUrl;
   });
 }
 
@@ -144,7 +150,6 @@ export default function UserMenu() {
   const username = session.user?.name ?? session.user?.email ?? "";
   const shownRoles = displayRolesFor(roles);
   const primaryRole = shownRoles[0] ?? "EDC_USER_PARTICIPANT";
-  const personaId = derivePersonaId(roles, username);
   // Derive a friendly participant type for display
   const _participantType = deriveParticipantType(roles, username);
 
@@ -212,24 +217,15 @@ export default function UserMenu() {
             </div>
           </div>
 
-          {/* Persona graph deep-link */}
+          {/* Settings link */}
           <div className="p-2 border-b border-gray-700">
             <a
-              href={
-                personaId === "default"
-                  ? "/graph"
-                  : `/graph?persona=${personaId}`
-              }
+              href="/settings"
               onClick={() => setOpen(false)}
-              className="flex items-center gap-2 w-full px-3 py-2 rounded text-sm text-blue-300 hover:bg-gray-700 transition-colors"
+              className="flex items-center gap-2 w-full px-3 py-2 rounded text-sm text-gray-300 hover:bg-gray-700 transition-colors"
             >
-              <Network size={14} />
-              <div className="text-left">
-                <div className="font-medium">My graph view</div>
-                <div className="text-xs text-gray-500">
-                  {PERSONA_GRAPH_LABELS[personaId]}
-                </div>
-              </div>
+              <Settings size={14} />
+              <span className="font-medium">Settings</span>
             </a>
           </div>
 
@@ -305,6 +301,7 @@ export default function UserMenu() {
             <button
               onClick={() => {
                 setOpen(false);
+                sessionStorage.removeItem("demo-password-banner-dismissed");
                 if (IS_STATIC) return;
                 const keycloakPublicUrl =
                   process.env.NEXT_PUBLIC_KEYCLOAK_PUBLIC_URL;

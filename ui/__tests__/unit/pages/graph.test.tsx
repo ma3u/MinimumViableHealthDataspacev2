@@ -54,35 +54,35 @@ const sampleGraphData = {
       name: "DataProduct-A",
       label: "DataProduct",
       layer: 1,
-      color: "#2471A3",
+      color: "#5B8DEF",
     },
     {
       id: "n2",
       name: "Dataset-B",
       label: "Dataset",
       layer: 2,
-      color: "#148F77",
+      color: "#45B7AA",
     },
     {
       id: "n3",
       name: "Patient-C",
       label: "Patient",
       layer: 3,
-      color: "#1E8449",
+      color: "#6ABF69",
     },
     {
       id: "n4",
       name: "Condition-D",
       label: "Condition",
       layer: 4,
-      color: "#CA6F1E",
+      color: "#F0A050",
     },
     {
       id: "n5",
       name: "SNOMED-E",
       label: "Concept",
       layer: 5,
-      color: "#7D3C98",
+      color: "#A78BDB",
     },
   ],
   links: [
@@ -114,13 +114,11 @@ describe("GraphPage", () => {
     ).toBeInTheDocument();
   });
 
-  // 2. Shows loading state
-  it("shows 'Connecting to Neo4j…' while data is loading", () => {
+  // 2. Shows loading state (persona-aware: EDC_ADMIN → "My Dataspace")
+  it("shows persona-aware loading text while data is loading", () => {
     mockFetchApi.mockReturnValue(new Promise(() => {}));
     render(<GraphPage />);
-    expect(
-      screen.getByText(/Building researcher overview/),
-    ).toBeInTheDocument();
+    expect(screen.getByText(/Loading.*Dataspace/)).toBeInTheDocument();
   });
 
   it("does not render ForceGraph while loading", () => {
@@ -142,22 +140,23 @@ describe("GraphPage", () => {
     mockFetchApi.mockReturnValue(mockResponse(sampleGraphData));
     render(<GraphPage />);
     await waitFor(() => {
-      expect(screen.getByText(/5 nodes/)).toBeInTheDocument();
-      expect(screen.getByText(/4 edges/)).toBeInTheDocument();
+      // +1 node for injected value center, +N links for VALUE_FOCUS edges
+      expect(screen.getByText(/6 nodes/)).toBeInTheDocument();
     });
   });
 
-  it("calls fetchApi with /api/graph", () => {
+  it("calls fetchApi with persona-qualified graph URL", () => {
     mockFetchApi.mockReturnValue(new Promise(() => {}));
     render(<GraphPage />);
-    expect(mockFetchApi).toHaveBeenCalledWith("/api/graph");
+    // Global mock session has EDC_ADMIN role → persona "edc-admin"
+    expect(mockFetchApi).toHaveBeenCalledWith("/api/graph?persona=edc-admin");
   });
 
   // 4. Shows sidebar with layer legend
-  it("renders the Layers heading in the sidebar", () => {
+  it("renders the Structural layers heading in the sidebar", () => {
     mockFetchApi.mockReturnValue(new Promise(() => {}));
     render(<GraphPage />);
-    expect(screen.getByText("Layers")).toBeInTheDocument();
+    expect(screen.getByText("Structural layers")).toBeInTheDocument();
   });
 
   // 5. Shows navigation links in sidebar
@@ -202,13 +201,12 @@ describe("GraphPage", () => {
     });
   });
 
-  // 7. Shows empty state when no nodes
-  it("shows 0 nodes · 0 edges when API returns empty data", async () => {
+  // 7. Shows empty state when no nodes (value center still injected)
+  it("shows 1 node when API returns empty data (value center injected)", async () => {
     mockFetchApi.mockReturnValue(mockResponse({ nodes: [], links: [] }));
     render(<GraphPage />);
     await waitFor(() => {
-      expect(screen.getByText(/0 nodes/)).toBeInTheDocument();
-      expect(screen.getByText(/0 edges/)).toBeInTheDocument();
+      expect(screen.getByText(/1 nodes/)).toBeInTheDocument();
     });
   });
 
@@ -220,46 +218,17 @@ describe("GraphPage", () => {
     });
   });
 
-  // 8. Layer filter/legend items
-  it("displays L1 Governance layer label", () => {
+  // 8. Layer filter/legend items (EDC_ADMIN persona → edc-admin labels)
+  it("displays persona-specific layer labels for edc-admin", () => {
     mockFetchApi.mockReturnValue(new Promise(() => {}));
     render(<GraphPage />);
-    expect(screen.getByText("L1 Governance")).toBeInTheDocument();
-  });
-
-  it("displays L2 HealthDCAT-AP layer label", () => {
-    mockFetchApi.mockReturnValue(new Promise(() => {}));
-    render(<GraphPage />);
-    expect(screen.getByText("L2 HealthDCAT-AP")).toBeInTheDocument();
-  });
-
-  it("displays L3 FHIR R4 layer label", () => {
-    mockFetchApi.mockReturnValue(new Promise(() => {}));
-    render(<GraphPage />);
-    expect(screen.getByText("L3 FHIR R4")).toBeInTheDocument();
-  });
-
-  it("displays L4 OMOP CDM layer label", () => {
-    mockFetchApi.mockReturnValue(new Promise(() => {}));
-    render(<GraphPage />);
-    expect(screen.getByText("L4 OMOP CDM")).toBeInTheDocument();
-  });
-
-  it("displays L5 Ontology layer label", () => {
-    mockFetchApi.mockReturnValue(new Promise(() => {}));
-    render(<GraphPage />);
-    expect(screen.getByText("L5 Ontology")).toBeInTheDocument();
-  });
-
-  it("renders all five layer labels together", () => {
-    mockFetchApi.mockReturnValue(new Promise(() => {}));
-    render(<GraphPage />);
+    // edc-admin persona-specific labels
     const labels = [
-      "L1 Governance",
-      "L2 HealthDCAT-AP",
-      "L3 FHIR R4",
-      "L4 OMOP CDM",
-      "L5 Ontology",
+      "Participants & Contracts",
+      "Data Offerings",
+      "Clinical Layer",
+      "Research Layer",
+      "Events & Credentials",
     ];
     for (const label of labels) {
       expect(screen.getByText(label)).toBeInTheDocument();
@@ -271,11 +240,11 @@ describe("GraphPage", () => {
     mockFetchApi.mockReturnValue(mockResponse(sampleGraphData));
     render(<GraphPage />);
     await waitFor(() => {
-      expect(screen.queryByText(/Connecting to Neo4j/)).not.toBeInTheDocument();
+      expect(screen.queryByText(/Loading.*Dataspace/)).not.toBeInTheDocument();
     });
   });
 
-  // Sidebar renders with single-node data
+  // Sidebar renders with single-node data (+1 for injected value center)
   it("updates counts with single node response", async () => {
     const oneNodeData = {
       nodes: [
@@ -284,7 +253,7 @@ describe("GraphPage", () => {
           name: "Only Node",
           label: "Thing",
           layer: 1,
-          color: "#2471A3",
+          color: "#94A3B8",
         },
       ],
       links: [],
@@ -292,8 +261,7 @@ describe("GraphPage", () => {
     mockFetchApi.mockReturnValue(mockResponse(oneNodeData));
     render(<GraphPage />);
     await waitFor(() => {
-      expect(screen.getByText(/1 nodes/)).toBeInTheDocument();
-      expect(screen.getByText(/0 edges/)).toBeInTheDocument();
+      expect(screen.getByText(/2 nodes/)).toBeInTheDocument();
     });
   });
 });

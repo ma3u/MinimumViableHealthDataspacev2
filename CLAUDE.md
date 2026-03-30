@@ -126,13 +126,16 @@ Institut de Recherche Santé. Never use real names (Charité, Bayer, BfArM, etc.
 4. **Pre-commit Prettier auto-reformats staged files** — After prettier runs you must
    `git add` the reformatted files before the commit succeeds. Pre-push runs full Vitest.
 
-5. **Keycloak `wellKnown` vs `issuer` split** — In Docker, `KEYCLOAK_SERVER_URL` must use
-   the internal hostname (`http://keycloak:8080`) for token discovery; `KEYCLOAK_PUBLIC_URL`
-   uses `localhost:8080` for browser redirects. Mixing them causes `?error=keycloak` on sign-in.
-   See `ui/src/lib/auth.ts` `wellKnown` field.
+5. **Do NOT use `wellKnown` in the NextAuth provider** — Keycloak's OIDC discovery returns
+   endpoints with `localhost:8080` (its public hostname). From inside the UI container,
+   `localhost` resolves to the container itself, causing `ECONNREFUSED` during token exchange.
+   Instead, set `token`, `userinfo`, and `jwks_endpoint` explicitly using the Docker-internal
+   hostname (`keycloak:8080`), and `authorization`/`issuer` using the public URL (`localhost:8080`).
+   See `ui/src/lib/auth.ts`.
 
-6. **Keycloak client must be confidential, not public** — `health-dataspace-ui` is configured
-   as `publicClient: false` with `secret: "health-dataspace-ui-secret"` in `jad/keycloak-realm.json`.
-   NextAuth always sends `client_secret` in the token exchange; if the Keycloak client is
-   `publicClient: true`, Keycloak rejects the secret and the callback fails with `?error=OAuthCallback`.
-   PKCE (`pkce.code.challenge.method: S256`) must NOT be set for confidential clients.
+6. **Keycloak client is confidential + PKCE** — `health-dataspace-ui` is configured
+   as `publicClient: false` with `secret: "health-dataspace-ui-secret"` and
+   `pkce.code.challenge.method: S256` in `jad/keycloak-realm.json`. NextAuth's `checks`
+   must include `["pkce", "state"]` to send the `code_challenge_method` parameter.
+   If PKCE is missing from `checks`, Keycloak returns `error=invalid_request` with
+   `Missing parameter: code_challenge_method`, which NextAuth surfaces as `?error=OAuthCallback`.

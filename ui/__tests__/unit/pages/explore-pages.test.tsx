@@ -54,21 +54,21 @@ const sampleGraphData = {
       name: "DataProduct-A",
       label: "DataProduct",
       layer: 1,
-      color: "#2471A3",
+      color: "#5B8DEF",
     },
     {
       id: "n2",
       name: "Dataset-B",
       label: "Dataset",
       layer: 2,
-      color: "#148F77",
+      color: "#45B7AA",
     },
     {
       id: "n3",
       name: "Patient-C",
       label: "Patient",
       layer: 3,
-      color: "#1E8449",
+      color: "#6ABF69",
     },
   ],
   links: [
@@ -82,44 +82,44 @@ describe("GraphPage", () => {
     mockFetchApi.mockReset();
   });
 
-  it("renders sidebar with layer labels", () => {
+  it("renders sidebar with structural layers heading", () => {
     mockFetchApi.mockReturnValue(new Promise(() => {}));
     render(<GraphPage />);
-    expect(screen.getByText("Layers")).toBeInTheDocument();
+    expect(screen.getByText("Structural layers")).toBeInTheDocument();
   });
 
   it("shows loading state", () => {
     mockFetchApi.mockReturnValue(new Promise(() => {}));
     render(<GraphPage />);
-    expect(
-      screen.getByText(/Building researcher overview/),
-    ).toBeInTheDocument();
+    expect(screen.getByText(/Loading.*Dataspace/)).toBeInTheDocument();
   });
 
   it("renders graph after data loads", async () => {
     mockFetchApi.mockReturnValue(mockResponse({ nodes: [], links: [] }));
     render(<GraphPage />);
     await waitFor(() => {
-      expect(screen.getByText(/0 nodes/)).toBeInTheDocument();
+      // 1 node = injected value center (no real data)
+      expect(screen.getByText(/1 nodes/)).toBeInTheDocument();
     });
   });
 
-  it("displays all five layer labels in the sidebar", () => {
+  it("displays all five edc-admin persona layer labels in the sidebar", () => {
     mockFetchApi.mockReturnValue(new Promise(() => {}));
     render(<GraphPage />);
-    expect(screen.getByText("L1 Governance")).toBeInTheDocument();
-    expect(screen.getByText("L2 HealthDCAT-AP")).toBeInTheDocument();
-    expect(screen.getByText("L3 FHIR R4")).toBeInTheDocument();
-    expect(screen.getByText("L4 OMOP CDM")).toBeInTheDocument();
-    expect(screen.getByText("L5 Ontology")).toBeInTheDocument();
+    // EDC_ADMIN persona-specific layer labels
+    expect(screen.getByText("Participants & Contracts")).toBeInTheDocument();
+    expect(screen.getByText("Data Offerings")).toBeInTheDocument();
+    expect(screen.getByText("Clinical Layer")).toBeInTheDocument();
+    expect(screen.getByText("Research Layer")).toBeInTheDocument();
+    expect(screen.getByText("Events & Credentials")).toBeInTheDocument();
   });
 
   it("shows node and edge counts after data loads", async () => {
     mockFetchApi.mockReturnValue(mockResponse(sampleGraphData));
     render(<GraphPage />);
     await waitFor(() => {
-      expect(screen.getByText(/3 nodes/)).toBeInTheDocument();
-      expect(screen.getByText(/2 edges/)).toBeInTheDocument();
+      // +1 for injected value center node
+      expect(screen.getByText(/4 nodes/)).toBeInTheDocument();
     });
   });
 

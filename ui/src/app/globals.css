@@ -3,13 +3,28 @@
 @tailwind utilities;
 
 :root {
-  --layer1: #2471a3;
-  --layer2: #148f77;
-  --layer3: #1e8449;
-  --layer4: #ca6f1e;
-  --layer5: #7d3c98;
+  --layer1: #5b8def;
+  --layer2: #45b7aa;
+  --layer3: #6abf69;
+  --layer4: #f0a050;
+  --layer5: #a78bdb;
 }
 
 body {
   @apply bg-gray-950 text-gray-100;
+}
+
+@keyframes slide-in-right {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.animate-slide-in-right {
+  animation: slide-in-right 0.2s ease-out;
 }

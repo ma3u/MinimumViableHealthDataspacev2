@@ -31,8 +31,8 @@ test.describe("Graph Explorer", () => {
 
     await page.goto("/graph");
     await expect(page).toHaveURL(/\/graph/);
-    // Graph page has a sidebar with "Layers" heading
-    await expect(page.locator("text=Layers").first()).toBeVisible();
+    // Graph page has a sidebar with "Data layers" heading
+    await expect(page.locator("text=Data layers").first()).toBeVisible();
   });
 });
 

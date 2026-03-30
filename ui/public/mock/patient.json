@@ -80,7 +80,7 @@
     },
     {
       "id": "7a0bc09c-bf6f-175c-a2ac-23725f85b630",
-      "name": "Antonio44 José María211 Ruiz676",
+      "name": "Antonio44 Jos\u00e9 Mar\u00eda211 Ruiz676",
       "gender": "male",
       "birthDate": "1972-05-07"
     },
@@ -464,7 +464,7 @@
     },
     {
       "id": "c3df449d-1b3c-43d6-b130-dc73801c8867",
-      "name": "Inés791 Sonia106 Casillas702",
+      "name": "In\u00e9s791 Sonia106 Casillas702",
       "gender": "female",
       "birthDate": "1989-06-09"
     },
@@ -632,13 +632,13 @@
     },
     {
       "id": "25bdfded-c126-3458-d2ea-30b0e043bb7e",
-      "name": "Manuel446 Homero668 Alarcón922",
+      "name": "Manuel446 Homero668 Alarc\u00f3n922",
       "gender": "male",
       "birthDate": "1974-01-29"
     },
     {
       "id": "3e2865f6-0d8f-69fe-3b70-beab3c4d9312",
-      "name": "Manuela585 María Soledad68 Alonso270",
+      "name": "Manuela585 Mar\u00eda Soledad68 Alonso270",
       "gender": "female",
       "birthDate": "2012-08-04"
     },
@@ -662,13 +662,13 @@
     },
     {
       "id": "ad0b3865-70f4-6d67-41fe-0382a59e0b39",
-      "name": "María José279 Lourdes258 Matos876",
+      "name": "Mar\u00eda Jos\u00e9279 Lourdes258 Matos876",
       "gender": "female",
       "birthDate": "1957-04-05"
     },
     {
       "id": "f55e91d4-f36e-b9d2-487f-7c6ee77a4418",
-      "name": "María Luisa888 Cristina921 Jiménez568",
+      "name": "Mar\u00eda Luisa888 Cristina921 Jim\u00e9nez568",
       "gender": "female",
       "birthDate": "1998-02-03"
     },
@@ -1015,5 +1015,6 @@
     "medications": 3895,
     "procedures": 8534
   },
-  "timeline": []
+  "timeline": [],
+  "restricted": false
 }

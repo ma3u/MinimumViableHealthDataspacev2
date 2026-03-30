@@ -19,6 +19,7 @@ import {
   Settings,
   Award,
 } from "lucide-react";
+import { DemoPersonaCards } from "@/components/DemoPersonaCards";
 
 const exploreCards = [
   {
@@ -211,7 +212,7 @@ export default function Home() {
       <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">
         Govern · Manage · Docs
       </h2>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-10">
         {governCards.map(({ href, icon: Icon, label, desc, color }) => (
           <Link
             key={href}
@@ -226,6 +227,9 @@ export default function Home() {
           </Link>
         ))}
       </div>
+
+      {/* Demo personas */}
+      <DemoPersonaCards />
     </div>
   );
 }

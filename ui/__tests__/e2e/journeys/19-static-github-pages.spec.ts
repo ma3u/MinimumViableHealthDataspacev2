@@ -19,11 +19,11 @@
  * /demo hub is required for most assertions.
  *
  * Personas under test:
- *   edcadmin   → EDC_ADMIN            → Get Started / Explore / Governance / Exchange / Manage / Docs
- *   clinicuser → DATA_HOLDER          → Get Started / Explore / Exchange / Docs
- *   lmcuser    → DATA_HOLDER          → Get Started / Explore / Exchange / Docs
- *   researcher → DATA_USER            → Get Started / Explore / Exchange / Docs
- *   regulator  → HDAB_AUTHORITY       → Explore / Governance / Manage / Docs
+ *   edcadmin   → EDC_ADMIN            → Explore / Governance / Exchange / Manage / Docs
+ *   clinicuser → DATA_HOLDER          → Explore / Exchange / Docs
+ *   lmcuser    → DATA_HOLDER          → Explore / Exchange / Docs
+ *   researcher → DATA_USER            → Explore / Exchange / Docs
+ *   regulator  → HDAB_AUTHORITY       → Explore / Governance / Exchange / Manage / Docs
  *   patient1   → PATIENT              → Explore / My Health / Docs (citizen, not participant)
  *   patient2   → PATIENT              → Explore / My Health / Docs (citizen, not participant)
  */
@@ -70,35 +70,34 @@ const PERSONA_SPECS: PersonaSpec[] = [
   {
     username: "edcadmin",
     expectedGroups: [
-      /get started/i,
       /explore/i,
       /governance/i,
       /exchange/i,
       /manage/i,
       /docs/i,
     ],
-    blockedGroups: [/my health/i],
+    blockedGroups: [/my health/i, /get started/i],
     home: "/graph",
     roleLabel: /dataspace admin/i,
   },
   {
     username: "clinicuser",
-    expectedGroups: [/get started/i, /explore/i, /exchange/i, /docs/i],
-    blockedGroups: [/governance/i, /manage/i, /my health/i],
+    expectedGroups: [/explore/i, /exchange/i, /docs/i],
+    blockedGroups: [/governance/i, /manage/i, /my health/i, /get started/i],
     home: "/catalog",
     roleLabel: /data holder/i,
   },
   {
     username: "lmcuser",
-    expectedGroups: [/get started/i, /explore/i, /exchange/i, /docs/i],
-    blockedGroups: [/governance/i, /my health/i],
+    expectedGroups: [/explore/i, /exchange/i, /docs/i],
+    blockedGroups: [/governance/i, /my health/i, /get started/i],
     home: "/catalog",
     roleLabel: /data holder/i,
   },
   {
     username: "researcher",
-    expectedGroups: [/get started/i, /explore/i, /exchange/i, /docs/i],
-    blockedGroups: [/governance/i, /manage/i, /my health/i],
+    expectedGroups: [/my researches/i, /docs/i],
+    blockedGroups: [/governance/i, /manage/i, /my health/i, /^explore$/i],
     home: "/analytics",
     roleLabel: /researcher/i,
   },
@@ -111,21 +110,21 @@ const PERSONA_SPECS: PersonaSpec[] = [
       /manage/i,
       /docs/i,
     ],
-    blockedGroups: [/my health/i],
+    blockedGroups: [/my health/i, /get started/i],
     home: "/compliance",
     roleLabel: /hdab authority/i,
   },
   {
     username: "patient1",
-    expectedGroups: [/explore/i, /my health/i, /docs/i],
-    blockedGroups: [/get started/i, /governance/i, /exchange/i, /manage/i],
+    expectedGroups: [/my health/i, /docs/i],
+    blockedGroups: [/governance/i, /exchange/i, /manage/i, /^explore$/i],
     home: "/patient/profile",
     roleLabel: /patient/i,
   },
   {
     username: "patient2",
-    expectedGroups: [/explore/i, /my health/i, /docs/i],
-    blockedGroups: [/get started/i, /governance/i, /exchange/i, /manage/i],
+    expectedGroups: [/my health/i, /docs/i],
+    blockedGroups: [/governance/i, /exchange/i, /manage/i, /^explore$/i],
     home: "/patient/profile",
     roleLabel: /patient/i,
   },
@@ -891,13 +890,12 @@ test.describe("S · EDC Admin — admin pages with data", () => {
     ).toBeVisible({ timeout: T });
   });
 
-  test("J283 — edcadmin sees all 6 nav groups (not My Health)", async ({
+  test("J283 — edcadmin sees 5 nav groups (not My Health or Get Started)", async ({
     page,
   }) => {
     await gotoAs(page, "/", "edcadmin");
     const nav = page.locator("nav");
     for (const group of [
-      /get started/i,
       /explore/i,
       /governance/i,
       /exchange/i,
@@ -910,6 +908,9 @@ test.describe("S · EDC Admin — admin pages with data", () => {
     }
     await expect(
       nav.getByRole("button", { name: /my health/i }),
+    ).not.toBeVisible({ timeout: 3_000 });
+    await expect(
+      nav.getByRole("button", { name: /get started/i }),
     ).not.toBeVisible({ timeout: 3_000 });
   });
 });
@@ -929,12 +930,12 @@ test.describe("S · Data Holder (clinicuser) — catalog & exchange", () => {
     ).toBeVisible({ timeout: T });
   });
 
-  test("J285 — clinicuser sees Get Started + Explore + Exchange + Docs", async ({
+  test("J285 — clinicuser sees Explore + Exchange + Docs (no Get Started)", async ({
     page,
   }) => {
     await gotoAs(page, "/", "clinicuser");
     const nav = page.locator("nav");
-    for (const group of [/get started/i, /explore/i, /exchange/i, /docs/i]) {
+    for (const group of [/explore/i, /exchange/i, /docs/i]) {
       await expect(nav.getByRole("button", { name: group })).toBeVisible({
         timeout: T,
       });
@@ -1073,7 +1074,7 @@ test.describe("S · LMC user — second Data Holder", () => {
   }) => {
     await gotoAs(page, "/", "lmcuser");
     const nav = page.locator("nav");
-    for (const group of [/get started/i, /explore/i, /exchange/i, /docs/i]) {
+    for (const group of [/explore/i, /exchange/i, /docs/i]) {
       await expect(nav.getByRole("button", { name: group })).toBeVisible({
         timeout: T,
       });
@@ -1081,6 +1082,9 @@ test.describe("S · LMC user — second Data Holder", () => {
     await expect(nav.getByRole("button", { name: /manage/i })).not.toBeVisible({
       timeout: 3_000,
     });
+    await expect(
+      nav.getByRole("button", { name: /get started/i }),
+    ).not.toBeVisible({ timeout: 3_000 });
   });
 
   test("J295 — lmcuser /catalog loads datasets", async ({ page }) => {
@@ -1161,6 +1165,92 @@ test.describe("S · Public pages with data for every persona", () => {
   }) => {
     await gotoAs(page, "/patient", "edcadmin");
     await expect(page.getByText(/patient|journey|fhir/i).first()).toBeVisible({
+      timeout: T,
+    });
+  });
+});
+
+// ── S8: Persona-specific graph views on static export ─────────────────────────
+
+test.describe("S · Persona graph views (static)", () => {
+  test.skip(
+    process.env.NEXT_PUBLIC_STATIC_EXPORT !== "true",
+    "Requires NEXT_PUBLIC_STATIC_EXPORT=true",
+  );
+
+  test("J300 — graph page loads for researcher with canvas", async ({
+    page,
+  }) => {
+    await gotoAs(page, "/graph", "researcher");
+    await expect(page.getByText("Knowledge Graph")).toBeVisible({ timeout: T });
+    await expect(page.locator("canvas")).toBeVisible({ timeout: T });
+  });
+
+  test("J301 — researcher sees 'My Researches' nav group", async ({ page }) => {
+    await gotoAs(page, "/graph", "researcher");
+    const nav = page.locator("nav");
+    await expect(
+      nav.getByRole("button", { name: /my researches/i }),
+    ).toBeVisible({ timeout: T });
+  });
+
+  test("J302 — patient sees 'My Health' nav group on graph", async ({
+    page,
+  }) => {
+    await gotoAs(page, "/graph", "patient1");
+    const nav = page.locator("nav");
+    await expect(nav.getByRole("button", { name: /my health/i })).toBeVisible({
+      timeout: T,
+    });
+  });
+
+  test("J303 — hospital persona shows hospital layer labels", async ({
+    page,
+  }) => {
+    await gotoAs(page, "/graph", "clinicuser");
+    await expect(page.getByText("Structural layers")).toBeVisible({
+      timeout: T,
+    });
+    await expect(page.getByText("Contracts & Access")).toBeVisible({
+      timeout: T,
+    });
+  });
+
+  test("J304 — edcadmin sees Manage nav group on graph", async ({ page }) => {
+    await gotoAs(page, "/graph", "edcadmin");
+    const nav = page.locator("nav");
+    await expect(nav.getByRole("button", { name: /manage/i })).toBeVisible({
+      timeout: T,
+    });
+  });
+
+  test("J305 — regulator sees Governance nav group on graph", async ({
+    page,
+  }) => {
+    await gotoAs(page, "/graph", "regulator");
+    const nav = page.locator("nav");
+    await expect(nav.getByRole("button", { name: /governance/i })).toBeVisible({
+      timeout: T,
+    });
+  });
+
+  test("J306 — graph sidebar shows Key actors legend", async ({ page }) => {
+    await gotoAs(page, "/graph", "edcadmin");
+    await expect(page.getByText("Key actors")).toBeVisible({ timeout: T });
+  });
+
+  test("J307 — graph sidebar shows filter preset buttons", async ({ page }) => {
+    await gotoAs(page, "/graph", "researcher");
+    await expect(page.getByText("Filter by question")).toBeVisible({
+      timeout: T,
+    });
+  });
+
+  test("J308 — patient graph loads and shows My Health label", async ({
+    page,
+  }) => {
+    await gotoAs(page, "/graph", "patient1");
+    await expect(page.getByText("Who Uses My Data")).toBeVisible({
       timeout: T,
     });
   });
