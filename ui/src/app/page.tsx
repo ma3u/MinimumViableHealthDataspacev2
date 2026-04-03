@@ -1,166 +1,19 @@
 import Link from "next/link";
 import {
-  Network,
   BookOpen,
   ShieldCheck,
-  User,
-  BarChart2,
-  Layers,
-  ArrowRightLeft,
-  FileJson2,
-  FileText,
-  LayoutDashboard,
   Github,
-  Search,
-  Handshake,
-  UserPlus,
-  MessageSquare,
-  ClipboardList,
-  Settings,
-  Award,
   Heart,
   FlaskConical,
   Globe,
   Lock,
+  Network,
   ExternalLink,
   MessageCircle,
 } from "lucide-react";
 import { DemoPersonaCards } from "@/components/DemoPersonaCards";
 import { PersonaJourneyCards } from "@/components/PersonaJourneyCards";
-import {
-  FeatureCardGrid,
-  type FeatureCard,
-} from "@/components/FeatureCardGrid";
-
-/* ── Card data ───────────────────────────────────────────────────────────── */
-
-const exploreCards: FeatureCard[] = [
-  {
-    href: "/graph",
-    icon: Network,
-    label: "Graph Explorer",
-    desc: "Force-directed visualisation of all 5 architecture layers",
-    color: "border-layer1 hover:bg-layer1/10",
-  },
-  {
-    href: "/catalog",
-    icon: BookOpen,
-    label: "Dataset Catalog",
-    desc: "HealthDCAT-AP metadata for all published datasets",
-    color: "border-layer2 hover:bg-layer2/10",
-  },
-  {
-    href: "/patient",
-    icon: User,
-    label: "Patient Journey",
-    desc: "FHIR R4 clinical timeline with OMOP CDM mapping",
-    color: "border-layer3 hover:bg-layer3/10",
-  },
-  {
-    href: "/analytics",
-    icon: BarChart2,
-    label: "OMOP Analytics",
-    desc: "Cohort-level research analytics dashboard",
-    color: "border-layer4 hover:bg-layer4/10",
-  },
-  {
-    href: "/eehrxf",
-    icon: Layers,
-    label: "EEHRxF Profiles",
-    desc: "EU FHIR profile alignment and EHDS coverage gap analysis",
-    color: "border-layer2 hover:bg-layer2/10",
-  },
-  {
-    href: "/query",
-    icon: MessageSquare,
-    label: "Natural Language Query",
-    desc: "Federated Cypher queries via natural language interface",
-    color: "border-layer1 hover:bg-layer1/10",
-  },
-];
-
-const exchangeCards: FeatureCard[] = [
-  {
-    href: "/data/share",
-    icon: ArrowRightLeft,
-    label: "Share Data",
-    desc: "Publish and register health data assets for the dataspace",
-    color: "border-layer1 hover:bg-layer1/10",
-  },
-  {
-    href: "/data/discover",
-    icon: Search,
-    label: "Discover Data",
-    desc: "Search the federated catalog for available datasets",
-    color: "border-layer2 hover:bg-layer2/10",
-  },
-  {
-    href: "/negotiate",
-    icon: Handshake,
-    label: "Contract Negotiation",
-    desc: "Negotiate data usage contracts with providers via DSP",
-    color: "border-layer3 hover:bg-layer3/10",
-  },
-  {
-    href: "/data/transfer",
-    icon: FileJson2,
-    label: "Data Transfer & FHIR Viewer",
-    desc: "Transfer FHIR/OMOP data and inspect FHIR R4 bundles",
-    color: "border-layer4 hover:bg-layer4/10",
-  },
-  {
-    href: "/tasks",
-    icon: ClipboardList,
-    label: "EHDS Tasks",
-    desc: "Track data access permit tasks and approval workflows",
-    color: "border-layer5 hover:bg-layer5/10",
-  },
-];
-
-const governCards: FeatureCard[] = [
-  {
-    href: "/compliance",
-    icon: ShieldCheck,
-    label: "Governance & Compliance",
-    desc: "EHDS compliance, data permits, and protocol conformance testing",
-    color: "border-layer5 hover:bg-layer5/10",
-  },
-  {
-    href: "/credentials",
-    icon: Award,
-    label: "Verifiable Credentials",
-    desc: "Manage MembershipCredential, EHDS participant, and data permits",
-    color: "border-layer1 hover:bg-layer1/10",
-  },
-  {
-    href: "/onboarding",
-    icon: UserPlus,
-    label: "Onboarding",
-    desc: "Register new participants and generate DID identities",
-    color: "border-layer2 hover:bg-layer2/10",
-  },
-  {
-    href: "/settings",
-    icon: Settings,
-    label: "Settings",
-    desc: "Participant profile, connector endpoints, and credentials",
-    color: "border-layer3 hover:bg-layer3/10",
-  },
-  {
-    href: "/admin",
-    icon: LayoutDashboard,
-    label: "Portal Admin",
-    desc: "Tenant management, policies, component topology, and audit logs",
-    color: "border-layer4 hover:bg-layer4/10",
-  },
-  {
-    href: "/docs",
-    icon: FileText,
-    label: "Documentation",
-    desc: "User guide, developer docs, and architecture reference",
-    color: "border-layer3 hover:bg-layer3/10",
-  },
-];
+import { FeatureCardGrid } from "@/components/FeatureCardGrid";
 
 /* ── Page ─────────────────────────────────────────────────────────────────── */
 
@@ -451,7 +304,7 @@ export default function Home() {
           query OMOP analytics, and search the HealthDCAT-AP dataset catalogue.
           All publicly accessible without sign-in.
         </p>
-        <FeatureCardGrid cards={exploreCards} delay={1200} />
+        <FeatureCardGrid section="explore" delay={1200} />
       </section>
 
       <div className="my-8 sm:my-10" />
@@ -469,7 +322,7 @@ export default function Home() {
           under ODRL policies, and approved FHIR/OMOP data is transferred
           securely.
         </p>
-        <FeatureCardGrid cards={exchangeCards} delay={1400} />
+        <FeatureCardGrid section="exchange" delay={1400} />
       </section>
 
       <div className="my-8 sm:my-10" />
@@ -486,7 +339,7 @@ export default function Home() {
           onboarding with DID:web identities, portal administration, and
           architecture documentation.
         </p>
-        <FeatureCardGrid cards={governCards} delay={1600} />
+        <FeatureCardGrid section="govern" delay={1600} />
       </section>
 
       <div className="my-8 sm:my-10" />
