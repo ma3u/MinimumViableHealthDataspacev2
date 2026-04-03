@@ -69,56 +69,55 @@ test.describe("U1: Start Page — EHDS Demo Guide", () => {
     });
   });
 
-  test("J262 — workflow steps guide users through EHDS lifecycle", async ({
+  test("J262 — persona journeys guide users through EHDS lifecycle", async ({
     page,
   }) => {
     await expect(page.getByText(/How the EHDS Demo Works/i)).toBeVisible({
       timeout: T,
     });
 
-    const steps = [
-      /Choose a Persona/i,
-      /Browse the Catalog/i,
-      /Negotiate Access/i,
-      /Transfer & Analyze/i,
-      /Verify Compliance/i,
+    const personas = [
+      /Patient/,
+      /Researcher/,
+      /Hospital/,
+      /Regulator/,
+      /Admin/,
     ];
-    for (const step of steps) {
-      await expect(page.getByText(step).first()).toBeVisible({ timeout: T });
+    for (const persona of personas) {
+      await expect(
+        page.locator("h3").filter({ hasText: persona }).first(),
+      ).toBeVisible({ timeout: T });
     }
   });
 
-  test("J263 — workflow steps are an ordered list", async ({ page }) => {
-    const ol = page.locator("ol[aria-label='Demo workflow steps']");
-    await expect(ol).toBeVisible({ timeout: T });
-    const items = ol.locator("li");
-    await expect(items).toHaveCount(5);
+  test("J263 — persona journey cards have numbered steps", async ({ page }) => {
+    const journeyList = page.locator("[aria-label='Persona user journeys']");
+    await expect(journeyList).toBeVisible({ timeout: T });
+    const cards = journeyList.locator("[role='listitem']");
+    await expect(cards).toHaveCount(5);
+    // Each card should have an ordered step list
+    const firstStepList = journeyList.locator("ol").first();
+    await expect(firstStepList).toBeVisible({ timeout: T });
   });
 
-  test("J264 — quick start cards link to persona-appropriate pages", async ({
+  test("J264 — persona journey cards have sign-in buttons", async ({
     page,
   }) => {
-    await expect(page.getByText(/Quick Start by Role/i)).toBeVisible({
-      timeout: T,
-    });
+    const journeySection = page.locator("[aria-label='Persona user journeys']");
+    await expect(journeySection).toBeVisible({ timeout: T });
 
-    const roles = [
-      "Patient",
-      "Researcher",
-      "Hospital",
-      "Regulator",
-      "Dataspace Admin",
-      "Explore Everything",
-    ];
-    for (const role of roles) {
-      const card = page
-        .locator("a")
-        .filter({ hasText: new RegExp(role, "i") })
-        .first();
-      await expect(card).toBeVisible({ timeout: T });
-      // Each card should have a link
-      const href = await card.getAttribute("href");
-      expect(href).toBeTruthy();
+    // In live mode, each journey card has a <button> that calls signIn("keycloak")
+    // In static mode, each card has a <Link> instead
+    if (IS_STATIC) {
+      const links = journeySection.locator("a");
+      const count = await links.count();
+      expect(count).toBe(5);
+    } else {
+      const buttons = journeySection.locator("button");
+      const count = await buttons.count();
+      expect(count).toBe(5);
+      // Each button should contain "Sign in & start" text
+      await expect(buttons.first()).toContainText("Sign in");
     }
   });
 
@@ -156,6 +155,98 @@ test.describe("U1: Start Page — EHDS Demo Guide", () => {
     page,
   }) => {
     await expect(page.getByText(/Demo Users & Roles/i)).toBeVisible({
+      timeout: T,
+    });
+  });
+
+  test("J269a — Why EHDS Matters section is visible", async ({ page }) => {
+    await expect(
+      page.getByText(/Why the European Health Data Space Matters/i),
+    ).toBeVisible({ timeout: T });
+  });
+
+  test("J269b — explains value for researchers", async ({ page }) => {
+    await expect(page.getByText("For Researchers")).toBeVisible({ timeout: T });
+    await expect(page.getByText(/cross-border access/i)).toBeVisible({
+      timeout: T,
+    });
+    await expect(page.getByText(/single-window approval/i)).toBeVisible({
+      timeout: T,
+    });
+  });
+
+  test("J269c — explains value for hospitals", async ({ page }) => {
+    await expect(page.getByText("For Hospitals")).toBeVisible({ timeout: T });
+    await expect(page.getByText(/legal basis for sharing/i)).toBeVisible({
+      timeout: T,
+    });
+    await expect(page.getByText(/reducing legal risk/i)).toBeVisible({
+      timeout: T,
+    });
+  });
+
+  test("J269d — links to official EHDS regulation", async ({ page }) => {
+    const ehdsLink = page.getByRole("link", {
+      name: /read the official ehds regulation/i,
+    });
+    await expect(ehdsLink).toBeVisible({ timeout: T });
+    const href = await ehdsLink.getAttribute("href");
+    expect(href).toContain("health.ec.europa.eu");
+  });
+
+  test("J269e — persona journeys show login credentials", async ({ page }) => {
+    // Each journey card shows which user to sign in as
+    await expect(page.getByText("patient1").first()).toBeVisible({
+      timeout: T,
+    });
+    await expect(page.getByText("researcher").first()).toBeVisible({
+      timeout: T,
+    });
+    await expect(page.getByText("edcadmin").first()).toBeVisible({
+      timeout: T,
+    });
+  });
+
+  test("J269f — Standards & Interoperability section is visible", async ({
+    page,
+  }) => {
+    await expect(page.getByText(/Standards & Interoperability/i)).toBeVisible({
+      timeout: T,
+    });
+  });
+
+  test("J269g — standard cards link to official specs", async ({ page }) => {
+    const standards = [
+      { name: "HL7 FHIR R4", url: "hl7.org/fhir" },
+      { name: "Dataspace Protocol", url: "internationaldataspaces.org" },
+      { name: "OMOP Common Data Model", url: "ohdsi.github.io" },
+    ];
+    for (const { name, url } of standards) {
+      const card = page.getByText(name).first();
+      await expect(card).toBeVisible({ timeout: T });
+      const link = card.locator("xpath=ancestor::a");
+      const href = await link.getAttribute("href");
+      expect(href).toContain(url);
+    }
+  });
+
+  test("J269h — stakeholder cards for patients and regulators", async ({
+    page,
+  }) => {
+    await expect(page.getByText("For Patients")).toBeVisible({ timeout: T });
+    await expect(page.getByText("For Regulators")).toBeVisible({ timeout: T });
+  });
+
+  test("J269i — section descriptions explain each feature group", async ({
+    page,
+  }) => {
+    await expect(page.getByText(/5-layer knowledge graph/i)).toBeVisible({
+      timeout: T,
+    });
+    await expect(page.getByText(/DSP data exchange lifecycle/i)).toBeVisible({
+      timeout: T,
+    });
+    await expect(page.getByText(/EHDS compliance monitoring/i)).toBeVisible({
       timeout: T,
     });
   });
@@ -375,27 +466,15 @@ test.describe("U3: Mobile Responsiveness", () => {
     expect(box!.width).toBeLessThanOrEqual(375);
   });
 
-  test("J287 — workflow steps stack vertically on mobile", async ({ page }) => {
-    const steps = page.locator("ol[aria-label='Demo workflow steps'] li");
-    const count = await steps.count();
-    expect(count).toBe(5);
-    // Each step should be full-width (stacked, not side by side)
-    for (let i = 0; i < 2; i++) {
-      const box = await steps.nth(i).boundingBox();
-      expect(box).toBeTruthy();
-      expect(box!.width).toBeGreaterThan(300);
-    }
-  });
-
-  test("J288 — cards form single column on mobile", async ({ page }) => {
-    // Quick start cards should stack
-    const cards = page
-      .locator("section")
-      .filter({ hasText: /Quick Start by Role/i })
-      .locator("a");
+  test("J287 — persona journey cards stack vertically on mobile", async ({
+    page,
+  }) => {
+    const journeyList = page.locator("[aria-label='Persona user journeys']");
+    await expect(journeyList).toBeVisible({ timeout: T });
+    const cards = journeyList.locator("[role='listitem']");
     const count = await cards.count();
-    expect(count).toBeGreaterThan(0);
-    // First two cards should have same x position (stacked)
+    expect(count).toBe(5);
+    // Cards should be stacked (same x, different y)
     if (count >= 2) {
       const box1 = await cards.nth(0).boundingBox();
       const box2 = await cards.nth(1).boundingBox();
@@ -403,6 +482,22 @@ test.describe("U3: Mobile Responsiveness", () => {
       expect(box2).toBeTruthy();
       expect(box1!.x).toBeCloseTo(box2!.x, -1);
     }
+  });
+
+  test("J288 — persona journey cards form single column on mobile", async ({
+    page,
+  }) => {
+    const journeyCards = page.locator(
+      "[aria-label='Persona user journeys'] [role='listitem']",
+    );
+    const count = await journeyCards.count();
+    expect(count).toBe(5);
+    // First two cards should have same x position (stacked)
+    const box1 = await journeyCards.nth(0).boundingBox();
+    const box2 = await journeyCards.nth(1).boundingBox();
+    expect(box1).toBeTruthy();
+    expect(box2).toBeTruthy();
+    expect(box1!.x).toBeCloseTo(box2!.x, -1);
   });
 
   test("J289 — no horizontal scroll on mobile", async ({ page }) => {

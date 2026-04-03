@@ -16,6 +16,21 @@ const PATIENT_RESOURCE_MAP: Record<string, number> = {
   patient2: 1, // second patient by name order
 };
 
+/**
+ * Sensitive clinical entries that should not appear in a patient-facing EHR view.
+ * Synthea generates death certificates, autopsy, and hospice entries for deceased
+ * patients — these are inappropriate for patient self-service portals.
+ * Researchers and admins see unfiltered data via /analytics or /graph.
+ */
+const FILTERED_DISPLAYS = [
+  "cause of death",
+  "death certification",
+  "certificate of death",
+  "autopsy",
+  "hospice",
+  "sudden cardiac death",
+] as const;
+
 export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
@@ -180,7 +195,16 @@ export async function GET(req: Request) {
       { patientId },
     );
 
-    return NextResponse.json({ timeline: rows });
+    // Filter out sensitive end-of-life entries (death certificates, hospice, autopsy)
+    // that Synthea generates for deceased synthetic patients.
+    // These are inappropriate for patient-facing EHR views.
+    const filtered = rows.filter((row) => {
+      if (!row.display) return true;
+      const lower = row.display.toLowerCase();
+      return !FILTERED_DISPLAYS.some((term) => lower.includes(term));
+    });
+
+    return NextResponse.json({ timeline: filtered });
   } catch (err) {
     console.error("GET /api/patient error:", err);
     return NextResponse.json({ error: "Neo4j unavailable" }, { status: 502 });

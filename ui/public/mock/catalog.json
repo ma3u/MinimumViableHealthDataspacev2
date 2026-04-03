@@ -317,7 +317,7 @@
     "title": "Federated HealthDCAT-AP Catalog",
     "description": "Aggregated HealthDCAT-AP metadata catalog combining dataset descriptions from all EHDS participating data holders for cross-border health data access.",
     "license": "CC-BY-4.0",
-    "conformsTo": "https://ehds2pilot.eu/healthdcat-ap/",
+    "conformsTo": "https://healthdcat-ap.github.io/",
     "publisher": "MedReg DE",
     "theme": "Catalog Metadata",
     "datasetType": "MetadataCatalog",
