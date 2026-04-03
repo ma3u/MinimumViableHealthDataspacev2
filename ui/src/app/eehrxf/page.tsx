@@ -267,8 +267,8 @@ export default function EEHRxFPage() {
         nextStep={{ href: "/compliance", label: "EHDS Compliance" }}
         infoText="EEHRxF defines 10 priority categories of electronic health data that must be interoperable across EU member states. Each profile is matched against FHIR resources in your graph to show alignment status."
         docLink={{
-          href: "https://www.ehds2pilot.eu/",
-          label: "EHDS2 Pilot — EEHRxF",
+          href: "https://digital-strategy.ec.europa.eu/en/library/recommendation-european-electronic-health-record-exchange-format",
+          label: "EEHRxF Recommendation C(2019)800",
           external: true,
         }}
       />
@@ -387,7 +387,7 @@ export default function EEHRxFPage() {
             },
             {
               label: "Xt-EHR Joint Action",
-              url: "https://xt-ehr.eu/",
+              url: "https://www.xt-ehr.eu/",
             },
           ].map((ref) => (
             <a

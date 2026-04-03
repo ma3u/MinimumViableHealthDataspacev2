@@ -9,7 +9,7 @@
 //   - Commission Recommendation C(2019)800 (EEHRxF)
 //   - EHDS Regulation (entered into force 26 March 2025)
 //   - HL7 Europe FHIR IGs: https://hl7.eu/fhir/
-//   - Xt-EHR Joint Action: https://xt-ehr.eu/
+//   - Xt-EHR Joint Action: https://www.xt-ehr.eu/
 //
 // Run after: init-schema.cypher
 // Idempotent: safe to re-run (uses MERGE)
@@ -77,7 +77,7 @@ SET p.name = 'Patient (EU core)',
     p.igPackage = 'hl7.fhir.eu.base#0.1.0',
     p.fhirVersion = 'R4',
     p.status = 'STU',
-    p.url = 'https://hl7.eu/fhir/base/StructureDefinition-Patient-eu.html',
+    p.url = 'https://hl7.eu/fhir/base/StructureDefinition-patient-eu-core.html',
     p.baseResource = 'Patient',
     p.description = 'Core Patient profile for the European context. When ips-pat-1 invariant is satisfied, complies with IPS patient profile.',
     p.coverage = 'full'
@@ -89,7 +89,7 @@ SET p.name = 'Practitioner (EU core)',
     p.igPackage = 'hl7.fhir.eu.base#0.1.0',
     p.fhirVersion = 'R4',
     p.status = 'STU',
-    p.url = 'https://hl7.eu/fhir/base/StructureDefinition-Practitioner-eu.html',
+    p.url = 'https://hl7.eu/fhir/base/StructureDefinition-practitioner-eu-core.html',
     p.baseResource = 'Practitioner',
     p.description = 'Core Practitioner profile for the European context with common constraints.',
     p.coverage = 'none'
@@ -101,7 +101,7 @@ SET p.name = 'Organization (EU core)',
     p.igPackage = 'hl7.fhir.eu.base#0.1.0',
     p.fhirVersion = 'R4',
     p.status = 'STU',
-    p.url = 'https://hl7.eu/fhir/base/StructureDefinition-Organization-eu.html',
+    p.url = 'https://hl7.eu/fhir/base/StructureDefinition-organization-eu-core.html',
     p.baseResource = 'Organization',
     p.description = 'Core Organization profile for the European context.',
     p.coverage = 'none'
@@ -113,7 +113,7 @@ SET p.name = 'PractitionerRole (EU core)',
     p.igPackage = 'hl7.fhir.eu.base#0.1.0',
     p.fhirVersion = 'R4',
     p.status = 'STU',
-    p.url = 'https://hl7.eu/fhir/base/StructureDefinition-PractitionerRole-eu.html',
+    p.url = 'https://hl7.eu/fhir/base/StructureDefinition-practitionerRole-eu-core.html',
     p.baseResource = 'PractitionerRole',
     p.description = 'Core PractitionerRole profile for the European context.',
     p.coverage = 'none'
@@ -197,7 +197,7 @@ SET p.name = 'MedicationRequest (EU MPD)',
     p.igPackage = 'hl7.fhir.eu.mpd',
     p.fhirVersion = 'R4',
     p.status = 'Ballot',
-    p.url = 'https://build.fhir.org/ig/hl7-eu/medications/',
+    p.url = 'https://build.fhir.org/ig/hl7-eu/mpd/',
     p.baseResource = 'MedicationRequest',
     p.description = 'European ePrescription as MedicationRequest with cross-border dispensation support.',
     p.coverage = 'partial'
@@ -209,7 +209,7 @@ SET p.name = 'MedicationDispense (EU MPD)',
     p.igPackage = 'hl7.fhir.eu.mpd',
     p.fhirVersion = 'R4',
     p.status = 'Ballot',
-    p.url = 'https://build.fhir.org/ig/hl7-eu/medications/',
+    p.url = 'https://build.fhir.org/ig/hl7-eu/mpd/',
     p.baseResource = 'MedicationDispense',
     p.description = 'European eDispensation record for cross-border medication fulfillment.',
     p.coverage = 'none'

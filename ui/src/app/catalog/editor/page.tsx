@@ -12,6 +12,8 @@ import {
   BookOpen,
   CheckCircle2,
   AlertCircle,
+  Download,
+  ExternalLink,
 } from "lucide-react";
 import PageIntro from "@/components/PageIntro";
 
@@ -125,6 +127,217 @@ function generateId(title: string): string {
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-|-$/g, "");
   return `dataset:${slug || "untitled"}-${Date.now().toString(36)}`;
+}
+
+/* ── RDF Turtle export (EHDS editor compatible) ────── */
+
+/** Escape a string for Turtle literal */
+function ttlEscape(s: string): string {
+  return s.replace(/\\/g, "\\\\").replace(/"/g, '\\"').replace(/\n/g, "\\n");
+}
+
+/** Map legal basis label → ELI URI used by the EHDS editor */
+const LEGAL_BASIS_URI: Record<string, string> = {
+  "EHDS Article 33 Primary Use": "http://data.europa.eu/eli/reg/2025/327/oj",
+  "EHDS Article 53 Secondary Use": "http://data.europa.eu/eli/reg/2025/327/oj",
+  "GDPR Article 6(1)(a) Consent": "http://data.europa.eu/eli/reg/2016/679/oj",
+  "GDPR Article 9(2)(j) Research": "http://data.europa.eu/eli/reg/2016/679/oj",
+};
+
+/** Map dataset type → EU authority table URI */
+const DATASET_TYPE_URI: Record<string, string> = {
+  SyntheticData:
+    "http://publications.europa.eu/resource/authority/dataset-type/SYNTHETIC",
+  RealWorldData:
+    "http://publications.europa.eu/resource/authority/dataset-type/STATISTICAL",
+  ClinicalTrial:
+    "http://publications.europa.eu/resource/authority/dataset-type/CLINICAL_TRIAL",
+  Registry:
+    "http://publications.europa.eu/resource/authority/dataset-type/CODE_LIST",
+  AnalyticsData:
+    "http://publications.europa.eu/resource/authority/dataset-type/STATISTICAL",
+  ObservationalStudy:
+    "http://publications.europa.eu/resource/authority/dataset-type/STATISTICAL",
+  Biobank:
+    "http://publications.europa.eu/resource/authority/dataset-type/CODE_LIST",
+  AdminHealth:
+    "http://publications.europa.eu/resource/authority/dataset-type/STATISTICAL",
+};
+
+/**
+ * Serialize a DatasetEntry as RDF Turtle compatible with the EHDS
+ * HealthDCAT-AP Editor at https://ehds.healthdataportal.eu/editor2/
+ */
+function buildTurtle(entry: DatasetEntry): string {
+  const datasetUri = `<https://ehds-demo.local/dataset/${encodeURIComponent(
+    entry.id,
+  )}>`;
+  const lang = entry.language || "en";
+  const now = new Date().toISOString().split("T")[0];
+
+  const lines: string[] = [
+    `@prefix dcat: <http://www.w3.org/ns/dcat#> .`,
+    `@prefix dct: <http://purl.org/dc/terms/> .`,
+    `@prefix foaf: <http://xmlns.com/foaf/0.1/> .`,
+    `@prefix healthdcatap: <http://healthdataportal.eu/ns/health#> .`,
+    `@prefix dcatap: <http://data.europa.eu/r5r/> .`,
+    `@prefix dpv: <https://w3id.org/dpv#> .`,
+    `@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .`,
+    `@prefix vcard: <http://www.w3.org/2006/vcard/ns#> .`,
+    ``,
+    `${datasetUri} a dcat:Dataset ;`,
+  ];
+
+  // Mandatory fields
+  lines.push(`    dct:title "${ttlEscape(entry.title)}"@${lang} ;`);
+  if (entry.description) {
+    lines.push(
+      `    dct:description "${ttlEscape(entry.description)}"@${lang} ;`,
+    );
+  }
+  lines.push(`    dct:identifier "${ttlEscape(entry.id)}" ;`);
+  lines.push(`    dct:issued "${now}"^^xsd:date ;`);
+  lines.push(`    dct:modified "${now}"^^xsd:date ;`);
+
+  // Publisher
+  if (entry.publisher) {
+    lines.push(
+      `    dct:publisher [ a foaf:Organization ; foaf:name "${ttlEscape(
+        entry.publisher,
+      )}"@${lang} ] ;`,
+    );
+  }
+
+  // Theme / keyword
+  if (entry.theme) {
+    lines.push(`    dcat:keyword "${ttlEscape(entry.theme)}"@${lang} ;`);
+    lines.push(`    dcat:theme "${ttlEscape(entry.theme)}" ;`);
+  }
+
+  // Language
+  if (entry.language) {
+    const langUri = `http://publications.europa.eu/resource/authority/language/${entry.language.toUpperCase()}`;
+    lines.push(`    dct:language <${langUri}> ;`);
+  }
+
+  // Spatial coverage
+  if (entry.spatial) {
+    lines.push(
+      `    dct:spatial <http://publications.europa.eu/resource/authority/country/${entry.spatial.toUpperCase()}> ;`,
+    );
+  }
+
+  // Conforms to
+  if (entry.conformsTo) {
+    lines.push(`    dct:conformsTo <${entry.conformsTo}> ;`);
+  }
+
+  // License
+  if (entry.license) {
+    lines.push(
+      `    dct:license <https://creativecommons.org/licenses/${entry.license
+        .toLowerCase()
+        .replace("cc-", "")
+        .replace("-4.0", "/4.0/")}> ;`,
+    );
+  }
+
+  // Dataset type
+  if (entry.datasetType && DATASET_TYPE_URI[entry.datasetType]) {
+    lines.push(`    dct:type <${DATASET_TYPE_URI[entry.datasetType]}> ;`);
+  }
+
+  // Applicable legislation (EHDS)
+  const legalUri = entry.legalBasis
+    ? LEGAL_BASIS_URI[entry.legalBasis]
+    : undefined;
+  if (legalUri) {
+    lines.push(`    dcatap:applicableLegislation <${legalUri}> ;`);
+  }
+
+  // HealthDCAT-AP extensions
+  if (entry.healthCategory) {
+    lines.push(
+      `    healthdcatap:healthCategory "${ttlEscape(
+        entry.healthCategory,
+      )}"@${lang} ;`,
+    );
+  }
+  if (entry.purpose) {
+    lines.push(
+      `    healthdcatap:purpose "${ttlEscape(entry.purpose)}"@${lang} ;`,
+    );
+  }
+  if (entry.populationCoverage) {
+    lines.push(
+      `    healthdcatap:populationCoverage "${ttlEscape(
+        entry.populationCoverage,
+      )}"@${lang} ;`,
+    );
+  }
+  if (entry.personalData != null) {
+    lines.push(
+      `    dpv:hasPersonalData "${entry.personalData}"^^xsd:boolean ;`,
+    );
+  }
+  if (entry.recordCount != null) {
+    lines.push(
+      `    healthdcatap:numberOfRecords "${entry.recordCount}"^^xsd:integer ;`,
+    );
+  }
+  if (entry.numberOfUniqueIndividuals != null) {
+    lines.push(
+      `    healthdcatap:numberOfUniqueIndividuals "${entry.numberOfUniqueIndividuals}"^^xsd:integer ;`,
+    );
+  }
+  if (entry.minTypicalAge != null) {
+    lines.push(
+      `    healthdcatap:minTypicalAge "${entry.minTypicalAge}"^^xsd:integer ;`,
+    );
+  }
+  if (entry.maxTypicalAge != null) {
+    lines.push(
+      `    healthdcatap:maxTypicalAge "${entry.maxTypicalAge}"^^xsd:integer ;`,
+    );
+  }
+
+  // Close the dataset with a period (replace last semicolon)
+  const last = lines.length - 1;
+  lines[last] = lines[last].replace(/ ;$/, " .");
+
+  return lines.join("\n") + "\n";
+}
+
+/** Download a single dataset entry as RDF Turtle */
+function downloadTurtle(entry: DatasetEntry) {
+  const ttl = buildTurtle(entry);
+  const blob = new Blob([ttl], { type: "text/turtle" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  const slug = entry.title
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_|_$/g, "");
+  a.download = `healthDCATAP_${slug || "dataset"}.ttl`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+/** Download all datasets as a single RDF Turtle file */
+function downloadAllTurtle(entries: DatasetEntry[]) {
+  const ttl = entries.map((e) => buildTurtle(e)).join("\n");
+  const blob = new Blob([ttl], { type: "text/turtle" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  const ts = new Date()
+    .toISOString()
+    .replace(/[-:]/g, "")
+    .replace(/\.\d+Z/, "");
+  a.download = `healthDCATAP_RDF_${ts}.ttl`;
+  a.click();
+  URL.revokeObjectURL(url);
 }
 
 /* ── Components ────────────────────────────────────── */
@@ -377,14 +590,14 @@ function EditorContent() {
         nextStep={{ href: "/data/discover", label: "Discover Data" }}
         infoText="Fields marked with * are mandatory per the HealthDCAT-AP specification. The editor generates unique dataset identifiers and stores metadata in the Neo4j graph database."
         docLink={{
-          href: "https://ehds2pilot.eu/healthdcat-ap/",
+          href: "https://healthdcat-ap.github.io/",
           label: "HealthDCAT-AP Specification",
           external: true,
         }}
       />
 
-      {/* Tabs */}
-      <div className="flex gap-2 mb-6">
+      {/* Tabs + Export actions */}
+      <div className="flex items-center gap-2 mb-6 flex-wrap">
         <button
           onClick={() => setTab("browse")}
           className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
@@ -406,6 +619,29 @@ function EditorContent() {
           <Plus size={14} />
           New Entry
         </button>
+
+        <div className="flex-1" />
+
+        {datasets.length > 0 && (
+          <button
+            onClick={() => downloadAllTurtle(datasets)}
+            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium bg-green-900/40 text-green-300 border border-green-700/50 hover:bg-green-900/60 transition-colors"
+            title="Export all entries as RDF Turtle for the EHDS editor"
+          >
+            <Download size={14} />
+            Export All (.ttl)
+          </button>
+        )}
+        <a
+          href="https://ehds.healthdataportal.eu/editor2/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium bg-gray-800 text-gray-400 hover:text-white transition-colors"
+          title="Open the official EHDS HealthDCAT-AP editor"
+        >
+          <ExternalLink size={14} />
+          EHDS Editor
+        </a>
       </div>
 
       {/* Browse Tab */}
@@ -461,6 +697,13 @@ function EditorContent() {
                       </div>
                     </div>
                     <div className="flex gap-2 shrink-0 opacity-50 group-hover:opacity-100 transition-opacity">
+                      <button
+                        onClick={() => downloadTurtle(d)}
+                        className="p-1.5 rounded hover:bg-gray-700 text-gray-400 hover:text-green-300"
+                        title="Download as RDF Turtle (.ttl) for EHDS editor"
+                      >
+                        <Download size={14} />
+                      </button>
                       <button
                         onClick={() => startEdit(d)}
                         className="p-1.5 rounded hover:bg-gray-700 text-gray-400 hover:text-purple-300"

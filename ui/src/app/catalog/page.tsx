@@ -212,7 +212,7 @@ function CatalogContent() {
         nextStep={{ href: "/data/discover", label: "Discover Data" }}
         infoText="Datasets are registered using the HealthDCAT-AP standard (DCAT 3 profile for health data). Use the search to filter by title, theme, or description before requesting access."
         docLink={{
-          href: "https://ehds2pilot.eu/healthdcat-ap/",
+          href: "https://healthdcat-ap.github.io/",
           label: "HealthDCAT-AP Specification",
           external: true,
         }}
