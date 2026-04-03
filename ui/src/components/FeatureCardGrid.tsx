@@ -29,7 +29,7 @@ const IS_STATIC = process.env.NEXT_PUBLIC_STATIC_EXPORT === "true";
 
 /** Routes that are most relevant for each role. */
 const ROLE_PATHS: Record<string, string[]> = {
-  PATIENT: ["/patient", "/graph"],
+  PATIENT: ["/patient", "/graph", "/eehrxf"],
   DATA_HOLDER: [
     "/graph",
     "/catalog",
