@@ -5,11 +5,11 @@ import DemoPasswordBanner from "@/components/DemoPasswordBanner";
 import AuthProvider from "@/components/AuthProvider";
 
 export const metadata: Metadata = {
-  title: "European Health Data Space — Interactive Demo",
+  title: "European Health Data Space | Interactive Demo",
   description:
-    "Interactive demo of the European Health Data Space (EHDS) — explore FHIR R4 clinical records, OMOP CDM analytics, and DSP contract negotiation across 7 participant roles with 127 synthetic patients.",
+    "Interactive demo of the European Health Data Space (EHDS). Explore FHIR R4 clinical records, OMOP CDM analytics, and DSP contract negotiation across 7 participant roles with 127 synthetic patients.",
   openGraph: {
-    title: "European Health Data Space — Interactive Demo",
+    title: "European Health Data Space | Interactive Demo",
     description:
       "Explore cross-border health data sharing with 7 demo personas, 127 synthetic patients, and 5,300+ knowledge graph nodes. DSP 2025-1, FHIR R4, OMOP CDM, HealthDCAT-AP.",
     url: "https://ma3u.github.io/MinimumViableHealthDataspacev2/",
@@ -19,7 +19,7 @@ export const metadata: Metadata = {
         url: "https://ma3u.github.io/MinimumViableHealthDataspacev2/og-image.png",
         width: 1200,
         height: 630,
-        alt: "European Health Data Space demo — knowledge graph, FHIR clinical data, and OMOP analytics dashboard",
+        alt: "European Health Data Space demo: knowledge graph, FHIR clinical data, and OMOP analytics dashboard",
       },
     ],
     locale: "en_US",
@@ -27,7 +27,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "European Health Data Space — Interactive Demo",
+    title: "European Health Data Space | Interactive Demo",
     description:
       "Explore cross-border health data sharing with 7 demo personas, 127 synthetic patients, and 5,300+ knowledge graph nodes.",
     images: [

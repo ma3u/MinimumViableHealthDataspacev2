@@ -51,7 +51,7 @@ export function DemoPersonaCards() {
                 });
               }
             }}
-            aria-label={`Sign in as ${persona.username} — ${persona.organisation}`}
+            aria-label={`Sign in as ${persona.username}, ${persona.organisation}`}
             className={`group text-left rounded-xl border p-4 bg-gray-800/40 hover:bg-gray-800 transition-colors touch-target ${
               persona.badge.split(" ").find((c) => c.startsWith("border-")) ??
               "border-gray-700"

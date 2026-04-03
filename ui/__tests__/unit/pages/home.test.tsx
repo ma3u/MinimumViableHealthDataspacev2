@@ -67,12 +67,13 @@ describe("Home Page", () => {
     expect(screen.getByText(/legal basis for sharing/i)).toBeInTheDocument();
   });
 
-  it("renders link to official EHDS regulation", () => {
+  it("renders links to EHDS regulation", () => {
     render(<Home />);
-    const ehdsLink = screen.getByRole("link", {
-      name: /read the official ehds regulation/i,
+    const ehdsLinks = screen.getAllByRole("link", {
+      name: /ehds regulation/i,
     });
-    expect(ehdsLink).toHaveAttribute(
+    expect(ehdsLinks.length).toBeGreaterThanOrEqual(1);
+    expect(ehdsLinks[0]).toHaveAttribute(
       "href",
       expect.stringContaining("health.ec.europa.eu"),
     );
@@ -89,7 +90,7 @@ describe("Home Page", () => {
     expect(screen.getAllByText("Regulator").length).toBeGreaterThanOrEqual(1);
     expect(screen.getAllByText("Admin").length).toBeGreaterThanOrEqual(1);
     // Each journey has numbered steps
-    expect(screen.getByText(/View your EHR/i)).toBeInTheDocument();
+    expect(screen.getByText(/View your EHR:/i)).toBeInTheDocument();
     expect(
       screen.getByText(/Run OMOP CDM cohort analytics/i),
     ).toBeInTheDocument();
