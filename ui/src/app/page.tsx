@@ -24,20 +24,15 @@ import {
   Lock,
   ExternalLink,
   MessageCircle,
-  type LucideIcon,
 } from "lucide-react";
 import { DemoPersonaCards } from "@/components/DemoPersonaCards";
 import { PersonaJourneyCards } from "@/components/PersonaJourneyCards";
+import {
+  FeatureCardGrid,
+  type FeatureCard,
+} from "@/components/FeatureCardGrid";
 
 /* ── Card data ───────────────────────────────────────────────────────────── */
-
-interface FeatureCard {
-  href: string;
-  icon: LucideIcon;
-  label: string;
-  desc: string;
-  color: string;
-}
 
 const exploreCards: FeatureCard[] = [
   {
@@ -167,29 +162,6 @@ const governCards: FeatureCard[] = [
   },
 ];
 
-/* ── Card grid renderer ─────────────────────────────────────────────────── */
-
-function CardGrid({ cards, delay }: { cards: FeatureCard[]; delay: number }) {
-  return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-      {cards.map(({ href, icon: Icon, label, desc, color }, i) => (
-        <Link
-          key={href}
-          href={href}
-          className={`border rounded-xl p-4 sm:p-5 transition-colors ${color} animate-fade-in-up`}
-          style={{ animationDelay: `${delay + i * 60}ms` }}
-        >
-          <div className="flex items-center gap-2 mb-2">
-            <Icon size={20} aria-hidden="true" />
-            <span className="font-semibold text-sm sm:text-base">{label}</span>
-          </div>
-          <p className="text-sm text-gray-400 leading-relaxed">{desc}</p>
-        </Link>
-      ))}
-    </div>
-  );
-}
-
 /* ── Page ─────────────────────────────────────────────────────────────────── */
 
 export default function Home() {
@@ -222,7 +194,7 @@ export default function Home() {
           This interactive demo shows how the{" "}
           <strong className="text-white">EHDS regulation</strong> enables secure
           cross-border health data sharing across Europe. Explore the full
-          lifecycle — from publishing clinical datasets to negotiating access
+          lifecycle, from publishing clinical datasets to negotiating access
           contracts and running privacy-preserving analytics.
         </p>
 
@@ -252,21 +224,9 @@ export default function Home() {
         style={{ animationDelay: "150ms" }}
         aria-labelledby="why-ehds-title"
       >
-        <div className="flex items-center gap-2 mb-2">
-          <h2 id="why-ehds-title" className="text-lg sm:text-xl font-bold">
-            Why the European Health Data Space Matters
-          </h2>
-          <a
-            href="https://health.ec.europa.eu/ehealth-digital-health-and-care/european-health-data-space_en"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-1 text-xs text-layer1 hover:text-white transition-colors touch-target-sm"
-            aria-label="Read the official EHDS regulation on the EU website"
-          >
-            <span className="hidden sm:inline">EHDS Regulation</span>
-            <ExternalLink size={14} aria-hidden="true" />
-          </a>
-        </div>
+        <h2 id="why-ehds-title" className="text-lg sm:text-xl font-bold mb-2">
+          Why the European Health Data Space Matters
+        </h2>
 
         <p className="text-gray-400 text-sm leading-relaxed max-w-3xl mb-5">
           The{" "}
@@ -283,7 +243,7 @@ export default function Home() {
           between <strong className="text-white">primary use</strong> (patients
           accessing their own records) and{" "}
           <strong className="text-white">secondary use</strong> (research,
-          policy, innovation) — each with strict governance and oversight.
+          policy, innovation), each with strict governance and oversight.
         </p>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -301,9 +261,9 @@ export default function Home() {
             <p className="text-sm text-gray-400 leading-relaxed">
               Cross-border access to standardised health datasets in{" "}
               <strong className="text-gray-300">FHIR R4</strong> and{" "}
-              <strong className="text-gray-300">OMOP CDM</strong> format — no
-              more bilateral negotiations with each hospital. The Health Data
-              Access Body (HDAB) provides a single-window approval process under
+              <strong className="text-gray-300">OMOP CDM</strong> format, ending
+              bilateral negotiations with each hospital. The Health Data Access
+              Body (HDAB) provides a single-window approval process under
               Art.&nbsp;46, cutting months of bureaucracy to weeks.
             </p>
           </div>
@@ -325,7 +285,7 @@ export default function Home() {
               <strong className="text-gray-300">HealthDCAT-AP</strong>{" "}
               catalogues, manage access through standardised{" "}
               <strong className="text-gray-300">DSP contracts</strong>, and let
-              the HDAB handle regulatory approval — reducing legal risk and
+              the HDAB handle regulatory approval, reducing legal risk and
               administrative burden.
             </p>
           </div>
@@ -398,35 +358,35 @@ export default function Home() {
             {
               name: "HL7 FHIR R4",
               abbr: "FHIR",
-              desc: "Fast Healthcare Interoperability Resources — the global standard for exchanging clinical data (Patient, Condition, Observation, Medication).",
+              desc: "Fast Healthcare Interoperability Resources, the global standard for exchanging clinical data (Patient, Condition, Observation, Medication).",
               href: "https://hl7.org/fhir/R4/",
               color: "border-layer3/50 text-layer3",
             },
             {
               name: "OMOP Common Data Model",
               abbr: "OMOP",
-              desc: "Observational Medical Outcomes Partnership CDM v5.4 — standardises clinical data for large-scale observational research and cohort analytics.",
+              desc: "Observational Medical Outcomes Partnership CDM v5.4. Standardises clinical data for large-scale observational research and cohort analytics.",
               href: "https://ohdsi.github.io/CommonDataModel/",
               color: "border-layer4/50 text-layer4",
             },
             {
               name: "HealthDCAT-AP",
               abbr: "DCAT",
-              desc: "Health extension of DCAT-AP — metadata standard for publishing and discovering health datasets in federated catalogues across the EU.",
+              desc: "Health extension of DCAT-AP, a metadata standard for publishing and discovering health datasets in federated catalogues across the EU.",
               href: "https://healthdcat-ap.github.io/",
               color: "border-layer2/50 text-layer2",
             },
             {
               name: "Dataspace Protocol",
               abbr: "DSP",
-              desc: "IDSA Dataspace Protocol 2025-1 — governs catalogue federation, contract negotiation, and secure data transfer between dataspace participants.",
+              desc: "IDSA Dataspace Protocol 2025-1. Governs catalogue federation, contract negotiation, and secure data transfer between dataspace participants.",
               href: "https://docs.internationaldataspaces.org/ids-knowledgebase/dataspace-protocol",
               color: "border-layer1/50 text-layer1",
             },
             {
               name: "Decentralised Claims Protocol",
               abbr: "DCP",
-              desc: "Verifiable credential issuance and presentation — enables trust anchors, membership credentials, and data access permits without central authority.",
+              desc: "Verifiable credential issuance and presentation. Enables trust anchors, membership credentials, and data access permits without central authority.",
               href: "https://docs.internationaldataspaces.org/ids-knowledgebase/decentralized-claims-protocol",
               color: "border-purple-500/50 text-purple-400",
             },
@@ -471,7 +431,7 @@ export default function Home() {
         </h2>
         <p className="text-gray-400 text-sm mb-6 max-w-2xl">
           Sign in as one of 5 personas and follow their journey through the
-          dataspace. Each role sees different pages, data, and actions —
+          dataspace. Each role sees different pages, data, and actions,
           mirroring real EHDS workflows.
         </p>
 
@@ -488,10 +448,10 @@ export default function Home() {
         </h2>
         <p className="text-xs text-gray-500 mb-3 max-w-2xl">
           Visualise the 5-layer knowledge graph, browse FHIR clinical data,
-          query OMOP analytics, and search the HealthDCAT-AP dataset catalogue —
-          all publicly accessible without sign-in.
+          query OMOP analytics, and search the HealthDCAT-AP dataset catalogue.
+          All publicly accessible without sign-in.
         </p>
-        <CardGrid cards={exploreCards} delay={1200} />
+        <FeatureCardGrid cards={exploreCards} delay={1200} />
       </section>
 
       <div className="my-8 sm:my-10" />
@@ -509,7 +469,7 @@ export default function Home() {
           under ODRL policies, and approved FHIR/OMOP data is transferred
           securely.
         </p>
-        <CardGrid cards={exchangeCards} delay={1400} />
+        <FeatureCardGrid cards={exchangeCards} delay={1400} />
       </section>
 
       <div className="my-8 sm:my-10" />
@@ -526,7 +486,7 @@ export default function Home() {
           onboarding with DID:web identities, portal administration, and
           architecture documentation.
         </p>
-        <CardGrid cards={governCards} delay={1600} />
+        <FeatureCardGrid cards={governCards} delay={1600} />
       </section>
 
       <div className="my-8 sm:my-10" />
@@ -586,7 +546,7 @@ export default function Home() {
       {/* ── Footer ────────────────────────────────────────────────────────── */}
       <footer className="mt-8 sm:mt-10 pt-6 border-t border-gray-800 text-center text-xs text-gray-600">
         <p>
-          Reference implementation — all data is synthetic. No real patient
+          Reference implementation. All data is synthetic. No real patient
           records.
         </p>
         <p className="mt-2 flex flex-wrap justify-center gap-x-1.5 gap-y-0.5">

@@ -186,9 +186,11 @@ test.describe("U1: Start Page — EHDS Demo Guide", () => {
   });
 
   test("J269d — links to official EHDS regulation", async ({ page }) => {
-    const ehdsLink = page.getByRole("link", {
-      name: /read the official ehds regulation/i,
-    });
+    const ehdsLink = page
+      .getByRole("link", {
+        name: /ehds regulation/i,
+      })
+      .first();
     await expect(ehdsLink).toBeVisible({ timeout: T });
     const href = await ehdsLink.getAttribute("href");
     expect(href).toContain("health.ec.europa.eu");
@@ -249,6 +251,23 @@ test.describe("U1: Start Page — EHDS Demo Guide", () => {
     await expect(page.getByText(/EHDS compliance monitoring/i)).toBeVisible({
       timeout: T,
     });
+  });
+
+  test("J269j — feature cards highlight for logged-in persona", async ({
+    page,
+  }) => {
+    // In static mode we can set a persona and check that relevant cards glow
+    if (!IS_STATIC) {
+      test.skip();
+      return;
+    }
+    await setPersona(page, "patient1");
+    // Patient should see checkmarks on Patient Journey and Graph Explorer
+    const checks = page.locator("[title='Relevant for your role']");
+    await expect(checks.first()).toBeVisible({ timeout: T });
+    const count = await checks.count();
+    // Patient role highlights exactly 2 cards: /patient and /graph
+    expect(count).toBe(2);
   });
 });
 

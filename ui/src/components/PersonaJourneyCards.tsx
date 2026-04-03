@@ -38,7 +38,7 @@ const personaJourneys: PersonaJourney[] = [
     steps: [
       {
         page: "/patient/profile",
-        action: "View your EHR — conditions, medications, observations",
+        action: "View your EHR: conditions, medications, observations",
       },
       {
         page: "/patient/research",
