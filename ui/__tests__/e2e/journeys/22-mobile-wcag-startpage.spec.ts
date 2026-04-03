@@ -262,12 +262,12 @@ test.describe("U1: Start Page — EHDS Demo Guide", () => {
       return;
     }
     await setPersona(page, "patient1");
-    // Patient should see checkmarks on Patient Journey and Graph Explorer
+    // Patient should see checkmarks on Patient Journey, Graph Explorer, and EEHRxF
     const checks = page.locator("[title='Relevant for your role']");
     await expect(checks.first()).toBeVisible({ timeout: T });
     const count = await checks.count();
-    // Patient role highlights exactly 2 cards: /patient and /graph
-    expect(count).toBe(2);
+    // Patient role highlights 3 cards: /patient, /graph, and /eehrxf
+    expect(count).toBe(3);
   });
 });
 
