@@ -14,6 +14,49 @@ body {
   @apply bg-gray-950 text-gray-100;
 }
 
+/* ── WCAG 2.2 Skip Navigation ─────────────────────────────────────────────── */
+.skip-to-content {
+  @apply absolute -top-12 left-4 z-[100] bg-layer1 text-white px-4 py-2 rounded-b-lg font-semibold text-sm;
+  transition: top 0.2s ease;
+}
+.skip-to-content:focus {
+  @apply top-0;
+}
+
+/* ── WCAG 2.2 Focus Visible (2.4.7 / 2.4.11) ─────────────────────────────── */
+*:focus-visible {
+  @apply outline-2 outline-offset-2 outline-blue-400;
+  outline-style: solid;
+}
+
+/* ── WCAG 2.2 Reduced Motion (2.3.3) ──────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ── Fade-in animation for guided content ──────────────────────────────────── */
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.5s ease-out both;
+}
+
 @keyframes slide-in-right {
   from {
     transform: translateX(100%);
@@ -27,4 +70,16 @@ body {
 
 .animate-slide-in-right {
   animation: slide-in-right 0.2s ease-out;
+}
+
+/* ── WCAG 2.2 Target Size (2.5.8) — minimum 24×24 for all interactives ──── */
+@layer utilities {
+  .touch-target {
+    min-width: 44px;
+    min-height: 44px;
+  }
+  .touch-target-sm {
+    min-width: 24px;
+    min-height: 24px;
+  }
 }

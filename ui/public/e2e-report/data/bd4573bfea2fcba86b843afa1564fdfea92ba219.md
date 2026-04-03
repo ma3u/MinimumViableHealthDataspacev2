@@ -1,0 +1,101 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+    - link "Skip to main content" [ref=e2] [cursor=pointer]:
+        - /url: "#main-content"
+    - navigation "Main navigation" [ref=e3]:
+        - generic [ref=e4]:
+            - link "Health Dataspace" [ref=e5] [cursor=pointer]:
+                - /url: /
+            - generic [ref=e6]:
+                - button "Explore" [ref=e8] [cursor=pointer]:
+                    - img [ref=e9]
+                    - text: Explore
+                    - img [ref=e14]
+                - button "Docs" [ref=e17] [cursor=pointer]:
+                    - img [ref=e18]
+                    - text: Docs
+                    - img [ref=e21]
+            - button "Sign in" [ref=e24] [cursor=pointer]:
+                - img [ref=e25]
+                - text: Sign in
+    - main [ref=e28]:
+        - generic [ref=e29]:
+            - generic [ref=e30]:
+                - img [ref=e31]
+                - heading "Health Dataspace Login" [level=1] [ref=e34]
+                - paragraph [ref=e35]:
+                    - text: Sign in with your Keycloak account to access protected resources.
+                    - generic [ref=e36]: Password = username (local dev only)
+                - button "Sign in with Keycloak" [ref=e37] [cursor=pointer]
+                - paragraph [ref=e38]: EHDS-compliant authentication via Keycloak SSO
+            - generic [ref=e39]:
+                - paragraph [ref=e40]: Demo users — sign in as any of these to test role-specific views
+                - generic [ref=e41]:
+                    - 'button "edcadmin Dataspace Operator Dataspace Admin Full operator access — all participants, contracts, admin → opens graph: edc-admin" [ref=e42] [cursor=pointer]':
+                        - generic [ref=e44]:
+                            - generic [ref=e45]: edcadmin
+                            - generic [ref=e46]: Dataspace Operator
+                        - generic [ref=e48]:
+                            - img [ref=e49]
+                            - text: Dataspace Admin
+                        - paragraph [ref=e51]: Full operator access — all participants, contracts, admin
+                        - paragraph [ref=e52]: "→ opens graph: edc-admin"
+                    - 'button "clinicuser AlphaKlinik Berlin Data Holder Publishes FHIR datasets, manages contracts with researchers → opens graph: hospital" [ref=e53] [cursor=pointer]':
+                        - generic [ref=e55]:
+                            - generic [ref=e56]: clinicuser
+                            - generic [ref=e57]: AlphaKlinik Berlin
+                        - generic [ref=e59]:
+                            - img [ref=e60]
+                            - text: Data Holder
+                        - paragraph [ref=e62]: Publishes FHIR datasets, manages contracts with researchers
+                        - paragraph [ref=e63]: "→ opens graph: hospital"
+                    - 'button "researcher PharmaCo Research AG Researcher Discovers datasets, negotiates access, runs OMOP analytics → opens graph: researcher" [ref=e64] [cursor=pointer]':
+                        - generic [ref=e66]:
+                            - generic [ref=e67]: researcher
+                            - generic [ref=e68]: PharmaCo Research AG
+                        - generic [ref=e70]:
+                            - img [ref=e71]
+                            - text: Researcher
+                        - paragraph [ref=e73]: Discovers datasets, negotiates access, runs OMOP analytics
+                        - paragraph [ref=e74]: "→ opens graph: researcher"
+                    - 'button "regulator MedReg DE HDAB Authority Reviews access applications, governs Trust Centers → opens graph: hdab" [ref=e75] [cursor=pointer]':
+                        - generic [ref=e77]:
+                            - generic [ref=e78]: regulator
+                            - generic [ref=e79]: MedReg DE
+                        - generic [ref=e81]:
+                            - img [ref=e82]
+                            - text: HDAB Authority
+                        - paragraph [ref=e84]: Reviews access applications, governs Trust Centers
+                        - paragraph [ref=e85]: "→ opens graph: hdab"
+                    - 'button "lmcuser Limburg Medical Centre Data Holder NL data holder — publishes cross-border datasets → opens graph: hospital" [ref=e86] [cursor=pointer]':
+                        - generic [ref=e88]:
+                            - generic [ref=e89]: lmcuser
+                            - generic [ref=e90]: Limburg Medical Centre
+                        - generic [ref=e92]:
+                            - img [ref=e93]
+                            - text: Data Holder
+                        - paragraph [ref=e95]: NL data holder — publishes cross-border datasets
+                        - paragraph [ref=e96]: "→ opens graph: hospital"
+                    - 'button "patient1 AlphaKlinik Berlin (patient) Patient / Citizen EHDS Art. 3 — access own EHR, donate to research, see insights → opens graph: patient" [ref=e97] [cursor=pointer]':
+                        - generic [ref=e99]:
+                            - generic [ref=e100]: patient1
+                            - generic [ref=e101]: AlphaKlinik Berlin (patient)
+                        - generic [ref=e103]:
+                            - img [ref=e104]
+                            - text: Patient / Citizen
+                        - paragraph [ref=e106]: EHDS Art. 3 — access own EHR, donate to research, see insights
+                        - paragraph [ref=e107]: "→ opens graph: patient"
+                    - 'button "patient2 Limburg Medical Centre (patient) Patient / Citizen Cross-border NL patient — MyHealth@EU Art. 7 data portability → opens graph: patient" [ref=e108] [cursor=pointer]':
+                        - generic [ref=e110]:
+                            - generic [ref=e111]: patient2
+                            - generic [ref=e112]: Limburg Medical Centre (patient)
+                        - generic [ref=e114]:
+                            - img [ref=e115]
+                            - text: Patient / Citizen
+                        - paragraph [ref=e117]: Cross-border NL patient — MyHealth@EU Art. 7 data portability
+                        - paragraph [ref=e118]: "→ opens graph: patient"
+                - paragraph [ref=e119]: "Password = username · Keycloak realm: EDCV · http://localhost:8080"
+    - alert [ref=e120]
+```

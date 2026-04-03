@@ -63,12 +63,12 @@ test.describe("Navigation", () => {
     const nav = page.locator("nav");
     const explore = nav.getByRole("button", { name: /Explore/i });
     await explore.click();
-    await nav.getByRole("link", { name: /Dataset Catalog/ }).click();
+    await nav.getByRole("menuitem", { name: /Dataset Catalog/ }).click();
     await expect(page).toHaveURL(/\/catalog/);
 
     // Navigate to patient via nav dropdown
     await explore.click();
-    await nav.getByRole("link", { name: /Patient Journey/ }).click();
+    await nav.getByRole("menuitem", { name: /Patient Journey/ }).click();
     await expect(page).toHaveURL(/\/patient/);
   });
 });

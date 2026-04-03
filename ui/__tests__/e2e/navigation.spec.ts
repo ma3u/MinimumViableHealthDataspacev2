@@ -24,13 +24,13 @@ test.describe("Navigation — unauthenticated view", () => {
     const trigger = nav.getByRole("button", { name: /Explore/i });
     await trigger.click();
     await expect(
-      nav.getByRole("link", { name: "Graph Explorer", exact: true }),
+      nav.getByRole("menuitem", { name: "Graph Explorer", exact: true }),
     ).toBeVisible();
     await expect(
-      nav.getByRole("link", { name: /Dataset Catalog/ }),
+      nav.getByRole("menuitem", { name: /Dataset Catalog/ }),
     ).toBeVisible();
     await expect(
-      nav.getByRole("link", { name: /Patient Journey/ }),
+      nav.getByRole("menuitem", { name: /Patient Journey/ }),
     ).toBeVisible();
   });
 
@@ -40,9 +40,13 @@ test.describe("Navigation — unauthenticated view", () => {
     const nav = page.locator("nav");
     const trigger = nav.getByRole("button", { name: /Docs/i });
     await trigger.click();
-    await expect(nav.getByRole("link", { name: /Overview/ })).toBeVisible();
-    await expect(nav.getByRole("link", { name: /Architecture/ })).toBeVisible();
-    await expect(nav.getByRole("link", { name: /Developer/ })).toBeVisible();
+    await expect(nav.getByRole("menuitem", { name: /Overview/ })).toBeVisible();
+    await expect(
+      nav.getByRole("menuitem", { name: /Architecture/ }),
+    ).toBeVisible();
+    await expect(
+      nav.getByRole("menuitem", { name: /Developer/ }),
+    ).toBeVisible();
   });
 
   test("Sign in button is visible when not authenticated", async ({ page }) => {

@@ -79,14 +79,21 @@ async function openDropdown(label: string) {
   await userEvent.click(btn);
 }
 
-/** All visible nav-group button labels (the dropdown triggers). */
+/** All visible nav-group button labels (the desktop dropdown triggers). */
 function visibleGroupLabels(): string[] {
-  // Group buttons are inside <nav> and have a chevron icon
+  // Desktop group buttons are inside the hidden md:flex container
   const nav = screen.getByRole("navigation");
+  // Get all buttons, excluding hamburger and UserMenu
   const buttons = nav.querySelectorAll("button");
   return Array.from(buttons)
     .map((b) => b.textContent?.trim() ?? "")
-    .filter((t) => t && t !== "UserMenu");
+    .filter(
+      (t) =>
+        t &&
+        t !== "UserMenu" &&
+        !/open menu/i.test(t) &&
+        !/close menu/i.test(t),
+    );
 }
 
 // ── Tests ─────────────────────────────────────────────────────────────────────
