@@ -571,17 +571,17 @@ test.describe("S · Static demo data completeness", () => {
     await nav.getByRole("button", { name: /my health/i }).click();
 
     await expect(
-      nav.getByRole("link", { name: /health profile/i }),
+      nav.getByRole("menuitem", { name: /health profile/i }),
     ).toBeVisible({
       timeout: T,
     });
     await expect(
-      nav.getByRole("link", { name: /research insights/i }),
+      nav.getByRole("menuitem", { name: /research insights/i }),
     ).toBeVisible({
       timeout: T,
     });
     await expect(
-      nav.getByRole("link", { name: /research programs/i }),
+      nav.getByRole("menuitem", { name: /research programs/i }),
     ).toBeVisible({
       timeout: T,
     });
@@ -596,7 +596,7 @@ test.describe("S · Static demo data completeness", () => {
     const nav = page.locator("nav");
     await nav.getByRole("button", { name: /manage/i }).click();
     await expect(
-      nav.getByRole("link", { name: /operator dashboard/i }),
+      nav.getByRole("menuitem", { name: /operator dashboard/i }),
     ).toBeVisible({ timeout: T });
   });
 });
@@ -955,7 +955,7 @@ test.describe("S · Data Holder (clinicuser) — catalog & exchange", () => {
     const nav = page.locator("nav");
     await nav.getByRole("button", { name: /explore/i }).click();
     await expect(
-      nav.getByRole("link", { name: /dcat-ap editor/i }),
+      nav.getByRole("menuitem", { name: /dcat-ap editor/i }),
     ).toBeVisible({
       timeout: T,
     });
@@ -985,12 +985,12 @@ test.describe("S · Researcher — analytics & explore", () => {
     await gotoAs(page, "/", "researcher");
     const nav = page.locator("nav");
     await nav.getByRole("button", { name: /my researches/i }).click();
-    await expect(nav.getByRole("link", { name: /run analytics/i })).toBeVisible(
-      { timeout: T },
-    );
-    await expect(nav.getByRole("link", { name: /query.*export/i })).toBeVisible(
-      { timeout: T },
-    );
+    await expect(
+      nav.getByRole("menuitem", { name: /run analytics/i }),
+    ).toBeVisible({ timeout: T });
+    await expect(
+      nav.getByRole("menuitem", { name: /query.*export/i }),
+    ).toBeVisible({ timeout: T });
   });
 
   test("J289 — researcher does NOT see Manage or My Health", async ({
@@ -1043,10 +1043,12 @@ test.describe("S · Regulator (HDAB) — governance pages", () => {
     await gotoAs(page, "/", "regulator");
     const nav = page.locator("nav");
     await nav.getByRole("button", { name: /governance/i }).click();
-    await expect(nav.getByRole("link", { name: /ehds approval/i })).toBeVisible(
-      { timeout: T },
-    );
-    await expect(nav.getByRole("link", { name: /protocol tck/i })).toBeVisible({
+    await expect(
+      nav.getByRole("menuitem", { name: /ehds approval/i }),
+    ).toBeVisible({ timeout: T });
+    await expect(
+      nav.getByRole("menuitem", { name: /protocol tck/i }),
+    ).toBeVisible({
       timeout: T,
     });
   });

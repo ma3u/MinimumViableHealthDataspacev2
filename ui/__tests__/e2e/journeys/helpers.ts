@@ -36,7 +36,7 @@ export async function navigateViaDropdown(
 ) {
   const nav = page.locator("nav");
   await nav.getByRole("button", { name: new RegExp(group, "i") }).click();
-  await nav.getByRole("link", { name: new RegExp(linkName, "i") }).click();
+  await nav.getByRole("menuitem", { name: new RegExp(linkName, "i") }).click();
 }
 
 /** Wait for the main page heading (h1 or h2) to contain the given text. */

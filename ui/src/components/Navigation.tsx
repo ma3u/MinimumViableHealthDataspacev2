@@ -28,6 +28,8 @@ import {
   Edit3,
   Lightbulb,
   FlaskConical,
+  Menu,
+  X,
 } from "lucide-react";
 import UserMenu from "./UserMenu";
 import { useState, useRef, useEffect } from "react";
@@ -400,7 +402,13 @@ function filterGroup(
 
 // ── NavDropdown ───────────────────────────────────────────────────────────────
 
-function NavDropdown({ group }: { group: NavGroup }) {
+function NavDropdown({
+  group,
+  onNavigate,
+}: {
+  group: NavGroup;
+  onNavigate?: () => void;
+}) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
@@ -421,33 +429,43 @@ function NavDropdown({ group }: { group: NavGroup }) {
     <div ref={ref} className="relative">
       <button
         onClick={() => setOpen(!open)}
-        className={`flex items-center gap-1 px-3 py-1.5 rounded text-sm transition-colors ${
+        aria-expanded={open}
+        aria-haspopup="true"
+        className={`flex items-center gap-1 px-3 py-2 rounded text-sm transition-colors touch-target-sm ${
           isActive
             ? "bg-layer1 text-white"
             : "text-gray-400 hover:text-gray-100 hover:bg-gray-800"
         }`}
       >
-        <group.icon size={15} />
+        <group.icon size={15} aria-hidden="true" />
         {group.label}
         <ChevronDown
           size={12}
+          aria-hidden="true"
           className={`transition-transform ${open ? "rotate-180" : ""}`}
         />
       </button>
       {open && (
-        <div className="absolute top-full left-0 mt-1 py-1 bg-gray-800 border border-gray-700 rounded-lg shadow-xl z-50 min-w-[170px]">
+        <div
+          className="absolute top-full left-0 mt-1 py-1 bg-gray-800 border border-gray-700 rounded-lg shadow-xl z-50 min-w-[170px]"
+          role="menu"
+        >
           {group.links.map((l) => (
             <Link
               key={l.href}
               href={l.href}
-              onClick={() => setOpen(false)}
-              className={`flex items-center gap-2 px-3 py-1.5 text-sm transition-colors ${
+              role="menuitem"
+              onClick={() => {
+                setOpen(false);
+                onNavigate?.();
+              }}
+              className={`flex items-center gap-2 px-3 py-2 text-sm transition-colors ${
                 pathname?.startsWith(l.href)
                   ? "text-layer2 bg-gray-700/50"
                   : "text-gray-300 hover:bg-gray-700"
               }`}
             >
-              <l.icon size={14} />
+              <l.icon size={14} aria-hidden="true" />
               {l.label}
             </Link>
           ))}
@@ -464,6 +482,7 @@ export default function Navigation() {
   // Always call useDemoPersona — hook rules require unconditional calls.
   // In live mode the return value is ignored.
   const demoPersona = useDemoPersona();
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   // In static demo mode, derive everything from the stored persona.
   // In live mode, use the NextAuth session as before.
@@ -493,20 +512,80 @@ export default function Navigation() {
     filterGroup(g, effectiveRoles, isAuthenticated),
   ).filter((g): g is NavGroup => g !== null);
 
+  // Close mobile nav on route change
+  const pathname = usePathname();
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [pathname]);
+
   return (
-    <nav className="flex items-center gap-1 px-4 py-2 bg-gray-900 border-b border-gray-700">
-      <Link
-        href="/"
-        className="mr-4 font-semibold text-layer1 tracking-wide text-sm hover:text-white transition-colors"
-      >
-        Health Dataspace
-      </Link>
-      {visibleGroups.map((g) => (
-        <NavDropdown key={g.label} group={g} />
-      ))}
-      <div className="ml-auto">
-        <UserMenu />
+    <nav
+      className="bg-gray-900 border-b border-gray-700"
+      role="navigation"
+      aria-label="Main navigation"
+    >
+      <div className="flex items-center gap-1 px-4 py-2">
+        <Link
+          href="/"
+          className="mr-4 font-semibold text-layer1 tracking-wide text-sm hover:text-white transition-colors"
+        >
+          Health Dataspace
+        </Link>
+
+        {/* Desktop nav */}
+        <div className="hidden md:flex items-center gap-1">
+          {visibleGroups.map((g) => (
+            <NavDropdown key={g.label} group={g} />
+          ))}
+        </div>
+
+        <div className="ml-auto flex items-center gap-2">
+          <UserMenu />
+          {/* Mobile hamburger */}
+          <button
+            onClick={() => setMobileOpen(!mobileOpen)}
+            className="md:hidden p-2 rounded text-gray-400 hover:text-white hover:bg-gray-800 touch-target"
+            aria-expanded={mobileOpen}
+            aria-controls="mobile-nav"
+            aria-label={mobileOpen ? "Close menu" : "Open menu"}
+          >
+            {mobileOpen ? (
+              <X size={22} aria-hidden="true" />
+            ) : (
+              <Menu size={22} aria-hidden="true" />
+            )}
+          </button>
+        </div>
       </div>
+
+      {/* Mobile dropdown panel */}
+      {mobileOpen && (
+        <div
+          id="mobile-nav"
+          className="md:hidden border-t border-gray-700 bg-gray-900 px-4 py-3 space-y-1 animate-fade-in-up"
+        >
+          {visibleGroups.map((g) => (
+            <div key={g.label} className="mb-2">
+              <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider px-2">
+                {g.label}
+              </span>
+              <div className="mt-1 space-y-0.5">
+                {g.links.map((l) => (
+                  <Link
+                    key={l.href}
+                    href={l.href}
+                    onClick={() => setMobileOpen(false)}
+                    className="flex items-center gap-2 px-3 py-2.5 rounded text-sm text-gray-300 hover:bg-gray-800 hover:text-white transition-colors touch-target-sm"
+                  >
+                    <l.icon size={16} aria-hidden="true" />
+                    {l.label}
+                  </Link>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </nav>
   );
 }
