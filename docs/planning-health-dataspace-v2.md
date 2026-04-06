@@ -118,6 +118,13 @@
       - [20c: Research Program Discovery \& EHR Donation ✅](#20c-research-program-discovery--ehr-donation-)
       - [20d: Research Insights Dashboard ✅](#20d-research-insights-dashboard-)
       - [20e: OrbStack Kubernetes Deployment ✅](#20e-orbstack-kubernetes-deployment-)
+    - [Phase 21: Hospital-Grade Design System — Light/Dark Mode](#phase-21-hospital-grade-design-system--lightdark-mode)
+      - [21a: Design Tokens \& Tailwind Theme](#21a-design-tokens--tailwind-theme)
+      - [21b: Light/Dark Toggle in Navigation](#21b-lightdark-toggle-in-navigation)
+      - [21c: Component-Level Theme Adoption](#21c-component-level-theme-adoption)
+      - [21d: Graph Explorer Theme Adaptation](#21d-graph-explorer-theme-adaptation)
+      - [21e: WCAG 2.2 AA Contrast Audit](#21e-wcag-22-aa-contrast-audit)
+      - [21f: localhost:3003 Deployment \& E2E Smoke Test](#21f-localhost3003-deployment--e2e-smoke-test)
   - [Architecture Decisions](#architecture-decisions)
     - [ADR-1: PostgreSQL vs Neo4j Data Storage Split](#adr-1-postgresql-vs-neo4j-data-storage-split)
       - [Decision](#decision)
@@ -2723,6 +2730,113 @@ compliance, patient → patient/profile, hospital → catalog).
 demo hub, per-persona nav groups, patient data (EHDS Art. 50/10), role pages,
 UserMenu switcher, broken image / link audit (10 pages), data completeness.
 Run with `PLAYWRIGHT_BASE_URL=https://ma3u.github.io/MinimumViableHealthDataspacev2`.
+
+---
+
+### Phase 21: Hospital-Grade Design System — Light/Dark Mode
+
+**GitHub Issue**: [#9](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/9)
+**Branch**: `feature/newdesign`
+**Deploy target**: `localhost:3003` (JAD full stack)
+**Reference design**: https://stitch.withgoogle.com/projects/16480474636660464855
+
+#### Motivation
+
+The current dark-only UI (bg-gray-900) is not appropriate for hospital and clinical environments where screens are used in bright, clinical-lit rooms. Staff need a crisp, white-default interface that is readable, professional, and accessible. A dark mode option allows evening / low-light usage without abandoning the clinical aesthetic.
+
+#### Design Principles
+
+- **White-first**: default to light mode — clean, clinical, trustworthy
+- **Calm palette**: no saturated colours in surfaces; reserve colour for status and action
+- **Legibility**: 16px base, 1.6 line-height, Inter/system-ui
+- **WCAG 2.2 AA**: all text ≥4.5:1 contrast in both modes
+- **Tailwind `class` strategy**: `dark:` variants driven by `<html class="dark">`
+- **Persist preference**: `localStorage.setItem("theme", "light"|"dark")`
+
+#### Colour Token System
+
+| Token              | Light (default) | Dark      |
+| ------------------ | --------------- | --------- |
+| `--bg`             | `#FFFFFF`       | `#0F172A` |
+| `--surface`        | `#F8FAFC`       | `#1E293B` |
+| `--surface-2`      | `#F1F5F9`       | `#334155` |
+| `--text-primary`   | `#0F172A`       | `#F1F5F9` |
+| `--text-secondary` | `#475569`       | `#94A3B8` |
+| `--border`         | `#E2E8F0`       | `#334155` |
+| `--accent`         | `#0369A1`       | `#38BDF8` |
+| `--accent-surface` | `#E0F2FE`       | `#0C4A6E` |
+| `--success`        | `#16A34A`       | `#4ADE80` |
+| `--warning`        | `#D97706`       | `#FCD34D` |
+| `--danger`         | `#DC2626`       | `#F87171` |
+
+Layer accent colours (graph) are unchanged; they must be verified for contrast in light mode.
+
+#### Sub-phases
+
+#### 21a: Design Tokens & Tailwind Theme
+
+- Update `ui/tailwind.config.ts`: enable `darkMode: "class"`, extend colour palette with semantic tokens
+- Add CSS custom properties to `ui/src/app/globals.css` for `:root` (light) and `.dark` (dark)
+- Remove hard-coded `bg-gray-900` / `text-gray-300` from layout root; replace with semantic tokens
+
+**Deliverables**: `tailwind.config.ts`, `globals.css` updated; no visual regressions on existing dark build
+
+#### 21b: Light/Dark Toggle in Navigation
+
+- Add `ThemeToggle` client component: sun icon (light mode), moon icon (dark mode)
+- On mount: read `localStorage.getItem("theme")` → apply class to `<html>`; default to `"light"` if unset
+- On toggle: flip class, write to `localStorage`
+- Insert toggle between notification bell and user menu in `ui/src/components/Navigation.tsx`
+
+**Deliverables**: `ui/src/components/ThemeToggle.tsx` (new), `Navigation.tsx` updated
+
+#### 21c: Component-Level Theme Adoption
+
+Apply light/dark semantic classes across all 16 pages and shared components:
+
+| Area             | Key changes                                                                               |
+| ---------------- | ----------------------------------------------------------------------------------------- |
+| Navigation       | `bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700`              |
+| Sidebar          | Same surface + border pattern                                                             |
+| Cards / panels   | `bg-white dark:bg-slate-800 shadow-sm`                                                    |
+| Tables           | `bg-white dark:bg-slate-800`; zebra `odd:bg-slate-50 dark:odd:bg-slate-700/50`            |
+| Inputs / selects | `bg-white dark:bg-slate-700 border-slate-300 dark:border-slate-600`                       |
+| Role badges      | Updated to new palette (clinical blue, slate, teal, amber, rose)                          |
+| Buttons          | Primary `bg-sky-700 hover:bg-sky-800`, secondary `border-slate-300`, danger `bg-rose-600` |
+
+**Deliverables**: All `ui/src/app/**/page.tsx` and `ui/src/components/` updated
+
+#### 21d: Graph Explorer Theme Adaptation
+
+- Pass theme to D3/force-graph; switch node labels and link colours on theme change
+- Light mode: white canvas `#FFFFFF`, dark labels, light node fill
+- Dark mode: current `#0F172A` canvas, white labels
+- Listen for `localStorage` theme changes via custom event
+
+**Deliverables**: `ui/src/app/graph/` components updated
+
+#### 21e: WCAG 2.2 AA Contrast Audit
+
+- Run automated contrast checks with Playwright + `axe-core` in both modes
+- Fix any failures (target: zero AA violations)
+- Update `ui/__tests__/e2e/journeys/` with a new smoke spec covering theme toggle
+
+**Deliverables**: Playwright spec `20-theme-toggle.spec.ts`; zero axe AA violations
+
+#### 21f: localhost:3003 Deployment & E2E Smoke Test
+
+- Start full JAD stack: `docker compose -f docker-compose.yml -f docker-compose.jad.yml up -d`
+- Run `PLAYWRIGHT_BASE_URL=http://localhost:3003 npm run test:e2e`
+- Verify theme toggle works in live stack
+- Screenshot both modes across 5 representative pages
+
+**Deliverables**: Screenshots in `ui/public/images/screenshots/`; all journey tests green
+
+#### Implementation Sequence
+
+```
+21a → 21b → 21c (parallel: pages + components) → 21d → 21e → 21f
+```
 
 ---
 
