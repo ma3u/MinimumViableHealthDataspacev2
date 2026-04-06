@@ -50,7 +50,7 @@ function ScreenshotCard({
   children: React.ReactNode;
 }) {
   return (
-    <div className="border border-gray-700 rounded-xl overflow-hidden">
+    <div className="border border-[var(--border)] rounded-xl overflow-hidden">
       <a
         href={href}
         target="_blank"
@@ -62,7 +62,7 @@ function ScreenshotCard({
           alt={alt}
           width={1200}
           height={675}
-          className="w-full h-auto border-b border-gray-700"
+          className="w-full h-auto border-b border-[var(--border)]"
         />
       </a>
       <div className="p-5">
@@ -72,7 +72,7 @@ function ScreenshotCard({
             href={href}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-gray-500 hover:text-indigo-400"
+            className="text-[var(--text-secondary)] hover:text-indigo-400"
             title="Open live page"
           >
             <ExternalLink size={14} />
@@ -89,12 +89,12 @@ export default function UserGuidePage() {
     <div className="max-w-5xl mx-auto px-6 py-12">
       <Link
         href="/docs"
-        className="inline-flex items-center gap-1 text-sm text-gray-400 hover:text-gray-200 mb-6"
+        className="inline-flex items-center gap-1 text-sm text-[var(--text-secondary)] hover:text-gray-200 mb-6"
       >
         <ArrowLeft size={14} /> Back to Docs
       </Link>
       <h1 className="text-3xl font-bold mb-2">User Guide</h1>
-      <p className="text-gray-400 mb-8">
+      <p className="text-[var(--text-secondary)] mb-8">
         A practical guide for business users, researchers, and data stewards
         working with the Health Dataspace platform. Each section includes a
         screenshot, a description, and a link to the{" "}
@@ -114,10 +114,10 @@ export default function UserGuidePage() {
         <h2 className="text-2xl font-semibold mb-3">
           Personas &amp; Roles — Who Uses What?
         </h2>
-        <p className="text-gray-400 text-sm mb-4">
+        <p className="text-[var(--text-secondary)] text-sm mb-4">
           The platform adapts its navigation, graph view, and available actions
           to the signed-in user&apos;s EHDS role. Sign in at{" "}
-          <code className="text-xs bg-gray-800 px-1 py-0.5 rounded">
+          <code className="text-xs bg-[var(--surface-2)] px-1 py-0.5 rounded">
             /auth/signin
           </code>{" "}
           with any demo account — password equals username in local dev.
@@ -129,7 +129,7 @@ export default function UserGuidePage() {
           href={`${LIVE_URL}/auth/signin`}
           title="Sign In — Demo Persona Cards"
         >
-          <p className="text-gray-400 text-sm mb-3">
+          <p className="text-[var(--text-secondary)] text-sm mb-3">
             The sign-in page lists every demo account with its role badge,
             organisation, and the graph persona view it will open after login.
             Clicking a card calls Keycloak SSO and redirects directly to the
@@ -140,7 +140,7 @@ export default function UserGuidePage() {
           <div className="overflow-x-auto">
             <table className="text-xs w-full border-collapse">
               <thead>
-                <tr className="border-b border-gray-700 text-gray-500">
+                <tr className="border-b border-[var(--border)] text-[var(--text-secondary)]">
                   <th className="text-left py-1.5 pr-3">Username</th>
                   <th className="text-left py-1.5 pr-3">Organisation</th>
                   <th className="text-left py-1.5 pr-3">Role</th>
@@ -191,11 +191,13 @@ export default function UserGuidePage() {
                     q: "What approvals are pending? Is the chain complete?",
                   },
                 ].map((p) => (
-                  <tr key={p.user} className="border-b border-gray-800">
+                  <tr key={p.user} className="border-b border-[var(--border)]">
                     <td className="py-1.5 pr-3 font-mono font-semibold text-white">
                       {p.user}
                     </td>
-                    <td className="py-1.5 pr-3 text-gray-400">{p.org}</td>
+                    <td className="py-1.5 pr-3 text-[var(--text-secondary)]">
+                      {p.org}
+                    </td>
                     <td className="py-1.5 pr-3">
                       <span
                         className={`inline-flex items-center gap-1 ${p.color} font-medium`}
@@ -204,10 +206,12 @@ export default function UserGuidePage() {
                         {p.role}
                       </span>
                     </td>
-                    <td className="py-1.5 pr-3 font-mono text-gray-400">
+                    <td className="py-1.5 pr-3 font-mono text-[var(--text-secondary)]">
                       {p.graph}
                     </td>
-                    <td className="py-1.5 text-gray-500 italic">{p.q}</td>
+                    <td className="py-1.5 text-[var(--text-secondary)] italic">
+                      {p.q}
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -216,18 +220,18 @@ export default function UserGuidePage() {
         </ScreenshotCard>
 
         {/* Menu items per role */}
-        <div className="mt-6 border border-gray-700 rounded-xl p-5">
+        <div className="mt-6 border border-[var(--border)] rounded-xl p-5">
           <h3 className="text-lg font-semibold text-indigo-400 mb-3">
             Menu Items per Role
           </h3>
-          <p className="text-gray-400 text-sm mb-4">
+          <p className="text-[var(--text-secondary)] text-sm mb-4">
             Navigation is filtered by role — items not relevant to a user&apos;s
             function are hidden entirely.
           </p>
           <div className="overflow-x-auto">
             <table className="text-xs w-full border-collapse">
               <thead>
-                <tr className="border-b border-gray-700 text-gray-500">
+                <tr className="border-b border-[var(--border)] text-[var(--text-secondary)]">
                   <th className="text-left py-1.5 pr-2">Route</th>
                   <th className="text-center py-1.5 px-2">Public</th>
                   <th className="text-center py-1.5 px-2">
@@ -261,8 +265,11 @@ export default function UserGuidePage() {
                   ["/admin/policies + audit", "—", "—", "—", "✅", "✅"],
                   ["/docs", "✅", "✅", "✅", "✅", "✅"],
                 ].map(([route, pub, dh, re, hdab, admin]) => (
-                  <tr key={route} className="border-b border-gray-800/50">
-                    <td className="py-1 pr-2 font-mono text-gray-300">
+                  <tr
+                    key={route}
+                    className="border-b border-[var(--border)]/50"
+                  >
+                    <td className="py-1 pr-2 font-mono text-[var(--text-primary)]">
                       {route}
                     </td>
                     {[pub, dh, re, hdab, admin].map((v, i) => (
@@ -283,11 +290,11 @@ export default function UserGuidePage() {
         </div>
 
         {/* Persona graph views */}
-        <div className="mt-6 border border-gray-700 rounded-xl p-5">
+        <div className="mt-6 border border-[var(--border)] rounded-xl p-5">
           <h3 className="text-lg font-semibold text-indigo-400 mb-3">
             Graph Explorer — Persona Views
           </h3>
-          <p className="text-gray-400 text-sm mb-4">
+          <p className="text-[var(--text-secondary)] text-sm mb-4">
             The <strong>&ldquo;View as&rdquo;</strong> panel in the graph
             sidebar and the <strong>&ldquo;My graph view&rdquo;</strong> link in
             the UserMenu dropdown load a role-specific subgraph that answers
@@ -342,7 +349,7 @@ export default function UserGuidePage() {
             ].map((p) => (
               <div
                 key={p.param}
-                className="border border-gray-700 rounded-lg overflow-hidden"
+                className="border border-[var(--border)] rounded-lg overflow-hidden"
               >
                 <a
                   href={`${LIVE_URL}/graph${p.param}`}
@@ -355,7 +362,7 @@ export default function UserGuidePage() {
                     alt={`${p.label} graph view`}
                     width={1440}
                     height={900}
-                    className="w-full h-auto border-b border-gray-700"
+                    className="w-full h-auto border-b border-[var(--border)]"
                   />
                 </a>
                 <div className="p-3">
@@ -363,11 +370,11 @@ export default function UserGuidePage() {
                     <span className={`font-semibold text-sm ${p.color}`}>
                       {p.label}
                     </span>
-                    <code className="text-xs text-gray-500 font-mono">
+                    <code className="text-xs text-[var(--text-secondary)] font-mono">
                       /graph{p.param}
                     </code>
                   </div>
-                  <p className="text-gray-400 text-xs italic mb-1">
+                  <p className="text-[var(--text-secondary)] text-xs italic mb-1">
                     &ldquo;{p.q}&rdquo;
                   </p>
                   <p className="text-gray-600 text-xs">
@@ -387,7 +394,7 @@ export default function UserGuidePage() {
           chart={userWorkflowDiagram}
           caption="User workflow overview"
         />
-        <p className="text-gray-400 text-sm mt-3 mb-6">
+        <p className="text-[var(--text-secondary)] text-sm mt-3 mb-6">
           After authenticating through Keycloak SSO, you land on the graph view
           personalised for your role. You can also browse datasets, review
           patient timelines, run analytics, or check EHDS compliance. The{" "}
@@ -402,12 +409,12 @@ export default function UserGuidePage() {
             href={LIVE_URL}
             title="Home Dashboard"
           >
-            <p className="text-gray-400 text-sm mb-2">
+            <p className="text-[var(--text-secondary)] text-sm mb-2">
               The landing page presents a high-level overview of the dataspace:
               active participants, registered datasets, and recent transfers.
               Quick-action cards let you jump to common tasks.
             </p>
-            <p className="text-gray-500 text-xs italic">
+            <p className="text-[var(--text-secondary)] text-xs italic">
               Example: PharmaCo Research AG logs in and sees 5 active
               participants, 3 published datasets, and a pending contract
               negotiation with AlphaKlinik Berlin.
@@ -420,13 +427,13 @@ export default function UserGuidePage() {
             href={`${LIVE_URL}/onboarding`}
             title="Participant Onboarding"
           >
-            <p className="text-gray-400 text-sm mb-2">
+            <p className="text-[var(--text-secondary)] text-sm mb-2">
               The onboarding wizard guides new participants through dataspace
               registration: creating a DID identity, registering with the
               Credential Federated Manager, and enrolling in the federated
               catalog.
             </p>
-            <p className="text-gray-500 text-xs italic">
+            <p className="text-[var(--text-secondary)] text-xs italic">
               Example: Limburg Medical Centre joins the EHDS dataspace by
               providing its organization details, generating{" "}
               <code className="text-xs">did:web:lmc.nl:clinic</code>, and
@@ -440,12 +447,12 @@ export default function UserGuidePage() {
             href={`${LIVE_URL}/settings`}
             title="Participant Settings"
           >
-            <p className="text-gray-400 text-sm mb-2">
+            <p className="text-[var(--text-secondary)] text-sm mb-2">
               View and manage your participant profile, verifiable credentials
               (MembershipCredential, EHDSParticipantCredential), connector
               endpoints, and Keycloak SSO configuration.
             </p>
-            <p className="text-gray-500 text-xs italic">
+            <p className="text-[var(--text-secondary)] text-xs italic">
               Example: AlphaKlinik Berlin checks that both its
               MembershipCredential and EHDSParticipantCredential are active and
               not expired before publishing a new dataset.
@@ -464,7 +471,7 @@ export default function UserGuidePage() {
             href={`${LIVE_URL}/graph`}
             title="Graph Explorer"
           >
-            <p className="text-gray-400 text-sm mb-2">
+            <p className="text-[var(--text-secondary)] text-sm mb-2">
               The force-directed graph visualisation displays all five
               architecture layers of the knowledge graph. Nodes are colour-coded
               by layer: <span className="text-blue-400">Marketplace</span>,{" "}
@@ -473,13 +480,13 @@ export default function UserGuidePage() {
               <span className="text-orange-400">OMOP CDM</span>, and{" "}
               <span className="text-purple-400">Ontology</span>.
             </p>
-            <ul className="text-gray-400 text-sm space-y-1 ml-4 list-disc">
+            <ul className="text-[var(--text-secondary)] text-sm space-y-1 ml-4 list-disc">
               <li>Click nodes to see properties and related entities</li>
               <li>Use the layer toggle to filter visible layers</li>
               <li>Zoom and pan with mouse controls</li>
               <li>Search bar finds specific nodes across all layers</li>
             </ul>
-            <p className="text-gray-500 text-xs italic mt-2">
+            <p className="text-[var(--text-secondary)] text-xs italic mt-2">
               Example: A researcher explores how a FHIR Patient resource
               connects to OMOP Person and condition_occurrence records via the
               SNOMED ontology layer.
@@ -492,18 +499,18 @@ export default function UserGuidePage() {
             href={`${LIVE_URL}/catalog`}
             title="Dataset Catalog"
           >
-            <p className="text-gray-400 text-sm mb-2">
+            <p className="text-[var(--text-secondary)] text-sm mb-2">
               Browse and search HealthDCAT-AP metadata records for all published
               datasets. Each entry shows title, description, publisher,
               temporal/spatial coverage, and distribution formats.
             </p>
-            <ul className="text-gray-400 text-sm space-y-1 ml-4 list-disc">
+            <ul className="text-[var(--text-secondary)] text-sm space-y-1 ml-4 list-disc">
               <li>Filter by publisher, theme, or keyword</li>
               <li>View distribution endpoints (FHIR, OMOP, bulk export)</li>
               <li>Check data quality metrics (DQV dimensions)</li>
               <li>Initiate data access requests from catalog entries</li>
             </ul>
-            <p className="text-gray-500 text-xs italic mt-2">
+            <p className="text-[var(--text-secondary)] text-xs italic mt-2">
               Example: PharmaCo Research AG searches for &quot;diabetes&quot;
               datasets and finds AlphaKlinik Berlin&apos;s Type 2 Diabetes
               Cohort with FHIR R4 and OMOP CDM distributions.
@@ -516,18 +523,18 @@ export default function UserGuidePage() {
             href={`${LIVE_URL}/patient`}
             title="Patient Journey"
           >
-            <p className="text-gray-400 text-sm mb-2">
+            <p className="text-[var(--text-secondary)] text-sm mb-2">
               View the clinical timeline for synthetic patients, showing FHIR R4
               resources (Encounters, Conditions, Observations, Medications,
               Procedures) mapped to their OMOP CDM equivalents.
             </p>
-            <ul className="text-gray-400 text-sm space-y-1 ml-4 list-disc">
+            <ul className="text-[var(--text-secondary)] text-sm space-y-1 ml-4 list-disc">
               <li>Select patients from the patient list</li>
               <li>Timeline displays events chronologically</li>
               <li>Toggle between FHIR and OMOP views</li>
               <li>Explore SNOMED/LOINC/RxNorm concept mappings</li>
             </ul>
-            <p className="text-gray-500 text-xs italic mt-2">
+            <p className="text-[var(--text-secondary)] text-xs italic mt-2">
               Example: A data steward reviews the timeline for a synthetic
               patient with hypertension, verifying that the FHIR Condition
               correctly maps to OMOP condition_occurrence with SNOMED code
@@ -541,18 +548,18 @@ export default function UserGuidePage() {
             href={`${LIVE_URL}/analytics`}
             title="OMOP Analytics"
           >
-            <p className="text-gray-400 text-sm mb-2">
+            <p className="text-[var(--text-secondary)] text-sm mb-2">
               Cohort-level research analytics powered by the OMOP CDM layer. Run
               aggregate queries across conditions, measurements, drug exposures,
               and procedures.
             </p>
-            <ul className="text-gray-400 text-sm space-y-1 ml-4 list-disc">
+            <ul className="text-[var(--text-secondary)] text-sm space-y-1 ml-4 list-disc">
               <li>View condition prevalence and demographics</li>
               <li>Analyse drug exposure patterns</li>
               <li>Run cohort characterisation queries</li>
               <li>Export results for further analysis</li>
             </ul>
-            <p className="text-gray-500 text-xs italic mt-2">
+            <p className="text-[var(--text-secondary)] text-xs italic mt-2">
               Example: PharmaCo Research AG runs a cohort query to identify
               patients with Type 2 Diabetes who received Metformin, showing age
               and gender distribution across the cohort.
@@ -565,12 +572,12 @@ export default function UserGuidePage() {
             href={`${LIVE_URL}/query`}
             title="Natural Language / Federated Query"
           >
-            <p className="text-gray-400 text-sm mb-2">
+            <p className="text-[var(--text-secondary)] text-sm mb-2">
               Execute cross-participant queries using natural language or
               structured query syntax. The query engine translates requests into
               federated SPARQL/Cypher queries across connected dataspace nodes.
             </p>
-            <p className="text-gray-500 text-xs italic">
+            <p className="text-[var(--text-secondary)] text-xs italic">
               Example: A researcher types &quot;How many patients with
               hypertension are older than 65?&quot; and the system queries both
               AlphaKlinik Berlin and Limburg Medical Centre, returning
@@ -584,13 +591,13 @@ export default function UserGuidePage() {
             href={`${LIVE_URL}/eehrxf`}
             title="EEHRxF Profiles"
           >
-            <p className="text-gray-400 text-sm mb-2">
+            <p className="text-[var(--text-secondary)] text-sm mb-2">
               European EHR Exchange Format profile alignment view. Analyse which
               FHIR profiles satisfy EHDS priority categories (Patient Summary,
               ePrescription, Laboratory Results, Medical Imaging, Hospital
               Discharge) and identify coverage gaps.
             </p>
-            <p className="text-gray-500 text-xs italic">
+            <p className="text-[var(--text-secondary)] text-xs italic">
               Example: MedReg DE reviews AlphaKlinik Berlin&apos;s profile
               coverage and sees that Patient Summary and Laboratory Results are
               fully aligned, while ePrescription has one missing profile.
@@ -602,7 +609,7 @@ export default function UserGuidePage() {
       {/* ── 3. Governance ── */}
       <section className="mb-12">
         <h2 className="text-2xl font-semibold mb-3">Governance</h2>
-        <p className="text-gray-400 text-sm mb-4">
+        <p className="text-[var(--text-secondary)] text-sm mb-4">
           The governance modules manage EHDS compliance, protocol testing, and
           verifiable credential issuance as required by the European Health Data
           Space regulation (Articles 45–52).
@@ -619,12 +626,12 @@ export default function UserGuidePage() {
             href={`${LIVE_URL}/compliance`}
             title="EHDS Approval"
           >
-            <p className="text-gray-400 text-sm mb-2">
+            <p className="text-[var(--text-secondary)] text-sm mb-2">
               Manage data access permits as required by EHDS Articles 45–49.
               Data users submit applications, HDABs review and approve, and
               verifiable credentials are issued as proof of authorization.
             </p>
-            <p className="text-gray-500 text-xs italic">
+            <p className="text-[var(--text-secondary)] text-xs italic">
               Example: PharmaCo Research AG submits a data access application
               for the diabetes cohort. MedReg DE (HDAB) reviews the request,
               approves it under Art. 46, and a DataPermitCredential is issued.
@@ -637,12 +644,12 @@ export default function UserGuidePage() {
             href={`${LIVE_URL}/compliance/tck`}
             title="Protocol TCK"
           >
-            <p className="text-gray-400 text-sm mb-2">
+            <p className="text-[var(--text-secondary)] text-sm mb-2">
               The Technology Compatibility Kit validates that your EDC connector
               implements the Dataspace Protocol (DSP) correctly. Tests cover
               catalog queries, contract negotiations, and transfer processes.
             </p>
-            <p className="text-gray-500 text-xs italic">
+            <p className="text-[var(--text-secondary)] text-xs italic">
               Example: The operator runs the TCK suite and confirms 20/20 tests
               passing — verifying DSP-compliant catalog, negotiation, and
               transfer process implementations.
@@ -655,12 +662,12 @@ export default function UserGuidePage() {
             href={`${LIVE_URL}/credentials`}
             title="Verifiable Credentials"
           >
-            <p className="text-gray-400 text-sm mb-2">
+            <p className="text-[var(--text-secondary)] text-sm mb-2">
               View and manage verifiable credentials across all dataspace
               participants. Each participant holds a MembershipCredential and an
               EHDSParticipantCredential, issued by the trusted issuer service.
             </p>
-            <p className="text-gray-500 text-xs italic">
+            <p className="text-[var(--text-secondary)] text-xs italic">
               Example: The operator verifies that all 5 participants
               (AlphaKlinik Berlin, PharmaCo Research AG, MedReg DE, Limburg
               Medical Centre, Institut de Recherche Santé) each hold 2 active
@@ -675,7 +682,7 @@ export default function UserGuidePage() {
         <h2 className="text-2xl font-semibold mb-3" id="data-exchange">
           Data Exchange
         </h2>
-        <p className="text-gray-400 text-sm mb-4">
+        <p className="text-[var(--text-secondary)] text-sm mb-4">
           The sovereign data exchange pipeline follows the Dataspace Protocol:
           share assets → discover via federated catalog → negotiate contracts →
           manage tasks → transfer data.
@@ -688,12 +695,12 @@ export default function UserGuidePage() {
             href={`${LIVE_URL}/data/share`}
             title="Share Data"
           >
-            <p className="text-gray-400 text-sm mb-2">
+            <p className="text-[var(--text-secondary)] text-sm mb-2">
               Publish datasets with HealthDCAT-AP metadata and ODRL access
               policies for the federated catalog. Define distribution endpoints,
               data quality attributes, and usage constraints.
             </p>
-            <p className="text-gray-500 text-xs italic">
+            <p className="text-[var(--text-secondary)] text-xs italic">
               Example: AlphaKlinik Berlin publishes a &quot;Synthetic Diabetes
               Cohort&quot; dataset with FHIR R4 bulk export distribution, EHDS
               Art. 33 usage policy, and spatial coverage set to DE.
@@ -706,12 +713,12 @@ export default function UserGuidePage() {
             href={`${LIVE_URL}/data/discover`}
             title="Discover"
           >
-            <p className="text-gray-400 text-sm mb-2">
+            <p className="text-[var(--text-secondary)] text-sm mb-2">
               Search the federated catalog across all connected dataspace
               participants. Results aggregate datasets from multiple EDC
               connectors, showing availability and access terms.
             </p>
-            <p className="text-gray-500 text-xs italic">
+            <p className="text-[var(--text-secondary)] text-xs italic">
               Example: PharmaCo Research AG discovers 3 datasets across 2
               participants for &quot;cardiovascular&quot; research — one from
               AlphaKlinik Berlin and two from Limburg Medical Centre.
@@ -724,12 +731,12 @@ export default function UserGuidePage() {
             href={`${LIVE_URL}/negotiate`}
             title="Negotiate"
           >
-            <p className="text-gray-400 text-sm mb-2">
+            <p className="text-[var(--text-secondary)] text-sm mb-2">
               Initiate and track DSP contract negotiations with data holders.
               View negotiation state (REQUESTED → AGREED → VERIFIED →
               FINALIZED), ODRL policy terms, and counter-offer history.
             </p>
-            <p className="text-gray-500 text-xs italic">
+            <p className="text-[var(--text-secondary)] text-xs italic">
               Example: PharmaCo Research AG initiates a contract negotiation
               with AlphaKlinik Berlin for the diabetes cohort. The negotiation
               progresses to FINALIZED with an EHDS Art. 33(c) research use
@@ -743,12 +750,12 @@ export default function UserGuidePage() {
             href={`${LIVE_URL}/tasks`}
             title="Tasks"
           >
-            <p className="text-gray-400 text-sm mb-2">
+            <p className="text-[var(--text-secondary)] text-sm mb-2">
               Monitor the task queue for pending and active data transfer
               operations. Tasks track the full lifecycle from initiation through
               provisioning to completion.
             </p>
-            <p className="text-gray-500 text-xs italic">
+            <p className="text-[var(--text-secondary)] text-xs italic">
               Example: The operator monitors a bulk FHIR export task from
               AlphaKlinik Berlin to PharmaCo Research AG — currently at the
               provisioning stage with an estimated 2-minute completion time.
@@ -761,12 +768,12 @@ export default function UserGuidePage() {
             href={`${LIVE_URL}/data/transfer`}
             title="Transfer"
           >
-            <p className="text-gray-400 text-sm mb-2">
+            <p className="text-[var(--text-secondary)] text-sm mb-2">
               View the complete history of data transfers — both initiated and
               received. Each entry includes timestamps, transfer size, protocol
               used, and a link to the audit trail.
             </p>
-            <p className="text-gray-500 text-xs italic">
+            <p className="text-[var(--text-secondary)] text-xs italic">
               Example: PharmaCo Research AG reviews its transfer history showing
               a completed 12 MB FHIR bulk export from AlphaKlinik Berlin,
               transferred via HTTP-PUSH with full W3C PROV audit trail.
@@ -780,7 +787,7 @@ export default function UserGuidePage() {
         <h2 className="text-2xl font-semibold mb-3" id="admin">
           Administration
         </h2>
-        <p className="text-gray-400 text-sm mb-4">
+        <p className="text-[var(--text-secondary)] text-sm mb-4">
           Platform administrators can manage tenants, access policies, and audit
           logs. The admin dashboard provides an overview of system health,
           active connections, and recent activity. Access requires the admin
@@ -794,12 +801,12 @@ export default function UserGuidePage() {
             href={`${LIVE_URL}/admin`}
             title="Operator Dashboard"
           >
-            <p className="text-gray-400 text-sm mb-2">
+            <p className="text-[var(--text-secondary)] text-sm mb-2">
               The admin dashboard shows system health at a glance: connector
               uptime, active participants, recent negotiations, transfer
               throughput, and credential status.
             </p>
-            <p className="text-gray-500 text-xs italic">
+            <p className="text-[var(--text-secondary)] text-xs italic">
               Example: The operator sees all 5 participants are online, 3
               contract negotiations are active, and 12 transfers completed in
               the last 24 hours with no failures.
@@ -812,13 +819,13 @@ export default function UserGuidePage() {
             href={`${LIVE_URL}/admin/components`}
             title="EDC Components"
           >
-            <p className="text-gray-400 text-sm mb-2">
+            <p className="text-[var(--text-secondary)] text-sm mb-2">
               Inspect the runtime status of Eclipse Dataspace Connector
               components — Control Plane, Data Plane, Identity Hub, Issuer
               Service, and Credential Federated Manager. View health checks,
               versions, and configuration details.
             </p>
-            <p className="text-gray-500 text-xs italic">
+            <p className="text-[var(--text-secondary)] text-xs italic">
               Example: The operator checks that the Control Plane (port 19193),
               Data Plane (port 19195), and Identity Hub (port 17171) are all
               reporting healthy status for AlphaKlinik Berlin&apos;s connector.
@@ -828,9 +835,9 @@ export default function UserGuidePage() {
       </section>
 
       {/* ── Help ── */}
-      <section className="bg-gray-800/50 border border-gray-700 rounded-xl p-6">
+      <section className="bg-[var(--surface-2)]/50 border border-[var(--border)] rounded-xl p-6">
         <h2 className="font-semibold mb-2">Need Help?</h2>
-        <p className="text-gray-400 text-sm">
+        <p className="text-[var(--text-secondary)] text-sm">
           For technical questions, see the{" "}
           <Link
             href="/docs/developer"

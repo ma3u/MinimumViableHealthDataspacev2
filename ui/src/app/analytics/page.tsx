@@ -53,19 +53,19 @@ function HorizontalBar({
   return (
     <div className="flex items-center gap-3 py-1">
       <span
-        className="text-xs text-gray-400 text-right shrink-0"
+        className="text-xs text-[var(--text-secondary)] text-right shrink-0"
         style={{ width: "260px", minWidth: "260px" }}
         title={label}
       >
         {shortLabel}
       </span>
-      <div className="flex-1 bg-gray-800 rounded-full h-4 overflow-hidden">
+      <div className="flex-1 bg-[var(--surface-2)] rounded-full h-4 overflow-hidden">
         <div
           className={`${colorClass} h-4 rounded-full transition-all`}
           style={{ width: `${pct}%` }}
         />
       </div>
-      <span className="text-xs text-gray-300 shrink-0 w-12 text-right">
+      <span className="text-xs text-[var(--text-primary)] shrink-0 w-12 text-right">
         {count.toLocaleString()}
       </span>
     </div>
@@ -87,15 +87,15 @@ function BarSection({
 }) {
   const maxCount = data[0]?.count ?? 1;
   return (
-    <section className="bg-gray-900 border border-gray-700 rounded-xl p-5">
+    <section className="bg-[var(--surface)] border border-[var(--border)] rounded-xl p-5">
       <div className="flex items-center gap-2 mb-4">
-        <Icon size={16} className="text-gray-400" />
+        <Icon size={16} className="text-[var(--text-secondary)]" />
         <h2 className="font-semibold text-sm text-gray-200">{title}</h2>
       </div>
       {loading ? (
-        <div className="text-gray-500 text-xs">Loading…</div>
+        <div className="text-[var(--text-secondary)] text-xs">Loading…</div>
       ) : data.length === 0 ? (
-        <div className="text-gray-500 text-xs">No data</div>
+        <div className="text-[var(--text-secondary)] text-xs">No data</div>
       ) : (
         <div className="flex flex-col gap-1">
           {data.map((d, i) => (
@@ -199,22 +199,24 @@ export default function AnalyticsPage() {
         {statCards.map(({ label, value, icon: Icon, color }) => (
           <div
             key={label}
-            className="bg-gray-900 border border-gray-700 rounded-xl p-4 flex flex-col gap-1"
+            className="bg-[var(--surface)] border border-[var(--border)] rounded-xl p-4 flex flex-col gap-1"
           >
             <Icon size={16} className={color} />
             <span className="text-2xl font-bold">
               {loading ? "—" : (value ?? 0).toLocaleString()}
             </span>
-            <span className="text-xs text-gray-500">{label}</span>
+            <span className="text-xs text-[var(--text-secondary)]">
+              {label}
+            </span>
           </div>
         ))}
       </div>
 
       {/* Gender breakdown */}
       {!loading && data?.genderBreakdown && (
-        <div className="mb-8 bg-gray-900 border border-gray-700 rounded-xl p-5">
+        <div className="mb-8 bg-[var(--surface)] border border-[var(--border)] rounded-xl p-5">
           <div className="flex items-center gap-2 mb-3">
-            <Users size={16} className="text-gray-400" />
+            <Users size={16} className="text-[var(--text-secondary)]" />
             <h2 className="font-semibold text-sm text-gray-200">
               Gender Distribution
             </h2>
@@ -233,8 +235,8 @@ export default function AnalyticsPage() {
                       g.gender === "Female" ? "bg-layer3" : "bg-layer4"
                     }`}
                   />
-                  <span className="text-gray-300">{g.gender}</span>
-                  <span className="text-gray-400">
+                  <span className="text-[var(--text-primary)]">{g.gender}</span>
+                  <span className="text-[var(--text-secondary)]">
                     {g.count.toLocaleString()} ({pct}%)
                   </span>
                 </div>

@@ -21,11 +21,11 @@ export function DemoPersonaCards() {
     <div>
       <h2
         id="personas-title"
-        className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3"
+        className="text-sm font-semibold text-[var(--text-secondary)] uppercase tracking-wider mb-3"
       >
         Demo Users &amp; Roles
       </h2>
-      <p className="text-xs text-gray-500 mb-3">
+      <p className="text-xs text-[var(--text-secondary)] mb-3">
         Sign in as any persona to explore role-specific views.
         <span className="text-gray-600">
           {" "}
@@ -52,9 +52,9 @@ export function DemoPersonaCards() {
               }
             }}
             aria-label={`Sign in as ${persona.username}, ${persona.organisation}`}
-            className={`group text-left rounded-xl border p-4 bg-gray-800/40 hover:bg-gray-800 transition-colors touch-target ${
+            className={`group text-left rounded-xl border p-4 bg-[var(--surface-2)]/40 hover:bg-[var(--surface-2)] transition-colors touch-target ${
               persona.badge.split(" ").find((c) => c.startsWith("border-")) ??
-              "border-gray-700"
+              "border-[var(--border)]"
             }`}
           >
             <div className="flex items-center justify-between mb-1.5">
@@ -62,7 +62,7 @@ export function DemoPersonaCards() {
                 <span className="font-mono text-sm font-semibold text-white group-hover:text-blue-200 transition-colors">
                   {persona.username}
                 </span>
-                <span className="text-xs text-gray-500 ml-2">
+                <span className="text-xs text-[var(--text-secondary)] ml-2">
                   {persona.organisation}
                 </span>
               </div>
@@ -88,7 +88,7 @@ export function DemoPersonaCards() {
                   </span>
                 ))}
             </div>
-            <p className="text-xs text-gray-500 leading-tight">
+            <p className="text-xs text-[var(--text-secondary)] leading-tight">
               {persona.description}
             </p>
           </button>

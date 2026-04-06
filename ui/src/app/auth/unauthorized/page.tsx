@@ -4,10 +4,10 @@ import { ShieldCheck } from "lucide-react";
 export default function UnauthorizedPage() {
   return (
     <div className="min-h-[60vh] flex items-center justify-center">
-      <div className="bg-gray-800 rounded-lg p-8 max-w-md w-full mx-4 text-center">
+      <div className="bg-[var(--surface-2)] rounded-lg p-8 max-w-md w-full mx-4 text-center">
         <ShieldCheck size={48} className="mx-auto mb-4 text-red-400" />
         <h1 className="text-2xl font-bold text-white mb-2">Access Denied</h1>
-        <p className="text-gray-400 mb-6">
+        <p className="text-[var(--text-secondary)] mb-6">
           You do not have the required role to access this resource. Contact
           your dataspace administrator to request access.
         </p>

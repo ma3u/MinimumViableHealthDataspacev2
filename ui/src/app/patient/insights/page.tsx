@@ -41,13 +41,13 @@ interface Insights {
 const PRIORITY_COLORS = {
   high: "border-red-700 bg-red-900/10",
   medium: "border-yellow-700 bg-yellow-900/10",
-  low: "border-gray-700 bg-gray-800/50",
+  low: "border-[var(--border)] bg-[var(--surface-2)]/50",
 };
 
 const EVIDENCE_BADGE: Record<string, string> = {
   high: "bg-green-900/40 text-green-400",
   moderate: "bg-yellow-900/40 text-yellow-400",
-  low: "bg-gray-800 text-gray-500",
+  low: "bg-[var(--surface-2)] text-[var(--text-secondary)]",
 };
 
 const DEMO_PATIENT_ID = "demo-patient-1";
@@ -85,9 +85,13 @@ export default function ResearchInsightsPage() {
       </div>
 
       {loading ? (
-        <div className="text-gray-500 text-sm">Loading insights…</div>
+        <div className="text-[var(--text-secondary)] text-sm">
+          Loading insights…
+        </div>
       ) : !insights ? (
-        <div className="text-gray-500 text-sm">No insights available.</div>
+        <div className="text-[var(--text-secondary)] text-sm">
+          No insights available.
+        </div>
       ) : (
         <div className="space-y-8">
           {/* Stats */}
@@ -114,11 +118,13 @@ export default function ResearchInsightsPage() {
             ].map(({ label, value, icon: Icon, color }) => (
               <div
                 key={label}
-                className="rounded-xl border border-gray-700 bg-gray-800/50 p-3 text-center"
+                className="rounded-xl border border-[var(--border)] bg-[var(--surface-2)]/50 p-3 text-center"
               >
                 <Icon size={20} className={`mx-auto mb-1 ${color}`} />
                 <div className={`text-2xl font-bold ${color}`}>{value}</div>
-                <div className="text-xs text-gray-500">{label}</div>
+                <div className="text-xs text-[var(--text-secondary)]">
+                  {label}
+                </div>
               </div>
             ))}
           </div>
@@ -135,10 +141,10 @@ export default function ResearchInsightsPage() {
                   <div
                     key={f.insightId}
                     data-testid="research-finding"
-                    className="rounded-xl border border-gray-700 bg-gray-800/50 p-4"
+                    className="rounded-xl border border-[var(--border)] bg-[var(--surface-2)]/50 p-4"
                   >
                     <div className="flex items-start justify-between mb-2">
-                      <span className="text-xs text-gray-500 font-mono">
+                      <span className="text-xs text-[var(--text-secondary)] font-mono">
                         {f.studyId}
                       </span>
                       <span
@@ -187,14 +193,14 @@ export default function ResearchInsightsPage() {
                             ? "bg-red-900/40 text-red-400"
                             : rec.priority === "medium"
                               ? "bg-yellow-900/40 text-yellow-400"
-                              : "bg-gray-800 text-gray-400"
+                              : "bg-[var(--surface-2)] text-[var(--text-secondary)]"
                         }`}
                       >
                         {rec.priority} priority
                       </span>
                     </div>
                     <p className="text-sm text-gray-200 mb-1.5">{rec.action}</p>
-                    <div className="text-xs text-gray-500">
+                    <div className="text-xs text-[var(--text-secondary)]">
                       Based on: {rec.basedOn} ·{" "}
                       <span className="text-gray-600">{rec.ehdsArticle}</span>
                     </div>
@@ -212,7 +218,7 @@ export default function ResearchInsightsPage() {
               </h2>
               <table className="text-xs w-full border-collapse">
                 <thead>
-                  <tr className="border-b border-gray-700 text-gray-500">
+                  <tr className="border-b border-[var(--border)] text-[var(--text-secondary)]">
                     <th className="text-left pb-1">Study</th>
                     <th className="text-left pb-1">Consented</th>
                     <th className="text-left pb-1">Status</th>
@@ -220,11 +226,14 @@ export default function ResearchInsightsPage() {
                 </thead>
                 <tbody>
                   {insights.donatedStudies.map((s) => (
-                    <tr key={s.studyId} className="border-b border-gray-800">
+                    <tr
+                      key={s.studyId}
+                      className="border-b border-[var(--border)]"
+                    >
                       <td className="py-1.5 pr-3">
                         {s.studyName || s.studyId}
                       </td>
-                      <td className="py-1.5 pr-3 text-gray-500">
+                      <td className="py-1.5 pr-3 text-[var(--text-secondary)]">
                         {s.grantedAt?.slice(0, 10) || "—"}
                       </td>
                       <td className="py-1.5">

@@ -99,7 +99,7 @@ export default function AdminDashboard() {
       />
 
       {loading ? (
-        <div className="flex items-center gap-2 text-gray-500">
+        <div className="flex items-center gap-2 text-[var(--text-secondary)]">
           <Loader2 size={16} className="animate-spin" />
           Loading dashboard…
         </div>
@@ -111,18 +111,20 @@ export default function AdminDashboard() {
               <Link
                 key={c.label}
                 href={c.href}
-                className="p-4 border border-gray-700 rounded-xl hover:border-layer2 transition-colors"
+                className="p-4 border border-[var(--border)] rounded-xl hover:border-layer2 transition-colors"
               >
                 <c.icon size={20} className={c.color + " mb-2"} />
                 <p className="text-2xl font-bold">{c.value}</p>
-                <p className="text-xs text-gray-500">{c.label}</p>
+                <p className="text-xs text-[var(--text-secondary)]">
+                  {c.label}
+                </p>
               </Link>
             ))}
           </div>
 
           {/* Role breakdown */}
           {summary?.byRole && Object.keys(summary.byRole).length > 0 && (
-            <div className="border border-gray-700 rounded-xl p-5 mb-8">
+            <div className="border border-[var(--border)] rounded-xl p-5 mb-8">
               <h2 className="font-semibold text-sm mb-4 flex items-center gap-2">
                 <FileKey2 size={16} className="text-layer2" />
                 Participants by EHDS Role
@@ -131,10 +133,12 @@ export default function AdminDashboard() {
                 {Object.entries(summary.byRole).map(([role, count]) => (
                   <div
                     key={role}
-                    className="p-3 rounded-lg bg-gray-800/50 border border-gray-700"
+                    className="p-3 rounded-lg bg-[var(--surface-2)]/50 border border-[var(--border)]"
                   >
                     <p className="text-lg font-bold">{count}</p>
-                    <p className="text-xs text-gray-400">{role}</p>
+                    <p className="text-xs text-[var(--text-secondary)]">
+                      {role}
+                    </p>
                   </div>
                 ))}
               </div>
@@ -145,41 +149,41 @@ export default function AdminDashboard() {
           <div className="grid md:grid-cols-4 gap-4">
             <Link
               href="/admin/components"
-              className="p-4 border border-gray-700 rounded-xl hover:border-layer2 transition-colors"
+              className="p-4 border border-[var(--border)] rounded-xl hover:border-layer2 transition-colors"
             >
               <Activity size={18} className="text-layer2 mb-2" />
               <h3 className="font-semibold text-sm mb-1">EDC Components</h3>
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-[var(--text-secondary)]">
                 Health, CPU &amp; memory per service
               </p>
             </Link>
             <Link
               href="/admin/tenants"
-              className="p-4 border border-gray-700 rounded-xl hover:border-layer2 transition-colors"
+              className="p-4 border border-[var(--border)] rounded-xl hover:border-layer2 transition-colors"
             >
               <Building2 size={18} className="text-layer2 mb-2" />
               <h3 className="font-semibold text-sm mb-1">Manage Tenants</h3>
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-[var(--text-secondary)]">
                 View and manage registered participants
               </p>
             </Link>
             <Link
               href="/admin/policies"
-              className="p-4 border border-gray-700 rounded-xl hover:border-layer2 transition-colors"
+              className="p-4 border border-[var(--border)] rounded-xl hover:border-layer2 transition-colors"
             >
               <ShieldCheck size={18} className="text-layer2 mb-2" />
               <h3 className="font-semibold text-sm mb-1">Policy Definitions</h3>
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-[var(--text-secondary)]">
                 View and create ODRL policies
               </p>
             </Link>
             <Link
               href="/admin/audit"
-              className="p-4 border border-gray-700 rounded-xl hover:border-layer2 transition-colors"
+              className="p-4 border border-[var(--border)] rounded-xl hover:border-layer2 transition-colors"
             >
               <ScrollText size={18} className="text-layer2 mb-2" />
               <h3 className="font-semibold text-sm mb-1">Audit & Provenance</h3>
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-[var(--text-secondary)]">
                 Query the Neo4j provenance graph
               </p>
             </Link>

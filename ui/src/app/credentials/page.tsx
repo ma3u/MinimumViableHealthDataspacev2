@@ -217,12 +217,12 @@ export default function CredentialsPage() {
       />
 
       {/* Request new credential */}
-      <div className="border border-gray-700 rounded-xl p-5 mb-8">
+      <div className="border border-[var(--border)] rounded-xl p-5 mb-8">
         <div className="flex items-center gap-2 mb-2">
           <Send size={18} className="text-layer2" />
           <h2 className="font-semibold text-sm">Request Credential</h2>
         </div>
-        <p className="text-xs text-gray-500 mb-4">
+        <p className="text-xs text-[var(--text-secondary)] mb-4">
           Request a Verifiable Credential (VC) from the IssuerService for a
           participant. VCs prove identity, compliance, and data-access
           authorization in the EHDS dataspace. They are stored in the
@@ -231,13 +231,13 @@ export default function CredentialsPage() {
         </p>
         <div className="grid sm:grid-cols-3 gap-3 items-end">
           <div>
-            <label className="text-xs text-gray-500 mb-1 block">
+            <label className="text-xs text-[var(--text-secondary)] mb-1 block">
               Participant Context
             </label>
             <select
               value={reqParticipant}
               onChange={(e) => setReqParticipant(e.target.value)}
-              className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded text-sm"
+              className="w-full px-3 py-2 bg-[var(--surface-2)] border border-gray-600 rounded text-sm"
             >
               {participants.map((p) => (
                 <option key={p["@id"]} value={p["@id"]}>
@@ -249,13 +249,13 @@ export default function CredentialsPage() {
           </div>
 
           <div>
-            <label className="text-xs text-gray-500 mb-1 block">
+            <label className="text-xs text-[var(--text-secondary)] mb-1 block">
               Credential Type
             </label>
             <select
               value={reqType}
               onChange={(e) => setReqType(e.target.value)}
-              className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded text-sm"
+              className="w-full px-3 py-2 bg-[var(--surface-2)] border border-gray-600 rounded text-sm"
             >
               {credentialDefs.length > 0 ? (
                 credentialDefs.map((d) => (
@@ -308,14 +308,16 @@ export default function CredentialsPage() {
 
       {/* Credential list */}
       {loading ? (
-        <div className="flex items-center gap-2 text-gray-500">
+        <div className="flex items-center gap-2 text-[var(--text-secondary)]">
           <Loader2 size={16} className="animate-spin" />
           Loading credentials…
         </div>
       ) : credentials.length === 0 ? (
         <div className="text-center py-12">
           <ShieldCheck size={40} className="text-gray-600 mx-auto mb-4" />
-          <p className="text-gray-400">No credentials found in Neo4j</p>
+          <p className="text-[var(--text-secondary)]">
+            No credentials found in Neo4j
+          </p>
           <p className="text-gray-600 text-xs mt-1">
             Register a participant and request credentials above
           </p>
@@ -329,8 +331,8 @@ export default function CredentialsPage() {
                 key={vc.id}
                 className={`border rounded-xl transition-colors ${
                   isOpen
-                    ? "border-layer2 bg-gray-900/60"
-                    : "border-gray-700 hover:border-layer2"
+                    ? "border-layer2 bg-[var(--surface)]/60"
+                    : "border-[var(--border)] hover:border-layer2"
                 }`}
               >
                 <button
@@ -344,14 +346,14 @@ export default function CredentialsPage() {
                         className={
                           vc.status === "Active"
                             ? "text-green-400"
-                            : "text-gray-500"
+                            : "text-[var(--text-secondary)]"
                         }
                       />
                       <div>
                         <p className="font-medium text-sm text-gray-200">
                           {vc.type}
                         </p>
-                        <p className="text-xs text-gray-500">
+                        <p className="text-xs text-[var(--text-secondary)]">
                           {vc.subject?.slice(0, 40)}… · Issued:{" "}
                           {vc.issuanceDate?.split("T")[0]}
                         </p>
@@ -362,44 +364,58 @@ export default function CredentialsPage() {
                         className={`text-xs px-2 py-0.5 rounded-full ${
                           vc.status === "Active"
                             ? "bg-green-900/40 text-green-400"
-                            : "bg-gray-700 text-gray-400"
+                            : "bg-gray-700 text-[var(--text-secondary)]"
                         }`}
                       >
                         {vc.status}
                       </span>
                       {isOpen ? (
-                        <ChevronUp size={16} className="text-gray-500" />
+                        <ChevronUp
+                          size={16}
+                          className="text-[var(--text-secondary)]"
+                        />
                       ) : (
-                        <ChevronDown size={16} className="text-gray-500" />
+                        <ChevronDown
+                          size={16}
+                          className="text-[var(--text-secondary)]"
+                        />
                       )}
                     </div>
                   </div>
                 </button>
 
                 {isOpen && (
-                  <div className="px-4 pb-4 space-y-1.5 border-t border-gray-700 pt-3">
+                  <div className="px-4 pb-4 space-y-1.5 border-t border-[var(--border)] pt-3">
                     <div className="flex gap-3 text-xs">
-                      <span className="text-gray-500 w-28">ID</span>
-                      <span className="text-gray-300 font-mono break-all">
+                      <span className="text-[var(--text-secondary)] w-28">
+                        ID
+                      </span>
+                      <span className="text-[var(--text-primary)] font-mono break-all">
                         {vc.id}
                       </span>
                     </div>
                     <div className="flex gap-3 text-xs">
-                      <span className="text-gray-500 w-28">Issuer</span>
-                      <span className="text-gray-300 font-mono break-all">
+                      <span className="text-[var(--text-secondary)] w-28">
+                        Issuer
+                      </span>
+                      <span className="text-[var(--text-primary)] font-mono break-all">
                         {vc.issuer}
                       </span>
                     </div>
                     <div className="flex gap-3 text-xs">
-                      <span className="text-gray-500 w-28">Subject</span>
-                      <span className="text-gray-300 font-mono break-all">
+                      <span className="text-[var(--text-secondary)] w-28">
+                        Subject
+                      </span>
+                      <span className="text-[var(--text-primary)] font-mono break-all">
                         {vc.subject}
                       </span>
                     </div>
                     {vc.expirationDate && (
                       <div className="flex gap-3 text-xs">
-                        <span className="text-gray-500 w-28">Expires</span>
-                        <span className="text-gray-300">
+                        <span className="text-[var(--text-secondary)] w-28">
+                          Expires
+                        </span>
+                        <span className="text-[var(--text-primary)]">
                           {vc.expirationDate}
                         </span>
                       </div>
@@ -407,11 +423,15 @@ export default function CredentialsPage() {
                     {vc.claims &&
                       Object.entries(vc.claims).map(([k, v]) => (
                         <div key={k} className="flex gap-3 text-xs">
-                          <span className="text-gray-500 w-28">{k}</span>
-                          <span className="text-gray-300">{String(v)}</span>
+                          <span className="text-[var(--text-secondary)] w-28">
+                            {k}
+                          </span>
+                          <span className="text-[var(--text-primary)]">
+                            {String(v)}
+                          </span>
                         </div>
                       ))}
-                    <div className="pt-3 mt-2 border-t border-gray-700 flex justify-end">
+                    <div className="pt-3 mt-2 border-t border-[var(--border)] flex justify-end">
                       <button
                         onClick={(e) => {
                           e.stopPropagation();

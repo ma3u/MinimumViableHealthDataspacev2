@@ -52,7 +52,7 @@ export default function MermaidDiagram({
     return (
       <div className="border border-red-700 rounded-lg p-4 my-4">
         <p className="text-red-400 text-sm">Diagram render error: {error}</p>
-        <pre className="text-xs text-gray-500 mt-2 overflow-x-auto">
+        <pre className="text-xs text-[var(--text-secondary)] mt-2 overflow-x-auto">
           {chart}
         </pre>
       </div>
@@ -63,11 +63,11 @@ export default function MermaidDiagram({
     <figure className="my-6">
       <div
         ref={containerRef}
-        className="bg-gray-900/50 border border-gray-700 rounded-lg p-4 overflow-x-auto flex justify-center"
+        className="bg-[var(--surface)]/50 border border-[var(--border)] rounded-lg p-4 overflow-x-auto flex justify-center"
         dangerouslySetInnerHTML={{ __html: svg }}
       />
       {caption && (
-        <figcaption className="text-center text-sm text-gray-500 mt-2 italic">
+        <figcaption className="text-center text-sm text-[var(--text-secondary)] mt-2 italic">
           {caption}
         </figcaption>
       )}

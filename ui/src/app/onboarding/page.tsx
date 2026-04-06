@@ -206,7 +206,7 @@ function StatusBadge({
       </span>
     );
   return (
-    <span className="flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-gray-800 text-gray-500 border border-gray-700">
+    <span className="flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-[var(--surface-2)] text-[var(--text-secondary)] border border-[var(--border)]">
       <Circle size={10} /> Pending
     </span>
   );
@@ -287,7 +287,7 @@ function OnboardingSteps({ tenant }: { tenant: Tenant }) {
                   ? "text-green-400"
                   : s.inProgress
                     ? "text-yellow-400"
-                    : "text-gray-500"
+                    : "text-[var(--text-secondary)]"
               }`}
             >
               {s.label}
@@ -297,9 +297,12 @@ function OnboardingSteps({ tenant }: { tenant: Tenant }) {
         </div>
       ))}
       {profiles.length > 0 && (
-        <div className="mt-1 space-y-1 border-t border-gray-700/50 pt-3">
+        <div className="mt-1 space-y-1 border-t border-[var(--border)]/50 pt-3">
           {profiles.map((p, i) => (
-            <div key={i} className="text-xs text-gray-500 font-mono truncate">
+            <div
+              key={i}
+              className="text-xs text-[var(--text-secondary)] font-mono truncate"
+            >
               {p.identifier || p.did
                 ? `DID: ${p.identifier || p.did}`
                 : `Profile: ${p.participantContextId || p.dataspaceProfileId}`}
@@ -336,8 +339,8 @@ function ParticipantCard({
     <div
       className={`rounded-xl border transition-colors ${
         expanded
-          ? "border-layer2/60 bg-gray-900/80"
-          : "border-gray-700 bg-gray-900/50 hover:border-gray-600"
+          ? "border-layer2/60 bg-[var(--surface)]/80"
+          : "border-[var(--border)] bg-[var(--surface)]/50 hover:border-gray-600"
       }`}
     >
       {/* Header */}
@@ -348,37 +351,49 @@ function ParticipantCard({
         <Building2 size={20} className="text-layer2 shrink-0" />
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <p className="font-medium text-gray-100">{name}</p>
+            <p className="font-medium text-[var(--text-primary)]">{name}</p>
             <StatusBadge status={status} />
           </div>
-          <p className="text-xs text-gray-500 mt-0.5">
+          <p className="text-xs text-[var(--text-secondary)] mt-0.5">
             {org} · {role} · {tenant.participantProfiles?.length || 0}{" "}
             profile(s)
           </p>
         </div>
         {expanded ? (
-          <ChevronDown size={16} className="text-gray-400 shrink-0" />
+          <ChevronDown
+            size={16}
+            className="text-[var(--text-secondary)] shrink-0"
+          />
         ) : (
-          <ChevronRight size={16} className="text-gray-400 shrink-0" />
+          <ChevronRight
+            size={16}
+            className="text-[var(--text-secondary)] shrink-0"
+          />
         )}
       </button>
 
       {/* Expanded body */}
       {expanded && (
-        <div className="px-5 pb-5 border-t border-gray-700/50 pt-4 space-y-5">
+        <div className="px-5 pb-5 border-t border-[var(--border)]/50 pt-4 space-y-5">
           {/* Contact columns */}
           <div className="grid sm:grid-cols-2 gap-5">
             <div className="space-y-2">
-              <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wide">
+              <h4 className="text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wide">
                 Organisation
               </h4>
               <p className="text-sm font-medium text-gray-200">{org}</p>
-              <div className="flex items-start gap-2 text-xs text-gray-400">
-                <MapPin size={12} className="text-gray-500 mt-0.5 shrink-0" />
+              <div className="flex items-start gap-2 text-xs text-[var(--text-secondary)]">
+                <MapPin
+                  size={12}
+                  className="text-[var(--text-secondary)] mt-0.5 shrink-0"
+                />
                 <span>{contact.address}</span>
               </div>
               <div className="flex items-center gap-2 text-xs">
-                <Mail size={12} className="text-gray-500 shrink-0" />
+                <Mail
+                  size={12}
+                  className="text-[var(--text-secondary)] shrink-0"
+                />
                 <a
                   href={`mailto:${contact.email}`}
                   className="text-layer2 hover:underline"
@@ -387,7 +402,10 @@ function ParticipantCard({
                 </a>
               </div>
               <div className="flex items-center gap-2 text-xs">
-                <ExternalLink size={12} className="text-gray-500 shrink-0" />
+                <ExternalLink
+                  size={12}
+                  className="text-[var(--text-secondary)] shrink-0"
+                />
                 <a
                   href={contact.website}
                   target="_blank"
@@ -400,14 +418,17 @@ function ParticipantCard({
             </div>
 
             <div className="space-y-2">
-              <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wide">
+              <h4 className="text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wide">
                 Data Compliance Officer
               </h4>
               <p className="text-sm font-medium text-gray-200">
                 {contact.dpoName}
               </p>
               <div className="flex items-center gap-2 text-xs">
-                <Mail size={12} className="text-gray-500 shrink-0" />
+                <Mail
+                  size={12}
+                  className="text-[var(--text-secondary)] shrink-0"
+                />
                 <a
                   href={`mailto:${contact.dpoEmail}`}
                   className="text-layer2 hover:underline"
@@ -424,12 +445,14 @@ function ParticipantCard({
           {/* Tenant ID */}
           <p className="text-xs text-gray-600">
             Tenant ID:{" "}
-            <span className="font-mono text-gray-500">{tenant.id}</span>
+            <span className="font-mono text-[var(--text-secondary)]">
+              {tenant.id}
+            </span>
           </p>
 
           {/* Onboarding progress */}
           <div>
-            <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">
+            <h4 className="text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wide mb-3">
               Onboarding Progress
             </h4>
             <OnboardingSteps tenant={tenant} />
@@ -447,9 +470,9 @@ function EhdsRequirements() {
   const [open, setOpen] = useState(false);
 
   return (
-    <div className="mt-10 border border-gray-700 rounded-xl overflow-hidden">
+    <div className="mt-10 border border-[var(--border)] rounded-xl overflow-hidden">
       <button
-        className="w-full flex items-center gap-3 px-5 py-4 text-left hover:bg-gray-800/40 transition-colors"
+        className="w-full flex items-center gap-3 px-5 py-4 text-left hover:bg-[var(--surface-2)]/40 transition-colors"
         onClick={() => setOpen(!open)}
       >
         <FileText size={18} className="text-layer2 shrink-0" />
@@ -457,29 +480,29 @@ function EhdsRequirements() {
           <p className="font-semibold text-sm">
             EHDS &amp; Contractual Requirements for Data Sharing
           </p>
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-[var(--text-secondary)]">
             Regulatory, NDA, and technical prerequisites before data exchange
           </p>
         </div>
         {open ? (
-          <ChevronDown size={16} className="text-gray-400" />
+          <ChevronDown size={16} className="text-[var(--text-secondary)]" />
         ) : (
-          <ChevronRight size={16} className="text-gray-400" />
+          <ChevronRight size={16} className="text-[var(--text-secondary)]" />
         )}
       </button>
 
       {open && (
-        <div className="border-t border-gray-700 px-5 py-5 space-y-6">
+        <div className="border-t border-[var(--border)] px-5 py-5 space-y-6">
           {REQUIREMENTS.map((section) => (
             <div key={section.category}>
-              <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">
+              <h3 className="text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wide mb-2">
                 {section.category}
               </h3>
               <ul className="space-y-1.5">
                 {section.items.map((item, i) => (
                   <li
                     key={i}
-                    className="flex items-start gap-2 text-xs text-gray-300"
+                    className="flex items-start gap-2 text-xs text-[var(--text-primary)]"
                   >
                     <span className="text-layer2 mt-0.5 shrink-0">•</span>
                     <span>{item}</span>
@@ -488,7 +511,7 @@ function EhdsRequirements() {
               </ul>
             </div>
           ))}
-          <p className="text-xs text-gray-600 italic pt-2 border-t border-gray-700">
+          <p className="text-xs text-gray-600 italic pt-2 border-t border-[var(--border)]">
             Note: In this demo environment all participants are pre-seeded. In
             production, onboarding triggers automated DID provisioning,
             credential issuance, and policy activation via the CFM orchestration
@@ -573,13 +596,13 @@ function OnboardingContent() {
 
       {/* Registered participants */}
       {loading ? (
-        <div className="flex items-center gap-2 text-gray-500 mb-8">
+        <div className="flex items-center gap-2 text-[var(--text-secondary)] mb-8">
           <Loader2 size={16} className="animate-spin" />
           Loading registered participants…
         </div>
       ) : tenants.length > 0 ? (
         <div className="mb-8">
-          <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wide mb-3">
+          <h2 className="text-sm font-semibold text-[var(--text-secondary)] uppercase tracking-wide mb-3">
             Registered Participants
           </h2>
           <div className="grid gap-3">
@@ -600,10 +623,10 @@ function OnboardingContent() {
 
       {/* Registration form / success */}
       {step === "done" ? (
-        <div className="flex flex-col items-center gap-4 py-12 text-center border border-gray-700 rounded-xl">
+        <div className="flex flex-col items-center gap-4 py-12 text-center border border-[var(--border)] rounded-xl">
           <CheckCircle2 size={48} className="text-green-400" />
           <h2 className="text-xl font-semibold">Registration Submitted</h2>
-          <p className="text-gray-400 text-sm max-w-md">
+          <p className="text-[var(--text-secondary)] text-sm max-w-md">
             Your participant context has been created. DID provisioning and
             credential issuance will proceed automatically via CFM agents.
           </p>
@@ -614,13 +637,13 @@ function OnboardingContent() {
               setOrganization("");
               setRole("data-holder");
             }}
-            className="mt-2 px-4 py-2 border border-gray-600 text-gray-300 rounded-lg text-sm hover:border-gray-400"
+            className="mt-2 px-4 py-2 border border-gray-600 text-[var(--text-primary)] rounded-lg text-sm hover:border-gray-400"
           >
             Register another participant
           </button>
         </div>
       ) : (
-        <div className="border border-gray-700 rounded-xl p-6">
+        <div className="border border-[var(--border)] rounded-xl p-6">
           <div className="flex items-center gap-2 mb-6">
             <UserPlus size={20} className="text-layer2" />
             <h2 className="font-semibold">New Participant Registration</h2>
@@ -634,7 +657,7 @@ function OnboardingContent() {
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label className="block text-sm text-gray-400 mb-1">
+              <label className="block text-sm text-[var(--text-secondary)] mb-1">
                 Display Name
               </label>
               <input
@@ -643,12 +666,12 @@ function OnboardingContent() {
                 value={displayName}
                 onChange={(e) => setDisplayName(e.target.value)}
                 placeholder="e.g. University Hospital Berlin"
-                className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded text-sm outline-none focus:border-layer2"
+                className="w-full px-3 py-2 bg-[var(--surface-2)] border border-gray-600 rounded text-sm outline-none focus:border-layer2"
               />
             </div>
 
             <div>
-              <label className="block text-sm text-gray-400 mb-1">
+              <label className="block text-sm text-[var(--text-secondary)] mb-1">
                 Organisation
               </label>
               <input
@@ -657,12 +680,12 @@ function OnboardingContent() {
                 value={organization}
                 onChange={(e) => setOrganization(e.target.value)}
                 placeholder="e.g. AlphaKlinik Berlin University Hospital"
-                className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded text-sm outline-none focus:border-layer2"
+                className="w-full px-3 py-2 bg-[var(--surface-2)] border border-gray-600 rounded text-sm outline-none focus:border-layer2"
               />
             </div>
 
             <div>
-              <label className="block text-sm text-gray-400 mb-2">
+              <label className="block text-sm text-[var(--text-secondary)] mb-2">
                 EHDS Role
               </label>
               <div className="grid gap-2">
@@ -672,7 +695,7 @@ function OnboardingContent() {
                     className={`flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${
                       role === r.value
                         ? "border-layer2 bg-layer2/10"
-                        : "border-gray-700 hover:border-gray-500"
+                        : "border-[var(--border)] hover:border-gray-500"
                     }`}
                   >
                     <input
@@ -685,7 +708,9 @@ function OnboardingContent() {
                     />
                     <div>
                       <span className="font-medium text-sm">{r.label}</span>
-                      <p className="text-xs text-gray-500 mt-0.5">{r.desc}</p>
+                      <p className="text-xs text-[var(--text-secondary)] mt-0.5">
+                        {r.desc}
+                      </p>
                     </div>
                   </label>
                 ))}

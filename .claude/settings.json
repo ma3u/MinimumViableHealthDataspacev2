@@ -78,8 +78,9 @@
       "Bash(cat:*.key)",
       "Bash(cat:*.env)",
       "Bash(cat:.env*)",
-      "Bash(cat:*secret*)",
-      "Bash(cat:*credential)",
+      "Bash(cat:*secret)",
+      "Bash(cat:*credentials)",
+      "Bash(cat:credentials*)",
       "Bash(cat:credential*)",
       "Bash(./jad/seed-all.sh:*)"
     ]

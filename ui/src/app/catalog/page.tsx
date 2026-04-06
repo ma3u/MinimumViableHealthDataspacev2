@@ -127,8 +127,10 @@ function DetailRow({
 }) {
   if (value == null || value === "") return null;
   return (
-    <div className="flex gap-3 py-1.5 border-b border-gray-800 last:border-0">
-      <span className="text-xs text-gray-500 w-36 shrink-0">{label}</span>
+    <div className="flex gap-3 py-1.5 border-b border-[var(--border)] last:border-0">
+      <span className="text-xs text-[var(--text-secondary)] w-36 shrink-0">
+        {label}
+      </span>
       <span className="text-xs text-gray-200 break-all">{String(value)}</span>
     </div>
   );
@@ -138,7 +140,7 @@ export default function CatalogPage() {
   return (
     <Suspense
       fallback={
-        <div className="flex items-center gap-2 text-gray-500 p-10">
+        <div className="flex items-center gap-2 text-[var(--text-secondary)] p-10">
           <Loader2 size={16} className="animate-spin" />
           Loading…
         </div>
@@ -223,13 +225,13 @@ function CatalogContent() {
         placeholder="Filter by title, description or theme…"
         value={filter}
         onChange={(e) => setFilter(e.target.value)}
-        className="w-full mb-6 px-3 py-2 bg-gray-800 border border-gray-600 rounded text-sm outline-none focus:border-layer2"
+        className="w-full mb-6 px-3 py-2 bg-[var(--surface-2)] border border-gray-600 rounded text-sm outline-none focus:border-layer2"
       />
 
       {loading ? (
-        <p className="text-gray-500">Connecting to Neo4j…</p>
+        <p className="text-[var(--text-secondary)]">Connecting to Neo4j…</p>
       ) : visible.length === 0 ? (
-        <p className="text-gray-500">No datasets found.</p>
+        <p className="text-[var(--text-secondary)]">No datasets found.</p>
       ) : (
         <div className="grid gap-4">
           {visible.map((d, idx) => {
@@ -239,8 +241,8 @@ function CatalogContent() {
                 key={d.id ?? `dataset-${idx}`}
                 className={`border rounded-xl transition-colors ${
                   isOpen
-                    ? "border-layer2 bg-gray-900/60"
-                    : "border-gray-700 hover:border-layer2"
+                    ? "border-layer2 bg-[var(--surface)]/60"
+                    : "border-[var(--border)] hover:border-layer2"
                 }`}
               >
                 {/* Card header — click to expand */}
@@ -254,7 +256,7 @@ function CatalogContent() {
                         {d.title ?? d.id}
                       </h2>
                       {d.description && (
-                        <p className="text-sm text-gray-400 mt-0.5 line-clamp-2">
+                        <p className="text-sm text-[var(--text-secondary)] mt-0.5 line-clamp-2">
                           {d.description}
                         </p>
                       )}
@@ -266,12 +268,12 @@ function CatalogContent() {
                         </span>
                       )}
                       {d.theme && (
-                        <span className="text-xs bg-gray-700 text-gray-300 px-2 py-0.5 rounded-full">
+                        <span className="text-xs bg-gray-700 text-[var(--text-primary)] px-2 py-0.5 rounded-full">
                           {d.theme}
                         </span>
                       )}
                     </div>
-                    <div className="shrink-0 text-gray-500 mt-0.5">
+                    <div className="shrink-0 text-[var(--text-secondary)] mt-0.5">
                       {isOpen ? (
                         <ChevronUp size={16} />
                       ) : (
@@ -281,7 +283,7 @@ function CatalogContent() {
                   </div>
 
                   {/* Summary row */}
-                  <div className="mt-3 flex flex-wrap gap-4 text-xs text-gray-500">
+                  <div className="mt-3 flex flex-wrap gap-4 text-xs text-[var(--text-secondary)]">
                     {d.publisher && <span>Publisher: {d.publisher}</span>}
                     {d.legalBasis && (
                       <span className="text-green-500">
@@ -349,11 +351,11 @@ function CatalogContent() {
 
                 {/* Expanded detail panel */}
                 {isOpen && (
-                  <div className="px-4 pb-4 border-t border-gray-700 mt-1 pt-3">
-                    <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
+                  <div className="px-4 pb-4 border-t border-[var(--border)] mt-1 pt-3">
+                    <h3 className="text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider mb-2">
                       HealthDCAT-AP Metadata
                     </h3>
-                    <div className="bg-gray-800/50 rounded-lg px-3 py-1">
+                    <div className="bg-[var(--surface-2)]/50 rounded-lg px-3 py-1">
                       <DetailRow label="Dataset ID" value={d.id} />
                       <DetailRow label="Title" value={d.title} />
                       <DetailRow label="Description" value={d.description} />
@@ -448,7 +450,7 @@ function CatalogContent() {
                         href="https://healthdataeu.pages.code.europa.eu/healthdcat-ap/releases/release-6/index.html"
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 text-xs text-gray-400 hover:underline"
+                        className="inline-flex items-center gap-1 text-xs text-[var(--text-secondary)] hover:underline"
                         onClick={(e) => e.stopPropagation()}
                       >
                         <ExternalLink size={11} />
@@ -482,17 +484,17 @@ function CatalogContent() {
           onClick={() => setDiagramDataset(null)}
         >
           <div
-            className="bg-gray-900 border border-gray-700 rounded-2xl w-full max-w-3xl max-h-[85vh] overflow-y-auto mx-4"
+            className="bg-[var(--surface)] border border-[var(--border)] rounded-2xl w-full max-w-3xl max-h-[85vh] overflow-y-auto mx-4"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center justify-between px-5 py-3 border-b border-gray-700">
+            <div className="flex items-center justify-between px-5 py-3 border-b border-[var(--border)]">
               <h2 className="font-semibold text-sm text-layer2">
                 <GitBranch size={14} className="inline mr-1.5" />
                 HealthDCAT-AP Data Model — {diagramDataset.title}
               </h2>
               <button
                 onClick={() => setDiagramDataset(null)}
-                className="text-gray-400 hover:text-white"
+                className="text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
               >
                 <X size={18} />
               </button>

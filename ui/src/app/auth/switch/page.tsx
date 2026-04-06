@@ -18,7 +18,7 @@ export default function SwitchPage() {
   }, []);
 
   return (
-    <div className="flex h-screen items-center justify-center bg-gray-950 text-gray-400">
+    <div className="flex h-screen items-center justify-center bg-[var(--bg)] text-[var(--text-secondary)]">
       <Loader2 size={16} className="mr-2 animate-spin" />
       Switching user…
     </div>

@@ -176,12 +176,12 @@ const SEVERITY_STYLES: Record<
   },
   healthy: {
     dot: "bg-emerald-500",
-    border: "border-gray-700",
+    border: "border-[var(--border)]",
     bg: "",
   },
   unknown: {
     dot: "bg-gray-500",
-    border: "border-gray-700",
+    border: "border-[var(--border)]",
     bg: "",
   },
 };
@@ -282,7 +282,7 @@ function InfoPopover({ name }: { name: string }) {
           e.stopPropagation();
           setOpen(!open);
         }}
-        className="text-gray-500 hover:text-layer2 transition-colors p-0.5"
+        className="text-[var(--text-secondary)] hover:text-layer2 transition-colors p-0.5"
         title={`Info: ${name}`}
       >
         <Info size={13} />
@@ -292,32 +292,38 @@ function InfoPopover({ name }: { name: string }) {
           {/* Backdrop */}
           <div className="fixed inset-0 z-30" onClick={() => setOpen(false)} />
           {/* Popover */}
-          <div className="absolute z-40 left-6 top-0 w-80 bg-gray-800 border border-gray-600 rounded-xl shadow-2xl p-4 text-xs space-y-2">
+          <div className="absolute z-40 left-6 top-0 w-80 bg-[var(--surface-2)] border border-gray-600 rounded-xl shadow-2xl p-4 text-xs space-y-2">
             <div className="flex items-center justify-between mb-1">
               <span className="font-semibold text-sm text-gray-200">
                 {name}
               </span>
               <button
                 onClick={() => setOpen(false)}
-                className="text-gray-500 hover:text-gray-300"
+                className="text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
               >
                 <X size={14} />
               </button>
             </div>
-            <p className="text-gray-400 leading-relaxed">{meta.description}</p>
-            <div className="grid grid-cols-[80px_1fr] gap-y-1.5 gap-x-2 pt-1 border-t border-gray-700">
-              <span className="text-gray-500">Protocol</span>
-              <span className="text-gray-300">{meta.protocol}</span>
-              <span className="text-gray-500">Ports</span>
-              <span className="text-gray-300 font-mono text-[11px]">
+            <p className="text-[var(--text-secondary)] leading-relaxed">
+              {meta.description}
+            </p>
+            <div className="grid grid-cols-[80px_1fr] gap-y-1.5 gap-x-2 pt-1 border-t border-[var(--border)]">
+              <span className="text-[var(--text-secondary)]">Protocol</span>
+              <span className="text-[var(--text-primary)]">
+                {meta.protocol}
+              </span>
+              <span className="text-[var(--text-secondary)]">Ports</span>
+              <span className="text-[var(--text-primary)] font-mono text-[11px]">
                 {meta.ports}
               </span>
-              <span className="text-gray-500">Depends on</span>
-              <span className="text-gray-300">
+              <span className="text-[var(--text-secondary)]">Depends on</span>
+              <span className="text-[var(--text-primary)]">
                 {meta.dependsOn.length > 0 ? meta.dependsOn.join(", ") : "None"}
               </span>
-              <span className="text-gray-500">Health</span>
-              <span className="text-gray-300">{meta.healthSource}</span>
+              <span className="text-[var(--text-secondary)]">Health</span>
+              <span className="text-[var(--text-primary)]">
+                {meta.healthSource}
+              </span>
             </div>
           </div>
         </>
@@ -342,7 +348,7 @@ function ComponentRow({
   const maxCpu = Math.max(...cpuData, 1);
 
   return (
-    <tr className="border-b border-gray-800 hover:bg-gray-800/40 transition-colors">
+    <tr className="border-b border-[var(--border)] hover:bg-[var(--surface-2)]/40 transition-colors">
       <td className="py-2.5 px-3 text-sm font-medium text-gray-200">
         <span className="flex items-center gap-1.5">
           {comp.component}
@@ -352,12 +358,12 @@ function ComponentRow({
       <td className="py-2.5 px-3">
         <StatusBadge status={comp.status} />
       </td>
-      <td className="py-2.5 px-3 text-xs text-gray-400 tabular-nums">
+      <td className="py-2.5 px-3 text-xs text-[var(--text-secondary)] tabular-nums">
         {comp.uptime}
       </td>
       <td className="py-2.5 px-3">
         <div className="flex items-center gap-2">
-          <span className="text-xs tabular-nums text-gray-300 w-12 text-right">
+          <span className="text-xs tabular-nums text-[var(--text-primary)] w-12 text-right">
             {comp.cpu.toFixed(1)}%
           </span>
           <Sparkline data={cpuData} max={maxCpu} color="#60a5fa" />
@@ -365,7 +371,7 @@ function ComponentRow({
       </td>
       <td className="py-2.5 px-3">
         <div className="flex items-center gap-2">
-          <span className="text-xs tabular-nums text-gray-300 w-16 text-right">
+          <span className="text-xs tabular-nums text-[var(--text-primary)] w-16 text-right">
             {comp.mem.usedMB < 1 ? "<1" : Math.round(comp.mem.usedMB)} MB
           </span>
           <Sparkline
@@ -375,7 +381,7 @@ function ComponentRow({
           />
         </div>
       </td>
-      <td className="py-2.5 px-3 text-xs text-gray-500 tabular-nums">
+      <td className="py-2.5 px-3 text-xs text-[var(--text-secondary)] tabular-nums">
         {comp.mem.percent.toFixed(1)}%
       </td>
     </tr>
@@ -398,11 +404,11 @@ function TopoComponentCard({ comp }: { comp: TopoComponent }) {
           {comp.name}
           <InfoPopover name={comp.name} />
         </span>
-        <span className="text-[10px] text-gray-500 capitalize">
+        <span className="text-[10px] text-[var(--text-secondary)] capitalize">
           {comp.status}
         </span>
       </div>
-      <div className="grid grid-cols-3 gap-1 text-[10px] text-gray-400">
+      <div className="grid grid-cols-3 gap-1 text-[10px] text-[var(--text-secondary)]">
         <span>
           <Cpu size={9} className="inline mr-0.5" />
           {comp.cpu.toFixed(1)}%
@@ -439,17 +445,17 @@ function ResourceSummary({
     mb > 1024 ? `${(mb / 1024).toFixed(1)} GB` : `${Math.round(mb)} MB`;
 
   return (
-    <div className="flex items-center gap-x-4 text-xs text-gray-400">
+    <div className="flex items-center gap-x-4 text-xs text-[var(--text-secondary)]">
       {label && <span className="text-gray-600 mr-1">{label}</span>}
       <span className="flex items-center gap-1 tabular-nums">
         <Cpu size={10} className="text-blue-400" />
-        <span className="text-gray-300 font-medium">
+        <span className="text-[var(--text-primary)] font-medium">
           CPU {totalCpu.toFixed(1)}%
         </span>
       </span>
       <span className="flex items-center gap-1 tabular-nums">
         <HardDrive size={10} className="text-purple-400" />
-        <span className="text-gray-300 font-medium">
+        <span className="text-[var(--text-primary)] font-medium">
           MEM {fmtMem(totalMem)}
         </span>
       </span>
@@ -502,23 +508,23 @@ function ClusterResourceBanner({
   const hasPrev = metrics.prev24h.samples > 0;
 
   return (
-    <div className="flex flex-wrap items-center gap-x-6 gap-y-2 border border-gray-700 rounded-xl px-4 py-3 mb-6 bg-gray-900/40">
-      <div className="flex items-center gap-2 text-xs text-gray-400">
+    <div className="flex flex-wrap items-center gap-x-6 gap-y-2 border border-[var(--border)] rounded-xl px-4 py-3 mb-6 bg-[var(--surface)]/40">
+      <div className="flex items-center gap-2 text-xs text-[var(--text-secondary)]">
         <Activity size={14} className="text-layer2 shrink-0" />
-        <span className="font-medium text-gray-300">Cluster</span>
+        <span className="font-medium text-[var(--text-primary)]">Cluster</span>
       </div>
 
       {/* Current */}
       <div className="flex items-center gap-1.5 text-xs">
         <Cpu size={11} className="text-blue-400" />
-        <span className="text-gray-300 tabular-nums">
+        <span className="text-[var(--text-primary)] tabular-nums">
           {metrics.currentCpu.toFixed(1)}%
         </span>
         <span className="text-gray-600">now</span>
       </div>
       <div className="flex items-center gap-1.5 text-xs">
         <HardDrive size={11} className="text-purple-400" />
-        <span className="text-gray-300 tabular-nums">
+        <span className="text-[var(--text-primary)] tabular-nums">
           {fmtMem(metrics.currentMemMB)}
         </span>
         <span className="text-gray-600">now</span>
@@ -574,7 +580,8 @@ function ParticipantTopologySection({
   );
   const sev = SEVERITY_STYLES[participant.health];
   const roleClass =
-    ROLE_COLORS[participant.role] || "bg-gray-500/20 text-gray-400";
+    ROLE_COLORS[participant.role] ||
+    "bg-gray-500/20 text-[var(--text-secondary)]";
 
   return (
     <div
@@ -583,12 +590,18 @@ function ParticipantTopologySection({
       {/* Header bar — click to expand/collapse */}
       <button
         onClick={() => setExpanded(!expanded)}
-        className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-gray-800/40 transition-colors"
+        className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-[var(--surface-2)]/40 transition-colors"
       >
         {expanded ? (
-          <ChevronDown size={14} className="text-gray-500 shrink-0" />
+          <ChevronDown
+            size={14}
+            className="text-[var(--text-secondary)] shrink-0"
+          />
         ) : (
-          <ChevronRight size={14} className="text-gray-500 shrink-0" />
+          <ChevronRight
+            size={14}
+            className="text-[var(--text-secondary)] shrink-0"
+          />
         )}
         <SeverityDot severity={participant.health} />
         <div className="flex-1 min-w-0">
@@ -596,7 +609,7 @@ function ParticipantTopologySection({
             <span className="font-semibold text-sm text-gray-200">
               {participant.displayName}
             </span>
-            <span className="text-xs text-gray-500">
+            <span className="text-xs text-[var(--text-secondary)]">
               {participant.organization}
             </span>
           </div>
@@ -607,18 +620,18 @@ function ParticipantTopologySection({
         >
           {participant.role}
         </span>
-        <span className="text-[10px] text-gray-500 shrink-0">
+        <span className="text-[10px] text-[var(--text-secondary)] shrink-0">
           {participant.components.length} services
         </span>
       </button>
 
       {/* Expanded: DID + component grid */}
       {expanded && (
-        <div className="px-4 pb-4 pt-1 border-t border-gray-800/60">
-          <div className="flex items-center gap-4 text-[11px] text-gray-500 mb-3">
+        <div className="px-4 pb-4 pt-1 border-t border-[var(--border)]/60">
+          <div className="flex items-center gap-4 text-[11px] text-[var(--text-secondary)] mb-3">
             <span>
               DID:{" "}
-              <span className="font-mono text-gray-400">
+              <span className="font-mono text-[var(--text-secondary)]">
                 {participant.did.length > 40
                   ? participant.did.slice(0, 40) + "…"
                   : participant.did}
@@ -673,7 +686,9 @@ function CriticalBanner({
         <span className="font-semibold text-red-400">
           {degraded} of {total} participants degraded
         </span>
-        <span className="text-gray-400 ml-2">— {names.join(", ")}</span>
+        <span className="text-[var(--text-secondary)] ml-2">
+          — {names.join(", ")}
+        </span>
       </div>
     </div>
   );
@@ -781,14 +796,14 @@ function CostEstimatorPanel({
   const logTotal = (count * LOG_INJECTION_MB) / 1024; // GB/month total
 
   return (
-    <div className="border border-gray-700 rounded-xl p-5 mt-10 space-y-6">
+    <div className="border border-[var(--border)] rounded-xl p-5 mt-10 space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-3">
-        <h2 className="font-semibold text-sm flex items-center gap-2 text-gray-300">
+        <h2 className="font-semibold text-sm flex items-center gap-2 text-[var(--text-primary)]">
           <BarChart2 size={16} className="text-emerald-400" />
           Monthly Cost Estimate — STACKIT (Frankfurt)
         </h2>
-        <div className="flex items-center gap-3 text-xs text-gray-400">
+        <div className="flex items-center gap-3 text-xs text-[var(--text-secondary)]">
           <label className="flex items-center gap-2">
             <Users size={13} />
             Participants:
@@ -809,14 +824,14 @@ function CostEstimatorPanel({
 
       {/* StackIT node grid */}
       <div>
-        <p className="text-[11px] text-gray-500 mb-2 uppercase tracking-wide">
+        <p className="text-[11px] text-[var(--text-secondary)] mb-2 uppercase tracking-wide">
           Shared Infrastructure (fixed)
         </p>
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-2">
           {STACKIT_NODES.map((n) => (
             <div
               key={n.id}
-              className="border border-gray-700 rounded-lg p-3 bg-gray-900/40"
+              className="border border-[var(--border)] rounded-lg p-3 bg-[var(--surface)]/40"
             >
               <div className="flex items-center justify-between mb-1">
                 <span className="text-xs font-medium text-gray-200">
@@ -826,14 +841,14 @@ function CostEstimatorPanel({
                   €{n.eur}/mo
                 </span>
               </div>
-              <p className="text-[10px] text-gray-500 font-mono mb-1.5">
+              <p className="text-[10px] text-[var(--text-secondary)] font-mono mb-1.5">
                 {n.flavor}
               </p>
               <div className="flex flex-wrap gap-1">
                 {n.components.map((c) => (
                   <span
                     key={c}
-                    className="text-[9px] px-1.5 py-0.5 rounded bg-gray-800 text-gray-400"
+                    className="text-[9px] px-1.5 py-0.5 rounded bg-[var(--surface-2)] text-[var(--text-secondary)]"
                   >
                     {c}
                   </span>
@@ -845,20 +860,22 @@ function CostEstimatorPanel({
             </div>
           ))}
         </div>
-        <p className="text-xs text-gray-500 mt-2 text-right">
+        <p className="text-xs text-[var(--text-secondary)] mt-2 text-right">
           Shared fixed:{" "}
-          <span className="font-mono text-gray-300">€{SHARED_EUR}/mo</span>
+          <span className="font-mono text-[var(--text-primary)]">
+            €{SHARED_EUR}/mo
+          </span>
         </p>
       </div>
 
       {/* Per-participant breakdown */}
       <div>
-        <p className="text-[11px] text-gray-500 mb-2 uppercase tracking-wide">
+        <p className="text-[11px] text-[var(--text-secondary)] mb-2 uppercase tracking-wide">
           Per-Participant Cost (2 GB allocation)
         </p>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 text-xs">
-          <div className="border border-gray-700 rounded-lg p-3 bg-gray-900/40">
-            <div className="text-gray-500 mb-0.5">Compute</div>
+          <div className="border border-[var(--border)] rounded-lg p-3 bg-[var(--surface)]/40">
+            <div className="text-[var(--text-secondary)] mb-0.5">Compute</div>
             <div className="font-mono text-gray-200">
               €{PER_PARTICIPANT_COMPUTE_EUR}/mo
             </div>
@@ -866,11 +883,11 @@ function CostEstimatorPanel({
               1 vCPU / 2 GB — Control Plane + Identity Hub + Issuer Service
             </div>
           </div>
-          <div className="border border-gray-700 rounded-lg p-3 bg-gray-900/40">
-            <div className="text-gray-500 mb-0.5">Storage</div>
+          <div className="border border-[var(--border)] rounded-lg p-3 bg-[var(--surface)]/40">
+            <div className="text-[var(--text-secondary)] mb-0.5">Storage</div>
             <div className="font-mono text-gray-200">
               €{(PER_PARTICIPANT_STORAGE_GB * STORAGE_EUR_PER_GB).toFixed(2)}{" "}
-              <span className="text-gray-500 text-[10px]">
+              <span className="text-[var(--text-secondary)] text-[10px]">
                 (+€{(HEALTH_DATA_STORAGE_GB * STORAGE_EUR_PER_GB).toFixed(2)}{" "}
                 data holders)
               </span>
@@ -880,8 +897,8 @@ function CostEstimatorPanel({
               health records · €{STORAGE_EUR_PER_GB}/GB/mo
             </div>
           </div>
-          <div className="border border-gray-700 rounded-lg p-3 bg-gray-900/40">
-            <div className="flex items-center gap-1 text-gray-500 mb-0.5">
+          <div className="border border-[var(--border)] rounded-lg p-3 bg-[var(--surface)]/40">
+            <div className="flex items-center gap-1 text-[var(--text-secondary)] mb-0.5">
               <Network size={11} />
               CP↔DP Network
             </div>
@@ -893,8 +910,10 @@ function CostEstimatorPanel({
               transfer receipts + audit) · €{NETWORK_EUR_PER_GB}/GB egress
             </div>
           </div>
-          <div className="border border-gray-700 rounded-lg p-3 bg-gray-900/40">
-            <div className="text-gray-500 mb-0.5">Log Injection</div>
+          <div className="border border-[var(--border)] rounded-lg p-3 bg-[var(--surface)]/40">
+            <div className="text-[var(--text-secondary)] mb-0.5">
+              Log Injection
+            </div>
             <div className="font-mono text-gray-200">
               €{((LOG_INJECTION_MB / 1024) * LOG_EUR_PER_GB).toFixed(3)}/mo
             </div>
@@ -907,16 +926,18 @@ function CostEstimatorPanel({
       </div>
 
       {/* Totals */}
-      <div className="border border-gray-700 rounded-xl p-4 bg-gray-900/60">
+      <div className="border border-[var(--border)] rounded-xl p-4 bg-[var(--surface)]/60">
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
           <div>
-            <div className="text-[10px] text-gray-500 mb-1">Shared fixed</div>
+            <div className="text-[10px] text-[var(--text-secondary)] mb-1">
+              Shared fixed
+            </div>
             <div className="font-mono text-lg font-semibold text-gray-200">
               €{SHARED_EUR}
             </div>
           </div>
           <div>
-            <div className="text-[10px] text-gray-500 mb-1">
+            <div className="text-[10px] text-[var(--text-secondary)] mb-1">
               {count} × participants
             </div>
             <div className="font-mono text-lg font-semibold text-gray-200">
@@ -924,7 +945,7 @@ function CostEstimatorPanel({
             </div>
           </div>
           <div>
-            <div className="text-[10px] text-gray-500 mb-1">
+            <div className="text-[10px] text-[var(--text-secondary)] mb-1">
               Network ({(networkTotal + logTotal).toFixed(1)} GB/mo)
             </div>
             <div className="font-mono text-lg font-semibold text-gray-200">
@@ -935,12 +956,14 @@ function CostEstimatorPanel({
               ).toFixed(1)}
             </div>
           </div>
-          <div className="border-l border-gray-700">
-            <div className="text-[10px] text-gray-500 mb-1">Total / month</div>
+          <div className="border-l border-[var(--border)]">
+            <div className="text-[10px] text-[var(--text-secondary)] mb-1">
+              Total / month
+            </div>
             <div className="font-mono text-xl font-bold text-emerald-400">
               €{total.toFixed(0)}
             </div>
-            <div className="text-[10px] text-gray-500 mt-0.5">
+            <div className="text-[10px] text-[var(--text-secondary)] mt-0.5">
               €{perParticipant.toFixed(2)}/participant
             </div>
           </div>
@@ -1084,15 +1107,15 @@ export default function AdminComponentsPage() {
 
       {/* Controls bar */}
       <div className="flex items-center justify-between mb-6 flex-wrap gap-2">
-        <div className="flex items-center gap-4 text-xs text-gray-500">
+        <div className="flex items-center gap-4 text-xs text-[var(--text-secondary)]">
           {/* View toggle */}
-          <div className="flex items-center border border-gray-700 rounded-lg overflow-hidden">
+          <div className="flex items-center border border-[var(--border)] rounded-lg overflow-hidden">
             <button
               onClick={() => setViewMode("layer")}
               className={`px-3 py-1.5 text-xs transition-colors ${
                 viewMode === "layer"
                   ? "bg-layer2/20 text-layer2"
-                  : "text-gray-400 hover:text-gray-200"
+                  : "text-[var(--text-secondary)] hover:text-gray-200"
               }`}
             >
               Layer View
@@ -1102,7 +1125,7 @@ export default function AdminComponentsPage() {
               className={`px-3 py-1.5 text-xs transition-colors ${
                 viewMode === "participant"
                   ? "bg-layer2/20 text-layer2"
-                  : "text-gray-400 hover:text-gray-200"
+                  : "text-[var(--text-secondary)] hover:text-gray-200"
               }`}
             >
               Participant View
@@ -1151,19 +1174,19 @@ export default function AdminComponentsPage() {
         </div>
 
         <div className="flex items-center gap-3">
-          <label className="flex items-center gap-1.5 text-xs text-gray-500 cursor-pointer">
+          <label className="flex items-center gap-1.5 text-xs text-[var(--text-secondary)] cursor-pointer">
             <input
               type="checkbox"
               checked={autoRefresh}
               onChange={(e) => setAutoRefresh(e.target.checked)}
-              className="rounded border-gray-600 bg-gray-800 text-layer2 focus:ring-layer2 w-3.5 h-3.5"
+              className="rounded border-gray-600 bg-[var(--surface-2)] text-layer2 focus:ring-layer2 w-3.5 h-3.5"
             />
             Auto-refresh (30s)
           </label>
           <button
             onClick={() => fetchData(true)}
             disabled={refreshing}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs border border-gray-700 rounded-lg hover:border-layer2 transition-colors disabled:opacity-50"
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs border border-[var(--border)] rounded-lg hover:border-layer2 transition-colors disabled:opacity-50"
           >
             <RefreshCw size={12} className={refreshing ? "animate-spin" : ""} />
             Refresh
@@ -1172,7 +1195,7 @@ export default function AdminComponentsPage() {
       </div>
 
       {loading ? (
-        <div className="flex items-center gap-2 text-gray-500">
+        <div className="flex items-center gap-2 text-[var(--text-secondary)]">
           <Loader2 size={16} className="animate-spin" />
           Loading EDC components…
         </div>
@@ -1196,10 +1219,10 @@ export default function AdminComponentsPage() {
 
             {/* Participant topology sections */}
             <div className="space-y-3 mb-8">
-              <h2 className="font-semibold text-sm flex items-center gap-2 text-gray-300 mb-3">
+              <h2 className="font-semibold text-sm flex items-center gap-2 text-[var(--text-primary)] mb-3">
                 <Users size={16} className="text-layer2" />
                 Dataspace Participants
-                <span className="text-xs font-normal text-gray-500">
+                <span className="text-xs font-normal text-[var(--text-secondary)]">
                   ({topology.participants.length})
                 </span>
               </h2>
@@ -1216,10 +1239,10 @@ export default function AdminComponentsPage() {
             {topology.infrastructure.length > 0 && (
               <div className="mb-8">
                 <div className="flex items-start justify-between mb-3 flex-wrap gap-2">
-                  <h2 className="font-semibold text-sm flex items-center gap-2 text-gray-300">
+                  <h2 className="font-semibold text-sm flex items-center gap-2 text-[var(--text-primary)]">
                     <HardDrive size={16} className="text-yellow-400" />
                     Shared Infrastructure &amp; CFM
-                    <span className="text-xs font-normal text-gray-500">
+                    <span className="text-xs font-normal text-[var(--text-secondary)]">
                       ({topology.infrastructure.length})
                     </span>
                   </h2>
@@ -1253,30 +1276,30 @@ export default function AdminComponentsPage() {
           {/* Participants */}
           {snapshot && snapshot.participants.length > 0 && (
             <div className="mb-8">
-              <h2 className="font-semibold text-sm mb-4 flex items-center gap-2 text-gray-300">
+              <h2 className="font-semibold text-sm mb-4 flex items-center gap-2 text-[var(--text-primary)]">
                 <Users size={16} className="text-layer2" />
                 Dataspace Participants
-                <span className="text-xs font-normal text-gray-500">
+                <span className="text-xs font-normal text-[var(--text-secondary)]">
                   ({snapshot.participants.length})
                 </span>
               </h2>
-              <div className="overflow-x-auto border border-gray-700 rounded-xl">
+              <div className="overflow-x-auto border border-[var(--border)] rounded-xl">
                 <table className="w-full text-left">
                   <thead>
-                    <tr className="border-b border-gray-700 bg-gray-900/60">
-                      <th className="py-2 px-3 text-xs font-medium text-gray-500 w-48">
+                    <tr className="border-b border-[var(--border)] bg-[var(--surface)]/60">
+                      <th className="py-2 px-3 text-xs font-medium text-[var(--text-secondary)] w-48">
                         Participant
                       </th>
-                      <th className="py-2 px-3 text-xs font-medium text-gray-500 w-32">
+                      <th className="py-2 px-3 text-xs font-medium text-[var(--text-secondary)] w-32">
                         Role
                       </th>
-                      <th className="py-2 px-3 text-xs font-medium text-gray-500">
+                      <th className="py-2 px-3 text-xs font-medium text-[var(--text-secondary)]">
                         DID
                       </th>
-                      <th className="py-2 px-3 text-xs font-medium text-gray-500 w-28">
+                      <th className="py-2 px-3 text-xs font-medium text-[var(--text-secondary)] w-28">
                         State
                       </th>
-                      <th className="py-2 px-3 text-xs font-medium text-gray-500 w-20 text-center">
+                      <th className="py-2 px-3 text-xs font-medium text-[var(--text-secondary)] w-20 text-center">
                         Profiles
                       </th>
                     </tr>
@@ -1285,13 +1308,13 @@ export default function AdminComponentsPage() {
                     {snapshot.participants.map((p) => (
                       <tr
                         key={p.id}
-                        className="border-b border-gray-800 hover:bg-gray-800/40 transition-colors"
+                        className="border-b border-[var(--border)] hover:bg-[var(--surface-2)]/40 transition-colors"
                       >
                         <td className="py-2.5 px-3">
                           <div className="font-semibold text-sm text-gray-200">
                             {p.displayName}
                           </div>
-                          <div className="text-[11px] text-gray-500">
+                          <div className="text-[11px] text-[var(--text-secondary)]">
                             {p.organization}
                           </div>
                         </td>
@@ -1299,13 +1322,13 @@ export default function AdminComponentsPage() {
                           <span
                             className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${
                               ROLE_COLORS[p.role] ||
-                              "bg-gray-500/20 text-gray-400"
+                              "bg-gray-500/20 text-[var(--text-secondary)]"
                             }`}
                           >
                             {p.role}
                           </span>
                         </td>
-                        <td className="py-2.5 px-3 font-mono text-[11px] text-gray-400">
+                        <td className="py-2.5 px-3 font-mono text-[11px] text-[var(--text-secondary)]">
                           {p.did}
                         </td>
                         <td className="py-2.5 px-3">
@@ -1319,7 +1342,7 @@ export default function AdminComponentsPage() {
                             {p.state}
                           </span>
                         </td>
-                        <td className="py-2.5 px-3 text-xs text-gray-300 text-center">
+                        <td className="py-2.5 px-3 text-xs text-[var(--text-primary)] text-center">
                           {p.profileCount}
                         </td>
                       </tr>
@@ -1339,33 +1362,33 @@ export default function AdminComponentsPage() {
 
             return (
               <div key={layer} className="mb-8">
-                <h2 className="font-semibold text-sm mb-3 flex items-center gap-2 text-gray-300">
+                <h2 className="font-semibold text-sm mb-3 flex items-center gap-2 text-[var(--text-primary)]">
                   <LayerIcon size={16} className={meta.color} />
                   {meta.label}
-                  <span className="text-xs font-normal text-gray-500">
+                  <span className="text-xs font-normal text-[var(--text-secondary)]">
                     ({items.length})
                   </span>
                 </h2>
-                <div className="overflow-x-auto border border-gray-700 rounded-xl">
+                <div className="overflow-x-auto border border-[var(--border)] rounded-xl">
                   <table className="w-full text-left">
                     <thead>
-                      <tr className="border-b border-gray-700 bg-gray-900/60">
-                        <th className="py-2 px-3 text-xs font-medium text-gray-500 w-48">
+                      <tr className="border-b border-[var(--border)] bg-[var(--surface)]/60">
+                        <th className="py-2 px-3 text-xs font-medium text-[var(--text-secondary)] w-48">
                           Component
                         </th>
-                        <th className="py-2 px-3 text-xs font-medium text-gray-500 w-28">
+                        <th className="py-2 px-3 text-xs font-medium text-[var(--text-secondary)] w-28">
                           Health
                         </th>
-                        <th className="py-2 px-3 text-xs font-medium text-gray-500 w-24">
+                        <th className="py-2 px-3 text-xs font-medium text-[var(--text-secondary)] w-24">
                           Uptime
                         </th>
-                        <th className="py-2 px-3 text-xs font-medium text-gray-500 w-40">
+                        <th className="py-2 px-3 text-xs font-medium text-[var(--text-secondary)] w-40">
                           CPU (Last 24h)
                         </th>
-                        <th className="py-2 px-3 text-xs font-medium text-gray-500 w-44">
+                        <th className="py-2 px-3 text-xs font-medium text-[var(--text-secondary)] w-44">
                           Memory (Last 24h)
                         </th>
-                        <th className="py-2 px-3 text-xs font-medium text-gray-500 w-16">
+                        <th className="py-2 px-3 text-xs font-medium text-[var(--text-secondary)] w-16">
                           Mem %
                         </th>
                       </tr>

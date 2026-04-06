@@ -69,14 +69,15 @@ export default function DemoHubPage() {
         <Users size={28} className="text-layer1" />
         <h1 className="text-3xl font-bold">Demo Persona Selector</h1>
       </div>
-      <p className="text-gray-400 mb-2">
+      <p className="text-[var(--text-secondary)] mb-2">
         Explore the Health Dataspace as any of the 7 demo participants — no
         login required.
       </p>
-      <p className="text-sm text-gray-500 mb-10">
+      <p className="text-sm text-[var(--text-secondary)] mb-10">
         Select a persona below. Navigation, data, and views will update to match
         that participant&apos;s role. Switch anytime via the user menu{" "}
-        <span className="text-gray-400">→</span> <em>Switch demo persona</em>.
+        <span className="text-[var(--text-secondary)]">→</span>{" "}
+        <em>Switch demo persona</em>.
       </p>
 
       {/* Persona cards */}
@@ -96,7 +97,7 @@ export default function DemoHubPage() {
             <button
               key={persona.username}
               onClick={() => handleSelect(persona.username, persona.personaId)}
-              className={`group text-left rounded-2xl border p-6 transition-all hover:scale-[1.02] hover:shadow-lg ${persona.badge} bg-gray-900 hover:bg-gray-800`}
+              className={`group text-left rounded-2xl border p-6 transition-all hover:scale-[1.02] hover:shadow-lg ${persona.badge} bg-[var(--surface)] hover:bg-[var(--surface-2)]`}
             >
               {/* Icon + username */}
               <div className={`flex items-center gap-3 mb-3 ${persona.color}`}>
@@ -107,12 +108,12 @@ export default function DemoHubPage() {
               </div>
 
               {/* Organisation */}
-              <p className="text-sm text-gray-300 font-medium mb-1">
+              <p className="text-sm text-[var(--text-primary)] font-medium mb-1">
                 {persona.organisation}
               </p>
 
               {/* Description */}
-              <p className="text-xs text-gray-500 mb-4 leading-relaxed">
+              <p className="text-xs text-[var(--text-secondary)] mb-4 leading-relaxed">
                 {persona.description}
               </p>
 

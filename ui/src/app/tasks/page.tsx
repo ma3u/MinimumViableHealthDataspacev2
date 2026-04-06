@@ -232,7 +232,7 @@ export default function TasksPage() {
   return (
     <Suspense
       fallback={
-        <div className="flex items-center gap-2 text-gray-500 p-10">
+        <div className="flex items-center gap-2 text-[var(--text-secondary)] p-10">
           <Loader2 size={16} className="animate-spin" />
           Loading…
         </div>
@@ -382,9 +382,9 @@ function TasksContent() {
         ].map((card) => (
           <div
             key={card.label}
-            className="p-3 rounded-xl border border-gray-700 bg-gray-800/50"
+            className="p-3 rounded-xl border border-[var(--border)] bg-[var(--surface-2)]/50"
           >
-            <p className="text-xs text-gray-500">{card.label}</p>
+            <p className="text-xs text-[var(--text-secondary)]">{card.label}</p>
             <p className={`text-2xl font-bold ${card.color}`}>{card.value}</p>
           </div>
         ))}
@@ -402,7 +402,7 @@ function TasksContent() {
               className={`flex items-center gap-1.5 px-3 py-1 text-xs rounded-full border transition-colors ${
                 selectedParticipant !== "all"
                   ? "border-layer2 bg-layer2/20 text-layer2"
-                  : "border-gray-700 text-gray-400 hover:text-gray-200 hover:border-gray-500"
+                  : "border-[var(--border)] text-[var(--text-secondary)] hover:text-gray-200 hover:border-gray-500"
               }`}
             >
               <Users size={12} />
@@ -414,16 +414,16 @@ function TasksContent() {
               <ChevronDown size={10} />
             </button>
             {participantDropdownOpen && (
-              <div className="absolute z-20 mt-1 bg-gray-800 border border-gray-700 rounded-lg shadow-xl py-1 min-w-[200px]">
+              <div className="absolute z-20 mt-1 bg-[var(--surface-2)] border border-[var(--border)] rounded-lg shadow-xl py-1 min-w-[200px]">
                 <button
                   onClick={() => {
                     setSelectedParticipant("all");
                     setParticipantDropdownOpen(false);
                   }}
-                  className={`w-full text-left px-3 py-1.5 text-xs hover:bg-gray-700 ${
+                  className={`w-full text-left px-3 py-1.5 text-xs hover:bg-[var(--surface-2)] ${
                     selectedParticipant === "all"
                       ? "text-layer2"
-                      : "text-gray-300"
+                      : "text-[var(--text-primary)]"
                   }`}
                 >
                   All Participants ({counts.total})
@@ -439,13 +439,16 @@ function TasksContent() {
                         setSelectedParticipant(id);
                         setParticipantDropdownOpen(false);
                       }}
-                      className={`w-full text-left px-3 py-1.5 text-xs hover:bg-gray-700 ${
+                      className={`w-full text-left px-3 py-1.5 text-xs hover:bg-[var(--surface-2)] ${
                         selectedParticipant === id
                           ? "text-layer2"
-                          : "text-gray-300"
+                          : "text-[var(--text-primary)]"
                       }`}
                     >
-                      {name} <span className="text-gray-500">({pCount})</span>
+                      {name}{" "}
+                      <span className="text-[var(--text-secondary)]">
+                        ({pCount})
+                      </span>
                     </button>
                   );
                 })}
@@ -455,7 +458,7 @@ function TasksContent() {
 
           {/* Type/status filter tabs */}
           <div className="flex items-center gap-1">
-            <Filter size={14} className="text-gray-500 mr-1" />
+            <Filter size={14} className="text-[var(--text-secondary)] mr-1" />
             {filters.map((f) => (
               <button
                 key={f.key}
@@ -463,7 +466,7 @@ function TasksContent() {
                 className={`px-3 py-1 text-xs rounded-full border transition-colors ${
                   filter === f.key
                     ? "border-layer2 bg-layer2/20 text-layer2"
-                    : "border-gray-700 text-gray-400 hover:text-gray-200 hover:border-gray-500"
+                    : "border-[var(--border)] text-[var(--text-secondary)] hover:text-gray-200 hover:border-gray-500"
                 }`}
               >
                 {f.label}
@@ -475,7 +478,7 @@ function TasksContent() {
         <button
           onClick={() => loadTasks(true)}
           disabled={refreshing}
-          className="flex items-center gap-1 text-xs text-gray-400 hover:text-gray-200 disabled:opacity-50"
+          className="flex items-center gap-1 text-xs text-[var(--text-secondary)] hover:text-gray-200 disabled:opacity-50"
         >
           <RefreshCw size={12} className={refreshing ? "animate-spin" : ""} />
           Refresh
@@ -484,12 +487,12 @@ function TasksContent() {
 
       {/* Task List */}
       {loading ? (
-        <div className="flex items-center gap-2 text-gray-500 py-8">
+        <div className="flex items-center gap-2 text-[var(--text-secondary)] py-8">
           <Loader2 size={16} className="animate-spin" />
           Loading tasks…
         </div>
       ) : filteredTasks.length === 0 ? (
-        <div className="text-center py-12 text-gray-500">
+        <div className="text-center py-12 text-[var(--text-secondary)]">
           <ClipboardList size={32} className="mx-auto mb-3 opacity-40" />
           <p className="text-sm">
             {filter === "all"
@@ -531,7 +534,7 @@ function TasksContent() {
               <Link
                 key={`${task.type}-${task.id}`}
                 href={detailHref}
-                className="block p-4 border border-gray-700 rounded-xl hover:border-gray-500 transition-colors space-y-3"
+                className="block p-4 border border-[var(--border)] rounded-xl hover:border-gray-500 transition-colors space-y-3"
               >
                 {/* Header row */}
                 <div className="flex items-center justify-between">
@@ -546,7 +549,7 @@ function TasksContent() {
                       {typeBadge}
                     </span>
                     {task.transferType && (
-                      <span className="text-[10px] px-1.5 py-0.5 rounded bg-gray-700 text-gray-400 shrink-0">
+                      <span className="text-[10px] px-1.5 py-0.5 rounded bg-gray-700 text-[var(--text-secondary)] shrink-0">
                         {task.transferType}
                       </span>
                     )}
@@ -595,7 +598,7 @@ function TasksContent() {
                 })()}
 
                 {/* Metadata row */}
-                <div className="flex items-center gap-4 text-[11px] text-gray-500 flex-wrap">
+                <div className="flex items-center gap-4 text-[11px] text-[var(--text-secondary)] flex-wrap">
                   <span>
                     {task.participant}
                     {task.counterParty !== "—" && ` → ${task.counterParty}`}

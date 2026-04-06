@@ -103,12 +103,12 @@ export default function PatientProfilePage() {
       {/* Patient selector */}
       {!loading && patients.length > 0 && (
         <div className="mb-6">
-          <label className="text-sm text-gray-400">
+          <label className="text-sm text-[var(--text-secondary)]">
             Select patient record
             <select
               value={selectedId}
               onChange={(e) => setSelectedId(e.target.value)}
-              className="mt-1 w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded text-sm outline-none focus:border-teal-500 block"
+              className="mt-1 w-full px-3 py-2 bg-[var(--surface-2)] border border-gray-600 rounded text-sm outline-none focus:border-teal-500 block"
             >
               {patients.map((p) => (
                 <option key={p.id} value={p.id}>
@@ -122,34 +122,42 @@ export default function PatientProfilePage() {
       )}
 
       {profileLoading && (
-        <div className="text-gray-500 text-sm">Loading health profile…</div>
+        <div className="text-[var(--text-secondary)] text-sm">
+          Loading health profile…
+        </div>
       )}
 
       {profile && !profileLoading && (
         <div className="space-y-6">
           {/* Patient demographics */}
-          <div className="rounded-xl border border-gray-700 bg-gray-800/50 p-4">
+          <div className="rounded-xl border border-[var(--border)] bg-[var(--surface-2)]/50 p-4">
             <div className="flex items-center gap-2 mb-3">
               <User size={16} className="text-teal-400" />
               <h2 className="font-semibold">
                 {profile.patient.name || "Anonymous Patient"}
               </h2>
             </div>
-            <div className="grid grid-cols-2 gap-2 text-xs text-gray-400">
+            <div className="grid grid-cols-2 gap-2 text-xs text-[var(--text-secondary)]">
               <div>
-                <span className="text-gray-500">Gender:</span>{" "}
+                <span className="text-[var(--text-secondary)]">Gender:</span>{" "}
                 {profile.patient.gender}
               </div>
               <div>
-                <span className="text-gray-500">Date of birth:</span>{" "}
+                <span className="text-[var(--text-secondary)]">
+                  Date of birth:
+                </span>{" "}
                 {profile.patient.birthDate || "—"}
               </div>
               <div>
-                <span className="text-gray-500">Active Conditions:</span>{" "}
+                <span className="text-[var(--text-secondary)]">
+                  Active Conditions:
+                </span>{" "}
                 {profile.totalConditionCount ?? profile.conditions.length}
               </div>
               <div>
-                <span className="text-gray-500">Medications:</span>{" "}
+                <span className="text-[var(--text-secondary)]">
+                  Medications:
+                </span>{" "}
                 {profile.medications.length}
               </div>
             </div>
@@ -220,10 +228,10 @@ export default function PatientProfilePage() {
           {profile.conditions.length > 0 && (
             <div>
               <h2 className="text-lg font-semibold mb-2">Active Conditions</h2>
-              <div className="rounded-xl border border-gray-700 overflow-hidden">
+              <div className="rounded-xl border border-[var(--border)] overflow-hidden">
                 <table className="text-xs w-full border-collapse">
                   <thead>
-                    <tr className="border-b border-gray-700 text-gray-500">
+                    <tr className="border-b border-[var(--border)] text-[var(--text-secondary)]">
                       <th className="text-left p-2">Condition</th>
                       <th className="text-left p-2">ICD-10 / SNOMED</th>
                       <th className="text-left p-2">Onset</th>
@@ -231,12 +239,12 @@ export default function PatientProfilePage() {
                   </thead>
                   <tbody>
                     {profile.conditions.slice(0, 8).map((c, i) => (
-                      <tr key={i} className="border-b border-gray-800">
+                      <tr key={i} className="border-b border-[var(--border)]">
                         <td className="p-2 text-gray-200">{c.display}</td>
-                        <td className="p-2 font-mono text-gray-500">
+                        <td className="p-2 font-mono text-[var(--text-secondary)]">
                           {c.code}
                         </td>
-                        <td className="p-2 text-gray-500">
+                        <td className="p-2 text-[var(--text-secondary)]">
                           {c.onsetDate?.slice(0, 10) || "—"}
                         </td>
                       </tr>

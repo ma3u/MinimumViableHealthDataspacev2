@@ -35,7 +35,7 @@ const ROLE_SHIELD: Record<string, string> = {
   DATA_HOLDER: "text-blue-400",
   DATA_USER: "text-green-400",
   TRUST_CENTER_OPERATOR: "text-violet-400",
-  EDC_USER_PARTICIPANT: "text-gray-400",
+  EDC_USER_PARTICIPANT: "text-[var(--text-secondary)]",
   PATIENT: "text-teal-400",
 };
 
@@ -127,7 +127,7 @@ export default function UserMenu() {
 
   if (status === "loading") {
     return (
-      <div className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-gray-500">
+      <div className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-[var(--text-secondary)]">
         <User size={15} />
         <span className="animate-pulse">…</span>
       </div>
@@ -138,7 +138,7 @@ export default function UserMenu() {
     return (
       <button
         onClick={() => !IS_STATIC && signIn("keycloak")}
-        className="flex items-center gap-1.5 px-3 py-1.5 rounded text-sm text-gray-400 hover:text-gray-100 hover:bg-gray-800 transition-colors"
+        className="flex items-center gap-1.5 px-3 py-1.5 rounded text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-2)] transition-colors"
       >
         <LogIn size={15} />
         Sign in
@@ -156,14 +156,15 @@ export default function UserMenu() {
   // Short role label for the nav bar chip
   const navLabel = ROLE_LABELS[primaryRole] ?? username;
   const accentClass = ROLE_ACCENT[primaryRole] ?? "border-gray-600";
-  const shieldClass = ROLE_SHIELD[primaryRole] ?? "text-gray-400";
+  const shieldClass =
+    ROLE_SHIELD[primaryRole] ?? "text-[var(--text-secondary)]";
 
   return (
     <div ref={ref} className="relative">
       {/* ── Nav bar button ── */}
       <button
         onClick={() => setOpen(!open)}
-        className="flex items-center gap-1.5 px-2.5 py-1.5 rounded text-sm text-gray-300 hover:text-gray-100 hover:bg-gray-800 transition-colors"
+        className="flex items-center gap-1.5 px-2.5 py-1.5 rounded text-sm text-[var(--text-primary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-2)] transition-colors"
         aria-label="User menu"
       >
         <Shield size={14} className={shieldClass} />
@@ -186,10 +187,10 @@ export default function UserMenu() {
       {/* ── Dropdown panel ── */}
       {open && (
         <div
-          className={`absolute right-0 top-full mt-1 w-72 bg-gray-800 border rounded-lg shadow-xl z-50 ${accentClass}`}
+          className={`absolute right-0 top-full mt-1 w-72 bg-[var(--surface-2)] border rounded-lg shadow-xl z-50 ${accentClass}`}
         >
           {/* Identity block */}
-          <div className="p-3 border-b border-gray-700">
+          <div className="p-3 border-b border-[var(--border)]">
             <p className="text-sm text-white font-semibold truncate">
               {username}
               {IS_STATIC && (
@@ -198,7 +199,7 @@ export default function UserMenu() {
                 </span>
               )}
             </p>
-            <p className="text-xs text-gray-400 truncate mt-0.5">
+            <p className="text-xs text-[var(--text-secondary)] truncate mt-0.5">
               {session.user?.email}
             </p>
             {/* Role badges */}
@@ -218,11 +219,11 @@ export default function UserMenu() {
           </div>
 
           {/* Settings link */}
-          <div className="p-2 border-b border-gray-700">
+          <div className="p-2 border-b border-[var(--border)]">
             <a
               href="/settings"
               onClick={() => setOpen(false)}
-              className="flex items-center gap-2 w-full px-3 py-2 rounded text-sm text-gray-300 hover:bg-gray-700 transition-colors"
+              className="flex items-center gap-2 w-full px-3 py-2 rounded text-sm text-[var(--text-primary)] hover:bg-[var(--surface-2)] transition-colors"
             >
               <Settings size={14} />
               <span className="font-medium">Settings</span>
@@ -230,10 +231,10 @@ export default function UserMenu() {
           </div>
 
           {/* Persona switcher — Keycloak in live mode, localStorage in static demo */}
-          <div className="border-t border-gray-700">
+          <div className="border-t border-[var(--border)]">
             <div className="px-3 pt-2 pb-1 flex items-center gap-1.5">
-              <Users size={11} className="text-gray-500" />
-              <span className="text-[10px] text-gray-500 uppercase tracking-wide font-semibold">
+              <Users size={11} className="text-[var(--text-secondary)]" />
+              <span className="text-[10px] text-[var(--text-secondary)] uppercase tracking-wide font-semibold">
                 {IS_STATIC ? "Switch demo persona" : "Returning users"}
               </span>
             </div>
@@ -266,7 +267,7 @@ export default function UserMenu() {
                     className={`flex items-center gap-2 w-full px-2 py-1.5 rounded text-left transition-colors ${
                       isActive
                         ? "bg-gray-700/50 cursor-default"
-                        : "hover:bg-gray-700 cursor-pointer"
+                        : "hover:bg-[var(--surface-2)] cursor-pointer"
                     }`}
                   >
                     <span
@@ -280,13 +281,13 @@ export default function UserMenu() {
                     </span>
                     <span
                       className={`font-mono text-xs truncate ${
-                        isActive ? "text-white" : "text-gray-300"
+                        isActive ? "text-white" : "text-[var(--text-primary)]"
                       }`}
                     >
                       {persona.username}
                     </span>
                     {isActive && (
-                      <span className="ml-auto text-[9px] text-gray-500 shrink-0">
+                      <span className="ml-auto text-[9px] text-[var(--text-secondary)] shrink-0">
                         active
                       </span>
                     )}
@@ -297,7 +298,7 @@ export default function UserMenu() {
           </div>
 
           {/* Sign out */}
-          <div className="p-2 border-t border-gray-700">
+          <div className="p-2 border-t border-[var(--border)]">
             <button
               onClick={() => {
                 setOpen(false);
@@ -315,7 +316,7 @@ export default function UserMenu() {
                   : undefined;
                 signOut({ callbackUrl: logoutUrl ?? "/" });
               }}
-              className="flex items-center gap-2 w-full px-3 py-2 text-sm text-red-400 hover:bg-gray-700 rounded transition-colors"
+              className="flex items-center gap-2 w-full px-3 py-2 text-sm text-red-400 hover:bg-[var(--surface-2)] rounded transition-colors"
             >
               <LogOut size={14} />
               {IS_STATIC ? "Sign out (disabled in demo)" : "Sign out"}

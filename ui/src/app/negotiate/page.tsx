@@ -113,7 +113,7 @@ export default function NegotiatePage() {
   return (
     <Suspense
       fallback={
-        <div className="flex items-center gap-2 text-gray-500 p-10">
+        <div className="flex items-center gap-2 text-[var(--text-secondary)] p-10">
           <Loader2 size={16} className="animate-spin" />
           Loading…
         </div>
@@ -331,13 +331,13 @@ function NegotiateContent() {
 
       {/* Consumer context selector */}
       <div className="mb-6">
-        <label className="text-xs text-gray-500 mb-1 block">
+        <label className="text-xs text-[var(--text-secondary)] mb-1 block">
           Requesting as (your participant)
         </label>
         <select
           value={selectedCtx}
           onChange={(e) => setSelectedCtx(e.target.value)}
-          className="w-full max-w-md px-3 py-2 bg-gray-800 border border-gray-600 rounded text-sm"
+          className="w-full max-w-md px-3 py-2 bg-[var(--surface-2)] border border-gray-600 rounded text-sm"
         >
           {participants.map((p) => (
             <option key={p["@id"]} value={p["@id"]}>
@@ -349,20 +349,20 @@ function NegotiateContent() {
       </div>
 
       {/* ── Step 1: Catalog discovery ── */}
-      <div className="border border-gray-700 rounded-xl p-5 mb-5">
+      <div className="border border-[var(--border)] rounded-xl p-5 mb-5">
         <div className="flex items-center gap-2 mb-1">
           <Search size={16} className="text-layer2" />
           <h2 className="font-semibold text-sm">
             Step 1 — Choose Data Provider
           </h2>
         </div>
-        <p className="text-xs text-gray-500 mb-4">
+        <p className="text-xs text-[var(--text-secondary)] mb-4">
           Choose a data provider below — the catalog will be fetched
           automatically.
         </p>
 
         <div className="mb-4">
-          <label className="text-xs text-gray-500 mb-1 block">
+          <label className="text-xs text-[var(--text-secondary)] mb-1 block">
             Data Provider
           </label>
           <select
@@ -381,7 +381,7 @@ function NegotiateContent() {
               setSelectedOffer(null);
               setCatalogError(null);
             }}
-            className="w-full max-w-md px-3 py-2 bg-gray-800 border border-gray-600 rounded text-sm"
+            className="w-full max-w-md px-3 py-2 bg-[var(--surface-2)] border border-gray-600 rounded text-sm"
             disabled={participants.length === 0}
           >
             {participants.length === 0 && (
@@ -421,7 +421,7 @@ function NegotiateContent() {
 
         {offers.length > 0 && (
           <div className="mt-4 space-y-2">
-            <p className="text-xs text-gray-400 mb-2">
+            <p className="text-xs text-[var(--text-secondary)] mb-2">
               {offers.length} offer(s) found — select one to negotiate:
             </p>
             {offers.map((o) => (
@@ -432,7 +432,7 @@ function NegotiateContent() {
                 className={`w-full text-left p-3 rounded-lg border text-sm transition-colors ${
                   selectedOffer?.offerId === o.offerId
                     ? "border-layer2 bg-layer2/10"
-                    : "border-gray-700 hover:border-gray-500 bg-gray-800/50"
+                    : "border-[var(--border)] hover:border-gray-500 bg-[var(--surface-2)]/50"
                 }`}
               >
                 <div className="flex items-center justify-between">
@@ -441,7 +441,7 @@ function NegotiateContent() {
                   </span>
                   <div className="flex items-center gap-2">
                     {o.contentType && (
-                      <span className="text-[10px] px-1.5 py-0.5 rounded bg-gray-700 text-gray-400">
+                      <span className="text-[10px] px-1.5 py-0.5 rounded bg-gray-700 text-[var(--text-secondary)]">
                         {o.contentType}
                       </span>
                     )}
@@ -451,7 +451,7 @@ function NegotiateContent() {
                   </div>
                 </div>
                 {o.description && (
-                  <p className="text-xs text-gray-500 mt-0.5 truncate">
+                  <p className="text-xs text-[var(--text-secondary)] mt-0.5 truncate">
                     {o.description}
                   </p>
                 )}
@@ -462,17 +462,20 @@ function NegotiateContent() {
       </div>
 
       {/* ── Step 2: Negotiation ── */}
-      <div className="border border-gray-700 rounded-xl p-5 mb-8">
+      <div className="border border-[var(--border)] rounded-xl p-5 mb-8">
         <div className="flex items-center gap-2 mb-1">
           <FileSignature size={18} className="text-layer2" />
           <h2 className="font-semibold text-sm">
             Step 2 — Initiate Negotiation
           </h2>
         </div>
-        <p className="text-xs text-gray-500 mb-4">
-          Submit a DSP <code className="text-gray-400">ContractRequest</code>{" "}
+        <p className="text-xs text-[var(--text-secondary)] mb-4">
+          Submit a DSP{" "}
+          <code className="text-[var(--text-secondary)]">ContractRequest</code>{" "}
           with the selected ODRL offer. Protocol:{" "}
-          <code className="text-gray-400">dataspace-protocol-http:2025-1</code>
+          <code className="text-[var(--text-secondary)]">
+            dataspace-protocol-http:2025-1
+          </code>
         </p>
 
         {result && (
@@ -497,13 +500,13 @@ function NegotiateContent() {
         )}
 
         {selectedOffer && (
-          <div className="mb-4 p-3 rounded bg-gray-800/60 border border-gray-700 text-sm">
-            <span className="text-gray-400">Selected:</span>{" "}
+          <div className="mb-4 p-3 rounded bg-[var(--surface-2)]/60 border border-[var(--border)] text-sm">
+            <span className="text-[var(--text-secondary)]">Selected:</span>{" "}
             <span className="text-gray-200 font-medium">
               {selectedOffer.name || assetLabel(selectedOffer.assetId)}
             </span>
             {selectedOffer.contentType && (
-              <span className="ml-2 text-[10px] px-1.5 py-0.5 rounded bg-gray-700 text-gray-400">
+              <span className="ml-2 text-[10px] px-1.5 py-0.5 rounded bg-gray-700 text-[var(--text-secondary)]">
                 {selectedOffer.contentType}
               </span>
             )}
@@ -532,12 +535,14 @@ function NegotiateContent() {
       {/* Negotiation history */}
       <h2 className="font-semibold text-sm mb-3">Negotiation History</h2>
       {loading ? (
-        <div className="flex items-center gap-2 text-gray-500">
+        <div className="flex items-center gap-2 text-[var(--text-secondary)]">
           <Loader2 size={16} className="animate-spin" />
           Loading negotiations…
         </div>
       ) : negotiations.length === 0 ? (
-        <p className="text-gray-500 text-sm">No negotiations found</p>
+        <p className="text-[var(--text-secondary)] text-sm">
+          No negotiations found
+        </p>
       ) : (
         <div className="grid gap-2">
           {negotiations.map((n) => {
@@ -547,7 +552,7 @@ function NegotiateContent() {
             return (
               <div
                 key={n["@id"]}
-                className="flex items-center gap-3 p-3 border border-gray-700 rounded-lg"
+                className="flex items-center gap-3 p-3 border border-[var(--border)] rounded-lg"
               >
                 {stateIcon(state)}
                 <div className="flex-1 min-w-0">
@@ -556,7 +561,7 @@ function NegotiateContent() {
                       ? assetLabel(n.assetId as string)
                       : n["@id"].slice(0, 12)}
                   </p>
-                  <p className="text-xs text-gray-500">
+                  <p className="text-xs text-[var(--text-secondary)]">
                     Provider: {counterParty ? didToName(counterParty) : "—"}
                     {state === "FINALIZED" && " · Agreement ready"}
                   </p>

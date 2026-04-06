@@ -277,7 +277,9 @@ export function FeatureCardGrid({
                 </span>
               )}
             </div>
-            <p className="text-sm text-gray-400 leading-relaxed">{desc}</p>
+            <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
+              {desc}
+            </p>
           </Link>
         );
       })}

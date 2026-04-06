@@ -123,9 +123,9 @@ export default function NlqPage() {
       : [];
 
   return (
-    <div className="min-h-screen bg-gray-950 text-gray-100">
+    <div className="min-h-screen bg-[var(--bg)] text-[var(--text-primary)]">
       {/* Header with federated stats */}
-      <div className="border-b border-gray-800 bg-gray-900/50">
+      <div className="border-b border-[var(--border)] bg-[var(--surface)]/50">
         <div className="max-w-6xl mx-auto px-6 py-5">
           <div className="flex items-center justify-between">
             <div>
@@ -135,7 +135,7 @@ export default function NlqPage() {
                   Natural Language Query
                 </h1>
               </div>
-              <p className="text-sm text-gray-500 mt-1">
+              <p className="text-sm text-[var(--text-secondary)] mt-1">
                 Ask questions about the Health Dataspace knowledge graph in
                 plain language. The query engine translates your question into
                 Cypher and returns structured results from all five graph
@@ -144,14 +144,14 @@ export default function NlqPage() {
               <div className="flex items-center gap-4 text-xs text-gray-600 mt-2">
                 <a
                   href="/analytics"
-                  className="hover:text-gray-400 transition-colors"
+                  className="hover:text-[var(--text-secondary)] transition-colors"
                 >
                   ← OMOP Analytics
                 </a>
                 <span>|</span>
                 <a
                   href="/eehrxf"
-                  className="hover:text-gray-400 transition-colors"
+                  className="hover:text-[var(--text-secondary)] transition-colors"
                 >
                   EEHRxF Profiles →
                 </a>
@@ -163,25 +163,33 @@ export default function NlqPage() {
                   <div className="text-lg font-semibold text-blue-400">
                     {stats.speCount}
                   </div>
-                  <div className="text-gray-500 text-xs">SPEs</div>
+                  <div className="text-[var(--text-secondary)] text-xs">
+                    SPEs
+                  </div>
                 </div>
                 <div className="text-center">
                   <div className="text-lg font-semibold text-emerald-400">
                     {stats.totals.patients.toLocaleString()}
                   </div>
-                  <div className="text-gray-500 text-xs">Patients</div>
+                  <div className="text-[var(--text-secondary)] text-xs">
+                    Patients
+                  </div>
                 </div>
                 <div className="text-center">
                   <div className="text-lg font-semibold text-amber-400">
                     {stats.totals.encounters.toLocaleString()}
                   </div>
-                  <div className="text-gray-500 text-xs">Encounters</div>
+                  <div className="text-[var(--text-secondary)] text-xs">
+                    Encounters
+                  </div>
                 </div>
                 <div className="text-center">
                   <div className="text-lg font-semibold text-purple-400">
                     {stats.totals.conditions.toLocaleString()}
                   </div>
-                  <div className="text-gray-500 text-xs">Conditions</div>
+                  <div className="text-[var(--text-secondary)] text-xs">
+                    Conditions
+                  </div>
                 </div>
               </div>
             )}
@@ -191,7 +199,7 @@ export default function NlqPage() {
 
       <div className="max-w-6xl mx-auto px-6 py-6 space-y-6">
         {/* Query input */}
-        <div className="bg-gray-900 border border-gray-800 rounded-lg p-4">
+        <div className="bg-[var(--surface)] border border-[var(--border)] rounded-lg p-4">
           <form
             onSubmit={(e) => {
               e.preventDefault();
@@ -206,7 +214,7 @@ export default function NlqPage() {
                 value={question}
                 onChange={(e) => setQuestion(e.target.value)}
                 placeholder="Ask a question about the health data..."
-                className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-sm text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500"
+                className="w-full bg-[var(--surface-2)] border border-[var(--border)] rounded-lg px-4 py-2.5 text-sm text-[var(--text-primary)] placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500"
                 disabled={loading}
               />
             </div>
@@ -216,7 +224,7 @@ export default function NlqPage() {
               className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-colors border ${
                 federated
                   ? "bg-blue-500/20 border-blue-500/50 text-blue-300"
-                  : "bg-gray-800 border-gray-700 text-gray-400 hover:text-gray-200"
+                  : "bg-[var(--surface-2)] border-[var(--border)] text-[var(--text-secondary)] hover:text-gray-200"
               }`}
               title="Query across all Secure Processing Environments"
             >
@@ -226,7 +234,7 @@ export default function NlqPage() {
             <button
               type="submit"
               disabled={loading || !question.trim()}
-              className="flex items-center gap-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-500 disabled:bg-gray-700 disabled:text-gray-500 text-white rounded-lg text-sm font-medium transition-colors"
+              className="flex items-center gap-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-500 disabled:bg-gray-700 disabled:text-[var(--text-secondary)] text-white rounded-lg text-sm font-medium transition-colors"
             >
               {loading ? (
                 <Loader2 size={14} className="animate-spin" />
@@ -243,7 +251,7 @@ export default function NlqPage() {
               <button
                 key={q}
                 onClick={() => handleExampleClick(q)}
-                className="px-2.5 py-1 rounded-full bg-gray-800 border border-gray-700 text-xs text-gray-400 hover:text-gray-200 hover:border-gray-600 transition-colors"
+                className="px-2.5 py-1 rounded-full bg-[var(--surface-2)] border border-[var(--border)] text-xs text-[var(--text-secondary)] hover:text-gray-200 hover:border-gray-600 transition-colors"
                 disabled={loading}
               >
                 {q}
@@ -280,14 +288,14 @@ export default function NlqPage() {
                   Federated
                 </span>
               )}
-              <span className="text-xs text-gray-500">
+              <span className="text-xs text-[var(--text-secondary)]">
                 {result.totalRows} row{result.totalRows !== 1 ? "s" : ""}
               </span>
 
               {/* Cypher toggle */}
               <button
                 onClick={() => setShowCypher(!showCypher)}
-                className="ml-auto flex items-center gap-1 text-xs text-gray-500 hover:text-gray-300 transition-colors"
+                className="ml-auto flex items-center gap-1 text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
               >
                 {showCypher ? (
                   <ChevronUp size={12} />
@@ -300,7 +308,7 @@ export default function NlqPage() {
 
             {/* Cypher query */}
             {showCypher && result.cypher && (
-              <pre className="bg-gray-900 border border-gray-800 rounded-lg p-3 text-xs font-mono text-gray-400 overflow-x-auto whitespace-pre-wrap">
+              <pre className="bg-[var(--surface)] border border-[var(--border)] rounded-lg p-3 text-xs font-mono text-[var(--text-secondary)] overflow-x-auto whitespace-pre-wrap">
                 {result.cypher}
               </pre>
             )}
@@ -314,15 +322,15 @@ export default function NlqPage() {
 
             {/* Results table */}
             {result.results.length > 0 && (
-              <div className="border border-gray-800 rounded-lg overflow-hidden">
+              <div className="border border-[var(--border)] rounded-lg overflow-hidden">
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead>
-                      <tr className="bg-gray-900 border-b border-gray-800">
+                      <tr className="bg-[var(--surface)] border-b border-[var(--border)]">
                         {columns.map((col) => (
                           <th
                             key={col}
-                            className="px-4 py-2.5 text-left text-xs font-medium text-gray-400 uppercase tracking-wider"
+                            className="px-4 py-2.5 text-left text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider"
                           >
                             {col}
                           </th>
@@ -333,12 +341,12 @@ export default function NlqPage() {
                       {result.results.map((row, i) => (
                         <tr
                           key={i}
-                          className="hover:bg-gray-900/50 transition-colors"
+                          className="hover:bg-[var(--surface)]/50 transition-colors"
                         >
                           {columns.map((col) => (
                             <td
                               key={col}
-                              className="px-4 py-2 text-gray-300 whitespace-nowrap"
+                              className="px-4 py-2 text-[var(--text-primary)] whitespace-nowrap"
                             >
                               {row[col] != null
                                 ? typeof row[col] === "object"
@@ -359,8 +367,8 @@ export default function NlqPage() {
 
         {/* Available templates */}
         {!result && templates.length > 0 && (
-          <div className="bg-gray-900/50 border border-gray-800 rounded-lg p-4">
-            <h3 className="text-sm font-medium text-gray-300 mb-3 flex items-center gap-1.5">
+          <div className="bg-[var(--surface)]/50 border border-[var(--border)] rounded-lg p-4">
+            <h3 className="text-sm font-medium text-[var(--text-primary)] mb-3 flex items-center gap-1.5">
               <Database size={14} className="text-emerald-400" />
               Available Query Templates
             </h3>
@@ -368,12 +376,12 @@ export default function NlqPage() {
               {templates.map((t) => (
                 <div
                   key={t.name}
-                  className="bg-gray-800/50 border border-gray-700/50 rounded-lg p-3"
+                  className="bg-[var(--surface-2)]/50 border border-[var(--border)]/50 rounded-lg p-3"
                 >
                   <div className="text-sm font-medium text-gray-200">
                     {t.name.replace(/_/g, " ")}
                   </div>
-                  <div className="text-xs text-gray-500 mt-1">
+                  <div className="text-xs text-[var(--text-secondary)] mt-1">
                     {t.description}
                   </div>
                 </div>
@@ -384,8 +392,8 @@ export default function NlqPage() {
 
         {/* SPE breakdown */}
         {stats && stats.spes && (
-          <div className="bg-gray-900/50 border border-gray-800 rounded-lg p-4">
-            <h3 className="text-sm font-medium text-gray-300 mb-3 flex items-center gap-1.5">
+          <div className="bg-[var(--surface)]/50 border border-[var(--border)] rounded-lg p-4">
+            <h3 className="text-sm font-medium text-[var(--text-primary)] mb-3 flex items-center gap-1.5">
               <Globe size={14} className="text-blue-400" />
               Secure Processing Environments
             </h3>
@@ -393,32 +401,40 @@ export default function NlqPage() {
               {stats.spes.map((spe) => (
                 <div
                   key={spe.label}
-                  className="bg-gray-800/50 border border-gray-700/50 rounded-lg p-3"
+                  className="bg-[var(--surface-2)]/50 border border-[var(--border)]/50 rounded-lg p-3"
                 >
                   <div className="text-sm font-semibold text-gray-200 mb-2">
                     {spe.label}
                   </div>
                   <div className="grid grid-cols-2 gap-2 text-xs">
                     <div>
-                      <span className="text-gray-500">Patients: </span>
+                      <span className="text-[var(--text-secondary)]">
+                        Patients:{" "}
+                      </span>
                       <span className="text-emerald-400">
                         {spe.patients.toLocaleString()}
                       </span>
                     </div>
                     <div>
-                      <span className="text-gray-500">Encounters: </span>
+                      <span className="text-[var(--text-secondary)]">
+                        Encounters:{" "}
+                      </span>
                       <span className="text-amber-400">
                         {spe.encounters.toLocaleString()}
                       </span>
                     </div>
                     <div>
-                      <span className="text-gray-500">Conditions: </span>
+                      <span className="text-[var(--text-secondary)]">
+                        Conditions:{" "}
+                      </span>
                       <span className="text-purple-400">
                         {spe.conditions.toLocaleString()}
                       </span>
                     </div>
                     <div>
-                      <span className="text-gray-500">Observations: </span>
+                      <span className="text-[var(--text-secondary)]">
+                        Observations:{" "}
+                      </span>
                       <span className="text-blue-400">
                         {spe.observations.toLocaleString()}
                       </span>
@@ -432,8 +448,8 @@ export default function NlqPage() {
 
         {/* Query history */}
         {history.length > 1 && (
-          <div className="bg-gray-900/50 border border-gray-800 rounded-lg p-4">
-            <h3 className="text-sm font-medium text-gray-300 mb-3">
+          <div className="bg-[var(--surface)]/50 border border-[var(--border)] rounded-lg p-4">
+            <h3 className="text-sm font-medium text-[var(--text-primary)] mb-3">
               Recent Queries
             </h3>
             <div className="space-y-2">
@@ -441,7 +457,7 @@ export default function NlqPage() {
                 <button
                   key={i}
                   onClick={() => handleExampleClick(h.question)}
-                  className="w-full text-left px-3 py-2 rounded bg-gray-800/50 border border-gray-700/50 text-xs text-gray-400 hover:text-gray-200 hover:border-gray-600 transition-colors flex items-center justify-between"
+                  className="w-full text-left px-3 py-2 rounded bg-[var(--surface-2)]/50 border border-[var(--border)]/50 text-xs text-[var(--text-secondary)] hover:text-gray-200 hover:border-gray-600 transition-colors flex items-center justify-between"
                 >
                   <span className="truncate">{h.question}</span>
                   <span className="text-gray-600 shrink-0 ml-2">

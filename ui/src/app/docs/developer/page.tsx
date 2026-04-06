@@ -88,18 +88,18 @@ export default function DeveloperGuidePage() {
     <div className="max-w-5xl mx-auto px-6 py-12">
       <Link
         href="/docs"
-        className="inline-flex items-center gap-1 text-sm text-gray-400 hover:text-gray-200 mb-6"
+        className="inline-flex items-center gap-1 text-sm text-[var(--text-secondary)] hover:text-gray-200 mb-6"
       >
         <ArrowLeft size={14} /> Back to Docs
       </Link>
       <h1 className="text-3xl font-bold mb-2">Developer Guide</h1>
-      <p className="text-gray-400 mb-8">
+      <p className="text-[var(--text-secondary)] mb-8">
         Technical documentation for developers building and extending the Health
         Dataspace v2 platform.
       </p>
 
       {/* TOC */}
-      <nav className="border border-gray-700 rounded-xl p-5 mb-10">
+      <nav className="border border-[var(--border)] rounded-xl p-5 mb-10">
         <h2 className="font-semibold mb-3">Contents</h2>
         <ul className="text-sm space-y-1.5 text-indigo-400">
           <li>
@@ -165,9 +165,9 @@ export default function DeveloperGuidePage() {
           caption="Technology stack overview"
         />
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-          <div className="border border-gray-700 rounded-lg p-4">
+          <div className="border border-[var(--border)] rounded-lg p-4">
             <h4 className="font-semibold text-sm mb-2">Frontend</h4>
-            <ul className="text-gray-400 text-xs space-y-1">
+            <ul className="text-[var(--text-secondary)] text-xs space-y-1">
               <li>
                 <strong>Next.js 14</strong> — App Router, React Server
                 Components
@@ -188,9 +188,9 @@ export default function DeveloperGuidePage() {
               </li>
             </ul>
           </div>
-          <div className="border border-gray-700 rounded-lg p-4">
+          <div className="border border-[var(--border)] rounded-lg p-4">
             <h4 className="font-semibold text-sm mb-2">Backend</h4>
-            <ul className="text-gray-400 text-xs space-y-1">
+            <ul className="text-[var(--text-secondary)] text-xs space-y-1">
               <li>
                 <strong>Neo4j 5</strong> — Graph database with APOC + n10s
                 plugins
@@ -220,11 +220,11 @@ export default function DeveloperGuidePage() {
           Quick Start
         </h2>
         <div className="space-y-4">
-          <div className="bg-gray-900 border border-gray-700 rounded-lg p-4">
+          <div className="bg-[var(--surface)] border border-[var(--border)] rounded-lg p-4">
             <h4 className="font-semibold text-sm mb-2 text-green-400">
               1. Prerequisites
             </h4>
-            <pre className="text-xs text-gray-300 overflow-x-auto">{`# Required
+            <pre className="text-xs text-[var(--text-primary)] overflow-x-auto">{`# Required
 Node.js 20+, Docker & Docker Compose, Git
 
 # Optional
@@ -232,11 +232,11 @@ Java 17+ (for EDC-V connector build)
 Python 3.11+ (for Synthea data loading)`}</pre>
           </div>
 
-          <div className="bg-gray-900 border border-gray-700 rounded-lg p-4">
+          <div className="bg-[var(--surface)] border border-[var(--border)] rounded-lg p-4">
             <h4 className="font-semibold text-sm mb-2 text-green-400">
               2. Start Neo4j
             </h4>
-            <pre className="text-xs text-gray-300 overflow-x-auto">{`docker compose up -d
+            <pre className="text-xs text-[var(--text-primary)] overflow-x-auto">{`docker compose up -d
 
 # Initialize schema
 cat neo4j/init-schema.cypher | \\
@@ -244,11 +244,11 @@ cat neo4j/init-schema.cypher | \\
   cypher-shell -u neo4j -p healthdataspace`}</pre>
           </div>
 
-          <div className="bg-gray-900 border border-gray-700 rounded-lg p-4">
+          <div className="bg-[var(--surface)] border border-[var(--border)] rounded-lg p-4">
             <h4 className="font-semibold text-sm mb-2 text-green-400">
               3. Load Synthetic Data
             </h4>
-            <pre className="text-xs text-gray-300 overflow-x-auto">{`# Insert synthetic FHIR + OMOP data
+            <pre className="text-xs text-[var(--text-primary)] overflow-x-auto">{`# Insert synthetic FHIR + OMOP data
 cat neo4j/insert-synthetic-schema-data.cypher | \\
   docker exec -i health-dataspace-neo4j \\
   cypher-shell -u neo4j -p healthdataspace
@@ -258,11 +258,11 @@ pip install -r scripts/requirements.txt
 python scripts/load_fhir_neo4j.py`}</pre>
           </div>
 
-          <div className="bg-gray-900 border border-gray-700 rounded-lg p-4">
+          <div className="bg-[var(--surface)] border border-[var(--border)] rounded-lg p-4">
             <h4 className="font-semibold text-sm mb-2 text-green-400">
               4. Start the UI
             </h4>
-            <pre className="text-xs text-gray-300 overflow-x-auto">{`cd ui
+            <pre className="text-xs text-[var(--text-primary)] overflow-x-auto">{`cd ui
 npm install
 npm run dev        # → http://localhost:3000
 
@@ -277,8 +277,8 @@ npm run lint       # ESLint checks`}</pre>
         <h2 className="text-2xl font-semibold mb-3" id="project-structure">
           Project Structure
         </h2>
-        <div className="bg-gray-900 border border-gray-700 rounded-lg p-4">
-          <pre className="text-xs text-gray-300 overflow-x-auto whitespace-pre">{`├── .github/workflows/     # CI/CD (pages.yml for GitHub Pages)
+        <div className="bg-[var(--surface)] border border-[var(--border)] rounded-lg p-4">
+          <pre className="text-xs text-[var(--text-primary)] overflow-x-auto whitespace-pre">{`├── .github/workflows/     # CI/CD (pages.yml for GitHub Pages)
 ├── connector/             # EDC-V connector (Gradle multi-module)
 │   ├── controlplane/      # DSP + Management API
 │   ├── dataplane/         # FHIR + OMOP data planes
@@ -310,7 +310,7 @@ npm run lint       # ESLint checks`}</pre>
         <h2 className="text-2xl font-semibold mb-3" id="graph-schema">
           Neo4j Graph Schema
         </h2>
-        <p className="text-gray-400 text-sm mb-4">
+        <p className="text-[var(--text-secondary)] text-sm mb-4">
           The 5-layer knowledge graph uses these core node labels and
           relationships:
         </p>
@@ -318,9 +318,9 @@ npm run lint       # ESLint checks`}</pre>
           chart={graphSchemaDiagram}
           caption="Core entity-relationship diagram (FHIR ↔ OMOP mapping)"
         />
-        <div className="mt-4 border border-gray-700 rounded-lg p-4">
+        <div className="mt-4 border border-[var(--border)] rounded-lg p-4">
           <h4 className="font-semibold text-sm mb-2">Key Conventions</h4>
-          <ul className="text-gray-400 text-xs space-y-1 list-disc ml-4">
+          <ul className="text-[var(--text-secondary)] text-xs space-y-1 list-disc ml-4">
             <li>
               Node labels: <code className="text-indigo-400">PascalCase</code>{" "}
               (Patient, ConditionOccurrence)
@@ -336,11 +336,13 @@ npm run lint       # ESLint checks`}</pre>
             </li>
             <li>
               Schema defined in{" "}
-              <code className="text-gray-300">neo4j/init-schema.cypher</code>
+              <code className="text-[var(--text-primary)]">
+                neo4j/init-schema.cypher
+              </code>
             </li>
             <li>
               Transformations in{" "}
-              <code className="text-gray-300">
+              <code className="text-[var(--text-primary)]">
                 neo4j/fhir-to-omop-transform.cypher
               </code>
             </li>
@@ -353,44 +355,48 @@ npm run lint       # ESLint checks`}</pre>
         <h2 className="text-2xl font-semibold mb-3" id="api-reference">
           API Reference
         </h2>
-        <p className="text-gray-400 text-sm mb-4">
+        <p className="text-[var(--text-secondary)] text-sm mb-4">
           The Next.js API routes (disabled in static export) proxy to Neo4j and
           EDC-V services:
         </p>
         <div className="overflow-x-auto">
-          <table className="w-full text-sm border border-gray-700 rounded-lg">
-            <thead className="bg-gray-800">
+          <table className="w-full text-sm border border-[var(--border)] rounded-lg">
+            <thead className="bg-[var(--surface-2)]">
               <tr>
-                <th className="px-4 py-2 text-left text-gray-300">Route</th>
-                <th className="px-4 py-2 text-left text-gray-300">Method</th>
-                <th className="px-4 py-2 text-left text-gray-300">
+                <th className="px-4 py-2 text-left text-[var(--text-primary)]">
+                  Route
+                </th>
+                <th className="px-4 py-2 text-left text-[var(--text-primary)]">
+                  Method
+                </th>
+                <th className="px-4 py-2 text-left text-[var(--text-primary)]">
                   Description
                 </th>
               </tr>
             </thead>
-            <tbody className="text-gray-400">
-              <tr className="border-t border-gray-700">
+            <tbody className="text-[var(--text-secondary)]">
+              <tr className="border-t border-[var(--border)]">
                 <td className="px-4 py-2 font-mono text-xs">/api/graph</td>
                 <td className="px-4 py-2">GET</td>
                 <td className="px-4 py-2">
                   Fetch graph nodes & relationships for visualisation
                 </td>
               </tr>
-              <tr className="border-t border-gray-700">
+              <tr className="border-t border-[var(--border)]">
                 <td className="px-4 py-2 font-mono text-xs">/api/catalog</td>
                 <td className="px-4 py-2">GET</td>
                 <td className="px-4 py-2">
                   HealthDCAT-AP dataset catalog search
                 </td>
               </tr>
-              <tr className="border-t border-gray-700">
+              <tr className="border-t border-[var(--border)]">
                 <td className="px-4 py-2 font-mono text-xs">/api/patients</td>
                 <td className="px-4 py-2">GET</td>
                 <td className="px-4 py-2">
                   Patient list with FHIR demographics
                 </td>
               </tr>
-              <tr className="border-t border-gray-700">
+              <tr className="border-t border-[var(--border)]">
                 <td className="px-4 py-2 font-mono text-xs">
                   /api/patients/[id]
                 </td>
@@ -399,27 +405,27 @@ npm run lint       # ESLint checks`}</pre>
                   Patient journey timeline (FHIR + OMOP)
                 </td>
               </tr>
-              <tr className="border-t border-gray-700">
+              <tr className="border-t border-[var(--border)]">
                 <td className="px-4 py-2 font-mono text-xs">/api/analytics</td>
                 <td className="px-4 py-2">GET</td>
                 <td className="px-4 py-2">OMOP cohort analytics aggregates</td>
               </tr>
-              <tr className="border-t border-gray-700">
+              <tr className="border-t border-[var(--border)]">
                 <td className="px-4 py-2 font-mono text-xs">/api/compliance</td>
                 <td className="px-4 py-2">GET</td>
                 <td className="px-4 py-2">EHDS compliance chain status</td>
               </tr>
-              <tr className="border-t border-gray-700">
+              <tr className="border-t border-[var(--border)]">
                 <td className="px-4 py-2 font-mono text-xs">/api/eehrxf</td>
                 <td className="px-4 py-2">GET</td>
                 <td className="px-4 py-2">EEHRxF profile alignment data</td>
               </tr>
-              <tr className="border-t border-gray-700">
+              <tr className="border-t border-[var(--border)]">
                 <td className="px-4 py-2 font-mono text-xs">/api/negotiate</td>
                 <td className="px-4 py-2">POST</td>
                 <td className="px-4 py-2">Initiate DSP contract negotiation</td>
               </tr>
-              <tr className="border-t border-gray-700">
+              <tr className="border-t border-[var(--border)]">
                 <td className="px-4 py-2 font-mono text-xs">/api/query</td>
                 <td className="px-4 py-2">POST</td>
                 <td className="px-4 py-2">
@@ -429,7 +435,7 @@ npm run lint       # ESLint checks`}</pre>
             </tbody>
           </table>
         </div>
-        <p className="text-gray-500 text-xs mt-2">
+        <p className="text-[var(--text-secondary)] text-xs mt-2">
           Note: API routes are only available when running locally (npm run
           dev). The GitHub Pages static export uses mock data from{" "}
           <code>ui/public/mock/</code>.
@@ -442,9 +448,9 @@ npm run lint       # ESLint checks`}</pre>
           Testing
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="border border-gray-700 rounded-lg p-4">
+          <div className="border border-[var(--border)] rounded-lg p-4">
             <h4 className="font-semibold text-sm mb-2">Unit Tests (Vitest)</h4>
-            <ul className="text-gray-400 text-xs space-y-1">
+            <ul className="text-[var(--text-secondary)] text-xs space-y-1">
               <li>
                 <strong>1,490 tests</strong> across 78 files
               </li>
@@ -467,15 +473,15 @@ npm run lint       # ESLint checks`}</pre>
                 </span>
               </li>
             </ul>
-            <pre className="text-xs text-gray-500 mt-2 bg-gray-900 p-2 rounded">{`npm run test           # Run once
+            <pre className="text-xs text-[var(--text-secondary)] mt-2 bg-[var(--surface)] p-2 rounded">{`npm run test           # Run once
 npm run test:watch     # Watch mode
 npm run test:coverage  # With coverage`}</pre>
           </div>
-          <div className="border border-gray-700 rounded-lg p-4">
+          <div className="border border-[var(--border)] rounded-lg p-4">
             <h4 className="font-semibold text-sm mb-2">
               E2E Tests (Playwright)
             </h4>
-            <ul className="text-gray-400 text-xs space-y-1">
+            <ul className="text-[var(--text-secondary)] text-xs space-y-1">
               <li>
                 <strong>166 tests</strong> across 18 spec files
               </li>
@@ -498,15 +504,15 @@ npm run test:coverage  # With coverage`}</pre>
                 </a>
               </li>
             </ul>
-            <pre className="text-xs text-gray-500 mt-2 bg-gray-900 p-2 rounded">{`npm run test:e2e       # Headless
+            <pre className="text-xs text-[var(--text-secondary)] mt-2 bg-[var(--surface)] p-2 rounded">{`npm run test:e2e       # Headless
 npm run test:e2e:ui    # Interactive UI`}</pre>
           </div>
         </div>
-        <div className="mt-4 border border-gray-700 rounded-lg p-4">
+        <div className="mt-4 border border-[var(--border)] rounded-lg p-4">
           <h4 className="font-semibold text-sm mb-2" id="user-journey">
             EHDS User Journey
           </h4>
-          <p className="text-gray-400 text-xs mb-2">
+          <p className="text-[var(--text-secondary)] text-xs mb-2">
             The full 8-step EHDS secondary-use journey is documented with
             sequence diagrams, persona mappings, and E2E test coverage:
           </p>
@@ -530,16 +536,16 @@ npm run test:e2e:ui    # Interactive UI`}</pre>
           chart={cicdDiagram}
           caption="CI/CD workflow from local dev to deployment"
         />
-        <div className="mt-4 border border-gray-700 rounded-lg p-4">
+        <div className="mt-4 border border-[var(--border)] rounded-lg p-4">
           <h4 className="font-semibold text-sm mb-2">
             GitHub Pages Deployment
           </h4>
-          <p className="text-gray-400 text-xs mb-2">
+          <p className="text-[var(--text-secondary)] text-xs mb-2">
             On push to main, the{" "}
             <code className="text-indigo-400">.github/workflows/pages.yml</code>{" "}
             workflow:
           </p>
-          <ol className="text-gray-400 text-xs space-y-1 list-decimal ml-4">
+          <ol className="text-[var(--text-secondary)] text-xs space-y-1 list-decimal ml-4">
             <li>Checks out code and sets up Node 20</li>
             <li>
               Disables API routes (<code>mv src/app/api src/api_disabled</code>)
@@ -604,14 +610,16 @@ npm run test:e2e:ui    # Interactive UI`}</pre>
           ].map((adr) => (
             <div
               key={adr.id}
-              className="border border-gray-700 rounded-lg px-4 py-3 flex items-start gap-3"
+              className="border border-[var(--border)] rounded-lg px-4 py-3 flex items-start gap-3"
             >
               <span className="text-xs font-mono text-indigo-400 bg-indigo-950/50 px-2 py-0.5 rounded">
                 {adr.id}
               </span>
               <div>
                 <span className="font-semibold text-sm">{adr.title}</span>
-                <p className="text-gray-500 text-xs mt-0.5">{adr.desc}</p>
+                <p className="text-[var(--text-secondary)] text-xs mt-0.5">
+                  {adr.desc}
+                </p>
               </div>
             </div>
           ))}
@@ -623,8 +631,8 @@ npm run test:e2e:ui    # Interactive UI`}</pre>
         <h2 className="text-2xl font-semibold mb-3" id="conventions">
           Conventions
         </h2>
-        <div className="border border-gray-700 rounded-lg p-4">
-          <ul className="text-gray-400 text-sm space-y-2">
+        <div className="border border-[var(--border)] rounded-lg p-4">
+          <ul className="text-[var(--text-secondary)] text-sm space-y-2">
             <li>
               <strong>Commit messages:</strong> Conventional Commits format
               (feat:, fix:, docs:, chore:)
@@ -654,7 +662,7 @@ npm run test:e2e:ui    # Interactive UI`}</pre>
       </section>
 
       {/* Related */}
-      <section className="bg-gray-800/50 border border-gray-700 rounded-xl p-6">
+      <section className="bg-[var(--surface-2)]/50 border border-[var(--border)] rounded-xl p-6">
         <h2 className="font-semibold mb-2">Related Documentation</h2>
         <div className="flex flex-wrap gap-3">
           <Link

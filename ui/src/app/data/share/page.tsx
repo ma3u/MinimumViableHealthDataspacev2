@@ -49,7 +49,7 @@ function JsonNode({ data, depth = 0 }: { data: unknown; depth?: number }) {
   const [collapsed, setCollapsed] = useState(depth > 1);
 
   if (data === null || data === undefined) {
-    return <span className="text-gray-500">null</span>;
+    return <span className="text-[var(--text-secondary)]">null</span>;
   }
   if (typeof data === "boolean") {
     return <span className="text-yellow-400">{String(data)}</span>;
@@ -62,18 +62,21 @@ function JsonNode({ data, depth = 0 }: { data: unknown; depth?: number }) {
   }
 
   if (Array.isArray(data)) {
-    if (data.length === 0) return <span className="text-gray-500">[]</span>;
+    if (data.length === 0)
+      return <span className="text-[var(--text-secondary)]">[]</span>;
     return (
       <span>
         <button
           onClick={() => setCollapsed(!collapsed)}
-          className="text-gray-400 hover:text-gray-200 inline-flex items-center"
+          className="text-[var(--text-secondary)] hover:text-gray-200 inline-flex items-center"
         >
           {collapsed ? <ChevronRight size={12} /> : <ChevronDown size={12} />}
-          <span className="text-gray-500 text-xs ml-0.5">[{data.length}]</span>
+          <span className="text-[var(--text-secondary)] text-xs ml-0.5">
+            [{data.length}]
+          </span>
         </button>
         {!collapsed && (
-          <div className="ml-4 border-l border-gray-700 pl-2">
+          <div className="ml-4 border-l border-[var(--border)] pl-2">
             {data.map((item, i) => (
               <div key={i}>
                 <span className="text-gray-600 text-xs mr-1">{i}:</span>
@@ -89,27 +92,27 @@ function JsonNode({ data, depth = 0 }: { data: unknown; depth?: number }) {
   if (typeof data === "object") {
     const entries = Object.entries(data as Record<string, unknown>);
     if (entries.length === 0) {
-      return <span className="text-gray-500">{"{}"}</span>;
+      return <span className="text-[var(--text-secondary)]">{"{}"}</span>;
     }
     return (
       <span>
         <button
           onClick={() => setCollapsed(!collapsed)}
-          className="text-gray-400 hover:text-gray-200 inline-flex items-center"
+          className="text-[var(--text-secondary)] hover:text-gray-200 inline-flex items-center"
         >
           {collapsed ? <ChevronRight size={12} /> : <ChevronDown size={12} />}
-          <span className="text-gray-500 text-xs ml-0.5">
+          <span className="text-[var(--text-secondary)] text-xs ml-0.5">
             {"{"}
             {entries.length}
             {"}"}
           </span>
         </button>
         {!collapsed && (
-          <div className="ml-4 border-l border-gray-700 pl-2">
+          <div className="ml-4 border-l border-[var(--border)] pl-2">
             {entries.map(([key, val]) => (
               <div key={key}>
                 <span className="text-blue-300">{key}</span>
-                <span className="text-gray-500">: </span>
+                <span className="text-[var(--text-secondary)]">: </span>
                 <JsonNode data={val} depth={depth + 1} />
               </div>
             ))}
@@ -201,12 +204,12 @@ function AssetDetailPanel({ asset }: { asset: Asset }) {
     : [];
 
   return (
-    <div className="border-t border-layer2/30 bg-gray-900/80">
+    <div className="border-t border-layer2/30 bg-[var(--surface)]/80">
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-2 bg-layer2/10 border-b border-layer2/30">
         <div className="flex items-center gap-2">
           <FileJson2 size={14} className="text-layer2" />
-          <span className="text-xs font-medium text-gray-300">
+          <span className="text-xs font-medium text-[var(--text-primary)]">
             Asset Details — {name}
           </span>
         </div>
@@ -221,9 +224,9 @@ function AssetDetailPanel({ asset }: { asset: Asset }) {
       </div>
 
       {/* Summary metadata */}
-      <div className="px-4 py-3 border-b border-gray-700 grid grid-cols-2 sm:grid-cols-4 gap-3">
+      <div className="px-4 py-3 border-b border-[var(--border)] grid grid-cols-2 sm:grid-cols-4 gap-3">
         <div>
-          <div className="text-[10px] text-gray-500 uppercase tracking-wide">
+          <div className="text-[10px] text-[var(--text-secondary)] uppercase tracking-wide">
             Asset ID
           </div>
           <div className="text-sm text-gray-200 font-mono truncate">
@@ -231,7 +234,7 @@ function AssetDetailPanel({ asset }: { asset: Asset }) {
           </div>
         </div>
         <div>
-          <div className="text-[10px] text-gray-500 uppercase tracking-wide">
+          <div className="text-[10px] text-[var(--text-secondary)] uppercase tracking-wide">
             Type
           </div>
           <div className="text-sm text-gray-200">
@@ -239,13 +242,13 @@ function AssetDetailPanel({ asset }: { asset: Asset }) {
           </div>
         </div>
         <div>
-          <div className="text-[10px] text-gray-500 uppercase tracking-wide">
+          <div className="text-[10px] text-[var(--text-secondary)] uppercase tracking-wide">
             Content Type
           </div>
           <div className="text-sm text-gray-200">{ct || "—"}</div>
         </div>
         <div>
-          <div className="text-[10px] text-gray-500 uppercase tracking-wide">
+          <div className="text-[10px] text-[var(--text-secondary)] uppercase tracking-wide">
             Properties
           </div>
           <div className="text-sm text-gray-200">
@@ -256,23 +259,23 @@ function AssetDetailPanel({ asset }: { asset: Asset }) {
 
       {/* Description */}
       {desc && (
-        <div className="px-4 py-2 border-b border-gray-700">
-          <div className="text-[10px] text-gray-500 uppercase tracking-wide mb-1">
+        <div className="px-4 py-2 border-b border-[var(--border)]">
+          <div className="text-[10px] text-[var(--text-secondary)] uppercase tracking-wide mb-1">
             Description
           </div>
-          <p className="text-xs text-gray-300">{desc as string}</p>
+          <p className="text-xs text-[var(--text-primary)]">{desc as string}</p>
         </div>
       )}
 
       {/* View mode tabs & copy */}
-      <div className="px-4 py-2 border-b border-gray-700 flex items-center justify-between">
+      <div className="px-4 py-2 border-b border-[var(--border)] flex items-center justify-between">
         <div className="flex gap-1">
           <button
             onClick={() => setViewMode("details")}
             className={`text-xs px-2.5 py-1 rounded ${
               viewMode === "details"
                 ? "bg-layer2/20 text-layer2"
-                : "text-gray-400 hover:text-gray-200"
+                : "text-[var(--text-secondary)] hover:text-gray-200"
             }`}
           >
             Details
@@ -282,7 +285,7 @@ function AssetDetailPanel({ asset }: { asset: Asset }) {
             className={`text-xs px-2.5 py-1 rounded ${
               viewMode === "json"
                 ? "bg-layer2/20 text-layer2"
-                : "text-gray-400 hover:text-gray-200"
+                : "text-[var(--text-secondary)] hover:text-gray-200"
             }`}
           >
             Raw JSON
@@ -296,7 +299,7 @@ function AssetDetailPanel({ asset }: { asset: Asset }) {
               className={`text-xs px-2.5 py-1 rounded inline-flex items-center gap-1 ${
                 viewMode === "fhir"
                   ? "bg-green-900/30 text-green-400"
-                  : "text-gray-400 hover:text-gray-200"
+                  : "text-[var(--text-secondary)] hover:text-gray-200"
               }`}
             >
               <Activity size={10} />
@@ -306,7 +309,7 @@ function AssetDetailPanel({ asset }: { asset: Asset }) {
         </div>
         <button
           onClick={copyJson}
-          className="flex items-center gap-1 text-[11px] text-gray-400 hover:text-gray-200"
+          className="flex items-center gap-1 text-[11px] text-[var(--text-secondary)] hover:text-gray-200"
         >
           <Copy size={10} />
           {copied ? "Copied!" : "Copy"}
@@ -318,7 +321,7 @@ function AssetDetailPanel({ asset }: { asset: Asset }) {
         {viewMode === "fhir" ? (
           <div className="p-4">
             {fhirLoading ? (
-              <div className="flex items-center gap-2 text-gray-500 py-6 justify-center">
+              <div className="flex items-center gap-2 text-[var(--text-secondary)] py-6 justify-center">
                 <Loader2 size={14} className="animate-spin" />
                 Loading FHIR bundle…
               </div>
@@ -328,7 +331,7 @@ function AssetDetailPanel({ asset }: { asset: Asset }) {
                 title={`FHIR Resources — ${name}`}
               />
             ) : (
-              <p className="text-gray-500 text-xs text-center py-6">
+              <p className="text-[var(--text-secondary)] text-xs text-center py-6">
                 No FHIR bundle data available for this asset.
               </p>
             )}
@@ -338,7 +341,7 @@ function AssetDetailPanel({ asset }: { asset: Asset }) {
             {/* Extra top-level properties */}
             {extraEntries.length > 0 && (
               <div>
-                <div className="text-[10px] text-gray-500 uppercase tracking-wide mb-1.5">
+                <div className="text-[10px] text-[var(--text-secondary)] uppercase tracking-wide mb-1.5">
                   EDC Metadata
                 </div>
                 <div className="space-y-1 font-mono text-xs">
@@ -356,7 +359,7 @@ function AssetDetailPanel({ asset }: { asset: Asset }) {
             {/* Nested properties */}
             {propEntries.length > 0 && (
               <div>
-                <div className="text-[10px] text-gray-500 uppercase tracking-wide mb-1.5">
+                <div className="text-[10px] text-[var(--text-secondary)] uppercase tracking-wide mb-1.5">
                   Properties
                 </div>
                 <div className="space-y-1 font-mono text-xs">
@@ -480,7 +483,7 @@ export default function DataSharePage() {
       />
 
       {/* Tabs */}
-      <div className="flex gap-1 mb-6 border-b border-gray-700">
+      <div className="flex gap-1 mb-6 border-b border-[var(--border)]">
         {(["existing", "create"] as Tab[]).map((t) => (
           <button
             key={t}
@@ -488,7 +491,7 @@ export default function DataSharePage() {
             className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors ${
               tab === t
                 ? "border-layer2 text-layer2"
-                : "border-transparent text-gray-500 hover:text-gray-300"
+                : "border-transparent text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
             }`}
           >
             {t === "existing" ? "My Assets" : "Register New"}
@@ -498,14 +501,16 @@ export default function DataSharePage() {
 
       {tab === "existing" ? (
         loading ? (
-          <div className="flex items-center gap-2 text-gray-500">
+          <div className="flex items-center gap-2 text-[var(--text-secondary)]">
             <Loader2 size={16} className="animate-spin" />
             Loading assets…
           </div>
         ) : assets.length === 0 ? (
           <div className="text-center py-12">
             <Database size={40} className="text-gray-600 mx-auto mb-4" />
-            <p className="text-gray-400">No data assets registered yet</p>
+            <p className="text-[var(--text-secondary)]">
+              No data assets registered yet
+            </p>
             <button
               onClick={() => setTab("create")}
               className="mt-3 text-sm text-layer2 hover:underline"
@@ -523,8 +528,8 @@ export default function DataSharePage() {
                   key={id}
                   className={`border rounded-xl transition-colors ${
                     isOpen
-                      ? "border-layer2 bg-gray-900/60"
-                      : "border-gray-700 hover:border-layer2"
+                      ? "border-layer2 bg-[var(--surface)]/60"
+                      : "border-[var(--border)] hover:border-layer2"
                   }`}
                 >
                   <button
@@ -542,7 +547,7 @@ export default function DataSharePage() {
                         {(a.description ||
                           a["edc:description"] ||
                           a.properties?.description) && (
-                          <p className="text-xs text-gray-500 mt-0.5 line-clamp-1">
+                          <p className="text-xs text-[var(--text-secondary)] mt-0.5 line-clamp-1">
                             {
                               (a.description ||
                                 a["edc:description"] ||
@@ -555,7 +560,7 @@ export default function DataSharePage() {
                         {(a.contenttype ||
                           a["edc:contenttype"] ||
                           a.properties?.contenttype) && (
-                          <span className="text-xs bg-gray-700 text-gray-300 px-2 py-0.5 rounded-full">
+                          <span className="text-xs bg-gray-700 text-[var(--text-primary)] px-2 py-0.5 rounded-full">
                             {
                               (a.contenttype ||
                                 a["edc:contenttype"] ||
@@ -564,9 +569,15 @@ export default function DataSharePage() {
                           </span>
                         )}
                         {isOpen ? (
-                          <ChevronUp size={16} className="text-gray-500" />
+                          <ChevronUp
+                            size={16}
+                            className="text-[var(--text-secondary)]"
+                          />
                         ) : (
-                          <ChevronDown size={16} className="text-gray-500" />
+                          <ChevronDown
+                            size={16}
+                            className="text-[var(--text-secondary)]"
+                          />
                         )}
                       </div>
                     </div>
@@ -579,7 +590,7 @@ export default function DataSharePage() {
         )
       ) : (
         /* Create new asset form */
-        <div className="border border-gray-700 rounded-xl p-6">
+        <div className="border border-[var(--border)] rounded-xl p-6">
           <div className="flex items-center gap-2 mb-6">
             <Upload size={18} className="text-layer2" />
             <h2 className="font-semibold text-sm">Register Data Asset</h2>
@@ -602,13 +613,13 @@ export default function DataSharePage() {
 
           <form onSubmit={handleCreate} className="space-y-4">
             <div>
-              <label className="text-xs text-gray-400 mb-1 block">
+              <label className="text-xs text-[var(--text-secondary)] mb-1 block">
                 Participant Context
               </label>
               <select
                 value={selectedCtx}
                 onChange={(e) => setSelectedCtx(e.target.value)}
-                className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded text-sm"
+                className="w-full px-3 py-2 bg-[var(--surface-2)] border border-gray-600 rounded text-sm"
               >
                 {participants.map((p) => (
                   <option key={p["@id"]} value={p["@id"]}>
@@ -621,7 +632,7 @@ export default function DataSharePage() {
 
             <div className="grid sm:grid-cols-2 gap-4">
               <div>
-                <label className="text-xs text-gray-400 mb-1 block">
+                <label className="text-xs text-[var(--text-secondary)] mb-1 block">
                   Asset Name
                 </label>
                 <input
@@ -630,17 +641,17 @@ export default function DataSharePage() {
                   value={assetName}
                   onChange={(e) => setAssetName(e.target.value)}
                   placeholder="e.g. fhir-patient-cohort"
-                  className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded text-sm outline-none focus:border-layer2"
+                  className="w-full px-3 py-2 bg-[var(--surface-2)] border border-gray-600 rounded text-sm outline-none focus:border-layer2"
                 />
               </div>
               <div>
-                <label className="text-xs text-gray-400 mb-1 block">
+                <label className="text-xs text-[var(--text-secondary)] mb-1 block">
                   Content Type
                 </label>
                 <select
                   value={contentType}
                   onChange={(e) => setContentType(e.target.value)}
-                  className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded text-sm"
+                  className="w-full px-3 py-2 bg-[var(--surface-2)] border border-gray-600 rounded text-sm"
                 >
                   <option value="application/fhir+json">
                     FHIR R4 (application/fhir+json)
@@ -653,7 +664,7 @@ export default function DataSharePage() {
             </div>
 
             <div>
-              <label className="text-xs text-gray-400 mb-1 block">
+              <label className="text-xs text-[var(--text-secondary)] mb-1 block">
                 Description
               </label>
               <textarea
@@ -661,12 +672,12 @@ export default function DataSharePage() {
                 onChange={(e) => setAssetDesc(e.target.value)}
                 rows={2}
                 placeholder="Describe the dataset…"
-                className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded text-sm outline-none focus:border-layer2"
+                className="w-full px-3 py-2 bg-[var(--surface-2)] border border-gray-600 rounded text-sm outline-none focus:border-layer2"
               />
             </div>
 
             <div>
-              <label className="text-xs text-gray-400 mb-1 block">
+              <label className="text-xs text-[var(--text-secondary)] mb-1 block">
                 Data Source URL
               </label>
               <input
@@ -674,7 +685,7 @@ export default function DataSharePage() {
                 value={baseUrl}
                 onChange={(e) => setBaseUrl(e.target.value)}
                 placeholder="https://fhir-server/Patient"
-                className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded text-sm outline-none focus:border-layer2"
+                className="w-full px-3 py-2 bg-[var(--surface-2)] border border-gray-600 rounded text-sm outline-none focus:border-layer2"
               />
             </div>
 

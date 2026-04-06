@@ -85,7 +85,7 @@ export default function AdminTenantsPage() {
 
       {/* Summary */}
       {!loading && (
-        <div className="flex gap-4 mb-6 text-xs text-gray-500">
+        <div className="flex gap-4 mb-6 text-xs text-[var(--text-secondary)]">
           <span className="flex items-center gap-1">
             <Building2 size={12} />
             {tenants.length} tenant{tenants.length !== 1 ? "s" : ""}
@@ -100,12 +100,12 @@ export default function AdminTenantsPage() {
       )}
 
       {loading ? (
-        <div className="flex items-center gap-2 text-gray-500">
+        <div className="flex items-center gap-2 text-[var(--text-secondary)]">
           <Loader2 size={16} className="animate-spin" />
           Loading tenants…
         </div>
       ) : tenants.length === 0 ? (
-        <p className="text-gray-500">No tenants registered</p>
+        <p className="text-[var(--text-secondary)]">No tenants registered</p>
       ) : (
         <div className="grid gap-3">
           {tenants.map((t) => {
@@ -115,8 +115,8 @@ export default function AdminTenantsPage() {
                 key={t.id}
                 className={`border rounded-xl transition-colors ${
                   isOpen
-                    ? "border-layer2 bg-gray-900/60"
-                    : "border-gray-700 hover:border-layer2"
+                    ? "border-layer2 bg-[var(--surface)]/60"
+                    : "border-[var(--border)] hover:border-layer2"
                 }`}
               >
                 <button
@@ -130,7 +130,7 @@ export default function AdminTenantsPage() {
                         <p className="font-medium text-gray-200">
                           {t.properties.displayName || t.id}
                         </p>
-                        <p className="text-xs text-gray-500">
+                        <p className="text-xs text-[var(--text-secondary)]">
                           {t.properties.organization} · {t.properties.role} · v
                           {t.version} · {t.participantProfiles?.length || 0}{" "}
                           profile(s)
@@ -142,31 +142,43 @@ export default function AdminTenantsPage() {
                         {t.properties.ehdsParticipantType || t.properties.role}
                       </span>
                       {isOpen ? (
-                        <ChevronUp size={16} className="text-gray-500" />
+                        <ChevronUp
+                          size={16}
+                          className="text-[var(--text-secondary)]"
+                        />
                       ) : (
-                        <ChevronDown size={16} className="text-gray-500" />
+                        <ChevronDown
+                          size={16}
+                          className="text-[var(--text-secondary)]"
+                        />
                       )}
                     </div>
                   </div>
                 </button>
 
                 {isOpen && (
-                  <div className="px-4 pb-4 border-t border-gray-700 pt-3 space-y-3">
+                  <div className="px-4 pb-4 border-t border-[var(--border)] pt-3 space-y-3">
                     {/* Properties */}
                     <div>
-                      <h3 className="text-xs font-medium text-gray-500 mb-2">
+                      <h3 className="text-xs font-medium text-[var(--text-secondary)] mb-2">
                         Properties
                       </h3>
                       <div className="grid grid-cols-2 gap-2">
                         {Object.entries(t.properties).map(([k, v]) => (
                           <div key={k} className="text-xs">
-                            <span className="text-gray-500">{k}: </span>
-                            <span className="text-gray-300">{v}</span>
+                            <span className="text-[var(--text-secondary)]">
+                              {k}:{" "}
+                            </span>
+                            <span className="text-[var(--text-primary)]">
+                              {v}
+                            </span>
                           </div>
                         ))}
                         <div className="text-xs">
-                          <span className="text-gray-500">ID: </span>
-                          <span className="text-gray-300 font-mono">
+                          <span className="text-[var(--text-secondary)]">
+                            ID:{" "}
+                          </span>
+                          <span className="text-[var(--text-primary)] font-mono">
                             {t.id}
                           </span>
                         </div>
@@ -176,7 +188,7 @@ export default function AdminTenantsPage() {
                     {/* Participant profiles */}
                     {t.participantProfiles?.length > 0 && (
                       <div>
-                        <h3 className="text-xs font-medium text-gray-500 mb-2">
+                        <h3 className="text-xs font-medium text-[var(--text-secondary)] mb-2">
                           Dataspace Profiles
                         </h3>
                         {t.participantProfiles.map((pp, i) => {
@@ -202,7 +214,7 @@ export default function AdminTenantsPage() {
                               className={`p-3 rounded-lg border text-xs space-y-2 mb-2 ${
                                 pp.error
                                   ? "border-yellow-700/60 bg-yellow-900/10"
-                                  : "border-gray-700 bg-gray-800/50"
+                                  : "border-[var(--border)] bg-[var(--surface-2)]/50"
                               }`}
                             >
                               {/* VPA status banner */}
@@ -220,32 +232,36 @@ export default function AdminTenantsPage() {
                               {/* Profile ID + DID */}
                               <div className="grid grid-cols-2 gap-x-4 gap-y-1">
                                 <div>
-                                  <span className="text-gray-500">
+                                  <span className="text-[var(--text-secondary)]">
                                     Profile ID{" "}
                                   </span>
-                                  <span className="text-gray-300 font-mono">
+                                  <span className="text-[var(--text-primary)] font-mono">
                                     {pp.id}
                                   </span>
                                 </div>
                                 <div>
-                                  <span className="text-gray-500">DID </span>
-                                  <span className="text-gray-300 font-mono break-all">
+                                  <span className="text-[var(--text-secondary)]">
+                                    DID{" "}
+                                  </span>
+                                  <span className="text-[var(--text-primary)] font-mono break-all">
                                     {pp.identifier
                                       ? decodeURIComponent(pp.identifier)
                                       : "—"}
                                   </span>
                                 </div>
                                 <div>
-                                  <span className="text-gray-500">
+                                  <span className="text-[var(--text-secondary)]">
                                     Participant Ctx{" "}
                                   </span>
-                                  <span className="text-gray-300 font-mono">
+                                  <span className="text-[var(--text-primary)] font-mono">
                                     {ctxId || "—"}
                                   </span>
                                 </div>
                                 <div>
-                                  <span className="text-gray-500">Roles </span>
-                                  <span className="text-gray-300">
+                                  <span className="text-[var(--text-secondary)]">
+                                    Roles{" "}
+                                  </span>
+                                  <span className="text-[var(--text-primary)]">
                                     {roles.length > 0 ? roles.join(", ") : "—"}
                                   </span>
                                 </div>
@@ -254,7 +270,7 @@ export default function AdminTenantsPage() {
                               {/* Participant context state */}
                               {ctx && (
                                 <div>
-                                  <span className="text-gray-500">
+                                  <span className="text-[var(--text-secondary)]">
                                     Participant State:{" "}
                                   </span>
                                   <span
@@ -281,7 +297,7 @@ export default function AdminTenantsPage() {
                                         v.state === "active"
                                           ? "bg-green-900/30 text-green-400"
                                           : v.state === "disposed"
-                                            ? "bg-gray-700/50 text-gray-500"
+                                            ? "bg-gray-700/50 text-[var(--text-secondary)]"
                                             : v.state === "provisioning"
                                               ? "bg-blue-900/30 text-blue-400"
                                               : "bg-yellow-900/30 text-yellow-400"
