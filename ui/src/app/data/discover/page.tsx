@@ -83,7 +83,7 @@ export default function DataDiscoverPage() {
   return (
     <Suspense
       fallback={
-        <div className="flex items-center gap-2 text-gray-500 p-10">
+        <div className="flex items-center gap-2 text-[var(--text-secondary)] p-10">
           <Loader2 size={16} className="animate-spin" />
           Loading…
         </div>
@@ -170,19 +170,19 @@ function DataDiscoverContent() {
       <div className="relative mb-4">
         <Search
           size={16}
-          className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500"
+          className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-secondary)]"
         />
         <input
           type="search"
           placeholder="Search by name, theme, FHIR type, publisher…"
           value={filter}
           onChange={(e) => setFilter(e.target.value)}
-          className="w-full pl-10 pr-3 py-2 bg-gray-800 border border-gray-600 rounded text-sm outline-none focus:border-layer2"
+          className="w-full pl-10 pr-3 py-2 bg-[var(--surface-2)] border border-gray-600 rounded text-sm outline-none focus:border-layer2"
         />
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 mb-4 border-b border-gray-700">
+      <div className="flex gap-1 mb-4 border-b border-[var(--border)]">
         {(
           [
             { key: "all", label: "All" },
@@ -196,7 +196,7 @@ function DataDiscoverContent() {
             className={`px-4 py-2 text-xs font-medium border-b-2 -mb-px transition-colors ${
               tab === t.key
                 ? "border-layer2 text-layer2"
-                : "border-transparent text-gray-500 hover:text-gray-300"
+                : "border-transparent text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
             }`}
           >
             {t.label}
@@ -217,7 +217,7 @@ function DataDiscoverContent() {
 
       {/* Stats bar */}
       {!loading && (
-        <div className="flex gap-4 mb-6 text-xs text-gray-500">
+        <div className="flex gap-4 mb-6 text-xs text-[var(--text-secondary)]">
           <span>
             {groups.length} participant{groups.length !== 1 ? "s" : ""}
           </span>
@@ -235,14 +235,14 @@ function DataDiscoverContent() {
       )}
 
       {loading ? (
-        <div className="flex items-center gap-2 text-gray-500">
+        <div className="flex items-center gap-2 text-[var(--text-secondary)]">
           <Loader2 size={16} className="animate-spin" />
           Querying federated catalog…
         </div>
       ) : totalMatching === 0 ? (
         <div className="text-center py-12">
           <Database size={40} className="text-gray-600 mx-auto mb-4" />
-          <p className="text-gray-400">
+          <p className="text-[var(--text-secondary)]">
             {filter ? "No datasets match your search" : "No datasets available"}
           </p>
         </div>
@@ -252,7 +252,7 @@ function DataDiscoverContent() {
           {showCatalog && visibleCatalog.length > 0 && (
             <div>
               {tab === "all" && (
-                <h2 className="text-xs font-semibold uppercase text-gray-500 mb-3 flex items-center gap-1.5">
+                <h2 className="text-xs font-semibold uppercase text-[var(--text-secondary)] mb-3 flex items-center gap-1.5">
                   <BookOpen size={12} />
                   HealthDCAT-AP Datasets ({visibleCatalog.length})
                 </h2>
@@ -265,8 +265,8 @@ function DataDiscoverContent() {
                       key={c.id}
                       className={`border rounded-xl transition-colors ${
                         isOpen
-                          ? "border-purple-500 bg-gray-900/60"
-                          : "border-gray-700 hover:border-purple-500"
+                          ? "border-purple-500 bg-[var(--surface)]/60"
+                          : "border-[var(--border)] hover:border-purple-500"
                       }`}
                     >
                       <button
@@ -285,7 +285,7 @@ function DataDiscoverContent() {
                               </h3>
                             </div>
                             {c.description && (
-                              <p className="text-xs text-gray-400 mt-0.5 ml-5 line-clamp-2">
+                              <p className="text-xs text-[var(--text-secondary)] mt-0.5 ml-5 line-clamp-2">
                                 {c.description}
                               </p>
                             )}
@@ -304,16 +304,19 @@ function DataDiscoverContent() {
                           </div>
                           <div className="flex items-center gap-2 shrink-0">
                             {c.datasetType && (
-                              <span className="text-xs bg-gray-700 text-gray-300 px-2 py-0.5 rounded-full">
+                              <span className="text-xs bg-gray-700 text-[var(--text-primary)] px-2 py-0.5 rounded-full">
                                 {c.datasetType}
                               </span>
                             )}
                             {isOpen ? (
-                              <ChevronUp size={16} className="text-gray-500" />
+                              <ChevronUp
+                                size={16}
+                                className="text-[var(--text-secondary)]"
+                              />
                             ) : (
                               <ChevronDown
                                 size={16}
-                                className="text-gray-500"
+                                className="text-[var(--text-secondary)]"
                               />
                             )}
                           </div>
@@ -321,29 +324,31 @@ function DataDiscoverContent() {
                       </button>
 
                       {isOpen && (
-                        <div className="px-4 pb-4 border-t border-gray-700 pt-3">
+                        <div className="px-4 pb-4 border-t border-[var(--border)] pt-3">
                           <div className="grid grid-cols-2 gap-x-6 gap-y-1.5 mb-3">
                             {c.license && (
                               <div className="text-xs">
-                                <span className="text-gray-500">License:</span>{" "}
-                                <span className="text-gray-300">
+                                <span className="text-[var(--text-secondary)]">
+                                  License:
+                                </span>{" "}
+                                <span className="text-[var(--text-primary)]">
                                   {c.license}
                                 </span>
                               </div>
                             )}
                             {c.legalBasis && (
                               <div className="text-xs">
-                                <span className="text-gray-500">
+                                <span className="text-[var(--text-secondary)]">
                                   Legal Basis:
                                 </span>{" "}
-                                <span className="text-gray-300">
+                                <span className="text-[var(--text-primary)]">
                                   {c.legalBasis}
                                 </span>
                               </div>
                             )}
                             {c.conformsTo && (
                               <div className="text-xs">
-                                <span className="text-gray-500">
+                                <span className="text-[var(--text-secondary)]">
                                   Conforms To:
                                 </span>{" "}
                                 <a
@@ -361,8 +366,10 @@ function DataDiscoverContent() {
                             )}
                             {c.recordCount != null && (
                               <div className="text-xs">
-                                <span className="text-gray-500">Records:</span>{" "}
-                                <span className="text-gray-300">
+                                <span className="text-[var(--text-secondary)]">
+                                  Records:
+                                </span>{" "}
+                                <span className="text-[var(--text-primary)]">
                                   {c.recordCount.toLocaleString()}
                                 </span>
                               </div>
@@ -382,7 +389,7 @@ function DataDiscoverContent() {
                               href={`/graph?highlight=${encodeURIComponent(
                                 c.title,
                               )}`}
-                              className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-gray-600 text-gray-300 rounded text-xs font-medium hover:border-purple-500 hover:text-purple-300 transition-colors"
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-gray-600 text-[var(--text-primary)] rounded text-xs font-medium hover:border-purple-500 hover:text-purple-300 transition-colors"
                             >
                               <Network size={14} />
                               View in Graph
@@ -401,7 +408,7 @@ function DataDiscoverContent() {
           {showAssets && visibleAssets.length > 0 && (
             <div>
               {tab === "all" && (
-                <h2 className="text-xs font-semibold uppercase text-gray-500 mb-3 flex items-center gap-1.5">
+                <h2 className="text-xs font-semibold uppercase text-[var(--text-secondary)] mb-3 flex items-center gap-1.5">
                   <Database size={12} />
                   EDC Data Assets ({visibleAssets.length})
                 </h2>
@@ -416,8 +423,8 @@ function DataDiscoverContent() {
                       key={uniqueKey}
                       className={`border rounded-xl transition-colors ${
                         isOpen
-                          ? "border-layer2 bg-gray-900/60"
-                          : "border-gray-700 hover:border-layer2"
+                          ? "border-layer2 bg-[var(--surface)]/60"
+                          : "border-[var(--border)] hover:border-layer2"
                       }`}
                     >
                       <button
@@ -430,7 +437,7 @@ function DataDiscoverContent() {
                               {assetField(a, "name")}
                             </h3>
                             {assetField(a, "description") && (
-                              <p className="text-xs text-gray-400 mt-0.5 line-clamp-2">
+                              <p className="text-xs text-[var(--text-secondary)] mt-0.5 line-clamp-2">
                                 {assetField(a, "description")}
                               </p>
                             )}
@@ -444,16 +451,19 @@ function DataDiscoverContent() {
                           </div>
                           <div className="flex items-center gap-2 shrink-0">
                             {assetField(a, "contenttype") && (
-                              <span className="text-xs bg-gray-700 text-gray-300 px-2 py-0.5 rounded-full">
+                              <span className="text-xs bg-gray-700 text-[var(--text-primary)] px-2 py-0.5 rounded-full">
                                 {assetField(a, "contenttype")}
                               </span>
                             )}
                             {isOpen ? (
-                              <ChevronUp size={16} className="text-gray-500" />
+                              <ChevronUp
+                                size={16}
+                                className="text-[var(--text-secondary)]"
+                              />
                             ) : (
                               <ChevronDown
                                 size={16}
-                                className="text-gray-500"
+                                className="text-[var(--text-secondary)]"
                               />
                             )}
                           </div>
@@ -461,8 +471,8 @@ function DataDiscoverContent() {
                       </button>
 
                       {isOpen && (
-                        <div className="px-4 pb-4 border-t border-gray-700 pt-3">
-                          <pre className="text-xs text-gray-400 overflow-auto max-h-48 mb-3">
+                        <div className="px-4 pb-4 border-t border-[var(--border)] pt-3">
+                          <pre className="text-xs text-[var(--text-secondary)] overflow-auto max-h-48 mb-3">
                             {JSON.stringify(a, null, 2)}
                           </pre>
                           <div className="flex flex-wrap gap-3">
@@ -477,7 +487,7 @@ function DataDiscoverContent() {
                               href={`/graph?highlight=${encodeURIComponent(
                                 assetField(a, "name"),
                               )}`}
-                              className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-gray-600 text-gray-300 rounded text-xs font-medium hover:border-layer2 hover:text-layer2 transition-colors"
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-gray-600 text-[var(--text-primary)] rounded text-xs font-medium hover:border-layer2 hover:text-layer2 transition-colors"
                             >
                               <Network size={14} />
                               View in Graph

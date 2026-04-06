@@ -50,7 +50,7 @@ export default function DocsPage() {
     <div className="max-w-5xl mx-auto px-6 py-12">
       <div className="mb-10">
         <h1 className="text-3xl font-bold mb-2">Documentation</h1>
-        <p className="text-gray-400 text-lg">
+        <p className="text-[var(--text-secondary)] text-lg">
           Health Dataspace v2 — comprehensive guides for business users and
           developers.
         </p>
@@ -68,7 +68,7 @@ export default function DocsPage() {
               <Icon size={22} />
               <span className="font-semibold text-lg">{label}</span>
             </div>
-            <p className="text-sm text-gray-400 mb-4">{desc}</p>
+            <p className="text-sm text-[var(--text-secondary)] mb-4">{desc}</p>
             <span className="inline-flex items-center gap-1 text-sm text-indigo-400 group-hover:text-indigo-300">
               Read more <ArrowRight size={14} />
             </span>
@@ -77,16 +77,16 @@ export default function DocsPage() {
       </div>
 
       {/* Quick links */}
-      <div className="border border-gray-700 rounded-xl p-6">
+      <div className="border border-[var(--border)] rounded-xl p-6">
         <h2 className="text-lg font-semibold mb-4">Quick Links</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           {quickLinks.map(({ href, icon: Icon, label }) => (
             <Link
               key={href}
               href={href}
-              className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-gray-300 hover:bg-gray-800 transition-colors"
+              className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-[var(--text-primary)] hover:bg-[var(--surface-2)] transition-colors"
             >
-              <Icon size={16} className="text-gray-500" />
+              <Icon size={16} className="text-[var(--text-secondary)]" />
               {label}
             </Link>
           ))}
@@ -98,7 +98,7 @@ export default function DocsPage() {
         <h3 className="font-semibold text-indigo-300 mb-2">
           About Health Dataspace v2
         </h3>
-        <p className="text-sm text-gray-400 leading-relaxed">
+        <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
           An EHDS-compliant demonstration platform built with Eclipse EDC-V,
           DCore, CFM, Neo4j, FHIR R4, and OMOP CDM. The project implements the
           European Health Data Space regulation through a 5-layer knowledge

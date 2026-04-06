@@ -62,11 +62,11 @@ const C = {
   string: "text-emerald-400",
   number: "text-amber-400",
   bool: "text-sky-400",
-  null: "text-gray-500 italic",
-  brace: "text-gray-500",
+  null: "text-[var(--text-secondary)] italic",
+  brace: "text-[var(--text-secondary)]",
   odrl: "text-cyan-400 font-semibold",
   edc: "text-orange-400 font-semibold",
-  punc: "text-gray-500",
+  punc: "text-[var(--text-secondary)]",
 } as const;
 
 interface Token {

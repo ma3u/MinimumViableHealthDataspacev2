@@ -246,7 +246,7 @@ export default function SettingsPage() {
   if (loading) {
     return (
       <div className="max-w-3xl mx-auto px-6 py-10">
-        <div className="flex items-center gap-2 text-gray-500">
+        <div className="flex items-center gap-2 text-[var(--text-secondary)]">
           <Loader2 size={16} className="animate-spin" />
           Loading settings…
         </div>
@@ -268,7 +268,9 @@ export default function SettingsPage() {
       {tenants.length === 0 ? (
         <div className="text-center py-12">
           <Settings2 size={40} className="text-gray-600 mx-auto mb-4" />
-          <p className="text-gray-400 mb-2">No participant profile found</p>
+          <p className="text-[var(--text-secondary)] mb-2">
+            No participant profile found
+          </p>
           <a href="/onboarding" className="text-sm text-layer2 hover:underline">
             Register first →
           </a>
@@ -277,13 +279,13 @@ export default function SettingsPage() {
         <>
           {/* Tenant selector */}
           <div className="mb-6">
-            <label className="block text-sm text-gray-400 mb-1">
+            <label className="block text-sm text-[var(--text-secondary)] mb-1">
               Active Profile
             </label>
             <select
               value={selected?.id || ""}
               onChange={(e) => handleSelect(e.target.value)}
-              className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded text-sm"
+              className="w-full px-3 py-2 bg-[var(--surface-2)] border border-gray-600 rounded text-sm"
             >
               {tenants.map((t) => (
                 <option key={t.id} value={t.id}>
@@ -294,7 +296,7 @@ export default function SettingsPage() {
           </div>
 
           {selected && (
-            <div className="border border-gray-700 rounded-xl divide-y divide-gray-700">
+            <div className="border border-[var(--border)] rounded-xl divide-y divide-gray-700">
               {/* Identity (read-only) */}
               <div className="p-6">
                 <h2 className="font-semibold mb-4 flex items-center gap-2">
@@ -303,7 +305,9 @@ export default function SettingsPage() {
                 </h2>
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div>
-                    <label className="text-xs text-gray-500">EHDS Role</label>
+                    <label className="text-xs text-[var(--text-secondary)]">
+                      EHDS Role
+                    </label>
                     <p className="text-sm font-medium text-gray-200 mt-0.5">
                       {selected.properties.ehdsParticipantType ||
                         selected.properties.role ||
@@ -311,8 +315,10 @@ export default function SettingsPage() {
                     </p>
                   </div>
                   <div>
-                    <label className="text-xs text-gray-500">Tenant ID</label>
-                    <p className="font-mono text-xs text-gray-400 break-all mt-0.5">
+                    <label className="text-xs text-[var(--text-secondary)]">
+                      Tenant ID
+                    </label>
+                    <p className="font-mono text-xs text-[var(--text-secondary)] break-all mt-0.5">
                       {selected.id}
                     </p>
                   </div>
@@ -400,7 +406,7 @@ export default function SettingsPage() {
                     }[]
                   ).map(({ key, label, icon: Icon, placeholder, type }) => (
                     <div key={key}>
-                      <label className="text-xs text-gray-500 flex items-center gap-1 mb-1">
+                      <label className="text-xs text-[var(--text-secondary)] flex items-center gap-1 mb-1">
                         <Icon size={11} />
                         {label}
                       </label>
@@ -411,7 +417,7 @@ export default function SettingsPage() {
                           setForm((f) => ({ ...f, [key]: e.target.value }))
                         }
                         placeholder={placeholder}
-                        className="w-full px-3 py-1.5 bg-gray-800 border border-gray-600 rounded text-sm text-gray-200 placeholder-gray-600 focus:outline-none focus:border-layer2"
+                        className="w-full px-3 py-1.5 bg-[var(--surface-2)] border border-gray-600 rounded text-sm text-gray-200 placeholder-gray-600 focus:outline-none focus:border-layer2"
                       />
                     </div>
                   ))}
@@ -444,7 +450,7 @@ export default function SettingsPage() {
                               ? "bg-red-950/30 border-red-800/50"
                               : allDisposed
                                 ? "bg-yellow-950/20 border-yellow-800/40"
-                                : "bg-gray-800/50 border-gray-700"
+                                : "bg-[var(--surface-2)]/50 border-[var(--border)]"
                           }`}
                         >
                           {hasError && (
@@ -466,26 +472,26 @@ export default function SettingsPage() {
                             </div>
                           )}
                           <div className="flex gap-2">
-                            <span className="text-gray-500 w-32 shrink-0">
+                            <span className="text-[var(--text-secondary)] w-32 shrink-0">
                               Profile ID
                             </span>
-                            <span className="text-gray-300 font-mono break-all">
+                            <span className="text-[var(--text-primary)] font-mono break-all">
                               {pp.id}
                             </span>
                           </div>
                           <div className="flex gap-2">
-                            <span className="text-gray-500 w-32 shrink-0">
+                            <span className="text-[var(--text-secondary)] w-32 shrink-0">
                               DID
                             </span>
-                            <span className="text-gray-300 font-mono break-all">
+                            <span className="text-[var(--text-primary)] font-mono break-all">
                               {did}
                             </span>
                           </div>
                           <div className="flex gap-2">
-                            <span className="text-gray-500 w-32 shrink-0">
+                            <span className="text-[var(--text-secondary)] w-32 shrink-0">
                               Participant Ctx
                             </span>
-                            <span className="text-gray-300 font-mono">
+                            <span className="text-[var(--text-primary)] font-mono">
                               {ctxId !== "—" ? (
                                 ctxId
                               ) : (
@@ -495,7 +501,7 @@ export default function SettingsPage() {
                           </div>
                           {activeVpas.length > 0 && (
                             <div className="flex gap-2">
-                              <span className="text-gray-500 w-32 shrink-0">
+                              <span className="text-[var(--text-secondary)] w-32 shrink-0">
                                 Active VPAs
                               </span>
                               <span className="text-green-400">
@@ -510,7 +516,7 @@ export default function SettingsPage() {
                     })}
                   </div>
                 ) : (
-                  <p className="text-gray-500 text-sm">
+                  <p className="text-[var(--text-secondary)] text-sm">
                     No dataspace profiles linked yet.
                   </p>
                 )}
@@ -526,7 +532,7 @@ export default function SettingsPage() {
                   <button
                     onClick={() => selected && loadCredentials(selected.id)}
                     disabled={credsLoading}
-                    className="text-xs text-gray-500 hover:text-gray-300 flex items-center gap-1 disabled:opacity-40"
+                    className="text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center gap-1 disabled:opacity-40"
                   >
                     <RefreshCw
                       size={11}
@@ -537,25 +543,25 @@ export default function SettingsPage() {
                 </div>
 
                 {credsLoading ? (
-                  <div className="flex items-center gap-2 text-gray-500 text-sm">
+                  <div className="flex items-center gap-2 text-[var(--text-secondary)] text-sm">
                     <Loader2 size={13} className="animate-spin" />
                     Fetching credentials…
                   </div>
                 ) : credentials.length === 0 ||
                   credentials.every((c) => c.credentials.length === 0) ? (
-                  <div className="rounded-lg bg-gray-800/40 border border-gray-700 p-4 text-sm">
+                  <div className="rounded-lg bg-[var(--surface-2)]/40 border border-[var(--border)] p-4 text-sm">
                     <div className="flex items-center gap-2 text-yellow-500 mb-2">
                       <ShieldOff size={14} />
                       <span className="font-medium">
                         No credentials issued yet
                       </span>
                     </div>
-                    <p className="text-gray-500 text-xs leading-relaxed">
+                    <p className="text-[var(--text-secondary)] text-xs leading-relaxed">
                       Verifiable Credentials (EHDS-compliant VCs) are issued by
                       the HDAB after participant onboarding via the IdentityHub.
                       To issue credentials, run:
                     </p>
-                    <code className="mt-2 block text-xs text-green-400/80 bg-gray-900 rounded px-3 py-2">
+                    <code className="mt-2 block text-xs text-green-400/80 bg-[var(--surface)] rounded px-3 py-2">
                       bash jad/issue-ehds-credentials.sh
                     </code>
                   </div>
@@ -601,18 +607,18 @@ export default function SettingsPage() {
                               )}
                             </div>
                             <div className="flex gap-2">
-                              <span className="text-gray-500 w-28 shrink-0">
+                              <span className="text-[var(--text-secondary)] w-28 shrink-0">
                                 Issuer
                               </span>
-                              <span className="text-gray-300 font-mono break-all">
+                              <span className="text-[var(--text-primary)] font-mono break-all">
                                 {vc.issuer || "—"}
                               </span>
                             </div>
                             <div className="flex gap-2">
-                              <span className="text-gray-500 w-28 shrink-0">
+                              <span className="text-[var(--text-secondary)] w-28 shrink-0">
                                 Issued
                               </span>
-                              <span className="text-gray-300">
+                              <span className="text-[var(--text-primary)]">
                                 {vc.issuanceDate
                                   ? new Date(
                                       vc.issuanceDate,
@@ -622,12 +628,14 @@ export default function SettingsPage() {
                             </div>
                             {vc.expirationDate && (
                               <div className="flex gap-2">
-                                <span className="text-gray-500 w-28 shrink-0">
+                                <span className="text-[var(--text-secondary)] w-28 shrink-0">
                                   Expires
                                 </span>
                                 <span
                                   className={
-                                    expired ? "text-red-400" : "text-gray-300"
+                                    expired
+                                      ? "text-red-400"
+                                      : "text-[var(--text-primary)]"
                                   }
                                 >
                                   {new Date(
@@ -638,10 +646,10 @@ export default function SettingsPage() {
                             )}
                             {vc.id && (
                               <div className="flex gap-2">
-                                <span className="text-gray-500 w-28 shrink-0">
+                                <span className="text-[var(--text-secondary)] w-28 shrink-0">
                                   Credential ID
                                 </span>
-                                <span className="text-gray-400 font-mono text-[10px] break-all">
+                                <span className="text-[var(--text-secondary)] font-mono text-[10px] break-all">
                                   {vc.id}
                                 </span>
                               </div>

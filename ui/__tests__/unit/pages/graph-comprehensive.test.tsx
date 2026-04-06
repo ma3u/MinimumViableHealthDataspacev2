@@ -833,7 +833,8 @@ describe("GraphPage", () => {
 
     it("passes backgroundColor", async () => {
       const props = await renderAndGetForceGraphProps();
-      expect(props.backgroundColor).toBe("#030712");
+      // Default is light mode (#ffffff); dark mode would be #030712
+      expect(props.backgroundColor).toMatch(/^#(ffffff|030712)$/i);
     });
 
     it("passes d3AlphaDecay", async () => {

@@ -28,15 +28,15 @@ function SignInContent() {
   return (
     <div className="min-h-[60vh] flex flex-col items-center justify-center gap-8 py-10 px-4">
       {/* ── Login card ── */}
-      <div className="bg-gray-800 rounded-lg p-8 max-w-md w-full text-center">
+      <div className="bg-[var(--surface-2)] rounded-lg p-8 max-w-md w-full text-center">
         <ShieldCheck size={48} className="mx-auto mb-4 text-layer1" />
         <h1 className="text-2xl font-bold text-white mb-2">
           Health Dataspace Login
         </h1>
-        <p className="text-gray-400 mb-6">
+        <p className="text-[var(--text-secondary)] mb-6">
           Sign in with your Keycloak account to access protected resources.
           <br />
-          <span className="text-gray-500 text-xs mt-1 block">
+          <span className="text-[var(--text-secondary)] text-xs mt-1 block">
             Password = username (local dev only)
           </span>
         </p>
@@ -54,14 +54,14 @@ function SignInContent() {
           Sign in with Keycloak
         </button>
 
-        <p className="text-gray-500 text-xs mt-4">
+        <p className="text-[var(--text-secondary)] text-xs mt-4">
           EHDS-compliant authentication via Keycloak SSO
         </p>
       </div>
 
       {/* ── Demo persona reference cards ── */}
       <div className="w-full max-w-3xl">
-        <p className="text-xs text-gray-500 text-center mb-3 uppercase tracking-wide font-semibold">
+        <p className="text-xs text-[var(--text-secondary)] text-center mb-3 uppercase tracking-wide font-semibold">
           Demo users — sign in as any of these to test role-specific views
         </p>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -73,7 +73,7 @@ function SignInContent() {
                   callbackUrl: `/graph?persona=${persona.personaId}`,
                 })
               }
-              className={`group text-left rounded-lg border p-3 bg-gray-800/60 hover:bg-gray-800 transition-colors ${
+              className={`group text-left rounded-lg border p-3 bg-[var(--surface-2)]/60 hover:bg-[var(--surface-2)] transition-colors ${
                 persona.badge.replace("text-", "border-").split(" ")[0]
               }`}
             >
@@ -83,7 +83,7 @@ function SignInContent() {
                   <div className="font-mono text-sm font-semibold text-white group-hover:text-blue-200 transition-colors">
                     {persona.username}
                   </div>
-                  <div className="text-xs text-gray-400">
+                  <div className="text-xs text-[var(--text-secondary)]">
                     {persona.organisation}
                   </div>
                 </div>
@@ -107,7 +107,7 @@ function SignInContent() {
                   ))}
               </div>
               {/* Description */}
-              <p className="text-xs text-gray-500 leading-tight">
+              <p className="text-xs text-[var(--text-secondary)] leading-tight">
                 {persona.description}
               </p>
               <p className="text-[10px] text-gray-600 mt-1.5">
@@ -131,7 +131,7 @@ export default function SignInPage() {
     <Suspense
       fallback={
         <div className="min-h-[60vh] flex items-center justify-center">
-          <div className="text-gray-400">Loading…</div>
+          <div className="text-[var(--text-secondary)]">Loading…</div>
         </div>
       }
     >

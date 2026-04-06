@@ -659,7 +659,9 @@ describe("AdminTenantsPage", () => {
       const profileCard = screen
         .getByText("profile-alpha-1")
         .closest("div.p-3");
-      expect(profileCard).toHaveClass("border-gray-700");
+      expect(profileCard?.className).toMatch(
+        /border-gray-700|border-\[var\(--border\)\]/,
+      );
     });
   });
 

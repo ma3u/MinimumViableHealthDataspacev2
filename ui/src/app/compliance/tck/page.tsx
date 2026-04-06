@@ -101,16 +101,16 @@ function SuiteCard({
   );
 
   return (
-    <div className="bg-gray-800 rounded-lg border border-gray-700 overflow-hidden">
+    <div className="bg-[var(--surface-2)] rounded-lg border border-[var(--border)] overflow-hidden">
       <button
         onClick={() => setExpanded(!expanded)}
-        className="w-full flex items-center justify-between px-5 py-4 hover:bg-gray-700/40 transition-colors"
+        className="w-full flex items-center justify-between px-5 py-4 hover:bg-[var(--surface-2)]/40 transition-colors"
       >
         <div className="flex items-center gap-3">
           <ShieldCheck size={18} className="text-layer1 shrink-0" />
           <div className="text-left">
             <span className="font-semibold text-white">{meta.title}</span>
-            <span className="block text-xs text-gray-400">
+            <span className="block text-xs text-[var(--text-secondary)]">
               {meta.description}
             </span>
           </div>
@@ -119,10 +119,10 @@ function SuiteCard({
       </button>
 
       {expanded && (
-        <div className="border-t border-gray-700 divide-y divide-gray-700/60">
+        <div className="border-t border-[var(--border)] divide-y divide-gray-700/60">
           {Object.entries(categories).map(([cat, tests]) => (
             <div key={cat} className="px-5 py-3">
-              <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
+              <h4 className="text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider mb-2">
                 {cat}
               </h4>
               <ul className="space-y-1.5">
@@ -131,12 +131,12 @@ function SuiteCard({
                     <StatusIcon status={t.status} />
                     <div>
                       <span className="text-gray-200">
-                        <span className="font-mono text-xs text-gray-500 mr-1.5">
+                        <span className="font-mono text-xs text-[var(--text-secondary)] mr-1.5">
                           {t.id}
                         </span>
                         {t.name}
                       </span>
-                      <span className="block text-xs text-gray-500 mt-0.5">
+                      <span className="block text-xs text-[var(--text-secondary)] mt-0.5">
                         {t.detail}
                       </span>
                     </div>
@@ -192,16 +192,16 @@ export default function ComplianceTckPage() {
         <button
           onClick={load}
           disabled={loading}
-          className="flex items-center gap-1.5 text-sm px-3 py-1.5 rounded bg-gray-800 border border-gray-700 text-gray-300 hover:bg-gray-700 disabled:opacity-50 transition-colors"
+          className="flex items-center gap-1.5 text-sm px-3 py-1.5 rounded bg-[var(--surface-2)] border border-[var(--border)] text-[var(--text-primary)] hover:bg-[var(--surface-2)] disabled:opacity-50 transition-colors"
         >
           <RefreshCw size={14} className={loading ? "animate-spin" : ""} />
           {loading ? "Running…" : "Re-run"}
         </button>
       </div>
-      <div className="flex items-center gap-3 mb-8 text-xs text-gray-500">
+      <div className="flex items-center gap-3 mb-8 text-xs text-[var(--text-secondary)]">
         <Link
           href="/compliance"
-          className="flex items-center gap-1 hover:text-gray-300 transition-colors"
+          className="flex items-center gap-1 hover:text-[var(--text-primary)] transition-colors"
         >
           <ExternalLink size={12} />
           EHDS Approval Checker
@@ -224,7 +224,7 @@ export default function ComplianceTckPage() {
           {[1, 2, 3].map((i) => (
             <div
               key={i}
-              className="h-32 bg-gray-800 rounded-lg animate-pulse border border-gray-700"
+              className="h-32 bg-[var(--surface-2)] rounded-lg animate-pulse border border-[var(--border)]"
             />
           ))}
         </div>
@@ -258,10 +258,12 @@ export default function ComplianceTckPage() {
             ].map((s) => (
               <div
                 key={s.label}
-                className="bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-center"
+                className="bg-[var(--surface-2)] border border-[var(--border)] rounded-lg px-4 py-3 text-center"
               >
                 <div className={`text-2xl font-bold ${s.color}`}>{s.value}</div>
-                <div className="text-xs text-gray-400 mt-0.5">{s.label}</div>
+                <div className="text-xs text-[var(--text-secondary)] mt-0.5">
+                  {s.label}
+                </div>
               </div>
             ))}
           </div>

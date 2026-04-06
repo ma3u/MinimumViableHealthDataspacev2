@@ -355,12 +355,14 @@ function FormField({
 }) {
   return (
     <div>
-      <label className="block text-xs font-semibold text-gray-300 mb-1">
+      <label className="block text-xs font-semibold text-[var(--text-primary)] mb-1">
         {label}
         {required && <span className="text-red-400 ml-1">*</span>}
       </label>
       {children}
-      {help && <p className="text-xs text-gray-500 mt-0.5">{help}</p>}
+      {help && (
+        <p className="text-xs text-[var(--text-secondary)] mt-0.5">{help}</p>
+      )}
     </div>
   );
 }
@@ -380,7 +382,7 @@ function SelectField({
     <select
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded text-sm text-gray-200 outline-none focus:border-purple-500"
+      className="w-full px-3 py-2 bg-[var(--surface-2)] border border-gray-600 rounded text-sm text-gray-200 outline-none focus:border-purple-500"
     >
       {placeholder && (
         <option value="" disabled>
@@ -413,7 +415,7 @@ function InputField({
       value={value}
       onChange={(e) => onChange(e.target.value)}
       placeholder={placeholder}
-      className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded text-sm text-gray-200 outline-none focus:border-purple-500"
+      className="w-full px-3 py-2 bg-[var(--surface-2)] border border-gray-600 rounded text-sm text-gray-200 outline-none focus:border-purple-500"
     />
   );
 }
@@ -424,7 +426,7 @@ export default function DcatApEditorPage() {
   return (
     <Suspense
       fallback={
-        <div className="flex items-center gap-2 text-gray-500 p-10">
+        <div className="flex items-center gap-2 text-[var(--text-secondary)] p-10">
           <Loader2 size={16} className="animate-spin" />
           Loading…
         </div>
@@ -603,7 +605,7 @@ function EditorContent() {
           className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
             tab === "browse"
               ? "bg-purple-600 text-white"
-              : "bg-gray-800 text-gray-400 hover:text-white"
+              : "bg-[var(--surface-2)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
           }`}
         >
           Browse ({datasets.length})
@@ -613,7 +615,7 @@ function EditorContent() {
           className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors inline-flex items-center gap-1.5 ${
             tab === "create" && !editingId
               ? "bg-purple-600 text-white"
-              : "bg-gray-800 text-gray-400 hover:text-white"
+              : "bg-[var(--surface-2)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
           }`}
         >
           <Plus size={14} />
@@ -636,7 +638,7 @@ function EditorContent() {
           href="https://ehds.healthdataportal.eu/editor2/"
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium bg-gray-800 text-gray-400 hover:text-white transition-colors"
+          className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium bg-[var(--surface-2)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
           title="Open the official EHDS HealthDCAT-AP editor"
         >
           <ExternalLink size={14} />
@@ -648,12 +650,12 @@ function EditorContent() {
       {tab === "browse" && (
         <div>
           {loading ? (
-            <div className="flex items-center gap-2 text-gray-500">
+            <div className="flex items-center gap-2 text-[var(--text-secondary)]">
               <Loader2 size={16} className="animate-spin" />
               Loading catalog…
             </div>
           ) : datasets.length === 0 ? (
-            <p className="text-gray-500">
+            <p className="text-[var(--text-secondary)]">
               No HealthDCAT-AP entries yet.{" "}
               <button
                 onClick={startNew}
@@ -667,17 +669,17 @@ function EditorContent() {
               {datasets.map((d, idx) => (
                 <div
                   key={d.id ?? `entry-${idx}`}
-                  className="border border-gray-700 rounded-xl p-4 hover:border-purple-500/50 transition-colors group"
+                  className="border border-[var(--border)] rounded-xl p-4 hover:border-purple-500/50 transition-colors group"
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex-1 min-w-0">
                       <h3 className="font-semibold text-purple-300 truncate">
                         {d.title || d.id}
                       </h3>
-                      <p className="text-xs text-gray-400 mt-0.5 line-clamp-2">
+                      <p className="text-xs text-[var(--text-secondary)] mt-0.5 line-clamp-2">
                         {d.description}
                       </p>
-                      <div className="flex flex-wrap gap-3 mt-2 text-xs text-gray-500">
+                      <div className="flex flex-wrap gap-3 mt-2 text-xs text-[var(--text-secondary)]">
                         {d.publisher && <span>{d.publisher}</span>}
                         {d.theme && (
                           <span className="bg-purple-900/30 text-purple-300 px-1.5 py-0.5 rounded">
@@ -685,7 +687,7 @@ function EditorContent() {
                           </span>
                         )}
                         {d.datasetType && (
-                          <span className="bg-gray-700 text-gray-300 px-1.5 py-0.5 rounded">
+                          <span className="bg-gray-700 text-[var(--text-primary)] px-1.5 py-0.5 rounded">
                             {d.datasetType}
                           </span>
                         )}
@@ -699,21 +701,21 @@ function EditorContent() {
                     <div className="flex gap-2 shrink-0 opacity-50 group-hover:opacity-100 transition-opacity">
                       <button
                         onClick={() => downloadTurtle(d)}
-                        className="p-1.5 rounded hover:bg-gray-700 text-gray-400 hover:text-green-300"
+                        className="p-1.5 rounded hover:bg-[var(--surface-2)] text-[var(--text-secondary)] hover:text-green-300"
                         title="Download as RDF Turtle (.ttl) for EHDS editor"
                       >
                         <Download size={14} />
                       </button>
                       <button
                         onClick={() => startEdit(d)}
-                        className="p-1.5 rounded hover:bg-gray-700 text-gray-400 hover:text-purple-300"
+                        className="p-1.5 rounded hover:bg-[var(--surface-2)] text-[var(--text-secondary)] hover:text-purple-300"
                         title="Edit entry"
                       >
                         <Edit3 size={14} />
                       </button>
                       <button
                         onClick={() => handleDelete(d.id)}
-                        className="p-1.5 rounded hover:bg-gray-700 text-gray-400 hover:text-red-400"
+                        className="p-1.5 rounded hover:bg-[var(--surface-2)] text-[var(--text-secondary)] hover:text-red-400"
                         title="Delete entry"
                       >
                         <Trash2 size={14} />
@@ -731,14 +733,15 @@ function EditorContent() {
       {tab === "create" && (
         <form onSubmit={handleSave} className="space-y-6">
           {editingId && (
-            <div className="text-xs text-gray-500 bg-gray-800/50 rounded px-3 py-2">
-              Editing: <span className="text-gray-300">{editingId}</span>
+            <div className="text-xs text-[var(--text-secondary)] bg-[var(--surface-2)]/50 rounded px-3 py-2">
+              Editing:{" "}
+              <span className="text-[var(--text-primary)]">{editingId}</span>
             </div>
           )}
 
           {/* Section: DCAT-AP Mandatory */}
           <fieldset className="space-y-4">
-            <legend className="text-sm font-semibold text-purple-400 border-b border-gray-700 pb-1 mb-2">
+            <legend className="text-sm font-semibold text-purple-400 border-b border-[var(--border)] pb-1 mb-2">
               DCAT-AP Mandatory Fields
             </legend>
 
@@ -756,7 +759,7 @@ function EditorContent() {
                 onChange={(e) => setField("description", e.target.value)}
                 placeholder="Describe the dataset contents, coverage and purpose…"
                 rows={3}
-                className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded text-sm text-gray-200 outline-none focus:border-purple-500 resize-y"
+                className="w-full px-3 py-2 bg-[var(--surface-2)] border border-gray-600 rounded text-sm text-gray-200 outline-none focus:border-purple-500 resize-y"
               />
             </FormField>
 
@@ -797,7 +800,7 @@ function EditorContent() {
 
           {/* Section: DCAT-AP Recommended */}
           <fieldset className="space-y-4">
-            <legend className="text-sm font-semibold text-purple-400 border-b border-gray-700 pb-1 mb-2">
+            <legend className="text-sm font-semibold text-purple-400 border-b border-[var(--border)] pb-1 mb-2">
               DCAT-AP Recommended Fields
             </legend>
 
@@ -836,7 +839,7 @@ function EditorContent() {
 
           {/* Section: HealthDCAT-AP Extensions */}
           <fieldset className="space-y-4">
-            <legend className="text-sm font-semibold text-purple-400 border-b border-gray-700 pb-1 mb-2">
+            <legend className="text-sm font-semibold text-purple-400 border-b border-[var(--border)] pb-1 mb-2">
               HealthDCAT-AP Extensions
             </legend>
 
@@ -899,9 +902,11 @@ function EditorContent() {
                     type="checkbox"
                     checked={form.personalData ?? false}
                     onChange={(e) => setField("personalData", e.target.checked)}
-                    className="w-4 h-4 rounded bg-gray-800 border-gray-600"
+                    className="w-4 h-4 rounded bg-[var(--surface-2)] border-gray-600"
                   />
-                  <span className="text-sm text-gray-300">Yes</span>
+                  <span className="text-sm text-[var(--text-primary)]">
+                    Yes
+                  </span>
                 </div>
               </FormField>
 
@@ -913,9 +918,11 @@ function EditorContent() {
                     onChange={(e) =>
                       setField("sensitiveData", e.target.checked)
                     }
-                    className="w-4 h-4 rounded bg-gray-800 border-gray-600"
+                    className="w-4 h-4 rounded bg-[var(--surface-2)] border-gray-600"
                   />
-                  <span className="text-sm text-gray-300">Yes</span>
+                  <span className="text-sm text-[var(--text-primary)]">
+                    Yes
+                  </span>
                 </div>
               </FormField>
             </div>
@@ -923,7 +930,7 @@ function EditorContent() {
 
           {/* Section: Statistics */}
           <fieldset className="space-y-4">
-            <legend className="text-sm font-semibold text-purple-400 border-b border-gray-700 pb-1 mb-2">
+            <legend className="text-sm font-semibold text-purple-400 border-b border-[var(--border)] pb-1 mb-2">
               Statistics
             </legend>
 
@@ -1019,7 +1026,7 @@ function EditorContent() {
                 setForm({ ...EMPTY_ENTRY });
                 setResult(null);
               }}
-              className="px-5 py-2.5 bg-gray-700 hover:bg-gray-600 text-gray-300 rounded-lg text-sm transition-colors"
+              className="px-5 py-2.5 bg-gray-700 hover:bg-gray-600 text-[var(--text-primary)] rounded-lg text-sm transition-colors"
             >
               Cancel
             </button>

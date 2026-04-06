@@ -178,7 +178,7 @@ function ResourceDetail({ resource }: { resource: FhirResource }) {
   const entries = Object.entries(resource).filter(([k]) => !skipKeys.has(k));
 
   return (
-    <div className="bg-gray-800/50 rounded-lg p-3 space-y-2">
+    <div className="bg-[var(--surface-2)]/50 rounded-lg p-3 space-y-2">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
@@ -186,13 +186,13 @@ function ResourceDetail({ resource }: { resource: FhirResource }) {
             className="w-2 h-2 rounded-full shrink-0"
             style={{ background: meta.color }}
           />
-          <span className="text-xs font-semibold text-gray-300">
+          <span className="text-xs font-semibold text-[var(--text-primary)]">
             {resource.resourceType}/{resource.id ?? "?"}
           </span>
         </div>
         <button
           onClick={copyJson}
-          className="flex items-center gap-1 text-[10px] text-gray-500 hover:text-gray-300"
+          className="flex items-center gap-1 text-[10px] text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
         >
           <Copy size={10} />
           {copied ? "Copied!" : "JSON"}
@@ -203,7 +203,7 @@ function ResourceDetail({ resource }: { resource: FhirResource }) {
         {entries.map(([key, val]) => (
           <div key={key} className="flex gap-2 text-xs">
             <span className="text-blue-300 shrink-0 w-40 truncate">{key}</span>
-            <span className="text-gray-300 break-all truncate">
+            <span className="text-[var(--text-primary)] break-all truncate">
               {typeof val === "string"
                 ? val
                 : typeof val === "number" || typeof val === "boolean"
@@ -230,30 +230,30 @@ function ResourceGroup({
   const Icon = meta.icon;
 
   return (
-    <div className="border border-gray-700 rounded-lg overflow-hidden">
+    <div className="border border-[var(--border)] rounded-lg overflow-hidden">
       <button
         onClick={() => {
           setExpanded(!expanded);
           setSelectedIdx(null);
         }}
-        className="w-full text-left px-4 py-2.5 flex items-center gap-3 hover:bg-gray-800/50"
+        className="w-full text-left px-4 py-2.5 flex items-center gap-3 hover:bg-[var(--surface-2)]/50"
       >
         {expanded ? (
-          <ChevronDown size={14} className="text-gray-500" />
+          <ChevronDown size={14} className="text-[var(--text-secondary)]" />
         ) : (
-          <ChevronRight size={14} className="text-gray-500" />
+          <ChevronRight size={14} className="text-[var(--text-secondary)]" />
         )}
         <Icon size={14} style={{ color: meta.color }} />
         <span className="text-sm font-medium" style={{ color: meta.color }}>
           {meta.label}
         </span>
-        <span className="text-xs text-gray-500 ml-auto">
+        <span className="text-xs text-[var(--text-secondary)] ml-auto">
           {resources.length} resource{resources.length !== 1 ? "s" : ""}
         </span>
       </button>
 
       {expanded && (
-        <div className="border-t border-gray-700">
+        <div className="border-t border-[var(--border)]">
           {/* Resource list */}
           <div className="divide-y divide-gray-800">
             {resources.map((r, i) => {
@@ -267,7 +267,9 @@ function ResourceGroup({
                   <button
                     onClick={() => setSelectedIdx(isSelected ? null : i)}
                     className={`w-full text-left px-4 py-2 flex items-center gap-3 text-xs transition-colors ${
-                      isSelected ? "bg-gray-800" : "hover:bg-gray-800/40"
+                      isSelected
+                        ? "bg-[var(--surface-2)]"
+                        : "hover:bg-[var(--surface-2)]/40"
                     }`}
                   >
                     <span
@@ -283,12 +285,20 @@ function ResourceGroup({
                       </span>
                     )}
                     {date && (
-                      <span className="text-gray-500 shrink-0">{date}</span>
+                      <span className="text-[var(--text-secondary)] shrink-0">
+                        {date}
+                      </span>
                     )}
                     {isSelected ? (
-                      <ChevronDown size={12} className="text-gray-500" />
+                      <ChevronDown
+                        size={12}
+                        className="text-[var(--text-secondary)]"
+                      />
                     ) : (
-                      <ChevronRight size={12} className="text-gray-500" />
+                      <ChevronRight
+                        size={12}
+                        className="text-[var(--text-secondary)]"
+                      />
                     )}
                   </button>
                   {isSelected && (
@@ -343,7 +353,7 @@ export default function FhirResourceViewer({
   const totalResources = bundle.entry?.length ?? 0;
 
   return (
-    <div className="border border-layer3 rounded-xl overflow-hidden bg-gray-900/80">
+    <div className="border border-layer3 rounded-xl overflow-hidden bg-[var(--surface)]/80">
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 bg-layer3/10 border-b border-layer3/30">
         <div className="flex items-center gap-2">
@@ -351,12 +361,15 @@ export default function FhirResourceViewer({
           <span className="text-sm font-semibold text-layer3">
             {title ?? "FHIR Resource Viewer"}
           </span>
-          <span className="text-xs text-gray-500">
+          <span className="text-xs text-[var(--text-secondary)]">
             {totalResources} resources · {orderedTypes.length} types
           </span>
         </div>
         {onClose && (
-          <button onClick={onClose} className="text-gray-400 hover:text-white">
+          <button
+            onClick={onClose}
+            className="text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+          >
             <X size={16} />
           </button>
         )}
@@ -372,20 +385,25 @@ export default function FhirResourceViewer({
       </div>
 
       {/* Bundle info bar */}
-      <div className="px-4 py-2 border-b border-gray-700 flex flex-wrap gap-4 text-xs text-gray-500">
+      <div className="px-4 py-2 border-b border-[var(--border)] flex flex-wrap gap-4 text-xs text-[var(--text-secondary)]">
         <span>
-          Bundle ID: <span className="text-gray-300">{bundle.id ?? "—"}</span>
+          Bundle ID:{" "}
+          <span className="text-[var(--text-primary)]">{bundle.id ?? "—"}</span>
         </span>
         <span>
-          Type: <span className="text-gray-300">{bundle.type ?? "—"}</span>
+          Type:{" "}
+          <span className="text-[var(--text-primary)]">
+            {bundle.type ?? "—"}
+          </span>
         </span>
         <span>
-          Total: <span className="text-gray-300">{totalResources}</span>
+          Total:{" "}
+          <span className="text-[var(--text-primary)]">{totalResources}</span>
         </span>
       </div>
 
       {/* Resource type summary */}
-      <div className="px-4 py-3 border-b border-gray-700">
+      <div className="px-4 py-3 border-b border-[var(--border)]">
         <div className="flex flex-wrap gap-2">
           {orderedTypes.map((rt) => {
             const meta = RESOURCE_META[rt] ?? DEFAULT_META;

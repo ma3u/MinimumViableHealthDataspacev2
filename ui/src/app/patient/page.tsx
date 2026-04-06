@@ -40,11 +40,11 @@ const FHIR_COLORS: Record<string, string> = {
 
 function StatBadge({ label, value }: { label: string; value?: number }) {
   return (
-    <div className="bg-gray-800 rounded px-3 py-2 text-center">
+    <div className="bg-[var(--surface-2)] rounded px-3 py-2 text-center">
       <div className="text-lg font-semibold text-white">
         {value != null ? value.toLocaleString() : "—"}
       </div>
-      <div className="text-xs text-gray-400 mt-0.5">{label}</div>
+      <div className="text-xs text-[var(--text-secondary)] mt-0.5">{label}</div>
     </div>
   );
 }
@@ -123,7 +123,7 @@ export default function PatientPage() {
         <select
           value={selected}
           onChange={(e) => setSelected(e.target.value)}
-          className="mb-4 px-3 py-2 bg-gray-800 border border-gray-600 rounded text-sm outline-none focus:border-layer3 w-full"
+          className="mb-4 px-3 py-2 bg-[var(--surface-2)] border border-gray-600 rounded text-sm outline-none focus:border-layer3 w-full"
         >
           <option value="">
             — select patient ({patients.length} loaded) —
@@ -138,31 +138,32 @@ export default function PatientPage() {
 
       {/* Patient demographics */}
       {selectedPatient && (
-        <div className="flex gap-4 text-xs text-gray-400 mb-6">
+        <div className="flex gap-4 text-xs text-[var(--text-secondary)] mb-6">
           <span>
-            <span className="text-gray-500">Gender:</span>{" "}
+            <span className="text-[var(--text-secondary)]">Gender:</span>{" "}
             {selectedPatient.gender ?? "—"}
           </span>
           <span>
-            <span className="text-gray-500">Born:</span>{" "}
+            <span className="text-[var(--text-secondary)]">Born:</span>{" "}
             {selectedPatient.birthDate ?? "—"}
           </span>
           <span>
-            <span className="text-gray-500">Events:</span> {timeline.length}
+            <span className="text-[var(--text-secondary)]">Events:</span>{" "}
+            {timeline.length}
           </span>
         </div>
       )}
 
-      {loading && <p className="text-gray-500">Loading…</p>}
+      {loading && <p className="text-[var(--text-secondary)]">Loading…</p>}
 
       {!loading && selected && timeline.length === 0 && (
-        <p className="text-gray-500">
+        <p className="text-[var(--text-secondary)]">
           No timeline events found for this patient.
         </p>
       )}
 
       {timeline.length > 0 && (
-        <ol className="relative border-l border-gray-700 space-y-6 pl-6">
+        <ol className="relative border-l border-[var(--border)] space-y-6 pl-6">
           {timeline.map((e, i) => (
             <li key={i} className="relative">
               <span
@@ -171,7 +172,7 @@ export default function PatientPage() {
                   background: FHIR_COLORS[e.fhirType] ?? "#888",
                 }}
               />
-              <div className="text-xs text-gray-500 mb-0.5">
+              <div className="text-xs text-[var(--text-secondary)] mb-0.5">
                 {e.date ?? "—"}
               </div>
               <div className="font-medium text-sm">
@@ -181,7 +182,7 @@ export default function PatientPage() {
                 {e.display ? (
                   <span className="text-gray-200">{e.display}</span>
                 ) : (
-                  <span className="text-gray-500 font-mono text-xs">
+                  <span className="text-[var(--text-secondary)] font-mono text-xs">
                     {e.fhirId}
                   </span>
                 )}

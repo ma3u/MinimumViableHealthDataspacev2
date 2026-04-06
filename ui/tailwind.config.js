@@ -1,6 +1,7 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: ["./src/**/*.{js,ts,jsx,tsx,mdx}"],
+  darkMode: "class",
   theme: {
     extend: {
       colors: {
@@ -30,6 +31,21 @@ module.exports = {
           light: "#D0C0ED",
           dark: "#7B5FB0",
         },
+        // Semantic surface tokens (used via CSS vars in globals.css)
+        surface: {
+          DEFAULT: "var(--surface)",
+          2: "var(--surface-2)",
+        },
+      },
+      backgroundColor: {
+        base: "var(--bg)",
+      },
+      textColor: {
+        base: "var(--text-primary)",
+        muted: "var(--text-secondary)",
+      },
+      borderColor: {
+        base: "var(--border)",
       },
     },
   },

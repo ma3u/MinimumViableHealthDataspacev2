@@ -32,6 +32,7 @@ import {
   X,
 } from "lucide-react";
 import UserMenu from "./UserMenu";
+import ThemeToggle from "./ThemeToggle";
 import { useState, useRef, useEffect } from "react";
 import { deriveParticipantType, derivePersonaId } from "@/lib/auth";
 import { useDemoPersona } from "@/lib/use-demo-persona";
@@ -434,7 +435,7 @@ function NavDropdown({
         className={`flex items-center gap-1 px-3 py-2 rounded text-sm transition-colors touch-target-sm ${
           isActive
             ? "bg-layer1 text-white"
-            : "text-gray-400 hover:text-gray-100 hover:bg-gray-800"
+            : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-2)]"
         }`}
       >
         <group.icon size={15} aria-hidden="true" />
@@ -447,7 +448,7 @@ function NavDropdown({
       </button>
       {open && (
         <div
-          className="absolute top-full left-0 mt-1 py-1 bg-gray-800 border border-gray-700 rounded-lg shadow-xl z-50 min-w-[170px]"
+          className="absolute top-full left-0 mt-1 py-1 bg-[var(--surface)] border border-[var(--border)] rounded-lg shadow-xl z-50 min-w-[170px]"
           role="menu"
         >
           {group.links.map((l) => (
@@ -461,8 +462,8 @@ function NavDropdown({
               }}
               className={`flex items-center gap-2 px-3 py-2 text-sm transition-colors ${
                 pathname?.startsWith(l.href)
-                  ? "text-layer2 bg-gray-700/50"
-                  : "text-gray-300 hover:bg-gray-700"
+                  ? "text-layer2 bg-[var(--surface-2)]"
+                  : "text-[var(--text-secondary)] hover:bg-[var(--surface-2)] hover:text-[var(--text-primary)]"
               }`}
             >
               <l.icon size={14} aria-hidden="true" />
@@ -520,7 +521,7 @@ export default function Navigation() {
 
   return (
     <nav
-      className="bg-gray-900 border-b border-gray-700"
+      className="bg-[var(--surface)] border-b border-[var(--border)]"
       role="navigation"
       aria-label="Main navigation"
     >
@@ -540,11 +541,12 @@ export default function Navigation() {
         </div>
 
         <div className="ml-auto flex items-center gap-2">
+          <ThemeToggle />
           <UserMenu />
           {/* Mobile hamburger */}
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
-            className="md:hidden p-2 rounded text-gray-400 hover:text-white hover:bg-gray-800 touch-target"
+            className="md:hidden p-2 rounded text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-2)] touch-target"
             aria-expanded={mobileOpen}
             aria-controls="mobile-nav"
             aria-label={mobileOpen ? "Close menu" : "Open menu"}
@@ -562,11 +564,11 @@ export default function Navigation() {
       {mobileOpen && (
         <div
           id="mobile-nav"
-          className="md:hidden border-t border-gray-700 bg-gray-900 px-4 py-3 space-y-1 animate-fade-in-up"
+          className="md:hidden border-t border-[var(--border)] bg-[var(--surface)] px-4 py-3 space-y-1 animate-fade-in-up"
         >
           {visibleGroups.map((g) => (
             <div key={g.label} className="mb-2">
-              <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider px-2">
+              <span className="text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider px-2">
                 {g.label}
               </span>
               <div className="mt-1 space-y-0.5">
@@ -575,7 +577,7 @@ export default function Navigation() {
                     key={l.href}
                     href={l.href}
                     onClick={() => setMobileOpen(false)}
-                    className="flex items-center gap-2 px-3 py-2.5 rounded text-sm text-gray-300 hover:bg-gray-800 hover:text-white transition-colors touch-target-sm"
+                    className="flex items-center gap-2 px-3 py-2.5 rounded text-sm text-[var(--text-secondary)] hover:bg-[var(--surface-2)] hover:text-[var(--text-primary)] transition-colors touch-target-sm"
                   >
                     <l.icon size={16} aria-hidden="true" />
                     {l.label}

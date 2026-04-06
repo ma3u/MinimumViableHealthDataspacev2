@@ -242,7 +242,8 @@ const FHIR_RESOURCE_COLORS: Record<string, string> = {
 
 function fhirColor(type: string): string {
   return (
-    FHIR_RESOURCE_COLORS[type] || "bg-gray-800 text-gray-300 border-gray-600"
+    FHIR_RESOURCE_COLORS[type] ||
+    "bg-[var(--surface-2)] text-[var(--text-primary)] border-gray-600"
   );
 }
 
@@ -252,7 +253,7 @@ function JsonNode({ data, depth = 0 }: { data: unknown; depth?: number }) {
   const [collapsed, setCollapsed] = useState(depth > 1);
 
   if (data === null || data === undefined) {
-    return <span className="text-gray-500">null</span>;
+    return <span className="text-[var(--text-secondary)]">null</span>;
   }
   if (typeof data === "boolean") {
     return <span className="text-yellow-400">{String(data)}</span>;
@@ -265,18 +266,21 @@ function JsonNode({ data, depth = 0 }: { data: unknown; depth?: number }) {
   }
 
   if (Array.isArray(data)) {
-    if (data.length === 0) return <span className="text-gray-500">[]</span>;
+    if (data.length === 0)
+      return <span className="text-[var(--text-secondary)]">[]</span>;
     return (
       <span>
         <button
           onClick={() => setCollapsed(!collapsed)}
-          className="text-gray-400 hover:text-gray-200 inline-flex items-center"
+          className="text-[var(--text-secondary)] hover:text-gray-200 inline-flex items-center"
         >
           {collapsed ? <ChevronRight size={12} /> : <ChevronDown size={12} />}
-          <span className="text-gray-500 text-xs ml-0.5">[{data.length}]</span>
+          <span className="text-[var(--text-secondary)] text-xs ml-0.5">
+            [{data.length}]
+          </span>
         </button>
         {!collapsed && (
-          <div className="ml-4 border-l border-gray-700 pl-2">
+          <div className="ml-4 border-l border-[var(--border)] pl-2">
             {data.map((item, i) => (
               <div key={i}>
                 <span className="text-gray-600 text-xs mr-1">{i}:</span>
@@ -292,27 +296,27 @@ function JsonNode({ data, depth = 0 }: { data: unknown; depth?: number }) {
   if (typeof data === "object") {
     const entries = Object.entries(data as Record<string, unknown>);
     if (entries.length === 0) {
-      return <span className="text-gray-500">{"{}"}</span>;
+      return <span className="text-[var(--text-secondary)]">{"{}"}</span>;
     }
     return (
       <span>
         <button
           onClick={() => setCollapsed(!collapsed)}
-          className="text-gray-400 hover:text-gray-200 inline-flex items-center"
+          className="text-[var(--text-secondary)] hover:text-gray-200 inline-flex items-center"
         >
           {collapsed ? <ChevronRight size={12} /> : <ChevronDown size={12} />}
-          <span className="text-gray-500 text-xs ml-0.5">
+          <span className="text-[var(--text-secondary)] text-xs ml-0.5">
             {"{"}
             {entries.length}
             {"}"}
           </span>
         </button>
         {!collapsed && (
-          <div className="ml-4 border-l border-gray-700 pl-2">
+          <div className="ml-4 border-l border-[var(--border)] pl-2">
             {entries.map(([key, val]) => (
               <div key={key}>
                 <span className="text-blue-300">{key}</span>
-                <span className="text-gray-500">: </span>
+                <span className="text-[var(--text-secondary)]">: </span>
                 <JsonNode data={val} depth={depth + 1} />
               </div>
             ))}
@@ -367,15 +371,15 @@ function FhirResourceCard({ entry }: { entry: FhirBundleEntry }) {
   }
 
   return (
-    <div className="border border-gray-700 rounded-lg overflow-hidden">
+    <div className="border border-[var(--border)] rounded-lg overflow-hidden">
       <button
         onClick={() => setExpanded(!expanded)}
-        className="w-full flex items-center gap-2 px-3 py-2 text-left hover:bg-gray-800/50 transition-colors"
+        className="w-full flex items-center gap-2 px-3 py-2 text-left hover:bg-[var(--surface-2)]/50 transition-colors"
       >
         {expanded ? (
-          <ChevronDown size={12} className="text-gray-400" />
+          <ChevronDown size={12} className="text-[var(--text-secondary)]" />
         ) : (
-          <ChevronRight size={12} className="text-gray-400" />
+          <ChevronRight size={12} className="text-[var(--text-secondary)]" />
         )}
         <span
           className={`text-[10px] px-1.5 py-0.5 rounded border ${fhirColor(
@@ -384,11 +388,13 @@ function FhirResourceCard({ entry }: { entry: FhirBundleEntry }) {
         >
           {type}
         </span>
-        <span className="text-xs text-gray-300 truncate flex-1">{summary}</span>
+        <span className="text-xs text-[var(--text-primary)] truncate flex-1">
+          {summary}
+        </span>
         <span className="text-[10px] text-gray-600">{r.id}</span>
       </button>
       {expanded && (
-        <div className="px-3 pb-3 pt-1 bg-gray-900/50 font-mono text-xs overflow-x-auto max-h-64 overflow-y-auto">
+        <div className="px-3 pb-3 pt-1 bg-[var(--surface)]/50 font-mono text-xs overflow-x-auto max-h-64 overflow-y-auto">
           <JsonNode data={r} depth={0} />
         </div>
       )}
@@ -433,7 +439,7 @@ function FhirViewerPanel({
   }, [bundle, payload]);
 
   return (
-    <div className="border border-layer2/50 rounded-xl overflow-hidden bg-gray-900/80 mt-3">
+    <div className="border border-layer2/50 rounded-xl overflow-hidden bg-[var(--surface)]/80 mt-3">
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 bg-layer2/10 border-b border-layer2/30">
         <div className="flex items-center gap-2">
@@ -442,7 +448,7 @@ function FhirViewerPanel({
             FHIR Data — {aId ? assetLabel(aId as string) : "Bundle"}
           </span>
           {payload?.provider && (
-            <span className="text-[10px] px-1.5 py-0.5 rounded bg-gray-700 text-gray-400">
+            <span className="text-[10px] px-1.5 py-0.5 rounded bg-gray-700 text-[var(--text-secondary)]">
               from {payload.provider}
             </span>
           )}
@@ -466,7 +472,7 @@ function FhirViewerPanel({
           </a>
           <button
             onClick={onClose}
-            className="text-gray-500 hover:text-gray-300"
+            className="text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
           >
             <X size={16} />
           </button>
@@ -474,9 +480,9 @@ function FhirViewerPanel({
       </div>
 
       {/* Summary stats */}
-      <div className="px-4 py-3 border-b border-gray-700 grid grid-cols-2 sm:grid-cols-4 gap-3">
+      <div className="px-4 py-3 border-b border-[var(--border)] grid grid-cols-2 sm:grid-cols-4 gap-3">
         <div>
-          <div className="text-[10px] text-gray-500 uppercase tracking-wide">
+          <div className="text-[10px] text-[var(--text-secondary)] uppercase tracking-wide">
             Total Resources
           </div>
           <div className="text-lg font-semibold text-gray-200">
@@ -484,7 +490,7 @@ function FhirViewerPanel({
           </div>
         </div>
         <div>
-          <div className="text-[10px] text-gray-500 uppercase tracking-wide">
+          <div className="text-[10px] text-[var(--text-secondary)] uppercase tracking-wide">
             Resource Types
           </div>
           <div className="text-lg font-semibold text-gray-200">
@@ -494,10 +500,10 @@ function FhirViewerPanel({
           </div>
         </div>
         <div>
-          <div className="text-[10px] text-gray-500 uppercase tracking-wide">
+          <div className="text-[10px] text-[var(--text-secondary)] uppercase tracking-wide">
             Transferred
           </div>
-          <div className="text-sm text-gray-300">
+          <div className="text-sm text-[var(--text-primary)]">
             {payload?.transferredAt
               ? new Date(payload.transferredAt).toLocaleString(undefined, {
                   dateStyle: "short",
@@ -507,10 +513,10 @@ function FhirViewerPanel({
           </div>
         </div>
         <div>
-          <div className="text-[10px] text-gray-500 uppercase tracking-wide">
+          <div className="text-[10px] text-[var(--text-secondary)] uppercase tracking-wide">
             Size
           </div>
-          <div className="text-sm text-gray-300">
+          <div className="text-sm text-[var(--text-primary)]">
             {payload?.sizeBytes
               ? `${(payload.sizeBytes / 1024).toFixed(0)} KB`
               : "—"}
@@ -521,7 +527,7 @@ function FhirViewerPanel({
       {/* Resource type pills */}
       {(Object.keys(resourceCounts).length > 0 ||
         (payload?.containedResourceTypes?.length ?? 0) > 0) && (
-        <div className="px-4 py-2 border-b border-gray-700 flex flex-wrap gap-1.5">
+        <div className="px-4 py-2 border-b border-[var(--border)] flex flex-wrap gap-1.5">
           {Object.keys(resourceCounts).length > 0
             ? Object.entries(resourceCounts).map(([type, count]) => (
                 <span
@@ -547,14 +553,14 @@ function FhirViewerPanel({
       )}
 
       {/* View mode tabs & actions */}
-      <div className="px-4 py-2 border-b border-gray-700 flex items-center justify-between">
+      <div className="px-4 py-2 border-b border-[var(--border)] flex items-center justify-between">
         <div className="flex gap-1">
           <button
             onClick={() => setViewMode("resources")}
             className={`text-xs px-2.5 py-1 rounded ${
               viewMode === "resources"
                 ? "bg-layer2/20 text-layer2"
-                : "text-gray-400 hover:text-gray-200"
+                : "text-[var(--text-secondary)] hover:text-gray-200"
             }`}
           >
             Resources
@@ -564,7 +570,7 @@ function FhirViewerPanel({
             className={`text-xs px-2.5 py-1 rounded ${
               viewMode === "json"
                 ? "bg-layer2/20 text-layer2"
-                : "text-gray-400 hover:text-gray-200"
+                : "text-[var(--text-secondary)] hover:text-gray-200"
             }`}
           >
             Raw JSON
@@ -572,7 +578,7 @@ function FhirViewerPanel({
         </div>
         <button
           onClick={copyJson}
-          className="flex items-center gap-1 text-[11px] text-gray-400 hover:text-gray-200"
+          className="flex items-center gap-1 text-[11px] text-[var(--text-secondary)] hover:text-gray-200"
         >
           <Copy size={10} />
           {copied ? "Copied!" : "Copy"}
@@ -588,7 +594,7 @@ function FhirViewerPanel({
             ))}
           </div>
         ) : viewMode === "resources" && !bundle?.entry ? (
-          <div className="p-6 text-center text-sm text-gray-500">
+          <div className="p-6 text-center text-sm text-[var(--text-secondary)]">
             <FileJson2 size={24} className="mx-auto mb-2 text-gray-600" />
             <p>Full FHIR Bundle data not available for this transfer.</p>
             <p className="text-xs mt-1">
@@ -597,7 +603,7 @@ function FhirViewerPanel({
             </p>
           </div>
         ) : (
-          <pre className="p-4 font-mono text-xs text-gray-300 overflow-x-auto">
+          <pre className="p-4 font-mono text-xs text-[var(--text-primary)] overflow-x-auto">
             {JSON.stringify(bundle || payload, null, 2)}
           </pre>
         )}
@@ -612,7 +618,7 @@ export default function DataTransferPage() {
   return (
     <Suspense
       fallback={
-        <div className="flex items-center gap-2 text-gray-500 p-10">
+        <div className="flex items-center gap-2 text-[var(--text-secondary)] p-10">
           <Loader2 size={16} className="animate-spin" />
           Loading…
         </div>
@@ -879,13 +885,13 @@ function DataTransferContent() {
 
       {/* Participant selector */}
       <div className="mb-6">
-        <label className="text-xs text-gray-500 mb-1 block">
+        <label className="text-xs text-[var(--text-secondary)] mb-1 block">
           Requesting as (your participant)
         </label>
         <select
           value={selectedCtx}
           onChange={(e) => setSelectedCtx(e.target.value)}
-          className="w-full max-w-md px-3 py-2 bg-gray-800 border border-gray-600 rounded text-sm"
+          className="w-full max-w-md px-3 py-2 bg-[var(--surface-2)] border border-gray-600 rounded text-sm"
         >
           {participants.map((p) => (
             <option key={p["@id"]} value={p["@id"]}>
@@ -897,16 +903,16 @@ function DataTransferContent() {
       </div>
 
       {/* ── Initiate Transfer from Agreement ── */}
-      <div className="border border-gray-700 rounded-xl p-5 mb-8">
+      <div className="border border-[var(--border)] rounded-xl p-5 mb-8">
         <div className="flex items-center gap-2 mb-1">
           <Play size={16} className="text-layer2" />
           <h2 className="font-semibold text-sm">
             Start Transfer from Agreement
           </h2>
         </div>
-        <p className="text-xs text-gray-500 mb-4">
+        <p className="text-xs text-[var(--text-secondary)] mb-4">
           Select a finalized contract agreement to pull data via{" "}
-          <code className="text-gray-400">HttpData-PULL</code>.
+          <code className="text-[var(--text-secondary)]">HttpData-PULL</code>.
         </p>
 
         {result && (
@@ -922,7 +928,7 @@ function DataTransferContent() {
         )}
 
         {agreements.length === 0 && !loading && (
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-[var(--text-secondary)]">
             No finalized agreements found. Complete a{" "}
             <a href="/negotiate" className="text-layer2 hover:underline">
               contract negotiation
@@ -934,7 +940,7 @@ function DataTransferContent() {
         {agreements.length > 0 && (
           <form onSubmit={handleInitiate} className="space-y-3">
             {/* Select All */}
-            <label className="flex items-center gap-2 px-3 py-2 text-xs text-gray-400 cursor-pointer hover:text-gray-200">
+            <label className="flex items-center gap-2 px-3 py-2 text-xs text-[var(--text-secondary)] cursor-pointer hover:text-gray-200">
               <input
                 type="checkbox"
                 checked={selectedAgreements.size === agreements.length}
@@ -957,7 +963,7 @@ function DataTransferContent() {
                     className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${
                       selectedAgreements.has(agrId)
                         ? "border-layer2 bg-layer2/10"
-                        : "border-gray-700 hover:border-gray-500 bg-gray-800/50"
+                        : "border-[var(--border)] hover:border-gray-500 bg-[var(--surface-2)]/50"
                     } ${hasTransfer ? "opacity-60" : ""}`}
                   >
                     <input
@@ -970,7 +976,7 @@ function DataTransferContent() {
                       <p className="text-sm font-medium text-gray-200">
                         {aId ? assetLabel(aId as string) : agrId.slice(0, 12)}
                       </p>
-                      <p className="text-xs text-gray-500">
+                      <p className="text-xs text-[var(--text-secondary)]">
                         Provider: {cp ? didToName(cp as string) : "—"}
                         {hasTransfer && (
                           <span className="ml-2 text-yellow-500">
@@ -1029,14 +1035,14 @@ function DataTransferContent() {
       <div className="flex items-center justify-between mb-3">
         <h2 className="font-semibold text-sm">
           Transfer Processes{" "}
-          <span className="font-normal text-gray-500">
+          <span className="font-normal text-[var(--text-secondary)]">
             (DSP Signalling Protocol)
           </span>
         </h2>
         <button
           onClick={refreshTransfers}
           disabled={refreshing}
-          className="flex items-center gap-1 text-xs text-gray-400 hover:text-gray-200 disabled:opacity-50"
+          className="flex items-center gap-1 text-xs text-[var(--text-secondary)] hover:text-gray-200 disabled:opacity-50"
         >
           <RefreshCw size={12} className={refreshing ? "animate-spin" : ""} />
           Refresh
@@ -1064,7 +1070,7 @@ function DataTransferContent() {
                 className={`text-xs px-2.5 py-1 rounded-full transition-colors ${
                   statusFilter === s
                     ? "bg-layer2/20 text-layer2 border border-layer2/40"
-                    : "bg-gray-800 text-gray-400 border border-gray-700 hover:border-gray-500"
+                    : "bg-[var(--surface-2)] text-[var(--text-secondary)] border border-[var(--border)] hover:border-gray-500"
                 }`}
               >
                 {s} ({count})
@@ -1075,12 +1081,12 @@ function DataTransferContent() {
       )}
 
       {loading ? (
-        <div className="flex items-center gap-2 text-gray-500">
+        <div className="flex items-center gap-2 text-[var(--text-secondary)]">
           <Loader2 size={16} className="animate-spin" />
           Loading transfers…
         </div>
       ) : filteredTransfers.length === 0 ? (
-        <p className="text-gray-500 text-sm">
+        <p className="text-[var(--text-secondary)] text-sm">
           {transfers.length === 0
             ? "No transfer processes yet. Start one from an agreed contract above."
             : `No transfers matching "${statusFilter}".`}
@@ -1106,8 +1112,8 @@ function DataTransferContent() {
                 key={t["@id"]}
                 className={`p-4 border rounded-xl space-y-3 transition-colors ${
                   isViewing
-                    ? "border-layer2/50 bg-gray-800/30"
-                    : "border-gray-700"
+                    ? "border-layer2/50 bg-[var(--surface-2)]/30"
+                    : "border-[var(--border)]"
                 }`}
               >
                 {/* Header row */}
@@ -1117,7 +1123,7 @@ function DataTransferContent() {
                     <span className="text-sm font-medium text-gray-200">
                       {aId ? assetLabel(aId as string) : t["@id"].slice(0, 12)}
                     </span>
-                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-gray-700 text-gray-400">
+                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-gray-700 text-[var(--text-secondary)]">
                       {transferType}
                     </span>
                   </div>
@@ -1147,7 +1153,7 @@ function DataTransferContent() {
                 <DspPipeline state={state} />
 
                 {/* Metadata row */}
-                <div className="flex items-center gap-4 text-[11px] text-gray-500">
+                <div className="flex items-center gap-4 text-[11px] text-[var(--text-secondary)]">
                   {timestamp > 0 && (
                     <span>
                       Updated:{" "}
@@ -1169,7 +1175,7 @@ function DataTransferContent() {
                 {/* FHIR Viewer panel (expanded) */}
                 {isViewing &&
                   (loadingFhir ? (
-                    <div className="flex items-center gap-2 text-gray-500 py-4 justify-center">
+                    <div className="flex items-center gap-2 text-[var(--text-secondary)] py-4 justify-center">
                       <Loader2 size={14} className="animate-spin" />
                       Loading FHIR data…
                     </div>

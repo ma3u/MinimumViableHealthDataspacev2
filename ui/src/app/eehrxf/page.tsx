@@ -111,38 +111,40 @@ function CoverageMeter({ percent }: { percent: number }) {
           : "bg-red-500";
   return (
     <div className="flex items-center gap-2">
-      <div className="flex-1 bg-gray-800 rounded-full h-2 overflow-hidden">
+      <div className="flex-1 bg-[var(--surface-2)] rounded-full h-2 overflow-hidden">
         <div
           className={`${color} h-2 rounded-full transition-all`}
           style={{ width: `${Math.max(percent, 2)}%` }}
         />
       </div>
-      <span className="text-xs text-gray-400 w-9 text-right">{percent}%</span>
+      <span className="text-xs text-[var(--text-secondary)] w-9 text-right">
+        {percent}%
+      </span>
     </div>
   );
 }
 
 function ProfileRow({ profile }: { profile: EEHRxFProfile }) {
   return (
-    <div className="flex items-center gap-3 py-2 px-3 rounded hover:bg-gray-800/50 transition-colors">
+    <div className="flex items-center gap-3 py-2 px-3 rounded hover:bg-[var(--surface-2)]/50 transition-colors">
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
           <span className="text-sm font-medium text-gray-200 truncate">
             {profile.name}
           </span>
-          <span className="text-[10px] text-gray-500 bg-gray-800 px-1.5 py-0.5 rounded">
+          <span className="text-[10px] text-[var(--text-secondary)] bg-[var(--surface-2)] px-1.5 py-0.5 rounded">
             {profile.fhirVersion}
           </span>
-          <span className="text-[10px] text-gray-500 bg-gray-800 px-1.5 py-0.5 rounded">
+          <span className="text-[10px] text-[var(--text-secondary)] bg-[var(--surface-2)] px-1.5 py-0.5 rounded">
             {profile.status}
           </span>
         </div>
-        <div className="text-xs text-gray-500 mt-0.5 truncate">
+        <div className="text-xs text-[var(--text-secondary)] mt-0.5 truncate">
           {profile.baseResource} — {profile.igName}
         </div>
       </div>
       <div className="flex items-center gap-3 shrink-0">
-        <span className="text-xs text-gray-400 tabular-nums">
+        <span className="text-xs text-[var(--text-secondary)] tabular-nums">
           {profile.resourceCount.toLocaleString()} resources
         </span>
         <StatusBadge status={profile.coverage} />
@@ -151,7 +153,7 @@ function ProfileRow({ profile }: { profile: EEHRxFProfile }) {
             href={profile.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-gray-500 hover:text-layer2 transition-colors"
+            className="text-[var(--text-secondary)] hover:text-layer2 transition-colors"
             title="View IG specification"
           >
             <ExternalLink size={14} />
@@ -180,37 +182,45 @@ function CategoryCard({ category }: { category: EEHRxFCategory }) {
 
   return (
     <div
-      className={`bg-gray-900 border rounded-xl overflow-hidden ${
-        groupColors[category.ehdsGroup] ?? "border-gray-700"
+      className={`bg-[var(--surface)] border rounded-xl overflow-hidden ${
+        groupColors[category.ehdsGroup] ?? "border-[var(--border)]"
       }`}
     >
       <button
         onClick={() => setExpanded(!expanded)}
-        className="w-full flex items-center gap-3 p-5 text-left hover:bg-gray-800/30 transition-colors"
+        className="w-full flex items-center gap-3 p-5 text-left hover:bg-[var(--surface-2)]/30 transition-colors"
       >
         {expanded ? (
-          <ChevronDown size={16} className="text-gray-500 shrink-0" />
+          <ChevronDown
+            size={16}
+            className="text-[var(--text-secondary)] shrink-0"
+          />
         ) : (
-          <ChevronRight size={16} className="text-gray-500 shrink-0" />
+          <ChevronRight
+            size={16}
+            className="text-[var(--text-secondary)] shrink-0"
+          />
         )}
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1">
-            <h3 className="font-semibold text-gray-100">{category.name}</h3>
+            <h3 className="font-semibold text-[var(--text-primary)]">
+              {category.name}
+            </h3>
             <StatusBadge status={category.status} />
           </div>
-          <p className="text-xs text-gray-500 line-clamp-1">
+          <p className="text-xs text-[var(--text-secondary)] line-clamp-1">
             {category.description}
           </p>
         </div>
         <div className="shrink-0 text-right">
-          <div className="flex items-center gap-1.5 text-xs text-gray-400 mb-1">
+          <div className="flex items-center gap-1.5 text-xs text-[var(--text-secondary)] mb-1">
             <Clock size={12} />
             <span>
               EHDS{" "}
               {category.ehdsDeadline === "TBD" ? "TBD" : category.ehdsDeadline}
             </span>
           </div>
-          <div className="text-[10px] text-gray-500">
+          <div className="text-[10px] text-[var(--text-secondary)]">
             Group {category.ehdsGroup} ·{" "}
             {category.totalResources.toLocaleString()} resources
           </div>
@@ -218,10 +228,10 @@ function CategoryCard({ category }: { category: EEHRxFCategory }) {
       </button>
 
       {expanded && (
-        <div className="border-t border-gray-800 px-5 pb-4">
+        <div className="border-t border-[var(--border)] px-5 pb-4">
           <div className="pt-3 pb-2">
             <div className="flex items-center justify-between mb-1">
-              <span className="text-xs text-gray-400">
+              <span className="text-xs text-[var(--text-secondary)]">
                 Profile Coverage: {profileCovered}/{profileTotal} profiles
               </span>
             </div>
@@ -281,40 +291,48 @@ export default function EEHRxFPage() {
 
       {/* Summary stats */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
-        <div className="bg-gray-900 border border-gray-700 rounded-xl p-4 flex flex-col gap-1">
+        <div className="bg-[var(--surface)] border border-[var(--border)] rounded-xl p-4 flex flex-col gap-1">
           <Layers size={16} className="text-layer2" />
           <span className="text-2xl font-bold">
             {loading ? "—" : data?.summary.totalCategories ?? 0}
           </span>
-          <span className="text-xs text-gray-500">Priority Categories</span>
+          <span className="text-xs text-[var(--text-secondary)]">
+            Priority Categories
+          </span>
         </div>
-        <div className="bg-gray-900 border border-gray-700 rounded-xl p-4 flex flex-col gap-1">
+        <div className="bg-[var(--surface)] border border-[var(--border)] rounded-xl p-4 flex flex-col gap-1">
           <ShieldCheck size={16} className="text-layer3" />
           <span className="text-2xl font-bold">
             {loading ? "—" : data?.summary.totalProfiles ?? 0}
           </span>
-          <span className="text-xs text-gray-500">EU Profiles Tracked</span>
+          <span className="text-xs text-[var(--text-secondary)]">
+            EU Profiles Tracked
+          </span>
         </div>
-        <div className="bg-gray-900 border border-gray-700 rounded-xl p-4 flex flex-col gap-1">
+        <div className="bg-[var(--surface)] border border-[var(--border)] rounded-xl p-4 flex flex-col gap-1">
           <CheckCircle size={16} className="text-green-400" />
           <span className="text-2xl font-bold">
             {loading ? "—" : data?.summary.coveredProfiles ?? 0}
           </span>
-          <span className="text-xs text-gray-500">Profiles with Data</span>
+          <span className="text-xs text-[var(--text-secondary)]">
+            Profiles with Data
+          </span>
         </div>
-        <div className="bg-gray-900 border border-gray-700 rounded-xl p-4 flex flex-col gap-1">
+        <div className="bg-[var(--surface)] border border-[var(--border)] rounded-xl p-4 flex flex-col gap-1">
           <AlertTriangle size={16} className="text-yellow-400" />
           <span className="text-2xl font-bold">
             {loading ? "—" : `${data?.summary.coveragePercent ?? 0}%`}
           </span>
-          <span className="text-xs text-gray-500">Overall Coverage</span>
+          <span className="text-xs text-[var(--text-secondary)]">
+            Overall Coverage
+          </span>
         </div>
       </div>
 
       {/* EHDS Timeline */}
-      <div className="bg-gray-900 border border-gray-700 rounded-xl p-5 mb-8">
+      <div className="bg-[var(--surface)] border border-[var(--border)] rounded-xl p-5 mb-8">
         <div className="flex items-center gap-2 mb-4">
-          <Clock size={16} className="text-gray-400" />
+          <Clock size={16} className="text-[var(--text-secondary)]" />
           <h2 className="font-semibold text-sm text-gray-200">
             EHDS Implementation Timeline
           </h2>
@@ -330,17 +348,17 @@ export default function EEHRxFPage() {
                   className={`w-4 h-4 rounded-full border-2 ${
                     m.active
                       ? "bg-layer2 border-layer2"
-                      : "bg-gray-900 border-gray-600"
+                      : "bg-[var(--surface)] border-gray-600"
                   }`}
                 />
                 <span
                   className={`text-xs font-medium mt-1 ${
-                    m.active ? "text-layer2" : "text-gray-400"
+                    m.active ? "text-layer2" : "text-[var(--text-secondary)]"
                   }`}
                 >
                   {m.year}
                 </span>
-                <span className="text-[10px] text-gray-500 text-center max-w-[100px] leading-tight mt-0.5">
+                <span className="text-[10px] text-[var(--text-secondary)] text-center max-w-[100px] leading-tight mt-0.5">
                   {m.label}
                 </span>
               </div>
@@ -351,7 +369,9 @@ export default function EEHRxFPage() {
 
       {/* Category cards */}
       {loading ? (
-        <div className="text-gray-500 text-sm">Loading EEHRxF profiles…</div>
+        <div className="text-[var(--text-secondary)] text-sm">
+          Loading EEHRxF profiles…
+        </div>
       ) : (
         <div className="flex flex-col gap-4">
           {data?.categories.map((cat) => (
@@ -361,8 +381,10 @@ export default function EEHRxFPage() {
       )}
 
       {/* Reference links */}
-      <div className="mt-10 border-t border-gray-800 pt-6">
-        <h3 className="text-sm font-semibold text-gray-300 mb-3">References</h3>
+      <div className="mt-10 border-t border-[var(--border)] pt-6">
+        <h3 className="text-sm font-semibold text-[var(--text-primary)] mb-3">
+          References
+        </h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
           {[
             {
@@ -395,7 +417,7 @@ export default function EEHRxFPage() {
               href={ref.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-1.5 text-gray-400 hover:text-layer2 transition-colors"
+              className="flex items-center gap-1.5 text-[var(--text-secondary)] hover:text-layer2 transition-colors"
             >
               <ExternalLink size={12} />
               {ref.label}

@@ -723,7 +723,9 @@ describe("CredentialsPage", () => {
 
     await waitFor(() => {
       const badge = screen.getByText("Revoked");
-      expect(badge.className).toContain("text-gray-400");
+      expect(badge.className).toMatch(
+        /text-gray-400|text-\[var\(--text-secondary\)\]/,
+      );
     });
   });
 

@@ -195,7 +195,7 @@ function statusBadge(status: string) {
   return (
     <span
       className={`inline-block px-1.5 py-0.5 rounded text-[10px] font-semibold uppercase ${
-        map[status] ?? "bg-gray-800 text-gray-400"
+        map[status] ?? "bg-[var(--surface-2)] text-[var(--text-secondary)]"
       }`}
     >
       {status}
@@ -209,13 +209,13 @@ function ehdsArticle(policyId?: string) {
     return <span className="text-purple-400">Art. 53(c)</span>;
   if (policyId.includes("art7") || policyId.includes("cross-border"))
     return <span className="text-orange-400">Art. 7</span>;
-  return <span className="text-gray-500">{policyId}</span>;
+  return <span className="text-[var(--text-secondary)]">{policyId}</span>;
 }
 
 function shortHash(h?: string) {
   if (!h) return "—";
   return (
-    <span title={h} className="font-mono text-gray-500">
+    <span title={h} className="font-mono text-[var(--text-secondary)]">
       {h.slice(0, 8)}
     </span>
   );
@@ -244,7 +244,7 @@ function directionBadge(direction?: string) {
 }
 
 function accessTypeBadge(t?: string) {
-  if (!t) return <span className="text-gray-500">—</span>;
+  if (!t) return <span className="text-[var(--text-secondary)]">—</span>;
   const cls =
     t === "INITIAL_TRANSFER"
       ? "bg-blue-900 text-blue-300"
@@ -311,37 +311,40 @@ function FilterBar({
   const hasFilters = Object.values(filters).some(Boolean);
 
   return (
-    <div className="flex flex-wrap items-end gap-2 p-3 mb-4 bg-gray-900 border border-gray-700 rounded-lg text-xs">
-      <Filter size={13} className="text-gray-500 self-center mt-4" />
+    <div className="flex flex-wrap items-end gap-2 p-3 mb-4 bg-[var(--surface)] border border-[var(--border)] rounded-lg text-xs">
+      <Filter
+        size={13}
+        className="text-[var(--text-secondary)] self-center mt-4"
+      />
 
       {/* Date range */}
       <div className="flex flex-col gap-1">
-        <label className="text-gray-500">From</label>
+        <label className="text-[var(--text-secondary)]">From</label>
         <input
           type="date"
           value={filters.dateFrom}
           onChange={(e) => onChange({ dateFrom: e.target.value })}
-          className="bg-gray-800 border border-gray-700 rounded px-2 py-1 text-gray-300 w-32"
+          className="bg-[var(--surface-2)] border border-[var(--border)] rounded px-2 py-1 text-[var(--text-primary)] w-32"
         />
       </div>
       <div className="flex flex-col gap-1">
-        <label className="text-gray-500">To</label>
+        <label className="text-[var(--text-secondary)]">To</label>
         <input
           type="date"
           value={filters.dateTo}
           onChange={(e) => onChange({ dateTo: e.target.value })}
-          className="bg-gray-800 border border-gray-700 rounded px-2 py-1 text-gray-300 w-32"
+          className="bg-[var(--surface-2)] border border-[var(--border)] rounded px-2 py-1 text-[var(--text-primary)] w-32"
         />
       </div>
 
       {/* Status */}
       {tab !== "all" && tab !== "credentials" && (
         <div className="flex flex-col gap-1">
-          <label className="text-gray-500">Status</label>
+          <label className="text-[var(--text-secondary)]">Status</label>
           <select
             value={filters.status}
             onChange={(e) => onChange({ status: e.target.value })}
-            className="bg-gray-800 border border-gray-700 rounded px-2 py-1 text-gray-300 w-36"
+            className="bg-[var(--surface-2)] border border-[var(--border)] rounded px-2 py-1 text-[var(--text-primary)] w-36"
           >
             <option value="">All statuses</option>
             {statuses.map((s) => (
@@ -356,11 +359,11 @@ function FilterBar({
       {/* Consumer */}
       {tab !== "credentials" && (
         <div className="flex flex-col gap-1">
-          <label className="text-gray-500">Consumer</label>
+          <label className="text-[var(--text-secondary)]">Consumer</label>
           <select
             value={filters.consumerDid}
             onChange={(e) => onChange({ consumerDid: e.target.value })}
-            className="bg-gray-800 border border-gray-700 rounded px-2 py-1 text-gray-300 w-44"
+            className="bg-[var(--surface-2)] border border-[var(--border)] rounded px-2 py-1 text-[var(--text-primary)] w-44"
           >
             <option value="">All consumers</option>
             {participants.map((p) => (
@@ -375,11 +378,11 @@ function FilterBar({
       {/* Provider */}
       {tab !== "credentials" && (
         <div className="flex flex-col gap-1">
-          <label className="text-gray-500">Provider</label>
+          <label className="text-[var(--text-secondary)]">Provider</label>
           <select
             value={filters.providerDid}
             onChange={(e) => onChange({ providerDid: e.target.value })}
-            className="bg-gray-800 border border-gray-700 rounded px-2 py-1 text-gray-300 w-44"
+            className="bg-[var(--surface-2)] border border-[var(--border)] rounded px-2 py-1 text-[var(--text-primary)] w-44"
           >
             <option value="">All providers</option>
             {participants.map((p) => (
@@ -394,11 +397,11 @@ function FilterBar({
       {/* Cross-border */}
       {tab !== "credentials" && (
         <div className="flex flex-col gap-1">
-          <label className="text-gray-500">Cross-border</label>
+          <label className="text-[var(--text-secondary)]">Cross-border</label>
           <select
             value={filters.crossBorder}
             onChange={(e) => onChange({ crossBorder: e.target.value })}
-            className="bg-gray-800 border border-gray-700 rounded px-2 py-1 text-gray-300 w-32"
+            className="bg-[var(--surface-2)] border border-[var(--border)] rounded px-2 py-1 text-[var(--text-primary)] w-32"
           >
             <option value="">All</option>
             <option value="true">Yes</option>
@@ -410,7 +413,7 @@ function FilterBar({
       {hasFilters && (
         <button
           onClick={onClear}
-          className="flex items-center gap-1 mt-4 px-2 py-1 rounded text-gray-400 hover:text-white hover:bg-gray-700 transition-colors"
+          className="flex items-center gap-1 mt-4 px-2 py-1 rounded text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-2)] transition-colors"
         >
           <X size={11} /> Clear
         </button>
@@ -487,7 +490,7 @@ export default function AdminAuditPage() {
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 mt-5 mb-6 border-b border-gray-700">
+      <div className="flex gap-1 mt-5 mb-6 border-b border-[var(--border)]">
         {TABS.map((t) => (
           <button
             key={t.key}
@@ -498,7 +501,7 @@ export default function AdminAuditPage() {
             className={`flex items-center gap-1.5 px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors ${
               activeTab === t.key
                 ? "border-layer2 text-layer2"
-                : "border-transparent text-gray-500 hover:text-gray-300"
+                : "border-transparent text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
             }`}
           >
             <t.icon size={14} />
@@ -519,12 +522,14 @@ export default function AdminAuditPage() {
       )}
 
       {loading ? (
-        <div className="flex items-center gap-2 text-gray-500 mt-6">
+        <div className="flex items-center gap-2 text-[var(--text-secondary)] mt-6">
           <Loader2 size={16} className="animate-spin" />
           Querying Neo4j…
         </div>
       ) : !data ? (
-        <p className="text-gray-500 mt-6">Failed to load audit data</p>
+        <p className="text-[var(--text-secondary)] mt-6">
+          Failed to load audit data
+        </p>
       ) : (
         <>
           {/* Overview summary cards */}
@@ -535,10 +540,12 @@ export default function AdminAuditPage() {
                   ([label, count]) => (
                     <div
                       key={label}
-                      className="p-3 border border-gray-700 rounded-lg"
+                      className="p-3 border border-[var(--border)] rounded-lg"
                     >
                       <p className="text-xl font-bold">{count}</p>
-                      <p className="text-xs text-gray-500">{label}</p>
+                      <p className="text-xs text-[var(--text-secondary)]">
+                        {label}
+                      </p>
                     </div>
                   ),
                 )}
@@ -554,7 +561,7 @@ export default function AdminAuditPage() {
                   <div className="overflow-auto">
                     <table className="w-full text-xs">
                       <thead>
-                        <tr className="text-gray-500 border-b border-gray-700">
+                        <tr className="text-[var(--text-secondary)] border-b border-[var(--border)]">
                           <th className="text-left py-2 px-2">Consumer</th>
                           <th className="text-left py-2 px-2">
                             Total Accesses
@@ -569,9 +576,9 @@ export default function AdminAuditPage() {
                         {data.summary.accessByConsumer!.map((row, i) => (
                           <tr
                             key={i}
-                            className="border-b border-gray-800 hover:bg-gray-800/50"
+                            className="border-b border-[var(--border)] hover:bg-[var(--surface-2)]/50"
                           >
-                            <td className="py-2 px-2 text-gray-300">
+                            <td className="py-2 px-2 text-[var(--text-primary)]">
                               {row.consumerName ?? "—"}
                             </td>
                             <td className="py-2 px-2">
@@ -579,10 +586,10 @@ export default function AdminAuditPage() {
                                 {row.totalAccesses}×
                               </span>
                             </td>
-                            <td className="py-2 px-2 text-gray-400">
+                            <td className="py-2 px-2 text-[var(--text-secondary)]">
                               {formatBytes(row.totalBytes)}
                             </td>
-                            <td className="py-2 px-2 text-gray-500">
+                            <td className="py-2 px-2 text-[var(--text-secondary)]">
                               {row.lastAccess
                                 ? row.lastAccess.slice(0, 10)
                                 : "—"}
@@ -617,19 +624,21 @@ export default function AdminAuditPage() {
                           "transfers.csv",
                         )
                       }
-                      className="flex items-center gap-1 text-xs text-gray-500 hover:text-white transition-colors"
+                      className="flex items-center gap-1 text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
                     >
                       <Download size={12} /> Export CSV
                     </button>
                   )}
                 </div>
                 {data.transfers.length === 0 ? (
-                  <p className="text-gray-500 text-sm">No transfers recorded</p>
+                  <p className="text-[var(--text-secondary)] text-sm">
+                    No transfers recorded
+                  </p>
                 ) : (
                   <div className="overflow-auto">
                     <table className="w-full text-xs">
                       <thead>
-                        <tr className="text-gray-500 border-b border-gray-700">
+                        <tr className="text-[var(--text-secondary)] border-b border-[var(--border)]">
                           <th className="text-left py-2 px-2">Dir</th>
                           <th className="text-left py-2 px-2">Consumer</th>
                           <th className="text-left py-2 px-2">Provider</th>
@@ -647,13 +656,13 @@ export default function AdminAuditPage() {
                         {data.transfers.map((t, i) => (
                           <tr
                             key={i}
-                            className="border-b border-gray-800 hover:bg-gray-800/50"
+                            className="border-b border-[var(--border)] hover:bg-[var(--surface-2)]/50"
                           >
                             <td className="py-2 px-2">
                               {directionBadge(t.direction)}
                             </td>
                             <td className="py-2 px-2">
-                              <div className="text-gray-300">
+                              <div className="text-[var(--text-primary)]">
                                 {displayName(
                                   t.consumerName,
                                   t.consumerDid,
@@ -668,7 +677,7 @@ export default function AdminAuditPage() {
                               </div>
                             </td>
                             <td className="py-2 px-2">
-                              <div className="text-gray-300">
+                              <div className="text-[var(--text-primary)]">
                                 {displayName(
                                   t.providerName,
                                   t.providerDid,
@@ -682,11 +691,11 @@ export default function AdminAuditPage() {
                                 />
                               </div>
                             </td>
-                            <td className="py-2 px-2 text-gray-400">
+                            <td className="py-2 px-2 text-[var(--text-secondary)]">
                               {t.asset || t.assetId || "—"}
                             </td>
                             <td
-                              className="py-2 px-2 text-gray-400 max-w-[140px] truncate"
+                              className="py-2 px-2 text-[var(--text-secondary)] max-w-[140px] truncate"
                               title={t.purposeOfSharing}
                             >
                               {t.purposeOfSharing || "—"}
@@ -702,13 +711,13 @@ export default function AdminAuditPage() {
                                 </span>
                               )}
                             </td>
-                            <td className="py-2 px-2 text-gray-500">
+                            <td className="py-2 px-2 text-[var(--text-secondary)]">
                               {(t.timestamp || t.transferDate || "—").slice(
                                 0,
                                 10,
                               )}
                             </td>
-                            <td className="py-2 px-2 text-gray-500">
+                            <td className="py-2 px-2 text-[var(--text-secondary)]">
                               {formatBytes(t.byteSize)}
                             </td>
                             <td className="py-2 px-2">
@@ -725,7 +734,7 @@ export default function AdminAuditPage() {
                               {t.edcProviderEndpoint ? (
                                 <span
                                   title={t.edcProviderEndpoint}
-                                  className="font-mono text-gray-500 text-[10px] truncate max-w-[100px] block cursor-help"
+                                  className="font-mono text-[var(--text-secondary)] text-[10px] truncate max-w-[100px] block cursor-help"
                                 >
                                   {t.edcProviderEndpoint.replace(
                                     /^https?:\/\//,
@@ -775,21 +784,21 @@ export default function AdminAuditPage() {
                           "negotiations.csv",
                         )
                       }
-                      className="flex items-center gap-1 text-xs text-gray-500 hover:text-white transition-colors"
+                      className="flex items-center gap-1 text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
                     >
                       <Download size={12} /> Export CSV
                     </button>
                   )}
                 </div>
                 {data.negotiations.length === 0 ? (
-                  <p className="text-gray-500 text-sm">
+                  <p className="text-[var(--text-secondary)] text-sm">
                     No negotiations recorded
                   </p>
                 ) : (
                   <div className="overflow-auto">
                     <table className="w-full text-xs">
                       <thead>
-                        <tr className="text-gray-500 border-b border-gray-700">
+                        <tr className="text-[var(--text-secondary)] border-b border-[var(--border)]">
                           <th className="text-left py-2 px-2 w-5"></th>
                           <th className="text-left py-2 px-2">Consumer</th>
                           <th className="text-left py-2 px-2">Provider</th>
@@ -807,7 +816,7 @@ export default function AdminAuditPage() {
                           return (
                             <Fragment key={rowKey}>
                               <tr
-                                className="border-b border-gray-800 hover:bg-gray-800/40 cursor-pointer"
+                                className="border-b border-[var(--border)] hover:bg-[var(--surface-2)]/40 cursor-pointer"
                                 onClick={() =>
                                   setExpandedNeg((prev) => {
                                     const next = new Set(prev);
@@ -820,7 +829,7 @@ export default function AdminAuditPage() {
                                   })
                                 }
                               >
-                                <td className="py-2 px-2 text-gray-500">
+                                <td className="py-2 px-2 text-[var(--text-secondary)]">
                                   {isOpen ? (
                                     <ChevronDown size={11} />
                                   ) : (
@@ -828,7 +837,7 @@ export default function AdminAuditPage() {
                                   )}
                                 </td>
                                 <td className="py-2 px-2">
-                                  <div className="text-gray-300">
+                                  <div className="text-[var(--text-primary)]">
                                     {displayName(
                                       n.consumerName,
                                       n.consumerDid,
@@ -843,7 +852,7 @@ export default function AdminAuditPage() {
                                   </div>
                                 </td>
                                 <td className="py-2 px-2">
-                                  <div className="text-gray-300">
+                                  <div className="text-[var(--text-primary)]">
                                     {displayName(
                                       n.providerName,
                                       n.providerDid,
@@ -857,13 +866,13 @@ export default function AdminAuditPage() {
                                     />
                                   </div>
                                 </td>
-                                <td className="py-2 px-2 text-gray-400">
+                                <td className="py-2 px-2 text-[var(--text-secondary)]">
                                   {n.asset || n.assetId || "—"}
                                 </td>
                                 <td className="py-2 px-2">
                                   {statusBadge(n.status)}
                                 </td>
-                                <td className="py-2 px-2 text-gray-500">
+                                <td className="py-2 px-2 text-[var(--text-secondary)]">
                                   {(
                                     n.timestamp ||
                                     n.negotiationDate ||
@@ -894,63 +903,63 @@ export default function AdminAuditPage() {
 
                               {/* Expanded policy card */}
                               {isOpen && (
-                                <tr className="border-b border-gray-700 bg-gray-900/60">
+                                <tr className="border-b border-[var(--border)] bg-[var(--surface)]/60">
                                   <td colSpan={8} className="px-6 py-4">
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                       {/* Policy details */}
-                                      <div className="border border-gray-700 rounded-lg p-3">
-                                        <p className="text-[10px] font-semibold text-gray-500 uppercase mb-2">
+                                      <div className="border border-[var(--border)] rounded-lg p-3">
+                                        <p className="text-[10px] font-semibold text-[var(--text-secondary)] uppercase mb-2">
                                           Policy Details
                                         </p>
                                         <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
-                                          <span className="text-gray-500">
+                                          <span className="text-[var(--text-secondary)]">
                                             Purpose
                                           </span>
-                                          <span className="text-gray-300">
+                                          <span className="text-[var(--text-primary)]">
                                             {n.policyPurpose ?? "—"}
                                           </span>
-                                          <span className="text-gray-500">
+                                          <span className="text-[var(--text-secondary)]">
                                             Legal Basis
                                           </span>
-                                          <span className="text-gray-300">
+                                          <span className="text-[var(--text-primary)]">
                                             {n.policyLegalBasis ?? "—"}
                                           </span>
-                                          <span className="text-gray-500">
+                                          <span className="text-[var(--text-secondary)]">
                                             Permitted
                                           </span>
-                                          <span className="text-gray-300">
+                                          <span className="text-[var(--text-primary)]">
                                             {n.policyPermittedUses ?? "—"}
                                           </span>
-                                          <span className="text-gray-500">
+                                          <span className="text-[var(--text-secondary)]">
                                             Prohibited
                                           </span>
                                           <span className="text-red-400">
                                             {n.policyProhibitedUses ?? "—"}
                                           </span>
-                                          <span className="text-gray-500">
+                                          <span className="text-[var(--text-secondary)]">
                                             Data Minimisation
                                           </span>
-                                          <span className="text-gray-300">
+                                          <span className="text-[var(--text-primary)]">
                                             {n.policyDataMinimisation ?? "—"}
                                           </span>
-                                          <span className="text-gray-500">
+                                          <span className="text-[var(--text-secondary)]">
                                             Retention
                                           </span>
-                                          <span className="text-gray-300">
+                                          <span className="text-[var(--text-primary)]">
                                             {n.policyRetentionDays
                                               ? `${n.policyRetentionDays} days`
                                               : "—"}
                                           </span>
-                                          <span className="text-gray-500">
+                                          <span className="text-[var(--text-secondary)]">
                                             Total Accesses
                                           </span>
                                           <span className="text-teal-300 font-semibold">
                                             {n.accessCount ?? 0}×
                                           </span>
-                                          <span className="text-gray-500">
+                                          <span className="text-[var(--text-secondary)]">
                                             Last Access
                                           </span>
-                                          <span className="text-gray-300">
+                                          <span className="text-[var(--text-primary)]">
                                             {n.lastAccessAt
                                               ? n.lastAccessAt.slice(0, 10)
                                               : "—"}
@@ -959,27 +968,27 @@ export default function AdminAuditPage() {
                                       </div>
 
                                       {/* EDC endpoints + contract ID */}
-                                      <div className="border border-gray-700 rounded-lg p-3">
-                                        <p className="text-[10px] font-semibold text-gray-500 uppercase mb-2">
+                                      <div className="border border-[var(--border)] rounded-lg p-3">
+                                        <p className="text-[10px] font-semibold text-[var(--text-secondary)] uppercase mb-2">
                                           EDC Endpoints &amp; Contract
                                         </p>
                                         <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
-                                          <span className="text-gray-500">
+                                          <span className="text-[var(--text-secondary)]">
                                             Consumer EDC
                                           </span>
-                                          <span className="font-mono text-gray-400 break-all">
+                                          <span className="font-mono text-[var(--text-secondary)] break-all">
                                             {n.consumerEdcEndpoint ?? "—"}
                                           </span>
-                                          <span className="text-gray-500">
+                                          <span className="text-[var(--text-secondary)]">
                                             Provider EDC
                                           </span>
-                                          <span className="font-mono text-gray-400 break-all">
+                                          <span className="font-mono text-[var(--text-secondary)] break-all">
                                             {n.providerEdcEndpoint ?? "—"}
                                           </span>
-                                          <span className="text-gray-500">
+                                          <span className="text-[var(--text-secondary)]">
                                             Contract ID
                                           </span>
-                                          <span className="font-mono text-gray-500">
+                                          <span className="font-mono text-[var(--text-secondary)]">
                                             {n.contractId ?? "—"}
                                           </span>
                                         </div>
@@ -1007,14 +1016,14 @@ export default function AdminAuditPage() {
                   Verifiable Credentials ({data.credentials.length})
                 </h2>
                 {data.credentials.length === 0 ? (
-                  <p className="text-gray-500 text-sm">
+                  <p className="text-[var(--text-secondary)] text-sm">
                     No credentials recorded
                   </p>
                 ) : (
                   <div className="overflow-auto">
                     <table className="w-full text-xs">
                       <thead>
-                        <tr className="text-gray-500 border-b border-gray-700">
+                        <tr className="text-[var(--text-secondary)] border-b border-[var(--border)]">
                           <th className="text-left py-2 px-2">Participant</th>
                           <th className="text-left py-2 px-2">Type</th>
                           <th className="text-left py-2 px-2">Issued</th>
@@ -1024,19 +1033,19 @@ export default function AdminAuditPage() {
                         {data.credentials.map((c, i) => (
                           <tr
                             key={i}
-                            className="border-b border-gray-800 hover:bg-gray-800/50"
+                            className="border-b border-[var(--border)] hover:bg-[var(--surface-2)]/50"
                           >
-                            <td className="py-2 px-2 text-gray-300">
+                            <td className="py-2 px-2 text-[var(--text-primary)]">
                               {c.participant ||
                                 c.subjectDid
                                   ?.replace("did:web:", "")
                                   .replace(/%3A/g, ":") ||
                                 "—"}
                             </td>
-                            <td className="py-2 px-2 text-gray-300">
+                            <td className="py-2 px-2 text-[var(--text-primary)]">
                               {c.credentialType || c.type || "—"}
                             </td>
-                            <td className="py-2 px-2 text-gray-500">
+                            <td className="py-2 px-2 text-[var(--text-secondary)]">
                               {(c.issuedAt || c.issuanceDate || "—").slice(
                                 0,
                                 10,
@@ -1058,12 +1067,14 @@ export default function AdminAuditPage() {
                 Data Access Logs ({data.accesslogs?.length ?? 0})
               </h2>
               {!data.accesslogs || data.accesslogs.length === 0 ? (
-                <p className="text-gray-500 text-sm">No access logs recorded</p>
+                <p className="text-[var(--text-secondary)] text-sm">
+                  No access logs recorded
+                </p>
               ) : (
                 <div className="overflow-auto">
                   <table className="w-full text-xs">
                     <thead>
-                      <tr className="text-gray-500 border-b border-gray-700">
+                      <tr className="text-[var(--text-secondary)] border-b border-[var(--border)]">
                         <th className="text-left py-2 px-2">Consumer</th>
                         <th className="text-left py-2 px-2">Provider</th>
                         <th className="text-left py-2 px-2">Asset</th>
@@ -1078,42 +1089,42 @@ export default function AdminAuditPage() {
                       {data.accesslogs.map((a, i) => (
                         <tr
                           key={i}
-                          className="border-b border-gray-800 hover:bg-gray-800/50"
+                          className="border-b border-[var(--border)] hover:bg-[var(--surface-2)]/50"
                         >
-                          <td className="py-2 px-2 text-gray-300">
+                          <td className="py-2 px-2 text-[var(--text-primary)]">
                             {a.consumerName ?? a.consumerDid ?? "—"}
                             {a.consumerCountry && (
-                              <span className="text-gray-500">
+                              <span className="text-[var(--text-secondary)]">
                                 {" "}
                                 ({a.consumerCountry})
                               </span>
                             )}
                           </td>
-                          <td className="py-2 px-2 text-gray-300">
+                          <td className="py-2 px-2 text-[var(--text-primary)]">
                             {a.providerName ?? a.providerDid ?? "—"}
                             {a.providerCountry && (
-                              <span className="text-gray-500">
+                              <span className="text-[var(--text-secondary)]">
                                 {" "}
                                 ({a.providerCountry})
                               </span>
                             )}
                           </td>
-                          <td className="py-2 px-2 text-gray-400">
+                          <td className="py-2 px-2 text-[var(--text-secondary)]">
                             {a.assetId ?? "—"}
                           </td>
                           <td className="py-2 px-2">
                             {accessTypeBadge(a.accessType)}
                           </td>
                           <td
-                            className="py-2 px-2 text-gray-400 max-w-[140px] truncate"
+                            className="py-2 px-2 text-[var(--text-secondary)] max-w-[140px] truncate"
                             title={a.purpose}
                           >
                             {a.purpose ?? "—"}
                           </td>
-                          <td className="py-2 px-2 text-gray-500">
+                          <td className="py-2 px-2 text-[var(--text-secondary)]">
                             {a.accessedAt ? a.accessedAt.slice(0, 10) : "—"}
                           </td>
-                          <td className="py-2 px-2 text-gray-500">
+                          <td className="py-2 px-2 text-[var(--text-secondary)]">
                             {formatBytes(a.bytesAccessed)}
                           </td>
                           <td className="py-2 px-2 font-mono text-gray-600 text-[10px]">

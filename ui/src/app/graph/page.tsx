@@ -1,6 +1,7 @@
 "use client";
 
 import { fetchApi } from "@/lib/api";
+import { themeChangeTarget } from "@/components/ThemeToggle";
 import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
@@ -271,7 +272,7 @@ export default function GraphPage() {
   return (
     <Suspense
       fallback={
-        <div className="flex h-[calc(100vh-44px)] items-center justify-center text-gray-500">
+        <div className="flex h-[calc(100vh-44px)] items-center justify-center text-[var(--text-secondary)]">
           <Loader2 size={16} className="mr-2 animate-spin" />
           Loading…
         </div>
@@ -338,6 +339,17 @@ function GraphContent() {
   // Panel collapse state
   const [leftCollapsed, setLeftCollapsed] = useState(false);
   const [rightCollapsed, setRightCollapsed] = useState(false);
+
+  // ── Theme (light / dark) ─────────────────────────────────────────────────
+  const [isDark, setIsDark] = useState(false);
+  useEffect(() => {
+    setIsDark(document.documentElement.classList.contains("dark"));
+    const handler = (e: Event) => {
+      setIsDark((e as CustomEvent<{ dark: boolean }>).detail.dark);
+    };
+    themeChangeTarget.addEventListener("theme-change", handler);
+    return () => themeChangeTarget.removeEventListener("theme-change", handler);
+  }, []);
 
   // ── Load graph (re-fetches when persona changes) ──────────────────────────
   // Wait for session to resolve before first load — avoids double-fetch
@@ -767,7 +779,7 @@ function GraphContent() {
           ctx.font = `${fs}px sans-serif`;
           const tw = ctx.measureText(typeLabel).width;
           ctx.globalAlpha = 0.7;
-          ctx.fillStyle = "#0f172a";
+          ctx.fillStyle = isDark ? "#0f172a" : "#ffffff";
           ctx.fillRect(mx - tw / 2 - 2, my - fs / 2 - 1, tw + 4, fs + 2);
           ctx.fillStyle = "#FBBF24";
           ctx.textAlign = "center";
@@ -779,7 +791,7 @@ function GraphContent() {
         return;
       }
       ctx.globalAlpha = filteredOut ? 0.05 : isAdj ? 1 : selected ? 0.1 : 0.55;
-      ctx.strokeStyle = isAdj ? "#60a5fa" : "#374151";
+      ctx.strokeStyle = isAdj ? "#60a5fa" : isDark ? "#374151" : "#cbd5e1";
       ctx.lineWidth = (isAdj ? 1.5 : 0.7) / gs;
       ctx.beginPath();
       ctx.moveTo(s.x, s.y ?? 0);
@@ -798,9 +810,15 @@ function GraphContent() {
         ctx.font = `${fs}px sans-serif`;
         const tw = ctx.measureText(friendlyType).width;
         ctx.globalAlpha = isAdj ? 0.9 : 0.5;
-        ctx.fillStyle = "#0f172a";
+        ctx.fillStyle = isDark ? "#0f172a" : "#ffffff";
         ctx.fillRect(mx - tw / 2 - 2, my - fs / 2 - 1, tw + 4, fs + 2);
-        ctx.fillStyle = isAdj ? "#93c5fd" : "#6b7280";
+        ctx.fillStyle = isAdj
+          ? isDark
+            ? "#93c5fd"
+            : "#2563eb"
+          : isDark
+            ? "#6b7280"
+            : "#94a3b8";
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
         ctx.fillText(friendlyType, mx, my);
@@ -809,7 +827,7 @@ function GraphContent() {
       ctx.globalAlpha = 1;
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [selected, filterLabelSet],
+    [selected, filterLabelSet, isDark],
   );
 
   // ── Render ────────────────────────────────────────────────────────────────
@@ -817,14 +835,14 @@ function GraphContent() {
     <div className="relative flex h-[calc(100vh-44px)]">
       {/* Left sidebar — collapsible */}
       <aside
-        className={`flex shrink-0 flex-col gap-4 overflow-y-auto border-r border-gray-700 bg-gray-900 transition-all duration-200 ${
+        className={`flex shrink-0 flex-col gap-4 overflow-y-auto border-r border-[var(--border)] bg-[var(--surface)] transition-all duration-200 ${
           leftCollapsed ? "w-10 p-1" : "w-64 p-4"
         }`}
       >
         {/* Collapse/expand toggle */}
         <button
           onClick={() => setLeftCollapsed((v) => !v)}
-          className="flex items-center justify-center rounded p-1 text-gray-500 hover:text-gray-200 transition-colors"
+          className="flex items-center justify-center rounded p-1 text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
           title={leftCollapsed ? "Expand sidebar" : "Collapse sidebar"}
         >
           {leftCollapsed ? (
@@ -837,33 +855,33 @@ function GraphContent() {
           <>
             <div>
               <h2 className="mb-1 text-sm font-bold">Knowledge Graph</h2>
-              <p className="mb-2 text-xs text-gray-500">
+              <p className="mb-2 text-xs text-[var(--text-secondary)]">
                 5-layer EHDS health dataspace — {data.nodes.length} nodes ·{" "}
                 {data.links.length} edges
               </p>
               <div className="flex flex-col gap-1 text-xs">
                 <a
                   href="/catalog"
-                  className="flex items-center gap-1.5 text-gray-500 hover:text-teal-400 transition-colors"
+                  className="flex items-center gap-1.5 text-[var(--text-secondary)] hover:text-teal-400 transition-colors"
                 >
                   <BookOpen size={11} /> Dataset Catalog
                 </a>
                 <a
                   href="/patient"
-                  className="flex items-center gap-1.5 text-gray-500 hover:text-teal-400 transition-colors"
+                  className="flex items-center gap-1.5 text-[var(--text-secondary)] hover:text-teal-400 transition-colors"
                 >
                   <Activity size={11} /> Patient Journey
                 </a>
                 <a
                   href="/analytics"
-                  className="flex items-center gap-1.5 text-gray-500 hover:text-teal-400 transition-colors"
+                  className="flex items-center gap-1.5 text-[var(--text-secondary)] hover:text-teal-400 transition-colors"
                 >
                   <Database size={11} /> OMOP Analytics
                 </a>
                 <a
                   href="/api/graph/validate"
                   target="_blank"
-                  className="flex items-center gap-1.5 text-gray-500 hover:text-yellow-400 transition-colors"
+                  className="flex items-center gap-1.5 text-[var(--text-secondary)] hover:text-yellow-400 transition-colors"
                 >
                   <ShieldCheck size={11} /> Validate graph
                 </a>
@@ -872,7 +890,7 @@ function GraphContent() {
 
             {/* Active persona indicator — auto-derived from user role */}
             {activePersona !== "default" && (
-              <div className="rounded border border-gray-700 bg-gray-800/40 px-2 py-1.5">
+              <div className="rounded border border-[var(--border)] bg-[var(--surface-2)]/40 px-2 py-1.5">
                 {(() => {
                   const pv = PERSONA_VIEWS.find((p) => p.id === activePersona);
                   const Icon = pv ? PRESET_ICONS[pv.icon] ?? Eye : Eye;
@@ -883,12 +901,12 @@ function GraphContent() {
                         {pv?.label ?? activePersona}
                       </div>
                       {pv?.ehdsArticle && (
-                        <div className="text-[10px] text-gray-500 mt-0.5">
+                        <div className="text-[10px] text-[var(--text-secondary)] mt-0.5">
                           {pv.ehdsArticle}
                         </div>
                       )}
                       {pv?.question && (
-                        <p className="mt-1 text-xs italic text-gray-500">
+                        <p className="mt-1 text-xs italic text-[var(--text-secondary)]">
                           &ldquo;{pv.question}&rdquo;
                         </p>
                       )}
@@ -900,7 +918,7 @@ function GraphContent() {
 
             {/* Filter presets — persona-aware */}
             <div>
-              <p className="mb-2 text-xs font-semibold uppercase text-gray-500">
+              <p className="mb-2 text-xs font-semibold uppercase text-[var(--text-secondary)]">
                 Filter by question
               </p>
               <div className="flex flex-col gap-1">
@@ -934,7 +952,7 @@ function GraphContent() {
                       className={`flex items-center gap-2 rounded px-2 py-1.5 text-left text-xs transition-colors ${
                         isActive
                           ? "bg-teal-900/60 text-teal-200 border border-teal-700"
-                          : "text-gray-400 hover:bg-gray-800 hover:text-gray-200 border border-transparent"
+                          : "text-[var(--text-secondary)] hover:bg-[var(--surface-2)] hover:text-[var(--text-primary)] border border-transparent"
                       }`}
                       style={
                         isActive && activePersona !== "patient"
@@ -969,7 +987,7 @@ function GraphContent() {
 
             {/* Layer legend — persona-aware labels */}
             <div>
-              <p className="mb-2 text-xs font-semibold uppercase text-gray-500">
+              <p className="mb-2 text-xs font-semibold uppercase text-[var(--text-secondary)]">
                 Structural layers
               </p>
               {Object.entries(LAYER_LABELS)
@@ -987,7 +1005,9 @@ function GraphContent() {
                         className="h-2.5 w-2.5 shrink-0 rounded-full"
                         style={{ background: LAYER_COLORS[+k] }}
                       />
-                      <span className="text-gray-300">{personaLabel}</span>
+                      <span className="text-[var(--text-primary)]">
+                        {personaLabel}
+                      </span>
                     </div>
                   );
                 })}
@@ -995,7 +1015,7 @@ function GraphContent() {
 
             {/* Node type color legend — warm/vivid accents */}
             <div>
-              <p className="mb-2 text-xs font-semibold uppercase text-gray-500">
+              <p className="mb-2 text-xs font-semibold uppercase text-[var(--text-secondary)]">
                 Key actors
               </p>
               {ROLE_LEGEND.map(({ label, color, description, tooltip }) => (
@@ -1009,7 +1029,9 @@ function GraphContent() {
                     style={{ background: color }}
                   />
                   <div>
-                    <div className="font-medium text-gray-300">{label}</div>
+                    <div className="font-medium text-[var(--text-primary)]">
+                      {label}
+                    </div>
                     <div className="text-gray-600">{description}</div>
                   </div>
                 </div>
@@ -1018,7 +1040,7 @@ function GraphContent() {
 
             {/* Hint */}
             {!selected && !loading && (
-              <div className="flex items-start gap-1.5 rounded-lg border border-gray-700 bg-gray-800/50 p-2 text-xs text-gray-500">
+              <div className="flex items-start gap-1.5 rounded-lg border border-[var(--border)] bg-[var(--surface-2)]/50 p-2 text-xs text-[var(--text-secondary)]">
                 <MousePointerClick
                   size={11}
                   className="mt-0.5 shrink-0 text-blue-500"
@@ -1031,14 +1053,14 @@ function GraphContent() {
       </aside>
 
       {/* Graph canvas */}
-      <div ref={containerRef} className="relative flex-1 bg-gray-950">
+      <div ref={containerRef} className="relative flex-1 bg-[var(--bg)]">
         {loading ? (
-          <div className="flex h-full items-center justify-center text-gray-500">
+          <div className="flex h-full items-center justify-center text-[var(--text-secondary)]">
             <Loader2 size={14} className="mr-2 animate-spin" />
             Loading {PERSONA_VALUE_NODES[activePersona]?.name ?? "graph"}…
           </div>
         ) : error ? (
-          <div className="flex h-full items-center justify-center text-gray-500">
+          <div className="flex h-full items-center justify-center text-[var(--text-secondary)]">
             {error}
           </div>
         ) : (
@@ -1060,7 +1082,7 @@ function GraphContent() {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             onNodeHover={handleNodeHover as any}
             onBackgroundClick={handleBgClick}
-            backgroundColor="#030712"
+            backgroundColor={isDark ? "#030712" : "#ffffff"}
             // Nodes have pre-assigned ring positions — physics not needed
             d3AlphaDecay={1}
             d3VelocityDecay={1}
@@ -1073,7 +1095,7 @@ function GraphContent() {
         {/* Canvas hover tooltip */}
         {hoveredNode && !selected && (
           <div
-            className="pointer-events-none absolute z-50 max-w-xs rounded-lg border border-gray-600 bg-gray-900/95 px-3 py-2 shadow-xl backdrop-blur-sm"
+            className="pointer-events-none absolute z-50 max-w-xs rounded-lg border border-[var(--border)] bg-[var(--surface)]/95 px-3 py-2 shadow-xl backdrop-blur-sm"
             style={{
               left: Math.min(mousePos.x + 14, dims.width - 280),
               top: Math.min(mousePos.y + 14, dims.height - 120),
@@ -1084,11 +1106,11 @@ function GraphContent() {
                 className="h-2.5 w-2.5 shrink-0 rounded-full"
                 style={{ background: hoveredNode.color }}
               />
-              <span className="truncate text-sm font-semibold text-white">
+              <span className="truncate text-sm font-semibold text-[var(--text-primary)]">
                 {hoveredNode.name}
               </span>
             </div>
-            <div className="mb-1 text-xs text-gray-400">
+            <div className="mb-1 text-xs text-[var(--text-secondary)]">
               {NODE_DISPLAY_NAMES[hoveredNode.label] ?? hoveredNode.label}
               {" · "}
               {(PERSONA_LAYER_LABELS[activePersona] ?? LAYER_LABELS)[
@@ -1096,7 +1118,7 @@ function GraphContent() {
               ] ?? LAYER_LABELS[hoveredNode.layer]}
             </div>
             {NODE_TOOLTIPS[hoveredNode.label] && (
-              <p className="text-xs leading-relaxed text-gray-500">
+              <p className="text-xs leading-relaxed text-[var(--text-secondary)]">
                 {NODE_TOOLTIPS[hoveredNode.label]}
               </p>
             )}
@@ -1105,7 +1127,7 @@ function GraphContent() {
 
         {/* Expanding spinner overlay */}
         {expanding && (
-          <div className="pointer-events-none absolute bottom-4 right-4 flex items-center gap-2 rounded-full bg-gray-900/90 px-3 py-1.5 text-xs text-blue-300">
+          <div className="pointer-events-none absolute bottom-4 right-4 flex items-center gap-2 rounded-full bg-[var(--surface)]/90 px-3 py-1.5 text-xs text-blue-300">
             <Loader2 size={12} className="animate-spin" />
             Loading neighbours…
           </div>
@@ -1115,14 +1137,14 @@ function GraphContent() {
       {/* ── Right-side detail panel (absolute overlay to avoid layout squeeze) */}
       {selected && (
         <aside
-          className={`absolute right-0 top-0 h-full overflow-y-auto border-l border-gray-700 bg-gray-900 animate-slide-in-right transition-all duration-200 z-40 shadow-2xl ${
+          className={`absolute right-0 top-0 h-full overflow-y-auto border-l border-[var(--border)] bg-[var(--surface)] animate-slide-in-right transition-all duration-200 z-40 shadow-2xl ${
             rightCollapsed ? "w-10" : "w-80"
           }`}
         >
           {/* Collapse/expand toggle */}
           <button
             onClick={() => setRightCollapsed((v) => !v)}
-            className="flex w-full items-center justify-center border-b border-gray-700 p-2 text-gray-500 hover:text-gray-200 transition-colors"
+            className="flex w-full items-center justify-center border-b border-[var(--border)] p-2 text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
             title={rightCollapsed ? "Expand panel" : "Collapse panel"}
           >
             {rightCollapsed ? (
@@ -1134,7 +1156,7 @@ function GraphContent() {
           {rightCollapsed ? null : (
             <>
               {/* Header */}
-              <div className="flex items-start justify-between gap-2 border-b border-gray-700 p-4">
+              <div className="flex items-start justify-between gap-2 border-b border-[var(--border)] p-4">
                 <div className="min-w-0">
                   <h3
                     className="text-sm font-bold leading-tight truncate"
@@ -1150,7 +1172,7 @@ function GraphContent() {
                       className="h-2 w-2 shrink-0 rounded-full"
                       style={{ background: selected.color }}
                     />
-                    <span className="text-xs text-gray-400">
+                    <span className="text-xs text-[var(--text-secondary)]">
                       {NODE_DISPLAY_NAMES[selected.label] ?? selected.label}
                     </span>
                   </div>
@@ -1164,7 +1186,7 @@ function GraphContent() {
                 </div>
                 <button
                   onClick={() => setSelected(null)}
-                  className="shrink-0 mt-0.5 text-gray-500 hover:text-gray-200 transition-colors"
+                  className="shrink-0 mt-0.5 text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
                   aria-label="Close detail panel"
                 >
                   <X size={14} />
@@ -1172,14 +1194,14 @@ function GraphContent() {
               </div>
 
               {/* Node ID (collapsible) */}
-              <div className="px-4 py-2 border-b border-gray-700">
+              <div className="px-4 py-2 border-b border-[var(--border)]">
                 <p className="break-all text-[10px] leading-tight text-gray-700 font-mono">
                   {selected.id}
                 </p>
               </div>
 
               {/* Deep links */}
-              <div className="px-4 py-3 border-b border-gray-700 flex flex-wrap gap-2">
+              <div className="px-4 py-3 border-b border-[var(--border)] flex flex-wrap gap-2">
                 {selected.layer === 2 && (
                   <a
                     href={`/catalog?search=${encodeURIComponent(
@@ -1220,23 +1242,23 @@ function GraphContent() {
 
               {/* Node properties */}
               {!selected.isValueCenter && (
-                <div className="px-4 py-3 border-b border-gray-700">
+                <div className="px-4 py-3 border-b border-[var(--border)]">
                   {propsLoading ? (
-                    <div className="flex items-center gap-2 text-xs text-gray-500">
+                    <div className="flex items-center gap-2 text-xs text-[var(--text-secondary)]">
                       <Loader2 size={10} className="animate-spin" />
                       Loading details…
                     </div>
                   ) : nodeProps.length > 0 ? (
                     <div className="flex flex-col gap-1.5">
-                      <p className="text-xs font-semibold uppercase text-gray-500 mb-0.5">
+                      <p className="text-xs font-semibold uppercase text-[var(--text-secondary)] mb-0.5">
                         Properties
                       </p>
                       {nodeProps.map((p) => (
                         <div key={p.key} className="flex gap-2 text-xs">
-                          <span className="shrink-0 text-gray-500 min-w-[80px]">
+                          <span className="shrink-0 text-[var(--text-secondary)] min-w-[80px]">
                             {p.label}
                           </span>
-                          <span className="text-gray-300 break-all">
+                          <span className="text-[var(--text-primary)] break-all">
                             {p.value.length > 120
                               ? p.value.slice(0, 118) + "…"
                               : p.value}
@@ -1253,7 +1275,7 @@ function GraphContent() {
               )}
 
               {/* Expand button (hidden for value center) */}
-              <div className="px-4 py-3 border-b border-gray-700">
+              <div className="px-4 py-3 border-b border-[var(--border)]">
                 {selected.isValueCenter ? (
                   <p className="text-xs text-amber-400/70 italic">
                     {PERSONA_VALUE_NODES[activePersona]?.tooltip ??
@@ -1289,7 +1311,7 @@ function GraphContent() {
                   {/* Outgoing */}
                   {neighbours.filter((nb) => nb.dir === "out").length > 0 && (
                     <div className="mb-3">
-                      <p className="mb-1.5 text-xs font-semibold uppercase text-gray-500">
+                      <p className="mb-1.5 text-xs font-semibold uppercase text-[var(--text-secondary)]">
                         Outgoing (
                         {neighbours.filter((nb) => nb.dir === "out").length})
                       </p>
@@ -1300,7 +1322,7 @@ function GraphContent() {
                             <button
                               key={`out-${i}`}
                               onClick={() => setSelected(nb.node)}
-                              className="rounded border border-gray-700 bg-gray-800/40 px-2 py-1.5 text-left transition-colors hover:border-gray-500"
+                              className="rounded border border-[var(--border)] bg-[var(--surface-2)]/40 px-2 py-1.5 text-left transition-colors hover:border-[var(--accent)]"
                             >
                               <div className="mb-0.5 flex items-center gap-1">
                                 <span className="font-mono text-xs font-semibold text-blue-400">
@@ -1315,7 +1337,7 @@ function GraphContent() {
                                   className="h-2 w-2 shrink-0 rounded-full"
                                   style={{ background: nb.node.color }}
                                 />
-                                <span className="truncate text-xs text-gray-300">
+                                <span className="truncate text-xs text-[var(--text-primary)]">
                                   {nb.node.name}
                                 </span>
                                 <span className="ml-auto text-[10px] text-gray-600 shrink-0">
@@ -1332,7 +1354,7 @@ function GraphContent() {
                   {/* Incoming */}
                   {neighbours.filter((nb) => nb.dir === "in").length > 0 && (
                     <div>
-                      <p className="mb-1.5 text-xs font-semibold uppercase text-gray-500">
+                      <p className="mb-1.5 text-xs font-semibold uppercase text-[var(--text-secondary)]">
                         Incoming (
                         {neighbours.filter((nb) => nb.dir === "in").length})
                       </p>
@@ -1343,7 +1365,7 @@ function GraphContent() {
                             <button
                               key={`in-${i}`}
                               onClick={() => setSelected(nb.node)}
-                              className="rounded border border-gray-700 bg-gray-800/40 px-2 py-1.5 text-left transition-colors hover:border-gray-500"
+                              className="rounded border border-[var(--border)] bg-[var(--surface-2)]/40 px-2 py-1.5 text-left transition-colors hover:border-[var(--accent)]"
                             >
                               <div className="mb-0.5 flex items-center gap-1">
                                 <span className="font-mono text-xs font-semibold text-green-400">
@@ -1358,7 +1380,7 @@ function GraphContent() {
                                   className="h-2 w-2 shrink-0 rounded-full"
                                   style={{ background: nb.node.color }}
                                 />
-                                <span className="truncate text-xs text-gray-300">
+                                <span className="truncate text-xs text-[var(--text-primary)]">
                                   {nb.node.name}
                                 </span>
                                 <span className="ml-auto text-[10px] text-gray-600 shrink-0">

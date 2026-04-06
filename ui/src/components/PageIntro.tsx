@@ -58,20 +58,22 @@ export default function PageIntro({
     <div className="mb-8">
       {/* Title row */}
       <div className="flex items-center gap-2 mb-1">
-        {Icon && <Icon size={22} className="text-gray-400" />}
+        {Icon && <Icon size={22} className="text-[var(--text-secondary)]" />}
         <h1 className="text-2xl font-bold">{title}</h1>
       </div>
 
       {/* Description */}
-      <p className="text-gray-400 text-sm mb-4 max-w-3xl">{description}</p>
+      <p className="text-[var(--text-secondary)] text-sm mb-4 max-w-3xl">
+        {description}
+      </p>
 
       {/* Workflow navigation: step before / step after */}
       {(prevStep || nextStep) && (
-        <div className="flex items-center gap-4 text-xs text-gray-500 mb-4">
+        <div className="flex items-center gap-4 text-xs text-[var(--text-secondary)] mb-4">
           {prevStep && (
             <Link
               href={prevStep.href}
-              className="flex items-center gap-1 hover:text-gray-300 transition-colors"
+              className="flex items-center gap-1 hover:text-[var(--text-primary)] transition-colors"
             >
               <ArrowLeft size={12} />
               <span>{prevStep.label}</span>
@@ -81,7 +83,7 @@ export default function PageIntro({
           {nextStep && (
             <Link
               href={nextStep.href}
-              className="flex items-center gap-1 hover:text-gray-300 transition-colors"
+              className="flex items-center gap-1 hover:text-[var(--text-primary)] transition-colors"
             >
               <span>{nextStep.label}</span>
               <ArrowRight size={12} />
@@ -102,7 +104,7 @@ export default function PageIntro({
           </button>
 
           {infoOpen && (
-            <div className="mt-2 p-3 rounded-lg bg-blue-500/5 border border-blue-500/20 text-sm text-gray-300 max-w-3xl">
+            <div className="mt-2 p-3 rounded-lg bg-blue-500/5 border border-blue-500/20 text-sm text-[var(--text-primary)] max-w-3xl">
               {infoText && <p className="mb-2">{infoText}</p>}
               {docLink && (
                 <Link

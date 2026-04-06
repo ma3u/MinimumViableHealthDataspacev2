@@ -144,17 +144,17 @@ export default function CompliancePage() {
       />
 
       <div className="flex flex-col gap-3 mb-6">
-        <label className="text-sm text-gray-400">
+        <label className="text-sm text-[var(--text-secondary)]">
           Consumer (Participant)
           {optionsLoading ? (
-            <div className="mt-1 w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded text-sm text-gray-500">
+            <div className="mt-1 w-full px-3 py-2 bg-[var(--surface-2)] border border-[var(--border)] rounded text-sm text-[var(--text-secondary)]">
               Loading from graph…
             </div>
           ) : consumers.length > 0 ? (
             <select
               value={consumerId}
               onChange={(e) => setConsumerId(e.target.value)}
-              className="mt-1 w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded text-sm outline-none focus:border-layer5 block"
+              className="mt-1 w-full px-3 py-2 bg-[var(--surface-2)] border border-gray-600 rounded text-sm outline-none focus:border-layer5 block"
             >
               <option value="">— select consumer —</option>
               {consumers.map((c, idx) => (
@@ -169,22 +169,22 @@ export default function CompliancePage() {
               value={consumerId}
               onChange={(e) => setConsumerId(e.target.value)}
               placeholder="Participant ID or DID"
-              className="mt-1 w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded text-sm outline-none focus:border-layer5 block"
+              className="mt-1 w-full px-3 py-2 bg-[var(--surface-2)] border border-gray-600 rounded text-sm outline-none focus:border-layer5 block"
             />
           )}
         </label>
 
-        <label className="text-sm text-gray-400">
+        <label className="text-sm text-[var(--text-secondary)]">
           Dataset
           {optionsLoading ? (
-            <div className="mt-1 w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded text-sm text-gray-500">
+            <div className="mt-1 w-full px-3 py-2 bg-[var(--surface-2)] border border-[var(--border)] rounded text-sm text-[var(--text-secondary)]">
               Loading from graph…
             </div>
           ) : datasets.length > 0 ? (
             <select
               value={datasetId}
               onChange={(e) => setDatasetId(e.target.value)}
-              className="mt-1 w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded text-sm outline-none focus:border-layer5 block"
+              className="mt-1 w-full px-3 py-2 bg-[var(--surface-2)] border border-gray-600 rounded text-sm outline-none focus:border-layer5 block"
             >
               <option value="">— select dataset —</option>
               {datasets.map((d, idx) => (
@@ -199,7 +199,7 @@ export default function CompliancePage() {
               value={datasetId}
               onChange={(e) => setDatasetId(e.target.value)}
               placeholder="Dataset ID"
-              className="mt-1 w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded text-sm outline-none focus:border-layer5 block"
+              className="mt-1 w-full px-3 py-2 bg-[var(--surface-2)] border border-gray-600 rounded text-sm outline-none focus:border-layer5 block"
             />
           )}
         </label>
@@ -242,7 +242,7 @@ export default function CompliancePage() {
           {result.chain.length > 0 && (
             <table className="text-xs w-full border-collapse">
               <thead>
-                <tr className="text-gray-500 border-b border-gray-700">
+                <tr className="text-[var(--text-secondary)] border-b border-[var(--border)]">
                   <th className="text-left pb-1">Application</th>
                   <th className="text-left pb-1">Status</th>
                   <th className="text-left pb-1">Approval</th>
@@ -252,14 +252,14 @@ export default function CompliancePage() {
               </thead>
               <tbody>
                 {result.chain.map((c, i) => (
-                  <tr key={i} className="border-b border-gray-800">
+                  <tr key={i} className="border-b border-[var(--border)]">
                     <td className="py-1 pr-2 font-mono">{c.applicationId}</td>
                     <td className="py-1 pr-2 text-green-400">
                       {c.applicationStatus}
                     </td>
                     <td className="py-1 pr-2 font-mono">{c.approvalId}</td>
                     <td className="py-1 pr-2">{c.ehdsArticle}</td>
-                    <td className="py-1 font-mono text-gray-400">
+                    <td className="py-1 font-mono text-[var(--text-secondary)]">
                       {c.contract ?? "—"}
                     </td>
                   </tr>
@@ -271,18 +271,18 @@ export default function CompliancePage() {
       )}
 
       {/* ── Verifiable Credentials Trust Section ── */}
-      <div className="mt-12 border-t border-gray-700 pt-8">
+      <div className="mt-12 border-t border-[var(--border)] pt-8">
         <div className="flex items-center gap-2 mb-1">
           <Key size={18} className="text-layer1" />
           <h2 className="text-xl font-bold">EHDS Verifiable Credentials</h2>
         </div>
-        <p className="text-gray-400 text-sm mb-6">
+        <p className="text-[var(--text-secondary)] text-sm mb-6">
           DCP credential definitions registered on IssuerService — presented
           during DSP negotiation
         </p>
 
         {credentials.length === 0 ? (
-          <div className="text-gray-500 text-sm">
+          <div className="text-[var(--text-secondary)] text-sm">
             {optionsLoading ? "Loading…" : "No credentials found in graph."}
           </div>
         ) : (
@@ -290,7 +290,7 @@ export default function CompliancePage() {
             {credentials.map((vc) => (
               <div
                 key={vc.credentialId}
-                className="rounded-lg border border-gray-700 bg-gray-800/50 p-4"
+                className="rounded-lg border border-[var(--border)] bg-[var(--surface-2)]/50 p-4"
               >
                 <div className="flex items-start justify-between mb-2">
                   <div className="flex items-center gap-2">
@@ -322,16 +322,20 @@ export default function CompliancePage() {
                   </span>
                 </div>
 
-                <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs text-gray-400">
+                <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs text-[var(--text-secondary)]">
                   <div>
-                    <span className="text-gray-500">Holder:</span>{" "}
+                    <span className="text-[var(--text-secondary)]">
+                      Holder:
+                    </span>{" "}
                     {vc.holderName ?? "—"}
                     {vc.holderType && (
                       <span className="text-gray-600"> [{vc.holderType}]</span>
                     )}
                   </div>
                   <div>
-                    <span className="text-gray-500">Subject:</span>{" "}
+                    <span className="text-[var(--text-secondary)]">
+                      Subject:
+                    </span>{" "}
                     <span className="font-mono">
                       {vc.subjectDid?.replace(
                         /did:web:identityhub%3A7083:/,
@@ -340,7 +344,9 @@ export default function CompliancePage() {
                     </span>
                   </div>
                   <div>
-                    <span className="text-gray-500">Issuer:</span>{" "}
+                    <span className="text-[var(--text-secondary)]">
+                      Issuer:
+                    </span>{" "}
                     <span className="font-mono">
                       {vc.issuerDid?.replace(
                         /did:web:issuerservice%3A10016:/,
@@ -349,25 +355,34 @@ export default function CompliancePage() {
                     </span>
                   </div>
                   <div>
-                    <span className="text-gray-500">Format:</span> VC1_0_JWT
+                    <span className="text-[var(--text-secondary)]">
+                      Format:
+                    </span>{" "}
+                    VC1_0_JWT
                   </div>
 
                   {/* Type-specific details */}
                   {vc.purpose && (
                     <div className="col-span-2">
-                      <span className="text-gray-500">Purpose:</span>{" "}
+                      <span className="text-[var(--text-secondary)]">
+                        Purpose:
+                      </span>{" "}
                       {vc.purpose}
                     </div>
                   )}
                   {vc.datasetId && (
                     <div className="col-span-2">
-                      <span className="text-gray-500">Dataset:</span>{" "}
+                      <span className="text-[var(--text-secondary)]">
+                        Dataset:
+                      </span>{" "}
                       <span className="font-mono">{vc.datasetId}</span>
                     </div>
                   )}
                   {vc.completeness != null && (
                     <div className="col-span-2 mt-1">
-                      <span className="text-gray-500">Quality:</span>{" "}
+                      <span className="text-[var(--text-secondary)]">
+                        Quality:
+                      </span>{" "}
                       Completeness{" "}
                       <span className="text-green-400">
                         {(vc.completeness * 100).toFixed(0)}%
@@ -389,11 +404,11 @@ export default function CompliancePage() {
         )}
 
         {/* Trust chain diagram */}
-        <div className="mt-6 rounded-lg border border-gray-700 bg-gray-900/50 p-4">
-          <h3 className="text-sm font-semibold mb-3 text-gray-300">
+        <div className="mt-6 rounded-lg border border-[var(--border)] bg-[var(--surface)]/50 p-4">
+          <h3 className="text-sm font-semibold mb-3 text-[var(--text-primary)]">
             DCP Trust Chain — Credential Presentation Flow
           </h3>
-          <div className="flex items-center gap-2 text-xs text-gray-400 flex-wrap">
+          <div className="flex items-center gap-2 text-xs text-[var(--text-secondary)] flex-wrap">
             <span className="px-2 py-1 rounded bg-layer1/20 text-layer1 font-medium">
               IssuerService
             </span>
@@ -418,14 +433,17 @@ export default function CompliancePage() {
       </div>
 
       {/* ── Phase 18: Trust Center Section ── */}
-      <div id="trust-center" className="mt-12 border-t border-gray-700 pt-8">
+      <div
+        id="trust-center"
+        className="mt-12 border-t border-[var(--border)] pt-8"
+      >
         <div className="flex items-center gap-2 mb-1">
           <Lock size={18} className="text-layer1" />
           <h2 className="text-xl font-bold">
             Trust Center — Pseudonym Resolution
           </h2>
         </div>
-        <p className="text-gray-400 text-sm mb-6">
+        <p className="text-[var(--text-secondary)] text-sm mb-6">
           EHDS Art. 50/51 — HDAB-designated trust centers enabling
           cross-provider longitudinal patient linkage without exposing real
           identities to researchers. Provider pseudonyms are resolved to
@@ -433,11 +451,13 @@ export default function CompliancePage() {
         </p>
 
         {optionsLoading ? (
-          <div className="text-gray-500 text-sm">Loading trust centers…</div>
+          <div className="text-[var(--text-secondary)] text-sm">
+            Loading trust centers…
+          </div>
         ) : trustCenters.length === 0 ? (
-          <div className="text-gray-500 text-sm">
+          <div className="text-[var(--text-secondary)] text-sm">
             No trust centers found. Run{" "}
-            <code className="font-mono text-xs bg-gray-800 px-1 py-0.5 rounded">
+            <code className="font-mono text-xs bg-[var(--surface-2)] px-1 py-0.5 rounded">
               neo4j/seed-trust-center.cypher
             </code>{" "}
             to seed demo data.
@@ -448,13 +468,13 @@ export default function CompliancePage() {
               <div
                 key={tc.name}
                 data-testid="trust-center-card"
-                className="rounded-lg border border-gray-700 bg-gray-800/50 p-4"
+                className="rounded-lg border border-[var(--border)] bg-[var(--surface-2)]/50 p-4"
               >
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex items-center gap-2">
                     <Globe size={16} className="text-layer1" />
                     <span className="font-semibold text-sm">{tc.name}</span>
-                    <span className="text-xs px-2 py-0.5 rounded bg-gray-700 text-gray-300">
+                    <span className="text-xs px-2 py-0.5 rounded bg-gray-700 text-[var(--text-primary)]">
                       {tc.country}
                     </span>
                   </div>
@@ -469,22 +489,28 @@ export default function CompliancePage() {
                   </span>
                 </div>
 
-                <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs text-gray-400 mb-3">
+                <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs text-[var(--text-secondary)] mb-3">
                   <div>
-                    <span className="text-gray-500">Operated by:</span>{" "}
+                    <span className="text-[var(--text-secondary)]">
+                      Operated by:
+                    </span>{" "}
                     {tc.operatedBy}
                   </div>
                   <div>
-                    <span className="text-gray-500">Protocol:</span>{" "}
+                    <span className="text-[var(--text-secondary)]">
+                      Protocol:
+                    </span>{" "}
                     {tc.protocol}
                   </div>
                   <div className="col-span-2">
-                    <span className="text-gray-500">DID:</span>{" "}
+                    <span className="text-[var(--text-secondary)]">DID:</span>{" "}
                     <span className="font-mono">{tc.did}</span>
                   </div>
                   {tc.hdabApprovalId && (
                     <div>
-                      <span className="text-gray-500">HDAB Approval:</span>{" "}
+                      <span className="text-[var(--text-secondary)]">
+                        HDAB Approval:
+                      </span>{" "}
                       <span className="font-mono">{tc.hdabApprovalId}</span>{" "}
                       <span
                         className={
@@ -498,16 +524,20 @@ export default function CompliancePage() {
                     </div>
                   )}
                   <div>
-                    <span className="text-gray-500">Datasets covered:</span>{" "}
+                    <span className="text-[var(--text-secondary)]">
+                      Datasets covered:
+                    </span>{" "}
                     {tc.datasetCount}
                   </div>
                   <div>
-                    <span className="text-gray-500">Active RPSNs:</span>{" "}
+                    <span className="text-[var(--text-secondary)]">
+                      Active RPSNs:
+                    </span>{" "}
                     <span className="text-green-400">{tc.activeRpsnCount}</span>
                   </div>
                   {tc.recognisedCountries.length > 0 && (
                     <div className="col-span-2">
-                      <span className="text-gray-500">
+                      <span className="text-[var(--text-secondary)]">
                         Mutual recognition (EHDS Art. 51):
                       </span>{" "}
                       {tc.recognisedCountries.join(", ")}
@@ -516,7 +546,7 @@ export default function CompliancePage() {
                 </div>
 
                 {/* Cross-border pseudonym resolution flow */}
-                <div className="rounded bg-gray-900/60 p-3 text-xs text-gray-400 flex items-center gap-2 flex-wrap">
+                <div className="rounded bg-[var(--surface)]/60 p-3 text-xs text-[var(--text-secondary)] flex items-center gap-2 flex-wrap">
                   <span className="px-2 py-1 rounded bg-layer1/20 text-layer1 font-medium">
                     Provider PSN
                   </span>
@@ -541,12 +571,12 @@ export default function CompliancePage() {
         {/* SPE Sessions */}
         {speSessions.length > 0 && (
           <div className="mt-6">
-            <h3 className="text-sm font-semibold mb-3 text-gray-300">
+            <h3 className="text-sm font-semibold mb-3 text-[var(--text-primary)]">
               Active SPE Sessions (TEE-Attested)
             </h3>
             <table className="text-xs w-full border-collapse">
               <thead>
-                <tr className="text-gray-500 border-b border-gray-700">
+                <tr className="text-[var(--text-secondary)] border-b border-[var(--border)]">
                   <th className="text-left pb-1">Session ID</th>
                   <th className="text-left pb-1">Study</th>
                   <th className="text-left pb-1">Status</th>
@@ -559,10 +589,10 @@ export default function CompliancePage() {
                 {speSessions.map((s) => (
                   <tr
                     key={s.sessionId}
-                    className="border-b border-gray-800"
+                    className="border-b border-[var(--border)]"
                     data-testid="spe-session-row"
                   >
-                    <td className="py-1 pr-2 font-mono text-gray-300">
+                    <td className="py-1 pr-2 font-mono text-[var(--text-primary)]">
                       {s.sessionId}
                     </td>
                     <td className="py-1 pr-2">{s.studyId}</td>
@@ -571,7 +601,7 @@ export default function CompliancePage() {
                         className={
                           s.status === "active"
                             ? "text-green-400"
-                            : "text-gray-400"
+                            : "text-[var(--text-secondary)]"
                         }
                       >
                         {s.status}
@@ -579,7 +609,7 @@ export default function CompliancePage() {
                     </td>
                     <td className="py-1 pr-2">≥ {s.kAnonymityThreshold}</td>
                     <td className="py-1 pr-2">{s.outputPolicy}</td>
-                    <td className="py-1 font-mono text-gray-500">
+                    <td className="py-1 font-mono text-[var(--text-secondary)]">
                       {s.createdBy?.split(":").pop()}
                     </td>
                   </tr>
@@ -590,11 +620,11 @@ export default function CompliancePage() {
         )}
 
         {/* Security model summary */}
-        <div className="mt-6 rounded-lg border border-gray-700 bg-gray-900/50 p-4">
-          <h3 className="text-sm font-semibold mb-3 text-gray-300">
+        <div className="mt-6 rounded-lg border border-[var(--border)] bg-[var(--surface)]/50 p-4">
+          <h3 className="text-sm font-semibold mb-3 text-[var(--text-primary)]">
             Security Model — Threat Mitigations
           </h3>
-          <div className="space-y-1 text-xs text-gray-400">
+          <div className="space-y-1 text-xs text-[var(--text-secondary)]">
             {[
               [
                 "Researcher accesses raw data",
@@ -616,7 +646,9 @@ export default function CompliancePage() {
             ].map(([threat, mitigation]) => (
               <div key={threat} className="flex gap-2">
                 <span className="text-red-400 shrink-0">⚠</span>
-                <span className="text-gray-500 shrink-0 w-56">{threat}</span>
+                <span className="text-[var(--text-secondary)] shrink-0 w-56">
+                  {threat}
+                </span>
                 <span className="text-green-400">{mitigation}</span>
               </div>
             ))}
