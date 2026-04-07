@@ -267,162 +267,164 @@ export default function EEHRxFPage() {
   }, []);
 
   return (
-    <div className="max-w-5xl mx-auto px-6 py-10">
-      {/* Header */}
-      <PageIntro
-        title="EEHRxF Profile Alignment"
-        icon={Layers}
-        description="European Electronic Health Record Exchange Format — HL7 Europe FHIR R4 Implementation Guides mapped to current graph data. Verify how well your FHIR resources conform to the mandatory EEHRxF profiles required by the EHDS regulation."
-        prevStep={{ href: "/query", label: "Natural Language Query" }}
-        nextStep={{ href: "/compliance", label: "EHDS Compliance" }}
-        infoText="EEHRxF defines 10 priority categories of electronic health data that must be interoperable across EU member states. Each profile is matched against FHIR resources in your graph to show alignment status."
-        docLink={{
-          href: "https://digital-strategy.ec.europa.eu/en/library/recommendation-european-electronic-health-record-exchange-format",
-          label: "EEHRxF Recommendation C(2019)800",
-          external: true,
-        }}
-      />
+    <div className="min-h-screen bg-[var(--bg)]">
+      <div className="max-w-5xl mx-auto px-6 py-10">
+        {/* Header */}
+        <PageIntro
+          title="EEHRxF Profile Alignment"
+          icon={Layers}
+          description="European Electronic Health Record Exchange Format — HL7 Europe FHIR R4 Implementation Guides mapped to current graph data. Verify how well your FHIR resources conform to the mandatory EEHRxF profiles required by the EHDS regulation."
+          prevStep={{ href: "/query", label: "Natural Language Query" }}
+          nextStep={{ href: "/compliance", label: "EHDS Compliance" }}
+          infoText="EEHRxF defines 10 priority categories of electronic health data that must be interoperable across EU member states. Each profile is matched against FHIR resources in your graph to show alignment status."
+          docLink={{
+            href: "https://digital-strategy.ec.europa.eu/en/library/recommendation-european-electronic-health-record-exchange-format",
+            label: "EEHRxF Recommendation C(2019)800",
+            external: true,
+          }}
+        />
 
-      {error && (
-        <div className="mb-6 p-3 rounded bg-red-900/20 border border-red-700 text-red-400 text-sm">
-          {error}
-        </div>
-      )}
+        {error && (
+          <div className="mb-6 p-3 rounded bg-red-900/20 border border-red-700 text-red-400 text-sm">
+            {error}
+          </div>
+        )}
 
-      {/* Summary stats */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
-        <div className="bg-[var(--surface)] border border-[var(--border)] rounded-xl p-4 flex flex-col gap-1">
-          <Layers size={16} className="text-layer2" />
-          <span className="text-2xl font-bold">
-            {loading ? "—" : data?.summary.totalCategories ?? 0}
-          </span>
-          <span className="text-xs text-[var(--text-secondary)]">
-            Priority Categories
-          </span>
+        {/* Summary stats */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
+          <div className="bg-[var(--surface)] border border-[var(--border)] rounded-xl p-4 flex flex-col gap-1">
+            <Layers size={16} className="text-layer2" />
+            <span className="text-2xl font-bold">
+              {loading ? "—" : data?.summary.totalCategories ?? 0}
+            </span>
+            <span className="text-xs text-[var(--text-secondary)]">
+              Priority Categories
+            </span>
+          </div>
+          <div className="bg-[var(--surface)] border border-[var(--border)] rounded-xl p-4 flex flex-col gap-1">
+            <ShieldCheck size={16} className="text-layer3" />
+            <span className="text-2xl font-bold">
+              {loading ? "—" : data?.summary.totalProfiles ?? 0}
+            </span>
+            <span className="text-xs text-[var(--text-secondary)]">
+              EU Profiles Tracked
+            </span>
+          </div>
+          <div className="bg-[var(--surface)] border border-[var(--border)] rounded-xl p-4 flex flex-col gap-1">
+            <CheckCircle size={16} className="text-green-400" />
+            <span className="text-2xl font-bold">
+              {loading ? "—" : data?.summary.coveredProfiles ?? 0}
+            </span>
+            <span className="text-xs text-[var(--text-secondary)]">
+              Profiles with Data
+            </span>
+          </div>
+          <div className="bg-[var(--surface)] border border-[var(--border)] rounded-xl p-4 flex flex-col gap-1">
+            <AlertTriangle size={16} className="text-yellow-400" />
+            <span className="text-2xl font-bold">
+              {loading ? "—" : `${data?.summary.coveragePercent ?? 0}%`}
+            </span>
+            <span className="text-xs text-[var(--text-secondary)]">
+              Overall Coverage
+            </span>
+          </div>
         </div>
-        <div className="bg-[var(--surface)] border border-[var(--border)] rounded-xl p-4 flex flex-col gap-1">
-          <ShieldCheck size={16} className="text-layer3" />
-          <span className="text-2xl font-bold">
-            {loading ? "—" : data?.summary.totalProfiles ?? 0}
-          </span>
-          <span className="text-xs text-[var(--text-secondary)]">
-            EU Profiles Tracked
-          </span>
-        </div>
-        <div className="bg-[var(--surface)] border border-[var(--border)] rounded-xl p-4 flex flex-col gap-1">
-          <CheckCircle size={16} className="text-green-400" />
-          <span className="text-2xl font-bold">
-            {loading ? "—" : data?.summary.coveredProfiles ?? 0}
-          </span>
-          <span className="text-xs text-[var(--text-secondary)]">
-            Profiles with Data
-          </span>
-        </div>
-        <div className="bg-[var(--surface)] border border-[var(--border)] rounded-xl p-4 flex flex-col gap-1">
-          <AlertTriangle size={16} className="text-yellow-400" />
-          <span className="text-2xl font-bold">
-            {loading ? "—" : `${data?.summary.coveragePercent ?? 0}%`}
-          </span>
-          <span className="text-xs text-[var(--text-secondary)]">
-            Overall Coverage
-          </span>
-        </div>
-      </div>
 
-      {/* EHDS Timeline */}
-      <div className="bg-[var(--surface)] border border-[var(--border)] rounded-xl p-5 mb-8">
-        <div className="flex items-center gap-2 mb-4">
-          <Clock size={16} className="text-[var(--text-secondary)]" />
-          <h2 className="font-semibold text-sm text-gray-200">
-            EHDS Implementation Timeline
-          </h2>
-        </div>
-        <div className="flex items-center gap-0 overflow-x-auto pb-2">
-          {EHDS_MILESTONES.map((m, i) => (
-            <div key={m.year} className="flex items-center">
-              {i > 0 && (
-                <div className="w-8 sm:w-16 h-0.5 bg-gray-700 shrink-0" />
-              )}
-              <div className="flex flex-col items-center shrink-0">
-                <div
-                  className={`w-4 h-4 rounded-full border-2 ${
-                    m.active
-                      ? "bg-layer2 border-layer2"
-                      : "bg-[var(--surface)] border-gray-600"
-                  }`}
-                />
-                <span
-                  className={`text-xs font-medium mt-1 ${
-                    m.active ? "text-layer2" : "text-[var(--text-secondary)]"
-                  }`}
-                >
-                  {m.year}
-                </span>
-                <span className="text-[10px] text-[var(--text-secondary)] text-center max-w-[100px] leading-tight mt-0.5">
-                  {m.label}
-                </span>
+        {/* EHDS Timeline */}
+        <div className="bg-[var(--surface)] border border-[var(--border)] rounded-xl p-5 mb-8">
+          <div className="flex items-center gap-2 mb-4">
+            <Clock size={16} className="text-[var(--text-secondary)]" />
+            <h2 className="font-semibold text-sm text-gray-200">
+              EHDS Implementation Timeline
+            </h2>
+          </div>
+          <div className="flex items-center gap-0 overflow-x-auto pb-2">
+            {EHDS_MILESTONES.map((m, i) => (
+              <div key={m.year} className="flex items-center">
+                {i > 0 && (
+                  <div className="w-8 sm:w-16 h-0.5 bg-gray-700 shrink-0" />
+                )}
+                <div className="flex flex-col items-center shrink-0">
+                  <div
+                    className={`w-4 h-4 rounded-full border-2 ${
+                      m.active
+                        ? "bg-layer2 border-layer2"
+                        : "bg-[var(--surface)] border-gray-600"
+                    }`}
+                  />
+                  <span
+                    className={`text-xs font-medium mt-1 ${
+                      m.active ? "text-layer2" : "text-[var(--text-secondary)]"
+                    }`}
+                  >
+                    {m.year}
+                  </span>
+                  <span className="text-[10px] text-[var(--text-secondary)] text-center max-w-[100px] leading-tight mt-0.5">
+                    {m.label}
+                  </span>
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
-      </div>
 
-      {/* Category cards */}
-      {loading ? (
-        <div className="text-[var(--text-secondary)] text-sm">
-          Loading EEHRxF profiles…
-        </div>
-      ) : (
-        <div className="flex flex-col gap-4">
-          {data?.categories.map((cat) => (
-            <CategoryCard key={cat.categoryId} category={cat} />
-          ))}
-        </div>
-      )}
+        {/* Category cards */}
+        {loading ? (
+          <div className="text-[var(--text-secondary)] text-sm">
+            Loading EEHRxF profiles…
+          </div>
+        ) : (
+          <div className="flex flex-col gap-4">
+            {data?.categories.map((cat) => (
+              <CategoryCard key={cat.categoryId} category={cat} />
+            ))}
+          </div>
+        )}
 
-      {/* Reference links */}
-      <div className="mt-10 border-t border-[var(--border)] pt-6">
-        <h3 className="text-sm font-semibold text-[var(--text-primary)] mb-3">
-          References
-        </h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
-          {[
-            {
-              label: "EHDS Regulation (EU)",
-              url: "https://health.ec.europa.eu/ehealth-digital-health-and-care/european-health-data-space_en",
-            },
-            {
-              label: "EEHRxF Recommendation C(2019)800",
-              url: "https://digital-strategy.ec.europa.eu/en/library/recommendation-european-electronic-health-record-exchange-format",
-            },
-            {
-              label: "HL7 Europe FHIR IGs",
-              url: "https://hl7.eu/fhir/",
-            },
-            {
-              label: "HL7 EU Base & Core Profiles",
-              url: "https://hl7.eu/fhir/base/",
-            },
-            {
-              label: "HL7 EU Laboratory Report",
-              url: "https://hl7.eu/fhir/laboratory/",
-            },
-            {
-              label: "Xt-EHR Joint Action",
-              url: "https://www.xt-ehr.eu/",
-            },
-          ].map((ref) => (
-            <a
-              key={ref.url}
-              href={ref.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-1.5 text-[var(--text-secondary)] hover:text-layer2 transition-colors"
-            >
-              <ExternalLink size={12} />
-              {ref.label}
-            </a>
-          ))}
+        {/* Reference links */}
+        <div className="mt-10 border-t border-[var(--border)] pt-6">
+          <h3 className="text-sm font-semibold text-[var(--text-primary)] mb-3">
+            References
+          </h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+            {[
+              {
+                label: "EHDS Regulation (EU)",
+                url: "https://health.ec.europa.eu/ehealth-digital-health-and-care/european-health-data-space_en",
+              },
+              {
+                label: "EEHRxF Recommendation C(2019)800",
+                url: "https://digital-strategy.ec.europa.eu/en/library/recommendation-european-electronic-health-record-exchange-format",
+              },
+              {
+                label: "HL7 Europe FHIR IGs",
+                url: "https://hl7.eu/fhir/",
+              },
+              {
+                label: "HL7 EU Base & Core Profiles",
+                url: "https://hl7.eu/fhir/base/",
+              },
+              {
+                label: "HL7 EU Laboratory Report",
+                url: "https://hl7.eu/fhir/laboratory/",
+              },
+              {
+                label: "Xt-EHR Joint Action",
+                url: "https://www.xt-ehr.eu/",
+              },
+            ].map((ref) => (
+              <a
+                key={ref.url}
+                href={ref.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1.5 text-[var(--text-secondary)] hover:text-layer2 transition-colors"
+              >
+                <ExternalLink size={12} />
+                {ref.label}
+              </a>
+            ))}
+          </div>
         </div>
       </div>
     </div>

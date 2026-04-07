@@ -173,109 +173,116 @@ export default function AnalyticsPage() {
   ];
 
   return (
-    <div className="max-w-5xl mx-auto px-6 py-10">
-      <PageIntro
-        title="OMOP Research Analytics"
-        icon={BarChart2}
-        description="Layer 4 — OMOP CDM cohort statistics from the Synthea-generated dataset, supporting EHDS Art. 53 secondary-use research. View aggregate counts for persons, conditions, drugs, measurements, and procedures."
-        prevStep={{ href: "/patient", label: "Patient Journey" }}
-        nextStep={{ href: "/query", label: "Natural Language Query" }}
-        infoText="Analytics are computed from OMOP CDM nodes in Neo4j. The OMOP Common Data Model standardises clinical data across institutions, enabling federated cohort analysis without moving patient-level data."
-        docLink={{
-          href: "https://ohdsi.github.io/CommonDataModel/",
-          label: "OMOP CDM Documentation",
-          external: true,
-        }}
-      />
+    <div className="min-h-screen bg-[var(--bg)]">
+      <div className="max-w-5xl mx-auto px-6 py-10">
+        <PageIntro
+          title="OMOP Research Analytics"
+          icon={BarChart2}
+          description="Layer 4 — OMOP CDM cohort statistics from the Synthea-generated dataset, supporting EHDS Art. 53 secondary-use research. View aggregate counts for persons, conditions, drugs, measurements, and procedures."
+          prevStep={{ href: "/patient", label: "Patient Journey" }}
+          nextStep={{ href: "/query", label: "Natural Language Query" }}
+          infoText="Analytics are computed from OMOP CDM nodes in Neo4j. The OMOP Common Data Model standardises clinical data across institutions, enabling federated cohort analysis without moving patient-level data."
+          docLink={{
+            href: "https://ohdsi.github.io/CommonDataModel/",
+            label: "OMOP CDM Documentation",
+            external: true,
+          }}
+        />
 
-      {error && (
-        <div className="mb-6 p-3 rounded bg-red-900/20 border border-red-700 text-red-400 text-sm">
-          {error}
+        {error && (
+          <div className="mb-6 p-3 rounded bg-red-900/20 border border-red-700 text-red-400 text-sm">
+            {error}
+          </div>
+        )}
+
+        {/* Stat cards */}
+        <div className="grid grid-cols-3 sm:grid-cols-6 gap-3 mb-8">
+          {statCards.map(({ label, value, icon: Icon, color }) => (
+            <div
+              key={label}
+              className="bg-[var(--surface)] border border-[var(--border)] rounded-xl p-4 flex flex-col gap-1"
+            >
+              <Icon size={16} className={color} />
+              <span className="text-2xl font-bold">
+                {loading ? "—" : (value ?? 0).toLocaleString()}
+              </span>
+              <span className="text-xs text-[var(--text-secondary)]">
+                {label}
+              </span>
+            </div>
+          ))}
         </div>
-      )}
 
-      {/* Stat cards */}
-      <div className="grid grid-cols-3 sm:grid-cols-6 gap-3 mb-8">
-        {statCards.map(({ label, value, icon: Icon, color }) => (
-          <div
-            key={label}
-            className="bg-[var(--surface)] border border-[var(--border)] rounded-xl p-4 flex flex-col gap-1"
-          >
-            <Icon size={16} className={color} />
-            <span className="text-2xl font-bold">
-              {loading ? "—" : (value ?? 0).toLocaleString()}
-            </span>
-            <span className="text-xs text-[var(--text-secondary)]">
-              {label}
-            </span>
+        {/* Gender breakdown */}
+        {!loading && data?.genderBreakdown && (
+          <div className="mb-8 bg-[var(--surface)] border border-[var(--border)] rounded-xl p-5">
+            <div className="flex items-center gap-2 mb-3">
+              <Users size={16} className="text-[var(--text-secondary)]" />
+              <h2 className="font-semibold text-sm text-gray-200">
+                Gender Distribution
+              </h2>
+            </div>
+            <div className="flex gap-6">
+              {data.genderBreakdown.map((g) => {
+                const total = data.genderBreakdown.reduce(
+                  (s, x) => s + x.count,
+                  0,
+                );
+                const pct = total > 0 ? Math.round((g.count / total) * 100) : 0;
+                return (
+                  <div
+                    key={g.gender}
+                    className="flex items-center gap-2 text-sm"
+                  >
+                    <span
+                      className={`inline-block w-3 h-3 rounded-full ${
+                        g.gender === "Female" ? "bg-layer3" : "bg-layer4"
+                      }`}
+                    />
+                    <span className="text-[var(--text-primary)]">
+                      {g.gender}
+                    </span>
+                    <span className="text-[var(--text-secondary)]">
+                      {g.count.toLocaleString()} ({pct}%)
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
           </div>
-        ))}
-      </div>
+        )}
 
-      {/* Gender breakdown */}
-      {!loading && data?.genderBreakdown && (
-        <div className="mb-8 bg-[var(--surface)] border border-[var(--border)] rounded-xl p-5">
-          <div className="flex items-center gap-2 mb-3">
-            <Users size={16} className="text-[var(--text-secondary)]" />
-            <h2 className="font-semibold text-sm text-gray-200">
-              Gender Distribution
-            </h2>
-          </div>
-          <div className="flex gap-6">
-            {data.genderBreakdown.map((g) => {
-              const total = data.genderBreakdown.reduce(
-                (s, x) => s + x.count,
-                0,
-              );
-              const pct = total > 0 ? Math.round((g.count / total) * 100) : 0;
-              return (
-                <div key={g.gender} className="flex items-center gap-2 text-sm">
-                  <span
-                    className={`inline-block w-3 h-3 rounded-full ${
-                      g.gender === "Female" ? "bg-layer3" : "bg-layer4"
-                    }`}
-                  />
-                  <span className="text-[var(--text-primary)]">{g.gender}</span>
-                  <span className="text-[var(--text-secondary)]">
-                    {g.count.toLocaleString()} ({pct}%)
-                  </span>
-                </div>
-              );
-            })}
-          </div>
+        {/* Bar chart sections */}
+        <div className="flex flex-col gap-6">
+          <BarSection
+            title="Top Conditions (OMOPConditionOccurrence)"
+            icon={Activity}
+            data={data?.topConditions ?? []}
+            colorClass={LAYER_COLORS.condition}
+            loading={loading}
+          />
+          <BarSection
+            title="Top Drug Exposures (OMOPDrugExposure)"
+            icon={Pill}
+            data={data?.topDrugs ?? []}
+            colorClass={LAYER_COLORS.drug}
+            loading={loading}
+          />
+          <BarSection
+            title="Top Measurements (OMOPMeasurement)"
+            icon={FlaskConical}
+            data={data?.topMeasurements ?? []}
+            colorClass={LAYER_COLORS.measurement}
+            loading={loading}
+          />
+          <BarSection
+            title="Top Procedures (OMOPProcedureOccurrence)"
+            icon={Scissors}
+            data={data?.topProcedures ?? []}
+            colorClass={LAYER_COLORS.procedure}
+            loading={loading}
+          />
         </div>
-      )}
-
-      {/* Bar chart sections */}
-      <div className="flex flex-col gap-6">
-        <BarSection
-          title="Top Conditions (OMOPConditionOccurrence)"
-          icon={Activity}
-          data={data?.topConditions ?? []}
-          colorClass={LAYER_COLORS.condition}
-          loading={loading}
-        />
-        <BarSection
-          title="Top Drug Exposures (OMOPDrugExposure)"
-          icon={Pill}
-          data={data?.topDrugs ?? []}
-          colorClass={LAYER_COLORS.drug}
-          loading={loading}
-        />
-        <BarSection
-          title="Top Measurements (OMOPMeasurement)"
-          icon={FlaskConical}
-          data={data?.topMeasurements ?? []}
-          colorClass={LAYER_COLORS.measurement}
-          loading={loading}
-        />
-        <BarSection
-          title="Top Procedures (OMOPProcedureOccurrence)"
-          icon={Scissors}
-          data={data?.topProcedures ?? []}
-          colorClass={LAYER_COLORS.procedure}
-          loading={loading}
-        />
       </div>
     </div>
   );

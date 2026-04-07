@@ -205,309 +205,313 @@ function CatalogContent() {
   );
 
   return (
-    <div className="max-w-5xl mx-auto px-6 py-10">
-      <PageIntro
-        title="Dataset Catalog"
-        icon={Database}
-        description="Browse HealthDCAT-AP metadata for all EHDS secondary-use datasets registered in the dataspace. Each entry describes the data holder, legal basis, FHIR profiles, and access conditions."
-        prevStep={{ href: "/graph", label: "Graph Explorer" }}
-        nextStep={{ href: "/data/discover", label: "Discover Data" }}
-        infoText="Datasets are registered using the HealthDCAT-AP standard (DCAT 3 profile for health data). Use the search to filter by title, theme, or description before requesting access."
-        docLink={{
-          href: "https://healthdcat-ap.github.io/",
-          label: "HealthDCAT-AP Specification",
-          external: true,
-        }}
-      />
+    <div className="min-h-screen bg-[var(--bg)]">
+      <div className="max-w-5xl mx-auto px-6 py-10">
+        <PageIntro
+          title="Dataset Catalog"
+          icon={Database}
+          description="Browse HealthDCAT-AP metadata for all EHDS secondary-use datasets registered in the dataspace. Each entry describes the data holder, legal basis, FHIR profiles, and access conditions."
+          prevStep={{ href: "/graph", label: "Graph Explorer" }}
+          nextStep={{ href: "/data/discover", label: "Discover Data" }}
+          infoText="Datasets are registered using the HealthDCAT-AP standard (DCAT 3 profile for health data). Use the search to filter by title, theme, or description before requesting access."
+          docLink={{
+            href: "https://healthdcat-ap.github.io/",
+            label: "HealthDCAT-AP Specification",
+            external: true,
+          }}
+        />
 
-      <input
-        type="search"
-        placeholder="Filter by title, description or theme…"
-        value={filter}
-        onChange={(e) => setFilter(e.target.value)}
-        className="w-full mb-6 px-3 py-2 bg-[var(--surface-2)] border border-gray-600 rounded text-sm outline-none focus:border-layer2"
-      />
+        <input
+          type="search"
+          placeholder="Filter by title, description or theme…"
+          value={filter}
+          onChange={(e) => setFilter(e.target.value)}
+          className="w-full mb-6 px-3 py-2 bg-[var(--surface-2)] border border-gray-600 rounded text-sm outline-none focus:border-layer2"
+        />
 
-      {loading ? (
-        <p className="text-[var(--text-secondary)]">Connecting to Neo4j…</p>
-      ) : visible.length === 0 ? (
-        <p className="text-[var(--text-secondary)]">No datasets found.</p>
-      ) : (
-        <div className="grid gap-4">
-          {visible.map((d, idx) => {
-            const isOpen = expanded === d.id;
-            return (
-              <div
-                key={d.id ?? `dataset-${idx}`}
-                className={`border rounded-xl transition-colors ${
-                  isOpen
-                    ? "border-layer2 bg-[var(--surface)]/60"
-                    : "border-[var(--border)] hover:border-layer2"
-                }`}
-              >
-                {/* Card header — click to expand */}
-                <button
-                  className="w-full text-left p-4"
-                  onClick={() => setExpanded(isOpen ? null : d.id)}
+        {loading ? (
+          <p className="text-[var(--text-secondary)]">Connecting to Neo4j…</p>
+        ) : visible.length === 0 ? (
+          <p className="text-[var(--text-secondary)]">No datasets found.</p>
+        ) : (
+          <div className="grid gap-4">
+            {visible.map((d, idx) => {
+              const isOpen = expanded === d.id;
+              return (
+                <div
+                  key={d.id ?? `dataset-${idx}`}
+                  className={`border rounded-xl transition-colors ${
+                    isOpen
+                      ? "border-layer2 bg-[var(--surface)]/60"
+                      : "border-[var(--border)] hover:border-layer2"
+                  }`}
                 >
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex-1 min-w-0">
-                      <h2 className="font-semibold text-layer2">
-                        {d.title ?? d.id}
-                      </h2>
-                      {d.description && (
-                        <p className="text-sm text-[var(--text-secondary)] mt-0.5 line-clamp-2">
-                          {d.description}
-                        </p>
-                      )}
+                  {/* Card header — click to expand */}
+                  <button
+                    className="w-full text-left p-4"
+                    onClick={() => setExpanded(isOpen ? null : d.id)}
+                  >
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex-1 min-w-0">
+                        <h2 className="font-semibold text-layer2">
+                          {d.title ?? d.id}
+                        </h2>
+                        {d.description && (
+                          <p className="text-sm text-[var(--text-secondary)] mt-0.5 line-clamp-2">
+                            {d.description}
+                          </p>
+                        )}
+                      </div>
+                      <div className="shrink-0 flex flex-col items-end gap-1">
+                        {d.datasetType && (
+                          <span className="text-xs bg-layer2/20 text-layer2 px-2 py-0.5 rounded-full">
+                            {d.datasetType}
+                          </span>
+                        )}
+                        {d.theme && (
+                          <span className="text-xs bg-gray-700 text-[var(--text-primary)] px-2 py-0.5 rounded-full">
+                            {d.theme}
+                          </span>
+                        )}
+                      </div>
+                      <div className="shrink-0 text-[var(--text-secondary)] mt-0.5">
+                        {isOpen ? (
+                          <ChevronUp size={16} />
+                        ) : (
+                          <ChevronDown size={16} />
+                        )}
+                      </div>
                     </div>
-                    <div className="shrink-0 flex flex-col items-end gap-1">
-                      {d.datasetType && (
-                        <span className="text-xs bg-layer2/20 text-layer2 px-2 py-0.5 rounded-full">
-                          {d.datasetType}
+
+                    {/* Summary row */}
+                    <div className="mt-3 flex flex-wrap gap-4 text-xs text-[var(--text-secondary)]">
+                      {d.publisher && <span>Publisher: {d.publisher}</span>}
+                      {d.legalBasis && (
+                        <span className="text-green-500">
+                          Legal basis:{" "}
+                          {LEGAL_BASIS_LABELS[d.legalBasis] ?? d.legalBasis}
                         </span>
                       )}
-                      {d.theme && (
-                        <span className="text-xs bg-gray-700 text-[var(--text-primary)] px-2 py-0.5 rounded-full">
-                          {d.theme}
+                      {d.recordCount != null && (
+                        <span>
+                          {Number(d.recordCount).toLocaleString()} records
                         </span>
                       )}
+                      {d.license && <span>License: {d.license}</span>}
                     </div>
-                    <div className="shrink-0 text-[var(--text-secondary)] mt-0.5">
-                      {isOpen ? (
-                        <ChevronUp size={16} />
-                      ) : (
-                        <ChevronDown size={16} />
-                      )}
-                    </div>
-                  </div>
 
-                  {/* Summary row */}
-                  <div className="mt-3 flex flex-wrap gap-4 text-xs text-[var(--text-secondary)]">
-                    {d.publisher && <span>Publisher: {d.publisher}</span>}
-                    {d.legalBasis && (
-                      <span className="text-green-500">
-                        Legal basis:{" "}
-                        {LEGAL_BASIS_LABELS[d.legalBasis] ?? d.legalBasis}
-                      </span>
-                    )}
-                    {d.recordCount != null && (
-                      <span>
-                        {Number(d.recordCount).toLocaleString()} records
-                      </span>
-                    )}
-                    {d.license && <span>License: {d.license}</span>}
-                  </div>
-
-                  {/* Provider / Consumer / FHIR badges */}
-                  {((d.providers && d.providers.length > 0) ||
-                    (d.consumers && d.consumers.length > 0) ||
-                    (d.fhirResources && d.fhirResources.length > 0)) && (
-                    <div className="mt-2 flex flex-wrap gap-3 text-xs">
-                      {d.providers && d.providers.length > 0 && (
-                        <div className="flex items-center gap-1">
-                          <span className="text-blue-400 font-medium">
-                            Providers:
-                          </span>
-                          {d.providers.map((p) => (
-                            <span
-                              key={p}
-                              className="bg-blue-900/40 text-blue-300 px-1.5 py-0.5 rounded"
-                            >
-                              {p}
+                    {/* Provider / Consumer / FHIR badges */}
+                    {((d.providers && d.providers.length > 0) ||
+                      (d.consumers && d.consumers.length > 0) ||
+                      (d.fhirResources && d.fhirResources.length > 0)) && (
+                      <div className="mt-2 flex flex-wrap gap-3 text-xs">
+                        {d.providers && d.providers.length > 0 && (
+                          <div className="flex items-center gap-1">
+                            <span className="text-blue-400 font-medium">
+                              Providers:
                             </span>
-                          ))}
-                        </div>
-                      )}
-                      {d.consumers && d.consumers.length > 0 && (
-                        <div className="flex items-center gap-1">
-                          <span className="text-orange-400 font-medium">
-                            Consumers:
-                          </span>
-                          {d.consumers.map((c) => (
-                            <span
-                              key={c}
-                              className="bg-orange-900/40 text-orange-300 px-1.5 py-0.5 rounded"
-                            >
-                              {c}
+                            {d.providers.map((p) => (
+                              <span
+                                key={p}
+                                className="bg-blue-900/40 text-blue-300 px-1.5 py-0.5 rounded"
+                              >
+                                {p}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                        {d.consumers && d.consumers.length > 0 && (
+                          <div className="flex items-center gap-1">
+                            <span className="text-orange-400 font-medium">
+                              Consumers:
                             </span>
-                          ))}
-                        </div>
-                      )}
-                      {d.fhirResources && d.fhirResources.length > 0 && (
-                        <div className="flex items-center gap-1">
-                          <span className="text-green-400 font-medium">
-                            FHIR:
-                          </span>
-                          <span className="bg-green-900/40 text-green-300 px-1.5 py-0.5 rounded">
-                            {d.fhirResources.length} Patient
-                            {d.fhirResources.length !== 1 ? "s" : ""}
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </button>
+                            {d.consumers.map((c) => (
+                              <span
+                                key={c}
+                                className="bg-orange-900/40 text-orange-300 px-1.5 py-0.5 rounded"
+                              >
+                                {c}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                        {d.fhirResources && d.fhirResources.length > 0 && (
+                          <div className="flex items-center gap-1">
+                            <span className="text-green-400 font-medium">
+                              FHIR:
+                            </span>
+                            <span className="bg-green-900/40 text-green-300 px-1.5 py-0.5 rounded">
+                              {d.fhirResources.length} Patient
+                              {d.fhirResources.length !== 1 ? "s" : ""}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </button>
 
-                {/* Expanded detail panel */}
-                {isOpen && (
-                  <div className="px-4 pb-4 border-t border-[var(--border)] mt-1 pt-3">
-                    <h3 className="text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider mb-2">
-                      HealthDCAT-AP Metadata
-                    </h3>
-                    <div className="bg-[var(--surface-2)]/50 rounded-lg px-3 py-1">
-                      <DetailRow label="Dataset ID" value={d.id} />
-                      <DetailRow label="Title" value={d.title} />
-                      <DetailRow label="Description" value={d.description} />
-                      <DetailRow label="Publisher" value={d.publisher} />
-                      <DetailRow
-                        label="Data Providers"
-                        value={
-                          d.providers?.length ? d.providers.join(", ") : null
-                        }
-                      />
-                      <DetailRow
-                        label="Data Consumers"
-                        value={
-                          d.consumers?.length ? d.consumers.join(", ") : null
-                        }
-                      />
-                      <DetailRow
-                        label="FHIR Patients"
-                        value={
-                          d.fhirResources?.length
-                            ? `${
-                                d.fhirResources.length
-                              } linked (${d.fhirResources.join(", ")})`
-                            : null
-                        }
-                      />
-                      <DetailRow
-                        label="Data Transfers"
-                        value={
-                          d.transfers?.length ? d.transfers.join(", ") : null
-                        }
-                      />
-                      <DetailRow label="Dataset Type" value={d.datasetType} />
-                      <DetailRow
-                        label="Legal Basis"
-                        value={LEGAL_BASIS_LABELS[d.legalBasis] ?? d.legalBasis}
-                      />
-                      <DetailRow
-                        label="Record Count"
-                        value={
-                          d.recordCount != null
-                            ? Number(d.recordCount).toLocaleString()
-                            : null
-                        }
-                      />
-                      <DetailRow label="Theme" value={d.theme} />
-                      <DetailRow label="License" value={d.license} />
-                      <DetailRow label="Conforms To" value={d.conformsTo} />
-                    </div>
-                    <div className="flex flex-wrap gap-3 mt-3">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setDiagramDataset(d);
-                        }}
-                        className="inline-flex items-center gap-1 text-xs text-purple-400 hover:underline"
-                      >
-                        <GitBranch size={11} />
-                        Show Data Model
-                      </button>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          downloadDcatAp(d);
-                        }}
-                        className="inline-flex items-center gap-1 text-xs text-cyan-400 hover:underline"
-                      >
-                        <Download size={11} />
-                        Download DCAT-AP
-                      </button>
-                      <a
-                        href={`/graph?highlight=${encodeURIComponent(
-                          d.title || d.id,
-                        )}`}
-                        className="inline-flex items-center gap-1 text-xs text-layer2 hover:underline"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <Network size={11} />
-                        View in Graph
-                      </a>
-                      <a
-                        href="https://ehds.healthdataportal.eu/editor2/"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 text-xs text-green-400 hover:underline"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <Edit3 size={11} />
-                        Open in EHDS DCAT-AP Editor
-                      </a>
-                      <a
-                        href="https://healthdataeu.pages.code.europa.eu/healthdcat-ap/releases/release-6/index.html"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 text-xs text-[var(--text-secondary)] hover:underline"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <ExternalLink size={11} />
-                        HealthDCAT-AP Spec
-                      </a>
-                      {d.conformsTo?.includes("fhir") && (
+                  {/* Expanded detail panel */}
+                  {isOpen && (
+                    <div className="px-4 pb-4 border-t border-[var(--border)] mt-1 pt-3">
+                      <h3 className="text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider mb-2">
+                        HealthDCAT-AP Metadata
+                      </h3>
+                      <div className="bg-[var(--surface-2)]/50 rounded-lg px-3 py-1">
+                        <DetailRow label="Dataset ID" value={d.id} />
+                        <DetailRow label="Title" value={d.title} />
+                        <DetailRow label="Description" value={d.description} />
+                        <DetailRow label="Publisher" value={d.publisher} />
+                        <DetailRow
+                          label="Data Providers"
+                          value={
+                            d.providers?.length ? d.providers.join(", ") : null
+                          }
+                        />
+                        <DetailRow
+                          label="Data Consumers"
+                          value={
+                            d.consumers?.length ? d.consumers.join(", ") : null
+                          }
+                        />
+                        <DetailRow
+                          label="FHIR Patients"
+                          value={
+                            d.fhirResources?.length
+                              ? `${
+                                  d.fhirResources.length
+                                } linked (${d.fhirResources.join(", ")})`
+                              : null
+                          }
+                        />
+                        <DetailRow
+                          label="Data Transfers"
+                          value={
+                            d.transfers?.length ? d.transfers.join(", ") : null
+                          }
+                        />
+                        <DetailRow label="Dataset Type" value={d.datasetType} />
+                        <DetailRow
+                          label="Legal Basis"
+                          value={
+                            LEGAL_BASIS_LABELS[d.legalBasis] ?? d.legalBasis
+                          }
+                        />
+                        <DetailRow
+                          label="Record Count"
+                          value={
+                            d.recordCount != null
+                              ? Number(d.recordCount).toLocaleString()
+                              : null
+                          }
+                        />
+                        <DetailRow label="Theme" value={d.theme} />
+                        <DetailRow label="License" value={d.license} />
+                        <DetailRow label="Conforms To" value={d.conformsTo} />
+                      </div>
+                      <div className="flex flex-wrap gap-3 mt-3">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setDiagramDataset(d);
+                          }}
+                          className="inline-flex items-center gap-1 text-xs text-purple-400 hover:underline"
+                        >
+                          <GitBranch size={11} />
+                          Show Data Model
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            downloadDcatAp(d);
+                          }}
+                          className="inline-flex items-center gap-1 text-xs text-cyan-400 hover:underline"
+                        >
+                          <Download size={11} />
+                          Download DCAT-AP
+                        </button>
                         <a
-                          href="https://hl7.org/fhir/R4/"
+                          href={`/graph?highlight=${encodeURIComponent(
+                            d.title || d.id,
+                          )}`}
+                          className="inline-flex items-center gap-1 text-xs text-layer2 hover:underline"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <Network size={11} />
+                          View in Graph
+                        </a>
+                        <a
+                          href="https://ehds.healthdataportal.eu/editor2/"
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1 text-xs text-orange-400 hover:underline"
+                          className="inline-flex items-center gap-1 text-xs text-green-400 hover:underline"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <Edit3 size={11} />
+                          Open in EHDS DCAT-AP Editor
+                        </a>
+                        <a
+                          href="https://healthdataeu.pages.code.europa.eu/healthdcat-ap/releases/release-6/index.html"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 text-xs text-[var(--text-secondary)] hover:underline"
                           onClick={(e) => e.stopPropagation()}
                         >
                           <ExternalLink size={11} />
-                          FHIR R4 Spec
+                          HealthDCAT-AP Spec
                         </a>
-                      )}
+                        {d.conformsTo?.includes("fhir") && (
+                          <a
+                            href="https://hl7.org/fhir/R4/"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1 text-xs text-orange-400 hover:underline"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <ExternalLink size={11} />
+                            FHIR R4 Spec
+                          </a>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
-      )}
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
 
-      {/* Data model diagram modal */}
-      {diagramDataset && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm"
-          onClick={() => setDiagramDataset(null)}
-        >
+        {/* Data model diagram modal */}
+        {diagramDataset && (
           <div
-            className="bg-[var(--surface)] border border-[var(--border)] rounded-2xl w-full max-w-3xl max-h-[85vh] overflow-y-auto mx-4"
-            onClick={(e) => e.stopPropagation()}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm"
+            onClick={() => setDiagramDataset(null)}
           >
-            <div className="flex items-center justify-between px-5 py-3 border-b border-[var(--border)]">
-              <h2 className="font-semibold text-sm text-layer2">
-                <GitBranch size={14} className="inline mr-1.5" />
-                HealthDCAT-AP Data Model — {diagramDataset.title}
-              </h2>
-              <button
-                onClick={() => setDiagramDataset(null)}
-                className="text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
-              >
-                <X size={18} />
-              </button>
-            </div>
-            <div className="p-5">
-              <MermaidDiagram
-                chart={buildDcatApDiagram(diagramDataset)}
-                caption={`HealthDCAT-AP entity-relationship model for "${diagramDataset.title}"`}
-              />
+            <div
+              className="bg-[var(--surface)] border border-[var(--border)] rounded-2xl w-full max-w-3xl max-h-[85vh] overflow-y-auto mx-4"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center justify-between px-5 py-3 border-b border-[var(--border)]">
+                <h2 className="font-semibold text-sm text-layer2">
+                  <GitBranch size={14} className="inline mr-1.5" />
+                  HealthDCAT-AP Data Model — {diagramDataset.title}
+                </h2>
+                <button
+                  onClick={() => setDiagramDataset(null)}
+                  className="text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+              <div className="p-5">
+                <MermaidDiagram
+                  chart={buildDcatApDiagram(diagramDataset)}
+                  caption={`HealthDCAT-AP entity-relationship model for "${diagramDataset.title}"`}
+                />
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }

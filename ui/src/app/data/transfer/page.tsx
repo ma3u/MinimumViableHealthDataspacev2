@@ -868,329 +868,337 @@ function DataTransferContent() {
   };
 
   return (
-    <div className="max-w-5xl mx-auto px-6 py-10">
-      <PageIntro
-        title="Data Transfers"
-        icon={ArrowRightLeft}
-        description="Monitor and initiate EDC-V data transfers via the DSP Transfer Process (Signalling Protocol). Once a contract is agreed, start a transfer to pull FHIR or OMOP data from the provider's data plane."
-        prevStep={{ href: "/negotiate", label: "Contract Negotiation" }}
-        nextStep={{ href: "/admin", label: "Operator Dashboard" }}
-        infoText="The DSP Signalling Protocol defines the transfer state machine: REQUESTED → STARTED → COMPLETED (or TERMINATED on failure). Each transfer is secured by EDC-V access tokens issued during the STARTED phase."
-        docLink={{
-          href: "https://docs.internationaldataspaces.org/ids-knowledgebase/dataspace-protocol/transfer-process",
-          label: "DSP Transfer Process Spec",
-          external: true,
-        }}
-      />
+    <div className="min-h-screen bg-[var(--bg)]">
+      <div className="max-w-5xl mx-auto px-6 py-10">
+        <PageIntro
+          title="Data Transfers"
+          icon={ArrowRightLeft}
+          description="Monitor and initiate EDC-V data transfers via the DSP Transfer Process (Signalling Protocol). Once a contract is agreed, start a transfer to pull FHIR or OMOP data from the provider's data plane."
+          prevStep={{ href: "/negotiate", label: "Contract Negotiation" }}
+          nextStep={{ href: "/admin", label: "Operator Dashboard" }}
+          infoText="The DSP Signalling Protocol defines the transfer state machine: REQUESTED → STARTED → COMPLETED (or TERMINATED on failure). Each transfer is secured by EDC-V access tokens issued during the STARTED phase."
+          docLink={{
+            href: "https://docs.internationaldataspaces.org/ids-knowledgebase/dataspace-protocol/transfer-process",
+            label: "DSP Transfer Process Spec",
+            external: true,
+          }}
+        />
 
-      {/* Participant selector */}
-      <div className="mb-6">
-        <label className="text-xs text-[var(--text-secondary)] mb-1 block">
-          Requesting as (your participant)
-        </label>
-        <select
-          value={selectedCtx}
-          onChange={(e) => setSelectedCtx(e.target.value)}
-          className="w-full max-w-md px-3 py-2 bg-[var(--surface-2)] border border-gray-600 rounded text-sm"
-        >
-          {participants.map((p) => (
-            <option key={p["@id"]} value={p["@id"]}>
-              {displayParticipant(p)}
-              {p.role ? ` [${p.role}]` : ""}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      {/* ── Initiate Transfer from Agreement ── */}
-      <div className="border border-[var(--border)] rounded-xl p-5 mb-8">
-        <div className="flex items-center gap-2 mb-1">
-          <Play size={16} className="text-layer2" />
-          <h2 className="font-semibold text-sm">
-            Start Transfer from Agreement
-          </h2>
-        </div>
-        <p className="text-xs text-[var(--text-secondary)] mb-4">
-          Select a finalized contract agreement to pull data via{" "}
-          <code className="text-[var(--text-secondary)]">HttpData-PULL</code>.
-        </p>
-
-        {result && (
-          <div
-            className={`mb-4 p-3 rounded text-sm whitespace-pre-line ${
-              result.startsWith("Error")
-                ? "bg-red-900/40 border border-red-700 text-red-300"
-                : "bg-green-900/40 border border-green-700 text-green-300"
-            }`}
+        {/* Participant selector */}
+        <div className="mb-6">
+          <label className="text-xs text-[var(--text-secondary)] mb-1 block">
+            Requesting as (your participant)
+          </label>
+          <select
+            value={selectedCtx}
+            onChange={(e) => setSelectedCtx(e.target.value)}
+            className="w-full max-w-md px-3 py-2 bg-[var(--surface-2)] border border-gray-600 rounded text-sm"
           >
-            {result}
+            {participants.map((p) => (
+              <option key={p["@id"]} value={p["@id"]}>
+                {displayParticipant(p)}
+                {p.role ? ` [${p.role}]` : ""}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* ── Initiate Transfer from Agreement ── */}
+        <div className="border border-[var(--border)] rounded-xl p-5 mb-8">
+          <div className="flex items-center gap-2 mb-1">
+            <Play size={16} className="text-layer2" />
+            <h2 className="font-semibold text-sm">
+              Start Transfer from Agreement
+            </h2>
+          </div>
+          <p className="text-xs text-[var(--text-secondary)] mb-4">
+            Select a finalized contract agreement to pull data via{" "}
+            <code className="text-[var(--text-secondary)]">HttpData-PULL</code>.
+          </p>
+
+          {result && (
+            <div
+              className={`mb-4 p-3 rounded text-sm whitespace-pre-line ${
+                result.startsWith("Error")
+                  ? "bg-red-900/40 border border-red-700 text-red-300"
+                  : "bg-green-900/40 border border-green-700 text-green-300"
+              }`}
+            >
+              {result}
+            </div>
+          )}
+
+          {agreements.length === 0 && !loading && (
+            <p className="text-xs text-[var(--text-secondary)]">
+              No finalized agreements found. Complete a{" "}
+              <a href="/negotiate" className="text-layer2 hover:underline">
+                contract negotiation
+              </a>{" "}
+              first.
+            </p>
+          )}
+
+          {agreements.length > 0 && (
+            <form onSubmit={handleInitiate} className="space-y-3">
+              {/* Select All */}
+              <label className="flex items-center gap-2 px-3 py-2 text-xs text-[var(--text-secondary)] cursor-pointer hover:text-gray-200">
+                <input
+                  type="checkbox"
+                  checked={selectedAgreements.size === agreements.length}
+                  onChange={toggleAll}
+                  className="accent-layer2"
+                />
+                Select All ({agreements.length})
+              </label>
+
+              <div className="space-y-2">
+                {visibleAgreements.map((agr) => {
+                  const agrId = agr["@id"];
+                  const aId = f(agr as Record<string, unknown>, "assetId");
+                  const cp = f(
+                    agr as Record<string, unknown>,
+                    "counterPartyId",
+                  );
+                  const hasTransfer = agreementHasTransfer(agrId);
+
+                  return (
+                    <label
+                      key={agrId}
+                      className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${
+                        selectedAgreements.has(agrId)
+                          ? "border-layer2 bg-layer2/10"
+                          : "border-[var(--border)] hover:border-gray-500 bg-[var(--surface-2)]/50"
+                      } ${hasTransfer ? "opacity-60" : ""}`}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={selectedAgreements.has(agrId)}
+                        onChange={() => toggleAgreement(agrId)}
+                        className="accent-layer2"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-gray-200">
+                          {aId ? assetLabel(aId as string) : agrId.slice(0, 12)}
+                        </p>
+                        <p className="text-xs text-[var(--text-secondary)]">
+                          Provider: {cp ? didToName(cp as string) : "—"}
+                          {hasTransfer && (
+                            <span className="ml-2 text-yellow-500">
+                              (transfer in progress)
+                            </span>
+                          )}
+                        </p>
+                      </div>
+                      <span className="text-[10px] px-1.5 py-0.5 rounded bg-green-900/40 text-green-400">
+                        AGREED
+                      </span>
+                    </label>
+                  );
+                })}
+              </div>
+
+              {/* Show more / Show less */}
+              {hasMoreAgreements && (
+                <button
+                  type="button"
+                  onClick={() => setShowAllAgreements(!showAllAgreements)}
+                  className="flex items-center gap-1 text-xs text-layer2 hover:text-layer2/80"
+                >
+                  {showAllAgreements ? (
+                    <>
+                      <ChevronDown size={12} /> Show less
+                    </>
+                  ) : (
+                    <>
+                      <ChevronRight size={12} /> Show{" "}
+                      {agreements.length - AGREEMENTS_PAGE_SIZE} more
+                    </>
+                  )}
+                </button>
+              )}
+
+              <button
+                type="submit"
+                disabled={initiating || selectedAgreements.size === 0}
+                className="flex items-center gap-2 px-4 py-2 bg-layer2 text-white rounded text-sm font-medium hover:bg-layer2/90 disabled:opacity-50"
+              >
+                {initiating ? (
+                  <Loader2 size={14} className="animate-spin" />
+                ) : (
+                  <ArrowRightLeft size={14} />
+                )}
+                {selectedAgreements.size > 1
+                  ? `Start ${selectedAgreements.size} Transfers`
+                  : "Start Transfer"}
+              </button>
+            </form>
+          )}
+        </div>
+
+        {/* ── Transfer Processes (DSP State Machine) ── */}
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="font-semibold text-sm">
+            Transfer Processes{" "}
+            <span className="font-normal text-[var(--text-secondary)]">
+              (DSP Signalling Protocol)
+            </span>
+          </h2>
+          <button
+            onClick={refreshTransfers}
+            disabled={refreshing}
+            className="flex items-center gap-1 text-xs text-[var(--text-secondary)] hover:text-gray-200 disabled:opacity-50"
+          >
+            <RefreshCw size={12} className={refreshing ? "animate-spin" : ""} />
+            Refresh
+          </button>
+        </div>
+
+        {/* Status filter */}
+        {transfers.length > 0 && (
+          <div className="flex flex-wrap gap-1.5 mb-4">
+            {transferStatuses.map((s) => {
+              const count =
+                s === "ALL"
+                  ? transfers.length
+                  : transfers.filter(
+                      (t) =>
+                        f(
+                          t as Record<string, unknown>,
+                          "state",
+                        )?.toUpperCase() === s,
+                    ).length;
+              return (
+                <button
+                  key={s}
+                  onClick={() => setStatusFilter(s)}
+                  className={`text-xs px-2.5 py-1 rounded-full transition-colors ${
+                    statusFilter === s
+                      ? "bg-layer2/20 text-layer2 border border-layer2/40"
+                      : "bg-[var(--surface-2)] text-[var(--text-secondary)] border border-[var(--border)] hover:border-gray-500"
+                  }`}
+                >
+                  {s} ({count})
+                </button>
+              );
+            })}
           </div>
         )}
 
-        {agreements.length === 0 && !loading && (
-          <p className="text-xs text-[var(--text-secondary)]">
-            No finalized agreements found. Complete a{" "}
-            <a href="/negotiate" className="text-layer2 hover:underline">
-              contract negotiation
-            </a>{" "}
-            first.
+        {loading ? (
+          <div className="flex items-center gap-2 text-[var(--text-secondary)]">
+            <Loader2 size={16} className="animate-spin" />
+            Loading transfers…
+          </div>
+        ) : filteredTransfers.length === 0 ? (
+          <p className="text-[var(--text-secondary)] text-sm">
+            {transfers.length === 0
+              ? "No transfer processes yet. Start one from an agreed contract above."
+              : `No transfers matching "${statusFilter}".`}
           </p>
-        )}
+        ) : (
+          <div className="grid gap-3">
+            {filteredTransfers.map((t) => {
+              const state = f(t as Record<string, unknown>, "state");
+              const aId =
+                t.assetId || f(t as Record<string, unknown>, "assetId");
+              const transferType =
+                f(t as Record<string, unknown>, "transferType") ||
+                "HttpData-PULL";
+              const timestamp =
+                (t.stateTimestamp as number) ||
+                (t["edc:stateTimestamp"] as number) ||
+                0;
+              const isCompleted = state?.toUpperCase().includes("COMPLETED");
+              const isViewing = viewingTransferId === t["@id"];
+              const bundle = fhirBundles?.[aId as string] ?? null;
 
-        {agreements.length > 0 && (
-          <form onSubmit={handleInitiate} className="space-y-3">
-            {/* Select All */}
-            <label className="flex items-center gap-2 px-3 py-2 text-xs text-[var(--text-secondary)] cursor-pointer hover:text-gray-200">
-              <input
-                type="checkbox"
-                checked={selectedAgreements.size === agreements.length}
-                onChange={toggleAll}
-                className="accent-layer2"
-              />
-              Select All ({agreements.length})
-            </label>
-
-            <div className="space-y-2">
-              {visibleAgreements.map((agr) => {
-                const agrId = agr["@id"];
-                const aId = f(agr as Record<string, unknown>, "assetId");
-                const cp = f(agr as Record<string, unknown>, "counterPartyId");
-                const hasTransfer = agreementHasTransfer(agrId);
-
-                return (
-                  <label
-                    key={agrId}
-                    className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${
-                      selectedAgreements.has(agrId)
-                        ? "border-layer2 bg-layer2/10"
-                        : "border-[var(--border)] hover:border-gray-500 bg-[var(--surface-2)]/50"
-                    } ${hasTransfer ? "opacity-60" : ""}`}
-                  >
-                    <input
-                      type="checkbox"
-                      checked={selectedAgreements.has(agrId)}
-                      onChange={() => toggleAgreement(agrId)}
-                      className="accent-layer2"
-                    />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-200">
-                        {aId ? assetLabel(aId as string) : agrId.slice(0, 12)}
-                      </p>
-                      <p className="text-xs text-[var(--text-secondary)]">
-                        Provider: {cp ? didToName(cp as string) : "—"}
-                        {hasTransfer && (
-                          <span className="ml-2 text-yellow-500">
-                            (transfer in progress)
-                          </span>
-                        )}
-                      </p>
+              return (
+                <div
+                  key={t["@id"]}
+                  className={`p-4 border rounded-xl space-y-3 transition-colors ${
+                    isViewing
+                      ? "border-layer2/50 bg-[var(--surface-2)]/30"
+                      : "border-[var(--border)]"
+                  }`}
+                >
+                  {/* Header row */}
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <ArrowRightLeft size={14} className={stateColor(state)} />
+                      <span className="text-sm font-medium text-gray-200">
+                        {aId
+                          ? assetLabel(aId as string)
+                          : t["@id"].slice(0, 12)}
+                      </span>
+                      <span className="text-[10px] px-1.5 py-0.5 rounded bg-gray-700 text-[var(--text-secondary)]">
+                        {transferType}
+                      </span>
                     </div>
-                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-green-900/40 text-green-400">
-                      AGREED
-                    </span>
-                  </label>
-                );
-              })}
-            </div>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => openFhirViewer(t["@id"])}
+                        className={`flex items-center gap-1 text-xs px-2 py-1 rounded transition-colors ${
+                          isViewing
+                            ? "bg-layer2/20 text-layer2"
+                            : "bg-green-900/30 text-green-400 hover:bg-green-900/50"
+                        }`}
+                      >
+                        <FileJson2 size={12} />
+                        {isViewing ? "Hide FHIR" : "View FHIR"}
+                      </button>
+                      <span
+                        className={`text-xs px-2 py-0.5 rounded-full ${stateBg(
+                          state,
+                        )}`}
+                      >
+                        {state || "UNKNOWN"}
+                      </span>
+                    </div>
+                  </div>
 
-            {/* Show more / Show less */}
-            {hasMoreAgreements && (
-              <button
-                type="button"
-                onClick={() => setShowAllAgreements(!showAllAgreements)}
-                className="flex items-center gap-1 text-xs text-layer2 hover:text-layer2/80"
-              >
-                {showAllAgreements ? (
-                  <>
-                    <ChevronDown size={12} /> Show less
-                  </>
-                ) : (
-                  <>
-                    <ChevronRight size={12} /> Show{" "}
-                    {agreements.length - AGREEMENTS_PAGE_SIZE} more
-                  </>
-                )}
-              </button>
-            )}
+                  {/* DSP Pipeline visualization */}
+                  <DspPipeline state={state} />
 
-            <button
-              type="submit"
-              disabled={initiating || selectedAgreements.size === 0}
-              className="flex items-center gap-2 px-4 py-2 bg-layer2 text-white rounded text-sm font-medium hover:bg-layer2/90 disabled:opacity-50"
-            >
-              {initiating ? (
-                <Loader2 size={14} className="animate-spin" />
-              ) : (
-                <ArrowRightLeft size={14} />
-              )}
-              {selectedAgreements.size > 1
-                ? `Start ${selectedAgreements.size} Transfers`
-                : "Start Transfer"}
-            </button>
-          </form>
+                  {/* Metadata row */}
+                  <div className="flex items-center gap-4 text-[11px] text-[var(--text-secondary)]">
+                    {timestamp > 0 && (
+                      <span>
+                        Updated:{" "}
+                        {new Date(timestamp).toLocaleString(undefined, {
+                          dateStyle: "short",
+                          timeStyle: "short",
+                        })}
+                      </span>
+                    )}
+                    <span>Process: {t["@id"].slice(0, 8)}…</span>
+                    {isCompleted && (t.dataPayload as DataPayload)?.total && (
+                      <span className="text-green-500">
+                        {(t.dataPayload as DataPayload).total} resources
+                        transferred
+                      </span>
+                    )}
+                  </div>
+
+                  {/* FHIR Viewer panel (expanded) */}
+                  {isViewing &&
+                    (loadingFhir ? (
+                      <div className="flex items-center gap-2 text-[var(--text-secondary)] py-4 justify-center">
+                        <Loader2 size={14} className="animate-spin" />
+                        Loading FHIR data…
+                      </div>
+                    ) : (
+                      <FhirViewerPanel
+                        transfer={t}
+                        bundle={bundle}
+                        onClose={() => setViewingTransferId(null)}
+                      />
+                    ))}
+                </div>
+              );
+            })}
+          </div>
         )}
       </div>
-
-      {/* ── Transfer Processes (DSP State Machine) ── */}
-      <div className="flex items-center justify-between mb-3">
-        <h2 className="font-semibold text-sm">
-          Transfer Processes{" "}
-          <span className="font-normal text-[var(--text-secondary)]">
-            (DSP Signalling Protocol)
-          </span>
-        </h2>
-        <button
-          onClick={refreshTransfers}
-          disabled={refreshing}
-          className="flex items-center gap-1 text-xs text-[var(--text-secondary)] hover:text-gray-200 disabled:opacity-50"
-        >
-          <RefreshCw size={12} className={refreshing ? "animate-spin" : ""} />
-          Refresh
-        </button>
-      </div>
-
-      {/* Status filter */}
-      {transfers.length > 0 && (
-        <div className="flex flex-wrap gap-1.5 mb-4">
-          {transferStatuses.map((s) => {
-            const count =
-              s === "ALL"
-                ? transfers.length
-                : transfers.filter(
-                    (t) =>
-                      f(
-                        t as Record<string, unknown>,
-                        "state",
-                      )?.toUpperCase() === s,
-                  ).length;
-            return (
-              <button
-                key={s}
-                onClick={() => setStatusFilter(s)}
-                className={`text-xs px-2.5 py-1 rounded-full transition-colors ${
-                  statusFilter === s
-                    ? "bg-layer2/20 text-layer2 border border-layer2/40"
-                    : "bg-[var(--surface-2)] text-[var(--text-secondary)] border border-[var(--border)] hover:border-gray-500"
-                }`}
-              >
-                {s} ({count})
-              </button>
-            );
-          })}
-        </div>
-      )}
-
-      {loading ? (
-        <div className="flex items-center gap-2 text-[var(--text-secondary)]">
-          <Loader2 size={16} className="animate-spin" />
-          Loading transfers…
-        </div>
-      ) : filteredTransfers.length === 0 ? (
-        <p className="text-[var(--text-secondary)] text-sm">
-          {transfers.length === 0
-            ? "No transfer processes yet. Start one from an agreed contract above."
-            : `No transfers matching "${statusFilter}".`}
-        </p>
-      ) : (
-        <div className="grid gap-3">
-          {filteredTransfers.map((t) => {
-            const state = f(t as Record<string, unknown>, "state");
-            const aId = t.assetId || f(t as Record<string, unknown>, "assetId");
-            const transferType =
-              f(t as Record<string, unknown>, "transferType") ||
-              "HttpData-PULL";
-            const timestamp =
-              (t.stateTimestamp as number) ||
-              (t["edc:stateTimestamp"] as number) ||
-              0;
-            const isCompleted = state?.toUpperCase().includes("COMPLETED");
-            const isViewing = viewingTransferId === t["@id"];
-            const bundle = fhirBundles?.[aId as string] ?? null;
-
-            return (
-              <div
-                key={t["@id"]}
-                className={`p-4 border rounded-xl space-y-3 transition-colors ${
-                  isViewing
-                    ? "border-layer2/50 bg-[var(--surface-2)]/30"
-                    : "border-[var(--border)]"
-                }`}
-              >
-                {/* Header row */}
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <ArrowRightLeft size={14} className={stateColor(state)} />
-                    <span className="text-sm font-medium text-gray-200">
-                      {aId ? assetLabel(aId as string) : t["@id"].slice(0, 12)}
-                    </span>
-                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-gray-700 text-[var(--text-secondary)]">
-                      {transferType}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => openFhirViewer(t["@id"])}
-                      className={`flex items-center gap-1 text-xs px-2 py-1 rounded transition-colors ${
-                        isViewing
-                          ? "bg-layer2/20 text-layer2"
-                          : "bg-green-900/30 text-green-400 hover:bg-green-900/50"
-                      }`}
-                    >
-                      <FileJson2 size={12} />
-                      {isViewing ? "Hide FHIR" : "View FHIR"}
-                    </button>
-                    <span
-                      className={`text-xs px-2 py-0.5 rounded-full ${stateBg(
-                        state,
-                      )}`}
-                    >
-                      {state || "UNKNOWN"}
-                    </span>
-                  </div>
-                </div>
-
-                {/* DSP Pipeline visualization */}
-                <DspPipeline state={state} />
-
-                {/* Metadata row */}
-                <div className="flex items-center gap-4 text-[11px] text-[var(--text-secondary)]">
-                  {timestamp > 0 && (
-                    <span>
-                      Updated:{" "}
-                      {new Date(timestamp).toLocaleString(undefined, {
-                        dateStyle: "short",
-                        timeStyle: "short",
-                      })}
-                    </span>
-                  )}
-                  <span>Process: {t["@id"].slice(0, 8)}…</span>
-                  {isCompleted && (t.dataPayload as DataPayload)?.total && (
-                    <span className="text-green-500">
-                      {(t.dataPayload as DataPayload).total} resources
-                      transferred
-                    </span>
-                  )}
-                </div>
-
-                {/* FHIR Viewer panel (expanded) */}
-                {isViewing &&
-                  (loadingFhir ? (
-                    <div className="flex items-center gap-2 text-[var(--text-secondary)] py-4 justify-center">
-                      <Loader2 size={14} className="animate-spin" />
-                      Loading FHIR data…
-                    </div>
-                  ) : (
-                    <FhirViewerPanel
-                      transfer={t}
-                      bundle={bundle}
-                      onClose={() => setViewingTransferId(null)}
-                    />
-                  ))}
-              </div>
-            );
-          })}
-        </div>
-      )}
     </div>
   );
 }

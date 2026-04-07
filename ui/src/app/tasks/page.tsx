@@ -343,286 +343,293 @@ function TasksContent() {
   ];
 
   return (
-    <div className="max-w-5xl mx-auto px-6 py-10">
-      <PageIntro
-        title="Tasks"
-        icon={ClipboardList}
-        description="Track all DSP protocol tasks across your dataspace participants. Negotiations and transfers are shown as live state pipelines following the Dataspace Protocol and Data Plane Signaling (DPS) specification."
-        infoText="Tasks are aggregated from all registered participant contexts. Negotiations follow: REQUESTED → OFFERED → ACCEPTED → AGREED → VERIFIED → FINALIZED. Transfers follow: REQUESTED → STARTED → SUSPENDED → COMPLETED. The EDR badge indicates the Data Plane has been signalled via DPS and generated an Endpoint Data Reference with JWT bearer token."
-        docLink={{
-          href: "https://docs.internationaldataspaces.org/ids-knowledgebase/dataspace-protocol",
-          label: "DSP Specification",
-          external: true,
-        }}
-      />
+    <div className="min-h-screen bg-[var(--bg)]">
+      <div className="max-w-5xl mx-auto px-6 py-10">
+        <PageIntro
+          title="Tasks"
+          icon={ClipboardList}
+          description="Track all DSP protocol tasks across your dataspace participants. Negotiations and transfers are shown as live state pipelines following the Dataspace Protocol and Data Plane Signaling (DPS) specification."
+          infoText="Tasks are aggregated from all registered participant contexts. Negotiations follow: REQUESTED → OFFERED → ACCEPTED → AGREED → VERIFIED → FINALIZED. Transfers follow: REQUESTED → STARTED → SUSPENDED → COMPLETED. The EDR badge indicates the Data Plane has been signalled via DPS and generated an Endpoint Data Reference with JWT bearer token."
+          docLink={{
+            href: "https://docs.internationaldataspaces.org/ids-knowledgebase/dataspace-protocol",
+            label: "DSP Specification",
+            external: true,
+          }}
+        />
 
-      {/* Summary Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
-        {[
-          {
-            label: "Total Tasks",
-            value: filteredCounts.total,
-            color: "text-gray-200",
-          },
-          {
-            label: "Active",
-            value: filteredCounts.active,
-            color: "text-yellow-400",
-          },
-          {
-            label: "Negotiations",
-            value: filteredCounts.negotiations,
-            color: "text-blue-400",
-          },
-          {
-            label: "Transfers",
-            value: filteredCounts.transfers,
-            color: "text-purple-400",
-          },
-        ].map((card) => (
-          <div
-            key={card.label}
-            className="p-3 rounded-xl border border-[var(--border)] bg-[var(--surface-2)]/50"
-          >
-            <p className="text-xs text-[var(--text-secondary)]">{card.label}</p>
-            <p className={`text-2xl font-bold ${card.color}`}>{card.value}</p>
-          </div>
-        ))}
-      </div>
-
-      {/* Participant filter + Type filter tabs + Refresh */}
-      <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
-        <div className="flex items-center gap-2 flex-wrap">
-          {/* Participant dropdown */}
-          <div className="relative">
-            <button
-              onClick={() =>
-                setParticipantDropdownOpen(!participantDropdownOpen)
-              }
-              className={`flex items-center gap-1.5 px-3 py-1 text-xs rounded-full border transition-colors ${
-                selectedParticipant !== "all"
-                  ? "border-layer2 bg-layer2/20 text-layer2"
-                  : "border-[var(--border)] text-[var(--text-secondary)] hover:text-gray-200 hover:border-gray-500"
-              }`}
+        {/* Summary Cards */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+          {[
+            {
+              label: "Total Tasks",
+              value: filteredCounts.total,
+              color: "text-gray-200",
+            },
+            {
+              label: "Active",
+              value: filteredCounts.active,
+              color: "text-yellow-400",
+            },
+            {
+              label: "Negotiations",
+              value: filteredCounts.negotiations,
+              color: "text-blue-400",
+            },
+            {
+              label: "Transfers",
+              value: filteredCounts.transfers,
+              color: "text-purple-400",
+            },
+          ].map((card) => (
+            <div
+              key={card.label}
+              className="p-3 rounded-xl border border-[var(--border)] bg-[var(--surface-2)]/50"
             >
-              <Users size={12} />
-              {selectedParticipant === "all"
-                ? "All Participants"
-                : uniqueParticipants.find(
-                    ([id]) => id === selectedParticipant,
-                  )?.[1] || "Unknown"}
-              <ChevronDown size={10} />
-            </button>
-            {participantDropdownOpen && (
-              <div className="absolute z-20 mt-1 bg-[var(--surface-2)] border border-[var(--border)] rounded-lg shadow-xl py-1 min-w-[200px]">
-                <button
-                  onClick={() => {
-                    setSelectedParticipant("all");
-                    setParticipantDropdownOpen(false);
-                  }}
-                  className={`w-full text-left px-3 py-1.5 text-xs hover:bg-[var(--surface-2)] ${
-                    selectedParticipant === "all"
-                      ? "text-layer2"
-                      : "text-[var(--text-primary)]"
-                  }`}
-                >
-                  All Participants ({counts.total})
-                </button>
-                {uniqueParticipants.map(([id, name]) => {
-                  const pCount = tasks.filter(
-                    (t) => t.participantId === id,
-                  ).length;
-                  return (
-                    <button
-                      key={id}
-                      onClick={() => {
-                        setSelectedParticipant(id);
-                        setParticipantDropdownOpen(false);
-                      }}
-                      className={`w-full text-left px-3 py-1.5 text-xs hover:bg-[var(--surface-2)] ${
-                        selectedParticipant === id
-                          ? "text-layer2"
-                          : "text-[var(--text-primary)]"
-                      }`}
-                    >
-                      {name}{" "}
-                      <span className="text-[var(--text-secondary)]">
-                        ({pCount})
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
-            )}
-          </div>
+              <p className="text-xs text-[var(--text-secondary)]">
+                {card.label}
+              </p>
+              <p className={`text-2xl font-bold ${card.color}`}>{card.value}</p>
+            </div>
+          ))}
+        </div>
 
-          {/* Type/status filter tabs */}
-          <div className="flex items-center gap-1">
-            <Filter size={14} className="text-[var(--text-secondary)] mr-1" />
-            {filters.map((f) => (
+        {/* Participant filter + Type filter tabs + Refresh */}
+        <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
+            {/* Participant dropdown */}
+            <div className="relative">
               <button
-                key={f.key}
-                onClick={() => setFilter(f.key)}
-                className={`px-3 py-1 text-xs rounded-full border transition-colors ${
-                  filter === f.key
+                onClick={() =>
+                  setParticipantDropdownOpen(!participantDropdownOpen)
+                }
+                className={`flex items-center gap-1.5 px-3 py-1 text-xs rounded-full border transition-colors ${
+                  selectedParticipant !== "all"
                     ? "border-layer2 bg-layer2/20 text-layer2"
                     : "border-[var(--border)] text-[var(--text-secondary)] hover:text-gray-200 hover:border-gray-500"
                 }`}
               >
-                {f.label}
-                <span className="ml-1 opacity-60">{f.count}</span>
+                <Users size={12} />
+                {selectedParticipant === "all"
+                  ? "All Participants"
+                  : uniqueParticipants.find(
+                      ([id]) => id === selectedParticipant,
+                    )?.[1] || "Unknown"}
+                <ChevronDown size={10} />
               </button>
-            ))}
-          </div>
-        </div>
-        <button
-          onClick={() => loadTasks(true)}
-          disabled={refreshing}
-          className="flex items-center gap-1 text-xs text-[var(--text-secondary)] hover:text-gray-200 disabled:opacity-50"
-        >
-          <RefreshCw size={12} className={refreshing ? "animate-spin" : ""} />
-          Refresh
-        </button>
-      </div>
-
-      {/* Task List */}
-      {loading ? (
-        <div className="flex items-center gap-2 text-[var(--text-secondary)] py-8">
-          <Loader2 size={16} className="animate-spin" />
-          Loading tasks…
-        </div>
-      ) : filteredTasks.length === 0 ? (
-        <div className="text-center py-12 text-[var(--text-secondary)]">
-          <ClipboardList size={32} className="mx-auto mb-3 opacity-40" />
-          <p className="text-sm">
-            {filter === "all"
-              ? "No tasks yet. Start by sharing data or negotiating a contract."
-              : `No ${filter} tasks found.`}
-          </p>
-          <div className="flex items-center justify-center gap-3 mt-4">
-            <Link
-              href="/data/share"
-              className="text-xs text-layer2 hover:underline"
-            >
-              Share Data →
-            </Link>
-            <Link
-              href="/negotiate"
-              className="text-xs text-layer2 hover:underline"
-            >
-              Negotiate →
-            </Link>
-          </div>
-        </div>
-      ) : (
-        <div className="grid gap-3">
-          {filteredTasks.map((task) => {
-            const isNeg = task.type === "negotiation";
-            const states = isNeg ? NEGOTIATION_STATES : TRANSFER_STATES;
-            const TypeIcon = isNeg ? FileSignature : ArrowRightLeft;
-            const typeBadge = isNeg ? "Negotiation" : "Transfer";
-            const typeBadgeColor = isNeg
-              ? "bg-blue-900/40 text-blue-400"
-              : "bg-purple-900/40 text-purple-400";
-
-            // Link to the detail page
-            const detailHref = isNeg
-              ? `/negotiate?participantId=${task.participantId}`
-              : `/data/transfer?participantId=${task.participantId}`;
-
-            return (
-              <Link
-                key={`${task.type}-${task.id}`}
-                href={detailHref}
-                className="block p-4 border border-[var(--border)] rounded-xl hover:border-gray-500 transition-colors space-y-3"
-              >
-                {/* Header row */}
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 min-w-0">
-                    <TypeIcon size={14} className={stateColor(task.state)} />
-                    <span className="text-sm font-medium text-gray-200 truncate">
-                      {task.asset}
-                    </span>
-                    <span
-                      className={`text-[10px] px-1.5 py-0.5 rounded ${typeBadgeColor} shrink-0`}
-                    >
-                      {typeBadge}
-                    </span>
-                    {task.transferType && (
-                      <span className="text-[10px] px-1.5 py-0.5 rounded bg-gray-700 text-[var(--text-secondary)] shrink-0">
-                        {task.transferType}
-                      </span>
-                    )}
-                    {/* DPS: EDR availability indicator — shows when Data Plane
-                        has been signalled and generated an Endpoint Data Reference */}
-                    {task.edrAvailable && (
-                      <span className="flex items-center gap-0.5 text-[10px] px-1.5 py-0.5 rounded bg-green-900/40 text-green-400 shrink-0">
-                        <Key size={9} />
-                        EDR
-                      </span>
-                    )}
-                  </div>
-                  <span
-                    className={`text-xs px-2 py-0.5 rounded-full shrink-0 ${stateBg(
-                      task.state,
-                    )}`}
+              {participantDropdownOpen && (
+                <div className="absolute z-20 mt-1 bg-[var(--surface-2)] border border-[var(--border)] rounded-lg shadow-xl py-1 min-w-[200px]">
+                  <button
+                    onClick={() => {
+                      setSelectedParticipant("all");
+                      setParticipantDropdownOpen(false);
+                    }}
+                    className={`w-full text-left px-3 py-1.5 text-xs hover:bg-[var(--surface-2)] ${
+                      selectedParticipant === "all"
+                        ? "text-layer2"
+                        : "text-[var(--text-primary)]"
+                    }`}
                   >
-                    {task.state || "UNKNOWN"}
-                  </span>
-                </div>
-
-                {/* Pipeline */}
-                <StatePipeline state={task.state} states={states} />
-
-                {/* DSP Actions — available state transitions */}
-                {(() => {
-                  const actions = isNeg
-                    ? NEGOTIATION_ACTIONS[task.state]
-                    : TRANSFER_ACTIONS[task.state];
-                  if (!actions || actions.length === 0) return null;
-                  return (
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-[10px] text-gray-600">
-                        Actions:
-                      </span>
-                      {actions.map((action) => (
-                        <span
-                          key={action.label}
-                          className={`text-[10px] px-2 py-0.5 rounded-full bg-layer2/10 border border-layer2/30 ${action.color}`}
-                        >
-                          {action.label}
+                    All Participants ({counts.total})
+                  </button>
+                  {uniqueParticipants.map(([id, name]) => {
+                    const pCount = tasks.filter(
+                      (t) => t.participantId === id,
+                    ).length;
+                    return (
+                      <button
+                        key={id}
+                        onClick={() => {
+                          setSelectedParticipant(id);
+                          setParticipantDropdownOpen(false);
+                        }}
+                        className={`w-full text-left px-3 py-1.5 text-xs hover:bg-[var(--surface-2)] ${
+                          selectedParticipant === id
+                            ? "text-layer2"
+                            : "text-[var(--text-primary)]"
+                        }`}
+                      >
+                        {name}{" "}
+                        <span className="text-[var(--text-secondary)]">
+                          ({pCount})
                         </span>
-                      ))}
-                    </div>
-                  );
-                })()}
-
-                {/* Metadata row */}
-                <div className="flex items-center gap-4 text-[11px] text-[var(--text-secondary)] flex-wrap">
-                  <span>
-                    {task.participant}
-                    {task.counterParty !== "—" && ` → ${task.counterParty}`}
-                  </span>
-                  {task.contractId && (
-                    <span className="opacity-60" title="Contract Agreement ID">
-                      📄 {task.contractId.slice(0, 12)}…
-                    </span>
-                  )}
-                  {task.timestamp > 0 && (
-                    <span>
-                      {new Date(task.timestamp).toLocaleString(undefined, {
-                        dateStyle: "short",
-                        timeStyle: "short",
-                      })}
-                    </span>
-                  )}
-                  <span className="opacity-60">{task.id.slice(0, 8)}…</span>
+                      </button>
+                    );
+                  })}
                 </div>
-              </Link>
-            );
-          })}
+              )}
+            </div>
+
+            {/* Type/status filter tabs */}
+            <div className="flex items-center gap-1">
+              <Filter size={14} className="text-[var(--text-secondary)] mr-1" />
+              {filters.map((f) => (
+                <button
+                  key={f.key}
+                  onClick={() => setFilter(f.key)}
+                  className={`px-3 py-1 text-xs rounded-full border transition-colors ${
+                    filter === f.key
+                      ? "border-layer2 bg-layer2/20 text-layer2"
+                      : "border-[var(--border)] text-[var(--text-secondary)] hover:text-gray-200 hover:border-gray-500"
+                  }`}
+                >
+                  {f.label}
+                  <span className="ml-1 opacity-60">{f.count}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+          <button
+            onClick={() => loadTasks(true)}
+            disabled={refreshing}
+            className="flex items-center gap-1 text-xs text-[var(--text-secondary)] hover:text-gray-200 disabled:opacity-50"
+          >
+            <RefreshCw size={12} className={refreshing ? "animate-spin" : ""} />
+            Refresh
+          </button>
         </div>
-      )}
+
+        {/* Task List */}
+        {loading ? (
+          <div className="flex items-center gap-2 text-[var(--text-secondary)] py-8">
+            <Loader2 size={16} className="animate-spin" />
+            Loading tasks…
+          </div>
+        ) : filteredTasks.length === 0 ? (
+          <div className="text-center py-12 text-[var(--text-secondary)]">
+            <ClipboardList size={32} className="mx-auto mb-3 opacity-40" />
+            <p className="text-sm">
+              {filter === "all"
+                ? "No tasks yet. Start by sharing data or negotiating a contract."
+                : `No ${filter} tasks found.`}
+            </p>
+            <div className="flex items-center justify-center gap-3 mt-4">
+              <Link
+                href="/data/share"
+                className="text-xs text-layer2 hover:underline"
+              >
+                Share Data →
+              </Link>
+              <Link
+                href="/negotiate"
+                className="text-xs text-layer2 hover:underline"
+              >
+                Negotiate →
+              </Link>
+            </div>
+          </div>
+        ) : (
+          <div className="grid gap-3">
+            {filteredTasks.map((task) => {
+              const isNeg = task.type === "negotiation";
+              const states = isNeg ? NEGOTIATION_STATES : TRANSFER_STATES;
+              const TypeIcon = isNeg ? FileSignature : ArrowRightLeft;
+              const typeBadge = isNeg ? "Negotiation" : "Transfer";
+              const typeBadgeColor = isNeg
+                ? "bg-blue-900/40 text-blue-400"
+                : "bg-purple-900/40 text-purple-400";
+
+              // Link to the detail page
+              const detailHref = isNeg
+                ? `/negotiate?participantId=${task.participantId}`
+                : `/data/transfer?participantId=${task.participantId}`;
+
+              return (
+                <Link
+                  key={`${task.type}-${task.id}`}
+                  href={detailHref}
+                  className="block p-4 border border-[var(--border)] rounded-xl hover:border-gray-500 transition-colors space-y-3"
+                >
+                  {/* Header row */}
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <TypeIcon size={14} className={stateColor(task.state)} />
+                      <span className="text-sm font-medium text-gray-200 truncate">
+                        {task.asset}
+                      </span>
+                      <span
+                        className={`text-[10px] px-1.5 py-0.5 rounded ${typeBadgeColor} shrink-0`}
+                      >
+                        {typeBadge}
+                      </span>
+                      {task.transferType && (
+                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-gray-700 text-[var(--text-secondary)] shrink-0">
+                          {task.transferType}
+                        </span>
+                      )}
+                      {/* DPS: EDR availability indicator — shows when Data Plane
+                        has been signalled and generated an Endpoint Data Reference */}
+                      {task.edrAvailable && (
+                        <span className="flex items-center gap-0.5 text-[10px] px-1.5 py-0.5 rounded bg-green-900/40 text-green-400 shrink-0">
+                          <Key size={9} />
+                          EDR
+                        </span>
+                      )}
+                    </div>
+                    <span
+                      className={`text-xs px-2 py-0.5 rounded-full shrink-0 ${stateBg(
+                        task.state,
+                      )}`}
+                    >
+                      {task.state || "UNKNOWN"}
+                    </span>
+                  </div>
+
+                  {/* Pipeline */}
+                  <StatePipeline state={task.state} states={states} />
+
+                  {/* DSP Actions — available state transitions */}
+                  {(() => {
+                    const actions = isNeg
+                      ? NEGOTIATION_ACTIONS[task.state]
+                      : TRANSFER_ACTIONS[task.state];
+                    if (!actions || actions.length === 0) return null;
+                    return (
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-[10px] text-gray-600">
+                          Actions:
+                        </span>
+                        {actions.map((action) => (
+                          <span
+                            key={action.label}
+                            className={`text-[10px] px-2 py-0.5 rounded-full bg-layer2/10 border border-layer2/30 ${action.color}`}
+                          >
+                            {action.label}
+                          </span>
+                        ))}
+                      </div>
+                    );
+                  })()}
+
+                  {/* Metadata row */}
+                  <div className="flex items-center gap-4 text-[11px] text-[var(--text-secondary)] flex-wrap">
+                    <span>
+                      {task.participant}
+                      {task.counterParty !== "—" && ` → ${task.counterParty}`}
+                    </span>
+                    {task.contractId && (
+                      <span
+                        className="opacity-60"
+                        title="Contract Agreement ID"
+                      >
+                        📄 {task.contractId.slice(0, 12)}…
+                      </span>
+                    )}
+                    {task.timestamp > 0 && (
+                      <span>
+                        {new Date(task.timestamp).toLocaleString(undefined, {
+                          dateStyle: "short",
+                          timeStyle: "short",
+                        })}
+                      </span>
+                    )}
+                    <span className="opacity-60">{task.id.slice(0, 8)}…</span>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
