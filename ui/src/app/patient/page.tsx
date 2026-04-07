@@ -2,7 +2,15 @@
 
 import { fetchApi } from "@/lib/api";
 import { useEffect, useState } from "react";
-import { Activity } from "lucide-react";
+import {
+  Activity,
+  Heart,
+  Stethoscope,
+  FlaskConical,
+  Pill,
+  Scissors,
+  Users,
+} from "lucide-react";
 import PageIntro from "@/components/PageIntro";
 
 interface PatientListItem {
@@ -30,21 +38,70 @@ interface TimelineEntry {
   omopId: string;
 }
 
-const FHIR_COLORS: Record<string, string> = {
-  Encounter: "#2471A3",
-  Condition: "#148F77",
-  Observation: "#1E8449",
-  MedicationRequest: "#CA6F1E",
-  Procedure: "#7D3C98",
+/* WCAG-safe FHIR type colours — ≥4.5:1 on white (light) and on #0b1326 (dark) */
+const FHIR_TYPE_TOKENS: Record<
+  string,
+  { text: string; bg: string; icon: React.ReactNode }
+> = {
+  Encounter: {
+    text: "var(--fhir-encounter)",
+    bg: "var(--role-holder-bg)",
+    icon: <Stethoscope size={12} />,
+  },
+  Condition: {
+    text: "var(--fhir-condition)",
+    bg: "var(--role-user-bg)",
+    icon: <Activity size={12} />,
+  },
+  Observation: {
+    text: "var(--fhir-observation)",
+    bg: "var(--role-user-bg)",
+    icon: <FlaskConical size={12} />,
+  },
+  MedicationRequest: {
+    text: "var(--fhir-medication)",
+    bg: "var(--role-hdab-bg)",
+    icon: <Pill size={12} />,
+  },
+  Procedure: {
+    text: "var(--fhir-procedure)",
+    bg: "var(--role-trust-bg)",
+    icon: <Scissors size={12} />,
+  },
 };
 
-function StatBadge({ label, value }: { label: string; value?: number }) {
+/* Metric orb stat card — Stitch patient_dashboard_day pattern */
+function MetricCard({
+  label,
+  value,
+  isOrb = false,
+  icon,
+  sub,
+}: {
+  label: string;
+  value?: number;
+  isOrb?: boolean;
+  icon: React.ReactNode;
+  sub?: string;
+}) {
   return (
-    <div className="bg-[var(--surface-2)] rounded px-3 py-2 text-center">
-      <div className="text-lg font-semibold text-[var(--text-primary)]">
-        {value != null ? value.toLocaleString() : "—"}
+    <div className="surface-card p-5 flex flex-col justify-between gap-3 border border-[var(--border)]">
+      <div className="flex items-start justify-between">
+        <div>
+          <p className="section-label mb-1">{label}</p>
+          <p className="text-3xl font-black text-[var(--text-primary)] leading-none tracking-tight">
+            {value != null ? value.toLocaleString() : "—"}
+          </p>
+          {sub && (
+            <p className="text-xs text-[var(--text-secondary)] mt-1">{sub}</p>
+          )}
+        </div>
+        {isOrb ? (
+          <div className="metric-orb">{icon}</div>
+        ) : (
+          <div className="icon-orb">{icon}</div>
+        )}
       </div>
-      <div className="text-xs text-[var(--text-secondary)] mt-0.5">{label}</div>
     </div>
   );
 }
@@ -55,10 +112,8 @@ export default function PatientPage() {
   const [selected, setSelected] = useState<string>("");
   const [timeline, setTimeline] = useState<TimelineEntry[]>([]);
   const [loading, setLoading] = useState(true);
-  // When true, the API returned restricted=true (PATIENT role — own record only)
   const [restricted, setRestricted] = useState(false);
 
-  // Load patient list + cohort stats on mount
   useEffect(() => {
     fetchApi("/api/patient")
       .then((r) => r.json())
@@ -66,7 +121,6 @@ export default function PatientPage() {
         setPatients(d.patients ?? []);
         setStats(d.stats ?? null);
         setRestricted(d.restricted === true);
-        // Auto-select the only patient when restricted (PATIENT role)
         if (d.restricted && d.patients?.length === 1) {
           setSelected(d.patients[0].id);
         }
@@ -75,7 +129,6 @@ export default function PatientPage() {
       .catch(() => setLoading(false));
   }, []);
 
-  // Load timeline when patient changes
   useEffect(() => {
     if (!selected) return;
     setLoading(true);
@@ -92,7 +145,7 @@ export default function PatientPage() {
 
   return (
     <div className="min-h-screen bg-[var(--bg)]">
-      <div className="max-w-3xl mx-auto px-6 py-10">
+      <div className="max-w-4xl mx-auto px-6 py-10">
         <PageIntro
           title="Patient Journey"
           icon={Activity}
@@ -103,101 +156,168 @@ export default function PatientPage() {
           docLink={{ href: "/docs/architecture", label: "Architecture Docs" }}
         />
 
-        {/* Cohort stats */}
+        {/* Cohort metric orb cards — Stitch patient_dashboard_day bento */}
         {stats && (
-          <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 mb-8">
-            <StatBadge label="Patients" value={stats.patients} />
-            <StatBadge label="Encounters" value={stats.encounters} />
-            <StatBadge label="Conditions" value={stats.conditions} />
-            <StatBadge label="Observations" value={stats.observations} />
-            <StatBadge label="Medications" value={stats.medications} />
-            <StatBadge label="Procedures" value={stats.procedures} />
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
+            <MetricCard
+              label="Patients"
+              value={stats.patients}
+              isOrb
+              icon={<Heart size={20} className="text-white" />}
+              sub="Synthea cohort"
+            />
+            <MetricCard
+              label="Encounters"
+              value={stats.encounters}
+              icon={<Stethoscope size={18} />}
+            />
+            <MetricCard
+              label="Conditions"
+              value={stats.conditions}
+              icon={<Activity size={18} />}
+            />
+            <MetricCard
+              label="Observations"
+              value={stats.observations}
+              icon={<FlaskConical size={18} />}
+            />
+            <MetricCard
+              label="Medications"
+              value={stats.medications}
+              icon={<Pill size={18} />}
+            />
+            <MetricCard
+              label="Procedures"
+              value={stats.procedures}
+              icon={<Scissors size={18} />}
+            />
           </div>
         )}
 
-        {/* Patient selector — hidden for PATIENT role (they only see their own record) */}
+        {/* Patient selector */}
         {restricted ? (
-          <div className="mb-4 px-3 py-2 bg-teal-900/30 border border-teal-700/50 rounded text-sm text-teal-200">
+          <div className="mb-4 px-4 py-3 bg-[var(--role-patient-bg)] border border-[var(--role-patient-border)] rounded-xl text-sm text-[var(--role-patient-text)] flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-[var(--role-patient-text)] inline-block animate-pulse" />
             Showing your personal health record (EHDS Art. 3 / GDPR Art. 15)
           </div>
         ) : (
-          <select
-            value={selected}
-            onChange={(e) => setSelected(e.target.value)}
-            className="mb-4 px-3 py-2 bg-[var(--surface-2)] border border-gray-600 rounded text-sm outline-none focus:border-layer3 w-full"
-          >
-            <option value="">
-              — select patient ({patients.length} loaded) —
-            </option>
-            {patients.map((p) => (
-              <option key={p.id} value={p.id}>
-                {p.name ?? p.id}
+          <div className="mb-6">
+            <p className="section-label">Select patient</p>
+            <select
+              value={selected}
+              onChange={(e) => setSelected(e.target.value)}
+              className="px-3 py-2.5 bg-[var(--surface-card)] border border-[var(--border-ui)] rounded-xl text-sm outline-none focus:border-[var(--accent)] w-full text-[var(--text-primary)]"
+            >
+              <option value="">
+                — select patient ({patients.length} loaded) —
               </option>
-            ))}
-          </select>
-        )}
-
-        {/* Patient demographics */}
-        {selectedPatient && (
-          <div className="flex gap-4 text-xs text-[var(--text-secondary)] mb-6">
-            <span>
-              <span className="text-[var(--text-secondary)]">Gender:</span>{" "}
-              {selectedPatient.gender ?? "—"}
-            </span>
-            <span>
-              <span className="text-[var(--text-secondary)]">Born:</span>{" "}
-              {selectedPatient.birthDate ?? "—"}
-            </span>
-            <span>
-              <span className="text-[var(--text-secondary)]">Events:</span>{" "}
-              {timeline.length}
-            </span>
+              {patients.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.name ?? p.id}
+                </option>
+              ))}
+            </select>
           </div>
         )}
 
-        {loading && <p className="text-[var(--text-secondary)]">Loading…</p>}
+        {/* Patient demographics header */}
+        {selectedPatient && (
+          <div className="surface-card p-4 mb-6 flex items-center gap-6 border border-[var(--border)]">
+            <div className="metric-orb shrink-0">
+              <Users size={20} className="text-white" />
+            </div>
+            <div className="flex gap-6 flex-wrap text-sm">
+              <div>
+                <p className="section-label mb-0.5">Name</p>
+                <p className="font-semibold text-[var(--text-primary)]">
+                  {selectedPatient.name ?? selectedPatient.id}
+                </p>
+              </div>
+              <div>
+                <p className="section-label mb-0.5">Gender</p>
+                <p className="font-semibold text-[var(--text-primary)]">
+                  {selectedPatient.gender ?? "—"}
+                </p>
+              </div>
+              <div>
+                <p className="section-label mb-0.5">Born</p>
+                <p className="font-semibold text-[var(--text-primary)]">
+                  {selectedPatient.birthDate ?? "—"}
+                </p>
+              </div>
+              <div>
+                <p className="section-label mb-0.5">Events</p>
+                <p className="font-semibold text-[var(--text-primary)]">
+                  {timeline.length}
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {loading && (
+          <p className="text-[var(--text-secondary)] text-sm">Loading…</p>
+        )}
 
         {!loading && selected && timeline.length === 0 && (
-          <p className="text-[var(--text-secondary)]">
+          <p className="text-[var(--text-secondary)] text-sm">
             No timeline events found for this patient.
           </p>
         )}
 
+        {/* Clinical timeline — Stitch activity-timeline pattern */}
         {timeline.length > 0 && (
-          <ol className="relative border-l border-[var(--border)] space-y-6 pl-6">
-            {timeline.map((e, i) => (
-              <li key={i} className="relative">
-                <span
-                  className="absolute -left-[25px] w-4 h-4 rounded-full border-2 border-gray-950"
-                  style={{
-                    background: FHIR_COLORS[e.fhirType] ?? "#888",
-                  }}
-                />
-                <div className="text-xs text-[var(--text-secondary)] mb-0.5">
-                  {e.date ?? "—"}
-                </div>
-                <div className="font-medium text-sm">
-                  <span style={{ color: FHIR_COLORS[e.fhirType] ?? "#888" }}>
-                    {e.fhirType}
-                  </span>{" "}
-                  {e.display ? (
-                    <span className="text-[var(--text-primary)]">
-                      {e.display}
-                    </span>
-                  ) : (
-                    <span className="text-[var(--text-secondary)] font-mono text-xs">
-                      {e.fhirId}
-                    </span>
-                  )}
-                </div>
-                {e.omopType && (
-                  <div className="text-xs text-layer4 mt-0.5">
-                    ↳ OMOP {e.omopType}: {e.omopId}
-                  </div>
-                )}
-              </li>
-            ))}
-          </ol>
+          <div>
+            <p className="section-label mb-4">Clinical timeline</p>
+            <ol className="activity-timeline space-y-5 pl-8">
+              {timeline.map((e, i) => {
+                const token = FHIR_TYPE_TOKENS[e.fhirType];
+                return (
+                  <li key={i} className="relative">
+                    {/* Timeline dot */}
+                    <span
+                      className="absolute -left-[1.75rem] top-1 w-3.5 h-3.5 rounded-full border-2 border-[var(--surface-card)] z-10"
+                      style={{
+                        background: token?.text ?? "var(--text-secondary)",
+                      }}
+                    />
+                    <div className="surface-card p-4 border border-[var(--border)] hover:shadow-md transition-shadow">
+                      <div className="flex items-start justify-between gap-3 mb-1">
+                        <div className="flex items-center gap-2">
+                          {/* FHIR type badge */}
+                          <span
+                            className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full"
+                            style={{
+                              color: token?.text ?? "var(--text-secondary)",
+                              background: token?.bg ?? "var(--surface-2)",
+                            }}
+                          >
+                            {token?.icon}
+                            {e.fhirType}
+                          </span>
+                          <span className="text-xs text-[var(--text-secondary)]">
+                            {e.date ?? "—"}
+                          </span>
+                        </div>
+                      </div>
+                      <p className="text-sm font-medium text-[var(--text-primary)]">
+                        {e.display || (
+                          <span className="font-mono text-xs text-[var(--text-secondary)]">
+                            {e.fhirId}
+                          </span>
+                        )}
+                      </p>
+                      {e.omopType && (
+                        <p className="text-xs text-[var(--layer4-text)] mt-1">
+                          ↳ OMOP {e.omopType}: {e.omopId}
+                        </p>
+                      )}
+                    </div>
+                  </li>
+                );
+              })}
+            </ol>
+          </div>
         )}
       </div>
     </div>
