@@ -6,37 +6,39 @@ import { useState, useRef, useEffect } from "react";
 import { ROLE_LABELS, DEMO_PERSONAS, deriveParticipantType } from "@/lib/auth";
 import { useDemoPersona, setDemoPersona } from "@/lib/use-demo-persona";
 
-/** Badge colours per role code (compact chip in nav bar and dropdown). */
+/** Badge colours per role code — uses semantic CSS tokens, adapts to light/dark. */
 const ROLE_BADGE: Record<string, string> = {
-  EDC_ADMIN: "bg-red-700/80 text-red-100",
-  EDC_USER_PARTICIPANT: "bg-blue-700/80 text-blue-100",
-  HDAB_AUTHORITY: "bg-amber-700/80 text-amber-100",
-  DATA_HOLDER: "bg-blue-600/80 text-blue-100",
-  DATA_USER: "bg-green-700/80 text-green-100",
-  TRUST_CENTER_OPERATOR: "bg-violet-700/80 text-violet-100",
-  PATIENT: "bg-teal-700/80 text-teal-100",
+  EDC_ADMIN: "bg-[var(--role-admin-bg)]   text-[var(--role-admin-text)]",
+  EDC_USER_PARTICIPANT:
+    "bg-[var(--role-holder-bg)]  text-[var(--role-holder-text)]",
+  HDAB_AUTHORITY: "bg-[var(--role-hdab-bg)]    text-[var(--role-hdab-text)]",
+  DATA_HOLDER: "bg-[var(--role-holder-bg)]  text-[var(--role-holder-text)]",
+  DATA_USER: "bg-[var(--role-user-bg)]    text-[var(--role-user-text)]",
+  TRUST_CENTER_OPERATOR:
+    "bg-[var(--role-trust-bg)]   text-[var(--role-trust-text)]",
+  PATIENT: "bg-[var(--role-patient-bg)] text-[var(--role-patient-text)]",
 };
 
 /** Dropdown border accent per primary role. */
 const ROLE_ACCENT: Record<string, string> = {
-  EDC_ADMIN: "border-red-700",
-  HDAB_AUTHORITY: "border-amber-600",
-  DATA_HOLDER: "border-blue-600",
-  DATA_USER: "border-green-600",
-  TRUST_CENTER_OPERATOR: "border-violet-600",
-  EDC_USER_PARTICIPANT: "border-blue-700",
-  PATIENT: "border-teal-600",
+  EDC_ADMIN: "border-[var(--role-admin-border)]",
+  HDAB_AUTHORITY: "border-[var(--role-hdab-border)]",
+  DATA_HOLDER: "border-[var(--role-holder-border)]",
+  DATA_USER: "border-[var(--role-user-border)]",
+  TRUST_CENTER_OPERATOR: "border-[var(--role-trust-border)]",
+  EDC_USER_PARTICIPANT: "border-[var(--role-holder-border)]",
+  PATIENT: "border-[var(--role-patient-border)]",
 };
 
 /** Shield icon colour per primary role. */
 const ROLE_SHIELD: Record<string, string> = {
-  EDC_ADMIN: "text-red-400",
-  HDAB_AUTHORITY: "text-amber-400",
-  DATA_HOLDER: "text-blue-400",
-  DATA_USER: "text-green-400",
-  TRUST_CENTER_OPERATOR: "text-violet-400",
+  EDC_ADMIN: "text-[var(--role-admin-text)]",
+  HDAB_AUTHORITY: "text-[var(--role-hdab-text)]",
+  DATA_HOLDER: "text-[var(--role-holder-text)]",
+  DATA_USER: "text-[var(--role-user-text)]",
+  TRUST_CENTER_OPERATOR: "text-[var(--role-trust-text)]",
   EDC_USER_PARTICIPANT: "text-[var(--text-secondary)]",
-  PATIENT: "text-teal-400",
+  PATIENT: "text-[var(--role-patient-text)]",
 };
 
 const IS_STATIC = process.env.NEXT_PUBLIC_STATIC_EXPORT === "true";
@@ -191,7 +193,7 @@ export default function UserMenu() {
         >
           {/* Identity block */}
           <div className="p-3 border-b border-[var(--border)]">
-            <p className="text-sm text-white font-semibold truncate">
+            <p className="text-sm text-[var(--text-primary)] font-semibold truncate">
               {username}
               {IS_STATIC && (
                 <span className="ml-1.5 text-[10px] text-amber-400 font-normal">
@@ -266,7 +268,7 @@ export default function UserMenu() {
                     }}
                     className={`flex items-center gap-2 w-full px-2 py-1.5 rounded text-left transition-colors ${
                       isActive
-                        ? "bg-gray-700/50 cursor-default"
+                        ? "bg-[var(--surface-2)] cursor-default"
                         : "hover:bg-[var(--surface-2)] cursor-pointer"
                     }`}
                   >
@@ -281,7 +283,9 @@ export default function UserMenu() {
                     </span>
                     <span
                       className={`font-mono text-xs truncate ${
-                        isActive ? "text-white" : "text-[var(--text-primary)]"
+                        isActive
+                          ? "text-[var(--accent)] font-semibold"
+                          : "text-[var(--text-primary)]"
                       }`}
                     >
                       {persona.username}

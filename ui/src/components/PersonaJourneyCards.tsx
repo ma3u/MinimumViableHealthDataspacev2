@@ -30,9 +30,9 @@ const personaJourneys: PersonaJourney[] = [
   {
     role: "Patient",
     icon: Heart,
-    color: "text-teal-300",
-    border: "border-teal-700/40",
-    bg: "bg-teal-950/20",
+    color: "text-[var(--role-patient-text)]",
+    border: "border-[var(--role-patient-border)]",
+    bg: "bg-[var(--role-patient-bg)]",
     org: "AlphaKlinik Berlin",
     loginAs: "patient1",
     steps: [
@@ -57,9 +57,9 @@ const personaJourneys: PersonaJourney[] = [
   {
     role: "Researcher",
     icon: FlaskConical,
-    color: "text-green-300",
-    border: "border-green-700/40",
-    bg: "bg-green-950/20",
+    color: "text-[var(--role-user-text)]",
+    border: "border-[var(--role-user-border)]",
+    bg: "bg-[var(--role-user-bg)]",
     org: "PharmaCo Research AG",
     loginAs: "researcher",
     steps: [
@@ -78,9 +78,9 @@ const personaJourneys: PersonaJourney[] = [
   {
     role: "Hospital",
     icon: BookOpen,
-    color: "text-blue-300",
-    border: "border-blue-700/40",
-    bg: "bg-blue-950/20",
+    color: "text-[var(--role-holder-text)]",
+    border: "border-[var(--role-holder-border)]",
+    bg: "bg-[var(--role-holder-bg)]",
     org: "AlphaKlinik Berlin",
     loginAs: "clinicuser",
     steps: [
@@ -105,9 +105,9 @@ const personaJourneys: PersonaJourney[] = [
   {
     role: "Regulator",
     icon: ShieldCheck,
-    color: "text-amber-300",
-    border: "border-amber-700/40",
-    bg: "bg-amber-950/20",
+    color: "text-[var(--role-hdab-text)]",
+    border: "border-[var(--role-hdab-border)]",
+    bg: "bg-[var(--role-hdab-bg)]",
     org: "MedReg DE (HDAB)",
     loginAs: "regulator",
     steps: [
@@ -132,9 +132,9 @@ const personaJourneys: PersonaJourney[] = [
   {
     role: "Admin",
     icon: LayoutDashboard,
-    color: "text-red-300",
-    border: "border-red-700/40",
-    bg: "bg-red-950/20",
+    color: "text-[var(--role-admin-text)]",
+    border: "border-[var(--role-admin-border)]",
+    bg: "bg-[var(--role-admin-bg)]",
     org: "Dataspace Operator",
     loginAs: "edcadmin",
     steps: [

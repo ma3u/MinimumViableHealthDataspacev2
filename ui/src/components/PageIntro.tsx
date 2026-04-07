@@ -79,7 +79,11 @@ export default function PageIntro({
               <span>{prevStep.label}</span>
             </Link>
           )}
-          {prevStep && nextStep && <span className="text-gray-700">|</span>}
+          {prevStep && nextStep && (
+            <span className="text-[var(--border-ui)]" aria-hidden="true">
+              |
+            </span>
+          )}
           {nextStep && (
             <Link
               href={nextStep.href}
@@ -97,7 +101,7 @@ export default function PageIntro({
         <div className="mb-2">
           <button
             onClick={() => setInfoOpen(!infoOpen)}
-            className="flex items-center gap-1.5 text-xs text-blue-400 hover:text-blue-300 transition-colors"
+            className="flex items-center gap-1.5 text-xs text-[var(--accent)] hover:text-[var(--text-secondary)] transition-colors"
           >
             <Info size={14} />
             <span>{infoOpen ? "Hide details" : "How does this work?"}</span>
@@ -111,7 +115,7 @@ export default function PageIntro({
                   href={docLink.href}
                   target={docLink.external ? "_blank" : undefined}
                   rel={docLink.external ? "noopener noreferrer" : undefined}
-                  className="inline-flex items-center gap-1 text-blue-400 hover:text-blue-300 text-xs"
+                  className="inline-flex items-center gap-1 text-[var(--accent)] hover:text-[var(--text-secondary)] text-xs"
                 >
                   {docLink.external ? (
                     <ExternalLink size={12} />

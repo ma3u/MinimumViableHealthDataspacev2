@@ -52,27 +52,59 @@ const RESOURCE_META: Record<
   string,
   { icon: typeof Activity; color: string; label: string }
 > = {
-  Patient: { icon: User, color: "#3b82f6", label: "Patients" },
-  Encounter: { icon: Stethoscope, color: "#2471A3", label: "Encounters" },
-  Condition: { icon: Heart, color: "#148F77", label: "Conditions" },
-  Observation: { icon: FlaskConical, color: "#1E8449", label: "Observations" },
-  MedicationRequest: { icon: Pill, color: "#CA6F1E", label: "Medications" },
-  Procedure: { icon: Scissors, color: "#7D3C98", label: "Procedures" },
-  Immunization: { icon: Syringe, color: "#2980B9", label: "Immunizations" },
+  Patient: { icon: User, color: "var(--fhir-patient)", label: "Patients" },
+  Encounter: {
+    icon: Stethoscope,
+    color: "var(--fhir-encounter)",
+    label: "Encounters",
+  },
+  Condition: {
+    icon: Heart,
+    color: "var(--fhir-condition)",
+    label: "Conditions",
+  },
+  Observation: {
+    icon: FlaskConical,
+    color: "var(--fhir-observation)",
+    label: "Observations",
+  },
+  MedicationRequest: {
+    icon: Pill,
+    color: "var(--fhir-medication)",
+    label: "Medications",
+  },
+  Procedure: {
+    icon: Scissors,
+    color: "var(--fhir-procedure)",
+    label: "Procedures",
+  },
+  Immunization: {
+    icon: Syringe,
+    color: "var(--fhir-immunization)",
+    label: "Immunizations",
+  },
   DiagnosticReport: {
     icon: FileText,
-    color: "#D35400",
+    color: "var(--fhir-diagnostic)",
     label: "Diagnostic Reports",
   },
   AllergyIntolerance: {
     icon: AlertTriangle,
-    color: "#C0392B",
+    color: "var(--fhir-allergy)",
     label: "Allergies",
   },
-  CarePlan: { icon: ClipboardList, color: "#27AE60", label: "Care Plans" },
+  CarePlan: {
+    icon: ClipboardList,
+    color: "var(--fhir-careplan)",
+    label: "Care Plans",
+  },
 };
 
-const DEFAULT_META = { icon: Activity, color: "#888", label: "Resources" };
+const DEFAULT_META = {
+  icon: Activity,
+  color: "var(--text-secondary)",
+  label: "Resources",
+};
 
 /* ── Helpers ───────────────────────────────────── */
 
@@ -202,7 +234,9 @@ function ResourceDetail({ resource }: { resource: FhirResource }) {
       <div className="space-y-1">
         {entries.map(([key, val]) => (
           <div key={key} className="flex gap-2 text-xs">
-            <span className="text-blue-300 shrink-0 w-40 truncate">{key}</span>
+            <span className="text-[var(--layer1-text)] shrink-0 w-40 truncate">
+              {key}
+            </span>
             <span className="text-[var(--text-primary)] break-all truncate">
               {typeof val === "string"
                 ? val

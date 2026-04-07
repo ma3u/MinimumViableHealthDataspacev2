@@ -39,17 +39,20 @@ export default function DemoPasswordBanner() {
   return (
     <div
       role="alert"
-      className="bg-amber-900/40 border-b border-amber-700/50 px-4 py-2 flex items-center gap-3 text-sm"
+      className="bg-amber-50 dark:bg-amber-900/40 border-b border-amber-200 dark:border-amber-700/50 px-4 py-2 flex items-center gap-3 text-sm"
     >
-      <AlertTriangle size={16} className="text-amber-400 shrink-0" />
-      <p className="text-amber-200 flex-1">
+      <AlertTriangle
+        size={16}
+        className="text-[var(--warning-text)] shrink-0"
+      />
+      <p className="text-[var(--warning-text)] flex-1">
         <span className="font-semibold">Demo mode:</span> You are using a
         default password.{" "}
         <a
           href={passwordUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-1 text-amber-300 underline underline-offset-2 hover:text-amber-100 transition-colors"
+          className="inline-flex items-center gap-1 text-[var(--warning-text)] underline underline-offset-2 hover:opacity-80 transition-opacity"
         >
           Change your password
           <ExternalLink size={12} />
@@ -57,7 +60,7 @@ export default function DemoPasswordBanner() {
       </p>
       <button
         onClick={handleDismiss}
-        className="text-amber-400 hover:text-amber-200 transition-colors p-1 rounded hover:bg-amber-800/40"
+        className="text-[var(--warning-text)] hover:bg-amber-100 dark:hover:bg-amber-800/40 transition-colors p-1 rounded"
         aria-label="Dismiss password warning"
       >
         <X size={16} />
