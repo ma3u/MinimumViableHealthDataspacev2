@@ -2733,6 +2733,94 @@ Run with `PLAYWRIGHT_BASE_URL=https://ma3u.github.io/MinimumViableHealthDataspac
 
 ---
 
+### Phase 23: Stitch Vitalis Blue — Full Design Alignment & New Features
+
+**Branch**: `feature/newdesign`
+**Reference designs**: `stitch_health_ui_redesign/` (15 HTML templates + 2 DESIGN.md specs)
+**Design system**: Vitalis Blue (light) + Vitalis Blue Nocturne (dark)
+
+#### Motivation
+
+Phase 21 established the token foundation (CSS custom properties, dark/light mode). Phase 23 applies the full Stitch "Clinical Clarity & Ethereal Trust" philosophy across all 15 UI screens by:
+
+1. Aligning implementation with the Stitch Vitalis Blue token set (gradient buttons, metric orbs, glass panels, no-line rule, ambient shadows)
+2. Implementing new features identified from each design template but not yet in the codebase
+3. Fixing all WCAG 2.2 AA contrast failures identified in the accessibility audit (200+ dark-mode colour replacements)
+
+#### Design → Page Mapping
+
+| Design Template                     | Current Page        | Status | New Features                                               |
+| ----------------------------------- | ------------------- | ------ | ---------------------------------------------------------- |
+| `administrative_dashboard_day`      | `/admin`            | 🔲     | Gradient CTA, European data flow placeholder, activity log |
+| `clinical_analytics_day`            | `/analytics`        | 🔲     | HRV chart, AI recommendations panel, data provenance       |
+| `compliance_overview_day`           | `/compliance`       | 🔲     | Audit trail timeline, regulatory framework status cards    |
+| `credentials_management_day`        | `/credentials`      | 🔲     | Credential lifecycle orb, expiry countdown                 |
+| `dataset_catalog_day`               | `/catalog`          | 🔲     | Collection grouping, WCAG-safe badges ✅ done              |
+| `infrastructure_health_day`         | `/admin/components` | 🔲     | Cluster topology map, deployment health bars               |
+| `knowledge_graph_with_search_light` | `/graph`            | 🔲     | Topological search overlay, entity inspector panel         |
+| `knowledge_graph_with_search_dark`  | `/graph` (dark)     | 🔲     | Dark-mode graph with luminous node glows                   |
+| `patient_dashboard_day`             | `/patient`          | 🔲     | Metric orbs (HR, BP), activity timeline, research bento    |
+| `patient_profile_day`               | `/patient/profile`  | 🔲     | Privacy settings, medical preferences section              |
+| `query_ehr_exchange_day`            | `/query`            | 🔲     | Query builder UI, federated search results panel           |
+| `research_participation_day`        | `/patient/research` | 🔲     | Study enrollment flow, consent management timeline         |
+| `system_logs_day`                   | `/admin/audit`      | 🔲     | WCAG-safe status badges ✅ done, error severity chart      |
+| `technical_compliance_kit_day`      | `/compliance/tck`   | 🔲     | Protocol verification status grid                          |
+| `user_management_day`               | `/admin/tenants`    | 🔲     | RBAC summary sidebar ✅ done, access control matrix        |
+
+#### 23a: WCAG 2.2 AA Contrast Fixes ✅
+
+Global replace of 200+ dark-mode-only colour patterns (`bg-*-900`, `text-*-400`, `text-white` on insufficient backgrounds) with pre-verified WCAG 2.2 AA CSS custom property tokens (`--role-*-text/bg/border`, `--layerN-text`). Affected files: 29 TSX + 1 CSS. Committed `dbf1fea`.
+
+Key fixes:
+
+- Auth/signin H1, Keycloak button, demo card usernames
+- Admin/audit status badges (all states), direction/access-type badges
+- Credentials VC badge, remove button, request result text
+- Data/share + data/transfer: JSON syntax highlighter, FHIR resource badges, DSP state functions
+- EEHRxF summary stat icons
+- globals.css skip-to-content
+- Onboarding status pills, step icons, error banner
+- All `bg-layer2 text-white` buttons → `bg-[var(--accent)] text-white`
+
+#### 23b: Design Token Additions — globals.css 🔲
+
+Add missing Stitch Vitalis Blue tokens to CSS custom properties:
+
+- `--secondary-container` (#6cf8bb light / #0a3d2e dark) — metric orb fill
+- `--primary-fixed` (#d8e2ff light) — icon background tint
+- `--on-surface-variant-subtle` — tertiary label text
+- `--gradient-cta` — gradient direction token
+- Utility classes: `.metric-orb`, `.glass-panel`, `.btn-gradient`, `.activity-timeline`
+
+#### 23c: Patient Dashboard — Metric Orb Cards 🔲
+
+Redesign `/patient` stat section to match `patient_dashboard_day` template:
+
+- Heart Rate card with `.metric-orb` (radial gradient: secondary-container → secondary)
+- Blood Pressure card with primary-fixed icon orb
+- Research bento card: "Cardiovascular Longevity Study" participation banner
+- Activity timeline with vertical connector line
+
+#### 23d: Admin Dashboard — Bento Grid Enhancements 🔲
+
+Enhance `/admin` page to match `administrative_dashboard_day`:
+
+- Add gradient "Generate Report" CTA button in sidebar
+- European data flow map (static SVG placeholder with participant nodes)
+- Activity log with participant avatar initials + DSP event descriptions
+- System health percentage bar for each service
+
+#### 23e: Knowledge Graph — Topological Search Overlay 🔲
+
+Add search overlay to `/graph` matching `knowledge_graph_with_search_light`:
+
+- Search input floated over canvas with glass-panel style
+- Entity inspector slide-in panel (right side) showing node details
+- Network health metric badges (L1–L5 node counts)
+- Layer filter toggle pills below search bar
+
+---
+
 ### Phase 21: Hospital-Grade Design System — Light/Dark Mode
 
 **GitHub Issue**: [#9](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/9)

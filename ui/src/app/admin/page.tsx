@@ -104,9 +104,15 @@ export default function AdminDashboard() {
               EHDS Health Dataspace — Operator Control
             </p>
           </div>
-          <div className="flex items-center gap-2 px-4 py-2 bg-[var(--success)]/10 text-[var(--success-text)] rounded-full border border-[var(--success)]/20 text-sm font-bold tracking-tight">
-            <span className="w-2 h-2 rounded-full bg-[var(--success)] animate-pulse" />
-            SYSTEMS NOMINAL
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 px-4 py-2 bg-[var(--success)]/10 text-[var(--success-text)] rounded-full border border-[var(--success)]/20 text-sm font-bold tracking-tight">
+              <span className="w-2 h-2 rounded-full bg-[var(--success)] animate-pulse" />
+              SYSTEMS NOMINAL
+            </div>
+            <button className="btn-gradient flex items-center gap-2 text-sm">
+              <ScrollText size={16} />
+              Generate Report
+            </button>
           </div>
         </div>
 
@@ -179,7 +185,7 @@ export default function AdminDashboard() {
 
             {/* ── Main content grid ── */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {/* EHDS Role breakdown */}
+              {/* EHDS Role breakdown + EU data flow */}
               <div className="lg:col-span-2 bg-[var(--surface)] rounded-xl p-8 relative overflow-hidden min-h-[320px]">
                 <div className="flex justify-between items-start mb-6">
                   <div>
@@ -190,13 +196,17 @@ export default function AdminDashboard() {
                       Access control breakdown across the dataspace
                     </p>
                   </div>
+                  <LayoutDashboard
+                    size={32}
+                    className="text-[var(--border)] shrink-0"
+                  />
                 </div>
                 {summary?.byRole && Object.keys(summary.byRole).length > 0 ? (
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                     {Object.entries(summary.byRole).map(([role, count]) => (
                       <div
                         key={role}
-                        className="bg-[var(--surface-card)] rounded-xl p-4 shadow-sm"
+                        className="surface-card p-4 border border-[var(--border)]"
                       >
                         <p className="text-2xl font-black text-[var(--text-primary)] tabular-nums">
                           {count}
@@ -215,6 +225,60 @@ export default function AdminDashboard() {
                     </span>
                   </div>
                 )}
+                {/* EU data flow indicator strip */}
+                <div className="mt-6 pt-4 border-t border-[var(--border)]">
+                  <p className="section-label mb-3">European data flow</p>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    {[
+                      {
+                        id: "DE",
+                        label: "AlphaKlinik Berlin",
+                        color: "var(--role-holder-text)",
+                        bg: "var(--role-holder-bg)",
+                      },
+                      {
+                        id: "NL",
+                        label: "Limburg Medical",
+                        color: "var(--role-holder-text)",
+                        bg: "var(--role-holder-bg)",
+                      },
+                      {
+                        id: "FR",
+                        label: "Institut Santé",
+                        color: "var(--role-hdab-text)",
+                        bg: "var(--role-hdab-bg)",
+                      },
+                      {
+                        id: "DE",
+                        label: "MedReg DE",
+                        color: "var(--role-hdab-text)",
+                        bg: "var(--role-hdab-bg)",
+                      },
+                      {
+                        id: "DE",
+                        label: "PharmaCo AG",
+                        color: "var(--role-user-text)",
+                        bg: "var(--role-user-bg)",
+                      },
+                    ].map((node, i) => (
+                      <span
+                        key={i}
+                        className="flex items-center gap-1.5 text-[10px] font-bold px-2.5 py-1 rounded-full border"
+                        style={{
+                          color: node.color,
+                          background: node.bg,
+                          borderColor: node.color,
+                        }}
+                      >
+                        <span className="font-mono">{node.id}</span>
+                        {node.label}
+                      </span>
+                    ))}
+                    <span className="text-[10px] text-[var(--text-secondary)]">
+                      ↔ DSP 2025-1
+                    </span>
+                  </div>
+                </div>
               </div>
 
               {/* Quick Operations + Activity */}
@@ -241,18 +305,19 @@ export default function AdminDashboard() {
                   </div>
                 </div>
 
-                {/* Activity feed */}
-                <div className="flex-1 bg-[var(--surface-card)] rounded-xl p-6 shadow-sm border border-[var(--border)]">
+                {/* Activity feed — Stitch activity-timeline pattern */}
+                <div className="flex-1 surface-card p-6 border border-[var(--border)]">
                   <p className="section-label">Administrative Activity</p>
-                  <div className="space-y-5">
+                  <div className="activity-timeline space-y-5 pl-7">
                     {ACTIVITY_LOG.map((item, i) => (
                       <div
                         key={i}
-                        className={`flex gap-3 items-start ${
-                          item.dim ? "opacity-50" : ""
+                        className={`flex gap-3 items-start relative ${
+                          item.dim ? "opacity-40" : ""
                         }`}
                       >
-                        <div className="w-8 h-8 rounded-full bg-[var(--surface)] flex items-center justify-center shrink-0">
+                        {/* Timeline node */}
+                        <div className="absolute -left-7 top-1 w-8 h-8 rounded-full bg-[var(--surface)] border border-[var(--border)] flex items-center justify-center shrink-0 z-10">
                           <item.icon size={14} className={item.color} />
                         </div>
                         <div>

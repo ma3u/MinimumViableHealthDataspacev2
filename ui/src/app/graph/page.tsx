@@ -339,6 +339,8 @@ function GraphContent() {
   // Panel collapse state
   const [leftCollapsed, setLeftCollapsed] = useState(false);
   const [rightCollapsed, setRightCollapsed] = useState(false);
+  // Topological search — Phase 23e
+  const [nodeSearch, setNodeSearch] = useState("");
 
   // ── Theme (light / dark) ─────────────────────────────────────────────────
   const [isDark, setIsDark] = useState(false);
@@ -877,6 +879,71 @@ function GraphContent() {
                   </p>
                 </div>
               </div>
+            </div>
+
+            {/* ── Topological search — Phase 23e glass-panel overlay pattern ── */}
+            <div className="py-3 border-b border-[var(--border)]">
+              <p className="section-label">Search nodes</p>
+              <input
+                type="search"
+                value={nodeSearch}
+                onChange={(e) => setNodeSearch(e.target.value)}
+                placeholder="Filter by name or type…"
+                className="w-full px-3 py-2 text-xs bg-[var(--surface-card)] border border-[var(--border-ui)] rounded-xl text-[var(--text-primary)] placeholder-[var(--text-secondary)] outline-none focus:border-[var(--accent)] transition-colors"
+              />
+              {nodeSearch.trim() && (
+                <div className="mt-2 max-h-40 overflow-y-auto flex flex-col gap-0.5">
+                  {data.nodes
+                    .filter(
+                      (n) =>
+                        (n.name ?? "")
+                          .toLowerCase()
+                          .includes(nodeSearch.toLowerCase()) ||
+                        (n.label ?? "")
+                          .toLowerCase()
+                          .includes(nodeSearch.toLowerCase()),
+                    )
+                    .slice(0, 10)
+                    .map((n) => (
+                      <button
+                        key={n.id}
+                        onClick={() => {
+                          handleNodeClick(
+                            n as Parameters<typeof handleNodeClick>[0],
+                          );
+                          setNodeSearch("");
+                        }}
+                        className="text-left px-2 py-1.5 rounded-lg hover:bg-[var(--surface-2)] transition-colors flex items-center gap-2 text-xs"
+                      >
+                        <span
+                          className="w-2 h-2 rounded-full shrink-0"
+                          style={{
+                            background: n.color ?? "var(--text-secondary)",
+                          }}
+                        />
+                        <span className="truncate text-[var(--text-primary)] font-medium">
+                          {n.name}
+                        </span>
+                        <span className="text-[var(--text-secondary)] shrink-0">
+                          {n.label}
+                        </span>
+                      </button>
+                    ))}
+                  {data.nodes.filter(
+                    (n) =>
+                      (n.name ?? "")
+                        .toLowerCase()
+                        .includes(nodeSearch.toLowerCase()) ||
+                      (n.label ?? "")
+                        .toLowerCase()
+                        .includes(nodeSearch.toLowerCase()),
+                  ).length === 0 && (
+                    <p className="text-xs text-[var(--text-secondary)] px-2 py-1">
+                      No nodes match
+                    </p>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* ── Quick links ── */}

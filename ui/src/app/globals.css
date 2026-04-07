@@ -85,6 +85,14 @@
   --fhir-diagnostic:    #7c2d12;  /* orange-900,    9.6:1 ✅ */
   --fhir-allergy:       #881337;  /* rose-900,      9.7:1 ✅ */
   --fhir-careplan:      #14532d;  /* green-900,     10.4:1 ✅ */
+
+  /* Stitch Phase 23 — metric orb & glass panel tokens */
+  --secondary-container: #6cf8bb; /* metric orb fill (teal health indicator) */
+  --secondary-container-on: #006c49; /* on-secondary-container text */
+  --primary-fixed:       #d8e2ff; /* icon background tint */
+  --primary-fixed-on:    #001a42; /* icon colour on primary-fixed bg */
+  --surface-shadow: 0px 12px 32px rgba(21, 28, 39, 0.06); /* ambient shadow */
+  --gradient-cta: linear-gradient(135deg, var(--accent), var(--accent-hover));
 }
 
 /* Dark mode */
@@ -170,6 +178,14 @@
   --fhir-diagnostic:    #fb923c;  /* orange-400,  6.4:1 ✅ */
   --fhir-allergy:       #fda4af;  /* rose-300,    7.2:1 ✅ */
   --fhir-careplan:      #86efac;  /* green-300,   9.6:1 ✅ */
+
+  /* Stitch Phase 23 — nocturne metric orb & glass tokens */
+  --secondary-container: #0a3d2e; /* metric orb — dark teal base */
+  --secondary-container-on: #4edea3; /* on-secondary-container text */
+  --primary-fixed:       #1e3a5f; /* icon background tint — nocturne */
+  --primary-fixed-on:    #adc6ff; /* icon colour on primary-fixed bg */
+  --surface-shadow: 0px 24px 48px rgba(0, 0, 0, 0.4);
+  --gradient-cta: linear-gradient(135deg, #adc6ff, #4d8eff);
 }
 
 /* ── Base resets ───────────────────────────────────────────────────────────── */
@@ -316,5 +332,90 @@ body {
     font-weight: 700;
     background: color-mix(in srgb, var(--accent) 8%, transparent);
     border-radius: 0.75rem 0 0 0.75rem; /* rounded-l-xl */
+  }
+
+  /* ── Phase 23: Stitch Vitalis Blue — Design System Utilities ─────────────── */
+
+  /* Metric orb — radial gradient teal circle for health vital signs */
+  .metric-orb {
+    background: radial-gradient(circle at top left, var(--secondary-container), #006c49);
+    box-shadow: inset 0 0 20px rgba(255, 255, 255, 0.3);
+    border-radius: 9999px;
+    width: 3rem;
+    height: 3rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    flex-shrink: 0;
+  }
+  .dark .metric-orb {
+    background: radial-gradient(circle at top left, #4edea3, #006c49);
+    box-shadow: inset 0 0 20px rgba(78, 222, 163, 0.2);
+  }
+
+  /* Glass panel — backdrop-blur floating surface (Stitch "Ethereal Trust") */
+  .glass-panel {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-radius: 1rem;
+    box-shadow: 0px 12px 32px rgba(21, 28, 39, 0.08);
+  }
+  .dark .glass-panel {
+    background: rgba(23, 31, 51, 0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    box-shadow: 0px 24px 48px rgba(0, 0, 0, 0.4);
+  }
+
+  /* Gradient CTA button — Stitch primary → primary-container, 135° */
+  .btn-gradient {
+    background: var(--gradient-cta);
+    color: white;
+    font-weight: 700;
+    border-radius: 0.75rem;
+    padding: 0.75rem 1.5rem;
+    transition: opacity 0.15s ease, box-shadow 0.15s ease;
+    box-shadow: 0 4px 16px color-mix(in srgb, var(--accent) 30%, transparent);
+  }
+  .btn-gradient:hover {
+    opacity: 0.92;
+    box-shadow: 0 6px 24px color-mix(in srgb, var(--accent) 40%, transparent);
+  }
+
+  /* Activity timeline — vertical connector line pattern */
+  .activity-timeline {
+    position: relative;
+  }
+  .activity-timeline::before {
+    content: "";
+    position: absolute;
+    left: 11px;
+    top: 8px;
+    bottom: 8px;
+    width: 2px;
+    background: var(--border);
+    border-radius: 1px;
+  }
+
+  /* Surface card with ambient shadow (no hard border, Stitch "no-line" rule) */
+  .surface-card {
+    background: var(--surface-card);
+    border-radius: 0.75rem;
+    box-shadow: var(--surface-shadow);
+  }
+
+  /* Icon orb — primary-fixed tinted circle for non-health icons */
+  .icon-orb {
+    background: var(--primary-fixed);
+    color: var(--primary-fixed-on);
+    border-radius: 9999px;
+    width: 2.5rem;
+    height: 2.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
   }
 }
