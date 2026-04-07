@@ -363,7 +363,7 @@ function TasksContent() {
             {
               label: "Total Tasks",
               value: filteredCounts.total,
-              color: "text-gray-200",
+              color: "text-[var(--text-primary)]",
             },
             {
               label: "Active",
@@ -405,7 +405,7 @@ function TasksContent() {
                 className={`flex items-center gap-1.5 px-3 py-1 text-xs rounded-full border transition-colors ${
                   selectedParticipant !== "all"
                     ? "border-layer2 bg-layer2/20 text-layer2"
-                    : "border-[var(--border)] text-[var(--text-secondary)] hover:text-gray-200 hover:border-gray-500"
+                    : "border-[var(--border)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-gray-500"
                 }`}
               >
                 <Users size={12} />
@@ -469,7 +469,7 @@ function TasksContent() {
                   className={`px-3 py-1 text-xs rounded-full border transition-colors ${
                     filter === f.key
                       ? "border-layer2 bg-layer2/20 text-layer2"
-                      : "border-[var(--border)] text-[var(--text-secondary)] hover:text-gray-200 hover:border-gray-500"
+                      : "border-[var(--border)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-gray-500"
                   }`}
                 >
                   {f.label}
@@ -481,7 +481,7 @@ function TasksContent() {
           <button
             onClick={() => loadTasks(true)}
             disabled={refreshing}
-            className="flex items-center gap-1 text-xs text-[var(--text-secondary)] hover:text-gray-200 disabled:opacity-50"
+            className="flex items-center gap-1 text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] disabled:opacity-50"
           >
             <RefreshCw size={12} className={refreshing ? "animate-spin" : ""} />
             Refresh
@@ -543,7 +543,7 @@ function TasksContent() {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2 min-w-0">
                       <TypeIcon size={14} className={stateColor(task.state)} />
-                      <span className="text-sm font-medium text-gray-200 truncate">
+                      <span className="text-sm font-medium text-[var(--text-primary)] truncate">
                         {task.asset}
                       </span>
                       <span

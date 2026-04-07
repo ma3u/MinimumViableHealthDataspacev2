@@ -314,7 +314,7 @@ export default function SettingsPage() {
                       <label className="text-xs text-[var(--text-secondary)]">
                         EHDS Role
                       </label>
-                      <p className="text-sm font-medium text-gray-200 mt-0.5">
+                      <p className="text-sm font-medium text-[var(--text-primary)] mt-0.5">
                         {selected.properties.ehdsParticipantType ||
                           selected.properties.role ||
                           "—"}
@@ -423,7 +423,7 @@ export default function SettingsPage() {
                             setForm((f) => ({ ...f, [key]: e.target.value }))
                           }
                           placeholder={placeholder}
-                          className="w-full px-3 py-1.5 bg-[var(--surface-2)] border border-gray-600 rounded text-sm text-gray-200 placeholder-gray-600 focus:outline-none focus:border-layer2"
+                          className="w-full px-3 py-1.5 bg-[var(--surface-2)] border border-gray-600 rounded text-sm text-[var(--text-primary)] placeholder-gray-600 focus:outline-none focus:border-layer2"
                         />
                       </div>
                     ))}
@@ -676,7 +676,7 @@ export default function SettingsPage() {
                   <button
                     onClick={handleSave}
                     disabled={saving}
-                    className="flex items-center gap-2 px-4 py-2 bg-layer2 text-white rounded-lg text-sm font-medium hover:bg-layer2/90 disabled:opacity-50"
+                    className="flex items-center gap-2 px-4 py-2 bg-[var(--accent)] text-white rounded-lg text-sm font-medium hover:bg-[var(--accent-hover)] disabled:opacity-50"
                   >
                     {saving ? (
                       <>

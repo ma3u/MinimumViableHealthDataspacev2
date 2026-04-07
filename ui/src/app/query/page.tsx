@@ -224,7 +224,7 @@ export default function NlqPage() {
               className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-colors border ${
                 federated
                   ? "bg-blue-500/20 border-blue-500/50 text-blue-300"
-                  : "bg-[var(--surface-2)] border-[var(--border)] text-[var(--text-secondary)] hover:text-gray-200"
+                  : "bg-[var(--surface-2)] border-[var(--border)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
               }`}
               title="Query across all Secure Processing Environments"
             >
@@ -251,7 +251,7 @@ export default function NlqPage() {
               <button
                 key={q}
                 onClick={() => handleExampleClick(q)}
-                className="px-2.5 py-1 rounded-full bg-[var(--surface-2)] border border-[var(--border)] text-xs text-[var(--text-secondary)] hover:text-gray-200 hover:border-gray-600 transition-colors"
+                className="px-2.5 py-1 rounded-full bg-[var(--surface-2)] border border-[var(--border)] text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-gray-600 transition-colors"
                 disabled={loading}
               >
                 {q}
@@ -378,7 +378,7 @@ export default function NlqPage() {
                   key={t.name}
                   className="bg-[var(--surface-2)]/50 border border-[var(--border)]/50 rounded-lg p-3"
                 >
-                  <div className="text-sm font-medium text-gray-200">
+                  <div className="text-sm font-medium text-[var(--text-primary)]">
                     {t.name.replace(/_/g, " ")}
                   </div>
                   <div className="text-xs text-[var(--text-secondary)] mt-1">
@@ -403,7 +403,7 @@ export default function NlqPage() {
                   key={spe.label}
                   className="bg-[var(--surface-2)]/50 border border-[var(--border)]/50 rounded-lg p-3"
                 >
-                  <div className="text-sm font-semibold text-gray-200 mb-2">
+                  <div className="text-sm font-semibold text-[var(--text-primary)] mb-2">
                     {spe.label}
                   </div>
                   <div className="grid grid-cols-2 gap-2 text-xs">
@@ -457,7 +457,7 @@ export default function NlqPage() {
                 <button
                   key={i}
                   onClick={() => handleExampleClick(h.question)}
-                  className="w-full text-left px-3 py-2 rounded bg-[var(--surface-2)]/50 border border-[var(--border)]/50 text-xs text-[var(--text-secondary)] hover:text-gray-200 hover:border-gray-600 transition-colors flex items-center justify-between"
+                  className="w-full text-left px-3 py-2 rounded bg-[var(--surface-2)]/50 border border-[var(--border)]/50 text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-gray-600 transition-colors flex items-center justify-between"
                 >
                   <span className="truncate">{h.question}</span>
                   <span className="text-gray-600 shrink-0 ml-2">

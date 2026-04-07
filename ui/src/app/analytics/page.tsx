@@ -90,7 +90,9 @@ function BarSection({
     <section className="bg-[var(--surface)] border border-[var(--border)] rounded-xl p-5">
       <div className="flex items-center gap-2 mb-4">
         <Icon size={16} className="text-[var(--text-secondary)]" />
-        <h2 className="font-semibold text-sm text-gray-200">{title}</h2>
+        <h2 className="font-semibold text-sm text-[var(--text-primary)]">
+          {title}
+        </h2>
       </div>
       {loading ? (
         <div className="text-[var(--text-secondary)] text-xs">Loading…</div>
@@ -190,7 +192,7 @@ export default function AnalyticsPage() {
         />
 
         {error && (
-          <div className="mb-6 p-3 rounded bg-red-900/20 border border-red-700 text-red-400 text-sm">
+          <div className="mb-6 p-3 rounded bg-[var(--role-admin-bg)] border border-[var(--role-admin-border)] text-[var(--role-admin-text)] text-sm">
             {error}
           </div>
         )}
@@ -218,7 +220,7 @@ export default function AnalyticsPage() {
           <div className="mb-8 bg-[var(--surface)] border border-[var(--border)] rounded-xl p-5">
             <div className="flex items-center gap-2 mb-3">
               <Users size={16} className="text-[var(--text-secondary)]" />
-              <h2 className="font-semibold text-sm text-gray-200">
+              <h2 className="font-semibold text-sm text-[var(--text-primary)]">
                 Gender Distribution
               </h2>
             </div>

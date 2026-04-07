@@ -186,12 +186,18 @@ const NEGOTIATION_STATUSES = [
 
 function statusBadge(status: string) {
   const map: Record<string, string> = {
-    COMPLETED: "bg-green-900 text-green-300",
-    CONFIRMED: "bg-blue-900 text-blue-300",
-    FINALIZED: "bg-blue-900 text-blue-300",
-    IN_PROGRESS: "bg-yellow-900 text-yellow-300",
-    TERMINATED: "bg-red-900 text-red-300",
-    ERROR: "bg-red-900 text-red-300",
+    COMPLETED:
+      "bg-[var(--role-user-bg)] text-[var(--role-user-text)] border border-[var(--role-user-border)]",
+    CONFIRMED:
+      "bg-[var(--role-holder-bg)] text-[var(--role-holder-text)] border border-[var(--role-holder-border)]",
+    FINALIZED:
+      "bg-[var(--role-holder-bg)] text-[var(--role-holder-text)] border border-[var(--role-holder-border)]",
+    IN_PROGRESS:
+      "bg-[var(--role-hdab-bg)] text-[var(--role-hdab-text)] border border-[var(--role-hdab-border)]",
+    TERMINATED:
+      "bg-[var(--role-admin-bg)] text-[var(--role-admin-text)] border border-[var(--role-admin-border)]",
+    ERROR:
+      "bg-[var(--role-admin-bg)] text-[var(--role-admin-text)] border border-[var(--role-admin-border)]",
   };
   return (
     <span
@@ -207,9 +213,9 @@ function statusBadge(status: string) {
 function ehdsArticle(policyId?: string) {
   if (!policyId) return null;
   if (policyId.includes("53c") || policyId.includes("research"))
-    return <span className="text-purple-400">Art. 53(c)</span>;
+    return <span className="text-[var(--role-trust-text)]">Art. 53(c)</span>;
   if (policyId.includes("art7") || policyId.includes("cross-border"))
-    return <span className="text-orange-400">Art. 7</span>;
+    return <span className="text-[var(--role-hdab-text)]">Art. 7</span>;
   return <span className="text-[var(--text-secondary)]">{policyId}</span>;
 }
 
@@ -233,12 +239,12 @@ function directionBadge(direction?: string) {
   if (!direction) return null;
   if (direction === "OUTGOING")
     return (
-      <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-teal-900 text-teal-300">
+      <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-[var(--role-patient-bg)] text-[var(--role-patient-text)] border border-[var(--role-patient-border)]">
         <ArrowRight size={9} /> OUT
       </span>
     );
   return (
-    <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-green-900 text-green-300">
+    <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-[var(--role-user-bg)] text-[var(--role-user-text)] border border-[var(--role-user-border)]">
       <ArrowLeft size={9} /> IN
     </span>
   );
@@ -248,8 +254,8 @@ function accessTypeBadge(t?: string) {
   if (!t) return <span className="text-[var(--text-secondary)]">—</span>;
   const cls =
     t === "INITIAL_TRANSFER"
-      ? "bg-blue-900 text-blue-300"
-      : "bg-purple-900 text-purple-300";
+      ? "bg-[var(--role-holder-bg)] text-[var(--role-holder-text)] border border-[var(--role-holder-border)]"
+      : "bg-[var(--role-trust-bg)] text-[var(--role-trust-text)] border border-[var(--role-trust-border)]";
   return (
     <span
       className={`inline-block px-1.5 py-0.5 rounded text-[10px] font-semibold uppercase ${cls}`}
@@ -265,7 +271,7 @@ function ComplianceButton({ name, email }: { name?: string; email?: string }) {
     <a
       href={`mailto:${email}?subject=Data Access Restriction Request`}
       title={`Contact compliance officer: ${name ?? email}`}
-      className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] bg-orange-900/60 text-orange-300 hover:bg-orange-800 transition-colors"
+      className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] bg-[var(--role-hdab-bg)] text-[var(--role-hdab-text)] border border-[var(--role-hdab-border)] hover:opacity-80 transition-opacity"
     >
       <Mail size={9} /> {name ?? email}
     </a>
@@ -588,7 +594,7 @@ export default function AdminAuditPage() {
                                 {row.consumerName ?? "—"}
                               </td>
                               <td className="py-2 px-2">
-                                <span className="inline-block px-1.5 py-0.5 rounded bg-teal-900 text-teal-300 text-[10px] font-semibold">
+                                <span className="inline-block px-1.5 py-0.5 rounded bg-[var(--role-patient-bg)] text-[var(--role-patient-text)] border border-[var(--role-patient-border)] text-[10px] font-semibold">
                                   {row.totalAccesses}×
                                 </span>
                               </td>
@@ -729,7 +735,7 @@ export default function AdminAuditPage() {
                               <td className="py-2 px-2">
                                 {t.accessLogCount != null &&
                                 t.accessLogCount > 0 ? (
-                                  <span className="inline-block px-1.5 py-0.5 rounded bg-teal-900 text-teal-300 text-[10px] font-semibold">
+                                  <span className="inline-block px-1.5 py-0.5 rounded bg-[var(--role-patient-bg)] text-[var(--role-patient-text)] border border-[var(--role-patient-border)] text-[10px] font-semibold">
                                     {t.accessLogCount}×
                                   </span>
                                 ) : (
@@ -889,7 +895,7 @@ export default function AdminAuditPage() {
                                   <td className="py-2 px-2">
                                     {n.accessLogCount != null &&
                                     n.accessLogCount > 0 ? (
-                                      <span className="inline-block px-1.5 py-0.5 rounded bg-teal-900 text-teal-300 text-[10px] font-semibold">
+                                      <span className="inline-block px-1.5 py-0.5 rounded bg-[var(--role-patient-bg)] text-[var(--role-patient-text)] border border-[var(--role-patient-border)] text-[10px] font-semibold">
                                         {n.accessLogCount}×
                                       </span>
                                     ) : (

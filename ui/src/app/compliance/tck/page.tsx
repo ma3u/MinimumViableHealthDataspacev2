@@ -130,7 +130,7 @@ function SuiteCard({
                   <li key={t.id} className="flex items-start gap-2 text-sm">
                     <StatusIcon status={t.status} />
                     <div>
-                      <span className="text-gray-200">
+                      <span className="text-[var(--text-primary)]">
                         <span className="font-mono text-xs text-[var(--text-secondary)] mr-1.5">
                           {t.id}
                         </span>

@@ -437,7 +437,7 @@ function NegotiateContent() {
                   }`}
                 >
                   <div className="flex items-center justify-between">
-                    <span className="font-medium text-gray-200">
+                    <span className="font-medium text-[var(--text-primary)]">
                       {o.name || assetLabel(o.assetId)}
                     </span>
                     <div className="flex items-center gap-2">
@@ -506,7 +506,7 @@ function NegotiateContent() {
           {selectedOffer && (
             <div className="mb-4 p-3 rounded bg-[var(--surface-2)]/60 border border-[var(--border)] text-sm">
               <span className="text-[var(--text-secondary)]">Selected:</span>{" "}
-              <span className="text-gray-200 font-medium">
+              <span className="text-[var(--text-primary)] font-medium">
                 {selectedOffer.name || assetLabel(selectedOffer.assetId)}
               </span>
               {selectedOffer.contentType && (
@@ -524,7 +524,7 @@ function NegotiateContent() {
             <button
               type="submit"
               disabled={initiating || !offerId}
-              className="flex items-center gap-2 px-4 py-2 bg-layer2 text-white rounded text-sm font-medium hover:bg-layer2/90 disabled:opacity-50"
+              className="flex items-center gap-2 px-4 py-2 bg-[var(--accent)] text-white rounded text-sm font-medium hover:bg-[var(--accent-hover)] disabled:opacity-50"
             >
               {initiating ? (
                 <Loader2 size={14} className="animate-spin" />
@@ -560,7 +560,7 @@ function NegotiateContent() {
                 >
                   {stateIcon(state)}
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-200 truncate">
+                    <p className="text-sm font-medium text-[var(--text-primary)] truncate">
                       {n.assetId
                         ? assetLabel(n.assetId as string)
                         : n["@id"].slice(0, 12)}

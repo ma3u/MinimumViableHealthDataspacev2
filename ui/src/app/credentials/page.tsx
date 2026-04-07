@@ -283,7 +283,7 @@ export default function CredentialsPage() {
             <button
               onClick={handleRequest}
               disabled={requesting || !reqParticipant}
-              className="flex items-center justify-center gap-2 px-4 py-2 bg-layer2 text-white rounded text-sm font-medium hover:bg-layer2/90 disabled:opacity-50"
+              className="flex items-center justify-center gap-2 px-4 py-2 bg-[var(--accent)] text-white rounded text-sm font-medium hover:bg-[var(--accent-hover)] disabled:opacity-50"
             >
               {requesting ? (
                 <Loader2 size={14} className="animate-spin" />
@@ -298,8 +298,8 @@ export default function CredentialsPage() {
             <p
               className={`mt-3 text-xs ${
                 requestResult.startsWith("Error")
-                  ? "text-red-400"
-                  : "text-green-400"
+                  ? "text-[var(--role-admin-text)]"
+                  : "text-[var(--role-user-text)]"
               }`}
             >
               {requestResult}
@@ -346,12 +346,12 @@ export default function CredentialsPage() {
                           size={18}
                           className={
                             vc.status === "Active"
-                              ? "text-green-400"
+                              ? "text-[var(--role-user-text)]"
                               : "text-[var(--text-secondary)]"
                           }
                         />
                         <div>
-                          <p className="font-medium text-sm text-gray-200">
+                          <p className="font-medium text-sm text-[var(--text-primary)]">
                             {vc.type}
                           </p>
                           <p className="text-xs text-[var(--text-secondary)]">
@@ -364,8 +364,8 @@ export default function CredentialsPage() {
                         <span
                           className={`text-xs px-2 py-0.5 rounded-full ${
                             vc.status === "Active"
-                              ? "bg-green-900/40 text-green-400"
-                              : "bg-gray-700 text-[var(--text-secondary)]"
+                              ? "bg-[var(--role-user-bg)] text-[var(--role-user-text)] border border-[var(--role-user-border)]"
+                              : "bg-[var(--surface-2)] text-[var(--text-secondary)]"
                           }`}
                         >
                           {vc.status}
@@ -439,7 +439,7 @@ export default function CredentialsPage() {
                             handleRemove(vc.id);
                           }}
                           disabled={removingId === vc.id}
-                          className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-red-400 border border-red-800 rounded hover:bg-red-900/30 disabled:opacity-50 transition-colors"
+                          className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-[var(--role-admin-text)] border border-[var(--role-admin-border)] rounded hover:bg-[var(--role-admin-bg)] disabled:opacity-50 transition-colors"
                         >
                           {removingId === vc.id ? (
                             <Loader2 size={12} className="animate-spin" />

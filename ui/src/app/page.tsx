@@ -45,10 +45,10 @@ export default function Home() {
 
         <p className="text-[var(--text-primary)] text-base sm:text-lg leading-relaxed max-w-3xl mb-4">
           This interactive demo shows how the{" "}
-          <strong className="text-white">EHDS regulation</strong> enables secure
-          cross-border health data sharing across Europe. Explore the full
-          lifecycle, from publishing clinical datasets to negotiating access
-          contracts and running privacy-preserving analytics.
+          <strong className="text-[var(--accent)]">EHDS regulation</strong>{" "}
+          enables secure cross-border health data sharing across Europe. Explore
+          the full lifecycle, from publishing clinical datasets to negotiating
+          access contracts and running privacy-preserving analytics.
         </p>
 
         <div className="flex flex-wrap gap-3 text-sm text-[var(--text-secondary)]">
@@ -93,21 +93,23 @@ export default function Home() {
           </a>{" "}
           creates a unified framework for sharing health data across EU member
           states while safeguarding patient rights under GDPR. It distinguishes
-          between <strong className="text-white">primary use</strong> (patients
-          accessing their own records) and{" "}
-          <strong className="text-white">secondary use</strong> (research,
-          policy, innovation), each with strict governance and oversight.
+          between{" "}
+          <strong className="text-[var(--text-primary)]">primary use</strong>{" "}
+          (patients accessing their own records) and{" "}
+          <strong className="text-[var(--text-primary)]">secondary use</strong>{" "}
+          (research, policy, innovation), each with strict governance and
+          oversight.
         </p>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div className="rounded-xl border border-green-700/40 bg-green-950/20 p-4 sm:p-5">
+          <div className="rounded-xl border border-[var(--role-user-border)] bg-[var(--role-user-bg)] p-4 sm:p-5">
             <div className="flex items-center gap-2 mb-2">
               <FlaskConical
                 size={18}
-                className="text-green-300"
+                className="text-[var(--role-user-text)]"
                 aria-hidden="true"
               />
-              <h3 className="font-semibold text-green-300 text-sm sm:text-base">
+              <h3 className="font-semibold text-[var(--role-user-text)] text-sm sm:text-base">
                 For Researchers
               </h3>
             </div>
@@ -123,14 +125,14 @@ export default function Home() {
             </p>
           </div>
 
-          <div className="rounded-xl border border-blue-700/40 bg-blue-950/20 p-4 sm:p-5">
+          <div className="rounded-xl border border-[var(--role-holder-border)] bg-[var(--role-holder-bg)] p-4 sm:p-5">
             <div className="flex items-center gap-2 mb-2">
               <BookOpen
                 size={18}
-                className="text-blue-300"
+                className="text-[var(--role-holder-text)]"
                 aria-hidden="true"
               />
-              <h3 className="font-semibold text-blue-300 text-sm sm:text-base">
+              <h3 className="font-semibold text-[var(--role-holder-text)] text-sm sm:text-base">
                 For Hospitals
               </h3>
             </div>
@@ -149,10 +151,14 @@ export default function Home() {
             </p>
           </div>
 
-          <div className="rounded-xl border border-teal-700/40 bg-teal-950/20 p-4 sm:p-5">
+          <div className="rounded-xl border border-[var(--role-patient-border)] bg-[var(--role-patient-bg)] p-4 sm:p-5">
             <div className="flex items-center gap-2 mb-2">
-              <Heart size={18} className="text-teal-300" aria-hidden="true" />
-              <h3 className="font-semibold text-teal-300 text-sm sm:text-base">
+              <Heart
+                size={18}
+                className="text-[var(--role-patient-text)]"
+                aria-hidden="true"
+              />
+              <h3 className="font-semibold text-[var(--role-patient-text)] text-sm sm:text-base">
                 For Patients
               </h3>
             </div>
@@ -169,14 +175,14 @@ export default function Home() {
             </p>
           </div>
 
-          <div className="rounded-xl border border-amber-700/40 bg-amber-950/20 p-4 sm:p-5">
+          <div className="rounded-xl border border-[var(--role-hdab-border)] bg-[var(--role-hdab-bg)] p-4 sm:p-5">
             <div className="flex items-center gap-2 mb-2">
               <ShieldCheck
                 size={18}
-                className="text-amber-300"
+                className="text-[var(--role-hdab-text)]"
                 aria-hidden="true"
               />
-              <h3 className="font-semibold text-amber-300 text-sm sm:text-base">
+              <h3 className="font-semibold text-[var(--role-hdab-text)] text-sm sm:text-base">
                 For Regulators
               </h3>
             </div>
@@ -378,7 +384,7 @@ export default function Home() {
             />
             <h2
               id="feedback-title"
-              className="text-sm sm:text-base font-semibold text-gray-200"
+              className="text-sm sm:text-base font-semibold text-[var(--text-primary)]"
             >
               Feedback & Contributions
             </h2>
