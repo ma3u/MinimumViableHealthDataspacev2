@@ -814,8 +814,8 @@ function GraphContent() {
         ctx.fillRect(mx - tw / 2 - 2, my - fs / 2 - 1, tw + 4, fs + 2);
         ctx.fillStyle = isAdj
           ? isDark
-            ? "#93c5fd"
-            : "#2563eb"
+            ? "#adc6ff" /* Stitch nocturne primary */
+            : "#0058be" /* Stitch primary */
           : isDark
             ? "#6b7280"
             : "#94a3b8";
@@ -853,50 +853,81 @@ function GraphContent() {
         </button>
         {leftCollapsed ? null : (
           <>
-            <div>
-              <h2 className="mb-1 text-sm font-bold">Knowledge Graph</h2>
-              <p className="mb-2 text-xs text-[var(--text-secondary)]">
-                5-layer EHDS health dataspace — {data.nodes.length} nodes ·{" "}
-                {data.links.length} edges
+            {/* ── Brand header ── */}
+            <div className="pb-3 border-b border-[var(--border)]">
+              <h2 className="text-base font-bold text-[var(--accent)] leading-tight">
+                Knowledge Graph
+              </h2>
+              <p className="text-[10px] text-[var(--text-secondary)] uppercase tracking-wider mt-0.5 mb-3">
+                EHDS Health Dataspace
               </p>
-              <div className="flex flex-col gap-1 text-xs">
-                <a
-                  href="/catalog"
-                  className="flex items-center gap-1.5 text-[var(--text-secondary)] hover:text-teal-400 transition-colors"
-                >
-                  <BookOpen size={11} /> Dataset Catalog
-                </a>
-                <a
-                  href="/patient"
-                  className="flex items-center gap-1.5 text-[var(--text-secondary)] hover:text-teal-400 transition-colors"
-                >
-                  <Activity size={11} /> Patient Journey
-                </a>
-                <a
-                  href="/analytics"
-                  className="flex items-center gap-1.5 text-[var(--text-secondary)] hover:text-teal-400 transition-colors"
-                >
-                  <Database size={11} /> OMOP Analytics
-                </a>
-                <a
-                  href="/api/graph/validate"
-                  target="_blank"
-                  className="flex items-center gap-1.5 text-[var(--text-secondary)] hover:text-yellow-400 transition-colors"
-                >
-                  <ShieldCheck size={11} /> Validate graph
-                </a>
+              {/* Active Entities — Stitch stat-card: numbers are text-primary, border gives color */}
+              <p className="section-label">Active Entities</p>
+              <div className="grid grid-cols-2 gap-2">
+                <div className="stat-card border-l-[var(--accent)]">
+                  <p className="section-label mb-0.5">Nodes</p>
+                  <p className="text-2xl font-black text-[var(--text-primary)] leading-none tabular-nums">
+                    {data.nodes.length.toLocaleString()}
+                  </p>
+                </div>
+                <div className="stat-card border-l-[var(--success-text)]">
+                  <p className="section-label mb-0.5">Links</p>
+                  <p className="text-2xl font-black text-[var(--text-primary)] leading-none tabular-nums">
+                    {data.links.length.toLocaleString()}
+                  </p>
+                </div>
               </div>
             </div>
 
-            {/* Active persona indicator — auto-derived from user role */}
+            {/* ── Quick links ── */}
+            <div>
+              <p className="section-label">Explore</p>
+              <div className="flex flex-col">
+                {[
+                  {
+                    href: "/catalog",
+                    icon: BookOpen,
+                    label: "Dataset Catalog",
+                  },
+                  {
+                    href: "/patient",
+                    icon: Activity,
+                    label: "Patient Journey",
+                  },
+                  {
+                    href: "/analytics",
+                    icon: Database,
+                    label: "OMOP Analytics",
+                  },
+                  {
+                    href: "/api/graph/validate",
+                    icon: ShieldCheck,
+                    label: "Validate graph",
+                    external: true,
+                  },
+                ].map(({ href, icon: Icon, label, external }) => (
+                  <a
+                    key={href}
+                    href={href}
+                    target={external ? "_blank" : undefined}
+                    className="flex items-center gap-2 py-1.5 text-xs text-[var(--text-secondary)] hover:text-[var(--accent)] transition-colors rounded hover:bg-[var(--accent-surface)] px-1"
+                  >
+                    <Icon size={12} aria-hidden="true" />
+                    {label}
+                  </a>
+                ))}
+              </div>
+            </div>
+
+            {/* Active persona indicator */}
             {activePersona !== "default" && (
-              <div className="rounded border border-[var(--border)] bg-[var(--surface-2)]/40 px-2 py-1.5">
+              <div className="rounded-lg border border-[var(--accent)]/30 bg-[var(--accent-surface)] px-3 py-2">
                 {(() => {
                   const pv = PERSONA_VIEWS.find((p) => p.id === activePersona);
                   const Icon = pv ? PRESET_ICONS[pv.icon] ?? Eye : Eye;
                   return (
                     <>
-                      <div className="flex items-center gap-1.5 text-xs font-medium text-amber-200">
+                      <div className="flex items-center gap-1.5 text-xs font-semibold text-[var(--accent)]">
                         <Icon size={11} />
                         {pv?.label ?? activePersona}
                       </div>
@@ -906,7 +937,7 @@ function GraphContent() {
                         </div>
                       )}
                       {pv?.question && (
-                        <p className="mt-1 text-xs italic text-[var(--text-secondary)]">
+                        <p className="mt-1 text-[10px] italic text-[var(--text-secondary)] leading-snug">
                           &ldquo;{pv.question}&rdquo;
                         </p>
                       )}
@@ -918,10 +949,8 @@ function GraphContent() {
 
             {/* Filter presets — persona-aware */}
             <div>
-              <p className="mb-2 text-xs font-semibold uppercase text-[var(--text-secondary)]">
-                Filter by question
-              </p>
-              <div className="flex flex-col gap-1">
+              <p className="section-label">Filter by question</p>
+              <div className="flex flex-col gap-0.5">
                 {(activePersona === "patient"
                   ? PATIENT_FILTER_PRESETS
                   : activePersona === "hospital"
@@ -949,20 +978,11 @@ function GraphContent() {
                         )
                       }
                       title={preset.description}
-                      className={`flex items-center gap-2 rounded px-2 py-1.5 text-left text-xs transition-colors ${
+                      className={`flex items-center gap-2 py-1.5 text-left text-xs transition-colors ${
                         isActive
-                          ? "bg-teal-900/60 text-teal-200 border border-teal-700"
-                          : "text-[var(--text-secondary)] hover:bg-[var(--surface-2)] hover:text-[var(--text-primary)] border border-transparent"
+                          ? "nav-item-active rounded-r"
+                          : "px-2 rounded text-[var(--text-secondary)] hover:bg-[var(--surface-2)] hover:text-[var(--text-primary)]"
                       }`}
-                      style={
-                        isActive && activePersona !== "patient"
-                          ? {
-                              background: "rgb(30 58 138 / 0.6)",
-                              color: "#bfdbfe",
-                              borderColor: "#1d4ed8",
-                            }
-                          : {}
-                      }
                     >
                       <Icon size={11} />
                       <span className="leading-tight">{preset.label}</span>
@@ -971,7 +991,7 @@ function GraphContent() {
                 })}
               </div>
               {activeFilter && (
-                <p className="mt-1.5 text-xs text-gray-600">
+                <p className="mt-1.5 text-xs text-[var(--text-secondary)]">
                   {
                     [
                       ...FILTER_PRESETS,
@@ -987,9 +1007,7 @@ function GraphContent() {
 
             {/* Layer legend — persona-aware labels */}
             <div>
-              <p className="mb-2 text-xs font-semibold uppercase text-[var(--text-secondary)]">
-                Structural layers
-              </p>
+              <p className="section-label">Structural layers</p>
               {Object.entries(LAYER_LABELS)
                 .filter(([k]) => +k >= 1)
                 .map(([k, v]) => {
@@ -1015,9 +1033,7 @@ function GraphContent() {
 
             {/* Node type color legend — warm/vivid accents */}
             <div>
-              <p className="mb-2 text-xs font-semibold uppercase text-[var(--text-secondary)]">
-                Key actors
-              </p>
+              <p className="section-label">Key actors</p>
               {ROLE_LEGEND.map(({ label, color, description, tooltip }) => (
                 <div
                   key={label}
@@ -1032,7 +1048,9 @@ function GraphContent() {
                     <div className="font-medium text-[var(--text-primary)]">
                       {label}
                     </div>
-                    <div className="text-gray-600">{description}</div>
+                    <div className="text-[var(--text-secondary)]">
+                      {description}
+                    </div>
                   </div>
                 </div>
               ))}
@@ -1043,7 +1061,7 @@ function GraphContent() {
               <div className="flex items-start gap-1.5 rounded-lg border border-[var(--border)] bg-[var(--surface-2)]/50 p-2 text-xs text-[var(--text-secondary)]">
                 <MousePointerClick
                   size={11}
-                  className="mt-0.5 shrink-0 text-blue-500"
+                  className="mt-0.5 shrink-0 text-[var(--accent)]"
                 />
                 Click a node to inspect and expand its neighbours.
               </div>
@@ -1127,7 +1145,7 @@ function GraphContent() {
 
         {/* Expanding spinner overlay */}
         {expanding && (
-          <div className="pointer-events-none absolute bottom-4 right-4 flex items-center gap-2 rounded-full bg-[var(--surface)]/90 px-3 py-1.5 text-xs text-blue-300">
+          <div className="pointer-events-none absolute bottom-4 right-4 flex items-center gap-2 rounded-full bg-[var(--surface)]/90 px-3 py-1.5 text-xs text-[var(--text-secondary)]">
             <Loader2 size={12} className="animate-spin" />
             Loading neighbours…
           </div>
@@ -1137,7 +1155,7 @@ function GraphContent() {
       {/* ── Right-side detail panel (absolute overlay to avoid layout squeeze) */}
       {selected && (
         <aside
-          className={`absolute right-0 top-0 h-full overflow-y-auto border-l border-[var(--border)] bg-[var(--surface)] animate-slide-in-right transition-all duration-200 z-40 shadow-2xl ${
+          className={`absolute right-0 top-0 h-full overflow-y-auto border-l border-[var(--border)] bg-[var(--surface-card)] animate-slide-in-right transition-all duration-200 z-40 shadow-2xl ${
             rightCollapsed ? "w-10" : "w-80"
           }`}
         >
@@ -1155,47 +1173,49 @@ function GraphContent() {
           </button>
           {rightCollapsed ? null : (
             <>
-              {/* Header */}
-              <div className="flex items-start justify-between gap-2 border-b border-[var(--border)] p-4">
-                <div className="min-w-0">
-                  <h3
-                    className="text-sm font-bold leading-tight truncate"
+              {/* Header — Stitch "Entity Details" pattern */}
+              <div className="border-b border-[var(--border)] px-4 pt-4 pb-3">
+                <div className="flex items-start justify-between mb-1.5">
+                  <h2 className="text-2xl font-black tracking-tight text-[var(--text-primary)] leading-tight">
+                    Entity Details
+                  </h2>
+                  <button
+                    onClick={() => setSelected(null)}
+                    className="shrink-0 mt-1 text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
+                    aria-label="Close detail panel"
+                  >
+                    <X size={14} />
+                  </button>
+                </div>
+                <div
+                  className="flex items-center gap-1.5 cursor-help"
+                  title={NODE_TOOLTIPS[selected.label]}
+                >
+                  <span
+                    className="h-2.5 w-2.5 shrink-0 rounded-full"
+                    style={{ background: selected.color }}
+                  />
+                  <span
+                    className="text-sm font-semibold text-[var(--accent)] truncate"
                     style={{ color: selected.color }}
                   >
                     {selected.name}
-                  </h3>
-                  <div
-                    className="mt-1 flex items-center gap-1.5 cursor-help"
-                    title={NODE_TOOLTIPS[selected.label]}
-                  >
-                    <span
-                      className="h-2 w-2 shrink-0 rounded-full"
-                      style={{ background: selected.color }}
-                    />
-                    <span className="text-xs text-[var(--text-secondary)]">
-                      {NODE_DISPLAY_NAMES[selected.label] ?? selected.label}
-                    </span>
-                  </div>
-                  <div
-                    className="mt-0.5 text-xs text-gray-600 cursor-help"
-                    title={LAYER_TOOLTIPS[selected.layer]}
-                  >
-                    {PERSONA_LAYER_LABELS[activePersona]?.[selected.layer] ??
-                      LAYER_LABELS[selected.layer]}
-                  </div>
+                  </span>
                 </div>
-                <button
-                  onClick={() => setSelected(null)}
-                  className="shrink-0 mt-0.5 text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
-                  aria-label="Close detail panel"
+                <p
+                  className="mt-0.5 text-xs text-[var(--text-secondary)] cursor-help"
+                  title={LAYER_TOOLTIPS[selected.layer]}
                 >
-                  <X size={14} />
-                </button>
+                  {NODE_DISPLAY_NAMES[selected.label] ?? selected.label}
+                  {" · "}
+                  {PERSONA_LAYER_LABELS[activePersona]?.[selected.layer] ??
+                    LAYER_LABELS[selected.layer]}
+                </p>
               </div>
 
               {/* Node ID (collapsible) */}
               <div className="px-4 py-2 border-b border-[var(--border)]">
-                <p className="break-all text-[10px] leading-tight text-gray-700 font-mono">
+                <p className="break-all text-[10px] leading-tight text-[var(--text-secondary)] font-mono">
                   {selected.id}
                 </p>
               </div>
@@ -1207,7 +1227,7 @@ function GraphContent() {
                     href={`/catalog?search=${encodeURIComponent(
                       selected.name,
                     )}`}
-                    className="inline-flex items-center gap-1 text-xs text-teal-400 hover:underline"
+                    className="inline-flex items-center gap-1 text-xs text-[var(--layer2-text)] hover:underline"
                   >
                     <BookOpen size={10} /> Catalog
                   </a>
@@ -1215,7 +1235,7 @@ function GraphContent() {
                 {(selected.layer === 3 || selected.layer === 4) && (
                   <a
                     href="/patient"
-                    className="inline-flex items-center gap-1 text-xs text-green-400 hover:underline"
+                    className="inline-flex items-center gap-1 text-xs text-[var(--layer3-text)] hover:underline"
                   >
                     <Activity size={10} /> Patient view
                   </a>
@@ -1223,7 +1243,7 @@ function GraphContent() {
                 {selected.layer === 4 && (
                   <a
                     href="/analytics"
-                    className="inline-flex items-center gap-1 text-xs text-orange-400 hover:underline"
+                    className="inline-flex items-center gap-1 text-xs text-[var(--layer4-text)] hover:underline"
                   >
                     <Database size={10} /> Analytics
                   </a>
@@ -1233,7 +1253,7 @@ function GraphContent() {
                   selected.label === "ResearchPseudonym") && (
                   <a
                     href="/compliance#trust-center"
-                    className="inline-flex items-center gap-1 text-xs text-blue-400 hover:underline"
+                    className="inline-flex items-center gap-1 text-xs text-[var(--layer1-text)] hover:underline"
                   >
                     <Lock size={10} /> Trust Center
                   </a>
@@ -1249,25 +1269,28 @@ function GraphContent() {
                       Loading details…
                     </div>
                   ) : nodeProps.length > 0 ? (
-                    <div className="flex flex-col gap-1.5">
-                      <p className="text-xs font-semibold uppercase text-[var(--text-secondary)] mb-0.5">
-                        Properties
-                      </p>
-                      {nodeProps.map((p) => (
-                        <div key={p.key} className="flex gap-2 text-xs">
-                          <span className="shrink-0 text-[var(--text-secondary)] min-w-[80px]">
-                            {p.label}
-                          </span>
-                          <span className="text-[var(--text-primary)] break-all">
-                            {p.value.length > 120
-                              ? p.value.slice(0, 118) + "…"
-                              : p.value}
-                          </span>
-                        </div>
-                      ))}
+                    <div>
+                      <p className="section-label">Graph Properties</p>
+                      <div className="space-y-2">
+                        {nodeProps.map((p) => (
+                          <div
+                            key={p.key}
+                            className="flex items-center justify-between gap-2 px-3 py-2.5 bg-[var(--surface)] rounded-xl text-xs"
+                          >
+                            <span className="text-[var(--text-secondary)] shrink-0">
+                              {p.label}
+                            </span>
+                            <span className="text-[var(--text-primary)] font-bold text-right break-all">
+                              {p.value.length > 55
+                                ? p.value.slice(0, 53) + "…"
+                                : p.value}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   ) : (
-                    <p className="text-xs text-gray-600 italic">
+                    <p className="text-xs text-[var(--text-secondary)] italic">
                       No additional properties
                     </p>
                   )}
@@ -1285,7 +1308,7 @@ function GraphContent() {
                   <button
                     onClick={() => expandNode(selected)}
                     disabled={!!expanding}
-                    className="flex w-full items-center justify-center gap-1.5 rounded border border-blue-700 bg-blue-900/40 py-2 text-xs text-blue-300 hover:bg-blue-900/70 disabled:opacity-50 transition-colors"
+                    className="flex w-full items-center justify-center gap-1.5 rounded border border-[var(--accent)] py-2 text-xs text-[var(--accent)] hover:bg-[var(--accent-surface)] disabled:opacity-50 transition-colors"
                   >
                     {expanding === selected.id ? (
                       <>
@@ -1299,7 +1322,7 @@ function GraphContent() {
                     )}
                   </button>
                 ) : (
-                  <p className="text-xs text-gray-600">
+                  <p className="text-xs text-[var(--text-secondary)]">
                     Neighbours loaded ({neighbours.length} connections)
                   </p>
                 )}
@@ -1311,40 +1334,33 @@ function GraphContent() {
                   {/* Outgoing */}
                   {neighbours.filter((nb) => nb.dir === "out").length > 0 && (
                     <div className="mb-3">
-                      <p className="mb-1.5 text-xs font-semibold uppercase text-[var(--text-secondary)]">
+                      <p className="section-label">
                         Outgoing (
                         {neighbours.filter((nb) => nb.dir === "out").length})
                       </p>
-                      <div className="flex flex-col gap-1">
+                      <div className="divide-y divide-[var(--border)]">
                         {neighbours
                           .filter((nb) => nb.dir === "out")
                           .map((nb, i) => (
                             <button
                               key={`out-${i}`}
                               onClick={() => setSelected(nb.node)}
-                              className="rounded border border-[var(--border)] bg-[var(--surface-2)]/40 px-2 py-1.5 text-left transition-colors hover:border-[var(--accent)]"
+                              className="w-full flex items-center gap-2 py-2 px-1 text-left transition-colors hover:bg-[var(--surface-2)] rounded group"
                             >
-                              <div className="mb-0.5 flex items-center gap-1">
-                                <span className="font-mono text-xs font-semibold text-blue-400">
-                                  →
-                                </span>
-                                <span className="truncate font-mono text-xs text-blue-300">
-                                  {FRIENDLY_REL_NAMES[nb.type] ?? nb.type}
-                                </span>
-                              </div>
-                              <div className="flex items-center gap-1">
-                                <span
-                                  className="h-2 w-2 shrink-0 rounded-full"
-                                  style={{ background: nb.node.color }}
-                                />
-                                <span className="truncate text-xs text-[var(--text-primary)]">
-                                  {nb.node.name}
-                                </span>
-                                <span className="ml-auto text-[10px] text-gray-600 shrink-0">
-                                  {NODE_DISPLAY_NAMES[nb.node.label] ??
-                                    nb.node.label}
-                                </span>
-                              </div>
+                              <span className="shrink-0 font-mono text-[10px] font-semibold text-[var(--accent)] bg-[var(--accent-surface)] px-1.5 py-0.5 rounded">
+                                {FRIENDLY_REL_NAMES[nb.type] ?? nb.type}
+                              </span>
+                              <span
+                                className="h-2 w-2 shrink-0 rounded-full"
+                                style={{ background: nb.node.color }}
+                              />
+                              <span className="truncate text-xs text-[var(--text-primary)] group-hover:text-[var(--accent)] flex-1">
+                                {nb.node.name}
+                              </span>
+                              <span className="shrink-0 text-[10px] text-[var(--text-secondary)]">
+                                {NODE_DISPLAY_NAMES[nb.node.label] ??
+                                  nb.node.label}
+                              </span>
                             </button>
                           ))}
                       </div>
@@ -1354,40 +1370,33 @@ function GraphContent() {
                   {/* Incoming */}
                   {neighbours.filter((nb) => nb.dir === "in").length > 0 && (
                     <div>
-                      <p className="mb-1.5 text-xs font-semibold uppercase text-[var(--text-secondary)]">
+                      <p className="section-label">
                         Incoming (
                         {neighbours.filter((nb) => nb.dir === "in").length})
                       </p>
-                      <div className="flex flex-col gap-1">
+                      <div className="divide-y divide-[var(--border)]">
                         {neighbours
                           .filter((nb) => nb.dir === "in")
                           .map((nb, i) => (
                             <button
                               key={`in-${i}`}
                               onClick={() => setSelected(nb.node)}
-                              className="rounded border border-[var(--border)] bg-[var(--surface-2)]/40 px-2 py-1.5 text-left transition-colors hover:border-[var(--accent)]"
+                              className="w-full flex items-center gap-2 py-2 px-1 text-left transition-colors hover:bg-[var(--surface-2)] rounded group"
                             >
-                              <div className="mb-0.5 flex items-center gap-1">
-                                <span className="font-mono text-xs font-semibold text-green-400">
-                                  ←
-                                </span>
-                                <span className="truncate font-mono text-xs text-green-300">
-                                  {FRIENDLY_REL_NAMES[nb.type] ?? nb.type}
-                                </span>
-                              </div>
-                              <div className="flex items-center gap-1">
-                                <span
-                                  className="h-2 w-2 shrink-0 rounded-full"
-                                  style={{ background: nb.node.color }}
-                                />
-                                <span className="truncate text-xs text-[var(--text-primary)]">
-                                  {nb.node.name}
-                                </span>
-                                <span className="ml-auto text-[10px] text-gray-600 shrink-0">
-                                  {NODE_DISPLAY_NAMES[nb.node.label] ??
-                                    nb.node.label}
-                                </span>
-                              </div>
+                              <span className="shrink-0 font-mono text-[10px] font-semibold text-[var(--layer3-text)] bg-[var(--surface-2)] px-1.5 py-0.5 rounded">
+                                {FRIENDLY_REL_NAMES[nb.type] ?? nb.type}
+                              </span>
+                              <span
+                                className="h-2 w-2 shrink-0 rounded-full"
+                                style={{ background: nb.node.color }}
+                              />
+                              <span className="truncate text-xs text-[var(--text-primary)] group-hover:text-[var(--accent)] flex-1">
+                                {nb.node.name}
+                              </span>
+                              <span className="shrink-0 text-[10px] text-[var(--text-secondary)]">
+                                {NODE_DISPLAY_NAMES[nb.node.label] ??
+                                  nb.node.label}
+                              </span>
                             </button>
                           ))}
                       </div>

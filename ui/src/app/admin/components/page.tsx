@@ -3,7 +3,6 @@
 import { fetchApi } from "@/lib/api";
 import { COMPONENT_INFO, type ComponentMeta } from "@/lib/edc/component-info";
 import { useCallback, useEffect, useRef, useState } from "react";
-import PageIntro from "@/components/PageIntro";
 import {
   Activity,
   AlertTriangle,
@@ -1094,279 +1093,201 @@ export default function AdminComponentsPage() {
     viewMode === "layer" ? snapshot?.timestamp : topology?.timestamp;
 
   return (
-    <div className="max-w-7xl mx-auto px-6 py-10">
-      <PageIntro
-        title="EDC Components"
-        icon={Activity}
-        description="Real-time health, CPU, and memory overview of all EDC-V, DCore, CFM, and infrastructure services. Switch between Layer view (grouped by architecture) and Participant view (per-participant component topology)."
-        prevStep={{ href: "/admin", label: "Operator Dashboard" }}
-        nextStep={{ href: "/admin/tenants", label: "Manage Tenants" }}
-        infoText="Health status is sourced from Docker container health checks. CPU and memory metrics are collected from the Docker Engine API. Click the ⓘ button on any component to see its role, protocol, ports, dependencies and health source. In Participant view, each participant shows their own decentralised connector stack. Critical or degraded participants sort to the top."
-        docLink={{ href: "/docs/architecture", label: "Architecture" }}
-      />
+    <div className="min-h-screen bg-[var(--bg)]">
+      <div className="max-w-7xl mx-auto px-8 py-10">
+        {/* ── Page header ── */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
+          <div>
+            <h1 className="page-header">EDC Components</h1>
+            <p className="text-[var(--text-secondary)] text-lg mt-1">
+              Infrastructure health · CPU &amp; memory per service
+            </p>
+          </div>
+          <div className="flex items-center gap-2 px-4 py-2 bg-[var(--success)]/10 text-[var(--success-text)] rounded-full border border-[var(--success)]/20 text-sm font-bold tracking-tight">
+            <span className="w-2 h-2 rounded-full bg-[var(--success)] animate-pulse" />
+            LIVE MONITORING
+          </div>
+        </div>
 
-      {/* Controls bar */}
-      <div className="flex items-center justify-between mb-6 flex-wrap gap-2">
-        <div className="flex items-center gap-4 text-xs text-[var(--text-secondary)]">
-          {/* View toggle */}
-          <div className="flex items-center border border-[var(--border)] rounded-lg overflow-hidden">
-            <button
-              onClick={() => setViewMode("layer")}
-              className={`px-3 py-1.5 text-xs transition-colors ${
-                viewMode === "layer"
-                  ? "bg-layer2/20 text-layer2"
-                  : "text-[var(--text-secondary)] hover:text-gray-200"
-              }`}
-            >
-              Layer View
-            </button>
-            <button
-              onClick={() => setViewMode("participant")}
-              className={`px-3 py-1.5 text-xs transition-colors ${
-                viewMode === "participant"
-                  ? "bg-layer2/20 text-layer2"
-                  : "text-[var(--text-secondary)] hover:text-gray-200"
-              }`}
-            >
-              Participant View
-            </button>
+        {/* Controls bar */}
+        <div className="flex items-center justify-between mb-6 flex-wrap gap-2">
+          <div className="flex items-center gap-4 text-xs text-[var(--text-secondary)]">
+            {/* View toggle */}
+            <div className="flex bg-[var(--surface)] p-1 rounded-xl border border-[var(--border)]">
+              <button
+                onClick={() => setViewMode("layer")}
+                className={`px-4 py-1.5 text-xs font-bold rounded-lg transition-all ${
+                  viewMode === "layer"
+                    ? "bg-[var(--surface-card)] shadow-sm text-[var(--accent)]"
+                    : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                }`}
+              >
+                Layer View
+              </button>
+              <button
+                onClick={() => setViewMode("participant")}
+                className={`px-4 py-1.5 text-xs font-bold rounded-lg transition-all ${
+                  viewMode === "participant"
+                    ? "bg-[var(--surface-card)] shadow-sm text-[var(--accent)]"
+                    : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                }`}
+              >
+                Participant View
+              </button>
+            </div>
+
+            {/* Stats summary for layer view */}
+            {viewMode === "layer" && snapshot && (
+              <>
+                <span>{totalServices} services</span>
+                <span>·</span>
+                <span className="text-emerald-400">{healthyCount} healthy</span>
+                <span className="text-blue-400">{runningCount} running</span>
+                <span>·</span>
+                <span>
+                  <Cpu size={11} className="inline mr-0.5" />
+                  {totalCpu.toFixed(1)}% total
+                </span>
+                <span>·</span>
+                <span>
+                  <HardDrive size={11} className="inline mr-0.5" />
+                  {totalMem > 1024
+                    ? `${(totalMem / 1024).toFixed(1)} GB`
+                    : `${Math.round(totalMem)} MB`}{" "}
+                  total
+                </span>
+              </>
+            )}
+
+            {/* Stats summary for participant view */}
+            {viewMode === "participant" && topology && (
+              <>
+                <span>{topology.summary.totalParticipants} participants</span>
+                <span>·</span>
+                <span>{topology.summary.totalInfra} infra services</span>
+                {topology.summary.degradedParticipants > 0 && (
+                  <>
+                    <span>·</span>
+                    <span className="text-red-400">
+                      {topology.summary.degradedParticipants} degraded
+                    </span>
+                  </>
+                )}
+              </>
+            )}
           </div>
 
-          {/* Stats summary for layer view */}
-          {viewMode === "layer" && snapshot && (
-            <>
-              <span>{totalServices} services</span>
-              <span>·</span>
-              <span className="text-emerald-400">{healthyCount} healthy</span>
-              <span className="text-blue-400">{runningCount} running</span>
-              <span>·</span>
-              <span>
-                <Cpu size={11} className="inline mr-0.5" />
-                {totalCpu.toFixed(1)}% total
-              </span>
-              <span>·</span>
-              <span>
-                <HardDrive size={11} className="inline mr-0.5" />
-                {totalMem > 1024
-                  ? `${(totalMem / 1024).toFixed(1)} GB`
-                  : `${Math.round(totalMem)} MB`}{" "}
-                total
-              </span>
-            </>
-          )}
-
-          {/* Stats summary for participant view */}
-          {viewMode === "participant" && topology && (
-            <>
-              <span>{topology.summary.totalParticipants} participants</span>
-              <span>·</span>
-              <span>{topology.summary.totalInfra} infra services</span>
-              {topology.summary.degradedParticipants > 0 && (
-                <>
-                  <span>·</span>
-                  <span className="text-red-400">
-                    {topology.summary.degradedParticipants} degraded
-                  </span>
-                </>
-              )}
-            </>
-          )}
+          <div className="flex items-center gap-3">
+            <label className="flex items-center gap-1.5 text-xs text-[var(--text-secondary)] cursor-pointer">
+              <input
+                type="checkbox"
+                checked={autoRefresh}
+                onChange={(e) => setAutoRefresh(e.target.checked)}
+                className="rounded border-gray-600 bg-[var(--surface-2)] text-layer2 focus:ring-layer2 w-3.5 h-3.5"
+              />
+              Auto-refresh (30s)
+            </label>
+            <button
+              onClick={() => fetchData(true)}
+              disabled={refreshing}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs border border-[var(--border)] rounded-lg hover:border-layer2 transition-colors disabled:opacity-50"
+            >
+              <RefreshCw
+                size={12}
+                className={refreshing ? "animate-spin" : ""}
+              />
+              Refresh
+            </button>
+          </div>
         </div>
 
-        <div className="flex items-center gap-3">
-          <label className="flex items-center gap-1.5 text-xs text-[var(--text-secondary)] cursor-pointer">
-            <input
-              type="checkbox"
-              checked={autoRefresh}
-              onChange={(e) => setAutoRefresh(e.target.checked)}
-              className="rounded border-gray-600 bg-[var(--surface-2)] text-layer2 focus:ring-layer2 w-3.5 h-3.5"
-            />
-            Auto-refresh (30s)
-          </label>
-          <button
-            onClick={() => fetchData(true)}
-            disabled={refreshing}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs border border-[var(--border)] rounded-lg hover:border-layer2 transition-colors disabled:opacity-50"
-          >
-            <RefreshCw size={12} className={refreshing ? "animate-spin" : ""} />
-            Refresh
-          </button>
-        </div>
-      </div>
-
-      {loading ? (
-        <div className="flex items-center gap-2 text-[var(--text-secondary)]">
-          <Loader2 size={16} className="animate-spin" />
-          Loading EDC components…
-        </div>
-      ) : viewMode === "participant" ? (
-        /* ═══════════════════════════════════════════════════════════════
+        {loading ? (
+          <div className="flex items-center gap-2 text-[var(--text-secondary)]">
+            <Loader2 size={16} className="animate-spin" />
+            Loading EDC components…
+          </div>
+        ) : viewMode === "participant" ? (
+          /* ═══════════════════════════════════════════════════════════════
            PARTICIPANT VIEW
            ═══════════════════════════════════════════════════════════════ */
-        topology && (
-          <>
-            {/* Cluster resource banner */}
-            {topology.clusterMetrics && (
-              <ClusterResourceBanner metrics={topology.clusterMetrics} />
-            )}
+          topology && (
+            <>
+              {/* Cluster resource banner */}
+              {topology.clusterMetrics && (
+                <ClusterResourceBanner metrics={topology.clusterMetrics} />
+              )}
 
-            {/* Critical banner */}
-            <CriticalBanner
-              degraded={topology.summary.degradedParticipants}
-              total={topology.summary.totalParticipants}
-              participants={topology.participants}
-            />
+              {/* Critical banner */}
+              <CriticalBanner
+                degraded={topology.summary.degradedParticipants}
+                total={topology.summary.totalParticipants}
+                participants={topology.participants}
+              />
 
-            {/* Participant topology sections */}
-            <div className="space-y-3 mb-8">
-              <h2 className="font-semibold text-sm flex items-center gap-2 text-[var(--text-primary)] mb-3">
-                <Users size={16} className="text-layer2" />
-                Dataspace Participants
-                <span className="text-xs font-normal text-[var(--text-secondary)]">
-                  ({topology.participants.length})
-                </span>
-              </h2>
-              {topology.participants.map((p) => (
-                <ParticipantTopologySection
-                  key={p.id}
-                  participant={p}
-                  peaks={peaksRef.current}
-                />
-              ))}
-            </div>
-
-            {/* Shared infrastructure */}
-            {topology.infrastructure.length > 0 && (
-              <div className="mb-8">
-                <div className="flex items-start justify-between mb-3 flex-wrap gap-2">
-                  <h2 className="font-semibold text-sm flex items-center gap-2 text-[var(--text-primary)]">
-                    <HardDrive size={16} className="text-yellow-400" />
-                    Shared Infrastructure &amp; CFM
-                    <span className="text-xs font-normal text-[var(--text-secondary)]">
-                      ({topology.infrastructure.length})
-                    </span>
-                  </h2>
-                  <ResourceSummary
-                    components={topology.infrastructure}
+              {/* Participant topology sections */}
+              <div className="space-y-3 mb-8">
+                <h2 className="font-semibold text-sm flex items-center gap-2 text-[var(--text-primary)] mb-3">
+                  <Users size={16} className="text-layer2" />
+                  Dataspace Participants
+                  <span className="text-xs font-normal text-[var(--text-secondary)]">
+                    ({topology.participants.length})
+                  </span>
+                </h2>
+                {topology.participants.map((p) => (
+                  <ParticipantTopologySection
+                    key={p.id}
+                    participant={p}
                     peaks={peaksRef.current}
                   />
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
-                  {topology.infrastructure.map((c) => (
-                    <TopoComponentCard key={c.container} comp={c} />
-                  ))}
-                </div>
+                ))}
               </div>
-            )}
 
-            {/* Docker unavailable */}
-            {!topology.dockerAvailable && (
-              <div className="border border-yellow-600/40 bg-yellow-900/20 rounded-xl p-4 text-sm text-yellow-400">
-                <strong>Docker socket not available.</strong> CPU and memory
-                metrics require the Docker socket to be mounted.
-              </div>
-            )}
-          </>
-        )
-      ) : (
-        /* ═══════════════════════════════════════════════════════════════
+              {/* Shared infrastructure */}
+              {topology.infrastructure.length > 0 && (
+                <div className="mb-8">
+                  <div className="flex items-start justify-between mb-3 flex-wrap gap-2">
+                    <h2 className="font-semibold text-sm flex items-center gap-2 text-[var(--text-primary)]">
+                      <HardDrive size={16} className="text-yellow-400" />
+                      Shared Infrastructure &amp; CFM
+                      <span className="text-xs font-normal text-[var(--text-secondary)]">
+                        ({topology.infrastructure.length})
+                      </span>
+                    </h2>
+                    <ResourceSummary
+                      components={topology.infrastructure}
+                      peaks={peaksRef.current}
+                    />
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
+                    {topology.infrastructure.map((c) => (
+                      <TopoComponentCard key={c.container} comp={c} />
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Docker unavailable */}
+              {!topology.dockerAvailable && (
+                <div className="border border-yellow-600/40 bg-yellow-900/20 rounded-xl p-4 text-sm text-yellow-400">
+                  <strong>Docker socket not available.</strong> CPU and memory
+                  metrics require the Docker socket to be mounted.
+                </div>
+              )}
+            </>
+          )
+        ) : (
+          /* ═══════════════════════════════════════════════════════════════
            LAYER VIEW (original)
            ═══════════════════════════════════════════════════════════════ */
-        <>
-          {/* Participants */}
-          {snapshot && snapshot.participants.length > 0 && (
-            <div className="mb-8">
-              <h2 className="font-semibold text-sm mb-4 flex items-center gap-2 text-[var(--text-primary)]">
-                <Users size={16} className="text-layer2" />
-                Dataspace Participants
-                <span className="text-xs font-normal text-[var(--text-secondary)]">
-                  ({snapshot.participants.length})
-                </span>
-              </h2>
-              <div className="overflow-x-auto border border-[var(--border)] rounded-xl">
-                <table className="w-full text-left">
-                  <thead>
-                    <tr className="border-b border-[var(--border)] bg-[var(--surface)]/60">
-                      <th className="py-2 px-3 text-xs font-medium text-[var(--text-secondary)] w-48">
-                        Participant
-                      </th>
-                      <th className="py-2 px-3 text-xs font-medium text-[var(--text-secondary)] w-32">
-                        Role
-                      </th>
-                      <th className="py-2 px-3 text-xs font-medium text-[var(--text-secondary)]">
-                        DID
-                      </th>
-                      <th className="py-2 px-3 text-xs font-medium text-[var(--text-secondary)] w-28">
-                        State
-                      </th>
-                      <th className="py-2 px-3 text-xs font-medium text-[var(--text-secondary)] w-20 text-center">
-                        Profiles
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {snapshot.participants.map((p) => (
-                      <tr
-                        key={p.id}
-                        className="border-b border-[var(--border)] hover:bg-[var(--surface-2)]/40 transition-colors"
-                      >
-                        <td className="py-2.5 px-3">
-                          <div className="font-semibold text-sm text-gray-200">
-                            {p.displayName}
-                          </div>
-                          <div className="text-[11px] text-[var(--text-secondary)]">
-                            {p.organization}
-                          </div>
-                        </td>
-                        <td className="py-2.5 px-3">
-                          <span
-                            className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${
-                              ROLE_COLORS[p.role] ||
-                              "bg-gray-500/20 text-[var(--text-secondary)]"
-                            }`}
-                          >
-                            {p.role}
-                          </span>
-                        </td>
-                        <td className="py-2.5 px-3 font-mono text-[11px] text-[var(--text-secondary)]">
-                          {p.did}
-                        </td>
-                        <td className="py-2.5 px-3">
-                          <span
-                            className={`text-xs font-medium ${
-                              p.state === "CREATED"
-                                ? "text-green-400"
-                                : "text-yellow-400"
-                            }`}
-                          >
-                            {p.state}
-                          </span>
-                        </td>
-                        <td className="py-2.5 px-3 text-xs text-[var(--text-primary)] text-center">
-                          {p.profileCount}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
-
-          {/* Component tables per layer */}
-          {["edc-core", "identity", "cfm", "infrastructure"].map((layer) => {
-            const items = grouped[layer];
-            if (!items || items.length === 0) return null;
-            const meta = LAYER_META[layer];
-            const LayerIcon = meta.icon;
-
-            return (
-              <div key={layer} className="mb-8">
-                <h2 className="font-semibold text-sm mb-3 flex items-center gap-2 text-[var(--text-primary)]">
-                  <LayerIcon size={16} className={meta.color} />
-                  {meta.label}
+          <>
+            {/* Participants */}
+            {snapshot && snapshot.participants.length > 0 && (
+              <div className="mb-8">
+                <h2 className="font-semibold text-sm mb-4 flex items-center gap-2 text-[var(--text-primary)]">
+                  <Users size={16} className="text-layer2" />
+                  Dataspace Participants
                   <span className="text-xs font-normal text-[var(--text-secondary)]">
-                    ({items.length})
+                    ({snapshot.participants.length})
                   </span>
                 </h2>
                 <div className="overflow-x-auto border border-[var(--border)] rounded-xl">
@@ -1374,65 +1295,154 @@ export default function AdminComponentsPage() {
                     <thead>
                       <tr className="border-b border-[var(--border)] bg-[var(--surface)]/60">
                         <th className="py-2 px-3 text-xs font-medium text-[var(--text-secondary)] w-48">
-                          Component
+                          Participant
+                        </th>
+                        <th className="py-2 px-3 text-xs font-medium text-[var(--text-secondary)] w-32">
+                          Role
+                        </th>
+                        <th className="py-2 px-3 text-xs font-medium text-[var(--text-secondary)]">
+                          DID
                         </th>
                         <th className="py-2 px-3 text-xs font-medium text-[var(--text-secondary)] w-28">
-                          Health
+                          State
                         </th>
-                        <th className="py-2 px-3 text-xs font-medium text-[var(--text-secondary)] w-24">
-                          Uptime
-                        </th>
-                        <th className="py-2 px-3 text-xs font-medium text-[var(--text-secondary)] w-40">
-                          CPU (Last 24h)
-                        </th>
-                        <th className="py-2 px-3 text-xs font-medium text-[var(--text-secondary)] w-44">
-                          Memory (Last 24h)
-                        </th>
-                        <th className="py-2 px-3 text-xs font-medium text-[var(--text-secondary)] w-16">
-                          Mem %
+                        <th className="py-2 px-3 text-xs font-medium text-[var(--text-secondary)] w-20 text-center">
+                          Profiles
                         </th>
                       </tr>
                     </thead>
                     <tbody>
-                      {items.map((comp) => (
-                        <ComponentRow
-                          key={comp.container}
-                          comp={comp}
-                          history={historyRef.current.get(comp.container) || []}
-                        />
+                      {snapshot.participants.map((p) => (
+                        <tr
+                          key={p.id}
+                          className="border-b border-[var(--border)] hover:bg-[var(--surface-2)]/40 transition-colors"
+                        >
+                          <td className="py-2.5 px-3">
+                            <div className="font-semibold text-sm text-gray-200">
+                              {p.displayName}
+                            </div>
+                            <div className="text-[11px] text-[var(--text-secondary)]">
+                              {p.organization}
+                            </div>
+                          </td>
+                          <td className="py-2.5 px-3">
+                            <span
+                              className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${
+                                ROLE_COLORS[p.role] ||
+                                "bg-gray-500/20 text-[var(--text-secondary)]"
+                              }`}
+                            >
+                              {p.role}
+                            </span>
+                          </td>
+                          <td className="py-2.5 px-3 font-mono text-[11px] text-[var(--text-secondary)]">
+                            {p.did}
+                          </td>
+                          <td className="py-2.5 px-3">
+                            <span
+                              className={`text-xs font-medium ${
+                                p.state === "CREATED"
+                                  ? "text-green-400"
+                                  : "text-yellow-400"
+                              }`}
+                            >
+                              {p.state}
+                            </span>
+                          </td>
+                          <td className="py-2.5 px-3 text-xs text-[var(--text-primary)] text-center">
+                            {p.profileCount}
+                          </td>
+                        </tr>
                       ))}
                     </tbody>
                   </table>
                 </div>
               </div>
-            );
-          })}
+            )}
 
-          {/* Docker unavailable banner */}
-          {snapshot && !snapshot.dockerAvailable && (
-            <div className="border border-yellow-600/40 bg-yellow-900/20 rounded-xl p-4 text-sm text-yellow-400">
-              <strong>Docker socket not available.</strong> CPU and memory
-              metrics require the Docker socket to be mounted.
-            </div>
-          )}
-        </>
-      )}
+            {/* Component tables per layer */}
+            {["edc-core", "identity", "cfm", "infrastructure"].map((layer) => {
+              const items = grouped[layer];
+              if (!items || items.length === 0) return null;
+              const meta = LAYER_META[layer];
+              const LayerIcon = meta.icon;
 
-      {/* Cost estimator — always visible, seeded with current participant count */}
-      <CostEstimatorPanel
-        participantCount={
-          viewMode === "participant"
-            ? topology?.summary.totalParticipants ?? 5
-            : snapshot?.participants.length ?? 5
-        }
-      />
+              return (
+                <div key={layer} className="mb-8">
+                  <h2 className="font-semibold text-sm mb-3 flex items-center gap-2 text-[var(--text-primary)]">
+                    <LayerIcon size={16} className={meta.color} />
+                    {meta.label}
+                    <span className="text-xs font-normal text-[var(--text-secondary)]">
+                      ({items.length})
+                    </span>
+                  </h2>
+                  <div className="overflow-x-auto border border-[var(--border)] rounded-xl">
+                    <table className="w-full text-left">
+                      <thead>
+                        <tr className="border-b border-[var(--border)] bg-[var(--surface)]/60">
+                          <th className="py-2 px-3 text-xs font-medium text-[var(--text-secondary)] w-48">
+                            Component
+                          </th>
+                          <th className="py-2 px-3 text-xs font-medium text-[var(--text-secondary)] w-28">
+                            Health
+                          </th>
+                          <th className="py-2 px-3 text-xs font-medium text-[var(--text-secondary)] w-24">
+                            Uptime
+                          </th>
+                          <th className="py-2 px-3 text-xs font-medium text-[var(--text-secondary)] w-40">
+                            CPU (Last 24h)
+                          </th>
+                          <th className="py-2 px-3 text-xs font-medium text-[var(--text-secondary)] w-44">
+                            Memory (Last 24h)
+                          </th>
+                          <th className="py-2 px-3 text-xs font-medium text-[var(--text-secondary)] w-16">
+                            Mem %
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {items.map((comp) => (
+                          <ComponentRow
+                            key={comp.container}
+                            comp={comp}
+                            history={
+                              historyRef.current.get(comp.container) || []
+                            }
+                          />
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              );
+            })}
 
-      {/* Timestamp */}
-      {timestamp && (
-        <p className="text-[10px] text-gray-600 mt-4">
-          Last updated: {new Date(timestamp).toLocaleString()}
-        </p>
-      )}
+            {/* Docker unavailable banner */}
+            {snapshot && !snapshot.dockerAvailable && (
+              <div className="border border-yellow-600/40 bg-yellow-900/20 rounded-xl p-4 text-sm text-yellow-400">
+                <strong>Docker socket not available.</strong> CPU and memory
+                metrics require the Docker socket to be mounted.
+              </div>
+            )}
+          </>
+        )}
+
+        {/* Cost estimator — always visible, seeded with current participant count */}
+        <CostEstimatorPanel
+          participantCount={
+            viewMode === "participant"
+              ? topology?.summary.totalParticipants ?? 5
+              : snapshot?.participants.length ?? 5
+          }
+        />
+
+        {/* Timestamp */}
+        {timestamp && (
+          <p className="text-[10px] text-[var(--text-secondary)] mt-4">
+            Last updated: {new Date(timestamp).toLocaleString()}
+          </p>
+        )}
+      </div>
     </div>
   );
 }

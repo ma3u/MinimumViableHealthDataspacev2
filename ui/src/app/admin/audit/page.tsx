@@ -19,8 +19,9 @@ import {
   ArrowLeft,
   Database,
   Eye,
+  AlertTriangle,
+  CheckCircle2,
 } from "lucide-react";
-import PageIntro from "@/components/PageIntro";
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
@@ -476,122 +477,666 @@ export default function AdminAuditPage() {
     setFilters((f) => ({ ...f, ...patch }));
 
   return (
-    <div className="max-w-6xl mx-auto px-6 py-10">
-      <div className="flex items-start justify-between mb-1">
-        <PageIntro
-          title="Audit & Provenance"
-          icon={ScrollText}
-          description="Neo4j provenance graph providing a complete, tamper-evident audit trail compliant with EHDS Art. 32 and GDPR Art. 30. Every data transfer, contract negotiation, credential issuance, and access log is recorded with SHA-256 hash chaining."
-          prevStep={{ href: "/admin/policies", label: "Policy Definitions" }}
-          nextStep={{ href: "/settings", label: "Settings" }}
-          infoText="Audit entries are stored as linked nodes in Neo4j, forming an immutable chain. Use the tabs to filter by event type and the export button to download records for regulatory reporting."
-          docLink={{ href: "/docs/architecture", label: "Architecture Docs" }}
-        />
-      </div>
-
-      {/* Tabs */}
-      <div className="flex gap-1 mt-5 mb-6 border-b border-[var(--border)]">
-        {TABS.map((t) => (
-          <button
-            key={t.key}
-            onClick={() => {
-              setActiveTab(t.key);
-              setFilters(EMPTY_FILTERS);
-            }}
-            className={`flex items-center gap-1.5 px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors ${
-              activeTab === t.key
-                ? "border-layer2 text-layer2"
-                : "border-transparent text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
-            }`}
-          >
-            <t.icon size={14} />
-            {t.label}
-          </button>
-        ))}
-      </div>
-
-      {/* Filter bar (not on overview) */}
-      {activeTab !== "all" && (
-        <FilterBar
-          filters={filters}
-          onChange={updateFilter}
-          onClear={() => setFilters(EMPTY_FILTERS)}
-          participants={participants}
-          tab={activeTab}
-        />
-      )}
-
-      {loading ? (
-        <div className="flex items-center gap-2 text-[var(--text-secondary)] mt-6">
-          <Loader2 size={16} className="animate-spin" />
-          Querying Neo4j…
+    <div className="min-h-screen bg-[var(--bg)]">
+      <main className="px-8 py-10 max-w-7xl mx-auto space-y-8">
+        {/* ── Page header ── */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+          <div>
+            <h1 className="page-header">Audit &amp; Provenance</h1>
+            <p className="text-[var(--text-secondary)] text-lg mt-1">
+              Tamper-evident audit trail · EHDS Art. 32 · GDPR Art. 30
+            </p>
+          </div>
+          <div className="flex items-center gap-2 px-4 py-2 bg-[var(--success)]/10 text-[var(--success-text)] rounded-full border border-[var(--success)]/20 text-sm font-bold tracking-tight">
+            <CheckCircle2 size={14} />
+            HIPAA COMPLIANT
+          </div>
         </div>
-      ) : !data ? (
-        <p className="text-[var(--text-secondary)] mt-6">
-          Failed to load audit data
-        </p>
-      ) : (
-        <>
-          {/* Overview summary cards */}
-          {activeTab === "all" && data.summary?.nodeCounts && (
-            <>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-                {Object.entries(data.summary.nodeCounts).map(
-                  ([label, count]) => (
-                    <div
-                      key={label}
-                      className="p-3 border border-[var(--border)] rounded-lg"
-                    >
-                      <p className="text-xl font-bold">{count}</p>
-                      <p className="text-xs text-[var(--text-secondary)]">
-                        {label}
-                      </p>
-                    </div>
-                  ),
-                )}
-              </div>
 
-              {/* Access by consumer */}
-              {(data.summary.accessByConsumer?.length ?? 0) > 0 && (
+        {/* Tabs */}
+        <div className="flex gap-1 border-b border-[var(--border)]">
+          {TABS.map((t) => (
+            <button
+              key={t.key}
+              onClick={() => {
+                setActiveTab(t.key);
+                setFilters(EMPTY_FILTERS);
+              }}
+              className={`flex items-center gap-1.5 px-4 py-2.5 text-sm font-bold border-b-2 -mb-px transition-colors ${
+                activeTab === t.key
+                  ? "border-[var(--accent)] text-[var(--accent)]"
+                  : "border-transparent text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+              }`}
+            >
+              <t.icon size={14} />
+              {t.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Filter bar (not on overview) */}
+        {activeTab !== "all" && (
+          <FilterBar
+            filters={filters}
+            onChange={updateFilter}
+            onClear={() => setFilters(EMPTY_FILTERS)}
+            participants={participants}
+            tab={activeTab}
+          />
+        )}
+
+        {loading ? (
+          <div className="flex items-center gap-2 text-[var(--text-secondary)] mt-6">
+            <Loader2 size={16} className="animate-spin" />
+            Querying Neo4j…
+          </div>
+        ) : !data ? (
+          <p className="text-[var(--text-secondary)] mt-6">
+            Failed to load audit data
+          </p>
+        ) : (
+          <>
+            {/* Overview summary cards */}
+            {activeTab === "all" && data.summary?.nodeCounts && (
+              <>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                  {Object.entries(data.summary.nodeCounts).map(
+                    ([label, count]) => (
+                      <div
+                        key={label}
+                        className="stat-card border-l-[var(--accent)]"
+                      >
+                        <p className="text-2xl font-black text-[var(--text-primary)] tabular-nums">
+                          {count}
+                        </p>
+                        <p className="text-xs font-medium text-[var(--text-secondary)] mt-1">
+                          {label}
+                        </p>
+                      </div>
+                    ),
+                  )}
+                </div>
+
+                {/* Access by consumer */}
+                {(data.summary.accessByConsumer?.length ?? 0) > 0 && (
+                  <section className="mb-8">
+                    <h2 className="font-semibold text-sm mb-3 flex items-center gap-2">
+                      <Database size={14} className="text-layer2" />
+                      Access Activity by Consumer
+                    </h2>
+                    <div className="overflow-auto">
+                      <table className="w-full text-xs">
+                        <thead>
+                          <tr className="text-[var(--text-secondary)] border-b border-[var(--border)]">
+                            <th className="text-left py-2 px-2">Consumer</th>
+                            <th className="text-left py-2 px-2">
+                              Total Accesses
+                            </th>
+                            <th className="text-left py-2 px-2">
+                              Data Transferred
+                            </th>
+                            <th className="text-left py-2 px-2">Last Access</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {data.summary.accessByConsumer!.map((row, i) => (
+                            <tr
+                              key={i}
+                              className="border-b border-[var(--border)] hover:bg-[var(--surface-2)]/50"
+                            >
+                              <td className="py-2 px-2 text-[var(--text-primary)]">
+                                {row.consumerName ?? "—"}
+                              </td>
+                              <td className="py-2 px-2">
+                                <span className="inline-block px-1.5 py-0.5 rounded bg-teal-900 text-teal-300 text-[10px] font-semibold">
+                                  {row.totalAccesses}×
+                                </span>
+                              </td>
+                              <td className="py-2 px-2 text-[var(--text-secondary)]">
+                                {formatBytes(row.totalBytes)}
+                              </td>
+                              <td className="py-2 px-2 text-[var(--text-secondary)]">
+                                {row.lastAccess
+                                  ? row.lastAccess.slice(0, 10)
+                                  : "—"}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </section>
+                )}
+              </>
+            )}
+
+            {/* ── Transfers ──────────────────────────────────────────────── */}
+            {(activeTab === "all" || activeTab === "transfers") &&
+              data.transfers && (
+                <section className="mb-8">
+                  <div className="flex items-center justify-between mb-3">
+                    <h2 className="font-semibold text-sm flex items-center gap-2">
+                      <ArrowRightLeft size={14} className="text-layer2" />
+                      Data Transfers ({data.transfers.length})
+                    </h2>
+                    {data.transfers.length > 0 && (
+                      <button
+                        onClick={() =>
+                          exportCSV(
+                            data.transfers as unknown as Record<
+                              string,
+                              unknown
+                            >[],
+                            "transfers.csv",
+                          )
+                        }
+                        className="flex items-center gap-1 text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
+                      >
+                        <Download size={12} /> Export CSV
+                      </button>
+                    )}
+                  </div>
+                  {data.transfers.length === 0 ? (
+                    <p className="text-[var(--text-secondary)] text-sm">
+                      No transfers recorded
+                    </p>
+                  ) : (
+                    <div className="overflow-auto">
+                      <table className="w-full text-xs">
+                        <thead>
+                          <tr className="text-[var(--text-secondary)] border-b border-[var(--border)]">
+                            <th className="text-left py-2 px-2">Dir</th>
+                            <th className="text-left py-2 px-2">Consumer</th>
+                            <th className="text-left py-2 px-2">Provider</th>
+                            <th className="text-left py-2 px-2">Asset</th>
+                            <th className="text-left py-2 px-2">Purpose</th>
+                            <th className="text-left py-2 px-2">Status</th>
+                            <th className="text-left py-2 px-2">Date</th>
+                            <th className="text-left py-2 px-2">Size</th>
+                            <th className="text-left py-2 px-2">Accesses</th>
+                            <th className="text-left py-2 px-2">EDC Source</th>
+                            <th className="text-left py-2 px-2">EHDS</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {data.transfers.map((t, i) => (
+                            <tr
+                              key={i}
+                              className="border-b border-[var(--border)] hover:bg-[var(--surface-2)]/50"
+                            >
+                              <td className="py-2 px-2">
+                                {directionBadge(t.direction)}
+                              </td>
+                              <td className="py-2 px-2">
+                                <div className="text-[var(--text-primary)]">
+                                  {displayName(
+                                    t.consumerName,
+                                    t.consumerDid,
+                                    t.consumerCountryCode,
+                                  )}
+                                </div>
+                                <div className="mt-0.5">
+                                  <ComplianceButton
+                                    name={t.consumerComplianceName}
+                                    email={t.consumerComplianceEmail}
+                                  />
+                                </div>
+                              </td>
+                              <td className="py-2 px-2">
+                                <div className="text-[var(--text-primary)]">
+                                  {displayName(
+                                    t.providerName,
+                                    t.providerDid,
+                                    t.providerCountryCode,
+                                  )}
+                                </div>
+                                <div className="mt-0.5">
+                                  <ComplianceButton
+                                    name={t.providerComplianceName}
+                                    email={t.providerComplianceEmail}
+                                  />
+                                </div>
+                              </td>
+                              <td className="py-2 px-2 text-[var(--text-secondary)]">
+                                {t.asset || t.assetId || "—"}
+                              </td>
+                              <td
+                                className="py-2 px-2 text-[var(--text-secondary)] max-w-[140px] truncate"
+                                title={t.purposeOfSharing}
+                              >
+                                {t.purposeOfSharing || "—"}
+                              </td>
+                              <td className="py-2 px-2">
+                                {statusBadge(t.status)}
+                                {t.errorMessage && (
+                                  <span
+                                    title={String(t.errorMessage)}
+                                    className="ml-1 text-red-400 cursor-help"
+                                  >
+                                    ⚠
+                                  </span>
+                                )}
+                              </td>
+                              <td className="py-2 px-2 text-[var(--text-secondary)]">
+                                {(t.timestamp || t.transferDate || "—").slice(
+                                  0,
+                                  10,
+                                )}
+                              </td>
+                              <td className="py-2 px-2 text-[var(--text-secondary)]">
+                                {formatBytes(t.byteSize)}
+                              </td>
+                              <td className="py-2 px-2">
+                                {t.accessLogCount != null &&
+                                t.accessLogCount > 0 ? (
+                                  <span className="inline-block px-1.5 py-0.5 rounded bg-teal-900 text-teal-300 text-[10px] font-semibold">
+                                    {t.accessLogCount}×
+                                  </span>
+                                ) : (
+                                  <span className="text-gray-600">—</span>
+                                )}
+                              </td>
+                              <td className="py-2 px-2">
+                                {t.edcProviderEndpoint ? (
+                                  <span
+                                    title={t.edcProviderEndpoint}
+                                    className="font-mono text-[var(--text-secondary)] text-[10px] truncate max-w-[100px] block cursor-help"
+                                  >
+                                    {t.edcProviderEndpoint.replace(
+                                      /^https?:\/\//,
+                                      "",
+                                    )}
+                                  </span>
+                                ) : (
+                                  "—"
+                                )}
+                              </td>
+                              <td className="py-2 px-2">
+                                {t.crossBorder ? (
+                                  <span className="flex items-center gap-0.5 text-orange-400">
+                                    <Globe size={10} />
+                                    {ehdsArticle(t.policyId)}
+                                  </span>
+                                ) : (
+                                  ehdsArticle(t.policyId)
+                                )}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </section>
+              )}
+
+            {/* ── Negotiations ───────────────────────────────────────────── */}
+            {(activeTab === "all" || activeTab === "negotiations") &&
+              data.negotiations && (
+                <section className="mb-8">
+                  <div className="flex items-center justify-between mb-3">
+                    <h2 className="font-semibold text-sm flex items-center gap-2">
+                      <FileSignature size={14} className="text-layer2" />
+                      Contract Negotiations ({data.negotiations.length})
+                    </h2>
+                    {data.negotiations.length > 0 && (
+                      <button
+                        onClick={() =>
+                          exportCSV(
+                            data.negotiations as unknown as Record<
+                              string,
+                              unknown
+                            >[],
+                            "negotiations.csv",
+                          )
+                        }
+                        className="flex items-center gap-1 text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
+                      >
+                        <Download size={12} /> Export CSV
+                      </button>
+                    )}
+                  </div>
+                  {data.negotiations.length === 0 ? (
+                    <p className="text-[var(--text-secondary)] text-sm">
+                      No negotiations recorded
+                    </p>
+                  ) : (
+                    <div className="overflow-auto">
+                      <table className="w-full text-xs">
+                        <thead>
+                          <tr className="text-[var(--text-secondary)] border-b border-[var(--border)]">
+                            <th className="text-left py-2 px-2 w-5"></th>
+                            <th className="text-left py-2 px-2">Consumer</th>
+                            <th className="text-left py-2 px-2">Provider</th>
+                            <th className="text-left py-2 px-2">Asset</th>
+                            <th className="text-left py-2 px-2">Status</th>
+                            <th className="text-left py-2 px-2">Date</th>
+                            <th className="text-left py-2 px-2">Accesses</th>
+                            <th className="text-left py-2 px-2">EHDS</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {data.negotiations.map((n, nIdx) => {
+                            const rowKey =
+                              n.id || n.contractId || `neg-${nIdx}`;
+                            const isOpen = expandedNeg.has(rowKey);
+                            return (
+                              <Fragment key={rowKey}>
+                                <tr
+                                  className="border-b border-[var(--border)] hover:bg-[var(--surface-2)]/40 cursor-pointer"
+                                  onClick={() =>
+                                    setExpandedNeg((prev) => {
+                                      const next = new Set(prev);
+                                      if (isOpen) {
+                                        next.delete(rowKey);
+                                      } else {
+                                        next.add(rowKey);
+                                      }
+                                      return next;
+                                    })
+                                  }
+                                >
+                                  <td className="py-2 px-2 text-[var(--text-secondary)]">
+                                    {isOpen ? (
+                                      <ChevronDown size={11} />
+                                    ) : (
+                                      <ChevronRight size={11} />
+                                    )}
+                                  </td>
+                                  <td className="py-2 px-2">
+                                    <div className="text-[var(--text-primary)]">
+                                      {displayName(
+                                        n.consumerName,
+                                        n.consumerDid,
+                                        n.consumerCountryCode,
+                                      )}
+                                    </div>
+                                    <div className="mt-0.5">
+                                      <ComplianceButton
+                                        name={n.consumerComplianceName}
+                                        email={n.consumerComplianceEmail}
+                                      />
+                                    </div>
+                                  </td>
+                                  <td className="py-2 px-2">
+                                    <div className="text-[var(--text-primary)]">
+                                      {displayName(
+                                        n.providerName,
+                                        n.providerDid,
+                                        n.providerCountryCode,
+                                      )}
+                                    </div>
+                                    <div className="mt-0.5">
+                                      <ComplianceButton
+                                        name={n.providerComplianceName}
+                                        email={n.providerComplianceEmail}
+                                      />
+                                    </div>
+                                  </td>
+                                  <td className="py-2 px-2 text-[var(--text-secondary)]">
+                                    {n.asset || n.assetId || "—"}
+                                  </td>
+                                  <td className="py-2 px-2">
+                                    {statusBadge(n.status)}
+                                  </td>
+                                  <td className="py-2 px-2 text-[var(--text-secondary)]">
+                                    {(
+                                      n.timestamp ||
+                                      n.negotiationDate ||
+                                      "—"
+                                    ).slice(0, 10)}
+                                  </td>
+                                  <td className="py-2 px-2">
+                                    {n.accessLogCount != null &&
+                                    n.accessLogCount > 0 ? (
+                                      <span className="inline-block px-1.5 py-0.5 rounded bg-teal-900 text-teal-300 text-[10px] font-semibold">
+                                        {n.accessLogCount}×
+                                      </span>
+                                    ) : (
+                                      <span className="text-gray-600">—</span>
+                                    )}
+                                  </td>
+                                  <td className="py-2 px-2">
+                                    {n.crossBorder ? (
+                                      <span className="flex items-center gap-0.5 text-orange-400">
+                                        <Globe size={10} />
+                                        {ehdsArticle(n.policyId)}
+                                      </span>
+                                    ) : (
+                                      ehdsArticle(n.policyId)
+                                    )}
+                                  </td>
+                                </tr>
+
+                                {/* Expanded policy card */}
+                                {isOpen && (
+                                  <tr className="border-b border-[var(--border)] bg-[var(--surface)]/60">
+                                    <td colSpan={8} className="px-6 py-4">
+                                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        {/* Policy details */}
+                                        <div className="border border-[var(--border)] rounded-lg p-3">
+                                          <p className="text-[10px] font-semibold text-[var(--text-secondary)] uppercase mb-2">
+                                            Policy Details
+                                          </p>
+                                          <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
+                                            <span className="text-[var(--text-secondary)]">
+                                              Purpose
+                                            </span>
+                                            <span className="text-[var(--text-primary)]">
+                                              {n.policyPurpose ?? "—"}
+                                            </span>
+                                            <span className="text-[var(--text-secondary)]">
+                                              Legal Basis
+                                            </span>
+                                            <span className="text-[var(--text-primary)]">
+                                              {n.policyLegalBasis ?? "—"}
+                                            </span>
+                                            <span className="text-[var(--text-secondary)]">
+                                              Permitted
+                                            </span>
+                                            <span className="text-[var(--text-primary)]">
+                                              {n.policyPermittedUses ?? "—"}
+                                            </span>
+                                            <span className="text-[var(--text-secondary)]">
+                                              Prohibited
+                                            </span>
+                                            <span className="text-red-400">
+                                              {n.policyProhibitedUses ?? "—"}
+                                            </span>
+                                            <span className="text-[var(--text-secondary)]">
+                                              Data Minimisation
+                                            </span>
+                                            <span className="text-[var(--text-primary)]">
+                                              {n.policyDataMinimisation ?? "—"}
+                                            </span>
+                                            <span className="text-[var(--text-secondary)]">
+                                              Retention
+                                            </span>
+                                            <span className="text-[var(--text-primary)]">
+                                              {n.policyRetentionDays
+                                                ? `${n.policyRetentionDays} days`
+                                                : "—"}
+                                            </span>
+                                            <span className="text-[var(--text-secondary)]">
+                                              Total Accesses
+                                            </span>
+                                            <span className="text-teal-300 font-semibold">
+                                              {n.accessCount ?? 0}×
+                                            </span>
+                                            <span className="text-[var(--text-secondary)]">
+                                              Last Access
+                                            </span>
+                                            <span className="text-[var(--text-primary)]">
+                                              {n.lastAccessAt
+                                                ? n.lastAccessAt.slice(0, 10)
+                                                : "—"}
+                                            </span>
+                                          </div>
+                                        </div>
+
+                                        {/* EDC endpoints + contract ID */}
+                                        <div className="border border-[var(--border)] rounded-lg p-3">
+                                          <p className="text-[10px] font-semibold text-[var(--text-secondary)] uppercase mb-2">
+                                            EDC Endpoints &amp; Contract
+                                          </p>
+                                          <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
+                                            <span className="text-[var(--text-secondary)]">
+                                              Consumer EDC
+                                            </span>
+                                            <span className="font-mono text-[var(--text-secondary)] break-all">
+                                              {n.consumerEdcEndpoint ?? "—"}
+                                            </span>
+                                            <span className="text-[var(--text-secondary)]">
+                                              Provider EDC
+                                            </span>
+                                            <span className="font-mono text-[var(--text-secondary)] break-all">
+                                              {n.providerEdcEndpoint ?? "—"}
+                                            </span>
+                                            <span className="text-[var(--text-secondary)]">
+                                              Contract ID
+                                            </span>
+                                            <span className="font-mono text-[var(--text-secondary)]">
+                                              {n.contractId ?? "—"}
+                                            </span>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    </td>
+                                  </tr>
+                                )}
+                              </Fragment>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </section>
+              )}
+
+            {/* ── Credentials ────────────────────────────────────────────── */}
+            {(activeTab === "all" || activeTab === "credentials") &&
+              data.credentials && (
                 <section className="mb-8">
                   <h2 className="font-semibold text-sm mb-3 flex items-center gap-2">
-                    <Database size={14} className="text-layer2" />
-                    Access Activity by Consumer
+                    <ShieldCheck size={14} className="text-layer2" />
+                    Verifiable Credentials ({data.credentials.length})
                   </h2>
+                  {data.credentials.length === 0 ? (
+                    <p className="text-[var(--text-secondary)] text-sm">
+                      No credentials recorded
+                    </p>
+                  ) : (
+                    <div className="overflow-auto">
+                      <table className="w-full text-xs">
+                        <thead>
+                          <tr className="text-[var(--text-secondary)] border-b border-[var(--border)]">
+                            <th className="text-left py-2 px-2">Participant</th>
+                            <th className="text-left py-2 px-2">Type</th>
+                            <th className="text-left py-2 px-2">Issued</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {data.credentials.map((c, i) => (
+                            <tr
+                              key={i}
+                              className="border-b border-[var(--border)] hover:bg-[var(--surface-2)]/50"
+                            >
+                              <td className="py-2 px-2 text-[var(--text-primary)]">
+                                {c.participant ||
+                                  c.subjectDid
+                                    ?.replace("did:web:", "")
+                                    .replace(/%3A/g, ":") ||
+                                  "—"}
+                              </td>
+                              <td className="py-2 px-2 text-[var(--text-primary)]">
+                                {c.credentialType || c.type || "—"}
+                              </td>
+                              <td className="py-2 px-2 text-[var(--text-secondary)]">
+                                {(c.issuedAt || c.issuanceDate || "—").slice(
+                                  0,
+                                  10,
+                                )}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </section>
+              )}
+            {/* ── Access Logs ────────────────────────────────────────────── */}
+            {activeTab === "accesslogs" && (
+              <section className="mb-8">
+                <h2 className="font-semibold text-sm mb-3 flex items-center gap-2">
+                  <Eye size={14} className="text-layer2" />
+                  Data Access Logs ({data.accesslogs?.length ?? 0})
+                </h2>
+                {!data.accesslogs || data.accesslogs.length === 0 ? (
+                  <p className="text-[var(--text-secondary)] text-sm">
+                    No access logs recorded
+                  </p>
+                ) : (
                   <div className="overflow-auto">
                     <table className="w-full text-xs">
                       <thead>
                         <tr className="text-[var(--text-secondary)] border-b border-[var(--border)]">
                           <th className="text-left py-2 px-2">Consumer</th>
-                          <th className="text-left py-2 px-2">
-                            Total Accesses
-                          </th>
-                          <th className="text-left py-2 px-2">
-                            Data Transferred
-                          </th>
-                          <th className="text-left py-2 px-2">Last Access</th>
+                          <th className="text-left py-2 px-2">Provider</th>
+                          <th className="text-left py-2 px-2">Asset</th>
+                          <th className="text-left py-2 px-2">Type</th>
+                          <th className="text-left py-2 px-2">Purpose</th>
+                          <th className="text-left py-2 px-2">Accessed At</th>
+                          <th className="text-left py-2 px-2">Bytes</th>
+                          <th className="text-left py-2 px-2">Contract</th>
                         </tr>
                       </thead>
                       <tbody>
-                        {data.summary.accessByConsumer!.map((row, i) => (
+                        {data.accesslogs.map((a, i) => (
                           <tr
                             key={i}
                             className="border-b border-[var(--border)] hover:bg-[var(--surface-2)]/50"
                           >
                             <td className="py-2 px-2 text-[var(--text-primary)]">
-                              {row.consumerName ?? "—"}
+                              {a.consumerName ?? a.consumerDid ?? "—"}
+                              {a.consumerCountry && (
+                                <span className="text-[var(--text-secondary)]">
+                                  {" "}
+                                  ({a.consumerCountry})
+                                </span>
+                              )}
+                            </td>
+                            <td className="py-2 px-2 text-[var(--text-primary)]">
+                              {a.providerName ?? a.providerDid ?? "—"}
+                              {a.providerCountry && (
+                                <span className="text-[var(--text-secondary)]">
+                                  {" "}
+                                  ({a.providerCountry})
+                                </span>
+                              )}
+                            </td>
+                            <td className="py-2 px-2 text-[var(--text-secondary)]">
+                              {a.assetId ?? "—"}
                             </td>
                             <td className="py-2 px-2">
-                              <span className="inline-block px-1.5 py-0.5 rounded bg-teal-900 text-teal-300 text-[10px] font-semibold">
-                                {row.totalAccesses}×
-                              </span>
+                              {accessTypeBadge(a.accessType)}
+                            </td>
+                            <td
+                              className="py-2 px-2 text-[var(--text-secondary)] max-w-[140px] truncate"
+                              title={a.purpose}
+                            >
+                              {a.purpose ?? "—"}
                             </td>
                             <td className="py-2 px-2 text-[var(--text-secondary)]">
-                              {formatBytes(row.totalBytes)}
+                              {a.accessedAt ? a.accessedAt.slice(0, 10) : "—"}
                             </td>
                             <td className="py-2 px-2 text-[var(--text-secondary)]">
-                              {row.lastAccess
-                                ? row.lastAccess.slice(0, 10)
+                              {formatBytes(a.bytesAccessed)}
+                            </td>
+                            <td className="py-2 px-2 font-mono text-gray-600 text-[10px]">
+                              {a.contractId
+                                ? a.contractId.slice(0, 12) + "…"
                                 : "—"}
                             </td>
                           </tr>
@@ -599,549 +1144,12 @@ export default function AdminAuditPage() {
                       </tbody>
                     </table>
                   </div>
-                </section>
-              )}
-            </>
-          )}
-
-          {/* ── Transfers ──────────────────────────────────────────────── */}
-          {(activeTab === "all" || activeTab === "transfers") &&
-            data.transfers && (
-              <section className="mb-8">
-                <div className="flex items-center justify-between mb-3">
-                  <h2 className="font-semibold text-sm flex items-center gap-2">
-                    <ArrowRightLeft size={14} className="text-layer2" />
-                    Data Transfers ({data.transfers.length})
-                  </h2>
-                  {data.transfers.length > 0 && (
-                    <button
-                      onClick={() =>
-                        exportCSV(
-                          data.transfers as unknown as Record<
-                            string,
-                            unknown
-                          >[],
-                          "transfers.csv",
-                        )
-                      }
-                      className="flex items-center gap-1 text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
-                    >
-                      <Download size={12} /> Export CSV
-                    </button>
-                  )}
-                </div>
-                {data.transfers.length === 0 ? (
-                  <p className="text-[var(--text-secondary)] text-sm">
-                    No transfers recorded
-                  </p>
-                ) : (
-                  <div className="overflow-auto">
-                    <table className="w-full text-xs">
-                      <thead>
-                        <tr className="text-[var(--text-secondary)] border-b border-[var(--border)]">
-                          <th className="text-left py-2 px-2">Dir</th>
-                          <th className="text-left py-2 px-2">Consumer</th>
-                          <th className="text-left py-2 px-2">Provider</th>
-                          <th className="text-left py-2 px-2">Asset</th>
-                          <th className="text-left py-2 px-2">Purpose</th>
-                          <th className="text-left py-2 px-2">Status</th>
-                          <th className="text-left py-2 px-2">Date</th>
-                          <th className="text-left py-2 px-2">Size</th>
-                          <th className="text-left py-2 px-2">Accesses</th>
-                          <th className="text-left py-2 px-2">EDC Source</th>
-                          <th className="text-left py-2 px-2">EHDS</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {data.transfers.map((t, i) => (
-                          <tr
-                            key={i}
-                            className="border-b border-[var(--border)] hover:bg-[var(--surface-2)]/50"
-                          >
-                            <td className="py-2 px-2">
-                              {directionBadge(t.direction)}
-                            </td>
-                            <td className="py-2 px-2">
-                              <div className="text-[var(--text-primary)]">
-                                {displayName(
-                                  t.consumerName,
-                                  t.consumerDid,
-                                  t.consumerCountryCode,
-                                )}
-                              </div>
-                              <div className="mt-0.5">
-                                <ComplianceButton
-                                  name={t.consumerComplianceName}
-                                  email={t.consumerComplianceEmail}
-                                />
-                              </div>
-                            </td>
-                            <td className="py-2 px-2">
-                              <div className="text-[var(--text-primary)]">
-                                {displayName(
-                                  t.providerName,
-                                  t.providerDid,
-                                  t.providerCountryCode,
-                                )}
-                              </div>
-                              <div className="mt-0.5">
-                                <ComplianceButton
-                                  name={t.providerComplianceName}
-                                  email={t.providerComplianceEmail}
-                                />
-                              </div>
-                            </td>
-                            <td className="py-2 px-2 text-[var(--text-secondary)]">
-                              {t.asset || t.assetId || "—"}
-                            </td>
-                            <td
-                              className="py-2 px-2 text-[var(--text-secondary)] max-w-[140px] truncate"
-                              title={t.purposeOfSharing}
-                            >
-                              {t.purposeOfSharing || "—"}
-                            </td>
-                            <td className="py-2 px-2">
-                              {statusBadge(t.status)}
-                              {t.errorMessage && (
-                                <span
-                                  title={String(t.errorMessage)}
-                                  className="ml-1 text-red-400 cursor-help"
-                                >
-                                  ⚠
-                                </span>
-                              )}
-                            </td>
-                            <td className="py-2 px-2 text-[var(--text-secondary)]">
-                              {(t.timestamp || t.transferDate || "—").slice(
-                                0,
-                                10,
-                              )}
-                            </td>
-                            <td className="py-2 px-2 text-[var(--text-secondary)]">
-                              {formatBytes(t.byteSize)}
-                            </td>
-                            <td className="py-2 px-2">
-                              {t.accessLogCount != null &&
-                              t.accessLogCount > 0 ? (
-                                <span className="inline-block px-1.5 py-0.5 rounded bg-teal-900 text-teal-300 text-[10px] font-semibold">
-                                  {t.accessLogCount}×
-                                </span>
-                              ) : (
-                                <span className="text-gray-600">—</span>
-                              )}
-                            </td>
-                            <td className="py-2 px-2">
-                              {t.edcProviderEndpoint ? (
-                                <span
-                                  title={t.edcProviderEndpoint}
-                                  className="font-mono text-[var(--text-secondary)] text-[10px] truncate max-w-[100px] block cursor-help"
-                                >
-                                  {t.edcProviderEndpoint.replace(
-                                    /^https?:\/\//,
-                                    "",
-                                  )}
-                                </span>
-                              ) : (
-                                "—"
-                              )}
-                            </td>
-                            <td className="py-2 px-2">
-                              {t.crossBorder ? (
-                                <span className="flex items-center gap-0.5 text-orange-400">
-                                  <Globe size={10} />
-                                  {ehdsArticle(t.policyId)}
-                                </span>
-                              ) : (
-                                ehdsArticle(t.policyId)
-                              )}
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
                 )}
               </section>
             )}
-
-          {/* ── Negotiations ───────────────────────────────────────────── */}
-          {(activeTab === "all" || activeTab === "negotiations") &&
-            data.negotiations && (
-              <section className="mb-8">
-                <div className="flex items-center justify-between mb-3">
-                  <h2 className="font-semibold text-sm flex items-center gap-2">
-                    <FileSignature size={14} className="text-layer2" />
-                    Contract Negotiations ({data.negotiations.length})
-                  </h2>
-                  {data.negotiations.length > 0 && (
-                    <button
-                      onClick={() =>
-                        exportCSV(
-                          data.negotiations as unknown as Record<
-                            string,
-                            unknown
-                          >[],
-                          "negotiations.csv",
-                        )
-                      }
-                      className="flex items-center gap-1 text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
-                    >
-                      <Download size={12} /> Export CSV
-                    </button>
-                  )}
-                </div>
-                {data.negotiations.length === 0 ? (
-                  <p className="text-[var(--text-secondary)] text-sm">
-                    No negotiations recorded
-                  </p>
-                ) : (
-                  <div className="overflow-auto">
-                    <table className="w-full text-xs">
-                      <thead>
-                        <tr className="text-[var(--text-secondary)] border-b border-[var(--border)]">
-                          <th className="text-left py-2 px-2 w-5"></th>
-                          <th className="text-left py-2 px-2">Consumer</th>
-                          <th className="text-left py-2 px-2">Provider</th>
-                          <th className="text-left py-2 px-2">Asset</th>
-                          <th className="text-left py-2 px-2">Status</th>
-                          <th className="text-left py-2 px-2">Date</th>
-                          <th className="text-left py-2 px-2">Accesses</th>
-                          <th className="text-left py-2 px-2">EHDS</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {data.negotiations.map((n, nIdx) => {
-                          const rowKey = n.id || n.contractId || `neg-${nIdx}`;
-                          const isOpen = expandedNeg.has(rowKey);
-                          return (
-                            <Fragment key={rowKey}>
-                              <tr
-                                className="border-b border-[var(--border)] hover:bg-[var(--surface-2)]/40 cursor-pointer"
-                                onClick={() =>
-                                  setExpandedNeg((prev) => {
-                                    const next = new Set(prev);
-                                    if (isOpen) {
-                                      next.delete(rowKey);
-                                    } else {
-                                      next.add(rowKey);
-                                    }
-                                    return next;
-                                  })
-                                }
-                              >
-                                <td className="py-2 px-2 text-[var(--text-secondary)]">
-                                  {isOpen ? (
-                                    <ChevronDown size={11} />
-                                  ) : (
-                                    <ChevronRight size={11} />
-                                  )}
-                                </td>
-                                <td className="py-2 px-2">
-                                  <div className="text-[var(--text-primary)]">
-                                    {displayName(
-                                      n.consumerName,
-                                      n.consumerDid,
-                                      n.consumerCountryCode,
-                                    )}
-                                  </div>
-                                  <div className="mt-0.5">
-                                    <ComplianceButton
-                                      name={n.consumerComplianceName}
-                                      email={n.consumerComplianceEmail}
-                                    />
-                                  </div>
-                                </td>
-                                <td className="py-2 px-2">
-                                  <div className="text-[var(--text-primary)]">
-                                    {displayName(
-                                      n.providerName,
-                                      n.providerDid,
-                                      n.providerCountryCode,
-                                    )}
-                                  </div>
-                                  <div className="mt-0.5">
-                                    <ComplianceButton
-                                      name={n.providerComplianceName}
-                                      email={n.providerComplianceEmail}
-                                    />
-                                  </div>
-                                </td>
-                                <td className="py-2 px-2 text-[var(--text-secondary)]">
-                                  {n.asset || n.assetId || "—"}
-                                </td>
-                                <td className="py-2 px-2">
-                                  {statusBadge(n.status)}
-                                </td>
-                                <td className="py-2 px-2 text-[var(--text-secondary)]">
-                                  {(
-                                    n.timestamp ||
-                                    n.negotiationDate ||
-                                    "—"
-                                  ).slice(0, 10)}
-                                </td>
-                                <td className="py-2 px-2">
-                                  {n.accessLogCount != null &&
-                                  n.accessLogCount > 0 ? (
-                                    <span className="inline-block px-1.5 py-0.5 rounded bg-teal-900 text-teal-300 text-[10px] font-semibold">
-                                      {n.accessLogCount}×
-                                    </span>
-                                  ) : (
-                                    <span className="text-gray-600">—</span>
-                                  )}
-                                </td>
-                                <td className="py-2 px-2">
-                                  {n.crossBorder ? (
-                                    <span className="flex items-center gap-0.5 text-orange-400">
-                                      <Globe size={10} />
-                                      {ehdsArticle(n.policyId)}
-                                    </span>
-                                  ) : (
-                                    ehdsArticle(n.policyId)
-                                  )}
-                                </td>
-                              </tr>
-
-                              {/* Expanded policy card */}
-                              {isOpen && (
-                                <tr className="border-b border-[var(--border)] bg-[var(--surface)]/60">
-                                  <td colSpan={8} className="px-6 py-4">
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                      {/* Policy details */}
-                                      <div className="border border-[var(--border)] rounded-lg p-3">
-                                        <p className="text-[10px] font-semibold text-[var(--text-secondary)] uppercase mb-2">
-                                          Policy Details
-                                        </p>
-                                        <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
-                                          <span className="text-[var(--text-secondary)]">
-                                            Purpose
-                                          </span>
-                                          <span className="text-[var(--text-primary)]">
-                                            {n.policyPurpose ?? "—"}
-                                          </span>
-                                          <span className="text-[var(--text-secondary)]">
-                                            Legal Basis
-                                          </span>
-                                          <span className="text-[var(--text-primary)]">
-                                            {n.policyLegalBasis ?? "—"}
-                                          </span>
-                                          <span className="text-[var(--text-secondary)]">
-                                            Permitted
-                                          </span>
-                                          <span className="text-[var(--text-primary)]">
-                                            {n.policyPermittedUses ?? "—"}
-                                          </span>
-                                          <span className="text-[var(--text-secondary)]">
-                                            Prohibited
-                                          </span>
-                                          <span className="text-red-400">
-                                            {n.policyProhibitedUses ?? "—"}
-                                          </span>
-                                          <span className="text-[var(--text-secondary)]">
-                                            Data Minimisation
-                                          </span>
-                                          <span className="text-[var(--text-primary)]">
-                                            {n.policyDataMinimisation ?? "—"}
-                                          </span>
-                                          <span className="text-[var(--text-secondary)]">
-                                            Retention
-                                          </span>
-                                          <span className="text-[var(--text-primary)]">
-                                            {n.policyRetentionDays
-                                              ? `${n.policyRetentionDays} days`
-                                              : "—"}
-                                          </span>
-                                          <span className="text-[var(--text-secondary)]">
-                                            Total Accesses
-                                          </span>
-                                          <span className="text-teal-300 font-semibold">
-                                            {n.accessCount ?? 0}×
-                                          </span>
-                                          <span className="text-[var(--text-secondary)]">
-                                            Last Access
-                                          </span>
-                                          <span className="text-[var(--text-primary)]">
-                                            {n.lastAccessAt
-                                              ? n.lastAccessAt.slice(0, 10)
-                                              : "—"}
-                                          </span>
-                                        </div>
-                                      </div>
-
-                                      {/* EDC endpoints + contract ID */}
-                                      <div className="border border-[var(--border)] rounded-lg p-3">
-                                        <p className="text-[10px] font-semibold text-[var(--text-secondary)] uppercase mb-2">
-                                          EDC Endpoints &amp; Contract
-                                        </p>
-                                        <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
-                                          <span className="text-[var(--text-secondary)]">
-                                            Consumer EDC
-                                          </span>
-                                          <span className="font-mono text-[var(--text-secondary)] break-all">
-                                            {n.consumerEdcEndpoint ?? "—"}
-                                          </span>
-                                          <span className="text-[var(--text-secondary)]">
-                                            Provider EDC
-                                          </span>
-                                          <span className="font-mono text-[var(--text-secondary)] break-all">
-                                            {n.providerEdcEndpoint ?? "—"}
-                                          </span>
-                                          <span className="text-[var(--text-secondary)]">
-                                            Contract ID
-                                          </span>
-                                          <span className="font-mono text-[var(--text-secondary)]">
-                                            {n.contractId ?? "—"}
-                                          </span>
-                                        </div>
-                                      </div>
-                                    </div>
-                                  </td>
-                                </tr>
-                              )}
-                            </Fragment>
-                          );
-                        })}
-                      </tbody>
-                    </table>
-                  </div>
-                )}
-              </section>
-            )}
-
-          {/* ── Credentials ────────────────────────────────────────────── */}
-          {(activeTab === "all" || activeTab === "credentials") &&
-            data.credentials && (
-              <section className="mb-8">
-                <h2 className="font-semibold text-sm mb-3 flex items-center gap-2">
-                  <ShieldCheck size={14} className="text-layer2" />
-                  Verifiable Credentials ({data.credentials.length})
-                </h2>
-                {data.credentials.length === 0 ? (
-                  <p className="text-[var(--text-secondary)] text-sm">
-                    No credentials recorded
-                  </p>
-                ) : (
-                  <div className="overflow-auto">
-                    <table className="w-full text-xs">
-                      <thead>
-                        <tr className="text-[var(--text-secondary)] border-b border-[var(--border)]">
-                          <th className="text-left py-2 px-2">Participant</th>
-                          <th className="text-left py-2 px-2">Type</th>
-                          <th className="text-left py-2 px-2">Issued</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {data.credentials.map((c, i) => (
-                          <tr
-                            key={i}
-                            className="border-b border-[var(--border)] hover:bg-[var(--surface-2)]/50"
-                          >
-                            <td className="py-2 px-2 text-[var(--text-primary)]">
-                              {c.participant ||
-                                c.subjectDid
-                                  ?.replace("did:web:", "")
-                                  .replace(/%3A/g, ":") ||
-                                "—"}
-                            </td>
-                            <td className="py-2 px-2 text-[var(--text-primary)]">
-                              {c.credentialType || c.type || "—"}
-                            </td>
-                            <td className="py-2 px-2 text-[var(--text-secondary)]">
-                              {(c.issuedAt || c.issuanceDate || "—").slice(
-                                0,
-                                10,
-                              )}
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                )}
-              </section>
-            )}
-          {/* ── Access Logs ────────────────────────────────────────────── */}
-          {activeTab === "accesslogs" && (
-            <section className="mb-8">
-              <h2 className="font-semibold text-sm mb-3 flex items-center gap-2">
-                <Eye size={14} className="text-layer2" />
-                Data Access Logs ({data.accesslogs?.length ?? 0})
-              </h2>
-              {!data.accesslogs || data.accesslogs.length === 0 ? (
-                <p className="text-[var(--text-secondary)] text-sm">
-                  No access logs recorded
-                </p>
-              ) : (
-                <div className="overflow-auto">
-                  <table className="w-full text-xs">
-                    <thead>
-                      <tr className="text-[var(--text-secondary)] border-b border-[var(--border)]">
-                        <th className="text-left py-2 px-2">Consumer</th>
-                        <th className="text-left py-2 px-2">Provider</th>
-                        <th className="text-left py-2 px-2">Asset</th>
-                        <th className="text-left py-2 px-2">Type</th>
-                        <th className="text-left py-2 px-2">Purpose</th>
-                        <th className="text-left py-2 px-2">Accessed At</th>
-                        <th className="text-left py-2 px-2">Bytes</th>
-                        <th className="text-left py-2 px-2">Contract</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {data.accesslogs.map((a, i) => (
-                        <tr
-                          key={i}
-                          className="border-b border-[var(--border)] hover:bg-[var(--surface-2)]/50"
-                        >
-                          <td className="py-2 px-2 text-[var(--text-primary)]">
-                            {a.consumerName ?? a.consumerDid ?? "—"}
-                            {a.consumerCountry && (
-                              <span className="text-[var(--text-secondary)]">
-                                {" "}
-                                ({a.consumerCountry})
-                              </span>
-                            )}
-                          </td>
-                          <td className="py-2 px-2 text-[var(--text-primary)]">
-                            {a.providerName ?? a.providerDid ?? "—"}
-                            {a.providerCountry && (
-                              <span className="text-[var(--text-secondary)]">
-                                {" "}
-                                ({a.providerCountry})
-                              </span>
-                            )}
-                          </td>
-                          <td className="py-2 px-2 text-[var(--text-secondary)]">
-                            {a.assetId ?? "—"}
-                          </td>
-                          <td className="py-2 px-2">
-                            {accessTypeBadge(a.accessType)}
-                          </td>
-                          <td
-                            className="py-2 px-2 text-[var(--text-secondary)] max-w-[140px] truncate"
-                            title={a.purpose}
-                          >
-                            {a.purpose ?? "—"}
-                          </td>
-                          <td className="py-2 px-2 text-[var(--text-secondary)]">
-                            {a.accessedAt ? a.accessedAt.slice(0, 10) : "—"}
-                          </td>
-                          <td className="py-2 px-2 text-[var(--text-secondary)]">
-                            {formatBytes(a.bytesAccessed)}
-                          </td>
-                          <td className="py-2 px-2 font-mono text-gray-600 text-[10px]">
-                            {a.contractId
-                              ? a.contractId.slice(0, 12) + "…"
-                              : "—"}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-            </section>
-          )}
-        </>
-      )}
+          </>
+        )}
+      </main>
     </div>
   );
 }

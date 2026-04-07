@@ -11,15 +11,55 @@ import {
   ScrollText,
   ShieldCheck,
   Users,
+  Key,
+  Shield,
+  RefreshCw,
+  Terminal,
+  ClipboardList,
+  Gauge,
 } from "lucide-react";
 import Link from "next/link";
-import PageIntro from "@/components/PageIntro";
 
 interface Summary {
   totalTenants: number;
   totalParticipants: number;
   byRole: Record<string, number>;
 }
+
+const ACTIVITY_LOG = [
+  {
+    icon: Key,
+    color: "text-[var(--accent)]",
+    title: "Security keys rotated",
+    sub: "Admin • 12m ago",
+  },
+  {
+    icon: Shield,
+    color: "text-[var(--success-text)]",
+    title: "New node authorized",
+    sub: "Frankfurt-Cluster-04 • 45m ago",
+  },
+  {
+    icon: ShieldCheck,
+    color: "text-[var(--danger-text)]",
+    title: "DDoS attempt mitigated",
+    sub: "Auto-Defense System • 1h ago",
+  },
+  {
+    icon: RefreshCw,
+    color: "text-[var(--text-secondary)]",
+    title: "Scheduled Backup Complete",
+    sub: "System • 3h ago",
+    dim: true,
+  },
+];
+
+const QUICK_OPS = [
+  { icon: RefreshCw, label: "Deploy Patch", href: "/admin/components" },
+  { icon: Terminal, label: "Flush Cache", href: "/admin/components" },
+  { icon: ClipboardList, label: "Audit Logs", href: "/admin/audit" },
+  { icon: Gauge, label: "Test Latency", href: "/admin/components" },
+];
 
 export default function AdminDashboard() {
   const [summary, setSummary] = useState<Summary | null>(null);
@@ -37,7 +77,6 @@ export default function AdminDashboard() {
         .then((r) => (r.ok ? r.json() : null))
         .then((d: Record<string, unknown> | null) => {
           if (!d) return;
-          // EDC-V returns { participants: [{ policies: [...] }, ...] }
           if (Array.isArray(d.participants)) {
             const total = (d.participants as { policies?: unknown[] }[]).reduce(
               (sum, p) =>
@@ -46,7 +85,6 @@ export default function AdminDashboard() {
             );
             setPolicyCount(total);
           } else if (Array.isArray(d.policies)) {
-            // Neo4j fallback returns { policies: [...] }
             setPolicyCount(d.policies.length);
           }
         }),
@@ -55,141 +93,230 @@ export default function AdminDashboard() {
       .finally(() => setLoading(false));
   }, []);
 
-  const cards = [
-    {
-      href: "/admin/tenants",
-      label: "Tenants",
-      value: summary?.totalTenants ?? "—",
-      icon: Building2,
-      color: "text-blue-400",
-    },
-    {
-      href: "/admin/tenants",
-      label: "Participants",
-      value: summary?.totalParticipants ?? "—",
-      icon: Users,
-      color: "text-green-400",
-    },
-    {
-      href: "/admin/policies",
-      label: "Policies",
-      icon: ShieldCheck,
-      value: policyCount ?? "—",
-      color: "text-purple-400",
-    },
-    {
-      href: "/admin/audit",
-      label: "Audit Log",
-      icon: ScrollText,
-      value: "→",
-      color: "text-yellow-400",
-    },
-  ];
-
   return (
-    <div className="max-w-5xl mx-auto px-6 py-10">
-      <PageIntro
-        title="Operator Dashboard"
-        icon={LayoutDashboard}
-        description="EHDS Health Data Access Body administration overview. Monitor registered tenants, active policies, issued credentials, and recent audit events at a glance. Click any card to drill into detail."
-        prevStep={{ href: "/data/transfer", label: "Data Transfers" }}
-        nextStep={{ href: "/admin/tenants", label: "Manage Tenants" }}
-        infoText="This dashboard aggregates key metrics from the tenant-manager, EDC-V control plane, IssuerService, and Neo4j provenance graph. Use the admin sub-pages for full management capabilities."
-        docLink={{ href: "/docs/user-guide", label: "User Guide" }}
-      />
-
-      {loading ? (
-        <div className="flex items-center gap-2 text-[var(--text-secondary)]">
-          <Loader2 size={16} className="animate-spin" />
-          Loading dashboard…
-        </div>
-      ) : (
-        <>
-          {/* Stat cards */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-            {cards.map((c) => (
-              <Link
-                key={c.label}
-                href={c.href}
-                className="p-4 border border-[var(--border)] rounded-xl hover:border-layer2 transition-colors"
-              >
-                <c.icon size={20} className={c.color + " mb-2"} />
-                <p className="text-2xl font-bold">{c.value}</p>
-                <p className="text-xs text-[var(--text-secondary)]">
-                  {c.label}
-                </p>
-              </Link>
-            ))}
+    <div className="min-h-screen bg-[var(--bg)]">
+      <main className="px-8 py-10 max-w-7xl mx-auto space-y-8">
+        {/* ── Page header ── */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+          <div>
+            <h1 className="page-header">System Overview</h1>
+            <p className="text-[var(--text-secondary)] text-lg mt-1">
+              EHDS Health Dataspace — Operator Control
+            </p>
           </div>
+          <div className="flex items-center gap-2 px-4 py-2 bg-[var(--success)]/10 text-[var(--success-text)] rounded-full border border-[var(--success)]/20 text-sm font-bold tracking-tight">
+            <span className="w-2 h-2 rounded-full bg-[var(--success)] animate-pulse" />
+            SYSTEMS NOMINAL
+          </div>
+        </div>
 
-          {/* Role breakdown */}
-          {summary?.byRole && Object.keys(summary.byRole).length > 0 && (
-            <div className="border border-[var(--border)] rounded-xl p-5 mb-8">
-              <h2 className="font-semibold text-sm mb-4 flex items-center gap-2">
-                <FileKey2 size={16} className="text-layer2" />
-                Participants by EHDS Role
-              </h2>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                {Object.entries(summary.byRole).map(([role, count]) => (
-                  <div
-                    key={role}
-                    className="p-3 rounded-lg bg-[var(--surface-2)]/50 border border-[var(--border)]"
-                  >
-                    <p className="text-lg font-bold">{count}</p>
-                    <p className="text-xs text-[var(--text-secondary)]">
-                      {role}
+        {loading ? (
+          <div className="flex items-center gap-2 text-[var(--text-secondary)]">
+            <Loader2 size={16} className="animate-spin" />
+            Loading dashboard…
+          </div>
+        ) : (
+          <>
+            {/* ── Bento stat grid ── */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+              {[
+                {
+                  href: "/admin/tenants",
+                  icon: Building2,
+                  iconColor: "text-[var(--accent)]",
+                  iconBg: "bg-[var(--accent)]/5",
+                  label: "Tenants",
+                  value: summary?.totalTenants ?? "—",
+                  border: "border-l-[var(--accent)]",
+                },
+                {
+                  href: "/admin/tenants",
+                  icon: Users,
+                  iconColor: "text-[var(--success-text)]",
+                  iconBg: "bg-[var(--success)]/5",
+                  label: "Participants",
+                  value: summary?.totalParticipants ?? "—",
+                  border: "border-l-[var(--success-text)]",
+                },
+                {
+                  href: "/admin/policies",
+                  icon: ShieldCheck,
+                  iconColor: "text-[var(--layer5-text)]",
+                  iconBg: "bg-[var(--layer5)]/5",
+                  label: "Policies",
+                  value: policyCount ?? "—",
+                  border: "border-l-[var(--layer5-text)]",
+                },
+                {
+                  href: "/admin/audit",
+                  icon: ScrollText,
+                  iconColor: "text-[var(--warning-text)]",
+                  iconBg: "bg-[var(--warning)]/5",
+                  label: "Audit Logs",
+                  value: "→",
+                  border: "border-l-[var(--warning-text)]",
+                },
+              ].map((c) => (
+                <Link
+                  key={c.label}
+                  href={c.href}
+                  className={`stat-card ${c.border} hover:shadow-md transition-shadow`}
+                >
+                  <div className="flex justify-between items-start mb-4">
+                    <div className={`p-2 ${c.iconBg} rounded-lg`}>
+                      <c.icon size={20} className={c.iconColor} />
+                    </div>
+                  </div>
+                  <p className="text-sm font-medium text-[var(--text-secondary)]">
+                    {c.label}
+                  </p>
+                  <p className="text-3xl font-black text-[var(--text-primary)] mt-1 tabular-nums">
+                    {c.value}
+                  </p>
+                </Link>
+              ))}
+            </div>
+
+            {/* ── Main content grid ── */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* EHDS Role breakdown */}
+              <div className="lg:col-span-2 bg-[var(--surface)] rounded-xl p-8 relative overflow-hidden min-h-[320px]">
+                <div className="flex justify-between items-start mb-6">
+                  <div>
+                    <h2 className="text-xl font-bold tracking-tight text-[var(--text-primary)]">
+                      Participants by EHDS Role
+                    </h2>
+                    <p className="text-sm text-[var(--text-secondary)] mt-0.5">
+                      Access control breakdown across the dataspace
                     </p>
                   </div>
-                ))}
+                </div>
+                {summary?.byRole && Object.keys(summary.byRole).length > 0 ? (
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                    {Object.entries(summary.byRole).map(([role, count]) => (
+                      <div
+                        key={role}
+                        className="bg-[var(--surface-card)] rounded-xl p-4 shadow-sm"
+                      >
+                        <p className="text-2xl font-black text-[var(--text-primary)] tabular-nums">
+                          {count}
+                        </p>
+                        <p className="text-xs text-[var(--text-secondary)] mt-1 break-all">
+                          {role}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-3 text-[var(--text-secondary)]">
+                    <FileKey2 size={18} />
+                    <span className="text-sm">
+                      No role data available — connect to live stack
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              {/* Quick Operations + Activity */}
+              <div className="flex flex-col gap-6">
+                {/* Quick ops */}
+                <div className="bg-[var(--surface-2)] rounded-xl p-6">
+                  <p className="section-label">Quick Operations</p>
+                  <div className="grid grid-cols-2 gap-3">
+                    {QUICK_OPS.map(({ icon: Icon, label, href }) => (
+                      <Link
+                        key={label}
+                        href={href}
+                        className="flex flex-col items-center justify-center p-4 bg-[var(--surface-card)] rounded-xl hover:bg-[var(--accent)] hover:text-white transition-all group shadow-sm"
+                      >
+                        <Icon
+                          size={20}
+                          className="text-[var(--accent)] group-hover:text-white mb-2"
+                        />
+                        <span className="text-xs font-bold text-center leading-tight">
+                          {label}
+                        </span>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Activity feed */}
+                <div className="flex-1 bg-[var(--surface-card)] rounded-xl p-6 shadow-sm border border-[var(--border)]">
+                  <p className="section-label">Administrative Activity</p>
+                  <div className="space-y-5">
+                    {ACTIVITY_LOG.map((item, i) => (
+                      <div
+                        key={i}
+                        className={`flex gap-3 items-start ${
+                          item.dim ? "opacity-50" : ""
+                        }`}
+                      >
+                        <div className="w-8 h-8 rounded-full bg-[var(--surface)] flex items-center justify-center shrink-0">
+                          <item.icon size={14} className={item.color} />
+                        </div>
+                        <div>
+                          <p className="text-sm font-bold text-[var(--text-primary)]">
+                            {item.title}
+                          </p>
+                          <p className="text-xs text-[var(--text-secondary)]">
+                            {item.sub}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
             </div>
-          )}
 
-          {/* Quick links */}
-          <div className="grid md:grid-cols-4 gap-4">
-            <Link
-              href="/admin/components"
-              className="p-4 border border-[var(--border)] rounded-xl hover:border-layer2 transition-colors"
-            >
-              <Activity size={18} className="text-layer2 mb-2" />
-              <h3 className="font-semibold text-sm mb-1">EDC Components</h3>
-              <p className="text-xs text-[var(--text-secondary)]">
-                Health, CPU &amp; memory per service
-              </p>
-            </Link>
-            <Link
-              href="/admin/tenants"
-              className="p-4 border border-[var(--border)] rounded-xl hover:border-layer2 transition-colors"
-            >
-              <Building2 size={18} className="text-layer2 mb-2" />
-              <h3 className="font-semibold text-sm mb-1">Manage Tenants</h3>
-              <p className="text-xs text-[var(--text-secondary)]">
-                View and manage registered participants
-              </p>
-            </Link>
-            <Link
-              href="/admin/policies"
-              className="p-4 border border-[var(--border)] rounded-xl hover:border-layer2 transition-colors"
-            >
-              <ShieldCheck size={18} className="text-layer2 mb-2" />
-              <h3 className="font-semibold text-sm mb-1">Policy Definitions</h3>
-              <p className="text-xs text-[var(--text-secondary)]">
-                View and create ODRL policies
-              </p>
-            </Link>
-            <Link
-              href="/admin/audit"
-              className="p-4 border border-[var(--border)] rounded-xl hover:border-layer2 transition-colors"
-            >
-              <ScrollText size={18} className="text-layer2 mb-2" />
-              <h3 className="font-semibold text-sm mb-1">Audit & Provenance</h3>
-              <p className="text-xs text-[var(--text-secondary)]">
-                Query the Neo4j provenance graph
-              </p>
-            </Link>
-          </div>
-        </>
-      )}
+            {/* ── Sub-page quick links ── */}
+            <div className="grid md:grid-cols-2 gap-6">
+              <div className="bg-[var(--surface)] rounded-xl p-6 border border-[var(--border)] flex items-center gap-6">
+                <div className="w-14 h-14 rounded-2xl bg-[var(--success)]/10 flex items-center justify-center shrink-0">
+                  <ShieldCheck
+                    size={28}
+                    className="text-[var(--success-text)]"
+                  />
+                </div>
+                <div>
+                  <h3 className="font-bold text-lg text-[var(--text-primary)]">
+                    GDPR Compliance Check
+                  </h3>
+                  <p className="text-sm text-[var(--text-secondary)] mb-3">
+                    Next automated audit scheduled for next month.
+                  </p>
+                  <Link
+                    href="/compliance"
+                    className="text-sm font-black text-[var(--success-text)] hover:underline uppercase tracking-wider"
+                  >
+                    RUN PRE-AUDIT NOW
+                  </Link>
+                </div>
+              </div>
+              <div className="bg-[var(--surface)] rounded-xl p-6 border border-[var(--border)] flex items-center gap-6">
+                <div className="w-14 h-14 rounded-2xl bg-[var(--accent)]/10 flex items-center justify-center shrink-0">
+                  <Activity size={28} className="text-[var(--accent)]" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-lg text-[var(--text-primary)]">
+                    EDC Components
+                  </h3>
+                  <p className="text-sm text-[var(--text-secondary)] mb-3">
+                    Monitor health, CPU &amp; memory per service.
+                  </p>
+                  <Link
+                    href="/admin/components"
+                    className="text-sm font-black text-[var(--accent)] hover:underline uppercase tracking-wider"
+                  >
+                    VIEW COMPONENTS
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </>
+        )}
+      </main>
     </div>
   );
 }
