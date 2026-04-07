@@ -584,162 +584,164 @@ function OnboardingContent() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto px-6 py-10">
-      <PageIntro
-        title="Participant Onboarding"
-        icon={UserPlus}
-        description="Register your organisation as a participant in the European Health Data Space. Each participant receives a DID identity, Verifiable Credentials, and a dataspace profile to enable trusted data sharing."
-        nextStep={{ href: "/catalog", label: "Explore Datasets" }}
-        infoText="After onboarding, your organisation can share or consume health data under EHDS Regulation (EU) 2025/327. The registration creates a tenant, participant context, and DID:web identity."
-        docLink={{ href: "/docs/user-guide", label: "Read the User Guide" }}
-      />
+    <div className="min-h-screen bg-[var(--bg)]">
+      <div className="max-w-4xl mx-auto px-6 py-10">
+        <PageIntro
+          title="Participant Onboarding"
+          icon={UserPlus}
+          description="Register your organisation as a participant in the European Health Data Space. Each participant receives a DID identity, Verifiable Credentials, and a dataspace profile to enable trusted data sharing."
+          nextStep={{ href: "/catalog", label: "Explore Datasets" }}
+          infoText="After onboarding, your organisation can share or consume health data under EHDS Regulation (EU) 2025/327. The registration creates a tenant, participant context, and DID:web identity."
+          docLink={{ href: "/docs/user-guide", label: "Read the User Guide" }}
+        />
 
-      {/* Registered participants */}
-      {loading ? (
-        <div className="flex items-center gap-2 text-[var(--text-secondary)] mb-8">
-          <Loader2 size={16} className="animate-spin" />
-          Loading registered participants…
-        </div>
-      ) : tenants.length > 0 ? (
-        <div className="mb-8">
-          <h2 className="text-sm font-semibold text-[var(--text-secondary)] uppercase tracking-wide mb-3">
-            Registered Participants
-          </h2>
-          <div className="grid gap-3">
-            {tenants.map((t) => (
-              <ParticipantCard
-                key={t.id}
-                tenant={t}
-                defaultExpanded={t.id === highlightTenantId}
-              />
-            ))}
+        {/* Registered participants */}
+        {loading ? (
+          <div className="flex items-center gap-2 text-[var(--text-secondary)] mb-8">
+            <Loader2 size={16} className="animate-spin" />
+            Loading registered participants…
           </div>
-          <p className="text-xs text-gray-600 mt-3">
-            Click a participant card to expand contact details and onboarding
-            status.
-          </p>
-        </div>
-      ) : null}
-
-      {/* Registration form / success */}
-      {step === "done" ? (
-        <div className="flex flex-col items-center gap-4 py-12 text-center border border-[var(--border)] rounded-xl">
-          <CheckCircle2 size={48} className="text-green-400" />
-          <h2 className="text-xl font-semibold">Registration Submitted</h2>
-          <p className="text-[var(--text-secondary)] text-sm max-w-md">
-            Your participant context has been created. DID provisioning and
-            credential issuance will proceed automatically via CFM agents.
-          </p>
-          <button
-            onClick={() => {
-              setStep("form");
-              setDisplayName("");
-              setOrganization("");
-              setRole("data-holder");
-            }}
-            className="mt-2 px-4 py-2 border border-gray-600 text-[var(--text-primary)] rounded-lg text-sm hover:border-gray-400"
-          >
-            Register another participant
-          </button>
-        </div>
-      ) : (
-        <div className="border border-[var(--border)] rounded-xl p-6">
-          <div className="flex items-center gap-2 mb-6">
-            <UserPlus size={20} className="text-layer2" />
-            <h2 className="font-semibold">New Participant Registration</h2>
+        ) : tenants.length > 0 ? (
+          <div className="mb-8">
+            <h2 className="text-sm font-semibold text-[var(--text-secondary)] uppercase tracking-wide mb-3">
+              Registered Participants
+            </h2>
+            <div className="grid gap-3">
+              {tenants.map((t) => (
+                <ParticipantCard
+                  key={t.id}
+                  tenant={t}
+                  defaultExpanded={t.id === highlightTenantId}
+                />
+              ))}
+            </div>
+            <p className="text-xs text-gray-600 mt-3">
+              Click a participant card to expand contact details and onboarding
+              status.
+            </p>
           </div>
+        ) : null}
 
-          {error && (
-            <div className="mb-4 p-3 rounded bg-red-900/40 border border-red-700 text-sm text-red-300">
-              {error}
-            </div>
-          )}
-
-          <form onSubmit={handleSubmit} className="space-y-5">
-            <div>
-              <label className="block text-sm text-[var(--text-secondary)] mb-1">
-                Display Name
-              </label>
-              <input
-                type="text"
-                required
-                value={displayName}
-                onChange={(e) => setDisplayName(e.target.value)}
-                placeholder="e.g. University Hospital Berlin"
-                className="w-full px-3 py-2 bg-[var(--surface-2)] border border-gray-600 rounded text-sm outline-none focus:border-layer2"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm text-[var(--text-secondary)] mb-1">
-                Organisation
-              </label>
-              <input
-                type="text"
-                required
-                value={organization}
-                onChange={(e) => setOrganization(e.target.value)}
-                placeholder="e.g. AlphaKlinik Berlin University Hospital"
-                className="w-full px-3 py-2 bg-[var(--surface-2)] border border-gray-600 rounded text-sm outline-none focus:border-layer2"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm text-[var(--text-secondary)] mb-2">
-                EHDS Role
-              </label>
-              <div className="grid gap-2">
-                {EHDS_ROLES.map((r) => (
-                  <label
-                    key={r.value}
-                    className={`flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${
-                      role === r.value
-                        ? "border-layer2 bg-layer2/10"
-                        : "border-[var(--border)] hover:border-gray-500"
-                    }`}
-                  >
-                    <input
-                      type="radio"
-                      name="role"
-                      value={r.value}
-                      checked={role === r.value}
-                      onChange={() => setRole(r.value)}
-                      className="mt-1"
-                    />
-                    <div>
-                      <span className="font-medium text-sm">{r.label}</span>
-                      <p className="text-xs text-[var(--text-secondary)] mt-0.5">
-                        {r.desc}
-                      </p>
-                    </div>
-                  </label>
-                ))}
-              </div>
-            </div>
-
+        {/* Registration form / success */}
+        {step === "done" ? (
+          <div className="flex flex-col items-center gap-4 py-12 text-center border border-[var(--border)] rounded-xl">
+            <CheckCircle2 size={48} className="text-green-400" />
+            <h2 className="text-xl font-semibold">Registration Submitted</h2>
+            <p className="text-[var(--text-secondary)] text-sm max-w-md">
+              Your participant context has been created. DID provisioning and
+              credential issuance will proceed automatically via CFM agents.
+            </p>
             <button
-              type="submit"
-              disabled={step === "submitting"}
-              className="flex items-center gap-2 px-5 py-2.5 bg-layer2 text-white rounded-lg text-sm font-medium hover:bg-layer2/90 disabled:opacity-50"
+              onClick={() => {
+                setStep("form");
+                setDisplayName("");
+                setOrganization("");
+                setRole("data-holder");
+              }}
+              className="mt-2 px-4 py-2 border border-gray-600 text-[var(--text-primary)] rounded-lg text-sm hover:border-gray-400"
             >
-              {step === "submitting" ? (
-                <>
-                  <Loader2 size={16} className="animate-spin" />
-                  Registering…
-                </>
-              ) : (
-                <>
-                  <ShieldCheck size={16} />
-                  Register Participant
-                </>
-              )}
+              Register another participant
             </button>
-          </form>
-        </div>
-      )}
+          </div>
+        ) : (
+          <div className="border border-[var(--border)] rounded-xl p-6">
+            <div className="flex items-center gap-2 mb-6">
+              <UserPlus size={20} className="text-layer2" />
+              <h2 className="font-semibold">New Participant Registration</h2>
+            </div>
 
-      {/* EHDS + NDA requirements accordion */}
-      <EhdsRequirements />
+            {error && (
+              <div className="mb-4 p-3 rounded bg-red-900/40 border border-red-700 text-sm text-red-300">
+                {error}
+              </div>
+            )}
+
+            <form onSubmit={handleSubmit} className="space-y-5">
+              <div>
+                <label className="block text-sm text-[var(--text-secondary)] mb-1">
+                  Display Name
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={displayName}
+                  onChange={(e) => setDisplayName(e.target.value)}
+                  placeholder="e.g. University Hospital Berlin"
+                  className="w-full px-3 py-2 bg-[var(--surface-2)] border border-gray-600 rounded text-sm outline-none focus:border-layer2"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm text-[var(--text-secondary)] mb-1">
+                  Organisation
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={organization}
+                  onChange={(e) => setOrganization(e.target.value)}
+                  placeholder="e.g. AlphaKlinik Berlin University Hospital"
+                  className="w-full px-3 py-2 bg-[var(--surface-2)] border border-gray-600 rounded text-sm outline-none focus:border-layer2"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm text-[var(--text-secondary)] mb-2">
+                  EHDS Role
+                </label>
+                <div className="grid gap-2">
+                  {EHDS_ROLES.map((r) => (
+                    <label
+                      key={r.value}
+                      className={`flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${
+                        role === r.value
+                          ? "border-layer2 bg-layer2/10"
+                          : "border-[var(--border)] hover:border-gray-500"
+                      }`}
+                    >
+                      <input
+                        type="radio"
+                        name="role"
+                        value={r.value}
+                        checked={role === r.value}
+                        onChange={() => setRole(r.value)}
+                        className="mt-1"
+                      />
+                      <div>
+                        <span className="font-medium text-sm">{r.label}</span>
+                        <p className="text-xs text-[var(--text-secondary)] mt-0.5">
+                          {r.desc}
+                        </p>
+                      </div>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={step === "submitting"}
+                className="flex items-center gap-2 px-5 py-2.5 bg-layer2 text-white rounded-lg text-sm font-medium hover:bg-layer2/90 disabled:opacity-50"
+              >
+                {step === "submitting" ? (
+                  <>
+                    <Loader2 size={16} className="animate-spin" />
+                    Registering…
+                  </>
+                ) : (
+                  <>
+                    <ShieldCheck size={16} />
+                    Register Participant
+                  </>
+                )}
+              </button>
+            </form>
+          </div>
+        )}
+
+        {/* EHDS + NDA requirements accordion */}
+        <EhdsRequirements />
+      </div>
     </div>
   );
 }

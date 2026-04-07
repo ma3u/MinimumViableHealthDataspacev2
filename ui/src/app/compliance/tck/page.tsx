@@ -173,109 +173,113 @@ export default function ComplianceTckPage() {
   }, []);
 
   return (
-    <div className="max-w-4xl mx-auto px-6 py-10">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-1">
-        <PageIntro
-          title="Protocol Compliance Dashboard"
-          icon={ShieldCheck}
-          description="Run the DSP 2025-1 and DCP v1.0 Technology Compatibility Kit against your connectors. This dashboard validates that your EDC-V deployment correctly implements the Dataspace Protocol and Decentralized Claims Protocol."
-          prevStep={{ href: "/compliance", label: "EHDS Compliance" }}
-          nextStep={{ href: "/credentials", label: "Verifiable Credentials" }}
-          infoText="The TCK executes protocol-level tests covering catalog, negotiation, transfer, and identity resolution. Results indicate whether your connectors are interoperable with other EHDS participants."
-          docLink={{
-            href: "https://docs.internationaldataspaces.org/ids-knowledgebase/dataspace-protocol",
-            label: "Dataspace Protocol Spec",
-            external: true,
-          }}
-        />
-        <button
-          onClick={load}
-          disabled={loading}
-          className="flex items-center gap-1.5 text-sm px-3 py-1.5 rounded bg-[var(--surface-2)] border border-[var(--border)] text-[var(--text-primary)] hover:bg-[var(--surface-2)] disabled:opacity-50 transition-colors"
-        >
-          <RefreshCw size={14} className={loading ? "animate-spin" : ""} />
-          {loading ? "Running…" : "Re-run"}
-        </button>
-      </div>
-      <div className="flex items-center gap-3 mb-8 text-xs text-[var(--text-secondary)]">
-        <Link
-          href="/compliance"
-          className="flex items-center gap-1 hover:text-[var(--text-primary)] transition-colors"
-        >
-          <ExternalLink size={12} />
-          EHDS Approval Checker
-        </Link>
+    <div className="min-h-screen bg-[var(--bg)]">
+      <div className="max-w-4xl mx-auto px-6 py-10">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-1">
+          <PageIntro
+            title="Protocol Compliance Dashboard"
+            icon={ShieldCheck}
+            description="Run the DSP 2025-1 and DCP v1.0 Technology Compatibility Kit against your connectors. This dashboard validates that your EDC-V deployment correctly implements the Dataspace Protocol and Decentralized Claims Protocol."
+            prevStep={{ href: "/compliance", label: "EHDS Compliance" }}
+            nextStep={{ href: "/credentials", label: "Verifiable Credentials" }}
+            infoText="The TCK executes protocol-level tests covering catalog, negotiation, transfer, and identity resolution. Results indicate whether your connectors are interoperable with other EHDS participants."
+            docLink={{
+              href: "https://docs.internationaldataspaces.org/ids-knowledgebase/dataspace-protocol",
+              label: "Dataspace Protocol Spec",
+              external: true,
+            }}
+          />
+          <button
+            onClick={load}
+            disabled={loading}
+            className="flex items-center gap-1.5 text-sm px-3 py-1.5 rounded bg-[var(--surface-2)] border border-[var(--border)] text-[var(--text-primary)] hover:bg-[var(--surface-2)] disabled:opacity-50 transition-colors"
+          >
+            <RefreshCw size={14} className={loading ? "animate-spin" : ""} />
+            {loading ? "Running…" : "Re-run"}
+          </button>
+        </div>
+        <div className="flex items-center gap-3 mb-8 text-xs text-[var(--text-secondary)]">
+          <Link
+            href="/compliance"
+            className="flex items-center gap-1 hover:text-[var(--text-primary)] transition-colors"
+          >
+            <ExternalLink size={12} />
+            EHDS Approval Checker
+          </Link>
+          {data && (
+            <span>Last run: {new Date(data.timestamp).toLocaleString()}</span>
+          )}
+        </div>
+
+        {/* Error state */}
+        {error && (
+          <div className="bg-red-900/30 border border-red-800 rounded-lg p-4 mb-6 text-red-300 text-sm">
+            {error}
+          </div>
+        )}
+
+        {/* Loading skeleton */}
+        {loading && !data && (
+          <div className="space-y-4">
+            {[1, 2, 3].map((i) => (
+              <div
+                key={i}
+                className="h-32 bg-[var(--surface-2)] rounded-lg animate-pulse border border-[var(--border)]"
+              />
+            ))}
+          </div>
+        )}
+
+        {/* Summary bar */}
         {data && (
-          <span>Last run: {new Date(data.timestamp).toLocaleString()}</span>
+          <>
+            <div className="grid grid-cols-4 gap-4 mb-8">
+              {[
+                {
+                  label: "Total",
+                  value: data.summary.total,
+                  color: "text-white",
+                },
+                {
+                  label: "Passed",
+                  value: data.summary.passed,
+                  color: "text-green-400",
+                },
+                {
+                  label: "Failed",
+                  value: data.summary.failed,
+                  color: "text-red-400",
+                },
+                {
+                  label: "Skipped",
+                  value: data.summary.skipped,
+                  color: "text-yellow-400",
+                },
+              ].map((s) => (
+                <div
+                  key={s.label}
+                  className="bg-[var(--surface-2)] border border-[var(--border)] rounded-lg px-4 py-3 text-center"
+                >
+                  <div className={`text-2xl font-bold ${s.color}`}>
+                    {s.value}
+                  </div>
+                  <div className="text-xs text-[var(--text-secondary)] mt-0.5">
+                    {s.label}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Suite cards */}
+            <div className="space-y-4">
+              {(["DSP", "DCP", "EHDS"] as const).map((key) => (
+                <SuiteCard key={key} suiteKey={key} data={data.suites[key]} />
+              ))}
+            </div>
+          </>
         )}
       </div>
-
-      {/* Error state */}
-      {error && (
-        <div className="bg-red-900/30 border border-red-800 rounded-lg p-4 mb-6 text-red-300 text-sm">
-          {error}
-        </div>
-      )}
-
-      {/* Loading skeleton */}
-      {loading && !data && (
-        <div className="space-y-4">
-          {[1, 2, 3].map((i) => (
-            <div
-              key={i}
-              className="h-32 bg-[var(--surface-2)] rounded-lg animate-pulse border border-[var(--border)]"
-            />
-          ))}
-        </div>
-      )}
-
-      {/* Summary bar */}
-      {data && (
-        <>
-          <div className="grid grid-cols-4 gap-4 mb-8">
-            {[
-              {
-                label: "Total",
-                value: data.summary.total,
-                color: "text-white",
-              },
-              {
-                label: "Passed",
-                value: data.summary.passed,
-                color: "text-green-400",
-              },
-              {
-                label: "Failed",
-                value: data.summary.failed,
-                color: "text-red-400",
-              },
-              {
-                label: "Skipped",
-                value: data.summary.skipped,
-                color: "text-yellow-400",
-              },
-            ].map((s) => (
-              <div
-                key={s.label}
-                className="bg-[var(--surface-2)] border border-[var(--border)] rounded-lg px-4 py-3 text-center"
-              >
-                <div className={`text-2xl font-bold ${s.color}`}>{s.value}</div>
-                <div className="text-xs text-[var(--text-secondary)] mt-0.5">
-                  {s.label}
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Suite cards */}
-          <div className="space-y-4">
-            {(["DSP", "DCP", "EHDS"] as const).map((key) => (
-              <SuiteCard key={key} suiteKey={key} data={data.suites[key]} />
-            ))}
-          </div>
-        </>
-      )}
     </div>
   );
 }

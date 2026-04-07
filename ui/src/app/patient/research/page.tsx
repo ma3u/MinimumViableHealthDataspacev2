@@ -88,154 +88,156 @@ export default function ResearchProgramsPage() {
   );
 
   return (
-    <div className="max-w-3xl mx-auto px-6 py-10">
-      <PageIntro
-        title="Research Programs"
-        icon={FlaskConical}
-        description="EHDS Art. 10 — Discover research programs and donate your pseudonymised EHR data. Your explicit consent is required for each study. You can revoke at any time (GDPR Art. 17)."
-        prevStep={{ href: "/patient/profile", label: "Health Profile" }}
-        nextStep={{ href: "/patient/insights", label: "Research Insights" }}
-        infoText="Your data is pseudonymised by the Trust Center before reaching researchers. Individual-level data never leaves the Secure Processing Environment (EHDS Art. 50)."
-        docLink={{ href: "/docs/user-guide", label: "Patient Rights Guide" }}
-      />
+    <div className="min-h-screen bg-[var(--bg)]">
+      <div className="max-w-3xl mx-auto px-6 py-10">
+        <PageIntro
+          title="Research Programs"
+          icon={FlaskConical}
+          description="EHDS Art. 10 — Discover research programs and donate your pseudonymised EHR data. Your explicit consent is required for each study. You can revoke at any time (GDPR Art. 17)."
+          prevStep={{ href: "/patient/profile", label: "Health Profile" }}
+          nextStep={{ href: "/patient/insights", label: "Research Insights" }}
+          infoText="Your data is pseudonymised by the Trust Center before reaching researchers. Individual-level data never leaves the Secure Processing Environment (EHDS Art. 50)."
+          docLink={{ href: "/docs/user-guide", label: "Patient Rights Guide" }}
+        />
 
-      {/* EHDS Art. 10 banner */}
-      <div className="mb-6 rounded-lg border border-teal-700 bg-teal-900/20 p-3 flex items-start gap-2">
-        <Shield size={16} className="mt-0.5 shrink-0 text-teal-400" />
-        <div className="text-xs text-teal-300">
-          <strong>EHDS Art. 10:</strong> You have the right to consent to or opt
-          out of secondary use of your health data for research. Each consent is
-          study-specific and revocable at any time (GDPR Art. 17).
+        {/* EHDS Art. 10 banner */}
+        <div className="mb-6 rounded-lg border border-teal-700 bg-teal-900/20 p-3 flex items-start gap-2">
+          <Shield size={16} className="mt-0.5 shrink-0 text-teal-400" />
+          <div className="text-xs text-teal-300">
+            <strong>EHDS Art. 10:</strong> You have the right to consent to or
+            opt out of secondary use of your health data for research. Each
+            consent is study-specific and revocable at any time (GDPR Art. 17).
+          </div>
         </div>
-      </div>
 
-      {message && (
-        <div className="mb-4 rounded-lg bg-green-900/30 border border-green-700 p-3 text-sm text-green-300">
-          {message}
-        </div>
-      )}
+        {message && (
+          <div className="mb-4 rounded-lg bg-green-900/30 border border-green-700 p-3 text-sm text-green-300">
+            {message}
+          </div>
+        )}
 
-      {loading ? (
-        <div className="text-[var(--text-secondary)] text-sm">
-          Loading research programs…
-        </div>
-      ) : (
-        <div className="space-y-4">
-          <h2 className="text-lg font-semibold">
-            Available Research Programs ({programs.length})
-          </h2>
+        {loading ? (
+          <div className="text-[var(--text-secondary)] text-sm">
+            Loading research programs…
+          </div>
+        ) : (
+          <div className="space-y-4">
+            <h2 className="text-lg font-semibold">
+              Available Research Programs ({programs.length})
+            </h2>
 
-          {programs.length === 0 && (
-            <div className="text-[var(--text-secondary)] text-sm">
-              No research programs found. Seed the JAD stack to populate.
-            </div>
-          )}
+            {programs.length === 0 && (
+              <div className="text-[var(--text-secondary)] text-sm">
+                No research programs found. Seed the JAD stack to populate.
+              </div>
+            )}
 
-          {programs.map((prog) => {
-            const isConsented = consentedStudyIds.has(prog.studyId);
-            return (
-              <div
-                key={prog.studyId}
-                data-testid="research-program-card"
-                className={`rounded-xl border p-4 ${
-                  isConsented
-                    ? "border-teal-700 bg-teal-900/10"
-                    : "border-[var(--border)] bg-[var(--surface-2)]/50"
-                }`}
-              >
-                <div className="flex items-start justify-between mb-2">
-                  <div>
-                    <div className="font-semibold text-sm">
-                      {prog.studyName}
+            {programs.map((prog) => {
+              const isConsented = consentedStudyIds.has(prog.studyId);
+              return (
+                <div
+                  key={prog.studyId}
+                  data-testid="research-program-card"
+                  className={`rounded-xl border p-4 ${
+                    isConsented
+                      ? "border-teal-700 bg-teal-900/10"
+                      : "border-[var(--border)] bg-[var(--surface-2)]/50"
+                  }`}
+                >
+                  <div className="flex items-start justify-between mb-2">
+                    <div>
+                      <div className="font-semibold text-sm">
+                        {prog.studyName}
+                      </div>
+                      <div className="text-xs text-[var(--text-secondary)]">
+                        {prog.institution}
+                      </div>
                     </div>
-                    <div className="text-xs text-[var(--text-secondary)]">
-                      {prog.institution}
-                    </div>
+                    {isConsented ? (
+                      <span className="flex items-center gap-1 text-xs text-teal-400 font-medium">
+                        <CheckCircle2 size={12} /> Donated
+                      </span>
+                    ) : (
+                      <span className="text-xs text-[var(--text-secondary)] border border-gray-600 rounded px-2 py-0.5">
+                        {prog.status}
+                      </span>
+                    )}
                   </div>
+                  <p className="text-xs text-[var(--text-secondary)] mb-2">
+                    {prog.description}
+                  </p>
+                  <div className="text-xs text-[var(--text-secondary)] mb-3">
+                    <span className="text-gray-600">Data needed: </span>
+                    {prog.dataNeeded}
+                  </div>
+
                   {isConsented ? (
-                    <span className="flex items-center gap-1 text-xs text-teal-400 font-medium">
-                      <CheckCircle2 size={12} /> Donated
-                    </span>
+                    <button
+                      onClick={() => {
+                        const consent = consents.find(
+                          (c) => c.studyId === prog.studyId && !c.revoked,
+                        );
+                        if (consent) revoke(consent);
+                      }}
+                      disabled={revoking !== null}
+                      className="flex items-center gap-1.5 text-xs text-red-400 hover:text-red-300 transition-colors disabled:opacity-50"
+                    >
+                      <XCircle size={12} />
+                      {revoking ? "Revoking…" : "Revoke consent (GDPR Art. 17)"}
+                    </button>
                   ) : (
-                    <span className="text-xs text-[var(--text-secondary)] border border-gray-600 rounded px-2 py-0.5">
-                      {prog.status}
-                    </span>
+                    <button
+                      onClick={() => donate(prog.studyId)}
+                      disabled={donating !== null}
+                      className="px-3 py-1.5 rounded bg-teal-700 hover:bg-teal-600 text-white text-xs font-medium transition-colors disabled:opacity-50"
+                    >
+                      {donating === prog.studyId
+                        ? "Registering…"
+                        : "Donate my EHR to this study"}
+                    </button>
                   )}
                 </div>
-                <p className="text-xs text-[var(--text-secondary)] mb-2">
-                  {prog.description}
-                </p>
-                <div className="text-xs text-[var(--text-secondary)] mb-3">
-                  <span className="text-gray-600">Data needed: </span>
-                  {prog.dataNeeded}
-                </div>
+              );
+            })}
 
-                {isConsented ? (
-                  <button
-                    onClick={() => {
-                      const consent = consents.find(
-                        (c) => c.studyId === prog.studyId && !c.revoked,
-                      );
-                      if (consent) revoke(consent);
-                    }}
-                    disabled={revoking !== null}
-                    className="flex items-center gap-1.5 text-xs text-red-400 hover:text-red-300 transition-colors disabled:opacity-50"
-                  >
-                    <XCircle size={12} />
-                    {revoking ? "Revoking…" : "Revoke consent (GDPR Art. 17)"}
-                  </button>
-                ) : (
-                  <button
-                    onClick={() => donate(prog.studyId)}
-                    disabled={donating !== null}
-                    className="px-3 py-1.5 rounded bg-teal-700 hover:bg-teal-600 text-white text-xs font-medium transition-colors disabled:opacity-50"
-                  >
-                    {donating === prog.studyId
-                      ? "Registering…"
-                      : "Donate my EHR to this study"}
-                  </button>
-                )}
-              </div>
-            );
-          })}
-
-          {/* Consent history */}
-          {consents.length > 0 && (
-            <div className="mt-8">
-              <h2 className="text-lg font-semibold mb-3">Consent History</h2>
-              <table className="text-xs w-full border-collapse">
-                <thead>
-                  <tr className="border-b border-[var(--border)] text-[var(--text-secondary)]">
-                    <th className="text-left pb-1">Study</th>
-                    <th className="text-left pb-1">Granted</th>
-                    <th className="text-left pb-1">Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {consents.map((c) => (
-                    <tr
-                      key={c.consentId}
-                      className="border-b border-[var(--border)]"
-                    >
-                      <td className="py-1.5 pr-3 font-mono">{c.studyId}</td>
-                      <td className="py-1.5 pr-3 text-[var(--text-secondary)]">
-                        {c.grantedAt?.slice(0, 10) || "—"}
-                      </td>
-                      <td className="py-1.5">
-                        {c.revoked ? (
-                          <span className="text-red-400">Revoked</span>
-                        ) : (
-                          <span className="text-teal-400">Active</span>
-                        )}
-                      </td>
+            {/* Consent history */}
+            {consents.length > 0 && (
+              <div className="mt-8">
+                <h2 className="text-lg font-semibold mb-3">Consent History</h2>
+                <table className="text-xs w-full border-collapse">
+                  <thead>
+                    <tr className="border-b border-[var(--border)] text-[var(--text-secondary)]">
+                      <th className="text-left pb-1">Study</th>
+                      <th className="text-left pb-1">Granted</th>
+                      <th className="text-left pb-1">Status</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
-      )}
+                  </thead>
+                  <tbody>
+                    {consents.map((c) => (
+                      <tr
+                        key={c.consentId}
+                        className="border-b border-[var(--border)]"
+                      >
+                        <td className="py-1.5 pr-3 font-mono">{c.studyId}</td>
+                        <td className="py-1.5 pr-3 text-[var(--text-secondary)]">
+                          {c.grantedAt?.slice(0, 10) || "—"}
+                        </td>
+                        <td className="py-1.5">
+                          {c.revoked ? (
+                            <span className="text-red-400">Revoked</span>
+                          ) : (
+                            <span className="text-teal-400">Active</span>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

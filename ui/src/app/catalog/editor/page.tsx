@@ -583,456 +583,463 @@ function EditorContent() {
   }
 
   return (
-    <div className="max-w-5xl mx-auto px-6 py-10">
-      <PageIntro
-        title="HealthDCAT-AP Editor"
-        icon={BookOpen}
-        description="Create and edit HealthDCAT-AP metadata entries for EHDS secondary-use datasets. This editor follows the HealthDCAT-AP 3.0 profile — an application profile of DCAT-AP extending W3C DCAT 3 with health-domain extensions required by the EHDS Regulation."
-        prevStep={{ href: "/catalog", label: "Dataset Catalog" }}
-        nextStep={{ href: "/data/discover", label: "Discover Data" }}
-        infoText="Fields marked with * are mandatory per the HealthDCAT-AP specification. The editor generates unique dataset identifiers and stores metadata in the Neo4j graph database."
-        docLink={{
-          href: "https://healthdcat-ap.github.io/",
-          label: "HealthDCAT-AP Specification",
-          external: true,
-        }}
-      />
+    <div className="min-h-screen bg-[var(--bg)]">
+      <div className="max-w-5xl mx-auto px-6 py-10">
+        <PageIntro
+          title="HealthDCAT-AP Editor"
+          icon={BookOpen}
+          description="Create and edit HealthDCAT-AP metadata entries for EHDS secondary-use datasets. This editor follows the HealthDCAT-AP 3.0 profile — an application profile of DCAT-AP extending W3C DCAT 3 with health-domain extensions required by the EHDS Regulation."
+          prevStep={{ href: "/catalog", label: "Dataset Catalog" }}
+          nextStep={{ href: "/data/discover", label: "Discover Data" }}
+          infoText="Fields marked with * are mandatory per the HealthDCAT-AP specification. The editor generates unique dataset identifiers and stores metadata in the Neo4j graph database."
+          docLink={{
+            href: "https://healthdcat-ap.github.io/",
+            label: "HealthDCAT-AP Specification",
+            external: true,
+          }}
+        />
 
-      {/* Tabs + Export actions */}
-      <div className="flex items-center gap-2 mb-6 flex-wrap">
-        <button
-          onClick={() => setTab("browse")}
-          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-            tab === "browse"
-              ? "bg-purple-600 text-white"
-              : "bg-[var(--surface-2)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
-          }`}
-        >
-          Browse ({datasets.length})
-        </button>
-        <button
-          onClick={startNew}
-          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors inline-flex items-center gap-1.5 ${
-            tab === "create" && !editingId
-              ? "bg-purple-600 text-white"
-              : "bg-[var(--surface-2)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
-          }`}
-        >
-          <Plus size={14} />
-          New Entry
-        </button>
-
-        <div className="flex-1" />
-
-        {datasets.length > 0 && (
+        {/* Tabs + Export actions */}
+        <div className="flex items-center gap-2 mb-6 flex-wrap">
           <button
-            onClick={() => downloadAllTurtle(datasets)}
-            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium bg-green-900/40 text-green-300 border border-green-700/50 hover:bg-green-900/60 transition-colors"
-            title="Export all entries as RDF Turtle for the EHDS editor"
+            onClick={() => setTab("browse")}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              tab === "browse"
+                ? "bg-purple-600 text-white"
+                : "bg-[var(--surface-2)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+            }`}
           >
-            <Download size={14} />
-            Export All (.ttl)
+            Browse ({datasets.length})
           </button>
-        )}
-        <a
-          href="https://ehds.healthdataportal.eu/editor2/"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium bg-[var(--surface-2)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
-          title="Open the official EHDS HealthDCAT-AP editor"
-        >
-          <ExternalLink size={14} />
-          EHDS Editor
-        </a>
-      </div>
+          <button
+            onClick={startNew}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors inline-flex items-center gap-1.5 ${
+              tab === "create" && !editingId
+                ? "bg-purple-600 text-white"
+                : "bg-[var(--surface-2)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+            }`}
+          >
+            <Plus size={14} />
+            New Entry
+          </button>
 
-      {/* Browse Tab */}
-      {tab === "browse" && (
-        <div>
-          {loading ? (
-            <div className="flex items-center gap-2 text-[var(--text-secondary)]">
-              <Loader2 size={16} className="animate-spin" />
-              Loading catalog…
-            </div>
-          ) : datasets.length === 0 ? (
-            <p className="text-[var(--text-secondary)]">
-              No HealthDCAT-AP entries yet.{" "}
-              <button
-                onClick={startNew}
-                className="text-purple-400 hover:underline"
-              >
-                Create one
-              </button>
-            </p>
-          ) : (
-            <div className="grid gap-3">
-              {datasets.map((d, idx) => (
-                <div
-                  key={d.id ?? `entry-${idx}`}
-                  className="border border-[var(--border)] rounded-xl p-4 hover:border-purple-500/50 transition-colors group"
+          <div className="flex-1" />
+
+          {datasets.length > 0 && (
+            <button
+              onClick={() => downloadAllTurtle(datasets)}
+              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium bg-green-900/40 text-green-300 border border-green-700/50 hover:bg-green-900/60 transition-colors"
+              title="Export all entries as RDF Turtle for the EHDS editor"
+            >
+              <Download size={14} />
+              Export All (.ttl)
+            </button>
+          )}
+          <a
+            href="https://ehds.healthdataportal.eu/editor2/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium bg-[var(--surface-2)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
+            title="Open the official EHDS HealthDCAT-AP editor"
+          >
+            <ExternalLink size={14} />
+            EHDS Editor
+          </a>
+        </div>
+
+        {/* Browse Tab */}
+        {tab === "browse" && (
+          <div>
+            {loading ? (
+              <div className="flex items-center gap-2 text-[var(--text-secondary)]">
+                <Loader2 size={16} className="animate-spin" />
+                Loading catalog…
+              </div>
+            ) : datasets.length === 0 ? (
+              <p className="text-[var(--text-secondary)]">
+                No HealthDCAT-AP entries yet.{" "}
+                <button
+                  onClick={startNew}
+                  className="text-purple-400 hover:underline"
                 >
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-semibold text-purple-300 truncate">
-                        {d.title || d.id}
-                      </h3>
-                      <p className="text-xs text-[var(--text-secondary)] mt-0.5 line-clamp-2">
-                        {d.description}
-                      </p>
-                      <div className="flex flex-wrap gap-3 mt-2 text-xs text-[var(--text-secondary)]">
-                        {d.publisher && <span>{d.publisher}</span>}
-                        {d.theme && (
-                          <span className="bg-purple-900/30 text-purple-300 px-1.5 py-0.5 rounded">
-                            {d.theme}
-                          </span>
-                        )}
-                        {d.datasetType && (
-                          <span className="bg-gray-700 text-[var(--text-primary)] px-1.5 py-0.5 rounded">
-                            {d.datasetType}
-                          </span>
-                        )}
-                        {d.recordCount != null && (
-                          <span>
-                            {Number(d.recordCount).toLocaleString()} records
-                          </span>
-                        )}
+                  Create one
+                </button>
+              </p>
+            ) : (
+              <div className="grid gap-3">
+                {datasets.map((d, idx) => (
+                  <div
+                    key={d.id ?? `entry-${idx}`}
+                    className="border border-[var(--border)] rounded-xl p-4 hover:border-purple-500/50 transition-colors group"
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-semibold text-purple-300 truncate">
+                          {d.title || d.id}
+                        </h3>
+                        <p className="text-xs text-[var(--text-secondary)] mt-0.5 line-clamp-2">
+                          {d.description}
+                        </p>
+                        <div className="flex flex-wrap gap-3 mt-2 text-xs text-[var(--text-secondary)]">
+                          {d.publisher && <span>{d.publisher}</span>}
+                          {d.theme && (
+                            <span className="bg-purple-900/30 text-purple-300 px-1.5 py-0.5 rounded">
+                              {d.theme}
+                            </span>
+                          )}
+                          {d.datasetType && (
+                            <span className="bg-gray-700 text-[var(--text-primary)] px-1.5 py-0.5 rounded">
+                              {d.datasetType}
+                            </span>
+                          )}
+                          {d.recordCount != null && (
+                            <span>
+                              {Number(d.recordCount).toLocaleString()} records
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex gap-2 shrink-0 opacity-50 group-hover:opacity-100 transition-opacity">
+                        <button
+                          onClick={() => downloadTurtle(d)}
+                          className="p-1.5 rounded hover:bg-[var(--surface-2)] text-[var(--text-secondary)] hover:text-green-300"
+                          title="Download as RDF Turtle (.ttl) for EHDS editor"
+                        >
+                          <Download size={14} />
+                        </button>
+                        <button
+                          onClick={() => startEdit(d)}
+                          className="p-1.5 rounded hover:bg-[var(--surface-2)] text-[var(--text-secondary)] hover:text-purple-300"
+                          title="Edit entry"
+                        >
+                          <Edit3 size={14} />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(d.id)}
+                          className="p-1.5 rounded hover:bg-[var(--surface-2)] text-[var(--text-secondary)] hover:text-red-400"
+                          title="Delete entry"
+                        >
+                          <Trash2 size={14} />
+                        </button>
                       </div>
                     </div>
-                    <div className="flex gap-2 shrink-0 opacity-50 group-hover:opacity-100 transition-opacity">
-                      <button
-                        onClick={() => downloadTurtle(d)}
-                        className="p-1.5 rounded hover:bg-[var(--surface-2)] text-[var(--text-secondary)] hover:text-green-300"
-                        title="Download as RDF Turtle (.ttl) for EHDS editor"
-                      >
-                        <Download size={14} />
-                      </button>
-                      <button
-                        onClick={() => startEdit(d)}
-                        className="p-1.5 rounded hover:bg-[var(--surface-2)] text-[var(--text-secondary)] hover:text-purple-300"
-                        title="Edit entry"
-                      >
-                        <Edit3 size={14} />
-                      </button>
-                      <button
-                        onClick={() => handleDelete(d.id)}
-                        className="p-1.5 rounded hover:bg-[var(--surface-2)] text-[var(--text-secondary)] hover:text-red-400"
-                        title="Delete entry"
-                      >
-                        <Trash2 size={14} />
-                      </button>
-                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Create / Edit Tab */}
-      {tab === "create" && (
-        <form onSubmit={handleSave} className="space-y-6">
-          {editingId && (
-            <div className="text-xs text-[var(--text-secondary)] bg-[var(--surface-2)]/50 rounded px-3 py-2">
-              Editing:{" "}
-              <span className="text-[var(--text-primary)]">{editingId}</span>
-            </div>
-          )}
-
-          {/* Section: DCAT-AP Mandatory */}
-          <fieldset className="space-y-4">
-            <legend className="text-sm font-semibold text-purple-400 border-b border-[var(--border)] pb-1 mb-2">
-              DCAT-AP Mandatory Fields
-            </legend>
-
-            <FormField label="Title" required>
-              <InputField
-                value={form.title}
-                onChange={(v) => setField("title", v)}
-                placeholder="e.g. Synthetic FHIR R4 Patient Cohort"
-              />
-            </FormField>
-
-            <FormField label="Description">
-              <textarea
-                value={form.description}
-                onChange={(e) => setField("description", e.target.value)}
-                placeholder="Describe the dataset contents, coverage and purpose…"
-                rows={3}
-                className="w-full px-3 py-2 bg-[var(--surface-2)] border border-gray-600 rounded text-sm text-gray-200 outline-none focus:border-purple-500 resize-y"
-              />
-            </FormField>
-
-            <div className="grid grid-cols-2 gap-4">
-              <FormField label="Publisher" required>
-                <SelectField
-                  value={form.publisher}
-                  onChange={(v) => setField("publisher", v)}
-                  options={PUBLISHERS}
-                  placeholder="Select publisher…"
-                />
-              </FormField>
-
-              <FormField
-                label="Theme"
-                help="EuroVoc health theme classification"
-              >
-                <SelectField
-                  value={form.theme}
-                  onChange={(v) => setField("theme", v)}
-                  options={THEMES}
-                  placeholder="Select theme…"
-                />
-              </FormField>
-            </div>
-
-            <FormField
-              label="Language"
-              help="ISO 639-1 code (e.g. en, de, nl, fr)"
-            >
-              <InputField
-                value={form.language ?? ""}
-                onChange={(v) => setField("language", v)}
-                placeholder="en"
-              />
-            </FormField>
-          </fieldset>
-
-          {/* Section: DCAT-AP Recommended */}
-          <fieldset className="space-y-4">
-            <legend className="text-sm font-semibold text-purple-400 border-b border-[var(--border)] pb-1 mb-2">
-              DCAT-AP Recommended Fields
-            </legend>
-
-            <div className="grid grid-cols-2 gap-4">
-              <FormField
-                label="Conforms To"
-                help="Standard URI (e.g. http://hl7.org/fhir/R4)"
-              >
-                <InputField
-                  value={form.conformsTo}
-                  onChange={(v) => setField("conformsTo", v)}
-                  placeholder="http://hl7.org/fhir/R4"
-                />
-              </FormField>
-
-              <FormField
-                label="Spatial Coverage"
-                help="ISO 3166 country code (e.g. DE, NL, FR)"
-              >
-                <InputField
-                  value={form.spatial ?? ""}
-                  onChange={(v) => setField("spatial", v)}
-                  placeholder="DE"
-                />
-              </FormField>
-            </div>
-
-            <FormField label="License">
-              <SelectField
-                value={form.license}
-                onChange={(v) => setField("license", v)}
-                options={LICENSES}
-              />
-            </FormField>
-          </fieldset>
-
-          {/* Section: HealthDCAT-AP Extensions */}
-          <fieldset className="space-y-4">
-            <legend className="text-sm font-semibold text-purple-400 border-b border-[var(--border)] pb-1 mb-2">
-              HealthDCAT-AP Extensions
-            </legend>
-
-            <div className="grid grid-cols-2 gap-4">
-              <FormField label="Dataset Type">
-                <SelectField
-                  value={form.datasetType}
-                  onChange={(v) => setField("datasetType", v)}
-                  options={DATASET_TYPES}
-                  placeholder="Select type…"
-                />
-              </FormField>
-
-              <FormField label="Publisher Type">
-                <SelectField
-                  value={form.publisherType ?? ""}
-                  onChange={(v) => setField("publisherType", v)}
-                  options={PUBLISHER_TYPES}
-                  placeholder="Select role…"
-                />
-              </FormField>
-            </div>
-
-            <FormField label="Legal Basis for Access">
-              <SelectField
-                value={form.legalBasis}
-                onChange={(v) => setField("legalBasis", v)}
-                options={LEGAL_BASIS_OPTIONS}
-              />
-            </FormField>
-
-            <FormField label="Purpose" help="Permitted purpose description">
-              <InputField
-                value={form.purpose ?? ""}
-                onChange={(v) => setField("purpose", v)}
-                placeholder="e.g. Secondary use for public health research"
-              />
-            </FormField>
-
-            <FormField label="Population Coverage">
-              <InputField
-                value={form.populationCoverage ?? ""}
-                onChange={(v) => setField("populationCoverage", v)}
-                placeholder="e.g. Adult patients (18+) in Berlin region"
-              />
-            </FormField>
-
-            <FormField label="Health Category" help="EEHRxF priority category">
-              <InputField
-                value={form.healthCategory ?? ""}
-                onChange={(v) => setField("healthCategory", v)}
-                placeholder="e.g. Patient Summary, ePrescription"
-              />
-            </FormField>
-
-            <div className="grid grid-cols-2 gap-4">
-              <FormField label="Contains Personal Data">
-                <div className="flex items-center gap-2 mt-1">
-                  <input
-                    type="checkbox"
-                    checked={form.personalData ?? false}
-                    onChange={(e) => setField("personalData", e.target.checked)}
-                    className="w-4 h-4 rounded bg-[var(--surface-2)] border-gray-600"
-                  />
-                  <span className="text-sm text-[var(--text-primary)]">
-                    Yes
-                  </span>
-                </div>
-              </FormField>
-
-              <FormField label="Contains Sensitive Data">
-                <div className="flex items-center gap-2 mt-1">
-                  <input
-                    type="checkbox"
-                    checked={form.sensitiveData ?? false}
-                    onChange={(e) =>
-                      setField("sensitiveData", e.target.checked)
-                    }
-                    className="w-4 h-4 rounded bg-[var(--surface-2)] border-gray-600"
-                  />
-                  <span className="text-sm text-[var(--text-primary)]">
-                    Yes
-                  </span>
-                </div>
-              </FormField>
-            </div>
-          </fieldset>
-
-          {/* Section: Statistics */}
-          <fieldset className="space-y-4">
-            <legend className="text-sm font-semibold text-purple-400 border-b border-[var(--border)] pb-1 mb-2">
-              Statistics
-            </legend>
-
-            <div className="grid grid-cols-2 gap-4">
-              <FormField label="Number of Records">
-                <InputField
-                  value={form.recordCount?.toString() ?? ""}
-                  onChange={(v) =>
-                    setField("recordCount", v ? parseInt(v, 10) : null)
-                  }
-                  placeholder="e.g. 10000"
-                  type="number"
-                />
-              </FormField>
-
-              <FormField label="Unique Individuals">
-                <InputField
-                  value={form.numberOfUniqueIndividuals?.toString() ?? ""}
-                  onChange={(v) =>
-                    setField(
-                      "numberOfUniqueIndividuals",
-                      v ? parseInt(v, 10) : null,
-                    )
-                  }
-                  placeholder="e.g. 500"
-                  type="number"
-                />
-              </FormField>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <FormField label="Min Typical Age">
-                <InputField
-                  value={form.minTypicalAge?.toString() ?? ""}
-                  onChange={(v) =>
-                    setField("minTypicalAge", v ? parseInt(v, 10) : null)
-                  }
-                  placeholder="e.g. 18"
-                  type="number"
-                />
-              </FormField>
-
-              <FormField label="Max Typical Age">
-                <InputField
-                  value={form.maxTypicalAge?.toString() ?? ""}
-                  onChange={(v) =>
-                    setField("maxTypicalAge", v ? parseInt(v, 10) : null)
-                  }
-                  placeholder="e.g. 90"
-                  type="number"
-                />
-              </FormField>
-            </div>
-          </fieldset>
-
-          {/* Result message */}
-          {result && (
-            <div
-              className={`flex items-center gap-2 p-3 rounded text-sm ${
-                result.ok
-                  ? "bg-green-900/30 text-green-300"
-                  : "bg-red-900/30 text-red-300"
-              }`}
-            >
-              {result.ok ? (
-                <CheckCircle2 size={16} />
-              ) : (
-                <AlertCircle size={16} />
-              )}
-              {result.message}
-            </div>
-          )}
-
-          {/* Actions */}
-          <div className="flex gap-3">
-            <button
-              type="submit"
-              disabled={saving || !form.title.trim()}
-              className="inline-flex items-center gap-2 px-5 py-2.5 bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white rounded-lg text-sm font-medium transition-colors"
-            >
-              {saving ? (
-                <Loader2 size={14} className="animate-spin" />
-              ) : (
-                <Save size={14} />
-              )}
-              {editingId ? "Update Entry" : "Create Entry"}
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setTab("browse");
-                setEditingId(null);
-                setForm({ ...EMPTY_ENTRY });
-                setResult(null);
-              }}
-              className="px-5 py-2.5 bg-gray-700 hover:bg-gray-600 text-[var(--text-primary)] rounded-lg text-sm transition-colors"
-            >
-              Cancel
-            </button>
+                ))}
+              </div>
+            )}
           </div>
-        </form>
-      )}
+        )}
+
+        {/* Create / Edit Tab */}
+        {tab === "create" && (
+          <form onSubmit={handleSave} className="space-y-6">
+            {editingId && (
+              <div className="text-xs text-[var(--text-secondary)] bg-[var(--surface-2)]/50 rounded px-3 py-2">
+                Editing:{" "}
+                <span className="text-[var(--text-primary)]">{editingId}</span>
+              </div>
+            )}
+
+            {/* Section: DCAT-AP Mandatory */}
+            <fieldset className="space-y-4">
+              <legend className="text-sm font-semibold text-purple-400 border-b border-[var(--border)] pb-1 mb-2">
+                DCAT-AP Mandatory Fields
+              </legend>
+
+              <FormField label="Title" required>
+                <InputField
+                  value={form.title}
+                  onChange={(v) => setField("title", v)}
+                  placeholder="e.g. Synthetic FHIR R4 Patient Cohort"
+                />
+              </FormField>
+
+              <FormField label="Description">
+                <textarea
+                  value={form.description}
+                  onChange={(e) => setField("description", e.target.value)}
+                  placeholder="Describe the dataset contents, coverage and purpose…"
+                  rows={3}
+                  className="w-full px-3 py-2 bg-[var(--surface-2)] border border-gray-600 rounded text-sm text-gray-200 outline-none focus:border-purple-500 resize-y"
+                />
+              </FormField>
+
+              <div className="grid grid-cols-2 gap-4">
+                <FormField label="Publisher" required>
+                  <SelectField
+                    value={form.publisher}
+                    onChange={(v) => setField("publisher", v)}
+                    options={PUBLISHERS}
+                    placeholder="Select publisher…"
+                  />
+                </FormField>
+
+                <FormField
+                  label="Theme"
+                  help="EuroVoc health theme classification"
+                >
+                  <SelectField
+                    value={form.theme}
+                    onChange={(v) => setField("theme", v)}
+                    options={THEMES}
+                    placeholder="Select theme…"
+                  />
+                </FormField>
+              </div>
+
+              <FormField
+                label="Language"
+                help="ISO 639-1 code (e.g. en, de, nl, fr)"
+              >
+                <InputField
+                  value={form.language ?? ""}
+                  onChange={(v) => setField("language", v)}
+                  placeholder="en"
+                />
+              </FormField>
+            </fieldset>
+
+            {/* Section: DCAT-AP Recommended */}
+            <fieldset className="space-y-4">
+              <legend className="text-sm font-semibold text-purple-400 border-b border-[var(--border)] pb-1 mb-2">
+                DCAT-AP Recommended Fields
+              </legend>
+
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  label="Conforms To"
+                  help="Standard URI (e.g. http://hl7.org/fhir/R4)"
+                >
+                  <InputField
+                    value={form.conformsTo}
+                    onChange={(v) => setField("conformsTo", v)}
+                    placeholder="http://hl7.org/fhir/R4"
+                  />
+                </FormField>
+
+                <FormField
+                  label="Spatial Coverage"
+                  help="ISO 3166 country code (e.g. DE, NL, FR)"
+                >
+                  <InputField
+                    value={form.spatial ?? ""}
+                    onChange={(v) => setField("spatial", v)}
+                    placeholder="DE"
+                  />
+                </FormField>
+              </div>
+
+              <FormField label="License">
+                <SelectField
+                  value={form.license}
+                  onChange={(v) => setField("license", v)}
+                  options={LICENSES}
+                />
+              </FormField>
+            </fieldset>
+
+            {/* Section: HealthDCAT-AP Extensions */}
+            <fieldset className="space-y-4">
+              <legend className="text-sm font-semibold text-purple-400 border-b border-[var(--border)] pb-1 mb-2">
+                HealthDCAT-AP Extensions
+              </legend>
+
+              <div className="grid grid-cols-2 gap-4">
+                <FormField label="Dataset Type">
+                  <SelectField
+                    value={form.datasetType}
+                    onChange={(v) => setField("datasetType", v)}
+                    options={DATASET_TYPES}
+                    placeholder="Select type…"
+                  />
+                </FormField>
+
+                <FormField label="Publisher Type">
+                  <SelectField
+                    value={form.publisherType ?? ""}
+                    onChange={(v) => setField("publisherType", v)}
+                    options={PUBLISHER_TYPES}
+                    placeholder="Select role…"
+                  />
+                </FormField>
+              </div>
+
+              <FormField label="Legal Basis for Access">
+                <SelectField
+                  value={form.legalBasis}
+                  onChange={(v) => setField("legalBasis", v)}
+                  options={LEGAL_BASIS_OPTIONS}
+                />
+              </FormField>
+
+              <FormField label="Purpose" help="Permitted purpose description">
+                <InputField
+                  value={form.purpose ?? ""}
+                  onChange={(v) => setField("purpose", v)}
+                  placeholder="e.g. Secondary use for public health research"
+                />
+              </FormField>
+
+              <FormField label="Population Coverage">
+                <InputField
+                  value={form.populationCoverage ?? ""}
+                  onChange={(v) => setField("populationCoverage", v)}
+                  placeholder="e.g. Adult patients (18+) in Berlin region"
+                />
+              </FormField>
+
+              <FormField
+                label="Health Category"
+                help="EEHRxF priority category"
+              >
+                <InputField
+                  value={form.healthCategory ?? ""}
+                  onChange={(v) => setField("healthCategory", v)}
+                  placeholder="e.g. Patient Summary, ePrescription"
+                />
+              </FormField>
+
+              <div className="grid grid-cols-2 gap-4">
+                <FormField label="Contains Personal Data">
+                  <div className="flex items-center gap-2 mt-1">
+                    <input
+                      type="checkbox"
+                      checked={form.personalData ?? false}
+                      onChange={(e) =>
+                        setField("personalData", e.target.checked)
+                      }
+                      className="w-4 h-4 rounded bg-[var(--surface-2)] border-gray-600"
+                    />
+                    <span className="text-sm text-[var(--text-primary)]">
+                      Yes
+                    </span>
+                  </div>
+                </FormField>
+
+                <FormField label="Contains Sensitive Data">
+                  <div className="flex items-center gap-2 mt-1">
+                    <input
+                      type="checkbox"
+                      checked={form.sensitiveData ?? false}
+                      onChange={(e) =>
+                        setField("sensitiveData", e.target.checked)
+                      }
+                      className="w-4 h-4 rounded bg-[var(--surface-2)] border-gray-600"
+                    />
+                    <span className="text-sm text-[var(--text-primary)]">
+                      Yes
+                    </span>
+                  </div>
+                </FormField>
+              </div>
+            </fieldset>
+
+            {/* Section: Statistics */}
+            <fieldset className="space-y-4">
+              <legend className="text-sm font-semibold text-purple-400 border-b border-[var(--border)] pb-1 mb-2">
+                Statistics
+              </legend>
+
+              <div className="grid grid-cols-2 gap-4">
+                <FormField label="Number of Records">
+                  <InputField
+                    value={form.recordCount?.toString() ?? ""}
+                    onChange={(v) =>
+                      setField("recordCount", v ? parseInt(v, 10) : null)
+                    }
+                    placeholder="e.g. 10000"
+                    type="number"
+                  />
+                </FormField>
+
+                <FormField label="Unique Individuals">
+                  <InputField
+                    value={form.numberOfUniqueIndividuals?.toString() ?? ""}
+                    onChange={(v) =>
+                      setField(
+                        "numberOfUniqueIndividuals",
+                        v ? parseInt(v, 10) : null,
+                      )
+                    }
+                    placeholder="e.g. 500"
+                    type="number"
+                  />
+                </FormField>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <FormField label="Min Typical Age">
+                  <InputField
+                    value={form.minTypicalAge?.toString() ?? ""}
+                    onChange={(v) =>
+                      setField("minTypicalAge", v ? parseInt(v, 10) : null)
+                    }
+                    placeholder="e.g. 18"
+                    type="number"
+                  />
+                </FormField>
+
+                <FormField label="Max Typical Age">
+                  <InputField
+                    value={form.maxTypicalAge?.toString() ?? ""}
+                    onChange={(v) =>
+                      setField("maxTypicalAge", v ? parseInt(v, 10) : null)
+                    }
+                    placeholder="e.g. 90"
+                    type="number"
+                  />
+                </FormField>
+              </div>
+            </fieldset>
+
+            {/* Result message */}
+            {result && (
+              <div
+                className={`flex items-center gap-2 p-3 rounded text-sm ${
+                  result.ok
+                    ? "bg-green-900/30 text-green-300"
+                    : "bg-red-900/30 text-red-300"
+                }`}
+              >
+                {result.ok ? (
+                  <CheckCircle2 size={16} />
+                ) : (
+                  <AlertCircle size={16} />
+                )}
+                {result.message}
+              </div>
+            )}
+
+            {/* Actions */}
+            <div className="flex gap-3">
+              <button
+                type="submit"
+                disabled={saving || !form.title.trim()}
+                className="inline-flex items-center gap-2 px-5 py-2.5 bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white rounded-lg text-sm font-medium transition-colors"
+              >
+                {saving ? (
+                  <Loader2 size={14} className="animate-spin" />
+                ) : (
+                  <Save size={14} />
+                )}
+                {editingId ? "Update Entry" : "Create Entry"}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setTab("browse");
+                  setEditingId(null);
+                  setForm({ ...EMPTY_ENTRY });
+                  setResult(null);
+                }}
+                className="px-5 py-2.5 bg-gray-700 hover:bg-gray-600 text-[var(--text-primary)] rounded-lg text-sm transition-colors"
+              >
+                Cancel
+              </button>
+            </div>
+          </form>
+        )}
+      </div>
     </div>
   );
 }
