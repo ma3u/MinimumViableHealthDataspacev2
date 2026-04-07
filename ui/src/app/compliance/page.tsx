@@ -10,7 +10,7 @@ import {
   Globe,
   Lock,
 } from "lucide-react";
-import PageIntro from "@/components/PageIntro";
+import Link from "next/link";
 
 interface TrustCenter {
   name: string;
@@ -132,526 +132,548 @@ export default function CompliancePage() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto px-6 py-10">
-      <PageIntro
-        title="EHDS Compliance Checker"
-        icon={ShieldCheck}
-        description="Validate the HDAB approval chain for data access permits under EHDS Articles 45–53. Select a consumer and dataset to check whether all required Verifiable Credentials and HDAB approvals are in place."
-        prevStep={{ href: "/eehrxf", label: "EEHRxF Profiles" }}
-        nextStep={{ href: "/compliance/tck", label: "Protocol TCK" }}
-        infoText="The checker verifies DID:web identities, EHDS credentials, and the complete approval chain in Neo4j. A green result means the participant meets all regulatory requirements for secondary-use data access."
-        docLink={{ href: "/docs/architecture", label: "Architecture Docs" }}
-      />
-
-      <div className="flex flex-col gap-3 mb-6">
-        <label className="text-sm text-[var(--text-secondary)]">
-          Consumer (Participant)
-          {optionsLoading ? (
-            <div className="mt-1 w-full px-3 py-2 bg-[var(--surface-2)] border border-[var(--border)] rounded text-sm text-[var(--text-secondary)]">
-              Loading from graph…
-            </div>
-          ) : consumers.length > 0 ? (
-            <select
-              value={consumerId}
-              onChange={(e) => setConsumerId(e.target.value)}
-              className="mt-1 w-full px-3 py-2 bg-[var(--surface-2)] border border-gray-600 rounded text-sm outline-none focus:border-layer5 block"
+    <div className="min-h-screen bg-[var(--bg)]">
+      <div className="max-w-2xl mx-auto px-8 py-10">
+        {/* ── Page header ── */}
+        <div className="mb-8">
+          <h1 className="page-header">EHDS Compliance Checker</h1>
+          <p className="text-[var(--text-secondary)] text-lg mt-1">
+            HDAB approval chain · EHDS Art. 45–53
+          </p>
+          <div className="flex gap-4 mt-4 text-sm">
+            <Link
+              href="/eehrxf"
+              className="font-bold text-[var(--accent)] hover:underline"
             >
-              <option value="">— select consumer —</option>
-              {consumers.map((c, idx) => (
-                <option key={`${c.id}-${idx}`} value={c.id}>
-                  {c.name} [{c.type}]
-                </option>
-              ))}
-            </select>
-          ) : (
-            <input
-              type="text"
-              value={consumerId}
-              onChange={(e) => setConsumerId(e.target.value)}
-              placeholder="Participant ID or DID"
-              className="mt-1 w-full px-3 py-2 bg-[var(--surface-2)] border border-gray-600 rounded text-sm outline-none focus:border-layer5 block"
-            />
-          )}
-        </label>
-
-        <label className="text-sm text-[var(--text-secondary)]">
-          Dataset
-          {optionsLoading ? (
-            <div className="mt-1 w-full px-3 py-2 bg-[var(--surface-2)] border border-[var(--border)] rounded text-sm text-[var(--text-secondary)]">
-              Loading from graph…
-            </div>
-          ) : datasets.length > 0 ? (
-            <select
-              value={datasetId}
-              onChange={(e) => setDatasetId(e.target.value)}
-              className="mt-1 w-full px-3 py-2 bg-[var(--surface-2)] border border-gray-600 rounded text-sm outline-none focus:border-layer5 block"
+              ← EEHRxF Profiles
+            </Link>
+            <Link
+              href="/compliance/tck"
+              className="font-bold text-[var(--accent)] hover:underline"
             >
-              <option value="">— select dataset —</option>
-              {datasets.map((d, idx) => (
-                <option key={`${d.id}-${idx}`} value={d.id}>
-                  {d.title}
-                </option>
-              ))}
-            </select>
-          ) : (
-            <input
-              type="text"
-              value={datasetId}
-              onChange={(e) => setDatasetId(e.target.value)}
-              placeholder="Dataset ID"
-              className="mt-1 w-full px-3 py-2 bg-[var(--surface-2)] border border-gray-600 rounded text-sm outline-none focus:border-layer5 block"
-            />
-          )}
-        </label>
+              Protocol TCK →
+            </Link>
+          </div>
+        </div>
 
-        <button
-          onClick={check}
-          disabled={loading || !consumerId || !datasetId}
-          className="mt-2 px-4 py-2 bg-layer5 hover:bg-layer5-dark rounded font-medium text-sm disabled:opacity-50"
-        >
-          {loading ? "Checking…" : "Validate Compliance"}
-        </button>
-      </div>
-
-      {result && (
-        <div
-          className={`rounded-xl p-4 border ${
-            result.compliant
-              ? "border-layer3 bg-layer3/10"
-              : "border-red-600 bg-red-900/10"
-          }`}
-        >
-          <div className="flex items-center gap-2 font-semibold mb-3">
-            {result.compliant ? (
-              <>
-                <ShieldCheck size={18} className="text-layer3" />
-                <span className="text-layer3">
-                  Compliant — full HDAB chain found
-                </span>
-              </>
+        <div className="flex flex-col gap-3 mb-6">
+          <label className="text-sm text-[var(--text-secondary)]">
+            Consumer (Participant)
+            {optionsLoading ? (
+              <div className="mt-1 w-full px-3 py-2 bg-[var(--surface-2)] border border-[var(--border)] rounded text-sm text-[var(--text-secondary)]">
+                Loading from graph…
+              </div>
+            ) : consumers.length > 0 ? (
+              <select
+                value={consumerId}
+                onChange={(e) => setConsumerId(e.target.value)}
+                className="mt-1 w-full px-3 py-2 bg-[var(--surface-2)] border border-gray-600 rounded text-sm outline-none focus:border-layer5 block"
+              >
+                <option value="">— select consumer —</option>
+                {consumers.map((c, idx) => (
+                  <option key={`${c.id}-${idx}`} value={c.id}>
+                    {c.name} [{c.type}]
+                  </option>
+                ))}
+              </select>
             ) : (
-              <>
-                <AlertCircle size={18} className="text-red-400" />
-                <span className="text-red-400">
-                  Non-compliant — no approval chain found
-                </span>
-              </>
+              <input
+                type="text"
+                value={consumerId}
+                onChange={(e) => setConsumerId(e.target.value)}
+                placeholder="Participant ID or DID"
+                className="mt-1 w-full px-3 py-2 bg-[var(--surface-2)] border border-gray-600 rounded text-sm outline-none focus:border-layer5 block"
+              />
+            )}
+          </label>
+
+          <label className="text-sm text-[var(--text-secondary)]">
+            Dataset
+            {optionsLoading ? (
+              <div className="mt-1 w-full px-3 py-2 bg-[var(--surface-2)] border border-[var(--border)] rounded text-sm text-[var(--text-secondary)]">
+                Loading from graph…
+              </div>
+            ) : datasets.length > 0 ? (
+              <select
+                value={datasetId}
+                onChange={(e) => setDatasetId(e.target.value)}
+                className="mt-1 w-full px-3 py-2 bg-[var(--surface-2)] border border-gray-600 rounded text-sm outline-none focus:border-layer5 block"
+              >
+                <option value="">— select dataset —</option>
+                {datasets.map((d, idx) => (
+                  <option key={`${d.id}-${idx}`} value={d.id}>
+                    {d.title}
+                  </option>
+                ))}
+              </select>
+            ) : (
+              <input
+                type="text"
+                value={datasetId}
+                onChange={(e) => setDatasetId(e.target.value)}
+                placeholder="Dataset ID"
+                className="mt-1 w-full px-3 py-2 bg-[var(--surface-2)] border border-gray-600 rounded text-sm outline-none focus:border-layer5 block"
+              />
+            )}
+          </label>
+
+          <button
+            onClick={check}
+            disabled={loading || !consumerId || !datasetId}
+            className="mt-2 px-4 py-2 bg-layer5 hover:bg-layer5-dark rounded font-medium text-sm disabled:opacity-50"
+          >
+            {loading ? "Checking…" : "Validate Compliance"}
+          </button>
+        </div>
+
+        {result && (
+          <div
+            className={`rounded-xl p-4 border ${
+              result.compliant
+                ? "border-layer3 bg-layer3/10"
+                : "border-red-600 bg-red-900/10"
+            }`}
+          >
+            <div className="flex items-center gap-2 font-semibold mb-3">
+              {result.compliant ? (
+                <>
+                  <ShieldCheck size={18} className="text-layer3" />
+                  <span className="text-layer3">
+                    Compliant — full HDAB chain found
+                  </span>
+                </>
+              ) : (
+                <>
+                  <AlertCircle size={18} className="text-red-400" />
+                  <span className="text-red-400">
+                    Non-compliant — no approval chain found
+                  </span>
+                </>
+              )}
+            </div>
+
+            {result.chain.length > 0 && (
+              <table className="text-xs w-full border-collapse">
+                <thead>
+                  <tr className="text-[var(--text-secondary)] border-b border-[var(--border)]">
+                    <th className="text-left pb-1">Application</th>
+                    <th className="text-left pb-1">Status</th>
+                    <th className="text-left pb-1">Approval</th>
+                    <th className="text-left pb-1">EHDS Article</th>
+                    <th className="text-left pb-1">Contract</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {result.chain.map((c, i) => (
+                    <tr key={i} className="border-b border-[var(--border)]">
+                      <td className="py-1 pr-2 font-mono">{c.applicationId}</td>
+                      <td className="py-1 pr-2 text-green-400">
+                        {c.applicationStatus}
+                      </td>
+                      <td className="py-1 pr-2 font-mono">{c.approvalId}</td>
+                      <td className="py-1 pr-2">{c.ehdsArticle}</td>
+                      <td className="py-1 font-mono text-[var(--text-secondary)]">
+                        {c.contract ?? "—"}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             )}
           </div>
-
-          {result.chain.length > 0 && (
-            <table className="text-xs w-full border-collapse">
-              <thead>
-                <tr className="text-[var(--text-secondary)] border-b border-[var(--border)]">
-                  <th className="text-left pb-1">Application</th>
-                  <th className="text-left pb-1">Status</th>
-                  <th className="text-left pb-1">Approval</th>
-                  <th className="text-left pb-1">EHDS Article</th>
-                  <th className="text-left pb-1">Contract</th>
-                </tr>
-              </thead>
-              <tbody>
-                {result.chain.map((c, i) => (
-                  <tr key={i} className="border-b border-[var(--border)]">
-                    <td className="py-1 pr-2 font-mono">{c.applicationId}</td>
-                    <td className="py-1 pr-2 text-green-400">
-                      {c.applicationStatus}
-                    </td>
-                    <td className="py-1 pr-2 font-mono">{c.approvalId}</td>
-                    <td className="py-1 pr-2">{c.ehdsArticle}</td>
-                    <td className="py-1 font-mono text-[var(--text-secondary)]">
-                      {c.contract ?? "—"}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
-        </div>
-      )}
-
-      {/* ── Verifiable Credentials Trust Section ── */}
-      <div className="mt-12 border-t border-[var(--border)] pt-8">
-        <div className="flex items-center gap-2 mb-1">
-          <Key size={18} className="text-layer1" />
-          <h2 className="text-xl font-bold">EHDS Verifiable Credentials</h2>
-        </div>
-        <p className="text-[var(--text-secondary)] text-sm mb-6">
-          DCP credential definitions registered on IssuerService — presented
-          during DSP negotiation
-        </p>
-
-        {credentials.length === 0 ? (
-          <div className="text-[var(--text-secondary)] text-sm">
-            {optionsLoading ? "Loading…" : "No credentials found in graph."}
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {credentials.map((vc) => (
-              <div
-                key={vc.credentialId}
-                className="rounded-lg border border-[var(--border)] bg-[var(--surface-2)]/50 p-4"
-              >
-                <div className="flex items-start justify-between mb-2">
-                  <div className="flex items-center gap-2">
-                    <BadgeCheck
-                      size={16}
-                      className={
-                        vc.status === "active"
-                          ? "text-green-400"
-                          : "text-red-400"
-                      }
-                    />
-                    <span className="font-semibold text-sm">
-                      {vc.credentialType}
-                    </span>
-                    {vc.participantRole && (
-                      <span className="text-xs px-2 py-0.5 rounded bg-layer5/20 text-layer5">
-                        {vc.participantRole}
-                      </span>
-                    )}
-                  </div>
-                  <span
-                    className={`text-xs font-medium px-2 py-0.5 rounded ${
-                      vc.status === "active"
-                        ? "bg-green-900/40 text-green-400"
-                        : "bg-red-900/40 text-red-400"
-                    }`}
-                  >
-                    {vc.status}
-                  </span>
-                </div>
-
-                <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs text-[var(--text-secondary)]">
-                  <div>
-                    <span className="text-[var(--text-secondary)]">
-                      Holder:
-                    </span>{" "}
-                    {vc.holderName ?? "—"}
-                    {vc.holderType && (
-                      <span className="text-gray-600"> [{vc.holderType}]</span>
-                    )}
-                  </div>
-                  <div>
-                    <span className="text-[var(--text-secondary)]">
-                      Subject:
-                    </span>{" "}
-                    <span className="font-mono">
-                      {vc.subjectDid?.replace(
-                        /did:web:identityhub%3A7083:/,
-                        "",
-                      )}
-                    </span>
-                  </div>
-                  <div>
-                    <span className="text-[var(--text-secondary)]">
-                      Issuer:
-                    </span>{" "}
-                    <span className="font-mono">
-                      {vc.issuerDid?.replace(
-                        /did:web:issuerservice%3A10016:/,
-                        "",
-                      )}
-                    </span>
-                  </div>
-                  <div>
-                    <span className="text-[var(--text-secondary)]">
-                      Format:
-                    </span>{" "}
-                    VC1_0_JWT
-                  </div>
-
-                  {/* Type-specific details */}
-                  {vc.purpose && (
-                    <div className="col-span-2">
-                      <span className="text-[var(--text-secondary)]">
-                        Purpose:
-                      </span>{" "}
-                      {vc.purpose}
-                    </div>
-                  )}
-                  {vc.datasetId && (
-                    <div className="col-span-2">
-                      <span className="text-[var(--text-secondary)]">
-                        Dataset:
-                      </span>{" "}
-                      <span className="font-mono">{vc.datasetId}</span>
-                    </div>
-                  )}
-                  {vc.completeness != null && (
-                    <div className="col-span-2 mt-1">
-                      <span className="text-[var(--text-secondary)]">
-                        Quality:
-                      </span>{" "}
-                      Completeness{" "}
-                      <span className="text-green-400">
-                        {(vc.completeness * 100).toFixed(0)}%
-                      </span>
-                      {" · "}Conformance{" "}
-                      <span className="text-green-400">
-                        {((vc.conformance ?? 0) * 100).toFixed(0)}%
-                      </span>
-                      {" · "}Timeliness{" "}
-                      <span className="text-green-400">
-                        {((vc.timeliness ?? 0) * 100).toFixed(0)}%
-                      </span>
-                    </div>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
         )}
 
-        {/* Trust chain diagram */}
-        <div className="mt-6 rounded-lg border border-[var(--border)] bg-[var(--surface)]/50 p-4">
-          <h3 className="text-sm font-semibold mb-3 text-[var(--text-primary)]">
-            DCP Trust Chain — Credential Presentation Flow
-          </h3>
-          <div className="flex items-center gap-2 text-xs text-[var(--text-secondary)] flex-wrap">
-            <span className="px-2 py-1 rounded bg-layer1/20 text-layer1 font-medium">
-              IssuerService
-            </span>
-            <span>→ signs VC →</span>
-            <span className="px-2 py-1 rounded bg-layer2/20 text-layer2 font-medium">
-              IdentityHub
-            </span>
-            <span>→ stores →</span>
-            <span className="px-2 py-1 rounded bg-layer3/20 text-layer3 font-medium">
-              DCP Presentation
-            </span>
-            <span>→ verifies →</span>
-            <span className="px-2 py-1 rounded bg-layer5/20 text-layer5 font-medium">
-              Policy Engine
-            </span>
-            <span>→ evaluates →</span>
-            <span className="px-2 py-1 rounded bg-green-900/40 text-green-400 font-medium">
-              ✓ Access Granted
-            </span>
+        {/* ── Verifiable Credentials Trust Section ── */}
+        <div className="mt-12 border-t border-[var(--border)] pt-8">
+          <div className="flex items-center gap-2 mb-1">
+            <Key size={18} className="text-layer1" />
+            <h2 className="text-xl font-bold">EHDS Verifiable Credentials</h2>
           </div>
-        </div>
-      </div>
+          <p className="text-[var(--text-secondary)] text-sm mb-6">
+            DCP credential definitions registered on IssuerService — presented
+            during DSP negotiation
+          </p>
 
-      {/* ── Phase 18: Trust Center Section ── */}
-      <div
-        id="trust-center"
-        className="mt-12 border-t border-[var(--border)] pt-8"
-      >
-        <div className="flex items-center gap-2 mb-1">
-          <Lock size={18} className="text-layer1" />
-          <h2 className="text-xl font-bold">
-            Trust Center — Pseudonym Resolution
-          </h2>
-        </div>
-        <p className="text-[var(--text-secondary)] text-sm mb-6">
-          EHDS Art. 50/51 — HDAB-designated trust centers enabling
-          cross-provider longitudinal patient linkage without exposing real
-          identities to researchers. Provider pseudonyms are resolved to
-          research pseudonyms inside the Secure Processing Environment only.
-        </p>
-
-        {optionsLoading ? (
-          <div className="text-[var(--text-secondary)] text-sm">
-            Loading trust centers…
-          </div>
-        ) : trustCenters.length === 0 ? (
-          <div className="text-[var(--text-secondary)] text-sm">
-            No trust centers found. Run{" "}
-            <code className="font-mono text-xs bg-[var(--surface-2)] px-1 py-0.5 rounded">
-              neo4j/seed-trust-center.cypher
-            </code>{" "}
-            to seed demo data.
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {trustCenters.map((tc) => (
-              <div
-                key={tc.name}
-                data-testid="trust-center-card"
-                className="rounded-lg border border-[var(--border)] bg-[var(--surface-2)]/50 p-4"
-              >
-                <div className="flex items-start justify-between mb-3">
-                  <div className="flex items-center gap-2">
-                    <Globe size={16} className="text-layer1" />
-                    <span className="font-semibold text-sm">{tc.name}</span>
-                    <span className="text-xs px-2 py-0.5 rounded bg-gray-700 text-[var(--text-primary)]">
-                      {tc.country}
+          {credentials.length === 0 ? (
+            <div className="text-[var(--text-secondary)] text-sm">
+              {optionsLoading ? "Loading…" : "No credentials found in graph."}
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {credentials.map((vc) => (
+                <div
+                  key={vc.credentialId}
+                  className="rounded-lg border border-[var(--border)] bg-[var(--surface-2)]/50 p-4"
+                >
+                  <div className="flex items-start justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <BadgeCheck
+                        size={16}
+                        className={
+                          vc.status === "active"
+                            ? "text-green-400"
+                            : "text-red-400"
+                        }
+                      />
+                      <span className="font-semibold text-sm">
+                        {vc.credentialType}
+                      </span>
+                      {vc.participantRole && (
+                        <span className="text-xs px-2 py-0.5 rounded bg-layer5/20 text-layer5">
+                          {vc.participantRole}
+                        </span>
+                      )}
+                    </div>
+                    <span
+                      className={`text-xs font-medium px-2 py-0.5 rounded ${
+                        vc.status === "active"
+                          ? "bg-green-900/40 text-green-400"
+                          : "bg-red-900/40 text-red-400"
+                      }`}
+                    >
+                      {vc.status}
                     </span>
                   </div>
-                  <span
-                    className={`text-xs font-medium px-2 py-0.5 rounded ${
-                      tc.status === "active"
-                        ? "bg-green-900/40 text-green-400"
-                        : "bg-red-900/40 text-red-400"
-                    }`}
-                  >
-                    {tc.status}
-                  </span>
-                </div>
 
-                <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs text-[var(--text-secondary)] mb-3">
-                  <div>
-                    <span className="text-[var(--text-secondary)]">
-                      Operated by:
-                    </span>{" "}
-                    {tc.operatedBy}
-                  </div>
-                  <div>
-                    <span className="text-[var(--text-secondary)]">
-                      Protocol:
-                    </span>{" "}
-                    {tc.protocol}
-                  </div>
-                  <div className="col-span-2">
-                    <span className="text-[var(--text-secondary)]">DID:</span>{" "}
-                    <span className="font-mono">{tc.did}</span>
-                  </div>
-                  {tc.hdabApprovalId && (
+                  <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs text-[var(--text-secondary)]">
                     <div>
                       <span className="text-[var(--text-secondary)]">
-                        HDAB Approval:
+                        Holder:
                       </span>{" "}
-                      <span className="font-mono">{tc.hdabApprovalId}</span>{" "}
-                      <span
-                        className={
-                          tc.hdabApprovalStatus === "approved"
-                            ? "text-green-400"
-                            : "text-yellow-400"
-                        }
-                      >
-                        [{tc.hdabApprovalStatus}]
-                      </span>
+                      {vc.holderName ?? "—"}
+                      {vc.holderType && (
+                        <span className="text-gray-600">
+                          {" "}
+                          [{vc.holderType}]
+                        </span>
+                      )}
                     </div>
-                  )}
-                  <div>
-                    <span className="text-[var(--text-secondary)]">
-                      Datasets covered:
-                    </span>{" "}
-                    {tc.datasetCount}
-                  </div>
-                  <div>
-                    <span className="text-[var(--text-secondary)]">
-                      Active RPSNs:
-                    </span>{" "}
-                    <span className="text-green-400">{tc.activeRpsnCount}</span>
-                  </div>
-                  {tc.recognisedCountries.length > 0 && (
-                    <div className="col-span-2">
+                    <div>
                       <span className="text-[var(--text-secondary)]">
-                        Mutual recognition (EHDS Art. 51):
+                        Subject:
                       </span>{" "}
-                      {tc.recognisedCountries.join(", ")}
-                    </div>
-                  )}
-                </div>
-
-                {/* Cross-border pseudonym resolution flow */}
-                <div className="rounded bg-[var(--surface)]/60 p-3 text-xs text-[var(--text-secondary)] flex items-center gap-2 flex-wrap">
-                  <span className="px-2 py-1 rounded bg-layer1/20 text-layer1 font-medium">
-                    Provider PSN
-                  </span>
-                  <span>→ HDAB-auth resolve →</span>
-                  <span className="px-2 py-1 rounded bg-layer5/20 text-layer5 font-medium">
-                    {tc.name}
-                  </span>
-                  <span>→ RPSN →</span>
-                  <span className="px-2 py-1 rounded bg-layer3/20 text-layer3 font-medium">
-                    SPE (TEE)
-                  </span>
-                  <span>→ aggregate-only →</span>
-                  <span className="px-2 py-1 rounded bg-green-900/40 text-green-400 font-medium">
-                    Researcher
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* SPE Sessions */}
-        {speSessions.length > 0 && (
-          <div className="mt-6">
-            <h3 className="text-sm font-semibold mb-3 text-[var(--text-primary)]">
-              Active SPE Sessions (TEE-Attested)
-            </h3>
-            <table className="text-xs w-full border-collapse">
-              <thead>
-                <tr className="text-[var(--text-secondary)] border-b border-[var(--border)]">
-                  <th className="text-left pb-1">Session ID</th>
-                  <th className="text-left pb-1">Study</th>
-                  <th className="text-left pb-1">Status</th>
-                  <th className="text-left pb-1">k-anon</th>
-                  <th className="text-left pb-1">Output Policy</th>
-                  <th className="text-left pb-1">Created by</th>
-                </tr>
-              </thead>
-              <tbody>
-                {speSessions.map((s) => (
-                  <tr
-                    key={s.sessionId}
-                    className="border-b border-[var(--border)]"
-                    data-testid="spe-session-row"
-                  >
-                    <td className="py-1 pr-2 font-mono text-[var(--text-primary)]">
-                      {s.sessionId}
-                    </td>
-                    <td className="py-1 pr-2">{s.studyId}</td>
-                    <td className="py-1 pr-2">
-                      <span
-                        className={
-                          s.status === "active"
-                            ? "text-green-400"
-                            : "text-[var(--text-secondary)]"
-                        }
-                      >
-                        {s.status}
+                      <span className="font-mono">
+                        {vc.subjectDid?.replace(
+                          /did:web:identityhub%3A7083:/,
+                          "",
+                        )}
                       </span>
-                    </td>
-                    <td className="py-1 pr-2">≥ {s.kAnonymityThreshold}</td>
-                    <td className="py-1 pr-2">{s.outputPolicy}</td>
-                    <td className="py-1 font-mono text-[var(--text-secondary)]">
-                      {s.createdBy?.split(":").pop()}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+                    </div>
+                    <div>
+                      <span className="text-[var(--text-secondary)]">
+                        Issuer:
+                      </span>{" "}
+                      <span className="font-mono">
+                        {vc.issuerDid?.replace(
+                          /did:web:issuerservice%3A10016:/,
+                          "",
+                        )}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-[var(--text-secondary)]">
+                        Format:
+                      </span>{" "}
+                      VC1_0_JWT
+                    </div>
 
-        {/* Security model summary */}
-        <div className="mt-6 rounded-lg border border-[var(--border)] bg-[var(--surface)]/50 p-4">
-          <h3 className="text-sm font-semibold mb-3 text-[var(--text-primary)]">
-            Security Model — Threat Mitigations
-          </h3>
-          <div className="space-y-1 text-xs text-[var(--text-secondary)]">
-            {[
-              [
-                "Researcher accesses raw data",
-                "SPE + TEE enforce aggregate-only output (k ≥ 5)",
-              ],
-              [
-                "Provider re-identification",
-                "Provider-specific pseudonyms (local key per provider)",
-              ],
-              [
-                "Cross-provider linkage leak",
-                "Trust Center under HDAB authority only",
-              ],
-              [
-                "Trust Center collusion",
-                "Stateless or key-split design; full audit trail",
-              ],
-              ["Pseudonym reversal", "One-way HMAC mapping; revocable by HDAB"],
-            ].map(([threat, mitigation]) => (
-              <div key={threat} className="flex gap-2">
-                <span className="text-red-400 shrink-0">⚠</span>
-                <span className="text-[var(--text-secondary)] shrink-0 w-56">
-                  {threat}
-                </span>
-                <span className="text-green-400">{mitigation}</span>
-              </div>
-            ))}
+                    {/* Type-specific details */}
+                    {vc.purpose && (
+                      <div className="col-span-2">
+                        <span className="text-[var(--text-secondary)]">
+                          Purpose:
+                        </span>{" "}
+                        {vc.purpose}
+                      </div>
+                    )}
+                    {vc.datasetId && (
+                      <div className="col-span-2">
+                        <span className="text-[var(--text-secondary)]">
+                          Dataset:
+                        </span>{" "}
+                        <span className="font-mono">{vc.datasetId}</span>
+                      </div>
+                    )}
+                    {vc.completeness != null && (
+                      <div className="col-span-2 mt-1">
+                        <span className="text-[var(--text-secondary)]">
+                          Quality:
+                        </span>{" "}
+                        Completeness{" "}
+                        <span className="text-green-400">
+                          {(vc.completeness * 100).toFixed(0)}%
+                        </span>
+                        {" · "}Conformance{" "}
+                        <span className="text-green-400">
+                          {((vc.conformance ?? 0) * 100).toFixed(0)}%
+                        </span>
+                        {" · "}Timeliness{" "}
+                        <span className="text-green-400">
+                          {((vc.timeliness ?? 0) * 100).toFixed(0)}%
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Trust chain diagram */}
+          <div className="mt-6 rounded-lg border border-[var(--border)] bg-[var(--surface)]/50 p-4">
+            <h3 className="text-sm font-semibold mb-3 text-[var(--text-primary)]">
+              DCP Trust Chain — Credential Presentation Flow
+            </h3>
+            <div className="flex items-center gap-2 text-xs text-[var(--text-secondary)] flex-wrap">
+              <span className="px-2 py-1 rounded bg-layer1/20 text-layer1 font-medium">
+                IssuerService
+              </span>
+              <span>→ signs VC →</span>
+              <span className="px-2 py-1 rounded bg-layer2/20 text-layer2 font-medium">
+                IdentityHub
+              </span>
+              <span>→ stores →</span>
+              <span className="px-2 py-1 rounded bg-layer3/20 text-layer3 font-medium">
+                DCP Presentation
+              </span>
+              <span>→ verifies →</span>
+              <span className="px-2 py-1 rounded bg-layer5/20 text-layer5 font-medium">
+                Policy Engine
+              </span>
+              <span>→ evaluates →</span>
+              <span className="px-2 py-1 rounded bg-green-900/40 text-green-400 font-medium">
+                ✓ Access Granted
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* ── Phase 18: Trust Center Section ── */}
+        <div
+          id="trust-center"
+          className="mt-12 border-t border-[var(--border)] pt-8"
+        >
+          <div className="flex items-center gap-2 mb-1">
+            <Lock size={18} className="text-layer1" />
+            <h2 className="text-xl font-bold">
+              Trust Center — Pseudonym Resolution
+            </h2>
+          </div>
+          <p className="text-[var(--text-secondary)] text-sm mb-6">
+            EHDS Art. 50/51 — HDAB-designated trust centers enabling
+            cross-provider longitudinal patient linkage without exposing real
+            identities to researchers. Provider pseudonyms are resolved to
+            research pseudonyms inside the Secure Processing Environment only.
+          </p>
+
+          {optionsLoading ? (
+            <div className="text-[var(--text-secondary)] text-sm">
+              Loading trust centers…
+            </div>
+          ) : trustCenters.length === 0 ? (
+            <div className="text-[var(--text-secondary)] text-sm">
+              No trust centers found. Run{" "}
+              <code className="font-mono text-xs bg-[var(--surface-2)] px-1 py-0.5 rounded">
+                neo4j/seed-trust-center.cypher
+              </code>{" "}
+              to seed demo data.
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {trustCenters.map((tc) => (
+                <div
+                  key={tc.name}
+                  data-testid="trust-center-card"
+                  className="rounded-lg border border-[var(--border)] bg-[var(--surface-2)]/50 p-4"
+                >
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      <Globe size={16} className="text-layer1" />
+                      <span className="font-semibold text-sm">{tc.name}</span>
+                      <span className="text-xs px-2 py-0.5 rounded bg-gray-700 text-[var(--text-primary)]">
+                        {tc.country}
+                      </span>
+                    </div>
+                    <span
+                      className={`text-xs font-medium px-2 py-0.5 rounded ${
+                        tc.status === "active"
+                          ? "bg-green-900/40 text-green-400"
+                          : "bg-red-900/40 text-red-400"
+                      }`}
+                    >
+                      {tc.status}
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs text-[var(--text-secondary)] mb-3">
+                    <div>
+                      <span className="text-[var(--text-secondary)]">
+                        Operated by:
+                      </span>{" "}
+                      {tc.operatedBy}
+                    </div>
+                    <div>
+                      <span className="text-[var(--text-secondary)]">
+                        Protocol:
+                      </span>{" "}
+                      {tc.protocol}
+                    </div>
+                    <div className="col-span-2">
+                      <span className="text-[var(--text-secondary)]">DID:</span>{" "}
+                      <span className="font-mono">{tc.did}</span>
+                    </div>
+                    {tc.hdabApprovalId && (
+                      <div>
+                        <span className="text-[var(--text-secondary)]">
+                          HDAB Approval:
+                        </span>{" "}
+                        <span className="font-mono">{tc.hdabApprovalId}</span>{" "}
+                        <span
+                          className={
+                            tc.hdabApprovalStatus === "approved"
+                              ? "text-green-400"
+                              : "text-yellow-400"
+                          }
+                        >
+                          [{tc.hdabApprovalStatus}]
+                        </span>
+                      </div>
+                    )}
+                    <div>
+                      <span className="text-[var(--text-secondary)]">
+                        Datasets covered:
+                      </span>{" "}
+                      {tc.datasetCount}
+                    </div>
+                    <div>
+                      <span className="text-[var(--text-secondary)]">
+                        Active RPSNs:
+                      </span>{" "}
+                      <span className="text-green-400">
+                        {tc.activeRpsnCount}
+                      </span>
+                    </div>
+                    {tc.recognisedCountries.length > 0 && (
+                      <div className="col-span-2">
+                        <span className="text-[var(--text-secondary)]">
+                          Mutual recognition (EHDS Art. 51):
+                        </span>{" "}
+                        {tc.recognisedCountries.join(", ")}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Cross-border pseudonym resolution flow */}
+                  <div className="rounded bg-[var(--surface)]/60 p-3 text-xs text-[var(--text-secondary)] flex items-center gap-2 flex-wrap">
+                    <span className="px-2 py-1 rounded bg-layer1/20 text-layer1 font-medium">
+                      Provider PSN
+                    </span>
+                    <span>→ HDAB-auth resolve →</span>
+                    <span className="px-2 py-1 rounded bg-layer5/20 text-layer5 font-medium">
+                      {tc.name}
+                    </span>
+                    <span>→ RPSN →</span>
+                    <span className="px-2 py-1 rounded bg-layer3/20 text-layer3 font-medium">
+                      SPE (TEE)
+                    </span>
+                    <span>→ aggregate-only →</span>
+                    <span className="px-2 py-1 rounded bg-green-900/40 text-green-400 font-medium">
+                      Researcher
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* SPE Sessions */}
+          {speSessions.length > 0 && (
+            <div className="mt-6">
+              <h3 className="text-sm font-semibold mb-3 text-[var(--text-primary)]">
+                Active SPE Sessions (TEE-Attested)
+              </h3>
+              <table className="text-xs w-full border-collapse">
+                <thead>
+                  <tr className="text-[var(--text-secondary)] border-b border-[var(--border)]">
+                    <th className="text-left pb-1">Session ID</th>
+                    <th className="text-left pb-1">Study</th>
+                    <th className="text-left pb-1">Status</th>
+                    <th className="text-left pb-1">k-anon</th>
+                    <th className="text-left pb-1">Output Policy</th>
+                    <th className="text-left pb-1">Created by</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {speSessions.map((s) => (
+                    <tr
+                      key={s.sessionId}
+                      className="border-b border-[var(--border)]"
+                      data-testid="spe-session-row"
+                    >
+                      <td className="py-1 pr-2 font-mono text-[var(--text-primary)]">
+                        {s.sessionId}
+                      </td>
+                      <td className="py-1 pr-2">{s.studyId}</td>
+                      <td className="py-1 pr-2">
+                        <span
+                          className={
+                            s.status === "active"
+                              ? "text-green-400"
+                              : "text-[var(--text-secondary)]"
+                          }
+                        >
+                          {s.status}
+                        </span>
+                      </td>
+                      <td className="py-1 pr-2">≥ {s.kAnonymityThreshold}</td>
+                      <td className="py-1 pr-2">{s.outputPolicy}</td>
+                      <td className="py-1 font-mono text-[var(--text-secondary)]">
+                        {s.createdBy?.split(":").pop()}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          {/* Security model summary */}
+          <div className="mt-6 rounded-lg border border-[var(--border)] bg-[var(--surface)]/50 p-4">
+            <h3 className="text-sm font-semibold mb-3 text-[var(--text-primary)]">
+              Security Model — Threat Mitigations
+            </h3>
+            <div className="space-y-1 text-xs text-[var(--text-secondary)]">
+              {[
+                [
+                  "Researcher accesses raw data",
+                  "SPE + TEE enforce aggregate-only output (k ≥ 5)",
+                ],
+                [
+                  "Provider re-identification",
+                  "Provider-specific pseudonyms (local key per provider)",
+                ],
+                [
+                  "Cross-provider linkage leak",
+                  "Trust Center under HDAB authority only",
+                ],
+                [
+                  "Trust Center collusion",
+                  "Stateless or key-split design; full audit trail",
+                ],
+                [
+                  "Pseudonym reversal",
+                  "One-way HMAC mapping; revocable by HDAB",
+                ],
+              ].map(([threat, mitigation]) => (
+                <div key={threat} className="flex gap-2">
+                  <span className="text-red-400 shrink-0">⚠</span>
+                  <span className="text-[var(--text-secondary)] shrink-0 w-56">
+                    {threat}
+                  </span>
+                  <span className="text-green-400">{mitigation}</span>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </div>

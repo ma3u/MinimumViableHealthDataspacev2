@@ -10,7 +10,6 @@ import {
   ShieldCheck,
   X,
 } from "lucide-react";
-import PageIntro from "@/components/PageIntro";
 import OdrlJsonHighlighter from "@/components/OdrlJsonHighlighter";
 
 /* ── Types ────────────────────────────────────────────────────── */
@@ -398,289 +397,288 @@ export default function AdminPoliciesPage() {
   /* ── Render ───────────────────────────────────────────────────── */
 
   return (
-    <div className="max-w-5xl mx-auto px-6 py-10">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <PageIntro
-          title="Policy Definitions"
-          icon={ShieldCheck}
-          description="Manage ODRL policies across all participant contexts under EHDS Regulation (EU) 2025/327. Policies define the conditions for data access — including legal basis, purpose limitation, and retention periods."
-          prevStep={{ href: "/admin/tenants", label: "Tenant Management" }}
-          nextStep={{ href: "/admin/audit", label: "Audit & Provenance" }}
-          infoText="Each policy is defined using the ODRL vocabulary and attached to contract definitions. Use the templates below to create common EHDS-compliant policies quickly."
-          docLink={{
-            href: "https://www.w3.org/TR/odrl-model/",
-            label: "ODRL Specification (W3C)",
-            external: true,
-          }}
-        />
-        <button
-          onClick={() => {
-            setShowForm((v) => !v);
-            setFormMsg(null);
-          }}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium bg-layer2 text-white hover:bg-layer2/80 transition-colors"
-        >
-          {showForm ? (
-            <>
-              <X size={14} /> Close
-            </>
-          ) : (
-            <>
-              <Plus size={14} /> Create Policy
-            </>
-          )}
-        </button>
-      </div>
-
-      {/* ── Create Form ──────────────────────────────────────────── */}
-      {showForm && (
-        <div className="mb-8 border border-layer2 rounded-xl p-5 bg-[var(--surface)]/40">
-          <h2 className="text-lg font-semibold mb-4">
-            Create EHDS Policy Definition
-          </h2>
-
-          {/* Template selector */}
-          <label className="block text-xs text-[var(--text-secondary)] mb-1">
-            Policy Template
-          </label>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 mb-4">
-            {POLICY_TEMPLATES.map((t) => (
-              <button
-                key={t.id}
-                onClick={() => setSelectedTemplate(t.id)}
-                className={`text-left p-3 rounded-lg border transition-colors ${
-                  selectedTemplate === t.id
-                    ? "border-layer2 bg-layer2/10"
-                    : "border-[var(--border)] hover:border-gray-500"
-                }`}
-              >
-                <span className="text-xs font-mono text-layer2">
-                  {t.article}
-                </span>
-                <p className="text-sm font-medium text-gray-200">{t.label}</p>
-              </button>
-            ))}
-          </div>
-
-          {/* Selected template description */}
-          <div className="mb-4 p-3 rounded-lg bg-[var(--surface-2)]/50 border border-[var(--border)]">
-            <p className="text-xs text-[var(--text-secondary)]">
-              {tpl.description}
+    <div className="min-h-screen bg-[var(--bg)]">
+      <div className="max-w-5xl mx-auto px-8 py-10">
+        {/* ── Page header ── */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
+          <div>
+            <h1 className="page-header">Policy Definitions</h1>
+            <p className="text-[var(--text-secondary)] text-lg mt-1">
+              ODRL policies · EHDS Regulation (EU) 2025/327
             </p>
           </div>
-
-          {/* Participant + Duration row */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-            <div>
-              <label className="block text-xs text-[var(--text-secondary)] mb-1">
-                Participant Context
-              </label>
-              <select
-                value={selectedParticipant}
-                onChange={(e) => setSelectedParticipant(e.target.value)}
-                className="w-full rounded-lg bg-[var(--surface-2)] border border-gray-600 text-sm px-3 py-2 text-gray-200"
-              >
-                <option value="">— select —</option>
-                {groups.map((g) => (
-                  <option key={g.participantId} value={g.participantId}>
-                    {g.identity?.replace("did:web:", "").replace(/%3A/g, ":") ||
-                      g.participantId.slice(0, 20)}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="block text-xs text-[var(--text-secondary)] mb-1">
-                Access Duration
-              </label>
-              <select
-                value={selectedDuration}
-                onChange={(e) => setSelectedDuration(e.target.value)}
-                className="w-full rounded-lg bg-[var(--surface-2)] border border-gray-600 text-sm px-3 py-2 text-gray-200"
-              >
-                {DURATION_OPTIONS.map((d) => (
-                  <option key={d.value} value={d.value}>
-                    {d.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          {/* Preview */}
-          <details className="mb-4">
-            <summary className="cursor-pointer text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)]">
-              Preview ODRL policy JSON
-            </summary>
-            <OdrlJsonHighlighter
-              data={tpl.build({ duration: selectedDuration })}
-              className="mt-2 p-3 rounded-lg bg-[var(--surface-2)]/50 border border-[var(--border)] max-h-60"
-            />
-          </details>
-
-          {/* Submit */}
-          <div className="flex items-center gap-3">
-            <button
-              onClick={handleCreate}
-              disabled={creating || !selectedParticipant}
-              className="px-4 py-2 rounded-lg bg-layer2 text-white text-sm font-medium hover:bg-layer2/80 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
-            >
-              {creating && <Loader2 size={14} className="animate-spin" />}
-              Create Policy
-            </button>
-            {formMsg && (
-              <span
-                className={`text-xs ${
-                  formMsg.type === "ok" ? "text-green-400" : "text-red-400"
-                }`}
-              >
-                {formMsg.text}
-              </span>
+          <button
+            onClick={() => {
+              setShowForm((v) => !v);
+              setFormMsg(null);
+            }}
+            className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-bold bg-[var(--accent)] text-white hover:opacity-90 transition-opacity"
+          >
+            {showForm ? (
+              <>
+                <X size={14} /> Close
+              </>
+            ) : (
+              <>
+                <Plus size={14} /> Create Policy
+              </>
             )}
-          </div>
+          </button>
         </div>
-      )}
 
-      {/* ── Stats ────────────────────────────────────────────────── */}
-      {!loading && (
-        <div className="flex gap-4 mb-6 text-xs text-[var(--text-secondary)]">
-          <span>{groups.length} participants</span>
-          <span>&middot;</span>
-          <span>{totalPolicies} total policies</span>
-        </div>
-      )}
+        {/* ── Create Form ──────────────────────────────────────────── */}
+        {showForm && (
+          <div className="mb-8 border border-layer2 rounded-xl p-5 bg-[var(--surface)]/40">
+            <h2 className="text-lg font-semibold mb-4">
+              Create EHDS Policy Definition
+            </h2>
 
-      {/* ── Policy List ──────────────────────────────────────────── */}
-      {loading ? (
-        <div className="flex items-center gap-2 text-[var(--text-secondary)]">
-          <Loader2 size={16} className="animate-spin" />
-          Loading policies&hellip;
-        </div>
-      ) : groups.length === 0 ? (
-        <div className="text-center py-12">
-          <ShieldCheck size={40} className="text-gray-600 mx-auto mb-4" />
-          <p className="text-[var(--text-secondary)]">No policies found</p>
-        </div>
-      ) : (
-        <div className="grid gap-4">
-          {groups.map((g) => {
-            const isOpen = expanded === g.participantId;
-            const policies = Array.isArray(g.policies) ? g.policies : [];
-            return (
-              <div
-                key={g.participantId}
-                className={`border rounded-xl transition-colors ${
-                  isOpen
-                    ? "border-layer2 bg-[var(--surface)]/60"
-                    : "border-[var(--border)] hover:border-layer2"
-                }`}
-              >
+            {/* Template selector */}
+            <label className="block text-xs text-[var(--text-secondary)] mb-1">
+              Policy Template
+            </label>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 mb-4">
+              {POLICY_TEMPLATES.map((t) => (
                 <button
-                  className="w-full text-left p-4"
-                  onClick={() => setExpanded(isOpen ? null : g.participantId)}
+                  key={t.id}
+                  onClick={() => setSelectedTemplate(t.id)}
+                  className={`text-left p-3 rounded-lg border transition-colors ${
+                    selectedTemplate === t.id
+                      ? "border-layer2 bg-layer2/10"
+                      : "border-[var(--border)] hover:border-gray-500"
+                  }`}
                 >
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium text-gray-200">
-                        {g.identity
-                          ?.replace("did:web:", "")
-                          .replace(/%3A/g, ":") || g.participantId.slice(0, 16)}
-                      </p>
-                      <p className="text-xs text-[var(--text-secondary)]">
-                        {policies.length} polic
-                        {policies.length === 1 ? "y" : "ies"}
-                        {g.error && (
-                          <span className="text-red-400 ml-2">({g.error})</span>
-                        )}
-                      </p>
-                    </div>
-                    {isOpen ? (
-                      <ChevronUp
-                        size={16}
-                        className="text-[var(--text-secondary)]"
-                      />
-                    ) : (
-                      <ChevronDown
-                        size={16}
-                        className="text-[var(--text-secondary)]"
-                      />
-                    )}
-                  </div>
+                  <span className="text-xs font-mono text-layer2">
+                    {t.article}
+                  </span>
+                  <p className="text-sm font-medium text-gray-200">{t.label}</p>
                 </button>
+              ))}
+            </div>
 
-                {isOpen && (
-                  <div className="px-4 pb-4 border-t border-[var(--border)] pt-3">
-                    {policies.length === 0 ? (
-                      <p className="text-[var(--text-secondary)] text-sm">
-                        No policies defined
-                      </p>
-                    ) : (
-                      <div className="space-y-3">
-                        {policies.map((p, i) => {
-                          const pObj = p as Record<string, unknown>;
-                          const policyBody = pObj["edc:policy"] as
-                            | Record<string, unknown>
-                            | undefined;
-                          const perms = policyBody?.["odrl:permission"];
-                          const firstPerm = Array.isArray(perms)
-                            ? (perms[0] as Record<string, unknown>)
-                            : undefined;
-                          const purposeConstraint = (
-                            (firstPerm?.["odrl:constraint"] as
-                              | Record<string, unknown>[]
-                              | undefined) || []
-                          ).find(
-                            (c: Record<string, unknown>) =>
-                              (c["odrl:leftOperand"] as { "@id"?: string })?.[
-                                "@id"
-                              ] === "edc:purpose",
-                          );
-                          const purposes = purposeConstraint
-                            ? (purposeConstraint["odrl:rightOperand"] as
-                                | string
-                                | string[])
-                            : null;
-                          const purposeLabel = Array.isArray(purposes)
-                            ? purposes.join(", ")
-                            : purposes || "—";
-                          return (
-                            <div
-                              key={i}
-                              className="p-3 rounded-lg bg-[var(--surface-2)]/50 border border-[var(--border)]"
-                            >
-                              <div className="flex items-start justify-between mb-2">
-                                <div>
-                                  <p className="text-sm font-medium text-gray-200">
-                                    {(pObj["@id"] as string) ||
-                                      `Policy #${i + 1}`}
-                                  </p>
-                                  <p className="text-xs text-[var(--text-secondary)] mt-0.5">
-                                    {purposeLabel}
-                                  </p>
-                                </div>
-                              </div>
-                              <details>
-                                <summary className="cursor-pointer text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)]">
-                                  View full ODRL JSON
-                                </summary>
-                                <OdrlJsonHighlighter
-                                  data={p}
-                                  className="mt-2 max-h-48"
-                                />
-                              </details>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    )}
-                  </div>
-                )}
+            {/* Selected template description */}
+            <div className="mb-4 p-3 rounded-lg bg-[var(--surface-2)]/50 border border-[var(--border)]">
+              <p className="text-xs text-[var(--text-secondary)]">
+                {tpl.description}
+              </p>
+            </div>
+
+            {/* Participant + Duration row */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+              <div>
+                <label className="block text-xs text-[var(--text-secondary)] mb-1">
+                  Participant Context
+                </label>
+                <select
+                  value={selectedParticipant}
+                  onChange={(e) => setSelectedParticipant(e.target.value)}
+                  className="w-full rounded-lg bg-[var(--surface-2)] border border-gray-600 text-sm px-3 py-2 text-gray-200"
+                >
+                  <option value="">— select —</option>
+                  {groups.map((g) => (
+                    <option key={g.participantId} value={g.participantId}>
+                      {g.identity
+                        ?.replace("did:web:", "")
+                        .replace(/%3A/g, ":") || g.participantId.slice(0, 20)}
+                    </option>
+                  ))}
+                </select>
               </div>
-            );
-          })}
-        </div>
-      )}
+              <div>
+                <label className="block text-xs text-[var(--text-secondary)] mb-1">
+                  Access Duration
+                </label>
+                <select
+                  value={selectedDuration}
+                  onChange={(e) => setSelectedDuration(e.target.value)}
+                  className="w-full rounded-lg bg-[var(--surface-2)] border border-gray-600 text-sm px-3 py-2 text-gray-200"
+                >
+                  {DURATION_OPTIONS.map((d) => (
+                    <option key={d.value} value={d.value}>
+                      {d.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            {/* Preview */}
+            <details className="mb-4">
+              <summary className="cursor-pointer text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)]">
+                Preview ODRL policy JSON
+              </summary>
+              <OdrlJsonHighlighter
+                data={tpl.build({ duration: selectedDuration })}
+                className="mt-2 p-3 rounded-lg bg-[var(--surface-2)]/50 border border-[var(--border)] max-h-60"
+              />
+            </details>
+
+            {/* Submit */}
+            <div className="flex items-center gap-3">
+              <button
+                onClick={handleCreate}
+                disabled={creating || !selectedParticipant}
+                className="px-4 py-2 rounded-lg bg-layer2 text-white text-sm font-medium hover:bg-layer2/80 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+              >
+                {creating && <Loader2 size={14} className="animate-spin" />}
+                Create Policy
+              </button>
+              {formMsg && (
+                <span
+                  className={`text-xs ${
+                    formMsg.type === "ok" ? "text-green-400" : "text-red-400"
+                  }`}
+                >
+                  {formMsg.text}
+                </span>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* ── Stats ────────────────────────────────────────────────── */}
+        {!loading && (
+          <div className="flex gap-4 mb-6 text-xs text-[var(--text-secondary)]">
+            <span>{groups.length} participants</span>
+            <span>&middot;</span>
+            <span>{totalPolicies} total policies</span>
+          </div>
+        )}
+
+        {/* ── Policy List ──────────────────────────────────────────── */}
+        {loading ? (
+          <div className="flex items-center gap-2 text-[var(--text-secondary)]">
+            <Loader2 size={16} className="animate-spin" />
+            Loading policies&hellip;
+          </div>
+        ) : groups.length === 0 ? (
+          <div className="text-center py-12">
+            <ShieldCheck size={40} className="text-gray-600 mx-auto mb-4" />
+            <p className="text-[var(--text-secondary)]">No policies found</p>
+          </div>
+        ) : (
+          <div className="grid gap-4">
+            {groups.map((g) => {
+              const isOpen = expanded === g.participantId;
+              const policies = Array.isArray(g.policies) ? g.policies : [];
+              return (
+                <div
+                  key={g.participantId}
+                  className={`border rounded-xl transition-colors ${
+                    isOpen
+                      ? "border-layer2 bg-[var(--surface)]/60"
+                      : "border-[var(--border)] hover:border-layer2"
+                  }`}
+                >
+                  <button
+                    className="w-full text-left p-4"
+                    onClick={() => setExpanded(isOpen ? null : g.participantId)}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-medium text-gray-200">
+                          {g.identity
+                            ?.replace("did:web:", "")
+                            .replace(/%3A/g, ":") ||
+                            g.participantId.slice(0, 16)}
+                        </p>
+                        <p className="text-xs text-[var(--text-secondary)]">
+                          {policies.length} polic
+                          {policies.length === 1 ? "y" : "ies"}
+                          {g.error && (
+                            <span className="text-red-400 ml-2">
+                              ({g.error})
+                            </span>
+                          )}
+                        </p>
+                      </div>
+                      {isOpen ? (
+                        <ChevronUp
+                          size={16}
+                          className="text-[var(--text-secondary)]"
+                        />
+                      ) : (
+                        <ChevronDown
+                          size={16}
+                          className="text-[var(--text-secondary)]"
+                        />
+                      )}
+                    </div>
+                  </button>
+
+                  {isOpen && (
+                    <div className="px-4 pb-4 border-t border-[var(--border)] pt-3">
+                      {policies.length === 0 ? (
+                        <p className="text-[var(--text-secondary)] text-sm">
+                          No policies defined
+                        </p>
+                      ) : (
+                        <div className="space-y-3">
+                          {policies.map((p, i) => {
+                            const pObj = p as Record<string, unknown>;
+                            const policyBody = pObj["edc:policy"] as
+                              | Record<string, unknown>
+                              | undefined;
+                            const perms = policyBody?.["odrl:permission"];
+                            const firstPerm = Array.isArray(perms)
+                              ? (perms[0] as Record<string, unknown>)
+                              : undefined;
+                            const purposeConstraint = (
+                              (firstPerm?.["odrl:constraint"] as
+                                | Record<string, unknown>[]
+                                | undefined) || []
+                            ).find(
+                              (c: Record<string, unknown>) =>
+                                (c["odrl:leftOperand"] as { "@id"?: string })?.[
+                                  "@id"
+                                ] === "edc:purpose",
+                            );
+                            const purposes = purposeConstraint
+                              ? (purposeConstraint["odrl:rightOperand"] as
+                                  | string
+                                  | string[])
+                              : null;
+                            const purposeLabel = Array.isArray(purposes)
+                              ? purposes.join(", ")
+                              : purposes || "—";
+                            return (
+                              <div
+                                key={i}
+                                className="p-3 rounded-lg bg-[var(--surface-2)]/50 border border-[var(--border)]"
+                              >
+                                <div className="flex items-start justify-between mb-2">
+                                  <div>
+                                    <p className="text-sm font-medium text-gray-200">
+                                      {(pObj["@id"] as string) ||
+                                        `Policy #${i + 1}`}
+                                    </p>
+                                    <p className="text-xs text-[var(--text-secondary)] mt-0.5">
+                                      {purposeLabel}
+                                    </p>
+                                  </div>
+                                </div>
+                                <details>
+                                  <summary className="cursor-pointer text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)]">
+                                    View full ODRL JSON
+                                  </summary>
+                                  <OdrlJsonHighlighter
+                                    data={p}
+                                    className="mt-2 max-h-48"
+                                  />
+                                </details>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

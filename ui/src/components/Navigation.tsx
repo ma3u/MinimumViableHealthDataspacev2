@@ -432,10 +432,10 @@ function NavDropdown({
         onClick={() => setOpen(!open)}
         aria-expanded={open}
         aria-haspopup="true"
-        className={`flex items-center gap-1 px-3 py-2 rounded text-sm transition-colors touch-target-sm ${
+        className={`flex items-center gap-1 px-3 py-2 text-sm transition-colors touch-target-sm ${
           isActive
-            ? "bg-layer1 text-white"
-            : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-2)]"
+            ? "text-[var(--accent)] font-semibold border-b-2 border-[var(--accent)] rounded-none"
+            : "rounded text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-2)]"
         }`}
       >
         <group.icon size={15} aria-hidden="true" />
@@ -460,10 +460,10 @@ function NavDropdown({
                 setOpen(false);
                 onNavigate?.();
               }}
-              className={`flex items-center gap-2 px-3 py-2 text-sm transition-colors ${
+              className={`flex items-center gap-2 py-2 text-sm transition-colors ${
                 pathname?.startsWith(l.href)
-                  ? "text-layer2 bg-[var(--surface-2)]"
-                  : "text-[var(--text-secondary)] hover:bg-[var(--surface-2)] hover:text-[var(--text-primary)]"
+                  ? "text-[var(--accent)] font-medium border-l-2 border-[var(--accent)] pl-[10px] pr-3 bg-[var(--accent-surface)]"
+                  : "text-[var(--text-secondary)] hover:bg-[var(--surface-2)] hover:text-[var(--text-primary)] px-3"
               }`}
             >
               <l.icon size={14} aria-hidden="true" />
@@ -521,14 +521,14 @@ export default function Navigation() {
 
   return (
     <nav
-      className="bg-[var(--surface)] border-b border-[var(--border)]"
+      className="glass border-b border-[var(--border)] sticky top-0 z-50"
       role="navigation"
       aria-label="Main navigation"
     >
       <div className="flex items-center gap-1 px-4 py-2">
         <Link
           href="/"
-          className="mr-4 font-semibold text-layer1 tracking-wide text-sm hover:text-white transition-colors"
+          className="mr-4 font-bold text-[var(--accent)] tracking-wide text-sm hover:text-[var(--accent-hover)] transition-colors"
         >
           Health Dataspace
         </Link>
