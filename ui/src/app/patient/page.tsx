@@ -41,7 +41,7 @@ const FHIR_COLORS: Record<string, string> = {
 function StatBadge({ label, value }: { label: string; value?: number }) {
   return (
     <div className="bg-[var(--surface-2)] rounded px-3 py-2 text-center">
-      <div className="text-lg font-semibold text-white">
+      <div className="text-lg font-semibold text-[var(--text-primary)]">
         {value != null ? value.toLocaleString() : "—"}
       </div>
       <div className="text-xs text-[var(--text-secondary)] mt-0.5">{label}</div>
@@ -181,7 +181,9 @@ export default function PatientPage() {
                     {e.fhirType}
                   </span>{" "}
                   {e.display ? (
-                    <span className="text-gray-200">{e.display}</span>
+                    <span className="text-[var(--text-primary)]">
+                      {e.display}
+                    </span>
                   ) : (
                     <span className="text-[var(--text-secondary)] font-mono text-xs">
                       {e.fhirId}

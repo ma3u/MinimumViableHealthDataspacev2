@@ -30,7 +30,7 @@ function SignInContent() {
       {/* ── Login card ── */}
       <div className="bg-[var(--surface-2)] rounded-lg p-8 max-w-md w-full text-center">
         <ShieldCheck size={48} className="mx-auto mb-4 text-layer1" />
-        <h1 className="text-2xl font-bold text-white mb-2">
+        <h1 className="text-2xl font-bold text-[var(--text-primary)] mb-2">
           Health Dataspace Login
         </h1>
         <p className="text-[var(--text-secondary)] mb-6">
@@ -49,7 +49,7 @@ function SignInContent() {
 
         <button
           onClick={() => signIn("keycloak", { callbackUrl })}
-          className="w-full px-4 py-3 bg-layer1 hover:bg-layer1/80 text-white rounded-lg font-medium transition-colors"
+          className="w-full px-4 py-3 bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white rounded-lg font-medium transition-colors"
         >
           Sign in with Keycloak
         </button>
@@ -80,7 +80,7 @@ function SignInContent() {
               {/* Username + org */}
               <div className="flex items-start justify-between gap-2 mb-1.5">
                 <div>
-                  <div className="font-mono text-sm font-semibold text-white group-hover:text-blue-200 transition-colors">
+                  <div className="font-mono text-sm font-semibold text-[var(--text-primary)] group-hover:text-[var(--accent)] transition-colors">
                     {persona.username}
                   </div>
                   <div className="text-xs text-[var(--text-secondary)]">

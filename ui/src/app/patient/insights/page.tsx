@@ -157,7 +157,9 @@ export default function ResearchInsightsPage() {
                           {f.evidenceLevel} evidence
                         </span>
                       </div>
-                      <p className="text-sm text-gray-200 mb-2">{f.finding}</p>
+                      <p className="text-sm text-[var(--text-primary)] mb-2">
+                        {f.finding}
+                      </p>
                       {f.recommendation && (
                         <div className="rounded bg-teal-900/20 border border-teal-800 p-2 text-xs text-teal-300">
                           <strong>For you:</strong> {f.recommendation}
@@ -201,7 +203,7 @@ export default function ResearchInsightsPage() {
                           {rec.priority} priority
                         </span>
                       </div>
-                      <p className="text-sm text-gray-200 mb-1.5">
+                      <p className="text-sm text-[var(--text-primary)] mb-1.5">
                         {rec.action}
                       </p>
                       <div className="text-xs text-[var(--text-secondary)]">

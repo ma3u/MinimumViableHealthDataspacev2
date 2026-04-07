@@ -195,13 +195,13 @@ function StatusBadge({
 }) {
   if (status === "active")
     return (
-      <span className="flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-green-900/50 text-green-400 border border-green-700">
+      <span className="flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-[var(--role-user-bg)] text-[var(--role-user-text)] border border-[var(--role-user-border)]">
         <CheckCircle2 size={10} /> Active
       </span>
     );
   if (status === "provisioning")
     return (
-      <span className="flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-yellow-900/50 text-yellow-400 border border-yellow-700">
+      <span className="flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-[var(--role-hdab-bg)] text-[var(--role-hdab-text)] border border-[var(--role-hdab-border)]">
         <Clock size={10} className="animate-pulse" /> Provisioning
       </span>
     );
@@ -263,11 +263,14 @@ function OnboardingSteps({ tenant }: { tenant: Tenant }) {
         <div key={s.label} className="flex gap-3">
           <div className="flex flex-col items-center">
             {s.done ? (
-              <CheckCircle2 size={16} className="text-green-400 shrink-0" />
+              <CheckCircle2
+                size={16}
+                className="text-[var(--role-user-text)] shrink-0"
+              />
             ) : s.inProgress ? (
               <Clock
                 size={16}
-                className="text-yellow-400 animate-pulse shrink-0"
+                className="text-[var(--role-hdab-text)] animate-pulse shrink-0"
               />
             ) : (
               <Circle size={16} className="text-gray-600 shrink-0" />
@@ -284,9 +287,9 @@ function OnboardingSteps({ tenant }: { tenant: Tenant }) {
             <p
               className={`text-xs font-medium ${
                 s.done
-                  ? "text-green-400"
+                  ? "text-[var(--role-user-text)]"
                   : s.inProgress
-                    ? "text-yellow-400"
+                    ? "text-[var(--role-hdab-text)]"
                     : "text-[var(--text-secondary)]"
               }`}
             >
@@ -381,7 +384,9 @@ function ParticipantCard({
               <h4 className="text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wide">
                 Organisation
               </h4>
-              <p className="text-sm font-medium text-gray-200">{org}</p>
+              <p className="text-sm font-medium text-[var(--text-primary)]">
+                {org}
+              </p>
               <div className="flex items-start gap-2 text-xs text-[var(--text-secondary)]">
                 <MapPin
                   size={12}
@@ -421,7 +426,7 @@ function ParticipantCard({
               <h4 className="text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wide">
                 Data Compliance Officer
               </h4>
-              <p className="text-sm font-medium text-gray-200">
+              <p className="text-sm font-medium text-[var(--text-primary)]">
                 {contact.dpoName}
               </p>
               <div className="flex items-center gap-2 text-xs">
@@ -625,7 +630,7 @@ function OnboardingContent() {
         {/* Registration form / success */}
         {step === "done" ? (
           <div className="flex flex-col items-center gap-4 py-12 text-center border border-[var(--border)] rounded-xl">
-            <CheckCircle2 size={48} className="text-green-400" />
+            <CheckCircle2 size={48} className="text-[var(--role-user-text)]" />
             <h2 className="text-xl font-semibold">Registration Submitted</h2>
             <p className="text-[var(--text-secondary)] text-sm max-w-md">
               Your participant context has been created. DID provisioning and
@@ -651,7 +656,7 @@ function OnboardingContent() {
             </div>
 
             {error && (
-              <div className="mb-4 p-3 rounded bg-red-900/40 border border-red-700 text-sm text-red-300">
+              <div className="mb-4 p-3 rounded bg-[var(--role-admin-bg)] border border-[var(--role-admin-border)] text-sm text-[var(--role-admin-text)]">
                 {error}
               </div>
             )}
@@ -721,7 +726,7 @@ function OnboardingContent() {
               <button
                 type="submit"
                 disabled={step === "submitting"}
-                className="flex items-center gap-2 px-5 py-2.5 bg-layer2 text-white rounded-lg text-sm font-medium hover:bg-layer2/90 disabled:opacity-50"
+                className="flex items-center gap-2 px-5 py-2.5 bg-[var(--accent)] text-white rounded-lg text-sm font-medium hover:bg-[var(--accent-hover)] disabled:opacity-50"
               >
                 {step === "submitting" ? (
                   <>

@@ -122,8 +122,9 @@ export const DEMO_PERSONAS = [
     roles: ["EDC_ADMIN"],
     personaId: "edc-admin",
     description: "Full operator access: all participants, contracts, admin",
-    color: "text-red-300",
-    badge: "bg-red-900/50 text-red-200 border-red-700",
+    color: "text-[var(--role-admin-text)]",
+    badge:
+      "bg-[var(--role-admin-bg)] text-[var(--role-admin-text)] border-[var(--role-admin-border)]",
   },
   {
     username: "clinicuser",
@@ -132,8 +133,9 @@ export const DEMO_PERSONAS = [
     roles: ["EDC_USER_PARTICIPANT", "DATA_HOLDER"],
     personaId: "hospital",
     description: "Publishes FHIR datasets, manages contracts with researchers",
-    color: "text-blue-300",
-    badge: "bg-blue-900/50 text-blue-200 border-blue-700",
+    color: "text-[var(--role-holder-text)]",
+    badge:
+      "bg-[var(--role-holder-bg)] text-[var(--role-holder-text)] border-[var(--role-holder-border)]",
   },
   {
     username: "researcher",
@@ -142,8 +144,9 @@ export const DEMO_PERSONAS = [
     roles: ["EDC_USER_PARTICIPANT", "DATA_USER"],
     personaId: "researcher",
     description: "Discovers datasets, negotiates access, runs OMOP analytics",
-    color: "text-green-300",
-    badge: "bg-green-900/50 text-green-200 border-green-700",
+    color: "text-[var(--role-user-text)]",
+    badge:
+      "bg-[var(--role-user-bg)] text-[var(--role-user-text)] border-[var(--role-user-border)]",
   },
   {
     username: "regulator",
@@ -152,8 +155,9 @@ export const DEMO_PERSONAS = [
     roles: ["HDAB_AUTHORITY"],
     personaId: "hdab",
     description: "Reviews access applications, governs Trust Centers",
-    color: "text-amber-300",
-    badge: "bg-amber-900/50 text-amber-200 border-amber-700",
+    color: "text-[var(--role-hdab-text)]",
+    badge:
+      "bg-[var(--role-hdab-bg)] text-[var(--role-hdab-text)] border-[var(--role-hdab-border)]",
   },
   {
     username: "lmcuser",
@@ -162,8 +166,9 @@ export const DEMO_PERSONAS = [
     roles: ["EDC_USER_PARTICIPANT", "DATA_HOLDER"],
     personaId: "hospital",
     description: "NL data holder, publishes cross-border datasets",
-    color: "text-blue-300",
-    badge: "bg-blue-900/50 text-blue-200 border-blue-700",
+    color: "text-[var(--role-holder-text)]",
+    badge:
+      "bg-[var(--role-holder-bg)] text-[var(--role-holder-text)] border-[var(--role-holder-border)]",
   },
   // EHDS Chapter II / GDPR Art. 15-22 — patient primary-use access
   {
@@ -174,8 +179,9 @@ export const DEMO_PERSONAS = [
     personaId: "patient",
     description:
       "EHDS Art. 3: access own EHR, donate to research, see insights",
-    color: "text-teal-300",
-    badge: "bg-teal-900/50 text-teal-200 border-teal-700",
+    color: "text-[var(--role-patient-text)]",
+    badge:
+      "bg-[var(--role-patient-bg)] text-[var(--role-patient-text)] border-[var(--role-patient-border)]",
   },
   {
     username: "patient2",
@@ -184,8 +190,9 @@ export const DEMO_PERSONAS = [
     roles: ["PATIENT"],
     personaId: "patient",
     description: "Cross-border NL patient, MyHealth@EU Art. 7 data portability",
-    color: "text-teal-300",
-    badge: "bg-teal-900/50 text-teal-200 border-teal-700",
+    color: "text-[var(--role-patient-text)]",
+    badge:
+      "bg-[var(--role-patient-bg)] text-[var(--role-patient-text)] border-[var(--role-patient-border)]",
   },
 ] as const;
 

@@ -103,22 +103,26 @@ function stateIndex(state: DspState): number {
 
 function stateColor(state: DspState) {
   const s = state?.toUpperCase() || "";
-  if (s.includes("COMPLETED")) return "text-green-400";
-  if (s.includes("TERMINATED") || s.includes("ERROR")) return "text-red-400";
-  if (s.includes("STARTED")) return "text-blue-400";
-  if (s.includes("SUSPENDED")) return "text-orange-400";
-  return "text-yellow-400";
+  if (s.includes("COMPLETED")) return "text-[var(--role-user-text)]";
+  if (s.includes("TERMINATED") || s.includes("ERROR"))
+    return "text-[var(--role-admin-text)]";
+  if (s.includes("STARTED")) return "text-[var(--role-holder-text)]";
+  if (s.includes("SUSPENDED")) return "text-[var(--role-hdab-text)]";
+  return "text-[var(--role-hdab-text)]";
 }
 
 function stateBg(state: DspState) {
   const s = state?.toUpperCase() || "";
-  if (s.includes("COMPLETED")) return "bg-green-900/40 text-green-400";
+  if (s.includes("COMPLETED"))
+    return "bg-[var(--role-user-bg)] text-[var(--role-user-text)] border border-[var(--role-user-border)]";
   if (s.includes("TERMINATED") || s.includes("ERROR")) {
-    return "bg-red-900/40 text-red-400";
+    return "bg-[var(--role-admin-bg)] text-[var(--role-admin-text)] border border-[var(--role-admin-border)]";
   }
-  if (s.includes("STARTED")) return "bg-blue-900/40 text-blue-400";
-  if (s.includes("SUSPENDED")) return "bg-orange-900/40 text-orange-400";
-  return "bg-yellow-900/40 text-yellow-400";
+  if (s.includes("STARTED"))
+    return "bg-[var(--role-holder-bg)] text-[var(--role-holder-text)] border border-[var(--role-holder-border)]";
+  if (s.includes("SUSPENDED"))
+    return "bg-[var(--role-hdab-bg)] text-[var(--role-hdab-text)] border border-[var(--role-hdab-border)]";
+  return "bg-[var(--role-hdab-bg)] text-[var(--role-hdab-text)] border border-[var(--role-hdab-border)]";
 }
 
 /* ── DSP Pipeline Stepper ── */
@@ -137,18 +141,27 @@ function DspPipeline({ state }: { state: DspState }) {
         const isFuture = current >= 0 && i > current;
 
         let icon;
-        let color = "text-gray-600";
+        let color = "text-[var(--text-secondary)]";
         if (isTerminated && i === 0) {
           // Show error on first uncompleted step
-          icon = <XCircle size={14} className="text-red-400" />;
-          color = "text-red-400";
+          icon = (
+            <XCircle size={14} className="text-[var(--role-admin-text)]" />
+          );
+          color = "text-[var(--role-admin-text)]";
         } else if (isPast) {
-          icon = <CheckCircle2 size={14} className="text-green-400" />;
-          color = "text-green-400";
+          icon = (
+            <CheckCircle2 size={14} className="text-[var(--role-user-text)]" />
+          );
+          color = "text-[var(--role-user-text)]";
         } else if (isActive) {
           if (step === "COMPLETED") {
-            icon = <CheckCircle2 size={14} className="text-green-400" />;
-            color = "text-green-400";
+            icon = (
+              <CheckCircle2
+                size={14}
+                className="text-[var(--role-user-text)]"
+              />
+            );
+            color = "text-[var(--role-user-text)]";
           } else {
             icon = (
               <div className="relative">
@@ -189,8 +202,10 @@ function DspPipeline({ state }: { state: DspState }) {
       })}
       {isTerminated && (
         <div className="flex flex-col items-center gap-0.5 ml-1">
-          <XCircle size={14} className="text-red-400" />
-          <span className="text-[10px] text-red-400">TERMINATED</span>
+          <XCircle size={14} className="text-[var(--role-admin-text)]" />
+          <span className="text-[10px] text-[var(--role-admin-text)]">
+            TERMINATED
+          </span>
         </div>
       )}
     </div>
@@ -228,16 +243,26 @@ interface DataPayload {
 
 /* ── FHIR Resource colors ── */
 const FHIR_RESOURCE_COLORS: Record<string, string> = {
-  Patient: "bg-blue-900/50 text-blue-300 border-blue-700",
-  Observation: "bg-purple-900/50 text-purple-300 border-purple-700",
-  Condition: "bg-orange-900/50 text-orange-300 border-orange-700",
-  Encounter: "bg-emerald-900/50 text-emerald-300 border-emerald-700",
-  MedicationRequest: "bg-pink-900/50 text-pink-300 border-pink-700",
-  DiagnosticReport: "bg-indigo-900/50 text-indigo-300 border-indigo-700",
-  Immunization: "bg-teal-900/50 text-teal-300 border-teal-700",
-  AllergyIntolerance: "bg-red-900/50 text-red-300 border-red-700",
-  Procedure: "bg-cyan-900/50 text-cyan-300 border-cyan-700",
-  CarePlan: "bg-lime-900/50 text-lime-300 border-lime-700",
+  Patient:
+    "bg-[var(--role-holder-bg)] text-[var(--role-holder-text)] border-[var(--role-holder-border)]",
+  Observation:
+    "bg-[var(--role-trust-bg)] text-[var(--role-trust-text)] border-[var(--role-trust-border)]",
+  Condition:
+    "bg-[var(--role-hdab-bg)] text-[var(--role-hdab-text)] border-[var(--role-hdab-border)]",
+  Encounter:
+    "bg-[var(--role-user-bg)] text-[var(--role-user-text)] border-[var(--role-user-border)]",
+  MedicationRequest:
+    "bg-[var(--role-admin-bg)] text-[var(--role-admin-text)] border-[var(--role-admin-border)]",
+  DiagnosticReport:
+    "bg-[var(--role-trust-bg)] text-[var(--role-trust-text)] border-[var(--role-trust-border)]",
+  Immunization:
+    "bg-[var(--role-patient-bg)] text-[var(--role-patient-text)] border-[var(--role-patient-border)]",
+  AllergyIntolerance:
+    "bg-[var(--role-admin-bg)] text-[var(--role-admin-text)] border-[var(--role-admin-border)]",
+  Procedure:
+    "bg-[var(--role-patient-bg)] text-[var(--role-patient-text)] border-[var(--role-patient-border)]",
+  CarePlan:
+    "bg-[var(--role-user-bg)] text-[var(--role-user-text)] border-[var(--role-user-border)]",
 };
 
 function fhirColor(type: string): string {
@@ -256,13 +281,15 @@ function JsonNode({ data, depth = 0 }: { data: unknown; depth?: number }) {
     return <span className="text-[var(--text-secondary)]">null</span>;
   }
   if (typeof data === "boolean") {
-    return <span className="text-yellow-400">{String(data)}</span>;
+    return <span className="text-[var(--role-hdab-text)]">{String(data)}</span>;
   }
   if (typeof data === "number") {
-    return <span className="text-cyan-400">{data}</span>;
+    return <span className="text-[var(--role-holder-text)]">{data}</span>;
   }
   if (typeof data === "string") {
-    return <span className="text-green-400">&quot;{data}&quot;</span>;
+    return (
+      <span className="text-[var(--role-user-text)]">&quot;{data}&quot;</span>
+    );
   }
 
   if (Array.isArray(data)) {
@@ -272,7 +299,7 @@ function JsonNode({ data, depth = 0 }: { data: unknown; depth?: number }) {
       <span>
         <button
           onClick={() => setCollapsed(!collapsed)}
-          className="text-[var(--text-secondary)] hover:text-gray-200 inline-flex items-center"
+          className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] inline-flex items-center"
         >
           {collapsed ? <ChevronRight size={12} /> : <ChevronDown size={12} />}
           <span className="text-[var(--text-secondary)] text-xs ml-0.5">
@@ -302,7 +329,7 @@ function JsonNode({ data, depth = 0 }: { data: unknown; depth?: number }) {
       <span>
         <button
           onClick={() => setCollapsed(!collapsed)}
-          className="text-[var(--text-secondary)] hover:text-gray-200 inline-flex items-center"
+          className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] inline-flex items-center"
         >
           {collapsed ? <ChevronRight size={12} /> : <ChevronDown size={12} />}
           <span className="text-[var(--text-secondary)] text-xs ml-0.5">
@@ -315,7 +342,7 @@ function JsonNode({ data, depth = 0 }: { data: unknown; depth?: number }) {
           <div className="ml-4 border-l border-[var(--border)] pl-2">
             {entries.map(([key, val]) => (
               <div key={key}>
-                <span className="text-blue-300">{key}</span>
+                <span className="text-[var(--accent)]">{key}</span>
                 <span className="text-[var(--text-secondary)]">: </span>
                 <JsonNode data={val} depth={depth + 1} />
               </div>
@@ -444,7 +471,7 @@ function FhirViewerPanel({
       <div className="flex items-center justify-between px-4 py-3 bg-layer2/10 border-b border-layer2/30">
         <div className="flex items-center gap-2">
           <FileJson2 size={16} className="text-layer2" />
-          <span className="text-sm font-medium text-gray-200">
+          <span className="text-sm font-medium text-[var(--text-primary)]">
             FHIR Data — {aId ? assetLabel(aId as string) : "Bundle"}
           </span>
           {payload?.provider && (
@@ -458,7 +485,7 @@ function FhirViewerPanel({
             href={`/graph?highlight=${encodeURIComponent(
               aId ? assetLabel(aId as string) : "FHIR",
             )}`}
-            className="flex items-center gap-1 text-[11px] text-green-400 hover:text-green-300 transition-colors"
+            className="flex items-center gap-1 text-[11px] text-[var(--accent)] hover:underline transition-colors"
           >
             View in Graph <Network size={10} />
           </a>
@@ -485,7 +512,7 @@ function FhirViewerPanel({
           <div className="text-[10px] text-[var(--text-secondary)] uppercase tracking-wide">
             Total Resources
           </div>
-          <div className="text-lg font-semibold text-gray-200">
+          <div className="text-lg font-semibold text-[var(--text-primary)]">
             {bundle?.entry?.length ?? payload?.total ?? "—"}
           </div>
         </div>
@@ -493,7 +520,7 @@ function FhirViewerPanel({
           <div className="text-[10px] text-[var(--text-secondary)] uppercase tracking-wide">
             Resource Types
           </div>
-          <div className="text-lg font-semibold text-gray-200">
+          <div className="text-lg font-semibold text-[var(--text-primary)]">
             {Object.keys(resourceCounts).length ||
               payload?.containedResourceTypes?.length ||
               "—"}
@@ -560,7 +587,7 @@ function FhirViewerPanel({
             className={`text-xs px-2.5 py-1 rounded ${
               viewMode === "resources"
                 ? "bg-layer2/20 text-layer2"
-                : "text-[var(--text-secondary)] hover:text-gray-200"
+                : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
             }`}
           >
             Resources
@@ -570,7 +597,7 @@ function FhirViewerPanel({
             className={`text-xs px-2.5 py-1 rounded ${
               viewMode === "json"
                 ? "bg-layer2/20 text-layer2"
-                : "text-[var(--text-secondary)] hover:text-gray-200"
+                : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
             }`}
           >
             Raw JSON
@@ -578,7 +605,7 @@ function FhirViewerPanel({
         </div>
         <button
           onClick={copyJson}
-          className="flex items-center gap-1 text-[11px] text-[var(--text-secondary)] hover:text-gray-200"
+          className="flex items-center gap-1 text-[11px] text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
         >
           <Copy size={10} />
           {copied ? "Copied!" : "Copy"}
@@ -920,8 +947,8 @@ function DataTransferContent() {
             <div
               className={`mb-4 p-3 rounded text-sm whitespace-pre-line ${
                 result.startsWith("Error")
-                  ? "bg-red-900/40 border border-red-700 text-red-300"
-                  : "bg-green-900/40 border border-green-700 text-green-300"
+                  ? "bg-[var(--role-admin-bg)] border border-[var(--role-admin-border)] text-[var(--role-admin-text)]"
+                  : "bg-[var(--role-user-bg)] border border-[var(--role-user-border)] text-[var(--role-user-text)]"
               }`}
             >
               {result}
@@ -941,7 +968,7 @@ function DataTransferContent() {
           {agreements.length > 0 && (
             <form onSubmit={handleInitiate} className="space-y-3">
               {/* Select All */}
-              <label className="flex items-center gap-2 px-3 py-2 text-xs text-[var(--text-secondary)] cursor-pointer hover:text-gray-200">
+              <label className="flex items-center gap-2 px-3 py-2 text-xs text-[var(--text-secondary)] cursor-pointer hover:text-[var(--text-primary)]">
                 <input
                   type="checkbox"
                   checked={selectedAgreements.size === agreements.length}
@@ -977,7 +1004,7 @@ function DataTransferContent() {
                         className="accent-layer2"
                       />
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-gray-200">
+                        <p className="text-sm font-medium text-[var(--text-primary)]">
                           {aId ? assetLabel(aId as string) : agrId.slice(0, 12)}
                         </p>
                         <p className="text-xs text-[var(--text-secondary)]">
@@ -989,7 +1016,7 @@ function DataTransferContent() {
                           )}
                         </p>
                       </div>
-                      <span className="text-[10px] px-1.5 py-0.5 rounded bg-green-900/40 text-green-400">
+                      <span className="text-[10px] px-1.5 py-0.5 rounded bg-[var(--role-user-bg)] text-[var(--role-user-text)] border border-[var(--role-user-border)]">
                         AGREED
                       </span>
                     </label>
@@ -1020,7 +1047,7 @@ function DataTransferContent() {
               <button
                 type="submit"
                 disabled={initiating || selectedAgreements.size === 0}
-                className="flex items-center gap-2 px-4 py-2 bg-layer2 text-white rounded text-sm font-medium hover:bg-layer2/90 disabled:opacity-50"
+                className="flex items-center gap-2 px-4 py-2 bg-[var(--accent)] text-white rounded text-sm font-medium hover:bg-[var(--accent-hover)] disabled:opacity-50"
               >
                 {initiating ? (
                   <Loader2 size={14} className="animate-spin" />
@@ -1046,7 +1073,7 @@ function DataTransferContent() {
           <button
             onClick={refreshTransfers}
             disabled={refreshing}
-            className="flex items-center gap-1 text-xs text-[var(--text-secondary)] hover:text-gray-200 disabled:opacity-50"
+            className="flex items-center gap-1 text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] disabled:opacity-50"
           >
             <RefreshCw size={12} className={refreshing ? "animate-spin" : ""} />
             Refresh
@@ -1125,7 +1152,7 @@ function DataTransferContent() {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <ArrowRightLeft size={14} className={stateColor(state)} />
-                      <span className="text-sm font-medium text-gray-200">
+                      <span className="text-sm font-medium text-[var(--text-primary)]">
                         {aId
                           ? assetLabel(aId as string)
                           : t["@id"].slice(0, 12)}
@@ -1140,7 +1167,7 @@ function DataTransferContent() {
                         className={`flex items-center gap-1 text-xs px-2 py-1 rounded transition-colors ${
                           isViewing
                             ? "bg-layer2/20 text-layer2"
-                            : "bg-green-900/30 text-green-400 hover:bg-green-900/50"
+                            : "bg-[var(--role-user-bg)] text-[var(--role-user-text)] hover:opacity-80"
                         }`}
                       >
                         <FileJson2 size={12} />

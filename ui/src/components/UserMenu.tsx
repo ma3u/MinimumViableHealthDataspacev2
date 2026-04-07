@@ -179,7 +179,7 @@ export default function UserMenu() {
         {/* Role chip — hidden on very small screens */}
         <span
           className={`hidden sm:inline-block text-[10px] px-1.5 py-0.5 rounded font-medium ${
-            ROLE_BADGE[primaryRole] ?? "bg-gray-600 text-gray-200"
+            ROLE_BADGE[primaryRole] ?? "bg-gray-600 text-[var(--text-primary)]"
           }`}
         >
           {navLabel}
@@ -210,7 +210,7 @@ export default function UserMenu() {
                 <span
                   key={role}
                   className={`inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded border font-medium ${
-                    ROLE_BADGE[role] ?? "bg-gray-600 text-gray-200"
+                    ROLE_BADGE[role] ?? "bg-gray-600 text-[var(--text-primary)]"
                   } border-transparent`}
                 >
                   <Shield size={9} />
@@ -275,7 +275,7 @@ export default function UserMenu() {
                     <span
                       className={`inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded font-medium shrink-0 ${
                         ROLE_BADGE[primaryRole ?? ""] ??
-                        "bg-gray-600 text-gray-200"
+                        "bg-gray-600 text-[var(--text-primary)]"
                       }`}
                     >
                       <Shield size={8} />

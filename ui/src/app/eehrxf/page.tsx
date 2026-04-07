@@ -77,14 +77,14 @@ function StatusBadge({ status }: { status: string }) {
     case "available":
     case "full":
       return (
-        <span className="inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full bg-green-900/40 text-green-400 border border-green-700/50">
+        <span className="inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full bg-[var(--role-user-bg)] text-[var(--role-user-text)] border border-[var(--role-user-border)]">
           <CheckCircle size={12} />
           Available
         </span>
       );
     case "partial":
       return (
-        <span className="inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full bg-yellow-900/40 text-yellow-400 border border-yellow-700/50">
+        <span className="inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full bg-[var(--role-hdab-bg)] text-[var(--role-hdab-text)] border border-[var(--role-hdab-border)]">
           <AlertTriangle size={12} />
           Partial
         </span>
@@ -92,7 +92,7 @@ function StatusBadge({ status }: { status: string }) {
     case "none":
     default:
       return (
-        <span className="inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full bg-red-900/40 text-red-400 border border-red-700/50">
+        <span className="inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full bg-[var(--role-admin-bg)] text-[var(--role-admin-text)] border border-[var(--role-admin-border)]">
           <XCircle size={12} />
           Gap
         </span>
@@ -129,7 +129,7 @@ function ProfileRow({ profile }: { profile: EEHRxFProfile }) {
     <div className="flex items-center gap-3 py-2 px-3 rounded hover:bg-[var(--surface-2)]/50 transition-colors">
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
-          <span className="text-sm font-medium text-gray-200 truncate">
+          <span className="text-sm font-medium text-[var(--text-primary)] truncate">
             {profile.name}
           </span>
           <span className="text-[10px] text-[var(--text-secondary)] bg-[var(--surface-2)] px-1.5 py-0.5 rounded">
@@ -285,7 +285,7 @@ export default function EEHRxFPage() {
         />
 
         {error && (
-          <div className="mb-6 p-3 rounded bg-red-900/20 border border-red-700 text-red-400 text-sm">
+          <div className="mb-6 p-3 rounded bg-[var(--role-admin-bg)] border border-[var(--role-admin-border)] text-[var(--role-admin-text)] text-sm">
             {error}
           </div>
         )}
@@ -334,7 +334,7 @@ export default function EEHRxFPage() {
         <div className="bg-[var(--surface)] border border-[var(--border)] rounded-xl p-5 mb-8">
           <div className="flex items-center gap-2 mb-4">
             <Clock size={16} className="text-[var(--text-secondary)]" />
-            <h2 className="font-semibold text-sm text-gray-200">
+            <h2 className="font-semibold text-sm text-[var(--text-primary)]">
               EHDS Implementation Timeline
             </h2>
           </div>

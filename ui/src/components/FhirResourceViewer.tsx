@@ -310,7 +310,7 @@ function ResourceGroup({
                       className="w-1.5 h-1.5 rounded-full shrink-0"
                       style={{ background: meta.color }}
                     />
-                    <span className="text-gray-200 flex-1 truncate">
+                    <span className="text-[var(--text-primary)] flex-1 truncate">
                       {display}
                     </span>
                     {value && (

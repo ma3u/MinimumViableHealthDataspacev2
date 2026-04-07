@@ -196,7 +196,7 @@ body {
 
 /* ── WCAG 2.2 Skip Navigation (2.4.1) ─────────────────────────────────────── */
 .skip-to-content {
-  @apply absolute -top-12 left-4 z-[100] bg-layer1 text-white px-4 py-2 rounded-b-lg font-semibold text-sm;
+  @apply absolute -top-12 left-4 z-[100] bg-[var(--accent)] text-white px-4 py-2 rounded-b-lg font-semibold text-sm;
   transition: top 0.2s ease;
 }
 .skip-to-content:focus {

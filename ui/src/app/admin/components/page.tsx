@@ -293,7 +293,7 @@ function InfoPopover({ name }: { name: string }) {
           {/* Popover */}
           <div className="absolute z-40 left-6 top-0 w-80 bg-[var(--surface-2)] border border-gray-600 rounded-xl shadow-2xl p-4 text-xs space-y-2">
             <div className="flex items-center justify-between mb-1">
-              <span className="font-semibold text-sm text-gray-200">
+              <span className="font-semibold text-sm text-[var(--text-primary)]">
                 {name}
               </span>
               <button
@@ -348,7 +348,7 @@ function ComponentRow({
 
   return (
     <tr className="border-b border-[var(--border)] hover:bg-[var(--surface-2)]/40 transition-colors">
-      <td className="py-2.5 px-3 text-sm font-medium text-gray-200">
+      <td className="py-2.5 px-3 text-sm font-medium text-[var(--text-primary)]">
         <span className="flex items-center gap-1.5">
           {comp.component}
           <InfoPopover name={comp.component} />
@@ -398,7 +398,7 @@ function TopoComponentCard({ comp }: { comp: TopoComponent }) {
       className={`border rounded-lg p-3 ${sev.border} ${sev.bg} transition-colors`}
     >
       <div className="flex items-center justify-between mb-1.5">
-        <span className="flex items-center gap-1.5 text-xs font-medium text-gray-200">
+        <span className="flex items-center gap-1.5 text-xs font-medium text-[var(--text-primary)]">
           <SeverityDot severity={comp.severity} />
           {comp.name}
           <InfoPopover name={comp.name} />
@@ -605,7 +605,7 @@ function ParticipantTopologySection({
         <SeverityDot severity={participant.health} />
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="font-semibold text-sm text-gray-200">
+            <span className="font-semibold text-sm text-[var(--text-primary)]">
               {participant.displayName}
             </span>
             <span className="text-xs text-[var(--text-secondary)]">
@@ -814,7 +814,7 @@ function CostEstimatorPanel({
               onChange={(e) => setCount(Number(e.target.value))}
               className="w-28 accent-emerald-500"
             />
-            <span className="font-mono font-semibold text-gray-200 w-6 text-right">
+            <span className="font-mono font-semibold text-[var(--text-primary)] w-6 text-right">
               {count}
             </span>
           </label>
@@ -833,7 +833,7 @@ function CostEstimatorPanel({
               className="border border-[var(--border)] rounded-lg p-3 bg-[var(--surface)]/40"
             >
               <div className="flex items-center justify-between mb-1">
-                <span className="text-xs font-medium text-gray-200">
+                <span className="text-xs font-medium text-[var(--text-primary)]">
                   {n.label}
                 </span>
                 <span className="text-xs font-mono text-emerald-400">
@@ -875,7 +875,7 @@ function CostEstimatorPanel({
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 text-xs">
           <div className="border border-[var(--border)] rounded-lg p-3 bg-[var(--surface)]/40">
             <div className="text-[var(--text-secondary)] mb-0.5">Compute</div>
-            <div className="font-mono text-gray-200">
+            <div className="font-mono text-[var(--text-primary)]">
               €{PER_PARTICIPANT_COMPUTE_EUR}/mo
             </div>
             <div className="text-[10px] text-gray-600 mt-1">
@@ -884,7 +884,7 @@ function CostEstimatorPanel({
           </div>
           <div className="border border-[var(--border)] rounded-lg p-3 bg-[var(--surface)]/40">
             <div className="text-[var(--text-secondary)] mb-0.5">Storage</div>
-            <div className="font-mono text-gray-200">
+            <div className="font-mono text-[var(--text-primary)]">
               €{(PER_PARTICIPANT_STORAGE_GB * STORAGE_EUR_PER_GB).toFixed(2)}{" "}
               <span className="text-[var(--text-secondary)] text-[10px]">
                 (+€{(HEALTH_DATA_STORAGE_GB * STORAGE_EUR_PER_GB).toFixed(2)}{" "}
@@ -901,7 +901,7 @@ function CostEstimatorPanel({
               <Network size={11} />
               CP↔DP Network
             </div>
-            <div className="font-mono text-gray-200">
+            <div className="font-mono text-[var(--text-primary)]">
               €{((CP_DP_TRAFFIC_MB / 1024) * NETWORK_EUR_PER_GB).toFixed(3)}/mo
             </div>
             <div className="text-[10px] text-gray-600 mt-1">
@@ -913,7 +913,7 @@ function CostEstimatorPanel({
             <div className="text-[var(--text-secondary)] mb-0.5">
               Log Injection
             </div>
-            <div className="font-mono text-gray-200">
+            <div className="font-mono text-[var(--text-primary)]">
               €{((LOG_INJECTION_MB / 1024) * LOG_EUR_PER_GB).toFixed(3)}/mo
             </div>
             <div className="text-[10px] text-gray-600 mt-1">
@@ -931,7 +931,7 @@ function CostEstimatorPanel({
             <div className="text-[10px] text-[var(--text-secondary)] mb-1">
               Shared fixed
             </div>
-            <div className="font-mono text-lg font-semibold text-gray-200">
+            <div className="font-mono text-lg font-semibold text-[var(--text-primary)]">
               €{SHARED_EUR}
             </div>
           </div>
@@ -939,7 +939,7 @@ function CostEstimatorPanel({
             <div className="text-[10px] text-[var(--text-secondary)] mb-1">
               {count} × participants
             </div>
-            <div className="font-mono text-lg font-semibold text-gray-200">
+            <div className="font-mono text-lg font-semibold text-[var(--text-primary)]">
               €{participantCost.toFixed(0)}
             </div>
           </div>
@@ -947,7 +947,7 @@ function CostEstimatorPanel({
             <div className="text-[10px] text-[var(--text-secondary)] mb-1">
               Network ({(networkTotal + logTotal).toFixed(1)} GB/mo)
             </div>
-            <div className="font-mono text-lg font-semibold text-gray-200">
+            <div className="font-mono text-lg font-semibold text-[var(--text-primary)]">
               €
               {(
                 networkTotal * NETWORK_EUR_PER_GB +
@@ -1318,7 +1318,7 @@ export default function AdminComponentsPage() {
                           className="border-b border-[var(--border)] hover:bg-[var(--surface-2)]/40 transition-colors"
                         >
                           <td className="py-2.5 px-3">
-                            <div className="font-semibold text-sm text-gray-200">
+                            <div className="font-semibold text-sm text-[var(--text-primary)]">
                               {p.displayName}
                             </div>
                             <div className="text-[11px] text-[var(--text-secondary)]">

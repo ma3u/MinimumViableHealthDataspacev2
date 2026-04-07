@@ -451,7 +451,9 @@ export default function AdminPoliciesPage() {
                   <span className="text-xs font-mono text-layer2">
                     {t.article}
                   </span>
-                  <p className="text-sm font-medium text-gray-200">{t.label}</p>
+                  <p className="text-sm font-medium text-[var(--text-primary)]">
+                    {t.label}
+                  </p>
                 </button>
               ))}
             </div>
@@ -472,7 +474,7 @@ export default function AdminPoliciesPage() {
                 <select
                   value={selectedParticipant}
                   onChange={(e) => setSelectedParticipant(e.target.value)}
-                  className="w-full rounded-lg bg-[var(--surface-2)] border border-gray-600 text-sm px-3 py-2 text-gray-200"
+                  className="w-full rounded-lg bg-[var(--surface-2)] border border-gray-600 text-sm px-3 py-2 text-[var(--text-primary)]"
                 >
                   <option value="">— select —</option>
                   {groups.map((g) => (
@@ -491,7 +493,7 @@ export default function AdminPoliciesPage() {
                 <select
                   value={selectedDuration}
                   onChange={(e) => setSelectedDuration(e.target.value)}
-                  className="w-full rounded-lg bg-[var(--surface-2)] border border-gray-600 text-sm px-3 py-2 text-gray-200"
+                  className="w-full rounded-lg bg-[var(--surface-2)] border border-gray-600 text-sm px-3 py-2 text-[var(--text-primary)]"
                 >
                   {DURATION_OPTIONS.map((d) => (
                     <option key={d.value} value={d.value}>
@@ -518,7 +520,7 @@ export default function AdminPoliciesPage() {
               <button
                 onClick={handleCreate}
                 disabled={creating || !selectedParticipant}
-                className="px-4 py-2 rounded-lg bg-layer2 text-white text-sm font-medium hover:bg-layer2/80 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+                className="px-4 py-2 rounded-lg bg-[var(--accent)] text-white text-sm font-medium hover:bg-[var(--accent-hover)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
               >
                 {creating && <Loader2 size={14} className="animate-spin" />}
                 Create Policy
@@ -576,7 +578,7 @@ export default function AdminPoliciesPage() {
                   >
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="font-medium text-gray-200">
+                        <p className="font-medium text-[var(--text-primary)]">
                           {g.identity
                             ?.replace("did:web:", "")
                             .replace(/%3A/g, ":") ||
@@ -648,7 +650,7 @@ export default function AdminPoliciesPage() {
                               >
                                 <div className="flex items-start justify-between mb-2">
                                   <div>
-                                    <p className="text-sm font-medium text-gray-200">
+                                    <p className="text-sm font-medium text-[var(--text-primary)]">
                                       {(pObj["@id"] as string) ||
                                         `Policy #${i + 1}`}
                                     </p>

@@ -243,7 +243,9 @@ export default function PatientProfilePage() {
                     <tbody>
                       {profile.conditions.slice(0, 8).map((c, i) => (
                         <tr key={i} className="border-b border-[var(--border)]">
-                          <td className="p-2 text-gray-200">{c.display}</td>
+                          <td className="p-2 text-[var(--text-primary)]">
+                            {c.display}
+                          </td>
                           <td className="p-2 font-mono text-[var(--text-secondary)]">
                             {c.code}
                           </td>

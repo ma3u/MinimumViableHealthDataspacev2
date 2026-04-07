@@ -382,7 +382,7 @@ function SelectField({
     <select
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      className="w-full px-3 py-2 bg-[var(--surface-2)] border border-gray-600 rounded text-sm text-gray-200 outline-none focus:border-purple-500"
+      className="w-full px-3 py-2 bg-[var(--surface-2)] border border-gray-600 rounded text-sm text-[var(--text-primary)] outline-none focus:border-purple-500"
     >
       {placeholder && (
         <option value="" disabled>
@@ -415,7 +415,7 @@ function InputField({
       value={value}
       onChange={(e) => onChange(e.target.value)}
       placeholder={placeholder}
-      className="w-full px-3 py-2 bg-[var(--surface-2)] border border-gray-600 rounded text-sm text-gray-200 outline-none focus:border-purple-500"
+      className="w-full px-3 py-2 bg-[var(--surface-2)] border border-gray-600 rounded text-sm text-[var(--text-primary)] outline-none focus:border-purple-500"
     />
   );
 }
@@ -760,7 +760,7 @@ function EditorContent() {
                   onChange={(e) => setField("description", e.target.value)}
                   placeholder="Describe the dataset contents, coverage and purpose…"
                   rows={3}
-                  className="w-full px-3 py-2 bg-[var(--surface-2)] border border-gray-600 rounded text-sm text-gray-200 outline-none focus:border-purple-500 resize-y"
+                  className="w-full px-3 py-2 bg-[var(--surface-2)] border border-gray-600 rounded text-sm text-[var(--text-primary)] outline-none focus:border-purple-500 resize-y"
                 />
               </FormField>
 

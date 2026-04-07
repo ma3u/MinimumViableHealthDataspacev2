@@ -52,13 +52,15 @@ function JsonNode({ data, depth = 0 }: { data: unknown; depth?: number }) {
     return <span className="text-[var(--text-secondary)]">null</span>;
   }
   if (typeof data === "boolean") {
-    return <span className="text-yellow-400">{String(data)}</span>;
+    return <span className="text-[var(--role-hdab-text)]">{String(data)}</span>;
   }
   if (typeof data === "number") {
-    return <span className="text-cyan-400">{data}</span>;
+    return <span className="text-[var(--role-holder-text)]">{data}</span>;
   }
   if (typeof data === "string") {
-    return <span className="text-green-400">&quot;{data}&quot;</span>;
+    return (
+      <span className="text-[var(--role-user-text)]">&quot;{data}&quot;</span>
+    );
   }
 
   if (Array.isArray(data)) {
@@ -68,7 +70,7 @@ function JsonNode({ data, depth = 0 }: { data: unknown; depth?: number }) {
       <span>
         <button
           onClick={() => setCollapsed(!collapsed)}
-          className="text-[var(--text-secondary)] hover:text-gray-200 inline-flex items-center"
+          className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] inline-flex items-center"
         >
           {collapsed ? <ChevronRight size={12} /> : <ChevronDown size={12} />}
           <span className="text-[var(--text-secondary)] text-xs ml-0.5">
@@ -98,7 +100,7 @@ function JsonNode({ data, depth = 0 }: { data: unknown; depth?: number }) {
       <span>
         <button
           onClick={() => setCollapsed(!collapsed)}
-          className="text-[var(--text-secondary)] hover:text-gray-200 inline-flex items-center"
+          className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] inline-flex items-center"
         >
           {collapsed ? <ChevronRight size={12} /> : <ChevronDown size={12} />}
           <span className="text-[var(--text-secondary)] text-xs ml-0.5">
@@ -111,7 +113,7 @@ function JsonNode({ data, depth = 0 }: { data: unknown; depth?: number }) {
           <div className="ml-4 border-l border-[var(--border)] pl-2">
             {entries.map(([key, val]) => (
               <div key={key}>
-                <span className="text-blue-300">{key}</span>
+                <span className="text-[var(--accent)]">{key}</span>
                 <span className="text-[var(--text-secondary)]">: </span>
                 <JsonNode data={val} depth={depth + 1} />
               </div>
@@ -216,7 +218,7 @@ function AssetDetailPanel({ asset }: { asset: Asset }) {
         <div className="flex items-center gap-2">
           <a
             href={`/graph?highlight=${encodeURIComponent(String(name))}`}
-            className="flex items-center gap-1 text-[11px] text-green-400 hover:text-green-300 transition-colors"
+            className="flex items-center gap-1 text-[11px] text-[var(--accent)] hover:underline transition-colors"
           >
             View in Graph <Network size={10} />
           </a>
@@ -229,7 +231,7 @@ function AssetDetailPanel({ asset }: { asset: Asset }) {
           <div className="text-[10px] text-[var(--text-secondary)] uppercase tracking-wide">
             Asset ID
           </div>
-          <div className="text-sm text-gray-200 font-mono truncate">
+          <div className="text-sm text-[var(--text-primary)] font-mono truncate">
             {asset["@id"]}
           </div>
         </div>
@@ -237,7 +239,7 @@ function AssetDetailPanel({ asset }: { asset: Asset }) {
           <div className="text-[10px] text-[var(--text-secondary)] uppercase tracking-wide">
             Type
           </div>
-          <div className="text-sm text-gray-200">
+          <div className="text-sm text-[var(--text-primary)]">
             {String(asset["@type"] || "Asset")}
           </div>
         </div>
@@ -245,13 +247,13 @@ function AssetDetailPanel({ asset }: { asset: Asset }) {
           <div className="text-[10px] text-[var(--text-secondary)] uppercase tracking-wide">
             Content Type
           </div>
-          <div className="text-sm text-gray-200">{ct || "—"}</div>
+          <div className="text-sm text-[var(--text-primary)]">{ct || "—"}</div>
         </div>
         <div>
           <div className="text-[10px] text-[var(--text-secondary)] uppercase tracking-wide">
             Properties
           </div>
-          <div className="text-sm text-gray-200">
+          <div className="text-sm text-[var(--text-primary)]">
             {Object.keys(asset.properties || {}).length} fields
           </div>
         </div>
@@ -275,7 +277,7 @@ function AssetDetailPanel({ asset }: { asset: Asset }) {
             className={`text-xs px-2.5 py-1 rounded ${
               viewMode === "details"
                 ? "bg-layer2/20 text-layer2"
-                : "text-[var(--text-secondary)] hover:text-gray-200"
+                : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
             }`}
           >
             Details
@@ -285,7 +287,7 @@ function AssetDetailPanel({ asset }: { asset: Asset }) {
             className={`text-xs px-2.5 py-1 rounded ${
               viewMode === "json"
                 ? "bg-layer2/20 text-layer2"
-                : "text-[var(--text-secondary)] hover:text-gray-200"
+                : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
             }`}
           >
             Raw JSON
@@ -298,8 +300,8 @@ function AssetDetailPanel({ asset }: { asset: Asset }) {
               }}
               className={`text-xs px-2.5 py-1 rounded inline-flex items-center gap-1 ${
                 viewMode === "fhir"
-                  ? "bg-green-900/30 text-green-400"
-                  : "text-[var(--text-secondary)] hover:text-gray-200"
+                  ? "bg-[var(--role-user-bg)] text-[var(--role-user-text)]"
+                  : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
               }`}
             >
               <Activity size={10} />
@@ -309,7 +311,7 @@ function AssetDetailPanel({ asset }: { asset: Asset }) {
         </div>
         <button
           onClick={copyJson}
-          className="flex items-center gap-1 text-[11px] text-[var(--text-secondary)] hover:text-gray-200"
+          className="flex items-center gap-1 text-[11px] text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
         >
           <Copy size={10} />
           {copied ? "Copied!" : "Copy"}
@@ -347,8 +349,10 @@ function AssetDetailPanel({ asset }: { asset: Asset }) {
                 <div className="space-y-1 font-mono text-xs">
                   {extraEntries.map(([k, v]) => (
                     <div key={k} className="flex gap-2">
-                      <span className="text-blue-300 shrink-0">{k}:</span>
-                      <span className="text-green-400 truncate">
+                      <span className="text-[var(--accent)] shrink-0">
+                        {k}:
+                      </span>
+                      <span className="text-[var(--role-user-text)] truncate">
                         {typeof v === "string" ? v : JSON.stringify(v)}
                       </span>
                     </div>
@@ -365,8 +369,10 @@ function AssetDetailPanel({ asset }: { asset: Asset }) {
                 <div className="space-y-1 font-mono text-xs">
                   {propEntries.map(([k, v]) => (
                     <div key={k} className="flex gap-2">
-                      <span className="text-blue-300 shrink-0">{k}:</span>
-                      <span className="text-green-400 truncate">
+                      <span className="text-[var(--accent)] shrink-0">
+                        {k}:
+                      </span>
+                      <span className="text-[var(--role-user-text)] truncate">
                         {typeof v === "string" ? v : JSON.stringify(v)}
                       </span>
                     </div>
@@ -601,8 +607,8 @@ export default function DataSharePage() {
               <div
                 className={`mb-4 p-3 rounded text-sm ${
                   createResult.startsWith("Error")
-                    ? "bg-red-900/40 border border-red-700 text-red-300"
-                    : "bg-green-900/40 border border-green-700 text-green-300"
+                    ? "bg-[var(--role-admin-bg)] border border-[var(--role-admin-border)] text-[var(--role-admin-text)]"
+                    : "bg-[var(--role-user-bg)] border border-[var(--role-user-border)] text-[var(--role-user-text)]"
                 }`}
               >
                 {createResult.startsWith("Error") ? null : (
@@ -694,7 +700,7 @@ export default function DataSharePage() {
               <button
                 type="submit"
                 disabled={creating}
-                className="flex items-center gap-2 px-5 py-2.5 bg-layer2 text-white rounded-lg text-sm font-medium hover:bg-layer2/90 disabled:opacity-50"
+                className="flex items-center gap-2 px-5 py-2.5 bg-[var(--accent)] text-white rounded-lg text-sm font-medium hover:bg-[var(--accent-hover)] disabled:opacity-50"
               >
                 {creating ? (
                   <Loader2 size={16} className="animate-spin" />

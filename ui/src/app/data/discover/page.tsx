@@ -481,7 +481,7 @@ function DataDiscoverContent() {
                             <div className="flex flex-wrap gap-3">
                               <a
                                 href={`/negotiate?assetId=${a["@id"]}&providerId=${a._participantId}`}
-                                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-layer2 text-white rounded text-xs font-medium hover:bg-layer2/90"
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[var(--accent)] text-white rounded text-xs font-medium hover:bg-[var(--accent-hover)]"
                               >
                                 <FileSignature size={14} />
                                 Negotiate Access

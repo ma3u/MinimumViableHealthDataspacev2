@@ -131,7 +131,9 @@ function DetailRow({
       <span className="text-xs text-[var(--text-secondary)] w-36 shrink-0">
         {label}
       </span>
-      <span className="text-xs text-gray-200 break-all">{String(value)}</span>
+      <span className="text-xs text-[var(--text-primary)] break-all">
+        {String(value)}
+      </span>
     </div>
   );
 }
@@ -253,7 +255,7 @@ function CatalogContent() {
                   >
                     <div className="flex items-start justify-between gap-4">
                       <div className="flex-1 min-w-0">
-                        <h2 className="font-semibold text-layer2">
+                        <h2 className="font-semibold text-[var(--text-primary)]">
                           {d.title ?? d.id}
                         </h2>
                         {d.description && (
@@ -264,12 +266,12 @@ function CatalogContent() {
                       </div>
                       <div className="shrink-0 flex flex-col items-end gap-1">
                         {d.datasetType && (
-                          <span className="text-xs bg-layer2/20 text-layer2 px-2 py-0.5 rounded-full">
+                          <span className="text-xs bg-[var(--layer2-text)]/10 text-[var(--layer2-text)] px-2 py-0.5 rounded-full font-medium">
                             {d.datasetType}
                           </span>
                         )}
                         {d.theme && (
-                          <span className="text-xs bg-gray-700 text-[var(--text-primary)] px-2 py-0.5 rounded-full">
+                          <span className="text-xs bg-[var(--surface-2)] text-[var(--text-secondary)] px-2 py-0.5 rounded-full border border-[var(--border)]">
                             {d.theme}
                           </span>
                         )}
@@ -287,7 +289,7 @@ function CatalogContent() {
                     <div className="mt-3 flex flex-wrap gap-4 text-xs text-[var(--text-secondary)]">
                       {d.publisher && <span>Publisher: {d.publisher}</span>}
                       {d.legalBasis && (
-                        <span className="text-green-500">
+                        <span className="text-[var(--success-text)]">
                           Legal basis:{" "}
                           {LEGAL_BASIS_LABELS[d.legalBasis] ?? d.legalBasis}
                         </span>
@@ -307,13 +309,13 @@ function CatalogContent() {
                       <div className="mt-2 flex flex-wrap gap-3 text-xs">
                         {d.providers && d.providers.length > 0 && (
                           <div className="flex items-center gap-1">
-                            <span className="text-blue-400 font-medium">
+                            <span className="text-[var(--role-holder-text)] font-medium">
                               Providers:
                             </span>
                             {d.providers.map((p) => (
                               <span
                                 key={p}
-                                className="bg-blue-900/40 text-blue-300 px-1.5 py-0.5 rounded"
+                                className="bg-[var(--role-holder-bg)] text-[var(--role-holder-text)] px-1.5 py-0.5 rounded border border-[var(--role-holder-border)]"
                               >
                                 {p}
                               </span>
@@ -322,13 +324,13 @@ function CatalogContent() {
                         )}
                         {d.consumers && d.consumers.length > 0 && (
                           <div className="flex items-center gap-1">
-                            <span className="text-orange-400 font-medium">
+                            <span className="text-[var(--role-hdab-text)] font-medium">
                               Consumers:
                             </span>
                             {d.consumers.map((c) => (
                               <span
                                 key={c}
-                                className="bg-orange-900/40 text-orange-300 px-1.5 py-0.5 rounded"
+                                className="bg-[var(--role-hdab-bg)] text-[var(--role-hdab-text)] px-1.5 py-0.5 rounded border border-[var(--role-hdab-border)]"
                               >
                                 {c}
                               </span>
@@ -337,10 +339,10 @@ function CatalogContent() {
                         )}
                         {d.fhirResources && d.fhirResources.length > 0 && (
                           <div className="flex items-center gap-1">
-                            <span className="text-green-400 font-medium">
+                            <span className="text-[var(--role-user-text)] font-medium">
                               FHIR:
                             </span>
-                            <span className="bg-green-900/40 text-green-300 px-1.5 py-0.5 rounded">
+                            <span className="bg-[var(--role-user-bg)] text-[var(--role-user-text)] px-1.5 py-0.5 rounded border border-[var(--role-user-border)]">
                               {d.fhirResources.length} Patient
                               {d.fhirResources.length !== 1 ? "s" : ""}
                             </span>
