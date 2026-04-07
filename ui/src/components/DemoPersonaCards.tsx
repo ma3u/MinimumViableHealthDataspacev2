@@ -59,7 +59,7 @@ export function DemoPersonaCards() {
           >
             <div className="flex items-center justify-between mb-1.5">
               <div>
-                <span className="font-mono text-sm font-semibold text-white group-hover:text-blue-200 transition-colors">
+                <span className="font-mono text-sm font-semibold text-[var(--text-primary)] group-hover:text-[var(--accent)] transition-colors">
                   {persona.username}
                 </span>
                 <span className="text-xs text-[var(--text-secondary)] ml-2">
@@ -68,7 +68,7 @@ export function DemoPersonaCards() {
               </div>
               <LogIn
                 size={14}
-                className="text-gray-600 group-hover:text-blue-300 transition-colors"
+                className="text-[var(--text-secondary)] group-hover:text-[var(--accent)] transition-colors"
                 aria-hidden="true"
               />
             </div>
