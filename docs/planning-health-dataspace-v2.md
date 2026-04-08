@@ -2749,23 +2749,23 @@ Phase 21 established the token foundation (CSS custom properties, dark/light mod
 
 #### Design → Page Mapping
 
-| Design Template                     | Current Page        | Status | New Features                                               |
-| ----------------------------------- | ------------------- | ------ | ---------------------------------------------------------- |
-| `administrative_dashboard_day`      | `/admin`            | 🔲     | Gradient CTA, European data flow placeholder, activity log |
-| `clinical_analytics_day`            | `/analytics`        | 🔲     | HRV chart, AI recommendations panel, data provenance       |
-| `compliance_overview_day`           | `/compliance`       | 🔲     | Audit trail timeline, regulatory framework status cards    |
-| `credentials_management_day`        | `/credentials`      | 🔲     | Credential lifecycle orb, expiry countdown                 |
-| `dataset_catalog_day`               | `/catalog`          | 🔲     | Collection grouping, WCAG-safe badges ✅ done              |
-| `infrastructure_health_day`         | `/admin/components` | 🔲     | Cluster topology map, deployment health bars               |
-| `knowledge_graph_with_search_light` | `/graph`            | 🔲     | Topological search overlay, entity inspector panel         |
-| `knowledge_graph_with_search_dark`  | `/graph` (dark)     | 🔲     | Dark-mode graph with luminous node glows                   |
-| `patient_dashboard_day`             | `/patient`          | 🔲     | Metric orbs (HR, BP), activity timeline, research bento    |
-| `patient_profile_day`               | `/patient/profile`  | 🔲     | Privacy settings, medical preferences section              |
-| `query_ehr_exchange_day`            | `/query`            | 🔲     | Query builder UI, federated search results panel           |
-| `research_participation_day`        | `/patient/research` | 🔲     | Study enrollment flow, consent management timeline         |
-| `system_logs_day`                   | `/admin/audit`      | 🔲     | WCAG-safe status badges ✅ done, error severity chart      |
-| `technical_compliance_kit_day`      | `/compliance/tck`   | 🔲     | Protocol verification status grid                          |
-| `user_management_day`               | `/admin/tenants`    | 🔲     | RBAC summary sidebar ✅ done, access control matrix        |
+| Design Template                     | Current Page        | Status | Stitch Features Identified                                                         | Implementation Gaps vs. Stitch                                                               |
+| ----------------------------------- | ------------------- | ------ | ---------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| `administrative_dashboard_day`      | `/admin`            | ✅     | Gradient CTA button, EU participant data flow strip, activity log with icons       | Static activity log (not live); EU flow strip is hardcoded (no dynamic participant map)      |
+| `clinical_analytics_day`            | `/analytics`        | 🔲     | HRV sparkline chart, AI clinical recommendations panel, OMOP data provenance chain | No HRV chart; no AI panel; analytics use static bar chart only                               |
+| `compliance_overview_day`           | `/compliance`       | 🔲     | Audit trail timeline, regulatory article status cards (GDPR/EHDS), risk matrix     | Compliance page has basic checklist; no visual audit timeline or risk matrix                 |
+| `credentials_management_day`        | `/credentials`      | 🔲     | Credential lifecycle orb (issued/active/expiring/revoked), expiry countdown badge  | VC list exists but no lifecycle orb or expiry countdown; status badges now WCAG-safe         |
+| `dataset_catalog_day`               | `/catalog`          | ✅     | 2-panel layout (filter sidebar + card grid), gradient dataset cards, stats row     | Filter sidebar fully functional; "Request Access" links to /negotiate; bookmark opens modal  |
+| `infrastructure_health_day`         | `/admin/components` | 🔲     | Cluster topology map, per-service CPU/memory bars, deployment status badges        | Components page shows card grid; no topology map; no resource utilization bars               |
+| `knowledge_graph_with_search_light` | `/graph`            | ✅     | Topological search input in sidebar, entity inspector, layer filter pills          | Search filters node list in sidebar; no slide-in inspector panel; layer pills not yet wired  |
+| `knowledge_graph_with_search_dark`  | `/graph` (dark)     | 🔲     | Dark graph with luminous node glows, neon accent lines, glass-panel inspector      | Dark mode applied globally but graph canvas colors not remapped to Nocturne palette          |
+| `patient_dashboard_day`             | `/patient`          | ✅     | Metric orb stat cards, clinical timeline with connector line, demographics bento   | Orb cards done; timeline connector line done; no research enrollment bento                   |
+| `patient_profile_day`               | `/patient/profile`  | 🔲     | Privacy settings section, medical preferences, consent timeline by category        | Profile page exists; no privacy settings panel or consent timeline per resource category     |
+| `query_ehr_exchange_day`            | `/query`            | 🔲     | Visual query builder (drag-and-drop), federated search results panel, FHIR badges  | Query page has NLQ text input only; no visual builder; no federated multi-site results panel |
+| `research_participation_day`        | `/patient/research` | 🔲     | Study enrollment flow, consent management timeline, outcome reporting              | Research page lists studies; no enrollment flow UI; no consent timeline                      |
+| `system_logs_day`                   | `/admin/audit`      | ✅     | WCAG-safe status badges (all states), direction/access-type badges, transfer log   | All badge colors now WCAG 2.2 AA; no error severity chart or anomaly detection panel         |
+| `technical_compliance_kit_day`      | `/compliance/tck`   | 🔲     | Protocol verification status grid (DSP/DCP/EHDS), pass/fail summary donut chart    | TCK page has test list; no visual grid or donut chart summary                                |
+| `user_management_day`               | `/admin/tenants`    | 🔲     | RBAC participant table, role distribution sidebar, access control matrix           | Tenant list exists; no matrix view; role distribution chart not rendered                     |
 
 #### 23a: WCAG 2.2 AA Contrast Fixes ✅
 
