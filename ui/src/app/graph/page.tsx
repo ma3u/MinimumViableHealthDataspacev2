@@ -12,12 +12,17 @@ const IS_STATIC = process.env.NEXT_PUBLIC_STATIC_EXPORT === "true";
 import dynamic from "next/dynamic";
 import {
   Activity,
+  ArrowDownLeft,
+  ArrowUpRight,
   BarChart2,
   BookOpen,
   Building2,
+  Check,
   ChevronLeft,
   ChevronRight,
+  Copy,
   Database,
+  ExternalLink,
   Eye,
   FlaskConical,
   Heart,
@@ -339,6 +344,7 @@ function GraphContent() {
   // Panel collapse state
   const [leftCollapsed, setLeftCollapsed] = useState(false);
   const [rightCollapsed, setRightCollapsed] = useState(false);
+  const [copiedKey, setCopiedKey] = useState<string | null>(null);
   // Topological search — Phase 23e
   const [nodeSearch, setNodeSearch] = useState("");
 
@@ -1219,11 +1225,11 @@ function GraphContent() {
         )}
       </div>
 
-      {/* ── Right-side detail panel (absolute overlay to avoid layout squeeze) */}
+      {/* ── Right-side entity inspector panel ── */}
       {selected && (
         <aside
-          className={`absolute right-0 top-0 h-full overflow-y-auto border-l border-[var(--border)] bg-[var(--surface-card)] animate-slide-in-right transition-all duration-200 z-40 shadow-2xl ${
-            rightCollapsed ? "w-10" : "w-80"
+          className={`absolute right-0 top-0 h-full overflow-y-auto border-l border-[var(--border)] bg-[var(--surface-card)] animate-slide-in-right z-40 shadow-2xl transition-[width] duration-200 ${
+            rightCollapsed ? "w-10" : "w-96"
           }`}
         >
           {/* Collapse/expand toggle */}
@@ -1231,6 +1237,9 @@ function GraphContent() {
             onClick={() => setRightCollapsed((v) => !v)}
             className="flex w-full items-center justify-center border-b border-[var(--border)] p-2 text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
             title={rightCollapsed ? "Expand panel" : "Collapse panel"}
+            aria-label={
+              rightCollapsed ? "Expand inspector" : "Collapse inspector"
+            }
           >
             {rightCollapsed ? (
               <ChevronLeft size={14} />
@@ -1238,124 +1247,216 @@ function GraphContent() {
               <PanelRightClose size={14} />
             )}
           </button>
+
           {rightCollapsed ? null : (
             <>
-              {/* Header — Stitch "Entity Details" pattern */}
-              <div className="border-b border-[var(--border)] px-4 pt-4 pb-3">
-                <div className="flex items-start justify-between mb-1.5">
-                  <h2 className="text-2xl font-black tracking-tight text-[var(--text-primary)] leading-tight">
+              {/* ── Header ── */}
+              <div className="border-b border-[var(--border)] px-5 pt-5 pb-4">
+                <div className="flex items-center justify-between mb-3">
+                  <p className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest">
                     Entity Details
-                  </h2>
+                  </p>
                   <button
                     onClick={() => setSelected(null)}
-                    className="shrink-0 mt-1 text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
+                    className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-2)] rounded-lg p-1 transition-colors"
                     aria-label="Close detail panel"
                   >
                     <X size={14} />
                   </button>
                 </div>
-                <div
-                  className="flex items-center gap-1.5 cursor-help"
-                  title={NODE_TOOLTIPS[selected.label]}
-                >
+
+                {/* Node name with color indicator */}
+                <div className="flex items-start gap-2.5 mb-3">
                   <span
-                    className="h-2.5 w-2.5 shrink-0 rounded-full"
+                    className="mt-1.5 h-3 w-3 shrink-0 rounded-full shadow-sm"
                     style={{ background: selected.color }}
                   />
-                  <span
-                    className="text-sm font-semibold text-[var(--accent)] truncate"
+                  <h2
+                    className="text-xl font-black leading-tight tracking-tight break-words"
                     style={{ color: selected.color }}
+                    title={NODE_TOOLTIPS[selected.label]}
                   >
                     {selected.name}
+                  </h2>
+                </div>
+
+                {/* Type + layer badges */}
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span
+                    className="inline-flex items-center text-[10px] font-bold px-2 py-0.5 rounded-full"
+                    style={{
+                      background: selected.color + "20",
+                      color: selected.color,
+                    }}
+                  >
+                    {NODE_DISPLAY_NAMES[selected.label] ?? selected.label}
+                  </span>
+                  <span className="text-[10px] font-semibold text-[var(--text-secondary)]">
+                    {PERSONA_LAYER_LABELS[activePersona]?.[selected.layer] ??
+                      LAYER_LABELS[selected.layer]}
                   </span>
                 </div>
-                <p
-                  className="mt-0.5 text-xs text-[var(--text-secondary)] cursor-help"
-                  title={LAYER_TOOLTIPS[selected.layer]}
-                >
-                  {NODE_DISPLAY_NAMES[selected.label] ?? selected.label}
-                  {" · "}
-                  {PERSONA_LAYER_LABELS[activePersona]?.[selected.layer] ??
-                    LAYER_LABELS[selected.layer]}
-                </p>
               </div>
 
-              {/* Node ID (collapsible) */}
-              <div className="px-4 py-2 border-b border-[var(--border)]">
-                <p className="break-all text-[10px] leading-tight text-[var(--text-secondary)] font-mono">
+              {/* ── Node ID (copyable) ── */}
+              <div className="px-5 py-3 border-b border-[var(--border)] group flex items-center gap-2">
+                <p className="break-all text-[10px] leading-relaxed text-[var(--text-secondary)] font-mono flex-1">
                   {selected.id}
                 </p>
+                <button
+                  onClick={() => {
+                    navigator.clipboard.writeText(selected.id);
+                    setCopiedKey("__id__");
+                    setTimeout(() => setCopiedKey(null), 1500);
+                  }}
+                  className="shrink-0 text-[var(--text-secondary)] hover:text-[var(--accent)] transition-colors"
+                  title="Copy node ID"
+                  aria-label="Copy node ID"
+                >
+                  {copiedKey === "__id__" ? (
+                    <Check size={12} className="text-[var(--success-text)]" />
+                  ) : (
+                    <Copy size={12} />
+                  )}
+                </button>
               </div>
 
-              {/* Deep links */}
-              <div className="px-4 py-3 border-b border-[var(--border)] flex flex-wrap gap-2">
-                {selected.layer === 2 && (
-                  <a
-                    href={`/catalog?search=${encodeURIComponent(
-                      selected.name,
-                    )}`}
-                    className="inline-flex items-center gap-1 text-xs text-[var(--layer2-text)] hover:underline"
-                  >
-                    <BookOpen size={10} /> Catalog
-                  </a>
-                )}
-                {(selected.layer === 3 || selected.layer === 4) && (
-                  <a
-                    href="/patient"
-                    className="inline-flex items-center gap-1 text-xs text-[var(--layer3-text)] hover:underline"
-                  >
-                    <Activity size={10} /> Patient view
-                  </a>
-                )}
-                {selected.layer === 4 && (
-                  <a
-                    href="/analytics"
-                    className="inline-flex items-center gap-1 text-xs text-[var(--layer4-text)] hover:underline"
-                  >
-                    <Database size={10} /> Analytics
-                  </a>
-                )}
-                {(selected.label === "TrustCenter" ||
-                  selected.label === "SPESession" ||
-                  selected.label === "ResearchPseudonym") && (
-                  <a
-                    href="/compliance#trust-center"
-                    className="inline-flex items-center gap-1 text-xs text-[var(--layer1-text)] hover:underline"
-                  >
-                    <Lock size={10} /> Trust Center
-                  </a>
-                )}
-              </div>
+              {/* ── Deep links ── */}
+              {(selected.layer === 2 ||
+                selected.layer === 3 ||
+                selected.layer === 4 ||
+                selected.label === "TrustCenter" ||
+                selected.label === "SPESession" ||
+                selected.label === "ResearchPseudonym") && (
+                <div className="px-5 py-3 border-b border-[var(--border)] flex flex-wrap gap-2">
+                  {selected.layer === 2 && (
+                    <a
+                      href={`/catalog?search=${encodeURIComponent(
+                        selected.name,
+                      )}`}
+                      className="inline-flex items-center gap-1.5 text-[10px] font-bold text-[var(--layer2-text)] bg-[var(--surface-2)] px-2.5 py-1.5 rounded-full hover:bg-[var(--accent-surface)] transition-colors"
+                    >
+                      <BookOpen size={10} /> Dataset Catalog
+                    </a>
+                  )}
+                  {(selected.layer === 3 || selected.layer === 4) && (
+                    <a
+                      href="/patient"
+                      className="inline-flex items-center gap-1.5 text-[10px] font-bold text-[var(--layer3-text)] bg-[var(--surface-2)] px-2.5 py-1.5 rounded-full hover:bg-[var(--accent-surface)] transition-colors"
+                    >
+                      <Activity size={10} /> Patient Journey
+                    </a>
+                  )}
+                  {selected.layer === 4 && (
+                    <a
+                      href="/analytics"
+                      className="inline-flex items-center gap-1.5 text-[10px] font-bold text-[var(--layer4-text)] bg-[var(--surface-2)] px-2.5 py-1.5 rounded-full hover:bg-[var(--accent-surface)] transition-colors"
+                    >
+                      <Database size={10} /> OMOP Analytics
+                    </a>
+                  )}
+                  {(selected.label === "TrustCenter" ||
+                    selected.label === "SPESession" ||
+                    selected.label === "ResearchPseudonym") && (
+                    <a
+                      href="/compliance#trust-center"
+                      className="inline-flex items-center gap-1.5 text-[10px] font-bold text-[var(--layer1-text)] bg-[var(--surface-2)] px-2.5 py-1.5 rounded-full hover:bg-[var(--accent-surface)] transition-colors"
+                    >
+                      <Lock size={10} /> Trust Center
+                    </a>
+                  )}
+                </div>
+              )}
 
-              {/* Node properties */}
+              {/* ── Graph properties ── */}
               {!selected.isValueCenter && (
-                <div className="px-4 py-3 border-b border-[var(--border)]">
+                <div className="px-5 py-4 border-b border-[var(--border)]">
                   {propsLoading ? (
                     <div className="flex items-center gap-2 text-xs text-[var(--text-secondary)]">
-                      <Loader2 size={10} className="animate-spin" />
-                      Loading details…
+                      <Loader2 size={12} className="animate-spin" />
+                      Loading properties…
                     </div>
                   ) : nodeProps.length > 0 ? (
-                    <div>
-                      <p className="section-label">Graph Properties</p>
-                      <div className="space-y-2">
-                        {nodeProps.map((p) => (
-                          <div
-                            key={p.key}
-                            className="flex items-center justify-between gap-2 px-3 py-2.5 bg-[var(--surface)] rounded-xl text-xs"
-                          >
-                            <span className="text-[var(--text-secondary)] shrink-0">
-                              {p.label}
-                            </span>
-                            <span className="text-[var(--text-primary)] font-bold text-right break-all">
-                              {p.value.length > 55
-                                ? p.value.slice(0, 53) + "…"
-                                : p.value}
-                            </span>
-                          </div>
-                        ))}
+                    <>
+                      <p className="section-label mb-3">Graph Properties</p>
+                      <div className="space-y-1.5">
+                        {nodeProps.map((p) => {
+                          const isUrl = p.value.startsWith("http");
+                          const isEmail =
+                            p.value.includes("@") &&
+                            !p.value.startsWith("http");
+                          const isPhone = p.value.startsWith("+");
+                          const isCopied = copiedKey === p.key;
+                          return (
+                            <div
+                              key={p.key}
+                              className="flex items-start justify-between gap-2 px-3 py-2.5 bg-[var(--surface)] rounded-xl text-xs group"
+                            >
+                              <span className="text-[var(--text-secondary)] shrink-0 pt-0.5 w-24 leading-snug">
+                                {p.label}
+                              </span>
+                              <div className="flex items-start gap-1.5 flex-1 min-w-0 justify-end">
+                                {isUrl ? (
+                                  <a
+                                    href={p.value}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-[var(--accent)] font-medium break-all hover:underline flex items-center gap-1 text-right"
+                                  >
+                                    {p.value.length > 36
+                                      ? p.value.slice(0, 34) + "…"
+                                      : p.value}
+                                    <ExternalLink
+                                      size={9}
+                                      className="shrink-0"
+                                    />
+                                  </a>
+                                ) : isEmail ? (
+                                  <a
+                                    href={`mailto:${p.value}`}
+                                    className="text-[var(--accent)] font-medium hover:underline text-right"
+                                  >
+                                    {p.value}
+                                  </a>
+                                ) : isPhone ? (
+                                  <a
+                                    href={`tel:${p.value.replace(/\s/g, "")}`}
+                                    className="text-[var(--text-primary)] font-bold hover:text-[var(--accent)] text-right"
+                                  >
+                                    {p.value}
+                                  </a>
+                                ) : (
+                                  <span className="text-[var(--text-primary)] font-bold text-right break-all">
+                                    {p.value.length > 45
+                                      ? p.value.slice(0, 43) + "…"
+                                      : p.value}
+                                  </span>
+                                )}
+                                <button
+                                  onClick={() => {
+                                    navigator.clipboard.writeText(p.value);
+                                    setCopiedKey(p.key);
+                                    setTimeout(() => setCopiedKey(null), 1500);
+                                  }}
+                                  className="shrink-0 mt-0.5 opacity-0 group-hover:opacity-100 transition-opacity text-[var(--text-secondary)] hover:text-[var(--accent)]"
+                                  title={`Copy ${p.label}`}
+                                  aria-label={`Copy ${p.label}`}
+                                >
+                                  {isCopied ? (
+                                    <Check
+                                      size={10}
+                                      className="text-[var(--success-text)]"
+                                    />
+                                  ) : (
+                                    <Copy size={10} />
+                                  )}
+                                </button>
+                              </div>
+                            </div>
+                          );
+                        })}
                       </div>
-                    </div>
+                    </>
                   ) : (
                     <p className="text-xs text-[var(--text-secondary)] italic">
                       No additional properties
@@ -1364,10 +1465,10 @@ function GraphContent() {
                 </div>
               )}
 
-              {/* Expand button (hidden for value center) */}
-              <div className="px-4 py-3 border-b border-[var(--border)]">
+              {/* ── Expand / neighbours loaded ── */}
+              <div className="px-5 py-4 border-b border-[var(--border)]">
                 {selected.isValueCenter ? (
-                  <p className="text-xs text-amber-400/70 italic">
+                  <p className="text-xs text-[var(--warning-text)] italic">
                     {PERSONA_VALUE_NODES[activePersona]?.tooltip ??
                       "Your starting point in the dataspace"}
                   </p>
@@ -1375,59 +1476,67 @@ function GraphContent() {
                   <button
                     onClick={() => expandNode(selected)}
                     disabled={!!expanding}
-                    className="flex w-full items-center justify-center gap-1.5 rounded border border-[var(--accent)] py-2 text-xs text-[var(--accent)] hover:bg-[var(--accent-surface)] disabled:opacity-50 transition-colors"
+                    className="btn-gradient w-full flex items-center justify-center gap-2 rounded-xl py-2.5 text-xs font-bold disabled:opacity-50"
                   >
                     {expanding === selected.id ? (
                       <>
-                        <Loader2 size={11} className="animate-spin" />{" "}
+                        <Loader2 size={12} className="animate-spin" />
                         Expanding…
                       </>
                     ) : (
                       <>
-                        <MousePointerClick size={11} /> Expand neighbours
+                        <MousePointerClick size={12} />
+                        Expand Neighbours
                       </>
                     )}
                   </button>
                 ) : (
-                  <p className="text-xs text-[var(--text-secondary)]">
-                    Neighbours loaded ({neighbours.length} connections)
-                  </p>
+                  <div className="flex items-center gap-2 text-xs text-[var(--text-secondary)]">
+                    <span className="w-2 h-2 rounded-full bg-[var(--success)] animate-pulse shrink-0" />
+                    {neighbours.length} connections loaded
+                  </div>
                 )}
               </div>
 
-              {/* Relationships */}
+              {/* ── Relationships ── */}
               {neighbours.length > 0 && (
-                <div className="px-4 py-3">
+                <div className="px-5 py-4">
                   {/* Outgoing */}
                   {neighbours.filter((nb) => nb.dir === "out").length > 0 && (
-                    <div className="mb-3">
-                      <p className="section-label">
-                        Outgoing (
-                        {neighbours.filter((nb) => nb.dir === "out").length})
-                      </p>
-                      <div className="divide-y divide-[var(--border)]">
+                    <div className="mb-5">
+                      <div className="flex items-center gap-2 mb-2">
+                        <p className="section-label">Outgoing</p>
+                        <span className="text-[10px] font-bold text-[var(--text-secondary)] bg-[var(--surface)] px-1.5 py-0.5 rounded-full border border-[var(--border)]">
+                          {neighbours.filter((nb) => nb.dir === "out").length}
+                        </span>
+                      </div>
+                      <div className="space-y-1">
                         {neighbours
                           .filter((nb) => nb.dir === "out")
                           .map((nb, i) => (
                             <button
                               key={`out-${i}`}
                               onClick={() => setSelected(nb.node)}
-                              className="w-full flex items-center gap-2 py-2 px-1 text-left transition-colors hover:bg-[var(--surface-2)] rounded group"
+                              className="w-full flex items-center gap-2 py-2.5 px-3 text-left bg-[var(--surface)] hover:bg-[var(--accent-surface)] rounded-xl transition-colors group"
                             >
-                              <span className="shrink-0 font-mono text-[10px] font-semibold text-[var(--accent)] bg-[var(--accent-surface)] px-1.5 py-0.5 rounded">
+                              <ArrowUpRight
+                                size={12}
+                                className="shrink-0 text-[var(--accent)] opacity-60 group-hover:opacity-100"
+                              />
+                              <span className="shrink-0 font-mono text-[9px] font-black text-[var(--accent)] bg-[var(--accent-surface)] group-hover:bg-white/50 px-1.5 py-0.5 rounded max-w-[90px] truncate">
                                 {FRIENDLY_REL_NAMES[nb.type] ?? nb.type}
                               </span>
                               <span
                                 className="h-2 w-2 shrink-0 rounded-full"
                                 style={{ background: nb.node.color }}
                               />
-                              <span className="truncate text-xs text-[var(--text-primary)] group-hover:text-[var(--accent)] flex-1">
+                              <span className="truncate text-xs text-[var(--text-primary)] group-hover:text-[var(--accent)] flex-1 text-left">
                                 {nb.node.name}
                               </span>
-                              <span className="shrink-0 text-[10px] text-[var(--text-secondary)]">
-                                {NODE_DISPLAY_NAMES[nb.node.label] ??
-                                  nb.node.label}
-                              </span>
+                              <ChevronRight
+                                size={10}
+                                className="shrink-0 text-[var(--text-secondary)] opacity-0 group-hover:opacity-100 transition-opacity"
+                              />
                             </button>
                           ))}
                       </div>
@@ -1437,33 +1546,39 @@ function GraphContent() {
                   {/* Incoming */}
                   {neighbours.filter((nb) => nb.dir === "in").length > 0 && (
                     <div>
-                      <p className="section-label">
-                        Incoming (
-                        {neighbours.filter((nb) => nb.dir === "in").length})
-                      </p>
-                      <div className="divide-y divide-[var(--border)]">
+                      <div className="flex items-center gap-2 mb-2">
+                        <p className="section-label">Incoming</p>
+                        <span className="text-[10px] font-bold text-[var(--text-secondary)] bg-[var(--surface)] px-1.5 py-0.5 rounded-full border border-[var(--border)]">
+                          {neighbours.filter((nb) => nb.dir === "in").length}
+                        </span>
+                      </div>
+                      <div className="space-y-1">
                         {neighbours
                           .filter((nb) => nb.dir === "in")
                           .map((nb, i) => (
                             <button
                               key={`in-${i}`}
                               onClick={() => setSelected(nb.node)}
-                              className="w-full flex items-center gap-2 py-2 px-1 text-left transition-colors hover:bg-[var(--surface-2)] rounded group"
+                              className="w-full flex items-center gap-2 py-2.5 px-3 text-left bg-[var(--surface)] hover:bg-[var(--surface-2)] rounded-xl transition-colors group"
                             >
-                              <span className="shrink-0 font-mono text-[10px] font-semibold text-[var(--layer3-text)] bg-[var(--surface-2)] px-1.5 py-0.5 rounded">
+                              <ArrowDownLeft
+                                size={12}
+                                className="shrink-0 text-[var(--layer3-text)] opacity-60 group-hover:opacity-100"
+                              />
+                              <span className="shrink-0 font-mono text-[9px] font-black text-[var(--layer3-text)] bg-[var(--surface-2)] px-1.5 py-0.5 rounded max-w-[90px] truncate">
                                 {FRIENDLY_REL_NAMES[nb.type] ?? nb.type}
                               </span>
                               <span
                                 className="h-2 w-2 shrink-0 rounded-full"
                                 style={{ background: nb.node.color }}
                               />
-                              <span className="truncate text-xs text-[var(--text-primary)] group-hover:text-[var(--accent)] flex-1">
+                              <span className="truncate text-xs text-[var(--text-primary)] group-hover:text-[var(--accent)] flex-1 text-left">
                                 {nb.node.name}
                               </span>
-                              <span className="shrink-0 text-[10px] text-[var(--text-secondary)]">
-                                {NODE_DISPLAY_NAMES[nb.node.label] ??
-                                  nb.node.label}
-                              </span>
+                              <ChevronRight
+                                size={10}
+                                className="shrink-0 text-[var(--text-secondary)] opacity-0 group-hover:opacity-100 transition-opacity"
+                              />
                             </button>
                           ))}
                       </div>
