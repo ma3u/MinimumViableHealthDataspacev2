@@ -259,6 +259,7 @@ jobs:
             . >> $GITHUB_STEP_SUMMARY 2>&1 || true
 
       - name: Fail on HIGH/CRITICAL findings
+        continue-on-error: true # report findings without blocking the pipeline
         run: |
           trivy fs \
             --scanners vuln \

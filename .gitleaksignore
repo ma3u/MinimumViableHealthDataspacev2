@@ -1,0 +1,9 @@
+# Gitleaks allowlist — fingerprints of known dev-only secrets
+# These are local development stack credentials (in-memory Vault, JAD bootstrap).
+# They are NOT production secrets.
+
+# jad/issuerservice.env — base64-encoded dev superuser key for local Issuer Service
+93bba9e675890d1370e5828402049e82f10b72b2:jad/issuerservice.env:generic-api-key:14
+
+# typescript (compiled output) — Vault dev clientSecret (in-memory, reset on restart)
+7444429b1c452b94330127964824124af2a4cd23:typescript:generic-api-key:2502
