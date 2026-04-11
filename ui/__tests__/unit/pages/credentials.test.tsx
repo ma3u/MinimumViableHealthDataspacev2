@@ -708,7 +708,7 @@ describe("CredentialsPage", () => {
       const badges = screen.getAllByText("Active");
       expect(badges.length).toBeGreaterThan(0);
       // Active badge should have green styling
-      expect(badges[0].className).toContain("text-green-400");
+      expect(badges[0].className).toContain("role-user");
     });
   });
 

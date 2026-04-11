@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { runQuery } from "@/lib/neo4j";
+import { requireAuth, isAuthError } from "@/lib/auth-guard";
 import { LABEL_LAYER } from "@/lib/graph-constants";
 
 export const dynamic = "force-dynamic";
@@ -80,6 +81,9 @@ const VALID_EDGES: Array<{
 ];
 
 export async function GET() {
+  const auth = await requireAuth();
+  if (isAuthError(auth)) return auth;
+
   try {
     const [
       nodeLabelRows,

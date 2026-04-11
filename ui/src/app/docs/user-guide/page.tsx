@@ -67,12 +67,14 @@ function ScreenshotCard({
       </a>
       <div className="p-5">
         <div className="flex items-center gap-2 mb-2">
-          <h3 className="text-lg font-semibold text-indigo-400">{title}</h3>
+          <h3 className="text-lg font-semibold text-indigo-700 dark:text-indigo-400">
+            {title}
+          </h3>
           <a
             href={href}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-[var(--text-secondary)] hover:text-indigo-400"
+            className="text-[var(--text-secondary)] hover:text-indigo-900 dark:hover:text-indigo-400"
             title="Open live page"
           >
             <ExternalLink size={14} />
@@ -102,7 +104,7 @@ export default function UserGuidePage() {
           href={LIVE_URL}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-indigo-400 hover:text-indigo-300 underline"
+          className="text-indigo-700 dark:text-indigo-400 hover:text-indigo-900 dark:hover:text-indigo-300 underline"
         >
           live demo
         </a>
@@ -154,7 +156,7 @@ export default function UserGuidePage() {
                     user: "edcadmin",
                     org: "Dataspace Operator",
                     role: "EDC Admin",
-                    color: "text-red-400",
+                    color: "text-[var(--danger-text)]",
                     graph: "edc-admin",
                     q: "Who are my participants? What contracts are active?",
                   },
@@ -162,7 +164,7 @@ export default function UserGuidePage() {
                     user: "clinicuser",
                     org: "AlphaKlinik Berlin",
                     role: "Data Holder",
-                    color: "text-blue-400",
+                    color: "text-[var(--accent)]",
                     graph: "hospital",
                     q: "Who has approved access to my datasets?",
                   },
@@ -170,7 +172,7 @@ export default function UserGuidePage() {
                     user: "lmcuser",
                     org: "Limburg Medical Centre",
                     role: "Data Holder",
-                    color: "text-blue-400",
+                    color: "text-[var(--accent)]",
                     graph: "hospital",
                     q: "What contracts are active for my NL datasets?",
                   },
@@ -178,7 +180,7 @@ export default function UserGuidePage() {
                     user: "researcher",
                     org: "PharmaCo Research AG",
                     role: "Researcher",
-                    color: "text-green-400",
+                    color: "text-[var(--success-text)]",
                     graph: "researcher",
                     q: "What datasets match my study protocol?",
                   },
@@ -186,13 +188,13 @@ export default function UserGuidePage() {
                     user: "regulator",
                     org: "MedReg DE",
                     role: "HDAB Authority",
-                    color: "text-amber-400",
+                    color: "text-amber-700 dark:text-amber-400",
                     graph: "hdab",
                     q: "What approvals are pending? Is the chain complete?",
                   },
                 ].map((p) => (
                   <tr key={p.user} className="border-b border-[var(--border)]">
-                    <td className="py-1.5 pr-3 font-mono font-semibold text-white">
+                    <td className="py-1.5 pr-3 font-mono font-semibold text-[var(--text-primary)]">
                       {p.user}
                     </td>
                     <td className="py-1.5 pr-3 text-[var(--text-secondary)]">
@@ -221,7 +223,7 @@ export default function UserGuidePage() {
 
         {/* Menu items per role */}
         <div className="mt-6 border border-[var(--border)] rounded-xl p-5">
-          <h3 className="text-lg font-semibold text-indigo-400 mb-3">
+          <h3 className="text-lg font-semibold text-indigo-700 dark:text-indigo-400 mb-3">
             Menu Items per Role
           </h3>
           <p className="text-[var(--text-secondary)] text-sm mb-4">
@@ -235,16 +237,20 @@ export default function UserGuidePage() {
                   <th className="text-left py-1.5 pr-2">Route</th>
                   <th className="text-center py-1.5 px-2">Public</th>
                   <th className="text-center py-1.5 px-2">
-                    <span className="text-blue-400">Data Holder</span>
+                    <span className="text-[var(--accent)]">Data Holder</span>
                   </th>
                   <th className="text-center py-1.5 px-2">
-                    <span className="text-green-400">Researcher</span>
+                    <span className="text-[var(--success-text)]">
+                      Researcher
+                    </span>
                   </th>
                   <th className="text-center py-1.5 px-2">
-                    <span className="text-amber-400">HDAB</span>
+                    <span className="text-amber-700 dark:text-amber-400">
+                      HDAB
+                    </span>
                   </th>
                   <th className="text-center py-1.5 px-2">
-                    <span className="text-red-400">EDC Admin</span>
+                    <span className="text-[var(--danger-text)]">EDC Admin</span>
                   </th>
                 </tr>
               </thead>
@@ -276,7 +282,9 @@ export default function UserGuidePage() {
                       <td
                         key={i}
                         className={`py-1 px-2 text-center ${
-                          v === "✅" ? "text-green-400" : "text-gray-700"
+                          v === "✅"
+                            ? "text-[var(--success-text)]"
+                            : "text-[var(--text-secondary)]"
                         }`}
                       >
                         {v}
@@ -291,7 +299,7 @@ export default function UserGuidePage() {
 
         {/* Persona graph views */}
         <div className="mt-6 border border-[var(--border)] rounded-xl p-5">
-          <h3 className="text-lg font-semibold text-indigo-400 mb-3">
+          <h3 className="text-lg font-semibold text-indigo-700 dark:text-indigo-400 mb-3">
             Graph Explorer — Persona Views
           </h3>
           <p className="text-[var(--text-secondary)] text-sm mb-4">
@@ -305,7 +313,7 @@ export default function UserGuidePage() {
               {
                 param: "?persona=hospital",
                 label: "Hospital / Data Holder",
-                color: "text-blue-400",
+                color: "text-[var(--accent)]",
                 img: "graph-explorer-hospital-persona.png",
                 q: "Who has approved access to my datasets?",
                 nodes:
@@ -314,7 +322,7 @@ export default function UserGuidePage() {
               {
                 param: "?persona=researcher",
                 label: "Researcher / Data User",
-                color: "text-green-400",
+                color: "text-[var(--success-text)]",
                 img: "graph-explorer-researcher-persona.png",
                 q: "What datasets match my study? What OMOP analytics can I run?",
                 nodes:
@@ -323,7 +331,7 @@ export default function UserGuidePage() {
               {
                 param: "?persona=hdab",
                 label: "HDAB Authority",
-                color: "text-amber-400",
+                color: "text-amber-700 dark:text-amber-400",
                 img: "graph-explorer-hdab-persona.png",
                 q: "What approvals are pending? Is the governance chain complete?",
                 nodes:
@@ -332,7 +340,7 @@ export default function UserGuidePage() {
               {
                 param: "?persona=trust-center",
                 label: "Trust Center Operator",
-                color: "text-violet-400",
+                color: "text-violet-700 dark:text-violet-400",
                 img: "graph-explorer-trust-center-persona.png",
                 q: "Which pseudonym resolution flows am I managing?",
                 nodes:
@@ -341,7 +349,7 @@ export default function UserGuidePage() {
               {
                 param: "?persona=edc-admin",
                 label: "EDC Admin",
-                color: "text-red-400",
+                color: "text-[var(--danger-text)]",
                 img: "graph-explorer-edc-admin-persona.png",
                 q: "Who are my participants? What contracts and transfers are live?",
                 nodes: "Participant · DataProduct · Contract · TransferEvent",
@@ -377,7 +385,7 @@ export default function UserGuidePage() {
                   <p className="text-[var(--text-secondary)] text-xs italic mb-1">
                     &ldquo;{p.q}&rdquo;
                   </p>
-                  <p className="text-gray-600 text-xs">
+                  <p className="text-[var(--text-secondary)] text-xs">
                     Focus nodes: {p.nodes}
                   </p>
                 </div>
@@ -474,11 +482,20 @@ export default function UserGuidePage() {
             <p className="text-[var(--text-secondary)] text-sm mb-2">
               The force-directed graph visualisation displays all five
               architecture layers of the knowledge graph. Nodes are colour-coded
-              by layer: <span className="text-blue-400">Marketplace</span>,{" "}
-              <span className="text-green-400">HealthDCAT-AP</span>,{" "}
-              <span className="text-yellow-400">FHIR R4</span>,{" "}
-              <span className="text-orange-400">OMOP CDM</span>, and{" "}
-              <span className="text-purple-400">Ontology</span>.
+              by layer:{" "}
+              <span className="text-[var(--accent)]">Marketplace</span>,{" "}
+              <span className="text-emerald-700 dark:text-teal-300">
+                HealthDCAT-AP
+              </span>
+              ,{" "}
+              <span className="text-green-700 dark:text-green-300">
+                FHIR R4
+              </span>
+              ,{" "}
+              <span className="text-orange-700 dark:text-orange-400">
+                OMOP CDM
+              </span>
+              , and <span className="text-[var(--accent)]">Ontology</span>.
             </p>
             <ul className="text-[var(--text-secondary)] text-sm space-y-1 ml-4 list-disc">
               <li>Click nodes to see properties and related entities</li>
@@ -841,14 +858,14 @@ export default function UserGuidePage() {
           For technical questions, see the{" "}
           <Link
             href="/docs/developer"
-            className="text-indigo-400 hover:text-indigo-300 underline"
+            className="text-indigo-700 dark:text-indigo-400 hover:text-indigo-900 dark:hover:text-indigo-300 underline"
           >
             Developer Guide
           </Link>
           . For architecture details, visit the{" "}
           <Link
             href="/docs/architecture"
-            className="text-indigo-400 hover:text-indigo-300 underline"
+            className="text-indigo-700 dark:text-indigo-400 hover:text-indigo-900 dark:hover:text-indigo-300 underline"
           >
             Architecture Diagrams
           </Link>
@@ -857,7 +874,7 @@ export default function UserGuidePage() {
             href={LIVE_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-indigo-400 hover:text-indigo-300 underline"
+            className="text-indigo-700 dark:text-indigo-400 hover:text-indigo-900 dark:hover:text-indigo-300 underline"
           >
             GitHub Pages
           </a>

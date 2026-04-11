@@ -270,13 +270,16 @@ export default function SettingsPage() {
 
         {tenants.length === 0 ? (
           <div className="text-center py-12">
-            <Settings2 size={40} className="text-gray-600 mx-auto mb-4" />
+            <Settings2
+              size={40}
+              className="text-[var(--text-secondary)] mx-auto mb-4"
+            />
             <p className="text-[var(--text-secondary)] mb-2">
               No participant profile found
             </p>
             <a
               href="/onboarding"
-              className="text-sm text-layer2 hover:underline"
+              className="text-sm text-teal-800 dark:text-teal-300 hover:underline"
             >
               Register first →
             </a>
@@ -289,9 +292,10 @@ export default function SettingsPage() {
                 Active Profile
               </label>
               <select
+                aria-label="Active Profile"
                 value={selected?.id || ""}
                 onChange={(e) => handleSelect(e.target.value)}
-                className="w-full px-3 py-2 bg-[var(--surface-2)] border border-gray-600 rounded text-sm"
+                className="w-full px-3 py-2 bg-[var(--surface-2)] border border-[var(--border-ui)] rounded text-sm"
               >
                 {tenants.map((t) => (
                   <option key={t.id} value={t.id}>
@@ -306,7 +310,10 @@ export default function SettingsPage() {
                 {/* Identity (read-only) */}
                 <div className="p-6">
                   <h2 className="font-semibold mb-4 flex items-center gap-2">
-                    <User size={16} className="text-layer2" />
+                    <User
+                      size={16}
+                      className="text-teal-800 dark:text-teal-300"
+                    />
                     Identity
                   </h2>
                   <div className="grid gap-4 sm:grid-cols-2">
@@ -334,7 +341,10 @@ export default function SettingsPage() {
                 {/* Editable contact & organisation fields */}
                 <div className="p-6">
                   <h2 className="font-semibold mb-4 flex items-center gap-2">
-                    <Settings2 size={16} className="text-layer2" />
+                    <Settings2
+                      size={16}
+                      className="text-teal-800 dark:text-teal-300"
+                    />
                     Profile &amp; Contact Details
                   </h2>
                   <div className="grid gap-4 sm:grid-cols-2">
@@ -417,13 +427,14 @@ export default function SettingsPage() {
                           {label}
                         </label>
                         <input
+                          aria-label={label}
                           type={type || "text"}
                           value={form[key]}
                           onChange={(e) =>
                             setForm((f) => ({ ...f, [key]: e.target.value }))
                           }
                           placeholder={placeholder}
-                          className="w-full px-3 py-1.5 bg-[var(--surface-2)] border border-gray-600 rounded text-sm text-[var(--text-primary)] placeholder-gray-600 focus:outline-none focus:border-layer2"
+                          className="w-full px-3 py-1.5 bg-[var(--surface-2)] border border-[var(--border-ui)] rounded text-sm text-[var(--text-primary)] placeholder-[var(--text-secondary)] focus:outline-none focus:border-layer2"
                         />
                       </div>
                     ))}
@@ -453,20 +464,20 @@ export default function SettingsPage() {
                             key={pp.id || i}
                             className={`p-3 rounded-lg border text-xs space-y-1.5 ${
                               hasError
-                                ? "bg-red-950/30 border-red-800/50"
+                                ? "bg-red-100 dark:bg-red-950/30 border-red-300 dark:border-red-800/50"
                                 : allDisposed
-                                  ? "bg-yellow-950/20 border-yellow-800/40"
+                                  ? "bg-yellow-100 dark:bg-yellow-950/20 border-yellow-300 dark:border-yellow-800/40"
                                   : "bg-[var(--surface-2)]/50 border-[var(--border)]"
                             }`}
                           >
                             {hasError && (
-                              <div className="flex items-center gap-1.5 text-red-400 mb-1">
+                              <div className="flex items-center gap-1.5 text-red-800 dark:text-red-400 mb-1">
                                 <AlertCircle size={12} />
                                 <span>Provisioning failed</span>
                               </div>
                             )}
                             {allDisposed && (
-                              <div className="flex items-center gap-1.5 text-yellow-500 mb-1">
+                              <div className="flex items-center gap-1.5 text-yellow-800 dark:text-yellow-400 mb-1">
                                 <AlertCircle size={12} />
                                 <span>
                                   VPAs disposed — re-run{" "}
@@ -501,7 +512,9 @@ export default function SettingsPage() {
                                 {ctxId !== "—" ? (
                                   ctxId
                                 ) : (
-                                  <span className="text-gray-600">none</span>
+                                  <span className="text-[var(--text-secondary)]">
+                                    none
+                                  </span>
                                 )}
                               </span>
                             </div>
@@ -510,7 +523,7 @@ export default function SettingsPage() {
                                 <span className="text-[var(--text-secondary)] w-32 shrink-0">
                                   Active VPAs
                                 </span>
-                                <span className="text-green-400">
+                                <span className="text-green-800 dark:text-green-400">
                                   {activeVpas
                                     .map((v) => v.type.replace("cfm.", ""))
                                     .join(", ")}
@@ -532,7 +545,10 @@ export default function SettingsPage() {
                 <div className="p-6">
                   <div className="flex items-center justify-between mb-3">
                     <h2 className="font-semibold flex items-center gap-2">
-                      <ShieldCheck size={16} className="text-layer2" />
+                      <ShieldCheck
+                        size={16}
+                        className="text-teal-800 dark:text-teal-300"
+                      />
                       Digital Credentials
                     </h2>
                     <button
@@ -556,7 +572,7 @@ export default function SettingsPage() {
                   ) : credentials.length === 0 ||
                     credentials.every((c) => c.credentials.length === 0) ? (
                     <div className="rounded-lg bg-[var(--surface-2)]/40 border border-[var(--border)] p-4 text-sm">
-                      <div className="flex items-center gap-2 text-yellow-500 mb-2">
+                      <div className="flex items-center gap-2 text-yellow-800 dark:text-yellow-400 mb-2">
                         <ShieldOff size={14} />
                         <span className="font-medium">
                           No credentials issued yet
@@ -567,7 +583,7 @@ export default function SettingsPage() {
                         by the HDAB after participant onboarding via the
                         IdentityHub. To issue credentials, run:
                       </p>
-                      <code className="mt-2 block text-xs text-green-400/80 bg-[var(--surface)] rounded px-3 py-2">
+                      <code className="mt-2 block text-xs text-[var(--success-text)] bg-[var(--surface)] rounded px-3 py-2">
                         bash jad/issue-ehds-credentials.sh
                       </code>
                     </div>
@@ -586,31 +602,33 @@ export default function SettingsPage() {
                               key={`${ctx.profileId}-${i}`}
                               className={`p-3 rounded-lg border text-xs space-y-1.5 ${
                                 expired
-                                  ? "bg-red-950/30 border-red-800/50"
-                                  : "bg-green-950/20 border-green-800/40"
+                                  ? "bg-red-100 dark:bg-red-950/30 border-red-300 dark:border-red-800/50"
+                                  : "bg-green-100 dark:bg-green-950/20 border-green-300 dark:border-green-800/40"
                               }`}
                             >
                               <div className="flex items-center gap-1.5 mb-1">
                                 {expired ? (
                                   <ShieldOff
                                     size={12}
-                                    className="text-red-400"
+                                    className="text-red-800 dark:text-red-400"
                                   />
                                 ) : (
                                   <ShieldCheck
                                     size={12}
-                                    className="text-green-400"
+                                    className="text-green-800 dark:text-green-400"
                                   />
                                 )}
                                 <span
                                   className={
-                                    expired ? "text-red-400" : "text-green-400"
+                                    expired
+                                      ? "text-red-800 dark:text-red-400"
+                                      : "text-green-800 dark:text-green-400"
                                   }
                                 >
                                   {types.join(", ") || "VerifiableCredential"}
                                 </span>
                                 {expired && (
-                                  <span className="text-red-500 ml-auto">
+                                  <span className="text-red-800 dark:text-red-400 ml-auto">
                                     EXPIRED
                                   </span>
                                 )}
@@ -643,7 +661,7 @@ export default function SettingsPage() {
                                   <span
                                     className={
                                       expired
-                                        ? "text-red-400"
+                                        ? "text-red-800 dark:text-red-400"
                                         : "text-[var(--text-primary)]"
                                     }
                                   >
@@ -676,7 +694,7 @@ export default function SettingsPage() {
                   <button
                     onClick={handleSave}
                     disabled={saving}
-                    className="flex items-center gap-2 px-4 py-2 bg-[var(--accent)] text-white rounded-lg text-sm font-medium hover:bg-[var(--accent-hover)] disabled:opacity-50"
+                    className="flex items-center gap-2 px-4 py-2 bg-[var(--accent)] text-white dark:text-gray-900 rounded-lg text-sm font-medium hover:bg-[var(--accent-hover)] disabled:opacity-50"
                   >
                     {saving ? (
                       <>
@@ -696,7 +714,7 @@ export default function SettingsPage() {
                     )}
                   </button>
                   {saveError && (
-                    <span className="text-xs text-red-400 flex items-center gap-1">
+                    <span className="text-xs text-[var(--danger-text)] flex items-center gap-1">
                       <AlertCircle size={12} />
                       {saveError}
                     </span>

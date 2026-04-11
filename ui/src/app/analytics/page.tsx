@@ -140,37 +140,37 @@ export default function AnalyticsPage() {
       label: "Patients",
       value: summary?.persons,
       icon: Users,
-      color: "text-layer1",
+      color: "text-blue-800 dark:text-blue-300",
     },
     {
       label: "Conditions",
       value: summary?.conditions,
       icon: Activity,
-      color: "text-layer3",
+      color: "text-green-800 dark:text-green-300",
     },
     {
       label: "Drug Exposures",
       value: summary?.drugs,
       icon: Pill,
-      color: "text-layer4",
+      color: "text-amber-800 dark:text-amber-300",
     },
     {
       label: "Procedures",
       value: summary?.procedures,
       icon: Scissors,
-      color: "text-layer1",
+      color: "text-blue-800 dark:text-blue-300",
     },
     {
       label: "Measurements",
       value: summary?.measurements,
       icon: FlaskConical,
-      color: "text-layer5",
+      color: "text-purple-800 dark:text-purple-300",
     },
     {
       label: "Visits",
       value: summary?.visits,
       icon: Calendar,
-      color: "text-layer2",
+      color: "text-teal-800 dark:text-teal-300",
     },
   ];
 

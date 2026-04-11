@@ -24,7 +24,7 @@ function P(path: string): string {
 
 async function setPersona(page: Page, username: string) {
   await page.evaluate(
-    ([key, value]) => localStorage.setItem(key, value),
+    ([key, value]) => sessionStorage.setItem(key, value),
     ["demo-persona", username],
   );
   await page.reload({ waitUntil: "networkidle" });

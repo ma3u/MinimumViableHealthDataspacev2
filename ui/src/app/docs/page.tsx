@@ -1,14 +1,5 @@
 import Link from "next/link";
-import {
-  BookOpen,
-  Code2,
-  Layers,
-  Users,
-  ArrowRight,
-  FileText,
-  Network,
-  ShieldCheck,
-} from "lucide-react";
+import { Code2, Layers, Users, ArrowRight } from "lucide-react";
 
 const sections = [
   {
@@ -34,17 +25,6 @@ const sections = [
   },
 ];
 
-const quickLinks = [
-  { href: "/graph", icon: Network, label: "Graph Explorer" },
-  { href: "/catalog", icon: BookOpen, label: "Dataset Catalog" },
-  { href: "/compliance", icon: ShieldCheck, label: "EHDS Compliance" },
-  {
-    href: "/docs/developer#api-reference",
-    icon: FileText,
-    label: "API Reference",
-  },
-];
-
 export default function DocsPage() {
   return (
     <div className="max-w-5xl mx-auto px-6 py-12">
@@ -56,7 +36,7 @@ export default function DocsPage() {
         </p>
       </div>
 
-      {/* Main sections */}
+      {/* Main sections — horizontal 3-card layout */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-12">
         {sections.map(({ href, icon: Icon, label, desc, color }) => (
           <Link
@@ -69,33 +49,16 @@ export default function DocsPage() {
               <span className="font-semibold text-lg">{label}</span>
             </div>
             <p className="text-sm text-[var(--text-secondary)] mb-4">{desc}</p>
-            <span className="inline-flex items-center gap-1 text-sm text-indigo-400 group-hover:text-indigo-300">
+            <span className="inline-flex items-center gap-1 text-sm text-[var(--accent)] group-hover:underline">
               Read more <ArrowRight size={14} />
             </span>
           </Link>
         ))}
       </div>
 
-      {/* Quick links */}
-      <div className="border border-[var(--border)] rounded-xl p-6">
-        <h2 className="text-lg font-semibold mb-4">Quick Links</h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          {quickLinks.map(({ href, icon: Icon, label }) => (
-            <Link
-              key={href}
-              href={href}
-              className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-[var(--text-primary)] hover:bg-[var(--surface-2)] transition-colors"
-            >
-              <Icon size={16} className="text-[var(--text-secondary)]" />
-              {label}
-            </Link>
-          ))}
-        </div>
-      </div>
-
-      {/* About callout */}
-      <div className="mt-10 bg-indigo-950/30 border border-indigo-800/40 rounded-xl p-6">
-        <h3 className="font-semibold text-indigo-300 mb-2">
+      {/* About callout — WCAG-safe contrast in both light and dark */}
+      <div className="mt-2 bg-[var(--surface-2)] border border-[var(--border)] rounded-xl p-6">
+        <h3 className="font-semibold text-[var(--text-primary)] mb-2">
           About Health Dataspace v2
         </h3>
         <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
@@ -104,7 +67,13 @@ export default function DocsPage() {
           European Health Data Space regulation through a 5-layer knowledge
           graph architecture — from DSP Marketplace discovery to Ontology
           alignment — enabling sovereign health data exchange between data
-          holders and approved research users.
+          holders and approved research users.{" "}
+          <Link
+            href="/docs/architecture"
+            className="text-[var(--accent)] underline hover:opacity-80"
+          >
+            Explore the architecture&nbsp;&rarr;
+          </Link>
         </p>
       </div>
     </div>

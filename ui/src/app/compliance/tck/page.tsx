@@ -40,20 +40,24 @@ interface TckData {
 
 function StatusIcon({ status }: { status: string }) {
   if (status === "pass")
-    return <CheckCircle2 size={16} className="text-green-400 shrink-0" />;
+    return (
+      <CheckCircle2 size={16} className="text-[var(--success-text)] shrink-0" />
+    );
   if (status === "fail")
-    return <XCircle size={16} className="text-red-400 shrink-0" />;
-  return <MinusCircle size={16} className="text-yellow-400 shrink-0" />;
+    return <XCircle size={16} className="text-[var(--danger-text)] shrink-0" />;
+  return (
+    <MinusCircle size={16} className="text-[var(--warning-text)] shrink-0" />
+  );
 }
 
 function ScoreBadge({ passed, total }: { passed: number; total: number }) {
   const pct = total > 0 ? Math.round((passed / total) * 100) : 0;
   const color =
     pct === 100
-      ? "bg-green-900/60 text-green-300 border-green-700"
+      ? "bg-[var(--badge-active-bg)] text-[var(--badge-active-text)] border-[var(--badge-active-border)]"
       : pct >= 80
-        ? "bg-yellow-900/60 text-yellow-300 border-yellow-700"
-        : "bg-red-900/60 text-red-300 border-red-700";
+        ? "bg-[var(--role-hdab-bg)] text-[var(--role-hdab-text)] border-[var(--role-hdab-border)]"
+        : "bg-[var(--badge-inactive-bg)] text-[var(--badge-inactive-text)] border-[var(--badge-inactive-border)]";
   return (
     <span className={`text-xs font-mono px-2 py-0.5 rounded border ${color}`}>
       {passed}/{total} ({pct}%)
@@ -107,9 +111,14 @@ function SuiteCard({
         className="w-full flex items-center justify-between px-5 py-4 hover:bg-[var(--surface-2)]/40 transition-colors"
       >
         <div className="flex items-center gap-3">
-          <ShieldCheck size={18} className="text-layer1 shrink-0" />
+          <ShieldCheck
+            size={18}
+            className="text-blue-800 dark:text-blue-300 shrink-0"
+          />
           <div className="text-left">
-            <span className="font-semibold text-white">{meta.title}</span>
+            <span className="font-semibold text-[var(--text-primary)]">
+              {meta.title}
+            </span>
             <span className="block text-xs text-[var(--text-secondary)]">
               {meta.description}
             </span>
@@ -119,7 +128,7 @@ function SuiteCard({
       </button>
 
       {expanded && (
-        <div className="border-t border-[var(--border)] divide-y divide-gray-700/60">
+        <div className="border-t border-[var(--border)] divide-y divide-[var(--border)]">
           {Object.entries(categories).map(([cat, tests]) => (
             <div key={cat} className="px-5 py-3">
               <h4 className="text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider mb-2">
@@ -214,7 +223,7 @@ export default function ComplianceTckPage() {
 
         {/* Error state */}
         {error && (
-          <div className="bg-red-900/30 border border-red-800 rounded-lg p-4 mb-6 text-red-300 text-sm">
+          <div className="bg-[var(--badge-inactive-bg)] border border-[var(--badge-inactive-border)] rounded-lg p-4 mb-6 text-[var(--danger-text)] text-sm">
             {error}
           </div>
         )}
@@ -239,22 +248,22 @@ export default function ComplianceTckPage() {
                 {
                   label: "Total",
                   value: data.summary.total,
-                  color: "text-white",
+                  color: "text-[var(--text-primary)]",
                 },
                 {
                   label: "Passed",
                   value: data.summary.passed,
-                  color: "text-green-400",
+                  color: "text-[var(--success-text)]",
                 },
                 {
                   label: "Failed",
                   value: data.summary.failed,
-                  color: "text-red-400",
+                  color: "text-[var(--danger-text)]",
                 },
                 {
                   label: "Skipped",
                   value: data.summary.skipped,
-                  color: "text-yellow-400",
+                  color: "text-[var(--warning-text)]",
                 },
               ].map((s) => (
                 <div

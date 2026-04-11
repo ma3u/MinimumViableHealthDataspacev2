@@ -615,7 +615,7 @@ export default function AdminTenantsPage() {
                   </div>
 
                   {/* Security notice */}
-                  <div className="mt-8 p-6 bg-[var(--accent)] text-white rounded-xl">
+                  <div className="mt-8 p-6 bg-[var(--accent)] text-white dark:text-gray-900 rounded-xl">
                     <p className="text-xs font-bold uppercase tracking-widest mb-2 opacity-80">
                       Security Notice
                     </p>

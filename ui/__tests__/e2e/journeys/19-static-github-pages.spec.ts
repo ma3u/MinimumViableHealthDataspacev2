@@ -15,7 +15,7 @@
  *   NEXT_PUBLIC_STATIC_EXPORT=true PLAYWRIGHT_BASE_URL=https://ma3u.github.io \
  *     npx playwright test 19-static-github-pages.spec.ts
  *
- * All tests set the demo persona via localStorage — no clicking through the
+ * All tests set the demo persona via sessionStorage — no clicking through the
  * /demo hub is required for most assertions.
  *
  * Personas under test:
@@ -41,10 +41,10 @@ function P(path: string): string {
   return BP + path;
 }
 
-/** Set the demo persona in localStorage and reload. */
+/** Set the demo persona in sessionStorage and reload. */
 async function setPersona(page: Page, username: string) {
   await page.evaluate(
-    ([key, value]) => localStorage.setItem(key, value),
+    ([key, value]) => sessionStorage.setItem(key, value),
     ["demo-persona", username],
   );
   await page.reload({ waitUntil: "networkidle" });
@@ -171,16 +171,16 @@ test.describe("S · Demo hub /demo", () => {
     }
   });
 
-  test("J223 — clicking a persona card stores it in localStorage and navigates away", async ({
+  test("J223 — clicking a persona card stores it in sessionStorage and navigates away", async ({
     page,
   }) => {
     await page.goto(P("/demo"));
     await page.getByText("edcadmin", { exact: true }).click();
     // Should navigate away from /demo
     await expect(page).not.toHaveURL(/\/demo$/, { timeout: T });
-    // localStorage should be set
+    // sessionStorage should be set
     const stored = await page.evaluate(() =>
-      localStorage.getItem("demo-persona"),
+      sessionStorage.getItem("demo-persona"),
     );
     expect(stored).toBe("edcadmin");
   });
@@ -413,7 +413,7 @@ test.describe("S · UserMenu demo persona switcher", () => {
       timeout: T,
     });
 
-    // Switch to patient by changing localStorage and reloading
+    // Switch to patient by changing sessionStorage and reloading
     await setPersona(page, "patient1");
 
     // Patient sees My Health but NOT Manage
@@ -425,7 +425,7 @@ test.describe("S · UserMenu demo persona switcher", () => {
     });
   });
 
-  test("J248 — after browser reload persona is preserved from localStorage", async ({
+  test("J248 — after browser reload persona is preserved from sessionStorage", async ({
     page,
   }) => {
     await page.goto(P("/"));

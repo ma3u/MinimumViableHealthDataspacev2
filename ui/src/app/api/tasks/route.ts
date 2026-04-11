@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { edcClient, EDC_CONTEXT } from "@/lib/edc";
+import { requireAuth, isAuthError } from "@/lib/auth-guard";
 import { promises as fs } from "fs";
 import path from "path";
 
@@ -69,6 +70,9 @@ interface EdcParticipant {
  * Returns: { tasks: Task[], counts: { total, negotiations, transfers, active } }
  */
 export async function GET() {
+  const auth = await requireAuth();
+  if (isAuthError(auth)) return auth;
+
   try {
     // 1. List all participant contexts
     const participants = await edcClient.management<EdcParticipant[]>(

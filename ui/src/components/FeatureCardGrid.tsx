@@ -261,7 +261,7 @@ export function FeatureCardGrid({
           >
             <div className="flex items-center gap-2 mb-2">
               <Icon size={20} aria-hidden="true" />
-              <span className="font-semibold text-sm sm:text-base">
+              <span className="font-semibold text-sm sm:text-base text-gray-900 dark:text-gray-100">
                 {label}
               </span>
               {isRelevant && (
@@ -271,13 +271,13 @@ export function FeatureCardGrid({
                 >
                   <Check
                     size={12}
-                    className="text-green-400"
+                    className="text-[var(--success-text)]"
                     aria-hidden="true"
                   />
                 </span>
               )}
             </div>
-            <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
+            <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
               {desc}
             </p>
           </Link>

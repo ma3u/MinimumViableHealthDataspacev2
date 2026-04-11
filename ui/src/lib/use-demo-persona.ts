@@ -5,8 +5,11 @@
  *
  * In a static build (NEXT_PUBLIC_STATIC_EXPORT=true) there is no server
  * session, so useSession() always returns unauthenticated.  This module
- * provides a localStorage-backed persona that Navigation and UserMenu
+ * provides a sessionStorage-backed persona that Navigation and UserMenu
  * read to simulate the correct role-filtered view for each demo user.
+ *
+ * sessionStorage is intentionally tab-scoped: switching persona in one tab
+ * does NOT affect other open tabs (use localStorage if you want shared state).
  *
  * Usage:
  *   setDemoPersona("patient1")   — call from the /demo hub page
@@ -23,17 +26,17 @@ export const DEMO_PERSONA_KEY = "demo-persona";
 const emitter: EventTarget | null =
   typeof window !== "undefined" ? new EventTarget() : null;
 
-/** Write the active demo persona to localStorage and notify all hooks. */
+/** Write the active demo persona to sessionStorage and notify same-tab hooks. */
 export function setDemoPersona(username: string): void {
-  if (typeof localStorage === "undefined") return;
-  localStorage.setItem(DEMO_PERSONA_KEY, username);
+  if (typeof sessionStorage === "undefined") return;
+  sessionStorage.setItem(DEMO_PERSONA_KEY, username);
   emitter?.dispatchEvent(new Event("change"));
 }
 
-/** Read the active demo persona username from localStorage (sync, no hooks). */
+/** Read the active demo persona username from sessionStorage (sync, no hooks). */
 export function getDemoPersonaUsername(): string {
-  if (typeof localStorage === "undefined") return "edcadmin";
-  return localStorage.getItem(DEMO_PERSONA_KEY) ?? "edcadmin";
+  if (typeof sessionStorage === "undefined") return "edcadmin";
+  return sessionStorage.getItem(DEMO_PERSONA_KEY) ?? "edcadmin";
 }
 
 export type DemoPersona = (typeof DEMO_PERSONAS)[number];
@@ -54,17 +57,16 @@ export function useDemoPersona(): DemoPersona {
 
   useEffect(() => {
     function read() {
-      const stored = localStorage.getItem(DEMO_PERSONA_KEY);
+      const stored = sessionStorage.getItem(DEMO_PERSONA_KEY);
       const found = DEMO_PERSONAS.find((p) => p.username === stored);
       if (found) setPersona(found);
     }
 
     read(); // synchronous first read after hydration
+    // emitter handles same-tab reactivity; no cross-tab sync by design
     emitter?.addEventListener("change", read);
-    window.addEventListener("storage", read); // cross-tab support
     return () => {
       emitter?.removeEventListener("change", read);
-      window.removeEventListener("storage", read);
     };
   }, []);
 

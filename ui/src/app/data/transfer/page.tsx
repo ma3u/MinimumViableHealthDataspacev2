@@ -470,12 +470,12 @@ function FhirViewerPanel({
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 bg-layer2/10 border-b border-layer2/30">
         <div className="flex items-center gap-2">
-          <FileJson2 size={16} className="text-layer2" />
+          <FileJson2 size={16} className="text-teal-800 dark:text-teal-300" />
           <span className="text-sm font-medium text-[var(--text-primary)]">
             FHIR Data — {aId ? assetLabel(aId as string) : "Bundle"}
           </span>
           {payload?.provider && (
-            <span className="text-[10px] px-1.5 py-0.5 rounded bg-gray-700 text-[var(--text-secondary)]">
+            <span className="text-[10px] px-1.5 py-0.5 rounded bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200">
               from {payload.provider}
             </span>
           )}
@@ -493,7 +493,7 @@ function FhirViewerPanel({
             href="https://fire.ly/fhir-tools/fhir-viewer/"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-1 text-[11px] text-layer2 hover:text-layer2/80 transition-colors"
+            className="flex items-center gap-1 text-[11px] text-teal-800 dark:text-teal-300 hover:text-teal-800/80 dark:hover:text-teal-300/80 transition-colors"
           >
             Open FHIR Viewer <ExternalLink size={10} />
           </a>
@@ -586,7 +586,7 @@ function FhirViewerPanel({
             onClick={() => setViewMode("resources")}
             className={`text-xs px-2.5 py-1 rounded ${
               viewMode === "resources"
-                ? "bg-layer2/20 text-layer2"
+                ? "bg-layer2/20 text-teal-800 dark:text-teal-300"
                 : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
             }`}
           >
@@ -596,7 +596,7 @@ function FhirViewerPanel({
             onClick={() => setViewMode("json")}
             className={`text-xs px-2.5 py-1 rounded ${
               viewMode === "json"
-                ? "bg-layer2/20 text-layer2"
+                ? "bg-layer2/20 text-teal-800 dark:text-teal-300"
                 : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
             }`}
           >
@@ -917,6 +917,7 @@ function DataTransferContent() {
             Requesting as (your participant)
           </label>
           <select
+            aria-label="Requesting as (your participant)"
             value={selectedCtx}
             onChange={(e) => setSelectedCtx(e.target.value)}
             className="w-full max-w-md px-3 py-2 bg-[var(--surface-2)] border border-gray-600 rounded text-sm"
@@ -933,7 +934,7 @@ function DataTransferContent() {
         {/* ── Initiate Transfer from Agreement ── */}
         <div className="border border-[var(--border)] rounded-xl p-5 mb-8">
           <div className="flex items-center gap-2 mb-1">
-            <Play size={16} className="text-layer2" />
+            <Play size={16} className="text-teal-800 dark:text-teal-300" />
             <h2 className="font-semibold text-sm">
               Start Transfer from Agreement
             </h2>
@@ -958,7 +959,10 @@ function DataTransferContent() {
           {agreements.length === 0 && !loading && (
             <p className="text-xs text-[var(--text-secondary)]">
               No finalized agreements found. Complete a{" "}
-              <a href="/negotiate" className="text-layer2 hover:underline">
+              <a
+                href="/negotiate"
+                className="text-teal-800 dark:text-teal-300 hover:underline"
+              >
                 contract negotiation
               </a>{" "}
               first.
@@ -995,7 +999,7 @@ function DataTransferContent() {
                         selectedAgreements.has(agrId)
                           ? "border-layer2 bg-layer2/10"
                           : "border-[var(--border)] hover:border-gray-500 bg-[var(--surface-2)]/50"
-                      } ${hasTransfer ? "opacity-60" : ""}`}
+                      }`}
                     >
                       <input
                         type="checkbox"
@@ -1010,7 +1014,7 @@ function DataTransferContent() {
                         <p className="text-xs text-[var(--text-secondary)]">
                           Provider: {cp ? didToName(cp as string) : "—"}
                           {hasTransfer && (
-                            <span className="ml-2 text-yellow-500">
+                            <span className="ml-2 text-yellow-800 dark:text-yellow-400">
                               (transfer in progress)
                             </span>
                           )}
@@ -1029,7 +1033,7 @@ function DataTransferContent() {
                 <button
                   type="button"
                   onClick={() => setShowAllAgreements(!showAllAgreements)}
-                  className="flex items-center gap-1 text-xs text-layer2 hover:text-layer2/80"
+                  className="flex items-center gap-1 text-xs text-teal-800 dark:text-teal-300 hover:text-teal-800/80 dark:hover:text-teal-300/80"
                 >
                   {showAllAgreements ? (
                     <>
@@ -1047,7 +1051,7 @@ function DataTransferContent() {
               <button
                 type="submit"
                 disabled={initiating || selectedAgreements.size === 0}
-                className="flex items-center gap-2 px-4 py-2 bg-[var(--accent)] text-white rounded text-sm font-medium hover:bg-[var(--accent-hover)] disabled:opacity-50"
+                className="flex items-center gap-2 px-4 py-2 bg-[var(--accent)] text-white dark:text-gray-900 rounded text-sm font-medium hover:bg-[var(--accent-hover)] disabled:opacity-50"
               >
                 {initiating ? (
                   <Loader2 size={14} className="animate-spin" />
@@ -1100,7 +1104,7 @@ function DataTransferContent() {
                   onClick={() => setStatusFilter(s)}
                   className={`text-xs px-2.5 py-1 rounded-full transition-colors ${
                     statusFilter === s
-                      ? "bg-layer2/20 text-layer2 border border-layer2/40"
+                      ? "bg-layer2/20 text-teal-800 dark:text-teal-300 border border-layer2/40"
                       : "bg-[var(--surface-2)] text-[var(--text-secondary)] border border-[var(--border)] hover:border-gray-500"
                   }`}
                 >
@@ -1157,7 +1161,7 @@ function DataTransferContent() {
                           ? assetLabel(aId as string)
                           : t["@id"].slice(0, 12)}
                       </span>
-                      <span className="text-[10px] px-1.5 py-0.5 rounded bg-gray-700 text-[var(--text-secondary)]">
+                      <span className="text-[10px] px-1.5 py-0.5 rounded bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200">
                         {transferType}
                       </span>
                     </div>
@@ -1166,7 +1170,7 @@ function DataTransferContent() {
                         onClick={() => openFhirViewer(t["@id"])}
                         className={`flex items-center gap-1 text-xs px-2 py-1 rounded transition-colors ${
                           isViewing
-                            ? "bg-layer2/20 text-layer2"
+                            ? "bg-layer2/20 text-teal-800 dark:text-teal-300"
                             : "bg-[var(--role-user-bg)] text-[var(--role-user-text)] hover:opacity-80"
                         }`}
                       >
@@ -1199,7 +1203,7 @@ function DataTransferContent() {
                     )}
                     <span>Process: {t["@id"].slice(0, 8)}…</span>
                     {isCompleted && (t.dataPayload as DataPayload)?.total && (
-                      <span className="text-green-500">
+                      <span className="text-green-800 dark:text-green-400">
                         {(t.dataPayload as DataPayload).total} resources
                         transferred
                       </span>

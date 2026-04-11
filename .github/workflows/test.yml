@@ -376,6 +376,22 @@ jobs:
           NEXTAUTH_SECRET: ci-test-secret-not-for-production
           NEXTAUTH_URL: http://localhost:3000
 
+      - name: WCAG 2.2 AA accessibility audit
+        run: npx playwright test __tests__/e2e/journeys/27-wcag-accessibility.spec.ts --project=chromium
+        env:
+          CI: true
+          NEXT_PUBLIC_STATIC_EXPORT: "false"
+          NEXTAUTH_SECRET: ci-test-secret-not-for-production
+          NEXTAUTH_URL: http://localhost:3000
+
+      - name: Security & penetration tests (OWASP/BSI)
+        run: npx playwright test __tests__/e2e/journeys/28-security-pentest.spec.ts --project=chromium --grep-invert "SEC-4[1-9]|SEC-50"
+        env:
+          CI: true
+          NEXT_PUBLIC_STATIC_EXPORT: "false"
+          NEXTAUTH_SECRET: ci-test-secret-not-for-production
+          NEXTAUTH_URL: http://localhost:3000
+
       - name: Upload Playwright report
         uses: actions/upload-artifact@v4
         if: always()

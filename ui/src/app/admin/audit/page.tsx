@@ -328,6 +328,7 @@ function FilterBar({
       <div className="flex flex-col gap-1">
         <label className="text-[var(--text-secondary)]">From</label>
         <input
+          aria-label="From date"
           type="date"
           value={filters.dateFrom}
           onChange={(e) => onChange({ dateFrom: e.target.value })}
@@ -337,6 +338,7 @@ function FilterBar({
       <div className="flex flex-col gap-1">
         <label className="text-[var(--text-secondary)]">To</label>
         <input
+          aria-label="To date"
           type="date"
           value={filters.dateTo}
           onChange={(e) => onChange({ dateTo: e.target.value })}
@@ -349,6 +351,7 @@ function FilterBar({
         <div className="flex flex-col gap-1">
           <label className="text-[var(--text-secondary)]">Status</label>
           <select
+            aria-label="Status"
             value={filters.status}
             onChange={(e) => onChange({ status: e.target.value })}
             className="bg-[var(--surface-2)] border border-[var(--border)] rounded px-2 py-1 text-[var(--text-primary)] w-36"
@@ -368,6 +371,7 @@ function FilterBar({
         <div className="flex flex-col gap-1">
           <label className="text-[var(--text-secondary)]">Consumer</label>
           <select
+            aria-label="Consumer"
             value={filters.consumerDid}
             onChange={(e) => onChange({ consumerDid: e.target.value })}
             className="bg-[var(--surface-2)] border border-[var(--border)] rounded px-2 py-1 text-[var(--text-primary)] w-44"
@@ -387,6 +391,7 @@ function FilterBar({
         <div className="flex flex-col gap-1">
           <label className="text-[var(--text-secondary)]">Provider</label>
           <select
+            aria-label="Provider"
             value={filters.providerDid}
             onChange={(e) => onChange({ providerDid: e.target.value })}
             className="bg-[var(--surface-2)] border border-[var(--border)] rounded px-2 py-1 text-[var(--text-primary)] w-44"
@@ -406,6 +411,7 @@ function FilterBar({
         <div className="flex flex-col gap-1">
           <label className="text-[var(--text-secondary)]">Cross-border</label>
           <select
+            aria-label="Cross-border"
             value={filters.crossBorder}
             onChange={(e) => onChange({ crossBorder: e.target.value })}
             className="bg-[var(--surface-2)] border border-[var(--border)] rounded px-2 py-1 text-[var(--text-primary)] w-32"
@@ -567,7 +573,10 @@ export default function AdminAuditPage() {
                 {(data.summary.accessByConsumer?.length ?? 0) > 0 && (
                   <section className="mb-8">
                     <h2 className="font-semibold text-sm mb-3 flex items-center gap-2">
-                      <Database size={14} className="text-layer2" />
+                      <Database
+                        size={14}
+                        className="text-teal-800 dark:text-teal-300"
+                      />
                       Access Activity by Consumer
                     </h2>
                     <div className="overflow-auto">
@@ -622,7 +631,10 @@ export default function AdminAuditPage() {
                 <section className="mb-8">
                   <div className="flex items-center justify-between mb-3">
                     <h2 className="font-semibold text-sm flex items-center gap-2">
-                      <ArrowRightLeft size={14} className="text-layer2" />
+                      <ArrowRightLeft
+                        size={14}
+                        className="text-teal-800 dark:text-teal-300"
+                      />
                       Data Transfers ({data.transfers.length})
                     </h2>
                     {data.transfers.length > 0 && (
@@ -739,7 +751,9 @@ export default function AdminAuditPage() {
                                     {t.accessLogCount}×
                                   </span>
                                 ) : (
-                                  <span className="text-gray-600">—</span>
+                                  <span className="text-[var(--text-secondary)]">
+                                    —
+                                  </span>
                                 )}
                               </td>
                               <td className="py-2 px-2">
@@ -759,7 +773,7 @@ export default function AdminAuditPage() {
                               </td>
                               <td className="py-2 px-2">
                                 {t.crossBorder ? (
-                                  <span className="flex items-center gap-0.5 text-orange-400">
+                                  <span className="flex items-center gap-0.5 text-orange-800 dark:text-orange-400">
                                     <Globe size={10} />
                                     {ehdsArticle(t.policyId)}
                                   </span>
@@ -782,7 +796,10 @@ export default function AdminAuditPage() {
                 <section className="mb-8">
                   <div className="flex items-center justify-between mb-3">
                     <h2 className="font-semibold text-sm flex items-center gap-2">
-                      <FileSignature size={14} className="text-layer2" />
+                      <FileSignature
+                        size={14}
+                        className="text-teal-800 dark:text-teal-300"
+                      />
                       Contract Negotiations ({data.negotiations.length})
                     </h2>
                     {data.negotiations.length > 0 && (
@@ -899,12 +916,14 @@ export default function AdminAuditPage() {
                                         {n.accessLogCount}×
                                       </span>
                                     ) : (
-                                      <span className="text-gray-600">—</span>
+                                      <span className="text-[var(--text-secondary)]">
+                                        —
+                                      </span>
                                     )}
                                   </td>
                                   <td className="py-2 px-2">
                                     {n.crossBorder ? (
-                                      <span className="flex items-center gap-0.5 text-orange-400">
+                                      <span className="flex items-center gap-0.5 text-orange-800 dark:text-orange-400">
                                         <Globe size={10} />
                                         {ehdsArticle(n.policyId)}
                                       </span>
@@ -946,7 +965,7 @@ export default function AdminAuditPage() {
                                             <span className="text-[var(--text-secondary)]">
                                               Prohibited
                                             </span>
-                                            <span className="text-red-400">
+                                            <span className="text-red-800 dark:text-red-400">
                                               {n.policyProhibitedUses ?? "—"}
                                             </span>
                                             <span className="text-[var(--text-secondary)]">
@@ -1025,7 +1044,10 @@ export default function AdminAuditPage() {
               data.credentials && (
                 <section className="mb-8">
                   <h2 className="font-semibold text-sm mb-3 flex items-center gap-2">
-                    <ShieldCheck size={14} className="text-layer2" />
+                    <ShieldCheck
+                      size={14}
+                      className="text-teal-800 dark:text-teal-300"
+                    />
                     Verifiable Credentials ({data.credentials.length})
                   </h2>
                   {data.credentials.length === 0 ? (
@@ -1076,7 +1098,7 @@ export default function AdminAuditPage() {
             {activeTab === "accesslogs" && (
               <section className="mb-8">
                 <h2 className="font-semibold text-sm mb-3 flex items-center gap-2">
-                  <Eye size={14} className="text-layer2" />
+                  <Eye size={14} className="text-teal-800 dark:text-teal-300" />
                   Data Access Logs ({data.accesslogs?.length ?? 0})
                 </h2>
                 {!data.accesslogs || data.accesslogs.length === 0 ? (
@@ -1140,7 +1162,7 @@ export default function AdminAuditPage() {
                             <td className="py-2 px-2 text-[var(--text-secondary)]">
                               {formatBytes(a.bytesAccessed)}
                             </td>
-                            <td className="py-2 px-2 font-mono text-gray-600 text-[10px]">
+                            <td className="py-2 px-2 font-mono text-[var(--text-secondary)] text-[10px]">
                               {a.contractId
                                 ? a.contractId.slice(0, 12) + "…"
                                 : "—"}

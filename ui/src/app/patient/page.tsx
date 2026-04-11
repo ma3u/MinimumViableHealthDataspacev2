@@ -202,21 +202,23 @@ export default function PatientPage() {
           </div>
         ) : (
           <div className="mb-6">
-            <p className="section-label">Select patient</p>
-            <select
-              value={selected}
-              onChange={(e) => setSelected(e.target.value)}
-              className="px-3 py-2.5 bg-[var(--surface-card)] border border-[var(--border-ui)] rounded-xl text-sm outline-none focus:border-[var(--accent)] w-full text-[var(--text-primary)]"
-            >
-              <option value="">
-                — select patient ({patients.length} loaded) —
-              </option>
-              {patients.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.name ?? p.id}
+            <label className="section-label block">
+              Select patient
+              <select
+                value={selected}
+                onChange={(e) => setSelected(e.target.value)}
+                className="mt-1 px-3 py-2.5 bg-[var(--surface-card)] border border-[var(--border-ui)] rounded-xl text-sm outline-none focus:border-[var(--accent)] w-full text-[var(--text-primary)] block"
+              >
+                <option value="">
+                  — select patient ({patients.length} loaded) —
                 </option>
-              ))}
-            </select>
+                {patients.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.name ?? p.id}
+                  </option>
+                ))}
+              </select>
+            </label>
           </div>
         )}
 

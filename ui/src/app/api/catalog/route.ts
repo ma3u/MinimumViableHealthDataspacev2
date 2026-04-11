@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { runQuery } from "@/lib/neo4j";
+import { requireAuth, isAuthError } from "@/lib/auth-guard";
+import { Roles } from "@/lib/auth";
 import { promises as fs } from "fs";
 import path from "path";
 
@@ -34,6 +36,9 @@ async function loadMockCatalog(): Promise<CatalogRow[]> {
 }
 
 export async function GET() {
+  const auth = await requireAuth();
+  if (isAuthError(auth)) return auth;
+
   let realRows: CatalogRow[] = [];
   try {
     realRows = await runQuery<CatalogRow>(
@@ -76,6 +81,9 @@ export async function GET() {
 
 /** Create or update a HealthDCAT-AP dataset entry. */
 export async function POST(request: NextRequest) {
+  const auth = await requireAuth([Roles.DATA_HOLDER, Roles.EDC_ADMIN]);
+  if (isAuthError(auth)) return auth;
+
   try {
     const body = await request.json();
     const { id, title, description, publisher, ...rest } = body;
@@ -193,6 +201,9 @@ export async function POST(request: NextRequest) {
 
 /** Delete a HealthDCAT-AP dataset entry. */
 export async function DELETE(request: NextRequest) {
+  const auth = await requireAuth([Roles.DATA_HOLDER, Roles.EDC_ADMIN]);
+  if (isAuthError(auth)) return auth;
+
   const { searchParams } = new URL(request.url);
   const id = searchParams.get("id");
 

@@ -391,8 +391,8 @@ export default function FhirResourceViewer({
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 bg-layer3/10 border-b border-layer3/30">
         <div className="flex items-center gap-2">
-          <Activity size={14} className="text-layer3" />
-          <span className="text-sm font-semibold text-layer3">
+          <Activity size={14} className="text-green-800 dark:text-green-300" />
+          <span className="text-sm font-semibold text-green-800 dark:text-green-300">
             {title ?? "FHIR Resource Viewer"}
           </span>
           <span className="text-xs text-[var(--text-secondary)]">

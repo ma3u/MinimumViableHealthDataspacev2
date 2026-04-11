@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import neo4j from "neo4j-driver";
 import { runQuery } from "@/lib/neo4j";
+import { requireAuth, isAuthError } from "@/lib/auth-guard";
 import {
   LABEL_LAYER,
   LAYER_COLORS,
@@ -53,6 +54,9 @@ function toExpandNode(r: { nId: string; nLabels: string[]; nName: string }) {
  * applied so expanded nodes match the main overview palette.
  */
 export async function GET(req: Request) {
+  const auth = await requireAuth();
+  if (isAuthError(auth)) return auth;
+
   const { searchParams } = new URL(req.url);
   const nodeId = searchParams.get("id");
   if (!nodeId) {

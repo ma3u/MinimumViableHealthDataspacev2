@@ -41,6 +41,7 @@ const ENV_BACKUP = { ...process.env };
 describe("UserMenu", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    sessionStorage.clear();
     process.env.NEXT_PUBLIC_STATIC_EXPORT = "false";
     process.env.NEXT_PUBLIC_KEYCLOAK_PUBLIC_URL = "";
     process.env.NEXT_PUBLIC_KEYCLOAK_CLIENT_ID = "";

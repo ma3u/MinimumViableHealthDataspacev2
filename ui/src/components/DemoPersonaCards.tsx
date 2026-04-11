@@ -27,7 +27,7 @@ export function DemoPersonaCards() {
       </h2>
       <p className="text-xs text-[var(--text-secondary)] mb-3">
         Sign in as any persona to explore role-specific views.
-        <span className="text-gray-600">
+        <span className="text-gray-500 dark:text-gray-400">
           {" "}
           Password = username · Keycloak realm: EDCV
         </span>

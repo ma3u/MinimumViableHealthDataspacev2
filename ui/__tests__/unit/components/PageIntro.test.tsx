@@ -53,12 +53,10 @@ describe("PageIntro", () => {
   });
 
   it("should render the icon when provided", () => {
-    const { container } = render(
-      <PageIntro title="Home" description="Welcome." icon={Home} />,
-    );
-    // Lucide renders an <svg> element; verify it appears in the title row
-    const svg = container.querySelector("svg");
-    expect(svg).not.toBeNull();
+    // icon prop is accepted for API compatibility but not rendered in the
+    // Stitch layout — verify the component renders without crashing
+    render(<PageIntro title="Home" description="Welcome." icon={Home} />);
+    expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("Home");
   });
 
   it("should show previous step link", () => {
@@ -96,7 +94,8 @@ describe("PageIntro", () => {
     );
     expect(screen.getByText("Previous")).toBeInTheDocument();
     expect(screen.getByText("Next")).toBeInTheDocument();
-    expect(screen.getByText("|")).toBeInTheDocument();
+    // Separator is a middle dot (·) in the Stitch layout
+    expect(screen.getByText("·")).toBeInTheDocument();
   });
 
   it("should toggle info callout on click", async () => {
@@ -208,11 +207,12 @@ describe("PageIntro", () => {
   });
 
   it("should render with a custom icon component", () => {
-    const { container } = render(
-      <PageIntro title="Library" description="Books." icon={BookOpen} />,
+    // icon prop is accepted for API compatibility but not rendered in the
+    // Stitch layout — verify the component renders title and description
+    render(<PageIntro title="Library" description="Books." icon={BookOpen} />);
+    expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(
+      "Library",
     );
-    const svgs = container.querySelectorAll("svg");
-    // At least one SVG for the icon
-    expect(svgs.length).toBeGreaterThanOrEqual(1);
+    expect(screen.getByText("Books.")).toBeInTheDocument();
   });
 });

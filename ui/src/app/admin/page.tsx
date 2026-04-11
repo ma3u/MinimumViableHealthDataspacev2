@@ -310,21 +310,28 @@ export default function AdminDashboard() {
                   <p className="section-label">Administrative Activity</p>
                   <div className="activity-timeline space-y-5 pl-7">
                     {ACTIVITY_LOG.map((item, i) => (
-                      <div
-                        key={i}
-                        className={`flex gap-3 items-start relative ${
-                          item.dim ? "opacity-40" : ""
-                        }`}
-                      >
+                      <div key={i} className="flex gap-3 items-start relative">
                         {/* Timeline node */}
                         <div className="absolute -left-7 top-1 w-8 h-8 rounded-full bg-[var(--surface)] border border-[var(--border)] flex items-center justify-center shrink-0 z-10">
                           <item.icon size={14} className={item.color} />
                         </div>
                         <div>
-                          <p className="text-sm font-bold text-[var(--text-primary)]">
+                          <p
+                            className={`text-sm font-bold ${
+                              item.dim
+                                ? "text-gray-500 dark:text-gray-400"
+                                : "text-[var(--text-primary)]"
+                            }`}
+                          >
                             {item.title}
                           </p>
-                          <p className="text-xs text-[var(--text-secondary)]">
+                          <p
+                            className={`text-xs ${
+                              item.dim
+                                ? "text-gray-500 dark:text-gray-400"
+                                : "text-[var(--text-secondary)]"
+                            }`}
+                          >
                             {item.sub}
                           </p>
                         </div>

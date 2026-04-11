@@ -178,7 +178,7 @@ function DataDiscoverContent() {
             placeholder="Search by name, theme, FHIR type, publisher…"
             value={filter}
             onChange={(e) => setFilter(e.target.value)}
-            className="w-full pl-10 pr-3 py-2 bg-[var(--surface-2)] border border-gray-600 rounded text-sm outline-none focus:border-layer2"
+            className="w-full pl-10 pr-3 py-2 bg-[var(--surface-2)] border border-[var(--border-ui)] rounded text-sm outline-none focus:border-layer2"
           />
         </div>
 
@@ -196,13 +196,13 @@ function DataDiscoverContent() {
               onClick={() => setTab(t.key)}
               className={`px-4 py-2 text-xs font-medium border-b-2 -mb-px transition-colors ${
                 tab === t.key
-                  ? "border-layer2 text-layer2"
+                  ? "border-layer2 text-teal-800 dark:text-teal-300"
                   : "border-transparent text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
               }`}
             >
               {t.label}
               {!loading && (
-                <span className="ml-1 text-gray-600">
+                <span className="ml-1 text-[var(--text-secondary)]">
                   (
                   {t.key === "all"
                     ? totalMatching
@@ -242,7 +242,10 @@ function DataDiscoverContent() {
           </div>
         ) : totalMatching === 0 ? (
           <div className="text-center py-12">
-            <Database size={40} className="text-gray-600 mx-auto mb-4" />
+            <Database
+              size={40}
+              className="text-[var(--text-secondary)] mx-auto mb-4"
+            />
             <p className="text-[var(--text-secondary)]">
               {filter
                 ? "No datasets match your search"
@@ -274,6 +277,9 @@ function DataDiscoverContent() {
                       >
                         <button
                           className="w-full text-left p-4"
+                          aria-label={`${isOpen ? "Collapse" : "Expand"} ${
+                            c.title
+                          }`}
                           onClick={() => setExpanded(isOpen ? null : c.id)}
                         >
                           <div className="flex items-start justify-between gap-4">
@@ -281,9 +287,9 @@ function DataDiscoverContent() {
                               <div className="flex items-center gap-2">
                                 <BookOpen
                                   size={14}
-                                  className="text-purple-400 shrink-0"
+                                  className="text-[var(--accent)] shrink-0"
                                 />
-                                <h3 className="font-semibold text-sm text-purple-300">
+                                <h3 className="font-semibold text-sm text-[var(--accent)]">
                                   {c.title}
                                 </h3>
                               </div>
@@ -294,12 +300,12 @@ function DataDiscoverContent() {
                               )}
                               <div className="flex flex-wrap gap-2 mt-1.5 ml-5">
                                 {c.publisher && (
-                                  <span className="text-xs text-gray-600">
+                                  <span className="text-xs text-[var(--text-secondary)]">
                                     {c.publisher}
                                   </span>
                                 )}
                                 {c.theme && (
-                                  <span className="text-xs bg-purple-900/40 text-purple-300 px-1.5 py-0.5 rounded">
+                                  <span className="text-xs bg-purple-100 dark:bg-purple-900/40 text-purple-800 dark:text-purple-300 px-1.5 py-0.5 rounded">
                                     {c.theme}
                                   </span>
                                 )}
@@ -307,7 +313,7 @@ function DataDiscoverContent() {
                             </div>
                             <div className="flex items-center gap-2 shrink-0">
                               {c.datasetType && (
-                                <span className="text-xs bg-gray-700 text-[var(--text-primary)] px-2 py-0.5 rounded-full">
+                                <span className="text-xs bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 px-2 py-0.5 rounded-full">
                                   {c.datasetType}
                                 </span>
                               )}
@@ -358,7 +364,7 @@ function DataDiscoverContent() {
                                     href={c.conformsTo}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="text-purple-400 hover:underline inline-flex items-center gap-0.5"
+                                    className="text-[var(--accent)] hover:underline inline-flex items-center gap-0.5"
                                   >
                                     {c.conformsTo
                                       .replace(/^https?:\/\//, "")
@@ -392,7 +398,7 @@ function DataDiscoverContent() {
                                 href={`/graph?highlight=${encodeURIComponent(
                                   c.title,
                                 )}`}
-                                className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-gray-600 text-[var(--text-primary)] rounded text-xs font-medium hover:border-purple-500 hover:text-purple-300 transition-colors"
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-[var(--border-ui)] text-[var(--text-primary)] rounded text-xs font-medium hover:border-purple-500 hover:text-[var(--accent)] transition-colors"
                               >
                                 <Network size={14} />
                                 View in Graph
@@ -432,11 +438,14 @@ function DataDiscoverContent() {
                       >
                         <button
                           className="w-full text-left p-4"
+                          aria-label={`${isOpen ? "Collapse" : "Expand"} ${
+                            assetField(a, "name") || id
+                          }`}
                           onClick={() => setExpanded(isOpen ? null : id)}
                         >
                           <div className="flex items-start justify-between gap-4">
                             <div className="flex-1 min-w-0">
-                              <h3 className="font-semibold text-sm text-layer2">
+                              <h3 className="font-semibold text-sm text-teal-800 dark:text-teal-300">
                                 {assetField(a, "name")}
                               </h3>
                               {assetField(a, "description") && (
@@ -444,7 +453,7 @@ function DataDiscoverContent() {
                                   {assetField(a, "description")}
                                 </p>
                               )}
-                              <p className="text-xs text-gray-600 mt-1">
+                              <p className="text-xs text-[var(--text-secondary)] mt-1">
                                 Provider:{" "}
                                 {a._identity
                                   ?.replace("did:web:", "")
@@ -454,7 +463,7 @@ function DataDiscoverContent() {
                             </div>
                             <div className="flex items-center gap-2 shrink-0">
                               {assetField(a, "contenttype") && (
-                                <span className="text-xs bg-gray-700 text-[var(--text-primary)] px-2 py-0.5 rounded-full">
+                                <span className="text-xs bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 px-2 py-0.5 rounded-full">
                                   {assetField(a, "contenttype")}
                                 </span>
                               )}
@@ -481,7 +490,7 @@ function DataDiscoverContent() {
                             <div className="flex flex-wrap gap-3">
                               <a
                                 href={`/negotiate?assetId=${a["@id"]}&providerId=${a._participantId}`}
-                                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[var(--accent)] text-white rounded text-xs font-medium hover:bg-[var(--accent-hover)]"
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[var(--accent)] text-white dark:text-gray-900 rounded text-xs font-medium hover:bg-[var(--accent-hover)]"
                               >
                                 <FileSignature size={14} />
                                 Negotiate Access
@@ -490,7 +499,7 @@ function DataDiscoverContent() {
                                 href={`/graph?highlight=${encodeURIComponent(
                                   assetField(a, "name"),
                                 )}`}
-                                className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-gray-600 text-[var(--text-primary)] rounded text-xs font-medium hover:border-layer2 hover:text-layer2 transition-colors"
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-[var(--border-ui)] text-[var(--text-primary)] rounded text-xs font-medium hover:border-layer2 hover:text-teal-800 dark:hover:text-teal-300 transition-colors"
                               >
                                 <Network size={14} />
                                 View in Graph

@@ -1,39 +1,135 @@
 {
-  "timestamp": "2026-03-22T20:59:00.598Z",
+  "timestamp": "2026-04-10T17:25:14.035Z",
   "summary": {
-    "total": 8,
-    "passed": 5,
-    "failed": 3,
+    "total": 20,
+    "passed": 20,
+    "failed": 0,
     "skipped": 0
   },
   "suites": {
     "DSP": {
       "results": [
         {
-          "id": "DSP-ERR",
+          "id": "DSP-1.1",
           "category": "Schema Compliance",
           "suite": "DSP",
-          "name": "DSP proxy check",
-          "status": "fail",
-          "detail": "neo4j-proxy /tck returned 404"
+          "name": "Control Plane Readiness",
+          "status": "pass",
+          "detail": "GET /api/check/readiness → 200"
+        },
+        {
+          "id": "DSP-1.2",
+          "category": "Schema Compliance",
+          "suite": "DSP",
+          "name": "Control Plane Liveness",
+          "status": "pass",
+          "detail": "GET /api/check/liveness → 200"
+        },
+        {
+          "id": "DSP-2.1",
+          "category": "Catalog Protocol",
+          "suite": "DSP",
+          "name": "Catalog query — alpha-klinik",
+          "status": "pass",
+          "detail": "2 asset(s) for alpha-klinik"
+        },
+        {
+          "id": "DSP-2.2",
+          "category": "Catalog Protocol",
+          "suite": "DSP",
+          "name": "Catalog query — pharmaco",
+          "status": "pass",
+          "detail": "2 asset(s) for pharmaco"
+        },
+        {
+          "id": "DSP-2.3",
+          "category": "Catalog Protocol",
+          "suite": "DSP",
+          "name": "Catalog query — medreg",
+          "status": "pass",
+          "detail": "1 asset(s) for medreg"
+        },
+        {
+          "id": "DSP-2.4",
+          "category": "Catalog Protocol",
+          "suite": "DSP",
+          "name": "Catalog query — lmc",
+          "status": "pass",
+          "detail": "4 asset(s) for lmc"
+        },
+        {
+          "id": "DSP-2.5",
+          "category": "Catalog Protocol",
+          "suite": "DSP",
+          "name": "Catalog query — irs",
+          "status": "pass",
+          "detail": "0 asset(s) for irs"
         }
       ],
-      "passed": 0,
-      "total": 1
+      "passed": 7,
+      "total": 7
     },
     "DCP": {
       "results": [
         {
-          "id": "DCP-ERR",
+          "id": "DCP-1.1",
           "category": "DID Resolution",
           "suite": "DCP",
-          "name": "DCP proxy check",
-          "status": "fail",
-          "detail": "neo4j-proxy /tck returned 404"
+          "name": "IdentityHub reachable",
+          "status": "pass",
+          "detail": "IdentityHub responded with 5 participant(s)"
+        },
+        {
+          "id": "DCP-2.1",
+          "category": "Key Pair Management",
+          "suite": "DCP",
+          "name": "Key pairs — alpha-klinik",
+          "status": "pass",
+          "detail": "1 key pair(s) found"
+        },
+        {
+          "id": "DCP-2.2",
+          "category": "Key Pair Management",
+          "suite": "DCP",
+          "name": "Key pairs — pharmaco",
+          "status": "pass",
+          "detail": "1 key pair(s) found"
+        },
+        {
+          "id": "DCP-2.3",
+          "category": "Key Pair Management",
+          "suite": "DCP",
+          "name": "Key pairs — medreg",
+          "status": "pass",
+          "detail": "1 key pair(s) found"
+        },
+        {
+          "id": "DCP-2.4",
+          "category": "Key Pair Management",
+          "suite": "DCP",
+          "name": "Key pairs — lmc",
+          "status": "pass",
+          "detail": "1 key pair(s) found"
+        },
+        {
+          "id": "DCP-2.5",
+          "category": "Key Pair Management",
+          "suite": "DCP",
+          "name": "Key pairs — irs",
+          "status": "pass",
+          "detail": "1 key pair(s) found"
+        },
+        {
+          "id": "DCP-3.1",
+          "category": "Issuer Service",
+          "suite": "DCP",
+          "name": "IssuerService reachable",
+          "status": "pass",
+          "detail": "IssuerService responded with 0 credential definition(s)"
         }
       ],
-      "passed": 0,
-      "total": 1
+      "passed": 7,
+      "total": 7
     },
     "EHDS": {
       "results": [
@@ -43,7 +139,7 @@
           "suite": "EHDS",
           "name": "HealthDataset nodes present",
           "status": "pass",
-          "detail": "4 HealthDataset node(s)"
+          "detail": "10 HealthDataset node(s)"
         },
         {
           "id": "EHDS-2.1",
@@ -59,7 +155,7 @@
           "suite": "EHDS",
           "name": "OMOP Person nodes present",
           "status": "pass",
-          "detail": "1 OMOPPerson node(s)"
+          "detail": "174 OMOPPerson node(s)"
         },
         {
           "id": "EHDS-4.1",
@@ -67,7 +163,7 @@
           "suite": "EHDS",
           "name": "HDAB approval chains",
           "status": "pass",
-          "detail": "1 approval chain(s)"
+          "detail": "5 approval chain(s)"
         },
         {
           "id": "EHDS-5.1",
@@ -82,11 +178,11 @@
           "category": "Knowledge Graph",
           "suite": "EHDS",
           "name": "Total graph nodes",
-          "status": "fail",
-          "detail": "95 total nodes"
+          "status": "pass",
+          "detail": "113702 total nodes"
         }
       ],
-      "passed": 5,
+      "passed": 6,
       "total": 6
     }
   }

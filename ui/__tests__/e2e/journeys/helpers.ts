@@ -87,6 +87,26 @@ export async function loginAs(page: Page, username: string, password: string) {
 
   // Wait to land back on the app
   await expect(page).toHaveURL(/localhost/, { timeout: 20_000 });
+
+  // Wait for the NextAuth session to be established, then reload.
+  // The OIDC redirect sets the session cookie but the server-rendered HTML
+  // has no session — useSession() fetches it asynchronously. The React tree
+  // sometimes keeps the server-rendered nav groups. Waiting for a valid
+  // session response then reloading ensures the server render includes
+  // the authenticated state.
+  await page.waitForFunction(
+    async () => {
+      try {
+        const res = await fetch("/api/auth/session");
+        const data = await res.json();
+        return !!data?.roles?.length;
+      } catch {
+        return false;
+      }
+    },
+    { timeout: 10_000 },
+  );
+  await page.reload({ waitUntil: "networkidle" });
 }
 
 /* ── Service-availability checks ─────────────────────────────── */

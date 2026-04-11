@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { runQuery } from "@/lib/neo4j";
 import { edcClient } from "@/lib/edc";
+import { requireAuth, isAuthError } from "@/lib/auth-guard";
 
 export const dynamic = "force-dynamic";
 
@@ -21,25 +22,68 @@ function didSlug(did: string): string {
 }
 
 export async function GET(req: Request) {
+  const auth = await requireAuth();
+  if (isAuthError(auth)) return auth;
+
   const { searchParams } = new URL(req.url);
   const consumerId = searchParams.get("consumerId");
   const datasetId = searchParams.get("datasetId");
 
-  // List mode: return available consumers and datasets for the UI dropdowns
+  // List mode: return participants, datasets, and the full compliance matrix
   if (!consumerId || !datasetId) {
-    const [consumers, datasets] = await Promise.all([
+    const [consumers, datasets, matrixRows] = await Promise.all([
+      // Show ALL participants (not just those with access applications)
       runQuery<{ id: string; name: string; type: string }>(
-        `MATCH (p:Participant)-[:SUBMITTED]->(:AccessApplication)
-         RETURN coalesce(p.participantId, p.id) AS id,
+        `MATCH (p:Participant)
+         WHERE p.name IS NOT NULL AND p.name <> ''
+         RETURN DISTINCT
+                coalesce(p.participantId, p.id) AS id,
                 p.name                          AS name,
                 p.participantType               AS type
          ORDER BY p.name`,
       ),
+      // Show ALL datasets (not just those with HDAB approvals)
       runQuery<{ id: string; title: string }>(
-        `MATCH (approval:HDABApproval)-[:GRANTS_ACCESS_TO]->(ds:HealthDataset)
-         RETURN coalesce(ds.id, ds.datasetId) AS id,
-                coalesce(ds.title, ds.name)   AS title
-         ORDER BY ds.title`,
+        `MATCH (ds:HealthDataset)
+         WHERE ds.title IS NOT NULL OR ds.name IS NOT NULL
+         RETURN DISTINCT
+                coalesce(ds.id, ds.datasetId)   AS id,
+                coalesce(ds.title, ds.name)     AS title
+         ORDER BY title`,
+      ),
+      // Compliance matrix: for every participant, check what chain elements exist
+      runQuery<{
+        consumerId: string;
+        consumerName: string;
+        consumerType: string;
+        hasApplication: boolean;
+        applicationStatus: string | null;
+        hasApproval: boolean;
+        approvalStatus: string | null;
+        datasetId: string | null;
+        datasetTitle: string | null;
+        hasContract: boolean;
+        ehdsArticle: string | null;
+      }>(
+        `MATCH (p:Participant)
+         WHERE p.name IS NOT NULL AND p.name <> ''
+         WITH DISTINCT p
+         OPTIONAL MATCH (p)-[:SUBMITTED]->(app:AccessApplication)
+         OPTIONAL MATCH (approval:HDABApproval)-[:APPROVES]->(app)
+         OPTIONAL MATCH (approval)-[:GRANTS_ACCESS_TO]->(ds:HealthDataset)
+         OPTIONAL MATCH (contract:Contract)-[:GOVERNS]->(dp:DataProduct)-[:DESCRIBED_BY]->(ds)
+         RETURN coalesce(p.participantId, p.id) AS consumerId,
+                p.name                          AS consumerName,
+                p.participantType               AS consumerType,
+                app IS NOT NULL                 AS hasApplication,
+                app.status                      AS applicationStatus,
+                approval IS NOT NULL            AS hasApproval,
+                approval.status                 AS approvalStatus,
+                coalesce(ds.id, ds.datasetId)   AS datasetId,
+                coalesce(ds.title, ds.name)     AS datasetTitle,
+                contract IS NOT NULL            AS hasContract,
+                approval.ehdsArticle            AS ehdsArticle
+         ORDER BY p.name`,
       ),
     ]);
 
@@ -77,7 +121,7 @@ export async function GET(req: Request) {
                 coalesce(ds.title, ds.name)   AS title
          ORDER BY ds.title`,
       );
-      if (graphDatasets.length > 0) {
+      if (graphDatasets && graphDatasets.length > 0) {
         finalDatasets = graphDatasets;
       }
     }
@@ -85,6 +129,7 @@ export async function GET(req: Request) {
     return NextResponse.json({
       consumers: finalConsumers,
       datasets: finalDatasets,
+      matrix: matrixRows,
     });
   }
 

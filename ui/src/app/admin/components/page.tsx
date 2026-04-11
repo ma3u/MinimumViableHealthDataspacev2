@@ -133,21 +133,25 @@ const LAYER_META: Record<
   string,
   { label: string; icon: React.ComponentType<any>; color: string }
 > = {
-  "edc-core": { label: "EDC-V Core", icon: Server, color: "text-blue-400" },
+  "edc-core": {
+    label: "EDC-V Core",
+    icon: Server,
+    color: "text-[var(--accent)]",
+  },
   identity: {
     label: "Identity & Trust",
     icon: Shield,
-    color: "text-purple-400",
+    color: "text-[var(--accent)]",
   },
   cfm: {
     label: "Connector Fabric Manager",
     icon: Workflow,
-    color: "text-green-400",
+    color: "text-[var(--success-text)]",
   },
   infrastructure: {
     label: "Infrastructure",
     icon: HardDrive,
-    color: "text-yellow-400",
+    color: "text-[var(--warning-text)]",
   },
 };
 
@@ -186,12 +190,12 @@ const SEVERITY_STYLES: Record<
 };
 
 const ROLE_COLORS: Record<string, string> = {
-  DATA_HOLDER: "bg-blue-500/20 text-blue-400",
-  DATA_USER: "bg-green-500/20 text-green-400",
-  HDAB: "bg-purple-500/20 text-purple-400",
-  "health-data-access-body": "bg-purple-500/20 text-purple-400",
-  "data-holder": "bg-blue-500/20 text-blue-400",
-  "data-user": "bg-green-500/20 text-green-400",
+  DATA_HOLDER: "bg-blue-500/20 text-[var(--accent)]",
+  DATA_USER: "bg-[var(--badge-active-bg)] text-[var(--badge-active-text)]",
+  HDAB: "bg-purple-500/20 text-[var(--accent)]",
+  "health-data-access-body": "bg-purple-500/20 text-[var(--accent)]",
+  "data-holder": "bg-blue-500/20 text-[var(--accent)]",
+  "data-user": "bg-[var(--badge-active-bg)] text-[var(--badge-active-text)]",
 };
 
 // ---------------------------------------------------------------------------
@@ -212,7 +216,11 @@ function Sparkline({
   height?: number;
 }) {
   if (data.length < 2)
-    return <span className="text-[10px] text-gray-600">collecting…</span>;
+    return (
+      <span className="text-[10px] text-[var(--text-secondary)]">
+        collecting…
+      </span>
+    );
 
   const effectiveMax = max > 0 ? max : 1;
   const points = data.map((v, i) => {
@@ -281,7 +289,7 @@ function InfoPopover({ name }: { name: string }) {
           e.stopPropagation();
           setOpen(!open);
         }}
-        className="text-[var(--text-secondary)] hover:text-layer2 transition-colors p-0.5"
+        className="text-[var(--text-secondary)] hover:text-teal-800 dark:hover:text-teal-300 transition-colors p-0.5"
         title={`Info: ${name}`}
       >
         <Info size={13} />
@@ -291,7 +299,7 @@ function InfoPopover({ name }: { name: string }) {
           {/* Backdrop */}
           <div className="fixed inset-0 z-30" onClick={() => setOpen(false)} />
           {/* Popover */}
-          <div className="absolute z-40 left-6 top-0 w-80 bg-[var(--surface-2)] border border-gray-600 rounded-xl shadow-2xl p-4 text-xs space-y-2">
+          <div className="absolute z-40 left-6 top-0 w-80 bg-[var(--surface-2)] border border-[var(--border-ui)] rounded-xl shadow-2xl p-4 text-xs space-y-2">
             <div className="flex items-center justify-between mb-1">
               <span className="font-semibold text-sm text-[var(--text-primary)]">
                 {name}
@@ -445,15 +453,17 @@ function ResourceSummary({
 
   return (
     <div className="flex items-center gap-x-4 text-xs text-[var(--text-secondary)]">
-      {label && <span className="text-gray-600 mr-1">{label}</span>}
+      {label && (
+        <span className="text-[var(--text-secondary)] mr-1">{label}</span>
+      )}
       <span className="flex items-center gap-1 tabular-nums">
-        <Cpu size={10} className="text-blue-400" />
+        <Cpu size={10} className="text-[var(--accent)]" />
         <span className="text-[var(--text-primary)] font-medium">
           CPU {totalCpu.toFixed(1)}%
         </span>
       </span>
       <span className="flex items-center gap-1 tabular-nums">
-        <HardDrive size={10} className="text-purple-400" />
+        <HardDrive size={10} className="text-[var(--accent)]" />
         <span className="text-[var(--text-primary)] font-medium">
           MEM {fmtMem(totalMem)}
         </span>
@@ -475,19 +485,23 @@ function TrendArrow({
   previous: number;
   hasPrevData: boolean;
 }) {
-  if (!hasPrevData) return <span className="text-gray-600">—</span>;
+  if (!hasPrevData)
+    return <span className="text-[var(--text-secondary)]">—</span>;
   const delta = current - previous;
   const pct =
     previous > 0 ? Math.round((delta / previous) * 100) : delta > 0 ? 100 : 0;
   if (Math.abs(pct) < 3) return <span title="Stable vs yesterday">→</span>;
   if (delta > 0)
     return (
-      <span className="text-red-400" title={`+${pct}% vs yesterday`}>
+      <span
+        className="text-[var(--danger-text)]"
+        title={`+${pct}% vs yesterday`}
+      >
         ↑
       </span>
     );
   return (
-    <span className="text-green-400" title={`${pct}% vs yesterday`}>
+    <span className="text-[var(--success-text)]" title={`${pct}% vs yesterday`}>
       ↓
     </span>
   );
@@ -509,27 +523,30 @@ function ClusterResourceBanner({
   return (
     <div className="flex flex-wrap items-center gap-x-6 gap-y-2 border border-[var(--border)] rounded-xl px-4 py-3 mb-6 bg-[var(--surface)]/40">
       <div className="flex items-center gap-2 text-xs text-[var(--text-secondary)]">
-        <Activity size={14} className="text-layer2 shrink-0" />
+        <Activity
+          size={14}
+          className="text-teal-800 dark:text-teal-300 shrink-0"
+        />
         <span className="font-medium text-[var(--text-primary)]">Cluster</span>
       </div>
 
       {/* Current */}
       <div className="flex items-center gap-1.5 text-xs">
-        <Cpu size={11} className="text-blue-400" />
+        <Cpu size={11} className="text-[var(--accent)]" />
         <span className="text-[var(--text-primary)] tabular-nums">
           {metrics.currentCpu.toFixed(1)}%
         </span>
-        <span className="text-gray-600">now</span>
+        <span className="text-[var(--text-secondary)]">now</span>
       </div>
       <div className="flex items-center gap-1.5 text-xs">
-        <HardDrive size={11} className="text-purple-400" />
+        <HardDrive size={11} className="text-[var(--accent)]" />
         <span className="text-[var(--text-primary)] tabular-nums">
           {fmtMem(metrics.currentMemMB)}
         </span>
-        <span className="text-gray-600">now</span>
+        <span className="text-[var(--text-secondary)]">now</span>
       </div>
 
-      <span className="text-gray-700">│</span>
+      <span className="text-[var(--text-secondary)]">│</span>
 
       {/* 24h peaks */}
       <div className="flex items-center gap-1 text-xs">
@@ -538,10 +555,10 @@ function ClusterResourceBanner({
           previous={metrics.prev24h.peakCpu}
           hasPrevData={hasPrev}
         />
-        <span className="text-blue-400 tabular-nums font-medium">
+        <span className="text-[var(--accent)] tabular-nums font-medium">
           CPU {metrics.last24h.peakCpu.toFixed(1)}%
         </span>
-        <span className="text-gray-600">peak 24h</span>
+        <span className="text-[var(--text-secondary)]">peak 24h</span>
       </div>
       <div className="flex items-center gap-1 text-xs">
         <TrendArrow
@@ -549,15 +566,15 @@ function ClusterResourceBanner({
           previous={metrics.prev24h.peakMemMB}
           hasPrevData={hasPrev}
         />
-        <span className="text-purple-400 tabular-nums font-medium">
+        <span className="text-[var(--accent)] tabular-nums font-medium">
           MEM {fmtMem(metrics.last24h.peakMemMB)}
         </span>
-        <span className="text-gray-600">peak 24h</span>
+        <span className="text-[var(--text-secondary)]">peak 24h</span>
       </div>
 
       {metrics.last24h.samples > 0 && (
         <span
-          className="text-[10px] text-gray-600"
+          className="text-[10px] text-[var(--text-secondary)]"
           title="Number of data points collected in the last 24h"
         >
           ({metrics.last24h.samples} samples)
@@ -641,8 +658,8 @@ function ParticipantTopologySection({
               <span
                 className={
                   participant.state === "CREATED"
-                    ? "text-green-400"
-                    : "text-yellow-400"
+                    ? "text-[var(--success-text)]"
+                    : "text-[var(--warning-text)]"
                 }
               >
                 {participant.state}
@@ -680,9 +697,9 @@ function CriticalBanner({
 
   return (
     <div className="flex items-center gap-3 border border-red-500/40 bg-red-900/15 rounded-xl px-4 py-3 mb-6">
-      <AlertTriangle size={18} className="text-red-400 shrink-0" />
+      <AlertTriangle size={18} className="text-[var(--danger-text)] shrink-0" />
       <div className="text-sm">
-        <span className="font-semibold text-red-400">
+        <span className="font-semibold text-[var(--danger-text)]">
           {degraded} of {total} participants degraded
         </span>
         <span className="text-[var(--text-secondary)] ml-2">
@@ -799,7 +816,7 @@ function CostEstimatorPanel({
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <h2 className="font-semibold text-sm flex items-center gap-2 text-[var(--text-primary)]">
-          <BarChart2 size={16} className="text-emerald-400" />
+          <BarChart2 size={16} className="text-[var(--success-text)]" />
           Monthly Cost Estimate — STACKIT (Frankfurt)
         </h2>
         <div className="flex items-center gap-3 text-xs text-[var(--text-secondary)]">
@@ -836,7 +853,7 @@ function CostEstimatorPanel({
                 <span className="text-xs font-medium text-[var(--text-primary)]">
                   {n.label}
                 </span>
-                <span className="text-xs font-mono text-emerald-400">
+                <span className="text-xs font-mono text-[var(--success-text)]">
                   €{n.eur}/mo
                 </span>
               </div>
@@ -853,7 +870,7 @@ function CostEstimatorPanel({
                   </span>
                 ))}
               </div>
-              <p className="text-[9px] text-gray-600 mt-1.5 leading-relaxed">
+              <p className="text-[9px] text-[var(--text-secondary)] mt-1.5 leading-relaxed">
                 {n.note}
               </p>
             </div>
@@ -878,7 +895,7 @@ function CostEstimatorPanel({
             <div className="font-mono text-[var(--text-primary)]">
               €{PER_PARTICIPANT_COMPUTE_EUR}/mo
             </div>
-            <div className="text-[10px] text-gray-600 mt-1">
+            <div className="text-[10px] text-[var(--text-secondary)] mt-1">
               1 vCPU / 2 GB — Control Plane + Identity Hub + Issuer Service
             </div>
           </div>
@@ -891,7 +908,7 @@ function CostEstimatorPanel({
                 data holders)
               </span>
             </div>
-            <div className="text-[10px] text-gray-600 mt-1">
+            <div className="text-[10px] text-[var(--text-secondary)] mt-1">
               {PER_PARTICIPANT_STORAGE_GB} GB base · {HEALTH_DATA_STORAGE_GB} GB
               health records · €{STORAGE_EUR_PER_GB}/GB/mo
             </div>
@@ -904,7 +921,7 @@ function CostEstimatorPanel({
             <div className="font-mono text-[var(--text-primary)]">
               €{((CP_DP_TRAFFIC_MB / 1024) * NETWORK_EUR_PER_GB).toFixed(3)}/mo
             </div>
-            <div className="text-[10px] text-gray-600 mt-1">
+            <div className="text-[10px] text-[var(--text-secondary)] mt-1">
               {CP_DP_TRAFFIC_MB} MB/mo per participant (DSP negotiation +
               transfer receipts + audit) · €{NETWORK_EUR_PER_GB}/GB egress
             </div>
@@ -916,7 +933,7 @@ function CostEstimatorPanel({
             <div className="font-mono text-[var(--text-primary)]">
               €{((LOG_INJECTION_MB / 1024) * LOG_EUR_PER_GB).toFixed(3)}/mo
             </div>
-            <div className="text-[10px] text-gray-600 mt-1">
+            <div className="text-[10px] text-[var(--text-secondary)] mt-1">
               {LOG_INJECTION_MB} MB/mo EHDS Article 50 audit trail → SIEM/Loki ·
               €{LOG_EUR_PER_GB}/GB
             </div>
@@ -959,7 +976,7 @@ function CostEstimatorPanel({
             <div className="text-[10px] text-[var(--text-secondary)] mb-1">
               Total / month
             </div>
-            <div className="font-mono text-xl font-bold text-emerald-400">
+            <div className="font-mono text-xl font-bold text-[var(--success-text)]">
               €{total.toFixed(0)}
             </div>
             <div className="text-[10px] text-[var(--text-secondary)] mt-0.5">
@@ -967,7 +984,7 @@ function CostEstimatorPanel({
             </div>
           </div>
         </div>
-        <p className="text-[9px] text-gray-600 mt-3 text-center">
+        <p className="text-[9px] text-[var(--text-secondary)] mt-3 text-center">
           Assumes 60 % DATA_HOLDER / 40 % DATA_USER mix · STACKIT Frankfurt ·
           prices excl. VAT · does not include Kubernetes management fee or
           premium support
@@ -1141,8 +1158,12 @@ export default function AdminComponentsPage() {
               <>
                 <span>{totalServices} services</span>
                 <span>·</span>
-                <span className="text-emerald-400">{healthyCount} healthy</span>
-                <span className="text-blue-400">{runningCount} running</span>
+                <span className="text-[var(--success-text)]">
+                  {healthyCount} healthy
+                </span>
+                <span className="text-[var(--accent)]">
+                  {runningCount} running
+                </span>
                 <span>·</span>
                 <span>
                   <Cpu size={11} className="inline mr-0.5" />
@@ -1168,7 +1189,7 @@ export default function AdminComponentsPage() {
                 {topology.summary.degradedParticipants > 0 && (
                   <>
                     <span>·</span>
-                    <span className="text-red-400">
+                    <span className="text-[var(--danger-text)]">
                       {topology.summary.degradedParticipants} degraded
                     </span>
                   </>
@@ -1183,7 +1204,7 @@ export default function AdminComponentsPage() {
                 type="checkbox"
                 checked={autoRefresh}
                 onChange={(e) => setAutoRefresh(e.target.checked)}
-                className="rounded border-gray-600 bg-[var(--surface-2)] text-layer2 focus:ring-layer2 w-3.5 h-3.5"
+                className="rounded border-[var(--border-ui)] bg-[var(--surface-2)] text-teal-800 dark:text-teal-300 focus:ring-layer2 w-3.5 h-3.5"
               />
               Auto-refresh (30s)
             </label>
@@ -1227,7 +1248,10 @@ export default function AdminComponentsPage() {
               {/* Participant topology sections */}
               <div className="space-y-3 mb-8">
                 <h2 className="font-semibold text-sm flex items-center gap-2 text-[var(--text-primary)] mb-3">
-                  <Users size={16} className="text-layer2" />
+                  <Users
+                    size={16}
+                    className="text-teal-800 dark:text-teal-300"
+                  />
                   Dataspace Participants
                   <span className="text-xs font-normal text-[var(--text-secondary)]">
                     ({topology.participants.length})
@@ -1247,7 +1271,10 @@ export default function AdminComponentsPage() {
                 <div className="mb-8">
                   <div className="flex items-start justify-between mb-3 flex-wrap gap-2">
                     <h2 className="font-semibold text-sm flex items-center gap-2 text-[var(--text-primary)]">
-                      <HardDrive size={16} className="text-yellow-400" />
+                      <HardDrive
+                        size={16}
+                        className="text-[var(--warning-text)]"
+                      />
                       Shared Infrastructure &amp; CFM
                       <span className="text-xs font-normal text-[var(--text-secondary)]">
                         ({topology.infrastructure.length})
@@ -1268,7 +1295,7 @@ export default function AdminComponentsPage() {
 
               {/* Docker unavailable */}
               {!topology.dockerAvailable && (
-                <div className="border border-yellow-600/40 bg-yellow-900/20 rounded-xl p-4 text-sm text-yellow-400">
+                <div className="border border-yellow-600/40 bg-yellow-900/20 rounded-xl p-4 text-sm text-[var(--warning-text)]">
                   <strong>Docker socket not available.</strong> CPU and memory
                   metrics require the Docker socket to be mounted.
                 </div>
@@ -1284,7 +1311,10 @@ export default function AdminComponentsPage() {
             {snapshot && snapshot.participants.length > 0 && (
               <div className="mb-8">
                 <h2 className="font-semibold text-sm mb-4 flex items-center gap-2 text-[var(--text-primary)]">
-                  <Users size={16} className="text-layer2" />
+                  <Users
+                    size={16}
+                    className="text-teal-800 dark:text-teal-300"
+                  />
                   Dataspace Participants
                   <span className="text-xs font-normal text-[var(--text-secondary)]">
                     ({snapshot.participants.length})
@@ -1342,8 +1372,8 @@ export default function AdminComponentsPage() {
                             <span
                               className={`text-xs font-medium ${
                                 p.state === "CREATED"
-                                  ? "text-green-400"
-                                  : "text-yellow-400"
+                                  ? "text-[var(--success-text)]"
+                                  : "text-[var(--warning-text)]"
                               }`}
                             >
                               {p.state}
@@ -1419,7 +1449,7 @@ export default function AdminComponentsPage() {
 
             {/* Docker unavailable banner */}
             {snapshot && !snapshot.dockerAvailable && (
-              <div className="border border-yellow-600/40 bg-yellow-900/20 rounded-xl p-4 text-sm text-yellow-400">
+              <div className="border border-yellow-600/40 bg-yellow-900/20 rounded-xl p-4 text-sm text-[var(--warning-text)]">
                 <strong>Docker socket not available.</strong> CPU and memory
                 metrics require the Docker socket to be mounted.
               </div>

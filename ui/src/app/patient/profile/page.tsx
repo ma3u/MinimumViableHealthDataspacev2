@@ -37,9 +37,10 @@ interface PatientItem {
 }
 
 const RISK_COLORS = {
-  low: "text-green-400 bg-green-900/30 border-green-700",
-  moderate: "text-yellow-400 bg-yellow-900/30 border-yellow-700",
-  high: "text-red-400 bg-red-900/30 border-red-700",
+  low: "text-green-800 dark:text-green-300 bg-green-50 dark:bg-green-950 border-green-200 dark:border-green-800",
+  moderate:
+    "text-yellow-800 dark:text-yellow-300 bg-yellow-50 dark:bg-yellow-900/30 border-yellow-300 dark:border-yellow-700",
+  high: "text-red-800 dark:text-red-300 bg-red-50 dark:bg-red-950 border-red-200 dark:border-red-800",
 };
 
 const RISK_ICONS = {
@@ -91,9 +92,9 @@ export default function PatientProfilePage() {
         />
 
         {/* GDPR rights banner */}
-        <div className="mb-6 rounded-lg border border-blue-700 bg-blue-900/20 p-3 flex items-start gap-2">
-          <Shield size={16} className="mt-0.5 shrink-0 text-blue-400" />
-          <div className="text-xs text-blue-300">
+        <div className="mb-6 rounded-lg border border-[var(--border)] bg-[var(--surface-2)] p-3 flex items-start gap-2">
+          <Shield size={16} className="mt-0.5 shrink-0 text-[var(--accent)]" />
+          <div className="text-xs text-[var(--text-secondary)]">
             <strong>Your data rights:</strong> You have the right to access
             (GDPR Art. 15), portability (Art. 20), rectification (Art. 16), and
             erasure (Art. 17) of your health data. Under EHDS Art. 3, you can
@@ -109,7 +110,7 @@ export default function PatientProfilePage() {
               <select
                 value={selectedId}
                 onChange={(e) => setSelectedId(e.target.value)}
-                className="mt-1 w-full px-3 py-2 bg-[var(--surface-2)] border border-gray-600 rounded text-sm outline-none focus:border-teal-500 block"
+                className="mt-1 w-full px-3 py-2 bg-[var(--surface-2)] border border-[var(--border-ui)] rounded text-sm outline-none focus:border-teal-500 block"
               >
                 {patients.map((p) => (
                   <option key={p.id} value={p.id}>
@@ -133,7 +134,7 @@ export default function PatientProfilePage() {
             {/* Patient demographics */}
             <div className="rounded-xl border border-[var(--border)] bg-[var(--surface-2)]/50 p-4">
               <div className="flex items-center gap-2 mb-3">
-                <User size={16} className="text-teal-400" />
+                <User size={16} className="text-teal-800 dark:text-teal-400" />
                 <h2 className="font-semibold">
                   {profile.patient.name || "Anonymous Patient"}
                 </h2>
@@ -167,7 +168,10 @@ export default function PatientProfilePage() {
             {/* Risk scores */}
             <div>
               <h2 className="text-lg font-semibold mb-3 flex items-center gap-2">
-                <Activity size={18} className="text-teal-400" />
+                <Activity
+                  size={18}
+                  className="text-teal-800 dark:text-teal-400"
+                />
                 Health Risk Assessment
               </h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -216,7 +220,7 @@ export default function PatientProfilePage() {
                   {profile.interests.map((i) => (
                     <span
                       key={i}
-                      className="text-xs px-3 py-1 rounded-full bg-teal-900/40 text-teal-300 border border-teal-700 capitalize"
+                      className="text-xs px-3 py-1 rounded-full bg-teal-100 dark:bg-teal-900/40 text-teal-800 dark:text-teal-300 border border-teal-300 dark:border-teal-700 capitalize"
                     >
                       {i.replace(/-/g, " ")}
                     </span>

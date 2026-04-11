@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { runQuery } from "@/lib/neo4j";
+import { requireAuth, isAuthError } from "@/lib/auth-guard";
 
 export const dynamic = "force-dynamic";
 
@@ -24,6 +25,9 @@ interface TestResult {
 const NEO4J_PROXY_URL = process.env.NEO4J_PROXY_URL ?? "http://localhost:9090";
 
 export async function GET() {
+  const auth = await requireAuth();
+  if (isAuthError(auth)) return auth;
+
   const results: TestResult[] = [];
   const timestamp = new Date().toISOString();
 

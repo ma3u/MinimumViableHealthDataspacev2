@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { edcClient } from "@/lib/edc";
+import { requireAuth, isAuthError } from "@/lib/auth-guard";
 
 export const dynamic = "force-dynamic";
 
@@ -11,6 +12,9 @@ export const dynamic = "force-dynamic";
  * demo we return all tenants with their profiles.
  */
 export async function GET() {
+  const auth = await requireAuth();
+  if (isAuthError(auth)) return auth;
+
   try {
     const tenants = await edcClient.tenant<
       {

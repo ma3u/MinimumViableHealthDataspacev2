@@ -412,7 +412,7 @@ export default function AdminPoliciesPage() {
               setShowForm((v) => !v);
               setFormMsg(null);
             }}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-bold bg-[var(--accent)] text-white hover:opacity-90 transition-opacity"
+            className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-bold bg-[var(--accent)] text-white dark:text-gray-900 hover:opacity-90 transition-opacity"
           >
             {showForm ? (
               <>
@@ -448,7 +448,7 @@ export default function AdminPoliciesPage() {
                       : "border-[var(--border)] hover:border-gray-500"
                   }`}
                 >
-                  <span className="text-xs font-mono text-layer2">
+                  <span className="text-xs font-mono text-teal-800 dark:text-teal-300">
                     {t.article}
                   </span>
                   <p className="text-sm font-medium text-[var(--text-primary)]">
@@ -472,9 +472,10 @@ export default function AdminPoliciesPage() {
                   Participant Context
                 </label>
                 <select
+                  aria-label="Participant Context"
                   value={selectedParticipant}
                   onChange={(e) => setSelectedParticipant(e.target.value)}
-                  className="w-full rounded-lg bg-[var(--surface-2)] border border-gray-600 text-sm px-3 py-2 text-[var(--text-primary)]"
+                  className="w-full rounded-lg bg-[var(--surface-2)] border border-[var(--border-ui)] text-sm px-3 py-2 text-[var(--text-primary)]"
                 >
                   <option value="">— select —</option>
                   {groups.map((g) => (
@@ -491,9 +492,10 @@ export default function AdminPoliciesPage() {
                   Access Duration
                 </label>
                 <select
+                  aria-label="Access Duration"
                   value={selectedDuration}
                   onChange={(e) => setSelectedDuration(e.target.value)}
-                  className="w-full rounded-lg bg-[var(--surface-2)] border border-gray-600 text-sm px-3 py-2 text-[var(--text-primary)]"
+                  className="w-full rounded-lg bg-[var(--surface-2)] border border-[var(--border-ui)] text-sm px-3 py-2 text-[var(--text-primary)]"
                 >
                   {DURATION_OPTIONS.map((d) => (
                     <option key={d.value} value={d.value}>
@@ -520,7 +522,7 @@ export default function AdminPoliciesPage() {
               <button
                 onClick={handleCreate}
                 disabled={creating || !selectedParticipant}
-                className="px-4 py-2 rounded-lg bg-[var(--accent)] text-white text-sm font-medium hover:bg-[var(--accent-hover)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+                className="px-4 py-2 rounded-lg bg-[var(--accent)] text-white dark:text-gray-900 text-sm font-medium hover:bg-[var(--accent-hover)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
               >
                 {creating && <Loader2 size={14} className="animate-spin" />}
                 Create Policy
@@ -528,7 +530,9 @@ export default function AdminPoliciesPage() {
               {formMsg && (
                 <span
                   className={`text-xs ${
-                    formMsg.type === "ok" ? "text-green-400" : "text-red-400"
+                    formMsg.type === "ok"
+                      ? "text-[var(--success-text)]"
+                      : "text-[var(--danger-text)]"
                   }`}
                 >
                   {formMsg.text}
@@ -555,7 +559,10 @@ export default function AdminPoliciesPage() {
           </div>
         ) : groups.length === 0 ? (
           <div className="text-center py-12">
-            <ShieldCheck size={40} className="text-gray-600 mx-auto mb-4" />
+            <ShieldCheck
+              size={40}
+              className="text-[var(--text-secondary)] mx-auto mb-4"
+            />
             <p className="text-[var(--text-secondary)]">No policies found</p>
           </div>
         ) : (
@@ -574,6 +581,11 @@ export default function AdminPoliciesPage() {
                 >
                   <button
                     className="w-full text-left p-4"
+                    aria-label={`${isOpen ? "Collapse" : "Expand"} ${
+                      g.identity
+                        ?.replace("did:web:", "")
+                        .replace(/%3A/g, ":") || g.participantId.slice(0, 16)
+                    }`}
                     onClick={() => setExpanded(isOpen ? null : g.participantId)}
                   >
                     <div className="flex items-center justify-between">
@@ -588,7 +600,7 @@ export default function AdminPoliciesPage() {
                           {policies.length} polic
                           {policies.length === 1 ? "y" : "ies"}
                           {g.error && (
-                            <span className="text-red-400 ml-2">
+                            <span className="text-red-800 dark:text-red-400 ml-2">
                               ({g.error})
                             </span>
                           )}
