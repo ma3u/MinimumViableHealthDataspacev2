@@ -82,10 +82,10 @@ describe("GraphPage", () => {
     mockFetchApi.mockReset();
   });
 
-  it("renders sidebar with structural layers heading", () => {
+  it("renders sidebar with layers legend heading", () => {
     mockFetchApi.mockReturnValue(new Promise(() => {}));
     render(<GraphPage />);
-    expect(screen.getByText("Structural layers")).toBeInTheDocument();
+    expect(screen.getByText("Layers")).toBeInTheDocument();
   });
 
   it("shows loading state", () => {
@@ -169,7 +169,7 @@ describe("CatalogPage", () => {
   it("renders filter input", () => {
     mockFetchApi.mockReturnValue(new Promise(() => {}));
     render(<CatalogPage />);
-    expect(screen.getByPlaceholderText(/Filter by title/)).toBeInTheDocument();
+    expect(screen.getByPlaceholderText(/Search datasets/)).toBeInTheDocument();
   });
 
   it("renders datasets after loading", async () => {
@@ -199,7 +199,9 @@ describe("CatalogPage", () => {
     mockFetchApi.mockReturnValue(mockResponse([]));
     render(<CatalogPage />);
     await waitFor(() => {
-      expect(screen.getByText("No datasets found.")).toBeInTheDocument();
+      expect(
+        screen.getByText("No datasets match the current filters."),
+      ).toBeInTheDocument();
     });
   });
 
@@ -240,14 +242,14 @@ describe("CatalogPage", () => {
     // Both visible initially
     expect(screen.getByText("OMOP Analysis")).toBeInTheDocument();
     // Type filter
-    const filterInput = screen.getByPlaceholderText(/Filter by title/);
+    const filterInput = screen.getByPlaceholderText(/Search datasets/);
     await user.type(filterInput, "FHIR");
     // After filter, only FHIR dataset should be visible
     expect(screen.getByText("FHIR Cohort")).toBeInTheDocument();
     expect(screen.queryByText("OMOP Analysis")).not.toBeInTheDocument();
   });
 
-  it("expands dataset to show detail panel", async () => {
+  it("opens detail modal when the details button is clicked", async () => {
     const user = userEvent.setup();
     mockFetchApi.mockReturnValue(
       mockResponse([
@@ -269,13 +271,15 @@ describe("CatalogPage", () => {
     await waitFor(() =>
       expect(screen.getByText("Test Dataset")).toBeInTheDocument(),
     );
-    // Click to expand
-    await user.click(screen.getByText("Test Dataset"));
-    // Detail panel should show HealthDCAT-AP Metadata heading
+    // Click the Bookmark details button to open the modal
+    await user.click(
+      screen.getByRole("button", { name: "View dataset details" }),
+    );
+    // Detail modal should show HealthDCAT-AP Metadata heading
     await waitFor(() => {
       expect(screen.getByText("HealthDCAT-AP Metadata")).toBeInTheDocument();
     });
-    // Detail row values
+    // HealthDCAT-AP Spec link is always present in the modal
     expect(screen.getByText("HealthDCAT-AP Spec")).toBeInTheDocument();
   });
 
@@ -306,7 +310,9 @@ describe("CatalogPage", () => {
     mockFetchApi.mockReturnValue(Promise.reject(new Error("fail")));
     render(<CatalogPage />);
     await waitFor(() => {
-      expect(screen.getByText("No datasets found.")).toBeInTheDocument();
+      expect(
+        screen.getByText("No datasets match the current filters."),
+      ).toBeInTheDocument();
     });
   });
 });

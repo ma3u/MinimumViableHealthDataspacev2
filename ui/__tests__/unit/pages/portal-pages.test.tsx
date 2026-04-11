@@ -50,7 +50,7 @@ describe("AdminDashboard", () => {
   it("renders heading", () => {
     mockFetchApi.mockReturnValue(new Promise(() => {}));
     render(<AdminDashboard />);
-    expect(screen.getByText("Operator Dashboard")).toBeInTheDocument();
+    expect(screen.getByText("System Overview")).toBeInTheDocument();
   });
 
   it("shows loading state", () => {

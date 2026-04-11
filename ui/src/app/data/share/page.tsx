@@ -210,7 +210,7 @@ function AssetDetailPanel({ asset }: { asset: Asset }) {
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-2 bg-layer2/10 border-b border-layer2/30">
         <div className="flex items-center gap-2">
-          <FileJson2 size={14} className="text-layer2" />
+          <FileJson2 size={14} className="text-teal-800 dark:text-teal-300" />
           <span className="text-xs font-medium text-[var(--text-primary)]">
             Asset Details — {name}
           </span>
@@ -276,7 +276,7 @@ function AssetDetailPanel({ asset }: { asset: Asset }) {
             onClick={() => setViewMode("details")}
             className={`text-xs px-2.5 py-1 rounded ${
               viewMode === "details"
-                ? "bg-layer2/20 text-layer2"
+                ? "bg-layer2/20 text-teal-800 dark:text-teal-300"
                 : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
             }`}
           >
@@ -286,7 +286,7 @@ function AssetDetailPanel({ asset }: { asset: Asset }) {
             onClick={() => setViewMode("json")}
             className={`text-xs px-2.5 py-1 rounded ${
               viewMode === "json"
-                ? "bg-layer2/20 text-layer2"
+                ? "bg-layer2/20 text-teal-800 dark:text-teal-300"
                 : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
             }`}
           >
@@ -497,7 +497,7 @@ export default function DataSharePage() {
               onClick={() => setTab(t)}
               className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors ${
                 tab === t
-                  ? "border-layer2 text-layer2"
+                  ? "border-layer2 text-teal-800 dark:text-teal-300"
                   : "border-transparent text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
               }`}
             >
@@ -520,7 +520,7 @@ export default function DataSharePage() {
               </p>
               <button
                 onClick={() => setTab("create")}
-                className="mt-3 text-sm text-layer2 hover:underline"
+                className="mt-3 text-sm text-teal-800 dark:text-teal-300 hover:underline"
               >
                 Register your first asset →
               </button>
@@ -541,11 +541,17 @@ export default function DataSharePage() {
                   >
                     <button
                       className="w-full text-left p-4"
+                      aria-label={`${isOpen ? "Collapse" : "Expand"} ${
+                        a.name ||
+                        a["edc:name"] ||
+                        a.properties?.name ||
+                        a["@id"]
+                      }`}
                       onClick={() => setExpanded(isOpen ? null : id)}
                     >
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="font-medium text-sm text-layer2">
+                          <p className="font-medium text-sm text-teal-800 dark:text-teal-300">
                             {a.name ||
                               a["edc:name"] ||
                               a.properties?.name ||
@@ -567,7 +573,7 @@ export default function DataSharePage() {
                           {(a.contenttype ||
                             a["edc:contenttype"] ||
                             a.properties?.contenttype) && (
-                            <span className="text-xs bg-gray-700 text-[var(--text-primary)] px-2 py-0.5 rounded-full">
+                            <span className="text-xs bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 px-2 py-0.5 rounded-full">
                               {
                                 (a.contenttype ||
                                   a["edc:contenttype"] ||
@@ -599,7 +605,7 @@ export default function DataSharePage() {
           /* Create new asset form */
           <div className="border border-[var(--border)] rounded-xl p-6">
             <div className="flex items-center gap-2 mb-6">
-              <Upload size={18} className="text-layer2" />
+              <Upload size={18} className="text-teal-800 dark:text-teal-300" />
               <h2 className="font-semibold text-sm">Register Data Asset</h2>
             </div>
 
@@ -624,6 +630,7 @@ export default function DataSharePage() {
                   Participant Context
                 </label>
                 <select
+                  aria-label="Participant Context"
                   value={selectedCtx}
                   onChange={(e) => setSelectedCtx(e.target.value)}
                   className="w-full px-3 py-2 bg-[var(--surface-2)] border border-gray-600 rounded text-sm"
@@ -644,6 +651,7 @@ export default function DataSharePage() {
                     Asset Name
                   </label>
                   <input
+                    aria-label="Asset Name"
                     type="text"
                     required
                     value={assetName}
@@ -657,6 +665,7 @@ export default function DataSharePage() {
                     Content Type
                   </label>
                   <select
+                    aria-label="Content Type"
                     value={contentType}
                     onChange={(e) => setContentType(e.target.value)}
                     className="w-full px-3 py-2 bg-[var(--surface-2)] border border-gray-600 rounded text-sm"
@@ -689,6 +698,7 @@ export default function DataSharePage() {
                   Data Source URL
                 </label>
                 <input
+                  aria-label="Data Source URL"
                   type="url"
                   value={baseUrl}
                   onChange={(e) => setBaseUrl(e.target.value)}
@@ -700,7 +710,7 @@ export default function DataSharePage() {
               <button
                 type="submit"
                 disabled={creating}
-                className="flex items-center gap-2 px-5 py-2.5 bg-[var(--accent)] text-white rounded-lg text-sm font-medium hover:bg-[var(--accent-hover)] disabled:opacity-50"
+                className="flex items-center gap-2 px-5 py-2.5 bg-[var(--accent)] text-white dark:text-gray-900 rounded-lg text-sm font-medium hover:bg-[var(--accent-hover)] disabled:opacity-50"
               >
                 {creating ? (
                   <Loader2 size={16} className="animate-spin" />

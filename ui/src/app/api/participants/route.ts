@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { edcClient } from "@/lib/edc";
+import { requireAuth, isAuthError } from "@/lib/auth-guard";
 import { promises as fs } from "fs";
 import path from "path";
 
@@ -67,6 +68,9 @@ interface CfmTenant {
  * enriched with human-readable display names from CFM Tenant Manager.
  */
 export async function GET() {
+  const auth = await requireAuth();
+  if (isAuthError(auth)) return auth;
+
   try {
     const participants = await edcClient.management<EdcParticipant[]>(
       "/v5alpha/participants",
@@ -167,6 +171,9 @@ export async function GET() {
  * 2. Create participant profile (triggers provisioning via CFM agents)
  */
 export async function POST(req: NextRequest) {
+  const auth = await requireAuth();
+  if (isAuthError(auth)) return auth;
+
   try {
     const body = await req.json();
     const { displayName, organization, role, ehdsParticipantType } = body;

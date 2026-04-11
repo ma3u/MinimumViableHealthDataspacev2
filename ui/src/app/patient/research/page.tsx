@@ -102,8 +102,11 @@ export default function ResearchProgramsPage() {
 
         {/* EHDS Art. 10 banner */}
         <div className="mb-6 rounded-lg border border-teal-700 bg-teal-900/20 p-3 flex items-start gap-2">
-          <Shield size={16} className="mt-0.5 shrink-0 text-teal-400" />
-          <div className="text-xs text-teal-300">
+          <Shield
+            size={16}
+            className="mt-0.5 shrink-0 text-teal-800 dark:text-teal-400"
+          />
+          <div className="text-xs text-teal-800 dark:text-teal-300">
             <strong>EHDS Art. 10:</strong> You have the right to consent to or
             opt out of secondary use of your health data for research. Each
             consent is study-specific and revocable at any time (GDPR Art. 17).
@@ -111,7 +114,7 @@ export default function ResearchProgramsPage() {
         </div>
 
         {message && (
-          <div className="mb-4 rounded-lg bg-green-900/30 border border-green-700 p-3 text-sm text-green-300">
+          <div className="mb-4 rounded-lg bg-green-100 dark:bg-green-900/30 border border-green-300 dark:border-green-700 p-3 text-sm text-green-800 dark:text-green-300">
             {message}
           </div>
         )}
@@ -140,7 +143,7 @@ export default function ResearchProgramsPage() {
                   data-testid="research-program-card"
                   className={`rounded-xl border p-4 ${
                     isConsented
-                      ? "border-teal-700 bg-teal-900/10"
+                      ? "border-teal-300 dark:border-teal-700 bg-teal-50 dark:bg-teal-900/10"
                       : "border-[var(--border)] bg-[var(--surface-2)]/50"
                   }`}
                 >
@@ -154,7 +157,7 @@ export default function ResearchProgramsPage() {
                       </div>
                     </div>
                     {isConsented ? (
-                      <span className="flex items-center gap-1 text-xs text-teal-400 font-medium">
+                      <span className="flex items-center gap-1 text-xs text-teal-800 dark:text-teal-400 font-medium">
                         <CheckCircle2 size={12} /> Donated
                       </span>
                     ) : (
@@ -167,7 +170,9 @@ export default function ResearchProgramsPage() {
                     {prog.description}
                   </p>
                   <div className="text-xs text-[var(--text-secondary)] mb-3">
-                    <span className="text-gray-600">Data needed: </span>
+                    <span className="text-gray-700 dark:text-gray-400">
+                      Data needed:{" "}
+                    </span>
                     {prog.dataNeeded}
                   </div>
 
@@ -180,7 +185,7 @@ export default function ResearchProgramsPage() {
                         if (consent) revoke(consent);
                       }}
                       disabled={revoking !== null}
-                      className="flex items-center gap-1.5 text-xs text-red-400 hover:text-red-300 transition-colors disabled:opacity-50"
+                      className="flex items-center gap-1.5 text-xs text-red-800 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300 transition-colors disabled:opacity-50"
                     >
                       <XCircle size={12} />
                       {revoking ? "Revoking…" : "Revoke consent (GDPR Art. 17)"}
@@ -224,9 +229,13 @@ export default function ResearchProgramsPage() {
                         </td>
                         <td className="py-1.5">
                           {c.revoked ? (
-                            <span className="text-red-400">Revoked</span>
+                            <span className="text-red-800 dark:text-red-400">
+                              Revoked
+                            </span>
                           ) : (
-                            <span className="text-teal-400">Active</span>
+                            <span className="text-teal-800 dark:text-teal-400">
+                              Active
+                            </span>
                           )}
                         </td>
                       </tr>

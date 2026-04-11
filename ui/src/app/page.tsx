@@ -53,19 +53,35 @@ export default function Home() {
 
         <div className="flex flex-wrap gap-3 text-sm text-[var(--text-secondary)]">
           <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[var(--surface-2)]/60 border border-[var(--border)]">
-            <Heart size={14} className="text-layer3" aria-hidden="true" />
+            <Heart
+              size={14}
+              className="text-green-800 dark:text-green-300"
+              aria-hidden="true"
+            />
             <span>127 synthetic patients</span>
           </span>
           <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[var(--surface-2)]/60 border border-[var(--border)]">
-            <Network size={14} className="text-layer1" aria-hidden="true" />
+            <Network
+              size={14}
+              className="text-blue-800 dark:text-blue-300"
+              aria-hidden="true"
+            />
             <span>5,300+ graph nodes</span>
           </span>
           <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[var(--surface-2)]/60 border border-[var(--border)]">
-            <Globe size={14} className="text-layer2" aria-hidden="true" />
+            <Globe
+              size={14}
+              className="text-teal-800 dark:text-teal-300"
+              aria-hidden="true"
+            />
             <span>7 demo personas</span>
           </span>
           <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[var(--surface-2)]/60 border border-[var(--border)]">
-            <Lock size={14} className="text-layer5" aria-hidden="true" />
+            <Lock
+              size={14}
+              className="text-purple-800 dark:text-purple-300"
+              aria-hidden="true"
+            />
             <span>All data is synthetic</span>
           </span>
         </div>
@@ -87,7 +103,7 @@ export default function Home() {
             href="https://health.ec.europa.eu/ehealth-digital-health-and-care/european-health-data-space_en"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-layer1 underline underline-offset-2 hover:text-[var(--text-primary)] transition-colors"
+            className="text-[var(--accent)] underline underline-offset-2 hover:text-[var(--text-primary)] transition-colors"
           >
             EHDS regulation
           </a>{" "}
@@ -109,15 +125,19 @@ export default function Home() {
                 className="text-[var(--role-user-text)]"
                 aria-hidden="true"
               />
-              <h3 className="font-semibold text-[var(--role-user-text)] text-sm sm:text-base">
+              <h3 className="font-semibold text-gray-900 dark:text-gray-100 text-sm sm:text-base">
                 For Researchers
               </h3>
             </div>
-            <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
+            <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
               Cross-border access to standardised health datasets in{" "}
-              <strong className="text-[var(--text-primary)]">FHIR R4</strong>{" "}
+              <strong className="text-gray-800 dark:text-gray-200">
+                FHIR R4
+              </strong>{" "}
               and{" "}
-              <strong className="text-[var(--text-primary)]">OMOP CDM</strong>{" "}
+              <strong className="text-gray-800 dark:text-gray-200">
+                OMOP CDM
+              </strong>{" "}
               format, ending bilateral negotiations with each hospital. The
               Health Data Access Body (HDAB) provides a single-window approval
               process under Art.&nbsp;46, cutting months of bureaucracy to
@@ -132,18 +152,18 @@ export default function Home() {
                 className="text-[var(--role-holder-text)]"
                 aria-hidden="true"
               />
-              <h3 className="font-semibold text-[var(--role-holder-text)] text-sm sm:text-base">
+              <h3 className="font-semibold text-gray-900 dark:text-gray-100 text-sm sm:text-base">
                 For Hospitals
               </h3>
             </div>
-            <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
+            <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
               A clear legal basis for sharing data with researchers while
               staying GDPR-compliant. Publish datasets once via{" "}
-              <strong className="text-[var(--text-primary)]">
+              <strong className="text-gray-800 dark:text-gray-200">
                 HealthDCAT-AP
               </strong>{" "}
               catalogues, manage access through standardised{" "}
-              <strong className="text-[var(--text-primary)]">
+              <strong className="text-gray-800 dark:text-gray-200">
                 DSP contracts
               </strong>
               , and let the HDAB handle regulatory approval, reducing legal risk
@@ -158,16 +178,18 @@ export default function Home() {
                 className="text-[var(--role-patient-text)]"
                 aria-hidden="true"
               />
-              <h3 className="font-semibold text-[var(--role-patient-text)] text-sm sm:text-base">
+              <h3 className="font-semibold text-gray-900 dark:text-gray-100 text-sm sm:text-base">
                 For Patients
               </h3>
             </div>
-            <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
+            <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
               Full control over your health records across borders. Access your
               data from any EU provider via{" "}
-              <strong className="text-[var(--text-primary)]">EEHRxF</strong>{" "}
+              <strong className="text-gray-800 dark:text-gray-200">
+                EEHRxF
+              </strong>{" "}
               (European Electronic Health Record exchange Format), with{" "}
-              <strong className="text-[var(--text-primary)]">
+              <strong className="text-gray-800 dark:text-gray-200">
                 GDPR Art.&nbsp;15-22
               </strong>{" "}
               rights to access, rectify, and control how your data is used for
@@ -182,17 +204,17 @@ export default function Home() {
                 className="text-[var(--role-hdab-text)]"
                 aria-hidden="true"
               />
-              <h3 className="font-semibold text-[var(--role-hdab-text)] text-sm sm:text-base">
+              <h3 className="font-semibold text-gray-900 dark:text-gray-100 text-sm sm:text-base">
                 For Regulators
               </h3>
             </div>
-            <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
+            <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
               Enforce EHDS Art.&nbsp;46-51 data access permits through the{" "}
-              <strong className="text-[var(--text-primary)]">
+              <strong className="text-gray-800 dark:text-gray-200">
                 Health Data Access Body
               </strong>
               . Audit compliance via{" "}
-              <strong className="text-[var(--text-primary)]">
+              <strong className="text-gray-800 dark:text-gray-200">
                 verifiable credentials
               </strong>
               , ensure protocol conformance, and govern trust anchors across the
@@ -224,42 +246,42 @@ export default function Home() {
               abbr: "EHDS",
               desc: "EU regulation establishing rules for primary use (patient access) and secondary use (research) of electronic health data across member states.",
               href: "https://health.ec.europa.eu/ehealth-digital-health-and-care/european-health-data-space_en",
-              color: "border-layer5/50 text-layer5",
+              color: "border-layer5/50 text-purple-800 dark:text-purple-300",
             },
             {
               name: "HL7 FHIR R4",
               abbr: "FHIR",
               desc: "Fast Healthcare Interoperability Resources, the global standard for exchanging clinical data (Patient, Condition, Observation, Medication).",
               href: "https://hl7.org/fhir/R4/",
-              color: "border-layer3/50 text-layer3",
+              color: "border-layer3/50 text-green-800 dark:text-green-300",
             },
             {
               name: "OMOP Common Data Model",
               abbr: "OMOP",
               desc: "Observational Medical Outcomes Partnership CDM v5.4. Standardises clinical data for large-scale observational research and cohort analytics.",
               href: "https://ohdsi.github.io/CommonDataModel/",
-              color: "border-layer4/50 text-layer4",
+              color: "border-layer4/50 text-amber-800 dark:text-amber-300",
             },
             {
               name: "HealthDCAT-AP",
               abbr: "DCAT",
               desc: "Health extension of DCAT-AP, a metadata standard for publishing and discovering health datasets in federated catalogues across the EU.",
               href: "https://healthdcat-ap.github.io/",
-              color: "border-layer2/50 text-layer2",
+              color: "border-layer2/50 text-teal-800 dark:text-teal-300",
             },
             {
               name: "Dataspace Protocol",
               abbr: "DSP",
               desc: "IDSA Dataspace Protocol 2025-1. Governs catalogue federation, contract negotiation, and secure data transfer between dataspace participants.",
               href: "https://docs.internationaldataspaces.org/ids-knowledgebase/dataspace-protocol",
-              color: "border-layer1/50 text-layer1",
+              color: "border-layer1/50 text-blue-800 dark:text-blue-300",
             },
             {
               name: "Decentralised Claims Protocol",
               abbr: "DCP",
               desc: "Verifiable credential issuance and presentation. Enables trust anchors, membership credentials, and data access permits without central authority.",
               href: "https://docs.internationaldataspaces.org/ids-knowledgebase/decentralized-claims-protocol",
-              color: "border-purple-500/50 text-purple-400",
+              color: "border-purple-500/50 text-[var(--accent)]",
             },
           ].map(({ name, abbr, desc, href, color }) => (
             <a
@@ -273,19 +295,17 @@ export default function Home() {
             >
               <div className="flex items-center justify-between mb-2">
                 <span
-                  className={`font-semibold text-sm sm:text-base ${
-                    color.split(" ")[1]
-                  }`}
+                  className={`font-semibold text-sm sm:text-base text-gray-900 dark:text-gray-100`}
                 >
                   {name}
                 </span>
                 <ExternalLink
                   size={14}
-                  className="text-gray-600 group-hover:text-[var(--text-secondary)] transition-colors"
+                  className="text-[var(--text-secondary)] group-hover:text-[var(--text-secondary)] transition-colors"
                   aria-hidden="true"
                 />
               </div>
-              <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
+              <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
                 {desc}
               </p>
             </a>
@@ -379,7 +399,7 @@ export default function Home() {
           <div className="flex items-center justify-center gap-2 mb-2">
             <MessageCircle
               size={18}
-              className="text-layer1"
+              className="text-blue-800 dark:text-blue-300"
               aria-hidden="true"
             />
             <h2
@@ -398,7 +418,7 @@ export default function Home() {
               href="https://github.com/ma3u/MinimumViableHealthDataspacev2/issues"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-[var(--surface-2)] text-[var(--text-primary)] border border-gray-600 hover:border-layer1 hover:text-[var(--text-primary)] transition-colors"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-[var(--surface-2)] text-[var(--text-primary)] border border-[var(--border-ui)] hover:border-layer1 hover:text-[var(--text-primary)] transition-colors"
             >
               <Github size={16} aria-hidden="true" />
               Report an Issue
@@ -407,7 +427,7 @@ export default function Home() {
               href="https://github.com/ma3u/MinimumViableHealthDataspacev2/discussions"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-[var(--surface-2)] text-[var(--text-primary)] border border-gray-600 hover:border-layer2 hover:text-[var(--text-primary)] transition-colors"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-[var(--surface-2)] text-[var(--text-primary)] border border-[var(--border-ui)] hover:border-layer2 hover:text-[var(--text-primary)] transition-colors"
             >
               <MessageCircle size={16} aria-hidden="true" />
               Join the Discussion
@@ -417,7 +437,7 @@ export default function Home() {
       </section>
 
       {/* ── Footer ────────────────────────────────────────────────────────── */}
-      <footer className="mt-8 sm:mt-10 pt-6 border-t border-[var(--border)] text-center text-xs text-gray-600">
+      <footer className="mt-8 sm:mt-10 pt-6 border-t border-[var(--border)] text-center text-xs text-[var(--text-secondary)]">
         <p>
           Reference implementation. All data is synthetic. No real patient
           records.

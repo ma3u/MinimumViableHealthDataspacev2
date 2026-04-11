@@ -29,7 +29,10 @@ function SignInContent() {
     <div className="min-h-[60vh] flex flex-col items-center justify-center gap-8 py-10 px-4">
       {/* ── Login card ── */}
       <div className="bg-[var(--surface-2)] rounded-lg p-8 max-w-md w-full text-center">
-        <ShieldCheck size={48} className="mx-auto mb-4 text-layer1" />
+        <ShieldCheck
+          size={48}
+          className="mx-auto mb-4 text-blue-800 dark:text-blue-300"
+        />
         <h1 className="text-2xl font-bold text-[var(--text-primary)] mb-2">
           Health Dataspace Login
         </h1>
@@ -42,14 +45,14 @@ function SignInContent() {
         </p>
 
         {error && (
-          <div className="bg-red-900/50 border border-red-700 rounded p-3 mb-4 text-sm text-red-300">
+          <div className="bg-red-100 dark:bg-red-900/50 border border-red-300 dark:border-red-700 rounded p-3 mb-4 text-sm text-red-800 dark:text-red-300">
             {oauthErrorMessage(error)}
           </div>
         )}
 
         <button
           onClick={() => signIn("keycloak", { callbackUrl })}
-          className="w-full px-4 py-3 bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white rounded-lg font-medium transition-colors"
+          className="w-full px-4 py-3 bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white dark:text-gray-900 rounded-lg font-medium transition-colors"
         >
           Sign in with Keycloak
         </button>
@@ -110,14 +113,14 @@ function SignInContent() {
               <p className="text-xs text-[var(--text-secondary)] leading-tight">
                 {persona.description}
               </p>
-              <p className="text-[10px] text-gray-600 mt-1.5">
+              <p className="text-[10px] text-[var(--text-secondary)] mt-1.5">
                 → opens graph:{" "}
                 <span className="font-mono">{persona.personaId}</span>
               </p>
             </button>
           ))}
         </div>
-        <p className="text-[10px] text-gray-600 text-center mt-3">
+        <p className="text-[10px] text-[var(--text-secondary)] text-center mt-3">
           Password = username &nbsp;·&nbsp; Keycloak realm: EDCV &nbsp;·&nbsp;
           http://localhost:8080
         </p>

@@ -149,29 +149,23 @@ describe("AdminPoliciesPage", () => {
 
   it("renders the page description about ODRL policies", async () => {
     await renderLoaded();
+    // Component subtitle: "ODRL policies · EHDS Regulation (EU) 2025/327"
+    expect(screen.getByText(/ODRL policies/)).toBeInTheDocument();
+  });
+
+  it("renders the create form heading when form is opened", async () => {
+    const user = userEvent.setup();
+    await renderLoaded();
+    await user.click(screen.getByRole("button", { name: /Create Policy/ }));
     expect(
-      screen.getByText(/Manage ODRL policies across all participant contexts/),
+      screen.getByText("Create EHDS Policy Definition"),
     ).toBeInTheDocument();
   });
 
-  it("renders a link to the ODRL W3C specification", async () => {
-    const user = userEvent.setup();
+  it("renders the page with Policy Definitions heading", async () => {
     await renderLoaded();
-    // The doc link is inside PageIntro's collapsible info section
-    const infoToggle = screen.getByText("How does this work?");
-    await user.click(infoToggle);
-    const link = screen.getByText("ODRL Specification (W3C)");
-    expect(link).toBeInTheDocument();
-    expect(link.closest("a")).toHaveAttribute(
-      "href",
-      "https://www.w3.org/TR/odrl-model/",
-    );
-  });
-
-  it("renders workflow navigation links", async () => {
-    await renderLoaded();
-    expect(screen.getByText("Tenant Management")).toBeInTheDocument();
-    expect(screen.getByText("Audit & Provenance")).toBeInTheDocument();
+    // Navigation links are not in the component; heading is always present
+    expect(screen.getByText("Policy Definitions")).toBeInTheDocument();
   });
 
   /* ─── Stats bar ─── */
@@ -576,7 +570,7 @@ describe("AdminPoliciesPage", () => {
     });
   });
 
-  it("shows green colour for success message", async () => {
+  it("shows success styling for success message", async () => {
     const user = userEvent.setup();
     await renderLoaded();
     await user.click(screen.getByRole("button", { name: /Create Policy/ }));
@@ -596,7 +590,8 @@ describe("AdminPoliciesPage", () => {
 
     await waitFor(() => {
       const msg = screen.getByText("Policy created successfully.");
-      expect(msg.className).toContain("text-green-400");
+      // Component uses CSS variable class text-[var(--success-text)] not text-green-400
+      expect(msg.className).toContain("text-[var(--success-text)]");
     });
   });
 
@@ -671,7 +666,7 @@ describe("AdminPoliciesPage", () => {
     });
   });
 
-  it("shows red colour for error messages", async () => {
+  it("shows error styling for error messages", async () => {
     const user = userEvent.setup();
     await renderLoaded();
     await user.click(screen.getByRole("button", { name: /Create Policy/ }));
@@ -688,7 +683,8 @@ describe("AdminPoliciesPage", () => {
 
     await waitFor(() => {
       const msg = screen.getByText(/Failed: Boom/);
-      expect(msg.className).toContain("text-red-400");
+      // Component uses CSS variable class text-[var(--danger-text)] not text-red-400
+      expect(msg.className).toContain("text-[var(--danger-text)]");
     });
   });
 

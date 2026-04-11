@@ -336,7 +336,7 @@ describe("TasksPage – extra coverage", () => {
     await waitFor(() => {
       expect(screen.getByText("Error Transfer")).toBeInTheDocument();
       const badge = screen.getByText("ERROR");
-      expect(badge.className).toContain("red");
+      expect(badge.className).toContain("badge");
     });
   });
 

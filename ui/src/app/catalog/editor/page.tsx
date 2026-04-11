@@ -357,7 +357,7 @@ function FormField({
     <div>
       <label className="block text-xs font-semibold text-[var(--text-primary)] mb-1">
         {label}
-        {required && <span className="text-red-400 ml-1">*</span>}
+        {required && <span className="text-[var(--danger-text)] ml-1">*</span>}
       </label>
       {children}
       {help && (
@@ -382,7 +382,7 @@ function SelectField({
     <select
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      className="w-full px-3 py-2 bg-[var(--surface-2)] border border-gray-600 rounded text-sm text-[var(--text-primary)] outline-none focus:border-purple-500"
+      className="w-full px-3 py-2 bg-[var(--surface-2)] border border-[var(--border-ui)] rounded text-sm text-[var(--text-primary)] outline-none focus:border-purple-500"
     >
       {placeholder && (
         <option value="" disabled>
@@ -415,7 +415,7 @@ function InputField({
       value={value}
       onChange={(e) => onChange(e.target.value)}
       placeholder={placeholder}
-      className="w-full px-3 py-2 bg-[var(--surface-2)] border border-gray-600 rounded text-sm text-[var(--text-primary)] outline-none focus:border-purple-500"
+      className="w-full px-3 py-2 bg-[var(--surface-2)] border border-[var(--border-ui)] rounded text-sm text-[var(--text-primary)] outline-none focus:border-purple-500"
     />
   );
 }
@@ -628,7 +628,7 @@ function EditorContent() {
           {datasets.length > 0 && (
             <button
               onClick={() => downloadAllTurtle(datasets)}
-              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium bg-green-900/40 text-green-300 border border-green-700/50 hover:bg-green-900/60 transition-colors"
+              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium bg-[var(--badge-active-bg)] text-[var(--badge-active-text)] border border-[var(--badge-active-border)] hover:opacity-80 transition-colors"
               title="Export all entries as RDF Turtle for the EHDS editor"
             >
               <Download size={14} />
@@ -660,7 +660,7 @@ function EditorContent() {
                 No HealthDCAT-AP entries yet.{" "}
                 <button
                   onClick={startNew}
-                  className="text-purple-400 hover:underline"
+                  className="text-[var(--accent)] hover:underline"
                 >
                   Create one
                 </button>
@@ -674,7 +674,7 @@ function EditorContent() {
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-semibold text-purple-300 truncate">
+                        <h3 className="font-semibold text-[var(--accent)] truncate">
                           {d.title || d.id}
                         </h3>
                         <p className="text-xs text-[var(--text-secondary)] mt-0.5 line-clamp-2">
@@ -683,12 +683,12 @@ function EditorContent() {
                         <div className="flex flex-wrap gap-3 mt-2 text-xs text-[var(--text-secondary)]">
                           {d.publisher && <span>{d.publisher}</span>}
                           {d.theme && (
-                            <span className="bg-purple-900/30 text-purple-300 px-1.5 py-0.5 rounded">
+                            <span className="bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300 px-1.5 py-0.5 rounded">
                               {d.theme}
                             </span>
                           )}
                           {d.datasetType && (
-                            <span className="bg-gray-700 text-[var(--text-primary)] px-1.5 py-0.5 rounded">
+                            <span className="bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 px-1.5 py-0.5 rounded">
                               {d.datasetType}
                             </span>
                           )}
@@ -709,14 +709,14 @@ function EditorContent() {
                         </button>
                         <button
                           onClick={() => startEdit(d)}
-                          className="p-1.5 rounded hover:bg-[var(--surface-2)] text-[var(--text-secondary)] hover:text-purple-300"
+                          className="p-1.5 rounded hover:bg-[var(--surface-2)] text-[var(--text-secondary)] hover:text-[var(--accent)]"
                           title="Edit entry"
                         >
                           <Edit3 size={14} />
                         </button>
                         <button
                           onClick={() => handleDelete(d.id)}
-                          className="p-1.5 rounded hover:bg-[var(--surface-2)] text-[var(--text-secondary)] hover:text-red-400"
+                          className="p-1.5 rounded hover:bg-[var(--surface-2)] text-[var(--text-secondary)] hover:text-[var(--danger-text)]"
                           title="Delete entry"
                         >
                           <Trash2 size={14} />
@@ -742,7 +742,7 @@ function EditorContent() {
 
             {/* Section: DCAT-AP Mandatory */}
             <fieldset className="space-y-4">
-              <legend className="text-sm font-semibold text-purple-400 border-b border-[var(--border)] pb-1 mb-2">
+              <legend className="text-sm font-semibold text-[var(--accent)] border-b border-[var(--border)] pb-1 mb-2">
                 DCAT-AP Mandatory Fields
               </legend>
 
@@ -760,7 +760,7 @@ function EditorContent() {
                   onChange={(e) => setField("description", e.target.value)}
                   placeholder="Describe the dataset contents, coverage and purpose…"
                   rows={3}
-                  className="w-full px-3 py-2 bg-[var(--surface-2)] border border-gray-600 rounded text-sm text-[var(--text-primary)] outline-none focus:border-purple-500 resize-y"
+                  className="w-full px-3 py-2 bg-[var(--surface-2)] border border-[var(--border-ui)] rounded text-sm text-[var(--text-primary)] outline-none focus:border-purple-500 resize-y"
                 />
               </FormField>
 
@@ -801,7 +801,7 @@ function EditorContent() {
 
             {/* Section: DCAT-AP Recommended */}
             <fieldset className="space-y-4">
-              <legend className="text-sm font-semibold text-purple-400 border-b border-[var(--border)] pb-1 mb-2">
+              <legend className="text-sm font-semibold text-[var(--accent)] border-b border-[var(--border)] pb-1 mb-2">
                 DCAT-AP Recommended Fields
               </legend>
 
@@ -840,7 +840,7 @@ function EditorContent() {
 
             {/* Section: HealthDCAT-AP Extensions */}
             <fieldset className="space-y-4">
-              <legend className="text-sm font-semibold text-purple-400 border-b border-[var(--border)] pb-1 mb-2">
+              <legend className="text-sm font-semibold text-[var(--accent)] border-b border-[var(--border)] pb-1 mb-2">
                 HealthDCAT-AP Extensions
               </legend>
 
@@ -908,7 +908,7 @@ function EditorContent() {
                       onChange={(e) =>
                         setField("personalData", e.target.checked)
                       }
-                      className="w-4 h-4 rounded bg-[var(--surface-2)] border-gray-600"
+                      className="w-4 h-4 rounded bg-[var(--surface-2)] border-[var(--border-ui)]"
                     />
                     <span className="text-sm text-[var(--text-primary)]">
                       Yes
@@ -924,7 +924,7 @@ function EditorContent() {
                       onChange={(e) =>
                         setField("sensitiveData", e.target.checked)
                       }
-                      className="w-4 h-4 rounded bg-[var(--surface-2)] border-gray-600"
+                      className="w-4 h-4 rounded bg-[var(--surface-2)] border-[var(--border-ui)]"
                     />
                     <span className="text-sm text-[var(--text-primary)]">
                       Yes
@@ -936,7 +936,7 @@ function EditorContent() {
 
             {/* Section: Statistics */}
             <fieldset className="space-y-4">
-              <legend className="text-sm font-semibold text-purple-400 border-b border-[var(--border)] pb-1 mb-2">
+              <legend className="text-sm font-semibold text-[var(--accent)] border-b border-[var(--border)] pb-1 mb-2">
                 Statistics
               </legend>
 
@@ -997,8 +997,8 @@ function EditorContent() {
               <div
                 className={`flex items-center gap-2 p-3 rounded text-sm ${
                   result.ok
-                    ? "bg-green-900/30 text-green-300"
-                    : "bg-red-900/30 text-red-300"
+                    ? "bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300"
+                    : "bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300"
                 }`}
               >
                 {result.ok ? (

@@ -1,10 +1,11 @@
 "use client";
 
-import { useSession, signIn, signOut } from "next-auth/react";
+import { signIn, signOut } from "next-auth/react";
 import { LogIn, LogOut, Settings, Shield, User, Users } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { ROLE_LABELS, DEMO_PERSONAS, deriveParticipantType } from "@/lib/auth";
 import { useDemoPersona, setDemoPersona } from "@/lib/use-demo-persona";
+import { useTabSession, markSessionSwitch } from "@/lib/use-tab-session";
 
 /** Badge colours per role code — uses semantic CSS tokens, adapts to light/dark. */
 const ROLE_BADGE: Record<string, string> = {
@@ -85,6 +86,9 @@ function switchPersona(
     process.env.NEXT_PUBLIC_KEYCLOAK_CLIENT_ID ?? "health-dataspace-ui";
   // Store the target username so we can pass it as login_hint after logout
   sessionStorage.setItem("switch_to_user", username);
+  // Mark this tab as intentionally switching — clears the session snapshot
+  // so the new Keycloak session is accepted after redirect.
+  markSessionSwitch();
   // Re-show the demo password warning for the new user
   sessionStorage.removeItem("demo-password-banner-dismissed");
   // Sign out from NextAuth first, then redirect to Keycloak's logout endpoint.
@@ -100,7 +104,8 @@ function switchPersona(
 }
 
 export default function UserMenu() {
-  const { data: liveSession, status: liveStatus } = useSession();
+  // Tab-scoped session: immune to cross-tab cookie changes in live mode.
+  const { session: tabSession, status: tabStatus } = useTabSession();
   // Always call useDemoPersona — hook rules require unconditional calls.
   const demoPersona = useDemoPersona();
   const demoSession = IS_STATIC
@@ -112,8 +117,16 @@ export default function UserMenu() {
         roles: [...demoPersona.roles],
       }
     : null;
-  const session = IS_STATIC ? demoSession : liveSession;
-  const status = IS_STATIC ? "authenticated" : liveStatus;
+  // In static mode: use demo persona. In live mode: use tab-scoped snapshot.
+  const session = IS_STATIC
+    ? demoSession
+    : tabSession
+      ? {
+          user: { name: tabSession.username, email: tabSession.email },
+          roles: tabSession.roles,
+        }
+      : null;
+  const status = IS_STATIC ? "authenticated" : tabStatus;
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -307,6 +320,8 @@ export default function UserMenu() {
               onClick={() => {
                 setOpen(false);
                 sessionStorage.removeItem("demo-password-banner-dismissed");
+                // Clear the tab session snapshot so re-login gets a fresh one
+                markSessionSwitch();
                 if (IS_STATIC) return;
                 const keycloakPublicUrl =
                   process.env.NEXT_PUBLIC_KEYCLOAK_PUBLIC_URL;

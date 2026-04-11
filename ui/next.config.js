@@ -6,6 +6,8 @@ const isStaticExport =
 const isDocker = !!process.env.DOCKER_BUILD;
 
 const nextConfig = {
+  // Suppress X-Powered-By header (OWASP A05 — security misconfiguration)
+  poweredByHeader: false,
   // Static export for GitHub Pages, standalone for Docker, default for dev
   ...(isStaticExport
     ? { output: "export" }

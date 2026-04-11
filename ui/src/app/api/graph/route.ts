@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { runQuery } from "@/lib/neo4j";
+import { requireAuth, isAuthError } from "@/lib/auth-guard";
 import {
   LABEL_LAYER,
   LAYER_COLORS,
@@ -476,6 +477,9 @@ async function buildDefaultGraph() {
  *   hdab           — authority: approvals + credentials + TC governance
  */
 export async function GET(req: Request) {
+  const auth = await requireAuth();
+  if (isAuthError(auth)) return auth;
+
   const { searchParams } = new URL(req.url);
   const persona = (searchParams.get("persona") ?? "default") as PersonaId;
 

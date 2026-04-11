@@ -180,15 +180,13 @@ export function PersonaJourneyCards() {
                 className={persona.color}
                 aria-hidden="true"
               />
-              <h3
-                className={`font-semibold text-sm sm:text-base ${persona.color}`}
-              >
+              <h3 className="font-semibold text-sm sm:text-base text-gray-900 dark:text-gray-100">
                 {persona.role}
               </h3>
             </div>
-            <p className="text-[11px] text-[var(--text-secondary)] mb-3">
+            <p className="text-[11px] text-gray-700 dark:text-gray-300 mb-3">
               {persona.org} · login as{" "}
-              <code className="font-mono text-[var(--text-secondary)]">
+              <code className="font-mono text-gray-700 dark:text-gray-300">
                 {persona.loginAs}
               </code>
             </p>
@@ -200,16 +198,16 @@ export function PersonaJourneyCards() {
               {persona.steps.map((step, si) => (
                 <li key={si} className="flex gap-2 items-start">
                   <span
-                    className={`flex-shrink-0 w-5 h-5 rounded-full bg-[var(--surface-2)] flex items-center justify-center text-[10px] font-bold ${persona.color} mt-0.5`}
+                    className="flex-shrink-0 w-5 h-5 rounded-full bg-[var(--surface-2)] flex items-center justify-center text-[10px] font-bold text-gray-700 dark:text-gray-300 mt-0.5"
                     aria-hidden="true"
                   >
                     {si + 1}
                   </span>
                   <div className="min-w-0">
-                    <p className="text-xs text-[var(--text-primary)] leading-relaxed">
+                    <p className="text-xs text-gray-800 dark:text-gray-200 leading-relaxed">
                       {step.action}
                     </p>
-                    <p className="text-[10px] text-gray-600 font-mono">
+                    <p className="text-[10px] text-gray-600 dark:text-gray-400 font-mono">
                       {step.page}
                     </p>
                   </div>
@@ -220,7 +218,7 @@ export function PersonaJourneyCards() {
             {IS_STATIC ? (
               <Link
                 href={persona.steps[0].page}
-                className={`mt-3 inline-flex items-center gap-1 text-xs ${persona.color} hover:text-[var(--text-primary)] transition-colors touch-target-sm`}
+                className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-gray-800 dark:text-gray-200 hover:text-gray-900 dark:hover:text-white transition-colors touch-target-sm"
               >
                 <span>Start journey</span>
                 <ArrowRight size={12} aria-hidden="true" />
@@ -235,7 +233,7 @@ export function PersonaJourneyCards() {
                     { login_hint: persona.loginAs },
                   )
                 }
-                className={`mt-3 inline-flex items-center gap-1 text-xs ${persona.color} hover:text-[var(--text-primary)] transition-colors touch-target-sm cursor-pointer text-left`}
+                className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-gray-800 dark:text-gray-200 hover:text-gray-900 dark:hover:text-white transition-colors touch-target-sm cursor-pointer text-left"
               >
                 <Lock size={10} aria-hidden="true" />
                 <span>Sign in & start</span>

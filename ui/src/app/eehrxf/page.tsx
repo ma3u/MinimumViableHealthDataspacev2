@@ -153,7 +153,7 @@ function ProfileRow({ profile }: { profile: EEHRxFProfile }) {
             href={profile.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-[var(--text-secondary)] hover:text-layer2 transition-colors"
+            className="text-[var(--text-secondary)] hover:text-teal-800 dark:hover:text-teal-300 transition-colors"
             title="View IG specification"
           >
             <ExternalLink size={14} />
@@ -293,7 +293,7 @@ export default function EEHRxFPage() {
         {/* Summary stats */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
           <div className="bg-[var(--surface)] border border-[var(--border)] rounded-xl p-4 flex flex-col gap-1">
-            <Layers size={16} className="text-layer2" />
+            <Layers size={16} className="text-teal-800 dark:text-teal-300" />
             <span className="text-2xl font-bold">
               {loading ? "—" : data?.summary.totalCategories ?? 0}
             </span>
@@ -302,7 +302,10 @@ export default function EEHRxFPage() {
             </span>
           </div>
           <div className="bg-[var(--surface)] border border-[var(--border)] rounded-xl p-4 flex flex-col gap-1">
-            <ShieldCheck size={16} className="text-layer3" />
+            <ShieldCheck
+              size={16}
+              className="text-green-800 dark:text-green-300"
+            />
             <span className="text-2xl font-bold">
               {loading ? "—" : data?.summary.totalProfiles ?? 0}
             </span>
@@ -311,7 +314,7 @@ export default function EEHRxFPage() {
             </span>
           </div>
           <div className="bg-[var(--surface)] border border-[var(--border)] rounded-xl p-4 flex flex-col gap-1">
-            <CheckCircle size={16} className="text-green-400" />
+            <CheckCircle size={16} className="text-[var(--success-text)]" />
             <span className="text-2xl font-bold">
               {loading ? "—" : data?.summary.coveredProfiles ?? 0}
             </span>
@@ -320,7 +323,7 @@ export default function EEHRxFPage() {
             </span>
           </div>
           <div className="bg-[var(--surface)] border border-[var(--border)] rounded-xl p-4 flex flex-col gap-1">
-            <AlertTriangle size={16} className="text-yellow-400" />
+            <AlertTriangle size={16} className="text-[var(--warning-text)]" />
             <span className="text-2xl font-bold">
               {loading ? "—" : `${data?.summary.coveragePercent ?? 0}%`}
             </span>
@@ -349,12 +352,14 @@ export default function EEHRxFPage() {
                     className={`w-4 h-4 rounded-full border-2 ${
                       m.active
                         ? "bg-layer2 border-layer2"
-                        : "bg-[var(--surface)] border-gray-600"
+                        : "bg-[var(--surface)] border-[var(--border-ui)]"
                     }`}
                   />
                   <span
                     className={`text-xs font-medium mt-1 ${
-                      m.active ? "text-layer2" : "text-[var(--text-secondary)]"
+                      m.active
+                        ? "text-teal-800 dark:text-teal-300"
+                        : "text-[var(--text-secondary)]"
                     }`}
                   >
                     {m.year}
@@ -418,7 +423,7 @@ export default function EEHRxFPage() {
                 href={ref.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-1.5 text-[var(--text-secondary)] hover:text-layer2 transition-colors"
+                className="flex items-center gap-1.5 text-[var(--text-secondary)] hover:text-teal-800 dark:hover:text-teal-300 transition-colors"
               >
                 <ExternalLink size={12} />
                 {ref.label}

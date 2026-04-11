@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { runQuery } from "@/lib/neo4j";
+import { requireAuth, isAuthError } from "@/lib/auth-guard";
 
 export const dynamic = "force-dynamic";
 
@@ -223,6 +224,9 @@ function autoLabel(key: string): string {
  * user-friendly property metadata for the detail panel.
  */
 export async function GET(req: Request) {
+  const auth = await requireAuth();
+  if (isAuthError(auth)) return auth;
+
   const { searchParams } = new URL(req.url);
   const nodeId = searchParams.get("id");
   if (!nodeId) {

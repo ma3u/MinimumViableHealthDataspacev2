@@ -45,6 +45,10 @@ const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 const OPENAI_MODEL = process.env.OPENAI_MODEL ?? "gpt-4o-mini";
 const OLLAMA_URL = process.env.OLLAMA_URL; // e.g. http://localhost:11434
 const OLLAMA_MODEL = process.env.OLLAMA_MODEL ?? "llama3.1";
+const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
+const ANTHROPIC_MODEL = process.env.ANTHROPIC_MODEL ?? "claude-sonnet-4-6";
+const AZURE_OPENAI_GPT4O_URL = process.env.AZURE_OPENAI_GPT4O_URL;
+const AZURE_OPENAI_API_KEY = process.env.AZURE_OPENAI_API_KEY;
 
 // ---------------------------------------------------------------------------
 // Neo4j drivers (primary SPE + optional secondary SPE)
@@ -811,16 +815,11 @@ app.post(
         return;
       }
 
-      // Safety: reject write operations
-      const trimmed = cypher.trim().toUpperCase();
-      if (
-        trimmed.startsWith("CREATE") ||
-        trimmed.startsWith("MERGE") ||
-        trimmed.startsWith("DELETE") ||
-        trimmed.startsWith("SET") ||
-        trimmed.startsWith("REMOVE") ||
-        trimmed.startsWith("DROP")
-      ) {
+      // Safety: reject write operations (hardened regex — catches CALL { CREATE } subqueries)
+      const upperCypher = cypher.toUpperCase().replace(/\s+/g, " ").trim();
+      const WRITE_PATTERN =
+        /\b(CREATE|MERGE|DELETE|DETACH\s+DELETE|SET|REMOVE|DROP|CALL\s*\{[^}]*(CREATE|MERGE|DELETE|SET|REMOVE))/i;
+      if (WRITE_PATTERN.test(upperCypher)) {
         res.status(403).json({
           error: "Write operations not permitted on federated endpoint",
         });
@@ -1101,7 +1100,7 @@ const QUERY_TEMPLATES: QueryTemplate[] = [
       /common diseases/i,
     ],
     cypher: `MATCH (c:Condition)
-             RETURN c.name AS condition, count(*) AS count
+             RETURN coalesce(c.display, c.name) AS condition, count(*) AS count
              ORDER BY count DESC
              LIMIT $limit`,
     extractParams: (_match, question) => {
@@ -1117,7 +1116,7 @@ const QUERY_TEMPLATES: QueryTemplate[] = [
       /what (?:are |)(?:the )?(?:most )?(?:common |prescribed |)(?:medications|drugs)/i,
     ],
     cypher: `MATCH (m:MedicationRequest)
-             RETURN m.name AS medication, count(*) AS count
+             RETURN coalesce(m.display, m.name) AS medication, count(*) AS count
              ORDER BY count DESC
              LIMIT $limit`,
     extractParams: (_match, question) => {
@@ -1154,8 +1153,8 @@ const QUERY_TEMPLATES: QueryTemplate[] = [
     cypher: `MATCH (p:Patient)
              WITH count(p) AS total
              MATCH (c:Condition)
-             WHERE toLower(c.name) CONTAINS toLower($condition)
-             WITH total, c.name AS condition, count(DISTINCT c) AS occurrences
+             WHERE toLower(coalesce(c.display, c.name, '')) CONTAINS toLower($condition)
+             WITH total, coalesce(c.display, c.name) AS condition, count(DISTINCT c) AS occurrences
              RETURN condition, occurrences, total,
                     round(toFloat(occurrences) / total * 100, 2) AS prevalencePercent
              ORDER BY occurrences DESC
@@ -1221,9 +1220,11 @@ const GRAPH_SCHEMA_CONTEXT = `
 Neo4j Health Knowledge Graph Schema (5 layers):
 
 Layer 1 - DSP Marketplace:
-  (:DataProduct {productId, title, provider})
-  (:Contract {contractId, state, negotiatedDate})
-  (:HDABApproval {approvalId, purpose, legalBasis})
+  (:Participant {participantId, name, did, participantType})
+  (:DataProduct {productId, title, provider, productType})
+  (:Contract {contractId, status, signedAt})
+  (:HDABApproval {approvalId, status, ehdsArticle, purpose, legalBasis})
+  (:OdrlPolicy {policyId, ehdsPermissions, ehdsProhibitions, temporalLimit})
 
 Layer 2 - HealthDCAT-AP Catalog:
   (:HealthDataset {datasetId, title, description, publisher, recordCount, temporalCoverage})
@@ -1231,35 +1232,45 @@ Layer 2 - HealthDCAT-AP Catalog:
   (:Catalog {catalogId, title})
 
 Layer 3 - FHIR R4 Clinical:
-  (:Patient {id, name, birthDate, gender, deceased, city, state})
-  (:Encounter {id, name, date, class, type, status})
-  (:Condition {id, name, code, onsetDate, clinicalStatus})
-  (:Observation {id, name, value, unit, date, code})
-  (:MedicationRequest {id, name, code, authoredOn, status})
-  (:Procedure {id, name, code, performedStart, status})
+  (:Patient {resourceId, patientId, name, birthDate, gender, deceased, city, country})
+  (:Encounter {resourceId, name, date, class, type, status})
+  (:Condition {resourceId, code, display, name, onsetDate, clinicalStatus})
+  (:Observation {resourceId, code, display, value, unit, effectiveDate})
+  (:MedicationRequest {resourceId, medicationCode, display, status})
+  (:Procedure {resourceId, code, display, performedStart, status})
 
 Layer 4 - OMOP CDM Research:
   (:OMOPPerson {personId, yearOfBirth, genderConceptId})
-  (:OMOPVisitOccurrence {visitId, visitStartDate})
-  (:OMOPConditionOccurrence {conditionId, conditionConceptId})
-  (:OMOPMeasurement {measurementId, measurementConceptId})
-  (:OMOPDrugExposure {drugExposureId, drugConceptId})
-  (:OMOPProcedureOccurrence {procedureOccurrenceId})
+  (:OMOPConditionOccurrence {conditionOccurrenceId, conditionConceptId, startDate})
+  (:OMOPMeasurement {measurementId, measurementConceptId, valueAsNumber, unit})
+  (:OMOPDrugExposure {drugExposureId, drugConceptId, startDate})
+  (:OMOPProcedureOccurrence {procedureOccurrenceId, procedureConceptId})
 
 Layer 5 - Ontology:
-  (:SnomedConcept {code, display})
-  (:LoincConcept {code, display})
+  (:SnomedConcept {conceptId, display})
+  (:LoincCode {loincNumber, display})
+  (:ICD10Code {code, display})
+  (:RxNormConcept {rxcui, display})
 
 Key relationships:
   (:Patient)-[:HAS_ENCOUNTER]->(:Encounter)
   (:Patient)-[:HAS_CONDITION]->(:Condition)
   (:Patient)-[:HAS_OBSERVATION]->(:Observation)
-  (:Patient)-[:HAS_MEDICATION]->(:MedicationRequest)
+  (:Patient)-[:HAS_MEDICATION_REQUEST]->(:MedicationRequest)
   (:Patient)-[:HAS_PROCEDURE]->(:Procedure)
-  (:Patient)-[:FROM_DATASET]->(:HealthDataset)
   (:Condition)-[:CODED_BY]->(:SnomedConcept)
+  (:Observation)-[:CODED_BY]->(:LoincCode)
+  (:MedicationRequest)-[:CODED_BY]->(:RxNormConcept)
   (:OMOPPerson)-[:MAPPED_FROM]->(:Patient)
   (:OMOPConditionOccurrence)-[:CODED_BY]->(:SnomedConcept)
+  (:Participant)-[:OFFERS]->(:DataProduct)-[:GOVERNED_BY]->(:OdrlPolicy)
+  (:DataProduct)-[:DESCRIBED_BY]->(:HealthDataset)
+  (:Contract)-[:COVERS]->(:DataProduct)
+
+Fulltext indexes (use CALL db.index.fulltext.queryNodes):
+  clinical_search — Condition.display, Observation.display, MedicationRequest.display, Procedure.display
+  catalog_search — HealthDataset.title, HealthDataset.description, DataProduct.name
+  ontology_search — SnomedConcept.display, LoincCode.display, ICD10Code.display, RxNormConcept.display
 `;
 
 /**
@@ -1294,6 +1305,36 @@ NEVER generate CREATE, MERGE, DELETE, SET, REMOVE, or DROP statements.
 Return ONLY the Cypher query, no explanation or markdown.
 
 ${GRAPH_SCHEMA_CONTEXT}`;
+
+  // Azure OpenAI (GPT-4o) — preferred when configured
+  if (AZURE_OPENAI_GPT4O_URL && AZURE_OPENAI_API_KEY) {
+    try {
+      const resp = await fetch(AZURE_OPENAI_GPT4O_URL, {
+        method: "POST",
+        headers: {
+          "api-key": AZURE_OPENAI_API_KEY,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          messages: [
+            { role: "system", content: systemPrompt },
+            { role: "user", content: question },
+          ],
+          temperature: 0,
+          max_tokens: 500,
+        }),
+      });
+      const data = (await resp.json()) as any;
+      const cypher = data.choices?.[0]?.message?.content?.trim();
+      if (cypher)
+        return cypher
+          .replace(/```cypher\n?/g, "")
+          .replace(/```/g, "")
+          .trim();
+    } catch (err) {
+      console.error("[neo4j-proxy] Azure OpenAI Text2Cypher failed:", err);
+    }
+  }
 
   if (OPENAI_API_KEY) {
     try {
@@ -1348,6 +1389,523 @@ ${GRAPH_SCHEMA_CONTEXT}`;
     }
   }
 
+  if (ANTHROPIC_API_KEY) {
+    try {
+      const resp = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: {
+          "x-api-key": ANTHROPIC_API_KEY,
+          "anthropic-version": "2023-06-01",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: ANTHROPIC_MODEL,
+          max_tokens: 500,
+          system: systemPrompt,
+          messages: [{ role: "user", content: question }],
+        }),
+      });
+      const data = (await resp.json()) as any;
+      const cypher = data.content?.[0]?.text?.trim();
+      if (cypher)
+        return cypher
+          .replace(/```cypher\n?/g, "")
+          .replace(/```/g, "")
+          .trim();
+    } catch (err) {
+      console.error("[neo4j-proxy] Anthropic Text2Cypher failed:", err);
+    }
+  }
+
+  return null;
+}
+
+/* ── ODRL scope type (forwarded from UI auth layer) ──────────── */
+interface OdrlScope {
+  participantId: string;
+  participantName: string;
+  permissions: string[];
+  prohibitions: string[];
+  accessibleDatasets: string[];
+  temporalLimit: string | null;
+  policyIds: string[];
+  hasActiveContract: boolean;
+  hdabApproved: boolean;
+}
+
+/**
+ * Check ODRL temporal limits — reject if policy has expired.
+ */
+function checkOdrlTemporal(scope: OdrlScope): string | null {
+  if (scope.temporalLimit) {
+    const limit = new Date(scope.temporalLimit);
+    if (limit < new Date()) {
+      return `ODRL temporal limit expired: ${scope.temporalLimit}`;
+    }
+  }
+  return null;
+}
+
+/**
+ * Check ODRL re-identification prohibition.
+ * Returns true if the query appears to attempt re-identification.
+ */
+function checkReIdentification(cypher: string, scope: OdrlScope): boolean {
+  if (!scope.prohibitions.includes("re_identification")) return false;
+  // Heuristic: queries selecting patient name + birthDate + city together
+  const upper = cypher.toUpperCase();
+  const hasName = upper.includes(".NAME") || upper.includes(".PATIENTID");
+  const hasBirth =
+    upper.includes(".BIRTHDATE") || upper.includes(".YEAROFBIRTH");
+  const hasGeo =
+    upper.includes(".CITY") ||
+    upper.includes(".COUNTRY") ||
+    upper.includes(".ADDRESS");
+  return hasName && hasBirth && hasGeo;
+}
+
+/**
+ * Log a query audit event to Neo4j (best-effort, non-blocking).
+ * Creates a QueryAuditEvent node for EHDS Art. 53 compliance.
+ */
+function logQueryAudit(
+  participantId: string | undefined,
+  question: string,
+  cypher: string | null,
+  method: string,
+  resultCount: number,
+  odrlEnforced: boolean,
+): void {
+  if (!driver) return;
+  const session = driver.session({ database: "neo4j" });
+  session
+    .run(
+      `MERGE (qa:QueryAuditEvent {eventId: $eventId})
+       ON CREATE SET
+         qa.participantId = $participantId,
+         qa.question = $question,
+         qa.cypher = $cypher,
+         qa.method = $method,
+         qa.resultCount = $resultCount,
+         qa.odrlEnforced = $odrlEnforced,
+         qa.timestamp = datetime()`,
+      {
+        eventId: `qa-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+        participantId: participantId ?? "anonymous",
+        question: question.slice(0, 500),
+        cypher: (cypher ?? "").slice(0, 2000),
+        method,
+        resultCount,
+        odrlEnforced,
+      },
+    )
+    .catch((err) => console.error("[neo4j-proxy] Audit log error:", err))
+    .finally(() => session.close());
+}
+
+/**
+ * Fulltext search — queries Neo4j native fulltext indexes for keyword matches.
+ * Tier 2 in the NLQ resolution chain (between template and GraphRAG).
+ * Searches clinical_search, catalog_search, and ontology_search indexes.
+ */
+async function fulltextSearch(
+  question: string,
+): Promise<{ cypher: string; params: Record<string, any> } | null> {
+  if (!driver) return null;
+
+  const session = driver.session({ database: "neo4j" });
+  try {
+    // Build Lucene search term: filter stop words, add wildcard for prefix matching
+    const STOP_WORDS = new Set([
+      "the",
+      "a",
+      "an",
+      "is",
+      "are",
+      "was",
+      "were",
+      "be",
+      "been",
+      "being",
+      "have",
+      "has",
+      "had",
+      "do",
+      "does",
+      "did",
+      "will",
+      "would",
+      "could",
+      "should",
+      "may",
+      "might",
+      "shall",
+      "can",
+      "need",
+      "dare",
+      "ought",
+      "what",
+      "which",
+      "who",
+      "whom",
+      "this",
+      "that",
+      "these",
+      "those",
+      "how",
+      "many",
+      "much",
+      "where",
+      "when",
+      "why",
+      "all",
+      "each",
+      "every",
+      "both",
+      "few",
+      "more",
+      "most",
+      "some",
+      "any",
+      "no",
+      "not",
+      "only",
+      "own",
+      "same",
+      "so",
+      "than",
+      "too",
+      "very",
+      "just",
+      "about",
+      "above",
+      "after",
+      "again",
+      "against",
+      "between",
+      "into",
+      "through",
+      "during",
+      "before",
+      "with",
+      "from",
+      "for",
+      "and",
+      "but",
+      "or",
+      "nor",
+      "on",
+      "at",
+      "to",
+      "in",
+      "of",
+      "by",
+      "it",
+      "its",
+      "me",
+      "my",
+      "per",
+      "show",
+      "give",
+      "get",
+      "tell",
+      "find",
+      "list",
+      "average",
+      "total",
+      "number",
+      "count",
+      "patient",
+      "patients",
+      "person",
+      "people",
+      "encounter",
+      "encounters",
+      "observation",
+      "observations",
+      "medication",
+      "medications",
+      "condition",
+      "conditions",
+      "procedure",
+      "procedures",
+      "dataset",
+      "datasets",
+      "data",
+      "result",
+      "results",
+      "type",
+      "types",
+      "class",
+      "classes",
+      "common",
+      "prescribed",
+    ]);
+    const words = question
+      .trim()
+      .split(/\s+/)
+      .map((w) => w.replace(/[?.!,;:]+$/g, "")) // strip trailing punctuation
+      .filter(Boolean)
+      .filter((w) => w.length > 2 && !STOP_WORDS.has(w.toLowerCase()));
+    if (words.length === 0) return null;
+    const escaped = words
+      .map((w) => w.replace(/[+\-&|!(){}[\]^"~*?:\\/]/g, "\\$&"))
+      .map((w) => `${w}* ${w}~`) // wildcard + fuzzy for each word
+      .join(" ");
+    // Try each fulltext index in priority order
+    const indexes = [
+      {
+        name: "clinical_search",
+        query: `CALL db.index.fulltext.queryNodes('clinical_search', $term)
+                YIELD node, score WHERE score > 0.5
+                WITH labels(node)[0] AS label, node, score
+                RETURN label, coalesce(node.display, node.name, node.code) AS name,
+                       node.code AS code, score
+                ORDER BY score DESC LIMIT 10`,
+      },
+      {
+        name: "catalog_search",
+        query: `CALL db.index.fulltext.queryNodes('catalog_search', $term)
+                YIELD node, score WHERE score > 0.5
+                WITH labels(node)[0] AS label, node, score
+                RETURN label, coalesce(node.title, node.name) AS name,
+                       node.description AS description, score
+                ORDER BY score DESC LIMIT 10`,
+      },
+      {
+        name: "ontology_search",
+        query: `CALL db.index.fulltext.queryNodes('ontology_search', $term)
+                YIELD node, score WHERE score > 0.5
+                WITH labels(node)[0] AS label, node, score
+                RETURN label, coalesce(node.display, node.name) AS name, score
+                ORDER BY score DESC LIMIT 10`,
+      },
+    ];
+
+    for (const idx of indexes) {
+      try {
+        const result = await session.run(idx.query, { term: escaped });
+        if (result.records.length > 0) {
+          const topLabel = result.records[0].get("label");
+          const topName = result.records[0].get("name");
+
+          // Build a context-expanding query based on what was found
+          if (topLabel === "Condition") {
+            return {
+              cypher: `CALL db.index.fulltext.queryNodes('clinical_search', $term)
+                       YIELD node, score WHERE score > 0.5 AND 'Condition' IN labels(node)
+                       WITH node AS c, score
+                       MATCH (p:Patient)-[:HAS_CONDITION]->(c)
+                       OPTIONAL MATCH (c)-[:CODED_BY]->(s:SnomedConcept)
+                       RETURN coalesce(c.display, c.name) AS condition, c.code AS code,
+                              count(DISTINCT p) AS patients, s.display AS snomedTerm, score
+                       ORDER BY score DESC LIMIT 10`,
+              params: { term: escaped },
+            };
+          } else if (
+            topLabel === "Observation" ||
+            topLabel === "MedicationRequest" ||
+            topLabel === "Procedure"
+          ) {
+            return {
+              cypher: `CALL db.index.fulltext.queryNodes('clinical_search', $term)
+                       YIELD node, score WHERE score > 0.5
+                       WITH node, score, labels(node)[0] AS label
+                       RETURN label AS resourceType, coalesce(node.display, node.name) AS name,
+                              node.code AS code, score
+                       ORDER BY score DESC LIMIT 10`,
+              params: { term: escaped },
+            };
+          } else if (
+            topLabel === "HealthDataset" ||
+            topLabel === "DataProduct"
+          ) {
+            return {
+              cypher: `CALL db.index.fulltext.queryNodes('catalog_search', $term)
+                       YIELD node, score WHERE score > 0.5
+                       WITH node, score, labels(node)[0] AS label
+                       RETURN label AS resourceType, coalesce(node.title, node.name) AS name,
+                              node.description AS description, score
+                       ORDER BY score DESC LIMIT 10`,
+              params: { term: escaped },
+            };
+          } else {
+            // Ontology or generic match
+            return {
+              cypher: `CALL db.index.fulltext.queryNodes('ontology_search', $term)
+                       YIELD node, score WHERE score > 0.5
+                       WITH node, score, labels(node)[0] AS label
+                       RETURN label AS resourceType, coalesce(node.display, node.name) AS name, score
+                       ORDER BY score DESC LIMIT 10`,
+              params: { term: escaped },
+            };
+          }
+        }
+      } catch {
+        // Index might not exist yet — continue to next
+        continue;
+      }
+    }
+
+    return null;
+  } catch (err) {
+    console.error("[neo4j-proxy] Fulltext search error:", err);
+    return null;
+  } finally {
+    await session.close();
+  }
+}
+
+/**
+ * GraphRAG search — vector similarity search + graph context expansion.
+ * Requires vector indexes on HealthDataset, Condition, SnomedConcept.
+ * Returns a Cypher query + params if a relevant match is found.
+ */
+async function graphRagSearch(
+  question: string,
+): Promise<{ cypher: string; params: Record<string, any> } | null> {
+  // GraphRAG requires embeddings. Check if vector indexes exist.
+  if (!driver) return null;
+
+  const session = driver.session({ database: "neo4j" });
+  try {
+    // Check if any vector index exists
+    const indexResult = await session.run(
+      `SHOW INDEXES WHERE type = 'VECTOR' RETURN name LIMIT 1`,
+    );
+    if (indexResult.records.length === 0) return null;
+
+    // Generate embedding for the question (requires Ollama or OpenAI)
+    const embedding = await generateEmbedding(question);
+    if (!embedding) return null;
+
+    // Search across all 3 vector indexes: condition, healthdataset, snomed
+    const vectorIndexes = [
+      {
+        name: "condition_embedding",
+        expandCypher: (ids: string[]) =>
+          `MATCH (c:Condition) WHERE elementId(c) IN $nodeIds
+           MATCH (p:Patient)-[:HAS_CONDITION]->(c)
+           OPTIONAL MATCH (c)-[:CODED_BY]->(s:SnomedConcept)
+           OPTIONAL MATCH (p)-[:HAS_OBSERVATION]->(o:Observation)
+           RETURN coalesce(c.display, c.name) AS match, 'Condition' AS type,
+                  count(DISTINCT p) AS patients, s.display AS snomedTerm,
+                  collect(DISTINCT o.display)[0..5] AS relatedObservations
+           ORDER BY patients DESC LIMIT 10`,
+      },
+      {
+        name: "healthdataset_embedding",
+        expandCypher: (ids: string[]) =>
+          `MATCH (d:HealthDataset) WHERE elementId(d) IN $nodeIds
+           OPTIONAL MATCH (d)<-[:CONTAINS]-(cat:Catalog)
+           OPTIONAL MATCH (d)-[:HAS_DISTRIBUTION]->(dist:Distribution)
+           RETURN d.title AS match, 'HealthDataset' AS type,
+                  d.description AS description, cat.name AS catalog,
+                  collect(DISTINCT dist.format) AS formats
+           LIMIT 10`,
+      },
+      {
+        name: "snomed_embedding",
+        expandCypher: (ids: string[]) =>
+          `MATCH (s:SnomedConcept) WHERE elementId(s) IN $nodeIds
+           OPTIONAL MATCH (c:Condition)-[:CODED_BY]->(s)
+           OPTIONAL MATCH (p:Patient)-[:HAS_CONDITION]->(c)
+           RETURN s.display AS match, 'SnomedConcept' AS type,
+                  s.conceptId AS code, count(DISTINCT p) AS patients
+           ORDER BY patients DESC LIMIT 10`,
+      },
+    ];
+
+    for (const idx of vectorIndexes) {
+      try {
+        const result = await session.run(
+          `CALL db.index.vector.queryNodes($indexName, 5, $embedding)
+           YIELD node, score WHERE score > 0.5
+           RETURN elementId(node) AS nodeId, score
+           ORDER BY score DESC LIMIT 5`,
+          { indexName: idx.name, embedding },
+        );
+
+        if (result.records.length > 0) {
+          const nodeIds = result.records.map((r) => r.get("nodeId"));
+          return {
+            cypher: idx.expandCypher(nodeIds),
+            params: { nodeIds },
+          };
+        }
+      } catch {
+        // Vector index might not exist — continue to next
+        continue;
+      }
+    }
+
+    return null;
+  } catch (err) {
+    console.error("[neo4j-proxy] GraphRAG search error:", err);
+    return null;
+  } finally {
+    await session.close();
+  }
+}
+
+/**
+ * Generate an embedding vector for a text string.
+ * Uses Azure OpenAI, Ollama (nomic-embed-text), or OpenAI (text-embedding-3-small).
+ */
+async function generateEmbedding(text: string): Promise<number[] | null> {
+  const AZURE_EMBEDDINGS_URL = process.env.AZURE_OPENAI_EMBEDDINGS_URL;
+  if (AZURE_EMBEDDINGS_URL && AZURE_OPENAI_API_KEY) {
+    try {
+      const resp = await fetch(AZURE_EMBEDDINGS_URL, {
+        method: "POST",
+        headers: {
+          "api-key": AZURE_OPENAI_API_KEY,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ input: text }),
+      });
+      const data = (await resp.json()) as any;
+      return data.data?.[0]?.embedding ?? null;
+    } catch (err) {
+      console.error("[neo4j-proxy] Azure OpenAI embedding error:", err);
+    }
+  }
+
+  if (OLLAMA_URL) {
+    try {
+      const resp = await fetch(`${OLLAMA_URL}/api/embeddings`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ model: "nomic-embed-text", prompt: text }),
+      });
+      const data = (await resp.json()) as any;
+      return data.embedding ?? null;
+    } catch (err) {
+      console.error("[neo4j-proxy] Ollama embedding error:", err);
+    }
+  }
+
+  if (OPENAI_API_KEY) {
+    try {
+      const resp = await fetch("https://api.openai.com/v1/embeddings", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${OPENAI_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "text-embedding-3-small",
+          input: text,
+          dimensions: 384,
+        }),
+      });
+      const data = (await resp.json()) as any;
+      return data.data?.[0]?.embedding ?? null;
+    } catch (err) {
+      console.error("[neo4j-proxy] OpenAI embedding error:", err);
+    }
+  }
+
   return null;
 }
 
@@ -1355,28 +1913,42 @@ ${GRAPH_SCHEMA_CONTEXT}`;
  * POST /nlq
  * Natural Language Query — translates a question to Cypher and executes it.
  *
- * Body: { question: string, federated?: boolean }
+ * Body: { question: string, federated?: boolean, odrlScope?: OdrlScope }
  * - question: Natural language question about the health data
  * - federated: If true, dispatch to all SPEs (default: false, primary only)
+ * - odrlScope: Caller's effective ODRL scope (forwarded from UI auth layer)
  *
  * Returns: {
- *   question, cypher, method ("template"|"llm"|"none"),
- *   templateName?, results, totalRows
+ *   question, cypher, method ("template"|"fulltext"|"graphrag"|"llm"|"none"),
+ *   templateName?, results, totalRows, odrlEnforced
  * }
  */
 app.post("/nlq", async (req: Request, res: Response, next: NextFunction) => {
+  let cypher: string | null = null;
+  let method: "template" | "fulltext" | "graphrag" | "llm" | "none" = "none";
+
   try {
-    const { question, federated = false } = req.body;
+    const { question, federated = false, odrlScope } = req.body;
 
     if (!question || typeof question !== "string") {
       res.status(400).json({ error: "Missing 'question' in request body" });
       return;
     }
 
-    let cypher: string | null = null;
-    let method: "template" | "llm" | "none" = "none";
     let templateName: string | undefined;
     let params: Record<string, any> = {};
+    let odrlEnforced = false;
+
+    // ODRL enforcement: check temporal limits and prohibitions
+    const scope = odrlScope as OdrlScope | undefined;
+    if (scope) {
+      odrlEnforced = true;
+      const temporalErr = checkOdrlTemporal(scope);
+      if (temporalErr) {
+        res.status(403).json({ error: temporalErr, odrlEnforced: true });
+        return;
+      }
+    }
 
     // Step 1: Try template matching
     const templateMatch = matchTemplate(question);
@@ -1387,19 +1959,39 @@ app.post("/nlq", async (req: Request, res: Response, next: NextFunction) => {
       templateName = templateMatch.template.name;
     }
 
-    // Step 2: Try LLM if no template matched
+    // Step 2: Try native fulltext search
+    if (!cypher) {
+      const ftResult = await fulltextSearch(question);
+      if (ftResult) {
+        cypher = ftResult.cypher;
+        params = ftResult.params;
+        method = "fulltext";
+      }
+    }
+
+    // Step 3: Try GraphRAG (vector similarity + graph context)
+    if (!cypher) {
+      const ragResult = await graphRagSearch(question);
+      if (ragResult) {
+        cypher = ragResult.cypher;
+        params = ragResult.params;
+        method = "graphrag";
+      }
+    }
+
+    // Step 4: Try LLM if no template, fulltext, or GraphRAG matched
     if (!cypher) {
       cypher = await llmText2Cypher(question);
       if (cypher) method = "llm";
     }
 
-    // Step 3: If still no match, return available templates
+    // Step 5: If still no match, return available templates
     if (!cypher) {
       res.json({
         question,
         method: "none",
         message:
-          "No matching query template found. Configure OPENAI_API_KEY or OLLAMA_URL for LLM-based Text2Cypher.",
+          "No matching query template found. Configure ANTHROPIC_API_KEY, OPENAI_API_KEY, or OLLAMA_URL for LLM-based Text2Cypher.",
         availableTemplates: QUERY_TEMPLATES.map((t) => ({
           name: t.name,
           description: t.description,
@@ -1409,23 +2001,29 @@ app.post("/nlq", async (req: Request, res: Response, next: NextFunction) => {
       return;
     }
 
-    // Safety check for LLM-generated Cypher
-    if (method === "llm") {
-      const trimmed = cypher.trim().toUpperCase();
-      if (
-        trimmed.startsWith("CREATE") ||
-        trimmed.startsWith("MERGE") ||
-        trimmed.startsWith("DELETE") ||
-        trimmed.startsWith("SET") ||
-        trimmed.startsWith("REMOVE") ||
-        trimmed.startsWith("DROP")
-      ) {
+    // Safety check for non-template Cypher (hardened regex)
+    if (method === "llm" || method === "graphrag" || method === "fulltext") {
+      const WRITE_PATTERN =
+        /\b(CREATE|MERGE|DELETE|DETACH\s+DELETE|SET|REMOVE|DROP|CALL\s*\{[^}]*(CREATE|MERGE|DELETE|SET|REMOVE))/i;
+      if (WRITE_PATTERN.test(cypher)) {
         res.status(403).json({
           error: "LLM generated a write query — blocked for safety",
           cypher,
         });
         return;
       }
+    }
+
+    // ODRL: check re-identification prohibition before execution
+    if (scope && cypher && checkReIdentification(cypher, scope)) {
+      res.status(403).json({
+        error:
+          "Query blocked: potential re-identification prohibited by ODRL policy",
+        odrlEnforced: true,
+        policyIds: scope.policyIds,
+      });
+      logQueryAudit(scope.participantId, question, cypher, method, 0, true);
+      return;
     }
 
     // Execute query
@@ -1473,6 +2071,9 @@ app.post("/nlq", async (req: Request, res: Response, next: NextFunction) => {
       }
     }
 
+    const participantId =
+      (req.headers["x-participant"] as string) ?? scope?.participantId;
+
     res.json({
       question,
       cypher,
@@ -1481,17 +2082,31 @@ app.post("/nlq", async (req: Request, res: Response, next: NextFunction) => {
       federated: federated && spe2Driver != null,
       results,
       totalRows: results.length,
+      odrlEnforced,
     });
 
-    logTransferEvent(
-      "/nlq",
-      "POST",
-      req.headers["x-participant"] as string,
-      200,
+    logTransferEvent("/nlq", "POST", participantId, 200, results.length);
+    logQueryAudit(
+      participantId,
+      question,
+      cypher,
+      method,
       results.length,
+      odrlEnforced,
     );
-  } catch (err) {
-    next(err);
+  } catch (err: any) {
+    // Return structured NLQ error (not generic 500) so the UI can display it
+    const errMsg = err?.message ?? String(err);
+    console.error("[neo4j-proxy] NLQ execution error:", errMsg);
+    res.status(200).json({
+      question: req.body?.question ?? "",
+      cypher: cypher ?? "",
+      method: method ?? "none",
+      error: `Query execution failed: ${errMsg.slice(0, 300)}`,
+      results: [],
+      totalRows: 0,
+      odrlEnforced: false,
+    });
   }
 });
 

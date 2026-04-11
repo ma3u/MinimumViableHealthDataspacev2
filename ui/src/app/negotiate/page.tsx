@@ -298,10 +298,10 @@ function NegotiateContent() {
   function stateIcon(state: string) {
     const s = state?.toUpperCase() || "";
     if (s.includes("FINALIZED") || s.includes("AGREED"))
-      return <CheckCircle2 size={16} className="text-green-400" />;
+      return <CheckCircle2 size={16} className="text-[var(--success-text)]" />;
     if (s.includes("TERMINATED") || s.includes("ERROR"))
-      return <XCircle size={16} className="text-red-400" />;
-    return <Clock size={16} className="text-yellow-400" />;
+      return <XCircle size={16} className="text-[var(--danger-text)]" />;
+    return <Clock size={16} className="text-[var(--warning-text)]" />;
   }
 
   function displayId(p: ParticipantCtx) {
@@ -336,9 +336,10 @@ function NegotiateContent() {
             Requesting as (your participant)
           </label>
           <select
+            aria-label="Requesting as (your participant)"
             value={selectedCtx}
             onChange={(e) => setSelectedCtx(e.target.value)}
-            className="w-full max-w-md px-3 py-2 bg-[var(--surface-2)] border border-gray-600 rounded text-sm"
+            className="w-full max-w-md px-3 py-2 bg-[var(--surface-2)] border border-[var(--border-ui)] rounded text-sm"
           >
             {participants.map((p) => (
               <option key={p["@id"]} value={p["@id"]}>
@@ -352,7 +353,7 @@ function NegotiateContent() {
         {/* ── Step 1: Catalog discovery ── */}
         <div className="border border-[var(--border)] rounded-xl p-5 mb-5">
           <div className="flex items-center gap-2 mb-1">
-            <Search size={16} className="text-layer2" />
+            <Search size={16} className="text-teal-800 dark:text-teal-300" />
             <h2 className="font-semibold text-sm">
               Step 1 — Choose Data Provider
             </h2>
@@ -367,6 +368,7 @@ function NegotiateContent() {
               Data Provider
             </label>
             <select
+              aria-label="Data Provider"
               value={selectedProviderCtx}
               onChange={(e) => {
                 const chosen = participants.find(
@@ -382,7 +384,7 @@ function NegotiateContent() {
                 setSelectedOffer(null);
                 setCatalogError(null);
               }}
-              className="w-full max-w-md px-3 py-2 bg-[var(--surface-2)] border border-gray-600 rounded text-sm"
+              className="w-full max-w-md px-3 py-2 bg-[var(--surface-2)] border border-[var(--border-ui)] rounded text-sm"
               disabled={participants.length === 0}
             >
               {participants.length === 0 && (
@@ -414,7 +416,7 @@ function NegotiateContent() {
           </button>
 
           {catalogError && (
-            <div className="mt-3 p-3 rounded bg-red-900/30 border border-red-700 text-red-300 text-xs flex gap-2">
+            <div className="mt-3 p-3 rounded bg-red-100 dark:bg-red-900/30 border border-red-300 dark:border-red-700 text-red-800 dark:text-red-300 text-xs flex gap-2">
               <AlertCircle size={14} className="shrink-0 mt-0.5" />
               <span>{catalogError}</span>
             </div>
@@ -442,12 +444,15 @@ function NegotiateContent() {
                     </span>
                     <div className="flex items-center gap-2">
                       {o.contentType && (
-                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-gray-700 text-[var(--text-secondary)]">
+                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200">
                           {o.contentType}
                         </span>
                       )}
                       {selectedOffer?.offerId === o.offerId && (
-                        <CheckCircle2 size={14} className="text-layer2" />
+                        <CheckCircle2
+                          size={14}
+                          className="text-teal-800 dark:text-teal-300"
+                        />
                       )}
                     </div>
                   </div>
@@ -465,7 +470,10 @@ function NegotiateContent() {
         {/* ── Step 2: Negotiation ── */}
         <div className="border border-[var(--border)] rounded-xl p-5 mb-8">
           <div className="flex items-center gap-2 mb-1">
-            <FileSignature size={18} className="text-layer2" />
+            <FileSignature
+              size={18}
+              className="text-teal-800 dark:text-teal-300"
+            />
             <h2 className="font-semibold text-sm">
               Step 2 — Initiate Negotiation
             </h2>
@@ -485,8 +493,8 @@ function NegotiateContent() {
             <div
               className={`mb-4 p-3 rounded text-sm ${
                 result.startsWith("Error")
-                  ? "bg-red-900/40 border border-red-700 text-red-300"
-                  : "bg-green-900/40 border border-green-700 text-green-300"
+                  ? "bg-[var(--badge-inactive-bg)] border border-[var(--badge-inactive-border)] text-[var(--badge-inactive-text)]"
+                  : "bg-[var(--badge-active-bg)] border border-[var(--badge-active-border)] text-[var(--badge-active-text)]"
               }`}
             >
               {result}
@@ -494,7 +502,7 @@ function NegotiateContent() {
           )}
 
           {!selectedOffer && (
-            <div className="mb-4 p-3 rounded bg-yellow-900/20 border border-yellow-700/40 text-yellow-400 text-xs flex gap-2">
+            <div className="mb-4 p-3 rounded bg-yellow-100 dark:bg-yellow-900/20 border border-yellow-300 dark:border-yellow-700/40 text-yellow-800 dark:text-yellow-400 text-xs flex gap-2">
               <AlertCircle size={14} className="shrink-0 mt-0.5" />
               <span>
                 Complete Step 1 first — select a dataset offer above to
@@ -510,7 +518,7 @@ function NegotiateContent() {
                 {selectedOffer.name || assetLabel(selectedOffer.assetId)}
               </span>
               {selectedOffer.contentType && (
-                <span className="ml-2 text-[10px] px-1.5 py-0.5 rounded bg-gray-700 text-[var(--text-secondary)]">
+                <span className="ml-2 text-[10px] px-1.5 py-0.5 rounded bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200">
                   {selectedOffer.contentType}
                 </span>
               )}
@@ -524,7 +532,7 @@ function NegotiateContent() {
             <button
               type="submit"
               disabled={initiating || !offerId}
-              className="flex items-center gap-2 px-4 py-2 bg-[var(--accent)] text-white rounded text-sm font-medium hover:bg-[var(--accent-hover)] disabled:opacity-50"
+              className="flex items-center gap-2 px-4 py-2 bg-[var(--accent)] text-white dark:text-gray-900 rounded text-sm font-medium hover:bg-[var(--accent-hover)] disabled:opacity-50"
             >
               {initiating ? (
                 <Loader2 size={14} className="animate-spin" />
@@ -574,10 +582,10 @@ function NegotiateContent() {
                     <span
                       className={`text-xs px-2 py-0.5 rounded-full ${
                         state.includes("FINALIZED")
-                          ? "bg-green-900/40 text-green-400"
+                          ? "bg-[var(--badge-active-bg)] text-[var(--badge-active-text)] border border-[var(--badge-active-border)]"
                           : state.includes("ERROR")
-                            ? "bg-red-900/40 text-red-400"
-                            : "bg-yellow-900/40 text-yellow-400"
+                            ? "bg-[var(--badge-inactive-bg)] text-[var(--badge-inactive-text)] border border-[var(--badge-inactive-border)]"
+                            : "bg-yellow-100 dark:bg-yellow-900/40 text-yellow-800 dark:text-yellow-400"
                       }`}
                     >
                       {state || "UNKNOWN"}
@@ -585,7 +593,7 @@ function NegotiateContent() {
                     {agreementId && (
                       <a
                         href={`/data/transfer?participantId=${selectedCtx}&contractId=${agreementId}`}
-                        className="flex items-center gap-1 text-xs text-layer2 hover:underline"
+                        className="flex items-center gap-1 text-xs text-teal-800 dark:text-teal-300 hover:underline"
                       >
                         Transfer <ArrowRight size={12} />
                       </a>

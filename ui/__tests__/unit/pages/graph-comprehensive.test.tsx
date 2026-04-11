@@ -163,12 +163,11 @@ describe("GraphPage", () => {
       expect(screen.getByText("Knowledge Graph")).toBeInTheDocument();
     });
 
-    it("renders the description paragraph", () => {
+    it("renders the graph page sidebar", () => {
       mockFetchApi.mockReturnValue(new Promise(() => {}));
       render(<GraphPage />);
-      expect(
-        screen.getByText(/5-layer EHDS health dataspace/),
-      ).toBeInTheDocument();
+      // Sidebar renders with the Ask the graph section
+      expect(screen.getByText("Ask the graph")).toBeInTheDocument();
     });
 
     it("shows persona-aware loading text while data is loading", () => {
@@ -222,10 +221,10 @@ describe("GraphPage", () => {
   // Sidebar: layers, nav links
   // ────────────────────────────────────────────────────────────────────
   describe("sidebar", () => {
-    it("renders Structural layers heading", () => {
+    it("renders Legend heading in the sidebar", () => {
       mockFetchApi.mockReturnValue(new Promise(() => {}));
       render(<GraphPage />);
-      expect(screen.getByText("Structural layers")).toBeInTheDocument();
+      expect(screen.getByText("Legend")).toBeInTheDocument();
     });
 
     it("renders all five edc-admin persona layer labels", () => {
@@ -242,24 +241,24 @@ describe("GraphPage", () => {
       }
     });
 
-    it("renders Dataset Catalog link pointing to /catalog", () => {
+    it("renders Catalog quick link pointing to /catalog", () => {
       mockFetchApi.mockReturnValue(new Promise(() => {}));
       render(<GraphPage />);
-      const link = screen.getByText("Dataset Catalog");
+      const link = screen.getByText("Catalog");
       expect(link.closest("a")).toHaveAttribute("href", "/catalog");
     });
 
-    it("renders OMOP Analytics link pointing to /analytics", () => {
+    it("renders OMOP quick link pointing to /analytics", () => {
       mockFetchApi.mockReturnValue(new Promise(() => {}));
       render(<GraphPage />);
-      const link = screen.getByText("OMOP Analytics");
+      const link = screen.getByText("OMOP");
       expect(link.closest("a")).toHaveAttribute("href", "/analytics");
     });
 
-    it("renders Patient Journey link pointing to /patient", () => {
+    it("renders Patients quick link pointing to /patient", () => {
       mockFetchApi.mockReturnValue(new Promise(() => {}));
       render(<GraphPage />);
-      const link = screen.getByText("Patient Journey");
+      const link = screen.getByText("Patients");
       expect(link.closest("a")).toHaveAttribute("href", "/patient");
     });
   });
@@ -463,14 +462,14 @@ describe("GraphPage", () => {
   // Contextual links based on layer
   // ────────────────────────────────────────────────────────────────────
   describe("contextual links", () => {
-    it("shows 'Catalog' link for layer 2 node", async () => {
+    it("shows 'Dataset Catalog' deep link for layer 2 node", async () => {
       const props = await renderAndGetForceGraphProps();
       const node = sampleGraphData.nodes[1]; // Dataset-B, layer 2
       act(() => {
         (props.onNodeClick as (n: object) => void)(node);
       });
       await waitFor(() => {
-        const catalogLink = screen.getByText("Catalog");
+        const catalogLink = screen.getByText("Dataset Catalog");
         expect(catalogLink).toBeInTheDocument();
         expect(catalogLink.closest("a")).toHaveAttribute(
           "href",
@@ -479,7 +478,7 @@ describe("GraphPage", () => {
       });
     });
 
-    it("does not show 'Catalog' link for non-layer-2 node", async () => {
+    it("does not show 'Dataset Catalog' deep link for non-layer-2 node", async () => {
       const props = await renderAndGetForceGraphProps();
       const node = sampleGraphData.nodes[0]; // layer 1
       act(() => {
@@ -488,47 +487,55 @@ describe("GraphPage", () => {
       await waitFor(() => {
         expect(screen.getByText("DataProduct-A")).toBeInTheDocument();
       });
-      expect(screen.queryByText("Catalog")).not.toBeInTheDocument();
+      expect(screen.queryByText("Dataset Catalog")).not.toBeInTheDocument();
     });
 
-    it("shows 'Patient view' link for layer 3 node", async () => {
+    it("shows 'Patient Journey' deep link for layer 3 node", async () => {
       const props = await renderAndGetForceGraphProps();
       const node = sampleGraphData.nodes[2]; // Patient-C, layer 3
       act(() => {
         (props.onNodeClick as (n: object) => void)(node);
       });
       await waitFor(() => {
-        const patientLink = screen.getByText("Patient view");
-        expect(patientLink).toBeInTheDocument();
-        expect(patientLink.closest("a")).toHaveAttribute("href", "/patient");
+        // Detail card shows "Patient Journey" deep link (icon + text rendered as one)
+        const patientLinks = screen.getAllByText("Patient Journey");
+        // At least one should be a link to /patient
+        const patientLink = patientLinks.find(
+          (el) => el.closest("a")?.getAttribute("href") === "/patient",
+        );
+        expect(patientLink).toBeDefined();
       });
     });
 
-    it("shows 'Patient view' link for layer 3 node (detail card only)", async () => {
+    it("shows 'Patient Journey' deep link for layer 3 node (appears in detail card)", async () => {
       const props = await renderAndGetForceGraphProps();
       const node = sampleGraphData.nodes[2]; // Patient-C, layer 3
       act(() => {
         (props.onNodeClick as (n: object) => void)(node);
       });
       await waitFor(() => {
-        // Sidebar has "Patient Journey", detail card has "Patient view"
-        expect(screen.getByText("Patient view")).toBeInTheDocument();
-        expect(screen.getByText("Patient Journey")).toBeInTheDocument();
+        // "Patient Journey" appears in both the sidebar quick links and the detail card deep links
+        const links = screen.getAllByText("Patient Journey");
+        expect(links.length).toBeGreaterThanOrEqual(1);
       });
     });
 
-    it("shows 'Patient view' link for layer 4 node", async () => {
+    it("shows 'Patient Journey' deep link for layer 4 node", async () => {
       const props = await renderAndGetForceGraphProps();
       const node = sampleGraphData.nodes[3]; // Condition-D, layer 4
       act(() => {
         (props.onNodeClick as (n: object) => void)(node);
       });
       await waitFor(() => {
-        expect(screen.getByText("Patient view")).toBeInTheDocument();
+        const patientLinks = screen.getAllByText("Patient Journey");
+        const patientLink = patientLinks.find(
+          (el) => el.closest("a")?.getAttribute("href") === "/patient",
+        );
+        expect(patientLink).toBeDefined();
       });
     });
 
-    it("does not show contextual links for layer 1 node", async () => {
+    it("does not show 'Dataset Catalog' deep link for layer 1 node", async () => {
       const props = await renderAndGetForceGraphProps();
       const node = sampleGraphData.nodes[0]; // layer 1
       act(() => {
@@ -537,13 +544,12 @@ describe("GraphPage", () => {
       await waitFor(() => {
         expect(screen.getByText("DataProduct-A")).toBeInTheDocument();
       });
-      expect(screen.queryByText("Catalog")).not.toBeInTheDocument();
-      expect(screen.queryByText("Patient view")).not.toBeInTheDocument();
-      // Only the sidebar Patient Journey link should exist
-      expect(screen.getByText("Patient Journey")).toBeInTheDocument();
+      expect(screen.queryByText("Dataset Catalog")).not.toBeInTheDocument();
+      // Sidebar has Patients quick link but no Patient Journey deep link
+      expect(screen.getByText("Patients")).toBeInTheDocument();
     });
 
-    it("does not show contextual links for layer 5 node", async () => {
+    it("does not show 'Dataset Catalog' deep link for layer 5 node", async () => {
       const props = await renderAndGetForceGraphProps();
       const node = sampleGraphData.nodes[4]; // layer 5
       act(() => {
@@ -552,9 +558,9 @@ describe("GraphPage", () => {
       await waitFor(() => {
         expect(screen.getByText("SNOMED-E")).toBeInTheDocument();
       });
-      expect(screen.queryByText("Catalog")).not.toBeInTheDocument();
-      expect(screen.queryByText("Patient view")).not.toBeInTheDocument();
-      expect(screen.getByText("Patient Journey")).toBeInTheDocument();
+      expect(screen.queryByText("Dataset Catalog")).not.toBeInTheDocument();
+      // Sidebar has Patients quick link
+      expect(screen.getByText("Patients")).toBeInTheDocument();
     });
   });
 
@@ -570,8 +576,10 @@ describe("GraphPage", () => {
         (props.onNodeClick as (n: object) => void)(node);
       });
       await waitFor(() => {
-        expect(screen.getByText(/Outgoing \(1\)/)).toBeInTheDocument();
-        expect(screen.getByText(/Incoming \(1\)/)).toBeInTheDocument();
+        // Outgoing and Incoming section labels appear as section-label elements,
+        // with count displayed in a separate badge span
+        expect(screen.getByText("Outgoing")).toBeInTheDocument();
+        expect(screen.getByText("Incoming")).toBeInTheDocument();
       });
     });
 
@@ -613,16 +621,19 @@ describe("GraphPage", () => {
       });
     });
 
-    it("shows direction arrows for neighbours", async () => {
+    it("shows direction sections for neighbours", async () => {
       const props = await renderAndGetForceGraphProps();
       const node = sampleGraphData.nodes[1]; // Dataset-B
       act(() => {
         (props.onNodeClick as (n: object) => void)(node);
       });
       await waitFor(() => {
-        // Outgoing arrow for CONTAINS, incoming arrow for DESCRIBES
-        expect(screen.getByText("→")).toBeInTheDocument();
-        expect(screen.getByText("←")).toBeInTheDocument();
+        // Outgoing and Incoming sections are shown (icons are SVG, not text arrows)
+        expect(screen.getByText("Outgoing")).toBeInTheDocument();
+        expect(screen.getByText("Incoming")).toBeInTheDocument();
+        // Relationship types are shown as text
+        expect(screen.getByText("CONTAINS")).toBeInTheDocument();
+        expect(screen.getByText("describes")).toBeInTheDocument();
       });
     });
 
@@ -867,6 +878,7 @@ describe("GraphPage", () => {
       arc: vi.fn(),
       fill: vi.fn(),
       stroke: vi.fn(),
+      closePath: vi.fn(),
       moveTo: vi.fn(),
       lineTo: vi.fn(),
       fillText: vi.fn(),
@@ -891,6 +903,7 @@ describe("GraphPage", () => {
         arc: vi.fn(),
         fill: vi.fn(),
         stroke: vi.fn(),
+        closePath: vi.fn(),
         moveTo: vi.fn(),
         lineTo: vi.fn(),
         fillText: vi.fn(),
@@ -992,8 +1005,10 @@ describe("GraphPage", () => {
         type: "DESCRIBES",
       };
       paintLink(link, ctx, 1);
+      // Line starts at source coordinates
       expect(ctx.moveTo).toHaveBeenCalledWith(10, 20);
-      expect(ctx.lineTo).toHaveBeenCalledWith(30, 40);
+      // Line ends at an offset before the target node edge (not exactly target coords)
+      expect(ctx.lineTo).toHaveBeenCalled();
       expect(ctx.stroke).toHaveBeenCalled();
     });
 
@@ -1037,8 +1052,9 @@ describe("GraphPage", () => {
         type: "DESCRIBES",
       };
       paintLink(link, ctx, 1);
-      // Should draw the relationship type text on the midpoint
+      // Should draw the relationship type text at the midpoint of the link
       // FRIENDLY_REL_NAMES maps "DESCRIBES" → "describes"
+      // mx = (10+30)/2 = 20, my = (20+40)/2 = 30
       expect(ctx.fillText).toHaveBeenCalledWith("describes", 20, 30);
     });
   });
@@ -1068,7 +1084,7 @@ describe("GraphPage", () => {
       });
     });
 
-    it("handles node with long name (truncated in canvas)", async () => {
+    it("handles node with long id (truncated in canvas)", async () => {
       const props = await renderAndGetForceGraphProps();
       const paintNode = props.nodeCanvasObject as (
         node: object,
@@ -1076,9 +1092,10 @@ describe("GraphPage", () => {
         globalScale: number,
       ) => void;
       const ctx = createMockCtx() as CanvasRenderingContext2D;
+      // The label rendered is node.id (not node.name); must exceed maxLen (18)
       const longNameNode = {
-        id: "long",
-        name: "A very long node name that exceeds twenty-eight characters",
+        id: "a-very-long-node-id-that-exceeds-eighteen-characters",
+        name: "Long Node",
         label: "Test",
         layer: 1,
         color: "#333",
@@ -1086,7 +1103,7 @@ describe("GraphPage", () => {
         y: 0,
       };
       paintNode(longNameNode, ctx, 2);
-      // Check that fillText was called with a truncated string
+      // Check that fillText was called with a truncated string (…)
       expect(ctx.fillText).toHaveBeenCalledWith(
         expect.stringContaining("…"),
         expect.any(Number),

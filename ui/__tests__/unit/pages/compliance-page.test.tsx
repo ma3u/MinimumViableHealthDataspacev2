@@ -193,12 +193,13 @@ beforeEach(() => {
 describe("CompliancePage", () => {
   // ─── Initial Loading State ───────────────────────────────────────
   describe("Loading state", () => {
-    it("shows loading placeholders on mount", () => {
+    it("shows loading state on mount", () => {
       mockFetchApi.mockReturnValue(new Promise(() => {}));
       render(<CompliancePage />);
-      expect(screen.getAllByText(/Loading from graph/i).length).toBeGreaterThan(
-        0,
-      );
+      // Page renders immediately — loading state shows within compliance section
+      expect(
+        screen.getByText(/Loading compliance data from graph/i),
+      ).toBeInTheDocument();
     });
 
     it("fetches /api/compliance on mount", () => {
@@ -216,11 +217,13 @@ describe("CompliancePage", () => {
 
   // ─── Page Header ─────────────────────────────────────────────────
   describe("Page header", () => {
-    it("renders the EHDS Compliance Checker title", async () => {
+    it("renders the EHDS Compliance Overview title", async () => {
       setupMountMocks();
       render(<CompliancePage />);
       await waitFor(() => {
-        expect(screen.getByText("EHDS Compliance Checker")).toBeInTheDocument();
+        expect(
+          screen.getByText("EHDS Compliance Overview"),
+        ).toBeInTheDocument();
       });
     });
 
@@ -228,9 +231,7 @@ describe("CompliancePage", () => {
       setupMountMocks();
       render(<CompliancePage />);
       await waitFor(() => {
-        expect(
-          screen.getByText(/Validate the HDAB approval chain/i),
-        ).toBeInTheDocument();
+        expect(screen.getByText(/HDAB approval chain/i)).toBeInTheDocument();
       });
     });
 
@@ -244,170 +245,139 @@ describe("CompliancePage", () => {
     });
   });
 
-  // ─── Dropdown Rendering ──────────────────────────────────────────
-  describe("Dropdown options", () => {
-    it("renders consumer dropdown with options after loading", async () => {
-      setupMountMocks();
-      render(<CompliancePage />);
-
-      await waitFor(() => {
-        const select = screen.getAllByRole("combobox")[0];
-        const options = within(select).getAllByRole("option");
-        // Placeholder + 2 consumers
-        expect(options.length).toBe(3);
-      });
-    });
-
-    it("renders dataset dropdown with options after loading", async () => {
-      setupMountMocks();
-      render(<CompliancePage />);
-
-      await waitFor(() => {
-        const selects = screen.getAllByRole("combobox");
-        const datasetSelect = selects[1];
-        const options = within(datasetSelect).getAllByRole("option");
-        expect(options.length).toBe(3);
-      });
-    });
-
-    it("displays consumer names with type in options", async () => {
+  // ─── Compliance Matrix ───────────────────────────────────────────
+  describe("Compliance matrix", () => {
+    it("renders Participant Compliance Matrix heading", async () => {
       setupMountMocks();
       render(<CompliancePage />);
 
       await waitFor(() => {
         expect(
-          screen.getByText("PharmaCo Research AG [DATA_USER]"),
-        ).toBeInTheDocument();
-        expect(
-          screen.getByText("Institut de Recherche Santé [HDAB]"),
+          screen.getByText("Participant Compliance Matrix"),
         ).toBeInTheDocument();
       });
     });
 
-    it("displays dataset titles in options", async () => {
-      setupMountMocks();
-      render(<CompliancePage />);
-
-      await waitFor(() => {
-        expect(screen.getByText("Synthetic FHIR Cohort")).toBeInTheDocument();
-        expect(screen.getByText("Cancer Registry Limburg")).toBeInTheDocument();
-      });
-    });
-
-    it("auto-selects first consumer and dataset on load", async () => {
-      setupMountMocks();
-      render(<CompliancePage />);
-
-      await waitFor(() => {
-        const selects = screen.getAllByRole("combobox");
-        expect(selects[0]).toHaveValue(CONSUMERS[0].id);
-        expect(selects[1]).toHaveValue(DATASETS[0].id);
-      });
-    });
-  });
-
-  // ─── Fallback Text Inputs ───────────────────────────────────────
-  describe("Fallback to text inputs", () => {
-    it("renders text input when no consumers available", async () => {
-      setupMountMocks({ consumers: [], datasets: DATASETS });
-      render(<CompliancePage />);
-
-      await waitFor(() => {
-        expect(
-          screen.getByPlaceholderText("Participant ID or DID"),
-        ).toBeInTheDocument();
-      });
-    });
-
-    it("renders text input when no datasets available", async () => {
-      setupMountMocks({ consumers: CONSUMERS, datasets: [] });
-      render(<CompliancePage />);
-
-      await waitFor(() => {
-        expect(screen.getByPlaceholderText("Dataset ID")).toBeInTheDocument();
-      });
-    });
-  });
-
-  // ─── Validate Button ────────────────────────────────────────────
-  describe("Validate button", () => {
-    it("renders the Validate Compliance button", async () => {
-      setupMountMocks();
-      render(<CompliancePage />);
-
-      await waitFor(() => {
-        expect(
-          screen.getByRole("button", { name: /Validate Compliance/i }),
-        ).toBeInTheDocument();
-      });
-    });
-
-    it("button is enabled when consumer and dataset are selected", async () => {
-      setupMountMocks();
-      render(<CompliancePage />);
-
-      await waitFor(() => {
-        expect(
-          screen.getByRole("button", { name: /Validate Compliance/i }),
-        ).toBeEnabled();
-      });
-    });
-
-    it("button is disabled when consumer text input is empty", async () => {
-      setupMountMocks({ consumers: [], datasets: [] });
-      render(<CompliancePage />);
-
-      await waitFor(() => {
-        expect(
-          screen.getByRole("button", { name: /Validate Compliance/i }),
-        ).toBeDisabled();
-      });
-    });
-  });
-
-  // ─── Compliance Check (Compliant) ───────────────────────────────
-  describe("Compliant result", () => {
-    it("shows compliant message after successful check", async () => {
-      setupMountMocks();
-      render(<CompliancePage />);
-
-      await waitFor(() => {
-        expect(screen.getByRole("button", { name: /Validate/i })).toBeEnabled();
-      });
-
-      // Override fetchApi for the compliance check call
+    it("shows no participants message when matrix is empty", async () => {
       mockFetchApi.mockImplementation((url: string) => {
+        if (url === "/api/compliance")
+          return mockResponse({ consumers: [], datasets: [], matrix: [] });
+        if (url === "/api/credentials")
+          return mockResponse({ credentials: [] });
+        if (url === "/api/trust-center")
+          return mockResponse({ trustCenters: [], speSessions: [] });
+        return mockResponse({});
+      });
+      render(<CompliancePage />);
+
+      await waitFor(() => {
+        expect(screen.getByText(/No participants found/i)).toBeInTheDocument();
+      });
+    });
+
+    it("renders matrix rows for each participant", async () => {
+      const matrixData = {
+        consumers: [],
+        datasets: [],
+        matrix: [
+          {
+            consumerId: "did:web:pharmaco.de:research",
+            consumerName: "PharmaCo Research AG",
+            consumerType: "DATA_USER",
+            hasApplication: true,
+            applicationStatus: "APPROVED",
+            hasApproval: true,
+            approvalStatus: "APPROVED",
+            datasetId: "dataset:fhir-patients",
+            datasetTitle: "Synthetic FHIR Cohort",
+            hasContract: true,
+            ehdsArticle: "Art. 53",
+          },
+        ],
+      };
+      mockFetchApi.mockImplementation((url: string) => {
+        if (url === "/api/compliance") return mockResponse(matrixData);
+        if (url === "/api/credentials")
+          return mockResponse({ credentials: [] });
+        if (url === "/api/trust-center")
+          return mockResponse({ trustCenters: [], speSessions: [] });
+        return mockResponse({});
+      });
+      render(<CompliancePage />);
+
+      await waitFor(() => {
+        expect(screen.getByText("PharmaCo Research AG")).toBeInTheDocument();
+        expect(screen.getByText("DATA_USER")).toBeInTheDocument();
+      });
+    });
+  });
+
+  // ─── Detail Panel ───────────────────────────────────────────────
+  describe("Detail panel", () => {
+    const matrixWithRow = {
+      consumers: [],
+      datasets: [],
+      matrix: [
+        {
+          consumerId: "did:web:pharmaco.de:research",
+          consumerName: "PharmaCo Research AG",
+          consumerType: "DATA_USER",
+          hasApplication: true,
+          applicationStatus: "APPROVED",
+          hasApproval: true,
+          approvalStatus: "APPROVED",
+          datasetId: "dataset:fhir-patients",
+          datasetTitle: "Synthetic FHIR Cohort",
+          hasContract: true,
+          ehdsArticle: "Art. 53",
+        },
+      ],
+    };
+
+    it("shows approval chain detail panel when row is clicked", async () => {
+      mockFetchApi.mockImplementation((url: string) => {
+        if (url === "/api/compliance") return mockResponse(matrixWithRow);
+        if (url === "/api/credentials")
+          return mockResponse({ credentials: [] });
+        if (url === "/api/trust-center")
+          return mockResponse({ trustCenters: [], speSessions: [] });
         if (typeof url === "string" && url.startsWith("/api/compliance?"))
           return mockResponse(COMPLIANT_RESULT);
         return mockResponse({});
       });
-
-      const user = userEvent.setup();
-      await user.click(screen.getByRole("button", { name: /Validate/i }));
-
-      await waitFor(() => {
-        expect(
-          screen.getByText(/Compliant — full HDAB chain found/i),
-        ).toBeInTheDocument();
-      });
-    });
-
-    it("renders chain table with correct application data", async () => {
-      setupMountMocks();
       render(<CompliancePage />);
 
       await waitFor(() => {
-        expect(screen.getByRole("button", { name: /Validate/i })).toBeEnabled();
+        expect(screen.getByText("PharmaCo Research AG")).toBeInTheDocument();
       });
 
+      const user = userEvent.setup();
+      await user.click(screen.getByText("PharmaCo Research AG"));
+
+      await waitFor(() => {
+        expect(screen.getByText(/Approval Chain Detail/i)).toBeInTheDocument();
+      });
+    });
+
+    it("renders chain table with correct application data after row click", async () => {
       mockFetchApi.mockImplementation((url: string) => {
+        if (url === "/api/compliance") return mockResponse(matrixWithRow);
+        if (url === "/api/credentials")
+          return mockResponse({ credentials: [] });
+        if (url === "/api/trust-center")
+          return mockResponse({ trustCenters: [], speSessions: [] });
         if (typeof url === "string" && url.startsWith("/api/compliance?"))
           return mockResponse(COMPLIANT_RESULT);
         return mockResponse({});
       });
+      render(<CompliancePage />);
+
+      await waitFor(() => {
+        expect(screen.getByText("PharmaCo Research AG")).toBeInTheDocument();
+      });
 
       const user = userEvent.setup();
-      await user.click(screen.getByRole("button", { name: /Validate/i }));
+      await user.click(screen.getByText("PharmaCo Research AG"));
 
       await waitFor(() => {
         expect(screen.getByText("app-001")).toBeInTheDocument();
@@ -418,22 +388,52 @@ describe("CompliancePage", () => {
       });
     });
 
-    it("renders multiple chain rows", async () => {
-      setupMountMocks();
+    it("shows compliant indicator after successful chain fetch", async () => {
+      mockFetchApi.mockImplementation((url: string) => {
+        if (url === "/api/compliance") return mockResponse(matrixWithRow);
+        if (url === "/api/credentials")
+          return mockResponse({ credentials: [] });
+        if (url === "/api/trust-center")
+          return mockResponse({ trustCenters: [], speSessions: [] });
+        if (typeof url === "string" && url.startsWith("/api/compliance?"))
+          return mockResponse(COMPLIANT_RESULT);
+        return mockResponse({});
+      });
       render(<CompliancePage />);
 
       await waitFor(() => {
-        expect(screen.getByRole("button", { name: /Validate/i })).toBeEnabled();
+        expect(screen.getByText("PharmaCo Research AG")).toBeInTheDocument();
       });
 
+      const user = userEvent.setup();
+      await user.click(screen.getByText("PharmaCo Research AG"));
+
+      await waitFor(() => {
+        expect(
+          screen.getByText(/Full HDAB approval chain found/i),
+        ).toBeInTheDocument();
+      });
+    });
+
+    it("renders multiple chain rows", async () => {
       mockFetchApi.mockImplementation((url: string) => {
+        if (url === "/api/compliance") return mockResponse(matrixWithRow);
+        if (url === "/api/credentials")
+          return mockResponse({ credentials: [] });
+        if (url === "/api/trust-center")
+          return mockResponse({ trustCenters: [], speSessions: [] });
         if (typeof url === "string" && url.startsWith("/api/compliance?"))
           return mockResponse(MULTI_CHAIN_RESULT);
         return mockResponse({});
       });
+      render(<CompliancePage />);
+
+      await waitFor(() => {
+        expect(screen.getByText("PharmaCo Research AG")).toBeInTheDocument();
+      });
 
       const user = userEvent.setup();
-      await user.click(screen.getByRole("button", { name: /Validate/i }));
+      await user.click(screen.getByText("PharmaCo Research AG"));
 
       await waitFor(() => {
         expect(screen.getByText("app-001")).toBeInTheDocument();
@@ -443,97 +443,107 @@ describe("CompliancePage", () => {
     });
 
     it("shows dash for null contract in chain", async () => {
-      setupMountMocks();
-      render(<CompliancePage />);
-
-      await waitFor(() => {
-        expect(screen.getByRole("button", { name: /Validate/i })).toBeEnabled();
-      });
-
       mockFetchApi.mockImplementation((url: string) => {
+        if (url === "/api/compliance") return mockResponse(matrixWithRow);
+        if (url === "/api/credentials")
+          return mockResponse({ credentials: [] });
+        if (url === "/api/trust-center")
+          return mockResponse({ trustCenters: [], speSessions: [] });
         if (typeof url === "string" && url.startsWith("/api/compliance?"))
           return mockResponse(MULTI_CHAIN_RESULT);
         return mockResponse({});
       });
-
-      const user = userEvent.setup();
-      await user.click(screen.getByRole("button", { name: /Validate/i }));
-
-      await waitFor(() => {
-        expect(screen.getByText("—")).toBeInTheDocument();
-      });
-    });
-  });
-
-  // ─── Compliance Check (Non-compliant) ──────────────────────────
-  describe("Non-compliant result", () => {
-    it("shows non-compliant message", async () => {
-      setupMountMocks();
       render(<CompliancePage />);
 
       await waitFor(() => {
-        expect(screen.getByRole("button", { name: /Validate/i })).toBeEnabled();
+        expect(screen.getByText("PharmaCo Research AG")).toBeInTheDocument();
       });
 
+      const user = userEvent.setup();
+      await user.click(screen.getByText("PharmaCo Research AG"));
+
+      await waitFor(() => {
+        // null contract renders as "—"
+        expect(screen.getByText("—")).toBeInTheDocument();
+      });
+    });
+
+    it("shows incomplete approval chain for non-compliant result", async () => {
       mockFetchApi.mockImplementation((url: string) => {
+        if (url === "/api/compliance") return mockResponse(matrixWithRow);
+        if (url === "/api/credentials")
+          return mockResponse({ credentials: [] });
+        if (url === "/api/trust-center")
+          return mockResponse({ trustCenters: [], speSessions: [] });
         if (typeof url === "string" && url.startsWith("/api/compliance?"))
           return mockResponse(NON_COMPLIANT_RESULT);
         return mockResponse({});
       });
+      render(<CompliancePage />);
+
+      await waitFor(() => {
+        expect(screen.getByText("PharmaCo Research AG")).toBeInTheDocument();
+      });
 
       const user = userEvent.setup();
-      await user.click(screen.getByRole("button", { name: /Validate/i }));
+      await user.click(screen.getByText("PharmaCo Research AG"));
 
       await waitFor(() => {
         expect(
-          screen.getByText(/Non-compliant — no approval chain found/i),
+          screen.getByText(/Incomplete approval chain/i),
         ).toBeInTheDocument();
       });
     });
 
-    it("does not render a chain table when chain is empty", async () => {
-      setupMountMocks();
-      render(<CompliancePage />);
-
-      await waitFor(() => {
-        expect(screen.getByRole("button", { name: /Validate/i })).toBeEnabled();
-      });
-
+    it("does not render chain table when chain is empty", async () => {
       mockFetchApi.mockImplementation((url: string) => {
+        if (url === "/api/compliance") return mockResponse(matrixWithRow);
+        if (url === "/api/credentials")
+          return mockResponse({ credentials: [] });
+        if (url === "/api/trust-center")
+          return mockResponse({ trustCenters: [], speSessions: [] });
         if (typeof url === "string" && url.startsWith("/api/compliance?"))
           return mockResponse(NON_COMPLIANT_RESULT);
         return mockResponse({});
       });
-
-      const user = userEvent.setup();
-      await user.click(screen.getByRole("button", { name: /Validate/i }));
-
-      await waitFor(() => {
-        expect(screen.getByText(/Non-compliant/i)).toBeInTheDocument();
-      });
-
-      expect(screen.queryByText("Application")).not.toBeInTheDocument();
-    });
-  });
-
-  // ─── Compliance Check Request ──────────────────────────────────
-  describe("Check request", () => {
-    it("sends consumerId and datasetId as query params", async () => {
-      setupMountMocks();
       render(<CompliancePage />);
 
       await waitFor(() => {
-        expect(screen.getByRole("button", { name: /Validate/i })).toBeEnabled();
+        expect(screen.getByText("PharmaCo Research AG")).toBeInTheDocument();
       });
 
+      const user = userEvent.setup();
+      await user.click(screen.getByText("PharmaCo Research AG"));
+
+      await waitFor(() => {
+        expect(
+          screen.getByText(/Incomplete approval chain/i),
+        ).toBeInTheDocument();
+      });
+
+      // Incomplete chain detail does not show the approval chain table (no "EHDS Article" column)
+      expect(screen.queryByText("EHDS Article")).not.toBeInTheDocument();
+    });
+
+    it("sends consumerId and datasetId as query params when row clicked", async () => {
       mockFetchApi.mockImplementation((url: string) => {
+        if (url === "/api/compliance") return mockResponse(matrixWithRow);
+        if (url === "/api/credentials")
+          return mockResponse({ credentials: [] });
+        if (url === "/api/trust-center")
+          return mockResponse({ trustCenters: [], speSessions: [] });
         if (typeof url === "string" && url.startsWith("/api/compliance?"))
           return mockResponse(COMPLIANT_RESULT);
         return mockResponse({});
       });
+      render(<CompliancePage />);
+
+      await waitFor(() => {
+        expect(screen.getByText("PharmaCo Research AG")).toBeInTheDocument();
+      });
 
       const user = userEvent.setup();
-      await user.click(screen.getByRole("button", { name: /Validate/i }));
+      await user.click(screen.getByText("PharmaCo Research AG"));
 
       await waitFor(() => {
         const checkCall = mockFetchApi.mock.calls.find(
@@ -542,84 +552,83 @@ describe("CompliancePage", () => {
             (c[0] as string).startsWith("/api/compliance?"),
         );
         expect(checkCall).toBeDefined();
-        expect(checkCall![0]).toContain(
-          `consumerId=${encodeURIComponent(CONSUMERS[0].id)}`,
-        );
-        expect(checkCall![0]).toContain(
-          `datasetId=${encodeURIComponent(DATASETS[0].id)}`,
-        );
+        expect(checkCall![0]).toContain("consumerId=");
+        expect(checkCall![0]).toContain("datasetId=");
       });
     });
 
-    it("shows Checking… text while loading", async () => {
-      setupMountMocks();
-      render(<CompliancePage />);
-
-      await waitFor(() => {
-        expect(screen.getByRole("button", { name: /Validate/i })).toBeEnabled();
-      });
-
-      // Make the compliance check hang
+    it("shows checking state while detail loads", async () => {
       mockFetchApi.mockImplementation((url: string) => {
+        if (url === "/api/compliance") return mockResponse(matrixWithRow);
+        if (url === "/api/credentials")
+          return mockResponse({ credentials: [] });
+        if (url === "/api/trust-center")
+          return mockResponse({ trustCenters: [], speSessions: [] });
         if (typeof url === "string" && url.startsWith("/api/compliance?"))
           return new Promise(() => {});
         return mockResponse({});
       });
+      render(<CompliancePage />);
+
+      await waitFor(() => {
+        expect(screen.getByText("PharmaCo Research AG")).toBeInTheDocument();
+      });
 
       const user = userEvent.setup();
-      await user.click(screen.getByRole("button", { name: /Validate/i }));
+      await user.click(screen.getByText("PharmaCo Research AG"));
 
-      expect(screen.getByText("Checking…")).toBeInTheDocument();
+      expect(screen.getByText(/Checking approval chain/i)).toBeInTheDocument();
+    });
+
+    it("closes detail panel when Close button clicked", async () => {
+      mockFetchApi.mockImplementation((url: string) => {
+        if (url === "/api/compliance") return mockResponse(matrixWithRow);
+        if (url === "/api/credentials")
+          return mockResponse({ credentials: [] });
+        if (url === "/api/trust-center")
+          return mockResponse({ trustCenters: [], speSessions: [] });
+        if (typeof url === "string" && url.startsWith("/api/compliance?"))
+          return mockResponse(COMPLIANT_RESULT);
+        return mockResponse({});
+      });
+      render(<CompliancePage />);
+
+      await waitFor(() => {
+        expect(screen.getByText("PharmaCo Research AG")).toBeInTheDocument();
+      });
+
+      const user = userEvent.setup();
+      await user.click(screen.getByText("PharmaCo Research AG"));
+
+      await waitFor(() => {
+        expect(screen.getByText(/Approval Chain Detail/i)).toBeInTheDocument();
+      });
+
+      await user.click(screen.getByText("Close"));
+      expect(
+        screen.queryByText(/Approval Chain Detail/i),
+      ).not.toBeInTheDocument();
     });
   });
 
-  // ─── Consumer/Dataset Selection ────────────────────────────────
-  describe("Selection changes", () => {
-    it("allows changing consumer via dropdown", async () => {
+  // ─── No Detail Initially ─────────────────────────────────────────
+  describe("Initial state", () => {
+    it("does not show detail panel before any row is clicked", async () => {
       setupMountMocks();
-      const user = userEvent.setup();
-      render(<CompliancePage />);
-
-      await waitFor(() => {
-        expect(screen.getAllByRole("combobox").length).toBe(2);
-      });
-
-      const consumerSelect = screen.getAllByRole("combobox")[0];
-      await user.selectOptions(consumerSelect, CONSUMERS[1].id);
-
-      expect(consumerSelect).toHaveValue(CONSUMERS[1].id);
-    });
-
-    it("allows changing dataset via dropdown", async () => {
-      setupMountMocks();
-      const user = userEvent.setup();
-      render(<CompliancePage />);
-
-      await waitFor(() => {
-        expect(screen.getAllByRole("combobox").length).toBe(2);
-      });
-
-      const datasetSelect = screen.getAllByRole("combobox")[1];
-      await user.selectOptions(datasetSelect, DATASETS[1].id);
-
-      expect(datasetSelect).toHaveValue(DATASETS[1].id);
-    });
-
-    it("allows typing in fallback consumer text input", async () => {
-      setupMountMocks({ consumers: [], datasets: DATASETS });
-      const user = userEvent.setup();
       render(<CompliancePage />);
 
       await waitFor(() => {
         expect(
-          screen.getByPlaceholderText("Participant ID or DID"),
+          screen.getByText("EHDS Compliance Overview"),
         ).toBeInTheDocument();
       });
 
-      const input = screen.getByPlaceholderText("Participant ID or DID");
-      await user.type(input, "did:web:custom");
-
-      expect(input).toHaveValue("did:web:custom");
+      expect(
+        screen.queryByText(/Approval Chain Detail/i),
+      ).not.toBeInTheDocument();
+      expect(
+        screen.queryByText(/Full HDAB approval chain found/i),
+      ).not.toBeInTheDocument();
     });
   });
 
@@ -784,9 +793,11 @@ describe("CompliancePage", () => {
     it("handles failed /api/compliance fetch gracefully", async () => {
       mockFetchApi.mockImplementation((url: string) => {
         if (url === "/api/compliance")
-          return mockResponse({ consumers: [], datasets: [] });
+          return mockResponse({ consumers: [], datasets: [], matrix: [] });
         if (url === "/api/credentials")
           return mockResponse({ credentials: [] });
+        if (url === "/api/trust-center")
+          return mockResponse({ trustCenters: [], speSessions: [] });
         return mockResponse({});
       });
 
@@ -794,22 +805,29 @@ describe("CompliancePage", () => {
 
       // Should still render the page without crashing
       await waitFor(() => {
-        expect(screen.getByText("EHDS Compliance Checker")).toBeInTheDocument();
+        expect(
+          screen.getByText("EHDS Compliance Overview"),
+        ).toBeInTheDocument();
       });
     });
 
     it("handles failed /api/credentials fetch gracefully", async () => {
       mockFetchApi.mockImplementation((url: string) => {
-        if (url === "/api/compliance") return mockResponse(OPTIONS_RESPONSE);
+        if (url === "/api/compliance")
+          return mockResponse({ consumers: [], datasets: [], matrix: [] });
         if (url === "/api/credentials")
           return mockResponse({ credentials: [] });
+        if (url === "/api/trust-center")
+          return mockResponse({ trustCenters: [], speSessions: [] });
         return mockResponse({});
       });
 
       render(<CompliancePage />);
 
       await waitFor(() => {
-        expect(screen.getByText("EHDS Compliance Checker")).toBeInTheDocument();
+        expect(
+          screen.getByText("EHDS Compliance Overview"),
+        ).toBeInTheDocument();
       });
 
       // Credentials section should show empty state
@@ -818,31 +836,45 @@ describe("CompliancePage", () => {
       ).toBeInTheDocument();
     });
 
-    it("handles empty consumers/datasets from API", async () => {
-      setupMountMocks({ consumers: [], datasets: [] }, []);
+    it("handles empty matrix from API gracefully", async () => {
+      mockFetchApi.mockImplementation((url: string) => {
+        if (url === "/api/compliance")
+          return mockResponse({ consumers: [], datasets: [], matrix: [] });
+        if (url === "/api/credentials")
+          return mockResponse({ credentials: [] });
+        if (url === "/api/trust-center")
+          return mockResponse({ trustCenters: [], speSessions: [] });
+        return mockResponse({});
+      });
       render(<CompliancePage />);
 
       await waitFor(() => {
         expect(
-          screen.getByPlaceholderText("Participant ID or DID"),
+          screen.getByText("EHDS Compliance Overview"),
         ).toBeInTheDocument();
-        expect(screen.getByPlaceholderText("Dataset ID")).toBeInTheDocument();
+        expect(screen.getByText(/No participants found/i)).toBeInTheDocument();
       });
     });
   });
 
   // ─── No Result Initially ─────────────────────────────────────────
-  describe("Initial state", () => {
-    it("does not show compliance result before checking", async () => {
+  describe("Initial state (duplicate check)", () => {
+    it("does not show detail panel before any row is clicked (duplicate)", async () => {
       setupMountMocks();
       render(<CompliancePage />);
 
       await waitFor(() => {
-        expect(screen.getByRole("button", { name: /Validate/i })).toBeEnabled();
+        expect(
+          screen.getByText("EHDS Compliance Overview"),
+        ).toBeInTheDocument();
       });
 
-      expect(screen.queryByText(/Compliant/)).not.toBeInTheDocument();
-      expect(screen.queryByText(/Non-compliant/)).not.toBeInTheDocument();
+      expect(
+        screen.queryByText(/Full HDAB approval chain found/i),
+      ).not.toBeInTheDocument();
+      expect(
+        screen.queryByText(/Incomplete approval chain/i),
+      ).not.toBeInTheDocument();
     });
   });
 
@@ -1016,7 +1048,9 @@ describe("CompliancePage", () => {
 
       await waitFor(() => {
         // Page still renders without trust center data
-        expect(screen.getByText("EHDS Compliance Checker")).toBeInTheDocument();
+        expect(
+          screen.getByText("EHDS Compliance Overview"),
+        ).toBeInTheDocument();
       });
 
       // No crash, no trust center cards

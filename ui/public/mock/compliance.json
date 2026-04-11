@@ -1,9 +1,35 @@
 {
   "consumers": [
     {
-      "id": "did:web:trialcorp.example:research",
-      "name": "TrialCorp Research (CRO)",
-      "type": "CRO"
+      "id": "did:web:alpha-klinik.de:participant",
+      "name": "AlphaKlinik Berlin",
+      "type": "DATA_HOLDER"
+    },
+    {
+      "id": "did:web:healthgov.example:hdab",
+      "name": "HealthGov (HDAB)",
+      "type": "HDAB"
+    },
+    {
+      "id": "did:web:irs.fr:hdab",
+      "name": "Institut de Recherche Santé",
+      "type": "HDAB"
+    },
+    {
+      "id": "did:web:lmc.nl:clinic",
+      "name": "Limburg Medical Centre",
+      "type": "DATA_HOLDER"
+    },
+    { "id": "did:web:medreg.de:hdab", "name": "MedReg DE", "type": "HDAB" },
+    {
+      "id": "did:web:pharmaco.de:research",
+      "name": "PharmaCo Research AG",
+      "type": "DATA_USER"
+    },
+    {
+      "id": "did:web:riverside.example:participant",
+      "name": "Riverside General (CLINIC)",
+      "type": "CLINIC"
     },
     {
       "id": "did:web:trialcorp.example:research",
@@ -13,20 +39,126 @@
   ],
   "datasets": [
     {
-      "id": "Synthea Synthetic FHIR R4 Patient Cohort",
-      "title": "Synthea Synthetic FHIR R4 Patient Cohort"
-    },
-    {
-      "id": "Synthetic Type 2 Diabetes Patient Journey",
-      "title": "Synthetic Type 2 Diabetes Patient Journey"
-    },
-    {
-      "id": "dataset-4:00dc0fb2-d2c4-4e4b-87d0-88a983ba3532:83",
+      "id": "dataset:omop-cdm-v54-analytics",
       "title": "OMOP CDM v5.4 Analytics Cohort"
     },
     {
-      "id": "dataset-4:00dc0fb2-d2c4-4e4b-87d0-88a983ba3532:84",
+      "id": "dataset:prostate-cancer-registry",
       "title": "Prostate Cancer Registry 2024"
+    },
+    {
+      "id": "dataset:synthea-fhir-r4-mvd",
+      "title": "Synthea Synthetic FHIR R4 Patient Cohort"
+    },
+    {
+      "id": "urn:uuid:alphaklinik:dataset:diab-001",
+      "title": "Synthetic Type 2 Diabetes Patient Journey"
+    }
+  ],
+  "matrix": [
+    {
+      "consumerId": "did:web:alpha-klinik.de:participant",
+      "consumerName": "AlphaKlinik Berlin",
+      "consumerType": "DATA_HOLDER",
+      "hasApplication": true,
+      "applicationStatus": "PENDING",
+      "hasApproval": false,
+      "approvalStatus": null,
+      "datasetId": null,
+      "datasetTitle": null,
+      "hasContract": false,
+      "ehdsArticle": null
+    },
+    {
+      "consumerId": "did:web:healthgov.example:hdab",
+      "consumerName": "HealthGov (HDAB)",
+      "consumerType": "HDAB",
+      "hasApplication": false,
+      "applicationStatus": null,
+      "hasApproval": false,
+      "approvalStatus": null,
+      "datasetId": null,
+      "datasetTitle": null,
+      "hasContract": false,
+      "ehdsArticle": null
+    },
+    {
+      "consumerId": "did:web:irs.fr:hdab",
+      "consumerName": "Institut de Recherche Santé",
+      "consumerType": "HDAB",
+      "hasApplication": true,
+      "applicationStatus": "REJECTED",
+      "hasApproval": true,
+      "approvalStatus": "REJECTED",
+      "datasetId": null,
+      "datasetTitle": null,
+      "hasContract": false,
+      "ehdsArticle": "EHDS Art. 46"
+    },
+    {
+      "consumerId": "did:web:lmc.nl:clinic",
+      "consumerName": "Limburg Medical Centre",
+      "consumerType": "DATA_HOLDER",
+      "hasApplication": true,
+      "applicationStatus": "APPROVED",
+      "hasApproval": true,
+      "approvalStatus": "APPROVED",
+      "datasetId": "dataset:synthea-fhir-r4-mvd",
+      "datasetTitle": "Synthea Synthetic FHIR R4 Patient Cohort",
+      "hasContract": false,
+      "ehdsArticle": "EHDS Art. 51"
+    },
+    {
+      "consumerId": "did:web:medreg.de:hdab",
+      "consumerName": "MedReg DE",
+      "consumerType": "HDAB",
+      "hasApplication": false,
+      "applicationStatus": null,
+      "hasApproval": false,
+      "approvalStatus": null,
+      "datasetId": null,
+      "datasetTitle": null,
+      "hasContract": false,
+      "ehdsArticle": null
+    },
+    {
+      "consumerId": "did:web:pharmaco.de:research",
+      "consumerName": "PharmaCo Research AG",
+      "consumerType": "DATA_USER",
+      "hasApplication": true,
+      "applicationStatus": "APPROVED",
+      "hasApproval": true,
+      "approvalStatus": "APPROVED",
+      "datasetId": "urn:uuid:alphaklinik:dataset:diab-001",
+      "datasetTitle": "Synthetic Type 2 Diabetes Patient Journey",
+      "hasContract": true,
+      "ehdsArticle": "EHDS Art. 46"
+    },
+    {
+      "consumerId": "did:web:riverside.example:participant",
+      "consumerName": "Riverside General (CLINIC)",
+      "consumerType": "CLINIC",
+      "hasApplication": true,
+      "applicationStatus": "UNDER_REVIEW",
+      "hasApproval": false,
+      "approvalStatus": null,
+      "datasetId": null,
+      "datasetTitle": null,
+      "hasContract": false,
+      "ehdsArticle": null
+    },
+    {
+      "consumerId": "did:web:trialcorp.example:research",
+      "consumerName": "TrialCorp Research (CRO)",
+      "consumerType": "CRO",
+      "hasApplication": true,
+      "applicationStatus": "APPROVED",
+      "hasApproval": true,
+      "approvalStatus": "APPROVED",
+      "datasetId": "urn:uuid:riverside:dataset:diab-001",
+      "datasetTitle": "Synthetic Type 2 Diabetes Patient Journey",
+      "hasContract": true,
+      "ehdsArticle": "EHDS Art. 46"
     }
   ]
 }

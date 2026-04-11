@@ -24,6 +24,7 @@ vi.mock("neo4j-driver", () => ({
       basic: vi.fn(),
     },
     int: vi.fn((n: number) => n),
+    isInt: vi.fn(() => false),
   },
 }));
 
@@ -242,6 +243,165 @@ describe("Neo4j Proxy API", () => {
       expect(res.body.templates[0]).toHaveProperty("name");
       expect(res.body.templates[0]).toHaveProperty("description");
       expect(res.body).toHaveProperty("llmAvailable");
+    });
+  });
+
+  // ── NLQ Template Matching (Tier 1) ────────────────────────────────────
+  describe("POST /nlq — template matching", () => {
+    it("should match 'how many patients' to patient_count template", async () => {
+      const record = {
+        keys: ["patientCount"],
+        get: vi.fn((key: string) => (key === "patientCount" ? 174 : null)),
+      };
+      // forEach used by keys iteration in the handler
+      record.keys.forEach = Array.prototype.forEach.bind(record.keys);
+      mockRun.mockResolvedValue({ records: [record] });
+
+      const res = await request
+        .post("/nlq")
+        .send({ question: "How many patients are in the database?" });
+
+      expect(res.status).toBe(200);
+      expect(res.body.method).toBe("template");
+      expect(res.body.templateName).toBe("patient_count");
+      expect(res.body.results).toBeDefined();
+      expect(res.body.totalRows).toBeGreaterThanOrEqual(0);
+    });
+
+    it("should match 'top conditions' to top_conditions template", async () => {
+      const record = {
+        keys: ["condition", "count"],
+        get: vi.fn((key: string) => {
+          if (key === "condition") return "Hypertension";
+          if (key === "count") return 42;
+          return null;
+        }),
+      };
+      record.keys.forEach = Array.prototype.forEach.bind(record.keys);
+      mockRun.mockResolvedValue({ records: [record] });
+
+      const res = await request
+        .post("/nlq")
+        .send({ question: "What are the top 5 conditions?" });
+
+      expect(res.status).toBe(200);
+      expect(res.body.method).toBe("template");
+      expect(res.body.templateName).toBe("top_conditions");
+    });
+
+    it("should match 'patients by gender' template", async () => {
+      const record = {
+        keys: ["gender", "count"],
+        get: vi.fn((key: string) => {
+          if (key === "gender") return "female";
+          if (key === "count") return 80;
+          return null;
+        }),
+      };
+      record.keys.forEach = Array.prototype.forEach.bind(record.keys);
+      mockRun.mockResolvedValue({ records: [record] });
+
+      const res = await request
+        .post("/nlq")
+        .send({ question: "Show me patients by gender" });
+
+      expect(res.status).toBe(200);
+      expect(res.body.method).toBe("template");
+      expect(res.body.templateName).toBe("patient_by_gender");
+    });
+
+    it("should return 400 when question is missing", async () => {
+      const res = await request.post("/nlq").send({});
+
+      expect(res.status).toBe(400);
+      expect(res.body.error).toContain("Missing");
+    });
+
+    it("should return method=none when no template matches and no LLM configured", async () => {
+      // No fulltext indexes in mock, no LLM configured
+      mockRun.mockRejectedValue(new Error("no such index"));
+
+      const res = await request
+        .post("/nlq")
+        .send({ question: "xyzzy foobar nonsense" });
+
+      expect(res.status).toBe(200);
+      expect(res.body.method).toBe("none");
+      expect(res.body.availableTemplates).toBeDefined();
+    });
+  });
+
+  // ── NLQ Write Guard (Safety) ──────────────────────────────────────────
+  describe("POST /nlq — write guard", () => {
+    it("should return structured error on query execution failure", async () => {
+      // Force template match but execution failure
+      mockRun.mockRejectedValue(
+        new Error("Neo.ClientError.Statement.SyntaxError"),
+      );
+
+      const res = await request
+        .post("/nlq")
+        .send({ question: "How many patients are in the database?" });
+
+      expect(res.status).toBe(200);
+      expect(res.body.error).toBeDefined();
+      expect(res.body.results).toEqual([]);
+      expect(res.body.totalRows).toBe(0);
+      expect(res.body.method).toBeDefined();
+    });
+  });
+
+  // ── NLQ Response Structure ────────────────────────────────────────────
+  describe("POST /nlq — response structure", () => {
+    it("should always include question, cypher, method, results, totalRows", async () => {
+      const record = {
+        keys: ["patientCount"],
+        get: vi.fn(() => 100),
+      };
+      record.keys.forEach = Array.prototype.forEach.bind(record.keys);
+      mockRun.mockResolvedValue({ records: [record] });
+
+      const res = await request
+        .post("/nlq")
+        .send({ question: "How many patients?" });
+
+      expect(res.status).toBe(200);
+      const body = res.body;
+      expect(body).toHaveProperty("question");
+      expect(body).toHaveProperty("cypher");
+      expect(body).toHaveProperty("method");
+      expect(body).toHaveProperty("results");
+      expect(body).toHaveProperty("totalRows");
+      expect(typeof body.question).toBe("string");
+      expect(typeof body.cypher).toBe("string");
+      expect(Array.isArray(body.results)).toBe(true);
+    });
+
+    it("should include odrlEnforced field in response", async () => {
+      const record = {
+        keys: ["patientCount"],
+        get: vi.fn(() => 50),
+      };
+      record.keys.forEach = Array.prototype.forEach.bind(record.keys);
+      mockRun.mockResolvedValue({ records: [record] });
+
+      const res = await request
+        .post("/nlq")
+        .send({ question: "How many patients?" });
+
+      expect(res.body).toHaveProperty("odrlEnforced");
+    });
+  });
+
+  // ── Rate Limiting ─────────────────────────────────────────────────────
+  describe("Rate limiting", () => {
+    it("should include rate limit headers", async () => {
+      mockGetServerInfo.mockResolvedValue({ address: "localhost:7687" });
+
+      const res = await request.get("/health");
+
+      // express-rate-limit standardHeaders returns these
+      expect(res.headers).toHaveProperty("ratelimit-limit");
     });
   });
 });

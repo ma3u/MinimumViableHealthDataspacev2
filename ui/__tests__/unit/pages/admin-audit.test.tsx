@@ -312,7 +312,10 @@ describe("AdminAuditPage", () => {
       setupMocks();
       await renderAndWait();
       expect(screen.getByText("Audit & Provenance")).toBeInTheDocument();
-      expect(screen.getByText(/Neo4j provenance graph/)).toBeInTheDocument();
+      // Component subtitle: "Tamper-evident audit trail · EHDS Art. 32 · GDPR Art. 30"
+      expect(
+        screen.getByText(/Tamper-evident audit trail/),
+      ).toBeInTheDocument();
     });
   });
 

@@ -48,26 +48,46 @@ vi.mock("next/navigation", () => ({
 
 // ── Session mock — override per-test ──────────────────────────────────────────
 
-const mockUseSession = vi.fn();
+// Mock next-auth/react (still needed transitively by useTabSession internals)
 vi.mock("next-auth/react", () => ({
-  useSession: () => mockUseSession(),
+  useSession: vi.fn(),
   signIn: vi.fn(),
   signOut: vi.fn(),
   SessionProvider: ({ children }: { children: React.ReactNode }) => children,
 }));
 
-/** Helper: configure the session mock for a given role set. */
+// Mock useTabSession so Navigation reads roles directly from our test helper,
+// bypassing sessionStorage / cross-tab snapshot logic entirely.
+const mockUseTabSession = vi.fn();
+vi.mock("@/lib/use-tab-session", () => ({
+  useTabSession: () => mockUseTabSession(),
+  markSessionSwitch: vi.fn(),
+}));
+
+// Mock useDemoPersona — Navigation always calls it (hook rules); in live mode
+// (IS_STATIC=false) the return value is ignored, so a minimal stub suffices.
+vi.mock("@/lib/use-demo-persona", () => ({
+  useDemoPersona: () => ({
+    username: "edcadmin",
+    roles: [],
+    displayName: "EDC Admin",
+  }),
+  setDemoPersona: vi.fn(),
+  getDemoPersonaUsername: vi.fn(() => "edcadmin"),
+  DEMO_PERSONA_KEY: "demo-persona",
+}));
+
+/** Helper: configure the tab-session mock for a given role set. */
 function setSession(
   roles: string[],
   username = "testuser",
   status: "authenticated" | "unauthenticated" | "loading" = "authenticated",
 ) {
-  mockUseSession.mockReturnValue({
-    data:
-      status === "authenticated"
-        ? { user: { name: username, email: `${username}@test.eu` }, roles }
-        : null,
+  const isAuth = status === "authenticated";
+  mockUseTabSession.mockReturnValue({
+    session: isAuth ? { username, email: `${username}@test.eu`, roles } : null,
     status,
+    liveSession: null,
   });
 }
 
@@ -135,19 +155,22 @@ describe("Navigation Component", () => {
     mockPathname.mockReturnValue("/graph");
     render(<Navigation />);
 
+    // Active button gets border-b-2 accent underline (Vitalis Blue design)
     const exploreButton = screen.getByText("Explore").closest("button");
-    expect(exploreButton?.className).toContain("bg-layer1");
+    expect(exploreButton?.className).toContain("border-b-2");
 
+    // Inactive button does NOT have the accent border
     const docsButton = screen.getByText("Docs").closest("button");
-    expect(docsButton?.className).not.toContain("bg-layer1");
+    expect(docsButton?.className).not.toContain("border-b-2");
   });
 
   it("should highlight governance group when on /compliance path", () => {
     mockPathname.mockReturnValue("/compliance");
     render(<Navigation />);
 
+    // Active button gets border-b-2 accent underline (Vitalis Blue design)
     const governanceButton = screen.getByText("Governance").closest("button");
-    expect(governanceButton?.className).toContain("bg-layer1");
+    expect(governanceButton?.className).toContain("border-b-2");
   });
 
   it("should have correct href on brand link", () => {

@@ -66,7 +66,7 @@ export default function DemoHubPage() {
     <div className="max-w-4xl mx-auto px-6 py-14">
       {/* Header */}
       <div className="flex items-center gap-3 mb-2">
-        <Users size={28} className="text-layer1" />
+        <Users size={28} className="text-blue-800 dark:text-blue-300" />
         <h1 className="text-3xl font-bold">Demo Persona Selector</h1>
       </div>
       <p className="text-[var(--text-secondary)] mb-2">
@@ -156,7 +156,7 @@ export default function DemoHubPage() {
       </div>
 
       {/* Footer note */}
-      <p className="mt-12 text-xs text-gray-600 text-center">
+      <p className="mt-12 text-xs text-[var(--text-secondary)] text-center">
         Static demo — all data is synthetic. No login, no real patient records.
         <br />
         EHDS Art. 3 · GDPR Art. 15-22 · DSP 2025-1 · FHIR R4 · OMOP CDM

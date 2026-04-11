@@ -106,12 +106,11 @@ describe("GraphPage", () => {
     expect(screen.getByText("Knowledge Graph")).toBeInTheDocument();
   });
 
-  it("renders the description paragraph", () => {
+  it("renders the graph page with sidebar", () => {
     mockFetchApi.mockReturnValue(new Promise(() => {}));
     render(<GraphPage />);
-    expect(
-      screen.getByText(/5-layer EHDS health dataspace/),
-    ).toBeInTheDocument();
+    // Sidebar is rendered with the sidebar panel
+    expect(screen.getByRole("complementary")).toBeInTheDocument();
   });
 
   // 2. Shows loading state (persona-aware: EDC_ADMIN → "My Dataspace")
@@ -153,33 +152,33 @@ describe("GraphPage", () => {
   });
 
   // 4. Shows sidebar with layer legend
-  it("renders the Structural layers heading in the sidebar", () => {
+  it("renders the Legend section in the sidebar", () => {
     mockFetchApi.mockReturnValue(new Promise(() => {}));
     render(<GraphPage />);
-    expect(screen.getByText("Structural layers")).toBeInTheDocument();
+    expect(screen.getByText("Legend")).toBeInTheDocument();
   });
 
-  // 5. Shows navigation links in sidebar
-  it("renders Dataset Catalog link pointing to /catalog", () => {
+  // 5. Shows navigation links in sidebar (quick links section)
+  it("renders Catalog link pointing to /catalog", () => {
     mockFetchApi.mockReturnValue(new Promise(() => {}));
     render(<GraphPage />);
-    const link = screen.getByText("Dataset Catalog");
+    const link = screen.getByText("Catalog");
     expect(link).toBeInTheDocument();
     expect(link.closest("a")).toHaveAttribute("href", "/catalog");
   });
 
-  it("renders Validate graph link pointing to /api/graph/validate", () => {
+  it("renders Validate link pointing to /api/graph/validate", () => {
     mockFetchApi.mockReturnValue(new Promise(() => {}));
     render(<GraphPage />);
-    const link = screen.getByText("Validate graph");
+    const link = screen.getByText("Validate");
     expect(link).toBeInTheDocument();
     expect(link.closest("a")).toHaveAttribute("href", "/api/graph/validate");
   });
 
-  it("renders Patient Journey link pointing to /patient", () => {
+  it("renders Patients link pointing to /patient", () => {
     mockFetchApi.mockReturnValue(new Promise(() => {}));
     render(<GraphPage />);
-    const link = screen.getByText("Patient Journey");
+    const link = screen.getByText("Patients");
     expect(link).toBeInTheDocument();
     expect(link.closest("a")).toHaveAttribute("href", "/patient");
   });

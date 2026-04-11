@@ -387,6 +387,7 @@ export const FILTER_PRESETS = [
       "Contract",
       "HDABApproval",
       "OdrlPolicy",
+      "VerifiableCredential",
     ],
   },
   {
@@ -402,6 +403,7 @@ export const FILTER_PRESETS = [
       "ProviderPseudonym",
       "HDABApproval",
       "Participant",
+      "Organization",
     ],
   },
   {
@@ -470,6 +472,44 @@ export const FILTER_PRESETS = [
 ] as const;
 
 export type FilterPresetId = (typeof FILTER_PRESETS)[number]["id"];
+
+/**
+ * Maps each filter preset to the persona API endpoint that loads the relevant
+ * node types. When the user activates a filter and the needed nodes aren't in
+ * the current graph, the page fetches this persona subgraph and merges it in.
+ */
+export const FILTER_PRESET_PERSONA: Record<string, PersonaId | null> = {
+  // Default FILTER_PRESETS
+  participants: "default",
+  "trust-center": "trust-center",
+  "hdab-chain": "hdab",
+  datasets: "hospital",
+  clinical: "default",
+  analytics: "researcher",
+  // Patient presets — already loaded when patient persona is active
+  "patient-data-usage": "patient",
+  "patient-research-programs": "patient",
+  "patient-my-data": "patient",
+  "patient-risks": "patient",
+  // Hospital presets
+  "hospital-data-offerings": "hospital",
+  "hospital-data-consumers": "hospital",
+  "hospital-contracts": "hospital",
+  "hospital-compliance": "hospital",
+  "hospital-clinical": "hospital",
+  // HDAB presets
+  "hdab-approvals": "hdab",
+  "hdab-policies": "hdab",
+  "hdab-contracts": "hdab",
+  "hdab-credentials": "hdab",
+  "hdab-trust-center": "trust-center",
+  // Researcher presets
+  "researcher-discover": "researcher",
+  "researcher-access": "researcher",
+  "researcher-analytics": "researcher",
+  "researcher-clinical": "researcher",
+  "researcher-spe": "trust-center",
+};
 
 // ── Patient / Citizen filter presets ──────────────────────────────────────────
 

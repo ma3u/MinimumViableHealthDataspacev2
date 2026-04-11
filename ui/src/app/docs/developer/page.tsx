@@ -101,54 +101,84 @@ export default function DeveloperGuidePage() {
       {/* TOC */}
       <nav className="border border-[var(--border)] rounded-xl p-5 mb-10">
         <h2 className="font-semibold mb-3">Contents</h2>
-        <ul className="text-sm space-y-1.5 text-indigo-400">
+        <ul className="text-sm space-y-1.5 text-indigo-700 dark:text-indigo-400">
           <li>
-            <a href="#tech-stack" className="hover:text-indigo-300">
+            <a
+              href="#tech-stack"
+              className="hover:text-indigo-900 dark:hover:text-indigo-300"
+            >
               Technology Stack
             </a>
           </li>
           <li>
-            <a href="#quick-start" className="hover:text-indigo-300">
+            <a
+              href="#quick-start"
+              className="hover:text-indigo-900 dark:hover:text-indigo-300"
+            >
               Quick Start
             </a>
           </li>
           <li>
-            <a href="#project-structure" className="hover:text-indigo-300">
+            <a
+              href="#project-structure"
+              className="hover:text-indigo-900 dark:hover:text-indigo-300"
+            >
               Project Structure
             </a>
           </li>
           <li>
-            <a href="#graph-schema" className="hover:text-indigo-300">
+            <a
+              href="#graph-schema"
+              className="hover:text-indigo-900 dark:hover:text-indigo-300"
+            >
               Neo4j Graph Schema
             </a>
           </li>
           <li>
-            <a href="#api-reference" className="hover:text-indigo-300">
+            <a
+              href="#api-reference"
+              className="hover:text-indigo-900 dark:hover:text-indigo-300"
+            >
               API Reference
             </a>
           </li>
           <li>
-            <a href="#testing" className="hover:text-indigo-300">
+            <a
+              href="#testing"
+              className="hover:text-indigo-900 dark:hover:text-indigo-300"
+            >
               Testing
             </a>
           </li>
           <li>
-            <a href="#user-journey" className="hover:text-indigo-300">
+            <a
+              href="#user-journey"
+              className="hover:text-indigo-900 dark:hover:text-indigo-300"
+            >
               EHDS User Journey
             </a>
           </li>
           <li>
-            <a href="#cicd" className="hover:text-indigo-300">
+            <a
+              href="#cicd"
+              className="hover:text-indigo-900 dark:hover:text-indigo-300"
+            >
               CI/CD Pipeline
             </a>
           </li>
           <li>
-            <a href="#adrs" className="hover:text-indigo-300">
+            <a
+              href="#adrs"
+              className="hover:text-indigo-900 dark:hover:text-indigo-300"
+            >
               Architecture Decision Records
             </a>
           </li>
           <li>
-            <a href="#conventions" className="hover:text-indigo-300">
+            <a
+              href="#conventions"
+              className="hover:text-indigo-900 dark:hover:text-indigo-300"
+            >
               Conventions
             </a>
           </li>
@@ -221,7 +251,7 @@ export default function DeveloperGuidePage() {
         </h2>
         <div className="space-y-4">
           <div className="bg-[var(--surface)] border border-[var(--border)] rounded-lg p-4">
-            <h4 className="font-semibold text-sm mb-2 text-green-400">
+            <h4 className="font-semibold text-sm mb-2 text-[var(--success-text)]">
               1. Prerequisites
             </h4>
             <pre className="text-xs text-[var(--text-primary)] overflow-x-auto">{`# Required
@@ -233,7 +263,7 @@ Python 3.11+ (for Synthea data loading)`}</pre>
           </div>
 
           <div className="bg-[var(--surface)] border border-[var(--border)] rounded-lg p-4">
-            <h4 className="font-semibold text-sm mb-2 text-green-400">
+            <h4 className="font-semibold text-sm mb-2 text-[var(--success-text)]">
               2. Start Neo4j
             </h4>
             <pre className="text-xs text-[var(--text-primary)] overflow-x-auto">{`docker compose up -d
@@ -245,7 +275,7 @@ cat neo4j/init-schema.cypher | \\
           </div>
 
           <div className="bg-[var(--surface)] border border-[var(--border)] rounded-lg p-4">
-            <h4 className="font-semibold text-sm mb-2 text-green-400">
+            <h4 className="font-semibold text-sm mb-2 text-[var(--success-text)]">
               3. Load Synthetic Data
             </h4>
             <pre className="text-xs text-[var(--text-primary)] overflow-x-auto">{`# Insert synthetic FHIR + OMOP data
@@ -259,7 +289,7 @@ python scripts/load_fhir_neo4j.py`}</pre>
           </div>
 
           <div className="bg-[var(--surface)] border border-[var(--border)] rounded-lg p-4">
-            <h4 className="font-semibold text-sm mb-2 text-green-400">
+            <h4 className="font-semibold text-sm mb-2 text-[var(--success-text)]">
               4. Start the UI
             </h4>
             <pre className="text-xs text-[var(--text-primary)] overflow-x-auto">{`cd ui
@@ -322,16 +352,24 @@ npm run lint       # ESLint checks`}</pre>
           <h4 className="font-semibold text-sm mb-2">Key Conventions</h4>
           <ul className="text-[var(--text-secondary)] text-xs space-y-1 list-disc ml-4">
             <li>
-              Node labels: <code className="text-indigo-400">PascalCase</code>{" "}
+              Node labels:{" "}
+              <code className="text-indigo-700 dark:text-indigo-400">
+                PascalCase
+              </code>{" "}
               (Patient, ConditionOccurrence)
             </li>
             <li>
               Relationship types:{" "}
-              <code className="text-indigo-400">UPPER_SNAKE_CASE</code>{" "}
+              <code className="text-indigo-700 dark:text-indigo-400">
+                UPPER_SNAKE_CASE
+              </code>{" "}
               (HAS_ENCOUNTER, MAPS_TO)
             </li>
             <li>
-              Properties: <code className="text-indigo-400">camelCase</code>{" "}
+              Properties:{" "}
+              <code className="text-indigo-700 dark:text-indigo-400">
+                camelCase
+              </code>{" "}
               (birthDate, conceptId)
             </li>
             <li>
@@ -464,11 +502,11 @@ npm run lint       # ESLint checks`}</pre>
                   href={`https://ma3u.github.io${PAGES_BASE}/test-reports/`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-indigo-400 hover:text-indigo-300"
+                  className="text-indigo-700 dark:text-indigo-400 hover:text-indigo-900 dark:hover:text-indigo-300"
                 >
                   View Test Report →
                 </a>
-                <span className="text-gray-600 text-[10px] ml-1">
+                <span className="text-[var(--text-secondary)] text-[10px] ml-1">
                   (CI only)
                 </span>
               </li>
@@ -490,7 +528,7 @@ npm run test:coverage  # With coverage`}</pre>
               <li>
                 <a
                   href={`${basePath}/e2e-report/`}
-                  className="text-indigo-400 hover:text-indigo-300"
+                  className="text-indigo-700 dark:text-indigo-400 hover:text-indigo-900 dark:hover:text-indigo-300"
                 >
                   Playwright Report →
                 </a>
@@ -498,7 +536,7 @@ npm run test:coverage  # With coverage`}</pre>
               <li>
                 <a
                   href={`${basePath}/e2e-report/ehds-journey.html`}
-                  className="text-indigo-400 hover:text-indigo-300"
+                  className="text-indigo-700 dark:text-indigo-400 hover:text-indigo-900 dark:hover:text-indigo-300"
                 >
                   EHDS Journey Report →
                 </a>
@@ -520,7 +558,7 @@ npm run test:e2e:ui    # Interactive UI`}</pre>
             href="https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docs/FULL_USER_JOURNEY.md"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-indigo-400 hover:text-indigo-300 text-xs underline"
+            className="text-indigo-700 dark:text-indigo-400 hover:text-indigo-900 dark:hover:text-indigo-300 text-xs underline"
           >
             View Full User Journey →
           </a>
@@ -542,7 +580,9 @@ npm run test:e2e:ui    # Interactive UI`}</pre>
           </h4>
           <p className="text-[var(--text-secondary)] text-xs mb-2">
             On push to main, the{" "}
-            <code className="text-indigo-400">.github/workflows/pages.yml</code>{" "}
+            <code className="text-indigo-700 dark:text-indigo-400">
+              .github/workflows/pages.yml
+            </code>{" "}
             workflow:
           </p>
           <ol className="text-[var(--text-secondary)] text-xs space-y-1 list-decimal ml-4">
@@ -612,7 +652,7 @@ npm run test:e2e:ui    # Interactive UI`}</pre>
               key={adr.id}
               className="border border-[var(--border)] rounded-lg px-4 py-3 flex items-start gap-3"
             >
-              <span className="text-xs font-mono text-indigo-400 bg-indigo-950/50 px-2 py-0.5 rounded">
+              <span className="text-xs font-mono text-indigo-700 dark:text-indigo-400 bg-indigo-100 dark:bg-indigo-950/50 px-2 py-0.5 rounded">
                 {adr.id}
               </span>
               <div>
@@ -667,13 +707,13 @@ npm run test:e2e:ui    # Interactive UI`}</pre>
         <div className="flex flex-wrap gap-3">
           <Link
             href="/docs/user-guide"
-            className="text-sm text-indigo-400 hover:text-indigo-300 underline"
+            className="text-sm text-indigo-700 dark:text-indigo-400 hover:text-indigo-900 dark:hover:text-indigo-300 underline"
           >
             User Guide
           </Link>
           <Link
             href="/docs/architecture"
-            className="text-sm text-indigo-400 hover:text-indigo-300 underline"
+            className="text-sm text-indigo-700 dark:text-indigo-400 hover:text-indigo-900 dark:hover:text-indigo-300 underline"
           >
             Architecture Diagrams
           </Link>
@@ -681,7 +721,7 @@ npm run test:e2e:ui    # Interactive UI`}</pre>
             href="https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docs/FULL_USER_JOURNEY.md"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-sm text-indigo-400 hover:text-indigo-300 underline"
+            className="text-sm text-indigo-700 dark:text-indigo-400 hover:text-indigo-900 dark:hover:text-indigo-300 underline"
           >
             EHDS User Journey
           </a>
@@ -689,7 +729,7 @@ npm run test:e2e:ui    # Interactive UI`}</pre>
             href="https://github.com/ma3u/MinimumViableHealthDataspacev2"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-sm text-indigo-400 hover:text-indigo-300 underline"
+            className="text-sm text-indigo-700 dark:text-indigo-400 hover:text-indigo-900 dark:hover:text-indigo-300 underline"
           >
             GitHub Repository
           </a>

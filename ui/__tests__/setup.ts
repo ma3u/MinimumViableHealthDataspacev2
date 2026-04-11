@@ -43,3 +43,21 @@ vi.mock("next-auth/next", () => ({
     roles: ["EDC_ADMIN"],
   }),
 }));
+
+// Mock auth-guard — Phase 24 added requireAuth() to all API routes.
+// Default: returns authenticated EDC_ADMIN session so route tests exercise
+// business logic. Override per-test with vi.mocked(requireAuth).
+vi.mock("@/lib/auth-guard", () => ({
+  requireAuth: vi.fn().mockResolvedValue({
+    session: {
+      user: {
+        id: "test-admin",
+        name: "Test Admin",
+        email: "admin@test.example",
+      },
+      roles: ["EDC_ADMIN"],
+      accessToken: "test-token",
+    },
+  }),
+  isAuthError: vi.fn().mockReturnValue(false),
+}));

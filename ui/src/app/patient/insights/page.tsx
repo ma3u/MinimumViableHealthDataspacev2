@@ -39,14 +39,16 @@ interface Insights {
 }
 
 const PRIORITY_COLORS = {
-  high: "border-red-700 bg-red-900/10",
-  medium: "border-yellow-700 bg-yellow-900/10",
+  high: "border-red-300 dark:border-red-700 bg-red-50 dark:bg-red-900/10",
+  medium:
+    "border-yellow-300 dark:border-yellow-700 bg-yellow-50 dark:bg-yellow-900/10",
   low: "border-[var(--border)] bg-[var(--surface-2)]/50",
 };
 
 const EVIDENCE_BADGE: Record<string, string> = {
-  high: "bg-green-900/40 text-green-400",
-  moderate: "bg-yellow-900/40 text-yellow-400",
+  high: "bg-[var(--badge-active-bg)] text-[var(--badge-active-text)]",
+  moderate:
+    "bg-yellow-50 dark:bg-yellow-900/40 text-yellow-800 dark:text-yellow-300",
   low: "bg-[var(--surface-2)] text-[var(--text-secondary)]",
 };
 
@@ -77,9 +79,12 @@ export default function ResearchInsightsPage() {
         />
 
         {/* Privacy guarantee */}
-        <div className="mb-6 rounded-lg border border-violet-700 bg-violet-900/20 p-3 flex items-start gap-2">
-          <Shield size={16} className="mt-0.5 shrink-0 text-violet-400" />
-          <div className="text-xs text-violet-300">
+        <div className="mb-6 rounded-lg border border-violet-300 dark:border-violet-700 bg-violet-100 dark:bg-violet-900/20 p-3 flex items-start gap-2">
+          <Shield
+            size={16}
+            className="mt-0.5 shrink-0 text-violet-600 dark:text-violet-400"
+          />
+          <div className="text-xs text-violet-800 dark:text-violet-300">
             {insights?.privacyNote ??
               "All findings are aggregate results (k ≥ 5). Your individual data is never shared with researchers — only pseudonymised summaries reach the Secure Processing Environment (EHDS Art. 50)."}
           </div>
@@ -102,19 +107,19 @@ export default function ResearchInsightsPage() {
                   label: "Active donations",
                   value: insights.activeDonations,
                   icon: Activity,
-                  color: "text-teal-400",
+                  color: "text-teal-800 dark:text-teal-400",
                 },
                 {
                   label: "Active SPE studies",
                   value: insights.activeStudies,
                   icon: TrendingUp,
-                  color: "text-blue-400",
+                  color: "text-[var(--accent)]",
                 },
                 {
                   label: "Research findings",
                   value: insights.findings.length,
                   icon: Lightbulb,
-                  color: "text-yellow-400",
+                  color: "text-[var(--warning-text)]",
                 },
               ].map(({ label, value, icon: Icon, color }) => (
                 <div
@@ -134,7 +139,7 @@ export default function ResearchInsightsPage() {
             {insights.findings.length > 0 && (
               <div>
                 <h2 className="text-lg font-semibold mb-3 flex items-center gap-2">
-                  <TrendingUp size={18} className="text-blue-400" />
+                  <TrendingUp size={18} className="text-[var(--accent)]" />
                   Aggregate Research Findings
                 </h2>
                 <div className="space-y-3">
@@ -161,7 +166,7 @@ export default function ResearchInsightsPage() {
                         {f.finding}
                       </p>
                       {f.recommendation && (
-                        <div className="rounded bg-teal-900/20 border border-teal-800 p-2 text-xs text-teal-300">
+                        <div className="rounded bg-teal-100 dark:bg-teal-900/20 border border-teal-300 dark:border-teal-800 p-2 text-xs text-teal-800 dark:text-teal-300">
                           <strong>For you:</strong> {f.recommendation}
                         </div>
                       )}
@@ -175,7 +180,10 @@ export default function ResearchInsightsPage() {
             {insights.recommendations.length > 0 && (
               <div>
                 <h2 className="text-lg font-semibold mb-3 flex items-center gap-2">
-                  <Lightbulb size={18} className="text-yellow-400" />
+                  <Lightbulb
+                    size={18}
+                    className="text-yellow-600 dark:text-yellow-400"
+                  />
                   Personalised Recommendations
                 </h2>
                 <div className="space-y-3">
@@ -194,9 +202,9 @@ export default function ResearchInsightsPage() {
                         <span
                           className={`text-[10px] px-2 py-0.5 rounded font-medium ${
                             rec.priority === "high"
-                              ? "bg-red-900/40 text-red-400"
+                              ? "bg-red-50 dark:bg-red-950 text-red-800 dark:text-red-300"
                               : rec.priority === "medium"
-                                ? "bg-yellow-900/40 text-yellow-400"
+                                ? "bg-yellow-50 dark:bg-yellow-900/40 text-yellow-800 dark:text-yellow-300"
                                 : "bg-[var(--surface-2)] text-[var(--text-secondary)]"
                           }`}
                         >
@@ -208,7 +216,9 @@ export default function ResearchInsightsPage() {
                       </p>
                       <div className="text-xs text-[var(--text-secondary)]">
                         Based on: {rec.basedOn} ·{" "}
-                        <span className="text-gray-600">{rec.ehdsArticle}</span>
+                        <span className="text-[var(--text-secondary)]">
+                          {rec.ehdsArticle}
+                        </span>
                       </div>
                     </div>
                   ))}
@@ -243,7 +253,9 @@ export default function ResearchInsightsPage() {
                           {s.grantedAt?.slice(0, 10) || "—"}
                         </td>
                         <td className="py-1.5">
-                          <span className="text-teal-400">{s.status}</span>
+                          <span className="text-teal-800 dark:text-teal-400">
+                            {s.status}
+                          </span>
                         </td>
                       </tr>
                     ))}

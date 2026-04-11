@@ -11,17 +11,32 @@ import {
   ChevronUp,
   Sparkles,
   Globe,
+  Shield,
+  Zap,
 } from "lucide-react";
+
+interface OdrlScope {
+  participantId: string;
+  permissions: string[];
+  prohibitions: string[];
+  accessibleDatasets: string[];
+  temporalLimit: string | null;
+  policyIds: string[];
+  hasActiveContract: boolean;
+  hdabApproved: boolean;
+}
 
 interface NlqResult {
   question: string;
   cypher: string;
-  method: "template" | "llm" | "none";
+  method: "template" | "fulltext" | "graphrag" | "llm" | "none";
   templateName?: string;
   federated: boolean;
   results: Record<string, any>[];
   totalRows: number;
   error?: string;
+  message?: string;
+  odrlEnforced?: boolean;
 }
 
 interface NlqTemplate {
@@ -56,6 +71,9 @@ const EXAMPLE_QUESTIONS = [
   "What are the most prescribed medications?",
   "Show me encounters by type",
   "What is the age distribution?",
+  "Patients with diabetes",
+  "How prevalent is hypertension?",
+  "Sinusitis",
 ];
 
 export default function NlqPage() {
@@ -67,10 +85,11 @@ export default function NlqPage() {
   const [stats, setStats] = useState<FederatedStats | null>(null);
   const [showCypher, setShowCypher] = useState(false);
   const [history, setHistory] = useState<NlqResult[]>([]);
+  const [odrlScope, setOdrlScope] = useState<OdrlScope | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    // Load templates and federated stats on mount
+    // Load templates, federated stats, and ODRL scope on mount
     fetchApi("/api/nlq")
       .then((r) => (r.ok ? r.json() : null))
       .then((d) => setTemplates(d?.templates ?? []))
@@ -79,6 +98,12 @@ export default function NlqPage() {
       .then((r) => (r.ok ? r.json() : null))
       .then((d) => {
         if (d?.totals) setStats(d);
+      })
+      .catch(() => {});
+    fetchApi("/api/odrl/scope")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => {
+        if (d?.participantId) setOdrlScope(d);
       })
       .catch(() => {});
   }, []);
@@ -95,9 +120,17 @@ export default function NlqPage() {
         body: JSON.stringify({ question: query, federated }),
       });
       const data: NlqResult = await resp.json();
-      setResult(data);
-      setHistory((prev) => [data, ...prev.slice(0, 9)]);
-    } catch (err: any) {
+      // Normalize: NLQ "none" responses may lack results/totalRows
+      const normalized: NlqResult = {
+        ...data,
+        results: data.results ?? [],
+        totalRows: data.totalRows ?? 0,
+        cypher: data.cypher ?? "",
+      };
+      setResult(normalized);
+      setHistory((prev) => [normalized, ...prev.slice(0, 9)]);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Query failed";
       setResult({
         question: query,
         cypher: "",
@@ -105,7 +138,7 @@ export default function NlqPage() {
         federated,
         results: [],
         totalRows: 0,
-        error: err.message,
+        error: message,
       });
     } finally {
       setLoading(false);
@@ -130,7 +163,7 @@ export default function NlqPage() {
           <div className="flex items-center justify-between">
             <div>
               <div className="flex items-center gap-2 mb-1">
-                <Search size={20} className="text-blue-400" />
+                <Search size={20} className="text-[var(--accent-l1)]" />
                 <h1 className="text-xl font-semibold">
                   Natural Language Query
                 </h1>
@@ -141,7 +174,7 @@ export default function NlqPage() {
                 Cypher and returns structured results from all five graph
                 layers.
               </p>
-              <div className="flex items-center gap-4 text-xs text-gray-600 mt-2">
+              <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400 mt-2">
                 <a
                   href="/analytics"
                   className="hover:text-[var(--text-secondary)] transition-colors"
@@ -160,7 +193,7 @@ export default function NlqPage() {
             {stats?.totals && (
               <div className="flex gap-6 text-sm">
                 <div className="text-center">
-                  <div className="text-lg font-semibold text-blue-400">
+                  <div className="text-lg font-semibold text-[var(--accent-l1)]">
                     {stats.speCount}
                   </div>
                   <div className="text-[var(--text-secondary)] text-xs">
@@ -168,7 +201,7 @@ export default function NlqPage() {
                   </div>
                 </div>
                 <div className="text-center">
-                  <div className="text-lg font-semibold text-emerald-400">
+                  <div className="text-lg font-semibold text-[var(--accent-l3)]">
                     {stats.totals.patients.toLocaleString()}
                   </div>
                   <div className="text-[var(--text-secondary)] text-xs">
@@ -176,7 +209,7 @@ export default function NlqPage() {
                   </div>
                 </div>
                 <div className="text-center">
-                  <div className="text-lg font-semibold text-amber-400">
+                  <div className="text-lg font-semibold text-[var(--accent-l4)]">
                     {stats.totals.encounters.toLocaleString()}
                   </div>
                   <div className="text-[var(--text-secondary)] text-xs">
@@ -184,7 +217,7 @@ export default function NlqPage() {
                   </div>
                 </div>
                 <div className="text-center">
-                  <div className="text-lg font-semibold text-purple-400">
+                  <div className="text-lg font-semibold text-[var(--accent-l5)]">
                     {stats.totals.conditions.toLocaleString()}
                   </div>
                   <div className="text-[var(--text-secondary)] text-xs">
@@ -210,6 +243,7 @@ export default function NlqPage() {
             <div className="flex-1 relative">
               <input
                 ref={inputRef}
+                aria-label="Ask a question about the health data"
                 type="text"
                 value={question}
                 onChange={(e) => setQuestion(e.target.value)}
@@ -223,7 +257,7 @@ export default function NlqPage() {
               onClick={() => setFederated(!federated)}
               className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-colors border ${
                 federated
-                  ? "bg-blue-500/20 border-blue-500/50 text-blue-300"
+                  ? "bg-blue-500/20 border-blue-500/50 text-[var(--accent)]"
                   : "bg-[var(--surface-2)] border-[var(--border)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
               }`}
               title="Query across all Secure Processing Environments"
@@ -260,6 +294,95 @@ export default function NlqPage() {
           </div>
         </div>
 
+        {/* ODRL Policy Scope Indicator */}
+        {odrlScope && (
+          <div className="bg-[var(--surface)] border border-[var(--border)] rounded-lg p-4">
+            <div className="flex items-center gap-2 mb-3">
+              <Shield size={14} className="text-[var(--accent-l1)]" />
+              <h3 className="text-sm font-medium text-[var(--text-primary)]">
+                Policy Scope
+              </h3>
+              {odrlScope.hasActiveContract && (
+                <span className="px-2 py-0.5 rounded-full text-xs bg-emerald-500/20 text-[var(--success-text)]">
+                  Active Contract
+                </span>
+              )}
+              {odrlScope.hdabApproved && (
+                <span className="px-2 py-0.5 rounded-full text-xs bg-blue-500/20 text-[var(--accent)]">
+                  HDAB Approved
+                </span>
+              )}
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+              <div>
+                <div className="text-[var(--text-secondary)] mb-1">
+                  Permissions
+                </div>
+                <div className="flex flex-wrap gap-1">
+                  {odrlScope.permissions.length > 0 ? (
+                    odrlScope.permissions.map((p) => (
+                      <span
+                        key={p}
+                        className="px-1.5 py-0.5 rounded bg-emerald-500/10 text-[var(--success-text)]"
+                      >
+                        {p}
+                      </span>
+                    ))
+                  ) : (
+                    <span className="text-[var(--text-secondary)]">None</span>
+                  )}
+                </div>
+              </div>
+              <div>
+                <div className="text-[var(--text-secondary)] mb-1">
+                  Prohibitions
+                </div>
+                <div className="flex flex-wrap gap-1">
+                  {odrlScope.prohibitions.length > 0 ? (
+                    odrlScope.prohibitions.map((p) => (
+                      <span
+                        key={p}
+                        className="px-1.5 py-0.5 rounded bg-red-500/10 text-red-300"
+                      >
+                        {p}
+                      </span>
+                    ))
+                  ) : (
+                    <span className="text-[var(--text-secondary)]">None</span>
+                  )}
+                </div>
+              </div>
+              <div>
+                <div className="text-[var(--text-secondary)] mb-1">
+                  Accessible Datasets
+                </div>
+                <div className="flex flex-wrap gap-1">
+                  {odrlScope.accessibleDatasets.length > 0 ? (
+                    odrlScope.accessibleDatasets.map((d) => (
+                      <span
+                        key={d}
+                        className="px-1.5 py-0.5 rounded bg-[var(--surface-2)] text-[var(--text-primary)]"
+                      >
+                        {d}
+                      </span>
+                    ))
+                  ) : (
+                    <span className="text-[var(--text-secondary)]">All</span>
+                  )}
+                </div>
+                {odrlScope.temporalLimit && (
+                  <div className="mt-1 text-[var(--text-secondary)]">
+                    Valid until:{" "}
+                    <span className="text-[var(--text-primary)]">
+                      {odrlScope.temporalLimit}
+                    </span>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Results */}
         {result && (
           <div className="space-y-4">
@@ -268,24 +391,40 @@ export default function NlqPage() {
               <span
                 className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium ${
                   result.method === "template"
-                    ? "bg-emerald-500/20 text-emerald-300"
-                    : result.method === "llm"
-                      ? "bg-purple-500/20 text-purple-300"
-                      : "bg-red-500/20 text-red-300"
+                    ? "bg-emerald-500/20 text-[var(--success-text)]"
+                    : result.method === "fulltext"
+                      ? "bg-amber-500/20 text-amber-300"
+                      : result.method === "graphrag"
+                        ? "bg-cyan-500/20 text-cyan-300"
+                        : result.method === "llm"
+                          ? "bg-purple-500/20 text-[var(--accent)]"
+                          : "bg-red-500/20 text-red-300"
                 }`}
               >
                 {result.method === "template" && <Database size={12} />}
+                {result.method === "fulltext" && <Search size={12} />}
+                {result.method === "graphrag" && <Zap size={12} />}
                 {result.method === "llm" && <Sparkles size={12} />}
                 {result.method === "template"
                   ? `Template: ${result.templateName}`
-                  : result.method === "llm"
-                    ? "LLM Generated"
-                    : "No Match"}
+                  : result.method === "fulltext"
+                    ? "Fulltext Search"
+                    : result.method === "graphrag"
+                      ? "GraphRAG"
+                      : result.method === "llm"
+                        ? "LLM Generated"
+                        : "No Match"}
               </span>
               {result.federated && (
-                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-blue-500/20 text-blue-300">
+                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-blue-500/20 text-[var(--accent)]">
                   <Globe size={12} />
                   Federated
+                </span>
+              )}
+              {result.odrlEnforced && (
+                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-amber-500/20 text-amber-300">
+                  <Shield size={12} />
+                  ODRL Enforced
                 </span>
               )}
               <span className="text-xs text-[var(--text-secondary)]">
@@ -320,8 +459,15 @@ export default function NlqPage() {
               </div>
             )}
 
+            {/* No match message */}
+            {!result.error && result.method === "none" && result.message && (
+              <div className="bg-amber-500/10 border border-amber-500/30 rounded-lg p-3 text-sm text-amber-300">
+                {result.message}
+              </div>
+            )}
+
             {/* Results table */}
-            {result.results.length > 0 && (
+            {result.results && result.results.length > 0 && (
               <div className="border border-[var(--border)] rounded-lg overflow-hidden">
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
@@ -369,7 +515,7 @@ export default function NlqPage() {
         {!result && templates.length > 0 && (
           <div className="bg-[var(--surface)]/50 border border-[var(--border)] rounded-lg p-4">
             <h3 className="text-sm font-medium text-[var(--text-primary)] mb-3 flex items-center gap-1.5">
-              <Database size={14} className="text-emerald-400" />
+              <Database size={14} className="text-[var(--accent-l3)]" />
               Available Query Templates
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -394,7 +540,7 @@ export default function NlqPage() {
         {stats && stats.spes && (
           <div className="bg-[var(--surface)]/50 border border-[var(--border)] rounded-lg p-4">
             <h3 className="text-sm font-medium text-[var(--text-primary)] mb-3 flex items-center gap-1.5">
-              <Globe size={14} className="text-blue-400" />
+              <Globe size={14} className="text-[var(--accent-l1)]" />
               Secure Processing Environments
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -411,7 +557,7 @@ export default function NlqPage() {
                       <span className="text-[var(--text-secondary)]">
                         Patients:{" "}
                       </span>
-                      <span className="text-emerald-400">
+                      <span className="text-[var(--accent-l3)]">
                         {spe.patients.toLocaleString()}
                       </span>
                     </div>
@@ -419,7 +565,7 @@ export default function NlqPage() {
                       <span className="text-[var(--text-secondary)]">
                         Encounters:{" "}
                       </span>
-                      <span className="text-amber-400">
+                      <span className="text-[var(--accent-l4)]">
                         {spe.encounters.toLocaleString()}
                       </span>
                     </div>
@@ -427,7 +573,7 @@ export default function NlqPage() {
                       <span className="text-[var(--text-secondary)]">
                         Conditions:{" "}
                       </span>
-                      <span className="text-purple-400">
+                      <span className="text-[var(--accent-l5)]">
                         {spe.conditions.toLocaleString()}
                       </span>
                     </div>
@@ -435,7 +581,7 @@ export default function NlqPage() {
                       <span className="text-[var(--text-secondary)]">
                         Observations:{" "}
                       </span>
-                      <span className="text-blue-400">
+                      <span className="text-[var(--accent-l1)]">
                         {spe.observations.toLocaleString()}
                       </span>
                     </div>

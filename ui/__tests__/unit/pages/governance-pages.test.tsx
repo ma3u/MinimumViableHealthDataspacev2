@@ -39,33 +39,43 @@ describe("CompliancePage", () => {
 
   it("renders heading", () => {
     mockFetchApi.mockReturnValue(
-      mockResponse({ consumers: [], datasets: [], credentials: [] }),
+      mockResponse({
+        consumers: [],
+        datasets: [],
+        matrix: [],
+        credentials: [],
+      }),
     );
     render(<CompliancePage />);
-    expect(screen.getByText("EHDS Compliance Checker")).toBeInTheDocument();
+    expect(screen.getByText("EHDS Compliance Overview")).toBeInTheDocument();
   });
 
-  it("shows loading state for options", () => {
+  it("shows loading state for compliance matrix", () => {
     mockFetchApi.mockReturnValue(new Promise(() => {}));
     render(<CompliancePage />);
-    // Two labels show "Loading from graph…" (consumers + datasets)
-    const matches = screen.getAllByText(/Loading from graph/);
+    // Loading state shown in matrix section
+    const matches = screen.getAllByText(/Loading compliance data from graph/i);
     expect(matches.length).toBeGreaterThan(0);
   });
 
-  it("renders form after options load", async () => {
+  it("renders matrix after options load", async () => {
     mockFetchApi.mockImplementation((url: string) => {
-      if (url.includes("compliance"))
+      if (url === "/api/compliance")
         return mockResponse({
           consumers: [{ id: "c1", name: "Researcher A", type: "data-user" }],
           datasets: [{ id: "d1", title: "Dataset 1" }],
+          matrix: [],
         });
-      if (url.includes("credentials")) return mockResponse({ credentials: [] });
+      if (url === "/api/credentials") return mockResponse({ credentials: [] });
+      if (url === "/api/trust-center")
+        return mockResponse({ trustCenters: [], speSessions: [] });
       return mockResponse({});
     });
     render(<CompliancePage />);
     await waitFor(() => {
-      expect(screen.getByText(/Validate Compliance/)).toBeInTheDocument();
+      expect(
+        screen.getByText("Participant Compliance Matrix"),
+      ).toBeInTheDocument();
     });
   });
 });

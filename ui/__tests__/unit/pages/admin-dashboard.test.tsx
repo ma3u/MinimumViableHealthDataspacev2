@@ -82,7 +82,7 @@ describe("AdminDashboard", () => {
     setupMocks({ tenants: { summary: SUMMARY } });
     render(<AdminDashboard />);
     await waitFor(() => {
-      expect(screen.getByText("Operator Dashboard")).toBeInTheDocument();
+      expect(screen.getByText("System Overview")).toBeInTheDocument();
     });
   });
 
@@ -161,7 +161,9 @@ describe("AdminDashboard", () => {
       expect(screen.getByText("Tenants")).toBeInTheDocument();
       expect(screen.getByText("Participants")).toBeInTheDocument();
       expect(screen.getByText("Policies")).toBeInTheDocument();
-      expect(screen.getByText("Audit Log")).toBeInTheDocument();
+      // Component renders "Audit Logs" in both the stat card and the quick-ops button
+      const auditLogsElements = screen.getAllByText("Audit Logs");
+      expect(auditLogsElements.length).toBeGreaterThanOrEqual(1);
     });
   });
 
@@ -202,7 +204,7 @@ describe("AdminDashboard", () => {
     expect(roleSection).toBeTruthy();
   });
 
-  it("hides role breakdown when byRole is empty", async () => {
+  it("shows empty state message when byRole is empty", async () => {
     setupMocks({
       tenants: {
         summary: { totalTenants: 1, totalParticipants: 1, byRole: {} },
@@ -213,12 +215,12 @@ describe("AdminDashboard", () => {
     await waitFor(() => {
       expect(screen.getByText("Tenants")).toBeInTheDocument();
     });
-    expect(
-      screen.queryByText("Participants by EHDS Role"),
-    ).not.toBeInTheDocument();
+    // Heading is always rendered; empty byRole shows the empty state message
+    expect(screen.getByText("Participants by EHDS Role")).toBeInTheDocument();
+    expect(screen.getByText(/No role data available/)).toBeInTheDocument();
   });
 
-  it("hides role breakdown when byRole is undefined", async () => {
+  it("shows empty state message when byRole is undefined", async () => {
     setupMocks({
       tenants: {
         summary: { totalTenants: 2, totalParticipants: 3 },
@@ -229,9 +231,9 @@ describe("AdminDashboard", () => {
     await waitFor(() => {
       expect(screen.getByText("Tenants")).toBeInTheDocument();
     });
-    expect(
-      screen.queryByText("Participants by EHDS Role"),
-    ).not.toBeInTheDocument();
+    // Heading is always rendered; no byRole data → empty state message
+    expect(screen.getByText("Participants by EHDS Role")).toBeInTheDocument();
+    expect(screen.getByText(/No role data available/)).toBeInTheDocument();
   });
 
   /* ─── 6. Quick link navigation ─── */
@@ -241,12 +243,13 @@ describe("AdminDashboard", () => {
     render(<AdminDashboard />);
 
     await waitFor(() => {
+      // Quick ops grid contains Deploy Patch, Flush Cache, Audit Logs, Test Latency
+      expect(screen.getByText("Deploy Patch")).toBeInTheDocument();
+      expect(screen.getByText("Flush Cache")).toBeInTheDocument();
+      // Bottom cards link to compliance and components
       expect(screen.getByText("EDC Components")).toBeInTheDocument();
-      expect(screen.getByText("Policy Definitions")).toBeInTheDocument();
+      expect(screen.getByText("GDPR Compliance Check")).toBeInTheDocument();
     });
-    // "Manage Tenants" appears in both quick links and PageIntro navboth instances are present
-    const tenantLinks = screen.getAllByText("Manage Tenants");
-    expect(tenantLinks.length).toBeGreaterThanOrEqual(1);
   });
 
   it("links to /admin/components", async () => {
@@ -254,22 +257,23 @@ describe("AdminDashboard", () => {
     render(<AdminDashboard />);
 
     await waitFor(() => {
-      expect(screen.getByText("EDC Components")).toBeInTheDocument();
+      expect(screen.getByText("VIEW COMPONENTS")).toBeInTheDocument();
     });
 
-    const link = screen.getByText("EDC Components").closest("a");
+    const link = screen.getByText("VIEW COMPONENTS").closest("a");
     expect(link?.getAttribute("href")).toBe("/admin/components");
   });
 
-  it("links to /admin/policies", async () => {
+  it("links to /admin/policies from stat card", async () => {
     setupMocks({ tenants: { summary: SUMMARY } });
     render(<AdminDashboard />);
 
     await waitFor(() => {
-      expect(screen.getByText("Policy Definitions")).toBeInTheDocument();
+      expect(screen.getByText("Policies")).toBeInTheDocument();
     });
 
-    const link = screen.getByText("Policy Definitions").closest("a");
+    // The Policies stat card is an anchor linking to /admin/policies
+    const link = screen.getByText("Policies").closest("a");
     expect(link?.getAttribute("href")).toBe("/admin/policies");
   });
 
@@ -321,7 +325,7 @@ describe("AdminDashboard", () => {
 
     await waitFor(() => {
       // Should exit loading state and show the dashboard shell
-      expect(screen.getByText("Operator Dashboard")).toBeInTheDocument();
+      expect(screen.getByText("System Overview")).toBeInTheDocument();
     });
     // Stat cards should show — for all missing values
     const dashes = screen.getAllByText("—");
@@ -385,47 +389,47 @@ describe("AdminDashboard", () => {
 
   /* ─── 10. PageIntro navigation ─── */
 
-  it("renders prev/next step navigation links", async () => {
+  it("renders the page subtitle text", async () => {
     setupMocks({ tenants: { summary: SUMMARY } });
     render(<AdminDashboard />);
 
     await waitFor(() => {
-      expect(screen.getByText("Data Transfers")).toBeInTheDocument();
-      expect(screen.getByText("Manage Tenants")).toBeInTheDocument();
+      expect(screen.getByText("System Overview")).toBeInTheDocument();
     });
+    // Subtitle below the heading
+    expect(
+      screen.getByText(/EHDS Health Dataspace — Operator Control/),
+    ).toBeInTheDocument();
   });
 
-  it("renders PageIntro with description text", async () => {
+  it("renders system status badge", async () => {
     setupMocks({ tenants: { summary: SUMMARY } });
     render(<AdminDashboard />);
 
     await waitFor(() => {
-      expect(screen.getByText("Operator Dashboard")).toBeInTheDocument();
+      expect(screen.getByText("SYSTEMS NOMINAL")).toBeInTheDocument();
     });
-    // The description is always visible in PageIntro
-    expect(
-      screen.getByText(/EHDS Health Data Access Body administration/),
-    ).toBeInTheDocument();
   });
 
   /* ─── 11. Quick-link descriptions ─── */
 
-  it("renders quick link descriptions", async () => {
+  it("renders EDC component monitoring card description", async () => {
+    setupMocks({ tenants: { summary: SUMMARY } });
+    render(<AdminDashboard />);
+
+    await waitFor(() => {
+      // Description under "EDC Components" card
+      expect(screen.getByText(/Monitor health, CPU/)).toBeInTheDocument();
+    });
+  });
+
+  it("renders GDPR compliance card description", async () => {
     setupMocks({ tenants: { summary: SUMMARY } });
     render(<AdminDashboard />);
 
     await waitFor(() => {
       expect(
-        screen.getByText("Health, CPU & memory per service"),
-      ).toBeInTheDocument();
-      expect(
-        screen.getByText("View and manage registered participants"),
-      ).toBeInTheDocument();
-      expect(
-        screen.getByText("View and create ODRL policies"),
-      ).toBeInTheDocument();
-      expect(
-        screen.getByText("Query the Neo4j provenance graph"),
+        screen.getByText(/Next automated audit scheduled/),
       ).toBeInTheDocument();
     });
   });

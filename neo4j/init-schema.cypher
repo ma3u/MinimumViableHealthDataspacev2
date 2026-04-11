@@ -126,3 +126,43 @@ CREATE CONSTRAINT transfer_event_id IF NOT EXISTS FOR (te:TransferEvent) REQUIRE
 CREATE INDEX transfer_event_timestamp IF NOT EXISTS FOR (te:TransferEvent) ON (te.timestamp);
 CREATE INDEX transfer_event_endpoint IF NOT EXISTS FOR (te:TransferEvent) ON (te.endpoint);
 CREATE INDEX transfer_event_participant IF NOT EXISTS FOR (te:TransferEvent) ON (te.participant);
+
+// ============================================================
+// Phase 24: ODRL Policy Enforcement & GraphRAG
+// ============================================================
+
+// ODRL Policy — runtime-enforced access control policies
+CREATE CONSTRAINT odrl_policy_id IF NOT EXISTS FOR (pol:OdrlPolicy) REQUIRE pol.policyId IS UNIQUE;
+
+// Query Audit Events — EHDS Art. 53 compliance logging
+CREATE CONSTRAINT query_audit_event_id IF NOT EXISTS FOR (qa:QueryAuditEvent) REQUIRE qa.eventId IS UNIQUE;
+CREATE INDEX query_audit_timestamp IF NOT EXISTS FOR (qa:QueryAuditEvent) ON (qa.timestamp);
+CREATE INDEX query_audit_participant IF NOT EXISTS FOR (qa:QueryAuditEvent) ON (qa.participantId);
+
+// Fulltext indexes for natural language search (Phase 24f)
+// Used by Tier 2 (fulltextSearch) in the NLQ resolution chain
+CREATE FULLTEXT INDEX clinical_search IF NOT EXISTS
+  FOR (n:Condition|Observation|MedicationRequest|Procedure)
+  ON EACH [n.display, n.name, n.code];
+
+CREATE FULLTEXT INDEX catalog_search IF NOT EXISTS
+  FOR (n:HealthDataset|DataProduct)
+  ON EACH [n.title, n.description, n.name];
+
+CREATE FULLTEXT INDEX ontology_search IF NOT EXISTS
+  FOR (n:SnomedConcept|LoincCode|ICD10Code|RxNormConcept)
+  ON EACH [n.display, n.name];
+
+// Vector indexes for GraphRAG (Neo4j 5.13+ Community)
+// Embeddings generated via scripts/generate-embeddings.sh
+CREATE VECTOR INDEX healthdataset_embedding IF NOT EXISTS
+  FOR (d:HealthDataset) ON (d.embedding)
+  OPTIONS {indexConfig: {`vector.dimensions`: 384, `vector.similarity_function`: 'cosine'}};
+
+CREATE VECTOR INDEX condition_embedding IF NOT EXISTS
+  FOR (c:Condition) ON (c.embedding)
+  OPTIONS {indexConfig: {`vector.dimensions`: 384, `vector.similarity_function`: 'cosine'}};
+
+CREATE VECTOR INDEX snomed_embedding IF NOT EXISTS
+  FOR (s:SnomedConcept) ON (s.embedding)
+  OPTIONS {indexConfig: {`vector.dimensions`: 384, `vector.similarity_function`: 'cosine'}};

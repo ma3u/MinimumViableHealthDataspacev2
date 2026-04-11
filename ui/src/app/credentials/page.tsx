@@ -220,7 +220,7 @@ export default function CredentialsPage() {
         {/* Request new credential */}
         <div className="border border-[var(--border)] rounded-xl p-5 mb-8">
           <div className="flex items-center gap-2 mb-2">
-            <Send size={18} className="text-layer2" />
+            <Send size={18} className="text-teal-800 dark:text-teal-300" />
             <h2 className="font-semibold text-sm">Request Credential</h2>
           </div>
           <p className="text-xs text-[var(--text-secondary)] mb-4">
@@ -236,9 +236,10 @@ export default function CredentialsPage() {
                 Participant Context
               </label>
               <select
+                aria-label="Participant Context"
                 value={reqParticipant}
                 onChange={(e) => setReqParticipant(e.target.value)}
-                className="w-full px-3 py-2 bg-[var(--surface-2)] border border-gray-600 rounded text-sm"
+                className="w-full px-3 py-2 bg-[var(--surface-2)] border border-[var(--border-ui)] rounded text-sm"
               >
                 {participants.map((p) => (
                   <option key={p["@id"]} value={p["@id"]}>
@@ -254,9 +255,10 @@ export default function CredentialsPage() {
                 Credential Type
               </label>
               <select
+                aria-label="Credential Type"
                 value={reqType}
                 onChange={(e) => setReqType(e.target.value)}
-                className="w-full px-3 py-2 bg-[var(--surface-2)] border border-gray-600 rounded text-sm"
+                className="w-full px-3 py-2 bg-[var(--surface-2)] border border-[var(--border-ui)] rounded text-sm"
               >
                 {credentialDefs.length > 0 ? (
                   credentialDefs.map((d) => (
@@ -283,7 +285,7 @@ export default function CredentialsPage() {
             <button
               onClick={handleRequest}
               disabled={requesting || !reqParticipant}
-              className="flex items-center justify-center gap-2 px-4 py-2 bg-[var(--accent)] text-white rounded text-sm font-medium hover:bg-[var(--accent-hover)] disabled:opacity-50"
+              className="flex items-center justify-center gap-2 px-4 py-2 bg-[var(--accent)] text-white dark:text-gray-900 rounded text-sm font-medium hover:bg-[var(--accent-hover)] disabled:opacity-50"
             >
               {requesting ? (
                 <Loader2 size={14} className="animate-spin" />
@@ -315,11 +317,14 @@ export default function CredentialsPage() {
           </div>
         ) : credentials.length === 0 ? (
           <div className="text-center py-12">
-            <ShieldCheck size={40} className="text-gray-600 mx-auto mb-4" />
+            <ShieldCheck
+              size={40}
+              className="text-[var(--text-secondary)] mx-auto mb-4"
+            />
             <p className="text-[var(--text-secondary)]">
               No credentials found in Neo4j
             </p>
-            <p className="text-gray-600 text-xs mt-1">
+            <p className="text-[var(--text-secondary)] text-xs mt-1">
               Register a participant and request credentials above
             </p>
           </div>
@@ -338,6 +343,7 @@ export default function CredentialsPage() {
                 >
                   <button
                     className="w-full text-left p-4"
+                    aria-label={`${isOpen ? "Collapse" : "Expand"} ${vc.type}`}
                     onClick={() => setExpanded(isOpen ? null : vc.id)}
                   >
                     <div className="flex items-center justify-between">

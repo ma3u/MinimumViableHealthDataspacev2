@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { edcClient } from "@/lib/edc";
+import { requireAuth, isAuthError } from "@/lib/auth-guard";
 
 export const dynamic = "force-dynamic";
 
@@ -68,6 +69,9 @@ export async function GET(
   _req: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
+  const auth = await requireAuth();
+  if (isAuthError(auth)) return auth;
+
   try {
     const { id } = await params;
     const profiles = await edcClient.tenant<ParticipantProfile[]>(

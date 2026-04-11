@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { edcClient, EDC_CONTEXT } from "@/lib/edc";
+import { requireAuth, isAuthError } from "@/lib/auth-guard";
 import { promises as fs } from "fs";
 import path from "path";
 
@@ -28,6 +29,9 @@ async function loadMockTransfers(): Promise<unknown[]> {
  */
 
 export async function GET(req: NextRequest) {
+  const auth = await requireAuth();
+  if (isAuthError(auth)) return auth;
+
   const participantId = req.nextUrl.searchParams.get("participantId");
 
   if (!participantId) {
@@ -71,6 +75,9 @@ export async function GET(req: NextRequest) {
 const MOCK_AGREEMENT_RE = /^agreement-fhir-[\w-]+-\d{3}$/;
 
 export async function POST(req: NextRequest) {
+  const auth = await requireAuth();
+  if (isAuthError(auth)) return auth;
+
   try {
     const body = await req.json();
     const {

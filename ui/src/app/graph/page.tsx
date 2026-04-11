@@ -40,6 +40,7 @@ import {
 import type { LucideProps } from "lucide-react";
 import {
   FILTER_PRESETS,
+  FILTER_PRESET_PERSONA,
   PATIENT_FILTER_PRESETS,
   HOSPITAL_FILTER_PRESETS,
   HDAB_FILTER_PRESETS,
@@ -451,6 +452,77 @@ function GraphContent() {
     }
   }, [highlightId, data.nodes]);
 
+  // ── Auto-load subgraph when filter activated + auto-select starting node ──
+  useEffect(() => {
+    if (!activeFilter) return;
+    const preset = [
+      ...FILTER_PRESETS,
+      ...PATIENT_FILTER_PRESETS,
+      ...HOSPITAL_FILTER_PRESETS,
+      ...HDAB_FILTER_PRESETS,
+      ...RESEARCHER_FILTER_PRESETS,
+    ].find((p) => p.id === activeFilter);
+    if (!preset) return;
+    const filterLabels = new Set(preset.labels as readonly string[]);
+
+    // Always fetch the designated persona subgraph to ensure all relevant nodes
+    // are present (the default graph often lacks specialist nodes like
+    // ResearchPseudonym, ProviderPseudonym, etc.)
+    const neededPersona = FILTER_PRESET_PERSONA[activeFilter];
+    const shouldFetch = neededPersona && neededPersona !== activePersona;
+
+    const afterMerge = () => {
+      // Auto-select the most connected matching node and open inspector
+      setData((prev) => {
+        const matching = prev.nodes.filter(
+          (n) => filterLabels.has(n.label) && !n.isValueCenter,
+        );
+        if (matching.length === 0) return prev;
+        // Prefer nodes that have the most links (most connected = best starting point)
+        const linkCount = new Map<string, number>();
+        for (const l of prev.links) {
+          const sid = nId(l.source),
+            tid = nId(l.target);
+          linkCount.set(sid, (linkCount.get(sid) ?? 0) + 1);
+          linkCount.set(tid, (linkCount.get(tid) ?? 0) + 1);
+        }
+        matching.sort(
+          (a, b) => (linkCount.get(b.id) ?? 0) - (linkCount.get(a.id) ?? 0),
+        );
+        const best = matching[0];
+        // Use setTimeout so React state updates don't conflict
+        setTimeout(() => {
+          setSelected(best);
+          setRightCollapsed(false);
+          // Center the graph on the starting node
+          if (fgRef.current && best.x != null) {
+            fgRef.current.centerAt(best.x, best.y, 600);
+            fgRef.current.zoom(2.5, 600);
+          }
+        }, 100);
+        return prev;
+      });
+    };
+
+    if (shouldFetch) {
+      const url =
+        neededPersona === "default"
+          ? "/api/graph"
+          : `/api/graph?persona=${neededPersona}`;
+      fetchApi(url)
+        .then((r) => r.json())
+        .then((d) => {
+          if (!Array.isArray(d.nodes)) return;
+          setData((prev) => mergeInto(prev, d.nodes, d.links, activePersona));
+          // Give the merge a tick to settle, then auto-select
+          setTimeout(afterMerge, 50);
+        })
+        .catch(() => afterMerge());
+    } else {
+      afterMerge();
+    }
+  }, [activeFilter]); // eslint-disable-line react-hooks/exhaustive-deps
+
   // ── Resize ────────────────────────────────────────────────────────────────
   useEffect(() => {
     const update = () =>
@@ -493,6 +565,19 @@ function GraphContent() {
       }
     }
   }, [!!selected]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // ── Canvas accessibility — WCAG 1.1.1 / 4.1.2 ───────────────────────────
+  useEffect(() => {
+    if (!containerRef.current) return;
+    const canvas = containerRef.current.querySelector("canvas");
+    if (!canvas) return;
+    canvas.setAttribute("role", "img");
+    canvas.setAttribute(
+      "aria-label",
+      `Interactive force-directed knowledge graph showing ${data.nodes.length} nodes and ${data.links.length} links across 5 data layers`,
+    );
+    canvas.setAttribute("tabIndex", "0");
+  }, [data.nodes.length, data.links.length]);
 
   // ── Recalculate canvas dims when panels open/close ─────────────────────
   useEffect(() => {
@@ -579,6 +664,7 @@ function GraphContent() {
     (raw: object) => {
       const node = raw as GraphNode;
       setSelected(node);
+      setRightCollapsed(false); // auto-open inspector on single click
       // Clicking the value center clears any active filter to show all connections
       if (node.isValueCenter) {
         setActiveFilter(null);
@@ -677,14 +763,14 @@ function GraphContent() {
         // Bold label
         const fs = Math.max(5, 14 / gs);
         ctx.font = `bold ${fs}px sans-serif`;
-        ctx.fillStyle = "#fff";
+        ctx.fillStyle = isDark ? "#fff" : "#0f172a";
         ctx.textAlign = "center";
         ctx.fillText(node.name, x, y + vcR + fs * 1.3);
 
         // Subtitle
         const sfs = Math.max(3, 9 / gs);
         ctx.font = `${sfs}px sans-serif`;
-        ctx.fillStyle = "#fbbf24";
+        ctx.fillStyle = isDark ? "#fbbf24" : "#b45309";
         ctx.fillText(
           NODE_DISPLAY_NAMES[node.label] ?? "",
           x,
@@ -693,14 +779,17 @@ function GraphContent() {
         return;
       }
 
-      const r = Math.max(2, 6 / Math.sqrt(gs));
-      ctx.globalAlpha = dim ? 0.15 : 1;
+      const r = Math.max(3, 7 / Math.sqrt(gs));
+      const filterHighlighted = filterLabelSet && !filteredOut && !isVC;
+      // When a filter is active, make non-matching nodes dimmed but still visible
+      // Selection-based dimming uses a milder 0.30
+      ctx.globalAlpha = filteredOut ? (isDark ? 0.1 : 0.25) : dim ? 0.3 : 1;
 
       // Outer glow for selected
       if (isSel) {
         ctx.beginPath();
         ctx.arc(x, y, r + 4, 0, 2 * Math.PI);
-        ctx.strokeStyle = "rgba(255,255,255,0.7)";
+        ctx.strokeStyle = isDark ? "rgba(255,255,255,0.7)" : "rgba(0,0,0,0.5)";
         ctx.lineWidth = 1.5 / gs;
         ctx.stroke();
       }
@@ -726,28 +815,80 @@ function GraphContent() {
         ctx.stroke();
       }
 
-      // Main node circle
+      // Glow ring for filter-highlighted nodes
+      if (filterHighlighted && !isSel) {
+        ctx.beginPath();
+        ctx.arc(x, y, r + 3, 0, 2 * Math.PI);
+        ctx.strokeStyle = node.color + "66";
+        ctx.lineWidth = 2 / gs;
+        ctx.stroke();
+      }
+
+      // Main node circle with border for visibility on any background
+      const drawR = filterHighlighted ? r * 1.3 : r;
       ctx.beginPath();
-      ctx.arc(x, y, r, 0, 2 * Math.PI);
+      ctx.arc(x, y, drawR, 0, 2 * Math.PI);
       ctx.fillStyle = node.color;
       ctx.fill();
+      // Stroke outline — ensures nodes are visible in light mode
+      if (!filteredOut) {
+        ctx.strokeStyle = isDark
+          ? "rgba(255,255,255,0.25)"
+          : "rgba(0,0,0,0.35)";
+        ctx.lineWidth = 0.8 / gs;
+        ctx.stroke();
+      }
 
       // Label — always visible (font size formula keeps it ~9 screen-px regardless of zoom)
-      if (gs >= 0.1 || isSel || isConn) {
-        const fs = Math.max(3, 9 / gs);
-        ctx.font = `${isSel ? "bold " : ""}${fs}px sans-serif`;
-        ctx.fillStyle = isSel ? "#fff" : isConn ? "#f3f4f6" : "#9ca3af";
+      // When a filter is active, matching nodes show their name in bold
+      if (gs >= 0.1 || isSel || isConn || filterHighlighted) {
+        const fs = Math.max(3, (filterHighlighted ? 11 : 9) / gs);
+        ctx.font = `${
+          isSel || filterHighlighted ? "bold " : ""
+        }${fs}px sans-serif`;
+        // Theme-aware label colors — high contrast in both light and dark mode
+        ctx.fillStyle = isSel
+          ? isDark
+            ? "#fff"
+            : "#0f172a"
+          : filterHighlighted
+            ? isDark
+              ? "#f1f5f9"
+              : "#0f172a"
+            : isConn
+              ? isDark
+                ? "#e2e8f0"
+                : "#1e293b"
+              : isDark
+                ? "#94a3b8"
+                : "#475569";
         ctx.textAlign = "center";
+        // Filter-matching nodes show the friendly name; others show ID
+        const labelText = filterHighlighted ? node.name : node.id;
+        const maxLen = filterHighlighted ? 24 : 18;
         ctx.fillText(
-          node.name.length > 24 ? node.name.slice(0, 22) + "…" : node.name,
+          labelText.length > maxLen
+            ? labelText.slice(0, maxLen - 2) + "…"
+            : labelText,
           x,
           y + r + fs * 1.3,
         );
+        // Show type label below name for filter-highlighted nodes
+        if (filterHighlighted && !isSel) {
+          const tfs = Math.max(2.5, 7 / gs);
+          ctx.font = `${tfs}px sans-serif`;
+          ctx.fillStyle = node.color;
+          ctx.fillText(
+            NODE_DISPLAY_NAMES[node.label] ?? node.label,
+            x,
+            y + r + fs * 1.3 + tfs * 1.4,
+          );
+        }
       }
       ctx.globalAlpha = 1;
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [selected, connectedIds, expanding, filterLabelSet],
+    [selected, connectedIds, expanding, filterLabelSet, isDark],
   );
 
   const paintLink = useCallback(
@@ -798,16 +939,84 @@ function GraphContent() {
         ctx.globalAlpha = 1;
         return;
       }
-      ctx.globalAlpha = filteredOut ? 0.05 : isAdj ? 1 : selected ? 0.1 : 0.55;
-      ctx.strokeStyle = isAdj ? "#60a5fa" : isDark ? "#374151" : "#cbd5e1";
-      ctx.lineWidth = (isAdj ? 1.5 : 0.7) / gs;
+      // When a filter is active, links between two matching nodes are highlighted
+      const filterMatch =
+        filterLabelSet &&
+        !filteredOut &&
+        filterLabelSet.has(s.label) &&
+        filterLabelSet.has(t.label);
+      ctx.globalAlpha = filteredOut
+        ? isDark
+          ? 0.05
+          : 0.12
+        : filterMatch
+          ? 0.9
+          : isAdj
+            ? 1
+            : selected
+              ? isDark
+                ? 0.22
+                : 0.3
+              : isDark
+                ? 0.55
+                : 0.7;
+      const linkColor = isAdj
+        ? "#60a5fa"
+        : filterMatch
+          ? isDark
+            ? "#93c5fd"
+            : "#2563eb"
+          : isDark
+            ? "#64748b"
+            : "#475569";
+      ctx.strokeStyle = linkColor;
+      ctx.lineWidth =
+        (isAdj ? 1.5 : filterMatch ? 1.2 : isDark ? 0.7 : 1.0) / gs;
+      // Offset line end to stop before target node edge
+      const angle = Math.atan2((t.y ?? 0) - (s.y ?? 0), t.x - s.x);
+      const tR = Math.max(3, 7 / Math.sqrt(gs));
+      const tx = t.x - (tR + 4 / gs) * Math.cos(angle);
+      const ty = (t.y ?? 0) - (tR + 4 / gs) * Math.sin(angle);
       ctx.beginPath();
       ctx.moveTo(s.x, s.y ?? 0);
-      ctx.lineTo(t.x, t.y ?? 0);
+      ctx.lineTo(tx, ty);
       ctx.stroke();
+      // Arrowhead pointing at target
+      const aLen = Math.max(4, 10 / gs);
+      ctx.globalAlpha = filteredOut
+        ? isDark
+          ? 0.05
+          : 0.15
+        : filterMatch
+          ? 0.9
+          : isAdj
+            ? 1
+            : selected
+              ? 0.3
+              : isDark
+                ? 0.65
+                : 0.8;
+      ctx.fillStyle = linkColor;
+      ctx.beginPath();
+      ctx.moveTo(t.x - tR * Math.cos(angle), (t.y ?? 0) - tR * Math.sin(angle));
+      ctx.lineTo(
+        t.x - (tR + aLen) * Math.cos(angle) - aLen * 0.4 * Math.sin(angle),
+        (t.y ?? 0) -
+          (tR + aLen) * Math.sin(angle) +
+          aLen * 0.4 * Math.cos(angle),
+      );
+      ctx.lineTo(
+        t.x - (tR + aLen) * Math.cos(angle) + aLen * 0.4 * Math.sin(angle),
+        (t.y ?? 0) -
+          (tR + aLen) * Math.sin(angle) -
+          aLen * 0.4 * Math.cos(angle),
+      );
+      ctx.closePath();
+      ctx.fill();
 
-      // Relationship type label — shown on adjacent links or all visible when zoomed in
-      const showLabel = isAdj || (!selected && !filteredOut && gs >= 0.6);
+      // Relationship type label — shown on adjacent links, filter-matched links, or when zoomed in
+      const showLabel =
+        isAdj || filterMatch || (!selected && !filteredOut && gs >= 0.6);
       if (showLabel) {
         // User-friendly relationship label
         const rawType = link.type;
@@ -817,16 +1026,17 @@ function GraphContent() {
         const fs = Math.max(3, 7 / gs);
         ctx.font = `${fs}px sans-serif`;
         const tw = ctx.measureText(friendlyType).width;
-        ctx.globalAlpha = isAdj ? 0.9 : 0.5;
+        ctx.globalAlpha = isAdj || filterMatch ? 1 : 0.7;
         ctx.fillStyle = isDark ? "#0f172a" : "#ffffff";
         ctx.fillRect(mx - tw / 2 - 2, my - fs / 2 - 1, tw + 4, fs + 2);
-        ctx.fillStyle = isAdj
-          ? isDark
-            ? "#adc6ff" /* Stitch nocturne primary */
-            : "#0058be" /* Stitch primary */
-          : isDark
-            ? "#6b7280"
-            : "#94a3b8";
+        ctx.fillStyle =
+          isAdj || filterMatch
+            ? isDark
+              ? "#93c5fd" /* bright blue adjacent / filter match */
+              : "#0058be" /* Stitch primary */
+            : isDark
+              ? "#94a3b8"
+              : "#475569";
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
         ctx.fillText(friendlyType, mx, my);
@@ -851,178 +1061,122 @@ function GraphContent() {
         <button
           onClick={() => setLeftCollapsed((v) => !v)}
           className="flex items-center justify-center rounded p-1 text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
-          title={leftCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+          aria-label={leftCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+          aria-expanded={!leftCollapsed}
+          aria-controls="graph-sidebar-panel"
         >
           {leftCollapsed ? (
-            <ChevronRight size={14} />
+            <ChevronRight size={14} aria-hidden="true" />
           ) : (
-            <PanelLeftClose size={14} />
+            <PanelLeftClose size={14} aria-hidden="true" />
           )}
         </button>
         {leftCollapsed ? null : (
-          <>
-            {/* ── Brand header ── */}
-            <div className="pb-3 border-b border-[var(--border)]">
-              <h2 className="text-base font-bold text-[var(--accent)] leading-tight">
-                Knowledge Graph
-              </h2>
-              <p className="text-[10px] text-[var(--text-secondary)] uppercase tracking-wider mt-0.5 mb-3">
-                EHDS Health Dataspace
-              </p>
-              {/* Active Entities — Stitch stat-card: numbers are text-primary, border gives color */}
-              <p className="section-label">Active Entities</p>
-              <div className="grid grid-cols-2 gap-2">
-                <div className="stat-card border-l-[var(--accent)]">
-                  <p className="section-label mb-0.5">Nodes</p>
-                  <p className="text-2xl font-black text-[var(--text-primary)] leading-none tabular-nums">
-                    {data.nodes.length.toLocaleString()}
-                  </p>
-                </div>
-                <div className="stat-card border-l-[var(--success-text)]">
-                  <p className="section-label mb-0.5">Links</p>
-                  <p className="text-2xl font-black text-[var(--text-primary)] leading-none tabular-nums">
-                    {data.links.length.toLocaleString()}
-                  </p>
-                </div>
+          <div id="graph-sidebar-panel" className="flex flex-col gap-3">
+            {/* ── Compact header with inline stats ── */}
+            <div className="pb-2 border-b border-[var(--border)]">
+              <div className="flex items-baseline justify-between">
+                <h1 className="text-sm font-bold text-[var(--accent)] leading-tight">
+                  Knowledge Graph
+                </h1>
+                <span className="text-[10px] text-[var(--text-secondary)] tabular-nums">
+                  {data.nodes.length} nodes · {data.links.length} links
+                </span>
               </div>
-            </div>
 
-            {/* ── Topological search — Phase 23e glass-panel overlay pattern ── */}
-            <div className="py-3 border-b border-[var(--border)]">
-              <p className="section-label">Search nodes</p>
-              <input
-                type="search"
-                value={nodeSearch}
-                onChange={(e) => setNodeSearch(e.target.value)}
-                placeholder="Filter by name or type…"
-                className="w-full px-3 py-2 text-xs bg-[var(--surface-card)] border border-[var(--border-ui)] rounded-xl text-[var(--text-primary)] placeholder-[var(--text-secondary)] outline-none focus:border-[var(--accent)] transition-colors"
-              />
-              {nodeSearch.trim() && (
-                <div className="mt-2 max-h-40 overflow-y-auto flex flex-col gap-0.5">
-                  {data.nodes
-                    .filter(
-                      (n) =>
-                        (n.name ?? "")
-                          .toLowerCase()
-                          .includes(nodeSearch.toLowerCase()) ||
-                        (n.label ?? "")
-                          .toLowerCase()
-                          .includes(nodeSearch.toLowerCase()),
-                    )
-                    .slice(0, 10)
-                    .map((n) => (
-                      <button
-                        key={n.id}
-                        onClick={() => {
-                          handleNodeClick(
-                            n as Parameters<typeof handleNodeClick>[0],
-                          );
-                          setNodeSearch("");
-                        }}
-                        className="text-left px-2 py-1.5 rounded-lg hover:bg-[var(--surface-2)] transition-colors flex items-center gap-2 text-xs"
-                      >
-                        <span
-                          className="w-2 h-2 rounded-full shrink-0"
-                          style={{
-                            background: n.color ?? "var(--text-secondary)",
-                          }}
-                        />
-                        <span className="truncate text-[var(--text-primary)] font-medium">
-                          {n.name}
-                        </span>
-                        <span className="text-[var(--text-secondary)] shrink-0">
-                          {n.label}
-                        </span>
-                      </button>
-                    ))}
-                  {data.nodes.filter(
-                    (n) =>
-                      (n.name ?? "")
-                        .toLowerCase()
-                        .includes(nodeSearch.toLowerCase()) ||
-                      (n.label ?? "")
-                        .toLowerCase()
-                        .includes(nodeSearch.toLowerCase()),
-                  ).length === 0 && (
-                    <p className="text-xs text-[var(--text-secondary)] px-2 py-1">
-                      No nodes match
-                    </p>
-                  )}
-                </div>
-              )}
-            </div>
-
-            {/* ── Quick links ── */}
-            <div>
-              <p className="section-label">Explore</p>
-              <div className="flex flex-col">
-                {[
-                  {
-                    href: "/catalog",
-                    icon: BookOpen,
-                    label: "Dataset Catalog",
-                  },
-                  {
-                    href: "/patient",
-                    icon: Activity,
-                    label: "Patient Journey",
-                  },
-                  {
-                    href: "/analytics",
-                    icon: Database,
-                    label: "OMOP Analytics",
-                  },
-                  {
-                    href: "/api/graph/validate",
-                    icon: ShieldCheck,
-                    label: "Validate graph",
-                    external: true,
-                  },
-                ].map(({ href, icon: Icon, label, external }) => (
-                  <a
-                    key={href}
-                    href={href}
-                    target={external ? "_blank" : undefined}
-                    className="flex items-center gap-2 py-1.5 text-xs text-[var(--text-secondary)] hover:text-[var(--accent)] transition-colors rounded hover:bg-[var(--accent-surface)] px-1"
-                  >
-                    <Icon size={12} aria-hidden="true" />
-                    {label}
-                  </a>
-                ))}
-              </div>
-            </div>
-
-            {/* Active persona indicator */}
-            {activePersona !== "default" && (
-              <div className="rounded-lg border border-[var(--accent)]/30 bg-[var(--accent-surface)] px-3 py-2">
-                {(() => {
+              {/* Active persona indicator — compact inline */}
+              {activePersona !== "default" &&
+                (() => {
                   const pv = PERSONA_VIEWS.find((p) => p.id === activePersona);
                   const Icon = pv ? PRESET_ICONS[pv.icon] ?? Eye : Eye;
                   return (
-                    <>
-                      <div className="flex items-center gap-1.5 text-xs font-semibold text-[var(--accent)]">
-                        <Icon size={11} />
+                    <div className="mt-1.5 flex items-center gap-1.5 text-[10px] text-[var(--accent)]">
+                      <Icon size={10} />
+                      <span className="font-semibold">
                         {pv?.label ?? activePersona}
-                      </div>
+                      </span>
                       {pv?.ehdsArticle && (
-                        <div className="text-[10px] text-[var(--text-secondary)] mt-0.5">
-                          {pv.ehdsArticle}
-                        </div>
+                        <span className="text-[var(--text-secondary)]">
+                          · {pv.ehdsArticle}
+                        </span>
                       )}
-                      {pv?.question && (
-                        <p className="mt-1 text-[10px] italic text-[var(--text-secondary)] leading-snug">
-                          &ldquo;{pv.question}&rdquo;
-                        </p>
-                      )}
-                    </>
+                    </div>
                   );
                 })()}
-              </div>
-            )}
+            </div>
 
-            {/* Filter presets — persona-aware */}
+            {/* ── Search — matches name, label, display name, and group ── */}
             <div>
-              <p className="section-label">Filter by question</p>
+              <input
+                id="graph-node-search"
+                type="search"
+                value={nodeSearch}
+                onChange={(e) => setNodeSearch(e.target.value)}
+                placeholder="e.g. Organization, Contract, Pseudonym…"
+                aria-label="Search graph nodes by name, type, or keyword"
+                className="w-full px-3 py-1.5 text-xs bg-[var(--surface-card)] border border-[var(--border-ui)] rounded-lg text-[var(--text-primary)] placeholder-[var(--text-secondary)] outline-none focus:border-[var(--accent)] transition-colors"
+              />
+              {nodeSearch.trim() &&
+                (() => {
+                  const q = nodeSearch.toLowerCase();
+                  const matches = data.nodes.filter(
+                    (n) =>
+                      (n.name ?? "").toLowerCase().includes(q) ||
+                      (n.label ?? "").toLowerCase().includes(q) ||
+                      (NODE_DISPLAY_NAMES[n.label] ?? "")
+                        .toLowerCase()
+                        .includes(q) ||
+                      (n.group ?? "").toLowerCase().includes(q),
+                  );
+                  return (
+                    <div className="mt-1.5 max-h-48 overflow-y-auto flex flex-col gap-0.5">
+                      {matches.length > 0 ? (
+                        <>
+                          <p className="text-[10px] text-[var(--text-secondary)] px-2 py-0.5">
+                            {matches.length} result
+                            {matches.length !== 1 ? "s" : ""}
+                          </p>
+                          {matches.slice(0, 15).map((n) => (
+                            <button
+                              key={n.id}
+                              onClick={() => {
+                                handleNodeClick(
+                                  n as Parameters<typeof handleNodeClick>[0],
+                                );
+                                setNodeSearch("");
+                                setRightCollapsed(false);
+                              }}
+                              className="text-left px-2 py-1 rounded hover:bg-[var(--surface-2)] transition-colors flex items-center gap-2 text-xs"
+                            >
+                              <span
+                                className="w-2 h-2 rounded-full shrink-0"
+                                style={{
+                                  background:
+                                    n.color ?? "var(--text-secondary)",
+                                }}
+                              />
+                              <span className="truncate text-[var(--text-primary)] font-medium">
+                                {n.name}
+                              </span>
+                              <span className="text-[var(--text-secondary)] shrink-0 text-[10px]">
+                                {NODE_DISPLAY_NAMES[n.label] ?? n.label}
+                              </span>
+                            </button>
+                          ))}
+                        </>
+                      ) : (
+                        <p className="text-xs text-[var(--text-secondary)] px-2 py-1">
+                          No nodes match &ldquo;{nodeSearch}&rdquo;
+                        </p>
+                      )}
+                    </div>
+                  );
+                })()}
+            </div>
+
+            {/* ── Filter by question — most prominent section ── */}
+            <div>
+              <p className="section-label">Ask the graph</p>
               <div className="flex flex-col gap-0.5">
                 {(activePersona === "patient"
                   ? PATIENT_FILTER_PRESETS
@@ -1064,7 +1218,7 @@ function GraphContent() {
                 })}
               </div>
               {activeFilter && (
-                <p className="mt-1.5 text-xs text-[var(--text-secondary)]">
+                <p className="mt-1.5 px-2 py-1.5 text-[10px] text-[var(--text-secondary)] bg-[var(--accent-surface)] rounded leading-snug">
                   {
                     [
                       ...FILTER_PRESETS,
@@ -1078,68 +1232,114 @@ function GraphContent() {
               )}
             </div>
 
-            {/* Layer legend — persona-aware labels */}
-            <div>
-              <p className="section-label">Structural layers</p>
-              {Object.entries(LAYER_LABELS)
-                .filter(([k]) => +k >= 1)
-                .map(([k, v]) => {
-                  const personaLabel =
-                    PERSONA_LAYER_LABELS[activePersona]?.[+k] ?? v;
-                  return (
+            {/* ── Quick links — compact icon row ── */}
+            <div className="border-t border-[var(--border)] pt-2">
+              <p className="section-label">Explore</p>
+              <div className="grid grid-cols-2 gap-1">
+                {[
+                  { href: "/catalog", icon: BookOpen, label: "Catalog" },
+                  { href: "/patient", icon: Activity, label: "Patients" },
+                  { href: "/analytics", icon: Database, label: "OMOP" },
+                  {
+                    href: "/api/graph/validate",
+                    icon: ShieldCheck,
+                    label: "Validate",
+                    external: true,
+                  },
+                ].map(({ href, icon: Icon, label, external }) => (
+                  <a
+                    key={href}
+                    href={href}
+                    target={external ? "_blank" : undefined}
+                    className="flex items-center gap-1.5 py-1 px-1.5 text-[10px] text-[var(--text-secondary)] hover:text-[var(--accent)] transition-colors rounded hover:bg-[var(--accent-surface)]"
+                  >
+                    <Icon size={10} aria-hidden="true" />
+                    {label}
+                  </a>
+                ))}
+              </div>
+            </div>
+
+            {/* ── Legend — always available, collapsed by default ── */}
+            <details
+              className="border-t border-[var(--border)] pt-2"
+              open={!activeFilter}
+            >
+              <summary className="section-label cursor-pointer select-none hover:text-[var(--accent)] transition-colors mb-1">
+                Legend
+              </summary>
+              <div className="mt-2 space-y-3">
+                {/* Layer colors */}
+                <div>
+                  <p className="text-[10px] text-[var(--text-secondary)] uppercase tracking-wider font-semibold mb-1">
+                    Layers
+                  </p>
+                  {Object.entries(LAYER_LABELS)
+                    .filter(([k]) => +k >= 1)
+                    .map(([k, v]) => {
+                      const personaLabel =
+                        PERSONA_LAYER_LABELS[activePersona]?.[+k] ?? v;
+                      return (
+                        <div
+                          key={k}
+                          className="mb-0.5 flex items-center gap-2 text-[11px] cursor-help"
+                          title={LAYER_TOOLTIPS[+k]}
+                        >
+                          <span
+                            className="h-2 w-2 shrink-0 rounded-full"
+                            style={{ background: LAYER_COLORS[+k] }}
+                            aria-hidden="true"
+                          />
+                          <span className="text-[var(--text-primary)]">
+                            {personaLabel}
+                          </span>
+                        </div>
+                      );
+                    })}
+                </div>
+                {/* Key actors */}
+                <div>
+                  <p className="text-[10px] text-[var(--text-secondary)] uppercase tracking-wider font-semibold mb-1">
+                    Key actors
+                  </p>
+                  {ROLE_LEGEND.map(({ label, color, description, tooltip }) => (
                     <div
-                      key={k}
-                      className="mb-1 flex items-center gap-2 text-xs cursor-help"
-                      title={LAYER_TOOLTIPS[+k]}
+                      key={label}
+                      className="mb-1 flex items-start gap-2 text-[11px] cursor-help"
+                      title={tooltip}
                     >
                       <span
-                        className="h-2.5 w-2.5 shrink-0 rounded-full"
-                        style={{ background: LAYER_COLORS[+k] }}
+                        className="mt-0.5 h-2 w-2 shrink-0 rounded-full"
+                        style={{ background: color }}
+                        aria-hidden="true"
                       />
-                      <span className="text-[var(--text-primary)]">
-                        {personaLabel}
-                      </span>
+                      <div>
+                        <span className="font-medium text-[var(--text-primary)]">
+                          {label}
+                        </span>
+                        <span className="text-[var(--text-secondary)]">
+                          {" "}
+                          — {description}
+                        </span>
+                      </div>
                     </div>
-                  );
-                })}
-            </div>
-
-            {/* Node type color legend — warm/vivid accents */}
-            <div>
-              <p className="section-label">Key actors</p>
-              {ROLE_LEGEND.map(({ label, color, description, tooltip }) => (
-                <div
-                  key={label}
-                  className="mb-1.5 flex items-start gap-2 text-xs cursor-help"
-                  title={tooltip}
-                >
-                  <span
-                    className="mt-0.5 h-2.5 w-2.5 shrink-0 rounded-full"
-                    style={{ background: color }}
-                  />
-                  <div>
-                    <div className="font-medium text-[var(--text-primary)]">
-                      {label}
-                    </div>
-                    <div className="text-[var(--text-secondary)]">
-                      {description}
-                    </div>
-                  </div>
+                  ))}
                 </div>
-              ))}
-            </div>
+              </div>
+            </details>
 
-            {/* Hint */}
-            {!selected && !loading && (
-              <div className="flex items-start gap-1.5 rounded-lg border border-[var(--border)] bg-[var(--surface-2)]/50 p-2 text-xs text-[var(--text-secondary)]">
+            {/* Hint — only when no selection and no filter */}
+            {!selected && !activeFilter && !loading && (
+              <div className="flex items-start gap-1.5 rounded-lg border border-[var(--border)] bg-[var(--surface-2)]/50 p-2 text-[10px] text-[var(--text-secondary)]">
                 <MousePointerClick
-                  size={11}
+                  size={10}
                   className="mt-0.5 shrink-0 text-[var(--accent)]"
+                  aria-hidden="true"
                 />
-                Click a node to inspect and expand its neighbours.
+                Click a node to inspect, or pick a question above.
               </div>
             )}
-          </>
+          </div>
         )}
       </aside>
 
@@ -1236,20 +1436,21 @@ function GraphContent() {
           <button
             onClick={() => setRightCollapsed((v) => !v)}
             className="flex w-full items-center justify-center border-b border-[var(--border)] p-2 text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
-            title={rightCollapsed ? "Expand panel" : "Collapse panel"}
             aria-label={
               rightCollapsed ? "Expand inspector" : "Collapse inspector"
             }
+            aria-expanded={!rightCollapsed}
+            aria-controls="graph-inspector-panel"
           >
             {rightCollapsed ? (
-              <ChevronLeft size={14} />
+              <ChevronLeft size={14} aria-hidden="true" />
             ) : (
-              <PanelRightClose size={14} />
+              <PanelRightClose size={14} aria-hidden="true" />
             )}
           </button>
 
           {rightCollapsed ? null : (
-            <>
+            <div id="graph-inspector-panel">
               {/* ── Header ── */}
               <div className="border-b border-[var(--border)] px-5 pt-5 pb-4">
                 <div className="flex items-center justify-between mb-3">
@@ -1261,7 +1462,7 @@ function GraphContent() {
                     className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-2)] rounded-lg p-1 transition-colors"
                     aria-label="Close detail panel"
                   >
-                    <X size={14} />
+                    <X size={14} aria-hidden="true" />
                   </button>
                 </div>
 
@@ -1586,7 +1787,7 @@ function GraphContent() {
                   )}
                 </div>
               )}
-            </>
+            </div>
           )}
         </aside>
       )}

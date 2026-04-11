@@ -81,24 +81,26 @@ const TRANSFER_STATES = [
 function stateColor(state: string): string {
   const s = state?.toUpperCase() || "";
   if (s.includes("FINALIZED") || s.includes("COMPLETED"))
-    return "text-green-400";
-  if (s.includes("TERMINATED") || s.includes("ERROR")) return "text-red-400";
+    return "text-[var(--success-text)]";
+  if (s.includes("TERMINATED") || s.includes("ERROR"))
+    return "text-[var(--danger-text)]";
   if (s.includes("STARTED") || s.includes("AGREED") || s.includes("VERIFIED"))
-    return "text-blue-400";
-  if (s.includes("SUSPENDED")) return "text-orange-400";
-  return "text-yellow-400";
+    return "text-[var(--accent)]";
+  if (s.includes("SUSPENDED")) return "text-orange-800 dark:text-orange-400";
+  return "text-[var(--warning-text)]";
 }
 
 function stateBg(state: string): string {
   const s = state?.toUpperCase() || "";
   if (s.includes("FINALIZED") || s.includes("COMPLETED"))
-    return "bg-green-900/40 text-green-400";
+    return "bg-[var(--badge-active-bg)] text-[var(--badge-active-text)] border border-[var(--badge-active-border)]";
   if (s.includes("TERMINATED") || s.includes("ERROR"))
-    return "bg-red-900/40 text-red-400";
+    return "bg-[var(--badge-inactive-bg)] text-[var(--badge-inactive-text)] border border-[var(--badge-inactive-border)]";
   if (s.includes("STARTED") || s.includes("AGREED") || s.includes("VERIFIED"))
-    return "bg-blue-900/40 text-blue-400";
-  if (s.includes("SUSPENDED")) return "bg-orange-900/40 text-orange-400";
-  return "bg-yellow-900/40 text-yellow-400";
+    return "bg-[var(--accent)]/10 text-[var(--accent)]";
+  if (s.includes("SUSPENDED"))
+    return "bg-orange-100 dark:bg-orange-900/40 text-orange-800 dark:text-orange-400";
+  return "bg-yellow-100 dark:bg-yellow-900/40 text-yellow-800 dark:text-yellow-400";
 }
 
 /** Determine index in a state array, -1 for terminated/error */
@@ -120,21 +122,21 @@ function stateIndex(state: string, states: readonly string[]): number {
  */
 const NEGOTIATION_ACTIONS: Record<string, { label: string; color: string }[]> =
   {
-    REQUESTED: [{ label: "Offer", color: "text-blue-400" }],
-    OFFERED: [{ label: "Accept", color: "text-blue-400" }],
-    ACCEPTED: [{ label: "Agree", color: "text-blue-400" }],
-    AGREED: [{ label: "Verify", color: "text-blue-400" }],
-    VERIFIED: [{ label: "Finalize", color: "text-green-400" }],
+    REQUESTED: [{ label: "Offer", color: "text-[var(--accent)]" }],
+    OFFERED: [{ label: "Accept", color: "text-[var(--accent)]" }],
+    ACCEPTED: [{ label: "Agree", color: "text-[var(--accent)]" }],
+    AGREED: [{ label: "Verify", color: "text-[var(--accent)]" }],
+    VERIFIED: [{ label: "Finalize", color: "text-[var(--success-text)]" }],
     FINALIZED: [],
   };
 
 const TRANSFER_ACTIONS: Record<string, { label: string; color: string }[]> = {
-  REQUESTED: [{ label: "Start", color: "text-blue-400" }],
+  REQUESTED: [{ label: "Start", color: "text-[var(--accent)]" }],
   STARTED: [
-    { label: "Suspend", color: "text-orange-400" },
-    { label: "Complete", color: "text-green-400" },
+    { label: "Suspend", color: "text-orange-800 dark:text-orange-400" },
+    { label: "Complete", color: "text-[var(--success-text)]" },
   ],
-  SUSPENDED: [{ label: "Resume", color: "text-blue-400" }],
+  SUSPENDED: [{ label: "Resume", color: "text-[var(--accent)]" }],
   COMPLETED: [],
 };
 
@@ -159,19 +161,23 @@ function StatePipeline({
         const isPast = current >= 0 && i < current;
 
         let icon;
-        let color = "text-gray-600";
+        let color = "text-[var(--text-secondary)]";
 
         if (isTerminated && i === 0) {
-          icon = <XCircle size={12} className="text-red-400" />;
-          color = "text-red-400";
+          icon = <XCircle size={12} className="text-[var(--danger-text)]" />;
+          color = "text-[var(--danger-text)]";
         } else if (isPast) {
-          icon = <CheckCircle2 size={12} className="text-green-400" />;
-          color = "text-green-400";
+          icon = (
+            <CheckCircle2 size={12} className="text-[var(--success-text)]" />
+          );
+          color = "text-[var(--success-text)]";
         } else if (isActive) {
           const isEndState = step === "FINALIZED" || step === "COMPLETED";
           if (isEndState) {
-            icon = <CheckCircle2 size={12} className="text-green-400" />;
-            color = "text-green-400";
+            icon = (
+              <CheckCircle2 size={12} className="text-[var(--success-text)]" />
+            );
+            color = "text-[var(--success-text)]";
           } else {
             icon = (
               <div className="relative">
@@ -187,7 +193,7 @@ function StatePipeline({
             color = stateColor(state);
           }
         } else {
-          icon = <Circle size={12} className="text-gray-600" />;
+          icon = <Circle size={12} className="text-[var(--text-secondary)]" />;
         }
 
         return (
@@ -212,8 +218,8 @@ function StatePipeline({
       })}
       {isTerminated && (
         <div className="flex flex-col items-center gap-0.5 ml-1">
-          <XCircle size={12} className="text-red-400" />
-          <span className="text-[9px] text-red-400 leading-none">
+          <XCircle size={12} className="text-[var(--danger-text)]" />
+          <span className="text-[9px] text-[var(--danger-text)] leading-none">
             TERMINATED
           </span>
         </div>
@@ -368,17 +374,17 @@ function TasksContent() {
             {
               label: "Active",
               value: filteredCounts.active,
-              color: "text-yellow-400",
+              color: "text-[var(--warning-text)]",
             },
             {
               label: "Negotiations",
               value: filteredCounts.negotiations,
-              color: "text-blue-400",
+              color: "text-[var(--accent)]",
             },
             {
               label: "Transfers",
               value: filteredCounts.transfers,
-              color: "text-purple-400",
+              color: "text-[var(--accent)]",
             },
           ].map((card) => (
             <div
@@ -404,7 +410,7 @@ function TasksContent() {
                 }
                 className={`flex items-center gap-1.5 px-3 py-1 text-xs rounded-full border transition-colors ${
                   selectedParticipant !== "all"
-                    ? "border-layer2 bg-layer2/20 text-layer2"
+                    ? "border-layer2 bg-layer2/20 text-teal-800 dark:text-teal-300"
                     : "border-[var(--border)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-gray-500"
                 }`}
               >
@@ -425,7 +431,7 @@ function TasksContent() {
                     }}
                     className={`w-full text-left px-3 py-1.5 text-xs hover:bg-[var(--surface-2)] ${
                       selectedParticipant === "all"
-                        ? "text-layer2"
+                        ? "text-teal-800 dark:text-teal-300"
                         : "text-[var(--text-primary)]"
                     }`}
                   >
@@ -444,7 +450,7 @@ function TasksContent() {
                         }}
                         className={`w-full text-left px-3 py-1.5 text-xs hover:bg-[var(--surface-2)] ${
                           selectedParticipant === id
-                            ? "text-layer2"
+                            ? "text-teal-800 dark:text-teal-300"
                             : "text-[var(--text-primary)]"
                         }`}
                       >
@@ -468,12 +474,14 @@ function TasksContent() {
                   onClick={() => setFilter(f.key)}
                   className={`px-3 py-1 text-xs rounded-full border transition-colors ${
                     filter === f.key
-                      ? "border-layer2 bg-layer2/20 text-layer2"
+                      ? "border-layer2 bg-layer2/20 text-teal-800 dark:text-teal-300"
                       : "border-[var(--border)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-gray-500"
                   }`}
                 >
                   {f.label}
-                  <span className="ml-1 opacity-60">{f.count}</span>
+                  <span className="ml-1 text-[var(--text-secondary)]">
+                    {f.count}
+                  </span>
                 </button>
               ))}
             </div>
@@ -505,13 +513,13 @@ function TasksContent() {
             <div className="flex items-center justify-center gap-3 mt-4">
               <Link
                 href="/data/share"
-                className="text-xs text-layer2 hover:underline"
+                className="text-xs text-teal-800 dark:text-teal-300 hover:underline"
               >
                 Share Data →
               </Link>
               <Link
                 href="/negotiate"
-                className="text-xs text-layer2 hover:underline"
+                className="text-xs text-teal-800 dark:text-teal-300 hover:underline"
               >
                 Negotiate →
               </Link>
@@ -525,8 +533,8 @@ function TasksContent() {
               const TypeIcon = isNeg ? FileSignature : ArrowRightLeft;
               const typeBadge = isNeg ? "Negotiation" : "Transfer";
               const typeBadgeColor = isNeg
-                ? "bg-blue-900/40 text-blue-400"
-                : "bg-purple-900/40 text-purple-400";
+                ? "bg-[var(--accent)]/10 text-[var(--accent)]"
+                : "bg-purple-100 dark:bg-purple-900/40 text-purple-800 dark:text-purple-300";
 
               // Link to the detail page
               const detailHref = isNeg
@@ -552,14 +560,14 @@ function TasksContent() {
                         {typeBadge}
                       </span>
                       {task.transferType && (
-                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-gray-700 text-[var(--text-secondary)] shrink-0">
+                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 shrink-0">
                           {task.transferType}
                         </span>
                       )}
                       {/* DPS: EDR availability indicator — shows when Data Plane
                         has been signalled and generated an Endpoint Data Reference */}
                       {task.edrAvailable && (
-                        <span className="flex items-center gap-0.5 text-[10px] px-1.5 py-0.5 rounded bg-green-900/40 text-green-400 shrink-0">
+                        <span className="flex items-center gap-0.5 text-[10px] px-1.5 py-0.5 rounded bg-[var(--badge-active-bg)] text-[var(--badge-active-text)] shrink-0">
                           <Key size={9} />
                           EDR
                         </span>
@@ -585,7 +593,7 @@ function TasksContent() {
                     if (!actions || actions.length === 0) return null;
                     return (
                       <div className="flex items-center gap-1.5">
-                        <span className="text-[10px] text-gray-600">
+                        <span className="text-[10px] text-[var(--text-secondary)]">
                           Actions:
                         </span>
                         {actions.map((action) => (
@@ -608,7 +616,7 @@ function TasksContent() {
                     </span>
                     {task.contractId && (
                       <span
-                        className="opacity-60"
+                        className="text-[var(--text-secondary)]"
                         title="Contract Agreement ID"
                       >
                         📄 {task.contractId.slice(0, 12)}…
@@ -622,7 +630,9 @@ function TasksContent() {
                         })}
                       </span>
                     )}
-                    <span className="opacity-60">{task.id.slice(0, 8)}…</span>
+                    <span className="text-[var(--text-secondary)]">
+                      {task.id.slice(0, 8)}…
+                    </span>
                   </div>
                 </Link>
               );

@@ -273,7 +273,10 @@ function OnboardingSteps({ tenant }: { tenant: Tenant }) {
                 className="text-[var(--role-hdab-text)] animate-pulse shrink-0"
               />
             ) : (
-              <Circle size={16} className="text-gray-600 shrink-0" />
+              <Circle
+                size={16}
+                className="text-gray-500 dark:text-gray-400 shrink-0"
+              />
             )}
             {i < steps.length - 1 && (
               <div
@@ -295,7 +298,7 @@ function OnboardingSteps({ tenant }: { tenant: Tenant }) {
             >
               {s.label}
             </p>
-            <p className="text-xs text-gray-600">{s.desc}</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">{s.desc}</p>
           </div>
         </div>
       ))}
@@ -351,7 +354,10 @@ function ParticipantCard({
         className="w-full text-left flex items-center gap-4 p-4"
         onClick={() => setExpanded(!expanded)}
       >
-        <Building2 size={20} className="text-layer2 shrink-0" />
+        <Building2
+          size={20}
+          className="text-teal-800 dark:text-teal-300 shrink-0"
+        />
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
             <p className="font-medium text-[var(--text-primary)]">{name}</p>
@@ -401,7 +407,7 @@ function ParticipantCard({
                 />
                 <a
                   href={`mailto:${contact.email}`}
-                  className="text-layer2 hover:underline"
+                  className="text-teal-800 dark:text-teal-300 hover:underline"
                 >
                   {contact.email}
                 </a>
@@ -415,7 +421,7 @@ function ParticipantCard({
                   href={contact.website}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-layer2 hover:underline"
+                  className="text-teal-800 dark:text-teal-300 hover:underline"
                 >
                   {contact.website.replace("https://", "")}
                 </a>
@@ -436,19 +442,19 @@ function ParticipantCard({
                 />
                 <a
                   href={`mailto:${contact.dpoEmail}`}
-                  className="text-layer2 hover:underline"
+                  className="text-teal-800 dark:text-teal-300 hover:underline"
                 >
                   {contact.dpoEmail}
                 </a>
               </div>
-              <p className="text-xs text-gray-600 italic">
+              <p className="text-xs text-gray-500 dark:text-gray-400 italic">
                 GDPR Art. 37 / EHDS Art. 34 appointed contact
               </p>
             </div>
           </div>
 
           {/* Tenant ID */}
-          <p className="text-xs text-gray-600">
+          <p className="text-xs text-gray-500 dark:text-gray-400">
             Tenant ID:{" "}
             <span className="font-mono text-[var(--text-secondary)]">
               {tenant.id}
@@ -480,7 +486,10 @@ function EhdsRequirements() {
         className="w-full flex items-center gap-3 px-5 py-4 text-left hover:bg-[var(--surface-2)]/40 transition-colors"
         onClick={() => setOpen(!open)}
       >
-        <FileText size={18} className="text-layer2 shrink-0" />
+        <FileText
+          size={18}
+          className="text-teal-800 dark:text-teal-300 shrink-0"
+        />
         <div className="flex-1">
           <p className="font-semibold text-sm">
             EHDS &amp; Contractual Requirements for Data Sharing
@@ -509,14 +518,16 @@ function EhdsRequirements() {
                     key={i}
                     className="flex items-start gap-2 text-xs text-[var(--text-primary)]"
                   >
-                    <span className="text-layer2 mt-0.5 shrink-0">•</span>
+                    <span className="text-teal-800 dark:text-teal-300 mt-0.5 shrink-0">
+                      •
+                    </span>
                     <span>{item}</span>
                   </li>
                 ))}
               </ul>
             </div>
           ))}
-          <p className="text-xs text-gray-600 italic pt-2 border-t border-[var(--border)]">
+          <p className="text-xs text-gray-500 dark:text-gray-400 italic pt-2 border-t border-[var(--border)]">
             Note: In this demo environment all participants are pre-seeded. In
             production, onboarding triggers automated DID provisioning,
             credential issuance, and policy activation via the CFM orchestration
@@ -620,7 +631,7 @@ function OnboardingContent() {
                 />
               ))}
             </div>
-            <p className="text-xs text-gray-600 mt-3">
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-3">
               Click a participant card to expand contact details and onboarding
               status.
             </p>
@@ -651,7 +662,10 @@ function OnboardingContent() {
         ) : (
           <div className="border border-[var(--border)] rounded-xl p-6">
             <div className="flex items-center gap-2 mb-6">
-              <UserPlus size={20} className="text-layer2" />
+              <UserPlus
+                size={20}
+                className="text-teal-800 dark:text-teal-300"
+              />
               <h2 className="font-semibold">New Participant Registration</h2>
             </div>
 
@@ -667,6 +681,7 @@ function OnboardingContent() {
                   Display Name
                 </label>
                 <input
+                  aria-label="Display Name"
                   type="text"
                   required
                   value={displayName}
@@ -681,6 +696,7 @@ function OnboardingContent() {
                   Organisation
                 </label>
                 <input
+                  aria-label="Organisation"
                   type="text"
                   required
                   value={organization}
@@ -726,7 +742,7 @@ function OnboardingContent() {
               <button
                 type="submit"
                 disabled={step === "submitting"}
-                className="flex items-center gap-2 px-5 py-2.5 bg-[var(--accent)] text-white rounded-lg text-sm font-medium hover:bg-[var(--accent-hover)] disabled:opacity-50"
+                className="flex items-center gap-2 px-5 py-2.5 bg-[var(--accent)] text-white dark:text-gray-900 rounded-lg text-sm font-medium hover:bg-[var(--accent-hover)] disabled:opacity-50"
               >
                 {step === "submitting" ? (
                   <>

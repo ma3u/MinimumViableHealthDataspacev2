@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import { runQuery } from "@/lib/neo4j";
+import { requireAuth, isAuthError } from "@/lib/auth-guard";
+import { Roles } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
@@ -10,6 +12,12 @@ export const dynamic = "force-dynamic";
  * Used by the compliance dashboard Trust Center section (Phase 18d).
  */
 export async function GET() {
+  const auth = await requireAuth([
+    Roles.TRUST_CENTER_OPERATOR,
+    Roles.EDC_ADMIN,
+  ]);
+  if (isAuthError(auth)) return auth;
+
   const trustCenters = await runQuery<{
     name: string;
     operatedBy: string;

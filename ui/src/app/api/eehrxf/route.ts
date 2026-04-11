@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { runQuery } from "@/lib/neo4j";
+import { requireAuth, isAuthError } from "@/lib/auth-guard";
 
 export const dynamic = "force-dynamic";
 
@@ -30,6 +31,9 @@ interface EEHRxFCategory {
 }
 
 export async function GET() {
+  const auth = await requireAuth();
+  if (isAuthError(auth)) return auth;
+
   const [categories, profiles, resourceCounts] = await Promise.all([
     runQuery<{
       categoryId: string;

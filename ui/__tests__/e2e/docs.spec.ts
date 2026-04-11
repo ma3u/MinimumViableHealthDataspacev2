@@ -36,7 +36,7 @@ test.describe("Documentation Content", () => {
 test.describe("Responsive Layout", () => {
   test("page has correct title tag", async ({ page }) => {
     await page.goto("/");
-    await expect(page).toHaveTitle(/Health Dataspace/i);
+    await expect(page).toHaveTitle(/Health Data Space/i);
   });
 
   test("mobile viewport still renders navigation", async ({ page }) => {

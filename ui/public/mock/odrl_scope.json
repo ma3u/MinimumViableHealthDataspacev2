@@ -1,0 +1,23 @@
+{
+  "participantId": "did:web:pharmaco.de:research",
+  "participantName": "PharmaCo Research AG",
+  "permissions": [
+    "scientific_research",
+    "statistics",
+    "policy_support",
+    "education",
+    "ai_training"
+  ],
+  "prohibitions": [
+    "re_identification",
+    "commercial_exploitation_without_approval"
+  ],
+  "accessibleDatasets": [
+    "dataset-synthea-fhir-r4-2026",
+    "dataset-synthea-omop-2026"
+  ],
+  "temporalLimit": "2027-12-31T23:59:59",
+  "policyIds": ["policy-ehds-art53-synthetic-2026"],
+  "hasActiveContract": true,
+  "hdabApproved": true
+}

@@ -20,20 +20,35 @@ export default function MermaidDiagram({
     async function render() {
       try {
         const mermaid = (await import("mermaid")).default;
+        const isDark = document.documentElement.classList.contains("dark");
         mermaid.initialize({
           startOnLoad: false,
-          theme: "dark",
-          themeVariables: {
-            darkMode: true,
-            background: "#1a1a2e",
-            primaryColor: "#6366f1",
-            primaryTextColor: "#e2e8f0",
-            primaryBorderColor: "#818cf8",
-            lineColor: "#94a3b8",
-            secondaryColor: "#1e293b",
-            tertiaryColor: "#0f172a",
-            fontFamily: "ui-sans-serif, system-ui, sans-serif",
-          },
+          theme: isDark ? "dark" : "default",
+          themeVariables: isDark
+            ? {
+                darkMode: true,
+                background: "#1a1a2e",
+                primaryColor: "#6366f1",
+                primaryTextColor: "#e2e8f0",
+                primaryBorderColor: "#818cf8",
+                lineColor: "#e2e8f0",
+                secondaryColor: "#1e293b",
+                tertiaryColor: "#0f172a",
+                edgeLabelBackground: "#1e293b",
+                fontFamily: "ui-sans-serif, system-ui, sans-serif",
+              }
+            : {
+                darkMode: false,
+                background: "#ffffff",
+                primaryColor: "#4f46e5",
+                primaryTextColor: "#1e293b",
+                primaryBorderColor: "#6366f1",
+                lineColor: "#334155",
+                secondaryColor: "#f1f5f9",
+                tertiaryColor: "#e2e8f0",
+                edgeLabelBackground: "#f8fafc",
+                fontFamily: "ui-sans-serif, system-ui, sans-serif",
+              },
         });
         const id = `mermaid-${Math.random().toString(36).slice(2, 9)}`;
         const { svg: rendered } = await mermaid.render(id, chart.trim());

@@ -90,7 +90,7 @@ describe("CatalogPage", () => {
       expect(screen.getByText("Dataset Catalog")).toBeInTheDocument();
     });
     expect(
-      screen.getByText(/Browse HealthDCAT-AP metadata/),
+      screen.getByText(/Explore curated FHIR R4 and OMOP datasets/),
     ).toBeInTheDocument();
   });
 
@@ -116,11 +116,12 @@ describe("CatalogPage", () => {
 
     expect(screen.getByText(/AlphaKlinik Berlin/)).toBeInTheDocument();
     expect(screen.getByText(/CC-BY-4.0/)).toBeInTheDocument();
-    expect(screen.getByText(/100 records/)).toBeInTheDocument();
+    // Record count is displayed as a plain number in the Samples column
+    expect(screen.getAllByText("100").length).toBeGreaterThan(0);
     expect(mockFetchApi).toHaveBeenCalledWith("/api/catalog");
   });
 
-  it('shows empty state ("No datasets found.") when API returns empty array', async () => {
+  it('shows empty state ("No datasets match the current filters.") when API returns empty array', async () => {
     // fetchApi returns empty → triggers fallback → fallback also empty
     mockFetchApi.mockReturnValue(mockResponse([]));
     globalThis.fetch = vi.fn().mockResolvedValue({
@@ -131,7 +132,9 @@ describe("CatalogPage", () => {
     render(<CatalogPage />);
 
     await waitFor(() => {
-      expect(screen.getByText("No datasets found.")).toBeInTheDocument();
+      expect(
+        screen.getByText("No datasets match the current filters."),
+      ).toBeInTheDocument();
     });
   });
 
@@ -146,9 +149,7 @@ describe("CatalogPage", () => {
       ).toBeInTheDocument();
     });
 
-    const search = screen.getByPlaceholderText(
-      "Filter by title, description or theme…",
-    );
+    const search = screen.getByPlaceholderText("Search datasets…");
     await user.type(search, "OMOP");
 
     expect(screen.getByText("OMOP CDM Condition Data")).toBeInTheDocument();
@@ -168,9 +169,7 @@ describe("CatalogPage", () => {
       ).toBeInTheDocument();
     });
 
-    const search = screen.getByPlaceholderText(
-      "Filter by title, description or theme…",
-    );
+    const search = screen.getByPlaceholderText("Search datasets…");
     await user.type(search, "Condition");
 
     expect(screen.getByText("OMOP CDM Condition Data")).toBeInTheDocument();
@@ -179,7 +178,7 @@ describe("CatalogPage", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("expands a dataset card to show HealthDCAT-AP detail panel", async () => {
+  it("opens HealthDCAT-AP detail modal via the details button", async () => {
     mockFetchApi.mockReturnValue(mockResponse([sampleDataset]));
     const user = userEvent.setup();
     render(<CatalogPage />);
@@ -190,47 +189,47 @@ describe("CatalogPage", () => {
       ).toBeInTheDocument();
     });
 
-    // Detail panel should not be visible yet
+    // Detail modal should not be visible yet
     expect(
       screen.queryByText("HealthDCAT-AP Metadata"),
     ).not.toBeInTheDocument();
 
-    // Click the card to expand
-    await user.click(screen.getByText("Synthetic FHIR Patient Cohort"));
+    // Click the Bookmark details button to open the modal
+    await user.click(
+      screen.getByRole("button", { name: "View dataset details" }),
+    );
 
     expect(screen.getByText("HealthDCAT-AP Metadata")).toBeInTheDocument();
     expect(screen.getByText("Download DCAT-AP")).toBeInTheDocument();
-    expect(screen.getByText("Show Data Model")).toBeInTheDocument();
+    expect(screen.getByText("Data Model Diagram")).toBeInTheDocument();
     expect(screen.getByText("View in Graph")).toBeInTheDocument();
   });
 
-  it("collapses an expanded card on second click", async () => {
+  it("closes the detail modal when the Close button is clicked", async () => {
     mockFetchApi.mockReturnValue(mockResponse([sampleDataset]));
     const user = userEvent.setup();
     render(<CatalogPage />);
 
     await waitFor(() => {
       expect(
-        screen.getByRole("heading", { name: "Synthetic FHIR Patient Cohort" }),
+        screen.getByText("Synthetic FHIR Patient Cohort"),
       ).toBeInTheDocument();
     });
 
-    // Expand
+    // Open modal via Bookmark details button
     await user.click(
-      screen.getByRole("heading", { name: "Synthetic FHIR Patient Cohort" }),
+      screen.getByRole("button", { name: "View dataset details" }),
     );
     expect(screen.getByText("HealthDCAT-AP Metadata")).toBeInTheDocument();
 
-    // Collapse — click the card button containing the heading
-    await user.click(
-      screen.getByRole("heading", { name: "Synthetic FHIR Patient Cohort" }),
-    );
+    // Close via the Close button in the modal header
+    await user.click(screen.getByRole("button", { name: "Close" }));
     expect(
       screen.queryByText("HealthDCAT-AP Metadata"),
     ).not.toBeInTheDocument();
   });
 
-  it("triggers JSON-LD download when Download DCAT-AP is clicked", async () => {
+  it("triggers JSON-LD download when Download DCAT-AP is clicked in the modal", async () => {
     mockFetchApi.mockReturnValue(mockResponse([sampleDataset]));
     const user = userEvent.setup();
 
@@ -238,13 +237,13 @@ describe("CatalogPage", () => {
 
     await waitFor(() => {
       expect(
-        screen.getByRole("heading", { name: "Synthetic FHIR Patient Cohort" }),
+        screen.getByText("Synthetic FHIR Patient Cohort"),
       ).toBeInTheDocument();
     });
 
-    // Expand the card first
+    // Open the detail modal first via the Bookmark details button
     await user.click(
-      screen.getByRole("heading", { name: "Synthetic FHIR Patient Cohort" }),
+      screen.getByRole("button", { name: "View dataset details" }),
     );
     await user.click(screen.getByText("Download DCAT-AP"));
 
@@ -252,23 +251,23 @@ describe("CatalogPage", () => {
     expect(globalThis.URL.revokeObjectURL).toHaveBeenCalled();
   });
 
-  it("opens the Mermaid ER diagram modal when Show Data Model is clicked", async () => {
+  it("opens the Mermaid ER diagram modal when Data Model Diagram is clicked", async () => {
     mockFetchApi.mockReturnValue(mockResponse([sampleDataset]));
     const user = userEvent.setup();
     render(<CatalogPage />);
 
     await waitFor(() => {
       expect(
-        screen.getByRole("heading", { name: "Synthetic FHIR Patient Cohort" }),
+        screen.getByText("Synthetic FHIR Patient Cohort"),
       ).toBeInTheDocument();
     });
 
-    // Expand the card
+    // Open the detail modal first via the Bookmark details button
     await user.click(
-      screen.getByRole("heading", { name: "Synthetic FHIR Patient Cohort" }),
+      screen.getByRole("button", { name: "View dataset details" }),
     );
-    // Open the diagram modal
-    await user.click(screen.getByText("Show Data Model"));
+    // Click Data Model Diagram to switch to the diagram modal
+    await user.click(screen.getByText("Data Model Diagram"));
 
     await waitFor(() => {
       expect(screen.getByTestId("mermaid-diagram")).toBeInTheDocument();
@@ -310,7 +309,8 @@ describe("CatalogPage", () => {
 
     expect(screen.getByText("OMOP CDM Condition Data")).toBeInTheDocument();
     expect(screen.getByText(/AlphaKlinik Berlin/)).toBeInTheDocument();
-    expect(screen.getByText(/Limburg Medical Centre/)).toBeInTheDocument();
+    // shortPublisher() truncates to first 2 words
+    expect(screen.getByText(/Limburg Medical/)).toBeInTheDocument();
   });
 
   it("handles API returning datasets wrapped in an object", async () => {
@@ -333,36 +333,7 @@ describe("CatalogPage", () => {
     });
   });
 
-  it("shows FHIR R4 Spec link for FHIR-conformant datasets when expanded", async () => {
-    mockFetchApi.mockReturnValue(mockResponse([sampleDataset]));
-    const user = userEvent.setup();
-    render(<CatalogPage />);
-
-    await waitFor(() => {
-      expect(
-        screen.getByRole("heading", { name: "Synthetic FHIR Patient Cohort" }),
-      ).toBeInTheDocument();
-    });
-
-    await user.click(
-      screen.getByRole("heading", { name: "Synthetic FHIR Patient Cohort" }),
-    );
-
-    expect(screen.getByText("FHIR R4 Spec")).toBeInTheDocument();
-  });
-
-  it("shows search input with correct placeholder", async () => {
-    mockFetchApi.mockReturnValue(mockResponse([sampleDataset]));
-    render(<CatalogPage />);
-
-    await waitFor(() => {
-      expect(
-        screen.getByPlaceholderText("Filter by title, description or theme…"),
-      ).toBeInTheDocument();
-    });
-  });
-
-  it('shows "No datasets found." when filter matches nothing', async () => {
+  it("shows HealthDCAT-AP Spec link in the detail modal", async () => {
     mockFetchApi.mockReturnValue(mockResponse([sampleDataset]));
     const user = userEvent.setup();
     render(<CatalogPage />);
@@ -373,11 +344,41 @@ describe("CatalogPage", () => {
       ).toBeInTheDocument();
     });
 
-    const search = screen.getByPlaceholderText(
-      "Filter by title, description or theme…",
+    // Open the detail modal via the Bookmark details button
+    await user.click(
+      screen.getByRole("button", { name: "View dataset details" }),
     );
+
+    expect(screen.getByText("HealthDCAT-AP Spec")).toBeInTheDocument();
+  });
+
+  it("shows search input with correct placeholder", async () => {
+    mockFetchApi.mockReturnValue(mockResponse([sampleDataset]));
+    render(<CatalogPage />);
+
+    await waitFor(() => {
+      expect(
+        screen.getByPlaceholderText("Search datasets…"),
+      ).toBeInTheDocument();
+    });
+  });
+
+  it('shows "No datasets match the current filters." when filter matches nothing', async () => {
+    mockFetchApi.mockReturnValue(mockResponse([sampleDataset]));
+    const user = userEvent.setup();
+    render(<CatalogPage />);
+
+    await waitFor(() => {
+      expect(
+        screen.getByText("Synthetic FHIR Patient Cohort"),
+      ).toBeInTheDocument();
+    });
+
+    const search = screen.getByPlaceholderText("Search datasets…");
     await user.type(search, "zzz_no_match_zzz");
 
-    expect(screen.getByText("No datasets found.")).toBeInTheDocument();
+    expect(
+      screen.getByText("No datasets match the current filters."),
+    ).toBeInTheDocument();
   });
 });

@@ -175,6 +175,7 @@ describe("GET /api/compliance — list mode", () => {
         { id: "c1", name: "Consumer", type: "DATA_USER" },
       ])
       .mockResolvedValueOnce([]) // no approval-linked datasets
+      .mockResolvedValueOnce([]) // matrixRows (Promise.all slot 3)
       .mockResolvedValueOnce([
         { id: "ds-graph", title: "Graph Dataset" },
         { id: "ds-graph-2", title: "Another Dataset" },
@@ -206,14 +207,15 @@ describe("GET /api/compliance — list mode", () => {
       .mockResolvedValueOnce([
         { id: "c1", name: "Consumer", type: "DATA_USER" },
       ])
-      .mockResolvedValueOnce([{ id: "ds-1", title: "Approved Dataset" }]);
+      .mockResolvedValueOnce([{ id: "ds-1", title: "Approved Dataset" }])
+      .mockResolvedValueOnce([]); // matrixRows (Promise.all slot 3)
 
     const res = await GET(new Request("http://localhost:3000/api/compliance"));
     const data = await res.json();
 
     expect(data.datasets).toHaveLength(1);
-    // runQuery should have been called exactly 2 times (consumers + datasets)
-    expect(mockRunQuery).toHaveBeenCalledTimes(2);
+    // runQuery should have been called exactly 3 times (consumers + datasets + matrixRows via Promise.all)
+    expect(mockRunQuery).toHaveBeenCalledTimes(3);
   });
 
   // ── DID slug parsing & display mapping ────────────────────────────
@@ -284,6 +286,7 @@ describe("GET /api/compliance — list mode", () => {
     mockRunQuery
       .mockResolvedValueOnce([]) // no consumers
       .mockResolvedValueOnce([]) // no approval-linked datasets
+      .mockResolvedValueOnce([]) // matrixRows (Promise.all slot 3)
       .mockResolvedValueOnce([{ id: "ds-fallback", title: "Fallback DS" }]); // HealthDataset fallback
 
     mockManagement.mockResolvedValue([

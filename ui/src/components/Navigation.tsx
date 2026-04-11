@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useSession } from "next-auth/react";
 import {
   Network,
   BookOpen,
@@ -36,6 +35,7 @@ import ThemeToggle from "./ThemeToggle";
 import { useState, useRef, useEffect } from "react";
 import { deriveParticipantType, derivePersonaId } from "@/lib/auth";
 import { useDemoPersona } from "@/lib/use-demo-persona";
+import { useTabSession } from "@/lib/use-tab-session";
 import type { LucideProps } from "lucide-react";
 
 const IS_STATIC = process.env.NEXT_PUBLIC_STATIC_EXPORT === "true";
@@ -479,25 +479,26 @@ function NavDropdown({
 // ── Navigation ────────────────────────────────────────────────────────────────
 
 export default function Navigation() {
-  const { data: session, status } = useSession();
+  // Tab-scoped session: immune to cross-tab cookie changes in live mode.
+  const { session: tabSession, status: tabStatus } = useTabSession();
   // Always call useDemoPersona — hook rules require unconditional calls.
   // In live mode the return value is ignored.
   const demoPersona = useDemoPersona();
   const [mobileOpen, setMobileOpen] = useState(false);
 
   // In static demo mode, derive everything from the stored persona.
-  // In live mode, use the NextAuth session as before.
+  // In live mode, use the tab-scoped session snapshot.
   const isAuthenticated = IS_STATIC
     ? true
-    : status === "authenticated" && !!session;
+    : tabStatus === "authenticated" && !!tabSession;
 
   const baseRoles: string[] = IS_STATIC
     ? [...demoPersona.roles]
-    : (session as { roles?: string[] })?.roles ?? [];
+    : tabSession?.roles ?? [];
 
   const username = IS_STATIC
     ? demoPersona.username
-    : session?.user?.name ?? session?.user?.email ?? "";
+    : tabSession?.username ?? "";
 
   const participantType = deriveParticipantType(baseRoles, username);
   const _personaId = derivePersonaId(baseRoles, username);

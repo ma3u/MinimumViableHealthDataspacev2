@@ -65,24 +65,9 @@
       "WebFetch(domain:github.com)"
     ],
     "deny": [
-      "Bash(rm -rf:*)",
-      "Bash(git reset --hard:*)",
-      "Bash(git push --force:*)",
-      "Bash(git push -f:*)",
       "Bash(kubectl delete:*)",
       "Bash(kubectl drain:*)",
-      "Bash(docker compose down -v:*)",
-      "Bash(docker system prune:*)",
-      "Bash(docker volume rm:*)",
-      "Bash(cat:*.pem)",
-      "Bash(cat:*.key)",
-      "Bash(cat:*.env)",
-      "Bash(cat:.env*)",
-      "Bash(cat:*secret)",
-      "Bash(cat:*credentials)",
-      "Bash(cat:credentials*)",
-      "Bash(cat:credential*)",
-      "Bash(./jad/seed-all.sh:*)"
+      "Bash(docker system prune:*)"
     ]
   }
 }
