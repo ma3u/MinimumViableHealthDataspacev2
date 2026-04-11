@@ -152,6 +152,14 @@ export default function DeveloperGuidePage() {
           </li>
           <li>
             <a
+              href="#quality-gates"
+              className="hover:text-indigo-900 dark:hover:text-indigo-300"
+            >
+              Quality Gates
+            </a>
+          </li>
+          <li>
+            <a
               href="#user-journey"
               className="hover:text-indigo-900 dark:hover:text-indigo-300"
             >
@@ -563,6 +571,57 @@ npm run test:e2e:ui    # Interactive UI`}</pre>
             View Full User Journey →
           </a>
         </div>
+      </section>
+
+      {/* Quality Gates */}
+      <section className="mb-10">
+        <h2 className="text-2xl font-semibold mb-3" id="quality-gates">
+          Quality Gates
+        </h2>
+        <p className="text-[var(--text-secondary)] text-sm mb-4">
+          Four-stage quality pipeline from pre-commit to protocol compliance,
+          aligned with BSI C5, OWASP Top 10, EHDS, and WCAG 2.2 AA.
+        </p>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+          <div className="border border-[var(--border)] rounded-lg p-3 text-center">
+            <div className="text-xl font-bold text-[var(--text-primary)]">
+              13
+            </div>
+            <div className="text-[10px] text-[var(--text-secondary)]">
+              Pre-commit hooks
+            </div>
+          </div>
+          <div className="border border-[var(--border)] rounded-lg p-3 text-center">
+            <div className="text-xl font-bold text-[var(--text-primary)]">
+              2
+            </div>
+            <div className="text-[10px] text-[var(--text-secondary)]">
+              Pre-push gates
+            </div>
+          </div>
+          <div className="border border-[var(--border)] rounded-lg p-3 text-center">
+            <div className="text-xl font-bold text-[var(--text-primary)]">
+              10
+            </div>
+            <div className="text-[10px] text-[var(--text-secondary)]">
+              CI jobs
+            </div>
+          </div>
+          <div className="border border-[var(--border)] rounded-lg p-3 text-center">
+            <div className="text-xl font-bold text-[var(--text-primary)]">
+              3
+            </div>
+            <div className="text-[10px] text-[var(--text-secondary)]">
+              Compliance suites
+            </div>
+          </div>
+        </div>
+        <Link
+          href="/docs/developer/quality-gates"
+          className="inline-flex items-center gap-1 text-sm text-indigo-700 dark:text-indigo-400 hover:text-indigo-900 dark:hover:text-indigo-300"
+        >
+          View full Quality Gates documentation &rarr;
+        </Link>
       </section>
 
       {/* CI/CD */}
