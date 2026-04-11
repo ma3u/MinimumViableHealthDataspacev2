@@ -98,8 +98,8 @@ describe("SignInPage — error messages", () => {
     mockSearchParams.mockReturnValue(new URLSearchParams("error=Callback"));
     render(<SignInPage />);
     const errorBanner = screen.getByText(/OAuth callback error/).closest("div");
-    expect(errorBanner).toHaveClass("bg-red-900/50");
-    expect(errorBanner).toHaveClass("border-red-700");
+    expect(errorBanner).toHaveClass("bg-red-100");
+    expect(errorBanner).toHaveClass("border-red-300");
   });
 
   it("preserves callbackUrl from search params", async () => {
