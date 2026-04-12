@@ -299,10 +299,12 @@ function GraphContent() {
   // Always call useDemoPersona — hook rules require unconditional calls
   const demoPersona = useDemoPersona();
   const sessionRoles: string[] = IS_STATIC
-    ? [...demoPersona.roles]
+    ? demoPersona
+      ? [...demoPersona.roles]
+      : []
     : (session as { roles?: string[] } | null)?.roles ?? [];
   const sessionUsername: string = IS_STATIC
-    ? demoPersona.username
+    ? demoPersona?.username ?? ""
     : session?.user?.name ?? session?.user?.email ?? "";
   const sessionPersonaId = derivePersonaId(sessionRoles, sessionUsername);
 

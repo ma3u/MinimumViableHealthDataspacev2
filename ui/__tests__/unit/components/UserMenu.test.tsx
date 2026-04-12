@@ -405,8 +405,8 @@ describe("UserMenu", () => {
 
       // In static mode, signOut (NextAuth) should NOT be called
       expect(mockSignOut).not.toHaveBeenCalled();
-      // sessionStorage persona should be cleared
-      expect(sessionStorage.getItem("demo-persona")).toBeNull();
+      // sessionStorage persona should be set to signed-out sentinel
+      expect(sessionStorage.getItem("demo-persona")).toBe("__signed_out__");
     });
   });
 
