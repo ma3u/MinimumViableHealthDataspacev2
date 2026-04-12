@@ -5,8 +5,8 @@ import { themeChangeTarget } from "@/components/ThemeToggle";
 import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { derivePersonaId } from "@/lib/auth";
-import { useDemoPersona } from "@/lib/use-demo-persona";
+import { derivePersonaId, DEMO_PERSONAS } from "@/lib/auth";
+import { useDemoPersona, setDemoPersona } from "@/lib/use-demo-persona";
 
 const IS_STATIC = process.env.NEXT_PUBLIC_STATIC_EXPORT === "true";
 import dynamic from "next/dynamic";
@@ -305,6 +305,16 @@ function GraphContent() {
     ? demoPersona.username
     : session?.user?.name ?? session?.user?.email ?? "";
   const sessionPersonaId = derivePersonaId(sessionRoles, sessionUsername);
+
+  // Sync URL ?persona= to sessionStorage so Navigation/UserMenu reflect the
+  // correct persona. Without this, the graph fetches the right data but the
+  // nav still shows the old persona (e.g. "Patient / Citizen" instead of
+  // "EDC / Dataspace Admin").
+  useEffect(() => {
+    if (!IS_STATIC || !urlPersona) return;
+    const match = DEMO_PERSONAS.find((p) => p.personaId === urlPersona);
+    if (match) setDemoPersona(match.username);
+  }, [urlPersona]);
 
   const [data, setData] = useState<GraphData>({ nodes: [], links: [] });
   const [loading, setLoading] = useState(true);
