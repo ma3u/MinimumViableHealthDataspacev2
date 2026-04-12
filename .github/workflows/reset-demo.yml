@@ -1,0 +1,235 @@
+name: Nightly Demo Reset
+
+on:
+  schedule:
+    # Run at 02:00 UTC daily (04:00 CET)
+    - cron: "0 2 * * *"
+  workflow_dispatch:
+    inputs:
+      skip_tests:
+        description: "Skip post-reset smoke tests"
+        type: boolean
+        default: false
+
+permissions:
+  id-token: write
+  contents: read
+
+concurrency:
+  group: "azure-reset"
+  cancel-in-progress: false
+
+env:
+  ACR_NAME: acrmvhddev
+  ACR_LOGIN_SERVER: acrmvhddev.azurecr.io
+  RESOURCE_GROUP: rg-mvhd-dev
+  ACA_ENV: mvhd-env
+
+jobs:
+  reset-environment:
+    name: Reset Demo Environment
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Azure Login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      # ── Step 1: Restart stateful services to clear runtime state ──
+      - name: Restart stateful services
+        run: |
+          echo "=== Restarting stateful services ==="
+          for app in mvhd-neo4j mvhd-postgres mvhd-vault mvhd-keycloak; do
+            echo "Restarting $app..."
+            az containerapp revision restart \
+              --name "$app" \
+              --resource-group ${{ env.RESOURCE_GROUP }} \
+              --revision "$(az containerapp revision list --name "$app" \
+                --resource-group ${{ env.RESOURCE_GROUP }} \
+                --query "[0].name" -o tsv)" 2>/dev/null || \
+            az containerapp update --name "$app" \
+              --resource-group ${{ env.RESOURCE_GROUP }} \
+              --set-env-vars "RESET_TRIGGER=$(date +%s)=secretref:reset-trigger" 2>/dev/null || true
+          done
+
+      - name: Wait for services to be ready
+        run: |
+          echo "Waiting 60s for services to initialize..."
+          sleep 60
+          # Verify Neo4j is responding
+          NEO4J_FQDN=$(az containerapp show --name mvhd-neo4j \
+            --resource-group ${{ env.RESOURCE_GROUP }} \
+            --query "properties.configuration.ingress.fqdn" -o tsv 2>/dev/null || echo "")
+          if [ -n "$NEO4J_FQDN" ]; then
+            for i in $(seq 1 20); do
+              code=$(curl -sf -o /dev/null -w "%{http_code}" "https://${NEO4J_FQDN}" 2>/dev/null || echo "000")
+              if [ "$code" != "000" ]; then
+                echo "Neo4j responding (HTTP $code)"
+                break
+              fi
+              echo "  attempt $i: waiting..."
+              sleep 10
+            done
+          fi
+
+      # ── Step 2: Run bootstrap job (Vault init + keys) ──
+      - name: Run bootstrap job
+        run: |
+          echo "=== Running bootstrap job ==="
+          az containerapp job start \
+            --name mvhd-bootstrap-job \
+            --resource-group ${{ env.RESOURCE_GROUP }} 2>/dev/null || \
+          echo "Bootstrap job not found or already running — skipping"
+
+      - name: Wait for bootstrap
+        run: sleep 30
+
+      # ── Step 3: Run schema init job (Neo4j constraints + indexes) ──
+      - name: Run schema init job
+        run: |
+          echo "=== Running schema init job ==="
+          az containerapp job start \
+            --name mvhd-schema-job \
+            --resource-group ${{ env.RESOURCE_GROUP }} 2>/dev/null || \
+          echo "Schema job not found — skipping"
+
+      - name: Wait for schema
+        run: sleep 20
+
+      # ── Step 4: Run seed job (synthetic data + EHDS credentials) ──
+      - name: Run seed job
+        run: |
+          echo "=== Running seed job ==="
+          az containerapp job start \
+            --name mvhd-seed-job \
+            --resource-group ${{ env.RESOURCE_GROUP }} 2>/dev/null || \
+          echo "Seed job not found — skipping"
+
+      - name: Wait for seed completion
+        run: |
+          echo "Waiting for seed job to complete (up to 5 minutes)..."
+          for i in $(seq 1 30); do
+            status=$(az containerapp job execution list \
+              --name mvhd-seed-job \
+              --resource-group ${{ env.RESOURCE_GROUP }} \
+              --query "[0].properties.status" -o tsv 2>/dev/null || echo "unknown")
+            if [ "$status" = "Succeeded" ]; then
+              echo "Seed job completed successfully"
+              break
+            elif [ "$status" = "Failed" ]; then
+              echo "::warning::Seed job failed"
+              break
+            fi
+            echo "  attempt $i: status=$status"
+            sleep 10
+          done
+
+      # ── Step 5: Restart application services to pick up fresh data ──
+      - name: Restart application services
+        run: |
+          echo "=== Restarting application services ==="
+          for app in mvhd-ui mvhd-neo4j-proxy mvhd-controlplane mvhd-identityhub mvhd-issuerservice; do
+            echo "Restarting $app..."
+            az containerapp update --name "$app" \
+              --resource-group ${{ env.RESOURCE_GROUP }} \
+              --set-env-vars "RESET_TS=$(date -u +%Y-%m-%dT%H:%M:%SZ)" 2>/dev/null || true
+          done
+
+      - name: Wait for services
+        run: sleep 30
+
+      # ── Step 6: Verify UI is healthy ──
+      - name: Verify UI responds
+        id: verify
+        run: |
+          UI_FQDN=$(az containerapp show --name mvhd-ui \
+            --resource-group ${{ env.RESOURCE_GROUP }} \
+            --query "properties.configuration.ingress.fqdn" -o tsv)
+          echo "ui_url=https://${UI_FQDN}" >> "$GITHUB_OUTPUT"
+          echo "Checking https://${UI_FQDN}..."
+          for i in $(seq 1 15); do
+            code=$(curl -sf -o /dev/null -w "%{http_code}" "https://${UI_FQDN}" 2>/dev/null || echo "000")
+            if [ "$code" = "200" ]; then
+              echo "UI is healthy (HTTP 200)"
+              exit 0
+            fi
+            echo "  attempt $i: HTTP $code"
+            sleep 5
+          done
+          echo "::warning::UI did not return 200 after reset"
+
+      - name: Reset summary
+        if: always()
+        run: |
+          echo "## Nightly Demo Reset" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Time:** $(date -u +%Y-%m-%dT%H:%M:%SZ)" >> $GITHUB_STEP_SUMMARY
+          echo "**Target:** ${{ steps.verify.outputs.ui_url }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "All user data cleared. Environment restored to baseline seed state." >> $GITHUB_STEP_SUMMARY
+
+  # ── Smoke tests after reset ──
+  smoke-test:
+    name: Post-Reset Smoke Tests
+    needs: reset-environment
+    if: ${{ !inputs.skip_tests }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: ./ui
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: ./ui/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright
+        run: npx playwright install --with-deps chromium
+
+      - name: Azure Login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Get Azure UI URL
+        id: azure-url
+        run: |
+          UI_FQDN=$(az containerapp show --name mvhd-ui --resource-group rg-mvhd-dev \
+            --query "properties.configuration.ingress.fqdn" -o tsv)
+          KC_FQDN=$(az containerapp show --name mvhd-keycloak --resource-group rg-mvhd-dev \
+            --query "properties.configuration.ingress.fqdn" -o tsv)
+          echo "url=https://${UI_FQDN}" >> "$GITHUB_OUTPUT"
+          echo "keycloak_url=https://${KC_FQDN}" >> "$GITHUB_OUTPUT"
+
+      - name: Run smoke tests
+        run: |
+          npx playwright test \
+            __tests__/e2e/journeys/01-graph-explorer.spec.ts \
+            __tests__/e2e/journeys/03-catalog-dcat-ap.spec.ts \
+            --project=chromium --reporter=line
+        env:
+          CI: true
+          PLAYWRIGHT_BASE_URL: ${{ steps.azure-url.outputs.url }}
+          KEYCLOAK_PUBLIC_URL: ${{ steps.azure-url.outputs.keycloak_url }}
+
+      - name: Smoke test result
+        if: always()
+        run: |
+          echo "## Post-Reset Smoke Tests" >> $GITHUB_STEP_SUMMARY
+          echo "Target: ${{ steps.azure-url.outputs.url }}" >> $GITHUB_STEP_SUMMARY
