@@ -488,16 +488,19 @@ export default function Navigation() {
 
   // In static demo mode, derive everything from the stored persona.
   // In live mode, use the tab-scoped session snapshot.
+  // demoPersona is null when the user has signed out in static mode.
   const isAuthenticated = IS_STATIC
-    ? true
+    ? !!demoPersona
     : tabStatus === "authenticated" && !!tabSession;
 
   const baseRoles: string[] = IS_STATIC
-    ? [...demoPersona.roles]
+    ? demoPersona
+      ? [...demoPersona.roles]
+      : []
     : tabSession?.roles ?? [];
 
   const username = IS_STATIC
-    ? demoPersona.username
+    ? demoPersona?.username ?? ""
     : tabSession?.username ?? "";
 
   const participantType = deriveParticipantType(baseRoles, username);

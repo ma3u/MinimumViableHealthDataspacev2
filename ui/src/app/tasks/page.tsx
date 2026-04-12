@@ -260,10 +260,12 @@ function TasksContent() {
   const { session: tabSession } = useTabSession();
 
   const currentRoles: string[] = IS_STATIC
-    ? [...demoPersona.roles]
+    ? demoPersona
+      ? [...demoPersona.roles]
+      : []
     : tabSession?.roles ?? [];
   const currentUsername: string = IS_STATIC
-    ? demoPersona.username
+    ? demoPersona?.username ?? ""
     : tabSession?.username ?? "";
 
   // Resolve the user's organisation name (matches task.participant)

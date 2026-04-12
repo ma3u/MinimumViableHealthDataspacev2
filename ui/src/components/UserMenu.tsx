@@ -4,7 +4,11 @@ import { signIn, signOut } from "next-auth/react";
 import { LogIn, LogOut, Settings, Shield, User, Users } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { ROLE_LABELS, DEMO_PERSONAS, deriveParticipantType } from "@/lib/auth";
-import { useDemoPersona, setDemoPersona } from "@/lib/use-demo-persona";
+import {
+  useDemoPersona,
+  setDemoPersona,
+  clearDemoPersona,
+} from "@/lib/use-demo-persona";
 import { useTabSession, markSessionSwitch } from "@/lib/use-tab-session";
 
 /** Badge colours per role code — uses semantic CSS tokens, adapts to light/dark. */
@@ -108,16 +112,17 @@ export default function UserMenu() {
   const { session: tabSession, status: tabStatus } = useTabSession();
   // Always call useDemoPersona — hook rules require unconditional calls.
   const demoPersona = useDemoPersona();
-  const demoSession = IS_STATIC
-    ? {
-        user: {
-          name: demoPersona.username,
-          email: `${demoPersona.username}@demo.ehds.eu`,
-        },
-        roles: [...demoPersona.roles],
-      }
-    : null;
-  // In static mode: use demo persona. In live mode: use tab-scoped snapshot.
+  const demoSession =
+    IS_STATIC && demoPersona
+      ? {
+          user: {
+            name: demoPersona.username,
+            email: `${demoPersona.username}@demo.ehds.eu`,
+          },
+          roles: [...demoPersona.roles],
+        }
+      : null;
+  // In static mode: use demo persona (null = signed out). In live mode: use tab-scoped snapshot.
   const session = IS_STATIC
     ? demoSession
     : tabSession
@@ -126,7 +131,11 @@ export default function UserMenu() {
           roles: tabSession.roles,
         }
       : null;
-  const status = IS_STATIC ? "authenticated" : tabStatus;
+  const status = IS_STATIC
+    ? demoPersona
+      ? "authenticated"
+      : "unauthenticated"
+    : tabStatus;
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -150,9 +159,69 @@ export default function UserMenu() {
   }
 
   if (!session) {
+    if (IS_STATIC) {
+      // Static demo: show persona picker dropdown
+      return (
+        <div ref={ref} className="relative">
+          <button
+            onClick={() => setOpen(!open)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-2)] transition-colors"
+          >
+            <LogIn size={15} />
+            Sign in
+          </button>
+          {open && (
+            <div className="absolute right-0 top-full mt-1 w-64 bg-[var(--surface-2)] border border-[var(--border)] rounded-lg shadow-xl z-50">
+              <div className="px-3 pt-2 pb-1 flex items-center gap-1.5">
+                <Users size={11} className="text-[var(--text-secondary)]" />
+                <span className="text-[10px] text-[var(--text-secondary)] uppercase tracking-wide font-semibold">
+                  Choose a demo persona
+                </span>
+              </div>
+              <div className="px-2 pb-2 space-y-0.5">
+                {DEMO_PERSONAS.map((persona) => {
+                  const pRole = [...persona.roles].find((r) =>
+                    [
+                      "EDC_ADMIN",
+                      "HDAB_AUTHORITY",
+                      "DATA_HOLDER",
+                      "DATA_USER",
+                      "PATIENT",
+                    ].includes(r),
+                  );
+                  return (
+                    <button
+                      key={persona.username}
+                      onClick={() => {
+                        setDemoPersona(persona.username);
+                        setOpen(false);
+                      }}
+                      className="flex items-center gap-2 w-full px-2 py-1.5 rounded text-left hover:bg-[var(--surface-2)] cursor-pointer transition-colors"
+                    >
+                      <span
+                        className={`inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded font-medium shrink-0 ${
+                          ROLE_BADGE[pRole ?? ""] ??
+                          "bg-gray-600 text-[var(--text-primary)]"
+                        }`}
+                      >
+                        <Shield size={8} />
+                        {ROLE_LABELS[pRole ?? ""] ?? pRole}
+                      </span>
+                      <span className="font-mono text-xs truncate text-[var(--text-primary)]">
+                        {persona.username}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    }
     return (
       <button
-        onClick={() => !IS_STATIC && signIn("keycloak")}
+        onClick={() => signIn("keycloak")}
         className="flex items-center gap-1.5 px-3 py-1.5 rounded text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-2)] transition-colors"
       >
         <LogIn size={15} />
@@ -323,8 +392,7 @@ export default function UserMenu() {
                 // Clear the tab session snapshot so re-login gets a fresh one
                 markSessionSwitch();
                 if (IS_STATIC) {
-                  sessionStorage.removeItem("demo-persona");
-                  window.location.href = "/";
+                  clearDemoPersona();
                   return;
                 }
                 const keycloakPublicUrl =

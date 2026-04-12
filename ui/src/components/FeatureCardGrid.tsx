@@ -231,7 +231,7 @@ export function FeatureCardGrid({
   // Determine active roles
   let roles: readonly string[] = [];
   if (IS_STATIC) {
-    roles = demoPersona.roles;
+    roles = demoPersona?.roles ?? [];
   } else if (session) {
     roles = (session as { roles?: string[] }).roles ?? [];
   }

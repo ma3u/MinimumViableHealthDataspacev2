@@ -20,6 +20,8 @@ import { useState, useEffect } from "react";
 import { DEMO_PERSONAS } from "@/lib/auth";
 
 export const DEMO_PERSONA_KEY = "demo-persona";
+/** Sentinel value indicating user explicitly signed out. */
+export const SIGNED_OUT = "__signed_out__";
 
 // Module-level EventTarget so setDemoPersona() triggers re-renders on the
 // same tab (window "storage" event only fires in *other* tabs).
@@ -33,31 +35,50 @@ export function setDemoPersona(username: string): void {
   emitter?.dispatchEvent(new Event("change"));
 }
 
+/** Mark the user as signed out in static demo mode. */
+export function clearDemoPersona(): void {
+  if (typeof sessionStorage === "undefined") return;
+  sessionStorage.setItem(DEMO_PERSONA_KEY, SIGNED_OUT);
+  emitter?.dispatchEvent(new Event("change"));
+}
+
 /** Read the active demo persona username from sessionStorage (sync, no hooks). */
 export function getDemoPersonaUsername(): string {
   if (typeof sessionStorage === "undefined") return "edcadmin";
-  return sessionStorage.getItem(DEMO_PERSONA_KEY) ?? "edcadmin";
+  const stored = sessionStorage.getItem(DEMO_PERSONA_KEY);
+  if (!stored || stored === SIGNED_OUT) return "edcadmin";
+  return stored;
+}
+
+/** Check if user is signed out (static mode only). */
+export function isDemoSignedOut(): boolean {
+  if (typeof sessionStorage === "undefined") return false;
+  return sessionStorage.getItem(DEMO_PERSONA_KEY) === SIGNED_OUT;
 }
 
 export type DemoPersona = (typeof DEMO_PERSONAS)[number];
 
 /**
- * React hook — returns the active demo persona object.
+ * React hook — returns the active demo persona object, or null if signed out.
  * Initialises with the edcadmin fallback (matches legacy DEMO_SESSION),
- * then updates synchronously once the component mounts and localStorage
+ * then updates synchronously once the component mounts and sessionStorage
  * can be read.
  *
  * Must be called unconditionally (React Rules of Hooks).
  * In live (non-static) mode its return value should simply be ignored.
  */
-export function useDemoPersona(): DemoPersona {
-  const [persona, setPersona] = useState<DemoPersona>(
+export function useDemoPersona(): DemoPersona | null {
+  const [persona, setPersona] = useState<DemoPersona | null>(
     () => DEMO_PERSONAS.find((p) => p.username === "edcadmin")!,
   );
 
   useEffect(() => {
     function read() {
       const stored = sessionStorage.getItem(DEMO_PERSONA_KEY);
+      if (stored === SIGNED_OUT) {
+        setPersona(null);
+        return;
+      }
       const found = DEMO_PERSONAS.find((p) => p.username === stored);
       if (found) setPersona(found);
     }
