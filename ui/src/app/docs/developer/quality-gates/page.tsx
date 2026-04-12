@@ -212,6 +212,20 @@ const ciGates = [
     blocking: false,
     standard: "OWASP Top 10",
   },
+  {
+    job: "SBOM Generation",
+    tests: "2",
+    tool: "CycloneDX npm",
+    blocking: false,
+    standard: "EU CRA Art. 13",
+  },
+  {
+    job: "Licence Compliance",
+    tests: "—",
+    tool: "license-checker",
+    blocking: true,
+    standard: "BSI C5 OPS-04",
+  },
 ];
 
 const coverageData = [
@@ -283,11 +297,11 @@ const futureGates: FutureGate[] = [
     title: "Licence Compliance Scanning",
     icon: Scale,
     description:
-      "Add license-checker or FOSSA to CI. Allowlist: MIT, Apache-2.0, ISC, BSD-2/3-Clause, 0BSD.",
+      "license-checker in CI with allowlist: MIT, Apache-2.0, ISC, BSD-2/3-Clause, 0BSD, CC0-1.0, CC-BY-4.0.",
     standard: "EU Open Source Strategy, BSI C5 OPS-04",
     rationale:
-      "EHDS implementations must comply with EU procurement and open-source licence requirements.",
-    effort: "Low — npm package + CI step",
+      "EHDS implementations must comply with EU procurement and open-source licence requirements. Important for SIMPL-Open programme compatibility.",
+    effort: "Done — implemented in test.yml",
   },
   {
     priority: 4,
@@ -305,11 +319,11 @@ const futureGates: FutureGate[] = [
     title: "SBOM Generation",
     icon: Boxes,
     description:
-      "Generate CycloneDX or SPDX Software Bill of Materials on every release.",
+      "CycloneDX 1.5 SBOM generated on every CI run for UI and Neo4j Proxy. Uploaded as 90-day artifact.",
     standard: "EU CRA Art. 13, NTIA SBOM",
     rationale:
-      "EHDS Art. 50 requires transparency about software components. EU Cyber Resilience Act mandates SBOMs by 2027.",
-    effort: "Low — npm package + CI step",
+      "EHDS Art. 50 requires transparency about software components. EU Cyber Resilience Act mandates SBOMs by 2027. Critical for supply chain security and SIMPL-Open.",
+    effort: "Done — implemented in test.yml",
   },
   {
     priority: 6,
@@ -787,8 +801,15 @@ export default function QualityGatesPage() {
                 ["DSP 2025-1 TCK", "—", "—", "Art. 50", "—"],
                 ["DCP v1.0 compliance", "—", "—", "Art. 50", "—"],
                 ["EHDS domain tests", "—", "—", "Art. 3–51", "—"],
+                [
+                  "SBOM generation (CycloneDX)",
+                  "OPS-04",
+                  "A06",
+                  "Art. 50",
+                  "—",
+                ],
+                ["Licence compliance", "OPS-04", "—", "Art. 50", "—"],
                 ["ODRL enforcement (planned)", "—", "A01", "Art. 44", "—"],
-                ["SBOM generation (planned)", "OPS-04", "A06", "Art. 50", "—"],
               ].map(([gate, bsi, owasp, ehds, wcag]) => (
                 <tr key={gate} className="border-t border-[var(--border)]">
                   <td className="px-3 py-2 font-semibold">{gate}</td>

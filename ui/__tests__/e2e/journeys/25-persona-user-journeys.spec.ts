@@ -16,7 +16,7 @@
  * For persona-specific nav group tests, see 19-static-github-pages.spec.ts.
  */
 import { test, expect } from "@playwright/test";
-import { T, expectHeading, waitForDataLoad } from "./helpers";
+import { T, expectHeading, waitForDataLoad, skipIfNeo4jDown } from "./helpers";
 
 const BASE = process.env.PLAYWRIGHT_BASE_URL ?? "http://localhost:3000";
 
@@ -31,6 +31,7 @@ test.describe("A - Public Page Accessibility", () => {
   });
 
   test("J421 Catalog displays dataset cards", async ({ page }) => {
+    await skipIfNeo4jDown(page);
     await page.goto(`${BASE}/catalog`, { waitUntil: "domcontentloaded" });
     await waitForDataLoad(page);
     const cards = page.locator("article, [class*='card'], [class*='Card']");
@@ -38,6 +39,7 @@ test.describe("A - Public Page Accessibility", () => {
   });
 
   test("J422 Catalog cards have title text", async ({ page }) => {
+    await skipIfNeo4jDown(page);
     await page.goto(`${BASE}/catalog`, { waitUntil: "domcontentloaded" });
     await waitForDataLoad(page);
     const headings = page.locator("h2, h3, [class*='title']");
@@ -103,6 +105,7 @@ test.describe("A - Public Page Accessibility", () => {
 
 test.describe("B - Graph Explorer Persona Views", () => {
   test("J430 Graph Explorer renders canvas or SVG", async ({ page }) => {
+    await skipIfNeo4jDown(page);
     await page.goto(`${BASE}/graph`, { waitUntil: "domcontentloaded" });
     await waitForDataLoad(page);
     const graphEl = page.locator("canvas, svg, [data-testid*='graph']");
@@ -112,6 +115,7 @@ test.describe("B - Graph Explorer Persona Views", () => {
   test("J431 Graph with hospital persona loads graph visualization", async ({
     page,
   }) => {
+    await skipIfNeo4jDown(page);
     await page.goto(`${BASE}/graph?persona=hospital`, {
       waitUntil: "domcontentloaded",
     });
@@ -121,6 +125,7 @@ test.describe("B - Graph Explorer Persona Views", () => {
   });
 
   test("J432 Graph with researcher persona loads", async ({ page }) => {
+    await skipIfNeo4jDown(page);
     await page.goto(`${BASE}/graph?persona=researcher`, {
       waitUntil: "domcontentloaded",
     });
@@ -130,6 +135,7 @@ test.describe("B - Graph Explorer Persona Views", () => {
   });
 
   test("J433 Graph with hdab persona loads", async ({ page }) => {
+    await skipIfNeo4jDown(page);
     await page.goto(`${BASE}/graph?persona=hdab`, {
       waitUntil: "domcontentloaded",
     });
@@ -139,6 +145,7 @@ test.describe("B - Graph Explorer Persona Views", () => {
   });
 
   test("J434 Graph with trust-center persona loads", async ({ page }) => {
+    await skipIfNeo4jDown(page);
     await page.goto(`${BASE}/graph?persona=trust-center`, {
       waitUntil: "domcontentloaded",
     });
@@ -148,6 +155,7 @@ test.describe("B - Graph Explorer Persona Views", () => {
   });
 
   test("J435 Graph with edc-admin persona loads", async ({ page }) => {
+    await skipIfNeo4jDown(page);
     await page.goto(`${BASE}/graph?persona=edc-admin`, {
       waitUntil: "domcontentloaded",
     });
@@ -157,6 +165,7 @@ test.describe("B - Graph Explorer Persona Views", () => {
   });
 
   test("J436 Graph with patient persona loads", async ({ page }) => {
+    await skipIfNeo4jDown(page);
     await page.goto(`${BASE}/graph?persona=patient`, {
       waitUntil: "domcontentloaded",
     });
@@ -166,6 +175,7 @@ test.describe("B - Graph Explorer Persona Views", () => {
   });
 
   test("J437 Graph Explorer has no broken images", async ({ page }) => {
+    await skipIfNeo4jDown(page);
     await page.goto(`${BASE}/graph`, { waitUntil: "domcontentloaded" });
     await waitForDataLoad(page);
     const brokenImages = await page.evaluate(() =>
@@ -179,6 +189,7 @@ test.describe("B - Graph Explorer Persona Views", () => {
   test("J438 Graph Explorer shows layer legend or sidebar", async ({
     page,
   }) => {
+    await skipIfNeo4jDown(page);
     await page.goto(`${BASE}/graph`, { waitUntil: "domcontentloaded" });
     await waitForDataLoad(page);
     // Graph should have sidebar or legend with layer information
@@ -190,6 +201,7 @@ test.describe("B - Graph Explorer Persona Views", () => {
   });
 
   test("J439 Graph Explorer default view loads nodes", async ({ page }) => {
+    await skipIfNeo4jDown(page);
     await page.goto(`${BASE}/graph`, { waitUntil: "domcontentloaded" });
     await waitForDataLoad(page);
     // Should show node count or have visible graph content
@@ -212,6 +224,7 @@ test.describe("C - NLQ Query Page", () => {
   });
 
   test("J441 Query page shows example query buttons", async ({ page }) => {
+    await skipIfNeo4jDown(page);
     await page.goto(`${BASE}/query`, { waitUntil: "domcontentloaded" });
     await waitForDataLoad(page);
     const examples = page.locator("button", {
@@ -222,6 +235,7 @@ test.describe("C - NLQ Query Page", () => {
   });
 
   test("J442 Clicking example query fills search input", async ({ page }) => {
+    await skipIfNeo4jDown(page);
     await page.goto(`${BASE}/query`, { waitUntil: "domcontentloaded" });
     await waitForDataLoad(page);
     const exampleBtn = page.locator("button", { hasText: /patient/i }).first();
@@ -448,6 +462,7 @@ test.describe("F - Content Integrity", () => {
   test("J470 Catalog shows HealthDCAT-AP dataset metadata", async ({
     page,
   }) => {
+    await skipIfNeo4jDown(page);
     await page.goto(`${BASE}/catalog`, { waitUntil: "domcontentloaded" });
     await waitForDataLoad(page);
     // Dataset cards should contain metadata text
@@ -491,6 +506,7 @@ test.describe("F - Content Integrity", () => {
   test("J474 Graph Explorer shows node counts or statistics", async ({
     page,
   }) => {
+    await skipIfNeo4jDown(page);
     await page.goto(`${BASE}/graph`, { waitUntil: "domcontentloaded" });
     await waitForDataLoad(page);
     // Graph should display node/edge counts or layer info

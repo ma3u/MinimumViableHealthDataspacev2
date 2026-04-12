@@ -452,9 +452,12 @@ function EditorContent() {
 
   const loadCatalog = useCallback(() => {
     fetchApi("/api/catalog")
-      .then((r) => r.json())
-      .then((d: DatasetEntry[]) => {
-        setDatasets(d);
+      .then((r) => {
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        return r.json();
+      })
+      .then((d) => {
+        setDatasets(Array.isArray(d) ? d : []);
         setLoading(false);
       })
       .catch(() => setLoading(false));

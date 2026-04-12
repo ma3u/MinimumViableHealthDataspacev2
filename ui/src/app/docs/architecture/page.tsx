@@ -77,39 +77,105 @@ const dataFlowDiagram = `sequenceDiagram
   OMOP->>AN: Cohort analytics queries
   AN->>AN: Render dashboards & charts`;
 
-const deploymentDiagram = `graph LR
-  subgraph "Docker Compose Stack"
-    NEO4J["Neo4j 5<br/>:7474 / :7687<br/>APOC + n10s"]
-    PROXY["Neo4j Proxy<br/>:3001<br/>Node.js"]
-    UI["Next.js UI<br/>:3000<br/>React 18"]
+const deploymentDiagram = `graph TB
+  subgraph INFRA["Infrastructure Layer"]
+    TFK["Traefik<br/>API Gateway<br/>:80 / :8090"]
+    PG["PostgreSQL 17<br/>8 databases<br/>:5432"]
+    VAULT["HashiCorp Vault<br/>Secrets (dev)<br/>:8200"]
+    NATS["NATS JetStream<br/>Event Mesh<br/>:4222 / :8222"]
+    KC["Keycloak<br/>OIDC SSO<br/>:8080 / :9000"]
+    VB["vault-bootstrap<br/>Sidecar Init"]
   end
 
-  subgraph "JAD Infrastructure"
-    PG["PostgreSQL<br/>EDC Runtime Store"]
-    KC["Keycloak<br/>SSO / OIDC"]
-    VAULT["HashiCorp Vault<br/>Secrets"]
-    NATS["NATS<br/>Event Mesh"]
+  subgraph EDCV["EDC-V / DCore Layer"]
+    CP["Control Plane<br/>DSP + Mgmt API<br/>:11003"]
+    DPFHIR["Data Plane FHIR<br/>DCore FHIR<br/>:11002"]
+    DPOMOP["Data Plane OMOP<br/>DCore OMOP<br/>:11012"]
   end
 
-  subgraph "EDC-V Stack"
-    CP["Control Plane<br/>DSP / Management API"]
-    DP["Data Plane<br/>FHIR + OMOP"]
-    IH["Identity Hub<br/>DCP / VC"]
+  subgraph IDENTITY["Identity Layer"]
+    IH["Identity Hub<br/>DCP / VC Store<br/>:11005"]
+    IS["Issuer Service<br/>VC Issuance<br/>:10013"]
   end
 
-  subgraph "GitHub Pages"
-    STATIC["Static Export<br/>Demo Site"]
+  subgraph CFM["CFM Layer"]
+    TM["Tenant Manager<br/>:11006"]
+    PM["Provision Manager<br/>:11007"]
+    CFMKC["cfm-keycloak-agent"]
+    CFMEDCV["cfm-edcv-agent"]
+    CFMREG["cfm-registration-agent"]
+    CFMONB["cfm-onboarding-agent"]
   end
 
-  UI --> PROXY --> NEO4J
-  UI --> CP
+  subgraph APP["Application Layer"]
+    NEO4J["Neo4j 5<br/>Knowledge Graph<br/>:7474 / :7687"]
+    NEO4J2["Neo4j SPE2<br/>Federated<br/>:7475 / :7688"]
+    PROXY["Neo4j Proxy<br/>Express Bridge<br/>:9090"]
+    UI["Next.js UI<br/>Graph Explorer<br/>:3000 / :3003"]
+  end
+
+  subgraph STATIC["Static Export"]
+    GHP["GitHub Pages<br/>Demo Site"]
+  end
+
+  subgraph SEED["One-Shot"]
+    JADSEED["jad-seed<br/>Phases 1-7"]
+  end
+
+  %% Infrastructure dependencies
+  KC --> PG
+  VB --> VAULT
+  VB --> KC
+
+  %% EDC-V dependencies
   CP --> PG
   CP --> VAULT
   CP --> NATS
-  CP --> DP
-  IH --> KC
+  CP --> KC
+  DPFHIR --> PG
+  DPFHIR --> VAULT
+  DPFHIR --> CP
+  DPOMOP --> PG
+  DPOMOP --> VAULT
+  DPOMOP --> CP
+
+  %% Identity dependencies
+  IH --> PG
   IH --> VAULT
-  UI -.->|"next export"| STATIC`;
+  IH --> KC
+  IS --> PG
+  IS --> VAULT
+  IS --> KC
+
+  %% CFM dependencies
+  TM --> PG
+  TM --> KC
+  PM --> PG
+  PM --> KC
+  PM --> CP
+  CFMKC --> KC
+  CFMEDCV --> CP
+  CFMREG --> IH
+  CFMONB --> TM
+
+  %% Application dependencies
+  PROXY --> CP
+  PROXY --> NEO4J
+  UI --> PROXY
+  UI --> CP
+
+  %% Routing
+  TFK --> UI
+  TFK --> CP
+  TFK --> DPFHIR
+  TFK --> DPOMOP
+  TFK --> IH
+  TFK --> IS
+  TFK --> TM
+  TFK --> PM
+
+  %% Static export
+  UI -.->|"next export"| GHP`;
 
 const dspNegotiationFlow = `sequenceDiagram
   participant DH as Data Holder<br/>(Provider EDC)
@@ -163,6 +229,202 @@ const identityTrustDiagram = `graph TB
   IH --> STS
   STS --> MGMT & DSP & DATA`;
 
+interface ServiceInfo {
+  name: string;
+  port: string;
+  depends: string;
+  purpose: string;
+  layer: string;
+}
+
+const services: ServiceInfo[] = [
+  {
+    name: "Traefik",
+    port: ":80 / :8090",
+    depends: "--",
+    purpose: "API gateway, reverse proxy, *.localhost routing",
+    layer: "Infrastructure",
+  },
+  {
+    name: "PostgreSQL 17",
+    port: ":5432",
+    depends: "--",
+    purpose:
+      "Shared database (8 DBs: controlplane, dataplane-fhir, dataplane-omop, identityhub, issuerservice, keycloak, tenant-mgr, provision-mgr)",
+    layer: "Infrastructure",
+  },
+  {
+    name: "HashiCorp Vault",
+    port: ":8200",
+    depends: "--",
+    purpose: "Secrets management (dev/in-memory mode, lost on restart)",
+    layer: "Infrastructure",
+  },
+  {
+    name: "NATS JetStream",
+    port: ":4222 / :8222",
+    depends: "--",
+    purpose: "Async event mesh for DSP protocol events",
+    layer: "Infrastructure",
+  },
+  {
+    name: "Keycloak",
+    port: ":8080 / :9000",
+    depends: "PostgreSQL",
+    purpose: "OIDC SSO provider, realm edcv, 7 personas",
+    layer: "Infrastructure",
+  },
+  {
+    name: "vault-bootstrap",
+    port: "--",
+    depends: "Vault, Keycloak",
+    purpose: "Init sidecar: seeds Vault secrets and Keycloak config",
+    layer: "Infrastructure",
+  },
+  {
+    name: "Control Plane",
+    port: ":11003",
+    depends: "PostgreSQL, Vault, NATS, Keycloak",
+    purpose: "EDC-V runtime: DSP negotiation, management API, policy engine",
+    layer: "EDC-V / DCore",
+  },
+  {
+    name: "Data Plane FHIR",
+    port: ":11002",
+    depends: "PostgreSQL, Vault, Control Plane",
+    purpose: "DCore data plane for FHIR R4 resource transfer",
+    layer: "EDC-V / DCore",
+  },
+  {
+    name: "Data Plane OMOP",
+    port: ":11012",
+    depends: "PostgreSQL, Vault, Control Plane",
+    purpose: "DCore data plane for OMOP CDM data transfer",
+    layer: "EDC-V / DCore",
+  },
+  {
+    name: "Identity Hub",
+    port: ":11005",
+    depends: "PostgreSQL, Vault, Keycloak",
+    purpose: "DCP: DID resolution, Verifiable Credential storage",
+    layer: "Identity",
+  },
+  {
+    name: "Issuer Service",
+    port: ":10013",
+    depends: "PostgreSQL, Vault, Keycloak",
+    purpose: "VC issuance: EHDS membership, data permits, org credentials",
+    layer: "Identity",
+  },
+  {
+    name: "Tenant Manager",
+    port: ":11006",
+    depends: "PostgreSQL, Keycloak",
+    purpose: "CFM: multi-tenant participant management",
+    layer: "CFM",
+  },
+  {
+    name: "Provision Manager",
+    port: ":11007",
+    depends: "PostgreSQL, Keycloak, Control Plane",
+    purpose: "CFM: automated resource provisioning",
+    layer: "CFM",
+  },
+  {
+    name: "cfm-keycloak-agent",
+    port: "--",
+    depends: "Keycloak",
+    purpose: "Background: syncs Keycloak realm configuration",
+    layer: "CFM",
+  },
+  {
+    name: "cfm-edcv-agent",
+    port: "--",
+    depends: "Control Plane",
+    purpose: "Background: manages EDC-V connector lifecycle",
+    layer: "CFM",
+  },
+  {
+    name: "cfm-registration-agent",
+    port: "--",
+    depends: "Identity Hub",
+    purpose: "Background: handles participant DID registration",
+    layer: "CFM",
+  },
+  {
+    name: "cfm-onboarding-agent",
+    port: "--",
+    depends: "Tenant Manager",
+    purpose: "Background: automates tenant onboarding workflows",
+    layer: "CFM",
+  },
+  {
+    name: "Neo4j 5",
+    port: ":7474 / :7687",
+    depends: "--",
+    purpose: "Knowledge graph: 5-layer model, APOC + n10s plugins",
+    layer: "Application",
+  },
+  {
+    name: "Neo4j SPE2",
+    port: ":7475 / :7688",
+    depends: "--",
+    purpose: "Secondary graph instance (federated profile)",
+    layer: "Application",
+  },
+  {
+    name: "Neo4j Proxy",
+    port: ":9090",
+    depends: "Neo4j, Control Plane",
+    purpose: "Express bridge: FHIR/OMOP REST endpoints over Neo4j",
+    layer: "Application",
+  },
+  {
+    name: "Next.js UI",
+    port: ":3000 / :3003",
+    depends: "Neo4j Proxy",
+    purpose: "Graph Explorer: 16 pages, 36 API routes, 7 personas",
+    layer: "Application",
+  },
+  {
+    name: "jad-seed",
+    port: "--",
+    depends: "All services",
+    purpose: "One-shot: phases 1-7 data seeding (Synthea, FHIR, OMOP, DSP)",
+    layer: "Seed",
+  },
+  {
+    name: "GitHub Pages",
+    port: "--",
+    depends: "Next.js UI (static export)",
+    purpose: "Public demo site with mock data fixtures",
+    layer: "Static",
+  },
+];
+
+const layerColors: Record<string, string> = {
+  Infrastructure:
+    "bg-blue-900/30 text-blue-300 dark:bg-blue-900/30 dark:text-blue-300",
+  "EDC-V / DCore":
+    "bg-emerald-900/30 text-emerald-300 dark:bg-emerald-900/30 dark:text-emerald-300",
+  Identity:
+    "bg-purple-900/30 text-purple-300 dark:bg-purple-900/30 dark:text-purple-300",
+  CFM: "bg-amber-900/30 text-amber-300 dark:bg-amber-900/30 dark:text-amber-300",
+  Application:
+    "bg-cyan-900/30 text-cyan-300 dark:bg-cyan-900/30 dark:text-cyan-300",
+  Seed: "bg-gray-800/30 text-gray-300 dark:bg-gray-800/30 dark:text-gray-300",
+  Static: "bg-gray-800/30 text-gray-300 dark:bg-gray-800/30 dark:text-gray-300",
+};
+
+const tocItems = [
+  { id: "five-layer-model", label: "1. Five-Layer Knowledge Graph" },
+  { id: "data-flow", label: "2. Data Flow Pipeline" },
+  { id: "deployment", label: "3. Deployment Topology" },
+  { id: "service-dependencies", label: "4. Service Dependencies" },
+  { id: "negotiation", label: "5. DSP Contract Negotiation" },
+  { id: "identity-trust", label: "6. Identity & Trust Framework" },
+];
+
 export default function ArchitecturePage() {
   return (
     <div className="max-w-6xl mx-auto px-6 py-12">
@@ -175,14 +437,33 @@ export default function ArchitecturePage() {
       <h1 className="text-3xl font-bold mb-2">Architecture</h1>
       <p className="text-[var(--text-secondary)] mb-8">
         Interactive diagrams of the Health Dataspace v2 architecture — 5-layer
-        graph model, data flows, deployment topology, and identity trust
-        framework.
+        graph model, data flows, deployment topology, service dependencies, and
+        identity trust framework.
       </p>
+
+      {/* Table of Contents */}
+      <nav className="border border-[var(--border)] rounded-xl p-5 mb-12 bg-[var(--surface)]">
+        <h2 className="text-sm font-semibold uppercase tracking-wider text-[var(--text-secondary)] mb-3">
+          Contents
+        </h2>
+        <ol className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+          {tocItems.map((item) => (
+            <li key={item.id}>
+              <a
+                href={`#${item.id}`}
+                className="text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
+              >
+                {item.label}
+              </a>
+            </li>
+          ))}
+        </ol>
+      </nav>
 
       {/* 5-Layer Architecture */}
       <section className="mb-12">
         <h2 className="text-2xl font-semibold mb-3" id="five-layer-model">
-          5-Layer Knowledge Graph
+          1. Five-Layer Knowledge Graph
         </h2>
         <p className="text-[var(--text-secondary)] text-sm mb-4">
           The Neo4j knowledge graph organises health data across five
@@ -199,7 +480,7 @@ export default function ArchitecturePage() {
       {/* Data Flow */}
       <section className="mb-12">
         <h2 className="text-2xl font-semibold mb-3" id="data-flow">
-          Data Flow Pipeline
+          2. Data Flow Pipeline
         </h2>
         <p className="text-[var(--text-secondary)] text-sm mb-4">
           Synthetic patient data flows from Synthea generation through FHIR R4
@@ -216,24 +497,111 @@ export default function ArchitecturePage() {
       {/* Deployment */}
       <section className="mb-12">
         <h2 className="text-2xl font-semibold mb-3" id="deployment">
-          Deployment Topology
+          3. Deployment Topology
         </h2>
         <p className="text-[var(--text-secondary)] text-sm mb-4">
-          The platform runs as Docker Compose services locally, with the Next.js
-          UI also deployed as a static export to GitHub Pages for the demo site.
-          The JAD infrastructure provides PostgreSQL, Keycloak SSO, Vault
-          secrets, and NATS event mesh.
+          The full JAD stack runs 19+ Docker Compose services across six layers:
+          infrastructure (Traefik, PostgreSQL, Vault, NATS, Keycloak), EDC-V /
+          DCore (Control Plane, dual Data Planes), Identity (Identity Hub,
+          Issuer Service), CFM (Tenant/Provision Managers, 4 background agents),
+          Application (Neo4j, Proxy, UI), and a static GitHub Pages export. The
+          same topology is deployed to{" "}
+          <a
+            href="https://mvhd-ui.blackforest-0a04f26e.westeurope.azurecontainerapps.io"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-[var(--accent)] underline hover:opacity-80"
+          >
+            Azure Container Apps
+          </a>{" "}
+          (13 apps + 3 jobs, see{" "}
+          <a
+            href="https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docs/ADRs/ADR-012-azure-container-apps.md"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-[var(--accent)] underline hover:opacity-80"
+          >
+            ADR-012
+          </a>
+          ). Arrows show runtime dependencies.
         </p>
         <MermaidDiagram
           chart={deploymentDiagram}
-          caption="Fig 3. Deployment architecture and service topology"
+          caption="Fig 3. Full deployment topology — 19+ services with dependency graph"
         />
+      </section>
+
+      {/* Service Dependencies Table */}
+      <section className="mb-12">
+        <h2 className="text-2xl font-semibold mb-3" id="service-dependencies">
+          4. Service Dependencies
+        </h2>
+        <p className="text-[var(--text-secondary)] text-sm mb-4">
+          Complete inventory of all services in the docker-compose.yml and
+          docker-compose.jad.yml stacks, their exposed ports, upstream
+          dependencies, and purpose.
+        </p>
+        <div className="overflow-x-auto border border-[var(--border)] rounded-xl">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-[var(--border)] bg-[var(--surface)]">
+                <th className="text-left px-4 py-3 font-semibold text-[var(--text-primary)]">
+                  Service
+                </th>
+                <th className="text-left px-4 py-3 font-semibold text-[var(--text-primary)]">
+                  Layer
+                </th>
+                <th className="text-left px-4 py-3 font-semibold text-[var(--text-primary)]">
+                  Port(s)
+                </th>
+                <th className="text-left px-4 py-3 font-semibold text-[var(--text-primary)]">
+                  Depends On
+                </th>
+                <th className="text-left px-4 py-3 font-semibold text-[var(--text-primary)]">
+                  Purpose
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {services.map((svc, i) => (
+                <tr
+                  key={svc.name}
+                  className={`border-b border-[var(--border)] ${
+                    i % 2 === 0 ? "" : "bg-[var(--surface)]/30"
+                  }`}
+                >
+                  <td className="px-4 py-2.5 font-medium text-[var(--text-primary)] whitespace-nowrap">
+                    {svc.name}
+                  </td>
+                  <td className="px-4 py-2.5">
+                    <span
+                      className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${
+                        layerColors[svc.layer] || ""
+                      }`}
+                    >
+                      {svc.layer}
+                    </span>
+                  </td>
+                  <td className="px-4 py-2.5 text-[var(--text-secondary)] font-mono text-xs whitespace-nowrap">
+                    {svc.port}
+                  </td>
+                  <td className="px-4 py-2.5 text-[var(--text-secondary)] text-xs">
+                    {svc.depends}
+                  </td>
+                  <td className="px-4 py-2.5 text-[var(--text-secondary)] text-xs">
+                    {svc.purpose}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </section>
 
       {/* DSP Negotiation */}
       <section className="mb-12">
         <h2 className="text-2xl font-semibold mb-3" id="negotiation">
-          DSP Contract Negotiation
+          5. DSP Contract Negotiation
         </h2>
         <p className="text-[var(--text-secondary)] text-sm mb-4">
           The Dataspace Protocol (DSP) governs how data holders and data users
@@ -250,7 +618,7 @@ export default function ArchitecturePage() {
       {/* Identity & Trust */}
       <section className="mb-12">
         <h2 className="text-2xl font-semibold mb-3" id="identity-trust">
-          Identity & Trust Framework
+          6. Identity & Trust Framework
         </h2>
         <p className="text-[var(--text-secondary)] text-sm mb-4">
           The Decentralized Claims Protocol (DCP) manages identity, credentials,
@@ -269,16 +637,16 @@ export default function ArchitecturePage() {
         <h3 className="font-semibold mb-3">Diagram Legend</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-[var(--text-secondary)]">
           <div>
-            <span className="text-indigo-400">■</span> Solid lines — direct data
-            flow or API calls
+            <span className="text-indigo-700 dark:text-indigo-400">■</span>{" "}
+            Solid lines — direct data flow or API calls
           </div>
           <div>
             <span className="text-[var(--text-secondary)]">■</span> Dashed lines
             — mapping / transformation relationships
           </div>
           <div>
-            <span className="text-indigo-400">●</span> Subgraphs — logical
-            boundary groupings
+            <span className="text-indigo-700 dark:text-indigo-400">●</span>{" "}
+            Subgraphs — logical boundary groupings
           </div>
           <div>
             <span className="text-[var(--text-secondary)]">●</span> Participants
