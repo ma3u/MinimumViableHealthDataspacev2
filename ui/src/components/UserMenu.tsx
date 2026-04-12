@@ -322,7 +322,11 @@ export default function UserMenu() {
                 sessionStorage.removeItem("demo-password-banner-dismissed");
                 // Clear the tab session snapshot so re-login gets a fresh one
                 markSessionSwitch();
-                if (IS_STATIC) return;
+                if (IS_STATIC) {
+                  sessionStorage.removeItem("demo-persona");
+                  window.location.href = "/";
+                  return;
+                }
                 const keycloakPublicUrl =
                   process.env.NEXT_PUBLIC_KEYCLOAK_PUBLIC_URL;
                 const logoutUrl = keycloakPublicUrl
@@ -338,7 +342,7 @@ export default function UserMenu() {
               className="flex items-center gap-2 w-full px-3 py-2 text-sm text-red-400 hover:bg-[var(--surface-2)] rounded transition-colors"
             >
               <LogOut size={14} />
-              {IS_STATIC ? "Sign out (disabled in demo)" : "Sign out"}
+              Sign out
             </button>
           </div>
         </div>
