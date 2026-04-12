@@ -141,6 +141,13 @@ const preCommitGates: GateRow[] = [
   },
 ];
 
+const CI_WORKFLOW_URL =
+  "https://github.com/ma3u/MinimumViableHealthDataspacev2/actions/workflows/test.yml";
+const COMPLIANCE_WORKFLOW_URL =
+  "https://github.com/ma3u/MinimumViableHealthDataspacev2/actions/workflows/compliance.yml";
+const PAGES_WORKFLOW_URL =
+  "https://github.com/ma3u/MinimumViableHealthDataspacev2/actions/workflows/pages.yml";
+
 const ciGates = [
   {
     job: "UI Tests (Vitest)",
@@ -188,7 +195,7 @@ const ciGates = [
     job: "K8s Posture",
     tests: "—",
     tool: "Kubescape (NSA + CIS)",
-    blocking: false,
+    blocking: true,
     standard: "NSA K8s Guide",
   },
   {
@@ -202,7 +209,7 @@ const ciGates = [
     job: "WCAG 2.2 AA Audit",
     tests: "93",
     tool: "axe-core/playwright",
-    blocking: false,
+    blocking: true,
     standard: "EN 301 549",
   },
   {
@@ -216,7 +223,7 @@ const ciGates = [
     job: "SBOM Generation",
     tests: "2",
     tool: "CycloneDX npm",
-    blocking: false,
+    blocking: true,
     standard: "EU CRA Art. 13",
   },
   {
@@ -406,11 +413,13 @@ function Badge({ blocking }: { blocking: boolean }) {
 }
 
 function EffortBadge({ effort }: { effort: string }) {
-  const color = effort.startsWith("Low")
+  const color = effort.startsWith("Done")
     ? "bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300"
-    : effort.startsWith("High")
-      ? "bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300"
-      : "bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300";
+    : effort.startsWith("Low")
+      ? "bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300"
+      : effort.startsWith("High")
+        ? "bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300"
+        : "bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300";
   return (
     <span className={`text-[10px] font-semibold px-2 py-0.5 rounded ${color}`}>
       {effort}
@@ -553,10 +562,23 @@ export default function QualityGatesPage() {
         </h2>
         <p className="text-sm text-[var(--text-secondary)] mb-4">
           GitHub Actions workflow{" "}
-          <code className="text-[var(--accent)]">
+          <a
+            href={CI_WORKFLOW_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-[var(--accent)] hover:underline font-mono"
+          >
             .github/workflows/test.yml
-          </code>{" "}
-          — 8 parallel jobs on every push.
+          </a>{" "}
+          — 13 jobs on every push.{" "}
+          <a
+            href={CI_WORKFLOW_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-[var(--accent)] hover:underline text-xs"
+          >
+            View latest run &rarr;
+          </a>
         </p>
         <div className="overflow-x-auto">
           <table className="w-full text-sm border border-[var(--border)] rounded-lg">
@@ -643,10 +665,22 @@ export default function QualityGatesPage() {
         </h2>
         <p className="text-sm text-[var(--text-secondary)] mb-4">
           Weekly + on push to main. Workflow:{" "}
-          <code className="text-[var(--accent)]">
+          <a
+            href={COMPLIANCE_WORKFLOW_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-[var(--accent)] hover:underline font-mono"
+          >
             .github/workflows/compliance.yml
-          </code>
-          .
+          </a>{" "}
+          <a
+            href={COMPLIANCE_WORKFLOW_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-[var(--accent)] hover:underline text-xs"
+          >
+            View latest run &rarr;
+          </a>
         </p>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {complianceSuites.map((s) => (
@@ -859,6 +893,30 @@ export default function QualityGatesPage() {
             className="text-sm text-[var(--accent)] hover:underline"
           >
             Coverage Report
+          </a>
+          <a
+            href={CI_WORKFLOW_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-sm text-[var(--accent)] hover:underline"
+          >
+            CI Pipeline (latest)
+          </a>
+          <a
+            href={COMPLIANCE_WORKFLOW_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-sm text-[var(--accent)] hover:underline"
+          >
+            Compliance Tests (latest)
+          </a>
+          <a
+            href={PAGES_WORKFLOW_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-sm text-[var(--accent)] hover:underline"
+          >
+            Pages Deploy (latest)
           </a>
         </div>
       </section>

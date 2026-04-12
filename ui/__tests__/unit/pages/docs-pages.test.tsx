@@ -75,8 +75,8 @@ describe("DeveloperPage", () => {
 
   it("renders key sections", () => {
     render(<DeveloperPage />);
-    // "Technology Stack" appears in both TOC link and section heading
-    const matches = screen.getAllByText(/Technology Stack/i);
+    // "Quick Start" appears in both TOC link and section heading
+    const matches = screen.getAllByText(/Quick Start/i);
     expect(matches.length).toBeGreaterThan(0);
   });
 });
