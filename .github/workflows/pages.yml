@@ -17,6 +17,20 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    services:
+      neo4j:
+        image: neo4j:5-community
+        env:
+          NEO4J_AUTH: neo4j/healthdataspace
+          NEO4J_PLUGINS: "[]"
+        ports:
+          - 7474:7474
+          - 7687:7687
+        options: >-
+          --health-cmd "cypher-shell -u neo4j -p healthdataspace 'RETURN 1'"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
     defaults:
       run:
         working-directory: ./ui
@@ -39,6 +53,44 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      # ── Seed Neo4j and refresh mock fixtures ─────────────────────
+      - name: Install cypher-shell
+        working-directory: .
+        run: |
+          wget -q https://dist.neo4j.org/cypher-shell/cypher-shell-5.26.0.zip -O /tmp/cs.zip
+          unzip -q /tmp/cs.zip -d /tmp/cs
+          echo "/tmp/cs/cypher-shell-5.26.0/bin" >> "$GITHUB_PATH"
+
+      - name: Seed Neo4j with schema and synthetic data
+        working-directory: .
+        run: |
+          cypher-shell -u neo4j -p healthdataspace -a bolt://localhost:7687 < neo4j/init-schema.cypher
+          cypher-shell -u neo4j -p healthdataspace -a bolt://localhost:7687 < neo4j/insert-synthetic-schema-data.cypher
+
+      - name: Start Next.js server for mock generation
+        run: |
+          npx next build
+          npx next start -p 3000 &
+          echo "Waiting for server..."
+          for i in $(seq 1 30); do
+            curl -sf http://localhost:3000/api/graph > /dev/null 2>&1 && break
+            sleep 2
+          done
+        env:
+          NEXT_PUBLIC_STATIC_EXPORT: "false"
+          NEO4J_URI: bolt://localhost:7687
+          NEO4J_USER: neo4j
+          NEO4J_PASSWORD: healthdataspace
+          NEXTAUTH_SECRET: ci-mock-generation
+          NEXTAUTH_URL: http://localhost:3000
+
+      - name: Refresh mock fixtures from live API
+        working-directory: .
+        run: ./scripts/refresh-mocks.sh http://localhost:3000
+
+      - name: Stop Next.js server
+        run: kill $(lsof -t -i:3000) 2>/dev/null || true
+
       - name: Run unit tests with coverage
         run: npx vitest run --coverage --reporter=json --outputFile=test-results.json
         continue-on-error: true
@@ -58,6 +110,9 @@ jobs:
         env:
           CI: true
           NEXT_PUBLIC_STATIC_EXPORT: "false"
+          NEO4J_URI: bolt://localhost:7687
+          NEO4J_USER: neo4j
+          NEO4J_PASSWORD: healthdataspace
           NEXTAUTH_SECRET: ci-test-secret-not-for-production
           NEXTAUTH_URL: http://localhost:3000
 
