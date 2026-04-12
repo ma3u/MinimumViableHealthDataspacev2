@@ -206,8 +206,9 @@ test.describe("M · Live Data Validation", () => {
 
   test("J117 — Keycloak OIDC discovery endpoint is reachable", async () => {
     await skipIfKeycloakDown();
+    const kcUrl = process.env.KEYCLOAK_PUBLIC_URL || "http://localhost:8080";
     const res = await fetch(
-      "http://localhost:8080/realms/edcv/.well-known/openid-configuration",
+      `${kcUrl}/realms/edcv/.well-known/openid-configuration`,
       { signal: AbortSignal.timeout(5_000) },
     );
     expect(res.ok).toBe(true);
@@ -222,7 +223,7 @@ test.describe("M · Live Data Validation", () => {
     await page.goto("/onboarding");
     await expect(page).toHaveURL(/\/auth\/signin/, { timeout: T });
     await page.click('button:has-text("Sign in with Keycloak")');
-    await expect(page).toHaveURL(/localhost:8080.*openid-connect\/auth/, {
+    await expect(page).toHaveURL(/openid-connect\/auth/, {
       timeout: T,
     });
     await page.fill("#username", "edcadmin");
@@ -239,7 +240,7 @@ test.describe("M · Live Data Validation", () => {
     await page.goto("/data/share");
     await expect(page).toHaveURL(/\/auth\/signin/, { timeout: T });
     await page.click('button:has-text("Sign in with Keycloak")');
-    await expect(page).toHaveURL(/localhost:8080.*openid-connect\/auth/, {
+    await expect(page).toHaveURL(/openid-connect\/auth/, {
       timeout: T,
     });
     await page.fill("#username", "clinicuser");
@@ -255,7 +256,7 @@ test.describe("M · Live Data Validation", () => {
     await page.goto("/data/discover");
     await expect(page).toHaveURL(/\/auth\/signin/, { timeout: T });
     await page.click('button:has-text("Sign in with Keycloak")');
-    await expect(page).toHaveURL(/localhost:8080.*openid-connect\/auth/, {
+    await expect(page).toHaveURL(/openid-connect\/auth/, {
       timeout: T,
     });
     await page.fill("#username", "researcher");
@@ -271,7 +272,7 @@ test.describe("M · Live Data Validation", () => {
     await page.goto("/compliance");
     await expect(page).toHaveURL(/\/auth\/signin/, { timeout: T });
     await page.click('button:has-text("Sign in with Keycloak")');
-    await expect(page).toHaveURL(/localhost:8080.*openid-connect\/auth/, {
+    await expect(page).toHaveURL(/openid-connect\/auth/, {
       timeout: T,
     });
     await page.fill("#username", "regulator");

@@ -85,8 +85,10 @@ export async function loginAs(page: Page, username: string, password: string) {
   await page.locator("#password").fill(password);
   await page.getByRole("button", { name: /sign in/i }).click();
 
-  // Wait to land back on the app
-  await expect(page).toHaveURL(/localhost/, { timeout: 20_000 });
+  // Wait to land back on the app (works for both localhost and Azure URLs)
+  const baseUrl = process.env.PLAYWRIGHT_BASE_URL || "http://localhost:3000";
+  const baseHostname = new URL(baseUrl).hostname.replace(/\./g, "\\.");
+  await expect(page).toHaveURL(new RegExp(baseHostname), { timeout: 20_000 });
 
   // Wait for the NextAuth session to be established, then reload.
   // The OIDC redirect sets the session cookie but the server-rendered HTML
@@ -123,9 +125,11 @@ export async function skipIfNeo4jDown(page: Page) {
 
 /** Skip the current test if Keycloak is unreachable. */
 export async function skipIfKeycloakDown() {
+  const keycloakUrl =
+    process.env.KEYCLOAK_PUBLIC_URL || "http://localhost:8080";
   try {
     const res = await fetch(
-      "http://localhost:8080/realms/edcv/.well-known/openid-configuration",
+      `${keycloakUrl}/realms/edcv/.well-known/openid-configuration`,
       { signal: AbortSignal.timeout(3_000) },
     );
     if (!res.ok) test.skip(true, "Keycloak unavailable");
