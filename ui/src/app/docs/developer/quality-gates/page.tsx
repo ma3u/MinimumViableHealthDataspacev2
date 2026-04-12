@@ -226,6 +226,13 @@ const ciGates = [
     blocking: true,
     standard: "BSI C5 OPS-04",
   },
+  {
+    job: "Lighthouse CI",
+    tests: "12",
+    tool: "Lighthouse CI (4 pages × 3 runs)",
+    blocking: false,
+    standard: "Core Web Vitals",
+  },
 ];
 
 const coverageData = [
@@ -275,11 +282,11 @@ const futureGates: FutureGate[] = [
     title: "Enforce Coverage Thresholds",
     icon: FlaskConical,
     description:
-      "Add minimum coverage thresholds to vitest.config.ts: 85% statements, 70% branches, 80% functions, 85% lines.",
+      "Minimum coverage thresholds in vitest.config.ts: 85% statements, 70% branches, 80% functions, 85% lines. Vitest fails if coverage drops below.",
     standard: "BSI C5 DEV-03",
     rationale:
-      "Current coverage (93%+ statements) is well above these thresholds, but without enforcement it can silently regress.",
-    effort: "Low — config change only",
+      "Current coverage (93%+ statements) is well above these thresholds. Enforcement prevents silent regression.",
+    effort: "Done — vitest.config.ts",
   },
   {
     priority: 2,
@@ -297,10 +304,10 @@ const futureGates: FutureGate[] = [
     title: "Licence Compliance Scanning",
     icon: Scale,
     description:
-      "license-checker in CI with allowlist: MIT, Apache-2.0, ISC, BSD-2/3-Clause, 0BSD, CC0-1.0, CC-BY-4.0.",
-    standard: "EU Open Source Strategy, BSI C5 OPS-04",
+      "license-checker in CI with allowlist: MIT, Apache-2.0, ISC, BSD-2/3-Clause, 0BSD, CC0-1.0, CC-BY-4.0. Blocks build on copyleft violations.",
+    standard: "EU CRA Art. 13, BSI C5 OPS-04, SIMPL-Open",
     rationale:
-      "EHDS implementations must comply with EU procurement and open-source licence requirements. Important for SIMPL-Open programme compatibility.",
+      "EU CRA and SIMPL-Open require licence transparency. EUPL compatibility must be verified for all transitive dependencies.",
     effort: "Done — implemented in test.yml",
   },
   {
@@ -319,10 +326,10 @@ const futureGates: FutureGate[] = [
     title: "SBOM Generation",
     icon: Boxes,
     description:
-      "CycloneDX 1.5 SBOM generated on every CI run for UI and Neo4j Proxy. Uploaded as 90-day artifact.",
-    standard: "EU CRA Art. 13, NTIA SBOM",
+      "CycloneDX 1.5 SBOM generated on every CI run for UI and Neo4j Proxy. Uploaded as 90-day artifact. Required by EU CRA Art. 13(5) and critical for SIMPL-Open supply chain transparency.",
+    standard: "EU CRA Art. 13, NTIA SBOM, SIMPL-Open",
     rationale:
-      "EHDS Art. 50 requires transparency about software components. EU Cyber Resilience Act mandates SBOMs by 2027. Critical for supply chain security and SIMPL-Open.",
+      "Supply chain attacks (XZ Utils, Trivy compromise) make SBOMs non-negotiable. SIMPL-Open must provide SBOMs for downstream consumers. EU CRA mandates machine-readable SBOMs by 2027.",
     effort: "Done — implemented in test.yml",
   },
   {
@@ -330,11 +337,11 @@ const futureGates: FutureGate[] = [
     title: "Performance Regression Testing",
     icon: Gauge,
     description:
-      "Add Core Web Vitals budgets: LCP < 2.5s, FID < 100ms, CLS < 0.1, bundle < 500 KB.",
+      "Lighthouse CI with Core Web Vitals budgets: LCP < 4s (error), CLS < 0.1 (error), TBT < 300ms (warn), bundle < 500 KB (warn). Runs on 4 key pages.",
     standard: "WCAG 2.2 SC 2.2.1, Core Web Vitals",
     rationale:
-      "Healthcare professionals use the platform under time pressure. No gate currently catches performance regressions.",
-    effort: "Medium — Lighthouse CI setup",
+      "Healthcare professionals use the platform under time pressure. Performance regressions now blocked in CI.",
+    effort: "Done — Lighthouse CI in test.yml",
   },
   {
     priority: 7,
@@ -352,33 +359,33 @@ const futureGates: FutureGate[] = [
     title: "WCAG Blocking Gate",
     icon: Accessibility,
     description:
-      "Promote WCAG 2.2 AA audit from continue-on-error to a blocking gate with zero-violation budget.",
+      "WCAG 2.2 AA audit promoted to blocking gate — zero-violation budget enforced. Build fails on accessibility regressions.",
     standard: "EN 301 549, EU Directive 2016/2102",
     rationale:
-      "Current state is zero violations. Without enforcement, any new component could introduce regressions.",
-    effort: "Low — remove continue-on-error",
+      "Current state is zero violations. Now enforced — any new component that introduces violations will block the build.",
+    effort: "Done — removed continue-on-error",
   },
   {
     priority: 9,
     title: "IaC Policy Enforcement",
     icon: Server,
     description:
-      "Promote Kubescape from informational to blocking on critical findings. Add OPA/Rego policies.",
+      "Kubescape promoted to blocking on critical findings (--severity-threshold critical). NSA and CIS frameworks enforced.",
     standard: "BSI C5 OPS-01, NSA K8s Guide",
     rationale:
-      "K8s manifests define production topology. Enforcing resource limits and pod security prevents incidents.",
-    effort: "Medium — policy tuning",
+      "K8s manifests define production topology. Critical security findings now block the build.",
+    effort: "Done — blocking in test.yml",
   },
   {
     priority: 10,
     title: "Dependency Freshness",
     icon: RefreshCw,
     description:
-      "Add Renovate Bot with auto-merge for patch updates and weekly PRs for minor/major.",
-    standard: "OWASP A06",
+      "Renovate Bot configured: auto-merge patches, weekly PRs for minor, manual review for major. Security updates bypass schedule.",
+    standard: "OWASP A06, EU CRA Art. 14",
     rationale:
-      "No automated dependency update mechanism. Stale dependencies accumulate CVEs.",
-    effort: "Low — Renovate config",
+      "Automated dependency updates prevent CVE accumulation. Supply chain freshness is critical for CRA compliance.",
+    effort: "Done — renovate.json",
   },
 ];
 
@@ -792,23 +799,20 @@ export default function QualityGatesPage() {
               {[
                 ["TypeScript strict", "DEV-01", "—", "—", "—"],
                 ["ESLint", "DEV-02", "A03", "—", "—"],
-                ["Unit tests + coverage", "DEV-03", "—", "—", "—"],
+                ["Unit tests + coverage thresholds", "DEV-03", "—", "—", "—"],
                 ["Secret scan (Gitleaks)", "DEV-08", "A07", "—", "—"],
                 ["Dependency audit", "DEV-05", "A06", "—", "—"],
                 ["Trivy vuln scan", "DEV-05", "A06", "—", "—"],
                 ["Security headers", "DEV-07", "A05", "—", "—"],
-                ["WCAG 2.2 AA audit", "—", "—", "—", "2.2 AA"],
+                ["WCAG 2.2 AA (blocking)", "—", "—", "—", "2.2 AA"],
                 ["DSP 2025-1 TCK", "—", "—", "Art. 50", "—"],
                 ["DCP v1.0 compliance", "—", "—", "Art. 50", "—"],
                 ["EHDS domain tests", "—", "—", "Art. 3–51", "—"],
-                [
-                  "SBOM generation (CycloneDX)",
-                  "OPS-04",
-                  "A06",
-                  "Art. 50",
-                  "—",
-                ],
+                ["SBOM (CycloneDX 1.5)", "OPS-04", "A06", "Art. 50", "—"],
                 ["Licence compliance", "OPS-04", "—", "Art. 50", "—"],
+                ["Lighthouse perf budget", "—", "—", "—", "2.2 SC2.2.1"],
+                ["Kubescape (blocking)", "OPS-01", "—", "—", "—"],
+                ["Renovate freshness", "DEV-05", "A06", "—", "—"],
                 ["ODRL enforcement (planned)", "—", "A01", "Art. 44", "—"],
               ].map(([gate, bsi, owasp, ehds, wcag]) => (
                 <tr key={gate} className="border-t border-[var(--border)]">
