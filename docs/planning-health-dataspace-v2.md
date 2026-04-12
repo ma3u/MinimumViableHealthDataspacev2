@@ -15,6 +15,7 @@ Planning and implementation are tracked in [GitHub Issues](https://github.com/ma
 | [#8](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/8)   | Cross-Participant Dataset Discovery (NLP)                              | 🔓 Open   | Phase 5 extension (federated discovery across unknown participants)                     |
 | [#9](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/9)   | Hospital-Grade Design System (Light/Dark)                              | ✅ Closed | Phase 6                                                                                 |
 | [#10](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/10) | Deploy MVHD to Azure — ACA + managed services                          | ✅ Closed | [ADR-012](ADRs/ADR-012-azure-container-apps.md), v1.2.0                                 |
+| [#11](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/11) | Nightly Demo Reset — 24h data retention policy                         | 🔓 Open   | [ADR-014](ADRs/ADR-014-nightly-demo-reset.md)                                           |
 
 ## Table of Contents
 
@@ -3477,6 +3478,7 @@ See [ADR-012: Azure Container Apps](ADRs/ADR-012-azure-container-apps.md) and [A
 | [011](ADRs/ADR-011-security-testing.md)             | Security Penetration Testing Strategy         | 2026-04-01 | Accepted |
 | [012](ADRs/ADR-012-azure-container-apps.md)         | Azure Container Apps Deployment               | 2026-04-10 | Accepted |
 | [013](ADRs/ADR-013-simpl-open-alignment.md)         | SIMPL-Open EU Programme Alignment             | 2026-04-05 | Accepted |
+| [014](ADRs/ADR-014-nightly-demo-reset.md)           | Nightly Demo Environment Reset                | 2026-04-12 | Accepted |
 
 ### ADR-1: PostgreSQL vs Neo4j Data Storage Split
 
