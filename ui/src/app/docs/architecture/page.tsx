@@ -423,6 +423,7 @@ const tocItems = [
   { id: "service-dependencies", label: "4. Service Dependencies" },
   { id: "negotiation", label: "5. DSP Contract Negotiation" },
   { id: "identity-trust", label: "6. Identity & Trust Framework" },
+  { id: "simpl-compliance", label: "7. SIMPL-Open & Compliance" },
 ];
 
 export default function ArchitecturePage() {
@@ -630,6 +631,95 @@ export default function ArchitecturePage() {
           chart={identityTrustDiagram}
           caption="Fig 5. DCP identity and trust architecture"
         />
+      </section>
+
+      {/* SIMPL-Open & Compliance */}
+      <section className="mb-12">
+        <h2 className="text-2xl font-semibold mb-3" id="simpl-compliance">
+          7. SIMPL-Open & Compliance
+        </h2>
+        <p className="text-[var(--text-secondary)] text-sm mb-4">
+          This reference implementation aligns with the EU SIMPL-Open programme
+          for federated data spaces. The architecture satisfies EHDS regulation,
+          DSP 2025-1, DCP v1.0, and supply chain transparency requirements.
+        </p>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+          <div className="border border-[var(--border)] rounded-lg p-4">
+            <h4 className="font-semibold text-sm mb-2">SIMPL-Open Alignment</h4>
+            <ul className="text-[var(--text-secondary)] text-xs space-y-1.5 list-disc ml-4">
+              <li>
+                <strong>DSP 2025-1:</strong> Sovereign data exchange via Control
+                Plane
+              </li>
+              <li>
+                <strong>DCP v1.0:</strong> DID:web identity + Verifiable
+                Credentials
+              </li>
+              <li>
+                <strong>Trust Framework:</strong> Gaia-X compatible credential
+                attestation
+              </li>
+              <li>
+                <strong>Federated Catalog:</strong> HealthDCAT-AP 3.0 metadata
+                profiles
+              </li>
+              <li>
+                <strong>SBOM:</strong> CycloneDX 1.5 supply chain transparency
+              </li>
+            </ul>
+          </div>
+          <div className="border border-[var(--border)] rounded-lg p-4">
+            <h4 className="font-semibold text-sm mb-2">
+              Regulatory Compliance
+            </h4>
+            <ul className="text-[var(--text-secondary)] text-xs space-y-1.5 list-disc ml-4">
+              <li>
+                <strong>EHDS Art. 3-12:</strong> Patient rights (access,
+                rectification, portability)
+              </li>
+              <li>
+                <strong>EHDS Art. 50-51:</strong> Secondary use — HDAB approval,
+                data permits
+              </li>
+              <li>
+                <strong>GDPR Art. 15-22:</strong> Data subject rights
+                enforcement
+              </li>
+              <li>
+                <strong>EU CRA Art. 13:</strong> SBOM mandate, vulnerability
+                disclosure
+              </li>
+              <li>
+                <strong>BSI C5:</strong> Cloud security baseline (DEV, OPS
+                controls)
+              </li>
+            </ul>
+          </div>
+        </div>
+        <div className="flex flex-wrap gap-3">
+          <a
+            href="https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docs/simpl-ehds-gap-analysis.md"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-sm text-[var(--accent)] hover:underline inline-flex items-center gap-1"
+          >
+            SIMPL-Open Gap Analysis &rarr;
+          </a>
+          <a
+            href="https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docs/ADRs/ADR-013-simpl-open-alignment.md"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-sm text-[var(--accent)] hover:underline inline-flex items-center gap-1"
+          >
+            ADR-013: SIMPL Alignment &rarr;
+          </a>
+          <Link
+            href="/docs/developer/quality-gates"
+            className="text-sm text-[var(--accent)] hover:underline inline-flex items-center gap-1"
+          >
+            Quality Gates &rarr;
+          </Link>
+        </div>
       </section>
 
       {/* Legend */}

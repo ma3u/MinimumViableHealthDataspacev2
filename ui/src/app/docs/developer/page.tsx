@@ -155,6 +155,7 @@ export default function DeveloperGuidePage() {
       <nav className="border border-[var(--border)] rounded-xl p-5 mb-10">
         <h2 className="font-semibold mb-3">Contents</h2>
         <ul className="text-sm space-y-1.5 text-indigo-700 dark:text-indigo-400 columns-1 md:columns-2">
+          <TocLink href="#onboarding">Onboarding</TocLink>
           <TocLink href="#jad-architecture">JAD Stack Architecture</TocLink>
           <TocLink href="#prerequisites">Prerequisites</TocLink>
           <TocLink href="#quick-start">Quick Start (Minimal)</TocLink>
@@ -174,6 +175,80 @@ export default function DeveloperGuidePage() {
           <TocLink href="#conventions">Conventions</TocLink>
         </ul>
       </nav>
+
+      {/* Onboarding */}
+      <section className="mb-10">
+        <h2 className="text-2xl font-semibold mb-3" id="onboarding">
+          Onboarding
+        </h2>
+        <p className="text-[var(--text-secondary)] text-sm mb-4">
+          New to the project? Follow this quick-start path to get productive
+          within your first day.
+        </p>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+          <div className="border border-[var(--border)] rounded-lg p-4">
+            <h4 className="font-semibold text-sm mb-2 text-[var(--success-text)]">
+              1. Get Running
+            </h4>
+            <ol className="text-[var(--text-secondary)] text-xs space-y-1 list-decimal ml-4">
+              <li>Clone the repository</li>
+              <li>
+                <code>docker compose up -d</code> (Neo4j)
+              </li>
+              <li>Seed schema &amp; data (cypher-shell)</li>
+              <li>
+                <code>cd ui &amp;&amp; npm install &amp;&amp; npm run dev</code>
+              </li>
+              <li>
+                Open <code>http://localhost:3000</code>
+              </li>
+            </ol>
+          </div>
+          <div className="border border-[var(--border)] rounded-lg p-4">
+            <h4 className="font-semibold text-sm mb-2 text-amber-700 dark:text-amber-400">
+              2. Explore the Platform
+            </h4>
+            <ul className="text-[var(--text-secondary)] text-xs space-y-1 list-disc ml-4">
+              <li>Switch personas via the User Menu</li>
+              <li>Explore the Graph Explorer (center node)</li>
+              <li>Browse the Data Catalog</li>
+              <li>Check Patient Portal (PATIENT role)</li>
+              <li>Review ODRL policies (HDAB role)</li>
+            </ul>
+          </div>
+          <div className="border border-[var(--border)] rounded-lg p-4">
+            <h4 className="font-semibold text-sm mb-2 text-indigo-700 dark:text-indigo-400">
+              3. Key Concepts
+            </h4>
+            <ul className="text-[var(--text-secondary)] text-xs space-y-1 list-disc ml-4">
+              <li>
+                <strong>DSP:</strong> Dataspace Protocol — sovereign data
+                exchange
+              </li>
+              <li>
+                <strong>DCP:</strong> Decentralised Claims — DID + VC identity
+              </li>
+              <li>
+                <strong>FHIR R4:</strong> Clinical data standard (EHR)
+              </li>
+              <li>
+                <strong>OMOP CDM:</strong> Analytics layer for research
+              </li>
+              <li>
+                <strong>EHDS:</strong> EU regulation for health data sharing
+              </li>
+            </ul>
+          </div>
+        </div>
+        <a
+          href={`${GITHUB_REPO}/blob/main/docs/onboarding-guide.md`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-1 text-sm text-indigo-700 dark:text-indigo-400 hover:text-indigo-900 dark:hover:text-indigo-300"
+        >
+          Full Onboarding Guide &rarr; <ExternalLink size={12} />
+        </a>
+      </section>
 
       {/* JAD Architecture */}
       <section className="mb-10">
@@ -1047,7 +1122,7 @@ PLAYWRIGHT_BASE_URL=http://localhost:3003 \\
           {[
             ["15", "Pre-commit hooks"],
             ["2", "Pre-push gates"],
-            ["10", "CI jobs"],
+            ["13", "CI jobs"],
             ["3", "Compliance suites"],
           ].map(([count, label]) => (
             <div
@@ -1428,9 +1503,14 @@ PLAYWRIGHT_BASE_URL=http://localhost:3003 \\
               desc: "test.yml, pages.yml, compliance.yml, deploy-azure.yml, reset-demo.yml",
             },
             {
-              title: "SIMPL-Open Evaluation",
-              href: `${GITHUB_REPO}/blob/main/docs/ADRs/ADR-013-simpl-open-alignment.md`,
-              desc: "Gap analysis and alignment roadmap for EU SIMPL-Open programme",
+              title: "SIMPL-Open Gap Analysis",
+              href: `${GITHUB_REPO}/blob/main/docs/simpl-ehds-gap-analysis.md`,
+              desc: "Comprehensive SIMPL vs EHDS gap analysis — DID/SSI rationale, supply chain transparency",
+            },
+            {
+              title: "Onboarding Guide",
+              href: `${GITHUB_REPO}/blob/main/docs/onboarding-guide.md`,
+              desc: "New developer onboarding — first day checklist, key concepts, common tasks",
             },
           ].map((link) => (
             <a
