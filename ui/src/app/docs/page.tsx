@@ -42,14 +42,16 @@ export default function DocsPage() {
           <Link
             key={href}
             href={href}
-            className={`border rounded-xl p-6 transition-colors group ${color}`}
+            className={`flex flex-col border rounded-xl p-6 transition-colors group ${color}`}
           >
             <div className="flex items-center gap-2 mb-3">
               <Icon size={22} />
               <span className="font-semibold text-lg">{label}</span>
             </div>
-            <p className="text-sm text-[var(--text-secondary)] mb-4">{desc}</p>
-            <span className="inline-flex items-center gap-1 text-sm text-[var(--accent)] group-hover:underline">
+            <p className="text-sm text-[var(--text-secondary)] mb-4 flex-1">
+              {desc}
+            </p>
+            <span className="inline-flex items-center gap-1 text-sm text-[var(--accent)] group-hover:underline mt-auto">
               Read more <ArrowRight size={14} />
             </span>
           </Link>
