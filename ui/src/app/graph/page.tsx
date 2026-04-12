@@ -455,6 +455,7 @@ function GraphContent() {
     );
     if (match) {
       setSelected(match);
+      setRightCollapsed(false); // auto-open inspector for highlighted node
       setTimeout(() => {
         if (fgRef.current && match.x != null) {
           fgRef.current.centerAt(match.x, match.y, 600);
@@ -875,8 +876,8 @@ function GraphContent() {
                 ? "#94a3b8"
                 : "#475569";
         ctx.textAlign = "center";
-        // Filter-matching nodes show the friendly name; others show ID
-        const labelText = filterHighlighted ? node.name : node.id;
+        // Always show the friendly name (node.name) instead of raw Neo4j IDs
+        const labelText = node.name;
         const maxLen = filterHighlighted ? 24 : 18;
         ctx.fillText(
           labelText.length > maxLen

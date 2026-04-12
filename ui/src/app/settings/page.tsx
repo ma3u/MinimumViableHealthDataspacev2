@@ -98,6 +98,7 @@ export default function SettingsPage() {
     ? demoPersona?.username ?? ""
     : tabSession?.username ?? "";
 
+  const isPatient = currentRoles.includes("PATIENT");
   const isAdmin =
     currentRoles.includes("EDC_ADMIN") ||
     currentRoles.includes("HDAB_AUTHORITY");
@@ -307,6 +308,30 @@ export default function SettingsPage() {
     } finally {
       setSaving(false);
     }
+  }
+
+  // Patients do not have DCP business credentials — redirect away
+  if (isPatient && !isAdmin) {
+    return (
+      <div className="min-h-screen bg-[var(--bg)]">
+        <div className="max-w-3xl mx-auto px-6 py-10 text-center">
+          <Settings2
+            size={40}
+            className="text-[var(--text-secondary)] mx-auto mb-4"
+          />
+          <p className="text-[var(--text-secondary)] mb-2">
+            Patient accounts use personal health credentials (eIDAS 2.0 /
+            OIDC4VP), not DCP business profiles.
+          </p>
+          <a
+            href="/patient"
+            className="text-sm text-teal-800 dark:text-teal-300 hover:underline"
+          >
+            Go to My Health →
+          </a>
+        </div>
+      </div>
+    );
   }
 
   if (loading) {

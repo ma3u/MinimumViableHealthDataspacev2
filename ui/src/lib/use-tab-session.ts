@@ -25,6 +25,8 @@ const SWITCH_PENDING_KEY = "session-switch-pending";
 
 export interface TabSession {
   username: string;
+  /** Keycloak login name (preferred_username) — used for role derivation. */
+  preferredUsername: string;
   email: string;
   roles: string[];
 }
@@ -94,7 +96,14 @@ export function useTabSession(): {
       // Clear old snapshot — will be replaced by the new session below
       sessionStorage.removeItem(SNAPSHOT_KEY);
       setTabSession(null);
+      return;
     }
+
+    // SSR hydration fix: useState initializer ran on the server where
+    // sessionStorage is unavailable, so it returned null. On the client
+    // the snapshot may already exist — load it now.
+    const snap = readSnapshot();
+    if (snap) setTabSession(snap);
   }, []);
 
   useEffect(() => {
@@ -102,14 +111,22 @@ export function useTabSession(): {
 
     const existing = readSnapshot();
     if (existing) {
-      // Snapshot exists — keep using it (ignore cross-tab cookie changes)
+      // Snapshot exists — ensure state is in sync (covers SSR hydration gap)
+      setTabSession((prev) => prev ?? existing);
       return;
     }
 
     // No snapshot yet (first load or after switch) — take the live session
-    const roles = (liveSession as { roles?: string[] }).roles ?? [];
+    const sessionData = liveSession as {
+      roles?: string[];
+      user?: { name?: string; email?: string; preferredUsername?: string };
+    };
+    const roles = sessionData.roles ?? [];
+    const preferredUsername =
+      sessionData.user?.preferredUsername ?? liveSession.user?.name ?? "";
     const snap: TabSession = {
       username: liveSession.user?.name ?? liveSession.user?.email ?? "",
+      preferredUsername,
       email: liveSession.user?.email ?? "",
       roles: [...roles],
     };

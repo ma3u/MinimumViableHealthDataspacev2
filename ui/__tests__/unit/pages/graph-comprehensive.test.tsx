@@ -1084,7 +1084,7 @@ describe("GraphPage", () => {
       });
     });
 
-    it("handles node with long id (truncated in canvas)", async () => {
+    it("handles node with long name (truncated in canvas)", async () => {
       const props = await renderAndGetForceGraphProps();
       const paintNode = props.nodeCanvasObject as (
         node: object,
@@ -1092,10 +1092,10 @@ describe("GraphPage", () => {
         globalScale: number,
       ) => void;
       const ctx = createMockCtx() as CanvasRenderingContext2D;
-      // The label rendered is node.id (not node.name); must exceed maxLen (18)
+      // The label rendered is node.name (friendly name); must exceed maxLen (18)
       const longNameNode = {
-        id: "a-very-long-node-id-that-exceeds-eighteen-characters",
-        name: "Long Node",
+        id: "some-id",
+        name: "A Very Long Node Name That Exceeds Eighteen Characters",
         label: "Test",
         layer: 1,
         color: "#333",

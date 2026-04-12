@@ -364,12 +364,19 @@ export async function GET() {
         ?.participantContextId;
       const ctx = edcParticipants.find((p) => p["@id"] === ctxId);
 
+      // Extract DID from profile identifier (URL-encoded), EDC identity, or tenant property
+      const profileDid = (profiles as { identifier?: string }[])?.[0]
+        ?.identifier;
+      const decodedDid = profileDid
+        ? decodeURIComponent(profileDid)
+        : undefined;
+
       participants.push({
         id: t.id,
         displayName: t.properties?.displayName || t.id,
         organization: t.properties?.organization || "—",
         role: t.properties?.ehdsParticipantType || t.properties?.role || "—",
-        did: ctx?.identity || t.properties?.did || "—",
+        did: ctx?.identity || decodedDid || t.properties?.did || "—",
         state: ctx?.state || "—",
         profileCount: profiles.length,
       });

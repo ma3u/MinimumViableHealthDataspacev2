@@ -1,7 +1,15 @@
 "use client";
 
 import { signIn, signOut } from "next-auth/react";
-import { LogIn, LogOut, Settings, Shield, User, Users } from "lucide-react";
+import {
+  LogIn,
+  LogOut,
+  Settings,
+  Shield,
+  ShieldCheck,
+  User,
+  Users,
+} from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { ROLE_LABELS, DEMO_PERSONAS, deriveParticipantType } from "@/lib/auth";
 import {
@@ -219,14 +227,77 @@ export default function UserMenu() {
         </div>
       );
     }
+    // Live mode: show persona picker dropdown (same as static mode but triggers Keycloak sign-in)
     return (
-      <button
-        onClick={() => signIn("keycloak")}
-        className="flex items-center gap-1.5 px-3 py-1.5 rounded text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-2)] transition-colors"
-      >
-        <LogIn size={15} />
-        Sign in
-      </button>
+      <div ref={ref} className="relative">
+        <button
+          onClick={() => setOpen(!open)}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-2)] transition-colors"
+        >
+          <LogIn size={15} />
+          Sign in
+        </button>
+        {open && (
+          <div className="absolute right-0 top-full mt-1 w-64 bg-[var(--surface-2)] border border-[var(--border)] rounded-lg shadow-xl z-50">
+            <div className="px-3 pt-2 pb-1 flex items-center gap-1.5">
+              <Users size={11} className="text-[var(--text-secondary)]" />
+              <span className="text-[10px] text-[var(--text-secondary)] uppercase tracking-wide font-semibold">
+                Returning users
+              </span>
+            </div>
+            <div className="px-2 pb-2 space-y-0.5">
+              {DEMO_PERSONAS.map((persona) => {
+                const pRole = [...persona.roles].find((r) =>
+                  [
+                    "EDC_ADMIN",
+                    "HDAB_AUTHORITY",
+                    "DATA_HOLDER",
+                    "DATA_USER",
+                    "PATIENT",
+                  ].includes(r),
+                );
+                return (
+                  <button
+                    key={persona.username}
+                    onClick={() => {
+                      setOpen(false);
+                      signIn(
+                        "keycloak",
+                        { callbackUrl: `/graph?persona=${persona.personaId}` },
+                        { login_hint: persona.username },
+                      );
+                    }}
+                    className="flex items-center gap-2 w-full px-2 py-1.5 rounded text-left hover:bg-[var(--surface-2)] cursor-pointer transition-colors"
+                  >
+                    <span
+                      className={`inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded font-medium shrink-0 ${
+                        ROLE_BADGE[pRole ?? ""] ??
+                        "bg-gray-600 text-[var(--text-primary)]"
+                      }`}
+                    >
+                      <Shield size={8} />
+                      {ROLE_LABELS[pRole ?? ""] ?? pRole}
+                    </span>
+                    <span className="font-mono text-xs truncate text-[var(--text-primary)]">
+                      {persona.username}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+            <div className="p-2 border-t border-[var(--border)]">
+              <a
+                href="/auth/signin"
+                onClick={() => setOpen(false)}
+                className="flex items-center justify-center gap-1.5 w-full px-3 py-2 text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-2)] rounded transition-colors"
+              >
+                <ShieldCheck size={12} />
+                All users &amp; details
+              </a>
+            </div>
+          </div>
+        )}
+      </div>
     );
   }
 
@@ -302,17 +373,19 @@ export default function UserMenu() {
             </div>
           </div>
 
-          {/* Settings link */}
-          <div className="p-2 border-b border-[var(--border)]">
-            <a
-              href="/settings"
-              onClick={() => setOpen(false)}
-              className="flex items-center gap-2 w-full px-3 py-2 rounded text-sm text-[var(--text-primary)] hover:bg-[var(--surface-2)] transition-colors"
-            >
-              <Settings size={14} />
-              <span className="font-medium">Settings</span>
-            </a>
-          </div>
+          {/* Settings link — hidden for PATIENT (no DCP business credentials) */}
+          {!roles.includes("PATIENT") && (
+            <div className="p-2 border-b border-[var(--border)]">
+              <a
+                href="/settings"
+                onClick={() => setOpen(false)}
+                className="flex items-center gap-2 w-full px-3 py-2 rounded text-sm text-[var(--text-primary)] hover:bg-[var(--surface-2)] transition-colors"
+              >
+                <Settings size={14} />
+                <span className="font-medium">Settings</span>
+              </a>
+            </div>
+          )}
 
           {/* Persona switcher — Keycloak in live mode, localStorage in static demo */}
           <div className="border-t border-[var(--border)]">

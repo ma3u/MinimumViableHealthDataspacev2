@@ -58,7 +58,20 @@ export const authOptions: NextAuthOptions = {
         const realmAccess = keycloakProfile.realm_access as
           | { roles?: string[] }
           | undefined;
-        token.roles = realmAccess?.roles ?? [];
+        const roles = [...(realmAccess?.roles ?? [])];
+        // Store the Keycloak login name (preferred_username) for derivation.
+        // user.name is the display name (e.g. "Maria Schmidt") which may not
+        // match the username-based derivation patterns.
+        const preferredUsername =
+          (keycloakProfile.preferred_username as string) ?? "";
+        token.preferredUsername = preferredUsername;
+        // Augment roles with derived participant type so Navigation/UserMenu
+        // always have the correct roles regardless of Keycloak configuration.
+        const derived = deriveParticipantType(roles, preferredUsername);
+        if (derived && !roles.includes(derived)) {
+          roles.push(derived);
+        }
+        token.roles = roles;
         token.sub = profile.sub;
       }
       return token;
@@ -68,7 +81,12 @@ export const authOptions: NextAuthOptions = {
         ...session,
         accessToken: token.accessToken as string,
         roles: (token.roles as string[]) ?? [],
-        user: { ...session.user, id: token.sub as string },
+        user: {
+          ...session.user,
+          id: token.sub as string,
+          // Expose preferred_username so tab-session can use it for derivation
+          preferredUsername: (token.preferredUsername as string) ?? "",
+        },
       };
     },
   },
