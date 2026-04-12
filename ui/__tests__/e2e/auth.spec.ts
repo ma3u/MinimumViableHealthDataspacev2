@@ -1,9 +1,11 @@
 import { test, expect } from "@playwright/test";
 
+const KEYCLOAK_URL = process.env.KEYCLOAK_PUBLIC_URL || "http://localhost:8080";
+
 async function isKeycloakUp(): Promise<boolean> {
   try {
     const res = await fetch(
-      "http://localhost:8080/realms/edcv/.well-known/openid-configuration",
+      `${KEYCLOAK_URL}/realms/edcv/.well-known/openid-configuration`,
       { signal: AbortSignal.timeout(3_000) },
     );
     return res.ok;
@@ -38,7 +40,7 @@ test.describe("Portal Login flow with all users", () => {
       await page.click('button:has-text("Sign in with Keycloak")');
 
       // 3. We should now be on the Keycloak login page. Wait for it to load.
-      await expect(page).toHaveURL(/.*localhost:8080.*openid-connect\/auth/);
+      await expect(page).toHaveURL(/openid-connect\/auth/);
 
       // 4. Fill in the Keycloak login form
       await page.fill("#username", user.username);

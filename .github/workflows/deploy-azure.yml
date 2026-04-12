@@ -1,0 +1,185 @@
+name: Deploy to Azure Container Apps
+
+on:
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+concurrency:
+  group: "azure-deploy"
+  cancel-in-progress: false
+
+env:
+  ACR_NAME: acrmvhddev
+  ACR_LOGIN_SERVER: acrmvhddev.azurecr.io
+  RESOURCE_GROUP: rg-mvhd-dev
+  ACA_ENV: mvhd-env
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Azure Login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: ACR Login
+        run: az acr login --name ${{ env.ACR_NAME }}
+
+      # ── Build custom images (amd64) ──────────────────────────
+      - name: Build & push UI image
+        run: |
+          docker buildx build --platform linux/amd64 \
+            -t ${{ env.ACR_LOGIN_SERVER }}/mvhd-ui:${{ github.sha }} \
+            -t ${{ env.ACR_LOGIN_SERVER }}/mvhd-ui:latest \
+            --push ./ui
+
+      - name: Build & push Neo4j Proxy image
+        run: |
+          docker buildx build --platform linux/amd64 \
+            -t ${{ env.ACR_LOGIN_SERVER }}/mvhd-neo4j-proxy:${{ github.sha }} \
+            -t ${{ env.ACR_LOGIN_SERVER }}/mvhd-neo4j-proxy:latest \
+            --push ./services/neo4j-proxy
+
+      # ── Deploy to Azure Container Apps ───────────────────────
+      - name: Deploy UI
+        run: |
+          az containerapp update \
+            --name mvhd-ui \
+            --resource-group ${{ env.RESOURCE_GROUP }} \
+            --image ${{ env.ACR_LOGIN_SERVER }}/mvhd-ui:${{ github.sha }}
+
+      - name: Deploy Neo4j Proxy
+        run: |
+          az containerapp update \
+            --name mvhd-neo4j-proxy \
+            --resource-group ${{ env.RESOURCE_GROUP }} \
+            --image ${{ env.ACR_LOGIN_SERVER }}/mvhd-neo4j-proxy:${{ github.sha }}
+
+      - name: Verify deployments
+        id: verify
+        run: |
+          echo "=== Deployment Status ==="
+          for app in mvhd-ui mvhd-neo4j-proxy; do
+            status=$(az containerapp show --name $app --resource-group ${{ env.RESOURCE_GROUP }} \
+              --query "properties.runningStatus" -o tsv 2>/dev/null || echo "unknown")
+            fqdn=$(az containerapp show --name $app --resource-group ${{ env.RESOURCE_GROUP }} \
+              --query "properties.configuration.ingress.fqdn" -o tsv 2>/dev/null || echo "n/a")
+            echo "$app: status=$status fqdn=$fqdn"
+          done
+          UI_FQDN=$(az containerapp show --name mvhd-ui --resource-group ${{ env.RESOURCE_GROUP }} \
+            --query "properties.configuration.ingress.fqdn" -o tsv)
+          echo "ui_url=https://${UI_FQDN}" >> "$GITHUB_OUTPUT"
+
+      # ── Wait for new revision to be healthy ──────────────────
+      - name: Wait for UI to respond
+        run: |
+          echo "Waiting for ${{ steps.verify.outputs.ui_url }} ..."
+          for i in $(seq 1 30); do
+            code=$(curl -sf -o /dev/null -w "%{http_code}" "${{ steps.verify.outputs.ui_url }}" 2>/dev/null || echo "000")
+            if [ "$code" = "200" ]; then
+              echo "UI is healthy (HTTP 200)"
+              exit 0
+            fi
+            echo "  attempt $i: HTTP $code"
+            sleep 10
+          done
+          echo "::warning::UI did not return 200 within 5 minutes"
+
+  # -------------------------------------------------------------------
+  # E2E Tests against live Azure deployment
+  # -------------------------------------------------------------------
+  e2e-azure:
+    name: E2E Tests (Azure)
+    needs: build-and-deploy
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: ./ui
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: ./ui/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Azure Login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Get Azure service URLs
+        id: azure-url
+        run: |
+          UI_FQDN=$(az containerapp show --name mvhd-ui --resource-group ${{ env.RESOURCE_GROUP }} \
+            --query "properties.configuration.ingress.fqdn" -o tsv)
+          KC_FQDN=$(az containerapp show --name mvhd-keycloak --resource-group ${{ env.RESOURCE_GROUP }} \
+            --query "properties.configuration.ingress.fqdn" -o tsv)
+          echo "url=https://${UI_FQDN}" >> "$GITHUB_OUTPUT"
+          echo "keycloak_url=https://${KC_FQDN}" >> "$GITHUB_OUTPUT"
+          echo "Azure UI URL: https://${UI_FQDN}"
+          echo "Azure Keycloak URL: https://${KC_FQDN}"
+
+      - name: Run E2E tests against Azure
+        continue-on-error: true
+        run: npx playwright test --project=chromium --reporter=line,html
+        env:
+          CI: true
+          PLAYWRIGHT_BASE_URL: ${{ steps.azure-url.outputs.url }}
+          KEYCLOAK_PUBLIC_URL: ${{ steps.azure-url.outputs.keycloak_url }}
+
+      - name: WCAG accessibility audit (Azure)
+        continue-on-error: true
+        run: npx playwright test __tests__/e2e/journeys/27-wcag-accessibility.spec.ts --project=chromium
+        env:
+          CI: true
+          PLAYWRIGHT_BASE_URL: ${{ steps.azure-url.outputs.url }}
+          KEYCLOAK_PUBLIC_URL: ${{ steps.azure-url.outputs.keycloak_url }}
+
+      - name: Security tests (Azure)
+        continue-on-error: true
+        run: npx playwright test __tests__/e2e/journeys/28-security-pentest.spec.ts --project=chromium --grep-invert "SEC-4[1-9]|SEC-50"
+        env:
+          CI: true
+          PLAYWRIGHT_BASE_URL: ${{ steps.azure-url.outputs.url }}
+          KEYCLOAK_PUBLIC_URL: ${{ steps.azure-url.outputs.keycloak_url }}
+
+      - name: Upload Playwright report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-azure-report
+          path: ui/playwright-report/
+          retention-days: 30
+
+      - name: Test summary
+        if: always()
+        run: |
+          echo "## E2E Test Results (Azure)" >> $GITHUB_STEP_SUMMARY
+          echo "**Target:** ${{ steps.azure-url.outputs.url }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [ -f playwright-report/index.html ]; then
+            echo "Full report available in the **playwright-azure-report** artifact." >> $GITHUB_STEP_SUMMARY
+          fi

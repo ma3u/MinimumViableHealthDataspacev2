@@ -86,6 +86,26 @@ repos:
         pass_filenames: false
         stages: [pre-commit]
 
+  # Broken link checker for Markdown files
+  # Checks that local links, images, and anchors resolve to real files/paths.
+  # Requires: npm i -g markdown-link-check  (or: brew install lychee)
+  - repo: local
+    hooks:
+      - id: check-broken-links-md
+        name: Broken links (Markdown)
+        language: system
+        entry: 'bash -c ''if command -v lychee >/dev/null 2>&1; then lychee --no-progress --offline "$@"; elif command -v markdown-link-check >/dev/null 2>&1; then for f in "$@"; do markdown-link-check --quiet "$f" || exit 1; done; else echo "[WARN] Neither lychee nor markdown-link-check installed"; fi'' --'
+        files: \.(md|markdown)$
+        stages: [pre-commit]
+
+      - id: check-no-screenshot-imports
+        name: No screenshot images in doc pages
+        language: system
+        entry: 'bash -c ''if grep -rl "images/screenshots" --include="*.tsx" ui/src/app/docs/ 2>/dev/null; then echo "ERROR: Doc pages must not reference screenshot images"; exit 1; fi'''
+        files: ^ui/src/app/docs/.*\.tsx$
+        pass_filenames: false
+        stages: [pre-commit]
+
   # npm dependency audit — HIGH/CRITICAL CVEs on pre-push (BSI C5 DEV-05)
   # Requires: node/npm in PATH
   - repo: local

@@ -13,8 +13,9 @@ import { test, expect, Page } from "@playwright/test";
 
 async function isKeycloakUp(): Promise<boolean> {
   try {
+    const kcUrl = process.env.KEYCLOAK_PUBLIC_URL || "http://localhost:8080";
     const res = await fetch(
-      "http://localhost:8080/realms/edcv/.well-known/openid-configuration",
+      `${kcUrl}/realms/edcv/.well-known/openid-configuration`,
       { signal: AbortSignal.timeout(3_000) },
     );
     return res.ok;
@@ -128,7 +129,7 @@ async function loginAsEdcAdmin(page: Page) {
   await page.goto("/onboarding");
   await expect(page).toHaveURL(/\/auth\/signin/, { timeout: 10_000 });
   await page.click('button:has-text("Sign in with Keycloak")');
-  await expect(page).toHaveURL(/localhost:8080.*openid-connect\/auth/, {
+  await expect(page).toHaveURL(/openid-connect\/auth/, {
     timeout: 15_000,
   });
   await page.fill("#username", "edcadmin");

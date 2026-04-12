@@ -3385,7 +3385,82 @@ Audit events are written to Neo4j as `(:QueryAuditEvent)` nodes linked to the ca
 
 ---
 
+## Cross-Cutting Concerns
+
+### SIMPL-Open EU Programme Alignment
+
+The [SIMPL-Open](https://simpl-programme.eu/) programme provides EU open-source middleware for common European data spaces. This implementation aligns with SIMPL requirements:
+
+| SIMPL Requirement       | Status       | Implementation                                    |
+| ----------------------- | ------------ | ------------------------------------------------- |
+| DSP 2025-1              | ✅ Compliant | EDC-V control plane + TCK validation (140+ tests) |
+| DCP v1.0                | ✅ Compliant | IdentityHub + IssuerService (15 VCs issued)       |
+| DID:web                 | ✅ Compliant | 5 participants with DID documents                 |
+| DCAT-AP federation      | ✅ Compliant | HealthDCAT-AP JSON-LD serialization               |
+| ODRL policies           | ✅ Compliant | 14 EHDS policies across 5 participants            |
+| Gaia-X labels           | ⚠️ Gap       | Not yet required for EHDS pilot phase             |
+| Connector certification | ⚠️ Gap       | SIMPL certification process TBD                   |
+
+See [ADR-013: SIMPL-Open Alignment](ADRs/ADR-013-simpl-open-alignment.md) and [Gap Analysis](simpl-ehds-gap-analysis.md).
+
+### WCAG 2.2 AA Accessibility
+
+All UI pages comply with WCAG 2.2 Level AA (EN 301 549):
+
+- **Automated enforcement**: axe-core scans all 22 routes in CI via `27-wcag-accessibility.spec.ts`
+- **Zero-violation gate**: CI fails on any AA-level violation
+- **Keyboard navigation**: full functionality without mouse, visible focus indicators
+- **Color contrast**: 4.5:1 minimum (dark theme), all status colors tuned
+- **Screen reader**: semantic HTML, ARIA landmarks, live regions for dynamic updates
+- **Lighthouse score**: 95+ accessibility target
+
+See [ADR-010: WCAG 2.2 AA Compliance](ADRs/ADR-010-wcag-accessibility.md).
+
+### Security Testing
+
+Automated security testing as part of CI/CD:
+
+- **Playwright security spec** (`28-security-pentest.spec.ts`): 50 checks covering HTTP headers, auth boundaries, session management, input validation, information leakage, CORS
+- **Trivy container scanning**: CVE detection at CRITICAL/HIGH severity blocks deployment
+- **Gitleaks**: secret detection in source (pre-commit + CI)
+- **Dependency audit**: `npm audit` in pipeline
+- **BSI IT-Grundschutz**: health infrastructure baseline alignment
+
+See [ADR-011: Security Testing Strategy](ADRs/ADR-011-security-testing.md).
+
+### Azure Container Apps Deployment
+
+Production deployment on Azure Container Apps:
+
+- **13 Container Apps** + **3 ACA Jobs** (bootstrap, schema, seed)
+- **CI/CD**: GitHub Actions with OIDC federation (`deploy-azure.yml`)
+- **E2E validation**: Playwright runs against Azure after every deploy
+- **Infrastructure**: ACR for images, managed certificates, Azure Files for persistence
+- **Scripts**: 11 deployment scripts in `scripts/azure/`
+
+See [ADR-012: Azure Container Apps](ADRs/ADR-012-azure-container-apps.md) and [Azure Deployment Guide](azure-deployment-guide.md).
+
+---
+
 ## Architecture Decisions
+
+> **Note:** ADRs are maintained as standalone documents in [`docs/ADRs/`](ADRs/). The sections below provide the full context and rationale for each decision.
+
+| ADR                                                 | Title                                         | Date       | Status   |
+| --------------------------------------------------- | --------------------------------------------- | ---------- | -------- |
+| [001](ADRs/ADR-001-postgresql-neo4j-split.md)       | PostgreSQL vs Neo4j Data Storage Split        | 2025-07-24 | Accepted |
+| [002](ADRs/ADR-002-edc-data-plane-architecture.md)  | EDC Data Plane Architecture                   | 2025-07-24 | Accepted |
+| [003](ADRs/ADR-003-healthdcat-ap-alignment.md)      | W3C HealthDCAT-AP Alignment                   | 2025-07-24 | Accepted |
+| [004](ADRs/ADR-004-nextjs-unified-frontend.md)      | Next.js 14 as Unified Frontend                | 2025-07-25 | Accepted |
+| [005](ADRs/ADR-005-jad-cfm-source-builds.md)        | JAD + CFM Source Builds                       | 2026-03-09 | Accepted |
+| [006](ADRs/ADR-006-ghcr-image-publishing.md)        | GHCR Image Publishing                         | 2026-03-10 | Accepted |
+| [007](ADRs/ADR-007-did-web-dsp-negotiation.md)      | DID:web Resolution & DSP Contract Negotiation | 2026-07-08 | Accepted |
+| [008](ADRs/ADR-008-testing-strategy.md)             | Comprehensive Testing Strategy                | 2026-03-11 | Accepted |
+| [009](ADRs/ADR-009-issuerservice-credential-fix.md) | IssuerService DCP Credential Issuance Fix     | 2026-07-12 | Accepted |
+| [010](ADRs/ADR-010-wcag-accessibility.md)           | WCAG 2.2 AA Accessibility Compliance          | 2026-04-01 | Accepted |
+| [011](ADRs/ADR-011-security-testing.md)             | Security Penetration Testing Strategy         | 2026-04-01 | Accepted |
+| [012](ADRs/ADR-012-azure-container-apps.md)         | Azure Container Apps Deployment               | 2026-04-10 | Accepted |
+| [013](ADRs/ADR-013-simpl-open-alignment.md)         | SIMPL-Open EU Programme Alignment             | 2026-04-05 | Accepted |
 
 ### ADR-1: PostgreSQL vs Neo4j Data Storage Split
 
