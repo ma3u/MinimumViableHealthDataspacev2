@@ -703,6 +703,31 @@ export default function QualityGatesPage() {
             </div>
           ))}
         </div>
+        <div className="mt-4 bg-[var(--surface-2)] border border-[var(--border)] rounded-lg p-4">
+          <h4 className="font-semibold text-sm mb-2">
+            Infrastructure Requirements
+          </h4>
+          <p className="text-xs text-[var(--text-secondary)] mb-2">
+            Protocol compliance tests require the full JAD stack (19 services, 8
+            GB RAM). In CI, the workflow starts JAD infrastructure with graceful
+            fallback — tests produce results only when the controlplane is
+            healthy.
+          </p>
+          <p className="text-xs text-[var(--text-secondary)]">
+            Local execution:{" "}
+            <code className="text-[var(--accent)]">
+              ./scripts/run-dsp-tck.sh
+            </code>
+            ,{" "}
+            <code className="text-[var(--accent)]">
+              ./scripts/run-dcp-tests.sh
+            </code>
+            ,{" "}
+            <code className="text-[var(--accent)]">
+              ./scripts/run-ehds-tests.sh
+            </code>
+          </p>
+        </div>
       </section>
 
       {/* Coverage */}
