@@ -378,15 +378,13 @@ describe("UserMenu", () => {
       expect(demoLabel).not.toBeNull();
     });
 
-    it("shows 'Sign out (disabled in demo)' text in static mode", async () => {
+    it("shows 'Sign out' text in static mode", async () => {
       const DemoUserMenu = await loadDemoUserMenu();
       const user = userEvent.setup();
       render(<DemoUserMenu />);
 
       await user.click(screen.getByText("edcadmin"));
-      expect(
-        screen.getByText("Sign out (disabled in demo)"),
-      ).toBeInTheDocument();
+      expect(screen.getByText("Sign out")).toBeInTheDocument();
     });
 
     it("sign-in button is no-op in static mode", async () => {
@@ -397,16 +395,18 @@ describe("UserMenu", () => {
       expect(screen.getByText("edcadmin")).toBeInTheDocument();
     });
 
-    it("sign-out is a no-op in demo mode (signOut not called)", async () => {
+    it("sign-out clears persona and redirects in demo mode", async () => {
       const DemoUserMenu = await loadDemoUserMenu();
       const user = userEvent.setup();
       render(<DemoUserMenu />);
 
       await user.click(screen.getByText("edcadmin"));
-      await user.click(screen.getByText("Sign out (disabled in demo)"));
+      await user.click(screen.getByText("Sign out"));
 
-      // signOut should NOT be called in demo mode
+      // In static mode, signOut (NextAuth) should NOT be called
       expect(mockSignOut).not.toHaveBeenCalled();
+      // sessionStorage persona should be cleared
+      expect(sessionStorage.getItem("demo-persona")).toBeNull();
     });
   });
 
