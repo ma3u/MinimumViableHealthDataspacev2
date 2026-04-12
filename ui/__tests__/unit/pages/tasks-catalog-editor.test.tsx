@@ -9,6 +9,21 @@ vi.mock("@/lib/api", () => ({
   fetchApi: (...args: unknown[]) => mockFetchApi(...args),
 }));
 
+vi.mock("@/lib/use-demo-persona", () => ({
+  useDemoPersona: () => ({ username: "edcadmin", roles: ["EDC_ADMIN"] }),
+}));
+
+vi.mock("@/lib/use-tab-session", () => ({
+  useTabSession: () => ({
+    session: {
+      username: "edcadmin",
+      email: "edcadmin@demo.ehds.eu",
+      roles: ["EDC_ADMIN"],
+    },
+    status: "authenticated",
+  }),
+}));
+
 vi.mock("next/link", () => ({
   default: ({
     href,
@@ -39,7 +54,7 @@ describe("TasksPage", () => {
   it("renders heading", () => {
     mockFetchApi.mockReturnValue(new Promise(() => {}));
     render(<TasksPage />);
-    expect(screen.getByText("Tasks")).toBeInTheDocument();
+    expect(screen.getByText(/All Tasks/)).toBeInTheDocument();
   });
 
   it("shows loading state", () => {
@@ -105,7 +120,7 @@ describe("TasksPage", () => {
 
     await waitFor(() => {
       // Should not crash — shows empty or error state
-      expect(screen.getByText("Tasks")).toBeInTheDocument();
+      expect(screen.getByText(/All Tasks/)).toBeInTheDocument();
     });
   });
 });
