@@ -7,3 +7,6 @@
 
 # typescript (compiled output) — Vault dev clientSecret (in-memory, reset on restart)
 7444429b1c452b94330127964824124af2a4cd23:typescript:generic-api-key:2502
+
+# neo4j/seed.sh — base64-encoded Neo4j dev credentials (neo4j:healthdataspace, local only)
+fe7320a578f5136c47218a80e351859235221353:neo4j/seed.sh:generic-api-key:5
