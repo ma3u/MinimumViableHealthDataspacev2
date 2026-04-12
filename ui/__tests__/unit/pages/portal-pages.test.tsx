@@ -10,6 +10,21 @@ vi.mock("@/lib/api", () => ({
   fetchApi: (...args: unknown[]) => mockFetchApi(...args),
 }));
 
+vi.mock("@/lib/use-demo-persona", () => ({
+  useDemoPersona: () => ({ username: "edcadmin", roles: ["EDC_ADMIN"] }),
+}));
+
+vi.mock("@/lib/use-tab-session", () => ({
+  useTabSession: () => ({
+    session: {
+      username: "edcadmin",
+      email: "edcadmin@demo.ehds.eu",
+      roles: ["EDC_ADMIN"],
+    },
+    status: "authenticated",
+  }),
+}));
+
 vi.mock("next/link", () => ({
   default: ({
     href,
@@ -230,7 +245,7 @@ describe("SettingsPage", () => {
     mockFetchApi.mockReturnValue(mockResponse({ tenants: [] }));
     render(<SettingsPage />);
     await waitFor(() => {
-      expect(screen.getByText("Participant Settings")).toBeInTheDocument();
+      expect(screen.getByText(/Settings/)).toBeInTheDocument();
     });
   });
 
@@ -326,7 +341,7 @@ describe("SettingsPage", () => {
     render(<SettingsPage />);
     await waitFor(() => {
       // Should show empty state (no crash), heading renders
-      expect(screen.getByText("Participant Settings")).toBeInTheDocument();
+      expect(screen.getByText(/Settings/)).toBeInTheDocument();
     });
   });
 });

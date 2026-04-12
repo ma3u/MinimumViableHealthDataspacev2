@@ -1,6 +1,27 @@
 {
   "tenants": [
     {
+      "id": "dataspace-operator-id",
+      "version": 1,
+      "properties": {
+        "displayName": "Health Dataspace Operator",
+        "role": "operator",
+        "ehdsParticipantType": "dataspace-operator",
+        "organization": "European Health Dataspace Association",
+        "contactPerson": "Admin",
+        "email": "admin@health-dataspace.local",
+        "country": "EU",
+        "website": "https://health-dataspace.eu"
+      },
+      "participantProfiles": [
+        {
+          "participantContextId": "f6a7b8c9d0e162f3a4b5c6d7e8f9a0b1",
+          "did": "did:web:health-dataspace.eu:operator",
+          "state": "ACTIVATED"
+        }
+      ]
+    },
+    {
       "id": "alpha-klinik-id",
       "version": 1,
       "properties": {
