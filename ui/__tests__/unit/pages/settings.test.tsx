@@ -16,6 +16,21 @@ vi.mock("@/lib/api", () => ({
   fetchApi: (...args: unknown[]) => mockFetchApi(...args),
 }));
 
+vi.mock("@/lib/use-demo-persona", () => ({
+  useDemoPersona: () => ({ username: "edcadmin", roles: ["EDC_ADMIN"] }),
+}));
+
+vi.mock("@/lib/use-tab-session", () => ({
+  useTabSession: () => ({
+    session: {
+      username: "edcadmin",
+      email: "edcadmin@demo.ehds.eu",
+      roles: ["EDC_ADMIN"],
+    },
+    status: "authenticated",
+  }),
+}));
+
 vi.mock("next/link", () => ({
   default: ({
     href,
@@ -113,7 +128,7 @@ beforeEach(() => {
 // ── Tests ────────────────────────────────────────────────────────────
 describe("SettingsPage", () => {
   describe("page title", () => {
-    it("renders the Participant Settings heading", async () => {
+    it("renders the Settings heading", async () => {
       mockFetchApi.mockImplementation((url: string) => {
         if (url === "/api/participants/me") return mockResponse([sampleTenant]);
         if (url.includes("/credentials")) return mockResponse([]);
@@ -122,7 +137,7 @@ describe("SettingsPage", () => {
 
       render(<SettingsPage />);
       await waitFor(() => {
-        expect(screen.getByText("Participant Settings")).toBeTruthy();
+        expect(screen.getByText(/Settings/)).toBeTruthy();
       });
     });
   });

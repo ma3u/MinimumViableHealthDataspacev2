@@ -1,7 +1,10 @@
 "use client";
 
 import { fetchApi } from "@/lib/api";
-import { useEffect, useState, type ElementType } from "react";
+import { DEMO_PERSONAS } from "@/lib/auth";
+import { useDemoPersona } from "@/lib/use-demo-persona";
+import { useTabSession } from "@/lib/use-tab-session";
+import { useEffect, useMemo, useState, type ElementType } from "react";
 import {
   Loader2,
   Settings2,
@@ -18,6 +21,22 @@ import {
   RefreshCw,
 } from "lucide-react";
 import PageIntro from "@/components/PageIntro";
+
+const IS_STATIC = process.env.NEXT_PUBLIC_STATIC_EXPORT === "true";
+
+/**
+ * Maps a demo persona username to the tenant IDs they should see.
+ * Admin and HDAB see all tenants; others see only their own organisation.
+ */
+const PERSONA_TENANT_MAP: Record<string, string[]> = {
+  edcadmin: [], // empty = show all (admin)
+  regulator: ["medreg-de-id", "irs-fr-id"],
+  clinicuser: ["alpha-klinik-id"],
+  researcher: ["pharmaco-research-id"],
+  lmcuser: ["limburg-mc-id"],
+  patient1: ["alpha-klinik-id"],
+  patient2: ["limburg-mc-id"],
+};
 
 interface VPA {
   id: string;
@@ -66,7 +85,28 @@ interface CredentialContext {
 }
 
 export default function SettingsPage() {
-  const [tenants, setTenants] = useState<Tenant[]>([]);
+  /* ── Current user context ── */
+  const demoPersona = useDemoPersona();
+  const { session: tabSession } = useTabSession();
+
+  const currentRoles: string[] = IS_STATIC
+    ? [...demoPersona.roles]
+    : tabSession?.roles ?? [];
+  const currentUsername: string = IS_STATIC
+    ? demoPersona.username
+    : tabSession?.username ?? "";
+
+  const isAdmin =
+    currentRoles.includes("EDC_ADMIN") ||
+    currentRoles.includes("HDAB_AUTHORITY");
+
+  // Resolve which organisation this user belongs to
+  const currentOrg = useMemo(() => {
+    const persona = DEMO_PERSONAS.find((p) => p.username === currentUsername);
+    return persona?.organisation ?? "";
+  }, [currentUsername]);
+
+  const [allTenants, setAllTenants] = useState<Tenant[]>([]);
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState<Tenant | null>(null);
   const [saving, setSaving] = useState(false);
@@ -74,6 +114,26 @@ export default function SettingsPage() {
   const [saveError, setSaveError] = useState("");
   const [credentials, setCredentials] = useState<CredentialContext[]>([]);
   const [credsLoading, setCredsLoading] = useState(false);
+
+  // Filter tenants by persona — admin sees all, others see their own
+  const tenants = useMemo(() => {
+    if (isAdmin) return allTenants;
+    const allowed = PERSONA_TENANT_MAP[currentUsername];
+    if (allowed && allowed.length > 0) {
+      return allTenants.filter((t) => allowed.includes(t.id));
+    }
+    // Fallback: match by organisation name in displayName
+    if (currentOrg) {
+      const orgBase = currentOrg.replace(/ \(patient\)$/, "");
+      const matched = allTenants.filter(
+        (t) =>
+          t.properties.displayName === orgBase ||
+          t.properties.organization?.includes(orgBase),
+      );
+      if (matched.length > 0) return matched;
+    }
+    return allTenants;
+  }, [allTenants, isAdmin, currentUsername, currentOrg]);
 
   // Editable contact field state — seeded from tenant properties
   const [form, setForm] = useState({
@@ -94,17 +154,21 @@ export default function SettingsPage() {
       .then((r) => (r.ok ? r.json() : []))
       .then((d) => {
         const list = Array.isArray(d) ? d : d.tenants || [];
-        setTenants(list);
-        if (list.length > 0) {
-          setSelected(list[0]);
-          seedForm(list[0]);
-          loadCredentials(list[0].id);
-        }
+        setAllTenants(list);
         setLoading(false);
       })
       .catch(() => setLoading(false));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // When tenants (filtered) change, auto-select the first one
+  useEffect(() => {
+    if (tenants.length > 0 && !tenants.find((t) => t.id === selected?.id)) {
+      setSelected(tenants[0]);
+      seedForm(tenants[0]);
+      loadCredentials(tenants[0].id);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tenants]);
 
   function seedForm(t: Tenant) {
     const p = t.properties || {};
@@ -227,7 +291,7 @@ export default function SettingsPage() {
       });
       if (!res.ok) throw new Error(await res.text());
       // Update local state
-      setTenants((prev) =>
+      setAllTenants((prev) =>
         prev.map((t) =>
           t.id === selected.id
             ? { ...t, properties: { ...t.properties, ...form } }
@@ -260,9 +324,15 @@ export default function SettingsPage() {
     <div className="min-h-screen bg-[var(--bg)]">
       <div className="max-w-3xl mx-auto px-6 py-10">
         <PageIntro
-          title="Participant Settings"
+          title={isAdmin ? "Dataspace Settings" : "Participant Settings"}
           icon={Settings2}
-          description="Manage your participant profile and preferences. Update display name, contact details, and notification settings for your registered dataspace identity."
+          description={
+            isAdmin
+              ? "Manage all participant profiles across the dataspace. Update display names, contact details, and notification settings."
+              : `Manage your profile and preferences for ${
+                  currentOrg || "your organisation"
+                }. Update display name, contact details, and notification settings.`
+          }
           prevStep={{ href: "/admin/audit", label: "Audit & Provenance" }}
           infoText="Changes are saved to the tenant-manager API and reflected across all dataspace interactions. Your DID:web identity and credentials remain unchanged."
           docLink={{ href: "/docs/user-guide", label: "User Guide" }}
