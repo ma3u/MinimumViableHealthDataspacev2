@@ -1,6 +1,9 @@
 "use client";
 
 import { fetchApi } from "@/lib/api";
+import { DEMO_PERSONAS } from "@/lib/auth";
+import { useDemoPersona } from "@/lib/use-demo-persona";
+import { useTabSession } from "@/lib/use-tab-session";
 import { Suspense, useEffect, useMemo, useState } from "react";
 import {
   ArrowRightLeft,
@@ -18,6 +21,8 @@ import {
 } from "lucide-react";
 import PageIntro from "@/components/PageIntro";
 import Link from "next/link";
+
+const IS_STATIC = process.env.NEXT_PUBLIC_STATIC_EXPORT === "true";
 
 /* ── Types ── */
 
@@ -250,6 +255,28 @@ export default function TasksPage() {
 }
 
 function TasksContent() {
+  /* ── Current user context ── */
+  const demoPersona = useDemoPersona();
+  const { session: tabSession } = useTabSession();
+
+  const currentRoles: string[] = IS_STATIC
+    ? [...demoPersona.roles]
+    : tabSession?.roles ?? [];
+  const currentUsername: string = IS_STATIC
+    ? demoPersona.username
+    : tabSession?.username ?? "";
+
+  // Resolve the user's organisation name (matches task.participant)
+  const currentOrg = useMemo(() => {
+    const persona = DEMO_PERSONAS.find((p) => p.username === currentUsername);
+    return persona?.organisation ?? "";
+  }, [currentUsername]);
+
+  // Admin and HDAB can see all tasks; everyone else only sees their own
+  const isAdmin =
+    currentRoles.includes("EDC_ADMIN") ||
+    currentRoles.includes("HDAB_AUTHORITY");
+
   const [data, setData] = useState<TasksResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -285,7 +312,18 @@ function TasksContent() {
     return () => clearInterval(interval);
   }, []);
 
-  const tasks = data?.tasks || [];
+  const allTasks = data?.tasks || [];
+
+  // Scope: non-admin users only see tasks where participant matches their org
+  // or where they are the counterParty
+  const tasks = useMemo(() => {
+    if (isAdmin) return allTasks;
+    if (!currentOrg) return allTasks;
+    return allTasks.filter(
+      (t) => t.participant === currentOrg || t.counterParty === currentOrg,
+    );
+  }, [allTasks, isAdmin, currentOrg]);
+
   const counts = data?.counts || {
     total: 0,
     negotiations: 0,
@@ -293,7 +331,7 @@ function TasksContent() {
     active: 0,
   };
 
-  // Unique participants for the filter dropdown
+  // Unique participants for the filter dropdown (admin only)
   const uniqueParticipants = useMemo(() => {
     const map = new Map<string, string>();
     tasks.forEach((t) => map.set(t.participantId, t.participant));
@@ -301,8 +339,9 @@ function TasksContent() {
   }, [tasks]);
 
   const filteredTasks = tasks.filter((t) => {
-    // Participant filter
+    // Participant filter (admin only)
     if (
+      isAdmin &&
       selectedParticipant !== "all" &&
       t.participantId !== selectedParticipant
     )
@@ -321,9 +360,9 @@ function TasksContent() {
   // Recompute counts after participant filter
   const filteredCounts = useMemo(() => {
     const pTasks =
-      selectedParticipant === "all"
-        ? tasks
-        : tasks.filter((t) => t.participantId === selectedParticipant);
+      isAdmin && selectedParticipant !== "all"
+        ? tasks.filter((t) => t.participantId === selectedParticipant)
+        : tasks;
     return {
       total: pTasks.length,
       negotiations: pTasks.filter((t) => t.type === "negotiation").length,
@@ -335,7 +374,7 @@ function TasksContent() {
           ),
       ).length,
     };
-  }, [tasks, selectedParticipant]);
+  }, [tasks, isAdmin, selectedParticipant]);
 
   const filters: { key: FilterType; label: string; count: number }[] = [
     { key: "all", label: "All", count: filteredCounts.total },
@@ -352,9 +391,15 @@ function TasksContent() {
     <div className="min-h-screen bg-[var(--bg)]">
       <div className="max-w-5xl mx-auto px-6 py-10">
         <PageIntro
-          title="Tasks"
+          title={isAdmin ? "All Tasks" : "My Tasks"}
           icon={ClipboardList}
-          description="Track all DSP protocol tasks across your dataspace participants. Negotiations and transfers are shown as live state pipelines following the Dataspace Protocol and Data Plane Signaling (DPS) specification."
+          description={
+            isAdmin
+              ? "Track all DSP protocol tasks across your dataspace participants. Negotiations and transfers are shown as live state pipelines following the Dataspace Protocol and Data Plane Signaling (DPS) specification."
+              : `Negotiations and transfers for ${
+                  currentOrg || "your organisation"
+                }. Use action buttons to advance the DSP state machine.`
+          }
           infoText="Tasks are aggregated from all registered participant contexts. Negotiations follow: REQUESTED → OFFERED → ACCEPTED → AGREED → VERIFIED → FINALIZED. Transfers follow: REQUESTED → STARTED → SUSPENDED → COMPLETED. The EDR badge indicates the Data Plane has been signalled via DPS and generated an Endpoint Data Reference with JWT bearer token."
           docLink={{
             href: "https://docs.internationaldataspaces.org/ids-knowledgebase/dataspace-protocol",
@@ -402,68 +447,70 @@ function TasksContent() {
         {/* Participant filter + Type filter tabs + Refresh */}
         <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
           <div className="flex items-center gap-2 flex-wrap">
-            {/* Participant dropdown */}
-            <div className="relative">
-              <button
-                onClick={() =>
-                  setParticipantDropdownOpen(!participantDropdownOpen)
-                }
-                className={`flex items-center gap-1.5 px-3 py-1 text-xs rounded-full border transition-colors ${
-                  selectedParticipant !== "all"
-                    ? "border-layer2 bg-layer2/20 text-teal-800 dark:text-teal-300"
-                    : "border-[var(--border)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-gray-500"
-                }`}
-              >
-                <Users size={12} />
-                {selectedParticipant === "all"
-                  ? "All Participants"
-                  : uniqueParticipants.find(
-                      ([id]) => id === selectedParticipant,
-                    )?.[1] || "Unknown"}
-                <ChevronDown size={10} />
-              </button>
-              {participantDropdownOpen && (
-                <div className="absolute z-20 mt-1 bg-[var(--surface-2)] border border-[var(--border)] rounded-lg shadow-xl py-1 min-w-[200px]">
-                  <button
-                    onClick={() => {
-                      setSelectedParticipant("all");
-                      setParticipantDropdownOpen(false);
-                    }}
-                    className={`w-full text-left px-3 py-1.5 text-xs hover:bg-[var(--surface-2)] ${
-                      selectedParticipant === "all"
-                        ? "text-teal-800 dark:text-teal-300"
-                        : "text-[var(--text-primary)]"
-                    }`}
-                  >
-                    All Participants ({counts.total})
-                  </button>
-                  {uniqueParticipants.map(([id, name]) => {
-                    const pCount = tasks.filter(
-                      (t) => t.participantId === id,
-                    ).length;
-                    return (
-                      <button
-                        key={id}
-                        onClick={() => {
-                          setSelectedParticipant(id);
-                          setParticipantDropdownOpen(false);
-                        }}
-                        className={`w-full text-left px-3 py-1.5 text-xs hover:bg-[var(--surface-2)] ${
-                          selectedParticipant === id
-                            ? "text-teal-800 dark:text-teal-300"
-                            : "text-[var(--text-primary)]"
-                        }`}
-                      >
-                        {name}{" "}
-                        <span className="text-[var(--text-secondary)]">
-                          ({pCount})
-                        </span>
-                      </button>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
+            {/* Participant dropdown — admin / HDAB only */}
+            {isAdmin && (
+              <div className="relative">
+                <button
+                  onClick={() =>
+                    setParticipantDropdownOpen(!participantDropdownOpen)
+                  }
+                  className={`flex items-center gap-1.5 px-3 py-1 text-xs rounded-full border transition-colors ${
+                    selectedParticipant !== "all"
+                      ? "border-layer2 bg-layer2/20 text-teal-800 dark:text-teal-300"
+                      : "border-[var(--border)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-gray-500"
+                  }`}
+                >
+                  <Users size={12} />
+                  {selectedParticipant === "all"
+                    ? "All Participants"
+                    : uniqueParticipants.find(
+                        ([id]) => id === selectedParticipant,
+                      )?.[1] || "Unknown"}
+                  <ChevronDown size={10} />
+                </button>
+                {participantDropdownOpen && (
+                  <div className="absolute z-20 mt-1 bg-[var(--surface-2)] border border-[var(--border)] rounded-lg shadow-xl py-1 min-w-[200px]">
+                    <button
+                      onClick={() => {
+                        setSelectedParticipant("all");
+                        setParticipantDropdownOpen(false);
+                      }}
+                      className={`w-full text-left px-3 py-1.5 text-xs hover:bg-[var(--surface-2)] ${
+                        selectedParticipant === "all"
+                          ? "text-teal-800 dark:text-teal-300"
+                          : "text-[var(--text-primary)]"
+                      }`}
+                    >
+                      All Participants ({counts.total})
+                    </button>
+                    {uniqueParticipants.map(([id, name]) => {
+                      const pCount = tasks.filter(
+                        (t) => t.participantId === id,
+                      ).length;
+                      return (
+                        <button
+                          key={id}
+                          onClick={() => {
+                            setSelectedParticipant(id);
+                            setParticipantDropdownOpen(false);
+                          }}
+                          className={`w-full text-left px-3 py-1.5 text-xs hover:bg-[var(--surface-2)] ${
+                            selectedParticipant === id
+                              ? "text-teal-800 dark:text-teal-300"
+                              : "text-[var(--text-primary)]"
+                          }`}
+                        >
+                          {name}{" "}
+                          <span className="text-[var(--text-secondary)]">
+                            ({pCount})
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Type/status filter tabs */}
             <div className="flex items-center gap-1">
