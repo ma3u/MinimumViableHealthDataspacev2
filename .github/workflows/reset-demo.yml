@@ -10,6 +10,10 @@ on:
         description: "Skip post-reset smoke tests"
         type: boolean
         default: false
+      force_reset:
+        description: "Force full reset even if databases are clean"
+        type: boolean
+        default: false
 
 permissions:
   id-token: write
@@ -26,8 +30,84 @@ env:
   ACA_ENV: mvhd-env
 
 jobs:
+  # ── Pre-flight: check if databases have user-created data ──
+  check-dirty:
+    name: Check if Reset Needed
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      needs_reset: ${{ steps.check.outputs.needs_reset }}
+      neo4j_dirty: ${{ steps.check.outputs.neo4j_dirty }}
+      reason: ${{ steps.check.outputs.reason }}
+    steps:
+      - name: Azure Login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Check database state
+        id: check
+        run: |
+          # Force reset if manually requested
+          if [ "${{ inputs.force_reset }}" = "true" ]; then
+            echo "needs_reset=true" >> "$GITHUB_OUTPUT"
+            echo "reason=Manual force reset requested" >> "$GITHUB_OUTPUT"
+            echo "neo4j_dirty=unknown" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          # Get Neo4j endpoint
+          NEO4J_FQDN=$(az containerapp show --name mvhd-neo4j \
+            --resource-group ${{ env.RESOURCE_GROUP }} \
+            --query "properties.configuration.ingress.fqdn" -o tsv 2>/dev/null || echo "")
+
+          if [ -z "$NEO4J_FQDN" ]; then
+            echo "needs_reset=true" >> "$GITHUB_OUTPUT"
+            echo "reason=Cannot reach Neo4j — assuming dirty" >> "$GITHUB_OUTPUT"
+            echo "neo4j_dirty=unknown" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          # Query Neo4j for user-created data (local-registry policies, non-seed nodes)
+          DIRTY_COUNT=$(curl -sf -X POST "https://${NEO4J_FQDN}:7474/db/neo4j/tx/commit" \
+            -H "Content-Type: application/json" \
+            -u "neo4j:${{ secrets.NEO4J_PASSWORD }}" \
+            -d '{
+              "statements": [{
+                "statement": "MATCH (n) WHERE n.source = '\''local-registry'\'' OR (n.createdAt IS NOT NULL AND n:OdrlPolicy AND NOT exists(n.isSeed)) RETURN count(n) AS dirtyCount"
+              }]
+            }' 2>/dev/null | jq -r '.results[0].data[0].row[0] // "0"' 2>/dev/null || echo "-1")
+
+          echo "Neo4j dirty count: $DIRTY_COUNT"
+          echo "neo4j_dirty=$DIRTY_COUNT" >> "$GITHUB_OUTPUT"
+
+          if [ "$DIRTY_COUNT" = "-1" ]; then
+            # Query failed — be safe and run reset
+            echo "needs_reset=true" >> "$GITHUB_OUTPUT"
+            echo "reason=Neo4j query failed — assuming dirty" >> "$GITHUB_OUTPUT"
+          elif [ "$DIRTY_COUNT" -gt 0 ] 2>/dev/null; then
+            echo "needs_reset=true" >> "$GITHUB_OUTPUT"
+            echo "reason=Found $DIRTY_COUNT user-created nodes in Neo4j" >> "$GITHUB_OUTPUT"
+          else
+            echo "needs_reset=false" >> "$GITHUB_OUTPUT"
+            echo "reason=Databases are clean — no user data detected" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Dirty-check summary
+        if: always()
+        run: |
+          echo "## Pre-Reset Dirty Check" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "**Needs reset:** ${{ steps.check.outputs.needs_reset }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "**Neo4j dirty nodes:** ${{ steps.check.outputs.neo4j_dirty }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "**Reason:** ${{ steps.check.outputs.reason }}" >> "$GITHUB_STEP_SUMMARY"
+
   reset-environment:
     name: Reset Demo Environment
+    needs: check-dirty
+    if: needs.check-dirty.outputs.needs_reset == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -174,11 +254,11 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "All user data cleared. Environment restored to baseline seed state." >> $GITHUB_STEP_SUMMARY
 
-  # ── Smoke tests after reset ──
+  # ── Smoke tests — runs after reset, or as standalone health check when clean ──
   smoke-test:
     name: Post-Reset Smoke Tests
-    needs: reset-environment
-    if: ${{ !inputs.skip_tests }}
+    needs: [check-dirty, reset-environment]
+    if: ${{ always() && !inputs.skip_tests && (needs.reset-environment.result == 'success' || needs.check-dirty.outputs.needs_reset == 'false') }}
     runs-on: ubuntu-latest
     timeout-minutes: 15
     defaults:
