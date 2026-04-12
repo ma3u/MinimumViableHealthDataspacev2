@@ -54,6 +54,9 @@ const IGNORED_CONSOLE_PATTERNS = [
   /Failed to fetch RSC payload/,
   /Failed to fetch.*\/api\/auth\/session/,
   /chrome-extension:\/\//,
+  // 401/403 on unauthenticated page visits — expected when no session
+  /the server responded with a status of 40[13]/i,
+  /Failed to load resource.*40[13]/i,
   // 502/503 from backend services — covered by the API-health tests below
   /the server responded with a status of 50[0-9]/i,
   /Failed to load resource.*50[0-9]/i,

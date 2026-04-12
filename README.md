@@ -76,7 +76,7 @@ The motivation comes from a practical gap: the Eclipse [JAD (Joint Architecture 
 
 For the full background, see the companion article: [European Health Dataspaces, Digital Twins: A Journey from FHIR Basics to Intelligent Patient Models](https://www.linkedin.com/pulse/european-health-dataspaces-digital-twins-journey-fhir-buchhorn-roth-8t51c/).
 
-**Live Demo:** Static UI at [ma3u.github.io/MinimumViableHealthDataspacev2](https://ma3u.github.io/MinimumViableHealthDataspacev2/) | Full stack on [Azure Container Apps](docs/azure-deployment-guide.md)
+**Live Demo:** Static UI at [ma3u.github.io/MinimumViableHealthDataspacev2](https://ma3u.github.io/MinimumViableHealthDataspacev2/) | Full stack on [Azure EHDS Portal](https://mvhd-ui.blackforest-0a04f26e.westeurope.azurecontainerapps.io) ([deployment guide](docs/azure-deployment-guide.md))
 
 ---
 

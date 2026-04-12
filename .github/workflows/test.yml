@@ -192,6 +192,90 @@ jobs:
             )" >> $GITHUB_STEP_SUMMARY || true
 
   # -----------------------------------------------------------------------
+  # SBOM Generation (CycloneDX) — EU CRA Art. 13, EHDS Art. 50, SIMPL-Open
+  # -----------------------------------------------------------------------
+  sbom:
+    name: SBOM Generation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: ./ui/package-lock.json
+
+      - name: Install dependencies
+        working-directory: ./ui
+        run: npm ci
+
+      - name: Generate CycloneDX SBOM (UI)
+        working-directory: ./ui
+        run: npx @cyclonedx/cyclonedx-npm --output-file ../sbom-ui.cdx.json --spec-version 1.5
+
+      - name: Generate CycloneDX SBOM (Neo4j Proxy)
+        working-directory: ./services/neo4j-proxy
+        run: |
+          npm ci
+          npx @cyclonedx/cyclonedx-npm --output-file ../../sbom-neo4j-proxy.cdx.json --spec-version 1.5
+
+      - name: Upload SBOM artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom
+          path: |
+            sbom-ui.cdx.json
+            sbom-neo4j-proxy.cdx.json
+          retention-days: 90
+
+      - name: SBOM summary
+        run: |
+          echo "## SBOM Generation" >> $GITHUB_STEP_SUMMARY
+          echo "| Component | Format | Spec |" >> $GITHUB_STEP_SUMMARY
+          echo "| --- | --- | --- |" >> $GITHUB_STEP_SUMMARY
+          echo "| ui | CycloneDX | 1.5 |" >> $GITHUB_STEP_SUMMARY
+          echo "| neo4j-proxy | CycloneDX | 1.5 |" >> $GITHUB_STEP_SUMMARY
+
+  # -----------------------------------------------------------------------
+  # Licence Compliance — EU OSS Strategy, BSI C5 OPS-04, SIMPL-Open
+  # -----------------------------------------------------------------------
+  license-check:
+    name: Licence Compliance
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: ./ui/package-lock.json
+
+      - name: Install dependencies
+        working-directory: ./ui
+        run: npm ci
+
+      - name: Check licences (UI)
+        working-directory: ./ui
+        run: |
+          npx license-checker --production --onlyAllow "MIT;Apache-2.0;ISC;BSD-2-Clause;BSD-3-Clause;0BSD;CC0-1.0;CC-BY-4.0;Unlicense;Python-2.0;BlueOak-1.0.0" --summary
+
+      - name: Check licences (Neo4j Proxy)
+        working-directory: ./services/neo4j-proxy
+        run: |
+          npm ci
+          npx license-checker --production --onlyAllow "MIT;Apache-2.0;ISC;BSD-2-Clause;BSD-3-Clause;0BSD;CC0-1.0;CC-BY-4.0;Unlicense;Python-2.0;BlueOak-1.0.0" --summary
+
+      - name: Licence summary
+        if: always()
+        run: |
+          echo "## Licence Compliance" >> $GITHUB_STEP_SUMMARY
+          echo "Allowlist: MIT, Apache-2.0, ISC, BSD-2-Clause, BSD-3-Clause, 0BSD, CC0-1.0, CC-BY-4.0, Unlicense, Python-2.0, BlueOak-1.0.0" >> $GITHUB_STEP_SUMMARY
+
+  # -----------------------------------------------------------------------
   # Trivy Security Scan (CVE-2026-33634 safe version pinned)
   #
   # ⚠️  IMPORTANT: Do NOT use aquasecurity/trivy-action or setup-trivy —

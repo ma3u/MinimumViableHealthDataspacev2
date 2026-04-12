@@ -153,13 +153,15 @@ test.describe("Graph page — public access & persona indicator", () => {
 
   test("shows validate graph link", async ({ page }) => {
     await page.goto("/graph");
-    await expect(page.getByText("Validate graph")).toBeVisible({ timeout: T });
+    await expect(page.getByRole("link", { name: "Validate" })).toBeVisible({
+      timeout: T,
+    });
   });
 
   test("hospital persona shows description question", async ({ page }) => {
     // Use ?persona=hospital so the hospital persona button is rendered in the sidebar
     await page.goto("/graph?persona=hospital");
-    await expect(page.getByText(/What data do we offer/i)).toBeVisible({
+    await expect(page.getByText(/Which data do we offer/i)).toBeVisible({
       timeout: T,
     });
   });
