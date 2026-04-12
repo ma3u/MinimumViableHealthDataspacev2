@@ -50,6 +50,22 @@ describe("Keycloak realm configuration", () => {
       expect(roleNames).toContain("HDAB_AUTHORITY");
     });
 
+    it("should define DATA_HOLDER role", () => {
+      expect(roleNames).toContain("DATA_HOLDER");
+    });
+
+    it("should define DATA_USER role", () => {
+      expect(roleNames).toContain("DATA_USER");
+    });
+
+    it("should define PATIENT role", () => {
+      expect(roleNames).toContain("PATIENT");
+    });
+
+    it("should define TRUST_CENTER_OPERATOR role", () => {
+      expect(roleNames).toContain("TRUST_CENTER_OPERATOR");
+    });
+
     it("should define admin, provisioner, and participant base roles", () => {
       expect(roleNames).toContain("admin");
       expect(roleNames).toContain("provisioner");
@@ -170,8 +186,8 @@ describe("Keycloak realm configuration", () => {
   describe("users", () => {
     const users = realm.users;
 
-    it("should have exactly 4 health dataspace users", () => {
-      expect(users).toHaveLength(4);
+    it("should have all 7 demo personas", () => {
+      expect(users).toHaveLength(7);
     });
 
     it("edcadmin user should have EDC_ADMIN role", () => {
@@ -186,7 +202,7 @@ describe("Keycloak realm configuration", () => {
       expect(user.credentials[0].temporary).toBe(false);
     });
 
-    it("clinicuser should have EDC_USER_PARTICIPANT role", () => {
+    it("clinicuser should have EDC_USER_PARTICIPANT and DATA_HOLDER roles", () => {
       const user = users.find(
         (u: { username: string }) => u.username === "clinicuser",
       );
@@ -194,9 +210,10 @@ describe("Keycloak realm configuration", () => {
       expect(user.enabled).toBe(true);
       expect(user.email).toBe("clinic@health-dataspace.local");
       expect(user.realmRoles).toContain("EDC_USER_PARTICIPANT");
+      expect(user.realmRoles).toContain("DATA_HOLDER");
     });
 
-    it("researcher should have EDC_USER_PARTICIPANT role", () => {
+    it("researcher should have EDC_USER_PARTICIPANT and DATA_USER roles", () => {
       const user = users.find(
         (u: { username: string }) => u.username === "researcher",
       );
@@ -204,6 +221,7 @@ describe("Keycloak realm configuration", () => {
       expect(user.enabled).toBe(true);
       expect(user.email).toBe("researcher@pharmaco.de");
       expect(user.realmRoles).toContain("EDC_USER_PARTICIPANT");
+      expect(user.realmRoles).toContain("DATA_USER");
     });
 
     it("regulator should have HDAB_AUTHORITY role", () => {
@@ -214,6 +232,34 @@ describe("Keycloak realm configuration", () => {
       expect(user.enabled).toBe(true);
       expect(user.email).toBe("regulator@health-dataspace.local");
       expect(user.realmRoles).toContain("HDAB_AUTHORITY");
+    });
+
+    it("lmcuser should have EDC_USER_PARTICIPANT and DATA_HOLDER roles", () => {
+      const user = users.find(
+        (u: { username: string }) => u.username === "lmcuser",
+      );
+      expect(user).toBeDefined();
+      expect(user.enabled).toBe(true);
+      expect(user.realmRoles).toContain("EDC_USER_PARTICIPANT");
+      expect(user.realmRoles).toContain("DATA_HOLDER");
+    });
+
+    it("patient1 should have PATIENT role", () => {
+      const user = users.find(
+        (u: { username: string }) => u.username === "patient1",
+      );
+      expect(user).toBeDefined();
+      expect(user.enabled).toBe(true);
+      expect(user.realmRoles).toContain("PATIENT");
+    });
+
+    it("patient2 should have PATIENT role", () => {
+      const user = users.find(
+        (u: { username: string }) => u.username === "patient2",
+      );
+      expect(user).toBeDefined();
+      expect(user.enabled).toBe(true);
+      expect(user.realmRoles).toContain("PATIENT");
     });
 
     it("all users should have non-temporary passwords", () => {

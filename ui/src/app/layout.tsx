@@ -50,6 +50,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       {/* Inline script applies saved theme class before first paint — prevents flash */}
       <head>
+        <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
         <script
           dangerouslySetInnerHTML={{
             __html: `(function(){try{var t=localStorage.getItem('theme');document.documentElement.classList.toggle('dark',t==='dark')}catch(e){}})()`,

@@ -85,14 +85,28 @@ describe("UserMenu", () => {
       expect(screen.getByText("Sign in")).toBeInTheDocument();
     });
 
-    it("calls signIn('keycloak') on click", async () => {
+    it("opens persona picker dropdown on Sign in click", async () => {
       const user = userEvent.setup();
       render(<UserMenu />);
       await user.click(screen.getByText("Sign in"));
-      expect(mockSignIn).toHaveBeenCalledWith("keycloak");
+      // Dropdown shows "Returning users" header and persona list
+      expect(screen.getByText("Returning users")).toBeInTheDocument();
+      expect(screen.getByText("edcadmin")).toBeInTheDocument();
     });
 
-    it("does not show user name or dropdown", () => {
+    it("calls signIn('keycloak') with callbackUrl when persona clicked", async () => {
+      const user = userEvent.setup();
+      render(<UserMenu />);
+      await user.click(screen.getByText("Sign in"));
+      await user.click(screen.getByText("edcadmin"));
+      expect(mockSignIn).toHaveBeenCalledWith(
+        "keycloak",
+        { callbackUrl: "/graph?persona=edc-admin" },
+        { login_hint: "edcadmin" },
+      );
+    });
+
+    it("does not show user name or dropdown initially", () => {
       render(<UserMenu />);
       expect(screen.queryByText("Roles")).not.toBeInTheDocument();
       expect(screen.queryByText("Sign out")).not.toBeInTheDocument();

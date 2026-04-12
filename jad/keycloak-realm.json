@@ -28,6 +28,22 @@
       {
         "name": "HDAB_AUTHORITY",
         "description": "Health Data Access Body regulator — access to compliance dashboards and audit logs"
+      },
+      {
+        "name": "DATA_HOLDER",
+        "description": "Hospital / clinic — publishes FHIR datasets, manages contracts with researchers"
+      },
+      {
+        "name": "DATA_USER",
+        "description": "Researcher / pharma — discovers datasets, negotiates access, runs analytics"
+      },
+      {
+        "name": "PATIENT",
+        "description": "Patient / citizen — EHDS Chapter II primary use, accesses own EHR data"
+      },
+      {
+        "name": "TRUST_CENTER_OPERATOR",
+        "description": "Trust Center operator — manages trust anchors, DID infrastructure"
       }
     ]
   },
@@ -306,7 +322,7 @@
           "temporary": false
         }
       ],
-      "realmRoles": ["EDC_USER_PARTICIPANT"]
+      "realmRoles": ["EDC_USER_PARTICIPANT", "DATA_HOLDER"]
     },
     {
       "username": "regulator",
@@ -336,7 +352,52 @@
           "temporary": false
         }
       ],
-      "realmRoles": ["EDC_USER_PARTICIPANT"]
+      "realmRoles": ["EDC_USER_PARTICIPANT", "DATA_USER"]
+    },
+    {
+      "username": "lmcuser",
+      "enabled": true,
+      "email": "lmc@limburg-mc.nl",
+      "firstName": "LMC",
+      "lastName": "User",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "lmcuser",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["EDC_USER_PARTICIPANT", "DATA_HOLDER"]
+    },
+    {
+      "username": "patient1",
+      "enabled": true,
+      "email": "patient1@health-dataspace.local",
+      "firstName": "Maria",
+      "lastName": "Schmidt",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "patient1",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["PATIENT"]
+    },
+    {
+      "username": "patient2",
+      "enabled": true,
+      "email": "patient2@limburg-mc.nl",
+      "firstName": "Jan",
+      "lastName": "de Vries",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "patient2",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["PATIENT"]
     }
   ],
   "groups": [],

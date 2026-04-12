@@ -36,6 +36,8 @@ const ROLE_PATHS: Record<string, string[]> = {
     "/eehrxf",
     "/data/share",
     "/negotiate",
+    "/data/transfer",
+    "/tasks",
     "/credentials",
     "/settings",
   ],

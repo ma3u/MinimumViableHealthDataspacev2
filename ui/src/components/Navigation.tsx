@@ -503,8 +503,14 @@ export default function Navigation() {
     ? demoPersona?.username ?? ""
     : tabSession?.username ?? "";
 
-  const participantType = deriveParticipantType(baseRoles, username);
-  const _personaId = derivePersonaId(baseRoles, username);
+  // Use preferredUsername (Keycloak login name) for derivation — the display
+  // name (e.g. "Maria Schmidt") may not match username-based patterns.
+  const derivationName = IS_STATIC
+    ? username
+    : tabSession?.preferredUsername ?? username;
+
+  const participantType = deriveParticipantType(baseRoles, derivationName);
+  const _personaId = derivePersonaId(baseRoles, derivationName);
 
   // Augment roles with derived sub-type so filter helpers work
   const effectiveRoles =

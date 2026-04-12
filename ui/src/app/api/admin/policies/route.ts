@@ -229,3 +229,120 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+
+/**
+ * PUT /api/admin/policies — Update an existing policy definition.
+ * Body: { participantId, policyId, policy: { ... } }
+ */
+export async function PUT(request: NextRequest) {
+  const authError = await requireAdmin();
+  if (authError) return authError;
+
+  try {
+    const body = await request.json();
+    const { participantId, policyId, policy } = body;
+
+    if (!participantId || !policy) {
+      return NextResponse.json(
+        { error: "participantId and policy are required" },
+        { status: 400 },
+      );
+    }
+
+    try {
+      // EDC-V: delete old + create new (no PATCH in EDC-V Management API)
+      if (policyId) {
+        await edcClient.management(
+          `/v5alpha/participants/${participantId}/policydefinitions/${policyId}`,
+          "DELETE",
+        );
+      }
+      const result = await edcClient.management(
+        `/v5alpha/participants/${participantId}/policydefinitions`,
+        "POST",
+        { "@context": [EDC_CONTEXT], ...policy },
+      );
+      return NextResponse.json(result);
+    } catch {
+      // EDC-V offline — update in Neo4j
+      console.warn("EDC-V offline, updating policy in Neo4j local registry");
+      const newPolicyId =
+        (policy["@id"] as string) || policyId || `policy:local:${Date.now()}`;
+      const now = new Date().toISOString();
+
+      await neo4jCypher(
+        `MERGE (pol:OdrlPolicy {id: $policyId})
+         SET pol.participantId = $participantId,
+             pol.policyJson    = $policyJson,
+             pol.updatedAt     = $updatedAt,
+             pol.source        = 'local-registry'`,
+        {
+          policyId: newPolicyId,
+          participantId,
+          policyJson: JSON.stringify(policy),
+          updatedAt: now,
+        },
+      );
+
+      return NextResponse.json({
+        "@id": newPolicyId,
+        source: "neo4j",
+        offline: true,
+      });
+    }
+  } catch (err) {
+    console.error("Failed to update policy:", err);
+    return NextResponse.json(
+      { error: "Failed to update policy" },
+      { status: 502 },
+    );
+  }
+}
+
+/**
+ * DELETE /api/admin/policies — Remove a policy definition.
+ * Body: { participantId, policyId }
+ */
+export async function DELETE(request: NextRequest) {
+  const authError = await requireAdmin();
+  if (authError) return authError;
+
+  try {
+    const body = await request.json();
+    const { participantId, policyId } = body;
+
+    if (!participantId || !policyId) {
+      return NextResponse.json(
+        { error: "participantId and policyId are required" },
+        { status: 400 },
+      );
+    }
+
+    try {
+      await edcClient.management(
+        `/v5alpha/participants/${participantId}/policydefinitions/${policyId}`,
+        "DELETE",
+      );
+      return NextResponse.json({ deleted: policyId });
+    } catch {
+      // EDC-V offline — delete from Neo4j
+      console.warn("EDC-V offline, deleting policy from Neo4j local registry");
+      await neo4jCypher(
+        `MATCH (pol:OdrlPolicy {id: $policyId})
+         DETACH DELETE pol`,
+        { policyId },
+      );
+      return NextResponse.json({
+        deleted: policyId,
+        source: "neo4j",
+        offline: true,
+      });
+    }
+  } catch (err) {
+    console.error("Failed to delete policy:", err);
+    return NextResponse.json(
+      { error: "Failed to delete policy" },
+      { status: 502 },
+    );
+  }
+}

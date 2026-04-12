@@ -9,11 +9,29 @@
           "@type": "PolicyDefinition",
           "createdAt": 1774142046232,
           "policy": {
-            "@id": "8d2e47ae-3a87-457f-b6a4-920ccec6983a",
             "@type": "Set",
             "permission": [
               {
-                "action": "use"
+                "action": "use",
+                "constraint": [
+                  {
+                    "leftOperand": "purpose",
+                    "operator": "isAnyOf",
+                    "rightOperand": [
+                      "EHDS Article 7 — cross-border treatment continuity",
+                      "EHDS Article 53(1)(a) — public health surveillance"
+                    ]
+                  },
+                  {
+                    "leftOperand": "inForceDate",
+                    "operator": "lteq",
+                    "rightOperand": "contractAgreement+365d"
+                  }
+                ],
+                "duty": [
+                  { "action": "logAccess" },
+                  { "action": "notifyPatient" }
+                ]
               }
             ],
             "prohibition": [],
@@ -26,14 +44,44 @@
           "@type": "PolicyDefinition",
           "createdAt": 1774142046344,
           "policy": {
-            "@id": "1c557097-34a6-4718-8431-790bbcc38f23",
             "@type": "Set",
             "permission": [
               {
-                "action": "use"
+                "action": "use",
+                "constraint": [
+                  {
+                    "leftOperand": "purpose",
+                    "operator": "isAnyOf",
+                    "rightOperand": [
+                      "EHDS Article 53(1)(c) — scientific research",
+                      "EHDS Article 53(1)(e) — official statistics"
+                    ]
+                  },
+                  {
+                    "leftOperand": "inForceDate",
+                    "operator": "lteq",
+                    "rightOperand": "contractAgreement+90d"
+                  }
+                ],
+                "duty": [
+                  {
+                    "action": "anonymize",
+                    "constraint": [
+                      {
+                        "leftOperand": "kAnonymity",
+                        "operator": "gteq",
+                        "rightOperand": 5
+                      }
+                    ]
+                  },
+                  { "action": "minimizeData" }
+                ]
               }
             ],
-            "prohibition": [],
+            "prohibition": [
+              { "action": "reIdentify" },
+              { "action": "commercialize" }
+            ],
             "obligation": []
           },
           "@context": ["https://w3id.org/edc/connector/management/v2"]
@@ -43,14 +91,37 @@
           "@type": "PolicyDefinition",
           "createdAt": 1774142046442,
           "policy": {
-            "@id": "d16d022d-7d9b-4bec-b943-d48b2e204f20",
             "@type": "Set",
             "permission": [
               {
-                "action": "use"
+                "action": "use",
+                "constraint": [
+                  {
+                    "leftOperand": "purpose",
+                    "operator": "eq",
+                    "rightOperand": "EHDS Article 7 — cross-border treatment continuity"
+                  },
+                  {
+                    "leftOperand": "patientConsent",
+                    "operator": "eq",
+                    "rightOperand": "explicit"
+                  },
+                  {
+                    "leftOperand": "inForceDate",
+                    "operator": "lteq",
+                    "rightOperand": "contractAgreement+180d"
+                  }
+                ],
+                "duty": [
+                  { "action": "logAccess" },
+                  { "action": "notifyPatient" }
+                ]
               }
             ],
-            "prohibition": [],
+            "prohibition": [
+              { "action": "secondaryUse" },
+              { "action": "thirdPartySharing" }
+            ],
             "obligation": []
           },
           "@context": ["https://w3id.org/edc/connector/management/v2"]
@@ -60,13 +131,8 @@
           "@type": "PolicyDefinition",
           "createdAt": 1774142048691,
           "policy": {
-            "@id": "877ea3b4-e74b-45d0-9f53-d532b461e85e",
             "@type": "Set",
-            "permission": [
-              {
-                "action": "use"
-              }
-            ],
+            "permission": [{ "action": "use" }],
             "prohibition": [],
             "obligation": []
           },
@@ -84,14 +150,40 @@
           "@type": "PolicyDefinition",
           "createdAt": 1774142047026,
           "policy": {
-            "@id": "2b007c6d-5995-4aac-be64-5d0fa9d2ed70",
             "@type": "Set",
             "permission": [
               {
-                "action": "use"
+                "action": "use",
+                "constraint": [
+                  {
+                    "leftOperand": "purpose",
+                    "operator": "isAnyOf",
+                    "rightOperand": [
+                      "EHDS Article 53(1)(c) — scientific research"
+                    ]
+                  },
+                  {
+                    "leftOperand": "inForceDate",
+                    "operator": "lteq",
+                    "rightOperand": "contractAgreement+365d"
+                  }
+                ],
+                "duty": [
+                  {
+                    "action": "anonymize",
+                    "constraint": [
+                      {
+                        "leftOperand": "kAnonymity",
+                        "operator": "gteq",
+                        "rightOperand": 5
+                      }
+                    ]
+                  },
+                  { "action": "maintainAuditTrail" }
+                ]
               }
             ],
-            "prohibition": [],
+            "prohibition": [{ "action": "reIdentify" }],
             "obligation": []
           },
           "@context": ["https://w3id.org/edc/connector/management/v2"]
@@ -101,14 +193,41 @@
           "@type": "PolicyDefinition",
           "createdAt": 1774142047136,
           "policy": {
-            "@id": "325b2dd5-b5f3-4fec-a674-01ae31630954",
             "@type": "Set",
             "permission": [
               {
-                "action": "use"
+                "action": "use",
+                "constraint": [
+                  {
+                    "leftOperand": "purpose",
+                    "operator": "eq",
+                    "rightOperand": "EHDS Article 53(1)(c) — AI/ML model training in health"
+                  },
+                  {
+                    "leftOperand": "inForceDate",
+                    "operator": "lteq",
+                    "rightOperand": "contractAgreement+730d"
+                  }
+                ],
+                "duty": [
+                  {
+                    "action": "anonymize",
+                    "constraint": [
+                      {
+                        "leftOperand": "kAnonymity",
+                        "operator": "gteq",
+                        "rightOperand": 5
+                      }
+                    ]
+                  },
+                  { "action": "secureProcessingEnvironment" }
+                ]
               }
             ],
-            "prohibition": [],
+            "prohibition": [
+              { "action": "reIdentify" },
+              { "action": "extractTrainingData" }
+            ],
             "obligation": []
           },
           "@context": ["https://w3id.org/edc/connector/management/v2"]
@@ -118,13 +237,8 @@
           "@type": "PolicyDefinition",
           "createdAt": 1774142051088,
           "policy": {
-            "@id": "1ec750de-ae14-4d8d-a737-d7f23e920b81",
             "@type": "Set",
-            "permission": [
-              {
-                "action": "use"
-              }
-            ],
+            "permission": [{ "action": "use" }],
             "prohibition": [],
             "obligation": []
           },
@@ -142,14 +256,35 @@
           "@type": "PolicyDefinition",
           "createdAt": 1774142047235,
           "policy": {
-            "@id": "fbe2ab27-118c-435f-b3f8-da69c060d25d",
             "@type": "Set",
             "permission": [
               {
-                "action": "use"
+                "action": "use",
+                "constraint": [
+                  {
+                    "leftOperand": "purpose",
+                    "operator": "isAnyOf",
+                    "rightOperand": [
+                      "EHDS Article 53(1)(b) — pharmacovigilance",
+                      "EHDS Article 53(1)(b) — medical device safety"
+                    ]
+                  },
+                  {
+                    "leftOperand": "inForceDate",
+                    "operator": "lteq",
+                    "rightOperand": "contractAgreement+365d"
+                  }
+                ],
+                "duty": [
+                  { "action": "pseudonymize" },
+                  { "action": "maintainAuditTrail" }
+                ]
               }
             ],
-            "prohibition": [],
+            "prohibition": [
+              { "action": "reIdentify" },
+              { "action": "commercialize" }
+            ],
             "obligation": []
           },
           "@context": ["https://w3id.org/edc/connector/management/v2"]
@@ -159,14 +294,41 @@
           "@type": "PolicyDefinition",
           "createdAt": 1774142047328,
           "policy": {
-            "@id": "21dfc0fe-557b-48da-9c0e-c47f1825a5b8",
             "@type": "Set",
             "permission": [
               {
-                "action": "use"
+                "action": "use",
+                "constraint": [
+                  {
+                    "leftOperand": "purpose",
+                    "operator": "eq",
+                    "rightOperand": "EHDS Article 53(1)(e) — official statistics"
+                  },
+                  {
+                    "leftOperand": "inForceDate",
+                    "operator": "lteq",
+                    "rightOperand": "contractAgreement+180d"
+                  }
+                ],
+                "duty": [
+                  {
+                    "action": "anonymize",
+                    "constraint": [
+                      {
+                        "leftOperand": "kAnonymity",
+                        "operator": "gteq",
+                        "rightOperand": 10
+                      }
+                    ]
+                  },
+                  { "action": "aggregateOnly" }
+                ]
               }
             ],
-            "prohibition": [],
+            "prohibition": [
+              { "action": "reIdentify" },
+              { "action": "publishIndividualLevel" }
+            ],
             "obligation": []
           },
           "@context": ["https://w3id.org/edc/connector/management/v2"]
@@ -176,13 +338,8 @@
           "@type": "PolicyDefinition",
           "createdAt": 1774142047424,
           "policy": {
-            "@id": "f0f47ece-7da1-43d7-bcb2-5df2be34ac28",
             "@type": "Set",
-            "permission": [
-              {
-                "action": "use"
-              }
-            ],
+            "permission": [{ "action": "use" }],
             "prohibition": [],
             "obligation": []
           },
@@ -193,13 +350,8 @@
           "@type": "PolicyDefinition",
           "createdAt": 1774142051689,
           "policy": {
-            "@id": "c9a0520a-c942-4df7-be9a-c85ef5da3443",
             "@type": "Set",
-            "permission": [
-              {
-                "action": "use"
-              }
-            ],
+            "permission": [{ "action": "use" }],
             "prohibition": [],
             "obligation": []
           },
@@ -217,13 +369,8 @@
           "@type": "PolicyDefinition",
           "createdAt": 1774142046536,
           "policy": {
-            "@id": "6a9b1706-c93b-43c4-88d3-36abd81e6370",
             "@type": "Set",
-            "permission": [
-              {
-                "action": "use"
-              }
-            ],
+            "permission": [{ "action": "use" }],
             "prohibition": [],
             "obligation": []
           },
@@ -234,14 +381,43 @@
           "@type": "PolicyDefinition",
           "createdAt": 1774142046634,
           "policy": {
-            "@id": "18dece61-aca4-45d4-a484-21cda0baa091",
             "@type": "Set",
             "permission": [
               {
-                "action": "use"
+                "action": "use",
+                "constraint": [
+                  {
+                    "leftOperand": "purpose",
+                    "operator": "isAnyOf",
+                    "rightOperand": [
+                      "EHDS Article 53(1)(c) — scientific research",
+                      "EHDS Article 53(1)(e) — official statistics"
+                    ]
+                  },
+                  {
+                    "leftOperand": "inForceDate",
+                    "operator": "lteq",
+                    "rightOperand": "contractAgreement+90d"
+                  }
+                ],
+                "duty": [
+                  {
+                    "action": "anonymize",
+                    "constraint": [
+                      {
+                        "leftOperand": "kAnonymity",
+                        "operator": "gteq",
+                        "rightOperand": 5
+                      }
+                    ]
+                  }
+                ]
               }
             ],
-            "prohibition": [],
+            "prohibition": [
+              { "action": "reIdentify" },
+              { "action": "commercialize" }
+            ],
             "obligation": []
           },
           "@context": ["https://w3id.org/edc/connector/management/v2"]
@@ -251,14 +427,32 @@
           "@type": "PolicyDefinition",
           "createdAt": 1774142046826,
           "policy": {
-            "@id": "630f9d3e-f1be-4c10-8f3a-5ebb275b54ff",
             "@type": "Set",
             "permission": [
               {
-                "action": "use"
+                "action": "use",
+                "constraint": [
+                  {
+                    "leftOperand": "purpose",
+                    "operator": "isAnyOf",
+                    "rightOperand": [
+                      "EHDS Article 53(1)(a) — public health surveillance",
+                      "EHDS Article 53(1)(a) — health threat assessment"
+                    ]
+                  },
+                  {
+                    "leftOperand": "inForceDate",
+                    "operator": "lteq",
+                    "rightOperand": "contractAgreement+180d"
+                  }
+                ],
+                "duty": [
+                  { "action": "pseudonymize" },
+                  { "action": "maintainAuditTrail" }
+                ]
               }
             ],
-            "prohibition": [],
+            "prohibition": [{ "action": "reIdentify" }],
             "obligation": []
           },
           "@context": ["https://w3id.org/edc/connector/management/v2"]
@@ -268,14 +462,37 @@
           "@type": "PolicyDefinition",
           "createdAt": 1774142046927,
           "policy": {
-            "@id": "b268c6db-2256-41af-b341-f162bae76f67",
             "@type": "Set",
             "permission": [
               {
-                "action": "use"
+                "action": "use",
+                "constraint": [
+                  {
+                    "leftOperand": "purpose",
+                    "operator": "eq",
+                    "rightOperand": "EHDS Article 7 — cross-border treatment continuity"
+                  },
+                  {
+                    "leftOperand": "patientConsent",
+                    "operator": "eq",
+                    "rightOperand": "explicit"
+                  },
+                  {
+                    "leftOperand": "inForceDate",
+                    "operator": "lteq",
+                    "rightOperand": "contractAgreement+180d"
+                  }
+                ],
+                "duty": [
+                  { "action": "logAccess" },
+                  { "action": "notifyPatient" }
+                ]
               }
             ],
-            "prohibition": [],
+            "prohibition": [
+              { "action": "secondaryUse" },
+              { "action": "thirdPartySharing" }
+            ],
             "obligation": []
           },
           "@context": ["https://w3id.org/edc/connector/management/v2"]
@@ -285,13 +502,8 @@
           "@type": "PolicyDefinition",
           "createdAt": 1774142049957,
           "policy": {
-            "@id": "3598c5af-22ca-4557-8b6d-c39b147447e7",
             "@type": "Set",
-            "permission": [
-              {
-                "action": "use"
-              }
-            ],
+            "permission": [{ "action": "use" }],
             "prohibition": [],
             "obligation": []
           },
@@ -302,13 +514,8 @@
           "@type": "PolicyDefinition",
           "createdAt": 1774142050084,
           "policy": {
-            "@id": "807b82df-1d26-495e-9ffc-f99d839e456f",
             "@type": "Set",
-            "permission": [
-              {
-                "action": "use"
-              }
-            ],
+            "permission": [{ "action": "use" }],
             "prohibition": [],
             "obligation": []
           },
@@ -326,14 +533,43 @@
           "@type": "PolicyDefinition",
           "createdAt": 1774142047523,
           "policy": {
-            "@id": "6fca34d1-2fec-44d3-9ca6-7279838b7aef",
             "@type": "Set",
             "permission": [
               {
-                "action": "use"
+                "action": "use",
+                "constraint": [
+                  {
+                    "leftOperand": "purpose",
+                    "operator": "isAnyOf",
+                    "rightOperand": [
+                      "EHDS Article 53(1)(c) — scientific research"
+                    ]
+                  },
+                  {
+                    "leftOperand": "inForceDate",
+                    "operator": "lteq",
+                    "rightOperand": "contractAgreement+365d"
+                  }
+                ],
+                "duty": [
+                  {
+                    "action": "anonymize",
+                    "constraint": [
+                      {
+                        "leftOperand": "kAnonymity",
+                        "operator": "gteq",
+                        "rightOperand": 5
+                      }
+                    ]
+                  },
+                  { "action": "maintainAuditTrail" }
+                ]
               }
             ],
-            "prohibition": [],
+            "prohibition": [
+              { "action": "reIdentify" },
+              { "action": "commercialize" }
+            ],
             "obligation": []
           },
           "@context": ["https://w3id.org/edc/connector/management/v2"]
@@ -343,14 +579,41 @@
           "@type": "PolicyDefinition",
           "createdAt": 1774142047619,
           "policy": {
-            "@id": "50f62510-de5c-40c2-b49c-786114aa7144",
             "@type": "Set",
             "permission": [
               {
-                "action": "use"
+                "action": "use",
+                "constraint": [
+                  {
+                    "leftOperand": "purpose",
+                    "operator": "eq",
+                    "rightOperand": "EHDS Article 53(1)(e) — official statistics"
+                  },
+                  {
+                    "leftOperand": "inForceDate",
+                    "operator": "lteq",
+                    "rightOperand": "contractAgreement+180d"
+                  }
+                ],
+                "duty": [
+                  {
+                    "action": "anonymize",
+                    "constraint": [
+                      {
+                        "leftOperand": "kAnonymity",
+                        "operator": "gteq",
+                        "rightOperand": 10
+                      }
+                    ]
+                  },
+                  { "action": "aggregateOnly" }
+                ]
               }
             ],
-            "prohibition": [],
+            "prohibition": [
+              { "action": "reIdentify" },
+              { "action": "publishIndividualLevel" }
+            ],
             "obligation": []
           },
           "@context": ["https://w3id.org/edc/connector/management/v2"]
