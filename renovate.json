@@ -1,0 +1,42 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended", "schedule:weekends"],
+  "labels": ["dependencies"],
+  "packageRules": [
+    {
+      "description": "Auto-merge patch updates (low risk)",
+      "matchUpdateTypes": ["patch"],
+      "automerge": true,
+      "automergeType": "pr",
+      "platformAutomerge": true
+    },
+    {
+      "description": "Group minor updates into weekly PR",
+      "matchUpdateTypes": ["minor"],
+      "groupName": "minor dependencies",
+      "schedule": ["every weekend"]
+    },
+    {
+      "description": "Major updates require manual review",
+      "matchUpdateTypes": ["major"],
+      "automerge": false,
+      "labels": ["dependencies", "breaking-change"]
+    },
+    {
+      "description": "Security updates are urgent — no schedule restriction",
+      "matchCategories": ["security"],
+      "schedule": ["at any time"],
+      "automerge": true,
+      "labels": ["dependencies", "security"]
+    },
+    {
+      "description": "Pin GitHub Actions to exact SHA for supply chain security",
+      "matchManagers": ["github-actions"],
+      "pinDigests": true
+    }
+  ],
+  "vulnerabilityAlerts": {
+    "enabled": true,
+    "labels": ["security"]
+  }
+}

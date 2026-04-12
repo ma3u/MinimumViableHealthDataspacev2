@@ -371,16 +371,18 @@ jobs:
       - name: Scan k8s manifests (NSA framework)
         run: |
           kubescape scan framework nsa \
+            --severity-threshold critical \
             --format json \
             --output kubescape-nsa.json \
-            k8s/ 2>/dev/null || true
+            k8s/
 
       - name: Scan k8s manifests (CIS benchmark)
         run: |
           kubescape scan framework cis-v1.23-t1.0.1 \
+            --severity-threshold critical \
             --format json \
             --output kubescape-cis.json \
-            k8s/ 2>/dev/null || true
+            k8s/
 
       - name: Kubescape summary
         if: always()
@@ -425,6 +427,65 @@ jobs:
         run: npm run lint
 
   # -----------------------------------------------------------------------
+  # Performance Budget (Lighthouse CI) — Core Web Vitals enforcement
+  # -----------------------------------------------------------------------
+  lighthouse:
+    name: Performance Budget (Lighthouse)
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
+    defaults:
+      run:
+        working-directory: ./ui
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: ./ui/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build application
+        run: npm run build
+        env:
+          NEXT_PUBLIC_STATIC_EXPORT: "false"
+
+      - name: Install Lighthouse CI
+        run: npm install -g @lhci/cli
+
+      - name: Run Lighthouse CI
+        run: |
+          lhci autorun \
+            --collect.startServerCommand="npx next start -p 9222" \
+            --collect.url="http://localhost:9222/" \
+            --collect.url="http://localhost:9222/graph" \
+            --collect.url="http://localhost:9222/catalog" \
+            --collect.url="http://localhost:9222/docs" \
+            --collect.numberOfRuns=3 \
+            --assert.preset="lighthouse:recommended" \
+            --assert.assertions.first-contentful-paint="warn:maxNumericValue=3000" \
+            --assert.assertions.largest-contentful-paint="error:maxNumericValue=4000" \
+            --assert.assertions.cumulative-layout-shift="error:maxNumericValue=0.1" \
+            --assert.assertions.total-blocking-time="warn:maxNumericValue=300" \
+            --assert.assertions.resource-summary:script:size="warn:maxNumericValue=500000"
+        env:
+          NEXTAUTH_SECRET: ci-lighthouse-not-for-production
+          NEXTAUTH_URL: http://localhost:9222
+          LHCI_BUILD_CONTEXT__CURRENT_HASH: ${{ github.sha }}
+
+      - name: Upload Lighthouse reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: lighthouse-reports
+          path: ui/.lighthouseci/
+          retention-days: 30
+
+  # -----------------------------------------------------------------------
   # E2E Tests (Playwright) — only on main / manual dispatch
   # -----------------------------------------------------------------------
   e2e-tests:
@@ -465,7 +526,6 @@ jobs:
           NEXTAUTH_URL: http://localhost:3000
 
       - name: WCAG 2.2 AA accessibility audit
-        continue-on-error: true # requires running services for full coverage
         run: npx playwright test __tests__/e2e/journeys/27-wcag-accessibility.spec.ts --project=chromium
         env:
           CI: true
