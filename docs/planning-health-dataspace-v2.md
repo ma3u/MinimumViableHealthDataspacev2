@@ -1,5 +1,21 @@
 # Planning: Health Dataspace v2
 
+## GitHub Issues & Tracking
+
+Planning and implementation are tracked in [GitHub Issues](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues):
+
+| Issue                                                                   | Title                                                                  | Status    | Related ADR/Phase                                                                       |
+| ----------------------------------------------------------------------- | ---------------------------------------------------------------------- | --------- | --------------------------------------------------------------------------------------- |
+| [#1](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/1)   | Trust Center for Cross-Provider Pseudonym Resolution (EHDS Art. 50/51) | ✅ Closed | Phase 6, Graph personas                                                                 |
+| [#2](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/2)   | Documentation refers to missing neo4j script                           | ✅ Closed | Phase 3                                                                                 |
+| [#3](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/3)   | Stability, Load Tests and Cost per Tenant                              | ✅ Closed | Phase 8                                                                                 |
+| [#4](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/4)   | Security Assessment & BSI C5 Plan                                      | 🔓 Open   | [ADR-011](ADRs/ADR-011-security-testing.md) (demo track done, production track pending) |
+| [#5](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/5)   | Pentest Plan + Trivy Remediation                                       | ✅ Closed | [ADR-011](ADRs/ADR-011-security-testing.md)                                             |
+| [#6](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/6)   | Pentest Results (2026-03-28 scan)                                      | ✅ Closed | Security spec 28                                                                        |
+| [#8](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/8)   | Cross-Participant Dataset Discovery (NLP)                              | 🔓 Open   | Phase 5 extension (federated discovery across unknown participants)                     |
+| [#9](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/9)   | Hospital-Grade Design System (Light/Dark)                              | ✅ Closed | Phase 6                                                                                 |
+| [#10](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/10) | Deploy MVHD to Azure — ACA + managed services                          | ✅ Closed | [ADR-012](ADRs/ADR-012-azure-container-apps.md), v1.2.0                                 |
+
 ## Table of Contents
 
 - [Planning: Health Dataspace v2](#planning-health-dataspace-v2)

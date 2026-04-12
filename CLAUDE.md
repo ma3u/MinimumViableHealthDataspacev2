@@ -3,6 +3,16 @@
 EHDS regulation reference implementation: DSP Dataspace Protocol + FHIR R4 + OMOP CDM + biomedical
 ontologies unified in a Neo4j knowledge graph. 127 synthetic patients, 5300+ graph nodes.
 
+## Planning & ADR Workflow
+
+Before implementing significant changes, always:
+
+1. **Check existing ADRs** in `docs/ADRs/` (ADR-001 to ADR-013) for architectural context
+2. **Consult the planning document** at `docs/planning-health-dataspace-v2.md` for phase context
+3. **Check GitHub Issues** for related tracking: `gh issue list --repo ma3u/MinimumViableHealthDataspacev2`
+4. **Create a new ADR** in `docs/ADRs/ADR-NNN-slug.md` for architectural decisions
+5. **Link new ADRs** in the planning document's ADR index table
+
 ## Build Commands
 
 ```bash
