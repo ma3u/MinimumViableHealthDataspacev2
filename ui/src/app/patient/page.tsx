@@ -12,6 +12,7 @@ import {
   Users,
 } from "lucide-react";
 import PageIntro from "@/components/PageIntro";
+import { SignInRequired } from "@/components/SignInRequired";
 
 interface PatientListItem {
   id: string;
@@ -113,10 +114,14 @@ export default function PatientPage() {
   const [timeline, setTimeline] = useState<TimelineEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [restricted, setRestricted] = useState(false);
+  const [unauthenticated, setUnauthenticated] = useState(false);
 
   useEffect(() => {
     fetchApi("/api/patient")
-      .then((r) => r.json())
+      .then(async (r) => {
+        if (r.status === 401) throw new Error("UNAUTHENTICATED");
+        return r.json();
+      })
       .then((d) => {
         setPatients(d.patients ?? []);
         setStats(d.stats ?? null);
@@ -126,19 +131,28 @@ export default function PatientPage() {
         }
         setLoading(false);
       })
-      .catch(() => setLoading(false));
+      .catch((e: Error) => {
+        if (e.message === "UNAUTHENTICATED") setUnauthenticated(true);
+        setLoading(false);
+      });
   }, []);
 
   useEffect(() => {
     if (!selected) return;
     setLoading(true);
     fetchApi(`/api/patient?patientId=${encodeURIComponent(selected)}`)
-      .then((r) => r.json())
+      .then(async (r) => {
+        if (r.status === 401) throw new Error("UNAUTHENTICATED");
+        return r.json();
+      })
       .then((d) => {
         setTimeline(d.timeline ?? []);
         setLoading(false);
       })
-      .catch(() => setLoading(false));
+      .catch((e: Error) => {
+        if (e.message === "UNAUTHENTICATED") setUnauthenticated(true);
+        setLoading(false);
+      });
   }, [selected]);
 
   const selectedPatient = patients.find((p) => p.id === selected);
@@ -156,170 +170,176 @@ export default function PatientPage() {
           docLink={{ href: "/docs/architecture", label: "Architecture Docs" }}
         />
 
-        {/* Cohort metric orb cards — Stitch patient_dashboard_day bento */}
-        {stats && (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
-            <MetricCard
-              label="Patients"
-              value={stats.patients}
-              isOrb
-              icon={<Heart size={20} className="text-white" />}
-              sub="Synthea cohort"
-            />
-            <MetricCard
-              label="Encounters"
-              value={stats.encounters}
-              icon={<Stethoscope size={18} />}
-            />
-            <MetricCard
-              label="Conditions"
-              value={stats.conditions}
-              icon={<Activity size={18} />}
-            />
-            <MetricCard
-              label="Observations"
-              value={stats.observations}
-              icon={<FlaskConical size={18} />}
-            />
-            <MetricCard
-              label="Medications"
-              value={stats.medications}
-              icon={<Pill size={18} />}
-            />
-            <MetricCard
-              label="Procedures"
-              value={stats.procedures}
-              icon={<Scissors size={18} />}
-            />
-          </div>
-        )}
-
-        {/* Patient selector */}
-        {restricted ? (
-          <div className="mb-4 px-4 py-3 bg-[var(--role-patient-bg)] border border-[var(--role-patient-border)] rounded-xl text-sm text-[var(--role-patient-text)] flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-[var(--role-patient-text)] inline-block animate-pulse" />
-            Showing your personal health record (EHDS Art. 3 / GDPR Art. 15)
-          </div>
+        {unauthenticated ? (
+          <SignInRequired description="The Patient Journey view is restricted to authenticated users. Sign in with one of the demo personas to explore FHIR R4 clinical timelines mapped to OMOP CDM concepts." />
         ) : (
-          <div className="mb-6">
-            <label className="section-label block">
-              Select patient
-              <select
-                value={selected}
-                onChange={(e) => setSelected(e.target.value)}
-                className="mt-1 px-3 py-2.5 bg-[var(--surface-card)] border border-[var(--border-ui)] rounded-xl text-sm outline-none focus:border-[var(--accent)] w-full text-[var(--text-primary)] block"
-              >
-                <option value="">
-                  — select patient ({patients.length} loaded) —
-                </option>
-                {patients.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.name ?? p.id}
-                  </option>
-                ))}
-              </select>
-            </label>
-          </div>
-        )}
-
-        {/* Patient demographics header */}
-        {selectedPatient && (
-          <div className="surface-card p-4 mb-6 flex items-center gap-6 border border-[var(--border)]">
-            <div className="metric-orb shrink-0">
-              <Users size={20} className="text-white" />
-            </div>
-            <div className="flex gap-6 flex-wrap text-sm">
-              <div>
-                <p className="section-label mb-0.5">Name</p>
-                <p className="font-semibold text-[var(--text-primary)]">
-                  {selectedPatient.name ?? selectedPatient.id}
-                </p>
+          <>
+            {/* Cohort metric orb cards — Stitch patient_dashboard_day bento */}
+            {stats && (
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
+                <MetricCard
+                  label="Patients"
+                  value={stats.patients}
+                  isOrb
+                  icon={<Heart size={20} className="text-white" />}
+                  sub="Synthea cohort"
+                />
+                <MetricCard
+                  label="Encounters"
+                  value={stats.encounters}
+                  icon={<Stethoscope size={18} />}
+                />
+                <MetricCard
+                  label="Conditions"
+                  value={stats.conditions}
+                  icon={<Activity size={18} />}
+                />
+                <MetricCard
+                  label="Observations"
+                  value={stats.observations}
+                  icon={<FlaskConical size={18} />}
+                />
+                <MetricCard
+                  label="Medications"
+                  value={stats.medications}
+                  icon={<Pill size={18} />}
+                />
+                <MetricCard
+                  label="Procedures"
+                  value={stats.procedures}
+                  icon={<Scissors size={18} />}
+                />
               </div>
-              <div>
-                <p className="section-label mb-0.5">Gender</p>
-                <p className="font-semibold text-[var(--text-primary)]">
-                  {selectedPatient.gender ?? "—"}
-                </p>
-              </div>
-              <div>
-                <p className="section-label mb-0.5">Born</p>
-                <p className="font-semibold text-[var(--text-primary)]">
-                  {selectedPatient.birthDate ?? "—"}
-                </p>
-              </div>
-              <div>
-                <p className="section-label mb-0.5">Events</p>
-                <p className="font-semibold text-[var(--text-primary)]">
-                  {timeline.length}
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
+            )}
 
-        {loading && (
-          <p className="text-[var(--text-secondary)] text-sm">Loading…</p>
-        )}
+            {/* Patient selector */}
+            {restricted ? (
+              <div className="mb-4 px-4 py-3 bg-[var(--role-patient-bg)] border border-[var(--role-patient-border)] rounded-xl text-sm text-[var(--role-patient-text)] flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-[var(--role-patient-text)] inline-block animate-pulse" />
+                Showing your personal health record (EHDS Art. 3 / GDPR Art. 15)
+              </div>
+            ) : (
+              <div className="mb-6">
+                <label className="section-label block">
+                  Select patient
+                  <select
+                    value={selected}
+                    onChange={(e) => setSelected(e.target.value)}
+                    className="mt-1 px-3 py-2.5 bg-[var(--surface-card)] border border-[var(--border-ui)] rounded-xl text-sm outline-none focus:border-[var(--accent)] w-full text-[var(--text-primary)] block"
+                  >
+                    <option value="">
+                      — select patient ({patients.length} loaded) —
+                    </option>
+                    {patients.map((p) => (
+                      <option key={p.id} value={p.id}>
+                        {p.name ?? p.id}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              </div>
+            )}
 
-        {!loading && selected && timeline.length === 0 && (
-          <p className="text-[var(--text-secondary)] text-sm">
-            No timeline events found for this patient.
-          </p>
-        )}
+            {/* Patient demographics header */}
+            {selectedPatient && (
+              <div className="surface-card p-4 mb-6 flex items-center gap-6 border border-[var(--border)]">
+                <div className="metric-orb shrink-0">
+                  <Users size={20} className="text-white" />
+                </div>
+                <div className="flex gap-6 flex-wrap text-sm">
+                  <div>
+                    <p className="section-label mb-0.5">Name</p>
+                    <p className="font-semibold text-[var(--text-primary)]">
+                      {selectedPatient.name ?? selectedPatient.id}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="section-label mb-0.5">Gender</p>
+                    <p className="font-semibold text-[var(--text-primary)]">
+                      {selectedPatient.gender ?? "—"}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="section-label mb-0.5">Born</p>
+                    <p className="font-semibold text-[var(--text-primary)]">
+                      {selectedPatient.birthDate ?? "—"}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="section-label mb-0.5">Events</p>
+                    <p className="font-semibold text-[var(--text-primary)]">
+                      {timeline.length}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
 
-        {/* Clinical timeline — Stitch activity-timeline pattern */}
-        {timeline.length > 0 && (
-          <div>
-            <p className="section-label mb-4">Clinical timeline</p>
-            <ol className="activity-timeline space-y-5 pl-8">
-              {timeline.map((e, i) => {
-                const token = FHIR_TYPE_TOKENS[e.fhirType];
-                return (
-                  <li key={i} className="relative">
-                    {/* Timeline dot */}
-                    <span
-                      className="absolute -left-[1.75rem] top-1 w-3.5 h-3.5 rounded-full border-2 border-[var(--surface-card)] z-10"
-                      style={{
-                        background: token?.text ?? "var(--text-secondary)",
-                      }}
-                    />
-                    <div className="surface-card p-4 border border-[var(--border)] hover:shadow-md transition-shadow">
-                      <div className="flex items-start justify-between gap-3 mb-1">
-                        <div className="flex items-center gap-2">
-                          {/* FHIR type badge */}
-                          <span
-                            className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full"
-                            style={{
-                              color: token?.text ?? "var(--text-secondary)",
-                              background: token?.bg ?? "var(--surface-2)",
-                            }}
-                          >
-                            {token?.icon}
-                            {e.fhirType}
-                          </span>
-                          <span className="text-xs text-[var(--text-secondary)]">
-                            {e.date ?? "—"}
-                          </span>
+            {loading && (
+              <p className="text-[var(--text-secondary)] text-sm">Loading…</p>
+            )}
+
+            {!loading && selected && timeline.length === 0 && (
+              <p className="text-[var(--text-secondary)] text-sm">
+                No timeline events found for this patient.
+              </p>
+            )}
+
+            {/* Clinical timeline — Stitch activity-timeline pattern */}
+            {timeline.length > 0 && (
+              <div>
+                <p className="section-label mb-4">Clinical timeline</p>
+                <ol className="activity-timeline space-y-5 pl-8">
+                  {timeline.map((e, i) => {
+                    const token = FHIR_TYPE_TOKENS[e.fhirType];
+                    return (
+                      <li key={i} className="relative">
+                        {/* Timeline dot */}
+                        <span
+                          className="absolute -left-[1.75rem] top-1 w-3.5 h-3.5 rounded-full border-2 border-[var(--surface-card)] z-10"
+                          style={{
+                            background: token?.text ?? "var(--text-secondary)",
+                          }}
+                        />
+                        <div className="surface-card p-4 border border-[var(--border)] hover:shadow-md transition-shadow">
+                          <div className="flex items-start justify-between gap-3 mb-1">
+                            <div className="flex items-center gap-2">
+                              {/* FHIR type badge */}
+                              <span
+                                className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full"
+                                style={{
+                                  color: token?.text ?? "var(--text-secondary)",
+                                  background: token?.bg ?? "var(--surface-2)",
+                                }}
+                              >
+                                {token?.icon}
+                                {e.fhirType}
+                              </span>
+                              <span className="text-xs text-[var(--text-secondary)]">
+                                {e.date ?? "—"}
+                              </span>
+                            </div>
+                          </div>
+                          <p className="text-sm font-medium text-[var(--text-primary)]">
+                            {e.display || (
+                              <span className="font-mono text-xs text-[var(--text-secondary)]">
+                                {e.fhirId}
+                              </span>
+                            )}
+                          </p>
+                          {e.omopType && (
+                            <p className="text-xs text-[var(--layer4-text)] mt-1">
+                              ↳ OMOP {e.omopType}: {e.omopId}
+                            </p>
+                          )}
                         </div>
-                      </div>
-                      <p className="text-sm font-medium text-[var(--text-primary)]">
-                        {e.display || (
-                          <span className="font-mono text-xs text-[var(--text-secondary)]">
-                            {e.fhirId}
-                          </span>
-                        )}
-                      </p>
-                      {e.omopType && (
-                        <p className="text-xs text-[var(--layer4-text)] mt-1">
-                          ↳ OMOP {e.omopType}: {e.omopId}
-                        </p>
-                      )}
-                    </div>
-                  </li>
-                );
-              })}
-            </ol>
-          </div>
+                      </li>
+                    );
+                  })}
+                </ol>
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>

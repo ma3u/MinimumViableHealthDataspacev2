@@ -14,6 +14,7 @@ import {
   Layers,
 } from "lucide-react";
 import PageIntro from "@/components/PageIntro";
+import { SignInRequired } from "@/components/SignInRequired";
 
 interface EEHRxFProfile {
   profileId: string;
@@ -252,10 +253,12 @@ export default function EEHRxFPage() {
   const [data, setData] = useState<EEHRxFData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [unauthenticated, setUnauthenticated] = useState(false);
 
   useEffect(() => {
     fetchApi("/api/eehrxf")
-      .then((r) => {
+      .then(async (r) => {
+        if (r.status === 401) throw new Error("UNAUTHENTICATED");
         if (!r.ok) throw new Error(`HTTP ${r.status}`);
         return r.json();
       })
@@ -263,8 +266,9 @@ export default function EEHRxFPage() {
         setData(d);
         setLoading(false);
       })
-      .catch((e) => {
-        setError(e.message);
+      .catch((e: Error) => {
+        if (e.message === "UNAUTHENTICATED") setUnauthenticated(true);
+        else setError(e.message);
         setLoading(false);
       });
   }, []);
@@ -287,106 +291,118 @@ export default function EEHRxFPage() {
           }}
         />
 
-        {error && (
-          <div className="mb-6 p-3 rounded bg-[var(--role-admin-bg)] border border-[var(--role-admin-border)] text-[var(--role-admin-text)] text-sm">
-            {error}
-          </div>
-        )}
-
-        {/* Summary stats */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
-          <div className="bg-[var(--surface)] border border-[var(--border)] rounded-xl p-4 flex flex-col gap-1">
-            <Layers size={16} className="text-teal-800 dark:text-teal-300" />
-            <span className="text-2xl font-bold">
-              {loading ? "—" : data?.summary.totalCategories ?? 0}
-            </span>
-            <span className="text-xs text-[var(--text-secondary)]">
-              Priority Categories
-            </span>
-          </div>
-          <div className="bg-[var(--surface)] border border-[var(--border)] rounded-xl p-4 flex flex-col gap-1">
-            <ShieldCheck
-              size={16}
-              className="text-green-800 dark:text-green-300"
-            />
-            <span className="text-2xl font-bold">
-              {loading ? "—" : data?.summary.totalProfiles ?? 0}
-            </span>
-            <span className="text-xs text-[var(--text-secondary)]">
-              EU Profiles Tracked
-            </span>
-          </div>
-          <div className="bg-[var(--surface)] border border-[var(--border)] rounded-xl p-4 flex flex-col gap-1">
-            <CheckCircle size={16} className="text-[var(--success-text)]" />
-            <span className="text-2xl font-bold">
-              {loading ? "—" : data?.summary.coveredProfiles ?? 0}
-            </span>
-            <span className="text-xs text-[var(--text-secondary)]">
-              Profiles with Data
-            </span>
-          </div>
-          <div className="bg-[var(--surface)] border border-[var(--border)] rounded-xl p-4 flex flex-col gap-1">
-            <AlertTriangle size={16} className="text-[var(--warning-text)]" />
-            <span className="text-2xl font-bold">
-              {loading ? "—" : `${data?.summary.coveragePercent ?? 0}%`}
-            </span>
-            <span className="text-xs text-[var(--text-secondary)]">
-              Overall Coverage
-            </span>
-          </div>
-        </div>
-
-        {/* EHDS Timeline */}
-        <div className="bg-[var(--surface)] border border-[var(--border)] rounded-xl p-5 mb-8">
-          <div className="flex items-center gap-2 mb-4">
-            <Clock size={16} className="text-[var(--text-secondary)]" />
-            <h2 className="font-semibold text-sm text-[var(--text-primary)]">
-              EHDS Implementation Timeline
-            </h2>
-          </div>
-          <div className="flex items-center gap-0 overflow-x-auto pb-2">
-            {EHDS_MILESTONES.map((m, i) => (
-              <div key={m.year} className="flex items-center">
-                {i > 0 && (
-                  <div className="w-8 sm:w-16 h-0.5 bg-gray-700 shrink-0" />
-                )}
-                <div className="flex flex-col items-center shrink-0">
-                  <div
-                    className={`w-4 h-4 rounded-full border-2 ${
-                      m.active
-                        ? "bg-layer2 border-layer2"
-                        : "bg-[var(--surface)] border-[var(--border-ui)]"
-                    }`}
-                  />
-                  <span
-                    className={`text-xs font-medium mt-1 ${
-                      m.active
-                        ? "text-teal-800 dark:text-teal-300"
-                        : "text-[var(--text-secondary)]"
-                    }`}
-                  >
-                    {m.year}
-                  </span>
-                  <span className="text-[10px] text-[var(--text-secondary)] text-center max-w-[100px] leading-tight mt-0.5">
-                    {m.label}
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Category cards */}
-        {loading ? (
-          <div className="text-[var(--text-secondary)] text-sm">
-            Loading EEHRxF profiles…
-          </div>
+        {unauthenticated ? (
+          <SignInRequired description="EEHRxF profile alignment is restricted to authenticated users. Sign in with one of the demo personas to see how your FHIR resources conform to the mandatory HL7 Europe profiles required by EHDS." />
         ) : (
-          <div className="flex flex-col gap-4">
-            {data?.categories.map((cat) => (
-              <CategoryCard key={cat.categoryId} category={cat} />
-            ))}
-          </div>
+          <>
+            {error && (
+              <div className="mb-6 p-3 rounded bg-[var(--role-admin-bg)] border border-[var(--role-admin-border)] text-[var(--role-admin-text)] text-sm">
+                {error}
+              </div>
+            )}
+
+            {/* Summary stats */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
+              <div className="bg-[var(--surface)] border border-[var(--border)] rounded-xl p-4 flex flex-col gap-1">
+                <Layers
+                  size={16}
+                  className="text-teal-800 dark:text-teal-300"
+                />
+                <span className="text-2xl font-bold">
+                  {loading ? "—" : data?.summary.totalCategories ?? 0}
+                </span>
+                <span className="text-xs text-[var(--text-secondary)]">
+                  Priority Categories
+                </span>
+              </div>
+              <div className="bg-[var(--surface)] border border-[var(--border)] rounded-xl p-4 flex flex-col gap-1">
+                <ShieldCheck
+                  size={16}
+                  className="text-green-800 dark:text-green-300"
+                />
+                <span className="text-2xl font-bold">
+                  {loading ? "—" : data?.summary.totalProfiles ?? 0}
+                </span>
+                <span className="text-xs text-[var(--text-secondary)]">
+                  EU Profiles Tracked
+                </span>
+              </div>
+              <div className="bg-[var(--surface)] border border-[var(--border)] rounded-xl p-4 flex flex-col gap-1">
+                <CheckCircle size={16} className="text-[var(--success-text)]" />
+                <span className="text-2xl font-bold">
+                  {loading ? "—" : data?.summary.coveredProfiles ?? 0}
+                </span>
+                <span className="text-xs text-[var(--text-secondary)]">
+                  Profiles with Data
+                </span>
+              </div>
+              <div className="bg-[var(--surface)] border border-[var(--border)] rounded-xl p-4 flex flex-col gap-1">
+                <AlertTriangle
+                  size={16}
+                  className="text-[var(--warning-text)]"
+                />
+                <span className="text-2xl font-bold">
+                  {loading ? "—" : `${data?.summary.coveragePercent ?? 0}%`}
+                </span>
+                <span className="text-xs text-[var(--text-secondary)]">
+                  Overall Coverage
+                </span>
+              </div>
+            </div>
+
+            {/* EHDS Timeline */}
+            <div className="bg-[var(--surface)] border border-[var(--border)] rounded-xl p-5 mb-8">
+              <div className="flex items-center gap-2 mb-4">
+                <Clock size={16} className="text-[var(--text-secondary)]" />
+                <h2 className="font-semibold text-sm text-[var(--text-primary)]">
+                  EHDS Implementation Timeline
+                </h2>
+              </div>
+              <div className="flex items-center gap-0 overflow-x-auto pb-2">
+                {EHDS_MILESTONES.map((m, i) => (
+                  <div key={m.year} className="flex items-center">
+                    {i > 0 && (
+                      <div className="w-8 sm:w-16 h-0.5 bg-gray-700 shrink-0" />
+                    )}
+                    <div className="flex flex-col items-center shrink-0">
+                      <div
+                        className={`w-4 h-4 rounded-full border-2 ${
+                          m.active
+                            ? "bg-layer2 border-layer2"
+                            : "bg-[var(--surface)] border-[var(--border-ui)]"
+                        }`}
+                      />
+                      <span
+                        className={`text-xs font-medium mt-1 ${
+                          m.active
+                            ? "text-teal-800 dark:text-teal-300"
+                            : "text-[var(--text-secondary)]"
+                        }`}
+                      >
+                        {m.year}
+                      </span>
+                      <span className="text-[10px] text-[var(--text-secondary)] text-center max-w-[100px] leading-tight mt-0.5">
+                        {m.label}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Category cards */}
+            {loading ? (
+              <div className="text-[var(--text-secondary)] text-sm">
+                Loading EEHRxF profiles…
+              </div>
+            ) : (
+              <div className="flex flex-col gap-4">
+                {data?.categories.map((cat) => (
+                  <CategoryCard key={cat.categoryId} category={cat} />
+                ))}
+              </div>
+            )}
+          </>
         )}
 
         {/* Reference links */}
