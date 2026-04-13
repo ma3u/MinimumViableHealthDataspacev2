@@ -1,7 +1,12 @@
 # ADR-015: Single-VM Dev Deployment for Personal VS Subscription
 
-**Status:** Accepted
-**Date:** 2026-04-13
+**Status:** Superseded by [ADR-016](ADR-016-aca-off-hours-scaledown.md) · Kept as fallback
+**Date:** 2026-04-13 · Superseded 2026-04-13
+
+> **Superseded note (2026-04-13):** After re-evaluation, scaling the full ACA topology down
+> outside working hours (ADR-016) fits the 50 EUR/month budget while avoiding infrastructure
+> drift. The scripts in `scripts/azure-vm/` remain available as a disaster-recovery fallback
+> if ACA proves unreliable at cold-start, but are no longer the recommended path.
 
 ## Context
 

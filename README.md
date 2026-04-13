@@ -76,7 +76,7 @@ The motivation comes from a practical gap: the Eclipse [JAD (Joint Architecture 
 
 For the full background, see the companion article: [European Health Dataspaces, Digital Twins: A Journey from FHIR Basics to Intelligent Patient Models](https://www.linkedin.com/pulse/european-health-dataspaces-digital-twins-journey-fhir-buchhorn-roth-8t51c/).
 
-**Live Demo:** Static UI at [ma3u.github.io/MinimumViableHealthDataspacev2](https://ma3u.github.io/MinimumViableHealthDataspacev2/) | Full stack on [Azure EHDS Portal](https://mvhd-ui.blackforest-0a04f26e.westeurope.azurecontainerapps.io) ([deployment guide](docs/azure-deployment-guide.md))
+**Live Demo:** Static UI at [ma3u.github.io/MinimumViableHealthDataspacev2](https://ma3u.github.io/MinimumViableHealthDataspacev2/) · Azure live stack at [mvhd-ui.blackforest-0a04f26e.westeurope.azurecontainerapps.io](https://mvhd-ui.blackforest-0a04f26e.westeurope.azurecontainerapps.io) (online **Mon–Fri 07:00–20:00 Europe/Berlin**, offline otherwise — see [ADR-016](docs/ADRs/ADR-016-aca-off-hours-scaledown.md))
 
 ---
 
@@ -805,20 +805,23 @@ The full stack is deployed to **Azure Container Apps** for shared team access an
 
 > **[https://mvhd-ui.blackforest-0a04f26e.westeurope.azurecontainerapps.io](https://mvhd-ui.blackforest-0a04f26e.westeurope.azurecontainerapps.io)**
 
-**Availability — Mon–Fri 07:00–20:00 Europe/Berlin** (outside these hours the environment is
-scaled down to keep the deployment under the **50 EUR/month** personal Azure credit).
-Pick any of the [7 demo personas](#demo-users--roles) to sign in — e.g. `matthias` / `password`.
+**Availability — Mon–Fri 07:00–20:00 Europe/Berlin** (outside these hours all 13 Container
+Apps are scaled to 0 replicas and PostgreSQL is stopped to keep the deployment under the
+**50 EUR/month** personal Azure credit). Pick any of the [7 demo personas](#demo-users--roles)
+to sign in — e.g. `matthias` / `password`.
 
 | Window          | Mon–Fri           | Sat–Sun           |
 | --------------- | ----------------- | ----------------- |
 | 07:00–20:00 CET | 🟢 Online         | 🔴 Offline (cost) |
 | 20:00–07:00 CET | 🔴 Offline (cost) | 🔴 Offline (cost) |
 
-If the URL is unreachable, you're outside the working window — try again the next weekday
-morning, or run the stack locally via [Quick Start](#quick-start).
+Cold-start after the Monday scale-up takes ~90 seconds (Neo4j + Keycloak warmup + Vault
+re-bootstrap). If the URL is unreachable, you're either outside the working window or in
+the morning cold-start — try again shortly, or run the stack locally via
+[Quick Start](#quick-start).
 
-See [ADR-015: Single-VM Dev Deployment](docs/ADRs/ADR-015-single-vm-dev-deployment.md) for the
-cost model and scheduling rationale.
+See [ADR-016: ACA Off-Hours Scale-Down](docs/ADRs/ADR-016-aca-off-hours-scaledown.md) for
+the cost model and scheduling rationale. ADR-015 documents the single-VM fallback path.
 
 ### Topology
 
@@ -835,7 +838,8 @@ cost model and scheduling rationale.
 - [Azure Deployment Guide](docs/azure-deployment-guide.md) — full setup, endpoints, and troubleshooting
 - [Deploy workflow](.github/workflows/deploy-azure.yml) — CI/CD pipeline
 - [Deployment scripts](scripts/azure/) — 11 scripts for provisioning and lifecycle management
-- [Personal dev VM (ADR-015)](scripts/azure-vm/README.md) — single-VM variant for a 50 EUR VS subscription
+- [ACA off-hours schedule (ADR-016)](.github/workflows/aca-schedule.yml) — nightly / weekend scale-down workflow
+- [Personal dev VM fallback (ADR-015)](scripts/azure-vm/README.md) — single-VM variant (superseded by ADR-016)
 
 ---
 
