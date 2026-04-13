@@ -1,0 +1,69 @@
+#cloud-config
+# cloud-init for ADR-015 single-VM dev deployment.
+# Renders during `az vm create --custom-data`. Re-runs on every boot only for
+# the systemd unit — the apt/Docker install steps run once via runcmd.
+
+package_update: true
+package_upgrade: false
+
+packages:
+  - ca-certificates
+  - curl
+  - git
+  - gnupg
+  - jq
+  - lsb-release
+  - unzip
+
+write_files:
+  - path: /etc/systemd/system/health-dataspace.service
+    permissions: "0644"
+    owner: root:root
+    content: |
+      [Unit]
+      Description=MVHD full JAD Docker Compose stack
+      Documentation=https://github.com/ma3u/MinimumViableHealthDataspacev2
+      After=docker.service network-online.target
+      Requires=docker.service
+      Wants=network-online.target
+
+      [Service]
+      Type=oneshot
+      RemainAfterExit=yes
+      WorkingDirectory=/opt/mvhd
+      # Start minimal stack first (Neo4j + UI), then full JAD overlay.
+      ExecStart=/usr/bin/docker compose -f docker-compose.yml -f docker-compose.jad.yml up -d
+      # Vault is in-memory — bootstrap is idempotent and must run on every boot.
+      ExecStartPost=/bin/bash -c 'until curl -sf http://localhost:8200/v1/sys/health >/dev/null 2>&1 || [ $SECONDS -gt 120 ]; do sleep 2; done; /opt/mvhd/scripts/bootstrap-jad.sh || true'
+      ExecStop=/usr/bin/docker compose -f docker-compose.yml -f docker-compose.jad.yml down
+      TimeoutStartSec=900
+      TimeoutStopSec=180
+
+      [Install]
+      WantedBy=multi-user.target
+
+runcmd:
+  # Docker Engine + compose plugin (official repo)
+  - install -m 0755 -d /etc/apt/keyrings
+  - curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+  - chmod a+r /etc/apt/keyrings/docker.asc
+  - |
+    echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu $(. /etc/os-release && echo $VERSION_CODENAME) stable" \
+      > /etc/apt/sources.list.d/docker.list
+  - apt-get update
+  - DEBIAN_FRONTEND=noninteractive apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+  - usermod -aG docker azureuser
+  - systemctl enable --now docker
+  # Raise vm.max_map_count for Neo4j
+  - sysctl -w vm.max_map_count=262144
+  - echo "vm.max_map_count=262144" > /etc/sysctl.d/99-neo4j.conf
+  # Clone public repo (ADR-015: repo is public, no credentials needed)
+  - git clone --depth 1 --branch main https://github.com/ma3u/MinimumViableHealthDataspacev2.git /opt/mvhd
+  - chown -R azureuser:azureuser /opt/mvhd
+  - chmod +x /opt/mvhd/scripts/bootstrap-jad.sh /opt/mvhd/jad/seed-all.sh 2>/dev/null || true
+  # Enable and start the stack
+  - systemctl daemon-reload
+  - systemctl enable health-dataspace.service
+  - systemctl start health-dataspace.service
+
+final_message: "MVHD dev VM ready. docker compose ps on the host to verify."

@@ -1,0 +1,69 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "logicAppName": { "type": "string" },
+    "location": { "type": "string" },
+    "vmResourceGroup": { "type": "string" },
+    "vmName": { "type": "string" },
+    "startupHour": { "type": "int", "defaultValue": 7 },
+    "weekDays": {
+      "type": "array",
+      "defaultValue": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]
+    },
+    "timeZone": { "type": "string", "defaultValue": "W. Europe Standard Time" }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Logic/workflows",
+      "apiVersion": "2019-05-01",
+      "name": "[parameters('logicAppName')]",
+      "location": "[parameters('location')]",
+      "identity": { "type": "SystemAssigned" },
+      "properties": {
+        "state": "Enabled",
+        "definition": {
+          "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+          "contentVersion": "1.0.0.0",
+          "parameters": {},
+          "triggers": {
+            "WeekdayMorning": {
+              "type": "Recurrence",
+              "recurrence": {
+                "frequency": "Week",
+                "interval": 1,
+                "schedule": {
+                  "weekDays": "[parameters('weekDays')]",
+                  "hours": ["[parameters('startupHour')]"],
+                  "minutes": [0]
+                },
+                "timeZone": "[parameters('timeZone')]"
+              }
+            }
+          },
+          "actions": {
+            "Start_VM": {
+              "type": "Http",
+              "inputs": {
+                "method": "POST",
+                "uri": "[concat('https://management.azure.com/subscriptions/', subscription().subscriptionId, '/resourceGroups/', parameters('vmResourceGroup'), '/providers/Microsoft.Compute/virtualMachines/', parameters('vmName'), '/start?api-version=2023-03-01')]",
+                "authentication": {
+                  "type": "ManagedServiceIdentity",
+                  "audience": "https://management.azure.com/"
+                }
+              },
+              "runAfter": {}
+            }
+          },
+          "outputs": {}
+        }
+      }
+    }
+  ],
+  "outputs": {
+    "principalId": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.Logic/workflows', parameters('logicAppName')), '2019-05-01', 'Full').identity.principalId]"
+    }
+  }
+}
