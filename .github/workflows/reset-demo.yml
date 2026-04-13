@@ -1,9 +1,11 @@
-name: Nightly Demo Reset
+name: Weekly Demo Reset
 
 on:
   schedule:
-    # Run at 02:00 UTC daily (04:00 CET)
-    - cron: "0 2 * * *"
+    # Run Monday 05:15 UTC = 07:15 Europe/Berlin (CEST) / 06:15 (CET).
+    # GitHub Actions cron is UTC-only; the local time shifts ±1 h across DST.
+    # Fires 15 minutes after the Monday 07:00 Europe/Berlin environment start-up.
+    - cron: "15 5 * * 1"
   workflow_dispatch:
     inputs:
       skip_tests:
@@ -247,7 +249,7 @@ jobs:
       - name: Reset summary
         if: always()
         run: |
-          echo "## Nightly Demo Reset" >> $GITHUB_STEP_SUMMARY
+          echo "## Weekly Demo Reset" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Time:** $(date -u +%Y-%m-%dT%H:%M:%SZ)" >> $GITHUB_STEP_SUMMARY
           echo "**Target:** ${{ steps.verify.outputs.ui_url }}" >> $GITHUB_STEP_SUMMARY

@@ -1397,9 +1397,9 @@ PLAYWRIGHT_BASE_URL=http://localhost:3003 \\
             },
             {
               id: "ADR-014",
-              file: "ADR-014-nightly-demo-reset.md",
-              title: "Nightly Demo Reset",
-              desc: "Scheduled 02:00 UTC reset of all demo environment state for GDPR data minimisation.",
+              file: "ADR-014-weekly-demo-reset.md",
+              title: "Weekly Demo Reset",
+              desc: "Scheduled Monday 05:15 UTC (07:15 Europe/Berlin) reset of demo state for GDPR data minimisation.",
             },
           ].map((adr) => (
             <a

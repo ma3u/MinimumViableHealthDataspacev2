@@ -801,6 +801,27 @@ Complete list of all services and their direct `localhost` port mappings when th
 
 The full stack is deployed to **Azure Container Apps** for shared team access and CI/CD validation.
 
+### Live demo
+
+> **[https://mvhd-ui.blackforest-0a04f26e.westeurope.azurecontainerapps.io](https://mvhd-ui.blackforest-0a04f26e.westeurope.azurecontainerapps.io)**
+
+**Availability — Mon–Fri 07:00–20:00 Europe/Berlin** (outside these hours the environment is
+scaled down to keep the deployment under the **50 EUR/month** personal Azure credit).
+Pick any of the [7 demo personas](#demo-users--roles) to sign in — e.g. `matthias` / `password`.
+
+| Window          | Mon–Fri           | Sat–Sun           |
+| --------------- | ----------------- | ----------------- |
+| 07:00–20:00 CET | 🟢 Online         | 🔴 Offline (cost) |
+| 20:00–07:00 CET | 🔴 Offline (cost) | 🔴 Offline (cost) |
+
+If the URL is unreachable, you're outside the working window — try again the next weekday
+morning, or run the stack locally via [Quick Start](#quick-start).
+
+See [ADR-015: Single-VM Dev Deployment](docs/ADRs/ADR-015-single-vm-dev-deployment.md) for the
+cost model and scheduling rationale.
+
+### Topology
+
 | Resource       | Details                                                                                                                              |
 | -------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
 | Environment    | `mvhd-env` (West Europe, consumption plan)                                                                                           |
@@ -814,6 +835,7 @@ The full stack is deployed to **Azure Container Apps** for shared team access an
 - [Azure Deployment Guide](docs/azure-deployment-guide.md) — full setup, endpoints, and troubleshooting
 - [Deploy workflow](.github/workflows/deploy-azure.yml) — CI/CD pipeline
 - [Deployment scripts](scripts/azure/) — 11 scripts for provisioning and lifecycle management
+- [Personal dev VM (ADR-015)](scripts/azure-vm/README.md) — single-VM variant for a 50 EUR VS subscription
 
 ---
 

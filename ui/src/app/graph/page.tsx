@@ -4,7 +4,7 @@ import { fetchApi } from "@/lib/api";
 import { themeChangeTarget } from "@/components/ThemeToggle";
 import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { useSession } from "next-auth/react";
+import { useSession, signIn } from "next-auth/react";
 import { derivePersonaId, DEMO_PERSONAS } from "@/lib/auth";
 import { useDemoPersona, setDemoPersona } from "@/lib/use-demo-persona";
 
@@ -386,7 +386,15 @@ function GraphContent() {
         ? "/api/graph"
         : `/api/graph?persona=${activePersona}`;
     fetchApi(url)
-      .then((r) => r.json())
+      .then(async (r) => {
+        if (r.status === 401) {
+          throw new Error("UNAUTHENTICATED");
+        }
+        if (!r.ok) {
+          throw new Error(`HTTP ${r.status}`);
+        }
+        return r.json();
+      })
       .then((d) => {
         if (!Array.isArray(d.nodes)) throw new Error("Bad response");
 
@@ -440,8 +448,12 @@ function GraphContent() {
         // Auto-fit all nodes into view after data arrives
         setTimeout(() => fgRef.current?.zoomToFit(400, 40), 150);
       })
-      .catch(() => {
-        setError("Neo4j unavailable — graph could not be loaded.");
+      .catch((e: Error) => {
+        if (e.message === "UNAUTHENTICATED") {
+          setError("UNAUTHENTICATED");
+        } else {
+          setError("Neo4j unavailable — graph could not be loaded.");
+        }
         setLoading(false);
       });
   }, [activePersona, sessionStatus]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -1362,6 +1374,21 @@ function GraphContent() {
           <div className="flex h-full items-center justify-center text-[var(--text-secondary)]">
             <Loader2 size={14} className="mr-2 animate-spin" />
             Loading {PERSONA_VALUE_NODES[activePersona]?.name ?? "graph"}…
+          </div>
+        ) : error === "UNAUTHENTICATED" ? (
+          <div className="flex h-full flex-col items-center justify-center gap-4 text-[var(--text-secondary)]">
+            <p className="text-lg">Sign in to explore the knowledge graph.</p>
+            <p className="text-sm opacity-70">
+              The graph shows participants, data products, policies and clinical
+              entities scoped to your persona.
+            </p>
+            <button
+              type="button"
+              onClick={() => signIn("keycloak")}
+              className="rounded bg-[var(--accent)] px-4 py-2 text-sm font-medium text-white hover:opacity-90"
+            >
+              Sign in
+            </button>
           </div>
         ) : error ? (
           <div className="flex h-full items-center justify-center text-[var(--text-secondary)]">
