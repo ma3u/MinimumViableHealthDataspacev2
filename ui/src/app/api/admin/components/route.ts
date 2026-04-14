@@ -2,6 +2,14 @@ import { getServerSession } from "next-auth/next";
 import { NextResponse } from "next/server";
 import http from "node:http";
 import { edcClient } from "@/lib/edc";
+import {
+  azureResourceGroup,
+  azureSubscriptionId,
+  getContainerAppMetrics,
+  isAzureDeployment,
+  listContainerApps,
+  parseMemoryToBytes,
+} from "@/lib/azure-arm";
 
 import { authOptions } from "@/lib/auth";
 
@@ -242,6 +250,113 @@ interface ParticipantInfo {
 }
 
 // ---------------------------------------------------------------------------
+// ACA topology mapping (subset of the full Docker SERVICE_MAP — only the apps
+// actually deployed on Azure Container Apps via scripts/azure/*.sh)
+// ---------------------------------------------------------------------------
+
+interface AcaMapping {
+  component: string;
+  layer: "edc-core" | "identity" | "cfm" | "infrastructure";
+}
+
+const ACA_SERVICE_MAP: Record<string, AcaMapping> = {
+  "mvhd-controlplane": { component: "Control Plane", layer: "edc-core" },
+  "mvhd-dp-fhir": { component: "Data Plane FHIR", layer: "edc-core" },
+  "mvhd-dp-omop": { component: "Data Plane OMOP", layer: "edc-core" },
+  "mvhd-identityhub": { component: "Identity Hub", layer: "identity" },
+  "mvhd-issuerservice": { component: "Issuer Service", layer: "identity" },
+  "mvhd-keycloak": { component: "Keycloak", layer: "identity" },
+  "mvhd-vault": { component: "Vault", layer: "identity" },
+  "mvhd-tenant-mgr": { component: "Tenant Manager", layer: "cfm" },
+  "mvhd-provision-mgr": { component: "Provision Manager", layer: "cfm" },
+  "mvhd-postgres": { component: "PostgreSQL", layer: "infrastructure" },
+  "mvhd-nats": { component: "NATS", layer: "infrastructure" },
+  "mvhd-neo4j": { component: "Neo4j", layer: "infrastructure" },
+  "mvhd-neo4j-proxy": { component: "Neo4j Proxy", layer: "infrastructure" },
+  "mvhd-ui": { component: "UI", layer: "infrastructure" },
+};
+
+/**
+ * Enumerate Container Apps in the configured resource group and populate the
+ * `components` array with the same shape Docker would produce, using Azure
+ * Monitor metrics instead of Docker stats.
+ */
+async function loadAcaComponents(
+  components: ComponentInfo[],
+): Promise<boolean> {
+  const subscriptionId = azureSubscriptionId();
+  const resourceGroup = azureResourceGroup();
+  if (!subscriptionId || !resourceGroup) return false;
+
+  let apps: Awaited<ReturnType<typeof listContainerApps>>;
+  try {
+    apps = await listContainerApps(subscriptionId, resourceGroup);
+  } catch (err) {
+    console.warn("ARM listContainerApps failed:", err);
+    return false;
+  }
+
+  await Promise.all(
+    apps.map(async (app) => {
+      const mapping = ACA_SERVICE_MAP[app.name];
+      if (!mapping) return;
+
+      const container = app.properties.template?.containers?.[0];
+      const cpuReservation = container?.resources?.cpu ?? 0;
+      const memReservationBytes = parseMemoryToBytes(
+        container?.resources?.memory,
+      );
+
+      let sample;
+      try {
+        sample = await getContainerAppMetrics(
+          subscriptionId,
+          resourceGroup,
+          app.name,
+        );
+      } catch {
+        sample = null;
+      }
+
+      const runningStatus =
+        app.properties.runningStatus ?? app.properties.provisioningState ?? "";
+      const status: ComponentInfo["status"] = /running/i.test(runningStatus)
+        ? "running"
+        : /stopped|stop/i.test(runningStatus)
+          ? "stopped"
+          : "unknown";
+
+      // CPU %: Azure gives UsageNanoCores; divide by cpuReservation (vCPUs).
+      // If reservation is present, rescale to "% of reservation"; else keep raw.
+      const rawCpuPct = sample?.cpuPercent ?? 0;
+      const cpu =
+        cpuReservation > 0
+          ? Math.round((rawCpuPct / cpuReservation) * 100) / 100
+          : rawCpuPct;
+
+      // memPercent field from azure-arm is actually bytes; convert.
+      const usedBytes = sample?.memPercent ?? 0;
+      const usedMB = Math.round((usedBytes / 1024 / 1024) * 10) / 10;
+      const limitMB = Math.round((memReservationBytes / 1024 / 1024) * 10) / 10;
+      const memPct =
+        limitMB > 0 ? Math.round((usedMB / limitMB) * 1000) / 10 : 0;
+
+      components.push({
+        container: app.name,
+        component: mapping.component,
+        layer: mapping.layer,
+        status,
+        uptime: "—",
+        cpu,
+        mem: { usedMB, limitMB, percent: memPct },
+      });
+    }),
+  );
+
+  return true;
+}
+
+// ---------------------------------------------------------------------------
 // GET /api/admin/components
 // ---------------------------------------------------------------------------
 
@@ -258,77 +373,97 @@ export async function GET() {
   const components: ComponentInfo[] = [];
   const participants: ParticipantInfo[] = [];
   let dockerAvailable = false;
+  let metricsSource: "docker" | "azure-monitor" | "none" = "none";
 
-  // 1) Try Docker Engine API for container stats
-  try {
-    const containers = await dockerGet<DockerContainer[]>(
-      "/containers/json?all=true&filters=" +
-        encodeURIComponent(JSON.stringify({ name: ["health-dataspace"] })),
-    );
-    dockerAvailable = true;
+  // 1a) Azure Container Apps path — use Azure Monitor via managed identity.
+  //     Skips the Docker socket entirely (not available on ACA).
+  if (isAzureDeployment()) {
+    const ok = await loadAcaComponents(components);
+    if (ok && components.length > 0) {
+      dockerAvailable = true; // UI flag: "metrics are available"
+      metricsSource = "azure-monitor";
+    }
+  }
 
-    await Promise.all(
-      SERVICE_MAP.map(async (svc) => {
-        const container = containers.find((c) =>
-          c.Names.some((n) => n === `/${svc.container}`),
-        );
-        if (!container) {
-          components.push({
-            ...svc,
-            status: "stopped",
-            uptime: "—",
-            cpu: 0,
-            mem: { usedMB: 0, limitMB: 0, percent: 0 },
-          });
-          return;
-        }
+  // 1b) Docker Engine API fallback (local dev / single-VM deployment)
+  if (metricsSource === "none") {
+    try {
+      const containers = await dockerGet<DockerContainer[]>(
+        "/containers/json?all=true&filters=" +
+          encodeURIComponent(JSON.stringify({ name: ["health-dataspace"] })),
+      );
+      dockerAvailable = true;
 
-        // Get inspect for health + uptime
-        let healthStatus: ComponentInfo["status"] = "running";
-        let uptime = "—";
-        try {
-          const inspect = await dockerGet<DockerInspect>(
-            `/containers/${container.Id}/json`,
+      await Promise.all(
+        SERVICE_MAP.map(async (svc) => {
+          const container = containers.find((c) =>
+            c.Names.some((n) => n === `/${svc.container}`),
           );
-          if (inspect.State.Health?.Status) {
-            healthStatus = inspect.State.Health
-              .Status as ComponentInfo["status"];
+          if (!container) {
+            components.push({
+              ...svc,
+              status: "stopped",
+              uptime: "—",
+              cpu: 0,
+              mem: { usedMB: 0, limitMB: 0, percent: 0 },
+            });
+            return;
           }
-          const started = new Date(inspect.State.StartedAt);
-          const diffMs = Date.now() - started.getTime();
-          const hours = Math.floor(diffMs / 3600000);
-          const mins = Math.floor((diffMs % 3600000) / 60000);
-          uptime = hours > 0 ? `${hours}h ${mins}m` : `${mins}m`;
-        } catch {
-          /* ignore inspect failures */
-        }
 
-        // Get stats (one-shot, non-streaming)
-        let cpu = 0;
-        let mem = { usedMB: 0, limitMB: 0, percent: 0 };
-        try {
-          const stats = await dockerGet<DockerStats>(
-            `/containers/${container.Id}/stats?stream=false`,
-          );
-          cpu = Math.round(calcCpuPercent(stats) * 100) / 100;
-          mem = calcMemUsage(stats);
-        } catch {
-          /* ignore stats failures */
-        }
+          // Get inspect for health + uptime
+          let healthStatus: ComponentInfo["status"] = "running";
+          let uptime = "—";
+          try {
+            const inspect = await dockerGet<DockerInspect>(
+              `/containers/${container.Id}/json`,
+            );
+            if (inspect.State.Health?.Status) {
+              healthStatus = inspect.State.Health
+                .Status as ComponentInfo["status"];
+            }
+            const started = new Date(inspect.State.StartedAt);
+            const diffMs = Date.now() - started.getTime();
+            const hours = Math.floor(diffMs / 3600000);
+            const mins = Math.floor((diffMs % 3600000) / 60000);
+            uptime = hours > 0 ? `${hours}h ${mins}m` : `${mins}m`;
+          } catch {
+            /* ignore inspect failures */
+          }
 
-        components.push({ ...svc, status: healthStatus, uptime, cpu, mem });
-      }),
-    );
-  } catch {
-    // Docker socket not available — fall back to health endpoint probing
-    for (const svc of SERVICE_MAP) {
-      components.push({
-        ...svc,
-        status: "unknown",
-        uptime: "—",
-        cpu: 0,
-        mem: { usedMB: 0, limitMB: 0, percent: 0 },
-      });
+          // Get stats (one-shot, non-streaming)
+          let cpu = 0;
+          let mem = { usedMB: 0, limitMB: 0, percent: 0 };
+          try {
+            const stats = await dockerGet<DockerStats>(
+              `/containers/${container.Id}/stats?stream=false`,
+            );
+            cpu = Math.round(calcCpuPercent(stats) * 100) / 100;
+            mem = calcMemUsage(stats);
+          } catch {
+            /* ignore stats failures */
+          }
+
+          components.push({ ...svc, status: healthStatus, uptime, cpu, mem });
+        }),
+      );
+    } catch {
+      // Docker socket not available — fall back to unknown topology
+      const fallbackMap = isAzureDeployment()
+        ? Object.entries(ACA_SERVICE_MAP).map(([container, m]) => ({
+            container,
+            component: m.component,
+            layer: m.layer,
+          }))
+        : SERVICE_MAP;
+      for (const svc of fallbackMap) {
+        components.push({
+          ...svc,
+          status: "unknown",
+          uptime: "—",
+          cpu: 0,
+          mem: { usedMB: 0, limitMB: 0, percent: 0 },
+        });
+      }
     }
   }
 
@@ -397,6 +532,7 @@ export async function GET() {
   return NextResponse.json({
     timestamp: new Date().toISOString(),
     dockerAvailable,
+    metricsSource,
     components,
     participants,
   });

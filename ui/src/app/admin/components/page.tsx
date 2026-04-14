@@ -2,7 +2,17 @@
 
 import { fetchApi } from "@/lib/api";
 import { COMPONENT_INFO, type ComponentMeta } from "@/lib/edc/component-info";
-import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  AZURE_EGRESS_FREE_GIB,
+  AZURE_EGRESS_USD_PER_GIB,
+  AZURE_FILES_USD_PER_GIB,
+  costForEnvironment,
+  formatEur,
+  formatUsd,
+  USD_TO_EUR,
+  type AcaAppSpec,
+} from "@/lib/azure-pricing";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Activity,
   AlertTriangle,
@@ -55,6 +65,7 @@ interface ParticipantInfo {
 interface Snapshot {
   timestamp: string;
   dockerAvailable: boolean;
+  metricsSource?: "docker" | "azure-monitor" | "none";
   components: ComponentInfo[];
   participants: ParticipantInfo[];
 }
@@ -995,6 +1006,245 @@ function CostEstimatorPanel({
 }
 
 // ---------------------------------------------------------------------------
+// Azure Container Apps Cost Estimator — real reservations from /api/admin/components
+// ---------------------------------------------------------------------------
+
+// Hard-coded reservations mirror scripts/azure/*.sh. These are the minReplicas
+// defaults under ADR-018 Workaround B (24×7, no scale-down). If Ops bumps a
+// reservation, the live panel reflects it via the `snapshot.components` memLimit
+// field; we keep this map as the fallback source of truth for names + memory.
+const ACA_APP_SPECS: AcaAppSpec[] = [
+  { name: "mvhd-controlplane", cpu: 0.5, memGiB: 1.0, minReplicas: 1 },
+  { name: "mvhd-dp-fhir", cpu: 0.5, memGiB: 1.0, minReplicas: 1 },
+  { name: "mvhd-dp-omop", cpu: 0.5, memGiB: 1.0, minReplicas: 1 },
+  { name: "mvhd-identityhub", cpu: 0.5, memGiB: 1.0, minReplicas: 1 },
+  { name: "mvhd-issuerservice", cpu: 0.25, memGiB: 0.5, minReplicas: 1 },
+  { name: "mvhd-keycloak", cpu: 1.0, memGiB: 2.0, minReplicas: 1 },
+  { name: "mvhd-vault", cpu: 0.25, memGiB: 0.5, minReplicas: 1 },
+  { name: "mvhd-tenant-mgr", cpu: 0.5, memGiB: 1.0, minReplicas: 1 },
+  { name: "mvhd-provision-mgr", cpu: 0.5, memGiB: 1.0, minReplicas: 1 },
+  { name: "mvhd-postgres", cpu: 1.0, memGiB: 2.0, minReplicas: 1 },
+  { name: "mvhd-nats", cpu: 0.25, memGiB: 0.5, minReplicas: 1 },
+  { name: "mvhd-neo4j", cpu: 1.0, memGiB: 4.0, minReplicas: 1 },
+  { name: "mvhd-neo4j-proxy", cpu: 0.25, memGiB: 0.5, minReplicas: 1 },
+  { name: "mvhd-ui", cpu: 0.5, memGiB: 1.0, minReplicas: 1 },
+];
+
+// Default storage: Neo4j 20 GiB + PostgreSQL 10 GiB + Vault 2 GiB (Azure Files Premium ZRS)
+const DEFAULT_STORAGE_GIB = 32;
+// Default egress: rough estimate — most traffic is internal to the ACA env
+const DEFAULT_EGRESS_GIB = 20;
+
+function AzureCostEstimatorPanel({
+  liveComponents,
+}: {
+  liveComponents: ComponentInfo[];
+}) {
+  const [storageGiB, setStorageGiB] = useState(DEFAULT_STORAGE_GIB);
+  const [egressGiB, setEgressGiB] = useState(DEFAULT_EGRESS_GIB);
+
+  // Prefer live memory reservations from the API (more accurate if ops changed them)
+  const specs = useMemo<AcaAppSpec[]>(() => {
+    return ACA_APP_SPECS.map((fallback) => {
+      const live = liveComponents.find((c) => c.container === fallback.name);
+      if (!live || live.mem.limitMB <= 0) return fallback;
+      return {
+        ...fallback,
+        memGiB: Math.round((live.mem.limitMB / 1024) * 100) / 100,
+      };
+    });
+  }, [liveComponents]);
+
+  const cost = useMemo(
+    () => costForEnvironment(specs, { storageGiB, egressGiB }),
+    [specs, storageGiB, egressGiB],
+  );
+
+  const totalVcpu = specs.reduce((s, a) => s + a.cpu, 0);
+  const totalMemGiB = specs.reduce((s, a) => s + a.memGiB, 0);
+
+  return (
+    <div className="border border-[var(--border)] rounded-xl p-5 mt-10 space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between flex-wrap gap-3">
+        <h2 className="font-semibold text-sm flex items-center gap-2 text-[var(--text-primary)]">
+          <BarChart2 size={16} className="text-[var(--success-text)]" />
+          Monthly Cost Estimate — Azure Container Apps (Consumption, 24×7)
+        </h2>
+        <div className="flex items-center gap-4 text-xs text-[var(--text-secondary)]">
+          <label className="flex items-center gap-2">
+            <HardDrive size={13} />
+            Storage GiB:
+            <input
+              type="range"
+              min={0}
+              max={200}
+              value={storageGiB}
+              onChange={(e) => setStorageGiB(Number(e.target.value))}
+              className="w-24 accent-emerald-500"
+            />
+            <span className="font-mono font-semibold text-[var(--text-primary)] w-8 text-right">
+              {storageGiB}
+            </span>
+          </label>
+          <label className="flex items-center gap-2">
+            <Network size={13} />
+            Egress GiB:
+            <input
+              type="range"
+              min={0}
+              max={500}
+              value={egressGiB}
+              onChange={(e) => setEgressGiB(Number(e.target.value))}
+              className="w-24 accent-emerald-500"
+            />
+            <span className="font-mono font-semibold text-[var(--text-primary)] w-8 text-right">
+              {egressGiB}
+            </span>
+          </label>
+        </div>
+      </div>
+
+      {/* App grid — sorted by cost descending */}
+      <div>
+        <p className="text-[11px] text-[var(--text-secondary)] mb-2 uppercase tracking-wide">
+          Container Apps — Compute (vCPU + Memory, 24×7 minReplicas=1)
+        </p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-2">
+          {[...cost.apps]
+            .sort((a, b) => b.totalUsd - a.totalUsd)
+            .map((app) => {
+              const spec = specs.find((s) => s.name === app.name)!;
+              return (
+                <div
+                  key={app.name}
+                  className="border border-[var(--border)] rounded-lg p-3 bg-[var(--surface)]/40"
+                >
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-xs font-medium text-[var(--text-primary)] font-mono">
+                      {app.name}
+                    </span>
+                    <span className="text-xs font-mono text-[var(--success-text)]">
+                      {formatUsd(app.totalUsd)}/mo
+                    </span>
+                  </div>
+                  <p className="text-[10px] text-[var(--text-secondary)] font-mono mb-1">
+                    {spec.cpu} vCPU · {spec.memGiB} GiB RAM
+                  </p>
+                  <div className="flex gap-3 text-[9px] text-[var(--text-secondary)]">
+                    <span>CPU {formatUsd(app.vcpuUsd)}</span>
+                    <span>MEM {formatUsd(app.memUsd)}</span>
+                  </div>
+                </div>
+              );
+            })}
+        </div>
+        <p className="text-xs text-[var(--text-secondary)] mt-2 text-right">
+          Gross compute:{" "}
+          <span className="font-mono text-[var(--text-primary)]">
+            {formatUsd(cost.grossVcpuUsd + cost.grossMemUsd)}/mo
+          </span>{" "}
+          · Free tier credit:{" "}
+          <span className="font-mono text-[var(--success-text)]">
+            −{formatUsd(cost.freeCreditUsd)}
+          </span>
+        </p>
+      </div>
+
+      {/* Storage + egress breakdown */}
+      <div>
+        <p className="text-[11px] text-[var(--text-secondary)] mb-2 uppercase tracking-wide">
+          Storage & Network
+        </p>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
+          <div className="border border-[var(--border)] rounded-lg p-3 bg-[var(--surface)]/40">
+            <div className="text-[var(--text-secondary)] mb-0.5">
+              Azure Files (Premium ZRS)
+            </div>
+            <div className="font-mono text-[var(--text-primary)]">
+              {formatUsd(cost.storageUsd)}/mo
+            </div>
+            <div className="text-[10px] text-[var(--text-secondary)] mt-1">
+              {storageGiB} GiB · ${AZURE_FILES_USD_PER_GIB}/GiB·mo · Neo4j + PG
+              + Vault volumes
+            </div>
+          </div>
+          <div className="border border-[var(--border)] rounded-lg p-3 bg-[var(--surface)]/40">
+            <div className="text-[var(--text-secondary)] mb-0.5">
+              Egress (outbound)
+            </div>
+            <div className="font-mono text-[var(--text-primary)]">
+              {formatUsd(cost.egressUsd)}/mo
+            </div>
+            <div className="text-[10px] text-[var(--text-secondary)] mt-1">
+              {egressGiB} GiB · first {AZURE_EGRESS_FREE_GIB} GiB free · then $
+              {AZURE_EGRESS_USD_PER_GIB}/GiB
+            </div>
+          </div>
+          <div className="border border-[var(--border)] rounded-lg p-3 bg-[var(--surface)]/40">
+            <div className="text-[var(--text-secondary)] mb-0.5">
+              Environment totals
+            </div>
+            <div className="font-mono text-[var(--text-primary)]">
+              {totalVcpu.toFixed(2)} vCPU · {totalMemGiB.toFixed(1)} GiB
+            </div>
+            <div className="text-[10px] text-[var(--text-secondary)] mt-1">
+              {specs.length} Container Apps · Workaround B (no Log Analytics)
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Totals */}
+      <div className="border border-[var(--border)] rounded-xl p-4 bg-[var(--surface)]/60">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
+          <div>
+            <div className="text-[10px] text-[var(--text-secondary)] mb-1">
+              Compute (net)
+            </div>
+            <div className="font-mono text-lg font-semibold text-[var(--text-primary)]">
+              {formatUsd(cost.computeUsd)}
+            </div>
+          </div>
+          <div>
+            <div className="text-[10px] text-[var(--text-secondary)] mb-1">
+              Storage
+            </div>
+            <div className="font-mono text-lg font-semibold text-[var(--text-primary)]">
+              {formatUsd(cost.storageUsd)}
+            </div>
+          </div>
+          <div>
+            <div className="text-[10px] text-[var(--text-secondary)] mb-1">
+              Egress
+            </div>
+            <div className="font-mono text-lg font-semibold text-[var(--text-primary)]">
+              {formatUsd(cost.egressUsd)}
+            </div>
+          </div>
+          <div className="border-l border-[var(--border)]">
+            <div className="text-[10px] text-[var(--text-secondary)] mb-1">
+              Total / month
+            </div>
+            <div className="font-mono text-xl font-bold text-[var(--success-text)]">
+              {formatUsd(cost.totalUsd)}
+            </div>
+            <div className="text-[10px] text-[var(--text-secondary)] mt-0.5">
+              ≈ {formatEur(cost.totalEur)} (@ {USD_TO_EUR} EUR/USD)
+            </div>
+          </div>
+        </div>
+        <p className="text-[9px] text-[var(--text-secondary)] mt-3 text-center">
+          Azure Container Apps Consumption plan · West Europe list prices · 24×7
+          minReplicas=1 · free tier (180 K vCPU-s + 360 K GiB-s) applied ·
+          ADR-018 Workaround B (no Log Analytics Workspace)
+        </p>
+      </div>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
 // Page Component
 // ---------------------------------------------------------------------------
 
@@ -1102,10 +1352,6 @@ export default function AdminComponentsPage() {
 
   void historyVersion;
 
-  const dockerAvailable =
-    viewMode === "layer"
-      ? snapshot?.dockerAvailable
-      : topology?.dockerAvailable;
   const timestamp =
     viewMode === "layer" ? snapshot?.timestamp : topology?.timestamp;
 
@@ -1457,14 +1703,20 @@ export default function AdminComponentsPage() {
           </>
         )}
 
-        {/* Cost estimator — always visible, seeded with current participant count */}
-        <CostEstimatorPanel
-          participantCount={
-            viewMode === "participant"
-              ? topology?.summary.totalParticipants ?? 5
-              : snapshot?.participants.length ?? 5
-          }
-        />
+        {/* Cost estimator — Azure or StackIT, based on deployment target */}
+        {process.env.NEXT_PUBLIC_DEPLOYMENT_TARGET === "azure" ? (
+          <AzureCostEstimatorPanel
+            liveComponents={snapshot?.components ?? []}
+          />
+        ) : (
+          <CostEstimatorPanel
+            participantCount={
+              viewMode === "participant"
+                ? topology?.summary.totalParticipants ?? 5
+                : snapshot?.participants.length ?? 5
+            }
+          />
+        )}
 
         {/* Timestamp */}
         {timestamp && (

@@ -2,23 +2,49 @@
 # Shared environment variables for Azure deployment scripts.
 # Source this file — do not execute directly.
 #   source scripts/azure/env.sh
+#
+# Workaround B (ADR-018): this subscription (INF-STG-EU_EHDS) cannot register
+# Microsoft.DBforPostgreSQL or Microsoft.OperationalInsights. Postgres runs as
+# an ACA container app on Azure Files; Log Analytics is skipped.
 
 set -euo pipefail
 
 # ── Azure resource names ─────────────────────────────────────────────────────
 export RG="rg-mvhd-dev"
 export LOCATION="westeurope"
-export ACR_NAME="acrmvhddev"
+# Derived at source time so 05-cfm-ui.sh can inject it into the UI container.
+export SUBSCRIPTION_ID="${SUBSCRIPTION_ID:-$(az account show --query id -o tsv 2>/dev/null || echo "")}"
+export ACR_NAME="acrmvhdehds"
 export ACA_ENV="mvhd-env"
+# Log Analytics workspace (disabled under Workaround B, kept for reference)
 export LAW_NAME="law-mvhd-dev"
 
-# ── PostgreSQL ───────────────────────────────────────────────────────────────
-export PG_SERVER="pg-mvhd-dev"
-export PG_LOCATION="northeurope"
+# ── Persistent storage (Azure Files — ADR-017 + Workaround B) ───────────────
+# Storage account name must be 3–24 lowercase alphanumerics, globally unique.
+export STORAGE_ACCOUNT="stmvhddev$(printf '%s' "$RG$LOCATION" | shasum | cut -c1-6)"
+export STORAGE_SKU="Standard_LRS"
+export SHARE_NEO4J_DATA="neo4j-data"
+export SHARE_NEO4J_LOGS="neo4j-logs"
+export SHARE_VAULT_DATA="vault-data"
+export SHARE_PG_DATA="pg-data"
+export QUOTA_NEO4J_DATA=10
+export QUOTA_NEO4J_LOGS=5
+export QUOTA_VAULT_DATA=2
+export QUOTA_PG_DATA=20
+
+# ── PostgreSQL (Container App — Workaround B) ───────────────────────────────
+# PG_SERVER retained as logical name; PG_HOST resolves via ACA internal DNS.
+export PG_APP="mvhd-postgres"
+export PG_SERVER="$PG_APP"
+export PG_HOST="$PG_APP"
+export PG_PORT=5432
 export PG_ADMIN="mvhdadmin"
 export PG_PASSWORD="H3althDataSp@ce2026!"
-export PG_SKU="B_Standard_B1ms"
+export PG_IMAGE="${ACR_NAME}.azurecr.io/postgres:16"
 export PG_DATABASES=(keycloak controlplane dataplane dataplane_omop identityhub issuerservice cfm)
+
+# ── Custom domain (24/7 public demo) ────────────────────────────────────────
+export CUSTOM_DOMAIN="ehds.mabu.red"
 
 # ── Container Apps ───────────────────────────────────────────────────────────
 export NEO4J_APP="mvhd-neo4j"

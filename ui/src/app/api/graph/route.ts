@@ -531,7 +531,23 @@ export async function GET(req: Request) {
       question: personaMeta?.question,
     });
   } catch (err) {
-    console.error("GET /api/graph error:", err);
-    return NextResponse.json({ error: "Neo4j unavailable" }, { status: 502 });
+    const msg = err instanceof Error ? err.message : String(err);
+    const code =
+      err && typeof err === "object" && "code" in err
+        ? String((err as { code?: unknown }).code ?? "")
+        : "";
+    console.error("GET /api/graph error:", {
+      message: msg,
+      code,
+      uri: process.env.NEO4J_URI ?? "(unset)",
+    });
+    return NextResponse.json(
+      {
+        error: "Neo4j unavailable",
+        detail: msg,
+        code,
+      },
+      { status: 502 },
+    );
   }
 }

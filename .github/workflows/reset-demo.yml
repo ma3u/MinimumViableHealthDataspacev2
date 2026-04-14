@@ -51,6 +51,8 @@ jobs:
 
       - name: Check database state
         id: check
+        env:
+          NEO4J_PASSWORD: ${{ secrets.NEO4J_PASSWORD }}
         run: |
           # Force reset if manually requested
           if [ "${{ inputs.force_reset }}" = "true" ]; then
@@ -72,10 +74,13 @@ jobs:
             exit 0
           fi
 
-          # Query Neo4j for user-created data (local-registry policies, non-seed nodes)
+          # Query Neo4j for user-created data (local-registry policies, non-seed nodes).
+          # NEO4J_PASSWORD is passed via env to avoid inlining secrets in the
+          # curl command line (trips gitleaks curl-auth-user rule).
+          NEO4J_AUTH_HEADER="Authorization: Basic $(printf 'neo4j:%s' "$NEO4J_PASSWORD" | base64)"
           DIRTY_COUNT=$(curl -sf -X POST "https://${NEO4J_FQDN}:7474/db/neo4j/tx/commit" \
             -H "Content-Type: application/json" \
-            -u "neo4j:${{ secrets.NEO4J_PASSWORD }}" \
+            -H "$NEO4J_AUTH_HEADER" \
             -d '{
               "statements": [{
                 "statement": "MATCH (n) WHERE n.source = '\''local-registry'\'' OR (n.createdAt IS NOT NULL AND n:OdrlPolicy AND NOT exists(n.isSeed)) RETURN count(n) AS dirtyCount"

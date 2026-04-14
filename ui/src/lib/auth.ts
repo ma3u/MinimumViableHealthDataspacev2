@@ -47,6 +47,55 @@ const keycloakProvider: OAuthConfig<Record<string, unknown>> = {
   },
 };
 
+/**
+ * Decodes a JWT payload without verifying the signature.
+ * Safe here because the token comes directly from the Keycloak token endpoint
+ * over TLS during the NextAuth server-side callback — we only read claims,
+ * never trust them for authorisation beyond what Keycloak already validated.
+ */
+function decodeJwtPayload(jwt: string): Record<string, unknown> | null {
+  const parts = jwt.split(".");
+  if (parts.length < 2) return null;
+  try {
+    const base64 = parts[1].replace(/-/g, "+").replace(/_/g, "/");
+    const padded = base64 + "=".repeat((4 - (base64.length % 4)) % 4);
+    const json = Buffer.from(padded, "base64").toString("utf8");
+    return JSON.parse(json) as Record<string, unknown>;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Extracts realm roles from all Keycloak-provided sources.
+ *
+ * Keycloak may expose `realm_access.roles` in any of: userinfo (profile),
+ * id_token, or access_token. Which one depends on the realm's client-scope
+ * mapper flags ("Add to userinfo" / "Add to id token" / "Add to access token"),
+ * which differ by Keycloak version and can be lost on realm reimport.
+ *
+ * To be robust across configurations, merge roles from every source that
+ * carries them.
+ */
+function extractRealmRoles(
+  profile: Record<string, unknown> | undefined,
+  account: { access_token?: string; id_token?: string } | null,
+): string[] {
+  const collected = new Set<string>();
+
+  const addFrom = (src: Record<string, unknown> | null | undefined) => {
+    if (!src) return;
+    const realmAccess = src.realm_access as { roles?: string[] } | undefined;
+    for (const r of realmAccess?.roles ?? []) collected.add(r);
+  };
+
+  addFrom(profile);
+  if (account?.access_token) addFrom(decodeJwtPayload(account.access_token));
+  if (account?.id_token) addFrom(decodeJwtPayload(account.id_token));
+
+  return [...collected];
+}
+
 export const authOptions: NextAuthOptions = {
   providers: [keycloakProvider],
   callbacks: {
@@ -55,10 +104,7 @@ export const authOptions: NextAuthOptions = {
         token.accessToken = account.access_token;
         token.refreshToken = account.refresh_token;
         const keycloakProfile = profile as Record<string, unknown>;
-        const realmAccess = keycloakProfile.realm_access as
-          | { roles?: string[] }
-          | undefined;
-        const roles = [...(realmAccess?.roles ?? [])];
+        const roles = extractRealmRoles(keycloakProfile, account);
         // Store the Keycloak login name (preferred_username) for derivation.
         // user.name is the display name (e.g. "Maria Schmidt") which may not
         // match the username-based derivation patterns.

@@ -145,11 +145,37 @@ export default function DeveloperGuidePage() {
         <ArrowLeft size={14} /> Back to Docs
       </Link>
       <h1 className="text-3xl font-bold mb-2">Developer Guide</h1>
-      <p className="text-[var(--text-secondary)] mb-8">
+      <p className="text-[var(--text-secondary)] mb-6">
         Technical documentation for developing, testing, and deploying the
         Health Dataspace v2 platform — an EHDS regulation reference
         implementation built on Eclipse Dataspace Components.
       </p>
+
+      {/* Resources */}
+      <div className="flex flex-wrap gap-3 mb-8">
+        <a
+          href={GITHUB_REPO}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md border border-[var(--border)] bg-[var(--surface-2)] hover:bg-[var(--surface-3)] transition-colors text-sm text-[var(--text-primary)]"
+        >
+          GitHub Repository <ExternalLink size={12} />
+        </a>
+        <Link
+          href="/docs/developer/api"
+          className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md border border-[var(--border)] bg-[var(--surface-2)] hover:bg-[var(--surface-3)] transition-colors text-sm text-[var(--text-primary)]"
+        >
+          Swagger UI →
+        </Link>
+        <a
+          href={`${GITHUB_REPO}/tree/main/bruno/MVHDv2`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md border border-[var(--border)] bg-[var(--surface-2)] hover:bg-[var(--surface-3)] transition-colors text-sm text-[var(--text-primary)]"
+        >
+          Bruno Collection <ExternalLink size={12} />
+        </a>
+      </div>
 
       {/* TOC */}
       <nav className="border border-[var(--border)] rounded-xl p-5 mb-10">
@@ -169,7 +195,6 @@ export default function DeveloperGuidePage() {
           <TocLink href="#quality-gates">Quality Gates</TocLink>
           <TocLink href="#cicd">CI/CD Pipeline</TocLink>
           <TocLink href="#reports">Latest Reports</TocLink>
-          <TocLink href="#adrs">Architecture Decisions</TocLink>
           <TocLink href="#releases">Release Notes</TocLink>
           <TocLink href="#project-links">Planning & Issues</TocLink>
           <TocLink href="#conventions">Conventions</TocLink>
@@ -1319,131 +1344,6 @@ PLAYWRIGHT_BASE_URL=http://localhost:3003 \\
           chart={dataFlowDiagram}
           caption="Data pipeline: Synthea → Neo4j → Proxy → UI"
         />
-      </section>
-
-      {/* ADRs */}
-      <section className="mb-10">
-        <h2 className="text-2xl font-semibold mb-3" id="adrs">
-          Architecture Decision Records
-        </h2>
-        <p className="text-[var(--text-secondary)] text-sm mb-4">
-          All ADRs are maintained as standalone Markdown files in{" "}
-          <a
-            href={`${GITHUB_REPO}/tree/main/docs/ADRs`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-indigo-700 dark:text-indigo-400 underline inline-flex items-center gap-1"
-          >
-            docs/ADRs/ <ExternalLink size={10} />
-          </a>
-          .
-        </p>
-        <div className="space-y-3">
-          {[
-            {
-              id: "ADR-001",
-              file: "ADR-001-postgresql-neo4j-split.md",
-              title: "PostgreSQL / Neo4j Split",
-              desc: "EDC runtime metadata in PostgreSQL (8 databases), health knowledge graph in Neo4j.",
-            },
-            {
-              id: "ADR-002",
-              file: "ADR-002-edc-data-plane-architecture.md",
-              title: "Dual EDC Data Planes",
-              desc: "Separate FHIR R4 (PUSH) and OMOP CDM (PULL) data planes for type-safe access.",
-            },
-            {
-              id: "ADR-003",
-              file: "ADR-003-healthdcat-ap-alignment.md",
-              title: "HealthDCAT-AP Alignment",
-              desc: "Graph nodes aligned with HealthDCAT-AP 3.0 profile for EU catalog interoperability.",
-            },
-            {
-              id: "ADR-004",
-              file: "ADR-004-nextjs-unified-frontend.md",
-              title: "Next.js App Router",
-              desc: "Client SPA with 36 API routes proxying to Neo4j and EDC-V; static export for demo.",
-            },
-            {
-              id: "ADR-005",
-              file: "ADR-005-jad-cfm-source-builds.md",
-              title: "Source Builds from Public Repos",
-              desc: "Build EDC-V, DCore, CFM from source using Gradle multi-module layout.",
-            },
-            {
-              id: "ADR-006",
-              file: "ADR-006-ghcr-image-publishing.md",
-              title: "GHCR Image Publishing",
-              desc: "Publish OCI images to GitHub Container Registry for consistent deployments.",
-            },
-            {
-              id: "ADR-007",
-              file: "ADR-007-did-web-dsp-negotiation.md",
-              title: "DID:web for Participant Identity",
-              desc: "W3C DID:web method for decentralised participant identification.",
-            },
-            {
-              id: "ADR-008",
-              file: "ADR-008-testing-strategy.md",
-              title: "Vitest + MSW + Playwright Testing",
-              desc: "1,613 unit tests with MSW API mocking, 19 Playwright E2E specs, pre-push gate.",
-            },
-            {
-              id: "ADR-009",
-              file: "ADR-009-issuerservice-credential-fix.md",
-              title: "Credential Issuance Flow",
-              desc: "EHDS membership, data permits, and org VCs issued via DCP Issuer Service.",
-            },
-            {
-              id: "ADR-010",
-              file: "ADR-010-wcag-accessibility.md",
-              title: "WCAG 2.2 AA Accessibility",
-              desc: "Zero WCAG violations enforced by automated axe-core audits in CI.",
-            },
-            {
-              id: "ADR-011",
-              file: "ADR-011-security-testing.md",
-              title: "Security Penetration Testing",
-              desc: "OWASP ZAP + BSI C5 baseline scans integrated into CI pipeline.",
-            },
-            {
-              id: "ADR-012",
-              file: "ADR-012-azure-container-apps.md",
-              title: "Azure Container Apps Deployment",
-              desc: "13 Container Apps + 3 jobs on Azure with OIDC federation and VNet isolation.",
-            },
-            {
-              id: "ADR-013",
-              file: "ADR-013-simpl-open-alignment.md",
-              title: "SIMPL-Open Alignment",
-              desc: "Gap analysis and alignment roadmap for EU SIMPL-Open programme compatibility.",
-            },
-            {
-              id: "ADR-014",
-              file: "ADR-014-weekly-demo-reset.md",
-              title: "Weekly Demo Reset",
-              desc: "Scheduled Monday 05:15 UTC (07:15 Europe/Berlin) reset of demo state for GDPR data minimisation.",
-            },
-          ].map((adr) => (
-            <a
-              key={adr.id}
-              href={`${GITHUB_REPO}/blob/main/docs/ADRs/${adr.file}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="border border-[var(--border)] rounded-lg px-4 py-3 flex items-start gap-3 hover:border-indigo-500/50 transition-colors block"
-            >
-              <span className="text-xs font-mono text-indigo-700 dark:text-indigo-400 bg-indigo-100 dark:bg-indigo-950/50 px-2 py-0.5 rounded shrink-0">
-                {adr.id}
-              </span>
-              <div>
-                <span className="font-semibold text-sm">{adr.title}</span>
-                <p className="text-[var(--text-secondary)] text-xs mt-0.5">
-                  {adr.desc}
-                </p>
-              </div>
-            </a>
-          ))}
-        </div>
       </section>
 
       {/* Release Notes */}
