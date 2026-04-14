@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 640" width="1280" height="640" role="img" aria-label="Minimum Viable Health Dataspace – EHDS-compliant demo with Neo4j, FHIR R4, OMOP CDM, Eclipse EDC, and HealthDCAT-AP">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 640" width="1280" height="640" role="img" aria-label="EHDS Integration Hub – EHDS-compliant demo with Neo4j, FHIR R4, OMOP CDM, Eclipse EDC, and HealthDCAT-AP">
   <defs>
     <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" style="stop-color:#0a0e1a"/>
@@ -43,7 +43,7 @@
   <text x="1188" y="44" font-family="'Segoe UI', system-ui, sans-serif" font-size="13" font-weight="600" fill="#60c6ff" text-anchor="middle">EHDS Compliant</text>
 
   <!-- Main title -->
-  <text x="640" y="180" font-family="'Segoe UI', system-ui, sans-serif" font-size="64" font-weight="700" fill="#f0f9ff" text-anchor="middle" filter="url(#glow)">Minimum Viable Health Dataspace</text>
+  <text x="640" y="180" font-family="'Segoe UI', system-ui, sans-serif" font-size="64" font-weight="700" fill="#f0f9ff" text-anchor="middle" filter="url(#glow)">EHDS Integration Hub</text>
 
   <!-- Gradient underline -->
   <rect x="220" y="198" width="840" height="4" rx="2" fill="url(#accent)"/>

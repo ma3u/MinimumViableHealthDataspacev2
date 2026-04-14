@@ -1,4 +1,4 @@
-# Minimum Viable Health Dataspace v2
+# EHDS Integration Hub
 
 [![GitHub](https://img.shields.io/badge/GitHub-Repository-181717?logo=github&logoColor=white)](https://github.com/ma3u/MinimumViableHealthDataspacev2) [![CI Tests](https://github.com/ma3u/MinimumViableHealthDataspacev2/actions/workflows/test.yml/badge.svg)](https://github.com/ma3u/MinimumViableHealthDataspacev2/actions/workflows/test.yml) [![Coverage 94%](https://img.shields.io/badge/coverage-94%25-brightgreen)](docs/test-coverage-report.md) [![1490 Tests](https://img.shields.io/badge/tests-1490%20passed-brightgreen)](docs/test-coverage-report.md) [![Playwright 778](https://img.shields.io/badge/E2E-778%20tests-brightgreen)](docs/e2e-test-report.md) [![Azure](https://img.shields.io/badge/Azure-Deployed-0078D4?logo=microsoftazure&logoColor=white)](docs/azure-deployment-guide.md)
 
@@ -6,7 +6,7 @@
 
 ## Table of Contents
 
-- [Minimum Viable Health Dataspace v2](#minimum-viable-health-dataspace-v2)
+- [EHDS Integration Hub](#ehds-integration-hub)
   - [Table of Contents](#table-of-contents)
   - [Why This Project Exists](#why-this-project-exists)
   - [What It Does](#what-it-does)
@@ -76,8 +76,8 @@ The motivation comes from a practical gap: the Eclipse [JAD (Joint Architecture 
 
 For the full background, see the companion article: [European Health Dataspaces, Digital Twins: A Journey from FHIR Basics to Intelligent Patient Models](https://www.linkedin.com/pulse/european-health-dataspaces-digital-twins-journey-fhir-buchhorn-roth-8t51c/).
 
-* **Live Demo:** Static UI at [ma3u.github.io/MinimumViableHealthDataspacev2](https://ma3u.github.io/MinimumViableHealthDataspacev2/)
-* **Azure live stack** at [mvhd-ui.blackforest-0a04f26e.westeurope.azurecontainerapps.io](https://mvhd-ui.blackforest-0a04f26e.westeurope.azurecontainerapps.io) (online **Mon–Fri 07:00–20:00 Europe/Berlin** — see [ADR-016](docs/ADRs/ADR-016-aca-off-hours-scaledown.md))
+- **Live Demo:** Static UI at [ma3u.github.io/MinimumViableHealthDataspacev2](https://ma3u.github.io/MinimumViableHealthDataspacev2/)
+- **Azure live stack** at [mvhd-ui.blackforest-0a04f26e.westeurope.azurecontainerapps.io](https://mvhd-ui.blackforest-0a04f26e.westeurope.azurecontainerapps.io) (online **Mon–Fri 07:00–20:00 Europe/Berlin** — see [ADR-016](docs/ADRs/ADR-016-aca-off-hours-scaledown.md))
 
 ---
 
@@ -904,7 +904,7 @@ grouped by startup tier — Docker Compose launches each tier in parallel once a
 in the previous tier report healthy. The `neo4j-spe2` and `jad-seed` containers only start
 when their respective profiles (`federated`, `seed`) are explicitly activated.
 
-![ORB K8s cluster with all Minimum Viable Health Dataspace V2](image-1.png)
+![ORB K8s cluster with the EHDS Integration Hub](image-1.png)
 
 ```
 Tier 0 ──► Tier 1 ──► Tier 2 ──► Tier 3 ──► Tier 4

@@ -2,7 +2,7 @@
 
 ## European Health Data Space (EHDS) Compliance
 
-> Applies to: all deployments of the Minimum Viable Health Dataspace v2
+> Applies to: all deployments of the EHDS Integration Hub
 > Legal basis: EHDS Regulation (EU) 2025/327, Article 50 — Logging and audit trails
 > Effective: 2026-03-25
 

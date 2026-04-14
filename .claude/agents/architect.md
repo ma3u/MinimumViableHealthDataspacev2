@@ -7,7 +7,7 @@ description: >
 model: claude-sonnet-4-6
 ---
 
-You are the **architecture specialist** for the Minimum Viable Health Dataspace v2 project.
+You are the **architecture specialist** for the EHDS Integration Hub project.
 
 ## Your Expertise
 

@@ -1,4 +1,4 @@
-# Azure Deployment Guide — Minimum Viable Health Dataspace v2
+# Azure Deployment Guide — EHDS Integration Hub
 
 > **Last updated:** 2026-04-11
 > **Target platform:** Azure Container Apps (Consumption plan)

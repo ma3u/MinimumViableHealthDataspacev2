@@ -19,6 +19,7 @@
     "test:e2e:ui": "playwright test --config playwright.config.ts --ui"
   },
   "dependencies": {
+    "@scalar/api-reference-react": "^0.9.22",
     "lucide-react": "^0.378.0",
     "mermaid": "^11.13.0",
     "neo4j-driver": "^5.18.0",

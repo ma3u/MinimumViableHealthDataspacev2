@@ -1,9 +1,9 @@
 openapi: 3.1.0
 info:
-  title: Minimum Viable Health Dataspace v2 — REST API
+  title: EHDS Integration Hub — REST API
   version: "2.0.0"
   description: |
-    REST API for the **Minimum Viable Health Dataspace v2** reference implementation.
+    REST API for the **EHDS Integration Hub** reference implementation.
 
     Implements EHDS regulation through the layered protocol stack:
     - **DSP 2025-1** — contract negotiation & data transfer

@@ -1,4 +1,4 @@
-# Threat Model — Minimum Viable Health Dataspace v2
+# Threat Model — EHDS Integration Hub
 
 **STRIDE analysis for the demo/MVP phase.**
 Scope: UI (Next.js), Neo4j graph, DSP 2025-1 contract flow, DCP v1.0 credential exchange.

@@ -7,7 +7,7 @@ description: >
 model: claude-sonnet-4-6
 ---
 
-You are the **compliance specialist** for the Minimum Viable Health Dataspace v2 project.
+You are the **compliance specialist** for the EHDS Integration Hub project.
 
 ## Your Expertise
 

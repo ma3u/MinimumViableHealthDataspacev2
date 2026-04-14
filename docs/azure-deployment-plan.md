@@ -1,4 +1,4 @@
-# Azure Deployment Plan — Minimum Viable Health Dataspace v2
+# Azure Deployment Plan — EHDS Integration Hub
 
 > **Status:** Deployed & Operational
 > **Author:** Matthias Buchhorn

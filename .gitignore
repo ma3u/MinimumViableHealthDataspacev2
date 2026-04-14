@@ -65,3 +65,6 @@ test-results/
 load-tests/results/*.json
 vault/init.json
 reports/
+
+# Scalar API reference diagnostics (generated at dev time)
+.scalarDiagnostics/

@@ -1,4 +1,4 @@
-# Contributing to Minimum Viable Health Dataspace v2
+# Contributing to EHDS Integration Hub
 
 Thank you for your interest in contributing! This project demonstrates an EHDS-compliant health
 data space using Eclipse EDC-V, HealthDCAT-AP, FHIR R4, OMOP CDM, and Neo4j.
