@@ -89,7 +89,20 @@ jobs:
         run: ./scripts/refresh-mocks.sh http://localhost:3000
 
       - name: Stop Next.js server
-        run: kill $(lsof -t -i:3000) 2>/dev/null || true
+        run: |
+          # Kill anything still bound to :3000 — lsof alone is unreliable in CI.
+          pkill -f "next-server" 2>/dev/null || true
+          pkill -f "next start" 2>/dev/null || true
+          fuser -k 3000/tcp 2>/dev/null || true
+          lsof -t -i:3000 2>/dev/null | xargs -r kill -9 2>/dev/null || true
+          # Wait for the port to be released before the next step starts Next.js again.
+          for i in $(seq 1 10); do
+            if ! lsof -i:3000 > /dev/null 2>&1; then
+              echo "Port 3000 is free"
+              break
+            fi
+            sleep 1
+          done
 
       - name: Run unit tests with coverage
         run: npx vitest run --coverage --reporter=json --outputFile=test-results.json

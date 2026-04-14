@@ -3,11 +3,12 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "postinstall": "sh scripts/setup-env.sh",
+    "postinstall": "sh scripts/setup-env.sh && sh scripts/copy-swagger-ui.sh",
     "clean": "rm -rf .next",
     "dev": "next dev",
     "dev:clean": "npm run clean && next dev",
-    "predev": "rm -rf .next/cache/webpack",
+    "predev": "rm -rf .next/cache/webpack && sh scripts/copy-swagger-ui.sh",
+    "prebuild": "sh scripts/copy-swagger-ui.sh",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
@@ -27,7 +28,8 @@
     "next-auth": "^4.24.13",
     "react": "^18",
     "react-dom": "^18",
-    "react-force-graph-2d": "^1.25.5"
+    "react-force-graph-2d": "^1.25.5",
+    "swagger-ui-dist": "^5.17.14"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.11.1",
