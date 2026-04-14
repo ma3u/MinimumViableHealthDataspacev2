@@ -2,6 +2,7 @@ import { getServerSession } from "next-auth/next";
 import { NextResponse } from "next/server";
 import http from "node:http";
 import { edcClient } from "@/lib/edc";
+import { runQuery } from "@/lib/neo4j";
 import {
   azureResourceGroup,
   azureSubscriptionId,
@@ -517,7 +518,43 @@ export async function GET() {
       });
     }
   } catch (err) {
-    console.warn("Could not fetch participant data:", err);
+    console.warn("Could not fetch participant data from CFM:", err);
+  }
+
+  // Neo4j fallback — when CFM is unreachable (e.g. Azure deployment without
+  // tenant-manager) the participants array is empty. Backfill from Neo4j so
+  // the /admin/components page still shows the seeded dataspace members.
+  if (participants.length === 0) {
+    try {
+      const neoRows = await runQuery<{
+        id: string;
+        name: string;
+        type: string;
+        did: string;
+      }>(
+        `MATCH (p:Participant)
+         WHERE p.name IS NOT NULL AND p.name <> ''
+         RETURN DISTINCT
+                coalesce(p.participantId, p.id)      AS id,
+                p.name                               AS name,
+                coalesce(p.participantType, '—')     AS type,
+                coalesce(p.did, p.participantId, '—') AS did
+         ORDER BY p.name`,
+      );
+      for (const row of neoRows) {
+        participants.push({
+          id: row.id,
+          displayName: row.name,
+          organization: row.name,
+          role: row.type,
+          did: row.did,
+          state: "SEEDED",
+          profileCount: 0,
+        });
+      }
+    } catch (neoErr) {
+      console.warn("Neo4j participant fallback failed:", neoErr);
+    }
   }
 
   // Sort components by layer order then name

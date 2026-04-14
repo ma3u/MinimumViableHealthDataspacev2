@@ -1693,18 +1693,20 @@ export default function AdminComponentsPage() {
               );
             })}
 
-            {/* Docker unavailable banner */}
-            {snapshot && !snapshot.dockerAvailable && (
-              <div className="border border-yellow-600/40 bg-yellow-900/20 rounded-xl p-4 text-sm text-[var(--warning-text)]">
-                <strong>Docker socket not available.</strong> CPU and memory
-                metrics require the Docker socket to be mounted.
-              </div>
-            )}
+            {/* Docker unavailable banner — hidden when Azure Monitor provides metrics */}
+            {snapshot &&
+              !snapshot.dockerAvailable &&
+              snapshot.metricsSource !== "azure-monitor" && (
+                <div className="border border-yellow-600/40 bg-yellow-900/20 rounded-xl p-4 text-sm text-[var(--warning-text)]">
+                  <strong>Docker socket not available.</strong> CPU and memory
+                  metrics require the Docker socket to be mounted.
+                </div>
+              )}
           </>
         )}
 
-        {/* Cost estimator — Azure or StackIT, based on deployment target */}
-        {process.env.NEXT_PUBLIC_DEPLOYMENT_TARGET === "azure" ? (
+        {/* Cost estimator — Azure when metrics come from Azure Monitor, StackIT otherwise */}
+        {snapshot?.metricsSource === "azure-monitor" ? (
           <AzureCostEstimatorPanel
             liveComponents={snapshot?.components ?? []}
           />

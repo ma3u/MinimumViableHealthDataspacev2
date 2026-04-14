@@ -1378,14 +1378,14 @@ function GraphContent() {
         ) : error === "UNAUTHENTICATED" ? (
           <div className="flex h-full flex-col items-center justify-center gap-4 text-[var(--text-secondary)]">
             <p className="text-lg">Sign in to explore the knowledge graph.</p>
-            <p className="text-sm opacity-70">
+            <p className="text-sm text-[var(--text-secondary)]">
               The graph shows participants, data products, policies and clinical
               entities scoped to your persona.
             </p>
             <button
               type="button"
               onClick={() => signIn("keycloak")}
-              className="rounded bg-[var(--accent)] px-4 py-2 text-sm font-medium text-white hover:opacity-90"
+              className="rounded bg-[var(--accent)] px-4 py-2 text-sm font-medium text-white dark:text-[var(--bg)] hover:opacity-90"
             >
               Sign in
             </button>

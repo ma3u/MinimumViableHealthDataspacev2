@@ -97,7 +97,7 @@ function FeatureCard({
           </div>
           <div className="flex items-center gap-2">
             {requiresJAD && (
-              <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/20 font-medium">
+              <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-900 dark:text-amber-300 border border-amber-500/30 font-medium">
                 JAD Stack
               </span>
             )}
