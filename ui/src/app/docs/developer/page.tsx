@@ -771,27 +771,33 @@ open http://traefik.localhost`}</pre>
             <h4 className="font-semibold text-sm mb-2">5 Semantic Layers</h4>
             <ul className="text-[var(--text-secondary)] text-xs space-y-1.5">
               <li>
-                <span className="text-[#2471A3] font-medium">
+                <span className="text-[#2471A3] dark:text-[#85C1E9] font-medium">
                   L1 Marketplace:
                 </span>{" "}
                 Participant, DataProduct, Contract, HDABApproval, OdrlPolicy
               </li>
               <li>
-                <span className="text-[#148F77] font-medium">
+                <span className="text-[#148F77] dark:text-[#76D7C4] font-medium">
                   L2 HealthDCAT-AP:
                 </span>{" "}
                 Catalogue, HealthDataset, Distribution, DataService
               </li>
               <li>
-                <span className="text-[#1E8449] font-medium">L3 FHIR R4:</span>{" "}
+                <span className="text-[#1E8449] dark:text-[#82E0AA] font-medium">
+                  L3 FHIR R4:
+                </span>{" "}
                 Patient, Encounter, Condition, Observation, MedicationRequest
               </li>
               <li>
-                <span className="text-[#CA6F1E] font-medium">L4 OMOP CDM:</span>{" "}
+                <span className="text-[#CA6F1E] dark:text-[#F5B041] font-medium">
+                  L4 OMOP CDM:
+                </span>{" "}
                 OMOPPerson, ConditionOccurrence, DrugExposure, Measurement
               </li>
               <li>
-                <span className="text-[#7D3C98] font-medium">L5 Ontology:</span>{" "}
+                <span className="text-[#7D3C98] dark:text-[#C39BD3] font-medium">
+                  L5 Ontology:
+                </span>{" "}
                 SnomedConcept, ICD10Code, RxNormConcept, LoincCode
               </li>
             </ul>

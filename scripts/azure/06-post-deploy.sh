@@ -31,12 +31,18 @@ cp "${REPO_ROOT}"/neo4j/*.cypher "${SEED_DIR}/"
 cp "${REPO_ROOT}/neo4j/seed.sh" "${SEED_DIR}/seed.sh"
 
 cat > "${SEED_DIR}/Dockerfile" <<'DOCKERFILE'
-FROM alpine:3.19
-RUN apk add --no-cache curl jq
+# neo4j:5-community bundles cypher-shell at /var/lib/neo4j/bin — required by
+# seed.sh (Bolt-based loader). A plain alpine base has no cypher-shell and
+# silently drops every run_file call, leaving compliance/participants empty.
+FROM neo4j:5-community
+USER root
+RUN apt-get update && apt-get install -y --no-install-recommends bash curl jq \
+    && rm -rf /var/lib/apt/lists/*
 COPY *.cypher /seed/
 COPY seed.sh /seed/seed.sh
-RUN chmod +x /seed/seed.sh
-ENTRYPOINT ["/bin/sh", "/seed/seed.sh"]
+RUN chmod +x /seed/seed.sh \
+    && ln -sf /var/lib/neo4j/bin/cypher-shell /usr/local/bin/cypher-shell
+ENTRYPOINT ["/bin/bash", "/seed/seed.sh"]
 DOCKERFILE
 
 docker buildx build --platform linux/amd64 \
@@ -44,21 +50,37 @@ docker buildx build --platform linux/amd64 \
 rm -rf "${SEED_DIR}"
 ok "Neo4j seed image pushed"
 
-log "Creating Neo4j seed job..."
-az containerapp job create \
-  --name "$NEO4J_SEED_JOB" --resource-group "$RG" --environment "$ACA_ENV" \
-  --image "${ACR_LOGIN_SERVER}/mvhd-neo4j-seed:latest" \
-  --registry-server "$ACR_LOGIN_SERVER" \
-  --registry-username "$ACR_NAME" \
-  --registry-password "$ACR_PASSWORD" \
-  --cpu 0.5 --memory 1Gi \
-  --trigger-type Manual --replica-timeout 600 \
-  --env-vars \
-    "NEO4J_HTTP_URL=${NEO4J_HTTP_URL}" \
-    "NEO4J_USER=${NEO4J_USER}" \
-    "NEO4J_PASSWORD=${NEO4J_PASSWORD}" \
-  -o none
-ok "Neo4j seed job created"
+log "Creating/updating Neo4j seed job..."
+if az containerapp job show --name "$NEO4J_SEED_JOB" --resource-group "$RG" -o none 2>/dev/null; then
+  az containerapp job update \
+    --name "$NEO4J_SEED_JOB" --resource-group "$RG" \
+    --image "${ACR_LOGIN_SERVER}/mvhd-neo4j-seed:latest" \
+    --cpu 0.5 --memory 1Gi \
+    --replica-timeout 600 \
+    --set-env-vars \
+      "NEO4J_HOST=${NEO4J_APP}.internal.${ACA_DOMAIN}" \
+      "NEO4J_PORT=7687" \
+      "NEO4J_USER=${NEO4J_USER}" \
+      "NEO4J_PASSWORD=${NEO4J_PASSWORD}" \
+    -o none
+  ok "Neo4j seed job updated"
+else
+  az containerapp job create \
+    --name "$NEO4J_SEED_JOB" --resource-group "$RG" --environment "$ACA_ENV" \
+    --image "${ACR_LOGIN_SERVER}/mvhd-neo4j-seed:latest" \
+    --registry-server "$ACR_LOGIN_SERVER" \
+    --registry-username "$ACR_NAME" \
+    --registry-password "$ACR_PASSWORD" \
+    --cpu 0.5 --memory 1Gi \
+    --trigger-type Manual --replica-timeout 600 \
+    --env-vars \
+      "NEO4J_HOST=${NEO4J_APP}.internal.${ACA_DOMAIN}" \
+      "NEO4J_PORT=7687" \
+      "NEO4J_USER=${NEO4J_USER}" \
+      "NEO4J_PASSWORD=${NEO4J_PASSWORD}" \
+    -o none
+  ok "Neo4j seed job created"
+fi
 
 log "Starting Neo4j seed job..."
 az containerapp job start --name "$NEO4J_SEED_JOB" --resource-group "$RG" -o none
