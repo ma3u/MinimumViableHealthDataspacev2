@@ -14,10 +14,9 @@ import {
 const IS_STATIC = process.env.NEXT_PUBLIC_STATIC_EXPORT === "true";
 const BASE_PATH = IS_STATIC ? "/MinimumViableHealthDataspacev2" : "";
 const OPENAPI_URL = `${BASE_PATH}/openapi.yaml`;
-const SWAGGER_VERSION = "5.17.14";
-const SWAGGER_CSS = `https://cdn.jsdelivr.net/npm/swagger-ui-dist@${SWAGGER_VERSION}/swagger-ui.css`;
-const SWAGGER_BUNDLE = `https://cdn.jsdelivr.net/npm/swagger-ui-dist@${SWAGGER_VERSION}/swagger-ui-bundle.js`;
-const SWAGGER_PRESET = `https://cdn.jsdelivr.net/npm/swagger-ui-dist@${SWAGGER_VERSION}/swagger-ui-standalone-preset.js`;
+const SWAGGER_CSS = `${BASE_PATH}/swagger-ui/swagger-ui.css`;
+const SWAGGER_BUNDLE = `${BASE_PATH}/swagger-ui/swagger-ui-bundle.js`;
+const SWAGGER_PRESET = `${BASE_PATH}/swagger-ui/swagger-ui-standalone-preset.js`;
 
 declare global {
   interface Window {
@@ -177,7 +176,7 @@ export default function ApiReferencePage() {
           <div className="rounded-lg border border-[var(--border)] bg-[var(--surface-2)] p-10 flex flex-col items-center gap-3 text-[var(--text-secondary)]">
             <Loader2 className="w-6 h-6 animate-spin" />
             <div className="text-sm">
-              Loading Swagger UI from jsDelivr and fetching{" "}
+              Loading Swagger UI and fetching{" "}
               <code className="text-xs bg-[var(--surface-3)] px-1 py-0.5 rounded">
                 {OPENAPI_URL}
               </code>

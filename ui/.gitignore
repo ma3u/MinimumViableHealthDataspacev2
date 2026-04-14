@@ -4,3 +4,6 @@ node_modules/
 .next/
 out/
 *.tsbuildinfo
+
+# Swagger UI assets copied from node_modules by scripts/copy-swagger-ui.sh
+public/swagger-ui/
