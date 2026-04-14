@@ -165,7 +165,8 @@ az containerapp create \
   --min-replicas 1 --max-replicas 1 \
   --ingress internal --target-port 9090 \
   --env-vars \
-    "NEO4J_URI=bolt://${NEO4J_APP}.internal.${ACA_DOMAIN}:7687" \
+    "NEO4J_URI=bolt://${NEO4J_APP}:7687" \
+    "NEO4J_ENCRYPTED=false" \
     "NEO4J_USER=${NEO4J_USER}" \
     "NEO4J_PASSWORD=${NEO4J_PASSWORD}" \
     "PORT=9090" \

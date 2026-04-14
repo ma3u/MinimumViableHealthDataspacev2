@@ -34,7 +34,7 @@ az containerapp create \
   --registry-password "$ACR_PASSWORD" \
   --cpu 1.0 --memory 2Gi \
   --min-replicas 1 --max-replicas 1 \
-  --ingress internal --target-port 5432 --transport tcp \
+  --ingress internal --target-port 5432 --exposed-port 5432 --transport tcp \
   --secrets "pg-password=${PG_PASSWORD}" \
   --env-vars \
     "POSTGRES_USER=${PG_ADMIN}" \
@@ -89,7 +89,7 @@ az containerapp create \
   --registry-password "$ACR_PASSWORD" \
   --cpu 1.0 --memory 2Gi \
   --min-replicas 1 --max-replicas 1 \
-  --ingress internal --target-port 7687 --transport tcp \
+  --ingress internal --target-port 7687 --exposed-port 7687 --transport tcp \
   --env-vars \
     "NEO4J_AUTH=${NEO4J_USER}/${NEO4J_PASSWORD}" \
     "NEO4J_PLUGINS=[\"apoc\"]" \

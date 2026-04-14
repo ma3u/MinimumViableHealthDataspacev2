@@ -70,7 +70,7 @@ az containerapp create \
     "KEYCLOAK_PUBLIC_URL=${KEYCLOAK_PUBLIC_URL:-}/realms/edcv" \
     "NEO4J_PROXY_URL=${NEO4J_PROXY_URL:-}:9090" \
     "NEO4J_HTTP_URL=${NEO4J_HTTP_URL:-}" \
-    "NEO4J_URI=neo4j://${NEO4J_APP}.internal.${ACA_DOMAIN}:7687" \
+    "NEO4J_URI=bolt://${NEO4J_APP}:7687" \
     "NEO4J_ENCRYPTED=false" \
     "NEO4J_USER=${NEO4J_USER}" \
     "NEO4J_PASSWORD=${NEO4J_PASSWORD}" \
