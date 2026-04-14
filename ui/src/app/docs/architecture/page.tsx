@@ -722,6 +722,14 @@ export default function ArchitecturePage() {
           >
             Quality Gates &rarr;
           </Link>
+          <a
+            href="https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docs/ehds-data-planes.md"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-sm text-[var(--accent)] hover:underline inline-flex items-center gap-1"
+          >
+            EHDS Data Planes (20 future planes) &rarr;
+          </a>
         </div>
       </section>
 

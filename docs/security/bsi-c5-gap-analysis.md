@@ -1,4 +1,4 @@
-# BSI C5 Gap Analysis — Minimum Viable Health Dataspace v2
+# BSI C5 Gap Analysis — EHDS Integration Hub
 
 **Standard**: BSI Cloud Computing Compliance Criteria Catalogue (C5:2020)
 **Relevance**: EHDS Art. 50(6) requires HDAB-approved dataspaces to meet C5 or equivalent.

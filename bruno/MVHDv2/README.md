@@ -1,7 +1,7 @@
 # MVHDv2 Bruno API Collection
 
 A [Bruno](https://www.usebruno.com/) collection covering all 38 Next.js API routes of the
-Minimum Viable Health Dataspace v2 reference implementation.
+EHDS Integration Hub reference implementation.
 
 ## Why Bruno?
 

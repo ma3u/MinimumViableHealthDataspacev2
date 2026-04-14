@@ -1,4 +1,4 @@
-# StackIT Cost Model — Minimum Viable Health Dataspace
+# StackIT Cost Model — EHDS Integration Hub
 
 ## 200 Participants | Production Sizing
 

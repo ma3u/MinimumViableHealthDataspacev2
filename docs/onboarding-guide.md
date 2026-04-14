@@ -2,7 +2,7 @@
 
 ## Welcome & Overview
 
-The Minimum Viable Health Dataspace v2 is a reference implementation of the **European Health Data Space (EHDS) regulation**. It demonstrates how health data can be shared across organizations while preserving sovereignty, consent, and regulatory compliance.
+The EHDS Integration Hub is a reference implementation of the **European Health Data Space (EHDS) regulation**. It demonstrates how health data can be shared across organizations while preserving sovereignty, consent, and regulatory compliance.
 
 The system unifies:
 

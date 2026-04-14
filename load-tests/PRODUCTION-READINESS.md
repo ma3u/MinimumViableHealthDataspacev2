@@ -2,7 +2,7 @@
 
 ## Well-Architected Framework (WAF) + Cloud Adoption Framework (CAF)
 
-### Minimum Viable Health Dataspace v2
+### EHDS Integration Hub
 
 > Assessment date: 2026-03-25 | Based on load tests + codebase analysis
 

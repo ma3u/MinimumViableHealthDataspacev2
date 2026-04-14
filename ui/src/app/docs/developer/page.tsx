@@ -190,6 +190,7 @@ export default function DeveloperGuidePage() {
           <TocLink href="#project-structure">Project Structure</TocLink>
           <TocLink href="#graph-schema">Neo4j Graph Schema</TocLink>
           <TocLink href="#postgres-schema">PostgreSQL Schema</TocLink>
+          <TocLink href="#integration-flows">Integration Flows</TocLink>
           <TocLink href="#api-reference">API Reference</TocLink>
           <TocLink href="#testing">Testing</TocLink>
           <TocLink href="#quality-gates">Quality Gates</TocLink>
@@ -933,6 +934,154 @@ open http://traefik.localhost`}</pre>
         </div>
       </section>
 
+      {/* Integration Flows */}
+      <section className="mb-10">
+        <h2 className="text-2xl font-semibold mb-3" id="integration-flows">
+          Integration Flows
+        </h2>
+        <p className="text-[var(--text-secondary)] text-sm mb-4">
+          Two canonical flows cover 90% of real-world EHDS integrations. Pick
+          the one that matches your role, then use the{" "}
+          <Link
+            href="/docs/developer/reference"
+            className="text-indigo-700 dark:text-indigo-300 underline"
+          >
+            Scalar API Reference
+          </Link>{" "}
+          to try each endpoint from the browser.
+        </p>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Data Consumer */}
+          <div className="border border-[var(--border)] rounded-lg p-5 bg-[var(--surface-1)]">
+            <div className="flex items-center gap-2 mb-2">
+              <span className="inline-block w-2 h-2 rounded-full bg-emerald-500" />
+              <h3 className="font-semibold text-base text-[var(--text-primary)]">
+                Data Consumer flow
+              </h3>
+            </div>
+            <p className="text-xs text-[var(--text-secondary)] mb-3">
+              Researcher / pharma / HTA body discovers and requests cross-border
+              health data.
+            </p>
+            <ol className="text-xs text-[var(--text-secondary)] space-y-2 list-decimal ml-4">
+              <li>
+                <strong>Discover</strong> →{" "}
+                <code className="bg-[var(--surface-2)] px-1 py-0.5 rounded">
+                  GET /api/catalog
+                </code>{" "}
+                returns HealthDCAT-AP datasets
+              </li>
+              <li>
+                <strong>Inspect</strong> →{" "}
+                <code className="bg-[var(--surface-2)] px-1 py-0.5 rounded">
+                  GET /api/assets
+                </code>{" "}
+                for access policies (ODRL)
+              </li>
+              <li>
+                <strong>Negotiate</strong> →{" "}
+                <code className="bg-[var(--surface-2)] px-1 py-0.5 rounded">
+                  POST /api/negotiations
+                </code>{" "}
+                opens a DSP 2025-1 contract
+              </li>
+              <li>
+                <strong>Attest</strong> →{" "}
+                <code className="bg-[var(--surface-2)] px-1 py-0.5 rounded">
+                  POST /api/credentials/present
+                </code>{" "}
+                proves role via DCP VC
+              </li>
+              <li>
+                <strong>Transfer</strong> →{" "}
+                <code className="bg-[var(--surface-2)] px-1 py-0.5 rounded">
+                  GET /api/transfers/:id
+                </code>{" "}
+                monitors the data plane
+              </li>
+              <li>
+                <strong>Analyse</strong> →{" "}
+                <code className="bg-[var(--surface-2)] px-1 py-0.5 rounded">
+                  GET /api/analytics
+                </code>{" "}
+                or{" "}
+                <code className="bg-[var(--surface-2)] px-1 py-0.5 rounded">
+                  POST /api/nlq
+                </code>
+              </li>
+            </ol>
+            <div className="mt-4 pt-3 border-t border-[var(--border)] text-xs text-[var(--text-secondary)]">
+              Role:{" "}
+              <code className="bg-[var(--surface-2)] px-1 py-0.5 rounded">
+                DATA_USER
+              </code>{" "}
+              · Persona: Dr. Petra Lang (PharmaCo Research)
+            </div>
+          </div>
+
+          {/* Data Provider */}
+          <div className="border border-[var(--border)] rounded-lg p-5 bg-[var(--surface-1)]">
+            <div className="flex items-center gap-2 mb-2">
+              <span className="inline-block w-2 h-2 rounded-full bg-blue-500" />
+              <h3 className="font-semibold text-base text-[var(--text-primary)]">
+                Data Provider flow
+              </h3>
+            </div>
+            <p className="text-xs text-[var(--text-secondary)] mb-3">
+              Hospital / clinic / registry publishes datasets for secondary use.
+            </p>
+            <ol className="text-xs text-[var(--text-secondary)] space-y-2 list-decimal ml-4">
+              <li>
+                <strong>Register</strong> →{" "}
+                <code className="bg-[var(--surface-2)] px-1 py-0.5 rounded">
+                  POST /api/participants
+                </code>{" "}
+                creates a did:web identity
+              </li>
+              <li>
+                <strong>Publish</strong> →{" "}
+                <code className="bg-[var(--surface-2)] px-1 py-0.5 rounded">
+                  POST /api/catalog
+                </code>{" "}
+                adds a HealthDCAT-AP dataset
+              </li>
+              <li>
+                <strong>Policy</strong> →{" "}
+                <code className="bg-[var(--surface-2)] px-1 py-0.5 rounded">
+                  PUT /api/assets/:id
+                </code>{" "}
+                attaches an ODRL policy
+              </li>
+              <li>
+                <strong>HDAB approval</strong> →{" "}
+                <code className="bg-[var(--surface-2)] px-1 py-0.5 rounded">
+                  GET /api/compliance
+                </code>{" "}
+                tracks approval state
+              </li>
+              <li>
+                <strong>Accept</strong> →{" "}
+                <code className="bg-[var(--surface-2)] px-1 py-0.5 rounded">
+                  GET /api/negotiations
+                </code>{" "}
+                shows incoming contract offers
+              </li>
+              <li>
+                <strong>Deliver</strong> → data plane pushes FHIR/OMOP bundles
+                to the consumer
+              </li>
+            </ol>
+            <div className="mt-4 pt-3 border-t border-[var(--border)] text-xs text-[var(--text-secondary)]">
+              Role:{" "}
+              <code className="bg-[var(--surface-2)] px-1 py-0.5 rounded">
+                DATA_HOLDER
+              </code>{" "}
+              · Persona: Dr. Klaus Weber (AlphaKlinik Berlin)
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* API Reference */}
       <section className="mb-10">
         <h2 className="text-2xl font-semibold mb-3" id="api-reference">
@@ -948,14 +1097,20 @@ open http://traefik.localhost`}</pre>
         </p>
         <div className="flex flex-wrap gap-3 mb-4 text-sm">
           <Link
+            href="/docs/developer/reference"
+            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md border border-indigo-500 bg-indigo-600 hover:bg-indigo-700 transition-colors text-white font-medium"
+          >
+            Scalar API Reference →
+          </Link>
+          <Link
             href="/docs/developer/api"
             className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md border border-[var(--border)] bg-[var(--surface-2)] hover:bg-[var(--surface-3)] transition-colors text-[var(--text-primary)]"
           >
-            Interactive Swagger UI →
+            Swagger UI →
           </Link>
           <a
             href="/openapi.yaml"
-            download="mvhdv2-openapi.yaml"
+            download="ehds-integration-hub-openapi.yaml"
             className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md border border-[var(--border)] bg-[var(--surface-2)] hover:bg-[var(--surface-3)] transition-colors text-[var(--text-primary)]"
           >
             Download openapi.yaml

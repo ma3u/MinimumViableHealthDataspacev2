@@ -1,7 +1,7 @@
 # Simpl-Open vs EHDS Reference Implementation: Gap Analysis
 
-* **Date:** 2026-04-11
-* **Context:** The EU Simpl programme provides generic smart middleware for data spaces. This analysis maps where the EHDS Minimum Viable Health Dataspace demonstrates capabilities that Simpl-Open needs to develop further to meet European Health Data Space requirements.
+- **Date:** 2026-04-11
+- **Context:** The EU Simpl programme provides generic smart middleware for data spaces. This analysis maps where the EHDS Integration Hub demonstrates capabilities that Simpl-Open needs to develop further to meet European Health Data Space requirements.
 
 ---
 
