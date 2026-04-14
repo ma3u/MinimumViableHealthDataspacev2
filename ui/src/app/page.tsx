@@ -289,25 +289,21 @@ export default function Home() {
               href={href}
               target="_blank"
               rel="noopener noreferrer"
-              className={`group rounded-xl border p-4 sm:p-5 transition-colors hover:bg-[var(--surface-2)]/50 ${
+              className={`group flex flex-col rounded-xl border p-4 sm:p-5 transition-colors hover:bg-[var(--surface-2)]/50 ${
                 color.split(" ")[0]
               }`}
             >
-              <div className="flex items-center justify-between mb-2">
-                <span
-                  className={`font-semibold text-sm sm:text-base text-gray-900 dark:text-gray-100`}
-                >
-                  {name}
-                </span>
-                <ExternalLink
-                  size={14}
-                  className="text-[var(--text-secondary)] group-hover:text-[var(--text-secondary)] transition-colors"
-                  aria-hidden="true"
-                />
-              </div>
-              <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
+              <span className="font-semibold text-sm sm:text-base text-gray-900 dark:text-gray-100 mb-2">
+                {name}
+              </span>
+              <p className="flex-1 text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
                 {desc}
               </p>
+              <ExternalLink
+                size={14}
+                className="mt-3 text-[var(--text-secondary)] group-hover:text-[var(--text-secondary)] transition-colors"
+                aria-hidden="true"
+              />
             </a>
           ))}
         </div>

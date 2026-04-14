@@ -9,6 +9,20 @@ eval "$(get_aca_fqdns)"
 log "Phase 6: Post-deployment setup"
 
 az acr login --name "$ACR_NAME"
+ACR_PASSWORD=$(az acr credential show --name "$ACR_NAME" --query "passwords[0].value" -o tsv)
+
+# ── Create additional Postgres databases (Workaround B — ADR-018) ───────────
+# Postgres auto-creates "keycloak" via POSTGRES_DB. Create the remaining 6 via
+# a one-shot exec into the running container.
+log "Creating additional Postgres databases..."
+for db in controlplane dataplane dataplane_omop identityhub issuerservice cfm; do
+  log "  creating ${db}..."
+  az containerapp exec \
+    --name "$PG_APP" --resource-group "$RG" \
+    --command "psql -U ${PG_ADMIN} -d postgres -tAc \"SELECT 1 FROM pg_database WHERE datname='${db}';\" | grep -q 1 || psql -U ${PG_ADMIN} -d postgres -c \"CREATE DATABASE ${db};\"" \
+    2>/dev/null || warn "db ${db} create may have failed (check manually)"
+done
+ok "Postgres databases ensured"
 
 # ── Build and run Neo4j seed job ─────────────────────────────────────────────
 log "Building Neo4j seed image..."
@@ -35,6 +49,8 @@ az containerapp job create \
   --name "$NEO4J_SEED_JOB" --resource-group "$RG" --environment "$ACA_ENV" \
   --image "${ACR_LOGIN_SERVER}/mvhd-neo4j-seed:latest" \
   --registry-server "$ACR_LOGIN_SERVER" \
+  --registry-username "$ACR_NAME" \
+  --registry-password "$ACR_PASSWORD" \
   --cpu 0.5 --memory 1Gi \
   --trigger-type Manual --replica-timeout 600 \
   --env-vars \
@@ -134,6 +150,8 @@ az containerapp job create \
   --name "$VAULT_BOOTSTRAP_JOB" --resource-group "$RG" --environment "$ACA_ENV" \
   --image "${ACR_LOGIN_SERVER}/mvhd-vault-bootstrap:latest" \
   --registry-server "$ACR_LOGIN_SERVER" \
+  --registry-username "$ACR_NAME" \
+  --registry-password "$ACR_PASSWORD" \
   --cpu 0.25 --memory 0.5Gi \
   --trigger-type Manual --replica-timeout 300 \
   --env-vars \
@@ -199,11 +217,94 @@ else
   warn "Realm file not found at ${REALM_FILE} — skipping Keycloak import"
 fi
 
+# ── Custom domain binding (ADR-018: ehds.mabu.red) ──────────────────────────
+if [[ -n "${CUSTOM_DOMAIN:-}" ]]; then
+  log "Preparing custom domain ${CUSTOM_DOMAIN} for ${UI_APP}..."
+
+  UI_FQDN=$(az containerapp show --name "$UI_APP" --resource-group "$RG" \
+    --query "properties.configuration.ingress.fqdn" -o tsv)
+  VERIFY_ID=$(az containerapp env show --name "$ACA_ENV" --resource-group "$RG" \
+    --query "properties.customDomainConfiguration.customDomainVerificationId" -o tsv)
+
+  cat <<DNS
+
+  ╔══════════════════════════════════════════════════════════════════════════╗
+  ║  DNS RECORDS REQUIRED at your DNS provider (iwantmyname / mabu.red)      ║
+  ╠══════════════════════════════════════════════════════════════════════════╣
+  ║  Type   Name          TTL    Value                                       ║
+  ║  ────   ─────────     ────   ─────────────────────────────────────────   ║
+  ║  CNAME  ehds          3600   ${UI_FQDN}
+  ║  TXT    asuid.ehds    3600   ${VERIFY_ID}
+  ╚══════════════════════════════════════════════════════════════════════════╝
+
+  Add both records, wait ~5 min for propagation, then press ENTER to continue
+  (or Ctrl-C and re-run: scripts/azure/06-post-deploy.sh)...
+DNS
+  read -r _
+
+  log "Verifying DNS..."
+  for i in $(seq 1 12); do
+    cname_value=$(dig +short CNAME "${CUSTOM_DOMAIN}" @8.8.8.8 2>/dev/null | head -1)
+    txt_value=$(dig +short TXT "asuid.${CUSTOM_DOMAIN}" @8.8.8.8 2>/dev/null | tr -d '"' | head -1)
+    if [[ "${cname_value%.}" == "${UI_FQDN}" && "$txt_value" == "$VERIFY_ID" ]]; then
+      ok "DNS verified"
+      break
+    fi
+    echo "  attempt ${i}/12: CNAME=${cname_value:-missing} TXT=${txt_value:-missing}"
+    sleep 15
+  done
+
+  log "Adding hostname ${CUSTOM_DOMAIN} to ${UI_APP}..."
+  az containerapp hostname add \
+    --name "$UI_APP" --resource-group "$RG" \
+    --hostname "$CUSTOM_DOMAIN" -o none || warn "hostname add may have already been run"
+
+  log "Binding managed certificate (may take 5–15 min)..."
+  az containerapp hostname bind \
+    --name "$UI_APP" --resource-group "$RG" \
+    --hostname "$CUSTOM_DOMAIN" \
+    --environment "$ACA_ENV" \
+    --validation-method CNAME -o none \
+    && ok "Managed certificate bound for https://${CUSTOM_DOMAIN}" \
+    || warn "hostname bind failed — retry: az containerapp hostname bind --name ${UI_APP} --resource-group ${RG} --hostname ${CUSTOM_DOMAIN} --environment ${ACA_ENV} --validation-method CNAME"
+
+  # Point NEXTAUTH_URL at the custom domain
+  log "Updating NEXTAUTH_URL to https://${CUSTOM_DOMAIN}..."
+  az containerapp update --name "$UI_APP" --resource-group "$RG" \
+    --set-env-vars "NEXTAUTH_URL=https://${CUSTOM_DOMAIN}" -o none
+
+  # Update Keycloak client redirect URIs to include the custom domain
+  if [[ -n "${KC_TOKEN:-}" && -n "${CLIENT_ID_INTERNAL:-}" ]]; then
+    log "Adding ${CUSTOM_DOMAIN} to Keycloak client redirectUris..."
+    curl -sf -X PUT \
+      "${KEYCLOAK_PUBLIC_URL}/admin/realms/edcv/clients/${CLIENT_ID_INTERNAL}" \
+      -H "Authorization: Bearer ${KC_TOKEN}" \
+      -H "Content-Type: application/json" \
+      -d "{
+        \"redirectUris\": [
+          \"https://${CUSTOM_DOMAIN}/*\",
+          \"${UI_PUBLIC_URL}/*\",
+          \"http://localhost:3000/*\"
+        ],
+        \"webOrigins\": [
+          \"https://${CUSTOM_DOMAIN}\",
+          \"${UI_PUBLIC_URL}\",
+          \"http://localhost:3000\"
+        ]
+      }" -o /dev/null \
+      && ok "Keycloak redirectUris updated" \
+      || warn "Keycloak client update failed — add redirectUri https://${CUSTOM_DOMAIN}/* manually"
+  fi
+fi
+
 # ── Summary ──────────────────────────────────────────────────────────────────
 log "Post-deployment complete"
 echo "  Neo4j seed job:       ${NEO4J_SEED_JOB} (running)"
 echo "  Vault bootstrap job:  ${VAULT_BOOTSTRAP_JOB} (running)"
 echo "  Keycloak realm:       imported"
+if [[ -n "${CUSTOM_DOMAIN:-}" ]]; then
+  echo "  Custom domain:        https://${CUSTOM_DOMAIN}"
+fi
 echo ""
 echo "Monitor job progress:"
 echo "  az containerapp job execution list --name ${NEO4J_SEED_JOB} --resource-group ${RG}"

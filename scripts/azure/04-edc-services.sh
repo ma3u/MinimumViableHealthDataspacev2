@@ -7,8 +7,9 @@ eval "$(get_aca_fqdns)"
 
 log "Phase 4: EDC-V core services"
 
-PG_HOST="${PG_SERVER}.postgres.database.azure.com"
+# Workaround B (ADR-018): PG_HOST exported by env.sh (mvhd-postgres short name)
 az acr login --name "$ACR_NAME"
+ACR_PASSWORD=$(az acr credential show --name "$ACR_NAME" --query "passwords[0].value" -o tsv)
 
 # ── Push NATS image ─────────────────────────────────────────────────────────
 log "Pulling and pushing NATS image..."
@@ -23,6 +24,8 @@ az containerapp create \
   --name "$NATS_APP" --resource-group "$RG" --environment "$ACA_ENV" \
   --image "$NATS_IMAGE" \
   --registry-server "$ACR_LOGIN_SERVER" \
+  --registry-username "$ACR_NAME" \
+  --registry-password "$ACR_PASSWORD" \
   --cpu 0.25 --memory 0.5Gi \
   --min-replicas 1 --max-replicas 1 \
   --ingress internal --target-port 4222 \
@@ -35,11 +38,13 @@ az containerapp create \
   --name "$CONTROLPLANE_APP" --resource-group "$RG" --environment "$ACA_ENV" \
   --image "$CONTROLPLANE_IMAGE" \
   --registry-server "$ACR_LOGIN_SERVER" \
+  --registry-username "$ACR_NAME" \
+  --registry-password "$ACR_PASSWORD" \
   --cpu 1 --memory 2Gi \
   --min-replicas 1 --max-replicas 1 \
   --ingress internal --target-port 8081 \
   --env-vars \
-    "EDC_DATASOURCE_DEFAULT_URL=jdbc:postgresql://${PG_HOST}:5432/controlplane" \
+    "EDC_DATASOURCE_DEFAULT_URL=jdbc:postgresql://${PG_HOST}:${PG_PORT}/controlplane" \
     "EDC_DATASOURCE_DEFAULT_USER=${PG_ADMIN}" \
     "EDC_DATASOURCE_DEFAULT_PASSWORD=${PG_PASSWORD}" \
     "EDC_DSP_CALLBACK_ADDRESS=${CONTROLPLANE_URL:-}" \
@@ -61,11 +66,13 @@ az containerapp create \
   --name "$DP_FHIR_APP" --resource-group "$RG" --environment "$ACA_ENV" \
   --image "$DP_FHIR_IMAGE" \
   --registry-server "$ACR_LOGIN_SERVER" \
+  --registry-username "$ACR_NAME" \
+  --registry-password "$ACR_PASSWORD" \
   --cpu 0.5 --memory 1Gi \
   --min-replicas 1 --max-replicas 1 \
   --ingress internal --target-port 11002 \
   --env-vars \
-    "EDC_DATASOURCE_DEFAULT_URL=jdbc:postgresql://${PG_HOST}:5432/dataplane" \
+    "EDC_DATASOURCE_DEFAULT_URL=jdbc:postgresql://${PG_HOST}:${PG_PORT}/dataplane" \
     "EDC_DATASOURCE_DEFAULT_USER=${PG_ADMIN}" \
     "EDC_DATASOURCE_DEFAULT_PASSWORD=${PG_PASSWORD}" \
     "EDC_VAULT_HASHICORP_URL=${VAULT_URL:-}" \
@@ -84,11 +91,13 @@ az containerapp create \
   --name "$DP_OMOP_APP" --resource-group "$RG" --environment "$ACA_ENV" \
   --image "$DP_OMOP_IMAGE" \
   --registry-server "$ACR_LOGIN_SERVER" \
+  --registry-username "$ACR_NAME" \
+  --registry-password "$ACR_PASSWORD" \
   --cpu 0.5 --memory 1Gi \
   --min-replicas 1 --max-replicas 1 \
   --ingress internal --target-port 11012 \
   --env-vars \
-    "EDC_DATASOURCE_DEFAULT_URL=jdbc:postgresql://${PG_HOST}:5432/dataplane_omop" \
+    "EDC_DATASOURCE_DEFAULT_URL=jdbc:postgresql://${PG_HOST}:${PG_PORT}/dataplane_omop" \
     "EDC_DATASOURCE_DEFAULT_USER=${PG_ADMIN}" \
     "EDC_DATASOURCE_DEFAULT_PASSWORD=${PG_PASSWORD}" \
     "EDC_VAULT_HASHICORP_URL=${VAULT_URL:-}" \
@@ -107,11 +116,13 @@ az containerapp create \
   --name "$IDENTITYHUB_APP" --resource-group "$RG" --environment "$ACA_ENV" \
   --image "$IDENTITYHUB_IMAGE" \
   --registry-server "$ACR_LOGIN_SERVER" \
+  --registry-username "$ACR_NAME" \
+  --registry-password "$ACR_PASSWORD" \
   --cpu 0.5 --memory 1Gi \
   --min-replicas 1 --max-replicas 1 \
   --ingress internal --target-port 7081 \
   --env-vars \
-    "EDC_DATASOURCE_DEFAULT_URL=jdbc:postgresql://${PG_HOST}:5432/identityhub" \
+    "EDC_DATASOURCE_DEFAULT_URL=jdbc:postgresql://${PG_HOST}:${PG_PORT}/identityhub" \
     "EDC_DATASOURCE_DEFAULT_USER=${PG_ADMIN}" \
     "EDC_DATASOURCE_DEFAULT_PASSWORD=${PG_PASSWORD}" \
     "EDC_VAULT_HASHICORP_URL=${VAULT_URL:-}" \
@@ -127,11 +138,13 @@ az containerapp create \
   --name "$ISSUER_APP" --resource-group "$RG" --environment "$ACA_ENV" \
   --image "$ISSUER_IMAGE" \
   --registry-server "$ACR_LOGIN_SERVER" \
+  --registry-username "$ACR_NAME" \
+  --registry-password "$ACR_PASSWORD" \
   --cpu 0.5 --memory 1Gi \
   --min-replicas 1 --max-replicas 1 \
   --ingress internal --target-port 10013 \
   --env-vars \
-    "EDC_DATASOURCE_DEFAULT_URL=jdbc:postgresql://${PG_HOST}:5432/issuerservice" \
+    "EDC_DATASOURCE_DEFAULT_URL=jdbc:postgresql://${PG_HOST}:${PG_PORT}/issuerservice" \
     "EDC_DATASOURCE_DEFAULT_USER=${PG_ADMIN}" \
     "EDC_DATASOURCE_DEFAULT_PASSWORD=${PG_PASSWORD}" \
     "EDC_VAULT_HASHICORP_URL=${VAULT_URL:-}" \
@@ -146,6 +159,8 @@ az containerapp create \
   --name "$NEO4J_PROXY_APP" --resource-group "$RG" --environment "$ACA_ENV" \
   --image "$NEO4J_PROXY_IMAGE" \
   --registry-server "$ACR_LOGIN_SERVER" \
+  --registry-username "$ACR_NAME" \
+  --registry-password "$ACR_PASSWORD" \
   --cpu 0.25 --memory 0.5Gi \
   --min-replicas 1 --max-replicas 1 \
   --ingress internal --target-port 9090 \

@@ -10,3 +10,10 @@
 
 # neo4j/seed.sh — base64-encoded Neo4j dev credentials (neo4j:healthdataspace, local only)
 fe7320a578f5136c47218a80e351859235221353:neo4j/seed.sh:generic-api-key:5
+
+# .github/workflows/reset-demo.yml — false positive: curl -u with GitHub Actions
+# secret template (${{ secrets.NEO4J_PASSWORD }}) flagged by curl-auth-user rule.
+# Not a real credential; the token is resolved by Actions at runtime. The current
+# file on HEAD uses an env var + header to avoid the pattern; this fingerprint
+# covers the original commit in history.
+25ae55ec0402f17406a78f7f137c583517d4d9d9:.github/workflows/reset-demo.yml:curl-auth-user:74

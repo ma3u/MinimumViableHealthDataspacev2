@@ -1,11 +1,12 @@
-name: ACA Off-Hours Scale-Down
+name: ACA Manual Scale (disabled schedule — ADR-018)
 
+# ADR-018: INF-STG-EU_EHDS runs 24/7. Scheduled triggers disabled.
+# The start/stop jobs remain available via workflow_dispatch for manual
+# maintenance windows (e.g., cost investigations, planned downtime).
 on:
-  schedule:
-    # Start: Mon-Fri 05:00 UTC = 07:00 Europe/Berlin CEST / 06:00 CET
-    - cron: "0 5 * * 1-5"
-    # Stop: daily 18:00 UTC = 20:00 Europe/Berlin CEST / 19:00 CET
-    - cron: "0 18 * * *"
+  # schedule:
+  #   - cron: "0 5 * * 1-5"   # disabled — was start (07:00 Europe/Berlin)
+  #   - cron: "0 18 * * *"    # disabled — was stop  (20:00 Europe/Berlin)
   workflow_dispatch:
     inputs:
       action:
