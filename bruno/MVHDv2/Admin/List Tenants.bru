@@ -1,0 +1,19 @@
+meta {
+  name: List Tenants
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/api/admin/tenants
+  body: none
+  auth: inherit
+}
+
+headers {
+  Accept: application/json
+}
+
+docs {
+  CFM tenant inventory (admin only).
+}

@@ -1,0 +1,19 @@
+meta {
+  name: Templates
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/api/nlq
+  body: none
+  auth: inherit
+}
+
+headers {
+  Accept: application/json
+}
+
+docs {
+  List NLQ templates and supported intents.
+}

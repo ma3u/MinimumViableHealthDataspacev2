@@ -914,13 +914,36 @@ open http://traefik.localhost`}</pre>
           API Reference
         </h2>
         <p className="text-[var(--text-secondary)] text-sm mb-4">
-          36 Next.js API routes proxy to Neo4j and EDC-V services. Routes are
+          38 Next.js API routes proxy to Neo4j and EDC-V services. Routes are
           disabled in static export — mock data served from{" "}
           <code className="text-xs bg-[var(--surface-2)] px-1 py-0.5 rounded">
             ui/public/mock/*.json
           </code>
           .
         </p>
+        <div className="flex flex-wrap gap-3 mb-4 text-sm">
+          <Link
+            href="/docs/developer/api"
+            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md border border-[var(--border)] bg-[var(--surface-2)] hover:bg-[var(--surface-3)] transition-colors text-[var(--text-primary)]"
+          >
+            Interactive Swagger UI →
+          </Link>
+          <a
+            href="/openapi.yaml"
+            download="mvhdv2-openapi.yaml"
+            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md border border-[var(--border)] bg-[var(--surface-2)] hover:bg-[var(--surface-3)] transition-colors text-[var(--text-primary)]"
+          >
+            Download openapi.yaml
+          </a>
+          <a
+            href="https://github.com/ma3u/MinimumViableHealthDataspacev2/tree/main/bruno/MVHDv2"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md border border-[var(--border)] bg-[var(--surface-2)] hover:bg-[var(--surface-3)] transition-colors text-[var(--text-primary)]"
+          >
+            Bruno collection ↗
+          </a>
+        </div>
         <div className="overflow-x-auto">
           <table className="w-full text-xs border border-[var(--border)] rounded-lg">
             <thead className="bg-[var(--surface-2)]">

@@ -1,0 +1,19 @@
+meta {
+  name: Validate Schema
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{baseUrl}}/api/graph/validate
+  body: none
+  auth: inherit
+}
+
+headers {
+  Accept: application/json
+}
+
+docs {
+  Run schema constraints + count checks against the live Neo4j instance.
+}

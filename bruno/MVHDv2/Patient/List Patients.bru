@@ -1,0 +1,19 @@
+meta {
+  name: List Patients
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/api/patient
+  body: none
+  auth: inherit
+}
+
+headers {
+  Accept: application/json
+}
+
+docs {
+  List all FHIR patients (Layer 3).
+}

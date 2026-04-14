@@ -1,0 +1,19 @@
+meta {
+  name: Components Topology
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{baseUrl}}/api/admin/components/topology
+  body: none
+  auth: inherit
+}
+
+headers {
+  Accept: application/json
+}
+
+docs {
+  Service dependency topology graph for the operator dashboard.
+}

@@ -1,0 +1,15 @@
+meta {
+  name: Get Transfer
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/api/transfers/transfer-123?participantId={{participantId}}
+  body: none
+  auth: inherit
+}
+
+headers {
+  Accept: application/json
+}

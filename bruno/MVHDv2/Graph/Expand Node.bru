@@ -1,0 +1,19 @@
+meta {
+  name: Expand Node
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/api/graph/expand?id=patient-1&depth=2
+  body: none
+  auth: inherit
+}
+
+headers {
+  Accept: application/json
+}
+
+docs {
+  Expand neighborhood around a starting node up to the given depth.
+}

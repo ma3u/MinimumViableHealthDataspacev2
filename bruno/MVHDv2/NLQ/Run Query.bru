@@ -1,0 +1,21 @@
+meta {
+  name: Run Query
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/api/nlq
+  body: json
+  auth: inherit
+}
+
+headers {
+  Content-Type: application/json
+  Accept: application/json
+}
+
+body:json {
+  "question": "How many patients with type 2 diabetes have an Hb1Ac > 7?",
+  "templateId": "auto"
+}

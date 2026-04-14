@@ -1,0 +1,39 @@
+meta {
+  name: Create Policy
+  type: http
+  seq: 6
+}
+
+post {
+  url: {{baseUrl}}/api/admin/policies
+  body: json
+  auth: inherit
+}
+
+headers {
+  Content-Type: application/json
+  Accept: application/json
+}
+
+body:json {
+  "participantId": "{{participantId}}",
+  "policy": {
+    "@id": "policy:research:diabetes:001",
+    "@type": "PolicyDefinition",
+    "policy": {
+      "@type": "Set",
+      "permission": [
+        {
+          "action": "read",
+          "constraint": [
+            {
+              "leftOperand": "purpose",
+              "operator": "eq",
+              "rightOperand": "research"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

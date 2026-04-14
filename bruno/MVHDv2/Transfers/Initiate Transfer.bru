@@ -1,0 +1,24 @@
+meta {
+  name: Initiate Transfer
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/api/transfers
+  body: json
+  auth: inherit
+}
+
+headers {
+  Content-Type: application/json
+  Accept: application/json
+}
+
+body:json {
+  "participantId": "{{participantId}}",
+  "contractId": "contract-001",
+  "counterPartyAddress": "http://controlplane:9290",
+  "assetId": "asset-001",
+  "transferType": "HttpData-PULL"
+}

@@ -1,0 +1,19 @@
+meta {
+  name: Compliance Status
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/api/compliance
+  body: none
+  auth: inherit
+}
+
+headers {
+  Accept: application/json
+}
+
+docs {
+  EHDS / GDPR / DSP / DCP compliance summary. Aggregates audit and HDAB approvals.
+}

@@ -1,0 +1,15 @@
+meta {
+  name: List Assets
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/api/assets?participantId={{participantId}}
+  body: none
+  auth: inherit
+}
+
+headers {
+  Accept: application/json
+}

@@ -1,0 +1,19 @@
+meta {
+  name: Get Node
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseUrl}}/api/graph/node?id=patient-1
+  body: none
+  auth: inherit
+}
+
+headers {
+  Accept: application/json
+}
+
+docs {
+  Fetch a single node with all properties and direct relationships.
+}

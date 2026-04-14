@@ -861,6 +861,8 @@ available online at **[ma3u.github.io/MinimumViableHealthDataspacev2/docs](https
 | [Quality Gates](docs/quality-gates.md)                          | CI quality standards: lint, type-check, test thresholds.                    |
 | [Full User Journey](docs/FULL_USER_JOURNEY.md)                  | EHDS 8-step journey from onboarding to analytics with sequence diagram.     |
 | [OpenAPI Specs](jad/openapi/)                                   | OpenAPI specs for all JAD services (Management, Identity, Issuer APIs).     |
+| [Bruno API Collection](bruno/MVHDv2/)                           | Bruno collection covering all 38 Next.js API routes with 3 environments.    |
+| [Interactive API Reference](ui/public/openapi.yaml)             | OpenAPI 3.1 spec rendered as Swagger UI at `/docs/developer/api`.           |
 
 ---
 
@@ -889,6 +891,9 @@ All 12 phases are **✅ Complete** — from infrastructure migration through Azu
 - **Security Testing** — 50 automated OWASP/BSI checks, Trivy CVE scanning, Gitleaks ([ADR-011](docs/ADRs/ADR-011-security-testing.md))
 - **Azure Deployment** — 13 Container Apps + 3 Jobs with CI/CD and E2E validation ([ADR-012](docs/ADRs/ADR-012-azure-container-apps.md))
 - **SIMPL-Open Alignment** — 5/7 EU programme requirements met ([ADR-013](docs/ADRs/ADR-013-simpl-open-alignment.md))
+- **Weekly Demo Reset** — Idempotent Sunday-night re-seed of Neo4j, Vault, and Postgres for a clean Monday-morning demo ([ADR-014](docs/ADRs/ADR-014-weekly-demo-reset.md))
+- **ACA Off-Hours Scale-Down** — Mon–Fri 07:00–20:00 Europe/Berlin schedule keeps the full ACA topology under the personal €50/month credit ([ADR-016](docs/ADRs/ADR-016-aca-off-hours-scaledown.md), supersedes [ADR-015](docs/ADRs/ADR-015-single-vm-dev-deployment.md))
+- **Persistent Storage on ACA** — Azure Files volumes for Neo4j (`/data`, `/logs`) and Vault (`/vault/data`); knowledge graph and Vault secrets survive revision restarts and morning scale-up ([ADR-017](docs/ADRs/ADR-017-persistent-storage-aca.md))
 
 For detailed phase descriptions, sub-tasks, and architecture decisions, see the full **[Implementation Roadmap](docs/planning-health-dataspace-v2.md)** and **[Architecture Decision Records](docs/ADRs/)**.
 

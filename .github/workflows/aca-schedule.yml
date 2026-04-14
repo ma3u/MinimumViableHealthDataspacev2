@@ -152,17 +152,22 @@ jobs:
             --min-replicas 1 --max-replicas 3 \
             -o none || echo "::warning::Failed to scale mvhd-ui"
 
-      - name: Wait for Vault to be reachable
+      - name: Wait for stateful services to be reachable
         run: |
-          echo "Waiting 60s for Vault pod to start..."
-          sleep 60
+          echo "Waiting 75s for Neo4j + Vault pods to start..."
+          sleep 75
 
-      - name: Re-bootstrap Vault (in-memory gotcha)
+      - name: Re-bootstrap Vault (in-memory gotcha #1)
         run: |
           echo "=== Re-running bootstrap job (Vault secrets + keys) ==="
           az containerapp job start \
-            --name mvhd-bootstrap-job --resource-group "$RESOURCE_GROUP" \
-            -o none || echo "::warning::Bootstrap job start failed"
+            --name mvhd-vault-bootstrap --resource-group "$RESOURCE_GROUP" \
+            -o none || echo "::warning::Vault bootstrap job start failed"
+
+      # Neo4j is now persistent on Azure Files (ADR-017). The seed job is no
+      # longer required on every start — data survives the 0/0 → 1/1 cycle.
+      # If the database is empty (fresh storage account) the one-time bootstrap
+      # workflow `bootstrap-stateful.yml` should be run manually instead.
 
       - name: Verify UI is reachable
         id: verify
@@ -190,5 +195,5 @@ jobs:
           echo "" >> "$GITHUB_STEP_SUMMARY"
           echo "**Time:** $(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_STEP_SUMMARY"
           echo "**Target:** ${{ steps.verify.outputs.ui_url }}" >> "$GITHUB_STEP_SUMMARY"
-          echo "**Status:** PostgreSQL started, 13 Container Apps scaled up, Vault re-bootstrapped" >> "$GITHUB_STEP_SUMMARY"
+          echo "**Status:** PostgreSQL started, 13 Container Apps scaled up, Vault re-bootstrapped (Neo4j data persists via Azure Files — see ADR-017)" >> "$GITHUB_STEP_SUMMARY"
           echo "**Next stop:** Today 18:00 UTC (20:00 Europe/Berlin CEST)" >> "$GITHUB_STEP_SUMMARY"

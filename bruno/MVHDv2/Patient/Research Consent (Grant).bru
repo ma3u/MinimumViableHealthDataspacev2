@@ -1,0 +1,22 @@
+meta {
+  name: Research Consent (Grant)
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{baseUrl}}/api/patient/research
+  body: json
+  auth: inherit
+}
+
+headers {
+  Content-Type: application/json
+  Accept: application/json
+}
+
+body:json {
+  "patientId": "{{patientId}}",
+  "studyId": "{{studyId}}",
+  "purpose": "RESEARCH"
+}

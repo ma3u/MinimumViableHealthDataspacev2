@@ -1,0 +1,19 @@
+meta {
+  name: Patient Profile
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/api/patient/profile?patientId={{patientId}}
+  body: none
+  auth: inherit
+}
+
+headers {
+  Accept: application/json
+}
+
+docs {
+  Single patient profile — encounters, conditions, medications, observations.
+}
