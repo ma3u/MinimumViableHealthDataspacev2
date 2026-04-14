@@ -1,0 +1,20 @@
+meta {
+  name: Update Participant
+  type: http
+  seq: 3
+}
+
+patch {
+  url: {{baseUrl}}/api/participants/limburg-mc
+  body: json
+  auth: inherit
+}
+
+headers {
+  Content-Type: application/json
+  Accept: application/json
+}
+
+body:json {
+  "displayName": "Limburg Medical Centre (NL)"
+}

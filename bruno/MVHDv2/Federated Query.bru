@@ -1,0 +1,19 @@
+meta {
+  name: Federated Query
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/api/federated
+  body: none
+  auth: inherit
+}
+
+headers {
+  Accept: application/json
+}
+
+docs {
+  Multi-site federated cohort query (k-anonymity enforced).
+}

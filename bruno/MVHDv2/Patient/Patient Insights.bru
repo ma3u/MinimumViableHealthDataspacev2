@@ -1,0 +1,19 @@
+meta {
+  name: Patient Insights
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseUrl}}/api/patient/insights?patientId={{patientId}}
+  body: none
+  auth: inherit
+}
+
+headers {
+  Accept: application/json
+}
+
+docs {
+  Aggregated insights for the patient — risk factors, recent events, care gaps.
+}

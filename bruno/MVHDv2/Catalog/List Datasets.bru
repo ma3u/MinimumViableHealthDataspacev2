@@ -1,0 +1,19 @@
+meta {
+  name: List Datasets
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/api/catalog
+  body: none
+  auth: inherit
+}
+
+headers {
+  Accept: application/json
+}
+
+docs {
+  List HealthDCAT-AP datasets aggregated from Neo4j Layer 2.
+}

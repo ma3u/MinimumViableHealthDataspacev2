@@ -1,0 +1,26 @@
+meta {
+  name: Update Policy
+  type: http
+  seq: 7
+}
+
+put {
+  url: {{baseUrl}}/api/admin/policies
+  body: json
+  auth: inherit
+}
+
+headers {
+  Content-Type: application/json
+  Accept: application/json
+}
+
+body:json {
+  "policyId": "policy:research:diabetes:001",
+  "participantId": "{{participantId}}",
+  "policy": {
+    "@id": "policy:research:diabetes:001",
+    "@type": "PolicyDefinition",
+    "policy": { "@type": "Set", "permission": [] }
+  }
+}

@@ -1,0 +1,19 @@
+meta {
+  name: Analytics
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/api/analytics
+  body: none
+  auth: inherit
+}
+
+headers {
+  Accept: application/json
+}
+
+docs {
+  OMOP-derived cohort analytics dashboard data.
+}

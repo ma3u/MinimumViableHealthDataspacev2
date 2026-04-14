@@ -1,0 +1,19 @@
+meta {
+  name: List Negotiations
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/api/negotiations?participantId={{participantId}}
+  body: none
+  auth: inherit
+}
+
+headers {
+  Accept: application/json
+}
+
+docs {
+  DSP 2025-1 contract negotiations for the given participant.
+}

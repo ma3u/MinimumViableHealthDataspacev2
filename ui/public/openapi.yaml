@@ -1,0 +1,955 @@
+openapi: 3.1.0
+info:
+  title: Minimum Viable Health Dataspace v2 — REST API
+  version: "2.0.0"
+  description: |
+    REST API for the **Minimum Viable Health Dataspace v2** reference implementation.
+
+    Implements EHDS regulation through the layered protocol stack:
+    - **DSP 2025-1** — contract negotiation & data transfer
+    - **DCP v1.0** — Verifiable Credential attestation
+    - **FHIR R4** — clinical data exchange
+    - **OMOP CDM v5.4** — observational analytics
+    - **HealthDCAT-AP 2.1** — dataset catalogue metadata
+    - **GDPR Art. 15–22** — patient data rights
+    - **ODRL 2.2** — policy expressions
+
+    All routes are Next.js 14 App Router handlers under `ui/src/app/api/`.
+    In the static GitHub Pages export the API folder is renamed away by the
+    workflow and requests fall back to fixtures in `ui/public/mock/*.json`
+    via `fetchApi()` in `ui/src/lib/api.ts`.
+  contact:
+    name: MVHDv2 Maintainers
+    url: https://github.com/ma3u/MinimumViableHealthDataspacev2
+  license:
+    name: Apache-2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
+servers:
+  - url: http://localhost:3000
+    description: Local dev (Next.js)
+  - url: https://mvhd-ui.blackforest-0a04f26e.westeurope.azurecontainerapps.io
+    description: Azure Dev (ACA, Mon–Fri 07:00–20:00 Europe/Berlin per ADR-016)
+  - url: https://ma3u.github.io/MinimumViableHealthDataspacev2
+    description: GitHub Pages static export (mock JSON fixtures)
+
+tags:
+  - name: Health
+  - name: Catalog
+  - name: Graph
+  - name: Patient
+  - name: Compliance
+  - name: Credentials
+  - name: Negotiations
+  - name: Transfers
+  - name: Assets
+  - name: Participants
+  - name: Tasks
+  - name: Trust Center
+  - name: Federated
+  - name: NLQ
+  - name: EEHRxF
+  - name: Analytics
+  - name: ODRL
+  - name: Admin
+
+components:
+  securitySchemes:
+    nextAuthSession:
+      type: apiKey
+      in: cookie
+      name: next-auth.session-token
+      description: |
+        NextAuth.js session cookie issued by Keycloak (realm `edcv`).
+        Sign in via the UI at `/auth/signin` to obtain it.
+
+  schemas:
+    Error:
+      type: object
+      required: [error]
+      properties:
+        error: { type: string }
+    Health:
+      type: object
+      properties:
+        status: { type: string, enum: [ok, degraded, down] }
+        neo4j: { type: boolean }
+        keycloak: { type: boolean }
+        timestamp: { type: string, format: date-time }
+    GraphResponse:
+      type: object
+      properties:
+        nodes:
+          type: array
+          items: { $ref: "#/components/schemas/GraphNode" }
+        edges:
+          type: array
+          items: { $ref: "#/components/schemas/GraphEdge" }
+        meta:
+          type: object
+          properties:
+            layer: { type: string }
+            totalNodes: { type: integer }
+            totalEdges: { type: integer }
+    GraphNode:
+      type: object
+      properties:
+        id: { type: string }
+        label: { type: string }
+        layer: { type: string, enum: [l1, l2, l3, l4, l5] }
+        properties: { type: object, additionalProperties: true }
+    GraphEdge:
+      type: object
+      properties:
+        id: { type: string }
+        source: { type: string }
+        target: { type: string }
+        type: { type: string }
+    HealthDataset:
+      type: object
+      required: [id, title]
+      properties:
+        id: { type: string }
+        title: { type: string }
+        description: { type: string }
+        publisher: { type: string }
+        license: { type: string, format: uri }
+        datasetType: { type: string, format: uri }
+        legalBasis: { type: string }
+        recordCount: { type: integer }
+        personalData: { type: boolean }
+        sensitiveData: { type: boolean }
+        purpose: { type: string }
+        populationCoverage: { type: string }
+        conformsTo:
+          type: array
+          items: { type: string, format: uri }
+    Patient:
+      type: object
+      properties:
+        id: { type: string }
+        resourceId: { type: string }
+        name: { type: string }
+        birthDate: { type: string, format: date }
+        gender: { type: string }
+        city: { type: string }
+        country: { type: string }
+    PatientProfile:
+      type: object
+      properties:
+        patient: { $ref: "#/components/schemas/Patient" }
+        encounters: { type: array, items: { type: object } }
+        conditions: { type: array, items: { type: object } }
+        observations: { type: array, items: { type: object } }
+        medications: { type: array, items: { type: object } }
+    Participant:
+      type: object
+      required: [id, displayName]
+      properties:
+        id: { type: string }
+        displayName: { type: string }
+        organization: { type: string }
+        role:
+          type: string
+          enum:
+            [
+              DATA_HOLDER,
+              DATA_USER,
+              HDAB_AUTHORITY,
+              EDC_ADMIN,
+              PATIENT,
+              TRUST_CENTER_OPERATOR,
+              EDC_USER_PARTICIPANT,
+            ]
+        ehdsParticipantType: { type: string }
+        did: { type: string }
+    NegotiationRequest:
+      type: object
+      required: [participantId, counterPartyAddress, assetId]
+      properties:
+        participantId: { type: string }
+        counterPartyAddress: { type: string }
+        counterPartyId: { type: string }
+        providerDid: { type: string }
+        offerId: { type: string }
+        assetId: { type: string }
+        policyId: { type: string }
+    Negotiation:
+      type: object
+      properties:
+        "@id": { type: string }
+        "@type": { type: string }
+        state:
+          type: string
+          enum:
+            [
+              INITIAL,
+              REQUESTING,
+              REQUESTED,
+              OFFERED,
+              ACCEPTING,
+              ACCEPTED,
+              AGREEING,
+              AGREED,
+              FINALIZING,
+              FINALIZED,
+              TERMINATED,
+            ]
+        contractId: { type: string }
+        counterPartyAddress: { type: string }
+    TransferRequest:
+      type: object
+      required: [participantId, contractId, counterPartyAddress]
+      properties:
+        participantId: { type: string }
+        contractId: { type: string }
+        counterPartyAddress: { type: string }
+        assetId: { type: string }
+        transferType:
+          type: string
+          enum: [HttpData-PULL, HttpData-PUSH]
+    TransferProcess:
+      type: object
+      properties:
+        "@id": { type: string }
+        "@type": { type: string }
+        state: { type: string }
+        contractId: { type: string }
+        assetId: { type: string }
+        transferType: { type: string }
+        counterPartyAddress: { type: string }
+    Asset:
+      type: object
+      required: [participantId, assetId, name]
+      properties:
+        participantId: { type: string }
+        assetId: { type: string }
+        name: { type: string }
+        description: { type: string }
+        contentType: { type: string }
+        dataAddress:
+          type: object
+          properties:
+            "@type": { type: string }
+            type: { type: string }
+            baseUrl: { type: string }
+    Credential:
+      type: object
+      properties:
+        id: { type: string }
+        type:
+          type: array
+          items: { type: string }
+        issuer: { type: string }
+        credentialSubject: { type: object }
+        issuanceDate: { type: string, format: date-time }
+        proof: { type: object }
+    OdrlPolicy:
+      type: object
+      properties:
+        "@id": { type: string }
+        "@type": { type: string }
+        policy:
+          type: object
+          properties:
+            "@type": { type: string, enum: [Set, Offer, Agreement] }
+            permission: { type: array, items: { type: object } }
+            prohibition: { type: array, items: { type: object } }
+            obligation: { type: array, items: { type: object } }
+    Task:
+      type: object
+      properties:
+        id: { type: string }
+        title: { type: string }
+        kind: { type: string, enum: [negotiation, transfer] }
+        state: { type: string }
+        participantId: { type: string }
+        updatedAt: { type: string, format: date-time }
+    AuditEntry:
+      type: object
+      properties:
+        id: { type: string }
+        timestamp: { type: string, format: date-time }
+        action: { type: string }
+        actor: { type: string }
+        target: { type: string }
+        outcome: { type: string }
+    Component:
+      type: object
+      properties:
+        name: { type: string }
+        kind: { type: string }
+        version: { type: string }
+        url: { type: string }
+        health: { type: string, enum: [up, down, degraded] }
+
+  parameters:
+    ParticipantId:
+      name: participantId
+      in: query
+      schema: { type: string }
+    PatientId:
+      name: patientId
+      in: query
+      required: true
+      schema: { type: string }
+
+  responses:
+    Unauthorized:
+      description: Missing or invalid session
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+    Forbidden:
+      description: Authenticated but missing required role
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+
+security:
+  - nextAuthSession: []
+
+paths:
+  /api/health:
+    get:
+      tags: [Health]
+      summary: Liveness probe
+      security: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Health" }
+
+  /api/catalog:
+    get:
+      tags: [Catalog]
+      summary: List HealthDCAT-AP datasets
+      responses:
+        "200":
+          description: Dataset list
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/HealthDataset" }
+    post:
+      tags: [Catalog]
+      summary: Create HealthDCAT-AP dataset
+      description: Requires DATA_HOLDER or EDC_ADMIN role.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/HealthDataset" }
+      responses:
+        "201": { description: Dataset created }
+        "400": { description: id and title are required }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+    delete:
+      tags: [Catalog]
+      summary: Delete dataset
+      parameters:
+        - name: id
+          in: query
+          required: true
+          schema: { type: string }
+      responses:
+        "204": { description: Deleted }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /api/graph:
+    get:
+      tags: [Graph]
+      summary: Load 5-layer knowledge graph
+      parameters:
+        - name: layer
+          in: query
+          schema: { type: string, enum: [all, l1, l2, l3, l4, l5] }
+        - name: persona
+          in: query
+          schema: { type: string }
+        - name: limit
+          in: query
+          schema: { type: integer, default: 1000 }
+      responses:
+        "200":
+          description: Graph payload
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/GraphResponse" }
+
+  /api/graph/expand:
+    get:
+      tags: [Graph]
+      summary: Expand neighborhood around a node
+      parameters:
+        - name: id
+          in: query
+          required: true
+          schema: { type: string }
+        - name: depth
+          in: query
+          schema: { type: integer, default: 1 }
+      responses:
+        "200":
+          description: Expanded subgraph
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/GraphResponse" }
+
+  /api/graph/node:
+    get:
+      tags: [Graph]
+      summary: Fetch single node with relationships
+      parameters:
+        - name: id
+          in: query
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Node detail
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/GraphNode" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /api/graph/validate:
+    get:
+      tags: [Graph]
+      summary: Validate Neo4j schema constraints and counts
+      responses:
+        "200": { description: Validation result }
+
+  /api/patient:
+    get:
+      tags: [Patient]
+      summary: List FHIR patients
+      responses:
+        "200":
+          description: Patient list
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Patient" }
+
+  /api/patient/profile:
+    get:
+      tags: [Patient]
+      summary: Patient profile (encounters, conditions, observations, medications)
+      parameters:
+        - $ref: "#/components/parameters/PatientId"
+      responses:
+        "200":
+          description: Patient profile
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/PatientProfile" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /api/patient/insights:
+    get:
+      tags: [Patient]
+      summary: Aggregated patient insights
+      parameters:
+        - $ref: "#/components/parameters/PatientId"
+      responses:
+        "200": { description: Insight summary }
+
+  /api/patient/research:
+    get:
+      tags: [Patient]
+      summary: List research programmes for patient
+      parameters:
+        - $ref: "#/components/parameters/PatientId"
+      responses:
+        "200": { description: Programme list }
+    post:
+      tags: [Patient]
+      summary: Grant research consent (GDPR Art. 7)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [patientId, studyId]
+              properties:
+                patientId: { type: string }
+                studyId: { type: string }
+                purpose: { type: string, default: RESEARCH }
+      responses:
+        "201":
+          description: Consent created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  consentId: { type: string }
+        "400": { description: patientId and studyId are required }
+    delete:
+      tags: [Patient]
+      summary: Revoke research consent
+      parameters:
+        - $ref: "#/components/parameters/PatientId"
+        - name: studyId
+          in: query
+          required: true
+          schema: { type: string }
+      responses:
+        "204": { description: Consent revoked }
+
+  /api/compliance:
+    get:
+      tags: [Compliance]
+      summary: EHDS / GDPR / DSP / DCP compliance summary
+      responses:
+        "200": { description: Compliance status }
+
+  /api/compliance/tck:
+    get:
+      tags: [Compliance]
+      summary: DSP / DCP / EHDS test suite results
+      responses:
+        "200": { description: TCK results }
+
+  /api/credentials:
+    get:
+      tags: [Credentials]
+      summary: List W3C Verifiable Credentials
+      responses:
+        "200":
+          description: Credentials list
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Credential" }
+
+  /api/credentials/definitions:
+    get:
+      tags: [Credentials]
+      summary: List credential definitions registered with IssuerService
+      responses:
+        "200": { description: Definitions list }
+
+  /api/credentials/request:
+    post:
+      tags: [Credentials]
+      summary: Request a credential issuance
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [participantContextId, credentialType]
+              properties:
+                participantContextId: { type: string }
+                credentialType: { type: string }
+      responses:
+        "201": { description: Issuance process started }
+        "400": { description: Required fields missing }
+
+  /api/credentials/{id}:
+    delete:
+      tags: [Credentials]
+      summary: Revoke a credential
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "204": { description: Revoked }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /api/negotiations:
+    get:
+      tags: [Negotiations]
+      summary: List DSP contract negotiations
+      parameters:
+        - $ref: "#/components/parameters/ParticipantId"
+      responses:
+        "200":
+          description: Negotiation list
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Negotiation" }
+    post:
+      tags: [Negotiations]
+      summary: Initiate DSP contract negotiation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/NegotiationRequest" }
+      responses:
+        "201":
+          description: Negotiation initiated
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Negotiation" }
+        "400": { description: Required fields missing }
+
+  /api/negotiations/{id}:
+    get:
+      tags: [Negotiations]
+      summary: Fetch single negotiation
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+        - $ref: "#/components/parameters/ParticipantId"
+      responses:
+        "200":
+          description: Negotiation detail
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Negotiation" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /api/transfers:
+    get:
+      tags: [Transfers]
+      summary: List data plane transfers
+      parameters:
+        - $ref: "#/components/parameters/ParticipantId"
+      responses:
+        "200":
+          description: Transfer list
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/TransferProcess" }
+    post:
+      tags: [Transfers]
+      summary: Initiate data transfer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/TransferRequest" }
+      responses:
+        "201":
+          description: Transfer started
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/TransferProcess" }
+        "400": { description: Required fields missing }
+
+  /api/transfers/{id}:
+    get:
+      tags: [Transfers]
+      summary: Fetch single transfer
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+        - $ref: "#/components/parameters/ParticipantId"
+      responses:
+        "200":
+          description: Transfer detail
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/TransferProcess" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /api/assets:
+    get:
+      tags: [Assets]
+      summary: List EDC-V assets
+      parameters:
+        - $ref: "#/components/parameters/ParticipantId"
+      responses:
+        "200": { description: Asset list }
+    post:
+      tags: [Assets]
+      summary: Register an EDC-V asset
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/Asset" }
+      responses:
+        "201": { description: Asset registered }
+        "400": { description: participantId, assetId, name required }
+
+  /api/participants:
+    get:
+      tags: [Participants]
+      summary: List dataspace participants
+      responses:
+        "200":
+          description: Participant list
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Participant" }
+    post:
+      tags: [Participants]
+      summary: Create a new participant
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [displayName, role]
+              properties:
+                displayName: { type: string }
+                organization: { type: string }
+                role: { type: string }
+                ehdsParticipantType: { type: string }
+      responses:
+        "201":
+          description: Participant created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Participant" }
+
+  /api/participants/{id}:
+    patch:
+      tags: [Participants]
+      summary: Update a participant
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                displayName: { type: string }
+                organization: { type: string }
+      responses:
+        "200": { description: Updated }
+
+  /api/participants/me:
+    get:
+      tags: [Participants]
+      summary: Current authenticated participant profile
+      responses:
+        "200":
+          description: Profile
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Participant" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
+  /api/participants/{id}/credentials:
+    get:
+      tags: [Participants]
+      summary: List credentials for a participant
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Credentials list
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Credential" }
+
+  /api/tasks:
+    get:
+      tags: [Tasks]
+      summary: Aggregated contract negotiation + transfer task list
+      description: Scoped to the user's organisation; admins see all.
+      responses:
+        "200":
+          description: Task list
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Task" }
+
+  /api/trust-center:
+    get:
+      tags: [Trust Center]
+      summary: Trust Center operator view
+      responses:
+        "200": { description: Trust state }
+
+  /api/federated:
+    get:
+      tags: [Federated]
+      summary: Federated cross-site cohort query (k-anonymity)
+      responses:
+        "200": { description: Cohort summary }
+
+  /api/nlq:
+    get:
+      tags: [NLQ]
+      summary: List NLQ templates
+      responses:
+        "200": { description: Template list }
+    post:
+      tags: [NLQ]
+      summary: Run a Text2Cypher natural language query
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [question]
+              properties:
+                question: { type: string }
+                templateId: { type: string, default: auto }
+      responses:
+        "200": { description: NLQ result }
+        "502": { description: Proxy error }
+
+  /api/eehrxf:
+    get:
+      tags: [EEHRxF]
+      summary: EEHRxF profile catalog (Layer 2b)
+      responses:
+        "200": { description: Profile list }
+
+  /api/analytics:
+    get:
+      tags: [Analytics]
+      summary: OMOP-derived dashboard analytics
+      responses:
+        "200": { description: Dashboard data }
+
+  /api/odrl/scope:
+    get:
+      tags: [ODRL]
+      summary: Effective ODRL scope for current participant
+      responses:
+        "200": { description: Scope }
+
+  /api/admin/tenants:
+    get:
+      tags: [Admin]
+      summary: List CFM tenants (admin only)
+      responses:
+        "200": { description: Tenant list }
+        "403": { $ref: "#/components/responses/Forbidden" }
+
+  /api/admin/audit:
+    get:
+      tags: [Admin]
+      summary: Admin audit log
+      parameters:
+        - name: limit
+          in: query
+          schema: { type: integer, default: 100 }
+      responses:
+        "200":
+          description: Audit entries
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/AuditEntry" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+
+  /api/admin/components:
+    get:
+      tags: [Admin]
+      summary: System component catalog
+      responses:
+        "200":
+          description: Component list
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Component" }
+
+  /api/admin/components/topology:
+    get:
+      tags: [Admin]
+      summary: Service dependency topology graph
+      responses:
+        "200": { description: Topology graph }
+
+  /api/admin/policies:
+    get:
+      tags: [Admin]
+      summary: List ODRL policies
+      parameters:
+        - $ref: "#/components/parameters/ParticipantId"
+      responses:
+        "200":
+          description: Policy list
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/OdrlPolicy" }
+    post:
+      tags: [Admin]
+      summary: Create an ODRL policy
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [participantId, policy]
+              properties:
+                participantId: { type: string }
+                policy: { $ref: "#/components/schemas/OdrlPolicy" }
+      responses:
+        "201": { description: Policy created }
+        "400": { description: participantId and policy are required }
+        "403": { $ref: "#/components/responses/Forbidden" }
+    put:
+      tags: [Admin]
+      summary: Update an ODRL policy
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [policyId, participantId, policy]
+              properties:
+                policyId: { type: string }
+                participantId: { type: string }
+                policy: { $ref: "#/components/schemas/OdrlPolicy" }
+      responses:
+        "200": { description: Policy updated }
+        "403": { $ref: "#/components/responses/Forbidden" }
+    delete:
+      tags: [Admin]
+      summary: Delete an ODRL policy
+      parameters:
+        - name: policyId
+          in: query
+          required: true
+          schema: { type: string }
+      responses:
+        "204": { description: Deleted }
+        "403": { $ref: "#/components/responses/Forbidden" }

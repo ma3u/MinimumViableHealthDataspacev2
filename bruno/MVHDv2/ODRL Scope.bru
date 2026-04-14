@@ -1,0 +1,19 @@
+meta {
+  name: ODRL Scope
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/api/odrl/scope
+  body: none
+  auth: inherit
+}
+
+headers {
+  Accept: application/json
+}
+
+docs {
+  Effective ODRL scope for the current participant — used by NLQ + transfer routing.
+}

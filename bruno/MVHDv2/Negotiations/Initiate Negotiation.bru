@@ -1,0 +1,26 @@
+meta {
+  name: Initiate Negotiation
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/api/negotiations
+  body: json
+  auth: inherit
+}
+
+headers {
+  Content-Type: application/json
+  Accept: application/json
+}
+
+body:json {
+  "participantId": "{{participantId}}",
+  "counterPartyAddress": "http://controlplane:9290",
+  "counterPartyId": "did:web:pharmaco.de:research",
+  "providerDid": "did:web:pharmaco.de:research",
+  "offerId": "offer-001",
+  "assetId": "asset-001",
+  "policyId": "policy-001"
+}

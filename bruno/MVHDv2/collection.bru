@@ -1,0 +1,30 @@
+headers {
+  Accept: application/json
+}
+
+auth {
+  mode: none
+}
+
+docs {
+  # MVHDv2 API Collection
+
+  REST API for the Minimum Viable Health Dataspace v2 — DSP 2025-1 / DCP v1.0 /
+  FHIR R4 / OMOP CDM / HealthDCAT-AP unified in a Neo4j knowledge graph.
+
+  ## Authentication
+
+  Most routes require a NextAuth session cookie (Keycloak OIDC, realm `edcv`).
+  In the `Local` environment you must first sign in via the UI at
+  `{{baseUrl}}/auth/signin` so that `next-auth.session-token` is set in the
+  cookie jar Bruno shares with the browser.
+
+  Static-mode routes (under the `Static-mock` environment) bypass auth and
+  serve fixtures from `ui/public/mock/*.json` — no sign-in required.
+
+  ## Environments
+
+  - **Local**     — `http://localhost:3000` (NextAuth + Keycloak + Neo4j running locally)
+  - **Static-mock** — `https://ma3u.github.io/MinimumViableHealthDataspacev2` (GitHub Pages, mock JSON)
+  - **Azure-Dev** — `https://mvhd-ui.blackforest-...azurecontainerapps.io` (live ACA stack)
+}

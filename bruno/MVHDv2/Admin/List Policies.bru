@@ -1,0 +1,19 @@
+meta {
+  name: List Policies
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{baseUrl}}/api/admin/policies?participantId={{participantId}}
+  body: none
+  auth: inherit
+}
+
+headers {
+  Accept: application/json
+}
+
+docs {
+  ODRL access policies, scoped to the given participant when provided.
+}

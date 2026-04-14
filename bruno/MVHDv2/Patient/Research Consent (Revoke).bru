@@ -1,0 +1,15 @@
+meta {
+  name: Research Consent (Revoke)
+  type: http
+  seq: 6
+}
+
+delete {
+  url: {{baseUrl}}/api/patient/research?patientId={{patientId}}&studyId={{studyId}}
+  body: none
+  auth: inherit
+}
+
+headers {
+  Accept: application/json
+}

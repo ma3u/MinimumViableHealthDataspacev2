@@ -1,0 +1,19 @@
+meta {
+  name: Tasks
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/api/tasks
+  body: none
+  auth: inherit
+}
+
+headers {
+  Accept: application/json
+}
+
+docs {
+  Aggregated contract negotiation + transfer pipeline tasks (scoped to user organisation).
+}

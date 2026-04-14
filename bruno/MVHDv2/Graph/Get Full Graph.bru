@@ -1,0 +1,19 @@
+meta {
+  name: Get Full Graph
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/api/graph?layer=all&persona=edc-admin&limit=1000
+  body: none
+  auth: inherit
+}
+
+headers {
+  Accept: application/json
+}
+
+docs {
+  Returns nodes + edges for the 5-layer knowledge graph. Filterable by layer (l1..l5) and persona.
+}

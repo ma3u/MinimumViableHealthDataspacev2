@@ -1,0 +1,19 @@
+meta {
+  name: Trust Center
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/api/trust-center
+  body: none
+  auth: inherit
+}
+
+headers {
+  Accept: application/json
+}
+
+docs {
+  Trust Center operator view — DID resolution, certificate status, attestation chain.
+}

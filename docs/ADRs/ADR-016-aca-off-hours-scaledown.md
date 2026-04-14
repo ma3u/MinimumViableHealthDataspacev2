@@ -78,8 +78,16 @@ Comfortable 36% margin under the 50 EUR credit.
   Users hitting the URL at 07:00 sharp may see 502s for up to ~2 minutes. Workflow
   waits for `mvhd-ui` HTTP 200 before declaring success.
 - **Vault re-bootstrap required every morning**: Vault is in-memory (gotcha #1). The
-  start workflow must re-run `mvhd-bootstrap-job` before the UI is usable. Adds ~30 s
+  start workflow must re-run `mvhd-vault-bootstrap` before the UI is usable. Adds ~30 s
   to morning startup.
+- ~~**Neo4j is ephemeral on ACA and must be re-seeded every morning**~~ —
+  **Superseded by [ADR-017](ADR-017-persistent-storage-aca.md).** The
+  `mvhd-neo4j` Container App now mounts Azure Files at `/data` and `/logs`,
+  so the knowledge graph survives revision restarts and the morning scale-up
+  no longer wipes the database. The seed job runs as a one-time bootstrap
+  rather than a daily re-population. The seed job talks to Neo4j via Bolt
+  (cypher-shell) on port 7687, so the `mvhd-neo4j` ingress only needs
+  `transport: Tcp, targetPort: 7687` — no `additionalPortMappings` required.
 - **DST drift**: GitHub Actions cron is UTC-only. 18:00 UTC = 20:00 Europe/Berlin
   in summer (CEST), 19:00 local in winter (CET). Same ±1 h drift as ADR-014.
 - **Accidental manual scaling**: if a contributor manually scales an app during the
@@ -98,4 +106,6 @@ job. The VM fallback in ADR-015 remains provisioned as an option.
 - Team deployment: [ADR-012: Azure Container Apps](ADR-012-azure-container-apps.md)
 - Weekly reset: [ADR-014: Weekly Demo Reset](ADR-014-weekly-demo-reset.md)
 - VM fallback: [ADR-015: Single-VM Dev Deployment](ADR-015-single-vm-dev-deployment.md)
-- Vault-in-memory constraint: `CLAUDE.md` gotcha #1
+- Vault-in-memory constraint: `CLAUDE.md` gotcha #1 — **resolution pending in [ADR-017](ADR-017-persistent-storage-aca.md)** (Vault file backend on Azure Files)
+- Neo4j ephemeral on ACA: **resolved by [ADR-017](ADR-017-persistent-storage-aca.md)** — Azure Files volumes mounted at `/data` and `/logs`
+- Persistent storage decision: [ADR-017: Persistent Storage for Stateful Services on ACA](ADR-017-persistent-storage-aca.md)

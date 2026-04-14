@@ -1,0 +1,19 @@
+meta {
+  name: Research Programmes (List)
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{baseUrl}}/api/patient/research?patientId={{patientId}}
+  body: none
+  auth: inherit
+}
+
+headers {
+  Accept: application/json
+}
+
+docs {
+  Research programmes the patient is enrolled in or eligible for.
+}

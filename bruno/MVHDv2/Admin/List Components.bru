@@ -1,0 +1,19 @@
+meta {
+  name: List Components
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseUrl}}/api/admin/components
+  body: none
+  auth: inherit
+}
+
+headers {
+  Accept: application/json
+}
+
+docs {
+  System component catalog with health and version.
+}

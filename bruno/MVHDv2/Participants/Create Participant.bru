@@ -1,0 +1,23 @@
+meta {
+  name: Create Participant
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/api/participants
+  body: json
+  auth: inherit
+}
+
+headers {
+  Content-Type: application/json
+  Accept: application/json
+}
+
+body:json {
+  "displayName": "Limburg Medical Centre",
+  "organization": "Limburg Medical Centre",
+  "role": "DATA_HOLDER",
+  "ehdsParticipantType": "HealthcareProvider"
+}

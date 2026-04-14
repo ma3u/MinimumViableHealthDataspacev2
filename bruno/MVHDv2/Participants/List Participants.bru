@@ -1,0 +1,15 @@
+meta {
+  name: List Participants
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/api/participants
+  body: none
+  auth: inherit
+}
+
+headers {
+  Accept: application/json
+}

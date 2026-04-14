@@ -1,0 +1,15 @@
+meta {
+  name: Delete Policy
+  type: http
+  seq: 8
+}
+
+delete {
+  url: {{baseUrl}}/api/admin/policies?policyId=policy:research:diabetes:001
+  body: none
+  auth: inherit
+}
+
+headers {
+  Accept: application/json
+}
