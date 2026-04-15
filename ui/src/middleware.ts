@@ -1,32 +1,50 @@
-import { withAuth } from "next-auth/middleware";
-import { NextResponse } from "next/server";
+import { NextResponse, type NextRequest } from "next/server";
+import { getToken } from "next-auth/jwt";
 
 /**
  * Role-based route protection + per-request Content-Security-Policy.
  *
- * Route rules:
+ * IMPORTANT: we do NOT wrap this in `withAuth()` from next-auth/middleware.
+ * `withAuth` intercepts the response and rebuilds it internally, which strips
+ * the `request: { headers }` option we pass to `NextResponse.next()`. That
+ * option is how Next.js 15 discovers our per-request nonce and injects it
+ * into its own streaming `<script>` tags. Without it, every framework inline
+ * script is blocked by our CSP. So we do the auth check manually via
+ * `getToken()` and fully own the response chain.
+ *
+ * Route rules (auth required):
  *   /admin/*                   → requires EDC_ADMIN
  *   /compliance                → requires HDAB_AUTHORITY or EDC_ADMIN
  *   /patient/profile           → requires PATIENT or EDC_ADMIN
  *   /patient/research          → requires PATIENT or EDC_ADMIN
  *   /patient/insights          → requires PATIENT or EDC_ADMIN
- *   /onboarding/*              → requires authenticated (any role)
- *   /credentials               → requires authenticated (any role)
- *   /settings                  → requires authenticated (any role)
- *   /data/*                    → requires authenticated (any role)
- *   /negotiate                 → requires authenticated (any role)
- *   /patient (index), /graph   → public (no auth required)
- *   All other UI               → public (no auth required)
+ *   /onboarding/*              → any authenticated
+ *   /credentials               → any authenticated
+ *   /settings                  → any authenticated
+ *   /data/*                    → any authenticated
+ *   /negotiate                 → any authenticated
+ *   All other UI routes        → public (CSP still applied)
  *
  * CSP:
  *   Every HTML response gets a per-request nonce so we can drop
- *   'unsafe-inline' from script-src. Next.js automatically propagates
- *   the nonce to its framework scripts when it reads the `x-nonce`
- *   request header we set below. style-src-attr still needs
- *   'unsafe-inline' for React's `style={}` prop (CSP3 separation).
- *
- * API routes (/api/*) are excluded — they handle auth internally.
+ *   'unsafe-inline' from script-src. Next.js automatically propagates the
+ *   nonce to its framework scripts when it reads the `Content-Security-Policy`
+ *   REQUEST header we set on the forwarded request. style-src-attr still
+ *   needs 'unsafe-inline' for React's `style={}` prop (CSP3 separation).
  */
+
+const PROTECTED_PATHS = [
+  "/admin",
+  "/compliance",
+  "/onboarding",
+  "/credentials",
+  "/settings",
+  "/data",
+  "/negotiate",
+  "/patient/profile",
+  "/patient/research",
+  "/patient/insights",
+] as const;
 
 function generateNonce(): string {
   // Edge runtime has globalThis.crypto
@@ -46,11 +64,10 @@ function buildCsp(nonce: string, isDev: boolean): string {
   return [
     `default-src 'self'`,
     `script-src ${scriptSrc}`,
-    `script-src-elem 'self' 'nonce-${nonce}'`,
-    // style-src-elem blocks unnonced <style> tags; style-src-attr
-    // still allows React inline style attributes (CSP3 split).
-    `style-src 'self' 'nonce-${nonce}'`,
-    `style-src-elem 'self' 'nonce-${nonce}' 'unsafe-inline'`,
+    // script-src-elem falls back to script-src when omitted, so we don't
+    // set it — keeping one source of truth avoids divergence where the elem
+    // directive is stricter than the parent and blocks nonced inline scripts.
+    `style-src 'self' 'nonce-${nonce}' 'unsafe-inline'`,
     `style-src-attr 'unsafe-inline'`,
     `img-src 'self' data: blob:`,
     `font-src 'self' data:`,
@@ -65,102 +82,75 @@ function buildCsp(nonce: string, isDev: boolean): string {
   ].join("; ");
 }
 
-function applyCspHeaders(req: Request, res: NextResponse): NextResponse {
+function requiresRole(pathname: string): string[] | null {
+  if (pathname.startsWith("/admin")) return ["EDC_ADMIN"];
+  if (pathname.startsWith("/compliance"))
+    return ["HDAB_AUTHORITY", "EDC_ADMIN"];
+  if (
+    pathname.startsWith("/patient/profile") ||
+    pathname.startsWith("/patient/research") ||
+    pathname.startsWith("/patient/insights")
+  ) {
+    return ["PATIENT", "EDC_ADMIN"];
+  }
+  return null;
+}
+
+function isProtected(pathname: string): boolean {
+  return PROTECTED_PATHS.some((p) => pathname.startsWith(p));
+}
+
+export default async function middleware(req: NextRequest) {
   const nonce = generateNonce();
   const isDev = process.env.NODE_ENV !== "production";
   const csp = buildCsp(nonce, isDev);
+  const { pathname } = req.nextUrl;
 
-  // Propagate nonce to the request so server components can read it
-  // via `headers().get('x-nonce')` and pass it to <Script nonce>.
-  const reqHeaders = new Headers(req.headers);
-  reqHeaders.set("x-nonce", nonce);
-
-  // Rebuild the response with forwarded request headers (Next.js trick
-  // for middleware-to-server-component data passing).
-  const forwarded = NextResponse.next({ request: { headers: reqHeaders } });
-  // Copy any auth-related headers (redirects etc.) from the upstream response.
-  res.headers.forEach((value, key) => forwarded.headers.set(key, value));
-  forwarded.headers.set("Content-Security-Policy", csp);
-  return forwarded;
-}
-
-export default withAuth(
-  function middleware(req) {
-    const { pathname } = req.nextUrl;
-    const roles = (req.nextauth.token?.roles as string[]) ?? [];
-
-    // /admin/* requires EDC_ADMIN
-    if (pathname.startsWith("/admin") && !roles.includes("EDC_ADMIN")) {
-      return applyCspHeaders(
-        req,
-        NextResponse.redirect(new URL("/auth/unauthorized", req.url)),
-      );
+  // Auth gate for protected routes.
+  if (isProtected(pathname)) {
+    const token = await getToken({ req });
+    if (!token) {
+      const signInUrl = new URL("/auth/signin", req.url);
+      signInUrl.searchParams.set("callbackUrl", req.url);
+      return withCspResponse(NextResponse.redirect(signInUrl), csp, nonce);
     }
-
-    // /compliance requires HDAB_AUTHORITY or EDC_ADMIN
-    if (
-      pathname.startsWith("/compliance") &&
-      !roles.includes("HDAB_AUTHORITY") &&
-      !roles.includes("EDC_ADMIN")
-    ) {
-      return applyCspHeaders(
-        req,
-        NextResponse.redirect(new URL("/auth/unauthorized", req.url)),
-      );
-    }
-
-    // /patient/profile|research|insights require PATIENT or EDC_ADMIN (GDPR Art. 15-22)
-    const patientSubRoutes = [
-      "/patient/profile",
-      "/patient/research",
-      "/patient/insights",
-    ];
-    if (patientSubRoutes.some((p) => pathname.startsWith(p))) {
-      if (!roles.includes("PATIENT") && !roles.includes("EDC_ADMIN")) {
-        return applyCspHeaders(
-          req,
+    const required = requiresRole(pathname);
+    if (required) {
+      const roles = (token.roles as string[] | undefined) ?? [];
+      if (!required.some((r) => roles.includes(r))) {
+        return withCspResponse(
           NextResponse.redirect(new URL("/auth/unauthorized", req.url)),
+          csp,
+          nonce,
         );
       }
     }
+  }
 
-    return applyCspHeaders(req, NextResponse.next());
-  },
-  {
-    callbacks: {
-      authorized: ({ token, req }) => {
-        const { pathname } = req.nextUrl;
+  // Forward the nonce via request headers so Next.js injects it into
+  // framework inline scripts (streaming RSC payload).
+  const reqHeaders = new Headers(req.headers);
+  reqHeaders.set("x-nonce", nonce);
+  reqHeaders.set("Content-Security-Policy", csp);
 
-        // Protected routes require authentication
-        const protectedPaths = [
-          "/admin",
-          "/compliance",
-          "/onboarding",
-          "/credentials",
-          "/settings",
-          "/data",
-          "/negotiate",
-          "/patient/profile",
-          "/patient/research",
-          "/patient/insights",
-        ];
-        const isProtected = protectedPaths.some((p) => pathname.startsWith(p));
+  const res = NextResponse.next({ request: { headers: reqHeaders } });
+  res.headers.set("Content-Security-Policy", csp);
+  return res;
+}
 
-        if (isProtected) {
-          return !!token;
-        }
-
-        // All other routes are public (CSP middleware still runs)
-        return true;
-      },
-    },
-  },
-);
+function withCspResponse(
+  res: NextResponse,
+  csp: string,
+  _nonce: string,
+): NextResponse {
+  res.headers.set("Content-Security-Policy", csp);
+  return res;
+}
 
 export const config = {
   // Run on every route except API routes, Next.js static assets, and
   // mock JSON fixtures. CSP is applied to HTML responses; auth checks
-  // only fire on the `protectedPaths` list above.
+  // only fire on the PROTECTED_PATHS list.
   matcher: [
     "/((?!api|_next/static|_next/image|favicon.ico|swagger-ui|mock|static).*)",
   ],

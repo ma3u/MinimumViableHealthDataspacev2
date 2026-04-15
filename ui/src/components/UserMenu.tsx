@@ -89,13 +89,19 @@ function switchPersona(
   username: string,
   _personaId: string,
   onClose: () => void,
+  keycloakConfig: { publicUrl: string; clientId: string } | null,
 ) {
   onClose();
-  const keycloakPublicUrl =
-    process.env.NEXT_PUBLIC_KEYCLOAK_PUBLIC_URL ??
-    "http://localhost:8080/realms/edcv";
-  const clientId =
-    process.env.NEXT_PUBLIC_KEYCLOAK_CLIENT_ID ?? "health-dataspace-ui";
+  // Fall back to same-origin "/" if the runtime config hasn't loaded yet —
+  // never bake in localhost since this code runs in the browser against the
+  // production deployment.
+  const keycloakPublicUrl = keycloakConfig?.publicUrl;
+  const clientId = keycloakConfig?.clientId ?? "health-dataspace-ui";
+  if (!keycloakPublicUrl) {
+    // Config not loaded yet — fall back to plain NextAuth signOut.
+    signOut({ callbackUrl: "/auth/switch" });
+    return;
+  }
   // Store the target username so we can pass it as login_hint after logout
   sessionStorage.setItem("switch_to_user", username);
   // Mark this tab as intentionally switching — clears the session snapshot
@@ -146,6 +152,13 @@ export default function UserMenu() {
     : tabStatus;
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+  // Runtime Keycloak config — fetched once on mount from /api/auth/keycloak-config.
+  // We can't use NEXT_PUBLIC_* env vars because they're baked in at `npm run build`
+  // time inside the Docker image and our build doesn't pass them as build args.
+  const [keycloakConfig, setKeycloakConfig] = useState<{
+    publicUrl: string;
+    clientId: string;
+  } | null>(null);
 
   useEffect(() => {
     function handleClick(e: MouseEvent) {
@@ -155,6 +168,22 @@ export default function UserMenu() {
     }
     document.addEventListener("mousedown", handleClick);
     return () => document.removeEventListener("mousedown", handleClick);
+  }, []);
+
+  useEffect(() => {
+    if (IS_STATIC) return;
+    let cancelled = false;
+    fetch("/api/keycloak-config")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((cfg) => {
+        if (!cancelled && cfg) setKeycloakConfig(cfg);
+      })
+      .catch(() => {
+        /* leave null — sign-out falls back to NextAuth-only */
+      });
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   if (status === "loading") {
@@ -416,8 +445,11 @@ export default function UserMenu() {
                         setDemoPersona(persona.username);
                         setOpen(false);
                       } else {
-                        switchPersona(persona.username, persona.personaId, () =>
-                          setOpen(false),
+                        switchPersona(
+                          persona.username,
+                          persona.personaId,
+                          () => setOpen(false),
+                          keycloakConfig,
                         );
                       }
                     }}
@@ -468,15 +500,12 @@ export default function UserMenu() {
                   clearDemoPersona();
                   return;
                 }
-                const keycloakPublicUrl =
-                  process.env.NEXT_PUBLIC_KEYCLOAK_PUBLIC_URL;
-                const logoutUrl = keycloakPublicUrl
-                  ? `${keycloakPublicUrl}/protocol/openid-connect/logout?post_logout_redirect_uri=${encodeURIComponent(
+                const logoutUrl = keycloakConfig?.publicUrl
+                  ? `${
+                      keycloakConfig.publicUrl
+                    }/protocol/openid-connect/logout?post_logout_redirect_uri=${encodeURIComponent(
                       window.location.origin,
-                    )}&client_id=${
-                      process.env.NEXT_PUBLIC_KEYCLOAK_CLIENT_ID ??
-                      "health-dataspace-ui"
-                    }`
+                    )}&client_id=${keycloakConfig.clientId}`
                   : undefined;
                 signOut({ callbackUrl: logoutUrl ?? "/" });
               }}
