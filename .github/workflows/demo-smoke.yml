@@ -1,0 +1,99 @@
+# ---------------------------------------------------------------------------
+# Demo Smoke — ehds.mabu.red
+# ---------------------------------------------------------------------------
+# Health checks for the public Azure demo:
+#   - Bruno API suite (Azure-Dev env, 49 requests)
+#   - Playwright public-route smoke (no auth)
+#   - ZAP baseline (anonymous)
+#
+# Triggers:
+#   - Daily 06:00 UTC
+#   - Push to main when UI or workflows change
+#   - Manual dispatch
+# ---------------------------------------------------------------------------
+name: Demo Smoke
+
+on:
+  schedule:
+    - cron: "0 6 * * *"
+  push:
+    branches: [main]
+    paths:
+      - "ui/**"
+      - "bruno/**"
+      - ".github/workflows/demo-smoke.yml"
+  workflow_dispatch:
+
+env:
+  DEMO_URL: https://ehds.mabu.red
+
+jobs:
+  bruno:
+    name: Bruno API (Azure-Dev)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Run Bruno Azure-Dev collection
+        run: |
+          chmod +x scripts/run-api-tests.sh
+          BRUNO_REPORT_DIR=bruno-report ./scripts/run-api-tests.sh Azure-Dev
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: bruno-azure-dev
+          path: bruno-report/
+          retention-days: 14
+
+  playwright-public:
+    name: Playwright public routes
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: ui
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: ui/package-lock.json
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Smoke against ${{ env.DEMO_URL }}
+        env:
+          PLAYWRIGHT_BASE_URL: ${{ env.DEMO_URL }}
+        run: npx playwright test __tests__/e2e/smoke.spec.ts --project=chromium
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-public
+          path: ui/playwright-report/
+          retention-days: 14
+
+  zap-baseline:
+    name: ZAP baseline (anonymous)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: ZAP baseline scan
+        uses: zaproxy/action-baseline@v0.13.0
+        with:
+          target: ${{ env.DEMO_URL }}
+          cmd_options: "-m 2"
+          fail_action: false
+          allow_issue_writing: false
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: zap-baseline
+          path: |
+            report_html.html
+            report_json.json
+            report_md.md
+          retention-days: 30

@@ -19,7 +19,7 @@ for CI runs.
    - **Local** — `http://localhost:3000` (NextAuth + Keycloak + Neo4j running locally)
    - **Static-mock** — `https://ma3u.github.io/MinimumViableHealthDataspacev2`
      (GitHub Pages static export, mock JSON, no auth)
-   - **Azure-Dev** — `https://mvhd-ui.blackforest-0a04f26e.westeurope.azurecontainerapps.io`
+   - **Azure-Dev** — `https://ehds.mabu.red`
      (live ACA stack — only reachable Mon–Fri 07:00–20:00 Europe/Berlin per ADR-016)
 
 ## Authentication

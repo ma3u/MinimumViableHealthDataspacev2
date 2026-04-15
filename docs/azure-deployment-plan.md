@@ -851,7 +851,7 @@ resource controlplane 'Microsoft.App/containerApps@2024-03-01' = {
 
 | App                  | Image                                            | Ingress      | FQDN                                                                                |
 | -------------------- | ------------------------------------------------ | ------------ | ----------------------------------------------------------------------------------- |
-| `mvhd-ui`            | `acrmvhddev.azurecr.io/mvhd-ui:latest`           | **External** | `mvhd-ui.blackforest-0a04f26e.westeurope.azurecontainerapps.io`                     |
+| `mvhd-ui`            | `acrmvhddev.azurecr.io/mvhd-ui:latest`           | **External** | `ehds.mabu.red`                                                                     |
 | `mvhd-keycloak`      | `acrmvhddev.azurecr.io/keycloak:latest`          | **External** | `mvhd-keycloak.blackforest-0a04f26e.westeurope.azurecontainerapps.io`               |
 | `mvhd-neo4j`         | `acrmvhddev.azurecr.io/neo4j:5-community`        | Internal     | `mvhd-neo4j.internal.blackforest-0a04f26e.westeurope.azurecontainerapps.io`         |
 | `mvhd-neo4j-proxy`   | `acrmvhddev.azurecr.io/mvhd-neo4j-proxy:latest`  | Internal     | `mvhd-neo4j-proxy.internal.blackforest-0a04f26e.westeurope.azurecontainerapps.io`   |
@@ -869,7 +869,7 @@ resource controlplane 'Microsoft.App/containerApps@2024-03-01' = {
 
 | Endpoint         | URL                                                                         | Purpose                                   |
 | ---------------- | --------------------------------------------------------------------------- | ----------------------------------------- |
-| **UI**           | https://mvhd-ui.blackforest-0a04f26e.westeurope.azurecontainerapps.io       | Next.js 14 application — main entry point |
+| **UI**           | https://ehds.mabu.red                                                       | Next.js 14 application — main entry point |
 | **Keycloak**     | https://mvhd-keycloak.blackforest-0a04f26e.westeurope.azurecontainerapps.io | OIDC provider (realm: `edcv`)             |
 | **GitHub Pages** | https://ma3u.github.io/MinimumViableHealthDataspacev2/                      | Static export (demo/docs)                 |
 
@@ -974,7 +974,7 @@ No custom domain is currently configured. The deployment uses Azure-provided FQD
 1. **DNS Configuration** — Add these DNS records for your domain (e.g., `mvhd.example.com`):
 
    ```
-   CNAME  ui.mvhd.example.com       → mvhd-ui.blackforest-0a04f26e.westeurope.azurecontainerapps.io
+   CNAME  ui.mvhd.example.com       → ehds.mabu.red
    CNAME  auth.mvhd.example.com     → mvhd-keycloak.blackforest-0a04f26e.westeurope.azurecontainerapps.io
    TXT    asuid.ui.mvhd.example.com → 638D1E3BB51AAF53AC9FC4D1D45EC8FBBA81B180CD2D39417A068E8BD2A85828
    ```

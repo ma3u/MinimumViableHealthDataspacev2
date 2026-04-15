@@ -29,8 +29,7 @@ import {
 } from "lucide-react";
 
 const LIVE_URL = "https://ma3u.github.io/MinimumViableHealthDataspacev2";
-const AZURE_URL =
-  "https://mvhd-ui.blackforest-0a04f26e.westeurope.azurecontainerapps.io";
+const AZURE_URL = "https://ehds.mabu.red";
 
 const FULL_JOURNEY_URL =
   "https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docs/FULL_USER_JOURNEY.md";

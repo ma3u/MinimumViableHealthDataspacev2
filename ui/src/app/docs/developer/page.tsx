@@ -1688,7 +1688,7 @@ PLAYWRIGHT_BASE_URL=http://localhost:3003 \\
             Releases <ExternalLink size={12} />
           </a>
           <a
-            href="https://mvhd-ui.blackforest-0a04f26e.westeurope.azurecontainerapps.io"
+            href="https://ehds.mabu.red"
             target="_blank"
             rel="noopener noreferrer"
             className="text-sm text-indigo-700 dark:text-indigo-400 hover:text-indigo-900 dark:hover:text-indigo-300 underline inline-flex items-center gap-1"

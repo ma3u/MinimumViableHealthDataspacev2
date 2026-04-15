@@ -113,7 +113,7 @@ cd MinimumViableHealthDataspacev2
 
 | Service            | URL                                                                                                                      | Purpose                                    |
 | ------------------ | ------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------ |
-| **UI**             | https://mvhd-ui.blackforest-0a04f26e.westeurope.azurecontainerapps.io                                                    | Next.js 14 application — main entry point  |
+| **UI**             | https://ehds.mabu.red                                                                                                    | Next.js 14 application — main entry point  |
 | **Keycloak**       | https://mvhd-keycloak.blackforest-0a04f26e.westeurope.azurecontainerapps.io                                              | OIDC provider, realm: `edcv`               |
 | **Keycloak Admin** | https://mvhd-keycloak.blackforest-0a04f26e.westeurope.azurecontainerapps.io/admin/                                       | Admin console (user: `admin`, pw: `admin`) |
 | **Keycloak OIDC**  | https://mvhd-keycloak.blackforest-0a04f26e.westeurope.azurecontainerapps.io/realms/edcv/.well-known/openid-configuration | OIDC discovery document                    |

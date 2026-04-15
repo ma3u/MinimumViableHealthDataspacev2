@@ -379,10 +379,15 @@ run_issuer_tests() {
   # 4.1 — Issuer service health check
   local test_id="ISS-4.1"
   local http_code
-  # Default API port 10010 is not exposed; use docker exec
-  http_code=$(docker exec health-dataspace-issuerservice \
-    curl -s -o /dev/null -w "%{http_code}" \
-    "http://localhost:10010/api/check/readiness" 2>/dev/null) || http_code="000"
+  # Default API port 10010 is not exposed on ACA; probe via admin API under
+  # DEMO_MODE=azure, otherwise docker-exec the internal port for local runs.
+  if [ "${DEMO_MODE:-local}" = "azure" ]; then
+    http_code="000"
+  else
+    http_code=$(docker exec health-dataspace-issuerservice \
+      curl -s -o /dev/null -w "%{http_code}" \
+      "http://localhost:10010/api/check/readiness" 2>/dev/null) || http_code="000"
+  fi
 
   if [ "$http_code" = "200" ]; then
     pass "$test_id: IssuerService readiness check passed"
