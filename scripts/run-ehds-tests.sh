@@ -467,7 +467,7 @@ run_omop_tests() {
 
   # 4.3 — OMOP clinical events linked
   local test_id="OMOP-4.3"
-  resp=$(neo4j_query "MATCH (p:OMOPPerson)-[:HAS_CONDITION]->(c:OMOPConditionOccurrence) RETURN count(*) AS cnt") || resp=""
+  resp=$(neo4j_query "MATCH (p:OMOPPerson)-[:HAS_CONDITION_OCCURRENCE]->(c:OMOPConditionOccurrence) RETURN count(*) AS cnt") || resp=""
 
   if [ -n "$resp" ]; then
     local count
@@ -486,7 +486,7 @@ run_omop_tests() {
 
   # 4.4 — OMOP drug exposures
   local test_id="OMOP-4.4"
-  resp=$(neo4j_query "MATCH (p:OMOPPerson)-[:HAS_DRUG]->(d:OMOPDrugExposure) RETURN count(*) AS cnt") || resp=""
+  resp=$(neo4j_query "MATCH (p:OMOPPerson)-[:HAS_DRUG_EXPOSURE]->(d:OMOPDrugExposure) RETURN count(*) AS cnt") || resp=""
 
   if [ -n "$resp" ]; then
     local count
