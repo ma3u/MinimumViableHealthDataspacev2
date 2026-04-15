@@ -27,3 +27,7 @@ body:json {
     "baseUrl": "http://neo4j-proxy:9090/fhir/Patient"
   }
 }
+
+assert {
+  res.status: lt 500
+}

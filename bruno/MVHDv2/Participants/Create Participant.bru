@@ -21,3 +21,7 @@ body:json {
   "role": "DATA_HOLDER",
   "ehdsParticipantType": "HealthcareProvider"
 }
+
+assert {
+  res.status: lt 500
+}

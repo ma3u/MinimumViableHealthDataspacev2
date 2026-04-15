@@ -14,6 +14,10 @@ headers {
   Accept: application/json
 }
 
+assert {
+  res.status: lt 500
+}
+
 docs {
   Admin audit log of policy / participant / contract events.
 }

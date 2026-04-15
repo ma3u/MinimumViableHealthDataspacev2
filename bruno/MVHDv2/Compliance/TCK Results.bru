@@ -14,6 +14,10 @@ headers {
   Accept: application/json
 }
 
+assert {
+  res.status: lt 500
+}
+
 docs {
   Latest DSP 2025-1 TCK + DCP v1.0 + EHDS test suite results.
 }

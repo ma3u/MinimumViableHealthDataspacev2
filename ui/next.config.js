@@ -19,44 +19,48 @@ const nextConfig = {
   }),
   // Security headers (BSI C5 DEV-07 / OWASP A05) — skipped for static export
   // because GitHub Pages serves pre-built HTML without a Next.js server.
+  //
+  // Content-Security-Policy is *not* set here — it's emitted by middleware.ts
+  // with a per-request nonce so script-src / style-src can drop 'unsafe-inline'.
   ...(!isStaticExport && {
     async headers() {
       return [
         {
           source: "/(.*)",
           headers: [
-            {
-              key: "X-Frame-Options",
-              value: "DENY",
-            },
-            {
-              key: "X-Content-Type-Options",
-              value: "nosniff",
-            },
+            { key: "X-Frame-Options", value: "DENY" },
+            { key: "X-Content-Type-Options", value: "nosniff" },
             {
               key: "Referrer-Policy",
               value: "strict-origin-when-cross-origin",
             },
             {
               key: "Permissions-Policy",
-              value: "camera=(), microphone=(), geolocation=()",
+              value:
+                "camera=(), microphone=(), geolocation=(), interest-cohort=()",
+            },
+            // HSTS — plugin 10035. 2-year max-age, preload-eligible.
+            {
+              key: "Strict-Transport-Security",
+              value: "max-age=63072000; includeSubDomains; preload",
+            },
+            // Cross-Origin isolation — plugin 90004.
+            // same-origin is the strictest value that still lets our own
+            // static assets (Swagger UI, Mermaid) load.
+            {
+              key: "Cross-Origin-Resource-Policy",
+              value: "same-origin",
             },
             {
-              key: "Content-Security-Policy",
-              value: [
-                "default-src 'self'",
-                // Next.js inline scripts (nonce-less dev mode)
-                "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
-                "style-src 'self' 'unsafe-inline'",
-                "img-src 'self' data: blob:",
-                // Neo4j Browser, Keycloak (local dev only)
-                "connect-src 'self' http://localhost:7474 http://localhost:8080 ws://localhost:*",
-                "font-src 'self'",
-                "frame-src 'none'",
-                "object-src 'none'",
-                "base-uri 'self'",
-                "form-action 'self'",
-              ].join("; "),
+              key: "Cross-Origin-Opener-Policy",
+              value: "same-origin",
+            },
+            // credentialless is laxer than require-corp — it allows
+            // cross-origin <img>/<script> without CORP headers, which
+            // we need for Neo4j Browser + Keycloak iframes in dev.
+            {
+              key: "Cross-Origin-Embedder-Policy",
+              value: "credentialless",
             },
           ],
         },

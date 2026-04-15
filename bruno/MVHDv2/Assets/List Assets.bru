@@ -13,3 +13,7 @@ get {
 headers {
   Accept: application/json
 }
+
+assert {
+  res.status: lt 500
+}

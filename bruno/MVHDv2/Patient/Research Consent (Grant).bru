@@ -20,3 +20,7 @@ body:json {
   "studyId": "{{studyId}}",
   "purpose": "RESEARCH"
 }
+
+assert {
+  res.status: lt 500
+}
