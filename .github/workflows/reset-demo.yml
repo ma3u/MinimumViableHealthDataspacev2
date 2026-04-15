@@ -26,8 +26,8 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  ACR_NAME: acrmvhddev
-  ACR_LOGIN_SERVER: acrmvhddev.azurecr.io
+  ACR_NAME: acrmvhdehds
+  ACR_LOGIN_SERVER: acrmvhdehds.azurecr.io
   RESOURCE_GROUP: rg-mvhd-dev
   ACA_ENV: mvhd-env
 
