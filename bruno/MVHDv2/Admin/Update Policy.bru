@@ -24,3 +24,7 @@ body:json {
     "policy": { "@type": "Set", "permission": [] }
   }
 }
+
+assert {
+  res.status: lt 500
+}

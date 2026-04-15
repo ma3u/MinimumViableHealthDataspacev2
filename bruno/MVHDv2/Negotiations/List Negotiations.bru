@@ -14,6 +14,10 @@ headers {
   Accept: application/json
 }
 
+assert {
+  res.status: lt 500
+}
+
 docs {
   DSP 2025-1 contract negotiations for the given participant.
 }

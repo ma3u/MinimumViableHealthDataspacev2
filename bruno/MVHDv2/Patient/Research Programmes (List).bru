@@ -14,6 +14,10 @@ headers {
   Accept: application/json
 }
 
+assert {
+  res.status: lt 500
+}
+
 docs {
   Research programmes the patient is enrolled in or eligible for.
 }

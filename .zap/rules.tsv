@@ -1,0 +1,18 @@
+# ZAP Baseline suppression rules — MVHDv2
+# Format: <pluginId>	<action>	<reason>
+# Actions: IGNORE | WARN | FAIL
+# Reference: https://www.zaproxy.org/docs/docker/baseline-scan/#configuration-file
+#
+# 10099 Source Code Disclosure (SQL / Java)
+#   False positives on:
+#     /docs/user-guide       — natural-language phrase "Select patients from the patient list"
+#                              matches ZAP's SQL-select regex.
+#     /e2e-report            — minified Next.js chunk `class i2 { constructor(u) { ... } }`
+#                              matches ZAP's Java-class regex.
+#   Neither is source code. Both are client-visible by design (docs site + Playwright report).
+10099	IGNORE	False positive: natural-language + minified JS chunk matched SQL/Java source regex
+#
+# 10096 Timestamp Disclosure - Unix
+#   The embedded Playwright report at /e2e-report contains asset content hashes and build
+#   timestamps that ZAP mistakes for unix epochs. No exploitable information disclosed.
+10096	IGNORE	False positive: Playwright report contains asset hashes that match unix-epoch regex

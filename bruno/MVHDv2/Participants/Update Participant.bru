@@ -18,3 +18,7 @@ headers {
 body:json {
   "displayName": "Limburg Medical Centre (NL)"
 }
+
+assert {
+  res.status: lt 500
+}

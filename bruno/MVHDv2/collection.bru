@@ -6,6 +6,10 @@ auth {
   mode: none
 }
 
+assert {
+  res.status: lt 500
+}
+
 docs {
   # MVHDv2 API Collection
 

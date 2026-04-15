@@ -19,3 +19,7 @@ body:json {
   "question": "How many patients with type 2 diabetes have an Hb1Ac > 7?",
   "templateId": "auto"
 }
+
+assert {
+  res.status: lt 500
+}

@@ -89,6 +89,7 @@ jobs:
         with:
           target: ${{ env.DEMO_URL }}
           cmd_options: "-m 2"
+          rules_file_name: .zap/rules.tsv
           fail_action: false
           allow_issue_writing: false
           artifact_name: zap_scan_${{ github.run_id }}

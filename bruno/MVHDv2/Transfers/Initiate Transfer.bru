@@ -22,3 +22,7 @@ body:json {
   "assetId": "asset-001",
   "transferType": "HttpData-PULL"
 }
+
+assert {
+  res.status: lt 500
+}

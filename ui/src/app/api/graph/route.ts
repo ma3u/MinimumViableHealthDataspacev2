@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 import { runQuery } from "@/lib/neo4j";
-import { requireAuth, isAuthError } from "@/lib/auth-guard";
 import {
   LABEL_LAYER,
   LAYER_COLORS,
@@ -476,10 +475,10 @@ async function buildDefaultGraph() {
  *   edc-admin      — operator: participants + products + transfers
  *   hdab           — authority: approvals + credentials + TC governance
  */
+// Public endpoint — the /graph page is the demo landing view and must
+// work without authentication. Data is fully synthetic (127 fictional
+// patients seeded from Synthea).
 export async function GET(req: Request) {
-  const auth = await requireAuth();
-  if (isAuthError(auth)) return auth;
-
   const { searchParams } = new URL(req.url);
   const persona = (searchParams.get("persona") ?? "default") as PersonaId;
 

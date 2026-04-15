@@ -24,3 +24,7 @@ body:json {
   "assetId": "asset-001",
   "policyId": "policy-001"
 }
+
+assert {
+  res.status: lt 500
+}

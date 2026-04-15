@@ -14,6 +14,10 @@ headers {
   Accept: application/json
 }
 
+assert {
+  res.status: lt 500
+}
+
 docs {
   Aggregated insights for the patient — risk factors, recent events, care gaps.
 }
