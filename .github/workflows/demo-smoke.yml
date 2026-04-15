@@ -38,9 +38,12 @@ jobs:
         with:
           node-version: "20"
       - name: Run Bruno Azure-Dev collection
+        env:
+          BRUNO_REPORT_DIR: ${{ github.workspace }}/bruno-report
         run: |
           chmod +x scripts/run-api-tests.sh
-          BRUNO_REPORT_DIR=bruno-report ./scripts/run-api-tests.sh Azure-Dev
+          mkdir -p "$BRUNO_REPORT_DIR"
+          ./scripts/run-api-tests.sh Azure-Dev
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -82,16 +85,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: ZAP baseline scan
-        uses: zaproxy/action-baseline@v0.13.0
+        uses: zaproxy/action-baseline@v0.14.0
         with:
           target: ${{ env.DEMO_URL }}
           cmd_options: "-m 2"
           fail_action: false
           allow_issue_writing: false
+          artifact_name: zap_scan_${{ github.run_id }}
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: zap-baseline
+          name: zap-baseline-${{ github.run_id }}
           path: |
             report_html.html
             report_json.json
