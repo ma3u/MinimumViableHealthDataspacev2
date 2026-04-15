@@ -511,7 +511,7 @@ export default function ArchitecturePage() {
           Application (Neo4j, Proxy, UI), and a static GitHub Pages export. The
           same topology is deployed to{" "}
           <a
-            href="https://mvhd-ui.blackforest-0a04f26e.westeurope.azurecontainerapps.io"
+            href="https://ehds.mabu.red"
             target="_blank"
             rel="noopener noreferrer"
             className="text-[var(--accent)] underline hover:opacity-80"

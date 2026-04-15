@@ -15,12 +15,23 @@ on:
     branches: [main]
     paths:
       - "scripts/run-*.sh"
+      - "scripts/azure/compliance-runner/**"
+      - "scripts/azure/08-compliance-runner.sh"
       - "docker-compose.jad.yml"
       - "neo4j/**"
       - ".github/workflows/compliance.yml"
   schedule:
     - cron: "0 6 * * 1" # Weekly Monday 6am UTC
   workflow_dispatch:
+    inputs:
+      target:
+        description: "Run suites against local JAD stack or the Azure demo env"
+        required: true
+        default: local
+        type: choice
+        options:
+          - local
+          - azure
 
 env:
   REPORT_DIR: test-results
@@ -33,6 +44,7 @@ jobs:
     name: DSP 2025-1 TCK
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    if: github.event_name != 'workflow_dispatch' || inputs.target == 'local'
     steps:
       - uses: actions/checkout@v4
 
@@ -92,6 +104,7 @@ jobs:
     name: DCP v1.0 Compliance
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    if: github.event_name != 'workflow_dispatch' || inputs.target == 'local'
     steps:
       - uses: actions/checkout@v4
 
@@ -153,6 +166,7 @@ jobs:
     name: EHDS Health Domain
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    if: github.event_name != 'workflow_dispatch' || inputs.target == 'local'
     steps:
       - uses: actions/checkout@v4
 
@@ -213,13 +227,56 @@ jobs:
           docker compose -f docker-compose.yml -f docker-compose.jad.yml down -v
 
   # -----------------------------------------------------------------------
+  # Azure Demo — launches the in-cluster mvhd-compliance-runner ACA Job
+  # (built by scripts/azure/08-compliance-runner.sh) and tails logs until
+  # it finishes. Requires the AZURE_CREDENTIALS secret (service principal
+  # with Contributor on rg-mvhd-dev).
+  # -----------------------------------------------------------------------
+  compliance-azure:
+    name: Azure Demo Compliance (ACA Job)
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    if: github.event_name == 'workflow_dispatch' && inputs.target == 'azure'
+    env:
+      RG: rg-mvhd-dev
+      COMPLIANCE_JOB: mvhd-compliance-runner
+    steps:
+      - uses: actions/checkout@v4
+      - uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+      - uses: docker/setup-buildx-action@v3
+      - name: Build + deploy + start runner job
+        run: |
+          chmod +x scripts/azure/08-compliance-runner.sh
+          ./scripts/azure/08-compliance-runner.sh
+      - name: Wait for job execution
+        run: |
+          set -e
+          for i in $(seq 1 60); do
+            latest=$(az containerapp job execution list \
+              --name "$COMPLIANCE_JOB" --resource-group "$RG" \
+              --query "[0]" -o json)
+            status=$(echo "$latest" | jq -r '.properties.status // "Unknown"')
+            name=$(echo "$latest" | jq -r '.name // "-"')
+            echo "[$i] $name: $status"
+            case "$status" in
+              Succeeded) echo "runner finished successfully"; exit 0 ;;
+              Failed)    echo "runner failed — check logs in Azure portal"; exit 1 ;;
+            esac
+            sleep 20
+          done
+          echo "timeout waiting for runner"
+          exit 1
+
+  # -----------------------------------------------------------------------
   # Aggregate Results
   # -----------------------------------------------------------------------
   compliance-report:
     name: Compliance Report
     runs-on: ubuntu-latest
     needs: [dsp-tck, dcp-compliance, ehds-compliance]
-    if: always()
+    if: always() && (github.event_name != 'workflow_dispatch' || inputs.target == 'local')
     steps:
       - uses: actions/checkout@v4
 

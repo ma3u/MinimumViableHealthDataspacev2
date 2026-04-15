@@ -556,33 +556,42 @@ run_contract_def_tests() {
 run_schema_tests() {
   log "Category 7: Management API Schema Compliance"
 
-  # 7.1 — Readiness endpoint (port 8080 not exposed; use docker exec)
+  # 7.1 — Readiness endpoint (port 8080 not exposed; use docker exec locally,
+  # skip under DEMO_MODE=azure since ACA only exposes the mgmt targetPort).
   local test_id="SCHEMA-7.1"
   local http_code
-  http_code=$(docker exec health-dataspace-controlplane \
-    curl -s -o /dev/null -w "%{http_code}" \
-    "http://localhost:8080/api/check/readiness" 2>/dev/null) || http_code="000"
-
-  if [ "$http_code" = "200" ]; then
-    pass "$test_id: Readiness endpoint returns HTTP 200"
-    record_result "$test_id" "schema" "passed"
+  if [ "${DEMO_MODE:-local}" = "azure" ]; then
+    skip "$test_id: Readiness probe not reachable across ACA ingress (8080 not exposed)"
+    record_result "$test_id" "schema" "skipped" "DEMO_MODE=azure"
   else
-    fail "$test_id: Readiness endpoint returns HTTP ${http_code}"
-    record_result "$test_id" "schema" "failed" "HTTP ${http_code}"
+    http_code=$(docker exec health-dataspace-controlplane \
+      curl -s -o /dev/null -w "%{http_code}" \
+      "http://localhost:8080/api/check/readiness" 2>/dev/null) || http_code="000"
+    if [ "$http_code" = "200" ]; then
+      pass "$test_id: Readiness endpoint returns HTTP 200"
+      record_result "$test_id" "schema" "passed"
+    else
+      fail "$test_id: Readiness endpoint returns HTTP ${http_code}"
+      record_result "$test_id" "schema" "failed" "HTTP ${http_code}"
+    fi
   fi
 
-  # 7.2 — Liveness endpoint (port 8080 not exposed; use docker exec)
+  # 7.2 — Liveness endpoint (same rationale as 7.1)
   local test_id="SCHEMA-7.2"
-  http_code=$(docker exec health-dataspace-controlplane \
-    curl -s -o /dev/null -w "%{http_code}" \
-    "http://localhost:8080/api/check/liveness" 2>/dev/null) || http_code="000"
-
-  if [ "$http_code" = "200" ]; then
-    pass "$test_id: Liveness endpoint returns HTTP 200"
-    record_result "$test_id" "schema" "passed"
+  if [ "${DEMO_MODE:-local}" = "azure" ]; then
+    skip "$test_id: Liveness probe not reachable across ACA ingress (8080 not exposed)"
+    record_result "$test_id" "schema" "skipped" "DEMO_MODE=azure"
   else
-    fail "$test_id: Liveness endpoint returns HTTP ${http_code}"
-    record_result "$test_id" "schema" "failed" "HTTP ${http_code}"
+    http_code=$(docker exec health-dataspace-controlplane \
+      curl -s -o /dev/null -w "%{http_code}" \
+      "http://localhost:8080/api/check/liveness" 2>/dev/null) || http_code="000"
+    if [ "$http_code" = "200" ]; then
+      pass "$test_id: Liveness endpoint returns HTTP 200"
+      record_result "$test_id" "schema" "passed"
+    else
+      fail "$test_id: Liveness endpoint returns HTTP ${http_code}"
+      record_result "$test_id" "schema" "failed" "HTTP ${http_code}"
+    fi
   fi
 
   # 7.3 — JSON-LD @context handling in response

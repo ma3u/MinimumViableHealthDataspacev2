@@ -77,7 +77,7 @@ The motivation comes from a practical gap: the Eclipse [JAD (Joint Architecture 
 For the full background, see the companion article: [European Health Dataspaces, Digital Twins: A Journey from FHIR Basics to Intelligent Patient Models](https://www.linkedin.com/pulse/european-health-dataspaces-digital-twins-journey-fhir-buchhorn-roth-8t51c/).
 
 - **Live Demo:** Static UI at [ma3u.github.io/MinimumViableHealthDataspacev2](https://ma3u.github.io/MinimumViableHealthDataspacev2/)
-- **Azure live stack** at [mvhd-ui.blackforest-0a04f26e.westeurope.azurecontainerapps.io](https://mvhd-ui.blackforest-0a04f26e.westeurope.azurecontainerapps.io) (online **Mon–Fri 07:00–20:00 Europe/Berlin** — see [ADR-016](docs/ADRs/ADR-016-aca-off-hours-scaledown.md))
+- **Azure live stack** at [ehds.mabu.red](https://ehds.mabu.red) (online **Mon–Fri 07:00–20:00 Europe/Berlin** — see [ADR-016](docs/ADRs/ADR-016-aca-off-hours-scaledown.md))
 
 ---
 
@@ -804,7 +804,7 @@ The full stack is deployed to **Azure Container Apps** for shared team access an
 
 ### Live demo
 
-> **[https://mvhd-ui.blackforest-0a04f26e.westeurope.azurecontainerapps.io](https://mvhd-ui.blackforest-0a04f26e.westeurope.azurecontainerapps.io)**
+> **[https://ehds.mabu.red](https://ehds.mabu.red)**
 
 **Availability — Mon–Fri 07:00–20:00 Europe/Berlin** (outside these hours all 13 Container
 Apps are scaled to 0 replicas and PostgreSQL is stopped to keep the deployment under the
