@@ -10,6 +10,11 @@ import {
   Network,
   ExternalLink,
   MessageCircle,
+  Code2,
+  Boxes,
+  KeyRound,
+  Scale,
+  Workflow,
 } from "lucide-react";
 import { DemoPersonaCards } from "@/components/DemoPersonaCards";
 import { PersonaJourneyCards } from "@/components/PersonaJourneyCards";
@@ -44,11 +49,27 @@ export default function Home() {
         </div>
 
         <p className="text-[var(--text-primary)] text-base sm:text-lg leading-relaxed max-w-3xl mb-4">
-          This interactive demo shows how the{" "}
-          <strong className="text-[var(--accent)]">EHDS regulation</strong>{" "}
-          enables secure cross-border health data sharing across Europe. Explore
-          the full lifecycle, from publishing clinical datasets to negotiating
-          access contracts and running privacy-preserving analytics.
+          This interactive demo is an{" "}
+          <strong className="text-[var(--accent)]">
+            EHDS integration platform
+          </strong>{" "}
+          you can run, fork, and wire into your own stack. It shows how the{" "}
+          <a
+            href="https://health.ec.europa.eu/ehealth-digital-health-and-care/european-health-data-space_en"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline underline-offset-2 hover:text-[var(--accent)] transition-colors"
+          >
+            EHDS regulation
+          </a>{" "}
+          enables secure cross-border health data sharing across Europe —
+          publishing clinical datasets, negotiating access contracts under ODRL,
+          and transferring FHIR / OMOP data through the{" "}
+          <strong className="text-[var(--text-primary)]">
+            Dataspace Protocol
+          </strong>
+          . Every flow is exposed as a REST API you can exercise from Swagger,
+          Scalar, Bruno, or your own client.
         </p>
 
         <div className="flex flex-wrap gap-3 text-sm text-[var(--text-secondary)]">
@@ -306,6 +327,272 @@ export default function Home() {
               />
             </a>
           ))}
+        </div>
+      </section>
+
+      {/* ── Learn by Doing: Dataspace & Data Mesh ───────────────────────── */}
+      <section
+        className="mb-12 sm:mb-16 animate-fade-in-up"
+        style={{ animationDelay: "190ms" }}
+        aria-labelledby="learn-title"
+      >
+        <h2 id="learn-title" className="text-lg sm:text-xl font-bold mb-2">
+          Learn the New Principles: Dataspaces & Data Mesh
+        </h2>
+        <p className="text-[var(--text-secondary)] text-sm leading-relaxed max-w-3xl mb-5">
+          Health data is no longer moved by point-to-point integrations. The
+          EHDS is built on{" "}
+          <strong className="text-[var(--text-primary)]">dataspace</strong> and{" "}
+          <strong className="text-[var(--text-primary)]">data mesh</strong>{" "}
+          principles: sovereign participants own their <em>data domains</em>,
+          publish them as <em>data products</em>, and exchange them through open
+          protocols instead of bulk copies. Use this demo to get hands-on with
+          the four building blocks every implementer needs to understand.
+        </p>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="rounded-xl border border-layer2/50 bg-[var(--surface-2)]/40 p-4 sm:p-5">
+            <div className="flex items-center gap-2 mb-2">
+              <Boxes
+                size={18}
+                className="text-teal-800 dark:text-teal-300"
+                aria-hidden="true"
+              />
+              <h3 className="font-semibold text-[var(--text-primary)] text-sm sm:text-base">
+                Data Domains & Data Products
+              </h3>
+            </div>
+            <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
+              Each hospital, registry, or research org is a domain that owns its
+              data end-to-end. A{" "}
+              <strong className="text-[var(--text-primary)]">
+                data product
+              </strong>{" "}
+              packages a dataset with metadata (HealthDCAT-AP), contract terms
+              (ODRL), and an access endpoint (FHIR / OMOP). Browse them in the
+              catalogue to see what federated ownership actually looks like.
+            </p>
+            <Link
+              href="/catalog"
+              className="mt-3 inline-flex items-center gap-1 text-xs font-medium text-[var(--accent)] hover:underline"
+            >
+              Explore the catalogue{" "}
+              <ExternalLink size={12} aria-hidden="true" />
+            </Link>
+          </div>
+
+          <div className="rounded-xl border border-layer1/50 bg-[var(--surface-2)]/40 p-4 sm:p-5">
+            <div className="flex items-center gap-2 mb-2">
+              <Workflow
+                size={18}
+                className="text-blue-800 dark:text-blue-300"
+                aria-hidden="true"
+              />
+              <h3 className="font-semibold text-[var(--text-primary)] text-sm sm:text-base">
+                Dataspace Protocol (DSP) — Exchange
+              </h3>
+            </div>
+            <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
+              DSP 2025-1 standardises the four exchange phases —{" "}
+              <em>catalogue → negotiation → agreement → transfer</em> — so any
+              two participants can trade data without bilateral glue code. Walk
+              through a full negotiation and watch the state transitions in the
+              live graph.
+            </p>
+            <Link
+              href="/negotiate"
+              className="mt-3 inline-flex items-center gap-1 text-xs font-medium text-[var(--accent)] hover:underline"
+            >
+              Run a DSP negotiation{" "}
+              <ExternalLink size={12} aria-hidden="true" />
+            </Link>
+          </div>
+
+          <div className="rounded-xl border border-purple-500/40 bg-[var(--surface-2)]/40 p-4 sm:p-5">
+            <div className="flex items-center gap-2 mb-2">
+              <KeyRound
+                size={18}
+                className="text-purple-800 dark:text-purple-300"
+                aria-hidden="true"
+              />
+              <h3 className="font-semibold text-[var(--text-primary)] text-sm sm:text-base">
+                W3C DID & Verifiable Credentials — Authentication
+              </h3>
+            </div>
+            <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
+              Participants identify themselves with{" "}
+              <strong className="text-[var(--text-primary)]">did:web</strong>{" "}
+              identifiers and prove membership, HDAB approval, or researcher
+              status with{" "}
+              <strong className="text-[var(--text-primary)]">
+                W3C Verifiable Credentials
+              </strong>{" "}
+              issued via the Decentralised Claims Protocol (DCP). No central
+              identity broker — trust is federated and cryptographically
+              verifiable.
+            </p>
+            <Link
+              href="/credentials"
+              className="mt-3 inline-flex items-center gap-1 text-xs font-medium text-[var(--accent)] hover:underline"
+            >
+              Inspect credentials <ExternalLink size={12} aria-hidden="true" />
+            </Link>
+          </div>
+
+          <div className="rounded-xl border border-layer4/50 bg-[var(--surface-2)]/40 p-4 sm:p-5">
+            <div className="flex items-center gap-2 mb-2">
+              <Scale
+                size={18}
+                className="text-amber-800 dark:text-amber-300"
+                aria-hidden="true"
+              />
+              <h3 className="font-semibold text-[var(--text-primary)] text-sm sm:text-base">
+                W3C ODRL Policies — Authorization
+              </h3>
+            </div>
+            <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
+              Every data product is governed by a machine-readable{" "}
+              <strong className="text-[var(--text-primary)]">
+                ODRL 2.2 policy
+              </strong>{" "}
+              declaring permissions, prohibitions, and duties (purpose limits,
+              retention, geographic scope, anonymisation). Policies travel with
+              the contract and are enforced at the data plane — not as free-text
+              T&amp;Cs.
+            </p>
+            <Link
+              href="/admin/policies"
+              className="mt-3 inline-flex items-center gap-1 text-xs font-medium text-[var(--accent)] hover:underline"
+            >
+              Edit ODRL policies <ExternalLink size={12} aria-hidden="true" />
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* ── REST API Integration Tools ──────────────────────────────────── */}
+      <section
+        className="mb-12 sm:mb-16 animate-fade-in-up"
+        style={{ animationDelay: "200ms" }}
+        aria-labelledby="integration-title"
+      >
+        <h2
+          id="integration-title"
+          className="text-lg sm:text-xl font-bold mb-2"
+        >
+          Integrate It: REST API Tools
+        </h2>
+        <p className="text-[var(--text-secondary)] text-sm leading-relaxed max-w-3xl mb-5">
+          All 36 endpoints are documented in{" "}
+          <strong className="text-[var(--text-primary)]">OpenAPI 3.1</strong>{" "}
+          and can be exercised from three interactive explorers, a portable
+          Bruno collection, or any HTTP client. Use them to test flows, build
+          integrations, or wire the platform into a downstream system.
+        </p>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          <Link
+            href="/docs/developer/reference"
+            className="group flex flex-col rounded-xl border border-layer1/50 bg-[var(--surface-2)]/40 p-4 sm:p-5 transition-colors hover:bg-[var(--surface-2)]/70"
+          >
+            <div className="flex items-center gap-2 mb-2">
+              <Code2
+                size={18}
+                className="text-blue-800 dark:text-blue-300"
+                aria-hidden="true"
+              />
+              <span className="font-semibold text-sm text-[var(--text-primary)]">
+                Scalar Reference
+              </span>
+            </div>
+            <p className="flex-1 text-xs text-[var(--text-secondary)] leading-relaxed">
+              Modern API reference with try-it-now requests, language samples,
+              and schema navigation. Powered by Scalar.
+            </p>
+            <ExternalLink
+              size={14}
+              className="mt-3 text-[var(--text-secondary)]"
+              aria-hidden="true"
+            />
+          </Link>
+
+          <Link
+            href="/docs/developer/api"
+            className="group flex flex-col rounded-xl border border-layer3/50 bg-[var(--surface-2)]/40 p-4 sm:p-5 transition-colors hover:bg-[var(--surface-2)]/70"
+          >
+            <div className="flex items-center gap-2 mb-2">
+              <Code2
+                size={18}
+                className="text-green-800 dark:text-green-300"
+                aria-hidden="true"
+              />
+              <span className="font-semibold text-sm text-[var(--text-primary)]">
+                Swagger UI
+              </span>
+            </div>
+            <p className="flex-1 text-xs text-[var(--text-secondary)] leading-relaxed">
+              Classic OpenAPI explorer for testing endpoints against the live
+              instance with OIDC auth.
+            </p>
+            <ExternalLink
+              size={14}
+              className="mt-3 text-[var(--text-secondary)]"
+              aria-hidden="true"
+            />
+          </Link>
+
+          <a
+            href="/openapi.yaml"
+            className="group flex flex-col rounded-xl border border-layer2/50 bg-[var(--surface-2)]/40 p-4 sm:p-5 transition-colors hover:bg-[var(--surface-2)]/70"
+            download="mvhdv2-openapi.yaml"
+          >
+            <div className="flex items-center gap-2 mb-2">
+              <BookOpen
+                size={18}
+                className="text-teal-800 dark:text-teal-300"
+                aria-hidden="true"
+              />
+              <span className="font-semibold text-sm text-[var(--text-primary)]">
+                OpenAPI 3.1 Spec
+              </span>
+            </div>
+            <p className="flex-1 text-xs text-[var(--text-secondary)] leading-relaxed">
+              Raw YAML spec for codegen, Postman import, or custom tooling.
+              Source of truth for every route.
+            </p>
+            <ExternalLink
+              size={14}
+              className="mt-3 text-[var(--text-secondary)]"
+              aria-hidden="true"
+            />
+          </a>
+
+          <a
+            href="https://github.com/ma3u/MinimumViableHealthDataspacev2/tree/main/bruno/MVHDv2"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="group flex flex-col rounded-xl border border-layer5/50 bg-[var(--surface-2)]/40 p-4 sm:p-5 transition-colors hover:bg-[var(--surface-2)]/70"
+          >
+            <div className="flex items-center gap-2 mb-2">
+              <Github
+                size={18}
+                className="text-purple-800 dark:text-purple-300"
+                aria-hidden="true"
+              />
+              <span className="font-semibold text-sm text-[var(--text-primary)]">
+                Bruno Collection
+              </span>
+            </div>
+            <p className="flex-1 text-xs text-[var(--text-secondary)] leading-relaxed">
+              Git-friendly, offline-capable API client. Clone the repo and run
+              every DSP, FHIR, and OMOP journey locally.
+            </p>
+            <ExternalLink
+              size={14}
+              className="mt-3 text-[var(--text-secondary)]"
+              aria-hidden="true"
+            />
+          </a>
         </div>
       </section>
 
