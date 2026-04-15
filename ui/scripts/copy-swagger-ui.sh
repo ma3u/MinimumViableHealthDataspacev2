@@ -1,11 +1,12 @@
-#!/usr/bin/env bash
-set -euo pipefail
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+#!/bin/sh
+# POSIX sh — runs under Alpine (Docker), Ubuntu CI, and macOS.
+set -eu
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 UI_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 SRC="${UI_ROOT}/node_modules/swagger-ui-dist"
 DEST="${UI_ROOT}/public/swagger-ui"
 
-if [[ ! -d "$SRC" ]]; then
+if [ ! -d "$SRC" ]; then
   echo "swagger-ui-dist not installed; skipping asset copy" >&2
   exit 0
 fi
