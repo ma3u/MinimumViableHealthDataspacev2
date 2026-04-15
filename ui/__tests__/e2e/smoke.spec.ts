@@ -75,8 +75,8 @@ test.describe("Graph Explorer", () => {
 
     await page.goto("/graph");
     await expect(page).toHaveURL(/\/graph/);
-    // Graph page has a sidebar with "Data layers" heading
-    await expect(page.locator("text=Data layers").first()).toBeVisible();
+    // Graph page has a sidebar with "Knowledge Graph" heading
+    await expect(page.locator("text=Knowledge Graph").first()).toBeVisible();
     expect(errors, `client errors on /graph:\n${errors.join("\n")}`).toEqual(
       [],
     );
@@ -109,7 +109,9 @@ test.describe("Patient Journey", () => {
 
 test.describe("Navigation", () => {
   test("should navigate between pages", async ({ page }) => {
-    const errors = collectClientErrors(page);
+    // Auth-gated APIs (/api/compliance, /api/credentials, /api/patient/profile)
+    // return 401 for unauthenticated browsers — expected, not a regression.
+    const errors = collectClientErrors(page, [/status of 401/]);
     const probe = await probeGraphApi(page);
     if (!probe.ok) {
       if (process.env.CI) {
