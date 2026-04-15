@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { headers } from "next/headers";
 import "./globals.css";
 import Navigation from "@/components/Navigation";
 import DemoPasswordBanner from "@/components/DemoPasswordBanner";
@@ -51,16 +52,23 @@ export const viewport: Viewport = {
   initialScale: 1,
 };
 
-export default function RootLayout({
+// Reading headers() opts the layout into dynamic rendering, which is required
+// for the per-request CSP nonce set by middleware.ts to propagate into the HTML
+// stream. Without this, Next.js prerenders layout.tsx at build time and the
+// nonce never reaches the client — every framework inline script gets blocked
+// by 'strict-dynamic'.
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const nonce = (await headers()).get("x-nonce") ?? undefined;
   return (
     <html lang="en" suppressHydrationWarning>
       {/* Inline script applies saved theme class before first paint — prevents flash */}
       <head>
         <script
+          nonce={nonce}
           dangerouslySetInnerHTML={{
             __html: `(function(){try{var t=localStorage.getItem('theme');document.documentElement.classList.toggle('dark',t==='dark')}catch(e){}})()`,
           }}
