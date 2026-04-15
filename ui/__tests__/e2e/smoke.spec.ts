@@ -10,6 +10,29 @@
  */
 import { test, expect, Page } from "@playwright/test";
 
+/**
+ * Attach pageerror + console.error collectors to a page. Returns an array
+ * that fills as the test runs — assert it's empty at the end of each test
+ * so a CSP violation, undefined-ref, or hydration crash fails CI loudly.
+ *
+ * `ignore` lets individual tests opt-out of known-noisy errors (e.g. a
+ * missing favicon when running against a stripped-down dev env).
+ */
+function collectClientErrors(page: Page, ignore: RegExp[] = []): string[] {
+  const errors: string[] = [];
+  const shouldIgnore = (msg: string) => ignore.some((re) => re.test(msg));
+  page.on("pageerror", (err) => {
+    const msg = err.message;
+    if (!shouldIgnore(msg)) errors.push(`pageerror: ${msg}`);
+  });
+  page.on("console", (msg) => {
+    if (msg.type() !== "error") return;
+    const text = msg.text();
+    if (!shouldIgnore(text)) errors.push(`console.error: ${text}`);
+  });
+  return errors;
+}
+
 async function probeGraphApi(
   page: Page,
 ): Promise<{ ok: boolean; status: number; nodes?: number }> {
@@ -25,16 +48,19 @@ async function probeGraphApi(
 
 test.describe("Home Page", () => {
   test("should load and show the brand name", async ({ page }) => {
+    const errors = collectClientErrors(page);
     await page.goto("/");
     // Either the home page redirects to /graph or shows a nav with the brand
     await expect(page.locator("text=Health Dataspace").first()).toBeVisible({
       timeout: 15_000,
     });
+    expect(errors, `client errors on /:\n${errors.join("\n")}`).toEqual([]);
   });
 });
 
 test.describe("Graph Explorer", () => {
   test("should load the graph page", async ({ page }) => {
+    const errors = collectClientErrors(page);
     const probe = await probeGraphApi(page);
     if (!probe.ok) {
       if (process.env.CI) {
@@ -51,27 +77,39 @@ test.describe("Graph Explorer", () => {
     await expect(page).toHaveURL(/\/graph/);
     // Graph page has a sidebar with "Data layers" heading
     await expect(page.locator("text=Data layers").first()).toBeVisible();
+    expect(errors, `client errors on /graph:\n${errors.join("\n")}`).toEqual(
+      [],
+    );
   });
 });
 
 test.describe("Dataset Catalog", () => {
   test("should load the catalog page", async ({ page }) => {
+    const errors = collectClientErrors(page);
     await page.goto("/catalog");
     await expect(page).toHaveURL(/\/catalog/);
     await expect(page.locator("text=Dataset Catalog").first()).toBeVisible();
+    expect(errors, `client errors on /catalog:\n${errors.join("\n")}`).toEqual(
+      [],
+    );
   });
 });
 
 test.describe("Patient Journey", () => {
   test("should load the patient page", async ({ page }) => {
+    const errors = collectClientErrors(page);
     await page.goto("/patient");
     await expect(page).toHaveURL(/\/patient/);
     await expect(page.locator("text=Patient").first()).toBeVisible();
+    expect(errors, `client errors on /patient:\n${errors.join("\n")}`).toEqual(
+      [],
+    );
   });
 });
 
 test.describe("Navigation", () => {
   test("should navigate between pages", async ({ page }) => {
+    const errors = collectClientErrors(page);
     const probe = await probeGraphApi(page);
     if (!probe.ok) {
       if (process.env.CI) {
@@ -96,5 +134,9 @@ test.describe("Navigation", () => {
     await explore.click();
     await nav.getByRole("menuitem", { name: /Patient Journey/ }).click();
     await expect(page).toHaveURL(/\/patient/);
+    expect(
+      errors,
+      `client errors during navigation:\n${errors.join("\n")}`,
+    ).toEqual([]);
   });
 });
