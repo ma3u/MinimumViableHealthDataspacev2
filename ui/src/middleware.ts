@@ -67,7 +67,12 @@ function buildCsp(nonce: string, isDev: boolean): string {
     // script-src-elem falls back to script-src when omitted, so we don't
     // set it — keeping one source of truth avoids divergence where the elem
     // directive is stricter than the parent and blocks nonced inline scripts.
-    `style-src 'self' 'nonce-${nonce}' 'unsafe-inline'`,
+    // style-src: NO nonce here. When a nonce and 'unsafe-inline' both appear
+    // in style-src, browsers ignore 'unsafe-inline' — and Next.js injects
+    // <style> tags for CSS-in-JS that aren't nonced, so they'd get blocked.
+    // Keeping 'unsafe-inline' is the pragmatic trade-off (CSS injection is
+    // far lower risk than JS injection) and is still CSP3-compliant.
+    `style-src 'self' 'unsafe-inline'`,
     `style-src-attr 'unsafe-inline'`,
     `img-src 'self' data: blob:`,
     `font-src 'self' data:`,
