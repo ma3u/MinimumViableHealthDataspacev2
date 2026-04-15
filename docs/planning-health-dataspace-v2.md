@@ -3462,29 +3462,125 @@ See [ADR-012: Azure Container Apps](ADRs/ADR-012-azure-container-apps.md), [ADR-
 
 ---
 
+### Phase 25: GraphRAG Accuracy — GDS + APOC + Azure AI Foundry
+
+**Goal:** Turn the NLP query view (`/query`) into a first-class semantic-search experience by enabling Neo4j GDS + APOC, materialising embeddings at seed time, deploying `gpt-4o-mini` + `text-embedding-3-small` via Azure AI Foundry, and wiring a GraphRAG pipeline in `services/neo4j-proxy/`. Local install remains zero-cost — the LLM backend is strictly optional and auto-detected from environment.
+
+**Why now:**
+
+- Phase 5 (Federated Queries & GraphRAG) shipped the UI and the `/api/nlq` proxy but stopped short of real semantic retrieval; every free-form question falls back to fulltext or "no results".
+- The multi-provider LLM glue already exists in `services/neo4j-proxy/src/index.ts` (OpenAI, Anthropic, Ollama, Azure OpenAI) — only env vars and the GDS plugin are missing.
+- GraphRAG is the single most visible gap on the public demo at `ehds.mabu.red`.
+
+See [ADR-019: GDS + APOC + Azure AI Foundry GraphRAG](ADRs/ADR-019-gds-apoc-azure-ai-foundry-graphrag.md) for the full design, alternatives, and trade-offs. Tracked by GitHub issue [Phase 25: GraphRAG Accuracy](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues).
+
+#### 25a: Neo4j plugin upgrade — GDS + APOC everywhere ⏳
+
+- `docker-compose.yml`: add `"graph-data-science"` + `"apoc-extended"` to `NEO4J_PLUGINS`; bump heap 512m→1G initial / 1G→2G max; pagecache 1G; add `NEO4J_dbms_security_procedures_allowlist=apoc.*,gds.*`.
+- `scripts/azure/02-data-layer.sh`: same plugin list and allowlist; bump the `mvhd-neo4j` container app to 1.5 vCPU / 4 GiB (still Consumption profile).
+- Smoke test via `CALL gds.version()` and `CALL apoc.version()` in the seed job verification block.
+- **Gotcha:** the Neo4j GDS jar is ~80 MB and downloads on first container start. Baked-in image avoids flaky first-boot — the Azure path should use a custom `neo4j:5-community-gds` image pushed to ACR.
+
+#### 25b: Structural embeddings (FastRP, always-on) ⏳
+
+- New Cypher file `neo4j/register-embeddings-fastrp.cypher` with `gds.graph.project` over the 5-layer label set and `gds.fastRP.write` at `embeddingDimension: 256`.
+- Create `CREATE VECTOR INDEX node_fastrp_index` (256-dim, cosine) for all labelled nodes.
+- Wire into `neo4j/seed.sh` as the step after `insert-synthetic-schema-data.cypher`.
+- Adds ~30 s to seed time; zero API cost; works offline; foundation for the cloud GraphRAG fallback.
+
+#### 25c: Azure AI Foundry model deployment ⏳
+
+- New script `scripts/azure/07-ai-foundry.sh`:
+  - `az cognitiveservices account create --kind OpenAI --sku S0 --name aoai-mvhd-ehds`
+  - Deploy `gpt-4o-mini` (chat) and `text-embedding-3-small` (1536-dim embedding)
+  - Fetch endpoint + key, create an ACA secret `aoai-key` on the ACA environment
+  - Inject `AZURE_OPENAI_GPT4O_URL`, `AZURE_OPENAI_EMBEDDING_URL`, `AZURE_OPENAI_API_KEY=secretref:aoai-key` into the `mvhd-neo4j-proxy` container app and the `mvhd-neo4j-seed` job
+- **Subscription RBAC check** (ADR-018 precedent): verify that `Microsoft.CognitiveServices` provider is registerable on `INF-STG-EU_EHDS` before starting. If blocked, pivot to the Ollama-in-ACA fallback (deferred 25c'). Document result in ADR-018 update.
+- Secret hygiene: `AZURE_OPENAI_API_KEY` is an ACA secret, never a plain env var, never committed, never logged.
+
+#### 25d: Semantic embeddings (Azure OpenAI, optional) ⏳
+
+- New Cypher file `neo4j/register-embeddings-aoai.cypher` using `apoc.ml.azure.openai.embedding()` via `apoc.periodic.iterate` (batch 50, serial).
+- Scope to high-value nodes first: `HealthDataset`, `Condition`, `Observation`, `MedicationRequest` — about 400 nodes, <$0.02 per full seed.
+- Create `CREATE VECTOR INDEX dataset_semantic_index` (1536-dim, cosine).
+- `seed.sh` guards the call with `if [[ -n "${AZURE_OPENAI_API_KEY:-}" ]]` so zero-cost installs skip silently.
+- Re-runnable: the `WHERE n.embedding IS NULL` filter makes re-seeds incremental.
+
+#### 25e: GraphRAG pipeline in `neo4j-proxy` ⏳
+
+- New file `services/neo4j-proxy/src/graphrag.ts` implementing:
+  1. Embed user query (Azure OpenAI if configured, else hash-to-FastRP-query-embedding)
+  2. Vector search on the top-3 indexed labels, top-k=10 each
+  3. 2-hop neighbourhood expansion via `apoc.path.subgraphAll`
+  4. LLM rerank with `gpt-4o-mini` to pick top-5 nodes + generate a targeted Cypher plan
+  5. Execute, return rows + a `trace[]` payload for the debug drawer on `/query`
+- Extend `POST /nlq` branch logic: `template` → `graphrag-vector` → `graphrag-hybrid` → `llm-text2cypher` → `none`.
+- Unit tests in `services/neo4j-proxy/__tests__/graphrag.test.ts` using a mocked Neo4j driver + recorded embedding fixtures.
+- No API-contract change: existing `method` field gains `graphrag-vector` / `graphrag-hybrid` values; consumers already handle unknown methods gracefully.
+
+#### 25f: Optional-by-default local install ⏳
+
+- `docker-compose.yml` uses `${AZURE_OPENAI_GPT4O_URL:-}` defaults so nothing is required.
+- `services/neo4j-proxy/src/index.ts` startup prints exactly one of:
+  - `NLP backend: Azure OpenAI (gpt-4o-mini)`
+  - `NLP backend: Ollama (llama3.1)`
+  - `NLP backend: template + fulltext + FastRP only (no LLM configured)`
+- `ui/src/app/query/page.tsx` renders a single status badge reflecting the detected mode (fetched from a new `GET /nlq/backend` endpoint).
+- `README.md` gains an "Optional AI backends" section with three copy-pasteable setups (zero-cost / Ollama / Azure OpenAI).
+
+#### 25g: Tests — Playwright + Vitest ⏳
+
+- New Playwright spec `ui/__tests__/e2e/journeys/31-graphrag-nlp.spec.ts` (J610–J629):
+  - J610 query page reachable
+  - J611 backend badge visible and one of the three expected values
+  - J612 `/nlq` returns `method: "template"` for a known templated question
+  - J613 `/nlq` returns a non-empty result for "datasets about cardiovascular disease" (GraphRAG branch, skipped if `NLP_BACKEND=none`)
+  - J614 response includes `trace` with at least one `vector-search` stage
+  - J615 query page renders the trace in the debug drawer
+- Vitest: new `services/neo4j-proxy/__tests__/graphrag.test.ts` covering the rerank scoring and the `none`-backend fallback path.
+
+#### 25h: Docs + ADR ⏳
+
+- ADR-019 (this phase's decision record) — already in `docs/ADRs/` as `ADR-019-gds-apoc-azure-ai-foundry-graphrag.md`.
+- Update `docs/gotchas.md` with the GDS memory footprint note.
+- Update `docs/persona-journeys/` — add a "Data User asks a free-form research question" journey demonstrating the GraphRAG trace.
+- Update `docs/azure-deployment-guide.md` with the new `07-ai-foundry.sh` step.
+
+**Exit criteria:**
+
+1. `docker compose up` + `./neo4j/seed.sh` completes with FastRP embeddings present on 5000+ nodes.
+2. `curl localhost:9090/nlq -d '{"query":"datasets about diabetes"}'` returns at least 3 ranked HealthDataset nodes with a `trace` array.
+3. `https://ehds.mabu.red/query` shows `NLP backend: Azure OpenAI (gpt-4o-mini)` and answers the same query against the Azure deployment.
+4. All existing NLQ templates still work (regression suite green).
+5. Cost of a full weekly reset remains under €0.10 for AI Foundry (verified from Azure cost panel).
+
+---
+
 ## Architecture Decisions
 
 > **Note:** ADRs are maintained as standalone documents in [`docs/ADRs/`](ADRs/). Click any row below to read the full context, decision, and consequences for each ADR.
 
-| ADR                                                 | Title                                         | Date       | Status     |
-| --------------------------------------------------- | --------------------------------------------- | ---------- | ---------- |
-| [001](ADRs/ADR-001-postgresql-neo4j-split.md)       | PostgreSQL vs Neo4j Data Storage Split        | 2025-07-24 | Accepted   |
-| [002](ADRs/ADR-002-edc-data-plane-architecture.md)  | EDC Data Plane Architecture                   | 2025-07-24 | Accepted   |
-| [003](ADRs/ADR-003-healthdcat-ap-alignment.md)      | W3C HealthDCAT-AP Alignment                   | 2025-07-24 | Accepted   |
-| [004](ADRs/ADR-004-nextjs-unified-frontend.md)      | Next.js 14 as Unified Frontend                | 2025-07-25 | Accepted   |
-| [005](ADRs/ADR-005-jad-cfm-source-builds.md)        | JAD + CFM Source Builds                       | 2026-03-09 | Accepted   |
-| [006](ADRs/ADR-006-ghcr-image-publishing.md)        | GHCR Image Publishing                         | 2026-03-10 | Accepted   |
-| [007](ADRs/ADR-007-did-web-dsp-negotiation.md)      | DID:web Resolution & DSP Contract Negotiation | 2026-07-08 | Accepted   |
-| [008](ADRs/ADR-008-testing-strategy.md)             | Comprehensive Testing Strategy                | 2026-03-11 | Accepted   |
-| [009](ADRs/ADR-009-issuerservice-credential-fix.md) | IssuerService DCP Credential Issuance Fix     | 2026-07-12 | Accepted   |
-| [010](ADRs/ADR-010-wcag-accessibility.md)           | WCAG 2.2 AA Accessibility Compliance          | 2026-04-01 | Accepted   |
-| [011](ADRs/ADR-011-security-testing.md)             | Security Penetration Testing Strategy         | 2026-04-01 | Accepted   |
-| [012](ADRs/ADR-012-azure-container-apps.md)         | Azure Container Apps Deployment               | 2026-04-10 | Accepted   |
-| [013](ADRs/ADR-013-simpl-open-alignment.md)         | SIMPL-Open EU Programme Alignment             | 2026-04-05 | Accepted   |
-| [014](ADRs/ADR-014-weekly-demo-reset.md)            | Weekly Demo Environment Reset                 | 2026-04-12 | Accepted   |
-| [015](ADRs/ADR-015-single-vm-dev-deployment.md)     | Single-VM Dev Deployment (VS Subscription)    | 2026-04-13 | Superseded |
-| [016](ADRs/ADR-016-aca-off-hours-scaledown.md)      | ACA Off-Hours Scale-Down                      | 2026-04-13 | Accepted   |
-| [017](ADRs/ADR-017-persistent-storage-aca.md)       | Persistent Storage for Stateful ACA Services  | 2026-04-14 | Accepted   |
+| ADR                                                       | Title                                         | Date       | Status     |
+| --------------------------------------------------------- | --------------------------------------------- | ---------- | ---------- |
+| [001](ADRs/ADR-001-postgresql-neo4j-split.md)             | PostgreSQL vs Neo4j Data Storage Split        | 2025-07-24 | Accepted   |
+| [002](ADRs/ADR-002-edc-data-plane-architecture.md)        | EDC Data Plane Architecture                   | 2025-07-24 | Accepted   |
+| [003](ADRs/ADR-003-healthdcat-ap-alignment.md)            | W3C HealthDCAT-AP Alignment                   | 2025-07-24 | Accepted   |
+| [004](ADRs/ADR-004-nextjs-unified-frontend.md)            | Next.js 14 as Unified Frontend                | 2025-07-25 | Accepted   |
+| [005](ADRs/ADR-005-jad-cfm-source-builds.md)              | JAD + CFM Source Builds                       | 2026-03-09 | Accepted   |
+| [006](ADRs/ADR-006-ghcr-image-publishing.md)              | GHCR Image Publishing                         | 2026-03-10 | Accepted   |
+| [007](ADRs/ADR-007-did-web-dsp-negotiation.md)            | DID:web Resolution & DSP Contract Negotiation | 2026-07-08 | Accepted   |
+| [008](ADRs/ADR-008-testing-strategy.md)                   | Comprehensive Testing Strategy                | 2026-03-11 | Accepted   |
+| [009](ADRs/ADR-009-issuerservice-credential-fix.md)       | IssuerService DCP Credential Issuance Fix     | 2026-07-12 | Accepted   |
+| [010](ADRs/ADR-010-wcag-accessibility.md)                 | WCAG 2.2 AA Accessibility Compliance          | 2026-04-01 | Accepted   |
+| [011](ADRs/ADR-011-security-testing.md)                   | Security Penetration Testing Strategy         | 2026-04-01 | Accepted   |
+| [012](ADRs/ADR-012-azure-container-apps.md)               | Azure Container Apps Deployment               | 2026-04-10 | Accepted   |
+| [013](ADRs/ADR-013-simpl-open-alignment.md)               | SIMPL-Open EU Programme Alignment             | 2026-04-05 | Accepted   |
+| [014](ADRs/ADR-014-weekly-demo-reset.md)                  | Weekly Demo Environment Reset                 | 2026-04-12 | Accepted   |
+| [015](ADRs/ADR-015-single-vm-dev-deployment.md)           | Single-VM Dev Deployment (VS Subscription)    | 2026-04-13 | Superseded |
+| [016](ADRs/ADR-016-aca-off-hours-scaledown.md)            | ACA Off-Hours Scale-Down                      | 2026-04-13 | Accepted   |
+| [017](ADRs/ADR-017-persistent-storage-aca.md)             | Persistent Storage for Stateful ACA Services  | 2026-04-14 | Accepted   |
+| [018](ADRs/ADR-018-24x7-workaround-b.md)                  | 24×7 Operation + Postgres-on-ACA Workaround B | 2026-04-14 | Accepted   |
+| [019](ADRs/ADR-019-gds-apoc-azure-ai-foundry-graphrag.md) | GDS + APOC + Azure AI Foundry GraphRAG        | 2026-04-15 | Proposed   |
 
 > **Note:** The full text of ADR-1 through ADR-9 has been moved into the standalone ADR documents linked in the table above. Click any row to read the full context, decision, and consequences.
 
