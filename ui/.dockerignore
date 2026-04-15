@@ -1,3 +1,10 @@
 node_modules
 .next
 .env.local
+out
+test-results
+playwright-report
+coverage
+__tests__
+*.tsbuildinfo
+.turbo
