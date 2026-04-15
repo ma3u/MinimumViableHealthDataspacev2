@@ -50,6 +50,9 @@ docker buildx build --platform linux/amd64 \
 rm -rf "${SEED_DIR}"
 ok "Neo4j seed image pushed"
 
+# NEO4J_HOST must be the short app name, not the internal FQDN. ACA TCP ingress
+# only routes environment-local Bolt via the service short name; the
+# *.internal.<domain> FQDN used for HTTP ingress silently times out on TCP.
 log "Creating/updating Neo4j seed job..."
 if az containerapp job show --name "$NEO4J_SEED_JOB" --resource-group "$RG" -o none 2>/dev/null; then
   az containerapp job update \
@@ -58,7 +61,7 @@ if az containerapp job show --name "$NEO4J_SEED_JOB" --resource-group "$RG" -o n
     --cpu 0.5 --memory 1Gi \
     --replica-timeout 600 \
     --set-env-vars \
-      "NEO4J_HOST=${NEO4J_APP}.internal.${ACA_DOMAIN}" \
+      "NEO4J_HOST=${NEO4J_APP}" \
       "NEO4J_PORT=7687" \
       "NEO4J_USER=${NEO4J_USER}" \
       "NEO4J_PASSWORD=${NEO4J_PASSWORD}" \
@@ -74,7 +77,7 @@ else
     --cpu 0.5 --memory 1Gi \
     --trigger-type Manual --replica-timeout 600 \
     --env-vars \
-      "NEO4J_HOST=${NEO4J_APP}.internal.${ACA_DOMAIN}" \
+      "NEO4J_HOST=${NEO4J_APP}" \
       "NEO4J_PORT=7687" \
       "NEO4J_USER=${NEO4J_USER}" \
       "NEO4J_PASSWORD=${NEO4J_PASSWORD}" \
