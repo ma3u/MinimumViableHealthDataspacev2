@@ -71,12 +71,22 @@ export async function apiGet(page: Page, path: string) {
  * After this call, `page.request` shares the authenticated session cookies.
  */
 export async function loginAs(page: Page, username: string, password: string) {
-  await page.goto("/auth/signin", { waitUntil: "domcontentloaded" });
+  // Wait for networkidle so NextAuth's SessionProvider has finished
+  // initializing (fetched /api/auth/session + /api/keycloak-config). Clicking
+  // "Sign in with Keycloak" before this is established causes signIn() to
+  // fail silently and reload the page instead of redirecting to Keycloak.
+  await page.goto("/auth/signin", { waitUntil: "networkidle" });
   const keycloakBtn = page.getByRole("button", {
     name: /sign in with keycloak/i,
   });
   await expect(keycloakBtn).toBeVisible({ timeout: T });
   await keycloakBtn.click();
+
+  // Wait for the navigation to Keycloak to complete. NextAuth's signIn() is
+  // async (csrf → providers → signin/keycloak → navigate), so the click
+  // resolves before the navigation starts. Without an explicit URL wait, the
+  // username-field assertion polls /auth/signin and times out.
+  await page.waitForURL(/protocol\/openid-connect\/auth/, { timeout: 20_000 });
 
   await expect(page.getByLabel(/username or email/i)).toBeVisible({
     timeout: 15_000,

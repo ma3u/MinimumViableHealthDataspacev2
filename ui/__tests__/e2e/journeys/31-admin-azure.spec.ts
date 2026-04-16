@@ -32,6 +32,12 @@ test.describe("Admin → Azure regression (J610–J619)", () => {
   });
 
   test.beforeEach(async ({ page }) => {
+    // Keycloak OIDC login on ACA consumes ~25s (networkidle + OIDC redirect
+    // chain). The admin/components route itself can take 10-15s because it
+    // sequentially fetches Azure Monitor metrics and CFM tenant data. The 30s
+    // default per-test timeout leaves no margin for the API response waits,
+    // so raise it for every test in this describe block.
+    test.setTimeout(60_000);
     await loginAs(page, "edcadmin", "edcadmin");
   });
 
