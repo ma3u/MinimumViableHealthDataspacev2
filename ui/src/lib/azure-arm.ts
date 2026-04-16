@@ -38,6 +38,11 @@ interface CachedToken {
 
 let cachedArmToken: CachedToken | null = null;
 
+// Short enough that a dead managed-identity endpoint or unreachable ARM
+// doesn't stall the /admin/components topology route until Next.js gives up
+// (which leaves the UI stuck on "Loading EDC components…").
+const ARM_FETCH_TIMEOUT_MS = 8_000;
+
 /**
  * Fetch an ARM access token via the ACA managed identity endpoint.
  *
@@ -67,6 +72,7 @@ async function getArmAccessToken(): Promise<string> {
   const res = await fetch(url.toString(), {
     method: "GET",
     headers: { "X-IDENTITY-HEADER": header },
+    signal: AbortSignal.timeout(ARM_FETCH_TIMEOUT_MS),
   });
   if (!res.ok) {
     throw new Error(
@@ -97,6 +103,7 @@ async function armGet<T>(path: string): Promise<T> {
     },
     // Disable Next.js caching for live metrics
     cache: "no-store",
+    signal: AbortSignal.timeout(ARM_FETCH_TIMEOUT_MS),
   });
   if (!res.ok) {
     throw new Error(`ARM ${path} → ${res.status} ${await res.text()}`);
