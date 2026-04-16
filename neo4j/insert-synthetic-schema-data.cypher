@@ -389,6 +389,24 @@ MERGE (obs4)-[:CODED_BY]->(loincHbA1c)
 MERGE (op4:OMOPPerson {personId: 99004})
   SET op4.name = 'OMOP Person 99004', op4.yearOfBirth = 1972
 MERGE (p4)-[:MAPPED_TO]->(op4)
+MERGE (ov4:OMOPVisitOccurrence {visitOccurrenceId: 88004})
+  SET ov4.name = 'Annual Check-up (OMOP)', ov4.visitConceptId = 9202
+MERGE (op4)-[:HAS_VISIT_OCCURRENCE]->(ov4)
+MERGE (enc4)-[:MAPPED_TO]->(ov4)
+MERGE (oc4a:OMOPConditionOccurrence {conditionOccurrenceId: 77004})
+  SET oc4a.name = 'T2D (OMOP)', oc4a.conditionConceptId = 201826
+MERGE (op4)-[:HAS_CONDITION_OCCURRENCE]->(oc4a)
+MERGE (oc4a)-[:STANDARD_CONCEPT]->(scDM)
+MERGE (cond4a)-[:MAPPED_TO]->(oc4a)
+MERGE (oc4b:OMOPConditionOccurrence {conditionOccurrenceId: 77104})
+  SET oc4b.name = 'Hypertension (OMOP)', oc4b.conditionConceptId = 320128
+MERGE (op4)-[:HAS_CONDITION_OCCURRENCE]->(oc4b)
+MERGE (oc4b)-[:STANDARD_CONCEPT]->(scHTN)
+MERGE (cond4b)-[:MAPPED_TO]->(oc4b)
+MERGE (om4:OMOPMeasurement {measurementId: 66004})
+  SET om4.name = 'HbA1c Measurement (OMOP)', om4.valueAsNumber = 7.2
+MERGE (op4)-[:HAS_MEASUREMENT]->(om4)
+MERGE (obs4)-[:MAPPED_TO]->(om4)
 
 // ── Patient 5: CKD Stage 3 ──
 MERGE (p5:Patient {resourceId: 'fhir-pat-1005'})
@@ -445,6 +463,23 @@ MERGE (med6)-[:CODED_BY]->(rxMetformin)
 MERGE (op6:OMOPPerson {personId: 99006})
   SET op6.name = 'OMOP Person 99006', op6.yearOfBirth = 1980
 MERGE (p6)-[:MAPPED_TO]->(op6)
+MERGE (ov6:OMOPVisitOccurrence {visitOccurrenceId: 88006})
+  SET ov6.name = 'Diabetology Follow-up (OMOP)', ov6.visitConceptId = 9202
+MERGE (op6)-[:HAS_VISIT_OCCURRENCE]->(ov6)
+MERGE (enc6)-[:MAPPED_TO]->(ov6)
+MERGE (oc6:OMOPConditionOccurrence {conditionOccurrenceId: 77006})
+  SET oc6.name = 'T2D (OMOP)', oc6.conditionConceptId = 201826
+MERGE (op6)-[:HAS_CONDITION_OCCURRENCE]->(oc6)
+MERGE (oc6)-[:STANDARD_CONCEPT]->(scDM)
+MERGE (cond6)-[:MAPPED_TO]->(oc6)
+MERGE (om6:OMOPMeasurement {measurementId: 66006})
+  SET om6.name = 'HbA1c Measurement (OMOP)', om6.valueAsNumber = 9.3
+MERGE (op6)-[:HAS_MEASUREMENT]->(om6)
+MERGE (obs6)-[:MAPPED_TO]->(om6)
+MERGE (od6:OMOPDrugExposure {drugExposureId: 55006})
+  SET od6.name = 'Metformin Exposure (OMOP)', od6.drugConceptId = 1503297
+MERGE (op6)-[:HAS_DRUG_EXPOSURE]->(od6)
+MERGE (med6)-[:MAPPED_TO]->(od6)
 
 // ── Patient 7: Hypertension + CKD comorbidity ──
 MERGE (p7:Patient {resourceId: 'fhir-pat-1007'})
@@ -472,6 +507,28 @@ MERGE (med7)-[:CODED_BY]->(rxLisinopril)
 MERGE (op7:OMOPPerson {personId: 99007})
   SET op7.name = 'OMOP Person 99007', op7.yearOfBirth = 1945
 MERGE (p7)-[:MAPPED_TO]->(op7)
+MERGE (ov7:OMOPVisitOccurrence {visitOccurrenceId: 88007})
+  SET ov7.name = 'Internal Medicine Visit (OMOP)', ov7.visitConceptId = 9202
+MERGE (op7)-[:HAS_VISIT_OCCURRENCE]->(ov7)
+MERGE (enc7)-[:MAPPED_TO]->(ov7)
+MERGE (oc7a:OMOPConditionOccurrence {conditionOccurrenceId: 77007})
+  SET oc7a.name = 'Hypertension (OMOP)', oc7a.conditionConceptId = 320128
+MERGE (op7)-[:HAS_CONDITION_OCCURRENCE]->(oc7a)
+MERGE (oc7a)-[:STANDARD_CONCEPT]->(scHTN)
+MERGE (cond7a)-[:MAPPED_TO]->(oc7a)
+MERGE (oc7b:OMOPConditionOccurrence {conditionOccurrenceId: 77107})
+  SET oc7b.name = 'CKD Stage 3 (OMOP)', oc7b.conditionConceptId = 443611
+MERGE (op7)-[:HAS_CONDITION_OCCURRENCE]->(oc7b)
+MERGE (oc7b)-[:STANDARD_CONCEPT]->(scCKD)
+MERGE (cond7b)-[:MAPPED_TO]->(oc7b)
+MERGE (om7:OMOPMeasurement {measurementId: 66007})
+  SET om7.name = 'BP Measurement (OMOP)', om7.valueAsNumber = 160
+MERGE (op7)-[:HAS_MEASUREMENT]->(om7)
+MERGE (obs7)-[:MAPPED_TO]->(om7)
+MERGE (od7:OMOPDrugExposure {drugExposureId: 55007})
+  SET od7.name = 'Lisinopril Exposure (OMOP)', od7.drugConceptId = 1308216
+MERGE (op7)-[:HAS_DRUG_EXPOSURE]->(od7)
+MERGE (med7)-[:MAPPED_TO]->(od7)
 
 // ── Patient 8: Asthma (paediatric) ──
 MERGE (p8:Patient {resourceId: 'fhir-pat-1008'})
@@ -495,6 +552,23 @@ MERGE (med8)-[:CODED_BY]->(rxAlbuterol)
 MERGE (op8:OMOPPerson {personId: 99008})
   SET op8.name = 'OMOP Person 99008', op8.yearOfBirth = 2012
 MERGE (p8)-[:MAPPED_TO]->(op8)
+MERGE (ov8:OMOPVisitOccurrence {visitOccurrenceId: 88008})
+  SET ov8.name = 'Paediatric Asthma Review (OMOP)', ov8.visitConceptId = 9202
+MERGE (op8)-[:HAS_VISIT_OCCURRENCE]->(ov8)
+MERGE (enc8)-[:MAPPED_TO]->(ov8)
+MERGE (oc8:OMOPConditionOccurrence {conditionOccurrenceId: 77008})
+  SET oc8.name = 'Asthma (OMOP)', oc8.conditionConceptId = 317009
+MERGE (op8)-[:HAS_CONDITION_OCCURRENCE]->(oc8)
+MERGE (oc8)-[:STANDARD_CONCEPT]->(scAsthma)
+MERGE (cond8)-[:MAPPED_TO]->(oc8)
+MERGE (om8:OMOPMeasurement {measurementId: 66008})
+  SET om8.name = 'FEV1 Measurement (OMOP)', om8.valueAsNumber = 85
+MERGE (op8)-[:HAS_MEASUREMENT]->(om8)
+MERGE (obs8)-[:MAPPED_TO]->(om8)
+MERGE (od8:OMOPDrugExposure {drugExposureId: 55008})
+  SET od8.name = 'Albuterol Exposure (OMOP)', od8.drugConceptId = 1154343
+MERGE (op8)-[:HAS_DRUG_EXPOSURE]->(od8)
+MERGE (med8)-[:MAPPED_TO]->(od8)
 
 // ==============================================================================
 // End of all synthetic data
