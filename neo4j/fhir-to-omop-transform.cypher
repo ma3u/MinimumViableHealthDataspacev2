@@ -136,7 +136,20 @@ MATCH (pr)-[:MAPPED_TO]->(opo:OMOPProcedureOccurrence)
 MERGE (opo)-[:CODED_BY]->(sc)
 RETURN count(sc) AS snomed_links_on_omop_procedures;
 
-// ── 7. Summary ───────────────────────────────────────────────────────────────
+// ── 7. Cleanup: Remove orphaned OMOPPerson (no clinical events) ─────────────
+// An OMOPPerson with no downstream HAS_CONDITION_OCCURRENCE / HAS_DRUG_EXPOSURE /
+// HAS_MEASUREMENT / HAS_PROCEDURE_OCCURRENCE has nothing to contribute to research
+// analytics. Detach-delete keeps EHDS OMOP-4.7 passing (no orphan OMOP persons).
+MATCH (op:OMOPPerson)
+WHERE NOT (op)-[:HAS_CONDITION_OCCURRENCE]->()
+  AND NOT (op)-[:HAS_DRUG_EXPOSURE]->()
+  AND NOT (op)-[:HAS_MEASUREMENT]->()
+  AND NOT (op)-[:HAS_PROCEDURE_OCCURRENCE]->()
+WITH op, count(op) AS orphans
+DETACH DELETE op
+RETURN orphans AS orphan_omop_persons_removed;
+
+// ── 8. Summary ───────────────────────────────────────────────────────────────
 
 MATCH (n)
 WHERE n:OMOPPerson

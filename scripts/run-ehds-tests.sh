@@ -370,8 +370,10 @@ run_eehrxf_tests() {
   fi
 
   # 3.3 — Profiles linked to categories
+  # Schema convention: (profile)-[:PART_OF_CATEGORY]->(category).
+  # See docs/health-dataspace-graph-schema.md:442 and neo4j/register-eehrxf-profiles.cypher.
   local test_id="EEHR-3.3"
-  resp=$(neo4j_query "MATCH (c:EEHRxFCategory)-[:HAS_PROFILE]->(p:EEHRxFProfile) RETURN count(*) AS cnt") || resp=""
+  resp=$(neo4j_query "MATCH (p:EEHRxFProfile)-[:PART_OF_CATEGORY]->(c:EEHRxFCategory) RETURN count(*) AS cnt") || resp=""
 
   if [ -n "$resp" ]; then
     local count

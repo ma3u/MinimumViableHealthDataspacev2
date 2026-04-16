@@ -45,6 +45,16 @@ az containerapp create \
   -o none
 ok "Provision Manager"
 
+# ── EDC internal endpoints (ACA internal ingress uses 443/80 on FQDN,
+# not the container targetPort) ─────────────────────────────────────────────
+EDC_MANAGEMENT_URL="https://${CONTROLPLANE_APP}.internal.${ACA_DOMAIN}/api/mgmt"
+EDC_IDENTITY_URL="https://${IDENTITYHUB_APP}.internal.${ACA_DOMAIN}/api/identity"
+EDC_ISSUER_URL="https://${ISSUER_APP}.internal.${ACA_DOMAIN}/api/admin"
+EDC_TENANT_URL="https://${TENANT_MGR_APP}.internal.${ACA_DOMAIN}/api"
+EDC_PROVISION_URL="https://${PROVISION_MGR_APP}.internal.${ACA_DOMAIN}/api"
+# Keycloak has external ingress only — reach it via public FQDN, not :8080.
+KEYCLOAK_BASE_URL="https://${KEYCLOAK_APP}.${ACA_DOMAIN}"
+
 # ── Next.js UI ──────────────────────────────────────────────────────────────
 log "Creating UI container app..."
 az containerapp create \
@@ -66,14 +76,24 @@ az containerapp create \
     "NEXTAUTH_SECRET=mvhd-azure-secret-change-me" \
     "KEYCLOAK_ID=health-dataspace-ui" \
     "KEYCLOAK_SECRET=health-dataspace-ui-secret" \
-    "KEYCLOAK_ISSUER=${KEYCLOAK_PUBLIC_URL:-}/realms/edcv" \
-    "KEYCLOAK_PUBLIC_URL=${KEYCLOAK_PUBLIC_URL:-}/realms/edcv" \
+    "KEYCLOAK_ISSUER=${KEYCLOAK_BASE_URL}/realms/edcv" \
+    "KEYCLOAK_PUBLIC_URL=${KEYCLOAK_BASE_URL}/realms/edcv" \
+    "KEYCLOAK_INTERNAL_URL=${KEYCLOAK_BASE_URL}" \
+    "NEXT_PUBLIC_KEYCLOAK_URL=${KEYCLOAK_BASE_URL}" \
+    "NEXT_PUBLIC_KEYCLOAK_REALM=edcv" \
     "NEO4J_PROXY_URL=${NEO4J_PROXY_URL:-}:9090" \
     "NEO4J_HTTP_URL=${NEO4J_HTTP_URL:-}" \
     "NEO4J_URI=bolt://${NEO4J_APP}:7687" \
     "NEO4J_ENCRYPTED=false" \
     "NEO4J_USER=${NEO4J_USER}" \
     "NEO4J_PASSWORD=${NEO4J_PASSWORD}" \
+    "EDC_MANAGEMENT_URL=${EDC_MANAGEMENT_URL}" \
+    "EDC_IDENTITY_URL=${EDC_IDENTITY_URL}" \
+    "EDC_ISSUER_URL=${EDC_ISSUER_URL}" \
+    "EDC_TENANT_URL=${EDC_TENANT_URL}" \
+    "EDC_PROVISION_URL=${EDC_PROVISION_URL}" \
+    "EDC_SERVICE_CLIENT_ID=admin" \
+    "EDC_SERVICE_CLIENT_SECRET=edc-v-admin-secret" \
   -o none
 ok "UI container app"
 
