@@ -66,6 +66,10 @@ interface Snapshot {
   timestamp: string;
   dockerAvailable: boolean;
   metricsSource?: "docker" | "azure-monitor" | "none";
+  // Set to "azure" when the API server detects DEPLOYMENT_TARGET=azure.
+  // This drives the Azure-vs-StackIT cost panel choice independently of
+  // whether the live metrics call succeeded.
+  deploymentTarget?: "azure" | "docker" | "stackit" | "unknown";
   components: ComponentInfo[];
   participants: ParticipantInfo[];
 }
@@ -1693,10 +1697,13 @@ export default function AdminComponentsPage() {
               );
             })}
 
-            {/* Docker unavailable banner — hidden when Azure Monitor provides metrics */}
+            {/* Docker unavailable banner — hidden on Azure deployments
+                (where Docker socket is genuinely not present and metrics come
+                from Azure Monitor instead). */}
             {snapshot &&
               !snapshot.dockerAvailable &&
-              snapshot.metricsSource !== "azure-monitor" && (
+              snapshot.metricsSource !== "azure-monitor" &&
+              snapshot.deploymentTarget !== "azure" && (
                 <div className="border border-yellow-600/40 bg-yellow-900/20 rounded-xl p-4 text-sm text-[var(--warning-text)]">
                   <strong>Docker socket not available.</strong> CPU and memory
                   metrics require the Docker socket to be mounted.
@@ -1705,8 +1712,12 @@ export default function AdminComponentsPage() {
           </>
         )}
 
-        {/* Cost estimator — Azure when metrics come from Azure Monitor, StackIT otherwise */}
-        {snapshot?.metricsSource === "azure-monitor" ? (
+        {/* Cost estimator — Azure on ACA deployment, StackIT otherwise.
+            We use the deploy-target signal from the snapshot rather than only
+            metricsSource so the Azure card stays visible even when Azure Monitor
+            metrics are momentarily unavailable (e.g. role-assignment lag). */}
+        {snapshot?.deploymentTarget === "azure" ||
+        snapshot?.metricsSource === "azure-monitor" ? (
           <AzureCostEstimatorPanel
             liveComponents={snapshot?.components ?? []}
           />

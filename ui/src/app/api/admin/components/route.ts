@@ -566,10 +566,17 @@ export async function GET() {
       a.component.localeCompare(b.component),
   );
 
+  const deploymentTarget = isAzureDeployment()
+    ? "azure"
+    : dockerAvailable
+      ? "docker"
+      : "unknown";
+
   return NextResponse.json({
     timestamp: new Date().toISOString(),
     dockerAvailable,
     metricsSource,
+    deploymentTarget,
     components,
     participants,
   });
