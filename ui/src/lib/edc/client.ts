@@ -110,6 +110,7 @@ async function getAccessToken(): Promise<string> {
       client_secret: clientSecret,
     }),
     cache: "no-store",
+    signal: AbortSignal.timeout(5_000),
   });
 
   if (!response.ok) {
@@ -137,7 +138,14 @@ interface RequestOptions {
   headers?: Record<string, string>;
   /** AbortSignal for cancellation */
   signal?: AbortSignal;
+  /** Request timeout in ms (default 8_000). Prevents hung fetches when the
+   *  upstream ACA replica is unavailable (e.g. mvhd-tenant-mgr scaled to 0). */
+  timeoutMs?: number;
 }
+
+/** Default fetch timeout — short enough that a dead upstream doesn't stall
+ *  operator dashboards, long enough for normal JAD startup latency. */
+const DEFAULT_TIMEOUT_MS = 8_000;
 
 /**
  * Make a typed API request to a JAD service.
@@ -174,11 +182,21 @@ async function apiRequest<T = unknown>(
     }
   }
 
+  // Compose caller-supplied AbortSignal (if any) with a default timeout.
+  // Without this, a dead ACA replica causes fetches to hang indefinitely,
+  // which blocks the /api/admin/components route until the HTTP client
+  // times out (and times out the test harness with it).
+  const timeoutMs = options.timeoutMs ?? DEFAULT_TIMEOUT_MS;
+  const timeoutSignal = AbortSignal.timeout(timeoutMs);
+  const signal = options.signal
+    ? AbortSignal.any([options.signal, timeoutSignal])
+    : timeoutSignal;
+
   const response = await fetch(url, {
     method,
     headers,
     body: body ? JSON.stringify(body) : undefined,
-    signal: options.signal,
+    signal,
     cache: "no-store",
   });
 
