@@ -85,7 +85,7 @@ export async function GET(req: Request) {
                WITH p, encounters, count(c) AS conditions
                OPTIONAL MATCH (p)-[:HAS_OBSERVATION]->(o:Observation)
                WITH p, encounters, conditions, count(o) AS observations
-               OPTIONAL MATCH (p)-[:HAS_MEDICATION_REQUEST]->(m:MedicationRequest)
+               OPTIONAL MATCH (p)-[:HAS_MEDICATION|HAS_MEDICATION_REQUEST]->(m:MedicationRequest)
                WITH p, encounters, conditions, observations, count(m) AS medications
                OPTIONAL MATCH (p)-[:HAS_PROCEDURE]->(pr:Procedure)
                RETURN encounters, conditions, observations, medications, count(pr) AS procedures`,
@@ -138,7 +138,7 @@ export async function GET(req: Request) {
            MATCH (e:Encounter)  WITH patients, count(e) AS encounters
            MATCH (c:Condition)  WITH patients, encounters, count(c) AS conditions
            MATCH (o:Observation) WITH patients, encounters, conditions, count(o) AS observations
-           MATCH (m:MedicationRequest) WITH patients, encounters, conditions, observations, count(m) AS medications
+           OPTIONAL MATCH (m:MedicationRequest) WITH patients, encounters, conditions, observations, count(m) AS medications
            OPTIONAL MATCH (pr:Procedure)
            RETURN patients, encounters, conditions, observations, medications, count(pr) AS procedures`,
         ),
@@ -183,14 +183,16 @@ export async function GET(req: Request) {
     }>(
       `MATCH (p:Patient)
        WHERE coalesce(p.id, p.resourceId) = $patientId
-       MATCH (p)-[:HAS_ENCOUNTER|HAS_CONDITION|HAS_OBSERVATION|HAS_MEDICATION|HAS_PROCEDURE]->(fhir)
+       MATCH (p)-[:HAS_ENCOUNTER|HAS_CONDITION|HAS_OBSERVATION|HAS_MEDICATION|HAS_MEDICATION_REQUEST|HAS_PROCEDURE]->(fhir)
        OPTIONAL MATCH (fhir)-[:MAPPED_TO]->(omop)
-       RETURN labels(fhir)[0]                                   AS fhirType,
-              fhir.id                                           AS fhirId,
-              coalesce(fhir.date, fhir.onsetDate, fhir.dateTime, fhir.performedStart) AS date,
-              coalesce(fhir.display, fhir.code)                 AS display,
-              labels(omop)[0]                                   AS omopType,
-              omop.id                                           AS omopId
+       RETURN labels(fhir)[0]                                                          AS fhirType,
+              coalesce(fhir.id, fhir.resourceId)                                       AS fhirId,
+              coalesce(fhir.date, fhir.onsetDate, fhir.dateTime, fhir.performedStart)  AS date,
+              coalesce(fhir.display, fhir.name, fhir.code)                             AS display,
+              labels(omop)[0]                                                          AS omopType,
+              coalesce(omop.id, omop.personId, omop.visitOccurrenceId,
+                       omop.conditionOccurrenceId, omop.measurementId,
+                       omop.drugExposureId)                                            AS omopId
        ORDER BY date`,
       { patientId },
     );

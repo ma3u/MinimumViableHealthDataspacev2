@@ -150,14 +150,18 @@ MERGE (patient)-[:FROM_DATASET]->(dataset)
 MERGE (encounter:Encounter {resourceId: 'fhir-enc-2001'})
   SET encounter.name = 'Ambulatory Encounter',
       encounter.class = 'ambulatory',
-      encounter.status = 'finished'
+      encounter.status = 'finished',
+      encounter.date = '2023-06-15T09:30:00Z',
+      encounter.display = 'Initial diabetes screening'
 MERGE (patient)-[:HAS_ENCOUNTER]->(encounter)
 
 MERGE (condition:Condition {resourceId: 'fhir-cond-3001'})
   SET condition.name = 'Type 2 Diabetes (FHIR)',
       condition.clinicalStatus = 'active',
       condition.code = '73211009',
-      condition.codeSystem = 'http://snomed.info/sct'
+      condition.codeSystem = 'http://snomed.info/sct',
+      condition.onsetDate = '2023-06-15T10:00:00Z',
+      condition.display = 'Type 2 diabetes mellitus'
 MERGE (patient)-[:HAS_CONDITION]->(condition)
 MERGE (condition)-[:RECORDED_DURING]->(encounter)
 MERGE (condition)-[:CODED_BY]->(scDM)
@@ -169,7 +173,9 @@ MERGE (obs:Observation {resourceId: 'fhir-obs-4001'})
       obs.status = 'final',
       obs.code = '4548-4',
       obs.valueQuantity = 8.1,
-      obs.valueUnit = '%'
+      obs.valueUnit = '%',
+      obs.dateTime = '2023-06-15T10:15:00Z',
+      obs.display = 'HbA1c 8.1%'
 MERGE (patient)-[:HAS_OBSERVATION]->(obs)
 MERGE (obs)-[:PART_OF]->(encounter)
 MERGE (obs)-[:CODED_BY]->(loincHbA1c)
@@ -179,7 +185,9 @@ MERGE (medReq:MedicationRequest {resourceId: 'fhir-med-5001'})
   SET medReq.name = 'Metformin 500mg (FHIR)',
       medReq.status = 'active',
       medReq.intent = 'order',
-      medReq.medicationCode = '860975'
+      medReq.medicationCode = '860975',
+      medReq.date = '2023-07-10T14:20:00Z',
+      medReq.display = 'Metformin 500mg'
 MERGE (patient)-[:HAS_MEDICATION_REQUEST]->(medReq)
 MERGE (medReq)-[:CODED_BY]->(rxMetformin)
 
@@ -295,21 +303,25 @@ MERGE (p2:Patient {resourceId: 'fhir-pat-1002'})
   SET p2.name = 'Patient fhir-pat-1002', p2.gender = 'male', p2.birthDate = date('1958-11-03')
 MERGE (p2)-[:FROM_DATASET]->(ds)
 MERGE (enc2:Encounter {resourceId: 'fhir-enc-2002'})
-  SET enc2.name = 'Cardiology Visit', enc2.class = 'ambulatory', enc2.status = 'finished'
+  SET enc2.name = 'Cardiology Visit', enc2.class = 'ambulatory', enc2.status = 'finished',
+      enc2.date = '2023-09-12T11:00:00Z', enc2.display = 'Cardiology consultation'
 MERGE (p2)-[:HAS_ENCOUNTER]->(enc2)
 MERGE (cond2:Condition {resourceId: 'fhir-cond-3002'})
-  SET cond2.name = 'Essential Hypertension (FHIR)', cond2.clinicalStatus = 'active', cond2.code = '38341003'
+  SET cond2.name = 'Essential Hypertension (FHIR)', cond2.clinicalStatus = 'active', cond2.code = '38341003',
+      cond2.onsetDate = '2023-09-12T11:30:00Z', cond2.display = 'Essential hypertension'
 MERGE (p2)-[:HAS_CONDITION]->(cond2)
 MERGE (cond2)-[:RECORDED_DURING]->(enc2)
 MERGE (cond2)-[:CODED_BY]->(scHTN)
 MERGE (cond2)-[:CODED_BY]->(icdHTN)
 MERGE (obs2:Observation {resourceId: 'fhir-obs-4002'})
-  SET obs2.name = 'BP 145/92 (FHIR)', obs2.status = 'final', obs2.code = '55284-4', obs2.valueQuantity = 145, obs2.valueUnit = 'mmHg'
+  SET obs2.name = 'BP 145/92 (FHIR)', obs2.status = 'final', obs2.code = '55284-4', obs2.valueQuantity = 145, obs2.valueUnit = 'mmHg',
+      obs2.dateTime = '2023-09-12T11:45:00Z', obs2.display = 'Blood pressure 145/92 mmHg'
 MERGE (p2)-[:HAS_OBSERVATION]->(obs2)
 MERGE (obs2)-[:PART_OF]->(enc2)
 MERGE (obs2)-[:CODED_BY]->(loincBP)
 MERGE (med2:MedicationRequest {resourceId: 'fhir-med-5002'})
-  SET med2.name = 'Lisinopril 10mg (FHIR)', med2.status = 'active', med2.intent = 'order'
+  SET med2.name = 'Lisinopril 10mg (FHIR)', med2.status = 'active', med2.intent = 'order',
+      med2.date = '2023-10-01T09:00:00Z', med2.display = 'Lisinopril 10mg'
 MERGE (p2)-[:HAS_MEDICATION_REQUEST]->(med2)
 MERGE (med2)-[:CODED_BY]->(rxLisinopril)
 // OMOP mappings
@@ -335,19 +347,23 @@ MERGE (p3:Patient {resourceId: 'fhir-pat-1003'})
   SET p3.name = 'Patient fhir-pat-1003', p3.gender = 'female', p3.birthDate = date('1990-07-22')
 MERGE (p3)-[:FROM_DATASET]->(ds)
 MERGE (enc3:Encounter {resourceId: 'fhir-enc-2003'})
-  SET enc3.name = 'Pulmonology Visit', enc3.class = 'ambulatory', enc3.status = 'finished'
+  SET enc3.name = 'Pulmonology Visit', enc3.class = 'ambulatory', enc3.status = 'finished',
+      enc3.date = '2024-02-05T14:00:00Z', enc3.display = 'Pulmonology consultation'
 MERGE (p3)-[:HAS_ENCOUNTER]->(enc3)
 MERGE (cond3:Condition {resourceId: 'fhir-cond-3003'})
-  SET cond3.name = 'Asthma (FHIR)', cond3.clinicalStatus = 'active', cond3.code = '195967001'
+  SET cond3.name = 'Asthma (FHIR)', cond3.clinicalStatus = 'active', cond3.code = '195967001',
+      cond3.onsetDate = '2024-02-05T14:30:00Z', cond3.display = 'Asthma'
 MERGE (p3)-[:HAS_CONDITION]->(cond3)
 MERGE (cond3)-[:CODED_BY]->(scAsthma)
 MERGE (cond3)-[:CODED_BY]->(icdAsthma)
 MERGE (obs3:Observation {resourceId: 'fhir-obs-4003'})
-  SET obs3.name = 'FEV1 72% (FHIR)', obs3.status = 'final', obs3.code = '20150-9', obs3.valueQuantity = 72, obs3.valueUnit = '%'
+  SET obs3.name = 'FEV1 72% (FHIR)', obs3.status = 'final', obs3.code = '20150-9', obs3.valueQuantity = 72, obs3.valueUnit = '%',
+      obs3.dateTime = '2024-02-05T14:45:00Z', obs3.display = 'FEV1 72%'
 MERGE (p3)-[:HAS_OBSERVATION]->(obs3)
 MERGE (obs3)-[:CODED_BY]->(loincFEV1)
 MERGE (med3:MedicationRequest {resourceId: 'fhir-med-5003'})
-  SET med3.name = 'Albuterol Inhaler (FHIR)', med3.status = 'active', med3.intent = 'order'
+  SET med3.name = 'Albuterol Inhaler (FHIR)', med3.status = 'active', med3.intent = 'order',
+      med3.date = '2024-02-20T10:00:00Z', med3.display = 'Albuterol inhaler'
 MERGE (p3)-[:HAS_MEDICATION_REQUEST]->(med3)
 MERGE (med3)-[:CODED_BY]->(rxAlbuterol)
 MERGE (op3:OMOPPerson {personId: 99003})
@@ -372,18 +388,22 @@ MERGE (p4:Patient {resourceId: 'fhir-pat-1004'})
   SET p4.name = 'Patient fhir-pat-1004', p4.gender = 'male', p4.birthDate = date('1972-01-15')
 MERGE (p4)-[:FROM_DATASET]->(ds)
 MERGE (enc4:Encounter {resourceId: 'fhir-enc-2004'})
-  SET enc4.name = 'Annual Check-up', enc4.class = 'ambulatory', enc4.status = 'finished'
+  SET enc4.name = 'Annual Check-up', enc4.class = 'ambulatory', enc4.status = 'finished',
+      enc4.date = '2024-04-18T08:30:00Z', enc4.display = 'Annual check-up'
 MERGE (p4)-[:HAS_ENCOUNTER]->(enc4)
 MERGE (cond4a:Condition {resourceId: 'fhir-cond-3004a'})
-  SET cond4a.name = 'Type 2 Diabetes (FHIR)', cond4a.clinicalStatus = 'active', cond4a.code = '73211009'
+  SET cond4a.name = 'Type 2 Diabetes (FHIR)', cond4a.clinicalStatus = 'active', cond4a.code = '73211009',
+      cond4a.onsetDate = '2023-11-22T09:15:00Z', cond4a.display = 'Type 2 diabetes mellitus'
 MERGE (p4)-[:HAS_CONDITION]->(cond4a)
 MERGE (cond4a)-[:CODED_BY]->(scDM)
 MERGE (cond4b:Condition {resourceId: 'fhir-cond-3004b'})
-  SET cond4b.name = 'Essential Hypertension (FHIR)', cond4b.clinicalStatus = 'active', cond4b.code = '38341003'
+  SET cond4b.name = 'Essential Hypertension (FHIR)', cond4b.clinicalStatus = 'active', cond4b.code = '38341003',
+      cond4b.onsetDate = '2024-01-10T10:00:00Z', cond4b.display = 'Essential hypertension'
 MERGE (p4)-[:HAS_CONDITION]->(cond4b)
 MERGE (cond4b)-[:CODED_BY]->(scHTN)
 MERGE (obs4:Observation {resourceId: 'fhir-obs-4004'})
-  SET obs4.name = 'HbA1c 7.2% (FHIR)', obs4.status = 'final', obs4.code = '4548-4', obs4.valueQuantity = 7.2, obs4.valueUnit = '%'
+  SET obs4.name = 'HbA1c 7.2% (FHIR)', obs4.status = 'final', obs4.code = '4548-4', obs4.valueQuantity = 7.2, obs4.valueUnit = '%',
+      obs4.dateTime = '2024-04-18T09:00:00Z', obs4.display = 'HbA1c 7.2%'
 MERGE (p4)-[:HAS_OBSERVATION]->(obs4)
 MERGE (obs4)-[:CODED_BY]->(loincHbA1c)
 MERGE (op4:OMOPPerson {personId: 99004})
@@ -413,14 +433,17 @@ MERGE (p5:Patient {resourceId: 'fhir-pat-1005'})
   SET p5.name = 'Patient fhir-pat-1005', p5.gender = 'female', p5.birthDate = date('1950-09-30')
 MERGE (p5)-[:FROM_DATASET]->(ds)
 MERGE (enc5:Encounter {resourceId: 'fhir-enc-2005'})
-  SET enc5.name = 'Nephrology Consult', enc5.class = 'ambulatory', enc5.status = 'finished'
+  SET enc5.name = 'Nephrology Consult', enc5.class = 'ambulatory', enc5.status = 'finished',
+      enc5.date = '2024-05-10T13:15:00Z', enc5.display = 'Nephrology consultation'
 MERGE (p5)-[:HAS_ENCOUNTER]->(enc5)
 MERGE (cond5:Condition {resourceId: 'fhir-cond-3005'})
-  SET cond5.name = 'CKD Stage 3 (FHIR)', cond5.clinicalStatus = 'active', cond5.code = '709044004'
+  SET cond5.name = 'CKD Stage 3 (FHIR)', cond5.clinicalStatus = 'active', cond5.code = '709044004',
+      cond5.onsetDate = '2023-12-05T10:30:00Z', cond5.display = 'Chronic kidney disease stage 3'
 MERGE (p5)-[:HAS_CONDITION]->(cond5)
 MERGE (cond5)-[:CODED_BY]->(scCKD)
 MERGE (obs5:Observation {resourceId: 'fhir-obs-4005'})
-  SET obs5.name = 'Creatinine 1.8 (FHIR)', obs5.status = 'final', obs5.code = '2160-0', obs5.valueQuantity = 1.8, obs5.valueUnit = 'mg/dL'
+  SET obs5.name = 'Creatinine 1.8 (FHIR)', obs5.status = 'final', obs5.code = '2160-0', obs5.valueQuantity = 1.8, obs5.valueUnit = 'mg/dL',
+      obs5.dateTime = '2024-05-10T14:00:00Z', obs5.display = 'Serum creatinine 1.8 mg/dL'
 MERGE (p5)-[:HAS_OBSERVATION]->(obs5)
 MERGE (obs5)-[:CODED_BY]->(loincCreat)
 MERGE (op5:OMOPPerson {personId: 99005})
@@ -445,19 +468,23 @@ MERGE (p6:Patient {resourceId: 'fhir-pat-1006'})
   SET p6.name = 'Patient fhir-pat-1006', p6.gender = 'male', p6.birthDate = date('1980-03-18')
 MERGE (p6)-[:FROM_DATASET]->(ds)
 MERGE (enc6:Encounter {resourceId: 'fhir-enc-2006'})
-  SET enc6.name = 'Diabetology Follow-up', enc6.class = 'ambulatory', enc6.status = 'finished'
+  SET enc6.name = 'Diabetology Follow-up', enc6.class = 'ambulatory', enc6.status = 'finished',
+      enc6.date = '2024-08-22T15:00:00Z', enc6.display = 'Diabetology follow-up'
 MERGE (p6)-[:HAS_ENCOUNTER]->(enc6)
 MERGE (cond6:Condition {resourceId: 'fhir-cond-3006'})
-  SET cond6.name = 'Type 2 Diabetes (FHIR)', cond6.clinicalStatus = 'active', cond6.code = '73211009'
+  SET cond6.name = 'Type 2 Diabetes (FHIR)', cond6.clinicalStatus = 'active', cond6.code = '73211009',
+      cond6.onsetDate = '2022-03-14T11:00:00Z', cond6.display = 'Type 2 diabetes mellitus'
 MERGE (p6)-[:HAS_CONDITION]->(cond6)
 MERGE (cond6)-[:CODED_BY]->(scDM)
 MERGE (cond6)-[:CODED_BY]->(icdDM)
 MERGE (obs6:Observation {resourceId: 'fhir-obs-4006'})
-  SET obs6.name = 'HbA1c 9.3% (FHIR)', obs6.status = 'final', obs6.code = '4548-4', obs6.valueQuantity = 9.3, obs6.valueUnit = '%'
+  SET obs6.name = 'HbA1c 9.3% (FHIR)', obs6.status = 'final', obs6.code = '4548-4', obs6.valueQuantity = 9.3, obs6.valueUnit = '%',
+      obs6.dateTime = '2024-08-22T15:30:00Z', obs6.display = 'HbA1c 9.3%'
 MERGE (p6)-[:HAS_OBSERVATION]->(obs6)
 MERGE (obs6)-[:CODED_BY]->(loincHbA1c)
 MERGE (med6:MedicationRequest {resourceId: 'fhir-med-5006'})
-  SET med6.name = 'Metformin 500mg (FHIR)', med6.status = 'active', med6.intent = 'order'
+  SET med6.name = 'Metformin 500mg (FHIR)', med6.status = 'active', med6.intent = 'order',
+      med6.date = '2022-03-20T09:00:00Z', med6.display = 'Metformin 500mg'
 MERGE (p6)-[:HAS_MEDICATION_REQUEST]->(med6)
 MERGE (med6)-[:CODED_BY]->(rxMetformin)
 MERGE (op6:OMOPPerson {personId: 99006})
@@ -486,22 +513,27 @@ MERGE (p7:Patient {resourceId: 'fhir-pat-1007'})
   SET p7.name = 'Patient fhir-pat-1007', p7.gender = 'female', p7.birthDate = date('1945-12-05')
 MERGE (p7)-[:FROM_DATASET]->(ds)
 MERGE (enc7:Encounter {resourceId: 'fhir-enc-2007'})
-  SET enc7.name = 'Internal Medicine Visit', enc7.class = 'ambulatory', enc7.status = 'finished'
+  SET enc7.name = 'Internal Medicine Visit', enc7.class = 'ambulatory', enc7.status = 'finished',
+      enc7.date = '2024-10-05T10:00:00Z', enc7.display = 'Internal medicine visit'
 MERGE (p7)-[:HAS_ENCOUNTER]->(enc7)
 MERGE (cond7a:Condition {resourceId: 'fhir-cond-3007a'})
-  SET cond7a.name = 'Hypertension (FHIR)', cond7a.clinicalStatus = 'active', cond7a.code = '38341003'
+  SET cond7a.name = 'Hypertension (FHIR)', cond7a.clinicalStatus = 'active', cond7a.code = '38341003',
+      cond7a.onsetDate = '2019-07-20T09:00:00Z', cond7a.display = 'Essential hypertension'
 MERGE (p7)-[:HAS_CONDITION]->(cond7a)
 MERGE (cond7a)-[:CODED_BY]->(scHTN)
 MERGE (cond7b:Condition {resourceId: 'fhir-cond-3007b'})
-  SET cond7b.name = 'CKD Stage 3 (FHIR)', cond7b.clinicalStatus = 'active', cond7b.code = '709044004'
+  SET cond7b.name = 'CKD Stage 3 (FHIR)', cond7b.clinicalStatus = 'active', cond7b.code = '709044004',
+      cond7b.onsetDate = '2022-11-15T10:30:00Z', cond7b.display = 'Chronic kidney disease stage 3'
 MERGE (p7)-[:HAS_CONDITION]->(cond7b)
 MERGE (cond7b)-[:CODED_BY]->(scCKD)
 MERGE (obs7:Observation {resourceId: 'fhir-obs-4007'})
-  SET obs7.name = 'BP 160/98 (FHIR)', obs7.status = 'final', obs7.code = '55284-4', obs7.valueQuantity = 160, obs7.valueUnit = 'mmHg'
+  SET obs7.name = 'BP 160/98 (FHIR)', obs7.status = 'final', obs7.code = '55284-4', obs7.valueQuantity = 160, obs7.valueUnit = 'mmHg',
+      obs7.dateTime = '2024-10-05T10:30:00Z', obs7.display = 'Blood pressure 160/98 mmHg'
 MERGE (p7)-[:HAS_OBSERVATION]->(obs7)
 MERGE (obs7)-[:CODED_BY]->(loincBP)
 MERGE (med7:MedicationRequest {resourceId: 'fhir-med-5007'})
-  SET med7.name = 'Lisinopril 10mg (FHIR)', med7.status = 'active', med7.intent = 'order'
+  SET med7.name = 'Lisinopril 10mg (FHIR)', med7.status = 'active', med7.intent = 'order',
+      med7.date = '2019-08-01T14:00:00Z', med7.display = 'Lisinopril 10mg'
 MERGE (p7)-[:HAS_MEDICATION_REQUEST]->(med7)
 MERGE (med7)-[:CODED_BY]->(rxLisinopril)
 MERGE (op7:OMOPPerson {personId: 99007})
@@ -535,18 +567,22 @@ MERGE (p8:Patient {resourceId: 'fhir-pat-1008'})
   SET p8.name = 'Patient fhir-pat-1008', p8.gender = 'male', p8.birthDate = date('2012-06-14')
 MERGE (p8)-[:FROM_DATASET]->(ds)
 MERGE (enc8:Encounter {resourceId: 'fhir-enc-2008'})
-  SET enc8.name = 'Paediatric Asthma Review', enc8.class = 'ambulatory', enc8.status = 'finished'
+  SET enc8.name = 'Paediatric Asthma Review', enc8.class = 'ambulatory', enc8.status = 'finished',
+      enc8.date = '2024-11-12T09:30:00Z', enc8.display = 'Paediatric asthma review'
 MERGE (p8)-[:HAS_ENCOUNTER]->(enc8)
 MERGE (cond8:Condition {resourceId: 'fhir-cond-3008'})
-  SET cond8.name = 'Asthma (FHIR)', cond8.clinicalStatus = 'active', cond8.code = '195967001'
+  SET cond8.name = 'Asthma (FHIR)', cond8.clinicalStatus = 'active', cond8.code = '195967001',
+      cond8.onsetDate = '2020-05-18T11:00:00Z', cond8.display = 'Asthma'
 MERGE (p8)-[:HAS_CONDITION]->(cond8)
 MERGE (cond8)-[:CODED_BY]->(scAsthma)
 MERGE (obs8:Observation {resourceId: 'fhir-obs-4008'})
-  SET obs8.name = 'FEV1 85% (FHIR)', obs8.status = 'final', obs8.code = '20150-9', obs8.valueQuantity = 85, obs8.valueUnit = '%'
+  SET obs8.name = 'FEV1 85% (FHIR)', obs8.status = 'final', obs8.code = '20150-9', obs8.valueQuantity = 85, obs8.valueUnit = '%',
+      obs8.dateTime = '2024-11-12T10:00:00Z', obs8.display = 'FEV1 85%'
 MERGE (p8)-[:HAS_OBSERVATION]->(obs8)
 MERGE (obs8)-[:CODED_BY]->(loincFEV1)
 MERGE (med8:MedicationRequest {resourceId: 'fhir-med-5008'})
-  SET med8.name = 'Albuterol Inhaler (FHIR)', med8.status = 'active', med8.intent = 'order'
+  SET med8.name = 'Albuterol Inhaler (FHIR)', med8.status = 'active', med8.intent = 'order',
+      med8.date = '2020-05-25T15:00:00Z', med8.display = 'Albuterol inhaler'
 MERGE (p8)-[:HAS_MEDICATION_REQUEST]->(med8)
 MERGE (med8)-[:CODED_BY]->(rxAlbuterol)
 MERGE (op8:OMOPPerson {personId: 99008})
