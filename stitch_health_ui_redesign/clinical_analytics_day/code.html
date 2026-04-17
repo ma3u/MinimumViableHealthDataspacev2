@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Clinical Analytics | Clinical Clarity</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-background": "#151c27",
+                    "on-primary": "#ffffff",
+                    "secondary-fixed": "#6ffbbe",
+                    "on-error": "#ffffff",
+                    "surface-container-lowest": "#ffffff",
+                    "error": "#ba1a1a",
+                    "surface-container-low": "#f0f3ff",
+                    "error-container": "#ffdad6",
+                    "inverse-surface": "#2a313d",
+                    "tertiary-container": "#6e7487",
+                    "outline-variant": "#c2c6d6",
+                    "on-primary-fixed-variant": "#004395",
+                    "surface-container": "#e7eefe",
+                    "secondary-container": "#6cf8bb",
+                    "on-tertiary-fixed-variant": "#404758",
+                    "surface-tint": "#005ac2",
+                    "surface-variant": "#dce2f3",
+                    "primary": "#0058be",
+                    "surface": "#f9f9ff",
+                    "tertiary-fixed": "#dce2f7",
+                    "secondary": "#006c49",
+                    "on-tertiary-fixed": "#141b2b",
+                    "on-primary-container": "#fefcff",
+                    "surface-dim": "#d3daea",
+                    "on-secondary-fixed": "#002113",
+                    "on-primary-fixed": "#001a42",
+                    "inverse-on-surface": "#ebf1ff",
+                    "surface-container-high": "#e2e8f8",
+                    "primary-fixed-dim": "#adc6ff",
+                    "primary-fixed": "#d8e2ff",
+                    "tertiary-fixed-dim": "#c0c6db",
+                    "surface-container-highest": "#dce2f3",
+                    "background": "#f9f9ff",
+                    "tertiary": "#555c6e",
+                    "on-surface": "#151c27",
+                    "on-secondary-container": "#00714d",
+                    "outline": "#727785",
+                    "on-tertiary": "#ffffff",
+                    "on-error-container": "#93000a",
+                    "secondary-fixed-dim": "#4edea3",
+                    "on-secondary": "#ffffff",
+                    "on-surface-variant": "#424754",
+                    "inverse-primary": "#adc6ff",
+                    "primary-container": "#2170e4",
+                    "on-tertiary-container": "#fefcff",
+                    "on-secondary-fixed-variant": "#005236",
+                    "surface-bright": "#f9f9ff"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Inter"],
+                    "body": ["Inter"],
+                    "label": ["Inter"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            display: inline-block;
+            line-height: 1;
+        }
+        .glass-panel {
+            background: rgba(249, 249, 255, 0.8);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface antialiased">
+<!-- TopNavBar -->
+<header class="fixed top-0 w-full z-50 bg-slate-50/80 backdrop-blur-xl shadow-sm flex justify-between items-center px-6 py-3 w-full font-sans antialiased tracking-tight">
+<div class="flex items-center gap-8">
+<span class="text-xl font-bold tracking-tighter text-blue-800">Clinical Clarity</span>
+<div class="hidden md:flex items-center gap-6">
+<nav class="flex items-center gap-6 text-sm font-medium">
+<a class="text-blue-700 border-b-2 border-blue-600 pb-1" href="#">Dashboard</a>
+<a class="text-slate-600 hover:text-blue-600 transition-colors" href="#">Cohort Analysis</a>
+<a class="text-slate-600 hover:text-blue-600 transition-colors" href="#">Safety Logs</a>
+</nav>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="hidden lg:flex items-center bg-slate-100 px-3 py-1.5 rounded-full">
+<span class="material-symbols-outlined text-slate-500 text-sm mr-2" data-icon="search">search</span>
+<input class="bg-transparent border-none focus:ring-0 text-sm w-48 text-on-surface" placeholder="Search research data..." type="text"/>
+</div>
+<div class="flex items-center gap-3">
+<button class="p-2 text-slate-600 hover:text-blue-600 transition-all active:opacity-80">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="p-2 text-slate-600 hover:text-blue-600 transition-all active:opacity-80">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+</button>
+<div class="h-8 w-8 rounded-full bg-primary-fixed flex items-center justify-center overflow-hidden">
+<img alt="Researcher Profile" class="h-full w-full object-cover" data-alt="professional headshot of a female clinical researcher in a laboratory setting with soft blue lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCNiDCyDbcM8qyS4d6oCdptjJg9iAcN4zgRoSnVSK4tw6bIzZDIIn5vLqo0_5kYOxN_-eJ1Di6hsSyitJCTKrw1QLk6yHzLD2YT_5X5YqbJq6D2_TtRaVdeW8tiDrUsxXQ4YeJyTfeadIovdcGCGcB3j_IxtGz3s8kdPKuq_BdH02A0Tke9IxQ5AmfdI7oYCw5WHqMdp9mcaSZyvMKrZK7qbeuOgviuqa4Ov0tymvzIrp-3m-FLJWu6Ppa05q_SEjqJ_6Vnjw4HtizB"/>
+</div>
+</div>
+</div>
+</header>
+<!-- SideNavBar -->
+<aside class="h-screen w-64 fixed left-0 top-0 border-r border-slate-200 bg-slate-50 flex flex-col h-full p-4 hidden md:flex pt-20">
+<div class="mb-8 px-2">
+<div class="flex items-center gap-3 mb-1">
+<div class="h-10 w-10 bg-blue-900 rounded-xl flex items-center justify-center text-white">
+<span class="material-symbols-outlined" data-icon="biotech">biotech</span>
+</div>
+<div>
+<p class="text-lg font-black text-blue-900 leading-none">Research Portal</p>
+<p class="text-[10px] uppercase tracking-widest text-slate-500 font-bold mt-1">Data Governance</p>
+</div>
+</div>
+</div>
+<nav class="flex-1 space-y-1">
+<a class="flex items-center gap-3 px-3 py-2.5 text-slate-500 hover:bg-slate-100 transition-all scale-95 active:scale-100 rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="gavel">gavel</span>
+<span class="text-sm font-medium">Compliance</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 text-slate-500 hover:bg-slate-100 transition-all scale-95 active:scale-100 rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="security">security</span>
+<span class="text-sm font-medium">TCK</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 text-slate-500 hover:bg-slate-100 transition-all scale-95 active:scale-100 rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="verified_user">verified_user</span>
+<span class="text-sm font-medium">Credentials</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 text-slate-500 hover:bg-slate-100 transition-all scale-95 active:scale-100 rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="menu_book">menu_book</span>
+<span class="text-sm font-medium">Catalog</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 bg-blue-50 text-blue-700 rounded-lg scale-95 active:scale-100" href="#">
+<span class="material-symbols-outlined" data-icon="leaderboard">leaderboard</span>
+<span class="text-sm font-medium">Analytics</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 text-slate-500 hover:bg-slate-100 transition-all scale-95 active:scale-100 rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="search_insights">search_insights</span>
+<span class="text-sm font-medium">Query</span>
+</a>
+</nav>
+<div class="mt-auto border-t border-slate-100 pt-4 space-y-1">
+<button class="w-full bg-gradient-to-br from-primary to-primary-container text-on-primary py-3 rounded-xl font-semibold text-sm mb-4 shadow-lg shadow-blue-200">
+                New Analysis
+            </button>
+<a class="flex items-center gap-3 px-3 py-2 text-slate-500 hover:bg-slate-100 rounded-lg transition-all text-sm" href="#">
+<span class="material-symbols-outlined" data-icon="contact_support">contact_support</span>
+                Support
+            </a>
+<a class="flex items-center gap-3 px-3 py-2 text-slate-500 hover:bg-slate-100 rounded-lg transition-all text-sm" href="#">
+<span class="material-symbols-outlined" data-icon="history">history</span>
+                Logs
+            </a>
+</div>
+</aside>
+<!-- Main Canvas -->
+<main class="md:ml-64 pt-20 pb-12 px-6 lg:px-10">
+<!-- Header Section -->
+<div class="max-w-7xl mx-auto">
+<header class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
+<div class="space-y-2">
+<span class="px-3 py-1 bg-secondary-container text-on-secondary-container rounded-full text-xs font-bold uppercase tracking-widest">Active Study: CV-2024-X</span>
+<h1 class="text-4xl font-extrabold tracking-tight text-on-surface">Clinical Analytics &amp; Insights</h1>
+<p class="text-slate-500 text-lg max-w-2xl">High-fidelity analysis of cardiovascular performance metrics across multi-source clinical data streams.</p>
+</div>
+<div class="flex gap-3">
+<button class="px-6 py-2.5 rounded-xl bg-surface-container-high font-semibold text-on-surface-variant flex items-center gap-2">
+<span class="material-symbols-outlined text-sm" data-icon="calendar_today">calendar_today</span>
+                        Last 30 Days
+                    </button>
+<button class="px-6 py-2.5 rounded-xl bg-primary text-white font-semibold flex items-center gap-2 shadow-xl shadow-blue-100">
+<span class="material-symbols-outlined text-sm" data-icon="file_download">file_download</span>
+                        Export PDF
+                    </button>
+</div>
+</header>
+<!-- Bento Grid Layout -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+<!-- Main Chart Area -->
+<div class="lg:col-span-8 bg-surface-container-lowest rounded-xl p-8 border border-outline-variant/10 shadow-sm relative overflow-hidden">
+<div class="flex items-center justify-between mb-8">
+<div>
+<h3 class="text-xl font-bold text-on-surface">Cardiovascular Performance</h3>
+<p class="text-sm text-slate-500">Aggregated Heart Rate Variability vs. Resting Heart Rate</p>
+</div>
+<div class="flex gap-2">
+<span class="flex items-center gap-1.5 text-xs font-medium text-blue-600 px-2 py-1 bg-blue-50 rounded-lg">
+<span class="h-2 w-2 rounded-full bg-blue-600"></span> HRV
+                            </span>
+<span class="flex items-center gap-1.5 text-xs font-medium text-emerald-600 px-2 py-1 bg-emerald-50 rounded-lg">
+<span class="h-2 w-2 rounded-full bg-emerald-600"></span> RHR
+                            </span>
+</div>
+</div>
+<div class="h-80 w-full relative flex items-end justify-between gap-2 px-4">
+<!-- Simulated Chart Bars -->
+<div class="flex-1 bg-surface-container rounded-t-lg transition-all hover:bg-primary-fixed" style="height: 60%"></div>
+<div class="flex-1 bg-surface-container rounded-t-lg transition-all hover:bg-primary-fixed" style="height: 45%"></div>
+<div class="flex-1 bg-surface-container rounded-t-lg transition-all hover:bg-primary-fixed" style="height: 75%"></div>
+<div class="flex-1 bg-surface-container rounded-t-lg transition-all hover:bg-primary-fixed" style="height: 65%"></div>
+<div class="flex-1 bg-primary-container rounded-t-lg transition-all" style="height: 90%"></div>
+<div class="flex-1 bg-surface-container rounded-t-lg transition-all hover:bg-primary-fixed" style="height: 55%"></div>
+<div class="flex-1 bg-surface-container rounded-t-lg transition-all hover:bg-primary-fixed" style="height: 70%"></div>
+<div class="flex-1 bg-surface-container rounded-t-lg transition-all hover:bg-primary-fixed" style="height: 85%"></div>
+<div class="flex-1 bg-surface-container rounded-t-lg transition-all hover:bg-primary-fixed" style="height: 40%"></div>
+<div class="flex-1 bg-surface-container rounded-t-lg transition-all hover:bg-primary-fixed" style="height: 60%"></div>
+<div class="flex-1 bg-surface-container rounded-t-lg transition-all hover:bg-primary-fixed" style="height: 50%"></div>
+<div class="flex-1 bg-surface-container rounded-t-lg transition-all hover:bg-primary-fixed" style="height: 75%"></div>
+</div>
+<div class="mt-6 flex justify-between text-[10px] font-bold text-slate-400 uppercase tracking-widest px-4">
+<span>WK 1</span><span>WK 2</span><span>WK 3</span><span>WK 4</span><span>WK 5</span><span>WK 6</span>
+</div>
+</div>
+<!-- AI Insights Sidebar -->
+<div class="lg:col-span-4 space-y-6">
+<div class="bg-gradient-to-br from-blue-900 to-indigo-950 rounded-xl p-6 text-white shadow-2xl relative overflow-hidden group">
+<div class="absolute -top-12 -right-12 w-32 h-32 bg-white/10 rounded-full blur-2xl group-hover:bg-white/20 transition-all"></div>
+<div class="flex items-start justify-between mb-4">
+<div class="p-2 bg-white/10 rounded-lg backdrop-blur-md">
+<span class="material-symbols-outlined" data-icon="auto_awesome">auto_awesome</span>
+</div>
+<span class="text-[10px] font-bold tracking-widest uppercase py-1 px-2 bg-blue-500/30 rounded">AI Recommendation</span>
+</div>
+<h4 class="text-xl font-bold mb-2">Detected Anomaly in Patient Cohort B</h4>
+<p class="text-blue-100/80 text-sm leading-relaxed mb-6">
+                            Recent data reveals a 12.4% deviation in nocturnal respiration rates among male subjects aged 45-60. Recommend increasing telemetry frequency.
+                        </p>
+<button class="w-full py-3 bg-white text-blue-900 font-bold rounded-xl text-sm hover:bg-blue-50 transition-colors">
+                            Deep Investigation
+                        </button>
+</div>
+<div class="bg-surface-container-low rounded-xl p-6 border border-outline-variant/20">
+<h4 class="text-sm font-bold text-slate-500 uppercase tracking-widest mb-4">Clinical Metric Health</h4>
+<div class="space-y-4">
+<div class="flex items-center justify-between">
+<span class="text-sm font-medium">Data Completeness</span>
+<span class="text-sm font-bold text-secondary">98.2%</span>
+</div>
+<div class="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden">
+<div class="bg-secondary h-full" style="width: 98.2%"></div>
+</div>
+<div class="flex items-center justify-between pt-2">
+<span class="text-sm font-medium">Protocol Adherence</span>
+<span class="text-sm font-bold text-primary">84.5%</span>
+</div>
+<div class="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden">
+<div class="bg-primary h-full" style="width: 84.5%"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Secondary Row - Asymmetric Bento -->
+<div class="lg:col-span-5 bg-surface-container-lowest rounded-xl p-8 border border-outline-variant/10 shadow-sm">
+<div class="flex items-center justify-between mb-8">
+<h3 class="text-xl font-bold">Research Velocity</h3>
+<span class="material-symbols-outlined text-slate-300" data-icon="speed">speed</span>
+</div>
+<div class="flex items-center gap-12">
+<div class="relative">
+<svg class="w-32 h-32">
+<circle cx="64" cy="64" fill="transparent" r="56" stroke="#f0f3ff" stroke-width="12"></circle>
+<circle cx="64" cy="64" fill="transparent" r="56" stroke="#0058be" stroke-dasharray="351.8" stroke-dashoffset="100" stroke-linecap="round" stroke-width="12"></circle>
+</svg>
+<div class="absolute inset-0 flex flex-col items-center justify-center">
+<span class="text-2xl font-black text-on-surface">72%</span>
+<span class="text-[8px] font-bold text-slate-500 uppercase tracking-tighter">Capacity</span>
+</div>
+</div>
+<div class="space-y-4">
+<div class="flex items-center gap-3">
+<div class="h-3 w-3 bg-primary rounded-sm"></div>
+<div>
+<p class="text-sm font-bold leading-none">Phase II Trials</p>
+<p class="text-[10px] text-slate-500">Accelerated</p>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<div class="h-3 w-3 bg-surface-container rounded-sm"></div>
+<div>
+<p class="text-sm font-bold leading-none">Future Pipeline</p>
+<p class="text-[10px] text-slate-500">Projected</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Data Provenance Section -->
+<div class="lg:col-span-7 bg-surface-container-lowest rounded-xl p-8 border border-outline-variant/10 shadow-sm">
+<div class="flex items-center justify-between mb-6">
+<div>
+<h3 class="text-xl font-bold">Data Provenance</h3>
+<p class="text-xs text-slate-500">Verified record sources &amp; synchronization status</p>
+</div>
+<button class="text-primary text-sm font-bold flex items-center gap-1">
+<span class="material-symbols-outlined text-sm" data-icon="sync">sync</span> Re-sync all
+                        </button>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<div class="flex items-center gap-4 p-4 rounded-xl bg-surface hover:bg-surface-container-low transition-colors cursor-pointer">
+<div class="h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center overflow-hidden border-2 border-white shadow-sm">
+<img alt="Mayo Clinic" class="h-full w-full object-cover" data-alt="minimal medical institution logo on clean background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAHDK_VckzPVyv9dYT2ZjOQtseZqJ1PMvzuu6u8pn5UfmAkqYI5C9-dgOLKM4jWPRxFS5f_cnOq-rkknfw3vcosKaRXB2_akq1qmqrxLXsJ_AWgLBBnO2Wbc8ZouV9-H9kRpUsufchlYdWaKMMuzw7vfKG9cogUyVd5O34XnLpLBKzq_Kvkxj5mG350-gbvJTYsC0fn96mPLi3g_XHfjum5Q2UZdeKF8yySZtAuh30GZW3b_KpI5grmmUJBQ1m8m1htGWpROdD2q_bI"/>
+</div>
+<div class="flex-1">
+<p class="text-sm font-bold text-on-surface">Mayo Clinic</p>
+<p class="text-[10px] text-slate-400">Synced 2m ago • EHR-FHIR</p>
+</div>
+<span class="material-symbols-outlined text-secondary" data-icon="check_circle" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<div class="flex items-center gap-4 p-4 rounded-xl bg-surface hover:bg-surface-container-low transition-colors cursor-pointer">
+<div class="h-12 w-12 rounded-full bg-slate-100 flex items-center justify-center overflow-hidden border-2 border-white shadow-sm">
+<img alt="Apple Health" class="h-full w-full object-cover" data-alt="clean apple tech interface background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD8HD5H6Bh5fqc2QhC6brcTcn6oi8m2GfBJ9ysnWdEo3BhtmIqyUnnOjfQQOx-jt-grmpSHNdW6YeAJuzcu-kXIB5PVJPt7r6Q8Ruas9yRvlzsItr_1H0hXSoodlVAMsbr5rJ9MOmGUQbAWdOHDiwRXg8aHpo1NtQfabjIyp78fXaWq59R5FSMPbAMhDT42Qmzo8L1D5gzkwHAVz_rF33YNZLWTt5DnkduZEeV-okYvf3Mw-mO1hFOmCVXXKE3PkvKj381OLmP7GjQl"/>
+</div>
+<div class="flex-1">
+<p class="text-sm font-bold text-on-surface">Apple Health</p>
+<p class="text-[10px] text-slate-400">Synced 45m ago • HealthKit</p>
+</div>
+<span class="material-symbols-outlined text-secondary" data-icon="check_circle" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<div class="flex items-center gap-4 p-4 rounded-xl bg-surface hover:bg-surface-container-low transition-colors cursor-pointer">
+<div class="h-12 w-12 rounded-full bg-red-50 flex items-center justify-center overflow-hidden border-2 border-white shadow-sm">
+<img alt="Cleveland Clinic" class="h-full w-full object-cover" data-alt="medical institution architectural detail macro" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCRW6mhQhsvxKOZoQRWQAA5rZ9mM0puGxgjbBIEJcGBhbuKDttLFYPHFfUGK0bvtK1uXdswQE-kD4S5aJkSqdeix4tSq-k5zXk5xnLCMzM92Crk1peiOMNXzoA_jBEIUNPuBw71_U29orUg5_jCu_rjdN5XCffqNxl3ajBwr-VH98fd2Oo5_66vEYo935YvN9MnXtL__7ld5E2JcDANCbpNM6RyEkdNg6M0hZK9OXg22_Udi-t0fotbihKBKNqpvMqOwaz8vSltGNVZ"/>
+</div>
+<div class="flex-1">
+<p class="text-sm font-bold text-on-surface">Cleveland Clinic</p>
+<p class="text-[10px] text-slate-400">Awaiting Auth • EPIC System</p>
+</div>
+<span class="material-symbols-outlined text-slate-300" data-icon="pending">pending</span>
+</div>
+<div class="flex items-center gap-4 p-4 rounded-xl bg-surface hover:bg-surface-container-low transition-colors cursor-pointer">
+<div class="h-12 w-12 rounded-full bg-slate-900 flex items-center justify-center overflow-hidden border-2 border-white shadow-sm">
+<img alt="Whoop" class="h-full w-full object-cover" data-alt="high end fitness wearable technology macro" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDNHNDvqnGD5FupJEAdsiMl-p88NIvfOa8HrNwOngqiVQ75rq-uOo6Jie26KQ8RjDPJdHHI0loHYVLr4BbMyUqHRoTtjqFuhj6nW88bc95Sb2RdGbts8M5D2eQmQwU7rw9JNwuqCDg00Q1AbF4-pPm1LAxRb9U1v4Z2KcrQTBsF1L7-YiAI9w_5i5EAEoltrC-N-l-icaoxSaFHxeApsBl65iqi2XmFnFA2Vje6gMB2o7GbebWC1ESiRj5MbAQNVwuA__BKf1dzs8P0"/>
+</div>
+<div class="flex-1">
+<p class="text-sm font-bold text-on-surface">Whoop Sensor</p>
+<p class="text-[10px] text-slate-400">Synced 12h ago • API-Cloud</p>
+</div>
+<span class="material-symbols-outlined text-secondary" data-icon="check_circle" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+</div>
+</div>
+<!-- Footer Focus Module -->
+<div class="lg:col-span-12 bg-surface-container rounded-2xl p-10 flex flex-col md:flex-row items-center gap-10">
+<div class="md:w-1/3 text-center md:text-left">
+<div class="h-16 w-16 bg-white rounded-full flex items-center justify-center mx-auto md:mx-0 mb-6 shadow-xl shadow-blue-200">
+<span class="material-symbols-outlined text-primary text-3xl" data-icon="health_and_safety">health_and_safety</span>
+</div>
+<h3 class="text-2xl font-black text-on-surface leading-tight">Patient Safety Benchmark</h3>
+<p class="text-slate-500 mt-2">Global stability metric based on real-time biometric telemetry.</p>
+</div>
+<div class="flex-1 grid grid-cols-2 lg:grid-cols-4 gap-6 w-full">
+<div class="bg-white p-6 rounded-2xl border border-slate-100 text-center">
+<p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Adverse Events</p>
+<p class="text-3xl font-black text-on-surface">0.04<span class="text-sm font-medium text-slate-400 ml-1">%</span></p>
+</div>
+<div class="bg-white p-6 rounded-2xl border border-slate-100 text-center">
+<p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Stability Index</p>
+<p class="text-3xl font-black text-secondary">9.8<span class="text-sm font-medium text-slate-400 ml-1">/10</span></p>
+</div>
+<div class="bg-white p-6 rounded-2xl border border-slate-100 text-center">
+<p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Active Monitors</p>
+<p class="text-3xl font-black text-on-surface">1,429</p>
+</div>
+<div class="bg-white p-6 rounded-2xl border border-slate-100 text-center">
+<p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Data Latency</p>
+<p class="text-3xl font-black text-primary">120<span class="text-sm font-medium text-slate-400 ml-1">ms</span></p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- BottomNavBar (Mobile Only) -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full bg-slate-50 border-t border-slate-200 px-6 py-4 flex justify-between items-center z-50">
+<button class="flex flex-col items-center gap-1 text-slate-400">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="text-[10px] font-bold">Home</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-blue-700">
+<span class="material-symbols-outlined" data-icon="leaderboard" style="font-variation-settings: 'FILL' 1;">leaderboard</span>
+<span class="text-[10px] font-bold">Insights</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-slate-400">
+<span class="material-symbols-outlined" data-icon="clinical_notes">clinical_notes</span>
+<span class="text-[10px] font-bold">Records</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-slate-400">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="text-[10px] font-bold">Account</span>
+</button>
+</nav>
+</body></html>

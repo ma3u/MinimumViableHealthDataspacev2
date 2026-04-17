@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Clinical Clarity | Research Portal</title>
+<!-- Google Fonts & Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-background": "#151c27",
+                    "on-primary": "#ffffff",
+                    "secondary-fixed": "#6ffbbe",
+                    "on-error": "#ffffff",
+                    "surface-container-lowest": "#ffffff",
+                    "error": "#ba1a1a",
+                    "surface-container-low": "#f0f3ff",
+                    "error-container": "#ffdad6",
+                    "inverse-surface": "#2a313d",
+                    "tertiary-container": "#6e7487",
+                    "outline-variant": "#c2c6d6",
+                    "on-primary-fixed-variant": "#004395",
+                    "surface-container": "#e7eefe",
+                    "secondary-container": "#6cf8bb",
+                    "on-tertiary-fixed-variant": "#404758",
+                    "surface-tint": "#005ac2",
+                    "surface-variant": "#dce2f3",
+                    "primary": "#0058be",
+                    "surface": "#f9f9ff",
+                    "tertiary-fixed": "#dce2f7",
+                    "secondary": "#006c49",
+                    "on-tertiary-fixed": "#141b2b",
+                    "on-primary-container": "#fefcff",
+                    "surface-dim": "#d3daea",
+                    "on-secondary-fixed": "#002113",
+                    "on-primary-fixed": "#001a42",
+                    "inverse-on-surface": "#ebf1ff",
+                    "surface-container-high": "#e2e8f8",
+                    "primary-fixed-dim": "#adc6ff",
+                    "primary-fixed": "#d8e2ff",
+                    "tertiary-fixed-dim": "#c0c6db",
+                    "surface-container-highest": "#dce2f3",
+                    "background": "#f9f9ff",
+                    "tertiary": "#555c6e",
+                    "on-surface": "#151c27",
+                    "on-secondary-container": "#00714d",
+                    "outline": "#727785",
+                    "on-tertiary": "#ffffff",
+                    "on-error-container": "#93000a",
+                    "secondary-fixed-dim": "#4edea3",
+                    "on-secondary": "#ffffff",
+                    "on-surface-variant": "#424754",
+                    "inverse-primary": "#adc6ff",
+                    "primary-container": "#2170e4",
+                    "on-tertiary-container": "#fefcff",
+                    "on-secondary-fixed-variant": "#005236",
+                    "surface-bright": "#f9f9ff"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Inter"],
+                    "body": ["Inter"],
+                    "label": ["Inter"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            display: inline-block;
+            vertical-align: middle;
+        }
+        body { font-family: 'Inter', sans-serif; }
+        .glass-panel {
+            background: rgba(249, 249, 255, 0.8);
+            backdrop-filter: blur(20px);
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface antialiased overflow-hidden">
+<!-- SideNavBar (Shared Component) -->
+<nav class="h-screen w-64 fixed left-0 top-0 bg-slate-50 dark:bg-slate-950 border-r border-slate-200 dark:border-slate-800 flex flex-col p-4 z-50">
+<div class="flex items-center gap-3 mb-8 px-2">
+<div class="w-10 h-10 rounded-lg bg-primary-container flex items-center justify-center">
+<span class="material-symbols-outlined text-on-primary-container" data-icon="security" style="font-variation-settings: 'FILL' 1;">security</span>
+</div>
+<div>
+<h1 class="text-lg font-black text-blue-900 dark:text-blue-100 leading-none">Research Portal</h1>
+<p class="text-[10px] uppercase tracking-widest text-slate-500 font-bold mt-1">Data Governance</p>
+</div>
+</div>
+<div class="flex-1 space-y-1">
+<a class="flex items-center gap-3 px-3 py-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900 transition-all rounded-lg text-sm font-medium Inter group" href="#">
+<span class="material-symbols-outlined" data-icon="gavel">gavel</span>
+                Compliance
+            </a>
+<a class="flex items-center gap-3 px-3 py-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900 transition-all rounded-lg text-sm font-medium Inter group" href="#">
+<span class="material-symbols-outlined" data-icon="security">security</span>
+                TCK
+            </a>
+<a class="flex items-center gap-3 px-3 py-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900 transition-all rounded-lg text-sm font-medium Inter group" href="#">
+<span class="material-symbols-outlined" data-icon="verified_user">verified_user</span>
+                Credentials
+            </a>
+<a class="flex items-center gap-3 px-3 py-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900 transition-all rounded-lg text-sm font-medium Inter group" href="#">
+<span class="material-symbols-outlined" data-icon="menu_book">menu_book</span>
+                Catalog
+            </a>
+<a class="flex items-center gap-3 px-3 py-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900 transition-all rounded-lg text-sm font-medium Inter group" href="#">
+<span class="material-symbols-outlined" data-icon="leaderboard">leaderboard</span>
+                Analytics
+            </a>
+<a class="flex items-center gap-3 px-3 py-2 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 rounded-lg text-sm font-medium Inter group" href="#">
+<span class="material-symbols-outlined" data-icon="search_insights" style="font-variation-settings: 'FILL' 1;">search_insights</span>
+                Query
+            </a>
+</div>
+<button class="w-full bg-gradient-to-br from-primary to-primary-container text-white py-3 rounded-xl font-semibold mb-6 shadow-lg shadow-primary/20 flex items-center justify-center gap-2 text-sm active:scale-95 transition-all">
+<span class="material-symbols-outlined text-[20px]" data-icon="add">add</span>
+            New Analysis
+        </button>
+<div class="pt-4 border-t border-slate-200 dark:border-slate-800 space-y-1">
+<a class="flex items-center gap-3 px-3 py-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900 transition-all rounded-lg text-sm font-medium Inter" href="#">
+<span class="material-symbols-outlined" data-icon="contact_support">contact_support</span>
+                Support
+            </a>
+<a class="flex items-center gap-3 px-3 py-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900 transition-all rounded-lg text-sm font-medium Inter" href="#">
+<span class="material-symbols-outlined" data-icon="history">history</span>
+                Logs
+            </a>
+</div>
+</nav>
+<!-- Main Workspace -->
+<main class="ml-64 h-screen flex flex-col">
+<!-- TopNavBar (Shared Component) -->
+<header class="fixed top-0 right-0 left-64 z-50 bg-slate-50/80 dark:bg-slate-900/80 backdrop-blur-xl flex justify-between items-center px-6 py-3 shadow-sm">
+<div class="flex items-center gap-6">
+<span class="text-xl font-bold tracking-tighter text-blue-800 dark:text-blue-300 font-sans antialiased tracking-tight">Clinical Clarity</span>
+<div class="flex items-center gap-4 border-l border-slate-200 dark:border-slate-800 pl-6">
+<button class="text-blue-700 dark:text-blue-400 border-b-2 border-blue-600 px-1 py-1 font-medium text-sm transition-colors">Query Builder</button>
+<button class="text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-300 transition-colors px-1 py-1 font-medium text-sm">Exchange Logs</button>
+<button class="text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-300 transition-colors px-1 py-1 font-medium text-sm">Patient Registry</button>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-2 bg-slate-100 dark:bg-slate-800/50 rounded-full px-4 py-1.5">
+<span class="material-symbols-outlined text-[18px] text-slate-500" data-icon="search">search</span>
+<input class="bg-transparent border-none focus:ring-0 text-sm w-48 text-on-surface" placeholder="Search data points..." type="text"/>
+</div>
+<div class="flex items-center gap-2 border-l border-slate-200 dark:border-slate-800 pl-4">
+<button class="material-symbols-outlined text-slate-600 dark:text-slate-400 hover:text-blue-600 transition-all" data-icon="notifications">notifications</button>
+<button class="material-symbols-outlined text-slate-600 dark:text-slate-400 hover:text-blue-600 transition-all" data-icon="settings">settings</button>
+<img alt="Researcher" class="w-8 h-8 rounded-full border-2 border-primary/20" data-alt="professional portrait of a female medical researcher in a modern laboratory setting with soft cool lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAJfUGr6v8WqPUCPGK0TYUMETN3C9mQAMnRKFtZhihpIHmBeZcXTsReHSaNPtFCZLFvK28nZTM6tOqqcChGtrdJyVqkDuUWKZq0ployLOTkENOEJALHzmJz-o_nIiI9XGn_34NrW5W_y6eeDdMvYDG75juyv5-QXMEn6t_gAqPYnAqKEqP5zU2cIuGpq3ORnERyNdXAVMGG3ox-YKXy3-jcI463A_C6lvLQUJQ7Y39XDcPsuiG_dQzdWoILmvZR8SQiHMJeS1Y2sNr1"/>
+</div>
+</div>
+</header>
+<!-- Tool Body -->
+<div class="flex-1 pt-16 flex overflow-hidden">
+<!-- Left Side: Query Builder (Bento Style) -->
+<section class="w-1/2 h-full flex flex-col p-6 space-y-6 border-r border-slate-200 dark:border-slate-800">
+<!-- Action Bar -->
+<div class="flex items-center justify-between">
+<div>
+<h2 class="text-xl font-bold tracking-tight text-on-surface">Query Engine</h2>
+<p class="text-xs text-slate-500 font-medium">Drafting: Population_Study_A_2024</p>
+</div>
+<div class="flex gap-2">
+<div class="flex bg-surface-container-low rounded-lg p-1">
+<button class="px-3 py-1 text-[11px] font-bold bg-white shadow-sm rounded-md text-primary">SQL</button>
+<button class="px-3 py-1 text-[11px] font-bold text-slate-500 hover:text-slate-700">FHIR</button>
+</div>
+<button class="flex items-center gap-2 bg-secondary text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-secondary/90 transition-all">
+<span class="material-symbols-outlined text-[18px]" data-icon="play_arrow" style="font-variation-settings: 'FILL' 1;">play_arrow</span>
+                            Execute
+                        </button>
+</div>
+</div>
+<!-- Editor Grid -->
+<div class="flex-1 grid grid-cols-6 grid-rows-6 gap-4">
+<!-- Main SQL Editor -->
+<div class="col-span-6 row-span-4 bg-on-background rounded-xl p-6 relative overflow-hidden">
+<div class="absolute top-0 right-0 p-4 opacity-10">
+<span class="material-symbols-outlined text-[80px]" data-icon="code">code</span>
+</div>
+<div class="font-mono text-sm space-y-1">
+<div class="flex gap-4"><span class="text-slate-600 select-none">1</span><span class="text-blue-400">SELECT</span> <span class="text-on-primary">patient_id, age, gender, diagnostic_code</span></div>
+<div class="flex gap-4"><span class="text-slate-600 select-none">2</span><span class="text-blue-400">FROM</span> <span class="text-on-primary">"clinical_clarity_prod"."records"</span></div>
+<div class="flex gap-4"><span class="text-slate-600 select-none">3</span><span class="text-blue-400">WHERE</span> <span class="text-on-primary">diagnostic_code</span> <span class="text-secondary-fixed">IN</span> <span class="text-secondary-container">('E11.9', 'I10')</span></div>
+<div class="flex gap-4"><span class="text-slate-600 select-none">4</span><span class="text-blue-400">AND</span> <span class="text-on-primary">last_updated</span> <span class="text-secondary-fixed">&gt;</span> <span class="text-secondary-container">'2023-01-01'</span></div>
+<div class="flex gap-4"><span class="text-slate-600 select-none">5</span><span class="text-blue-400">ORDER BY</span> <span class="text-on-primary">patient_id</span> <span class="text-blue-400">ASC</span></div>
+<div class="flex gap-4"><span class="text-slate-600 select-none">6</span><span class="animate-pulse bg-blue-500 w-[2px] h-[1.2rem]"></span></div>
+</div>
+</div>
+<!-- Status Indicator -->
+<div class="col-span-3 row-span-2 bg-surface-container-low rounded-xl p-5 flex flex-col justify-between">
+<div class="flex items-center justify-between">
+<span class="text-xs font-bold text-slate-500 uppercase tracking-widest">System Status</span>
+<span class="flex items-center gap-1.5 text-[11px] font-bold text-secondary bg-secondary-container/20 px-2 py-0.5 rounded-full">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+                                CONNECTED
+                            </span>
+</div>
+<div>
+<div class="flex items-end justify-between mb-1">
+<span class="text-sm font-medium text-on-surface-variant">Resources Used</span>
+<span class="text-sm font-bold text-on-surface">42%</span>
+</div>
+<div class="h-1.5 bg-slate-200 rounded-full overflow-hidden">
+<div class="h-full bg-primary" style="width: 42%"></div>
+</div>
+</div>
+</div>
+<!-- Query History -->
+<div class="col-span-3 row-span-2 bg-surface-container-high rounded-xl p-5 overflow-y-auto">
+<h4 class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-3">Recent Runs</h4>
+<div class="space-y-3">
+<div class="flex items-center justify-between group cursor-pointer">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-[18px] text-primary" data-icon="history">history</span>
+<span class="text-xs font-medium text-on-surface-variant group-hover:text-primary transition-colors">COVID_Followup_v2</span>
+</div>
+<span class="text-[10px] text-slate-400">2m ago</span>
+</div>
+<div class="flex items-center justify-between group cursor-pointer">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-[18px] text-primary" data-icon="history">history</span>
+<span class="text-xs font-medium text-on-surface-variant group-hover:text-primary transition-colors">Cohort_XYZ_Baseline</span>
+</div>
+<span class="text-[10px] text-slate-400">1h ago</span>
+</div>
+<div class="flex items-center justify-between group cursor-pointer">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-[18px] text-primary" data-icon="history">history</span>
+<span class="text-xs font-medium text-on-surface-variant group-hover:text-primary transition-colors">Billing_Audit_Q3</span>
+</div>
+<span class="text-[10px] text-slate-400">Yesterday</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Right Side: Patient Record Preview (Structured/Glassmorphism) -->
+<section class="w-1/2 h-full flex flex-col p-6 bg-surface-container-low overflow-y-auto">
+<div class="flex items-center justify-between mb-6">
+<h2 class="text-xl font-bold tracking-tight text-on-surface">Patient Record Preview</h2>
+<div class="flex items-center gap-3">
+<button class="material-symbols-outlined p-2 hover:bg-slate-200 rounded-full transition-all" data-icon="ios_share">ios_share</button>
+<button class="flex items-center gap-2 bg-on-background text-on-primary px-4 py-2 rounded-lg text-sm font-semibold">
+<span class="material-symbols-outlined text-[18px]" data-icon="download">download</span>
+                            Export Dataset
+                        </button>
+</div>
+</div>
+<!-- Record Card -->
+<div class="bg-surface-container-lowest rounded-2xl shadow-xl shadow-blue-900/5 p-8 relative overflow-hidden">
+<!-- Glass Accent -->
+<div class="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-bl-full -mr-8 -mt-8 blur-2xl"></div>
+<!-- Header Info -->
+<div class="flex gap-6 mb-8 items-start">
+<div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center border border-blue-200/50">
+<span class="material-symbols-outlined text-primary text-[40px]" data-icon="person" style="font-variation-settings: 'FILL' 1;">person</span>
+</div>
+<div class="flex-1">
+<div class="flex items-center gap-3 mb-1">
+<h3 class="text-2xl font-black text-on-surface tracking-tight">Patient: CC-992-04X</h3>
+<span class="bg-secondary-container/30 text-on-secondary-container px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-widest">Active File</span>
+</div>
+<div class="grid grid-cols-3 gap-4 text-sm">
+<div>
+<p class="text-slate-400 font-medium">DOB</p>
+<p class="text-on-surface font-semibold">14 May 1978 (46Y)</p>
+</div>
+<div>
+<p class="text-slate-400 font-medium">Gender</p>
+<p class="text-on-surface font-semibold">Non-Binary</p>
+</div>
+<div>
+<p class="text-slate-400 font-medium">Org</p>
+<p class="text-on-surface font-semibold">Metro Health Trust</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Vitals Bento -->
+<div class="grid grid-cols-2 gap-4 mb-8">
+<div class="bg-surface p-4 rounded-xl border border-outline-variant/15">
+<div class="flex items-center gap-2 mb-3">
+<span class="material-symbols-outlined text-secondary" data-icon="favorite">favorite</span>
+<span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Vitals &amp; Obs</span>
+</div>
+<div class="space-y-3">
+<div class="flex justify-between items-center">
+<span class="text-xs text-on-surface-variant">Heart Rate</span>
+<div class="flex items-baseline gap-1">
+<span class="text-lg font-bold text-on-surface">72</span>
+<span class="text-[10px] font-bold text-slate-400">BPM</span>
+</div>
+</div>
+<div class="flex justify-between items-center">
+<span class="text-xs text-on-surface-variant">Blood Pressure</span>
+<div class="flex items-baseline gap-1">
+<span class="text-lg font-bold text-on-surface">118/76</span>
+<span class="text-[10px] font-bold text-slate-400">mmHg</span>
+</div>
+</div>
+</div>
+</div>
+<div class="bg-surface p-4 rounded-xl border border-outline-variant/15">
+<div class="flex items-center gap-2 mb-3">
+<span class="material-symbols-outlined text-error" data-icon="warning">warning</span>
+<span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Alerts</span>
+</div>
+<div class="space-y-2">
+<div class="bg-error-container/10 border border-error/10 p-2 rounded-lg">
+<p class="text-[10px] font-bold text-on-error-container">ALLERGY: PENICILLIN</p>
+</div>
+<div class="bg-tertiary-fixed-dim/20 p-2 rounded-lg">
+<p class="text-[10px] font-bold text-on-tertiary-fixed-variant">PROTOCOL: HYPERTENSION-B</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Encounter History (Editorial Timeline) -->
+<div>
+<h4 class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-4">Longitudinal History</h4>
+<div class="space-y-6 relative before:absolute before:left-[11px] before:top-2 before:bottom-2 before:w-[2px] before:bg-slate-100">
+<div class="relative pl-10">
+<div class="absolute left-0 top-1 w-[24px] h-[24px] bg-white border-4 border-primary rounded-full z-10"></div>
+<p class="text-[10px] font-bold text-primary uppercase mb-1">Latest: 12 Mar 2024</p>
+<h5 class="text-sm font-bold text-on-surface">Post-Op Consultation</h5>
+<p class="text-xs text-on-surface-variant leading-relaxed mt-1">Patient reports minor fatigue. Wound healing progressing normally. Prescription for Metformin renewed.</p>
+<div class="flex gap-2 mt-2">
+<span class="bg-slate-100 text-slate-600 px-2 py-0.5 rounded text-[10px] font-medium">Encounter #882</span>
+<span class="bg-slate-100 text-slate-600 px-2 py-0.5 rounded text-[10px] font-medium">Dr. Sterling</span>
+</div>
+</div>
+<div class="relative pl-10 opacity-60">
+<div class="absolute left-0 top-1 w-[24px] h-[24px] bg-white border-4 border-slate-200 rounded-full z-10"></div>
+<p class="text-[10px] font-bold text-slate-400 uppercase mb-1">05 Jan 2024</p>
+<h5 class="text-sm font-bold text-on-surface">Routine Diabetic Screening</h5>
+<p class="text-xs text-on-surface-variant leading-relaxed mt-1">HbA1c levels stable at 6.2%. Weight management goals met for Q4.</p>
+</div>
+</div>
+</div>
+<!-- Sensitive Layer Blur Overlay -->
+<div class="mt-8 relative">
+<div class="absolute inset-0 backdrop-blur-md bg-white/40 z-20 flex items-center justify-center rounded-xl">
+<div class="text-center p-6 glass-panel rounded-2xl shadow-lg border border-white/50">
+<span class="material-symbols-outlined text-primary mb-2" data-icon="lock" style="font-variation-settings: 'FILL' 1;">lock</span>
+<p class="text-sm font-bold text-on-surface">Privacy Shield Active</p>
+<p class="text-[10px] text-on-surface-variant mb-4">Genome sequencing data restricted.</p>
+<button class="text-xs font-bold text-primary hover:underline">Request Authorization</button>
+</div>
+</div>
+<img alt="DNA visualization" class="w-full h-40 object-cover rounded-xl grayscale opacity-30" data-alt="microscopic view of dna double helix with soft blue and teal clinical lighting in a research environment" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBHWOcsRWEP0yn5KRbOImEglC2XMHkZgn1836pJsG-TAtJUzjddxan5HR9nHXPlS06-nIiy40_HTRloh6PVimlTzzKdz3HXOlPLdy5sbhyYsvbtq4g_6it9XXhokJsMyWWbhvoTEw0_cvXGBVMmbB9ll_2zElMG7GwxeJkDdtQYHoY9mB11i2nxUOxnMK_FaUfGugMhA-LtrOeZaYvpWOyyowZidEuCpZ-bw0n-8mgG1Si_pgMkJTRUmTjX4QbmfC59cHt6yjoLHn0H"/>
+</div>
+</div>
+<div class="mt-6 flex justify-between items-center text-[10px] text-slate-400 font-medium">
+<p>EEHRXF Protocol v4.2.1-stable</p>
+<p>Security Audit: COMPLIANT (SHA-256)</p>
+</div>
+</section>
+</div>
+</main>
+<!-- FAB (Suppressed based on rules: focused task screen) -->
+</body></html>

@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Vitalis Blue | Knowledge Graph Explorer</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-error-container": "#ffdad6",
+                    "background": "#0b1326",
+                    "secondary-fixed": "#d8e2ff",
+                    "on-tertiary-container": "#461f00",
+                    "surface-container-low": "#131b2e",
+                    "on-surface": "#dae2fd",
+                    "on-background": "#dae2fd",
+                    "error": "#ffb4ab",
+                    "primary-fixed": "#d8e2ff",
+                    "primary-container": "#4d8eff",
+                    "outline": "#8c909f",
+                    "on-secondary-container": "#9fb5e7",
+                    "on-primary-fixed-variant": "#004395",
+                    "surface-dim": "#0b1326",
+                    "secondary-container": "#304671",
+                    "on-secondary-fixed-variant": "#304671",
+                    "tertiary-fixed-dim": "#ffb786",
+                    "on-secondary-fixed": "#001a42",
+                    "surface-bright": "#31394d",
+                    "on-surface-variant": "#c2c6d6",
+                    "on-secondary": "#182f59",
+                    "on-tertiary-fixed": "#311400",
+                    "surface-container-lowest": "#060e20",
+                    "secondary": "#b1c6f9",
+                    "on-primary": "#002e6a",
+                    "surface-container-high": "#222a3d",
+                    "inverse-primary": "#005ac2",
+                    "tertiary-fixed": "#ffdcc6",
+                    "error-container": "#93000a",
+                    "surface-container": "#171f33",
+                    "primary-fixed-dim": "#adc6ff",
+                    "on-tertiary": "#502400",
+                    "surface": "#0b1326",
+                    "surface-container-highest": "#2d3449",
+                    "on-primary-container": "#00285d",
+                    "inverse-surface": "#dae2fd",
+                    "primary": "#adc6ff",
+                    "tertiary-container": "#df7412",
+                    "surface-variant": "#2d3449",
+                    "on-primary-fixed": "#001a42",
+                    "outline-variant": "#424754",
+                    "secondary-fixed-dim": "#b1c6f9",
+                    "tertiary": "#ffb786",
+                    "surface-tint": "#adc6ff",
+                    "inverse-on-surface": "#283044",
+                    "on-tertiary-fixed-variant": "#723600",
+                    "on-error": "#690005"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.5rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Inter"],
+                    "body": ["Inter"],
+                    "label": ["Inter"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-panel {
+            background: rgba(11, 19, 38, 0.6);
+            backdrop-filter: blur(20px);
+        }
+        .glow-node {
+            box-shadow: 0 0 15px rgba(173, 198, 255, 0.3);
+        }
+        .node-line {
+            background: linear-gradient(90deg, rgba(77, 142, 255, 0.4) 0%, rgba(77, 142, 255, 0) 100%);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="bg-background text-on-surface font-body selection:bg-primary/30 min-h-screen pb-24">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 bg-[#0b1326]/60 backdrop-blur-xl flex justify-between items-center px-8 h-20 w-full shadow-[0px_24px_48px_rgba(0,0,0,0.4)]">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-lg bg-primary-container/20 flex items-center justify-center text-[#adc6ff]">
+<span class="material-symbols-outlined" data-icon="hub">hub</span>
+</div>
+<h1 class="text-xl font-bold text-[#adc6ff] tracking-tighter">Vitalis Blue</h1>
+</div>
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-[#c2c6d6]" data-icon="search">search</span>
+<div class="w-10 h-10 rounded-full border border-outline-variant/30 overflow-hidden">
+<img alt="Clinical Investigator Avatar" data-alt="close-up portrait of a clinical investigator with a professional and focused expression in a dimly lit modern medical office" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCAuHlB0YdDKqKucHWLP162MG_QkRiAdpwNqKeBOQ0B5N0XfsCDVWYwoEryWMxxqVvPJXn39ghYMYs0P36nCSEkYH4TGonGBxr8eB7JNW8uMzStgvuWYRbit_fq_aQk6qR4t1rjMA4xYL-YGY3wGnEspIALD-rtOWqRVYPdC5Og2g58SFR1pYx5T68MetLZ1QSL8JmMtfK8dmDU4PMy56Add8yKzKvQBHSXob9-K3xU4eg0MX4zuikq81AkPkzO1aklG-Hl4sFKCBtn"/>
+</div>
+</div>
+</header>
+<main class="pt-24 px-6 space-y-8"><!-- Entity Search Bar -->
+<section class="mb-6">
+<div class="relative group">
+<div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+<span class="material-symbols-outlined text-[#adc6ff] opacity-70 group-focus-within:opacity-100 transition-opacity" data-icon="search">search</span>
+</div>
+<input class="w-full bg-surface-container/60 backdrop-blur-md border border-outline-variant/20 rounded-2xl py-4 pl-12 pr-4 text-sm text-[#dae2fd] placeholder:text-[#c2c6d6]/50 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/40 transition-all shadow-lg" placeholder="Search entities, nodes or actors..." type="text"/>
+<div class="absolute inset-y-0 right-0 pr-4 flex items-center">
+<button class="p-1.5 rounded-lg bg-surface-container-highest/50 text-[#c2c6d6] hover:text-[#adc6ff] transition-colors">
+<span class="material-symbols-outlined text-xl" data-icon="tune">tune</span>
+</button>
+</div>
+</div>
+</section>
+<!-- Hero: Graph Statistics & Identity -->
+<section class="space-y-4">
+<div class="flex justify-between items-end">
+<div>
+<span class="text-[#adc6ff] font-bold text-[0.6875rem] uppercase tracking-widest mb-1 block">Clinical Dataspace</span>
+<h2 class="text-2xl font-semibold tracking-tight text-[#dae2fd]">Knowledge Graph</h2>
+</div>
+<div class="bg-surface-container-high px-3 py-1 rounded text-[#adc6ff] text-[0.6875rem] font-bold uppercase tracking-widest flex items-center gap-2">
+<span class="material-symbols-outlined text-[14px]" data-icon="verified" style="font-variation-settings: 'FILL' 1;">verified</span>
+                    Compliance Certified
+                </div>
+</div>
+<!-- Stats Grid -->
+<div class="grid grid-cols-2 gap-4">
+<div class="bg-surface-container p-4 rounded-xl border-l-4 border-[#4d8eff]">
+<div class="text-[#c2c6d6] text-[0.6875rem] font-bold uppercase tracking-widest mb-1">Total Nodes</div>
+<div class="text-3xl font-bold text-[#dae2fd]">14,208</div>
+</div>
+<div class="bg-surface-container p-4 rounded-xl border-l-4 border-tertiary-container">
+<div class="text-[#c2c6d6] text-[0.6875rem] font-bold uppercase tracking-widest mb-1">Relationships</div>
+<div class="text-3xl font-bold text-[#dae2fd]">84.2k</div>
+</div>
+</div>
+</section>
+<!-- Interactive Node-Link Explorer (Visual Mockup) -->
+<section class="relative aspect-square w-full bg-surface-container-lowest rounded-3xl overflow-hidden border border-outline-variant/10">
+<!-- Background Image Mocking the Graph Visualization -->
+<div class="absolute inset-0 opacity-40 mix-blend-screen">
+<img class="w-full h-full object-cover" data-alt="abstract node-link network diagram with glowing cyan and blue connections on a dark navy background, ethereal and scientific" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDhy3fcoxcqu2S54x6714Y-GnvF-iaZBojPz2EUapthol5OUyBbHas6aVQ6g6C6CDLYfghCJlvSJneIK_VKVl0QbBssKui-zBMtfQTbS2ALQHKrDuXc6v2ci8wezY4ng38rB7LaFDYW0i0Ptw3GfqSUxCMpBz1pAJqlypi0mUPxXw3-SGdJ9n3vmwgrQcV8RG3bzDH8R1jDhOlnZATFyAuxD-CAo8CB6QL8hYjR-f1_S5kAPGK-xiunjirPI-HGMYe8ZS7Y8QJZ9Ufy"/>
+</div>
+<!-- Floating Nodes (Interactive Mimicry) -->
+<div class="absolute inset-0 p-8">
+<!-- Center Node -->
+<div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+<div class="w-16 h-16 rounded-full bg-primary/20 border-2 border-primary flex items-center justify-center glow-node z-10">
+<span class="material-symbols-outlined text-primary text-3xl" data-icon="dna">genetics</span>
+</div>
+<div class="mt-2 text-center text-[10px] font-bold text-primary uppercase tracking-tighter">Vitalis Root</div>
+</div>
+<!-- Peripheral Node 1 -->
+<div class="absolute top-1/4 right-1/4">
+<div class="w-10 h-10 rounded-full bg-surface-container-highest border border-outline-variant flex items-center justify-center">
+<span class="material-symbols-outlined text-on-surface-variant text-xl" data-icon="person">person</span>
+</div>
+</div>
+<!-- Peripheral Node 2 -->
+<div class="absolute bottom-1/4 left-1/3">
+<div class="w-12 h-12 rounded-full bg-tertiary-container/20 border border-tertiary-container flex items-center justify-center">
+<span class="material-symbols-outlined text-tertiary text-2xl" data-icon="biotech">biotech</span>
+</div>
+</div>
+<!-- Connectors -->
+<div class="absolute top-1/2 left-1/2 w-32 h-[1px] node-line origin-left rotate-[-45deg]"></div>
+<div class="absolute top-1/2 left-1/2 w-24 h-[1px] node-line origin-left rotate-[120deg]"></div>
+</div>
+<!-- Layer Overlay Control -->
+<div class="absolute bottom-4 left-4 right-4 glass-panel p-3 rounded-2xl flex justify-between items-center">
+<div class="flex -space-x-2">
+<div class="w-8 h-8 rounded-full bg-primary-container flex items-center justify-center border-2 border-surface">
+<span class="material-symbols-outlined text-[16px] text-on-primary-container" data-icon="layers">layers</span>
+</div>
+<div class="w-8 h-8 rounded-full bg-surface-bright flex items-center justify-center border-2 border-surface">
+<span class="material-symbols-outlined text-[16px] text-on-surface" data-icon="visibility">visibility</span>
+</div>
+</div>
+<button class="bg-primary px-4 py-1.5 rounded-lg text-on-primary font-bold text-[0.6875rem] uppercase tracking-widest shadow-[0_0_15px_rgba(173,198,255,0.4)]">
+                    Expand View
+                </button>
+</div>
+</section>
+<!-- Structural Layers Legend -->
+<section class="space-y-4">
+<h3 class="text-[#c2c6d6] text-[0.6875rem] font-bold uppercase tracking-widest px-1">Structural Layers</h3>
+<div class="space-y-2">
+<div class="flex items-center justify-between p-4 bg-surface-container rounded-xl">
+<div class="flex items-center gap-3">
+<div class="w-2 h-2 rounded-full bg-[#adc6ff]"></div>
+<span class="text-[#dae2fd] text-sm font-medium">Clinical Actors</span>
+</div>
+<span class="text-[#c2c6d6] text-[10px]">1,204 Entities</span>
+</div>
+<div class="flex items-center justify-between p-4 bg-surface-container rounded-xl">
+<div class="flex items-center gap-3">
+<div class="w-2 h-2 rounded-full bg-[#ffb786]"></div>
+<span class="text-[#dae2fd] text-sm font-medium">Data Governance</span>
+</div>
+<span class="text-[#c2c6d6] text-[10px]">Active Protocol</span>
+</div>
+<div class="flex items-center justify-between p-4 bg-surface-container rounded-xl">
+<div class="flex items-center gap-3">
+<div class="w-2 h-2 rounded-full bg-[#4d8eff]"></div>
+<span class="text-[#dae2fd] text-sm font-medium">Patient Nodes</span>
+</div>
+<span class="text-[#c2c6d6] text-[10px]">9,420 Enrolled</span>
+</div>
+</div>
+</section>
+<!-- Key Actors Section (Horizontal Scroll) -->
+<section class="space-y-4">
+<div class="flex justify-between items-center px-1">
+<h3 class="text-[#c2c6d6] text-[0.6875rem] font-bold uppercase tracking-widest">Key Actors</h3>
+<span class="text-primary text-[10px] font-bold uppercase tracking-widest">See All</span>
+</div>
+<div class="flex gap-4 overflow-x-auto pb-4 no-scrollbar">
+<div class="min-w-[140px] bg-surface-container p-4 rounded-2xl flex flex-col items-center text-center space-y-3">
+<img alt="Investigator Profile" class="w-12 h-12 rounded-full ring-2 ring-primary/20" data-alt="professional medical researcher headshot with clinical lighting and high-tech background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAROds_7vPhBbtW9YyD07a6CreiQQsD-QnSbEAwtSkWq7uUzMzux20XUeVWZdDJ-QaV_3kLWPlt9DCJ6aFQkgQQnGzTSBmSmQxP0n5T8qc-LlGVljIwvWYk5hC2A0-n19dULB0I3RNyb4kGo-_xpAzCrcLA_M5Or_tPEP1M6yCdf5GgsLnJ_YUPT_mKptQRgR1P1m9Y7Jj_OB-lOxjNp_M1pfw-wFu-7KCO5mRyI8KhRmySxekttMIEsIg1fTtWuCNPR7r1ZfMF7Itq"/>
+<div>
+<div class="text-[#dae2fd] text-xs font-bold">Dr. Aris Thorne</div>
+<div class="text-[#c2c6d6] text-[10px]">Lead Architect</div>
+</div>
+</div>
+<div class="min-w-[140px] bg-surface-container p-4 rounded-2xl flex flex-col items-center text-center space-y-3">
+<img alt="Investigator Profile" class="w-12 h-12 rounded-full ring-2 ring-primary/10" data-alt="female medical data scientist portrait with soft lighting and sophisticated aesthetic" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCWAY5r_vZcOKSeFO8BvbUCYNSy1Cw2OFLXEZIXWkSotIDAmEhhUUPHL0agpVDfexS5EiA4mBpnw77kKWAP6k11C5pjN98ar7e6U31MZ-bE-nuLpW2Dd8fRwPtxFoyk_V-ft3OY2YAMQihe22pEswwE90zKvZzYG-SOfL3i22q8U2N9FyrxP4HYSmx71lj59tI-XNS_QL0VQdHUgUF2BzexUwMhcEo6z9OrDNpOTtllB6q9z4sPZWDx8x40tti2ZT2xzhZ17pVkfRxg"/>
+<div>
+<div class="text-[#dae2fd] text-xs font-bold">Elena Vance</div>
+<div class="text-[#c2c6d6] text-[10px]">Protocol Chief</div>
+</div>
+</div>
+<div class="min-w-[140px] bg-surface-container p-4 rounded-2xl flex flex-col items-center text-center space-y-3">
+<div class="w-12 h-12 rounded-full bg-surface-container-highest flex items-center justify-center ring-2 ring-primary/10">
+<span class="material-symbols-outlined text-primary" data-icon="add">add</span>
+</div>
+<div>
+<div class="text-[#dae2fd] text-xs font-bold">Invite</div>
+<div class="text-[#c2c6d6] text-[10px]">New Collaborator</div>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- NavigationDrawer (Suppressed for Mobile View, implemented as BottomNavBar per Hierarchy) -->
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full bg-[#0b1326]/80 backdrop-blur-lg flex justify-around items-center px-4 py-3 z-50 rounded-t-2xl shadow-[0_-12px_24px_rgba(0,0,0,0.3)]">
+<a class="flex flex-col items-center text-[#c2c6d6] opacity-70 hover:opacity-100 hover:text-[#adc6ff] transition-all" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="home">home</span>
+<span class="font-['Inter'] text-[10px] font-bold uppercase tracking-widest">Home</span>
+</a>
+<a class="flex flex-col items-center text-[#c2c6d6] opacity-70 hover:opacity-100 hover:text-[#adc6ff] transition-all" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="insights">insights</span>
+<span class="font-['Inter'] text-[10px] font-bold uppercase tracking-widest">Analytics</span>
+</a>
+<a class="flex flex-col items-center bg-[#4d8eff] text-[#0b1326] rounded-xl px-6 py-1 shadow-[0_0_15px_rgba(77,142,255,0.4)] scale-110 duration-300" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="share" style="font-variation-settings: 'FILL' 1;">share</span>
+<span class="font-['Inter'] text-[10px] font-bold uppercase tracking-widest">Network</span>
+</a>
+<a class="flex flex-col items-center text-[#c2c6d6] opacity-70 hover:opacity-100 hover:text-[#adc6ff] transition-all" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="settings">settings</span>
+<span class="font-['Inter'] text-[10px] font-bold uppercase tracking-widest">Settings</span>
+</a>
+</nav>
+<!-- Contextual FAB (Hidden on Mobile Detail/Explorer focus according to Suppression Rules, but included for top-level context) -->
+<button class="fixed bottom-24 right-6 w-14 h-14 bg-gradient-to-br from-[#adc6ff] to-[#4d8eff] rounded-2xl shadow-[0_8px_32px_rgba(77,142,255,0.4)] flex items-center justify-center text-on-primary z-40 active:scale-95 transition-transform">
+<span class="material-symbols-outlined text-3xl" data-icon="account_tree">account_tree</span>
+</button>
+</body></html>

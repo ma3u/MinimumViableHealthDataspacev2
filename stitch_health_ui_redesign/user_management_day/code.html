@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>HealthDataSpace - User &amp; Permissions Management</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "secondary-container": "#6cf8bb",
+                        "surface": "#f9f9ff",
+                        "surface-dim": "#d3daea",
+                        "surface-bright": "#f9f9ff",
+                        "on-error": "#ffffff",
+                        "surface-container": "#e7eefe",
+                        "inverse-surface": "#2a313d",
+                        "on-error-container": "#93000a",
+                        "on-tertiary-container": "#fefcff",
+                        "on-background": "#151c27",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container-high": "#e2e8f8",
+                        "primary-fixed-dim": "#adc6ff",
+                        "on-secondary-fixed-variant": "#005236",
+                        "surface-container-low": "#f0f3ff",
+                        "on-secondary": "#ffffff",
+                        "secondary-fixed-dim": "#4edea3",
+                        "on-surface-variant": "#424754",
+                        "on-surface": "#151c27",
+                        "primary": "#0058be",
+                        "on-primary-fixed": "#001a42",
+                        "secondary-fixed": "#6ffbbe",
+                        "on-tertiary-fixed": "#141b2b",
+                        "inverse-on-surface": "#ebf1ff",
+                        "outline-variant": "#c2c6d6",
+                        "surface-variant": "#dce2f3",
+                        "primary-fixed": "#d8e2ff",
+                        "error": "#ba1a1a",
+                        "on-primary-container": "#fefcff",
+                        "tertiary-fixed-dim": "#c0c6db",
+                        "surface-tint": "#005ac2",
+                        "primary-container": "#2170e4",
+                        "on-secondary-fixed": "#002113",
+                        "on-secondary-container": "#00714d",
+                        "error-container": "#ffdad6",
+                        "outline": "#727785",
+                        "on-tertiary-fixed-variant": "#404758",
+                        "on-primary": "#ffffff",
+                        "on-primary-fixed-variant": "#004395",
+                        "tertiary-fixed": "#dce2f7",
+                        "inverse-primary": "#adc6ff",
+                        "background": "#f9f9ff",
+                        "tertiary-container": "#6e7487",
+                        "secondary": "#006c49",
+                        "surface-container-highest": "#dce2f3",
+                        "on-tertiary": "#ffffff",
+                        "tertiary": "#555c6e"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Inter"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; background-color: #f9f9ff; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .glass-effect { backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
+        .tonal-shift { transition: background-color 0.2s ease; }
+    </style>
+</head>
+<body class="text-on-surface antialiased">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 bg-slate-50/80 dark:bg-slate-950/80 backdrop-blur-xl shadow-sm dark:shadow-none flex justify-between items-center px-6 h-16 w-full font-sans antialiased tracking-tight">
+<div class="flex items-center gap-8">
+<h1 class="text-xl font-bold tracking-tighter text-slate-900 dark:text-slate-50">HealthDataSpace</h1>
+<div class="hidden md:flex items-center gap-2 bg-slate-200/50 dark:bg-slate-800/50 px-4 py-1.5 rounded-full">
+<span class="material-symbols-outlined text-slate-500 text-sm">search</span>
+<input class="bg-transparent border-none focus:ring-0 text-sm w-64 placeholder-slate-500" placeholder="Search systems..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<button class="p-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors rounded-full relative">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-2 right-2 w-2 h-2 bg-error rounded-full border-2 border-slate-50"></span>
+</button>
+<div class="flex items-center gap-3 pl-4 border-l border-slate-200 dark:border-slate-800">
+<img alt="Administrator Profile" class="w-8 h-8 rounded-full object-cover" data-alt="Professional administrator headshot with clean lighting and neutral background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCNLJThFGdyVTTtQcbHP3qLiVBdH9Smldxiib4bMCl-gVvwOkyz_ZyKJpAwCZEaGBfU0E74MxAQlCEDrZtv0n4BLA2oSqGqVIXtHKCVf5HLYwUyFNujmDzuUv_v0vAUHR7jxQMYxtJ2DsbLdTPPcVrygMTRYkqXxQdmtjHgAhgIBkOee8xyiaKkGXLPrFooVbQmkMmJ4bPQod2u2LkKfYTOm8iKmNqxiplMyCzafjg6tzL0_s-ryUTQA5ZZ2RGejdTo5nS494gDthSR"/>
+<div class="hidden sm:block">
+<p class="text-xs font-bold text-slate-900 leading-none">Admin Console</p>
+<p class="text-[10px] text-slate-500">Enterprise Control</p>
+</div>
+</div>
+</div>
+</header>
+<!-- SideNavBar -->
+<aside class="fixed left-0 top-16 bottom-0 w-64 bg-slate-50 dark:bg-slate-950 border-r dark:border-slate-800 flex flex-col pt-4 z-40 hidden md:flex">
+<nav class="flex-1 px-4 space-y-1">
+<a class="flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all duration-200 ease-in-out rounded-xl" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="text-sm font-medium Inter">Status</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all duration-200 ease-in-out rounded-xl" href="#">
+<span class="material-symbols-outlined" data-icon="monitoring">monitoring</span>
+<span class="text-sm font-medium Inter">Metrics</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-blue-700 dark:text-blue-400 bg-blue-50/50 dark:bg-blue-900/20 border-r-4 border-blue-600 transition-all duration-200 ease-in-out rounded-l-xl" href="#">
+<span class="material-symbols-outlined" data-icon="group">group</span>
+<span class="text-sm font-medium Inter">Users</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all duration-200 ease-in-out rounded-xl" href="#">
+<span class="material-symbols-outlined" data-icon="notifications_active">notifications_active</span>
+<span class="text-sm font-medium Inter">Alerts</span>
+</a>
+</nav>
+<div class="p-4 mt-auto border-t dark:border-slate-800 space-y-1">
+<button class="w-full py-3 px-4 bg-primary text-white rounded-xl text-sm font-bold shadow-lg shadow-blue-500/20 flex items-center justify-center gap-2 mb-4">
+<span class="material-symbols-outlined text-sm">description</span>
+                Generate Report
+            </button>
+<a class="flex items-center gap-3 px-4 py-2 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="text-sm font-medium Inter">Settings</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl" href="#">
+<span class="material-symbols-outlined" data-icon="help">help</span>
+<span class="text-sm font-medium Inter">Support</span>
+</a>
+</div>
+</aside>
+<!-- Main Canvas -->
+<main class="md:ml-64 pt-24 px-6 pb-12 min-h-screen bg-surface">
+<!-- Header Section -->
+<div class="mb-10">
+<h2 class="text-3xl font-extrabold tracking-tight text-on-surface mb-2">User Permissions</h2>
+<p class="text-on-surface-variant max-w-2xl">Manage enterprise access levels, role assignments, and review pending authentication requests for the HealthDataSpace ecosystem.</p>
+</div>
+<div class="grid grid-cols-12 gap-8">
+<!-- Bento Stats Grid -->
+<div class="col-span-12 lg:col-span-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+<div class="bg-surface-container-lowest p-6 rounded-xl shadow-sm border-l-4 border-primary">
+<div class="flex items-center justify-between mb-4">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">group</span>
+<span class="text-xs font-bold text-secondary-fixed-dim bg-secondary-fixed-dim/10 px-2 py-0.5 rounded-full">+12%</span>
+</div>
+<p class="text-sm font-medium text-on-surface-variant">Total Users</p>
+<p class="text-2xl font-black text-on-surface">1,248</p>
+</div>
+<div class="bg-surface-container-lowest p-6 rounded-xl shadow-sm border-l-4 border-secondary">
+<div class="flex items-center justify-between mb-4">
+<span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 1;">verified_user</span>
+</div>
+<p class="text-sm font-medium text-on-surface-variant">Active Sessions</p>
+<p class="text-2xl font-black text-on-surface">312</p>
+</div>
+<div class="bg-surface-container-lowest p-6 rounded-xl shadow-sm border-l-4 border-error">
+<div class="flex items-center justify-between mb-4">
+<span class="material-symbols-outlined text-error" style="font-variation-settings: 'FILL' 1;">pending_actions</span>
+<span class="animate-pulse bg-error w-2 h-2 rounded-full"></span>
+</div>
+<p class="text-sm font-medium text-on-surface-variant">Pending Requests</p>
+<p class="text-2xl font-black text-on-surface">14</p>
+</div>
+</div>
+<!-- RBAC Summary Card -->
+<div class="col-span-12 lg:col-span-4 row-span-2">
+<div class="bg-surface-container-low p-8 rounded-xl h-full">
+<h3 class="text-lg font-bold mb-6">RBAC Summary</h3>
+<div class="space-y-6">
+<div class="flex items-center justify-between p-4 bg-white rounded-xl">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined">admin_panel_settings</span>
+</div>
+<div>
+<p class="text-sm font-bold">Administrators</p>
+<p class="text-xs text-on-surface-variant">Full Access (L4)</p>
+</div>
+</div>
+<span class="text-sm font-black">24</span>
+</div>
+<div class="flex items-center justify-between p-4 bg-white rounded-xl">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-secondary/10 flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined">stethoscope</span>
+</div>
+<div>
+<p class="text-sm font-bold">Clinicians</p>
+<p class="text-xs text-on-surface-variant">Write Access (L3)</p>
+</div>
+</div>
+<span class="text-sm font-black">892</span>
+</div>
+<div class="flex items-center justify-between p-4 bg-white rounded-xl">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-tertiary/10 flex items-center justify-center text-tertiary">
+<span class="material-symbols-outlined">biotech</span>
+</div>
+<div>
+<p class="text-sm font-bold">Researchers</p>
+<p class="text-xs text-on-surface-variant">Read-only (L1-2)</p>
+</div>
+</div>
+<span class="text-sm font-black">332</span>
+</div>
+</div>
+<div class="mt-12 p-6 bg-primary-container text-white rounded-xl">
+<p class="text-xs font-bold uppercase tracking-widest mb-2 opacity-80">Security Notice</p>
+<p class="text-sm mb-4">All Level 4 changes require secondary hardware key validation.</p>
+<button class="text-xs font-bold border border-white/30 px-3 py-1.5 rounded-full hover:bg-white/10 transition-colors">Audit Logs</button>
+</div>
+</div>
+</div>
+<!-- Users Table Section -->
+<div class="col-span-12 lg:col-span-8">
+<div class="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden">
+<div class="p-6 border-b border-surface-container flex flex-col md:flex-row md:items-center justify-between gap-4">
+<h3 class="text-lg font-bold">Manage Users</h3>
+<div class="flex items-center gap-2">
+<button class="px-4 py-2 text-sm font-medium text-on-surface-variant bg-surface-container-low rounded-xl hover:bg-surface-container-high transition-colors">Filters</button>
+<button class="px-4 py-2 text-sm font-medium text-white bg-primary rounded-xl hover:opacity-90 transition-opacity">Add New User</button>
+</div>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left">
+<thead class="bg-surface-container-low text-xs font-bold text-on-surface-variant uppercase tracking-wider">
+<tr>
+<th class="px-6 py-4">User Identity</th>
+<th class="px-6 py-4">Role</th>
+<th class="px-6 py-4">Access Level</th>
+<th class="px-6 py-4">Status</th>
+<th class="px-6 py-4 text-right">Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-surface-container">
+<tr class="hover:bg-surface-container-low transition-colors group">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<img class="w-10 h-10 rounded-full object-cover" data-alt="Modern close-up portrait of a medical professional in white scrubs" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDrHEzFSXau7atelZkB_CFbPs4isQi2-SFvW9LguBp8LB85r7CYFQF_oYgkkAQPfDaeNRhDrih70027uwYfxaewnxagCAcrwU1GNK19GdoF6nZhyAYURvGSPssTR2-t7TxprQS5etaAexkX_81AdDKExr4QGLWLN9BBNJIYYVkYBZmiKGjnYiQ8MpeF2y0VdZRAgod_jI547crg-RXvVlDgtPda0FmBMqwaEiuOSeax8kT7x6Lho2REo96MNK06kkDvpaP_d4Vdr6X7"/>
+<div>
+<p class="text-sm font-bold">Dr. Elena Rodriguez</p>
+<p class="text-[10px] text-on-surface-variant">e.rodriguez@medical-net.org</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-4 text-sm">Clinician</td>
+<td class="px-6 py-4">
+<span class="px-3 py-1 rounded-full bg-secondary-container/20 text-on-secondary-container text-xs font-bold">Level 3</span>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-2 text-xs font-medium text-secondary">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span> Active
+                                        </div>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="p-2 text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined">edit</span>
+</button>
+</td>
+</tr>
+<tr class="hover:bg-surface-container-low transition-colors group">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<img class="w-10 h-10 rounded-full object-cover" data-alt="Professional man with glasses in an office environment with soft focus" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB04TeNv4tloy0ddSLcfURAgn5UVXo0-MSxODy4tkIJGoxMJr8CIDxQ7zkhkSqc2S4tN1W5XlPKeIuoC5rqtFdETrkxf5ovpHbCwGpJK6zPCM0A5Pj9FsHAg4npU_kCnkZjtYwnGJbCaKDR44VaLvuKQEYEiImaqPOUdKQti2n7UM0cndlXyGB41cohpdNbumeebn35_Qrxr55xUjeZhmvStDecxnitUEXFwniBVQ_pOI315vmJeIF5r-rdcuiobnMPPLO1fHpX6aBV"/>
+<div>
+<p class="text-sm font-bold">Jameson Wu</p>
+<p class="text-[10px] text-on-surface-variant">j.wu@research-hub.io</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-4 text-sm">Researcher</td>
+<td class="px-6 py-4">
+<span class="px-3 py-1 rounded-full bg-surface-variant text-on-surface-variant text-xs font-bold">Level 2</span>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-2 text-xs font-medium text-secondary">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span> Active
+                                        </div>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="p-2 text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined">edit</span>
+</button>
+</td>
+</tr>
+<tr class="hover:bg-surface-container-low transition-colors group">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<img class="w-10 h-10 rounded-full object-cover" data-alt="Young professional woman with a welcoming smile in a bright corporate setting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAX_M7LXn3Uujgix5Qez4ih4nqzkJRKnyPc0n2aYPrLoAphj1AZgHjC1FHgH3Igrc2KR7YPpLPlnYjD305u-Un-9q7P9HcxQHHih472WmmmZZBGjhHA-K-2AqxzJgD5hgnMKxWX6OSvimH8D43FKUXxbPJS9NfyQ4X5v83jvB9Jf0_7pHIso4EMw78rV428PVa6w5s-jCFycxLnG5F98ZSn5_BcaKOO2WzUWq60yOjY08vv7q8xqNdU_uhXm7UpbSwvqpg4WVFJvkBc"/>
+<div>
+<p class="text-sm font-bold">Sarah Jenkins</p>
+<p class="text-[10px] text-on-surface-variant">s.jenkins@system-admin.com</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-4 text-sm">Admin</td>
+<td class="px-6 py-4">
+<span class="px-3 py-1 rounded-full bg-primary-container/20 text-primary text-xs font-bold">Level 4</span>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-2 text-xs font-medium text-outline">
+<span class="w-1.5 h-1.5 rounded-full bg-outline"></span> Offline
+                                        </div>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="p-2 text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined">edit</span>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<!-- Pending Requests Section -->
+<div class="col-span-12">
+<div class="bg-surface-container-low p-8 rounded-xl">
+<div class="flex items-center justify-between mb-8">
+<h3 class="text-xl font-bold">Pending Access Requests</h3>
+<span class="bg-error text-white text-[10px] font-black px-2 py-1 rounded uppercase tracking-tighter">Needs Immediate Action</span>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+<!-- Request Card 1 -->
+<div class="bg-white p-6 rounded-xl shadow-sm flex flex-col gap-6">
+<div class="flex gap-4">
+<img class="w-12 h-12 rounded-full object-cover" data-alt="Portrait of a serious man in professional attire with soft natural lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB2-sbEQAIrwtj4s-h3k-syflPR2HZgocutc3-vfEkW_dRsl5S0JFHUzj_Yim1M8C8P2n5SkWVBSe5eaxTXw9xdiH09ef_0xx3zUidnm_Kcb55adeHcnI4wIWKCE93hKIpgsTaSTJU-k0CC4EKwlcqNzjaw_st-6XVnmMWAd5Is6Wfv7dq5YtzN7zJewuSXR9NcYSjUgr3jIzNrma1IujXfsfoA8bQ9BU8n3eS3lidyv8nW3WN7Y2KIOuznEpAhy4-wo403YIvLEQro"/>
+<div>
+<p class="font-bold">Marcus Thorne</p>
+<p class="text-xs text-on-surface-variant">Biotech Analysis Lead</p>
+<div class="mt-2 flex items-center gap-2">
+<span class="text-[10px] bg-surface-container-high px-2 py-0.5 rounded-full font-bold">Requested: Level 3</span>
+</div>
+</div>
+</div>
+<div class="p-4 bg-surface-container-low rounded-lg text-xs leading-relaxed text-on-surface-variant">
+                                "Needs access to the Genomic Data Cluster for the upcoming Q3 longevity study. Verified by Dept Head."
+                            </div>
+<div class="flex gap-3">
+<button class="flex-1 py-2 text-xs font-bold text-white bg-primary rounded-lg hover:opacity-90">Approve</button>
+<button class="flex-1 py-2 text-xs font-bold text-on-surface-variant bg-surface-container-low rounded-lg hover:bg-surface-container-high">Deny</button>
+</div>
+</div>
+<!-- Request Card 2 -->
+<div class="bg-white p-6 rounded-xl shadow-sm flex flex-col gap-6">
+<div class="flex gap-4">
+<img class="w-12 h-12 rounded-full object-cover" data-alt="Close-up of a professional woman looking thoughtful with bright daylight" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCIi_otdLNKResuayAcHhI-4uXacf4vJ9GfgeecOfWiKNOSnJKpg48KHVGU_4Z0cckIamR_6UbQLrLph8LDdwzQwvLluV2XvvxRJSGlQ38kYvjuDZkRLi0MGxJNuhBXNr20BwQfBl6IEIJHOMmryobvduMdZbd5lPGKOdZXj5bBvwPpsi0sRiqA4VfKnYqSndtiQ3aiAZKPYEb46TKa6l0tWVY835IqSr1vxPdNMIKxt78aYfymo9OPF56E_NQB86TE1iUjqDi5W_3w"/>
+<div>
+<p class="font-bold">Linda Sterling</p>
+<p class="text-xs text-on-surface-variant">External Auditor</p>
+<div class="mt-2 flex items-center gap-2">
+<span class="text-[10px] bg-surface-container-high px-2 py-0.5 rounded-full font-bold">Requested: Level 1</span>
+</div>
+</div>
+</div>
+<div class="p-4 bg-surface-container-low rounded-lg text-xs leading-relaxed text-on-surface-variant">
+                                "Temporary 48-hour access for the compliance audit. Read-only permissions required for logs."
+                            </div>
+<div class="flex gap-3">
+<button class="flex-1 py-2 text-xs font-bold text-white bg-primary rounded-lg hover:opacity-90">Approve</button>
+<button class="flex-1 py-2 text-xs font-bold text-on-surface-variant bg-surface-container-low rounded-lg hover:bg-surface-container-high">Deny</button>
+</div>
+</div>
+<!-- Request Card 3 -->
+<div class="bg-white p-6 rounded-xl shadow-sm flex flex-col gap-6 border border-error/20">
+<div class="flex gap-4">
+<div class="w-12 h-12 rounded-full bg-error-container text-error flex items-center justify-center">
+<span class="material-symbols-outlined">person_outline</span>
+</div>
+<div>
+<p class="font-bold">Unidentified Access</p>
+<p class="text-xs text-error font-medium">Flagged IP: 192.168.1.104</p>
+<div class="mt-2 flex items-center gap-2">
+<span class="text-[10px] bg-error-container text-error px-2 py-0.5 rounded-full font-bold">Requested: Level 4</span>
+</div>
+</div>
+</div>
+<div class="p-4 bg-error-container/20 border border-error-container rounded-lg text-xs leading-relaxed text-on-error-container">
+                                "Automated flag: Attempted to bypass standard OAuth handshake. Immediate review required."
+                            </div>
+<div class="flex gap-3">
+<button class="flex-1 py-2 text-xs font-bold text-white bg-error rounded-lg hover:opacity-90">Blacklist</button>
+<button class="flex-1 py-2 text-xs font-bold text-on-surface-variant bg-surface-container-low rounded-lg hover:bg-surface-container-high">Ignore</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- FAB for Quick Actions -->
+<button class="fixed bottom-8 right-8 w-14 h-14 bg-primary text-white rounded-full shadow-2xl flex items-center justify-center hover:scale-110 active:scale-95 transition-all z-50">
+<span class="material-symbols-outlined" style="font-variation-settings: 'wght' 600;">add</span>
+</button>
+</body></html>

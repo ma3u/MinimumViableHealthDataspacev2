@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "tertiary-fixed": "#dce2f7",
+                    "primary-container": "#2170e4",
+                    "surface-variant": "#dce2f3",
+                    "surface-container-low": "#f0f3ff",
+                    "outline": "#727785",
+                    "on-tertiary-container": "#fefcff",
+                    "on-secondary-fixed": "#002113",
+                    "on-primary": "#ffffff",
+                    "surface-dim": "#d3daea",
+                    "secondary-container": "#6cf8bb",
+                    "outline-variant": "#c2c6d6",
+                    "on-secondary-fixed-variant": "#005236",
+                    "inverse-surface": "#2a313d",
+                    "background": "#f9f9ff",
+                    "tertiary": "#555c6e",
+                    "surface-tint": "#005ac2",
+                    "surface-container-high": "#e2e8f8",
+                    "secondary-fixed-dim": "#4edea3",
+                    "error-container": "#ffdad6",
+                    "primary-fixed-dim": "#adc6ff",
+                    "surface-container-highest": "#dce2f3",
+                    "on-secondary": "#ffffff",
+                    "surface": "#f9f9ff",
+                    "primary-fixed": "#d8e2ff",
+                    "on-surface-variant": "#424754",
+                    "on-primary-fixed": "#001a42",
+                    "error": "#ba1a1a",
+                    "on-surface": "#151c27",
+                    "on-error": "#ffffff",
+                    "inverse-primary": "#adc6ff",
+                    "on-error-container": "#93000a",
+                    "on-background": "#151c27",
+                    "on-primary-fixed-variant": "#004395",
+                    "surface-container-lowest": "#ffffff",
+                    "surface-container": "#e7eefe",
+                    "on-primary-container": "#fefcff",
+                    "on-tertiary-fixed-variant": "#404758",
+                    "surface-bright": "#f9f9ff",
+                    "secondary": "#006c49",
+                    "primary": "#0058be",
+                    "tertiary-container": "#6e7487",
+                    "tertiary-fixed-dim": "#c0c6db",
+                    "on-tertiary": "#ffffff",
+                    "inverse-on-surface": "#ebf1ff",
+                    "on-secondary-container": "#00714d",
+                    "secondary-fixed": "#6ffbbe",
+                    "on-tertiary-fixed": "#141b2b"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Inter"],
+                    "body": ["Inter"],
+                    "label": ["Inter"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="bg-surface text-on-surface min-h-screen flex flex-col">
+<!-- TopAppBar -->
+<header class="w-full sticky top-0 z-50 bg-slate-50/80 backdrop-blur-xl shadow-sm flex items-center justify-between px-6 h-16 w-full">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-blue-700 text-2xl" data-icon="account_tree">account_tree</span>
+<h1 class="text-xl font-bold text-slate-900 tracking-tight">Clinical Knowledge Graph</h1>
+</div>
+<div class="w-10 h-10 rounded-full bg-surface-container-high overflow-hidden border border-outline-variant/20 active:opacity-80 transition-opacity cursor-pointer">
+<img alt="user profile" data-alt="Close up portrait of a professional medical doctor in clinical attire with soft studio lighting and clean background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAW1-5rp8EpcfIX3m0tjxIaHQvQm7rAJOeiwKINend5kGIeJWc4uS9PcMFKSwFsacEn4zD09e2QsGx0cW12Yp-yG0ZX8QydAyQ-ONb33HNztCZ60ardDgP4o426xM78wu9MpFhIFdF0c86FO5m5yHp9049bkU58vo-PVPGzGHp8evWwc8rPbaHw1clIi-qWvkE1i7pUtMwZrXuDL0W3igK-k-9SySJ2_E9NEOtyBAgT35htZPUUBIgheqPu-Ful2xCOmrsGxI2SE-SE"/>
+</div>
+</header>
+<!-- Main Content Area -->
+<main class="flex-1 overflow-y-auto pb-32">
+<div class="px-6 py-8 max-w-2xl mx-auto w-full space-y-10"><!-- Entity Search Filter Bar -->
+<section class="w-full">
+<div class="bg-surface-container-lowest p-2 rounded-2xl shadow-[0px_4px_16px_rgba(21,28,39,0.06)] border border-outline-variant/10 flex items-center gap-3">
+<div class="flex-1 flex items-center gap-3 px-3 h-12 bg-surface-container-low rounded-xl border border-transparent focus-within:border-primary/20 focus-within:bg-white transition-all">
+<span class="material-symbols-outlined text-outline" data-icon="search">search</span>
+<input class="bg-transparent border-none focus:ring-0 text-sm text-on-surface w-full placeholder:text-outline/60 font-medium" placeholder="Search entities, nodes or layers..." type="text"/>
+</div>
+<button class="w-12 h-12 flex items-center justify-center rounded-xl bg-primary/5 text-primary hover:bg-primary/10 active:scale-95 transition-all">
+<span class="material-symbols-outlined" data-icon="tune">tune</span>
+</button>
+</div>
+</section>
+<!-- Summary Metrics Section -->
+<section class="grid grid-cols-2 gap-4">
+<div class="bg-surface-container-lowest p-5 rounded-xl shadow-[0px_12px_32px_rgba(21,28,39,0.04)] flex flex-col gap-1 border border-outline-variant/10">
+<span class="text-xs font-bold text-blue-600 uppercase tracking-widest">Total Nodes</span>
+<div class="flex items-baseline gap-2">
+<span class="text-3xl font-black text-on-surface tabular-nums">42.8k</span>
+<span class="text-secondary text-sm font-bold flex items-center">+12%</span>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-5 rounded-xl shadow-[0px_12px_32px_rgba(21,28,39,0.04)] flex flex-col gap-1 border border-outline-variant/10">
+<span class="text-xs font-bold text-tertiary-container uppercase tracking-widest">Relationships</span>
+<div class="flex items-baseline gap-2">
+<span class="text-3xl font-black text-on-surface tabular-nums">1.2m</span>
+<span class="text-blue-600 text-sm font-bold flex items-center">Stable</span>
+</div>
+</div>
+</section>
+<!-- Central Graph Visualization Placeholder -->
+<section class="relative aspect-square flex items-center justify-center">
+<!-- Abstract Graph Visual Representation using Tonal Layers -->
+<div class="absolute inset-0 bg-surface-container-low rounded-full scale-95 opacity-50"></div>
+<div class="absolute inset-0 border-[1px] border-dashed border-blue-200 rounded-full animate-pulse"></div>
+<!-- Central Node -->
+<div class="relative z-10 w-40 h-40 bg-white rounded-full shadow-2xl flex flex-col items-center justify-center p-6 border-4 border-blue-50">
+<div class="bg-primary p-3 rounded-full mb-3 shadow-lg shadow-primary/30">
+<span class="material-symbols-outlined text-white text-3xl" data-icon="hub">hub</span>
+</div>
+<span class="text-on-surface font-black text-lg tracking-tight">Vitalis Root</span>
+<span class="text-[10px] text-primary-container font-bold uppercase tracking-widest">Core Entity</span>
+</div>
+<!-- Satellite Nodes -->
+<div class="absolute top-10 right-10 w-16 h-16 bg-white rounded-xl shadow-lg border border-slate-100 flex items-center justify-center">
+<span class="material-symbols-outlined text-secondary" data-icon="clinical_notes">clinical_notes</span>
+</div>
+<div class="absolute bottom-16 left-4 w-20 h-20 bg-white rounded-full shadow-lg border border-slate-100 flex flex-col items-center justify-center text-center p-2">
+<span class="material-symbols-outlined text-blue-400" data-icon="genetics">genetics</span>
+<span class="text-[8px] font-bold text-slate-500 uppercase">Omics</span>
+</div>
+<div class="absolute top-1/4 -left-2 w-14 h-14 bg-white rounded-full shadow-lg border border-slate-100 flex items-center justify-center">
+<span class="material-symbols-outlined text-error" data-icon="emergency">emergency</span>
+</div>
+</section>
+<!-- Structural Layers List -->
+<section class="space-y-4">
+<div class="flex justify-between items-end">
+<h2 class="text-2xl font-black tracking-tight text-on-surface">Structural Layers</h2>
+<button class="text-sm font-bold text-primary hover:underline transition-all">Expand View</button>
+</div>
+<div class="space-y-3">
+<div class="group bg-white p-5 rounded-xl flex items-center gap-5 hover:bg-surface-container-low transition-colors duration-300">
+<div class="w-12 h-12 bg-blue-50 rounded-lg flex items-center justify-center text-primary group-hover:bg-white transition-colors">
+<span class="material-symbols-outlined" data-icon="groups">groups</span>
+</div>
+<div class="flex-1">
+<h3 class="font-bold text-on-surface">Clinical Actors</h3>
+<p class="text-xs text-on-surface-variant leading-relaxed">Mapping relationships between 1,204 active practitioners and lab specialists.</p>
+</div>
+<span class="material-symbols-outlined text-slate-300" data-icon="chevron_right">chevron_right</span>
+</div>
+<div class="group bg-white p-5 rounded-xl flex items-center gap-5 hover:bg-surface-container-low transition-colors duration-300">
+<div class="w-12 h-12 bg-secondary/10 rounded-lg flex items-center justify-center text-secondary group-hover:bg-white transition-colors">
+<span class="material-symbols-outlined" data-icon="gavel">gavel</span>
+</div>
+<div class="flex-1">
+<h3 class="font-bold text-on-surface">Data Governance</h3>
+<p class="text-xs text-on-surface-variant leading-relaxed">Policy-driven nodes governing PHI encryption and federated access logs.</p>
+</div>
+<span class="material-symbols-outlined text-slate-300" data-icon="chevron_right">chevron_right</span>
+</div>
+</div>
+</section>
+<!-- Key Actors Carousel -->
+<section class="space-y-4">
+<h2 class="text-2xl font-black tracking-tight text-on-surface">Key Actors</h2>
+<div class="flex overflow-x-auto hide-scrollbar gap-4 pb-4 -mx-6 px-6">
+<!-- Carousel Item 1 -->
+<div class="flex-shrink-0 w-44 bg-surface-container-lowest rounded-2xl p-4 border border-outline-variant/10 shadow-sm">
+<img alt="Dr. Sarah Chen" class="w-full h-32 object-cover rounded-xl mb-4" data-alt="A portrait of a female medical professional in white coat looking confident, with laboratory equipment softly blurred in the background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAtWFpxokSjDlQXZAgTLUYTfKF99bmbKLsCKnnZFi-w12cSob_bhNGbXo6G2I0JbNEDTWs7cSe36sWzCZ_kbFm_o4IggWgUA4eC9m4Fkug6MBFeNGu8vMqi5691mjc3pKKz7ixNr4lN53xxk4WfPqUnqTEopK-nIuu6vLzVjffINFXuTZmbPAs0Qc1B_SjnaqskNa17Wpo_lClJak6JZ_82pZ19RYt_fa_LmkUP59Z6iJe44q95PJChdaoac_4Uw3_bMrF4gnr2CLAW"/>
+<h4 class="font-bold text-sm text-on-surface truncate">Dr. Sarah Chen</h4>
+<p class="text-[10px] font-medium text-blue-600 uppercase tracking-tighter">Oncology Lead</p>
+</div>
+<!-- Carousel Item 2 -->
+<div class="flex-shrink-0 w-44 bg-surface-container-lowest rounded-2xl p-4 border border-outline-variant/10 shadow-sm">
+<img alt="Marcus Vane" class="w-full h-32 object-cover rounded-xl mb-4" data-alt="Portrait of a middle-aged male doctor smiling warmly, wearing medical scrubs and a stethoscope in a brightly lit modern hospital corridor" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCQxT3NB54JkKzPIlrTXtMy3SV7AV9tQWsVST0Lmssjk3AXkoxCitk-O1ii_zfGFhjT1CJB1Vv-RgctkjtcYJ3K6KV9HeirQBTKDaS6vE7yH2Dok_uuNEfp5KGsxd5VzTxhHMasRlydKgkp7vDBhJiiA8eVT8Yjf6027y418BerAD8xLJ4-MrQqY40ToeBmXegAr4eBa99V4DIcU7hL3rz9w2DELm66_tjxM6q9ekYQarry0R33uV9BxFn1curw2mN_smAQB4r3ZIkI"/>
+<h4 class="font-bold text-sm text-on-surface truncate">Marcus Vane</h4>
+<p class="text-[10px] font-medium text-blue-600 uppercase tracking-tighter">System Architect</p>
+</div>
+<!-- Carousel Item 3 -->
+<div class="flex-shrink-0 w-44 bg-surface-container-lowest rounded-2xl p-4 border border-outline-variant/10 shadow-sm">
+<img alt="Elena Rossi" class="w-full h-32 object-cover rounded-xl mb-4" data-alt="Young female medical researcher in a high-tech lab setting with blue analytical lights and microscope in soft focus" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBylDpZRb9iNLYvTZlW9a8koe8IQlhR6j3-lGdUBHU0Jf7D3WdPz9xzsVpy-zwLJUcafIqJNKKyF0w3sFyraBiyeKjj9i-KJ0u_KFce9U34nZOj-znQlRWPnoOOaY-Fg1MzwUpsfhLneZhKd_OlL5puXbSpOdQKbOUAIc_PNqxAmcbfGz9D9fQAeZMj-IbY6PajD1NmP5MbKd58-LUGxJBGP7aJFrUoaSa_92tAmF1A1Z71JYxDGVAgmUGn1uTzMgh4XQ9RayiH_K4D"/>
+<h4 class="font-bold text-sm text-on-surface truncate">Elena Rossi</h4>
+<p class="text-[10px] font-medium text-blue-600 uppercase tracking-tighter">Bioinformatics</p>
+</div>
+</div>
+</section>
+</div>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 py-3 pb-safe bg-white/90 backdrop-blur-lg rounded-t-2xl shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
+<!-- Overview -->
+<button class="flex flex-col items-center justify-center text-slate-400 hover:text-blue-500 scale-95 active:scale-90 transition-transform">
+<span class="material-symbols-outlined mb-1" data-icon="visibility">visibility</span>
+<span class="text-[11px] font-medium tracking-wide">Overview</span>
+</button>
+<!-- Connectivity (Active) -->
+<button class="flex flex-col items-center justify-center bg-blue-100 text-blue-700 rounded-xl px-5 py-1 scale-95 active:scale-90 transition-transform">
+<span class="material-symbols-outlined mb-1" data-icon="share_reviews" style="font-variation-settings: 'FILL' 1;">share_reviews</span>
+<span class="text-[11px] font-medium tracking-wide">Connectivity</span>
+</button>
+<!-- Insights -->
+<button class="flex flex-col items-center justify-center text-slate-400 hover:text-blue-500 scale-95 active:scale-90 transition-transform">
+<span class="material-symbols-outlined mb-1" data-icon="insights">insights</span>
+<span class="text-[11px] font-medium tracking-wide">Insights</span>
+</button>
+<!-- Settings -->
+<button class="flex flex-col items-center justify-center text-slate-400 hover:text-blue-500 scale-95 active:scale-90 transition-transform">
+<span class="material-symbols-outlined mb-1" data-icon="settings">settings</span>
+<span class="text-[11px] font-medium tracking-wide">Settings</span>
+</button>
+</nav>
+</body></html>

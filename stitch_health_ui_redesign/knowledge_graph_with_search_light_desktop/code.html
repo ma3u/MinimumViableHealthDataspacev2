@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Knowledge Map | ClinicalClarity</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                "tertiary-fixed": "#dce2f7",
+                "primary-container": "#2170e4",
+                "surface-variant": "#dce2f3",
+                "surface-container-low": "#f0f3ff",
+                "outline": "#727785",
+                "on-tertiary-container": "#fefcff",
+                "on-secondary-fixed": "#002113",
+                "on-primary": "#ffffff",
+                "surface-dim": "#d3daea",
+                "secondary-container": "#6cf8bb",
+                "outline-variant": "#c2c6d6",
+                "on-secondary-fixed-variant": "#005236",
+                "inverse-surface": "#2a313d",
+                "background": "#f9f9ff",
+                "tertiary": "#555c6e",
+                "surface-tint": "#005ac2",
+                "surface-container-high": "#e2e8f8",
+                "secondary-fixed-dim": "#4edea3",
+                "error-container": "#ffdad6",
+                "primary-fixed-dim": "#adc6ff",
+                "surface-container-highest": "#dce2f3",
+                "on-secondary": "#ffffff",
+                "surface": "#f9f9ff",
+                "primary-fixed": "#d8e2ff",
+                "on-surface-variant": "#424754",
+                "on-primary-fixed": "#001a42",
+                "error": "#ba1a1a",
+                "on-surface": "#151c27",
+                "on-error": "#ffffff",
+                "inverse-primary": "#adc6ff",
+                "on-error-container": "#93000a",
+                "on-background": "#151c27",
+                "on-primary-fixed-variant": "#004395",
+                "surface-container-lowest": "#ffffff",
+                "surface-container": "#e7eefe",
+                "on-primary-container": "#fefcff",
+                "on-tertiary-fixed-variant": "#404758",
+                "surface-bright": "#f9f9ff",
+                "secondary": "#006c49",
+                "primary": "#0058be",
+                "tertiary-container": "#6e7487",
+                "tertiary-fixed-dim": "#c0c6db",
+                "on-tertiary": "#ffffff",
+                "inverse-on-surface": "#ebf1ff",
+                "on-secondary-container": "#00714d",
+                "secondary-fixed": "#6ffbbe",
+                "on-tertiary-fixed": "#141b2b"
+            },
+            "borderRadius": {
+                "DEFAULT": "0.25rem",
+                "lg": "0.5rem",
+                "xl": "0.75rem",
+                "full": "9999px"
+            },
+            "fontFamily": {
+                "headline": ["Inter"],
+                "body": ["Inter"],
+                "label": ["Inter"]
+            }
+          },
+        }
+      }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .graph-node { transition: all 0.2s ease; }
+        .graph-node:hover { transform: scale(1.1); filter: brightness(1.1); }
+    </style>
+</head>
+<body class="bg-surface text-on-surface min-h-screen flex overflow-hidden">
+<!-- SideNavBar -->
+<aside class="h-screen w-64 fixed left-0 top-0 z-40 bg-slate-50 flex flex-col p-4 space-y-2 border-r border-slate-100 font-inter text-sm font-medium">
+<div class="px-2 py-6">
+<h1 class="text-lg font-black text-blue-800">Clinical Engine</h1>
+<p class="text-[10px] uppercase tracking-widest text-slate-400 font-bold">V2.4.0 Active</p>
+</div>
+<nav class="flex-1 space-y-1">
+<!-- Knowledge Map Active -->
+<a class="flex items-center gap-3 px-3 py-2.5 bg-white text-blue-700 rounded-lg shadow-sm hover:translate-x-1 transition-transform active:bg-slate-200" href="#">
+<span class="material-symbols-outlined text-[20px]" data-icon="hub">hub</span>
+<span>Knowledge Map</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 text-slate-600 hover:bg-slate-100 hover:translate-x-1 transition-transform active:bg-slate-200" href="#">
+<span class="material-symbols-outlined text-[20px]" data-icon="analytics">analytics</span>
+<span>Data Streams</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 text-slate-600 hover:bg-slate-100 hover:translate-x-1 transition-transform active:bg-slate-200" href="#">
+<span class="material-symbols-outlined text-[20px]" data-icon="manage_search">manage_search</span>
+<span>Entity Search</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 text-slate-600 hover:bg-slate-100 hover:translate-x-1 transition-transform active:bg-slate-200" href="#">
+<span class="material-symbols-outlined text-[20px]" data-icon="history_edu">history_edu</span>
+<span>Audit Log</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 text-slate-600 hover:bg-slate-100 hover:translate-x-1 transition-transform active:bg-slate-200" href="#">
+<span class="material-symbols-outlined text-[20px]" data-icon="verified_user">verified_user</span>
+<span>Security</span>
+</a>
+</nav>
+<div class="pt-4 border-t border-slate-200 space-y-1">
+<button class="w-full mb-4 px-4 py-2.5 bg-gradient-to-br from-primary to-primary-container text-white rounded-xl font-bold shadow-md hover:translate-x-1 transition-transform active:scale-95">
+                Export Graph
+            </button>
+<a class="flex items-center gap-3 px-3 py-2 text-slate-500 hover:bg-slate-100 hover:translate-x-1 transition-transform" href="#">
+<span class="material-symbols-outlined text-[20px]" data-icon="help_outline">help_outline</span>
+<span>Support</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-slate-500 hover:bg-slate-100 hover:translate-x-1 transition-transform" href="#">
+<span class="material-symbols-outlined text-[20px]" data-icon="logout">logout</span>
+<span>Logout</span>
+</a>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-1 ml-64 flex flex-col h-screen bg-white">
+<!-- TopNavBar Structure -->
+<header class="fixed top-0 right-0 left-64 h-16 z-50 bg-white/80 backdrop-blur-md shadow-sm">
+<div class="flex items-center justify-between px-6 h-full w-full max-w-screen-2xl mx-auto">
+<div class="flex items-center gap-4 flex-1">
+<div class="relative w-full max-w-md">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" data-icon="search">search</span>
+<input class="w-full bg-slate-100 border-none rounded-full py-2 pl-10 pr-4 text-sm focus:ring-2 focus:ring-primary/40 focus:bg-white transition-all" placeholder="Search biomarkers, studies, or patients..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<nav class="hidden lg:flex items-center gap-6 font-inter tracking-tight font-semibold">
+<a class="text-slate-500 hover:text-slate-900 transition-colors" href="#">Dashboard</a>
+<a class="text-slate-500 hover:text-slate-900 transition-colors" href="#">Patients</a>
+<a class="text-blue-700 border-b-2 border-blue-700 pb-1" href="#">Insights</a>
+<a class="text-slate-500 hover:text-slate-900 transition-colors" href="#">Archives</a>
+</nav>
+<div class="h-6 w-[1px] bg-slate-200 hidden lg:block"></div>
+<div class="flex items-center gap-3">
+<button class="p-2 text-slate-500 hover:bg-slate-50 rounded-full transition-colors active:scale-95">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="p-2 text-slate-500 hover:bg-slate-50 rounded-full transition-colors active:scale-95">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+</button>
+<div class="flex items-center gap-2 pl-2 cursor-pointer group">
+<img alt="Provider Profile" class="w-8 h-8 rounded-full object-cover ring-2 ring-slate-100 group-hover:ring-primary/30 transition-all" data-alt="Close-up portrait of a professional medical doctor in a white coat looking confident and friendly in a bright clinic setting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAVf1f6q14hNkpzoCHpyJc06NhdnihB1HVIH5ZhIj0QVaYM6jQraTsGabU1QvAr7Kzrj8NTgKc5JMB4xS91_jTeQmr8YYCQ8xgjd0XdzrKV_5iwpKEBMgWFLPaCu-k9G73F8Ve7SDfIk-es9wH7j4Sf4AP7i2RsRCxnBtDSTbhZrMmKArtfohwofLCblkcxyk5ycGVgjJFCMZcVQbZ7KKXAqGu0PKgwnTO_6d2hyuZ23KaAKx9-escdgTAzskyhU5vIArt8zy5fh-JM"/>
+<span class="text-sm font-bold text-slate-900">Dr. Aris</span>
+</div>
+</div>
+</div>
+</div>
+</header>
+<!-- Canvas Body -->
+<div class="flex-1 mt-16 flex overflow-hidden">
+<!-- Sidebar Controls: Layers -->
+<div class="w-72 bg-surface-container-low p-6 flex flex-col gap-6 overflow-y-auto border-r border-slate-100"><div><h3 class="text-xs font-black text-slate-400 uppercase tracking-widest mb-4">Entity Filter</h3><div class="relative group"><span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-primary/60 group-focus-within:text-primary transition-colors" data-icon="filter_alt">filter_alt</span><input class="w-full bg-white border-none rounded-xl py-3 pl-10 pr-4 text-sm shadow-sm ring-1 ring-slate-200 focus:ring-2 focus:ring-primary transition-all placeholder:text-slate-400" placeholder="Filter nodes by name..." type="text"/></div></div>
+<div>
+<h3 class="text-xs font-black text-slate-400 uppercase tracking-widest mb-4">Structural Layers</h3>
+<div class="space-y-3">
+<label class="flex items-center justify-between p-3 bg-white rounded-xl shadow-sm cursor-pointer hover:bg-slate-50 transition-colors">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary" data-icon="genetics">genetics</span>
+<span class="text-sm font-semibold">Genomic Markers</span>
+</div>
+<input checked="" class="rounded text-primary focus:ring-primary" type="checkbox"/>
+</label>
+<label class="flex items-center justify-between p-3 bg-white rounded-xl shadow-sm cursor-pointer hover:bg-slate-50 transition-colors">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-secondary" data-icon="history">history</span>
+<span class="text-sm font-semibold">Patient History</span>
+</div>
+<input checked="" class="rounded text-secondary focus:ring-secondary" type="checkbox"/>
+</label>
+<label class="flex items-center justify-between p-3 bg-white rounded-xl shadow-sm cursor-pointer hover:bg-slate-50 transition-colors opacity-60">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-tertiary" data-icon="science">science</span>
+<span class="text-sm font-semibold">Clinical Trials</span>
+</div>
+<input class="rounded text-tertiary focus:ring-tertiary" type="checkbox"/>
+</label>
+<label class="flex items-center justify-between p-3 bg-white rounded-xl shadow-sm cursor-pointer hover:bg-slate-50 transition-colors opacity-60">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-error" data-icon="medication">medication</span>
+<span class="text-sm font-semibold">Drug Interactions</span>
+</div>
+<input class="rounded text-error focus:ring-error" type="checkbox"/>
+</label>
+</div>
+</div>
+<div>
+<h3 class="text-xs font-black text-slate-400 uppercase tracking-widest mb-4">Active Entities</h3>
+<div class="grid grid-cols-2 gap-3">
+<div class="bg-white p-4 rounded-xl shadow-sm border-l-4 border-primary">
+<p class="text-[10px] font-bold text-slate-400 uppercase">Nodes</p>
+<p class="text-2xl font-black text-on-surface">1,248</p>
+</div>
+<div class="bg-white p-4 rounded-xl shadow-sm border-l-4 border-secondary">
+<p class="text-[10px] font-bold text-slate-400 uppercase">Links</p>
+<p class="text-2xl font-black text-on-surface">4,812</p>
+</div>
+</div>
+</div>
+<div class="mt-auto p-4 bg-primary-container/10 rounded-2xl border border-primary-container/20">
+<div class="flex items-center gap-2 mb-2">
+<span class="material-symbols-outlined text-primary text-sm" data-icon="auto_awesome">auto_awesome</span>
+<span class="text-xs font-bold text-primary">Insight Assistant</span>
+</div>
+<p class="text-xs leading-relaxed text-slate-600">The current cluster shows a 94% correlation between BRCA1 and Olaparib effectiveness in Tier-1 patients.</p>
+</div>
+</div>
+<!-- Central Graph Area -->
+<div class="flex-1 relative bg-white overflow-hidden">
+<!-- Watermark-like branding -->
+<div class="absolute inset-0 flex items-center justify-center opacity-[0.03] pointer-events-none">
+<span class="material-symbols-outlined text-[600px]" data-icon="hub">hub</span>
+</div>
+<!-- Simulated Interactive Graph Nodes -->
+<div class="absolute inset-0 p-12">
+<svg class="w-full h-full opacity-20 pointer-events-none">
+<line class="text-slate-400" stroke="currentColor" stroke-width="2" x1="50%" x2="30%" y1="50%" y2="40%"></line>
+<line class="text-slate-400" stroke="currentColor" stroke-width="2" x1="50%" x2="70%" y1="50%" y2="35%"></line>
+<line class="text-slate-400" stroke="currentColor" stroke-width="2" x1="50%" x2="60%" y1="50%" y2="70%"></line>
+<line class="text-slate-400" stroke="currentColor" stroke-width="2" x1="30%" x2="20%" y1="40%" y2="60%"></line>
+</svg>
+<!-- Main Node (BRCA1) -->
+<div class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 group cursor-pointer">
+<div class="w-32 h-32 rounded-full bg-white shadow-xl flex flex-col items-center justify-center border-4 border-primary ring-8 ring-primary/5 transition-transform group-hover:scale-110">
+<span class="text-xs font-black text-primary tracking-tighter">MUTATION</span>
+<span class="text-lg font-black text-on-surface">BRCA1</span>
+</div>
+</div>
+<!-- Connected Node 1 (Olaparib) -->
+<div class="absolute left-[30%] top-[40%] group cursor-pointer">
+<div class="w-24 h-24 rounded-full bg-white shadow-lg flex flex-col items-center justify-center border-2 border-secondary transition-transform group-hover:scale-110">
+<span class="text-[8px] font-black text-secondary tracking-widest">DRUG</span>
+<span class="text-sm font-bold text-on-surface">Olaparib</span>
+</div>
+</div>
+<!-- Connected Node 2 (Patient Cluster) -->
+<div class="absolute left-[70%] top-[35%] group cursor-pointer">
+<div class="w-20 h-20 rounded-full bg-white shadow-lg flex flex-col items-center justify-center border-2 border-slate-300 transition-transform group-hover:scale-110">
+<span class="text-[8px] font-black text-slate-400">CLUSTER</span>
+<span class="text-sm font-bold text-on-surface">Group-A</span>
+</div>
+</div>
+<!-- Secondary Connection -->
+<div class="absolute left-[20%] top-[60%] group cursor-pointer">
+<div class="w-16 h-16 rounded-full bg-white shadow-md flex flex-col items-center justify-center border-2 border-slate-200 transition-transform group-hover:scale-110">
+<span class="text-[8px] font-black text-slate-400">STUDY</span>
+<span class="text-xs font-bold text-on-surface">POLO-3</span>
+</div>
+</div>
+</div>
+<!-- Graph Toolbar -->
+<div class="absolute bottom-6 right-6 flex gap-2">
+<div class="bg-white rounded-xl shadow-lg border border-slate-100 p-1 flex">
+<button class="p-2 hover:bg-slate-50 text-slate-600 rounded-lg"><span class="material-symbols-outlined" data-icon="zoom_in">zoom_in</span></button>
+<button class="p-2 hover:bg-slate-50 text-slate-600 rounded-lg"><span class="material-symbols-outlined" data-icon="zoom_out">zoom_out</span></button>
+<div class="w-[1px] h-4 bg-slate-200 self-center mx-1"></div>
+<button class="p-2 hover:bg-slate-50 text-slate-600 rounded-lg"><span class="material-symbols-outlined" data-icon="filter_center_focus">filter_center_focus</span></button>
+</div>
+</div>
+</div>
+<!-- Entity Details Panel -->
+<div class="w-80 bg-white border-l border-slate-100 flex flex-col overflow-y-auto">
+<div class="p-6">
+<div class="flex items-start justify-between mb-6">
+<div>
+<h2 class="text-2xl font-black tracking-tight text-on-surface">Entity Details</h2>
+<p class="text-sm font-medium text-primary">Selected: BRCA1 Mutation</p>
+</div>
+<button class="p-2 hover:bg-slate-50 rounded-full text-slate-400"><span class="material-symbols-outlined" data-icon="close">close</span></button>
+</div>
+<div class="space-y-6">
+<div class="bg-surface-container-low rounded-2xl p-4">
+<div class="flex justify-between items-end mb-2">
+<span class="text-xs font-bold text-slate-500 uppercase">Reliability Index</span>
+<span class="text-lg font-black text-secondary">98.4%</span>
+</div>
+<div class="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
+<div class="bg-secondary h-full w-[98%]"></div>
+</div>
+</div>
+<div>
+<h4 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Graph Properties</h4>
+<div class="space-y-3">
+<div class="flex justify-between p-3 bg-slate-50 rounded-xl">
+<span class="text-sm font-medium text-slate-600">Centrality</span>
+<span class="text-sm font-bold text-on-surface">High (0.92)</span>
+</div>
+<div class="flex justify-between p-3 bg-slate-50 rounded-xl">
+<span class="text-sm font-medium text-slate-600">Neighbors</span>
+<span class="text-sm font-bold text-on-surface">14 Nodes</span>
+</div>
+<div class="flex justify-between p-3 bg-slate-50 rounded-xl">
+<span class="text-sm font-medium text-slate-600">Clinical Impact</span>
+<span class="text-sm font-bold text-on-surface">Tier-1 Significant</span>
+</div>
+</div>
+</div>
+<div>
+<h4 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Linked Studies</h4>
+<div class="space-y-4">
+<div class="group cursor-pointer">
+<p class="text-sm font-bold text-on-surface leading-tight mb-1 group-hover:text-primary transition-colors">Study of PARP Inhibitors in BRCA-deficient Patients</p>
+<p class="text-xs text-slate-500 flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px]" data-icon="event">event</span>
+                                        Oct 2023 • Journal of Clinical Oncology
+                                    </p>
+</div>
+<div class="group cursor-pointer">
+<p class="text-sm font-bold text-on-surface leading-tight mb-1 group-hover:text-primary transition-colors">Synthetic Lethality: Emerging Paradigms</p>
+<p class="text-xs text-slate-500 flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px]" data-icon="event">event</span>
+                                        Jan 2024 • Nature Genetics
+                                    </p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="mt-auto p-6 border-t border-slate-100">
+<button class="w-full py-4 bg-on-surface text-white rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-slate-800 transition-colors">
+<span class="material-symbols-outlined" data-icon="visibility">visibility</span>
+                        View Detailed Report
+                    </button>
+</div>
+</div>
+</div>
+</main>
+<!-- FAB Action (Suppressed per logic but included for potential global utility if page was top-level) -->
+<!-- Suppressed: This is a task-focused analysis screen -->
+</body></html>

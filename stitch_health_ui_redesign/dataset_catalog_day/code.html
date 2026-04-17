@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Dataset Catalog - Clinical Clarity</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-background": "#151c27",
+                    "on-primary": "#ffffff",
+                    "secondary-fixed": "#6ffbbe",
+                    "on-error": "#ffffff",
+                    "surface-container-lowest": "#ffffff",
+                    "error": "#ba1a1a",
+                    "surface-container-low": "#f0f3ff",
+                    "error-container": "#ffdad6",
+                    "inverse-surface": "#2a313d",
+                    "tertiary-container": "#6e7487",
+                    "outline-variant": "#c2c6d6",
+                    "on-primary-fixed-variant": "#004395",
+                    "surface-container": "#e7eefe",
+                    "secondary-container": "#6cf8bb",
+                    "on-tertiary-fixed-variant": "#404758",
+                    "surface-tint": "#005ac2",
+                    "surface-variant": "#dce2f3",
+                    "primary": "#0058be",
+                    "surface": "#f9f9ff",
+                    "tertiary-fixed": "#dce2f7",
+                    "secondary": "#006c49",
+                    "on-tertiary-fixed": "#141b2b",
+                    "on-primary-container": "#fefcff",
+                    "surface-dim": "#d3daea",
+                    "on-secondary-fixed": "#002113",
+                    "on-primary-fixed": "#001a42",
+                    "inverse-on-surface": "#ebf1ff",
+                    "surface-container-high": "#e2e8f8",
+                    "primary-fixed-dim": "#adc6ff",
+                    "primary-fixed": "#d8e2ff",
+                    "tertiary-fixed-dim": "#c0c6db",
+                    "surface-container-highest": "#dce2f3",
+                    "background": "#f9f9ff",
+                    "tertiary": "#555c6e",
+                    "on-surface": "#151c27",
+                    "on-secondary-container": "#00714d",
+                    "outline": "#727785",
+                    "on-tertiary": "#ffffff",
+                    "on-error-container": "#93000a",
+                    "secondary-fixed-dim": "#4edea3",
+                    "on-secondary": "#ffffff",
+                    "on-surface-variant": "#424754",
+                    "inverse-primary": "#adc6ff",
+                    "primary-container": "#2170e4",
+                    "on-tertiary-container": "#fefcff",
+                    "on-secondary-fixed-variant": "#005236",
+                    "surface-bright": "#f9f9ff"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Inter"],
+                    "body": ["Inter"],
+                    "label": ["Inter"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+      .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        vertical-align: middle;
+      }
+      .glass-effect {
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+      }
+      body {
+        background-color: #f9f9ff;
+        color: #151c27;
+        font-family: 'Inter', sans-serif;
+      }
+    </style>
+</head>
+<body class="bg-surface selection:bg-primary-fixed selection:text-on-primary-fixed">
+<!-- TopNavBar -->
+<header class="fixed top-0 w-full z-50 bg-slate-50/80 backdrop-blur-xl shadow-sm flex justify-between items-center px-6 py-3 w-full font-sans antialiased tracking-tight">
+<div class="flex items-center gap-8">
+<span class="text-xl font-bold tracking-tighter text-blue-800">Clinical Clarity</span>
+<div class="hidden md:flex items-center gap-6">
+<a class="text-blue-700 border-b-2 border-blue-600 font-medium pb-1" href="#">Compliance</a>
+<a class="text-slate-600 hover:text-blue-600 transition-colors font-medium pb-1" href="#">Catalog</a>
+<a class="text-slate-600 hover:text-blue-600 transition-colors font-medium pb-1" href="#">Analytics</a>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="relative hidden sm:block">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">search</span>
+<input class="bg-slate-100 border-none rounded-full pl-10 pr-4 py-1.5 text-sm w-64 focus:ring-2 focus:ring-primary/20" placeholder="Search datasets..." type="text"/>
+</div>
+<div class="flex items-center gap-2">
+<button class="p-2 text-slate-600 hover:text-blue-600 transition-all active:opacity-80">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="p-2 text-slate-600 hover:text-blue-600 transition-all active:opacity-80">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+</button>
+<div class="w-8 h-8 rounded-full overflow-hidden ml-2 bg-surface-container">
+<img alt="Researcher Profile" data-alt="professional portrait of a medical researcher in a lab setting with soft clinical lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCABpcKzyBtkWvTx3GgjJ_QFZN103NVeMKdzwPOqGg9vdKV48M-VzMEQDmnB45tauUAebo-BFp5XKw1q1UvX9orm7fBnsQITryZLcHz_z3BvhTKx-zxffIX8435-TCddognLydwNDiemIGDRauUhT-IgXo12_jFtEVGGJBsvZEgfUstitM9T_c7Tw7UZ4pJXV9GAUfDBzy2UHYqbirC0IH1nw1AOHbm2_Iz-wjeKxcsAk6ozNhts0WhBBIiSGWcxw3WEgn06l8qWuDV"/>
+</div>
+</div>
+</div>
+</header>
+<!-- SideNavBar -->
+<aside class="h-screen w-64 fixed left-0 top-0 border-r border-slate-200 bg-slate-50 flex flex-col h-full p-4 pt-20 z-40 hidden md:flex">
+<div class="mb-8 px-2">
+<div class="flex items-center gap-3 mb-1">
+<div class="w-8 h-8 bg-primary rounded flex items-center justify-center">
+<span class="material-symbols-outlined text-white text-lg">science</span>
+</div>
+<h2 class="text-lg font-black text-blue-900 tracking-tight">Research Portal</h2>
+</div>
+<p class="text-xs text-slate-500 font-medium uppercase tracking-widest ml-11">Data Governance</p>
+</div>
+<nav class="space-y-1 flex-grow">
+<a class="flex items-center gap-3 px-3 py-2 text-slate-500 hover:bg-slate-100 transition-all rounded-lg group" href="#">
+<span class="material-symbols-outlined text-xl group-hover:text-blue-700" data-icon="gavel">gavel</span>
+<span class="text-sm font-medium">Compliance</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-slate-500 hover:bg-slate-100 transition-all rounded-lg group" href="#">
+<span class="material-symbols-outlined text-xl group-hover:text-blue-700" data-icon="security">security</span>
+<span class="text-sm font-medium">TCK</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-slate-500 hover:bg-slate-100 transition-all rounded-lg group" href="#">
+<span class="material-symbols-outlined text-xl group-hover:text-blue-700" data-icon="verified_user">verified_user</span>
+<span class="text-sm font-medium">Credentials</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 bg-blue-50 text-blue-700 rounded-lg group" href="#">
+<span class="material-symbols-outlined text-xl" data-icon="menu_book">menu_book</span>
+<span class="text-sm font-medium">Catalog</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-slate-500 hover:bg-slate-100 transition-all rounded-lg group" href="#">
+<span class="material-symbols-outlined text-xl group-hover:text-blue-700" data-icon="leaderboard">leaderboard</span>
+<span class="text-sm font-medium">Analytics</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-slate-500 hover:bg-slate-100 transition-all rounded-lg group" href="#">
+<span class="material-symbols-outlined text-xl group-hover:text-blue-700" data-icon="search_insights">search_insights</span>
+<span class="text-sm font-medium">Query</span>
+</a>
+</nav>
+<button class="mt-4 bg-gradient-to-br from-primary to-primary-container text-white py-3 px-4 rounded-xl font-semibold text-sm shadow-md flex items-center justify-center gap-2 active:scale-95 duration-150">
+<span class="material-symbols-outlined text-lg">add</span>
+            New Analysis
+        </button>
+<div class="mt-8 pt-6 border-t border-slate-200 space-y-1">
+<a class="flex items-center gap-3 px-3 py-2 text-slate-500 hover:bg-slate-100 transition-all rounded-lg group" href="#">
+<span class="material-symbols-outlined text-xl group-hover:text-blue-700" data-icon="contact_support">contact_support</span>
+<span class="text-sm font-medium">Support</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-slate-500 hover:bg-slate-100 transition-all rounded-lg group" href="#">
+<span class="material-symbols-outlined text-xl group-hover:text-blue-700" data-icon="history">history</span>
+<span class="text-sm font-medium">Logs</span>
+</a>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="pt-24 pl-0 md:pl-64 min-h-screen bg-surface transition-all duration-300">
+<div class="max-w-7xl mx-auto px-6 pb-12">
+<!-- Page Header -->
+<div class="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
+<div class="space-y-1">
+<h1 class="text-4xl font-extrabold text-on-surface tracking-tighter">Dataset Catalog</h1>
+<p class="text-slate-500 text-lg font-medium">Explore curated multi-modal clinical data for high-impact research.</p>
+</div>
+<div class="flex items-center gap-3">
+<span class="text-sm font-bold text-blue-700 px-4 py-2 bg-blue-50 rounded-full">1,248 Datasets Available</span>
+</div>
+</div>
+<!-- Bento Layout Content -->
+<div class="grid grid-cols-12 gap-8">
+<!-- Filter Sidebar (In-canvas) -->
+<div class="col-span-12 lg:col-span-3">
+<div class="bg-surface-container-low rounded-xl p-6 sticky top-24">
+<h3 class="text-sm font-bold text-on-surface uppercase tracking-widest mb-6">Refine Search</h3>
+<!-- Disease Filter -->
+<div class="mb-8">
+<label class="block text-xs font-bold text-slate-400 uppercase mb-3">Disease Area</label>
+<div class="space-y-2">
+<label class="flex items-center gap-3 cursor-pointer group">
+<input checked="" class="w-4 h-4 rounded text-primary focus:ring-primary/20 border-outline-variant" type="checkbox"/>
+<span class="text-sm font-medium text-on-surface group-hover:text-primary transition-colors">Oncology</span>
+</label>
+<label class="flex items-center gap-3 cursor-pointer group">
+<input class="w-4 h-4 rounded text-primary focus:ring-primary/20 border-outline-variant" type="checkbox"/>
+<span class="text-sm font-medium text-on-surface group-hover:text-primary transition-colors">Cardiology</span>
+</label>
+<label class="flex items-center gap-3 cursor-pointer group">
+<input class="w-4 h-4 rounded text-primary focus:ring-primary/20 border-outline-variant" type="checkbox"/>
+<span class="text-sm font-medium text-on-surface group-hover:text-primary transition-colors">Genomics</span>
+</label>
+<label class="flex items-center gap-3 cursor-pointer group">
+<input class="w-4 h-4 rounded text-primary focus:ring-primary/20 border-outline-variant" type="checkbox"/>
+<span class="text-sm font-medium text-on-surface group-hover:text-primary transition-colors">Neurology</span>
+</label>
+</div>
+</div>
+<!-- Modality Filter -->
+<div class="mb-8">
+<label class="block text-xs font-bold text-slate-400 uppercase mb-3">Modality</label>
+<div class="space-y-2">
+<label class="flex items-center gap-3 cursor-pointer group">
+<input class="w-4 h-4 rounded text-primary focus:ring-primary/20 border-outline-variant" type="checkbox"/>
+<span class="text-sm font-medium text-on-surface group-hover:text-primary transition-colors">Imaging (DICOM)</span>
+</label>
+<label class="flex items-center gap-3 cursor-pointer group">
+<input class="w-4 h-4 rounded text-primary focus:ring-primary/20 border-outline-variant" type="checkbox"/>
+<span class="text-sm font-medium text-on-surface group-hover:text-primary transition-colors">Electronic Health Records</span>
+</label>
+<label class="flex items-center gap-3 cursor-pointer group">
+<input class="w-4 h-4 rounded text-primary focus:ring-primary/20 border-outline-variant" type="checkbox"/>
+<span class="text-sm font-medium text-on-surface group-hover:text-primary transition-colors">Biospecimen</span>
+</label>
+</div>
+</div>
+<!-- Population Range -->
+<div class="mb-8">
+<label class="block text-xs font-bold text-slate-400 uppercase mb-3">Min. Sample Size</label>
+<input class="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-primary" type="range"/>
+<div class="flex justify-between mt-2 text-[10px] font-bold text-slate-500">
+<span>0</span>
+<span>50K+</span>
+</div>
+</div>
+<button class="w-full py-2.5 bg-surface-container-high text-primary font-bold text-xs rounded-lg uppercase tracking-wider hover:bg-primary hover:text-white transition-all">
+                            Reset All Filters
+                        </button>
+</div>
+</div>
+<!-- Main Grid -->
+<div class="col-span-12 lg:col-span-9">
+<!-- Sorting & Layout Toggle -->
+<div class="flex justify-between items-center mb-6">
+<div class="flex items-center gap-4">
+<span class="text-sm font-semibold text-slate-500">Sort by:</span>
+<button class="flex items-center gap-1 text-sm font-bold text-on-surface">
+                                Relevance
+                                <span class="material-symbols-outlined text-sm">expand_more</span>
+</button>
+</div>
+<div class="flex bg-surface-container-low p-1 rounded-lg">
+<button class="p-1.5 bg-white shadow-sm rounded-md text-primary">
+<span class="material-symbols-outlined">grid_view</span>
+</button>
+<button class="p-1.5 text-slate-400">
+<span class="material-symbols-outlined">view_list</span>
+</button>
+</div>
+</div>
+<!-- Dataset Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<!-- Dataset Card 1 -->
+<div class="group bg-surface-container-lowest rounded-xl p-0 overflow-hidden transition-all hover:translate-y-[-4px]">
+<div class="h-32 bg-gradient-to-r from-blue-600 to-indigo-700 p-6 relative overflow-hidden">
+<div class="absolute inset-0 opacity-20" style="background-image: radial-gradient(circle at 2px 2px, white 1px, transparent 0); background-size: 20px 20px;"></div>
+<div class="relative z-10">
+<span class="px-3 py-1 bg-white/20 backdrop-blur-md rounded-full text-[10px] font-black text-white uppercase tracking-widest">Oncology</span>
+<h3 class="text-white text-xl font-bold mt-2 leading-tight">NSCLC Imaging &amp; Genomic Atlas</h3>
+</div>
+</div>
+<div class="p-6">
+<div class="flex items-center justify-between mb-4">
+<div class="flex items-center gap-2">
+<div class="w-2 h-2 rounded-full bg-secondary"></div>
+<span class="text-xs font-bold text-secondary uppercase">Verified Provider</span>
+</div>
+<span class="text-xs font-mono text-slate-400">v4.2.0</span>
+</div>
+<div class="grid grid-cols-3 gap-4 mb-6">
+<div class="flex flex-col">
+<span class="text-[10px] font-bold text-slate-400 uppercase">Samples</span>
+<span class="text-sm font-black text-on-surface">12,400</span>
+</div>
+<div class="flex flex-col">
+<span class="text-[10px] font-bold text-slate-400 uppercase">Data Type</span>
+<span class="text-sm font-black text-on-surface">Multi-modal</span>
+</div>
+<div class="flex flex-col">
+<span class="text-[10px] font-bold text-slate-400 uppercase">Provider</span>
+<span class="text-sm font-black text-on-surface">MSKCC</span>
+</div>
+</div>
+<p class="text-sm text-slate-600 leading-relaxed mb-6 line-clamp-2">Comprehensive longitudinal data for Non-Small Cell Lung Cancer patients including CT imaging and matched whole exome sequencing.</p>
+<div class="flex items-center justify-between gap-4">
+<button class="flex-grow py-3 bg-gradient-to-r from-primary to-primary-container text-white text-sm font-bold rounded-xl active:scale-95 transition-all">
+                                        Request Access
+                                    </button>
+<button class="w-12 h-12 flex items-center justify-center bg-surface-container-low text-slate-600 rounded-xl hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined">bookmark</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Dataset Card 2 -->
+<div class="group bg-surface-container-lowest rounded-xl p-0 overflow-hidden transition-all hover:translate-y-[-4px]">
+<div class="h-32 bg-gradient-to-r from-teal-600 to-emerald-700 p-6 relative overflow-hidden">
+<div class="absolute inset-0 opacity-20" style="background-image: radial-gradient(circle at 2px 2px, white 1px, transparent 0); background-size: 20px 20px;"></div>
+<div class="relative z-10">
+<span class="px-3 py-1 bg-white/20 backdrop-blur-md rounded-full text-[10px] font-black text-white uppercase tracking-widest">Cardiology</span>
+<h3 class="text-white text-xl font-bold mt-2 leading-tight">Advanced Arrhythmia EKG Data</h3>
+</div>
+</div>
+<div class="p-6">
+<div class="flex items-center justify-between mb-4">
+<div class="flex items-center gap-2">
+<div class="w-2 h-2 rounded-full bg-secondary"></div>
+<span class="text-xs font-bold text-secondary uppercase">Verified Provider</span>
+</div>
+<span class="text-xs font-mono text-slate-400">v1.0.5</span>
+</div>
+<div class="grid grid-cols-3 gap-4 mb-6">
+<div class="flex flex-col">
+<span class="text-[10px] font-bold text-slate-400 uppercase">Samples</span>
+<span class="text-sm font-black text-on-surface">45,000</span>
+</div>
+<div class="flex flex-col">
+<span class="text-[10px] font-bold text-slate-400 uppercase">Data Type</span>
+<span class="text-sm font-black text-on-surface">Waveform</span>
+</div>
+<div class="flex flex-col">
+<span class="text-[10px] font-bold text-slate-400 uppercase">Provider</span>
+<span class="text-sm font-black text-on-surface">Mayo Clinic</span>
+</div>
+</div>
+<p class="text-sm text-slate-600 leading-relaxed mb-6 line-clamp-2">High-fidelity 12-lead EKG waveforms from patients diagnosed with complex arrhythmias, including outcome labeling.</p>
+<div class="flex items-center justify-between gap-4">
+<button class="flex-grow py-3 bg-gradient-to-r from-primary to-primary-container text-white text-sm font-bold rounded-xl active:scale-95 transition-all">
+                                        Request Access
+                                    </button>
+<button class="w-12 h-12 flex items-center justify-center bg-surface-container-low text-slate-600 rounded-xl hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined">bookmark</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Dataset Card 3 -->
+<div class="group bg-surface-container-lowest rounded-xl p-0 overflow-hidden transition-all hover:translate-y-[-4px]">
+<div class="h-32 bg-gradient-to-r from-purple-600 to-fuchsia-700 p-6 relative overflow-hidden">
+<div class="absolute inset-0 opacity-20" style="background-image: radial-gradient(circle at 2px 2px, white 1px, transparent 0); background-size: 20px 20px;"></div>
+<div class="relative z-10">
+<span class="px-3 py-1 bg-white/20 backdrop-blur-md rounded-full text-[10px] font-black text-white uppercase tracking-widest">Genomics</span>
+<h3 class="text-white text-xl font-bold mt-2 leading-tight">Pediatric Rare Disease Cohort</h3>
+</div>
+</div>
+<div class="p-6">
+<div class="flex items-center justify-between mb-4">
+<div class="flex items-center gap-2">
+<div class="w-2 h-2 rounded-full bg-secondary"></div>
+<span class="text-xs font-bold text-secondary uppercase">Verified Provider</span>
+</div>
+<span class="text-xs font-mono text-slate-400">v2.1.0</span>
+</div>
+<div class="grid grid-cols-3 gap-4 mb-6">
+<div class="flex flex-col">
+<span class="text-[10px] font-bold text-slate-400 uppercase">Samples</span>
+<span class="text-sm font-black text-on-surface">2,800</span>
+</div>
+<div class="flex flex-col">
+<span class="text-[10px] font-bold text-slate-400 uppercase">Data Type</span>
+<span class="text-sm font-black text-on-surface">Whole Genome</span>
+</div>
+<div class="flex flex-col">
+<span class="text-[10px] font-bold text-slate-400 uppercase">Provider</span>
+<span class="text-sm font-black text-on-surface">Children's Hosp</span>
+</div>
+</div>
+<p class="text-sm text-slate-600 leading-relaxed mb-6 line-clamp-2">De-identified genomic sequencing data for pediatric patients with undiagnosed rare genetic disorders and their biological parents.</p>
+<div class="flex items-center justify-between gap-4">
+<button class="flex-grow py-3 bg-gradient-to-r from-primary to-primary-container text-white text-sm font-bold rounded-xl active:scale-95 transition-all">
+                                        Request Access
+                                    </button>
+<button class="w-12 h-12 flex items-center justify-center bg-surface-container-low text-slate-600 rounded-xl hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined">bookmark</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Dataset Card 4 -->
+<div class="group bg-surface-container-lowest rounded-xl p-0 overflow-hidden transition-all hover:translate-y-[-4px]">
+<div class="h-32 bg-gradient-to-r from-amber-600 to-orange-700 p-6 relative overflow-hidden">
+<div class="absolute inset-0 opacity-20" style="background-image: radial-gradient(circle at 2px 2px, white 1px, transparent 0); background-size: 20px 20px;"></div>
+<div class="relative z-10">
+<span class="px-3 py-1 bg-white/20 backdrop-blur-md rounded-full text-[10px] font-black text-white uppercase tracking-widest">Immunology</span>
+<h3 class="text-white text-xl font-bold mt-2 leading-tight">Post-COVID Autoimmune Response</h3>
+</div>
+</div>
+<div class="p-6">
+<div class="flex items-center justify-between mb-4">
+<div class="flex items-center gap-2">
+<div class="w-2 h-2 rounded-full bg-amber-400"></div>
+<span class="text-xs font-bold text-amber-600 uppercase">Partner Network</span>
+</div>
+<span class="text-xs font-mono text-slate-400">v1.2.0</span>
+</div>
+<div class="grid grid-cols-3 gap-4 mb-6">
+<div class="flex flex-col">
+<span class="text-[10px] font-bold text-slate-400 uppercase">Samples</span>
+<span class="text-sm font-black text-on-surface">5,200</span>
+</div>
+<div class="flex flex-col">
+<span class="text-[10px] font-bold text-slate-400 uppercase">Data Type</span>
+<span class="text-sm font-black text-on-surface">Serology</span>
+</div>
+<div class="flex flex-col">
+<span class="text-[10px] font-bold text-slate-400 uppercase">Provider</span>
+<span class="text-sm font-black text-on-surface">BioBank UK</span>
+</div>
+</div>
+<p class="text-sm text-slate-600 leading-relaxed mb-6 line-clamp-2">Longitudinal antibody profiling and cytokine panel data for patients exhibiting long-term autoimmune symptoms post-infection.</p>
+<div class="flex items-center justify-between gap-4">
+<button class="flex-grow py-3 bg-gradient-to-r from-primary to-primary-container text-white text-sm font-bold rounded-xl active:scale-95 transition-all">
+                                        Request Access
+                                    </button>
+<button class="w-12 h-12 flex items-center justify-center bg-surface-container-low text-slate-600 rounded-xl hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined">bookmark</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Pagination -->
+<div class="mt-12 flex items-center justify-between">
+<button class="px-4 py-2 text-sm font-bold text-slate-500 hover:text-primary transition-colors flex items-center gap-2">
+<span class="material-symbols-outlined">arrow_back</span>
+                            Previous
+                        </button>
+<div class="flex gap-2">
+<button class="w-10 h-10 rounded-lg bg-primary text-white font-bold text-sm">1</button>
+<button class="w-10 h-10 rounded-lg bg-white text-slate-500 font-bold text-sm hover:bg-slate-100">2</button>
+<button class="w-10 h-10 rounded-lg bg-white text-slate-500 font-bold text-sm hover:bg-slate-100">3</button>
+<span class="w-10 h-10 flex items-center justify-center text-slate-400">...</span>
+<button class="w-10 h-10 rounded-lg bg-white text-slate-500 font-bold text-sm hover:bg-slate-100">12</button>
+</div>
+<button class="px-4 py-2 text-sm font-bold text-slate-500 hover:text-primary transition-colors flex items-center gap-2">
+                            Next
+                            <span class="material-symbols-outlined">arrow_forward</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Contextual FAB (Only for Catalog Home) -->
+<button class="fixed bottom-8 right-8 w-14 h-14 rounded-full bg-primary-container text-white shadow-xl flex items-center justify-center hover:scale-110 active:scale-95 transition-all z-50">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">add</span>
+</button>
+</body></html>

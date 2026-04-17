@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Clinical Clarity - Compliance Overview</title>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Google Fonts: Inter -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-background": "#151c27",
+                    "on-primary": "#ffffff",
+                    "secondary-fixed": "#6ffbbe",
+                    "on-error": "#ffffff",
+                    "surface-container-lowest": "#ffffff",
+                    "error": "#ba1a1a",
+                    "surface-container-low": "#f0f3ff",
+                    "error-container": "#ffdad6",
+                    "inverse-surface": "#2a313d",
+                    "tertiary-container": "#6e7487",
+                    "outline-variant": "#c2c6d6",
+                    "on-primary-fixed-variant": "#004395",
+                    "surface-container": "#e7eefe",
+                    "secondary-container": "#6cf8bb",
+                    "on-tertiary-fixed-variant": "#404758",
+                    "surface-tint": "#005ac2",
+                    "surface-variant": "#dce2f3",
+                    "primary": "#0058be",
+                    "surface": "#f9f9ff",
+                    "tertiary-fixed": "#dce2f7",
+                    "secondary": "#006c49",
+                    "on-tertiary-fixed": "#141b2b",
+                    "on-primary-container": "#fefcff",
+                    "surface-dim": "#d3daea",
+                    "on-secondary-fixed": "#002113",
+                    "on-primary-fixed": "#001a42",
+                    "inverse-on-surface": "#ebf1ff",
+                    "surface-container-high": "#e2e8f8",
+                    "primary-fixed-dim": "#adc6ff",
+                    "primary-fixed": "#d8e2ff",
+                    "tertiary-fixed-dim": "#c0c6db",
+                    "surface-container-highest": "#dce2f3",
+                    "background": "#f9f9ff",
+                    "tertiary": "#555c6e",
+                    "on-surface": "#151c27",
+                    "on-secondary-container": "#00714d",
+                    "outline": "#727785",
+                    "on-tertiary": "#ffffff",
+                    "on-error-container": "#93000a",
+                    "secondary-fixed-dim": "#4edea3",
+                    "on-secondary": "#ffffff",
+                    "on-surface-variant": "#424754",
+                    "inverse-primary": "#adc6ff",
+                    "primary-container": "#2170e4",
+                    "on-tertiary-container": "#fefcff",
+                    "on-secondary-fixed-variant": "#005236",
+                    "surface-bright": "#f9f9ff"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Inter"],
+                    "body": ["Inter"],
+                    "label": ["Inter"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        body { font-family: 'Inter', sans-serif; background-color: #f9f9ff; color: #151c27; }
+        .glass-header { backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+    </style>
+</head>
+<body class="bg-surface text-on-surface font-body antialiased">
+<!-- TopNavBar -->
+<header class="fixed top-0 w-full z-50 glass-header bg-slate-50/80 dark:bg-slate-900/80 shadow-sm px-6 py-3 flex justify-between items-center w-full">
+<div class="flex items-center gap-8">
+<span class="text-xl font-bold tracking-tighter text-blue-800 dark:text-blue-300">Clinical Clarity</span>
+<div class="hidden md:flex gap-6 items-center">
+<nav class="flex gap-6 items-center text-sm font-medium">
+<a class="text-blue-700 dark:text-blue-400 border-b-2 border-blue-600 transition-all py-1" href="#">Dashboard</a>
+<a class="text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-300 transition-colors" href="#">Patients</a>
+<a class="text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-300 transition-colors" href="#">Reports</a>
+</nav>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="relative hidden sm:block">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-lg">search</span>
+<input class="pl-10 pr-4 py-2 bg-surface-container-low border-none rounded-xl text-sm w-64 focus:ring-2 focus:ring-primary/40 outline-none" placeholder="Search compliance logs..." type="text"/>
+</div>
+<div class="flex items-center gap-3">
+<button class="p-2 text-slate-600 hover:bg-slate-100 rounded-full transition-all active:opacity-80">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="p-2 text-slate-600 hover:bg-slate-100 rounded-full transition-all active:opacity-80">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+</button>
+<div class="h-8 w-8 rounded-full bg-primary-fixed flex items-center justify-center ml-2 border border-outline-variant/30 overflow-hidden">
+<img alt="Researcher Profile" class="object-cover h-full w-full" data-alt="professional medical researcher headshot with neutral background soft lighting high resolution" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAaLla6UDWuTV0kzL9FprJceRVISBaLCBFUx-j_ZZKmklqive6W67Pk7rTXmw-f4rpEiRe6dLq2e5hoGgH6X14415hL7fxhPQeYyd3F2PW2IiHMRe9NX6eYQNjSvxcQdvwgKrh9LZiSl8fy1PPgtD4JIPLMmG_2GUXnXS5SW258tuhambley3_lWG0bl-Hl7LrUug2EEiQgcuutYAKhXlIzx6ezgl9qs9qy53G2asNdWL5njqiOyY48yPgDrz5KPzYHCEJwWvfGotUM"/>
+</div>
+</div>
+</div>
+</header>
+<!-- SideNavBar -->
+<aside class="hidden md:flex flex-col h-screen w-64 fixed left-0 top-0 bg-slate-50 dark:bg-slate-950 border-r border-slate-200 dark:border-slate-800 p-4 z-40 pt-20">
+<div class="flex items-center gap-3 px-2 mb-8">
+<div class="w-10 h-10 bg-primary-container rounded-lg flex items-center justify-center text-white">
+<span class="material-symbols-outlined" data-icon="security" style="font-variation-settings: 'FILL' 1;">security</span>
+</div>
+<div>
+<h2 class="text-sm font-black text-blue-900 dark:text-blue-100 uppercase tracking-wider">Research Portal</h2>
+<p class="text-[10px] text-slate-500 font-medium">Data Governance</p>
+</div>
+</div>
+<nav class="flex-1 space-y-1">
+<a class="flex items-center gap-3 px-3 py-2.5 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 rounded-lg transition-all scale-95 active:scale-100 duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="gavel">gavel</span>
+<span class="text-sm font-medium">Compliance</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900 transition-all scale-95 active:scale-100 duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="security">security</span>
+<span class="text-sm font-medium">TCK</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900 transition-all scale-95 active:scale-100 duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="verified_user">verified_user</span>
+<span class="text-sm font-medium">Credentials</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900 transition-all scale-95 active:scale-100 duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="menu_book">menu_book</span>
+<span class="text-sm font-medium">Catalog</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900 transition-all scale-95 active:scale-100 duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="leaderboard">leaderboard</span>
+<span class="text-sm font-medium">Analytics</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900 transition-all scale-95 active:scale-100 duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="search_insights">search_insights</span>
+<span class="text-sm font-medium">Query</span>
+</a>
+</nav>
+<div class="mt-auto border-t border-slate-100 pt-4 space-y-1">
+<button class="w-full mb-4 bg-primary text-white py-2.5 rounded-xl text-sm font-semibold shadow-md shadow-primary/20 hover:opacity-90 transition-all">
+                New Analysis
+            </button>
+<a class="flex items-center gap-3 px-3 py-2 text-slate-500 hover:bg-slate-100 rounded-lg transition-all" href="#">
+<span class="material-symbols-outlined text-xl" data-icon="contact_support">contact_support</span>
+<span class="text-sm font-medium">Support</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-slate-500 hover:bg-slate-100 rounded-lg transition-all" href="#">
+<span class="material-symbols-outlined text-xl" data-icon="history">history</span>
+<span class="text-sm font-medium">Logs</span>
+</a>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="md:ml-64 pt-20 px-6 pb-12 min-h-screen">
+<header class="mb-10 mt-4 flex flex-col md:flex-row md:items-end justify-between gap-4">
+<div>
+<span class="text-secondary font-bold text-xs uppercase tracking-widest mb-2 block">System Status: Secure</span>
+<h1 class="text-4xl font-extrabold tracking-tight text-on-surface">Compliance Overview</h1>
+<p class="text-on-surface-variant mt-2 text-lg">Real-time EHDS monitoring and regulatory governance.</p>
+</div>
+<div class="flex gap-3">
+<button class="px-5 py-2.5 bg-surface-container-high rounded-xl text-sm font-semibold text-primary transition-all hover:bg-surface-container-highest">
+                    Download Audit Report
+                </button>
+<button class="px-5 py-2.5 bg-primary text-white rounded-xl text-sm font-semibold shadow-xl shadow-primary/10 hover:shadow-primary/20 transition-all">
+                    Initiate Audit
+                </button>
+</div>
+</header>
+<!-- Bento Grid Layout -->
+<div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+<!-- EHDS Compliance Score (Focal Point) -->
+<div class="md:col-span-4 bg-surface-container-low p-8 rounded-3xl relative overflow-hidden flex flex-col justify-between h-[400px]">
+<div class="relative z-10">
+<h3 class="text-sm font-bold text-on-surface-variant uppercase tracking-widest">EHDS Compliance Score</h3>
+<p class="text-xs text-secondary mt-1 font-medium">Updated 4 minutes ago</p>
+</div>
+<div class="relative z-10 flex flex-col items-center justify-center">
+<div class="w-48 h-48 rounded-full border-[12px] border-surface-container flex items-center justify-center relative">
+<!-- Simulated Progress -->
+<svg class="absolute inset-0 w-full h-full -rotate-90">
+<circle class="text-secondary transition-all duration-1000" cx="96" cy="96" fill="none" r="84" stroke="currentColor" stroke-dasharray="527" stroke-dashoffset="30" stroke-width="12"></circle>
+</svg>
+<div class="text-center">
+<span class="text-6xl font-black text-on-surface tracking-tighter">94<span class="text-2xl text-on-surface-variant">%</span></span>
+<p class="text-xs font-bold text-secondary uppercase tracking-tighter mt-1">Healthy</p>
+</div>
+</div>
+</div>
+<div class="relative z-10 bg-white/50 backdrop-blur-md p-4 rounded-2xl border border-white/20">
+<div class="flex justify-between items-center text-xs">
+<span class="text-on-surface-variant">Last month</span>
+<span class="text-secondary font-bold">+2.4%</span>
+</div>
+<div class="h-1.5 w-full bg-surface-container rounded-full mt-2 overflow-hidden">
+<div class="h-full bg-secondary w-full opacity-30"></div>
+</div>
+</div>
+<!-- Background decoration -->
+<div class="absolute -right-16 -top-16 w-64 h-64 bg-secondary/5 rounded-full blur-3xl"></div>
+</div>
+<!-- Regional Data Residency Map -->
+<div class="md:col-span-8 bg-surface-container-lowest p-8 rounded-3xl border border-outline-variant/10 shadow-sm relative group">
+<div class="flex justify-between items-start mb-6">
+<div>
+<h3 class="text-xl font-bold text-on-surface tracking-tight">Regional Data Residency</h3>
+<p class="text-sm text-on-surface-variant">Active data nodes and sovereign compliance zones.</p>
+</div>
+<div class="flex gap-2">
+<span class="inline-flex items-center px-3 py-1 rounded-full bg-secondary-container text-on-secondary-container text-[10px] font-bold uppercase tracking-tighter">EU-Sovereign</span>
+<span class="inline-flex items-center px-3 py-1 rounded-full bg-surface-container-high text-on-surface-variant text-[10px] font-bold uppercase tracking-tighter">GDPR Ready</span>
+</div>
+</div>
+<div class="w-full h-64 rounded-2xl overflow-hidden relative bg-slate-50 border border-slate-100">
+<img class="w-full h-full object-cover opacity-50 grayscale hover:grayscale-0 transition-all duration-700" data-alt="stylized minimalist digital world map with highlighting on European region blue and teal tones clinical aesthetic" data-location="Europe" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDtQyF3wuP3_hQ60nPlD2MT1GQlbqhZ1kinYdmShMdbRd743EWZCG2GDmK0Lunhk8YBBfySjhiV63vYc4-mxN-MxbY34oJwUP3vonW7HnU-jhFL5lxAYTNmsslI0Bll672WFa5FxjVFgsnnJgleENwxaLHGX50DpohKMLnZRSKVLLE6yUBrC0KrHAEjJXFFV4wsC2c7JMivsGsc0b-sjzbA2x3cR1WDR56ce5bTvuEvrq1T4jzVq8yggLlJ6zegoN8TIBqIBFqld5WF"/>
+<!-- Map Hotspots -->
+<div class="absolute top-1/4 left-1/3 group/dot">
+<div class="w-3 h-3 bg-secondary rounded-full animate-ping absolute"></div>
+<div class="w-3 h-3 bg-secondary rounded-full relative shadow-lg shadow-secondary/50"></div>
+<div class="absolute top-6 left-1/2 -translate-x-1/2 bg-white px-3 py-1 rounded-lg shadow-xl text-[10px] font-bold whitespace-nowrap border border-slate-100 opacity-0 group-hover/dot:opacity-100 transition-all">Berlin Node: Compliant</div>
+</div>
+<div class="absolute top-1/3 left-[45%] group/dot">
+<div class="w-3 h-3 bg-primary rounded-full relative shadow-lg shadow-primary/50"></div>
+<div class="absolute top-6 left-1/2 -translate-x-1/2 bg-white px-3 py-1 rounded-lg shadow-xl text-[10px] font-bold whitespace-nowrap border border-slate-100 opacity-0 group-hover/dot:opacity-100 transition-all">Paris Node: Syncing</div>
+</div>
+</div>
+<div class="grid grid-cols-3 gap-4 mt-6">
+<div class="p-4 bg-surface rounded-2xl border border-outline-variant/10">
+<p class="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">Storage Locality</p>
+<p class="text-xl font-black text-on-surface mt-1">98.2%</p>
+</div>
+<div class="p-4 bg-surface rounded-2xl border border-outline-variant/10">
+<p class="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">Cross-border Sync</p>
+<p class="text-xl font-black text-on-surface mt-1">Active</p>
+</div>
+<div class="p-4 bg-surface rounded-2xl border border-outline-variant/10">
+<p class="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">Latency Gap</p>
+<p class="text-xl font-black text-on-surface mt-1">12ms</p>
+</div>
+</div>
+</div>
+<!-- Active Policy Monitoring -->
+<div class="md:col-span-7 bg-surface-container-lowest p-8 rounded-3xl border border-outline-variant/10 shadow-sm">
+<div class="flex items-center justify-between mb-8">
+<h3 class="text-xl font-bold text-on-surface tracking-tight">Active Policy Monitoring</h3>
+<span class="text-xs font-semibold text-primary px-3 py-1 bg-primary/5 rounded-full">6 Policies Running</span>
+</div>
+<div class="space-y-4">
+<!-- Policy Item -->
+<div class="p-5 rounded-2xl bg-surface-container-low flex items-center justify-between group hover:bg-surface-container transition-all">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-xl bg-white flex items-center justify-center text-primary shadow-sm">
+<span class="material-symbols-outlined" data-icon="visibility_off">visibility_off</span>
+</div>
+<div>
+<h4 class="font-bold text-on-surface">Differential Anonymization</h4>
+<p class="text-xs text-on-surface-variant">Epsilon-level: 0.1 (Strict)</p>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<div class="hidden sm:block text-right">
+<p class="text-[10px] font-bold text-secondary uppercase">Active</p>
+<p class="text-xs font-medium">99.9% Match</p>
+</div>
+<button class="w-8 h-8 rounded-full border border-outline-variant/30 flex items-center justify-center text-outline hover:text-primary hover:border-primary transition-all">
+<span class="material-symbols-outlined text-sm">chevron_right</span>
+</button>
+</div>
+</div>
+<!-- Policy Item -->
+<div class="p-5 rounded-2xl bg-surface-container-low flex items-center justify-between group hover:bg-surface-container transition-all">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-xl bg-white flex items-center justify-center text-primary shadow-sm">
+<span class="material-symbols-outlined" data-icon="enhanced_encryption">enhanced_encryption</span>
+</div>
+<div>
+<h4 class="font-bold text-on-surface">At-Rest Encryption</h4>
+<p class="text-xs text-on-surface-variant">AES-256-GCM / Hardware Rooted</p>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<div class="hidden sm:block text-right">
+<p class="text-[10px] font-bold text-secondary uppercase">Active</p>
+<p class="text-xs font-medium">Validated</p>
+</div>
+<button class="w-8 h-8 rounded-full border border-outline-variant/30 flex items-center justify-center text-outline hover:text-primary hover:border-primary transition-all">
+<span class="material-symbols-outlined text-sm">chevron_right</span>
+</button>
+</div>
+</div>
+<!-- Policy Item -->
+<div class="p-5 rounded-2xl bg-surface-container-low flex items-center justify-between group hover:bg-surface-container transition-all">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-xl bg-white flex items-center justify-center text-primary shadow-sm">
+<span class="material-symbols-outlined" data-icon="key">key</span>
+</div>
+<div>
+<h4 class="font-bold text-on-surface">Zero-Knowledge Retrieval</h4>
+<p class="text-xs text-on-surface-variant">Decentralized TCK Protocol</p>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<div class="hidden sm:block text-right">
+<p class="text-[10px] font-bold text-secondary uppercase">Active</p>
+<p class="text-xs font-medium">Audited</p>
+</div>
+<button class="w-8 h-8 rounded-full border border-outline-variant/30 flex items-center justify-center text-outline hover:text-primary hover:border-primary transition-all">
+<span class="material-symbols-outlined text-sm">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Security Audit Log -->
+<div class="md:col-span-5 bg-surface-container-low p-8 rounded-3xl flex flex-col h-full">
+<div class="flex justify-between items-start mb-6">
+<div>
+<h3 class="text-xl font-bold text-on-surface tracking-tight">Security Audit Log</h3>
+<p class="text-sm text-on-surface-variant">Continuous ledger of portal interactions.</p>
+</div>
+<button class="text-primary text-xs font-bold hover:underline">View All</button>
+</div>
+<div class="flex-1 space-y-6 overflow-y-auto no-scrollbar pr-2">
+<!-- Log Entry -->
+<div class="flex gap-4 relative">
+<div class="z-10 w-2 h-2 rounded-full bg-secondary mt-1.5 shadow-[0_0_8px_rgba(0,108,73,0.4)]"></div>
+<div class="absolute left-1 top-4 bottom-[-24px] w-0.5 bg-outline-variant/20"></div>
+<div>
+<p class="text-sm font-bold text-on-surface">Node Re-authentication</p>
+<p class="text-xs text-on-surface-variant leading-relaxed">Berlin Secondary Node successfully rotated security certificates for EHDS compliance.</p>
+<p class="text-[10px] text-outline font-bold mt-1 uppercase">12:45 PM • SYSTEM</p>
+</div>
+</div>
+<!-- Log Entry -->
+<div class="flex gap-4 relative">
+<div class="z-10 w-2 h-2 rounded-full bg-primary mt-1.5"></div>
+<div class="absolute left-1 top-4 bottom-[-24px] w-0.5 bg-outline-variant/20"></div>
+<div>
+<p class="text-sm font-bold text-on-surface">Admin Access: Credentials</p>
+<p class="text-xs text-on-surface-variant leading-relaxed">User "dr_smith_research" accessed the credential catalog with MFA verification.</p>
+<p class="text-[10px] text-outline font-bold mt-1 uppercase">11:30 AM • AUTH</p>
+</div>
+</div>
+<!-- Log Entry -->
+<div class="flex gap-4 relative">
+<div class="z-10 w-2 h-2 rounded-full bg-error mt-1.5"></div>
+<div>
+<p class="text-sm font-bold text-on-surface">Blocked Access Attempt</p>
+<p class="text-xs text-on-surface-variant leading-relaxed">Unrecognized IP (192.168.x.x) attempted query on restricted datasets. Blocked by firewall.</p>
+<p class="text-[10px] text-outline font-bold mt-1 uppercase">10:15 AM • SECURITY</p>
+</div>
+</div>
+</div>
+<!-- Footer Callout -->
+<div class="mt-8 p-4 bg-white rounded-2xl flex items-center justify-between border border-outline-variant/20">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-secondary" data-icon="verified" style="font-variation-settings: 'FILL' 1;">verified</span>
+<span class="text-xs font-bold text-on-surface">Compliance Verified</span>
+</div>
+<span class="text-[10px] font-bold text-on-surface-variant uppercase">ID: EHDS-2024-0012</span>
+</div>
+</div>
+</div>
+</main>
+<!-- Navigation Shadow/Separation -->
+<div class="fixed top-12 left-0 right-0 h-px bg-slate-100 dark:bg-slate-800/50 z-50 pointer-events-none"></div>
+<!-- Privacy Shield Indicator (Design System Specialty) -->
+<div class="fixed bottom-6 right-6 z-50">
+<div class="flex items-center gap-2 bg-on-surface text-white px-4 py-2 rounded-full text-xs font-bold shadow-2xl transition-all hover:scale-105 cursor-pointer backdrop-blur-xl bg-opacity-90">
+<span class="material-symbols-outlined text-sm" data-icon="lock" style="font-variation-settings: 'FILL' 1;">lock</span>
+            Secure Session
+            <div class="w-1.5 h-1.5 bg-secondary rounded-full animate-pulse ml-1"></div>
+</div>
+</div>
+</body></html>
