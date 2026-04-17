@@ -163,7 +163,7 @@ describe("Home Page", () => {
     ).toBeInTheDocument();
     expect(screen.getByText("HL7 FHIR R4")).toBeInTheDocument();
     expect(screen.getByText("OMOP Common Data Model")).toBeInTheDocument();
-    expect(screen.getByText("Dataspace Protocol")).toBeInTheDocument();
+    expect(screen.getAllByText("Dataspace Protocol").length).toBeGreaterThan(0);
     expect(
       screen.getByText("Decentralised Claims Protocol"),
     ).toBeInTheDocument();

@@ -283,16 +283,26 @@ describe("UserMenu", () => {
       expect(mockSignOut).toHaveBeenCalledWith({ callbackUrl: "/" });
     });
 
-    it("builds Keycloak logout URL when env vars are set", async () => {
-      process.env.NEXT_PUBLIC_KEYCLOAK_PUBLIC_URL =
-        "http://keycloak.localhost/realms/EDCV";
-      process.env.NEXT_PUBLIC_KEYCLOAK_CLIENT_ID = "my-client";
+    it("builds Keycloak logout URL when /api/keycloak-config returns config", async () => {
+      const fetchMock = vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({
+          publicUrl: "http://keycloak.localhost/realms/EDCV",
+          clientId: "my-client",
+        }),
+      });
+      vi.stubGlobal("fetch", fetchMock);
 
       mockUseSession.mockReturnValue(
         sessionWith("Logout User", "logout@example.com", []),
       );
       const user = userEvent.setup();
       render(<UserMenu />);
+
+      await waitFor(() =>
+        expect(fetchMock).toHaveBeenCalledWith("/api/keycloak-config"),
+      );
+
       await user.click(screen.getByText("Logout User"));
       await user.click(screen.getByText("Sign out"));
 
@@ -303,21 +313,35 @@ describe("UserMenu", () => {
       );
       expect(callbackUrl).toContain("post_logout_redirect_uri=");
       expect(callbackUrl).toContain("client_id=my-client");
+
+      vi.unstubAllGlobals();
     });
 
-    it("uses default client_id when env var is not set", async () => {
-      process.env.NEXT_PUBLIC_KEYCLOAK_PUBLIC_URL =
-        "http://keycloak.localhost/realms/test";
-      delete process.env.NEXT_PUBLIC_KEYCLOAK_CLIENT_ID;
+    it("passes clientId from runtime config into logout URL", async () => {
+      const fetchMock = vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({
+          publicUrl: "http://keycloak.localhost/realms/test",
+          clientId: "health-dataspace-ui",
+        }),
+      });
+      vi.stubGlobal("fetch", fetchMock);
 
       mockUseSession.mockReturnValue(sessionWith("U", "u@test.com", []));
       const user = userEvent.setup();
       render(<UserMenu />);
+
+      await waitFor(() =>
+        expect(fetchMock).toHaveBeenCalledWith("/api/keycloak-config"),
+      );
+
       await user.click(screen.getByText("U"));
       await user.click(screen.getByText("Sign out"));
 
       const { callbackUrl } = mockSignOut.mock.calls[0][0];
       expect(callbackUrl).toContain("client_id=health-dataspace-ui");
+
+      vi.unstubAllGlobals();
     });
 
     it("closes dropdown after sign-out click", async () => {

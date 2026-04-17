@@ -11,7 +11,13 @@ FROM base AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
-ENV DOCKER_BUILD=1
+ARG BUILD_SHA=""
+ARG BUILD_TIME=""
+ARG BUILD_CHANNEL="local"
+ENV DOCKER_BUILD=1 \
+    BUILD_SHA=$BUILD_SHA \
+    BUILD_TIME=$BUILD_TIME \
+    BUILD_CHANNEL=$BUILD_CHANNEL
 RUN npm run build
 
 # Production image

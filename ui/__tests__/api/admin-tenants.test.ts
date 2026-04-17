@@ -13,11 +13,17 @@ vi.mock("@/lib/edc", () => ({
   EDC_CONTEXT: "https://w3id.org/edc/connector/management/v2",
 }));
 
+vi.mock("@/lib/neo4j", () => ({
+  runQuery: vi.fn(),
+}));
+
 import { edcClient } from "@/lib/edc";
+import { runQuery } from "@/lib/neo4j";
 import { GET } from "@/app/api/admin/tenants/route";
 
 const mockManagement = vi.mocked(edcClient.management);
 const mockTenant = vi.mocked(edcClient.tenant);
+const mockRunQuery = vi.mocked(runQuery);
 
 describe("GET /api/admin/tenants", () => {
   beforeEach(() => {
@@ -51,8 +57,9 @@ describe("GET /api/admin/tenants", () => {
     expect(data.summary.byRole.data_holder).toBe(1);
   });
 
-  it("should return 502 when CFM is unavailable", async () => {
+  it("should return 502 when CFM and Neo4j fallback are both unavailable", async () => {
     mockTenant.mockRejectedValue(new Error("Connection refused"));
+    mockRunQuery.mockRejectedValue(new Error("Neo4j unreachable"));
 
     const response = await GET();
     expect(response.status).toBe(502);
