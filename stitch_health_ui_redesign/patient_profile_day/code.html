@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                "tertiary-container": "#6e7487",
+                "on-tertiary-fixed": "#141b2b",
+                "secondary-fixed": "#6ffbbe",
+                "surface-variant": "#dce2f3",
+                "on-surface": "#151c27",
+                "on-tertiary-container": "#fefcff",
+                "surface-tint": "#005ac2",
+                "outline": "#727785",
+                "on-secondary-container": "#00714d",
+                "on-primary-fixed-variant": "#004395",
+                "on-error-container": "#93000a",
+                "background": "#f9f9ff",
+                "primary": "#0058be",
+                "on-secondary": "#ffffff",
+                "on-background": "#151c27",
+                "error-container": "#ffdad6",
+                "secondary-fixed-dim": "#4edea3",
+                "surface-container": "#e7eefe",
+                "secondary-container": "#6cf8bb",
+                "primary-container": "#2170e4",
+                "tertiary-fixed": "#dce2f7",
+                "on-secondary-fixed": "#002113",
+                "on-tertiary": "#ffffff",
+                "inverse-primary": "#adc6ff",
+                "surface-container-high": "#e2e8f8",
+                "outline-variant": "#c2c6d6",
+                "surface-container-low": "#f0f3ff",
+                "surface-bright": "#f9f9ff",
+                "primary-fixed-dim": "#adc6ff",
+                "secondary": "#006c49",
+                "on-primary": "#ffffff",
+                "tertiary": "#555c6e",
+                "error": "#ba1a1a",
+                "surface": "#f9f9ff",
+                "on-primary-container": "#fefcff",
+                "tertiary-fixed-dim": "#c0c6db",
+                "primary-fixed": "#d8e2ff",
+                "inverse-surface": "#2a313d",
+                "surface-dim": "#d3daea",
+                "surface-container-highest": "#dce2f3",
+                "on-primary-fixed": "#001a42",
+                "on-tertiary-fixed-variant": "#404758",
+                "surface-container-lowest": "#ffffff",
+                "on-surface-variant": "#424754",
+                "on-secondary-fixed-variant": "#005236",
+                "on-error": "#ffffff",
+                "inverse-on-surface": "#ebf1ff"
+            },
+            "borderRadius": {
+                "DEFAULT": "0.25rem",
+                "lg": "0.5rem",
+                "xl": "0.75rem",
+                "full": "9999px"
+            },
+            "fontFamily": {
+                "headline": ["Inter"],
+                "body": ["Inter"],
+                "label": ["Inter"]
+            }
+          }
+        }
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-background text-on-background min-h-screen">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-40 bg-slate-50/80 backdrop-blur-md shadow-sm flex justify-between items-center px-6 py-3">
+<div class="flex items-center gap-8">
+<span class="text-xl font-bold tracking-tighter text-blue-800">Clinical Clarity</span>
+<nav class="hidden md:flex gap-6">
+<a class="text-slate-500 hover:bg-blue-50/50 transition-colors px-3 py-1 rounded-lg" href="#">Dashboard</a>
+<a class="text-blue-700 font-semibold hover:bg-blue-50/50 transition-colors px-3 py-1 rounded-lg" href="#">Health Profile</a>
+<a class="text-slate-500 hover:bg-blue-50/50 transition-colors px-3 py-1 rounded-lg" href="#">Research</a>
+<a class="text-slate-500 hover:bg-blue-50/50 transition-colors px-3 py-1 rounded-lg" href="#">Insights</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<button class="p-2 text-slate-500 hover:bg-blue-50/50 rounded-full transition-colors active:scale-95 duration-200">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="p-2 text-slate-500 hover:bg-blue-50/50 rounded-full transition-colors active:scale-95 duration-200">
+<span class="material-symbols-outlined" data-icon="account_circle">account_circle</span>
+</button>
+</div>
+</header>
+<div class="flex pt-16">
+<!-- SideNavBar -->
+<aside class="hidden md:flex h-[calc(100vh-64px)] w-64 border-r border-slate-100 flex-col p-4 gap-2 bg-slate-50 sticky top-16">
+<div class="mb-6 px-2">
+<h2 class="text-lg font-black text-blue-900">Patient Portal</h2>
+<p class="text-xs text-slate-500">Secure Health Data</p>
+</div>
+<a class="flex items-center gap-3 px-3 py-2.5 text-slate-600 hover:bg-slate-100 transition-all rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="font-medium text-sm">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 text-blue-700 bg-blue-50/50 rounded-lg transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="clinical_notes">clinical_notes</span>
+<span class="font-medium text-sm">Health Profile</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 text-slate-600 hover:bg-slate-100 transition-all rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="science">science</span>
+<span class="font-medium text-sm">Research</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 text-slate-600 hover:bg-slate-100 transition-all rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="analytics">analytics</span>
+<span class="font-medium text-sm">Insights</span>
+</a>
+<div class="mt-auto pt-4 border-t border-slate-100 flex flex-col gap-1">
+<a class="flex items-center gap-3 px-3 py-2.5 text-slate-600 hover:bg-slate-100 transition-all rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="font-medium text-sm">Settings</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 text-slate-600 hover:bg-slate-100 transition-all rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="help_outline">help_outline</span>
+<span class="font-medium text-sm">Support</span>
+</a>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="flex-1 p-6 md:p-10 bg-surface">
+<!-- Hero Header -->
+<div class="max-w-6xl mx-auto">
+<header class="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6">
+<div>
+<div class="flex items-center gap-3 mb-4">
+<span class="bg-secondary-container text-on-secondary-container px-3 py-1 rounded-full text-xs font-bold tracking-wider uppercase">Verified Patient</span>
+<span class="text-outline text-xs font-medium">Last updated: Oct 24, 2023</span>
+</div>
+<h1 class="text-4xl md:text-5xl font-bold tracking-tight text-on-surface mb-2">Patient Clinical Profile</h1>
+<p class="text-lg text-tertiary max-w-2xl font-light">A secure, decentralized repository of your clinical identity and medical baseline.</p>
+</div>
+<div class="flex gap-3">
+<button class="bg-surface-container-lowest text-primary px-6 py-2.5 rounded-xl font-semibold shadow-sm border border-outline-variant/20 hover:bg-surface-container-high transition-colors">Export Record</button>
+<button class="bg-gradient-to-br from-primary to-primary-container text-on-primary px-6 py-2.5 rounded-xl font-semibold shadow-md active:scale-95 duration-200">Share Access</button>
+</div>
+</header>
+<!-- Bento Grid Layout -->
+<div class="grid grid-cols-1 md:grid-cols-12 gap-8">
+<!-- Identity Verification Card (Left Column) -->
+<section class="md:col-span-5 flex flex-col gap-8">
+<div class="bg-surface-container-lowest rounded-xl p-8 shadow-sm border border-outline-variant/10 relative overflow-hidden">
+<div class="absolute top-0 right-0 p-6 opacity-10">
+<span class="material-symbols-outlined text-8xl" data-icon="fingerprint">fingerprint</span>
+</div>
+<h3 class="text-xl font-bold mb-6 text-on-surface flex items-center gap-2">
+<span class="material-symbols-outlined text-blue-600" data-icon="verified_user">verified_user</span>
+                                Identity Verification
+                            </h3>
+<div class="flex items-center gap-6 mb-8">
+<img alt="Profile photo" class="w-24 h-24 rounded-2xl object-cover grayscale brightness-105" data-alt="Close-up professional studio portrait of a woman with calm expression, high-key lighting, clean white background, clinical photography style" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA1eCbOe5m_Wl6JKD3G-kosjGGqQM4i_kZmBVrZMzRGHmDmMzerj2cw7N0iMhNbcjrT8WX36RVtQOEoECWf1loRYCNrVnGMHfsEZLRRqZ_B-gUpKWoLbGf-PZqdIkvL0qnz-DB7SnrdWFB0_uLdjI8XiLlviCoGAkwwuA7drlSbZCBMzUAahV4z2jUl9NHYXbMhxJVz6U8yuEUNPa3K6N1aP7Uz32T03jRwm9TQvfn8Uh0PU-yuJSL2hNkDp5qvZVumi1Znbhb6qOUT"/>
+<div>
+<h4 class="text-2xl font-bold text-on-surface">Sarah J. Miller</h4>
+<p class="text-sm font-mono text-blue-600 bg-blue-50 px-2 py-0.5 rounded inline-block mt-1">DID:ion:392x-482a-v922</p>
+</div>
+</div>
+<div class="space-y-4">
+<div class="flex justify-between py-3 border-b border-surface-variant/30">
+<span class="text-sm text-outline">Birth Date</span>
+<span class="text-sm font-bold">14 May 1988</span>
+</div>
+<div class="flex justify-between py-3 border-b border-surface-variant/30">
+<span class="text-sm text-outline">Legal Gender</span>
+<span class="text-sm font-bold">Female</span>
+</div>
+<div class="flex justify-between py-3">
+<span class="text-sm text-outline">National Identifier</span>
+<span class="text-sm font-bold">XXX-XX-4902</span>
+</div>
+</div>
+</div>
+<!-- Primary Health Identifiers -->
+<div class="bg-surface-container-low rounded-xl p-8">
+<h3 class="text-xl font-bold mb-6 text-on-surface flex items-center gap-2">
+<span class="material-symbols-outlined text-primary" data-icon="medical_information">medical_information</span>
+                                Primary Identifiers
+                            </h3>
+<div class="grid grid-cols-1 gap-4">
+<div class="bg-surface-container-lowest p-4 rounded-lg flex items-center justify-between group hover:bg-white transition-colors">
+<div>
+<p class="text-xs text-outline font-bold uppercase tracking-widest">Medical Record Number (MRN)</p>
+<p class="text-lg font-mono text-on-surface">CC-88219-MILLER</p>
+</div>
+<span class="material-symbols-outlined text-outline group-hover:text-primary transition-colors" data-icon="content_copy">content_copy</span>
+</div>
+<div class="bg-surface-container-lowest p-4 rounded-lg flex items-center justify-between group hover:bg-white transition-colors">
+<div>
+<p class="text-xs text-outline font-bold uppercase tracking-widest">Health Insurance ID</p>
+<p class="text-lg font-mono text-on-surface">AET-990112344</p>
+</div>
+<span class="material-symbols-outlined text-outline group-hover:text-primary transition-colors" data-icon="content_copy">content_copy</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Clinical Metadata & Providers (Right Column) -->
+<section class="md:col-span-7 flex flex-col gap-8">
+<!-- Clinical Metadata -->
+<div class="bg-surface-container-lowest rounded-xl p-8 shadow-sm border border-outline-variant/10">
+<div class="flex justify-between items-center mb-8">
+<h3 class="text-xl font-bold text-on-surface">Clinical Metadata</h3>
+<span class="bg-primary/10 text-primary px-3 py-1 rounded-full text-xs font-semibold">Base Profile V2.4</span>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-x-12 gap-y-8">
+<div class="space-y-1">
+<p class="text-xs text-outline font-bold uppercase tracking-widest">Blood Type</p>
+<div class="flex items-center gap-2">
+<span class="text-2xl font-bold text-error">O Positive</span>
+<div class="w-8 h-8 rounded-full bg-error/10 flex items-center justify-center">
+<span class="material-symbols-outlined text-error text-sm" data-icon="water_drop" style="font-variation-settings: 'FILL' 1;">water_drop</span>
+</div>
+</div>
+</div>
+<div class="space-y-1">
+<p class="text-xs text-outline font-bold uppercase tracking-widest">Primary Language</p>
+<p class="text-2xl font-bold text-on-surface">English (US)</p>
+</div>
+<div class="space-y-1">
+<p class="text-xs text-outline font-bold uppercase tracking-widest">Height / Weight</p>
+<p class="text-2xl font-bold text-on-surface">168 cm / 64 kg</p>
+</div>
+<div class="space-y-1">
+<p class="text-xs text-outline font-bold uppercase tracking-widest">Body Mass Index</p>
+<div class="flex items-center gap-3">
+<p class="text-2xl font-bold text-on-surface">22.7</p>
+<span class="bg-secondary-container text-on-secondary-container px-2 py-0.5 rounded text-[10px] font-bold">NORMAL</span>
+</div>
+</div>
+</div>
+<div class="mt-12 p-6 bg-slate-50 rounded-xl border border-slate-100">
+<p class="text-xs text-outline font-bold uppercase tracking-widest mb-4">Known Allergies</p>
+<div class="flex flex-wrap gap-2">
+<span class="bg-error-container text-on-error-container px-4 py-1.5 rounded-full text-sm font-semibold flex items-center gap-2">
+<span class="material-symbols-outlined text-xs" data-icon="warning">warning</span>
+                                        Penicillin (Severe)
+                                    </span>
+<span class="bg-surface-container-high text-on-surface px-4 py-1.5 rounded-full text-sm font-semibold">Peanuts (Mild)</span>
+<span class="bg-surface-container-high text-on-surface px-4 py-1.5 rounded-full text-sm font-semibold">Latex</span>
+</div>
+</div>
+</div>
+<!-- Healthcare Providers -->
+<div class="bg-surface-container-low rounded-xl p-8">
+<div class="flex justify-between items-center mb-8">
+<h3 class="text-xl font-bold text-on-surface">Active Data Sharing</h3>
+<button class="text-sm font-bold text-primary flex items-center gap-1 hover:underline">
+                                    Manage Permissions
+                                    <span class="material-symbols-outlined text-sm" data-icon="open_in_new">open_in_new</span>
+</button>
+</div>
+<div class="space-y-4">
+<!-- Provider Item 1 -->
+<div class="bg-surface-container-lowest p-5 rounded-xl border border-outline-variant/10 flex items-center justify-between group">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center text-blue-700">
+<span class="material-symbols-outlined" data-icon="local_hospital">local_hospital</span>
+</div>
+<div>
+<h4 class="font-bold text-on-surface">North Memorial Health</h4>
+<p class="text-xs text-outline">Access: Full Clinical History</p>
+</div>
+</div>
+<div class="text-right">
+<span class="text-[10px] font-bold text-secondary uppercase block mb-1">Active Since 2021</span>
+<span class="material-symbols-outlined text-slate-300 group-hover:text-blue-600 transition-colors" data-icon="chevron_right">chevron_right</span>
+</div>
+</div>
+<!-- Provider Item 2 -->
+<div class="bg-surface-container-lowest p-5 rounded-xl border border-outline-variant/10 flex items-center justify-between group">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 bg-teal-100 rounded-full flex items-center justify-center text-teal-700">
+<span class="material-symbols-outlined" data-icon="stethoscope">stethoscope</span>
+</div>
+<div>
+<h4 class="font-bold text-on-surface">Dr. Helena Vance (Primary)</h4>
+<p class="text-xs text-outline">Access: Vitals &amp; Medications</p>
+</div>
+</div>
+<div class="text-right">
+<span class="text-[10px] font-bold text-secondary uppercase block mb-1">Active Since 2019</span>
+<span class="material-symbols-outlined text-slate-300 group-hover:text-blue-600 transition-colors" data-icon="chevron_right">chevron_right</span>
+</div>
+</div>
+<!-- Provider Item 3 -->
+<div class="bg-surface-container-lowest p-5 rounded-xl border border-outline-variant/10 flex items-center justify-between group opacity-70">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center text-slate-600">
+<span class="material-symbols-outlined" data-icon="lab_research">lab_research</span>
+</div>
+<div>
+<h4 class="font-bold text-on-surface">Genomic Research Inst.</h4>
+<p class="text-xs text-outline">Access: Anonymized Lab Results</p>
+</div>
+</div>
+<div class="text-right">
+<span class="text-[10px] font-bold text-outline uppercase block mb-1">Limited Access</span>
+<span class="material-symbols-outlined text-slate-300 group-hover:text-blue-600 transition-colors" data-icon="chevron_right">chevron_right</span>
+</div>
+</div>
+</div>
+<button class="w-full mt-6 py-4 border-2 border-dashed border-outline-variant/30 rounded-xl text-outline font-medium hover:border-primary hover:text-primary transition-all flex items-center justify-center gap-2">
+<span class="material-symbols-outlined" data-icon="add_circle">add_circle</span>
+                                Authorize New Provider
+                            </button>
+</div>
+</section>
+</div>
+<!-- Privacy/Footer Section -->
+<footer class="mt-16 pt-12 border-t border-surface-variant/30 text-center">
+<div class="inline-flex items-center gap-3 bg-surface-container-high/50 px-6 py-3 rounded-full mb-6">
+<span class="material-symbols-outlined text-secondary" data-icon="verified" style="font-variation-settings: 'FILL' 1;">verified</span>
+<p class="text-sm font-medium text-on-surface">Data encrypted with AES-256 and secured on the private healthcare ledger.</p>
+</div>
+<div class="flex justify-center gap-8 text-xs font-bold text-outline uppercase tracking-widest">
+<a class="hover:text-primary" href="#">Privacy Protocol</a>
+<a class="hover:text-primary" href="#">Terms of Data Use</a>
+<a class="hover:text-primary" href="#">Audit Log</a>
+</div>
+</footer>
+</div>
+</main>
+</div>
+<!-- Bottom Nav Bar (Mobile Only) -->
+<nav class="md:hidden fixed bottom-0 left-0 right-0 bg-slate-50 border-t border-slate-100 flex justify-around items-center py-2 px-4 z-50">
+<button class="flex flex-col items-center gap-1 text-slate-500">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="text-[10px] font-medium">Home</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-blue-700">
+<span class="material-symbols-outlined" data-icon="clinical_notes">clinical_notes</span>
+<span class="text-[10px] font-bold">Profile</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-slate-500">
+<span class="material-symbols-outlined" data-icon="science">science</span>
+<span class="text-[10px] font-medium">Research</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-slate-500">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="text-[10px] font-medium">Settings</span>
+</button>
+</nav>
+</body></html>

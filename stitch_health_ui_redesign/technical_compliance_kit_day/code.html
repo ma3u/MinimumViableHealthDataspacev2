@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-background": "#151c27",
+                        "on-primary": "#ffffff",
+                        "secondary-fixed": "#6ffbbe",
+                        "on-error": "#ffffff",
+                        "surface-container-lowest": "#ffffff",
+                        "error": "#ba1a1a",
+                        "surface-container-low": "#f0f3ff",
+                        "error-container": "#ffdad6",
+                        "inverse-surface": "#2a313d",
+                        "tertiary-container": "#6e7487",
+                        "outline-variant": "#c2c6d6",
+                        "on-primary-fixed-variant": "#004395",
+                        "surface-container": "#e7eefe",
+                        "secondary-container": "#6cf8bb",
+                        "on-tertiary-fixed-variant": "#404758",
+                        "surface-tint": "#005ac2",
+                        "surface-variant": "#dce2f3",
+                        "primary": "#0058be",
+                        "surface": "#f9f9ff",
+                        "tertiary-fixed": "#dce2f7",
+                        "secondary": "#006c49",
+                        "on-tertiary-fixed": "#141b2b",
+                        "on-primary-container": "#fefcff",
+                        "surface-dim": "#d3daea",
+                        "on-secondary-fixed": "#002113",
+                        "on-primary-fixed": "#001a42",
+                        "inverse-on-surface": "#ebf1ff",
+                        "surface-container-high": "#e2e8f8",
+                        "primary-fixed-dim": "#adc6ff",
+                        "primary-fixed": "#d8e2ff",
+                        "tertiary-fixed-dim": "#c0c6db",
+                        "surface-container-highest": "#dce2f3",
+                        "background": "#f9f9ff",
+                        "tertiary": "#555c6e",
+                        "on-surface": "#151c27",
+                        "on-secondary-container": "#00714d",
+                        "outline": "#727785",
+                        "on-tertiary": "#ffffff",
+                        "on-error-container": "#93000a",
+                        "secondary-fixed-dim": "#4edea3",
+                        "on-secondary": "#ffffff",
+                        "on-surface-variant": "#424754",
+                        "inverse-primary": "#adc6ff",
+                        "primary-container": "#2170e4",
+                        "on-tertiary-container": "#fefcff",
+                        "on-secondary-fixed-variant": "#005236",
+                        "surface-bright": "#f9f9ff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Inter"],
+                        "body": ["Inter"],
+                        "label": ["Inter"],
+                        "mono": ["JetBrains Mono"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-surface text-on-surface antialiased">
+<!-- TopNavBar -->
+<nav class="fixed top-0 w-full z-50 bg-slate-50/80 backdrop-blur-xl shadow-sm flex justify-between items-center px-6 py-3">
+<div class="flex items-center gap-8">
+<span class="text-xl font-bold tracking-tighter text-blue-800">Clinical Clarity</span>
+<div class="hidden md:flex gap-6">
+<a class="text-blue-700 border-b-2 border-blue-600 font-sans antialiased tracking-tight transition-colors" href="#">Overview</a>
+<a class="text-slate-600 hover:text-blue-600 transition-colors font-sans antialiased tracking-tight" href="#">Resources</a>
+<a class="text-slate-600 hover:text-blue-600 transition-colors font-sans antialiased tracking-tight" href="#">Network Status</a>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-slate-500 hover:text-blue-600 transition-all cursor-pointer">notifications</span>
+<span class="material-symbols-outlined text-slate-500 hover:text-blue-600 transition-all cursor-pointer">settings</span>
+<span class="material-symbols-outlined text-slate-500 hover:text-blue-600 transition-all cursor-pointer">help</span>
+<div class="w-8 h-8 rounded-full bg-surface-container-high overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="Researcher Profile" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDQkAGgVWb_c8m7gnHo4SxEosx6VpaCbB-3g4fNH3QWoOi1R_Sy1VfgHnUfEZhTdtX_1NXCf3LsTv7msVNSDjHV8eM3NZC_qb74nd5-xvyJiDxD60WkxZE3GMrchHApMSDydmsmiCduoEx6FKA3dD6sGQ16B3mZVs2tFR_yC-keDdp4SO8sbRVufJOen0vW-a-FQ5e33Hn8gR3msw4wQIukGuak4H5BdM5mxANRnHIj87AqQGLv63SX3Xz6_zzMYbIPMccK6IK97Inq"/>
+</div>
+</div>
+</nav>
+<!-- SideNavBar -->
+<aside class="h-screen w-64 fixed left-0 top-0 border-r border-slate-200 bg-slate-50 pt-20 px-4 flex flex-col hidden md:flex">
+<div class="mb-8 px-2">
+<div class="flex items-center gap-3 mb-1">
+<div class="w-8 h-8 rounded-lg bg-primary-container flex items-center justify-center">
+<span class="material-symbols-outlined text-white text-sm" style="font-variation-settings: 'FILL' 1;">security</span>
+</div>
+<span class="text-lg font-black text-blue-900 tracking-tight">Research Portal</span>
+</div>
+<span class="text-xs font-medium text-slate-400 uppercase tracking-widest ml-11">Data Governance</span>
+</div>
+<nav class="flex-1 flex flex-col gap-1">
+<a class="flex items-center gap-3 px-3 py-2 text-slate-500 hover:bg-slate-100 transition-all rounded-lg text-sm font-medium" href="#">
+<span class="material-symbols-outlined text-lg">gavel</span>
+                Compliance
+            </a>
+<a class="flex items-center gap-3 px-3 py-2 bg-blue-50 text-blue-700 transition-all rounded-lg text-sm font-medium" href="#">
+<span class="material-symbols-outlined text-lg" style="font-variation-settings: 'FILL' 1;">security</span>
+                TCK
+            </a>
+<a class="flex items-center gap-3 px-3 py-2 text-slate-500 hover:bg-slate-100 transition-all rounded-lg text-sm font-medium" href="#">
+<span class="material-symbols-outlined text-lg">verified_user</span>
+                Credentials
+            </a>
+<a class="flex items-center gap-3 px-3 py-2 text-slate-500 hover:bg-slate-100 transition-all rounded-lg text-sm font-medium" href="#">
+<span class="material-symbols-outlined text-lg">menu_book</span>
+                Catalog
+            </a>
+<a class="flex items-center gap-3 px-3 py-2 text-slate-500 hover:bg-slate-100 transition-all rounded-lg text-sm font-medium" href="#">
+<span class="material-symbols-outlined text-lg">leaderboard</span>
+                Analytics
+            </a>
+<a class="flex items-center gap-3 px-3 py-2 text-slate-500 hover:bg-slate-100 transition-all rounded-lg text-sm font-medium" href="#">
+<span class="material-symbols-outlined text-lg">search_insights</span>
+                Query
+            </a>
+</nav>
+<button class="mb-8 w-full py-3 bg-gradient-to-br from-primary to-primary-container text-white rounded-xl font-bold shadow-sm active:scale-95 transition-all text-sm flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-sm">add</span>
+            New Analysis
+        </button>
+<div class="mt-auto border-t border-slate-200 py-4 flex flex-col gap-1">
+<a class="flex items-center gap-3 px-3 py-2 text-slate-500 hover:bg-slate-100 transition-all rounded-lg text-sm font-medium" href="#">
+<span class="material-symbols-outlined text-lg">contact_support</span>
+                Support
+            </a>
+<a class="flex items-center gap-3 px-3 py-2 text-slate-500 hover:bg-slate-100 transition-all rounded-lg text-sm font-medium" href="#">
+<span class="material-symbols-outlined text-lg">history</span>
+                Logs
+            </a>
+</div>
+</aside>
+<!-- Main Content -->
+<main class="ml-0 md:ml-64 pt-24 px-8 pb-12">
+<!-- Header & Status Section -->
+<header class="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-10">
+<div>
+<h1 class="text-4xl font-bold tracking-tight text-on-surface mb-2">Technical Compliance Kit</h1>
+<p class="text-on-surface-variant text-lg">EHDS Node Validation Engine</p>
+</div>
+<div class="flex items-center gap-4 bg-surface-container-low p-4 rounded-xl">
+<div class="flex flex-col">
+<span class="text-xs text-on-surface-variant font-bold uppercase tracking-wider">Node Status</span>
+<span class="text-lg font-bold text-secondary flex items-center gap-2">
+<span class="w-2.5 h-2.5 bg-secondary rounded-full animate-pulse"></span>
+                        Active-EHDS-L4
+                    </span>
+</div>
+<div class="h-10 w-px bg-outline-variant opacity-20"></div>
+<div class="flex flex-col">
+<span class="text-xs text-on-surface-variant font-bold uppercase tracking-wider">Uptime</span>
+<span class="text-lg font-bold text-on-surface">99.98%</span>
+</div>
+</div>
+</header>
+<!-- Bento Grid Layout -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-8">
+<!-- Progress Section (Left Col) -->
+<section class="lg:col-span-4 flex flex-col gap-6">
+<div class="bg-surface-container-lowest p-6 rounded-xl shadow-[0px_12px_32px_rgba(21,28,39,0.04)]">
+<h3 class="text-sm font-bold text-on-surface uppercase tracking-widest mb-6">Test Suite Progress</h3>
+<div class="space-y-8">
+<div>
+<div class="flex justify-between text-sm mb-2">
+<span class="font-medium text-on-surface">Schema Validation</span>
+<span class="text-secondary font-bold">100%</span>
+</div>
+<div class="w-full h-2 bg-surface-container rounded-full overflow-hidden">
+<div class="w-full h-full bg-secondary"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between text-sm mb-2">
+<span class="font-medium text-on-surface">Handshake Protocol</span>
+<span class="text-primary font-bold">85%</span>
+</div>
+<div class="w-full h-2 bg-surface-container rounded-full overflow-hidden">
+<div class="w-[85%] h-full bg-primary"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between text-sm mb-2">
+<span class="font-medium text-on-surface">Identity Assertion</span>
+<span class="text-tertiary font-bold">40%</span>
+</div>
+<div class="w-full h-2 bg-surface-container rounded-full overflow-hidden">
+<div class="w-[40%] h-full bg-tertiary"></div>
+</div>
+</div>
+</div>
+<button class="mt-10 w-full py-4 bg-surface-container-high hover:bg-surface-variant transition-all text-on-surface font-bold rounded-xl flex items-center justify-center gap-2">
+<span class="material-symbols-outlined">play_circle</span>
+                        Run Full Suite
+                    </button>
+</div>
+<div class="bg-gradient-to-br from-blue-900 to-blue-950 p-6 rounded-xl text-white">
+<h3 class="text-xs font-bold uppercase tracking-widest opacity-60 mb-4">Node Identity</h3>
+<div class="flex items-center gap-4 mb-6">
+<div class="w-12 h-12 bg-white/10 rounded-lg flex items-center justify-center backdrop-blur-md">
+<span class="material-symbols-outlined">account_balance</span>
+</div>
+<div>
+<p class="font-bold">Charité Berlin v2.1</p>
+<p class="text-xs opacity-60">ID: DE-3392-TCK-X</p>
+</div>
+</div>
+<div class="space-y-3">
+<div class="flex justify-between text-sm">
+<span class="opacity-60">Security Level</span>
+<span class="font-mono text-secondary-fixed">Class-A</span>
+</div>
+<div class="flex justify-between text-sm">
+<span class="opacity-60">Last Sync</span>
+<span class="font-mono">2m ago</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Specs Viewer (Right Col) -->
+<section class="lg:col-span-8">
+<div class="bg-surface-container-low rounded-xl overflow-hidden h-full flex flex-col">
+<div class="px-6 py-4 bg-surface-container-high border-b border-outline-variant/10 flex justify-between items-center">
+<div class="flex gap-4">
+<button class="text-sm font-bold text-primary px-3 py-1 bg-white rounded-md shadow-sm">spec.json</button>
+<button class="text-sm font-medium text-on-surface-variant hover:text-on-surface px-3 py-1">config.yaml</button>
+<button class="text-sm font-medium text-on-surface-variant hover:text-on-surface px-3 py-1">auth.proto</button>
+</div>
+<button class="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors">content_copy</button>
+</div>
+<div class="p-6 bg-on-background h-full overflow-auto font-mono text-sm leading-relaxed">
+<div class="text-blue-400">
+                            {<br/>
+                              <span class="text-secondary-fixed">"node_id"</span>: <span class="text-tertiary-fixed">"ehds-de-node-01"</span>,<br/>
+                              <span class="text-secondary-fixed">"compliance_tier"</span>: <span class="text-tertiary-fixed">"platinum"</span>,<br/>
+                              <span class="text-secondary-fixed">"schema_version"</span>: <span class="text-tertiary-fixed">"1.4.0-rc2"</span>,<br/>
+                              <span class="text-secondary-fixed">"protocols"</span>: [<br/>
+                                <span class="text-tertiary-fixed">"TLS_1.3"</span>,<br/>
+                                <span class="text-tertiary-fixed">"FHIR_R4"</span>,<br/>
+                                <span class="text-tertiary-fixed">"OMOP_CDM_v5.4"</span><br/>
+                              ],<br/>
+                              <span class="text-secondary-fixed">"security"</span>: {<br/>
+                                <span class="text-secondary-fixed">"encryption"</span>: <span class="text-tertiary-fixed">"AES-256-GCM"</span>,<br/>
+                                <span class="text-secondary-fixed">"auth"</span>: <span class="text-tertiary-fixed">"OAuth2_PKCE"</span><br/>
+                              }<br/>
+                            }
+                        </div>
+</div>
+</div>
+</section>
+</div>
+<!-- Detailed Test Results -->
+<section class="bg-surface-container-low rounded-2xl overflow-hidden">
+<div class="p-6">
+<h2 class="text-xl font-bold text-on-surface mb-6">Detailed Test Execution Log</h2>
+<div class="overflow-x-auto">
+<table class="w-full text-left border-separate border-spacing-y-2">
+<thead>
+<tr class="text-xs text-on-surface-variant font-bold uppercase tracking-widest">
+<th class="pb-4 px-4">Test ID</th>
+<th class="pb-4 px-4">Component</th>
+<th class="pb-4 px-4">Result</th>
+<th class="pb-4 px-4">Latency</th>
+<th class="pb-4 px-4">Artifacts</th>
+<th class="pb-4 px-4 text-right">Action</th>
+</tr>
+</thead>
+<tbody class="space-y-4">
+<tr class="bg-surface-container-lowest group hover:bg-white transition-all">
+<td class="py-4 px-4 rounded-l-xl">
+<span class="font-mono text-xs text-on-surface">TCK-SC-001</span>
+</td>
+<td class="py-4 px-4">
+<span class="text-sm font-medium">OMOP Schema Verification</span>
+</td>
+<td class="py-4 px-4">
+<span class="px-3 py-1 rounded-full bg-secondary-container/20 text-secondary text-xs font-bold flex items-center w-fit gap-1">
+<span class="material-symbols-outlined text-[14px]">check_circle</span>
+                                        PASSED
+                                    </span>
+</td>
+<td class="py-4 px-4">
+<span class="text-sm font-mono text-on-surface-variant">12ms</span>
+</td>
+<td class="py-4 px-4 text-primary">
+<span class="material-symbols-outlined cursor-pointer hover:scale-110 transition-transform">description</span>
+</td>
+<td class="py-4 px-4 rounded-r-xl text-right">
+<button class="text-sm font-bold text-primary opacity-0 group-hover:opacity-100 transition-opacity">Retry</button>
+</td>
+</tr>
+<tr class="bg-surface-container-lowest group hover:bg-white transition-all">
+<td class="py-4 px-4 rounded-l-xl">
+<span class="font-mono text-xs text-on-surface">TCK-HS-042</span>
+</td>
+<td class="py-4 px-4">
+<span class="text-sm font-medium">mTLS Handshake Exchange</span>
+</td>
+<td class="py-4 px-4">
+<span class="px-3 py-1 rounded-full bg-secondary-container/20 text-secondary text-xs font-bold flex items-center w-fit gap-1">
+<span class="material-symbols-outlined text-[14px]">check_circle</span>
+                                        PASSED
+                                    </span>
+</td>
+<td class="py-4 px-4">
+<span class="text-sm font-mono text-on-surface-variant">184ms</span>
+</td>
+<td class="py-4 px-4 text-primary">
+<span class="material-symbols-outlined cursor-pointer hover:scale-110 transition-transform">lock</span>
+</td>
+<td class="py-4 px-4 rounded-r-xl text-right">
+<button class="text-sm font-bold text-primary opacity-0 group-hover:opacity-100 transition-opacity">Retry</button>
+</td>
+</tr>
+<tr class="bg-surface-container-lowest group hover:bg-white transition-all">
+<td class="py-4 px-4 rounded-l-xl border-l-4 border-error">
+<span class="font-mono text-xs text-on-surface">TCK-ID-009</span>
+</td>
+<td class="py-4 px-4">
+<span class="text-sm font-medium">Federated Identity Assert</span>
+</td>
+<td class="py-4 px-4">
+<span class="px-3 py-1 rounded-full bg-error-container/20 text-error text-xs font-bold flex items-center w-fit gap-1">
+<span class="material-symbols-outlined text-[14px]">error</span>
+                                        FAILED
+                                    </span>
+</td>
+<td class="py-4 px-4">
+<span class="text-sm font-mono text-on-surface-variant">2.1s</span>
+</td>
+<td class="py-4 px-4 text-error">
+<span class="material-symbols-outlined cursor-pointer hover:scale-110 transition-transform">bug_report</span>
+</td>
+<td class="py-4 px-4 rounded-r-xl text-right">
+<button class="text-sm font-bold text-primary opacity-0 group-hover:opacity-100 transition-opacity">Retry</button>
+</td>
+</tr>
+<tr class="bg-surface-container-lowest group hover:bg-white transition-all">
+<td class="py-4 px-4 rounded-l-xl">
+<span class="font-mono text-xs text-on-surface">TCK-EN-211</span>
+</td>
+<td class="py-4 px-4">
+<span class="text-sm font-medium">At-Rest Encryption Check</span>
+</td>
+<td class="py-4 px-4">
+<span class="px-3 py-1 rounded-full bg-surface-container-high text-on-surface-variant text-xs font-bold flex items-center w-fit gap-1">
+<span class="material-symbols-outlined text-[14px]">pending</span>
+                                        PENDING
+                                    </span>
+</td>
+<td class="py-4 px-4">
+<span class="text-sm font-mono text-on-surface-variant">--</span>
+</td>
+<td class="py-4 px-4 text-slate-400">
+<span class="material-symbols-outlined">draft</span>
+</td>
+<td class="py-4 px-4 rounded-r-xl text-right">
+<button class="text-sm font-bold text-primary opacity-0 group-hover:opacity-100 transition-opacity">Force Run</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</section>
+</main>
+<!-- Mobile Bottom Navigation -->
+<nav class="md:hidden fixed bottom-0 w-full bg-white/90 backdrop-blur-lg flex justify-around items-center py-4 px-2 shadow-[0_-4px_20px_rgba(0,0,0,0.05)] z-50">
+<div class="flex flex-col items-center text-slate-400">
+<span class="material-symbols-outlined">gavel</span>
+<span class="text-[10px] font-bold mt-1">Compliance</span>
+</div>
+<div class="flex flex-col items-center text-blue-700">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">security</span>
+<span class="text-[10px] font-bold mt-1">TCK</span>
+</div>
+<div class="flex flex-col items-center text-slate-400">
+<span class="material-symbols-outlined">menu_book</span>
+<span class="text-[10px] font-bold mt-1">Catalog</span>
+</div>
+<div class="flex flex-col items-center text-slate-400">
+<span class="material-symbols-outlined">leaderboard</span>
+<span class="text-[10px] font-bold mt-1">Analytics</span>
+</div>
+</nav>
+</body></html>
