@@ -86,19 +86,9 @@ function MetricCard({
   sub?: string;
 }) {
   return (
-    <div className="surface-card relative p-5 pr-16 flex flex-col gap-3 border border-[var(--border)]">
-      {/* Icon is absolutely pinned to top-right so it never drifts when the
-          card stretches (e.g. when only one card has a subtitle like
-          "Synthea cohort"). */}
-      <div className="absolute top-4 right-4">
-        {isOrb ? (
-          <div className="metric-orb">{icon}</div>
-        ) : (
-          <div className="icon-orb">{icon}</div>
-        )}
-      </div>
-      <div>
-        <p className="section-label mb-1">{label}</p>
+    <div className="surface-card p-5 flex items-start justify-between gap-3 border border-[var(--border)]">
+      <div className="min-w-0 flex-1">
+        <p className="section-label mb-1 break-words">{label}</p>
         <p className="text-3xl font-black text-[var(--text-primary)] leading-none tracking-tight">
           {value != null ? value.toLocaleString() : "—"}
         </p>
@@ -106,6 +96,11 @@ function MetricCard({
           <p className="text-xs text-[var(--text-secondary)] mt-1">{sub}</p>
         )}
       </div>
+      {isOrb ? (
+        <div className="metric-orb">{icon}</div>
+      ) : (
+        <div className="icon-orb">{icon}</div>
+      )}
     </div>
   );
 }
