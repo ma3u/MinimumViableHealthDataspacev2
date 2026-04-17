@@ -18,6 +18,7 @@ import {
   clearDemoPersona,
 } from "@/lib/use-demo-persona";
 import { useTabSession, markSessionSwitch } from "@/lib/use-tab-session";
+import { BuildInfo } from "@/components/BuildInfo";
 
 /** Badge colours per role code — uses semantic CSS tokens, adapts to light/dark. */
 const ROLE_BADGE: Record<string, string> = {
@@ -251,6 +252,7 @@ export default function UserMenu() {
                   );
                 })}
               </div>
+              <BuildInfo />
             </div>
           )}
         </div>
@@ -324,6 +326,7 @@ export default function UserMenu() {
                 All users &amp; details
               </a>
             </div>
+            <BuildInfo />
           </div>
         )}
       </div>
@@ -515,6 +518,8 @@ export default function UserMenu() {
               Sign out
             </button>
           </div>
+
+          <BuildInfo />
         </div>
       )}
     </div>
