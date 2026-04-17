@@ -1,11 +1,37 @@
 /** @type {import('next').NextConfig} */
+const { execSync } = require("child_process");
+const pkg = require("./package.json");
+
 const isStaticExport =
   process.env.NEXT_PUBLIC_STATIC_EXPORT === "true" ||
   (!!process.env.GITHUB_ACTIONS &&
     process.env.NEXT_PUBLIC_STATIC_EXPORT !== "false");
 const isDocker = !!process.env.DOCKER_BUILD;
 
+function safeExec(cmd) {
+  try {
+    return execSync(cmd, { stdio: ["ignore", "pipe", "ignore"] })
+      .toString()
+      .trim();
+  } catch {
+    return "";
+  }
+}
+const buildSha =
+  process.env.BUILD_SHA || safeExec("git rev-parse --short HEAD");
+const buildTime = process.env.BUILD_TIME || new Date().toISOString();
+const buildChannel = process.env.BUILD_CHANNEL || "local";
+
 const nextConfig = {
+  env: {
+    NEXT_PUBLIC_APP_VERSION: pkg.version,
+    NEXT_PUBLIC_BUILD_SHA: buildSha,
+    NEXT_PUBLIC_BUILD_TIME: buildTime,
+    NEXT_PUBLIC_BUILD_CHANNEL: buildChannel,
+    NEXT_PUBLIC_REPO_URL:
+      process.env.NEXT_PUBLIC_REPO_URL ||
+      "https://github.com/ma3u/MinimumViableHealthDataspacev2",
+  },
   // Suppress X-Powered-By header (OWASP A05 — security misconfiguration)
   poweredByHeader: false,
   // Static export for GitHub Pages, standalone for Docker, default for dev

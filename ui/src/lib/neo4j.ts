@@ -34,6 +34,34 @@ export function getDriver(): Driver {
   return driver;
 }
 
+// Recursively convert Neo4j temporal types (Date, DateTime, Time, etc.) and
+// Integer objects to JSON-safe primitives. React cannot render objects with
+// {year, month, day} shape as children, so unconverted Date values crash the
+// client with "Minified React error #31".
+function normalizeNeo4jValue(v: unknown): unknown {
+  if (v === null || v === undefined) return v;
+  if (Array.isArray(v)) return v.map(normalizeNeo4jValue);
+  if (typeof v !== "object") return v;
+  if (
+    neo4j.isDate(v as never) ||
+    neo4j.isDateTime(v as never) ||
+    neo4j.isLocalDateTime(v as never) ||
+    neo4j.isTime(v as never) ||
+    neo4j.isLocalTime(v as never) ||
+    neo4j.isDuration(v as never)
+  ) {
+    return (v as { toString(): string }).toString();
+  }
+  if (neo4j.isInt(v as never)) {
+    return (v as { toNumber(): number }).toNumber();
+  }
+  const out: Record<string, unknown> = {};
+  for (const [k, val] of Object.entries(v as Record<string, unknown>)) {
+    out[k] = normalizeNeo4jValue(val);
+  }
+  return out;
+}
+
 export async function runQuery<T>(
   cypher: string,
   params: Record<string, unknown> = {},
@@ -41,7 +69,7 @@ export async function runQuery<T>(
   const session = getDriver().session();
   try {
     const result = await session.run(cypher, params);
-    return result.records.map((r) => r.toObject() as T);
+    return result.records.map((r) => normalizeNeo4jValue(r.toObject()) as T);
   } finally {
     await session.close();
   }

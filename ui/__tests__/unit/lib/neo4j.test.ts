@@ -13,12 +13,20 @@ vi.mock("neo4j-driver", () => {
     session: vi.fn(() => mockSession),
     close: vi.fn(),
   };
+  const falseGuard = vi.fn(() => false);
   return {
     default: {
       driver: vi.fn(() => mockDriver),
       auth: {
         basic: vi.fn((user: string, pass: string) => ({ user, pass })),
       },
+      isDate: falseGuard,
+      isDateTime: falseGuard,
+      isLocalDateTime: falseGuard,
+      isTime: falseGuard,
+      isLocalTime: falseGuard,
+      isDuration: falseGuard,
+      isInt: falseGuard,
     },
     __mockDriver: mockDriver,
     __mockSession: mockSession,
