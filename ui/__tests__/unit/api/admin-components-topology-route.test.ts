@@ -24,6 +24,11 @@ vi.mock("@/lib/edc", () => ({
   },
 }));
 
+const mockRunQuery = vi.fn();
+vi.mock("@/lib/neo4j", () => ({
+  runQuery: (...args: unknown[]) => mockRunQuery(...args),
+}));
+
 import { GET } from "@/app/api/admin/components/topology/route";
 
 /* ── Docker mock helpers ── */
@@ -246,6 +251,9 @@ beforeEach(() => {
   vi.clearAllMocks();
   vi.spyOn(Date, "now").mockReturnValue(NOW);
   vi.spyOn(console, "warn").mockImplementation(() => {});
+  // Default: Neo4j fallback returns no participants so empty-case assertions
+  // remain valid. Tests that need seeded fallback override this.
+  mockRunQuery.mockResolvedValue([]);
 
   // Default: participants available
   mockTenant.mockImplementation((path: string) => {

@@ -1,7 +1,7 @@
 "use client";
 
 import { fetchApi } from "@/lib/api";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Activity,
   Heart,
@@ -157,6 +157,42 @@ export default function PatientPage() {
 
   const selectedPatient = patients.find((p) => p.id === selected);
 
+  /* Group timeline entries by year+month, newest first. Events within each
+     month are also sorted newest first so the reader scans most recent → oldest. */
+  const timelineGroups = useMemo(() => {
+    const dated = timeline.filter((e) => !!e.date);
+    const undated = timeline.filter((e) => !e.date);
+    dated.sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0));
+
+    const groups: { key: string; label: string; items: TimelineEntry[] }[] = [];
+    for (const entry of dated) {
+      const d = new Date(entry.date);
+      if (Number.isNaN(d.getTime())) continue;
+      const key = `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(
+        2,
+        "0",
+      )}`;
+      const existing = groups.find((g) => g.key === key);
+      if (existing) {
+        existing.items.push(entry);
+      } else {
+        groups.push({
+          key,
+          label: d.toLocaleString("en-US", {
+            month: "long",
+            year: "numeric",
+            timeZone: "UTC",
+          }),
+          items: [entry],
+        });
+      }
+    }
+    if (undated.length) {
+      groups.push({ key: "undated", label: "Undated", items: undated });
+    }
+    return groups;
+  }, [timeline]);
+
   return (
     <div className="min-h-screen bg-[var(--bg)]">
       <div className="max-w-4xl mx-auto px-6 py-10">
@@ -285,58 +321,77 @@ export default function PatientPage() {
               </p>
             )}
 
-            {/* Clinical timeline — Stitch activity-timeline pattern */}
+            {/* Clinical timeline — grouped by year+month, newest first */}
             {timeline.length > 0 && (
               <div>
-                <p className="section-label mb-4">Clinical timeline</p>
-                <ol className="activity-timeline space-y-5 pl-8">
-                  {timeline.map((e, i) => {
-                    const token = FHIR_TYPE_TOKENS[e.fhirType];
-                    return (
-                      <li key={i} className="relative">
-                        {/* Timeline dot */}
-                        <span
-                          className="absolute -left-[1.75rem] top-1 w-3.5 h-3.5 rounded-full border-2 border-[var(--surface-card)] z-10"
-                          style={{
-                            background: token?.text ?? "var(--text-secondary)",
-                          }}
-                        />
-                        <div className="surface-card p-4 border border-[var(--border)] hover:shadow-md transition-shadow">
-                          <div className="flex items-start justify-between gap-3 mb-1">
-                            <div className="flex items-center gap-2">
-                              {/* FHIR type badge */}
-                              <span
-                                className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full"
-                                style={{
-                                  color: token?.text ?? "var(--text-secondary)",
-                                  background: token?.bg ?? "var(--surface-2)",
-                                }}
-                              >
-                                {token?.icon}
-                                {e.fhirType}
-                              </span>
-                              <span className="text-xs text-[var(--text-secondary)]">
-                                {e.date ?? "—"}
-                              </span>
+                <div className="flex items-baseline justify-between mb-4">
+                  <p className="section-label">Clinical timeline</p>
+                  <p className="text-xs text-[var(--text-secondary)]">
+                    Newest first
+                  </p>
+                </div>
+                {timelineGroups.map((group) => (
+                  <section key={group.key} className="mb-6 last:mb-0">
+                    <h3 className="text-sm font-bold text-[var(--text-primary)] mb-3 pb-1 border-b border-[var(--border)] uppercase tracking-wider">
+                      {group.label}
+                      <span className="ml-2 text-xs font-normal text-[var(--text-secondary)] normal-case tracking-normal">
+                        {group.items.length}{" "}
+                        {group.items.length === 1 ? "event" : "events"}
+                      </span>
+                    </h3>
+                    <ol className="activity-timeline space-y-5 pl-8">
+                      {group.items.map((e, i) => {
+                        const token = FHIR_TYPE_TOKENS[e.fhirType];
+                        return (
+                          <li key={`${group.key}-${i}`} className="relative">
+                            {/* Timeline dot */}
+                            <span
+                              className="absolute -left-[1.75rem] top-1 w-3.5 h-3.5 rounded-full border-2 border-[var(--surface-card)] z-10"
+                              style={{
+                                background:
+                                  token?.text ?? "var(--text-secondary)",
+                              }}
+                            />
+                            <div className="surface-card p-4 border border-[var(--border)] hover:shadow-md transition-shadow">
+                              <div className="flex items-start justify-between gap-3 mb-1">
+                                <div className="flex items-center gap-2">
+                                  {/* FHIR type badge */}
+                                  <span
+                                    className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full"
+                                    style={{
+                                      color:
+                                        token?.text ?? "var(--text-secondary)",
+                                      background:
+                                        token?.bg ?? "var(--surface-2)",
+                                    }}
+                                  >
+                                    {token?.icon}
+                                    {e.fhirType}
+                                  </span>
+                                  <span className="text-xs text-[var(--text-secondary)]">
+                                    {e.date ?? "—"}
+                                  </span>
+                                </div>
+                              </div>
+                              <p className="text-sm font-medium text-[var(--text-primary)]">
+                                {e.display || (
+                                  <span className="font-mono text-xs text-[var(--text-secondary)]">
+                                    {e.fhirId}
+                                  </span>
+                                )}
+                              </p>
+                              {e.omopType && (
+                                <p className="text-xs text-[var(--layer4-text)] mt-1">
+                                  ↳ OMOP {e.omopType}: {e.omopId}
+                                </p>
+                              )}
                             </div>
-                          </div>
-                          <p className="text-sm font-medium text-[var(--text-primary)]">
-                            {e.display || (
-                              <span className="font-mono text-xs text-[var(--text-secondary)]">
-                                {e.fhirId}
-                              </span>
-                            )}
-                          </p>
-                          {e.omopType && (
-                            <p className="text-xs text-[var(--layer4-text)] mt-1">
-                              ↳ OMOP {e.omopType}: {e.omopId}
-                            </p>
-                          )}
-                        </div>
-                      </li>
-                    );
-                  })}
-                </ol>
+                          </li>
+                        );
+                      })}
+                    </ol>
+                  </section>
+                ))}
               </div>
             )}
           </>
