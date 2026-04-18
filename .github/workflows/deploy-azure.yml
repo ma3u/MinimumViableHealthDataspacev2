@@ -37,9 +37,14 @@ jobs:
         run: az acr login --name ${{ env.ACR_NAME }}
 
       # ── Build custom images (amd64) ──────────────────────────
+      # BUILD_CHANNEL=release so the Azure demo never shows "+local" in the
+      # build-info badge. BUILD_SHA + BUILD_TIME feed the commit link.
       - name: Build & push UI image
         run: |
           docker buildx build --platform linux/amd64 \
+            --build-arg BUILD_CHANNEL=release \
+            --build-arg BUILD_SHA=${{ github.sha }} \
+            --build-arg BUILD_TIME=$(date -u +%Y-%m-%dT%H:%M:%SZ) \
             -t ${{ env.ACR_LOGIN_SERVER }}/mvhd-ui:${{ github.sha }} \
             -t ${{ env.ACR_LOGIN_SERVER }}/mvhd-ui:latest \
             --push ./ui
