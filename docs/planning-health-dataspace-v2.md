@@ -3556,31 +3556,136 @@ See [ADR-019: GDS + APOC + Azure AI Foundry GraphRAG](ADRs/ADR-019-gds-apoc-azur
 
 ---
 
+### Phase 26: Cross-Participant Dataset Discovery
+
+**Goal:** Answer dataspace-wide natural-language questions like _"Find all diabetes datasets across German hospitals with DataQualityLabelCredential"_ by crawling remote participants' DSP catalogs, mirroring their HealthDCAT-AP datasets into our Neo4j graph as `source: "federated"` nodes, and extending the existing 4-tier NLQ resolver with L1 × L2 × L5 templates. Baseline single-participant queries stay unchanged.
+
+**Why now:**
+
+- Issue [#8](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/8) surfaces the gap: `getSpeDrivers()` in `services/neo4j-proxy/src/index.ts` only knows about SPE-1 + SPE-2; there is no path from a question to an unknown participant's catalog.
+- Phase 25 (ADR-019) delivers embeddings and vector indexes, but those only help if remote datasets are actually present in the graph. Phase 26 supplies the nodes.
+- EHDS Art. 50–51 transparency obligations require that research discovery happens against a consented, crawled catalog — not via ad-hoc human-mediated contact.
+
+See [ADR-020: Cross-Participant Dataset Discovery](ADRs/ADR-020-cross-participant-dataset-discovery.md) (Accepted) for the full design and the nine resolved decisions.
+
+Built on Eclipse EDC v0.16.0 and `org.eclipse.edc:federated-catalog-core:0.16.0` (latest stable, 2026-02-19). We do **not** wait for or depend on XFSC FACIS DCM.
+
+#### 26a: Dynamic participant directory ⏳
+
+- `:Participant` nodes carry `source` (`dcp` | `business-wallet` | `private-wallet` | `seed`) and `walletType` (`business` | `private`). The crawler reads the live Neo4j list, not a static YAML.
+- New Cypher file `neo4j/participant-source-init.cypher` augments the existing 5 demo participants with `source: "seed"` + `walletType: "business"` so the first crawler run has targets.
+- New admin page `ui/src/app/admin/participants/page.tsx` — CRUD over `:Participant`, admin-only. Add/remove wallets without a restart.
+- New API routes `GET|POST|DELETE /api/admin/participants`, `EDC_ADMIN` role only.
+- DCP discovery loop: if `DCP_DISCOVERY_URL` set, a background tick in neo4j-proxy pulls the trust-anchor and MERGEs `:Participant {source: "dcp"}` entries; idempotent, re-run safe.
+- `jad/federated-targets.yaml` retained only as a bootstrap seed; it is loaded once and never polled. Future onboarding happens through the admin page or DCP.
+
+#### 26b: Catalog crawler ACA job ⏳
+
+- New service `services/catalog-crawler/` (Java 21 + `org.eclipse.edc:federated-catalog-core:0.16.0`).
+- Reads target list from Neo4j: `MATCH (p:Participant) WHERE p.source IN ['dcp','business-wallet','private-wallet','seed'] AND p.dspCatalogUrl IS NOT NULL RETURN p`.
+- Signs DSP catalog requests with a **dedicated crawler DID** `did:web:ehds.mabu.red:crawler` (mint key pair in a new `scripts/azure/11-crawler-did.sh`). Crawler has discovery rights only; contract negotiation uses the caller's DID.
+- Publishes raw JSON-LD to NATS subject `dataspace.catalog.raw` with payload `{ participantDid, fetchedAt, catalog }`.
+- Deployed as ACA job `mvhd-catalog-crawler` with `--trigger-type Schedule --cron-expression "*/5 * * * *"` (5-min refresh, demo pace). Overridable via `CRAWL_INTERVAL`.
+- Rate limiting: max 1 concurrent request per participant, 10 s timeout, exponential backoff 1→2→4 s with 3 retries, circuit-breaker trips after 5 consecutive failures (closed again after 5 min).
+- `.github/workflows/catalog-crawler.yml` wraps the build + deploy (CI-SP pattern per project memory `project_aca_job_write_via_ci`).
+- **Gotchas:** DSP responses can exceed 5 MB → stream to NATS, don't buffer. Participants returning 401/403 because we have no VC do not count as errors — audit, don't fail.
+
+#### 26c: Catalog enricher service ⏳
+
+- New service `services/catalog-enricher/` (Python 3.12-slim, `neo4j==5.23.0`, `nats-py==2.7.0`, pydantic).
+- NATS durable consumer (name `enricher`) on subject `dataspace.catalog.raw`. Replays unacknowledged messages on restart — no work lost.
+- Maps each `dcat:Dataset` into HealthDCAT-AP per ADR-003; produces idempotent `MERGE`-only Cypher against `mvhd-neo4j:7687`.
+- Writes `:HealthDataset {source: "federated", publisherDid, lastSeenAt}`, upserts the publishing `:Participant` if missing (`walletType` derived from DCP or defaulted to `business`), stores ODRL policies verbatim as `:OdrlPolicy` nodes.
+- Emits audit `:CatalogEnrichmentEvent {ts, participantDid, datasetsUpserted, themesUnknown}` per catalog.
+- Prometheus `/metrics` on `:9464`: `enricher_messages_total`, `enricher_merge_seconds`, `enricher_unknown_theme_total{publisher=…}`.
+- Deployed as ACA container app `mvhd-catalog-enricher` — 0.25 vCPU / 0.5 GiB, min 1 max 1 replica. Script: `scripts/azure/12-catalog-enricher.sh`. Workflow: `.github/workflows/catalog-enricher.yml`.
+- **Not a crawler, not a policy engine, not a query path** — those concerns live elsewhere (see ADR-020 enricher spec).
+
+#### 26d: NLQ template extensions + glossary ⏳
+
+- Three new templates in `services/neo4j-proxy/src/index.ts` around `QUERY_TEMPLATES` (near `:1074`):
+  1. `federated_dataset_search` — "find diabetes datasets across German hospitals"
+  2. `participant_count_by_theme` — "how many hospitals offer oncology datasets?"
+  3. `dataset_with_credential` — "find datasets with DataQualityLabelCredential"
+- Hand-curated glossary `neo4j/nlq-glossary.cypher` — ≤100 entries v1. Maps common NL terms → SNOMED / ICD-10 / ISO-2 country codes. Reviewed in PR like any schema change.
+- Extend `llmText2Cypher()` schema context (`:1301–1421`) to include `:HealthDataset {source: "federated", publisherDid, …}` and `:Participant {walletType, source}` so LLM-generated Cypher scopes correctly.
+
+#### 26e: Audit + dual-side k-anonymity + dual-side ODRL ⏳
+
+- Extend `:QueryAuditEvent` with `federated: boolean`, `contributors: [participantDid]`, `aggregateSuppressed: boolean`, `suppressionReason: string | null`.
+- **k-anonymity (both sides enforced):** suppress any per-participant `count < MIN_COHORT_SIZE` (default 5). If **any** contributor is suppressed, suppress the global aggregate too. Response carries `{ aggregateSuppressed: true, reason: "contributor_k_violation" }`.
+- **ODRL (both sides enforced):** publisher's ODRL policy is evaluated against the caller's VCs; caller's own `odrlScope` is evaluated against the dataset. Both must pass for a row to surface.
+- Extend `/admin/audit` UI — add columns for federated flag + expandable contributor DIDs; filter toggle for "federated only".
+- Log the crawler DID on every federated query so transparency reports show "who we asked" alongside "what we answered".
+
+#### 26f: Playwright coverage — J730–J749 ⏳
+
+New spec `ui/__tests__/e2e/journeys/32-federated-nlq.spec.ts`:
+
+- **Discovery path:**
+  - J730 `/admin/participants` lists ≥5 rows, each with `source` + `walletType` badges
+  - J731 example NLQ "find diabetes datasets across German hospitals" → `method: "template"`, ≥1 row with `source=federated` + country=`DE`
+  - J732 glossary rollup: `"german"` resolves to `iso2: "DE"`
+  - J733 `/admin/audit?federated=true` shows ≥1 event with contributor DIDs
+  - J734 crawler resilience: a target returning 500 logs a failure but does not break the next cycle
+- **Discovery → negotiation:**
+  - J735 click result row → `/catalog/[datasetId]?source=federated` renders publisher policy
+  - J736 eligibility badge correct for caller's VCs
+  - J737 "Request contract" button fires `POST /api/negotiate`
+  - J738 negotiation appears in `/tasks` with state `REQUESTED`
+- **Azure live stack (J745–J749):** run against `https://ehds.mabu.red` once the crawler + enricher are deployed.
+
+#### 26g: User journey + docs + observability ⏳
+
+- New persona journey `docs/persona-journeys/data-user-federated-discovery.md` — the six-step loop in ADR-020 (discover → inspect offer → check eligibility → start negotiation → track/sign → fetch).
+- New `docs/architecture/federation.md` — sequence diagram (crawler → NATS → enricher → Neo4j → NLQ → /catalog → /negotiate → /tasks → dataplane), plus the 5-min freshness SLA and the both-sides k-anon + ODRL rules.
+- Prometheus wiring: Grafana board `federation-ops` with panels for `crawler_last_success_seconds`, `enricher_unknown_theme_total`, query audit suppression rate.
+- `README.md` "What's new" — screenshot of `/query` answering the issue-#8 example.
+
+**Exit criteria:**
+
+1. Admin can add a new `:Participant` via `/admin/participants` and the next crawl cycle (≤5 min) picks it up automatically — no restart.
+2. `curl https://ehds.mabu.red/api/nlq -d '{"question":"find diabetes datasets across German hospitals"}'` returns ≥2 `:HealthDataset` rows with `source = "federated"` and country = `DE`.
+3. Audit log shows the query with `federated: true` and ≥1 contributor DID other than ours.
+4. Regression: Phase 25 NLQ templates return identical results (no perturbation from federated branch).
+5. k-anonymity: crafted test with a 3-patient cohort on SPE-1 gets `aggregateSuppressed: true, reason: "contributor_k_violation"`.
+6. ODRL: a dataset requiring DQL credential does not surface for a caller without that VC, even if the caller's own `odrlScope` is unbounded.
+7. The discovery → negotiation journey (Playwright J735–J738) completes green against the Azure stack.
+8. Cost: full crawl cycle stays under €0.01 (Azure Files read + NATS intra-env, no egress).
+
+**Deferred to later phases:**
+
+- Approach 2 distributed broadcast — revisit once 30 days of audit log tell us which queries are cold.
+- Semantic query DSP extension proposal to IDSA — only worth raising if operational data shows Approach 1 hits its stale-cache ceiling.
+
+---
+
 ## Architecture Decisions
 
 > **Note:** ADRs are maintained as standalone documents in [`docs/ADRs/`](ADRs/). Click any row below to read the full context, decision, and consequences for each ADR.
 
-| ADR                                                       | Title                                         | Date       | Status     |
-| --------------------------------------------------------- | --------------------------------------------- | ---------- | ---------- |
-| [001](ADRs/ADR-001-postgresql-neo4j-split.md)             | PostgreSQL vs Neo4j Data Storage Split        | 2025-07-24 | Accepted   |
-| [002](ADRs/ADR-002-edc-data-plane-architecture.md)        | EDC Data Plane Architecture                   | 2025-07-24 | Accepted   |
-| [003](ADRs/ADR-003-healthdcat-ap-alignment.md)            | W3C HealthDCAT-AP Alignment                   | 2025-07-24 | Accepted   |
-| [004](ADRs/ADR-004-nextjs-unified-frontend.md)            | Next.js 14 as Unified Frontend                | 2025-07-25 | Accepted   |
-| [005](ADRs/ADR-005-jad-cfm-source-builds.md)              | JAD + CFM Source Builds                       | 2026-03-09 | Accepted   |
-| [006](ADRs/ADR-006-ghcr-image-publishing.md)              | GHCR Image Publishing                         | 2026-03-10 | Accepted   |
-| [007](ADRs/ADR-007-did-web-dsp-negotiation.md)            | DID:web Resolution & DSP Contract Negotiation | 2026-07-08 | Accepted   |
-| [008](ADRs/ADR-008-testing-strategy.md)                   | Comprehensive Testing Strategy                | 2026-03-11 | Accepted   |
-| [009](ADRs/ADR-009-issuerservice-credential-fix.md)       | IssuerService DCP Credential Issuance Fix     | 2026-07-12 | Accepted   |
-| [010](ADRs/ADR-010-wcag-accessibility.md)                 | WCAG 2.2 AA Accessibility Compliance          | 2026-04-01 | Accepted   |
-| [011](ADRs/ADR-011-security-testing.md)                   | Security Penetration Testing Strategy         | 2026-04-01 | Accepted   |
-| [012](ADRs/ADR-012-azure-container-apps.md)               | Azure Container Apps Deployment               | 2026-04-10 | Accepted   |
-| [013](ADRs/ADR-013-simpl-open-alignment.md)               | SIMPL-Open EU Programme Alignment             | 2026-04-05 | Accepted   |
-| [014](ADRs/ADR-014-weekly-demo-reset.md)                  | Weekly Demo Environment Reset                 | 2026-04-12 | Accepted   |
-| [015](ADRs/ADR-015-single-vm-dev-deployment.md)           | Single-VM Dev Deployment (VS Subscription)    | 2026-04-13 | Superseded |
-| [016](ADRs/ADR-016-aca-off-hours-scaledown.md)            | ACA Off-Hours Scale-Down                      | 2026-04-13 | Accepted   |
-| [017](ADRs/ADR-017-persistent-storage-aca.md)             | Persistent Storage for Stateful ACA Services  | 2026-04-14 | Accepted   |
-| [018](ADRs/ADR-018-24x7-workaround-b.md)                  | 24×7 Operation + Postgres-on-ACA Workaround B | 2026-04-14 | Accepted   |
-| [019](ADRs/ADR-019-gds-apoc-azure-ai-foundry-graphrag.md) | GDS + APOC + Azure AI Foundry GraphRAG        | 2026-04-15 | Proposed   |
+| ADR                                                        | Title                                          | Date       | Status     |
+| ---------------------------------------------------------- | ---------------------------------------------- | ---------- | ---------- |
+| [001](ADRs/ADR-001-postgresql-neo4j-split.md)              | PostgreSQL vs Neo4j Data Storage Split         | 2025-07-24 | Accepted   |
+| [002](ADRs/ADR-002-edc-data-plane-architecture.md)         | EDC Data Plane Architecture                    | 2025-07-24 | Accepted   |
+| [003](ADRs/ADR-003-healthdcat-ap-alignment.md)             | W3C HealthDCAT-AP Alignment                    | 2025-07-24 | Accepted   |
+| [004](ADRs/ADR-004-nextjs-unified-frontend.md)             | Next.js 14 as Unified Frontend                 | 2025-07-25 | Accepted   |
+| [005](ADRs/ADR-005-jad-cfm-source-builds.md)               | JAD + CFM Source Builds                        | 2026-03-09 | Accepted   |
+| [006](ADRs/ADR-006-ghcr-image-publishing.md)               | GHCR Image Publishing                          | 2026-03-10 | Accepted   |
+| [007](ADRs/ADR-007-did-web-dsp-negotiation.md)             | DID:web Resolution & DSP Contract Negotiation  | 2026-07-08 | Accepted   |
+| [008](ADRs/ADR-008-testing-strategy.md)                    | Comprehensive Testing Strategy                 | 2026-03-11 | Accepted   |
+| [009](ADRs/ADR-009-issuerservice-credential-fix.md)        | IssuerService DCP Credential Issuance Fix      | 2026-07-12 | Accepted   |
+| [010](ADRs/ADR-010-wcag-accessibility.md)                  | WCAG 2.2 AA Accessibility Compliance           | 2026-04-01 | Accepted   |
+| [011](ADRs/ADR-011-security-testing.md)                    | Security Penetration Testing Strategy          | 2026-04-01 | Accepted   |
+| [012](ADRs/ADR-012-azure-container-apps.md)                | Azure Container Apps Deployment                | 2026-04-10 | Accepted   |
+| [013](ADRs/ADR-013-simpl-open-alignment.md)                | SIMPL-Open EU Programme Alignment              | 2026-04-05 | Accepted   |
+| [014](ADRs/ADR-014-weekly-demo-reset.md)                   | Weekly Demo Environment Reset                  | 2026-04-12 | Accepted   |
+| [015](ADRs/ADR-015-single-vm-dev-deployment.md)            | Single-VM Dev Deployment (VS Subscription)     | 2026-04-13 | Superseded |
+| [016](ADRs/ADR-016-aca-off-hours-scaledown.md)             | ACA Off-Hours Scale-Down                       | 2026-04-13 | Accepted   |
+| [017](ADRs/ADR-017-persistent-storage-aca.md)              | Persistent Storage for Stateful ACA Services   | 2026-04-14 | Accepted   |
+| [018](ADRs/ADR-018-24x7-workaround-b.md)                   | 24×7 Operation + Postgres-on-ACA Workaround B  | 2026-04-14 | Accepted   |
+| [019](ADRs/ADR-019-gds-apoc-azure-ai-foundry-graphrag.md)  | GDS + APOC + Azure AI Foundry GraphRAG         | 2026-04-15 | Proposed   |
+| [020](ADRs/ADR-020-cross-participant-dataset-discovery.md) | Cross-Participant Dataset Discovery (Issue #8) | 2026-04-18 | Accepted   |
 
 > **Note:** The full text of ADR-1 through ADR-9 has been moved into the standalone ADR documents linked in the table above. Click any row to read the full context, decision, and consequences.
 

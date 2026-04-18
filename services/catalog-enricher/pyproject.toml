@@ -1,0 +1,25 @@
+[project]
+name = "catalog-enricher"
+version = "0.1.0"
+description = "Consumes raw DSP catalog JSON-LD from NATS and upserts HealthDCAT-AP nodes into Neo4j"
+requires-python = ">=3.12"
+dependencies = [
+  "nats-py==2.7.0",
+  "neo4j==5.23.0",
+  "pydantic==2.8.2",
+  "prometheus-client==0.21.0",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest==8.3.3",
+  "pytest-asyncio==0.24.0",
+  "ruff==0.6.9",
+]
+
+[tool.ruff]
+line-length = 100
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
