@@ -7,9 +7,15 @@ services:
       - "7687:7687" # Bolt protocol
     environment:
       NEO4J_AUTH: neo4j/healthdataspace
-      NEO4J_PLUGINS: '["apoc", "n10s"]'
-      NEO4J_server_memory_heap_initial__size: 512m
-      NEO4J_server_memory_heap_max__size: 1G
+      # Phase 25 (Issue #13): GDS + APOC-extended for GraphRAG (FastRP,
+      # apoc.path.subgraphAll, apoc.ml.azure.openai.embedding).
+      NEO4J_PLUGINS: '["apoc", "apoc-extended", "graph-data-science", "n10s"]'
+      NEO4J_dbms_security_procedures_unrestricted: "apoc.*,gds.*,n10s.*"
+      NEO4J_dbms_security_procedures_allowlist: "apoc.*,gds.*,n10s.*"
+      # Heap bumped for FastRP + vector-index workloads.
+      NEO4J_server_memory_heap_initial__size: 1G
+      NEO4J_server_memory_heap_max__size: 2G
+      NEO4J_server_memory_pagecache_size: 1G
     volumes:
       - neo4j_data:/data
       - neo4j_logs:/logs
@@ -28,9 +34,11 @@ services:
       - "7688:7687" # Bolt protocol (offset from primary)
     environment:
       NEO4J_AUTH: neo4j/healthdataspace
-      NEO4J_PLUGINS: '["apoc", "n10s"]'
-      NEO4J_server_memory_heap_initial__size: 256m
-      NEO4J_server_memory_heap_max__size: 512m
+      NEO4J_PLUGINS: '["apoc", "apoc-extended", "graph-data-science", "n10s"]'
+      NEO4J_dbms_security_procedures_unrestricted: "apoc.*,gds.*,n10s.*"
+      NEO4J_dbms_security_procedures_allowlist: "apoc.*,gds.*,n10s.*"
+      NEO4J_server_memory_heap_initial__size: 512m
+      NEO4J_server_memory_heap_max__size: 1G
     volumes:
       - neo4j_spe2_data:/data
       - neo4j_spe2_logs:/logs

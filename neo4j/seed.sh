@@ -56,6 +56,27 @@ run_file /seed/seed-trust-center.cypher "trust center"
 run_file /seed/seed-audit-provenance.cypher "audit provenance"
 run_file /seed/seed-compliance-matrix.cypher "compliance matrix"
 
+# Phase 25b (Issue #13): Structural embeddings (FastRP) — always on, no API.
+# Requires the graph-data-science plugin; silently no-ops on installs without
+# it (the CALL gds.version() check below logs a warning so the operator sees
+# the miss, but the rest of the seed still succeeds).
+if cypher-shell -a "$NEO4J_URI" -u "$NEO4J_USER" -p "$NEO4J_PASSWORD" \
+     --non-interactive --format plain \
+     "CALL gds.version() YIELD gdsVersion RETURN gdsVersion;" > /dev/null 2>&1; then
+  run_file /seed/register-embeddings-fastrp.cypher "FastRP structural embeddings"
+else
+  echo ""
+  echo "=== SKIPPED: FastRP embeddings (graph-data-science plugin not loaded) ==="
+  echo "  Install GDS to enable GraphRAG — see docker-compose.yml NEO4J_PLUGINS."
+fi
+
+# Phase 25d (Issue #13): Semantic embeddings via Azure OpenAI — optional.
+# Only runs when AZURE_OPENAI_API_KEY is present in the seed environment; a
+# fresh local install with no API key simply skips this step.
+if [ -n "${AZURE_OPENAI_API_KEY:-}" ] && [ -n "${AZURE_OPENAI_EMBEDDINGS_URL:-}" ]; then
+  run_file /seed/register-embeddings-aoai.cypher "Azure OpenAI semantic embeddings"
+fi
+
 echo ""
 echo "=== Verifying ==="
 cypher-shell -a "$NEO4J_URI" -u "$NEO4J_USER" -p "$NEO4J_PASSWORD" \

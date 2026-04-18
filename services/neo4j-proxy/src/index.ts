@@ -20,6 +20,12 @@ import express, {
 import neo4j, { type Driver, type Session } from "neo4j-driver";
 import pg from "pg";
 import rateLimit from "express-rate-limit";
+import {
+  runGraphRag,
+  type GraphRagTraceStage,
+  type RerankCandidate,
+  type RerankDecision,
+} from "./graphrag.js";
 
 // ---------------------------------------------------------------------------
 // Configuration
@@ -1910,6 +1916,80 @@ async function generateEmbedding(text: string): Promise<number[] | null> {
 }
 
 /**
+ * Phase 25e (Issue #13) — GraphRAG rerank via gpt-5-mini (or any chat model
+ * deployed behind AZURE_OPENAI_GPT4O_URL). Returns { topNodeIds, cypher } or
+ * null if the endpoint is not configured. The model is instructed to return
+ * READ-ONLY Cypher that references `$topIds` as the parameter name for the
+ * selected element ids, so the caller can bind them safely.
+ */
+async function graphRagRerank(
+  question: string,
+  candidates: RerankCandidate[],
+): Promise<RerankDecision | null> {
+  if (!AZURE_OPENAI_GPT4O_URL || !AZURE_OPENAI_API_KEY) return null;
+
+  const candidateBlock = candidates
+    .slice(0, 20)
+    .map(
+      (c, i) =>
+        `${i + 1}. [${c.label}] id=${c.nodeId} score=${c.score.toFixed(3)} :: ${
+          c.text
+        }`,
+    )
+    .join("\n");
+
+  const systemPrompt = `You rerank Neo4j graph nodes for a health-data dataspace.
+Pick the 3-5 most relevant candidates for the user's question and write a READ-ONLY
+Cypher query that (a) returns those candidates with their key properties and
+(b) expands 1 hop of context. The parameter name MUST be $topIds (list of elementId
+strings). Forbidden keywords: CREATE, MERGE, DELETE, SET, REMOVE, DROP, CALL { ...
+any write }. Return ONLY valid JSON of the form:
+{"topNodeIds": ["<elementId>", ...], "cypher": "MATCH (n) WHERE elementId(n) IN $topIds ..."}`;
+
+  try {
+    const resp = await fetch(AZURE_OPENAI_GPT4O_URL, {
+      method: "POST",
+      headers: {
+        "api-key": AZURE_OPENAI_API_KEY,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        messages: [
+          { role: "system", content: systemPrompt },
+          {
+            role: "user",
+            content: `Question: ${question}\n\nCandidates:\n${candidateBlock}`,
+          },
+        ],
+        temperature: 0,
+        max_tokens: 600,
+        response_format: { type: "json_object" },
+      }),
+    });
+    if (!resp.ok) {
+      console.warn(
+        "[graphrag] rerank HTTP",
+        resp.status,
+        await resp.text().catch(() => ""),
+      );
+      return null;
+    }
+    const body = (await resp.json()) as {
+      choices?: [{ message: { content: string } }];
+    };
+    const raw = body.choices?.[0]?.message?.content;
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as RerankDecision;
+    if (!Array.isArray(parsed.topNodeIds) || typeof parsed.cypher !== "string")
+      return null;
+    return parsed;
+  } catch (err) {
+    console.warn("[graphrag] rerank error:", err);
+    return null;
+  }
+}
+
+/**
  * POST /nlq
  * Natural Language Query — translates a question to Cypher and executes it.
  *
@@ -1969,13 +2049,24 @@ app.post("/nlq", async (req: Request, res: Response, next: NextFunction) => {
       }
     }
 
-    // Step 3: Try GraphRAG (vector similarity + graph context)
-    if (!cypher) {
-      const ragResult = await graphRagSearch(question);
+    // Step 3: Try GraphRAG (Phase 25e — vector search + neighbourhood
+    // expansion + optional gpt-5-mini rerank). Returns null unless at least
+    // one vector index is online.
+    let graphragTrace: GraphRagTraceStage[] | undefined;
+    if (!cypher && driver) {
+      const ragResult = await runGraphRag(question, {
+        driver,
+        generateSemanticEmbedding: generateEmbedding,
+        llmRerank:
+          AZURE_OPENAI_GPT4O_URL && AZURE_OPENAI_API_KEY
+            ? graphRagRerank
+            : null,
+      });
       if (ragResult) {
         cypher = ragResult.cypher;
-        params = ragResult.params;
+        params = ragResult.params as Record<string, any>;
         method = "graphrag";
+        graphragTrace = ragResult.trace;
       }
     }
 
@@ -2083,6 +2174,7 @@ app.post("/nlq", async (req: Request, res: Response, next: NextFunction) => {
       results,
       totalRows: results.length,
       odrlEnforced,
+      ...(graphragTrace ? { trace: graphragTrace } : {}),
     });
 
     logTransferEvent("/nlq", "POST", participantId, 200, results.length);
@@ -2122,6 +2214,60 @@ app.get("/nlq/templates", (_req: Request, res: Response) => {
       examplePatterns: t.patterns.map((p) => p.source),
     })),
     llmAvailable: !!(OPENAI_API_KEY || OLLAMA_URL),
+  });
+});
+
+/**
+ * GET /nlq/backend — Phase 25f (Issue #13).
+ * Reports which NLP backend is currently detected from environment so the UI
+ * can render a status badge on /query. Discovery is cheap and synchronous.
+ */
+app.get("/nlq/backend", async (_req: Request, res: Response) => {
+  let vectorIndexes: string[] = [];
+  if (driver) {
+    const session = driver.session({ database: "neo4j" });
+    try {
+      const r = await session.run(
+        `SHOW INDEXES YIELD name, type, state
+         WHERE type = 'VECTOR' AND state = 'ONLINE'
+         RETURN name`,
+      );
+      vectorIndexes = r.records.map((rec) => String(rec.get("name")));
+    } catch {
+      // GDS / vector index not present — leave list empty
+    } finally {
+      await session.close();
+    }
+  }
+
+  let chatBackend: string;
+  if (AZURE_OPENAI_GPT4O_URL && AZURE_OPENAI_API_KEY) {
+    chatBackend = "azure-openai";
+  } else if (OPENAI_API_KEY) {
+    chatBackend = "openai";
+  } else if (OLLAMA_URL) {
+    chatBackend = "ollama";
+  } else if (ANTHROPIC_API_KEY) {
+    chatBackend = "anthropic";
+  } else {
+    chatBackend = "none";
+  }
+
+  const embeddingsBackend =
+    process.env.AZURE_OPENAI_EMBEDDINGS_URL && AZURE_OPENAI_API_KEY
+      ? "azure-openai"
+      : OLLAMA_URL
+        ? "ollama"
+        : OPENAI_API_KEY
+          ? "openai"
+          : "none";
+
+  res.json({
+    chat: chatBackend,
+    embeddings: embeddingsBackend,
+    vectorIndexes,
+    graphragReady: vectorIndexes.length > 0 && embeddingsBackend !== "none",
+    cascade: ["template", "fulltext", "graphrag", "llm", "none"],
   });
 });
 
