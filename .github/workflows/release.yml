@@ -1,0 +1,121 @@
+name: Release
+
+# Auto-publish a GitHub Release whenever `ui/package.json` bumps on main.
+#
+# Triggered on every push to main; no-op unless `ui/package.json` actually
+# changed in the commit range. Avoids the silent drift pattern we hit
+# between v1.4.3 and v1.5.0 where tags got pushed without a corresponding
+# release entry.
+#
+# Release notes are generated from commits since the previous tag. When a
+# tag already exists (e.g. pre-created locally), we skip tag creation and
+# only publish the release.
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - "ui/package.json"
+  workflow_dispatch:
+    inputs:
+      force_version:
+        description: "Force release at this version (e.g. 1.5.0). Leave blank to read from ui/package.json."
+        type: string
+        required: false
+
+permissions:
+  contents: write # create tags + releases
+
+concurrency:
+  group: "release"
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout (full history for tag + notes generation)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Resolve version
+        id: ver
+        run: |
+          if [ -n "${{ inputs.force_version }}" ]; then
+            V="${{ inputs.force_version }}"
+          else
+            V=$(jq -r .version ui/package.json)
+          fi
+          TAG="v${V}"
+          echo "version=${V}"     >> "$GITHUB_OUTPUT"
+          echo "tag=${TAG}"       >> "$GITHUB_OUTPUT"
+          echo "Resolved tag: ${TAG}"
+
+      - name: Skip if release already exists
+        id: check
+        run: |
+          if gh release view "${{ steps.ver.outputs.tag }}" --repo "${{ github.repository }}" >/dev/null 2>&1; then
+            echo "exists=true"  >> "$GITHUB_OUTPUT"
+            echo "Release ${{ steps.ver.outputs.tag }} already exists — nothing to do."
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create git tag if missing
+        if: steps.check.outputs.exists == 'false'
+        run: |
+          TAG="${{ steps.ver.outputs.tag }}"
+          if git rev-parse -q --verify "refs/tags/${TAG}" >/dev/null; then
+            echo "Tag ${TAG} already exists locally — skipping create."
+          else
+            git config user.name  "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git tag -a "${TAG}" -m "Release ${TAG}"
+            git push origin "${TAG}"
+          fi
+
+      - name: Compose release notes from commit log
+        if: steps.check.outputs.exists == 'false'
+        id: notes
+        run: |
+          TAG="${{ steps.ver.outputs.tag }}"
+          # Previous tag to diff against — fall back to the root if none.
+          PREV=$(git tag --sort=-v:refname | grep -v "^${TAG}\$" | head -1 || true)
+          if [ -z "$PREV" ]; then
+            RANGE=""
+            RANGE_LABEL="(initial release)"
+          else
+            RANGE="${PREV}..HEAD"
+            RANGE_LABEL="since ${PREV}"
+          fi
+          {
+            echo "notes<<__NOTES__"
+            echo "Release ${TAG} ${RANGE_LABEL}."
+            echo ""
+            echo "### Changes"
+            echo ""
+            if [ -n "$RANGE" ]; then
+              git log --no-merges --pretty=format:'- %s (%h)' "$RANGE"
+            else
+              git log --no-merges --pretty=format:'- %s (%h)' -20
+            fi
+            echo ""
+            echo ""
+            echo "Full changelog: https://github.com/${{ github.repository }}/compare/${PREV}...${TAG}"
+            echo "__NOTES__"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Create GitHub Release
+        if: steps.check.outputs.exists == 'false'
+        run: |
+          gh release create "${{ steps.ver.outputs.tag }}" \
+            --repo "${{ github.repository }}" \
+            --title "${{ steps.ver.outputs.tag }}" \
+            --notes "${{ steps.notes.outputs.notes }}"
+          echo "Published ${{ steps.ver.outputs.tag }}"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
