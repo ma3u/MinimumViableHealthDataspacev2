@@ -173,15 +173,18 @@ jobs:
             --remove-env-vars AZURE_OPENAI_API_KEY AZURE_OPENAI_EMBEDDINGS_URL \
             -o none || echo "env vars already absent"
 
-      - name: Force seed job to pull fresh :latest image
+      - name: Force seed job to pull fresh :latest image + bump timeout
         if: ${{ !inputs.skip_seed }}
         run: |
           # ACA caches :latest; touching a harmless env var triggers the next
-          # run to re-pull. The SHA below just changes on each workflow run.
+          # run to re-pull. Also bump replica-timeout from the 600 s default —
+          # the extended seed (12 Cypher files + FastRP on a cold GDS runtime)
+          # routinely needs 10-15 min on Consumption SKUs.
           az containerapp job update \
             --name "${{ env.SEED_JOB }}" \
             --resource-group "${{ env.RESOURCE_GROUP }}" \
             --image acrmvhdehds.azurecr.io/mvhd-neo4j-seed:latest \
+            --replica-timeout 3600 \
             --set-env-vars "SEED_DEPLOY_TS=$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
             -o none
 
