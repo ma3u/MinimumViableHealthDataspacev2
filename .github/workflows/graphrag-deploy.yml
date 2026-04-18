@@ -20,6 +20,10 @@ on:
         description: "Skip AI Foundry wiring (assume already done)"
         type: boolean
         default: false
+      skip_seed_build:
+        description: "Skip seed image rebuild — use the existing :latest"
+        type: boolean
+        default: false
       skip_seed:
         description: "Skip seed re-run (FastRP + semantic embeddings)"
         type: boolean
@@ -53,6 +57,34 @@ jobs:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: ACR Login
+        run: az acr login --name acrmvhdehds
+
+      # ── 0. Rebuild mvhd-neo4j-seed image so it bundles the new
+      #      register-embeddings-fastrp.cypher + register-embeddings-aoai.cypher
+      #      + updated seed.sh with the gds.version() probe.
+      - name: Rebuild mvhd-neo4j-seed image
+        if: ${{ !inputs.skip_seed_build }}
+        run: |
+          SEED_DIR=$(mktemp -d)
+          cp neo4j/*.cypher "$SEED_DIR/"
+          cp neo4j/seed.sh "$SEED_DIR/seed.sh"
+          cat > "$SEED_DIR/Dockerfile" <<'DOCKERFILE'
+          FROM neo4j:5-community
+          USER root
+          RUN apt-get update && apt-get install -y --no-install-recommends bash curl jq \
+              && rm -rf /var/lib/apt/lists/*
+          COPY *.cypher /seed/
+          COPY seed.sh /seed/seed.sh
+          RUN chmod +x /seed/seed.sh \
+              && ln -sf /var/lib/neo4j/bin/cypher-shell /usr/local/bin/cypher-shell
+          ENTRYPOINT ["/bin/bash", "/seed/seed.sh"]
+          DOCKERFILE
+          docker buildx build --platform linux/amd64 \
+            -t acrmvhdehds.azurecr.io/mvhd-neo4j-seed:latest \
+            --push "$SEED_DIR"
+          rm -rf "$SEED_DIR"
 
       # ── 1. AI Foundry: embedding model + secrets + proxy env vars ────────
       - name: Wire Azure OpenAI on mvhd-neo4j-proxy
@@ -123,6 +155,18 @@ jobs:
               -o none
             echo "Seed job env updated."
           fi
+
+      - name: Force seed job to pull fresh :latest image
+        if: ${{ !inputs.skip_seed }}
+        run: |
+          # ACA caches :latest; touching a harmless env var triggers the next
+          # run to re-pull. The SHA below just changes on each workflow run.
+          az containerapp job update \
+            --name "${{ env.SEED_JOB }}" \
+            --resource-group "${{ env.RESOURCE_GROUP }}" \
+            --image acrmvhdehds.azurecr.io/mvhd-neo4j-seed:latest \
+            --set-env-vars "SEED_DEPLOY_TS=$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+            -o none
 
       - name: Start seed job
         if: ${{ !inputs.skip_seed }}
