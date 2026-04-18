@@ -1,0 +1,197 @@
+name: FHIR Loader (Azure Neo4j)
+
+# Build and run the mvhd-fhir-loader ACA Job to ingest Synthea FHIR bundles
+# into the Azure Neo4j instance.
+#
+# Bundles (~662 MB of JSON) are gitignored, so when building a fresh image
+# the workflow regenerates them via scripts/generate-synthea.sh. Use
+# skip_build=true to re-use the existing ACR image and only restart the job
+# (idempotent — MERGE upserts resume cleanly after a timeout).
+#
+# Why this lives in CI rather than being run locally:
+#   - Microsoft.App/jobs/write and .../start/action are gated behind a
+#     time-limited PIM role on personal accounts (~1h activation).
+#   - The CI service principal has stable perms for the same operations.
+#   - Keeps the ingestion reproducible across reset cycles.
+
+on:
+  workflow_dispatch:
+    inputs:
+      skip_build:
+        description: "Skip image build — start the existing :latest image"
+        type: boolean
+        default: false
+      population:
+        description: "Synthea patient population size (used when building)"
+        type: string
+        default: "200"
+
+permissions:
+  id-token: write
+  contents: read
+
+concurrency:
+  group: "fhir-loader"
+  cancel-in-progress: false
+
+env:
+  ACR_NAME: acrmvhdehds
+  ACR_LOGIN_SERVER: acrmvhdehds.azurecr.io
+  RESOURCE_GROUP: rg-mvhd-dev
+  ACA_ENV: mvhd-env
+  JOB_NAME: mvhd-fhir-loader
+
+jobs:
+  run-loader:
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Azure Login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Set up Java 21 (Synthea)
+        if: ${{ !inputs.skip_build }}
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - name: Generate Synthea FHIR bundles
+        if: ${{ !inputs.skip_build }}
+        run: |
+          chmod +x scripts/generate-synthea.sh
+          ./scripts/generate-synthea.sh "${{ inputs.population }}"
+          COUNT=$(find neo4j/import/fhir -maxdepth 1 -name '*.json' | wc -l)
+          SIZE=$(du -sh neo4j/import/fhir | awk '{print $1}')
+          echo "Generated ${COUNT} bundles (${SIZE})"
+
+      - name: ACR Login
+        if: ${{ !inputs.skip_build }}
+        run: az acr login --name ${{ env.ACR_NAME }}
+
+      - name: Build & push FHIR loader image
+        if: ${{ !inputs.skip_build }}
+        run: |
+          BUILD_DIR=$(mktemp -d)
+          mkdir -p "${BUILD_DIR}/bundles"
+          cp scripts/load_fhir_neo4j.py "${BUILD_DIR}/load_fhir_neo4j.py"
+          rsync -a --include='*.json' --exclude='*' neo4j/import/fhir/ "${BUILD_DIR}/bundles/"
+
+          cat > "${BUILD_DIR}/Dockerfile" <<'DOCKERFILE'
+          FROM python:3.12-slim
+          RUN pip install --no-cache-dir neo4j==5.23.0
+          WORKDIR /app
+          COPY load_fhir_neo4j.py /app/load_fhir_neo4j.py
+          COPY bundles /app/bundles
+          ENV PYTHONUNBUFFERED=1
+          ENTRYPOINT ["python3", "/app/load_fhir_neo4j.py", "--dir", "/app/bundles"]
+          DOCKERFILE
+
+          docker buildx build --platform linux/amd64 \
+            -t "${{ env.ACR_LOGIN_SERVER }}/${{ env.JOB_NAME }}:latest" \
+            --push "${BUILD_DIR}"
+
+      - name: Create or update ACA Job
+        env:
+          NEO4J_PASSWORD: ${{ secrets.NEO4J_PASSWORD }}
+        run: |
+          ACR_PASSWORD=$(az acr credential show --name "${{ env.ACR_NAME }}" \
+            --query "passwords[0].value" -o tsv)
+          # NEO4J_URI must use the short service name; ACA TCP ingress does
+          # not route Bolt via the *.internal.<domain> FQDN (see ADR-018).
+          NEO4J_URI="bolt://mvhd-neo4j:7687"
+
+          if az containerapp job show --name "${{ env.JOB_NAME }}" \
+               --resource-group "${{ env.RESOURCE_GROUP }}" -o none 2>/dev/null; then
+            echo "Updating existing job ${{ env.JOB_NAME }}..."
+            az containerapp job update \
+              --name "${{ env.JOB_NAME }}" \
+              --resource-group "${{ env.RESOURCE_GROUP }}" \
+              --image "${{ env.ACR_LOGIN_SERVER }}/${{ env.JOB_NAME }}:latest" \
+              --cpu 1.0 --memory 2Gi \
+              --replica-timeout 10800 \
+              --set-env-vars \
+                "NEO4J_URI=${NEO4J_URI}" \
+                "NEO4J_USER=neo4j" \
+                "NEO4J_PASSWORD=${NEO4J_PASSWORD}" \
+              -o none
+          else
+            echo "Creating job ${{ env.JOB_NAME }}..."
+            az containerapp job create \
+              --name "${{ env.JOB_NAME }}" \
+              --resource-group "${{ env.RESOURCE_GROUP }}" \
+              --environment "${{ env.ACA_ENV }}" \
+              --image "${{ env.ACR_LOGIN_SERVER }}/${{ env.JOB_NAME }}:latest" \
+              --registry-server "${{ env.ACR_LOGIN_SERVER }}" \
+              --registry-username "${{ env.ACR_NAME }}" \
+              --registry-password "$ACR_PASSWORD" \
+              --cpu 1.0 --memory 2Gi \
+              --trigger-type Manual --replica-timeout 10800 \
+              --env-vars \
+                "NEO4J_URI=${NEO4J_URI}" \
+                "NEO4J_USER=neo4j" \
+                "NEO4J_PASSWORD=${NEO4J_PASSWORD}" \
+              -o none
+          fi
+
+      - name: Start loader execution
+        run: |
+          az containerapp job start \
+            --name "${{ env.JOB_NAME }}" \
+            --resource-group "${{ env.RESOURCE_GROUP }}" -o none
+          echo "Job started — waiting for terminal state."
+
+      - name: Wait for execution to finish
+        id: wait
+        run: |
+          prev=""
+          for i in $(seq 1 210); do  # 210 × 60s = 3.5h budget
+            st=$(az containerapp job execution list \
+              --name "${{ env.JOB_NAME }}" \
+              --resource-group "${{ env.RESOURCE_GROUP }}" \
+              --query "[-1:].properties.status" -o tsv 2>/dev/null)
+            if [ "$st" != "$prev" ] && [ -n "$st" ]; then
+              echo "$(date -u +%H:%M:%S) status=$st"
+              prev="$st"
+            fi
+            case "$st" in
+              Succeeded) echo "final=Succeeded" >> "$GITHUB_OUTPUT"; exit 0;;
+              Failed|Stopped|Cancelled|Degraded)
+                echo "final=$st" >> "$GITHUB_OUTPUT"
+                echo "::error::FHIR loader execution ended with status=$st"
+                exit 1;;
+            esac
+            sleep 60
+          done
+          echo "::error::Timed out waiting for execution terminal state"
+          exit 1
+
+      - name: Verify cohort size via public API
+        if: always()
+        run: |
+          echo "Querying https://ehds.mabu.red/api/patient ..."
+          PAYLOAD=$(curl -sfS https://ehds.mabu.red/api/patient || echo '{}')
+          echo "$PAYLOAD" | python3 -c "
+          import json, sys
+          d = json.loads(sys.stdin.read() or '{}')
+          stats = d.get('stats') or {}
+          print('patients  =', len(d.get('patients') or []))
+          print('stats     =', stats)
+          "
+
+      - name: Summary
+        if: always()
+        run: |
+          echo "## FHIR Loader" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "**Final status:** ${{ steps.wait.outputs.final }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "**Job:** \`${{ env.JOB_NAME }}\` in \`${{ env.RESOURCE_GROUP }}\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "Verify: \`curl -s https://ehds.mabu.red/api/patient | jq .stats\`" >> "$GITHUB_STEP_SUMMARY"
