@@ -3,6 +3,7 @@
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
+import { useEffect, useState } from "react";
 import "@scalar/api-reference-react/style.css";
 
 const ApiReferenceReact = dynamic(
@@ -16,6 +17,18 @@ const SPEC_URL = IS_STATIC
   : "/openapi.yaml";
 
 export default function ApiReferencePage() {
+  // Scalar's "Try it" panel would otherwise use the first server in the
+  // OpenAPI spec (http://localhost:3000) even when the page is served from
+  // ehds.mabu.red, leaving copy-pasted curl snippets pointing at the wrong
+  // host. Pinning baseServerURL to the actual origin makes every example
+  // self-consistent on whichever environment the user is viewing.
+  const [baseServerUrl, setBaseServerUrl] = useState<string>("");
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setBaseServerUrl(window.location.origin);
+    }
+  }, []);
+
   return (
     <div className="min-h-screen flex flex-col">
       <div className="px-6 py-4 border-b border-[var(--border)] bg-[var(--surface-1)]">
@@ -40,6 +53,7 @@ export default function ApiReferencePage() {
             layout: "modern",
             hideDarkModeToggle: false,
             hideClientButton: false,
+            ...(baseServerUrl ? { baseServerURL: baseServerUrl } : {}),
             defaultHttpClient: {
               targetKey: "shell",
               clientKey: "curl",
