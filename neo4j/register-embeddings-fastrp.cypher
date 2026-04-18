@@ -63,7 +63,12 @@ CALL gds.graph.project.cypher(
      "MAPPED_TO","HAS_CONDITION_OCCURRENCE","HAS_MEASUREMENT","HAS_DRUG_EXPOSURE",
      "HAS_VISIT_OCCURRENCE","FROM_DATASET"
    ]
-   RETURN id(a) AS source, id(b) AS target, type(r) AS type'
+   RETURN id(a) AS source, id(b) AS target, type(r) AS type',
+  {
+    // Some target nodes may fall outside the curated label set (e.g. audit
+    // nodes, contract stubs); skip those relationships rather than failing.
+    validateRelationships: false
+  }
 ) YIELD graphName, nodeCount, relationshipCount
 RETURN graphName, nodeCount, relationshipCount;
 
@@ -86,13 +91,14 @@ RETURN nodePropertiesWritten, computeMillis;
 CALL gds.graph.drop('health-dataspace-rp') YIELD graphName
 RETURN graphName;
 
-// ── 5. Create a native vector index so cosine similarity is sub-linear ──
+// ── 5. Mark embedded nodes with a shared label so a single vector index
+//       covers the full 5-layer set without Neo4j-5 multi-label syntax ──
+MATCH (n) WHERE n.embedding IS NOT NULL SET n:Embedded;
+
+// ── 6. Native vector index (cosine, 256-d) — one per graph rather than
+//       one per label, reflecting that GraphRAG compares across layers ──
 CREATE VECTOR INDEX node_fastrp_index IF NOT EXISTS
-FOR (n:Patient|Encounter|Condition|Observation|MedicationRequest|Procedure
-     |HealthDataset|Distribution|DataService|Catalogue
-     |Participant|DataProduct|OdrlPolicy|Contract|HDABApproval|TransferEvent
-     |OMOPPerson|OMOPVisitOccurrence|OMOPConditionOccurrence|OMOPMeasurement|OMOPDrugExposure
-     |SnomedConcept|LoincCode|ICD10Code|RxNormConcept)
+FOR (n:Embedded)
 ON n.embedding
 OPTIONS {
   indexConfig: {
