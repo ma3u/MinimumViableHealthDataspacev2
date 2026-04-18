@@ -285,7 +285,7 @@ export default function NlqPage() {
               <button
                 key={q}
                 onClick={() => handleExampleClick(q)}
-                className="px-2.5 py-1 rounded-full bg-[var(--surface-2)] border border-[var(--border)] text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-gray-600 transition-colors"
+                className="px-3 py-1.5 rounded-full bg-[var(--surface)] border border-[var(--border)] text-xs font-medium text-[var(--text-primary)] hover:bg-[var(--surface-2)] hover:border-[var(--accent)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--accent)] transition-colors"
                 disabled={loading}
               >
                 {q}
