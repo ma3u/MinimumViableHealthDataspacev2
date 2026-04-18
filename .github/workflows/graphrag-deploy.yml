@@ -28,6 +28,10 @@ on:
         description: "Skip seed re-run (FastRP + semantic embeddings)"
         type: boolean
         default: false
+      skip_aoai_embeddings:
+        description: "Skip Azure OpenAI semantic embeddings in seed (FastRP still runs)"
+        type: boolean
+        default: true
 
 permissions:
   id-token: write
@@ -127,7 +131,7 @@ jobs:
 
       # ── 4. Seed Neo4j (inserts + FastRP + optional Azure OpenAI embeddings)
       - name: Inject AOAI env on the seed job so semantic embeddings run too
-        if: ${{ !inputs.skip_seed }}
+        if: ${{ !inputs.skip_seed && !inputs.skip_aoai_embeddings }}
         run: |
           # The seed job needs AZURE_OPENAI_API_KEY + AZURE_OPENAI_EMBEDDINGS_URL
           # to run register-embeddings-aoai.cypher (optional path). Reuse the
@@ -155,6 +159,19 @@ jobs:
               -o none
             echo "Seed job env updated."
           fi
+
+      - name: Remove AOAI env from seed job (when skip_aoai_embeddings)
+        if: ${{ !inputs.skip_seed && inputs.skip_aoai_embeddings }}
+        run: |
+          # Unset AZURE_OPENAI_* on the seed job so seed.sh's guard skips
+          # register-embeddings-aoai.cypher. The seed container can't reach
+          # Azure OpenAI from inside the ACA network without extra egress
+          # rules; FastRP alone is enough for GraphRAG to function.
+          az containerapp job update \
+            --name "${{ env.SEED_JOB }}" \
+            --resource-group "${{ env.RESOURCE_GROUP }}" \
+            --remove-env-vars AZURE_OPENAI_API_KEY AZURE_OPENAI_EMBEDDINGS_URL \
+            -o none || echo "env vars already absent"
 
       - name: Force seed job to pull fresh :latest image
         if: ${{ !inputs.skip_seed }}
