@@ -25,12 +25,16 @@ info:
     name: Apache-2.0
     url: https://www.apache.org/licenses/LICENSE-2.0
 servers:
-  - url: http://localhost:3000
-    description: Local dev (Next.js)
+  # The reference page overrides this at runtime via Scalar's
+  # baseServerURL so every "Try it" example points at the origin the user
+  # is actually viewing. The dropdown ordering below only matters when a
+  # user manually picks a different environment.
   - url: https://ehds.mabu.red
     description: Azure Dev (ACA, Mon–Fri 07:00–20:00 Europe/Berlin per ADR-016)
   - url: https://ma3u.github.io/MinimumViableHealthDataspacev2
     description: GitHub Pages static export (mock JSON fixtures)
+  - url: http://localhost:3000
+    description: Local dev (Next.js)
 
 tags:
   - name: Health
