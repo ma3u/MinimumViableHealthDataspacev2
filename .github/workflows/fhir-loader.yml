@@ -99,8 +99,6 @@ jobs:
             --push "${BUILD_DIR}"
 
       - name: Create or update ACA Job
-        env:
-          NEO4J_PASSWORD: ${{ secrets.NEO4J_PASSWORD }}
         run: |
           ACR_PASSWORD=$(az acr credential show --name "${{ env.ACR_NAME }}" \
             --query "passwords[0].value" -o tsv)
@@ -120,7 +118,7 @@ jobs:
               --set-env-vars \
                 "NEO4J_URI=${NEO4J_URI}" \
                 "NEO4J_USER=neo4j" \
-                "NEO4J_PASSWORD=${NEO4J_PASSWORD}" \
+                "NEO4J_PASSWORD=healthdataspace" \
               -o none
           else
             echo "Creating job ${{ env.JOB_NAME }}..."
@@ -137,7 +135,7 @@ jobs:
               --env-vars \
                 "NEO4J_URI=${NEO4J_URI}" \
                 "NEO4J_USER=neo4j" \
-                "NEO4J_PASSWORD=${NEO4J_PASSWORD}" \
+                "NEO4J_PASSWORD=healthdataspace" \
               -o none
           fi
 
@@ -146,7 +144,8 @@ jobs:
           az containerapp job start \
             --name "${{ env.JOB_NAME }}" \
             --resource-group "${{ env.RESOURCE_GROUP }}" -o none
-          echo "Job started — waiting for terminal state."
+          echo "Job started — waiting 20s for execution to register..."
+          sleep 20
 
       - name: Wait for execution to finish
         id: wait
@@ -156,7 +155,7 @@ jobs:
             st=$(az containerapp job execution list \
               --name "${{ env.JOB_NAME }}" \
               --resource-group "${{ env.RESOURCE_GROUP }}" \
-              --query "[-1:].properties.status" -o tsv 2>/dev/null)
+              --query "[0].properties.status" -o tsv 2>/dev/null)
             if [ "$st" != "$prev" ] && [ -n "$st" ]; then
               echo "$(date -u +%H:%M:%S) status=$st"
               prev="$st"
