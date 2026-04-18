@@ -1,0 +1,185 @@
+name: GraphRAG Deploy (Azure)
+
+# Phase 25 (Issue #13) — deploy the GraphRAG stack end to end:
+#   1. Ensure the Azure OpenAI account exists and the embedding model is
+#      deployed; wire secrets + env vars onto mvhd-neo4j-proxy.
+#   2. Enable GDS + APOC on mvhd-neo4j (plugins env vars — Neo4j downloads
+#      the jars on next restart). Bump heap to 4Gi.
+#   3. Restart mvhd-neo4j so the plugins load.
+#   4. Re-run the seed job — FastRP + semantic embeddings land on nodes.
+#   5. Restart mvhd-neo4j-proxy so it picks up the new AOAI env vars.
+#
+# Why via CI: Microsoft.App/jobs/write + start are PIM-gated for personal
+# accounts (~1h window); the CI service principal has stable perms (see
+# memory project_aca_job_write_via_ci).
+
+on:
+  workflow_dispatch:
+    inputs:
+      skip_foundry:
+        description: "Skip AI Foundry wiring (assume already done)"
+        type: boolean
+        default: false
+      skip_seed:
+        description: "Skip seed re-run (FastRP + semantic embeddings)"
+        type: boolean
+        default: false
+
+permissions:
+  id-token: write
+  contents: read
+
+concurrency:
+  group: "graphrag-deploy"
+  cancel-in-progress: false
+
+env:
+  RESOURCE_GROUP: rg-mvhd-dev
+  NEO4J_APP: mvhd-neo4j
+  NEO4J_PROXY_APP: mvhd-neo4j-proxy
+  SEED_JOB: mvhd-neo4j-seed
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Azure Login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      # ── 1. AI Foundry: embedding model + secrets + proxy env vars ────────
+      - name: Wire Azure OpenAI on mvhd-neo4j-proxy
+        if: ${{ !inputs.skip_foundry }}
+        run: |
+          chmod +x scripts/azure/07-ai-foundry.sh
+          ./scripts/azure/07-ai-foundry.sh
+
+      # ── 2. Enable GDS + APOC on Azure Neo4j ──────────────────────────────
+      - name: Enable GDS + APOC on mvhd-neo4j
+        run: |
+          echo "Enabling GDS + APOC plugins on ${{ env.NEO4J_APP }}..."
+          az containerapp update \
+            --name "${{ env.NEO4J_APP }}" \
+            --resource-group "${{ env.RESOURCE_GROUP }}" \
+            --set-env-vars \
+              'NEO4J_PLUGINS=["apoc","apoc-extended","graph-data-science"]' \
+              'NEO4J_dbms_security_procedures_unrestricted=apoc.*,gds.*' \
+              'NEO4J_dbms_security_procedures_allowlist=apoc.*,gds.*' \
+              'NEO4J_server_memory_heap_initial__size=2G' \
+              'NEO4J_server_memory_heap_max__size=4G' \
+              'NEO4J_server_memory_pagecache_size=2G' \
+            -o none
+          echo "Plugins + heap configured; Neo4j will restart with the new revision."
+
+      # ── 3. Wait for Neo4j to come back online ────────────────────────────
+      - name: Wait for mvhd-neo4j to be Running
+        run: |
+          for i in $(seq 1 60); do
+            st=$(az containerapp show --name "${{ env.NEO4J_APP }}" \
+              --resource-group "${{ env.RESOURCE_GROUP }}" \
+              --query "properties.runningStatus" -o tsv 2>/dev/null || echo "")
+            if [ "$st" = "Running" ]; then
+              echo "Neo4j is Running (after ${i}0s)"
+              break
+            fi
+            echo "  attempt $i: $st"
+            sleep 10
+          done
+
+      # ── 4. Seed Neo4j (inserts + FastRP + optional Azure OpenAI embeddings)
+      - name: Inject AOAI env on the seed job so semantic embeddings run too
+        if: ${{ !inputs.skip_seed }}
+        run: |
+          # The seed job needs AZURE_OPENAI_API_KEY + AZURE_OPENAI_EMBEDDINGS_URL
+          # to run register-embeddings-aoai.cypher (optional path). Reuse the
+          # same secret + env values we just set on the proxy.
+          PROXY_ENV=$(az containerapp show --name "${{ env.NEO4J_PROXY_APP }}" \
+            --resource-group "${{ env.RESOURCE_GROUP }}" \
+            --query "properties.template.containers[0].env" -o json)
+          EMBED_URL=$(echo "$PROXY_ENV" | jq -r '.[] | select(.name=="AZURE_OPENAI_EMBEDDINGS_URL") | .value // ""')
+          if [ -z "$EMBED_URL" ]; then
+            echo "No embeddings URL on proxy — skipping semantic embeddings in seed."
+          else
+            az containerapp job secret set \
+              --name "${{ env.SEED_JOB }}" \
+              --resource-group "${{ env.RESOURCE_GROUP }}" \
+              --secrets "aoai-key=$(az cognitiveservices account keys list \
+                  --resource-group '${{ env.RESOURCE_GROUP }}' \
+                  --name oai-mvhd-5f53b7 --query key1 -o tsv)" \
+              -o none || echo "Seed job secret set may have no-op'd"
+            az containerapp job update \
+              --name "${{ env.SEED_JOB }}" \
+              --resource-group "${{ env.RESOURCE_GROUP }}" \
+              --set-env-vars \
+                "AZURE_OPENAI_API_KEY=secretref:aoai-key" \
+                "AZURE_OPENAI_EMBEDDINGS_URL=${EMBED_URL}" \
+              -o none
+            echo "Seed job env updated."
+          fi
+
+      - name: Start seed job
+        if: ${{ !inputs.skip_seed }}
+        run: |
+          az containerapp job start \
+            --name "${{ env.SEED_JOB }}" \
+            --resource-group "${{ env.RESOURCE_GROUP }}" -o none
+          echo "Seed job started."
+
+      - name: Wait for seed job to finish
+        if: ${{ !inputs.skip_seed }}
+        run: |
+          sleep 15
+          prev=""
+          for i in $(seq 1 60); do
+            st=$(az containerapp job execution list \
+              --name "${{ env.SEED_JOB }}" \
+              --resource-group "${{ env.RESOURCE_GROUP }}" \
+              --query "[0].properties.status" -o tsv 2>/dev/null)
+            if [ "$st" != "$prev" ] && [ -n "$st" ]; then
+              echo "$(date -u +%H:%M:%S) status=$st"
+              prev="$st"
+            fi
+            case "$st" in
+              Succeeded) echo "seed OK"; exit 0;;
+              Failed|Stopped|Cancelled|Degraded)
+                echo "::error::Seed job ended with status=$st"
+                exit 1;;
+            esac
+            sleep 20
+          done
+          echo "::warning::Seed job still running after 20 min — continuing."
+
+      # ── 5. Restart proxy so it re-reads env + refreshes Neo4j connection ─
+      - name: Restart mvhd-neo4j-proxy
+        run: |
+          az containerapp update --name "${{ env.NEO4J_PROXY_APP }}" \
+            --resource-group "${{ env.RESOURCE_GROUP }}" \
+            --set-env-vars "GRAPHRAG_DEPLOY_TS=$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+            -o none
+          echo "Proxy restart triggered."
+
+      # ── 6. Verify backend status ─────────────────────────────────────────
+      - name: Verify backend via public API
+        if: always()
+        run: |
+          # Give ACA a moment to swap revisions
+          sleep 30
+          echo "Querying https://ehds.mabu.red/api/nlq/backend ..."
+          curl -sfS https://ehds.mabu.red/api/nlq/backend | jq .
+
+      - name: Summary
+        if: always()
+        run: |
+          echo "## GraphRAG Deploy" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Foundry wiring: \`${{ !inputs.skip_foundry }}\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Seed re-run: \`${{ !inputs.skip_seed }}\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "Verify: \`curl https://ehds.mabu.red/api/nlq/backend | jq\`" >> "$GITHUB_STEP_SUMMARY"
