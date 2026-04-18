@@ -2,7 +2,7 @@
 
 import { useSession } from "next-auth/react";
 import { AlertTriangle, ExternalLink, X } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const IS_STATIC = process.env.NEXT_PUBLIC_STATIC_EXPORT === "true";
 
@@ -12,6 +12,9 @@ const IS_STATIC = process.env.NEXT_PUBLIC_STATIC_EXPORT === "true";
  *
  * - Hidden in static export mode (no real auth)
  * - Dismissed state stored in sessionStorage (reappears next browser session)
+ * - Keycloak URL fetched at runtime from /api/keycloak-config so the link
+ *   points at the correct host on Azure (NEXT_PUBLIC_* is baked at build
+ *   time and would leak "localhost:8080" into production bundles).
  */
 export default function DemoPasswordBanner() {
   const { data: session, status } = useSession();
@@ -21,15 +24,29 @@ export default function DemoPasswordBanner() {
     }
     return sessionStorage.getItem("demo-password-banner-dismissed") === "true";
   });
+  const [passwordUrl, setPasswordUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (IS_STATIC) return;
+    let cancelled = false;
+    fetch("/api/keycloak-config", { cache: "no-store" })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((cfg) => {
+        if (cancelled || !cfg?.publicUrl) return;
+        setPasswordUrl(`${cfg.publicUrl}/account/#/security/signingin`);
+      })
+      .catch(() => {
+        /* leave null — link just hides until config resolves */
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   if (IS_STATIC || status !== "authenticated" || !session || dismissed) {
     return null;
   }
-
-  const keycloakPublicUrl =
-    process.env.NEXT_PUBLIC_KEYCLOAK_PUBLIC_URL ??
-    "http://localhost:8080/realms/edcv";
-  const passwordUrl = `${keycloakPublicUrl}/account/#/security/signingin`;
+  if (!passwordUrl) return null;
 
   function handleDismiss() {
     sessionStorage.setItem("demo-password-banner-dismissed", "true");
