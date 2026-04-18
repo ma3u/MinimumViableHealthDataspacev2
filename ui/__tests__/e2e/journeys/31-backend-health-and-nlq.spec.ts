@@ -205,7 +205,7 @@ test.describe("D · Version badge", () => {
     await expect(info).toContainText(/v\d+\.\d+\.\d+/);
   });
 
-  test("J724 release builds link to GitHub release tag (never +local)", async ({
+  test("J724 release builds link to /releases/tag/vX.Y.Z (never +local)", async ({
     page,
   }) => {
     await openUserMenu(page);
@@ -213,27 +213,63 @@ test.describe("D · Version badge", () => {
     const href = await link.getAttribute("href");
     expect(href).toMatch(/github\.com\/[^/]+\/[^/]+\/releases/);
     const text = await link.innerText();
-    const buildTimeText = await page
-      .locator('[data-testid="user-menu-build-info"]')
-      .innerText();
 
-    // Release channel: link MUST point at /releases/tag/vX.Y.Z and badge
-    // must show "Released ·" — never "+local" / "Built locally".
-    // Staging/local channel: allowed to show +local, but must still link to
-    // a valid /releases page.
-    if (buildTimeText.includes("Released")) {
-      expect(text).not.toContain("+local");
+    // Release channel: link goes to the tagged release, badge has no +local.
+    // Local/staging channel: link is the general /releases listing.
+    if (!text.includes("+local")) {
       expect(href).toMatch(/releases\/tag\/v\d+\.\d+\.\d+/);
     } else {
       expect(href).toMatch(/releases/);
     }
   });
 
-  test("J725 build info time is a valid ISO-ish date (not empty)", async ({
+  test("J725 build info shows ONLY version — no commit SHA, no timestamp", async ({
     page,
   }) => {
     await openUserMenu(page);
     const info = page.locator('[data-testid="user-menu-build-info"]');
-    await expect(info).toContainText(/\d{4}-\d{2}-\d{2}/);
+    const text = (await info.innerText()).trim();
+    // Must contain version tag.
+    expect(text).toMatch(/v\d+\.\d+\.\d+/);
+    // Must NOT contain a 40-char hex commit SHA or a yyyy-mm-dd timestamp.
+    expect(text).not.toMatch(/[0-9a-f]{40}/);
+    expect(text).not.toMatch(/\d{4}-\d{2}-\d{2}/);
+    expect(text).not.toMatch(/Released\s*·/);
+    expect(text).not.toMatch(/Built locally/);
+  });
+});
+
+/* ── E. Demo password banner — Keycloak link host ───────────────── */
+
+test.describe("E · Demo password banner", () => {
+  test.skip(!KC_AVAILABLE, "Keycloak required to surface the banner");
+
+  test.beforeEach(async ({ page }) => {
+    await keycloakLogin(page, {
+      username: "researcher",
+      password: "researcher",
+      protectedPath: "/onboarding",
+    });
+  });
+
+  test("J726 banner 'Change your password' link never resolves to localhost:8080", async ({
+    page,
+  }) => {
+    await page.goto(BASE);
+    const link = page
+      .getByRole("link", { name: /Change your password/i })
+      .first();
+    // Link may be absent if the user dismissed it; treat that as pass —
+    // the failure case we care about is "present and pointing at localhost
+    // on a non-localhost site."
+    if ((await link.count()) === 0) return;
+    const href = (await link.getAttribute("href")) ?? "";
+    expect(href, "banner must use the deployed Keycloak host").toMatch(
+      /\/realms\/edcv\/account\/#\/security\/signingin$/,
+    );
+    // On non-localhost deployments, href must not leak the dev default.
+    if (!BASE.includes("localhost")) {
+      expect(href).not.toMatch(/localhost:8080/);
+    }
   });
 });
