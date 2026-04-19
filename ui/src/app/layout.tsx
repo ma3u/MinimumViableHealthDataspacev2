@@ -70,7 +70,11 @@ export default async function RootLayout({
         <script
           nonce={nonce}
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{var t=localStorage.getItem('theme');document.documentElement.classList.toggle('dark',t==='dark')}catch(e){}})()`,
+            // Default theme = light. Only applies dark when the user has
+            // previously toggled it. Writing 'light' on first visit makes
+            // the choice explicit across reloads and prevents
+            // prefers-color-scheme from accidentally being honoured later.
+            __html: `(function(){try{var t=localStorage.getItem('theme');var dark=t==='dark';document.documentElement.classList.toggle('dark',dark);if(!t)localStorage.setItem('theme','light');}catch(e){}})()`,
           }}
         />
       </head>

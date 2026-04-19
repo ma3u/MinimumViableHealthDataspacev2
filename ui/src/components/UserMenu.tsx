@@ -491,8 +491,9 @@ export default function UserMenu() {
             </div>
           </div>
 
-          {/* Sign out */}
-          <div className="p-2 border-t border-[var(--border)]">
+          {/* Sign out + build info — inline on one row to save vertical
+              space. Sign out stays left-aligned; BuildInfo right-aligned. */}
+          <div className="flex items-center justify-between gap-2 p-2 border-t border-[var(--border)]">
             <button
               onClick={() => {
                 setOpen(false);
@@ -512,14 +513,13 @@ export default function UserMenu() {
                   : undefined;
                 signOut({ callbackUrl: logoutUrl ?? "/" });
               }}
-              className="flex items-center gap-2 w-full px-3 py-2 text-sm text-red-400 hover:bg-[var(--surface-2)] rounded transition-colors"
+              className="flex items-center gap-2 px-3 py-2 text-sm text-red-400 hover:bg-[var(--surface-2)] rounded transition-colors"
             >
               <LogOut size={14} />
               Sign out
             </button>
+            <BuildInfo />
           </div>
-
-          <BuildInfo />
         </div>
       )}
     </div>

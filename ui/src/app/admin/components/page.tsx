@@ -1351,8 +1351,14 @@ export default function AdminComponentsPage() {
   const runningCount =
     snapshot?.components.filter((c) => c.status === "running").length || 0;
   const totalCpu = snapshot?.components.reduce((s, c) => s + c.cpu, 0) || 0;
+  // Match the per-row display so the user's manual count of visible values
+  // adds up to the shown total. Per-row shows "<1" for sub-1 MB (contributes
+  // 0) and Math.round(usedMB) otherwise — sum the same quantities.
   const totalMem =
-    snapshot?.components.reduce((s, c) => s + c.mem.usedMB, 0) || 0;
+    snapshot?.components.reduce(
+      (s, c) => s + (c.mem.usedMB < 1 ? 0 : Math.round(c.mem.usedMB)),
+      0,
+    ) || 0;
 
   void historyVersion;
 
