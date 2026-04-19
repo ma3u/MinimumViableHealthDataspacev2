@@ -1757,11 +1757,15 @@ export default function AdminComponentsPage() {
         )}
 
         {/* Cost estimator — Azure on ACA deployment, StackIT otherwise.
-            We use the deploy-target signal from the snapshot rather than only
-            metricsSource so the Azure card stays visible even when Azure Monitor
-            metrics are momentarily unavailable (e.g. role-assignment lag). */}
+            Azure is detected from EITHER endpoint's deploy-target signal
+            (/api/admin/components snapshot OR the topology endpoint's
+            metricsShared flag). Layered OR means the Azure panel surfaces
+            as soon as any Azure signal is present — e.g. when participant
+            topology knows we're on ACA but the snapshot call raced the
+            Azure Monitor role binding. */}
         {snapshot?.deploymentTarget === "azure" ||
-        snapshot?.metricsSource === "azure-monitor" ? (
+        snapshot?.metricsSource === "azure-monitor" ||
+        topology?.metricsShared === true ? (
           <AzureCostEstimatorPanel
             liveComponents={snapshot?.components ?? []}
           />
