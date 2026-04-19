@@ -37,7 +37,10 @@ beforeEach(() => {
   fetchMock.mockReset();
   fetchMock.mockResolvedValue({
     ok: true,
-    json: async () => ({ publicUrl: KC_URL }),
+    json: async () => ({
+      publicUrl: KC_URL,
+      clientId: "health-dataspace-ui",
+    }),
   });
   vi.stubGlobal("fetch", fetchMock);
 });
@@ -61,7 +64,7 @@ describe("DemoPasswordBanner", () => {
     expect(container.textContent).toBe("");
   });
 
-  it("fetches /api/keycloak-config and links to the returned Keycloak host", async () => {
+  it("fetches /api/keycloak-config and links to the kc_action=UPDATE_PASSWORD flow", async () => {
     render(<DemoPasswordBanner />);
     await waitFor(() => {
       expect(fetchMock).toHaveBeenCalledWith("/api/keycloak-config", {
@@ -71,9 +74,11 @@ describe("DemoPasswordBanner", () => {
     const link = await screen.findByRole("link", {
       name: /change your password/i,
     });
-    expect(link.getAttribute("href")).toBe(
-      `${KC_URL}/account/#/security/signingin`,
-    );
+    const href = link.getAttribute("href") ?? "";
+    expect(href).toContain(`${KC_URL}/protocol/openid-connect/auth`);
+    expect(href).toContain("kc_action=UPDATE_PASSWORD");
+    expect(href).toContain("client_id=health-dataspace-ui");
+    expect(href).toContain("response_type=code");
   });
 
   it("never leaks localhost:8080 when the config endpoint is reachable", async () => {

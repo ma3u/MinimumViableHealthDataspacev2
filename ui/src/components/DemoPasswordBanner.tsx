@@ -32,8 +32,21 @@ export default function DemoPasswordBanner() {
     fetch("/api/keycloak-config", { cache: "no-store" })
       .then((r) => (r.ok ? r.json() : null))
       .then((cfg) => {
-        if (cancelled || !cfg?.publicUrl) return;
-        setPasswordUrl(`${cfg.publicUrl}/account/#/security/signingin`);
+        if (cancelled || !cfg?.publicUrl || !cfg?.clientId) return;
+        // Use Keycloak's OIDC "required action" flow (`kc_action`) rather
+        // than the Account Console — the latter crashes with "Something
+        // went wrong" when the realm lacks specific account-console client
+        // config, which our Azure realm hits today. The UPDATE_PASSWORD
+        // action is canonical Keycloak, works on every realm, and returns
+        // the user to our origin after the change.
+        const redirect = encodeURIComponent(window.location.origin);
+        const url = new URL(`${cfg.publicUrl}/protocol/openid-connect/auth`);
+        url.searchParams.set("client_id", cfg.clientId);
+        url.searchParams.set("redirect_uri", decodeURIComponent(redirect));
+        url.searchParams.set("response_type", "code");
+        url.searchParams.set("scope", "openid");
+        url.searchParams.set("kc_action", "UPDATE_PASSWORD");
+        setPasswordUrl(url.toString());
       })
       .catch(() => {
         /* leave null — link just hides until config resolves */

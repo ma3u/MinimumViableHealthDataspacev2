@@ -252,7 +252,7 @@ test.describe("E · Demo password banner", () => {
     });
   });
 
-  test("J726 banner 'Change your password' link never resolves to localhost:8080", async ({
+  test("J726 banner 'Change your password' opens kc_action=UPDATE_PASSWORD (not the crashy Account Console)", async ({
     page,
   }) => {
     await page.goto(BASE);
@@ -260,13 +260,17 @@ test.describe("E · Demo password banner", () => {
       .getByRole("link", { name: /Change your password/i })
       .first();
     // Link may be absent if the user dismissed it; treat that as pass —
-    // the failure case we care about is "present and pointing at localhost
-    // on a non-localhost site."
+    // the failure case we care about is "pointing at the wrong thing."
     if ((await link.count()) === 0) return;
     const href = (await link.getAttribute("href")) ?? "";
-    expect(href, "banner must use the deployed Keycloak host").toMatch(
-      /\/realms\/edcv\/account\/#\/security\/signingin$/,
+    // Must use the OIDC auth flow with kc_action=UPDATE_PASSWORD, NOT the
+    // /account/ Account Console which crashes with "Something went wrong"
+    // on the current realm config.
+    expect(href, "banner must use Keycloak kc_action flow").toMatch(
+      /\/realms\/edcv\/protocol\/openid-connect\/auth\?/,
     );
+    expect(href).toContain("kc_action=UPDATE_PASSWORD");
+    expect(href).not.toMatch(/\/account\/#/);
     // On non-localhost deployments, href must not leak the dev default.
     if (!BASE.includes("localhost")) {
       expect(href).not.toMatch(/localhost:8080/);
