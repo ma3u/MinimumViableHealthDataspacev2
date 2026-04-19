@@ -6,8 +6,13 @@ auth {
   mode: none
 }
 
-assert {
-  res.status: lt 500
+tests {
+  // Collection-level guard — every request must return < 500. assert{}
+  // blocks aren't allowed in collection.bru; the same check expressed as
+  // a test script runs on every request.
+  test("response is not a server error", function () {
+    expect(res.getStatus()).to.be.below(500);
+  });
 }
 
 docs {
