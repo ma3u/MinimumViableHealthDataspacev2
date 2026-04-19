@@ -633,6 +633,17 @@ export async function GET() {
   }
 
   // ── 4. Build per-participant topology rows ──
+  //
+  // On Azure (ACA) there is a single shared container per participant
+  // service — so every participant would otherwise show identical CPU/MEM
+  // values pulled from the same `serviceMetrics` key. That breaks the
+  // "sum of per-participant rows == cluster header" invariant the user
+  // expects. Divide each participant's share by the participant count so
+  // the per-participant row represents that participant's proportional
+  // slice of the shared pool; the UI carries `metricsShared: true` so the
+  // view can render a "shared across N" annotation.
+  const metricsShared = isAzure && participantsRaw.length > 0;
+  const shareDivisor = metricsShared ? participantsRaw.length : 1;
   const participantTopologies: ParticipantTopology[] = participantsRaw.map(
     (p) => {
       const components: ParticipantComponent[] = PARTICIPANT_SERVICES.map(
@@ -643,8 +654,10 @@ export async function GET() {
             container: containerLabel(svc),
             status: m.status,
             severity: deriveSeverity(m.status, m.cpu, m.memMB, m.memLimitMB),
-            cpu: m.cpu,
-            memMB: m.memMB,
+            // Report participant's share on shared-infra deployments so
+            // the sum across participants ≈ the dedup'd cluster total.
+            cpu: Math.round((m.cpu / shareDivisor) * 100) / 100,
+            memMB: Math.round((m.memMB / shareDivisor) * 10) / 10,
             uptime: m.uptime,
           };
         },
@@ -694,24 +707,25 @@ export async function GET() {
   ).length;
 
   // ── 6. Cluster-wide metrics ──
-  const allComponents = [
-    ...participantTopologies.flatMap((p) => p.components),
-    ...infraComponents,
-  ];
-  const uniqueByContainer = new Map<string, { cpu: number; memMB: number }>();
-  for (const c of allComponents) {
-    if (!uniqueByContainer.has(c.container)) {
-      uniqueByContainer.set(c.container, { cpu: c.cpu, memMB: c.memMB });
-    }
+  //
+  // Source: the raw per-container `serviceMetrics` map, summed once per
+  // distinct container. MUST NOT use participantTopologies.components here
+  // because those now carry divided per-participant shares on Azure; using
+  // them would under-report the real cluster footprint by `shareDivisor`.
+  const clusterContainers = new Set<string>([
+    ...PARTICIPANT_SERVICES.map(containerLabel),
+    ...INFRA_SERVICES.filter((svc) => (isAzure ? svc.aca !== "" : true)).map(
+      containerLabel,
+    ),
+  ]);
+  let clusterCpu = 0;
+  let clusterMemMB = 0;
+  for (const container of clusterContainers) {
+    const m = serviceMetrics.get(container);
+    if (!m) continue;
+    clusterCpu += m.cpu;
+    clusterMemMB += m.memMB;
   }
-  const clusterCpu = Array.from(uniqueByContainer.values()).reduce(
-    (s, c) => s + c.cpu,
-    0,
-  );
-  const clusterMemMB = Array.from(uniqueByContainer.values()).reduce(
-    (s, c) => s + c.memMB,
-    0,
-  );
   recordMetrics(clusterCpu, clusterMemMB);
 
   const now = Date.now();
@@ -728,6 +742,11 @@ export async function GET() {
     timestamp: new Date().toISOString(),
     metricsSource,
     deploymentTarget,
+    // True when per-participant metrics are that participant's share of a
+    // shared infrastructure pool (ACA case). The UI uses this to annotate
+    // rows with "shared" so users understand the values are not
+    // independent per-container reservations.
+    metricsShared,
     // Backwards-compatible flag — true whenever ANY runtime metrics are
     // available, so the old "Docker socket not available" banner only fires
     // when both Docker and Azure paths failed.

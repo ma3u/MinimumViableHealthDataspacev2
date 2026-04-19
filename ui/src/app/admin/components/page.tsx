@@ -120,6 +120,10 @@ interface InfraComponent extends TopoComponent {
 interface TopologyData {
   timestamp: string;
   dockerAvailable: boolean;
+  // True when per-participant CPU/MEM values represent a participant's
+  // share of shared infrastructure (ACA case), not an independent
+  // per-container reservation. Drives the "shared" annotation.
+  metricsShared?: boolean;
   participants: TopoParticipant[];
   infrastructure: InfraComponent[];
   summary: {
@@ -1447,6 +1451,17 @@ export default function AdminComponentsPage() {
                     <span>·</span>
                     <span className="text-[var(--danger-text)]">
                       {topology.summary.degradedParticipants} degraded
+                    </span>
+                  </>
+                )}
+                {topology.metricsShared && (
+                  <>
+                    <span>·</span>
+                    <span
+                      className="italic text-[var(--text-secondary)]"
+                      title={`Participants share the same ACA containers. Each participant's CPU/MEM is the pool divided by ${topology.summary.totalParticipants}. Sum across participants ≈ cluster header.`}
+                    >
+                      shared pool ÷ {topology.summary.totalParticipants}
                     </span>
                   </>
                 )}
