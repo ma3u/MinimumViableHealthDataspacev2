@@ -57,12 +57,17 @@ jobs:
             --push ./services/neo4j-proxy
 
       # ── Deploy to Azure Container Apps ───────────────────────
+      # DEPLOYMENT_TARGET=azure flips /api/admin/components to render
+      # the Azure Container Apps cost estimator instead of the StackIT
+      # one. Without it, the Azure demo incorrectly shows the STACKIT
+      # panel (see issue #17).
       - name: Deploy UI
         run: |
           az containerapp update \
             --name mvhd-ui \
             --resource-group ${{ env.RESOURCE_GROUP }} \
-            --image ${{ env.ACR_LOGIN_SERVER }}/mvhd-ui:${{ github.sha }}
+            --image ${{ env.ACR_LOGIN_SERVER }}/mvhd-ui:${{ github.sha }} \
+            --set-env-vars "DEPLOYMENT_TARGET=azure"
 
       - name: Deploy Neo4j Proxy
         run: |
