@@ -80,7 +80,6 @@ jobs:
 
       - name: Compose release notes from commit log
         if: steps.check.outputs.exists == 'false'
-        id: notes
         run: |
           TAG="${{ steps.ver.outputs.tag }}"
           # Previous tag to diff against — fall back to the root if none.
@@ -92,8 +91,10 @@ jobs:
             RANGE="${PREV}..HEAD"
             RANGE_LABEL="since ${PREV}"
           fi
+          # Write to a file instead of $GITHUB_OUTPUT so commit-message
+          # backticks (e.g. `mvhd-ui`) aren't interpreted as shell
+          # subcommands when interpolated into the next step's command.
           {
-            echo "notes<<__NOTES__"
             echo "Release ${TAG} ${RANGE_LABEL}."
             echo ""
             echo "### Changes"
@@ -106,8 +107,7 @@ jobs:
             echo ""
             echo ""
             echo "Full changelog: https://github.com/${{ github.repository }}/compare/${PREV}...${TAG}"
-            echo "__NOTES__"
-          } >> "$GITHUB_OUTPUT"
+          } > release-notes.md
 
       - name: Create GitHub Release
         if: steps.check.outputs.exists == 'false'
@@ -115,7 +115,7 @@ jobs:
           gh release create "${{ steps.ver.outputs.tag }}" \
             --repo "${{ github.repository }}" \
             --title "${{ steps.ver.outputs.tag }}" \
-            --notes "${{ steps.notes.outputs.notes }}"
+            --notes-file release-notes.md
           echo "Published ${{ steps.ver.outputs.tag }}"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
