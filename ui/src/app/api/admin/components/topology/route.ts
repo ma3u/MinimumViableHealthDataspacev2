@@ -634,16 +634,23 @@ export async function GET() {
 
   // ── 4. Build per-participant topology rows ──
   //
-  // On Azure (ACA) there is a single shared container per participant
-  // service — so every participant would otherwise show identical CPU/MEM
-  // values pulled from the same `serviceMetrics` key. That breaks the
-  // "sum of per-participant rows == cluster header" invariant the user
-  // expects. Divide each participant's share by the participant count so
-  // the per-participant row represents that participant's proportional
-  // slice of the shared pool; the UI carries `metricsShared: true` so the
-  // view can render a "shared across N" annotation.
+  // On Azure (ACA) there is exactly one container per service across ALL
+  // participants — `mvhd-controlplane`, `mvhd-dataplane-fhir`, etc. are
+  // single-instance. Participants are logical DIDs, not deployments, so
+  // per-participant CPU/MEM is meaningless: we'd either copy the same
+  // shared-pool number onto every row (misleading) or divide it by N
+  // (mathematically cute but implies a per-participant allocation that
+  // does not exist).
+  //
+  // Instead, on Azure we surface each participant's status/health only
+  // and zero out the resource fields. The `metricsShared` flag tells the
+  // UI to hide the CPU/MEM columns and point users to the Layer View for
+  // the real per-container metrics.
+  //
+  // On local JAD (docker), every participant has its own containers
+  // (ihub-alpha, dataplane-pharmaco-fhir, …) and the per-row values are
+  // real; metricsShared stays false.
   const metricsShared = isAzure && participantsRaw.length > 0;
-  const shareDivisor = metricsShared ? participantsRaw.length : 1;
   const participantTopologies: ParticipantTopology[] = participantsRaw.map(
     (p) => {
       const components: ParticipantComponent[] = PARTICIPANT_SERVICES.map(
@@ -654,10 +661,11 @@ export async function GET() {
             container: containerLabel(svc),
             status: m.status,
             severity: deriveSeverity(m.status, m.cpu, m.memMB, m.memLimitMB),
-            // Report participant's share on shared-infra deployments so
-            // the sum across participants ≈ the dedup'd cluster total.
-            cpu: Math.round((m.cpu / shareDivisor) * 100) / 100,
-            memMB: Math.round((m.memMB / shareDivisor) * 10) / 10,
+            // Only report resource numbers when this participant truly
+            // owns its own container. On Azure the shared-pool numbers
+            // are surfaced in the Layer View.
+            cpu: metricsShared ? 0 : m.cpu,
+            memMB: metricsShared ? 0 : m.memMB,
             uptime: m.uptime,
           };
         },
