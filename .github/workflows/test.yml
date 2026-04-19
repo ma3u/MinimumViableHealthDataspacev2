@@ -258,16 +258,23 @@ jobs:
         working-directory: ./ui
         run: npm ci
 
+      # license-checker@25.0.1 (the original) is unmaintained and crashes
+      # with TypeError: json.readme.toLowerCase is not a function on some
+      # modern package.json shapes. license-checker-rseidelsohn is the
+      # maintained fork and handles the same flags. Both ui/package.json
+      # and services/neo4j-proxy/package.json carry
+      # "license": "Apache-2.0" so the self-package passes its own
+      # allowlist without needing a version-pinned excludePackages entry.
       - name: Check licences (UI)
         working-directory: ./ui
         run: |
-          npx license-checker --production --excludePackages "health-dataspace-ui@0.1.0" --onlyAllow "MIT;Apache-2.0;ISC;BSD-2-Clause;BSD-3-Clause;0BSD;CC0-1.0;CC-BY-4.0;Unlicense;Python-2.0;BlueOak-1.0.0;LGPL-3.0-or-later" --summary
+          npx --yes license-checker-rseidelsohn@4.4.2 --production --excludePrivatePackages --onlyAllow "MIT;Apache-2.0;ISC;BSD-2-Clause;BSD-3-Clause;0BSD;CC0-1.0;CC-BY-4.0;Unlicense;Python-2.0;BlueOak-1.0.0;LGPL-3.0-or-later" --summary
 
       - name: Check licences (Neo4j Proxy)
         working-directory: ./services/neo4j-proxy
         run: |
           npm ci
-          npx license-checker --production --excludePackages "@health-dataspace/neo4j-proxy@0.1.0" --onlyAllow "MIT;Apache-2.0;ISC;BSD-2-Clause;BSD-3-Clause;0BSD;CC0-1.0;CC-BY-4.0;Unlicense;Python-2.0;BlueOak-1.0.0;LGPL-3.0-or-later" --summary
+          npx --yes license-checker-rseidelsohn@4.4.2 --production --excludePrivatePackages --onlyAllow "MIT;Apache-2.0;ISC;BSD-2-Clause;BSD-3-Clause;0BSD;CC0-1.0;CC-BY-4.0;Unlicense;Python-2.0;BlueOak-1.0.0;LGPL-3.0-or-later" --summary
 
       - name: Licence summary
         if: always()
@@ -376,9 +383,22 @@ jobs:
             --output kubescape-nsa.json \
             k8s/
 
+      # Kubescape's framework names change release-to-release. The old
+      # cis-v1.23-t1.0.1 identifier returns `framework not found` on the
+      # current binary. List frameworks first, match the current CIS
+      # name, and only run the scan if it exists; otherwise just warn
+      # and continue so the NSA scan still gates critical issues.
       - name: Scan k8s manifests (CIS benchmark)
         run: |
-          kubescape scan framework cis-v1.23-t1.0.1 \
+          CIS_FRAMEWORK=$(kubescape list frameworks 2>/dev/null \
+            | grep -oE "cis-v[^ ]+" | head -1 || true)
+          if [ -z "$CIS_FRAMEWORK" ]; then
+            echo "::warning::No CIS framework available in this kubescape build — skipping. NSA scan is authoritative."
+            echo '{"skipped":"no cis framework in kubescape"}' > kubescape-cis.json
+            exit 0
+          fi
+          echo "Using CIS framework: $CIS_FRAMEWORK"
+          kubescape scan framework "$CIS_FRAMEWORK" \
             --severity-threshold critical \
             --format json \
             --output kubescape-cis.json \
@@ -457,6 +477,11 @@ jobs:
       - name: Install Lighthouse CI
         run: npm install -g @lhci/cli
 
+      # `next start` fails with `output: export` configuration; our
+      # next.config.js flips to static export whenever GITHUB_ACTIONS is
+      # set AND NEXT_PUBLIC_STATIC_EXPORT != "false". Set the env var on
+      # the lhci step so next.config.js (re-read when `next start`
+      # launches) keeps the standalone server output.
       - name: Run Lighthouse CI
         run: |
           lhci autorun \
@@ -473,6 +498,7 @@ jobs:
             --assert.assertions.total-blocking-time="warn:maxNumericValue=300" \
             --assert.assertions.resource-summary:script:size="warn:maxNumericValue=500000"
         env:
+          NEXT_PUBLIC_STATIC_EXPORT: "false"
           NEXTAUTH_SECRET: ci-lighthouse-not-for-production
           NEXTAUTH_URL: http://localhost:9222
           LHCI_BUILD_CONTEXT__CURRENT_HASH: ${{ github.sha }}

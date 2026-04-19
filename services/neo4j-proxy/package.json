@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "description": "Neo4j Query Proxy — bridges DCore data planes to Neo4j graph (ADR-2)",
   "private": true,
+  "license": "Apache-2.0",
   "type": "module",
   "scripts": {
     "build": "tsc",
