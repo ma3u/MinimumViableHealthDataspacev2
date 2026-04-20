@@ -1,0 +1,116 @@
+name: Catalog Crawler Deploy
+
+# Build the mvhd-catalog-crawler image and create/update the ACA
+# Schedule-trigger Job. Runs on-demand and on pushes to the
+# services/catalog-crawler tree so the deployed image tracks source.
+#
+# Why CI, not local az: Microsoft.App/jobs/write is PIM-gated for
+# personal accounts (memory project_aca_job_write_via_ci).
+
+on:
+  workflow_dispatch:
+  push:
+    branches: ["main"]
+    paths:
+      - "services/catalog-crawler/**"
+      - "scripts/azure/10-catalog-crawler.sh"
+      - ".github/workflows/catalog-crawler.yml"
+
+permissions:
+  id-token: write
+  contents: read
+
+concurrency:
+  group: "catalog-crawler-deploy"
+  cancel-in-progress: false
+
+env:
+  ACR_NAME: acrmvhdehds
+  ACR_LOGIN_SERVER: acrmvhdehds.azurecr.io
+  RESOURCE_GROUP: rg-mvhd-dev
+  ACA_ENV: mvhd-env
+  JOB_NAME: mvhd-catalog-crawler
+  NATS_APP: mvhd-nats
+  NEO4J_APP: mvhd-neo4j
+  CUSTOM_DOMAIN: ehds.mabu.red
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Azure Login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: ACR Login
+        run: az acr login --name ${{ env.ACR_NAME }}
+
+      - name: Build & push crawler image
+        run: |
+          docker buildx build --platform linux/amd64 \
+            -t "${{ env.ACR_LOGIN_SERVER }}/${{ env.JOB_NAME }}:latest" \
+            -t "${{ env.ACR_LOGIN_SERVER }}/${{ env.JOB_NAME }}:${{ github.sha }}" \
+            --push ./services/catalog-crawler
+
+      - name: "Create or update ACA Job — Schedule every 5 min"
+        run: |
+          ACR_PASSWORD=$(az acr credential show --name "${{ env.ACR_NAME }}" \
+            --query "passwords[0].value" -o tsv)
+
+          COMMON_ENV=(
+            "RUN_ONCE=true"
+            "NATS_URL=nats://${{ env.NATS_APP }}:4222"
+            "NATS_SUBJECT=dataspace.catalog.raw"
+            "NEO4J_URI=bolt://${{ env.NEO4J_APP }}:7687"
+            "NEO4J_USER=neo4j"
+            "NEO4J_PASSWORD=healthdataspace"
+            "CRAWLER_DID=did:web:${{ env.CUSTOM_DOMAIN }}:crawler"
+          )
+
+          if az containerapp job show --name "${{ env.JOB_NAME }}" \
+               --resource-group "${{ env.RESOURCE_GROUP }}" -o none 2>/dev/null; then
+            az containerapp job update \
+              --name "${{ env.JOB_NAME }}" \
+              --resource-group "${{ env.RESOURCE_GROUP }}" \
+              --image "${{ env.ACR_LOGIN_SERVER }}/${{ env.JOB_NAME }}:${{ github.sha }}" \
+              --cpu 0.25 --memory 0.5Gi \
+              --replica-timeout 600 \
+              --cron-expression "*/5 * * * *" \
+              --set-env-vars "${COMMON_ENV[@]}" \
+              -o none
+          else
+            az containerapp job create \
+              --name "${{ env.JOB_NAME }}" \
+              --resource-group "${{ env.RESOURCE_GROUP }}" \
+              --environment "${{ env.ACA_ENV }}" \
+              --image "${{ env.ACR_LOGIN_SERVER }}/${{ env.JOB_NAME }}:${{ github.sha }}" \
+              --registry-server "${{ env.ACR_LOGIN_SERVER }}" \
+              --registry-username "${{ env.ACR_NAME }}" \
+              --registry-password "$ACR_PASSWORD" \
+              --cpu 0.25 --memory 0.5Gi \
+              --trigger-type Schedule --replica-timeout 600 \
+              --cron-expression "*/5 * * * *" \
+              --env-vars "${COMMON_ENV[@]}" \
+              -o none
+          fi
+
+      - name: Summary
+        if: always()
+        run: |
+          echo "## Catalog Crawler Deploy" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Image: \`${{ env.ACR_LOGIN_SERVER }}/${{ env.JOB_NAME }}:${{ github.sha }}\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Schedule: \`*/5 * * * *\` (every 5 min)" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Target discovery: Neo4j \`(:Participant)\` rows with \`dspCatalogUrl\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "Manual one-shot:" >> "$GITHUB_STEP_SUMMARY"
+          echo '```bash' >> "$GITHUB_STEP_SUMMARY"
+          echo "az containerapp job start --name ${{ env.JOB_NAME }} --resource-group ${{ env.RESOURCE_GROUP }}" >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
