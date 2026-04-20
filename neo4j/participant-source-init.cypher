@@ -18,7 +18,10 @@ MERGE (alpha:Participant {participantId: 'did:web:alpha-klinik.de:participant'})
   SET alpha.source        = coalesce(alpha.source, 'seed'),
       alpha.walletType    = 'business',
       alpha.country       = 'DE',
-      alpha.dspCatalogUrl = 'https://dsp.alpha-klinik.de/catalog',
+      // Points at the mock DSP route inside mvhd-ui so the crawler has a
+      // real endpoint to fetch. Real per-participant DSP connectors will
+      // replace this when a participant stands up their own.
+      alpha.dspCatalogUrl = 'https://ehds.mabu.red/api/mock-dsp/alpha-klinik',
       alpha.crawlerEnabled = true,
       alpha.onboardedAt   = coalesce(alpha.onboardedAt, datetime('2026-01-15T09:00:00Z'));
 
@@ -27,7 +30,7 @@ MERGE (pharmaco:Participant {participantId: 'did:web:pharmaco.de:research'})
   SET pharmaco.source        = coalesce(pharmaco.source, 'seed'),
       pharmaco.walletType    = 'business',
       pharmaco.country       = 'DE',
-      pharmaco.dspCatalogUrl = 'https://dsp.pharmaco.de/catalog',
+      pharmaco.dspCatalogUrl = 'https://ehds.mabu.red/api/mock-dsp/pharmaco-research',
       pharmaco.crawlerEnabled = true,
       pharmaco.onboardedAt   = coalesce(pharmaco.onboardedAt, datetime('2026-02-01T09:00:00Z'));
 
@@ -45,7 +48,7 @@ MERGE (lmc:Participant {participantId: 'did:web:lmc.nl:clinic'})
   SET lmc.source        = coalesce(lmc.source, 'seed'),
       lmc.walletType    = 'business',
       lmc.country       = 'NL',
-      lmc.dspCatalogUrl = 'https://dsp.lmc.nl/catalog',
+      lmc.dspCatalogUrl = 'https://ehds.mabu.red/api/mock-dsp/limburg-medical',
       lmc.crawlerEnabled = true,
       lmc.onboardedAt   = coalesce(lmc.onboardedAt, datetime('2026-01-20T09:00:00Z'));
 
@@ -54,7 +57,7 @@ MERGE (irs:Participant {participantId: 'did:web:irs.fr:hdab'})
   SET irs.source        = coalesce(irs.source, 'seed'),
       irs.walletType    = 'business',
       irs.country       = 'FR',
-      irs.dspCatalogUrl = 'https://dsp.irs.fr/catalog',
+      irs.dspCatalogUrl = 'https://ehds.mabu.red/api/mock-dsp/institut-recherche-sante',
       irs.crawlerEnabled = true,
       irs.onboardedAt   = coalesce(irs.onboardedAt, datetime('2026-02-14T09:00:00Z'));
 
