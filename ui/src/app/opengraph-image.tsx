@@ -1,6 +1,10 @@
 import { ImageResponse } from "next/og";
 
 export const runtime = "edge";
+// `output: export` (static GitHub Pages build) requires every route to
+// declare a static caching strategy. The OG image is deterministic, so
+// pre-render at build time and never revalidate.
+export const dynamic = "force-static";
 export const alt =
   "European Health Data Space demo — DSP 2025-1, FHIR R4, OMOP CDM, HealthDCAT-AP";
 export const size = { width: 1200, height: 630 };
