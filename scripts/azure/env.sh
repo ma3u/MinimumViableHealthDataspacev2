@@ -65,6 +65,8 @@ export PROVISION_MGR_APP="mvhd-provision-mgr"
 export NEO4J_SEED_JOB="mvhd-neo4j-seed"
 export VAULT_BOOTSTRAP_JOB="mvhd-vault-bootstrap"
 export FHIR_LOADER_JOB="mvhd-fhir-loader"
+export CATALOG_CRAWLER_JOB="mvhd-catalog-crawler"
+export CATALOG_ENRICHER_APP="mvhd-catalog-enricher"
 
 # ── Container images ─────────────────────────────────────────────────────────
 export ACR_LOGIN_SERVER="${ACR_NAME}.azurecr.io"
