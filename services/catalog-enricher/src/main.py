@@ -13,7 +13,7 @@ import signal
 from contextlib import suppress
 
 import nats
-from nats.js.api import AckPolicy, ConsumerConfig, DeliverPolicy
+from nats.aio.msg import Msg
 from neo4j import Driver
 from pydantic import ValidationError
 
@@ -24,14 +24,13 @@ from .models import CrawlEnvelope
 log = logging.getLogger("catalog-enricher")
 
 
-async def handle_message(driver: Driver, msg: nats.aio.msg.Msg) -> None:
+async def handle_message(driver: Driver, msg: Msg) -> None:
     try:
         raw = json.loads(msg.data.decode("utf-8"))
         envelope = CrawlEnvelope.model_validate(raw)
     except (json.JSONDecodeError, ValidationError) as e:
         log.warning("rejecting malformed envelope: %s", e)
         metrics.messages_total.labels(outcome="schema_error").inc()
-        await msg.ack()
         return
 
     datasets = mapping.extract_datasets(envelope)
@@ -52,12 +51,9 @@ async def handle_message(driver: Driver, msg: nats.aio.msg.Msg) -> None:
         for _ in range(unknown):
             metrics.unknown_theme_total.labels(publisher=envelope.participant_did).inc()
         metrics.messages_total.labels(outcome="ok").inc()
-        await msg.ack()
-    except Exception:  # noqa: BLE001
-        # No ack — NATS will redeliver. Don't tight-loop: sleep briefly.
-        log.exception("neo4j write failed — will redeliver")
+    except Exception:
+        log.exception("neo4j write failed")
         metrics.messages_total.labels(outcome="neo4j_error").inc()
-        await asyncio.sleep(2)
 
 
 async def run(cfg: Config) -> None:
@@ -65,21 +61,16 @@ async def run(cfg: Config) -> None:
     log.info("metrics on :%d", cfg.metrics_port)
 
     nc = await nats.connect(cfg.nats_url)
-    js = nc.jetstream()
-    await js.add_consumer(
-        stream="DATASPACE",
-        config=ConsumerConfig(
-            durable_name=cfg.nats_consumer,
-            deliver_policy=DeliverPolicy.ALL,
-            ack_policy=AckPolicy.EXPLICIT,
-            filter_subject=cfg.nats_subject,
-        ),
-    )
-    sub = await js.pull_subscribe(cfg.nats_subject, durable=cfg.nats_consumer)
-    log.info("subscribed to %s (consumer=%s)", cfg.nats_subject, cfg.nats_consumer)
+    log.info("connected to NATS %s", cfg.nats_url)
 
     with neo4j_writer.bolt_driver(cfg.neo4j_uri, cfg.neo4j_user, cfg.neo4j_password) as driver:
         stop = asyncio.Event()
+
+        async def _on_message(msg: Msg) -> None:
+            await handle_message(driver, msg)
+
+        sub = await nc.subscribe(cfg.nats_subject, cb=_on_message)
+        log.info("subscribed to %s (core NATS, no persistence)", cfg.nats_subject)
 
         def _shutdown(*_: object) -> None:
             log.info("shutdown signal received")
@@ -89,19 +80,10 @@ async def run(cfg: Config) -> None:
         for sig in (signal.SIGINT, signal.SIGTERM):
             loop.add_signal_handler(sig, _shutdown)
 
-        while not stop.is_set():
-            try:
-                msgs = await sub.fetch(batch=10, timeout=5)
-            except TimeoutError:
-                continue
-            except Exception:  # noqa: BLE001
-                log.exception("fetch error")
-                await asyncio.sleep(2)
-                continue
-            for msg in msgs:
-                await handle_message(driver, msg)
+        await stop.wait()
+        await sub.unsubscribe()
 
-    await nc.close()
+    await nc.drain()
     log.info("shutdown complete")
 
 
