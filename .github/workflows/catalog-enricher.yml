@@ -99,7 +99,6 @@ jobs:
               --registry-password "$ACR_PASSWORD" \
               --cpu 0.25 --memory 0.5Gi \
               --min-replicas 1 --max-replicas 1 \
-              --ingress disabled \
               --env-vars "${COMMON_ENV[@]}" \
               -o none
           fi
