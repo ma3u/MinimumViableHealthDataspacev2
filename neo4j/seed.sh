@@ -56,6 +56,16 @@ run_file /seed/seed-trust-center.cypher "trust center"
 run_file /seed/seed-audit-provenance.cypher "audit provenance"
 run_file /seed/seed-compliance-matrix.cypher "compliance matrix"
 
+# Phase 26a: bootstrap :Participant source labels + dspCatalogUrl so the
+# catalog-crawler has targets and the enricher can link federated datasets
+# back to their publishers. Idempotent MERGE, safe to re-run.
+run_file /seed/participant-source-init.cypher "participant source labels (Phase 26a)"
+
+# Phase 26d: NLQ glossary — NL->code mappings for federated templates.
+# Stored in Neo4j (not hardcoded) so operators can extend without a
+# redeploy. ~30 curated terms across kind=country|concept|credential.
+run_file /seed/nlq-glossary.cypher "NLQ glossary (Phase 26d)"
+
 # Phase 25b (Issue #13): Structural embeddings (FastRP) — always on, no API.
 # Requires the graph-data-science plugin; silently no-ops on installs without
 # it (the CALL gds.version() check below logs a warning so the operator sees
