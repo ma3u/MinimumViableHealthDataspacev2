@@ -74,6 +74,10 @@ jobs:
             "CRAWLER_DID=did:web:${{ env.CUSTOM_DOMAIN }}:crawler"
           )
 
+          # Schedule-trigger jobs require --replica-retry-limit (Manual
+          # ones default to 0 and accept --replica-retry-limit omitted).
+          # We set 0 so a failed run doesn't loop — the next scheduled
+          # tick is the retry and keeps metric pressure bounded.
           if az containerapp job show --name "${{ env.JOB_NAME }}" \
                --resource-group "${{ env.RESOURCE_GROUP }}" -o none 2>/dev/null; then
             az containerapp job update \
@@ -82,6 +86,7 @@ jobs:
               --image "${{ env.ACR_LOGIN_SERVER }}/${{ env.JOB_NAME }}:${{ github.sha }}" \
               --cpu 0.25 --memory 0.5Gi \
               --replica-timeout 600 \
+              --replica-retry-limit 0 \
               --cron-expression "*/5 * * * *" \
               --set-env-vars "${COMMON_ENV[@]}" \
               -o none
@@ -96,6 +101,7 @@ jobs:
               --registry-password "$ACR_PASSWORD" \
               --cpu 0.25 --memory 0.5Gi \
               --trigger-type Schedule --replica-timeout 600 \
+              --replica-retry-limit 0 \
               --cron-expression "*/5 * * * *" \
               --env-vars "${COMMON_ENV[@]}" \
               -o none

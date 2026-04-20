@@ -42,6 +42,7 @@ if az containerapp job show --name "$CATALOG_CRAWLER_JOB" --resource-group "$RG"
     --image "${ACR_LOGIN_SERVER}/${CATALOG_CRAWLER_JOB}:latest" \
     --cpu 0.25 --memory 0.5Gi \
     --replica-timeout 600 \
+    --replica-retry-limit 0 \
     --cron-expression "$CRON_EXPRESSION" \
     --set-env-vars \
       "RUN_ONCE=true" \
@@ -62,6 +63,7 @@ else
     --registry-password "$ACR_PASSWORD" \
     --cpu 0.25 --memory 0.5Gi \
     --trigger-type Schedule --replica-timeout 600 \
+    --replica-retry-limit 0 \
     --cron-expression "$CRON_EXPRESSION" \
     --env-vars \
       "RUN_ONCE=true" \
