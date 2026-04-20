@@ -1197,6 +1197,111 @@ const QUERY_TEMPLATES: QueryTemplate[] = [
     extractParams: () => ({}),
     description: "OMOP CDM aggregate statistics",
   },
+  // ── Phase 26d federated-discovery templates ────────────────────────────────
+  //
+  // These use the :NlqGlossary nodes seeded by neo4j/nlq-glossary.cypher to
+  // expand natural-language terms into SNOMED concept IDs + ISO-2 country
+  // codes, then filter across the `source: "federated"` HealthDataset rows
+  // the catalog-enricher writes. The question text is the only param — the
+  // Cypher does the glossary join so new terms are live as soon as ops MERGE
+  // them in, without any proxy redeploy.
+  {
+    name: "federated_dataset_search",
+    patterns: [
+      // "find/show/list [all] [any words] datasets/studies"
+      /(?:find|show|list) (?:all |).*?(?:datasets|studies)/i,
+      /datasets (?:across|from|about|in|with)/i,
+      /(?:data|studies) (?:available|about|on)/i,
+    ],
+    cypher: `
+      OPTIONAL MATCH (gc:NlqGlossary {kind: 'concept'})
+        WHERE toLower($question) CONTAINS gc.term
+      WITH collect(DISTINCT gc.code) AS snomedCodes
+      OPTIONAL MATCH (gg:NlqGlossary {kind: 'country'})
+        WHERE toLower($question) CONTAINS gg.term
+      WITH snomedCodes, collect(DISTINCT gg.code) AS countries
+      OPTIONAL MATCH (gk:NlqGlossary {kind: 'credential'})
+        WHERE toLower($question) CONTAINS gk.term
+      WITH snomedCodes, countries, collect(DISTINCT gk.code) AS credentials
+      MATCH (d:HealthDataset)
+      WHERE coalesce(d.source, 'local') IN ['federated', 'local']
+      OPTIONAL MATCH (d)-[:HAS_THEME]->(t)
+      OPTIONAL MATCH (d)-[:PUBLISHED_BY]->(p:Participant)
+      OPTIONAL MATCH (d)-[:GOVERNED_BY]->(pol:OdrlPolicy)
+      WITH d, p, pol, snomedCodes, countries, credentials,
+           collect(DISTINCT t.code) AS themeCodes
+      WHERE (size(snomedCodes) = 0 OR any(c IN themeCodes WHERE c IN snomedCodes))
+        AND (size(countries) = 0 OR coalesce(p.country, d.country) IN countries)
+        AND (size(credentials) = 0 OR any(c IN credentials
+             WHERE toLower(coalesce(pol.json, '')) CONTAINS toLower(c)))
+      RETURN d.datasetId     AS datasetId,
+             d.title          AS title,
+             coalesce(p.name, d.publisherDid, 'unknown') AS publisher,
+             coalesce(p.country, d.country)              AS country,
+             d.source         AS source,
+             themeCodes       AS themeCodes,
+             d.lastSeenAt     AS lastSeenAt
+      ORDER BY d.lastSeenAt DESC NULLS LAST, d.title
+      LIMIT 50
+    `,
+    extractParams: (_match, question) => ({ question }),
+    description:
+      "Find datasets across the dataspace — expands NL terms via glossary (diabetes, German hospitals, DataQualityLabelCredential, ...)",
+  },
+  {
+    name: "participant_count_by_theme",
+    patterns: [
+      /how many (?:hospitals|organi[sz]ations|participants|clinics|institutes) (?:offer|publish|have)/i,
+      /who (?:offers|publishes|has) (?:datasets |data |)(?:about|on|for)/i,
+      /(?:count|number) of (?:hospitals|organi[sz]ations|participants) (?:with|offering)/i,
+    ],
+    cypher: `
+      OPTIONAL MATCH (gc:NlqGlossary {kind: 'concept'})
+        WHERE toLower($question) CONTAINS gc.term
+      WITH collect(DISTINCT gc.code) AS snomedCodes
+      MATCH (p:Participant)<-[:PUBLISHED_BY]-(d:HealthDataset)
+      OPTIONAL MATCH (d)-[:HAS_THEME]->(t)
+      WITH p, snomedCodes, collect(DISTINCT t.code) AS themeCodes
+      WHERE size(snomedCodes) = 0
+         OR any(c IN themeCodes WHERE c IN snomedCodes)
+      RETURN p.name            AS participant,
+             p.country          AS country,
+             p.walletType       AS walletType,
+             count(*)           AS matchingDatasets
+      ORDER BY matchingDatasets DESC, p.name
+    `,
+    extractParams: (_match, question) => ({ question }),
+    description:
+      "Count participants offering datasets matching a theme (e.g. 'how many hospitals offer oncology datasets')",
+  },
+  {
+    name: "dataset_with_credential",
+    patterns: [
+      // "find/list/show datasets with/requiring/needing [a] credential|cred|DQL|quality label|DataQualityLabel"
+      /(?:find|list|show) (?:datasets|data) (?:with|requiring|needing) (?:a |the |)(?:credential|cred|DQL|DataQualityLabel|quality label)/i,
+      /datasets? (?:require|with|needing) (?:the |a |)(?:DataQualityLabel|DQL|quality label)/i,
+      /(?:credential-gated|credential required) datasets/i,
+    ],
+    cypher: `
+      OPTIONAL MATCH (gk:NlqGlossary {kind: 'credential'})
+        WHERE toLower($question) CONTAINS gk.term
+      WITH collect(DISTINCT gk.code) AS credentials
+      MATCH (d:HealthDataset)-[:GOVERNED_BY]->(pol:OdrlPolicy)
+      WHERE size(credentials) = 0
+         OR any(c IN credentials
+                WHERE toLower(coalesce(pol.json, '')) CONTAINS toLower(c))
+      OPTIONAL MATCH (d)-[:PUBLISHED_BY]->(p:Participant)
+      RETURN d.datasetId AS datasetId,
+             d.title      AS title,
+             coalesce(p.name, d.publisherDid, 'unknown') AS publisher,
+             pol.policyId AS policyId
+      ORDER BY d.title
+      LIMIT 50
+    `,
+    extractParams: (_match, question) => ({ question }),
+    description:
+      "Datasets whose ODRL policy requires a credential (e.g. DataQualityLabelCredential)",
+  },
   {
     name: "age_distribution",
     patterns: [
