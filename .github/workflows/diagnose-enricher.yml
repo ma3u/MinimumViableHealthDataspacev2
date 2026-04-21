@@ -45,3 +45,32 @@ jobs:
             --resource-group "${{ env.RESOURCE_GROUP }}" \
             --type console \
             --tail 200 || true
+
+      - name: Crawler — recent execution log
+        run: |
+          JOB=mvhd-catalog-crawler
+          EXEC=$(az containerapp job execution list --name "$JOB" \
+            --resource-group "${{ env.RESOURCE_GROUP }}" \
+            --query "[0].name" -o tsv)
+          echo "Latest crawler execution: $EXEC"
+          az containerapp job logs show \
+            --name "$JOB" \
+            --resource-group "${{ env.RESOURCE_GROUP }}" \
+            --container "$JOB" \
+            --execution "$EXEC" \
+            --tail 200 || true
+
+      - name: NATS — current state
+        run: |
+          az containerapp show --name mvhd-nats \
+            --resource-group "${{ env.RESOURCE_GROUP }}" \
+            --query "{status:properties.runningStatus,rev:properties.latestRevisionName,ingress:properties.configuration.ingress}" \
+            -o json || true
+          REV=$(az containerapp show --name mvhd-nats \
+            --resource-group "${{ env.RESOURCE_GROUP }}" \
+            --query "properties.latestRevisionName" -o tsv)
+          az containerapp replica list --name mvhd-nats \
+            --resource-group "${{ env.RESOURCE_GROUP }}" \
+            --revision "$REV" \
+            --query "[].{name:name,runningState:properties.runningState,details:properties.runningStateDetails}" \
+            -o table || true
