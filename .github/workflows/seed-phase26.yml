@@ -1,0 +1,119 @@
+name: Seed Phase 26 (fast-path)
+
+# Runs *only* the two Phase 26 Cypher files (participant-source-init +
+# nlq-glossary) against Azure Neo4j. Exists because the full seed.sh
+# blew past replica-timeout on the 100k-node Synthea cohort and the
+# Phase 26 bits (which come after FastRP in the pipeline) never ran.
+#
+# Re-uses the mvhd-neo4j-seed job by overriding SEED_PHASE=phase26-only
+# -- see neo4j/seed.sh for the fast-path handler.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  ACR_NAME: acrmvhdehds
+  ACR_LOGIN_SERVER: acrmvhdehds.azurecr.io
+  RESOURCE_GROUP: rg-mvhd-dev
+  SEED_JOB: mvhd-neo4j-seed
+
+jobs:
+  seed:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Azure Login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: ACR Login
+        run: az acr login --name ${{ env.ACR_NAME }}
+
+      - name: Rebuild mvhd-neo4j-seed image (with Phase 26 fast-path)
+        run: |
+          SEED_DIR=$(mktemp -d)
+          cp neo4j/*.cypher "$SEED_DIR/"
+          cp neo4j/seed.sh "$SEED_DIR/seed.sh"
+          cat > "$SEED_DIR/Dockerfile" <<'DOCKERFILE'
+          FROM neo4j:5-community
+          USER root
+          RUN apt-get update && apt-get install -y --no-install-recommends bash curl jq \
+              && rm -rf /var/lib/apt/lists/*
+          COPY *.cypher /seed/
+          COPY seed.sh /seed/seed.sh
+          RUN chmod +x /seed/seed.sh \
+              && ln -sf /var/lib/neo4j/bin/cypher-shell /usr/local/bin/cypher-shell
+          ENTRYPOINT ["/bin/bash", "/seed/seed.sh"]
+          DOCKERFILE
+          docker buildx build --platform linux/amd64 \
+            -t ${{ env.ACR_LOGIN_SERVER }}/mvhd-neo4j-seed:latest \
+            --push "$SEED_DIR"
+          rm -rf "$SEED_DIR"
+
+      - name: Inject SEED_PHASE=phase26-only on the seed job
+        run: |
+          az containerapp job update \
+            --name "${{ env.SEED_JOB }}" \
+            --resource-group "${{ env.RESOURCE_GROUP }}" \
+            --image ${{ env.ACR_LOGIN_SERVER }}/mvhd-neo4j-seed:latest \
+            --replica-timeout 600 \
+            --set-env-vars "SEED_PHASE=phase26-only" \
+            -o none
+
+      - name: Start seed job
+        id: start
+        run: |
+          az containerapp job start \
+            --name "${{ env.SEED_JOB }}" \
+            --resource-group "${{ env.RESOURCE_GROUP }}" \
+            -o none
+          echo "started=$(date -u +%s)" >> "$GITHUB_OUTPUT"
+
+      - name: Wait for seed job to finish
+        run: |
+          prev=""
+          for i in $(seq 1 30); do  # 30 * 20s = 10 min budget
+            st=$(az containerapp job execution list \
+              --name "${{ env.SEED_JOB }}" \
+              --resource-group "${{ env.RESOURCE_GROUP }}" \
+              --query "[0].properties.status" -o tsv 2>/dev/null)
+            if [ "$st" != "$prev" ] && [ -n "$st" ]; then
+              echo "$(date -u +%H:%M:%S) status=$st"
+              prev="$st"
+            fi
+            case "$st" in
+              Succeeded) echo "seed OK"; exit 0;;
+              Failed|Stopped|Cancelled|Degraded)
+                echo "::error::Seed job ended with status=$st"
+                exit 1;;
+            esac
+            sleep 20
+          done
+          echo "::error::Seed job still running after 10 min"
+          exit 1
+
+      - name: Revert SEED_PHASE so future full re-seeds work
+        if: always()
+        run: |
+          az containerapp job update \
+            --name "${{ env.SEED_JOB }}" \
+            --resource-group "${{ env.RESOURCE_GROUP }}" \
+            --remove-env-vars SEED_PHASE \
+            -o none || true
+
+      - name: Verify via public API
+        if: success()
+        run: |
+          sleep 5
+          echo "Hitting /api/debug/phase26 ..."
+          curl -sfS https://ehds.mabu.red/api/debug/phase26 | jq .
