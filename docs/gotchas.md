@@ -151,3 +151,21 @@ This applies to every Bolt client: `neo4j-proxy`, the `mvhd-neo4j-seed`
 job, the forthcoming `mvhd-catalog-enricher`.
 
 See ADR-018 / memory `project_aca_tcp_ingress_shortname.md`.
+
+## 2026-04-21 — ACA NATS needs `--transport tcp` + `--exposed-port`
+
+`mvhd-nats` was originally deployed with `--ingress internal --target-port 4222`
+only. ACA defaults to transport=Auto (HTTP via Envoy), which silently breaks the
+NATS binary framing. Symptoms:
+- `mvhd-catalog-crawler` Schedule Job runs complete "Succeeded" because
+  `run_once` mode swallows publish errors.
+- `mvhd-catalog-enricher` crashloops with
+  `nats.errors.NoServersError: nats: no servers available for connection`.
+
+Fix: add `--transport tcp --exposed-port 4222` on creation. ACA won't let you
+change transport in place — the recovery is delete + recreate. See
+`.github/workflows/fix-nats-transport.yml` for the one-off and
+`scripts/azure/04-edc-services.sh` for the now-correct creation command.
+
+Same class as `project_aca_tcp_ingress_shortname` (Neo4j/7687). Bolt, Postgres,
+NATS, Kafka — any binary protocol on ACA needs explicit `--transport tcp`.

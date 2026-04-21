@@ -1,0 +1,93 @@
+name: Fix mvhd-nats transport (recreate with TCP)
+
+# One-off fix. mvhd-nats was deployed with --ingress internal
+# (default HTTP transport), which wraps the binary NATS protocol with
+# Envoy HTTP and breaks connect. Crawler + enricher silently fail
+# with 'no servers available'. Same class as the documented
+# project_aca_tcp_ingress_shortname for Neo4j on 7687.
+#
+# Fix: recreate the app with --transport tcp --exposed-port 4222.
+# ACA does not allow changing transport in-place on an existing ingress.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  RESOURCE_GROUP: rg-mvhd-dev
+  ACA_ENV: mvhd-env
+  APP_NAME: mvhd-nats
+  NATS_IMAGE: acrmvhdehds.azurecr.io/nats:alpine
+  ACR_NAME: acrmvhdehds
+  ACR_LOGIN_SERVER: acrmvhdehds.azurecr.io
+
+jobs:
+  recreate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Delete existing mvhd-nats
+        run: |
+          az containerapp delete \
+            --name "${{ env.APP_NAME }}" \
+            --resource-group "${{ env.RESOURCE_GROUP }}" \
+            --yes -o none
+
+      - name: Recreate with TCP transport
+        run: |
+          ACR_PASSWORD=$(az acr credential show --name "${{ env.ACR_NAME }}" \
+            --query "passwords[0].value" -o tsv)
+          az containerapp create \
+            --name "${{ env.APP_NAME }}" \
+            --resource-group "${{ env.RESOURCE_GROUP }}" \
+            --environment "${{ env.ACA_ENV }}" \
+            --image "${{ env.NATS_IMAGE }}" \
+            --registry-server "${{ env.ACR_LOGIN_SERVER }}" \
+            --registry-username "${{ env.ACR_NAME }}" \
+            --registry-password "$ACR_PASSWORD" \
+            --cpu 0.25 --memory 0.5Gi \
+            --min-replicas 1 --max-replicas 1 \
+            --ingress internal --target-port 4222 --exposed-port 4222 --transport tcp \
+            -o none
+
+      - name: Restart enricher to pick up working NATS
+        run: |
+          REV=$(az containerapp show --name mvhd-catalog-enricher \
+            --resource-group "${{ env.RESOURCE_GROUP }}" \
+            --query "properties.latestRevisionName" -o tsv)
+          az containerapp revision restart --name mvhd-catalog-enricher \
+            --resource-group "${{ env.RESOURCE_GROUP }}" \
+            --revision "$REV" \
+            -o none
+
+      - name: Trigger crawler immediately
+        run: |
+          az containerapp job start --name mvhd-catalog-crawler \
+            --resource-group "${{ env.RESOURCE_GROUP }}" \
+            -o none
+
+      - name: Wait + verify via public API
+        run: |
+          echo "Waiting 60s for crawler + enricher to complete one cycle..."
+          sleep 60
+          echo ""
+          echo "Hitting /api/debug/phase26 ..."
+          for i in $(seq 1 10); do
+            curl -sfS https://ehds.mabu.red/api/debug/phase26 | jq .
+            FED=$(curl -sfS https://ehds.mabu.red/api/debug/phase26 | jq '.healthDatasets.federated')
+            echo "attempt=$i federated=$FED"
+            if [ "$FED" -gt 0 ]; then
+              echo "✅ Federated datasets appearing"
+              break
+            fi
+            sleep 15
+          done

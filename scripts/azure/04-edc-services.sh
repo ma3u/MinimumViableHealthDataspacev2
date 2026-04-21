@@ -28,7 +28,7 @@ az containerapp create \
   --registry-password "$ACR_PASSWORD" \
   --cpu 0.25 --memory 0.5Gi \
   --min-replicas 1 --max-replicas 1 \
-  --ingress internal --target-port 4222 \
+  --ingress internal --target-port 4222 --exposed-port 4222 --transport tcp \
   -o none
 ok "NATS container app"
 
