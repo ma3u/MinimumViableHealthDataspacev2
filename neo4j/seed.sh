@@ -43,6 +43,28 @@ run_file() {
   fi
 }
 
+# Phase 26 fast-path: when re-seeding just the federated discovery bits
+# on Azure, the full pipeline takes too long (FastRP on 100k+ nodes blew
+# past the 60 min replica-timeout last time). SEED_PHASE=phase26-only
+# lets operators run just the two small MERGE-idempotent files.
+if [ "${SEED_PHASE:-}" = "phase26-only" ]; then
+  echo ""
+  echo "=== SEED_PHASE=phase26-only — running just the two Phase 26 files ==="
+  run_file /seed/participant-source-init.cypher "participant source labels (Phase 26a)"
+  run_file /seed/nlq-glossary.cypher "NLQ glossary (Phase 26d)"
+  echo ""
+  echo "=== Verifying ==="
+  cypher-shell -a "$NEO4J_URI" -u "$NEO4J_USER" -p "$NEO4J_PASSWORD" \
+    --non-interactive --format plain \
+    "MATCH (p:Participant) WHERE p.dspCatalogUrl IS NOT NULL RETURN count(p) AS crawlerTargets;"
+  cypher-shell -a "$NEO4J_URI" -u "$NEO4J_USER" -p "$NEO4J_PASSWORD" \
+    --non-interactive --format plain \
+    "MATCH (g:NlqGlossary) RETURN count(g) AS glossaryRows;"
+  echo ""
+  echo "SEED_COMPLETE"
+  exit 0
+fi
+
 run_file /seed/init-schema.cypher "schema"
 run_file /seed/insert-synthetic-schema-data.cypher "synthetic data"
 run_file /seed/register-dsp-marketplace.cypher "DSP marketplace"
