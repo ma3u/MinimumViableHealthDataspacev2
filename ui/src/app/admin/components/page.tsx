@@ -418,7 +418,17 @@ function ComponentRow({
 // Topology Component Card (Participant view)
 // ---------------------------------------------------------------------------
 
-function TopoComponentCard({ comp }: { comp: TopoComponent }) {
+function TopoComponentCard({
+  comp,
+  metricsShared = false,
+}: {
+  comp: TopoComponent;
+  // When true, per-container CPU/MEM is meaningless (containers are
+  // shared across participants on this deployment). Render em-dashes
+  // instead of a misleading "0.0% / <1 MB" — real numbers live in Layer
+  // View.
+  metricsShared?: boolean;
+}) {
   const sev = SEVERITY_STYLES[comp.severity];
   return (
     <div
@@ -435,13 +445,15 @@ function TopoComponentCard({ comp }: { comp: TopoComponent }) {
         </span>
       </div>
       <div className="grid grid-cols-3 gap-1 text-[10px] text-[var(--text-secondary)]">
-        <span>
+        <span title={metricsShared ? "shared — see Layer View" : undefined}>
           <Cpu size={9} className="inline mr-0.5" />
-          {comp.cpu.toFixed(1)}%
+          {metricsShared ? "—" : `${comp.cpu.toFixed(1)}%`}
         </span>
-        <span>
+        <span title={metricsShared ? "shared — see Layer View" : undefined}>
           <HardDrive size={9} className="inline mr-0.5" />
-          {comp.memMB < 1 ? "<1" : Math.round(comp.memMB)} MB
+          {metricsShared
+            ? "—"
+            : `${comp.memMB < 1 ? "<1" : Math.round(comp.memMB)} MB`}
         </span>
         <span className="text-right">{comp.uptime}</span>
       </div>
@@ -709,7 +721,11 @@ function ParticipantTopologySection({
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
             {participant.components.map((c) => (
-              <TopoComponentCard key={c.container} comp={c} />
+              <TopoComponentCard
+                key={c.container}
+                comp={c}
+                metricsShared={metricsShared}
+              />
             ))}
           </div>
         </div>
