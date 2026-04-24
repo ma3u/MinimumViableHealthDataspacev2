@@ -1401,16 +1401,19 @@ const QUERY_TEMPLATES: QueryTemplate[] = [
       /\b(?:side\s+effects?|adverse\s+events?)\s+of\s+.+?\s+(?:in|for|among)\s+.+/i,
     ],
     // Two-stage Cypher:
-    //  1) resolve cohort: patients with indication AND treated with drug
+    //  1) resolve cohort: patients with indication ∩ patients treated with drug
     //  2) measure side-effect frequency in that cohort
-    // All three filters are optional (accept null) so the query still returns
-    // a meaningful row when one term does not resolve — the interpretation
-    // panel in the UI explains which terms were resolved vs. missing.
+    // Each role is OPTIONAL. When a role is unresolved (both its code and
+    // text params are null), that sub-cohort falls back to "all patients",
+    // so partial questions still return meaningful rows. The UI's
+    // interpretation panel tells the researcher which terms resolved and
+    // which fell back to the full population.
     cypher: `
       MATCH (p:Patient)
       WITH collect(DISTINCT p) AS allPatients, count(DISTINCT p) AS populationSize
 
-      // Sub-cohort: patients with the indication
+      // Sub-cohort: patients with the indication, or all patients if
+      // no indication was resolved.
       CALL {
         WITH allPatients
         UNWIND allPatients AS p
@@ -1419,11 +1422,13 @@ const QUERY_TEMPLATES: QueryTemplate[] = [
            OR ($indicationText IS NOT NULL
                AND toLower(coalesce(c.display, c.name, '')) CONTAINS $indicationText)
         WITH p, count(c) AS indicationHits
-        WHERE indicationHits > 0
+        WHERE ($indicationCode IS NULL AND $indicationText IS NULL)
+           OR indicationHits > 0
         RETURN collect(DISTINCT p) AS indicationCohort
       }
 
-      // Sub-cohort: patients treated with the drug
+      // Sub-cohort: patients treated with the drug, or all patients if
+      // no drug was resolved.
       CALL {
         WITH allPatients
         UNWIND allPatients AS p
@@ -1432,7 +1437,8 @@ const QUERY_TEMPLATES: QueryTemplate[] = [
            OR ($drugText IS NOT NULL
                AND toLower(coalesce(m.display, m.medicationCode, '')) CONTAINS $drugText)
         WITH p, count(m) AS drugHits
-        WHERE drugHits > 0
+        WHERE ($drugCode IS NULL AND $drugText IS NULL)
+           OR drugHits > 0
         RETURN collect(DISTINCT p) AS drugCohort
       }
 

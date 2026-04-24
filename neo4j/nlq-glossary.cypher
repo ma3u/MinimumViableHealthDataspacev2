@@ -55,20 +55,26 @@ UNWIND [
   // Rare disease
   {term: 'rare disease',      code: '49649001',  system: 'snomed', display: 'Rare disease',  icd10: ''},
   {term: 'orphan disease',    code: '49649001',  system: 'snomed', display: 'Rare disease',  icd10: ''},
-  // Hepatology — needed for the DrFalkPharma pharmacovigilance demo (issue #19)
+  // Infectious disease — indication for the canonical pharmacovigilance demo
+  {term: 'uti',               code: '68566005',  system: 'snomed', display: 'Urinary tract infectious disease', icd10: 'N39.0'},
+  {term: 'urinary tract infection', code: '68566005', system: 'snomed', display: 'Urinary tract infectious disease', icd10: 'N39.0'},
+  // Hepatology
   {term: 'psc',               code: '197441003', system: 'snomed', display: 'Primary sclerosing cholangitis', icd10: 'K83.0'},
   {term: 'primary sclerosing cholangitis', code: '197441003', system: 'snomed', display: 'Primary sclerosing cholangitis', icd10: 'K83.0'},
   {term: 'pbc',               code: '31712002',  system: 'snomed', display: 'Primary biliary cholangitis',    icd10: 'K74.3'},
   {term: 'cholangitis',       code: '82403002',  system: 'snomed', display: 'Cholangitis',                    icd10: 'K83.0'},
-  // Neurological symptoms / common ADRs
-  {term: 'headache',           code: '25064002', system: 'snomed', display: 'Headache',  icd10: 'R51'},
-  {term: 'migraine',           code: '37796009', system: 'snomed', display: 'Migraine',  icd10: 'G43.9'},
-  {term: 'nausea',             code: '422587007',system: 'snomed', display: 'Nausea',    icd10: 'R11.0'},
-  {term: 'vomiting',           code: '422400008',system: 'snomed', display: 'Vomiting',  icd10: 'R11.1'},
-  {term: 'fatigue',            code: '84229001', system: 'snomed', display: 'Fatigue',   icd10: 'R53'},
-  {term: 'dizziness',          code: '404640003',system: 'snomed', display: 'Dizziness', icd10: 'R42'},
-  {term: 'pruritus',           code: '418363000',system: 'snomed', display: 'Itching',   icd10: 'L29.9'},
-  {term: 'itching',            code: '418363000',system: 'snomed', display: 'Itching',   icd10: 'L29.9'}
+  // Adverse-drug-reaction symptoms / side-effects
+  {term: 'tendon rupture',     code: '262615006',system: 'snomed', display: 'Rupture of tendon',        icd10: 'M66.9'},
+  {term: 'tendinitis',         code: '202882001',system: 'snomed', display: 'Tendinitis',               icd10: 'M77.9'},
+  {term: 'tendinopathy',       code: '202882001',system: 'snomed', display: 'Tendinopathy',             icd10: 'M77.9'},
+  {term: 'headache',           code: '25064002', system: 'snomed', display: 'Headache',                 icd10: 'R51'},
+  {term: 'migraine',           code: '37796009', system: 'snomed', display: 'Migraine',                 icd10: 'G43.9'},
+  {term: 'nausea',             code: '422587007',system: 'snomed', display: 'Nausea',                   icd10: 'R11.0'},
+  {term: 'vomiting',           code: '422400008',system: 'snomed', display: 'Vomiting',                 icd10: 'R11.1'},
+  {term: 'fatigue',            code: '84229001', system: 'snomed', display: 'Fatigue',                  icd10: 'R53'},
+  {term: 'dizziness',          code: '404640003',system: 'snomed', display: 'Dizziness',                icd10: 'R42'},
+  {term: 'pruritus',           code: '418363000',system: 'snomed', display: 'Itching',                  icd10: 'L29.9'},
+  {term: 'itching',            code: '418363000',system: 'snomed', display: 'Itching',                  icd10: 'L29.9'}
 ] AS row
 MERGE (g:NlqGlossary {kind: 'concept', term: row.term})
   SET g.code    = row.code,
@@ -76,21 +82,20 @@ MERGE (g:NlqGlossary {kind: 'concept', term: row.term})
       g.display = row.display,
       g.icd10   = row.icd10;
 
-// ── Drug / product aliases: NL product names → RxNorm + generic ────────────
-// NCA is a fictional product name for this demo (no real drug). The NLQ
-// pharmacovigilance template uses kind='drug' to resolve a product/trade
-// name in the question to a MedicationRequest.medicationCode or
-// OMOPDrugExposure.drugConceptId match. `generic` holds the non-branded name
-// so the explanation panel can spell out the resolution.
+// ── Drug aliases: NL drug names → RxNorm + generic ─────────────────────────
+// kind='drug' rows power the pharmacovigilance template (issue #19).
+// Ciprofloxacin + tendon rupture is the canonical teaching example —
+// well-known FDA class warning on fluoroquinolones, plenty of synthetic data.
 UNWIND [
-  {term: 'nca',               rxnorm: '9991001', generic: 'norcholic acid (synthetic)', display: 'NCA (norcholic acid, investigational)'},
-  {term: 'norcholic',         rxnorm: '9991001', generic: 'norcholic acid (synthetic)', display: 'NCA (norcholic acid, investigational)'},
-  // Real RxNorm codes for common comparator drugs
-  {term: 'ursodiol',          rxnorm: '10633',   generic: 'ursodiol',     display: 'Ursodiol (UDCA)'},
-  {term: 'udca',              rxnorm: '10633',   generic: 'ursodiol',     display: 'Ursodiol (UDCA)'},
-  {term: 'metformin',         rxnorm: '6809',    generic: 'metformin',    display: 'Metformin'},
-  {term: 'atorvastatin',      rxnorm: '83367',   generic: 'atorvastatin', display: 'Atorvastatin'},
-  {term: 'ibuprofen',         rxnorm: '5640',    generic: 'ibuprofen',    display: 'Ibuprofen'}
+  {term: 'ciprofloxacin',     rxnorm: '2551',    generic: 'ciprofloxacin', display: 'Ciprofloxacin'},
+  {term: 'cipro',             rxnorm: '2551',    generic: 'ciprofloxacin', display: 'Ciprofloxacin'},
+  {term: 'levofloxacin',      rxnorm: '82122',   generic: 'levofloxacin',  display: 'Levofloxacin'},
+  {term: 'fluoroquinolone',   rxnorm: '2551',    generic: 'fluoroquinolone class', display: 'Fluoroquinolone (class)'},
+  {term: 'ursodiol',          rxnorm: '10633',   generic: 'ursodiol',      display: 'Ursodiol (UDCA)'},
+  {term: 'udca',              rxnorm: '10633',   generic: 'ursodiol',      display: 'Ursodiol (UDCA)'},
+  {term: 'metformin',         rxnorm: '6809',    generic: 'metformin',     display: 'Metformin'},
+  {term: 'atorvastatin',      rxnorm: '83367',   generic: 'atorvastatin',  display: 'Atorvastatin'},
+  {term: 'ibuprofen',         rxnorm: '5640',    generic: 'ibuprofen',     display: 'Ibuprofen'}
 ] AS row
 MERGE (g:NlqGlossary {kind: 'drug', term: row.term})
   SET g.code    = row.rxnorm,

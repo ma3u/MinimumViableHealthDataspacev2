@@ -136,10 +136,12 @@ describe("Issue #19 adverse_event_in_cohort pattern matching", () => {
     return adverseEventPatterns.some((p) => p.test(q));
   }
 
-  it("routes Roman Haack's canonical question (issue #19)", () => {
+  it("routes the canonical cipro+tendon-rupture question (issue #19)", () => {
+    // Fluoroquinolone-class tendon rupture is a well-known FDA warning;
+    // the canonical teaching example for this template.
     expect(
       matchesAE(
-        "Is headache frequently observed in patients treated with NCA diagnosed with PSC?",
+        "Is tendon rupture frequently observed in patients treated with ciprofloxacin diagnosed with UTI?",
       ),
     ).toBe(true);
   });
@@ -147,8 +149,8 @@ describe("Issue #19 adverse_event_in_cohort pattern matching", () => {
   it.each([
     "Is nausea observed in patients treated with metformin diagnosed with diabetes?",
     "How often is fatigue observed in patients treated with ursodiol diagnosed with PBC?",
-    "Is headache common in patients with diagnosis of PSC treated with NCA?",
-    "Side effects of NCA in PSC",
+    "Is tendon rupture common in patients with diagnosis of UTI treated with ciprofloxacin?",
+    "Side effects of ciprofloxacin in UTI",
     "adverse events of ursodiol in cholangitis",
   ])("pharmacovigilance question routes: %s", (question) => {
     expect(matchesAE(question)).toBe(true);
@@ -188,11 +190,11 @@ describe("Issue #19 span extraction for drug/indication/side-effect", () => {
 
   it("extracts all three roles from the canonical question", () => {
     const spans = extract(
-      "Is headache frequently observed in patients treated with NCA diagnosed with PSC?",
+      "Is tendon rupture frequently observed in patients treated with ciprofloxacin diagnosed with UTI?",
     );
-    expect(spans.sideEffectText).toBe("headache");
-    expect(spans.drugText).toBe("nca");
-    expect(spans.indicationText).toBe("psc");
+    expect(spans.sideEffectText).toBe("tendon rupture");
+    expect(spans.drugText).toBe("ciprofloxacin");
+    expect(spans.indicationText).toBe("uti");
   });
 
   it("extracts roles regardless of clause order", () => {

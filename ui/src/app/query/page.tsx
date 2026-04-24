@@ -111,7 +111,7 @@ const EXAMPLE_QUESTIONS = [
   "What is the age distribution?",
   "Patients with diabetes",
   "How prevalent is hypertension?",
-  "Is headache frequently observed in patients treated with NCA diagnosed with PSC?",
+  "Is tendon rupture frequently observed in patients treated with ciprofloxacin diagnosed with UTI?",
 ];
 
 const SCORE_COLUMNS = new Set(["score", "frequencyPct"]);
