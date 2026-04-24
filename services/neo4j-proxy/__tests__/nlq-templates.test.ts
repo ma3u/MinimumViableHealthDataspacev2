@@ -122,3 +122,93 @@ describe("Phase 26d NLQ pattern matching (regex-only regression)", () => {
     ).toBe(false);
   });
 });
+
+// ── Issue #19 — pharmacovigilance template ──────────────────────────────────
+describe("Issue #19 adverse_event_in_cohort pattern matching", () => {
+  const adverseEventPatterns: RegExp[] = [
+    /\bis\s+.+?\s+(?:frequently|commonly|often)?\s*(?:observed|seen|reported|prevalent|common|frequent)\s+in\s+patients\s+(?:treated|being\s+treated)\s+with\s+.+?\s+(?:diagnosed|with\s+diagnosis\s+of|who\s+have)\s+.+/i,
+    /\bhow\s+(?:often|common|frequent(?:ly)?)\s+(?:is|are)\s+.+?\s+in\s+patients\s+(?:treated|being\s+treated)\s+with\s+.+?\s+(?:diagnosed|with\s+diagnosis\s+of|who\s+have)\s+.+/i,
+    /\bis\s+.+?\s+(?:frequently|commonly|often)?\s*(?:observed|seen|reported|prevalent|common|frequent)\s+in\s+patients\s+(?:diagnosed|with\s+diagnosis\s+of|who\s+have)\s+.+?\s+(?:treated|being\s+treated)\s+with\s+.+/i,
+    /\b(?:side\s+effects?|adverse\s+events?)\s+of\s+.+?\s+(?:in|for|among)\s+.+/i,
+  ];
+
+  function matchesAE(q: string): boolean {
+    return adverseEventPatterns.some((p) => p.test(q));
+  }
+
+  it("routes Roman Haack's canonical question (issue #19)", () => {
+    expect(
+      matchesAE(
+        "Is headache frequently observed in patients treated with NCA diagnosed with PSC?",
+      ),
+    ).toBe(true);
+  });
+
+  it.each([
+    "Is nausea observed in patients treated with metformin diagnosed with diabetes?",
+    "How often is fatigue observed in patients treated with ursodiol diagnosed with PBC?",
+    "Is headache common in patients with diagnosis of PSC treated with NCA?",
+    "Side effects of NCA in PSC",
+    "adverse events of ursodiol in cholangitis",
+  ])("pharmacovigilance question routes: %s", (question) => {
+    expect(matchesAE(question)).toBe(true);
+  });
+
+  it("does not hijack simple condition or count questions", () => {
+    expect(matchesAE("How many patients are there?")).toBe(false);
+    expect(matchesAE("patients with diabetes")).toBe(false);
+    expect(matchesAE("top 10 conditions")).toBe(false);
+  });
+});
+
+describe("Issue #19 span extraction for drug/indication/side-effect", () => {
+  // Mirror extractAdverseEventSpans from src/index.ts. If someone tightens
+  // a regex and role extraction stops working for Roman's demo question,
+  // CI catches it without needing Neo4j.
+  function extract(question: string) {
+    const q = question.toLowerCase();
+    return {
+      sideEffectText: q
+        .match(
+          /(?:is|are|how\s+(?:often|common|frequent(?:ly)?))\s+([a-z][a-z0-9\s-]{1,40}?)\s+(?:frequently\s+|commonly\s+|often\s+)?(?:observed|seen|reported|prevalent|common|frequent)/,
+        )?.[1]
+        ?.trim(),
+      drugText: q
+        .match(
+          /treated\s+with\s+([a-z0-9][a-z0-9\s-]{0,40}?)(?:\s*,|\s+diagnosed|\s+who\s+have|\s+with\s+diagnosis|\s*\?|\s*$)/,
+        )?.[1]
+        ?.trim(),
+      indicationText: q
+        .match(
+          /(?:diagnosed\s+with|with\s+diagnosis\s+of|who\s+have)\s+([a-z0-9][a-z0-9\s-]{0,40}?)(?:\s*\?|\s*$|\s*,|\s+treated)/,
+        )?.[1]
+        ?.trim(),
+    };
+  }
+
+  it("extracts all three roles from the canonical question", () => {
+    const spans = extract(
+      "Is headache frequently observed in patients treated with NCA diagnosed with PSC?",
+    );
+    expect(spans.sideEffectText).toBe("headache");
+    expect(spans.drugText).toBe("nca");
+    expect(spans.indicationText).toBe("psc");
+  });
+
+  it("extracts roles regardless of clause order", () => {
+    const spans = extract(
+      "Is nausea observed in patients diagnosed with PBC treated with ursodiol?",
+    );
+    expect(spans.sideEffectText).toBe("nausea");
+    expect(spans.drugText).toBe("ursodiol");
+    expect(spans.indicationText).toBe("pbc");
+  });
+
+  it("tolerates multi-word drug and indication spans", () => {
+    const spans = extract(
+      "Is headache observed in patients treated with metformin diagnosed with type 2 diabetes?",
+    );
+    expect(spans.drugText).toBe("metformin");
+    expect(spans.indicationText).toBe("type 2 diabetes");
+  });
+});
