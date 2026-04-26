@@ -1,7 +1,7 @@
 [project]
-name = "awmf-scraper-scratch"
+name = "leitlinien-ingestion"
 version = "0.1.0"
-description = "Add your description here"
+description = "AWMF Leitlinien ingestion pipeline (Phase 1 of issue #20) — discovery, download, and Docling parsing of German medical guidelines for Layer 6 of the EHDS Integration Hub knowledge graph."
 requires-python = ">=3.11"
 dependencies = [
     "docling>=2.91.0",
