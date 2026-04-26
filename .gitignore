@@ -68,3 +68,8 @@ reports/
 
 # Scalar API reference diagnostics (generated at dev time)
 .scalarDiagnostics/
+
+# Leitlinien ingestion pipeline outputs (PDFs are AWMF-copyrighted; docling JSON is derivative)
+scripts/leitlinien/data/
+scripts/leitlinien/.venv/
+scripts/leitlinien/discovery_raw.json
