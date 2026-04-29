@@ -13,6 +13,10 @@ import {
   Globe,
   Shield,
   Zap,
+  Info,
+  Pill,
+  Stethoscope,
+  AlertTriangle,
 } from "lucide-react";
 
 interface OdrlScope {
@@ -26,6 +30,57 @@ interface OdrlScope {
   hdabApproved: boolean;
 }
 
+interface PharmaRole {
+  term: string;
+  code: string;
+  system: string;
+  display: string;
+  generic?: string;
+  icd10?: string;
+}
+
+interface NlqInterpretation {
+  drug?: PharmaRole;
+  indication?: PharmaRole;
+  sideEffect?: PharmaRole;
+  unresolved?: {
+    drug?: boolean | string;
+    indication?: boolean | string;
+    sideEffect?: boolean | string;
+  };
+  raw?: {
+    drugText?: string;
+    indicationText?: string;
+    sideEffectText?: string;
+  };
+}
+
+interface NlqDataQuality {
+  snomedCoveragePct: number;
+  rxnormCoveragePct: number;
+  totalConditions: number;
+  totalMedicationRequests: number;
+  cohortSize?: number;
+  cohortConditions?: number;
+  cohortMedicationRequests?: number;
+  cohortSnomedCoveragePct?: number;
+  cohortRxnormCoveragePct?: number;
+}
+
+type GraphLayerId = "L1" | "L2" | "L3" | "L4" | "L5";
+
+interface GraphLayerInfo {
+  id: GraphLayerId;
+  label: string;
+  short: string;
+}
+
+interface NlqCypherSection {
+  label: string;
+  cypher: string;
+  layer?: GraphLayerId;
+}
+
 interface NlqResult {
   question: string;
   cypher: string;
@@ -37,7 +92,21 @@ interface NlqResult {
   error?: string;
   message?: string;
   odrlEnforced?: boolean;
+  interpretation?: NlqInterpretation;
+  dataQuality?: NlqDataQuality;
+  graphLayers?: GraphLayerInfo[];
+  cypherSections?: NlqCypherSection[];
 }
+
+const LAYER_ACCENT: Record<GraphLayerId, string> = {
+  L1: "bg-[var(--accent-l1)]/20 text-[var(--accent-l1)] border-[var(--accent-l1)]/50",
+  L2: "bg-[var(--accent-l2)]/20 text-[var(--accent-l2)] border-[var(--accent-l2)]/50",
+  L3: "bg-[var(--accent-l3)]/20 text-[var(--accent-l3)] border-[var(--accent-l3)]/50",
+  L4: "bg-[var(--accent-l4)]/20 text-[var(--accent-l4)] border-[var(--accent-l4)]/50",
+  L5: "bg-[var(--accent-l5)]/20 text-[var(--accent-l5)] border-[var(--accent-l5)]/50",
+};
+
+const ALL_LAYERS: GraphLayerId[] = ["L1", "L2", "L3", "L4", "L5"];
 
 interface NlqTemplate {
   name: string;
@@ -73,8 +142,46 @@ const EXAMPLE_QUESTIONS = [
   "What is the age distribution?",
   "Patients with diabetes",
   "How prevalent is hypertension?",
-  "Sinusitis",
+  "Is tendon rupture frequently observed in patients treated with ciprofloxacin diagnosed with UTI?",
 ];
+
+const SCORE_COLUMNS = new Set(["score", "frequencyPct"]);
+
+function formatCellValue(col: string, value: unknown): string {
+  if (value == null) return "—";
+  if (typeof value === "number" && SCORE_COLUMNS.has(col)) {
+    return value.toFixed(2);
+  }
+  if (typeof value === "object") return JSON.stringify(value);
+  return String(value);
+}
+
+function codeBadge(system: string | undefined): {
+  label: string;
+  className: string;
+} {
+  switch ((system ?? "").toLowerCase()) {
+    case "snomed":
+      return {
+        label: "SNOMED",
+        className: "bg-purple-500/20 text-purple-300",
+      };
+    case "rxnorm":
+      return {
+        label: "RxNorm",
+        className: "bg-amber-500/20 text-amber-300",
+      };
+    case "loinc":
+      return { label: "LOINC", className: "bg-cyan-500/20 text-cyan-300" };
+    case "icd10":
+      return { label: "ICD-10", className: "bg-red-500/20 text-red-300" };
+    default:
+      return {
+        label: system ?? "?",
+        className: "bg-gray-500/20 text-gray-300",
+      };
+  }
+}
 
 export default function NlqPage() {
   const [question, setQuestion] = useState("");
@@ -445,12 +552,377 @@ export default function NlqPage() {
               </button>
             </div>
 
-            {/* Cypher query */}
-            {showCypher && result.cypher && (
-              <pre className="bg-[var(--surface)] border border-[var(--border)] rounded-lg p-3 text-xs font-mono text-[var(--text-secondary)] overflow-x-auto whitespace-pre-wrap">
-                {result.cypher}
-              </pre>
+            {/* 5-layer graph breadcrumb — which layers answer this question */}
+            {result.graphLayers && result.graphLayers.length > 0 && (
+              <div className="bg-[var(--surface)] border border-[var(--border)] rounded-lg p-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <Zap size={14} className="text-[var(--accent-l1)]" />
+                  <h3 className="text-sm font-medium text-[var(--text-primary)]">
+                    Graph layers traversed
+                  </h3>
+                  <span
+                    className="text-xs text-[var(--text-secondary)] cursor-help"
+                    title="The EHDS dataspace knowledge graph is built from five stacked layers. This breadcrumb shows which layers the generated Cypher reads from to answer your question."
+                  >
+                    (5-layer model)
+                  </span>
+                </div>
+                <div className="flex items-center gap-2 flex-wrap">
+                  {ALL_LAYERS.map((id, i) => {
+                    const active = result.graphLayers!.find((l) => l.id === id);
+                    return (
+                      <div key={id} className="flex items-center gap-2">
+                        <div
+                          className={`px-2.5 py-1 rounded-md border text-xs font-medium ${
+                            active
+                              ? LAYER_ACCENT[id]
+                              : "bg-[var(--surface-2)] text-[var(--text-secondary)] border-[var(--border)] opacity-40"
+                          }`}
+                          title={
+                            active
+                              ? `${active.label} — touched by this query`
+                              : `${id} — not touched`
+                          }
+                        >
+                          <span className="font-mono mr-1">{id}</span>
+                          <span>{active?.short ?? id}</span>
+                        </div>
+                        {i < ALL_LAYERS.length - 1 && (
+                          <span className="text-[var(--text-secondary)]">
+                            →
+                          </span>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
             )}
+
+            {/* Interpretation — how we parsed the question (issue #19) */}
+            {result.interpretation && (
+              <div className="bg-[var(--surface)] border border-[var(--border)] rounded-lg p-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <Info size={14} className="text-[var(--accent-l1)]" />
+                  <h3 className="text-sm font-medium text-[var(--text-primary)]">
+                    How we interpreted your question
+                  </h3>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  {/* Drug */}
+                  <div className="bg-[var(--surface-2)]/50 border border-[var(--border)]/50 rounded-lg p-3">
+                    <div className="flex items-center gap-1.5 text-xs text-[var(--text-secondary)] mb-1">
+                      <Pill size={12} className="text-amber-400" />
+                      Drug / product
+                    </div>
+                    {result.interpretation.drug ? (
+                      <div className="space-y-1">
+                        <div className="text-sm font-medium text-[var(--text-primary)]">
+                          {result.interpretation.drug.display}
+                        </div>
+                        <div className="flex items-center gap-1.5 text-xs">
+                          <span
+                            className={`px-1.5 py-0.5 rounded ${
+                              codeBadge(result.interpretation.drug.system)
+                                .className
+                            }`}
+                          >
+                            {codeBadge(result.interpretation.drug.system).label}
+                          </span>
+                          <span className="text-[var(--text-secondary)] font-mono">
+                            {result.interpretation.drug.code}
+                          </span>
+                        </div>
+                        {result.interpretation.drug.generic && (
+                          <div className="text-xs text-[var(--text-secondary)]">
+                            generic:{" "}
+                            <span className="text-[var(--text-primary)]">
+                              {result.interpretation.drug.generic}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="text-xs text-red-300/80 flex items-center gap-1.5">
+                        <AlertTriangle size={12} />
+                        {result.interpretation.raw?.drugText
+                          ? `"${result.interpretation.raw.drugText}" — not in glossary`
+                          : "No drug detected"}
+                      </div>
+                    )}
+                  </div>
+                  {/* Indication */}
+                  <div className="bg-[var(--surface-2)]/50 border border-[var(--border)]/50 rounded-lg p-3">
+                    <div className="flex items-center gap-1.5 text-xs text-[var(--text-secondary)] mb-1">
+                      <Stethoscope size={12} className="text-emerald-400" />
+                      Indication (diagnosis)
+                    </div>
+                    {result.interpretation.indication ? (
+                      <div className="space-y-1">
+                        <div className="text-sm font-medium text-[var(--text-primary)]">
+                          {result.interpretation.indication.display}
+                        </div>
+                        <div className="flex items-center gap-1.5 text-xs flex-wrap">
+                          <span
+                            className={`px-1.5 py-0.5 rounded ${
+                              codeBadge(result.interpretation.indication.system)
+                                .className
+                            }`}
+                          >
+                            {
+                              codeBadge(result.interpretation.indication.system)
+                                .label
+                            }
+                          </span>
+                          <span className="text-[var(--text-secondary)] font-mono">
+                            {result.interpretation.indication.code}
+                          </span>
+                          {result.interpretation.indication.icd10 && (
+                            <>
+                              <span
+                                className={`px-1.5 py-0.5 rounded ${
+                                  codeBadge("icd10").className
+                                }`}
+                              >
+                                ICD-10
+                              </span>
+                              <span className="text-[var(--text-secondary)] font-mono">
+                                {result.interpretation.indication.icd10}
+                              </span>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="text-xs text-red-300/80 flex items-center gap-1.5">
+                        <AlertTriangle size={12} />
+                        {result.interpretation.raw?.indicationText
+                          ? `"${result.interpretation.raw.indicationText}" — not in glossary`
+                          : "No indication detected"}
+                      </div>
+                    )}
+                  </div>
+                  {/* Side effect */}
+                  <div className="bg-[var(--surface-2)]/50 border border-[var(--border)]/50 rounded-lg p-3">
+                    <div className="flex items-center gap-1.5 text-xs text-[var(--text-secondary)] mb-1">
+                      <AlertTriangle size={12} className="text-red-400" />
+                      Side-effect (measured)
+                    </div>
+                    {result.interpretation.sideEffect ? (
+                      <div className="space-y-1">
+                        <div className="text-sm font-medium text-[var(--text-primary)]">
+                          {result.interpretation.sideEffect.display}
+                        </div>
+                        <div className="flex items-center gap-1.5 text-xs flex-wrap">
+                          <span
+                            className={`px-1.5 py-0.5 rounded ${
+                              codeBadge(result.interpretation.sideEffect.system)
+                                .className
+                            }`}
+                          >
+                            {
+                              codeBadge(result.interpretation.sideEffect.system)
+                                .label
+                            }
+                          </span>
+                          <span className="text-[var(--text-secondary)] font-mono">
+                            {result.interpretation.sideEffect.code}
+                          </span>
+                          {result.interpretation.sideEffect.icd10 && (
+                            <>
+                              <span
+                                className={`px-1.5 py-0.5 rounded ${
+                                  codeBadge("icd10").className
+                                }`}
+                              >
+                                ICD-10
+                              </span>
+                              <span className="text-[var(--text-secondary)] font-mono">
+                                {result.interpretation.sideEffect.icd10}
+                              </span>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="text-xs text-red-300/80 flex items-center gap-1.5">
+                        <AlertTriangle size={12} />
+                        {result.interpretation.raw?.sideEffectText
+                          ? `"${result.interpretation.raw.sideEffectText}" — not in glossary`
+                          : "No side-effect detected"}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Data quality snapshot (issue #19) — cohort + global */}
+            {result.dataQuality && (
+              <div className="bg-[var(--surface)] border border-[var(--border)] rounded-lg p-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <Database size={14} className="text-[var(--accent-l5)]" />
+                  <h3 className="text-sm font-medium text-[var(--text-primary)]">
+                    Data quality for this question
+                  </h3>
+                  <span
+                    className="text-xs text-[var(--text-secondary)] cursor-help"
+                    title="Share of Condition nodes with a CODED_BY SnomedConcept link, and MedicationRequest nodes with a CODED_BY RxNormConcept link. High coverage means the cohort filter is reliable."
+                  >
+                    (hover for details)
+                  </span>
+                </div>
+
+                {/* Cohort-scoped (preferred when we have a cohort) */}
+                {result.dataQuality.cohortSize !== undefined && (
+                  <div className="mb-4">
+                    <div className="text-xs text-[var(--text-secondary)] mb-2 flex items-center gap-1.5">
+                      <span className="inline-block w-1.5 h-1.5 rounded-full bg-[var(--accent-l3)]"></span>
+                      In this cohort
+                    </div>
+                    <div className="grid grid-cols-2 md:grid-cols-5 gap-3 text-xs">
+                      <div>
+                        <div className="text-[var(--text-secondary)]">
+                          Cohort size
+                        </div>
+                        <div className="text-lg font-semibold text-[var(--accent-l3)]">
+                          {result.dataQuality.cohortSize.toLocaleString()}
+                        </div>
+                      </div>
+                      <div>
+                        <div className="text-[var(--text-secondary)]">
+                          Conditions
+                        </div>
+                        <div className="text-lg font-semibold text-[var(--text-primary)]">
+                          {(
+                            result.dataQuality.cohortConditions ?? 0
+                          ).toLocaleString()}
+                        </div>
+                      </div>
+                      <div>
+                        <div className="text-[var(--text-secondary)]">
+                          Med requests
+                        </div>
+                        <div className="text-lg font-semibold text-[var(--text-primary)]">
+                          {(
+                            result.dataQuality.cohortMedicationRequests ?? 0
+                          ).toLocaleString()}
+                        </div>
+                      </div>
+                      <div>
+                        <div className="text-[var(--text-secondary)]">
+                          SNOMED coverage
+                        </div>
+                        <div className="text-lg font-semibold text-[var(--accent-l5)]">
+                          {(
+                            result.dataQuality.cohortSnomedCoveragePct ?? 0
+                          ).toFixed(1)}
+                          %
+                        </div>
+                      </div>
+                      <div>
+                        <div className="text-[var(--text-secondary)]">
+                          RxNorm coverage
+                        </div>
+                        <div className="text-lg font-semibold text-amber-300">
+                          {(
+                            result.dataQuality.cohortRxnormCoveragePct ?? 0
+                          ).toFixed(1)}
+                          %
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Global graph coverage — baseline */}
+                <div>
+                  <div className="text-xs text-[var(--text-secondary)] mb-2 flex items-center gap-1.5">
+                    <span className="inline-block w-1.5 h-1.5 rounded-full bg-[var(--accent-l5)]"></span>
+                    Across the whole graph
+                  </div>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
+                    <div>
+                      <div className="text-[var(--text-secondary)]">
+                        SNOMED coverage
+                      </div>
+                      <div className="text-lg font-semibold text-[var(--accent-l5)]">
+                        {result.dataQuality.snomedCoveragePct.toFixed(1)}%
+                      </div>
+                    </div>
+                    <div>
+                      <div className="text-[var(--text-secondary)]">
+                        RxNorm coverage
+                      </div>
+                      <div className="text-lg font-semibold text-amber-300">
+                        {result.dataQuality.rxnormCoveragePct.toFixed(1)}%
+                      </div>
+                    </div>
+                    <div>
+                      <div className="text-[var(--text-secondary)]">
+                        Conditions
+                      </div>
+                      <div className="text-lg font-semibold text-[var(--text-primary)]">
+                        {result.dataQuality.totalConditions.toLocaleString()}
+                      </div>
+                    </div>
+                    <div>
+                      <div className="text-[var(--text-secondary)]">
+                        Medication requests
+                      </div>
+                      <div className="text-lg font-semibold text-[var(--text-primary)]">
+                        {result.dataQuality.totalMedicationRequests.toLocaleString()}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Cypher query — annotated sections when the template exposes
+                them, otherwise the raw Cypher string. */}
+            {showCypher &&
+              (result.cypherSections && result.cypherSections.length > 0 ? (
+                <div className="space-y-2">
+                  {result.cypherSections.map((section, i) => (
+                    <div
+                      key={i}
+                      className={`rounded-lg border p-3 ${
+                        section.layer
+                          ? LAYER_ACCENT[section.layer].replace(
+                              "bg-",
+                              "bg-opacity-10 bg-",
+                            )
+                          : "bg-[var(--surface)] border-[var(--border)]"
+                      }`}
+                    >
+                      <div className="flex items-center gap-2 mb-2">
+                        {section.layer && (
+                          <span
+                            className={`px-1.5 py-0.5 rounded text-xs font-mono border ${
+                              LAYER_ACCENT[section.layer]
+                            }`}
+                          >
+                            {section.layer}
+                          </span>
+                        )}
+                        <span className="text-xs font-medium text-[var(--text-primary)]">
+                          {section.label}
+                        </span>
+                      </div>
+                      <pre className="text-xs font-mono text-[var(--text-secondary)] overflow-x-auto whitespace-pre-wrap">
+                        {section.cypher}
+                      </pre>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                result.cypher && (
+                  <pre className="bg-[var(--surface)] border border-[var(--border)] rounded-lg p-3 text-xs font-mono text-[var(--text-secondary)] overflow-x-auto whitespace-pre-wrap">
+                    {result.cypher}
+                  </pre>
+                )
+              ))}
 
             {/* Error */}
             {result.error && (
@@ -476,9 +948,21 @@ export default function NlqPage() {
                         {columns.map((col) => (
                           <th
                             key={col}
+                            title={
+                              col === "score"
+                                ? "Lucene relevance score — higher means the node's indexed text matched the query terms more strongly. Not a statistical frequency."
+                                : col === "frequencyPct"
+                                  ? "Percentage of the cohort that has the side-effect recorded (0–100)."
+                                  : undefined
+                            }
                             className="px-4 py-2.5 text-left text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider"
                           >
                             {col}
+                            {(col === "score" || col === "frequencyPct") && (
+                              <span className="ml-1 text-gray-500 cursor-help">
+                                ⓘ
+                              </span>
+                            )}
                           </th>
                         ))}
                       </tr>
@@ -494,11 +978,7 @@ export default function NlqPage() {
                               key={col}
                               className="px-4 py-2 text-[var(--text-primary)] whitespace-nowrap"
                             >
-                              {row[col] != null
-                                ? typeof row[col] === "object"
-                                  ? JSON.stringify(row[col])
-                                  : String(row[col])
-                                : "—"}
+                              {formatCellValue(col, row[col])}
                             </td>
                           ))}
                         </tr>
