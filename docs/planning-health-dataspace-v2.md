@@ -4,18 +4,20 @@
 
 Planning and implementation are tracked in [GitHub Issues](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues):
 
-| Issue                                                                   | Title                                                                  | Status    | Related ADR/Phase                                                                       |
-| ----------------------------------------------------------------------- | ---------------------------------------------------------------------- | --------- | --------------------------------------------------------------------------------------- |
-| [#1](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/1)   | Trust Center for Cross-Provider Pseudonym Resolution (EHDS Art. 50/51) | ✅ Closed | Phase 6, Graph personas                                                                 |
-| [#2](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/2)   | Documentation refers to missing neo4j script                           | ✅ Closed | Phase 3                                                                                 |
-| [#3](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/3)   | Stability, Load Tests and Cost per Tenant                              | ✅ Closed | Phase 8                                                                                 |
-| [#4](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/4)   | Security Assessment & BSI C5 Plan                                      | 🔓 Open   | [ADR-011](ADRs/ADR-011-security-testing.md) (demo track done, production track pending) |
-| [#5](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/5)   | Pentest Plan + Trivy Remediation                                       | ✅ Closed | [ADR-011](ADRs/ADR-011-security-testing.md)                                             |
-| [#6](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/6)   | Pentest Results (2026-03-28 scan)                                      | ✅ Closed | Security spec 28                                                                        |
-| [#8](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/8)   | Cross-Participant Dataset Discovery (NLP)                              | 🔓 Open   | Phase 5 extension (federated discovery across unknown participants)                     |
-| [#9](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/9)   | Hospital-Grade Design System (Light/Dark)                              | ✅ Closed | Phase 6                                                                                 |
-| [#10](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/10) | Deploy MVHD to Azure — ACA + managed services                          | ✅ Closed | [ADR-012](ADRs/ADR-012-azure-container-apps.md), v1.2.0                                 |
-| [#11](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/11) | Weekly Demo Reset — start-of-week baseline refresh                     | 🔓 Open   | [ADR-014](ADRs/ADR-014-weekly-demo-reset.md)                                            |
+| Issue                                                                   | Title                                                                         | Status    | Related ADR/Phase                                                                       |
+| ----------------------------------------------------------------------- | ----------------------------------------------------------------------------- | --------- | --------------------------------------------------------------------------------------- |
+| [#1](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/1)   | Trust Center for Cross-Provider Pseudonym Resolution (EHDS Art. 50/51)        | ✅ Closed | Phase 6, Graph personas                                                                 |
+| [#2](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/2)   | Documentation refers to missing neo4j script                                  | ✅ Closed | Phase 3                                                                                 |
+| [#3](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/3)   | Stability, Load Tests and Cost per Tenant                                     | ✅ Closed | Phase 8                                                                                 |
+| [#4](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/4)   | Security Assessment & BSI C5 Plan                                             | 🔓 Open   | [ADR-011](ADRs/ADR-011-security-testing.md) (demo track done, production track pending) |
+| [#5](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/5)   | Pentest Plan + Trivy Remediation                                              | ✅ Closed | [ADR-011](ADRs/ADR-011-security-testing.md)                                             |
+| [#6](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/6)   | Pentest Results (2026-03-28 scan)                                             | ✅ Closed | Security spec 28                                                                        |
+| [#8](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/8)   | Cross-Participant Dataset Discovery (NLP)                                     | 🔓 Open   | Phase 5 extension (federated discovery across unknown participants)                     |
+| [#9](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/9)   | Hospital-Grade Design System (Light/Dark)                                     | ✅ Closed | Phase 6                                                                                 |
+| [#10](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/10) | Deploy MVHD to Azure — ACA + managed services                                 | ✅ Closed | [ADR-012](ADRs/ADR-012-azure-container-apps.md), v1.2.0                                 |
+| [#11](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/11) | Weekly Demo Reset — start-of-week baseline refresh                            | 🔓 Open   | [ADR-014](ADRs/ADR-014-weekly-demo-reset.md)                                            |
+| [#22](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/22) | DCP BusinessWallet + EUDI Wallet Sandbox — hybrid credential stack (Option B) | 🔓 Open   | Phase 27a–h + planned ADR-022 (Option A vs B vs C vs hybrid)                            |
+| [#24](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/24) | GesundheitsID OIDC RP via gematik open-source stack (Option C)                | 🔓 Open   | Phase 27i + planned ADR-022                                                             |
 
 ## Table of Contents
 
@@ -3657,6 +3659,141 @@ New spec `ui/__tests__/e2e/journeys/32-federated-nlq.spec.ts`:
 
 - Approach 2 distributed broadcast — revisit once 30 days of audit log tell us which queries are cold.
 - Semantic query DSP extension proposal to IDSA — only worth raising if operational data shows Approach 1 hits its stale-cache ceiling.
+
+---
+
+### Phase 27: EUDI Wallet Sandbox Integration (Issues #22 + #24)
+
+**Goal:** Close the citizen-side identity, access-rights, and consent gap by integrating the **BMDS EUDI Wallet sandbox** as the patient-facing wallet alongside the existing DCP-1.0 **Business Wallet** stack. The MVHD already runs the four-step patient journey (Access → Explore → Consent → Insights — see Phase 20). Phase 27 promotes those server-side flags and platform logins to **wallet-issued, selectively disclosed, revocable Verifiable Credentials** so EHDS Art. 3 (primary access) and Art. 10 (consent-driven secondary use) are satisfied end-to-end.
+
+**Source:** [`docs/EUDI_Wallet_UseCase_EHDS.pdf`](EUDI_Wallet_UseCase_EHDS.pdf) — _BMDS Deutschland Architektur (Identitäten)_, sandbox use-case proposal by Matthias Buchhorn-Roth (Sopra Steria SE).
+
+**Why now:**
+
+- BMDS launched the **EUDI Wallet Sandbox 2026-01-27**; productive rollout (digital ID card, driver's licence) is planned **early 2027**. Alternative wallet providers can certify ~12 months after the state wallet goes live.
+- Sandbox access for MVHD has been **applied for in 2026-04** (issue #22 task list, awaiting access).
+- Issue #22 frames this as the **standards-based, self-hosted** option alongside the **vendor-combined** path tracked in #12 (Spherity + Bundesanzeiger Verlag). Both options must satisfy EHDS Art. 3–12 (primary use) + Art. 50–51 (secondary use). A comparison ADR is part of the deliverables.
+
+**Key insight from the proposal:** the existing Phase 20 patient journey **already maps 1:1 to the four EUDI-extended steps** in the use case (Access & Risk Assessment, Explore Clinical Timeline, Grant Consent · Donate EHR, Receive Aggregate Insights). Phase 27 swaps the trust anchor from "platform session + server flag" to "wallet-issued VC verified at the EDC connector". No new patient-facing pages are required for the MVP — only new credential plumbing.
+
+#### 27a: SPRIND sandbox onboarding ⏳
+
+- Confirm sandbox access (application submitted 2026-04). Track in issue #22 task list.
+- Obtain test **PID issuer endpoint** (Person Identification Data) and **EAA issuer endpoints** (Electronic Attestations of Attributes) for at least one EHDS-relevant attestation (target: health-insurance EAA from a fictional insurer).
+- Stand up the SPRIND **verifier endpoint** so the EDC connector and the Patient app can verify presented VCs.
+- Document sandbox limitations in `docs/eudi-wallet/sandbox-status.md`: PID-only initially, EAA later, k≥5 contributors not yet enforced upstream.
+- **Reference:** BMDS EUDI Ecosystem Knowledge Centre — [bmi.usercontent.opencode.de/eudi-wallet/eidas2/ecosystem_knowledge_centre](https://bmi.usercontent.opencode.de/eudi-wallet/eidas2/ecosystem_knowledge_centre/).
+
+#### 27b: OID4VP / OID4VCI bridge into the EDC IdentityHub ⏳
+
+- New service `services/eudi-bridge/` (Node.js or Java) implementing OID4VCI issuer-side (for receiving wallet-issued credentials) and OID4VP verifier-side (for presentation requests against the patient).
+- Bridges into the existing **DCP IdentityHub** so wallet-issued VCs land in the same credential store as DCP-issued LPID / MembershipCredential / EHDSParticipantCredential / DataPermitCredential. Result: a single `/credentials` view per principal, regardless of issuance protocol.
+- Selective disclosure via **SD-JWT VC** (the format the BMDS sandbox issues). Bridge unwraps disclosures only for fields the verifier policy actually requires — never the full PID.
+- Trust-anchor handling: eIDAS 2.0 trust list ingested into Trust Center (Phase 18); SD-JWT issuer keys validated against the list before a VC is accepted.
+- **Gotcha:** OID4VP returns a Verifiable Presentation, not the underlying VCs — store the VP audit record (presentation, audience, nonce, timestamp) but never the raw user attributes once verified.
+
+#### 27c: Patient-side wallet onboarding flow ⏳
+
+- New page `ui/src/app/patient/wallet/page.tsx` — opt-in screen: "Connect your EUDI Wallet". Launches OID4VCI flow with the SPRIND sandbox.
+- On first connect: PID is stored as a `:Credential {format: "sd-jwt-vc", source: "eudi-sandbox", subjectDid}` node in Neo4j L1; the patient's existing demo persona is **linked to** the wallet-issued PID via `:HOLDS` relationship — never replaced.
+- Static-export fallback: in `NEXT_PUBLIC_STATIC_EXPORT=true` mode the page shows a sandbox-mocked PID JSON (per `ui/public/mock/eudi-wallet.json`) so GitHub Pages still renders the journey.
+- Revocation panel: surface the VC status-list state so a patient can see and revoke each issued credential. Pulls from the bridge's `/status` endpoint, not from the issuer directly.
+
+#### 27d: Wallet-issued consent VC schema + dual-side enforcement ⏳
+
+- New JSON-LD context + schema file `schemas/credentials/HealthConsentCredential.jsonld` — fields: `subjectId` (PID hash), `studyId`, `dataNeeded` (FHIR resource list), `purpose`, `retentionDays`, `aggregationThreshold` (k), `notBefore`, `notAfter`, `revocable: true`, `revocationStatus` (BitstringStatusList ref).
+- Schema validated with HDABs (MedReg DE, IRS) and at least one statutory health insurer in the demo data.
+- **Dual-side enforcement:**
+  - At ingress: EDC connector requires a presentable, non-revoked `HealthConsentCredential` matching the requested dataset + study before the DSP transfer is approved.
+  - At egress (in the SPE): the existing Phase 24 ODRL evaluator additionally checks the consent VC's `aggregationThreshold` against the result row count; if the threshold is unmet, the result is suppressed with `reason: "consent_k_violation"` (parallel to Phase 26e).
+- Per-study consent VCs replace today's server-side `consent_history` flag in Phase 20c; existing flags become a fallback when `NEXT_PUBLIC_EUDI_ENABLED=false`.
+
+#### 27e: Dual-signature DSP negotiation (B2B + signer EAA) ⏳
+
+- DSP contract negotiation extends to a **two-VP exchange**: company side presents a DCP-issued `EHDSParticipantCredential` + `DataPermitCredential`; the human signer presents an EUDI Wallet **professional-role / signer EAA** (e.g., AlphaKlinik Berlin's contract signer).
+- The contract object stores `companyVp` and `signerVp` references; both must verify at the verifier service before the contract transitions to `AGREED`.
+- Demo journey: AlphaKlinik Berlin contract signer approves a data offer to PharmaCo Research AG via dual credential. Track as a new Playwright spec in `__tests__/e2e/journeys/33-eudi-dual-signature.spec.ts` (J750–J759).
+- This unblocks the issue #22 acceptance criterion _"Dual-signature contract flow demonstrated in the JAD demo stack"_.
+
+#### 27f: Trust Center extension — surface both wallets ⏳
+
+- Phase 18 Trust Center adds two tabs: **Business Wallets** (DCP, existing) and **Patient Wallets** (EUDI Sandbox, new).
+- Per principal, render: VC types held, issuer, last presentation timestamp, revocation status, trust-list verdict.
+- DID resolution: business wallets stay on `did:web:*`; patient wallets present a SD-JWT VC bound to a pseudonymous holder key (no DID required for citizen). Trust Center renders the issuer DID + sandbox key thumbprint.
+
+#### 27g: Patient consent → research donation E2E demo ⏳
+
+- New Playwright spec `__tests__/e2e/journeys/34-eudi-patient-consent.spec.ts` (J760–J779). Maria Schmidt (existing demo persona):
+  1. Opens `/patient/wallet`, connects EUDI sandbox, receives PID + health-insurance EAA.
+  2. Authenticates against `/patient/profile` via PID presentation (replaces Keycloak login in the wallet-enabled flow).
+  3. Browses `/patient/research`, donates EHR to PharmaCo Research AG study `product-syntha-thur-r4-2026`. A `HealthConsentCredential` is issued from her wallet, presented to the EDC connector via OID4VP.
+  4. Behind the scenes: consumer-side EDC negotiates a DSP contract, verifies the consent VC via the bridge, retrieves the scoped FHIR subset, runs analysis in the SPE.
+  5. Maria revisits `/patient/insights` and sees aggregate findings (k ≥ 5).
+  6. She revokes the consent — VC status flips to `revoked`, the next study attempt is rejected with `reason: "consent_revoked"`.
+- Live-stack project (`PLAYWRIGHT_BASE_URL=https://ehds.mabu.red`) once sandbox endpoints are reachable from ACA.
+
+#### 27h: Comparison ADR — Option A vs Option B vs Option C vs hybrid ⏳
+
+- New ADR `docs/ADRs/ADR-022-eudi-wallet-vs-vendor-stack.md` — compare three patient-side stacks against the same DCP B2B baseline:
+  - **Option A** — Spherity BusinessWallet + Bundesanzeiger EUDI Wallet, vendor-managed, production-ready today, commercial licensing.
+  - **Option B** — DCP IssuerService + BMDS / SPRIND EUDI Sandbox, self-hosted, sandbox now / productive ~2027, operational cost only, EU-wide.
+  - **Option C** — gematik sektoraler IDP federation + GesundheitsID via insurer apps (TK-Safe, AOK Mein Leben, BARMER eCare, etc.), production since 2024-01-01, ~70M citizens reachable, **DE-only**, OIDC today and OpenID Federation / EUDI fold-in via the gematik Federation Master on the roadmap. Tracked in [#12](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/12).
+- Decision matrix: maturity, control, standards alignment (OID4VP/VCI + ARF + DCP v1.0 + OIDC Federation), cost profile, geographic reach (DE vs EU), timeline-to-EHDS-rollout (Mar 2025 went into force, secondary-use mandate Mar 2029).
+- Recommendation: **hybrid** — DCP B2B stack stays self-hosted (no vendor lock for organisations); patient stack uses **Option C** for DE-resident demos today (production-grade flow against the gematik OSS stack), tracks **Option B** for cross-border + EUDI-native flows from sandbox into 2027 productive rollout. **Option A** stays a vendor fallback if both gematik certification and BMDS sandbox slip.
+- Link this ADR from issues #12 and #22, and from the planning doc ADR index.
+
+#### 27i: GesundheitsID OIDC RP via gematik open-source stack ⏳
+
+**Why:** Issue [#12](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/12) surfaced that gematik publishes the entire sektoraler IDP toolchain under Apache 2.0, but **operating a productive sIDP requires gematik Zulassung** (security assessment, operations manual, provider-type approval — held today only by T-Systems/Verimi, IBM, RISE). For the MVHD demo we deliberately split the work: build everything OSS for dev/sandbox, partner with an approved sIDP for productive cross-org demos, never pursue Zulassung ourselves.
+
+- New service `services/gematik-ref-idp/` running [`gematik/ref-idp-server`](https://github.com/gematik/ref-idp-server) (Apache 2.0) as a **fake sIDP** in the dev compose stack. Seeded with the existing demo patient personas (Maria Schmidt et al.) so the GesundheitsID flow has identifiable test users without leaking PII.
+- New service `services/gesundheitsid-rp/` based on [`oviva-ag/ehealthid-relying-party`](https://github.com/oviva-ag/ehealthid-relying-party) — OIDC RP that consumes tokens from any sIDP (fake `ref-idp-server` in dev, RISE / Verimi / IBM in productive pilots).
+- Wire the RP into NextAuth in `ui/src/lib/auth.ts` as an **additional provider next to Keycloak** — Keycloak stays for staff / EDC roles, GesundheitsID handles patient login. Persona resolution in `ui/src/lib/use-demo-persona.ts` extended to recognise `sub` claims minted by the fake sIDP.
+- **Conformance gate:** run [`gematik/app-gemSekIdp`](https://github.com/gematik/app-gemSekIdp) test suite against the RP in CI (new workflow `.github/workflows/sek-idp-conformance.yml`). Required green before merging changes to the RP. If it passes against `ref-idp-server`, it passes against any approved sIDP.
+- **Bridge to EDC IdentityHub:** the RP, on successful login, emits a `:Credential {format: "oidc-id-token", source: "gematik-sidp", subjectDid}` node in Neo4j L1, parallel to how Phase 27c stores wallet-issued PIDs. The downstream consent VC issuance (Phase 27d) is identical regardless of whether the upstream identity came from EUDI Wallet or GesundheitsID — the RP normalises the token.
+- **HBA / SMC-B path for staff / contract-signers:** add [`Bundesdruckerei-GmbH/Gematik-IDP`](https://github.com/Bundesdruckerei-GmbH/Gematik-IDP) Keycloak plugin (Apache 2.0) so AlphaKlinik Berlin demo staff can authenticate via Heilberufsausweis against the **central-IDP** (separate from the citizen sIDP). Wires into the Phase 27e dual-signature flow as the human-signer side.
+- **Productive pilot path (out of scope for MVP, documented for transparency):** RISE GmbH offers an RP sandbox against AccessKeeper that does not require full Zulassung for the RP side — only RPs registered with the Federation Master. Documented as the recommended next step if a real-patient demo becomes a goal.
+- **Explicit non-goal:** pursuing gematik **Zulassung** for our own sIDP. Surfaced in ADR-022 as the "production gate" between Option C dev/sandbox use and a fully self-hosted productive deployment. Cost and time profile (mid-six-figure EUR, multi-quarter) makes this an enterprise-vendor commitment, not a reference-implementation goal.
+
+**Sub-phase exit criteria:**
+
+1. `docker compose up -d` brings up `ref-idp-server` + `gesundheitsid-rp` alongside the existing stack.
+2. Maria Schmidt persona logs into `/patient/profile` via "Sign in with GesundheitsID" → fake sIDP → RP → NextAuth session; existing Phase 20 patient pages render unchanged.
+3. `gematik/app-gemSekIdp` conformance suite green in CI.
+4. Cypher query `MATCH (p:Person {personaId: 'maria'})-[:HOLDS]->(c:Credential {source: 'gematik-sidp'}) RETURN c` returns the issued ID token credential after login.
+5. HBA login path demonstrated for at least one AlphaKlinik staff persona via Bundesdruckerei Keycloak plugin.
+6. Documentation in `docs/eudi-wallet/gematik-oss-stack.md` covers: which OSS components are in use, what would need to change for a productive RP registration, and the explicit non-goal of self-Zulassung.
+
+**Exit criteria:**
+
+1. SPRIND sandbox account active; PID + at least one health-relevant EAA issuable end-to-end against the local stack.
+2. EUDI bridge service deployed; OID4VCI receives, OID4VP presents; SD-JWT verification succeeds against the eIDAS 2.0 trust list.
+3. `/patient/wallet` connects to the sandbox and surfaces issued VCs; revocation works through to the status list.
+4. `HealthConsentCredential` schema validated by at least one HDAB; per-study consent VCs replace `consent_history` flags in the wallet-enabled flow.
+5. Dual-signature contract flow (J750–J759) green; both `companyVp` and `signerVp` are required for `AGREED`.
+6. Patient consent → research donation E2E (J760–J779) green; revocation propagates within one minute.
+7. ADR-022 written, accepted, and linked from #12 + #22.
+8. Phase 20 regression: with `NEXT_PUBLIC_EUDI_ENABLED=false`, the existing four-step patient journey continues to work unchanged.
+
+**Deferred to later phases:**
+
+- BMDS productive wallet (early 2027) — switch trust anchor when the state wallet certification is final.
+- Cross-border MyHealth@EU integration via NCP-eH — touched only as a design hook (EHDS Art. 14); production rollout out of scope until at least one foreign HDAB is reachable.
+- Alternative wallet providers — certification window opens ~12 months after the state wallet goes live; revisit then.
+
+**Issue #22 task-list mapping:**
+
+| Issue #22 task                                                           | Phase 27 sub-task |
+| ------------------------------------------------------------------------ | ----------------- |
+| Confirm sandbox access                                                   | 27a               |
+| Map DCP IssuerService credentials ↔ EUDI EAA schemas                    | 27b + 27d         |
+| Patient onboarding flow: EUDI Wallet → IdentityHub → DSP transfer permit | 27c               |
+| Dual-signature DSP negotiation: company (DCP) + signer (EUDI EAA)        | 27e               |
+| Comparison ADR (Option A vs Option B vs hybrid)                          | 27h               |
+| Demo journey: patient consents to PharmaCo Research AG study via EUDI    | 27g               |
+| Demo journey: AlphaKlinik Berlin contract signer dual credential         | 27e               |
+| Update Trust Center to surface both wallets                              | 27f               |
+| Document sandbox limitations                                             | 27a               |
 
 ---
 
