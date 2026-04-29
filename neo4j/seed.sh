@@ -88,6 +88,19 @@ run_file /seed/participant-source-init.cypher "participant source labels (Phase 
 # redeploy. ~30 curated terms across kind=country|concept|credential.
 run_file /seed/nlq-glossary.cypher "NLQ glossary (Phase 26d)"
 
+# Issue #19: backfill :CODED_BY edges from Condition/MedicationRequest/
+# Observation to their ontology nodes, using the code strings that are
+# already present on the clinical nodes. Fills in the relationships the
+# Synthea bulk-import leaves empty so NLQ queries can join to the
+# ontology layer cleanly. Idempotent.
+run_file /seed/backfill-coded-by.cypher "CODED_BY edge backfill (issue #19)"
+
+# Issue #19: pharmacovigilance demo cohort (ciprofloxacin + UTI + tendon
+# rupture) so the canonical NLQ teaching question returns a real cohort
+# against the Synthea-based synthetic dataset (which does not include
+# fluoroquinolones out of the box). 6 fictional patients. Idempotent.
+run_file /seed/issue-19-demo-seed.cypher "pharmacovigilance demo cohort (issue #19)"
+
 # Phase 25b (Issue #13): Structural embeddings (FastRP) — always on, no API.
 # Requires the graph-data-science plugin; silently no-ops on installs without
 # it (the CALL gds.version() check below logs a warning so the operator sees
