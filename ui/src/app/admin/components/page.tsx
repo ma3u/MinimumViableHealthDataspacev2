@@ -1,6 +1,7 @@
 "use client";
 
 import { fetchApi } from "@/lib/api";
+import { ComponentActions } from "@/components/ComponentActions";
 import { COMPONENT_INFO, type ComponentMeta } from "@/lib/edc/component-info";
 import {
   AZURE_EGRESS_FREE_GIB,
@@ -1081,6 +1082,19 @@ const DEFAULT_STORAGE_GIB = 32;
 // Default egress: rough estimate — most traffic is internal to the ACA env
 const DEFAULT_EGRESS_GIB = 20;
 
+// ACA apps known to be broken on the current Azure deployment due to the
+// EDC multi-port architecture mismatch documented in issue #25. Kept in sync
+// with the diagnosis catalogue at /api/admin/components/[name]/diagnosis.
+const KNOWN_BROKEN_APPS = new Set<string>([
+  "mvhd-controlplane",
+  "mvhd-dp-fhir",
+  "mvhd-dp-omop",
+  "mvhd-identityhub",
+  "mvhd-issuerservice",
+  "mvhd-tenant-mgr",
+  "mvhd-provision-mgr",
+]);
+
 function AzureCostEstimatorPanel({
   liveComponents,
 }: {
@@ -1161,6 +1175,11 @@ function AzureCostEstimatorPanel({
             .sort((a, b) => b.totalUsd - a.totalUsd)
             .map((app) => {
               const spec = specs.find((s) => s.name === app.name)!;
+              const live = liveComponents.find((c) => c.container === app.name);
+              const isBroken =
+                KNOWN_BROKEN_APPS.has(app.name) ||
+                live?.status === "unhealthy" ||
+                live?.status === "stopped";
               return (
                 <div
                   key={app.name}
@@ -1181,6 +1200,7 @@ function AzureCostEstimatorPanel({
                     <span>CPU {formatUsd(app.vcpuUsd)}</span>
                     <span>MEM {formatUsd(app.memUsd)}</span>
                   </div>
+                  <ComponentActions name={app.name} isBroken={isBroken} />
                 </div>
               );
             })}

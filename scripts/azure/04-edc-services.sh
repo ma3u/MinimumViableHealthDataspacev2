@@ -50,13 +50,21 @@ az containerapp create \
     "EDC_DSP_CALLBACK_ADDRESS=${CONTROLPLANE_URL:-}" \
     "EDC_VAULT_HASHICORP_URL=${VAULT_URL:-}" \
     "EDC_VAULT_HASHICORP_TOKEN=${VAULT_ROOT_TOKEN}" \
-    "EDC_EVENTS_NATS_URL=${NATS_URL:-}" \
+    "EDC_NATS_CN_SUBSCRIBER_URL=nats://${NATS_APP}:4222" \
+    "EDC_NATS_CN_SUBSCRIBER_AUTOCREATE=true" \
+    "EDC_NATS_CN_PUBLISHER_URL=nats://${NATS_APP}:4222" \
+    "EDC_NATS_TP_SUBSCRIBER_URL=nats://${NATS_APP}:4222" \
+    "EDC_NATS_TP_SUBSCRIBER_AUTOCREATE=true" \
+    "EDC_NATS_TP_PUBLISHER_URL=nats://${NATS_APP}:4222" \
+    "EDC_IAM_OAUTH2_JWKS_URL=${KEYCLOAK_PUBLIC_URL:-}/realms/edcv/protocol/openid-connect/certs" \
     "WEB_HTTP_PORT=8081" \
     "WEB_HTTP_PATH=/api" \
     "WEB_HTTP_MANAGEMENT_PORT=8081" \
     "WEB_HTTP_MANAGEMENT_PATH=/management" \
     "WEB_HTTP_DSP_PORT=8081" \
     "WEB_HTTP_DSP_PATH=/api/dsp" \
+    "WEB_HTTP_CONTROL_PORT=8081" \
+    "WEB_HTTP_CONTROL_PATH=/api/control" \
   -o none
 ok "Control Plane"
 
@@ -127,6 +135,7 @@ az containerapp create \
     "EDC_DATASOURCE_DEFAULT_PASSWORD=${PG_PASSWORD}" \
     "EDC_VAULT_HASHICORP_URL=${VAULT_URL:-}" \
     "EDC_VAULT_HASHICORP_TOKEN=${VAULT_ROOT_TOKEN}" \
+    "EDC_IAM_OAUTH2_JWKS_URL=${KEYCLOAK_PUBLIC_URL:-}/realms/edcv/protocol/openid-connect/certs" \
     "WEB_HTTP_PORT=7081" \
     "WEB_HTTP_IDENTITY_PORT=7082" \
   -o none
@@ -149,11 +158,17 @@ az containerapp create \
     "EDC_DATASOURCE_DEFAULT_PASSWORD=${PG_PASSWORD}" \
     "EDC_VAULT_HASHICORP_URL=${VAULT_URL:-}" \
     "EDC_VAULT_HASHICORP_TOKEN=${VAULT_ROOT_TOKEN}" \
+    "EDC_IAM_OAUTH2_JWKS_URL=${KEYCLOAK_PUBLIC_URL:-}/realms/edcv/protocol/openid-connect/certs" \
     "WEB_HTTP_PORT=10013" \
   -o none
 ok "Issuer Service"
 
 # ── Neo4j Proxy ──────────────────────────────────────────────────────────────
+# TCK_* vars point the /tck endpoint at ACA-internal FQDNs. Without them the
+# proxy falls back to Docker hostnames (controlplane, identityhub, …) that
+# don't resolve in ACA, and every DSP/DCP test fails with "unreachable".
+# TCK_CONTROLPLANE_MGMT_URL overrides the default /api/mgmt path because the
+# controlplane on ACA is started with WEB_HTTP_MANAGEMENT_PATH=/management.
 log "Creating Neo4j Proxy container app..."
 az containerapp create \
   --name "$NEO4J_PROXY_APP" --resource-group "$RG" --environment "$ACA_ENV" \
@@ -170,6 +185,15 @@ az containerapp create \
     "NEO4J_USER=${NEO4J_USER}" \
     "NEO4J_PASSWORD=${NEO4J_PASSWORD}" \
     "PORT=9090" \
+    "TCK_KEYCLOAK_URL=${KEYCLOAK_PUBLIC_URL:-}" \
+    "TCK_KEYCLOAK_REALM=edcv" \
+    "TCK_CLIENT_ID=admin" \
+    "TCK_CLIENT_SECRET=edc-v-admin-secret" \
+    "TCK_CONTROLPLANE_DEFAULT_URL=https://${CONTROLPLANE_APP}.internal.${ACA_DOMAIN}" \
+    "TCK_CONTROLPLANE_MGMT_URL=https://${CONTROLPLANE_APP}.internal.${ACA_DOMAIN}/management" \
+    "TCK_IDENTITY_URL=https://${IDENTITYHUB_APP}.internal.${ACA_DOMAIN}/api/identity" \
+    "TCK_ISSUER_URL=https://${ISSUER_APP}.internal.${ACA_DOMAIN}/api/admin" \
+    "TCK_INFRA_OPTIONAL=true" \
   -o none
 ok "Neo4j Proxy"
 

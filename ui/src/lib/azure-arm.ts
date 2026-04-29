@@ -307,3 +307,83 @@ export function azureSubscriptionId(): string | null {
 export function azureResourceGroup(): string | null {
   return process.env.AZURE_RESOURCE_GROUP ?? null;
 }
+
+// ───────────────────────────────────────────────────────────────────────────
+// Container App actions (restart, scale)
+// ───────────────────────────────────────────────────────────────────────────
+
+async function armPost<T>(path: string, body?: unknown): Promise<T | null> {
+  const token = await getArmAccessToken();
+  const url = path.startsWith("http") ? path : `${ARM_BASE}${path}`;
+  const res = await fetch(url, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+    body: body ? JSON.stringify(body) : undefined,
+    cache: "no-store",
+    signal: AbortSignal.timeout(ARM_FETCH_TIMEOUT_MS),
+  });
+  if (!res.ok) {
+    throw new Error(`ARM POST ${path} → ${res.status} ${await res.text()}`);
+  }
+  if (res.status === 204) return null;
+  const text = await res.text();
+  return text ? (JSON.parse(text) as T) : null;
+}
+
+async function armPatch<T>(path: string, body: unknown): Promise<T> {
+  const token = await getArmAccessToken();
+  const url = path.startsWith("http") ? path : `${ARM_BASE}${path}`;
+  const res = await fetch(url, {
+    method: "PATCH",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(body),
+    cache: "no-store",
+    signal: AbortSignal.timeout(ARM_FETCH_TIMEOUT_MS),
+  });
+  if (!res.ok) {
+    throw new Error(`ARM PATCH ${path} → ${res.status} ${await res.text()}`);
+  }
+  return (await res.json()) as T;
+}
+
+/**
+ * Restart all replicas of the latest revision. If the app is currently scaled
+ * to zero (min-replicas=0 with no traffic), this is a no-op — caller should
+ * bump min-replicas first via setContainerAppMinReplicas().
+ */
+export async function restartContainerApp(
+  subscriptionId: string,
+  resourceGroup: string,
+  appName: string,
+): Promise<void> {
+  const path =
+    `/subscriptions/${subscriptionId}/resourceGroups/${resourceGroup}` +
+    `/providers/Microsoft.App/containerApps/${appName}/restart` +
+    `?api-version=2024-03-01`;
+  await armPost(path);
+}
+
+/**
+ * Patch min/max replicas without rewriting the rest of the spec. Used by the
+ * Restart action to wake up scale-to-zero apps.
+ */
+export async function setContainerAppMinReplicas(
+  subscriptionId: string,
+  resourceGroup: string,
+  appName: string,
+  minReplicas: number,
+): Promise<void> {
+  const path =
+    `/subscriptions/${subscriptionId}/resourceGroups/${resourceGroup}` +
+    `/providers/Microsoft.App/containerApps/${appName}` +
+    `?api-version=2024-03-01`;
+  await armPatch(path, {
+    properties: { template: { scale: { minReplicas } } },
+  });
+}
