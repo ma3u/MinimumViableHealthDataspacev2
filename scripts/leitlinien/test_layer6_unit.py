@@ -10,9 +10,11 @@ Run:
 """
 from __future__ import annotations
 
+import json
+
 import pytest
 
-from category_mapper import map_to_categories, explain
+from category_mapper import map_to_categories, explain, categories_for_records
 from load_layer6 import (
     chunk_section_body,
     chunk_id_for,
@@ -20,6 +22,10 @@ from load_layer6 import (
     section_id_for,
     CHUNK_TARGET_WORDS,
     CHUNK_MIN_WORDS,
+    load_index,
+    load_one,
+    GuidelineRecord,
+    _DryRunSession,
 )
 
 
@@ -55,6 +61,12 @@ def test_parse_sections_handles_german_umlauts_in_heading():
     md = "## Maßnahmen zur Qualitätsprüfung\n\nÜberblick über..."
     out = parse_markdown_sections(md)
     assert out[0][0] == "Maßnahmen zur Qualitätsprüfung"
+
+
+def test_parse_sections_heading_without_body_keeps_empty_body():
+    md = "## Nur Überschrift"
+    out = parse_markdown_sections(md)
+    assert out == [("Nur Überschrift", "")]
 
 
 # ── chunk_section_body ─────────────────────────────────────────────────────
@@ -178,3 +190,98 @@ def test_explain_strips_html_from_description():
     # HTML-stripped before matching, so a wrapped keyword still matches
     out = explain(None, None, "<p>Wir empfehlen <b>Pharmakotherapie</b> mit ...</p>")
     assert "eprescription" in out
+
+
+def test_categories_for_records_maps_known_id_and_skips_missing_id():
+    records = [
+        {
+            "AWMFGuidelineID": "001-018",
+            "name": "Bildgebung bei Schlaganfall",
+            "titleKeywords": "MRT, CT",
+            "description": "Empfehlungen zur radiologischen Diagnostik",
+        },
+        {
+            "name": "Kein Identifier",
+            "titleKeywords": "lorem ipsum",
+            "description": "soll übersprungen werden",
+        },
+    ]
+    out = categories_for_records(records)
+    assert "001-018" in out
+    assert out["001-018"][0] == "medical-imaging"
+    assert len(out) == 1
+
+
+def test_load_index_defaults_missing_optional_fields(tmp_path):
+    payload = {
+        "records": [
+            {
+                "AWMFGuidelineID": "001-999",
+                "name": "Testleitlinie",
+            }
+        ]
+    }
+    (tmp_path / "awmf-index.json").write_text(json.dumps(payload), encoding="utf-8")
+
+    out = load_index(tmp_path)
+    rec = out["001-999"]
+    assert rec.name == "Testleitlinie"
+    assert rec.guideline_class == ""
+    assert rec.leading_orgs == []
+    assert rec.participating_orgs == []
+
+
+# ── load_one (dry-run integration) ─────────────────────────────────────────
+
+def _record(**overrides) -> GuidelineRecord:
+    base = dict(
+        awmf_id="001-018",
+        name="Testleitlinie",
+        guideline_class="S3",
+        description="",
+        title_keywords="",
+        detail_page="",
+        release_date=None,
+        last_edit=None,
+        valid_until=None,
+        version_major=None,
+        version_minor=None,
+        association_number=None,
+        leading_orgs=[],
+        participating_orgs=[],
+    )
+    base.update(overrides)
+    return GuidelineRecord(**base)
+
+
+def test_load_one_dry_run_counts_sections_and_chunks(tmp_path):
+    para = ("wort " * 250).strip()
+    md = (
+        "Vorwort der Leitlinie.\n\n"
+        "## Indikation\n\n"
+        + f"{para}\n\n{para}\n\n{para}\n\n{para}"  # 4×250 ≈ 1000 words → ≥2 chunks
+        + "\n\n## Therapie\n\nKurzer Abschnitt."
+    )
+    md_path = tmp_path / "001-018.md"
+    md_path.write_text(md, encoding="utf-8")
+
+    rec = _record()
+    result = load_one(_DryRunSession(), rec, md_path, dry_run=True)
+
+    assert result["awmf_id"] == "001-018"
+    assert result["dry_run"] is True
+    # Preamble + Indikation + Therapie = 3 sections
+    assert result["sections"] == 3
+    # Indikation (~1000 words across 4 paragraphs) splits into ≥2 chunks
+    assert result["chunks"] >= 4
+
+
+def test_load_one_dry_run_skips_empty_markdown(tmp_path):
+    md_path = tmp_path / "001-018.md"
+    md_path.write_text("   \n\n   ", encoding="utf-8")
+
+    rec = _record()
+    result = load_one(_DryRunSession(), rec, md_path, dry_run=True)
+
+    assert result["sections"] == 0
+    assert result["chunks"] == 0
