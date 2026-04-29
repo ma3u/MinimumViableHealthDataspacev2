@@ -3199,6 +3199,19 @@ const TCK_ISSUER_URL =
 
 const TCK_PARTICIPANTS = ["alpha-klinik", "pharmaco", "medreg", "lmc", "irs"];
 
+// When set to "true" (e.g. on Azure where ADR-012's single-port ingress can't
+// host EDC's 4-port architecture), unreachable infrastructure is reported as
+// "skip" instead of "fail" — distinguishing protocol non-compliance from
+// "service not provisioned in this environment".
+const TCK_INFRA_OPTIONAL =
+  (process.env.TCK_INFRA_OPTIONAL ?? "").toLowerCase() === "true";
+const UNREACHABLE_STATUS: "skip" | "fail" = TCK_INFRA_OPTIONAL
+  ? "skip"
+  : "fail";
+const UNREACHABLE_SUFFIX = TCK_INFRA_OPTIONAL
+  ? " (not provisioned in this environment)"
+  : "";
+
 interface TckTestResult {
   id: string;
   category: string;
@@ -3272,10 +3285,10 @@ app.get("/tck", async (_req: Request, res: Response) => {
     category: "Schema Compliance",
     suite: "DSP",
     name: "Control Plane Readiness",
-    status: readiness ? "pass" : "fail",
+    status: readiness ? "pass" : UNREACHABLE_STATUS,
     detail: readiness
       ? "GET /api/check/readiness → 200"
-      : "Control plane not reachable",
+      : "Control plane not reachable" + UNREACHABLE_SUFFIX,
   });
 
   // DSP-1.2: Liveness (port 8080 default web port, no auth required)
@@ -3287,10 +3300,10 @@ app.get("/tck", async (_req: Request, res: Response) => {
     category: "Schema Compliance",
     suite: "DSP",
     name: "Control Plane Liveness",
-    status: liveness ? "pass" : "fail",
+    status: liveness ? "pass" : UNREACHABLE_STATUS,
     detail: liveness
       ? "GET /api/check/liveness → 200"
-      : "Liveness probe failed",
+      : "Liveness probe failed" + UNREACHABLE_SUFFIX,
   });
 
   // DSP-2.x: Catalog per participant (requires auth; need real context IDs)
@@ -3314,8 +3327,8 @@ app.get("/tck", async (_req: Request, res: Response) => {
         category: "Catalog Protocol",
         suite: "DSP",
         name: `Catalog query — ${name}`,
-        status: "fail",
-        detail: `ParticipantContext '${name}' not found`,
+        status: UNREACHABLE_STATUS,
+        detail: `ParticipantContext '${name}' not found` + UNREACHABLE_SUFFIX,
       });
       continue;
     }
@@ -3339,10 +3352,10 @@ app.get("/tck", async (_req: Request, res: Response) => {
       category: "Catalog Protocol",
       suite: "DSP",
       name: `Catalog query — ${name}`,
-      status: Array.isArray(assets) ? "pass" : "fail",
+      status: Array.isArray(assets) ? "pass" : UNREACHABLE_STATUS,
       detail: Array.isArray(assets)
         ? `${assets.length} asset(s) for ${name}`
-        : "Assets query failed",
+        : "Assets query failed" + UNREACHABLE_SUFFIX,
     });
   }
 
@@ -3358,10 +3371,10 @@ app.get("/tck", async (_req: Request, res: Response) => {
     category: "DID Resolution",
     suite: "DCP",
     name: "IdentityHub reachable",
-    status: ihReachable ? "pass" : "fail",
+    status: ihReachable ? "pass" : UNREACHABLE_STATUS,
     detail: ihReachable
       ? `IdentityHub responded with ${ihData!.length} participant(s)`
-      : "IdentityHub unreachable",
+      : "IdentityHub unreachable" + UNREACHABLE_SUFFIX,
   });
 
   // DCP-2.x: Key pairs per participant (use participantContextId from IH)
@@ -3388,8 +3401,9 @@ app.get("/tck", async (_req: Request, res: Response) => {
         category: "Key Pair Management",
         suite: "DCP",
         name: `Key pairs — ${name}`,
-        status: "fail",
-        detail: `ParticipantContext for '${name}' not found`,
+        status: UNREACHABLE_STATUS,
+        detail:
+          `ParticipantContext for '${name}' not found` + UNREACHABLE_SUFFIX,
       });
       continue;
     }
@@ -3404,8 +3418,10 @@ app.get("/tck", async (_req: Request, res: Response) => {
       category: "Key Pair Management",
       suite: "DCP",
       name: `Key pairs — ${name}`,
-      status: hasPairs ? "pass" : "fail",
-      detail: hasPairs ? `${data!.length} key pair(s) found` : "No key pairs",
+      status: hasPairs ? "pass" : UNREACHABLE_STATUS,
+      detail: hasPairs
+        ? `${data!.length} key pair(s) found`
+        : "No key pairs" + UNREACHABLE_SUFFIX,
     });
   }
 
@@ -3431,12 +3447,12 @@ app.get("/tck", async (_req: Request, res: Response) => {
       category: "Issuer Service",
       suite: "DCP",
       name: "IssuerService reachable",
-      status: issuerReachable ? "pass" : "fail",
+      status: issuerReachable ? "pass" : UNREACHABLE_STATUS,
       detail: issuerReachable
         ? `IssuerService responded with ${
             issuerData!.length
           } credential definition(s)`
-        : "IssuerService unreachable",
+        : "IssuerService unreachable" + UNREACHABLE_SUFFIX,
     });
   } else {
     results.push({
@@ -3444,8 +3460,10 @@ app.get("/tck", async (_req: Request, res: Response) => {
       category: "Issuer Service",
       suite: "DCP",
       name: "IssuerService reachable",
-      status: "fail",
-      detail: "No participant context available to query IssuerService",
+      status: UNREACHABLE_STATUS,
+      detail:
+        "No participant context available to query IssuerService" +
+        UNREACHABLE_SUFFIX,
     });
   }
 
