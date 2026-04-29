@@ -1114,6 +1114,24 @@ app.get(
  * Template-based query patterns for common health data questions.
  * Each pattern has a regex matcher, a Cypher template, and a parameter extractor.
  */
+/**
+ * Knowledge-graph layer identifier. See CLAUDE.md § 5-Layer Neo4j Knowledge Graph
+ * for the canonical description. Used by the NLQ handler to show a researcher
+ * which layers a given question traverses.
+ */
+type GraphLayer = "L1" | "L2" | "L3" | "L4" | "L5";
+
+/**
+ * A labelled section of the generated Cypher — the UI renders each section
+ * with its own header so the researcher can see what each clause is doing
+ * (e.g. "cohort: indication filter", "side-effect projection").
+ */
+interface CypherSection {
+  label: string;
+  cypher: string;
+  layer?: GraphLayer;
+}
+
 interface QueryTemplate {
   name: string;
   patterns: RegExp[];
@@ -1123,6 +1141,18 @@ interface QueryTemplate {
     question: string,
   ) => Record<string, any>;
   description: string;
+  /**
+   * Which of the 5 Neo4j graph layers this template traverses. Surfaced
+   * in the UI so the researcher sees the business question mapped to the
+   * dataspace's 5-layer model. Order is arbitrary; layers are de-duped.
+   */
+  graphLayers?: GraphLayer[];
+  /**
+   * Optional structured breakdown of the Cypher. When set, the UI renders
+   * each section with a heading + colour-coded border. When absent, the
+   * raw `cypher` string is shown unannotated.
+   */
+  cypherSections?: CypherSection[];
 }
 
 const QUERY_TEMPLATES: QueryTemplate[] = [
@@ -1450,7 +1480,10 @@ const QUERY_TEMPLATES: QueryTemplate[] = [
            size(cohort)           AS cohortSize,
            cohort
 
-      // Side-effect measurement inside the cohort
+      // Side-effect measurement inside the cohort. OPTIONAL MATCH + WHERE
+      // keeps cohort members with no matching side-effect as (cp, se=null)
+      // rows, so we count only the cps for which se actually matched
+      // via a CASE-gated count below.
       UNWIND (CASE WHEN size(cohort) = 0 THEN [null] ELSE cohort END) AS cp
       OPTIONAL MATCH (cp)-[:HAS_CONDITION|HAS_OBSERVATION]->(se)
       WHERE cp IS NOT NULL
@@ -1458,7 +1491,7 @@ const QUERY_TEMPLATES: QueryTemplate[] = [
              OR ($sideEffectText IS NOT NULL
                  AND toLower(coalesce(se.display, se.name, '')) CONTAINS $sideEffectText))
       WITH populationSize, indicationCohortSize, drugCohortSize, cohortSize,
-           count(DISTINCT cp) AS affected
+           count(DISTINCT CASE WHEN se IS NOT NULL THEN cp END) AS affected
       RETURN populationSize,
              indicationCohortSize,
              drugCohortSize,
@@ -1481,8 +1514,93 @@ const QUERY_TEMPLATES: QueryTemplate[] = [
     }),
     description:
       "Pharmacovigilance cohort: side-effect frequency in patients treated with a drug for an indication (issue #19)",
+    // L3 FHIR clinical (Patient/Condition/MedicationRequest) + L5 ontology
+    // via the glossary-resolved codes; the UI renders this as a layer
+    // breadcrumb so the researcher sees which layers answer the question.
+    graphLayers: ["L3", "L5"],
+    // Structured breakdown so the UI can colour-code each clause.
+    cypherSections: [
+      {
+        label: "Population",
+        layer: "L3",
+        cypher: `MATCH (p:Patient)
+WITH collect(DISTINCT p) AS allPatients, count(DISTINCT p) AS populationSize`,
+      },
+      {
+        label: "Indication sub-cohort (or all patients if unresolved)",
+        layer: "L3",
+        cypher: `CALL {
+  WITH allPatients
+  UNWIND allPatients AS p
+  OPTIONAL MATCH (p)-[:HAS_CONDITION]->(c:Condition)
+  WHERE ($indicationCode IS NOT NULL AND c.code = $indicationCode)
+     OR ($indicationText IS NOT NULL
+         AND toLower(coalesce(c.display, c.name, '')) CONTAINS $indicationText)
+  WITH p, count(c) AS indicationHits
+  WHERE ($indicationCode IS NULL AND $indicationText IS NULL)
+     OR indicationHits > 0
+  RETURN collect(DISTINCT p) AS indicationCohort
+}`,
+      },
+      {
+        label: "Drug sub-cohort (or all patients if unresolved)",
+        layer: "L3",
+        cypher: `CALL {
+  WITH allPatients
+  UNWIND allPatients AS p
+  OPTIONAL MATCH (p)-[:HAS_MEDICATION_REQUEST]->(m:MedicationRequest)
+  WHERE ($drugCode IS NOT NULL AND m.medicationCode = $drugCode)
+     OR ($drugText IS NOT NULL
+         AND toLower(coalesce(m.display, m.medicationCode, '')) CONTAINS $drugText)
+  WITH p, count(m) AS drugHits
+  WHERE ($drugCode IS NULL AND $drugText IS NULL)
+     OR drugHits > 0
+  RETURN collect(DISTINCT p) AS drugCohort
+}`,
+      },
+      {
+        label: "Cohort intersection",
+        layer: "L3",
+        cypher: `WITH populationSize, indicationCohort, drugCohort,
+     [p IN indicationCohort WHERE p IN drugCohort] AS cohort`,
+      },
+      {
+        label: "Side-effect measurement",
+        layer: "L3",
+        cypher: `UNWIND (CASE WHEN size(cohort) = 0 THEN [null] ELSE cohort END) AS cp
+OPTIONAL MATCH (cp)-[:HAS_CONDITION|HAS_OBSERVATION]->(se)
+WHERE cp IS NOT NULL
+  AND (($sideEffectCode IS NOT NULL AND se.code = $sideEffectCode)
+       OR ($sideEffectText IS NOT NULL
+           AND toLower(coalesce(se.display, se.name, '')) CONTAINS $sideEffectText))
+WITH cohortSize, count(DISTINCT CASE WHEN se IS NOT NULL THEN cp END) AS affected`,
+      },
+      {
+        label: "Aggregate + frequency",
+        cypher: `RETURN populationSize,
+       indicationCohortSize,
+       drugCohortSize,
+       cohortSize        AS cohortWithIndicationAndDrug,
+       affected          AS patientsWithSideEffect,
+       CASE WHEN cohortSize > 0
+            THEN round(toFloat(affected) / cohortSize * 100, 2)
+            ELSE 0.0 END AS frequencyPct`,
+      },
+    ],
   },
 ];
+
+/**
+ * Graph layer metadata — human labels and accent colours for the 5 layers.
+ * The UI uses these to render a breadcrumb above the results.
+ */
+const GRAPH_LAYER_META: Record<GraphLayer, { label: string; short: string }> = {
+  L1: { label: "Dataspace Marketplace", short: "DSP" },
+  L2: { label: "HealthDCAT-AP Catalog", short: "DCAT-AP" },
+  L3: { label: "FHIR R4 Clinical", short: "FHIR" },
+  L4: { label: "OMOP CDM Analytics", short: "OMOP" },
+  L5: { label: "Biomedical Ontology", short: "Ontology" },
+};
 
 /** Graph schema description for LLM context */
 const GRAPH_SCHEMA_CONTEXT = `
@@ -2375,16 +2493,34 @@ async function resolveAdverseEventContext(
   };
 }
 
-async function computeCohortDataQuality(
-  session: ReturnType<NonNullable<typeof driver>["session"]>,
-): Promise<{
+interface CohortFilterParams {
+  drugCode?: string | null;
+  drugText?: string | null;
+  indicationCode?: string | null;
+  indicationText?: string | null;
+}
+
+interface DataQualityResult {
+  // Global (whole graph) coverage
   snomedCoveragePct: number;
   rxnormCoveragePct: number;
   totalConditions: number;
   totalMedicationRequests: number;
-} | null> {
+  // Cohort-scoped coverage (null when no cohort filter was supplied)
+  cohortSize?: number;
+  cohortConditions?: number;
+  cohortMedicationRequests?: number;
+  cohortSnomedCoveragePct?: number;
+  cohortRxnormCoveragePct?: number;
+}
+
+async function computeCohortDataQuality(
+  session: ReturnType<NonNullable<typeof driver>["session"]>,
+  cohort?: CohortFilterParams,
+): Promise<DataQualityResult | null> {
   try {
-    const r = await session.run(`
+    // Global coverage first — always computed.
+    const globalResult = await session.run(`
       MATCH (c:Condition)
       OPTIONAL MATCH (c)-[:CODED_BY]->(s:SnomedConcept)
       WITH count(DISTINCT c) AS totalConditions,
@@ -2402,16 +2538,98 @@ async function computeCohortDataQuality(
                   THEN round(toFloat(codedMeds) / totalMeds * 100, 1)
                   ELSE 0.0 END AS rxnormCoveragePct
     `);
-    const rec = r.records[0];
-    if (!rec) return null;
+    const gRec = globalResult.records[0];
+    if (!gRec) return null;
     const toNum = (v: unknown) =>
       neo4j.isInt(v) ? (v as neo4j.Integer).toNumber() : (v as number);
-    return {
-      snomedCoveragePct: Number(rec.get("snomedCoveragePct")) || 0,
-      rxnormCoveragePct: Number(rec.get("rxnormCoveragePct")) || 0,
-      totalConditions: toNum(rec.get("totalConditions")),
-      totalMedicationRequests: toNum(rec.get("totalMeds")),
+    const out: DataQualityResult = {
+      snomedCoveragePct: Number(gRec.get("snomedCoveragePct")) || 0,
+      rxnormCoveragePct: Number(gRec.get("rxnormCoveragePct")) || 0,
+      totalConditions: toNum(gRec.get("totalConditions")),
+      totalMedicationRequests: toNum(gRec.get("totalMeds")),
     };
+
+    // Cohort-scoped coverage — only when at least one role resolved.
+    const hasCohort =
+      !!cohort &&
+      (!!cohort.drugCode ||
+        !!cohort.drugText ||
+        !!cohort.indicationCode ||
+        !!cohort.indicationText);
+    if (!hasCohort) return out;
+
+    const cohortResult = await session.run(
+      `
+      // Rebuild the cohort: patients with indication ∩ patients treated with drug.
+      MATCH (p:Patient)
+      WITH collect(DISTINCT p) AS allPatients
+      CALL {
+        WITH allPatients
+        UNWIND allPatients AS p
+        OPTIONAL MATCH (p)-[:HAS_CONDITION]->(c:Condition)
+        WHERE ($indicationCode IS NOT NULL AND c.code = $indicationCode)
+           OR ($indicationText IS NOT NULL
+               AND toLower(coalesce(c.display, c.name, '')) CONTAINS $indicationText)
+        WITH p, count(c) AS hits
+        WHERE ($indicationCode IS NULL AND $indicationText IS NULL) OR hits > 0
+        RETURN collect(DISTINCT p) AS indicationCohort
+      }
+      CALL {
+        WITH allPatients
+        UNWIND allPatients AS p
+        OPTIONAL MATCH (p)-[:HAS_MEDICATION_REQUEST]->(m:MedicationRequest)
+        WHERE ($drugCode IS NOT NULL AND m.medicationCode = $drugCode)
+           OR ($drugText IS NOT NULL
+               AND toLower(coalesce(m.display, m.medicationCode, '')) CONTAINS $drugText)
+        WITH p, count(m) AS hits
+        WHERE ($drugCode IS NULL AND $drugText IS NULL) OR hits > 0
+        RETURN collect(DISTINCT p) AS drugCohort
+      }
+      WITH [p IN indicationCohort WHERE p IN drugCohort] AS cohort
+      UNWIND (CASE WHEN size(cohort) = 0 THEN [null] ELSE cohort END) AS cp
+
+      // Cohort coverage: share of cohort patients' Conditions/MedRequests
+      // that have a CODED_BY edge to the ontology layer.
+      OPTIONAL MATCH (cp)-[:HAS_CONDITION]->(cc:Condition)
+      OPTIONAL MATCH (cc)-[:CODED_BY]->(cs:SnomedConcept)
+      WITH cohort, cp,
+           count(DISTINCT cc) AS cpConditions,
+           count(DISTINCT CASE WHEN cs IS NOT NULL THEN cc END) AS cpCodedConds
+      OPTIONAL MATCH (cp)-[:HAS_MEDICATION_REQUEST]->(cm:MedicationRequest)
+      OPTIONAL MATCH (cm)-[:CODED_BY]->(cr:RxNormConcept)
+      WITH size(cohort) AS cohortSize,
+           sum(cpConditions) AS cohortConditions,
+           sum(CASE WHEN cs IS NOT NULL THEN cpConditions ELSE 0 END) AS _unused,
+           sum(cpCodedConds) AS cohortSnomedConds,
+           count(DISTINCT cm) AS cohortMeds,
+           count(DISTINCT CASE WHEN cr IS NOT NULL THEN cm END) AS cohortCodedMeds
+      RETURN cohortSize, cohortConditions, cohortSnomedConds, cohortMeds, cohortCodedMeds,
+             CASE WHEN cohortConditions > 0
+                  THEN round(toFloat(cohortSnomedConds) / cohortConditions * 100, 1)
+                  ELSE 0.0 END AS cohortSnomedCoveragePct,
+             CASE WHEN cohortMeds > 0
+                  THEN round(toFloat(cohortCodedMeds) / cohortMeds * 100, 1)
+                  ELSE 0.0 END AS cohortRxnormCoveragePct
+      `,
+      {
+        drugCode: cohort.drugCode ?? null,
+        drugText: cohort.drugText ?? null,
+        indicationCode: cohort.indicationCode ?? null,
+        indicationText: cohort.indicationText ?? null,
+      },
+    );
+    const cRec = cohortResult.records[0];
+    if (cRec) {
+      out.cohortSize = toNum(cRec.get("cohortSize"));
+      out.cohortConditions = toNum(cRec.get("cohortConditions"));
+      out.cohortMedicationRequests = toNum(cRec.get("cohortMeds"));
+      out.cohortSnomedCoveragePct =
+        Number(cRec.get("cohortSnomedCoveragePct")) || 0;
+      out.cohortRxnormCoveragePct =
+        Number(cRec.get("cohortRxnormCoveragePct")) || 0;
+    }
+
+    return out;
   } catch (err) {
     console.warn("[neo4j-proxy] data-quality query failed:", err);
     return null;
@@ -2463,11 +2681,15 @@ app.post("/nlq", async (req: Request, res: Response, next: NextFunction) => {
 
     // Step 1: Try template matching
     const templateMatch = matchTemplate(question);
+    let graphLayers: GraphLayer[] | undefined;
+    let cypherSections: CypherSection[] | undefined;
     if (templateMatch) {
       cypher = templateMatch.template.cypher;
       params = templateMatch.params;
       method = "template";
       templateName = templateMatch.template.name;
+      graphLayers = templateMatch.template.graphLayers;
+      cypherSections = templateMatch.template.cypherSections;
     }
 
     // Step 1b: Pharmacovigilance template needs glossary-resolved params
@@ -2633,7 +2855,14 @@ app.post("/nlq", async (req: Request, res: Response, next: NextFunction) => {
     if (templateName === "adverse_event_in_cohort" && driver) {
       const dqSession = driver.session({ database: "neo4j" });
       try {
-        dataQuality = (await computeCohortDataQuality(dqSession)) ?? undefined;
+        dataQuality =
+          (await computeCohortDataQuality(dqSession, {
+            drugCode: interpretation?.drug?.code ?? null,
+            drugText: interpretation?.raw.drugText?.toLowerCase() ?? null,
+            indicationCode: interpretation?.indication?.code ?? null,
+            indicationText:
+              interpretation?.raw.indicationText?.toLowerCase() ?? null,
+          })) ?? undefined;
       } finally {
         await dqSession.close();
       }
@@ -2649,6 +2878,16 @@ app.post("/nlq", async (req: Request, res: Response, next: NextFunction) => {
       totalRows: results.length,
       odrlEnforced,
       ...(graphragTrace ? { trace: graphragTrace } : {}),
+      ...(graphLayers
+        ? {
+            graphLayers: graphLayers.map((id) => ({
+              id,
+              label: GRAPH_LAYER_META[id].label,
+              short: GRAPH_LAYER_META[id].short,
+            })),
+          }
+        : {}),
+      ...(cypherSections ? { cypherSections } : {}),
       ...(interpretation
         ? {
             interpretation: {
