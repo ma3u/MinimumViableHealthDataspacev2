@@ -1,10 +1,12 @@
-# Leitlinien ingestion pipeline (Phase 1 of issue #20)
+# Leitlinien ingestion pipeline (issue #20)
 
-Discovers, downloads, and parses German medical guidelines (AWMF Leitlinien)
-into structured DoclingDocument JSON and Markdown, ready for Neo4j GraphRAG
-ingestion as Layer 6 of the health knowledge graph.
+Discovers, downloads, parses, and **loads into Neo4j as Layer 6** of the EHDS
+Integration Hub knowledge graph the corpus of German medical guidelines (AWMF
+Leitlinien).
 
 Tracks [issue #20](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/20).
+Phase 1 = discovery + download + Docling parse. Phase 2 = Neo4j Layer 6 loader
+(this PR).
 
 ## Pipeline
 
@@ -20,6 +22,19 @@ register.awmf.org/assets/guidelines/{folder}/{media}  ──►  data/leitlinien
                                                         ▼
                                                   data/leitlinien-docling/*.json  (structured)
                                                   data/leitlinien-markdown/*.md   (chunk-friendly)
+                                                        │ load_layer6.py
+                                                        ▼
+                                                  Neo4j Layer 6:
+                                                    (:Guideline)-[:HAS_SECTION]->(:GuidelineSection)
+                                                                                     │
+                                                                                     ▼
+                                                                              (:GuidelineChunk)
+                                                    (:Guideline)-[:COVERS_EHDS_CATEGORY]->(:EEHRxFCategory)
+                                                    (:Guideline)-[:PUBLISHED_BY]->(:Organization)
+                                                        │ register-leitlinien-embeddings-aoai.cypher
+                                                        ▼
+                                                  c.semanticEmbedding (1536-dim, cosine)
+                                                  → guideline_chunk_embedding vector index
 ```
 
 Outputs are **gitignored** — the PDFs are AWMF-copyrighted, the docling JSON is
@@ -92,14 +107,78 @@ merged adjacent numbered list items.
 Steady-state parse cost: **~0.2-0.3 seconds per PDF page** after model warmup.
 Full 223-PDF parse: ~3 hours CPU-bound.
 
-## Next — Layer 6 loader (this issue, Phase 2)
+## Phase 2 — Neo4j Layer 6 loader
 
-The parsed Markdown + DoclingDocument JSON feed into a new Cypher loader that
-creates `Guideline` / `GuidelineSection` / `GuidelineRecommendation` /
-`GuidelineChunk` nodes per the graph schema described in issue #20. The
-`neo4j-graphrag` Python package handles chunking and embedding; the
-`APPLIES_TO` edges to existing `OntologyConcept` nodes (SNOMED CT / ICD-10-CM /
-ATC / LOINC) pivot through the AWMF guideline text — likely via a named-entity
-pass with a biomedical NER model.
+### Schema
 
-Not yet implemented. Tracked under the same issue.
+`neo4j/register-leitlinien-schema.cypher` registers four new node labels with
+constraints and indexes, plus a German fulltext index across all four labels
+and a 1536-dim cosine vector index on `:GuidelineChunk.semanticEmbedding`
+(matching the convention from `register-embeddings-aoai.cypher`).
+
+| Node                       | Unique key                          | Source                                       |
+| -------------------------- | ----------------------------------- | -------------------------------------------- |
+| `:Guideline`               | `awmfId` (e.g. `001-018`)           | `data/awmf-index.json`                       |
+| `:GuidelineSection`        | `sectionId` (`{awmfId}::sNNN-slug`) | H2 headings in the Markdown rendering        |
+| `:GuidelineRecommendation` | `recId`                             | _deferred — Phase 2.1, needs LLM extraction_ |
+| `:GuidelineChunk`          | `chunkId` (`{sectionId}::cNNN`)     | ~500-word windows over section bodies        |
+
+### Load
+
+```bash
+# 1. Register the Layer 6 schema (once per database)
+cypher-shell -u neo4j -p $NEO4J_PASSWORD < neo4j/register-leitlinien-schema.cypher
+
+# 2. Load Guideline + Section + Chunk nodes from local data
+cd scripts/leitlinien
+uv sync
+NEO4J_PASSWORD=... uv run python load_layer6.py --limit 5      # smoke test
+NEO4J_PASSWORD=... uv run python load_layer6.py                # full corpus
+
+# 3. Embed chunks via Azure OpenAI (matches the Layer 2-5 convention)
+cypher-shell -u neo4j -p $NEO4J_PASSWORD \
+  --param 'apiKey => $AZURE_OPENAI_API_KEY' \
+  --param 'endpoint => $AZURE_OPENAI_EMBEDDINGS_URL' \
+  < neo4j/register-leitlinien-embeddings-aoai.cypher
+```
+
+The loader is **resumable** — guidelines whose `chunkCount` is already > 0 are
+skipped unless `--force` is passed. `--dry-run` reports what would be written
+without touching the database.
+
+### Costs
+
+For 223 S3 guidelines:
+
+| Stage            | Output                                | Cost                                                 |
+| ---------------- | ------------------------------------- | ---------------------------------------------------- |
+| `load_layer6.py` | ~25-40K Section + ~30-60K Chunk nodes | Free (local Bolt session)                            |
+| AOAI embedding   | `c.semanticEmbedding` on every chunk  | ~€0.50-1.50 (`text-embedding-3-small` at $0.02/MTok) |
+
+### Tests
+
+```bash
+cd scripts/leitlinien
+uv run --group dev pytest test_layer6_unit.py -v   # 21 unit tests, no DB needed
+```
+
+Covers: Markdown section parsing, chunk grouping with target/min word logic,
+section/chunk ID generators, and EEHRxF category-mapping heuristics. Live-DB
+integration tests are deferred to a separate PR (require docker-compose Neo4j).
+
+## Deferred follow-ups under issue #20
+
+- **Phase 2.1 — `:GuidelineRecommendation` extraction.** German S3 guidelines
+  embed structured recommendations with grade-of-recommendation (A/B/0/GCP)
+  and level-of-evidence (1++/1+/2-/...) markers. Extracting these reliably
+  needs an LLM-per-section pass; not in this PR.
+- **Phase 2.2 — `APPLIES_TO` edges to ontology concepts.** Pivot
+  recommendations to existing `:SnomedConcept` / `:ICD10Code` / `:RxNormConcept`
+  / `:LoincCode` nodes via German biomedical NER (likely scispaCy + a German
+  medical model, or a structured-output LLM call).
+- **Phase 3 — UI.** New `/guidelines` route in `ui/`, Layer 6 colour in
+  Graph Explorer, integration with `/query` natural-language search (#19).
+- **Live-DB integration tests.** docker-compose Neo4j harness, ~10 E2E tests,
+  90 % coverage push.
+- **S2k / S2e / S1 ingestion.** Same pipeline, flip the `AWMFGuidelineClass`
+  filter in `download_s3_pdfs.py`. Trivial after Phase 2 lands.
