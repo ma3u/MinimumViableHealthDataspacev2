@@ -419,6 +419,19 @@ function ComponentRow({
 // Topology Component Card (Participant view)
 // ---------------------------------------------------------------------------
 
+// Hoisted out of AzureCostEstimatorPanel so TopoComponentCard can use it too.
+// Kept in sync with the diagnosis catalogue at
+// /api/admin/components/[name]/diagnosis.
+const KNOWN_BROKEN_ACA_APPS = new Set<string>([
+  "mvhd-controlplane",
+  "mvhd-dp-fhir",
+  "mvhd-dp-omop",
+  "mvhd-identityhub",
+  "mvhd-issuerservice",
+  "mvhd-tenant-mgr",
+  "mvhd-provision-mgr",
+]);
+
 function TopoComponentCard({
   comp,
   metricsShared = false,
@@ -434,6 +447,10 @@ function TopoComponentCard({
   const sharedTitle = metricsShared
     ? "Shared ACA container — same value applies to every participant. See Layer View for the cluster total."
     : undefined;
+  const isBroken =
+    KNOWN_BROKEN_ACA_APPS.has(comp.container) ||
+    comp.severity === "critical" ||
+    comp.severity === "warning";
   return (
     <div
       className={`border rounded-lg p-3 ${sev.border} ${sev.bg} transition-colors`}
@@ -469,6 +486,7 @@ function TopoComponentCard({
           {comp.uptime}
         </span>
       </div>
+      <ComponentActions name={comp.container} isBroken={isBroken} />
     </div>
   );
 }
@@ -1120,19 +1138,6 @@ function computeEgressGiB(participantCount: number): number {
   return Math.ceil(fromParticipants + EGRESS_INFRA_BASELINE_GB);
 }
 
-// ACA apps known to be broken on the current Azure deployment due to the
-// EDC multi-port architecture mismatch documented in issue #25. Kept in sync
-// with the diagnosis catalogue at /api/admin/components/[name]/diagnosis.
-const KNOWN_BROKEN_APPS = new Set<string>([
-  "mvhd-controlplane",
-  "mvhd-dp-fhir",
-  "mvhd-dp-omop",
-  "mvhd-identityhub",
-  "mvhd-issuerservice",
-  "mvhd-tenant-mgr",
-  "mvhd-provision-mgr",
-]);
-
 function AzureCostEstimatorPanel({
   liveComponents,
   participantCount,
@@ -1208,11 +1213,6 @@ function AzureCostEstimatorPanel({
             .sort((a, b) => b.totalUsd - a.totalUsd)
             .map((app) => {
               const spec = specs.find((s) => s.name === app.name)!;
-              const live = liveComponents.find((c) => c.container === app.name);
-              const isBroken =
-                KNOWN_BROKEN_APPS.has(app.name) ||
-                live?.status === "unhealthy" ||
-                live?.status === "stopped";
               return (
                 <div
                   key={app.name}
@@ -1233,7 +1233,6 @@ function AzureCostEstimatorPanel({
                     <span>CPU {formatUsd(app.vcpuUsd)}</span>
                     <span>MEM {formatUsd(app.memUsd)}</span>
                   </div>
-                  <ComponentActions name={app.name} isBroken={isBroken} />
                 </div>
               );
             })}
