@@ -13,8 +13,14 @@ import {
 } from "@/lib/azure-arm";
 
 import { authOptions } from "@/lib/auth";
+import { cached } from "@/lib/server-cache";
 
 export const dynamic = "force-dynamic";
+
+// First load on Azure spends 3-6s in ARM (list + per-app metrics) + ~1s in
+// CFM/Neo4j; serving stale data for up to 30s makes navigation feel instant
+// while keeping the dashboard fresh enough for live monitoring.
+const CACHE_TTL_MS = 30_000;
 
 // ---------------------------------------------------------------------------
 // Docker Engine API helpers (via Unix socket)
@@ -371,6 +377,15 @@ export async function GET() {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
+  const result = await cached(
+    "admin-components",
+    CACHE_TTL_MS,
+    buildComponentsResponse,
+  );
+  return NextResponse.json(result);
+}
+
+async function buildComponentsResponse() {
   const components: ComponentInfo[] = [];
   const participants: ParticipantInfo[] = [];
   let dockerAvailable = false;
@@ -572,12 +587,12 @@ export async function GET() {
       ? "docker"
       : "unknown";
 
-  return NextResponse.json({
+  return {
     timestamp: new Date().toISOString(),
     dockerAvailable,
     metricsSource,
     deploymentTarget,
     components,
     participants,
-  });
+  };
 }

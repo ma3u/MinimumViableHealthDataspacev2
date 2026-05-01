@@ -30,6 +30,7 @@ vi.mock("@/lib/neo4j", () => ({
 }));
 
 import { GET } from "@/app/api/admin/components/route";
+import { __resetCacheForTests } from "@/lib/server-cache";
 
 /* ── Docker mock helpers ── */
 
@@ -204,6 +205,7 @@ const MOCK_PROFILES = [{ participantContextId: "ctx-alpha" }];
 
 beforeEach(() => {
   vi.clearAllMocks();
+  __resetCacheForTests();
   vi.spyOn(Date, "now").mockReturnValue(NOW);
   vi.spyOn(console, "warn").mockImplementation(() => {});
 
