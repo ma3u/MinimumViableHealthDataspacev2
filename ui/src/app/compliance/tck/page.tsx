@@ -28,6 +28,7 @@ interface SuiteResult {
   results: TestResult[];
   passed: number;
   total: number;
+  skipped?: number;
 }
 
 interface TckData {
@@ -45,12 +46,35 @@ function StatusIcon({ status }: { status: string }) {
     );
   if (status === "fail")
     return <XCircle size={16} className="text-[var(--danger-text)] shrink-0" />;
+  // skip: distinctly *neutral* (blue), not warning-yellow — so users don't
+  // confuse "intentionally skipped on this deployment" with "test failed".
   return (
-    <MinusCircle size={16} className="text-[var(--warning-text)] shrink-0" />
+    <MinusCircle
+      size={16}
+      className="text-blue-600 dark:text-blue-400 shrink-0"
+    />
   );
 }
 
-function ScoreBadge({ passed, total }: { passed: number; total: number }) {
+function ScoreBadge({
+  passed,
+  total,
+  skipped = 0,
+}: {
+  passed: number;
+  total: number;
+  skipped?: number;
+}) {
+  // When all tests are skipped, render a neutral "Skipped" badge instead of
+  // a red "0/N (0%)" that visually screams failure even though nothing
+  // actually failed.
+  if (skipped > 0 && skipped === total) {
+    return (
+      <span className="text-xs font-mono px-2 py-0.5 rounded border bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 border-blue-300 dark:border-blue-700">
+        {skipped} skipped
+      </span>
+    );
+  }
   const pct = total > 0 ? Math.round((passed / total) * 100) : 0;
   const color =
     pct === 100
@@ -94,6 +118,7 @@ function SuiteCard({
 }) {
   const [expanded, setExpanded] = useState(true);
   const meta = suiteLabels[suiteKey];
+  const skipped = data.results.filter((r) => r.status === "skip").length;
 
   // Group by category
   const categories = data.results.reduce(
@@ -124,7 +149,7 @@ function SuiteCard({
             </span>
           </div>
         </div>
-        <ScoreBadge passed={data.passed} total={data.total} />
+        <ScoreBadge passed={data.passed} total={data.total} skipped={skipped} />
       </button>
 
       {expanded && (

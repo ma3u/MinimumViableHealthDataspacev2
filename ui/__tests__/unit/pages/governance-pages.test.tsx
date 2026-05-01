@@ -96,8 +96,10 @@ describe("TckPage (Protocol Compliance Dashboard)", () => {
   it("shows loading state", () => {
     mockFetchApi.mockReturnValue(new Promise(() => {}));
     render(<TckPage />);
-    // TCK page shows "Running…" in the button and animated skeleton divs
-    expect(screen.getByText(/Running/)).toBeInTheDocument();
+    // Page shows the "Running…" Re-run button label *and* the cold-start
+    // explainer row "Running 20 protocol probes…" — getAllByText avoids the
+    // multi-match error and asserts at least one is present.
+    expect(screen.getAllByText(/Running/).length).toBeGreaterThan(0);
   });
 
   it("renders suites after loading", async () => {
