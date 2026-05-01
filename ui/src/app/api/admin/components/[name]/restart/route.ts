@@ -31,7 +31,7 @@ const ALLOWED_APPS = new Set([
 
 export async function POST(
   _req: NextRequest,
-  { params }: { params: { name: string } },
+  { params }: { params: Promise<{ name: string }> },
 ) {
   const session = await getServerSession(authOptions);
   const roles = (session as { roles?: string[] } | null)?.roles ?? [];
@@ -42,7 +42,7 @@ export async function POST(
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  const name = params.name;
+  const { name } = await params;
   if (!ALLOWED_APPS.has(name)) {
     return NextResponse.json(
       { error: `Unknown component: ${name}` },
