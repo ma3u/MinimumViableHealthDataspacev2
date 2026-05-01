@@ -1458,14 +1458,19 @@ const QUERY_TEMPLATES: QueryTemplate[] = [
       }
 
       // Sub-cohort: patients treated with the drug, or all patients if
-      // no drug was resolved.
+      // no drug was resolved. Synthea seed data uses two relationship
+      // names — :HAS_MEDICATION (Synthea-style, ~3.9k edges, code on .code)
+      // and :HAS_MEDICATION_REQUEST (FHIR-style, on .medicationCode);
+      // match both so the cohort is complete on either backing dataset.
       CALL {
         WITH allPatients
         UNWIND allPatients AS p
-        OPTIONAL MATCH (p)-[:HAS_MEDICATION_REQUEST]->(m:MedicationRequest)
-        WHERE ($drugCode IS NOT NULL AND m.medicationCode = $drugCode)
+        OPTIONAL MATCH (p)-[:HAS_MEDICATION|HAS_MEDICATION_REQUEST]->(m)
+        WHERE ($drugCode IS NOT NULL AND
+               (m.medicationCode = $drugCode OR m.code = $drugCode))
            OR ($drugText IS NOT NULL
-               AND toLower(coalesce(m.display, m.medicationCode, '')) CONTAINS $drugText)
+               AND toLower(coalesce(m.display, m.medicationCode, m.code, ''))
+                   CONTAINS $drugText)
         WITH p, count(m) AS drugHits
         WHERE ($drugCode IS NULL AND $drugText IS NULL)
            OR drugHits > 0
@@ -2696,6 +2701,37 @@ app.post("/nlq", async (req: Request, res: Response, next: NextFunction) => {
     // (issue #19). The generic extractParams returns a stub; here we
     // populate drugCode/drugText/indicationCode/indicationText/sideEffect*
     // from the :NlqGlossary nodes so the Cypher filters are deterministic.
+    //
+    // For each role we prefer the longest, most-specific text the
+    // researcher could have meant. The user's raw token (e.g. "uti") is
+    // often a 2-3 letter abbreviation that wouldn't appear inside the
+    // SNOMED display string ("Urinary tract infectious disease"); the
+    // glossary `display` for the same row IS a substring of typical
+    // EHR-coded display strings ("Recurrent urinary tract infection
+    // (disorder)" CONTAINS "urinary tract infection"). Picking the
+    // longer of the two — the raw token vs. a normalised slice of the
+    // resolved display — gives the Cypher CONTAINS clause a much higher
+    // hit-rate against real Synthea / FHIR seed data.
+    const longerText = (raw?: string, display?: string): string | null => {
+      const r = raw?.toLowerCase().trim() ?? "";
+      // Strip parenthesised qualifier (e.g. "Rupture of tendon (finding)")
+      // and pick the most-substring-friendly head of the resolved display.
+      // SNOMED preferred terms are noun-phrase-shaped: the first two words
+      // are usually the distinctive ones ("urinary tract" → matches
+      // "Recurrent urinary tract infection"; "rupture of" → meh, but
+      // "tendon" alone is distinctive). We pick the longer of:
+      //   - the user's raw token (e.g. "uti", "tendon rupture")
+      //   - the first 2 words of the cleaned glossary display
+      const clean = (display ?? "")
+        .toLowerCase()
+        .replace(/\s*\([^)]+\)\s*$/, "")
+        .trim();
+      const head2 = clean.split(/\s+/).slice(0, 2).join(" ");
+      const d = head2.length >= 4 ? head2 : clean;
+      if (!r && !d) return null;
+      if (r.length >= d.length) return r || null;
+      return d || null;
+    };
     let interpretation: AdverseEventContext | undefined;
     if (templateName === "adverse_event_in_cohort" && driver) {
       const resolverSession = driver.session({ database: "neo4j" });
@@ -2707,13 +2743,20 @@ app.post("/nlq", async (req: Request, res: Response, next: NextFunction) => {
         params = {
           ...params,
           drugCode: interpretation.drug?.code ?? null,
-          drugText: interpretation.raw.drugText?.toLowerCase() ?? null,
+          drugText: longerText(
+            interpretation.raw.drugText,
+            interpretation.drug?.generic ?? interpretation.drug?.display,
+          ),
           indicationCode: interpretation.indication?.code ?? null,
-          indicationText:
-            interpretation.raw.indicationText?.toLowerCase() ?? null,
+          indicationText: longerText(
+            interpretation.raw.indicationText,
+            interpretation.indication?.display,
+          ),
           sideEffectCode: interpretation.sideEffect?.code ?? null,
-          sideEffectText:
-            interpretation.raw.sideEffectText?.toLowerCase() ?? null,
+          sideEffectText: longerText(
+            interpretation.raw.sideEffectText,
+            interpretation.sideEffect?.display,
+          ),
         };
       } finally {
         await resolverSession.close();
