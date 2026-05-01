@@ -17,3 +17,9 @@ fe7320a578f5136c47218a80e351859235221353:neo4j/seed.sh:generic-api-key:5
 # file on HEAD uses an env var + header to avoid the pattern; this fingerprint
 # covers the original commit in history.
 25ae55ec0402f17406a78f7f137c583517d4d9d9:.github/workflows/reset-demo.yml:curl-auth-user:74
+
+# scripts/leitlinien/fetch_index.py — AWMF_PUBLIC_API_KEY is the public Elasticsearch
+# API key embedded in the AWMF register's SPA bundle — every browser loading
+# the public guideline register sends it. Documented inline; if AWMF rotates
+# it, scripts/leitlinien/discover_auth.py re-extracts. Not a secret.
+d8fcd02ceb57dc739a88f6c192cd387a9949b351:scripts/leitlinien/fetch_index.py:generic-api-key:20
