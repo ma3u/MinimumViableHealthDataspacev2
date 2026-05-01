@@ -114,7 +114,7 @@ const KNOWN_DIAGNOSES: Record<string, Diagnosis> = {
 
 export async function GET(
   _req: NextRequest,
-  { params }: { params: { name: string } },
+  { params }: { params: Promise<{ name: string }> },
 ) {
   const session = await getServerSession(authOptions);
   const roles = (session as { roles?: string[] } | null)?.roles ?? [];
@@ -125,7 +125,7 @@ export async function GET(
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  const name = params.name;
+  const { name } = await params;
   const known = KNOWN_DIAGNOSES[name];
   if (known) return NextResponse.json(known);
 
