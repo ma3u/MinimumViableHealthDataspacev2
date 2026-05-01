@@ -424,13 +424,16 @@ function TopoComponentCard({
   metricsShared = false,
 }: {
   comp: TopoComponent;
-  // When true, per-container CPU/MEM is meaningless (containers are
-  // shared across participants on this deployment). Render em-dashes
-  // instead of a misleading "0.0% / <1 MB" — real numbers live in Layer
-  // View.
+  // When true the same underlying ACA app serves every participant. The
+  // CPU/MEM numbers are real (the container's actual draw) but identical
+  // across rows; we render a small "shared" suffix so users understand
+  // why eight rows show the same value.
   metricsShared?: boolean;
 }) {
   const sev = SEVERITY_STYLES[comp.severity];
+  const sharedTitle = metricsShared
+    ? "Shared ACA container — same value applies to every participant. See Layer View for the cluster total."
+    : undefined;
   return (
     <div
       className={`border rounded-lg p-3 ${sev.border} ${sev.bg} transition-colors`}
@@ -443,20 +446,28 @@ function TopoComponentCard({
         </span>
         <span className="text-[10px] text-[var(--text-secondary)] capitalize">
           {comp.status}
+          {metricsShared && (
+            <span
+              className="ml-1 italic text-[9px] text-[var(--text-secondary)]"
+              title={sharedTitle}
+            >
+              · shared
+            </span>
+          )}
         </span>
       </div>
       <div className="grid grid-cols-3 gap-1 text-[10px] text-[var(--text-secondary)]">
-        <span title={metricsShared ? "shared — see Layer View" : undefined}>
+        <span title={sharedTitle}>
           <Cpu size={9} className="inline mr-0.5" />
-          {metricsShared ? "—" : `${comp.cpu.toFixed(1)}%`}
+          {`${comp.cpu.toFixed(1)}%`}
         </span>
-        <span title={metricsShared ? "shared — see Layer View" : undefined}>
+        <span title={sharedTitle}>
           <HardDrive size={9} className="inline mr-0.5" />
-          {metricsShared
-            ? "—"
-            : `${comp.memMB < 1 ? "<1" : Math.round(comp.memMB)} MB`}
+          {`${comp.memMB < 1 ? "<1" : Math.round(comp.memMB)} MB`}
         </span>
-        <span className="text-right">{comp.uptime}</span>
+        <span className="text-right" title={sharedTitle}>
+          {comp.uptime}
+        </span>
       </div>
     </div>
   );
@@ -1077,10 +1088,37 @@ const ACA_APP_SPECS: AcaAppSpec[] = [
   { name: "mvhd-ui", cpu: 0.5, memGiB: 1.0, minReplicas: 1 },
 ];
 
-// Default storage: Neo4j 20 GiB + PostgreSQL 10 GiB + Vault 2 GiB (Azure Files Premium ZRS)
-const DEFAULT_STORAGE_GIB = 32;
-// Default egress: rough estimate — most traffic is internal to the ACA env
-const DEFAULT_EGRESS_GIB = 20;
+// Storage GiB — derived from the Azure Files share quotas declared in
+// scripts/azure/env.sh (neo4j-data 10 + neo4j-logs 5 + pg-data 20 + vault-data
+// 2 = 37 GiB). Premium tier is billed on provisioned size, so this is what
+// shows up on the bill regardless of actual usage. Constants kept inline so
+// the page stays renderable without an extra ARM call.
+const SHARE_NEO4J_DATA_GIB = 10;
+const SHARE_NEO4J_LOGS_GIB = 5;
+const SHARE_PG_DATA_GIB = 20;
+const SHARE_VAULT_DATA_GIB = 2;
+const COMPUTED_STORAGE_GIB =
+  SHARE_NEO4J_DATA_GIB +
+  SHARE_NEO4J_LOGS_GIB +
+  SHARE_PG_DATA_GIB +
+  SHARE_VAULT_DATA_GIB;
+
+// Egress estimate (per participant, GB / month):
+//   - CP_DP_TRAFFIC_MB + LOG_INJECTION_MB above (DSP messages + audit log
+//     injection) — roughly 450 MB/participant
+//   - UI traffic: ~500 MB / participant / month for typical exploratory
+//     dashboard use (graph rendering, FHIR responses)
+// Plus a small infra baseline (Keycloak introspection, NATS publish to
+// external SIEM hooks, ACR pulls when scaling).
+const EGRESS_PER_PARTICIPANT_MB =
+  CP_DP_TRAFFIC_MB + LOG_INJECTION_MB + /* user-facing UI */ 500;
+const EGRESS_INFRA_BASELINE_GB = 2;
+
+function computeEgressGiB(participantCount: number): number {
+  const fromParticipants =
+    (EGRESS_PER_PARTICIPANT_MB * participantCount) / 1024;
+  return Math.ceil(fromParticipants + EGRESS_INFRA_BASELINE_GB);
+}
 
 // ACA apps known to be broken on the current Azure deployment due to the
 // EDC multi-port architecture mismatch documented in issue #25. Kept in sync
@@ -1097,11 +1135,16 @@ const KNOWN_BROKEN_APPS = new Set<string>([
 
 function AzureCostEstimatorPanel({
   liveComponents,
+  participantCount,
 }: {
   liveComponents: ComponentInfo[];
+  participantCount: number;
 }) {
-  const [storageGiB, setStorageGiB] = useState(DEFAULT_STORAGE_GIB);
-  const [egressGiB, setEgressGiB] = useState(DEFAULT_EGRESS_GIB);
+  // Storage and egress are derived from environment configuration + participant
+  // count rather than slider input, so the figure shown is what the deployment
+  // actually generates today. See COMPUTED_STORAGE_GIB / computeEgressGiB above.
+  const storageGiB = COMPUTED_STORAGE_GIB;
+  const egressGiB = computeEgressGiB(participantCount);
 
   // Prefer live memory reservations from the API (more accurate if ops changed them)
   const specs = useMemo<AcaAppSpec[]>(() => {
@@ -1132,36 +1175,26 @@ function AzureCostEstimatorPanel({
           Monthly Cost Estimate — Azure Container Apps (Consumption, 24×7)
         </h2>
         <div className="flex items-center gap-4 text-xs text-[var(--text-secondary)]">
-          <label className="flex items-center gap-2">
+          <span
+            className="flex items-center gap-1.5"
+            title={`Sum of Azure Files share quotas: neo4j-data ${SHARE_NEO4J_DATA_GIB} + neo4j-logs ${SHARE_NEO4J_LOGS_GIB} + pg-data ${SHARE_PG_DATA_GIB} + vault-data ${SHARE_VAULT_DATA_GIB} GiB. Configured in scripts/azure/env.sh.`}
+          >
             <HardDrive size={13} />
-            Storage GiB:
-            <input
-              type="range"
-              min={0}
-              max={200}
-              value={storageGiB}
-              onChange={(e) => setStorageGiB(Number(e.target.value))}
-              className="w-24 accent-emerald-500"
-            />
-            <span className="font-mono font-semibold text-[var(--text-primary)] w-8 text-right">
-              {storageGiB}
+            Storage:{" "}
+            <span className="font-mono font-semibold text-[var(--text-primary)]">
+              {storageGiB} GiB
             </span>
-          </label>
-          <label className="flex items-center gap-2">
+          </span>
+          <span
+            className="flex items-center gap-1.5"
+            title={`Estimated: (${EGRESS_PER_PARTICIPANT_MB} MB/participant × ${participantCount} participants) + ${EGRESS_INFRA_BASELINE_GB} GB infra baseline. Includes DSP messaging, audit log injection, and user-facing UI traffic.`}
+          >
             <Network size={13} />
-            Egress GiB:
-            <input
-              type="range"
-              min={0}
-              max={500}
-              value={egressGiB}
-              onChange={(e) => setEgressGiB(Number(e.target.value))}
-              className="w-24 accent-emerald-500"
-            />
-            <span className="font-mono font-semibold text-[var(--text-primary)] w-8 text-right">
-              {egressGiB}
+            Egress (est.):{" "}
+            <span className="font-mono font-semibold text-[var(--text-primary)]">
+              {egressGiB} GiB
             </span>
-          </label>
+          </span>
         </div>
       </div>
 
@@ -1804,6 +1837,11 @@ export default function AdminComponentsPage() {
         topology?.metricsShared === true ? (
           <AzureCostEstimatorPanel
             liveComponents={snapshot?.components ?? []}
+            participantCount={
+              viewMode === "participant"
+                ? topology?.summary.totalParticipants ?? 5
+                : snapshot?.participants.length ?? 5
+            }
           />
         ) : (
           <CostEstimatorPanel
