@@ -32,7 +32,14 @@ az containerapp create \
   -o none
 ok "NATS container app"
 
-# ── Control Plane ────────────────────────────────────────────────────────────
+# ── Control Plane (multi-port — issue #25 resolved 2026-05-02) ──────────────
+# EDC's control plane needs four distinct Jetty web ports — collapsing them
+# all onto one port triggers `IllegalArgumentException: A binding for port X
+# already exists` from Jetty's PortMappingRegistry. ACA exposes additional
+# ports via `additionalPortMappings` on the ingress; we set the main
+# targetPort to 8080 (web/health endpoints, matches local docker-compose) and
+# add 8081 (mgmt) / 8082 (protocol-DSP) / 8083 (control-API) as additional
+# port mappings via a YAML patch right after create.
 log "Creating Control Plane container app..."
 az containerapp create \
   --name "$CONTROLPLANE_APP" --resource-group "$RG" --environment "$ACA_ENV" \
@@ -42,12 +49,13 @@ az containerapp create \
   --registry-password "$ACR_PASSWORD" \
   --cpu 1 --memory 2Gi \
   --min-replicas 1 --max-replicas 1 \
-  --ingress internal --target-port 8081 \
+  --ingress internal --target-port 8080 \
   --env-vars \
     "EDC_DATASOURCE_DEFAULT_URL=jdbc:postgresql://${PG_HOST}:${PG_PORT}/controlplane" \
     "EDC_DATASOURCE_DEFAULT_USER=${PG_ADMIN}" \
     "EDC_DATASOURCE_DEFAULT_PASSWORD=${PG_PASSWORD}" \
-    "EDC_DSP_CALLBACK_ADDRESS=${CONTROLPLANE_URL:-}" \
+    "EDC_SQL_SCHEMA_AUTOCREATE=true" \
+    "EDC_DSP_CALLBACK_ADDRESS=http://${CONTROLPLANE_APP}:8082/api/dsp" \
     "EDC_VAULT_HASHICORP_URL=${VAULT_URL:-}" \
     "EDC_VAULT_HASHICORP_TOKEN=${VAULT_ROOT_TOKEN}" \
     "EDC_NATS_CN_SUBSCRIBER_URL=nats://${NATS_APP}:4222" \
@@ -57,16 +65,49 @@ az containerapp create \
     "EDC_NATS_TP_SUBSCRIBER_AUTOCREATE=true" \
     "EDC_NATS_TP_PUBLISHER_URL=nats://${NATS_APP}:4222" \
     "EDC_IAM_OAUTH2_JWKS_URL=${KEYCLOAK_PUBLIC_URL:-}/realms/edcv/protocol/openid-connect/certs" \
-    "WEB_HTTP_PORT=8081" \
+    "WEB_HTTP_PORT=8080" \
     "WEB_HTTP_PATH=/api" \
     "WEB_HTTP_MANAGEMENT_PORT=8081" \
-    "WEB_HTTP_MANAGEMENT_PATH=/management" \
-    "WEB_HTTP_DSP_PORT=8081" \
-    "WEB_HTTP_DSP_PATH=/api/dsp" \
-    "WEB_HTTP_CONTROL_PORT=8081" \
+    "WEB_HTTP_MANAGEMENT_PATH=/api/mgmt" \
+    "WEB_HTTP_PROTOCOL_PORT=8082" \
+    "WEB_HTTP_PROTOCOL_PATH=/api/dsp" \
+    "WEB_HTTP_CONTROL_PORT=8083" \
     "WEB_HTTP_CONTROL_PATH=/api/control" \
   -o none
-ok "Control Plane"
+
+log "Patching Control Plane with additionalPortMappings (8081 mgmt, 8082 dsp, 8083 control)..."
+CP_YAML=$(mktemp)
+az containerapp show --name "$CONTROLPLANE_APP" --resource-group "$RG" -o yaml > "$CP_YAML"
+python3 - "$CP_YAML" <<'PY'
+import sys, yaml
+path = sys.argv[1]
+with open(path) as f: d = yaml.safe_load(f)
+d['properties']['configuration']['ingress']['additionalPortMappings'] = [
+    {'targetPort': 8081, 'exposedPort': 8081, 'external': False},
+    {'targetPort': 8082, 'exposedPort': 8082, 'external': False},
+    {'targetPort': 8083, 'exposedPort': 8083, 'external': False},
+]
+with open(path, 'w') as f: yaml.safe_dump(d, f, sort_keys=False)
+PY
+az containerapp update --name "$CONTROLPLANE_APP" --resource-group "$RG" --yaml "$CP_YAML" -o none
+rm -f "$CP_YAML"
+ok "Control Plane (multi-port)"
+
+# NATS needs JetStream enabled — controlplane's NatsContractNegotiationSubscriber
+# refuses to start without it ("Timeout waiting for NATS JetStream server").
+log "Enabling JetStream on NATS (-js -m 8222)..."
+NATS_YAML=$(mktemp)
+az containerapp show --name "$NATS_APP" --resource-group "$RG" -o yaml > "$NATS_YAML"
+python3 - "$NATS_YAML" <<'PY'
+import sys, yaml
+path = sys.argv[1]
+with open(path) as f: d = yaml.safe_load(f)
+d['properties']['template']['containers'][0]['args'] = ['-js', '-m', '8222']
+with open(path, 'w') as f: yaml.safe_dump(d, f, sort_keys=False)
+PY
+az containerapp update --name "$NATS_APP" --resource-group "$RG" --yaml "$NATS_YAML" -o none
+rm -f "$NATS_YAML"
+ok "NATS (JetStream enabled)"
 
 # ── Data Plane FHIR ─────────────────────────────────────────────────────────
 log "Creating Data Plane FHIR container app..."
