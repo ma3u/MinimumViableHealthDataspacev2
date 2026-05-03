@@ -57,12 +57,20 @@ export const viewport: Viewport = {
 // stream. Without this, Next.js prerenders layout.tsx at build time and the
 // nonce never reaches the client — every framework inline script gets blocked
 // by 'strict-dynamic'.
+//
+// Skip the headers() read in `output: "export"` builds (GitHub Pages): there is
+// no middleware in a static export, so there's no nonce to forward, and any
+// dynamic API in the root layout makes every page fail prerender with
+// "Route X with `dynamic = 'error'` couldn't be rendered statically".
 export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const nonce = (await headers()).get("x-nonce") ?? undefined;
+  const nonce =
+    process.env.NEXT_PUBLIC_STATIC_EXPORT === "true"
+      ? undefined
+      : (await headers()).get("x-nonce") ?? undefined;
   return (
     <html lang="en" suppressHydrationWarning>
       {/* Inline script applies saved theme class before first paint — prevents flash */}
