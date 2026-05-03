@@ -3824,7 +3824,7 @@ New spec `ui/__tests__/e2e/journeys/32-federated-nlq.spec.ts`:
 | [019](ADRs/ADR-019-gds-apoc-azure-ai-foundry-graphrag.md)  | GDS + APOC + Azure AI Foundry GraphRAG         | 2026-04-15 | Proposed   |
 | [020](ADRs/ADR-020-cross-participant-dataset-discovery.md) | Cross-Participant Dataset Discovery (Issue #8) | 2026-04-18 | Accepted   |
 | [021](ADRs/ADR-021-docling-leitlinien-ingestion.md)        | Docling AWMF Leitlinien Ingestion (Issue #20)  | 2026-04-26 | Accepted   |
-| [022](ADRs/ADR-022-edc-connector-cost-vs-function.md)      | EDC Connector — Function vs Cost (Issue #25)   | 2026-05-01 | Proposed   |
+| [022](ADRs/ADR-022-edc-connector-cost-vs-function.md)      | EDC Connector — Function vs Cost (Issue #25)   | 2026-05-03 | Accepted   |
 | [023](ADRs/ADR-023-reinstate-off-hours-scaledown.md)       | Reinstate Off-Hours ACA Scale-Down             | 2026-05-01 | Accepted   |
 
 > **Note:** The full text of ADR-1 through ADR-9 has been moved into the standalone ADR documents linked in the table above. Click any row to read the full context, decision, and consequences.
