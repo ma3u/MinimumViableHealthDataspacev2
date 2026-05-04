@@ -1,0 +1,123 @@
+name: EDC Schema Reset (issue #25)
+
+# Drops and recreates the identityhub + issuerservice databases on the live
+# mvhd-postgres so EDC's EDC_SQL_SCHEMA_AUTOCREATE=true bootstrap re-runs
+# from a clean slate. The original deploy of these two services missed the
+# autocreate flag, leaving partial schemas with the holder-credential
+# extension tables (e.g. edc_holder_credentialrequest) absent.
+#
+# Manual trigger only. Scales the affected services down before the reset
+# and back up to min=1 after.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+concurrency:
+  group: "azure-reset"
+  cancel-in-progress: false
+
+env:
+  RESOURCE_GROUP: rg-mvhd-dev
+
+jobs:
+  reset:
+    name: Reset IH + Issuer schemas
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Azure Login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Scale IH and Issuer to zero
+        run: |
+          az containerapp update -n mvhd-identityhub -g $RESOURCE_GROUP --min-replicas 0 -o none
+          az containerapp update -n mvhd-issuerservice -g $RESOURCE_GROUP --min-replicas 0 -o none
+          echo "scaled to zero, waiting 20s for replicas to drain"
+          sleep 20
+
+      - name: Resolve postgres password
+        id: pgpw
+        run: |
+          PW=$(az containerapp secret show -n mvhd-postgres -g $RESOURCE_GROUP --secret-name pg-password --query "value" -o tsv)
+          echo "::add-mask::$PW"
+          echo "pw=$PW" >> "$GITHUB_OUTPUT"
+
+      - name: Create one-shot pgfix job
+        env:
+          PGPW: ${{ steps.pgpw.outputs.pw }}
+        run: |
+          ENV_ID=$(az containerapp env show -n mvhd-env -g $RESOURCE_GROUP --query "id" -o tsv)
+          cat > /tmp/pgfix-job.yaml <<EOF
+          type: Microsoft.App/jobs
+          properties:
+            configuration:
+              triggerType: Manual
+              replicaTimeout: 120
+              replicaRetryLimit: 0
+              manualTriggerConfig:
+                replicaCompletionCount: 1
+                parallelism: 1
+              secrets:
+                - name: pg-password
+                  value: "${PGPW}"
+            environmentId: ${ENV_ID}
+            template:
+              containers:
+                - name: pgfix
+                  image: postgres:16-alpine
+                  resources:
+                    cpu: 0.25
+                    memory: 0.5Gi
+                  env:
+                    - name: PGPASSWORD
+                      secretRef: pg-password
+                    - name: PGHOST
+                      value: mvhd-postgres
+                    - name: PGUSER
+                      value: mvhdadmin
+                    - name: PGDATABASE
+                      value: postgres
+                  command: ["sh", "-c"]
+                  args:
+                    - "psql -c 'DROP DATABASE IF EXISTS identityhub WITH (FORCE)' && psql -c 'DROP DATABASE IF EXISTS issuerservice WITH (FORCE)' && psql -c 'CREATE DATABASE identityhub' && psql -c 'CREATE DATABASE issuerservice' && echo DONE"
+          EOF
+          # Replace if it already exists, otherwise create
+          if az containerapp job show -n mvhd-pgfix -g $RESOURCE_GROUP -o none 2>/dev/null; then
+            az containerapp job delete -n mvhd-pgfix -g $RESOURCE_GROUP --yes -o none
+          fi
+          az containerapp job create -n mvhd-pgfix -g $RESOURCE_GROUP --yaml /tmp/pgfix-job.yaml -o none
+
+      - name: Run pgfix job
+        run: |
+          EXEC=$(az containerapp job start -n mvhd-pgfix -g $RESOURCE_GROUP --query "name" -o tsv)
+          echo "Started execution: $EXEC"
+          # Poll for completion (max 90s)
+          for i in $(seq 1 30); do
+            STATUS=$(az containerapp job execution show -n mvhd-pgfix -g $RESOURCE_GROUP --job-execution-name "$EXEC" --query "properties.status" -o tsv 2>/dev/null || echo "Pending")
+            echo "[$i] status: $STATUS"
+            case "$STATUS" in
+              Succeeded) echo "pgfix Succeeded"; exit 0 ;;
+              Failed|Canceled) echo "pgfix $STATUS"; exit 1 ;;
+            esac
+            sleep 3
+          done
+          echo "Timed out waiting for pgfix"; exit 1
+
+      - name: Scale IH and Issuer back up
+        run: |
+          az containerapp update -n mvhd-identityhub  -g $RESOURCE_GROUP --min-replicas 1 --max-replicas 1 -o none
+          az containerapp update -n mvhd-issuerservice -g $RESOURCE_GROUP --min-replicas 1 --max-replicas 1 -o none
+          echo "scaled back up; clean schema bootstrap will run on first replica"
+
+      - name: Cleanup pgfix job
+        if: always()
+        run: |
+          az containerapp job delete -n mvhd-pgfix -g $RESOURCE_GROUP --yes -o none || true
