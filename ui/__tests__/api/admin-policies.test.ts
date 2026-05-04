@@ -27,8 +27,10 @@ vi.mock("fs", () => ({
 
 import { edcClient } from "@/lib/edc";
 import { GET, POST } from "@/app/api/admin/policies/route";
+import { getServerSession } from "next-auth/next";
 
 const mockManagement = vi.mocked(edcClient.management);
+const mockSession = vi.mocked(getServerSession);
 
 describe("/api/admin/policies", () => {
   beforeEach(() => {
@@ -101,6 +103,57 @@ describe("/api/admin/policies", () => {
 
       expect(response.status).toBe(201);
       expect(data["@id"]).toBe("pol-new");
+    });
+  });
+
+  // EHDS Art. 46 puts ODRL data permits in the regulator's supervision scope.
+  // GET must be readable by HDAB_AUTHORITY; mutations stay EDC_ADMIN-only.
+  describe("Role-based access (HDAB_AUTHORITY)", () => {
+    it("GET allows HDAB_AUTHORITY (regulator inspecting Art. 46 policies)", async () => {
+      mockSession.mockResolvedValueOnce({
+        user: { name: "Regulator", email: "regulator@test.example" },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        roles: ["HDAB_AUTHORITY"],
+      } as any);
+      mockManagement.mockResolvedValueOnce([{ "@id": "pol-1", policy: {} }]);
+      const req = new NextRequest(
+        "http://localhost:3000/api/admin/policies?participantId=spe-1",
+      );
+      const response = await GET(req);
+      expect(response.status).toBe(200);
+    });
+
+    it("POST forbids HDAB_AUTHORITY (writes are EDC_ADMIN-only)", async () => {
+      mockSession.mockResolvedValueOnce({
+        user: { name: "Regulator", email: "regulator@test.example" },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        roles: ["HDAB_AUTHORITY"],
+      } as any);
+      const req = new NextRequest("http://localhost:3000/api/admin/policies", {
+        method: "POST",
+        body: JSON.stringify({ participantId: "spe-1", policy: {} }),
+      });
+      const response = await POST(req);
+      expect(response.status).toBe(403);
+    });
+
+    it("GET forbids unrelated role (PATIENT)", async () => {
+      mockSession.mockResolvedValueOnce({
+        user: { name: "Patient", email: "patient@test.example" },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        roles: ["PATIENT"],
+      } as any);
+      const req = new NextRequest("http://localhost:3000/api/admin/policies");
+      const response = await GET(req);
+      expect(response.status).toBe(403);
+    });
+
+    it("GET unauthorized when no session", async () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      mockSession.mockResolvedValueOnce(null as any);
+      const req = new NextRequest("http://localhost:3000/api/admin/policies");
+      const response = await GET(req);
+      expect(response.status).toBe(401);
     });
   });
 });

@@ -543,6 +543,42 @@ test.describe("Route protection — authenticated role checks", () => {
     expect(page.url()).toContain("/compliance");
     await expect(page).not.toHaveURL(/unauthorized|signin/);
   });
+
+  // The Manage dropdown for HDAB shows Policies + Audit & Provenance. The
+  // navigation tests above check that the menu items render; these tests
+  // check that clicking them actually loads the page rather than bouncing
+  // the regulator to /auth/unauthorized. (Regression: the previous middleware
+  // gated all of /admin/* behind EDC_ADMIN, contradicting the navigation
+  // contract.)
+  test("regulator can access /admin/policies", async ({ page }) => {
+    await loginAs(page, "regulator", "regulator");
+    await page.goto("/admin/policies");
+    expect(page.url()).toContain("/admin/policies");
+    await expect(page).not.toHaveURL(/unauthorized|signin/);
+  });
+
+  test("regulator can access /admin/audit", async ({ page }) => {
+    await loginAs(page, "regulator", "regulator");
+    await page.goto("/admin/audit");
+    expect(page.url()).toContain("/admin/audit");
+    await expect(page).not.toHaveURL(/unauthorized|signin/);
+  });
+
+  test("regulator is still blocked from /admin/components (EDC_ADMIN-only)", async ({
+    page,
+  }) => {
+    await loginAs(page, "regulator", "regulator");
+    await page.goto("/admin/components");
+    await expect(page).toHaveURL(/unauthorized|signin/, { timeout: T });
+  });
+
+  test("regulator is still blocked from /admin/tenants (EDC_ADMIN-only)", async ({
+    page,
+  }) => {
+    await loginAs(page, "regulator", "regulator");
+    await page.goto("/admin/tenants");
+    await expect(page).toHaveURL(/unauthorized|signin/, { timeout: T });
+  });
 });
 
 // ═════════════════════════════════════════════════════════════════════════════

@@ -13,7 +13,9 @@ import { getToken } from "next-auth/jwt";
  * `getToken()` and fully own the response chain.
  *
  * Route rules (auth required):
- *   /admin/*                   → requires EDC_ADMIN
+ *   /admin/policies            → requires HDAB_AUTHORITY or EDC_ADMIN
+ *   /admin/audit               → requires HDAB_AUTHORITY or EDC_ADMIN
+ *   /admin/*  (other)          → requires EDC_ADMIN
  *   /compliance                → requires HDAB_AUTHORITY or EDC_ADMIN
  *   /patient/profile           → requires PATIENT or EDC_ADMIN
  *   /patient/research          → requires PATIENT or EDC_ADMIN
@@ -88,6 +90,16 @@ function buildCsp(nonce: string, isDev: boolean): string {
 }
 
 function requiresRole(pathname: string): string[] | null {
+  // HDAB-shared admin pages: policies (Art. 46 ODRL) and audit (Art. 37/38/53)
+  // are part of the regulator's supervision toolkit. Navigation.tsx exposes
+  // them to HDAB_AUTHORITY, so the middleware must match. All other /admin/*
+  // routes (tenants, components, etc.) stay EDC_ADMIN only.
+  if (
+    pathname.startsWith("/admin/policies") ||
+    pathname.startsWith("/admin/audit")
+  ) {
+    return ["HDAB_AUTHORITY", "EDC_ADMIN"];
+  }
   if (pathname.startsWith("/admin")) return ["EDC_ADMIN"];
   if (pathname.startsWith("/compliance"))
     return ["HDAB_AUTHORITY", "EDC_ADMIN"];
