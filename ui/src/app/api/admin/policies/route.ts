@@ -6,7 +6,25 @@ import path from "path";
 
 import { authOptions } from "@/lib/auth";
 
-async function requireAdmin(): Promise<NextResponse | null> {
+/**
+ * Policies are visible to both EDC_ADMIN (dataspace operator) and
+ * HDAB_AUTHORITY (regulator inspecting EHDS Art. 46 ODRL terms attached to
+ * data permits). Mutations are kept admin-only via the per-method guard
+ * below.
+ */
+async function requirePoliciesRead(): Promise<NextResponse | null> {
+  const session = await getServerSession(authOptions);
+  const roles = (session as { roles?: string[] } | null)?.roles ?? [];
+  if (!session) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  if (!roles.includes("EDC_ADMIN") && !roles.includes("HDAB_AUTHORITY")) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+  return null;
+}
+
+async function requirePoliciesWrite(): Promise<NextResponse | null> {
   const session = await getServerSession(authOptions);
   const roles = (session as { roles?: string[] } | null)?.roles ?? [];
   if (!session) {
@@ -59,7 +77,7 @@ async function neo4jCypher(
  * Attempts EDC-V management API first; falls back to Neo4j if offline.
  */
 export async function GET(request: NextRequest) {
-  const authError = await requireAdmin();
+  const authError = await requirePoliciesRead();
   if (authError) return authError;
 
   const participantId = request.nextUrl.searchParams.get("participantId");
@@ -157,7 +175,7 @@ export async function GET(request: NextRequest) {
  * Attempts EDC-V first; on failure stores the policy in Neo4j as OdrlPolicy node.
  */
 export async function POST(request: NextRequest) {
-  const authError = await requireAdmin();
+  const authError = await requirePoliciesWrite();
   if (authError) return authError;
 
   try {
@@ -235,7 +253,7 @@ export async function POST(request: NextRequest) {
  * Body: { participantId, policyId, policy: { ... } }
  */
 export async function PUT(request: NextRequest) {
-  const authError = await requireAdmin();
+  const authError = await requirePoliciesWrite();
   if (authError) return authError;
 
   try {
@@ -304,7 +322,7 @@ export async function PUT(request: NextRequest) {
  * Body: { participantId, policyId }
  */
 export async function DELETE(request: NextRequest) {
-  const authError = await requireAdmin();
+  const authError = await requirePoliciesWrite();
   if (authError) return authError;
 
   try {

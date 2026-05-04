@@ -5,14 +5,19 @@ import { authOptions } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
-/** Require an authenticated session with EDC_ADMIN role (BSI C5 IAM-01 / OWASP A01). */
-async function requireAdmin(): Promise<NextResponse | null> {
+/**
+ * Audit & Provenance is the regulator's supervision toolkit (EHDS Art. 37
+ * tasks & powers, Art. 38 DPA cooperation, Art. 53 penalties), not just a
+ * dataspace-operator dashboard. Allow EDC_ADMIN and HDAB_AUTHORITY (BSI C5
+ * IAM-01 / OWASP A01).
+ */
+async function requireAuditAccess(): Promise<NextResponse | null> {
   const session = await getServerSession(authOptions);
   const roles = (session as { roles?: string[] } | null)?.roles ?? [];
   if (!session) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  if (!roles.includes("EDC_ADMIN")) {
+  if (!roles.includes("EDC_ADMIN") && !roles.includes("HDAB_AUTHORITY")) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
   return null;
@@ -126,7 +131,7 @@ async function runCypher(
  *   contractId   – (accesslogs only) filter by contract ID
  */
 export async function GET(request: NextRequest) {
-  const authError = await requireAdmin();
+  const authError = await requireAuditAccess();
   if (authError) return authError;
 
   const sp = request.nextUrl.searchParams;
