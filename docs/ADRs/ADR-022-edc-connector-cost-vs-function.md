@@ -1,8 +1,8 @@
 # ADR-022: EDC Connector — Function vs Cost
 
-**Status:** Accepted (Option C)
-**Date:** 2026-05-01 (proposed) · 2026-05-03 (accepted)
-**Relates to:** [ADR-002](ADR-002-edc-data-plane-architecture.md), [ADR-007](ADR-007-did-web-dsp-negotiation.md), [ADR-009](ADR-009-issuerservice-credential-fix.md), [ADR-012](ADR-012-azure-container-apps.md), [ADR-018](ADR-018-24x7-workaround-b.md)
+**Status:** Superseded by [ADR-024](ADR-024-full-edc-provisioning-per-participant.md) on 2026-05-04. Original recommendation (Option C, hybrid scope split) was reversed during HDAB demo prep when regulator feedback established that protocol compliance must be observable on the live shared environment, not deferred to the local Docker stack. The function-vs-cost analysis in this document is retained as the trade-off matrix that informed the new decision.
+**Date:** 2026-05-01 (proposed) · 2026-05-03 (Option C accepted) · 2026-05-04 (superseded)
+**Relates to:** [ADR-002](ADR-002-edc-data-plane-architecture.md), [ADR-007](ADR-007-did-web-dsp-negotiation.md), [ADR-009](ADR-009-issuerservice-credential-fix.md), [ADR-012](ADR-012-azure-container-apps.md), [ADR-018](ADR-018-24x7-workaround-b.md), [ADR-024](ADR-024-full-edc-provisioning-per-participant.md)
 **Tracking:** Issue #25 (multi-port ACA / EDC architectural mismatch)
 
 ## State on acceptance day (2026-05-03)
