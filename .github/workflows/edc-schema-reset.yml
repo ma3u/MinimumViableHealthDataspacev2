@@ -1,4 +1,4 @@
-name: EDC Schema Reset (issue #25)
+name: EDC Schema Reset & Participant Seed (issue #25)
 
 # Drops and recreates the identityhub + issuerservice databases on the live
 # mvhd-postgres so EDC's EDC_SQL_SCHEMA_AUTOCREATE=true bootstrap re-runs
@@ -6,11 +6,23 @@ name: EDC Schema Reset (issue #25)
 # autocreate flag, leaving partial schemas with the holder-credential
 # extension tables (e.g. edc_holder_credentialrequest) absent.
 #
-# Manual trigger only. Scales the affected services down before the reset
-# and back up to min=1 after.
+# After a clean schema bootstrap, optionally seeds the 5 EHDS participants
+# (alpha-klinik, pharmaco, medreg, lmc, irs) into IdentityHub so the
+# /compliance/tck page can show green DSP-2.x and DCP-2.x rows.
+#
+# Manual trigger only.
 
 on:
   workflow_dispatch:
+    inputs:
+      seed_participants:
+        description: "Seed 5 EHDS participants into IH after schema reset"
+        type: boolean
+        default: true
+      skip_schema_reset:
+        description: "Skip schema reset, only seed participants"
+        type: boolean
+        default: false
 
 permissions:
   id-token: write
@@ -121,3 +133,111 @@ jobs:
         if: always()
         run: |
           az containerapp job delete -n mvhd-pgfix -g $RESOURCE_GROUP --yes -o none || true
+
+      - name: Wait for IH to boot cleanly
+        if: ${{ github.event.inputs.seed_participants == 'true' }}
+        run: |
+          # IH takes ~30-60s for clean cold-start with autocreate. Poll the
+          # internal /api/identity/v1alpha/participants endpoint via a one-shot
+          # curl job (since IH is internal-only).
+          for i in $(seq 1 24); do
+            sleep 5
+            REVS=$(az containerapp revision list -n mvhd-identityhub -g $RESOURCE_GROUP \
+              --query "[?properties.active && properties.healthState=='Healthy'].name" -o tsv 2>/dev/null || true)
+            if [ -n "$REVS" ]; then
+              echo "[$i] IH revision Healthy: $REVS"
+              break
+            fi
+            echo "[$i] IH not yet Healthy, waiting"
+          done
+
+      - name: Seed 5 EHDS participants via one-shot job
+        if: ${{ github.event.inputs.seed_participants == 'true' }}
+        run: |
+          ENV_ID=$(az containerapp env show -n mvhd-env -g $RESOURCE_GROUP --query "id" -o tsv)
+          # Auth key for IH management API: web.http.identity.auth.key=password
+          # in jad/identityhub.env. The env var is EDC_API_AUTH_KEY in the
+          # current EDC IH builds; fall back to literal "password" if missing.
+          AUTH_KEY="password"
+          cat > /tmp/seed-job.yaml <<EOF
+          type: Microsoft.App/jobs
+          properties:
+            configuration:
+              triggerType: Manual
+              replicaTimeout: 300
+              replicaRetryLimit: 0
+              manualTriggerConfig:
+                replicaCompletionCount: 1
+                parallelism: 1
+            environmentId: ${ENV_ID}
+            template:
+              containers:
+                - name: seed
+                  image: curlimages/curl:8.10.1
+                  resources:
+                    cpu: 0.25
+                    memory: 0.5Gi
+                  env:
+                    - name: IH
+                      value: http://mvhd-identityhub:7082/api/identity
+                    - name: AUTH
+                      value: "${AUTH_KEY}"
+                  command: ["sh", "-c"]
+                  args:
+                    - |
+                      set -e
+                      echo "Probing IH base..."
+                      for i in 1 2 3 4 5; do
+                        if curl -fsS -o /dev/null -w 'IH base %{http_code}\n' "\${IH}/v1alpha/participants" -H "x-api-key: \${AUTH}"; then
+                          break
+                        fi
+                        echo "wait \$i"; sleep 5
+                      done
+                      echo
+                      echo "Seeding 5 participants..."
+                      for P in alpha-klinik pharmaco medreg lmc irs; do
+                        echo "POST \$P"
+                        curl -fsS -X POST "\${IH}/v1alpha/participants" \\
+                          -H "Content-Type: application/json" \\
+                          -H "x-api-key: \${AUTH}" \\
+                          -d "{
+                            \"@context\": [\"https://w3id.org/identityhub/v1alpha\"],
+                            \"@type\": \"ParticipantContext\",
+                            \"participantId\": \"\${P}\",
+                            \"did\": \"did:web:\${P}.example:participant\",
+                            \"isActive\": true,
+                            \"key\": {
+                              \"keyId\": \"key-1\",
+                              \"type\": \"EC\",
+                              \"curve\": \"secp256r1\",
+                              \"active\": true
+                            }
+                          }" \\
+                          -w '%{http_code}\n' || echo "POST \$P failed (continuing)"
+                      done
+                      echo
+                      echo "Final state:"
+                      curl -fsS "\${IH}/v1alpha/participants" -H "x-api-key: \${AUTH}" | head -c 2000
+                      echo
+                      echo DONE
+          EOF
+          if az containerapp job show -n mvhd-edc-seed -g $RESOURCE_GROUP -o none 2>/dev/null; then
+            az containerapp job delete -n mvhd-edc-seed -g $RESOURCE_GROUP --yes -o none
+          fi
+          az containerapp job create -n mvhd-edc-seed -g $RESOURCE_GROUP --yaml /tmp/seed-job.yaml -o none
+          EXEC=$(az containerapp job start -n mvhd-edc-seed -g $RESOURCE_GROUP --query "name" -o tsv)
+          echo "started exec: $EXEC"
+          for i in $(seq 1 60); do
+            STATUS=$(az containerapp job execution show -n mvhd-edc-seed -g $RESOURCE_GROUP --job-execution-name "$EXEC" --query "properties.status" -o tsv 2>/dev/null || echo Pending)
+            echo "[$i] seed status: $STATUS"
+            case "$STATUS" in
+              Succeeded) echo "seed Succeeded"; break ;;
+              Failed|Canceled) echo "seed $STATUS — continuing for log dump"; break ;;
+            esac
+            sleep 5
+          done
+
+      - name: Cleanup seed job
+        if: ${{ always() && github.event.inputs.seed_participants == 'true' }}
+        run: |
+          az containerapp job delete -n mvhd-edc-seed -g $RESOURCE_GROUP --yes -o none || true
