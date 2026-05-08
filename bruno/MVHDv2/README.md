@@ -144,14 +144,33 @@ This works without running anything, but requires manual repetition every
 
 ## Send your first request
 
-Pick **GET EEHRxF** in the sidebar. The URL is `{{baseUrl}}/api/eehrxf`.
-Hit **Send**.
+Pick **GET EEHRxF** (or **GET Compliance Status**) in the sidebar. The
+URL is `{{baseUrl}}/api/eehrxf`. Hit **Send**.
 
 - On `Static-mock`: immediate 200 with the FHIR profile catalogue.
 - On `Azure-Dev` with `sessionToken` set: live data (currently 6
   categories, 14 profiles, ~93k resources).
 - On `Azure-Dev` without `sessionToken`: 401 plus a Bruno test failure
   with the hint "run the forge script".
+
+### What success looks like
+
+![Bruno against Azure-Dev with a forged session cookie returning 200 OK](docs/screenshots/azure-dev-200-compliance.png)
+
+Things to verify in your own window:
+
+| Check                          | Where                                                                                                                 |
+| ------------------------------ | --------------------------------------------------------------------------------------------------------------------- |
+| Environment selector top-right | Should read **`Azure-Dev`**                                                                                           |
+| Response status                | **`200 OK`** (red `401 Unauthorized` means `sessionToken` is empty or expired)                                        |
+| `Headers` tab on the request   | Two collection-level rows: `Accept: application/json` and `Cookie: __Secure-next-auth.session-token={{sessionToken}}` |
+| `Vars` tab on the request      | `sessionToken` shows a long string starting `eyJhbGciOiJkaXIiLCJlbmMiOiJBMjU2R0NNIn0..`                               |
+| Response body                  | Real participant DIDs (`did:web:alpha-klinik.de:participant`, …) — not a mock object                                  |
+
+If you see 401 after setting `sessionToken`, Bruno may not have re-read
+the environment file. Use the in-app **Environments → Azure-Dev** panel
+to set the value (instead of editing the file from outside) — those
+edits take effect immediately.
 
 ---
 
