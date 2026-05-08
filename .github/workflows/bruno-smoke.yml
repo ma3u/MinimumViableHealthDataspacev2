@@ -1,0 +1,126 @@
+name: Bruno API Smoke
+
+# Runs the bruno/MVHDv2 collection against either the GitHub Pages
+# static-mock mirror (no auth) or the live Azure-Dev deployment (auth via
+# a forged NextAuth session cookie). Pass-through for asserts and 5xx
+# guards defined at the collection level.
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - "bruno/MVHDv2/**"
+      - "ui/src/app/api/**"
+      - "ui/scripts/forge-bruno-session.mjs"
+      - ".github/workflows/bruno-smoke.yml"
+  pull_request:
+    paths:
+      - "bruno/MVHDv2/**"
+      - "ui/src/app/api/**"
+      - "ui/scripts/forge-bruno-session.mjs"
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Bruno environment to run against"
+        type: choice
+        options: [Static-mock, Azure-Dev]
+        default: Static-mock
+      persona:
+        description: "Persona for Azure-Dev session forge"
+        type: choice
+        options:
+          [edcadmin, regulator, clinicuser, lmcuser, researcher, patient1]
+        # edcadmin has the broadest role set so the smoke covers the most
+        # endpoints with green status. Switch to a narrower persona when
+        # explicitly testing role-based access control.
+        default: edcadmin
+
+permissions:
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: "bruno-smoke-${{ github.ref }}"
+  cancel-in-progress: true
+
+env:
+  ENV_NAME: ${{ github.event.inputs.environment || 'Static-mock' }}
+  PERSONA: ${{ github.event.inputs.persona || 'edcadmin' }}
+
+jobs:
+  smoke:
+    name: Bruno smoke (${{ github.event.inputs.environment || 'Static-mock' }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: ./ui/package-lock.json
+
+      - name: Install Bruno CLI
+        run: npm install -g @usebruno/cli
+
+      # Forge step only runs for Azure-Dev; Static-mock needs no auth.
+      - name: Install ui dependencies (forge prerequisite)
+        if: ${{ env.ENV_NAME == 'Azure-Dev' }}
+        working-directory: ui
+        run: npm ci
+
+      - name: Forge NextAuth session token
+        if: ${{ env.ENV_NAME == 'Azure-Dev' }}
+        working-directory: ui
+        env:
+          NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
+        run: |
+          if [ -z "$NEXTAUTH_SECRET" ]; then
+            echo "::error::NEXTAUTH_SECRET secret not set; cannot forge a session for Azure-Dev"
+            exit 1
+          fi
+          TOKEN=$(node scripts/forge-bruno-session.mjs "$PERSONA" \
+                  | awk -F= '/^COOKIE_VALUE/{print $2}')
+          if [ -z "$TOKEN" ]; then
+            echo "::error::forge script did not emit a COOKIE_VALUE"
+            exit 1
+          fi
+          echo "::add-mask::$TOKEN"
+          echo "BRUNO_TOKEN=$TOKEN" >> "$GITHUB_ENV"
+          echo "Forged session token for persona '$PERSONA' (8h validity)"
+
+      - name: Run Bruno collection
+        working-directory: bruno/MVHDv2
+        run: |
+          if [ "$ENV_NAME" = "Azure-Dev" ]; then
+            bru run \
+              --env Azure-Dev \
+              --env-var "sessionToken=$BRUNO_TOKEN" \
+              --reporter-html ../../bruno-report.html \
+              --reporter-junit ../../bruno-report.xml
+          else
+            bru run \
+              --env Static-mock \
+              --reporter-html ../../bruno-report.html \
+              --reporter-junit ../../bruno-report.xml
+          fi
+
+      - name: Publish JUnit summary
+        if: always()
+        uses: dorny/test-reporter@v1
+        with:
+          name: Bruno results (${{ env.ENV_NAME }})
+          path: bruno-report.xml
+          reporter: java-junit
+          fail-on-error: false
+
+      - name: Upload report artefact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bruno-report-${{ env.ENV_NAME }}
+          path: |
+            bruno-report.html
+            bruno-report.xml
+          retention-days: 14

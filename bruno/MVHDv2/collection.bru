@@ -1,9 +1,45 @@
 headers {
   Accept: application/json
+  Cookie: __Secure-next-auth.session-token={{sessionToken}}
 }
 
 auth {
   mode: none
+}
+
+script:pre-request {
+  // ── Auto-inject session cookie ────────────────────────────────────
+  //
+  // Most /api/* routes are gated by a NextAuth session cookie. The
+  // collection-level Cookie header references {{sessionToken}}.  If
+  // the variable is not set, the Cookie header is sent with a literal
+  // "{{sessionToken}}" string which the server rejects as 401 — that
+  // is the signal to run the forge script and populate the var.
+  //
+  // To get a token:
+  //   cd ui && node scripts/forge-bruno-session.mjs regulator
+  //
+  // Then either:
+  //   (a) paste the COOKIE_VALUE into Bruno → Environments → Azure-Dev
+  //       → variable name "sessionToken", or
+  //   (b) export it as the BRUNO_SESSION_TOKEN env var when running
+  //       via `bru run` (the CLI auto-maps env vars onto collection
+  //       vars when --env-var is passed).
+  //
+  // The Static-mock environment ignores this header — GitHub Pages
+  // serves fixtures unauthenticated.
+  // Bruno CLI's `--env-var` flag exposes the value via getEnvVar(); the
+  // desktop app's "Environments" panel also uses getEnvVar(). The runtime
+  // setVar() path uses getVar(). Check both so the warning only fires
+  // when the token is genuinely missing.
+  const tokenSet =
+    !!bru.getVar("sessionToken") || !!bru.getEnvVar("sessionToken");
+  if (!tokenSet && bru.getEnvVar("baseUrl")?.includes("ehds.mabu.red")) {
+    console.warn(
+      "[MVHDv2] sessionToken is empty against Azure-Dev. " +
+      "Run: cd ui && node scripts/forge-bruno-session.mjs regulator"
+    );
+  }
 }
 
 tests {
@@ -13,27 +49,54 @@ tests {
   test("response is not a server error", function () {
     expect(res.getStatus()).to.be.below(500);
   });
+
+  // Auth status check on Azure-Dev — surface the "did you forge a token?"
+  // hint right next to the failing request rather than buried in console.
+  if (bru.getEnvVar("baseUrl")?.includes("ehds.mabu.red") && res.getStatus() === 401) {
+    test("hint: forge a NextAuth session cookie for Azure-Dev", function () {
+      throw new Error(
+        "401 against Azure-Dev — run `cd ui && node scripts/forge-bruno-session.mjs regulator` " +
+        "and paste COOKIE_VALUE into Environments → Azure-Dev → sessionToken."
+      );
+    });
+  }
 }
 
 docs {
   # MVHDv2 API Collection
 
-  REST API for the EHDS Integration Hub — DSP 2025-1 / DCP v1.0 /
-  FHIR R4 / OMOP CDM / HealthDCAT-AP unified in a Neo4j knowledge graph.
+  REST API for the EHDS Integration Hub: DSP 2025-1, DCP v1.0, FHIR R4,
+  OMOP CDM, HealthDCAT-AP — unified in a Neo4j knowledge graph.
 
-  ## Authentication
+  See `bruno/MVHDv2/README.md` for the full setup, automation, and CI
+  guide.
 
-  Most routes require a NextAuth session cookie (Keycloak OIDC, realm `edcv`).
-  In the `Local` environment you must first sign in via the UI at
-  `{{baseUrl}}/auth/signin` so that `next-auth.session-token` is set in the
-  cookie jar Bruno shares with the browser.
+  ## Quick start
 
-  Static-mode routes (under the `Static-mock` environment) bypass auth and
-  serve fixtures from `ui/public/mock/*.json` — no sign-in required.
+  1. Pick an environment (top-right dropdown):
+     - **Local** — `http://localhost:3000` (full local stack required)
+     - **Static-mock** — GitHub Pages mirror, **no auth required**
+     - **Azure-Dev** — `https://ehds.mabu.red` (auth required)
+  2. For Azure-Dev: forge a session cookie. From the repo root:
+     ```
+     cd ui && node scripts/forge-bruno-session.mjs regulator
+     ```
+     Copy the printed `COOKIE_VALUE`. In Bruno, open
+     **Environments → Azure-Dev**, set variable `sessionToken` to the
+     pasted value, save.
+  3. Click **Send**. The collection-level pre-request script injects
+     the cookie automatically into every request.
+
+  ## Personas
+
+  Forge tokens for any of:
+  `edcadmin` (admin), `regulator` (HDAB authority), `clinicuser` /
+  `lmcuser` (data holders), `researcher` (data user), `patient1`
+  (patient).
 
   ## Environments
 
-  - **Local**     — `http://localhost:3000` (NextAuth + Keycloak + Neo4j running locally)
-  - **Static-mock** — `https://ma3u.github.io/MinimumViableHealthDataspacev2` (GitHub Pages, mock JSON)
-  - **Azure-Dev** — `https://ehds.mabu.red` (live ACA stack with custom domain)
+  - **Local** — `http://localhost:3000` (NextAuth + Keycloak + Neo4j running locally)
+  - **Static-mock** — `https://ma3u.github.io/MinimumViableHealthDataspacev2` (GitHub Pages, mock JSON, no auth)
+  - **Azure-Dev** — `https://ehds.mabu.red` (live ACA stack, auth required via forged session cookie)
 }
