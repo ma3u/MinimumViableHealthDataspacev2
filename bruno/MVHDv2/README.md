@@ -272,13 +272,96 @@ push and on demand. The relevant pieces:
     path: bruno-report.*
 ```
 
-Two GitHub repository secrets to set under **Settings → Secrets**:
+### Required repository secret
 
 | Secret            | Value                                      |
 | ----------------- | ------------------------------------------ |
 | `NEXTAUTH_SECRET` | Same value as on the live Azure deployment |
 
-The `add-mask` line ensures the token never appears in workflow logs.
+The `add-mask` line in the workflow ensures the token never appears in
+the run logs.
+
+### Setting the secret with the GitHub CLI
+
+The whole secret-and-trigger flow can be done from the terminal without
+opening the GitHub UI. The `gh` CLI handles secret management and
+workflow dispatch.
+
+```bash
+# Verify gh is authenticated against the right account
+gh auth status
+
+# Set (or rotate) the NEXTAUTH_SECRET repository secret
+gh secret set NEXTAUTH_SECRET \
+    --repo ma3u/MinimumViableHealthDataspacev2 \
+    --body 'mvhd-azure-secret-change-me'
+
+# For longer / multiline secrets, read from a file or stdin
+gh secret set NEXTAUTH_SECRET \
+    --repo ma3u/MinimumViableHealthDataspacev2 < secret.txt
+
+# List repository secrets (names + last-updated only — values aren't readable)
+gh secret list --repo ma3u/MinimumViableHealthDataspacev2
+
+# Delete a secret
+gh secret delete NEXTAUTH_SECRET --repo ma3u/MinimumViableHealthDataspacev2
+```
+
+The value to set must match the `NEXTAUTH_SECRET` env var on the live
+Azure Container App. Read it with:
+
+```bash
+az containerapp show -n mvhd-ui -g rg-mvhd-dev \
+    --query "properties.template.containers[0].env[?name=='NEXTAUTH_SECRET'].value" \
+    -o tsv
+```
+
+If the live secret is rotated, rotate the GitHub secret in the same
+window or the workflow's forge step will produce tokens that the live
+API rejects.
+
+### Triggering the workflow with the GitHub CLI
+
+```bash
+# Default run (Static-mock, no auth needed)
+gh workflow run bruno-smoke.yml --repo ma3u/MinimumViableHealthDataspacev2
+
+# Pick environment and persona explicitly
+gh workflow run bruno-smoke.yml \
+    --repo ma3u/MinimumViableHealthDataspacev2 \
+    -f environment=Azure-Dev \
+    -f persona=edcadmin
+
+# RBAC-focused smoke (regulator persona — admin write routes return 403)
+gh workflow run bruno-smoke.yml \
+    --repo ma3u/MinimumViableHealthDataspacev2 \
+    -f environment=Azure-Dev \
+    -f persona=regulator
+
+# List recent runs of this workflow
+gh run list --workflow=bruno-smoke.yml \
+    --repo ma3u/MinimumViableHealthDataspacev2 --limit 10
+
+# Watch the latest run interactively
+gh run watch --repo ma3u/MinimumViableHealthDataspacev2
+
+# View one run's step results
+RUN_ID=$(gh run list --workflow=bruno-smoke.yml \
+    --repo ma3u/MinimumViableHealthDataspacev2 \
+    --limit 1 --json databaseId --jq '.[0].databaseId')
+gh run view "$RUN_ID" --repo ma3u/MinimumViableHealthDataspacev2
+
+# Download the report artefact (HTML + JUnit) of the most recent run
+gh run download "$RUN_ID" \
+    --repo ma3u/MinimumViableHealthDataspacev2 \
+    --name "bruno-report-Azure-Dev"
+open bruno-report.html
+```
+
+Persona options accepted by the `-f persona=` input: `edcadmin`,
+`regulator`, `clinicuser`, `lmcuser`, `researcher`, `patient1`. See the
+table under [Authenticate against Azure-Dev](#authenticate-against-azure-dev)
+for the role each persona maps to.
 
 ---
 
