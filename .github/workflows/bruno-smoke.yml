@@ -38,6 +38,10 @@ on:
 permissions:
   contents: read
   pull-requests: write
+  # dorny/test-reporter@v1 publishes a Check Run; needs checks:write to do so.
+  # Without this the JUnit publish step fails with "Resource not accessible
+  # by integration" even though fail-on-error is false.
+  checks: write
 
 concurrency:
   group: "bruno-smoke-${{ github.ref }}"
