@@ -614,4 +614,60 @@ test.describe("Login flow — Keycloak integration", () => {
       { timeout: T },
     );
   });
+
+  // Issue #28: sign-in flow must visually stay within *.ehds.mabu.red.
+  // When the Keycloak custom domain (auth.ehds.mabu.red) is bound, every
+  // intermediate URL during the OIDC code-flow round-trip should be in
+  // the ehds.mabu.red eTLD+1 family. Until Phase 2 of #28 lands, the IdP
+  // hostname is still the long mvhd-keycloak….azurecontainerapps.io and
+  // this test would fail; gate on KEYCLOAK_PUBLIC_URL so the test
+  // becomes the regression check that confirms Phase 2 is in effect.
+  test("sign-in flow stays within *.ehds.mabu.red domain (issue #28)", async ({
+    page,
+  }) => {
+    const kcUrl = process.env.KEYCLOAK_PUBLIC_URL ?? "";
+    test.skip(
+      !kcUrl.includes("ehds.mabu.red"),
+      `Keycloak custom domain not yet bound (KEYCLOAK_PUBLIC_URL=${
+        kcUrl || "(unset)"
+      }). Issue #28 Phase 2 has not landed. Skipping the in-domain assertion.`,
+    );
+
+    const visitedHosts = new Set<string>();
+    page.on("framenavigated", (frame) => {
+      if (frame === page.mainFrame()) {
+        try {
+          visitedHosts.add(new URL(frame.url()).hostname);
+        } catch {
+          // ignore non-URL frame navigations
+        }
+      }
+    });
+
+    await loginAs(page, "edcadmin", "edcadmin");
+
+    // Every host the browser visited during the OIDC dance should be
+    // either ehds.mabu.red itself or a subdomain of it (auth.* etc.).
+    const offDomain = [...visitedHosts].filter(
+      (host) => host !== "ehds.mabu.red" && !host.endsWith(".ehds.mabu.red"),
+    );
+    expect(
+      offDomain,
+      `sign-in flow left ehds.mabu.red family: visited ${[...visitedHosts].join(
+        ", ",
+      )}; off-domain hosts: ${offDomain.join(", ")}`,
+    ).toEqual([]);
+
+    // Sanity: the auth subdomain should have been hit at least once
+    // (the IdP redirect). If the visitedHosts only contains ehds.mabu.red
+    // it likely means the test signed a session token in directly without
+    // exercising the full Keycloak round-trip.
+    const sawAuthSub = [...visitedHosts].some((h) => h.startsWith("auth."));
+    expect(
+      sawAuthSub,
+      `expected the auth.ehds.mabu.red subdomain to be in the navigation chain; visited ${[
+        ...visitedHosts,
+      ].join(", ")}`,
+    ).toBe(true);
+  });
 });
