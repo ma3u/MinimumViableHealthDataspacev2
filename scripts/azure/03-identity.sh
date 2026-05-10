@@ -34,8 +34,10 @@ az containerapp create \
     "KC_DB_URL=${PG_JDBC}" \
     "KC_DB_USERNAME=${PG_ADMIN}" \
     "KC_DB_PASSWORD=${PG_PASSWORD}" \
+    "KC_HOSTNAME=${KEYCLOAK_PUBLIC_HOSTNAME}" \
     "KC_HOSTNAME_STRICT=false" \
-    "KC_PROXY=edge" \
+    "KC_HOSTNAME_STRICT_BACKCHANNEL=false" \
+    "KC_PROXY_HEADERS=xforwarded" \
     "KEYCLOAK_ADMIN=${KC_ADMIN_USER}" \
     "KEYCLOAK_ADMIN_PASSWORD=${KC_ADMIN_PASSWORD}" \
   -o none

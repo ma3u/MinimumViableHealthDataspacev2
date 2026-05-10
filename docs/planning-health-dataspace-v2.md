@@ -3827,6 +3827,7 @@ New spec `ui/__tests__/e2e/journeys/32-federated-nlq.spec.ts`:
 | [022](ADRs/ADR-022-edc-connector-cost-vs-function.md)        | EDC Connector: Function vs Cost (Issue #25)    | 2026-05-03 | Superseded |
 | [023](ADRs/ADR-023-reinstate-off-hours-scaledown.md)         | Reinstate Off-Hours ACA Scale-Down             | 2026-05-01 | Accepted   |
 | [024](ADRs/ADR-024-full-edc-provisioning-per-participant.md) | Full EDC Provisioning per Participant on Azure | 2026-05-04 | Accepted   |
+| [025](ADRs/ADR-025-keycloak-custom-domain.md)                | Keycloak Custom Domain (auth.ehds.mabu.red)    | 2026-05-10 | Accepted   |
 
 > **Note:** The full text of ADR-1 through ADR-9 has been moved into the standalone ADR documents linked in the table above. Click any row to read the full context, decision, and consequences.
 

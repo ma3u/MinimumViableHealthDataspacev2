@@ -615,13 +615,13 @@ test.describe("Login flow — Keycloak integration", () => {
     );
   });
 
-  // Issue #28: sign-in flow must visually stay within *.ehds.mabu.red.
-  // When the Keycloak custom domain (auth.ehds.mabu.red) is bound, every
-  // intermediate URL during the OIDC code-flow round-trip should be in
-  // the ehds.mabu.red eTLD+1 family. Until Phase 2 of #28 lands, the IdP
-  // hostname is still the long mvhd-keycloak….azurecontainerapps.io and
-  // this test would fail; gate on KEYCLOAK_PUBLIC_URL so the test
-  // becomes the regression check that confirms Phase 2 is in effect.
+  // Issue #28 (closed 2026-05-10): sign-in flow stays within
+  // *.ehds.mabu.red. The Keycloak custom domain auth.ehds.mabu.red is
+  // bound; every intermediate URL during the OIDC code-flow round-trip
+  // is in the ehds.mabu.red eTLD+1 family. The KEYCLOAK_PUBLIC_URL
+  // gate keeps the test runnable in environments that haven't deployed
+  // the custom-domain change yet (test skips cleanly there) — drop the
+  // gate when the ACA-FQDN fallback path is removed entirely.
   test("sign-in flow stays within *.ehds.mabu.red domain (issue #28)", async ({
     page,
   }) => {

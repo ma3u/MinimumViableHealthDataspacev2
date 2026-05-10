@@ -113,7 +113,14 @@ export NEO4J_HTTP_URL="https://${NEO4J_APP}.internal.${domain}"
 export NEO4J_PROXY_URL="https://${NEO4J_PROXY_APP}.internal.${domain}"
 export VAULT_URL="https://${VAULT_APP}.internal.${domain}"
 export KEYCLOAK_INTERNAL_URL="https://${KEYCLOAK_APP}.internal.${domain}"
-export KEYCLOAK_PUBLIC_URL="https://${KEYCLOAK_APP}.${domain}"
+# KEYCLOAK_PUBLIC_URL: external-facing Keycloak URL. After issue #28 Phase 2,
+# the canonical value is https://auth.ehds.mabu.red — set
+# KEYCLOAK_PUBLIC_HOSTNAME=auth.ehds.mabu.red in your shell before sourcing
+# env.sh to pick it up. Default falls back to the long ACA FQDN so fresh
+# deploys work even when DNS hasn't been bound yet (run the
+# keycloak-custom-domain workflow afterwards to flip to the custom domain).
+export KEYCLOAK_PUBLIC_HOSTNAME="\${KEYCLOAK_PUBLIC_HOSTNAME:-${KEYCLOAK_APP}.${domain}}"
+export KEYCLOAK_PUBLIC_URL="https://\${KEYCLOAK_PUBLIC_HOSTNAME}"
 export UI_PUBLIC_URL="https://${UI_APP}.${domain}"
 export CONTROLPLANE_URL="https://${CONTROLPLANE_APP}.internal.${domain}"
 export NATS_URL="nats://${NATS_APP}.internal.${domain}:4222"
