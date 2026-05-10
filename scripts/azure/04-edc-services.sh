@@ -177,6 +177,7 @@ az containerapp create \
     "EDC_SQL_SCHEMA_AUTOCREATE=true" \
     "EDC_VAULT_HASHICORP_URL=${VAULT_URL:-}" \
     "EDC_VAULT_HASHICORP_TOKEN=${VAULT_ROOT_TOKEN}" \
+    "EDC_ENCRYPTION_AES_KEY_ALIAS=aes-key-alias" \
     "EDC_IAM_OAUTH2_JWKS_URL=${KEYCLOAK_PUBLIC_URL:-}/realms/edcv/protocol/openid-connect/certs" \
     "WEB_HTTP_PORT=7081" \
     "WEB_HTTP_IDENTITY_PORT=7082" \
@@ -201,6 +202,7 @@ az containerapp create \
     "EDC_SQL_SCHEMA_AUTOCREATE=true" \
     "EDC_VAULT_HASHICORP_URL=${VAULT_URL:-}" \
     "EDC_VAULT_HASHICORP_TOKEN=${VAULT_ROOT_TOKEN}" \
+    "EDC_ENCRYPTION_AES_KEY_ALIAS=aes-key-alias" \
     "EDC_IAM_OAUTH2_JWKS_URL=${KEYCLOAK_PUBLIC_URL:-}/realms/edcv/protocol/openid-connect/certs" \
     "WEB_HTTP_PORT=10013" \
   -o none
