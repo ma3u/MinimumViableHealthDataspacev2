@@ -21,7 +21,8 @@
     "test:e2e:ui": "playwright test --config playwright.config.ts --ui"
   },
   "overrides": {
-    "neverpanic": "^0.0.7"
+    "neverpanic": "^0.0.7",
+    "fast-uri": "^3.1.2"
   },
   "dependencies": {
     "@scalar/api-reference-react": "^0.9.0",
