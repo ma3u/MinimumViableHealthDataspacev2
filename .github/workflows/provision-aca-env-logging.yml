@@ -60,6 +60,24 @@ jobs:
         id: ws
         run: |
           NAME='${{ github.event.inputs.workspace_name }}'
+
+          # Wait for the Microsoft.OperationalInsights provider to finish
+          # registering (az provider register is async; can take 1-5 min).
+          for i in $(seq 1 30); do
+            STATE=$(az provider show --namespace Microsoft.OperationalInsights \
+                    --query "registrationState" -o tsv 2>/dev/null || echo "Unknown")
+            echo "[$i] Microsoft.OperationalInsights registrationState: $STATE"
+            case "$STATE" in
+              Registered) break ;;
+              Registering) sleep 10 ;;
+              *)
+                echo "::error::Microsoft.OperationalInsights is '$STATE'. Run: az provider register --namespace Microsoft.OperationalInsights --subscription INF-STG-EU_EHDS"
+                exit 1
+                ;;
+            esac
+          done
+          [ "$STATE" = "Registered" ] || { echo "::error::registration didn't complete in 5 min"; exit 1; }
+
           if az monitor log-analytics workspace show \
               -n "$NAME" -g "$RESOURCE_GROUP" -o none 2>/dev/null; then
             echo "Workspace '$NAME' already exists in '$RESOURCE_GROUP'"
