@@ -1,9 +1,17 @@
 #!/usr/bin/env python3
 """
-Generate a 10-slide PowerPoint for the Spanish Ministry of Health.
+Generate the initial 12-slide PowerPoint for the Spanish Ministry of Health.
 
 Audience: non-technical decision makers. No acronyms, no jargon, no
 implementation details — just plain words, simple shapes, and people.
+
+> NOTE (2026-05-10): the committed deck at
+> docs/demos/spain-ehds-ministry-deck.pptx has diverged from this
+> script's output — it has been hand-enhanced in PowerPoint with
+> embedded images, refined layouts, and additional content. Running
+> this script will overwrite those edits with the original 12-slide
+> skeleton. Use only as a starting point if you need to regenerate
+> from scratch; otherwise edit the .pptx directly.
 
 Output: docs/demos/spain-ehds-ministry-deck.pptx
 
