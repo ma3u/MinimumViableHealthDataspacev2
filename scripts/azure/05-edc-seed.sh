@@ -79,12 +79,16 @@ for entry in "${PARTICIPANTS[@]}"; do
   DID="${entry##*|}"
   log "POST participant $PID  (did=$DID)"
 
+  # EDC IdentityHub v0.13.x renamed the JSON field from `participantId` to
+  # `participantContextId` (matches the path-segment used elsewhere in the
+  # API). Older builds accept both, newer builds reject the old name with
+  # HTTP 400 ValidationFailure. Send the new name.
   PAYLOAD=$(cat <<JSON
 {
   "roles": [],
   "active": true,
   "did": "$DID",
-  "participantId": "$PID",
+  "participantContextId": "$PID",
   "key": {
     "keyId": "$PID-key-1",
     "privateKeyAlias": "$PID-private-key-alias",
