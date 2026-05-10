@@ -78,7 +78,7 @@ jobs:
           properties:
             configuration:
               triggerType: Manual
-              replicaTimeout: 120
+              replicaTimeout: 300
               replicaRetryLimit: 0
               manualTriggerConfig:
                 replicaCompletionCount: 1
@@ -92,7 +92,7 @@ jobs:
             template:
               containers:
                 - name: aes-bootstrap
-                  image: curlimages/curl:8.10.1
+                  image: hashicorp/vault:latest
                   resources: { cpu: 0.25, memory: 0.5Gi }
                   env:
                     - { name: VAULT_ADDR, value: "http://mvhd-vault:8200" }
@@ -101,32 +101,24 @@ jobs:
                       secretRef: vault-token
                     - name: AES_KEY_B64
                       secretRef: aes-key
-                  command: ["sh", "-c"]
+                  command: ["/bin/sh", "-c"]
                   args:
                     - |
                       set -e
-                      echo "Probing Vault..."
-                      curl -fsS -o /dev/null -w 'vault %{http_code}\n' \
-                        -H "X-Vault-Token: \$VAULT_TOKEN" \
-                        "\$VAULT_ADDR/v1/sys/health" || true
+                      echo "vault binary: \$(which vault)"
+                      echo "VAULT_ADDR=\$VAULT_ADDR  KEY_ALIAS=\$KEY_ALIAS"
+                      echo "DNS check (mvhd-vault):"
+                      getent hosts mvhd-vault 2>&1 || nslookup mvhd-vault 2>&1 || echo "(no resolver)"
 
-                      echo "Writing AES key to secret/data/\$KEY_ALIAS ..."
-                      HTTP=\$(curl -sS -o /tmp/out -w '%{http_code}' \
-                        -X POST "\$VAULT_ADDR/v1/secret/data/\$KEY_ALIAS" \
-                        -H "X-Vault-Token: \$VAULT_TOKEN" \
-                        -H "Content-Type: application/json" \
-                        -d "{\"data\":{\"content\":\"\$AES_KEY_B64\"}}")
-                      echo "write status: \$HTTP"
-                      if [ "\$HTTP" != "200" ] && [ "\$HTTP" != "204" ]; then
-                        head -c 500 /tmp/out; echo
-                        echo "FAILED"
-                        exit 1
-                      fi
+                      echo "Vault status (30s timeout):"
+                      timeout 30 vault status || echo "(non-zero exit allowed for sealed)"
 
-                      echo "Verifying readback..."
-                      curl -sS -H "X-Vault-Token: \$VAULT_TOKEN" \
-                        "\$VAULT_ADDR/v1/secret/data/\$KEY_ALIAS" \
-                        | head -c 200
+                      echo "Writing key with vault kv put (60s timeout)..."
+                      timeout 60 vault kv put secret/\$KEY_ALIAS content="\$AES_KEY_B64" \
+                        || { echo "FAILED to write"; exit 1; }
+
+                      echo "Reading back (30s timeout):"
+                      timeout 30 vault kv get -format=json secret/\$KEY_ALIAS | head -c 400
                       echo
                       echo DONE
           EOF
