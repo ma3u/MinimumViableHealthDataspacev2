@@ -1,9 +1,21 @@
 # ADR-025: Keycloak Custom Domain (`auth.ehds.mabu.red`)
 
-**Status:** Accepted
+**Status:** Accepted (implemented)
 **Date:** 2026-05-10
 **Relates to:** [ADR-012](ADR-012-azure-container-apps.md), [ADR-014](ADR-014-weekly-demo-reset.md)
 **Tracking:** Issue [#28](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/28) (closed)
+
+## Implementation status
+
+Three commits on `main` complete this ADR end to end:
+
+| Commit                                                                                                             | Date       | Scope                                                                                                                                                                 |
+| ------------------------------------------------------------------------------------------------------------------ | ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [`d724c27`](../../../../commit/d724c27)                                                                            | 2026-05-09 | `reset-demo.yml` re-imports the `edcv` realm on the weekly Monday reset (root-cause fix that surfaced this work).                                                     |
+| [`f5dc973`](../../../../commit/f5dc973) ([PR #29](https://github.com/ma3u/MinimumViableHealthDataspacev2/pull/29)) | 2026-05-10 | Phase 1 (Playwright regression test + Bruno staged var) + Phase 2 (`keycloak-custom-domain.yml` cutover workflow).                                                    |
+| [`1fc68ed`](../../../../commit/1fc68ed) ([PR #30](https://github.com/ma3u/MinimumViableHealthDataspacev2/pull/30)) | 2026-05-10 | Phase 3 cleanup — `KEYCLOAK_PUBLIC_HOSTNAME` override in `env.sh`, `KC_HOSTNAME` / `KC_PROXY_HEADERS=xforwarded` in `03-identity.sh`, Bruno var activation, this ADR. |
+
+Live cutover ran via the Phase 2 workflow at 2026-05-10 05:38 UTC. Live verification (`https://auth.ehds.mabu.red/realms/edcv/.well-known/openid-configuration` → 200, regression test 1 passed in 7.0s) recorded on issue #28's [closure comment](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/28#issuecomment-4414562130).
 
 ## Context
 
