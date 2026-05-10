@@ -79,11 +79,14 @@ for entry in "${PARTICIPANTS[@]}"; do
   DID="${entry##*|}"
   log "POST participant $PID  (did=$DID)"
 
-  # KeyDescriptor schema (jad/openapi/identity-api.yaml): IH accepts EITHER
-  # an explicit public key (publicKeyPem|publicKeyJwk) OR generator params
-  # (keyGeneratorParams) — not the inline {type, curve} shape we sent first.
-  # We let IH generate the keypair: simpler, no Vault pre-seed needed for
-  # the TCK probe path (which only iterates the participant list).
+  # KeyDescriptor: provide an explicit publicKeyJwk (Ed25519, same shape
+  # jad/seed-jad.sh uses for the issuer participant). The keyGeneratorParams
+  # path was rejected by IH v0.13.x with NullPointerException on the curve
+  # field — the map keys EDC expects there are not the documented ones.
+  # publicKeyJwk is the proven-working pattern. Each participant gets its
+  # own keyId so they're distinguishable; the JWK material is shared (the
+  # TCK probe doesn't actually exercise the keys, it just iterates the
+  # participant list and confirms the keypair entry exists).
   PAYLOAD=$(cat <<JSON
 {
   "roles": [],
@@ -95,9 +98,11 @@ for entry in "${PARTICIPANTS[@]}"; do
     "privateKeyAlias": "$PID-private-key-alias",
     "active": true,
     "type": "JsonWebKey2020",
-    "keyGeneratorParams": {
-      "algorithm": "EC",
-      "curve": "secp256r1"
+    "publicKeyJwk": {
+      "kty": "OKP",
+      "crv": "Ed25519",
+      "kid": "$PID-key-1",
+      "x": "I8dt08pwP4nQPv4MacRU5u5KsroVa3ESkWmyQEDn36A"
     }
   }
 }
