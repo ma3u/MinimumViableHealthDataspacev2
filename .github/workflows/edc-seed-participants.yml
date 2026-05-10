@@ -71,6 +71,31 @@ jobs:
             echo "IH already at min=1"
           fi
 
+      # Pre-flight: confirm we can get a Keycloak admin token from the
+      # runner (Keycloak is public via auth.ehds.mabu.red). If this
+      # fails the realm/client/secret is wrong and the ACA Job won't
+      # work either — fail fast with the diagnostic instead of waiting
+      # for an opaque container failure.
+      - name: Pre-flight Keycloak token check
+        run: |
+          KC='${{ github.event.inputs.keycloak_url }}'
+          REALM="$KC_REALM"
+          set +e
+          HTTP=$(curl -sS -o /tmp/kc.json -w "%{http_code}" -X POST \
+            "$KC/realms/$REALM/protocol/openid-connect/token" \
+            -H "Content-Type: application/x-www-form-urlencoded" \
+            -d "grant_type=client_credentials&client_id=$KC_CLIENT_ID&client_secret=$KC_CLIENT_SECRET")
+          set -e
+          echo "Keycloak token response: HTTP $HTTP"
+          if [ "$HTTP" != "200" ]; then
+            echo "::error::Keycloak admin token request failed (HTTP $HTTP)"
+            echo "Response body:"
+            head -c 500 /tmp/kc.json; echo
+            exit 1
+          fi
+          TOK_LEN=$(python3 -c "import json; print(len(json.load(open('/tmp/kc.json')).get('access_token','')))")
+          echo "  got access_token (${TOK_LEN} chars)"
+
       - name: Run seed as one-shot ACA Job
         run: |
           ENV_ID=$(az containerapp env show -n "$ACA_ENV" -g "$RESOURCE_GROUP" \
@@ -107,15 +132,24 @@ jobs:
                   command: ["/bin/bash", "-c"]
                   args:
                     - |
-                      set -eo pipefail
-                      mkdir -p /tmp/seed
-                      printf '%s' "\$SCRIPT_B64" | base64 -d > /tmp/seed/run.sh
-                      chmod +x /tmp/seed/run.sh
+                      # Force unbuffered stdout so logs land in LA in
+                      # near-real-time. Without this, on a fast-failing
+                      # container the buffered output is lost.
+                      exec >/proc/1/fd/1 2>/proc/1/fd/2
+                      set -x
                       echo "=== seed env ==="
                       echo "IH=\$IH"
                       echo "KC=\$KC (realm \$KC_REALM client \$KC_CLIENT_ID)"
+                      mkdir -p /tmp/seed
+                      printf '%s' "\$SCRIPT_B64" | base64 -d > /tmp/seed/run.sh
+                      ls -l /tmp/seed/run.sh
+                      head -3 /tmp/seed/run.sh
+                      chmod +x /tmp/seed/run.sh
                       echo "=== running /tmp/seed/run.sh ==="
-                      bash /tmp/seed/run.sh
+                      bash -x /tmp/seed/run.sh
+                      EXIT=\$?
+                      echo "=== seed exited with \$EXIT ==="
+                      exit \$EXIT
           EOF
 
           if az containerapp job show -n mvhd-edc-seed -g "$RESOURCE_GROUP" -o none 2>/dev/null; then
@@ -137,10 +171,16 @@ jobs:
           done
 
           # ACA Job stdout goes to Log Analytics — query it directly.
-          # `az containerapp logs show` is for apps, not jobs, so we use
-          # the LA workspace attached to the env.
+          # The customerId path on the env config is sometimes empty
+          # depending on how the env was provisioned; fall back to
+          # listing the RG's LA workspaces and picking the first one.
           WS_ID=$(az containerapp env show -n "$ACA_ENV" -g "$RESOURCE_GROUP" \
-                  --query "properties.appLogsConfiguration.logAnalyticsConfiguration.customerId" -o tsv)
+                  --query "properties.appLogsConfiguration.logAnalyticsConfiguration.customerId" -o tsv 2>/dev/null)
+          if [ -z "$WS_ID" ]; then
+            WS_ID=$(az monitor log-analytics workspace list -g "$RESOURCE_GROUP" \
+                    --query "[0].customerId" -o tsv 2>/dev/null)
+          fi
+          echo "Log Analytics workspace: ${WS_ID:-<not found>}"
           {
             echo "## Seed job execution"
             echo ""
