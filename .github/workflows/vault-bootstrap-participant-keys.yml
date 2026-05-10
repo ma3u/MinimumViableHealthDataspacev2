@@ -1,0 +1,140 @@
+name: Vault bootstrap participant keys (issue #25)
+
+# Pre-stages an Ed25519 private JWK in Vault for each of the 5 EHDS
+# participants under secret/data/{pid}-private-key-alias. The seed
+# script's POST /v1alpha/participants includes publicKeyJwk +
+# privateKeyAlias; IH validates by fetching the private key from the
+# alias to derive the public key. If the key isn't there, IH silently
+# skips persisting the KeyPairResource entry — which is exactly why
+# /v1alpha/participants/{pid}/keypairs returned [] for all 5 even
+# after a successful seed.
+#
+# Uses the same Ed25519 demo material jad/bootstrap-vault.sh stages
+# for the issuer (it's a demo environment; the keys aren't real).
+# Each participant gets its own kid but shares the same x/d so the
+# public key matches what the seed script sends.
+#
+# Idempotent: safe to re-run.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+concurrency:
+  group: "azure-vault-keys"
+  cancel-in-progress: false
+
+env:
+  RESOURCE_GROUP: rg-mvhd-dev
+  ACA_ENV: mvhd-env
+  # Same demo Ed25519 keypair JAD uses (jad/bootstrap-vault.sh).
+  ED25519_X: "I8dt08pwP4nQPv4MacRU5u5KsroVa3ESkWmyQEDn36A"
+  ED25519_D: "6DBtzJz3DjNAiM2P2RlzOsAQs-ramVeAUVnocd6F__Y"
+
+jobs:
+  bootstrap:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Resolve Vault token
+        id: vault
+        run: |
+          T=$(az containerapp show -n mvhd-vault -g "$RESOURCE_GROUP" \
+                --query "properties.template.containers[0].env[?name=='VAULT_DEV_ROOT_TOKEN_ID'].value" -o tsv)
+          [ -n "$T" ] || { echo "::error::Could not resolve Vault root token"; exit 1; }
+          echo "::add-mask::$T"
+          echo "tok=$T" >> "$GITHUB_OUTPUT"
+
+      - name: Run bootstrap as one-shot ACA Job
+        env:
+          VAULT_TOKEN: ${{ steps.vault.outputs.tok }}
+        run: |
+          ENV_ID=$(az containerapp env show -n "$ACA_ENV" -g "$RESOURCE_GROUP" --query id -o tsv)
+          cat > /tmp/job.yaml <<EOF
+          type: Microsoft.App/jobs
+          properties:
+            configuration:
+              triggerType: Manual
+              replicaTimeout: 300
+              replicaRetryLimit: 0
+              manualTriggerConfig: { replicaCompletionCount: 1, parallelism: 1 }
+              secrets:
+                - { name: vault-token, value: "${VAULT_TOKEN}" }
+            environmentId: ${ENV_ID}
+            template:
+              containers:
+                - name: keys-bootstrap
+                  image: hashicorp/vault:latest
+                  resources: { cpu: 0.25, memory: 0.5Gi }
+                  env:
+                    - { name: VAULT_ADDR,        value: "https://mvhd-vault.internal.happysand-37f82e30.westeurope.azurecontainerapps.io" }
+                    - { name: VAULT_SKIP_VERIFY, value: "true" }
+                    - { name: ED25519_X,         value: "${{ env.ED25519_X }}" }
+                    - { name: ED25519_D,         value: "${{ env.ED25519_D }}" }
+                    - name: VAULT_TOKEN
+                      secretRef: vault-token
+                  command: ["/bin/sh", "-c"]
+                  args:
+                    - |
+                      set -e
+                      echo "vault: \$(which vault)"
+                      timeout 30 vault status || echo "(sealed status non-zero ok)"
+
+                      for P in alpha-klinik pharmaco medreg lmc irs; do
+                        ALIAS="\${P}-private-key-alias"
+                        KID="\${P}-key-1"
+                        # Compose the private JWK as a single JSON string.
+                        # IH stores key material as the raw "content" string
+                        # (matches jad/bootstrap-vault.sh shape for issuer).
+                        JWK="{\"kty\":\"OKP\",\"d\":\"\$ED25519_D\",\"crv\":\"Ed25519\",\"kid\":\"\$KID\",\"x\":\"\$ED25519_X\"}"
+                        echo "writing secret/\$ALIAS (kid=\$KID)..."
+                        timeout 30 vault kv put secret/\$ALIAS content="\$JWK" \
+                          || { echo "FAILED to write \$ALIAS"; exit 1; }
+                      done
+
+                      echo
+                      echo "=== verifying readbacks ==="
+                      for P in alpha-klinik pharmaco medreg lmc irs; do
+                        ALIAS="\${P}-private-key-alias"
+                        timeout 15 vault kv get -field=content secret/\$ALIAS \
+                          | head -c 200
+                        echo
+                      done
+                      echo DONE
+          EOF
+
+          if az containerapp job show -n mvhd-vault-keys -g "$RESOURCE_GROUP" -o none 2>/dev/null; then
+            az containerapp job delete -n mvhd-vault-keys -g "$RESOURCE_GROUP" --yes -o none
+          fi
+          az containerapp job create -n mvhd-vault-keys -g "$RESOURCE_GROUP" --yaml /tmp/job.yaml -o none
+          EXEC=$(az containerapp job start -n mvhd-vault-keys -g "$RESOURCE_GROUP" --query name -o tsv)
+          echo "exec=$EXEC"
+          for i in $(seq 1 60); do
+            S=$(az containerapp job execution show -n mvhd-vault-keys -g "$RESOURCE_GROUP" \
+                  --job-execution-name "$EXEC" --query "properties.status" -o tsv 2>/dev/null || echo Pending)
+            echo "[$i] $S"
+            case "$S" in Succeeded|Failed|Canceled) break ;; esac
+            sleep 4
+          done
+
+          echo "=== container logs ==="
+          WS=$(az monitor log-analytics workspace show -n mvhd-logs -g "$RESOURCE_GROUP" --query customerId -o tsv)
+          sleep 10
+          az monitor log-analytics query -w "$WS" --analytics-query \
+            "ContainerAppConsoleLogs_CL | where ContainerJobName_s == 'mvhd-vault-keys' and TimeGenerated > ago(10m) | order by TimeGenerated asc | project Log_s" \
+            -o tsv 2>&1 | head -100
+
+          [ "$S" = "Succeeded" ] || exit 1
+
+      - name: Cleanup
+        if: always()
+        run: az containerapp job delete -n mvhd-vault-keys -g "$RESOURCE_GROUP" --yes -o none || true
