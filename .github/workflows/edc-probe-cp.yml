@@ -1,0 +1,112 @@
+name: EDC Probe Controlplane (issue #25 verify)
+
+# Hits the controlplane Management API at /v5alpha/participants to see
+# what the UI's /api/participants route would actually receive. We
+# need to know whether (a) the CP knows about our IH-seeded participants
+# at all, and (b) what state value they have, since the UI filters
+# on `state === "ACTIVATED"`.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  RESOURCE_GROUP: rg-mvhd-dev
+  ACA_ENV: mvhd-env
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Get Keycloak admin token
+        id: kc
+        run: |
+          T=$(curl -sS -X POST \
+            "https://auth.ehds.mabu.red/realms/edcv/protocol/openid-connect/token" \
+            -H "Content-Type: application/x-www-form-urlencoded" \
+            -d "grant_type=client_credentials&client_id=admin&client_secret=edc-v-admin-secret" \
+            | python3 -c "import json,sys;print(json.load(sys.stdin)['access_token'])")
+          echo "::add-mask::$T"
+          echo "tok=$T" >> "$GITHUB_OUTPUT"
+
+      - name: Probe CP + IH participants
+        env:
+          TOK: ${{ steps.kc.outputs.tok }}
+        run: |
+          ENV_ID=$(az containerapp env show -n "$ACA_ENV" -g "$RESOURCE_GROUP" --query id -o tsv)
+          cat > /tmp/job.yaml <<EOF
+          type: Microsoft.App/jobs
+          properties:
+            configuration:
+              triggerType: Manual
+              replicaTimeout: 120
+              replicaRetryLimit: 0
+              manualTriggerConfig: { replicaCompletionCount: 1, parallelism: 1 }
+              secrets:
+                - { name: tok, value: "${TOK}" }
+            environmentId: ${ENV_ID}
+            template:
+              containers:
+                - name: probe
+                  image: curlimages/curl:8.10.1
+                  resources: { cpu: 0.25, memory: 0.5Gi }
+                  env:
+                    - { name: CP, value: "http://mvhd-controlplane:8081/api/mgmt" }
+                    - { name: IH, value: "http://mvhd-identityhub:7082/api/identity" }
+                    - { name: TOKEN, secretRef: tok }
+                  command: ["sh","-c"]
+                  args:
+                    - |
+                      set -e
+                      echo "=== CP /v5alpha/participants ==="
+                      curl -sS -H "Authorization: Bearer \$TOKEN" \
+                        -H "Content-Type: application/json" \
+                        "\$CP/v5alpha/participants" \
+                        -w '\nHTTP %{http_code}\n' | head -c 2000
+                      echo
+                      echo "=== IH /v1alpha/participants (state field) ==="
+                      curl -sS -H "Authorization: Bearer \$TOKEN" \
+                        "\$IH/v1alpha/participants" | head -c 2000
+                      echo
+                      echo "=== IH per-participant keypairs ==="
+                      for P in alpha-klinik pharmaco medreg lmc irs; do
+                        echo "--- \$P ---"
+                        curl -sS -H "Authorization: Bearer \$TOKEN" \
+                          "\$IH/v1alpha/participants/\$P/keypairs" | head -c 600
+                        echo
+                      done
+          EOF
+          if az containerapp job show -n mvhd-cp-probe -g "$RESOURCE_GROUP" -o none 2>/dev/null; then
+            az containerapp job delete -n mvhd-cp-probe -g "$RESOURCE_GROUP" --yes -o none
+          fi
+          az containerapp job create -n mvhd-cp-probe -g "$RESOURCE_GROUP" --yaml /tmp/job.yaml -o none
+          EXEC=$(az containerapp job start -n mvhd-cp-probe -g "$RESOURCE_GROUP" --query name -o tsv)
+          echo "exec=$EXEC"
+          for i in $(seq 1 30); do
+            S=$(az containerapp job execution show -n mvhd-cp-probe -g "$RESOURCE_GROUP" \
+                  --job-execution-name "$EXEC" --query "properties.status" -o tsv 2>/dev/null || echo Pending)
+            echo "[$i] $S"
+            case "$S" in Succeeded|Failed|Canceled) break ;; esac
+            sleep 4
+          done
+
+          echo "=== container logs ==="
+          WS=$(az monitor log-analytics workspace show -n mvhd-logs -g "$RESOURCE_GROUP" --query customerId -o tsv)
+          sleep 10
+          az monitor log-analytics query -w "$WS" --analytics-query \
+            "ContainerAppConsoleLogs_CL | where ContainerJobName_s == 'mvhd-cp-probe' and TimeGenerated > ago(10m) | order by TimeGenerated asc | project Log_s" \
+            -o tsv 2>&1 | head -150
+
+      - name: Cleanup
+        if: always()
+        run: az containerapp job delete -n mvhd-cp-probe -g "$RESOURCE_GROUP" --yes -o none || true
