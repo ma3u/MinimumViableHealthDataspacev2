@@ -117,6 +117,28 @@ export async function GET() {
         } catch {
           /* no profiles yet */
         }
+        // CFM may return zero profiles even though the tenant is fully
+        // registered (Azure deployment hasn't run the participant-profile
+        // seed yet). The operator UI counts every tenant that has at
+        // least one profile entry as "active", so synthesize a minimal
+        // entry from the tenant's own metadata when CFM gives us nothing.
+        // Marker `synthetic: true` lets future deltas distinguish these
+        // from real CFM-provisioned profiles.
+        if (!Array.isArray(profiles) || profiles.length === 0) {
+          profiles = [
+            {
+              id: `${t.id}-synthetic`,
+              participantContextId: t.id,
+              displayName: t.properties?.displayName ?? t.id,
+              role:
+                t.properties?.ehdsParticipantType ??
+                t.properties?.role ??
+                "Unknown",
+              vpas: [],
+              synthetic: true,
+            },
+          ];
+        }
         return { ...t, participantProfiles: profiles };
       }),
     );
