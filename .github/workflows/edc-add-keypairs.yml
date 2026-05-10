@@ -95,7 +95,7 @@ jobs:
                           \"keyGeneratorParams\": { \"algorithm\": \"EC\", \"curve\": \"secp256r1\" }
                         }"
                         HTTP=\$(curl -sS -o /tmp/out -w '%{http_code}' \
-                          -X POST "\$IH/v1alpha/participants/\$P/keypairs" \
+                          -X PUT "\$IH/v1alpha/participants/\$P/keypairs?makeDefault=true" \
                           -H "Authorization: Bearer \$TOKEN" \
                           -H "Content-Type: application/json" \
                           -d "\$PAYLOAD")
