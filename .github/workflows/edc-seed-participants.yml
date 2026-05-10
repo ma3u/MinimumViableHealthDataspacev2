@@ -170,38 +170,53 @@ jobs:
             sleep 5
           done
 
-          # ACA Job stdout goes to Log Analytics — query it directly.
-          # The customerId path on the env config is sometimes empty
-          # depending on how the env was provisioned; fall back to
-          # listing the RG's LA workspaces and picking the first one.
+          # ACA Job stdout goes wherever the env's appLogsConfiguration
+          # points. Dump the env config first so we know what we're
+          # working with, then try several common workspace lookups.
+          echo "=== ACA env appLogsConfiguration ==="
+          az containerapp env show -n "$ACA_ENV" -g "$RESOURCE_GROUP" \
+            --query "properties.appLogsConfiguration" -o yaml || true
+
+          echo "=== LA workspaces in subscription ==="
+          az monitor log-analytics workspace list \
+            --query "[].{name:name, customerId:customerId, rg:resourceGroup}" -o table 2>/dev/null \
+            | head -20 || echo "(none / no perms)"
+
+          # Try a few paths in priority order.
           WS_ID=$(az containerapp env show -n "$ACA_ENV" -g "$RESOURCE_GROUP" \
                   --query "properties.appLogsConfiguration.logAnalyticsConfiguration.customerId" -o tsv 2>/dev/null)
           if [ -z "$WS_ID" ]; then
-            WS_ID=$(az monitor log-analytics workspace list -g "$RESOURCE_GROUP" \
+            # Subscription-wide search
+            WS_ID=$(az monitor log-analytics workspace list \
                     --query "[0].customerId" -o tsv 2>/dev/null)
           fi
           echo "Log Analytics workspace: ${WS_ID:-<not found>}"
           {
-            echo "## Seed job execution"
+            echo "## Seed job execution (full properties)"
             echo ""
             echo '```yaml'
             az containerapp job execution show -n mvhd-edc-seed -g "$RESOURCE_GROUP" \
-              --job-execution-name "$EXEC" \
-              --query "properties.{status:status, startTime:startTime, endTime:endTime}" -o yaml
+              --job-execution-name "$EXEC" -o yaml | head -60
             echo '```'
             echo ""
-            echo "## Container logs (Log Analytics)"
-            echo ""
-            echo '```'
-            # Wait a few seconds for log ingestion, then query.
-            sleep 15
-            az monitor log-analytics query -w "$WS_ID" --analytics-query \
-              "ContainerAppConsoleLogs_CL | where ContainerAppName_s == 'mvhd-edc-seed' | order by TimeGenerated asc | project TimeGenerated, Log_s | take 200" \
-              -o tsv 2>&1 \
-              | sed 's/\\u001b\[[0-9;]*m//g' \
-              | head -200 \
-              || echo "(no logs in LA yet — try retrying or query directly)"
-            echo '```'
+            if [ -n "$WS_ID" ]; then
+              echo "## Container logs (Log Analytics)"
+              echo ""
+              echo '```'
+              sleep 15
+              az monitor log-analytics query -w "$WS_ID" --analytics-query \
+                "ContainerAppConsoleLogs_CL | where ContainerAppName_s == 'mvhd-edc-seed' | order by TimeGenerated asc | project TimeGenerated, Log_s | take 300" \
+                -o tsv 2>&1 \
+                | head -300 \
+                || echo "(no logs returned)"
+              echo '```'
+            else
+              echo "## Container logs"
+              echo ""
+              echo '> No Log Analytics workspace reachable from the SP.'
+              echo '> The ACA env is configured without a queryable logging destination.'
+              echo '> See "ACA env appLogsConfiguration" earlier in the run output.'
+            fi
           } | tee -a "$GITHUB_STEP_SUMMARY"
 
           [ "$STATUS" = "Succeeded" ] || exit 1
