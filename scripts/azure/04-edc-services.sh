@@ -65,6 +65,7 @@ az containerapp create \
     "EDC_NATS_TP_SUBSCRIBER_AUTOCREATE=true" \
     "EDC_NATS_TP_PUBLISHER_URL=nats://${NATS_APP}:4222" \
     "EDC_IAM_OAUTH2_JWKS_URL=${KEYCLOAK_PUBLIC_URL:-}/realms/edcv/protocol/openid-connect/certs" \
+    "EDC_IAM_OAUTH2_ISSUER=${KEYCLOAK_PUBLIC_URL:-}/realms/edcv" \
     "WEB_HTTP_PORT=8080" \
     "WEB_HTTP_PATH=/api" \
     "WEB_HTTP_MANAGEMENT_PORT=8081" \
