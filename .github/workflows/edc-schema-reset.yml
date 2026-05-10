@@ -99,7 +99,7 @@ jobs:
                       value: postgres
                   command: ["sh", "-c"]
                   args:
-                    - "psql -c 'DROP DATABASE IF EXISTS identityhub WITH (FORCE)' && psql -c 'DROP DATABASE IF EXISTS issuerservice WITH (FORCE)' && psql -c 'CREATE DATABASE identityhub' && psql -c 'CREATE DATABASE issuerservice' && echo DONE"
+                    - "psql -c 'DROP DATABASE IF EXISTS controlplane WITH (FORCE)' && psql -c 'DROP DATABASE IF EXISTS dataplane WITH (FORCE)' && psql -c 'DROP DATABASE IF EXISTS dataplane_omop WITH (FORCE)' && psql -c 'DROP DATABASE IF EXISTS identityhub WITH (FORCE)' && psql -c 'DROP DATABASE IF EXISTS issuerservice WITH (FORCE)' && psql -c 'CREATE DATABASE controlplane' && psql -c 'CREATE DATABASE dataplane' && psql -c 'CREATE DATABASE dataplane_omop' && psql -c 'CREATE DATABASE identityhub' && psql -c 'CREATE DATABASE issuerservice' && echo DONE"
           EOF
           # Replace if it already exists, otherwise create
           if az containerapp job show -n mvhd-pgfix -g $RESOURCE_GROUP -o none 2>/dev/null; then
