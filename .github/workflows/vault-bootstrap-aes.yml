@@ -95,8 +95,13 @@ jobs:
                   image: hashicorp/vault:latest
                   resources: { cpu: 0.25, memory: 0.5Gi }
                   env:
-                    - { name: VAULT_ADDR, value: "http://mvhd-vault:8200" }
-                    - { name: KEY_ALIAS,  value: "${KEY_ALIAS}" }
+                    # ACA internal ingress runs Envoy on :443 (HTTPS, self-signed)
+                    # and forwards to the container's targetPort. Direct :8200
+                    # connections bypass Envoy and are blocked. Match what IH
+                    # uses (EDC_VAULT_HASHICORP_URL=https://mvhd-vault.internal…).
+                    - { name: VAULT_ADDR,         value: "https://mvhd-vault.internal.happysand-37f82e30.westeurope.azurecontainerapps.io" }
+                    - { name: VAULT_SKIP_VERIFY,  value: "true" }
+                    - { name: KEY_ALIAS,          value: "${KEY_ALIAS}" }
                     - name: VAULT_TOKEN
                       secretRef: vault-token
                     - name: AES_KEY_B64
