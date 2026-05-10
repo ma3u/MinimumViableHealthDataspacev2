@@ -58,6 +58,31 @@ interface Participant {
   state: string;
 }
 
+// CFM TenantManager stores roles in its own taxonomy
+// (CLINIC/CRO/HDAB/REGISTRY/etc.) which doesn't match the EDC role names
+// (DATA_HOLDER/DATA_USER/HDAB_AUTHORITY/EDC_ADMIN) the rest of this page,
+// the Role badge, and the RBAC Summary panel were originally written
+// against. Map CFM → EDC here so every consumer (badge label, access
+// level pill, RBAC counts) lights up consistently.
+const CFM_TO_EDC_ROLE: Record<string, string> = {
+  CLINIC: "DATA_HOLDER",
+  HOSPITAL: "DATA_HOLDER",
+  REGISTRY: "DATA_HOLDER",
+  CRO: "DATA_USER",
+  PHARMA: "DATA_USER",
+  RESEARCHER: "DATA_USER",
+  HDAB: "HDAB_AUTHORITY",
+  AUTHORITY: "HDAB_AUTHORITY",
+  OPERATOR: "EDC_ADMIN",
+  ADMIN: "EDC_ADMIN",
+};
+
+function normalizeRole(t: Tenant): string {
+  const raw =
+    t.properties.ehdsParticipantType || t.properties.role || "Unknown";
+  return CFM_TO_EDC_ROLE[raw.toUpperCase()] ?? raw;
+}
+
 const ROLE_CONFIG: Record<
   string,
   { label: string; color: string; bg: string; level: string }
@@ -151,11 +176,9 @@ export default function AdminTenantsPage() {
     );
   }, 0);
 
-  // RBAC summary counts
   const roleCounts: Record<string, number> = {};
   tenants.forEach((t) => {
-    const role =
-      t.properties.ehdsParticipantType || t.properties.role || "Unknown";
+    const role = normalizeRole(t);
     roleCounts[role] = (roleCounts[role] || 0) + 1;
   });
 
@@ -278,10 +301,7 @@ export default function AdminTenantsPage() {
                         <tbody className="divide-y divide-[var(--border)]">
                           {tenants.map((t) => {
                             const isOpen = expanded === t.id;
-                            const role =
-                              t.properties.ehdsParticipantType ||
-                              t.properties.role ||
-                              "Unknown";
+                            const role = normalizeRole(t);
                             const roleCfg = ROLE_CONFIG[role] ?? null;
                             const allVpasDisposed = (
                               t.participantProfiles || []
