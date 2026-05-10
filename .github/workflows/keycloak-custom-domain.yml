@@ -1,0 +1,295 @@
+name: Keycloak Custom Domain (issue #28 Phase 2)
+
+# Phase 2 of issue #28: bind auth.ehds.mabu.red as a custom domain on the
+# mvhd-keycloak ACA app and reconfigure the OIDC chain so all browser
+# navigation during sign-in stays within *.ehds.mabu.red.
+#
+# Manual trigger only. Two modes via input:
+#
+#   mode=dns_check_only
+#     Resolves the ACA env's customDomainVerificationId, prints the two
+#     DNS records the maintainer must add at the iwantmyname dashboard
+#     for mabu.red:
+#       asuid.auth.ehds.mabu.red.  IN TXT    "<verification-id>"
+#       auth.ehds.mabu.red.        IN CNAME  mvhd-keycloak.<env-fqdn>.
+#     Then queries DNS to see whether they're already in place. Read-only.
+#
+#   mode=cutover
+#     Assumes DNS records are in place. Adds + binds the hostname to
+#     mvhd-keycloak, requests the managed cert, updates Keycloak env
+#     (KC_HOSTNAME, KC_PROXY_HEADERS), updates the realm's webOrigins
+#     via the Admin API, updates the UI app's KEYCLOAK_* env vars to
+#     point at the new hostname, and runs end-to-end verification.
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "Operation mode"
+        type: choice
+        options:
+          - dns_check_only
+          - cutover
+        default: dns_check_only
+      hostname:
+        description: "Custom hostname for Keycloak"
+        type: string
+        default: auth.ehds.mabu.red
+      app:
+        description: "Target ACA app name"
+        type: string
+        default: mvhd-keycloak
+      ui_app:
+        description: "UI ACA app name (KEYCLOAK_* env vars updated here)"
+        type: string
+        default: mvhd-ui
+
+permissions:
+  id-token: write
+  contents: read
+
+concurrency:
+  group: "azure-keycloak-custom-domain"
+  cancel-in-progress: false
+
+env:
+  RESOURCE_GROUP: rg-mvhd-dev
+  ACA_ENV: mvhd-env
+  REALM: edcv
+  KC_CLIENT_ID: health-dataspace-ui
+
+jobs:
+  run:
+    name: Keycloak custom domain (${{ github.event.inputs.mode }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Azure Login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      # ── Step 1 — resolve verification ID + ACA hostnames ──
+      - name: Resolve verification ID and ACA hostnames
+        id: ids
+        run: |
+          ENV_FQDN=$(az containerapp env show -n "$ACA_ENV" -g "$RESOURCE_GROUP" \
+            --query "properties.defaultDomain" -o tsv)
+          VERIFICATION_ID=$(az containerapp env show -n "$ACA_ENV" -g "$RESOURCE_GROUP" \
+            --query "properties.customDomainConfiguration.customDomainVerificationId" -o tsv)
+          KC_FQDN=$(az containerapp show -n "${{ github.event.inputs.app }}" \
+            -g "$RESOURCE_GROUP" --query "properties.configuration.ingress.fqdn" -o tsv)
+          UI_FQDN=$(az containerapp show -n "${{ github.event.inputs.ui_app }}" \
+            -g "$RESOURCE_GROUP" --query "properties.configuration.ingress.fqdn" -o tsv)
+          echo "env_fqdn=$ENV_FQDN"        | tee -a "$GITHUB_OUTPUT"
+          echo "kc_fqdn=$KC_FQDN"          | tee -a "$GITHUB_OUTPUT"
+          echo "ui_fqdn=$UI_FQDN"          | tee -a "$GITHUB_OUTPUT"
+          echo "verification_id=$VERIFICATION_ID" | tee -a "$GITHUB_OUTPUT"
+
+      # ── Step 2 — print the DNS records the maintainer must add ──
+      - name: Print expected DNS records
+        run: |
+          HOSTNAME='${{ github.event.inputs.hostname }}'
+          KC_FQDN='${{ steps.ids.outputs.kc_fqdn }}'
+          VID='${{ steps.ids.outputs.verification_id }}'
+          {
+            echo "## DNS records required at iwantmyname.com (zone: mabu.red)"
+            echo ""
+            echo '```dns'
+            echo "asuid.${HOSTNAME}.  IN TXT    \"${VID}\""
+            echo "${HOSTNAME}.        IN CNAME  ${KC_FQDN}."
+            echo '```'
+            echo ""
+            echo "iwantmyname dashboard: https://iwantmyname.com/dashboard/domains/mabu.red/dns"
+            echo ""
+            echo "After adding both records, wait ~2 min for propagation, then re-run with mode=cutover."
+          } | tee -a "$GITHUB_STEP_SUMMARY"
+
+      # ── Step 3 — DNS state probe ──
+      - name: Probe live DNS state
+        id: dns
+        run: |
+          HOSTNAME='${{ github.event.inputs.hostname }}'
+          EXPECTED_TXT='${{ steps.ids.outputs.verification_id }}'
+          EXPECTED_CNAME='${{ steps.ids.outputs.kc_fqdn }}'
+
+          ACTUAL_TXT=$(dig +short "asuid.${HOSTNAME}" TXT | tr -d '"' | head -1)
+          ACTUAL_CNAME=$(dig +short "${HOSTNAME}" CNAME | head -1 | sed 's/\.$//')
+
+          echo "asuid.${HOSTNAME} TXT  expected: ${EXPECTED_TXT}"
+          echo "asuid.${HOSTNAME} TXT  actual:   ${ACTUAL_TXT:-<none>}"
+          echo "${HOSTNAME} CNAME      expected: ${EXPECTED_CNAME}"
+          echo "${HOSTNAME} CNAME      actual:   ${ACTUAL_CNAME:-<none>}"
+
+          TXT_OK=false; CNAME_OK=false
+          [ "$ACTUAL_TXT" = "$EXPECTED_TXT" ] && TXT_OK=true
+          [ "$ACTUAL_CNAME" = "$EXPECTED_CNAME" ] && CNAME_OK=true
+          echo "txt_ok=$TXT_OK"     >> "$GITHUB_OUTPUT"
+          echo "cname_ok=$CNAME_OK" >> "$GITHUB_OUTPUT"
+
+          {
+            echo ""
+            echo "## DNS probe"
+            echo "| Record | Status |"
+            echo "| --- | --- |"
+            echo "| asuid.${HOSTNAME} TXT | $($TXT_OK && echo '✅ matches' || echo '❌ missing/mismatch') |"
+            echo "| ${HOSTNAME} CNAME     | $($CNAME_OK && echo '✅ matches' || echo '❌ missing/mismatch') |"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      # ── Step 4 — guard cutover on DNS readiness ──
+      - name: Abort cutover if DNS is not ready
+        if: ${{ github.event.inputs.mode == 'cutover' }}
+        run: |
+          if [ "${{ steps.dns.outputs.txt_ok }}" != "true" ] \
+          || [ "${{ steps.dns.outputs.cname_ok }}" != "true" ]; then
+            echo "::error::DNS records are not in place yet. Add them at iwantmyname.com, wait ~2 min, then re-run."
+            exit 1
+          fi
+          echo "DNS is ready; proceeding with cutover."
+
+      # ── Step 5 — bind the custom domain to mvhd-keycloak ──
+      - name: Add hostname to ACA app
+        if: ${{ github.event.inputs.mode == 'cutover' }}
+        run: |
+          HOSTNAME='${{ github.event.inputs.hostname }}'
+          APP='${{ github.event.inputs.app }}'
+          # Idempotent — fails with 409-ish if already there, which is fine.
+          az containerapp hostname add \
+            --hostname "$HOSTNAME" \
+            --name "$APP" -g "$RESOURCE_GROUP" 2>&1 | tee /tmp/hostname-add.log || \
+            grep -q "already" /tmp/hostname-add.log
+
+          az containerapp hostname bind \
+            --hostname "$HOSTNAME" \
+            --name "$APP" -g "$RESOURCE_GROUP" \
+            --environment "$ACA_ENV" \
+            --validation-method CNAME -o none
+
+          echo "Waiting up to 8 min for the managed cert to provision..."
+          for i in $(seq 1 48); do
+            STATE=$(az containerapp hostname list -n "$APP" -g "$RESOURCE_GROUP" \
+              --query "[?name=='${HOSTNAME}'].bindingType" -o tsv)
+            CERT=$(az containerapp hostname list -n "$APP" -g "$RESOURCE_GROUP" \
+              --query "[?name=='${HOSTNAME}'].certificateId" -o tsv)
+            echo "[$i] bindingType=$STATE certificateId=${CERT:-<none>}"
+            if [ -n "$CERT" ]; then
+              echo "Cert bound: $CERT"
+              break
+            fi
+            sleep 10
+          done
+
+      # ── Step 6 — update Keycloak env so it accepts the new hostname ──
+      - name: Update Keycloak env vars (KC_HOSTNAME, KC_PROXY_HEADERS)
+        if: ${{ github.event.inputs.mode == 'cutover' }}
+        run: |
+          HOSTNAME='${{ github.event.inputs.hostname }}'
+          APP='${{ github.event.inputs.app }}'
+          # KC_HOSTNAME tells Keycloak its public-facing URL so issuer/JWKS
+          # claims point at the right place. KC_PROXY_HEADERS=xforwarded
+          # makes Keycloak trust ACA's TLS-terminator headers so it
+          # generates https:// URLs in redirects (default would be http://
+          # because the container itself listens on plain HTTP).
+          az containerapp update -n "$APP" -g "$RESOURCE_GROUP" \
+            --set-env-vars \
+              "KC_HOSTNAME=$HOSTNAME" \
+              "KC_HOSTNAME_STRICT_BACKCHANNEL=false" \
+              "KC_PROXY_HEADERS=xforwarded" -o none
+
+      # ── Step 7 — update realm webOrigins via Admin API ──
+      - name: Update edcv realm webOrigins + redirectUris
+        if: ${{ github.event.inputs.mode == 'cutover' }}
+        env:
+          KC_ADMIN_USER: admin
+          KC_ADMIN_PASS: admin
+        run: |
+          KC="https://${{ steps.ids.outputs.kc_fqdn }}"
+          # Wait for Keycloak to be back up after the env update restart.
+          for i in $(seq 1 30); do
+            code=$(curl -sf -o /dev/null -w "%{http_code}" \
+              "$KC/realms/master/.well-known/openid-configuration" || echo "000")
+            [ "$code" = "200" ] && break
+            sleep 5
+          done
+          TOKEN=$(curl -sS -X POST "$KC/realms/master/protocol/openid-connect/token" \
+            -H "Content-Type: application/x-www-form-urlencoded" \
+            -d "username=${KC_ADMIN_USER}&password=${KC_ADMIN_PASS}&grant_type=password&client_id=admin-cli" \
+            | python3 -c "import json,sys; print(json.load(sys.stdin).get('access_token',''))")
+          echo "::add-mask::$TOKEN"
+
+          # Look up the client UUID, then merge webOrigins to include the new host.
+          CLIENT_UUID=$(curl -sS -H "Authorization: Bearer $TOKEN" \
+            "$KC/admin/realms/$REALM/clients?clientId=$KC_CLIENT_ID" \
+            | python3 -c "import json,sys; print(json.load(sys.stdin)[0]['id'])")
+          echo "client UUID: $CLIENT_UUID"
+
+          NEW_ORIGIN="https://${{ github.event.inputs.hostname }}"
+          # Pull current client config, merge webOrigins / redirectUris, PUT it back.
+          curl -sS -H "Authorization: Bearer $TOKEN" \
+            "$KC/admin/realms/$REALM/clients/$CLIENT_UUID" > /tmp/client.json
+          python3 - <<PY
+          import json
+          c = json.load(open('/tmp/client.json'))
+          origin = "$NEW_ORIGIN"
+          c['webOrigins'] = sorted(set((c.get('webOrigins') or []) + [origin]))
+          # redirectUris already has https://ehds.mabu.red/api/auth/callback/keycloak;
+          # only add the new origin if it's not already covered by a wildcard.
+          uris = set(c.get('redirectUris') or [])
+          uris.add("https://ehds.mabu.red/api/auth/callback/keycloak")
+          c['redirectUris'] = sorted(uris)
+          open('/tmp/client.json', 'w').write(json.dumps(c))
+          print('webOrigins:', c['webOrigins'])
+          print('redirectUris:', c['redirectUris'])
+          PY
+
+          curl -sS -X PUT "$KC/admin/realms/$REALM/clients/$CLIENT_UUID" \
+            -H "Authorization: Bearer $TOKEN" \
+            -H "Content-Type: application/json" \
+            --data-binary @/tmp/client.json -o /dev/null -w "PUT client => %{http_code}\n"
+
+      # ── Step 8 — update UI env vars to point at the new hostname ──
+      - name: Update UI env vars (KEYCLOAK_PUBLIC_URL etc.)
+        if: ${{ github.event.inputs.mode == 'cutover' }}
+        run: |
+          HOSTNAME='${{ github.event.inputs.hostname }}'
+          UI_APP='${{ github.event.inputs.ui_app }}'
+          # KEYCLOAK_INTERNAL_URL stays on the ACA-internal FQDN so the
+          # server-to-server token exchange path is unaffected (per CLAUDE.md
+          # gotcha #5: localhost on the OIDC discovery doc breaks the token
+          # exchange from inside the UI container).
+          az containerapp update -n "$UI_APP" -g "$RESOURCE_GROUP" \
+            --set-env-vars \
+              "KEYCLOAK_PUBLIC_URL=https://$HOSTNAME/realms/$REALM" \
+              "KEYCLOAK_ISSUER=https://$HOSTNAME/realms/$REALM" \
+              "NEXT_PUBLIC_KEYCLOAK_URL=https://$HOSTNAME" \
+              "NEXT_PUBLIC_KEYCLOAK_REALM=$REALM" -o none
+
+      # ── Step 9 — verify ──
+      - name: Verify end-to-end
+        if: ${{ github.event.inputs.mode == 'cutover' }}
+        run: |
+          HOSTNAME='${{ github.event.inputs.hostname }}'
+          for i in $(seq 1 24); do
+            CODE=$(curl -sS -o /dev/null -w "%{http_code}" \
+              "https://${HOSTNAME}/realms/$REALM/.well-known/openid-configuration")
+            echo "[$i] https://${HOSTNAME}/realms/$REALM/.well-known/openid-configuration => $CODE"
+            [ "$CODE" = "200" ] && { echo VERIFIED; break; }
+            sleep 5
+          done
+          if [ "$CODE" != "200" ]; then
+            echo "::error::Verification failed; well-known endpoint did not return 200 within 2 minutes"
+            exit 1
+          fi
+          {
+            echo ""
+            echo "## Cutover complete"
+            echo ""
+            echo "- Custom domain: \`https://${HOSTNAME}\`"
+            echo "- Realm: \`${REALM}\`"
+            echo "- Well-known: \`200 OK\`"
+            echo "- Sign in to test: https://ehds.mabu.red/auth/signin"
+          } >> "$GITHUB_STEP_SUMMARY"
