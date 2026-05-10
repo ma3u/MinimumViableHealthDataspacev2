@@ -79,10 +79,11 @@ for entry in "${PARTICIPANTS[@]}"; do
   DID="${entry##*|}"
   log "POST participant $PID  (did=$DID)"
 
-  # EDC IdentityHub v0.13.x renamed the JSON field from `participantId` to
-  # `participantContextId` (matches the path-segment used elsewhere in the
-  # API). Older builds accept both, newer builds reject the old name with
-  # HTTP 400 ValidationFailure. Send the new name.
+  # KeyDescriptor schema (jad/openapi/identity-api.yaml): IH accepts EITHER
+  # an explicit public key (publicKeyPem|publicKeyJwk) OR generator params
+  # (keyGeneratorParams) — not the inline {type, curve} shape we sent first.
+  # We let IH generate the keypair: simpler, no Vault pre-seed needed for
+  # the TCK probe path (which only iterates the participant list).
   PAYLOAD=$(cat <<JSON
 {
   "roles": [],
@@ -92,9 +93,12 @@ for entry in "${PARTICIPANTS[@]}"; do
   "key": {
     "keyId": "$PID-key-1",
     "privateKeyAlias": "$PID-private-key-alias",
-    "publicKeyAlias": "$PID-public-key-alias",
-    "type": "EC",
-    "curve": "secp256r1"
+    "active": true,
+    "type": "JsonWebKey2020",
+    "keyGeneratorParams": {
+      "algorithm": "EC",
+      "curve": "secp256r1"
+    }
   }
 }
 JSON
