@@ -1,0 +1,150 @@
+name: EDC Add Keypairs (issue #25 finalize)
+
+# Adds a keypair to each of the 5 EHDS ParticipantContexts. The original
+# seed POSTs created the participant row but rolled back the keypair
+# because IH crashed at "Unsupported encryption algorithm: aes" before
+# the AES key alias was configured (PR #41 + AES bootstrap workflow).
+#
+# Now that AES encryption is configured, POST /v1alpha/participants/
+# {pid}/keypairs with keyGeneratorParams should succeed and persist.
+# After this runs, the TCK page DCP-2.x rows flip from skipped → green.
+#
+# Idempotent: if a keypair with our keyId already exists, IH returns
+# 409 which we treat as success.
+
+on:
+  workflow_dispatch:
+    inputs:
+      keycloak_url:
+        description: "Public Keycloak URL"
+        type: string
+        default: "https://auth.ehds.mabu.red"
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  RESOURCE_GROUP: rg-mvhd-dev
+  ACA_ENV: mvhd-env
+  IH_INTERNAL_URL: http://mvhd-identityhub:7082/api/identity
+  KC_REALM: edcv
+  KC_CLIENT_ID: admin
+  KC_CLIENT_SECRET: edc-v-admin-secret
+
+jobs:
+  add-keypairs:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Pre-flight Keycloak token
+        id: kc
+        run: |
+          T=$(curl -sS -X POST \
+            "${{ github.event.inputs.keycloak_url }}/realms/$KC_REALM/protocol/openid-connect/token" \
+            -H "Content-Type: application/x-www-form-urlencoded" \
+            -d "grant_type=client_credentials&client_id=$KC_CLIENT_ID&client_secret=$KC_CLIENT_SECRET" \
+            | python3 -c "import json,sys;print(json.load(sys.stdin)['access_token'])")
+          echo "::add-mask::$T"
+          echo "tok=$T" >> "$GITHUB_OUTPUT"
+          echo "token chars: ${#T}"
+
+      - name: Run add-keypair as one-shot ACA Job
+        env:
+          TOK: ${{ steps.kc.outputs.tok }}
+        run: |
+          ENV_ID=$(az containerapp env show -n "$ACA_ENV" -g "$RESOURCE_GROUP" --query id -o tsv)
+          cat > /tmp/job.yaml <<EOF
+          type: Microsoft.App/jobs
+          properties:
+            configuration:
+              triggerType: Manual
+              replicaTimeout: 300
+              replicaRetryLimit: 0
+              manualTriggerConfig: { replicaCompletionCount: 1, parallelism: 1 }
+              secrets:
+                - { name: tok, value: "${TOK}" }
+            environmentId: ${ENV_ID}
+            template:
+              containers:
+                - name: addkp
+                  image: mcr.microsoft.com/azure-cli:latest
+                  resources: { cpu: 0.5, memory: 1Gi }
+                  env:
+                    - { name: IH, value: "${IH_INTERNAL_URL}" }
+                    - { name: TOKEN, secretRef: tok }
+                  command: ["/bin/bash","-c"]
+                  args:
+                    - |
+                      set -e
+                      exec >/proc/1/fd/1 2>/proc/1/fd/2
+                      CREATED=0; SKIPPED=0; FAILED=0
+                      for P in alpha-klinik pharmaco medreg lmc irs; do
+                        echo "=== \$P ==="
+                        PAYLOAD="{
+                          \"keyId\": \"\$P-key-1\",
+                          \"privateKeyAlias\": \"\$P-private-key-alias\",
+                          \"active\": true,
+                          \"type\": \"JsonWebKey2020\",
+                          \"keyGeneratorParams\": { \"algorithm\": \"EC\", \"curve\": \"secp256r1\" }
+                        }"
+                        HTTP=\$(curl -sS -o /tmp/out -w '%{http_code}' \
+                          -X POST "\$IH/v1alpha/participants/\$P/keypairs" \
+                          -H "Authorization: Bearer \$TOKEN" \
+                          -H "Content-Type: application/json" \
+                          -d "\$PAYLOAD")
+                        case "\$HTTP" in
+                          200|201|204) echo "  ✓ keypair created (HTTP \$HTTP)"; CREATED=\$((CREATED+1)) ;;
+                          409)         echo "  · keypair exists (HTTP 409)";   SKIPPED=\$((SKIPPED+1)) ;;
+                          *)
+                            echo "  ✗ failed (HTTP \$HTTP)"
+                            head -c 500 /tmp/out; echo
+                            FAILED=\$((FAILED+1))
+                            ;;
+                        esac
+                      done
+                      echo
+                      echo "=== verification: keypair counts ==="
+                      for P in alpha-klinik pharmaco medreg lmc irs; do
+                        N=\$(curl -sS -H "Authorization: Bearer \$TOKEN" \
+                          "\$IH/v1alpha/participants/\$P/keypairs" \
+                          | python3 -c "import json,sys;d=json.load(sys.stdin);print(len(d) if isinstance(d,list) else '?')" 2>/dev/null || echo ERR)
+                        echo "  \$P: \$N keypair(s)"
+                      done
+                      echo
+                      echo "summary: created=\$CREATED skipped=\$SKIPPED failed=\$FAILED"
+                      [ "\$FAILED" -eq 0 ] || exit 1
+          EOF
+          if az containerapp job show -n mvhd-add-keypairs -g "$RESOURCE_GROUP" -o none 2>/dev/null; then
+            az containerapp job delete -n mvhd-add-keypairs -g "$RESOURCE_GROUP" --yes -o none
+          fi
+          az containerapp job create -n mvhd-add-keypairs -g "$RESOURCE_GROUP" --yaml /tmp/job.yaml -o none
+          EXEC=$(az containerapp job start -n mvhd-add-keypairs -g "$RESOURCE_GROUP" --query name -o tsv)
+          echo "exec=$EXEC"
+          for i in $(seq 1 60); do
+            S=$(az containerapp job execution show -n mvhd-add-keypairs -g "$RESOURCE_GROUP" \
+                  --job-execution-name "$EXEC" --query "properties.status" -o tsv 2>/dev/null || echo Pending)
+            echo "[$i] $S"
+            case "$S" in Succeeded) break ;; Failed|Canceled) break ;; esac
+            sleep 5
+          done
+
+          echo "=== container logs ==="
+          WS=$(az monitor log-analytics workspace show -n mvhd-logs -g "$RESOURCE_GROUP" --query customerId -o tsv)
+          sleep 10
+          az monitor log-analytics query -w "$WS" --analytics-query \
+            "ContainerAppConsoleLogs_CL | where ContainerJobName_s == 'mvhd-add-keypairs' and TimeGenerated > ago(10m) | order by TimeGenerated asc | project Log_s" \
+            -o tsv 2>&1 | head -100
+
+          [ "$S" = "Succeeded" ] || exit 1
+
+      - name: Cleanup
+        if: always()
+        run: |
+          az containerapp job delete -n mvhd-add-keypairs -g "$RESOURCE_GROUP" --yes -o none || true
