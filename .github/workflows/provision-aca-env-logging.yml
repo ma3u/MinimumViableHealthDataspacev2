@@ -1,0 +1,123 @@
+name: Provision ACA env logging (Log Analytics)
+
+# One-shot workflow that gives the mvhd-env ACA environment a queryable
+# logging destination. The env was provisioned with appLogsConfiguration.
+# destination=null which means container stdout/stderr (especially for
+# ACA Jobs) goes nowhere readable. After this workflow runs, every
+# container in the env logs to a Log Analytics workspace and we can
+# query via az monitor log-analytics query / KQL.
+#
+# Side effect: every container in the env restarts (~2 min total).
+# Schedule deliberately during off-hours.
+#
+# Idempotent: skips workspace creation if one already exists by name,
+# skips env update if destination is already log-analytics.
+
+on:
+  workflow_dispatch:
+    inputs:
+      workspace_name:
+        description: "Log Analytics workspace name"
+        type: string
+        default: "mvhd-logs"
+      retention_days:
+        description: "LA retention (days)"
+        type: string
+        default: "30"
+
+permissions:
+  id-token: write
+  contents: read
+
+concurrency:
+  group: "azure-env-logging"
+  cancel-in-progress: false
+
+env:
+  RESOURCE_GROUP: rg-mvhd-dev
+  ACA_ENV: mvhd-env
+  LOCATION: westeurope
+
+jobs:
+  provision:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Azure Login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Show current env logging config
+        run: |
+          echo "=== Before ==="
+          az containerapp env show -n "$ACA_ENV" -g "$RESOURCE_GROUP" \
+            --query "properties.appLogsConfiguration" -o yaml || true
+
+      - name: Ensure Log Analytics workspace exists
+        id: ws
+        run: |
+          NAME='${{ github.event.inputs.workspace_name }}'
+          if az monitor log-analytics workspace show \
+              -n "$NAME" -g "$RESOURCE_GROUP" -o none 2>/dev/null; then
+            echo "Workspace '$NAME' already exists in '$RESOURCE_GROUP'"
+          else
+            echo "Creating workspace '$NAME' in '$RESOURCE_GROUP' (region $LOCATION)..."
+            az monitor log-analytics workspace create \
+              -n "$NAME" -g "$RESOURCE_GROUP" -l "$LOCATION" \
+              --retention-time '${{ github.event.inputs.retention_days }}' \
+              -o none
+          fi
+          CUSTOMER_ID=$(az monitor log-analytics workspace show \
+            -n "$NAME" -g "$RESOURCE_GROUP" --query "customerId" -o tsv)
+          SHARED_KEY=$(az monitor log-analytics workspace get-shared-keys \
+            -n "$NAME" -g "$RESOURCE_GROUP" --query "primarySharedKey" -o tsv)
+          echo "::add-mask::$SHARED_KEY"
+          echo "customer_id=$CUSTOMER_ID" >> "$GITHUB_OUTPUT"
+          echo "shared_key=$SHARED_KEY"   >> "$GITHUB_OUTPUT"
+          echo "Workspace customerId: ${CUSTOMER_ID:0:8}…"
+
+      - name: Attach workspace to ACA env (this restarts all containers)
+        env:
+          CUSTOMER_ID: ${{ steps.ws.outputs.customer_id }}
+          SHARED_KEY: ${{ steps.ws.outputs.shared_key }}
+        run: |
+          CURRENT=$(az containerapp env show -n "$ACA_ENV" -g "$RESOURCE_GROUP" \
+            --query "properties.appLogsConfiguration.destination" -o tsv 2>/dev/null || echo "null")
+          if [ "$CURRENT" = "log-analytics" ]; then
+            echo "Env already configured for log-analytics; skipping update"
+            exit 0
+          fi
+
+          echo "Patching env (destination=$CURRENT → log-analytics)..."
+          az containerapp env update \
+            -n "$ACA_ENV" -g "$RESOURCE_GROUP" \
+            --logs-destination log-analytics \
+            --logs-workspace-id "$CUSTOMER_ID" \
+            --logs-workspace-key "$SHARED_KEY" \
+            -o none
+
+      - name: Verify after
+        run: |
+          {
+            echo "## After"
+            echo ""
+            echo '```yaml'
+            az containerapp env show -n "$ACA_ENV" -g "$RESOURCE_GROUP" \
+              --query "properties.appLogsConfiguration" -o yaml || true
+            echo '```'
+          } | tee -a "$GITHUB_STEP_SUMMARY"
+
+      - name: Wait for container restarts (~90s)
+        run: sleep 90
+
+      - name: Smoke check — UI and Keycloak still serve 200
+        run: |
+          for url in https://ehds.mabu.red/api/health \
+                    https://auth.ehds.mabu.red/realms/edcv/.well-known/openid-configuration; do
+            CODE=$(curl -sS -o /dev/null -w "%{http_code}" "$url")
+            echo "$url → $CODE"
+            [ "$CODE" = "200" ] || echo "::warning::$url returned $CODE"
+          done
