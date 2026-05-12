@@ -39,16 +39,20 @@ data:
   KEYCLOAK_CLIENT_ID: "ui"
   NEXT_PUBLIC_KEYCLOAK_PUBLIC_URL: "http://keycloak.localhost/realms/EDCV"
   NEXT_PUBLIC_KEYCLOAK_CLIENT_ID: "ui"
-  # EDC-V APIs (via Traefik if JAD stack running, otherwise skip)
-  EDC_MANAGEMENT_URL: "http://host.docker.internal:8080"
-  IDENTITYHUB_URL: "http://host.docker.internal:7081"
-  ISSUER_SERVICE_URL: "http://host.docker.internal:8080"
-  TENANT_MANAGER_URL: "http://host.docker.internal:8081"
-  PROVISION_MANAGER_URL: "http://host.docker.internal:8082"
+  # EDC-V APIs (via host.docker.internal — Docker Compose JAD stack ports)
+  EDC_MANAGEMENT_URL: "http://host.docker.internal:11003"
+  IDENTITYHUB_URL: "http://host.docker.internal:11005"
+  ISSUER_SERVICE_URL: "http://host.docker.internal:10013"
+  TENANT_MANAGER_URL: "http://host.docker.internal:11006"
+  PROVISION_MANAGER_URL: "http://host.docker.internal:11007"
   NEO4J_PROXY_URL: "http://host.docker.internal:9090"
   NEXTAUTH_URL: "http://health-dataspace.orbstack.local"
   NEXT_PUBLIC_STATIC_EXPORT: "false"
   NODE_ENV: "production"
+  # Force Next.js standalone to listen on all interfaces.
+  # k8s injects HOSTNAME=<pod-name> by default, which Next.js binds to,
+  # making port-forwards / NodePorts unable to reach the server.
+  HOSTNAME: "0.0.0.0"
 
 ---
 apiVersion: v1
@@ -204,6 +208,19 @@ spec:
     - ports:
         - protocol: TCP
           port: 9090
+    # Allow CFM Tenant/Provision Manager + EDC Management + IdentityHub +
+    # IssuerService (Docker Compose JAD stack ports)
+    - ports:
+        - protocol: TCP
+          port: 11003 # EDC controlplane management
+        - protocol: TCP
+          port: 11005 # IdentityHub
+        - protocol: TCP
+          port: 11006 # Tenant Manager
+        - protocol: TCP
+          port: 11007 # Provision Manager
+        - protocol: TCP
+          port: 10013 # IssuerService
 
 ---
 # OrbStack Ingress — provides http://health-dataspace.orbstack.local

@@ -385,8 +385,8 @@ jobs:
       - name: Run smoke tests
         run: |
           npx playwright test \
-            __tests__/e2e/journeys/01-graph-explorer.spec.ts \
-            __tests__/e2e/journeys/03-catalog-dcat-ap.spec.ts \
+            __tests__/e2e/journeys/15-persona-graphs.spec.ts \
+            __tests__/e2e/journeys/11-catalog-search-detail.spec.ts \
             --project=chromium --reporter=line
         env:
           CI: true

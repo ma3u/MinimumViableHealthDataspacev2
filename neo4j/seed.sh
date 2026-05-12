@@ -49,9 +49,13 @@ run_file() {
 # lets operators run just the two small MERGE-idempotent files.
 if [ "${SEED_PHASE:-}" = "phase26-only" ]; then
   echo ""
-  echo "=== SEED_PHASE=phase26-only — running just the two Phase 26 files ==="
+  echo "=== SEED_PHASE=phase26-only — running just the Phase 26 files ==="
+  # Schema constraints must exist before MERGE-by-property-key creates new
+  # ParticipantProfile/VPA nodes; init-schema is idempotent (IF NOT EXISTS).
+  run_file /seed/init-schema.cypher "schema (idempotent)"
   run_file /seed/participant-source-init.cypher "participant source labels (Phase 26a)"
   run_file /seed/nlq-glossary.cypher "NLQ glossary (Phase 26d)"
+  run_file /seed/seed-tenant-profiles.cypher "CFM tenant profiles + VPAs (Phase 26e)"
   echo ""
   echo "=== Verifying ==="
   cypher-shell -a "$NEO4J_URI" -u "$NEO4J_USER" -p "$NEO4J_PASSWORD" \
@@ -60,6 +64,9 @@ if [ "${SEED_PHASE:-}" = "phase26-only" ]; then
   cypher-shell -a "$NEO4J_URI" -u "$NEO4J_USER" -p "$NEO4J_PASSWORD" \
     --non-interactive --format plain \
     "MATCH (g:NlqGlossary) RETURN count(g) AS glossaryRows;"
+  cypher-shell -a "$NEO4J_URI" -u "$NEO4J_USER" -p "$NEO4J_PASSWORD" \
+    --non-interactive --format plain \
+    "MATCH (pp:ParticipantProfile) OPTIONAL MATCH (v:VPA)-[:OF_PROFILE]->(pp) RETURN count(DISTINCT pp) AS profiles, count(v) AS vpas;"
   echo ""
   echo "SEED_COMPLETE"
   exit 0
@@ -82,6 +89,11 @@ run_file /seed/seed-compliance-matrix.cypher "compliance matrix"
 # catalog-crawler has targets and the enricher can link federated datasets
 # back to their publishers. Idempotent MERGE, safe to re-run.
 run_file /seed/participant-source-init.cypher "participant source labels (Phase 26a)"
+
+# Phase 26e: CFM tenant profiles + VPAs. Drives /admin/tenants on Azure (where
+# there is no live CFM TenantManager) so the dashboard shows non-zero
+# Participant Profiles + Disposed VPAs counts. Idempotent MERGE.
+run_file /seed/seed-tenant-profiles.cypher "CFM tenant profiles + VPAs (Phase 26e)"
 
 # Phase 26d: NLQ glossary — NL->code mappings for federated templates.
 # Stored in Neo4j (not hardcoded) so operators can extend without a

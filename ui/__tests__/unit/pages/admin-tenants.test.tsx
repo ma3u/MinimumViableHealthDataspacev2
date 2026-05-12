@@ -495,7 +495,7 @@ describe("AdminTenantsPage", () => {
 
     // VPA badges show "connector active" and "identityhub provisioning"
     await waitFor(() =>
-      expect(screen.getByText(/connector/)).toBeInTheDocument(),
+      expect(screen.getByText(/connector\s+active/)).toBeInTheDocument(),
     );
   });
 
@@ -544,8 +544,14 @@ describe("AdminTenantsPage", () => {
     await user.click(expandBtns[0]);
 
     await waitFor(() => {
-      expect(screen.getByText(/connector/)).toBeInTheDocument();
-      expect(screen.getByText(/identityhub/)).toBeInTheDocument();
+      // Match the VPA badge shape ("connector active", "identityhub provisioning")
+      // so we don't accidentally hit the page-level VPA glossary text.
+      expect(
+        screen.getByText(/connector\s+(active|provisioning|disposed)/),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText(/identityhub\s+(active|provisioning|disposed)/),
+      ).toBeInTheDocument();
     });
   });
 
@@ -791,9 +797,14 @@ describe("AdminTenantsPage", () => {
     await waitFor(() => {
       // Profile section renders; no VPA badges (connector/identityhub) since vpas is empty
       expect(screen.getByText("Dataspace Profiles")).toBeInTheDocument();
-      // VPA type labels (stripped of cfm. prefix) should not appear
-      expect(screen.queryByText(/connector/)).not.toBeInTheDocument();
-      expect(screen.queryByText(/identityhub/)).not.toBeInTheDocument();
+      // VPA badge shape ("<type> <state>") should not appear when vpas is empty.
+      // The page-level VPA glossary is unrelated and may still mention the words.
+      expect(
+        screen.queryByText(/connector\s+(active|provisioning|disposed)/),
+      ).not.toBeInTheDocument();
+      expect(
+        screen.queryByText(/identityhub\s+(active|provisioning|disposed)/),
+      ).not.toBeInTheDocument();
     });
   });
 
