@@ -60,6 +60,15 @@ MERGE (healthgov:Participant {participantId: "did:web:healthgov.example:hdab"})
                 healthgov.participantType = "HDAB",
                 healthgov.country         = "DE";
 
+// Dataspace operator — owns the EDC_ADMIN role in CFM_TO_EDC_ROLE (page.tsx).
+// Without this 9th tenant the RBAC Summary "Administrators" tile reads 0 even
+// though edcadmin Keycloak users exist (that tile counts orgs, not users).
+MERGE (operations:Participant {participantId: "did:web:operations.ehds.example:dataspace"})
+  ON CREATE SET operations.name            = "Health Dataspace Operations",
+                operations.legalName       = "Health Dataspace Operations (Reference Implementation)",
+                operations.participantType = "OPERATOR",
+                operations.country         = "BE";
+
 // ── 2. Helper data: per-participant profile + VPA seed via UNWIND ────────────
 // One row per (participant, vpa-type). State is set per-row so we can mix
 // "active" / "provisioning" / "disposed" across the fleet to exercise the
@@ -95,7 +104,11 @@ WITH [
    states: ["active", "provisioning", "active"]},
   {participantId: "did:web:trialcorp.example:research",
    slug: "trialcorp",    role: "consumer",
-   states: ["disposed", "disposed", "disposed"]}
+   states: ["disposed", "disposed", "disposed"]},
+  // ── Dataspace operator — fills the EDC_ADMIN slot in RBAC Summary ───────
+  {participantId: "did:web:operations.ehds.example:dataspace",
+   slug: "operations",   role: "operator",
+   states: ["active", "active", "active"]}
 ] AS tenants
 
 UNWIND tenants AS t

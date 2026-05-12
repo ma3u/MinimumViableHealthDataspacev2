@@ -2,7 +2,7 @@
 # =============================================================================
 # Phase 1b: Health-Specific Tenant Configuration
 # =============================================================================
-# Creates 8 health-domain tenants via CFM TenantManager and deploys
+# Creates 9 health-domain tenants via CFM TenantManager and deploys
 # participant profiles that trigger automated provisioning via CFM agents.
 #
 # Tenants (all fictional — see .github/copilot-instructions.md):
@@ -14,6 +14,7 @@
 #   6. HealthGov (HDAB)         (healthgov)    — Health Data Access Body (DE)
 #   7. Riverside General (CLINIC) (riverside)  — FHIR R4 data provider (DE)
 #   8. TrialCorp Research (CRO) (trialcorp)    — Clinical research consumer (DE)
+#   9. Health Dataspace Operations (operations) — Dataspace Operator / EDC_ADMIN (BE)
 #
 # Prerequisites:
 #   - All JAD services running (docker-compose.jad.yml)
@@ -221,7 +222,7 @@ echo ""
 
 # --- Tenant 1: AlphaKlinik Berlin (Data Provider / DE) ---
 echo "────────────────────────────────────────────────"
-echo "Tenant 1/8: AlphaKlinik Berlin (Data Provider)"
+echo "Tenant 1/9: AlphaKlinik Berlin (Data Provider)"
 echo "────────────────────────────────────────────────"
 create_tenant "AlphaKlinik Berlin" '{"properties": {"displayName": "AlphaKlinik Berlin", "role": "provider", "organization": "AlphaKlinik Berlin — Universitätsklinikum", "ehdsParticipantType": "data-holder", "contactPerson": "Dr. Sophie Richter", "email": "data-office@alpha-klinik.de", "phone": "+49 30 4501-0", "website": "https://alpha-klinik.de", "address": "Augustenburger Platz 1", "city": "Berlin", "country": "DE", "postalCode": "13353"}}'
 
@@ -236,7 +237,7 @@ echo ""
 
 # --- Tenant 2: PharmaCo Research AG (Data Consumer / DE) ---
 echo "────────────────────────────────────────────────"
-echo "Tenant 2/8: PharmaCo Research AG (Data Consumer)"
+echo "Tenant 2/9: PharmaCo Research AG (Data Consumer)"
 echo "────────────────────────────────────────────────"
 create_tenant "PharmaCo Research AG" '{"properties": {"displayName": "PharmaCo Research AG", "role": "consumer", "organization": "PharmaCo Research AG — Clinical Trials Division", "ehdsParticipantType": "data-user", "contactPerson": "Dr. Klaus Berger", "email": "research-data@pharmaco.de", "phone": "+49 69 8100-0", "website": "https://pharmaco.de", "address": "Industriepark Hoechst G879", "city": "Frankfurt am Main", "country": "DE", "postalCode": "65926"}}'
 
@@ -251,7 +252,7 @@ echo ""
 
 # --- Tenant 3: MedReg DE (Health Data Access Body / DE) ---
 echo "────────────────────────────────────────────────"
-echo "Tenant 3/8: MedReg DE (Catalog Operator)"
+echo "Tenant 3/9: MedReg DE (Catalog Operator)"
 echo "────────────────────────────────────────────────"
 create_tenant "MedReg DE" '{"properties": {"displayName": "MedReg DE", "role": "operator", "organization": "MedReg DE — Health Data Access Body", "ehdsParticipantType": "health-data-access-body", "contactPerson": "Anke Hoffmann", "email": "contact@medreg.de", "phone": "+49 228 3080-0", "website": "https://medreg.de", "address": "Friedrich-Ebert-Allee 38", "city": "Bonn", "country": "DE", "postalCode": "53113"}}'
 
@@ -266,7 +267,7 @@ echo ""
 
 # --- Tenant 4: Limburg Medical Centre (Data Provider / NL) ---
 echo "────────────────────────────────────────────────"
-echo "Tenant 4/8: Limburg Medical Centre (Data Provider)"
+echo "Tenant 4/9: Limburg Medical Centre (Data Provider)"
 echo "────────────────────────────────────────────────"
 create_tenant "Limburg Medical Centre" '{"properties": {"displayName": "Limburg Medical Centre", "role": "provider", "organization": "Limburg Medical Centre — Academic Hospital", "ehdsParticipantType": "data-holder", "contactPerson": "Dr. Jan van der Berg", "email": "dataaccess@lmc.nl", "phone": "+31 77 320 5555", "website": "https://lmc.nl", "address": "Tegelseweg 210", "city": "Venlo", "country": "NL", "postalCode": "5912 BL"}}'
 
@@ -281,7 +282,7 @@ echo ""
 
 # --- Tenant 5: Institut de Recherche Santé (Research HDAB / FR) ---
 echo "────────────────────────────────────────────────"
-echo "Tenant 5/8: Institut de Recherche Santé (Research HDAB)"
+echo "Tenant 5/9: Institut de Recherche Santé (Research HDAB)"
 echo "────────────────────────────────────────────────"
 create_tenant "Institut de Recherche Santé" '{"properties": {"displayName": "Institut de Recherche Santé", "role": "operator", "organization": "Institut de Recherche Santé — Research HDAB", "ehdsParticipantType": "health-data-access-body", "contactPerson": "Prof. Marie Leblanc", "email": "data@irs.fr", "phone": "+33 1 44 23 60 00", "website": "https://irs.fr", "address": "101 rue de Tolbiac", "city": "Paris", "country": "FR", "postalCode": "75013"}}'
 
@@ -296,7 +297,7 @@ echo ""
 
 # --- Tenant 6: HealthGov (HDAB) — DE ---
 echo "────────────────────────────────────────────────"
-echo "Tenant 6/8: HealthGov (HDAB) (Health Data Access Body)"
+echo "Tenant 6/9: HealthGov (HDAB) (Health Data Access Body)"
 echo "────────────────────────────────────────────────"
 create_tenant "HealthGov (HDAB)" '{"properties": {"displayName": "HealthGov (HDAB)", "role": "operator", "organization": "HealthGov Data Access Authority", "ehdsParticipantType": "health-data-access-body", "contactPerson": "Dr. Martina Schulz", "email": "contact@healthgov.example", "phone": "+49 30 1810-0", "website": "https://healthgov.example", "address": "Rochusstraße 1", "city": "Berlin", "country": "DE", "postalCode": "10557"}}'
 
@@ -311,7 +312,7 @@ echo ""
 
 # --- Tenant 7: Riverside General (CLINIC) — DE ---
 echo "────────────────────────────────────────────────"
-echo "Tenant 7/8: Riverside General (CLINIC) (Data Provider)"
+echo "Tenant 7/9: Riverside General (CLINIC) (Data Provider)"
 echo "────────────────────────────────────────────────"
 create_tenant "Riverside General (CLINIC)" '{"properties": {"displayName": "Riverside General (CLINIC)", "role": "provider", "organization": "Riverside General Hospital", "ehdsParticipantType": "data-holder", "contactPerson": "Dr. Andreas Hoffmann", "email": "data-office@riverside.example", "phone": "+49 221 478-0", "website": "https://riverside.example", "address": "Kerpener Straße 62", "city": "Köln", "country": "DE", "postalCode": "50937"}}'
 
@@ -326,7 +327,7 @@ echo ""
 
 # --- Tenant 8: TrialCorp Research (CRO) — DE ---
 echo "────────────────────────────────────────────────"
-echo "Tenant 8/8: TrialCorp Research (CRO) (Clinical Research Consumer)"
+echo "Tenant 8/9: TrialCorp Research (CRO) (Clinical Research Consumer)"
 echo "────────────────────────────────────────────────"
 create_tenant "TrialCorp Research (CRO)" '{"properties": {"displayName": "TrialCorp Research (CRO)", "role": "consumer", "organization": "TrialCorp AG Clinical Research", "ehdsParticipantType": "data-user", "contactPerson": "Dr. Lena Vogt", "email": "research@trialcorp.example", "phone": "+49 89 4140-0", "website": "https://trialcorp.example", "address": "Ismaninger Straße 22", "city": "München", "country": "DE", "postalCode": "81675"}}'
 
@@ -336,6 +337,21 @@ deploy_participant "$TRIALCORP_TENANT_ID" "TrialCorp Research (CRO)" "trialcorp"
   "{\"$PROFILE_ID\": [\"consumer\"]}"
 
 TRIALCORP_PARTICIPANT_ID="$PARTICIPANT_ID"
+
+echo ""
+
+# --- Tenant 9: Health Dataspace Operations — BE (dataspace operator) ---
+echo "────────────────────────────────────────────────"
+echo "Tenant 9/9: Health Dataspace Operations (Dataspace Operator)"
+echo "────────────────────────────────────────────────"
+create_tenant "Health Dataspace Operations" '{"properties": {"displayName": "Health Dataspace Operations", "role": "operator", "organization": "Health Dataspace Operations (Reference Implementation)", "ehdsParticipantType": "OPERATOR", "contactPerson": "Sven Lindqvist", "email": "ops@operations.ehds.example", "phone": "+32 2 555 0100", "website": "https://operations.ehds.example", "address": "Rue de la Loi 200", "city": "Brussels", "country": "BE", "postalCode": "1040"}}'
+
+OPERATIONS_TENANT_ID="$TENANT_ID"
+
+deploy_participant "$OPERATIONS_TENANT_ID" "Health Dataspace Operations" "operations" \
+  "{\"$PROFILE_ID\": [\"operator\"]}"
+
+OPERATIONS_PARTICIPANT_ID="$PARTICIPANT_ID"
 
 echo ""
 
@@ -354,6 +370,7 @@ wait_for_active "$IRS_TENANT_ID" "$IRS_PARTICIPANT_ID" "Institut de Recherche Sa
 wait_for_active "$HEALTHGOV_TENANT_ID" "$HEALTHGOV_PARTICIPANT_ID" "HealthGov (HDAB)" 180 || FAILED=1
 wait_for_active "$RIVERSIDE_TENANT_ID" "$RIVERSIDE_PARTICIPANT_ID" "Riverside General (CLINIC)" 180 || FAILED=1
 wait_for_active "$TRIALCORP_TENANT_ID" "$TRIALCORP_PARTICIPANT_ID" "TrialCorp Research (CRO)" 180 || FAILED=1
+wait_for_active "$OPERATIONS_TENANT_ID" "$OPERATIONS_PARTICIPANT_ID" "Health Dataspace Operations" 180 || FAILED=1
 
 echo ""
 

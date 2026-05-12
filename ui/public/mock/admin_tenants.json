@@ -519,6 +519,71 @@
           "error": false
         }
       ]
+    },
+    {
+      "id": "9a8b7c6d-5e4f-3a2b-1c0d-9e8f7a6b5c4d",
+      "version": 0,
+      "properties": {
+        "address": "Rue de la Loi 200",
+        "city": "Brussels",
+        "contactPerson": "Sven Lindqvist",
+        "country": "BE",
+        "displayName": "Health Dataspace Operations",
+        "ehdsParticipantType": "OPERATOR",
+        "email": "ops@operations.ehds.example",
+        "organization": "Health Dataspace Operations (Reference Implementation)",
+        "phone": "+32 2 555 0100",
+        "postalCode": "1040",
+        "role": "operator",
+        "website": "https://operations.ehds.example"
+      },
+      "participantProfiles": [
+        {
+          "id": "1f2e3d4c-5b6a-7980-8c7d-6e5f4a3b2c1d",
+          "version": 0,
+          "identifier": "did:web:identityhub%3A7083:operations",
+          "tenantId": "9a8b7c6d-5e4f-3a2b-1c0d-9e8f7a6b5c4d",
+          "participantRoles": {
+            "a0fa03eb-d95f-4db3-be2c-6764483b38ff": ["operator"]
+          },
+          "vpas": [
+            {
+              "id": "0a1b2c3d-4e5f-6789-abcd-ef0123456789",
+              "version": 0,
+              "state": "active",
+              "stateTimestamp": "2026-05-11T09:00:00.000000000Z",
+              "type": "cfm.connector",
+              "cellId": "e3daa679-c189-423e-9448-310dccfafe1c"
+            },
+            {
+              "id": "1b2c3d4e-5f60-7182-93a4-b5c6d7e8f901",
+              "version": 0,
+              "state": "active",
+              "stateTimestamp": "2026-05-11T09:00:00.000000000Z",
+              "type": "cfm.credentialservice",
+              "cellId": "e3daa679-c189-423e-9448-310dccfafe1c"
+            },
+            {
+              "id": "2c3d4e5f-6071-8293-a4b5-c6d7e8f90123",
+              "version": 0,
+              "state": "active",
+              "stateTimestamp": "2026-05-11T09:00:00.000000000Z",
+              "type": "cfm.dataplane",
+              "cellId": "e3daa679-c189-423e-9448-310dccfafe1c"
+            }
+          ],
+          "properties": {
+            "cfm.vpa.state": {
+              "credentialRequest": "http://identityhub:7081/v1alpha/participants/operations/credentials/request/operator-pid",
+              "holderPid": "operator-pid",
+              "participantContextId": "operations-context"
+            },
+            "displayName": "Health Dataspace Operations",
+            "type": "operations"
+          },
+          "error": false
+        }
+      ]
     }
   ],
   "participants": [
@@ -585,15 +650,23 @@
       "properties": {},
       "state": "ACTIVATED",
       "@context": ["https://w3id.org/edc/connector/management/v2"]
+    },
+    {
+      "@type": "ParticipantContext",
+      "@id": "operations-context",
+      "identity": "did:web:identityhub%3A7083:operations",
+      "properties": {},
+      "state": "ACTIVATED",
+      "@context": ["https://w3id.org/edc/connector/management/v2"]
     }
   ],
   "summary": {
-    "totalTenants": 8,
-    "totalParticipants": 8,
+    "totalTenants": 9,
+    "totalParticipants": 9,
     "byRole": {
       "provider": 3,
       "consumer": 2,
-      "operator": 3
+      "operator": 4
     }
   }
 }

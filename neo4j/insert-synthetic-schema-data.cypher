@@ -64,6 +64,15 @@ MERGE (hdab:Participant {participantId: 'did:web:healthgov.example:hdab'})
       hdab.participantType = 'HDAB',
       hdab.jurisdiction = 'DE'
 
+// Dataspace operator — provides the EDC_ADMIN slot in RBAC Summary so the
+// operator dashboard reflects that the platform itself has a steward org,
+// distinct from the edcadmin Keycloak *user* account.
+MERGE (operations:Participant {participantId: 'did:web:operations.ehds.example:dataspace'})
+  SET operations.name = 'Health Dataspace Operations',
+      operations.legalName = 'Health Dataspace Operations (Reference Implementation)',
+      operations.participantType = 'OPERATOR',
+      operations.jurisdiction = 'BE'
+
 // Data Product available in Marketplace
 MERGE (dp:DataProduct {productId: 'product-diab-cohort-2025'})
   SET dp.name = 'T2D Cohort 2020-2025',
