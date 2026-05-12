@@ -75,6 +75,21 @@ CREATE INDEX vc_subject IF NOT EXISTS FOR (vc:VerifiableCredential) ON (vc.subje
 CREATE INDEX vc_status IF NOT EXISTS FOR (vc:VerifiableCredential) ON (vc.status);
 
 // ============================================================
+// Layer 1c: CFM Tenant Profiles + VPAs (Virtual Participant Agents)
+// Each :Participant exposes one :ParticipantProfile per dataspace,
+// which in turn owns the CFM-provisioned :VPA runtime instances
+// (cfm.connector, cfm.credentialservice, cfm.dataplane). Mirrors
+// the response shape of the CFM TenantManager `/v1alpha1/tenants`
+// API so the operator dashboard works identically whether data
+// comes from CFM (JAD) or the Neo4j fallback (Azure).
+// ============================================================
+CREATE CONSTRAINT participant_profile_id IF NOT EXISTS FOR (pp:ParticipantProfile) REQUIRE pp.profileId IS UNIQUE;
+CREATE INDEX participant_profile_tenant IF NOT EXISTS FOR (pp:ParticipantProfile) ON (pp.tenantId);
+CREATE CONSTRAINT vpa_id IF NOT EXISTS FOR (v:VPA) REQUIRE v.vpaId IS UNIQUE;
+CREATE INDEX vpa_state IF NOT EXISTS FOR (v:VPA) ON (v.state);
+CREATE INDEX vpa_type IF NOT EXISTS FOR (v:VPA) ON (v.vpaType);
+
+// ============================================================
 // Phase 20: Patient Portal — GDPR Art. 15-22 / EHDS Chapter II
 // Patient consent for research (EHDS Art. 10), insights
 // ============================================================

@@ -8,6 +8,7 @@ import {
   ChevronDown,
   ChevronUp,
   Circle,
+  Info,
   Loader2,
   Users,
   ShieldCheck,
@@ -192,6 +193,24 @@ export default function AdminTenantsPage() {
             <p className="text-[var(--text-secondary)] text-lg mt-1">
               Manage EHDS participant organisations, roles, and dataspace access
             </p>
+            <p className="text-xs text-[var(--text-secondary)] mt-2 max-w-2xl flex items-start gap-1.5">
+              <Info
+                size={14}
+                className="mt-0.5 shrink-0 text-[var(--accent)]"
+              />
+              <span>
+                <strong className="text-[var(--text-primary)]">
+                  VPA (Virtual Participant Agent)
+                </strong>{" "}
+                — a runtime instance provisioned by the CFM Tenant Manager for a
+                participant. Each tenant typically runs three VPAs:
+                <code>cfm.connector</code> (EDC-V control plane),{" "}
+                <code>cfm.credentialservice</code> (IdentityHub), and{" "}
+                <code>cfm.dataplane</code> (DCore data plane). State{" "}
+                <code>disposed</code> means the agent was terminated by a demo
+                reset — re-seed the tenants to recreate.
+              </span>
+            </p>
           </div>
           <Link
             href="/admin"
@@ -259,8 +278,15 @@ export default function AdminTenantsPage() {
                         <span className="animate-pulse w-2 h-2 rounded-full bg-[var(--warning)]" />
                       )}
                     </div>
-                    <p className="text-sm font-medium text-[var(--text-secondary)]">
+                    <p
+                      className="text-sm font-medium text-[var(--text-secondary)] flex items-center gap-1.5"
+                      title="Virtual Participant Agents (one per dataspace profile per tenant). Disposed = terminated by demo reset; re-seed to recreate."
+                    >
                       Disposed VPAs
+                      <Info
+                        size={12}
+                        className="text-[var(--text-secondary)] opacity-60"
+                      />
                     </p>
                     <p className="text-3xl font-black text-[var(--text-primary)] mt-1 tabular-nums">
                       {disposedCount}
