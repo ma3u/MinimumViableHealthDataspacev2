@@ -7,11 +7,14 @@ ontologies unified in a Neo4j knowledge graph. 127 synthetic patients, 5300+ gra
 
 Before implementing significant changes, always:
 
-1. **Check existing ADRs** in `docs/ADRs/` (ADR-001 to ADR-013) for architectural context
-2. **Consult the planning document** at `docs/planning-health-dataspace-v2.md` for phase context
+1. **Check existing ADRs** in `docs/ADRs/` (ADR-001 to ADR-025) for architectural context
+2. **Consult the planning index** at `docs/planning-health-dataspace-v2.md` — a slim
+   index (issues table, phase-status summary, ADR index, links). Per-phase detail
+   lives in `docs/planning/roadmap-phases-*.md`; open an archive only when you need
+   a specific phase's detail — do not read the whole roadmap by default
 3. **Check GitHub Issues** for related tracking: `gh issue list --repo ma3u/MinimumViableHealthDataspacev2`
 4. **Create a new ADR** in `docs/ADRs/ADR-NNN-slug.md` for architectural decisions
-5. **Link new ADRs** in the planning document's ADR index table
+5. **Link new ADRs** in the planning index's ADR index table
 
 ## Build Commands
 
