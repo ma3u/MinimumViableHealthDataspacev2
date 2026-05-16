@@ -132,5 +132,6 @@ All three core specifications are now final or near-final:
 | [023](ADRs/ADR-023-reinstate-off-hours-scaledown.md)         | Reinstate Off-Hours ACA Scale-Down             | 2026-05-01 | Accepted   |
 | [024](ADRs/ADR-024-full-edc-provisioning-per-participant.md) | Full EDC Provisioning per Participant on Azure | 2026-05-04 | Accepted   |
 | [025](ADRs/ADR-025-keycloak-custom-domain.md)                | Keycloak Custom Domain (auth.ehds.mabu.red)    | 2026-05-10 | Accepted   |
+| [026](ADRs/ADR-026-token-efficient-planning-structure.md)    | Token-Efficient Planning & ADR Structure       | 2026-05-17 | Accepted   |
 
 > **Note:** The full text of ADR-1 through ADR-9 has been moved into the standalone ADR documents linked in the table above. Click any row to read the full context, decision, and consequences.
