@@ -1,12 +1,18 @@
 name: ACA Off-Hours Scale (Mon-Fri 07-20 Europe/Berlin)
 
-# ADR-022: re-enable the schedule for cost optimisation. INF-STG-EU_EHDS no
-# longer requires 24/7 (the public ehds.mabu.red demo is documented as a
-# weekday-hours service in the README). Stop saves ~€100-150/mo on the
-# unlimited subscription by halting the always-on apps overnight + weekends.
+# ADR-022/023: re-enable the off-hours schedule for cost optimisation.
+# ADR-027: extend it to the full EDC stack. ADR-024 provisioned the 8 EDC
+# apps at min=1 (24/7) but this schedule still only covered the 7 "healthy"
+# apps — so the EDC stack billed nights + weekends, the cost surge flagged by
+# FinOps in May 2026. The schedule now scales all 15 Container Apps.
+#
+# INF-STG-EU_EHDS no longer requires 24/7 — the public ehds.mabu.red demo is
+# documented as a weekday-hours service in the README, so off-hours
+# scale-down is non-disruptive. Stop saves ~€250-300/mo by halting every app
+# overnight + weekends (apps run ~65h/week instead of 168h).
 #
 # The schedule was originally introduced by ADR-016 and disabled by ADR-018
-# when the subscription changed; ADR-022 reinstates it under the
+# when the subscription changed; ADR-022/023 reinstated it under the
 # Workaround-B (Postgres-on-ACA) model: there's no Microsoft.DBforPostgreSQL
 # Flexible Server to start/stop, so postgres scale-to-0 is a Container App
 # update like everything else.
@@ -75,12 +81,13 @@ jobs:
 
       - name: Scale all Container Apps to 0
         run: |
-          # Apps that were already scaled to 0 by ADR-022 (broken EDC services)
-          # are intentionally NOT in this list — they're either flagged for
-          # deletion or tracked under issue #25; the schedule shouldn't ever
-          # restore them to min=1.
-          # Postgres is included because Workaround B (ADR-018) made it an
-          # ACA app rather than a Flexible Server.
+          # All 15 Container Apps are scaled to 0 off-hours (ADR-027).
+          #  - 7 core apps: postgres, neo4j, keycloak, vault, proxy, ui,
+          #    catalog-enricher. Postgres is included because Workaround B
+          #    (ADR-018) made it an ACA app, not a Flexible Server.
+          #  - 8 EDC apps: ADR-024 provisioned the full EDC stack at min=1.
+          #    ADR-027 adds them here so they no longer bill nights + weekends.
+          # Stop order is irrelevant; start order is not (see the start job).
           APPS=(
             mvhd-postgres
             mvhd-neo4j
@@ -89,6 +96,14 @@ jobs:
             mvhd-neo4j-proxy
             mvhd-ui
             mvhd-catalog-enricher
+            mvhd-nats
+            mvhd-controlplane
+            mvhd-dp-fhir
+            mvhd-dp-omop
+            mvhd-identityhub
+            mvhd-issuerservice
+            mvhd-tenant-mgr
+            mvhd-provision-mgr
           )
           echo "=== Scaling ${#APPS[@]} Container Apps to 0 replicas ==="
           for app in "${APPS[@]}"; do
@@ -105,7 +120,7 @@ jobs:
           echo "## Off-Hours Scale-Down" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
           echo "**Time:** $(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_STEP_SUMMARY"
-          echo "**Status:** 7 healthy Container Apps (incl. mvhd-postgres) scaled to 0" >> "$GITHUB_STEP_SUMMARY"
+          echo "**Status:** 15 Container Apps (7 core + 8 EDC) scaled to 0" >> "$GITHUB_STEP_SUMMARY"
           echo "**Next start:** Monday-Friday 05:00 UTC (07:00 Europe/Berlin CEST)" >> "$GITHUB_STEP_SUMMARY"
 
   start:
@@ -159,15 +174,39 @@ jobs:
             --name mvhd-ui --resource-group "$RESOURCE_GROUP" \
             --min-replicas 1 --max-replicas 3 \
             -o none || echo "::warning::Failed to scale mvhd-ui"
-          # NOTE: mvhd-controlplane / -dp-fhir / -dp-omop / -identityhub /
-          # -issuerservice / -tenant-mgr / -provision-mgr / -nats remain at
-          # 0/1 — they don't boot on ACA today (issue #25 / ADR-022). Do not
-          # restore them here.
+          # NATS — started here with the core apps so JetStream is ready
+          # before the EDC controlplane comes up in the next step.
+          echo "  mvhd-nats -> 1/1"
+          az containerapp update \
+            --name mvhd-nats --resource-group "$RESOURCE_GROUP" \
+            --min-replicas 1 --max-replicas 1 \
+            -o none || echo "::warning::Failed to scale mvhd-nats"
+          # The 7 remaining EDC apps (controlplane, data planes, identity hub,
+          # issuer service, CFM tenant/provision managers) are restored after
+          # the stateful wait below — see "Restore EDC stack" (ADR-024/027).
 
       - name: Wait for stateful services to be reachable
         run: |
           echo "Waiting 75s for Neo4j + Vault pods to start..."
           sleep 75
+
+      - name: Restore EDC stack (ADR-024)
+        run: |
+          # ADR-024 provisions the full EDC stack at min=1 during work hours;
+          # ADR-027 scales it to 0 off-hours. Postgres (started first) and
+          # NATS (started with the core apps) are reachable by now. The
+          # controlplane needs both; the data planes, identity hub, issuer
+          # service and CFM managers need Postgres.
+          echo "=== Restoring 7 EDC Container Apps to 1/1 ==="
+          for app in mvhd-controlplane mvhd-dp-fhir mvhd-dp-omop \
+                     mvhd-identityhub mvhd-issuerservice \
+                     mvhd-tenant-mgr mvhd-provision-mgr; do
+            echo "  $app -> 1/1"
+            az containerapp update \
+              --name "$app" --resource-group "$RESOURCE_GROUP" \
+              --min-replicas 1 --max-replicas 1 \
+              -o none || echo "::warning::Failed to scale $app"
+          done
 
       - name: Re-bootstrap Vault (in-memory gotcha #1)
         run: |
@@ -207,5 +246,5 @@ jobs:
           echo "" >> "$GITHUB_STEP_SUMMARY"
           echo "**Time:** $(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_STEP_SUMMARY"
           echo "**Target:** ${{ steps.verify.outputs.ui_url }}" >> "$GITHUB_STEP_SUMMARY"
-          echo "**Status:** PostgreSQL started, 13 Container Apps scaled up, Vault re-bootstrapped (Neo4j data persists via Azure Files — see ADR-017)" >> "$GITHUB_STEP_SUMMARY"
+          echo "**Status:** PostgreSQL started, 15 Container Apps scaled up (7 core + 8 EDC), Vault re-bootstrapped (Neo4j data persists via Azure Files — see ADR-017)" >> "$GITHUB_STEP_SUMMARY"
           echo "**Next stop:** Today 18:00 UTC (20:00 Europe/Berlin CEST)" >> "$GITHUB_STEP_SUMMARY"
