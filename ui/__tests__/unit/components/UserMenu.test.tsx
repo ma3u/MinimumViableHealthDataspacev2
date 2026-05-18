@@ -273,7 +273,54 @@ describe("UserMenu", () => {
   // ── Sign out ─────────────────────────────────────────────────────
 
   describe("sign out", () => {
+    // signOut() returns a Promise — the component chains .then() on it for
+    // the Keycloak hard-redirect, so the mock must resolve.
+    beforeEach(() => {
+      mockSignOut.mockResolvedValue(undefined);
+    });
+
+    // ── window.location stub ──────────────────────────────────────
+    // The fix navigates the browser to Keycloak's end-session endpoint via
+    // `window.location.href = …`. jsdom does not implement cross-origin
+    // navigation, so we replace window.location with a plain writable object
+    // and read back the href the component set.
+    const realLocation = window.location;
+    function stubLocation() {
+      Object.defineProperty(window, "location", {
+        configurable: true,
+        writable: true,
+        value: {
+          ...realLocation,
+          origin: "https://ehds.mabu.red",
+          href: "https://ehds.mabu.red/",
+          assign: vi.fn(),
+          replace: vi.fn(),
+        },
+      });
+    }
+    afterEach(() => {
+      Object.defineProperty(window, "location", {
+        configurable: true,
+        writable: true,
+        value: realLocation,
+      });
+    });
+
+    /** Stub /api/keycloak-config so UserMenu has a Keycloak public URL. */
+    function stubKeycloakConfig(
+      publicUrl = "https://keycloak.ehds.mabu.red/realms/edcv",
+      clientId = "health-dataspace-ui",
+    ) {
+      const fetchMock = vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({ publicUrl, clientId }),
+      });
+      vi.stubGlobal("fetch", fetchMock);
+      return fetchMock;
+    }
+
     it("calls signOut with callbackUrl '/' when no Keycloak URL set", async () => {
+      stubLocation();
       mockUseSession.mockReturnValue(sessionWith("User", "u@example.com", []));
       const user = userEvent.setup();
       render(<UserMenu />);
@@ -283,15 +330,22 @@ describe("UserMenu", () => {
       expect(mockSignOut).toHaveBeenCalledWith({ callbackUrl: "/" });
     });
 
-    it("builds Keycloak logout URL when /api/keycloak-config returns config", async () => {
-      const fetchMock = vi.fn().mockResolvedValue({
-        ok: true,
-        json: async () => ({
-          publicUrl: "http://keycloak.localhost/realms/EDCV",
-          clientId: "my-client",
-        }),
-      });
-      vi.stubGlobal("fetch", fetchMock);
+    /**
+     * REGRESSION — issue #52.
+     *
+     * Reproduces "logout then re-login keeps the previous user": the sign-out
+     * MUST end Keycloak's SSO session, not just the NextAuth app cookie.
+     *
+     * Before the fix, the component called `signOut({ callbackUrl: logoutUrl })`
+     * with a cross-origin Keycloak URL. NextAuth v4 rejects cross-origin
+     * callback URLs, so the browser never reached Keycloak and the SSO cookie
+     * survived. This test asserts the correct flow instead:
+     *   1. signOut is invoked with `{ redirect: false }` (NOT a callbackUrl), and
+     *   2. the browser is hard-redirected to Keycloak's end-session endpoint.
+     */
+    it("hard-redirects the browser to Keycloak's end-session endpoint on sign out", async () => {
+      stubLocation();
+      stubKeycloakConfig();
 
       mockUseSession.mockReturnValue(
         sessionWith("Logout User", "logout@example.com", []),
@@ -300,51 +354,93 @@ describe("UserMenu", () => {
       render(<UserMenu />);
 
       await waitFor(() =>
-        expect(fetchMock).toHaveBeenCalledWith("/api/keycloak-config"),
+        expect(window.fetch).toHaveBeenCalledWith("/api/keycloak-config"),
       );
 
       await user.click(screen.getByText("Logout User"));
       await user.click(screen.getByText("Sign out"));
 
-      expect(mockSignOut).toHaveBeenCalledTimes(1);
-      const { callbackUrl } = mockSignOut.mock.calls[0][0];
-      expect(callbackUrl).toContain(
-        "http://keycloak.localhost/realms/EDCV/protocol/openid-connect/logout",
+      // 1. signOut must NOT receive the cross-origin Keycloak URL as a
+      //    callbackUrl — NextAuth would silently drop it.
+      expect(mockSignOut).toHaveBeenCalledWith({ redirect: false });
+      expect(mockSignOut).not.toHaveBeenCalledWith(
+        expect.objectContaining({
+          callbackUrl: expect.stringContaining("openid-connect/logout"),
+        }),
       );
-      expect(callbackUrl).toContain("post_logout_redirect_uri=");
-      expect(callbackUrl).toContain("client_id=my-client");
+
+      // 2. After signOut resolves, the browser is sent to Keycloak's
+      //    end-session endpoint so the SSO cookie is destroyed.
+      await waitFor(() =>
+        expect(window.location.href).toContain(
+          "https://keycloak.ehds.mabu.red/realms/edcv/protocol/openid-connect/logout",
+        ),
+      );
+      expect(window.location.href).toContain("post_logout_redirect_uri=");
+      expect(window.location.href).toContain("client_id=health-dataspace-ui");
+
+      vi.unstubAllGlobals();
+    });
+
+    it("includes id_token_hint in the logout URL when a session id_token exists", async () => {
+      stubLocation();
+      stubKeycloakConfig();
+
+      mockUseSession.mockReturnValue({
+        data: {
+          user: { name: "Token User", email: "tok@example.com" },
+          roles: [],
+          idToken: "eyJhbGciOiJ.fake.idtoken",
+        },
+        status: "authenticated" as const,
+      });
+      const user = userEvent.setup();
+      render(<UserMenu />);
+
+      await waitFor(() =>
+        expect(window.fetch).toHaveBeenCalledWith("/api/keycloak-config"),
+      );
+
+      await user.click(screen.getByText("Token User"));
+      await user.click(screen.getByText("Sign out"));
+
+      await waitFor(() =>
+        expect(window.location.href).toContain("openid-connect/logout"),
+      );
+      expect(window.location.href).toContain(
+        "id_token_hint=eyJhbGciOiJ.fake.idtoken",
+      );
 
       vi.unstubAllGlobals();
     });
 
     it("passes clientId from runtime config into logout URL", async () => {
-      const fetchMock = vi.fn().mockResolvedValue({
-        ok: true,
-        json: async () => ({
-          publicUrl: "http://keycloak.localhost/realms/test",
-          clientId: "health-dataspace-ui",
-        }),
-      });
-      vi.stubGlobal("fetch", fetchMock);
+      stubLocation();
+      stubKeycloakConfig(
+        "https://keycloak.ehds.mabu.red/realms/test",
+        "health-dataspace-ui",
+      );
 
       mockUseSession.mockReturnValue(sessionWith("U", "u@test.com", []));
       const user = userEvent.setup();
       render(<UserMenu />);
 
       await waitFor(() =>
-        expect(fetchMock).toHaveBeenCalledWith("/api/keycloak-config"),
+        expect(window.fetch).toHaveBeenCalledWith("/api/keycloak-config"),
       );
 
       await user.click(screen.getByText("U"));
       await user.click(screen.getByText("Sign out"));
 
-      const { callbackUrl } = mockSignOut.mock.calls[0][0];
-      expect(callbackUrl).toContain("client_id=health-dataspace-ui");
+      await waitFor(() =>
+        expect(window.location.href).toContain("client_id=health-dataspace-ui"),
+      );
 
       vi.unstubAllGlobals();
     });
 
     it("closes dropdown after sign-out click", async () => {
+      stubLocation();
       mockUseSession.mockReturnValue(
         sessionWith("Closer", "c@example.com", []),
       );
