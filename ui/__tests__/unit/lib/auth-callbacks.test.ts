@@ -41,6 +41,31 @@ describe("authOptions callbacks", () => {
       expect(result.sub).toBe("user-1");
     });
 
+    // Regression — issue #52: the id_token must be persisted on the JWT so
+    // the session callback can expose it for RP-initiated Keycloak logout.
+    it("persists the id_token on initial sign-in", async () => {
+      const token: JWT = { sub: "user-1" };
+      const account = {
+        access_token: "at-123",
+        refresh_token: "rt-456",
+        id_token: "eyJhbGciOiJ.fake.idtoken",
+        type: "oauth" as const,
+        provider: "keycloak",
+        providerAccountId: "user-1",
+      };
+      const profile = { sub: "user-1", name: "Test User" };
+
+      const result = await jwtCallback({
+        token,
+        account,
+        profile,
+        user: { id: "user-1" },
+        trigger: "signIn",
+      });
+
+      expect(result.idToken).toBe("eyJhbGciOiJ.fake.idtoken");
+    });
+
     it("returns token unchanged on subsequent requests", async () => {
       const token: JWT = {
         sub: "user-1",
@@ -128,6 +153,33 @@ describe("authOptions callbacks", () => {
       });
 
       expect((result as any).roles).toEqual([]);
+    });
+
+    // Regression — issue #52: the id_token must reach the session so the
+    // client can pass it as id_token_hint to Keycloak's end-session endpoint
+    // on sign-out (clears the SSO session, not just the app cookie).
+    it("exposes the id_token from the token on the session", async () => {
+      const session = {
+        user: { id: "user-3", name: "Test", email: "test@test.com" },
+        expires: "2099-01-01",
+        roles: [] as string[],
+      } as Session;
+      const token: JWT = {
+        sub: "user-3",
+        roles: ["EDC_ADMIN"],
+        accessToken: "at-123",
+        idToken: "eyJhbGciOiJ.fake.idtoken",
+      };
+
+      const result = await sessionCallback({
+        session,
+        token,
+        user: { id: "user-3", email: "test@test.com", emailVerified: null },
+        trigger: "update",
+        newSession: undefined,
+      });
+
+      expect((result as any).idToken).toBe("eyJhbGciOiJ.fake.idtoken");
     });
   });
 });

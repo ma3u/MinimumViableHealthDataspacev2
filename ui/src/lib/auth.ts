@@ -103,6 +103,10 @@ export const authOptions: NextAuthOptions = {
       if (account && profile) {
         token.accessToken = account.access_token;
         token.refreshToken = account.refresh_token;
+        // Persist the id_token so the client can pass it as `id_token_hint`
+        // to Keycloak's end-session endpoint on sign-out. Without it Keycloak
+        // shows a logout-confirmation prompt instead of logging out directly.
+        token.idToken = account.id_token;
         const keycloakProfile = profile as Record<string, unknown>;
         const roles = extractRealmRoles(keycloakProfile, account);
         // Store the Keycloak login name (preferred_username) for derivation.
@@ -126,6 +130,7 @@ export const authOptions: NextAuthOptions = {
       return {
         ...session,
         accessToken: token.accessToken as string,
+        idToken: token.idToken as string,
         roles: (token.roles as string[]) ?? [],
         user: {
           ...session.user,

@@ -79,6 +79,46 @@ function displayRolesFor(roles: string[]): string[] {
 }
 
 /**
+ * Builds the Keycloak RP-initiated logout (end-session) URL.
+ *
+ * Passing `id_token_hint` lets Keycloak end the SSO session immediately
+ * without showing a logout-confirmation prompt; `client_id` is the fallback
+ * when no id_token is available. `post_logout_redirect_uri` returns the
+ * browser to the app afterwards.
+ */
+function buildKeycloakLogoutUrl(
+  publicUrl: string,
+  clientId: string,
+  returnUrl: string,
+  idToken?: string | null,
+): string {
+  const params = new URLSearchParams({
+    post_logout_redirect_uri: returnUrl,
+    client_id: clientId,
+  });
+  if (idToken) params.set("id_token_hint", idToken);
+  return `${publicUrl}/protocol/openid-connect/logout?${params.toString()}`;
+}
+
+/**
+ * Performs a Keycloak RP-initiated logout.
+ *
+ * IMPORTANT: the Keycloak end-session URL must NOT be passed as
+ * `signOut({ callbackUrl })`. NextAuth v4's default `redirect` callback
+ * rejects cross-origin callback URLs and falls back to the app base URL, so
+ * the browser never reaches Keycloak and the SSO cookie survives — causing
+ * the next sign-in to silently restore the previous user (issue #52).
+ *
+ * Correct flow: clear the NextAuth session with `signOut({ redirect: false })`,
+ * then hard-redirect the browser to Keycloak's end-session endpoint.
+ */
+function keycloakLogout(logoutUrl: string): void {
+  signOut({ redirect: false }).then(() => {
+    window.location.href = logoutUrl;
+  });
+}
+
+/**
  * Switch to a different Keycloak user.
  * Must sign out from BOTH NextAuth AND Keycloak itself — otherwise Keycloak's
  * SSO session cookie auto-authenticates the same user on the next signIn().
@@ -91,6 +131,7 @@ function switchPersona(
   _personaId: string,
   onClose: () => void,
   keycloakConfig: { publicUrl: string; clientId: string } | null,
+  idToken?: string | null,
 ) {
   onClose();
   // Fall back to same-origin "/" if the runtime config hasn't loaded yet —
@@ -113,18 +154,23 @@ function switchPersona(
   // Sign out from NextAuth first, then redirect to Keycloak's logout endpoint.
   // The post_logout_redirect_uri sends the user to /auth/switch which triggers
   // a new sign-in with login_hint.
-  signOut({ redirect: false }).then(() => {
-    const returnUrl = window.location.origin + "/auth/switch";
-    const logoutUrl = `${keycloakPublicUrl}/protocol/openid-connect/logout?post_logout_redirect_uri=${encodeURIComponent(
-      returnUrl,
-    )}&client_id=${clientId}`;
-    window.location.href = logoutUrl;
-  });
+  const returnUrl = window.location.origin + "/auth/switch";
+  keycloakLogout(
+    buildKeycloakLogoutUrl(keycloakPublicUrl, clientId, returnUrl, idToken),
+  );
 }
 
 export default function UserMenu() {
   // Tab-scoped session: immune to cross-tab cookie changes in live mode.
-  const { session: tabSession, status: tabStatus } = useTabSession();
+  const {
+    session: tabSession,
+    status: tabStatus,
+    liveSession,
+  } = useTabSession();
+  // id_token from the live NextAuth session — passed to Keycloak's
+  // end-session endpoint as id_token_hint so logout skips the confirm prompt.
+  const idToken =
+    (liveSession as { idToken?: string } | null | undefined)?.idToken ?? null;
   // Always call useDemoPersona — hook rules require unconditional calls.
   const demoPersona = useDemoPersona();
   const demoSession =
@@ -453,6 +499,7 @@ export default function UserMenu() {
                           persona.personaId,
                           () => setOpen(false),
                           keycloakConfig,
+                          idToken,
                         );
                       }
                     }}
@@ -504,14 +551,26 @@ export default function UserMenu() {
                   clearDemoPersona();
                   return;
                 }
-                const logoutUrl = keycloakConfig?.publicUrl
-                  ? `${
-                      keycloakConfig.publicUrl
-                    }/protocol/openid-connect/logout?post_logout_redirect_uri=${encodeURIComponent(
+                // Sign out of Keycloak's SSO session too — not just the
+                // NextAuth app cookie. Passing the Keycloak end-session URL
+                // as signOut({ callbackUrl }) does NOT work: NextAuth drops
+                // cross-origin callback URLs, so the browser never reaches
+                // Keycloak and the SSO cookie survives — the next sign-in
+                // then silently restores this same user (issue #52).
+                if (keycloakConfig?.publicUrl) {
+                  keycloakLogout(
+                    buildKeycloakLogoutUrl(
+                      keycloakConfig.publicUrl,
+                      keycloakConfig.clientId,
                       window.location.origin,
-                    )}&client_id=${keycloakConfig.clientId}`
-                  : undefined;
-                signOut({ callbackUrl: logoutUrl ?? "/" });
+                      idToken,
+                    ),
+                  );
+                } else {
+                  // Runtime config not loaded — fall back to NextAuth-only
+                  // sign-out (Keycloak SSO cookie cannot be cleared here).
+                  signOut({ callbackUrl: "/" });
+                }
               }}
               className="flex items-center gap-2 px-3 py-2 text-sm text-red-400 hover:bg-[var(--surface-2)] rounded transition-colors"
             >
