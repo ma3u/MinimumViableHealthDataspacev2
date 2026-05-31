@@ -138,12 +138,12 @@ The first deterministic gate runs **on your machine, before a commit is
 created** (`.git/hooks/pre-commit`, `core.hooksPath` → `.git/hooks`). It runs
 fast checks only — the heavy suite runs in CI:
 
-| Step | Tool            | What it does                                                                             |
-| ---- | --------------- | ---------------------------------------------------------------------------------------- |
-| 1    | **Prettier**    | Auto-formats staged `*.md`, `*.yaml`, `*.json`, `*.ts(x)`, `*.js(x)` and re-stages them. |
-| 2    | **ESLint**      | Lints staged TS/TSX with `--max-warnings 55` (mirrors the CI threshold).                 |
-| 3    | **tsc**         | Type-checks the UI with `tsconfig.build.json` (strict mode, excludes tests).             |
-| 4    | **Secret scan** | Blocks obvious secret patterns (`api_key`, `token`, `private_key`, …) in staged content. |
+| Step | Tool            | What it does                                                                                                    |
+| ---- | --------------- | --------------------------------------------------------------------------------------------------------------- |
+| 1    | **Prettier**    | Auto-formats staged `*.md`, `*.yaml`, `*.json`, `*.ts(x)`, `*.js(x)` and re-stages them.                        |
+| 2    | **ESLint**      | Lints staged TS/TSX with `--max-warnings 55` — the project's ESLint warning budget (documented in `CLAUDE.md`). |
+| 3    | **tsc**         | Type-checks the UI with `tsconfig.build.json` (strict mode, excludes tests).                                    |
+| 4    | **Secret scan** | Blocks obvious secret patterns (`api_key`, `token`, `private_key`, …) in staged content.                        |
 
 Because Prettier **re-writes and re-stages** files, a commit can require a
 `git add` + retry — that is by design, not a bug.
@@ -280,7 +280,7 @@ pyramid:
 | --------------- | ----------------------------- | ------------------------------------------------------------------------------------------------ | ---------------------------- |
 | **Unit**        | Vitest                        | pure functions, React components, API handlers mocked with `vi.mock()` — no live services, <30 s | every push (+ pre-push hook) |
 | **Integration** | Vitest + **MSW**              | API routes with mocked Neo4j responses; validates request/response shapes                        | every push                   |
-| **E2E**         | Playwright                    | full browser journeys **J001–J260** across 19 spec files                                         | `main` + dispatch            |
+| **E2E**         | Playwright                    | numbered browser journeys (`J001`+) across 35 spec files                                         | `main` + dispatch            |
 | **Compliance**  | custom (DSP TCK / DCP / EHDS) | protocol conformance                                                                             | weekly + protocol changes    |
 
 Conventions (`.claude/rules/testing.md`): unit tests in `ui/__tests__/unit/`
