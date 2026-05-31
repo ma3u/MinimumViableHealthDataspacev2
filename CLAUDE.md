@@ -31,7 +31,7 @@ phase-status summary; they do not grow the index itself.
 cd ui && npm install
 npm run dev            # http://localhost:3000
 npm run build          # production build
-npm run lint           # ESLint — CI threshold: max 55 warnings
+npm run lint           # ESLint (CI lint job runs this; the pre-commit hook enforces --max-warnings 55)
 npx tsc --noEmit       # type-check (uses tsconfig.json)
 npx tsc --noEmit -p tsconfig.build.json  # pre-commit type-check (excludes tests)
 
