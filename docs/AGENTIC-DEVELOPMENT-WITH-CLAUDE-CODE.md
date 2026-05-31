@@ -91,17 +91,25 @@ approval:
 ```jsonc
 {
   "permissions": {
+    // Abridged excerpt — the live .claude/settings.json has ~51 allow entries.
+    // A representative subset of what auto-runs:
     "allow": [
+      "Bash(git diff:*)",
+      "Bash(git status)",
       "Bash(npm test:*)",
       "Bash(npm run build:*)",
-      "Bash(git diff:*)",
-      "Bash(git status:*)",
+      "Bash(npx tsc:*)",
       "Bash(grep:*)",
       "Bash(find:*)",
-      "Bash(npx tsc:*)"
+      "Bash(docker compose ps:*)",
+      "Bash(kubectl get:*)",
+      "Bash(gh pr view:*)"
     ],
-    "deny": [],
-    "ask": []
+    "deny": [
+      "Bash(kubectl delete:*)",
+      "Bash(kubectl drain:*)",
+      "Bash(docker system prune:*)"
+    ]
   }
 }
 ```
