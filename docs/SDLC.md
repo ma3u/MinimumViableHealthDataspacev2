@@ -70,13 +70,13 @@ downstream is deterministic.
 
 ## 3. Plan before you build: Issues, ADRs, and a token-efficient plan
 
-Before any significant change, the workflow (encoded in `CLAUDE.md`) is:
+Before any significant change, the workflow (encoded in [`CLAUDE.md`](https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/CLAUDE.md)) is:
 
 1. **Check existing ADRs.** Architectural decisions live in
    `docs/ADRs/ADR-NNN-slug.md` — **27 ADRs** today (ADR-001 … ADR-027), each a
    short, dated, _Status / Context / Decision / Consequences_ record. You start
    from the ADR index table, then open only the ADR(s) relevant to the task.
-2. **Consult the planning index** at `docs/planning-health-dataspace-v2.md` — a
+2. **Consult the planning index** at [`docs/planning-health-dataspace-v2.md`](https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docs/planning-health-dataspace-v2.md) — a
    slim index (issue table, phase-status summary, ADR index, links). Per-phase
    detail lives in `docs/planning/roadmap-phases-*.md` archives.
 3. **Check GitHub Issues** for related tracking:
@@ -142,12 +142,12 @@ The first deterministic gate runs **on your machine, before a commit is
 created** (`.git/hooks/pre-commit`, `core.hooksPath` → `.git/hooks`). It runs
 fast checks only — the heavy suite runs in CI:
 
-| Step | Tool            | What it does                                                                                                    |
-| ---- | --------------- | --------------------------------------------------------------------------------------------------------------- |
-| 1    | **Prettier**    | Auto-formats staged `*.md`, `*.yaml`, `*.json`, `*.ts(x)`, `*.js(x)` and re-stages them.                        |
-| 2    | **ESLint**      | Lints staged TS/TSX with `--max-warnings 55` — the project's ESLint warning budget (documented in `CLAUDE.md`). |
-| 3    | **tsc**         | Type-checks the UI with `tsconfig.build.json` (strict mode, excludes tests).                                    |
-| 4    | **Secret scan** | Blocks obvious secret patterns (`api_key`, `token`, `private_key`, …) in staged content.                        |
+| Step | Tool            | What it does                                                                                                                                                            |
+| ---- | --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1    | **Prettier**    | Auto-formats staged `*.md`, `*.yaml`, `*.json`, `*.ts(x)`, `*.js(x)` and re-stages them.                                                                                |
+| 2    | **ESLint**      | Lints staged TS/TSX with `--max-warnings 55` — the project's ESLint warning budget (documented in `CLAUDE.md`).                                                         |
+| 3    | **tsc**         | Type-checks the UI with [`tsconfig.build.json`](https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/ui/tsconfig.build.json) (strict mode, excludes tests). |
+| 4    | **Secret scan** | Blocks obvious secret patterns (`api_key`, `token`, `private_key`, …) in staged content.                                                                                |
 
 Because Prettier **re-writes and re-stages** files, a commit can require a
 `git add` + retry — that is by design, not a bug.
@@ -168,24 +168,24 @@ CI is the **authoritative, deterministic gate**. It runs the same way for every
 push and PR, independent of anyone's laptop. The pipeline is split into several
 workflows by purpose.
 
-### 6.1 Test Suite — `.github/workflows/test.yml`
+### 6.1 Test Suite — [`.github/workflows/test.yml`](https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/.github/workflows/test.yml)
 
 Triggers: **push to any branch** and **pull request to `main`** (scoped to
 `ui/**` and `services/neo4j-proxy/**` paths), plus manual dispatch.
 
-| Job                                   | Gate                                            | Runs on                  |
-| ------------------------------------- | ----------------------------------------------- | ------------------------ |
-| **UI Tests (Vitest)**                 | unit + integration + coverage                   | push & PR                |
-| **Neo4j Proxy Tests (Vitest)**        | proxy unit + coverage                           | push & PR                |
-| **Lint (ESLint)**                     | `npm run lint`                                  | push & PR                |
-| **Secret Scan (gitleaks)**            | full-history secret detection — _blocks_        | push & PR                |
-| **Dependency Audit (npm audit)**      | `--audit-level=high` (UI blocks; proxy reports) | push & PR                |
-| **SBOM (CycloneDX)**                  | software bill of materials, spec 1.5            | push & PR                |
-| **Licence Compliance**                | allow-list of OSS licences only                 | push & PR                |
-| **Trivy Security Scan**               | vuln/secret/misconfig → SARIF to Security tab   | push & PR                |
-| **Kubescape K8s Posture**             | NSA (+ CIS) framework scan of `k8s/`            | push & PR                |
-| **Performance Budget (Lighthouse)**   | Core Web Vitals budgets                         | **main / dispatch only** |
-| **E2E (Playwright)** + WCAG + pentest | browser journeys, a11y, OWASP/BSI               | **main / dispatch only** |
+| Job                                   | Gate                                                                                                         | Runs on                  |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------------------ | ------------------------ |
+| **UI Tests (Vitest)**                 | unit + integration + coverage                                                                                | push & PR                |
+| **Neo4j Proxy Tests (Vitest)**        | proxy unit + coverage                                                                                        | push & PR                |
+| **Lint (ESLint)**                     | `npm run lint`                                                                                               | push & PR                |
+| **Secret Scan (gitleaks)**            | full-history secret detection — _blocks_                                                                     | push & PR                |
+| **Dependency Audit (npm audit)**      | `--audit-level=high` (UI blocks; proxy reports)                                                              | push & PR                |
+| **SBOM (CycloneDX)**                  | software bill of materials, spec 1.5                                                                         | push & PR                |
+| **Licence Compliance**                | allow-list of OSS licences only                                                                              | push & PR                |
+| **Trivy Security Scan**               | vuln/secret/misconfig → SARIF to Security tab                                                                | push & PR                |
+| **Kubescape K8s Posture**             | NSA (+ CIS) framework scan of [`k8s/`](https://github.com/ma3u/MinimumViableHealthDataspacev2/tree/main/k8s) | push & PR                |
+| **Performance Budget (Lighthouse)**   | Core Web Vitals budgets                                                                                      | **main / dispatch only** |
+| **E2E (Playwright)** + WCAG + pentest | browser journeys, a11y, OWASP/BSI                                                                            | **main / dispatch only** |
 
 Two deliberate design choices:
 
@@ -210,14 +210,14 @@ _pinned and verified_:
 - After the **March 2026 `trivy-action` supply-chain compromise**
   (CVE-2026-33634), the pipeline explicitly **avoids** `aquasecurity/trivy-action`
   / `setup-trivy` and installs Trivy `0.69.3` (last clean version) directly. The
-  reasoning is documented inline in `test.yml` so the next person — or the next
+  reasoning is documented inline in [`test.yml`](https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/.github/workflows/test.yml) so the next person — or the next
   AI session — does not silently re-introduce the compromised action.
 
 The security/compliance jobs map to recognisable controls: **BSI C5**
 (DEV-05/08, OPS-04), **OWASP** (A06), **EU CRA** Art. 13 (SBOM), and **EHDS**
 Art. 50 / SIMPL-Open.
 
-### 6.3 Protocol Compliance — `.github/workflows/compliance.yml`
+### 6.3 Protocol Compliance — [`.github/workflows/compliance.yml`](https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/.github/workflows/compliance.yml)
 
 Triggers: **push to `main`** (on protocol-relevant paths), **weekly (Mon 06:00
 UTC)**, and manual dispatch. Runs the **DSP 2025-1 TCK**, **DCP v1.0**, and
@@ -225,15 +225,15 @@ UTC)**, and manual dispatch. Runs the **DSP 2025-1 TCK**, **DCP v1.0**, and
 report-heavy and currently `continue-on-error` — the weekly cadence catches
 protocol drift without blocking day-to-day PRs.
 
-### 6.4 GitHub Pages (static demo) — `.github/workflows/pages.yml`
+### 6.4 GitHub Pages (static demo) — [`.github/workflows/pages.yml`](https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/.github/workflows/pages.yml)
 
 Triggers: **push to `main`**. This is the public demo deploy and a nice example
 of an end-to-end deterministic build:
 
 1. Spin up a **Neo4j 5** service container and **seed** it from
-   `neo4j/init-schema.cypher` + `insert-synthetic-schema-data.cypher`.
+   [`neo4j/init-schema.cypher`](https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/neo4j/init-schema.cypher) + [`insert-synthetic-schema-data.cypher`](https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/neo4j/insert-synthetic-schema-data.cypher).
 2. Build the Next.js app, **refresh the mock JSON fixtures** from the live API
-   (`scripts/refresh-mocks.sh`) so the static fixtures match the real shapes.
+   ([`scripts/refresh-mocks.sh`](https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/scripts/refresh-mocks.sh)) so the static fixtures match the real shapes.
 3. Run Vitest + Playwright + WCAG + pentest (report-only).
 4. **Disable API routes** (`mv src/app/api …`) and build the **static export**
    (`NEXT_PUBLIC_STATIC_EXPORT=true`).
@@ -243,9 +243,9 @@ of an end-to-end deterministic build:
 > pages fall back to `ui/public/mock/*.json`. Mock fixtures must match the live
 > API response shape exactly; CI regenerates them so they cannot drift.
 
-### 6.5 Release — `.github/workflows/release.yml`
+### 6.5 Release — [`.github/workflows/release.yml`](https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/.github/workflows/release.yml)
 
-Triggers: **push to `main` that changes `ui/package.json`**. It resolves the
+Triggers: **push to `main` that changes [`ui/package.json`](https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/ui/package.json)**. It resolves the
 version, creates the `vX.Y.Z` tag if missing, **composes release notes from the
 commit log since the previous tag**, and publishes a **GitHub Release**. It is
 idempotent (skips if the release already exists) — built specifically to stop the
@@ -287,10 +287,10 @@ pyramid:
 | **E2E**         | Playwright                    | numbered browser journeys (`J001`+) across 35 spec files                                         | `main` + dispatch            |
 | **Compliance**  | custom (DSP TCK / DCP / EHDS) | protocol conformance                                                                             | weekly + protocol changes    |
 
-Conventions (`.claude/rules/testing.md`): unit tests in `ui/__tests__/unit/`
-mirror `ui/src/`; E2E specs in `ui/__tests__/e2e/journeys/NN-*.spec.ts`; tests
+Conventions ([`.claude/rules/testing.md`](https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/.claude/rules/testing.md)): unit tests in [`ui/__tests__/unit/`](https://github.com/ma3u/MinimumViableHealthDataspacev2/tree/main/ui/__tests__/unit)
+mirror [`ui/src/`](https://github.com/ma3u/MinimumViableHealthDataspacev2/tree/main/ui/src); E2E specs in `ui/__tests__/e2e/journeys/NN-*.spec.ts`; tests
 assert on visible text / aria-labels / `data-testid`, never CSS classes; do not
-mock the Neo4j driver — use the JSON fixtures under `ui/public/mock/`.
+mock the Neo4j driver — use the JSON fixtures under [`ui/public/mock/`](https://github.com/ma3u/MinimumViableHealthDataspacev2/tree/main/ui/public/mock).
 
 > Coverage is **collected and published** on every run but **thresholds are not
 > yet enforced** (aim: critical-path coverage). Enforcing minimums is an outlook
@@ -300,12 +300,12 @@ mock the Neo4j driver — use the JSON fixtures under `ui/public/mock/`.
 
 ## 9. Environments
 
-| Environment              | How                                                                                                                     | Purpose                      |
-| ------------------------ | ----------------------------------------------------------------------------------------------------------------------- | ---------------------------- |
-| **Local (minimal)**      | `docker compose up -d` (Neo4j + UI)                                                                                     | day-to-day dev               |
-| **Local (full JAD)**     | `docker compose -f docker-compose.yml -f docker-compose.jad.yml up -d` + `./jad/seed-all.sh` (phases 1–7, strict order) | full 19-service stack        |
-| **GitHub Pages**         | `pages.yml` static export                                                                                               | public, zero-backend demo    |
-| **Azure Container Apps** | `deploy-azure.yml` + ops workflows                                                                                      | live demo with real services |
+| Environment              | How                                                                                                                                                                                                         | Purpose                      |
+| ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------- |
+| **Local (minimal)**      | `docker compose up -d` (Neo4j + UI)                                                                                                                                                                         | day-to-day dev               |
+| **Local (full JAD)**     | `docker compose -f docker-compose.yml -f docker-compose.jad.yml up -d` + [`./jad/seed-all.sh`](https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/jad/seed-all.sh) (phases 1–7, strict order) | full 19-service stack        |
+| **GitHub Pages**         | [`pages.yml`](https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/.github/workflows/pages.yml) static export                                                                                   | public, zero-backend demo    |
+| **Azure Container Apps** | [`deploy-azure.yml`](https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/.github/workflows/deploy-azure.yml) + ops workflows                                                                   | live demo with real services |
 
 ---
 
@@ -390,7 +390,7 @@ Development with Claude Code](./AGENTIC-DEVELOPMENT-WITH-CLAUDE-CODE.md#8-the-hu
 
 - `CLAUDE.md` — the project's operating manual (build commands, architecture,
   conventions, gotchas).
-- `.claude/rules/` — `code-style.md`, `testing.md`, `api-conventions.md`.
+- [`.claude/rules/`](https://github.com/ma3u/MinimumViableHealthDataspacev2/tree/main/.claude/rules) — [`code-style.md`](https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/.claude/rules/code-style.md), [`testing.md`](https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/.claude/rules/testing.md), [`api-conventions.md`](https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/.claude/rules/api-conventions.md).
 - [ADR-008 — Testing Strategy](./ADRs/ADR-008-testing-strategy.md)
 - [ADR-026 — Token-Efficient Planning & ADR Structure](./ADRs/ADR-026-token-efficient-planning-structure.md)
 - `docs/planning-health-dataspace-v2.md` — the slim planning index.

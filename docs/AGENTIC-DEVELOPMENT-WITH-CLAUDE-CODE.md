@@ -64,22 +64,22 @@ subject of this document.
 
 ---
 
-## 3. Anatomy of the `.claude/` folder
+## 3. Anatomy of the [`.claude/`](https://github.com/ma3u/MinimumViableHealthDataspacev2/tree/main/.claude) folder
 
 Everything that constrains and configures the agent is **checked into the repo**,
 so it is versioned, reviewable, and identical for every session and every
 contributor.
 
-| Path                               | Role                                                                                                                                                                                                                                         |
-| ---------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `CLAUDE.md` (repo root)            | The operating manual the agent reads **every session**: build commands, the 5-layer architecture, key directories, coding conventions, and the **Top Gotchas** (the traps that waste an hour if you don't know them). Kept short on purpose. |
-| `.claude/settings.json`            | **Permission allow-list** — which tool calls run without asking (see §4).                                                                                                                                                                    |
-| `.claude/rules/code-style.md`      | TypeScript/Next.js + Cypher + Bash + Prettier conventions, scoped to source paths.                                                                                                                                                           |
-| `.claude/rules/testing.md`         | Test frameworks, locations, commands, what _not_ to mock.                                                                                                                                                                                    |
-| `.claude/rules/api-conventions.md` | Protocols (DSP/DCP/FHIR/OMOP/EHDS/GDPR), data models, route patterns, role/access matrix, mock-fixture mapping.                                                                                                                              |
-| `.claude/commands/*.md`            | **Slash commands** — repeatable, parameterised prompts (§5).                                                                                                                                                                                 |
-| `.claude/agents/*.md`              | **Specialist sub-agents** — scoped, read-only experts (§6).                                                                                                                                                                                  |
-| `.claude/skills/SKILL.md`          | A domain **skill** pack auto-triggered by task type.                                                                                                                                                                                         |
+| Path                                                                                                                                    | Role                                                                                                                                                                                                                                         |
+| --------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [`CLAUDE.md`](https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/CLAUDE.md) (repo root)                                   | The operating manual the agent reads **every session**: build commands, the 5-layer architecture, key directories, coding conventions, and the **Top Gotchas** (the traps that waste an hour if you don't know them). Kept short on purpose. |
+| [`.claude/settings.json`](https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/.claude/settings.json)                       | **Permission allow-list** — which tool calls run without asking (see §4).                                                                                                                                                                    |
+| [`.claude/rules/code-style.md`](https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/.claude/rules/code-style.md)           | TypeScript/Next.js + Cypher + Bash + Prettier conventions, scoped to source paths.                                                                                                                                                           |
+| [`.claude/rules/testing.md`](https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/.claude/rules/testing.md)                 | Test frameworks, locations, commands, what _not_ to mock.                                                                                                                                                                                    |
+| [`.claude/rules/api-conventions.md`](https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/.claude/rules/api-conventions.md) | Protocols (DSP/DCP/FHIR/OMOP/EHDS/GDPR), data models, route patterns, role/access matrix, mock-fixture mapping.                                                                                                                              |
+| `.claude/commands/*.md`                                                                                                                 | **Slash commands** — repeatable, parameterised prompts (§5).                                                                                                                                                                                 |
+| `.claude/agents/*.md`                                                                                                                   | **Specialist sub-agents** — scoped, read-only experts (§6).                                                                                                                                                                                  |
+| [`.claude/skills/SKILL.md`](https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/.claude/skills/SKILL.md)                   | A domain **skill** pack auto-triggered by task type.                                                                                                                                                                                         |
 
 Because this lives in git, improving the agent is a normal PR: change a rule,
 review the diff, merge. The agent's behaviour is **configuration, not folklore**.
@@ -145,7 +145,7 @@ longer depends on how I phrased it that day.
 ## 6. Specialist sub-agents (scoped, read-only experts)
 
 For deep reasoning in one domain, the project ships **specialist sub-agents**
-under `.claude/agents/`. Each is deliberately constrained:
+under [`.claude/agents/`](https://github.com/ma3u/MinimumViableHealthDataspacev2/tree/main/.claude/agents). Each is deliberately constrained:
 
 | Agent                   | When to use it                                                                                                        | Model  | Tools                                |
 | ----------------------- | --------------------------------------------------------------------------------------------------------------------- | ------ | ------------------------------------ |
@@ -255,15 +255,15 @@ repo_ and generate a complete `.claude/` folder:
 
 1. **`CLAUDE.md`** — concise: build commands, architecture, key dirs,
    conventions, top project-specific gotchas.
-2. **`settings.json`** — allow safe ops (build/test/git-read/grep/find), require
+2. **[`settings.json`](https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/.claude/settings.json)** — allow safe ops (build/test/git-read/grep/find), require
    approval for destructive actions.
-3. **`code-style.md`** — conventions extracted from the _actual_ codebase.
-4. **`testing.md`** — real test frameworks, commands, standards.
-5. **`api-conventions.md`** — protocols, data models, API patterns.
-6. **`review.md`** — a code-review command using `git diff` injection.
-7. **`fix-issue.md`** — an Issue-investigation workflow with `gh` CLI.
-8. **`deploy-check.md`** — pre-deploy validation using the real build command.
-9. **`SKILL.md`** — domain skill packs, auto-triggered by task type.
+3. **[`code-style.md`](https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/.claude/rules/code-style.md)** — conventions extracted from the _actual_ codebase.
+4. **[`testing.md`](https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/.claude/rules/testing.md)** — real test frameworks, commands, standards.
+5. **[`api-conventions.md`](https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/.claude/rules/api-conventions.md)** — protocols, data models, API patterns.
+6. **[`review.md`](https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/.claude/commands/review.md)** — a code-review command using `git diff` injection.
+7. **[`fix-issue.md`](https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/.claude/commands/fix-issue.md)** — an Issue-investigation workflow with `gh` CLI.
+8. **[`deploy-check.md`](https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/.claude/commands/deploy-check.md)** — pre-deploy validation using the real build command.
+9. **[`SKILL.md`](https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/.claude/skills/SKILL.md)** — domain skill packs, auto-triggered by task type.
 10. **`agents/`** — specialist read-only agents (architect, compliance, tester,
     security) on Sonnet.
 
