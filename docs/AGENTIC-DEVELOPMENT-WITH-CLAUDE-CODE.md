@@ -13,6 +13,20 @@
 > 🟢 **Not a software engineer?** Read the plain-language version first:
 > **[How We Use AI to Help Build This](./AGENTIC-AI-explained.md)**.
 
+<details>
+<summary><b>Acronyms used in this document</b> (click to expand)</summary>
+
+| Acronym   | Expansion                                                                                                                                  |
+| --------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| **LLM**   | Large Language Model — the kind of AI behind Claude Code; non-deterministic by nature                                                      |
+| **CI/CD** | Continuous Integration / Continuous Delivery — the automated build-test-publish gate (see [SDLC §6](./SDLC.md#6-ci-gates--github-actions)) |
+| **PR**    | Pull Request — a proposed change, reviewed before it is merged                                                                             |
+| **ADR**   | Architecture Decision Record — a short written note capturing a decision and its reason                                                    |
+| **RBAC**  | Role-Based Access Control — granting permissions by user role                                                                              |
+| **MCP**   | Model Context Protocol — a standard way for AI tools to connect to live data sources                                                       |
+
+</details>
+
 ---
 
 ## 1. The thesis: wrap a non-deterministic author in a deterministic harness
