@@ -1,14 +1,17 @@
 # Deterministic Agentic AI Development with Claude Code
 
-* **Project:** Minimum Viable Health Dataspace v2 (EHDS reference implementation)
-* **Audience:** anyone asking _"how do you actually use Agentic AI for programming
-without it going off the rails?"_
-* **Last updated:** 2026-05-31 ·
-* **Maintainer:** Matthias (`@ma3u`)
+- **Project:** Minimum Viable Health Dataspace v2 (EHDS reference implementation)
+- **Audience:** anyone asking _"how do you actually use Agentic AI for programming
+  without it going off the rails?"_
+- **Last updated:** 2026-05-31 ·
+- **Maintainer:** Matthias (`@ma3u`)
 
 > Companion document: **[Software Development Life Cycle
 > (SDLC)](./SDLC.md)** — the deterministic gates this AI author has to pass
 > through, same as any human contributor.
+
+> 🟢 **Not a software engineer?** Read the plain-language version first:
+> **[How We Use AI to Help Build This](./AGENTIC-AI-explained.md)**.
 
 ---
 

@@ -1,14 +1,17 @@
 # Software Development Life Cycle (SDLC)
 
-* **Project:** Minimum Viable Health Dataspace v2 (EHDS reference implementation)
-* **Audience:** contributors, reviewers, and anyone curious how a one-person,
-AI-assisted project keeps a regulated-domain codebase shippable.
-* **Last updated:** 2026-05-31
-* **Maintainer:** Matthias (`@ma3u`)
+- **Project:** Minimum Viable Health Dataspace v2 (EHDS reference implementation)
+- **Audience:** contributors, reviewers, and anyone curious how a one-person,
+  AI-assisted project keeps a regulated-domain codebase shippable.
+- **Last updated:** 2026-05-31
+- **Maintainer:** Matthias (`@ma3u`)
 
 > Companion document: **[Deterministic Agentic AI Development with Claude
 > Code](./AGENTIC-DEVELOPMENT-WITH-CLAUDE-CODE.md)** — how the AI author plugs
 > into the lifecycle described here.
+
+> 🟢 **Not a software engineer?** Read the plain-language version first:
+> **[How We Build This Software](./SDLC-explained.md)**.
 
 ---
 
