@@ -1,0 +1,11 @@
+{
+  "name": "oid4vc-es256",
+  "providerId": "ecdsa-generated",
+  "providerType": "org.keycloak.keys.KeyProvider",
+  "config": {
+    "priority": ["100"],
+    "enabled": ["true"],
+    "active": ["true"],
+    "ecdsaEllipticCurveKey": ["P-256"]
+  }
+}
