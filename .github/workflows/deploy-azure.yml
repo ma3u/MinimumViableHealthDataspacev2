@@ -69,7 +69,7 @@ jobs:
             --image ${{ env.ACR_LOGIN_SERVER }}/mvhd-ui:${{ github.sha }} \
             --set-env-vars \
               "DEPLOYMENT_TARGET=azure" \
-              "EUDI_VERIFIER_BASE_URL=https://verifier.eudiw.dev" \
+              "EUDI_VERIFIER_BASE_URL=https://verifier-backend.eudiw.dev" \
               "EUDI_VERIFIER_SCHEME=openid4vp://" \
               "EUDI_VERIFIER_PROFILE=openid4vp" \
               "EUDI_PID_DOCTYPE=eu.europa.ec.eudi.pid.1" \
