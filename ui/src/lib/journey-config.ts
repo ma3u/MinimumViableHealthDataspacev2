@@ -83,3 +83,72 @@ export const donationSources: DataSource[] = [
     screenshot: DEMO_TK ? `${BASE_PATH}/journey/bloodtest-labs.png` : null,
   },
 ];
+
+/** A single metric shown on a personal-health card. */
+export interface HealthMetric {
+  label: string;
+  value: string;
+}
+
+/** A personal-health data source displayed on the /patient record. */
+export interface PersonalHealthSource {
+  id: "fitness" | "labs" | "nutrition";
+  /** generic, build-agnostic title */
+  title: string;
+  /** the source/app (real name only under DEMO_TK) */
+  source: string;
+  /** brand / graph-layer accent colour */
+  brand: string;
+  /** git-ignored personal screenshot under DEMO_TK, else null */
+  screenshot: string | null;
+  /** illustrative, synthetic metrics */
+  metrics: HealthMetric[];
+}
+
+/**
+ * The patient's own health data shown on /patient. Under NEXT_PUBLIC_DEMO_TK the
+ * fitness/labs cards name the real apps and show the git-ignored screenshots
+ * (Whoop HealthGraph, Blood Test Oracle); the public default keeps generic,
+ * fictional source labels and no images. Metric values are synthetic.
+ */
+export const personalHealth: PersonalHealthSource[] = [
+  {
+    id: "fitness",
+    title: "Fitness & recovery",
+    source: DEMO_TK ? "Whoop · HealthGraph" : "Fitness tracker",
+    brand: "#CA6F1E",
+    screenshot: DEMO_TK ? `${BASE_PATH}/journey/whoop-fitness.png` : null,
+    metrics: [
+      { label: "Recovery", value: "62%" },
+      { label: "Resting HR", value: "54 bpm" },
+      { label: "HRV", value: "48 ms" },
+      { label: "Sleep", value: "7.0 h" },
+    ],
+  },
+  {
+    id: "labs",
+    title: "Lab results",
+    source: DEMO_TK ? "Blood Test Oracle" : "Lab panel",
+    brand: "#7D3C98",
+    screenshot: DEMO_TK ? `${BASE_PATH}/journey/bloodtest-labs.png` : null,
+    metrics: [
+      { label: "Ferritin", value: "112 ng/ml" },
+      { label: "Vitamin D", value: "48 ng/ml" },
+      { label: "CRP", value: "0.8 mg/l" },
+      { label: "Omega-3", value: "9.2 %" },
+    ],
+  },
+  {
+    id: "nutrition",
+    title: "Nutrition plan",
+    source: "Mediterranean plan",
+    brand: "#1E8449",
+    screenshot: null,
+    metrics: [
+      { label: "Calories", value: "2,050/d" },
+      { label: "Protein", value: "95 g/d" },
+      { label: "Fibre", value: "34 g/d" },
+      { label: "Adherence", value: "86 %" },
+    ],
+  },
+];

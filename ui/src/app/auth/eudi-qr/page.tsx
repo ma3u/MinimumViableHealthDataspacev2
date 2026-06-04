@@ -1,7 +1,7 @@
 "use client";
 
 import { signIn } from "next-auth/react";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import {
   ShieldCheck,
@@ -11,8 +11,9 @@ import {
 } from "lucide-react";
 import { WalletFlow } from "@/components/wallet/PhoneFrame";
 import { REGISTER_STEPS, LOGIN_STEPS } from "@/components/wallet/flows";
+import { EudiApprovalFlow } from "@/components/wallet/EudiApprovalFlow";
+import { setDemoPersona } from "@/lib/use-demo-persona";
 
-const IS_STATIC = process.env.NEXT_PUBLIC_STATIC_EXPORT === "true";
 const POLL_MS = 2000;
 const TIMEOUT_MS = 5 * 60 * 1000;
 
@@ -25,8 +26,12 @@ type Phase =
   | "unavailable";
 
 function EudiQrContent() {
+  // Read at render-time (not module load) so it is deterministic in tests and
+  // immune to test-ordering env pollution; NEXT_PUBLIC_* is build-inlined anyway.
+  const IS_STATIC = process.env.NEXT_PUBLIC_STATIC_EXPORT === "true";
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get("callbackUrl") || "/patient/profile";
+  const router = useRouter();
+  const callbackUrl = searchParams.get("callbackUrl") || "/patient";
   const mode = searchParams.get("mode") === "login" ? "login" : "register";
 
   const [phase, setPhase] = useState<Phase>(
@@ -62,7 +67,7 @@ function EudiQrContent() {
     } catch {
       setPhase("error");
     }
-  }, []);
+  }, [IS_STATIC]);
 
   useEffect(() => {
     start();
@@ -101,6 +106,53 @@ function EudiQrContent() {
       clearInterval(id);
     };
   }, [phase, callbackUrl]);
+
+  // Static export / demo: no live verifier backend, so drive an interactive
+  // QR + wallet-approval simulation; on approval, sign in as the demo patient
+  // and forward to their personal health record (the "EHR page").
+  if (IS_STATIC) {
+    const onComplete = () => {
+      setDemoPersona("patient1");
+      try {
+        localStorage.setItem("demo-persona", "patient1");
+      } catch {
+        /* storage unavailable — non-fatal for the visual demo */
+      }
+      router.push(callbackUrl);
+    };
+    return (
+      <div className="min-h-[60vh] flex flex-col items-center justify-center gap-6 py-10 px-4">
+        <div className="text-center max-w-md">
+          <ShieldCheck
+            size={40}
+            className="mx-auto mb-2 text-blue-800 dark:text-blue-300"
+          />
+          <h1 className="text-2xl font-bold text-[var(--text-primary)] mb-1">
+            {mode === "login" ? "Sign in" : "Register"} with your EUDI Wallet
+          </h1>
+          <p className="text-[var(--text-secondary)] text-sm">
+            Scan the QR with your EU Digital Identity Wallet, or approve on the
+            simulated phone (OpenID4VP).
+            <br />
+            <span className="text-xs">
+              Synthetic demo · maps to a demo patient
+            </span>
+          </p>
+        </div>
+        <EudiApprovalFlow
+          mode={mode}
+          onComplete={onComplete}
+          onCancel={() => router.push("/")}
+        />
+        <a
+          href="/auth/signin"
+          className="text-xs text-[var(--text-secondary)] hover:text-[var(--accent)] underline"
+        >
+          ← Back to other sign-in options
+        </a>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-[60vh] flex flex-col items-center justify-center gap-6 py-10 px-4">

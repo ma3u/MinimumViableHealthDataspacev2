@@ -18,6 +18,8 @@ export interface WalletStep {
   ms: number;
   /** progress-bar + button-ring accent (default EUDI purple) */
   accent?: string;
+  /** in interactive mode, auto-advance this (transitional) step after `ms` — e.g. a spinner */
+  auto?: boolean;
 }
 
 export interface BrandChip {
@@ -40,19 +42,59 @@ function StatusBar() {
   );
 }
 
-function Buttons({ primary, accent }: { primary: string; accent: string }) {
+function Buttons({
+  primary,
+  accent,
+  interactive = false,
+  atEnd = false,
+  onPrimary,
+  onCancel,
+}: {
+  primary: string;
+  accent: string;
+  interactive?: boolean;
+  atEnd?: boolean;
+  onPrimary?: () => void;
+  onCancel?: () => void;
+}) {
+  // Presentation mode: decorative, non-clickable (unchanged).
+  if (!interactive) {
+    return (
+      <div className="flex gap-2 px-3 pb-3 pt-2">
+        <div className="flex-1 text-center rounded-xl bg-gray-100 text-gray-600 text-sm font-semibold py-2.5">
+          Stop
+        </div>
+        <div className="flex-1 text-center rounded-xl bg-gray-900 text-white text-sm font-semibold py-2.5 relative">
+          {primary}
+          <span
+            className="absolute inset-0 rounded-xl animate-ping"
+            style={{ border: `2px solid ${accent}99` }}
+          />
+        </div>
+      </div>
+    );
+  }
+  // Interactive mode: the user drives the approval with real buttons.
   return (
     <div className="flex gap-2 px-3 pb-3 pt-2">
-      <div className="flex-1 text-center rounded-xl bg-gray-100 text-gray-600 text-sm font-semibold py-2.5">
-        Stop
-      </div>
-      <div className="flex-1 text-center rounded-xl bg-gray-900 text-white text-sm font-semibold py-2.5 relative">
+      <button
+        type="button"
+        onClick={onCancel}
+        className="flex-1 rounded-xl bg-gray-100 text-gray-600 text-sm font-semibold py-2.5 hover:bg-gray-200 transition-colors"
+      >
+        {atEnd ? "Close" : "Cancel"}
+      </button>
+      <button
+        type="button"
+        onClick={onPrimary}
+        className="flex-1 rounded-xl bg-gray-900 text-white text-sm font-semibold py-2.5 relative hover:bg-black transition-colors active:scale-95"
+      >
         {primary}
         <span
-          className="absolute inset-0 rounded-xl animate-ping"
+          className="absolute inset-0 rounded-xl animate-ping pointer-events-none"
           style={{ border: `2px solid ${accent}99` }}
         />
-      </div>
+      </button>
     </div>
   );
 }
@@ -62,23 +104,38 @@ export function WalletFlow({
   loop = true,
   ariaLabel,
   brand,
+  interactive = false,
+  onComplete,
+  onCancel,
 }: {
   steps: WalletStep[];
   loop?: boolean;
   ariaLabel?: string;
   brand?: BrandChip;
+  /** when true, the user advances each step via the primary button; the last
+   *  step's button fires onComplete. Steps flagged `auto` still self-advance. */
+  interactive?: boolean;
+  onComplete?: () => void;
+  onCancel?: () => void;
 }) {
   const [step, setStep] = useState(0);
+  const atEnd = step >= steps.length - 1;
 
   useEffect(() => {
-    const atEnd = step >= steps.length - 1;
+    // Interactive steps wait for a click, except transitional `auto` steps.
+    if (interactive && !steps[step].auto) return;
     if (atEnd && !loop) return;
     const t = setTimeout(
       () => setStep((s) => (s + 1) % steps.length),
       steps[step].ms,
     );
     return () => clearTimeout(t);
-  }, [step, steps, loop]);
+  }, [step, steps, loop, interactive, atEnd]);
+
+  const onPrimary = () => {
+    if (atEnd) onComplete?.();
+    else setStep((s) => s + 1);
+  };
 
   const accent = steps[step].accent ?? brand?.color ?? DEFAULT_ACCENT;
 
@@ -123,7 +180,14 @@ export function WalletFlow({
         {steps[step].body}
       </div>
 
-      <Buttons primary={steps[step].primary} accent={accent} />
+      <Buttons
+        primary={steps[step].primary}
+        accent={accent}
+        interactive={interactive}
+        atEnd={atEnd}
+        onPrimary={onPrimary}
+        onCancel={onCancel}
+      />
     </div>
   );
 }
