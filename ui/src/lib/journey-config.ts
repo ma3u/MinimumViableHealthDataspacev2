@@ -39,3 +39,47 @@ export const insurer: Insurer = DEMO_TK
       brand: "#148F77",
       screenshot: null,
     };
+
+/** One real data source the patient contributes on the donate slide. */
+export interface DataSource {
+  /** stable id → icon mapping in the slide */
+  id: "ehr" | "fitness" | "labs";
+  /** short brand/source label (real app name only under DEMO_TK) */
+  label: string;
+  /** the data it carries */
+  sublabel: string;
+  /** brand / graph-layer accent colour */
+  brand: string;
+  /** path to the (git-ignored) real screenshot, or null in the fictional default */
+  screenshot: string | null;
+}
+
+/**
+ * The three real sources Maria donates: her insurer ePA, her fitness tracker,
+ * and her lab panel. Under NEXT_PUBLIC_DEMO_TK these show real app names and the
+ * git-ignored personal screenshots (TK ePA, Whoop HealthGraph, Blood Test
+ * Oracle); the public default keeps generic, fictional labels and no images.
+ */
+export const donationSources: DataSource[] = [
+  {
+    id: "ehr",
+    label: `${insurer.short} · ePA`,
+    sublabel: "Diagnoses · medications",
+    brand: insurer.brand,
+    screenshot: insurer.screenshot,
+  },
+  {
+    id: "fitness",
+    label: DEMO_TK ? "Whoop · HealthGraph" : "Fitness tracker",
+    sublabel: "Recovery · resting HR · HRV",
+    brand: "#CA6F1E",
+    screenshot: DEMO_TK ? `${BASE_PATH}/journey/whoop-fitness.png` : null,
+  },
+  {
+    id: "labs",
+    label: DEMO_TK ? "Blood Test Oracle" : "Lab results",
+    sublabel: "Ferritin · B12 · CRP · omega-3",
+    brand: "#7D3C98",
+    screenshot: DEMO_TK ? `${BASE_PATH}/journey/bloodtest-labs.png` : null,
+  },
+];
