@@ -13,6 +13,7 @@
  */
 
 import { useCallback, useEffect, useState } from "react";
+import { WalletSimulation } from "@/components/WalletSimulation";
 import {
   type LucideIcon,
   ScanLine,
@@ -25,7 +26,6 @@ import {
   Wind,
   Salad,
   Database,
-  Fingerprint,
 } from "lucide-react";
 
 /** Per-step accent (matches the 5-layer graph palette). */
@@ -121,70 +121,39 @@ function SlideIntro() {
 /** ── Slide 1 — register via QR + EUDI Wallet ─────────────────────────────── */
 function SlideRegister() {
   return (
-    <div className="grid md:grid-cols-2 gap-8 items-center max-w-5xl mx-auto w-full">
-      <Reveal delay={140} className="flex flex-col items-center">
-        <div className="bg-white rounded-2xl p-4 shadow-lg">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={`${BASE_PATH}/journey/qr-register.png`}
-            alt="QR code to register with your EUDI Wallet"
-            width={260}
-            height={260}
-            className="block w-[clamp(180px,32vw,260px)] h-auto"
-          />
-        </div>
-        <p className="mt-4 flex items-center gap-2 text-sm font-semibold text-[var(--text-primary)]">
-          <ScanLine size={18} style={{ color: ACCENTS[0] }} />
-          Scan to authenticate with your digital identity
-        </p>
-        <p className="text-xs text-[var(--text-secondary)] mt-1">
-          Live flow → ehds.mabu.red/auth/eudi-qr
+    <div className="max-w-5xl mx-auto w-full">
+      <Reveal>
+        <h2 className="font-extrabold text-[clamp(1.4rem,3.2vw,2.1rem)] leading-tight text-[var(--text-primary)] mb-1 text-center">
+          Register with your EUDI Wallet — no password
+        </h2>
+      </Reveal>
+      <Reveal delay={120}>
+        <p className="text-center text-sm text-[var(--text-secondary)] mb-5">
+          Scan → approve on your phone → signed in · OpenID4VP · eIDAS 2.0
         </p>
       </Reveal>
-
-      <div>
-        <Reveal>
-          <h2 className="font-extrabold text-[clamp(1.5rem,3.4vw,2.3rem)] leading-tight text-[var(--text-primary)] mb-4">
-            Register with your EUDI Wallet
-          </h2>
-        </Reveal>
-        <Reveal delay={220}>
-          <ol className="space-y-3">
-            {(
-              [
-                { t: "Maria scans the QR on the portal", Icon: Fingerprint },
-                {
-                  t: "Her EUDI Wallet (Sandbox) authenticates her",
-                  Icon: ShieldCheck,
-                },
-                {
-                  t: "The wallet returns her PID — name + pseudonym",
-                  Icon: ScanLine,
-                },
-                {
-                  t: "She is registered at ehds.mabu.red — no password",
-                  Icon: ArrowRight,
-                },
-              ] as { t: string; Icon: LucideIcon }[]
-            ).map(({ t, Icon }, i) => (
-              <li key={i} className="flex items-start gap-3">
-                <span
-                  className="grid place-items-center w-7 h-7 rounded-lg text-white shrink-0"
-                  style={{ background: ACCENTS[0] }}
-                >
-                  <Icon size={16} />
-                </span>
-                <span className="text-[clamp(0.95rem,1.9vw,1.15rem)] text-[var(--text-primary)] pt-0.5">
-                  {t}
-                </span>
-              </li>
-            ))}
-          </ol>
-        </Reveal>
-        <Reveal delay={380}>
-          <p className="mt-5 text-sm text-[var(--text-secondary)]">
-            OpenID4VP · eIDAS 2.0 · self-sovereign — no central account.
+      <div className="grid md:grid-cols-2 gap-8 items-center justify-items-center">
+        <Reveal delay={200} className="flex flex-col items-center">
+          <div className="bg-white rounded-2xl p-4 shadow-lg">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={`${BASE_PATH}/journey/qr-register.png`}
+              alt="QR code to register with your EUDI Wallet"
+              width={230}
+              height={230}
+              className="block w-[clamp(150px,24vw,230px)] h-auto"
+            />
+          </div>
+          <p className="mt-3 flex items-center gap-2 text-sm font-semibold text-[var(--text-primary)]">
+            <ScanLine size={18} style={{ color: ACCENTS[0] }} />
+            Scan with your EUDI Wallet
           </p>
+          <p className="text-xs text-[var(--text-secondary)] mt-1">
+            Live flow → ehds.mabu.red/auth/eudi-qr
+          </p>
+        </Reveal>
+        <Reveal delay={340} className="flex justify-center">
+          <WalletSimulation />
         </Reveal>
       </div>
     </div>
