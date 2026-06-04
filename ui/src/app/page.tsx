@@ -17,7 +17,7 @@ import {
   Workflow,
   ScanLine,
   ArrowRight,
-  Smartphone,
+  Info,
 } from "lucide-react";
 import { DemoPersonaCards } from "@/components/DemoPersonaCards";
 import { PersonaJourneyCards } from "@/components/PersonaJourneyCards";
@@ -110,7 +110,7 @@ export default function Home() {
           </span>
         </div>
 
-        {/* ── Live-demo CTA: the patient journey ── */}
+        {/* ── Register with the EUDI Wallet (passwordless) ── */}
         <div className="mt-7 flex flex-wrap items-center gap-x-5 gap-y-3">
           <Link
             href="/journey"
@@ -118,23 +118,27 @@ export default function Home() {
             style={{ background: "linear-gradient(135deg,#7D3C98,#2471A3)" }}
           >
             <ScanLine size={20} aria-hidden="true" />
-            Register &amp; start the patient journey
+            Register with EUDI Wallet
             <ArrowRight
               size={18}
               aria-hidden="true"
               className="group-hover:translate-x-1 transition-transform"
             />
           </Link>
-          <a
-            href="https://ehds.mabu.red/auth/eudi-qr"
-            target="_blank"
-            rel="noopener noreferrer"
+          <Link
+            href="/journey"
+            title="Passwordless & sovereign — no email or password. You approve on your phone and share only the exact claims requested. Tap to see the full patient journey."
             className="inline-flex items-center gap-1.5 text-sm font-medium text-[var(--accent)] hover:underline"
           >
-            <Smartphone size={15} aria-hidden="true" /> or do the live EUDI
-            Wallet login
-            <ExternalLink size={12} aria-hidden="true" />
-          </a>
+            <Info size={15} aria-hidden="true" />
+            Why we need EUDI Wallet for the patient journey
+          </Link>
+          <Link
+            href="/auth/eudi-qr?mode=login"
+            className="inline-flex items-center gap-1.5 text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--accent)] transition-colors"
+          >
+            Already have it? Sign in <ArrowRight size={14} aria-hidden="true" />
+          </Link>
         </div>
       </section>
 
