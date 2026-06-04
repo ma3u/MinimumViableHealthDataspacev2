@@ -18,6 +18,7 @@ Planning and implementation are tracked in [GitHub Issues](https://github.com/ma
 | [#11](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/11) | Weekly Demo Reset — start-of-week baseline refresh                            | 🔓 Open   | [ADR-014](ADRs/ADR-014-weekly-demo-reset.md)                                            |
 | [#22](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/22) | DCP BusinessWallet + EUDI Wallet Sandbox — hybrid credential stack (Option B) | 🔓 Open   | Phase 27a–h + planned ADR-022 (Option A vs B vs C vs hybrid)                            |
 | [#24](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/24) | GesundheitsID OIDC RP via gematik open-source stack (Option C)                | 🔓 Open   | Phase 27i + planned ADR-022                                                             |
+| [#80](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/80) | EUDI wallet flows — register, returning-login, TK ePA transfer                | 🔓 Open   | [Plan](planning/eudi-wallet-flows-2026.md)                                              |
 
 ## Planning Documents
 
@@ -31,6 +32,7 @@ navigation; open an archive only when you need the detail of a specific phase.
 | [Roadmap — Phases 11-20](planning/roadmap-phases-11-20.md)                          | EDC component topology, API fixes, operational hardening, E2E testing, mock fallback, HealthDCAT-AP editor, 50 journey tests, Trust Center, role-aware UI, patient portal |
 | [Roadmap — Phases 21-24](planning/roadmap-phases-21-24.md)                          | Graph UX & risk scoring, static demo personas, design-system alignment, ODRL policy enforcement & GraphRAG, Phase 24 test plan                                            |
 | [Cross-Cutting Concerns & Architecture](planning/cross-cutting-and-architecture.md) | Cross-cutting concerns, target architecture, what the demo proves, implementation dependencies                                                                            |
+| [EUDI Wallet Flows (#80)](planning/eudi-wallet-flows-2026.md)                       | Register / returning-login / TK ePA-transfer wallet flows; WalletFlow engine; NEXT_PUBLIC_DEMO_TK real-org gate                                                           |
 
 For live task tracking see the [GitHub Issues](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues) table above. Architecture decisions are indexed below and kept as standalone documents in [`docs/ADRs/`](ADRs/).
 
