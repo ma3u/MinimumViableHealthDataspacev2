@@ -34,9 +34,16 @@ describe("lib/auth", () => {
   });
 
   describe("authOptions", () => {
-    it("should have keycloak provider configured", () => {
-      expect(authOptions.providers).toHaveLength(1);
-      expect((authOptions.providers[0] as { id: string }).id).toBe("keycloak");
+    it("should have keycloak and eudi-wallet providers configured", () => {
+      expect(authOptions.providers).toHaveLength(2);
+      // CredentialsProvider stores its configured id under `.options`; NextAuth
+      // merges it at runtime, so read the effective id from either place.
+      const ids = authOptions.providers.map((p) => {
+        const cfg = p as { id?: string; options?: { id?: string } };
+        return cfg.options?.id ?? cfg.id;
+      });
+      expect(ids).toContain("keycloak");
+      expect(ids).toContain("eudi-wallet");
     });
 
     it("should use JWT session strategy", () => {
