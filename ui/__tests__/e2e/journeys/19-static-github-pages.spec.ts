@@ -1313,3 +1313,118 @@ test.describe("S · Patient data isolation (static)", () => {
     await expect(page.locator("select")).not.toBeVisible();
   });
 });
+
+/**
+ * S · Patient EUDI Wallet journey (static click-path).
+ *
+ * Asserts the four-step presentation works on the static export with the prev/next
+ * controls. Assertions use build-agnostic copy (sublabels / headings identical in
+ * the public default and the NEXT_PUBLIC_DEMO_TK build) so they pass in CI (public,
+ * fictional) and when verified locally against the live-talk build. The
+ * fictional-vs-real gating itself is locked by the WalletFlow unit test.
+ */
+test.describe("S · Patient EUDI Wallet journey (static)", () => {
+  const next = (page: Page) =>
+    page.getByRole("button", { name: "Next step" }).click();
+
+  test("J314 — /journey intro renders the four-step story + always-visible controls", async ({
+    page,
+  }) => {
+    await page.goto(P("/journey"));
+    await expect(page.getByText("Maria takes control of")).toBeVisible({
+      timeout: T,
+    });
+    await expect(page.getByRole("button", { name: "Next step" })).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "Previous step" }),
+    ).toBeVisible();
+  });
+
+  test("J315 — register slide toggles First time · Register ⇄ Returning · Login", async ({
+    page,
+  }) => {
+    await page.goto(P("/journey"));
+    await next(page);
+    await expect(page.getByText("First time · Register")).toBeVisible({
+      timeout: T,
+    });
+    await expect(
+      page.getByText(/Register with your EUDI Wallet/i),
+    ).toBeVisible();
+    await page.getByText("Returning · Login").click();
+    await expect(page.getByText(/Sign in with your EUDI Wallet/i)).toBeVisible({
+      timeout: T,
+    });
+  });
+
+  test("J316 — EHR slide authorises the ePA transfer into the portal", async ({
+    page,
+  }) => {
+    await page.goto(P("/journey"));
+    await next(page); // → register
+    await next(page); // → EHR
+    await expect(
+      page.getByText("Pull my record from my insurance"),
+    ).toBeVisible({ timeout: T });
+    await expect(page.getByText("GesundheitsID").first()).toBeVisible();
+    await page.getByRole("button", { name: /Authorize the transfer/i }).click();
+    await expect(page.getByText(/Transferred to the portal/i)).toBeVisible({
+      timeout: T,
+    });
+    // wait for any images on the slide to finish loading before auditing
+    await page.waitForFunction(
+      () => [...document.images].every((i) => i.complete),
+      null,
+      { timeout: T },
+    );
+    const broken = await page.evaluate(() =>
+      [...document.images]
+        .filter((i) => i.naturalWidth === 0)
+        .map((i) => i.src),
+    );
+    expect(broken).toEqual([]);
+  });
+
+  test("J317 — donate slide shows three data sources flowing into trusted programs", async ({
+    page,
+  }) => {
+    await page.goto(P("/journey"));
+    await next(page); // register
+    await next(page); // EHR
+    await next(page); // donate
+    await expect(page.getByText("Contributing my real data")).toBeVisible({
+      timeout: T,
+    });
+    await expect(page.getByText("into programs I trust")).toBeVisible();
+    // three sources — sublabels are identical in both builds
+    await expect(page.getByText("Diagnoses · medications")).toBeVisible();
+    await expect(page.getByText("Recovery · resting HR · HRV")).toBeVisible();
+    await expect(
+      page.getByText("Ferritin · B12 · CRP · omega-3"),
+    ).toBeVisible();
+    await expect(page.getByText("CONSENT GRANTED").first()).toBeVisible();
+    // wait for any images on the slide to finish loading before auditing
+    await page.waitForFunction(
+      () => [...document.images].every((i) => i.complete),
+      null,
+      { timeout: T },
+    );
+    const broken = await page.evaluate(() =>
+      [...document.images]
+        .filter((i) => i.naturalWidth === 0)
+        .map((i) => i.src),
+    );
+    expect(broken).toEqual([]);
+  });
+
+  test("J318 — results slide lands the sovereignty message", async ({
+    page,
+  }) => {
+    await page.goto(P("/journey"));
+    for (let i = 0; i < 4; i++) await next(page);
+    await expect(page.getByText("My personal research results")).toBeVisible({
+      timeout: T,
+    });
+    await expect(page.getByText("Sovereign, by design.")).toBeVisible();
+  });
+});

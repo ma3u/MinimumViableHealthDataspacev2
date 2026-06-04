@@ -6,7 +6,7 @@ import {
   LOGIN_STEPS,
   EHR_TRANSFER_STEPS,
 } from "@/components/wallet/flows";
-import { insurer } from "@/lib/journey-config";
+import { insurer, donationSources } from "@/lib/journey-config";
 
 afterEach(() => vi.useRealTimers());
 
@@ -67,5 +67,19 @@ describe("wallet flows", () => {
     expect(insurer.name).toContain("AlphaKasse");
     expect(insurer.name).not.toContain("TK");
     expect(insurer.screenshot).toBeNull();
+  });
+
+  it("donation sources are fictional + image-free in the public default", () => {
+    expect(donationSources.map((s) => s.id)).toEqual([
+      "ehr",
+      "fitness",
+      "labs",
+    ]);
+    for (const s of donationSources) {
+      expect(s.screenshot).toBeNull();
+      for (const brand of ["Whoop", "Blood Test Oracle", "TK", "Techniker"]) {
+        expect(s.label).not.toContain(brand);
+      }
+    }
   });
 });

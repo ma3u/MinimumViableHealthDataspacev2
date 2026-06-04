@@ -16,7 +16,11 @@ import { useCallback, useEffect, useState } from "react";
 import { WalletFlow } from "@/components/wallet/PhoneFrame";
 import { REGISTER_STEPS, LOGIN_STEPS } from "@/components/wallet/flows";
 import { EhrTransferSim } from "@/components/wallet/EhrTransferSim";
-import { insurer } from "@/lib/journey-config";
+import {
+  insurer,
+  donationSources,
+  type DataSource,
+} from "@/lib/journey-config";
 import {
   type LucideIcon,
   ScanLine,
@@ -292,6 +296,63 @@ function SlideEhr() {
   );
 }
 
+/** Icon per donation-source id (data lives in journey-config). */
+const SOURCE_ICON: Record<DataSource["id"], LucideIcon> = {
+  ehr: Database,
+  fitness: Activity,
+  labs: FlaskConical,
+};
+
+/**
+ * One real data source the patient contributes. Under NEXT_PUBLIC_DEMO_TK it
+ * renders the git-ignored personal screenshot (TK ePA / Whoop / Blood Test);
+ * the public default shows a brand-tinted icon tile with a generic label.
+ */
+function SourceCard({ s }: { s: DataSource }) {
+  const [imgOk, setImgOk] = useState(true);
+  const Icon = SOURCE_ICON[s.id];
+  return (
+    <div
+      className="rounded-xl border bg-[var(--surface-2)] overflow-hidden h-full"
+      style={{ borderColor: s.brand }}
+    >
+      <div className="h-[clamp(76px,10vw,104px)] bg-white relative">
+        {s.screenshot && imgOk ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={s.screenshot}
+            alt={`${s.label} — ${s.sublabel} (real screenshot)`}
+            onError={() => setImgOk(false)}
+            className="w-full h-full object-cover object-top"
+          />
+        ) : (
+          <div
+            className="w-full h-full grid place-items-center"
+            style={{ background: `${s.brand}14` }}
+          >
+            <Icon size={30} style={{ color: s.brand }} />
+          </div>
+        )}
+      </div>
+      <div className="p-2.5 flex items-start gap-2">
+        <Icon
+          size={15}
+          className="mt-0.5 shrink-0"
+          style={{ color: s.brand }}
+        />
+        <div className="min-w-0">
+          <p className="text-xs font-semibold text-[var(--text-primary)] truncate">
+            {s.label}
+          </p>
+          <p className="text-[11px] text-[var(--text-secondary)] truncate">
+            {s.sublabel}
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /** ── Slide 3 — donate to research ────────────────────────────────────────── */
 function SlideDonate() {
   const programs = [
@@ -309,22 +370,41 @@ function SlideDonate() {
   return (
     <div className="max-w-5xl mx-auto w-full">
       <Reveal>
-        <h2 className="font-extrabold text-[clamp(1.5rem,3.4vw,2.3rem)] leading-tight text-[var(--text-primary)] mb-3 text-center">
+        <h2 className="font-extrabold text-[clamp(1.4rem,3.2vw,2.1rem)] leading-tight text-[var(--text-primary)] mb-2 text-center">
           Donate my data to research I care about
         </h2>
       </Reveal>
-      <Reveal delay={160} className="text-center">
+      <Reveal delay={140} className="text-center">
         <Quote>I want to donate my data for specific research programs.</Quote>
       </Reveal>
-      <div className="grid sm:grid-cols-2 gap-4 mt-7">
+
+      {/* the three real sources Maria contributes */}
+      <Reveal delay={260} className="mt-5">
+        <p className="text-center text-xs font-semibold uppercase tracking-[0.14em] text-[var(--text-secondary)] mb-2.5">
+          Contributing my real data
+        </p>
+        <div className="grid grid-cols-3 gap-3 max-w-3xl mx-auto">
+          {donationSources.map((s) => (
+            <SourceCard key={s.id} s={s} />
+          ))}
+        </div>
+      </Reveal>
+
+      {/* into the programs she trusts */}
+      <Reveal delay={420}>
+        <p className="text-center text-xs font-semibold uppercase tracking-[0.14em] text-[var(--text-secondary)] mt-5 mb-2.5">
+          into programs I trust
+        </p>
+      </Reveal>
+      <div className="grid sm:grid-cols-2 gap-3">
         {programs.map((p, i) => (
-          <Reveal key={i} delay={300 + i * 140}>
+          <Reveal key={i} delay={500 + i * 120}>
             <div
-              className="rounded-2xl border p-5 bg-[var(--surface-2)] h-full"
+              className="rounded-2xl border p-4 bg-[var(--surface-2)] h-full"
               style={{ borderColor: ACCENTS[2] }}
             >
               <div className="flex items-start justify-between gap-3">
-                <HandHeart size={22} style={{ color: ACCENTS[2] }} />
+                <HandHeart size={20} style={{ color: ACCENTS[2] }} />
                 <span
                   className="text-[11px] font-bold px-2.5 py-1 rounded-full text-white"
                   style={{ background: ACCENTS[2] }}
@@ -332,21 +412,21 @@ function SlideDonate() {
                   CONSENT GRANTED
                 </span>
               </div>
-              <h3 className="font-bold text-[var(--text-primary)] mt-2 text-[clamp(1rem,2vw,1.2rem)]">
+              <h3 className="font-bold text-[var(--text-primary)] mt-2 text-[clamp(0.95rem,1.9vw,1.15rem)]">
                 {p.name}
               </h3>
               <p className="text-sm text-[var(--text-secondary)] mt-1">
                 {p.org}
               </p>
-              <p className="text-xs text-[var(--text-secondary)] mt-2">
+              <p className="text-xs text-[var(--text-secondary)] mt-1.5">
                 Federated across {p.countries}
               </p>
             </div>
           </Reveal>
         ))}
       </div>
-      <Reveal delay={620}>
-        <p className="mt-6 text-center text-sm text-[var(--text-secondary)] flex items-center justify-center gap-2">
+      <Reveal delay={760}>
+        <p className="mt-4 text-center text-sm text-[var(--text-secondary)] flex items-center justify-center gap-2">
           <ShieldCheck size={16} style={{ color: ACCENTS[2] }} />
           Federated queries reach many databases — my data never leaves the
           secure environment. Withdraw any time.
