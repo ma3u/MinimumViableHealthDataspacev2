@@ -3,6 +3,7 @@
  */
 import { describe, it, expect } from "vitest";
 import { hasRole, Roles, authOptions } from "@/lib/auth";
+import { newSid, putTransaction, updateTransaction } from "@/lib/eudi-store";
 
 describe("lib/auth", () => {
   describe("hasRole", () => {
@@ -34,9 +35,16 @@ describe("lib/auth", () => {
   });
 
   describe("authOptions", () => {
-    it("should have keycloak provider configured", () => {
-      expect(authOptions.providers).toHaveLength(1);
-      expect((authOptions.providers[0] as { id: string }).id).toBe("keycloak");
+    it("should have keycloak and eudi-wallet providers configured", () => {
+      expect(authOptions.providers).toHaveLength(2);
+      // CredentialsProvider stores its configured id under `.options`; NextAuth
+      // merges it at runtime, so read the effective id from either place.
+      const ids = authOptions.providers.map((p) => {
+        const cfg = p as { id?: string; options?: { id?: string } };
+        return cfg.options?.id ?? cfg.id;
+      });
+      expect(ids).toContain("keycloak");
+      expect(ids).toContain("eudi-wallet");
     });
 
     it("should use JWT session strategy", () => {
@@ -45,6 +53,49 @@ describe("lib/auth", () => {
 
     it("should have custom sign-in page", () => {
       expect(authOptions.pages?.signIn).toBe("/auth/signin");
+    });
+
+    it("eudi-wallet authorize mints a patient from a completed sid (single-use)", async () => {
+      const sid = newSid();
+      putTransaction({ sid, transactionId: "t", nonce: "n" });
+      updateTransaction(sid, {
+        status: "completed",
+        verifiedPatient: {
+          username: "patient1",
+          displayName: "Erika Mustermann",
+          roles: ["PATIENT"],
+        },
+      });
+      const provider = authOptions.providers.find(
+        (p) =>
+          (p as { options?: { id?: string } }).options?.id === "eudi-wallet",
+      ) as { options: { authorize: (c: unknown) => Promise<unknown> } };
+      const authorize = provider.options.authorize;
+      const user = (await authorize({ sid })) as {
+        preferredUsername: string;
+        roles: string[];
+      } | null;
+      expect(user?.preferredUsername).toBe("patient1");
+      expect(user?.roles).toEqual(["PATIENT"]);
+      // single-use: a second call with the same (now consumed) sid is rejected
+      expect(await authorize({ sid })).toBeNull();
+      // unknown / missing sid
+      expect(await authorize({ sid: "nope" })).toBeNull();
+      expect(await authorize({})).toBeNull();
+    });
+
+    it("jwt callback carries roles for the eudi-wallet credentials user", async () => {
+      const jwt = authOptions.callbacks!.jwt!;
+      const token = (await jwt({
+        token: {},
+        user: {
+          id: "eudi:patient1",
+          roles: ["PATIENT"],
+          preferredUsername: "patient1",
+        },
+      } as never)) as { roles?: string[]; preferredUsername?: string };
+      expect(token.roles).toEqual(["PATIENT"]);
+      expect(token.preferredUsername).toBe("patient1");
     });
 
     it("should have jwt and session callbacks", () => {
