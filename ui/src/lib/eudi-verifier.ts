@@ -1,7 +1,8 @@
 /**
  * Adapter for the EU reference OpenID4VP Verifier backend
  * (eu-digital-identity-wallet/eudi-srv-web-verifier-endpoint-23220-4-kt),
- * as hosted at https://verifier.eudiw.dev.
+ * as hosted at https://verifier-backend.eudiw.dev (the REST backend; the
+ * verifier.eudiw.dev host is the frontend UI and returns 405 on the API paths).
  *
  * Contract pinned against the reference backend README:
  *   - POST /ui/presentations           — initialise a cross-device transaction
@@ -19,7 +20,7 @@ import { randomUUID } from "crypto";
 import type { VerifiedPid } from "@/lib/eudi-patient-map";
 
 const BASE = (
-  process.env.EUDI_VERIFIER_BASE_URL ?? "https://verifier.eudiw.dev"
+  process.env.EUDI_VERIFIER_BASE_URL ?? "https://verifier-backend.eudiw.dev"
 ).replace(/\/+$/, "");
 /** QR / wallet deep-link scheme. EU reference wallet historically uses openid4vp://; haip-vp:// and eudi-openid4vp:// are alternatives. */
 const SCHEME = process.env.EUDI_VERIFIER_SCHEME ?? "openid4vp://";
