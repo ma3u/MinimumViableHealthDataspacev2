@@ -9,6 +9,7 @@ import {
   CheckCircle2,
   AlertTriangle,
 } from "lucide-react";
+import { WalletSimulation } from "@/components/WalletSimulation";
 
 const IS_STATIC = process.env.NEXT_PUBLIC_STATIC_EXPORT === "true";
 const POLL_MS = 2000;
@@ -101,90 +102,102 @@ function EudiQrContent() {
 
   return (
     <div className="min-h-[60vh] flex flex-col items-center justify-center gap-6 py-10 px-4">
-      <div className="bg-[var(--surface-2)] rounded-lg p-8 max-w-md w-full text-center">
-        <ShieldCheck
-          size={44}
-          className="mx-auto mb-3 text-blue-800 dark:text-blue-300"
-        />
-        <h1 className="text-2xl font-bold text-[var(--text-primary)] mb-1">
-          Sign in with your EUDI Wallet
-        </h1>
-        <p className="text-[var(--text-secondary)] text-sm mb-6">
-          Scan the QR code with your EU Digital Identity Wallet to verify your
-          identity (OpenID4VP).
-          <br />
-          <span className="text-xs">
-            Synthetic demo · maps to a demo patient
-          </span>
-        </p>
+      <div className="flex flex-col lg:flex-row items-center justify-center gap-6 w-full max-w-4xl">
+        <div className="bg-[var(--surface-2)] rounded-lg p-8 max-w-md w-full text-center">
+          <ShieldCheck
+            size={44}
+            className="mx-auto mb-3 text-blue-800 dark:text-blue-300"
+          />
+          <h1 className="text-2xl font-bold text-[var(--text-primary)] mb-1">
+            Sign in with your EUDI Wallet
+          </h1>
+          <p className="text-[var(--text-secondary)] text-sm mb-6">
+            Scan the QR code with your EU Digital Identity Wallet to verify your
+            identity (OpenID4VP).
+            <br />
+            <span className="text-xs">
+              Synthetic demo · maps to a demo patient
+            </span>
+          </p>
 
-        {phase === "loading" && (
-          <div className="py-10 text-[var(--text-secondary)]">
-            Preparing a secure request…
-          </div>
-        )}
+          {phase === "loading" && (
+            <div className="py-10 text-[var(--text-secondary)]">
+              Preparing a secure request…
+            </div>
+          )}
 
-        {phase === "scanning" && qr && (
-          <>
-            <div className="bg-white rounded-lg p-4 inline-block mb-4">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={qr}
-                alt="EUDI Wallet OpenID4VP QR code"
-                width={256}
-                height={256}
-                className="block"
+          {phase === "scanning" && qr && (
+            <>
+              <div className="bg-white rounded-lg p-4 inline-block mb-4">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={qr}
+                  alt="EUDI Wallet OpenID4VP QR code"
+                  width={256}
+                  height={256}
+                  className="block"
+                />
+              </div>
+              <div className="flex items-center justify-center gap-2 text-sm text-[var(--text-secondary)] mb-3">
+                <span className="inline-block w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                Waiting for your wallet…
+              </div>
+              {walletLink && (
+                <a
+                  href={walletLink}
+                  className="text-xs text-[var(--accent)] underline break-all"
+                >
+                  On this phone? Tap to open your wallet
+                </a>
+              )}
+            </>
+          )}
+
+          {phase === "completed" && (
+            <div className="py-8 flex flex-col items-center gap-2 text-green-600 dark:text-green-400">
+              <CheckCircle2 size={40} />
+              <p className="font-medium">Verified — signing you in…</p>
+            </div>
+          )}
+
+          {(phase === "error" || phase === "expired") && (
+            <div className="py-6">
+              <AlertTriangle
+                size={36}
+                className="mx-auto mb-2 text-amber-500"
               />
-            </div>
-            <div className="flex items-center justify-center gap-2 text-sm text-[var(--text-secondary)] mb-3">
-              <span className="inline-block w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-              Waiting for your wallet…
-            </div>
-            {walletLink && (
-              <a
-                href={walletLink}
-                className="text-xs text-[var(--accent)] underline break-all"
+              <p className="text-sm text-[var(--text-secondary)] mb-4">
+                {phase === "expired"
+                  ? "This sign-in request expired."
+                  : "Could not reach the EUDI verifier."}
+              </p>
+              <button
+                onClick={start}
+                className="inline-flex items-center gap-2 px-4 py-2 bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white dark:text-gray-900 rounded-lg font-medium transition-colors"
               >
-                On this phone? Tap to open your wallet
-              </a>
-            )}
-          </>
-        )}
+                <RefreshCw size={16} /> Try again
+              </button>
+            </div>
+          )}
 
-        {phase === "completed" && (
-          <div className="py-8 flex flex-col items-center gap-2 text-green-600 dark:text-green-400">
-            <CheckCircle2 size={40} />
-            <p className="font-medium">Verified — signing you in…</p>
-          </div>
-        )}
+          {phase === "unavailable" && (
+            <div className="py-8 text-sm text-[var(--text-secondary)]">
+              EUDI Wallet sign-in is only available on the live deployment, not
+              in the static demo. Use the demo personas on the{" "}
+              <a href="/auth/signin" className="text-[var(--accent)] underline">
+                sign-in page
+              </a>{" "}
+              instead.
+            </div>
+          )}
+        </div>
 
-        {(phase === "error" || phase === "expired") && (
-          <div className="py-6">
-            <AlertTriangle size={36} className="mx-auto mb-2 text-amber-500" />
-            <p className="text-sm text-[var(--text-secondary)] mb-4">
-              {phase === "expired"
-                ? "This sign-in request expired."
-                : "Could not reach the EUDI verifier."}
-            </p>
-            <button
-              onClick={start}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white dark:text-gray-900 rounded-lg font-medium transition-colors"
-            >
-              <RefreshCw size={16} /> Try again
-            </button>
-          </div>
-        )}
-
-        {phase === "unavailable" && (
-          <div className="py-8 text-sm text-[var(--text-secondary)]">
-            EUDI Wallet sign-in is only available on the live deployment, not in
-            the static demo. Use the demo personas on the{" "}
-            <a href="/auth/signin" className="text-[var(--accent)] underline">
-              sign-in page
-            </a>{" "}
-            instead.
-          </div>
-        )}
+        <div className="flex flex-col items-center gap-2 shrink-0">
+          <WalletSimulation />
+          <p className="text-xs text-[var(--text-secondary)] max-w-[280px] text-center">
+            What happens on your phone — a simulated wallet approval
+          </p>
+        </div>
       </div>
 
       <a
