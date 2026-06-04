@@ -11,6 +11,7 @@
  * render the correct role-filtered view without any Keycloak session.
  */
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   Shield,
@@ -79,6 +80,35 @@ export default function DemoHubPage() {
         <span className="text-[var(--text-secondary)]">→</span>{" "}
         <em>Switch demo persona</em>.
       </p>
+
+      {/* Featured journey CTA */}
+      <Link
+        href="/journey"
+        className="group mb-10 flex items-center justify-between gap-4 rounded-2xl border-2 p-5 transition-all hover:scale-[1.01] hover:shadow-lg bg-[var(--surface-2)]"
+        style={{ borderColor: "#7D3C98" }}
+      >
+        <div className="flex items-center gap-4">
+          <span
+            className="grid place-items-center w-12 h-12 rounded-xl text-white shrink-0"
+            style={{ background: "#7D3C98" }}
+          >
+            <Heart size={24} />
+          </span>
+          <div>
+            <p className="font-bold text-lg text-[var(--text-primary)]">
+              ▶ Maria&apos;s journey — the EHDS Patient Wallet
+            </p>
+            <p className="text-sm text-[var(--text-secondary)]">
+              Register with EUDI Wallet → get your EHR → donate to research →
+              see your results
+            </p>
+          </div>
+        </div>
+        <ArrowRight
+          size={22}
+          className="text-[var(--text-secondary)] group-hover:translate-x-1 transition-transform shrink-0"
+        />
+      </Link>
 
       {/* Persona cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
