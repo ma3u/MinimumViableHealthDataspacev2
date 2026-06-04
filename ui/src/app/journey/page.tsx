@@ -12,7 +12,6 @@
  * Synthetic data · fictional orgs only.
  */
 
-import Image from "next/image";
 import { useCallback, useEffect, useState } from "react";
 import {
   type LucideIcon,
@@ -31,6 +30,16 @@ import {
 
 /** Per-step accent (matches the 5-layer graph palette). */
 const ACCENTS = ["#2471A3", "#148F77", "#1E8449", "#7D3C98"];
+
+/**
+ * The static GitHub Pages export is served under a basePath; client-rendered
+ * asset URLs must include it (next/image does not reliably prepend it here, so
+ * we use plain <img> with an explicit prefix — same pattern as src/lib/api.ts).
+ */
+const BASE_PATH =
+  process.env.NEXT_PUBLIC_STATIC_EXPORT === "true"
+    ? "/MinimumViableHealthDataspacev2"
+    : "";
 
 function Reveal({
   children,
@@ -115,12 +124,12 @@ function SlideRegister() {
     <div className="grid md:grid-cols-2 gap-8 items-center max-w-5xl mx-auto w-full">
       <Reveal delay={140} className="flex flex-col items-center">
         <div className="bg-white rounded-2xl p-4 shadow-lg">
-          <Image
-            src="/journey/qr-register.png"
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={`${BASE_PATH}/journey/qr-register.png`}
             alt="QR code to register with your EUDI Wallet"
             width={260}
             height={260}
-            priority
             className="block w-[clamp(180px,32vw,260px)] h-auto"
           />
         </div>
@@ -188,8 +197,9 @@ function SlideEhr() {
     <div className="grid md:grid-cols-2 gap-8 items-center max-w-6xl mx-auto w-full">
       <Reveal delay={140} className="order-2 md:order-1">
         <div className="rounded-xl overflow-hidden border border-[var(--border)] shadow-lg bg-white">
-          <Image
-            src="/journey/app-profile.png"
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={`${BASE_PATH}/journey/app-profile.png`}
             alt="Maria's electronic health record in the portal, with cardiovascular and diabetes risk scores"
             width={1280}
             height={860}
