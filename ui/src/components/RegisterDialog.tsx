@@ -7,7 +7,8 @@
  * role="dialog" + aria-modal, and body-scroll lock. z-[70] sits above the nav
  * (z-50) and UserMenu dropdown.
  */
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { X, ShieldCheck, ScanLine } from "lucide-react";
 import {
   EudiApprovalFlow,
@@ -34,6 +35,8 @@ export function RegisterDialog({
   onClose: () => void;
   onComplete: () => void;
 }) {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
@@ -47,17 +50,21 @@ export function RegisterDialog({
     };
   }, [onClose]);
 
-  return (
+  if (!mounted) return null;
+
+  // Portal to <body> so the modal escapes the page's stacking context and sits
+  // above the sticky nav (z-50) — true "always on top".
+  return createPortal(
     <div
       role="dialog"
       aria-modal="true"
       aria-label={title}
-      className="fixed inset-0 z-[70] flex items-center justify-center p-4"
+      className="fixed inset-0 z-[100] flex items-center justify-center p-4"
       onClick={onClose}
     >
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+      <div className="absolute inset-0 bg-black/75 backdrop-blur-md" />
       <div
-        className="relative z-10 w-full max-w-3xl rounded-2xl border border-[var(--border)] bg-[var(--surface)] shadow-2xl p-6 sm:p-8 max-h-[92vh] overflow-y-auto"
+        className="relative z-10 w-full max-w-3xl rounded-2xl border-2 border-[var(--border)] bg-[var(--surface)] ring-1 ring-black/10 shadow-[0_24px_70px_rgba(0,0,0,0.45)] p-6 sm:p-8 max-h-[92vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
         <button
@@ -102,6 +109,7 @@ export function RegisterDialog({
           />
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

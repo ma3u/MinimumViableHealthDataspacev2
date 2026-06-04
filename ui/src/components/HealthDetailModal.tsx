@@ -6,7 +6,8 @@
  * with an improving/declining chip, plus the weekly plan for nutrition.
  * Synthetic, illustrative data from journey-config.
  */
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { X, TrendingUp, TrendingDown, CalendarDays } from "lucide-react";
 import { TrendChart } from "@/components/charts/TrendChart";
 import type { PersonalHealthSource, TrendSeries } from "@/lib/journey-config";
@@ -39,6 +40,8 @@ export function HealthDetailModal({
   source: PersonalHealthSource;
   onClose: () => void;
 }) {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
@@ -52,17 +55,19 @@ export function HealthDetailModal({
     };
   }, [onClose]);
 
-  return (
+  if (!mounted) return null;
+
+  return createPortal(
     <div
       role="dialog"
       aria-modal="true"
       aria-label={`${source.title} detail`}
-      className="fixed inset-0 z-[70] flex items-center justify-center p-4"
+      className="fixed inset-0 z-[100] flex items-center justify-center p-4"
       onClick={onClose}
     >
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+      <div className="absolute inset-0 bg-black/75 backdrop-blur-md" />
       <div
-        className="relative z-10 w-full max-w-2xl rounded-2xl border border-[var(--border)] bg-[var(--surface)] shadow-2xl p-6 sm:p-8 max-h-[92vh] overflow-y-auto"
+        className="relative z-10 w-full max-w-2xl rounded-2xl border-2 border-[var(--border)] bg-[var(--surface)] ring-1 ring-black/10 shadow-[0_24px_70px_rgba(0,0,0,0.45)] p-6 sm:p-8 max-h-[92vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
         <button
@@ -153,6 +158,7 @@ export function HealthDetailModal({
           Synthetic · illustrative — not medical advice.
         </p>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
