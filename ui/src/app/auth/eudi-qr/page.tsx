@@ -9,7 +9,8 @@ import {
   CheckCircle2,
   AlertTriangle,
 } from "lucide-react";
-import { WalletSimulation } from "@/components/WalletSimulation";
+import { WalletFlow } from "@/components/wallet/PhoneFrame";
+import { REGISTER_STEPS, LOGIN_STEPS } from "@/components/wallet/flows";
 
 const IS_STATIC = process.env.NEXT_PUBLIC_STATIC_EXPORT === "true";
 const POLL_MS = 2000;
@@ -26,6 +27,7 @@ type Phase =
 function EudiQrContent() {
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") || "/patient/profile";
+  const mode = searchParams.get("mode") === "login" ? "login" : "register";
 
   const [phase, setPhase] = useState<Phase>(
     IS_STATIC ? "unavailable" : "loading",
@@ -109,7 +111,7 @@ function EudiQrContent() {
             className="mx-auto mb-3 text-blue-800 dark:text-blue-300"
           />
           <h1 className="text-2xl font-bold text-[var(--text-primary)] mb-1">
-            Sign in with your EUDI Wallet
+            {mode === "login" ? "Sign in" : "Register"} with your EUDI Wallet
           </h1>
           <p className="text-[var(--text-secondary)] text-sm mb-6">
             Scan the QR code with your EU Digital Identity Wallet to verify your
@@ -193,7 +195,11 @@ function EudiQrContent() {
         </div>
 
         <div className="flex flex-col items-center gap-2 shrink-0">
-          <WalletSimulation />
+          <WalletFlow
+            loop
+            ariaLabel={`Simulated EUDI Wallet ${mode}`}
+            steps={mode === "login" ? LOGIN_STEPS : REGISTER_STEPS}
+          />
           <p className="text-xs text-[var(--text-secondary)] max-w-[280px] text-center">
             What happens on your phone — a simulated wallet approval
           </p>

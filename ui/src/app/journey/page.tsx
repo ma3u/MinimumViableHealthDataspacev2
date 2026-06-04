@@ -13,7 +13,10 @@
  */
 
 import { useCallback, useEffect, useState } from "react";
-import { WalletSimulation } from "@/components/WalletSimulation";
+import { WalletFlow } from "@/components/wallet/PhoneFrame";
+import { REGISTER_STEPS, LOGIN_STEPS } from "@/components/wallet/flows";
+import { EhrTransferSim } from "@/components/wallet/EhrTransferSim";
+import { insurer } from "@/lib/journey-config";
 import {
   type LucideIcon,
   ScanLine,
@@ -120,17 +123,41 @@ function SlideIntro() {
 
 /** ── Slide 1 — register via QR + EUDI Wallet ─────────────────────────────── */
 function SlideRegister() {
+  const [mode, setMode] = useState<"register" | "login">("register");
+  const isReg = mode === "register";
   return (
     <div className="max-w-5xl mx-auto w-full">
       <Reveal>
         <h2 className="font-extrabold text-[clamp(1.4rem,3.2vw,2.1rem)] leading-tight text-[var(--text-primary)] mb-1 text-center">
-          Register with your EUDI Wallet — no password
+          {isReg ? "Register" : "Sign in"} with your EUDI Wallet — no password
         </h2>
       </Reveal>
-      <Reveal delay={120}>
-        <p className="text-center text-sm text-[var(--text-secondary)] mb-5">
-          Scan → approve on your phone → signed in · OpenID4VP · eIDAS 2.0
+      <Reveal delay={120} className="flex flex-col items-center gap-3 mb-4">
+        <p className="text-center text-sm text-[var(--text-secondary)]">
+          {isReg
+            ? "First time: scan → approve → registered."
+            : "Returning: scan → approve → back in. The wallet skips the trust step."}{" "}
+          · OpenID4VP · eIDAS 2.0
         </p>
+        <div className="inline-flex rounded-full border border-[var(--border)] p-1 bg-[var(--surface-2)]">
+          {(
+            [
+              ["register", "First time · Register"],
+              ["login", "Returning · Login"],
+            ] as const
+          ).map(([m, label]) => (
+            <button
+              key={m}
+              onClick={() => setMode(m)}
+              className={`px-4 py-1.5 text-sm font-medium rounded-full transition-colors ${
+                mode === m ? "text-white" : "text-[var(--text-secondary)]"
+              }`}
+              style={mode === m ? { background: ACCENTS[0] } : undefined}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
       </Reveal>
       <div className="grid md:grid-cols-2 gap-8 items-center justify-items-center">
         <Reveal delay={200} className="flex flex-col items-center">
@@ -150,10 +177,15 @@ function SlideRegister() {
           </p>
           <p className="text-xs text-[var(--text-secondary)] mt-1">
             Live flow → ehds.mabu.red/auth/eudi-qr
+            {isReg ? "" : "?mode=login"}
           </p>
         </Reveal>
-        <Reveal delay={340} className="flex justify-center">
-          <WalletSimulation />
+        <Reveal delay={340} key={mode} className="flex justify-center">
+          <WalletFlow
+            loop
+            ariaLabel={`Simulated EUDI Wallet ${mode}`}
+            steps={isReg ? REGISTER_STEPS : LOGIN_STEPS}
+          />
         </Reveal>
       </div>
     </div>
@@ -162,22 +194,33 @@ function SlideRegister() {
 
 /** ── Slide 2 — fetch EHR from health insurance ───────────────────────────── */
 function SlideEhr() {
+  const [transferred, setTransferred] = useState(false);
   return (
     <div className="grid md:grid-cols-2 gap-8 items-center max-w-6xl mx-auto w-full">
-      <Reveal delay={140} className="order-2 md:order-1">
-        <div className="rounded-xl overflow-hidden border border-[var(--border)] shadow-lg bg-white">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={`${BASE_PATH}/journey/app-profile.png`}
-            alt="Maria's electronic health record in the portal, with cardiovascular and diabetes risk scores"
-            width={1280}
-            height={860}
-            className="block w-full h-auto"
-          />
-        </div>
-        <p className="text-xs text-[var(--text-secondary)] mt-2 text-center">
-          My health record in the portal — synthetic data
-        </p>
+      <Reveal
+        delay={140}
+        key={transferred ? "shot" : "sim"}
+        className="order-2 md:order-1 flex justify-center w-full"
+      >
+        {transferred ? (
+          <div className="w-full">
+            <div className="rounded-xl overflow-hidden border border-[var(--border)] shadow-lg bg-white">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={`${BASE_PATH}/journey/app-profile.png`}
+                alt="Maria's electronic health record now in the portal, with cardiovascular and diabetes risk scores"
+                width={1280}
+                height={860}
+                className="block w-full h-auto"
+              />
+            </div>
+            <p className="text-xs text-[var(--text-secondary)] mt-2 text-center">
+              Now in the portal as FHIR R4 — synthetic data
+            </p>
+          </div>
+        ) : (
+          <EhrTransferSim />
+        )}
       </Reveal>
 
       <div className="order-1 md:order-2">
@@ -187,16 +230,16 @@ function SlideEhr() {
           </h2>
         </Reveal>
         <Reveal delay={180}>
-          <Quote>I need my data from my Electronic Health Record (EPA)!</Quote>
+          <Quote>I need my data from my Electronic Health Record (ePA)!</Quote>
         </Reveal>
         <Reveal delay={320}>
           <div className="mt-5 flex items-center gap-2 text-sm text-[var(--text-secondary)]">
             <Database size={16} style={{ color: ACCENTS[1] }} />
             <span>
               <strong className="text-[var(--text-primary)]">
-                AlphaKasse DE
+                {insurer.name}
               </strong>{" "}
-              (health insurance) · EPA / EHR via{" "}
+              (health insurance) · ePA / EHR via{" "}
               <strong className="text-[var(--text-primary)]">
                 GesundheitsID
               </strong>
@@ -223,9 +266,25 @@ function SlideEhr() {
           </div>
         </Reveal>
         <Reveal delay={560}>
-          <p className="mt-5 text-sm text-[var(--text-secondary)]">
-            An agent assembles my data to analyse my health —
-            GesundheitsID-authenticated.
+          <button
+            onClick={() => setTransferred(true)}
+            disabled={transferred}
+            className="mt-5 inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-white font-semibold text-sm transition-all hover:scale-[1.02] disabled:opacity-70"
+            style={{ background: ACCENTS[1] }}
+          >
+            {transferred ? (
+              <>
+                <ShieldCheck size={16} /> Transferred to the portal
+              </>
+            ) : (
+              <>
+                Authorize the transfer <ArrowRight size={16} />
+              </>
+            )}
+          </button>
+          <p className="mt-2 text-xs text-[var(--text-secondary)]">
+            GesundheitsID-authenticated · end-to-end encrypted · {insurer.short}{" "}
+            cannot read it · withdraw any time
           </p>
         </Reveal>
       </div>

@@ -130,7 +130,10 @@ Unit tests in `ui/__tests__/unit/` · E2E tests in `ui/__tests__/e2e/journeys/`
 **Bash scripts:** `set -euo pipefail` + quote all variables · shellcheck at error severity
 
 **Fictional orgs only:** AlphaKlinik Berlin, PharmaCo Research AG, MedReg DE, Limburg Medical Centre,
-Institut de Recherche Santé. Never use real names (Charité, Bayer, BfArM, etc.).
+Institut de Recherche Santé. Never use real names (Charité, Bayer, BfArM, etc.). **Exception:** real
+org names (e.g. TK Krankenkasse, gematik) may appear ONLY behind the `NEXT_PUBLIC_DEMO_TK` build flag
+for live interoperability demos; the default build, committed repo, and public github.io site stay
+fictional, and real third-party screenshots are git-ignored and never committed.
 
 ## Top 5 Gotchas
 

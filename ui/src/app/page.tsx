@@ -133,6 +133,12 @@ export default function Home() {
             <Info size={15} aria-hidden="true" />
             Why we need EUDI Wallet for the patient journey
           </Link>
+          <Link
+            href="/auth/eudi-qr?mode=login"
+            className="inline-flex items-center gap-1.5 text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--accent)] transition-colors"
+          >
+            Already have it? Sign in <ArrowRight size={14} aria-hidden="true" />
+          </Link>
         </div>
       </section>
 
