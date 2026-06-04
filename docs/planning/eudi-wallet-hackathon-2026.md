@@ -195,6 +195,55 @@ The wallet/consent layer plugs in at the **authorisation boundary**:
 
 ---
 
+## 9b. Build status & running the wallet (iPhone Simulator / Xcode)
+
+**Status (4 June):** the iOS wallet (`ma3u/eudi-app-ios-wallet-ui`, fixes merged in PR #1)
+**builds clean on Xcode 26.5 and runs in the iPhone 17 Simulator** (Debug Demo). Fixes applied:
+neutralised a failing SwiftLint build phase; removed an empty-SF-Symbol fault on the PIN screen;
+made `SwiftDataService` create a per-call `ModelContext` (Swift 6 / iOS 26 crash risk); set
+`include_bitcode: false` for TestFlight. The Demo issuer config is **sandbox-ready** — see
+`SandboxConfig` in `WalletKitConfig.swift`.
+
+### Run in the iPhone Simulator via Xcode (manual steps)
+
+1. **Open the project:** `open eudi-app-ios-wallet-ui/EudiReferenceWallet.xcodeproj` — do **not**
+   create a new project (cancel Xcode's template dialog).
+2. **Let Swift Package Manager resolve** the dependency graph on first open (40+ packages; wait).
+3. **Toolbar:** scheme **EUDI Wallet Demo** (or **Dev**) · destination **iPhone 17** simulator.
+4. **Run (⌘R).** The app installs and launches to the **"Enter a PIN"** onboarding screen.
+
+**What must be started/selected manually:** open the project, let SPM resolve, pick the scheme +
+an iPhone simulator, press Run. Simulator runs need **no Apple Team ID / signing** (those are only
+for a physical device or TestFlight — set your Team ID + a bundle id you own in _Signing &
+Capabilities_). The build only succeeds with the SwiftLint-phase fix (PR #1) applied.
+
+### CLI equivalent (headless build + launch)
+
+```bash
+cd eudi-app-ios-wallet-ui
+xcodebuild -project EudiReferenceWallet.xcodeproj -scheme "EUDI Wallet Demo" \
+  -configuration "Debug Demo" -destination "platform=iOS Simulator,name=iPhone 17" \
+  -derivedDataPath .build-dd -skipPackagePluginValidation -skipMacroValidation \
+  CODE_SIGNING_ALLOWED=NO build
+open -a Simulator
+xcrun simctl boot "iPhone 17" 2>/dev/null; xcrun simctl bootstatus "iPhone 17" -b
+xcrun simctl install booted ".build-dd/Build/Products/Debug Demo-iphonesimulator/EudiWallet.app"
+xcrun simctl launch booted eu.europa.ec.euidi
+```
+
+Device-debug + TestFlight steps: `eudi-app-ios-wallet-ui/HACKATHON_BUILD_TESTFLIGHT.md`.
+
+### Progress
+
+- [x] Fork cloned; builds on Xcode 26.5 (PR #1 merged)
+- [x] 2 runtime faults fixed (empty SF Symbol, SwiftData off-actor) — verified in Simulator
+- [x] Runs in the iPhone 17 Simulator (Debug Demo)
+- [x] Demo issuer config sandbox-ready (`SandboxConfig`)
+- [ ] Paste SPRIND sandbox issuer URL / client_id into `SandboxConfig`; issue a PID to the wallet
+- [ ] Run on a physical iPhone (your Team ID + bundle id) → TestFlight internal testers
+
+---
+
 ## 10. References
 
 - Hackathon: [page](https://eudi-wallet.gov.de/news/eudi-wallet-hackathon-2026) · [apply](https://2eut7s.share-eu1.hsforms.com/2w9z1xbh5SmaSLUc8caTPug) · [developer guide](https://bmi.usercontent.opencode.de/eudi-wallet/developer-guide/hackathon/) · [FAQ](https://eudi-wallet.gov.de/faq)
