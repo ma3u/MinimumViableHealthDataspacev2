@@ -15,6 +15,9 @@ import {
   KeyRound,
   Scale,
   Workflow,
+  ScanLine,
+  ArrowRight,
+  Smartphone,
 } from "lucide-react";
 import { DemoPersonaCards } from "@/components/DemoPersonaCards";
 import { PersonaJourneyCards } from "@/components/PersonaJourneyCards";
@@ -105,6 +108,33 @@ export default function Home() {
             />
             <span>All data is synthetic</span>
           </span>
+        </div>
+
+        {/* ── Live-demo CTA: the patient journey ── */}
+        <div className="mt-7 flex flex-wrap items-center gap-x-5 gap-y-3">
+          <Link
+            href="/journey"
+            className="group inline-flex items-center gap-2.5 px-6 py-3.5 rounded-xl text-white font-semibold text-base shadow-md transition-all hover:scale-[1.02]"
+            style={{ background: "linear-gradient(135deg,#7D3C98,#2471A3)" }}
+          >
+            <ScanLine size={20} aria-hidden="true" />
+            Register &amp; start the patient journey
+            <ArrowRight
+              size={18}
+              aria-hidden="true"
+              className="group-hover:translate-x-1 transition-transform"
+            />
+          </Link>
+          <a
+            href="https://ehds.mabu.red/auth/eudi-qr"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 text-sm font-medium text-[var(--accent)] hover:underline"
+          >
+            <Smartphone size={15} aria-hidden="true" /> or do the live EUDI
+            Wallet login
+            <ExternalLink size={12} aria-hidden="true" />
+          </a>
         </div>
       </section>
 
