@@ -8,11 +8,18 @@
  * (z-50) and UserMenu dropdown.
  */
 import { useEffect } from "react";
-import { X } from "lucide-react";
+import { X, ShieldCheck, ScanLine } from "lucide-react";
 import {
   EudiApprovalFlow,
   type ApprovalMode,
 } from "@/components/wallet/EudiApprovalFlow";
+
+/** Eyebrow label per approval mode, so the dialog's intent is unmistakable. */
+const EYEBROW: Record<ApprovalMode, string> = {
+  register: "European Health Dataspace · Registration",
+  login: "European Health Dataspace · Sign in",
+  ehr: "Electronic Patient Record · ePA transfer",
+};
 
 export function RegisterDialog({
   mode = "register",
@@ -57,19 +64,37 @@ export function RegisterDialog({
           type="button"
           onClick={onClose}
           aria-label="Close"
-          className="absolute top-3 right-3 grid place-items-center w-9 h-9 rounded-full text-[var(--text-secondary)] hover:bg-[var(--surface-2)] transition-colors"
+          className="absolute top-3 right-3 grid place-items-center w-9 h-9 rounded-full text-[var(--text-secondary)] hover:bg-[var(--surface-2)] transition-colors z-10"
         >
           <X size={18} />
         </button>
-        <h2 className="text-xl font-bold text-[var(--text-primary)] text-center">
-          {title}
-        </h2>
-        {subtitle && (
-          <p className="text-sm text-[var(--text-secondary)] text-center mt-1 mb-5 max-w-md mx-auto">
-            {subtitle}
-          </p>
-        )}
-        <div className="mt-4">
+
+        {/* Branded header — makes the registration intent unmistakable */}
+        <div className="flex flex-col items-center text-center">
+          <span
+            className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.12em] px-3 py-1 rounded-full mb-3"
+            style={{
+              background: "rgba(36,113,163,0.12)",
+              color: "var(--accent)",
+            }}
+          >
+            <ShieldCheck size={13} /> {EYEBROW[mode]}
+          </span>
+          <h2 className="text-2xl font-extrabold text-[var(--text-primary)] leading-tight">
+            {title}
+          </h2>
+          {subtitle && (
+            <p className="text-sm text-[var(--text-secondary)] mt-1.5 max-w-md mx-auto">
+              {subtitle}
+            </p>
+          )}
+          <span className="inline-flex items-center gap-1.5 mt-3 text-xs font-semibold text-[var(--text-secondary)]">
+            <ScanLine size={13} /> Scan the QR or approve on your phone — no
+            password
+          </span>
+        </div>
+
+        <div className="mt-5">
           <EudiApprovalFlow
             mode={mode}
             onComplete={onComplete}

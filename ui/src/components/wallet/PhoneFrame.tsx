@@ -143,12 +143,14 @@ export function WalletFlow({
     <div
       role="group"
       aria-label={ariaLabel}
-      className="w-[clamp(248px,30vw,288px)] rounded-[2rem] border-[5px] border-gray-900 bg-white shadow-2xl overflow-hidden flex flex-col"
+      className="relative w-[clamp(228px,27vw,268px)] aspect-[9/19.5] rounded-[2.6rem] border-[7px] border-gray-900 bg-white shadow-2xl overflow-hidden flex flex-col"
     >
       <style>{`
         @keyframes wsimReveal { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
         .wsim-step { opacity: 0; animation: wsimReveal 0.45s ease forwards; }
       `}</style>
+      {/* Dynamic Island */}
+      <div className="pointer-events-none absolute top-[7px] left-1/2 -translate-x-1/2 w-[32%] h-[15px] rounded-full bg-gray-900 z-20" />
       <StatusBar />
       {brand && (
         <div className="px-4 pt-0.5 pb-1.5">
@@ -174,8 +176,7 @@ export function WalletFlow({
 
       <div
         key={step}
-        className="flex-1 px-4 pt-4 wsim-step"
-        style={{ minHeight: 312 }}
+        className="flex-1 min-h-0 overflow-y-auto px-4 pt-4 wsim-step"
       >
         {steps[step].body}
       </div>

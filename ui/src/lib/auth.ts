@@ -293,7 +293,7 @@ export const DEMO_PERSONAS = [
   // EHDS Chapter II / GDPR Art. 15-22 — patient primary-use access
   {
     username: "patient1",
-    displayName: "patient1",
+    displayName: "Maria Lindqvist",
     organisation: "AlphaKlinik Berlin (patient)",
     roles: ["PATIENT"],
     personaId: "patient",

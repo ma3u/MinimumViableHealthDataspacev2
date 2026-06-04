@@ -2,19 +2,252 @@
   "patients": [
     {
       "id": "14b9ebcd-e969-3704-476b-c5897c3c8d8a",
-      "name": "Aaron697 Columbus656 Kilback373",
-      "gender": "male",
-      "birthDate": "1969-04-10"
+      "name": "Maria Lindqvist",
+      "gender": "female",
+      "birthDate": "1984-03-12"
     }
   ],
   "stats": {
     "patients": 1,
-    "encounters": 32,
-    "conditions": 14,
-    "observations": 89,
-    "medications": 7,
-    "procedures": 4
+    "encounters": 12,
+    "conditions": 6,
+    "observations": 24,
+    "medications": 4,
+    "procedures": 5
   },
-  "timeline": [],
-  "restricted": true
+  "restricted": true,
+  "timeline": [
+    {
+      "fhirType": "Observation",
+      "fhirId": "obs-vo2-2025q2",
+      "date": "2025-05-18",
+      "display": "VO₂max 47 ml/kg/min",
+      "omopType": "Measurement",
+      "omopId": "3022318"
+    },
+    {
+      "fhirType": "Observation",
+      "fhirId": "obs-crp-2025q2",
+      "date": "2025-05-18",
+      "display": "C-reactive protein 0.8 mg/L",
+      "omopType": "Measurement",
+      "omopId": "3020460"
+    },
+    {
+      "fhirType": "Observation",
+      "fhirId": "obs-vitd-2025q2",
+      "date": "2025-05-12",
+      "display": "Vitamin D (25-OH) 48 ng/mL",
+      "omopType": "Measurement",
+      "omopId": "3026910"
+    },
+    {
+      "fhirType": "Encounter",
+      "fhirId": "enc-2025-05",
+      "date": "2025-05-12",
+      "display": "Preventive health review",
+      "omopType": "VisitOccurrence",
+      "omopId": "9202"
+    },
+    {
+      "fhirType": "Observation",
+      "fhirId": "obs-hrv-2025q1",
+      "date": "2025-03-04",
+      "display": "Heart rate variability 48 ms",
+      "omopType": "Measurement",
+      "omopId": "4239408"
+    },
+    {
+      "fhirType": "Observation",
+      "fhirId": "obs-hba1c-2025q1",
+      "date": "2025-02-26",
+      "display": "HbA1c 5.5 %",
+      "omopType": "Measurement",
+      "omopId": "3004410"
+    },
+    {
+      "fhirType": "Observation",
+      "fhirId": "obs-ldl-2025q1",
+      "date": "2025-02-26",
+      "display": "LDL cholesterol 118 mg/dL",
+      "omopType": "Measurement",
+      "omopId": "3028288"
+    },
+    {
+      "fhirType": "Procedure",
+      "fhirId": "proc-lipid-2025",
+      "date": "2025-02-26",
+      "display": "Lipid panel",
+      "omopType": "ProcedureOccurrence",
+      "omopId": "4055137"
+    },
+    {
+      "fhirType": "Encounter",
+      "fhirId": "enc-2025-02",
+      "date": "2025-02-26",
+      "display": "GP follow-up — cardiometabolic",
+      "omopType": "VisitOccurrence",
+      "omopId": "9202"
+    },
+    {
+      "fhirType": "MedicationRequest",
+      "fhirId": "med-vitd-2025",
+      "date": "2025-02-26",
+      "display": "Cholecalciferol 2000 IU daily",
+      "omopType": "DrugExposure",
+      "omopId": "19035704"
+    },
+    {
+      "fhirType": "Observation",
+      "fhirId": "obs-ferr-2024q4",
+      "date": "2024-11-19",
+      "display": "Ferritin 108 ng/mL",
+      "omopType": "Measurement",
+      "omopId": "3001122"
+    },
+    {
+      "fhirType": "Observation",
+      "fhirId": "obs-bmi-2024q4",
+      "date": "2024-11-19",
+      "display": "BMI 24.8 kg/m²",
+      "omopType": "Measurement",
+      "omopId": "3038553"
+    },
+    {
+      "fhirType": "Observation",
+      "fhirId": "obs-bp-2024q4",
+      "date": "2024-11-19",
+      "display": "Blood pressure 124/78 mmHg",
+      "omopType": "Measurement",
+      "omopId": "3004249"
+    },
+    {
+      "fhirType": "Encounter",
+      "fhirId": "enc-2024-11",
+      "date": "2024-11-19",
+      "display": "Annual check-up",
+      "omopType": "VisitOccurrence",
+      "omopId": "9202"
+    },
+    {
+      "fhirType": "Procedure",
+      "fhirId": "proc-ecg-2024",
+      "date": "2024-08-07",
+      "display": "12-lead ECG",
+      "omopType": "ProcedureOccurrence",
+      "omopId": "4154102"
+    },
+    {
+      "fhirType": "Condition",
+      "fhirId": "cond-vitd-2024",
+      "date": "2024-08-07",
+      "display": "Vitamin D deficiency",
+      "omopType": "ConditionOccurrence",
+      "omopId": "4319998"
+    },
+    {
+      "fhirType": "Encounter",
+      "fhirId": "enc-2024-08",
+      "date": "2024-08-07",
+      "display": "GP consultation — fatigue",
+      "omopType": "VisitOccurrence",
+      "omopId": "9202"
+    },
+    {
+      "fhirType": "MedicationRequest",
+      "fhirId": "med-statin-2024",
+      "date": "2024-03-15",
+      "display": "Atorvastatin 10 mg daily",
+      "omopType": "DrugExposure",
+      "omopId": "1545958"
+    },
+    {
+      "fhirType": "Condition",
+      "fhirId": "cond-lipid-2024",
+      "date": "2024-03-15",
+      "display": "Mixed hyperlipidaemia",
+      "omopType": "ConditionOccurrence",
+      "omopId": "432867"
+    },
+    {
+      "fhirType": "Observation",
+      "fhirId": "obs-ldl-2024q1",
+      "date": "2024-03-15",
+      "display": "LDL cholesterol 162 mg/dL",
+      "omopType": "Measurement",
+      "omopId": "3028288"
+    },
+    {
+      "fhirType": "Condition",
+      "fhirId": "cond-prediab-2023",
+      "date": "2023-10-02",
+      "display": "Pre-diabetes (impaired fasting glucose)",
+      "omopType": "ConditionOccurrence",
+      "omopId": "4271305"
+    },
+    {
+      "fhirType": "Observation",
+      "fhirId": "obs-hba1c-2023",
+      "date": "2023-10-02",
+      "display": "HbA1c 6.0 %",
+      "omopType": "Measurement",
+      "omopId": "3004410"
+    },
+    {
+      "fhirType": "Procedure",
+      "fhirId": "proc-ogtt-2023",
+      "date": "2023-10-02",
+      "display": "Oral glucose tolerance test",
+      "omopType": "ProcedureOccurrence",
+      "omopId": "4046263"
+    },
+    {
+      "fhirType": "Encounter",
+      "fhirId": "enc-2023-10",
+      "date": "2023-10-02",
+      "display": "GP consultation — metabolic screen",
+      "omopType": "VisitOccurrence",
+      "omopId": "9202"
+    },
+    {
+      "fhirType": "Condition",
+      "fhirId": "cond-migraine-2022",
+      "date": "2022-06-21",
+      "display": "Migraine without aura",
+      "omopType": "ConditionOccurrence",
+      "omopId": "318736"
+    },
+    {
+      "fhirType": "MedicationRequest",
+      "fhirId": "med-suma-2022",
+      "date": "2022-06-21",
+      "display": "Sumatriptan 50 mg as needed",
+      "omopType": "DrugExposure",
+      "omopId": "1112807"
+    },
+    {
+      "fhirType": "Procedure",
+      "fhirId": "proc-dxa-2022",
+      "date": "2022-02-14",
+      "display": "DXA bone density scan",
+      "omopType": "ProcedureOccurrence",
+      "omopId": "4011988"
+    },
+    {
+      "fhirType": "Encounter",
+      "fhirId": "enc-2021-09",
+      "date": "2021-09-09",
+      "display": "New-patient registration",
+      "omopType": "VisitOccurrence",
+      "omopId": "9202"
+    },
+    {
+      "fhirType": "Condition",
+      "fhirId": "cond-asthma-2021",
+      "date": "2021-09-09",
+      "display": "Mild intermittent asthma",
+      "omopType": "ConditionOccurrence",
+      "omopId": "317009"
+    }
+  ]
 }

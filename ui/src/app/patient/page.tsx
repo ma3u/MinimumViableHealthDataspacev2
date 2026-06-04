@@ -13,11 +13,13 @@ import {
   Salad,
   ScanLine,
   ShieldCheck,
+  ArrowRight,
   type LucideIcon,
 } from "lucide-react";
 import PageIntro from "@/components/PageIntro";
 import { SignInRequired } from "@/components/SignInRequired";
 import { RegisterDialog } from "@/components/RegisterDialog";
+import { HealthDetailModal } from "@/components/HealthDetailModal";
 import {
   personalHealth,
   insurer,
@@ -127,11 +129,22 @@ const HEALTH_ICON: Record<PersonalHealthSource["id"], LucideIcon> = {
  * NEXT_PUBLIC_DEMO_TK it shows the git-ignored personal screenshot; the public
  * default shows a brand-tinted icon header with generic, fictional source labels.
  */
-function PersonalHealthCard({ s }: { s: PersonalHealthSource }) {
+function PersonalHealthCard({
+  s,
+  onOpen,
+}: {
+  s: PersonalHealthSource;
+  onOpen: () => void;
+}) {
   const [imgOk, setImgOk] = useState(true);
   const Icon = HEALTH_ICON[s.id];
   return (
-    <div className="surface-card border border-[var(--border)] rounded-xl overflow-hidden">
+    <button
+      type="button"
+      onClick={onOpen}
+      aria-label={`${s.title} — view 3-month trends`}
+      className="surface-card border border-[var(--border)] rounded-xl overflow-hidden text-left w-full transition-all hover:border-[var(--accent)] hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
+    >
       {s.screenshot && imgOk ? (
         <div className="h-24 bg-white relative">
           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -181,8 +194,14 @@ function PersonalHealthCard({ s }: { s: PersonalHealthSource }) {
             </div>
           ))}
         </div>
+        <p
+          className="mt-3 flex items-center gap-1 text-xs font-semibold"
+          style={{ color: s.brand }}
+        >
+          View 3-month trends <ArrowRight size={13} />
+        </p>
       </div>
-    </div>
+    </button>
   );
 }
 
@@ -190,6 +209,9 @@ export default function PatientPage() {
   const [patients, setPatients] = useState<PatientListItem[]>([]);
   const [ehrModal, setEhrModal] = useState(false);
   const [ehrReceived, setEhrReceived] = useState(false);
+  const [detailSource, setDetailSource] = useState<PersonalHealthSource | null>(
+    null,
+  );
   const [stats, setStats] = useState<CohortStats | null>(null);
   const [selected, setSelected] = useState<string>("");
   const [timeline, setTimeline] = useState<TimelineEntry[]>([]);
@@ -207,6 +229,8 @@ export default function PatientPage() {
         setPatients(d.patients ?? []);
         setStats(d.stats ?? null);
         setRestricted(d.restricted === true);
+        // The restricted (own-record) response embeds the patient's timeline.
+        if (Array.isArray(d.timeline)) setTimeline(d.timeline);
         if (d.restricted && d.patients?.length === 1) {
           setSelected(d.patients[0].id);
         }
@@ -219,7 +243,9 @@ export default function PatientPage() {
   }, []);
 
   useEffect(() => {
-    if (!selected) return;
+    // Restricted (own-record) patients already have their timeline embedded in
+    // the /api/patient response — don't refetch (and overwrite) it.
+    if (!selected || restricted) return;
     setLoading(true);
     fetchApi(`/api/patient?patientId=${encodeURIComponent(selected)}`)
       .then(async (r) => {
@@ -234,7 +260,7 @@ export default function PatientPage() {
         if (e.message === "UNAUTHENTICATED") setUnauthenticated(true);
         setLoading(false);
       });
-  }, [selected]);
+  }, [selected, restricted]);
 
   const selectedPatient = patients.find((p) => p.id === selected);
 
@@ -287,17 +313,38 @@ export default function PatientPage() {
           docLink={{ href: "/docs/architecture", label: "Architecture Docs" }}
         />
 
-        {/* ── My personal health record (personal data + Request EHR) ──────── */}
+        {/* ── My personal health record (identity + Request EHR) ──────────── */}
         <section className="mb-8">
-          <div className="flex items-center justify-between gap-3 mb-3 flex-wrap">
-            <div>
-              <h2 className="text-lg font-bold text-[var(--text-primary)]">
-                My personal health record
-              </h2>
-              <p className="text-xs text-[var(--text-secondary)]">
-                My own fitness, lab and nutrition data — plus my ePA on request.
-                Synthetic · illustrative.
-              </p>
+          <div className="flex items-start justify-between gap-3 mb-4 flex-wrap">
+            <div className="flex items-center gap-3">
+              <span
+                className="grid place-items-center w-12 h-12 rounded-full text-white shrink-0"
+                style={{ background: "var(--role-patient-text)" }}
+              >
+                <Heart size={22} />
+              </span>
+              <div>
+                <h2 className="text-xl font-extrabold text-[var(--text-primary)] leading-tight">
+                  {selectedPatient?.name ?? "My personal health record"}
+                </h2>
+                <p className="text-xs text-[var(--text-secondary)]">
+                  {selectedPatient ? (
+                    <>
+                      <span className="capitalize">
+                        {selectedPatient.gender}
+                      </span>
+                      {selectedPatient.birthDate
+                        ? ` · born ${selectedPatient.birthDate}`
+                        : ""}
+                      {" · "}
+                      {timeline.length} event
+                      {timeline.length === 1 ? "" : "s"} on record
+                    </>
+                  ) : (
+                    "My own fitness, lab and nutrition data — plus my ePA on request."
+                  )}
+                </p>
+              </div>
             </div>
             <button
               type="button"
@@ -325,10 +372,21 @@ export default function PatientPage() {
 
           <div className="grid sm:grid-cols-3 gap-4">
             {personalHealth.map((s) => (
-              <PersonalHealthCard key={s.id} s={s} />
+              <PersonalHealthCard
+                key={s.id}
+                s={s}
+                onOpen={() => setDetailSource(s)}
+              />
             ))}
           </div>
         </section>
+
+        {detailSource && (
+          <HealthDetailModal
+            source={detailSource}
+            onClose={() => setDetailSource(null)}
+          />
+        )}
 
         {ehrModal && (
           <RegisterDialog

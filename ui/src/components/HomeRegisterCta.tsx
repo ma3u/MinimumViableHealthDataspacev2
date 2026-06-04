@@ -65,8 +65,8 @@ export function HomeRegisterCta() {
       {open && (
         <RegisterDialog
           mode="register"
-          title="Register with your EUDI Wallet"
-          subtitle="Scan the QR with your wallet, or approve on the simulated phone. No email, no password — you share only the exact claims requested."
+          title="Register in the European Health Dataspace"
+          subtitle="Create your EHDS patient account with your EUDI Wallet — you share only the exact identity claims requested (name, date of birth)."
           onClose={() => setOpen(false)}
           onComplete={onComplete}
         />
