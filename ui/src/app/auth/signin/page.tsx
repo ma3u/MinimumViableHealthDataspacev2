@@ -3,8 +3,11 @@
 import { signIn } from "next-auth/react";
 import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
-import { ShieldCheck, Shield } from "lucide-react";
+import { ShieldCheck, Shield, Smartphone } from "lucide-react";
 import { DEMO_PERSONAS, ROLE_LABELS } from "@/lib/auth";
+
+/** EUDI Wallet QR sign-in needs server API routes — absent in the static export. */
+const IS_STATIC = process.env.NEXT_PUBLIC_STATIC_EXPORT === "true";
 
 /** Error message mapping for common OAuth errors. */
 function oauthErrorMessage(error: string): string {
@@ -56,6 +59,27 @@ function SignInContent() {
         >
           Sign in with Keycloak
         </button>
+
+        {!IS_STATIC && (
+          <>
+            <div className="flex items-center gap-3 my-4">
+              <div className="h-px flex-1 bg-[var(--text-secondary)]/20" />
+              <span className="text-xs text-[var(--text-secondary)]">or</span>
+              <div className="h-px flex-1 bg-[var(--text-secondary)]/20" />
+            </div>
+            <a
+              href={`/auth/eudi-qr?callbackUrl=${encodeURIComponent(
+                callbackUrl,
+              )}`}
+              className="w-full inline-flex items-center justify-center gap-2 px-4 py-3 border border-[var(--accent)] text-[var(--accent)] hover:bg-[var(--accent)]/10 rounded-lg font-medium transition-colors"
+            >
+              <Smartphone size={18} /> Sign in with EUDI Wallet (QR)
+            </a>
+            <p className="text-[var(--text-secondary)] text-[11px] mt-2">
+              Patient login via OpenID4VP · verified against the EUDI sandbox
+            </p>
+          </>
+        )}
 
         <p className="text-[var(--text-secondary)] text-xs mt-4">
           EHDS-compliant authentication via Keycloak SSO
