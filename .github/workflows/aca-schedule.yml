@@ -60,7 +60,20 @@ jobs:
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             echo "action=${{ inputs.action }}" >> "$GITHUB_OUTPUT"
           elif [ "${{ github.event.schedule }}" = "0 5 * * 1-5" ]; then
-            echo "action=start" >> "$GITHUB_OUTPUT"
+            # Skip the morning scale-up on Berlin public holidays — otherwise a
+            # weekday holiday (e.g. Ostermontag, Christi Himmelfahrt) would run
+            # the full stack 07:00–20:00 for nobody. subdiv='BE' = Land Berlin
+            # (includes Internationaler Frauentag, which most states lack).
+            # The evening stop cron still runs, so the stack stays at 0.
+            TODAY=$(TZ=Europe/Berlin date +%F)
+            python3 -m pip install --quiet holidays
+            HOL=$(python3 -c "import holidays, datetime as t; print(1 if t.date.fromisoformat('$TODAY') in holidays.Germany(subdiv='BE') else 0)")
+            if [ "$HOL" = "1" ]; then
+              echo "Berlin public holiday ($TODAY) — skipping scale-up"
+              echo "action=noop" >> "$GITHUB_OUTPUT"
+            else
+              echo "action=start" >> "$GITHUB_OUTPUT"
+            fi
           else
             echo "action=stop" >> "$GITHUB_OUTPUT"
           fi
