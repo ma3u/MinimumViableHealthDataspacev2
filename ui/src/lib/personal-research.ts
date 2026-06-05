@@ -1,18 +1,12 @@
 /**
  * Predefined personal-research questions for the patient's own data (NLQ page).
- * Three questions, each answered from the patient's own data — fitness / lab /
- * nutrition trends PLUS relevant ePA (elektronische Patientenakte) events
- * (infections, surgery, vaccinations, diagnoses). EHDS Art. 3 / GDPR Art. 15
- * primary use, own records only. Synthetic · illustrative.
- *
- * Free-text questions are resolved to one of these by keyword (no LLM in the
- * static demo).
+ * Three questions, each answered from the patient's own data — multi-year
+ * fitness / lab / nutrition trends PLUS the ePA (elektronische Patientenakte)
+ * events that shaped them (infections spike CRP, the knee surgery dips VO₂max,
+ * etc.). The events are also marked on the trend charts. EHDS Art. 3 / GDPR
+ * Art. 15 primary use, own records only. Synthetic · illustrative.
  */
-import { personalHealth, type TrendSeries } from "@/lib/journey-config";
-
-const fitness = personalHealth.find((s) => s.id === "fitness")!;
-const labs = personalHealth.find((s) => s.id === "labs")!;
-const nutrition = personalHealth.find((s) => s.id === "nutrition")!;
+import type { TrendSeries } from "@/lib/journey-config";
 
 /** A discrete clinical event from the patient's ePA (electronic patient record). */
 export interface EpaEvent {
@@ -29,11 +23,53 @@ export interface ResearchQA {
   source: string;
   /** keywords used to resolve a free-text question to this answer */
   keywords: string[];
-  /** trend series shown beneath the answer */
+  /** multi-year trend series (events from `events` are marked on them) */
   trends: TrendSeries[];
-  /** relevant ePA events shown beneath the answer */
+  /** ePA events shown beneath, and marked on, the trends */
   events: EpaEvent[];
 }
+
+/** Fraction (0–1) of `date` within [from, to]. */
+function frac(from: string, to: string, date: string): number {
+  const f = Date.parse(from);
+  const t = Date.parse(to);
+  return (Date.parse(date) - f) / (t - f);
+}
+
+/**
+ * Generate `n` evenly-spaced points from `start` → `end`, adding a transient
+ * bump near each event date (positive = spike, negative = dip), so the curve
+ * reflects the ePA events.
+ */
+function gen(
+  from: string,
+  to: string,
+  start: number,
+  end: number,
+  n: number,
+  bumps: { date: string; mag: number }[] = [],
+  decimals = 0,
+): number[] {
+  const f = Math.pow(10, decimals);
+  const out: number[] = [];
+  for (let i = 0; i < n; i++) {
+    const x = i / (n - 1);
+    let v = start + (end - start) * x;
+    for (const b of bumps) {
+      const dist = Math.abs(x - frac(from, to, b.date)) * (n - 1);
+      v += b.mag * Math.max(0, 1 - dist / 1.5);
+    }
+    out.push(Math.round(Math.max(0, v) * f) / f);
+  }
+  return out;
+}
+
+const SPORT_FROM = "2020-06-01";
+const SPORT_TO = "2026-03-01";
+const NUTR_FROM = "2023-06-01";
+const NUTR_TO = "2026-03-01";
+const BREATH_FROM = "2021-06-01";
+const BREATH_TO = "2026-03-01";
 
 export const personalResearchQA: ResearchQA[] = [
   {
@@ -41,7 +77,7 @@ export const personalResearchQA: ResearchQA[] = [
     question:
       "I increased my daily sport routine over the last 3 months — do you see any effect?",
     answer:
-      "Yes — your cardio-fitness improved: VO₂max rose from 42 to 47 ml/kg/min and your heart-rate variability climbed. Your ePA confirms you fully recovered from your 2020 knee arthroscopy and trained through the period without setbacks — you're fitter than before.",
+      "Yes — your cardio-fitness improved: VO₂max recovered after your 2020 knee arthroscopy and has climbed to 47 ml/kg/min, with heart-rate variability up too. The dip on the graph marks the surgery; you're now fitter than before it.",
     source:
       "From your fitness band + ePA (elektronische Patientenakte) — your own data only.",
     keywords: [
@@ -62,7 +98,32 @@ export const personalResearchQA: ResearchQA[] = [
       "steps",
       "knee",
     ],
-    trends: [fitness.trends[0], fitness.trends[1]],
+    trends: [
+      {
+        label: "VO₂max",
+        unit: "ml/kg/min",
+        color: "#CA6F1E",
+        current: "47",
+        goodDirection: "up",
+        from: SPORT_FROM,
+        to: SPORT_TO,
+        points: gen(SPORT_FROM, SPORT_TO, 43, 47, 18, [
+          { date: "2020-09-22", mag: -6 },
+        ]),
+      },
+      {
+        label: "HRV",
+        unit: "ms",
+        color: "#2471A3",
+        current: "48",
+        goodDirection: "up",
+        from: SPORT_FROM,
+        to: SPORT_TO,
+        points: gen(SPORT_FROM, SPORT_TO, 40, 48, 18, [
+          { date: "2020-09-22", mag: -7 },
+        ]),
+      },
+    ],
     events: [
       {
         date: "2020-09-22",
@@ -76,7 +137,7 @@ export const personalResearchQA: ResearchQA[] = [
     question:
       "I changed my nutrition over 3 months — how are my cardiovascular and pre-diabetes markers?",
     answer:
-      "Trending the right way — inflammation (CRP) is down and your Mediterranean-plan adherence reached 86%. That directly helps the conditions on your ePA: your pre-diabetes (2023) and mixed hyperlipidaemia (2024), now managed alongside atorvastatin.",
+      "Trending the right way — inflammation (CRP) is down and your Mediterranean-plan adherence reached 86%. The markers show when your pre-diabetes (2023) and mixed hyperlipidaemia (2024) were diagnosed; both are improving since you changed your nutrition.",
     source: "From your lab panel, nutrition plan + ePA — your own data only.",
     keywords: [
       "nutrition",
@@ -97,7 +158,28 @@ export const personalResearchQA: ResearchQA[] = [
       "mediterranean",
       "vitamin d",
     ],
-    trends: [labs.trends[2], nutrition.trends[0]],
+    trends: [
+      {
+        label: "CRP",
+        unit: "mg/l",
+        color: "#7D3C98",
+        current: "0.8",
+        goodDirection: "down",
+        from: NUTR_FROM,
+        to: NUTR_TO,
+        points: gen(NUTR_FROM, NUTR_TO, 1.8, 0.8, 14, [], 1),
+      },
+      {
+        label: "Adherence",
+        unit: "%",
+        color: "#1E8449",
+        current: "86",
+        goodDirection: "up",
+        from: NUTR_FROM,
+        to: NUTR_TO,
+        points: gen(NUTR_FROM, NUTR_TO, 68, 86, 14),
+      },
+    ],
     events: [
       {
         date: "2023-10-02",
@@ -116,7 +198,7 @@ export const personalResearchQA: ResearchQA[] = [
     question:
       "I've been doing daily breathing exercises — any effect on stress and inflammation?",
     answer:
-      "Likely yes — CRP fell from 2.1 to 0.8 mg/L and your HRV improved. Set against your ePA respiratory history — mild asthma, plus a resolved bronchitis (2023) and COVID-19 (2022) — your inflammation is now low, and your seasonal influenza vaccinations are up to date.",
+      "Likely yes — CRP fell to 0.8 mg/L and your HRV improved. The spikes on the graph line up with your ePA infections (COVID-19 in 2022, bronchitis in 2023, flu in 2024); between them, and since the breathing exercises, your inflammation is low. Your seasonal influenza vaccinations are up to date.",
     source: "From your lab panel, fitness band + ePA — your own data only.",
     keywords: [
       "breath",
@@ -143,16 +225,57 @@ export const personalResearchQA: ResearchQA[] = [
       "vaccination",
       "immunization",
     ],
-    trends: [labs.trends[2], fitness.trends[1]],
-    events: [
+    trends: [
       {
-        date: "2024-12-03",
-        label: "Influenza (seasonal) — resolved",
-        type: "Infection",
+        label: "CRP",
+        unit: "mg/l",
+        color: "#7D3C98",
+        current: "0.8",
+        goodDirection: "down",
+        from: BREATH_FROM,
+        to: BREATH_TO,
+        points: gen(
+          BREATH_FROM,
+          BREATH_TO,
+          1.4,
+          0.8,
+          20,
+          [
+            { date: "2022-11-08", mag: 4.5 },
+            { date: "2023-03-20", mag: 3.5 },
+            { date: "2024-12-03", mag: 2.2 },
+          ],
+          1,
+        ),
       },
+      {
+        label: "HRV",
+        unit: "ms",
+        color: "#2471A3",
+        current: "48",
+        goodDirection: "up",
+        from: BREATH_FROM,
+        to: BREATH_TO,
+        points: gen(BREATH_FROM, BREATH_TO, 36, 48, 20, [
+          { date: "2022-11-08", mag: -7 },
+          { date: "2024-12-03", mag: -4 },
+        ]),
+      },
+    ],
+    events: [
       {
         date: "2022-11-08",
         label: "COVID-19, mild — recovered",
+        type: "Infection",
+      },
+      {
+        date: "2023-03-20",
+        label: "Acute bronchitis — resolved",
+        type: "Infection",
+      },
+      {
+        date: "2024-12-03",
+        label: "Influenza (seasonal) — resolved",
         type: "Infection",
       },
       {
@@ -171,8 +294,7 @@ export const personalResearchQA: ResearchQA[] = [
 
 /**
  * Resolve a free-text question to one of the predefined answers by keyword
- * overlap (the static demo has no LLM). Returns the best match, or null when the
- * question is outside the patient's own data.
+ * overlap (the static demo has no LLM). Returns the best match, or null.
  */
 export function matchPersonalResearch(text: string): ResearchQA | null {
   const t = text.toLowerCase();
@@ -190,4 +312,21 @@ export function matchPersonalResearch(text: string): ResearchQA | null {
     }
   }
   return bestHits > 0 ? best : null;
+}
+
+/** Markers for an event list on a series with a date range (for TrendChart). */
+export function eventMarkers(
+  s: TrendSeries,
+  events: EpaEvent[],
+  colorOf: (type: EpaEvent["type"]) => string,
+) {
+  if (!s.from || !s.to) return [];
+  return events
+    .map((e) => ({
+      x: frac(s.from!, s.to!, e.date),
+      color: colorOf(e.type),
+      label: `${e.type}: ${e.label}`,
+    }))
+    .filter((m) => m.x >= -0.02 && m.x <= 1.02)
+    .map((m) => ({ ...m, x: Math.max(0, Math.min(1, m.x)) }));
 }

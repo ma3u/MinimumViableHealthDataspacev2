@@ -92,16 +92,20 @@ export interface HealthMetric {
   value: string;
 }
 
-/** A ~3-month weekly trend series shown in the detail view. */
+/** A trend series shown in the detail view (3-month dashboards or multi-year NLQ). */
 export interface TrendSeries {
   label: string;
   unit: string;
   color: string;
   current: string;
-  /** oldest → newest, ~12 weekly points */
+  /** oldest → newest, evenly spaced from `from` to `to` */
   points: number[];
   /** which direction is the healthy one (for the ▲/▼ chip) */
   goodDirection: "up" | "down";
+  /** optional ISO date of points[0] — when set, ePA event markers can be placed */
+  from?: string;
+  /** optional ISO date of the last point */
+  to?: string;
 }
 
 /** A day in the nutrition weekly plan. */
