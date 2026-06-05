@@ -42,6 +42,31 @@ describe("HealthDetailModal", () => {
     expect(screen.getAllByText(/kcal/i).length).toBeGreaterThanOrEqual(7);
   });
 
+  it("shows weekly goals (30 plants/week, fibre, protein) with progress bars", () => {
+    render(<HealthDetailModal source={nutrition} onClose={() => {}} />);
+    expect(screen.getByText("Weekly goals")).toBeInTheDocument();
+    // 30-plants-per-week goal
+    expect(screen.getByText("/ 30 plants/wk")).toBeInTheDocument();
+    expect(screen.getByText("30 different fruit & veg")).toBeInTheDocument();
+    // fibre + protein appear both as a goal and as an intake trend
+    expect(screen.getAllByText("Fibre").length).toBeGreaterThanOrEqual(2);
+    expect(screen.getAllByText("Protein").length).toBeGreaterThanOrEqual(2);
+    expect(screen.getByText("WHO ≥ 25–30 g/day")).toBeInTheDocument();
+    expect(screen.getByText("≈ 1.2 g/kg body weight")).toBeInTheDocument();
+    // three progress bars, two of which are met (fibre 34≥30, protein 95≥75)
+    expect(screen.getAllByRole("progressbar")).toHaveLength(3);
+    expect(screen.getAllByText("met")).toHaveLength(2);
+    // plants (27/30) shows a text "to go" cue — not colour alone (WCAG 1.4.1)
+    expect(screen.getByText("3 to go")).toBeInTheDocument();
+  });
+
+  it("shows fibre and protein intake as 12-week trends", () => {
+    render(<HealthDetailModal source={nutrition} onClose={() => {}} />);
+    // Plants/Fibre/Protein each render once as a trend label (and once as a goal)
+    expect(screen.getAllByText("Plants").length).toBeGreaterThanOrEqual(2);
+    expect(screen.getAllByText(/g\/day/).length).toBeGreaterThanOrEqual(2);
+  });
+
   it("uses no Whoop trademark in any personal-health source", () => {
     for (const s of personalHealth) {
       expect(s.source).not.toContain("Whoop");
