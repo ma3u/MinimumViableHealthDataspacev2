@@ -115,6 +115,21 @@ export interface NutritionDay {
   focus: string;
 }
 
+/** A weekly nutrition target with this-week progress (e.g. 30 plants/week). */
+export interface WeeklyGoal {
+  label: string;
+  /** this week's running count */
+  current: number;
+  /** the weekly target */
+  target: number;
+  /** unit suffix shown after `current / target` (e.g. "plants/wk", "g/day") */
+  unit: string;
+  /** icon key resolved in the detail modal */
+  icon: "plants" | "fibre" | "protein";
+  /** short guideline rationale */
+  note: string;
+}
+
 /** A personal-health data source displayed on the /patient record. */
 export interface PersonalHealthSource {
   id: "fitness" | "labs" | "nutrition";
@@ -134,6 +149,8 @@ export interface PersonalHealthSource {
   trends: TrendSeries[];
   /** optional weekly plan (nutrition) */
   weeklyPlan?: NutritionDay[];
+  /** optional weekly nutrition goals (plant diversity / fibre / protein) */
+  weeklyGoals?: WeeklyGoal[];
 }
 
 /**
@@ -238,8 +255,33 @@ export const personalHealth: PersonalHealthSource[] = [
       { label: "Fibre", value: "34 g/d" },
       { label: "Adherence", value: "86 %" },
     ],
-    detail: "This week's plan, plus a 3-month adherence trend.",
+    detail:
+      "Weekly goals — 30 plants, fibre and protein — plus this week's plan and 3-month trends.",
     trends: [
+      {
+        label: "Plants",
+        unit: "distinct/wk",
+        color: "#148F77",
+        current: "27",
+        goodDirection: "up",
+        points: [18, 19, 20, 19, 21, 22, 23, 24, 25, 26, 26, 27],
+      },
+      {
+        label: "Fibre",
+        unit: "g/day",
+        color: "#CA6F1E",
+        current: "34",
+        goodDirection: "up",
+        points: [26, 27, 28, 27, 29, 30, 31, 31, 32, 33, 33, 34],
+      },
+      {
+        label: "Protein",
+        unit: "g/day",
+        color: "#2471A3",
+        current: "95",
+        goodDirection: "up",
+        points: [82, 84, 85, 86, 88, 89, 90, 91, 92, 93, 94, 95],
+      },
       {
         label: "Adherence",
         unit: "%",
@@ -247,6 +289,32 @@ export const personalHealth: PersonalHealthSource[] = [
         current: "86",
         goodDirection: "up",
         points: [70, 72, 74, 73, 76, 78, 80, 79, 82, 84, 85, 86],
+      },
+    ],
+    weeklyGoals: [
+      {
+        label: "Plants",
+        current: 27,
+        target: 30,
+        unit: "plants/wk",
+        icon: "plants",
+        note: "30 different fruit & veg",
+      },
+      {
+        label: "Fibre",
+        current: 34,
+        target: 30,
+        unit: "g/day",
+        icon: "fibre",
+        note: "WHO ≥ 25–30 g/day",
+      },
+      {
+        label: "Protein",
+        current: 95,
+        target: 75,
+        unit: "g/day",
+        icon: "protein",
+        note: "≈ 1.2 g/kg body weight",
       },
     ],
     weeklyPlan: [

@@ -8,9 +8,30 @@
  */
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
-import { X, TrendingUp, TrendingDown, CalendarDays } from "lucide-react";
+import {
+  X,
+  TrendingUp,
+  TrendingDown,
+  CalendarDays,
+  Target,
+  Check,
+  Leaf,
+  Wheat,
+  Drumstick,
+} from "lucide-react";
 import { TrendChart } from "@/components/charts/TrendChart";
-import type { PersonalHealthSource, TrendSeries } from "@/lib/journey-config";
+import type {
+  PersonalHealthSource,
+  TrendSeries,
+  WeeklyGoal,
+} from "@/lib/journey-config";
+
+/** Maps a weekly-goal icon key to its lucide glyph. */
+const GOAL_ICON: Record<WeeklyGoal["icon"], typeof Leaf> = {
+  plants: Leaf,
+  fibre: Wheat,
+  protein: Drumstick,
+};
 
 function deltaChip(s: TrendSeries) {
   const first = s.points[0];
@@ -96,6 +117,87 @@ export function HealthDetailModal({
         <p className="text-sm text-[var(--text-secondary)] mb-5">
           {source.detail}
         </p>
+
+        {/* Weekly nutrition goals — plant diversity / fibre / protein */}
+        {source.weeklyGoals && (
+          <div className="mb-5">
+            <p className="flex items-center gap-1.5 text-sm font-bold text-[var(--text-primary)] mb-2">
+              <Target
+                size={15}
+                aria-hidden="true"
+                style={{ color: source.brand }}
+              />
+              Weekly goals
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+              {source.weeklyGoals.map((g) => {
+                const Icon = GOAL_ICON[g.icon];
+                const met = g.current >= g.target;
+                const ratio = Math.min(1, g.current / g.target);
+                const accent = met ? "#1E8449" : "#CA6F1E";
+                return (
+                  <div
+                    key={g.label}
+                    className="rounded-xl border border-[var(--border)] bg-[var(--surface-2)] p-3"
+                  >
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="inline-flex items-center gap-1.5 text-xs font-bold text-[var(--text-primary)]">
+                        <Icon
+                          size={14}
+                          aria-hidden="true"
+                          style={{ color: accent }}
+                        />
+                        {g.label}
+                      </span>
+                      {/* Status chip in BOTH states — text cue, not colour alone (WCAG 1.4.1) */}
+                      <span
+                        className="inline-flex items-center gap-0.5 text-[10px] font-semibold px-1.5 py-0.5 rounded-full whitespace-nowrap"
+                        style={{ color: accent, background: `${accent}1a` }}
+                      >
+                        {met ? (
+                          <>
+                            <Check size={10} aria-hidden="true" /> met
+                          </>
+                        ) : (
+                          `${g.target - g.current} to go`
+                        )}
+                      </span>
+                    </div>
+                    <div className="flex items-baseline gap-1">
+                      <span className="text-lg font-black text-[var(--text-primary)] tabular-nums">
+                        {g.current}
+                      </span>
+                      <span className="text-xs text-[var(--text-secondary)]">
+                        / {g.target} {g.unit}
+                      </span>
+                    </div>
+                    <div
+                      role="progressbar"
+                      aria-valuenow={Math.min(g.current, g.target)}
+                      aria-valuemin={0}
+                      aria-valuemax={g.target}
+                      aria-valuetext={`${g.current} of ${g.target} ${g.unit}`}
+                      aria-label={`${g.label}: ${g.current} of ${g.target} ${
+                        g.unit
+                      } — ${
+                        met ? "goal met" : `${g.target - g.current} to go`
+                      }`}
+                      className="h-1.5 rounded-full bg-[var(--border)] mt-2 overflow-hidden"
+                    >
+                      <div
+                        className="h-full rounded-full transition-all"
+                        style={{ width: `${ratio * 100}%`, background: accent }}
+                      />
+                    </div>
+                    <p className="text-[10px] text-[var(--text-secondary)] mt-1">
+                      {g.note}
+                    </p>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
         {/* 3-month weekly trends */}
         <div className="space-y-4">
