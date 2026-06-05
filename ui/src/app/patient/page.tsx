@@ -16,6 +16,7 @@ import {
   ShieldCheck,
   ArrowRight,
   Sparkles,
+  Syringe,
   type LucideIcon,
 } from "lucide-react";
 import PageIntro from "@/components/PageIntro";
@@ -82,6 +83,11 @@ const FHIR_TYPE_TOKENS: Record<
     text: "var(--fhir-procedure)",
     bg: "var(--role-trust-bg)",
     icon: <Scissors size={12} />,
+  },
+  Immunization: {
+    text: "var(--fhir-encounter)",
+    bg: "var(--role-holder-bg)",
+    icon: <Syringe size={12} />,
   },
 };
 

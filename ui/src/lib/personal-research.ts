@@ -13,16 +13,31 @@ const fitness = personalHealth.find((s) => s.id === "fitness")!;
 const labs = personalHealth.find((s) => s.id === "labs")!;
 const nutrition = personalHealth.find((s) => s.id === "nutrition")!;
 
+/** A discrete clinical event from the patient's ePA (electronic patient record). */
+export interface EpaEvent {
+  date: string;
+  label: string;
+  type: "Infection" | "Surgery" | "Vaccination" | "Diagnosis";
+}
+
 export interface ResearchQA {
-  id: "sport" | "nutrition" | "breathing";
+  id:
+    | "sport"
+    | "nutrition"
+    | "breathing"
+    | "infections"
+    | "surgeries"
+    | "vaccines";
   question: string;
   answer: string;
   /** provenance line — always "own data only" */
   source: string;
-  /** trend series shown beneath the answer */
-  trends: TrendSeries[];
   /** keywords used to resolve a free-text question to this answer */
   keywords: string[];
+  /** trend series shown beneath the answer (metric questions) */
+  trends?: TrendSeries[];
+  /** discrete ePA events shown beneath the answer (record questions) */
+  events?: EpaEvent[];
 }
 
 export const personalResearchQA: ResearchQA[] = [
@@ -103,6 +118,115 @@ export const personalResearchQA: ResearchQA[] = [
       "anxiety",
       "hrv",
       "recovery",
+    ],
+  },
+  {
+    id: "infections",
+    question: "Which infections are recorded in my ePA?",
+    answer:
+      "Your ePA lists three infections over the past few years — seasonal influenza (2024), acute bronchitis (2023) and a mild COVID-19 episode (2022). All are marked resolved.",
+    source: "From your ePA (elektronische Patientenakte) — your own data only.",
+    keywords: [
+      "infection",
+      "infections",
+      "flu",
+      "influenza",
+      "covid",
+      "bronchitis",
+      "sick",
+      "illness",
+      "fever",
+      "virus",
+    ],
+    events: [
+      {
+        date: "2024-12-03",
+        label: "Influenza (seasonal) — resolved",
+        type: "Infection",
+      },
+      {
+        date: "2023-03-20",
+        label: "Acute bronchitis — resolved",
+        type: "Infection",
+      },
+      {
+        date: "2022-11-08",
+        label: "COVID-19, mild — recovered",
+        type: "Infection",
+      },
+    ],
+  },
+  {
+    id: "surgeries",
+    question: "What surgeries or operations have I had?",
+    answer:
+      "Your ePA shows two surgical procedures, both completed without recorded complications: a knee arthroscopy (2020) and a laparoscopic appendectomy (2018).",
+    source: "From your ePA (elektronische Patientenakte) — your own data only.",
+    keywords: [
+      "surgery",
+      "surgeries",
+      "operation",
+      "operations",
+      "operated",
+      "procedure",
+      "appendectomy",
+      "arthroscopy",
+      "knee",
+      "operative",
+    ],
+    events: [
+      {
+        date: "2020-09-22",
+        label: "Knee arthroscopy (meniscus repair)",
+        type: "Surgery",
+      },
+      {
+        date: "2018-06-14",
+        label: "Laparoscopic appendectomy",
+        type: "Surgery",
+      },
+    ],
+  },
+  {
+    id: "vaccines",
+    question: "Am I up to date on my vaccinations?",
+    answer:
+      "Mostly — your ePA shows seasonal influenza vaccines for 2024/25 and 2025/26 and a COVID-19 booster (2024). Your tetanus-diphtheria booster is from 2021, so the next one is due around 2031.",
+    source: "From your ePA (elektronische Patientenakte) — your own data only.",
+    keywords: [
+      "vaccine",
+      "vaccines",
+      "vaccination",
+      "vaccinations",
+      "immunization",
+      "immunisation",
+      "jab",
+      "shot",
+      "booster",
+      "flu shot",
+      "tetanus",
+    ],
+    events: [
+      {
+        date: "2025-10-15",
+        label: "Influenza vaccine 2025/26",
+        type: "Vaccination",
+      },
+      {
+        date: "2024-10-08",
+        label: "Influenza vaccine 2024/25",
+        type: "Vaccination",
+      },
+      {
+        date: "2024-04-02",
+        label: "COVID-19 mRNA booster",
+        type: "Vaccination",
+      },
+      {
+        date: "2021-05-18",
+        label: "Tetanus-diphtheria (Td) booster",
+        type: "Vaccination",
+      },
     ],
   },
 ];

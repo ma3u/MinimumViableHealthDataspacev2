@@ -14,6 +14,9 @@ import {
   Activity,
   Salad,
   Wind,
+  Bug,
+  Scissors,
+  Syringe,
   ShieldCheck,
   Send,
   Info,
@@ -31,6 +34,17 @@ const QA_ICON: Record<string, LucideIcon> = {
   sport: Activity,
   nutrition: Salad,
   breathing: Wind,
+  infections: Bug,
+  surgeries: Scissors,
+  vaccines: Syringe,
+};
+
+/** Badge colour per ePA event type. */
+const EPA_TYPE_COLOR: Record<string, string> = {
+  Infection: "#CA6F1E",
+  Surgery: "#2471A3",
+  Vaccination: "#1E8449",
+  Diagnosis: "#7D3C98",
 };
 
 interface Message {
@@ -68,7 +82,7 @@ export default function PersonalQueryPage() {
         <PageIntro
           title="Personal Research"
           icon={Sparkles}
-          description="Ask a question about your own health data. Answers are computed only from your own records (EHDS Art. 3 / GDPR Art. 15 — primary use). Synthetic · illustrative — not medical advice."
+          description="Ask a question about your own health data — fitness, lab and nutrition trends, or your ePA record (infections, surgeries, vaccinations and more). Answers are computed only from your own records (EHDS Art. 3 / GDPR Art. 15 — primary use). Synthetic · illustrative — not medical advice."
           prevStep={{ href: "/patient", label: "My Health Records" }}
           nextStep={{ href: "/patient/insights", label: "Research Insights" }}
           infoText="This is primary use: you query your own data. It never leaves your record and is not compared against other patients. The static demo matches your free-text question to a predefined answer by keyword (no AI model)."
@@ -113,11 +127,38 @@ export default function PersonalQueryPage() {
                 </p>
                 {m.qa && (
                   <>
-                    <div className="grid sm:grid-cols-2 gap-2.5">
-                      {m.qa.trends.map((t) => (
-                        <MetricTrendRow key={t.label} s={t} />
-                      ))}
-                    </div>
+                    {m.qa.trends && (
+                      <div className="grid sm:grid-cols-2 gap-2.5">
+                        {m.qa.trends.map((t) => (
+                          <MetricTrendRow key={t.label} s={t} />
+                        ))}
+                      </div>
+                    )}
+                    {m.qa.events && (
+                      <ul className="space-y-1.5">
+                        {m.qa.events.map((e) => (
+                          <li
+                            key={e.label}
+                            className="flex items-center gap-2.5 rounded-lg bg-[var(--surface-2)] border border-[var(--border)] px-3 py-2"
+                          >
+                            <span
+                              className="text-[10px] font-bold px-2 py-0.5 rounded-full text-white shrink-0 w-[88px] text-center"
+                              style={{
+                                background: EPA_TYPE_COLOR[e.type] ?? "#7D3C98",
+                              }}
+                            >
+                              {e.type}
+                            </span>
+                            <span className="text-xs font-mono text-[var(--text-secondary)] shrink-0">
+                              {e.date}
+                            </span>
+                            <span className="text-sm text-[var(--text-primary)]">
+                              {e.label}
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
                     <p className="flex items-center gap-1.5 text-[11px] text-[var(--text-secondary)] mt-3">
                       <ShieldCheck size={12} /> {m.qa.source}
                     </p>
