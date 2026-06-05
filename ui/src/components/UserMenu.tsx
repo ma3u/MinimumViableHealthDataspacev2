@@ -550,6 +550,13 @@ export default function UserMenu() {
                 markSessionSwitch();
                 if (IS_STATIC) {
                   clearDemoPersona();
+                  // Navigate home so the signed-out patient's data leaves the
+                  // screen (full reload → fresh, signed-out state).
+                  const base =
+                    process.env.NEXT_PUBLIC_STATIC_EXPORT === "true"
+                      ? "/MinimumViableHealthDataspacev2"
+                      : "";
+                  window.location.href = `${base}/`;
                   return;
                 }
                 // Sign out of Keycloak's SSO session too — not just the
