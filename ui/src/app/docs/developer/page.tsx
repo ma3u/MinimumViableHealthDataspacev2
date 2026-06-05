@@ -777,19 +777,19 @@ open http://traefik.localhost`}</pre>
                 Participant, DataProduct, Contract, HDABApproval, OdrlPolicy
               </li>
               <li>
-                <span className="text-[#148F77] dark:text-[#76D7C4] font-medium">
+                <span className="text-[#0F766E] dark:text-[#76D7C4] font-medium">
                   L2 HealthDCAT-AP:
                 </span>{" "}
                 Catalogue, HealthDataset, Distribution, DataService
               </li>
               <li>
-                <span className="text-[#1E8449] dark:text-[#82E0AA] font-medium">
+                <span className="text-[#157A3C] dark:text-[#82E0AA] font-medium">
                   L3 FHIR R4:
                 </span>{" "}
                 Patient, Encounter, Condition, Observation, MedicationRequest
               </li>
               <li>
-                <span className="text-[#CA6F1E] dark:text-[#F5B041] font-medium">
+                <span className="text-[#9A5512] dark:text-[#F5B041] font-medium">
                   L4 OMOP CDM:
                 </span>{" "}
                 OMOPPerson, ConditionOccurrence, DrugExposure, Measurement

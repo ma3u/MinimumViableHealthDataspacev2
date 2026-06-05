@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { fetchApi } from "@/lib/api";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import {
   Activity,
   Heart,
@@ -28,6 +28,10 @@ import {
   insurer,
   type PersonalHealthSource,
 } from "@/lib/journey-config";
+import {
+  accessibleBrandText,
+  brandBackgroundForWhiteText,
+} from "@/lib/accessible-color";
 
 interface PatientListItem {
   id: string;
@@ -146,6 +150,9 @@ function PersonalHealthCard({
 }) {
   const [imgOk, setImgOk] = useState(true);
   const Icon = HEALTH_ICON[s.id];
+  // Brand accents fail WCAG AA as small text, so derive theme-aware,
+  // contrast-safe variants for the "View 3-month trends" CTA.
+  const brandText = accessibleBrandText(s.brand);
   return (
     <button
       type="button"
@@ -164,7 +171,7 @@ function PersonalHealthCard({
           />
           <span
             className="absolute top-1.5 left-1.5 text-[10px] font-bold px-2 py-0.5 rounded-full text-white"
-            style={{ background: s.brand }}
+            style={{ background: brandBackgroundForWhiteText(s.brand) }}
           >
             {s.source}
           </span>
@@ -203,8 +210,13 @@ function PersonalHealthCard({
           ))}
         </div>
         <p
-          className="mt-3 flex items-center gap-1 text-xs font-semibold"
-          style={{ color: s.brand }}
+          className="mt-3 flex items-center gap-1 text-xs font-semibold text-[var(--brand-l)] dark:text-[var(--brand-d)]"
+          style={
+            {
+              "--brand-l": brandText.light,
+              "--brand-d": brandText.dark,
+            } as CSSProperties
+          }
         >
           View 3-month trends <ArrowRight size={13} />
         </p>
@@ -358,7 +370,7 @@ export default function PatientPage() {
               type="button"
               onClick={() => setEhrModal(true)}
               className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-white text-sm font-semibold shadow-sm transition-all hover:scale-[1.02] shrink-0"
-              style={{ background: insurer.brand }}
+              style={{ background: brandBackgroundForWhiteText(insurer.brand) }}
             >
               <ScanLine size={16} aria-hidden="true" />
               {ehrReceived ? "Request more EHR data" : "Request EHR data"}
