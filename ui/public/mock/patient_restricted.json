@@ -10,10 +10,10 @@
   "stats": {
     "patients": 1,
     "encounters": 12,
-    "conditions": 6,
+    "conditions": 9,
     "observations": 24,
     "medications": 4,
-    "procedures": 5
+    "procedures": 7
   },
   "restricted": true,
   "timeline": [
@@ -248,6 +248,78 @@
       "display": "Mild intermittent asthma",
       "omopType": "ConditionOccurrence",
       "omopId": "317009"
+    },
+    {
+      "fhirType": "Immunization",
+      "fhirId": "imm-flu-2025",
+      "date": "2025-10-15",
+      "display": "Influenza vaccine 2025/26",
+      "omopType": "DrugExposure",
+      "omopId": "40213154"
+    },
+    {
+      "fhirType": "Immunization",
+      "fhirId": "imm-flu-2024",
+      "date": "2024-10-08",
+      "display": "Influenza vaccine 2024/25",
+      "omopType": "DrugExposure",
+      "omopId": "40213154"
+    },
+    {
+      "fhirType": "Condition",
+      "fhirId": "cond-flu-2024",
+      "date": "2024-12-03",
+      "display": "Influenza (seasonal) — resolved",
+      "omopType": "ConditionOccurrence",
+      "omopId": "4266367"
+    },
+    {
+      "fhirType": "Immunization",
+      "fhirId": "imm-covid-2024",
+      "date": "2024-04-02",
+      "display": "COVID-19 mRNA booster",
+      "omopType": "DrugExposure",
+      "omopId": "724904"
+    },
+    {
+      "fhirType": "Condition",
+      "fhirId": "cond-bronchitis-2023",
+      "date": "2023-03-20",
+      "display": "Acute bronchitis — resolved",
+      "omopType": "ConditionOccurrence",
+      "omopId": "260139"
+    },
+    {
+      "fhirType": "Condition",
+      "fhirId": "cond-covid-2022",
+      "date": "2022-11-08",
+      "display": "COVID-19, mild — recovered",
+      "omopType": "ConditionOccurrence",
+      "omopId": "37311061"
+    },
+    {
+      "fhirType": "Immunization",
+      "fhirId": "imm-tdap-2021",
+      "date": "2021-05-18",
+      "display": "Tetanus-diphtheria (Td) booster",
+      "omopType": "DrugExposure",
+      "omopId": "529411"
+    },
+    {
+      "fhirType": "Procedure",
+      "fhirId": "proc-knee-2020",
+      "date": "2020-09-22",
+      "display": "Knee arthroscopy (meniscus repair)",
+      "omopType": "ProcedureOccurrence",
+      "omopId": "4006988"
+    },
+    {
+      "fhirType": "Procedure",
+      "fhirId": "proc-appendectomy-2018",
+      "date": "2018-06-14",
+      "display": "Laparoscopic appendectomy",
+      "omopType": "ProcedureOccurrence",
+      "omopId": "4232476"
     }
   ]
 }
