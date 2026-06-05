@@ -236,6 +236,7 @@ export const EHR_TRANSFER_STEPS: WalletStep[] = [
     ms: 2200,
     primary: "Authorising…",
     accent: insurer.brand,
+    auto: true,
     body: (
       <div className="text-center pt-8">
         <div className="mx-auto mb-3 w-10 h-10 rounded-full border-2 border-gray-200 border-t-gray-700 animate-spin" />

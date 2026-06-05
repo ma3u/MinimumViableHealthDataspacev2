@@ -15,13 +15,11 @@ import {
   KeyRound,
   Scale,
   Workflow,
-  ScanLine,
-  ArrowRight,
-  Info,
 } from "lucide-react";
 import { DemoPersonaCards } from "@/components/DemoPersonaCards";
 import { PersonaJourneyCards } from "@/components/PersonaJourneyCards";
 import { FeatureCardGrid } from "@/components/FeatureCardGrid";
+import { HomeRegisterCta } from "@/components/HomeRegisterCta";
 
 /* ── Page ─────────────────────────────────────────────────────────────────── */
 
@@ -111,35 +109,7 @@ export default function Home() {
         </div>
 
         {/* ── Register with the EUDI Wallet (passwordless) ── */}
-        <div className="mt-7 flex flex-wrap items-center gap-x-5 gap-y-3">
-          <Link
-            href="/journey"
-            className="group inline-flex items-center gap-2.5 px-6 py-3.5 rounded-xl text-white font-semibold text-base shadow-md transition-all hover:scale-[1.02]"
-            style={{ background: "linear-gradient(135deg,#7D3C98,#2471A3)" }}
-          >
-            <ScanLine size={20} aria-hidden="true" />
-            Register with EUDI Wallet
-            <ArrowRight
-              size={18}
-              aria-hidden="true"
-              className="group-hover:translate-x-1 transition-transform"
-            />
-          </Link>
-          <Link
-            href="/journey"
-            title="Passwordless & sovereign — no email or password. You approve on your phone and share only the exact claims requested. Tap to see the full patient journey."
-            className="inline-flex items-center gap-1.5 text-sm font-medium text-[var(--accent)] hover:underline"
-          >
-            <Info size={15} aria-hidden="true" />
-            Why we need EUDI Wallet for the patient journey
-          </Link>
-          <Link
-            href="/auth/eudi-qr?mode=login"
-            className="inline-flex items-center gap-1.5 text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--accent)] transition-colors"
-          >
-            Already have it? Sign in <ArrowRight size={14} aria-hidden="true" />
-          </Link>
-        </div>
+        <HomeRegisterCta />
       </section>
 
       {/* ── Why EHDS Matters ─────────────────────────────────────────────── */}

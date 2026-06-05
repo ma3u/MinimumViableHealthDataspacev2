@@ -1,12 +1,12 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
-import { render, screen, act } from "@testing-library/react";
+import { render, screen, act, fireEvent } from "@testing-library/react";
 import { WalletFlow } from "@/components/wallet/PhoneFrame";
 import {
   REGISTER_STEPS,
   LOGIN_STEPS,
   EHR_TRANSFER_STEPS,
 } from "@/components/wallet/flows";
-import { insurer, donationSources } from "@/lib/journey-config";
+import { insurer, donationSources, personalHealth } from "@/lib/journey-config";
 
 afterEach(() => vi.useRealTimers());
 
@@ -67,6 +67,45 @@ describe("wallet flows", () => {
     expect(insurer.name).toContain("AlphaKasse");
     expect(insurer.name).not.toContain("TK");
     expect(insurer.screenshot).toBeNull();
+  });
+
+  it("interactive mode advances on click and fires onComplete on the last step", () => {
+    const onComplete = vi.fn();
+    const onCancel = vi.fn();
+    render(
+      <WalletFlow
+        interactive
+        loop={false}
+        steps={LOGIN_STEPS}
+        onComplete={onComplete}
+        onCancel={onCancel}
+      />,
+    );
+    expect(screen.getByText(/Sign in to EHDS/i)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Approve" }));
+    expect(screen.getByText(/Welcome back/i)).toBeInTheDocument();
+    expect(onComplete).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole("button", { name: "Done" }));
+    expect(onComplete).toHaveBeenCalledTimes(1);
+    expect(onCancel).not.toHaveBeenCalled();
+  });
+
+  it("personal-health sources are fictional + (fitness/labs) image-free by default", () => {
+    expect(personalHealth.map((s) => s.id)).toEqual([
+      "fitness",
+      "labs",
+      "nutrition",
+    ]);
+    for (const s of personalHealth) {
+      expect(s.metrics.length).toBeGreaterThan(0);
+      for (const brand of ["Whoop", "Blood Test Oracle", "TK", "Techniker"]) {
+        expect(s.source).not.toContain(brand);
+      }
+    }
+    expect(
+      personalHealth.find((s) => s.id === "fitness")?.screenshot,
+    ).toBeNull();
+    expect(personalHealth.find((s) => s.id === "labs")?.screenshot).toBeNull();
   });
 
   it("donation sources are fictional + image-free in the public default", () => {

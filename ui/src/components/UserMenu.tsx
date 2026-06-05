@@ -177,7 +177,8 @@ export default function UserMenu() {
     IS_STATIC && demoPersona
       ? {
           user: {
-            name: demoPersona.username,
+            // Friendly display name (e.g. "Maria Lindqvist") in the nav chip.
+            name: demoPersona.displayName,
             email: `${demoPersona.username}@demo.ehds.eu`,
           },
           roles: [...demoPersona.roles],
@@ -401,7 +402,7 @@ export default function UserMenu() {
         aria-label="User menu"
       >
         <Shield size={14} className={shieldClass} />
-        <span className="max-w-[90px] truncate text-xs font-medium">
+        <span className="max-w-[140px] truncate text-xs font-medium">
           {username}
           {IS_STATIC && (
             <span className="ml-1 text-[9px] text-amber-400">(demo)</span>
