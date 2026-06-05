@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import EudiQrPage from "@/app/auth/eudi-qr/page";
 import { signIn } from "next-auth/react";
 
@@ -54,7 +54,8 @@ describe("EudiQrPage", () => {
   });
 
   it("signs in when the wallet completes the presentation", async () => {
-    vi.useFakeTimers();
+    // Real timers + waitFor (not fake timers): the async start() resolves on the
+    // microtask queue, which fake-timer advancement raced — making this flaky.
     vi.stubGlobal(
       "fetch",
       vi.fn(async (url: string) =>
@@ -75,10 +76,15 @@ describe("EudiQrPage", () => {
       ),
     );
     render(<EudiQrPage />);
-    // flush start() → phase "scanning" → poll effect registers
-    await vi.advanceTimersByTimeAsync(0);
-    // fire the 2s poll → status completed → signIn
-    await vi.advanceTimersByTimeAsync(2100);
+    // start() → scanning → poll (every 2s) → status completed → signIn
+    await waitFor(
+      () =>
+        expect(signIn).toHaveBeenCalledWith(
+          "eudi-wallet",
+          expect.objectContaining({ sid: "s2" }),
+        ),
+      { timeout: 6000 },
+    );
     expect(signIn).toHaveBeenCalledWith(
       "eudi-wallet",
       expect.objectContaining({ sid: "s2" }),

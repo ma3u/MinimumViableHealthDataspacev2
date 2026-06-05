@@ -34,7 +34,7 @@ describe("Personal Research (NLQ) page", () => {
     expect(screen.getByText(/cardio-fitness improved/i)).toBeInTheDocument();
     expect(screen.getByText("VO₂max")).toBeInTheDocument();
     // ePA event folded into the answer
-    expect(screen.getByText("Related ePA events")).toBeInTheDocument();
+    expect(screen.getByText(/Related ePA events/)).toBeInTheDocument();
     expect(screen.getByText(/meniscus repair/i)).toBeInTheDocument();
     expect(screen.getByText("Surgery")).toBeInTheDocument();
   });

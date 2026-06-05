@@ -24,6 +24,7 @@ import { MetricTrendRow } from "@/components/charts/MetricTrendRow";
 import {
   personalResearchQA,
   matchPersonalResearch,
+  eventMarkers,
   type ResearchQA,
 } from "@/lib/personal-research";
 
@@ -163,13 +164,21 @@ export default function PersonalQueryPage() {
                       </p>
                       <div className="grid sm:grid-cols-2 gap-2.5">
                         {x.qa.trends.map((t) => (
-                          <MetricTrendRow key={t.label} s={t} />
+                          <MetricTrendRow
+                            key={t.label}
+                            s={t}
+                            markers={eventMarkers(
+                              t,
+                              x.qa!.events,
+                              (type) => EPA_TYPE_COLOR[type] ?? "#7D3C98",
+                            )}
+                          />
                         ))}
                       </div>
                       {x.qa.events.length > 0 && (
                         <ul className="space-y-1.5 mt-2.5">
                           <li className="text-[10px] font-bold uppercase tracking-wide text-[var(--text-secondary)]">
-                            Related ePA events
+                            Related ePA events · marked on the trends
                           </li>
                           {x.qa.events.map((e) => (
                             <li
