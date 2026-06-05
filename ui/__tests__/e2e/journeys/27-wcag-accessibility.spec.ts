@@ -178,19 +178,19 @@ test.describe("WCAG 2.2 AA — Light Mode (structural)", () => {
 /* ── Contrast audit (ratchet) ────────────────────────────────────── */
 /* Track current contrast-violation count and prevent regressions.
  *
- * Current baseline = 20 nodes across Developer Guide + Architecture in
- * light mode. Tracked separately as part of issue #25 follow-up; lower
- * the ratchet as fixes land, never raise it without an explicit ADR.
- *
- * Override via env var `WCAG_RATCHET` lets the CI workflow fail-fast
- * locally while accepting the current state in CI until those pages
- * are fixed. */
+ * Baseline is now 0: the Patient Journey, Developer Guide and Architecture
+ * contrast violations were fixed (theme-aware accessible brand colours, see
+ * `src/lib/accessible-color.ts`). Never raise the ratchet without an explicit
+ * ADR. Override via env var `WCAG_RATCHET` for local experimentation. */
 
-const MAX_CONTRAST_VIOLATIONS = Number(process.env.WCAG_RATCHET ?? "20");
+const MAX_CONTRAST_VIOLATIONS = Number(process.env.WCAG_RATCHET ?? "0");
 
 test("J598 Contrast audit — ratchet (max allowed across all pages)", async ({
   page,
 }) => {
+  // Runs axe on every public page in both themes — well past the default
+  // 30s budget — so give the aggregate sweep room to finish.
+  test.setTimeout(120_000);
   let totalNodes = 0;
   const summary: string[] = [];
 
@@ -239,6 +239,8 @@ test("J598 Contrast audit — ratchet (max allowed across all pages)", async ({
 /* ── Full summary (informational) ────────────────────────────────── */
 
 test("J599 WCAG summary — all rules, all pages", async ({ page }) => {
+  // Aggregate sweep over every page × theme — exceeds the default 30s budget.
+  test.setTimeout(120_000);
   let totalViolations = 0;
   const summary: string[] = [];
 
