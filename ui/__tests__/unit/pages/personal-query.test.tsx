@@ -13,9 +13,16 @@ afterEach(() => {
 });
 
 describe("Personal Research (NLQ) page", () => {
-  it("answers a typed free-text question only after Send, with a trend from own data", () => {
+  it("keeps exactly 3 questions", () => {
+    expect(personalResearchQA.map((q) => q.id)).toEqual([
+      "sport",
+      "nutrition",
+      "breathing",
+    ]);
+  });
+
+  it("answers a typed question after Send with a trend AND a related ePA event", () => {
     render(<PersonalQueryPage />);
-    // nothing shown before sending
     expect(screen.queryByText(/cardio-fitness improved/i)).toBeNull();
     const input = screen.getByLabelText(
       /Ask a question about your own health data/i,
@@ -26,16 +33,27 @@ describe("Personal Research (NLQ) page", () => {
     fireEvent.click(screen.getByLabelText(/Send question/i));
     expect(screen.getByText(/cardio-fitness improved/i)).toBeInTheDocument();
     expect(screen.getByText("VO₂max")).toBeInTheDocument();
-    expect(screen.getByText(/your own data only/i)).toBeInTheDocument();
+    // ePA event folded into the answer
+    expect(screen.getByText("Related ePA events")).toBeInTheDocument();
+    expect(screen.getByText(/meniscus repair/i)).toBeInTheDocument();
+    expect(screen.getByText("Surgery")).toBeInTheDocument();
   });
 
-  it("a suggestion chip sends the question and reveals the answer", () => {
+  it("a suggestion fills the box and submits, showing the answer below", () => {
     render(<PersonalQueryPage />);
-    fireEvent.click(screen.getByText(/increased my daily sport routine/i));
-    expect(screen.getByText(/cardio-fitness improved/i)).toBeInTheDocument();
+    fireEvent.click(screen.getByText(/breathing exercises/i));
+    const input = screen.getByLabelText(
+      /Ask a question about your own health data/i,
+    ) as HTMLInputElement;
+    // the question was copied into the box
+    expect(input.value).toMatch(/breathing exercises/i);
+    // breathing answer folds in respiratory ePA events
+    expect(screen.getByText(/CRP fell/i)).toBeInTheDocument();
+    expect(screen.getAllByText("Infection").length).toBeGreaterThan(0);
+    expect(screen.getByText("Vaccination")).toBeInTheDocument();
   });
 
-  it("out-of-scope questions get a graceful own-data-only fallback", () => {
+  it("out-of-scope questions get a graceful own-data fallback", () => {
     render(<PersonalQueryPage />);
     const input = screen.getByLabelText(
       /Ask a question about your own health data/i,
@@ -47,50 +65,22 @@ describe("Personal Research (NLQ) page", () => {
     ).toBeInTheDocument();
   });
 
-  it("answers an ePA question (infections) with a list of events", () => {
-    render(<PersonalQueryPage />);
-    const input = screen.getByLabelText(
-      /Ask a question about your own health data/i,
-    );
-    fireEvent.change(input, {
-      target: { value: "which infections do I have?" },
-    });
-    fireEvent.click(screen.getByLabelText(/Send question/i));
-    expect(screen.getByText(/three infections/i)).toBeInTheDocument();
-    // "Acute bronchitis" appears in both the answer and the event row
-    expect(
-      screen.getAllByText(/Acute bronchitis/i).length,
-    ).toBeGreaterThanOrEqual(2);
-    expect(screen.getAllByText("Infection").length).toBe(3);
-    expect(
-      screen.getByText(/elektronische Patientenakte/i),
-    ).toBeInTheDocument();
-  });
-
-  it("matchPersonalResearch maps keywords to the right answer (or null)", () => {
+  it("matchPersonalResearch maps keywords to one of the 3 answers (or null)", () => {
     expect(matchPersonalResearch("my running and VO2")?.id).toBe("sport");
-    expect(matchPersonalResearch("breathing and stress")?.id).toBe("breathing");
     expect(matchPersonalResearch("nutrition and cholesterol")?.id).toBe(
       "nutrition",
     );
-    expect(matchPersonalResearch("which infections have I had")?.id).toBe(
-      "infections",
+    expect(matchPersonalResearch("breathing, asthma and covid")?.id).toBe(
+      "breathing",
     );
-    expect(matchPersonalResearch("any surgeries or operations")?.id).toBe(
-      "surgeries",
-    );
-    expect(
-      matchPersonalResearch("am I up to date on my vaccinations")?.id,
-    ).toBe("vaccines");
     expect(matchPersonalResearch("hello world")).toBeNull();
   });
 
-  it("every Q&A is computed from the patient's own data only", () => {
+  it("every Q&A draws on own data — trends + ePA events", () => {
     for (const qa of personalResearchQA) {
       expect(qa.source).toMatch(/own data only/i);
-      expect(
-        (qa.trends?.length ?? 0) + (qa.events?.length ?? 0),
-      ).toBeGreaterThan(0);
+      expect(qa.trends.length).toBeGreaterThan(0);
+      expect(qa.events.length).toBeGreaterThan(0);
       expect(qa.keywords.length).toBeGreaterThan(0);
     }
   });
