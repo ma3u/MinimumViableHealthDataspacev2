@@ -78,10 +78,11 @@ export const donationSources: DataSource[] = [
   },
   {
     id: "labs",
-    label: DEMO_TK ? "Blood Test Oracle" : "Lab results",
+    label: "Lab results",
     sublabel: "Ferritin · B12 · CRP · omega-3",
     brand: "#7D3C98",
-    screenshot: DEMO_TK ? `${BASE_PATH}/journey/bloodtest-labs.png` : null,
+    // No third-party lab-brand screenshot.
+    screenshot: null,
   },
 ];
 
@@ -183,9 +184,10 @@ export const personalHealth: PersonalHealthSource[] = [
   {
     id: "labs",
     title: "Lab results",
-    source: DEMO_TK ? "Blood Test Oracle" : "Lab panel",
+    source: "Lab panel",
     brand: "#7D3C98",
-    screenshot: DEMO_TK ? `${BASE_PATH}/journey/bloodtest-labs.png` : null,
+    // No third-party lab-brand screenshot — the metrics + trend charts carry it.
+    screenshot: null,
     metrics: [
       { label: "Ferritin", value: "112 ng/ml" },
       { label: "Vitamin D", value: "48 ng/ml" },
