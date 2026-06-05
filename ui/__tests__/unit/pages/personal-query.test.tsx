@@ -47,19 +47,50 @@ describe("Personal Research (NLQ) page", () => {
     ).toBeInTheDocument();
   });
 
+  it("answers an ePA question (infections) with a list of events", () => {
+    render(<PersonalQueryPage />);
+    const input = screen.getByLabelText(
+      /Ask a question about your own health data/i,
+    );
+    fireEvent.change(input, {
+      target: { value: "which infections do I have?" },
+    });
+    fireEvent.click(screen.getByLabelText(/Send question/i));
+    expect(screen.getByText(/three infections/i)).toBeInTheDocument();
+    // "Acute bronchitis" appears in both the answer and the event row
+    expect(
+      screen.getAllByText(/Acute bronchitis/i).length,
+    ).toBeGreaterThanOrEqual(2);
+    expect(screen.getAllByText("Infection").length).toBe(3);
+    expect(
+      screen.getByText(/elektronische Patientenakte/i),
+    ).toBeInTheDocument();
+  });
+
   it("matchPersonalResearch maps keywords to the right answer (or null)", () => {
     expect(matchPersonalResearch("my running and VO2")?.id).toBe("sport");
     expect(matchPersonalResearch("breathing and stress")?.id).toBe("breathing");
     expect(matchPersonalResearch("nutrition and cholesterol")?.id).toBe(
       "nutrition",
     );
+    expect(matchPersonalResearch("which infections have I had")?.id).toBe(
+      "infections",
+    );
+    expect(matchPersonalResearch("any surgeries or operations")?.id).toBe(
+      "surgeries",
+    );
+    expect(
+      matchPersonalResearch("am I up to date on my vaccinations")?.id,
+    ).toBe("vaccines");
     expect(matchPersonalResearch("hello world")).toBeNull();
   });
 
   it("every Q&A is computed from the patient's own data only", () => {
     for (const qa of personalResearchQA) {
       expect(qa.source).toMatch(/own data only/i);
-      expect(qa.trends.length).toBeGreaterThan(0);
+      expect(
+        (qa.trends?.length ?? 0) + (qa.events?.length ?? 0),
+      ).toBeGreaterThan(0);
       expect(qa.keywords.length).toBeGreaterThan(0);
     }
   });
