@@ -120,6 +120,9 @@ jobs:
       - name: Run Playwright E2E tests
         run: npx playwright test --project=chromium
         continue-on-error: true
+        # Informational only (continue-on-error) — cap it so it never delays the
+        # build+deploy that follow. The full suite runs in ci.yml on PRs.
+        timeout-minutes: 10
         env:
           CI: true
           NEXT_PUBLIC_STATIC_EXPORT: "false"
@@ -132,6 +135,7 @@ jobs:
       - name: WCAG 2.2 AA accessibility audit
         run: npx playwright test __tests__/e2e/journeys/27-wcag-accessibility.spec.ts --project=chromium
         continue-on-error: true
+        timeout-minutes: 6
         env:
           CI: true
           NEXT_PUBLIC_STATIC_EXPORT: "false"
@@ -141,6 +145,7 @@ jobs:
       - name: Security & penetration tests (OWASP/BSI)
         run: npx playwright test __tests__/e2e/journeys/28-security-pentest.spec.ts --project=chromium --grep-invert "SEC-4[1-9]|SEC-50"
         continue-on-error: true
+        timeout-minutes: 6
         env:
           CI: true
           NEXT_PUBLIC_STATIC_EXPORT: "false"
