@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { fetchApi } from "@/lib/api";
 import { useEffect, useMemo, useState } from "react";
 import {
@@ -14,6 +15,7 @@ import {
   ScanLine,
   ShieldCheck,
   ArrowRight,
+  Sparkles,
   type LucideIcon,
 } from "lucide-react";
 import PageIntro from "@/components/PageIntro";
@@ -379,6 +381,15 @@ export default function PatientPage() {
               />
             ))}
           </div>
+
+          <Link
+            href="/patient/query"
+            className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-[var(--accent)] hover:underline"
+          >
+            <Sparkles size={16} aria-hidden="true" />
+            Ask research questions about my own data
+            <ArrowRight size={14} aria-hidden="true" />
+          </Link>
         </section>
 
         {detailSource && (
