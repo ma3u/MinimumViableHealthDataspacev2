@@ -3,9 +3,16 @@ import { render, screen } from "@testing-library/react";
 import EudiQrPage from "@/app/auth/eudi-qr/page";
 import { signIn } from "next-auth/react";
 
-beforeEach(() => vi.clearAllMocks());
+beforeEach(() => {
+  vi.clearAllMocks();
+  // These tests exercise the LIVE verifier flow — pin static export off so they
+  // are immune to env pollution from earlier test files (IS_STATIC is now read
+  // at render time in the page).
+  vi.stubEnv("NEXT_PUBLIC_STATIC_EXPORT", "");
+});
 afterEach(() => {
   vi.unstubAllGlobals();
+  vi.unstubAllEnvs();
   vi.useRealTimers();
 });
 

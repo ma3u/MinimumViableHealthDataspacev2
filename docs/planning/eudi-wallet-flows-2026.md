@@ -11,6 +11,38 @@
 > (`tk-transfer.png`, `whoop-fitness.png`, `bloodtest-labs.png`) are git-ignored (PHI) and
 > never committed. Journey E2E click-path locked by **J314–J318** in the static-export spec.
 
+## Phase 2 (2026-06-04) — Interactive QR + approval surfaces
+
+The presentation flows were _animated_ (auto-looping, non-clickable). Phase 2 makes the
+wallet approval **interactive** (the user taps Approve) and wires three real entry points,
+all static-export safe (client-generated QR via the bundled `qrcode` lib — no verifier
+backend needed for the local/GitHub-Pages demo).
+
+| Surface                      | Behaviour                                                                                                                                     |
+| ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Homepage** `Register…` CTA | Opens a **modal** ([`RegisterDialog`](../../ui/src/components/RegisterDialog.tsx)) with QR + interactive 3-step wallet → approve → `/patient` |
+| **`/auth/eudi-qr`** (static) | Was a dead "unavailable" message → now QR + clickable **Approve/Done**; on approval forwards to `/patient` (the EHR page)                     |
+| **`/patient`**               | Personal health record (Fitness · Lab · Nutrition) + **Request EHR data** → QR + TK insurer-app approval → "transferred as FHIR R4"           |
+
+**Shared primitives:**
+[`WalletFlow`](../../ui/src/components/wallet/PhoneFrame.tsx) gained an `interactive`/`onComplete`/`onCancel`
+mode (the auto-loop presentation usages are untouched; transitional steps can opt into
+`auto`-advance). [`EudiApprovalFlow`](../../ui/src/components/wallet/EudiApprovalFlow.tsx) = QR + interactive
+wallet. The demo signs the visitor in as `patient1` (sessionStorage + localStorage, per `lib/api.ts`).
+
+### Phase 2 progress
+
+- [x] `WalletFlow` interactive mode (`interactive`/`onComplete`/`onCancel`, `auto` steps); loop usages unchanged
+- [x] `EudiApprovalFlow` (client-side `qrcode` QR + interactive wallet; crash-proof in jsdom)
+- [x] `RegisterDialog` modal (ESC/backdrop close, `role=dialog`, body-scroll lock, z-[70])
+- [x] Homepage `HomeRegisterCta` — Register opens the dialog → approve → `setDemoPersona("patient1")` → `/patient`
+- [x] `/auth/eudi-qr` static path: QR + interactive Approve→Done → `/patient` (live polling flow unchanged); `IS_STATIC` read at render-time
+- [x] `/patient`: `personalHealth` config (Fitness/Lab/Nutrition, gated), `PersonalHealthCard`, Request-EHR modal → transferred banner
+- [x] Unit tests: interactive WalletFlow, EudiApprovalFlow, RegisterDialog, HomeRegisterCta, `personalHealth` fictional default
+- [x] E2E **J319–J322** (homepage modal, eudi-qr login, /patient record, Request-EHR) — build-agnostic
+- [x] Gates: tsc · eslint (0 errors) · 1742 unit tests pass · coverage 81.9% lines (≥80)
+- [x] Verified locally on the `DEMO_TK` static server (`localhost:3000`)
+
 Extends the patient [`/journey`](../../ui/src/app/journey/page.tsx) presentation and the
 [`WalletSimulation`](../../ui/src/components/WalletSimulation.tsx) with three coherent,
 static-export-safe wallet flows that share one phone-frame primitive, and reconciles the
