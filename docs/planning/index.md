@@ -7,7 +7,8 @@ Groom with `/plan`. Token budget per ADR-026: keep this index small.
 
 ## current/
 
-- [issue-97-edc-upgrade](current/issue-97-edc-upgrade.md) — dependency refresh; Phase A done, next Phase B (EDC v0.18)
+- [issue-97-edc-upgrade](current/issue-97-edc-upgrade.md) — dependency refresh; Phase A done, Phase B in progress
+- [issue-97-phase-b-analysis](current/issue-97-phase-b-analysis.md) — EDC v0.18 breaking-change analysis + upstream-image strategy
 - [issue-20-leitlinien-ingestion](current/issue-20-leitlinien-ingestion.md) — AWMF Leitlinien Layer-6 ingestion (Docling)
 - [issue-19-nlq-researcher](current/issue-19-nlq-researcher.md) — NLQ researcher improvements (pharmacovigilance)
 - [issue-4-bsi-c5-production](current/issue-4-bsi-c5-production.md) — BSI C5 production security track
