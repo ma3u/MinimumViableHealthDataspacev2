@@ -93,7 +93,7 @@ services:
   # HashiCorp Vault — Secret management (dev mode)
   # ---------------------------------------------------------------------------
   vault:
-    image: hashicorp/vault:latest
+    image: hashicorp/vault:2.0
     container_name: health-dataspace-vault
     environment:
       VAULT_DEV_ROOT_TOKEN_ID: "root"
@@ -120,7 +120,7 @@ services:
   # Keycloak — OAuth2/OIDC identity provider
   # ---------------------------------------------------------------------------
   keycloak:
-    image: quay.io/keycloak/keycloak:latest
+    image: quay.io/keycloak/keycloak:26.6.0
     container_name: health-dataspace-keycloak
     command:
       - "start-dev"
@@ -174,7 +174,7 @@ services:
   # NATS — JetStream messaging bus
   # ---------------------------------------------------------------------------
   nats:
-    image: nats:alpine
+    image: nats:2.14.3-alpine
     container_name: health-dataspace-nats
     command: ["-c", "/etc/nats/nats.conf"]
     volumes:
@@ -208,7 +208,7 @@ services:
   # This sidecar re-runs the idempotent bootstrap on every container start.
   # ---------------------------------------------------------------------------
   vault-bootstrap:
-    image: hashicorp/vault:latest
+    image: hashicorp/vault:2.0
     container_name: health-dataspace-vault-bootstrap
     environment:
       VAULT_ADDR: "http://vault:8200"
@@ -234,7 +234,9 @@ services:
   # EDC-V Control Plane — DSP protocol + management APIs
   # ---------------------------------------------------------------------------
   controlplane:
-    image: ghcr.io/ma3u/health-dataspace/jad-controlplane:latest
+    # GHCR :latest pinned by digest (built 2026-04-11, EDC 0.16 era — ADR-029);
+    # Phase B of issue #97 replaces this with a versioned rebuild tag.
+    image: ghcr.io/ma3u/health-dataspace/jad-controlplane:latest@sha256:2516cbebd4666f87564c825679fc14d3b515d1a5931f5a18bdd1176cfab64826
     container_name: health-dataspace-controlplane
     environment:
       # Base config
@@ -328,7 +330,9 @@ services:
   # Pushes FHIR Bundle JSON to consumer endpoints via Neo4j Query Proxy.
   # ---------------------------------------------------------------------------
   dataplane-fhir:
-    image: ghcr.io/ma3u/health-dataspace/jad-dataplane:latest
+    # GHCR :latest pinned by digest (built 2026-04-11, EDC 0.16 era — ADR-029);
+    # Phase B of issue #97 replaces this with a versioned rebuild tag.
+    image: ghcr.io/ma3u/health-dataspace/jad-dataplane:latest@sha256:9af05fab5af8f3993fdb9ba7f856dae51d2f2d6ef7a9d13d5eb7ba81b544a0ec
     container_name: health-dataspace-dataplane-fhir
     environment:
       edc.hostname: "dataplane-fhir"
@@ -393,7 +397,9 @@ services:
   # Consumer pulls query results from provider via Neo4j Query Proxy.
   # ---------------------------------------------------------------------------
   dataplane-omop:
-    image: ghcr.io/ma3u/health-dataspace/jad-dataplane:latest
+    # GHCR :latest pinned by digest (built 2026-04-11, EDC 0.16 era — ADR-029);
+    # Phase B of issue #97 replaces this with a versioned rebuild tag.
+    image: ghcr.io/ma3u/health-dataspace/jad-dataplane:latest@sha256:9af05fab5af8f3993fdb9ba7f856dae51d2f2d6ef7a9d13d5eb7ba81b544a0ec
     container_name: health-dataspace-dataplane-omop
     environment:
       edc.hostname: "dataplane-omop"
@@ -462,7 +468,9 @@ services:
     build:
       context: ./services/neo4j-proxy
       dockerfile: Dockerfile
-    image: ghcr.io/ma3u/health-dataspace/neo4j-proxy:latest
+    # GHCR :latest pinned by digest (built 2026-04-11, EDC 0.16 era — ADR-029);
+    # Phase B of issue #97 replaces this with a versioned rebuild tag.
+    image: ghcr.io/ma3u/health-dataspace/neo4j-proxy:latest@sha256:e64e5706b7ddc1e4f094ca6ea295d1124e73e50988067cb6d90950591f8fd85f
     container_name: health-dataspace-neo4j-proxy
     environment:
       NODE_ENV: "production"
@@ -505,7 +513,9 @@ services:
   # IdentityHub — DCP v1.0 credential storage & presentation
   # ---------------------------------------------------------------------------
   identityhub:
-    image: ghcr.io/ma3u/health-dataspace/jad-identity-hub:latest
+    # GHCR :latest pinned by digest (built 2026-04-11, EDC 0.16 era — ADR-029);
+    # Phase B of issue #97 replaces this with a versioned rebuild tag.
+    image: ghcr.io/ma3u/health-dataspace/jad-identity-hub:latest@sha256:1dd82530c0208254d660c3800db3fa837225edc450b765ff04a4072eb0bce305
     container_name: health-dataspace-identityhub
     env_file:
       - ./jad/identityhub.env
@@ -544,7 +554,9 @@ services:
   # IssuerService — Verifiable Credential issuance (trust anchor)
   # ---------------------------------------------------------------------------
   issuerservice:
-    image: ghcr.io/ma3u/health-dataspace/jad-issuerservice:latest
+    # GHCR :latest pinned by digest (built 2026-04-11, EDC 0.16 era — ADR-029);
+    # Phase B of issue #97 replaces this with a versioned rebuild tag.
+    image: ghcr.io/ma3u/health-dataspace/jad-issuerservice:latest@sha256:b42320defd351c0010b8d55592bdebc12d6ee1ad2fa3387a7b85977fce35c5c1
     container_name: health-dataspace-issuerservice
     env_file:
       - ./jad/issuerservice.env
@@ -587,7 +599,9 @@ services:
   # CFM Tenant Manager — Multi-tenant participant lifecycle
   # ---------------------------------------------------------------------------
   tenant-manager:
-    image: ghcr.io/ma3u/health-dataspace/cfm-tmanager:latest
+    # GHCR :latest pinned by digest (built 2026-04-11, EDC 0.16 era — ADR-029);
+    # Phase B of issue #97 replaces this with a versioned rebuild tag.
+    image: ghcr.io/ma3u/health-dataspace/cfm-tmanager:latest@sha256:c50cca3ffdf3c8a7657be9f51bdf79a3a09f1ba35458a17fc343c979f280dd54
     container_name: health-dataspace-tenant-manager
     volumes:
       - ./jad/tenant-manager-config.yaml:/etc/appname/tm.env:ro
@@ -610,7 +624,9 @@ services:
   # CFM Provision Manager — Automated resource provisioning
   # ---------------------------------------------------------------------------
   provision-manager:
-    image: ghcr.io/ma3u/health-dataspace/cfm-pmanager:latest
+    # GHCR :latest pinned by digest (built 2026-04-11, EDC 0.16 era — ADR-029);
+    # Phase B of issue #97 replaces this with a versioned rebuild tag.
+    image: ghcr.io/ma3u/health-dataspace/cfm-pmanager:latest@sha256:c50cca3ffdf3c8a7657be9f51bdf79a3a09f1ba35458a17fc343c979f280dd54
     container_name: health-dataspace-provision-manager
     volumes:
       - ./jad/provision-manager-config.yaml:/etc/appname/pm.env:ro
@@ -635,7 +651,9 @@ services:
   # CFM Agents — Background provisioning agents (Keycloak, EDC-V, Registration, Onboarding)
   # ---------------------------------------------------------------------------
   cfm-agents:
-    image: ghcr.io/ma3u/health-dataspace/cfm-kcagent:latest
+    # GHCR :latest pinned by digest (built 2026-04-11, EDC 0.16 era — ADR-029);
+    # Phase B of issue #97 replaces this with a versioned rebuild tag.
+    image: ghcr.io/ma3u/health-dataspace/cfm-kcagent:latest@sha256:c50cca3ffdf3c8a7657be9f51bdf79a3a09f1ba35458a17fc343c979f280dd54
     container_name: health-dataspace-cfm-keycloak-agent
     volumes:
       - ./jad/keycloak-agent-config.yaml:/etc/appname/kcagent.env:ro
@@ -649,7 +667,9 @@ services:
     restart: unless-stopped
 
   cfm-edcv-agent:
-    image: ghcr.io/ma3u/health-dataspace/cfm-edcvagent:latest
+    # GHCR :latest pinned by digest (built 2026-04-11, EDC 0.16 era — ADR-029);
+    # Phase B of issue #97 replaces this with a versioned rebuild tag.
+    image: ghcr.io/ma3u/health-dataspace/cfm-edcvagent:latest@sha256:c50cca3ffdf3c8a7657be9f51bdf79a3a09f1ba35458a17fc343c979f280dd54
     container_name: health-dataspace-cfm-edcv-agent
     volumes:
       - ./jad/edcv-agent-config.yaml:/etc/appname/edcvagent.env:ro
@@ -663,7 +683,9 @@ services:
     restart: unless-stopped
 
   cfm-registration-agent:
-    image: ghcr.io/ma3u/health-dataspace/cfm-regagent:latest
+    # GHCR :latest pinned by digest (built 2026-04-11, EDC 0.16 era — ADR-029);
+    # Phase B of issue #97 replaces this with a versioned rebuild tag.
+    image: ghcr.io/ma3u/health-dataspace/cfm-regagent:latest@sha256:c50cca3ffdf3c8a7657be9f51bdf79a3a09f1ba35458a17fc343c979f280dd54
     container_name: health-dataspace-cfm-registration-agent
     volumes:
       - ./jad/registration-agent-config.yaml:/etc/appname/regagent.env:ro
@@ -679,7 +701,9 @@ services:
     restart: unless-stopped
 
   cfm-onboarding-agent:
-    image: ghcr.io/ma3u/health-dataspace/cfm-obagent:latest
+    # GHCR :latest pinned by digest (built 2026-04-11, EDC 0.16 era — ADR-029);
+    # Phase B of issue #97 replaces this with a versioned rebuild tag.
+    image: ghcr.io/ma3u/health-dataspace/cfm-obagent:latest@sha256:c50cca3ffdf3c8a7657be9f51bdf79a3a09f1ba35458a17fc343c979f280dd54
     container_name: health-dataspace-cfm-onboarding-agent
     volumes:
       - ./jad/onboarding-agent-config.yaml:/etc/appname/obagent.env:ro
@@ -704,7 +728,7 @@ services:
   # Runs once after all services are healthy, then exits.
   # ---------------------------------------------------------------------------
   jad-seed:
-    image: curlimages/curl:latest
+    image: curlimages/curl:8.21.0
     container_name: health-dataspace-jad-seed
     entrypoint: ["/bin/sh", "/scripts/seed-jad.sh"]
     environment:

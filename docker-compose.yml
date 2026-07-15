@@ -1,6 +1,6 @@
 services:
   neo4j:
-    image: neo4j:5-community
+    image: neo4j:5.26.28-community
     container_name: health-dataspace-neo4j
     ports:
       - "7474:7474" # Browser UI
@@ -27,7 +27,7 @@ services:
   # for federated query testing (Phase 5). Runs a disjoint patient subset from a
   # different geographic region (e.g., New York vs Massachusetts).
   neo4j-spe2:
-    image: neo4j:5-community
+    image: neo4j:5.26.28-community
     container_name: health-dataspace-neo4j-spe2
     ports:
       - "7475:7474" # Browser UI (offset from primary)

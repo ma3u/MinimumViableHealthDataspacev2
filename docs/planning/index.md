@@ -7,6 +7,7 @@ Groom with `/plan`. Token budget per ADR-026: keep this index small.
 
 ## current/
 
+- [issue-97-edc-upgrade](current/issue-97-edc-upgrade.md) — dependency refresh; Phase A done, next Phase B (EDC v0.18)
 - [issue-20-leitlinien-ingestion](current/issue-20-leitlinien-ingestion.md) — AWMF Leitlinien Layer-6 ingestion (Docling)
 - [issue-19-nlq-researcher](current/issue-19-nlq-researcher.md) — NLQ researcher improvements (pharmacovigilance)
 - [issue-4-bsi-c5-production](current/issue-4-bsi-c5-production.md) — BSI C5 production security track
@@ -16,7 +17,6 @@ Groom with `/plan`. Token budget per ADR-026: keep this index small.
 - [issue-11-weekly-demo-reset](future/issue-11-weekly-demo-reset.md) — weekly baseline refresh (ADR-014)
 - [eudi-wallet-cluster](future/eudi-wallet-cluster.md) — issues #22 / #24 / #80, Phase 27
 - [phase-26g-deferred](future/phase-26g-deferred.md) — federation observability leftovers
-- [issue-97-edc-upgrade](future/issue-97-edc-upgrade.md) — EDC v0.18.0 upgrade + image pinning
 
 ## done/
 

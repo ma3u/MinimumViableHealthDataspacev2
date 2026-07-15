@@ -137,5 +137,6 @@ All three core specifications are now final or near-final:
 | [026](ADRs/ADR-026-token-efficient-planning-structure.md)    | Token-Efficient Planning & ADR Structure       | 2026-05-17 | Accepted   |
 | [027](ADRs/ADR-027-edc-stack-off-hours-scaledown.md)         | EDC Stack in Off-Hours Scale-Down (FinOps)     | 2026-05-18 | Accepted   |
 | [028](ADRs/ADR-028-patient-qr-login-eudi-wallet.md)          | Patient QR Login via EUDI Wallet (OpenID4VP)   | 2026-06-04 | Accepted   |
+| [029](ADRs/ADR-029-dependency-version-pinning.md)            | Dependency Version Pinning & Refresh Cadence   | 2026-07-15 | Accepted   |
 
 > **Note:** The full text of ADR-1 through ADR-9 has been moved into the standalone ADR documents linked in the table above. Click any row to read the full context, decision, and consequences.
