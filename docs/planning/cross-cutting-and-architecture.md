@@ -174,7 +174,7 @@ See [ADR-020: Cross-Participant Dataset Discovery](ADRs/ADR-020-cross-participan
 
 Built on Eclipse EDC v0.16.0 and `org.eclipse.edc:federated-catalog-core:0.16.0` (latest stable, 2026-02-19). We do **not** wait for or depend on XFSC FACIS DCM.
 
-#### 26a: Dynamic participant directory ⏳
+#### 26a: Dynamic participant directory ✅
 
 - `:Participant` nodes carry `source` (`dcp` | `business-wallet` | `private-wallet` | `seed`) and `walletType` (`business` | `private`). The crawler reads the live Neo4j list, not a static YAML.
 - New Cypher file `neo4j/participant-source-init.cypher` augments the existing 5 demo participants with `source: "seed"` + `walletType: "business"` so the first crawler run has targets.
@@ -183,7 +183,7 @@ Built on Eclipse EDC v0.16.0 and `org.eclipse.edc:federated-catalog-core:0.16.0`
 - DCP discovery loop: if `DCP_DISCOVERY_URL` set, a background tick in neo4j-proxy pulls the trust-anchor and MERGEs `:Participant {source: "dcp"}` entries; idempotent, re-run safe.
 - `jad/federated-targets.yaml` retained only as a bootstrap seed; it is loaded once and never polled. Future onboarding happens through the admin page or DCP.
 
-#### 26b: Catalog crawler ACA job ⏳
+#### 26b: Catalog crawler ACA job ✅
 
 - New service `services/catalog-crawler/` (Java 21 + `org.eclipse.edc:federated-catalog-core:0.16.0`).
 - Reads target list from Neo4j: `MATCH (p:Participant) WHERE p.source IN ['dcp','business-wallet','private-wallet','seed'] AND p.dspCatalogUrl IS NOT NULL RETURN p`.
@@ -194,7 +194,7 @@ Built on Eclipse EDC v0.16.0 and `org.eclipse.edc:federated-catalog-core:0.16.0`
 - `.github/workflows/catalog-crawler.yml` wraps the build + deploy (CI-SP pattern per project memory `project_aca_job_write_via_ci`).
 - **Gotchas:** DSP responses can exceed 5 MB → stream to NATS, don't buffer. Participants returning 401/403 because we have no VC do not count as errors — audit, don't fail.
 
-#### 26c: Catalog enricher service ⏳
+#### 26c: Catalog enricher service ✅
 
 - New service `services/catalog-enricher/` (Python 3.12-slim, `neo4j==5.23.0`, `nats-py==2.7.0`, pydantic).
 - NATS durable consumer (name `enricher`) on subject `dataspace.catalog.raw`. Replays unacknowledged messages on restart — no work lost.
@@ -205,7 +205,7 @@ Built on Eclipse EDC v0.16.0 and `org.eclipse.edc:federated-catalog-core:0.16.0`
 - Deployed as ACA container app `mvhd-catalog-enricher` — 0.25 vCPU / 0.5 GiB, min 1 max 1 replica. Script: `scripts/azure/12-catalog-enricher.sh`. Workflow: `.github/workflows/catalog-enricher.yml`.
 - **Not a crawler, not a policy engine, not a query path** — those concerns live elsewhere (see ADR-020 enricher spec).
 
-#### 26d: NLQ template extensions + glossary ⏳
+#### 26d: NLQ template extensions + glossary ✅
 
 - Three new templates in `services/neo4j-proxy/src/index.ts` around `QUERY_TEMPLATES` (near `:1074`):
   1. `federated_dataset_search` — "find diabetes datasets across German hospitals"
@@ -214,7 +214,7 @@ Built on Eclipse EDC v0.16.0 and `org.eclipse.edc:federated-catalog-core:0.16.0`
 - Hand-curated glossary `neo4j/nlq-glossary.cypher` — ≤100 entries v1. Maps common NL terms → SNOMED / ICD-10 / ISO-2 country codes. Reviewed in PR like any schema change.
 - Extend `llmText2Cypher()` schema context (`:1301–1421`) to include `:HealthDataset {source: "federated", publisherDid, …}` and `:Participant {walletType, source}` so LLM-generated Cypher scopes correctly.
 
-#### 26e: Audit + dual-side k-anonymity + dual-side ODRL ⏳
+#### 26e: Audit + dual-side k-anonymity + dual-side ODRL ✅
 
 - Extend `:QueryAuditEvent` with `federated: boolean`, `contributors: [participantDid]`, `aggregateSuppressed: boolean`, `suppressionReason: string | null`.
 - **k-anonymity (both sides enforced):** suppress any per-participant `count < MIN_COHORT_SIZE` (default 5). If **any** contributor is suppressed, suppress the global aggregate too. Response carries `{ aggregateSuppressed: true, reason: "contributor_k_violation" }`.
@@ -222,7 +222,7 @@ Built on Eclipse EDC v0.16.0 and `org.eclipse.edc:federated-catalog-core:0.16.0`
 - Extend `/admin/audit` UI — add columns for federated flag + expandable contributor DIDs; filter toggle for "federated only".
 - Log the crawler DID on every federated query so transparency reports show "who we asked" alongside "what we answered".
 
-#### 26f: Playwright coverage — J730–J749 ⏳
+#### 26f: Playwright coverage — J730–J749 ✅
 
 New spec `ui/__tests__/e2e/journeys/32-federated-nlq.spec.ts`:
 
@@ -239,7 +239,7 @@ New spec `ui/__tests__/e2e/journeys/32-federated-nlq.spec.ts`:
   - J738 negotiation appears in `/tasks` with state `REQUESTED`
 - **Azure live stack (J745–J749):** run against `https://ehds.mabu.red` once the crawler + enricher are deployed.
 
-#### 26g: User journey + docs + observability ⏳
+#### 26g: User journey + docs + observability 🔶 (docs done; Grafana board + README screenshot deferred)
 
 - New persona journey `docs/persona-journeys/data-user-federated-discovery.md` — the six-step loop in ADR-020 (discover → inspect offer → check eligibility → start negotiation → track/sign → fetch).
 - New `docs/architecture/federation.md` — sequence diagram (crawler → NATS → enricher → Neo4j → NLQ → /catalog → /negotiate → /tasks → dataplane), plus the 5-min freshness SLA and the both-sides k-anon + ODRL rules.

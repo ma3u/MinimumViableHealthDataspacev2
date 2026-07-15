@@ -867,10 +867,43 @@ app.post(
       const requestedMinK = req.body.minK ?? MIN_COHORT_SIZE;
       const { cypher, params = {} } = req.body;
       const minK = Math.max(requestedMinK, MIN_COHORT_SIZE);
+      const callerId = req.headers["x-participant"] as string | undefined;
 
       if (!cypher || typeof cypher !== "string") {
         res.status(400).json({ error: "Missing 'cypher' in request body" });
         return;
+      }
+
+      // Phase 26e (issue #8): caller-side ODRL — the caller's own odrlScope
+      // is evaluated against the query before any contributor is contacted.
+      const scope = req.body.odrlScope as OdrlScope | undefined;
+      if (scope) {
+        const temporalViolation = checkOdrlTemporal(scope);
+        if (temporalViolation) {
+          res
+            .status(403)
+            .json({ error: temporalViolation, odrlEnforced: true });
+          logQueryAudit(callerId, "(federated)", cypher, "federated", 0, true, {
+            contributors: [],
+            aggregateSuppressed: false,
+            suppressionReason: null,
+          });
+          return;
+        }
+        if (checkReIdentification(cypher, scope)) {
+          res.status(403).json({
+            error:
+              "Query blocked: potential re-identification prohibited by ODRL policy",
+            odrlEnforced: true,
+            policyIds: scope.policyIds,
+          });
+          logQueryAudit(callerId, "(federated)", cypher, "federated", 0, true, {
+            contributors: [],
+            aggregateSuppressed: false,
+            suppressionReason: null,
+          });
+          return;
+        }
       }
 
       // Safety: reject write operations (hardened regex — catches CALL { CREATE } subqueries)
@@ -949,6 +982,28 @@ app.post(
         }
       }
 
+      // Phase 26e (issue #8): contributor-side k-anonymity. A contributor
+      // whose row count is non-zero but below minK is suppressed entirely,
+      // and — because a missing contributor is itself identifying — the
+      // global aggregate is suppressed with it.
+      const suppressedContributors: string[] = [];
+      if (minK > 0) {
+        for (const r of allResults) {
+          const rows = r.records.filter((rec) => !rec._error);
+          if (rows.length > 0 && rows.length < minK) {
+            suppressedContributors.push(r.source);
+          }
+        }
+      }
+      const aggregateSuppressed = suppressedContributors.length > 0;
+      const suppressionReason = aggregateSuppressed
+        ? "contributor_k_violation"
+        : null;
+      if (aggregateSuppressed) {
+        filtered += merged.length;
+        merged = [];
+      }
+
       const sources = allResults.map((r) => r.source);
       res.json({
         results: merged,
@@ -957,7 +1012,23 @@ app.post(
         filtered,
         speCount: spes.length,
         minKApplied: minK,
+        aggregateSuppressed,
+        suppressionReason,
       });
+
+      logQueryAudit(
+        callerId,
+        "(federated)",
+        cypher,
+        "federated",
+        merged.length,
+        Boolean(scope),
+        {
+          contributors: sources,
+          aggregateSuppressed,
+          suppressionReason,
+        },
+      );
 
       logTransferEvent(
         "/federated/query",
@@ -1867,6 +1938,12 @@ function logQueryAudit(
   method: string,
   resultCount: number,
   odrlEnforced: boolean,
+  // Phase 26e (issue #8): federated-query provenance for transparency reports
+  federatedMeta?: {
+    contributors: string[];
+    aggregateSuppressed: boolean;
+    suppressionReason: string | null;
+  },
 ): void {
   if (!driver) return;
   const session = driver.session({ database: "neo4j" });
@@ -1880,6 +1957,10 @@ function logQueryAudit(
          qa.method = $method,
          qa.resultCount = $resultCount,
          qa.odrlEnforced = $odrlEnforced,
+         qa.federated = $federated,
+         qa.contributors = $contributors,
+         qa.aggregateSuppressed = $aggregateSuppressed,
+         qa.suppressionReason = $suppressionReason,
          qa.timestamp = datetime()`,
       {
         eventId: `qa-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
@@ -1889,6 +1970,10 @@ function logQueryAudit(
         method,
         resultCount,
         odrlEnforced,
+        federated: federatedMeta !== undefined,
+        contributors: federatedMeta?.contributors ?? [],
+        aggregateSuppressed: federatedMeta?.aggregateSuppressed ?? false,
+        suppressionReason: federatedMeta?.suppressionReason ?? null,
       },
     )
     .catch((err) => console.error("[neo4j-proxy] Audit log error:", err))
@@ -3875,6 +3960,90 @@ app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
 
 // ---- Startup ---------------------------------------------------------------
 
+/**
+ * Phase 26a (issue #8): DCP trust-anchor discovery loop.
+ * When DCP_DISCOVERY_URL is set, periodically pull the trust anchor's
+ * participant list and MERGE each entry as :Participant {source: 'dcp'}.
+ * Idempotent — existing nodes keep their properties unless the anchor
+ * supplies fresher values. The catalog crawler picks new entries up on
+ * its next tick, so onboarding needs no restart anywhere.
+ */
+const DCP_DISCOVERY_URL = process.env.DCP_DISCOVERY_URL ?? "";
+const DCP_DISCOVERY_INTERVAL_MS = parseInt(
+  process.env.DCP_DISCOVERY_INTERVAL_MS ?? "300000",
+  10,
+);
+
+async function dcpDiscoveryTick(): Promise<number> {
+  if (!DCP_DISCOVERY_URL || !driver) return 0;
+  const res = await fetch(DCP_DISCOVERY_URL, {
+    headers: { Accept: "application/json" },
+  });
+  if (!res.ok) {
+    throw new Error(`trust anchor returned HTTP ${res.status}`);
+  }
+  const body: any = await res.json();
+  const entries: any[] = Array.isArray(body) ? body : body.participants ?? [];
+  const rows = entries
+    .filter((e) => typeof e?.did === "string" && e.did.startsWith("did:"))
+    .map((e) => ({
+      did: e.did,
+      name: typeof e.name === "string" ? e.name : null,
+      walletType: e.walletType === "private" ? "private" : "business",
+      country: typeof e.country === "string" ? e.country : null,
+      dspCatalogUrl:
+        typeof e.dspCatalogUrl === "string" ? e.dspCatalogUrl : null,
+    }));
+  if (rows.length === 0) return 0;
+
+  const session = driver.session({ database: "neo4j" });
+  try {
+    await session.run(
+      `UNWIND $rows AS row
+       MERGE (p:Participant {participantId: row.did})
+       ON CREATE SET p.source = 'dcp',
+                     p.onboardedAt = datetime(),
+                     p.crawlerEnabled = true
+       SET p.name          = coalesce(row.name, p.name),
+           p.walletType    = coalesce(p.walletType, row.walletType),
+           p.country       = coalesce(row.country, p.country),
+           p.dspCatalogUrl = coalesce(row.dspCatalogUrl, p.dspCatalogUrl)`,
+      { rows },
+    );
+  } finally {
+    await session.close();
+  }
+  return rows.length;
+}
+
+function startDcpDiscoveryLoop(): void {
+  if (!DCP_DISCOVERY_URL) {
+    console.log(
+      "[neo4j-proxy] DCP discovery disabled (set DCP_DISCOVERY_URL to enable)",
+    );
+    return;
+  }
+  const tick = () =>
+    dcpDiscoveryTick()
+      .then((n) => {
+        if (n > 0)
+          console.log(
+            `[neo4j-proxy] DCP discovery: upserted ${n} participants`,
+          );
+      })
+      .catch((err) =>
+        console.warn("[neo4j-proxy] DCP discovery tick failed:", err.message),
+      );
+  tick();
+  const timer = setInterval(tick, DCP_DISCOVERY_INTERVAL_MS);
+  timer.unref();
+  console.log(
+    `[neo4j-proxy] DCP discovery loop every ${
+      DCP_DISCOVERY_INTERVAL_MS / 1000
+    }s → ${DCP_DISCOVERY_URL}`,
+  );
+}
+
 async function main() {
   driver = neo4j.driver(
     NEO4J_URI,
@@ -3911,6 +4080,8 @@ async function main() {
       "[neo4j-proxy] SPE-2 not configured (set NEO4J_SPE2_URI to enable)",
     );
   }
+
+  startDcpDiscoveryLoop();
 
   app.listen(PORT, () => {
     console.log(`[neo4j-proxy] Listening on port ${PORT}`);
@@ -3965,4 +4136,4 @@ if (isMainModule) {
   });
 }
 
-export { main };
+export { main, dcpDiscoveryTick };

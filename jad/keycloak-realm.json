@@ -267,9 +267,18 @@
         "http://localhost:3000/api/auth/callback/keycloak",
         "http://localhost:3000/*",
         "http://localhost:3003/api/auth/callback/keycloak",
-        "http://localhost:3003/*"
+        "http://localhost:3003/*",
+        "https://ehds.mabu.red/api/auth/callback/keycloak",
+        "https://ehds.mabu.red/*",
+        "https://mvhd-ui.happysand-37f82e30.westeurope.azurecontainerapps.io/*"
       ],
-      "webOrigins": ["http://localhost:3000", "http://localhost:3003", "+"],
+      "webOrigins": [
+        "http://localhost:3000",
+        "http://localhost:3003",
+        "https://ehds.mabu.red",
+        "https://mvhd-ui.happysand-37f82e30.westeurope.azurecontainerapps.io",
+        "+"
+      ],
       "attributes": {
         "post.logout.redirect.uris": "http://localhost:3000/*##http://localhost:3003/*##https://ehds.mabu.red/*##https://mvhd-ui.happysand-37f82e30.westeurope.azurecontainerapps.io/*",
         "pkce.code.challenge.method": "S256"

@@ -23,7 +23,7 @@ Root cause: a **gap between two ADRs**.
   identityhub, issuerservice, tenant-mgr, provision-mgr, nats).
 
 ADR-024's own cost section assumed the result would be **~€100-130/mo**
-*"combined with off-hours scale-down (ADR-016, ADR-023)"*. But the schedule
+_"combined with off-hours scale-down (ADR-016, ADR-023)"_. But the schedule
 was never updated to include the EDC apps. The 8 EDC apps therefore ran
 **24/7** — billing through every night and weekend — instead of weekday
 hours. ADR-022 estimated the full EDC stack at `min=1` costs **~€252-272/mo**;
@@ -37,10 +37,10 @@ stack** — restoring the cost envelope ADR-024 assumed.
 
 The schedule now manages **all 15 Container Apps**:
 
-| Group         | Apps                                                                                          | Work-hours scale |
-| ------------- | --------------------------------------------------------------------------------------------- | ---------------- |
-| Core (7)      | postgres, neo4j, keycloak, vault, neo4j-proxy, ui, catalog-enricher                           | 1/1 (proxy 1/2, ui 1/3) |
-| EDC stack (8) | nats, controlplane, dp-fhir, dp-omop, identityhub, issuerservice, tenant-mgr, provision-mgr   | 1/1              |
+| Group         | Apps                                                                                        | Work-hours scale        |
+| ------------- | ------------------------------------------------------------------------------------------- | ----------------------- |
+| Core (7)      | postgres, neo4j, keycloak, vault, neo4j-proxy, ui, catalog-enricher                         | 1/1 (proxy 1/2, ui 1/3) |
+| EDC stack (8) | nats, controlplane, dp-fhir, dp-omop, identityhub, issuerservice, tenant-mgr, provision-mgr | 1/1                     |
 
 Off-hours (nightly 20:00 Europe/Berlin + all weekend) every app is scaled to
 `0/0`. The operating window is unchanged: **Mon-Fri 07:00-20:00 Europe/Berlin**,

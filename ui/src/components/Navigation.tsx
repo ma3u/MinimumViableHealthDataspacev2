@@ -30,6 +30,7 @@ import {
   Sparkles,
   Menu,
   X,
+  Globe,
 } from "lucide-react";
 import UserMenu from "./UserMenu";
 import ThemeToggle from "./ThemeToggle";
@@ -340,6 +341,12 @@ const manageGroup: NavGroup = {
       href: "/admin/tenants",
       label: "Tenants",
       icon: User,
+      roles: ["EDC_ADMIN"],
+    },
+    {
+      href: "/admin/participants",
+      label: "Participants",
+      icon: Globe,
       roles: ["EDC_ADMIN"],
     },
     {
