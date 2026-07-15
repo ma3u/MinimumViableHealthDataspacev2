@@ -27,3 +27,6 @@ services:
       - "3003:3000"
     environment:
       NEXTAUTH_URL: http://localhost:3003
+      # EDC 0.18 JAD launchers serve the v5beta management API (issue #97
+      # Phase B); the Azure stack stays v5alpha until its Phase D cutover.
+      EDC_MGMT_API_VERSION: v5beta

@@ -219,6 +219,18 @@ async function apiRequest<T = unknown>(
 // Typed API client facade
 // ---------------------------------------------------------------------------
 
+/**
+ * Management API version segment. EDC ≥0.18-era JAD serves v5beta; older
+ * stacks (incl. the current Azure deployment) serve v5alpha. Callers keep
+ * writing '/v5alpha/…' paths — the client rewrites the segment so the
+ * cutover is a single env flip (issue #97 Phase B).
+ */
+const MGMT_API_VERSION = process.env.EDC_MGMT_API_VERSION || "v5alpha";
+
+function withMgmtVersion(path: string): string {
+  return path.replace(/^\/v5(alpha|beta)\//, `/${MGMT_API_VERSION}/`);
+}
+
 /** Type-safe EDC-V / CFM API client */
 export const edcClient = {
   /** EDC-V Management API — assets, policies, contracts, catalogs, transfers */
@@ -227,7 +239,8 @@ export const edcClient = {
     method: "GET" | "POST" | "PUT" | "DELETE" | "PATCH" = "GET",
     body?: unknown,
     options?: RequestOptions,
-  ) => apiRequest<T>("management", path, method, body, options),
+  ) =>
+    apiRequest<T>("management", withMgmtVersion(path), method, body, options),
 
   /** DCP Identity API — participants, key pairs, credentials */
   identity: <T = unknown>(

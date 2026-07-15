@@ -18,6 +18,10 @@
 # ---------------------------------------------------------------------------
 set -euo pipefail
 
+# EDC Management API version segment — v5beta since the EDC 0.18 JAD
+# launchers (issue #97 Phase B); override for older stacks.
+MGMT_V="${EDC_MGMT_API_VERSION:-v5beta}"
+
 # ---------------------------------------------------------------------------
 # Configuration
 # ---------------------------------------------------------------------------
@@ -116,7 +120,7 @@ mgmt_post() {
 discover_participants() {
   log "Discovering participant context UUIDs..."
   local participants_json
-  participants_json=$(mgmt_get "/v5alpha/participants") || {
+  participants_json=$(mgmt_get "/${MGMT_V}/participants") || {
     log "ERROR: Cannot fetch participant list from Management API"
     exit 1
   }
@@ -174,7 +178,7 @@ run_catalog_tests() {
     local catalog_body
     local provider_did="${PARTICIPANT_DIDS[$i]}"
     catalog_body=$(printf '{"@context":["https://w3id.org/edc/connector/management/v2"],"@type":"CatalogRequest","counterPartyAddress":"http://controlplane:8082/api/dsp/%s/2025-1","counterPartyId":"%s","protocol":"dataspace-protocol-http:2025-1"}' "$ctx" "$provider_did")
-    resp=$(mgmt_post "/v5alpha/participants/${CONSUMER_CTX}/catalog/request" "$catalog_body" 2>/dev/null) || resp=""
+    resp=$(mgmt_post "/${MGMT_V}/participants/${CONSUMER_CTX}/catalog/request" "$catalog_body" 2>/dev/null) || resp=""
 
     if [ -n "$resp" ] && echo "$resp" | jq -e '.["@type"]' >/dev/null 2>&1; then
       pass "$test_id: CatalogRequestMessage accepted for ${slug}"
@@ -194,7 +198,7 @@ run_catalog_tests() {
   local resp
   local cat12_body
   cat12_body=$(printf '{"@context":["https://w3id.org/edc/connector/management/v2"],"@type":"CatalogRequest","counterPartyAddress":"http://controlplane:8082/api/dsp/%s/2025-1","counterPartyId":"%s","protocol":"dataspace-protocol-http:2025-1"}' "$PROVIDER_CTX" "$PROVIDER_DID")
-  resp=$(mgmt_post "/v5alpha/participants/${CONSUMER_CTX}/catalog/request" "$cat12_body" 2>/dev/null) || resp=""
+  resp=$(mgmt_post "/${MGMT_V}/participants/${CONSUMER_CTX}/catalog/request" "$cat12_body" 2>/dev/null) || resp=""
 
   if [ -n "$resp" ] && echo "$resp" | jq -e '.dataset' >/dev/null 2>&1; then
     pass "$test_id: Catalog response contains dataset"
@@ -215,7 +219,7 @@ run_catalog_tests() {
   local resp
   local cat13_body
   cat13_body=$(printf '{"@context":["https://w3id.org/edc/connector/management/v2"],"@type":"CatalogRequest","counterPartyAddress":"http://controlplane:8082/api/dsp/%s/2025-1","counterPartyId":"%s","protocol":"dataspace-protocol-http:2025-1","querySpec":{"filterExpression":[]}}' "$PROVIDER_CTX" "$PROVIDER_DID")
-  resp=$(mgmt_post "/v5alpha/participants/${CONSUMER_CTX}/catalog/request" "$cat13_body" 2>/dev/null) || resp=""
+  resp=$(mgmt_post "/${MGMT_V}/participants/${CONSUMER_CTX}/catalog/request" "$cat13_body" 2>/dev/null) || resp=""
 
   if [ -n "$resp" ]; then
     pass "$test_id: CatalogRequest with querySpec accepted"
@@ -228,7 +232,7 @@ run_catalog_tests() {
   # 1.4 — Federated Catalog query
   local test_id="CAT-1.4"
   local resp
-  resp=$(mgmt_post "/v5alpha/participants/${OPERATOR_CTX}/federatedcatalog/request" \
+  resp=$(mgmt_post "/${MGMT_V}/participants/${OPERATOR_CTX}/federatedcatalog/request" \
     '{"@context":["https://w3id.org/edc/connector/management/v2"],"@type":"QuerySpec"}' 2>/dev/null) || resp=""
 
   if [ -n "$resp" ] && echo "$resp" | jq -e 'length > 0' >/dev/null 2>&1; then
@@ -249,7 +253,7 @@ run_catalog_tests() {
   local headers
   headers=$(curl -s -D - -o /dev/null -H "$(auth_header)" -H "Content-Type: application/json" \
     -X POST -d '{"@context":["https://w3id.org/edc/connector/management/v2"],"@type":"QuerySpec"}' \
-    "${MGMT_API}/v5alpha/participants/${PROVIDER_CTX}/assets/request" 2>/dev/null) || headers=""
+    "${MGMT_API}/${MGMT_V}/participants/${PROVIDER_CTX}/assets/request" 2>/dev/null) || headers=""
 
   if echo "$headers" | grep -qi "application/json"; then
     pass "$test_id: Management API returns application/json content-type"
@@ -275,7 +279,7 @@ run_asset_tests() {
     local ctx="${PARTICIPANT_CTXS[$i]}"
     local test_id="ASSET-2.1-${slug}"
     local resp
-    resp=$(mgmt_post "/v5alpha/participants/${ctx}/assets/request" \
+    resp=$(mgmt_post "/${MGMT_V}/participants/${ctx}/assets/request" \
       '{"@context":["https://w3id.org/edc/connector/management/v2"],"@type":"QuerySpec"}' 2>/dev/null) || resp=""
 
     if [ -n "$resp" ] && echo "$resp" | jq -e 'type == "array"' >/dev/null 2>&1; then
@@ -295,7 +299,7 @@ run_asset_tests() {
   # 2.2 — Asset contains required EDC properties
   local test_id="ASSET-2.2"
   local resp
-  resp=$(mgmt_post "/v5alpha/participants/${PROVIDER_CTX}/assets/request" \
+  resp=$(mgmt_post "/${MGMT_V}/participants/${PROVIDER_CTX}/assets/request" \
     '{"@context":["https://w3id.org/edc/connector/management/v2"],"@type":"QuerySpec","limit":1}' 2>/dev/null) || resp=""
 
   if [ -n "$resp" ] && echo "$resp" | jq -e '.[0]["@id"]' >/dev/null 2>&1; then
@@ -322,7 +326,7 @@ run_negotiation_tests() {
     local ctx="${PARTICIPANT_CTXS[$i]}"
     local test_id="NEG-3.1-${slug}"
     local resp
-    resp=$(mgmt_post "/v5alpha/participants/${ctx}/contractnegotiations/request" \
+    resp=$(mgmt_post "/${MGMT_V}/participants/${ctx}/contractnegotiations/request" \
       '{"@context":["https://w3id.org/edc/connector/management/v2"],"@type":"QuerySpec"}' 2>/dev/null) || resp=""
 
     if [ -n "$resp" ] && echo "$resp" | jq -e 'type == "array"' >/dev/null 2>&1; then
@@ -342,7 +346,7 @@ run_negotiation_tests() {
   # 3.2 — Verify negotiation states include FINALIZED
   local test_id="NEG-3.2"
   local resp
-  resp=$(mgmt_post "/v5alpha/participants/${CONSUMER_CTX}/contractnegotiations/request" \
+  resp=$(mgmt_post "/${MGMT_V}/participants/${CONSUMER_CTX}/contractnegotiations/request" \
     '{"@context":["https://w3id.org/edc/connector/management/v2"],"@type":"QuerySpec"}' 2>/dev/null) || resp=""
 
   if [ -n "$resp" ] && echo "$resp" | jq -e '[.[] | select(.state == "FINALIZED")] | length > 0' >/dev/null 2>&1; then
@@ -367,7 +371,7 @@ run_negotiation_tests() {
 
   if [ -n "$neg_id" ]; then
     local agreement
-    agreement=$(mgmt_get "/v5alpha/participants/${CONSUMER_CTX}/contractnegotiations/${neg_id}/agreement" 2>/dev/null) || agreement=""
+    agreement=$(mgmt_get "/${MGMT_V}/participants/${CONSUMER_CTX}/contractnegotiations/${neg_id}/agreement" 2>/dev/null) || agreement=""
 
     if [ -n "$agreement" ] && echo "$agreement" | jq -e '.["@id"]' >/dev/null 2>&1; then
       pass "$test_id: Contract agreement has @id field"
@@ -390,7 +394,7 @@ run_negotiation_tests() {
   http_code=$(curl -s -o /dev/null -w "%{http_code}" \
     -H "$(auth_header)" -H "Content-Type: application/json" \
     -X POST -d '{"@context":["https://w3id.org/edc/connector/management/v2"],"@type":"QuerySpec"}' \
-    "${MGMT_API}/v5alpha/participants/nonexistent-participant/contractnegotiations/request" 2>/dev/null)
+    "${MGMT_API}/${MGMT_V}/participants/nonexistent-participant/contractnegotiations/request" 2>/dev/null)
 
   if [ "$http_code" -ge 400 ] 2>/dev/null; then
     pass "$test_id: Invalid participant returns HTTP ${http_code}"
@@ -416,7 +420,7 @@ run_transfer_tests() {
     local ctx="${PARTICIPANT_CTXS[$i]}"
     local test_id="XFER-4.1-${slug}"
     local resp
-    resp=$(mgmt_post "/v5alpha/participants/${ctx}/transferprocesses/request" \
+    resp=$(mgmt_post "/${MGMT_V}/participants/${ctx}/transferprocesses/request" \
       '{"@context":["https://w3id.org/edc/connector/management/v2"],"@type":"QuerySpec"}' 2>/dev/null) || resp=""
 
     if [ -n "$resp" ] && echo "$resp" | jq -e 'type == "array"' >/dev/null 2>&1; then
@@ -436,7 +440,7 @@ run_transfer_tests() {
   # 4.2 — Verify transfer includes STARTED or COMPLETED state
   local test_id="XFER-4.2"
   local resp
-  resp=$(mgmt_post "/v5alpha/participants/${CONSUMER_CTX}/transferprocesses/request" \
+  resp=$(mgmt_post "/${MGMT_V}/participants/${CONSUMER_CTX}/transferprocesses/request" \
     '{"@context":["https://w3id.org/edc/connector/management/v2"],"@type":"QuerySpec"}' 2>/dev/null) || resp=""
 
   if [ -n "$resp" ] && echo "$resp" | jq -e '[.[] | select(.state == "STARTED" or .state == "COMPLETED")] | length > 0' >/dev/null 2>&1; then
@@ -486,7 +490,7 @@ run_policy_tests() {
     local ctx="${PARTICIPANT_CTXS[$i]}"
     local test_id="POL-5.1-${slug}"
     local resp
-    resp=$(mgmt_post "/v5alpha/participants/${ctx}/policydefinitions/request" \
+    resp=$(mgmt_post "/${MGMT_V}/participants/${ctx}/policydefinitions/request" \
       '{"@context":["https://w3id.org/edc/connector/management/v2"],"@type":"QuerySpec"}' 2>/dev/null) || resp=""
 
     if [ -n "$resp" ] && echo "$resp" | jq -e 'type == "array"' >/dev/null 2>&1; then
@@ -506,7 +510,7 @@ run_policy_tests() {
   # 5.2 — Policy contains ODRL structure
   local test_id="POL-5.2"
   local resp
-  resp=$(mgmt_post "/v5alpha/participants/${PROVIDER_CTX}/policydefinitions/request" \
+  resp=$(mgmt_post "/${MGMT_V}/participants/${PROVIDER_CTX}/policydefinitions/request" \
     '{"@context":["https://w3id.org/edc/connector/management/v2"],"@type":"QuerySpec","limit":1}' 2>/dev/null) || resp=""
 
   if [ -n "$resp" ] && echo "$resp" | jq -e '.[0].policy' >/dev/null 2>&1; then
@@ -532,7 +536,7 @@ run_contract_def_tests() {
     local ctx="${PARTICIPANT_CTXS[$i]}"
     local test_id="CDEF-6.1-${slug}"
     local resp
-    resp=$(mgmt_post "/v5alpha/participants/${ctx}/contractdefinitions/request" \
+    resp=$(mgmt_post "/${MGMT_V}/participants/${ctx}/contractdefinitions/request" \
       '{"@context":["https://w3id.org/edc/connector/management/v2"],"@type":"QuerySpec"}' 2>/dev/null) || resp=""
 
     if [ -n "$resp" ] && echo "$resp" | jq -e 'type == "array"' >/dev/null 2>&1; then
@@ -597,7 +601,7 @@ run_schema_tests() {
   # 7.3 — JSON-LD @context handling in response
   local test_id="SCHEMA-7.3"
   local resp
-  resp=$(mgmt_post "/v5alpha/participants/${PROVIDER_CTX}/assets/request" \
+  resp=$(mgmt_post "/${MGMT_V}/participants/${PROVIDER_CTX}/assets/request" \
     '{"@context":["https://w3id.org/edc/connector/management/v2"],"@type":"QuerySpec","limit":1}' 2>/dev/null) || resp=""
 
   if [ -n "$resp" ] && echo "$resp" | jq -e '.[0]["@context"]' >/dev/null 2>&1; then
@@ -616,7 +620,7 @@ run_schema_tests() {
   http_code=$(curl -s -o /dev/null -w "%{http_code}" \
     -H "$(auth_header)" -H "Content-Type: application/json" \
     -X POST -d 'not-json' \
-    "${MGMT_API}/v5alpha/participants/${PROVIDER_CTX}/assets/request" 2>/dev/null)
+    "${MGMT_API}/${MGMT_V}/participants/${PROVIDER_CTX}/assets/request" 2>/dev/null)
 
   if [ "$http_code" -ge 400 ] && [ "$http_code" -lt 500 ] 2>/dev/null; then
     pass "$test_id: Invalid JSON returns HTTP ${http_code} (client error)"
@@ -641,7 +645,7 @@ write_report() {
     echo "  \"version\": \"1.0.0\","
     echo "  \"timestamp\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\","
     echo "  \"deployment\": \"health-dataspace-v2\","
-    echo "  \"edcVersion\": \"v5alpha\","
+    echo "  \"edcVersion\": \"${MGMT_V}\","
     echo "  \"summary\": {"
     echo "    \"total\": ${TOTAL},"
     echo "    \"passed\": ${PASSED},"
