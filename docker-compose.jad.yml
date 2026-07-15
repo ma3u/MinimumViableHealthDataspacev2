@@ -120,7 +120,7 @@ services:
   # Keycloak — OAuth2/OIDC identity provider
   # ---------------------------------------------------------------------------
   keycloak:
-    image: quay.io/keycloak/keycloak:26.6.0
+    image: quay.io/keycloak/keycloak:26.6.4
     container_name: health-dataspace-keycloak
     command:
       - "start-dev"

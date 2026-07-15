@@ -76,7 +76,7 @@ export CATALOG_ENRICHER_APP="mvhd-catalog-enricher"
 # time (Docker Hub/Quay digests verified). Bumps are deliberate PRs, not pulls.
 # POSTGRES_VERSION is pinned above next to PG_IMAGE.
 export NEO4J_VERSION="5.26.28-community"
-export KEYCLOAK_VERSION="26.6.0" # matches live auth.ehds.mabu.red (verified 2026-07-15)
+export KEYCLOAK_VERSION="26.6.4" # patch bump from live 26.6.0 (Phase C, ADR-029 cadence)
 export VAULT_VERSION="2.0"
 export NATS_VERSION="2.14.3-alpine"
 
