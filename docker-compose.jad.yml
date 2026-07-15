@@ -234,9 +234,9 @@ services:
   # EDC-V Control Plane — DSP protocol + management APIs
   # ---------------------------------------------------------------------------
   controlplane:
-    # GHCR :latest pinned by digest (built 2026-04-11, EDC 0.16 era — ADR-029);
-    # Phase B of issue #97 replaces this with a versioned rebuild tag.
-    image: ghcr.io/ma3u/health-dataspace/jad-controlplane:latest@sha256:2516cbebd4666f87564c825679fc14d3b515d1a5931f5a18bdd1176cfab64826
+    # EDC 0.18-era jad launcher — Metaform's public per-commit build
+    # (issue #97 Phase B; edc 0.18.0-SNAPSHOT, OCI source label upstream).
+    image: ghcr.io/metaform/jad/controlplane:4a7e5bd096c58814748e956cc9329586ad309698
     container_name: health-dataspace-controlplane
     environment:
       # Base config
@@ -330,9 +330,9 @@ services:
   # Pushes FHIR Bundle JSON to consumer endpoints via Neo4j Query Proxy.
   # ---------------------------------------------------------------------------
   dataplane-fhir:
-    # GHCR :latest pinned by digest (built 2026-04-11, EDC 0.16 era — ADR-029);
-    # Phase B of issue #97 replaces this with a versioned rebuild tag.
-    image: ghcr.io/ma3u/health-dataspace/jad-dataplane:latest@sha256:9af05fab5af8f3993fdb9ba7f856dae51d2f2d6ef7a9d13d5eb7ba81b544a0ec
+    # EDC 0.18-era jad launcher — Metaform's public per-commit build
+    # (issue #97 Phase B; edc 0.18.0-SNAPSHOT, OCI source label upstream).
+    image: ghcr.io/metaform/jad/dataplane:4a7e5bd096c58814748e956cc9329586ad309698
     container_name: health-dataspace-dataplane-fhir
     environment:
       edc.hostname: "dataplane-fhir"
@@ -366,6 +366,8 @@ services:
     networks:
       - edcv
     depends_on:
+      siglet:
+        condition: service_started
       postgres:
         condition: service_healthy
       vault:
@@ -397,9 +399,9 @@ services:
   # Consumer pulls query results from provider via Neo4j Query Proxy.
   # ---------------------------------------------------------------------------
   dataplane-omop:
-    # GHCR :latest pinned by digest (built 2026-04-11, EDC 0.16 era — ADR-029);
-    # Phase B of issue #97 replaces this with a versioned rebuild tag.
-    image: ghcr.io/ma3u/health-dataspace/jad-dataplane:latest@sha256:9af05fab5af8f3993fdb9ba7f856dae51d2f2d6ef7a9d13d5eb7ba81b544a0ec
+    # EDC 0.18-era jad launcher — Metaform's public per-commit build
+    # (issue #97 Phase B; edc 0.18.0-SNAPSHOT, OCI source label upstream).
+    image: ghcr.io/metaform/jad/dataplane:4a7e5bd096c58814748e956cc9329586ad309698
     container_name: health-dataspace-dataplane-omop
     environment:
       edc.hostname: "dataplane-omop"
@@ -433,6 +435,8 @@ services:
     networks:
       - edcv
     depends_on:
+      siglet:
+        condition: service_started
       postgres:
         condition: service_healthy
       vault:
@@ -513,9 +517,9 @@ services:
   # IdentityHub — DCP v1.0 credential storage & presentation
   # ---------------------------------------------------------------------------
   identityhub:
-    # GHCR :latest pinned by digest (built 2026-04-11, EDC 0.16 era — ADR-029);
-    # Phase B of issue #97 replaces this with a versioned rebuild tag.
-    image: ghcr.io/ma3u/health-dataspace/jad-identity-hub:latest@sha256:1dd82530c0208254d660c3800db3fa837225edc450b765ff04a4072eb0bce305
+    # EDC 0.18-era jad launcher — Metaform's public per-commit build
+    # (issue #97 Phase B; edc 0.18.0-SNAPSHOT, OCI source label upstream).
+    image: ghcr.io/metaform/jad/identity-hub:4a7e5bd096c58814748e956cc9329586ad309698
     container_name: health-dataspace-identityhub
     env_file:
       - ./jad/identityhub.env
@@ -554,9 +558,9 @@ services:
   # IssuerService — Verifiable Credential issuance (trust anchor)
   # ---------------------------------------------------------------------------
   issuerservice:
-    # GHCR :latest pinned by digest (built 2026-04-11, EDC 0.16 era — ADR-029);
-    # Phase B of issue #97 replaces this with a versioned rebuild tag.
-    image: ghcr.io/ma3u/health-dataspace/jad-issuerservice:latest@sha256:b42320defd351c0010b8d55592bdebc12d6ee1ad2fa3387a7b85977fce35c5c1
+    # EDC 0.18-era jad launcher — Metaform's public per-commit build
+    # (issue #97 Phase B; edc 0.18.0-SNAPSHOT, OCI source label upstream).
+    image: ghcr.io/metaform/jad/issuerservice:4a7e5bd096c58814748e956cc9329586ad309698
     container_name: health-dataspace-issuerservice
     env_file:
       - ./jad/issuerservice.env
@@ -599,9 +603,10 @@ services:
   # CFM Tenant Manager — Multi-tenant participant lifecycle
   # ---------------------------------------------------------------------------
   tenant-manager:
-    # GHCR :latest pinned by digest (built 2026-04-11, EDC 0.16 era — ADR-029);
-    # Phase B of issue #97 replaces this with a versioned rebuild tag.
-    image: ghcr.io/ma3u/health-dataspace/cfm-tmanager:latest@sha256:c50cca3ffdf3c8a7657be9f51bdf79a3a09f1ba35458a17fc343c979f280dd54
+    # Pinned to the WORKING 2026-03-09 manager build (ADR-029). GHCR :latest
+    # was overwritten 2026-04-11 by the shared CFM *agent* image, which
+    # crash-loops in the manager role — found by the Phase B gate.
+    image: ghcr.io/ma3u/health-dataspace/cfm-tmanager:latest@sha256:fd096dc016d319faf85d25489b646d76df7c86c708f18c8facc84f3bbd41fa22
     container_name: health-dataspace-tenant-manager
     volumes:
       - ./jad/tenant-manager-config.yaml:/etc/appname/tm.env:ro
@@ -624,9 +629,10 @@ services:
   # CFM Provision Manager — Automated resource provisioning
   # ---------------------------------------------------------------------------
   provision-manager:
-    # GHCR :latest pinned by digest (built 2026-04-11, EDC 0.16 era — ADR-029);
-    # Phase B of issue #97 replaces this with a versioned rebuild tag.
-    image: ghcr.io/ma3u/health-dataspace/cfm-pmanager:latest@sha256:c50cca3ffdf3c8a7657be9f51bdf79a3a09f1ba35458a17fc343c979f280dd54
+    # Pinned to the WORKING 2026-03-09 manager build (ADR-029). GHCR :latest
+    # was overwritten 2026-04-11 by the shared CFM *agent* image, which
+    # crash-loops in the manager role — found by the Phase B gate.
+    image: ghcr.io/ma3u/health-dataspace/cfm-pmanager:latest@sha256:f72bb345dfcd145369b4baa76fbcda6055e1b5621772876559564b6e56be533c
     container_name: health-dataspace-provision-manager
     volumes:
       - ./jad/provision-manager-config.yaml:/etc/appname/pm.env:ro
@@ -755,6 +761,29 @@ services:
         condition: service_started
     profiles:
       - seed
+
+  # ---------------------------------------------------------------------------
+  # Siglet — cert-exchange / token signing for EDC 0.18 dataplanes
+  # (eclipse-dataplane-core/dsdk-facet-rs; issue #97 Phase B). Memory backend
+  # for local dev; Vault transit engine + signing-siglet key are created by
+  # scripts/bootstrap-jad.sh. postgres-vault backend is the Azure path.
+  # ---------------------------------------------------------------------------
+  siglet:
+    image: ghcr.io/eclipse-dataplane-core/dsdk-facet-rs/siglet:main@sha256:2e90595c3042631c8eebbc5e7766dbe75311e10f5f7d340efada4c7133bd88d2
+    container_name: health-dataspace-siglet
+    environment:
+      SIGLET__STORAGE_BACKEND__TYPE: "memory"
+      SIGLET__TOKEN__ISSUER: "siglet-issuer"
+      SIGLET__VAULT__URL: "http://vault:8200"
+      SIGLET__VAULT__TOKEN: "root" # dev-mode Vault root token (compose only)
+      SIGLET__SIGNALING_AUTH__MODE: "disabled" # dev: skip JWT verification
+      SIGLET__MANAGEMENT_API_AUTH__MODE: "disabled"
+    depends_on:
+      vault:
+        condition: service_healthy
+    networks:
+      - edcv
+    restart: unless-stopped
 
 networks:
   edcv:

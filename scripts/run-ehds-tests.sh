@@ -18,6 +18,10 @@
 # ---------------------------------------------------------------------------
 set -euo pipefail
 
+# EDC Management API version segment — v5beta since the EDC 0.18 JAD
+# launchers (issue #97 Phase B); override for older stacks.
+MGMT_V="${EDC_MGMT_API_VERSION:-v5beta}"
+
 # ---------------------------------------------------------------------------
 # Configuration
 # ---------------------------------------------------------------------------
@@ -103,7 +107,7 @@ discover_participants() {
   log "Discovering participant context UUIDs..."
   local participants_json
   participants_json=$(curl -sf -H "$(auth_header)" \
-    "${MGMT_API}/v5alpha/participants") || {
+    "${MGMT_API}/${MGMT_V}/participants") || {
     log "ERROR: Cannot fetch participant list from Management API"
     exit 1
   }
@@ -139,7 +143,7 @@ run_article53_tests() {
   # 1.1 — EHDS purpose constraints exist in policy definitions
   local test_id="ART53-1.1"
   local resp
-  resp=$(mgmt_post "/v5alpha/participants/${PROVIDER_CTX}/policydefinitions/request" \
+  resp=$(mgmt_post "/${MGMT_V}/participants/${PROVIDER_CTX}/policydefinitions/request" \
     '{"@context":["https://w3id.org/edc/connector/management/v2"],"@type":"QuerySpec"}' 2>/dev/null) || resp=""
 
   if [ -n "$resp" ] && echo "$resp" | jq -e 'length > 0' >/dev/null 2>&1; then

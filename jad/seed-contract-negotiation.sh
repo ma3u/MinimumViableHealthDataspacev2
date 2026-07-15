@@ -16,7 +16,7 @@
 #   - Protocol MUST be "dataspace-protocol-http:2025-1" (with version suffix)
 #   - @context MUST be array: ["https://w3id.org/edc/connector/management/v2"]
 #   - Data plane hostname MUST match docker-compose service name (dataplane-fhir)
-#   - Catalog uses v1alpha API; negotiation/transfer use v5alpha API
+#   - Catalog uses v1alpha API; negotiation/transfer use ${MGMT_V} API
 #   - operandLeft in contract defs: "https://w3id.org/edc/v0.0.1/ns/id" (not "@id")
 #   - Participant contexts must be ACTIVATED (state=200) for DID serving
 #
@@ -26,6 +26,10 @@
 #   - seed-data-assets.sh completed (assets + policies + contracts)
 # =============================================================================
 set -uo pipefail
+
+# EDC Management API version segment — v5beta since the EDC 0.18 JAD
+# launchers (issue #97 Phase B); override for older stacks.
+MGMT_V="${EDC_MGMT_API_VERSION:-v5beta}"
 # Note: -e removed intentionally — transfer failures (data plane key issues) should
 # not abort the entire script; negotiations still succeed and provide demo data.
 
@@ -77,12 +81,12 @@ get_token() {
 
 # discover_ctx DID_SLUG → returns the UUID context ID whose participantId contains SLUG
 # Example: discover_ctx "alpha-klinik"  → UUID assigned at provisioning time (dynamic)
-# Queries GET /api/mgmt/v5alpha/participants at runtime so it works after any re-provisioning.
+# Queries GET /api/mgmt/${MGMT_V}/participants at runtime so it works after any re-provisioning.
 discover_ctx() {
   local slug="$1"
   local token
   token=$(get_token)
-  curl -sf -H "Authorization: Bearer $token" "$MGMT_URL/v5alpha/participants" \
+  curl -sf -H "Authorization: Bearer $token" "$MGMT_URL/${MGMT_V}/participants" \
     | python3 -c "
 import json, sys
 slug = '$slug'
@@ -198,7 +202,7 @@ register_dataplane() {
   }"
   local http_code
   http_code=$(curl -s -o /dev/null -w '%{http_code}' -X POST \
-    "$MGMT_URL/v5alpha/dataplanes/$ctx_id" \
+    "$MGMT_URL/${MGMT_V}/dataplanes/$ctx_id" \
     -H "Authorization: Bearer $(get_token)" \
     -H "Content-Type: application/json" \
     -d "$payload")
@@ -291,7 +295,7 @@ echo "$OFFERS" | while IFS='|' read -r asset_id offer_id perms_json; do
   # --- 3a: Negotiate contract ---
   # EDC-V ContractRequest: include permission only — omit prohibition/obligation
   # (empty arrays fail validation; non-empty arrays cause policy mismatch)
-  NEG_RESPONSE=$(mgmt_call POST "v5alpha/participants/$PHARMACO_CTX/contractnegotiations" "{
+  NEG_RESPONSE=$(mgmt_call POST "${MGMT_V}/participants/$PHARMACO_CTX/contractnegotiations" "{
     \"@context\": [\"$EDC_CTX\"],
     \"@type\": \"ContractRequest\",
     \"counterPartyAddress\": \"$ALPHAKLINIK_DSP\",
@@ -323,7 +327,7 @@ print(d.get('@id', ''))
   # --- 3b: Poll until FINALIZED ---
   echo -n "    Waiting for FINALIZED..."
   FINAL_STATE=$(poll_state \
-    "v5alpha/participants/$PHARMACO_CTX/contractnegotiations/$NEG_ID" \
+    "${MGMT_V}/participants/$PHARMACO_CTX/contractnegotiations/$NEG_ID" \
     "FINALIZED" "$asset_id")
 
   if [ "$FINAL_STATE" != "FINALIZED" ]; then
@@ -334,7 +338,7 @@ print(d.get('@id', ''))
   echo " ✅"
 
   # --- 3c: Extract agreement ID ---
-  AGREEMENT_ID=$(mgmt_call GET "v5alpha/participants/$PHARMACO_CTX/contractnegotiations/$NEG_ID" \
+  AGREEMENT_ID=$(mgmt_call GET "${MGMT_V}/participants/$PHARMACO_CTX/contractnegotiations/$NEG_ID" \
     | python3 -c "
 import json, sys
 d = json.load(sys.stdin)
@@ -345,7 +349,7 @@ print(d.get('contractAgreementId', ''))
 
   # --- 3d: Initiate HttpData-PULL transfer ---
   echo "    Initiating data transfer (HttpData-PULL)..."
-  TP_RESPONSE=$(mgmt_call POST "v5alpha/participants/$PHARMACO_CTX/transferprocesses" "{
+  TP_RESPONSE=$(mgmt_call POST "${MGMT_V}/participants/$PHARMACO_CTX/transferprocesses" "{
     \"@context\": [\"$EDC_CTX\"],
     \"@type\": \"TransferRequest\",
     \"counterPartyAddress\": \"$ALPHAKLINIK_DSP\",
@@ -375,7 +379,7 @@ print(d.get('@id', ''))
   # --- 3e: Poll until STARTED ---
   echo -n "    Waiting for STARTED..."
   TP_STATE=$(poll_state \
-    "v5alpha/participants/$PHARMACO_CTX/transferprocesses/$TP_ID" \
+    "${MGMT_V}/participants/$PHARMACO_CTX/transferprocesses/$TP_ID" \
     "STARTED" "$asset_id")
 
   if [ "$TP_STATE" = "STARTED" ]; then
@@ -419,7 +423,7 @@ echo "Step 5: Verify Contract Negotiations & Transfers"
 echo "────────────────────────────────────────────────"
 
 # PharmaCo negotiations
-PHARMACO_NEG_COUNT=$(mgmt_call POST "v5alpha/participants/$PHARMACO_CTX/contractnegotiations/request" \
+PHARMACO_NEG_COUNT=$(mgmt_call POST "${MGMT_V}/participants/$PHARMACO_CTX/contractnegotiations/request" \
   "{\"@context\":[\"$EDC_CTX\"],\"@type\":\"QuerySpec\"}" \
   | python3 -c "
 import json, sys
@@ -437,7 +441,7 @@ for n in items:
 echo "  PharmaCo negotiations (FINALIZED/total): $PHARMACO_NEG_COUNT"
 
 # PharmaCo transfers
-PHARMACO_TP_COUNT=$(mgmt_call POST "v5alpha/participants/$PHARMACO_CTX/transferprocesses/request" \
+PHARMACO_TP_COUNT=$(mgmt_call POST "${MGMT_V}/participants/$PHARMACO_CTX/transferprocesses/request" \
   "{\"@context\":[\"$EDC_CTX\"],\"@type\":\"QuerySpec\"}" \
   | python3 -c "
 import json, sys
@@ -455,7 +459,7 @@ for t in items:
 echo "  PharmaCo transfers (STARTED/total): $PHARMACO_TP_COUNT"
 
 # Clinic (provider side)
-LMC_NEG_COUNT=$(mgmt_call POST "v5alpha/participants/$LMC_CTX/contractnegotiations/request" \
+LMC_NEG_COUNT=$(mgmt_call POST "${MGMT_V}/participants/$LMC_CTX/contractnegotiations/request" \
   "{\"@context\":[\"$EDC_CTX\"],\"@type\":\"QuerySpec\"}" \
   | python3 -c "
 import json, sys

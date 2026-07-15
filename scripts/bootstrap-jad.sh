@@ -164,6 +164,16 @@ start_stack() {
     sleep 2
   done
 
+  # Siglet (EDC 0.18 dataplane cert-exchange — issue #97 Phase B) signs tokens
+  # via the Vault transit engine. Vault is in-memory, so this must run on
+  # every bootstrap. Both calls are idempotent (400 "path is in use" is fine).
+  log "Enabling Vault transit engine + signing-siglet key for siglet..."
+  curl -s -X POST http://localhost:8200/v1/sys/mounts/transit \
+    -H "X-Vault-Token: root" -d '{"type":"transit"}' -o /dev/null || true
+  curl -s -X POST http://localhost:8200/v1/transit/keys/signing-siglet \
+    -H "X-Vault-Token: root" -d '{"type":"ed25519"}' -o /dev/null || true
+  ok "Vault transit ready for siglet"
+
   log "=== Phase 3: Starting Traefik gateway ==="
   docker compose $COMPOSE_FILES up -d traefik
   ok "Traefik gateway started"
