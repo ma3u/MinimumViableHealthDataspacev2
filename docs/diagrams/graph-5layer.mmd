@@ -1,0 +1,37 @@
+%% 5-layer Neo4j knowledge graph — source: CLAUDE.md "Architecture",
+%% docs/health-dataspace-graph-schema.md, .claude/rules/api-conventions.md
+graph TB
+    subgraph L1["L1 Dataspace Marketplace  #2471A3"]
+        P[Participant] -->|OFFERS| DP[DataProduct]
+        DP -->|GOVERNED_BY| POL[OdrlPolicy]
+        DP -->|SUBJECT_TO| HA[HDABApproval]
+        C[Contract] -->|COVERS| DP
+        TE[TransferEvent] -->|UNDER| C
+    end
+    subgraph L2["L2 HealthDCAT-AP Metadata  #148F77"]
+        CAT[Catalogue] -->|CONTAINS| HD[HealthDataset]
+        HD -->|HAS_DISTRIBUTION| DIST[Distribution]
+    end
+    subgraph L3["L3 FHIR R4 Clinical  #1E8449"]
+        PAT[Patient] -->|HAS_CONDITION| COND[Condition]
+        PAT -->|HAS_OBSERVATION| OBS[Observation]
+        PAT -->|HAS_MEDICATION_REQUEST| MR[MedicationRequest]
+    end
+    subgraph L4["L4 OMOP CDM Analytics  #CA6F1E"]
+        OP[OMOPPerson] -->|HAS_CONDITION_OCCURRENCE| CO[ConditionOccurrence]
+        OP -->|HAS_DRUG_EXPOSURE| DE[DrugExposure]
+        OP -->|HAS_MEASUREMENT| M[Measurement]
+    end
+    subgraph L5["L5 Biomedical Ontology  #7D3C98"]
+        SN[SnomedConcept]
+        ICD[ICD10Code]
+        RX[RxNormConcept]
+        LN[LoincCode]
+    end
+    P -.->|publishes| CAT
+    HD -.->|describes| PAT
+    PAT -.->|MAPS_TO| OP
+    COND -->|CODED_BY| SN
+    COND -->|CODED_BY| ICD
+    MR -->|CODED_BY| RX
+    OBS -->|CODED_BY| LN

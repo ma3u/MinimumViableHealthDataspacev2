@@ -1,0 +1,41 @@
+@startuml jad-deployment
+' JAD stack deployment — sources: CLAUDE.md "Key Services" table (pre-restructure,
+' now .claude/rules + docs/knowledge/services/), docker-compose.jad.yml,
+' scripts/azure/env.sh (ACA app names).
+title JAD stack — local Docker Compose / Azure Container Apps (rg-mvhd-dev)
+
+node "UI tier" {
+  [Next.js 14 UI\nport 3000 / mvhd-ui] as UI
+}
+node "Identity" {
+  [Keycloak (realm edcv)\nport 8080 / mvhd-keycloak] as KC
+  [Vault (in-memory!)\nport 8200 / mvhd-vault] as VAULT
+  [IdentityHub / mvhd-identityhub] as IH
+  [IssuerService / mvhd-issuerservice] as IS
+}
+node "Data tier" {
+  database "Neo4j 5\n7687/7474 / mvhd-neo4j" as N4
+  database "PostgreSQL\n5432 / mvhd-postgres" as PG
+  [neo4j-proxy (Express)\nport 9090 / mvhd-neo4j-proxy] as PX
+}
+node "Dataspace" {
+  [EDC controlplane / mvhd-controlplane] as CP
+  [dataplane FHIR / mvhd-dp-fhir] as DPF
+  [dataplane OMOP / mvhd-dp-omop] as DPO
+}
+node "Federation (issue #8)" {
+  [catalog-crawler\nACA job */5min] as CRAWL
+  [catalog-enricher / mvhd-catalog-enricher] as ENR
+  queue "NATS 4222 / mvhd-nats" as NATS
+}
+
+UI --> KC : OIDC (confidential + PKCE S256)
+UI --> PX : FHIR / OMOP / NLQ / federated
+PX --> N4 : bolt
+CP --> PG
+IH --> PG
+CRAWL --> N4 : crawl targets
+CRAWL --> NATS : dataspace.catalog.raw
+NATS --> ENR
+ENR --> N4 : MERGE federated datasets
+@enduml

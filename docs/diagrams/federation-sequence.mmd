@@ -1,0 +1,23 @@
+%% Federated catalog discovery — source: docs/architecture/federation.md (ADR-020, issue #8)
+sequenceDiagram
+    autonumber
+    participant TA as DCP Trust Anchor
+    participant PX as neo4j-proxy
+    participant N4 as Neo4j (L1/L2)
+    participant CR as catalog-crawler (ACA job, */5 min)
+    participant DSP as Participant DSP endpoints
+    participant NB as NATS (dataspace.catalog.raw)
+    participant EN as catalog-enricher
+    participant UI as UI /query · /data/discover
+
+    TA-->>PX: participants[] (DCP_DISCOVERY_URL tick)
+    PX->>N4: MERGE (:Participant {source:'dcp'})
+    CR->>N4: read crawl targets (dspCatalogUrl, crawlerEnabled)
+    CR->>DSP: DSP catalog request (crawler DID)
+    DSP-->>CR: DCAT catalog (JSON-LD)
+    CR->>NB: publish raw catalog
+    NB-->>EN: durable consumer "enricher"
+    EN->>N4: MERGE (:HealthDataset {source:'federated'}) + :OdrlPolicy
+    UI->>PX: /nlq "find diabetes datasets across German hospitals"
+    PX->>N4: federated_dataset_search (L1 × L2 × L5)
+    N4-->>UI: datasets incl. federated publishers

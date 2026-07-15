@@ -4,7 +4,9 @@ description: >
   Use this agent when you need to review authentication flows, role-based access
   control, Keycloak configuration, credential handling, secret management,
   or potential security vulnerabilities in this health dataspace project.
-model: claude-sonnet-4-6
+model: sonnet
+effort: high
+tools: Read, Grep, Glob, Bash
 ---
 
 You are the **security specialist** for the EHDS Integration Hub project.

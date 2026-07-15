@@ -1,75 +1,39 @@
-# /review — Code Review
+---
+description: Structured review of the current diff — findings by severity
+argument-hint: "[--staged | --branch <ref>]"
+allowed-tools: Bash(git diff:*), Bash(git status), Bash(git log:*), Read, Grep, Glob
+---
 
-Perform a structured code review of the current changes.
+## Context (auto-injected)
 
-## Usage
+- Status: !`git status --short`
+- Recent commits: !`git log --oneline -5`
+- Diff under review: !`git diff HEAD`
 
-```
-/review
-/review --staged         # review only staged changes
-/review --branch main    # review diff against a specific branch
-```
+## Task
 
-## Workflow
+Review the diff against the project rules (`.claude/rules/code-style.md`,
+`.claude/rules/testing.md`, `.claude/rules/api-conventions.md`). Verify each
+candidate finding against the actual file before reporting.
 
-1. Gather the diff:
+**Output findings grouped by severity, most severe first** — per finding give
+`file:line`, a one-sentence defect, the concrete failure scenario, and a minimal fix:
 
-```bash
-git diff HEAD
-```
+1. **Bug** — TypeScript strict violations, bare `CREATE` in Cypher (must be `MERGE`),
+   missing `set -euo pipefail` in bash, conditional React hooks.
+2. **Regression** — behavior that worked before this diff and breaks after
+   (check the touched tests and `ui/public/mock/` fixtures still match API shapes).
+3. **Security** — hardcoded secrets, missing role guard in new API routes
+   (`getServerSession` + role check — see `.claude/rules/api-conventions.md`),
+   user input interpolated into Cypher (parameters only), real org/patient names
+   outside the `NEXT_PUBLIC_DEMO_TK` gate, mutations of `TransferEvent` audit nodes.
+4. **Missing test** — changed logic without a Vitest test in `ui/__tests__/unit/`
+   (or `services/neo4j-proxy/__tests__/`), new journey without a Playwright spec.
+5. **Missing doc** — new API route without a mock fixture, schema change not
+   mirrored in `neo4j/init-schema.cypher`, architectural decision without an ADR.
 
-For staged only: `!git diff --cached`
-For branch comparison: `!git diff main...HEAD`
+Also flag static-export compatibility: new pages must guard
+`NEXT_PUBLIC_STATIC_EXPORT` and use `fetchApi()` (source: CLAUDE.md gotcha #3).
 
-2. Also gather context:
-
-```bash
-git status --short
-git log --oneline -5
-```
-
-3. Review against these project-specific criteria:
-
-### Correctness
-
-- TypeScript strict mode satisfied (no implicit any, no unhandled nulls)
-- `MERGE` used in Cypher (never bare `CREATE`)
-- `set -euo pipefail` present in all modified bash scripts
-- React hooks called unconditionally
-- `[...roles] as string[]` spread used when `DEMO_PERSONAS` roles are passed to functions
-
-### Security
-
-- No hardcoded credentials, tokens, or secrets
-- No real patient data or real organisation names
-- Role checks present in new API routes (`getServerSession` + role guard)
-- No user-controlled input interpolated directly into Cypher queries
-
-### Static export compatibility
-
-- New pages check `NEXT_PUBLIC_STATIC_EXPORT` / `IS_STATIC`
-- New API routes have a corresponding mock file in `ui/public/mock/`
-- `fetchApi()` used in client components (not bare `fetch`)
-
-### Testing
-
-- New UI components have a Vitest unit test in `ui/__tests__/unit/`
-- New user journeys have a Playwright spec in `ui/__tests__/e2e/journeys/`
-- New API routes have MSW handler if tested in unit tests
-
-### Pre-commit hygiene
-
-- Prettier will accept the file as-is (check with `npx prettier --check <file>`)
-- ESLint warning count remains ≤ 55 (`npm run lint`)
-- `npx tsc --noEmit -p tsconfig.build.json` passes
-
-### Compliance / policy
-
-- Only fictional organisation names used (AlphaKlinik Berlin, PharmaCo Research AG, MedReg DE, Limburg Medical Centre, Institut de Recherche Santé)
-- EHDS article references accurate when cited in code comments
-- `TransferEvent` nodes remain immutable (no delete operations on audit trail)
-
-4. Produce a review summary with:
-   - **Pass** / **Fail** / **Warn** for each category above
-   - Specific line references for any issues found
-   - Suggested fixes (not rewrites — minimal targeted changes)
+End with a verdict: **merge-ready** or **needs-changes**, plus the pre-commit
+reality check: Prettier will reformat, ESLint budget is ≤ 55 warnings.

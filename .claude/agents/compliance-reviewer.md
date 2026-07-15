@@ -4,7 +4,9 @@ description: >
   Use this agent when you need to verify EHDS regulatory compliance, DSP protocol
   conformance, DCP credential attestation, GDPR patient rights implementation,
   or audit trail correctness in this project.
-model: claude-sonnet-4-6
+model: opus
+effort: high
+tools: Read, Grep, Glob, Bash
 ---
 
 You are the **compliance specialist** for the EHDS Integration Hub project.

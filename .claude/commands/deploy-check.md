@@ -1,110 +1,39 @@
-# /deploy-check — Pre-Deploy Validation
+---
+description: Pre-deploy validation — run the real gates, report pass/fail checklist
+argument-hint: "[--static | --docker | --azure]"
+allowed-tools: Bash, Read, Grep
+---
 
-Run all pre-deployment checks before pushing to main or merging a PR.
+## Context (auto-injected)
 
-## Usage
+- TypeScript: !`cd ui && npx tsc --noEmit -p tsconfig.build.json && echo TSC_OK`
+- Lint (budget ≤ 55 warnings): !`cd ui && npm run lint 2>&1 | tail -3`
+- Unit tests: !`cd ui && npm test 2>&1 | tail -3`
+- Prod-dependency audit (pre-push gate): !`cd ui && npm audit --audit-level=high --omit=dev 2>&1 | tail -2`
+- Last CI runs: !`gh run list --limit 5`
 
-```
-/deploy-check              # full check (live + static)
-/deploy-check --static     # static GitHub Pages export only
-/deploy-check --docker     # Docker Compose stack only
-/deploy-check --k8s        # Kubernetes (OrbStack) only
-```
+## Task
 
-## Full Validation Sequence
+Interpret the injected results and complete the remaining checks for the requested
+target, then print a pass/fail checklist. Commands are the repo's real gates
+(sources: `ui/package.json`, `.pre-commit-config.yaml`, `.github/workflows/`):
 
-### 1 — TypeScript and lint
+- **Static (GitHub Pages):** `cd ui && npm run build` must produce `out/`; the CI
+  workflow renames `src/app/api/` — every new API route needs a
+  `ui/public/mock/*.json` fixture (CLAUDE.md gotcha #3). Spot-check with
+  `npx playwright test __tests__/e2e/journeys/19-static-github-pages.spec.ts --project=chromium`.
+- **Docker:** `docker compose up -d`, then `curl -s -o /dev/null -w "%{http_code}" http://localhost:3000/`
+  expects 200; re-run `neo4j/init-schema.cypher` (idempotent) without errors.
+- **Azure:** push to main triggers `.github/workflows/deploy-azure.yml`
+  (builds UI + neo4j-proxy images, updates ACA apps). Verify with
+  `gh run list --workflow=deploy-azure.yml --limit 1` and a live check of
+  https://ehds.mabu.red. Remember ACA caches `:latest` (docs/gotchas.md).
 
-```bash
-cd ui
-npx tsc --noEmit -p tsconfig.build.json
-npm run lint
-```
+## Checklist to print
 
-Expected: 0 TypeScript errors, ≤ 55 ESLint warnings.
-
-### 2 — Unit tests
-
-```bash
-cd ui && npm test
-```
-
-Expected: all Vitest tests pass.
-
-### 3 — Static export build
-
-```bash
-cd ui && npm run build
-```
-
-Expected: `out/` directory created, no build errors.
-Note: the build runs without `NEXT_PUBLIC_STATIC_EXPORT=true` here. The CI workflow
-handles moving the `api/` folder. For a local static export simulation:
-
-```bash
-mv src/app/api /tmp/api_disabled
-NEXT_PUBLIC_STATIC_EXPORT=true npm run build
-mv /tmp/api_disabled src/app/api
-```
-
-### 4 — E2E smoke tests
-
-```bash
-cd ui
-npx playwright test --project=chromium --grep @smoke
-```
-
-If no `@smoke` tag exists, run the static journeys spec:
-
-```bash
-npx playwright test __tests__/e2e/journeys/19-static-github-pages.spec.ts --project=chromium
-```
-
-### 5 — Docker Compose stack health
-
-```bash
-docker compose up -d
-sleep 10
-curl -s -o /dev/null -w "%{http_code}" http://localhost:3000/
-docker compose ps
-```
-
-Expected: HTTP 200, all services `Up`.
-
-### 6 — Neo4j schema idempotency check
-
-```bash
-cat neo4j/init-schema.cypher | docker exec -i health-dataspace-neo4j \
-  cypher-shell -u neo4j -p healthdataspace
-```
-
-Expected: completes without errors (all constraints/indexes use `IF NOT EXISTS`).
-
-### 7 — GitHub Actions status
-
-```bash
-gh run list --limit 5
-```
-
-Expected: last `Deploy Next.js to GitHub Pages` run is `success`.
-
-### 8 — Kubernetes health (if deploying to OrbStack)
-
-```bash
-kubectl -n health-dataspace get pods
-kubectl rollout status deployment/health-dataspace-ui -n health-dataspace
-```
-
-Expected: all pods `Running`, rollout `successfully rolled out`.
-
-## Checklist Before Merging
-
-- [ ] TypeScript: 0 errors
-- [ ] ESLint: ≤ 55 warnings
-- [ ] Vitest: all pass
-- [ ] Static build: no errors, `out/` generated
-- [ ] E2E: no new failures
-- [ ] Mock JSON added for any new API route
-- [ ] No real organisation names in new content
-- [ ] `MERGE` (not `CREATE`) in any new Cypher
-- [ ] Pre-commit hooks pass: `pre-commit run --all-files`
+- [ ] TypeScript 0 errors · [ ] ESLint ≤ 55 warnings · [ ] Vitest all pass
+- [ ] npm audit: no high/critical prod CVEs (this blocks pre-push)
+- [ ] Static build OK + mock fixture for every new route
+- [ ] Cypher idempotent (`MERGE`, `IF NOT EXISTS` only)
+- [ ] No real org names outside `NEXT_PUBLIC_DEMO_TK`
+- [ ] `pre-commit run --all-files` clean

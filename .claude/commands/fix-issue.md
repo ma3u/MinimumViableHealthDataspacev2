@@ -1,80 +1,35 @@
-# /fix-issue — Issue Investigation Workflow
+---
+description: Investigate and fix a GitHub issue — root cause, plan, validation
+argument-hint: "<issue-number> [--dry-run]"
+allowed-tools: Bash(gh issue view:*), Bash(git log:*), Read, Grep, Glob
+---
 
-Investigate and fix a GitHub issue in this repository.
+## Context (auto-injected)
 
-## Usage
+- Issue: !`gh issue view $ARGUMENTS`
+- Recent commits: !`git log --oneline -10`
 
-```
-/fix-issue 123
-/fix-issue 123 --dry-run    # diagnose only, no code changes
-```
+## Task
 
-`$ARGUMENTS` is the issue number.
+1. **Root-cause hypothesis** — state it with evidence. Map the symptom to the layer
+   first (table sourced from repo history):
 
-## Workflow
+   | Symptom                      | Where to look                                                                 |
+   | ---------------------------- | ----------------------------------------------------------------------------- |
+   | Graph wrong/empty            | `ui/src/app/api/graph/route.ts`, `ui/src/lib/graph-constants.ts`              |
+   | Static export / Pages broken | `ui/src/lib/api.ts`, `ui/public/mock/`, `IS_STATIC` guards                    |
+   | Keycloak / login error       | `ui/src/lib/auth.ts`, `jad/keycloak-realm.json`, realm-drift runbook          |
+   | Role-based nav wrong         | `ui/src/components/Navigation.tsx`, `ui/src/middleware.ts`                    |
+   | Neo4j query fails            | `neo4j/init-schema.cypher`, `services/neo4j-proxy/src/index.ts`               |
+   | NLQ / federated query wrong  | proxy 4-tier resolver — see ADR-020 + `docs/architecture/federation.md`       |
+   | JAD stack broken             | `docker-compose.jad.yml`, `scripts/bootstrap-jad.sh` (Vault is in-memory)     |
+   | Azure deploy issue           | `scripts/azure/*.sh`, `.github/workflows/deploy-azure.yml`, `docs/gotchas.md` |
 
-### Step 1 — Read the issue
-
-```bash
-gh issue view $ARGUMENTS
-```
-
-Also check for linked PRs:
-
-```bash
-gh issue view $ARGUMENTS --json linkedBranches,comments
-```
-
-### Step 2 — Understand the failing area
-
-Based on the issue description, identify the affected layer:
-
-| Symptom                             | Where to look                                                              |
-| ----------------------------------- | -------------------------------------------------------------------------- |
-| Graph not loading / wrong nodes     | `ui/src/app/api/graph/route.ts`, `graph-constants.ts`                      |
-| Static export / GitHub Pages broken | `ui/src/lib/api.ts`, `ui/public/mock/`, `IS_STATIC` guards                 |
-| Keycloak / login error              | `ui/src/lib/auth.ts`, `KEYCLOAK_SERVER_URL` vs `KEYCLOAK_PUBLIC_URL`       |
-| Role-based nav wrong                | `ui/src/components/Navigation.tsx`, `ui/src/middleware.ts`                 |
-| Patient portal missing data         | `ui/src/app/patient/*/page.tsx`, mock JSON in `ui/public/mock/`            |
-| Neo4j query fails                   | `neo4j/init-schema.cypher`, `services/neo4j-proxy/src/`                    |
-| Pre-commit hook failure             | `.pre-commit-config.yaml`, prettier/eslint/tsc output                      |
-| JAD stack not starting              | `docker-compose.jad.yml`, `scripts/bootstrap-jad.sh`, Vault in-memory loss |
-| Compliance test failure             | `scripts/run-dsp-tck.sh`, `scripts/run-dcp-tests.sh`                       |
-
-### Step 3 — Reproduce locally
-
-```bash
-cd ui && npm run dev
-# or for static export:
-NEXT_PUBLIC_STATIC_EXPORT=true npm run build && npx serve out
-```
-
-Run the relevant Playwright spec if an E2E regression:
-
-```bash
-npx playwright test __tests__/e2e/journeys/<relevant-spec>.spec.ts --project=chromium
-```
-
-### Step 4 — Fix
-
-- Make the minimal change that resolves the issue.
-- Do not refactor unrelated code.
-- Add or update a test that would have caught this regression.
-
-### Step 5 — Verify
-
-```bash
-npx tsc --noEmit -p tsconfig.build.json
-npm run lint
-npm test
-```
-
-### Step 6 — Commit
-
-```bash
-git add <changed files>
-git commit -m "fix(<scope>): <what was broken> (#$ARGUMENTS)"
-git push origin main
-```
-
-Reference the issue number in the commit message so GitHub auto-closes it.
+2. **Impacted files** — exact paths, must-change vs may-change.
+3. **Fix plan** — minimal targeted change; add the test that would have caught it.
+   Architectural decisions → new ADR in `docs/ADRs/` from `docs/adr/0000-template.md`,
+   linked in the planning index ADR table (workflow: CLAUDE.md "Knowledge & planning").
+4. **Validate:** `npx tsc --noEmit -p tsconfig.build.json` · `npm run lint` ·
+   targeted Vitest file · relevant Playwright journey.
+5. Commit as `fix(<scope>): <what was broken> (#$ARGUMENTS)` on a `fix/…` branch;
+   `--dry-run` stops after step 3.

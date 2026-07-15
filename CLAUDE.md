@@ -1,165 +1,82 @@
 # CLAUDE.md
 
 EHDS regulation reference implementation: DSP Dataspace Protocol + FHIR R4 + OMOP CDM + biomedical
-ontologies unified in a Neo4j knowledge graph. 127 synthetic patients, 5300+ graph nodes.
+ontologies unified in a 5-layer Neo4j knowledge graph. 127 synthetic patients, 5300+ graph nodes.
+Live deployment: https://ehds.mabu.red (Azure Container Apps, resource group `rg-mvhd-dev`).
 
-## Planning & ADR Workflow
-
-Before implementing significant changes, always:
-
-1. **Check existing ADRs** — start from the ADR index table in the planning index,
-   then open only the `docs/ADRs/ADR-NNN-*.md` files relevant to the task
-   (ADR-001 to ADR-026). Do not bulk-read the whole `docs/ADRs/` corpus
-2. **Consult the planning index** at `docs/planning-health-dataspace-v2.md` — a slim
-   index (issues table, phase-status summary, ADR index, links). Per-phase detail
-   lives in `docs/planning/roadmap-phases-*.md`; open an archive only when you need
-   a specific phase's detail — do not read the whole roadmap by default
-3. **Check GitHub Issues** for related tracking: `gh issue list --repo ma3u/MinimumViableHealthDataspacev2`
-4. **Create a new ADR** in `docs/ADRs/ADR-NNN-slug.md` for architectural decisions
-5. **Link new ADRs** in the planning index's ADR index table
-
-**Token efficiency (ADR-026):** keep any routinely-loaded doc under ~15K tokens
-(~60KB). When the planning index, an ADR, or a roadmap archive grows past that,
-split it — keep the index small and move detail into archives. New phases append
-to a `docs/planning/roadmap-phases-*.md` archive and update the index's
-phase-status summary; they do not grow the index itself.
-
-## Build Commands
+## Commands
 
 ```bash
 # UI (Next.js 14) — primary working area
 cd ui && npm install
 npm run dev            # http://localhost:3000
 npm run build          # production build
-npm run lint           # ESLint (CI lint job runs this; the pre-commit hook enforces --max-warnings 55)
-npx tsc --noEmit       # type-check (uses tsconfig.json)
-npx tsc --noEmit -p tsconfig.build.json  # pre-commit type-check (excludes tests)
+npm run lint           # ESLint — pre-commit enforces --max-warnings 55
+npx tsc --noEmit -p tsconfig.build.json   # pre-commit type-check (excludes tests)
+npm test               # Vitest unit suite (pre-push runs this with --bail)
+npm run test:e2e       # Playwright (needs running UI + Neo4j)
 
 # Neo4j proxy (Express + TypeScript)
-cd services/neo4j-proxy && npm run dev   # port 9090
+cd services/neo4j-proxy && npm run dev    # port 9090; npm test for its Vitest suite
 
 # Minimal stack: Neo4j + UI
 docker compose up -d
 cat neo4j/init-schema.cypher | docker exec -i health-dataspace-neo4j \
   cypher-shell -u neo4j -p healthdataspace
-cat neo4j/insert-synthetic-schema-data.cypher | docker exec -i health-dataspace-neo4j \
-  cypher-shell -u neo4j -p healthdataspace
 
 # Full JAD stack (19 services — needs 8 GB Docker RAM)
 docker compose -f docker-compose.yml -f docker-compose.jad.yml up -d
-./scripts/bootstrap-jad.sh
-./jad/seed-all.sh              # phases 1–7 (sequential, strict order)
-./jad/seed-all.sh --from 3     # resume from phase 3
+./scripts/bootstrap-jad.sh && ./jad/seed-all.sh      # phases 1–7, strict order
+
+# Azure deploy: push to main triggers .github/workflows/deploy-azure.yml
 ```
 
-## Testing
-
-```bash
-cd ui
-npm test                          # Vitest unit (once)
-npm run test:watch                # Vitest watch
-npm run test:coverage             # v8 coverage
-npx vitest run __tests__/unit/components/Navigation.test.tsx  # single file
-
-npm run test:e2e                  # Playwright (needs running UI + Neo4j)
-npm run test:e2e:ui               # Playwright interactive
-npx playwright test __tests__/e2e/journeys/19-static-github-pages.spec.ts
-
-PLAYWRIGHT_BASE_URL=http://localhost:3003 npm run test:e2e  # against JAD stack
-
-# Compliance suites (run by CI weekly)
-./scripts/run-dsp-tck.sh          # DSP 2025-1 TCK
-./scripts/run-dcp-tests.sh        # DCP v1.0
-./scripts/run-ehds-tests.sh       # EHDS domain
-```
-
-## Architecture
-
-### 5-Layer Neo4j Knowledge Graph
+## Directory map
 
 ```
-L1 Dataspace Marketplace  — Participant → DataProduct → OdrlPolicy → Contract → HDABApproval
-L2 HealthDCAT-AP Metadata — Catalogue → Dataset → Distribution → DataService
-L3 FHIR R4 Clinical       — Patient → Encounter → Condition → Observation → MedicationRequest
-L4 OMOP CDM Analytics     — OMOPPerson → ConditionOccurrence → DrugExposure → Measurement
-L5 Biomedical Ontology    — SnomedConcept / ICD10Code / RxNormConcept / LoincCode (CODED_BY)
+ui/src/app/             — Next.js 14 app router (pages + api/ routes)
+ui/src/lib/             — auth.ts, api.ts (static-export mock map), neo4j.ts
+ui/__tests__/           — unit/ (Vitest + MSW) · e2e/journeys/ (Playwright)
+ui/public/mock/         — JSON fixtures for NEXT_PUBLIC_STATIC_EXPORT=true
+services/neo4j-proxy/   — Express FHIR/OMOP/NLQ/federated bridge (port 9090)
+services/catalog-crawler|catalog-enricher — federated discovery pipeline (issue #8)
+neo4j/                  — init-schema.cypher + seed cyphers (idempotent MERGE only)
+jad/                    — JAD stack seeds, keycloak-realm.json
+scripts/azure/          — numbered deploy phases 01–10 + env.sh
+docs/                   — see "Knowledge & planning" below
 ```
 
-Schema: `neo4j/init-schema.cypher` — idempotent (`MERGE`/`IF NOT EXISTS`), safe to re-run.
+## Conventions
 
-### Key Services
+@.claude/rules/code-style.md
+@.claude/rules/testing.md
+@.claude/rules/api-conventions.md
 
-| Service           | Purpose                         | Port        |
-| ----------------- | ------------------------------- | ----------- |
-| Neo4j 5 Community | Knowledge graph                 | 7687 / 7474 |
-| neo4j-proxy       | Express bridge: DCore ↔ Neo4j  | 9090        |
-| UI                | Next.js 14                      | 3000        |
-| Keycloak          | OIDC (realm `edcv`, 7 personas) | 8080        |
-| Vault             | Secrets (in-memory)             | 8200        |
-| NATS              | Async event bus                 | 4222        |
-| PostgreSQL        | JAD service metadata            | 5432        |
+## Top gotchas
 
-Traefik routes JAD services via `*.localhost` hostnames.
+1. **Vault secrets lost on Docker restart** — in-memory only; re-run `./scripts/bootstrap-jad.sh`.
+2. **JAD seed phases 1–7 are strictly ordered** — FHIR before OMOP (phase 4 needs phase 3).
+3. **Static export disables API routes** — CI renames `src/app/api/`; guard with
+   `NEXT_PUBLIC_STATIC_EXPORT` and mirror every route in `ui/public/mock/*.json`.
+4. **Pre-commit Prettier reformats staged files** — `git add` again and retry the commit;
+   pre-push runs full Vitest + `npm audit --audit-level=high --omit=dev`.
+5. **Keycloak: never use `wellKnown` in the NextAuth provider** (container-internal
+   `localhost` breaks token exchange) and the UI client is confidential + PKCE S256 —
+   see `ui/src/lib/auth.ts`, `jad/keycloak-realm.json`, and the realm-drift runbook
+   `docs/knowledge/runbooks/keycloak-realm-drift.md`.
+6. **ACA caches `:latest` images** — a job/app won't re-pull on restart; deploy pushes a
+   new revision (see `docs/gotchas.md` for the full operational gotcha log).
 
-## Key Directories
+## Knowledge & planning
 
-```
-ui/src/app/             — Next.js 14 app router (16 pages, 36 API routes)
-ui/src/app/api/         — API routes — DISABLED in static export (workflow renames folder)
-ui/src/lib/             — auth.ts, api.ts, use-demo-persona.ts, graph-constants.ts
-ui/src/components/      — Navigation.tsx, UserMenu.tsx, shared UI components
-ui/__tests__/unit/      — Vitest tests (MSW mocks via __tests__/setup.ts)
-ui/__tests__/e2e/       — Playwright specs (journeys/ subdirectory)
-ui/public/mock/         — JSON fixtures served in NEXT_PUBLIC_STATIC_EXPORT=true mode
-neo4j/                  — init-schema.cypher, insert-synthetic-schema-data.cypher
-services/neo4j-proxy/   — Express FHIR/OMOP bridge
-docs/                   — Architecture docs, persona journeys, planning phases
-jad/                    — JAD stack seed scripts (phases 1–7)
-scripts/                — bootstrap-jad.sh, generate-synthea.sh, compliance runners
-k8s/                    — OrbStack / Kubernetes manifests
-```
-
-## Coding Conventions
-
-**Cypher:** Labels `PascalCase` · Relationships `UPPER_SNAKE_CASE` · Properties `camelCase` ·
-Always `MERGE`, never `CREATE` · Schema doc changes must mirror `neo4j/init-schema.cypher`
-
-**TypeScript:** Strict mode · `@/*` → `ui/src/*` · Unused vars prefixed `_` ·
-Unit tests in `ui/__tests__/unit/` · E2E tests in `ui/__tests__/e2e/journeys/`
-
-**Bash scripts:** `set -euo pipefail` + quote all variables · shellcheck at error severity
-
-**Fictional orgs only:** AlphaKlinik Berlin, PharmaCo Research AG, MedReg DE, Limburg Medical Centre,
-Institut de Recherche Santé. Never use real names (Charité, Bayer, BfArM, etc.). **Exception:** real
-org names (e.g. TK Krankenkasse, gematik) may appear ONLY behind the `NEXT_PUBLIC_DEMO_TK` build flag
-for live interoperability demos; the default build, committed repo, and public github.io site stay
-fictional, and real third-party screenshots are git-ignored and never committed.
-
-## Top 5 Gotchas
-
-1. **Vault secrets lost on Docker restart** — Vault is in-memory only. Re-run
-   `./scripts/bootstrap-jad.sh` (idempotent) after any `docker compose down`.
-
-2. **JAD seed phases are strictly ordered** — Phases 1–7 must run sequentially.
-   FHIR data must exist before OMOP transformation (phase 4 depends on phase 3).
-
-3. **Static export disables API routes** — GitHub Pages workflow runs
-   `mv src/app/api /tmp/api_disabled` before building. Never assume API routes work
-   in the static build; use `NEXT_PUBLIC_STATIC_EXPORT` guards and `ui/public/mock/*.json`.
-
-4. **Pre-commit Prettier auto-reformats staged files** — After prettier runs you must
-   `git add` the reformatted files before the commit succeeds. Pre-push runs full Vitest.
-
-5. **Do NOT use `wellKnown` in the NextAuth provider** — Keycloak's OIDC discovery returns
-   endpoints with `localhost:8080` (its public hostname). From inside the UI container,
-   `localhost` resolves to the container itself, causing `ECONNREFUSED` during token exchange.
-   Instead, set `token`, `userinfo`, and `jwks_endpoint` explicitly using the Docker-internal
-   hostname (`keycloak:8080`), and `authorization`/`issuer` using the public URL (`localhost:8080`).
-   See `ui/src/lib/auth.ts`.
-
-6. **Keycloak client is confidential + PKCE** — `health-dataspace-ui` is configured
-   as `publicClient: false` with `secret: "health-dataspace-ui-secret"` and
-   `pkce.code.challenge.method: S256` in `jad/keycloak-realm.json`. NextAuth's `checks`
-   must include `["pkce", "state"]` to send the `code_challenge_method` parameter.
-   If PKCE is missing from `checks`, Keycloak returns `error=invalid_request` with
-   `Missing parameter: code_challenge_method`, which NextAuth surfaces as `?error=OAuthCallback`.
+- `docs/knowledge/index.md` — OKF concept bundle: services, data models, APIs, runbooks.
+- `docs/planning/index.md` — work items in `done/ · current/ · future/`; roadmap detail in
+  `docs/planning/roadmap-phases-*.md`; issue table in `docs/planning-health-dataspace-v2.md`.
+- `docs/ADRs/` — canonical ADR corpus (ADR-001…028). `docs/adr/0000-template.md` is the
+  Nygard template for new ones; never edit an accepted ADR — supersede it.
+- Before significant changes: check ADRs + planning index + `gh issue list`. Keep any
+  routinely-loaded doc under ~15K tokens (ADR-026) — index stays small, detail in archives.
+- **Fictional orgs only** in demo data/docs (AlphaKlinik Berlin, PharmaCo Research AG,
+  MedReg DE, Limburg Medical Centre, Institut de Recherche Santé); real names (e.g. TK,
+  gematik) ONLY behind the `NEXT_PUBLIC_DEMO_TK` flag — details in
+  @.claude/rules/code-style.md.
