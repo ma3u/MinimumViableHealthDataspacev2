@@ -19,8 +19,8 @@ ACR_PASSWORD=$(az acr credential show --name "$ACR_NAME" --query "passwords[0].v
 
 # ── Push Postgres image to ACR ──────────────────────────────────────────────
 log "Pulling and pushing postgres:16 image..."
-docker pull --platform linux/amd64 postgres:16
-docker tag postgres:16 "${PG_IMAGE}"
+docker pull --platform linux/amd64 "postgres:${POSTGRES_VERSION}"
+docker tag "postgres:${POSTGRES_VERSION}" "${PG_IMAGE}"
 docker push "${PG_IMAGE}"
 ok "Postgres image in ACR"
 
@@ -79,8 +79,8 @@ ok "Postgres volume attached (pg-data → /var/lib/postgresql/data)"
 
 # ── Push Neo4j image to ACR ─────────────────────────────────────────────────
 log "Pulling and pushing Neo4j image..."
-docker pull --platform linux/amd64 neo4j:5-community
-docker tag neo4j:5-community "${NEO4J_IMAGE}"
+docker pull --platform linux/amd64 "neo4j:${NEO4J_VERSION}"
+docker tag "neo4j:${NEO4J_VERSION}" "${NEO4J_IMAGE}"
 docker push "${NEO4J_IMAGE}"
 ok "Neo4j image in ACR"
 

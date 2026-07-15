@@ -13,8 +13,8 @@ ACR_PASSWORD=$(az acr credential show --name "$ACR_NAME" --query "passwords[0].v
 
 # ── Push NATS image ─────────────────────────────────────────────────────────
 log "Pulling and pushing NATS image..."
-docker pull --platform linux/amd64 nats:alpine
-docker tag nats:alpine "${NATS_IMAGE}"
+docker pull --platform linux/amd64 "nats:${NATS_VERSION}"
+docker tag "nats:${NATS_VERSION}" "${NATS_IMAGE}"
 docker push "${NATS_IMAGE}"
 ok "NATS image in ACR"
 

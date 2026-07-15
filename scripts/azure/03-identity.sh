@@ -14,8 +14,8 @@ PG_JDBC="jdbc:postgresql://${PG_HOST}:${PG_PORT}/${KC_DB_NAME}?sslmode=disable"
 # ── Push Keycloak image ─────────────────────────────────────────────────────
 log "Pulling and pushing Keycloak image..."
 az acr login --name "$ACR_NAME"
-docker pull --platform linux/amd64 quay.io/keycloak/keycloak:latest
-docker tag quay.io/keycloak/keycloak:latest "${KEYCLOAK_IMAGE}"
+docker pull --platform linux/amd64 "quay.io/keycloak/keycloak:${KEYCLOAK_VERSION}"
+docker tag "quay.io/keycloak/keycloak:${KEYCLOAK_VERSION}" "${KEYCLOAK_IMAGE}"
 docker push "${KEYCLOAK_IMAGE}"
 ok "Keycloak image in ACR"
 
@@ -45,8 +45,8 @@ ok "Keycloak container app ${KEYCLOAK_APP}"
 
 # ── Push Vault image ────────────────────────────────────────────────────────
 log "Pulling and pushing Vault image..."
-docker pull --platform linux/amd64 hashicorp/vault:latest
-docker tag hashicorp/vault:latest "${VAULT_IMAGE}"
+docker pull --platform linux/amd64 "hashicorp/vault:${VAULT_VERSION}"
+docker tag "hashicorp/vault:${VAULT_VERSION}" "${VAULT_IMAGE}"
 docker push "${VAULT_IMAGE}"
 ok "Vault image in ACR"
 

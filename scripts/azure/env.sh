@@ -40,7 +40,10 @@ export PG_HOST="$PG_APP"
 export PG_PORT=5432
 export PG_ADMIN="mvhdadmin"
 export PG_PASSWORD="H3althDataSp@ce2026!"
-export PG_IMAGE="${ACR_NAME}.azurecr.io/postgres:16"
+# Pinned per ADR-029 (issue #97 Phase A): major 16 on Azure until a
+# pg_upgrade/dump-restore migration exists — local dev runs 17.x.
+export POSTGRES_VERSION="16.14"
+export PG_IMAGE="${ACR_NAME}.azurecr.io/postgres:${POSTGRES_VERSION}"
 export PG_DATABASES=(keycloak controlplane dataplane dataplane_omop identityhub issuerservice cfm)
 
 # ── Custom domain (24/7 public demo) ────────────────────────────────────────
@@ -68,14 +71,25 @@ export FHIR_LOADER_JOB="mvhd-fhir-loader"
 export CATALOG_CRAWLER_JOB="mvhd-catalog-crawler"
 export CATALOG_ENRICHER_APP="mvhd-catalog-enricher"
 
+# ── Pinned upstream versions (ADR-029; issue #97 Phase A, inventoried 2026-07-15)
+# Third-party images are pinned to what the floating tags resolved to at pin
+# time (Docker Hub/Quay digests verified). Bumps are deliberate PRs, not pulls.
+# POSTGRES_VERSION is pinned above next to PG_IMAGE.
+export NEO4J_VERSION="5.26.28-community"
+export KEYCLOAK_VERSION="26.6.0" # matches live auth.ehds.mabu.red (verified 2026-07-15)
+export VAULT_VERSION="2.0"
+export NATS_VERSION="2.14.3-alpine"
+
 # ── Container images ─────────────────────────────────────────────────────────
 export ACR_LOGIN_SERVER="${ACR_NAME}.azurecr.io"
+# mvhd-ui / mvhd-neo4j-proxy stay :latest on purpose — they are OUR images,
+# rebuilt and rolled by deploy-azure.yml on every merge to main (ADR-029).
 export UI_IMAGE="${ACR_LOGIN_SERVER}/mvhd-ui:latest"
 export NEO4J_PROXY_IMAGE="${ACR_LOGIN_SERVER}/mvhd-neo4j-proxy:latest"
-export NEO4J_IMAGE="${ACR_LOGIN_SERVER}/neo4j:5-community"
-export KEYCLOAK_IMAGE="${ACR_LOGIN_SERVER}/keycloak:latest"
-export VAULT_IMAGE="${ACR_LOGIN_SERVER}/vault:latest"
-export NATS_IMAGE="${ACR_LOGIN_SERVER}/nats:alpine"
+export NEO4J_IMAGE="${ACR_LOGIN_SERVER}/neo4j:${NEO4J_VERSION}"
+export KEYCLOAK_IMAGE="${ACR_LOGIN_SERVER}/keycloak:${KEYCLOAK_VERSION}"
+export VAULT_IMAGE="${ACR_LOGIN_SERVER}/vault:${VAULT_VERSION}"
+export NATS_IMAGE="${ACR_LOGIN_SERVER}/nats:${NATS_VERSION}"
 export CONTROLPLANE_IMAGE="${ACR_LOGIN_SERVER}/jad-controlplane:latest"
 export DP_FHIR_IMAGE="${ACR_LOGIN_SERVER}/jad-dataplane:latest"
 export DP_OMOP_IMAGE="${ACR_LOGIN_SERVER}/jad-dataplane:latest"
