@@ -18,6 +18,10 @@
 # ---------------------------------------------------------------------------
 set -euo pipefail
 
+# EDC Management API version segment — v5beta since the EDC 0.18 JAD
+# launchers (issue #97 Phase B); override for older stacks.
+MGMT_V="${EDC_MGMT_API_VERSION:-v5beta}"
+
 # ---------------------------------------------------------------------------
 # Configuration
 # ---------------------------------------------------------------------------
@@ -112,7 +116,7 @@ discover_participants() {
 
   local participants_json
   participants_json=$(curl -sf -H "Authorization: Bearer $tkn" \
-    "${MGMT_API}/v5alpha/participants") || {
+    "${MGMT_API}/${MGMT_V}/participants") || {
     log "ERROR: Cannot fetch participant list from Management API"
     exit 1
   }
@@ -155,7 +159,7 @@ run_did_tests() {
     local ctx="${PARTICIPANT_CTXS[$i]}"
     local test_id="DID-1.1-${slug}"
     local resp
-    resp=$(mgmt_post "/v5alpha/participants/${ctx}/did" \
+    resp=$(mgmt_post "/${MGMT_V}/participants/${ctx}/did" \
       '{"@context":["https://w3id.org/edc/connector/management/v2"]}' 2>/dev/null) || resp=""
 
     # Try participant query instead if direct DID endpoint doesn't exist
