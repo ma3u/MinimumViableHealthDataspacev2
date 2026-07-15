@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>HL7 AI Challenge 2026 — EHDS Demo &amp; Integration Platform</title>
+<style>
+  @page { size: A4; margin: 14mm 14mm 14mm 14mm; }
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+    font-size: 10.3pt; line-height: 1.36; color: #1a1a1a; margin: 0;
+  }
+  h1 { font-size: 17pt; margin: 0 0 2px 0; color: #0b3d66; line-height: 1.2; }
+  h2 {
+    font-size: 12.2pt; color: #0b3d66; margin: 14px 0 5px 0;
+    border-bottom: 2px solid #148f77; padding-bottom: 2px; page-break-after: avoid;
+  }
+  h3 { font-size: 10.8pt; color: #1d6b50; margin: 9px 0 3px 0; page-break-after: avoid; }
+  p { margin: 4px 0; }
+  ul { margin: 3px 0 6px 0; padding-left: 17px; }
+  li { margin: 2px 0; }
+  .sub { color: #444; font-size: 10pt; margin: 2px 0 6px 0; }
+  .header { border: 1px solid #cdd7df; background: #f5f8fa; border-radius: 6px; padding: 9px 12px; margin-bottom: 8px; }
+  .meta { font-size: 9.2pt; color: #333; margin-top: 4px; }
+  .meta b { color: #0b3d66; }
+  a { color: #0b5cab; text-decoration: none; }
+  table { width: 100%; border-collapse: collapse; margin: 5px 0 8px 0; font-size: 9.2pt; page-break-inside: avoid; }
+  th, td { border: 1px solid #c4ced6; padding: 4px 6px; text-align: left; vertical-align: top; }
+  th { background: #eef3f6; color: #0b3d66; }
+  .box { border-left: 3px solid #148f77; background: #f3faf7; padding: 6px 10px; margin: 7px 0; font-size: 9.6pt; }
+  .small { font-size: 8.8pt; color: #555; }
+  section { page-break-inside: auto; }
+  .nobreak { page-break-inside: avoid; }
+  figure { margin: 9px 0 10px 0; page-break-inside: avoid; }
+  figure img { width: 100%; display: block; border: 1px solid #c4ced6; border-radius: 4px; }
+  figcaption { font-size: 8.5pt; color: #555; margin-top: 3px; line-height: 1.3; }
+  footer { margin-top: 12px; border-top: 1px solid #cdd7df; padding-top: 5px; font-size: 8.6pt; color: #555; }
+  code { font-family: "SF Mono", Consolas, monospace; font-size: 9pt; background:#eef1f3; padding:0 2px; border-radius:3px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>FHIR-Grounded, Governed AI for the European Health Data Space</h1>
+  <div class="sub">An open-source reference implementation pairing an HL7&nbsp;FHIR knowledge graph with governed, retrieval-grounded AI for the safe secondary use of health data.</div>
+  <div class="meta">
+    <b>Submission:</b> HL7 AI Challenge 2026 &nbsp;·&nbsp; <b>Team:</b> Minimum Viable Health Dataspace (MVHD) — Matthias&nbsp;Buchhorn (<a href="https://github.com/ma3u">@ma3u</a>), independent open-source project<br/>
+    <b>Repository:</b> <a href="https://github.com/ma3u/MinimumViableHealthDataspacev2">github.com/ma3u/MinimumViableHealthDataspacev2</a> &nbsp;·&nbsp;
+    <b>Live demo:</b> <a href="https://ma3u.github.io/MinimumViableHealthDataspacev2/">ma3u.github.io/MinimumViableHealthDataspacev2</a> &nbsp;·&nbsp;
+    <b>Live cloud stack:</b> <a href="https://ehds.mabu.red">ehds.mabu.red</a> <span class="small">(Mon–Fri 07:00–20:00 CET)</span>
+  </div>
+</div>
+
+<p class="box"><b>In one sentence:</b> a FHIR&nbsp;R4 knowledge graph you can query in natural language, where every AI answer is grounded in standardised clinical data and gated by European Health Data Space (EHDS) governance — demonstrated end-to-end on synthetic data only.</p>
+
+<section>
+<h2>1&nbsp;&nbsp;Innovation &amp; Impact</h2>
+
+<h3>1.1&nbsp;&nbsp;Unique features &amp; why they are innovative</h3>
+<ul>
+  <li><b>FHIR-grounded AI.</b> Clinical data is modelled as an HL7&nbsp;FHIR&nbsp;R4 <i>knowledge graph</i> (Neo4j). The AI reasons over standardised, terminology-coded facts rather than free text — turning grounding into the primary defence against hallucination, the central risk of LLMs in healthcare.</li>
+  <li><b>Natural-language → governed query (Text2Cypher).</b> Clinicians and researchers ask questions in plain English; the platform produces an auditable graph query. No query language skills required, yet every request remains inspectable.</li>
+  <li><b>Graph retrieval-augmented generation (GraphRAG).</b> LLM answers are anchored to subgraphs retrieved from the FHIR graph, so responses are backed by structured clinical evidence.</li>
+  <li><b>Governance by construction.</b> Every data access traverses an EHDS Health Data Access Body (HDAB) approval chain, machine-readable ODRL policies, and role-based access control <i>before</i> any result is returned. The AI cannot bypass governance — “responsible AI” is structural, not a disclaimer.</li>
+  <li><b>Five interoperability layers in one graph.</b> A single query can traverse from a data-sharing contract → a FHIR patient → an OMOP analytic cohort → a SNOMED&nbsp;CT concept. This unification of marketplace, catalogue, clinical, analytics and terminology layers is the platform’s defining novelty (Fig.&nbsp;1).</li>
+  <li><b>Standards-first &amp; portable.</b> Built on the Eclipse Dataspace Components and the Dataspace Protocol; the same AI layer works against <i>any</i> FHIR-conformant source.</li>
+  <li><b>Open and reproducible.</b> Apache-2.0, runnable on a laptop in minutes; it also serves as a meta-demonstration of responsible <i>agentic-AI software engineering</i> (AI-assisted development wrapped in deterministic CI/CD gates).</li>
+</ul>
+
+<figure>
+  <img src="img/graph.png" alt="Graph Explorer showing the five-layer knowledge graph" />
+  <figcaption><b>Figure&nbsp;1.</b> The five interoperability layers in a single knowledge graph (Graph Explorer, dataspace-admin view): participants &amp; contracts, data offerings, the FHIR clinical layer, the OMOP research layer, and events &amp; credentials — with built-in entry points for the HDAB approval chain, pseudonym resolution, and clinical/OMOP cohorts. Public demo, synthetic data.</figcaption>
+</figure>
+
+<h3>1.2&nbsp;&nbsp;Real-world deployment — scope, scale &amp; status</h3>
+<p><b>Status (honest):</b> a working open-source <i>reference implementation / public demonstrator</i> (prototype maturity). It is <b>not yet deployed with real patient data</b> inside a healthcare organisation; it runs entirely on synthetic data.</p>
+<ul>
+  <li><b>Scope:</b> a complete EHDS secondary-use scenario — a clinical research organisation requests a hospital’s dataset for a <i>drug-repurposing study</i>, with access governed by a Health Data Access Body. It covers participant onboarding, catalogue discovery, contract negotiation (DSP), verifiable-credential issuance (DCP), governed data transfer, and analytics/querying.</li>
+  <li><b>Scale:</b> a 19-service dataspace stack; a Synthea-generated synthetic cohort of ≈200 patients with ≈7,500 encounters and ≈3,500 conditions (and tens of thousands of observations; see Fig.&nbsp;3); five graph layers; multiple participants (hospitals, a CRO, and HDABs).</li>
+  <li><b>Environments:</b> local Docker / Kubernetes; a public zero-backend demo (GitHub Pages); and a live cloud reference on Azure Container Apps (<code>ehds.mabu.red</code>), cost-managed via off-hours auto scale-down.</li>
+  <li><b>Planned:</b> partner with European public administrations / health authorities to pilot on governed real data; harden to BSI&nbsp;C5 for production; pursue EU recognition (e.g. European Data Spaces Awards).</li>
+</ul>
+
+<h3>1.3&nbsp;&nbsp;Realized &amp; anticipated impact on health / healthcare</h3>
+<p><b>Realized today:</b></p>
+<ul>
+  <li>A free, reproducible reference that lowers the barrier for health bodies to understand and prototype EHDS-compliant, AI-assisted data sharing.</li>
+  <li>A concrete, copyable pattern for <i>responsible AI on health data</i> (FHIR grounding + in-path governance + privacy protection).</li>
+  <li>Verifiable engineering quality: passes the DSP&nbsp;2025-1 Technology Compatibility Kit, DCP&nbsp;v1.0 and EHDS-domain compliance suites; meets WCAG&nbsp;2.2&nbsp;AA accessibility; runs automated OWASP/BSI security tests; ≈1,490 unit tests at ≈94% statement coverage and ≈778 end-to-end checks.</li>
+</ul>
+<p><b>Anticipated with adoption:</b></p>
+<ul>
+  <li>Faster, safer secondary use — self-service cohort discovery for researchers without exposing raw identifiable data.</li>
+  <li>Lower hallucination risk in clinical querying, because answers are grounded in standardised FHIR facts.</li>
+  <li>Reusable governance building blocks (HDAB approval, immutable audit, k-anonymity) that other implementers can adopt directly.</li>
+</ul>
+<p class="small"><b>On measurability:</b> the metrics above evidence breadth, standards-conformance and engineering rigour. Clinical-outcome metrics (e.g. study turnaround time, re-identification risk in practice) require a real-world pilot, which is the explicit next step.</p>
+</section>
+
+<section>
+<h2>2&nbsp;&nbsp;Technical Solution</h2>
+
+<h3>2.1&nbsp;&nbsp;Technical overview (architecture, stack, cost-benefit, scalability)</h3>
+<p>The core is a <b>single Neo4j&nbsp;5 knowledge graph</b> organised in five layers (Fig.&nbsp;1). A Next.js&nbsp;14 portal provides the UI; a TypeScript/Express <i>query proxy</i> bridges the dataspace data plane to the graph. Identity and trust use Keycloak (OIDC), DID:web and W3C Verifiable Credentials.</p>
+<table class="nobreak">
+  <tr><th>Layer</th><th>Standard / model</th><th>Represents</th></tr>
+  <tr><td>L1 — Dataspace marketplace</td><td>DSP 2025-1 · ODRL 2.2</td><td>Participants, Data Products, Contracts, HDAB approvals</td></tr>
+  <tr><td>L2 — Metadata catalogue</td><td>HealthDCAT-AP 2.1 (DCAT-AP)</td><td>Catalogues, Datasets, Distributions, Data Services</td></tr>
+  <tr><td>L3 — Clinical</td><td><b>HL7 FHIR R4</b></td><td>Patient, Encounter, Condition, Observation, MedicationRequest, Procedure</td></tr>
+  <tr><td>L4 — Analytics</td><td>OMOP CDM v5.4 (OHDSI)</td><td>Person, ConditionOccurrence, DrugExposure, Measurement, ProcedureOccurrence</td></tr>
+  <tr><td>L5 — Terminology</td><td>SNOMED CT · ICD-10 · LOINC · RxNorm</td><td>Coded concepts linked to clinical/analytic nodes</td></tr>
+</table>
+<ul>
+  <li><b>Dataspace connectivity:</b> Eclipse Dataspace Components — EDC-V (virtual, multi-tenant control plane), DCore (data plane), CFM (connector fabric manager) — packaged as the JAD reference stack (19 services incl. IdentityHub, IssuerService, Vault, NATS, PostgreSQL, Traefik). Protocols: DSP&nbsp;2025-1 (catalogue, negotiation, transfer), DCP&nbsp;v1.0 (credentials), DPS (data-plane signaling).</li>
+  <li><b>Cost-benefit:</b> the full stack runs for free on a laptop; the cloud reference uses Azure Container Apps with documented off-hours scale-down to keep a 24×5 live demo within a small personal budget — demonstrating deliberate cost engineering.</li>
+  <li><b>Scalability:</b> services are containerised and largely stateless (the graph is the principal stateful component); EDC-V isolates tenants; because the AI layer sits on standardised FHIR, onboarding an additional source is incremental rather than bespoke.</li>
+  <li><b>Delivery:</b> GitHub Actions CI/CD enforces unit/integration/E2E/accessibility/security/SBOM/compliance gates on every change (process documented openly in the repository’s SDLC guide).</li>
+</ul>
+
+<h3>2.2&nbsp;&nbsp;HL7 standards used — and the value realized</h3>
+<ul>
+  <li><b>HL7 FHIR R4 (primary).</b> The clinical substrate: synthetic records are generated as FHIR&nbsp;R4 and modelled as graph nodes/relationships; full-patient context follows the FHIR <code>$everything</code> pattern; resources bind to SNOMED&nbsp;CT / LOINC. <i>Value:</i> one interoperable, machine-readable clinical model that the AI can ground on and that is portable across any FHIR source — this standardisation is precisely what makes the AI layer reusable and the hallucination-grounding possible.</li>
+  <li><b>HL7 Europe EEHRxF.</b> Profile alignment and gap analysis against EHDS priority categories (the European EHR Exchange Format). <i>Value:</i> aligns the demonstrator with the EU cross-border exchange direction.</li>
+</ul>
+<p><b>Other standards leveraged (non-HL7):</b> OMOP&nbsp;CDM&nbsp;v5.4 (OHDSI) for analytics with a FHIR→OMOP transform; HealthDCAT-AP / DCAT-AP (W3C) for catalogue metadata; DSP&nbsp;2025-1, DCP&nbsp;v1.0, DPS (Eclipse/IDSA) for sovereign exchange; ODRL&nbsp;2.2 (W3C) for policy-as-code; DID:web &amp; Verifiable Credentials (W3C) and OIDC for identity; SNOMED&nbsp;CT, ICD-10, LOINC, RxNorm for terminology.</p>
+
+<h3>2.3&nbsp;&nbsp;AI technologies &amp; approaches</h3>
+<ul>
+  <li><b>Natural Language Processing (Text2Cypher):</b> translates plain-language clinical questions into governed graph queries (a template library with an optional LLM step).</li>
+  <li><b>Generative AI / Retrieval-Augmented Generation (GraphRAG):</b> LLM answers are grounded in subgraphs retrieved from the FHIR knowledge graph (using Neo4j graph algorithms and an Azure AI Foundry GraphRAG approach), so output cites structured clinical evidence.</li>
+  <li><b>Knowledge-graph reasoning:</b> multi-hop traversal across the five layers connects governance, clinical and analytic facts in a single query.</li>
+  <li><b>Privacy-preserving analytics:</b> k-anonymity thresholds are applied to federated query results.</li>
+  <li><b>Agentic AI (engineering):</b> the platform itself is built and maintained with an AI agent operating under deterministic CI gates — a governed-AI engineering demonstration.</li>
+</ul>
+<figure>
+  <img src="img/ai.png" alt="Natural-language query interface with live policy scope" />
+  <figcaption><b>Figure&nbsp;3.</b> Natural-language querying (Text2Cypher) over the FHIR knowledge graph. The question is answered within a live <i>policy scope</i> — an active contract, HDAB approval, permitted purposes (e.g. scientific research) and explicit prohibitions (no re-identification, no commercial exploitation) — so the AI operates strictly inside governance. Public demo, synthetic data.</figcaption>
+</figure>
+<p class="small"><b>Scope honesty:</b> the AI assists <i>discovery and querying</i>; it does not perform autonomous diagnosis or clinical decision-making. No predictive models are applied to real patients.</p>
+
+<h3>2.4&nbsp;&nbsp;Key learnings</h3>
+<ul>
+  <li><b>Grounding beats prompting.</b> Anchoring the LLM to a FHIR knowledge graph is the single most effective hallucination control for clinical querying.</li>
+  <li><b>Put governance in the data path.</b> Routing every AI query through the HDAB / ODRL / RBAC chain makes responsible AI structural rather than aspirational.</li>
+  <li><b>Standards are the scalability story.</b> Because data is FHIR- and terminology-coded, the AI layer is source-agnostic and reusable across organisations.</li>
+  <li><b>Disaggregated dataspace components are powerful but operationally heavy;</b> deliberate cost engineering was needed to keep a live demo affordable.</li>
+  <li><b>Decision-logged, token-efficient documentation</b> (architecture decision records) materially improves the quality of AI-assisted development.</li>
+  <li><b>Synthetic data (Synthea) is sufficient</b> to exercise the entire pipeline safely, end to end.</li>
+</ul>
+
+<h3>2.5&nbsp;&nbsp;Challenges / obstacles that HL7 could help improve</h3>
+<ul>
+  <li><b>No standard bridge between FHIR and dataspace protocols (DSP / EDC).</b> Exposing FHIR resources and bundles as governed “data products” required bespoke mapping; an HL7 implementation guide or profile for <i>FHIR-as-a-dataspace-data-product</i> would remove significant friction.</li>
+  <li><b>FHIR ↔ catalogue metadata.</b> Aligning FHIR datasets with HealthDCAT-AP / DCAT-AP needed manual crosswalks; standard mappings would help.</li>
+  <li><b>FHIR → OMOP.</b> The transform is non-trivial and not HL7-standardised; reference mappings and tooling would accelerate analytics interoperability.</li>
+  <li><b>AI grounding &amp; provenance.</b> Emerging need for FHIR-native RAG guidance and a standard way to represent AI provenance/derivation and consent-for-AI within FHIR.</li>
+  <li><b>EEHRxF maturity &amp; terminology binding.</b> Broader tooling for EEHRxF and clearer version/binding management across SNOMED&nbsp;CT, LOINC, ICD-10 and RxNorm would reduce implementation effort.</li>
+</ul>
+</section>
+
+<section>
+<h2>3&nbsp;&nbsp;Contextual Factors</h2>
+
+<h3>3.1&nbsp;&nbsp;Legal / policy implications</h3>
+<ul>
+  <li>Designed explicitly to the <b>EHDS Regulation (EU) 2025/327</b>: primary use / patient rights (Art.&nbsp;3–12) and secondary use (Art.&nbsp;50–51 — Health Data Access Bodies, secure processing, pseudonymisation, ~10-year audit retention).</li>
+  <li><b>GDPR (Art.&nbsp;15–22)</b> data-subject rights are modelled — access, rectification, erasure/restriction and portability — with revocable consent.</li>
+  <li><b>Policy-as-code:</b> ODRL&nbsp;2.2 permissions/prohibitions/obligations are attached to each data product; access is granted only after HDAB approval, encoding policy directly into the data path (Fig.&nbsp;2).</li>
+  <li>No real-world policy change was required, because the demonstrator uses synthetic data. For a real deployment, an HDAB authorisation and a Data Protection Impact Assessment (DPIA) would be prerequisites — documented as next steps.</li>
+</ul>
+<figure>
+  <img src="img/governance.png" alt="EHDS Compliance Overview — HDAB approval chain matrix" />
+  <figcaption><b>Figure&nbsp;2.</b> The governance check: an EHDS Compliance Overview (HDAB approval chain, Art.&nbsp;45–53). Each participant’s request moves through Access Application → HDAB Review &amp; Approval → Dataset Grant → Contract, with a per-participant status (Approved / Pending / Rejected) — no data is shared until the chain is complete. Public demo, synthetic data.</figcaption>
+</figure>
+
+<h3>3.2&nbsp;&nbsp;Ethics / ethical-use adjustments</h3>
+<ul>
+  <li><b>Synthetic data only</b> (Synthea) — no real patient data is ever processed, removing consent and processing risk from the demonstration.</li>
+  <li><b>Strictly fictional organisations</b> (e.g. AlphaKlinik Berlin, PharmaCo Research AG) — no real institutions are named or implied.</li>
+  <li><b>Consent &amp; autonomy:</b> research participation is opt-in and patient consent is revocable; consent records are append-only and never silently deleted.</li>
+  <li><b>Human-in-the-loop:</b> the AI is scoped to discovery/querying, not autonomous clinical decisions; answers are grounded and auditable.</li>
+  <li><b>Transparency:</b> fully open-source, with published architecture decisions and a documented responsible-AI engineering process.</li>
+</ul>
+
+<h3>3.3&nbsp;&nbsp;Security / privacy accommodations</h3>
+<ul>
+  <li><b>Pseudonymisation &amp; k-anonymity:</b> cross-participant identity resolution via a Trust Center, with k-anonymity thresholds on federated query results to resist re-identification.</li>
+  <li><b>Immutable audit trail:</b> every data transfer writes an append-only provenance record, supporting EHDS Art.&nbsp;50 retention.</li>
+  <li><b>Identity &amp; access:</b> Keycloak OIDC with PKCE; role-based access control enforced in middleware; DID:web + Verifiable Credentials (DCP) for participant trust; Vault-managed secrets.</li>
+  <li><b>Secure-by-default engineering:</b> parameterised graph queries (no injection); secret scanning (gitleaks); dependency and container scanning (npm audit, Trivy); Kubernetes posture (Kubescape); a CycloneDX SBOM; automated OWASP/BSI penetration tests; and a BSI&nbsp;C5 hardening plan for production.</li>
+  <li><b>Data minimisation:</b> synthetic data, least-privilege access, and governed transfers only.</li>
+</ul>
+</section>
+
+<footer>
+HL7 AI Challenge 2026 submission · “FHIR-Grounded, Governed AI for the European Health Data Space”. Open-source (Apache-2.0).
+Repository: github.com/ma3u/MinimumViableHealthDataspacev2 · Demo: ma3u.github.io/MinimumViableHealthDataspacev2 · Live: ehds.mabu.red.
+Figures are screenshots of the public demo on synthetic data; other figures are approximate and drawn from the project’s synthetic-data pipeline and automated test reports.
+</footer>
+
+</body>
+</html>

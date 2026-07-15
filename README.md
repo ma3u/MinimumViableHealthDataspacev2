@@ -849,20 +849,22 @@ the cost model and scheduling rationale. ADR-015 documents the single-VM fallbac
 Detailed reference documents live in the `docs/` directory. The UI documentation is also
 available online at **[ma3u.github.io/MinimumViableHealthDataspacev2/docs](https://ma3u.github.io/MinimumViableHealthDataspacev2/docs)**.
 
-| Document                                                        | Description                                                                 |
-| --------------------------------------------------------------- | --------------------------------------------------------------------------- |
-| [Implementation Roadmap](docs/planning-health-dataspace-v2.md)  | Full planning document: 12 phases, 9+ ADRs, architecture decisions.         |
-| [Architecture Decision Records](docs/ADRs/)                     | Standalone ADRs (001–013): data storage, testing, Azure, WCAG, security.    |
-| [Azure Deployment Guide](docs/azure-deployment-guide.md)        | Azure Container Apps setup, endpoints, post-deploy configuration.           |
-| [Graph Schema Reference](docs/health-dataspace-graph-schema.md) | Full 5-layer Neo4j schema: node labels, properties, indexes, relationships. |
-| [E2E Test Report](docs/e2e-test-report.md)                      | Playwright E2E results: 778 tests across 29 spec files.                     |
-| [Unit Test Coverage](docs/test-coverage-report.md)              | Vitest coverage: 1,490 tests, 94% statement coverage across 78 files.       |
-| [SIMPL-Open Gap Analysis](docs/simpl-ehds-gap-analysis.md)      | Alignment assessment with EU SIMPL programme requirements.                  |
-| [Quality Gates](docs/quality-gates.md)                          | CI quality standards: lint, type-check, test thresholds.                    |
-| [Full User Journey](docs/FULL_USER_JOURNEY.md)                  | EHDS 8-step journey from onboarding to analytics with sequence diagram.     |
-| [OpenAPI Specs](jad/openapi/)                                   | OpenAPI specs for all JAD services (Management, Identity, Issuer APIs).     |
-| [Bruno API Collection](bruno/MVHDv2/)                           | Bruno collection covering all 38 Next.js API routes with 3 environments.    |
-| [Interactive API Reference](ui/public/openapi.yaml)             | OpenAPI 3.1 spec rendered as Swagger UI at `/docs/developer/api`.           |
+| Document                                                                                | Description                                                                                                                                |
+| --------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| [Implementation Roadmap](docs/planning-health-dataspace-v2.md)                          | Full planning document: 12 phases, 9+ ADRs, architecture decisions.                                                                        |
+| [Architecture Decision Records](docs/ADRs/)                                             | Standalone ADRs (001–013): data storage, testing, Azure, WCAG, security.                                                                   |
+| [Azure Deployment Guide](docs/azure-deployment-guide.md)                                | Azure Container Apps setup, endpoints, post-deploy configuration.                                                                          |
+| [Graph Schema Reference](docs/health-dataspace-graph-schema.md)                         | Full 5-layer Neo4j schema: node labels, properties, indexes, relationships.                                                                |
+| [E2E Test Report](docs/e2e-test-report.md)                                              | Playwright E2E results: 778 tests across 29 spec files.                                                                                    |
+| [Unit Test Coverage](docs/test-coverage-report.md)                                      | Vitest coverage: 1,490 tests, 94% statement coverage across 78 files.                                                                      |
+| [SIMPL-Open Gap Analysis](docs/simpl-ehds-gap-analysis.md)                              | Alignment assessment with EU SIMPL programme requirements.                                                                                 |
+| [Quality Gates](docs/quality-gates.md)                                                  | CI quality standards: lint, type-check, test thresholds.                                                                                   |
+| [Software Development Life Cycle (SDLC)](docs/SDLC.md)                                  | How the project plans, gates, tests, releases & deploys — with a next-steps outlook. **[Plain-language version](docs/SDLC-explained.md).** |
+| [Agentic AI Development with Claude Code](docs/AGENTIC-DEVELOPMENT-WITH-CLAUDE-CODE.md) | How AI-assisted development is kept deterministic, reviewable & safe. **[Plain-language version](docs/AGENTIC-AI-explained.md).**          |
+| [Full User Journey](docs/FULL_USER_JOURNEY.md)                                          | EHDS 8-step journey from onboarding to analytics with sequence diagram.                                                                    |
+| [OpenAPI Specs](jad/openapi/)                                                           | OpenAPI specs for all JAD services (Management, Identity, Issuer APIs).                                                                    |
+| [Bruno API Collection](bruno/MVHDv2/)                                                   | Bruno collection covering all 38 Next.js API routes with 3 environments.                                                                   |
+| [Interactive API Reference](ui/public/openapi.yaml)                                     | OpenAPI 3.1 spec rendered as Swagger UI at `/docs/developer/api`.                                                                          |
 
 ---
 

@@ -21,7 +21,8 @@
     "test:e2e:ui": "playwright test --config playwright.config.ts --ui"
   },
   "overrides": {
-    "neverpanic": "^0.0.7"
+    "neverpanic": "^0.0.7",
+    "fast-uri": "^3.1.2"
   },
   "dependencies": {
     "@scalar/api-reference-react": "^0.9.0",
@@ -30,6 +31,7 @@
     "neo4j-driver": "^5.18.0",
     "next": "^15.5.14",
     "next-auth": "^4.24.13",
+    "qrcode": "^1.5.4",
     "react": "^18",
     "react-dom": "^18",
     "react-force-graph-2d": "^1.25.5",
@@ -43,6 +45,7 @@
     "@testing-library/react": "^16.3.2",
     "@testing-library/user-event": "^14.6.1",
     "@types/node": "^20",
+    "@types/qrcode": "^1.5.5",
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "@typescript-eslint/eslint-plugin": "^8.57.2",

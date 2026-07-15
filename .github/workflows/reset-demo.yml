@@ -165,6 +165,84 @@ jobs:
             done
           fi
 
+      # ── Step 1b: Re-import Keycloak `edcv` realm ──
+      # The Postgres restart above wipes the Keycloak schema on the demo
+      # environment (intentional — it lets us reset users/clients each
+      # week to a clean state). Without this step the realm stays empty
+      # and every login bounces to Keycloak's "Page not found" template.
+      # The realm definition lives at jad/keycloak-realm.json.
+      - name: Re-import Keycloak edcv realm
+        run: |
+          echo "=== Re-importing Keycloak edcv realm ==="
+          KC_FQDN=$(az containerapp show --name mvhd-keycloak \
+            --resource-group ${{ env.RESOURCE_GROUP }} \
+            --query "properties.configuration.ingress.fqdn" -o tsv)
+          KC="https://${KC_FQDN}"
+          echo "Keycloak: $KC"
+
+          # Wait for Keycloak's master realm to answer (it needs ~30-60s
+          # after restart to finish initialising before /admin/* works).
+          echo "Waiting for Keycloak master realm to be reachable..."
+          for i in $(seq 1 30); do
+            code=$(curl -sf -o /dev/null -w "%{http_code}" \
+              "$KC/realms/master/.well-known/openid-configuration" 2>/dev/null || echo "000")
+            if [ "$code" = "200" ]; then
+              echo "  Keycloak ready (HTTP $code)"
+              break
+            fi
+            echo "  attempt $i: HTTP $code, retrying in 5s..."
+            sleep 5
+          done
+
+          # Admin credentials are wired into the Keycloak container as
+          # KEYCLOAK_ADMIN / KEYCLOAK_ADMIN_PASSWORD env vars (currently
+          # admin / admin on the demo target). If you rotate them, also
+          # update this workflow.
+          KC_ADMIN_USER=admin
+          KC_ADMIN_PASS=admin
+
+          TOKEN=$(curl -sS -X POST \
+            "$KC/realms/master/protocol/openid-connect/token" \
+            -H "Content-Type: application/x-www-form-urlencoded" \
+            -d "username=${KC_ADMIN_USER}&password=${KC_ADMIN_PASS}&grant_type=password&client_id=admin-cli" \
+            | python3 -c "import json,sys; print(json.load(sys.stdin).get('access_token',''))")
+          if [ -z "$TOKEN" ]; then
+            echo "::error::Could not obtain Keycloak admin token"
+            exit 1
+          fi
+          echo "::add-mask::$TOKEN"
+          echo "Got admin token (${#TOKEN} chars)"
+
+          # Idempotent: DELETE the realm first (204 if existed, 404 if
+          # not — we accept both), then POST the JSON to create it
+          # fresh. Using -o /dev/null + -w status to avoid leaking the
+          # bearer token in any error body that might come back.
+          DEL=$(curl -sS -o /dev/null -w "%{http_code}" -X DELETE \
+            "$KC/admin/realms/edcv" \
+            -H "Authorization: Bearer $TOKEN")
+          echo "DELETE /admin/realms/edcv → HTTP $DEL"
+
+          POST=$(curl -sS -o /tmp/kc-import.out -w "%{http_code}" -X POST \
+            "$KC/admin/realms" \
+            -H "Authorization: Bearer $TOKEN" \
+            -H "Content-Type: application/json" \
+            --data-binary @jad/keycloak-realm.json)
+          echo "POST /admin/realms → HTTP $POST"
+          if [ "$POST" != "201" ]; then
+            echo "::error::Realm import failed"
+            head -c 500 /tmp/kc-import.out || true
+            exit 1
+          fi
+
+          # Confirm.
+          VERIFY=$(curl -sS -o /dev/null -w "%{http_code}" \
+            "$KC/realms/edcv/.well-known/openid-configuration")
+          if [ "$VERIFY" != "200" ]; then
+            echo "::error::edcv realm not reachable after import (HTTP $VERIFY)"
+            exit 1
+          fi
+          echo "edcv realm imported and reachable (HTTP $VERIFY)"
+
       # ── Step 2: Run bootstrap job (Vault init + keys) ──
       - name: Run bootstrap job
         run: |
@@ -307,8 +385,8 @@ jobs:
       - name: Run smoke tests
         run: |
           npx playwright test \
-            __tests__/e2e/journeys/01-graph-explorer.spec.ts \
-            __tests__/e2e/journeys/03-catalog-dcat-ap.spec.ts \
+            __tests__/e2e/journeys/15-persona-graphs.spec.ts \
+            __tests__/e2e/journeys/11-catalog-search-detail.spec.ts \
             --project=chromium --reporter=line
         env:
           CI: true

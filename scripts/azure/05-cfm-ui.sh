@@ -94,6 +94,12 @@ az containerapp create \
     "EDC_PROVISION_URL=${EDC_PROVISION_URL}" \
     "EDC_SERVICE_CLIENT_ID=admin" \
     "EDC_SERVICE_CLIENT_SECRET=edc-v-admin-secret" \
+    "EUDI_VERIFIER_BASE_URL=${EUDI_VERIFIER_BASE_URL:-https://verifier-backend.eudiw.dev}" \
+    "EUDI_VERIFIER_SCHEME=${EUDI_VERIFIER_SCHEME:-openid4vp://}" \
+    "EUDI_VERIFIER_PROFILE=${EUDI_VERIFIER_PROFILE:-openid4vp}" \
+    "EUDI_PID_DOCTYPE=${EUDI_PID_DOCTYPE:-eu.europa.ec.eudi.pid.1}" \
+    "EUDI_REQUEST_URI_METHOD=${EUDI_REQUEST_URI_METHOD:-get}" \
+    "EUDI_RESPONSE_MODE=${EUDI_RESPONSE_MODE:-direct_post}" \
   -o none
 ok "UI container app"
 

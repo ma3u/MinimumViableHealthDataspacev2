@@ -26,13 +26,18 @@ ok "Postgres image in ACR"
 
 # ── Postgres container app (step 1: create with CLI flags) ─────────────────
 log "Creating Postgres container app ${PG_APP} (no volume yet)..."
+# Sized for the keycloak realm DB only — the other 6 databases (controlplane,
+# dataplane, dataplane_omop, identityhub, issuerservice, cfm) exist for the EDC
+# services that don't boot on ACA (issue #25 / ADR-022). 0.5 vCPU / 1 GiB is
+# comfortable headroom for one Keycloak realm with a handful of clients and
+# users; raise to 1.0/2Gi if/when those services come back online.
 az containerapp create \
   --name "$PG_APP" --resource-group "$RG" --environment "$ACA_ENV" \
   --image "$PG_IMAGE" \
   --registry-server "$ACR_LOGIN_SERVER" \
   --registry-username "$ACR_NAME" \
   --registry-password "$ACR_PASSWORD" \
-  --cpu 1.0 --memory 2Gi \
+  --cpu 0.5 --memory 1Gi \
   --min-replicas 1 --max-replicas 1 \
   --ingress internal --target-port 5432 --exposed-port 5432 --transport tcp \
   --secrets "pg-password=${PG_PASSWORD}" \

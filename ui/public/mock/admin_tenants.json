@@ -324,6 +324,266 @@
           "error": false
         }
       ]
+    },
+    {
+      "id": "6f752c60-71ec-5f45-96ce-2e3077695f0b",
+      "version": 0,
+      "properties": {
+        "address": "Rochusstraße 1",
+        "city": "Berlin",
+        "contactPerson": "Dr. Martina Schulz",
+        "country": "DE",
+        "displayName": "HealthGov (HDAB)",
+        "ehdsParticipantType": "health-data-access-body",
+        "email": "contact@healthgov.example",
+        "organization": "HealthGov Data Access Authority",
+        "phone": "+49 30 1810-0",
+        "postalCode": "10557",
+        "role": "operator",
+        "website": "https://healthgov.example"
+      },
+      "participantProfiles": [
+        {
+          "id": "9dd5ee5c-fd68-5709-bb16-e26a9ee0ff9e",
+          "version": 0,
+          "identifier": "did:web:identityhub%3A7083:healthgov",
+          "tenantId": "6f752c60-71ec-5f45-96ce-2e3077695f0b",
+          "participantRoles": {
+            "a0fa03eb-d95f-4db3-be2c-6764483b38ff": ["operator"]
+          },
+          "vpas": [
+            {
+              "id": "0dd4db72-7fd2-50e3-9a57-539d18598eb0",
+              "version": 0,
+              "state": "active",
+              "stateTimestamp": "2026-05-11T09:00:00.000000000Z",
+              "type": "cfm.connector",
+              "cellId": "e3daa679-c189-423e-9448-310dccfafe1c"
+            },
+            {
+              "id": "be03ff82-5535-511d-8f0d-dcbd717dee24",
+              "version": 0,
+              "state": "active",
+              "stateTimestamp": "2026-05-11T09:00:00.000000000Z",
+              "type": "cfm.credentialservice",
+              "cellId": "e3daa679-c189-423e-9448-310dccfafe1c"
+            },
+            {
+              "id": "f70d4c74-0693-53d8-96ce-0287a92b5fca",
+              "version": 0,
+              "state": "active",
+              "stateTimestamp": "2026-05-11T09:00:00.000000000Z",
+              "type": "cfm.dataplane",
+              "cellId": "e3daa679-c189-423e-9448-310dccfafe1c"
+            }
+          ],
+          "properties": {
+            "cfm.vpa.state": {
+              "credentialRequest": "http://identityhub:7081/v1alpha/participants/777819c41183544f96d39e9b6297493d/credentials/request/d1614aee-a56f-5720-b805-401cacb4a6b2",
+              "holderPid": "d1614aee-a56f-5720-b805-401cacb4a6b2",
+              "participantContextId": "777819c41183544f96d39e9b6297493d"
+            },
+            "displayName": "HealthGov (HDAB)",
+            "type": "healthgov"
+          },
+          "error": false
+        }
+      ]
+    },
+    {
+      "id": "4bf19f0a-4dd7-52c7-8d86-a95046aba82e",
+      "version": 0,
+      "properties": {
+        "address": "Kerpener Straße 62",
+        "city": "Köln",
+        "contactPerson": "Dr. Andreas Hoffmann",
+        "country": "DE",
+        "displayName": "Riverside General (CLINIC)",
+        "ehdsParticipantType": "data-holder",
+        "email": "data-office@riverside.example",
+        "organization": "Riverside General Hospital",
+        "phone": "+49 221 478-0",
+        "postalCode": "50937",
+        "role": "provider",
+        "website": "https://riverside.example"
+      },
+      "participantProfiles": [
+        {
+          "id": "5cc30295-7093-58f3-9613-154dc56e4d56",
+          "version": 0,
+          "identifier": "did:web:identityhub%3A7083:riverside",
+          "tenantId": "4bf19f0a-4dd7-52c7-8d86-a95046aba82e",
+          "participantRoles": {
+            "a0fa03eb-d95f-4db3-be2c-6764483b38ff": ["provider"]
+          },
+          "vpas": [
+            {
+              "id": "d1be22c9-ddfc-5ce7-9f36-e51224a3dc18",
+              "version": 0,
+              "state": "active",
+              "stateTimestamp": "2026-05-11T09:00:00.000000000Z",
+              "type": "cfm.connector",
+              "cellId": "e3daa679-c189-423e-9448-310dccfafe1c"
+            },
+            {
+              "id": "3c8f51ea-4ac6-52fb-8ede-4e0125d5cc8c",
+              "version": 0,
+              "state": "active",
+              "stateTimestamp": "2026-05-11T09:00:00.000000000Z",
+              "type": "cfm.credentialservice",
+              "cellId": "e3daa679-c189-423e-9448-310dccfafe1c"
+            },
+            {
+              "id": "a84b6a75-04d7-5f1a-8d85-2aaa013499ac",
+              "version": 0,
+              "state": "active",
+              "stateTimestamp": "2026-05-11T09:00:00.000000000Z",
+              "type": "cfm.dataplane",
+              "cellId": "e3daa679-c189-423e-9448-310dccfafe1c"
+            }
+          ],
+          "properties": {
+            "cfm.vpa.state": {
+              "credentialRequest": "http://identityhub:7081/v1alpha/participants/4d23812c36dd5f5bb4049018cc8183ee/credentials/request/e312a548-9a7b-56e2-84bd-911e40768938",
+              "holderPid": "e312a548-9a7b-56e2-84bd-911e40768938",
+              "participantContextId": "4d23812c36dd5f5bb4049018cc8183ee"
+            },
+            "displayName": "Riverside General (CLINIC)",
+            "type": "riverside"
+          },
+          "error": false
+        }
+      ]
+    },
+    {
+      "id": "4abc0608-0c45-58f5-a089-3c5704ab82c4",
+      "version": 0,
+      "properties": {
+        "address": "Ismaninger Straße 22",
+        "city": "München",
+        "contactPerson": "Dr. Lena Vogt",
+        "country": "DE",
+        "displayName": "TrialCorp Research (CRO)",
+        "ehdsParticipantType": "data-user",
+        "email": "research@trialcorp.example",
+        "organization": "TrialCorp AG Clinical Research",
+        "phone": "+49 89 4140-0",
+        "postalCode": "81675",
+        "role": "consumer",
+        "website": "https://trialcorp.example"
+      },
+      "participantProfiles": [
+        {
+          "id": "2e884fa6-5821-5843-be5e-f4fce9aa3fab",
+          "version": 0,
+          "identifier": "did:web:identityhub%3A7083:trialcorp",
+          "tenantId": "4abc0608-0c45-58f5-a089-3c5704ab82c4",
+          "participantRoles": {
+            "a0fa03eb-d95f-4db3-be2c-6764483b38ff": ["consumer"]
+          },
+          "vpas": [
+            {
+              "id": "bda8f3e4-3125-5483-a0f2-08d163b132a8",
+              "version": 0,
+              "state": "active",
+              "stateTimestamp": "2026-05-11T09:00:00.000000000Z",
+              "type": "cfm.connector",
+              "cellId": "e3daa679-c189-423e-9448-310dccfafe1c"
+            },
+            {
+              "id": "94c5eaa5-eba6-5908-9ae7-2c26d859b987",
+              "version": 0,
+              "state": "active",
+              "stateTimestamp": "2026-05-11T09:00:00.000000000Z",
+              "type": "cfm.credentialservice",
+              "cellId": "e3daa679-c189-423e-9448-310dccfafe1c"
+            },
+            {
+              "id": "78115b5d-1a0e-5633-b3b7-56882f3d1c93",
+              "version": 0,
+              "state": "active",
+              "stateTimestamp": "2026-05-11T09:00:00.000000000Z",
+              "type": "cfm.dataplane",
+              "cellId": "e3daa679-c189-423e-9448-310dccfafe1c"
+            }
+          ],
+          "properties": {
+            "cfm.vpa.state": {
+              "credentialRequest": "http://identityhub:7081/v1alpha/participants/7bfe11c52102520997b42e801c8eaba2/credentials/request/c14b5cf2-3c72-5d0e-9cec-4d801d2141f8",
+              "holderPid": "c14b5cf2-3c72-5d0e-9cec-4d801d2141f8",
+              "participantContextId": "7bfe11c52102520997b42e801c8eaba2"
+            },
+            "displayName": "TrialCorp Research (CRO)",
+            "type": "trialcorp"
+          },
+          "error": false
+        }
+      ]
+    },
+    {
+      "id": "9a8b7c6d-5e4f-3a2b-1c0d-9e8f7a6b5c4d",
+      "version": 0,
+      "properties": {
+        "address": "Rue de la Loi 200",
+        "city": "Brussels",
+        "contactPerson": "Sven Lindqvist",
+        "country": "BE",
+        "displayName": "Health Dataspace Operations",
+        "ehdsParticipantType": "OPERATOR",
+        "email": "ops@operations.ehds.example",
+        "organization": "Health Dataspace Operations (Reference Implementation)",
+        "phone": "+32 2 555 0100",
+        "postalCode": "1040",
+        "role": "operator",
+        "website": "https://operations.ehds.example"
+      },
+      "participantProfiles": [
+        {
+          "id": "1f2e3d4c-5b6a-7980-8c7d-6e5f4a3b2c1d",
+          "version": 0,
+          "identifier": "did:web:identityhub%3A7083:operations",
+          "tenantId": "9a8b7c6d-5e4f-3a2b-1c0d-9e8f7a6b5c4d",
+          "participantRoles": {
+            "a0fa03eb-d95f-4db3-be2c-6764483b38ff": ["operator"]
+          },
+          "vpas": [
+            {
+              "id": "0a1b2c3d-4e5f-6789-abcd-ef0123456789",
+              "version": 0,
+              "state": "active",
+              "stateTimestamp": "2026-05-11T09:00:00.000000000Z",
+              "type": "cfm.connector",
+              "cellId": "e3daa679-c189-423e-9448-310dccfafe1c"
+            },
+            {
+              "id": "1b2c3d4e-5f60-7182-93a4-b5c6d7e8f901",
+              "version": 0,
+              "state": "active",
+              "stateTimestamp": "2026-05-11T09:00:00.000000000Z",
+              "type": "cfm.credentialservice",
+              "cellId": "e3daa679-c189-423e-9448-310dccfafe1c"
+            },
+            {
+              "id": "2c3d4e5f-6071-8293-a4b5-c6d7e8f90123",
+              "version": 0,
+              "state": "active",
+              "stateTimestamp": "2026-05-11T09:00:00.000000000Z",
+              "type": "cfm.dataplane",
+              "cellId": "e3daa679-c189-423e-9448-310dccfafe1c"
+            }
+          ],
+          "properties": {
+            "cfm.vpa.state": {
+              "credentialRequest": "http://identityhub:7081/v1alpha/participants/operations/credentials/request/operator-pid",
+              "holderPid": "operator-pid",
+              "participantContextId": "operations-context"
+            },
+            "displayName": "Health Dataspace Operations",
+            "type": "operations"
+          },
+          "error": false
+        }
+      ]
     }
   ],
   "participants": [
@@ -366,15 +626,47 @@
       "properties": {},
       "state": "ACTIVATED",
       "@context": ["https://w3id.org/edc/connector/management/v2"]
+    },
+    {
+      "@type": "ParticipantContext",
+      "@id": "777819c41183544f96d39e9b6297493d",
+      "identity": "did:web:identityhub%3A7083:healthgov",
+      "properties": {},
+      "state": "ACTIVATED",
+      "@context": ["https://w3id.org/edc/connector/management/v2"]
+    },
+    {
+      "@type": "ParticipantContext",
+      "@id": "4d23812c36dd5f5bb4049018cc8183ee",
+      "identity": "did:web:identityhub%3A7083:riverside",
+      "properties": {},
+      "state": "ACTIVATED",
+      "@context": ["https://w3id.org/edc/connector/management/v2"]
+    },
+    {
+      "@type": "ParticipantContext",
+      "@id": "7bfe11c52102520997b42e801c8eaba2",
+      "identity": "did:web:identityhub%3A7083:trialcorp",
+      "properties": {},
+      "state": "ACTIVATED",
+      "@context": ["https://w3id.org/edc/connector/management/v2"]
+    },
+    {
+      "@type": "ParticipantContext",
+      "@id": "operations-context",
+      "identity": "did:web:identityhub%3A7083:operations",
+      "properties": {},
+      "state": "ACTIVATED",
+      "@context": ["https://w3id.org/edc/connector/management/v2"]
     }
   ],
   "summary": {
-    "totalTenants": 5,
-    "totalParticipants": 5,
+    "totalTenants": 9,
+    "totalParticipants": 9,
     "byRole": {
-      "provider": 2,
-      "consumer": 1,
-      "operator": 2
+      "provider": 3,
+      "consumer": 2,
+      "operator": 4
     }
   }
 }

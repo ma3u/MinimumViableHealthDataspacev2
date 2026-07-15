@@ -7,11 +7,22 @@ ontologies unified in a Neo4j knowledge graph. 127 synthetic patients, 5300+ gra
 
 Before implementing significant changes, always:
 
-1. **Check existing ADRs** in `docs/ADRs/` (ADR-001 to ADR-013) for architectural context
-2. **Consult the planning document** at `docs/planning-health-dataspace-v2.md` for phase context
+1. **Check existing ADRs** — start from the ADR index table in the planning index,
+   then open only the `docs/ADRs/ADR-NNN-*.md` files relevant to the task
+   (ADR-001 to ADR-026). Do not bulk-read the whole `docs/ADRs/` corpus
+2. **Consult the planning index** at `docs/planning-health-dataspace-v2.md` — a slim
+   index (issues table, phase-status summary, ADR index, links). Per-phase detail
+   lives in `docs/planning/roadmap-phases-*.md`; open an archive only when you need
+   a specific phase's detail — do not read the whole roadmap by default
 3. **Check GitHub Issues** for related tracking: `gh issue list --repo ma3u/MinimumViableHealthDataspacev2`
 4. **Create a new ADR** in `docs/ADRs/ADR-NNN-slug.md` for architectural decisions
-5. **Link new ADRs** in the planning document's ADR index table
+5. **Link new ADRs** in the planning index's ADR index table
+
+**Token efficiency (ADR-026):** keep any routinely-loaded doc under ~15K tokens
+(~60KB). When the planning index, an ADR, or a roadmap archive grows past that,
+split it — keep the index small and move detail into archives. New phases append
+to a `docs/planning/roadmap-phases-*.md` archive and update the index's
+phase-status summary; they do not grow the index itself.
 
 ## Build Commands
 
@@ -20,7 +31,7 @@ Before implementing significant changes, always:
 cd ui && npm install
 npm run dev            # http://localhost:3000
 npm run build          # production build
-npm run lint           # ESLint — CI threshold: max 55 warnings
+npm run lint           # ESLint (CI lint job runs this; the pre-commit hook enforces --max-warnings 55)
 npx tsc --noEmit       # type-check (uses tsconfig.json)
 npx tsc --noEmit -p tsconfig.build.json  # pre-commit type-check (excludes tests)
 
@@ -119,7 +130,10 @@ Unit tests in `ui/__tests__/unit/` · E2E tests in `ui/__tests__/e2e/journeys/`
 **Bash scripts:** `set -euo pipefail` + quote all variables · shellcheck at error severity
 
 **Fictional orgs only:** AlphaKlinik Berlin, PharmaCo Research AG, MedReg DE, Limburg Medical Centre,
-Institut de Recherche Santé. Never use real names (Charité, Bayer, BfArM, etc.).
+Institut de Recherche Santé. Never use real names (Charité, Bayer, BfArM, etc.). **Exception:** real
+org names (e.g. TK Krankenkasse, gematik) may appear ONLY behind the `NEXT_PUBLIC_DEMO_TK` build flag
+for live interoperability demos; the default build, committed repo, and public github.io site stay
+fictional, and real third-party screenshots are git-ignored and never committed.
 
 ## Top 5 Gotchas
 

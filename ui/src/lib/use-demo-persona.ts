@@ -32,6 +32,13 @@ const emitter: EventTarget | null =
 export function setDemoPersona(username: string): void {
   if (typeof sessionStorage === "undefined") return;
   sessionStorage.setItem(DEMO_PERSONA_KEY, username);
+  // Mirror to localStorage: lib/api.ts reads localStorage to resolve the
+  // restricted patient mock, so the two stores must stay in sync.
+  try {
+    localStorage.setItem(DEMO_PERSONA_KEY, username);
+  } catch {
+    /* storage unavailable — non-fatal */
+  }
   emitter?.dispatchEvent(new Event("change"));
 }
 
@@ -39,6 +46,14 @@ export function setDemoPersona(username: string): void {
 export function clearDemoPersona(): void {
   if (typeof sessionStorage === "undefined") return;
   sessionStorage.setItem(DEMO_PERSONA_KEY, SIGNED_OUT);
+  // Clear localStorage too so lib/api.ts no longer resolves the patient's own
+  // record after sign-out (otherwise /patient keeps showing the signed-out
+  // patient's data).
+  try {
+    localStorage.removeItem(DEMO_PERSONA_KEY);
+  } catch {
+    /* storage unavailable — non-fatal */
+  }
   emitter?.dispatchEvent(new Event("change"));
 }
 

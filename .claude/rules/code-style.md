@@ -81,3 +81,7 @@ All participant names in demo data, comments, and docs must be fictional:
 - DATA_USER: PharmaCo Research AG
 - HDAB: MedReg DE, Institut de Recherche Santé
 - Forbidden: Charité, Bayer, BfArM, Zuyderland, INSERM, or any real organisation.
+- Exception: real org names (e.g. TK Krankenkasse, gematik) may appear ONLY behind the
+  `NEXT_PUBLIC_DEMO_TK` build flag for live interoperability demos. The default build, committed
+  repo, and public github.io site stay fictional; real third-party screenshots are git-ignored and
+  never committed (see `ui/src/lib/journey-config.ts`).

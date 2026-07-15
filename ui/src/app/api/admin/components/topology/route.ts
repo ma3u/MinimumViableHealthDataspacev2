@@ -13,8 +13,13 @@ import {
 } from "@/lib/azure-arm";
 
 import { authOptions } from "@/lib/auth";
+import { cached } from "@/lib/server-cache";
 
 export const dynamic = "force-dynamic";
+
+// Topology aggregates ARM list + per-app metrics + Neo4j + CFM lookups.
+// 30s SWR keeps the page snappy without losing live monitoring fidelity.
+const TOPOLOGY_CACHE_TTL_MS = 30_000;
 
 // ---------------------------------------------------------------------------
 // Docker helpers (local-dev path)
@@ -505,6 +510,15 @@ export async function GET() {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
+  const result = await cached(
+    "admin-components-topology",
+    TOPOLOGY_CACHE_TTL_MS,
+    buildTopologyResponse,
+  );
+  return NextResponse.json(result);
+}
+
+async function buildTopologyResponse() {
   // ── 1. Resolve metrics from whichever runtime is available ──
   let metricsSource: MetricsSource = "none";
   let acaMetrics: Map<string, ResolvedMetrics> | null = null;
@@ -642,14 +656,15 @@ export async function GET() {
   // (mathematically cute but implies a per-participant allocation that
   // does not exist).
   //
-  // Instead, on Azure we surface each participant's status/health only
-  // and zero out the resource fields. The `metricsShared` flag tells the
-  // UI to hide the CPU/MEM columns and point users to the Layer View for
-  // the real per-container metrics.
+  // Instead, on Azure we surface the same underlying ACA-app metric on
+  // every participant row and set `metricsShared=true` so the UI can
+  // annotate the value with a "shared" hint. That way the per-row CPU/MEM
+  // is *correct* (it reflects the actual container the participant uses)
+  // while the user knows the same number applies across all participants.
   //
   // On local JAD (docker), every participant has its own containers
   // (ihub-alpha, dataplane-pharmaco-fhir, …) and the per-row values are
-  // real; metricsShared stays false.
+  // independent; metricsShared stays false.
   const metricsShared = isAzure && participantsRaw.length > 0;
   const participantTopologies: ParticipantTopology[] = participantsRaw.map(
     (p) => {
@@ -661,11 +676,8 @@ export async function GET() {
             container: containerLabel(svc),
             status: m.status,
             severity: deriveSeverity(m.status, m.cpu, m.memMB, m.memLimitMB),
-            // Only report resource numbers when this participant truly
-            // owns its own container. On Azure the shared-pool numbers
-            // are surfaced in the Layer View.
-            cpu: metricsShared ? 0 : m.cpu,
-            memMB: metricsShared ? 0 : m.memMB,
+            cpu: m.cpu,
+            memMB: m.memMB,
             uptime: m.uptime,
           };
         },
@@ -746,7 +758,7 @@ export async function GET() {
       ? "docker"
       : "unknown";
 
-  return NextResponse.json({
+  return {
     timestamp: new Date().toISOString(),
     metricsSource,
     deploymentTarget,
@@ -780,5 +792,5 @@ export async function GET() {
         samples: prev24h.samples,
       },
     },
-  });
+  };
 }

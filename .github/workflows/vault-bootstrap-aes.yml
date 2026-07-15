@@ -1,0 +1,152 @@
+name: Vault bootstrap AES key (issue #25)
+
+# Stores a 256-bit AES key under `secret/data/aes-key-alias` in the live
+# Azure Vault. EDC's IH and Issuer runtimes need this key to encrypt
+# KeyPairResource entries when a participant is created. Without it,
+# every POST /v1alpha/participants that triggers internal keypair
+# generation crashes server-side with:
+#
+#   EdcException: Failed to encrypt entries: Unsupported encryption
+#   algorithm: aes
+#
+# Mirrors what jad/bootstrap-vault.sh does locally (write content to
+# secret/data/aes-key-alias). Idempotent: safe to re-run.
+#
+# Manual trigger only.
+
+on:
+  workflow_dispatch:
+    inputs:
+      key_alias:
+        description: "Vault key alias (must match EDC_ENCRYPTION_AES_KEY_ALIAS)"
+        type: string
+        default: "aes-key-alias"
+
+permissions:
+  id-token: write
+  contents: read
+
+concurrency:
+  group: "azure-vault-aes"
+  cancel-in-progress: false
+
+env:
+  RESOURCE_GROUP: rg-mvhd-dev
+  ACA_ENV: mvhd-env
+
+jobs:
+  bootstrap:
+    name: Write AES key into Vault
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Azure Login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Resolve Vault token from ACA secret
+        id: vault
+        run: |
+          TOKEN=$(az containerapp secret show -n mvhd-vault -g "$RESOURCE_GROUP" \
+                    --secret-name vault-root-token --query "value" -o tsv 2>/dev/null \
+                  || az containerapp show -n mvhd-vault -g "$RESOURCE_GROUP" \
+                       --query "properties.template.containers[0].env[?name=='VAULT_DEV_ROOT_TOKEN_ID'].value" -o tsv)
+          if [ -z "$TOKEN" ]; then
+            echo "::error::Could not resolve Vault root token"
+            exit 1
+          fi
+          echo "::add-mask::$TOKEN"
+          echo "token=$TOKEN" >> "$GITHUB_OUTPUT"
+
+      - name: Run bootstrap as one-shot ACA Job
+        env:
+          VAULT_TOKEN: ${{ steps.vault.outputs.token }}
+          KEY_ALIAS: ${{ github.event.inputs.key_alias }}
+        run: |
+          ENV_ID=$(az containerapp env show -n "$ACA_ENV" -g "$RESOURCE_GROUP" \
+                     --query "id" -o tsv)
+          # Generate a fresh 32-byte AES key, base64-encode. Done on the
+          # runner so we never log the secret value.
+          AES_KEY_B64=$(openssl rand -base64 32)
+          echo "::add-mask::$AES_KEY_B64"
+
+          cat > /tmp/aes-bootstrap-job.yaml <<EOF
+          type: Microsoft.App/jobs
+          properties:
+            configuration:
+              triggerType: Manual
+              replicaTimeout: 300
+              replicaRetryLimit: 0
+              manualTriggerConfig:
+                replicaCompletionCount: 1
+                parallelism: 1
+              secrets:
+                - name: vault-token
+                  value: "${VAULT_TOKEN}"
+                - name: aes-key
+                  value: "${AES_KEY_B64}"
+            environmentId: ${ENV_ID}
+            template:
+              containers:
+                - name: aes-bootstrap
+                  image: hashicorp/vault:latest
+                  resources: { cpu: 0.25, memory: 0.5Gi }
+                  env:
+                    # ACA internal ingress runs Envoy on :443 (HTTPS, self-signed)
+                    # and forwards to the container's targetPort. Direct :8200
+                    # connections bypass Envoy and are blocked. Match what IH
+                    # uses (EDC_VAULT_HASHICORP_URL=https://mvhd-vault.internal…).
+                    - { name: VAULT_ADDR,         value: "https://mvhd-vault.internal.happysand-37f82e30.westeurope.azurecontainerapps.io" }
+                    - { name: VAULT_SKIP_VERIFY,  value: "true" }
+                    - { name: KEY_ALIAS,          value: "${KEY_ALIAS}" }
+                    - name: VAULT_TOKEN
+                      secretRef: vault-token
+                    - name: AES_KEY_B64
+                      secretRef: aes-key
+                  command: ["/bin/sh", "-c"]
+                  args:
+                    - |
+                      set -e
+                      echo "vault binary: \$(which vault)"
+                      echo "VAULT_ADDR=\$VAULT_ADDR  KEY_ALIAS=\$KEY_ALIAS"
+                      echo "DNS check (mvhd-vault):"
+                      getent hosts mvhd-vault 2>&1 || nslookup mvhd-vault 2>&1 || echo "(no resolver)"
+
+                      echo "Vault status (30s timeout):"
+                      timeout 30 vault status || echo "(non-zero exit allowed for sealed)"
+
+                      echo "Writing key with vault kv put (60s timeout)..."
+                      timeout 60 vault kv put secret/\$KEY_ALIAS content="\$AES_KEY_B64" \
+                        || { echo "FAILED to write"; exit 1; }
+
+                      echo "Reading back (30s timeout):"
+                      timeout 30 vault kv get -format=json secret/\$KEY_ALIAS | head -c 400
+                      echo
+                      echo DONE
+          EOF
+
+          if az containerapp job show -n mvhd-vault-aes -g "$RESOURCE_GROUP" -o none 2>/dev/null; then
+            az containerapp job delete -n mvhd-vault-aes -g "$RESOURCE_GROUP" --yes -o none
+          fi
+          az containerapp job create -n mvhd-vault-aes -g "$RESOURCE_GROUP" --yaml /tmp/aes-bootstrap-job.yaml -o none
+          EXEC=$(az containerapp job start -n mvhd-vault-aes -g "$RESOURCE_GROUP" --query "name" -o tsv)
+          echo "started exec: $EXEC"
+          for i in $(seq 1 30); do
+            STATUS=$(az containerapp job execution show -n mvhd-vault-aes -g "$RESOURCE_GROUP" \
+                       --job-execution-name "$EXEC" --query "properties.status" -o tsv 2>/dev/null || echo Pending)
+            echo "[$i] status: $STATUS"
+            case "$STATUS" in
+              Succeeded) echo "AES key bootstrap Succeeded"; exit 0 ;;
+              Failed|Canceled) echo "AES key bootstrap $STATUS"; exit 1 ;;
+            esac
+            sleep 4
+          done
+          echo "Timed out"; exit 1
+
+      - name: Cleanup job
+        if: always()
+        run: |
+          az containerapp job delete -n mvhd-vault-aes -g "$RESOURCE_GROUP" --yes -o none || true

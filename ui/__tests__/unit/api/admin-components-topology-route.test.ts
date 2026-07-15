@@ -30,6 +30,7 @@ vi.mock("@/lib/neo4j", () => ({
 }));
 
 import { GET } from "@/app/api/admin/components/topology/route";
+import { __resetCacheForTests } from "@/lib/server-cache";
 
 /* ── Docker mock helpers ── */
 
@@ -249,6 +250,7 @@ const MOCK_EDC_PARTICIPANTS = [
 
 beforeEach(() => {
   vi.clearAllMocks();
+  __resetCacheForTests();
   vi.spyOn(Date, "now").mockReturnValue(NOW);
   vi.spyOn(console, "warn").mockImplementation(() => {});
   // Default: Neo4j fallback returns no participants so empty-case assertions

@@ -405,17 +405,19 @@ const services: ServiceInfo[] = [
 ];
 
 const layerColors: Record<string, string> = {
+  // Light mode uses dark text on a light tint (WCAG AA ≥ 4.5:1); dark mode
+  // keeps the original light-on-dark badge styling.
   Infrastructure:
-    "bg-blue-900/30 text-blue-300 dark:bg-blue-900/30 dark:text-blue-300",
+    "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300",
   "EDC-V / DCore":
-    "bg-emerald-900/30 text-emerald-300 dark:bg-emerald-900/30 dark:text-emerald-300",
+    "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300",
   Identity:
-    "bg-purple-900/30 text-purple-300 dark:bg-purple-900/30 dark:text-purple-300",
-  CFM: "bg-amber-900/30 text-amber-300 dark:bg-amber-900/30 dark:text-amber-300",
+    "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300",
+  CFM: "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300",
   Application:
-    "bg-cyan-900/30 text-cyan-300 dark:bg-cyan-900/30 dark:text-cyan-300",
-  Seed: "bg-gray-800/30 text-gray-300 dark:bg-gray-800/30 dark:text-gray-300",
-  Static: "bg-gray-800/30 text-gray-300 dark:bg-gray-800/30 dark:text-gray-300",
+    "bg-cyan-100 text-cyan-800 dark:bg-cyan-900/30 dark:text-cyan-300",
+  Seed: "bg-gray-200 text-gray-700 dark:bg-gray-800/30 dark:text-gray-300",
+  Static: "bg-gray-200 text-gray-700 dark:bg-gray-800/30 dark:text-gray-300",
 };
 
 const tocItems = [

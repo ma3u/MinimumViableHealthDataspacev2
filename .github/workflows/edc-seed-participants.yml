@@ -1,0 +1,238 @@
+name: EDC Seed Participants (issue #25)
+
+# Seeds 5 EHDS ParticipantContexts into the live IdentityHub on Azure so
+# the /compliance/tck page DSP-2.x and DCP-2.x rows flip from skipped to
+# green. Mirrors jad/seed-all.sh phases 2-3 (participant + key-pair) but
+# against ACA-internal IH endpoints.
+#
+# Architecture: IH is internal-ingress only, so the seed runs as a
+# one-shot ACA Job inside the same env. The job inlines the bash from
+# scripts/azure/05-edc-seed.sh (the canonical source) — keep them in
+# sync if you change either.
+#
+# Manual trigger only.
+
+on:
+  workflow_dispatch:
+    inputs:
+      keycloak_url:
+        description: "Public Keycloak URL"
+        type: string
+        default: "https://auth.ehds.mabu.red"
+      flip_tck_optional:
+        description: "Also flip TCK_INFRA_OPTIONAL=false on the proxy after seeding"
+        type: boolean
+        default: false
+
+permissions:
+  id-token: write
+  contents: read
+
+concurrency:
+  group: "azure-edc-seed"
+  cancel-in-progress: false
+
+env:
+  RESOURCE_GROUP: rg-mvhd-dev
+  ACA_ENV: mvhd-env
+  IH_INTERNAL_URL: http://mvhd-identityhub:7082/api/identity
+  KC_REALM: edcv
+  # The proxy's TCK probe authenticates as this client. Seeding uses the
+  # same identity so the participants end up with consistent ownership.
+  KC_CLIENT_ID: admin
+  KC_CLIENT_SECRET: edc-v-admin-secret
+
+jobs:
+  seed:
+    name: Seed 5 EHDS participants
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Azure Login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Ensure IH is scaled up
+        run: |
+          MIN=$(az containerapp show -n mvhd-identityhub -g $RESOURCE_GROUP \
+            --query "properties.template.scale.minReplicas" -o tsv)
+          if [ "$MIN" != "1" ]; then
+            echo "Scaling mvhd-identityhub to min=1 (was $MIN)"
+            az containerapp update -n mvhd-identityhub -g $RESOURCE_GROUP \
+              --min-replicas 1 --max-replicas 1 -o none
+            echo "Waiting 60s for IH to be ready..."
+            sleep 60
+          else
+            echo "IH already at min=1"
+          fi
+
+      # Pre-flight: confirm we can get a Keycloak admin token from the
+      # runner (Keycloak is public via auth.ehds.mabu.red). If this
+      # fails the realm/client/secret is wrong and the ACA Job won't
+      # work either — fail fast with the diagnostic instead of waiting
+      # for an opaque container failure.
+      - name: Pre-flight Keycloak token check
+        run: |
+          KC='${{ github.event.inputs.keycloak_url }}'
+          REALM="$KC_REALM"
+          set +e
+          HTTP=$(curl -sS -o /tmp/kc.json -w "%{http_code}" -X POST \
+            "$KC/realms/$REALM/protocol/openid-connect/token" \
+            -H "Content-Type: application/x-www-form-urlencoded" \
+            -d "grant_type=client_credentials&client_id=$KC_CLIENT_ID&client_secret=$KC_CLIENT_SECRET")
+          set -e
+          echo "Keycloak token response: HTTP $HTTP"
+          if [ "$HTTP" != "200" ]; then
+            echo "::error::Keycloak admin token request failed (HTTP $HTTP)"
+            echo "Response body:"
+            head -c 500 /tmp/kc.json; echo
+            exit 1
+          fi
+          TOK_LEN=$(python3 -c "import json; print(len(json.load(open('/tmp/kc.json')).get('access_token','')))")
+          echo "  got access_token (${TOK_LEN} chars)"
+
+      - name: Run seed as one-shot ACA Job
+        run: |
+          ENV_ID=$(az containerapp env show -n "$ACA_ENV" -g "$RESOURCE_GROUP" \
+                     --query "id" -o tsv)
+          # Inline the canonical seed script via base64. Image: Microsoft's
+          # azure-cli (has bash + curl + python3 all baked in — no apk
+          # install needed, which avoids alpine's outbound-during-startup
+          # uncertainty). It's bigger but reliable.
+          SCRIPT_B64=$(base64 < scripts/azure/05-edc-seed.sh | tr -d '\n')
+
+          cat > /tmp/seed-job.yaml <<EOF
+          type: Microsoft.App/jobs
+          properties:
+            configuration:
+              triggerType: Manual
+              replicaTimeout: 300
+              replicaRetryLimit: 0
+              manualTriggerConfig:
+                replicaCompletionCount: 1
+                parallelism: 1
+            environmentId: ${ENV_ID}
+            template:
+              containers:
+                - name: seed
+                  image: mcr.microsoft.com/azure-cli:latest
+                  resources: { cpu: 0.5, memory: 1Gi }
+                  env:
+                    - { name: IH,               value: "${IH_INTERNAL_URL}" }
+                    - { name: KC,               value: "${{ github.event.inputs.keycloak_url }}" }
+                    - { name: KC_REALM,         value: "${KC_REALM}" }
+                    - { name: KC_CLIENT_ID,     value: "${KC_CLIENT_ID}" }
+                    - { name: KC_CLIENT_SECRET, value: "${KC_CLIENT_SECRET}" }
+                    - { name: SCRIPT_B64,       value: "${SCRIPT_B64}" }
+                  command: ["/bin/bash", "-c"]
+                  args:
+                    - |
+                      # Force unbuffered stdout so logs land in LA in
+                      # near-real-time. Without this, on a fast-failing
+                      # container the buffered output is lost.
+                      exec >/proc/1/fd/1 2>/proc/1/fd/2
+                      set -x
+                      echo "=== seed env ==="
+                      echo "IH=\$IH"
+                      echo "KC=\$KC (realm \$KC_REALM client \$KC_CLIENT_ID)"
+                      mkdir -p /tmp/seed
+                      printf '%s' "\$SCRIPT_B64" | base64 -d > /tmp/seed/run.sh
+                      ls -l /tmp/seed/run.sh
+                      head -3 /tmp/seed/run.sh
+                      chmod +x /tmp/seed/run.sh
+                      echo "=== running /tmp/seed/run.sh ==="
+                      bash -x /tmp/seed/run.sh
+                      EXIT=\$?
+                      echo "=== seed exited with \$EXIT ==="
+                      exit \$EXIT
+          EOF
+
+          if az containerapp job show -n mvhd-edc-seed -g "$RESOURCE_GROUP" -o none 2>/dev/null; then
+            az containerapp job delete -n mvhd-edc-seed -g "$RESOURCE_GROUP" --yes -o none
+          fi
+          az containerapp job create -n mvhd-edc-seed -g "$RESOURCE_GROUP" --yaml /tmp/seed-job.yaml -o none
+
+          EXEC=$(az containerapp job start -n mvhd-edc-seed -g "$RESOURCE_GROUP" --query "name" -o tsv)
+          echo "started exec: $EXEC"
+          for i in $(seq 1 60); do
+            STATUS=$(az containerapp job execution show -n mvhd-edc-seed -g "$RESOURCE_GROUP" \
+              --job-execution-name "$EXEC" --query "properties.status" -o tsv 2>/dev/null || echo Pending)
+            echo "[$i] seed status: $STATUS"
+            case "$STATUS" in
+              Succeeded) echo "seed Succeeded"; break ;;
+              Failed|Canceled) echo "seed $STATUS"; break ;;
+            esac
+            sleep 5
+          done
+
+          # ACA Job stdout goes wherever the env's appLogsConfiguration
+          # points. Dump the env config first so we know what we're
+          # working with, then try several common workspace lookups.
+          echo "=== ACA env appLogsConfiguration ==="
+          az containerapp env show -n "$ACA_ENV" -g "$RESOURCE_GROUP" \
+            --query "properties.appLogsConfiguration" -o yaml || true
+
+          echo "=== LA workspaces in subscription ==="
+          az monitor log-analytics workspace list \
+            --query "[].{name:name, customerId:customerId, rg:resourceGroup}" -o table 2>/dev/null \
+            | head -20 || echo "(none / no perms)"
+
+          # Try a few paths in priority order.
+          WS_ID=$(az containerapp env show -n "$ACA_ENV" -g "$RESOURCE_GROUP" \
+                  --query "properties.appLogsConfiguration.logAnalyticsConfiguration.customerId" -o tsv 2>/dev/null)
+          if [ -z "$WS_ID" ]; then
+            # Subscription-wide search
+            WS_ID=$(az monitor log-analytics workspace list \
+                    --query "[0].customerId" -o tsv 2>/dev/null)
+          fi
+          echo "Log Analytics workspace: ${WS_ID:-<not found>}"
+          {
+            echo "## Seed job execution (full properties)"
+            echo ""
+            echo '```yaml'
+            az containerapp job execution show -n mvhd-edc-seed -g "$RESOURCE_GROUP" \
+              --job-execution-name "$EXEC" -o yaml | head -60
+            echo '```'
+            echo ""
+            if [ -n "$WS_ID" ]; then
+              echo "## Container logs (Log Analytics)"
+              echo ""
+              echo '```'
+              sleep 15
+              az monitor log-analytics query -w "$WS_ID" --analytics-query \
+                "ContainerAppConsoleLogs_CL | where ContainerAppName_s == 'mvhd-edc-seed' | order by TimeGenerated asc | project TimeGenerated, Log_s | take 300" \
+                -o tsv 2>&1 \
+                | head -300 \
+                || echo "(no logs returned)"
+              echo '```'
+            else
+              echo "## Container logs"
+              echo ""
+              echo '> No Log Analytics workspace reachable from the SP.'
+              echo '> The ACA env is configured without a queryable logging destination.'
+              echo '> See "ACA env appLogsConfiguration" earlier in the run output.'
+            fi
+          } | tee -a "$GITHUB_STEP_SUMMARY"
+
+          [ "$STATUS" = "Succeeded" ] || exit 1
+
+      - name: Cleanup seed job
+        if: always()
+        run: |
+          az containerapp job delete -n mvhd-edc-seed -g "$RESOURCE_GROUP" --yes -o none || true
+
+      # Optional: flip TCK_INFRA_OPTIONAL=false on the proxy so future
+      # runs treat unreachable infra as red `fail` instead of neutral
+      # blue `skip`. Per ADR-024 Phase 4. Off by default — only flip
+      # once the seed is verified working end to end.
+      - name: Flip TCK_INFRA_OPTIONAL on the proxy (optional)
+        if: ${{ github.event.inputs.flip_tck_optional == 'true' }}
+        run: |
+          az containerapp update -n mvhd-neo4j-proxy -g "$RESOURCE_GROUP" \
+            --set-env-vars TCK_INFRA_OPTIONAL=false -o none
+          echo "TCK_INFRA_OPTIONAL=false set on mvhd-neo4j-proxy"

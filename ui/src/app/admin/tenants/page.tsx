@@ -8,6 +8,7 @@ import {
   ChevronDown,
   ChevronUp,
   Circle,
+  Info,
   Loader2,
   Users,
   ShieldCheck,
@@ -56,6 +57,31 @@ interface Participant {
   "@id": string;
   identity: string;
   state: string;
+}
+
+// CFM TenantManager stores roles in its own taxonomy
+// (CLINIC/CRO/HDAB/REGISTRY/etc.) which doesn't match the EDC role names
+// (DATA_HOLDER/DATA_USER/HDAB_AUTHORITY/EDC_ADMIN) the rest of this page,
+// the Role badge, and the RBAC Summary panel were originally written
+// against. Map CFM → EDC here so every consumer (badge label, access
+// level pill, RBAC counts) lights up consistently.
+const CFM_TO_EDC_ROLE: Record<string, string> = {
+  CLINIC: "DATA_HOLDER",
+  HOSPITAL: "DATA_HOLDER",
+  REGISTRY: "DATA_HOLDER",
+  CRO: "DATA_USER",
+  PHARMA: "DATA_USER",
+  RESEARCHER: "DATA_USER",
+  HDAB: "HDAB_AUTHORITY",
+  AUTHORITY: "HDAB_AUTHORITY",
+  OPERATOR: "EDC_ADMIN",
+  ADMIN: "EDC_ADMIN",
+};
+
+function normalizeRole(t: Tenant): string {
+  const raw =
+    t.properties.ehdsParticipantType || t.properties.role || "Unknown";
+  return CFM_TO_EDC_ROLE[raw.toUpperCase()] ?? raw;
 }
 
 const ROLE_CONFIG: Record<
@@ -151,11 +177,9 @@ export default function AdminTenantsPage() {
     );
   }, 0);
 
-  // RBAC summary counts
   const roleCounts: Record<string, number> = {};
   tenants.forEach((t) => {
-    const role =
-      t.properties.ehdsParticipantType || t.properties.role || "Unknown";
+    const role = normalizeRole(t);
     roleCounts[role] = (roleCounts[role] || 0) + 1;
   });
 
@@ -168,6 +192,24 @@ export default function AdminTenantsPage() {
             <h1 className="page-header">Tenant Management</h1>
             <p className="text-[var(--text-secondary)] text-lg mt-1">
               Manage EHDS participant organisations, roles, and dataspace access
+            </p>
+            <p className="text-xs text-[var(--text-secondary)] mt-2 max-w-2xl flex items-start gap-1.5">
+              <Info
+                size={14}
+                className="mt-0.5 shrink-0 text-[var(--accent)]"
+              />
+              <span>
+                <strong className="text-[var(--text-primary)]">
+                  VPA (Virtual Participant Agent)
+                </strong>{" "}
+                — a runtime instance provisioned by the CFM Tenant Manager for a
+                participant. Each tenant typically runs three VPAs:
+                <code>cfm.connector</code> (EDC-V control plane),{" "}
+                <code>cfm.credentialservice</code> (IdentityHub), and{" "}
+                <code>cfm.dataplane</code> (DCore data plane). State{" "}
+                <code>disposed</code> means the agent was terminated by a demo
+                reset — re-seed the tenants to recreate.
+              </span>
             </p>
           </div>
           <Link
@@ -236,8 +278,15 @@ export default function AdminTenantsPage() {
                         <span className="animate-pulse w-2 h-2 rounded-full bg-[var(--warning)]" />
                       )}
                     </div>
-                    <p className="text-sm font-medium text-[var(--text-secondary)]">
+                    <p
+                      className="text-sm font-medium text-[var(--text-secondary)] flex items-center gap-1.5"
+                      title="Virtual Participant Agents (one per dataspace profile per tenant). Disposed = terminated by demo reset; re-seed to recreate."
+                    >
                       Disposed VPAs
+                      <Info
+                        size={12}
+                        className="text-[var(--text-secondary)] opacity-60"
+                      />
                     </p>
                     <p className="text-3xl font-black text-[var(--text-primary)] mt-1 tabular-nums">
                       {disposedCount}
@@ -278,10 +327,7 @@ export default function AdminTenantsPage() {
                         <tbody className="divide-y divide-[var(--border)]">
                           {tenants.map((t) => {
                             const isOpen = expanded === t.id;
-                            const role =
-                              t.properties.ehdsParticipantType ||
-                              t.properties.role ||
-                              "Unknown";
+                            const role = normalizeRole(t);
                             const roleCfg = ROLE_CONFIG[role] ?? null;
                             const allVpasDisposed = (
                               t.participantProfiles || []

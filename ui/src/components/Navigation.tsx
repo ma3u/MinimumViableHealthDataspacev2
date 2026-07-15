@@ -27,6 +27,7 @@ import {
   Edit3,
   Lightbulb,
   FlaskConical,
+  Sparkles,
   Menu,
   X,
 } from "lucide-react";
@@ -282,6 +283,12 @@ const myHealthGroup: NavGroup = {
       href: "/patient",
       label: "My Health Records",
       icon: User,
+      roles: ["PATIENT"],
+    },
+    {
+      href: "/patient/query",
+      label: "Personal Research",
+      icon: Sparkles,
       roles: ["PATIENT"],
     },
     {

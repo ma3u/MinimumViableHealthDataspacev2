@@ -28,6 +28,7 @@ interface SuiteResult {
   results: TestResult[];
   passed: number;
   total: number;
+  skipped?: number;
 }
 
 interface TckData {
@@ -45,12 +46,35 @@ function StatusIcon({ status }: { status: string }) {
     );
   if (status === "fail")
     return <XCircle size={16} className="text-[var(--danger-text)] shrink-0" />;
+  // skip: distinctly *neutral* (blue), not warning-yellow — so users don't
+  // confuse "intentionally skipped on this deployment" with "test failed".
   return (
-    <MinusCircle size={16} className="text-[var(--warning-text)] shrink-0" />
+    <MinusCircle
+      size={16}
+      className="text-blue-600 dark:text-blue-400 shrink-0"
+    />
   );
 }
 
-function ScoreBadge({ passed, total }: { passed: number; total: number }) {
+function ScoreBadge({
+  passed,
+  total,
+  skipped = 0,
+}: {
+  passed: number;
+  total: number;
+  skipped?: number;
+}) {
+  // When all tests are skipped, render a neutral "Skipped" badge instead of
+  // a red "0/N (0%)" that visually screams failure even though nothing
+  // actually failed.
+  if (skipped > 0 && skipped === total) {
+    return (
+      <span className="text-xs font-mono px-2 py-0.5 rounded border bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 border-blue-300 dark:border-blue-700">
+        {skipped} skipped
+      </span>
+    );
+  }
   const pct = total > 0 ? Math.round((passed / total) * 100) : 0;
   const color =
     pct === 100
@@ -94,6 +118,7 @@ function SuiteCard({
 }) {
   const [expanded, setExpanded] = useState(true);
   const meta = suiteLabels[suiteKey];
+  const skipped = data.results.filter((r) => r.status === "skip").length;
 
   // Group by category
   const categories = data.results.reduce(
@@ -124,7 +149,7 @@ function SuiteCard({
             </span>
           </div>
         </div>
-        <ScoreBadge passed={data.passed} total={data.total} />
+        <ScoreBadge passed={data.passed} total={data.total} skipped={skipped} />
       </button>
 
       {expanded && (
@@ -228,15 +253,38 @@ export default function ComplianceTckPage() {
           </div>
         )}
 
-        {/* Loading skeleton */}
+        {/* Loading skeleton — cold start only */}
         {loading && !data && (
-          <div className="space-y-4">
-            {[1, 2, 3].map((i) => (
-              <div
-                key={i}
-                className="h-32 bg-[var(--surface-2)] rounded-lg animate-pulse border border-[var(--border)]"
-              />
-            ))}
+          <>
+            <div className="flex items-center gap-3 mb-6 text-sm text-[var(--text-secondary)]">
+              <RefreshCw size={16} className="animate-spin" />
+              <span>
+                Running 20 protocol probes against the live deployment — this
+                takes up to a minute on first load…
+              </span>
+            </div>
+            <div className="space-y-4">
+              {[1, 2, 3].map((i) => (
+                <div
+                  key={i}
+                  className="h-32 bg-[var(--surface-2)] rounded-lg animate-pulse border border-[var(--border)]"
+                />
+              ))}
+            </div>
+          </>
+        )}
+
+        {/* Re-run overlay — keeps stale data visible but signals refresh */}
+        {loading && data && (
+          <div className="flex items-center gap-2 mb-4 px-3 py-2 rounded-lg bg-[var(--surface-2)] border border-[var(--border)] text-xs text-[var(--text-secondary)]">
+            <RefreshCw
+              size={14}
+              className="animate-spin text-[var(--text-primary)]"
+            />
+            <span>
+              Re-running probes — current results may be stale until this
+              completes (typically 30-60 s).
+            </span>
           </div>
         )}
 
@@ -279,6 +327,40 @@ export default function ComplianceTckPage() {
                 </div>
               ))}
             </div>
+
+            {/* Skip explainer — appears when DSP/DCP suites can't reach the
+                EDC services (typical for Azure deployments where multi-port
+                ACA ingress isn't configured; the local Docker stack has them
+                all green). */}
+            {data.summary.skipped > 0 && (
+              <div className="mb-6 px-4 py-3 rounded-lg border border-blue-300 dark:border-blue-700 bg-blue-50 dark:bg-blue-900/20 text-sm text-[var(--text-primary)]">
+                <p className="font-medium mb-1">
+                  {data.summary.skipped} test
+                  {data.summary.skipped === 1 ? "" : "s"} skipped — EDC services
+                  not provisioned in this environment
+                </p>
+                <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
+                  The Azure Container Apps deployment doesn&apos;t currently
+                  host the EDC controlplane / IdentityHub / IssuerService
+                  (single-port ingress vs EDC&apos;s 4-port architecture — see
+                  ADR-012 follow-up). For full DSP/DCP validation, run the local
+                  Docker stack:{" "}
+                  <code className="font-mono text-[11px] bg-[var(--surface-2)] px-1 py-0.5 rounded">
+                    docker compose -f docker-compose.yml -f
+                    docker-compose.jad.yml up -d
+                  </code>
+                  .{" "}
+                  <a
+                    href="https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/25"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-700 dark:text-blue-300 underline hover:no-underline"
+                  >
+                    Tracking issue #25 ↗
+                  </a>
+                </p>
+              </div>
+            )}
 
             {/* Suite cards */}
             <div className="space-y-4">

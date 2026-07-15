@@ -6,6 +6,8 @@ import { JWT } from "next-auth/jwt";
 declare module "next-auth" {
   interface Session extends DefaultSession {
     accessToken?: string;
+    /** Keycloak id_token — used as id_token_hint on RP-initiated logout. */
+    idToken?: string;
     roles: string[];
     user: {
       id: string;
@@ -24,6 +26,7 @@ declare module "next-auth/jwt" {
   interface JWT {
     accessToken?: string;
     refreshToken?: string;
+    idToken?: string;
     roles?: string[];
   }
 }

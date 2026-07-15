@@ -19,6 +19,7 @@ import {
 import { DemoPersonaCards } from "@/components/DemoPersonaCards";
 import { PersonaJourneyCards } from "@/components/PersonaJourneyCards";
 import { FeatureCardGrid } from "@/components/FeatureCardGrid";
+import { HomeRegisterCta } from "@/components/HomeRegisterCta";
 
 /* ── Page ─────────────────────────────────────────────────────────────────── */
 
@@ -106,6 +107,9 @@ export default function Home() {
             <span>All data is synthetic</span>
           </span>
         </div>
+
+        {/* ── Register with the EUDI Wallet (passwordless) ── */}
+        <HomeRegisterCta />
       </section>
 
       {/* ── Why EHDS Matters ─────────────────────────────────────────────── */}

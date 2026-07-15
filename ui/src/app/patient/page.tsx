@@ -1,7 +1,8 @@
 "use client";
 
+import Link from "next/link";
 import { fetchApi } from "@/lib/api";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import {
   Activity,
   Heart,
@@ -10,9 +11,27 @@ import {
   Pill,
   Scissors,
   Users,
+  Salad,
+  ScanLine,
+  ShieldCheck,
+  ArrowRight,
+  Sparkles,
+  Syringe,
+  type LucideIcon,
 } from "lucide-react";
 import PageIntro from "@/components/PageIntro";
 import { SignInRequired } from "@/components/SignInRequired";
+import { RegisterDialog } from "@/components/RegisterDialog";
+import { HealthDetailModal } from "@/components/HealthDetailModal";
+import {
+  personalHealth,
+  insurer,
+  type PersonalHealthSource,
+} from "@/lib/journey-config";
+import {
+  accessibleBrandText,
+  brandBackgroundForWhiteText,
+} from "@/lib/accessible-color";
 
 interface PatientListItem {
   id: string;
@@ -69,6 +88,11 @@ const FHIR_TYPE_TOKENS: Record<
     bg: "var(--role-trust-bg)",
     icon: <Scissors size={12} />,
   },
+  Immunization: {
+    text: "var(--fhir-encounter)",
+    bg: "var(--role-holder-bg)",
+    icon: <Syringe size={12} />,
+  },
 };
 
 /* Metric orb stat card — Stitch patient_dashboard_day pattern */
@@ -105,8 +129,109 @@ function MetricCard({
   );
 }
 
+/* Personal-health source icon per id (data lives in journey-config). */
+const HEALTH_ICON: Record<PersonalHealthSource["id"], LucideIcon> = {
+  fitness: Activity,
+  labs: FlaskConical,
+  nutrition: Salad,
+};
+
+/**
+ * A patient's own health-data source card (fitness / labs / nutrition). Under
+ * NEXT_PUBLIC_DEMO_TK it shows the git-ignored personal screenshot; the public
+ * default shows a brand-tinted icon header with generic, fictional source labels.
+ */
+function PersonalHealthCard({
+  s,
+  onOpen,
+}: {
+  s: PersonalHealthSource;
+  onOpen: () => void;
+}) {
+  const [imgOk, setImgOk] = useState(true);
+  const Icon = HEALTH_ICON[s.id];
+  // Brand accents fail WCAG AA as small text, so derive theme-aware,
+  // contrast-safe variants for the "View 3-month trends" CTA.
+  const brandText = accessibleBrandText(s.brand);
+  return (
+    <button
+      type="button"
+      onClick={onOpen}
+      aria-label={`${s.title} — view 3-month trends`}
+      className="surface-card border border-[var(--border)] rounded-xl overflow-hidden text-left w-full transition-all hover:border-[var(--accent)] hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
+    >
+      {s.screenshot && imgOk ? (
+        <div className="h-24 bg-white relative">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={s.screenshot}
+            alt={`${s.source} (real screenshot)`}
+            onError={() => setImgOk(false)}
+            className="w-full h-full object-cover object-top"
+          />
+          <span
+            className="absolute top-1.5 left-1.5 text-[10px] font-bold px-2 py-0.5 rounded-full text-white"
+            style={{ background: brandBackgroundForWhiteText(s.brand) }}
+          >
+            {s.source}
+          </span>
+        </div>
+      ) : null}
+      <div className="p-4">
+        <div className="flex items-center gap-2 mb-3">
+          <span
+            className="grid place-items-center w-8 h-8 rounded-lg text-white shrink-0"
+            style={{ background: s.brand }}
+          >
+            <Icon size={16} />
+          </span>
+          <div className="min-w-0">
+            <p className="text-sm font-bold text-[var(--text-primary)] truncate">
+              {s.title}
+            </p>
+            <p className="text-[11px] text-[var(--text-secondary)] truncate">
+              {s.source}
+            </p>
+          </div>
+        </div>
+        <div className="grid grid-cols-2 gap-2">
+          {s.metrics.map((m) => (
+            <div
+              key={m.label}
+              className="rounded-lg bg-[var(--surface-2)] px-2.5 py-1.5"
+            >
+              <p className="text-[10px] text-[var(--text-secondary)] uppercase tracking-wide">
+                {m.label}
+              </p>
+              <p className="text-sm font-bold text-[var(--text-primary)]">
+                {m.value}
+              </p>
+            </div>
+          ))}
+        </div>
+        <p
+          className="mt-3 flex items-center gap-1 text-xs font-semibold text-[var(--brand-l)] dark:text-[var(--brand-d)]"
+          style={
+            {
+              "--brand-l": brandText.light,
+              "--brand-d": brandText.dark,
+            } as CSSProperties
+          }
+        >
+          View 3-month trends <ArrowRight size={13} />
+        </p>
+      </div>
+    </button>
+  );
+}
+
 export default function PatientPage() {
   const [patients, setPatients] = useState<PatientListItem[]>([]);
+  const [ehrModal, setEhrModal] = useState(false);
+  const [ehrReceived, setEhrReceived] = useState(false);
+  const [detailSource, setDetailSource] = useState<PersonalHealthSource | null>(
+    null,
+  );
   const [stats, setStats] = useState<CohortStats | null>(null);
   const [selected, setSelected] = useState<string>("");
   const [timeline, setTimeline] = useState<TimelineEntry[]>([]);
@@ -124,6 +249,8 @@ export default function PatientPage() {
         setPatients(d.patients ?? []);
         setStats(d.stats ?? null);
         setRestricted(d.restricted === true);
+        // The restricted (own-record) response embeds the patient's timeline.
+        if (Array.isArray(d.timeline)) setTimeline(d.timeline);
         if (d.restricted && d.patients?.length === 1) {
           setSelected(d.patients[0].id);
         }
@@ -136,7 +263,9 @@ export default function PatientPage() {
   }, []);
 
   useEffect(() => {
-    if (!selected) return;
+    // Restricted (own-record) patients already have their timeline embedded in
+    // the /api/patient response — don't refetch (and overwrite) it.
+    if (!selected || restricted) return;
     setLoading(true);
     fetchApi(`/api/patient?patientId=${encodeURIComponent(selected)}`)
       .then(async (r) => {
@@ -151,7 +280,7 @@ export default function PatientPage() {
         if (e.message === "UNAUTHENTICATED") setUnauthenticated(true);
         setLoading(false);
       });
-  }, [selected]);
+  }, [selected, restricted]);
 
   const selectedPatient = patients.find((p) => p.id === selected);
 
@@ -203,6 +332,103 @@ export default function PatientPage() {
           infoText="Patient data is generated by Synthea and loaded into Neo4j as FHIR R4 resources. The OMOP CDM mapping (Layer 4) enables cross-site cohort analysis under EHDS Art. 53."
           docLink={{ href: "/docs/architecture", label: "Architecture Docs" }}
         />
+
+        {/* ── My personal health record (identity + Request EHR) ──────────── */}
+        <section className="mb-8">
+          <div className="flex items-start justify-between gap-3 mb-4 flex-wrap">
+            <div className="flex items-center gap-3">
+              <span
+                className="grid place-items-center w-12 h-12 rounded-full text-white shrink-0"
+                style={{ background: "var(--role-patient-text)" }}
+              >
+                <Heart size={22} />
+              </span>
+              <div>
+                <h2 className="text-xl font-extrabold text-[var(--text-primary)] leading-tight">
+                  {selectedPatient?.name ?? "My personal health record"}
+                </h2>
+                <p className="text-xs text-[var(--text-secondary)]">
+                  {selectedPatient ? (
+                    <>
+                      <span className="capitalize">
+                        {selectedPatient.gender}
+                      </span>
+                      {selectedPatient.birthDate
+                        ? ` · born ${selectedPatient.birthDate}`
+                        : ""}
+                      {" · "}
+                      {timeline.length} event
+                      {timeline.length === 1 ? "" : "s"} on record
+                    </>
+                  ) : (
+                    "My own fitness, lab and nutrition data — plus my ePA on request."
+                  )}
+                </p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => setEhrModal(true)}
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-white text-sm font-semibold shadow-sm transition-all hover:scale-[1.02] shrink-0"
+              style={{ background: brandBackgroundForWhiteText(insurer.brand) }}
+            >
+              <ScanLine size={16} aria-hidden="true" />
+              {ehrReceived ? "Request more EHR data" : "Request EHR data"}
+            </button>
+          </div>
+
+          {ehrReceived && (
+            <div className="mb-4 px-4 py-3 rounded-xl border border-[var(--role-holder-border)] bg-[var(--role-holder-bg)] text-sm text-[var(--role-holder-text)] flex items-start gap-2">
+              <ShieldCheck size={16} className="mt-0.5 shrink-0" />
+              <span>
+                Your ePA from{" "}
+                <strong className="font-semibold">{insurer.name}</strong> was
+                transferred into the portal as FHIR R4 —
+                GesundheitsID-authenticated, end-to-end encrypted.{" "}
+                {insurer.short} cannot read it; withdraw any time.
+              </span>
+            </div>
+          )}
+
+          <div className="grid sm:grid-cols-3 gap-4">
+            {personalHealth.map((s) => (
+              <PersonalHealthCard
+                key={s.id}
+                s={s}
+                onOpen={() => setDetailSource(s)}
+              />
+            ))}
+          </div>
+
+          <Link
+            href="/patient/query"
+            className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-[var(--accent)] hover:underline"
+          >
+            <Sparkles size={16} aria-hidden="true" />
+            Ask research questions about my own data
+            <ArrowRight size={14} aria-hidden="true" />
+          </Link>
+        </section>
+
+        {detailSource && (
+          <HealthDetailModal
+            source={detailSource}
+            onClose={() => setDetailSource(null)}
+          />
+        )}
+
+        {ehrModal && (
+          <RegisterDialog
+            mode="ehr"
+            title={`Request your ePA from ${insurer.name}`}
+            subtitle="Scan with your insurer app, or approve on the simulated phone — authorised via GesundheitsID. The insurer cannot read the encrypted contents."
+            onClose={() => setEhrModal(false)}
+            onComplete={() => {
+              setEhrModal(false);
+              setEhrReceived(true);
+            }}
+          />
+        )}
 
         {unauthenticated ? (
           <SignInRequired description="The Patient Journey view is restricted to authenticated users. Sign in with one of the demo personas to explore FHIR R4 clinical timelines mapped to OMOP CDM concepts." />

@@ -543,6 +543,42 @@ test.describe("Route protection — authenticated role checks", () => {
     expect(page.url()).toContain("/compliance");
     await expect(page).not.toHaveURL(/unauthorized|signin/);
   });
+
+  // The Manage dropdown for HDAB shows Policies + Audit & Provenance. The
+  // navigation tests above check that the menu items render; these tests
+  // check that clicking them actually loads the page rather than bouncing
+  // the regulator to /auth/unauthorized. (Regression: the previous middleware
+  // gated all of /admin/* behind EDC_ADMIN, contradicting the navigation
+  // contract.)
+  test("regulator can access /admin/policies", async ({ page }) => {
+    await loginAs(page, "regulator", "regulator");
+    await page.goto("/admin/policies");
+    expect(page.url()).toContain("/admin/policies");
+    await expect(page).not.toHaveURL(/unauthorized|signin/);
+  });
+
+  test("regulator can access /admin/audit", async ({ page }) => {
+    await loginAs(page, "regulator", "regulator");
+    await page.goto("/admin/audit");
+    expect(page.url()).toContain("/admin/audit");
+    await expect(page).not.toHaveURL(/unauthorized|signin/);
+  });
+
+  test("regulator is still blocked from /admin/components (EDC_ADMIN-only)", async ({
+    page,
+  }) => {
+    await loginAs(page, "regulator", "regulator");
+    await page.goto("/admin/components");
+    await expect(page).toHaveURL(/unauthorized|signin/, { timeout: T });
+  });
+
+  test("regulator is still blocked from /admin/tenants (EDC_ADMIN-only)", async ({
+    page,
+  }) => {
+    await loginAs(page, "regulator", "regulator");
+    await page.goto("/admin/tenants");
+    await expect(page).toHaveURL(/unauthorized|signin/, { timeout: T });
+  });
 });
 
 // ═════════════════════════════════════════════════════════════════════════════
@@ -577,5 +613,61 @@ test.describe("Login flow — Keycloak integration", () => {
     await expect(page.getByText(/Maria Schmidt|patient1/i).first()).toBeVisible(
       { timeout: T },
     );
+  });
+
+  // Issue #28 (closed 2026-05-10): sign-in flow stays within
+  // *.ehds.mabu.red. The Keycloak custom domain auth.ehds.mabu.red is
+  // bound; every intermediate URL during the OIDC code-flow round-trip
+  // is in the ehds.mabu.red eTLD+1 family. The KEYCLOAK_PUBLIC_URL
+  // gate keeps the test runnable in environments that haven't deployed
+  // the custom-domain change yet (test skips cleanly there) — drop the
+  // gate when the ACA-FQDN fallback path is removed entirely.
+  test("sign-in flow stays within *.ehds.mabu.red domain (issue #28)", async ({
+    page,
+  }) => {
+    const kcUrl = process.env.KEYCLOAK_PUBLIC_URL ?? "";
+    test.skip(
+      !kcUrl.includes("ehds.mabu.red"),
+      `Keycloak custom domain not yet bound (KEYCLOAK_PUBLIC_URL=${
+        kcUrl || "(unset)"
+      }). Issue #28 Phase 2 has not landed. Skipping the in-domain assertion.`,
+    );
+
+    const visitedHosts = new Set<string>();
+    page.on("framenavigated", (frame) => {
+      if (frame === page.mainFrame()) {
+        try {
+          visitedHosts.add(new URL(frame.url()).hostname);
+        } catch {
+          // ignore non-URL frame navigations
+        }
+      }
+    });
+
+    await loginAs(page, "edcadmin", "edcadmin");
+
+    // Every host the browser visited during the OIDC dance should be
+    // either ehds.mabu.red itself or a subdomain of it (auth.* etc.).
+    const offDomain = [...visitedHosts].filter(
+      (host) => host !== "ehds.mabu.red" && !host.endsWith(".ehds.mabu.red"),
+    );
+    expect(
+      offDomain,
+      `sign-in flow left ehds.mabu.red family: visited ${[...visitedHosts].join(
+        ", ",
+      )}; off-domain hosts: ${offDomain.join(", ")}`,
+    ).toEqual([]);
+
+    // Sanity: the auth subdomain should have been hit at least once
+    // (the IdP redirect). If the visitedHosts only contains ehds.mabu.red
+    // it likely means the test signed a session token in directly without
+    // exercising the full Keycloak round-trip.
+    const sawAuthSub = [...visitedHosts].some((h) => h.startsWith("auth."));
+    expect(
+      sawAuthSub,
+      `expected the auth.ehds.mabu.red subdomain to be in the navigation chain; visited ${[
+        ...visitedHosts,
+      ].join(", ")}`,
+    ).toBe(true);
   });
 });

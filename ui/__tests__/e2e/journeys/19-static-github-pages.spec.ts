@@ -1313,3 +1313,198 @@ test.describe("S · Patient data isolation (static)", () => {
     await expect(page.locator("select")).not.toBeVisible();
   });
 });
+
+/**
+ * S · Patient EUDI Wallet journey (static click-path).
+ *
+ * Asserts the four-step presentation works on the static export with the prev/next
+ * controls. Assertions use build-agnostic copy (sublabels / headings identical in
+ * the public default and the NEXT_PUBLIC_DEMO_TK build) so they pass in CI (public,
+ * fictional) and when verified locally against the live-talk build. The
+ * fictional-vs-real gating itself is locked by the WalletFlow unit test.
+ */
+test.describe("S · Patient EUDI Wallet journey (static)", () => {
+  const next = (page: Page) =>
+    page.getByRole("button", { name: "Next step" }).click();
+
+  test("J314 — /journey intro renders the four-step story + always-visible controls", async ({
+    page,
+  }) => {
+    await page.goto(P("/journey"));
+    await expect(page.getByText("Maria takes control of")).toBeVisible({
+      timeout: T,
+    });
+    await expect(page.getByRole("button", { name: "Next step" })).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "Previous step" }),
+    ).toBeVisible();
+  });
+
+  test("J315 — register slide toggles First time · Register ⇄ Returning · Login", async ({
+    page,
+  }) => {
+    await page.goto(P("/journey"));
+    await next(page);
+    await expect(page.getByText("First time · Register")).toBeVisible({
+      timeout: T,
+    });
+    await expect(
+      page.getByText(/Register with your EUDI Wallet/i),
+    ).toBeVisible();
+    await page.getByText("Returning · Login").click();
+    await expect(page.getByText(/Sign in with your EUDI Wallet/i)).toBeVisible({
+      timeout: T,
+    });
+  });
+
+  test("J316 — EHR slide authorises the ePA transfer into the portal", async ({
+    page,
+  }) => {
+    await page.goto(P("/journey"));
+    await next(page); // → register
+    await next(page); // → EHR
+    await expect(
+      page.getByText("Pull my record from my insurance"),
+    ).toBeVisible({ timeout: T });
+    await expect(page.getByText("GesundheitsID").first()).toBeVisible();
+    await page.getByRole("button", { name: /Authorize the transfer/i }).click();
+    await expect(page.getByText(/Transferred to the portal/i)).toBeVisible({
+      timeout: T,
+    });
+    // wait for any images on the slide to finish loading before auditing
+    await page.waitForFunction(
+      () => [...document.images].every((i) => i.complete),
+      null,
+      { timeout: T },
+    );
+    const broken = await page.evaluate(() =>
+      [...document.images]
+        .filter((i) => i.naturalWidth === 0)
+        .map((i) => i.src),
+    );
+    expect(broken).toEqual([]);
+  });
+
+  test("J317 — donate slide shows three data sources flowing into trusted programs", async ({
+    page,
+  }) => {
+    await page.goto(P("/journey"));
+    await next(page); // register
+    await next(page); // EHR
+    await next(page); // donate
+    await expect(page.getByText("Contributing my real data")).toBeVisible({
+      timeout: T,
+    });
+    await expect(page.getByText("into programs I trust")).toBeVisible();
+    // three sources — sublabels are identical in both builds
+    await expect(page.getByText("Diagnoses · medications")).toBeVisible();
+    await expect(page.getByText("Recovery · resting HR · HRV")).toBeVisible();
+    await expect(
+      page.getByText("Ferritin · B12 · CRP · omega-3"),
+    ).toBeVisible();
+    await expect(page.getByText("CONSENT GRANTED").first()).toBeVisible();
+    // wait for any images on the slide to finish loading before auditing
+    await page.waitForFunction(
+      () => [...document.images].every((i) => i.complete),
+      null,
+      { timeout: T },
+    );
+    const broken = await page.evaluate(() =>
+      [...document.images]
+        .filter((i) => i.naturalWidth === 0)
+        .map((i) => i.src),
+    );
+    expect(broken).toEqual([]);
+  });
+
+  test("J318 — results slide lands the sovereignty message", async ({
+    page,
+  }) => {
+    await page.goto(P("/journey"));
+    for (let i = 0; i < 4; i++) await next(page);
+    await expect(page.getByText("My personal research results")).toBeVisible({
+      timeout: T,
+    });
+    await expect(page.getByText("Sovereign, by design.")).toBeVisible();
+  });
+});
+
+/**
+ * S · Interactive EUDI Wallet approval flows (static).
+ *
+ * The homepage Register dialog, the /auth/eudi-qr login page, and the /patient
+ * "Request EHR data" button all share a client-generated QR + an interactive
+ * wallet where the user taps Approve. Static-export safe (no verifier backend);
+ * the QR is generated client-side via the bundled `qrcode` lib. Build-agnostic
+ * assertions (labels identical in the public and DEMO_TK builds).
+ */
+test.describe("S · Interactive EUDI Wallet approval (static)", () => {
+  const tap = (page: Page, name: string) =>
+    page.getByRole("button", { name, exact: true }).first().click();
+
+  test("J319 — homepage Register CTA opens a QR + wallet dialog and approval lands on /patient", async ({
+    page,
+  }) => {
+    await page.goto(P("/"));
+    await page
+      .getByRole("button", { name: /Register with EUDI Wallet/i })
+      .click();
+    const dialog = page.getByRole("dialog");
+    await expect(dialog).toBeVisible({ timeout: T });
+    await expect(dialog.locator('img[alt*="QR code"]')).toBeVisible({
+      timeout: T,
+    });
+    await tap(page, "Yes, continue");
+    await tap(page, "Share");
+    await tap(page, "Go to wallet");
+    await page.waitForURL(/\/patient(\/|$|\?)/, { timeout: T });
+  });
+
+  test("J320 — /auth/eudi-qr?mode=login shows a QR + clickable approval (not 'unavailable')", async ({
+    page,
+  }) => {
+    await page.goto(P("/auth/eudi-qr?mode=login"));
+    await expect(page.locator('img[alt*="QR code"]')).toBeVisible({
+      timeout: T,
+    });
+    await expect(
+      page.getByText(/only available on the live deployment/i),
+    ).toHaveCount(0);
+    await tap(page, "Approve");
+    await tap(page, "Done");
+    await page.waitForURL(/\/patient(\/|$|\?)/, { timeout: T });
+  });
+
+  test("J321 — /patient shows the personal health record (fitness · labs · nutrition)", async ({
+    page,
+  }) => {
+    await page.goto(P("/patient"));
+    await expect(page.getByText("My personal health record")).toBeVisible({
+      timeout: T,
+    });
+    await expect(page.getByText("Fitness & recovery")).toBeVisible();
+    await expect(page.getByText("Lab results").first()).toBeVisible();
+    await expect(page.getByText("Nutrition plan")).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: /Request EHR data/i }),
+    ).toBeVisible();
+  });
+
+  test("J322 — /patient Request EHR → approve → transferred-as-FHIR banner", async ({
+    page,
+  }) => {
+    await page.goto(P("/patient"));
+    await page.getByRole("button", { name: /Request EHR data/i }).click();
+    await expect(page.getByRole("dialog")).toBeVisible({ timeout: T });
+    await tap(page, "Authenticate");
+    await tap(page, "Allow access");
+    // the "Authorising…" step self-advances; then tap Done
+    await expect(page.getByRole("button", { name: "Done" })).toBeVisible({
+      timeout: T,
+    });
+    await tap(page, "Done");
+    await expect(
+      page.getByText(/was transferred into the portal as FHIR R4/i),
+    ).toBeVisible({ timeout: T });
+  });
+});

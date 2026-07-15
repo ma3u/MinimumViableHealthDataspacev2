@@ -20,12 +20,36 @@ interface ParticipantRow {
   state: string;
 }
 
+interface Neo4jVpa {
+  id: string | null;
+  version: number | null;
+  state: string | null;
+  stateTimestamp: string | null;
+  type: string | null;
+  cellId: string | null;
+}
+
+interface Neo4jProfile {
+  id: string | null;
+  version: number | null;
+  identifier: string | null;
+  tenantId: string | null;
+  role: string | null;
+  displayName: string | null;
+  vpas: Neo4jVpa[];
+}
+
 /**
  * Backfill tenants/participants from Neo4j when CFM tenant-manager and
  * EDC-V management API are unreachable (Azure deployment, or any environment
  * where the JAD services aren't yet wired). Mirrors the fallback already used
  * by /api/admin/components so the operator dashboard never shows zero
  * participants while the seeded knowledge graph clearly has them.
+ *
+ * Returns the same shape as CFM's /v1alpha1/tenants + per-tenant
+ * /participant-profiles endpoints, with :ParticipantProfile and :VPA nodes
+ * seeded by neo4j/seed-tenant-profiles.cypher driving the
+ * `participantProfiles[*].vpas[*]` arrays.
  */
 async function loadFromNeo4j(): Promise<{
   tenants: TenantRow[];
@@ -38,32 +62,88 @@ async function loadFromNeo4j(): Promise<{
     legalName: string | null;
     jurisdiction: string | null;
     vcCount: number;
+    profiles: Neo4jProfile[];
   }>(
     `MATCH (p:Participant)
      WHERE p.name IS NOT NULL AND p.name <> ''
      OPTIONAL MATCH (vc:VerifiableCredential)-[:ISSUED_TO]->(p)
+     WITH p, count(vc) AS vcCount
      RETURN p.participantId                  AS id,
             p.name                           AS name,
             coalesce(p.participantType, '—') AS type,
             p.legalName                      AS legalName,
             p.jurisdiction                   AS jurisdiction,
-            count(vc)                        AS vcCount
+            vcCount                          AS vcCount,
+            [(pp:ParticipantProfile)-[:OF_TENANT]->(p) | {
+              id: pp.profileId,
+              version: coalesce(pp.version, 1),
+              identifier: pp.identifier,
+              tenantId: pp.tenantId,
+              role: pp.role,
+              displayName: pp.displayName,
+              vpas: [(v:VPA)-[:OF_PROFILE]->(pp) | {
+                id: v.vpaId,
+                version: coalesce(v.version, 1),
+                state: v.state,
+                stateTimestamp: toString(v.stateTimestamp),
+                type: v.vpaType,
+                cellId: v.cellId
+              }]
+            }]                               AS profiles
      ORDER BY p.name`,
   );
 
-  const tenants: TenantRow[] = rows.map((r) => ({
-    id: r.id,
-    version: 1,
-    properties: {
-      displayName: r.name,
-      organization: r.legalName ?? r.name,
-      ehdsParticipantType: r.type,
-      role: r.type,
-      did: r.id,
-      jurisdiction: r.jurisdiction ?? "—",
-    },
-    participantProfiles: [],
-  }));
+  const tenants: TenantRow[] = rows.map((r) => {
+    const profiles =
+      Array.isArray(r.profiles) && r.profiles.length > 0
+        ? r.profiles.map((pp) => ({
+            id: pp.id ?? `${r.id}-profile`,
+            version: pp.version ?? 1,
+            identifier: pp.identifier ?? r.id,
+            tenantId: pp.tenantId ?? r.id,
+            // CFM's API key is an opaque dataspace-role UUID; for the Neo4j
+            // fallback we synthesise a stable label so the UI's
+            // Object.values(participantRoles).flat() still renders something.
+            participantRoles: { "neo4j-fallback": [pp.role ?? "—"] },
+            vpas: (pp.vpas ?? []).map((v) => ({
+              id: v.id ?? "",
+              version: v.version ?? 1,
+              state: v.state ?? "unknown",
+              stateTimestamp: v.stateTimestamp ?? "",
+              type: v.type ?? "",
+              cellId: v.cellId ?? "",
+            })),
+            properties: {},
+          }))
+        : // No :ParticipantProfile seeded yet — synthesise one minimal entry
+          // so the operator UI still shows the tenant as having a presence
+          // (mirrors the synthetic-profile fallback used on the CFM path).
+          [
+            {
+              id: `${r.id}-synthetic`,
+              version: 1,
+              identifier: r.id,
+              tenantId: r.id,
+              participantRoles: { "neo4j-fallback": [r.type] },
+              vpas: [],
+              properties: { synthetic: true } as Record<string, unknown>,
+            },
+          ];
+
+    return {
+      id: r.id,
+      version: 1,
+      properties: {
+        displayName: r.name,
+        organization: r.legalName ?? r.name,
+        ehdsParticipantType: r.type,
+        role: r.type,
+        did: r.id,
+        jurisdiction: r.jurisdiction ?? "—",
+      },
+      participantProfiles: profiles,
+    };
+  });
 
   const participants: ParticipantRow[] = rows.map((r) => ({
     "@id": r.id,
@@ -116,6 +196,28 @@ export async function GET() {
           );
         } catch {
           /* no profiles yet */
+        }
+        // CFM may return zero profiles even though the tenant is fully
+        // registered (Azure deployment hasn't run the participant-profile
+        // seed yet). The operator UI counts every tenant that has at
+        // least one profile entry as "active", so synthesize a minimal
+        // entry from the tenant's own metadata when CFM gives us nothing.
+        // Marker `synthetic: true` lets future deltas distinguish these
+        // from real CFM-provisioned profiles.
+        if (!Array.isArray(profiles) || profiles.length === 0) {
+          profiles = [
+            {
+              id: `${t.id}-synthetic`,
+              participantContextId: t.id,
+              displayName: t.properties?.displayName ?? t.id,
+              role:
+                t.properties?.ehdsParticipantType ??
+                t.properties?.role ??
+                "Unknown",
+              vpas: [],
+              synthetic: true,
+            },
+          ];
         }
         return { ...t, participantProfiles: profiles };
       }),
