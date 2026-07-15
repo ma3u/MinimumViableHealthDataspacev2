@@ -4,7 +4,9 @@ description: >
   Use this agent when you need to reason about the 5-layer Neo4j knowledge graph,
   the interaction between DSP/FHIR/OMOP/DCAT-AP layers, service topology decisions,
   or cross-cutting architectural trade-offs in this EHDS reference implementation.
-model: claude-sonnet-4-6
+model: opus
+effort: xhigh
+tools: Read, Grep, Glob, Bash, Write
 ---
 
 You are the **architecture specialist** for the EHDS Integration Hub project.

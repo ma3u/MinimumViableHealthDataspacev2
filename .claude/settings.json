@@ -1,4 +1,5 @@
 {
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
   "permissions": {
     "allow": [
       "Bash(git status)",
@@ -11,6 +12,7 @@
       "Bash(git commit:*)",
       "Bash(git push:*)",
       "Bash(git pull:*)",
+      "Bash(git fetch:*)",
       "Bash(gh run list:*)",
       "Bash(gh run view:*)",
       "Bash(gh issue list:*)",
@@ -23,12 +25,14 @@
       "Bash(npm run lint:*)",
       "Bash(npm test:*)",
       "Bash(npm run test:*)",
+      "Bash(npm audit:*)",
       "Bash(npx tsc:*)",
       "Bash(npx eslint:*)",
       "Bash(npx vitest:*)",
       "Bash(npx next:*)",
       "Bash(npx playwright:*)",
       "Bash(grep:*)",
+      "Bash(rg:*)",
       "Bash(find:*)",
       "Bash(ls:*)",
       "Bash(cat:*)",
@@ -39,6 +43,8 @@
       "Bash(mkdir -p:*)",
       "Bash(cp:*)",
       "Bash(mv:*)",
+      "Bash(jq:*)",
+      "Bash(shellcheck:*)",
       "Bash(docker ps:*)",
       "Bash(docker images:*)",
       "Bash(docker logs:*)",
@@ -55,6 +61,10 @@
       "Bash(kubectl config:*)",
       "Bash(kubectl rollout status:*)",
       "Bash(kubectl apply:*)",
+      "Bash(az account show:*)",
+      "Bash(az containerapp list:*)",
+      "Bash(az containerapp show:*)",
+      "Bash(az containerapp logs show:*)",
       "Bash(curl -s http://localhost:*)",
       "Bash(curl -s https://github.com:*)",
       "Bash(python3:*)",
@@ -64,10 +74,41 @@
       "Bash(./scripts/run-ehds-tests.sh)",
       "WebFetch(domain:github.com)"
     ],
-    "deny": [
+    "ask": [
+      "Bash(rm -rf:*)",
+      "Bash(git reset --hard:*)",
+      "Bash(git clean:*)",
+      "Bash(git push --force:*)",
       "Bash(kubectl delete:*)",
+      "Bash(helm uninstall:*)",
+      "Bash(terraform destroy:*)",
+      "Bash(az group delete:*)",
+      "Bash(az containerapp delete:*)",
+      "Bash(./scripts/azure/teardown.sh)"
+    ],
+    "deny": [
+      "Read(./.env)",
+      "Read(./.env.*)",
+      "Read(./**/.env)",
+      "Read(./**/.env.*)",
+      "Read(./**/*.pem)",
+      "Read(./**/*.key)",
+      "Read(./**/id_rsa)",
       "Bash(kubectl drain:*)",
       "Bash(docker system prune:*)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/pretooluse-guard.sh"
+          }
+        ]
+      }
     ]
   }
 }
