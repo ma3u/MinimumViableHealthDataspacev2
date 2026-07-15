@@ -1,0 +1,110 @@
+{
+  "participants": [
+    {
+      "participantId": "did:web:alpha-klinik.de:participant",
+      "name": "AlphaKlinik Berlin",
+      "participantType": "DATA_HOLDER",
+      "source": "seed",
+      "walletType": "business",
+      "country": "DE",
+      "dspCatalogUrl": "https://ehds.mabu.red/api/mock-dsp/alpha-klinik",
+      "crawlerEnabled": true,
+      "onboardedAt": "2026-01-15T09:00:00Z",
+      "datasetCount": 6
+    },
+    {
+      "participantId": "did:web:pharmaco.de:research",
+      "name": "PharmaCo Research AG",
+      "participantType": "DATA_USER",
+      "source": "seed",
+      "walletType": "business",
+      "country": "DE",
+      "dspCatalogUrl": "https://ehds.mabu.red/api/mock-dsp/pharmaco-research",
+      "crawlerEnabled": true,
+      "onboardedAt": "2026-02-01T09:00:00Z",
+      "datasetCount": 2
+    },
+    {
+      "participantId": "did:web:medreg.de:hdab",
+      "name": "MedReg DE",
+      "participantType": "HDAB",
+      "source": "seed",
+      "walletType": "business",
+      "country": "DE",
+      "dspCatalogUrl": null,
+      "crawlerEnabled": false,
+      "onboardedAt": "2026-01-10T09:00:00Z",
+      "datasetCount": 0
+    },
+    {
+      "participantId": "did:web:lmc.nl:clinic",
+      "name": "Limburg Medical Centre",
+      "participantType": "DATA_HOLDER",
+      "source": "seed",
+      "walletType": "business",
+      "country": "NL",
+      "dspCatalogUrl": "https://ehds.mabu.red/api/mock-dsp/limburg-mc",
+      "crawlerEnabled": true,
+      "onboardedAt": "2026-01-20T09:00:00Z",
+      "datasetCount": 5
+    },
+    {
+      "participantId": "did:web:irs.fr:hdab",
+      "name": "Institut de Recherche Santé",
+      "participantType": "HDAB",
+      "source": "seed",
+      "walletType": "business",
+      "country": "FR",
+      "dspCatalogUrl": null,
+      "crawlerEnabled": false,
+      "onboardedAt": "2026-01-12T09:00:00Z",
+      "datasetCount": 0
+    },
+    {
+      "participantId": "did:web:riverside-general.example:clinic",
+      "name": "Riverside General",
+      "participantType": "DATA_HOLDER",
+      "source": "dcp",
+      "walletType": "business",
+      "country": "DE",
+      "dspCatalogUrl": "https://ehds.mabu.red/api/mock-dsp/riverside-general",
+      "crawlerEnabled": true,
+      "onboardedAt": "2026-05-02T14:30:00Z",
+      "datasetCount": 9
+    },
+    {
+      "participantId": "did:web:nordsee-klinikum.example:participant",
+      "name": "Nordsee Klinikum",
+      "participantType": "DATA_HOLDER",
+      "source": "business-wallet",
+      "walletType": "business",
+      "country": "DE",
+      "dspCatalogUrl": "https://ehds.mabu.red/api/mock-dsp/nordsee-klinikum",
+      "crawlerEnabled": true,
+      "onboardedAt": "2026-05-20T10:00:00Z",
+      "datasetCount": 4
+    },
+    {
+      "participantId": "did:web:wallet.example:maria",
+      "name": "Maria's Private Wallet",
+      "participantType": "PATIENT",
+      "source": "private-wallet",
+      "walletType": "private",
+      "country": "DE",
+      "dspCatalogUrl": null,
+      "crawlerEnabled": false,
+      "onboardedAt": "2026-06-04T08:15:00Z",
+      "datasetCount": 1
+    }
+  ],
+  "summary": {
+    "total": 8,
+    "crawlable": 5,
+    "bySource": {
+      "seed": 5,
+      "dcp": 1,
+      "business-wallet": 1,
+      "private-wallet": 1
+    }
+  }
+}

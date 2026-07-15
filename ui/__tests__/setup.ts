@@ -2,6 +2,46 @@ import "@testing-library/jest-dom/vitest";
 import { cleanup } from "@testing-library/react";
 import { afterEach, vi } from "vitest";
 
+// Node ≥22 ships its own globalThis.localStorage/sessionStorage (backed by
+// --localstorage-file) whose getters shadow jsdom's and throw SecurityError
+// on access. Replace both with an in-memory Storage polyfill.
+class MemoryStorage implements Storage {
+  private store = new Map<string, string>();
+  get length() {
+    return this.store.size;
+  }
+  clear() {
+    this.store.clear();
+  }
+  getItem(key: string) {
+    return this.store.has(key) ? this.store.get(key)! : null;
+  }
+  key(index: number) {
+    return [...this.store.keys()][index] ?? null;
+  }
+  removeItem(key: string) {
+    this.store.delete(key);
+  }
+  setItem(key: string, value: string) {
+    this.store.set(key, String(value));
+  }
+}
+for (const name of ["localStorage", "sessionStorage"] as const) {
+  const storage = new MemoryStorage();
+  Object.defineProperty(globalThis, name, {
+    value: storage,
+    configurable: true,
+    writable: true,
+  });
+  if (typeof window !== "undefined" && window !== (globalThis as unknown)) {
+    Object.defineProperty(window, name, {
+      value: storage,
+      configurable: true,
+      writable: true,
+    });
+  }
+}
+
 // Cleanup after each test
 afterEach(() => {
   cleanup();
