@@ -16,6 +16,7 @@ Groom with `/plan`. Token budget per ADR-026: keep this index small.
 - [issue-11-weekly-demo-reset](future/issue-11-weekly-demo-reset.md) — weekly baseline refresh (ADR-014)
 - [eudi-wallet-cluster](future/eudi-wallet-cluster.md) — issues #22 / #24 / #80, Phase 27
 - [phase-26g-deferred](future/phase-26g-deferred.md) — federation observability leftovers
+- [issue-97-edc-upgrade](future/issue-97-edc-upgrade.md) — EDC v0.18.0 upgrade + image pinning
 
 ## done/
 
