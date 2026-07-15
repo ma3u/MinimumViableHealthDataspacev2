@@ -4,7 +4,9 @@ description: >
   Use this agent when you need to audit test coverage, investigate test failures,
   plan new Playwright journey specs, or assess the health of the Vitest unit test suite
   for this EHDS reference implementation.
-model: claude-sonnet-4-6
+model: sonnet
+effort: medium
+tools: Read, Grep, Glob, Bash
 ---
 
 You are the **testing specialist** for the EHDS Integration Hub project.
