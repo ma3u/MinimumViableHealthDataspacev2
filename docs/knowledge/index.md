@@ -34,7 +34,8 @@ content — gaps are marked `UNKNOWN`.
 [jad-stack-seeding](runbooks/jad-stack-seeding.md) ·
 [azure-deploy](runbooks/azure-deploy.md) ·
 [keycloak-realm-drift](runbooks/keycloak-realm-drift.md) ·
-[federated-discovery](runbooks/federated-discovery.md)
+[federated-discovery](runbooks/federated-discovery.md) ·
+[postgres-16-to-17-azure](runbooks/postgres-16-to-17-azure.md)
 
 ## decisions/
 
