@@ -1,8 +1,8 @@
-# Issue #26 — HealthDCAT-AP metadata validation (SHACL) + source-level data quality (DQV)
+# HealthDCAT-AP metadata validation (SHACL) + source-level data quality (DQV)
 
-**Issue:** [#26 — RDF Validate HealthDCAT-AP with SHACL and validate the structure ShEx](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/26)
-**Status:** planned (future) · **Depends on:** ADR-003 (HealthDCAT-AP alignment), ADR-020 (federated discovery)
-**Motivation (from the issue):** quality measures must run **at the data source, before sharing**, so
+* **Issue:** [#26 — RDF Validate HealthDCAT-AP with SHACL and validate the structure ShEx](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/26)
+* **Status:** planned (future) · **Depends on:** ADR-003 (HealthDCAT-AP alignment), ADR-020 (federated discovery)
+* **Motivation (from the issue):** quality measures must run **at the data source, before sharing**, so
 researchers get an honest assessment of the data in the W3C DCAT catalog.
 
 ## Decision: SHACL primary, ShEx optional spike
