@@ -7,11 +7,20 @@ tags: [runbook, postgres, azure, migration, issue-97]
 timestamp: 2026-07-15T00:00:00Z
 ---
 
-Azure runs `postgres:16.14` (pinned, ADR-029) with its data directory on ACA
-persistent storage (ADR-017); local dev runs 17.x. A major bump cannot be done
-by changing the image tag — PG 17 refuses to start on a 16 data directory.
-Dump/restore is the ACA-compatible path (no shell access for `pg_upgrade`
-across versions).
+> **⚠️ CORRECTED after the 2026-07-16 incident** (see
+> [aca-postgres-ephemeral-recovery](aca-postgres-ephemeral-recovery.md)):
+> `mvhd-postgres` data is **EPHEMERAL** — the app template carries an Azure
+> Files mount, but Postgres `initdb` cannot `chmod` on Azure Files, so every
+> revision created with that mount **fails to boot**; the long-running
+> revision that actually served traffic had **no volume mounts**. Any restart
+> or image change loses all data and requires the re-seed procedure. The
+> steps below that assume a persistent share (dump-to-share, PGDATA swap,
+> rollback-to-old-datadir) are therefore INVALID until persistent storage is
+> actually fixed (NFS-backed share or managed PostgreSQL — Phase D decision).
+
+Azure runs `postgres:16` with local dev on 17.x. A major bump cannot be done
+by changing the image tag — and on the current ephemeral setup ANY image
+change is a full data reset (recovery runbook above).
 
 ## Preconditions
 
