@@ -201,13 +201,28 @@ jobs:
           KC_ADMIN_USER=admin
           KC_ADMIN_PASS=admin
 
-          TOKEN=$(curl -sS -X POST \
-            "$KC/realms/master/protocol/openid-connect/token" \
-            -H "Content-Type: application/x-www-form-urlencoded" \
-            -d "username=${KC_ADMIN_USER}&password=${KC_ADMIN_PASS}&grant_type=password&client_id=admin-cli" \
-            | python3 -c "import json,sys; print(json.load(sys.stdin).get('access_token',''))")
+          # A 200 on the master well-known endpoint does not guarantee the
+          # token endpoint is serving yet (observed during ACA replica churn,
+          # 2026-07-17: two consecutive one-shot failures while the endpoint
+          # answered fine minutes later) — so retry the token call itself.
+          TOKEN=""
+          for i in $(seq 1 6); do
+            http=$(curl -sS -o /tmp/kc-token.json -w "%{http_code}" -X POST \
+              "$KC/realms/master/protocol/openid-connect/token" \
+              -H "Content-Type: application/x-www-form-urlencoded" \
+              -d "username=${KC_ADMIN_USER}&password=${KC_ADMIN_PASS}&grant_type=password&client_id=admin-cli" \
+              || echo "000")
+            TOKEN=$(python3 -c "import json,sys; print(json.load(sys.stdin).get('access_token',''))" \
+              < /tmp/kc-token.json 2>/dev/null || true)
+            if [ -n "$TOKEN" ]; then
+              break
+            fi
+            echo "  token attempt $i: HTTP $http, retrying in 10s..."
+            sleep 10
+          done
+          rm -f /tmp/kc-token.json
           if [ -z "$TOKEN" ]; then
-            echo "::error::Could not obtain Keycloak admin token"
+            echo "::error::Could not obtain Keycloak admin token after 6 attempts (last HTTP $http)"
             exit 1
           fi
           echo "::add-mask::$TOKEN"
