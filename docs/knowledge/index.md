@@ -35,7 +35,8 @@ content — gaps are marked `UNKNOWN`.
 [azure-deploy](runbooks/azure-deploy.md) ·
 [keycloak-realm-drift](runbooks/keycloak-realm-drift.md) ·
 [federated-discovery](runbooks/federated-discovery.md) ·
-[postgres-16-to-17-azure](runbooks/postgres-16-to-17-azure.md)
+[postgres-16-to-17-azure](runbooks/postgres-16-to-17-azure.md) ·
+[aca-postgres-ephemeral-recovery](runbooks/aca-postgres-ephemeral-recovery.md)
 
 ## decisions/
 
