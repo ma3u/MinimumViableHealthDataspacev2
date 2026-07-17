@@ -258,45 +258,40 @@ jobs:
           fi
           echo "edcv realm imported and reachable (HTTP $VERIFY)"
 
-      # ── Step 2: Run bootstrap job (Vault init + keys) ──
-      - name: Run bootstrap job
+      # ── Step 2: Run Vault bootstrap job (Vault init + keys) ──
+      # Job names must match scripts/azure/env.sh (NEO4J_SEED_JOB etc.) —
+      # earlier revisions used phantom names (mvhd-bootstrap-job,
+      # mvhd-schema-job, mvhd-seed-job) that never existed, so every step
+      # silently "skipped" and Neo4j was never re-seeded (found 2026-07-17).
+      - name: Run Vault bootstrap job
         run: |
-          echo "=== Running bootstrap job ==="
+          echo "=== Running Vault bootstrap job ==="
           az containerapp job start \
-            --name mvhd-bootstrap-job \
-            --resource-group ${{ env.RESOURCE_GROUP }} 2>/dev/null || \
-          echo "Bootstrap job not found or already running — skipping"
+            --name mvhd-vault-bootstrap \
+            --resource-group ${{ env.RESOURCE_GROUP }} || \
+          echo "::warning::mvhd-vault-bootstrap start failed"
 
       - name: Wait for bootstrap
         run: sleep 30
 
-      # ── Step 3: Run schema init job (Neo4j constraints + indexes) ──
-      - name: Run schema init job
+      # ── Step 3: Run Neo4j seed job (schema + all seed cyphers) ──
+      # mvhd-neo4j-seed applies init-schema.cypher first, then every seed
+      # file (datasets, credentials, trust center, compliance matrix, NLQ
+      # glossary) — there is no separate schema job.
+      - name: Run Neo4j seed job
         run: |
-          echo "=== Running schema init job ==="
+          echo "=== Running Neo4j seed job ==="
           az containerapp job start \
-            --name mvhd-schema-job \
-            --resource-group ${{ env.RESOURCE_GROUP }} 2>/dev/null || \
-          echo "Schema job not found — skipping"
-
-      - name: Wait for schema
-        run: sleep 20
-
-      # ── Step 4: Run seed job (synthetic data + EHDS credentials) ──
-      - name: Run seed job
-        run: |
-          echo "=== Running seed job ==="
-          az containerapp job start \
-            --name mvhd-seed-job \
-            --resource-group ${{ env.RESOURCE_GROUP }} 2>/dev/null || \
-          echo "Seed job not found — skipping"
+            --name mvhd-neo4j-seed \
+            --resource-group ${{ env.RESOURCE_GROUP }} || \
+          echo "::warning::mvhd-neo4j-seed start failed"
 
       - name: Wait for seed completion
         run: |
-          echo "Waiting for seed job to complete (up to 5 minutes)..."
-          for i in $(seq 1 30); do
+          echo "Waiting for seed job to complete (up to 10 minutes)..."
+          for i in $(seq 1 60); do
             status=$(az containerapp job execution list \
-              --name mvhd-seed-job \
+              --name mvhd-neo4j-seed \
               --resource-group ${{ env.RESOURCE_GROUP }} \
               --query "[0].properties.status" -o tsv 2>/dev/null || echo "unknown")
             if [ "$status" = "Succeeded" ]; then
@@ -304,6 +299,34 @@ jobs:
               break
             elif [ "$status" = "Failed" ]; then
               echo "::warning::Seed job failed"
+              break
+            fi
+            echo "  attempt $i: status=$status"
+            sleep 10
+          done
+
+      # ── Step 4: Run FHIR loader job (127 synthetic patients) ──
+      - name: Run FHIR loader job
+        run: |
+          echo "=== Running FHIR loader job ==="
+          az containerapp job start \
+            --name mvhd-fhir-loader \
+            --resource-group ${{ env.RESOURCE_GROUP }} || \
+          echo "::warning::mvhd-fhir-loader start failed"
+
+      - name: Wait for FHIR loader completion
+        run: |
+          echo "Waiting for FHIR loader to complete (up to 10 minutes)..."
+          for i in $(seq 1 60); do
+            status=$(az containerapp job execution list \
+              --name mvhd-fhir-loader \
+              --resource-group ${{ env.RESOURCE_GROUP }} \
+              --query "[0].properties.status" -o tsv 2>/dev/null || echo "unknown")
+            if [ "$status" = "Succeeded" ]; then
+              echo "FHIR loader completed successfully"
+              break
+            elif [ "$status" = "Failed" ]; then
+              echo "::warning::FHIR loader failed"
               break
             fi
             echo "  attempt $i: status=$status"
