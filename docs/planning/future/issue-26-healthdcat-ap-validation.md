@@ -27,6 +27,25 @@ researchers get an honest assessment of the data in the W3C DCAT catalog.
 | Validation            | None. Enricher does Pydantic envelope checks only (`services/catalog-enricher/src/models.py`); ADR-020 made the interface deliberately loose. `conformsTo` is an unchecked string                                              |
 | Quality metrics       | DQV appears only in docs/diagrams (`ui/src/app/docs/architecture/page.tsx:18`); nothing in Neo4j or services                                                                                                                   |
 
+## Existing building blocks (inventory 2026-07-17)
+
+Quality/validation pieces already implemented — none at the RDF/SHACL level, but real head starts:
+
+- **Graph structural validation** — `GET /api/graph/validate` (J160–J164): required props per
+  label, edge rules, orphans, unknown labels. Guards the property graph; SHACL will guard the
+  exported RDF. Complementary, keep both.
+- **`DataQualityLabelCredential`** — issued by issuerservice, seeded + linked to HealthDatasets
+  (`neo4j/register-ehds-credentials.cypher`), requirable by ODRL policies, NLQ-discoverable.
+  Currently _asserted, not measured_ — Phase 3 DQV measurements should become its backing
+  evidence (measured quality feeding credential issuance).
+- **Cohort data quality** (issue #19) — `computeCohortDataQuality` in the proxy: SNOMED/RxNorm
+  coding coverage %, global + cohort-scoped, in NLQ responses. First DQV dimension, already
+  computed — Phase 3 re-publishes it in the catalog.
+- **k-anonymity suppression** (issue #8) — `aggregateSuppressed`/`contributor_k_violation` on
+  `QueryAuditEvent`. Second ready-made DQV dimension.
+- **Ingest envelope validation** — enricher Pydantic checks + `unknownThemes[]` metric.
+- **JSON-LD export** — both endpoints exist; Phase 1 only adds shapes + validator over them.
+
 ## Phases
 
 ### Phase 0 — Serialization hygiene (prerequisite, ~1 PR)
