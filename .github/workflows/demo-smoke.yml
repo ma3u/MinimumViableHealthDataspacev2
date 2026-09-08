@@ -85,7 +85,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: ZAP baseline scan
-        uses: zaproxy/action-baseline@v0.14.0
+        uses: zaproxy/action-baseline@v0.15.0
         with:
           target: ${{ env.DEMO_URL }}
           cmd_options: "-m 2"
