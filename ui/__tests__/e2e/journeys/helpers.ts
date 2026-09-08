@@ -6,8 +6,20 @@
  *
  * Note: Protected pages (/admin, /data/*, /negotiate, /credentials,
  * /compliance) redirect unauthenticated users to /auth/signin.
- * Journey tests use PUBLIC pages for UI assertions and /api/* routes
- * for data-level assertions (API routes have no auth middleware).
+ *
+ * API routes are NOT covered by middleware (its matcher excludes /api), but
+ * most of them call `requireAuth()` themselves and answer 401 without a
+ * session. The older claim here — that /api/* needs no authentication — is why
+ * specs were written to assert on protected routes without logging in, and why
+ * the post-reset smoke job failed on every run for two months (issue #115).
+ *
+ * Public today: /api/graph, /api/patient.
+ * Requires a session: /api/graph/validate, /api/catalog, /api/credentials,
+ * /api/compliance, /api/analytics, and /api/trust-center (which additionally
+ * requires TRUST_CENTER_OPERATOR or EDC_ADMIN).
+ *
+ * If a spec asserts on any of the latter, call `loginAs()` first — `edcadmin`
+ * satisfies all of them.
  */
 import { type Page, expect, test } from "@playwright/test";
 
@@ -59,10 +71,26 @@ export async function waitForDataLoad(page: Page) {
   }
 }
 
-/** Helper to GET a JSON API route. */
+/**
+ * GET a JSON API route, failing with the status and body when it does not.
+ *
+ * The previous implementation asserted `expect(response.ok()).toBe(true)`,
+ * which reports "expected true, received false" and nothing else. The smoke
+ * job printed that 17 times a run for two months while the actual answer —
+ * `401 Unauthorized` — was never shown.
+ */
 export async function apiGet(page: Page, path: string) {
   const response = await page.request.get(path);
-  expect(response.ok()).toBe(true);
+  if (!response.ok()) {
+    const body = (await response.text().catch(() => "")).slice(0, 200);
+    throw new Error(
+      `GET ${path} → ${response.status()} ${response.statusText()}` +
+        (body ? ` — ${body}` : "") +
+        (response.status() === 401 || response.status() === 403
+          ? '\n  This route requires a session. Call loginAs(page, "edcadmin", "edcadmin") first.'
+          : ""),
+    );
+  }
   return response.json();
 }
 
@@ -121,16 +149,68 @@ export async function loginAs(page: Page, username: string, password: string) {
   await page.reload({ waitUntil: "networkidle" });
 }
 
+/**
+ * Log in as `edcadmin`, the only persona whose roles satisfy every protected
+ * API route these journeys touch (EDC_ADMIN covers /api/trust-center's
+ * TRUST_CENTER_OPERATOR|EDC_ADMIN check as well).
+ *
+ * Called per-test rather than in a blanket `beforeEach`: only about a third of
+ * the journey tests assert on protected routes, and authenticating the rest
+ * would both cost 3x the OIDC round-trips and destroy the signal that the
+ * public routes really are public.
+ */
+export async function loginAsAdmin(page: Page) {
+  try {
+    await loginAs(page, "edcadmin", "edcadmin");
+  } catch (err) {
+    // Deliberately not `test.skip` on a Keycloak problem. A login that stops
+    // working after a demo reset is the single most important thing the
+    // post-reset smoke job can catch; skipping would turn that into a green
+    // run, which is how issue #115 stayed invisible for two months.
+    throw new Error(
+      `loginAs("edcadmin") failed against ${
+        process.env.PLAYWRIGHT_BASE_URL || "http://localhost:3000"
+      }.\n` +
+        `  Check the Keycloak 'edcv' realm has the edcadmin user with the ` +
+        `EDC_ADMIN role: ./scripts/provision-keycloak-sso.sh\n` +
+        `  Original error: ${(err as Error).message}`,
+    );
+  }
+}
+
 /* ── Service-availability checks ─────────────────────────────── */
 
-/** Skip the current test if Neo4j is unreachable (API returns non-200). */
-export async function skipIfNeo4jDown(page: Page) {
+/**
+ * Skip the current test if Neo4j is unreachable.
+ *
+ * Pass the route the test is about to call. The default, `/api/graph`, is
+ * public — probing it while the test then calls a protected route is what made
+ * this guard useless: the probe returned 200, the test proceeded, and the real
+ * 401 surfaced as an assertion failure (issue #115).
+ *
+ * A 401/403 is a broken *test*, not a broken *environment*, so it throws rather
+ * than skipping. Skipping there would turn a spec that never logs in into a
+ * permanently-green no-op, which is the same "no signal" failure in a nicer
+ * colour.
+ */
+export async function skipIfNeo4jDown(page: Page, path = "/api/graph") {
+  let res;
   try {
-    const res = await page.request.get("/api/graph", { timeout: 5_000 });
-    if (!res.ok()) test.skip(true, "Neo4j unavailable");
+    res = await page.request.get(path, { timeout: 5_000 });
   } catch {
-    test.skip(true, "Neo4j unavailable");
+    test.skip(true, `Neo4j unavailable (${path} unreachable)`);
+    return;
   }
+  if (res.ok()) return;
+  if (res.status() === 401 || res.status() === 403) {
+    throw new Error(
+      `${path} returned ${res.status()} — this test is not authenticated.\n` +
+        `  Call loginAs(page, "edcadmin", "edcadmin") before asserting on ` +
+        `protected API routes. Not skipping: an auth gap is a test defect, ` +
+        `not an outage.`,
+    );
+  }
+  test.skip(true, `Neo4j unavailable (${path} → ${res.status()})`);
 }
 
 /** Skip the current test if Keycloak is unreachable. */
