@@ -27,7 +27,7 @@
   },
   "dependencies": {
     "@scalar/api-reference-react": "^0.9.66",
-    "lucide-react": "^0.378.0",
+    "lucide-react": "^1.41.0",
     "mermaid": "^11.13.0",
     "neo4j-driver": "^5.18.0",
     "next": "^15.5.14",
