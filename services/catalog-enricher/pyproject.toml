@@ -5,7 +5,7 @@ description = "Consumes raw DSP catalog JSON-LD from NATS and upserts HealthDCAT
 requires-python = ">=3.12"
 dependencies = [
   "nats-py==2.7.0",
-  "neo4j==5.23.0",
+  "neo4j==6.3.0",
   "pydantic==2.8.2",
   "prometheus-client==0.21.0",
 ]
