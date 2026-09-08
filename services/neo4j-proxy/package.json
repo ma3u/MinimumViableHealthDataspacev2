@@ -14,7 +14,7 @@
     "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
-    "express": "^4.21.2",
+    "express": "^5.2.1",
     "express-rate-limit": "^8.7.0",
     "neo4j-driver": "^5.28.1",
     "pg": "^8.23.0"
