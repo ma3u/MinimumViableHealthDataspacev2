@@ -56,8 +56,14 @@ updates:
       time: "04:00"
       timezone: Europe/Berlin
     groups:
-      actions:
+      # `update-types` is the important half. Without it this group swept every
+      # major into one PR: #140 arrived as 15 major bumps at once (checkout
+      # 4->7, setup-node 4->7, upload-artifact 4->7, azure/login 2->3,
+      # test-reporter 1->3, the docker actions 3->4) and was unreviewable, so it
+      # was closed unmerged. Majors now get an individual PR each.
+      actions-patch-minor:
         patterns: ["*"]
+        update-types: [minor, patch]
     labels: [dependencies, ci]
 
   # ── Container base images ──
@@ -91,4 +97,12 @@ updates:
       - /services/catalog-enricher
     schedule:
       interval: monthly
+    groups:
+      # This block was missing entirely, so Dependabot applied its own default
+      # grouping and produced #139: a single PR mixing pytest 8->9 and
+      # setuptools 81->83 with three harmless minors. Neither half could be
+      # taken without the other, so it was closed and the minors lost a cycle.
+      python-patch-minor:
+        patterns: ["*"]
+        update-types: [minor, patch]
     labels: [dependencies, scripts]
