@@ -141,12 +141,17 @@ test.describe("R · Multi-User Login — Keycloak authentication", () => {
     } can log in and role badge is visible`, async ({ page }) => {
       await loginAs(page, user.username, user.password);
 
-      // Role chip or username should be visible in nav
+      // Role chip or username should be visible in nav.
+      // `.first()`: the nav renders the role label in more than one place for
+      // some personas (regulator shows "HDAB Authority" twice), and without
+      // this the locator resolves to 2 elements and Playwright fails on strict
+      // mode — which reads as a login failure but is not one (J184).
       const nav = page.locator("nav");
       await expect(
         nav
           .getByText(new RegExp(user.roleLabel, "i"))
-          .or(nav.getByText(user.username, { exact: false })),
+          .or(nav.getByText(user.username, { exact: false }))
+          .first(),
       ).toBeVisible({ timeout: T });
 
       await logout(page);
@@ -240,7 +245,10 @@ test.describe("R · Patient graph — deep-link + filter presets", () => {
     await page.goto("/graph?persona=patient");
 
     await expect(
-      page.getByText("Filter by question", { exact: false }),
+      // The section heading is "Ask the graph" (src/app/graph/page.tsx).
+      // "Filter by question" survives only as a code comment there — the
+      // label was renamed and the unit tests were updated, these were not.
+      page.getByText("Ask the graph", { exact: false }).first(),
     ).toBeVisible({ timeout: T });
 
     for (const preset of [

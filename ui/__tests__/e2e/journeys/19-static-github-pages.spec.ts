@@ -1243,7 +1243,8 @@ test.describe("S · Persona graph views (static)", () => {
 
   test("J307 — graph sidebar shows filter preset buttons", async ({ page }) => {
     await gotoAs(page, "/graph", "researcher");
-    await expect(page.getByText("Filter by question")).toBeVisible({
+    // Heading is "Ask the graph" — see the note in 18-user-login-roles.
+    await expect(page.getByText("Ask the graph").first()).toBeVisible({
       timeout: T,
     });
   });

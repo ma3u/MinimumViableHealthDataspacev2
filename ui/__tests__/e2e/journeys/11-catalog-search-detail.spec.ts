@@ -4,10 +4,40 @@
  * Verifies the catalog search/filter functionality, dataset card expansion,
  * metadata detail panels, HealthDCAT-AP fields, and action buttons.
  *
- * /catalog is PUBLIC. All tests use mock fallback data.
+ * The /catalog PAGE is public; the /api/catalog ROUTE is not — it calls
+ * requireAuth() and answers 401 without a session. J89 and J90 assert on the
+ * API and so log in first (issue #115); the page-level tests do not.
  */
-import { test, expect } from "@playwright/test";
-import { T, expectHeading, waitForDataLoad, apiGet } from "./helpers";
+import { test, expect, type Page } from "@playwright/test";
+import {
+  T,
+  expectHeading,
+  waitForDataLoad,
+  apiGet,
+  loginAsAdmin,
+} from "./helpers";
+
+/**
+ * Expand the Synthea dataset card and open its HealthDCAT-AP detail modal.
+ *
+ * The catalog redesign moved Publisher / Legal Basis / Data Model Diagram /
+ * Download DCAT-AP out of the expanded card and into this modal, behind the
+ * "View dataset details" button. J84–J88 were still asserting on the old
+ * in-card layout (issue #115).
+ */
+async function openDatasetDetail(page: Page) {
+  await page.goto("/catalog");
+  await expectHeading(page, "Dataset Catalog");
+  await waitForDataLoad(page);
+  await page
+    .getByText("Synthea Synthetic FHIR R4 Patient Cohort")
+    .first()
+    .click();
+  await page
+    .getByRole("button", { name: "View dataset details" })
+    .first()
+    .click();
+}
 
 test.describe("K · Catalog Search & Dataset Detail", () => {
   /* ── J82: Catalog has a search/filter input ────────────── */
@@ -20,7 +50,7 @@ test.describe("K · Catalog Search & Dataset Detail", () => {
     await expect(searchInput).toBeVisible({ timeout: T });
     await expect(searchInput).toHaveAttribute(
       "placeholder",
-      /filter by title|description|theme/i,
+      /search datasets/i,
     );
   });
 
@@ -54,33 +84,19 @@ test.describe("K · Catalog Search & Dataset Detail", () => {
   });
 
   /* ── J84: Dataset card shows publisher info ────────────── */
-  test("J84 — Expanded dataset card shows publisher information", async ({
+  test("J84 — Dataset detail modal shows publisher information", async ({
     page,
   }) => {
-    await page.goto("/catalog");
-    await expectHeading(page, "Dataset Catalog");
-    await waitForDataLoad(page);
+    await openDatasetDetail(page);
 
-    // Click on first dataset to expand
-    const firstCard = page.getByText(/Synthea|FHIR|Synthetic/i).first();
-    await firstCard.click();
-
-    // Expanded view should show publisher info
     await expect(page.getByText(/publisher/i).first()).toBeVisible({
       timeout: T,
     });
   });
 
   /* ── J85: Dataset card shows legal basis ───────────────── */
-  test("J85 — Expanded dataset card shows legal basis", async ({ page }) => {
-    await page.goto("/catalog");
-    await expectHeading(page, "Dataset Catalog");
-    await waitForDataLoad(page);
-
-    await page
-      .getByText("Synthea Synthetic FHIR R4 Patient Cohort")
-      .first()
-      .click();
+  test("J85 — Dataset detail modal shows legal basis", async ({ page }) => {
+    await openDatasetDetail(page);
 
     await expect(page.getByText(/legal basis/i).first()).toBeVisible({
       timeout: T,
@@ -106,35 +122,21 @@ test.describe("K · Catalog Search & Dataset Detail", () => {
   });
 
   /* ── J87: Dataset detail has Show Data Model button ────── */
-  test("J87 — Expanded dataset has Show Data Model action", async ({
+  test("J87 — Dataset detail modal has the Data Model Diagram action", async ({
     page,
   }) => {
-    await page.goto("/catalog");
-    await expectHeading(page, "Dataset Catalog");
-    await waitForDataLoad(page);
+    await openDatasetDetail(page);
 
-    await page
-      .getByText("Synthea Synthetic FHIR R4 Patient Cohort")
-      .first()
-      .click();
-
-    await expect(page.getByText(/Show Data Model/i).first()).toBeVisible({
+    await expect(page.getByText(/Data Model Diagram/i).first()).toBeVisible({
       timeout: T,
     });
   });
 
   /* ── J88: Dataset detail has Download DCAT-AP action ───── */
-  test("J88 — Expanded dataset has Download DCAT-AP action", async ({
+  test("J88 — Dataset detail modal has the Download DCAT-AP action", async ({
     page,
   }) => {
-    await page.goto("/catalog");
-    await expectHeading(page, "Dataset Catalog");
-    await waitForDataLoad(page);
-
-    await page
-      .getByText("Synthea Synthetic FHIR R4 Patient Cohort")
-      .first()
-      .click();
+    await openDatasetDetail(page);
 
     await expect(page.getByText(/Download DCAT-AP/i).first()).toBeVisible({
       timeout: T,
@@ -145,6 +147,7 @@ test.describe("K · Catalog Search & Dataset Detail", () => {
   test("J89 — Catalog API datasets include title and publisher", async ({
     page,
   }) => {
+    await loginAsAdmin(page);
     const datasets = await apiGet(page, "/api/catalog");
     expect(datasets.length).toBeGreaterThanOrEqual(10);
 
@@ -163,6 +166,7 @@ test.describe("K · Catalog Search & Dataset Detail", () => {
   test("J90 — Catalog datasets include datasetType classification", async ({
     page,
   }) => {
+    await loginAsAdmin(page);
     const datasets = await apiGet(page, "/api/catalog");
     const withType = datasets.filter(
       (d: { datasetType?: string }) => d.datasetType,
