@@ -37,9 +37,9 @@ JAD/EDC images missing from the matrix on its first run.
 
 ## Component inventory
 
-Declared versions are from `scripts/azure/env.sh` and the compose files. Live ACA
-tags could not be confirmed on 2026-09-08 — the Azure token had expired past the
-4 h PIM cap, so **verify against the running revisions before acting**.
+Declared versions are from `scripts/azure/env.sh` and the compose files; the
+deployed images were read from ACA on 2026-09-08 (`rg-mvhd-dev`, subscription
+**INF-STG-EU_EHDS** — not the default subscription).
 
 | Component           | Declared          | Latest upstream      | Gap                       |
 | ------------------- | ----------------- | -------------------- | ------------------------- |
@@ -51,6 +51,42 @@ tags could not be confirmed on 2026-09-08 — the Azure token had expired past t
 | NATS                | 2.14.3-alpine     | 2.14.6               | 3 patch                   |
 | Vault               | 2.0               | 2.1.0                | 1 minor                   |
 | JAD / EDC ×4        | git SHA `4a7e5bd` | tracked by issue #97 | see #97                   |
+
+## What is actually deployed — and it is not what compose says
+
+**8 of the 15 container apps run `:latest`.** ACA caches `:latest` and will not
+re-pull on restart (CLAUDE.md gotcha #6), so those apps are frozen on whatever
+digest was current when the revision was created — `2026-04-14` for every one.
+
+| App                    | Deployed image                 | Built      |
+| ---------------------- | ------------------------------ | ---------- |
+| mvhd-controlplane      | `acr/jad-controlplane:latest`  | 2026-04-14 |
+| mvhd-identityhub       | `acr/jad-identity-hub:latest`  | 2026-04-14 |
+| mvhd-dp-fhir / dp-omop | `acr/jad-dataplane:latest`     | 2026-04-14 |
+| mvhd-issuerservice     | `acr/jad-issuerservice:latest` | 2026-04-14 |
+| mvhd-provision-mgr     | `acr/cfm-pmanager:latest`      | 2026-04-14 |
+| mvhd-tenant-mgr        | `acr/cfm-tmanager:latest`      | 2026-04-14 |
+| mvhd-vault             | `acr/vault:latest`             | 2026-04-14 |
+| mvhd-keycloak          | `acr/keycloak:26.6.4`          | 2026-07-16 |
+| mvhd-postgres          | `acr/postgres:16.14`           | 2026-07-16 |
+| mvhd-neo4j             | `acr/neo4j:5.26.28-community`  | 2026-07-16 |
+
+Two consequences, both more urgent than any version bump:
+
+1. **Vault has a pinned image that was never rolled out.** `acr/vault:2.0` exists,
+   pushed 2026-07-16 by issue #97 Phase A — but `mvhd-vault` still points at
+   `vault:latest` from April. One `az containerapp update --image` closes it.
+2. **The JAD/EDC and CFM repositories carry no version tag at all** — `latest` is
+   their only tag. ADR-029 pinning reached compose and `env.sh`, but not the ACA
+   apps or the ACR repositories. Until they carry a real tag, "which EDC build is
+   in production" has no answer, and any rebuild silently changes production on
+   the next revision.
+
+**Correction to the image CVE table below:** those numbers were measured against
+the _compose-declared_ `ghcr.io/metaform/jad/*:4a7e5bd` images. Production runs
+different, older ACR images, so treat the compose figures as a lower bound.
+`security-scan.yml` now resolves the live image list from ACA at run time and
+scans that too.
 
 ## Measured CVEs
 

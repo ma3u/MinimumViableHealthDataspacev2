@@ -35,6 +35,7 @@ on:
 permissions:
   contents: read
   security-events: write
+  id-token: write # Azure OIDC, for scanning the images actually deployed
 
 concurrency:
   group: security-scan-${{ github.ref }}
@@ -131,13 +132,93 @@ jobs:
           sarif_file: trivy.sarif
           category: trivy-${{ steps.cat.outputs.name }}
 
+  # ── Images actually running on Azure ──
+  # The matrix above scans what docker-compose *declares*. That is not what the
+  # deployed environment runs: on 2026-09-08 compose pinned
+  # ghcr.io/metaform/jad/controlplane:4a7e5bd while ACA ran
+  # acrmvhdehds.azurecr.io/jad-controlplane:latest, an image built 2026-04-14.
+  # Scanning only the compose list would report on images nobody is running.
+  #
+  # This job resolves the live image list from ACA at run time, so it cannot
+  # drift and needs no maintenance when a deployment changes.
+  deployed-image-scan:
+    name: Deployed image CVEs
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    # Needs the Azure federated credentials, which are not available to forks.
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Azure Login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Resolve deployed images
+        id: images
+        run: |
+          az containerapp list -g rg-mvhd-dev \
+            --query "[].properties.template.containers[0].image" -o tsv \
+            | sort -u > deployed-images.txt
+          echo "Deployed images:"
+          sed 's/^/  /' deployed-images.txt
+          {
+            echo "## Deployed images"
+            echo ""
+            echo '```'
+            cat deployed-images.txt
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: ACR login
+        run: az acr login --name acrmvhdehds
+
+      - name: Install Trivy
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y wget apt-transport-https gnupg
+          wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key \
+            | gpg --dearmor | sudo tee /usr/share/keyrings/trivy.gpg >/dev/null
+          echo "deb [signed-by=/usr/share/keyrings/trivy.gpg] https://aquasecurity.github.io/trivy-repo/deb generic main" \
+            | sudo tee /etc/apt/sources.list.d/trivy.list
+          sudo apt-get update -qq
+          sudo apt-get install -y trivy
+
+      - name: Scan each deployed image
+        run: |
+          mkdir -p trivy-out
+          fail=0
+          while IFS= read -r img; do
+            [ -z "$img" ] && continue
+            safe=$(echo "$img" | tr '/:.' '___')
+            echo "::group::$img"
+            # Keep going on a single image failure — one unpullable image must
+            # not hide the results for every other image.
+            trivy image --quiet --scanners vuln --severity CRITICAL,HIGH \
+              --ignore-unfixed --format table "$img" || fail=1
+            trivy image --quiet --scanners vuln --severity CRITICAL,HIGH \
+              --ignore-unfixed --format sarif -o "trivy-out/${safe}.sarif" "$img" || fail=1
+            echo "::endgroup::"
+          done < deployed-images.txt
+          [ "$fail" -eq 0 ] || echo "::warning::at least one deployed image could not be scanned"
+
+      - name: Upload deployed-image SARIF
+        if: always()
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: trivy-out
+          category: trivy-deployed
+
   # ── Explicit gate ──
   # Separate from the scans so the reporting jobs always publish to the Security
   # tab even when the gate fails, and so the gate can be tightened without
   # touching scan configuration.
   gate:
     name: Severity gate
-    needs: [source-sbom, image-scan]
+    needs: [source-sbom, image-scan, deployed-image-scan]
     if: always() && github.event.inputs.fail_on_severity != 'none'
     runs-on: ubuntu-latest
     steps:
@@ -151,7 +232,7 @@ jobs:
 
   summary:
     name: Summary
-    needs: [source-sbom, image-scan]
+    needs: [source-sbom, image-scan, deployed-image-scan]
     if: always()
     runs-on: ubuntu-latest
     steps:
@@ -163,7 +244,8 @@ jobs:
             echo "| Job | Result |"
             echo "| --- | --- |"
             echo "| Source SBOM & CVEs | ${{ needs.source-sbom.result }} |"
-            echo "| Image CVEs | ${{ needs.image-scan.result }} |"
+            echo "| Declared image CVEs | ${{ needs.image-scan.result }} |"
+            echo "| Deployed image CVEs | ${{ needs.deployed-image-scan.result }} |"
             echo ""
             echo "Findings are in the **Security → Code scanning** tab, grouped by"
             echo "\`grype-*\` (source) and \`trivy-*\` (images) categories."
