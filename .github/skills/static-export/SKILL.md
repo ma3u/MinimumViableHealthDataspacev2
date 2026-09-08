@@ -1,20 +1,12 @@
 ---
 name: static-export
 description: Use when the user works on demo personas, localStorage persistence, or GitHub Pages static-export behaviour.
-paths:
-  [
-    "ui/public/mock/**",
-    "ui/src/lib/api.ts",
-    "ui/src/lib/use-demo-persona.ts",
-    "ui/next.config.js",
-    ".github/workflows/pages.yml",
-  ]
 ---
 
 # Static export & demo personas
 
 Sources: `ui/src/lib/use-demo-persona.ts`, `ui/src/lib/auth.ts` (`DEMO_PERSONAS`),
-`.claude/rules/code-style.md` (static export guards), CLAUDE.md gotcha #3.
+`.github/instructions/code-style.instructions.md` (static export guards), AGENTS.md gotcha 3 (static export has no API routes).
 
 ## Procedure
 
@@ -27,9 +19,13 @@ Sources: `ui/src/lib/use-demo-persona.ts`, `ui/src/lib/auth.ts` (`DEMO_PERSONAS`
    (e.g. `patient_profile_patient1.json` for `?patientId=P1`).
 5. E2E coverage in `ui/__tests__/e2e/journeys/19-static-github-pages.spec.ts`
    via the `setPersona(page, username)` localStorage helper — never mock
-   `next-auth/react` in E2E (`.claude/rules/testing.md`).
+   `next-auth/react` in E2E (`.github/instructions/testing.instructions.md`).
 
 ## Output contract
 
 Page works in BOTH modes: live (API route) and static (mock fixture). If it only
 works in one, the task is not done.
+
+---
+
+Mirror of `.claude/skills/static-export/SKILL.md` (Claude Code). Change both together.

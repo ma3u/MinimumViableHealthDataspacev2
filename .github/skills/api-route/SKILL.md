@@ -1,12 +1,11 @@
 ---
 name: api-route
 description: Use when the user adds or modifies a Next.js API route under ui/src/app/api/.
-paths: ["ui/src/app/api/**", "ui/src/lib/api.ts", "ui/public/mock/**"]
 ---
 
 # Next.js API routes
 
-Sources: `.claude/rules/api-conventions.md`, `ui/src/lib/api.ts`, CLAUDE.md gotcha #3.
+Sources: `.github/instructions/api-conventions.instructions.md`, `ui/src/lib/api.ts`, AGENTS.md gotcha 3 (static export has no API routes).
 
 ## Procedure
 
@@ -26,3 +25,7 @@ Sources: `.claude/rules/api-conventions.md`, `ui/src/lib/api.ts`, CLAUDE.md gotc
 ## Output contract
 
 Route file + mock fixture + STATIC_MOCK_MAP entry + unit test — all four, always.
+
+---
+
+Mirror of `.claude/skills/api-route/SKILL.md` (Claude Code). Change both together.

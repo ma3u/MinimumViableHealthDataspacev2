@@ -1,13 +1,12 @@
 ---
 name: neo4j-schema
 description: Use when the user adds nodes, relationships, constraints, or indexes to the Neo4j knowledge graph, or edits any *.cypher file.
-paths: ["neo4j/**", "**/*.cypher", "docs/health-dataspace-graph-schema.md"]
 ---
 
 # Neo4j schema changes
 
 Sources: `neo4j/init-schema.cypher`, `docs/health-dataspace-graph-schema.md`,
-`.claude/rules/code-style.md` (Cypher section).
+`.github/instructions/code-style.instructions.md` (Cypher section).
 
 ## Procedure
 
@@ -30,3 +29,7 @@ Sources: `neo4j/init-schema.cypher`, `docs/health-dataspace-graph-schema.md`,
 - Re-run check: piping the file through cypher-shell twice produces no errors.
 - New labels referenced by the graph explorer also go in
   `ui/src/lib/graph-constants.ts` `LABEL_LAYER` (see graph-visualisation skill).
+
+---
+
+Mirror of `.claude/skills/neo4j-schema/SKILL.md` (Claude Code). Change both together.

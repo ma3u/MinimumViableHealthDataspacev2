@@ -1,18 +1,11 @@
 ---
 name: keycloak-auth
 description: Use when the user works on authentication, Keycloak configuration, OIDC, roles, or JWT claims.
-paths:
-  [
-    "ui/src/lib/auth.ts",
-    "ui/src/middleware.ts",
-    "jad/keycloak-realm.json",
-    "ui/__tests__/unit/config/keycloak-realm.test.ts",
-  ]
 ---
 
 # Keycloak / NextAuth
 
-Sources: `ui/src/lib/auth.ts`, `jad/keycloak-realm.json`, CLAUDE.md gotcha #5,
+Sources: `ui/src/lib/auth.ts`, `jad/keycloak-realm.json`, AGENTS.md gotcha 4 (Keycloak wellKnown),
 `ui/__tests__/unit/config/keycloak-realm.test.ts`,
 `docs/knowledge/runbooks/keycloak-realm-drift.md`.
 
@@ -36,3 +29,7 @@ Sources: `ui/src/lib/auth.ts`, `jad/keycloak-realm.json`, CLAUDE.md gotcha #5,
 ## Output contract
 
 Realm file, live instance, and the regression test stay in agreement.
+
+---
+
+Mirror of `.claude/skills/keycloak-auth/SKILL.md` (Claude Code). Change both together.
