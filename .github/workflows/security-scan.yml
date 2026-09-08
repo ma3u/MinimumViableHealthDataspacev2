@@ -130,9 +130,12 @@ jobs:
           ignore-unfixed: true
           exit-code: "0"
 
-      # HIGH+ still gets measured — it just lands in the run summary and an
-      # artifact instead of the alert list, so the counts stay reviewable
-      # without drowning the tab.
+      # HIGH+ still gets measured — it just lands in the run summary instead of
+      # the alert list, so the counts stay reviewable without drowning the tab.
+      # Not an artifact: actions/upload-artifact@v4 needs `actions: write`, and
+      # widening permissions on the security workflow is not worth it when the
+      # summary already carries the same table (it returned 403 FinalizeArtifact
+      # on the run that tried).
       - name: Scan ${{ matrix.image }} — CRITICAL,HIGH, for the run summary
         uses: aquasecurity/trivy-action@v0.36.0
         with:
@@ -157,14 +160,6 @@ jobs:
             head -c 60000 trivy-table.txt
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
-
-      - name: Upload the full HIGH+ report as an artifact
-        if: always() && hashFiles('trivy-table.txt') != ''
-        uses: actions/upload-artifact@v4
-        with:
-          name: trivy-high-${{ steps.cat.outputs.name }}
-          path: trivy-table.txt
-          retention-days: 30
 
       - name: Upload SARIF to the Security tab
         if: always() && hashFiles('trivy.sarif') != ''
