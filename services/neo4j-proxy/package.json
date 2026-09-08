@@ -16,7 +16,7 @@
   "dependencies": {
     "express": "^4.21.2",
     "express-rate-limit": "^8.7.0",
-    "neo4j-driver": "^5.28.1",
+    "neo4j-driver": "^6.2.0",
     "pg": "^8.16.0"
   },
   "devDependencies": {
