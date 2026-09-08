@@ -27,7 +27,7 @@ either — it reads Dockerfile `FROM` lines, not `docker-compose*.yml`.
 | ------------------------------------- | ------------------------------------------------------ | ---------------------------------------- |
 | `scripts/generate-sbom.sh`            | CycloneDX SBOM, source + images                        | On demand                                |
 | `.github/workflows/security-scan.yml` | Source CVEs (grype) + 11 images (Trivy) → Security tab | Mon 04:30 UTC, PRs touching deps, manual |
-| `.github/dependabot.yml`              | npm ×2, GitHub Actions, 5 Dockerfiles, pip             | Weekly, grouped                          |
+| `.github/dependabot.yml`              | npm ×2, GitHub Actions, 5 Dockerfiles, pip ×4          | Weekly, grouped                          |
 | pre-commit `actionlint`               | Workflow syntax + shellcheck                           | Every commit                             |
 | pre-commit `image-scan-coverage`      | Compose images vs scan matrix drift                    | Every commit                             |
 
@@ -73,9 +73,14 @@ digest was current when the revision was created — `2026-04-14` for every one.
 
 Two consequences, both more urgent than any version bump:
 
-1. **Vault has a pinned image that was never rolled out.** `acr/vault:2.0` exists,
-   pushed 2026-07-16 by issue #97 Phase A — but `mvhd-vault` still points at
-   `vault:latest` from April. One `az containerapp update --image` closes it.
+1. **Vault has a pinned image that was never rolled out.** ✅ **Done 2026-09-08**
+   — `mvhd-vault` now runs `acr/vault:2.0` (revision `mvhd-vault--0000134`).
+   It was **not** "one `az containerapp update --image`": Vault runs dev-mode
+   in-memory, so the new container came up with every secret gone, and the
+   re-bootstrap needs `Microsoft.App/jobs/start/action`, which interactive
+   accounts do not hold. The working sequence is the update, then the
+   `vault-bootstrap-aes.yml` and `vault-bootstrap-participant-keys.yml`
+   workflows under the CI service principal. Apps on `:latest`: 8 → 7.
 2. **The JAD/EDC and CFM repositories carry no version tag at all** — `latest` is
    their only tag. ADR-029 pinning reached compose and `env.sh`, but not the ACA
    apps or the ACR repositories. Until they carry a real tag, "which EDC build is
@@ -130,27 +135,74 @@ did not complete in reasonable time. The scheduled CI run covers it.
 
 ## Update queue
 
-### Wave 1 — no manifest change, unblocks the push gate
+### Wave 1 — DONE (2026-09-08), push gate unblocked
 
-`next` is declared `^15.5.14` and `next-auth` `^4.24.13`, so **15.5.21 and
-4.24.15 are already inside the allowed range**. `npm update` takes them without
-editing `package.json`:
+Applied via `npm audit fix` inside the existing semver ranges. `ui/package.json`
+changed only to raise `postcss` (below); `services/neo4j-proxy/package.json`
+gained an `overrides` block. Everything else moved in the lockfiles alone.
 
-```bash
-cd ui && npm update next next-auth nanoid postcss sharp
-cd services/neo4j-proxy && npm update path-to-regexp ip-address
-```
+| Tree                     | Before                 | After |
+| ------------------------ | ---------------------- | ----- |
+| `ui` production          | 9 (1 critical, 4 high) | **0** |
+| `neo4j-proxy` production | 2 (1 high, 1 moderate) | **0** |
 
-This is a patch-level move, not the major auth upgrade described earlier in
-issue #112 — that assessment was wrong and the issue has been corrected.
+- `next` 15.5.20 → 15.5.25, `next-auth` 4.24.14 → 4.24.15, `nanoid` → 3.3.18,
+  `sharp` → 0.35.4, `uuid` → 11.1.1, `mermaid` → 11.17.2, `dompurify` → 3.4.15.
+- `postcss`: next 15.5.25 hard-pins `8.4.31`, which carries four advisories.
+  npm reported `next@16.3.4` as the only fix; it is not. `overrides.postcss:
+^8.5.28` lifts the nested copy, and npm rejects that with `EOVERRIDE` unless
+  the direct devDependency agrees, so `postcss: ^8` was pinned to `^8.5.28`
+  alongside it. The `next` "moderate" disappeared with it — that entry was npm
+  reporting that next _depends on_ vulnerable postcss, not a flaw in next.
+- `neo4j-proxy`: `path-to-regexp` → 0.1.13 and `qs` → 6.16.0 via `overrides`,
+  because **no express 4.x release reaches either** (4.22.2 still pins
+  `~0.1.12` and `~6.15.1`). `express-rate-limit` 8.3.1 → 8.7.0 cleared the
+  `ip-address` SSRF/XSS advisories at their root.
 
-Verify: `npx tsc --noEmit -p tsconfig.build.json`, `npm run lint`, `npm test`,
-then the **J180 Keycloak login journeys** specifically, because next-auth sits
-directly on the login path (CLAUDE.md gotcha #5). Do not skip that last step
-just because the version delta is small.
+**Retraction — "avoid bare `npm audit fix`: it removes 421 packages and pulls
+`next` across a major".** That was wrong, and it is why Wave 1 was deferred. The
+421 removals came from running the dry run with `--omit=dev`, which prunes the
+dev tree out of `node_modules`; it was never a downgrade. The real fix adds 2,
+removes 2, changes 25, and crosses no major boundary.
 
-Avoid bare `npm audit fix`: the dry run removes 421 packages and pulls `next`
-across a major boundary.
+Verified: `tsc --noEmit` clean, lint within the 55-warning gate, production
+build generates all 45 static pages with CSS output intact, 1780/1780 Vitest
+unit tests pass, and the pre-push `npm audit --audit-level=high --omit=dev`
+gate now **passes** — pushes no longer need `--no-verify`.
+
+The J180 Keycloak login journeys were run against the live JAD stack with the
+UI container rebuilt on each lockfile, since next-auth sits on the login path
+(gotcha #5):
+
+| Build                                     | Result              |
+| ----------------------------------------- | ------------------- |
+| baseline next 15.5.20 / next-auth 4.24.14 | 7 failed, 14 passed |
+| bumped next 15.5.25 / next-auth 4.24.15   | 6 failed, 8 passed  |
+
+The same core (J182, J184, J185, J186, J210) fails identically either way and
+the remaining deltas move in both directions between runs, so no regression is
+attributable to the bump. Those specs are already failing on `main` — issue
+**#115**. A first attempt at this comparison was invalid: Playwright's
+`reuseExistingServer` had latched onto an unrelated Docusaurus site holding port
+3000, so every test ran against the wrong application. Use `--project=live`
+against :3003, or make sure :3000 is actually this UI.
+
+### Wave 1b — non-npm findings, also DONE (2026-09-08)
+
+Surfaced by the Trivy job that already ran in `test.yml` and had been reporting
+into the Security tab unattended:
+
+- `scripts/leitlinien/uv.lock`: `urllib3` 2.6.3 → 2.7.0, `soupsieve` 2.8.3 →
+  2.9.2, `docling` 2.91.0 → **2.94.0 exactly**. An unconstrained
+  `uv lock --upgrade` resolved docling 2.126.0 and dragged `docling-parse`
+  through 5.x → 7.x — far more surface than the CVE needs. The 26 unit tests
+  pass, but they cover the Neo4j loader, not the docling parse path.
+- **DS-0002** (container runs as root) on `catalog-crawler`, `catalog-enricher`
+  and `compliance-runner`. All three now run as uid 10001; all three images were
+  built and inspected, the Prometheus ports are >1024 so nothing needs a
+  capability, and `compliance-runner` still creates and writes `REPORT_DIR`.
+  hadolint clean; `trivy config` confirms DS-0002 gone. The remaining DS-0026
+  (no HEALTHCHECK) is LOW and pre-existing.
 
 ### Wave 2 — patch/minor infra bumps, one PR each
 
@@ -178,10 +230,39 @@ scheduled image scan confirm the CVE count drops.
   #97 EDC bump. Raise it with the Metaform upstream if we do not control the
   rebuild.
 
+## The scan workflow's own first run failed — three defects
+
+Worth recording, because each is a way a security gate can look installed and
+report nothing:
+
+1. `aquasecurity/trivy-action@0.28.0` does not exist (the tag is `v0.28.0`).
+   All 11 image jobs died in ~3 s with "unable to resolve action" — a red check,
+   but one that looks like any other CI blip. Now pinned to `v0.36.0`.
+2. `deployed-image-scan` gated Azure OIDC on a fork check. The real constraint
+   is that the app registration holds exactly one federated credential, subject
+   `repo:ma3u/MinimumViableHealthDataspacev2:ref:refs/heads/main`, so a
+   pull_request run can never authenticate. Now restricted to scheduled runs and
+   dispatches from `main`. **Widening it needs a new federated credential, not a
+   workflow change.**
+3. The severity gate ran on every event: `github.event.inputs` is null outside
+   `workflow_dispatch`, and `null != 'none'` is true, so it ran with an empty
+   `severity-cutoff` that the action defaults to `medium` — failing PRs on
+   exactly the findings it was configured not to fail on.
+
 ## Open items
 
 - Keycloak image CVE baseline is still missing — the local scan did not
   complete under arm64 emulation. The first scheduled `security-scan.yml` run
   fills it in.
-- `npm audit` will keep failing pre-push until Wave 1 lands (issue #112).
-- Confirm live ACA image tags once an `az login` session is available.
+- **Digest-pinned images are never CVE-scanned.**
+  `scripts/check-image-scan-coverage.sh` skips `*@sha256:*` on the grounds that
+  a digest pin cannot drift. True for drift detection, but it conflates drift
+  with vulnerability: a pinned digest is _fixed_, not _safe_. In practice this
+  leaves `ghcr.io/eclipse-dataplane-core/dsdk-facet-rs/siglet` unscanned by the
+  matrix, and it is not deployed on ACA either, so nothing covers it.
+- 7 apps still on `:latest` (issue **#116**). ACR holds no version tag for them,
+  so they need tagging with the upstream SHA in the build pipeline first.
+- ~~`npm audit` will keep failing pre-push until Wave 1 lands~~ — fixed
+  2026-09-08; both production trees are at 0 advisories and the gate passes.
+- ~~Confirm live ACA image tags once an `az login` session is available~~ —
+  confirmed 2026-09-08.
