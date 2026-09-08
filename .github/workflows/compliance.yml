@@ -46,10 +46,10 @@ jobs:
     timeout-minutes: 15
     if: github.event_name != 'workflow_dispatch' || inputs.target == 'local'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Login to GHCR
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -86,7 +86,7 @@ jobs:
         continue-on-error: true
 
       - name: Upload TCK results
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: dsp-tck-results
@@ -106,10 +106,10 @@ jobs:
     timeout-minutes: 15
     if: github.event_name != 'workflow_dispatch' || inputs.target == 'local'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Login to GHCR
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -148,7 +148,7 @@ jobs:
         continue-on-error: true
 
       - name: Upload DCP results
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: dcp-compliance-results
@@ -168,10 +168,10 @@ jobs:
     timeout-minutes: 20
     if: github.event_name != 'workflow_dispatch' || inputs.target == 'local'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Login to GHCR
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -214,7 +214,7 @@ jobs:
         continue-on-error: true
 
       - name: Upload EHDS results
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: ehds-compliance-results
@@ -241,11 +241,11 @@ jobs:
       RG: rg-mvhd-dev
       COMPLIANCE_JOB: mvhd-compliance-runner
     steps:
-      - uses: actions/checkout@v4
-      - uses: azure/login@v2
+      - uses: actions/checkout@v7
+      - uses: azure/login@v3
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
-      - uses: docker/setup-buildx-action@v3
+      - uses: docker/setup-buildx-action@v4
       - name: Build + deploy + start runner job
         run: |
           chmod +x scripts/azure/08-compliance-runner.sh
@@ -278,10 +278,10 @@ jobs:
     needs: [dsp-tck, dcp-compliance, ehds-compliance]
     if: always() && (github.event_name != 'workflow_dispatch' || inputs.target == 'local')
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Download all artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           path: test-results/
 
@@ -315,7 +315,7 @@ jobs:
           cat compliance-report.md
 
       - name: Upload compliance report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: compliance-report
           path: compliance-report.md

@@ -56,7 +56,7 @@ jobs:
           - name: neo4j-proxy
             path: services/neo4j-proxy
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Generate CycloneDX SBOM
         uses: anchore/sbom-action@v0
@@ -68,7 +68,7 @@ jobs:
 
       - name: Scan SBOM for vulnerabilities
         id: grype
-        uses: anchore/scan-action@v6
+        uses: anchore/scan-action@v7
         with:
           sbom: sbom-${{ matrix.name }}.cdx.json
           output-format: sarif
@@ -79,7 +79,7 @@ jobs:
 
       - name: Upload SARIF to the Security tab
         if: always() && steps.grype.outputs.sarif != ''
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: ${{ steps.grype.outputs.sarif }}
           category: grype-${{ matrix.name }}
@@ -170,7 +170,7 @@ jobs:
 
       - name: Upload SARIF to the Security tab
         if: always() && hashFiles('trivy.sarif') != ''
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: trivy.sarif
           category: trivy-${{ steps.cat.outputs.name }}
@@ -196,10 +196,10 @@ jobs:
     # new federated credential, not a workflow change.
     if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main')
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Azure Login (OIDC)
-        uses: azure/login@v2
+        uses: azure/login@v3
         with:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
@@ -256,7 +256,7 @@ jobs:
 
       - name: Upload deployed-image SARIF
         if: always() && hashFiles('trivy-out/*.sarif') != ''
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: trivy-out
           category: trivy-deployed
@@ -271,9 +271,9 @@ jobs:
     if: always() && github.event_name == 'workflow_dispatch' && github.event.inputs.fail_on_severity != 'none'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Fail on ${{ github.event.inputs.fail_on_severity }}+
-        uses: anchore/scan-action@v6
+        uses: anchore/scan-action@v7
         with:
           path: ui
           fail-build: true
