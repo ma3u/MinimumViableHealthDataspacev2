@@ -127,6 +127,13 @@ jobs:
           format: sarif
           output: trivy.sarif
           severity: CRITICAL
+          # Required, and easy to miss: trivy-action ignores `severity` for SARIF
+          # output unless this is set, so the line above is otherwise a silent
+          # no-op — the alert count does not move and nothing warns you.
+          # Measured locally at CRITICAL + ignore-unfixed:
+          #   neo4j 872 alerts -> 0, controlplane 253 -> 5,
+          #   traefik 205 -> 5, postgres 126 -> 3.
+          limit-severities-for-sarif: true
           ignore-unfixed: true
           exit-code: "0"
 

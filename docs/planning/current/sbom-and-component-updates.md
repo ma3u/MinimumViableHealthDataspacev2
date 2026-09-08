@@ -261,9 +261,25 @@ per-CVE in an alert list misrepresents one decision as a backlog. It is the same
 point already made about Neo4j's 300 highs above, just at the scale of every
 image at once.
 
-So the image jobs upload **CRITICAL** to the Security tab (29 alerts, an
-actionable number), and still measure **CRITICAL,HIGH** into the run summary and
-a 30-day artifact. Nothing is discarded; it is filed where it can be read.
+So the image jobs upload **CRITICAL** to the Security tab and still measure
+**CRITICAL,HIGH** into the run summary. Nothing is discarded; it is filed where
+it can be read.
+
+Setting `severity: CRITICAL` is **not enough on its own**. `trivy-action`
+ignores `severity` for SARIF output unless `limit-severities-for-sarif: true` is
+also set, so the first attempt changed nothing — the analyses kept reporting
+`results=872` for neo4j with no warning that the filter was inert. Measured
+locally at CRITICAL + `ignore-unfixed`:
+
+| Image                     | HIGH+ alerts | CRITICAL only |
+| ------------------------- | -----------: | ------------: |
+| `neo4j:5.26.28-community` |          872 |         **0** |
+| `jad/controlplane`        |          253 |             5 |
+| `traefik:v3.4`            |          205 |             5 |
+| `postgres:17.7-alpine`    |          126 |             3 |
+
+Neo4j going 872 → 0 is the clearest illustration of the point: every one of
+those 872 was a HIGH in a Debian base layer we do not build.
 
 Source scans are unchanged: `grype` on `ui` and `neo4j-proxy` and the `test.yml`
 filesystem/config scan still report from `low` up, because those map to code in
