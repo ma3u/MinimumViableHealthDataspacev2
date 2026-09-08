@@ -40,6 +40,7 @@ jobs:
     outputs:
       needs_reset: ${{ steps.check.outputs.needs_reset }}
       neo4j_dirty: ${{ steps.check.outputs.neo4j_dirty }}
+      keycloak_realm: ${{ steps.check.outputs.keycloak_realm }}
       reason: ${{ steps.check.outputs.reason }}
     steps:
       - name: Azure Login (OIDC)
@@ -59,7 +60,39 @@ jobs:
             echo "needs_reset=true" >> "$GITHUB_OUTPUT"
             echo "reason=Manual force reset requested" >> "$GITHUB_OUTPUT"
             echo "neo4j_dirty=unknown" >> "$GITHUB_OUTPUT"
+            echo "keycloak_realm=unchecked" >> "$GITHUB_OUTPUT"
             exit 0
+          fi
+
+          # ── Keycloak realm health ──
+          # This check exists because "clean" is not the same as "healthy".
+          # The dirty check used to look only at Neo4j, so on 2026-09-07 the
+          # scheduled run found Neo4j clean, skipped reset-environment, and
+          # therefore skipped Step 1b (the edcv realm re-import) — while the
+          # realm was in fact missing after a Postgres replica replacement.
+          # Every login served Keycloak's "Page not found" for a full day and
+          # the only signal was a red smoke-test job. A missing realm is now
+          # itself a reset trigger.
+          KC_FQDN=$(az containerapp show --name mvhd-keycloak \
+            --resource-group ${{ env.RESOURCE_GROUP }} \
+            --query "properties.configuration.ingress.fqdn" -o tsv 2>/dev/null || echo "")
+
+          if [ -n "$KC_FQDN" ]; then
+            REALM_CODE=$(curl -s -o /dev/null -w "%{http_code}" \
+              "https://${KC_FQDN}/realms/edcv/.well-known/openid-configuration" \
+              2>/dev/null || echo "000")
+            echo "Keycloak edcv realm: HTTP $REALM_CODE"
+            echo "keycloak_realm=$REALM_CODE" >> "$GITHUB_OUTPUT"
+
+            if [ "$REALM_CODE" != "200" ]; then
+              echo "needs_reset=true" >> "$GITHUB_OUTPUT"
+              echo "reason=Keycloak edcv realm unhealthy (HTTP $REALM_CODE) — logins are broken" >> "$GITHUB_OUTPUT"
+              echo "neo4j_dirty=not-checked" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+          else
+            echo "keycloak_realm=unreachable" >> "$GITHUB_OUTPUT"
+            echo "::warning::Could not resolve mvhd-keycloak FQDN — skipping realm probe"
           fi
 
           # Get Neo4j endpoint
@@ -109,6 +142,7 @@ jobs:
           echo "" >> "$GITHUB_STEP_SUMMARY"
           echo "**Needs reset:** ${{ steps.check.outputs.needs_reset }}" >> "$GITHUB_STEP_SUMMARY"
           echo "**Neo4j dirty nodes:** ${{ steps.check.outputs.neo4j_dirty }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "**Keycloak edcv realm:** ${{ steps.check.outputs.keycloak_realm }} (200 = healthy)" >> "$GITHUB_STEP_SUMMARY"
           echo "**Reason:** ${{ steps.check.outputs.reason }}" >> "$GITHUB_STEP_SUMMARY"
 
   reset-environment:
