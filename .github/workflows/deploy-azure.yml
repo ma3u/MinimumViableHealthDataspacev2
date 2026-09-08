@@ -44,7 +44,7 @@ jobs:
           docker buildx build --platform linux/amd64 \
             --build-arg BUILD_CHANNEL=release \
             --build-arg BUILD_SHA=${{ github.sha }} \
-            --build-arg BUILD_TIME=$(date -u +%Y-%m-%dT%H:%M:%SZ) \
+            --build-arg BUILD_TIME="$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
             -t ${{ env.ACR_LOGIN_SERVER }}/mvhd-ui:${{ github.sha }} \
             -t ${{ env.ACR_LOGIN_SERVER }}/mvhd-ui:latest \
             --push ./ui

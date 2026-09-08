@@ -79,3 +79,4 @@ scripts/leitlinien/discovery_raw.json
 ui/public/journey/tk-transfer.png
 ui/public/journey/whoop-fitness.png
 ui/public/journey/bloodtest-labs.png
+sbom/*.cdx.json

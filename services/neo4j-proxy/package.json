@@ -15,7 +15,7 @@
   },
   "dependencies": {
     "express": "^4.21.2",
-    "express-rate-limit": "^8.3.1",
+    "express-rate-limit": "^8.7.0",
     "neo4j-driver": "^5.28.1",
     "pg": "^8.16.0"
   },
@@ -32,5 +32,9 @@
   },
   "engines": {
     "node": ">=22"
+  },
+  "overrides": {
+    "path-to-regexp": "0.1.13",
+    "qs": "^6.16.0"
   }
 }

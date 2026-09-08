@@ -7,6 +7,7 @@ Groom with `/plan`. Token budget per ADR-026: keep this index small.
 
 ## current/
 
+- [sbom-and-component-updates](current/sbom-and-component-updates.md) — SBOM, automated CVE scanning, evidence-based update queue
 - [issue-97-edc-upgrade](current/issue-97-edc-upgrade.md) — dependency refresh; Phase A done, Phase B in progress
 - [issue-97-phase-b-analysis](current/issue-97-phase-b-analysis.md) — EDC v0.18 breaking-change analysis + upstream-image strategy
 - [issue-20-leitlinien-ingestion](current/issue-20-leitlinien-ingestion.md) — AWMF Leitlinien Layer-6 ingestion (Docling)

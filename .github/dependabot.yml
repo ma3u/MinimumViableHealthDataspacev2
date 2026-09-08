@@ -1,12 +1,94 @@
-# To get started with Dependabot version updates, you'll need to specify which
-# package ecosystems to update and where the package manifests are located.
-# Please see the documentation for all configuration options:
-# https://docs.github.com/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
-
+# Dependabot — automated dependency updates.
+#
+# Grouping rationale: this repo's pre-push gate is `npm audit --audit-level=high`,
+# so a flood of individual PRs blocks pushes without fixing the gate. Patch and
+# minor updates are therefore grouped into one PR per ecosystem per week, while
+# major updates stay separate because they need their own test run.
+#
+# Security updates are exempt from the schedule — Dependabot raises those
+# immediately regardless of the `interval` below.
 version: 2
+
 updates:
-  - package-ecosystem: "" # See documentation for possible values
-    directory: "/" # Location of package manifests
+  # ── npm: UI (Next.js) ──
+  - package-ecosystem: npm
+    directory: /ui
     schedule:
-      interval: "weekly"
- 
+      interval: weekly
+      day: monday
+      time: "04:00"
+      timezone: Europe/Berlin
+    open-pull-requests-limit: 5
+    groups:
+      ui-patch-minor:
+        patterns: ["*"]
+        update-types: [minor, patch]
+    ignore:
+      # React 19 is a deliberate hold — the UI targets React 18 (ui/package.json).
+      # Remove this ignore when the React 19 migration is planned.
+      - dependency-name: react
+        update-types: [version-update:semver-major]
+      - dependency-name: react-dom
+        update-types: [version-update:semver-major]
+    labels: [dependencies, ui]
+
+  # ── npm: Neo4j proxy ──
+  - package-ecosystem: npm
+    directory: /services/neo4j-proxy
+    schedule:
+      interval: weekly
+      day: monday
+      time: "04:00"
+      timezone: Europe/Berlin
+    open-pull-requests-limit: 5
+    groups:
+      proxy-patch-minor:
+        patterns: ["*"]
+        update-types: [minor, patch]
+    labels: [dependencies, neo4j-proxy]
+
+  # ── GitHub Actions ──
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "04:00"
+      timezone: Europe/Berlin
+    groups:
+      actions:
+        patterns: ["*"]
+    labels: [dependencies, ci]
+
+  # ── Container base images ──
+  # Dependabot reads FROM lines in Dockerfiles. It does NOT read
+  # docker-compose*.yml, so the infrastructure images pinned there
+  # (keycloak, postgres, neo4j, the JAD/EDC images) are covered by the
+  # scheduled Trivy scan in security-scan.yml instead.
+  - package-ecosystem: docker
+    directories:
+      - /ui
+      - /services/neo4j-proxy
+      - /services/catalog-crawler
+      - /services/catalog-enricher
+      - /scripts/azure/compliance-runner
+    schedule:
+      interval: weekly
+      day: monday
+      time: "04:00"
+      timezone: Europe/Berlin
+    labels: [dependencies, docker]
+
+  # ── Python ──
+  # Every Python manifest in the repo. `scripts/leitlinien` matters most: its
+  # uv.lock carried 4 high + 1 medium advisory (docling, urllib3, soupsieve)
+  # that nothing was watching until the Trivy scan surfaced them.
+  - package-ecosystem: pip
+    directories:
+      - /scripts
+      - /scripts/leitlinien
+      - /services/catalog-crawler
+      - /services/catalog-enricher
+    schedule:
+      interval: monthly
+    labels: [dependencies, scripts]

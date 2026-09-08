@@ -150,8 +150,14 @@ jobs:
       - name: Secret scan summary
         if: always()
         run: |
-          echo "## Secret Scan (gitleaks)" >> $GITHUB_STEP_SUMMARY
-          gitleaks detect --source . --log-opts="HEAD" --no-banner 2>&1 >> $GITHUB_STEP_SUMMARY || true
+          # `cmd 2>&1 >> file` sends stderr to the OLD stdout (the job log) and
+          # only stdout to the file. gitleaks writes its findings to stderr, so
+          # that ordering silently produced an empty summary. Redirect the group
+          # so both streams land in the summary.
+          {
+            echo "## Secret Scan (gitleaks)"
+            gitleaks detect --source . --log-opts="HEAD" --no-banner || true
+          } >> "$GITHUB_STEP_SUMMARY" 2>&1
 
   # -----------------------------------------------------------------------
   # Dependency Vulnerability Audit (BSI C5 DEV-05 / OWASP A06)

@@ -16,4 +16,9 @@ ENV PYTHONUNBUFFERED=1 \
 
 EXPOSE 9465
 
+# Run unprivileged (Trivy DS-0002). The Prometheus port is >1024, so dropping
+# root costs no capability. Nothing is written inside the image at run time.
+RUN useradd --system --no-create-home --uid 10001 crawler
+USER crawler
+
 ENTRYPOINT ["python", "-m", "src.main"]
