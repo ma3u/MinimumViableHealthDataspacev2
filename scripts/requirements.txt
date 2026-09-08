@@ -1,2 +1,2 @@
 # Phase 3b: FHIR → Neo4j loader dependencies
-neo4j>=5.18.0
+neo4j>=6.3.0
