@@ -30,7 +30,7 @@
     "lucide-react": "^0.378.0",
     "mermaid": "^11.13.0",
     "neo4j-driver": "^5.18.0",
-    "next": "^15.5.14",
+    "next": "^16.3.4",
     "next-auth": "^4.24.13",
     "qrcode": "^1.5.4",
     "react": "^18",
