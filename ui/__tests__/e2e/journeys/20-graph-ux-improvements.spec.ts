@@ -238,8 +238,8 @@ test.describe("Graph Explorer UX Improvements", () => {
     page,
   }) => {
     await page.goto("/graph");
-    // At least one "Filter by question" section should be visible
-    await expect(page.getByText("Filter by question")).toBeVisible({
+    // At least one "Ask the graph" section should be visible
+    await expect(page.getByText("Ask the graph").first()).toBeVisible({
       timeout: T,
     });
     // At least one filter button should be visible

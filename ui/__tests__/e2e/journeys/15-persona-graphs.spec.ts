@@ -9,17 +9,15 @@
  *   J165–J170 — Hospital / Data Holder journey (who uses my data?)
  *   J171–J175 — HDAB Authority journey (approval chain governance)
  *
- * All graph tests use the public /graph page and /api/graph* routes.
- * Protected pages are tested via redirect assertions only.
+ * The /graph page and /api/graph itself are public. /api/graph/validate,
+ * /api/catalog, /api/credentials, /api/compliance and /api/trust-center are
+ * NOT — they call requireAuth() and answer 401 without a session, so the tests
+ * that assert on them call loginAsAdmin() first (issue #115). Tests that only
+ * touch public routes stay unauthenticated on purpose: that is what verifies
+ * the public routes are still public.
  */
 import { test, expect } from "@playwright/test";
-import {
-  T,
-  apiGet,
-  skipIfNeo4jDown,
-  expectHeading,
-  waitForDataLoad,
-} from "./helpers";
+import { T, apiGet, loginAsAdmin, skipIfNeo4jDown } from "./helpers";
 
 // ── J150–J154: API persona subgraphs ──────────────────────────────────────────
 
@@ -199,7 +197,8 @@ test.describe("O · Graph Validation", () => {
   test("J160 — /api/graph/validate returns validation report structure", async ({
     page,
   }) => {
-    await skipIfNeo4jDown(page);
+    await loginAsAdmin(page);
+    await skipIfNeo4jDown(page, "/api/graph/validate");
     const data = await apiGet(page, "/api/graph/validate");
     expect(typeof data.summary).toBe("object");
     expect(typeof data.summary.totalNodes).toBe("number");
@@ -210,7 +209,8 @@ test.describe("O · Graph Validation", () => {
   test("J161 — /api/graph/validate returns nodeCounts array", async ({
     page,
   }) => {
-    await skipIfNeo4jDown(page);
+    await loginAsAdmin(page);
+    await skipIfNeo4jDown(page, "/api/graph/validate");
     const data = await apiGet(page, "/api/graph/validate");
     expect(Array.isArray(data.nodeCounts)).toBe(true);
     if (data.nodeCounts.length > 0) {
@@ -224,7 +224,8 @@ test.describe("O · Graph Validation", () => {
   test("J162 — /api/graph/validate returns edgeCounts with defined flag", async ({
     page,
   }) => {
-    await skipIfNeo4jDown(page);
+    await loginAsAdmin(page);
+    await skipIfNeo4jDown(page, "/api/graph/validate");
     const data = await apiGet(page, "/api/graph/validate");
     expect(Array.isArray(data.edgeCounts)).toBe(true);
     if (data.edgeCounts.length > 0) {
@@ -238,7 +239,8 @@ test.describe("O · Graph Validation", () => {
   test("J163 — /api/graph/validate includes validEdgeRules list", async ({
     page,
   }) => {
-    await skipIfNeo4jDown(page);
+    await loginAsAdmin(page);
+    await skipIfNeo4jDown(page, "/api/graph/validate");
     const data = await apiGet(page, "/api/graph/validate");
     expect(Array.isArray(data.validEdgeRules)).toBe(true);
     expect(data.validEdgeRules.length).toBeGreaterThan(10);
@@ -251,7 +253,8 @@ test.describe("O · Graph Validation", () => {
   test("J164 — /api/graph/validate reports zero issues for valid seed data", async ({
     page,
   }) => {
-    await skipIfNeo4jDown(page);
+    await loginAsAdmin(page);
+    await skipIfNeo4jDown(page, "/api/graph/validate");
     const data = await apiGet(page, "/api/graph/validate");
     // Orphans, missing props, unknown labels should be minimal with proper seeding
     expect(data.summary.totalNodes).toBeGreaterThan(0);
@@ -281,9 +284,16 @@ test.describe("O · Hospital / Data Holder Journey", () => {
     page,
   }) => {
     await page.goto("/graph?persona=hospital");
-    await expect(page.getByText(/What data do we offer/i)).toBeVisible({
-      timeout: T,
-    });
+    // "Which data do we offer?" is the rendered HOSPITAL_FILTER_PRESETS label.
+    // The persona's `question` field ("What data do we offer? …") is returned
+    // by /api/graph but never rendered, so asserting on "What" matched nothing.
+    // J172 passes for hdab only because there the preset label and the question
+    // happen to share a prefix ("What approvals are pending?").
+    await expect(page.getByText(/Which data do we offer/i).first()).toBeVisible(
+      {
+        timeout: T,
+      },
+    );
   });
 
   test("J167 — Hospital persona via URL triggers graph load", async ({
@@ -308,7 +318,8 @@ test.describe("O · Hospital / Data Holder Journey", () => {
   test("J168 — Hospital data: datasets API returns data with title", async ({
     page,
   }) => {
-    await skipIfNeo4jDown(page);
+    await loginAsAdmin(page);
+    await skipIfNeo4jDown(page, "/api/catalog");
     const data = await apiGet(page, "/api/catalog");
     const datasets = data["dcat:dataset"] || data.datasets || data;
     if (Array.isArray(datasets) && datasets.length > 0) {
@@ -322,7 +333,8 @@ test.describe("O · Hospital / Data Holder Journey", () => {
   test("J169 — Hospital data: credentials exist for data holder role", async ({
     page,
   }) => {
-    await skipIfNeo4jDown(page);
+    await loginAsAdmin(page);
+    await skipIfNeo4jDown(page, "/api/credentials");
     const data = await apiGet(page, "/api/credentials");
     const creds = data.credentials ?? data;
     if (Array.isArray(creds) && creds.length > 0) {
@@ -338,7 +350,8 @@ test.describe("O · Hospital / Data Holder Journey", () => {
   test("J170 — Hospital compliance: HDAB approval chain visible", async ({
     page,
   }) => {
-    await skipIfNeo4jDown(page);
+    await loginAsAdmin(page);
+    await skipIfNeo4jDown(page, "/api/compliance");
     const data = await apiGet(page, "/api/compliance");
     // List mode returns consumers and datasets
     expect(Array.isArray(data.consumers) || Array.isArray(data.datasets)).toBe(
@@ -405,7 +418,8 @@ test.describe("O · HDAB Authority Journey", () => {
   test("J175 — HDAB compliance: trust center status visible on compliance page", async ({
     page,
   }) => {
-    await skipIfNeo4jDown(page);
+    await loginAsAdmin(page);
+    await skipIfNeo4jDown(page, "/api/trust-center");
     const data = await apiGet(page, "/api/trust-center");
     expect(Array.isArray(data.trustCenters)).toBe(true);
     expect(Array.isArray(data.speSessions)).toBe(true);
