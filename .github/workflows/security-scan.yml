@@ -68,7 +68,7 @@ jobs:
 
       - name: Scan SBOM for vulnerabilities
         id: grype
-        uses: anchore/scan-action@v6
+        uses: anchore/scan-action@v7
         with:
           sbom: sbom-${{ matrix.name }}.cdx.json
           output-format: sarif
@@ -273,7 +273,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Fail on ${{ github.event.inputs.fail_on_severity }}+
-        uses: anchore/scan-action@v6
+        uses: anchore/scan-action@v7
         with:
           path: ui
           fail-build: true
