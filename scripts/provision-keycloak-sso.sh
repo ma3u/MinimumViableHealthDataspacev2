@@ -1,188 +1,240 @@
 #!/bin/bash
 # =============================================================================
-# provision-keycloak-sso.sh — Phase 2c: Keycloak SSO provisioning
+# provision-keycloak-sso.sh — reconcile the 'edcv' realm with the realm file
 # =============================================================================
-# Adds the health-dataspace-ui client, SSO roles, and demo users to the
-# existing 'edcv' realm via Keycloak Admin REST API.
-# Idempotent: safe to run multiple times.
+# Creates/repairs the SSO realm roles, demo users, passwords and role mappings
+# on an EXISTING 'edcv' realm, via the Keycloak Admin REST API.
+#
+# Everything is derived from jad/keycloak-realm.json. Nothing is hardcoded here.
+#
+# Why this exists: a realm import returns HTTP 409 on an existing realm and
+# imports NOTHING, so users, roles and role mappings added to the realm file
+# after the first import never reach a running instance. This script closes
+# that gap. See docs/knowledge/runbooks/keycloak-realm-drift.md.
+#
+# This script previously hardcoded 3 roles and 3 users, with a single role per
+# user. That is exactly how the drift it is meant to fix went unnoticed: on
+# 2026-09-08 the local realm was missing the DATA_HOLDER, DATA_USER and PATIENT
+# roles and the lmcuser, patient1 and patient2 users entirely, while clinicuser
+# and researcher were each missing their second role.
+#
+# Idempotent: safe to run repeatedly. Passwords are always reset to the value in
+# the realm file, so a drifted password self-heals.
+#
+# Usage:
+#   ./scripts/provision-keycloak-sso.sh
+#   KC_HOST=https://auth.example.com KC_ADMIN_PASSWORD=… ./scripts/provision-keycloak-sso.sh
+#
+# Exits non-zero if any account cannot obtain a token at the end, so drift is
+# loud rather than silent.
 # =============================================================================
 set -euo pipefail
 
 KC_HOST="${KC_HOST:-http://localhost:8080}"
-REALM="edcv"
+REALM="${REALM:-edcv}"
+KC_ADMIN_USER="${KC_ADMIN_USER:-admin}"
+KC_ADMIN_PASSWORD="${KC_ADMIN_PASSWORD:-admin}"
+UI_CLIENT_ID="${UI_CLIENT_ID:-health-dataspace-ui}"
+UI_CLIENT_SECRET="${UI_CLIENT_SECRET:-health-dataspace-ui-secret}"
 
-echo "=== Phase 2c: Keycloak SSO Provisioning ==="
-echo "Keycloak: $KC_HOST  Realm: $REALM"
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+REALM_FILE="${REALM_FILE:-${REPO_ROOT}/jad/keycloak-realm.json}"
 
-# --- Get admin token ---
+[ -f "$REALM_FILE" ] || {
+  echo "ERROR: realm file not found: $REALM_FILE" >&2
+  exit 1
+}
+
+echo "=== Keycloak SSO reconciliation ==="
+echo "Keycloak:   $KC_HOST"
+echo "Realm:      $REALM"
+echo "Realm file: ${REALM_FILE#"$REPO_ROOT"/}"
+
+# --- Admin token ---
 echo ""
 echo "1) Getting admin token..."
 KC_TOKEN=$(curl -sf -X POST "$KC_HOST/realms/master/protocol/openid-connect/token" \
   -H "Content-Type: application/x-www-form-urlencoded" \
-  -d "grant_type=password&username=admin&password=admin&client_id=admin-cli" | \
+  --data-urlencode "grant_type=password" \
+  --data-urlencode "username=$KC_ADMIN_USER" \
+  --data-urlencode "password=$KC_ADMIN_PASSWORD" \
+  --data-urlencode "client_id=admin-cli" |
   python3 -c "import sys,json; print(json.load(sys.stdin)['access_token'])")
 
-if [ -z "$KC_TOKEN" ]; then
-  echo "  ✗ Failed to get admin token"; exit 1
-fi
+[ -n "$KC_TOKEN" ] || {
+  echo "  ✗ Failed to get admin token" >&2
+  exit 1
+}
 echo "  ✓ Got admin token"
 
 AUTH="Authorization: Bearer $KC_TOKEN"
 CT="Content-Type: application/json"
 
-# --- Add realm roles ---
+# --- Realm roles, from the realm file ---
 echo ""
-echo "2) Adding SSO realm roles..."
-for ROLE_NAME in EDC_ADMIN EDC_USER_PARTICIPANT HDAB_AUTHORITY; do
-  case "$ROLE_NAME" in
-    EDC_ADMIN) DESC="Dataspace operator – full admin access to all portals and EDC management APIs" ;;
-    EDC_USER_PARTICIPANT) DESC="Clinic / CRO / Pharma participant – can browse catalog, negotiate contracts, transfer data" ;;
-    HDAB_AUTHORITY) DESC="Health Data Access Body regulator – access to compliance dashboards and audit logs" ;;
+echo "2) Reconciling realm roles..."
+while IFS=$'\t' read -r ROLE_NAME ROLE_JSON; do
+  [ -n "$ROLE_NAME" ] || continue
+  CODE=$(curl -so /dev/null -w "%{http_code}" -X POST "$KC_HOST/admin/realms/$REALM/roles" \
+    -H "$AUTH" -H "$CT" -d "$ROLE_JSON")
+  case "$CODE" in
+    201) echo "  ✓ Created role: $ROLE_NAME" ;;
+    409) echo "  · Role exists:   $ROLE_NAME" ;;
+    *) echo "  ✗ Role $ROLE_NAME failed (HTTP $CODE)" ;;
+  esac
+done < <(python3 -c "
+import json, sys
+d = json.load(open(sys.argv[1]))
+seen = set()
+for r in d.get('roles', {}).get('realm', []):
+    if r['name'] in seen:
+        continue
+    seen.add(r['name'])
+    print(r['name'] + '\t' + json.dumps(dict(name=r['name'], description=r.get('description') or '')))
+# Any role referenced by a user but not declared at realm level.
+for u in d.get('users', []):
+    for name in u.get('realmRoles', []):
+        if name not in seen:
+            seen.add(name)
+            print(name + '\t' + json.dumps(dict(name=name)))
+" "$REALM_FILE")
+
+# --- Users, passwords and role mappings, from the realm file ---
+echo ""
+echo "3) Reconciling demo users..."
+FAILED=0
+USERNAMES=()
+
+while IFS=$'\t' read -r USERNAME PASSWORD ROLES_CSV USER_JSON PW_JSON; do
+  [ -n "$USERNAME" ] || continue
+  USERNAMES+=("$USERNAME")
+
+  CODE=$(curl -so /dev/null -w "%{http_code}" -X POST "$KC_HOST/admin/realms/$REALM/users" \
+    -H "$AUTH" -H "$CT" -d "$USER_JSON")
+  case "$CODE" in
+    201) echo "  ✓ Created user:  $USERNAME" ;;
+    409) echo "  · User exists:   $USERNAME" ;;
+    *)
+      echo "  ✗ User $USERNAME failed (HTTP $CODE)"
+      FAILED=1
+      continue
+      ;;
   esac
 
-  HTTP_CODE=$(curl -so /dev/null -w "%{http_code}" -X POST "$KC_HOST/admin/realms/$REALM/roles" \
-    -H "$AUTH" -H "$CT" \
-    -d "{\"name\":\"$ROLE_NAME\",\"description\":\"$DESC\"}")
+  USER_ID=$(curl -sf "$KC_HOST/admin/realms/$REALM/users?username=$USERNAME&exact=true" \
+    -H "$AUTH" | python3 -c "import sys,json; u=json.load(sys.stdin); print(u[0]['id'] if u else '')")
+  [ -n "$USER_ID" ] || {
+    echo "  ✗ No user id for $USERNAME"
+    FAILED=1
+    continue
+  }
 
-  if [ "$HTTP_CODE" = "201" ]; then
-    echo "  ✓ Created role: $ROLE_NAME"
-  elif [ "$HTTP_CODE" = "409" ]; then
-    echo "  · Role already exists: $ROLE_NAME"
-  else
-    echo "  ✗ Failed to create role $ROLE_NAME (HTTP $HTTP_CODE)"
+  # Always reset the password: a user that exists with a drifted or missing
+  # credential is the failure mode this script is here to repair.
+  if [ -n "$PASSWORD" ]; then
+    CODE=$(curl -so /dev/null -w "%{http_code}" -X PUT \
+      "$KC_HOST/admin/realms/$REALM/users/$USER_ID/reset-password" \
+      -H "$AUTH" -H "$CT" -d "$PW_JSON")
+    [ "$CODE" = "204" ] || {
+      echo "  ✗ Password reset failed for $USERNAME (HTTP $CODE)"
+      FAILED=1
+    }
   fi
+
+  # Assign every realm role the file gives the user, not just the first.
+  IFS=',' read -r -a ROLES <<<"$ROLES_CSV"
+  for ROLE in "${ROLES[@]}"; do
+    [ -n "$ROLE" ] || continue
+    ROLE_JSON=$(curl -sf "$KC_HOST/admin/realms/$REALM/roles/$ROLE" -H "$AUTH" || echo "")
+    [ -n "$ROLE_JSON" ] || {
+      echo "  ✗ Role $ROLE not found for $USERNAME"
+      FAILED=1
+      continue
+    }
+    MAPPING=$(printf '%s' "$ROLE_JSON" | python3 -c "
+import json, sys
+r = json.load(sys.stdin)
+print(json.dumps([dict(id=r['id'], name=r['name'])]))
+")
+    CODE=$(curl -so /dev/null -w "%{http_code}" -X POST \
+      "$KC_HOST/admin/realms/$REALM/users/$USER_ID/role-mappings/realm" \
+      -H "$AUTH" -H "$CT" -d "$MAPPING")
+    [ "$CODE" = "204" ] || {
+      echo "  ✗ Role $ROLE failed for $USERNAME (HTTP $CODE)"
+      FAILED=1
+    }
+  done
+  echo "    roles: ${ROLES_CSV//,/, }"
+done < <(python3 -c "
+import json, sys
+d = json.load(open(sys.argv[1]))
+for u in d.get('users', []):
+    pw = ''
+    for c in u.get('credentials', []):
+        if c.get('type') == 'password':
+            pw = c.get('value', '')
+    payload = {
+        'username': u['username'],
+        'enabled': u.get('enabled', True),
+        'emailVerified': True,
+    }
+    for k in ('email', 'firstName', 'lastName'):
+        if u.get(k):
+            payload[k] = u[k]
+    if pw:
+        payload['credentials'] = [{'type': 'password', 'value': pw, 'temporary': False}]
+    print('\t'.join([
+        u['username'], pw, ','.join(u.get('realmRoles', [])), json.dumps(payload),
+        json.dumps(dict(type='password', value=pw, temporary=False)),
+    ]))
+" "$REALM_FILE")
+
+# --- Verify: every account must actually be able to log in ---
+echo ""
+echo "4) Verifying each account can obtain a token..."
+for USERNAME in "${USERNAMES[@]}"; do
+  PASSWORD=$(python3 -c "
+import json, sys
+d = json.load(open(sys.argv[1]))
+for u in d.get('users', []):
+    if u['username'] == sys.argv[2]:
+        for c in u.get('credentials', []):
+            if c.get('type') == 'password':
+                print(c.get('value', ''))
+" "$REALM_FILE" "$USERNAME")
+  TOKEN_ROLES=$(curl -sf -X POST "$KC_HOST/realms/$REALM/protocol/openid-connect/token" \
+    --data-urlencode "client_id=$UI_CLIENT_ID" \
+    --data-urlencode "client_secret=$UI_CLIENT_SECRET" \
+    --data-urlencode "grant_type=password" \
+    --data-urlencode "username=$USERNAME" \
+    --data-urlencode "password=$PASSWORD" 2>/dev/null |
+    python3 -c "
+import sys, json, base64
+try:
+    t = json.load(sys.stdin)['access_token']
+except Exception:
+    sys.exit(1)
+p = t.split('.')[1]
+p += '=' * (-len(p) % 4)
+c = json.loads(base64.urlsafe_b64decode(p))
+print(','.join(sorted(r for r in c.get('realm_access', {}).get('roles', []) if r.isupper())))
+" 2>/dev/null) || {
+    echo "  ✗ $USERNAME cannot log in"
+    FAILED=1
+    continue
+  }
+  echo "  ✓ $USERNAME → ${TOKEN_ROLES:-(no roles)}"
 done
 
-# --- Create health-dataspace-ui client ---
 echo ""
-echo "3) Creating health-dataspace-ui client (PKCE + confidential)..."
-
-CLIENT_PAYLOAD='{
-  "clientId": "health-dataspace-ui",
-  "name": "Health Dataspace UI",
-  "description": "Next.js UI client with PKCE authorization code flow for browser-based SSO",
-  "enabled": true,
-  "protocol": "openid-connect",
-  "publicClient": false,
-  "serviceAccountsEnabled": false,
-  "secret": "health-dataspace-ui-secret",
-  "standardFlowEnabled": true,
-  "directAccessGrantsEnabled": false,
-  "fullScopeAllowed": true,
-  "redirectUris": [
-    "http://localhost:3000/api/auth/callback/keycloak",
-    "http://localhost:3000/*",
-    "http://localhost:3003/api/auth/callback/keycloak",
-    "http://localhost:3003/*"
-  ],
-  "webOrigins": [
-    "http://localhost:3000",
-    "http://localhost:3003",
-    "+"
-  ],
-  "attributes": {
-    "pkce.code.challenge.method": "S256",
-    "post.logout.redirect.uris": "http://localhost:3000/*##http://localhost:3003/*"
-  },
-  "defaultClientScopes": ["openid", "profile", "email"],
-  "protocolMappers": [
-    {
-      "name": "realm-roles",
-      "protocol": "openid-connect",
-      "protocolMapper": "oidc-usermodel-realm-role-mapper",
-      "consentRequired": false,
-      "config": {
-        "claim.name": "realm_access.roles",
-        "multivalued": "true",
-        "jsonType.label": "String",
-        "access.token.claim": "true",
-        "id.token.claim": "true",
-        "userinfo.token.claim": "true"
-      }
-    }
-  ]
-}'
-
-HTTP_CODE=$(curl -so /dev/null -w "%{http_code}" -X POST "$KC_HOST/admin/realms/$REALM/clients" \
-  -H "$AUTH" -H "$CT" -d "$CLIENT_PAYLOAD")
-
-if [ "$HTTP_CODE" = "201" ]; then
-  echo "  ✓ Created client: health-dataspace-ui"
-elif [ "$HTTP_CODE" = "409" ]; then
-  echo "  · Client already exists: health-dataspace-ui"
-else
-  echo "  ✗ Failed to create client (HTTP $HTTP_CODE)"
+if [ "$FAILED" -ne 0 ]; then
+  echo "=== Reconciliation FAILED — see ✗ above ==="
+  exit 1
 fi
-
-# --- Create demo users ---
-echo ""
-echo "4) Creating demo users..."
-
-create_user() {
-  local USERNAME="$1" EMAIL="$2" FIRST="$3" LAST="$4" PASSWORD="$5" ROLE="$6"
-
-  USER_PAYLOAD="{
-    \"username\": \"$USERNAME\",
-    \"enabled\": true,
-    \"email\": \"$EMAIL\",
-    \"firstName\": \"$FIRST\",
-    \"lastName\": \"$LAST\",
-    \"credentials\": [{\"type\": \"password\", \"value\": \"$PASSWORD\", \"temporary\": false}]
-  }"
-
-  HTTP_CODE=$(curl -so /dev/null -w "%{http_code}" -X POST "$KC_HOST/admin/realms/$REALM/users" \
-    -H "$AUTH" -H "$CT" -d "$USER_PAYLOAD")
-
-  if [ "$HTTP_CODE" = "201" ]; then
-    echo "  ✓ Created user: $USERNAME"
-  elif [ "$HTTP_CODE" = "409" ]; then
-    echo "  · User already exists: $USERNAME"
-  else
-    echo "  ✗ Failed to create user $USERNAME (HTTP $HTTP_CODE)"
-    return
-  fi
-
-  # Assign role
-  USER_ID=$(curl -sf "$KC_HOST/admin/realms/$REALM/users?username=$USERNAME&exact=true" \
-    -H "$AUTH" | python3 -c "import sys,json; users=json.load(sys.stdin); print(users[0]['id'] if users else '')")
-
-  if [ -z "$USER_ID" ]; then
-    echo "  ✗ Could not find user ID for $USERNAME"
-    return
-  fi
-
-  ROLE_ID=$(curl -sf "$KC_HOST/admin/realms/$REALM/roles/$ROLE" \
-    -H "$AUTH" | python3 -c "import sys,json; print(json.load(sys.stdin)['id'])")
-
-  if [ -z "$ROLE_ID" ]; then
-    echo "  ✗ Could not find role ID for $ROLE"
-    return
-  fi
-
-  HTTP_CODE=$(curl -so /dev/null -w "%{http_code}" -X POST \
-    "$KC_HOST/admin/realms/$REALM/users/$USER_ID/role-mappings/realm" \
-    -H "$AUTH" -H "$CT" \
-    -d "[{\"id\":\"$ROLE_ID\",\"name\":\"$ROLE\"}]")
-
-  if [ "$HTTP_CODE" = "204" ]; then
-    echo "  ✓ Assigned role $ROLE to $USERNAME"
-  else
-    echo "  ✗ Failed to assign role $ROLE to $USERNAME (HTTP $HTTP_CODE)"
-  fi
-}
-
-create_user "edcadmin"   "admin@health-dataspace.local"     "EDC"    "Admin"     "admin"     "EDC_ADMIN"
-create_user "clinicuser" "clinic@health-dataspace.local"    "Clinic" "User"      "clinic"    "EDC_USER_PARTICIPANT"
-create_user "regulator"  "regulator@health-dataspace.local" "HDAB"   "Authority" "regulator" "HDAB_AUTHORITY"
-
-# --- Summary ---
-echo ""
-echo "=== Provisioning complete ==="
+echo "=== Reconciliation complete — realm matches ${REALM_FILE##*/} ==="
 echo ""
 echo "Demo accounts (password = username):"
-echo "  edcadmin   / admin     → EDC_ADMIN"
-echo "  clinicuser / clinic    → EDC_USER_PARTICIPANT"
-echo "  regulator  / regulator → HDAB_AUTHORITY"
+printf '  %s\n' "${USERNAMES[@]}"
 echo ""
 echo "Keycloak Admin:  $KC_HOST/admin/master/console/"
 echo "OIDC Discovery:  $KC_HOST/realms/$REALM/.well-known/openid-configuration"

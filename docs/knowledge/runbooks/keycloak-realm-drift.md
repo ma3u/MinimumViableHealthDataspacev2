@@ -25,8 +25,20 @@ localhost-only URIs) and `Invalid username or password` (user didn't exist).
    `/admin/realms/edcv/clients?clientId=health-dataspace-ui` and
    `/admin/realms/edcv/users` — diff against the realm file.
 
-**Reconcile:** PUT missing redirect URIs / client flags; POST missing users +
-`reset-password` (demo convention password = username) + role-mappings; create
-missing realm roles first. All operations are idempotent MERGE-style.
+**Reconcile:** run `./scripts/provision-keycloak-sso.sh`. It derives roles,
+users, passwords and role mappings from `jad/keycloak-realm.json`, applies them
+idempotently, and then verifies every account can obtain a token — exiting
+non-zero if any cannot, so drift fails loudly. Point it elsewhere with
+`KC_HOST` / `KC_ADMIN_PASSWORD`. Client redirect URIs are still a manual PUT.
+
+Recurrence 2026-09-08 (local stack): `patient1` could not log in. The realm had
+neither the `DATA_HOLDER`, `DATA_USER` nor `PATIENT` roles, was missing the
+`lmcuser`, `patient1` and `patient2` users outright, and `clinicuser` /
+`researcher` were each missing their second role — so two accounts that _did_
+log in were carrying the wrong authorisation. Cause: the provisioning script
+hardcoded three roles, three users, and **one role per user**, and had not been
+updated as the realm file grew. It now reads the realm file, so it cannot drift
+that way again. Production was unaffected: `reset-demo` deletes and re-imports
+the realm, which picks up the whole file.
 `06-post-deploy.sh` now verifies redirect URIs and exits non-zero on drift;
 `ui/__tests__/unit/config/keycloak-realm.test.ts` pins the production URIs.
