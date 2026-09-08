@@ -4,7 +4,9 @@ title: Start the minimal local stack (Neo4j + UI)
 description: Smallest working environment for UI and graph work.
 resource: CLAUDE.md (Commands), docker-compose.yml
 tags: [runbook, local-dev]
-timestamp: 2026-07-15T00:00:00Z
+generated: { by: claude-code/fable-5, at: 2026-07-15T15:30:23Z }
+verified: { by: human:ma3u, at: 2026-07-15T15:30:23Z }
+status: stable
 ---
 
 1. `docker compose up -d`

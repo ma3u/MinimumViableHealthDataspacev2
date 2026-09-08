@@ -4,7 +4,9 @@ title: Keycloak — OIDC identity provider (realm edcv)
 description: Authenticates 7 demo personas for the UI via a confidential PKCE client.
 resource: jad/keycloak-realm.json, ACA app mvhd-keycloak, https://auth.ehds.mabu.red
 tags: [oidc, keycloak, auth, port-8080]
-timestamp: 2026-07-15T00:00:00Z
+generated: { by: claude-code/fable-5, at: 2026-07-15T15:30:23Z }
+verified: { by: human:ma3u, at: 2026-07-15T15:30:23Z }
+status: stable
 ---
 
 Realm `edcv`, client `health-dataspace-ui` (confidential + PKCE S256, secret in

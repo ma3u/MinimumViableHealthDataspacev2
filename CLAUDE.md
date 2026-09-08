@@ -69,7 +69,7 @@ docs/                   — see "Knowledge & planning" below
 
 ## Knowledge & planning
 
-- `docs/knowledge/index.md` — OKF concept bundle: services, data models, APIs, runbooks.
+- `docs/knowledge/index.md` — OKF v0.2 concept bundle: services, data models, APIs, runbooks.
 - `docs/planning/index.md` — work items in `done/ · current/ · future/`; roadmap detail in
   `docs/planning/roadmap-phases-*.md`; issue table in `docs/planning-health-dataspace-v2.md`.
 - `docs/ADRs/` — canonical ADR corpus (ADR-001…028). `docs/adr/0000-template.md` is the

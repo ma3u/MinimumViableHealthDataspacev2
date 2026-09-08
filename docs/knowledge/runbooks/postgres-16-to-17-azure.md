@@ -4,7 +4,9 @@ title: Postgres 16 → 17 major upgrade on Azure (mvhd-postgres)
 description: Dump/restore migration for the ACA Postgres with persistent storage — closes the local/Azure major-version skew from ADR-029 §4.
 resource: scripts/azure/02-data-layer.sh, ADR-017 (persistent storage), ADR-029 §4
 tags: [runbook, postgres, azure, migration, issue-97]
-timestamp: 2026-07-15T00:00:00Z
+generated: { by: claude-code/fable-5, at: 2026-07-17T13:12:25Z }
+verified: { by: human:ma3u, at: 2026-07-17T13:12:25Z }
+status: stable
 ---
 
 > **⚠️ CORRECTED after the 2026-07-16 incident** (see

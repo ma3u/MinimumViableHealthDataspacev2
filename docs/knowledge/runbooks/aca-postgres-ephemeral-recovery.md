@@ -4,7 +4,9 @@ title: mvhd-postgres restart/loss recovery (Azure)
 description: Recover the full stack after the ephemeral ACA Postgres restarts or its revision is replaced — verified live during the 2026-07-16 incident.
 resource: incident 2026-07-16 (issue #97 rollout), .github/workflows/reset-demo.yml, jad/keycloak-realm.json
 tags: [runbook, postgres, azure, incident, recovery]
-timestamp: 2026-07-17T00:00:00Z
+generated: { by: claude-code/fable-5, at: 2026-07-17T13:12:25Z }
+verified: { by: human:ma3u, at: 2026-07-17T13:12:25Z }
+status: stable
 ---
 
 **Why this exists:** `mvhd-postgres` on ACA is effectively **ephemeral**. Its
