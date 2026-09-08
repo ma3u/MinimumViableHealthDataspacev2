@@ -116,3 +116,31 @@ repos:
         entry: bash -c 'cd ui && npm audit --audit-level=high --omit=dev'
         pass_filenames: false
         stages: [pre-push]
+
+  # GitHub Actions workflow linting.
+  # The ignore list suppresses shellcheck style/info codes that the existing
+  # workflows use pervasively (SC2129 grouped redirects, SC2086 word splitting
+  # in trusted literals, SC2209 literal assignment, SC2034 unused loop var).
+  # With those ignored the repo is at zero findings, so this hook is adoptable
+  # as a blocking gate without a cleanup backlog — keep it that way.
+  # Requires: brew install actionlint
+  - repo: local
+    hooks:
+      - id: actionlint
+        name: Lint GitHub Actions workflows
+        language: system
+        entry: bash -c 'if command -v actionlint >/dev/null 2>&1; then actionlint -ignore SC2129 -ignore SC2086 -ignore SC2209 -ignore SC2001 -ignore SC2016 -ignore SC2034 -ignore SC2012 "$@"; else echo "[WARN] actionlint not installed — skipping (brew install actionlint)"; fi' --
+        files: ^\.github/workflows/.*\.ya?ml$
+        stages: [pre-commit]
+
+      # The CVE scan matrix in security-scan.yml duplicates the compose image
+      # list because an Actions matrix cannot read docker-compose.yml. Without
+      # this check, bumping an image tag in compose leaves the scan pinned to
+      # the old image and still reporting green.
+      - id: image-scan-coverage
+        name: CVE scan covers every compose image
+        language: system
+        entry: ./scripts/check-image-scan-coverage.sh
+        files: ^(docker-compose.*\.yml|\.github/workflows/security-scan\.yml)$
+        pass_filenames: false
+        stages: [pre-commit]
