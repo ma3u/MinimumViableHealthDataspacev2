@@ -1,0 +1,172 @@
+name: Security Scan (SBOM + CVE)
+
+# Why this exists, on top of the existing `dependency-audit` job in test.yml:
+#
+#   * `npm audit` only sees npm packages. It cannot see Keycloak, Postgres,
+#     Neo4j, NATS, Traefik, Vault, or the JAD/EDC images — which is most of the
+#     attack surface in this stack.
+#   * Dependabot reads Dockerfile FROM lines, not docker-compose*.yml, so the
+#     infrastructure images pinned in compose are invisible to it too.
+#
+# This workflow closes both gaps: it produces a CycloneDX SBOM for the source
+# trees and scans the container images from the compose files, publishing
+# results to the GitHub Security tab.
+
+on:
+  schedule:
+    # Monday 04:30 UTC — before the 05:15 demo reset, so a bad image is known
+    # before the environment is rebuilt on it.
+    - cron: "30 4 * * 1"
+  workflow_dispatch:
+    inputs:
+      fail_on_severity:
+        description: "Fail the run at this severity or above"
+        type: choice
+        options: [none, critical, high]
+        default: none
+  pull_request:
+    paths:
+      - "ui/package*.json"
+      - "services/*/package*.json"
+      - "**/Dockerfile"
+      - "docker-compose*.yml"
+      - ".github/workflows/security-scan.yml"
+
+permissions:
+  contents: read
+  security-events: write
+
+concurrency:
+  group: security-scan-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ── Source dependencies: SBOM + CVE ──
+  source-sbom:
+    name: Source SBOM & CVEs
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: ui
+            path: ui
+          - name: neo4j-proxy
+            path: services/neo4j-proxy
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Generate CycloneDX SBOM
+        uses: anchore/sbom-action@v0
+        with:
+          path: ${{ matrix.path }}
+          format: cyclonedx-json
+          artifact-name: sbom-${{ matrix.name }}.cdx.json
+          output-file: sbom-${{ matrix.name }}.cdx.json
+
+      - name: Scan SBOM for vulnerabilities
+        id: grype
+        uses: anchore/scan-action@v6
+        with:
+          sbom: sbom-${{ matrix.name }}.cdx.json
+          output-format: sarif
+          # Report everything; gating is the explicit job below, so a new CVE
+          # never silently turns the whole pipeline red mid-sprint.
+          fail-build: false
+          severity-cutoff: low
+
+      - name: Upload SARIF to the Security tab
+        if: always() && steps.grype.outputs.sarif != ''
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: ${{ steps.grype.outputs.sarif }}
+          category: grype-${{ matrix.name }}
+
+  # ── Infrastructure images from docker-compose ──
+  image-scan:
+    name: Image CVEs
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        # Kept in step with docker-compose*.yml — scripts/check-image-scan-coverage.sh
+        # fails the build if an image is added there and not here. These are the
+        # images npm audit and Dependabot cannot reach. ghcr.io/ma3u/* images are
+        # omitted: they are built from this repo and covered by the source scan.
+        image:
+          - quay.io/keycloak/keycloak:26.6.4
+          - postgres:17.7-alpine
+          - neo4j:5.26.28-community
+          - nats:2.14.3-alpine
+          - traefik:v3.4
+          - hashicorp/vault:2.0
+          - curlimages/curl:8.21.0
+          # JAD / EDC stack — tagged by upstream git SHA, not digest-pinned, so
+          # the tag can move and these genuinely need scanning.
+          - ghcr.io/metaform/jad/controlplane:4a7e5bd096c58814748e956cc9329586ad309698
+          - ghcr.io/metaform/jad/dataplane:4a7e5bd096c58814748e956cc9329586ad309698
+          - ghcr.io/metaform/jad/identity-hub:4a7e5bd096c58814748e956cc9329586ad309698
+          - ghcr.io/metaform/jad/issuerservice:4a7e5bd096c58814748e956cc9329586ad309698
+    steps:
+      - name: Scan ${{ matrix.image }}
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: ${{ matrix.image }}
+          format: sarif
+          output: trivy.sarif
+          severity: CRITICAL,HIGH
+          ignore-unfixed: true
+          exit-code: "0"
+
+      - name: Derive a SARIF category
+        id: cat
+        run: echo "name=$(echo '${{ matrix.image }}' | tr '/:.' '___')" >> "$GITHUB_OUTPUT"
+
+      - name: Upload SARIF to the Security tab
+        if: always() && hashFiles('trivy.sarif') != ''
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: trivy.sarif
+          category: trivy-${{ steps.cat.outputs.name }}
+
+  # ── Explicit gate ──
+  # Separate from the scans so the reporting jobs always publish to the Security
+  # tab even when the gate fails, and so the gate can be tightened without
+  # touching scan configuration.
+  gate:
+    name: Severity gate
+    needs: [source-sbom, image-scan]
+    if: always() && github.event.inputs.fail_on_severity != 'none'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fail on ${{ github.event.inputs.fail_on_severity }}+
+        uses: anchore/scan-action@v6
+        with:
+          path: ui
+          fail-build: true
+          severity-cutoff: ${{ github.event.inputs.fail_on_severity }}
+
+  summary:
+    name: Summary
+    needs: [source-sbom, image-scan]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Write summary
+        run: |
+          {
+            echo "## Security scan"
+            echo ""
+            echo "| Job | Result |"
+            echo "| --- | --- |"
+            echo "| Source SBOM & CVEs | ${{ needs.source-sbom.result }} |"
+            echo "| Image CVEs | ${{ needs.image-scan.result }} |"
+            echo ""
+            echo "Findings are in the **Security → Code scanning** tab, grouped by"
+            echo "\`grype-*\` (source) and \`trivy-*\` (images) categories."
+            echo ""
+            echo "SBOMs are attached to this run as artifacts."
+          } >> "$GITHUB_STEP_SUMMARY"
