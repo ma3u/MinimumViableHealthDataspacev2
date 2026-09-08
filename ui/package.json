@@ -52,7 +52,7 @@
     "@typescript-eslint/eslint-plugin": "^8.69.0",
     "@typescript-eslint/parser": "^8.57.2",
     "@typescript-eslint/typescript-estree": "^8.57.2",
-    "@vitejs/plugin-react": "^5.1.4",
+    "@vitejs/plugin-react": "^6.1.1",
     "@vitest/coverage-v8": "^4.0.18",
     "autoprefixer": "^10.5.5",
     "eslint": "^8",
