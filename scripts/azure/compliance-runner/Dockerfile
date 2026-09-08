@@ -1,4 +1,4 @@
-FROM alpine:3.20
+FROM alpine:3.24
 # hadolint ignore=DL3018
 RUN apk add --no-cache bash curl jq coreutils
 WORKDIR /work
