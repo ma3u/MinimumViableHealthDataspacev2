@@ -249,6 +249,29 @@ report nothing:
    `severity-cutoff` that the action defaults to `medium` — failing PRs on
    exactly the findings it was configured not to fail on.
 
+## Why the Security tab gets CRITICAL only, not HIGH+
+
+The first working run of the image matrix uploaded **2,246 alerts** in one go —
+2,235 of them from the image scans, 872 from `neo4j:5.26.28-community` alone.
+That buried the 9 source findings a person could actually act on.
+
+Those thousands are not thousands of actions. A third-party base image we do not
+build has exactly one remediation — move to a newer tag — and enumerating it
+per-CVE in an alert list misrepresents one decision as a backlog. It is the same
+point already made about Neo4j's 300 highs above, just at the scale of every
+image at once.
+
+So the image jobs upload **CRITICAL** to the Security tab (29 alerts, an
+actionable number), and still measure **CRITICAL,HIGH** into the run summary and
+a 30-day artifact. Nothing is discarded; it is filed where it can be read.
+
+Source scans are unchanged: `grype` on `ui` and `neo4j-proxy` and the `test.yml`
+filesystem/config scan still report from `low` up, because those map to code in
+this repository where per-finding action is the right granularity.
+
+Revert by putting `severity: CRITICAL,HIGH` back on the SARIF step in
+`security-scan.yml` — one line per job.
+
 ## Open items
 
 - Keycloak image CVE baseline is still missing — the local scan did not

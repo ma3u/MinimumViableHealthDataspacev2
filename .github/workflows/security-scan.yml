@@ -111,12 +111,34 @@ jobs:
           - ghcr.io/metaform/jad/identity-hub:4a7e5bd096c58814748e956cc9329586ad309698
           - ghcr.io/metaform/jad/issuerservice:4a7e5bd096c58814748e956cc9329586ad309698
     steps:
-      - name: Scan ${{ matrix.image }}
+      # Two runs on purpose, because the Security tab and a human reviewer want
+      # different things from the same scan.
+      #
+      # CRITICAL-only goes to the Security tab. The first full HIGH+ upload put
+      # 2,235 alerts there in one run — 872 from the neo4j image alone — which
+      # buried the 9 source findings that a person could actually act on. Those
+      # thousands are not thousands of actions: a third-party base image we do
+      # not build has exactly one remediation, "move to a newer tag". Counting
+      # them per-CVE in an alert list misrepresents that as a backlog.
+      - name: Scan ${{ matrix.image }} — CRITICAL, for the Security tab
         uses: aquasecurity/trivy-action@v0.36.0
         with:
           image-ref: ${{ matrix.image }}
           format: sarif
           output: trivy.sarif
+          severity: CRITICAL
+          ignore-unfixed: true
+          exit-code: "0"
+
+      # HIGH+ still gets measured — it just lands in the run summary and an
+      # artifact instead of the alert list, so the counts stay reviewable
+      # without drowning the tab.
+      - name: Scan ${{ matrix.image }} — CRITICAL,HIGH, for the run summary
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          image-ref: ${{ matrix.image }}
+          format: table
+          output: trivy-table.txt
           severity: CRITICAL,HIGH
           ignore-unfixed: true
           exit-code: "0"
@@ -124,6 +146,25 @@ jobs:
       - name: Derive a SARIF category
         id: cat
         run: echo "name=$(echo '${{ matrix.image }}' | tr '/:.' '___')" >> "$GITHUB_OUTPUT"
+
+      - name: Publish counts to the run summary
+        if: always() && hashFiles('trivy-table.txt') != ''
+        run: |
+          {
+            echo "### ${{ matrix.image }}"
+            echo ""
+            echo '```'
+            head -c 60000 trivy-table.txt
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload the full HIGH+ report as an artifact
+        if: always() && hashFiles('trivy-table.txt') != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: trivy-high-${{ steps.cat.outputs.name }}
+          path: trivy-table.txt
+          retention-days: 30
 
       - name: Upload SARIF to the Security tab
         if: always() && hashFiles('trivy.sarif') != ''
@@ -204,7 +245,8 @@ jobs:
             # not hide the results for every other image.
             trivy image --quiet --scanners vuln --severity CRITICAL,HIGH \
               --ignore-unfixed --format table "$img" || fail=1
-            trivy image --quiet --scanners vuln --severity CRITICAL,HIGH \
+            # CRITICAL only in SARIF — see the rationale on the image-scan job.
+            trivy image --quiet --scanners vuln --severity CRITICAL \
               --ignore-unfixed --format sarif -o "trivy-out/${safe}.sarif" "$img" || fail=1
             echo "::endgroup::"
           done < deployed-images.txt
