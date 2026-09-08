@@ -112,7 +112,7 @@ jobs:
           - ghcr.io/metaform/jad/issuerservice:4a7e5bd096c58814748e956cc9329586ad309698
     steps:
       - name: Scan ${{ matrix.image }}
-        uses: aquasecurity/trivy-action@0.28.0
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           image-ref: ${{ matrix.image }}
           format: sarif
@@ -145,8 +145,13 @@ jobs:
     name: Deployed image CVEs
     runs-on: ubuntu-latest
     timeout-minutes: 45
-    # Needs the Azure federated credentials, which are not available to forks.
-    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+    # Azure OIDC only: the app registration has a single federated credential,
+    # subject `repo:ma3u/MinimumViableHealthDataspacev2:ref:refs/heads/main`.
+    # A pull_request run presents subject `...:pull_request` and a dispatch from
+    # a topic branch presents that branch's ref, so `azure/login` fails for both.
+    # Scheduled runs use the default branch and do match. Widening this needs a
+    # new federated credential, not a workflow change.
+    if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main')
     steps:
       - uses: actions/checkout@v4
 
@@ -206,7 +211,7 @@ jobs:
           [ "$fail" -eq 0 ] || echo "::warning::at least one deployed image could not be scanned"
 
       - name: Upload deployed-image SARIF
-        if: always()
+        if: always() && hashFiles('trivy-out/*.sarif') != ''
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: trivy-out
@@ -219,7 +224,7 @@ jobs:
   gate:
     name: Severity gate
     needs: [source-sbom, image-scan, deployed-image-scan]
-    if: always() && github.event.inputs.fail_on_severity != 'none'
+    if: always() && github.event_name == 'workflow_dispatch' && github.event.inputs.fail_on_severity != 'none'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
