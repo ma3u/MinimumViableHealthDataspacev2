@@ -167,12 +167,17 @@ export async function loginAsAdmin(page: Page) {
     // working after a demo reset is the single most important thing the
     // post-reset smoke job can catch; skipping would turn that into a green
     // run, which is how issue #115 stayed invisible for two months.
+    const base = process.env.PLAYWRIGHT_BASE_URL || "http://localhost:3000";
     throw new Error(
-      `loginAs("edcadmin") failed against ${
-        process.env.PLAYWRIGHT_BASE_URL || "http://localhost:3000"
-      }.\n` +
-        `  Check the Keycloak 'edcv' realm has the edcadmin user with the ` +
-        `EDC_ADMIN role: ./scripts/provision-keycloak-sso.sh\n` +
+      `loginAs("edcadmin") failed against ${base}.\n` +
+        `  Two causes, in the order they are worth checking:\n` +
+        `  1. Base URL mismatch. If the error mentions 'OAuthCallback', the ` +
+        `base URL above is not the host NEXTAUTH_URL is set to, so the PKCE/` +
+        `state cookies are set on one hostname and the callback lands on ` +
+        `another. Target the custom domain, not the raw ACA FQDN.\n` +
+        `  2. Realm drift. If the error is 'Invalid username or password', the ` +
+        `edcadmin user or its EDC_ADMIN role is missing: ` +
+        `./scripts/provision-keycloak-sso.sh\n` +
         `  Original error: ${(err as Error).message}`,
     );
   }
