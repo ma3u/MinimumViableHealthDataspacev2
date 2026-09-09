@@ -292,6 +292,36 @@ jobs:
           fi
           echo "edcv realm imported and reachable (HTTP $VERIFY)"
 
+      # ── Step 1c: Verify the personas can actually authenticate ──
+      # The import above proves the realm EXISTS (discovery answers 200). It
+      # does not prove anyone can log in, and those are different things: on
+      # 2026-09-08 the local realm answered discovery fine while missing three
+      # users and three roles outright, and two more users carried only half
+      # their roles. A realm that exists but cannot authenticate is exactly the
+      # state that produced the login outage this workflow is meant to prevent.
+      #
+      # The import also logs `Referenced client scope 'offline_access' doesn't
+      # exist`, so it is not a clean apply and should not be trusted on its own.
+      #
+      # provision-keycloak-sso.sh reconciles roles, users, passwords and role
+      # mappings from jad/keycloak-realm.json, then obtains a token for every
+      # account and exits non-zero if any cannot log in. That turns a silently
+      # bad import into a failed reset instead of leaving it for the smoke job.
+      - name: Verify demo logins work
+        run: |
+          KC_FQDN=$(az containerapp show --name mvhd-keycloak \
+            --resource-group ${{ env.RESOURCE_GROUP }} \
+            --query "properties.configuration.ingress.customDomains[0].name" -o tsv 2>/dev/null || echo "")
+          if [ -z "$KC_FQDN" ] || [ "$KC_FQDN" = "None" ]; then
+            KC_FQDN=$(az containerapp show --name mvhd-keycloak \
+              --resource-group ${{ env.RESOURCE_GROUP }} \
+              --query "properties.configuration.ingress.fqdn" -o tsv)
+          fi
+          KC_HOST="https://${KC_FQDN}" \
+          KC_ADMIN_USER=admin \
+          KC_ADMIN_PASSWORD=admin \
+            ./scripts/provision-keycloak-sso.sh
+
       # ── Step 2: Run Vault bootstrap job (Vault init + keys) ──
       # Job names must match scripts/azure/env.sh (NEO4J_SEED_JOB etc.) —
       # earlier revisions used phantom names (mvhd-bootstrap-job,
