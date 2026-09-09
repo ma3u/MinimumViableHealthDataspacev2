@@ -1,0 +1,111 @@
+name: Python Service Tests
+
+# Runs the pytest suites that CI previously never executed (issue #170).
+#
+# catalog-crawler and catalog-enricher each ship a real test suite, but their
+# only workflows — catalog-crawler.yml / catalog-enricher.yml — are `push:
+# branches: [main]` DEPLOY jobs. Nothing ran on a pull request, so merging a
+# change to either service both shipped it untested AND triggered a production
+# rebuild of the ACA Job. Four dependency PRs went through that way on
+# 2026-09-09 (#124, #127, #151); they passed only because the suites were run
+# by hand first.
+#
+# scripts/leitlinien is included for the same reason: its uv.lock carried
+# 4 high + 1 medium advisory that only the Trivy scan surfaced (#114), and
+# nothing runs its 26 unit tests.
+#
+# Per ADR-031, each job asserts an outcome and exits non-zero — a missing
+# suite fails rather than silently passing.
+
+on:
+  pull_request:
+    paths:
+      - "services/catalog-crawler/**"
+      - "services/catalog-enricher/**"
+      - "scripts/leitlinien/**"
+      - ".github/workflows/python-services-test.yml"
+  push:
+    branches: ["main"]
+    paths:
+      - "services/catalog-crawler/**"
+      - "services/catalog-enricher/**"
+      - "scripts/leitlinien/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: python-services-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  pytest:
+    name: ${{ matrix.name }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: catalog-crawler
+            path: services/catalog-crawler
+            install: ".[dev]"
+          - name: catalog-enricher
+            path: services/catalog-enricher
+            install: ".[dev]"
+          - name: leitlinien
+            path: scripts/leitlinien
+            install: "uv"
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install uv
+        run: pipx install uv
+
+      # `uv run --frozen` for leitlinien so the lockfile is exercised as
+      # committed — a test run that silently re-resolves would not tell us the
+      # lock is usable, which is the thing #114 found broken.
+      - name: Install dependencies
+        working-directory: ${{ matrix.path }}
+        run: |
+          if [ "${{ matrix.install }}" = "uv" ]; then
+            uv sync --frozen --all-extras
+          else
+            uv venv .venv
+            uv pip install -e "${{ matrix.install }}"
+          fi
+
+      - name: Assert a test suite exists
+        working-directory: ${{ matrix.path }}
+        run: |
+          # A suite that vanishes must fail the job, not pass it by collecting
+          # zero tests (ADR-031).
+          count=$(find . -name 'test_*.py' -not -path './.venv/*' | wc -l | tr -d ' ')
+          echo "test files: $count"
+          if [ "$count" -eq 0 ]; then
+            echo "::error::No test files found in ${{ matrix.path }}"
+            exit 1
+          fi
+
+      - name: pytest
+        working-directory: ${{ matrix.path }}
+        run: |
+          if [ "${{ matrix.install }}" = "uv" ]; then
+            uv run --frozen pytest -q
+          else
+            .venv/bin/python -m pytest -q
+          fi
+
+      - name: ruff
+        working-directory: ${{ matrix.path }}
+        run: |
+          if [ "${{ matrix.install }}" = "uv" ]; then
+            uv run --frozen ruff check . || echo "::warning::ruff findings (not gating)"
+          else
+            .venv/bin/python -m ruff check . || echo "::warning::ruff findings (not gating)"
+          fi
