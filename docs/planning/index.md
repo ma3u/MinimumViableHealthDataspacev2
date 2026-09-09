@@ -12,6 +12,7 @@ Groom with `/plan`. Token budget per ADR-026: keep this index small.
 - [issue-97-phase-b-analysis](current/issue-97-phase-b-analysis.md) — EDC v0.18 breaking-change analysis + upstream-image strategy
 - [issue-20-leitlinien-ingestion](current/issue-20-leitlinien-ingestion.md) — AWMF Leitlinien Layer-6 ingestion (Docling)
 - [issue-19-nlq-researcher](current/issue-19-nlq-researcher.md) — NLQ researcher improvements (pharmacovigilance)
+- [Issue #5 — completing the pentest checklist](current/issue-5-pentest-completion.md) — the five items that need a harness, not a probe
 - [issue-4-bsi-c5-production](current/issue-4-bsi-c5-production.md) — BSI C5 production security track
 
 ## future/
