@@ -251,6 +251,15 @@ services:
       web.http.path: "/api"
       web.http.protocol.port: "8082"
       web.http.protocol.path: "/api/dsp"
+      # Outbound DSP address. Without it the connector cannot address a
+      # counterparty and every negotiation dies with
+      #   "No callback address found for protocol: dataspace-protocol-http:2025-1"
+      # while catalog requests return
+      #   502 "No provider dispatcher registered for protocol: ..."
+      # Azure already sets this (scripts/azure/04-edc-services.sh), so the DSP
+      # path worked there and was broken only in the local stack — the two
+      # configurations had drifted.
+      edc.dsp.callback.address: "http://controlplane:8082/api/dsp"
       web.http.management.port: "8081"
       web.http.management.path: "/api/mgmt"
       web.http.control.port: "8083"
@@ -262,6 +271,22 @@ services:
       edc.nats.tp.subscriber.url: "nats://nats:4222"
       edc.nats.tp.subscriber.autocreate: "true"
       edc.nats.tp.publisher.url: "nats://nats:4222"
+
+      # MANDATORY since jad PR #108 — the NATS Event Publishing Extension fails
+      # dependency injection without these, and the connector never starts:
+      #   SEVERE Configuration object "natsConfig" ... is required by extension
+      #   NATS Event Publishing Extension
+      #   EdcException: Problems occurred during dependency injection
+      #
+      # #102 promoted the 0.18 launchers and its commit message records fixing
+      # this "via env", but the settings were never committed to any compose
+      # file. The container that had been running carried them from somewhere
+      # untracked, so `docker restart` kept working while
+      # `docker compose up -d controlplane` — which recreates from this file —
+      # produced a crash-looping connector. Found 2026-09-09.
+      edc.events.nats.url: "nats://nats:4222"
+      edc.events.nats.stream: "edc-events"
+      edc.events.nats.stream.create: "true"
       # Database
       edc.datasource.default.url: "jdbc:postgresql://postgres:5432/controlplane"
       edc.datasource.default.user: "cp"
