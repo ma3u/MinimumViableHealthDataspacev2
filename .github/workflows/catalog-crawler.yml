@@ -35,7 +35,18 @@ env:
   CUSTOM_DOMAIN: ehds.mabu.red
 
 jobs:
+  # Gate the deploy on the service's own test suite. Before #173 nothing ran
+  # these on a pull request, and a push to main rebuilt and redeployed the ACA
+  # Job regardless — so a broken change shipped to the demo environment with no
+  # signal. #175 proved the risk is live: Dependabot proposed pytest 9, which is
+  # unresolvable against pytest-asyncio 0.24, and only the new test job caught it.
+  test:
+    uses: ./.github/workflows/python-services-test.yml
+    with:
+      service: catalog-crawler
+
   deploy:
+    needs: test
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:

@@ -31,6 +31,16 @@ on:
       - "services/catalog-enricher/**"
       - "scripts/leitlinien/**"
   workflow_dispatch:
+  # Callable so the deploy workflows gate on THIS definition instead of a
+  # duplicate. Three copies of the same pytest invocation would drift, and the
+  # copy that drifts is the one that stops asserting (ADR-031).
+  workflow_call:
+    inputs:
+      service:
+        description: "Limit to one service; omit to run all three"
+        type: string
+        required: false
+        default: ""
 
 permissions:
   contents: read
@@ -46,17 +56,17 @@ jobs:
     timeout-minutes: 15
     strategy:
       fail-fast: false
+      # Chosen from `inputs.service` so a caller gating one deploy runs exactly
+      # that suite. `matrix` is not available in a job-level `if:`, and putting
+      # the guard on the steps would leave a job reporting success having
+      # asserted nothing — precisely the failure ADR-031 exists to prevent.
       matrix:
-        include:
-          - name: catalog-crawler
-            path: services/catalog-crawler
-            install: ".[dev]"
-          - name: catalog-enricher
-            path: services/catalog-enricher
-            install: ".[dev]"
-          - name: leitlinien
-            path: scripts/leitlinien
-            install: "uv"
+        include: ${{ fromJSON(
+          inputs.service == 'catalog-crawler' && '[{"name":"catalog-crawler","path":"services/catalog-crawler","install":".[dev]"}]'
+          || inputs.service == 'catalog-enricher' && '[{"name":"catalog-enricher","path":"services/catalog-enricher","install":".[dev]"}]'
+          || inputs.service == 'leitlinien' && '[{"name":"leitlinien","path":"scripts/leitlinien","install":"uv"}]'
+          || '[{"name":"catalog-crawler","path":"services/catalog-crawler","install":".[dev]"},{"name":"catalog-enricher","path":"services/catalog-enricher","install":".[dev]"},{"name":"leitlinien","path":"scripts/leitlinien","install":"uv"}]'
+          ) }}
     steps:
       - uses: actions/checkout@v4
 
