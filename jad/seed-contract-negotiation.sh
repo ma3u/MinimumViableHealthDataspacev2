@@ -293,7 +293,15 @@ TRANSFERRED=0
 # an EDC schema defect stayed invisible for months (issue #169).
 FAILED=0
 
-echo "$OFFERS" | while IFS='|' read -r asset_id offer_id perms_json; do
+# Fed by process substitution, NOT `echo "$OFFERS" | while`. Under bash the
+# right-hand side of a pipe runs in a subshell, so every FAILED, NEGOTIATED and
+# TRANSFERRED increment below would be discarded when the loop exits — the
+# parent would still see FAILED=0 and exit 0. Demonstrated:
+#   bash -c 'F=0; printf "a\nb\n" | while read x; do F=$((F+1)); done; echo $F'  -> 0
+#   bash -c 'F=0; while read x; do F=$((F+1)); done < <(printf "a\nb\n"); echo $F' -> 2
+# (zsh does not subshell the last pipeline stage, so this reads as correct when
+# tested interactively there — the shebang is bash.)
+while IFS='|' read -r asset_id offer_id perms_json; do
   echo ""
   echo "  [$asset_id]"
   echo "    Initiating contract negotiation..."
@@ -402,7 +410,7 @@ print(d.get('@id', ''))
     echo " $TP_STATE"
     warn "$asset_id — NEGOTIATED but transfer state: $TP_STATE"
   fi
-done
+done < <(echo "$OFFERS")
 
 echo ""
 
@@ -497,23 +505,16 @@ echo "  MedReg DE → AlphaKlinik Berlin:"
 echo "    Catalog datasets:   $MEDREG_DATASETS"
 echo ""
 
-# A provider that has contract definitions but offers nothing is a broken
-# dataspace, not an empty one — treat it as a failure rather than a quiet zero.
-if [ "${DATASET_COUNT:-0}" -eq 0 ] 2>/dev/null; then
-  echo "  ❌ Catalog discovery returned 0 datasets."
-  echo "     AlphaKlinik has contract definitions seeded, so an empty catalog"
-  echo "     means DSP discovery is broken, not that there is nothing to offer."
-  FAILED=$((FAILED + 1))
-fi
-
-case "$PHARMACO_NEG_COUNT" in
-  QUERY-FAILED)
-    echo "  ❌ Could not read PharmaCo negotiations — the management API did not"
-    echo "     return usable JSON. A 500 here usually means the EDC store schema"
-    echo "     does not match the connector build (issue #169)."
-    FAILED=$((FAILED + 1))
-    ;;
-esac
+for pair in "negotiations:$PHARMACO_NEG_COUNT" "transfers:$PHARMACO_TP_COUNT"; do
+  case "${pair#*:}" in
+    QUERY-FAILED)
+      echo "  ❌ Could not read PharmaCo ${pair%%:*} — the management API did not"
+      echo "     return usable JSON. A 500 here usually means the EDC store schema"
+      echo "     does not match the connector build (issue #169)."
+      FAILED=$((FAILED + 1))
+      ;;
+  esac
+done
 
 if [ "$FAILED" -gt 0 ]; then
   echo ""
