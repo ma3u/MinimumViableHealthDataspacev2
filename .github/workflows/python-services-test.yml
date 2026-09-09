@@ -46,7 +46,14 @@ permissions:
   contents: read
 
 concurrency:
-  group: python-services-${{ github.ref }}
+  # The service must be in the key. Both catalog-* deploy workflows call this on
+  # push to main, so with a ref-only group they shared one slot and
+  # cancel-in-progress made the second call kill the first: on 2026-09-09 the
+  # enricher's call cancelled `test / catalog-crawler`, which skipped the
+  # crawler's deploy entirely. Nothing shipped untested — but a legitimate
+  # deploy vanished with no failure to point at, which is the harder kind of
+  # broken to notice.
+  group: python-services-${{ github.ref }}-${{ inputs.service || 'all' }}
   cancel-in-progress: true
 
 jobs:
