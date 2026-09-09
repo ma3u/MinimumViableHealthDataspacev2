@@ -128,7 +128,20 @@ export default async function middleware(req: NextRequest) {
     const token = await getToken({ req });
     if (!token) {
       const signInUrl = new URL("/auth/signin", req.url);
-      signInUrl.searchParams.set("callbackUrl", req.url);
+      // Path-relative, NOT req.url. Inside the container req.url resolves to
+      // the internal bind address, so this emitted
+      // `callbackUrl=https://0.0.0.0:3000/admin` on production — deep-linking
+      // to a protected page and signing in sent the user to an unreachable
+      // host instead of where they were going. Found running the issue #5
+      // pentest checklist (J840-J842).
+      //
+      // A relative path is also the safer shape: NextAuth resolves it against
+      // NEXTAUTH_URL, so it cannot be used to bounce a signed-in user to an
+      // external origin.
+      signInUrl.searchParams.set(
+        "callbackUrl",
+        `${req.nextUrl.pathname}${req.nextUrl.search}`,
+      );
       return withCspResponse(NextResponse.redirect(signInUrl), csp, nonce);
     }
     const required = requiresRole(pathname);
