@@ -1,0 +1,116 @@
+{
+  "title": "Consent Wallet for the European Health Data Space",
+  "subtitle": "Watch my phone, not a slide — the EUDI Wallet as the citizen's verifiable, withdrawable channel to exercise their EHDS secondary-use rights: opt out by default, consent where the law requires. Running today on a real EHDS reference stack — synthetic data only.",
+  "tagline": "From honeypot to handset: opt out in your wallet, and the research gate goes dark.",
+  "framing": "Regulation-first spine (unanimous SPRIND/BSI/policy pick) + demo-first cold-open (coach pick) + Lena as a 15s labelled-synthetic anchor. Fact-check corrections applied: EHDS secondary use is HDAB-permit + opt-out (NOT GDPR 9(2)(a) opt-in consent); the wallet exercises the citizen's opt-out/consent right, it is not the legal basis. Revocation = auditable in-graph withdrawal driving a governance re-check (never cryptographic credential revocation; status-list is roadmap). Verifier = hosted EUDI reference verifier. Scope = static schema today, dynamic per-study on the roadmap. Max 4 bullets/slide; articles conservative and exact.",
+  "slides": [
+    {
+      "kind": "title",
+      "n": 0,
+      "title": "",
+      "bullets": [],
+      "visual": "",
+      "speakerNotes": "Open cold. Don't read the slide — start the 15-20s pre-recorded capture of Lena opting out in her EUDI wallet and the governance gate flipping to DENIED. Then: 'That's the whole pitch. Let me show you why one tap on a phone matters to the European Health Data Space.'"
+    },
+    {
+      "n": 1,
+      "title": "Watch my phone, not a slide",
+      "bullets": [
+        "Lena (34, synthetic patient) opts out of research use — in her EUDI Wallet",
+        "Re-run the governance gate → researcher access DENIED",
+        "Synthetic data · fictional orgs · standard eIDAS 2.0 + EHDS protocols",
+        "The idea: consent & opt-out as a wallet-held, verifiable, withdrawable trust primitive — no central registry"
+      ],
+      "image": "governance.png",
+      "visual": "MVHD governance gate — APPROVED, then DENIED after Lena opts out",
+      "speakerNotes": "Don't read a slide — watch my phone. This is Lena, a synthetic patient, in her EUDI Wallet. She opts out of research use of her data. I re-run our governance gate — and the researcher's access is denied. That's the pitch: the citizen's secondary-use choice as a wallet-held, verifiable, withdrawable trust primitive — no central registry. Synthetic data, standard eIDAS and EHDS protocols. Here's why that one tap matters."
+    },
+    {
+      "n": 2,
+      "title": "The regulation ships a gap",
+      "bullets": [
+        "EHDS (Reg. 2025/327, Ch. IV): secondary use runs on an HDAB data permit + a citizen right to opt out — no reason needed",
+        "eIDAS 2.0 (Reg. 2024/1183) ships the wallet, PID and EAA — the missing citizen-facing channel",
+        "The gap: no standardised, citizen-held, machine-verifiable opt-out + consent channel",
+        "Default fallback = a central opt-out registry: a honeypot the citizen never really controls"
+      ],
+      "visual": "Three article-stamped blocks — EHDS Ch. IV (HDAB data permit + opt-out, no reason) · eIDAS 2.0 (wallet, PID, EAA, selective disclosure) · GDPR (HDAB assesses the Art. 6 basis; Art. 7(3) withdrawal where consent applies) — with a glaring red dashed gap in the middle labelled 'NO standardised citizen-held opt-out + consent channel'. Below: a crossed-out central database cylinder captioned 'opt-out honeypot — single point of failure'.",
+      "speakerNotes": "Here's the policy gap. EHDS Chapter Four lets researchers reuse health data on a permit from a Health Data Access Body — but every citizen has the right to opt out, at any time, without giving a reason. EHDS even mandates 'an accessible, easily understandable opt-out mechanism' — yet specifies no standard for it. eIDAS 2.0 hands every citizen a wallet with attestations. What no regulation ships is the standardised, citizen-held channel to exercise and prove that choice. The fallback is a central registry — a honeypot, opaque, no real control."
+    },
+    {
+      "n": 3,
+      "title": "The use case, in one sentence",
+      "bullets": [
+        "The EUDI Wallet becomes the citizen's channel to exercise their EHDS secondary-use rights",
+        "Opt out by default · explicit consent where the law requires it · withdraw at any time",
+        "Keycloak issues a verifiable preference attestation — SD-JWT VC, dc+sd-jwt, ES256",
+        "Selective disclosure: the researcher sees patient_pseudonym, never the name (data minimisation)"
+      ],
+      "visual": "The wallet card (deep-navy #0b3d66 'EHDS Patient Identity') with literal claim chips: consent_purpose=secondary-use/research · consent_scope=drug-repurposing-study · patient_pseudonym=•••• · role=PATIENT, with family_name greyed/withheld to prove selective disclosure. Arrow labelled 'OpenID4VP' to the governance PASS/FAIL panel. Footnote chip: 'sovereignty by architecture — no central opt-out store'.",
+      "speakerNotes": "In one sentence: the EUDI Wallet becomes the citizen's channel to exercise their EHDS secondary-use rights — opt out by default, consent where the law requires it, withdraw any time. Our Keycloak bridge issues that choice as a verifiable SD-JWT attestation, ES256-signed. Selective disclosure means the researcher sees a pseudonym, never Lena's name — eIDAS data minimisation by construction. Every access is gated by the live record derived from that credential."
+    },
+    {
+      "n": 4,
+      "title": "Live demo: grant → govern → withdraw",
+      "bullets": [
+        "1 GRANT — Lena gets a PID via the EUDI reference issuer; presents at the MVHD portal; her preference attestation is issued back to the wallet",
+        "2 GOVERN — MedReg DE (HDAB) issues PharmaCo's data permit; Lena has not opted out → governance gate APPROVES",
+        "3 WITHDRAW — Lena opts out in the wallet → PatientConsent marked withdrawn (auditable, timestamped) → re-run gate → DENIED",
+        "All synthetic: 127 patients · 5,300+ nodes · AlphaKlinik Berlin · PharmaCo Research AG · MedReg DE"
+      ],
+      "image": "governance.png",
+      "visual": "MVHD governance check (PASS/FAIL) — the reliable gate visual for the demo",
+      "speakerNotes": "Three beats, all synthetic. Grant: Lena obtains a PID via the EUDI reference issuer, presents at our portal, and her preference attestation lands in her wallet. Govern: MedReg DE — our Health Data Access Body — issues PharmaCo's data permit; because Lena has not opted out, the permitted research can use her data and the gate approves. Withdraw: Lena opts out; we record it, auditable and timestamped, and re-run the same gate. Denied. The choice is authoritative at the access boundary — re-checked per query, never deleted."
+    },
+    {
+      "n": 5,
+      "title": "Why us: regulation, running",
+      "bullets": [
+        "MVHD: a working EHDS reference stack — DSP 2025-1, HealthDCAT-AP, FHIR R4, OMOP CDM, SNOMED/ICD-10/RxNorm/LOINC",
+        "Keycloak OID4VCI bridge issues the SD-JWT preference attestation into the EUDI wallet today",
+        "HDAB permit flow + DCP v1.0 org trust + ODRL 2.2 policies + contract/transfer chain — built",
+        "EUDI iOS reference wallet in simulator; presentation via the hosted EUDI reference verifier — not a 48h mockup"
+      ],
+      "image": "graph.png",
+      "visual": "The real 5-layer EHDS knowledge graph (L1 marketplace → L5 ontologies)",
+      "speakerNotes": "Most teams spend the hackathon building the backend. We already have it. MVHD is a working EHDS reference stack — a five-layer knowledge graph from the dataspace marketplace down to SNOMED and LOINC, with the Health Data Access Body permit flow, DCP machine trust and ODRL policies. Our Keycloak bridge issues the preference attestation into the wallet over OpenID4VCI today; presentation runs through the hosted EUDI reference verifier. It's not a mockup — it's a running stack."
+    },
+    {
+      "n": 6,
+      "title": "Regulation & privacy-by-design",
+      "bullets": [
+        "eIDAS 2.0 (2024/1183) → the attestation: PID + EAA, selective disclosure, data minimisation",
+        "EHDS (2025/327, Ch. IV) → HDAB permit + opt-out: MedReg DE issues the permit; the citizen's opt-out is honoured at the gate",
+        "GDPR → HDAB assesses the Art. 6 basis; Art. 7(3) withdrawal where consent applies; the EHDS opt-out needs no reason (beyond Art. 21)",
+        "Honest scope: enforced at the access boundary today; cryptographic status-list (IETF Token Status List, draft) is roadmap"
+      ],
+      "visual": "Article-to-feature mapping: each regulation block wired by an arrow to the exact built feature that satisfies it (eIDAS → EAA / selective disclosure · EHDS Ch. IV → HDAB permit + opt-out honoured at the gate · GDPR Art. 6 basis assessed by HDAB / Art. 7(3) withdrawal). A side ribbon marks built vs roadmap so the honesty is visible, not hidden in the notes.",
+      "speakerNotes": "Every step maps to an exact anchor — and we're precise about which. eIDAS 2.0 gives the attestation with selective disclosure: pseudonym, not name. EHDS Chapter Four is permit-plus-opt-out: the HDAB issues the permit and assesses the GDPR Article 6 basis; the citizen's opt-out is what the gate honours — no reason required, which goes beyond GDPR's Article 21. Where consent is the basis, Article 7(3) is the withdrawal. And we're honest: enforcement is at the access boundary today; a cryptographic status-list is roadmap. No central opt-out honeypot — the choice travels with the citizen."
+    },
+    {
+      "n": 7,
+      "title": "Impact + the ask",
+      "bullets": [
+        "Impact: the trust gap that slows EHDS secondary use — addressed by a citizen-held, verifiable, withdrawable opt-out/consent channel",
+        "Primary ask: shortlist us for EUDI ON — we'll run a live grant → govern → withdraw in Berlin",
+        "Co-develop: standardise the preference-attestation schema (purpose · scope · opt-out) as a reusable EHDS EAA — with HDABs in the loop",
+        "SPRIND/BSI input: treat the in-wallet opt-out as a first-class verifiable trust primitive"
+      ],
+      "kind": "closing",
+      "visual": "Closing: freeze-frame of the wallet opt-out action with the governance panel flipped to DENIED behind it; tagline large across the bottom. QR to the live MVHD portal + repo. A 3-step chevron: Shortlist → EUDI ON live demo → SPRIND/BSI-guided pilot with a fictional HDAB on synthetic cohorts.",
+      "speakerNotes": "The impact: what slows EHDS secondary use is trust, and a citizen-held, verifiable, withdrawable opt-out rebuilds it. Three asks. One: shortlist us for EUDI ON — we'll run grant, govern, withdraw live. Two: co-develop the preference-attestation schema as a reusable EHDS standard, with Health Data Access Bodies in the loop. Three: SPRIND and BSI input on treating the in-wallet opt-out as a first-class trust primitive. From honeypot to handset — sovereignty, no central registry."
+    },
+    {
+      "n": 8,
+      "title": "What's next",
+      "bullets": [
+        "Dynamic, purpose-bound issuance: citizen-selected scope per study (today: one fixed schema, demonstrated)",
+        "Cryptographic revocation: adopt the IETF Token Status List (draft) so verifiers learn opt-out without a server round-trip",
+        "Self-hosted OID4VP verifier path + SPRIND-sandbox PID conformance (not yet achieved)",
+        "Pilot: a fictional HDAB on synthetic cohorts → a reusable pattern any EHDS dataspace adopts"
+      ],
+      "visual": "Roadmap horizon graphic in three lanes — Now (built: SD-JWT attestation, HDAB gate, auditable in-graph withdrawal) → Next (status-list revocation, dynamic scope selection, self-hosted verifier) → Pilot (HDAB trial on synthetic cohorts, schema standardisation). Each item tagged built / next / pilot so the jury sees an honest, fundable progression.",
+      "speakerNotes": "Where this goes. Today the schema is fixed and demonstrated; next is dynamic, citizen-selected scope per study. We'll add an IETF Token Status List — still a draft — so a verifier learns the opt-out cryptographically, not just at our gate. We'll stand up our own verifier alongside the hosted reference one, achieve conformance against the SPRIND sandbox, then pilot with a fictional Health Data Access Body on synthetic cohorts — a pattern any EHDS dataspace can reuse."
+    }
+  ]
+}
