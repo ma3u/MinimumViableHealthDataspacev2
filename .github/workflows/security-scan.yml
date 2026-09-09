@@ -221,6 +221,14 @@ jobs:
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
 
+      # Conformance, not scanning: every check that looked like a pinning check
+      # read the repo rather than the cluster, so issue #116 (8 of 15 apps on
+      # :latest, frozen on an April digest) sat unnoticed while ADR-029
+      # conformance appeared satisfied. This job already resolves the live image
+      # list, so the data was always here — nothing was asserting on it.
+      - name: Verify no app runs a floating :latest tag
+        run: ./scripts/check-deployed-image-pins.sh
+
       - name: ACR login
         run: az acr login --name acrmvhdehds
 

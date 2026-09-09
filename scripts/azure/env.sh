@@ -90,25 +90,33 @@ export NEO4J_IMAGE="${ACR_LOGIN_SERVER}/neo4j:${NEO4J_VERSION}"
 export KEYCLOAK_IMAGE="${ACR_LOGIN_SERVER}/keycloak:${KEYCLOAK_VERSION}"
 export VAULT_IMAGE="${ACR_LOGIN_SERVER}/vault:${VAULT_VERSION}"
 export NATS_IMAGE="${ACR_LOGIN_SERVER}/nats:${NATS_VERSION}"
-# JAD / CFM images (issue #116). Unlike mvhd-ui above these are NOT ours and are
-# NOT rebuilt on merge, so `:latest` buys nothing and costs a lot: ACA caches
-# `:latest` and will not re-pull on restart (gotcha #6), so each app is frozen on
-# whatever digest was current when its revision was created — 2026-04-14 for all
-# seven — and "which EDC build is in production?" has no answer.
+# JAD / CFM images (issue #116). Unlike mvhd-ui these are NOT ours and are NOT
+# rebuilt on merge, so `:latest` bought nothing and cost a lot: ACA caches
+# `:latest` and will not re-pull on restart (gotcha #6), freezing each app on
+# whatever digest its revision was created with, with nothing to roll back to.
 #
-# Routing them through variables so the pin is a one-line change. They stay at
-# `latest` because that is still ACR's only tag for these repositories; flipping
-# the values below requires pushing the tagged images FIRST, or every deploy
-# breaks on a missing tag:
+# Pinned to the BUILD DATE, not a git SHA. #116 suggested tagging these with the
+# upstream commit `4a7e5bd…` that docker-compose.jad.yml uses, and an earlier
+# revision of this comment repeated that. It is wrong: the ACR images are a
+# different build. Measured 2026-09-09 —
 #
-#   JAD_VERSION="4a7e5bd096c58814748e956cc9329586ad309698"   # upstream git SHA,
-#                                                            # matches docker-compose.jad.yml
-#   docker buildx build --platform linux/amd64 \
-#     -t "${ACR_LOGIN_SERVER}/jad-controlplane:${JAD_VERSION}" --push .
+#   ACR jad-controlplane:latest        sha256:2516cbeb…  (built 2026-04-14)
+#   ghcr …/controlplane:4a7e5bd…       sha256:37b7840b…  (linux/amd64)
 #
-# See scripts/azure/build-images.sh for the full per-image command list.
-export JAD_VERSION="${JAD_VERSION:-latest}"
-export CFM_VERSION="${CFM_VERSION:-latest}"
+# Issue #97 Phase A already recorded that these images carry no OCI labels and
+# their source commits are unrecoverable, so a SHA tag would assert a provenance
+# the image does not have — worse than `:latest`, because it looks authoritative.
+# The build date is what we can actually verify.
+#
+# The tags were created by aliasing the digest already running, so pinning is a
+# content-free change:
+#   az acr import -n acrmvhdehds \
+#     --source acrmvhdehds.azurecr.io/<repo>@<digest> --image <repo>:2026-04-14
+#
+# scripts/check-deployed-image-pins.sh fails if any deployed app resolves to
+# `:latest`, which is the check that was missing when #116 went unnoticed.
+export JAD_VERSION="${JAD_VERSION:-2026-04-14}"
+export CFM_VERSION="${CFM_VERSION:-2026-04-14}"
 export CONTROLPLANE_IMAGE="${ACR_LOGIN_SERVER}/jad-controlplane:${JAD_VERSION}"
 export DP_FHIR_IMAGE="${ACR_LOGIN_SERVER}/jad-dataplane:${JAD_VERSION}"
 export DP_OMOP_IMAGE="${ACR_LOGIN_SERVER}/jad-dataplane:${JAD_VERSION}"
