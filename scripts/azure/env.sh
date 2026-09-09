@@ -90,13 +90,32 @@ export NEO4J_IMAGE="${ACR_LOGIN_SERVER}/neo4j:${NEO4J_VERSION}"
 export KEYCLOAK_IMAGE="${ACR_LOGIN_SERVER}/keycloak:${KEYCLOAK_VERSION}"
 export VAULT_IMAGE="${ACR_LOGIN_SERVER}/vault:${VAULT_VERSION}"
 export NATS_IMAGE="${ACR_LOGIN_SERVER}/nats:${NATS_VERSION}"
-export CONTROLPLANE_IMAGE="${ACR_LOGIN_SERVER}/jad-controlplane:latest"
-export DP_FHIR_IMAGE="${ACR_LOGIN_SERVER}/jad-dataplane:latest"
-export DP_OMOP_IMAGE="${ACR_LOGIN_SERVER}/jad-dataplane:latest"
-export IDENTITYHUB_IMAGE="${ACR_LOGIN_SERVER}/jad-identity-hub:latest"
-export ISSUER_IMAGE="${ACR_LOGIN_SERVER}/jad-issuerservice:latest"
-export TENANT_MGR_IMAGE="${ACR_LOGIN_SERVER}/cfm-tmanager:latest"
-export PROVISION_MGR_IMAGE="${ACR_LOGIN_SERVER}/cfm-pmanager:latest"
+# JAD / CFM images (issue #116). Unlike mvhd-ui above these are NOT ours and are
+# NOT rebuilt on merge, so `:latest` buys nothing and costs a lot: ACA caches
+# `:latest` and will not re-pull on restart (gotcha #6), so each app is frozen on
+# whatever digest was current when its revision was created — 2026-04-14 for all
+# seven — and "which EDC build is in production?" has no answer.
+#
+# Routing them through variables so the pin is a one-line change. They stay at
+# `latest` because that is still ACR's only tag for these repositories; flipping
+# the values below requires pushing the tagged images FIRST, or every deploy
+# breaks on a missing tag:
+#
+#   JAD_VERSION="4a7e5bd096c58814748e956cc9329586ad309698"   # upstream git SHA,
+#                                                            # matches docker-compose.jad.yml
+#   docker buildx build --platform linux/amd64 \
+#     -t "${ACR_LOGIN_SERVER}/jad-controlplane:${JAD_VERSION}" --push .
+#
+# See scripts/azure/build-images.sh for the full per-image command list.
+export JAD_VERSION="${JAD_VERSION:-latest}"
+export CFM_VERSION="${CFM_VERSION:-latest}"
+export CONTROLPLANE_IMAGE="${ACR_LOGIN_SERVER}/jad-controlplane:${JAD_VERSION}"
+export DP_FHIR_IMAGE="${ACR_LOGIN_SERVER}/jad-dataplane:${JAD_VERSION}"
+export DP_OMOP_IMAGE="${ACR_LOGIN_SERVER}/jad-dataplane:${JAD_VERSION}"
+export IDENTITYHUB_IMAGE="${ACR_LOGIN_SERVER}/jad-identity-hub:${JAD_VERSION}"
+export ISSUER_IMAGE="${ACR_LOGIN_SERVER}/jad-issuerservice:${JAD_VERSION}"
+export TENANT_MGR_IMAGE="${ACR_LOGIN_SERVER}/cfm-tmanager:${CFM_VERSION}"
+export PROVISION_MGR_IMAGE="${ACR_LOGIN_SERVER}/cfm-pmanager:${CFM_VERSION}"
 
 # ── Neo4j ────────────────────────────────────────────────────────────────────
 export NEO4J_USER="neo4j"
