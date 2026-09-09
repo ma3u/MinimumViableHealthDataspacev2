@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "hooks": {
+    "preToolUse": [
+      {
+        "type": "command",
+        "matcher": "bash|shell|terminal",
+        "bash": "./.github/hooks/safety-guard/scripts/guard.sh",
+        "timeoutSec": 10
+      }
+    ]
+  }
+}

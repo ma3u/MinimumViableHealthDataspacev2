@@ -4,7 +4,9 @@ title: Next.js API routes contract
 description: Conventions every route under ui/src/app/api/ follows, and their static-export twin.
 resource: .claude/rules/api-conventions.md
 tags: [nextjs, api, rbac]
-timestamp: 2026-07-15T00:00:00Z
+generated: { by: claude-code/fable-5, at: 2026-07-15T15:30:23Z }
+verified: { by: human:ma3u, at: 2026-07-15T15:30:23Z }
+status: stable
 ---
 
 Named `GET/POST/DELETE` exports returning `NextResponse.json`; errors always

@@ -1,6 +1,7 @@
 ---
 name: api-route
 description: Use when the user adds or modifies a Next.js API route under ui/src/app/api/.
+paths: ["ui/src/app/api/**", "ui/src/lib/api.ts", "ui/public/mock/**"]
 ---
 
 # Next.js API routes

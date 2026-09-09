@@ -4,7 +4,9 @@ title: 5-layer knowledge graph
 description: The unifying model — dataspace, metadata, clinical, analytics, ontology — in one Neo4j database.
 resource: neo4j/init-schema.cypher, docs/health-dataspace-graph-schema.md
 tags: [neo4j, architecture]
-timestamp: 2026-07-15T00:00:00Z
+generated: { by: claude-code/fable-5, at: 2026-07-15T15:30:23Z }
+verified: { by: human:ma3u, at: 2026-07-15T15:30:23Z }
+status: stable
 ---
 
 L1 Dataspace Marketplace → L2 HealthDCAT-AP → L3 FHIR R4 → L4 OMOP CDM →

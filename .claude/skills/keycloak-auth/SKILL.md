@@ -1,6 +1,13 @@
 ---
 name: keycloak-auth
 description: Use when the user works on authentication, Keycloak configuration, OIDC, roles, or JWT claims.
+paths:
+  [
+    "ui/src/lib/auth.ts",
+    "ui/src/middleware.ts",
+    "jad/keycloak-realm.json",
+    "ui/__tests__/unit/config/keycloak-realm.test.ts",
+  ]
 ---
 
 # Keycloak / NextAuth
