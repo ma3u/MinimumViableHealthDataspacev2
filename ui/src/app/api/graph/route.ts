@@ -323,35 +323,77 @@ async function buildHdabGraph() {
 
 /** Patient: own FHIR data + governance chain showing who uses it (EHDS Art. 3-12) */
 async function buildPatientGraph() {
-  const [patientNodes, conditionNodes, omopNodes, speNodes, govNodes] =
-    await Promise.all([
-      // Top 20 patients with richest records (GDPR Art. 15 — access own data)
-      runQuery<{ id: string; labels: string[]; name: string }>(
-        `MATCH (p:Patient)-[:HAS_CONDITION]->(:Condition)
-         WITH p, count(*) AS cnt ORDER BY cnt DESC LIMIT 20
+  // Anchor every slice to ONE set of patients.
+  //
+  // This previously ran five independent top-N queries: top-20 patients by
+  // condition count, the globally top-30 conditions, and 15 arbitrary
+  // OMOPPersons. Because each slice was ranked by its own criterion, the
+  // selected conditions were mostly not the selected patients' conditions and
+  // the OMOPPersons belonged to neither — so 66 of 95 returned nodes had no
+  // edge to anything else in the payload (measured 2026-09-09). The link query
+  // below is correct; it simply had nothing to join. The graph rendered as a
+  // dense hub surrounded by ~30 orphans, and clicking an orphan reported
+  // "0 connections loaded", which is computed from the loaded links.
+  //
+  // Ten patients rather than twenty, and their conditions capped per patient,
+  // because the old view also stacked ~50 condition labels into an unreadable
+  // arc around a single hub.
+  const anchors = await runQuery<{ id: string }>(
+    `MATCH (p:Patient)-[:HAS_CONDITION]->(:Condition)
+     WITH p, count(*) AS cnt ORDER BY cnt DESC LIMIT 10
+     RETURN elementId(p) AS id`,
+    {},
+  );
+  const anchorIds = anchors.map((a) => a.id);
+
+  const [
+    patientNodes,
+    conditionNodes,
+    omopNodes,
+    datasetNodes,
+    speNodes,
+    govNodes,
+  ] = await Promise.all([
+    runQuery<{ id: string; labels: string[]; name: string }>(
+      `MATCH (p:Patient) WHERE elementId(p) IN $anchorIds
          RETURN elementId(p) AS id, labels(p) AS labels,
                 coalesce(p.name, p.id, elementId(p)) AS name`,
-        {},
-      ),
-      // Their top conditions — display name before code
-      runQuery<{ id: string; labels: string[]; name: string }>(
-        `MATCH (c:Condition)<-[:HAS_CONDITION]-(:Patient)
-         WITH c, count(*) AS freq ORDER BY freq DESC LIMIT 30
-         RETURN elementId(c) AS id, labels(c) AS labels,
+      { anchorIds },
+    ),
+    // THEIR conditions, capped per patient so one rich record cannot flood
+    // the view. Previously the global top-30 by frequency.
+    runQuery<{ id: string; labels: string[]; name: string }>(
+      `MATCH (p:Patient)-[:HAS_CONDITION]->(c:Condition)
+         WHERE elementId(p) IN $anchorIds
+         WITH p, c ORDER BY coalesce(c.display, c.code)
+         WITH p, collect(c)[0..4] AS cs
+         UNWIND cs AS c
+         RETURN DISTINCT elementId(c) AS id, labels(c) AS labels,
                 coalesce(c.display, c.code, elementId(c)) AS name`,
-        {},
-      ),
-      // OMOP CDM: persons only (condition occurrences use numeric IDs unhelpful to patients)
-      runQuery<{ id: string; labels: string[]; name: string }>(
-        `MATCH (op:OMOPPerson)
-         RETURN elementId(op) AS id, labels(op) AS labels,
-                coalesce(op.name, toString(op.personId), elementId(op)) AS name
-         LIMIT 15`,
-        {},
-      ),
-      // Research pseudonyms, SPE sessions, consents (EHDS Art. 10 secondary use)
-      runQuery<{ id: string; labels: string[]; name: string }>(
-        `MATCH (rp:ResearchPseudonym {revoked: false})
+      { anchorIds },
+    ),
+    // THEIR OMOP twins, via Patient-[:MAPPED_TO]->OMOPPerson. Previously an
+    // unanchored `MATCH (op:OMOPPerson) LIMIT 15`, which is why every OMOP
+    // node floated free.
+    runQuery<{ id: string; labels: string[]; name: string }>(
+      `MATCH (p:Patient)-[:MAPPED_TO]->(op:OMOPPerson)
+         WHERE elementId(p) IN $anchorIds
+         RETURN DISTINCT elementId(op) AS id, labels(op) AS labels,
+                coalesce(op.name, toString(op.personId), elementId(op)) AS name`,
+      { anchorIds },
+    ),
+    // The datasets those patients belong to — the bridge from the clinical
+    // layer to the catalog/governance layer, so the two halves of the graph
+    // are actually joined rather than sitting side by side.
+    runQuery<{ id: string; labels: string[]; name: string }>(
+      `MATCH (p:Patient)-[:FROM_DATASET]->(ds:HealthDataset)
+         WHERE elementId(p) IN $anchorIds
+         RETURN DISTINCT elementId(ds) AS id, labels(ds) AS labels,
+                coalesce(ds.title, ds.datasetId, elementId(ds)) AS name`,
+      { anchorIds },
+    ),
+    runQuery<{ id: string; labels: string[]; name: string }>(
+      `MATCH (rp:ResearchPseudonym {revoked: false})
          RETURN elementId(rp) AS id, labels(rp) AS labels,
                 coalesce(rp.studyId, rp.rpsnId, elementId(rp)) AS name
          LIMIT 10
@@ -365,11 +407,10 @@ async function buildPatientGraph() {
          RETURN elementId(pc) AS id, labels(pc) AS labels,
                 coalesce(pc.studyId, pc.consentId, elementId(pc)) AS name
          LIMIT 10`,
-        {},
-      ),
-      // Data consumers — who has access to the data (GDPR Art. 15 transparency)
-      runQuery<{ id: string; labels: string[]; name: string }>(
-        `MATCH (p:Participant)
+      {},
+    ),
+    runQuery<{ id: string; labels: string[]; name: string }>(
+      `MATCH (p:Participant)
          RETURN elementId(p) AS id, labels(p) AS labels,
                 coalesce(p.name, p.participantId, elementId(p)) AS name
          ORDER BY p.name
@@ -383,14 +424,15 @@ async function buildPatientGraph() {
          RETURN elementId(ha) AS id, labels(ha) AS labels,
                 coalesce(ha.approvalId, elementId(ha)) AS name
          LIMIT 10`,
-        {},
-      ),
-    ]);
+      {},
+    ),
+  ]);
   return sortAndDedup([
     ...govNodes,
     ...patientNodes,
     ...conditionNodes,
     ...omopNodes,
+    ...datasetNodes,
     ...speNodes,
   ]);
 }
@@ -522,12 +564,40 @@ export async function GET(req: Request) {
       { ids: nodes.map((n) => n.id) },
     );
 
+    // Drop nodes that ended up with no edge in this payload.
+    //
+    // A persona builder selects nodes label-by-label, so it can pick a node
+    // whose neighbours it did not pick — and the link query above, which only
+    // joins nodes already in the set, then finds nothing for it. The result is
+    // a node rendered floating in space with "0 connections loaded" in the
+    // detail panel, which reads as missing data rather than a narrow query.
+    //
+    // The patient view was measured at 66 isolated of 95 nodes on 2026-09-09,
+    // while the same labels average degree 2-13 in Neo4j — none of those nodes
+    // is isolated in the database. This is a presentation artefact, so it is
+    // corrected in presentation. `isolatedRemoved` is returned so a persona
+    // that starts shedding nodes is visible rather than silently thinner.
+    const connected = new Set<string>();
+    for (const l of links) {
+      connected.add(l.source);
+      connected.add(l.target);
+    }
+    const linked = nodes.filter((n) => connected.has(n.id));
+    // Never prune the view down to nothing. A persona whose data is not seeded
+    // (locally, `trust-center` has no TrustCenter nodes at all) would otherwise
+    // render an empty canvas with no explanation, which is a worse answer than
+    // showing the disconnected nodes that do exist and letting the caller see
+    // isolatedRemoved.
+    const visibleNodes = linked.length > 0 ? linked : nodes;
+    const isolatedRemoved = nodes.length - visibleNodes.length;
+
     const personaMeta = PERSONA_VIEWS.find((p) => p.id === safePersona);
     return NextResponse.json({
-      nodes,
+      nodes: visibleNodes,
       links,
       persona: safePersona,
       question: personaMeta?.question,
+      isolatedRemoved,
     });
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
