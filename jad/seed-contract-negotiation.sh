@@ -255,7 +255,14 @@ for ds in datasets:
         print(f'{asset_id}|{offer_id}|{perms}')
 ")
 
-DATASET_COUNT=$(echo "$OFFERS" | grep -c '|' || echo 0)
+# `grep -c` already prints a count; it just exits 1 when that count is zero.
+# The old `|| echo 0` therefore appended a SECOND zero, making DATASET_COUNT the
+# two-line string "0\n0" — so the guard below evaluated
+# `[ "0\n0" -eq 0 ]`, which errors with "integer expression expected" and is
+# false. With no `set -e`, that error was silent, the guard never fired, and the
+# script sailed on to report success (issue #169). `|| true` absorbs the exit
+# status without corrupting the value.
+DATASET_COUNT=$(echo "$OFFERS" | grep -c '|' || true)
 echo "  Catalog from Clinic: $DATASET_COUNT dataset(s) discovered"
 
 if [ "$DATASET_COUNT" -eq 0 ]; then
@@ -280,6 +287,10 @@ echo "────────────────────────�
 
 NEGOTIATED=0
 TRANSFERRED=0
+# Counts everything that went wrong so the script can exit non-zero. This was
+# declared here and then never incremented or read, so the script reported
+# "Phase 4b complete" on runs where every negotiation TERMINATED — which is how
+# an EDC schema defect stayed invisible for months (issue #169).
 FAILED=0
 
 echo "$OFFERS" | while IFS='|' read -r asset_id offer_id perms_json; do
@@ -319,6 +330,7 @@ print(d.get('@id', ''))
     echo "    ❌ Negotiation failed to start"
     ERR=$(echo "$NEG_RESPONSE" | head -c 200)
     echo "    Error: $ERR"
+    FAILED=$((FAILED + 1))
     continue
   fi
 
@@ -333,6 +345,7 @@ print(d.get('@id', ''))
   if [ "$FINAL_STATE" != "FINALIZED" ]; then
     echo " $FINAL_STATE"
     echo "    ❌ Negotiation ended in state: $FINAL_STATE"
+    FAILED=$((FAILED + 1))
     continue
   fi
   echo " ✅"
@@ -436,7 +449,7 @@ for n in items:
     state = n.get('state','?')
     aid = n.get('contractAgreementId','—')[:20]
     print(f'    {nid}... {state} agreement={aid}...')
-" 2>/dev/null || echo "?/?")
+" 2>/dev/null || echo "QUERY-FAILED")
 
 echo "  PharmaCo negotiations (FINALIZED/total): $PHARMACO_NEG_COUNT"
 
@@ -454,7 +467,7 @@ for t in items:
     state = t.get('state','?')
     asset = t.get('assetId','?')
     print(f'    {tid}... {state} asset={asset}')
-" 2>/dev/null || echo "?/?")
+" 2>/dev/null || echo "QUERY-FAILED")
 
 echo "  PharmaCo transfers (STARTED/total): $PHARMACO_TP_COUNT"
 
@@ -483,4 +496,31 @@ echo ""
 echo "  MedReg DE → AlphaKlinik Berlin:"
 echo "    Catalog datasets:   $MEDREG_DATASETS"
 echo ""
+
+# A provider that has contract definitions but offers nothing is a broken
+# dataspace, not an empty one — treat it as a failure rather than a quiet zero.
+if [ "${DATASET_COUNT:-0}" -eq 0 ] 2>/dev/null; then
+  echo "  ❌ Catalog discovery returned 0 datasets."
+  echo "     AlphaKlinik has contract definitions seeded, so an empty catalog"
+  echo "     means DSP discovery is broken, not that there is nothing to offer."
+  FAILED=$((FAILED + 1))
+fi
+
+case "$PHARMACO_NEG_COUNT" in
+  QUERY-FAILED)
+    echo "  ❌ Could not read PharmaCo negotiations — the management API did not"
+    echo "     return usable JSON. A 500 here usually means the EDC store schema"
+    echo "     does not match the connector build (issue #169)."
+    FAILED=$((FAILED + 1))
+    ;;
+esac
+
+if [ "$FAILED" -gt 0 ]; then
+  echo ""
+  echo "  ❌ Phase 4b FAILED — ${FAILED} problem(s) above."
+  echo "     Not exiting 0: seed-all.sh phases are strictly ordered and later"
+  echo "     phases assume this one produced FINALIZED negotiations."
+  exit 1
+fi
+
 ok "Phase 4b: Contract Negotiation & Data Transfer complete"
