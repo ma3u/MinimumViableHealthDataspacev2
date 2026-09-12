@@ -19,6 +19,7 @@ Groom with `/plan`. Token budget per ADR-026: keep this index small.
 
 ## future/
 
+- [longevity-community-data-sharing](future/longevity-community-data-sharing.md) — no CVD Fox Insight exists; the behaviour lives in longevity communities. S3 journey deferred here
 - [issue-11-weekly-demo-reset](future/issue-11-weekly-demo-reset.md) — weekly baseline refresh (ADR-014)
 - [eudi-wallet-cluster](future/eudi-wallet-cluster.md) — issues #22 / #24 / #80, Phase 27
 - [phase-26g-deferred](future/phase-26g-deferred.md) — federation observability leftovers

@@ -339,31 +339,62 @@ Two honesty constraints that must survive into the UI copy:
 - The EU reference wallet path stays the working demo throughout; the German wallet is a
   config switch (W4), never a fork of the flow.
 
-### W9 — Primary-use surfaces (the half the platform is missing)
+### W9 — ePA ingest path (re-scoped 2026-09-12)
 
-The dataspace has no health professional in it. Three journeys, each on top of an existing
-surface, each carrying one argument the current demo cannot make:
+**Re-scoped by the platform owner**, from a real case: study lab results from the Friede
+Springer Cardiovascular Prevention Center at Charité, to be combined with Apple Health trends
+and read by a Hausarzt. Two corrections came with it, and both narrow the work:
 
-- **Home doctor (P2).** Practice onboarding → professional-qualification EAA from
-  AlphaKammer DE → `HEALTH_PROFESSIONAL` session → scoped EHR read (EEHRxF priority
-  categories, FHIR R4) → write-back. The moment worth building: the patient restricts a
-  category in their wallet, the GP reloads, and the category is **marked as restricted**, not
-  silently absent — silent omission is a clinical safety problem.
-- **Insurer (P3).** Keep GesundheitsID for the ePA pull (EUDI → ePA is ~2027–28; the caveat
-  in `eudi-wallet-flows-2026.md` must survive), make the transfer grant revocable for real.
-  Then the journey whose correct outcome is **no data moving**: AlphaKasse applies for a
-  secondary-use permit for risk-model calibration and the HDAB **rejects** it as a prohibited
-  purpose. It is the only refusal in the whole map, it exercises a branch the seed never
-  produces, and it is worth more to a regulator audience than another happy path.
-- **Patient community (S3).** AlphaPatients e.V. as both data user and data holder: citizens
-  enrol in its PROM registry under a Consent EAA, the registry cohort _is_ the set of valid
-  consents, and a researcher then applies to the HDAB for a permit over that donated data.
-  The consent chain stays intact from wallet to SPE — the clearest answer to "what is the
-  wallet for, if the permit is the legal basis".
+1. **The GP never logs into this platform.** They read the ePA through their practice system
+   over the TI. The exchange point between citizen and GP is the **ePA**, not our portal —
+   so the `HEALTH_PROFESSIONAL` role and the `/clinical/*` surfaces are **deferred**, not
+   planned. What the platform does instead is work **upstream of the ePA**.
+2. **The patient community journey is deferred** to
+   [`future/longevity-community-data-sharing.md`](../future/longevity-community-data-sharing.md),
+   which keeps the research: there is no cardiovascular Fox Insight, the patient-founded
+   registries that exist (FH Europe, Family Heart Foundation / CASCADE FH) serve _genetic_
+   high risk, and the people actually pooling this data are longevity communities —
+   Rejuvenation Olympics, Blueprint, the DeSci DAOs — with the data and no credible way to
+   donate it.
 
-Tests: **J920–J939** (consent loop) · **J940–J959** (GP) · **J960–J979** (insurer) ·
-**J980–J999** (community). J900–J919 stay reserved for W4's wallet chooser; J859 is the
-current maximum.
+**The premise:** researchers, labs and hospitals are paper-based today. Lab findings reach the
+ePA only from the provider who ordered them (§ 347 SGB V), and a cohort study is not GKV
+treatment — so nothing pushes a study result into the ePA, and the **citizen is the only
+integration point that exists**.
+
+**The constraint that rules out the obvious design:** a third-party app can write to the ePA
+only as a listed **DiGA**, with a productive **SMC-B DiGA**, over `gemSST_CS_ePA_DiGA`, after
+the insured authorises it in their ePA frontend (§ 6 DiGAV). That is market access, not an
+integration, and it is out of scope. **There is no API for us.**
+
+So the platform becomes a **pre-ePA workbench** — it prepares, the citizen uploads:
+
+- [ ] **Acquire** — a "request the digital original" path before scanning: GDPR Art. 15(3)
+      copy + Art. 20 portability against the study centre or lab
+- [ ] **Digitise** — scan → OCR → searchable PDF, one document per file
+- [ ] **Structure** — extract values to FHIR R4 `Observation`s; target **KBV MIO Laborbefund
+      1.0.0** (a FHIR bundle; manufacturer-mandatory expected autumn 2026, gematik integration
+      under way since May 2026). The repo already models FHIR R4 — this is a new producer, not
+      a new data model
+- [ ] **Combine** — Apple Health `export.xml` → trend summary (resting HR, HRV, VO2max,
+      cuff BP, weight). Summarised, never dumped: the raw export routinely exceeds the ePA's
+      **25 MB** ceiling and no GP reads 400,000 XML rows. There is **no** Apple Health ↔ ePA
+      bridge in Germany; do not imply one
+- [ ] **Emit** — one ePA-ready artefact ≤ 25 MB: readable summary + source scan + the
+      FHIR/MIO bundle attached for whoever can parse it. Formats the ePA accepts: PDF, JPEG,
+      PNG, TIFF (all converted to PDF)
+- [ ] **Hand off** — upload instructions for the insurer app **and** the desktop client
+      (AOK / BARMER eCare / TK-Safe / DAK; Windows, macOS, Ubuntu 20.04+; eGK + PIN + card
+      reader, or the Web2App QR flow)
+
+**Provenance is the acceptance test.** The ePA marks every document, tamper-proofly, as
+uploaded by a practice, the insurer, or the insured — and a GP is under no obligation to adopt
+what the insured uploaded. The artefact must therefore distinguish a lab-issued value, an
+OCR-transcribed value, and a self-tracked metric. The platform must not be weaker than the
+thing it feeds.
+
+Tests: **J940–J959** (ePA ingest). J920–J939 stay with the consent loop; J960–J979 stay with
+the insurer; J980–J999 reserved for the deferred community registry.
 
 ## Sequencing
 
