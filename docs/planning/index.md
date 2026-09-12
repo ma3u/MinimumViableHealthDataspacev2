@@ -7,6 +7,8 @@ Groom with `/plan`. Token budget per ADR-026: keep this index small.
 
 ## current/
 
+- [issue-182-german-national-wallet-integration](current/issue-182-german-national-wallet-integration.md) — German EUDI Wallet (RP contract, self-hosted verifier, wallet-provider backend) **+ the #72 citizen consent demo** it enables (W7–W9)
+- [persona-journeys/registration-identification-exchange](../persona-journeys/registration-identification-exchange.md) — the seven-actor map: registration · identification · data exchange, primary and secondary use
 - [sbom-and-component-updates](current/sbom-and-component-updates.md) — SBOM, automated CVE scanning, evidence-based update queue
 - [issue-97-edc-upgrade](current/issue-97-edc-upgrade.md) — dependency refresh; Phase A done, Phase B in progress
 - [issue-97-phase-b-analysis](current/issue-97-phase-b-analysis.md) — EDC v0.18 breaking-change analysis + upstream-image strategy
