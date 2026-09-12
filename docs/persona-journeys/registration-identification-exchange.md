@@ -146,11 +146,22 @@ Art. 8 (restrict access) · Art. 9 (information on access) · Chapter IV opt-out
 
 ### P2 — Home doctor / GP
 
-**Status: 🔴 entirely new.**
+**Status: 🟠 out of platform scope — corrected 2026-09-12.**
 
-The platform has no health-professional actor at all today. This is the largest gap in the
-primary-use story, and the most visible one in a live demo: a patient record nobody treats
-the patient with is not a health dataspace.
+> **The GP never logs into this platform.** They read the patient's record in the **ePA**,
+> through their practice system over the Telematikinfrastruktur, using the insurer-operated
+> file. There is no reason for a Hausarzt to hold an account here, and designing one would
+> model a world that does not exist.
+>
+> The exchange point between citizen and GP is therefore the **ePA**, not our portal — which
+> relocates the platform's job entirely: it works **upstream of the ePA**, turning material
+> the citizen holds into something the ePA can carry. See
+> [§8](#8-getting-data-into-the-epa--the-current-build-focus).
+
+The flows below stay in this document because they describe the _regulatory_ relationship
+accurately, and because a future EHDS deployment outside Germany may well put the
+professional in the platform. The platform-side surfaces (`HEALTH_PROFESSIONAL` role,
+`/clinical/*` pages) are **deferred**, not planned.
 
 | Flow               | Design                                                                                                                                                                                                                                                                                                                                                                                   |
 | ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -236,7 +247,13 @@ it is a two-line change to the analytics response that carries the entire narrat
 
 ### S3 — Patient community / non-profit
 
-**Status: 🔴 entirely new.**
+**Status: 🟠 deferred 2026-09-12** — research and rationale kept in
+[`planning/future/longevity-community-data-sharing.md`](../planning/future/longevity-community-data-sharing.md).
+The short version: there is no cardiovascular Fox Insight, the patient-founded registries that
+do exist (FH Europe, Family Heart Foundation / CASCADE FH) serve _genetic_ high risk rather
+than ordinary risk, and the people actually pooling cardiovascular-relevant data today are
+**longevity communities** — Rejuvenation Olympics, Blueprint, the DeSci DAOs — who have the
+data and no credible way to donate it. Worth building; not before §8.
 
 The user group the current model has no shape for at all. A patient organisation is
 _both_ a data user and a data holder, and it is the one actor for which **consent genuinely
@@ -335,18 +352,20 @@ Three properties this has to keep, because they are what a sceptical reviewer te
 | 9   | Community participant + PROM registry                  | S3             | items 2, 3                  |
 | 10  | Exclusion count in analytics output                    | S2             | item 1                      |
 
-Items 1–3 are the #72 demo spine. Items 4–7 are the primary-use half the platform is
-missing. Items 8–10 are each a single, high-value journey on top of an existing surface.
+Items 1–3 are the #72 demo spine. Items 4, 5 and 9 are **deferred** — see §8 and the
+longevity note. Items 6, 7, 8 and 10 stand. The **ePA ingest path in §8 is the current build
+focus**, and it is not in this table because it is not a dataspace journey at all: it is the
+platform working upstream of the ePA, for a citizen the rest of the system cannot reach.
 
 **Journey test ID allocation** (current maximum J859; J900–J919 already reserved by #182 W4
 for the wallet chooser):
 
-| Range     | Scope                                                                  |
-| --------- | ---------------------------------------------------------------------- |
-| J920–J939 | Citizen consent loop — grant → govern → revoke → access log            |
-| J940–J959 | GP primary-use journey — EAA login, restriction, redaction, write-back |
-| J960–J979 | Insurer — ePA transfer grant/revoke, prohibited-purpose rejection      |
-| J980–J999 | Community — enrolment, registry cohort, permit over donated data       |
+| Range     | Scope                                                                                |
+| --------- | ------------------------------------------------------------------------------------ |
+| J920–J939 | Citizen consent loop — grant → govern → revoke → access log                          |
+| J940–J959 | ePA ingest — digitise, structure to MIO, artefact export (was: GP journey, deferred) |
+| J960–J979 | Insurer — ePA transfer grant/revoke, prohibited-purpose rejection                    |
+| J980–J999 | Community — enrolment, registry cohort, permit over donated data                     |
 
 ---
 
@@ -366,6 +385,91 @@ tracked as a discrete item rather than folded into a journey change, because it 
 seed identities.
 
 ---
+
+## 8. Getting data into the ePA — the current build focus
+
+Set by the platform owner, 2026-09-12, from a real case: lab results from the Friede Springer
+Cardiovascular Prevention Center cohort study at Charité, to be combined with Apple Health
+trends and made readable by a Hausarzt.
+
+**The premise that decides the design: researchers, labs and hospitals are paper-based
+today.** Nothing pushes a study result into the ePA, and nothing will:
+
+- Lab findings are uploaded to the ePA by **the provider who ordered them** (§ 347 SGB V).
+  A cohort study is not GKV treatment, so no one in the chain is responsible for the result.
+- Since 01.10.2025 practices must fill the ePA, but only with data **they collected
+  themselves**, from the **current treatment**, already **in electronic form**.
+- So the **citizen is the only integration point that exists**, and the ePA is the only
+  surface every German GP already reads.
+
+### What the ePA accepts
+
+| Constraint      | Value                                                                                                              |
+| --------------- | ------------------------------------------------------------------------------------------------------------------ |
+| Formats         | PDF, JPEG, PNG, TIFF — all converted to PDF on upload                                                              |
+| Size ceiling    | **25 MB per file**                                                                                                 |
+| Upload surfaces | insurer ePA app; **desktop client** (AOK, BARMER eCare, TK-Safe, DAK) on Windows / macOS / Ubuntu 20.04+           |
+| Desktop auth    | eGK + PIN + USB card reader, **or** the Web2App QR flow with the insurer's ident app                               |
+| Provenance      | every document is permanently and tamper-proofly marked as uploaded by a practice, the insurer, or **the insured** |
+| Practice access | inserting the eGK grants **90 days**; the citizen can narrow, revoke per practice, or hide individual documents    |
+
+The provenance flag is the design constraint that matters. A GP sees "eingestellt vom
+Versicherten" and is under no obligation to adopt it as a finding. Whatever the platform
+produces has to survive that scepticism — which means legible structure, visible source, and
+an original the GP can check, not a re-typed value.
+
+### The only programmatic write path, and why we cannot take it
+
+A third-party application **can** write into the ePA, but only as a listed **DiGA**: it needs
+a productive **SMC-B DiGA** card, uses gematik's ClientSystem interface for ePA (`gemSST_CS_ePA_DiGA`),
+and the insured must authorise it in their ePA frontend first. Data goes in as a **DiGA-MIO**
+where one exists, PDF otherwise (§ 6 DiGAV).
+
+That is a regulated market-access route, not an integration. For this platform it is
+**out of reach and out of scope** — and saying so is more useful than pretending an API exists.
+
+**Consequence:** the platform is a **pre-ePA workbench**. It prepares; the citizen uploads.
+
+### The path to build
+
+```
+paper / PDF from lab, hospital, study
+  │
+  ├─ ask for the digital original first — GDPR Art. 15(3) copy + Art. 20 portability
+  │  (a study centre running a 5,000-person cohort can export values; scanning is the fallback)
+  │
+  ├─ digitise: 300 dpi → OCR → searchable PDF, one document per file
+  │
+  ├─ structure: extract values into FHIR R4 Observations
+  │     target format: KBV MIO Laborbefund 1.0.0 (a FHIR bundle; manufacturer-mandatory
+  │     expected autumn 2026, gematik integration under way since May 2026)
+  │
+  ├─ combine: Apple Health export (Health app → profile → Export All Health Data → export.xml)
+  │     summarised to trends, never dumped — the raw export routinely exceeds the 25 MB ceiling
+  │     and no GP reads 400,000 XML rows
+  │
+  └─ emit an ePA-ready artefact: one OCR'd, named PDF ≤ 25 MB carrying a readable summary,
+     the source scan, and the FHIR/MIO bundle as an attachment for whoever can parse it
+        → citizen uploads via ePA app or desktop client
+```
+
+Two honesty constraints for any UI built on this:
+
+1. **Provenance must be carried, not laundered.** A value transcribed by OCR from a scan is
+   not the same evidence as a lab-issued result, and a self-tracked metric is neither. The
+   artefact must say which is which — the ePA does exactly this at document level, and the
+   platform should not be weaker than the thing it feeds.
+2. **Consumer-device data are not diagnostic.** Apple Watch trends belong in the artefact as
+   trends with date ranges; blood pressure belongs there only from a validated cuff.
+
+### What this does _not_ change
+
+Secondary use (§4) is untouched: the permit-plus-opt-out model, the SPE, the DSP/DCP
+organisational layer all stand. In Germany the citizen's actual route to research is the
+**Forschungsdatenzentrum Gesundheit** (§ 363 SGB V) — ePA data delivered pseudonymised on an
+**opt-out** basis, extraction starting in model regions Q3 2026, first regular delivery Q4 2026,
+nationwide by early 2027. That is this document's §0 correction happening in production, on
+the same timetable as this plan.
 
 ## Related
 
