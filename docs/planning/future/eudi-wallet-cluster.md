@@ -14,3 +14,8 @@ register/returning-login/TK-ePA-transfer wallet flows (#80). QR login shipped
 A planned ADR-022 (Option A/B/C comparison) is referenced by the issue table but
 `ADR-022` was later used for EDC connector cost — numbering conflict:
 `UNKNOWN — the wallet-options ADR has no file yet; next author must take a free number.`
+
+**Update 2026-09-10:** the German national wallet source is public (iOS/Android EUPL-1.2,
+backend Apache-2.0) — issue #182 plans the integration demo and takes the free **ADR-032**
+slot for the wallet-path decision recorded as missing above:
+[`current/issue-182-german-national-wallet-integration.md`](../current/issue-182-german-national-wallet-integration.md).
