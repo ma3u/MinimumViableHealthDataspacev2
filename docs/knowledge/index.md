@@ -36,7 +36,9 @@ content — gaps are marked `UNKNOWN`.
 [keycloak-realm-drift](runbooks/keycloak-realm-drift.md) ·
 [federated-discovery](runbooks/federated-discovery.md) ·
 [postgres-16-to-17-azure](runbooks/postgres-16-to-17-azure.md) ·
-[aca-postgres-ephemeral-recovery](runbooks/aca-postgres-ephemeral-recovery.md)
+[aca-postgres-ephemeral-recovery](runbooks/aca-postgres-ephemeral-recovery.md) ·
+[eudi-wallet-backend-local](runbooks/eudi-wallet-backend-local.md) ·
+[eudi-wallet-ios-local](runbooks/eudi-wallet-ios-local.md)
 
 ## decisions/
 

@@ -8,6 +8,14 @@ regulation articles that govern their actions.
 Related: [docs/graph-explorer.md](./graph-explorer.md) — graph structure,
 colors, filter presets.
 
+> **Scope of this document.** The five personas below are the **organisational** actors that
+> ship today. The full actor map — including the three primary-use human actors the platform
+> does not have yet (home doctor, insurer, patient community) and the registration /
+> identification / data-exchange flow for each — is
+> [`persona-journeys/registration-identification-exchange.md`](./persona-journeys/registration-identification-exchange.md),
+> written for issues [#72](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/72)
+> and [#182](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/182).
+
 ---
 
 ## Persona Overview
@@ -19,6 +27,15 @@ colors, filter presets.
 | **HDAB Authority**         | HDAB_AUTHORITY | MedReg DE, Institut de Recherche Santé     | `hdab`           | `/compliance` → `/graph?persona=hdab`                       |
 | **Trust Center Operator**  | HDAB / TC      | RKI (DE), RIVM (NL)                        | `trust-center`   | `/compliance#trust-center` → `/graph?persona=trust-center`  |
 | **EDC Admin / Operator**   | EDC_ADMIN      | Dataspace Operator                         | `edc-admin`      | `/admin` → `/graph?persona=edc-admin`                       |
+| **Patient / Citizen**      | PATIENT        | Maria Lindqvist (AlphaKlinik Berlin)       | `patient`        | `/auth/eudi-qr` → `/patient/profile`                        |
+
+### Planned actors (issue #72 — not yet implemented)
+
+| Persona               | EHDS Role                     | Fictional actor               | Regime        | Flow detail                                                                                           |
+| --------------------- | ----------------------------- | ----------------------------- | ------------- | ----------------------------------------------------------------------------------------------------- |
+| **Home doctor / GP**  | `HEALTH_PROFESSIONAL` _(new)_ | Praxis Dr. Sommerfeld, Berlin | Primary use   | [P2](./persona-journeys/registration-identification-exchange.md#p2--home-doctor--gp)                  |
+| **Statutory insurer** | `INSURER` _(new)_             | AlphaKasse DE                 | Primary use   | [P3](./persona-journeys/registration-identification-exchange.md#p3--statutory-insurer--epa-custodian) |
+| **Patient community** | `DATA_USER` + `DATA_HOLDER`   | AlphaPatients e.V., Berlin    | Secondary use | [S3](./persona-journeys/registration-identification-exchange.md#s3--patient-community--non-profit)    |
 
 ---
 
@@ -176,6 +193,11 @@ Use the sidebar filter presets while in the `researcher` persona view:
 ---
 
 ## 4 — Trust Center Operator
+
+> ⚠️ **Fictional-organisation policy violation.** RKI and RIVM are real public institutions
+> and are named here and in `neo4j/seed-trust-center.cypher` outside the `NEXT_PUBLIC_DEMO_TK`
+> exception. Replacement proposed: **Alpha Trust Centre DE** / **Limburg Trust Centre NL** —
+> see [registration-identification-exchange.md §7](./persona-journeys/registration-identification-exchange.md#7-finding--real-organisations-in-the-trust-centre-seed).
 
 ### Primary question
 
