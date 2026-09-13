@@ -1,0 +1,130 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"/>
+<style>
+  @page { size: 1280px 720px; margin: 0; }
+  * { box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  html, body { margin: 0; padding: 0; font-family: -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; color: #0f1b2d; }
+  .slide { position: relative; width: 1280px; height: 720px; padding: 64px 72px 56px; page-break-after: always; overflow: hidden; background: #ffffff; }
+  .spine { position: absolute; top: 0; left: 0; width: 100%; height: 8px; display: flex; }
+  .spine span { flex: 1; }
+  /* Title */
+  .slide.title { background: radial-gradient(120% 120% at 0% 0%, #0b3d66 0%, #06223b 60%, #04182a 100%); color: #fff; display: flex; flex-direction: column; justify-content: center; }
+  .slide.title .badge { position: absolute; top: 48px; left: 72px; font-size: 20px; letter-spacing: .04em; color: #7fd1c1; text-transform: uppercase; font-weight: 600; }
+  .slide.title h1 { font-size: 76px; line-height: 1.04; margin: 0 0 18px; font-weight: 800; max-width: 1050px; letter-spacing: -.01em; }
+  .slide.title .subtitle { font-size: 30px; color: #cfe3f2; margin: 0 0 30px; max-width: 1000px; }
+  .slide.title .tagline { font-size: 34px; color: #ffd479; font-weight: 600; margin: 0; max-width: 1050px; }
+  .slide.title .footer { position: absolute; bottom: 44px; left: 72px; font-size: 19px; color: #8fb3cf; letter-spacing: .03em; }
+  /* Content */
+  .slide header { display: flex; align-items: baseline; gap: 18px; border-bottom: 3px solid #e6edf4; padding-bottom: 16px; margin-bottom: 26px; }
+  .slide .num { font-size: 28px; font-weight: 800; color: #148F77; min-width: 44px; }
+  .slide h2 { font-size: 42px; margin: 0; font-weight: 800; color: #0b3d66; letter-spacing: -.01em; }
+  .slide .body { display: grid; grid-template-columns: 1.05fr 0.95fr; gap: 40px; height: 478px; align-content: start; }
+  .slide ul { margin: 2px 0 0; padding: 0; list-style: none; align-self: start; }
+  .slide li { font-size: 23px; line-height: 1.36; margin: 0 0 15px; padding-left: 32px; position: relative; color: #1c2c40; }
+  .slide li::before { content: ""; position: absolute; left: 0; top: 10px; width: 15px; height: 15px; border-radius: 4px; background: #148F77; }
+  .visual { border-radius: 14px; overflow: hidden; display: flex; flex-direction: column; background: #f4f8fb; border: 1px solid #dbe6f0; }
+  .visual img { width: 100%; height: 100%; object-fit: cover; object-position: top center; }
+  .visual .caption { font-size: 16px; color: #51657c; padding: 10px 14px; background: #eef4f9; border-top: 1px solid #dbe6f0; }
+  .visual.placeholder { align-items: center; justify-content: center; text-align: center; padding: 28px; background: repeating-linear-gradient(135deg,#f1f6fb,#f1f6fb 14px,#eaf2f8 14px,#eaf2f8 28px); }
+  .visual .vlabel { font-size: 14px; letter-spacing: .18em; color: #9bb0c6; font-weight: 700; margin-bottom: 10px; }
+  .visual .vtext { font-size: 17px; color: #3a516b; line-height: 1.4; }
+  .slide.closing { background: linear-gradient(120% 120% at 100% 100%, #f0f7f4 0%, #ffffff 55%); }
+  .footnote { position: absolute; bottom: 30px; left: 72px; font-size: 15px; color: #9aa9bb; }
+</style></head><body>
+
+  <section class="slide title">
+    <div class="spine"><span style="background:#2471A3"></span><span style="background:#148F77"></span><span style="background:#1E8449"></span><span style="background:#CA6F1E"></span><span style="background:#7D3C98"></span></div>
+    <div class="badge">EUDI Wallet Hackathon 2026 &middot; Creative Use Cases &mdash; Health</div>
+    <h1>Consent Wallet for the European Health Data Space</h1>
+    <p class="subtitle">Watch my phone, not a slide — the EUDI Wallet as the citizen's verifiable, withdrawable channel to exercise their EHDS secondary-use rights: opt out by default, consent where the law requires. Running today on a real EHDS reference stack — synthetic data only.</p>
+    <p class="tagline">&ldquo;From honeypot to handset: opt out in your wallet, and the research gate goes dark.&rdquo;</p>
+    <div class="footer">EHDS &middot; eIDAS 2.0 &middot; OpenID4VCI / 4VP &middot; SD-JWT VC</div>
+  </section>
+
+  <section class="slide ">
+    <div class="spine"><span style="background:#2471A3"></span><span style="background:#148F77"></span><span style="background:#1E8449"></span><span style="background:#CA6F1E"></span><span style="background:#7D3C98"></span></div>
+    <header><span class="num">1</span><h2>Watch my phone, not a slide</h2></header>
+    <div class="body">
+      <ul><li>Lena (34, synthetic patient) opts out of research use — in her EUDI Wallet</li><li>Re-run the governance gate → researcher access DENIED</li><li>Synthetic data · fictional orgs · standard eIDAS 2.0 + EHDS protocols</li><li>The idea: consent &amp; opt-out as a wallet-held, verifiable, withdrawable trust primitive — no central registry</li></ul>
+      <div class="visual"><img src="img/governance.png" alt="MVHD governance gate — APPROVED, then DENIED after Lena opts out"/>
+      <div class="caption">MVHD governance gate — APPROVED, then DENIED after Lena opts out</div></div>
+    </div>
+    <div class="footnote">Consent Wallet for the European Health Data Space &middot; synthetic data &middot; fictional orgs</div>
+  </section>
+
+  <section class="slide ">
+    <div class="spine"><span style="background:#2471A3"></span><span style="background:#148F77"></span><span style="background:#1E8449"></span><span style="background:#CA6F1E"></span><span style="background:#7D3C98"></span></div>
+    <header><span class="num">2</span><h2>The regulation ships a gap</h2></header>
+    <div class="body">
+      <ul><li>EHDS (Reg. 2025/327, Ch. IV): secondary use runs on an HDAB data permit + a citizen right to opt out — no reason needed</li><li>eIDAS 2.0 (Reg. 2024/1183) ships the wallet, PID and EAA — the missing citizen-facing channel</li><li>The gap: no standardised, citizen-held, machine-verifiable opt-out + consent channel</li><li>Default fallback = a central opt-out registry: a honeypot the citizen never really controls</li></ul>
+      <div class="visual placeholder"><div class="vlabel">VISUAL</div>
+    <div class="vtext">Three article-stamped blocks — EHDS Ch. IV (HDAB data permit + opt-out, no reason) · eIDAS 2.0 (wallet, PID, EAA, selective disclosure) · GDPR (HDAB assesses the Art. 6 basis; Art. 7(3) withdrawal where consent applies) — with a glaring red dashed gap in the middle labelled 'NO standardised citizen-held opt-out + consent channel'. Below: a crossed-out central database cylinder captioned 'opt-out honeypot — single point of failure'.</div></div>
+    </div>
+    <div class="footnote">Consent Wallet for the European Health Data Space &middot; synthetic data &middot; fictional orgs</div>
+  </section>
+
+  <section class="slide ">
+    <div class="spine"><span style="background:#2471A3"></span><span style="background:#148F77"></span><span style="background:#1E8449"></span><span style="background:#CA6F1E"></span><span style="background:#7D3C98"></span></div>
+    <header><span class="num">3</span><h2>The use case, in one sentence</h2></header>
+    <div class="body">
+      <ul><li>The EUDI Wallet becomes the citizen's channel to exercise their EHDS secondary-use rights</li><li>Opt out by default · explicit consent where the law requires it · withdraw at any time</li><li>Keycloak issues a verifiable preference attestation — SD-JWT VC, dc+sd-jwt, ES256</li><li>Selective disclosure: the researcher sees patient_pseudonym, never the name (data minimisation)</li></ul>
+      <div class="visual placeholder"><div class="vlabel">VISUAL</div>
+    <div class="vtext">The wallet card (deep-navy #0b3d66 'EHDS Patient Identity') with literal claim chips: consent_purpose=secondary-use/research · consent_scope=drug-repurposing-study · patient_pseudonym=•••• · role=PATIENT, with family_name greyed/withheld to prove selective disclosure. Arrow labelled 'OpenID4VP' to the governance PASS/FAIL panel. Footnote chip: 'sovereignty by architecture — no central opt-out store'.</div></div>
+    </div>
+    <div class="footnote">Consent Wallet for the European Health Data Space &middot; synthetic data &middot; fictional orgs</div>
+  </section>
+
+  <section class="slide ">
+    <div class="spine"><span style="background:#2471A3"></span><span style="background:#148F77"></span><span style="background:#1E8449"></span><span style="background:#CA6F1E"></span><span style="background:#7D3C98"></span></div>
+    <header><span class="num">4</span><h2>Live demo: grant → govern → withdraw</h2></header>
+    <div class="body">
+      <ul><li>1 GRANT — Lena gets a PID via the EUDI reference issuer; presents at the MVHD portal; her preference attestation is issued back to the wallet</li><li>2 GOVERN — MedReg DE (HDAB) issues PharmaCo's data permit; Lena has not opted out → governance gate APPROVES</li><li>3 WITHDRAW — Lena opts out in the wallet → PatientConsent marked withdrawn (auditable, timestamped) → re-run gate → DENIED</li><li>All synthetic: 127 patients · 5,300+ nodes · AlphaKlinik Berlin · PharmaCo Research AG · MedReg DE</li></ul>
+      <div class="visual"><img src="img/governance.png" alt="MVHD governance check (PASS/FAIL) — the reliable gate visual for the demo"/>
+      <div class="caption">MVHD governance check (PASS/FAIL) — the reliable gate visual for the demo</div></div>
+    </div>
+    <div class="footnote">Consent Wallet for the European Health Data Space &middot; synthetic data &middot; fictional orgs</div>
+  </section>
+
+  <section class="slide ">
+    <div class="spine"><span style="background:#2471A3"></span><span style="background:#148F77"></span><span style="background:#1E8449"></span><span style="background:#CA6F1E"></span><span style="background:#7D3C98"></span></div>
+    <header><span class="num">5</span><h2>Why us: regulation, running</h2></header>
+    <div class="body">
+      <ul><li>MVHD: a working EHDS reference stack — DSP 2025-1, HealthDCAT-AP, FHIR R4, OMOP CDM, SNOMED/ICD-10/RxNorm/LOINC</li><li>Keycloak OID4VCI bridge issues the SD-JWT preference attestation into the EUDI wallet today</li><li>HDAB permit flow + DCP v1.0 org trust + ODRL 2.2 policies + contract/transfer chain — built</li><li>EUDI iOS reference wallet in simulator; presentation via the hosted EUDI reference verifier — not a 48h mockup</li></ul>
+      <div class="visual"><img src="img/graph.png" alt="The real 5-layer EHDS knowledge graph (L1 marketplace → L5 ontologies)"/>
+      <div class="caption">The real 5-layer EHDS knowledge graph (L1 marketplace → L5 ontologies)</div></div>
+    </div>
+    <div class="footnote">Consent Wallet for the European Health Data Space &middot; synthetic data &middot; fictional orgs</div>
+  </section>
+
+  <section class="slide ">
+    <div class="spine"><span style="background:#2471A3"></span><span style="background:#148F77"></span><span style="background:#1E8449"></span><span style="background:#CA6F1E"></span><span style="background:#7D3C98"></span></div>
+    <header><span class="num">6</span><h2>Regulation &amp; privacy-by-design</h2></header>
+    <div class="body">
+      <ul><li>eIDAS 2.0 (2024/1183) → the attestation: PID + EAA, selective disclosure, data minimisation</li><li>EHDS (2025/327, Ch. IV) → HDAB permit + opt-out: MedReg DE issues the permit; the citizen's opt-out is honoured at the gate</li><li>GDPR → HDAB assesses the Art. 6 basis; Art. 7(3) withdrawal where consent applies; the EHDS opt-out needs no reason (beyond Art. 21)</li><li>Honest scope: enforced at the access boundary today; cryptographic status-list (IETF Token Status List, draft) is roadmap</li></ul>
+      <div class="visual placeholder"><div class="vlabel">VISUAL</div>
+    <div class="vtext">Article-to-feature mapping: each regulation block wired by an arrow to the exact built feature that satisfies it (eIDAS → EAA / selective disclosure · EHDS Ch. IV → HDAB permit + opt-out honoured at the gate · GDPR Art. 6 basis assessed by HDAB / Art. 7(3) withdrawal). A side ribbon marks built vs roadmap so the honesty is visible, not hidden in the notes.</div></div>
+    </div>
+    <div class="footnote">Consent Wallet for the European Health Data Space &middot; synthetic data &middot; fictional orgs</div>
+  </section>
+
+  <section class="slide closing">
+    <div class="spine"><span style="background:#2471A3"></span><span style="background:#148F77"></span><span style="background:#1E8449"></span><span style="background:#CA6F1E"></span><span style="background:#7D3C98"></span></div>
+    <header><span class="num">7</span><h2>Impact + the ask</h2></header>
+    <div class="body">
+      <ul><li>Impact: the trust gap that slows EHDS secondary use — addressed by a citizen-held, verifiable, withdrawable opt-out/consent channel</li><li>Primary ask: shortlist us for EUDI ON — we'll run a live grant → govern → withdraw in Berlin</li><li>Co-develop: standardise the preference-attestation schema (purpose · scope · opt-out) as a reusable EHDS EAA — with HDABs in the loop</li><li>SPRIND/BSI input: treat the in-wallet opt-out as a first-class verifiable trust primitive</li></ul>
+      <div class="visual placeholder"><div class="vlabel">VISUAL</div>
+    <div class="vtext">Closing: freeze-frame of the wallet opt-out action with the governance panel flipped to DENIED behind it; tagline large across the bottom. QR to the live MVHD portal + repo. A 3-step chevron: Shortlist → EUDI ON live demo → SPRIND/BSI-guided pilot with a fictional HDAB on synthetic cohorts.</div></div>
+    </div>
+    <div class="footnote">Consent Wallet for the European Health Data Space &middot; synthetic data &middot; fictional orgs</div>
+  </section>
+
+  <section class="slide ">
+    <div class="spine"><span style="background:#2471A3"></span><span style="background:#148F77"></span><span style="background:#1E8449"></span><span style="background:#CA6F1E"></span><span style="background:#7D3C98"></span></div>
+    <header><span class="num">8</span><h2>What's next</h2></header>
+    <div class="body">
+      <ul><li>Dynamic, purpose-bound issuance: citizen-selected scope per study (today: one fixed schema, demonstrated)</li><li>Cryptographic revocation: adopt the IETF Token Status List (draft) so verifiers learn opt-out without a server round-trip</li><li>Self-hosted OID4VP verifier path + SPRIND-sandbox PID conformance (not yet achieved)</li><li>Pilot: a fictional HDAB on synthetic cohorts → a reusable pattern any EHDS dataspace adopts</li></ul>
+      <div class="visual placeholder"><div class="vlabel">VISUAL</div>
+    <div class="vtext">Roadmap horizon graphic in three lanes — Now (built: SD-JWT attestation, HDAB gate, auditable in-graph withdrawal) → Next (status-list revocation, dynamic scope selection, self-hosted verifier) → Pilot (HDAB trial on synthetic cohorts, schema standardisation). Each item tagged built / next / pilot so the jury sees an honest, fundable progression.</div></div>
+    </div>
+    <div class="footnote">Consent Wallet for the European Health Data Space &middot; synthetic data &middot; fictional orgs</div>
+  </section>
+</body></html>
