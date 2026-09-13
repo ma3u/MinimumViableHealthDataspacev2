@@ -1,11 +1,21 @@
 name: Weekly Demo Reset
 
 on:
-  schedule:
-    # Run Monday 05:15 UTC = 07:15 Europe/Berlin (CEST) / 06:15 (CET).
-    # GitHub Actions cron is UTC-only; the local time shifts ±1 h across DST.
-    # Fires 15 minutes after the Monday 07:00 Europe/Berlin environment start-up.
-    - cron: "15 5 * * 1"
+  # SCHEDULE DISABLED 2026-09-13. The stack stopped being a demo that could be
+  # rebuilt at will: it now carries the Keycloak realm `edcv` with the
+  # `meinbefund-ios` client and real user accounts (ADR-034), and the quota
+  # counter that bounds paid inference (ADR-035). A weekly re-import of the
+  # realm would delete the client the iPhone signs in with, and the app would
+  # simply stop working every Monday morning with no failing test to say why.
+  #
+  # ADR-014 chose a weekly reset because drift in synthetic demo data was the
+  # main risk. That reasoning has not changed for the demo data; what changed is
+  # that state a person depends on now lives in the same cluster. Re-enable
+  # only once the identity realm and the quota table are outside the blast
+  # radius of this workflow.
+  #
+  #   schedule:
+  #     - cron: "15 5 * * 1"   # Monday 05:15 UTC
   workflow_dispatch:
     inputs:
       skip_tests:

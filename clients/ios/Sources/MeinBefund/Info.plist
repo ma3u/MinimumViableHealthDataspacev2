@@ -29,5 +29,13 @@
 	</array>
 	<key>CFBundleVersion</key>
 	<string>1</string>
+	<key>MBFederationBaseURL</key>
+	<string>$(MB_FEDERATION_BASE_URL)</string>
+	<key>MBOIDCClientID</key>
+	<string>$(MB_OIDC_CLIENT_ID)</string>
+	<key>MBOIDCIssuer</key>
+	<string>$(MB_OIDC_ISSUER)</string>
+	<key>MBOIDCRedirectScheme</key>
+	<string>$(MB_OIDC_REDIRECT_SCHEME)</string>
 </dict>
 </plist>

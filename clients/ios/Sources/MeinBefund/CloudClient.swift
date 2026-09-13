@@ -31,13 +31,13 @@ struct CloudClient {
     var errorDescription: String? {
       switch self {
       case .notConfigured:
-        return "Keine Analyse-Adresse konfiguriert."
+        return "No analysis endpoint configured."
       case .notSignedIn:
-        return "Bitte melden Sie sich an, bevor Sie Werte senden."
+        return "Please sign in before sending values."
       case let .refused(message):
         return message
       case let .failed(status, detail):
-        return "Analyse fehlgeschlagen (\(status)). \(detail)"
+        return "Analysis failed (\(status)). \(detail)"
       }
     }
   }

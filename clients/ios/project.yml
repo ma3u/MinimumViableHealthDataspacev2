@@ -1,6 +1,7 @@
 name: MeinBefund
 options:
   bundleIdPrefix: red.mabu
+  developmentLanguage: en
   deploymentTarget:
     iOS: "26.0"
   createIntermediateGroups: true
@@ -35,6 +36,12 @@ targets:
       - target: Shared
     sources:
       - path: Sources/MeinBefund
+      # English is the base language; de.lproj supplies German. Listed so
+      # xcodegen copies both .lproj bundles into the app.
+      - path: Sources/MeinBefund/en.lproj
+        buildPhase: resources
+      - path: Sources/MeinBefund/de.lproj
+        buildPhase: resources
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: red.mabu.meinbefund
@@ -42,6 +49,8 @@ targets:
         # Synthesise Info.plist from the INFOPLIST_KEY_* settings below.
         GENERATE_INFOPLIST_FILE: YES
         INFOPLIST_KEY_CFBundleDisplayName: MeinBefund
+        # The device language decides. English base, German translation.
+        SWIFT_EMIT_LOC_STRINGS: YES
         INFOPLIST_KEY_UILaunchScreen_Generation: YES
         INFOPLIST_KEY_UISupportedInterfaceOrientations: UIInterfaceOrientationPortrait
         # VisionKit needs a reason string or the scanner crashes on first use.

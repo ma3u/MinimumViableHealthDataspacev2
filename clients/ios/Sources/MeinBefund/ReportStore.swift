@@ -88,6 +88,35 @@ public actor ReportStore {
     try FileManager.default.createDirectory(
       at: directory, withIntermediateDirectories: true,
       attributes: [.protectionKey: FileProtectionType.complete])
+    try excludeFromBackup()
+  }
+
+  /// Keeps the store out of iCloud Backup.
+  ///
+  /// `Application Support` is backed up by default, so without this every
+  /// sealed report is copied to iCloud on the next backup. Two reasons that is
+  /// wrong, and the second is the one that decides it:
+  ///
+  /// 1. App Review guideline 5.1.3(ii) says plainly that apps must not store
+  ///    personal health information in iCloud.
+  /// 2. iCloud Backup is encrypted, but Apple holds the keys unless Advanced
+  ///    Data Protection is switched on, and an app cannot check whether it is.
+  ///    So backing up a lipid panel is a decision only the user can make with
+  ///    the facts, and defaulting to "yes" makes it for them silently.
+  ///
+  /// The records are individually AES-GCM sealed, so a backup copy is not
+  /// readable on its own. The key is `ThisDeviceOnly`, so it is also not
+  /// restorable onto another device, which means a backed-up store would be
+  /// ciphertext nobody could ever open. Copying it to Apple anyway would be
+  /// exposure with no upside at all.
+  ///
+  /// Set on the directory rather than per file: a file written before the flag
+  /// was applied would otherwise slip through.
+  private func excludeFromBackup() throws {
+    var url = directory
+    var values = URLResourceValues()
+    values.isExcludedFromBackup = true
+    try url.setResourceValues(values)
   }
 
   private func url(for id: UUID) -> URL {

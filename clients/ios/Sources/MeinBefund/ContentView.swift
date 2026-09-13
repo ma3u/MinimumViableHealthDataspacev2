@@ -35,7 +35,7 @@ final class AppModel: ObservableObject {
     guard let extraction = pending else { return }
     let report = ReportStore.StoredReport(
       id: UUID(), scannedAt: Date(), collectedOn: nil,
-      title: title.isEmpty ? "Laborbefund" : title, extraction: extraction)
+      title: title.isEmpty ? "Lab report" : title, extraction: extraction)
     do {
       try await store.save(report)
       pending = nil
@@ -64,11 +64,39 @@ final class AppModel: ObservableObject {
   /// not offered at all rather than shown and then failing: an action that
   /// cannot work should not look available.
   var cloudAvailable: Bool {
-    OIDCSession.Configuration.fromBundle() != nil && CloudClient.Configuration.fromBundle() != nil
+    // Either the operator's service is configured, or the user pointed the app
+    // at their own provider. One is enough; the feature is not gated on the
+    // operator having set anything up.
+    if providerConfig.kind != .hosted { return providerConfig.isUsable }
+    return OIDCSession.Configuration.fromBundle() != nil
+      && CloudClient.Configuration.fromBundle() != nil
   }
+
+  @Published var providerConfig = BringYourOwnProvider.configuration()
+  @Published var showingSettings = false
 
   func askCloud(_ values: [CloudAnalysis.SharedValue], question: String) async {
     consenting = nil
+    asking = true
+    defer { asking = false }
+
+    // Your own provider: no sign-in, no backend, no quota.
+    //
+    // Signing in exists for one reason, to tell people apart so the daily limit
+    // can be applied per person. On this path there is no limit, because the
+    // operator is not paying for anything, so asking someone to authenticate
+    // would be collecting an identity for no purpose. The call goes straight
+    // from the phone to the endpoint they configured.
+    if providerConfig.kind != .hosted {
+      do {
+        reply = try await BringYourOwnProvider.analyse(
+          values: values, question: question, configuration: providerConfig)
+      } catch {
+        self.error = error.localizedDescription
+      }
+      return
+    }
+
     guard let clientConfig = CloudClient.Configuration.fromBundle(),
       let oidcConfig = OIDCSession.Configuration.fromBundle()
     else {
@@ -76,8 +104,6 @@ final class AppModel: ObservableObject {
       return
     }
 
-    asking = true
-    defer { asking = false }
     do {
       // Sign in lazily, and only when the user has already chosen to send
       // something. Asking someone to authenticate before they have decided
@@ -127,7 +153,7 @@ struct ContentView: View {
                       Button {
                         model.consenting = report.extraction.coded
                       } label: {
-                        Label("Claude fragen", systemImage: "sparkles")
+                        Label("Ask about these values", systemImage: "sparkles")
                       }
                     }
                   }
@@ -142,7 +168,14 @@ struct ContentView: View {
           Button {
             scanning = true
           } label: {
-            Label("Befund scannen", systemImage: "doc.viewfinder")
+            Label("Scan report", systemImage: "doc.viewfinder")
+          }
+        }
+        ToolbarItem(placement: .topBarLeading) {
+          Button {
+            model.showingSettings = true
+          } label: {
+            Label("Analysis provider", systemImage: "gearshape")
           }
         }
       }
@@ -175,9 +208,14 @@ struct ContentView: View {
     .sheet(item: Binding(get: { model.reply.map(ReplyBox.init) }, set: { _ in })) { box in
       CloudReplySheet(reply: box.reply) { model.reply = nil }
     }
-    .overlay { if model.asking { ProgressView("Claude antwortet…").padding().background(.regularMaterial, in: .rect(cornerRadius: 12)) } }
-    .overlay { if model.busy { ProgressView("Text wird erkannt…").padding().background(.regularMaterial, in: .rect(cornerRadius: 12)) } }
-    .alert("Fehler", isPresented: Binding(get: { model.error != nil }, set: { _ in model.error = nil })) {
+    .sheet(isPresented: $model.showingSettings) {
+      ProviderSettings(configuration: $model.providerConfig) {
+        model.showingSettings = false
+      }
+    }
+    .overlay { if model.asking { ProgressView("Waiting for an answer…").padding().background(.regularMaterial, in: .rect(cornerRadius: 12)) } }
+    .overlay { if model.busy { ProgressView("Recognising text…").padding().background(.regularMaterial, in: .rect(cornerRadius: 12)) } }
+    .alert("Error", isPresented: Binding(get: { model.error != nil }, set: { _ in model.error = nil })) {
       Button("OK", role: .cancel) {}
     } message: {
       Text(model.error ?? "")
@@ -207,9 +245,9 @@ private struct PendingBox: Identifiable {
 private struct EmptyStateView: View {
   var body: some View {
     ContentUnavailableView {
-      Label("Noch kein Befund", systemImage: "doc.text.magnifyingglass")
+      Label("No reports yet", systemImage: "doc.text.magnifyingglass")
     } description: {
-      Text("Scannen Sie einen Laborbefund. Die Werte bleiben verschlüsselt auf diesem Gerät.")
+      Text("Scan a lab report. The values stay encrypted on this device.")
     }
   }
 }
@@ -223,10 +261,10 @@ private struct ReportRow: View {
       HStack(spacing: 8) {
         Text(report.scannedAt.formatted(date: .abbreviated, time: .omitted))
         Text("·")
-        Text("\(report.extraction.coded.count) Werte")
+        Text("\(report.extraction.coded.count) values")
         if report.extraction.needsReview > 0 {
           Text("·")
-          Text("\(report.extraction.needsReview) zu prüfen").foregroundStyle(.orange)
+          Text("\(report.extraction.needsReview) to review").foregroundStyle(.orange)
         }
       }
       .font(.caption)

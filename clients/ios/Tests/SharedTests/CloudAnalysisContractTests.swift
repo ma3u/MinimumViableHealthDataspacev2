@@ -118,3 +118,46 @@ struct CloudAnalysisContractTests {
     #expect(CloudAnalysis.refusal(for: [value]) == nil)
   }
 }
+
+/// The generated prompt against the TypeScript it came from.
+@Suite("Prompt parity with services/claude-federation")
+struct PromptParityTests {
+
+  @Test("the intended purpose is stated, which is what keeps this out of IVDR scope")
+  func intendedPurpose() {
+    // Qualification as a medical device turns almost entirely on the stated
+    // intended purpose (MDCG 2019-11), and because these come from in-vitro
+    // samples it is IVDR that would apply. Asserted on the generated copy too,
+    // because the bring-your-own path sends this one and never touches the
+    // service that has its own test.
+    #expect(PromptText.system.contains("do not diagnose"))
+    #expect(PromptText.system.contains("do not estimate risk"))
+    #expect(PromptText.system.contains("do not recommend treatment"))
+    #expect(PromptText.system.contains("Never substitute a range"))
+  }
+
+  @Test("Swift renders a value exactly as TypeScript does")
+  func renderingMatches() {
+    // The golden is emitted by the generator from the TypeScript renderer, so
+    // this compares the two implementations rather than Swift against itself.
+    let rendered = PromptText.values([
+      CloudAnalysis.SharedValue(
+        label: "LDL-Cholesterin", value: 141, unit: "mg/dL", loinc: "2089-1",
+        referenceHigh: 116, status: "preliminary")
+    ])
+    #expect(rendered == PromptText.goldenSample)
+  }
+
+  @Test("an integral value prints without a fractional part, as JavaScript does")
+  func numberFormatting() {
+    // Swift's default would render 141 as "141.0" and the two paths would send
+    // different prompts for the same value.
+    let rendered = PromptText.values([
+      CloudAnalysis.SharedValue(
+        label: "Ferritin", value: 210, unit: "ug/L", loinc: "2276-4", status: "final")
+    ])
+    #expect(rendered.contains("210 ug/L"))
+    #expect(!rendered.contains("210.0"))
+    #expect(rendered.contains("none printed"))
+  }
+}

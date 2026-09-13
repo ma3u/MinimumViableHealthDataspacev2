@@ -13,21 +13,21 @@ struct ReviewSheet: View {
     NavigationStack {
       Form {
         Section {
-          TextField("Bezeichnung", text: $title, prompt: Text("Laborbefund"))
+          TextField("Title", text: $title, prompt: Text("Lab report"))
         } footer: {
-          Text("Die Werte wurden aus einem Foto gelesen und sind deshalb vorläufig, nicht bestätigt.")
+          Text("These values were read from a photo and are preliminary, not confirmed.")
         }
 
         ResultSections(extraction: extraction)
       }
-      .navigationTitle("Geprüft?")
+      .navigationTitle("Reviewed?")
       .navigationBarTitleDisplayMode(.inline)
       .toolbar {
         ToolbarItem(placement: .cancellationAction) {
-          Button("Verwerfen", role: .destructive, action: onDiscard)
+          Button("Discard", role: .destructive, action: onDiscard)
         }
         ToolbarItem(placement: .confirmationAction) {
-          Button("Speichern") { onConfirm(title) }
+          Button("Save") { onConfirm(title) }
         }
       }
     }
@@ -59,7 +59,7 @@ struct ResultSections: View {
         CodedRow(value: value)
       }
     } header: {
-      Label("\(extraction.coded.count) erkannt", systemImage: "checkmark.circle")
+      Label("\(extraction.coded.count) recognised", systemImage: "checkmark.circle")
     }
 
     if !extraction.unmapped.isEmpty {
@@ -73,9 +73,9 @@ struct ResultSections: View {
           }
         }
       } header: {
-        Label("\(extraction.unmapped.count) nicht zugeordnet", systemImage: "questionmark.circle")
+        Label("\(extraction.unmapped.count) unmatched", systemImage: "questionmark.circle")
       } footer: {
-        Text("Diese Zeilen wurden gelesen, aber keinem LOINC-Code zugeordnet. Sie werden nicht verworfen.")
+        Text("These lines were read but matched no LOINC code. They are not discarded.")
       }
     }
 
@@ -85,9 +85,9 @@ struct ResultSections: View {
           Text(line).font(.caption.monospaced())
         }
       } header: {
-        Label("\(extraction.suspiciousLines.count) nicht gelesen", systemImage: "exclamationmark.triangle")
+        Label("\(extraction.suspiciousLines.count) unread", systemImage: "exclamationmark.triangle")
       } footer: {
-        Text("Diese Zeilen sahen nach Messwerten aus, konnten aber nicht gelesen werden.")
+        Text("These lines looked like measurements but could not be read.")
       }
     }
   }
@@ -120,7 +120,7 @@ private struct CodedRow: View {
           Text("·")
           // Where on the paper this came from, so the number can be checked
           // against the source rather than trusted (#186 criterion 5).
-          Text("S. \(region.page), Z. \(rowOrdinal(region))")
+          Text("p. \(region.page), line \(rowOrdinal(region))")
         }
       }
       .font(.caption)
