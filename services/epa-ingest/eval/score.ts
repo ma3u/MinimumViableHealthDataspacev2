@@ -1,5 +1,5 @@
 /**
- * Scorer — is on-device extraction good enough to keep the report on the phone?
+ * Scorer, is on-device extraction good enough to keep the report on the phone?
  *
  * Compares one or more extraction arms against a ground truth the owner of the
  * report labelled by hand, and prints metrics that are safe to share: counts and
@@ -8,7 +8,7 @@
  * The headline number is NOT overall accuracy. It is the **critical error rate**:
  * rows where the extracted value is off by an order of magnitude, or carries the
  * wrong unit, or was never on the page at all. A run at 98% overall accuracy with
- * a 2% order-of-magnitude error rate is not a good extractor — it is one that
+ * a 2% order-of-magnitude error rate is not a good extractor. It is one that
  * turns 1240 pg/mL NT-proBNP into 1.24 twice per hundred rows.
  *
  * Hallucination is the asymmetry that decides the architecture: the deterministic
@@ -69,7 +69,7 @@ export interface Metrics {
    */
   hallucinated: number;
   /**
-   * Extra rows under a partial truth — unjudgeable, so reported separately and
+   * Extra rows under a partial truth, unjudgeable, so reported separately and
    * excluded from the critical error rate.
    */
   unlabelled: number;
@@ -78,7 +78,7 @@ export interface Metrics {
   /** Matched rows whose value equals the truth (within float tolerance). */
   valueExact: number;
   /**
-   * Matched rows off by a factor of 10 or more — the decimal-separator failure.
+   * Matched rows off by a factor of 10 or more, the decimal-separator failure.
    * Clinically the most dangerous outcome and the one that decides the verdict.
    */
   valueOrderOfMagnitude: number;
@@ -233,12 +233,12 @@ export function formatMetrics(all: Metrics[]): string {
     lines.push(`   value wrong (other)   ${m.valueOtherWrong}`);
     lines.push("");
     lines.push(
-      "   critical — each one of these could change a clinical decision",
+      "   critical: each one of these could change a clinical decision",
     );
     lines.push(
       m.hallucinationMeasurable
         ? `     hallucinated rows   ${m.hallucinated}`
-        : `     hallucinated rows   not measurable — truth is not marked complete`,
+        : `     hallucinated rows   not measurable, truth is not marked complete`,
     );
     lines.push(`     order-of-magnitude  ${m.valueOrderOfMagnitude}`);
     lines.push(`     wrong unit          ${m.unitWrong}`);

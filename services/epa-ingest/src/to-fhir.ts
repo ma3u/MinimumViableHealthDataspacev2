@@ -5,7 +5,7 @@
  * value, a DocumentReference standing for the paper, and a Provenance tying
  * them to it.
  *
- * It is **not** a KBV MIO Laborbefund document yet — that needs a `document`
+ * It is **not** a KBV MIO Laborbefund document yet. That needs a `document`
  * bundle with a Composition and the KBV profiles, and claiming conformance we
  * have not validated would be worse than not claiming it. The resource shapes
  * here are chosen so that step is additive; see README.
@@ -14,6 +14,7 @@ import type {
   CodedLabValue,
   ReportMeta,
   SourceKind,
+  SourceRegion,
   TextSource,
 } from "./types.js";
 
@@ -21,6 +22,17 @@ const EXT_BASE = "https://ehds.mabu.red/fhir/StructureDefinition";
 export const EXT_SOURCE_KIND = `${EXT_BASE}/epa-ingest-source-kind`;
 export const EXT_OCR_CONFIDENCE = `${EXT_BASE}/epa-ingest-ocr-confidence`;
 export const EXT_SOURCE_LINE = `${EXT_BASE}/epa-ingest-source-line`;
+/**
+ * Page and bounding box of the row this value was read from.
+ *
+ * Satisfies the citation rule: every analyte points back at the place on the
+ * document it came from, so a clinician can verify against the paper rather
+ * than trust the extractor. Serialised as a compact `page@x,y,w,h` string
+ * rather than a nested extension, because the consumer that matters is a human
+ * reading a rendered bundle, and five nested `valueDecimal` extensions per
+ * observation is not readable by anyone.
+ */
+export const EXT_SOURCE_REGION = `${EXT_BASE}/epa-ingest-source-region`;
 
 const UCUM = "http://unitsofmeasure.org";
 const LOINC = "http://loinc.org";
@@ -29,7 +41,7 @@ const LOINC = "http://loinc.org";
  * Observation status by provenance.
  *
  * Only a value read from the lab's own characters is `final`. A value we
- * recognised from pixels is `preliminary` — the lab finalised the result, but
+ * recognised from pixels is `preliminary`: the lab finalised the result, but
  * the transcription in this bundle is ours and unverified, and a receiving
  * system must be able to see that without reading an extension.
  */
@@ -81,13 +93,28 @@ function quantity(value: number, ucum: string, comparator?: string): Quantity {
   };
 }
 
-function provenanceExtensions(source: TextSource, line: string): Extension[] {
+/** `page@x,y,w,h`, coordinates to six decimals and trailing zeroes trimmed. */
+export function formatRegion(region: SourceRegion): string {
+  const n = (v: number) => String(Number(v.toFixed(6)));
+  return `${region.page}@${n(region.x)},${n(region.y)},${n(region.width)},${n(
+    region.height,
+  )}`;
+}
+
+function provenanceExtensions(
+  source: TextSource,
+  line: string,
+  region?: SourceRegion,
+): Extension[] {
   const ext: Extension[] = [
     { url: EXT_SOURCE_KIND, valueCode: source.kind },
     { url: EXT_SOURCE_LINE, valueString: line },
   ];
   if (source.ocrConfidence !== undefined) {
     ext.push({ url: EXT_OCR_CONFIDENCE, valueDecimal: source.ocrConfidence });
+  }
+  if (region !== undefined) {
+    ext.push({ url: EXT_SOURCE_REGION, valueString: formatRegion(region) });
   }
   return ext;
 }
@@ -136,7 +163,7 @@ export function buildBundle(
     resourceType: "Observation",
     id: `obs-${i + 1}`,
     status,
-    extension: provenanceExtensions(source, v.line),
+    extension: provenanceExtensions(source, v.line, v.region),
     category: [
       {
         coding: [

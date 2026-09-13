@@ -48,6 +48,12 @@ describe("parseReferenceRange", () => {
     expect(parseReferenceRange("197 bis 771")).toEqual({ low: 197, high: 771 });
   });
 
+  it("reads an interval separated by an em dash", () => {
+    // A style sweep twice replaced the em dash inside this parser's own regex
+    // alternation, and both suites stayed green because nothing covered it.
+    expect(parseReferenceRange("0,70 — 1,20")).toEqual({ low: 0.7, high: 1.2 });
+  });
+
   it("reads an upper bound", () => {
     expect(parseReferenceRange("< 200")).toEqual({ high: 200 });
     expect(parseReferenceRange("bis 150")).toEqual({ high: 150 });

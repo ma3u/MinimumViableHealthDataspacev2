@@ -1,11 +1,11 @@
 #!/usr/bin/env node
 /**
- * epa-ingest — turn a lab report into FHIR R4 Observations you can take to your
+ * epa-ingest, turn a lab report into FHIR R4 Observations you can take to your
  * Hausarzt, with provenance the receiving side can check.
  *
  * Part of the pre-ePA workbench (issue #182, W9). It prepares; the citizen
- * uploads. There is no API into the ePA for us — a third-party application can
- * only write there as a listed DiGA with a productive SMC-B DiGA — so the end
+ * uploads. There is no API into the ePA for us, a third-party application can
+ * only write there as a listed DiGA with a productive SMC-B DiGA, so the end
  * of this pipeline is a file, not a transfer.
  *
  *   epa-ingest befund.pdf --date 2026-08-14 --performer "FS-CPC Charite" \
@@ -17,11 +17,14 @@ import { extractText } from "./extract-text.js";
 import { parseLabReport } from "./parse-lab.js";
 import { codeValues } from "./code-values.js";
 import { buildBundle, statusForSource } from "./to-fhir.js";
+import { formatTrendSummary, summariseExportFile } from "./apple-health.js";
 import type { CodingResult, ExtractedText, SourceKind } from "./types.js";
 import type { ParseResult } from "./parse-lab.js";
 
 export interface CliOptions {
   input: string;
+  healthExport?: string;
+  trendsOut?: string;
   out?: string;
   patientId: string;
   date?: string;
@@ -36,7 +39,7 @@ const SOURCE_KINDS: readonly SourceKind[] = [
   "self-tracked",
 ];
 
-const USAGE = `epa-ingest — lab report to FHIR R4 Observations (pre-ePA workbench)
+const USAGE = `epa-ingest: lab report to FHIR R4 Observations (pre-ePA workbench)
 
 Usage:
   epa-ingest <file> [options]
@@ -52,6 +55,14 @@ Options:
   --source-kind <kind>  provenance for .txt input: ${SOURCE_KINDS.join(" | ")}
                         (default: self-tracked, the least-trust option)
   -h, --help            this text
+
+Apple Health:
+  epa-ingest --health-export <export.xml> [--trends-out <summary.txt>]
+
+  Streams the Health app export and writes a monthly trend summary. The raw
+  export routinely exceeds the ePA's 25 MB ceiling and no GP reads 400,000 XML
+  rows, so the samples are never emitted, only the aggregates. Everything it
+  produces is self-tracked, and the summary says so.
 `;
 
 export function parseArgs(argv: string[]): CliOptions | null {
@@ -83,6 +94,12 @@ export function parseArgs(argv: string[]): CliOptions | null {
       case "--title":
         opts.title = value;
         break;
+      case "--health-export":
+        opts.healthExport = value;
+        break;
+      case "--trends-out":
+        opts.trendsOut = value;
+        break;
       case "--source-kind":
         if (!SOURCE_KINDS.includes(value as SourceKind)) {
           throw new Error(
@@ -94,6 +111,20 @@ export function parseArgs(argv: string[]): CliOptions | null {
       default:
         throw new Error(`Unknown option ${arg}`);
     }
+  }
+
+  // The Apple Health path takes no positional input: there is no document to
+  // code, only an export to aggregate.
+  if (opts.healthExport !== undefined) {
+    if (positional.length > 0) {
+      throw new Error("--health-export takes no positional input file");
+    }
+    return {
+      input: "",
+      patientId: opts.patientId ?? "self",
+      healthExport: opts.healthExport,
+      ...(opts.trendsOut !== undefined ? { trendsOut: opts.trendsOut } : {}),
+    };
   }
 
   if (positional.length !== 1) {
@@ -234,6 +265,21 @@ async function main(): Promise<void> {
   }
   if (!options) {
     process.stdout.write(USAGE);
+    return;
+  }
+
+  if (options.healthExport) {
+    const summary = await summariseExportFile(options.healthExport);
+    const rendered = formatTrendSummary(summary);
+    if (options.trendsOut) {
+      await writeFile(options.trendsOut, rendered, "utf8");
+      process.stderr.write(
+        `scanned ${summary.recordsScanned.toLocaleString("en-GB")} records, ` +
+          `${summary.trends.length} metric(s) -> ${options.trendsOut}\n`,
+      );
+    } else {
+      process.stdout.write(rendered);
+    }
     return;
   }
 

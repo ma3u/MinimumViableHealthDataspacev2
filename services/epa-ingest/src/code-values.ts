@@ -1,5 +1,5 @@
 /**
- * Coding step — parsed rows to LOINC-coded values.
+ * Coding step, parsed rows to LOINC-coded values.
  *
  * Nothing is dropped here. A row we cannot code is returned as
  * `UnmappedLabValue` with the reason, because the citizen holding the paper is

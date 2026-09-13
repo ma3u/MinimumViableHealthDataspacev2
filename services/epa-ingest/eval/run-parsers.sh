@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Stage-1 parser arms — Marker v2 and MinerU — for the extraction evaluation.
+# Stage-1 parser arms: Marker v2 and MinerU, for the extraction evaluation.
 #
 # Neither tool is vendored or installed by this repo: both carry licence terms
 # worth reading before they touch anything commercial (ADR-033), and both are
@@ -20,13 +20,13 @@ if [ -z "$PDF" ] || [ -z "$OUT" ]; then
   cat <<'USAGE'
 Usage: ./eval/run-parsers.sh <report.pdf> <output-dir>
 
-Keep both paths outside this repository — a lab report is personal health data.
+Keep both paths outside this repository: a lab report is personal health data.
 
 Install the parsers first (neither is a dependency of this repo):
-  pip install marker-pdf     # Marker 2.x — Apache-2.0 code, RAIL-M weights
-  pip install mineru         # MinerU 2.x — custom Apache-2.0-based licence
+  pip install marker-pdf     # Marker 2.x, Apache-2.0 code, RAIL-M weights
+  pip install mineru         # MinerU 2.x, custom Apache-2.0-based licence
 
-Optional, Marker only — structured LLM assist against your own Azure deployment:
+Optional, Marker only: structured LLM assist against your own Azure deployment:
   export MARKER_USE_LLM=1
   export AZURE_API_KEY=...            AZURE_ENDPOINT=https://<account>.openai.azure.com
   export AZURE_DEPLOYMENT=gpt-5-mini  AZURE_API_VERSION=2024-10-21
@@ -45,7 +45,7 @@ run_marker() {
   fi
   local args=(--output_format markdown --output_dir "$OUT/marker")
   if [ "${MARKER_USE_LLM:-0}" = "1" ]; then
-    echo "  marker: --use_llm ENABLED — pages will be sent to ${AZURE_DEPLOYMENT:-<unset>}"
+    echo "  marker: --use_llm ENABLED: pages will be sent to ${AZURE_DEPLOYMENT:-<unset>}"
     args+=(--use_llm --llm_service marker.services.azure_openai.AzureOpenAIService)
   fi
   echo "→ marker_single ${PDF}"

@@ -1,4 +1,4 @@
-# ADR-033: Two-stage lab-report extraction — self-hosted parse, schema extraction, EU-resident models
+# ADR-033: Two-stage lab-report extraction: self-hosted parse, schema extraction, EU-resident models
 
 **Status:** Proposed
 **Date:** 2026-09-13
@@ -10,7 +10,7 @@
 The pre-ePA workbench (#182 W9) turns a lab report the citizen holds into FHIR R4
 Observations. `services/epa-ingest` does this today with a deterministic line
 parser over `pdftotext`-quality text. That works on a clean digital PDF and is
-brittle on anything else — multi-column layouts, tables split across pages, and
+brittle on anything else, multi-column layouts, tables split across pages, and
 scans.
 
 A lab report's real structure is **nested**: panel → analyte →
@@ -24,7 +24,7 @@ they are not negotiable:
 1. **Never normalise away the printed reference range.** It is lab- and
    assay-specific. A standardised value may be carried _alongside_ it, never
    instead of it.
-2. **Every analyte carries a source citation** — page and bounding box — so a
+2. **Every analyte carries a source citation** (page and bounding box) so a
    clinician can verify the value against the document rather than trusting the
    extractor.
 
@@ -58,19 +58,19 @@ unit-dependent in a way a general extractor will get wrong.
 ### 2. Stage 1: self-hosted parsing, evaluated rather than assumed
 
 Marker v2 and MinerU are both credible and both self-hostable, which is the
-property that matters most here — a self-hosted parser means no page of a lab
+property that matters most here, a self-hosted parser means no page of a lab
 report ever leaves the process.
 
-|                     | **Marker 2.0**                                                                              | **MinerU 2.5**                                                                  |
-| ------------------- | ------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
-| Code licence        | Apache-2.0                                                                                  | Custom "MinerU Open Source License" — Apache-2.0 base **plus additional terms** |
-| **Weights licence** | Modified AI Pubs Open-RAIL-M — **free under $5M revenue/funding**, commercial licence above | governed by the custom terms                                                    |
-| Bounding boxes      | JSON / debug output                                                                         | per block, normalised `[xmin,ymin,xmax,ymax]` in `[0,1]`                        |
-| LLM assist          | `--use_llm`, **supports Azure directly**                                                    | VLM-based pipeline                                                              |
-| olmOCR-Bench        | ~76–83% (varies by mode and source)                                                         | ~72.7%                                                                          |
-| OmniDocBench        | —                                                                                           | MinerU2.5-Pro among the top three (95.7–96.6)                                   |
+|                     | **Marker 2.0**                                                                             | **MinerU 2.5**                                                                 |
+| ------------------- | ------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------ |
+| Code licence        | Apache-2.0                                                                                 | Custom "MinerU Open Source License", Apache-2.0 base **plus additional terms** |
+| **Weights licence** | Modified AI Pubs Open-RAIL-M, **free under $5M revenue/funding**, commercial licence above | governed by the custom terms                                                   |
+| Bounding boxes      | JSON / debug output                                                                        | per block, normalised `[xmin,ymin,xmax,ymax]` in `[0,1]`                       |
+| LLM assist          | `--use_llm`, **supports Azure directly**                                                   | VLM-based pipeline                                                             |
+| olmOCR-Bench        | ~76–83% (varies by mode and source)                                                        | ~72.7%                                                                         |
+| OmniDocBench        | none                                                                                       | MinerU2.5-Pro among the top three (95.7–96.6)                                  |
 
-**The benchmarks disagree** — Marker leads on one, MinerU on the other — which is
+**The benchmarks disagree** (Marker leads on one, MinerU on the other) which is
 reason enough not to pick from a leaderboard. Neither is chosen here. Both are
 wired as arms in `services/epa-ingest/eval` and the choice is made on real
 German lab sheets, scored on critical error rate.
@@ -83,7 +83,7 @@ additional terms need reading rather than assuming from the Apache-2.0 base.
 
 **Azure AI Content Understanding** (West Europe) for the nested schema: custom
 field schemas, per-field confidence, and grounding with page number and bounding
-box — which is exactly constraint 2, satisfied by the platform rather than bolted
+box, which is exactly constraint 2, satisfied by the platform rather than bolted
 on. Fallback: our own `gpt-5.1` deployment with JSON-schema structured output,
 with citations carried from stage 1 by span matching.
 
@@ -102,7 +102,7 @@ returns `unknown-analyte` rather than guessing. That stays the primary path.
 
 Embeddings (`text-embedding-3-small`, already deployed) extend coverage to labels
 the dictionary does not hold, as **candidate retrieval feeding an adjudication
-step** — never as the coder. Short, abbreviation-heavy German labels ("GPT",
+step**, never as the coder. Short, abbreviation-heavy German labels ("GPT",
 "Lp(a)", "hs-CRP") are where pure vector retrieval is weakest, so the design is
 lexical + vector hybrid, then a decision, with the unit constraint from rule 3
 narrowing the candidates before anything is chosen.
@@ -120,14 +120,13 @@ yet the bottleneck. Move only if recall@10 on real labels says so.
 
 Azure OpenAI deployments default to **DataZoneStandard** (EU data zone), falling
 back to regional **Standard** where a model is not offered on that SKU in
-`westeurope` — never to a Global SKU.
+`westeurope`, never to a Global SKU.
 
 `GlobalStandard` routes inference to global capacity and carries **no EU-only
 processing guarantee**. It was the previous default in
 `scripts/azure/07-ai-foundry.sh`, which was defensible for the synthetic demo
 data it was provisioned for and is wrong the moment a real report goes through
-it. Existing deployments are **not** recreated by the script — changing a SKU is
-delete-and-create, which drops capacity — but every deployment's SKU is now
+it. Existing deployments are **not** recreated by the script (changing a SKU is delete-and-create, which drops capacity) but every deployment's SKU is now
 audited and printed, any `Global*` one is called out with the exact remediation
 commands, and `STRICT_RESIDENCY=true` turns that into a hard failure.
 
@@ -178,7 +177,7 @@ commands, and `STRICT_RESIDENCY=true` turns that into a hard failure.
 
 ## References
 
-- `services/epa-ingest/eval/README.md` — the harness and how to read its output
-- Marker — <https://github.com/datalab-to/marker> · MinerU — <https://github.com/opendatalab/MinerU>
-- Azure AI Content Understanding — document field extraction, confidence and grounding
+- `services/epa-ingest/eval/README.md`: the harness and how to read its output
+- Marker (<https://github.com/datalab-to/marker> · MinerU) <https://github.com/opendatalab/MinerU>
+- Azure AI Content Understanding, document field extraction, confidence and grounding
 - Azure OpenAI deployment types and data zones
