@@ -39,9 +39,16 @@ struct ResultList: View {
   let title: String
 
   var body: some View {
-    Form { ResultSections(extraction: extraction) }
-      .navigationTitle(title)
-      .navigationBarTitleDisplayMode(.inline)
+    Form {
+      ResultSections(extraction: extraction)
+      // Guideline 1.4.1 asks that a medical app remind people to check with a
+      // doctor before acting. The moment that matters is while they are looking
+      // at their own numbers, so it lives here rather than in a settings screen
+      // nobody opens.
+      Section { DoctorReminder() }
+    }
+    .navigationTitle(title)
+    .navigationBarTitleDisplayMode(.inline)
   }
 }
 
