@@ -14,7 +14,9 @@
     "dev": "tsx src/index.ts",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.eval.json",
+    "eval:score": "tsx eval/score.ts"
   },
   "dependencies": {},
   "optionalDependencies": {
