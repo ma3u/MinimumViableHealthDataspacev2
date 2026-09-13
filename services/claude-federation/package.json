@@ -1,0 +1,24 @@
+{
+  "name": "@health-dataspace/claude-federation",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Federates an Azure workload identity to the Claude API so no Anthropic API key exists anywhere, and mediates MeinBefund's explicit per-request cloud analysis.",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx src/server.ts",
+    "start": "node dist/server.js",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "diagnose": "tsx src/diagnose.ts"
+  },
+  "dependencies": {
+    "jose": "^6.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2",
+    "vitest": "^4.0.0"
+  }
+}
