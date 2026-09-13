@@ -64,7 +64,7 @@ kc_token() {
   token=$(curl -sS --max-time 30 -X POST \
     "${base}/realms/master/protocol/openid-connect/token" \
     -d "grant_type=password" -d "client_id=admin-cli" \
-    -d "username=${KC_ADMIN_USER}" -d "password=${KC_ADMIN_PASSWORD}" \
+    -d "username=${KC_ADMIN_USER}" -d "password=$(kc_admin_password)" \
     | python3 -c "import json,sys; print(json.load(sys.stdin).get('access_token',''))")
   [ -n "$token" ] || { error "could not obtain a Keycloak admin token"; exit 1; }
   echo "$token"

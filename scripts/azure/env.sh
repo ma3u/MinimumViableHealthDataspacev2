@@ -129,9 +129,31 @@ export PROVISION_MGR_IMAGE="${ACR_LOGIN_SERVER}/cfm-pmanager:${CFM_VERSION}"
 export NEO4J_USER="neo4j"
 export NEO4J_PASSWORD="healthdataspace"
 
+# ── Azure Key Vault (ADR-036) ────────────────────────────────────────────────
+# Operator secrets live here and are referenced, never copied into this file.
+export KEY_VAULT_NAME="${KEY_VAULT_NAME:-kv-mvhd-b53a0449}"
+
+# Reads a secret from the vault. Returns empty and warns rather than failing, so
+# sourcing this file still works for the many scripts that need no secret at all.
+kv_secret() {
+  local name="$1" value
+  value=$(az keyvault secret show --vault-name "$KEY_VAULT_NAME" --name "$name" \
+    --query value -o tsv 2>/dev/null) || true
+  if [ -z "$value" ]; then
+    echo "[env] WARNING: could not read '$name' from $KEY_VAULT_NAME." >&2
+    echo "[env] Run 'az login' and check the Key Vault Secrets User role." >&2
+  fi
+  printf '%s' "$value"
+}
+
 # ── Keycloak ─────────────────────────────────────────────────────────────────
 export KC_ADMIN_USER="admin"
-export KC_ADMIN_PASSWORD="admin"
+# Was literally "admin" in this file until 2026-09-13. That was tolerable while
+# Keycloak guarded a demo realm; it stopped being tolerable when the same realm
+# began gating access to paid inference (ADR-034, ADR-036). Resolved lazily so
+# sourcing env.sh does not require a vault round trip for scripts that never
+# touch Keycloak.
+kc_admin_password() { kv_secret keycloak-admin-password; }
 export KC_DB_NAME="keycloak"
 
 # ── Vault ────────────────────────────────────────────────────────────────────

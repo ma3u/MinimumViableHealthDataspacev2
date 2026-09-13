@@ -136,6 +136,20 @@ provider works with no per-provider configuration.
 
 ---
 
+## The Keycloak admin password
+
+It is in Azure Key Vault, not in this repository and not in `env.sh`:
+
+```bash
+az keyvault secret show --vault-name kv-mvhd-b53a0449 \
+  --name keycloak-admin-password --query value -o tsv
+```
+
+Scripts resolve it themselves through `kc_admin_password()` in `env.sh`, so
+nothing needs it pasted anywhere. Rotating it is one command plus one admin-API
+call; see [ADR-036](../../ADRs/ADR-036-operator-secrets-in-key-vault.md) for why
+it moved.
+
 ## Side 2: the workload and the Claude Console
 
 This side has no user in it. The Container App proves it is itself.
