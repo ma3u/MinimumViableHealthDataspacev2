@@ -1,4 +1,4 @@
-// GENERATED FILE — DO NOT EDIT.
+// GENERATED FILE, DO NOT EDIT.
 //
 // Source: services/epa-ingest/src/analytes.ts
 // Regenerate: cd services/epa-ingest && npm run generate:swift
@@ -13,7 +13,7 @@
 import Foundation
 
 public struct AnalyteCoding: Sendable, Equatable, Codable {
-  /// Normalised analyte label — see `normaliseLabel`.
+  /// Normalised analyte label, see `normaliseLabel`.
   public let labelKey: String
   /// UCUM unit code this coding applies to.
   public let ucum: String
@@ -204,7 +204,7 @@ public enum Analytes {
     return unitMap[key]
   }
 
-  /// Resolves a printed label and unit to a coding, or nil — never a guess.
+  /// Resolves a printed label and unit to a coding, or nil, never a guess.
   public static func lookup(label: String, unit: String) -> AnalyteCoding? {
     guard let ucum = normaliseUnit(unit) else { return nil }
     let key = normaliseLabel(label)
@@ -214,7 +214,7 @@ public enum Analytes {
   /// True when the dictionary knows this analyte in *some* unit.
   ///
   /// Separates "we have never heard of this analyte" from "we know it, but not
-  /// in the unit printed" — a distinction that decides whether a row is a gap
+  /// in the unit printed", a distinction that decides whether a row is a gap
   /// in the dictionary or a unit the lab reported unusually.
   public static func knowsLabel(_ label: String) -> Bool {
     let key = normaliseLabel(label)

@@ -2,15 +2,15 @@
  * Apple Health export → trend summary.
  *
  * The Health app exports as `export.zip` containing `export.xml`. That file is
- * routinely **hundreds of megabytes** — a decade of heart-rate samples at one
- * `<Record>` per reading — against an ePA ceiling of **25 MB per file**, and no
+ * routinely **hundreds of megabytes**: a decade of heart-rate samples at one
+ * `<Record>` per reading, against an ePA ceiling of **25 MB per file**, and no
  * GP is going to read 400,000 XML rows.
  *
  * So this never loads the document and never emits the samples. It streams the
  * file, keeps only running aggregates per metric per period, and produces a
  * summary measured in kilobytes: the shape a doctor can actually look at.
  *
- * Everything it produces is `self-tracked` — a consumer device is not a lab, and
+ * Everything it produces is `self-tracked`: a consumer device is not a lab, and
  * the artefact must say so (see `types.ts`).
  */
 import { createReadStream } from "node:fs";
@@ -23,7 +23,7 @@ interface MetricSpec {
   label: string;
   /** Preferred unit; samples in any other unit are counted and skipped. */
   unit: string;
-  /** How a period is summarised — a mean resting HR, a max VO2max. */
+  /** How a period is summarised: a mean resting HR, a max VO2max. */
   aggregate: "mean" | "max" | "latest";
   decimals: number;
 }
@@ -181,7 +181,7 @@ class Accumulator {
       return;
     }
 
-    // `Number("")` is 0, not NaN — an empty attribute would otherwise be
+    // `Number("")` is 0, not NaN, an empty attribute would otherwise be
     // recorded as a resting heart rate of zero.
     const raw = attrs.value?.trim();
     if (!raw) return;
@@ -262,7 +262,7 @@ class Accumulator {
   }
 }
 
-/** Aggregates an in-memory export — the testable core of the streaming path. */
+/** Aggregates an in-memory export: the testable core of the streaming path. */
 export function summariseXml(
   xml: string,
   generatedAt = new Date().toISOString(),
@@ -309,13 +309,13 @@ export async function summariseExportFile(
   return acc.summarise(generatedAt);
 }
 
-/** Compact, human-readable summary — the thing that goes in front of a doctor. */
+/** Compact, human-readable summary: the thing that goes in front of a doctor. */
 export function formatTrendSummary(
   summary: TrendSummary,
   maxPeriods = 12,
 ): string {
   const lines: string[] = [
-    "Self-tracked trends (consumer device — not diagnostic)",
+    "Self-tracked trends (consumer device, not diagnostic)",
     `Scanned ${summary.recordsScanned.toLocaleString("en-GB")} records`,
     "",
   ];
@@ -333,7 +333,7 @@ export function formatTrendSummary(
         : t.aggregate === "max"
           ? "monthly max"
           : "last reading";
-    lines.push(`${t.label} (${t.unit}) — ${how}, ${t.from} to ${t.to}`);
+    lines.push(`${t.label} (${t.unit}): ${how}, ${t.from} to ${t.to}`);
     lines.push(`  ${shown.map((p) => `${p.period} ${p.value}`).join("   ")}`);
     if (t.points.length > shown.length) {
       lines.push(
@@ -342,7 +342,7 @@ export function formatTrendSummary(
     }
     if (t.skippedOtherUnit > 0) {
       lines.push(
-        `  ${t.skippedOtherUnit} sample(s) skipped — unit other than ${t.unit}`,
+        `  ${t.skippedOtherUnit} sample(s) skipped, unit other than ${t.unit}`,
       );
     }
     lines.push("");

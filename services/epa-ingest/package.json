@@ -1,7 +1,7 @@
 {
   "name": "@health-dataspace/epa-ingest",
   "version": "0.1.0",
-  "description": "Pre-ePA workbench — turns a lab report (digital PDF or scan) into FHIR R4 Observations with explicit provenance (issue #182, W9)",
+  "description": "Pre-ePA workbench: turns a lab report (digital PDF or scan) into FHIR R4 Observations with explicit provenance (issue #182, W9)",
   "private": true,
   "license": "Apache-2.0",
   "type": "module",

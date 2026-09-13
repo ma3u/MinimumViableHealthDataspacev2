@@ -12,11 +12,11 @@ supersedes-scope-of: ../../persona-journeys/registration-identification-exchange
 
 **Deferred 2026-09-12.** The patient-community journey (S3 in the actor map) is out of current
 scope. This file keeps the research that motivated it, because the underlying observation is
-sound and the journey is worth building later — just not before the ePA ingest path (W9).
+sound and the journey is worth building later, just not before the ePA ingest path (W9).
 
 ## The finding that deferred it
 
-There is **no cardiovascular equivalent of Fox Insight** — no large, patient-governed,
+There is **no cardiovascular equivalent of Fox Insight**, no large, patient-governed,
 longitudinal cohort where people with ordinary cardiovascular risk pool data and researchers
 query it. What exists splits three ways, and none of them is the thing:
 
@@ -28,26 +28,26 @@ query it. What exists splits three ways, and none of them is the thing:
 
 The Family Heart Foundation is the closest real counter-example to "there are no associations":
 founded by a patient after a missed FH/Lp(a) diagnosis at 39, it runs the CASCADE FH registry,
-an annual global summit and National FH Awareness Day. It is patient-driven and data-backed —
+an annual global summit and National FH Awareness Day. It is patient-driven and data-backed,
 but it serves people with a _diagnosable genetic condition_, which is exactly the boundary.
 
 The EAS **FHSC** global registry (84 clinical leads, 70 countries) shows the friction that
 defines the gap: **its data cannot be shared with third parties** because of clauses in the
-agreements with the data suppliers. The Parkinson's community engineered that away —
+agreements with the data suppliers. The Parkinson's community engineered that away,
 Fox Insight's 54,000 participants feed **Fox DEN**, where researchers query and download under
 a data-use agreement. That is a governance choice, not a technical one.
 
 ## Where the behaviour actually lives: longevity communities
 
-People with ordinary cardiovascular risk _are_ already pooling data — outside the medical
+People with ordinary cardiovascular risk _are_ already pooling data, outside the medical
 system, under no registry governance at all:
 
-- **Rejuvenation Olympics** — a public leaderboard ranking ~5,700 people by DunedinPACE pace
+- **Rejuvenation Olympics**: a public leaderboard ranking ~5,700 people by DunedinPACE pace
   of ageing from TruDiagnostic epigenetic tests. Participants publish a biomarker, compare,
   and describe their protocols. The explicit framing is open-sourcing methods.
-- **Blueprint / "Don't Die"** — protocol published in full, biomarker panels published,
+- **Blueprint / "Don't Die"**: protocol published in full, biomarker panels published,
   a community reproducing and reporting back.
-- **DeSci DAOs** — ~50 active initiatives as of early 2026. **VitaDAO** (longevity, $10M+
+- **DeSci DAOs**: ~50 active initiatives as of early 2026. **VitaDAO** (longevity, $10M+
   deployed, Pfizer Ventures among backers) and **HairDAO** are community-governed research
   funders; **Hippocrat** builds patient-owned health-data networks. **Open Humans** remains
   the reference design for participant-controlled data sharing (genetics, wearables,
@@ -58,7 +58,7 @@ their own lifetime** as the point, and they already accept public or semi-public
 to get it. What they lack: provenance, clinical-grade measurement, and any governance a
 research institute can accept.
 
-**That gap is the product opportunity** — and it is the same one the actor map describes for
+**That gap is the product opportunity**, and it is the same one the actor map describes for
 the patient community (S3): consent-scoped, verifiable contribution where the cohort _is_ the
 set of valid consents. The difference from the deferred plan is the entry point: not a
 disease association, but a self-tracking community that already has the data and no
@@ -82,4 +82,4 @@ Fox Insight (Nature Sci Data 2020; 5-year cohort paper 2024) · Fox DEN · Healt
 Apple Health Study NCT06958523 · Deutsche Herzstiftung · DZHK/TORCH · FH Europe ·
 Family Heart Foundation / CASCADE FH · EAS FHSC (Lancet 2021) · Rejuvenation Olympics ·
 VitaDAO · Hippocrat · Open Humans (GigaScience 2019). URLs in the session record and in the
-issue thread — this file is a planning note, not a citation-grade review.
+issue thread, this file is a planning note, not a citation-grade review.

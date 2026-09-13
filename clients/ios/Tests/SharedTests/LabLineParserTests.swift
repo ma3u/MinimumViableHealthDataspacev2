@@ -2,11 +2,11 @@ import Testing
 
 @testable import Shared
 
-@Suite("Number parsing — the German convention")
+@Suite("Number parsing: the German convention")
 struct NumberTests {
   @Test("a dot before exactly three digits is thousands grouping")
   func thousands() {
-    // 1.240 pg/mL NT-proBNP is 1240 — a normal result and a cardiology
+    // 1.240 pg/mL NT-proBNP is 1240, a normal result and a cardiology
     // referral, told apart by one rule.
     #expect(LabLineParser.parseNumber("1.240") == 1240)
   }
@@ -43,6 +43,13 @@ struct ReferenceRangeTests {
     #expect(LabLineParser.parseReferenceRange("0,70 - 1,20") == .init(low: 0.7, high: 1.2))
     #expect(LabLineParser.parseReferenceRange("4,8 – 5,9") == .init(low: 4.8, high: 5.9))
     #expect(LabLineParser.parseReferenceRange("197 bis 771") == .init(low: 197, high: 771))
+  }
+
+  @Test("an em dash separates an interval too")
+  func emDashInterval() {
+    // A style sweep twice replaced the em dash inside this parser's own regex
+    // alternation, and every suite stayed green because nothing covered it.
+    #expect(LabLineParser.parseReferenceRange("0,70 — 1,20") == .init(low: 0.7, high: 1.2))
   }
 
   @Test("single bounds")

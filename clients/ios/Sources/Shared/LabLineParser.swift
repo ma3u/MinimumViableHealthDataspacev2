@@ -1,6 +1,6 @@
 import Foundation
 
-/// Line parser for German lab reports — the Swift side of
+/// Line parser for German lab reports, the Swift side of
 /// `services/epa-ingest/src/parse-lab.ts`.
 ///
 /// Works on recognised text, whether it came from a PDF's text layer or from
@@ -19,7 +19,7 @@ public enum LabLineParser {
   /// Parses a German-formatted number.
   ///
   /// German convention rules, because the input is a German lab sheet: `,` is
-  /// the decimal separator and `.` groups thousands — so `1.240` pg/mL
+  /// the decimal separator and `.` groups thousands, so `1.240` pg/mL
   /// NT-proBNP is **1240**, not 1.24, which is the difference between a normal
   /// result and a cardiology referral. The one concession to English-formatted
   /// reports is that a lone `.` before one or two digits (`0.92`) is a decimal
@@ -118,7 +118,7 @@ public enum LabLineParser {
   public struct ParseResult: Sendable, Equatable {
     public let values: [RawLabValue]
     /// Lines carrying a number and a unit that the parser could not read.
-    /// Surfaced so a human can check them — a silently dropped line is
+    /// Surfaced so a human can check them, a silently dropped line is
     /// indistinguishable from a line that was never there.
     public let suspiciousLines: [String]
   }
@@ -192,7 +192,7 @@ public enum LabLineParser {
       if let coding = Analytes.lookup(label: raw.label, unit: raw.unitRaw) {
         coded.append(CodedLabValue(raw: raw, coding: coding, source: source))
       } else if Analytes.knowsLabel(raw.label) {
-        // The label is known but not in this unit — a different measurement.
+        // The label is known but not in this unit, a different measurement.
         unmapped.append(UnmappedLabValue(raw: raw, reason: .unitMismatch))
       } else {
         unmapped.append(UnmappedLabValue(raw: raw, reason: .unknownAnalyte))

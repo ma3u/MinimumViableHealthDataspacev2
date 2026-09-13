@@ -162,7 +162,7 @@ private struct ReportRow: View {
 ///
 /// A GP is under no obligation to adopt what the insured uploaded, and the app
 /// must not present a transcription as a result. Colour alone is not the
-/// signal — the text says it too, for anyone who cannot see the colour.
+/// signal. The text says it too, for anyone who cannot see the colour.
 struct ProvenanceBadge: View {
   let source: SourceKind
 

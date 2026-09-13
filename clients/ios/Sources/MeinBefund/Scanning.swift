@@ -67,7 +67,7 @@ enum TextRecognizer {
     guard let observations = request.results else { return "" }
 
     // Vision returns observations in reading order but without column structure.
-    // Group by vertical position so a table row stays one line — otherwise the
+    // Group by vertical position so a table row stays one line, otherwise the
     // analyte, its value and its unit arrive as three separate lines and the
     // line grammar cannot see a measurement at all.
     let lines = observations.compactMap { obs -> (y: CGFloat, x: CGFloat, text: String)? in
@@ -94,7 +94,7 @@ enum TextRecognizer {
 
   /// Recognises every page and extracts, stamping OCR provenance.
   ///
-  /// A photographed report is `ocrTranscribed` — never `labIssuedDigital` —
+  /// A photographed report is `ocrTranscribed`, never `labIssuedDigital`:
   /// so every value it produces is `preliminary`.
   static func extract(from images: [UIImage]) async throws -> ExtractionResult {
     var text = ""

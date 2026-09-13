@@ -48,7 +48,7 @@ struct ResultList: View {
 /// The three outcomes, always all three.
 ///
 /// Coded, unmapped and unparsed are shown together because a value silently
-/// dropped is indistinguishable from a value that was never on the sheet — and
+/// dropped is indistinguishable from a value that was never on the sheet, and
 /// the person holding the paper is the only one who can tell the difference.
 struct ResultSections: View {
   let extraction: ExtractionResult

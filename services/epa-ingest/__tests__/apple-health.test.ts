@@ -69,7 +69,7 @@ describe("summariseXml", () => {
   const trend = (hkType: string) =>
     summary.trends.find((t) => t.hkType === hkType);
 
-  it("marks everything self-tracked — a consumer device is not a lab", () => {
+  it("marks everything self-tracked: a consumer device is not a lab", () => {
     expect(summary.sourceKind).toBe("self-tracked");
   });
 

@@ -2,7 +2,7 @@
  * Line parser for German lab reports.
  *
  * Works on plain text, whether that text came from a PDF's own text layer or
- * from OCR — the parser never learns which, so it cannot be tempted to treat a
+ * from OCR, the parser never learns which, so it cannot be tempted to treat a
  * recognised digit as more certain than it is. Provenance is attached later.
  *
  * The shape it recognises is the one every German lab sheet prints:
@@ -135,7 +135,7 @@ export interface ParseResult {
   values: RawLabValue[];
   /**
    * Lines containing a digit and a unit-like token that the parser could not
-   * read. Surfaced so a human can check them against the paper — a silently
+   * read. Surfaced so a human can check them against the paper, a silently
    * dropped line is indistinguishable from a line that was never there.
    */
   suspiciousLines: SuspiciousLine[];

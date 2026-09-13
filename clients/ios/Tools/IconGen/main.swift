@@ -5,7 +5,7 @@
 //
 //   cd clients/ios && swift run IconGen
 //
-// The mark: a document whose printed lines resolve into one rising trend — the
+// The mark: a document whose printed lines resolve into one rising trend, the
 // product in one image. Paper becomes a series. The upward line is deliberately
 // not a "good result"; it is the passage of time, which is what the app adds.
 import CoreGraphics
@@ -50,7 +50,7 @@ func drawIcon(size: CGFloat) -> CGImage? {
   ctx.fillPath()
   ctx.setShadow(offset: .zero, blur: 0, color: nil)
 
-  // Printed rules — the values on the page, fading as they become a series.
+  // Printed rules, the values on the page, fading as they become a series.
   ctx.setLineCap(.round)
   let ruleLengths: [CGFloat] = [1.0, 0.82, 0.94, 0.68]
   for (index, fraction) in ruleLengths.enumerated() {

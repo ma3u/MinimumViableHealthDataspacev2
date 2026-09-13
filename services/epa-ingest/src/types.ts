@@ -2,7 +2,7 @@
  * Shared types for the pre-ePA ingest pipeline.
  *
  * The pipeline is deliberately split so that the only step that can invent a
- * number — OCR — is isolated behind `Provenance`, and every value downstream
+ * number, OCR, is isolated behind `Provenance`, and every value downstream
  * carries how it was obtained. See `docs/persona-journeys/registration-identification-exchange.md` §8.
  */
 
@@ -10,7 +10,7 @@
  * How a value came to exist, in descending order of trust.
  *
  * The ePA marks every document, tamper-proofly, as uploaded by a practice, the
- * insurer, or the insured — and a GP is under no obligation to adopt the last
+ * insurer, or the insured, and a GP is under no obligation to adopt the last
  * one. An artefact that flattens these three into one "result" is weaker than
  * the record it feeds, so the distinction is carried per observation.
  */

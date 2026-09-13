@@ -5,7 +5,7 @@
  * value, a DocumentReference standing for the paper, and a Provenance tying
  * them to it.
  *
- * It is **not** a KBV MIO Laborbefund document yet — that needs a `document`
+ * It is **not** a KBV MIO Laborbefund document yet. That needs a `document`
  * bundle with a Composition and the KBV profiles, and claiming conformance we
  * have not validated would be worse than not claiming it. The resource shapes
  * here are chosen so that step is additive; see README.
@@ -29,7 +29,7 @@ const LOINC = "http://loinc.org";
  * Observation status by provenance.
  *
  * Only a value read from the lab's own characters is `final`. A value we
- * recognised from pixels is `preliminary` — the lab finalised the result, but
+ * recognised from pixels is `preliminary`: the lab finalised the result, but
  * the transcription in this bundle is ours and unverified, and a receiving
  * system must be able to see that without reading an extension.
  */

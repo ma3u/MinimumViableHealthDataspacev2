@@ -7,7 +7,7 @@
 #   1. A paid Apple Developer Program membership.
 #   2. An App Store Connect record for bundle id red.mabu.meinbefund
 #      (App Store Connect → Apps → +, platform iOS). The app NAME must be unique
-#      across the App Store — check "MeinBefund" is free before relying on it.
+#      across the App Store: check "MeinBefund" is free before relying on it.
 #   3. An App Store Connect API key (Users and Access → Integrations → App Store
 #      Connect API). Download the .p8 once; it is not downloadable again.
 #   4. A distribution certificate and provisioning profile for that bundle id,
@@ -34,7 +34,7 @@ command -v xcodegen >/dev/null || { echo "xcodegen not found: brew install xcode
 xcodegen generate
 
 # The generated analyte table must match its TypeScript source before a build
-# goes to a tester — a stale copy is the divergence clients/ios exists to stop.
+# goes to a tester: a stale copy is the divergence clients/ios exists to stop.
 echo "==> Checking the generated analyte table is current"
 (cd ../../services/epa-ingest && npm run --silent generate:swift -- --check)
 
@@ -81,7 +81,7 @@ echo "    $IPA"
 if [ -z "${ASC_KEY_ID:-}" ] || [ -z "${ASC_ISSUER_ID:-}" ]; then
   cat <<MSG
 
-Archive exported but NOT uploaded — no App Store Connect API key in the
+Archive exported but NOT uploaded: no App Store Connect API key in the
 environment. Either set ASC_KEY_ID / ASC_ISSUER_ID / ASC_KEY_PATH and re-run,
 or upload "$IPA" with the Transporter app from the Mac App Store.
 
@@ -113,6 +113,6 @@ Internal testing needs no App Review. External testing does.
 
 One thing to answer in App Store Connect before external testing: the export
 compliance question. This app uses only standard platform cryptography
-(CryptoKit AES-GCM and Keychain), which is normally the exempt answer — but
+(CryptoKit AES-GCM and Keychain), which is normally the exempt answer, but
 confirm it for your own filing rather than taking a script's word for it.
 DONE

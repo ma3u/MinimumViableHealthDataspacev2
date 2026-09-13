@@ -147,7 +147,7 @@ describe("run", () => {
   });
 });
 
-describe("parseArgs — Apple Health path", () => {
+describe("parseArgs, Apple Health path", () => {
   it("takes --health-export with no positional file", () => {
     expect(parseArgs(["--health-export", "export.xml"])).toMatchObject({
       healthExport: "export.xml",

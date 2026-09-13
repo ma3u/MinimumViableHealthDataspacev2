@@ -5,7 +5,7 @@ import Shared
 /// Encrypted local store for scanned reports.
 ///
 /// This is the **primary** store, not a cache. Apple Health has no quantity type
-/// for a lipid panel — none exists anywhere, including the US — so the values
+/// for a lipid panel, none exists anywhere, including the US, so the values
 /// this app is built for live here permanently (#186).
 ///
 /// Three properties it must keep:
@@ -145,7 +145,7 @@ public actor ReportStore {
     return cached
   }
 
-  /// Every coded value across all reports, oldest first — the trend series.
+  /// Every coded value across all reports, oldest first, the trend series.
   public func timeline() throws -> [(date: Date, value: CodedLabValue)] {
     try load()
       .flatMap { report in

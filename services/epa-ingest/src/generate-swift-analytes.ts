@@ -2,7 +2,7 @@
  * Emits the Swift analyte dictionary from the TypeScript one.
  *
  * `clients/ios` and this service do the same job on different devices, and the
- * failure mode the monorepo exists to prevent is **two divergent dictionaries** —
+ * failure mode the monorepo exists to prevent is **two divergent dictionaries**:
  * an iPhone coding Lp(a) one way and the CLI another, discovered when a value
  * reaches a doctor. So the Swift table is generated, never written, and CI fails
  * when the generated file is out of date with its source.
@@ -120,7 +120,7 @@ export function renderSwift(
     )
     .join("\n");
 
-  return `// GENERATED FILE — DO NOT EDIT.
+  return `// GENERATED FILE, DO NOT EDIT.
 //
 // Source: ${SOURCE_REL}
 // Regenerate: cd services/epa-ingest && npm run generate:swift
@@ -135,7 +135,7 @@ export function renderSwift(
 import Foundation
 
 public struct AnalyteCoding: Sendable, Equatable, Codable {
-  /// Normalised analyte label — see \`normaliseLabel\`.
+  /// Normalised analyte label, see \`normaliseLabel\`.
   public let labelKey: String
   /// UCUM unit code this coding applies to.
   public let ucum: String
@@ -173,7 +173,7 @@ ${rows}
     return unitMap[key]
   }
 
-  /// Resolves a printed label and unit to a coding, or nil — never a guess.
+  /// Resolves a printed label and unit to a coding, or nil, never a guess.
   public static func lookup(label: String, unit: String) -> AnalyteCoding? {
     guard let ucum = normaliseUnit(unit) else { return nil }
     let key = normaliseLabel(label)
@@ -183,7 +183,7 @@ ${rows}
   /// True when the dictionary knows this analyte in *some* unit.
   ///
   /// Separates "we have never heard of this analyte" from "we know it, but not
-  /// in the unit printed" — a distinction that decides whether a row is a gap
+  /// in the unit printed", a distinction that decides whether a row is a gap
   /// in the dictionary or a unit the lab reported unusually.
   public static func knowsLabel(_ label: String) -> Bool {
     let key = normaliseLabel(label)
@@ -204,7 +204,7 @@ export async function generate(): Promise<string> {
   const entries = buildEntries(labels, units);
   if (entries.length === 0) {
     throw new Error(
-      "No analyte codings recovered — the source shape changed; fix the generator.",
+      "No analyte codings recovered: the source shape changed; fix the generator.",
     );
   }
 

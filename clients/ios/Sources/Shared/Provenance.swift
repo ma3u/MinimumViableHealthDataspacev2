@@ -3,7 +3,7 @@ import Foundation
 /// How a value came to exist, in descending order of trust.
 ///
 /// The ePA marks every document, tamper-proofly, as uploaded by a practice, the
-/// insurer, or the insured — and a Hausarzt is under no obligation to adopt the
+/// insurer, or the insured, and a Hausarzt is under no obligation to adopt the
 /// last one. An app that flattens a lab-issued value, an OCR guess and a
 /// smartwatch reading into one undifferentiated "result" is weaker than the
 /// record it feeds, so the distinction is carried per value.
@@ -20,7 +20,7 @@ public enum SourceKind: String, Sendable, Codable, CaseIterable {
   /// FHIR `Observation.status`.
   ///
   /// Only the lab's own characters produce `final`. Anything recognised from
-  /// pixels or typed by hand is `preliminary` — a receiving system must see
+  /// pixels or typed by hand is `preliminary`: a receiving system must see
   /// that without reading an extension.
   public var observationStatus: String {
     self == .labIssuedDigital ? "final" : "preliminary"

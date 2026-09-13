@@ -1,11 +1,11 @@
 #!/usr/bin/env node
 /**
- * epa-ingest — turn a lab report into FHIR R4 Observations you can take to your
+ * epa-ingest, turn a lab report into FHIR R4 Observations you can take to your
  * Hausarzt, with provenance the receiving side can check.
  *
  * Part of the pre-ePA workbench (issue #182, W9). It prepares; the citizen
- * uploads. There is no API into the ePA for us — a third-party application can
- * only write there as a listed DiGA with a productive SMC-B DiGA — so the end
+ * uploads. There is no API into the ePA for us, a third-party application can
+ * only write there as a listed DiGA with a productive SMC-B DiGA, so the end
  * of this pipeline is a file, not a transfer.
  *
  *   epa-ingest befund.pdf --date 2026-08-14 --performer "FS-CPC Charite" \
@@ -39,7 +39,7 @@ const SOURCE_KINDS: readonly SourceKind[] = [
   "self-tracked",
 ];
 
-const USAGE = `epa-ingest — lab report to FHIR R4 Observations (pre-ePA workbench)
+const USAGE = `epa-ingest: lab report to FHIR R4 Observations (pre-ePA workbench)
 
 Usage:
   epa-ingest <file> [options]
@@ -61,7 +61,7 @@ Apple Health:
 
   Streams the Health app export and writes a monthly trend summary. The raw
   export routinely exceeds the ePA's 25 MB ceiling and no GP reads 400,000 XML
-  rows, so the samples are never emitted — only the aggregates. Everything it
+  rows, so the samples are never emitted, only the aggregates. Everything it
   produces is self-tracked, and the summary says so.
 `;
 
