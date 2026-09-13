@@ -103,12 +103,17 @@ public enum UnmappedReason: String, Sendable, Codable {
   case unknownAnalyte = "unknown-analyte"
   case unknownUnit = "unknown-unit"
   case unitMismatch = "unit-mismatch"
+  /// The row names a specimen the dictionary has no codings for, for example
+  /// urine. Refused rather than coded, because urine albumin and serum albumin
+  /// are different tests that share a name.
+  case specimenNotSupported = "specimen-not-supported"
 
   public var explanation: String {
     switch self {
     case .unknownAnalyte: return "not in the analyte dictionary"
     case .unknownUnit: return "unit has no UCUM mapping"
     case .unitMismatch: return "unit does not belong to this analyte"
+    case .specimenNotSupported: return "specimen is not blood, plasma or serum"
     }
   }
 }
