@@ -8,6 +8,13 @@
 #   - text-embedding-3-small is created only if missing.
 #   - ACA secret + env vars are upsert-safe.
 #
+# EU data residency (ADR-033): deployments default to DataZoneStandard, which
+# keeps inference inside the EU data zone. GlobalStandard — the previous default
+# here — routes to global capacity and gives NO EU-only guarantee, which is the
+# wrong posture for GDPR Art. 9 health data. Existing deployments are reported
+# with their SKU and a Global* one is called out loudly; this script never
+# silently recreates a deployment to change its SKU, because that drops capacity.
+#
 # Usage (locally, when your PIM role is fresh):
 #   ./scripts/azure/07-ai-foundry.sh
 # Or via GitHub Actions (recommended — stable CI SP):
@@ -28,7 +35,11 @@ EMBED_DEPLOYMENT="${EMBED_DEPLOYMENT:-text-embedding-3-small}"
 EMBED_MODEL_NAME="${EMBED_MODEL_NAME:-text-embedding-3-small}"
 EMBED_MODEL_VERSION="${EMBED_MODEL_VERSION:-1}"
 EMBED_CAPACITY="${EMBED_CAPACITY:-10}"
-EMBED_SKU="${EMBED_SKU:-GlobalStandard}"
+# EU data zone by default. Override to "Standard" to pin to the single region
+# instead, or to "GlobalStandard" only for synthetic data you do not mind
+# leaving the EU.
+EMBED_SKU="${EMBED_SKU:-DataZoneStandard}"
+EMBED_SKU_FALLBACK="${EMBED_SKU_FALLBACK:-Standard}"
 
 log "Phase 25c: Azure AI Foundry wiring for GraphRAG"
 
@@ -53,22 +64,74 @@ if ! az cognitiveservices account deployment show \
 fi
 ok "Chat deployment present: ${CHAT_DEPLOYMENT}"
 
+# ── 2b. Residency audit — report the SKU of every deployment, flag Global* ────
+# A deployment's SKU decides where inference actually runs. Reporting it here
+# means a Global* deployment cannot sit unnoticed once real health data flows.
+RESIDENCY_WARNINGS=0
+while IFS=$'\t' read -r dep_name dep_sku; do
+  [ -z "$dep_name" ] && continue
+  case "$dep_sku" in
+    Global*)
+      err "  ${dep_name}: ${dep_sku} — no EU-only processing guarantee (see ADR-033)"
+      RESIDENCY_WARNINGS=$((RESIDENCY_WARNINGS + 1))
+      ;;
+    *)
+      ok "  ${dep_name}: ${dep_sku}"
+      ;;
+  esac
+done < <(az cognitiveservices account deployment list \
+  --resource-group "$RG" --name "$AOAI_ACCOUNT" \
+  --query "[].[name, sku.name]" -o tsv 2>/dev/null)
+
+if [ "$RESIDENCY_WARNINGS" -gt 0 ]; then
+  err ""
+  err "${RESIDENCY_WARNINGS} deployment(s) use a Global* SKU. Inference may run"
+  err "outside the EU. That is acceptable for synthetic demo data and NOT"
+  err "acceptable for GDPR Art. 9 health data (ADR-033)."
+  err "Re-create them as DataZoneStandard (EU data zone) or Standard (this"
+  err "region only) before routing real patient data through this account:"
+  err "  az cognitiveservices account deployment delete -g ${RG} -n ${AOAI_ACCOUNT} --deployment-name <name>"
+  err "  az cognitiveservices account deployment create  -g ${RG} -n ${AOAI_ACCOUNT} \\"
+  err "    --deployment-name <name> --model-name <model> --model-version <ver> \\"
+  err "    --model-format OpenAI --sku-name DataZoneStandard --sku-capacity <cap>"
+  err ""
+  if [ "${STRICT_RESIDENCY:-false}" = "true" ]; then
+    err "STRICT_RESIDENCY=true — refusing to continue."
+    exit 1
+  fi
+fi
+
 # ── 3. Create embedding deployment if missing ────────────────────────────────
 if az cognitiveservices account deployment show \
      --resource-group "$RG" --name "$AOAI_ACCOUNT" \
      --deployment-name "$EMBED_DEPLOYMENT" -o none 2>/dev/null; then
   ok "Embedding deployment already present: ${EMBED_DEPLOYMENT}"
 else
-  log "Creating embedding deployment ${EMBED_DEPLOYMENT} (${EMBED_MODEL_NAME} v${EMBED_MODEL_VERSION})..."
-  az cognitiveservices account deployment create \
-    --resource-group "$RG" --name "$AOAI_ACCOUNT" \
-    --deployment-name "$EMBED_DEPLOYMENT" \
-    --model-name "$EMBED_MODEL_NAME" \
-    --model-version "$EMBED_MODEL_VERSION" \
-    --model-format OpenAI \
-    --sku-name "$EMBED_SKU" --sku-capacity "$EMBED_CAPACITY" \
-    -o none
-  ok "Embedding deployment created: ${EMBED_DEPLOYMENT}"
+  log "Creating embedding deployment ${EMBED_DEPLOYMENT} (${EMBED_MODEL_NAME} v${EMBED_MODEL_VERSION}, ${EMBED_SKU})..."
+  if az cognitiveservices account deployment create \
+      --resource-group "$RG" --name "$AOAI_ACCOUNT" \
+      --deployment-name "$EMBED_DEPLOYMENT" \
+      --model-name "$EMBED_MODEL_NAME" \
+      --model-version "$EMBED_MODEL_VERSION" \
+      --model-format OpenAI \
+      --sku-name "$EMBED_SKU" --sku-capacity "$EMBED_CAPACITY" \
+      -o none 2>/dev/null; then
+    ok "Embedding deployment created: ${EMBED_DEPLOYMENT} (${EMBED_SKU})"
+  else
+    # Not every model is offered on every SKU in every region. Fall back to the
+    # regional SKU, which still keeps inference in ${LOCATION} — never silently
+    # to a Global one.
+    log "${EMBED_SKU} unavailable for ${EMBED_MODEL_NAME} in ${LOCATION}; trying ${EMBED_SKU_FALLBACK}..."
+    az cognitiveservices account deployment create \
+      --resource-group "$RG" --name "$AOAI_ACCOUNT" \
+      --deployment-name "$EMBED_DEPLOYMENT" \
+      --model-name "$EMBED_MODEL_NAME" \
+      --model-version "$EMBED_MODEL_VERSION" \
+      --model-format OpenAI \
+      --sku-name "$EMBED_SKU_FALLBACK" --sku-capacity "$EMBED_CAPACITY" \
+      -o none
+    ok "Embedding deployment created: ${EMBED_DEPLOYMENT} (${EMBED_SKU_FALLBACK}, region-pinned)"
+  fi
 fi
 
 # ── 4. Fetch the account key (secret) ────────────────────────────────────────
