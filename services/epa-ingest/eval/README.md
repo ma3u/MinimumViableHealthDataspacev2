@@ -23,16 +23,34 @@ That is worth answering with numbers rather than opinion. This harness produces 
 - **Apple Intelligence enabled**: System Settings → Apple Intelligence & Siri. Without it the
   harness exits with `appleIntelligenceNotEnabled` and tells you the same thing.
 
-## The three arms
+Decision record: [ADR-033](../../../docs/ADRs/ADR-033-lab-report-extraction-pipeline.md).
 
-| Arm                            | What it is                                     | Can it invent a row?                                                 |
-| ------------------------------ | ---------------------------------------------- | -------------------------------------------------------------------- |
-| **`epa-ingest` parser**        | The deterministic parser in `src/parse-lab.ts` | **No** — structurally impossible; it only emits what it read         |
-| **Apple on-device**            | `SystemLanguageModel` with guided generation   | Yes                                                                  |
-| **Cloud LLM** _(not included)_ | Upper bound, if you choose to measure it       | Yes — and it sends the report off the device, so decide deliberately |
+## The arms
+
+| Arm                            | What it is                                                        | Can it invent a row?                                                 |
+| ------------------------------ | ----------------------------------------------------------------- | -------------------------------------------------------------------- |
+| **`epa-ingest` parser**        | The deterministic parser in `src/parse-lab.ts`                    | **No** — structurally impossible; it only emits what it read         |
+| **Apple on-device**            | `SystemLanguageModel` with guided generation                      | Yes                                                                  |
+| **Marker v2**                  | Self-hosted stage-1 parse, then the same deterministic extraction | No (the extraction step cannot)                                      |
+| **MinerU**                     | Self-hosted stage-1 parse, then the same deterministic extraction | No (the extraction step cannot)                                      |
+| **Cloud LLM** _(not included)_ | Upper bound, if you choose to measure it                          | Yes — and it sends the report off the device, so decide deliberately |
 
 The cloud arm is deliberately absent from this harness. Adding it means transmitting a real lab
 report to a third party; that should be an explicit act, not something a README makes easy.
+
+**Marker and MinerU are asked the stage-1 question only.** Both feed the _same_ deterministic
+extraction afterwards, so any difference in score is a difference in the parse and not in the
+coding — the only way to attribute a win to the parser rather than to a second variable.
+
+```bash
+./eval/run-parsers.sh ~/reports/befund.pdf ~/reports/out     # runs whichever is installed
+npx tsx eval/arm-from-parser.ts --in ~/reports/out/marker/befund.md --arm marker-v2 --out ~/reports/marker.json
+npx tsx eval/arm-from-parser.ts --in ~/reports/out/mineru/befund.md --arm mineru    --out ~/reports/mineru.json
+```
+
+Neither tool is a dependency of this repo. Both carry licence terms worth reading before
+anything commercial ships — Marker's code is Apache-2.0 but its _weights_ are RAIL-M with a
+revenue threshold, and MinerU's licence is Apache-2.0 **plus additional terms** (ADR-033).
 
 ## Procedure
 
@@ -85,7 +103,9 @@ cd eval/fm-extract && swift run fm-extract --in ~/reports/befund.txt --out ~/rep
 npm run eval:score -- \
   --truth ~/reports/truth.json \
   --report ~/reports/befund.txt \
-  --arm ~/reports/fm.json
+  --arm ~/reports/fm.json \
+  --arm ~/reports/marker.json \
+  --arm ~/reports/mineru.json
 ```
 
 ## Reading the result
@@ -124,7 +144,9 @@ nothing on the messy ones.
 ## Files
 
 ```
-eval/fm-extract/    Swift package — the on-device model arm (no network)
-eval/score.ts       scorer + metrics; `npm run eval:score`
-__tests__/score.test.ts   unit tests for the metric logic itself
+eval/fm-extract/         Swift package — the on-device model arm (no network)
+eval/run-parsers.sh      runs Marker / MinerU if installed; prints the next commands
+eval/arm-from-parser.ts  Markdown or JSON from a stage-1 parser → a scoreable arm
+eval/score.ts            scorer + metrics; `npm run eval:score`
+__tests__/               unit tests for the metric and adapter logic itself
 ```
