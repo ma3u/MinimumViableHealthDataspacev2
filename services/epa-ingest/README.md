@@ -1,7 +1,7 @@
-# epa-ingest — lab report → FHIR R4, with provenance
+# epa-ingest: lab report → FHIR R4, with provenance
 
 Part of the **pre-ePA workbench** (issue [#182](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/182), W9).
-Takes a lab report as the citizen actually holds it — a digital PDF, a scan, or typed text —
+Takes a lab report as the citizen actually holds it (a digital PDF, a scan, or typed text)
 and produces a FHIR R4 bundle in which every value says **where it came from**.
 
 It prepares. **The citizen uploads.** See "There is no API" below.
@@ -26,10 +26,28 @@ unparsed   1 line(s) looked like measurements but did not parse:
 written    bundle.json
 ```
 
+## Apple Health trends
+
+```bash
+npx tsx src/index.ts --health-export ~/export.xml --trends-out trends.txt
+```
+
+The Health app's `export.xml` is routinely **hundreds of megabytes** (one `<Record>` per heart-rate reading) against the ePA's **25 MB** ceiling, and no GP reads 400,000 XML rows. So
+the samples are never loaded and never emitted: the file is streamed, only running aggregates
+per metric per month are kept, and the output is a summary measured in kilobytes.
+
+Measured on a synthetic export: **175 MB and 1,061,826 records in → 1,035 bytes out, in 1.5 s.**
+
+Everything it produces is `self-tracked`, and the summary says so on its first line. Resting
+heart rate, HRV, VO2 max, cuff blood pressure, weight, steps and walking steadiness are
+summarised; every other HealthKit type present is counted and reported rather than silently
+dropped. A sample in an unexpected unit is skipped and counted, averaging 78.4 kg with
+172.8 lb would produce a number that is not a weight.
+
 ## Why provenance is the whole point
 
 The ePA marks every document, **tamper-proofly**, as uploaded by a practice, by the insurer, or
-by the insured — and a Hausarzt is under no obligation to adopt what the insured uploaded. An
+by the insured, and a Hausarzt is under no obligation to adopt what the insured uploaded. An
 artefact that flattens a lab-issued value, an OCR guess and a smartwatch reading into one
 undifferentiated "result" is **weaker than the record it feeds**. So this tool refuses to.
 
@@ -40,7 +58,7 @@ undifferentiated "result" is **weaker than the record it feeds**. So this tool r
 | `.txt`                   | `plain-text`     | `self-tracked` (default) | **`preliminary`**    |
 
 Only the lab's own characters produce `final`. A value recognised from pixels is
-`preliminary` — the lab finalised the result, but the transcription in this bundle is ours and
+`preliminary`: the lab finalised the result, but the transcription in this bundle is ours and
 unverified, and a receiving system must be able to see that **without reading an extension**.
 Plain text defaults to the least-trust option; `--source-kind` lets the citizen assert
 otherwise, deliberately as an explicit act.
@@ -48,10 +66,10 @@ otherwise, deliberately as an explicit act.
 Each Observation additionally carries three extensions under
 `https://ehds.mabu.red/fhir/StructureDefinition/`:
 
-- `epa-ingest-source-kind` — the provenance above
-- `epa-ingest-source-line` — **the source line verbatim**, so a reviewer can check the parse
+- `epa-ingest-source-kind`: the provenance above
+- `epa-ingest-source-line`: **the source line verbatim**, so a reviewer can check the parse
   against the paper without trusting the dictionary
-- `epa-ingest-ocr-confidence` — mean OCR confidence, when OCR ran
+- `epa-ingest-ocr-confidence`: mean OCR confidence, when OCR ran
 
 A `Provenance` resource ties every Observation and the DiagnosticReport to a
 `DocumentReference` standing for the original.
@@ -60,10 +78,10 @@ A `Provenance` resource ties every Observation and the DiagnosticReport to a
 
 Three outcomes, all reported:
 
-- **coded** — label and unit both resolved to a LOINC code
-- **unmapped** — parsed, but not coded: `unknown-analyte`, `unknown-unit`, or `unit-mismatch`
+- **coded**: label and unit both resolved to a LOINC code
+- **unmapped**: parsed, but not coded: `unknown-analyte`, `unknown-unit`, or `unit-mismatch`
   (with the units the analyte _is_ defined for)
-- **unparsed** — the line carried a number and a unit but did not parse, e.g. a result of
+- **unparsed**: the line carried a number and a unit but did not parse, e.g. a result of
   `n.b.` (nicht bestimmt)
 
 A silently dropped value is indistinguishable from a value that was never on the sheet, and the
@@ -77,7 +95,7 @@ put a wrong code on a real measurement, so a unit we do not recognise **for that
 error, not a fallback.
 
 The same care applies to the numbers. German convention rules: `,` is decimal, `.` groups
-thousands — so `1.240` pg/mL NT-proBNP parses as **1240**, not 1.24. The one concession to
+thousands, so `1.240` pg/mL NT-proBNP parses as **1240**, not 1.24. The one concession to
 English-formatted digital reports is that a lone `.` before one or two digits (`0.92`) is read
 as a decimal point, since no German grouping produces that.
 
@@ -88,7 +106,7 @@ as a decimal point, since no German grouping produces that.
 homocysteine), glucose metabolism (HbA1c both scales, glucose), renal (creatinine, eGFR,
 urate), liver (ALT/AST/GGT), TSH, ferritin, B12, vitamin D, electrolytes and basic haematology.
 
-`src/analytes.ts` is a plain table — adding an analyte is one entry.
+`src/analytes.ts` is a plain table, adding an analyte is one entry.
 
 ## There is no API into the ePA
 
@@ -112,7 +130,7 @@ each file at **25 MB**.
   output as a clinical document.
 - **Not a clinical device.** It transcribes and codes; it does not interpret, flag or advise.
 - **Not fully covered by tests.** ~78% lines. The uncovered remainder is the external-tool
-  boundary — `pdfjs-dist`, `tesseract.js` and the CLI's process shell. The parser, the analyte
+  boundary, `pdfjs-dist`, `tesseract.js` and the CLI's process shell. The parser, the analyte
   dictionary and the FHIR writer are at 94–100%.
 - **Not able to rasterise a scanned PDF.** That needs a native toolchain this package
   deliberately does not depend on. A scanned PDF is refused with instructions

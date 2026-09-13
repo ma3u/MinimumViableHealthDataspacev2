@@ -106,7 +106,7 @@ describe("toArm", () => {
           value: 141,
           unit: "mg/dl",
         }),
-        // Still 1240, not 1.24 — the parse route changed, the number rules did not.
+        // Still 1240, not 1.24, the parse route changed, the number rules did not.
         expect.objectContaining({ label: "NT-proBNP", value: 1240 }),
       ]),
     );

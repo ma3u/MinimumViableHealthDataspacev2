@@ -58,7 +58,7 @@ describe("renderSwift", () => {
   );
 
   it("marks the file as generated so nobody hand-edits it", () => {
-    expect(swift).toContain("GENERATED FILE — DO NOT EDIT");
+    expect(swift).toContain("GENERATED FILE, DO NOT EDIT");
     expect(swift).toContain("services/epa-ingest/src/analytes.ts");
   });
 
@@ -86,7 +86,7 @@ describe("generate", () => {
     }
   });
 
-  it("matches the committed file — otherwise the two dictionaries have drifted", async () => {
+  it("matches the committed file, otherwise the two dictionaries have drifted", async () => {
     // The same assertion CI makes. It fails here first, on the machine that can
     // fix it, instead of in a pipeline after the divergence is already pushed.
     const current = await readFile(SWIFT_TARGET, "utf8");

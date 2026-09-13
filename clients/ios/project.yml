@@ -1,0 +1,54 @@
+name: MeinBefund
+options:
+  bundleIdPrefix: red.mabu
+  deploymentTarget:
+    iOS: "26.0"
+  createIntermediateGroups: true
+  generateEmptyDirectories: false
+
+settings:
+  base:
+    SWIFT_VERSION: "6.0"
+    SWIFT_STRICT_CONCURRENCY: complete
+    ENABLE_USER_SCRIPT_SANDBOXING: YES
+    MARKETING_VERSION: "0.1.0"
+    CURRENT_PROJECT_VERSION: "1"
+
+targets:
+  # Mirrors the SwiftPM `Shared` target so the app and the parity tool compile
+  # exactly the same sources, including the generated analyte table.
+  Shared:
+    type: framework
+    platform: iOS
+    sources:
+      - path: Sources/Shared
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: red.mabu.meinbefund.shared
+        PRODUCT_NAME: Shared
+        GENERATE_INFOPLIST_FILE: YES
+
+  MeinBefund:
+    type: application
+    platform: iOS
+    dependencies:
+      - target: Shared
+    sources:
+      - path: Sources/MeinBefund
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: red.mabu.meinbefund
+        PRODUCT_NAME: MeinBefund
+        # Synthesise Info.plist from the INFOPLIST_KEY_* settings below.
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_CFBundleDisplayName: MeinBefund
+        INFOPLIST_KEY_UILaunchScreen_Generation: YES
+        INFOPLIST_KEY_UISupportedInterfaceOrientations: UIInterfaceOrientationPortrait
+        # VisionKit needs a reason string or the scanner crashes on first use.
+        INFOPLIST_KEY_NSCameraUsageDescription: >-
+          MeinBefund nutzt die Kamera nur, um Ihre Befunde zu scannen.
+          Die Aufnahmen bleiben verschlüsselt auf diesem Gerät.
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        # The store must be unreadable while the device is locked.
+        CODE_SIGN_ENTITLEMENTS: Sources/MeinBefund/MeinBefund.entitlements
+        TARGETED_DEVICE_FAMILY: "1"

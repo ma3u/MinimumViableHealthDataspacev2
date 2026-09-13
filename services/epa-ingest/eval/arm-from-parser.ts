@@ -1,5 +1,5 @@
 /**
- * Adapter — turn a stage-1 parser's output into a scoreable arm.
+ * Adapter, turn a stage-1 parser's output into a scoreable arm.
  *
  * Marker and MinerU both emit Markdown (plus JSON with layout boxes). Neither
  * knows what a lab panel is; they recover the *page*. So the question they are
@@ -8,7 +8,7 @@
  *   **does this parser hand our extractor a better page than pdftotext does?**
  *
  * Both arms therefore run the same deterministic extraction afterwards. Any
- * difference in the score is a difference in the parse, not in the coding — the
+ * difference in the score is a difference in the parse, not in the coding, the
  * only way to attribute a win to the parser rather than to a second variable.
  *
  *   npx tsx eval/arm-from-parser.ts --in marker/befund.md --arm marker-v2 --out marker.json

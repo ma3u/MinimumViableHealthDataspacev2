@@ -2,7 +2,7 @@
  * Shared types for the pre-ePA ingest pipeline.
  *
  * The pipeline is deliberately split so that the only step that can invent a
- * number — OCR — is isolated behind `Provenance`, and every value downstream
+ * number, OCR, is isolated behind `Provenance`, and every value downstream
  * carries how it was obtained. See `docs/persona-journeys/registration-identification-exchange.md` §8.
  */
 
@@ -10,7 +10,7 @@
  * How a value came to exist, in descending order of trust.
  *
  * The ePA marks every document, tamper-proofly, as uploaded by a practice, the
- * insurer, or the insured — and a GP is under no obligation to adopt the last
+ * insurer, or the insured, and a GP is under no obligation to adopt the last
  * one. An artefact that flattens these three into one "result" is weaker than
  * the record it feeds, so the distinction is carried per observation.
  */
@@ -42,6 +42,23 @@ export interface ExtractedText {
 /** A comparator on a value, as FHIR spells it (`<`, `<=`, `>=`, `>`). */
 export type Comparator = "<" | "<=" | ">=" | ">";
 
+/**
+ * Where on the page a value was read from.
+ *
+ * Normalised to 0..1 with the origin at the **bottom left**, which is Vision's
+ * convention on the phone, and the reason this is stated rather than assumed:
+ * a consumer drawing a highlight in a top-left coordinate system must flip y,
+ * and an unflipped box lands on a different analyte.
+ */
+export interface SourceRegion {
+  /** 1-based page number within the source document. */
+  page: number;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
 /** One `analyte value unit (range)` row, before any coding is applied. */
 export interface RawLabValue {
   /** Analyte label exactly as printed, kept for the audit trail. */
@@ -56,6 +73,16 @@ export interface RawLabValue {
   line: string;
   /** 1-based line number within the extracted text. */
   lineNumber: number;
+  /**
+   * Where on the page the row was found, when the extractor knew.
+   *
+   * Optional because the two extractors have different evidence. The iPhone
+   * scans pixels and can point at a rectangle; this CLI reads a PDF text layer
+   * and has no geometry to give. The field and its FHIR extension are defined
+   * here regardless, so both sides serialise it the same way when one of them
+   * can (ADR-033 names the absence of bounding boxes as a known gap).
+   */
+  region?: SourceRegion;
 }
 
 /** A LOINC coding plus the UCUM unit it is expressed in. */

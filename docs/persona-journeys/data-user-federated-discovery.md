@@ -1,4 +1,4 @@
-# Data User — Federated Discovery → Contract → Transfer
+# Data User: Federated Discovery → Contract → Transfer
 
 **Persona:** `DATA_USER` (PharmaCo Research AG, `did:web:pharmaco.de:research`)
 **Primary question:** _"Which datasets across the dataspace match my research
@@ -16,7 +16,7 @@ Phase 26 in [planning-health-dataspace-v2.md](../planning-health-dataspace-v2.md
   `ResearchOrganisationCredential` (issued by MedReg DE),
   `DataUserCredential` (purpose: `medical-research`).
 - The catalog crawler (`mvhd-catalog-crawler`) has completed at least one
-  5-minute cycle — `:HealthDataset {source: "federated"}` nodes exist in
+  5-minute cycle, `:HealthDataset {source: "federated"}` nodes exist in
   the graph.
 - At least one publisher (AlphaKlinik Berlin, Limburg Medical Centre, IRS)
   has attached an ODRL policy requiring `DataQualityLabelCredential` to
@@ -24,7 +24,7 @@ Phase 26 in [planning-health-dataspace-v2.md](../planning-health-dataspace-v2.md
 
 ## Journey
 
-### Step 1 — Discover
+### Step 1: Discover
 
 Researcher opens `/query` and asks:
 
@@ -60,9 +60,9 @@ Policy | Source | Last seen`.
 **Graph nodes touched:** L2 `HealthDataset` + `Distribution` (layer 2),
 L5 `SnomedConcept` (layer 5), L1 `Participant` + `OdrlPolicy` (layer 1).
 
-### Step 2 — Inspect the offer
+### Step 2: Inspect the offer
 
-Researcher clicks one row — e.g. the dataset
+Researcher clicks one row, e.g. the dataset
 `diabetes-registry-berlin-2026` published by AlphaKlinik Berlin.
 
 **What happens:**
@@ -80,7 +80,7 @@ Researcher clicks one row — e.g. the dataset
   - Required VCs to exercise the policy
   - `lastSeenAt` from the enricher audit event
 
-### Step 3 — Check eligibility
+### Step 3: Check eligibility
 
 Before contacting the publisher, the researcher wants to know whether
 they can actually get this dataset.
@@ -102,13 +102,13 @@ they can actually get this dataset.
     `/credentials/request`)
   - ❌ _Policy mismatch on retention_ (red, button disabled with tooltip)
 
-### Step 4 — Start negotiation
+### Step 4: Start negotiation
 
 Researcher clicks **Request contract**.
 
 **What happens:**
 
-- `POST /api/negotiate` — existing route — invokes the connector's
+- `POST /api/negotiate` (existing route) invokes the connector's
   `dsp:ContractRequestMessage` against AlphaKlinik's DSP endpoint.
 - **Signing DID:** caller's participant DID (`did:web:pharmaco.de:research`),
   **not** the crawler DID. The crawler DID has discovery rights only.
@@ -122,7 +122,7 @@ Researcher clicks **Request contract**.
 - Toast: _"Request sent to AlphaKlinik Berlin. Tracking in /tasks."_
 - Redirect to `/tasks`.
 
-### Step 5 — Track + sign
+### Step 5: Track + sign
 
 The Data Processing Service (`/tasks`) shows the negotiation alongside
 the researcher's other open items.
@@ -139,7 +139,7 @@ REQUESTED → OFFERED → AGREED → FINALIZED
 **What happens per state:**
 
 - `OFFERED`: publisher returns their counter-offer (may differ from the
-  original policy — e.g. requires extra constraint). UI diffs the two
+  original policy, e.g. requires extra constraint). UI diffs the two
   policies; researcher accepts or terminates.
 - `AGREED`: both sides have signed. Contract hash recorded in
   `:Contract {signatureHash}`.
@@ -150,7 +150,7 @@ REQUESTED → OFFERED → AGREED → FINALIZED
 `:ContractNegotiationEvent` node; EHDS Art. 50–51 transparency
 obligations satisfied.
 
-### Step 6 — Fetch data
+### Step 6: Fetch data
 
 Researcher clicks **Start transfer** on the finalized contract.
 
@@ -207,9 +207,9 @@ Researcher clicks **Start transfer** on the finalized contract.
 
 | Condition                                   | UI message                                                     | Recovery                                                     |
 | ------------------------------------------- | -------------------------------------------------------------- | ------------------------------------------------------------ |
-| Crawler has not run yet                     | _"No federated datasets yet — crawler cycle pending."_         | Wait ≤5 min or hit `/admin/crawler/trigger`                  |
+| Crawler has not run yet                     | _"No federated datasets yet, crawler cycle pending."_          | Wait ≤5 min or hit `/admin/crawler/trigger`                  |
 | Glossary miss                               | _"No match for '\<term>'. Glossary contains N terms."_         | Add term to `neo4j/nlq-glossary.cypher` and re-seed          |
-| k-anon suppressed                           | _"Result suppressed — cohort below 5 for one participant."_    | Broaden the filter or request aggregated study design        |
+| k-anon suppressed                           | _"Result suppressed, cohort below 5 for one participant."_     | Broaden the filter or request aggregated study design        |
 | ODRL mismatch on caller                     | _"You lack required credential: DataQualityLabelCredential"_   | Link: `/credentials/request?type=DataQualityLabelCredential` |
 | Publisher offline during negotiation        | _"Publisher unreachable. Contract held in REQUESTED state."_   | DSP retry after 10 min; admin can manually retrigger         |
 | Publisher counter-offer adds new constraint | _"Publisher requires extra constraint X. Accept / Terminate?"_ | User decision; diff rendered inline                          |
@@ -220,11 +220,11 @@ Researcher clicks **Start transfer** on the finalized contract.
 - **Discovery beyond pre-configured + DCP-discovered participants.**
   A participant whose wallet is not in the dataspace (business, private,
   or DCP-registered) cannot be found. A truly universal discovery would
-  need something like FACIS DCM — deferred.
+  need something like FACIS DCM, deferred.
 - **Policy templating.** Researchers cannot propose a counter-policy
   today; they can only accept or terminate the publisher's offer.
   DSP 2026 will likely add this; revisit then.
 - **Dynamic credential issuance.** If a researcher needs a
   `DataQualityLabelCredential` they don't have, `/credentials/request`
-  routes to the MedReg DE issuer — but issuance is manual. Automating
+  routes to the MedReg DE issuer, but issuance is manual. Automating
   this is out of scope for Phase 26.

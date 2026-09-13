@@ -1,5 +1,5 @@
 /**
- * Text extraction — the only step that can invent a character.
+ * Text extraction, the only step that can invent a character.
  *
  * Three inputs, three provenance outcomes:
  *
@@ -145,7 +145,7 @@ export async function extractText(
     const text = await extractPdfText(bytes);
     if (looksLikeScannedPdf(text)) {
       throw new Error(
-        `"${sourceDocument}" has no usable text layer — it is a scan.\n` +
+        `"${sourceDocument}" has no usable text layer. It is a scan.\n` +
           `Convert its pages to images first, then run this on them, e.g.:\n` +
           `  pdftoppm -r 300 -png "${path}" page\n` +
           `  epa-ingest page-1.png`,

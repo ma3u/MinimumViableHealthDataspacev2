@@ -1,5 +1,5 @@
 /**
- * Analyte dictionary — German lab labels → LOINC + UCUM.
+ * Analyte dictionary, German lab labels → LOINC + UCUM.
  *
  * Scope is deliberately cardiovascular-first (issue #182 W9's real case: a
  * cardiovascular-risk cohort panel), plus the routine chemistry that appears on
@@ -7,14 +7,14 @@
  * guessed: a mis-coded lab value is worse than an un-coded one.
  *
  * Some analytes are reported in two different dimensions and take a DIFFERENT
- * LOINC code per dimension — Lp(a) as mass vs. moles, HbA1c as % vs. mmol/mol.
+ * LOINC code per dimension, Lp(a) as mass vs. moles, HbA1c as % vs. mmol/mol.
  * Coding by label alone would silently produce the wrong code, so the unit
  * selects the coding and a unit we do not recognise for an analyte is an error,
  * not a fallback.
  *
  * The codes below are the widely used ones for these measurements. Validate the
  * table against an official LOINC release before anyone treats its output as a
- * clinical document — see README, "What this is not".
+ * clinical document, see README, "What this is not".
  */
 import type { AnalyteCoding } from "./types.js";
 
@@ -31,7 +31,7 @@ export function normaliseLabel(raw: string): string {
 
 /**
  * Maps a printed unit onto its UCUM code.
- * Returns `null` for units we have no UCUM mapping for — the caller reports
+ * Returns `null` for units we have no UCUM mapping for, the caller reports
  * `unknown-unit` rather than passing an uncoded unit into FHIR.
  */
 export function normaliseUnit(raw: string): string | null {

@@ -1,4 +1,4 @@
-// Parity check — does the generated Swift table agree with the TypeScript one?
+// Parity check, does the generated Swift table agree with the TypeScript one?
 //
 // `npm run generate:swift -- --check` proves the generated FILE is current.
 // This proves the generated CODE behaves the same: same codings, same folding,
@@ -19,7 +19,7 @@ struct Case {
 let cases: [Case] = [
   // The unit selects the code, never the label.
   Case(label: "Lp(a)", unit: "mg/dl", loinc: "10835-7", why: "Lp(a) by mass"),
-  Case(label: "Lp(a)", unit: "nmol/l", loinc: "43583-4", why: "by moles — a different measurement"),
+  Case(label: "Lp(a)", unit: "nmol/l", loinc: "43583-4", why: "by moles, a different measurement"),
   Case(label: "HbA1c", unit: "%", loinc: "4548-4", why: "HbA1c as a percentage"),
   Case(label: "HbA1c", unit: "mmol/mol", loinc: "59261-8", why: "HbA1c on the IFCC scale"),
 
@@ -37,7 +37,7 @@ let cases: [Case] = [
   Case(label: "hs-CRP", unit: "mg/l", loinc: "30522-7", why: "high-sensitivity CRP"),
   Case(label: "CRP", unit: "mg/l", loinc: "1988-5", why: "ordinary CRP is a different code"),
 
-  // Refusals — a wrong code is worse than no code.
+  // Refusals, a wrong code is worse than no code.
   Case(label: "Omega-3-Index", unit: "%", loinc: nil, why: "not in the dictionary"),
   Case(label: "HbA1c", unit: "mg/dl", loinc: nil, why: "unit does not belong to this analyte"),
   Case(label: "Ferritin", unit: "Titer", loinc: nil, why: "unit has no UCUM mapping"),
@@ -48,14 +48,14 @@ let failures = cases.reduce(into: 0) { total, c in
   if got == c.loinc {
     print("ok    \(c.label) [\(c.unit)] → \(got ?? "nil")")
   } else {
-    print("FAIL  \(c.label) [\(c.unit)] → \(got ?? "nil"), expected \(c.loinc ?? "nil") — \(c.why)")
+    print("FAIL  \(c.label) [\(c.unit)] → \(got ?? "nil"), expected \(c.loinc ?? "nil"): \(c.why)")
     total += 1
   }
 }
 
 print("")
 if failures == 0 {
-  print("parity ok — \(Analytes.codings.count) codings, \(Analytes.unitMap.count) units")
+  print("parity ok: \(Analytes.codings.count) codings, \(Analytes.unitMap.count) units")
 } else {
   print("\(failures) parity failure(s)")
   exit(1)

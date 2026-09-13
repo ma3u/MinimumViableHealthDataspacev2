@@ -1,4 +1,4 @@
-// fm-extract — can Apple's on-device model do the structured extraction?
+// fm-extract, can Apple's on-device model do the structured extraction?
 //
 // Reads a lab report as plain text, asks the on-device Foundation Model for
 // structured rows, and writes JSON in the same shape the scorer expects. The
@@ -67,7 +67,7 @@ struct Output: Codable {
   var rows: [OutputRow]
   var chunks: Int
   var elapsedSeconds: Double
-  /// Chunks the model refused or failed on — counted, never silently skipped.
+  /// Chunks the model refused or failed on, counted, never silently skipped.
   var failedChunks: [String]
 }
 
@@ -116,7 +116,7 @@ func parseArgs() -> Args? {
 }
 
 let usage = """
-fm-extract — Apple on-device model, structured lab extraction
+fm-extract: Apple on-device model, structured lab extraction
 
 Usage:
   swift run fm-extract --in <report.txt> [--out <result.json>]
@@ -124,7 +124,7 @@ Usage:
 Options:
   --in <path>           lab report as plain text (required)
   --out <path>          write JSON here (default: stdout)
-  --chunk-lines <n>     lines per model call (default 40) — the on-device
+  --chunk-lines <n>     lines per model call (default 40); the on-device
                         context is small, so a full report is split
   --temperature <t>     default 0.0, for repeatability
 
@@ -166,7 +166,7 @@ do {
 /// Splits the report into chunks the on-device context can hold.
 ///
 /// Lab reports are line-oriented and rows are independent, so a plain line
-/// split loses nothing — unlike prose, where a split mid-paragraph would.
+/// split loses nothing, unlike prose, where a split mid-paragraph would.
 func chunk(_ text: String, lines perChunk: Int) -> [String] {
   let lines = text.split(separator: "\n", omittingEmptySubsequences: false).map(String.init)
   guard lines.count > perChunk else { return [text] }

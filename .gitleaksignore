@@ -23,3 +23,17 @@ fe7320a578f5136c47218a80e351859235221353:neo4j/seed.sh:generic-api-key:5
 # the public guideline register sends it. Documented inline; if AWMF rotates
 # it, scripts/leitlinien/discover_auth.py re-extracts. Not a secret.
 d8fcd02ceb57dc739a88f6c192cd387a9949b351:scripts/leitlinien/fetch_index.py:generic-api-key:20
+
+# clients/ios/Sources/Shared/Analytes.generated.swift — false positives: two
+# normalised analyte label keys trip the generic-api-key entropy heuristic.
+# `25ohvitamind3` is 25-OH Vitamin D3 and `haemoglobina1c` is Hämoglobin A1c,
+# with case, spacing, punctuation and German diacritics stripped by
+# `normaliseLabel`. That folding is exactly what makes them look like tokens:
+# mixed letters and digits, no separators. The file is generated from
+# services/epa-ingest/src/analytes.ts and contains only LOINC codes, UCUM units
+# and German lab labels. Fingerprints rather than a path allowlist, so a real
+# credential added to this file in future is still caught.
+5b141340bf861538eac30984eed493ccd26d47b5:clients/ios/Sources/Shared/Analytes.generated.swift:generic-api-key:61
+5b141340bf861538eac30984eed493ccd26d47b5:clients/ios/Sources/Shared/Analytes.generated.swift:generic-api-key:62
+5b141340bf861538eac30984eed493ccd26d47b5:clients/ios/Sources/Shared/Analytes.generated.swift:generic-api-key:125
+5b141340bf861538eac30984eed493ccd26d47b5:clients/ios/Sources/Shared/Analytes.generated.swift:generic-api-key:126
