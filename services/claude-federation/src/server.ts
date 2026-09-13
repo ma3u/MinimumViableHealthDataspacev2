@@ -14,8 +14,16 @@ import {
   type IncomingMessage,
   type ServerResponse,
 } from "node:http";
-import { entraConfigFromEnv, fetchIdentityToken } from "./entra.js";
-import { FederatedCredentials, FederationError } from "./wif.js";
+import {
+  describeUnverifiedToken,
+  entraConfigFromEnv,
+  fetchIdentityToken,
+} from "./entra.js";
+import {
+  FederatedCredentials,
+  FederationError,
+  type FederationConfig,
+} from "./wif.js";
 import {
   UnauthorizedError,
   userAuthConfigFromEnv,
@@ -32,23 +40,38 @@ import {
 const MODEL = process.env.ANTHROPIC_MODEL ?? "claude-opus-5";
 const MAX_BODY_BYTES = 256 * 1024;
 
-function federationConfigFromEnv() {
+/**
+ * Resolves the federation configuration, or reports what is missing.
+ *
+ * Never throws at startup. The setup order is forced and looks circular: the
+ * Claude Console cannot be configured until it is given the exact issuer and
+ * audience of a real token, and only a running container can produce one. An
+ * app that refuses to boot without `fdrl_...` can therefore never be used to
+ * obtain the `fdrl_...`. That is a deadlock dressed as validation, and this
+ * deployment hit it.
+ *
+ * So a half-configured deployment starts, serves `/health` naming precisely
+ * which variables are missing, and refuses `/v1/analyse` with the same list.
+ */
+export function federationConfigFromEnv(env: NodeJS.ProcessEnv = process.env): {
+  config?: FederationConfig;
+  missing: string[];
+} {
   const required = [
     "ANTHROPIC_FEDERATION_RULE_ID",
     "ANTHROPIC_ORGANIZATION_ID",
     "ANTHROPIC_SERVICE_ACCOUNT_ID",
   ];
-  const missing = required.filter((name) => !process.env[name]);
-  if (missing.length > 0) {
-    throw new FederationError(
-      `missing federation environment: ${missing.join(", ")}`,
-    );
-  }
+  const missing = required.filter((name) => !env[name]);
+  if (missing.length > 0) return { missing };
   return {
-    federationRuleId: process.env.ANTHROPIC_FEDERATION_RULE_ID!,
-    organizationId: process.env.ANTHROPIC_ORGANIZATION_ID!,
-    serviceAccountId: process.env.ANTHROPIC_SERVICE_ACCOUNT_ID!,
-    workspaceId: process.env.ANTHROPIC_WORKSPACE_ID,
+    missing: [],
+    config: {
+      federationRuleId: env.ANTHROPIC_FEDERATION_RULE_ID!,
+      organizationId: env.ANTHROPIC_ORGANIZATION_ID!,
+      serviceAccountId: env.ANTHROPIC_SERVICE_ACCOUNT_ID!,
+      workspaceId: env.ANTHROPIC_WORKSPACE_ID,
+    },
   };
 }
 
@@ -77,23 +100,98 @@ function send(
   response.end(body);
 }
 
-export function createApp(credentials: FederatedCredentials) {
-  const userAuth = userAuthConfigFromEnv();
+export function createApp(
+  credentials: FederatedCredentials | undefined,
+  federationMissing: string[] = [],
+) {
+  // Resolved lazily rather than at construction. The two halves of this system
+  // are configured at different times: federation can be proven working before
+  // a user-facing identity provider exists at all. Throwing here would turn a
+  // half-configured deployment into a crash loop, which reports the problem as
+  // "the container will not start" rather than as "set USER_OIDC_ISSUER".
+  let userAuth: ReturnType<typeof userAuthConfigFromEnv> | undefined;
+  let userAuthError: string | undefined;
+  try {
+    userAuth = userAuthConfigFromEnv();
+  } catch (error) {
+    userAuthError = error instanceof Error ? error.message : "unknown";
+  }
 
   return createServer(async (request, response) => {
     try {
       if (request.method === "GET" && request.url === "/health") {
-        // Deliberately says nothing about the token itself, only that one
-        // exists. A health endpoint that leaks credential state is a gift.
+        // Says which halves are configured and nothing about the token
+        // itself. A health endpoint that leaks credential state is a gift.
+        // Reporting the missing variable names by name is the difference
+        // between a deployment someone can finish and one they have to guess at.
         send(response, 200, {
-          status: "ok",
-          credentialCached: credentials.expiresAt !== undefined,
+          status: userAuth && credentials ? "ok" : "incomplete",
+          credentialCached: credentials?.expiresAt !== undefined,
+          federationConfigured: credentials !== undefined,
+          userAuthConfigured: userAuth !== undefined,
+          ...(federationMissing.length > 0 ? { federationMissing } : {}),
+          ...(userAuthError ? { userAuthError } : {}),
         });
+        return;
+      }
+
+      if (request.method === "GET" && request.url === "/setup/claims") {
+        // A self-closing diagnostic. Registering a federation issuer needs the
+        // exact `iss` and `aud` of a real token, and Azure emits two issuer
+        // forms that differ only in shape, so guessing produces a signature
+        // failure with no hint which was expected. `az containerapp exec` needs
+        // a TTY and is not always available, so the app reports its own claims.
+        //
+        // It answers only while federation is unconfigured, which is precisely
+        // the setup window, and disappears the moment the rule is applied. A
+        // permanent endpoint publishing a tenant id would be a needless gift;
+        // one that closes behind itself cannot be forgotten about.
+        if (credentials) {
+          send(response, 404, { error: "not found" });
+          return;
+        }
+        try {
+          const entra = entraConfigFromEnv();
+          const claims = describeUnverifiedToken(
+            await fetchIdentityToken(entra),
+          );
+          // The token itself is never returned. These are configuration
+          // identifiers; the token is a credential.
+          send(response, 200, {
+            issuerUrl: claims.issuer,
+            matchAudience: claims.audience,
+            jwksSource: "discovery",
+            note: "Register these in Settings, Workload identity, Connect workload. Match on the audience AND a subject or claim: a rule matching only the issuer accepts every workload in the tenant.",
+          });
+        } catch (error) {
+          send(response, 503, {
+            error: "could not obtain a managed identity token",
+            detail: error instanceof Error ? error.message : "unknown",
+          });
+        }
         return;
       }
 
       if (request.method !== "POST" || request.url !== "/v1/analyse") {
         send(response, 404, { error: "not found" });
+        return;
+      }
+
+      if (!credentials) {
+        send(response, 503, {
+          error: "federation is not configured on this deployment",
+          missing: federationMissing,
+        });
+        return;
+      }
+
+      if (!userAuth) {
+        // 503 rather than 500: this is a deployment that is not finished, not
+        // a request that went wrong, and the message says which knob is missing.
+        send(response, 503, {
+          error: "user authentication is not configured on this deployment",
+          detail: userAuthError,
+        });
         return;
       }
 
@@ -199,13 +297,26 @@ if (
   process.argv[1] &&
   import.meta.url.endsWith(process.argv[1].split("/").pop()!)
 ) {
-  const entra = entraConfigFromEnv();
-  const credentials = new FederatedCredentials(
-    () => fetchIdentityToken(entra),
-    federationConfigFromEnv(),
-  );
+  const { config, missing } = federationConfigFromEnv();
+  let credentials: FederatedCredentials | undefined;
+  if (config) {
+    const entra = entraConfigFromEnv();
+    credentials = new FederatedCredentials(
+      () => fetchIdentityToken(entra),
+      config,
+    );
+  }
+
   const port = Number(process.env.PORT ?? 8080);
-  createApp(credentials).listen(port, () => {
-    console.log(JSON.stringify({ event: "listening", port, model: MODEL }));
+  createApp(credentials, missing).listen(port, () => {
+    console.log(
+      JSON.stringify({
+        event: "listening",
+        port,
+        model: MODEL,
+        federationConfigured: credentials !== undefined,
+        ...(missing.length > 0 ? { federationMissing: missing } : {}),
+      }),
+    );
   });
 }
