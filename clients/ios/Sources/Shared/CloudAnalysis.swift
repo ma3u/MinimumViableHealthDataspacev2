@@ -84,6 +84,12 @@ public enum CloudAnalysis {
     /// Echoed back so the UI can show which provider actually answered, rather
     /// than which one it believes it asked.
     public let provider: String
+
+    public init(text: String, model: String, provider: String) {
+      self.text = text
+      self.model = model
+      self.provider = provider
+    }
   }
 
   /// The server's own cap, mirrored so the app can refuse before sending
@@ -98,9 +104,9 @@ public enum CloudAnalysis {
     public var message: String {
       switch self {
       case .nothingSelected:
-        return "Wählen Sie die Werte aus, über die Sie fragen möchten."
+        return "Select the values you want to ask about."
       case let .tooMany(count):
-        return "\(count) Werte ausgewählt. Es können höchstens \(maxValues) auf einmal gesendet werden."
+        return "\(count) values selected. At most \(maxValues) can be sent at once."
       }
     }
   }

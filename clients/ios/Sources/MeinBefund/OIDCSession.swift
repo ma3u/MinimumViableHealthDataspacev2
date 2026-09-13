@@ -58,15 +58,15 @@ final class OIDCSession: NSObject, ObservableObject {
     var errorDescription: String? {
       switch self {
       case .notConfigured:
-        return "Kein Anmeldedienst konfiguriert."
+        return "No sign-in service configured."
       case let .discoveryFailed(detail):
-        return "Anmeldedienst nicht erreichbar: \(detail)"
+        return "Sign-in service unreachable: \(detail)"
       case .cancelled:
-        return "Anmeldung abgebrochen."
+        return "Sign-in cancelled."
       case .noIdentityToken:
-        return "Der Anmeldedienst hat kein ID-Token ausgestellt."
+        return "The sign-in service issued no ID token."
       case let .tokenExchangeFailed(detail):
-        return "Anmeldung fehlgeschlagen: \(detail)"
+        return "Sign-in failed: \(detail)"
       }
     }
   }

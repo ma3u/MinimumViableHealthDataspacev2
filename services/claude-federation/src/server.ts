@@ -41,6 +41,7 @@ import {
   MemoryQuotaStore,
   type QuotaStore,
 } from "./quota.js";
+import { createQuotaStore } from "./db.js";
 
 const ANTHROPIC_MODEL = process.env.ANTHROPIC_MODEL ?? "claude-opus-5";
 // The deployment must be DataZoneStandard. GlobalStandard gives no EU-only
@@ -117,6 +118,7 @@ export function createApp(
   federationMissing: string[] = [],
   providers: Partial<Record<ProviderName, Provider>> = {},
   quotaStore: QuotaStore = new MemoryQuotaStore(),
+  quotaStoreKind: "postgres" | "memory" = "memory",
 ) {
   // Resolved lazily rather than at construction. The two halves of this system
   // are configured at different times: federation can be proven working before
@@ -143,6 +145,10 @@ export function createApp(
           credentialCached: credentials?.expiresAt !== undefined,
           federationConfigured: credentials !== undefined,
           userAuthConfigured: userAuth !== undefined,
+          // Says which counter is live. "memory" means the limit applies per
+          // replica and resets on deploy, which the operator should know
+          // before trusting it.
+          quotaStore: quotaStoreKind,
           ...(federationMissing.length > 0 ? { federationMissing } : {}),
           ...(userAuthError ? { userAuthError } : {}),
         });
@@ -355,24 +361,27 @@ if (
     );
   }
 
-  // MemoryQuotaStore is correct only at one replica and loses the count on
-  // restart, so which store is in use is stated at startup rather than left to
-  // be discovered when a limit turns out not to have held.
-  const quotaStore = new MemoryQuotaStore();
+  // Which counter is live is announced at startup rather than left to be
+  // discovered when a limit turns out not to have held across replicas.
+  const quota = await createQuotaStore();
 
   const port = Number(process.env.PORT ?? 8080);
-  createApp(credentials, missing, providers, quotaStore).listen(port, () => {
-    console.log(
-      JSON.stringify({
-        event: "listening",
-        port,
-        defaultProvider: providers.azure ? "azure" : "none",
-        providers: Object.keys(providers),
-        dailyLimit: DAILY_LIMIT,
-        quotaStore: "memory (single replica only)",
-        federationConfigured: credentials !== undefined,
-        ...(missing.length > 0 ? { federationMissing: missing } : {}),
-      }),
-    );
-  });
+  createApp(credentials, missing, providers, quota.store, quota.kind).listen(
+    port,
+    () => {
+      console.log(
+        JSON.stringify({
+          event: "listening",
+          port,
+          defaultProvider: providers.azure ? "azure" : "none",
+          providers: Object.keys(providers),
+          dailyLimit: DAILY_LIMIT,
+          quotaStore: quota.kind,
+          ...(quota.detail ? { quotaStoreDetail: quota.detail } : {}),
+          federationConfigured: credentials !== undefined,
+          ...(missing.length > 0 ? { federationMissing: missing } : {}),
+        }),
+      );
+    },
+  );
 }

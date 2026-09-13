@@ -10,10 +10,13 @@
     "start": "node dist/server.js",
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
-    "diagnose": "tsx src/diagnose.ts"
+    "diagnose": "tsx src/diagnose.ts",
+    "generate:prompt": "tsx src/generate-swift-prompt.ts"
   },
   "dependencies": {
-    "jose": "^6.1.0"
+    "@types/pg": "^8.23.1",
+    "jose": "^6.1.0",
+    "pg": "^8.23.0"
   },
   "devDependencies": {
     "@types/node": "^22.10.2",

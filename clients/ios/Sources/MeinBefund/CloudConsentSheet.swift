@@ -35,7 +35,7 @@ struct CloudConsentSheet: View {
     NavigationStack {
       Form {
         Section {
-          Label("Diese Werte verlassen Ihr Gerät", systemImage: "arrow.up.forward.app")
+          Label("These values leave your device", systemImage: "arrow.up.forward.app")
             .font(.headline)
           Text(
             """
@@ -48,7 +48,7 @@ struct CloudConsentSheet: View {
           .foregroundStyle(.secondary)
         }
 
-        Section("Werte auswählen") {
+        Section("Select values") {
           ForEach(candidates, id: \.raw.lineNumber) { value in
             Button {
               let id = key(for: value)
@@ -70,7 +70,7 @@ struct CloudConsentSheet: View {
                 if value.source != .labIssuedDigital {
                   // The reviewer should know an OCR value may be misread before
                   // deciding to ask a question about it.
-                  Text("gescannt")
+                  Text("scanned")
                     .font(.caption2)
                     .padding(.horizontal, 6).padding(.vertical, 2)
                     .background(.quaternary, in: Capsule())
@@ -81,8 +81,8 @@ struct CloudConsentSheet: View {
           }
         }
 
-        Section("Ihre Frage") {
-          TextField("Was möchten Sie wissen?", text: $question, axis: .vertical)
+        Section("Your question") {
+          TextField("What would you like to know?", text: $question, axis: .vertical)
             .lineLimit(2...5)
         }
 
@@ -98,14 +98,14 @@ struct CloudConsentSheet: View {
           .foregroundStyle(.secondary)
         }
       }
-      .navigationTitle("An Claude senden")
+      .navigationTitle("Send for analysis")
       .navigationBarTitleDisplayMode(.inline)
       .toolbar {
         ToolbarItem(placement: .cancellationAction) {
-          Button("Abbrechen", action: onCancel)
+          Button("Cancel", action: onCancel)
         }
         ToolbarItem(placement: .confirmationAction) {
-          Button("\(chosen.count) senden") { onSend(chosen, question) }
+          Button("Send \(chosen.count)") { onSend(chosen, question) }
             .disabled(CloudAnalysis.refusal(for: chosen) != nil)
         }
       }
@@ -143,10 +143,10 @@ struct CloudReplySheet: View {
         }
         .padding()
       }
-      .navigationTitle("Antwort")
+      .navigationTitle("Answer")
       .navigationBarTitleDisplayMode(.inline)
       .toolbar {
-        ToolbarItem(placement: .confirmationAction) { Button("Fertig", action: onClose) }
+        ToolbarItem(placement: .confirmationAction) { Button("Done", action: onClose) }
       }
     }
   }

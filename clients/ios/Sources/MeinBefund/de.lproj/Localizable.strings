@@ -1,0 +1,49 @@
+/* MeinBefund, German.
+
+   English is the base language, so a device in English needs no file at all and
+   this one supplies German. The keys are the English strings exactly as they
+   appear in the source, which is how SwiftUI's Text(_:) resolves them. */
+
+"Scan report" = "Befund scannen";
+"No reports yet" = "Noch kein Befund";
+"Scan a lab report. The values stay encrypted on this device." = "Scannen Sie einen Laborbefund. Die Werte bleiben verschlüsselt auf diesem Gerät.";
+"Recognising text…" = "Text wird erkannt…";
+"Waiting for an answer…" = "Antwort wird erstellt…";
+"Error" = "Fehler";
+"Cancel" = "Abbrechen";
+"Done" = "Fertig";
+"Save" = "Sichern";
+"Discard" = "Verwerfen";
+"Reviewed?" = "Geprüft?";
+"Title" = "Bezeichnung";
+"Lab report" = "Laborbefund";
+"Answer" = "Antwort";
+"Ask about these values" = "Werte erklären lassen";
+"Send for analysis" = "Zur Analyse senden";
+"Analysis provider" = "Analyse-Anbieter";
+"These values leave your device" = "Diese Werte verlassen Ihr Gerät";
+"Select values" = "Werte auswählen";
+"Your question" = "Ihre Frage";
+"What would you like to know?" = "Was möchten Sie wissen?";
+"Provider" = "Anbieter";
+"API key" = "API-Schlüssel";
+"Deployment name" = "Deployment-Name";
+"Model, e.g. claude-opus-5" = "Modell, z. B. claude-opus-5";
+"Anthropic processes the values in the United States." = "Anthropic verarbeitet die Werte in den USA.";
+"These lines were read but matched no LOINC code. They are not discarded." = "Diese Zeilen wurden gelesen, aber keinem LOINC-Code zugeordnet. Sie werden nicht verworfen.";
+"These lines looked like measurements but could not be read." = "Diese Zeilen sahen nach Messwerten aus, konnten aber nicht gelesen werden.";
+"These values were read from a photo and are preliminary, not confirmed." = "Die Werte wurden aus einem Foto gelesen und sind deshalb vorläufig, nicht bestätigt.";
+"scanned" = "gescannt";
+
+"MeinBefund service (EU, limited)" = "MeinBefund-Dienst (EU, begrenzt)";
+"Your own Azure OpenAI" = "Eigenes Azure OpenAI";
+"Your own Anthropic API key" = "Eigener Anthropic-Schlüssel";
+
+/* Interpolated strings become format keys. %lld is an Int, %@ a String. */
+"%lld recognised" = "%lld erkannt";
+"%lld unmatched" = "%lld nicht zugeordnet";
+"%lld unread" = "%lld nicht gelesen";
+"%lld values" = "%lld Werte";
+"%lld to review" = "%lld zu prüfen";
+"Send %lld" = "%lld senden";
+"p. %lld, line %lld" = "S. %lld, Z. %lld";
