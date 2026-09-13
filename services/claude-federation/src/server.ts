@@ -177,14 +177,6 @@ export function createApp(
         return;
       }
 
-      if (!credentials) {
-        send(response, 503, {
-          error: "federation is not configured on this deployment",
-          missing: federationMissing,
-        });
-        return;
-      }
-
       if (!userAuth) {
         // 503 rather than 500: this is a deployment that is not finished, not
         // a request that went wrong, and the message says which knob is missing.
@@ -200,6 +192,18 @@ export function createApp(
       if (!idToken) throw new UnauthorizedError("missing bearer id token");
 
       const { subject } = await verifyUser(idToken, userAuth);
+
+      // Checked after authentication on purpose. Telling an anonymous caller
+      // which environment variables this deployment is missing is a small gift
+      // to anyone mapping it, and no help to a legitimate user who cannot fix
+      // it either. A caller who has proved who they are gets the real reason.
+      if (!credentials) {
+        send(response, 503, {
+          error: "federation is not configured on this deployment",
+          missing: federationMissing,
+        });
+        return;
+      }
       const parsed = JSON.parse(await readBody(request)) as AnalyseRequest;
       const { values, question } = vet(parsed);
 
