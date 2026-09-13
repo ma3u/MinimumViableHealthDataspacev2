@@ -52,10 +52,12 @@ targets:
         # Cloud analysis (ADR-034). Empty by default and checked at runtime, so
         # an unconfigured build simply does not offer the button rather than
         # offering it and failing. Set per build, never committed with values.
-        INFOPLIST_KEY_MBOIDCIssuer: $(MB_OIDC_ISSUER)
-        INFOPLIST_KEY_MBOIDCClientID: $(MB_OIDC_CLIENT_ID)
-        INFOPLIST_KEY_MBOIDCRedirectScheme: $(MB_OIDC_REDIRECT_SCHEME)
-        INFOPLIST_KEY_MBFederationBaseURL: $(MB_FEDERATION_BASE_URL)
+        #
+        # The values live in `info.properties` below, not as INFOPLIST_KEY_*.
+        # That prefix only synthesises Apple's own documented keys; a custom one
+        # is accepted without complaint and then silently absent from the built
+        # Info.plist, so the app reads nil and hides the feature while the build
+        # log says nothing at all.
         MB_OIDC_ISSUER: ""
         MB_OIDC_CLIENT_ID: ""
         MB_OIDC_REDIRECT_SCHEME: ""
@@ -66,6 +68,10 @@ targets:
     info:
       path: Sources/MeinBefund/Info.plist
       properties:
+        MBOIDCIssuer: $(MB_OIDC_ISSUER)
+        MBOIDCClientID: $(MB_OIDC_CLIENT_ID)
+        MBOIDCRedirectScheme: $(MB_OIDC_REDIRECT_SCHEME)
+        MBFederationBaseURL: $(MB_FEDERATION_BASE_URL)
         CFBundleURLTypes:
           - CFBundleURLName: red.mabu.meinbefund.oidc
             CFBundleURLSchemes: [$(MB_OIDC_REDIRECT_SCHEME)]

@@ -79,6 +79,25 @@ Register a **public** client at your IdP with these exact properties:
   are you, not who you are, and the backend deliberately reads only `sub`.
 - **Grant type: authorization code.** Not implicit, not hybrid.
 
+### Deployed, 2026-09-13
+
+```
+issuer     https://auth.ehds.mabu.red/realms/edcv
+client     meinbefund-ios   (public, PKCE S256, standard flow only)
+redirect   meinbefund://oidc-callback
+backend    https://mvhd-claude-federation.happysand-37f82e30.westeurope.azurecontainerapps.io
+```
+
+Provisioned by `scripts/azure/12-meinbefund-identity.sh`. Verified end to end: a
+real token from this realm passes signature, issuer, audience and subject
+allowlist and reaches the federation step.
+
+**Take the issuer from the discovery document, never from the URL you fetched
+it at.** Keycloak stamps `iss` from `KC_HOSTNAME`, which here is the ADR-025
+custom domain, while the Container App also answers on its own
+`*.azurecontainerapps.io` FQDN. Both serve the same realm; only one string
+appears in tokens. Using the other produced `unexpected "iss" claim value`.
+
 ### Keycloak, concretely
 
 The repo already runs a Keycloak realm (`edcv`). To use it the realm must be
