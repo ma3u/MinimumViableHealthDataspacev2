@@ -51,6 +51,50 @@ final class AppModel: ObservableObject {
       await refresh()
     } catch { self.error = error.localizedDescription }
   }
+
+  // MARK: - Cloud analysis (ADR-034)
+
+  @Published var consenting: [CodedLabValue]?
+  @Published var reply: CloudAnalysis.Reply?
+  @Published var asking = false
+
+  let signIn = OIDCSession()
+
+  /// True only when both halves are configured. Without either, the button is
+  /// not offered at all rather than shown and then failing: an action that
+  /// cannot work should not look available.
+  var cloudAvailable: Bool {
+    OIDCSession.Configuration.fromBundle() != nil && CloudClient.Configuration.fromBundle() != nil
+  }
+
+  func askCloud(_ values: [CloudAnalysis.SharedValue], question: String) async {
+    consenting = nil
+    guard let clientConfig = CloudClient.Configuration.fromBundle(),
+      let oidcConfig = OIDCSession.Configuration.fromBundle()
+    else {
+      error = CloudClient.ClientError.notConfigured.localizedDescription
+      return
+    }
+
+    asking = true
+    defer { asking = false }
+    do {
+      // Sign in lazily, and only when the user has already chosen to send
+      // something. Asking someone to authenticate before they have decided
+      // what they want is how a consent step becomes a habit.
+      if signIn.currentIdentityToken() == nil {
+        try await signIn.signIn(configuration: oidcConfig)
+      }
+      guard let token = signIn.currentIdentityToken() else {
+        error = CloudClient.ClientError.notSignedIn.localizedDescription
+        return
+      }
+      reply = try await CloudClient(configuration: clientConfig)
+        .analyse(values: values, question: question, identityToken: token)
+    } catch {
+      self.error = error.localizedDescription
+    }
+  }
 }
 
 struct ContentView: View {
@@ -77,6 +121,17 @@ struct ContentView: View {
           .navigationDestination(for: UUID.self) { id in
             if let report = model.reports.first(where: { $0.id == id }) {
               ResultList(extraction: report.extraction, title: report.title)
+                .toolbar {
+                  if model.cloudAvailable, !report.extraction.coded.isEmpty {
+                    ToolbarItem(placement: .primaryAction) {
+                      Button {
+                        model.consenting = report.extraction.coded
+                      } label: {
+                        Label("Claude fragen", systemImage: "sparkles")
+                      }
+                    }
+                  }
+                }
             }
           }
         }
@@ -109,6 +164,18 @@ struct ContentView: View {
         model.pending = nil
       }
     }
+    .sheet(item: Binding(get: { model.consenting.map(ConsentBox.init) }, set: { _ in })) { box in
+      CloudConsentSheet(
+        candidates: box.values,
+        onSend: { values, question in
+          Task { await model.askCloud(values, question: question) }
+        },
+        onCancel: { model.consenting = nil })
+    }
+    .sheet(item: Binding(get: { model.reply.map(ReplyBox.init) }, set: { _ in })) { box in
+      CloudReplySheet(reply: box.reply) { model.reply = nil }
+    }
+    .overlay { if model.asking { ProgressView("Claude antwortet…").padding().background(.regularMaterial, in: .rect(cornerRadius: 12)) } }
     .overlay { if model.busy { ProgressView("Text wird erkannt…").padding().background(.regularMaterial, in: .rect(cornerRadius: 12)) } }
     .alert("Fehler", isPresented: Binding(get: { model.error != nil }, set: { _ in model.error = nil })) {
       Button("OK", role: .cancel) {}
@@ -117,6 +184,18 @@ struct ContentView: View {
     }
     .task { await model.refresh() }
   }
+}
+
+private struct ConsentBox: Identifiable {
+  let values: [CodedLabValue]
+  var id: Int { values.count }
+  init(_ values: [CodedLabValue]) { self.values = values }
+}
+
+private struct ReplyBox: Identifiable {
+  let reply: CloudAnalysis.Reply
+  var id: String { reply.text }
+  init(_ reply: CloudAnalysis.Reply) { self.reply = reply }
 }
 
 private struct PendingBox: Identifiable {

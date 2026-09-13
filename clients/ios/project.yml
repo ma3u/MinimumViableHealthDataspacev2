@@ -49,6 +49,23 @@ targets:
           MeinBefund nutzt die Kamera nur, um Ihre Befunde zu scannen.
           Die Aufnahmen bleiben verschlüsselt auf diesem Gerät.
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        # Cloud analysis (ADR-034). Empty by default and checked at runtime, so
+        # an unconfigured build simply does not offer the button rather than
+        # offering it and failing. Set per build, never committed with values.
+        INFOPLIST_KEY_MBOIDCIssuer: $(MB_OIDC_ISSUER)
+        INFOPLIST_KEY_MBOIDCClientID: $(MB_OIDC_CLIENT_ID)
+        INFOPLIST_KEY_MBOIDCRedirectScheme: $(MB_OIDC_REDIRECT_SCHEME)
+        INFOPLIST_KEY_MBFederationBaseURL: $(MB_FEDERATION_BASE_URL)
+        MB_OIDC_ISSUER: ""
+        MB_OIDC_CLIENT_ID: ""
+        MB_OIDC_REDIRECT_SCHEME: ""
+        MB_FEDERATION_BASE_URL: ""
         # The store must be unreadable while the device is locked.
         CODE_SIGN_ENTITLEMENTS: Sources/MeinBefund/MeinBefund.entitlements
         TARGETED_DEVICE_FAMILY: "1"
+    info:
+      path: Sources/MeinBefund/Info.plist
+      properties:
+        CFBundleURLTypes:
+          - CFBundleURLName: red.mabu.meinbefund.oidc
+            CFBundleURLSchemes: [$(MB_OIDC_REDIRECT_SCHEME)]
