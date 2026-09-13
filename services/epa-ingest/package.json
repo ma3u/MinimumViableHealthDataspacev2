@@ -16,7 +16,8 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.eval.json",
-    "eval:score": "tsx eval/score.ts"
+    "eval:score": "tsx eval/score.ts",
+    "generate:swift": "tsx src/generate-swift-analytes.ts"
   },
   "dependencies": {},
   "optionalDependencies": {

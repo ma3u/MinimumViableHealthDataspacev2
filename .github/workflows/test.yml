@@ -21,6 +21,7 @@ on:
       - "ui/**"
       - "services/neo4j-proxy/**"
       - "services/epa-ingest/**"
+      - "clients/ios/**"
       - ".github/workflows/test.yml"
   pull_request:
     branches: [main]
@@ -28,6 +29,7 @@ on:
       - "ui/**"
       - "services/neo4j-proxy/**"
       - "services/epa-ingest/**"
+      - "clients/ios/**"
   workflow_dispatch:
 
 env:
@@ -147,6 +149,11 @@ jobs:
       - name: Type-check (src + eval harness)
         run: npm run typecheck
 
+      # The Swift analyte table is generated from analytes.ts. A stale copy is
+      # the silent divergence the shared repository was chosen to prevent.
+      - name: Generated Swift analyte table is current
+        run: npm run generate:swift -- --check
+
       - name: Run tests with coverage
         run: npx vitest run --coverage --reporter=verbose
 
@@ -157,6 +164,29 @@ jobs:
           name: epa-ingest-coverage
           path: services/epa-ingest/coverage/
           retention-days: 30
+
+  # -----------------------------------------------------------------------
+  # iOS Client — generated analyte table parity (Swift)
+  # Proves the generated Swift BEHAVES like the TypeScript it came from: same
+  # codings, same label/unit folding, same refusals. The drift check in
+  # epa-ingest-tests proves the file is current; this proves it is correct.
+  # macOS runners are free for public repos but scarce, so this is path-filtered
+  # and never gates the web or service suites.
+  # -----------------------------------------------------------------------
+  ios-analyte-parity:
+    name: iOS Analyte Parity (Swift)
+    runs-on: macos-latest
+    defaults:
+      run:
+        working-directory: ./clients/ios
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Swift version
+        run: swift --version
+
+      - name: Run parity check
+        run: swift run AnalyteParity
 
   # -----------------------------------------------------------------------
   # Secret Scan — gitleaks (BSI C5 DEV-08)
