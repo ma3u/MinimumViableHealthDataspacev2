@@ -63,18 +63,43 @@ export class UnauthorizedError extends Error {
  */
 const keySets = new Map<string, ReturnType<typeof createRemoteJWKSet>>();
 
-function keySetFor(issuer: string): ReturnType<typeof createRemoteJWKSet> {
+/**
+ * Resolves the JWKS URL by OIDC discovery.
+ *
+ * This used to guess the path from the issuer hostname: `/auth/keys` for Apple,
+ * `/protocol/openid-connect/certs` for everything else. That is the Keycloak
+ * path, so the "everything else" branch was wrong for Auth0, Okta, Entra
+ * External ID and every other provider, and would have failed at the first
+ * sign-in with a JWKS 404 rather than at configuration time.
+ *
+ * `jwks_uri` is a required field of the discovery document precisely so nobody
+ * has to guess. One fetch per issuer, cached for the process lifetime, and
+ * `createRemoteJWKSet` handles key rotation from there.
+ */
+async function keySetFor(
+  issuer: string,
+): Promise<ReturnType<typeof createRemoteJWKSet>> {
   const existing = keySets.get(issuer);
   if (existing) return existing;
-  // Apple and Keycloak both serve JWKS at a path derived from the issuer.
-  // Running OIDC discovery per request would make every analysis depend on the
-  // IdP's discovery document being up, so the JWKS URL is derived once and
-  // `createRemoteJWKSet` handles caching and key rotation from there.
-  const base = issuer.replace(/\/$/, "");
-  const jwksPath = issuer.includes("appleid.apple.com")
-    ? "/auth/keys"
-    : "/protocol/openid-connect/certs";
-  const jwks = createRemoteJWKSet(new URL(base + jwksPath));
+
+  const discovery = new URL(
+    issuer.replace(/\/$/, "") + "/.well-known/openid-configuration",
+  );
+  const response = await fetch(discovery);
+  if (!response.ok) {
+    throw new UnauthorizedError(
+      `cannot reach OIDC discovery at ${discovery} (HTTP ${response.status}). ` +
+        "USER_OIDC_ISSUER must be the exact issuer, with no trailing path.",
+    );
+  }
+  const metadata = (await response.json()) as { jwks_uri?: string };
+  if (!metadata.jwks_uri) {
+    throw new UnauthorizedError(
+      `discovery document at ${discovery} has no jwks_uri`,
+    );
+  }
+
+  const jwks = createRemoteJWKSet(new URL(metadata.jwks_uri));
   keySets.set(issuer, jwks);
   return jwks;
 }
@@ -93,7 +118,7 @@ export async function verifyUser(
 ): Promise<{ subject: string }> {
   let payload: JWTPayload;
   try {
-    ({ payload } = await jwtVerify(idToken, keySetFor(config.issuer), {
+    ({ payload } = await jwtVerify(idToken, await keySetFor(config.issuer), {
       issuer: config.issuer,
       audience: config.audience,
       // A little clock tolerance, because a phone's clock is not ours to trust
