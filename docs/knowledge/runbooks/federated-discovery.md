@@ -4,7 +4,9 @@ title: Federated discovery — operate and verify
 description: Check the crawler→enricher pipeline and onboard a new participant end-to-end.
 resource: docs/architecture/federation.md, docs/persona-journeys/data-user-federated-discovery.md
 tags: [runbook, federation, issue-8]
-timestamp: 2026-07-15T00:00:00Z
+generated: { by: claude-code/fable-5, at: 2026-07-15T15:30:23Z }
+verified: { by: human:ma3u, at: 2026-07-15T15:30:23Z }
+status: stable
 ---
 
 **Onboard a participant:** `/admin/participants` (EDC_ADMIN) → add DID + DSP

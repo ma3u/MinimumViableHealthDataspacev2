@@ -1,6 +1,14 @@
 ---
 name: static-export
 description: Use when the user works on demo personas, localStorage persistence, or GitHub Pages static-export behaviour.
+paths:
+  [
+    "ui/public/mock/**",
+    "ui/src/lib/api.ts",
+    "ui/src/lib/use-demo-persona.ts",
+    "ui/next.config.js",
+    ".github/workflows/pages.yml",
+  ]
 ---
 
 # Static export & demo personas

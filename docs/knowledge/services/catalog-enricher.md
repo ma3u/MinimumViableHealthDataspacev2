@@ -4,7 +4,9 @@ title: catalog-enricher — DSP→HealthDCAT-AP mapper
 description: NATS durable consumer that MERGEs crawled catalogs into Neo4j L2 as federated datasets.
 resource: services/catalog-enricher/ (Python), ACA app mvhd-catalog-enricher
 tags: [federation, enricher, issue-8]
-timestamp: 2026-07-15T00:00:00Z
+generated: { by: claude-code/fable-5, at: 2026-07-15T15:30:23Z }
+verified: { by: human:ma3u, at: 2026-07-15T15:30:23Z }
+status: stable
 ---
 
 Durable consumer `enricher` on `dataspace.catalog.raw`; writes idempotent

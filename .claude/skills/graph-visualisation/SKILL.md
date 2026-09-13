@@ -1,6 +1,12 @@
 ---
 name: graph-visualisation
 description: Use when the user works on the force-directed graph explorer, layer colours, persona views, or node filtering.
+paths:
+  [
+    "ui/src/lib/graph-constants.ts",
+    "ui/src/app/api/graph/**",
+    "ui/src/components/graph/**",
+  ]
 ---
 
 # Graph explorer

@@ -4,7 +4,9 @@ title: Neo4j 5 Community — knowledge graph
 description: Single graph database holding all 5 layers; 127 synthetic patients, 5300+ nodes.
 resource: docker-compose.yml (health-dataspace-neo4j), ACA app mvhd-neo4j
 tags: [neo4j, graph, L1-L5]
-timestamp: 2026-07-15T00:00:00Z
+generated: { by: claude-code/fable-5, at: 2026-07-15T15:30:23Z }
+verified: { by: human:ma3u, at: 2026-07-15T15:30:23Z }
+status: stable
 ---
 
 Ports 7687 (bolt) / 7474 (browser); credentials `neo4j/healthdataspace` (local

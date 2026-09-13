@@ -4,7 +4,9 @@ title: UI — Next.js 14 app router
 description: Unified frontend — 16+ pages, 36+ API routes, 7 role personas, dual live/static operation.
 resource: ui/, ACA app mvhd-ui, https://ehds.mabu.red
 tags: [nextjs, react, port-3000]
-timestamp: 2026-07-15T00:00:00Z
+generated: { by: claude-code/fable-5, at: 2026-07-15T15:30:23Z }
+verified: { by: human:ma3u, at: 2026-07-15T15:30:23Z }
+status: stable
 ---
 
 Dual mode: live (API routes → Neo4j/Keycloak) and static GitHub Pages export

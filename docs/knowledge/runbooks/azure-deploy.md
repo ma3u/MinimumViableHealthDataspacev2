@@ -4,7 +4,9 @@ title: Deploy to Azure (ACA)
 description: How code reaches https://ehds.mabu.red and how to verify it.
 resource: .github/workflows/deploy-azure.yml, scripts/azure/*.sh, docs/azure-deployment-guide.md
 tags: [runbook, azure, aca, ci]
-timestamp: 2026-07-15T00:00:00Z
+generated: { by: claude-code/fable-5, at: 2026-07-15T15:30:23Z }
+verified: { by: human:ma3u, at: 2026-07-15T15:30:23Z }
+status: stable
 ---
 
 **Normal path:** merge to `main` → `.github/workflows/deploy-azure.yml` builds

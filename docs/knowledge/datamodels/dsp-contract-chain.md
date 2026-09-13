@@ -4,7 +4,9 @@ title: DSP contract chain (L1)
 description: The dataspace-protocol trust chain from offer to auditable transfer.
 resource: .claude/rules/api-conventions.md (DSP contract chain)
 tags: [dsp, odrl, L1, audit]
-timestamp: 2026-07-15T00:00:00Z
+generated: { by: claude-code/fable-5, at: 2026-07-15T15:30:23Z }
+verified: { by: human:ma3u, at: 2026-07-15T15:30:23Z }
+status: stable
 ---
 
 ```

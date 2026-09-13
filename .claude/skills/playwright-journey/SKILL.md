@@ -1,6 +1,7 @@
 ---
 name: playwright-journey
 description: Use when the user adds E2E tests, Playwright specs, or journey coverage.
+paths: ["ui/__tests__/e2e/**", "ui/playwright.config.ts"]
 ---
 
 # Playwright journey specs
