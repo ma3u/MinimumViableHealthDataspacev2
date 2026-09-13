@@ -74,6 +74,7 @@ final class AppModel: ObservableObject {
 
   @Published var providerConfig = BringYourOwnProvider.configuration()
   @Published var showingSettings = false
+  @Published var showingPrivacy = false
 
   func askCloud(_ values: [CloudAnalysis.SharedValue], question: String) async {
     consenting = nil
@@ -172,10 +173,19 @@ struct ContentView: View {
           }
         }
         ToolbarItem(placement: .topBarLeading) {
-          Button {
-            model.showingSettings = true
+          Menu {
+            Button {
+              model.showingSettings = true
+            } label: {
+              Label("Analysis provider", systemImage: "gearshape")
+            }
+            Button {
+              model.showingPrivacy = true
+            } label: {
+              Label("Privacy and safety", systemImage: "hand.raised")
+            }
           } label: {
-            Label("Analysis provider", systemImage: "gearshape")
+            Label("More", systemImage: "ellipsis.circle")
           }
         }
       }
@@ -212,6 +222,9 @@ struct ContentView: View {
       ProviderSettings(configuration: $model.providerConfig) {
         model.showingSettings = false
       }
+    }
+    .sheet(isPresented: $model.showingPrivacy) {
+      PrivacySummary { model.showingPrivacy = false }
     }
     .overlay { if model.asking { ProgressView("Waiting for an answer…").padding().background(.regularMaterial, in: .rect(cornerRadius: 12)) } }
     .overlay { if model.busy { ProgressView("Recognising text…").padding().background(.regularMaterial, in: .rect(cornerRadius: 12)) } }

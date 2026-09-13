@@ -131,6 +131,7 @@ struct CloudReplySheet: View {
         VStack(alignment: .leading, spacing: 16) {
           Text(reply.text).font(.body)
           Divider()
+          DoctorReminder()
           Text(
             """
             Antwort von \(reply.provider), Modell \(reply.model). Keine \

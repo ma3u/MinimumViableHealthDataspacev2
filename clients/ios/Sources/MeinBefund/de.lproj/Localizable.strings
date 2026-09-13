@@ -47,3 +47,14 @@
 "%lld to review" = "%lld zu prüfen";
 "Send %lld" = "%lld senden";
 "p. %lld, line %lld" = "S. %lld, Z. %lld";
+
+/* Privacy and safety */
+"Privacy and safety" = "Datenschutz und Sicherheit";
+"More" = "Mehr";
+"Your reports stay on this phone" = "Ihre Befunde bleiben auf diesem iPhone";
+"Nothing is sent unless you send it" = "Es wird nichts gesendet, solange Sie es nicht senden";
+"Where the explanation comes from" = "Woher die Erklärung kommt";
+"Why signing in is sometimes asked for" = "Warum manchmal eine Anmeldung nötig ist";
+"This app does not diagnose" = "Diese App stellt keine Diagnose";
+"Full privacy policy" = "Vollständige Datenschutzerklärung";
+"Not a diagnosis. Values read from a photo may be misread. Talk to your doctor before acting on them." = "Keine Diagnose. Aus einem Foto gelesene Werte können Lesefehler enthalten. Sprechen Sie mit Ihrer Ärztin oder Ihrem Arzt, bevor Sie daraus Schlüsse ziehen.";
