@@ -4,7 +4,9 @@ title: Decisions index
 description: Pointer to the canonical ADR corpus — decisions are not duplicated here.
 resource: docs/ADRs/
 tags: [adr, decisions]
-timestamp: 2026-07-15T00:00:00Z
+generated: { by: claude-code/fable-5, at: 2026-07-15T15:30:23Z }
+verified: { by: human:ma3u, at: 2026-07-15T15:30:23Z }
+status: stable
 ---
 
 Canonical store: [`docs/ADRs/`](../../ADRs/) — ADR-001 … ADR-028, indexed with

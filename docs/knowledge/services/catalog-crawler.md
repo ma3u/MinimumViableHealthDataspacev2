@@ -4,7 +4,9 @@ title: catalog-crawler — federated DSP catalog fetcher
 description: ACA job that crawls participants' DSP catalogs every 5 minutes and publishes raw JSON-LD to NATS.
 resource: services/catalog-crawler/ (Python), ACA job mvhd-catalog-crawler
 tags: [federation, crawler, issue-8, aca-job]
-timestamp: 2026-07-15T00:00:00Z
+generated: { by: claude-code/fable-5, at: 2026-07-15T15:30:23Z }
+verified: { by: human:ma3u, at: 2026-07-15T15:30:23Z }
+status: stable
 ---
 
 Reads crawl targets from Neo4j (`:Participant` with `dspCatalogUrl` +

@@ -7,7 +7,6 @@ description: >
 model: sonnet
 effort: medium
 tools: Read, Grep, Glob, Bash
-permissionMode: readOnly
 ---
 
 You are the **read-only code reviewer** for the EHDS Integration Hub.

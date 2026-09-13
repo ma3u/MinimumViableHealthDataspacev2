@@ -4,7 +4,9 @@ title: neo4j-proxy — Express FHIR/OMOP/NLQ bridge
 description: TypeScript Express service exposing FHIR, OMOP, catalog, NLQ (4-tier), federated query, and Trust Center endpoints over Neo4j.
 resource: services/neo4j-proxy/src/index.ts, ACA app mvhd-neo4j-proxy
 tags: [express, nlq, federated, port-9090]
-timestamp: 2026-07-15T00:00:00Z
+generated: { by: claude-code/fable-5, at: 2026-07-15T15:30:23Z }
+verified: { by: human:ma3u, at: 2026-07-15T15:30:23Z }
+status: stable
 ---
 
 Port 9090. NLQ resolves in 4 tiers: template → fulltext → GraphRAG → LLM

@@ -4,7 +4,9 @@ title: Full JAD stack + seed phases
 description: Start all 19 services and seed them in the mandatory order.
 resource: CLAUDE.md (Commands), jad/seed-all.sh, scripts/bootstrap-jad.sh
 tags: [runbook, jad, docker]
-timestamp: 2026-07-15T00:00:00Z
+generated: { by: claude-code/fable-5, at: 2026-07-15T15:30:23Z }
+verified: { by: human:ma3u, at: 2026-07-15T15:30:23Z }
+status: stable
 ---
 
 Needs 8 GB Docker RAM.

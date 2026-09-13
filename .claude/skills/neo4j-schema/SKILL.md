@@ -1,6 +1,7 @@
 ---
 name: neo4j-schema
 description: Use when the user adds nodes, relationships, constraints, or indexes to the Neo4j knowledge graph, or edits any *.cypher file.
+paths: ["neo4j/**", "**/*.cypher", "docs/health-dataspace-graph-schema.md"]
 ---
 
 # Neo4j schema changes

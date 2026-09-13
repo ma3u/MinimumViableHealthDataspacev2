@@ -8,6 +8,7 @@ description: >
 model: opus
 effort: high
 tools: Read, Grep, Glob, Bash, Write, Edit
+isolation: worktree
 ---
 
 You are the **implementation specialist** for the EHDS Integration Hub.

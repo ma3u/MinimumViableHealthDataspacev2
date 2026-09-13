@@ -1,8 +1,14 @@
-# Knowledge bundle (OKF v0.1)
+# Knowledge bundle (OKF v0.2)
 
 One concept per file; the path is the concept identity; concepts cross-link into
 a graph. Change history in [log.md](log.md). Populated only from real repo
 content — gaps are marked `UNKNOWN`.
+
+Frontmatter carries the v0.2 trust signals: `generated: { by, at }` (producer +
+last meaningful change, taken from git), `verified: { by, at }` (human review at
+merge), and `status:`. `index.md` and `log.md` are reserved files and carry no
+frontmatter. Spec:
+[open-knowledge-format/SPEC.md](https://github.com/GoogleCloudPlatform/open-knowledge-format/blob/main/SPEC.md).
 
 ## services/ — running components
 

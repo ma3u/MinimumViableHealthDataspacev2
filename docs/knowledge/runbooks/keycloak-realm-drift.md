@@ -4,7 +4,9 @@ title: Keycloak realm drift — diagnose and reconcile
 description: What to do when logins fail on the deployed Keycloak although the realm file looks correct.
 resource: incident 2026-07-15 (issue-less; PR #95), jad/keycloak-realm.json, scripts/azure/06-post-deploy.sh
 tags: [runbook, keycloak, incident, auth]
-timestamp: 2026-07-15T00:00:00Z
+generated: { by: claude-code/fable-5, at: 2026-07-15T15:30:23Z }
+verified: { by: human:ma3u, at: 2026-07-15T15:30:23Z }
+status: stable
 ---
 
 **Root cause pattern:** realm import returns HTTP 409 on an existing realm and
