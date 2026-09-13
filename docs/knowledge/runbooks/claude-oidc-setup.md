@@ -141,6 +141,32 @@ expected. So the token comes first and the Console second:
 ./scripts/azure/11-claude-federation.sh configure   # apply the rule ids
 ```
 
+### Deployed values, 2026-09-13
+
+The Container App is live and reports its own claims while federation is
+unconfigured:
+
+```
+GET https://mvhd-claude-federation.happysand-37f82e30.westeurope.azurecontainerapps.io/setup/claims
+
+  issuerUrl      https://sts.windows.net/8b87af7d-8647-4dc7-8df4-5f69a2011bb5/
+  matchAudience  api://1566f14a-86a1-40d2-bab9-1b29dfd574b5
+  jwksSource     discovery
+```
+
+The issuer is the **v1** form. That was checked rather than assumed, which is
+the entire reason this step exists.
+
+Managed identity `id-mvhd-claude-federation`:
+
+| Claim         | Value                                  |
+| ------------- | -------------------------------------- |
+| `appid`       | `4aacf375-fe9a-477a-b7c4-d9cbe7c66fe3` |
+| `sub` / `oid` | `48fbc66e-3096-4ee6-a52d-8464eb2f3919` |
+
+`/setup/claims` returns 404 once a federation rule is applied, so it closes
+behind itself rather than publishing a tenant id forever.
+
 ### In the Console
 
 **Settings → Workload identity → Connect workload**, then **Custom OIDC** (or

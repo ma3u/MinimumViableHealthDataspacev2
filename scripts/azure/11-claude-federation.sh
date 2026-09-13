@@ -95,17 +95,32 @@ provision() {
 
 claims() {
   require_login
-  log "Reading the issuer and audience off a real token, from inside the app."
+  local fqdn
+  fqdn=$(az containerapp show --name "$APP" --resource-group "$RG" \
+    --query properties.configuration.ingress.fqdn -o tsv)
+
+  # Read the claims from the app's own /setup/claims rather than by exec'ing
+  # into it. `az containerapp exec` needs a TTY and fails headless with
+  # "Operation not supported by device", which is a poor thing to discover
+  # mid-setup. The endpoint answers only while federation is unconfigured and
+  # disappears the moment `configure` runs, so it cannot be left open.
+  log "Reading the issuer and audience off a real token ..."
+  local body
+  body=$(curl -sS --max-time 30 "https://${fqdn}/setup/claims")
+
+  if ! grep -q issuerUrl <<<"$body"; then
+    error "could not read claims: $body"
+    error "If this says 'not found', federation is already configured."
+    exit 1
+  fi
+
   echo ""
-  # Read from the running container rather than derived from the tenant id,
-  # because Azure emits two issuer forms that differ only in shape and the wrong
-  # one fails signature verification with no hint which was expected.
-  az containerapp exec --name "$APP" --resource-group "$RG" \
-    --command "npm run --silent diagnose" 2>/dev/null || {
-      error "could not exec into the app. Is it running?"
-      error "az containerapp logs show -n $APP -g $RG --tail 50"
-      exit 1
-    }
+  echo "$body" | python3 -m json.tool
+  echo ""
+  echo "Register the issuer above in the Claude Console, then match on the"
+  echo "audience AND the managed identity, whose ids are:"
+  az identity show --name "$IDENTITY" --resource-group "$RG" \
+    --query "{appid_claim:clientId, sub_oid_claim:principalId}" -o json
 }
 
 configure() {
