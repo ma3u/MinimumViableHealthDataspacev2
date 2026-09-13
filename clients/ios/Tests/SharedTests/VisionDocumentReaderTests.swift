@@ -64,7 +64,11 @@
     return context.makeImage()!
   }
 
-  @Suite("The hybrid, end to end through Vision")
+  @Suite("The hybrid, end to end through Vision", .serialized)
+  // Serialized on purpose. Each test renders a full A4 page and runs two
+  // recognisers over it; in parallel that is enough concurrent image memory to
+  // get the test process killed, which reads as a flaky suite rather than as
+  // the resource problem it is.
   struct VisionDocumentReaderTests {
 
     /// The regression this whole reconciler exists for.

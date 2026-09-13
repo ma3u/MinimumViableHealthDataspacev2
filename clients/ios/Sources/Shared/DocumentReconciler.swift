@@ -42,12 +42,21 @@ import Foundation
 ///
 /// - **Recovered:** the cell is empty and text fell inside it. Take the text.
 ///   This is the `%` case, and the reason the whole type exists.
-/// - **Extended:** the cell text is a prefix or substring of what the text pass
-///   read there, and the text pass read more. Take the longer one. Containment
-///   means the two agree and one is simply more complete, so this cannot invent
-///   a value. `5` becoming `5,4` is the case worth catching.
-/// - **Otherwise keep the cell.** Where the two genuinely disagree, the
-///   structured pass wins and the disagreement is not papered over.
+/// - **Otherwise keep the cell**, always. A non-empty cell is never rewritten.
+///
+/// There used to be a third rule: extend a cell when the text pass read the
+/// same thing but longer, on the theory that `5` should become `5,4`. It was
+/// speculation, it was never measured, and measuring it killed it. On a sheet
+/// skewed by one degree, which is an utterly ordinary hand-held photograph, a
+/// cell's axis-aligned box overlaps its neighbour's content, so the fragments
+/// inside it pick up stray characters. `mg/dl` became `mg/dll`, which still
+/// *contains* `mg/dl` and is longer, so the rule fired and produced a unit with
+/// no UCUM mapping. Coded values dropped from 8 to 6 at one degree and to 3 at
+/// two degrees. `ScanningTests` is what caught it.
+///
+/// The lesson is narrower than "be careful": a repair rule that can rewrite a
+/// cell the structured pass read correctly is a rule that can only lose
+/// information on a good scan. Recovery from *empty* cannot.
 ///
 /// Fragments are assigned to a cell by their **centre**, not by overlap, so a
 /// fragment can land in exactly one cell and text cannot be duplicated into two
@@ -94,8 +103,6 @@ public enum DocumentReconciler {
     case document
     /// The table pass read nothing here; the text pass did.
     case recovered
-    /// The text pass read the same thing, more completely.
-    case extended
   }
 
   public struct ReconciledCell: Sendable, Equatable {
@@ -183,14 +190,12 @@ public enum DocumentReconciler {
         .trimmingCharacters(in: .whitespaces)
       let fromCell = cell.text.trimmingCharacters(in: .whitespaces)
 
-      let resolved: (String, Origin)
-      if fromCell.isEmpty, !fromText.isEmpty {
-        resolved = (fromText, .recovered)
-      } else if !fromCell.isEmpty, fromText.count > fromCell.count, fromText.contains(fromCell) {
-        resolved = (fromText, .extended)
-      } else {
-        resolved = (fromCell, .document)
-      }
+      // Only an empty cell is ever filled in. See the type's documentation for
+      // the measurement that removed the second rule.
+      let resolved: (String, Origin) =
+        fromCell.isEmpty && !fromText.isEmpty
+        ? (fromText, .recovered)
+        : (fromCell, .document)
 
       reconciled.append(
         ReconciledCell(

@@ -1,0 +1,518 @@
+{
+  "now": "2026-09-13T12:00:00.000Z",
+  "meta": {
+    "patientId": "example-patient",
+    "effectiveDateTime": "2026-09-04",
+    "performer": "Praxis Dr. Muster",
+    "title": "Laborbefund"
+  },
+  "source": {
+    "kind": "ocr-transcribed",
+    "sourceDocument": "laborbefund-2026-09-04.pdf",
+    "ocrConfidence": 0.94,
+    "extractor": "tesseract"
+  },
+  "values": [
+    {
+      "label": "LDL-Cholesterin",
+      "value": 141,
+      "unitRaw": "mg/dl",
+      "referenceHigh": 116,
+      "line": "LDL-Cholesterin  141  mg/dl  < 116",
+      "lineNumber": 3,
+      "analyteKey": "ldl",
+      "coding": {
+        "loincNumber": "2089-1",
+        "display": "Cholesterol in LDL [Mass/volume] in Serum or Plasma",
+        "ucum": "mg/dL"
+      },
+      "region": {
+        "page": 1,
+        "x": 0.0706,
+        "y": 0.7525,
+        "width": 0.8466,
+        "height": 0.0292
+      }
+    },
+    {
+      "label": "HbA1c",
+      "value": 5.4,
+      "unitRaw": "%",
+      "referenceLow": 4,
+      "referenceHigh": 6,
+      "line": "HbA1c  5,4  %  4,0 - 6,0",
+      "lineNumber": 7,
+      "analyteKey": "hba1c",
+      "coding": {
+        "loincNumber": "4548-4",
+        "display": "Hemoglobin A1c/Hemoglobin.total in Blood",
+        "ucum": "%"
+      },
+      "region": {
+        "page": 1,
+        "x": 0.0706,
+        "y": 0.6525,
+        "width": 0.8466,
+        "height": 0.0292
+      }
+    },
+    {
+      "label": "NT-proBNP",
+      "value": 1240,
+      "unitRaw": "pg/ml",
+      "referenceHigh": 125,
+      "line": "NT-proBNP  1.240  pg/ml  < 125",
+      "lineNumber": 9,
+      "analyteKey": "ntprobnp",
+      "coding": {
+        "loincNumber": "33762-6",
+        "display": "Natriuretic peptide.B prohormone N-Terminal [Mass/volume] in Serum or Plasma",
+        "ucum": "pg/mL"
+      },
+      "region": {
+        "page": 1,
+        "x": 0.0706,
+        "y": 0.5525,
+        "width": 0.8466,
+        "height": 0.0292
+      }
+    },
+    {
+      "label": "Ferritin",
+      "value": 10,
+      "unitRaw": "ug/l",
+      "comparator": "<",
+      "referenceLow": 30,
+      "line": "Ferritin  <10  ug/l  30 - 400",
+      "lineNumber": 10,
+      "analyteKey": "ferritin",
+      "coding": {
+        "loincNumber": "2276-4",
+        "display": "Ferritin [Mass/volume] in Serum or Plasma",
+        "ucum": "ug/L"
+      }
+    }
+  ],
+  "bundle": {
+    "resourceType": "Bundle",
+    "type": "collection",
+    "timestamp": "2026-09-13T12:00:00.000Z",
+    "entry": [
+      {
+        "fullUrl": "urn:uuid:Patient-example-patient",
+        "resource": {
+          "resourceType": "Patient",
+          "id": "example-patient"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:DocumentReference-source-document",
+        "resource": {
+          "resourceType": "DocumentReference",
+          "id": "source-document",
+          "status": "current",
+          "subject": {
+            "reference": "Patient/example-patient"
+          },
+          "date": "2026-09-13T12:00:00.000Z",
+          "description": "laborbefund-2026-09-04.pdf",
+          "content": [
+            {
+              "attachment": {
+                "title": "laborbefund-2026-09-04.pdf",
+                "creation": "2026-09-04"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:DiagnosticReport-report-1",
+        "resource": {
+          "resourceType": "DiagnosticReport",
+          "id": "report-1",
+          "status": "preliminary",
+          "category": [
+            {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/v2-0074",
+                  "code": "LAB",
+                  "display": "Laboratory"
+                }
+              ]
+            }
+          ],
+          "code": {
+            "coding": [
+              {
+                "system": "http://loinc.org",
+                "code": "11502-2",
+                "display": "Laboratory report"
+              }
+            ],
+            "text": "Laborbefund"
+          },
+          "subject": {
+            "reference": "Patient/example-patient"
+          },
+          "effectiveDateTime": "2026-09-04",
+          "issued": "2026-09-13T12:00:00.000Z",
+          "performer": [
+            {
+              "display": "Praxis Dr. Muster"
+            }
+          ],
+          "result": [
+            {
+              "reference": "Observation/obs-1"
+            },
+            {
+              "reference": "Observation/obs-2"
+            },
+            {
+              "reference": "Observation/obs-3"
+            },
+            {
+              "reference": "Observation/obs-4"
+            }
+          ],
+          "presentedForm": [
+            {
+              "title": "laborbefund-2026-09-04.pdf"
+            }
+          ]
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:Observation-obs-1",
+        "resource": {
+          "resourceType": "Observation",
+          "id": "obs-1",
+          "status": "preliminary",
+          "extension": [
+            {
+              "url": "https://ehds.mabu.red/fhir/StructureDefinition/epa-ingest-source-kind",
+              "valueCode": "ocr-transcribed"
+            },
+            {
+              "url": "https://ehds.mabu.red/fhir/StructureDefinition/epa-ingest-source-line",
+              "valueString": "LDL-Cholesterin  141  mg/dl  < 116"
+            },
+            {
+              "url": "https://ehds.mabu.red/fhir/StructureDefinition/epa-ingest-ocr-confidence",
+              "valueDecimal": 0.94
+            },
+            {
+              "url": "https://ehds.mabu.red/fhir/StructureDefinition/epa-ingest-source-region",
+              "valueString": "1@0.0706,0.7525,0.8466,0.0292"
+            }
+          ],
+          "category": [
+            {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                  "code": "laboratory",
+                  "display": "Laboratory"
+                }
+              ]
+            }
+          ],
+          "code": {
+            "coding": [
+              {
+                "system": "http://loinc.org",
+                "code": "2089-1",
+                "display": "Cholesterol in LDL [Mass/volume] in Serum or Plasma"
+              }
+            ],
+            "text": "LDL-Cholesterin"
+          },
+          "subject": {
+            "reference": "Patient/example-patient"
+          },
+          "effectiveDateTime": "2026-09-04",
+          "valueQuantity": {
+            "value": 141,
+            "unit": "mg/dL",
+            "system": "http://unitsofmeasure.org",
+            "code": "mg/dL"
+          },
+          "referenceRange": [
+            {
+              "high": {
+                "value": 116,
+                "unit": "mg/dL",
+                "system": "http://unitsofmeasure.org",
+                "code": "mg/dL"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:Observation-obs-2",
+        "resource": {
+          "resourceType": "Observation",
+          "id": "obs-2",
+          "status": "preliminary",
+          "extension": [
+            {
+              "url": "https://ehds.mabu.red/fhir/StructureDefinition/epa-ingest-source-kind",
+              "valueCode": "ocr-transcribed"
+            },
+            {
+              "url": "https://ehds.mabu.red/fhir/StructureDefinition/epa-ingest-source-line",
+              "valueString": "HbA1c  5,4  %  4,0 - 6,0"
+            },
+            {
+              "url": "https://ehds.mabu.red/fhir/StructureDefinition/epa-ingest-ocr-confidence",
+              "valueDecimal": 0.94
+            },
+            {
+              "url": "https://ehds.mabu.red/fhir/StructureDefinition/epa-ingest-source-region",
+              "valueString": "1@0.0706,0.6525,0.8466,0.0292"
+            }
+          ],
+          "category": [
+            {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                  "code": "laboratory",
+                  "display": "Laboratory"
+                }
+              ]
+            }
+          ],
+          "code": {
+            "coding": [
+              {
+                "system": "http://loinc.org",
+                "code": "4548-4",
+                "display": "Hemoglobin A1c/Hemoglobin.total in Blood"
+              }
+            ],
+            "text": "HbA1c"
+          },
+          "subject": {
+            "reference": "Patient/example-patient"
+          },
+          "effectiveDateTime": "2026-09-04",
+          "valueQuantity": {
+            "value": 5.4,
+            "unit": "%",
+            "system": "http://unitsofmeasure.org",
+            "code": "%"
+          },
+          "referenceRange": [
+            {
+              "low": {
+                "value": 4,
+                "unit": "%",
+                "system": "http://unitsofmeasure.org",
+                "code": "%"
+              },
+              "high": {
+                "value": 6,
+                "unit": "%",
+                "system": "http://unitsofmeasure.org",
+                "code": "%"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:Observation-obs-3",
+        "resource": {
+          "resourceType": "Observation",
+          "id": "obs-3",
+          "status": "preliminary",
+          "extension": [
+            {
+              "url": "https://ehds.mabu.red/fhir/StructureDefinition/epa-ingest-source-kind",
+              "valueCode": "ocr-transcribed"
+            },
+            {
+              "url": "https://ehds.mabu.red/fhir/StructureDefinition/epa-ingest-source-line",
+              "valueString": "NT-proBNP  1.240  pg/ml  < 125"
+            },
+            {
+              "url": "https://ehds.mabu.red/fhir/StructureDefinition/epa-ingest-ocr-confidence",
+              "valueDecimal": 0.94
+            },
+            {
+              "url": "https://ehds.mabu.red/fhir/StructureDefinition/epa-ingest-source-region",
+              "valueString": "1@0.0706,0.5525,0.8466,0.0292"
+            }
+          ],
+          "category": [
+            {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                  "code": "laboratory",
+                  "display": "Laboratory"
+                }
+              ]
+            }
+          ],
+          "code": {
+            "coding": [
+              {
+                "system": "http://loinc.org",
+                "code": "33762-6",
+                "display": "Natriuretic peptide.B prohormone N-Terminal [Mass/volume] in Serum or Plasma"
+              }
+            ],
+            "text": "NT-proBNP"
+          },
+          "subject": {
+            "reference": "Patient/example-patient"
+          },
+          "effectiveDateTime": "2026-09-04",
+          "valueQuantity": {
+            "value": 1240,
+            "unit": "pg/mL",
+            "system": "http://unitsofmeasure.org",
+            "code": "pg/mL"
+          },
+          "referenceRange": [
+            {
+              "high": {
+                "value": 125,
+                "unit": "pg/mL",
+                "system": "http://unitsofmeasure.org",
+                "code": "pg/mL"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:Observation-obs-4",
+        "resource": {
+          "resourceType": "Observation",
+          "id": "obs-4",
+          "status": "preliminary",
+          "extension": [
+            {
+              "url": "https://ehds.mabu.red/fhir/StructureDefinition/epa-ingest-source-kind",
+              "valueCode": "ocr-transcribed"
+            },
+            {
+              "url": "https://ehds.mabu.red/fhir/StructureDefinition/epa-ingest-source-line",
+              "valueString": "Ferritin  <10  ug/l  30 - 400"
+            },
+            {
+              "url": "https://ehds.mabu.red/fhir/StructureDefinition/epa-ingest-ocr-confidence",
+              "valueDecimal": 0.94
+            }
+          ],
+          "category": [
+            {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                  "code": "laboratory",
+                  "display": "Laboratory"
+                }
+              ]
+            }
+          ],
+          "code": {
+            "coding": [
+              {
+                "system": "http://loinc.org",
+                "code": "2276-4",
+                "display": "Ferritin [Mass/volume] in Serum or Plasma"
+              }
+            ],
+            "text": "Ferritin"
+          },
+          "subject": {
+            "reference": "Patient/example-patient"
+          },
+          "effectiveDateTime": "2026-09-04",
+          "valueQuantity": {
+            "value": 10,
+            "comparator": "<",
+            "unit": "ug/L",
+            "system": "http://unitsofmeasure.org",
+            "code": "ug/L"
+          },
+          "referenceRange": [
+            {
+              "low": {
+                "value": 30,
+                "unit": "ug/L",
+                "system": "http://unitsofmeasure.org",
+                "code": "ug/L"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:Provenance-provenance-1",
+        "resource": {
+          "resourceType": "Provenance",
+          "id": "provenance-1",
+          "target": [
+            {
+              "reference": "DiagnosticReport/report-1"
+            },
+            {
+              "reference": "Observation/obs-1"
+            },
+            {
+              "reference": "Observation/obs-2"
+            },
+            {
+              "reference": "Observation/obs-3"
+            },
+            {
+              "reference": "Observation/obs-4"
+            }
+          ],
+          "recorded": "2026-09-13T12:00:00.000Z",
+          "activity": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/v3-DataOperation",
+                "code": "DERIVE",
+                "display": "derive"
+              }
+            ],
+            "text": "Values transcribed from a scanned document by OCR"
+          },
+          "agent": [
+            {
+              "type": {
+                "coding": [
+                  {
+                    "system": "http://terminology.hl7.org/CodeSystem/provenance-participant-type",
+                    "code": "assembler"
+                  }
+                ]
+              },
+              "who": {
+                "display": "epa-ingest (tesseract)"
+              }
+            }
+          ],
+          "entity": [
+            {
+              "role": "source",
+              "what": {
+                "reference": "DocumentReference/source-document"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

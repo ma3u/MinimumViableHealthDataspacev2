@@ -17,7 +17,8 @@
     "test:coverage": "vitest run --coverage",
     "typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.eval.json",
     "eval:score": "tsx eval/score.ts",
-    "generate:swift": "tsx src/generate-swift-analytes.ts"
+    "generate:swift": "tsx src/generate-swift-analytes.ts",
+    "golden:fhir": "tsx src/generate-fhir-golden.ts"
   },
   "dependencies": {},
   "optionalDependencies": {

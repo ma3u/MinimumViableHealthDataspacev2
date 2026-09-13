@@ -57,14 +57,24 @@ struct DocumentReconcilerTests {
     #expect(result.rows[0].line == "HbA1c  5,4  %  4,0 - 6,0")
   }
 
-  @Test("a truncated cell is extended only when the two passes agree")
-  func extendsOnContainment() {
+  @Test("a cell the table pass read is never rewritten, even by longer text")
+  func nonEmptyCellsAreNeverRewritten() {
+    // This used to be an "extend on containment" rule, on the theory that `5`
+    // should become `5,4`. Measuring it on a sheet skewed by one degree killed
+    // it: a cell's axis-aligned box overlaps its neighbour's content, so
+    // `mg/dl` picked up a stray character, became `mg/dll`, still contained the
+    // original and was longer, and the rule fired. The unit then had no UCUM
+    // mapping. Coded values fell from 8 to 6 at one degree and to 3 at two.
+    //
+    // A rule that can rewrite a correctly read cell can only lose information
+    // on a good scan. Recovering an empty cell cannot.
     let result = DocumentReconciler.reconcile(
-      cells: [cell("5", row: 0, column: 0)],
-      fragments: [fragment("5,4", row: 0, column: 0)])
+      cells: [cell("mg/dl", row: 0, column: 0)],
+      fragments: [fragment("mg/dll", row: 0, column: 0)])
 
-    #expect(result.rows[0].cells[0].text == "5,4")
-    #expect(result.rows[0].cells[0].origin == .extended)
+    #expect(result.rows[0].cells[0].text == "mg/dl")
+    #expect(result.rows[0].cells[0].origin == .document)
+    #expect(result.repairedCellCount == 0)
   }
 
   @Test("a genuine disagreement keeps the structured pass, it is not papered over")
