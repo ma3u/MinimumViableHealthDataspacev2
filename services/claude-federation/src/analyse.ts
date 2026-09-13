@@ -75,14 +75,24 @@ const FORBIDDEN_KEYS = [
 export function vet(request: AnalyseRequest): {
   values: SharedValue[];
   question: string;
+  provider: "azure" | "anthropic";
 } {
   // Issue #186: on-device by default, and a cloud provider only by an explicit
   // per-call act with the provider named at the moment of use. The named
   // provider travels with the request so this cannot be satisfied by a blanket
   // setting somewhere else.
-  if (request.consent?.provider !== "anthropic") {
+  //
+  // The name must be one this service actually runs. Accepting an unknown one
+  // and quietly substituting the default would mean the consent the user gave
+  // and the provider that answered were different things, which is the one
+  // property this check exists to guarantee.
+  const provider = request.consent?.provider;
+  if (provider !== "azure" && provider !== "anthropic") {
     throw new RefusedError(
-      "refused: the request carries no per-call consent naming anthropic as the provider",
+      "refused: the request carries no per-call consent naming a supported " +
+        `provider. Expected "azure" or "anthropic", got ${JSON.stringify(
+          provider ?? null,
+        )}`,
     );
   }
 
@@ -120,7 +130,7 @@ export function vet(request: AnalyseRequest): {
     throw new RefusedError("refused: question exceeds 2000 characters");
   }
 
-  return { values, question };
+  return { values, question, provider };
 }
 
 /**

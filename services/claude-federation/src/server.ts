@@ -29,15 +29,27 @@ import {
   userAuthConfigFromEnv,
   verifyUser,
 } from "./verify-user.js";
+import { RefusedError, vet, type AnalyseRequest } from "./analyse.js";
 import {
-  RefusedError,
-  SYSTEM_PROMPT,
-  renderValues,
-  vet,
-  type AnalyseRequest,
-} from "./analyse.js";
+  AnthropicProvider,
+  AzureProvider,
+  type Provider,
+  type ProviderName,
+} from "./providers.js";
+import {
+  DEFAULT_DAILY_LIMIT,
+  MemoryQuotaStore,
+  type QuotaStore,
+} from "./quota.js";
 
-const MODEL = process.env.ANTHROPIC_MODEL ?? "claude-opus-5";
+const ANTHROPIC_MODEL = process.env.ANTHROPIC_MODEL ?? "claude-opus-5";
+// The deployment must be DataZoneStandard. GlobalStandard gives no EU-only
+// guarantee and would undo the only reason Azure is the default (ADR-033, #187).
+const AZURE_DEPLOYMENT = process.env.AZURE_OPENAI_DEPLOYMENT ?? "gpt-5-mini-eu";
+const AZURE_ENDPOINT = process.env.AZURE_OPENAI_ENDPOINT ?? "";
+const DAILY_LIMIT = Number(
+  process.env.DAILY_ANALYSIS_LIMIT ?? DEFAULT_DAILY_LIMIT,
+);
 const MAX_BODY_BYTES = 256 * 1024;
 
 /**
@@ -103,6 +115,8 @@ function send(
 export function createApp(
   credentials: FederatedCredentials | undefined,
   federationMissing: string[] = [],
+  providers: Partial<Record<ProviderName, Provider>> = {},
+  quotaStore: QuotaStore = new MemoryQuotaStore(),
 ) {
   // Resolved lazily rather than at construction. The two halves of this system
   // are configured at different times: federation can be proven working before
@@ -193,19 +207,8 @@ export function createApp(
 
       const { subject } = await verifyUser(idToken, userAuth);
 
-      // Checked after authentication on purpose. Telling an anonymous caller
-      // which environment variables this deployment is missing is a small gift
-      // to anyone mapping it, and no help to a legitimate user who cannot fix
-      // it either. A caller who has proved who they are gets the real reason.
-      if (!credentials) {
-        send(response, 503, {
-          error: "federation is not configured on this deployment",
-          missing: federationMissing,
-        });
-        return;
-      }
       const parsed = JSON.parse(await readBody(request)) as AnalyseRequest;
-      const { values, question } = vet(parsed);
+      const { values, question, provider } = vet(parsed);
 
       // Logged without a single measurement in it. The count and the codes are
       // enough to debug a bad request; the numbers are the thing we are here to
@@ -220,50 +223,65 @@ export function createApp(
         }),
       );
 
-      const token = await credentials.get();
-      const upstream = await fetch("https://api.anthropic.com/v1/messages", {
-        method: "POST",
-        headers: {
-          authorization: `Bearer ${token}`,
-          "anthropic-version": "2023-06-01",
-          "content-type": "application/json",
-        },
-        body: JSON.stringify({
-          model: MODEL,
-          max_tokens: 1500,
-          system: SYSTEM_PROMPT,
-          messages: [
-            {
-              role: "user",
-              content: [
-                renderValues(values),
-                "",
-                question || "Please explain these values.",
-              ].join("\n"),
-            },
-          ],
-        }),
-      });
-
-      if (!upstream.ok) {
-        const detail = await upstream.text().catch(() => "");
-        send(response, 502, {
-          error: "upstream call failed",
-          status: upstream.status,
-          detail: detail.slice(0, 300),
+      // The quota is consumed before the provider is called, not after. A
+      // request that fails upstream has still cost the operator nothing, but
+      // charging only on success would let a client retry a deliberately bad
+      // request without limit.
+      const quota = await quotaStore.consume(subject, DAILY_LIMIT);
+      if (!quota.allowed) {
+        send(response, 429, {
+          error: "daily limit reached",
+          used: quota.used,
+          limit: quota.limit,
+          resetsAt: quota.resetsAt,
+          hint:
+            "This limit applies to analysis paid for by the app provider. " +
+            "Configuring your own provider in the app removes it, because " +
+            "nothing here is being spent.",
         });
         return;
       }
 
-      const message = (await upstream.json()) as {
-        content?: { type: string; text?: string }[];
-      };
-      const text = (message.content ?? [])
-        .filter((block) => block.type === "text")
-        .map((block) => block.text ?? "")
-        .join("\n");
+      // Per provider, never blanket. Anthropic needs workload federation;
+      // Azure does not, and gating the default on the opt-in one made a
+      // fully working EU path refuse every request because an unrelated
+      // credential was missing.
+      const selected = providers[provider];
+      if (!selected) {
+        send(response, 503, {
+          error: `provider "${provider}" is not configured on this deployment`,
+          available: Object.keys(providers),
+          ...(provider === "anthropic" && federationMissing.length > 0
+            ? { federationMissing }
+            : {}),
+        });
+        return;
+      }
 
-      send(response, 200, { text, model: MODEL, provider: "anthropic" });
+      let reply;
+      try {
+        reply = await selected.analyse(values, question);
+      } catch (error) {
+        send(response, 502, {
+          error: "provider call failed",
+          provider: selected.name,
+          detail:
+            error instanceof Error ? error.message.slice(0, 300) : "unknown",
+        });
+        return;
+      }
+
+      send(response, 200, {
+        text: reply.text,
+        model: reply.model,
+        provider: reply.provider,
+        euResident: selected.euResident,
+        quota: {
+          used: quota.used,
+          limit: quota.limit,
+          resetsAt: quota.resetsAt,
+        },
+      });
     } catch (error) {
       if (error instanceof UnauthorizedError) {
         send(response, 401, { error: error.message });
@@ -297,11 +315,33 @@ export function createApp(
   });
 }
 
+/** Azure OpenAI is reached with the same managed identity, different audience. */
+async function azureToken(): Promise<string> {
+  const entra = entraConfigFromEnv({
+    ...process.env,
+    ANTHROPIC_WIF_AUDIENCE: "https://cognitiveservices.azure.com",
+  });
+  return fetchIdentityToken(entra);
+}
+
 if (
   process.argv[1] &&
   import.meta.url.endsWith(process.argv[1].split("/").pop()!)
 ) {
   const { config, missing } = federationConfigFromEnv();
+  const providers: Partial<Record<ProviderName, Provider>> = {};
+
+  // Azure is the default and the only provider-paid option that keeps special
+  // category data inside the EU data zone. It is configured whenever an
+  // endpoint exists, independently of whether Anthropic federation is set up.
+  if (AZURE_ENDPOINT) {
+    providers.azure = new AzureProvider(
+      AZURE_DEPLOYMENT,
+      AZURE_ENDPOINT,
+      azureToken,
+    );
+  }
+
   let credentials: FederatedCredentials | undefined;
   if (config) {
     const entra = entraConfigFromEnv();
@@ -309,15 +349,27 @@ if (
       () => fetchIdentityToken(entra),
       config,
     );
+    const federated = credentials;
+    providers.anthropic = new AnthropicProvider(ANTHROPIC_MODEL, () =>
+      federated.get(),
+    );
   }
 
+  // MemoryQuotaStore is correct only at one replica and loses the count on
+  // restart, so which store is in use is stated at startup rather than left to
+  // be discovered when a limit turns out not to have held.
+  const quotaStore = new MemoryQuotaStore();
+
   const port = Number(process.env.PORT ?? 8080);
-  createApp(credentials, missing).listen(port, () => {
+  createApp(credentials, missing, providers, quotaStore).listen(port, () => {
     console.log(
       JSON.stringify({
         event: "listening",
         port,
-        model: MODEL,
+        defaultProvider: providers.azure ? "azure" : "none",
+        providers: Object.keys(providers),
+        dailyLimit: DAILY_LIMIT,
+        quotaStore: "memory (single replica only)",
         federationConfigured: credentials !== undefined,
         ...(missing.length > 0 ? { federationMissing: missing } : {}),
       }),
