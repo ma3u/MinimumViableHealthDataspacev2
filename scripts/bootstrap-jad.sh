@@ -195,6 +195,7 @@ start_stack() {
   log "=== Phase 5: Starting CFM services ==="
   docker compose $COMPOSE_FILES up -d tenant-manager provision-manager
   docker compose $COMPOSE_FILES up -d cfm-agents cfm-edcv-agent cfm-registration-agent cfm-onboarding-agent
+  assert_cfm_agents_running
   ok "CFM services started"
 
   log "=== Phase 6: Starting Neo4j (from base compose) ==="
@@ -204,6 +205,123 @@ start_stack() {
   log "=== Phase 6b: Building and starting Live UI (port 3003) ==="
   docker compose $COMPOSE_FILES up -d --build graph-explorer
   ok "Live UI started on http://localhost:3003"
+}
+
+# ---------------------------------------------------------------------------
+# Assert the CFM provisioning agents are actually running
+# ---------------------------------------------------------------------------
+# These agents drive participant provisioning. When they crash-loop, every VPA
+# stays `pending` and the only symptom downstream is a 180s wait that times out
+# 94 poll lines later (issue #181). Check them where the failure happens.
+# ---------------------------------------------------------------------------
+assert_cfm_agents_running() {
+  local agents=(
+    health-dataspace-cfm-keycloak-agent
+    health-dataspace-cfm-edcv-agent
+    health-dataspace-cfm-registration-agent
+    health-dataspace-cfm-onboarding-agent
+  )
+  local settle=15
+  log "Waiting ${settle}s for CFM agents to settle, then checking they stayed up..."
+  sleep "$settle"
+
+  local failed=0 agent state
+  for agent in "${agents[@]}"; do
+    state=$(docker inspect -f '{{.State.Status}}' "$agent" 2>/dev/null || true)
+    [ -n "$state" ] || state="missing (no such container)"
+    if [ "$state" != "running" ]; then
+      error "CFM agent $agent is '$state', not 'running'"
+      docker logs "$agent" --tail 15 2>&1 | sed 's/^/    /' >&2
+      failed=1
+      continue
+    fi
+    # A restarting container can report "running" between restarts, so also
+    # reject one that has panicked since it last started.
+    if docker logs "$agent" --tail 40 2>&1 | grep -q "^panic:"; then
+      error "CFM agent $agent panicked after starting:"
+      docker logs "$agent" --tail 40 2>&1 | grep -A3 "^panic:" | sed 's/^/    /' >&2
+      failed=1
+    fi
+  done
+
+  if [ "$failed" -ne 0 ]; then
+    error ""
+    error "Participant provisioning cannot work while any CFM agent is down."
+    error "Aborting here rather than timing out later on VPAs that will never"
+    error "leave 'pending'. See issue #181 and docs/gotchas.md."
+    exit 1
+  fi
+  ok "All four CFM agents are running"
+}
+
+# ---------------------------------------------------------------------------
+# Assert participants actually finished provisioning
+# ---------------------------------------------------------------------------
+# The single property that matters after seeding: at least one participant has
+# all of its VPAs active. It is the one check that catches every way this chain
+# breaks, whether the agents are down, the control plane rejects the call, the
+# JetStream volume is unusable, or a store is missing a column (issue #181).
+# ---------------------------------------------------------------------------
+assert_participants_active() {
+  local tm="http://localhost:11006"
+  log "Verifying at least one participant reached ACTIVE ..."
+
+  local report
+  report=$(python3 - "$tm" <<'PYEOF' 2>/dev/null || true
+import json, sys, urllib.request
+
+base = sys.argv[1].rstrip("/") + "/api/v1alpha1/tenants"
+try:
+    tenants = json.load(urllib.request.urlopen(base, timeout=10))
+except Exception as exc:
+    print(f"UNREACHABLE:{exc}")
+    raise SystemExit(0)
+
+active = stuck = 0
+detail = []
+for t in tenants:
+    name = t.get("properties", {}).get("displayName", t.get("id"))
+    try:
+        profiles = json.load(urllib.request.urlopen(f"{base}/{t['id']}/participant-profiles", timeout=10))
+    except Exception:
+        continue
+    for prof in profiles:
+        states = [v.get("state") for v in prof.get("vpas", [])]
+        if states and set(states) == {"active"}:
+            active += 1
+        elif states:
+            stuck += 1
+            detail.append(f"{name}: {', '.join(sorted(set(states)))}")
+
+print(f"RESULT:{active}:{stuck}:" + " | ".join(detail[:6]))
+PYEOF
+)
+
+  case "$report" in
+    UNREACHABLE:*)
+      error "TenantManager unreachable at $tm (${report#UNREACHABLE:})"
+      error "Cannot tell whether provisioning worked, so not claiming it did."
+      exit 1
+      ;;
+    RESULT:*)
+      local rest="${report#RESULT:}"
+      local active="${rest%%:*}"; rest="${rest#*:}"
+      local stuck="${rest%%:*}";  local detail="${rest#*:}"
+      if [ "${active:-0}" -gt 0 ]; then
+        ok "Participant provisioning verified: $active fully active, $stuck not"
+        [ "${stuck:-0}" -gt 0 ] && warn "Not active: $detail"
+        return 0
+      fi
+      error "No participant has all VPAs active (${stuck:-0} not active)"
+      [ -n "$detail" ] && error "  $detail"
+      error "Participant provisioning did not complete. See issue #181."
+      exit 1
+      ;;
+    *)
+      error "Could not read participant state from $tm"
+      exit 1
+      ;;
+  esac
 }
 
 # ---------------------------------------------------------------------------
@@ -274,13 +392,21 @@ seed_dataspace() {
 
   log "=== Phase 9: Seeding dataspace (tenants, credentials, policies, assets, negotiations) ==="
 
-  if [ -f "$PROJECT_DIR/jad/seed-all.sh" ]; then
-    bash "$PROJECT_DIR/jad/seed-all.sh" && \
-      ok "Dataspace seed pipeline complete" || \
-      warn "Dataspace seed pipeline had warnings — check output above"
-  else
-    warn "jad/seed-all.sh not found — skipping dataspace seeding"
+  if [ ! -f "$PROJECT_DIR/jad/seed-all.sh" ]; then
+    error "jad/seed-all.sh not found, cannot seed the dataspace"
+    exit 1
   fi
+
+  # seed-all.sh exits non-zero when a phase fails, and phases are strictly
+  # ordered, so a failure here means the stack is not usable. Reporting it as
+  # a warning and printing "ready" is what issue #181 was about.
+  if ! bash "$PROJECT_DIR/jad/seed-all.sh"; then
+    error "Dataspace seed pipeline FAILED, see the step list above"
+    exit 1
+  fi
+  ok "Dataspace seed pipeline complete"
+
+  assert_participants_active
 }
 
 # ---------------------------------------------------------------------------

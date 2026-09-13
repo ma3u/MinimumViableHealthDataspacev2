@@ -24,5 +24,9 @@ keycloak.tokenUrl: http://keycloak:8080/realms/edcv/protocol/openid-connect/toke
 identityhub.url: http://identityhub:7081/api/identity
 identityhub.sts.url: http://identityhub:7084/api/sts/token
 identityhub.cs.url: http://identityhub:7082/api/credentials/v1/participants/%s
-controlplane.url: http://controlplane:8081/api/mgmt
+# Routed through cfm-cp-shim, which rewrites this build's hardcoded v5alpha
+# path segment to the v5beta the EDC 0.18 control plane serves (issue #181).
+# Point back at http://controlplane:8081/api/mgmt and drop the shim service
+# once CFM is rebuilt against EDC 0.18.
+controlplane.url: http://cfm-cp-shim:8081/api/mgmt
 controlplane.protocol.url: http://controlplane:8082/api/dsp/%s/2025-1

@@ -679,12 +679,43 @@ services:
     restart: unless-stopped
 
   # ---------------------------------------------------------------------------
+  # CFM control plane shim, Management API v5alpha -> v5beta (issue #181)
+  # ---------------------------------------------------------------------------
+  # The pinned 2026-03-09 CFM agents have `v5alpha` compiled in and EDC 0.18
+  # serves `v5beta`. Config in jad/cfm-cp-shim.conf. Remove together with the
+  # `controlplane.url` override in jad/edcv-agent-config.yaml once CFM is
+  # rebuilt against EDC 0.18.
+  # ---------------------------------------------------------------------------
+  cfm-cp-shim:
+    image: nginx:1.29-alpine
+    container_name: health-dataspace-cfm-cp-shim
+    volumes:
+      - ./jad/cfm-cp-shim.conf:/etc/nginx/conf.d/default.conf:ro
+    networks:
+      - edcv
+    depends_on:
+      controlplane:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "wget -q --spider http://127.0.0.1:8081/api/mgmt/check/readiness 2>&1 | grep -qv 'connection refused' || true",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # ---------------------------------------------------------------------------
   # CFM Agents — Background provisioning agents (Keycloak, EDC-V, Registration, Onboarding)
   # ---------------------------------------------------------------------------
   cfm-agents:
-    # GHCR :latest pinned by digest (built 2026-04-11, EDC 0.16 era — ADR-029);
-    # Phase B of issue #97 replaces this with a versioned rebuild tag.
-    image: ghcr.io/ma3u/health-dataspace/cfm-kcagent:latest@sha256:c50cca3ffdf3c8a7657be9f51bdf79a3a09f1ba35458a17fc343c979f280dd54
+    # Pinned to the WORKING 2026-03-09 agent build (ADR-029, issue #181). GHCR
+    # :latest was overwritten 2026-04-11 by a build that requires a Fulcrum job
+    # coordinator (cfm-agent.tmanager_url / .pmanager_url), which this stack does
+    # not run, so every agent panicked at launch and VPAs never left `pending`.
+    image: ghcr.io/ma3u/health-dataspace/cfm-kcagent:latest@sha256:f9b96f905c9f8bbdc38177c48d8a2eb5b13f8ae37471cf5db28f055d4beafac6
     container_name: health-dataspace-cfm-keycloak-agent
     volumes:
       - ./jad/keycloak-agent-config.yaml:/etc/appname/kcagent.env:ro
@@ -698,9 +729,11 @@ services:
     restart: unless-stopped
 
   cfm-edcv-agent:
-    # GHCR :latest pinned by digest (built 2026-04-11, EDC 0.16 era — ADR-029);
-    # Phase B of issue #97 replaces this with a versioned rebuild tag.
-    image: ghcr.io/ma3u/health-dataspace/cfm-edcvagent:latest@sha256:c50cca3ffdf3c8a7657be9f51bdf79a3a09f1ba35458a17fc343c979f280dd54
+    # Pinned to the WORKING 2026-03-09 agent build (ADR-029, issue #181). GHCR
+    # :latest was overwritten 2026-04-11 by a build that requires a Fulcrum job
+    # coordinator (cfm-agent.tmanager_url / .pmanager_url), which this stack does
+    # not run, so every agent panicked at launch and VPAs never left `pending`.
+    image: ghcr.io/ma3u/health-dataspace/cfm-edcvagent:latest@sha256:78fbf70a14e1cc2f1f89700cdcd95cd3cef68dd647dd032a264fba34cbe34d39
     container_name: health-dataspace-cfm-edcv-agent
     volumes:
       - ./jad/edcv-agent-config.yaml:/etc/appname/edcvagent.env:ro
@@ -714,9 +747,11 @@ services:
     restart: unless-stopped
 
   cfm-registration-agent:
-    # GHCR :latest pinned by digest (built 2026-04-11, EDC 0.16 era — ADR-029);
-    # Phase B of issue #97 replaces this with a versioned rebuild tag.
-    image: ghcr.io/ma3u/health-dataspace/cfm-regagent:latest@sha256:c50cca3ffdf3c8a7657be9f51bdf79a3a09f1ba35458a17fc343c979f280dd54
+    # Pinned to the WORKING 2026-03-09 agent build (ADR-029, issue #181). GHCR
+    # :latest was overwritten 2026-04-11 by a build that requires a Fulcrum job
+    # coordinator (cfm-agent.tmanager_url / .pmanager_url), which this stack does
+    # not run, so every agent panicked at launch and VPAs never left `pending`.
+    image: ghcr.io/ma3u/health-dataspace/cfm-regagent:latest@sha256:d0925810736087f10d74cd31f7d95a552518a99f8868b0f9303ce0c059605be7
     container_name: health-dataspace-cfm-registration-agent
     volumes:
       - ./jad/registration-agent-config.yaml:/etc/appname/regagent.env:ro
@@ -732,9 +767,11 @@ services:
     restart: unless-stopped
 
   cfm-onboarding-agent:
-    # GHCR :latest pinned by digest (built 2026-04-11, EDC 0.16 era — ADR-029);
-    # Phase B of issue #97 replaces this with a versioned rebuild tag.
-    image: ghcr.io/ma3u/health-dataspace/cfm-obagent:latest@sha256:c50cca3ffdf3c8a7657be9f51bdf79a3a09f1ba35458a17fc343c979f280dd54
+    # Pinned to the WORKING 2026-03-09 agent build (ADR-029, issue #181). GHCR
+    # :latest was overwritten 2026-04-11 by a build that requires a Fulcrum job
+    # coordinator (cfm-agent.tmanager_url / .pmanager_url), which this stack does
+    # not run, so every agent panicked at launch and VPAs never left `pending`.
+    image: ghcr.io/ma3u/health-dataspace/cfm-obagent:latest@sha256:ffd7e5e1544c50e7a45f88b620656f31a0f118b2f3f305e55720d2762bcce3f3
     container_name: health-dataspace-cfm-onboarding-agent
     volumes:
       - ./jad/onboarding-agent-config.yaml:/etc/appname/obagent.env:ro

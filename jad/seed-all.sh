@@ -68,6 +68,13 @@ should_run() {
   fi
 }
 
+# Phases are strictly ordered (CLAUDE.md gotcha #2): phase 4 needs phase 3, and
+# so on. A failed phase therefore invalidates every phase after it, so this
+# aborts instead of downgrading the failure to a warning and carrying on.
+# Set SEED_CONTINUE_ON_ERROR=true to push past a failure while debugging; the
+# run still exits non-zero at the end, so it can never report success (ADR-031).
+FAILED_STEPS=()
+
 run_step() {
   local step="$1"
   local name="$2"
@@ -83,15 +90,56 @@ run_step() {
   log "════════════════════════════════════════════════════"
 
   if [ ! -f "$SCRIPT_DIR/$script" ]; then
-    error "Script not found: $SCRIPT_DIR/$script"
-    return 1
+    error "Step $step FAILED: script not found: $SCRIPT_DIR/$script"
+    FAILED_STEPS+=("$step ($name): script not found")
+    [ "${SEED_CONTINUE_ON_ERROR:-false}" = "true" ] && return 0
+    finish
   fi
 
-  if bash "$SCRIPT_DIR/$script"; then
+  local rc=0
+  bash "$SCRIPT_DIR/$script" || rc=$?
+
+  if [ "$rc" -eq 0 ]; then
     ok "Step $step complete: $name"
-  else
-    warn "Step $step had warnings: $name (continuing)"
+    return 0
   fi
+
+  error "Step $step FAILED: $name (exit $rc)"
+  FAILED_STEPS+=("$step ($name): exit $rc")
+
+  if [ "${SEED_CONTINUE_ON_ERROR:-false}" = "true" ]; then
+    warn "SEED_CONTINUE_ON_ERROR=true, continuing into steps that depend on this one"
+    return 0
+  fi
+
+  error "Steps are strictly ordered, so everything after step $step would run on"
+  error "incomplete state. Aborting. Fix the failure, then resume with:"
+  error "  $0 --from $step"
+  finish
+}
+
+# Prints the verdict and exits with a status that matches it.
+finish() {
+  echo ""
+  if [ ${#FAILED_STEPS[@]} -eq 0 ]; then
+    echo "╔══════════════════════════════════════════════════════════════╗"
+    echo "║   Seed Pipeline Complete                                   ║"
+    echo "╚══════════════════════════════════════════════════════════════╝"
+    ok "All seed steps completed successfully."
+    echo ""
+    exit 0
+  fi
+
+  echo "╔══════════════════════════════════════════════════════════════╗"
+  echo "║   Seed Pipeline FAILED                                     ║"
+  echo "╚══════════════════════════════════════════════════════════════╝"
+  error "${#FAILED_STEPS[@]} step(s) failed:"
+  local f
+  for f in "${FAILED_STEPS[@]}"; do
+    error "  - $f"
+  done
+  echo ""
+  exit 1
 }
 
 echo ""
@@ -107,9 +155,4 @@ run_step 5 "Contract Negotiations & Data Planes"       "seed-contract-negotiatio
 run_step 6 "Federated Catalog (HealthDCAT-AP)"         "seed-federated-catalog.sh"
 run_step 7 "Data Transfer Verification"                "seed-data-transfer.sh"
 
-echo ""
-echo "╔══════════════════════════════════════════════════════════════╗"
-echo "║   Seed Pipeline Complete                                   ║"
-echo "╚══════════════════════════════════════════════════════════════╝"
-ok "All seed steps finished. Check output above for any warnings."
-echo ""
+finish
