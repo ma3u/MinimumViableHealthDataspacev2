@@ -146,3 +146,26 @@ describe("run", () => {
     expect(report?.effectiveDateTime).toMatch(/^\d{4}-\d{2}-\d{2}$/);
   });
 });
+
+describe("parseArgs — Apple Health path", () => {
+  it("takes --health-export with no positional file", () => {
+    expect(parseArgs(["--health-export", "export.xml"])).toMatchObject({
+      healthExport: "export.xml",
+      input: "",
+    });
+  });
+
+  it("accepts --trends-out alongside it", () => {
+    expect(
+      parseArgs(["--health-export", "e.xml", "--trends-out", "t.txt"]),
+    ).toMatchObject({
+      trendsOut: "t.txt",
+    });
+  });
+
+  it("rejects a positional file with --health-export, rather than ignoring it", () => {
+    expect(() => parseArgs(["befund.pdf", "--health-export", "e.xml"])).toThrow(
+      /takes no positional input/,
+    );
+  });
+});

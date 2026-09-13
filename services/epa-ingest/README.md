@@ -26,6 +26,25 @@ unparsed   1 line(s) looked like measurements but did not parse:
 written    bundle.json
 ```
 
+## Apple Health trends
+
+```bash
+npx tsx src/index.ts --health-export ~/export.xml --trends-out trends.txt
+```
+
+The Health app's `export.xml` is routinely **hundreds of megabytes** — one `<Record>` per
+heart-rate reading — against the ePA's **25 MB** ceiling, and no GP reads 400,000 XML rows. So
+the samples are never loaded and never emitted: the file is streamed, only running aggregates
+per metric per month are kept, and the output is a summary measured in kilobytes.
+
+Measured on a synthetic export: **175 MB and 1,061,826 records in → 1,035 bytes out, in 1.5 s.**
+
+Everything it produces is `self-tracked`, and the summary says so on its first line. Resting
+heart rate, HRV, VO2 max, cuff blood pressure, weight, steps and walking steadiness are
+summarised; every other HealthKit type present is counted and reported rather than silently
+dropped. A sample in an unexpected unit is skipped and counted — averaging 78.4 kg with
+172.8 lb would produce a number that is not a weight.
+
 ## Why provenance is the whole point
 
 The ePA marks every document, **tamper-proofly**, as uploaded by a practice, by the insurer, or
