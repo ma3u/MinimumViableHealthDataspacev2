@@ -1,0 +1,35 @@
+Laborbefund
+
+Patient:            M. Buchhorn
+Eingang:            14.08.2026
+Auftrag:            Kardiovaskulaeres Risikoprofil
+
+Analyt                     Wert     Einheit        Referenzbereich
+
+Cholesterin gesamt          212     mg/dl          < 200
+LDL-Cholesterin             141     mg/dl          < 116
+HDL-Cholesterin              48     mg/dl          > 40
+Triglyceride                178     mg/dl          < 150
+Lp(a)                      87,3     mg/dl          < 30
+Apolipoprotein B            104     mg/dl          < 100
+hs-CRP                      2,4     mg/l           < 3,0
+HbA1c                       5,7     %              4,8 - 5,9
+Glucose                      94     mg/dl          74 - 99
+Kreatinin                  0,92     mg/dl          0,70 - 1,20
+eGFR                         94     ml/min/1,73m2  > 90
+Harnsaeure                  6,1     mg/dl          3,4 - 7,0
+GPT                          31     U/l            < 50
+Gamma-GT                     44     U/l            < 60
+TSH                        1,82     mU/l           0,27 - 4,20
+Ferritin                    <10     ug/l           30 - 400
+Vitamin B12                 412     pg/ml          197 - 771
+NT-proBNP                 1.240     pg/ml          < 125
+Natrium                     141     mmol/l         135 - 145
+Haemoglobin                14,8     g/dl           13,5 - 17,2
+Thrombozyten                248     /nl            150 - 400
+
+Troponin T hs              n.b.    ng/l           < 14
+Omega-3-Index               4,1     %              > 8
+LDL/HDL-Quotient            2,9
+
+Befund erstellt am 16.08.2026
