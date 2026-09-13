@@ -3,6 +3,62 @@
 Non-obvious pitfalls across the stack. Ordered newest first; add a new
 entry at the top when you hit something that cost you more than 30 minutes.
 
+## 2026-09-13: CFM participant provisioning had three independent breaks
+
+Symptom: every VPA stays `pending`, `bootstrap-jad.sh` still prints "ready".
+Issue #181. Three unrelated causes had to be fixed together, and each one alone
+was enough to stop provisioning.
+
+**1. GHCR `:latest` for the four CFM agents was overwritten on 2026-04-11** with
+a rewritten agent that requires a Fulcrum job coordinator this stack does not
+run, so it panics at launch:
+
+```
+panic: error launching Fulcrum CFM Agent: missing parameters:
+  cfm-agent.tmanager_url is empty, cfm-agent.pmanager_url is empty
+```
+
+Setting those two values is not the fix. The 2026-04-11 binary contains no EDC
+management API calls at all (`strings` finds `FulcrumClient` and
+`/api/v1/jobs/pending`, and nothing about participant contexts), so it would
+start and then poll a coordinator forever while provisioning nothing. The fix is
+the same one already applied to `cfm-tmanager` and `cfm-pmanager`: pin the
+working 2026-03-09 digests, which are still resolvable in GHCR even though the
+tag was overwritten. Same class as ADR-029.
+
+**2. EDC 0.18 renamed the Management API segment `v5alpha` to `v5beta`**
+(issue #97 Phase B) while the 2026-03-09 CFM agents have `v5alpha` compiled into
+`controlplane.HttpManagementAPIClient` and expose only `controlplane.url`. Every
+deploy then failed with `cannot create participant context in control plane:
+received status code 404`. Worked around by `cfm-cp-shim`, an nginx service that
+rewrites only that path segment (`jad/cfm-cp-shim.conf`). It deliberately passes
+every other path through unchanged so it cannot hide a route the control plane
+genuinely does not serve.
+
+**3. EDC creates its stores with `CREATE TABLE IF NOT EXISTS` and ships no
+migrations.** A table created under EDC 0.16 never gains a column added in 0.18,
+so on any Postgres volume older than the upgrade, credential issuance dies with:
+
+```
+EdcPersistenceException: The column name additional_context was not found in
+this ResultSet
+```
+
+Repaired idempotently in `jad/seed-issuer-identity.sql`. Expect this again on
+the next EDC upgrade: when a store starts failing on a column name, diff the
+live table against the `*-schema.sql` inside the service jar.
+
+Bonus, and the reason this went unnoticed for five months: `seed-all.sh` turned
+every failed phase into "had warnings (continuing)" and `bootstrap-jad.sh`
+printed "JAD stack is ready" regardless. Both now exit non-zero, and the
+bootstrap asserts that the agents are running and that a participant actually
+reached ACTIVE (ADR-031).
+
+Unrelated but found in the same session: a persistent `nats_data` volume can
+reach a state where every JetStream publish fails with `nats: invalid jetstream
+publish response`. Recreating the volume fixes it; the NATS server version is
+not the cause (2.14.3 works on a fresh volume).
+
 ## 2026-04 — Neo4j 5 vector indexes are single-label only
 
 `CREATE VECTOR INDEX foo FOR (n:A|B|C) ON (n.embedding)` **does not
@@ -157,6 +213,7 @@ See ADR-018 / memory `project_aca_tcp_ingress_shortname.md`.
 `mvhd-nats` was originally deployed with `--ingress internal --target-port 4222`
 only. ACA defaults to transport=Auto (HTTP via Envoy), which silently breaks the
 NATS binary framing. Symptoms:
+
 - `mvhd-catalog-crawler` Schedule Job runs complete "Succeeded" because
   `run_once` mode swallows publish errors.
 - `mvhd-catalog-enricher` crashloops with

@@ -18,6 +18,22 @@
 -- This script is IDEMPOTENT — safe to run multiple times.
 -- =============================================================================
 
+-- 0. Schema repair: columns added by later EDC versions (issue #181)
+-- ---------------------------------------------------------------------------
+-- EDC creates its stores with `CREATE TABLE IF NOT EXISTS` and ships no
+-- migrations, so a table created by an earlier EDC never gains columns added
+-- by a later one. On a Postgres volume that predates the EDC 0.18 upgrade
+-- (issue #97 Phase B) credential issuance fails at runtime with:
+--
+--   EdcPersistenceException: The column name additional_context was not found
+--   in this ResultSet
+--
+-- which surfaces as a CFM vpa.deploy rolling back and the participant's VPAs
+-- going to `error`. Column definition taken verbatim from the image's own
+-- credential-definition-schema.sql. No-op on a database created by 0.18.
+ALTER TABLE IF EXISTS credential_definitions
+  ADD COLUMN IF NOT EXISTS additional_context JSON NOT NULL DEFAULT '[]';
+
 -- Static EdDSA public key (matches the private key in Vault secret/ mount)
 -- Private key stored at: secret/data/did:web:issuerservice%3A10016:issuer#key-1
 

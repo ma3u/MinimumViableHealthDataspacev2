@@ -102,6 +102,7 @@ jobs:
           - neo4j:5.26.28-community
           - nats:2.14.3-alpine
           - traefik:v3.4
+          - nginx:1.29-alpine
           - hashicorp/vault:2.0
           - curlimages/curl:8.21.0
           # JAD / EDC stack — tagged by upstream git SHA, not digest-pinned, so
