@@ -20,12 +20,16 @@ on:
     paths:
       - "ui/**"
       - "services/neo4j-proxy/**"
+      - "services/epa-ingest/**"
+      - "clients/ios/**"
       - ".github/workflows/test.yml"
   pull_request:
     branches: [main]
     paths:
       - "ui/**"
       - "services/neo4j-proxy/**"
+      - "services/epa-ingest/**"
+      - "clients/ios/**"
   workflow_dispatch:
 
 env:
@@ -117,6 +121,72 @@ jobs:
           echo '```' >> $GITHUB_STEP_SUMMARY
           npx vitest run --coverage 2>&1 | grep -A 10 "^-.*-$" | head -20 >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
+
+  # -----------------------------------------------------------------------
+  # ePA Ingest Tests (Vitest)
+  # Pre-ePA workbench: lab report → FHIR R4 with provenance (issue #182, W9).
+  # Pure unit tests — the optional OCR/PDF dependencies are not exercised.
+  # -----------------------------------------------------------------------
+  epa-ingest-tests:
+    name: ePA Ingest Tests (Vitest)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./services/epa-ingest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: ./services/epa-ingest/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Type-check (src + eval harness)
+        run: npm run typecheck
+
+      # The Swift analyte table is generated from analytes.ts. A stale copy is
+      # the silent divergence the shared repository was chosen to prevent.
+      - name: Generated Swift analyte table is current
+        run: npm run generate:swift -- --check
+
+      - name: Run tests with coverage
+        run: npx vitest run --coverage --reporter=verbose
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: epa-ingest-coverage
+          path: services/epa-ingest/coverage/
+          retention-days: 30
+
+  # -----------------------------------------------------------------------
+  # iOS Client — generated analyte table parity (Swift)
+  # Proves the generated Swift BEHAVES like the TypeScript it came from: same
+  # codings, same label/unit folding, same refusals. The drift check in
+  # epa-ingest-tests proves the file is current; this proves it is correct.
+  # macOS runners are free for public repos but scarce, so this is path-filtered
+  # and never gates the web or service suites.
+  # -----------------------------------------------------------------------
+  ios-analyte-parity:
+    name: iOS Analyte Parity (Swift)
+    runs-on: macos-latest
+    defaults:
+      run:
+        working-directory: ./clients/ios
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Swift version
+        run: swift --version
+
+      - name: Run parity check
+        run: swift run AnalyteParity
 
   # -----------------------------------------------------------------------
   # Secret Scan — gitleaks (BSI C5 DEV-08)

@@ -1,0 +1,12 @@
+# Personal health data never enters this repository.
+# Put reports in the scratchpad or another directory outside the working tree;
+# these entries are a second line of defence, not the first.
+data/
+out/
+*.txt
+*.pdf
+*.png
+*.jpg
+*.jpeg
+!fixtures-synthetic/*
+.build/
