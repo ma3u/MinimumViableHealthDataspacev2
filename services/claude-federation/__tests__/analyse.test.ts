@@ -30,7 +30,25 @@ describe("vet", () => {
     expect(() => vet({ values: [value] })).toThrow(RefusedError);
     expect(() =>
       vet({ consent: { provider: "someone-else" }, values: [value] }),
-    ).toThrow(/naming anthropic/);
+    ).toThrow(/supported provider/);
+  });
+
+  it("accepts azure, the default, and anthropic, the opt-in", () => {
+    // Azure is the only provider-paid option that keeps special category data
+    // inside the EU data zone (ADR-033, issue #187).
+    expect(vet({ ...consented, consent: { provider: "azure" } }).provider).toBe(
+      "azure",
+    );
+    expect(vet(consented).provider).toBe("anthropic");
+  });
+
+  it("never substitutes the default for an unknown provider name", () => {
+    // Quietly falling back would mean the consent the user gave and the
+    // provider that answered were different things, which is the one property
+    // this check exists to guarantee.
+    expect(() =>
+      vet({ ...consented, consent: { provider: "openai" } }),
+    ).toThrow(/supported provider/);
   });
 
   it("accepts a consented request and returns only what may be sent", () => {
