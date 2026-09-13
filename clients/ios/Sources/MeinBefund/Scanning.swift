@@ -48,59 +48,49 @@ struct DocumentScanner: UIViewControllerRepresentable {
 /// On-device OCR. Nothing leaves the phone.
 enum TextRecognizer {
 
-  /// Recognises German and English text and returns it as lines.
-  ///
-  /// `.accurate` with language correction off: a lab sheet is a table of
-  /// analyte names and numbers, and a language model that "corrects" `Lp(a)`
-  /// or a decimal comma is actively harmful here.
-  static func recognise(_ image: UIImage) async throws -> String {
-    guard let cgImage = image.cgImage else { return "" }
-
-    let request = VNRecognizeTextRequest()
-    request.recognitionLevel = .accurate
-    request.usesLanguageCorrection = false
-    request.recognitionLanguages = ["de-DE", "en-US"]
-
-    let handler = VNImageRequestHandler(cgImage: cgImage, options: [:])
-    try handler.perform([request])
-
-    guard let observations = request.results else { return "" }
-
-    // Vision returns observations in reading order but without column structure.
-    // Group by vertical position so a table row stays one line, otherwise the
-    // analyte, its value and its unit arrive as three separate lines and the
-    // line grammar cannot see a measurement at all.
-    let lines = observations.compactMap { obs -> (y: CGFloat, x: CGFloat, text: String)? in
-      guard let candidate = obs.topCandidates(1).first else { return nil }
-      return (obs.boundingBox.midY, obs.boundingBox.minX, candidate.string)
-    }
-
-    let tolerance: CGFloat = 0.01
-    var rows: [(y: CGFloat, parts: [(x: CGFloat, text: String)])] = []
-    for line in lines.sorted(by: { $0.y > $1.y }) {
-      if let index = rows.firstIndex(where: { abs($0.y - line.y) < tolerance }) {
-        rows[index].parts.append((line.x, line.text))
-      } else {
-        rows.append((line.y, [(line.x, line.text)]))
-      }
-    }
-
-    return rows
-      .map { row in
-        row.parts.sorted { $0.x < $1.x }.map(\.text).joined(separator: "  ")
-      }
-      .joined(separator: "\n")
-  }
-
   /// Recognises every page and extracts, stamping OCR provenance.
   ///
-  /// A photographed report is `ocrTranscribed`, never `labIssuedDigital`:
-  /// so every value it produces is `preliminary`.
+  /// The hybrid of `VisionDocumentReader`: the table pass supplies row
+  /// boundaries and a rectangle per row, the text pass supplies characters the
+  /// table pass dropped, and `DocumentReconciler` decides between them. See
+  /// that type for the measured reason neither pass is sufficient alone.
+  ///
+  /// Three things can happen to a page, and all three are handled rather than
+  /// assumed away:
+  ///
+  /// 1. It has a table. Rows are parsed with their geometry.
+  /// 2. It has a table, and text outside it. The leftovers are parsed too: a
+  ///    fragment in no cell is where a second panel or a failed layout hides,
+  ///    and it cannot duplicate a row because it belonged to no cell.
+  /// 3. It has no table at all, for example a free-text doctor's letter. The
+  ///    page falls back to the text-only path, which is what shipped before
+  ///    this and is still the right answer for prose.
+  ///
+  /// A photographed report is `ocrTranscribed`, never `labIssuedDigital`, so
+  /// every value it produces is `preliminary`.
   static func extract(from images: [UIImage]) async throws -> ExtractionResult {
-    var text = ""
-    for image in images {
-      text += try await recognise(image) + "\n"
+    var merged = ExtractionResult.empty(source: .ocrTranscribed)
+
+    for (index, image) in images.enumerated() {
+      guard let cgImage = image.cgImage else { continue }
+      let reading = try await VisionDocumentReader.read(cgImage, page: index + 1)
+
+      if reading.rows.isEmpty {
+        merged = merged.merging(
+          LabLineParser.extract(reading.plainText, source: .ocrTranscribed))
+        continue
+      }
+
+      merged = merged.merging(
+        LabLineParser.extract(rows: reading.rows, source: .ocrTranscribed))
+
+      let leftovers = VisionDocumentReader.readingOrder(reading.orphanedFragments)
+      if !leftovers.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+        merged = merged.merging(
+          LabLineParser.extract(leftovers, source: .ocrTranscribed))
+      }
     }
-    return LabLineParser.extract(text, source: .ocrTranscribed)
+
+    return merged
   }
 }

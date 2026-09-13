@@ -116,11 +116,26 @@ private struct CodedRow: View {
           // assay-specific (ADR-033).
           Text("Ref. \(range)")
         }
+        if let region = value.raw.region {
+          Text("·")
+          // Where on the paper this came from, so the number can be checked
+          // against the source rather than trusted (#186 criterion 5).
+          Text("S. \(region.page), Z. \(rowOrdinal(region))")
+        }
       }
       .font(.caption)
       .foregroundStyle(.secondary)
     }
     .padding(.vertical, 2)
+  }
+
+  /// Turns a normalised y into a human row number counted from the top.
+  ///
+  /// Vision's origin is bottom left, so the top of the page is y = 1. Showing
+  /// the raw coordinate would be honest and useless; showing a row counted the
+  /// way a person reads is the point of the citation.
+  private func rowOrdinal(_ region: SourceRegion) -> Int {
+    max(1, Int(((1.0 - region.midY) / 0.03).rounded()) + 1)
   }
 
   private var referenceText: String? {

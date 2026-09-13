@@ -130,11 +130,35 @@ public enum LabLineParser {
   }
 
   public static func parse(_ text: String) -> ParseResult {
+    let lines = text.components(separatedBy: .newlines)
+      .enumerated()
+      .map { (line: $0.element, lineNumber: $0.offset + 1, region: SourceRegion?.none) }
+    return parse(lines: lines)
+  }
+
+  /// Parses rows a table recogniser already separated, keeping their geometry.
+  ///
+  /// The row is rendered to the same `label  value  unit  rest` shape the
+  /// text-only path produces and run through the same grammar, so the German
+  /// number rule, the comparators and the reference-range forms stay in one
+  /// tested place rather than being reimplemented per column. What the table
+  /// pass adds is trustworthy row boundaries and a rectangle per row.
+  public static func parse(rows: [DocumentReconciler.Row]) -> ParseResult {
+    parse(
+      lines: rows.enumerated().map {
+        (line: $0.element.line, lineNumber: $0.offset + 1, region: $0.element.region)
+      })
+  }
+
+  private static func parse(
+    lines: [(line: String, lineNumber: Int, region: SourceRegion?)]
+  ) -> ParseResult {
     var values: [RawLabValue] = []
     var suspicious: [String] = []
 
-    for (index, line) in text.components(separatedBy: .newlines).enumerated() {
-      let lineNumber = index + 1
+    for entry in lines {
+      let line = entry.line
+      let lineNumber = entry.lineNumber
       guard !line.trimmingCharacters(in: .whitespaces).isEmpty else { continue }
 
       let range = NSRange(line.startIndex..., in: line)
@@ -169,7 +193,8 @@ public enum LabLineParser {
           referenceLow: ref.low,
           referenceHigh: ref.high,
           line: line.trimmingCharacters(in: .whitespaces),
-          lineNumber: lineNumber
+          lineNumber: lineNumber,
+          region: entry.region
         ))
     }
 
@@ -180,7 +205,18 @@ public enum LabLineParser {
   ///
   /// Nothing is dropped: a row is coded, or reported with the reason it was not.
   public static func extract(_ text: String, source: SourceKind) -> ExtractionResult {
-    let parsed = parse(text)
+    code(parse(text), source: source)
+  }
+
+  /// Extracts from reconciled table rows, so every coded value keeps its
+  /// rectangle on the page (#186 acceptance criterion 5).
+  public static func extract(
+    rows: [DocumentReconciler.Row], source: SourceKind
+  ) -> ExtractionResult {
+    code(parse(rows: rows), source: source)
+  }
+
+  private static func code(_ parsed: ParseResult, source: SourceKind) -> ExtractionResult {
     var coded: [CodedLabValue] = []
     var unmapped: [UnmappedLabValue] = []
 

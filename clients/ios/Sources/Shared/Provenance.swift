@@ -58,10 +58,20 @@ public struct RawLabValue: Sendable, Equatable, Codable {
   public let line: String
   /// 1-based line number within the recognised text.
   public let lineNumber: Int
+  /// Where on the page the row was read from, when the extractor knew.
+  ///
+  /// Optional because the two extractors have different evidence available:
+  /// the phone scans pixels and can point at a rectangle, while
+  /// `services/epa-ingest` reads a PDF text layer and has no geometry to give.
+  /// A value without a region is not a lesser value, it is one whose source was
+  /// not an image. Decoding tolerates its absence, so reports stored before
+  /// regions existed still open.
+  public let region: SourceRegion?
 
   public init(
     label: String, value: Double, unitRaw: String, comparator: Comparator? = nil,
-    referenceLow: Double? = nil, referenceHigh: Double? = nil, line: String, lineNumber: Int
+    referenceLow: Double? = nil, referenceHigh: Double? = nil, line: String, lineNumber: Int,
+    region: SourceRegion? = nil
   ) {
     self.label = label
     self.value = value
@@ -71,6 +81,7 @@ public struct RawLabValue: Sendable, Equatable, Codable {
     self.referenceHigh = referenceHigh
     self.line = line
     self.lineNumber = lineNumber
+    self.region = region
   }
 }
 
@@ -132,4 +143,28 @@ public struct ExtractionResult: Sendable, Equatable, Codable {
 
   /// Rows that need a human before they can be trusted.
   public var needsReview: Int { unmapped.count + suspiciousLines.count }
+
+  /// Nothing extracted yet, for accumulating across pages.
+  public static func empty(source: SourceKind) -> ExtractionResult {
+    ExtractionResult(coded: [], unmapped: [], suspiciousLines: [], source: source)
+  }
+
+  /// Combines two extractions of the same provenance.
+  ///
+  /// A scan is many pages and a page can need more than one pass, so results
+  /// accumulate. Nothing is deduplicated: the same analyte legitimately appears
+  /// twice on a sheet that reprints a panel, and deciding that two identical
+  /// rows are one is the reviewer's call, not the extractor's.
+  public func merging(_ other: ExtractionResult) -> ExtractionResult {
+    precondition(
+      other.source == source,
+      "refusing to merge \(other.source.rawValue) into \(source.rawValue): provenance decides "
+        + "status, so combining trust classes would silently upgrade one of them")
+    return ExtractionResult(
+      coded: coded + other.coded,
+      unmapped: unmapped + other.unmapped,
+      suspiciousLines: suspiciousLines + other.suspiciousLines,
+      source: source
+    )
+  }
 }
