@@ -8,3 +8,8 @@ DerivedData/
 *.png
 *.jpg
 *.jpeg
+
+# The generated app icon is the one image that belongs in the repository.
+# Narrow exception, so the blanket rule above keeps protecting everything else.
+!Sources/MeinBefund/Assets.xcassets/**/*.png
+MeinBefund.xcodeproj/

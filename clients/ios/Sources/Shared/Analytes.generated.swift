@@ -12,7 +12,7 @@
 
 import Foundation
 
-public struct AnalyteCoding: Sendable, Equatable {
+public struct AnalyteCoding: Sendable, Equatable, Codable {
   /// Normalised analyte label — see `normaliseLabel`.
   public let labelKey: String
   /// UCUM unit code this coding applies to.
@@ -209,5 +209,21 @@ public enum Analytes {
     guard let ucum = normaliseUnit(unit) else { return nil }
     let key = normaliseLabel(label)
     return codings.first { $0.labelKey == key && $0.ucum == ucum }
+  }
+
+  /// True when the dictionary knows this analyte in *some* unit.
+  ///
+  /// Separates "we have never heard of this analyte" from "we know it, but not
+  /// in the unit printed" — a distinction that decides whether a row is a gap
+  /// in the dictionary or a unit the lab reported unusually.
+  public static func knowsLabel(_ label: String) -> Bool {
+    let key = normaliseLabel(label)
+    return codings.contains { $0.labelKey == key }
+  }
+
+  /// The units this analyte is defined for, for an actionable error message.
+  public static func expectedUnits(forLabel label: String) -> [String] {
+    let key = normaliseLabel(label)
+    return codings.filter { $0.labelKey == key }.map { $0.ucum }
   }
 }
