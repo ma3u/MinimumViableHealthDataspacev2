@@ -1,0 +1,157 @@
+<mxfile host="65bd71144e">
+    <diagram id="ehds-user-journey" name="EHDS Secondary Use User Journey">
+        <mxGraphModel dx="2330" dy="967" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1800" pageHeight="1100" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="lane_onboarding" value="Registration &amp; Trust (Onboarding)" style="swimlane;startSize=30;horizontal=0;html=1;fillColor=#fef3c7;strokeColor=#d97706;fontStyle=1;fontFamily=Helvetica;whiteSpace=wrap;" parent="1" vertex="1">
+                    <mxGeometry x="40" y="40" width="1720" height="130" as="geometry"/>
+                </mxCell>
+                <mxCell id="step0a" value="1a. Hospital Registers" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#d97706;fontStyle=1;" parent="lane_onboarding" vertex="1">
+                    <mxGeometry x="80" y="40" width="180" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="step0b" value="1b. Researcher Registers" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#d97706;fontStyle=1;" parent="lane_onboarding" vertex="1">
+                    <mxGeometry x="350" y="40" width="180" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="step0c" value="1c. HDAB Registers" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#d97706;fontStyle=1;" parent="lane_onboarding" vertex="1">
+                    <mxGeometry x="1110" y="40" width="180" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="lane_holder" value="Data Holder (Hospital)" style="swimlane;startSize=30;horizontal=0;html=1;fillColor=#fff7ed;strokeColor=#ea580c;fontStyle=1;fontFamily=Helvetica;whiteSpace=wrap;" parent="1" vertex="1">
+                    <mxGeometry x="40" y="200" width="1720" height="130" as="geometry"/>
+                </mxCell>
+                <mxCell id="step2" value="2. Publish Data&#xa;(DCAT Catalog)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#ea580c;fontStyle=1;" parent="lane_holder" vertex="1">
+                    <mxGeometry x="80" y="40" width="180" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="step5" value="5. Extract &amp; Upload&#xa;(FHIR, Pseudonymised)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#ea580c;fontStyle=1;" parent="lane_holder" vertex="1">
+                    <mxGeometry x="800" y="40" width="190" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="lane_user" value="Data User (Researcher)" style="swimlane;startSize=30;horizontal=0;html=1;fillColor=#eff6ff;strokeColor=#2563eb;fontStyle=1;fontFamily=Helvetica;whiteSpace=wrap;" parent="1" vertex="1">
+                    <mxGeometry x="40" y="360" width="1720" height="130" as="geometry"/>
+                </mxCell>
+                <mxCell id="step3" value="3. Discover Data&#xa;(DCAT Search)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#2563eb;fontStyle=1;" parent="lane_user" vertex="1">
+                    <mxGeometry x="350" y="40" width="180" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="step4" value="4. Negotiate Contract&#xa;(Offer → Accept → Finalize)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#2563eb;fontStyle=1;" parent="lane_user" vertex="1">
+                    <mxGeometry x="620" y="40" width="200" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="step7" value="6. Analyze in SPE&#xa;(OMOP / FHIR)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#2563eb;fontStyle=1;" parent="lane_user" vertex="1">
+                    <mxGeometry x="1180" y="40" width="190" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="step8" value="7. Share Results&#xa;(OMOP Output)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#2563eb;fontStyle=1;" parent="lane_user" vertex="1">
+                    <mxGeometry x="1480" y="40" width="180" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="lane_hdab" value="Health Data Access Body (HDAB)" style="swimlane;startSize=30;horizontal=0;html=1;fillColor=#f0fdf4;strokeColor=#16a34a;fontStyle=1;fontFamily=Helvetica;whiteSpace=wrap;" parent="1" vertex="1">
+                    <mxGeometry x="40" y="520" width="1720" height="130" as="geometry"/>
+                </mxCell>
+                <mxCell id="step4b" value="4b. Approve Data Permit" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#16a34a;fontStyle=1;" parent="lane_hdab" vertex="1">
+                    <mxGeometry x="900" y="40" width="200" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="step9" value="8. Receive Audit Report" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#16a34a;fontStyle=1;" parent="lane_hdab" vertex="1">
+                    <mxGeometry x="1480" y="40" width="180" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="lane_spe" value="Secure Processing Environment (SPE)" style="swimlane;startSize=30;horizontal=0;html=1;fillColor=#faf5ff;strokeColor=#9333ea;fontStyle=1;fontFamily=Helvetica;whiteSpace=wrap;" parent="1" vertex="1">
+                    <mxGeometry x="40" y="680" width="1720" height="130" as="geometry"/>
+                </mxCell>
+                <mxCell id="step6" value="Provision SPE &amp;&#xa;Ingest Data" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#9333ea;fontStyle=1;" parent="lane_spe" vertex="1">
+                    <mxGeometry x="1180" y="40" width="190" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="e0a" style="edgeStyle=none;html=1;strokeColor=#d97706;strokeWidth=2;endArrow=block;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" parent="1" source="step0a" target="step2" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e0a_label" value="registers" style="edgeLabel;html=1;align=center;verticalAlign=middle;fontSize=10;fontColor=#92400e;backgroundColor=#fef3c7;" parent="e0a" vertex="1" connectable="0">
+                    <mxGeometry x="-0.2" relative="1" as="geometry">
+                        <mxPoint x="80" y="-8" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="e0b" style="edgeStyle=none;html=1;strokeColor=#d97706;strokeWidth=2;endArrow=block;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" parent="1" source="step0b" target="step3" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e0b_label" value="registers" style="edgeLabel;html=1;align=center;verticalAlign=middle;fontSize=10;fontColor=#92400e;backgroundColor=#fef3c7;" parent="e0b" vertex="1" connectable="0">
+                    <mxGeometry x="-0.2" relative="1" as="geometry">
+                        <mxPoint x="100" y="-8" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="e0c" style="edgeStyle=none;html=1;strokeColor=#d97706;strokeWidth=2;endArrow=block;exitX=0.5;exitY=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" parent="1" source="step0c" target="step4b" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e0c_label" value="registers" style="edgeLabel;html=1;align=center;verticalAlign=middle;fontSize=10;fontColor=#92400e;backgroundColor=#fef3c7;" parent="e0c" vertex="1" connectable="0">
+                    <mxGeometry x="-0.2" relative="1" as="geometry">
+                        <mxPoint x="100" y="-8" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="e1" style="edgeStyle=none;html=1;strokeColor=#ea580c;strokeWidth=2;endArrow=block;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" parent="1" source="step2" target="step3" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e1_label" value="publishes DCAT" style="edgeLabel;html=1;align=center;verticalAlign=middle;fontSize=10;fontColor=#9a3412;backgroundColor=#fff7ed;" parent="e1" vertex="1" connectable="0">
+                    <mxGeometry x="-0.2" relative="1" as="geometry">
+                        <mxPoint x="100" y="-8" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="e2" style="edgeStyle=none;html=1;strokeColor=#2563eb;strokeWidth=2;endArrow=block;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" parent="1" source="step3" target="step4" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e2_label" value="requests access" style="edgeLabel;html=1;align=center;verticalAlign=middle;fontSize=10;fontColor=#1e40af;backgroundColor=#eff6ff;" parent="e2" vertex="1" connectable="0">
+                    <mxGeometry x="-0.2" relative="1" as="geometry">
+                        <mxPoint y="-10" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="e3" style="edgeStyle=none;html=1;strokeColor=#2563eb;strokeWidth=2;endArrow=block;exitX=0.5;exitY=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="step4" target="step4b" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e3_label" value="requests permit" style="edgeLabel;html=1;align=center;verticalAlign=middle;fontSize=10;fontColor=#1e40af;backgroundColor=#eff6ff;" parent="e3" vertex="1" connectable="0">
+                    <mxGeometry x="-0.2" relative="1" as="geometry">
+                        <mxPoint x="10" y="-8" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="e4" style="edgeStyle=none;html=1;strokeColor=#16a34a;strokeWidth=2;endArrow=block;exitX=0.435;exitY=0.017;entryX=0.5;entryY=1;exitDx=0;exitDy=0;exitPerimeter=0;" parent="1" source="step4b" target="step5" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e4_label" value="authorizes access" style="edgeLabel;html=1;align=center;verticalAlign=middle;fontSize=10;fontColor=#166534;backgroundColor=#f0fdf4;" parent="e4" vertex="1" connectable="0">
+                    <mxGeometry x="-0.2" relative="1" as="geometry">
+                        <mxPoint x="10" y="-8" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="e5" style="edgeStyle=none;html=1;strokeColor=#ea580c;strokeWidth=2;endArrow=block;exitX=1;exitY=0.5;entryX=0.5;entryY=0;" parent="1" source="step5" target="step6" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e5_label" value="uploads FHIR data" style="edgeLabel;html=1;align=center;verticalAlign=middle;fontSize=10;fontColor=#9a3412;backgroundColor=#fff7ed;" parent="e5" vertex="1" connectable="0">
+                    <mxGeometry x="-0.2" relative="1" as="geometry">
+                        <mxPoint x="10" y="-8" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="e6" style="edgeStyle=none;html=1;strokeColor=#9333ea;strokeWidth=2;endArrow=block;exitX=0.5;exitY=0;entryX=0.5;entryY=1;" parent="1" source="step6" target="step7" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e6_label" value="enables analysis" style="edgeLabel;html=1;align=center;verticalAlign=middle;fontSize=10;fontColor=#6b21a8;backgroundColor=#faf5ff;" parent="e6" vertex="1" connectable="0">
+                    <mxGeometry x="-0.2" relative="1" as="geometry">
+                        <mxPoint x="10" y="-8" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="e7" style="edgeStyle=none;html=1;strokeColor=#2563eb;strokeWidth=2;endArrow=block;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" parent="1" source="step7" target="step8" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e7_label" value="shares OMOP results" style="edgeLabel;html=1;align=center;verticalAlign=middle;fontSize=10;fontColor=#1e40af;backgroundColor=#eff6ff;" parent="e7" vertex="1" connectable="0">
+                    <mxGeometry x="-0.2" relative="1" as="geometry">
+                        <mxPoint y="-10" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="e8" style="edgeStyle=none;html=1;strokeColor=#16a34a;strokeWidth=2;dashed=1;endArrow=block;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" parent="1" source="step8" target="step9" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e8_label" value="reports use" style="edgeLabel;html=1;align=center;verticalAlign=middle;fontSize=10;fontColor=#166534;backgroundColor=#f0fdf4;" parent="e8" vertex="1" connectable="0">
+                    <mxGeometry x="-0.2" relative="1" as="geometry">
+                        <mxPoint x="10" y="-8" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="e9" style="edgeStyle=none;html=1;strokeColor=#16a34a;strokeWidth=1.5;dashed=1;endArrow=block;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" parent="1" source="step4b" target="step6" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e9_label" value="authorizes SPE" style="edgeLabel;html=1;align=center;verticalAlign=middle;fontSize=10;fontColor=#166534;backgroundColor=#f0fdf4;" parent="e9" vertex="1" connectable="0">
+                    <mxGeometry x="-0.2" relative="1" as="geometry">
+                        <mxPoint x="50" y="-4" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>
