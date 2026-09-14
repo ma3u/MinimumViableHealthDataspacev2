@@ -1,3 +1,4 @@
+import UIKit
 import Shared
 import SwiftUI
 
@@ -77,6 +78,18 @@ final class AppModel: ObservableObject {
   @Published var providerConfig = BringYourOwnProvider.configuration()
   @Published var showingSettings = false
   @Published var showingPrivacy = false
+  @Published var sharing: ReportExport.Artefacts?
+
+  /// Builds the PDF and FHIR bundle for one report. Entirely local: this is
+  /// the step that has to work in a GP's waiting room, where the cluster and
+  /// often the network are irrelevant.
+  func export(_ report: ReportStore.StoredReport) {
+    do {
+      sharing = try ReportExport.write(report)
+    } catch {
+      self.error = error.localizedDescription
+    }
+  }
 
   func askCloud(_ values: [CloudAnalysis.SharedValue], question: String) async {
     consenting = nil
@@ -166,8 +179,17 @@ struct ContentView: View {
             if let report = model.reports.first(where: { $0.id == id }) {
               ResultList(extraction: report.extraction, title: report.title)
                 .toolbar {
-                  if model.analysisAvailable, !report.extraction.coded.isEmpty {
+                  if !report.extraction.coded.isEmpty {
                     ToolbarItem(placement: .primaryAction) {
+                      Button {
+                        model.export(report)
+                      } label: {
+                        Label("Share for my doctor", systemImage: "square.and.arrow.up")
+                      }
+                    }
+                  }
+                  if model.analysisAvailable, !report.extraction.coded.isEmpty {
+                    ToolbarItem(placement: .secondaryAction) {
                       Button {
                         model.consenting = report.extraction.coded
                       } label: {
@@ -244,6 +266,11 @@ struct ContentView: View {
     .sheet(isPresented: $model.showingPrivacy) {
       PrivacySummary { model.showingPrivacy = false }
     }
+    .sheet(item: Binding(get: { model.sharing.map(ShareBox.init) }, set: { _ in })) { box in
+      ShareSheet(items: [box.artefacts.pdf, box.artefacts.fhir]) {
+        model.sharing = nil
+      }
+    }
     .overlay { if model.asking { ProgressView("Waiting for an answer…").padding().background(.regularMaterial, in: .rect(cornerRadius: 12)) } }
     .overlay { if model.busy { ProgressView("Recognising text…").padding().background(.regularMaterial, in: .rect(cornerRadius: 12)) } }
     .alert("Error", isPresented: Binding(get: { model.error != nil }, set: { _ in model.error = nil })) {
@@ -253,6 +280,31 @@ struct ContentView: View {
     }
     .task { await model.refresh() }
   }
+}
+
+private struct ShareBox: Identifiable {
+  let artefacts: ReportExport.Artefacts
+  var id: String { artefacts.pdf.lastPathComponent }
+  init(_ artefacts: ReportExport.Artefacts) { self.artefacts = artefacts }
+}
+
+/// The system share sheet, so the files can go wherever the person's insurer
+/// wants them: the ePA app, Files, AirDrop to a desktop client, or mail.
+///
+/// Deliberately not a bespoke upload. There is no API into the ePA for a
+/// non-DiGA, so the citizen is the integration point, and the share sheet is
+/// what respects that rather than pretending otherwise.
+private struct ShareSheet: UIViewControllerRepresentable {
+  let items: [Any]
+  let onDismiss: () -> Void
+
+  func makeUIViewController(context: Context) -> UIActivityViewController {
+    let controller = UIActivityViewController(activityItems: items, applicationActivities: nil)
+    controller.completionWithItemsHandler = { _, _, _, _ in onDismiss() }
+    return controller
+  }
+
+  func updateUIViewController(_ controller: UIActivityViewController, context: Context) {}
 }
 
 private struct ConsentBox: Identifiable {

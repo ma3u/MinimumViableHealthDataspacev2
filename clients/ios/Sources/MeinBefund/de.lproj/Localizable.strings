@@ -80,3 +80,18 @@
 "On-device analysis is unavailable." = "Analyse auf dem Gerät ist nicht verfügbar.";
 "The on-device model did not answer this one. Rephrasing helps, or use another provider." = "Das Modell auf dem Gerät hat hierauf nicht geantwortet. Formulieren Sie die Frage anders oder wählen Sie einen anderen Anbieter.";
 "Apple on-device model" = "Apple-Modell auf dem Gerät";
+
+/* Export */
+"Share for my doctor" = "Für meine Praxis teilen";
+"This report has no coded values to export." = "Dieser Befund enthält keine codierten Werte zum Export.";
+"Analyte" = "Analyt";
+"Result" = "Ergebnis";
+"Unit" = "Einheit";
+"Reference (as printed)" = "Referenz (wie gedruckt)";
+"none printed" = "nicht angegeben";
+"Read from the laboratory's own digital document." = "Aus dem digitalen Dokument des Labors gelesen.";
+"Transcribed from a photograph by on-device text recognition. Values are preliminary and have not been verified against the paper." = "Per Texterkennung auf dem Gerät von einem Foto übernommen. Die Werte sind vorläufig und wurden nicht gegen das Papier geprüft.";
+"Produced by MeinBefund on this device. Not a diagnosis and not a medical device. A machine-readable FHIR R4 bundle accompanies this document." = "Erstellt von MeinBefund auf diesem Gerät. Keine Diagnose und kein Medizinprodukt. Ein maschinenlesbares FHIR-R4-Bundle liegt diesem Dokument bei.";
+"Collected %@" = "Abnahme %@";
+"%lld line(s) could not be coded" = "%lld Zeile(n) konnten nicht codiert werden";
+"The document is %lld MB, over the 25 MB the ePA accepts." = "Das Dokument ist %lld MB groß, mehr als die 25 MB, die die ePA akzeptiert.";
