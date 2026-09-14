@@ -111,6 +111,17 @@ struct CloudConsentSheet: View {
             .disabled(CloudAnalysis.refusal(for: chosen) != nil)
         }
       }
+      .task {
+        #if DEBUG
+          // Screenshot mode only. Nothing is preselected in a real run: each
+          // value leaves the phone because someone ticked it, not because the
+          // app ticked it for them.
+          if DemoSeed.screen == .consent {
+            selected = Set(candidates.prefix(4).map(key(for:)))
+            question = "Which of these should I ask my doctor about?"
+          }
+        #endif
+      }
     }
   }
 
@@ -156,9 +167,9 @@ struct CloudReplySheet: View {
           DoctorReminder()
           Text(
             """
-            Antwort von \(reply.provider), Modell \(reply.model). Keine \
-            Diagnose und keine Behandlungsempfehlung. Die gesendeten Werte \
-            wurden aus einem Scan gelesen und können Lesefehler enthalten.
+            Answered by \(reply.provider), model \(reply.model). Not a \
+            diagnosis and not a treatment recommendation. The values sent were \
+            read from a scan and may contain recognition errors.
             """
           )
           .font(.footnote)

@@ -35,13 +35,13 @@ targets:
     dependencies:
       - target: Shared
     sources:
+      # One entry only. xcodegen finds en.lproj and de.lproj underneath and
+      # builds a variant group per file, which is what both the resource copy
+      # and `xcodebuild -exportLocalizations` expect. Naming the .lproj folders
+      # again as separate resource paths makes Xcode see each of them twice:
+      # the build then fails with "remove failed de.lproj" and the export with
+      # "en.lproj couldn't be copied ... an item with the same name exists".
       - path: Sources/MeinBefund
-      # English is the base language; de.lproj supplies German. Listed so
-      # xcodegen copies both .lproj bundles into the app.
-      - path: Sources/MeinBefund/en.lproj
-        buildPhase: resources
-      - path: Sources/MeinBefund/de.lproj
-        buildPhase: resources
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: red.mabu.meinbefund
@@ -54,9 +54,12 @@ targets:
         INFOPLIST_KEY_UILaunchScreen_Generation: YES
         INFOPLIST_KEY_UISupportedInterfaceOrientations: UIInterfaceOrientationPortrait
         # VisionKit needs a reason string or the scanner crashes on first use.
+        # English, like every other base string. The German is in
+        # `Sources/MeinBefund/de.lproj/InfoPlist.strings`: a permission prompt
+        # in the wrong language is the first thing a person sees.
         INFOPLIST_KEY_NSCameraUsageDescription: >-
-          MeinBefund nutzt die Kamera nur, um Ihre Befunde zu scannen.
-          Die Aufnahmen bleiben verschlüsselt auf diesem Gerät.
+          MeinBefund uses the camera only to scan your lab reports.
+          The photographs stay encrypted on this device.
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         # Cloud analysis (ADR-034). Empty by default and checked at runtime, so
         # an unconfigured build simply does not offer the button rather than

@@ -19,6 +19,14 @@ final class AppModel: ObservableObject {
   private let store = ReportStore()
 
   func refresh() async {
+    #if DEBUG
+      // Screenshot mode: fictional reports, never persisted, so nothing here
+      // can reach a real store or a real person's device.
+      if DemoSeed.isRequested {
+        reports = DemoSeed.reports
+        return
+      }
+    #endif
     do { reports = try await store.load() } catch { self.error = error.localizedDescription }
   }
 
@@ -157,9 +165,10 @@ final class AppModel: ObservableObject {
 struct ContentView: View {
   @StateObject private var model = AppModel()
   @State private var scanning = false
+  @State private var path: [UUID] = []
 
   var body: some View {
-    NavigationStack {
+    NavigationStack(path: $path) {
       Group {
         if model.reports.isEmpty {
           EmptyStateView()
@@ -278,8 +287,34 @@ struct ContentView: View {
     } message: {
       Text(model.error ?? "")
     }
-    .task { await model.refresh() }
+    .task {
+      await model.refresh()
+      #if DEBUG
+        openScreenshotScreen()
+      #endif
+    }
   }
+
+  #if DEBUG
+    /// Opens the screen named by `-MBShot`, once the reports are loaded.
+    ///
+    /// Screenshots are taken this way rather than by scripting taps, so a
+    /// re-shoot after a layout change needs no new coordinates.
+    private func openScreenshotScreen() {
+      switch DemoSeed.screen {
+      case .detail:
+        if let first = model.reports.first { path = [first.id] }
+      case .consent:
+        model.consenting = model.reports.first?.extraction.coded
+      case .settings:
+        model.showingSettings = true
+      case .privacy:
+        model.showingPrivacy = true
+      case .list, nil:
+        break
+      }
+    }
+  #endif
 }
 
 private struct ShareBox: Identifiable {
