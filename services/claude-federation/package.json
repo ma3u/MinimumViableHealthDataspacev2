@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Federates an Azure workload identity to the Claude API so no Anthropic API key exists anywhere, and mediates MeinBefund's explicit per-request cloud analysis.",
+  "description": "Federates an Azure workload identity to the Claude API so no Anthropic API key exists anywhere, and mediates Klarbefund's explicit per-request cloud analysis.",
   "scripts": {
     "build": "tsc",
     "dev": "tsx src/server.ts",

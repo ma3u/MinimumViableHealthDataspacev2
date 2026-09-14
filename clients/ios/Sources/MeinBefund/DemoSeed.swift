@@ -104,11 +104,11 @@
         ReportStore.StoredReport(
           id: UUID(uuidString: "00000000-0000-0000-0000-0000000000A1")!,
           scannedAt: september, collectedOn: september,
-          title: "Lipid panel, Praxis Dr. Muster", extraction: panel),
+          title: String(localized: "Lipid panel, Praxis Dr. Muster"), extraction: panel),
         ReportStore.StoredReport(
           id: UUID(uuidString: "00000000-0000-0000-0000-0000000000A2")!,
           scannedAt: march, collectedOn: march,
-          title: "Check-up, Praxis Dr. Muster", extraction: second),
+          title: String(localized: "Check-up, Praxis Dr. Muster"), extraction: second),
       ]
     }
   }

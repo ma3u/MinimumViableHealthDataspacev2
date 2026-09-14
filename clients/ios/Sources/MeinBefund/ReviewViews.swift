@@ -60,6 +60,20 @@ struct ResultList: View {
 struct ResultSections: View {
   let extraction: ExtractionResult
 
+  /// `UnmappedReason.explanation` is the wire wording, shared with
+  /// `services/epa-ingest` and written into a PDF export, so it stays English
+  /// and stays put. What a reader sees is translated here instead. Handing the
+  /// wire string to `Text` compiles, renders, and quietly shows English on a
+  /// German phone, because a `String` variable is not a localisation key.
+  private func localised(_ reason: UnmappedReason) -> String {
+    switch reason {
+    case .unknownAnalyte: String(localized: "not in the analyte dictionary")
+    case .unknownUnit: String(localized: "unit has no UCUM mapping")
+    case .unitMismatch: String(localized: "unit does not belong to this analyte")
+    case .specimenNotSupported: String(localized: "specimen is not blood, plasma or serum")
+    }
+  }
+
   var body: some View {
     Section {
       ForEach(Array(extraction.coded.enumerated()), id: \.offset) { _, value in
@@ -74,7 +88,7 @@ struct ResultSections: View {
         ForEach(Array(extraction.unmapped.enumerated()), id: \.offset) { _, item in
           VStack(alignment: .leading, spacing: 2) {
             Text("\(item.raw.label)  \(formatted(item.raw.value)) \(item.raw.unitRaw)")
-            Text(item.reason.explanation)
+            Text(localised(item.reason))
               .font(.caption)
               .foregroundStyle(.secondary)
           }

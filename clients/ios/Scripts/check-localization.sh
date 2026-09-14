@@ -26,7 +26,7 @@ ns = "{urn:oasis:names:tc:xliff:document:1.2}"
 # Listed one by one rather than pattern-matched: a new untranslated sentence
 # should fail the check, not slip through a clever regex.
 same_in_both = {
-    "Shared", "MeinBefund", "Anthropic", "Azure OpenAI", "OK", "·",
+    "Shared", "MeinBefund", "Klarbefund", "Anthropic", "Azure OpenAI", "OK", "·",
     "LOINC %@", "Ref. %@", "%@ · %@", "%@%@ %@", "%@  %@ %@",
     "%@ %@ · LOINC %@", "https://<name>.openai.azure.com",
 }

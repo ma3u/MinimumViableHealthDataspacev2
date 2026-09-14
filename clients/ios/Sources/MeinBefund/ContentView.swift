@@ -3,7 +3,7 @@ import Shared
 import SwiftUI
 
 @main
-struct MeinBefundApp: App {
+struct KlarbefundApp: App {
   var body: some Scene {
     WindowGroup { ContentView() }
   }
@@ -211,7 +211,7 @@ struct ContentView: View {
           }
         }
       }
-      .navigationTitle("MeinBefund")
+      .navigationTitle("Klarbefund")
       .toolbar {
         ToolbarItem(placement: .primaryAction) {
           Button {
@@ -409,8 +409,24 @@ struct ProvenanceBadge: View {
     }
   }
 
+  /// What the person reads.
+  ///
+  /// Deliberately not `source.shortLabel` interpolated into the `Text`.
+  /// `shortLabel` and `observationStatus` are the stable wire words that go
+  /// into a FHIR export and must not move, and interpolating them looked
+  /// right while shipping English to every German phone: the string extractor
+  /// only ever saw "%@ · %@", so there was nothing for a translation to
+  /// attach to and nothing for the localisation gate to report.
+  private var label: String {
+    switch source {
+    case .labIssuedDigital: String(localized: "Lab-issued, final")
+    case .ocrTranscribed: String(localized: "Scanned, preliminary")
+    case .selfTracked: String(localized: "Self-tracked, preliminary")
+    }
+  }
+
   var body: some View {
-    Text("\(source.shortLabel) · \(source.observationStatus)")
+    Text(label)
       .font(.caption2.weight(.medium))
       .padding(.horizontal, 6)
       .padding(.vertical, 2)

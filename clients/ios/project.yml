@@ -44,11 +44,15 @@ targets:
       - path: Sources/MeinBefund
     settings:
       base:
+        # The bundle id is registered with Apple and carries the App Store
+        # record, the TestFlight builds and the keychain items, so it stays as
+        # it is. The name people see is CFBundleDisplayName below; nobody sees
+        # either of these two.
         PRODUCT_BUNDLE_IDENTIFIER: red.mabu.meinbefund
         PRODUCT_NAME: MeinBefund
         # Synthesise Info.plist from the INFOPLIST_KEY_* settings below.
         GENERATE_INFOPLIST_FILE: YES
-        INFOPLIST_KEY_CFBundleDisplayName: MeinBefund
+        INFOPLIST_KEY_CFBundleDisplayName: Klarbefund
         # The device language decides. English base, German translation.
         SWIFT_EMIT_LOC_STRINGS: YES
         INFOPLIST_KEY_UILaunchScreen_Generation: YES
@@ -58,7 +62,7 @@ targets:
         # `Sources/MeinBefund/de.lproj/InfoPlist.strings`: a permission prompt
         # in the wrong language is the first thing a person sees.
         INFOPLIST_KEY_NSCameraUsageDescription: >-
-          MeinBefund uses the camera only to scan your lab reports.
+          Klarbefund uses the camera only to scan your lab reports.
           The photographs stay encrypted on this device.
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         # Cloud analysis (ADR-034). Empty by default and checked at runtime, so
