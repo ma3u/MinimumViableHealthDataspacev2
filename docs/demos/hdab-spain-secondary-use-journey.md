@@ -30,6 +30,39 @@ paths are the same.
 3. Have the diagram open next to the browser. The step numbers below are the
    numbers in the diagram.
 
+## Every step, both demos
+
+Two ways to show the same journey. Use the static one by default.
+
+|     | What it shows                 | Page             | Static (no login)                                                                                | Live (sign in)                              |
+| --- | ----------------------------- | ---------------- | ------------------------------------------------------------------------------------------------ | ------------------------------------------- |
+| 1a  | Hospital registers            | `/onboarding`    | [static](https://ma3u.github.io/MinimumViableHealthDataspacev2/onboarding?persona=hospital)      | [live](https://ehds.mabu.red/onboarding)    |
+| 1b  | Researcher registers          | `/onboarding`    | [static](https://ma3u.github.io/MinimumViableHealthDataspacev2/onboarding?persona=researcher)    | [live](https://ehds.mabu.red/onboarding)    |
+| 1c  | HDAB registers                | `/onboarding`    | [static](https://ma3u.github.io/MinimumViableHealthDataspacev2/onboarding?persona=hdab)          | [live](https://ehds.mabu.red/onboarding)    |
+| 1   | Trust: the credentials        | `/credentials`   | [static](https://ma3u.github.io/MinimumViableHealthDataspacev2/credentials?persona=hdab)         | [live](https://ehds.mabu.red/credentials)   |
+| 2   | Publish to the DCAT catalogue | `/data/share`    | [static](https://ma3u.github.io/MinimumViableHealthDataspacev2/data/share?persona=hospital)      | [live](https://ehds.mabu.red/data/share)    |
+| 2   | The catalogue lists it        | `/catalog`       | [static](https://ma3u.github.io/MinimumViableHealthDataspacev2/catalog?persona=hospital)         | [live](https://ehds.mabu.red/catalog)       |
+| 3   | Researcher discovers it       | `/data/discover` | [static](https://ma3u.github.io/MinimumViableHealthDataspacev2/data/discover?persona=researcher) | [live](https://ehds.mabu.red/data/discover) |
+| 4   | Contract negotiation          | `/negotiate`     | [static](https://ma3u.github.io/MinimumViableHealthDataspacev2/negotiate?persona=researcher)     | [live](https://ehds.mabu.red/negotiate)     |
+| 4b  | HDAB approves the permit      | `/compliance`    | [static](https://ma3u.github.io/MinimumViableHealthDataspacev2/compliance?persona=hdab)          | [live](https://ehds.mabu.red/compliance)    |
+| 5   | Extract and upload FHIR       | `/data/transfer` | [static](https://ma3u.github.io/MinimumViableHealthDataspacev2/data/transfer?persona=hospital)   | [live](https://ehds.mabu.red/data/transfer) |
+| 6   | Analyse in the SPE (OMOP)     | `/analytics`     | [static](https://ma3u.github.io/MinimumViableHealthDataspacev2/analytics?persona=researcher)     | [live](https://ehds.mabu.red/analytics)     |
+| 6   | Query the graph               | `/query`         | [static](https://ma3u.github.io/MinimumViableHealthDataspacev2/query?persona=researcher)         | [live](https://ehds.mabu.red/query)         |
+| 7   | Share results                 | `/tasks`         | [static](https://ma3u.github.io/MinimumViableHealthDataspacev2/tasks?persona=researcher)         | [live](https://ehds.mabu.red/tasks)         |
+| 8   | Receive the audit report      | `/admin/audit`   | [static](https://ma3u.github.io/MinimumViableHealthDataspacev2/admin/audit?persona=hdab)         | [live](https://ehds.mabu.red/admin/audit)   |
+
+**Static** is the GitHub Pages mirror. Fixed fixtures, no sign-in, no cluster,
+so it cannot fail because something was down that morning. The persona rides in
+the query string, so each link stands alone.
+
+**Live** is the real deployment: Keycloak, Neo4j, the actual APIs. It is the
+better demo when it is healthy, and it is the one to use if anyone asks whether
+this is a mock. Sign in once at [https://ehds.mabu.red/auth/signin](https://ehds.mabu.red/auth/signin) and the
+persona comes from your session, which is why those links carry no query
+string. Password equals username, realm `edcv`.
+
+Switch between them mid-demo if you like: the pages are the same pages.
+
 ## The journey
 
 The story: a hospital publishes a dataset, a researcher finds it and asks for

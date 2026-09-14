@@ -19,31 +19,31 @@
       },
       {
         "name": "EDC_ADMIN",
-        "description": "Dataspace operator — full admin access to all portals and EDC management APIs"
+        "description": "Dataspace operator \u2014 full admin access to all portals and EDC management APIs"
       },
       {
         "name": "EDC_USER_PARTICIPANT",
-        "description": "Clinic / CRO / Pharma participant — can browse catalog, negotiate contracts, transfer data"
+        "description": "Clinic / CRO / Pharma participant \u2014 can browse catalog, negotiate contracts, transfer data"
       },
       {
         "name": "HDAB_AUTHORITY",
-        "description": "Health Data Access Body regulator — access to compliance dashboards and audit logs"
+        "description": "Health Data Access Body regulator \u2014 access to compliance dashboards and audit logs"
       },
       {
         "name": "DATA_HOLDER",
-        "description": "Hospital / clinic — publishes FHIR datasets, manages contracts with researchers"
+        "description": "Hospital / clinic \u2014 publishes FHIR datasets, manages contracts with researchers"
       },
       {
         "name": "DATA_USER",
-        "description": "Researcher / pharma — discovers datasets, negotiates access, runs analytics"
+        "description": "Researcher / pharma \u2014 discovers datasets, negotiates access, runs analytics"
       },
       {
         "name": "PATIENT",
-        "description": "Patient / citizen — EHDS Chapter II primary use, accesses own EHR data"
+        "description": "Patient / citizen \u2014 EHDS Chapter II primary use, accesses own EHR data"
       },
       {
         "name": "TRUST_CENTER_OPERATOR",
-        "description": "Trust Center operator — manages trust anchors, DID infrastructure"
+        "description": "Trust Center operator \u2014 manages trust anchors, DID infrastructure"
       }
     ]
   },
@@ -254,7 +254,7 @@
     {
       "clientId": "health-dataspace-ui",
       "name": "Health Dataspace UI",
-      "description": "Next.js UI client — confidential, Authorization Code Flow with client secret",
+      "description": "Next.js UI client \u2014 confidential, Authorization Code Flow with client secret",
       "enabled": true,
       "protocol": "openid-connect",
       "publicClient": false,
@@ -407,6 +407,21 @@
         }
       ],
       "realmRoles": ["PATIENT"]
+    },
+    {
+      "username": "regulator-es",
+      "enabled": true,
+      "email": "regulator-es@health-dataspace.local",
+      "firstName": "HDAB",
+      "lastName": "Autoridad",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "regulator-es",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["HDAB_AUTHORITY"]
     }
   ],
   "groups": [],

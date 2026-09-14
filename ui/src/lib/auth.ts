@@ -280,6 +280,20 @@ export const DEMO_PERSONAS = [
       "bg-[var(--role-hdab-bg)] text-[var(--role-hdab-text)] border-[var(--role-hdab-border)]",
   },
   {
+    // A second access body, so EHDS Art. 14 coordination has two sides to it.
+    // Shares personaId "hdab" with MedReg DE: same role, same navigation, and
+    // the demo switches between them to show the cross-border permit.
+    username: "regulator-es",
+    displayName: "regulator-es",
+    organisation: "MedReg ES",
+    roles: ["HDAB_AUTHORITY"],
+    personaId: "hdab",
+    description: "Spanish access body, cross-border permits (EHDS Art. 14)",
+    color: "text-[var(--role-hdab-text)]",
+    badge:
+      "bg-[var(--role-hdab-bg)] text-[var(--role-hdab-text)] border-[var(--role-hdab-border)]",
+  },
+  {
     username: "lmcuser",
     displayName: "lmcuser",
     organisation: "Limburg Medical Centre",
