@@ -220,8 +220,24 @@ export async function skipIfNeo4jDown(page: Page, path = "/api/graph") {
 
 /** Skip the current test if Keycloak is unreachable. */
 export async function skipIfKeycloakDown() {
+  // Defaults to localhost, which is right for a local stack and a trap against
+  // a remote one: point PLAYWRIGHT_BASE_URL at a deployment without also
+  // setting KEYCLOAK_PUBLIC_URL and every test here skips while reporting
+  // nothing useful. "21 skipped" then reads like a clean run, which is how a
+  // broken realm survived a verification. Skipping is legitimate; skipping
+  // because the prober was pointed at the wrong host is not, so say so.
   const keycloakUrl =
     process.env.KEYCLOAK_PUBLIC_URL || "http://localhost:8080";
+  const baseUrl = process.env.PLAYWRIGHT_BASE_URL ?? "";
+  const remoteBase = /^https?:\/\/(?!localhost|127\.0\.0\.1)/.test(baseUrl);
+  if (remoteBase && keycloakUrl.includes("localhost")) {
+    throw new Error(
+      `PLAYWRIGHT_BASE_URL is ${baseUrl} but KEYCLOAK_PUBLIC_URL is ` +
+        `${keycloakUrl}. These tests would skip against a local Keycloak that ` +
+        `is not the one serving that deployment, and report nothing. Set ` +
+        `KEYCLOAK_PUBLIC_URL to the deployment's Keycloak.`,
+    );
+  }
   try {
     const res = await fetch(
       `${keycloakUrl}/realms/edcv/.well-known/openid-configuration`,

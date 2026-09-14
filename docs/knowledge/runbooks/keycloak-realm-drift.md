@@ -85,6 +85,7 @@ Verify with the real thing rather than with discovery alone:
 
 ```bash
 cd ui && PLAYWRIGHT_BASE_URL=https://ehds.mabu.red \
+  KEYCLOAK_PUBLIC_URL=https://auth.ehds.mabu.red \
   npx playwright test 18-user-login-roles.spec.ts --project=chromium
 ```
 
@@ -120,3 +121,26 @@ the realm, and nothing announces it: the UI stays up and every sign-in fails.
 Until the cause is found, the start job re-imports the realm on every start
 ("Ensure the Keycloak realm exists"). That is a bandage on the symptom, and it
 is named as one in the workflow so nobody mistakes it for the fix.
+
+### Set KEYCLOAK_PUBLIC_URL, or the verification verifies nothing
+
+`skipIfKeycloakDown()` probes `KEYCLOAK_PUBLIC_URL`, which defaults to
+`http://localhost:8080`. Point `PLAYWRIGHT_BASE_URL` at a deployment without
+also setting it and all 21 tests skip against a local Keycloak that is not the
+one serving that deployment:
+
+```
+21 skipped
+```
+
+which reads like a clean run at a glance. That is how a missing realm survived
+a verification on 2026-09-14. The helper now throws instead of skipping when
+the base URL is remote and the Keycloak URL is not, so the mistake fails loudly.
+
+Two things about the Azure session are worth knowing when restoring by hand.
+The management-plane (ARM) token and the Key Vault data-plane token expire
+independently: `az group show` can fail with AADSTS70043 while
+`az keyvault secret show` still works. The restore script only needs the data
+plane, so it can succeed when `az` looks broken. It skips the redirect-URI step
+in that case, which is safe, because `jad/keycloak-realm.json` already carries
+the `ehds.mabu.red` URIs.
