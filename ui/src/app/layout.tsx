@@ -4,6 +4,8 @@ import "./globals.css";
 import Navigation from "@/components/Navigation";
 import DemoPasswordBanner from "@/components/DemoPasswordBanner";
 import AuthProvider from "@/components/AuthProvider";
+import PersonaFromQuery from "@/components/PersonaFromQuery";
+import { Suspense } from "react";
 
 // Resolve the canonical base URL for metadata (og:image, canonical links, etc.).
 // - Azure prod:     https://ehds.mabu.red
@@ -88,6 +90,11 @@ export default async function RootLayout({
       </head>
       <body className="min-h-screen flex flex-col">
         <AuthProvider>
+          {/* useSearchParams needs a Suspense boundary, or the whole route
+              opts out of static generation and the export fails. */}
+          <Suspense fallback={null}>
+            <PersonaFromQuery />
+          </Suspense>
           <a href="#main-content" className="skip-to-content">
             Skip to main content
           </a>
