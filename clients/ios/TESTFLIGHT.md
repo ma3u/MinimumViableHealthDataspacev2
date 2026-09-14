@@ -1,4 +1,4 @@
-# MeinBefund on TestFlight
+# Klarbefund on TestFlight
 
 ## Links
 
@@ -15,7 +15,7 @@
 
 | Resource                 | Identifier                                                               |
 | ------------------------ | ------------------------------------------------------------------------ |
-| App record               | `6811688174`, MeinBefund, SKU `MEINBEFUND2026`, primary language en-GB   |
+| App record               | `6811688174`, Klarbefund, SKU `MEINBEFUND2026`, primary language en-GB   |
 | Bundle ID                | `red.mabu.meinbefund`, portal id `9KXVUG8LAQ`                            |
 | Capability               | Data Protection, `COMPLETE_PROTECTION`                                   |
 | Distribution certificate | `4429B495JU`, Apple Distribution, expires 2027-09-13                     |

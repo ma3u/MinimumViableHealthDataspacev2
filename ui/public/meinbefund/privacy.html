@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>MeinBefund, Privacy Policy</title>
+<title>Klarbefund, Privacy Policy</title>
 <style>
   :root { color-scheme: light dark; }
   body { font: 16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
@@ -16,11 +16,11 @@
 </style>
 </head>
 <body>
-<h1>MeinBefund, Privacy Policy</h1>
+<h1>Klarbefund, Privacy Policy</h1>
 <p class="updated">Last updated 13 September 2026. Controller: Matthias Buchhorn. Contact: the repository issue tracker at
 <a href="https://github.com/ma3u/MinimumViableHealthDataspacev2/issues">github.com/ma3u/MinimumViableHealthDataspacev2</a>.</p>
 
-<p><strong>MeinBefund reads your paper laboratory reports and keeps the values on your
+<p><strong>Klarbefund reads your paper laboratory reports and keeps the values on your
 phone.</strong> Nothing is sent anywhere unless you choose, per question, to have a value
 explained, and you are shown exactly which values would leave before anything does.</p>
 
@@ -49,23 +49,27 @@ three at all and does not transmit the fourth.</p>
 
 <table>
 <tr><th>Provider</th><th>Who pays</th><th>Where processed</th><th>How it is reached</th></tr>
-<tr><td>MeinBefund service (default)</td><td>The app provider</td><td>Azure OpenAI, EU data zone</td><td>Via the provider's service, which sees the selected values</td></tr>
-<tr><td>Anthropic (optional)</td><td>The app provider</td><td>United States</td><td>Via the provider's service</td></tr>
-<tr><td>Your own provider (optional)</td><td>You</td><td>Wherever you point it</td><td>Directly from your phone. The app provider never sees the values or your key</td></tr>
+<tr><td>This iPhone (default)</td><td>Nobody</td><td>On the device</td><td>No network is used at all</td></tr>
+<tr><td>Klarbefund service (optional)</td><td>The app provider</td><td>Azure OpenAI, EU data zone</td><td>Via the provider's service, which sees the selected values</td></tr>
+<tr><td>Your own Azure OpenAI (optional)</td><td>You</td><td>The region of your own resource</td><td>Directly from your phone. The app provider never sees the values or your key</td></tr>
+<tr><td>Your own Anthropic key (optional)</td><td>You</td><td>United States</td><td>Directly from your phone. The app provider never sees the values or your key</td></tr>
 </table>
 
-<p>Where a request goes through the app provider's service, the provider is a
-processor and the model vendor a sub-processor. Neither uses your values to
-train models. Choosing the United States option is an international transfer,
-and the app tells you so at the moment you choose it.</p>
+<p>The default asks nothing of anyone: the model on the device answers, so no
+request leaves the phone and no account is needed. Where you choose a request
+that does go through the app provider's service, the provider is a processor
+and the model vendor a sub-processor. Neither uses your values to train models.
+Choosing a provider that processes in the United States is an international
+transfer, and the app names the destination at the moment you choose it.</p>
 
 <h2>Signing in, and why</h2>
-<p>Signing in is required only for the default service, and only so that the
+<p>Signing in is required only for the Klarbefund service, and only so that the
 daily limit of 20 analyses can be counted per person. The counter stores a
 one-way hash of your account identifier and a number. It does not store your
 name or email.</p>
-<p>If you configure your own provider, no sign-in is required and no account is
-created, because there is nothing to meter.</p>
+<p>The default costs the app provider nothing and is not metered, so it asks
+for no sign-in. Neither does your own provider: there is nothing to meter when
+you are the one paying.</p>
 
 <h2>Logs</h2>
 <p>The service logs the number of values in a request and their LOINC codes, so
@@ -85,7 +89,7 @@ the answer.</p>
 misread. They are marked <em>preliminary</em> until you check them against the
 paper. Reference ranges are shown exactly as your laboratory printed them and
 are never replaced with ranges from elsewhere.</p>
-<p><strong>MeinBefund does not diagnose, does not assess risk and does not
+<p><strong>Klarbefund does not diagnose, does not assess risk and does not
 recommend treatment.</strong> It explains what a measurement is. It is not a
 medical device and it is not a substitute for your doctor. Always consult a
 qualified healthcare professional before making any decision about your health.</p>
@@ -102,7 +106,7 @@ rectification, erasure, restriction, portability and objection under Arts. 15 to
 a hash and a number per day and is not needed beyond the day it counts.</p>
 
 <h2>Children</h2>
-<p>MeinBefund is not directed at children and is intended for adults managing
+<p>Klarbefund is not directed at children and is intended for adults managing
 their own laboratory results.</p>
 </body>
 </html>

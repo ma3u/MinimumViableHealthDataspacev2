@@ -133,7 +133,7 @@ struct CloudConsentSheet: View {
     case .hosted:
       return String(
         localized:
-          "The selected values go to the MeinBefund service in the EU. Your name, date of birth and the scanned image are not sent.")
+          "The selected values go to the Klarbefund service in the EU. Your name, date of birth and the scanned image are not sent.")
     case .azure:
       return String(
         localized:

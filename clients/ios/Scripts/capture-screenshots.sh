@@ -12,7 +12,8 @@ cd "$(dirname "$0")/.."
 DEVICE="${DEVICE:-com.apple.CoreSimulator.SimDeviceType.iPhone-16-Pro-Max}"
 NAME="${NAME:-MB-Shots-69}"
 BUNDLE=red.mabu.meinbefund
-OUT="${OUT:-appstore/screenshots}"
+LOCALE="${LOCALE:-en}"
+OUT="${OUT:-appstore/screenshots/$LOCALE}"
 SCREENS=(list detail consent settings privacy)
 
 settle() { python3 -c "import time; time.sleep($1)"; }
@@ -50,10 +51,15 @@ mkdir -p "$OUT"
 for screen in "${SCREENS[@]}"; do
   xcrun simctl terminate "$sim" "$BUNDLE" >/dev/null 2>&1 || true
   settle 1
-  xcrun simctl launch "$sim" "$BUNDLE" -MBDemoSeed -MBShot "$screen" >/dev/null
+  # -AppleLanguages picks the app's language per launch, so both listings are
+  # shot from one simulator instead of one per locale.
+  xcrun simctl launch "$sim" "$BUNDLE" -MBDemoSeed -MBShot "$screen" \
+    -AppleLanguages "($LOCALE)" -AppleLocale "$LOCALE" >/dev/null
   settle 4
   xcrun simctl io "$sim" screenshot --type=png "$OUT/$screen.png" >/dev/null 2>&1
-  size="$(sips -g pixelWidth -g pixelHeight "$OUT/$screen.png" | awk '/pixel/{printf "%s", $2 (NR%2?"x":"")}')"
+  width="$(sips -g pixelWidth "$OUT/$screen.png" | awk '/pixelWidth/{print $2}')"
+  height="$(sips -g pixelHeight "$OUT/$screen.png" | awk '/pixelHeight/{print $2}')"
+  size="${width}x${height}"
   echo "    $screen.png  $size"
   case "$size" in
     1320x2868|1290x2796) ;;

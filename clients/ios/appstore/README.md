@@ -20,7 +20,7 @@ python3 push.py --texts-only          # or just one half
 | ------------------ | ------------------------------------------------------- |
 | Primary category   | Medical                                                 |
 | Secondary category | Health & Fitness                                        |
-| Name               | MeinBefund (en-GB)                                      |
+| Name               | Klarbefund, in both locales                             |
 | Subtitle           | Read your lab report                                    |
 | Privacy policy URL | `ma3u.github.io/.../meinbefund/privacy.html`            |
 | Support URL        | the GitHub issue tracker                                |
@@ -51,20 +51,29 @@ the size Apple's own table lists for 6.5 inch.
 also only discovered after an upload, having consumed a build number.
 `Scripts/archive-and-upload.sh` checks it before archiving.
 
-## The German listing is written but not live
+## Picking a name
 
-`texts.py` contains the full German copy. It is not pushed, because the App
-Store name is reserved per locale across all developer accounts and
-"MeinBefund" is held by someone else for `de-DE`:
+The App Store name is reserved per locale across every developer account, so a
+name has to be free in every locale the app lists in. "MeinBefund" was free for
+en-GB and held by someone else for de-DE, which would have left one app under
+two names, and the German one is the name most of its users would have seen.
+
+There is no availability endpoint. Probe instead: create an
+`appInfoLocalization` for the locale with the candidate name, and delete it
+straight away. A taken name answers
 
 ```
 409 ENTITY_ERROR.ATTRIBUTE.INVALID.DUPLICATE.DIFFERENT_ACCOUNT
-    The app name you entered is already being used.
 ```
 
-A `de-DE` listing needs a German store name that is free. Add it to
-`APP_NAME` in `texts.py` and re-run `push.py`, and the copy goes with it.
+and a created row reserves nothing once deleted. Of fifteen German candidates,
+Befundo, LabLens, Befundleser, Laborbuch, Meine Laborwerte and Klartext were
+taken; Klarbefund was free in both locales and is the name.
 
-This changes nothing about the app's own language: iOS picks that from the
-device, so a German phone shows the German app whichever store locale it came
-from. `Scripts/check-localization.sh` keeps both languages complete.
+The bundle id stays `red.mabu.meinbefund`. It carries the App Store record, the
+TestFlight builds and the keychain items, and nobody ever sees it. So do the
+Xcode target, the scheme and `Sources/MeinBefund/`. What people see is
+`CFBundleDisplayName`, and that is Klarbefund.
+
+`Scripts/check-localization.sh` keeps both languages complete. The app's own
+language comes from the device, not from the store locale it was downloaded in.

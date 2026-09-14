@@ -1,5 +1,5 @@
 ---
-title: "Setting up OIDC for MeinBefund and the Claude API"
+title: "Setting up OIDC for Klarbefund and the Claude API"
 status: current
 owner: ma3u
 updated: 2026-09-13

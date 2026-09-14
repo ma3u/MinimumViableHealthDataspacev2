@@ -1,21 +1,23 @@
-# App Store metadata for MeinBefund, English base and German.
+# App Store metadata for Klarbefund, English base and German.
 #
 # Every claim here is one the app actually makes good on: no "AI-powered
 # insights", no "take control of your health". Apple rejects copy it cannot
 # verify, and a medical app that oversells is the one that gets asked for a
 # CE mark.
 
-# The App Store name is reserved per locale across every developer account,
-# so a locale can only be listed once a free name exists for it. "MeinBefund"
-# is held by this account for en-GB and by someone else for de-DE, which is why
-# there is no de-DE entry: adding one returns
-# ENTITY_ERROR.ATTRIBUTE.INVALID.DUPLICATE.DIFFERENT_ACCOUNT. The German copy
-# below is written and waiting; it needs a German store name to go live.
+# The App Store name is reserved per locale across every developer account, so
+# a name has to be free in every locale the app lists in. "Klarbefund" was
+# free for en-GB and held by someone else for de-DE, which would have left one
+# app under two names, the German one being the name most of its users would
+# see. "Klarbefund" is free in both, so both listings carry it.
 #
-# This does not affect the app's own language. iOS picks that from the device,
-# so a German phone shows the German app whichever store locale it came from.
+# Probe a replacement rather than guessing: there is no availability endpoint,
+# but creating an appInfoLocalization with the candidate name returns
+# ENTITY_ERROR.ATTRIBUTE.INVALID.DUPLICATE.DIFFERENT_ACCOUNT when it is taken,
+# and deleting the row again straight away reserves nothing.
 APP_NAME = {
-    "en-GB": "MeinBefund",
+    "en-GB": "Klarbefund",
+    "de-DE": "Klarbefund",
 }
 
 SUBTITLE = {
@@ -45,7 +47,7 @@ MARKETING_URL = "https://ma3u.github.io/MinimumViableHealthDataspacev2/meinbefun
 PRIVACY_URL = "https://ma3u.github.io/MinimumViableHealthDataspacev2/meinbefund/privacy.html"
 
 DESCRIPTION = {
-"en-GB": """MeinBefund turns a paper lab report into something you can read.
+"en-GB": """Klarbefund turns a paper lab report into something you can read.
 
 Point the camera at an A4 result sheet. The app finds the page edges, reads the table, and shows every measurement with its unit, the reference range your laboratory printed, and the page and line it was read from, so you can check any value against the paper in front of you.
 
@@ -74,13 +76,13 @@ Scanning, reading, coding, storing, explaining and exporting all run on the devi
 
 NOT A MEDICAL DEVICE
 
-MeinBefund explains what a measurement is. It does not diagnose, does not assess your risk and does not recommend treatment. Values read from a photograph can be misread and are marked preliminary until you check them against the paper. Reference ranges are shown exactly as your laboratory printed them.
+Klarbefund explains what a measurement is. It does not diagnose, does not assess your risk and does not recommend treatment. Values read from a photograph can be misread and are marked preliminary until you check them against the paper. Reference ranges are shown exactly as your laboratory printed them.
 
 Always consult a doctor before making any decision about your health.
 
 Available in English and German.""",
 
-"de-DE": """MeinBefund macht aus einem Laborbefund auf Papier etwas Lesbares.
+"de-DE": """Klarbefund macht aus einem Laborbefund auf Papier etwas Lesbares.
 
 Halten Sie die Kamera auf ein A4-Befundblatt. Die App erkennt die Seitenränder, liest die Tabelle und zeigt jeden Messwert mit Einheit, dem Referenzbereich, den Ihr Labor gedruckt hat, und der Seite und Zeile, aus der er gelesen wurde. So können Sie jeden Wert mit dem Papier vor Ihnen abgleichen.
 
@@ -109,7 +111,7 @@ Scannen, Lesen, Codieren, Speichern, Erklären und Exportieren laufen auf dem Ge
 
 KEIN MEDIZINPRODUKT
 
-MeinBefund erklärt, was ein Messwert ist. Die App stellt keine Diagnose, bewertet kein Risiko und empfiehlt keine Behandlung. Aus einem Foto gelesene Werte können falsch erkannt werden und gelten als vorläufig, bis Sie sie mit dem Papier abgleichen. Referenzbereiche werden genau so angezeigt, wie Ihr Labor sie gedruckt hat.
+Klarbefund erklärt, was ein Messwert ist. Die App stellt keine Diagnose, bewertet kein Risiko und empfiehlt keine Behandlung. Aus einem Foto gelesene Werte können falsch erkannt werden und gelten als vorläufig, bis Sie sie mit dem Papier abgleichen. Referenzbereiche werden genau so angezeigt, wie Ihr Labor sie gedruckt hat.
 
 Fragen Sie immer eine Ärztin oder einen Arzt, bevor Sie eine Entscheidung über Ihre Gesundheit treffen.
 

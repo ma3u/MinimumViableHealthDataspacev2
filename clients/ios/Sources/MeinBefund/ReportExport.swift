@@ -216,7 +216,7 @@ enum ReportExport {
       draw(
         String(
           localized:
-            "Produced by MeinBefund on this device. Not a diagnosis and not a medical device. A machine-readable FHIR R4 bundle accompanies this document."),
+            "Produced by Klarbefund on this device. Not a diagnosis and not a medical device. A machine-readable FHIR R4 bundle accompanies this document."),
         small, x: margin, colour: .darkGray)
     }
   }

@@ -151,7 +151,15 @@ def push_screenshots(version, folder):
         "GET", f"/v1/appStoreVersions/{version}/appStoreVersionLocalizations")["data"]
     for localization in localizations:
         locale = localization["attributes"]["locale"]
-        print(f"screenshots for {locale}:")
+        # Screenshots are per locale, so the German listing shows the German
+        # app. `capture-screenshots.sh` writes into screenshots/<language>.
+        language = locale.split("-")[0]
+        shots = os.path.join(folder, language)
+        if not os.path.isdir(shots):
+            raise SystemExit(
+                f"no screenshots for {locale}: expected {shots}. "
+                f"Run: LOCALE={language} Scripts/capture-screenshots.sh")
+        print(f"screenshots for {locale} from {language}/:")
         sets = call("GET", f"/v1/appStoreVersionLocalizations/{localization['id']}"
                            "/appScreenshotSets")["data"]
         existing = {d["attributes"]["screenshotDisplayType"]: d["id"] for d in sets}
@@ -174,7 +182,7 @@ def push_screenshots(version, folder):
             print(f"  created {DISPLAY_TYPE} set")
 
         for name in SCREENSHOT_ORDER:
-            path = os.path.join(folder, f"{name}.png")
+            path = os.path.join(shots, f"{name}.png")
             size = png_size(path)
             if size not in ACCEPTED_SIZES:
                 raise SystemExit(

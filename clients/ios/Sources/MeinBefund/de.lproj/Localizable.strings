@@ -1,4 +1,4 @@
-/* MeinBefund, German.
+/* Klarbefund, German.
 
    English is the base language, so a device in English needs no file at all and
    this one supplies German. The keys are the English strings exactly as they
@@ -35,7 +35,7 @@
 "These values were read from a photo and are preliminary, not confirmed." = "Die Werte wurden aus einem Foto gelesen und sind deshalb vorläufig, nicht bestätigt.";
 "scanned" = "gescannt";
 
-"MeinBefund service (EU, limited)" = "MeinBefund-Dienst (EU, begrenzt)";
+"Klarbefund service (EU, limited)" = "Klarbefund-Dienst (EU, begrenzt)";
 "Your own Azure OpenAI" = "Eigenes Azure OpenAI";
 "Your own Anthropic API key" = "Eigener Anthropic-Schlüssel";
 
@@ -64,13 +64,10 @@
 "Nothing leaves your phone. Works with no network and no account." = "Nichts verlässt Ihr iPhone. Funktioniert ohne Netz und ohne Konto.";
 "Stays on this iPhone" = "Bleibt auf diesem iPhone";
 "The selected values are explained by the model on this device. Nothing is sent anywhere, and no network is used." = "Die ausgewählten Werte werden vom Modell auf diesem Gerät erklärt. Es wird nichts gesendet und kein Netz genutzt.";
-"MeinBefund service (EU, limited)" = "MeinBefund-Dienst (EU, begrenzt)";
-"Your own Azure OpenAI" = "Eigenes Azure OpenAI";
-"Your own Anthropic API key" = "Eigener Anthropic-Schlüssel";
 "Runs on the app provider's service in the EU. Up to 20 analyses per day." = "Läuft über den Dienst des Anbieters in der EU. Bis zu 20 Analysen pro Tag.";
 "Your values go straight to your own Azure resource. No limit, you pay." = "Ihre Werte gehen direkt an Ihre eigene Azure-Ressource. Kein Limit, Sie zahlen.";
 "Your values go straight to Anthropic in the United States. No limit, you pay." = "Ihre Werte gehen direkt an Anthropic in den USA. Kein Limit, Sie zahlen.";
-"The selected values go to the MeinBefund service in the EU. Your name, date of birth and the scanned image are not sent." = "Die ausgewählten Werte gehen an den MeinBefund-Dienst in der EU. Ihr Name, Ihr Geburtsdatum und der gescannte Befund werden nicht gesendet.";
+"The selected values go to the Klarbefund service in the EU. Your name, date of birth and the scanned image are not sent." = "Die ausgewählten Werte gehen an den Klarbefund-Dienst in der EU. Ihr Name, Ihr Geburtsdatum und der gescannte Befund werden nicht gesendet.";
 "The selected values go to your own Azure resource. Your name, date of birth and the scanned image are not sent." = "Die ausgewählten Werte gehen an Ihre eigene Azure-Ressource. Ihr Name, Ihr Geburtsdatum und der gescannte Befund werden nicht gesendet.";
 "The selected values go to Anthropic in the United States. Your name, date of birth and the scanned image are not sent." = "Die ausgewählten Werte gehen an Anthropic in den USA. Ihr Name, Ihr Geburtsdatum und der gescannte Befund werden nicht gesendet.";
 "Turn on Apple Intelligence in Settings to have your values explained on this device." = "Aktivieren Sie Apple Intelligence in den Einstellungen, um Werte auf diesem Gerät erklären zu lassen.";
@@ -91,7 +88,7 @@
 "none printed" = "nicht angegeben";
 "Read from the laboratory's own digital document." = "Aus dem digitalen Dokument des Labors gelesen.";
 "Transcribed from a photograph by on-device text recognition. Values are preliminary and have not been verified against the paper." = "Per Texterkennung auf dem Gerät von einem Foto übernommen. Die Werte sind vorläufig und wurden nicht gegen das Papier geprüft.";
-"Produced by MeinBefund on this device. Not a diagnosis and not a medical device. A machine-readable FHIR R4 bundle accompanies this document." = "Erstellt von MeinBefund auf diesem Gerät. Keine Diagnose und kein Medizinprodukt. Ein maschinenlesbares FHIR-R4-Bundle liegt diesem Dokument bei.";
+"Produced by Klarbefund on this device. Not a diagnosis and not a medical device. A machine-readable FHIR R4 bundle accompanies this document." = "Erstellt von Klarbefund auf diesem Gerät. Keine Diagnose und kein Medizinprodukt. Ein maschinenlesbares FHIR-R4-Bundle liegt diesem Dokument bei.";
 "Collected %@" = "Abnahme %@";
 "%lld line(s) could not be coded" = "%lld Zeile(n) konnten nicht codiert werden";
 "The document is %lld MB, over the 25 MB the ePA accepts." = "Das Dokument ist %lld MB groß, mehr als die 25 MB, die die ePA akzeptiert.";
@@ -99,7 +96,16 @@
 "The key stays on this device, in the keychain, and is never sent to the provider of this app. The values go straight from your iPhone to your own service." = "Der Schlüssel bleibt auf diesem Gerät, in der Schlüsselbund-Ablage, und wird niemals an den Anbieter dieser App gesendet. Die Werte gehen direkt von Ihrem iPhone an Ihren Dienst.";
 "The photographs never leave this device. The values read from them are encrypted individually, with a key that is unavailable while the phone is locked and is never restored onto another device. The store is excluded from iCloud Backup." = "Die Fotos verlassen dieses Gerät nie. Die daraus gelesenen Werte werden einzeln verschlüsselt, mit einem Schlüssel, der bei gesperrtem iPhone nicht verfügbar ist und nie auf ein anderes Gerät übertragen wird. Der Speicher ist vom iCloud-Backup ausgenommen.";
 "When you ask for an explanation you choose the values, see them listed, and confirm. Only those values and your question travel. Your name, date of birth and insurance number are never sent, because the app does not hold them. The scanned image is never sent either." = "Wenn Sie eine Erklärung anfordern, wählen Sie die Werte aus, sehen sie aufgelistet und bestätigen. Nur diese Werte und Ihre Frage werden übertragen. Name, Geburtsdatum und Versichertennummer werden nie gesendet, weil die App sie gar nicht speichert. Das gescannte Bild wird ebenfalls nie gesendet.";
-"By default the model on this iPhone answers, so your question never reaches a network at all. You may instead choose the MeinBefund service, which processes in the EU, or your own Azure resource or Anthropic key, in which case your phone talks to your service directly and neither your key nor your values reach the app provider at all. Whichever is in use is named on the screen before you send.\n\nNo model vendor uses your values for training." = "Standardmäßig antwortet das Modell auf diesem iPhone, Ihre Frage erreicht also gar kein Netz. Sie können stattdessen den MeinBefund-Dienst wählen, der in der EU verarbeitet, oder Ihre eigene Azure-Ressource oder Ihren Anthropic-Schlüssel. Dann spricht Ihr iPhone direkt mit Ihrem Dienst, und weder Ihr Schlüssel noch Ihre Werte erreichen den Anbieter dieser App. Was gerade verwendet wird, steht vor dem Senden auf dem Bildschirm.\n\nKein Modellanbieter nutzt Ihre Werte für Training.";
+"By default the model on this iPhone answers, so your question never reaches a network at all. You may instead choose the Klarbefund service, which processes in the EU, or your own Azure resource or Anthropic key, in which case your phone talks to your service directly and neither your key nor your values reach the app provider at all. Whichever is in use is named on the screen before you send.\n\nNo model vendor uses your values for training." = "Standardmäßig antwortet das Modell auf diesem iPhone, Ihre Frage erreicht also gar kein Netz. Sie können stattdessen den Klarbefund-Dienst wählen, der in der EU verarbeitet, oder Ihre eigene Azure-Ressource oder Ihren Anthropic-Schlüssel. Dann spricht Ihr iPhone direkt mit Ihrem Dienst, und weder Ihr Schlüssel noch Ihre Werte erreichen den Anbieter dieser App. Was gerade verwendet wird, steht vor dem Senden auf dem Bildschirm.\n\nKein Modellanbieter nutzt Ihre Werte für Training.";
 "Only the default service asks you to sign in, and only so the limit of 20 explanations a day can be counted per person. The counter stores a one-way hash and a number, not your name. With your own provider there is no sign-in and no limit." = "Nur der voreingestellte Dienst verlangt eine Anmeldung, und zwar allein, damit das Limit von 20 Erklärungen pro Tag je Person gezählt werden kann. Der Zähler speichert einen Einweg-Hash und eine Zahl, nicht Ihren Namen. Mit einem eigenen Anbieter gibt es weder Anmeldung noch Limit.";
-"MeinBefund explains what a measurement is. It does not diagnose, does not assess your risk and does not recommend treatment. Values read from a photograph can be misread and are marked preliminary until you check them against the paper. Reference ranges are shown exactly as your laboratory printed them.\n\nAlways consult a doctor before making any decision about your health." = "MeinBefund erklärt, was ein Messwert ist. Die App stellt keine Diagnose, bewertet kein Risiko und empfiehlt keine Behandlung. Aus einem Foto gelesene Werte können falsch erkannt werden und gelten als vorläufig, bis Sie sie mit dem Papier abgleichen. Referenzbereiche werden genau so angezeigt, wie Ihr Labor sie gedruckt hat.\n\nFragen Sie immer eine Ärztin oder einen Arzt, bevor Sie eine Entscheidung über Ihre Gesundheit treffen.";
+"Klarbefund explains what a measurement is. It does not diagnose, does not assess your risk and does not recommend treatment. Values read from a photograph can be misread and are marked preliminary until you check them against the paper. Reference ranges are shown exactly as your laboratory printed them.\n\nAlways consult a doctor before making any decision about your health." = "Klarbefund erklärt, was ein Messwert ist. Die App stellt keine Diagnose, bewertet kein Risiko und empfiehlt keine Behandlung. Aus einem Foto gelesene Werte können falsch erkannt werden und gelten als vorläufig, bis Sie sie mit dem Papier abgleichen. Referenzbereiche werden genau so angezeigt, wie Ihr Labor sie gedruckt hat.\n\nFragen Sie immer eine Ärztin oder einen Arzt, bevor Sie eine Entscheidung über Ihre Gesundheit treffen.";
 "Answered by %@, model %@. Not a diagnosis and not a treatment recommendation. The values sent were read from a scan and may contain recognition errors." = "Antwort von %1$@, Modell %2$@. Keine Diagnose und keine Behandlungsempfehlung. Die gesendeten Werte wurden aus einem Scan gelesen und können Lesefehler enthalten.";
+"Lab-issued, final" = "Vom Labor, endgültig";
+"Scanned, preliminary" = "Gescannt, vorläufig";
+"Self-tracked, preliminary" = "Selbst erfasst, vorläufig";
+"Lipid panel, Praxis Dr. Muster" = "Lipidprofil, Praxis Dr. Muster";
+"Check-up, Praxis Dr. Muster" = "Check-up, Praxis Dr. Muster";
+"not in the analyte dictionary" = "nicht im Analyt-Verzeichnis";
+"unit has no UCUM mapping" = "Einheit hat keine UCUM-Zuordnung";
+"unit does not belong to this analyte" = "Einheit gehört nicht zu diesem Analyten";
+"specimen is not blood, plasma or serum" = "Material ist weder Blut noch Plasma oder Serum";

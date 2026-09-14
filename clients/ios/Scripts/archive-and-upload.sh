@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# MeinBefund → App Store Connect → TestFlight (internal testers).
+# Klarbefund → App Store Connect → TestFlight (internal testers).
 #
 # This script takes the build as far as a signed .ipa and uploads it. What it
 # CANNOT do, and what you must do once by hand first:
@@ -7,7 +7,7 @@
 #   1. A paid Apple Developer Program membership.
 #   2. An App Store Connect record for bundle id red.mabu.meinbefund
 #      (App Store Connect → Apps → +, platform iOS). The app NAME must be unique
-#      across the App Store: check "MeinBefund" is free before relying on it.
+#      across the App Store: check "Klarbefund" is free before relying on it.
 #   3. An App Store Connect API key (Users and Access → Integrations → App Store
 #      Connect API). Download the .p8 once; it is not downloadable again.
 #   4. A distribution certificate and provisioning profile for that bundle id,

@@ -50,7 +50,7 @@ struct PrivacySummary: View {
               """
               By default the model on this iPhone answers, so your question \
               never reaches a network at all. You may instead choose the \
-              MeinBefund service, which processes in the EU, or your own Azure \
+              Klarbefund service, which processes in the EU, or your own Azure \
               resource or Anthropic key, in which case your phone talks to \
               your service directly and neither your key nor your values reach \
               the app provider at all. Whichever is in use is named on the \
@@ -79,7 +79,7 @@ struct PrivacySummary: View {
               .font(.headline)
             Text(
               """
-              MeinBefund explains what a measurement is. It does not diagnose, \
+              Klarbefund explains what a measurement is. It does not diagnose, \
               does not assess your risk and does not recommend treatment. \
               Values read from a photograph can be misread and are marked \
               preliminary until you check them against the paper. Reference \

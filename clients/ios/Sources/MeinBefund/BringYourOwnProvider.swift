@@ -34,7 +34,7 @@ enum BringYourOwnProvider {
     var label: String {
       switch self {
       case .onDevice: return String(localized: "On this iPhone")
-      case .hosted: return String(localized: "MeinBefund service (EU, limited)")
+      case .hosted: return String(localized: "Klarbefund service (EU, limited)")
       case .azure: return String(localized: "Your own Azure OpenAI")
       case .anthropic: return String(localized: "Your own Anthropic API key")
       }
