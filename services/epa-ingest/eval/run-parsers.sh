@@ -29,7 +29,7 @@ Install the parsers first (neither is a dependency of this repo):
 Optional, Marker only: structured LLM assist against your own Azure deployment:
   export MARKER_USE_LLM=1
   export AZURE_API_KEY=...            AZURE_ENDPOINT=https://<account>.openai.azure.com
-  export AZURE_DEPLOYMENT=gpt-5-mini  AZURE_API_VERSION=2024-10-21
+  export AZURE_DEPLOYMENT=gpt-5-mini-eu  AZURE_API_VERSION=2024-10-21
 Sending a real report to a cloud model is a deliberate act. Confirm the
 deployment is DataZoneStandard or regional Standard first (ADR-033).
 USAGE
@@ -46,6 +46,16 @@ run_marker() {
   local args=(--output_format markdown --output_dir "$OUT/marker")
   if [ "${MARKER_USE_LLM:-0}" = "1" ]; then
     echo "  marker: --use_llm ENABLED: pages will be sent to ${AZURE_DEPLOYMENT:-<unset>}"
+    # This harness is meant to be run against real lab reports, so the
+    # deployment it names decides where special category data is processed.
+    # gpt-5-mini-eu is DataZoneStandard; gpt-5-mini and gpt-5.1 are
+    # GlobalStandard and give no EU-only guarantee (ADR-033, ADR-035).
+    case "${AZURE_DEPLOYMENT:-}" in
+      *-eu) ;;
+      "")   echo "  WARNING: AZURE_DEPLOYMENT is unset" >&2 ;;
+      *)    echo "  WARNING: '${AZURE_DEPLOYMENT}' is not an EU data zone deployment." >&2
+            echo "           Real reports would leave the EU. Use gpt-5-mini-eu." >&2 ;;
+    esac
     args+=(--use_llm --llm_service marker.services.azure_openai.AzureOpenAIService)
   fi
   echo "→ marker_single ${PDF}"
