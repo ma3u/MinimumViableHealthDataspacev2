@@ -182,6 +182,19 @@ const PROPERTY_LABELS: Record<string, Record<string, string>> = {
     studyId: "Study ID",
     status: "Status",
     createdAt: "Created",
+    // Attestation, per ADR-037. `simulated` is shown deliberately: a
+    // demonstrator that labels its own simulation is more credible than one
+    // that does not, and far more credible than one caught not doing it.
+    simulated: "Simulated attestation",
+    teeType: "TEE",
+    attestation: "Manifest digest",
+    policyHash: "Policy hash",
+    approvedCodeHash: "Approved code digest",
+    coordinatorEndpoint: "Attestation coordinator",
+    attestedAt: "Attested",
+    verifiedBy: "Verified by",
+    kAnonymityThreshold: "k-anonymity threshold",
+    outputPolicy: "Output policy",
   },
   PatientConsent: {
     consentId: "Consent ID",
