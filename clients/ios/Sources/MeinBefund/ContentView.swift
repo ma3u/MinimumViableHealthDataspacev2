@@ -63,10 +63,12 @@ final class AppModel: ObservableObject {
   /// True only when both halves are configured. Without either, the button is
   /// not offered at all rather than shown and then failing: an action that
   /// cannot work should not look available.
-  var cloudAvailable: Bool {
-    // Either the operator's service is configured, or the user pointed the app
-    // at their own provider. One is enough; the feature is not gated on the
-    // operator having set anything up.
+  /// Whether asking a question is possible at all right now.
+  ///
+  /// Deliberately not "is the operator's service configured". On-device needs
+  /// nothing from anyone, so on a phone with Apple Intelligence the feature is
+  /// available even with no network, no account and no backend deployed.
+  var analysisAvailable: Bool {
     if providerConfig.kind != .hosted { return providerConfig.isUsable }
     return OIDCSession.Configuration.fromBundle() != nil
       && CloudClient.Configuration.fromBundle() != nil
@@ -80,6 +82,21 @@ final class AppModel: ObservableObject {
     consenting = nil
     asking = true
     defer { asking = false }
+
+    // On device: no network at all. This is the path that keeps working when
+    // the cluster is down, which is most of the reason it is the default.
+    if providerConfig.kind == .onDevice {
+      do {
+        if #available(iOS 26.0, *) {
+          reply = try await OnDeviceAnalysis.analyse(values: values, question: question)
+        } else {
+          self.error = OnDeviceAnalysis.Availability.unsupportedOS.explanation
+        }
+      } catch {
+        self.error = error.localizedDescription
+      }
+      return
+    }
 
     // Your own provider: no sign-in, no backend, no quota.
     //
@@ -149,7 +166,7 @@ struct ContentView: View {
             if let report = model.reports.first(where: { $0.id == id }) {
               ResultList(extraction: report.extraction, title: report.title)
                 .toolbar {
-                  if model.cloudAvailable, !report.extraction.coded.isEmpty {
+                  if model.analysisAvailable, !report.extraction.coded.isEmpty {
                     ToolbarItem(placement: .primaryAction) {
                       Button {
                         model.consenting = report.extraction.coded
@@ -210,6 +227,7 @@ struct ContentView: View {
     .sheet(item: Binding(get: { model.consenting.map(ConsentBox.init) }, set: { _ in })) { box in
       CloudConsentSheet(
         candidates: box.values,
+        provider: model.providerConfig.kind,
         onSend: { values, question in
           Task { await model.askCloud(values, question: question) }
         },

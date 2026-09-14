@@ -58,3 +58,25 @@
 "This app does not diagnose" = "Diese App stellt keine Diagnose";
 "Full privacy policy" = "Vollständige Datenschutzerklärung";
 "Not a diagnosis. Values read from a photo may be misread. Talk to your doctor before acting on them." = "Keine Diagnose. Aus einem Foto gelesene Werte können Lesefehler enthalten. Sprechen Sie mit Ihrer Ärztin oder Ihrem Arzt, bevor Sie daraus Schlüsse ziehen.";
+
+/* On-device analysis */
+"On this iPhone" = "Auf diesem iPhone";
+"Nothing leaves your phone. Works with no network and no account." = "Nichts verlässt Ihr iPhone. Funktioniert ohne Netz und ohne Konto.";
+"Stays on this iPhone" = "Bleibt auf diesem iPhone";
+"The selected values are explained by the model on this device. Nothing is sent anywhere, and no network is used." = "Die ausgewählten Werte werden vom Modell auf diesem Gerät erklärt. Es wird nichts gesendet und kein Netz genutzt.";
+"MeinBefund service (EU, limited)" = "MeinBefund-Dienst (EU, begrenzt)";
+"Your own Azure OpenAI" = "Eigenes Azure OpenAI";
+"Your own Anthropic API key" = "Eigener Anthropic-Schlüssel";
+"Runs on the app provider's service in the EU. Up to 20 analyses per day." = "Läuft über den Dienst des Anbieters in der EU. Bis zu 20 Analysen pro Tag.";
+"Your values go straight to your own Azure resource. No limit, you pay." = "Ihre Werte gehen direkt an Ihre eigene Azure-Ressource. Kein Limit, Sie zahlen.";
+"Your values go straight to Anthropic in the United States. No limit, you pay." = "Ihre Werte gehen direkt an Anthropic in den USA. Kein Limit, Sie zahlen.";
+"The selected values go to the MeinBefund service in the EU. Your name, date of birth and the scanned image are not sent." = "Die ausgewählten Werte gehen an den MeinBefund-Dienst in der EU. Ihr Name, Ihr Geburtsdatum und der gescannte Befund werden nicht gesendet.";
+"The selected values go to your own Azure resource. Your name, date of birth and the scanned image are not sent." = "Die ausgewählten Werte gehen an Ihre eigene Azure-Ressource. Ihr Name, Ihr Geburtsdatum und der gescannte Befund werden nicht gesendet.";
+"The selected values go to Anthropic in the United States. Your name, date of birth and the scanned image are not sent." = "Die ausgewählten Werte gehen an Anthropic in den USA. Ihr Name, Ihr Geburtsdatum und der gescannte Befund werden nicht gesendet.";
+"Turn on Apple Intelligence in Settings to have your values explained on this device." = "Aktivieren Sie Apple Intelligence in den Einstellungen, um Werte auf diesem Gerät erklären zu lassen.";
+"This iPhone cannot run the on-device model. You can still configure a provider of your own." = "Dieses iPhone kann das Modell nicht lokal ausführen. Sie können einen eigenen Anbieter hinterlegen.";
+"The on-device model is still downloading. Try again shortly." = "Das Modell wird noch geladen. Bitte gleich noch einmal versuchen.";
+"On-device explanations need a newer version of iOS." = "Erklärungen auf dem Gerät benötigen eine neuere iOS-Version.";
+"On-device analysis is unavailable." = "Analyse auf dem Gerät ist nicht verfügbar.";
+"The on-device model did not answer this one. Rephrasing helps, or use another provider." = "Das Modell auf dem Gerät hat hierauf nicht geantwortet. Formulieren Sie die Frage anders oder wählen Sie einen anderen Anbieter.";
+"Apple on-device model" = "Apple-Modell auf dem Gerät";

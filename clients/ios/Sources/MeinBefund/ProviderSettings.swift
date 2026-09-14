@@ -27,6 +27,17 @@ struct ProviderSettings: View {
           Text(configuration.kind.explanation)
             .font(.footnote)
             .foregroundStyle(.secondary)
+
+          // When the on-device model cannot run, say which switch to flip.
+          // "Unavailable" alone invites a bug report; naming the setting does
+          // not, and the person can usually fix it in ten seconds.
+          if configuration.kind == .onDevice,
+            let blocked = OnDeviceAnalysis.availability.explanation
+          {
+            Label(blocked, systemImage: "exclamationmark.triangle")
+              .font(.footnote)
+              .foregroundStyle(.orange)
+          }
         }
 
         if configuration.kind == .azure {
