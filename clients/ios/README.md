@@ -1,4 +1,4 @@
-# MeinBefund
+# Klarbefund
 
 The iPhone health-document scanner ([#186](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/186)).
 Scan a paper lab report, get structured values with their provenance intact, keep

@@ -144,11 +144,102 @@ public enum LabLineParser {
   /// tested place rather than being reimplemented per column. What the table
   /// pass adds is trustworthy row boundaries and a rectangle per row.
   public static func parse(rows: [DocumentReconciler.Row]) -> ParseResult {
-    parse(
+    // Read by column role when the table reveals one. A real sheet from a Berlin
+    // study centre orders its columns Analyt, Einheit, Referenzbereich, Wert,
+    // against which the positional grammar below fails every row. See
+    // `TableRoles` for why this is decided per table rather than per line.
+    if let layout = TableRoles.infer(rows: rows.map { $0.cells.map(\.text) }) {
+      return parse(rows: rows, layout: layout)
+    }
+    return parse(
       lines: rows.enumerated().map {
         (line: $0.element.line, lineNumber: $0.offset + 1, region: $0.element.region)
       })
   }
+
+  private static func parse(
+    rows: [DocumentReconciler.Row], layout: TableRoles.Layout
+  ) -> ParseResult {
+    var values: [RawLabValue] = []
+    var suspicious: [String] = []
+
+    for (index, row) in rows.enumerated() {
+      let cells = row.cells.map { $0.text.trimmingCharacters(in: .whitespaces) }
+      func cell(_ column: Int?) -> String {
+        guard let column, column < cells.count else { return "" }
+        return cells[column]
+      }
+
+      let label = cell(layout.label)
+      let unitRaw = cell(layout.unit)
+      let valueCell = cell(layout.value)
+
+      // The header row, and any section heading, land here and are simply not
+      // measurements. They are not suspicious either: a row with no number in
+      // its value column never claimed to be one.
+      guard !label.isEmpty, !valueCell.isEmpty else { continue }
+
+      let comparatorText = valueCell
+        .replacingOccurrences(of: "≤", with: "<=")
+        .replacingOccurrences(of: "≥", with: ">=")
+      let comparator = firstMatch(#"^(<=|>=|<|>)"#, in: comparatorText).map { $0[1] }
+      let numberText = comparatorText
+        .replacingOccurrences(of: #"^(<=|>=|<|>)\s*"#, with: "", options: .regularExpression)
+        .replacingOccurrences(of: #"\s*[*+!↑↓HL]{1,2}$"#, with: "", options: .regularExpression)
+        .trimmingCharacters(in: .whitespaces)
+
+      guard let value = parseNumber(numberText), Analytes.normaliseUnit(unitRaw) != nil else {
+        if looksLikeMeasurement(row.line) { suspicious.append(row.line) }
+        continue
+      }
+
+      let reference = parseReferenceRange(cell(layout.reference))
+      values.append(
+        RawLabValue(
+          label: label,
+          value: value,
+          unitRaw: unitRaw,
+          comparator: comparator.flatMap(Comparator.init(rawValue:)),
+          referenceLow: reference.low,
+          referenceHigh: reference.high,
+          line: row.line,
+          lineNumber: index + 1,
+          region: row.region
+        ))
+    }
+
+    return ParseResult(values: values, suspiciousLines: suspicious)
+  }
+
+  /// Splits a printed label into its analyte name and its specimen matrix.
+  ///
+  /// German reports mark the matrix in brackets: `Cholesterin [P]` is plasma,
+  /// `Albumin [U]` is urine. Two things follow, and both were costing rows.
+  ///
+  /// First, the marker breaks label matching outright. `normaliseLabel` strips
+  /// punctuation, so `Cholesterin [P]` folds to `cholesterinp`, which matches
+  /// no entry. An analyte the dictionary knows perfectly well was being
+  /// reported as unknown purely because of a two-character suffix.
+  ///
+  /// Second, and more seriously, the matrix is part of the identity of the
+  /// measurement. Urine albumin and serum albumin are different tests with
+  /// different LOINC codes and reference ranges that share a name. The
+  /// dictionary is blood-based throughout, so a non-blood matrix must be
+  /// refused rather than stripped and looked up, or `Albumin [U] 3.9 mg/l`
+  /// would be coded as a serum albumin and read as catastrophically low.
+  public static func splitSpecimen(_ label: String) -> (label: String, specimen: String?) {
+    guard
+      let match = firstMatch(
+        #"^(.*?)\s*\[\s*([A-Za-zÄÖÜäöü]{1,3})\s*\]\s*$"#, in: label)
+    else { return (label, nil) }
+    return (match[1].trimmingCharacters(in: .whitespaces), match[2].uppercased())
+  }
+
+  /// Matrices the analyte dictionary's codings are valid for.
+  ///
+  /// P plasma, S serum, B whole blood, and the German spellings of the same.
+  /// Anything else is a different measurement wearing the same name.
+  static let bloodSpecimens: Set<String> = ["P", "S", "B", "SE", "PL", "VB", "EDT"]
 
   private static func parse(
     lines: [(line: String, lineNumber: Int, region: SourceRegion?)]
@@ -225,9 +316,19 @@ public enum LabLineParser {
         unmapped.append(UnmappedLabValue(raw: raw, reason: .unknownUnit))
         continue
       }
-      if let coding = Analytes.lookup(label: raw.label, unit: raw.unitRaw) {
+
+      // `Cholesterin [P]` folds to `cholesterinp` and matches nothing, so the
+      // matrix comes off before lookup. A non-blood matrix is refused outright:
+      // see `splitSpecimen`.
+      let (bareLabel, specimen) = splitSpecimen(raw.label)
+      if let specimen, !bloodSpecimens.contains(specimen) {
+        unmapped.append(UnmappedLabValue(raw: raw, reason: .specimenNotSupported))
+        continue
+      }
+
+      if let coding = Analytes.lookup(label: bareLabel, unit: raw.unitRaw) {
         coded.append(CodedLabValue(raw: raw, coding: coding, source: source))
-      } else if Analytes.knowsLabel(raw.label) {
+      } else if Analytes.knowsLabel(bareLabel) {
         // The label is known but not in this unit, a different measurement.
         unmapped.append(UnmappedLabValue(raw: raw, reason: .unitMismatch))
       } else {

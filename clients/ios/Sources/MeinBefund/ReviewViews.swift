@@ -13,21 +13,21 @@ struct ReviewSheet: View {
     NavigationStack {
       Form {
         Section {
-          TextField("Bezeichnung", text: $title, prompt: Text("Laborbefund"))
+          TextField("Title", text: $title, prompt: Text("Lab report"))
         } footer: {
-          Text("Die Werte wurden aus einem Foto gelesen und sind deshalb vorläufig, nicht bestätigt.")
+          Text("These values were read from a photo and are preliminary, not confirmed.")
         }
 
         ResultSections(extraction: extraction)
       }
-      .navigationTitle("Geprüft?")
+      .navigationTitle("Reviewed?")
       .navigationBarTitleDisplayMode(.inline)
       .toolbar {
         ToolbarItem(placement: .cancellationAction) {
-          Button("Verwerfen", role: .destructive, action: onDiscard)
+          Button("Discard", role: .destructive, action: onDiscard)
         }
         ToolbarItem(placement: .confirmationAction) {
-          Button("Speichern") { onConfirm(title) }
+          Button("Save") { onConfirm(title) }
         }
       }
     }
@@ -39,9 +39,16 @@ struct ResultList: View {
   let title: String
 
   var body: some View {
-    Form { ResultSections(extraction: extraction) }
-      .navigationTitle(title)
-      .navigationBarTitleDisplayMode(.inline)
+    Form {
+      ResultSections(extraction: extraction)
+      // Guideline 1.4.1 asks that a medical app remind people to check with a
+      // doctor before acting. The moment that matters is while they are looking
+      // at their own numbers, so it lives here rather than in a settings screen
+      // nobody opens.
+      Section { DoctorReminder() }
+    }
+    .navigationTitle(title)
+    .navigationBarTitleDisplayMode(.inline)
   }
 }
 
@@ -53,13 +60,27 @@ struct ResultList: View {
 struct ResultSections: View {
   let extraction: ExtractionResult
 
+  /// `UnmappedReason.explanation` is the wire wording, shared with
+  /// `services/epa-ingest` and written into a PDF export, so it stays English
+  /// and stays put. What a reader sees is translated here instead. Handing the
+  /// wire string to `Text` compiles, renders, and quietly shows English on a
+  /// German phone, because a `String` variable is not a localisation key.
+  private func localised(_ reason: UnmappedReason) -> String {
+    switch reason {
+    case .unknownAnalyte: String(localized: "not in the analyte dictionary")
+    case .unknownUnit: String(localized: "unit has no UCUM mapping")
+    case .unitMismatch: String(localized: "unit does not belong to this analyte")
+    case .specimenNotSupported: String(localized: "specimen is not blood, plasma or serum")
+    }
+  }
+
   var body: some View {
     Section {
       ForEach(Array(extraction.coded.enumerated()), id: \.offset) { _, value in
         CodedRow(value: value)
       }
     } header: {
-      Label("\(extraction.coded.count) erkannt", systemImage: "checkmark.circle")
+      Label("\(extraction.coded.count) recognised", systemImage: "checkmark.circle")
     }
 
     if !extraction.unmapped.isEmpty {
@@ -67,15 +88,15 @@ struct ResultSections: View {
         ForEach(Array(extraction.unmapped.enumerated()), id: \.offset) { _, item in
           VStack(alignment: .leading, spacing: 2) {
             Text("\(item.raw.label)  \(formatted(item.raw.value)) \(item.raw.unitRaw)")
-            Text(item.reason.explanation)
+            Text(localised(item.reason))
               .font(.caption)
               .foregroundStyle(.secondary)
           }
         }
       } header: {
-        Label("\(extraction.unmapped.count) nicht zugeordnet", systemImage: "questionmark.circle")
+        Label("\(extraction.unmapped.count) unmatched", systemImage: "questionmark.circle")
       } footer: {
-        Text("Diese Zeilen wurden gelesen, aber keinem LOINC-Code zugeordnet. Sie werden nicht verworfen.")
+        Text("These lines were read but matched no LOINC code. They are not discarded.")
       }
     }
 
@@ -85,9 +106,9 @@ struct ResultSections: View {
           Text(line).font(.caption.monospaced())
         }
       } header: {
-        Label("\(extraction.suspiciousLines.count) nicht gelesen", systemImage: "exclamationmark.triangle")
+        Label("\(extraction.suspiciousLines.count) unread", systemImage: "exclamationmark.triangle")
       } footer: {
-        Text("Diese Zeilen sahen nach Messwerten aus, konnten aber nicht gelesen werden.")
+        Text("These lines looked like measurements but could not be read.")
       }
     }
   }
@@ -120,7 +141,7 @@ private struct CodedRow: View {
           Text("·")
           // Where on the paper this came from, so the number can be checked
           // against the source rather than trusted (#186 criterion 5).
-          Text("S. \(region.page), Z. \(rowOrdinal(region))")
+          Text("p. \(region.page), line \(rowOrdinal(region))")
         }
       }
       .font(.caption)

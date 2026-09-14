@@ -143,6 +143,18 @@ public struct AnalyteCoding: Sendable, Equatable, Codable {
   public let display: String
   /// Canonical key of the analyte definition, stable across units.
   public let analyteKey: String
+
+  /// Explicit because the synthesised memberwise initialiser is internal, so
+  /// another module cannot construct one. The app target needs to.
+  public init(
+    labelKey: String, ucum: String, loinc: String, display: String, analyteKey: String
+  ) {
+    self.labelKey = labelKey
+    self.ucum = ucum
+    self.loinc = loinc
+    self.display = display
+    self.analyteKey = analyteKey
+  }
 }
 
 public enum Analytes {

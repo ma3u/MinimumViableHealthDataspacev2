@@ -199,7 +199,7 @@ if [[ -f "$REALM_FILE" ]]; then
   KC_TOKEN=$(curl -sf -X POST "${KEYCLOAK_PUBLIC_URL}/realms/master/protocol/openid-connect/token" \
     -d "client_id=admin-cli" \
     -d "username=${KC_ADMIN_USER}" \
-    -d "password=${KC_ADMIN_PASSWORD}" \
+    -d "password=$(kc_admin_password)" \
     -d "grant_type=password" | jq -r '.access_token')
 
   if [[ -n "$KC_TOKEN" && "$KC_TOKEN" != "null" ]]; then
