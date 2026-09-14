@@ -279,6 +279,52 @@ test.describe("Deep-link mechanics the demo script depends on", () => {
     expect(await activePersona(page)).toBe("regulator");
   });
 
+  test("J886 the guide offers both demos for every step", async () => {
+    // The presenter picks static or live on the day, depending on whether the
+    // cluster is healthy. A step that only lists one of them is a step where
+    // that choice silently disappears.
+    const guide = readFileSync(
+      join(
+        __dirname,
+        "../../../../docs/demos/hdab-spain-secondary-use-journey.md",
+      ),
+      "utf8",
+    );
+    const rows = guide
+      .split("\n")
+      .filter((l) => l.includes("[static](") || l.includes("[live]("));
+    expect(rows.length, "expected the both-demos table").toBeGreaterThan(10);
+    for (const row of rows) {
+      expect(row, `row is missing one of the two demos: ${row}`).toMatch(
+        /\[static\]\(https:\/\/ma3u\.github\.io\/.*\[live\]\(https:\/\/ehds\.mabu\.red\//,
+      );
+    }
+  });
+
+  test("J887 the Spanish access body is in the participant data", async ({
+    request,
+  }) => {
+    // EHDS Art. 14 is coordination between access bodies in different member
+    // states, which needs two of them to exist. With only MedReg DE on the
+    // graph the cross-border story has nothing to point at.
+    const res = await request.get(`${BP}/mock/admin_participants.json`);
+    expect(res.status()).toBe(200);
+    const data = JSON.parse(await res.text());
+    const es = data.participants.find(
+      (p: { participantId: string }) =>
+        p.participantId === "did:web:medreg.es:hdab",
+    );
+    expect(es, "MedReg ES must be a participant").toBeTruthy();
+    expect(es.country).toBe("ES");
+    expect(es.participantType).toBe("HDAB_AUTHORITY");
+
+    // The summary is rendered as counts beside the table, so it has to agree
+    // with the rows rather than drift from them.
+    expect(data.summary.total).toBe(data.participants.length);
+    const bySource = Object.values(data.summary.bySource) as number[];
+    expect(bySource.reduce((a, b) => a + b, 0)).toBe(data.summary.total);
+  });
+
   test("J884 every mock fixture the journey reads is served", async ({
     request,
   }) => {
