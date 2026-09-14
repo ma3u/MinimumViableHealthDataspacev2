@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# MeinBefund → App Store Connect → TestFlight (internal testers).
+# Klarbefund → App Store Connect → TestFlight (internal testers).
 #
 # This script takes the build as far as a signed .ipa and uploads it. What it
 # CANNOT do, and what you must do once by hand first:
@@ -7,7 +7,7 @@
 #   1. A paid Apple Developer Program membership.
 #   2. An App Store Connect record for bundle id red.mabu.meinbefund
 #      (App Store Connect → Apps → +, platform iOS). The app NAME must be unique
-#      across the App Store: check "MeinBefund" is free before relying on it.
+#      across the App Store: check "Klarbefund" is free before relying on it.
 #   3. An App Store Connect API key (Users and Access → Integrations → App Store
 #      Connect API). Download the .p8 once; it is not downloadable again.
 #   4. A distribution certificate and provisioning profile for that bundle id,
@@ -37,6 +37,19 @@ xcodegen generate
 # goes to a tester: a stale copy is the divergence clients/ios exists to stop.
 echo "==> Checking the generated analyte table is current"
 (cd ../../services/epa-ingest && npm run --silent generate:swift -- --check)
+
+# Every user-visible string needs both languages, and none of them may be
+# German sitting in the English base. Cheap here, expensive after upload.
+echo "==> Checking English and German are both complete"
+./Scripts/check-localization.sh
+
+# App Store Connect rejects a marketing icon that carries an alpha channel
+# (ITMS-90717), and it rejects it after the upload, having consumed the build
+# number. Checking the file costs nothing.
+echo "==> Checking the marketing icon has no alpha channel"
+icon=Sources/MeinBefund/Assets.xcassets/AppIcon.appiconset/AppIcon-1024.png
+alpha="$(sips -g hasAlpha "$icon" | awk '/hasAlpha/ {print $2}')"
+[ "$alpha" = "no" ] || { echo "$icon has an alpha channel; flatten it first"; exit 1; }
 
 echo "==> Verifying analyte parity"
 swift run AnalyteParity >/dev/null && echo "    parity ok"

@@ -1,0 +1,6 @@
+/* Klarbefund, English.
+
+   English is the base language and the keys are already English, so this file
+   is intentionally empty of overrides. It exists so the bundle advertises
+   English as a supported localisation; without it a German device would be
+   offered German and an English one would fall back rather than match. */

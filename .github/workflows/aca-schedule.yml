@@ -101,10 +101,21 @@ jobs:
           #  - 8 EDC apps: ADR-024 provisioned the full EDC stack at min=1.
           #    ADR-027 adds them here so they no longer bill nights + weekends.
           # Stop order is irrelevant; start order is not (see the start job).
+          # mvhd-postgres and mvhd-keycloak are deliberately NOT in this list
+          # since 2026-09-13, and mvhd-claude-federation never was.
+          #
+          # MeinBefund is not a demo that is only looked at during office hours.
+          # A person scans a lab report when they get home, and with these three
+          # scaled to zero they cannot sign in and cannot ask anything, every
+          # evening and all weekend, with no error that explains why. Keycloak
+          # needs Postgres, and the quota counter is in the same database, so
+          # both have to stay.
+          #
+          # 12 of 15 apps still scale down, which keeps most of the saving that
+          # ADR-027 was after. Revisit if the identity and quota state moves out
+          # of this cluster.
           APPS=(
-            mvhd-postgres
             mvhd-neo4j
-            mvhd-keycloak
             mvhd-vault
             mvhd-neo4j-proxy
             mvhd-ui

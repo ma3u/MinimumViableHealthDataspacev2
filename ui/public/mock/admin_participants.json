@@ -50,7 +50,7 @@
     },
     {
       "participantId": "did:web:irs.fr:hdab",
-      "name": "Institut de Recherche Santé",
+      "name": "Institut de Recherche Sant\u00e9",
       "participantType": "HDAB",
       "source": "seed",
       "walletType": "business",
@@ -95,13 +95,25 @@
       "crawlerEnabled": false,
       "onboardedAt": "2026-06-04T08:15:00Z",
       "datasetCount": 1
+    },
+    {
+      "participantId": "did:web:medreg.es:hdab",
+      "name": "MedReg ES",
+      "participantType": "HDAB_AUTHORITY",
+      "source": "seed",
+      "walletType": "business",
+      "country": "ES",
+      "dspCatalogUrl": null,
+      "crawlerEnabled": false,
+      "onboardedAt": "2026-03-02T09:00:00Z",
+      "datasetCount": 0
     }
   ],
   "summary": {
-    "total": 8,
+    "total": 9,
     "crawlable": 5,
     "bySource": {
-      "seed": 5,
+      "seed": 6,
       "dcp": 1,
       "business-wallet": 1,
       "private-wallet": 1

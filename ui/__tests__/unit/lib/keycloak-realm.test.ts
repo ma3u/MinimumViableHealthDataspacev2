@@ -186,8 +186,34 @@ describe("Keycloak realm configuration", () => {
   describe("users", () => {
     const users = realm.users;
 
-    it("should have all 7 demo personas", () => {
-      expect(users).toHaveLength(7);
+    it("should have every demo persona, by name", () => {
+      // Names rather than a count. A bare length assertion fails whenever a
+      // persona is added and says nothing about which one is missing when a
+      // persona is accidentally dropped, which is the case that actually
+      // breaks a demo.
+      expect(users.map((u: { username: string }) => u.username).sort()).toEqual(
+        [
+          "clinicuser",
+          "edcadmin",
+          "lmcuser",
+          "patient1",
+          "patient2",
+          "regulator",
+          "regulator-es",
+          "researcher",
+        ],
+      );
+    });
+
+    it("regulator-es is the second access body, for EHDS Art. 14", () => {
+      const user = users.find(
+        (u: { username: string }) => u.username === "regulator-es",
+      );
+      expect(user).toBeDefined();
+      expect(user.enabled).toBe(true);
+      expect(user.realmRoles).toContain("HDAB_AUTHORITY");
+      expect(user.credentials).toHaveLength(1);
+      expect(user.credentials[0].temporary).toBe(false);
     });
 
     it("edcadmin user should have EDC_ADMIN role", () => {

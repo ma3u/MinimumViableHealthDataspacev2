@@ -39,7 +39,7 @@ az containerapp create \
     "KC_HOSTNAME_STRICT_BACKCHANNEL=false" \
     "KC_PROXY_HEADERS=xforwarded" \
     "KEYCLOAK_ADMIN=${KC_ADMIN_USER}" \
-    "KEYCLOAK_ADMIN_PASSWORD=${KC_ADMIN_PASSWORD}" \
+    "KEYCLOAK_ADMIN_PASSWORD=$(kc_admin_password)" \
   -o none
 ok "Keycloak container app ${KEYCLOAK_APP}"
 

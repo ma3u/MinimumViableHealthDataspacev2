@@ -44,3 +44,49 @@ that way again. Production was unaffected: `reset-demo` deletes and re-imports
 the realm, which picks up the whole file.
 `06-post-deploy.sh` now verifies redirect URIs and exits non-zero on drift;
 `ui/__tests__/unit/config/keycloak-realm.test.ts` pins the production URIs.
+
+## The realm has vanished entirely
+
+Different failure from drift, same blast radius. Symptom:
+
+```
+$ curl -s https://auth.ehds.mabu.red/realms/edcv/.well-known/openid-configuration
+{"error":"Realm does not exist"}
+```
+
+while `/realms/master` answers 200. Keycloak is healthy, Postgres is up, the
+realm row is simply not there. Every sign-in on the live UI fails and all seven
+demo personas are gone with it. Seen on 2026-09-14, two days before a regulator
+demo.
+
+Fix:
+
+```bash
+KEYCLOAK_PUBLIC_HOSTNAME=auth.ehds.mabu.red \
+  ./scripts/azure/restore-keycloak-realm.sh --check   # report only
+KEYCLOAK_PUBLIC_HOSTNAME=auth.ehds.mabu.red \
+  ./scripts/azure/restore-keycloak-realm.sh           # import it
+```
+
+`06-post-deploy.sh` also imports the realm, but it redeploys half the estate on
+the way, which is not what you want ten minutes before a demo.
+
+Two things that make this recoverable, both worth preserving:
+
+- `jad/keycloak-realm.json` pins the `health-dataspace-ui` client secret. If it
+  did not, a re-import would mint a fresh secret and the UI's stored one would
+  no longer match, turning a working login into a token-exchange failure that
+  looks nothing like the original problem.
+- The same file already lists the `ehds.mabu.red` redirect URIs, so a plain
+  re-import restores working logins without touching the client. The redirect
+  step in the script only matters when the ACA FQDN has changed.
+
+Verify with the real thing rather than with discovery alone:
+
+```bash
+cd ui && PLAYWRIGHT_BASE_URL=https://ehds.mabu.red \
+  npx playwright test 18-user-login-roles.spec.ts --project=chromium
+```
+
+21 tests, real Keycloak sign-in for all seven personas plus RBAC. Discovery
+answering 200 only proves the realm exists; this proves people can get in.

@@ -1,0 +1,33 @@
+{
+  "consent": {
+    "at": "2026-09-13T12:00:00Z",
+    "provider": "anthropic"
+  },
+  "question": "Was bedeuten diese Werte?",
+  "values": [
+    {
+      "label": "LDL-Cholesterin",
+      "loinc": "2089-1",
+      "referenceHigh": 116,
+      "status": "preliminary",
+      "unit": "mg/dL",
+      "value": 141
+    },
+    {
+      "label": "HbA1c",
+      "loinc": "4548-4",
+      "referenceHigh": 6,
+      "referenceLow": 4,
+      "status": "preliminary",
+      "unit": "%",
+      "value": 5.4
+    },
+    {
+      "label": "Ferritin",
+      "loinc": "2276-4",
+      "status": "final",
+      "unit": "ug/L",
+      "value": 210
+    }
+  ]
+}
