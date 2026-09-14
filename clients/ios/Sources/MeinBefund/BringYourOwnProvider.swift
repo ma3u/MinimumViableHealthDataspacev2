@@ -20,6 +20,10 @@ import Shared
 enum BringYourOwnProvider {
 
   enum Kind: String, Codable, CaseIterable, Sendable {
+    /// Apple's on-device model. No network, no account, no limit, and nothing
+    /// leaves the phone. The default, per issue #186 section 4.3, and the
+    /// reason the app keeps working when the cluster does not.
+    case onDevice
     /// The operator's service: OIDC sign-in, EU by default, daily limit.
     case hosted
     /// The user's own Azure OpenAI resource.
@@ -29,23 +33,31 @@ enum BringYourOwnProvider {
 
     var label: String {
       switch self {
-      case .hosted: return "MeinBefund service (EU, limited)"
-      case .azure: return "Your own Azure OpenAI"
-      case .anthropic: return "Your own Anthropic API key"
+      case .onDevice: return String(localized: "On this iPhone")
+      case .hosted: return String(localized: "MeinBefund service (EU, limited)")
+      case .azure: return String(localized: "Your own Azure OpenAI")
+      case .anthropic: return String(localized: "Your own Anthropic API key")
       }
     }
 
     var explanation: String {
       switch self {
+      case .onDevice:
+        return String(
+          localized:
+            "Nothing leaves your phone. Works with no network and no account.")
       case .hosted:
-        return
-          "Runs on the app provider's service in the EU. Up to 20 analyses per day."
+        return String(
+          localized:
+            "Runs on the app provider's service in the EU. Up to 20 analyses per day.")
       case .azure:
-        return
-          "Your values go straight to your own Azure resource. No limit, you pay."
+        return String(
+          localized:
+            "Your values go straight to your own Azure resource. No limit, you pay.")
       case .anthropic:
-        return
-          "Your values go straight to Anthropic in the United States. No limit, you pay."
+        return String(
+          localized:
+            "Your values go straight to Anthropic in the United States. No limit, you pay.")
       }
     }
   }
@@ -59,8 +71,11 @@ enum BringYourOwnProvider {
     /// Anthropic only.
     var model: String
 
-    static let hosted = Configuration(
-      kind: .hosted, endpoint: "", deployment: "", model: "")
+    /// The default. Not `hosted`: a network service cannot be the default for
+    /// an app whose point is that a person's results live on their own phone,
+    /// and the cluster is not always up.
+    static let onDevice = Configuration(
+      kind: .onDevice, endpoint: "", deployment: "", model: "")
 
     /// True when the configuration is complete enough to attempt a call.
     ///
@@ -68,6 +83,7 @@ enum BringYourOwnProvider {
     /// look usable and then fail on the values the user just chose to send.
     var isUsable: Bool {
       switch kind {
+      case .onDevice: return OnDeviceAnalysis.isAvailable
       case .hosted: return true
       case .azure:
         return URL(string: endpoint)?.scheme == "https" && !deployment.isEmpty
@@ -77,6 +93,8 @@ enum BringYourOwnProvider {
 
     var euResident: Bool {
       switch kind {
+      // Not merely EU-resident: it never leaves the device at all.
+      case .onDevice: return true
       case .hosted: return true
       // The user chose the region when they created the resource. The app
       // cannot know it and must not claim to.
@@ -145,7 +163,7 @@ enum BringYourOwnProvider {
   static func configuration() -> Configuration {
     guard let data = UserDefaults.standard.data(forKey: configKey),
       let decoded = try? JSONDecoder().decode(Configuration.self, from: data)
-    else { return .hosted }
+    else { return .onDevice }
     return decoded
   }
 
@@ -176,7 +194,9 @@ enum BringYourOwnProvider {
 
     let prompt = PromptText.user(values: values, question: question)
     switch configuration.kind {
-    case .hosted:
+    case .onDevice, .hosted:
+      // Neither arrives here: on-device runs before any key is needed, and
+      // hosted goes through the backend client.
       throw CallError.notConfigured
     case .azure:
       return try await callAzure(configuration, key: key, prompt: prompt)

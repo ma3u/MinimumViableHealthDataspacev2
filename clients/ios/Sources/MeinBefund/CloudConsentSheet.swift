@@ -15,6 +15,12 @@ import SwiftUI
 /// the UI makes on its own.
 struct CloudConsentSheet: View {
   let candidates: [CodedLabValue]
+  /// Which provider will answer, so the sheet can tell the truth about where
+  /// the values go. Claiming "these values leave your device" when the
+  /// on-device model is selected would be false, and a consent screen that
+  /// overstates is as bad as one that understates: both teach people to stop
+  /// reading it.
+  let provider: BringYourOwnProvider.Kind
   let onSend: ([CloudAnalysis.SharedValue], String) -> Void
   let onCancel: () -> Void
 
@@ -35,17 +41,21 @@ struct CloudConsentSheet: View {
     NavigationStack {
       Form {
         Section {
-          Label("These values leave your device", systemImage: "arrow.up.forward.app")
-            .font(.headline)
-          Text(
-            """
-            Die ausgewählten Werte werden an Anthropic (Claude) in den USA \
-            gesendet. Ihr Name, Ihr Geburtsdatum und der gescannte Befund \
-            werden nicht gesendet. Ohne Auswahl verlässt nichts das Gerät.
-            """
-          )
-          .font(.footnote)
-          .foregroundStyle(.secondary)
+          if provider == .onDevice {
+            Label("Stays on this iPhone", systemImage: "iphone")
+              .font(.headline)
+            Text(
+              "The selected values are explained by the model on this device. Nothing is sent anywhere, and no network is used."
+            )
+            .font(.footnote)
+            .foregroundStyle(.secondary)
+          } else {
+            Label("These values leave your device", systemImage: "arrow.up.forward.app")
+              .font(.headline)
+            Text(destinationNote)
+              .font(.footnote)
+              .foregroundStyle(.secondary)
+          }
         }
 
         Section("Select values") {
@@ -87,15 +97,7 @@ struct CloudConsentSheet: View {
         }
 
         Section {
-          Text(
-            """
-            Claude erklärt Messwerte. Es stellt keine Diagnose, schätzt kein \
-            Risiko ein und empfiehlt keine Behandlung. Für all das ist Ihre \
-            Ärztin oder Ihr Arzt zuständig.
-            """
-          )
-          .font(.footnote)
-          .foregroundStyle(.secondary)
+          DoctorReminder()
         }
       }
       .navigationTitle("Send for analysis")
@@ -109,6 +111,26 @@ struct CloudConsentSheet: View {
             .disabled(CloudAnalysis.refusal(for: chosen) != nil)
         }
       }
+    }
+  }
+
+  /// Names the destination precisely. "A third party" is not a disclosure.
+  private var destinationNote: String {
+    switch provider {
+    case .onDevice:
+      return ""
+    case .hosted:
+      return String(
+        localized:
+          "The selected values go to the MeinBefund service in the EU. Your name, date of birth and the scanned image are not sent.")
+    case .azure:
+      return String(
+        localized:
+          "The selected values go to your own Azure resource. Your name, date of birth and the scanned image are not sent.")
+    case .anthropic:
+      return String(
+        localized:
+          "The selected values go to Anthropic in the United States. Your name, date of birth and the scanned image are not sent.")
     }
   }
 
