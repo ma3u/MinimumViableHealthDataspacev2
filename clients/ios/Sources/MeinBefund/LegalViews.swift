@@ -48,12 +48,13 @@ struct PrivacySummary: View {
               .font(.headline)
             Text(
               """
-              By default the MeinBefund service processes your question in the \
-              EU. You may instead choose Anthropic, which processes in the \
-              United States and is shown as such before you send. Or you can \
-              configure your own provider, in which case your phone talks to it \
-              directly and neither your key nor your values reach the app \
-              provider at all.
+              By default the model on this iPhone answers, so your question \
+              never reaches a network at all. You may instead choose the \
+              MeinBefund service, which processes in the EU, or your own Azure \
+              resource or Anthropic key, in which case your phone talks to \
+              your service directly and neither your key nor your values reach \
+              the app provider at all. Whichever is in use is named on the \
+              screen before you send.
 
               No model vendor uses your values for training.
               """)

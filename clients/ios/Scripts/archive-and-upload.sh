@@ -38,6 +38,19 @@ xcodegen generate
 echo "==> Checking the generated analyte table is current"
 (cd ../../services/epa-ingest && npm run --silent generate:swift -- --check)
 
+# Every user-visible string needs both languages, and none of them may be
+# German sitting in the English base. Cheap here, expensive after upload.
+echo "==> Checking English and German are both complete"
+./Scripts/check-localization.sh
+
+# App Store Connect rejects a marketing icon that carries an alpha channel
+# (ITMS-90717), and it rejects it after the upload, having consumed the build
+# number. Checking the file costs nothing.
+echo "==> Checking the marketing icon has no alpha channel"
+icon=Sources/MeinBefund/Assets.xcassets/AppIcon.appiconset/AppIcon-1024.png
+alpha="$(sips -g hasAlpha "$icon" | awk '/hasAlpha/ {print $2}')"
+[ "$alpha" = "no" ] || { echo "$icon has an alpha channel; flatten it first"; exit 1; }
+
 echo "==> Verifying analyte parity"
 swift run AnalyteParity >/dev/null && echo "    parity ok"
 

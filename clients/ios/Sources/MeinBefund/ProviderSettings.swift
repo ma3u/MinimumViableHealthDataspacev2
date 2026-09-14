@@ -56,8 +56,8 @@ struct ProviderSettings: View {
             // badge that might be wrong.
             Text(
               """
-              Die Region Ihrer Ressource bestimmt, wo die Werte verarbeitet \
-              werden. Die App kann das nicht prüfen.
+              The region of your resource decides where the values are \
+              processed. The app cannot check that.
               """
             )
             .font(.footnote)
@@ -79,13 +79,16 @@ struct ProviderSettings: View {
           }
         }
 
-        if configuration.kind != .hosted {
+        // On device there is no key and no endpoint, so this note would be
+        // answering a question nobody asked. It belongs to the two kinds that
+        // actually take a key.
+        if configuration.kind == .azure || configuration.kind == .anthropic {
           Section {
             Text(
               """
-              Der Schlüssel bleibt auf diesem Gerät, in der Schlüsselbund-Ablage, \
-              und wird niemals an den Anbieter dieser App gesendet. Die Werte \
-              gehen direkt von Ihrem iPhone an Ihren Dienst.
+              The key stays on this device, in the keychain, and is never sent \
+              to the provider of this app. The values go straight from your \
+              iPhone to your own service.
               """
             )
             .font(.footnote)
