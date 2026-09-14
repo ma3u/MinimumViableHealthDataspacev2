@@ -9,33 +9,33 @@
 // 1. Trust Center nodes (Layer 1 extension)
 // ============================================================
 
-// DE: Robert Koch Institute — designated German national trust center
-MERGE (tc_de:TrustCenter {name: "RKI Trust Center DE"})
+// DE: fictional, like every participant here. See .claude/rules/code-style.md.
+MERGE (tc_de:TrustCenter {name: "MedReg DE Trust Centre"})
 SET tc_de += {
-  operatedBy: "Robert Koch Institute",
+  operatedBy: "MedReg DE",
   country: "DE",
   status: "active",
   protocol: "deterministic-pseudonym-v1",
-  endpoint: "https://trustcenter.rki.de/resolve",
-  did: "did:web:rki.de:trustcenter",
+  endpoint: "https://trustcentre.medreg.de/resolve",
+  did: "did:web:medreg.de:trustcentre",
   createdAt: datetime("2025-01-01T00:00:00Z"),
   description: "German national trust center designated under EHDS Art. 50. " +
                "Implements stateless HMAC-based pseudonym resolution for " +
                "cross-provider longitudinal patient linkage."
 };
 
-// NL: RIVM (Rijksinstituut voor Volksgezondheid en Milieu)
-MERGE (tc_nl:TrustCenter {name: "RIVM Trust Center NL"})
+// NL: fictional, paired with the Limburg Medical Centre data holder.
+MERGE (tc_nl:TrustCenter {name: "Limburg Trust Centre NL"})
 SET tc_nl += {
-  operatedBy: "Rijksinstituut voor Volksgezondheid en Milieu",
+  operatedBy: "Limburg Medical Centre",
   country: "NL",
   status: "active",
   protocol: "deterministic-pseudonym-v1",
-  endpoint: "https://trustcenter.rivm.nl/resolve",
-  did: "did:web:rivm.nl:trustcenter",
+  endpoint: "https://trustcentre.lmc.nl/resolve",
+  did: "did:web:lmc.nl:trustcentre",
   createdAt: datetime("2025-02-01T00:00:00Z"),
   description: "Dutch national trust center under HDAB authority. " +
-               "Supports cross-border mutual recognition with DE/RKI " +
+               "Supports cross-border mutual recognition with the German " +
                "under EHDS Art. 51."
 };
 
@@ -46,7 +46,7 @@ SET tc_nl += {
 // Link both trust centers to the MedReg DE HDAB approval
 MATCH (ha:HDABApproval)
 WHERE ha.approvalId IN ["hdab-approval-001", "hdab-approval-002"]
-MERGE (tc_de:TrustCenter {name: "RKI Trust Center DE"})
+MERGE (tc_de:TrustCenter {name: "MedReg DE Trust Centre"})
 MERGE (tc_de)-[:GOVERNED_BY]->(ha);
 
 // ============================================================
@@ -59,20 +59,20 @@ WHERE ds.datasetId IN [
   "dataset-fhir-lmc",
   "dataset-omop-alphaklinik"
 ]
-MERGE (tc_de:TrustCenter {name: "RKI Trust Center DE"})
+MERGE (tc_de:TrustCenter {name: "MedReg DE Trust Centre"})
 MERGE (tc_de)-[:RESOLVES_PSEUDONYMS_FOR]->(ds);
 
 MATCH (ds:HealthDataset)
 WHERE ds.datasetId IN ["dataset-fhir-lmc"]
-MERGE (tc_nl:TrustCenter {name: "RIVM Trust Center NL"})
+MERGE (tc_nl:TrustCenter {name: "Limburg Trust Centre NL"})
 MERGE (tc_nl)-[:RESOLVES_PSEUDONYMS_FOR]->(ds);
 
 // ============================================================
 // 4. Cross-border mutual recognition
 // ============================================================
 
-MERGE (tc_de:TrustCenter {name: "RKI Trust Center DE"})
-MERGE (tc_nl:TrustCenter {name: "RIVM Trust Center NL"})
+MERGE (tc_de:TrustCenter {name: "MedReg DE Trust Centre"})
+MERGE (tc_nl:TrustCenter {name: "Limburg Trust Centre NL"})
 MERGE (tc_de)-[:MUTUALLY_RECOGNISES {
   since: date("2025-03-01"),
   framework: "EHDS Art. 51",
@@ -92,24 +92,42 @@ MERGE (spe1:SPESession {sessionId: "spe-session-001"})
 SET spe1 += {
   studyId: "study-diabetes-de-nl-2025",
   status: "active",
-  attestation: "sha256:a3f8c2e1d4b7f6a9c0e2d5b8a1f4c7e0d3b6a9c2e5d8b1a4f7c0e3d6b9a2c5e8",
-  approvedCodeHash: "sha256:c7e0d3b6a9c2e5d8b1a4f7c0e3d6b9a2c5e8a3f8c2e1d4b7f6a9c0e2d5b8a1f4",
+  attestation: "sha256:a59aa00a8540f63528fd8e9c1731fed118a82b68cf03d65780e9053ae6f0a7d0",
+  approvedCodeHash: "sha256:a92de975fd6a22a6eb6cb760c67937829bc9f3c7da49362afca2a54f3ad9dc67",
   createdAt: datetime("2025-03-15T09:00:00Z"),
   createdBy: "did:web:medreg.de:hdab",
   kAnonymityThreshold: 5,
-  outputPolicy: "aggregate-only"
+  outputPolicy: "aggregate-only",
+  // Attestation shape per ADR-037. Simulated in this seed: no confidential
+  // node produced these. The field names and lengths match what Contrast
+  // actually yields, so phase 2 substitutes real values without a migration.
+  simulated: true,
+  teeType: "AMD SEV-SNP",
+  policyHash: "sha256:c2775865d3e11ffe183c42f114177cf5899bf95467b2d8430f966a42800a653c",
+  coordinatorEndpoint: "coordinator.spe.internal:1313",
+  attestedAt: datetime("2025-03-15T09:02:11Z"),
+  verifiedBy: "did:web:medreg.de:hdab"
 };
 
 MERGE (spe2:SPESession {sessionId: "spe-session-002"})
 SET spe2 += {
   studyId: "study-cardio-nl-2025",
   status: "completed",
-  attestation: "sha256:b4g9d3f2e5c8g1h4i7j0k3l6m9n2o5p8q1r4s7t0u3v6w9x2y5z8a1b4c7d0e3f6",
-  approvedCodeHash: "sha256:d8c1b4a7f0e3d6c9b2a5f8e1d4c7b0a3f6e9d2c5b8a1f4e7d0c3b6a9f2e5d8c1",
+  attestation: "sha256:da8c5c1d580565ce2210b65560c09a298f7f63e512b01fe404df7ecfbad20ac5",
+  approvedCodeHash: "sha256:5c14374f008bf035388906c6ac732b59bb27b69ab7a70ab17d08d85c932158f2",
   createdAt: datetime("2025-02-10T14:30:00Z"),
   createdBy: "did:web:medreg.de:hdab",
   kAnonymityThreshold: 5,
-  outputPolicy: "aggregate-only"
+  outputPolicy: "aggregate-only",
+  // Attestation shape per ADR-037. Simulated in this seed: no confidential
+  // node produced these. The field names and lengths match what Contrast
+  // actually yields, so phase 2 substitutes real values without a migration.
+  simulated: true,
+  teeType: "AMD SEV-SNP",
+  policyHash: "sha256:e938dd986b73e1939f83182761e550a902ebcbb528d6685bec118f2e72c4074c",
+  coordinatorEndpoint: "coordinator.spe.internal:1313",
+  attestedAt: datetime("2025-03-15T09:02:11Z"),
+  verifiedBy: "did:web:medreg.de:hdab"
 };
 
 // ============================================================
@@ -159,10 +177,10 @@ MERGE (rp1)-[:USED_IN]->(spe1);
 // 8. Trust Center → SPE Session governance
 // ============================================================
 
-MERGE (tc_de:TrustCenter {name: "RKI Trust Center DE"})
+MERGE (tc_de:TrustCenter {name: "MedReg DE Trust Centre"})
 MERGE (spe1:SPESession {sessionId: "spe-session-001"})
 MERGE (tc_de)-[:MANAGES]->(spe1);
 
-MERGE (tc_nl:TrustCenter {name: "RIVM Trust Center NL"})
+MERGE (tc_nl:TrustCenter {name: "Limburg Trust Centre NL"})
 MERGE (spe2:SPESession {sessionId: "spe-session-002"})
 MERGE (tc_nl)-[:MANAGES]->(spe2);
