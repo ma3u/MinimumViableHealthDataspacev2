@@ -251,7 +251,14 @@ jobs:
       # it does not is still open. Until that is answered, the realm is checked
       # and re-imported on every start, because the failure mode is that every
       # sign-in on the live UI breaks and nothing says so until someone tries.
+      # continue-on-error: a realm that cannot be restored must not stop the
+      # rest of the start. The first run of this step failed on a Key Vault
+      # permission and took the EDC stack, the Vault bootstrap and the UI
+      # verification down with it, which is a worse outage than the one it was
+      # added to fix. It still annotates loudly, because a silent failure here
+      # means every sign-in is broken and nothing says so.
       - name: Ensure the Keycloak realm exists (gotcha, see runbook)
+        continue-on-error: true
         env:
           KEYCLOAK_PUBLIC_HOSTNAME: auth.ehds.mabu.red
         run: |
@@ -262,7 +269,10 @@ jobs:
             if [ "$code" = "200" ]; then break; fi
             sleep 10
           done
-          ./scripts/azure/restore-keycloak-realm.sh
+          if ! ./scripts/azure/restore-keycloak-realm.sh; then
+            echo "::error::Keycloak realm could not be restored, so every sign-in on ${KEYCLOAK_PUBLIC_HOSTNAME} will fail. If this is a Key Vault permission, grant the CI service principal the 'Key Vault Secrets User' role on the vault holding keycloak-admin-password."
+            exit 1
+          fi
 
       - name: Restore EDC stack (ADR-024)
         run: |
