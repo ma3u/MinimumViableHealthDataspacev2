@@ -182,7 +182,7 @@ jobs:
       # Needed for scripts/azure/restore-keycloak-realm.sh and the realm file
       # it imports. The stop job needs no checkout and does not have one.
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Azure Login (OIDC)
         uses: azure/login@v2

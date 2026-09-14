@@ -46,7 +46,7 @@ jobs:
     timeout-minutes: 15
     if: github.event_name != 'workflow_dispatch' || inputs.target == 'local'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Login to GHCR
         uses: docker/login-action@v3
@@ -106,7 +106,7 @@ jobs:
     timeout-minutes: 15
     if: github.event_name != 'workflow_dispatch' || inputs.target == 'local'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Login to GHCR
         uses: docker/login-action@v3
@@ -168,7 +168,7 @@ jobs:
     timeout-minutes: 20
     if: github.event_name != 'workflow_dispatch' || inputs.target == 'local'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Login to GHCR
         uses: docker/login-action@v3
@@ -241,7 +241,7 @@ jobs:
       RG: rg-mvhd-dev
       COMPLIANCE_JOB: mvhd-compliance-runner
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: azure/login@v2
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
@@ -278,7 +278,7 @@ jobs:
     needs: [dsp-tck, dcp-compliance, ehds-compliance]
     if: always() && (github.event_name != 'workflow_dispatch' || inputs.target == 'local')
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Download all artifacts
         uses: actions/download-artifact@v4
