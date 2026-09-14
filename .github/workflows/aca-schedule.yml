@@ -179,6 +179,11 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
+      # Needed for scripts/azure/restore-keycloak-realm.sh and the realm file
+      # it imports. The stop job needs no checkout and does not have one.
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - name: Azure Login (OIDC)
         uses: azure/login@v2
         with:
@@ -238,6 +243,26 @@ jobs:
         run: |
           echo "Waiting 75s for Neo4j + Vault pods to start..."
           sleep 75
+
+      # The `edcv` realm does not survive this stop/start cycle. It has gone
+      # missing twice on 2026-09-14 alone: once found during demo prep, and
+      # again within minutes of the stack restarting after a deploy. Keycloak
+      # is configured with KC_DB=postgres, so it is meant to persist, and why
+      # it does not is still open. Until that is answered, the realm is checked
+      # and re-imported on every start, because the failure mode is that every
+      # sign-in on the live UI breaks and nothing says so until someone tries.
+      - name: Ensure the Keycloak realm exists (gotcha, see runbook)
+        env:
+          KEYCLOAK_PUBLIC_HOSTNAME: auth.ehds.mabu.red
+        run: |
+          echo "Waiting for Keycloak to answer..."
+          for _ in $(seq 1 30); do
+            code=$(curl -s -o /dev/null -w '%{http_code}' \
+              "https://${KEYCLOAK_PUBLIC_HOSTNAME}/realms/master/.well-known/openid-configuration" || true)
+            if [ "$code" = "200" ]; then break; fi
+            sleep 10
+          done
+          ./scripts/azure/restore-keycloak-realm.sh
 
       - name: Restore EDC stack (ADR-024)
         run: |

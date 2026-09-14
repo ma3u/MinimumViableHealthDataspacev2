@@ -90,3 +90,33 @@ cd ui && PLAYWRIGHT_BASE_URL=https://ehds.mabu.red \
 
 21 tests, real Keycloak sign-in for all seven personas plus RBAC. Discovery
 answering 200 only proves the realm exists; this proves people can get in.
+
+### Why it vanishes: it does not survive a restart
+
+Observed twice on 2026-09-14. Found missing during demo prep, re-imported, the
+full login suite passed 21/21 against the live URL. Then a merge to `main`
+triggered `deploy-azure.yml`, the stack came back up, and within minutes:
+
+```
+$ curl -s https://auth.ehds.mabu.red/realms/edcv/.well-known/openid-configuration
+{"error":"Realm does not exist"}
+```
+
+`deploy-azure.yml` only reads Keycloak's FQDN and runs tests against it. It
+never imports or deletes a realm. What it does do is create new container
+revisions, which restarts Keycloak.
+
+So the realm is not surviving a Keycloak restart, even though
+`scripts/azure/03-identity.sh` configures `KC_DB=postgres` with a JDBC URL and
+Postgres has a persistent Azure Files volume. Why the two do not add up is
+**still open**: confirming it needs an Azure session long enough to inspect the
+running revision's volume mounts and the `keycloak` database itself.
+
+What makes this bite daily rather than occasionally is `aca-schedule.yml`,
+which scales the whole stack to zero at 18:00 UTC and back up on weekday
+mornings. Every stop/start is a restart, so every day is another chance to lose
+the realm, and nothing announces it: the UI stays up and every sign-in fails.
+
+Until the cause is found, the start job re-imports the realm on every start
+("Ensure the Keycloak realm exists"). That is a bandage on the symptom, and it
+is named as one in the workflow so nobody mistakes it for the fix.
