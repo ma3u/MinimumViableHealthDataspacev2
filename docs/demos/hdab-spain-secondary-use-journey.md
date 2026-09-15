@@ -223,27 +223,35 @@ On the Pages mirror there is no password, because there is no sign-in.
 ## Closing the demo: who operates this?
 
 The question that follows the audit step is never technical. It is who runs this,
-and who is accountable when it breaks. Six slides at the end of
+and who is accountable when it breaks. Five slides at the end of
 `docs/demos/spain-ehds-ministry-deck.pptx` answer it, taken from the Catena-X
-operating model and re-cut for the Regulation:
+operating model and re-cut for the Regulation. Every one of them carries its
+sources bottom right, because the argument rests on two documents the audience
+can check themselves.
 
 1. **Who operates the Health Data Space?** The three-layer split, and the fact
    that EHDS already legislates two of them.
-2. **The operating model on one page.** The diagram,
+2. **A proposed operating model for the EHDS.** The diagram,
    [`docs/diagrams/ehds-operating-model.svg`](../diagrams/ehds-operating-model.svg).
 3. **What the access body keeps, and what an operator runs.** Art. 55(3) draws
    the line, and it is the body's own conflict-of-interest duty that draws it.
 4. **The five things an operating company does.** Roadmap, data holders,
    services, incidents, support.
-5. **The dates are not negotiable.** 2027 designate, 2029 Chapter IV, 2031, 2035.
-6. **Cost recovery, not a platform business.** What Art. 62 fixes, and which
-   corporate forms survive it.
+5. **The dates, and the money.** 2027, 2029, 2031, 2035, and why Art. 62 makes
+   this cost recovery rather than a platform business.
 
 The argument in full, with the questions to put back to the ministry, is in
 [`docs/ehds-operating-company.md`](../ehds-operating-company.md). Note that the
 article numbers on those slides are the **adopted** ones, which differ from the
 numbering used elsewhere in this guide: see
 [`docs/ehds-article-numbering.md`](../ehds-article-numbering.md).
+
+If the secure processing environment comes up, and with a regulator it does, the
+path from the simulated environment on screen to a hardware-attested one is
+[`docs/spe-contrast-migration.md`](../spe-contrast-migration.md). The short
+version to say out loud: today an access body audits an environment by reading
+the operator's documentation, and with remote attestation it verifies a
+measurement of what actually ran, without needing anything from the operator.
 
 ## Keeping this honest
 

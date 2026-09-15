@@ -7,7 +7,7 @@
 
 ## Context
 
-EHDS Art. 50 requires that secondary use of health data happens inside a secure
+EHDS Art. 73 requires that secondary use of health data happens inside a secure
 processing environment: the researcher gets results out, never the row-level
 data, and the environment is auditable by the access body that authorised it.
 
@@ -40,7 +40,7 @@ confidential computing CPUs, using software from
 overall solution is approved by gematik and serves up to 50 million insured
 people across AOK, Barmer and Techniker Krankenkasse.
 
-So the pattern this project needs for Art. 50 is not hypothetical, and it is
+So the pattern this project needs for Art. 73 is not hypothetical, and it is
 not a research prototype. It is deployed national infrastructure in the same
 member state, answering the same question one regulation over.
 
@@ -149,5 +149,10 @@ a more sophisticated version of the problem it fixes.
   the [security overview](https://docs.edgeless.systems/contrast/1.8/basics/security-benefits)
 - [Attestation in Contrast](https://docs.edgeless.systems/contrast/1.5/architecture/attestation)
 - [gematik, ePA für alle](https://www.gematik.de/anwendungen/epa-fuer-alle)
-- EHDS Art. 50 (secure processing environments), Art. 46 to 53 (data permits)
+- EHDS Art. 73 (secure processing environment) and Art. 67 to 69 (applications,
+  permits, requests), in the numbering of the adopted Regulation. This ADR was
+  written against the 2022 proposal numbering; see
+  [`../ehds-article-numbering.md`](../ehds-article-numbering.md)
+- [`../spe-contrast-migration.md`](../spe-contrast-migration.md), how phase 2 is
+  actually carried out
 - `neo4j/init-schema.cypher`, `neo4j/seed-trust-center.cypher`
