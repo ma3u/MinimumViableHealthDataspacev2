@@ -10,6 +10,28 @@ import { NextRequest } from "next/server";
 const mockFetch = vi.fn();
 vi.stubGlobal("fetch", mockFetch);
 
+// POST /api/nlq resolves the caller's ODRL scope before it proxies, and that
+// goes to Neo4j over Bolt, not through fetch. Without this mock the test hangs
+// on a real connection attempt until vitest times out at 5s.
+//
+// It used to pass anyway, because another test file mocks this module and
+// vitest module mocks leak between files sharing a worker. That made the
+// failure depend on file order: green in a full run, red under `--bail 1`,
+// which is what the pre-push hook uses. Mocked here so this file stands alone.
+// importActual, not a bare factory: the route also imports
+// userToParticipantId from this module, and replacing the whole module drops
+// it, so the route throws and answers 502 instead of proxying. Only the call
+// that reaches Neo4j is overridden.
+vi.mock("@/lib/odrl-engine", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/lib/odrl-engine")>()),
+  resolveOdrlScope: vi.fn().mockResolvedValue({
+    participantName: "AlphaKlinik Berlin",
+    permissions: ["read"],
+    prohibitions: [],
+    datasetIds: [],
+  }),
+}));
+
 describe("/api/federated", () => {
   beforeEach(() => {
     vi.clearAllMocks();
