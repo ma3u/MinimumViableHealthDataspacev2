@@ -107,11 +107,46 @@ $ curl -s https://auth.ehds.mabu.red/realms/edcv/.well-known/openid-configuratio
 never imports or deletes a realm. What it does do is create new container
 revisions, which restarts Keycloak.
 
-So the realm is not surviving a Keycloak restart, even though
-`scripts/azure/03-identity.sh` configures `KC_DB=postgres` with a JDBC URL and
-Postgres has a persistent Azure Files volume. Why the two do not add up is
-**still open**: confirming it needs an Azure session long enough to inspect the
-running revision's volume mounts and the `keycloak` database itself.
+So the realm is not surviving a Keycloak restart. **The cause is that
+Postgres has no storage.** Keycloak is configured correctly:
+
+```
+KC_DB       postgres
+KC_DB_URL   jdbc:postgresql://mvhd-postgres:5432/keycloak?sslmode=disable
+```
+
+Postgres is not:
+
+```
+$ az containerapp show -n mvhd-postgres -g rg-mvhd-dev \
+    --query "{volumes:properties.template.volumes, \
+              mounts:properties.template.containers[0].volumeMounts}"
+{ "volumes": [ { "name": "pgdata", "storageName": "pg-data",
+                 "storageType": "AzureFile" } ],
+  "mounts": null }
+```
+
+The volume is **declared and never mounted**. `PGDATA` points at
+`/var/lib/postgresql/data/pgdata` inside the container's own filesystem, so
+every restart takes the whole database with it: the Keycloak realm, and the EDC
+and CFM state alongside it.
+
+`02-data-layer.sh` creates the app and then patches the YAML to attach the
+volume, and that second step is not in effect on the running revision. Either
+it never applied, or a later `az containerapp update` dropped `volumeMounts`,
+which is easy to do because the CLI rewrites the template.
+
+Two checks confirm it. Neo4j and Vault, provisioned by the same two-step
+pattern, both have their mounts (2/2 and 1/1) while Postgres has 1 volume and 0
+mounts, which is why graph data survives and logins do not. And the Azure File
+share itself contains an empty `pgdata/` directory: had the mount ever been
+live, it would hold a real cluster (`base/`, `pg_wal/`, `PG_VERSION`). Postgres
+has been ephemeral for its entire life in this deployment.
+
+**The fix is to re-attach the mount**, which restarts Postgres, initialises a
+fresh cluster into the share, and requires re-importing the realm afterwards.
+Nothing durable is lost, because nothing there was ever durable, but the EDC
+stack restarts with it, so it is not a thing to do an hour before a demo.
 
 What makes this bite daily rather than occasionally is `aca-schedule.yml`,
 which scales the whole stack to zero at 18:00 UTC and back up on weekday
