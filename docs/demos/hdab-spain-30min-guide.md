@@ -309,6 +309,12 @@ which is honest, auditable, and traceable to specific ADRs.
 - ADR index: [`docs/ADRs/`](https://github.com/ma3u/MinimumViableHealthDataspacev2/tree/main/docs/ADRs).
 - Architectural overview: [`/docs/architecture`](https://ehds.mabu.red/docs/architecture).
 
+The deck closes with six slides on who would operate an EHDS in practice, built
+from the Catena-X operating model: see
+[`docs/ehds-operating-company.md`](https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docs/ehds-operating-company.md)
+and the diagram
+[`docs/diagrams/ehds-operating-model.svg`](https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docs/diagrams/ehds-operating-model.svg).
+
 If a follow-up session is requested, the natural next step is to add a
 Spanish HDAB persona to `jad/keycloak-realm.json` plus a `did:web`
 participant in the seed cypher, then walk through the cross-border
