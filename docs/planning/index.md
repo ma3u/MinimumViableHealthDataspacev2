@@ -25,6 +25,8 @@ Groom with `/plan`. Token budget per ADR-026: keep this index small.
 - [phase-26g-deferred](future/phase-26g-deferred.md) — federation observability leftovers
 - [issue-26-healthdcat-ap-validation](future/issue-26-healthdcat-ap-validation.md) — SHACL validation + DQV source-level quality for the catalog
 
+- [ehds-operating-company](future/ehds-operating-company.md): what the demonstrator would need to show the operating model, not only the journey. Paper: [`../ehds-operating-company.md`](../ehds-operating-company.md)
+
 ## done/
 
 - [issue-8-federated-discovery](done/issue-8-federated-discovery.md) — Phase 26 complete (2026-07-15)
