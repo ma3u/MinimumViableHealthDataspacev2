@@ -220,6 +220,31 @@ On the Pages mirror there is no password, because there is no sign-in.
 | A table is empty                   | Reload once. The page fetches its fixture client-side.                    |
 | The live site will not sign you in | Use these Pages links. They need nothing from the cluster.                |
 
+## Closing the demo: who operates this?
+
+The question that follows the audit step is never technical. It is who runs this,
+and who is accountable when it breaks. Six slides at the end of
+`docs/demos/spain-ehds-ministry-deck.pptx` answer it, taken from the Catena-X
+operating model and re-cut for the Regulation:
+
+1. **Who operates the Health Data Space?** The three-layer split, and the fact
+   that EHDS already legislates two of them.
+2. **The operating model on one page.** The diagram,
+   [`docs/diagrams/ehds-operating-model.svg`](../diagrams/ehds-operating-model.svg).
+3. **What the access body keeps, and what an operator runs.** Art. 55(3) draws
+   the line, and it is the body's own conflict-of-interest duty that draws it.
+4. **The five things an operating company does.** Roadmap, data holders,
+   services, incidents, support.
+5. **The dates are not negotiable.** 2027 designate, 2029 Chapter IV, 2031, 2035.
+6. **Cost recovery, not a platform business.** What Art. 62 fixes, and which
+   corporate forms survive it.
+
+The argument in full, with the questions to put back to the ministry, is in
+[`docs/ehds-operating-company.md`](../ehds-operating-company.md). Note that the
+article numbers on those slides are the **adopted** ones, which differ from the
+numbering used elsewhere in this guide: see
+[`docs/ehds-article-numbering.md`](../ehds-article-numbering.md).
+
 ## Keeping this honest
 
 `ui/__tests__/e2e/journeys/37-ehds-secondary-use-journey.spec.ts` walks every
