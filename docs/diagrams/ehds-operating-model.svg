@@ -1,0 +1,154 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1640" height="1252" viewBox="0 0 1640 1252" font-family="Inter, Helvetica Neue, Helvetica, Arial, sans-serif">
+<defs><marker id="tip" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#8FA0AE"/></marker></defs>
+<rect width="1640" height="1252" fill="#F7F9FB"/>
+<text x="40.0" y="46.0" font-size="25" fill="#16324F" font-weight="700" font-style="normal" text-anchor="start">An Operating Company for the European Health Data Space</text>
+<text x="40.0" y="68.0" font-size="14" fill="#5A6B7B" font-weight="normal" font-style="italic" text-anchor="start">Una sociedad operadora para el Espacio Europeo de Datos de Salud</text>
+<text x="40.0" y="92.0" font-size="11.5" fill="#5A6B7B" font-weight="normal" font-style="normal" text-anchor="start">The Catena-X operating model, re-cut for Regulation (EU) 2025/327. Grey chips name the Catena-X role each layer replaces.</text>
+<rect x="40" y="112" width="1560" height="196" rx="10" fill="#EEF4F9" stroke="#2471A3" stroke-opacity="0.28"/>
+<path d="M50 112 h-4 a6 6 0 0 0 -6 6 v184 a6 6 0 0 0 6 6 h4 z" fill="#2471A3"/>
+<text x="62.0" y="139.0" font-size="16" fill="#16324F" font-weight="700" font-style="normal" text-anchor="start">Union level: governance and the central platform</text>
+<text x="62.0" y="157.0" font-size="11.5" fill="#5A6B7B" font-weight="normal" font-style="italic" text-anchor="start">Nivel de la Unión: gobernanza y plataforma central</text>
+<rect x="1242" y="127" width="342" height="23" rx="11.5" fill="#FFFFFF" stroke="#8FA0AE" stroke-opacity="0.6"/>
+<text x="1413.0" y="142.5" font-size="10.5" fill="#5A6B7B" font-weight="normal" font-style="normal" text-anchor="middle">Catena-X analogue: Association e.V. and CSP-B</text>
+<text x="62.0" y="294.0" font-size="10.5" fill="#2471A3" font-weight="normal" font-style="italic" text-anchor="start">Statutory. There is no version of this layer that a company operates.</text>
+<rect x="62.0" y="170" width="501.3" height="100" rx="6" fill="#FFFFFF" stroke="#2471A3" stroke-opacity="0.35" stroke-width="1"/>
+<text x="75.0" y="192.0" font-size="12.5" fill="#16324F" font-weight="600" font-style="normal" text-anchor="start">EHDS Board</text>
+<text x="75.0" y="212.0" font-size="10.5" fill="#5A6B7B" font-weight="normal" font-style="normal" text-anchor="start">Member States and the Commission, one voice each</text>
+<text x="75.0" y="227.0" font-size="10.5" fill="#5A6B7B" font-weight="normal" font-style="normal" text-anchor="start">Guidance and consistency across the whole Regulation</text>
+<text x="75.0" y="242.0" font-size="10.5" fill="#5A6B7B" font-weight="normal" font-style="normal" text-anchor="start">A stakeholder forum sits alongside it, Art. 93</text>
+<text x="75.0" y="259.0" font-size="10" fill="#2471A3" font-weight="600" font-style="normal" text-anchor="start">Art. 92, 94</text>
+<rect x="580.3" y="170" width="501.3" height="100" rx="6" fill="#FFFFFF" stroke="#2471A3" stroke-opacity="0.35" stroke-width="1"/>
+<text x="593.3" y="192.0" font-size="12.5" fill="#16324F" font-weight="600" font-style="normal" text-anchor="start">HealthData@EU steering group</text>
+<text x="593.3" y="212.0" font-size="10.5" fill="#5A6B7B" font-weight="normal" font-style="normal" text-anchor="start">One seat per national contact point for secondary use</text>
+<text x="593.3" y="227.0" font-size="10.5" fill="#5A6B7B" font-weight="normal" font-style="normal" text-anchor="start">Takes the operational decisions on the infrastructure</text>
+<text x="593.3" y="242.0" font-size="10.5" fill="#5A6B7B" font-weight="normal" font-style="normal" text-anchor="start">Consensus first, otherwise two thirds, one vote each</text>
+<text x="593.3" y="259.0" font-size="10" fill="#2471A3" font-weight="600" font-style="normal" text-anchor="start">Art. 95</text>
+<rect x="1098.7" y="170" width="501.3" height="100" rx="6" fill="#FFFFFF" stroke="#2471A3" stroke-opacity="0.35" stroke-width="1"/>
+<text x="1111.7" y="192.0" font-size="12.5" fill="#16324F" font-weight="600" font-style="normal" text-anchor="start">Commission central platform</text>
+<text x="1111.7" y="212.0" font-size="10.5" fill="#5A6B7B" font-weight="normal" font-style="normal" text-anchor="start">A federated EU catalogue over the national ones</text>
+<text x="1111.7" y="227.0" font-size="10.5" fill="#5A6B7B" font-weight="normal" font-style="normal" text-anchor="start">Routes an application that spans several countries</text>
+<text x="1111.7" y="242.0" font-size="10.5" fill="#5A6B7B" font-weight="normal" font-style="normal" text-anchor="start">Compliance checks, and a central SPE for bodies that want one</text>
+<text x="1111.7" y="259.0" font-size="10" fill="#2471A3" font-weight="600" font-style="normal" text-anchor="start">Art. 96, 79, 67(3)</text>
+<line x1="820.0" y1="312" x2="820.0" y2="338" stroke="#8FA0AE" stroke-width="1.6" marker-end="url(#tip)"/>
+<text x="834.0" y="331.0" font-size="10.5" fill="#5A6B7B" font-weight="normal" font-style="italic" text-anchor="start">connect and comply, Art. 75(3) and (6)</text>
+<rect x="40" y="346" width="1560" height="196" rx="10" fill="#EDF6F3" stroke="#148F77" stroke-opacity="0.28"/>
+<path d="M50 346 h-4 a6 6 0 0 0 -6 6 v184 a6 6 0 0 0 6 6 h4 z" fill="#148F77"/>
+<text x="62.0" y="373.0" font-size="16" fill="#16324F" font-weight="700" font-style="normal" text-anchor="start">Member State: the sovereign decision</text>
+<text x="62.0" y="391.0" font-size="11.5" fill="#5A6B7B" font-weight="normal" font-style="italic" text-anchor="start">Estado miembro: la decisión soberana</text>
+<rect x="1242" y="361" width="342" height="23" rx="11.5" fill="#FFFFFF" stroke="#8FA0AE" stroke-opacity="0.6"/>
+<text x="1413.0" y="376.5" font-size="10.5" fill="#5A6B7B" font-weight="normal" font-style="normal" text-anchor="middle">Catena-X analogue: none, this layer is what EHDS adds</text>
+<text x="62.0" y="528.0" font-size="10.5" fill="#148F77" font-weight="normal" font-style="italic" text-anchor="start">Art. 55(3) obliges the body to segregate assessing applications, preparing datasets and running the environment. That duty is what makes room for an operating company.</text>
+<rect x="62.0" y="404" width="501.3" height="100" rx="6" fill="#FFFFFF" stroke="#148F77" stroke-opacity="0.35" stroke-width="1"/>
+<text x="75.0" y="426.0" font-size="12.5" fill="#16324F" font-weight="600" font-style="normal" text-anchor="start">Health Data Access Body</text>
+<text x="75.0" y="446.0" font-size="10.5" fill="#5A6B7B" font-weight="normal" font-style="normal" text-anchor="start">Issues, refuses and revokes the data permit</text>
+<text x="75.0" y="461.0" font-size="10.5" fill="#5A6B7B" font-weight="normal" font-style="normal" text-anchor="start">Three months to decide, two on the accelerated path</text>
+<text x="75.0" y="476.0" font-size="10.5" fill="#5A6B7B" font-weight="normal" font-style="normal" text-anchor="start">Controller for the secondary-use processing, Art. 74</text>
+<text x="75.0" y="493.0" font-size="10" fill="#148F77" font-weight="600" font-style="normal" text-anchor="start">Art. 55, 57, 68</text>
+<rect x="580.3" y="404" width="501.3" height="100" rx="6" fill="#FFFFFF" stroke="#148F77" stroke-opacity="0.35" stroke-width="1"/>
+<text x="593.3" y="426.0" font-size="12.5" fill="#16324F" font-weight="600" font-style="normal" text-anchor="start">Enforcement and fees</text>
+<text x="593.3" y="446.0" font-size="10.5" fill="#5A6B7B" font-weight="normal" font-style="normal" text-anchor="start">Revokes a permit, can exclude a user for five years</text>
+<text x="593.3" y="461.0" font-size="10.5" fill="#5A6B7B" font-weight="normal" font-style="normal" text-anchor="start">A daily penalty when a holder misses the three months</text>
+<text x="593.3" y="476.0" font-size="10.5" fill="#5A6B7B" font-weight="normal" font-style="normal" text-anchor="start">Fees recover cost only, transparent and non-discriminatory</text>
+<text x="593.3" y="493.0" font-size="10" fill="#148F77" font-weight="600" font-style="normal" text-anchor="start">Art. 62, 63</text>
+<rect x="1098.7" y="404" width="501.3" height="100" rx="6" fill="#FFFFFF" stroke="#148F77" stroke-opacity="0.35" stroke-width="1"/>
+<text x="1111.7" y="426.0" font-size="12.5" fill="#16324F" font-weight="600" font-style="normal" text-anchor="start">National contact point for secondary use</text>
+<text x="1111.7" y="446.0" font-size="10.5" fill="#5A6B7B" font-weight="normal" font-style="normal" text-anchor="start">The gateway to HealthData@EU, organisational and technical</text>
+<text x="1111.7" y="461.0" font-size="10.5" fill="#5A6B7B" font-weight="normal" font-style="normal" text-anchor="start">Designated and notified to the Commission by 26 March 2027</text>
+<text x="1111.7" y="476.0" font-size="10.5" fill="#5A6B7B" font-weight="normal" font-style="normal" text-anchor="start">May be the coordinator access body itself</text>
+<text x="1111.7" y="493.0" font-size="10" fill="#148F77" font-weight="600" font-style="normal" text-anchor="start">Art. 75(1)</text>
+<line x1="820.0" y1="546" x2="820.0" y2="572" stroke="#8FA0AE" stroke-width="1.6" marker-end="url(#tip)"/>
+<text x="834.0" y="565.0" font-size="10.5" fill="#5A6B7B" font-weight="normal" font-style="italic" text-anchor="start">delegates the operation, keeps the decision</text>
+<rect x="40" y="580" width="1560" height="202" rx="10" fill="#FBF1E6" stroke="#CA6F1E" stroke-opacity="0.28"/>
+<path d="M50 580 h-4 a6 6 0 0 0 -6 6 v190 a6 6 0 0 0 6 6 h4 z" fill="#CA6F1E"/>
+<text x="62.0" y="607.0" font-size="16" fill="#16324F" font-weight="700" font-style="normal" text-anchor="start">The Operating Company: processor for the access body, Art. 28 GDPR</text>
+<text x="62.0" y="625.0" font-size="11.5" fill="#5A6B7B" font-weight="normal" font-style="italic" text-anchor="start">La sociedad operadora: encargada del tratamiento por cuenta del organismo de acceso</text>
+<rect x="1242" y="595" width="342" height="23" rx="11.5" fill="#FFFFFF" stroke="#8FA0AE" stroke-opacity="0.6"/>
+<text x="1413.0" y="610.5" font-size="10.5" fill="#5A6B7B" font-weight="normal" font-style="normal" text-anchor="middle">Catena-X analogue: Cofinity-X</text>
+<text x="62.0" y="768.0" font-size="10.5" fill="#CA6F1E" font-weight="normal" font-style="italic" text-anchor="start">It never decides a permit. That stays with the access body and is not delegable.</text>
+<rect x="62.0" y="638" width="296.4" height="104" rx="6" fill="#FFFFFF" stroke="#CA6F1E" stroke-opacity="0.35" stroke-width="1"/>
+<text x="75.0" y="660.0" font-size="12.5" fill="#16324F" font-weight="600" font-style="normal" text-anchor="start">Planning and roadmap</text>
+<text x="75.0" y="680.0" font-size="10.5" fill="#5A6B7B" font-weight="normal" font-style="normal" text-anchor="start">A release train on the statutory dates</text>
+<text x="75.0" y="695.0" font-size="10.5" fill="#5A6B7B" font-weight="normal" font-style="normal" text-anchor="start">2027 designate, 2029 Chapter IV live</text>
+<text x="75.0" y="710.0" font-size="10.5" fill="#5A6B7B" font-weight="normal" font-style="normal" text-anchor="start">2031 more categories, 2035 third countries</text>
+<text x="75.0" y="731.0" font-size="10" fill="#CA6F1E" font-weight="600" font-style="normal" text-anchor="start">Art. 105</text>
+<rect x="372.4" y="638" width="296.4" height="104" rx="6" fill="#FFFFFF" stroke="#CA6F1E" stroke-opacity="0.35" stroke-width="1"/>
+<text x="385.4" y="660.0" font-size="12.5" fill="#16324F" font-weight="600" font-style="normal" text-anchor="start">Holders and onboarding</text>
+<text x="385.4" y="680.0" font-size="10.5" fill="#5A6B7B" font-weight="normal" font-style="normal" text-anchor="start">Find, contract, connect, catalogue, label</text>
+<text x="385.4" y="695.0" font-size="10.5" fill="#5A6B7B" font-weight="normal" font-style="normal" text-anchor="start">Keeps holders inside the three-month duty</text>
+<text x="385.4" y="710.0" font-size="10.5" fill="#5A6B7B" font-weight="normal" font-style="normal" text-anchor="start">Annual re-check of every description</text>
+<text x="385.4" y="731.0" font-size="10" fill="#CA6F1E" font-weight="600" font-style="normal" text-anchor="start">Art. 60, 77, 78</text>
+<rect x="682.8" y="638" width="296.4" height="104" rx="6" fill="#FFFFFF" stroke="#CA6F1E" stroke-opacity="0.35" stroke-width="1"/>
+<text x="695.8" y="660.0" font-size="12.5" fill="#16324F" font-weight="600" font-style="normal" text-anchor="start">Services to the ecosystem</text>
+<text x="695.8" y="680.0" font-size="10.5" fill="#5A6B7B" font-weight="normal" font-style="normal" text-anchor="start">Runs the service map below</text>
+<text x="695.8" y="695.0" font-size="10.5" fill="#5A6B7B" font-weight="normal" font-style="normal" text-anchor="start">A published catalogue with published prices</text>
+<text x="695.8" y="710.0" font-size="10.5" fill="#5A6B7B" font-weight="normal" font-style="normal" text-anchor="start">Non-discriminatory access for every actor</text>
+<text x="695.8" y="731.0" font-size="10" fill="#CA6F1E" font-weight="600" font-style="normal" text-anchor="start">Art. 57, 62</text>
+<rect x="993.2" y="638" width="296.4" height="104" rx="6" fill="#FFFFFF" stroke="#CA6F1E" stroke-opacity="0.35" stroke-width="1"/>
+<text x="1006.2" y="660.0" font-size="12.5" fill="#16324F" font-weight="600" font-style="normal" text-anchor="start">Incident management</text>
+<text x="1006.2" y="680.0" font-size="10.5" fill="#5A6B7B" font-weight="normal" font-style="normal" text-anchor="start">One bridge across holder, SPE and platform</text>
+<text x="1006.2" y="695.0" font-size="10.5" fill="#5A6B7B" font-weight="normal" font-style="normal" text-anchor="start">A permit-scope breach escalates to the body</text>
+<text x="1006.2" y="710.0" font-size="10.5" fill="#5A6B7B" font-weight="normal" font-style="normal" text-anchor="start">GDPR 72 h and NIS2 clocks start together</text>
+<text x="1006.2" y="731.0" font-size="10" fill="#CA6F1E" font-weight="600" font-style="normal" text-anchor="start">Art. 63, 73(3)</text>
+<rect x="1303.6" y="638" width="296.4" height="104" rx="6" fill="#FFFFFF" stroke="#CA6F1E" stroke-opacity="0.35" stroke-width="1"/>
+<text x="1316.6" y="660.0" font-size="12.5" fill="#16324F" font-weight="600" font-style="normal" text-anchor="start">Support model</text>
+<text x="1316.6" y="680.0" font-size="10.5" fill="#5A6B7B" font-weight="normal" font-style="normal" text-anchor="start">L1 desk in the national language, then L2, L3</text>
+<text x="1316.6" y="695.0" font-size="10.5" fill="#5A6B7B" font-weight="normal" font-style="normal" text-anchor="start">Holder success, not a ticket queue</text>
+<text x="1316.6" y="710.0" font-size="10.5" fill="#5A6B7B" font-weight="normal" font-style="normal" text-anchor="start">A researcher desk for feasibility, not only IT</text>
+<text x="1316.6" y="731.0" font-size="10" fill="#CA6F1E" font-weight="600" font-style="normal" text-anchor="start">Art. 82</text>
+<line x1="820.0" y1="786" x2="820.0" y2="810" stroke="#8FA0AE" stroke-width="1.6" marker-end="url(#tip)"/>
+<text x="834.0" y="804.0" font-size="10.5" fill="#5A6B7B" font-weight="normal" font-style="italic" text-anchor="start">operates and is measured on</text>
+<rect x="40" y="818" width="1560" height="180" rx="10" fill="#EDF6F0" stroke="#1E8449" stroke-opacity="0.28"/>
+<path d="M50 818 h-4 a6 6 0 0 0 -6 6 v168 a6 6 0 0 0 6 6 h4 z" fill="#1E8449"/>
+<text x="62.0" y="845.0" font-size="16" fill="#16324F" font-weight="700" font-style="normal" text-anchor="start">What it runs: the EHDS service map</text>
+<text x="62.0" y="863.0" font-size="11.5" fill="#5A6B7B" font-weight="normal" font-style="italic" text-anchor="start">Lo que opera: el mapa de servicios del EEDS</text>
+<rect x="1242" y="833" width="342" height="23" rx="11.5" fill="#FFFFFF" stroke="#8FA0AE" stroke-opacity="0.6"/>
+<text x="1413.0" y="848.5" font-size="10.5" fill="#5A6B7B" font-weight="normal" font-style="normal" text-anchor="middle">Catena-X analogue: the Service Map</text>
+<rect x="62.0" y="876" width="372.5" height="104" rx="6" fill="#FFFFFF" stroke="#1E8449" stroke-opacity="0.35" stroke-width="1"/>
+<text x="75.0" y="898.0" font-size="12.5" fill="#16324F" font-weight="600" font-style="normal" text-anchor="start">Onboarding services</text>
+<text x="75.0" y="918.0" font-size="10.5" fill="#5A6B7B" font-weight="normal" font-style="normal" text-anchor="start">Registration portal and legal-entity validation</text>
+<text x="75.0" y="933.0" font-size="10.5" fill="#5A6B7B" font-weight="normal" font-style="normal" text-anchor="start">Identity: did:web and verifiable credentials</text>
+<text x="75.0" y="948.0" font-size="10.5" fill="#5A6B7B" font-weight="normal" font-style="normal" text-anchor="start">Connector provisioning and a conformance test</text>
+<text x="75.0" y="963.0" font-size="10.5" fill="#5A6B7B" font-weight="normal" font-style="normal" text-anchor="start">Dataset description intake, HealthDCAT-AP</text>
+<rect x="450.5" y="876" width="372.5" height="104" rx="6" fill="#FFFFFF" stroke="#1E8449" stroke-opacity="0.35" stroke-width="1"/>
+<text x="463.5" y="898.0" font-size="12.5" fill="#16324F" font-weight="600" font-style="normal" text-anchor="start">Core services, one set per Member State</text>
+<text x="463.5" y="918.0" font-size="10.5" fill="#5A6B7B" font-weight="normal" font-style="normal" text-anchor="start">Permit and application register, Art. 57(1)(e)</text>
+<text x="463.5" y="933.0" font-size="10.5" fill="#5A6B7B" font-weight="normal" font-style="normal" text-anchor="start">Public information system, Art. 58</text>
+<text x="463.5" y="948.0" font-size="10.5" fill="#5A6B7B" font-weight="normal" font-style="normal" text-anchor="start">National dataset catalogue, Art. 77 and 79</text>
+<text x="463.5" y="963.0" font-size="10.5" fill="#5A6B7B" font-weight="normal" font-style="normal" text-anchor="start">Data quality and utility label, Art. 78</text>
+<rect x="839.0" y="876" width="372.5" height="104" rx="6" fill="#FFFFFF" stroke="#1E8449" stroke-opacity="0.35" stroke-width="1"/>
+<text x="852.0" y="898.0" font-size="12.5" fill="#16324F" font-weight="600" font-style="normal" text-anchor="start">Secure processing services</text>
+<text x="852.0" y="918.0" font-size="10.5" fill="#5A6B7B" font-weight="normal" font-style="normal" text-anchor="start">One environment per permit, Art. 73</text>
+<text x="852.0" y="933.0" font-size="10.5" fill="#5A6B7B" font-weight="normal" font-style="normal" text-anchor="start">Pseudonymisation by a segregated team, Art. 55(3)</text>
+<text x="852.0" y="948.0" font-size="10.5" fill="#5A6B7B" font-weight="normal" font-style="normal" text-anchor="start">Output checking before anything leaves</text>
+<text x="852.0" y="963.0" font-size="10.5" fill="#5A6B7B" font-weight="normal" font-style="normal" text-anchor="start">Attestation, a year of logs, third-party audits</text>
+<rect x="1227.5" y="876" width="372.5" height="104" rx="6" fill="#FFFFFF" stroke="#1E8449" stroke-opacity="0.35" stroke-width="1"/>
+<text x="1240.5" y="898.0" font-size="12.5" fill="#16324F" font-weight="600" font-style="normal" text-anchor="start">Enablement services and applications</text>
+<text x="1240.5" y="918.0" font-size="10.5" fill="#5A6B7B" font-weight="normal" font-style="normal" text-anchor="start">A competitive market, not the operator&#x27;s monopoly</text>
+<text x="1240.5" y="933.0" font-size="10.5" fill="#5A6B7B" font-weight="normal" font-style="normal" text-anchor="start">Dataspace connectors, FHIR and OMOP pipelines</text>
+<text x="1240.5" y="948.0" font-size="10.5" fill="#5A6B7B" font-weight="normal" font-style="normal" text-anchor="start">Confidential computing, for example Edgeless Contrast</text>
+<text x="1240.5" y="963.0" font-size="10.5" fill="#5A6B7B" font-weight="normal" font-style="normal" text-anchor="start">Cohort discovery, HTA, pharmacovigilance</text>
+<line x1="820.0" y1="1002" x2="820.0" y2="1028" stroke="#8FA0AE" stroke-width="1.6" marker-end="url(#tip)"/>
+<text x="834.0" y="1021.0" font-size="10.5" fill="#5A6B7B" font-weight="normal" font-style="italic" text-anchor="start">serves, at a cost-recovery fee</text>
+<rect x="40" y="1036" width="1560" height="156" rx="10" fill="#F4EEF7" stroke="#7D3C98" stroke-opacity="0.28"/>
+<path d="M50 1036 h-4 a6 6 0 0 0 -6 6 v144 a6 6 0 0 0 6 6 h4 z" fill="#7D3C98"/>
+<text x="62.0" y="1063.0" font-size="16" fill="#16324F" font-weight="700" font-style="normal" text-anchor="start">Who it serves</text>
+<text x="62.0" y="1081.0" font-size="11.5" fill="#5A6B7B" font-weight="normal" font-style="italic" text-anchor="start">A quién sirve</text>
+<rect x="1242" y="1051" width="342" height="23" rx="11.5" fill="#FFFFFF" stroke="#8FA0AE" stroke-opacity="0.6"/>
+<text x="1413.0" y="1066.5" font-size="10.5" fill="#5A6B7B" font-weight="normal" font-style="normal" text-anchor="middle">Catena-X analogue: data provider and consumer</text>
+<rect x="62.0" y="1094" width="501.3" height="82" rx="6" fill="#FFFFFF" stroke="#7D3C98" stroke-opacity="0.35" stroke-width="1"/>
+<text x="75.0" y="1116.0" font-size="12.5" fill="#16324F" font-weight="600" font-style="normal" text-anchor="start">Health data holders</text>
+<text x="75.0" y="1136.0" font-size="10.5" fill="#5A6B7B" font-weight="normal" font-style="normal" text-anchor="start">Hospitals, registries, insurers, biobanks, cohorts</text>
+<text x="75.0" y="1151.0" font-size="10.5" fill="#5A6B7B" font-weight="normal" font-style="normal" text-anchor="start">Deliver in three months, describe the dataset yearly</text>
+<text x="75.0" y="1165.0" font-size="10" fill="#7D3C98" font-weight="600" font-style="normal" text-anchor="start">Art. 60</text>
+<rect x="580.3" y="1094" width="501.3" height="82" rx="6" fill="#FFFFFF" stroke="#7D3C98" stroke-opacity="0.35" stroke-width="1"/>
+<text x="593.3" y="1116.0" font-size="12.5" fill="#16324F" font-weight="600" font-style="normal" text-anchor="start">Health data users</text>
+<text x="593.3" y="1136.0" font-size="10.5" fill="#5A6B7B" font-weight="normal" font-style="normal" text-anchor="start">Researchers, HTA bodies, regulators, innovators</text>
+<text x="593.3" y="1151.0" font-size="10.5" fill="#5A6B7B" font-weight="normal" font-style="normal" text-anchor="start">Work inside the environment, make results public</text>
+<text x="593.3" y="1165.0" font-size="10" fill="#7D3C98" font-weight="600" font-style="normal" text-anchor="start">Art. 53, 61</text>
+<rect x="1098.7" y="1094" width="501.3" height="82" rx="6" fill="#FFFFFF" stroke="#7D3C98" stroke-opacity="0.35" stroke-width="1"/>
+<text x="1111.7" y="1116.0" font-size="12.5" fill="#16324F" font-weight="600" font-style="normal" text-anchor="start">Natural persons</text>
+<text x="1111.7" y="1136.0" font-size="10.5" fill="#5A6B7B" font-weight="normal" font-style="normal" text-anchor="start">An opt-out honoured before a dataset is assembled</text>
+<text x="1111.7" y="1151.0" font-size="10.5" fill="#5A6B7B" font-weight="normal" font-style="normal" text-anchor="start">Can see which permits were issued, and to whom</text>
+<text x="1111.7" y="1165.0" font-size="10" fill="#7D3C98" font-weight="600" font-style="normal" text-anchor="start">Art. 58, 71</text>
+<text x="40.0" y="1228.0" font-size="10.5" fill="#8FA0AE" font-weight="normal" font-style="normal" text-anchor="start">Regulation (EU) 2025/327, article numbers as adopted   ·   Catena-X operating model, catenax-ev.github.io   ·   MinimumViableHealthDataspacev2, issue #27</text>
+</svg>
