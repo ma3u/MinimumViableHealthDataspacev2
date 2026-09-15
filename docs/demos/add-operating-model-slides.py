@@ -1,8 +1,12 @@
 #!/usr/bin/env python3
 """Adds the closing operating-model section to the Spanish ministry deck.
 
-Six slides, inserted before "The conversation we want to start", answering the
+Five slides, inserted before "The conversation we want to start", answering the
 question the demo always provokes at the end: who actually runs this?
+
+Every slide carries its sources bottom-right, because the argument rests on two
+documents the audience can check for themselves: the adopted Regulation and the
+published Catena-X operating model.
 
 The deck has no master to inherit from (every slide is Blank with hand-placed
 shapes), so the house style is reproduced here: navy rule across the top, 30pt
@@ -22,6 +26,7 @@ from pathlib import Path
 from pptx import Presentation
 from pptx.dml.color import RGBColor
 from pptx.enum.shapes import MSO_SHAPE
+from pptx.enum.text import PP_ALIGN
 from pptx.util import Inches, Pt
 
 DECK = Path(__file__).resolve().parent / "spain-ehds-ministry-deck.pptx"
@@ -34,6 +39,7 @@ RED = RGBColor(0xC3, 0x1E, 0x2E)
 GREEN = RGBColor(0x52, 0x8B, 0x55)
 CREAM = RGBColor(0xF4, 0xEF, 0xE6)
 BODY = RGBColor(0x4F, 0x55, 0x60)
+FAINT = RGBColor(0x8A, 0x8F, 0x98)
 WHITE = RGBColor(0xFF, 0xFF, 0xFF)
 
 FOOTER = "European Health Data Space  ·  A federated approach for Spain"
@@ -52,7 +58,7 @@ def shape(slide, kind, x, y, w, h, fill):
 
 
 def textbox(slide, x, y, w, h, lines, size, colour=BODY, bold=False, spacing=1.0):
-    """`lines` is a list of strings; an empty string leaves a blank line."""
+    """Lines are strings, or (lead, rest) pairs where the lead is bold navy."""
     tb = slide.shapes.add_textbox(Inches(x), Inches(y), Inches(w), Inches(h))
     tf = tb.text_frame
     tf.word_wrap = True
@@ -60,12 +66,21 @@ def textbox(slide, x, y, w, h, lines, size, colour=BODY, bold=False, spacing=1.0
     for i, line in enumerate(lines):
         p = tf.paragraphs[0] if i == 0 else tf.add_paragraph()
         p.line_spacing = spacing
-        run = p.add_run()
-        run.text = line
-        run.font.name = "Calibri"
-        run.font.size = Pt(size)
-        run.font.bold = bold
-        run.font.color.rgb = colour
+        parts = line if isinstance(line, tuple) else (line,)
+        for j, part in enumerate(parts):
+            run = p.add_run()
+            run.text = part
+            run.font.name = "Calibri"
+            run.font.size = Pt(size)
+            run.font.bold = bold or (len(parts) > 1 and j == 0)
+            run.font.color.rgb = NAVY if (len(parts) > 1 and j == 0) else colour
+    return tb
+
+
+def sources(slide, text):
+    """Bottom right, opposite the footer. The audience can check the argument."""
+    tb = textbox(slide, 6.5, 7.05, 6.2, 0.3, [text], 9, FAINT)
+    tb.text_frame.paragraphs[0].alignment = PP_ALIGN.RIGHT
     return tb
 
 
@@ -97,7 +112,7 @@ def phase(slide, y, h, tag, accent, heading, detail):
     shape(slide, MSO_SHAPE.ROUNDED_RECTANGLE, 0.95, y + 0.3, 1.55, 0.5, accent)
     textbox(slide, 0.95, y + 0.41, 1.55, 0.3, [tag], 14, WHITE, bold=True).text_frame.paragraphs[
         0
-    ].alignment = 2  # centre
+    ].alignment = PP_ALIGN.CENTER
     textbox(slide, 2.8, y + 0.16, 9.8, 0.42, [heading], 20, NAVY, bold=True)
     textbox(slide, 2.8, y + 0.62, 9.8, 0.5, [detail], 13, BODY, spacing=1.05)
 
@@ -136,10 +151,11 @@ def build(prs):
     band(s, 6.1, 0.75,
          "Catena-X did not become a working dataspace when the standards were published. "
          "It became one when somebody was made accountable for running it.")
+    sources(s, "catenax-ev.github.io/docs/operating-model  ·  cofinity-x.com  ·  eclipse-tractusx.github.io")
 
     # 2 -----------------------------------------------------------------
     s = frame(
-        prs, "The operating model on one page",
+        prs, "A proposed operating model for the EHDS",
         "The Catena-X operating model, re-cut for Regulation (EU) 2025/327.",
     )
     s.shapes.add_picture(str(DIAGRAM), Inches(0.55), Inches(1.8), Inches(6.68), Inches(5.1))
@@ -149,6 +165,7 @@ def build(prs):
         (AMBER, "Never delegated", "Issuing a permit, enforcement and fees stay with the access body. Art. 68, Art. 63, Art. 62."),
     ]):
         card(s, 7.5, 1.8 + i * 1.78, 5.2, 1.6, header, accent, [line], size=12, head_size=15)
+    sources(s, "Regulation (EU) 2025/327, data.europa.eu/eli/reg/2025/327/oj  ·  catenax-ev.github.io/docs/operating-model")
 
     # 3 -----------------------------------------------------------------
     s = frame(
@@ -176,6 +193,7 @@ def build(prs):
     band(s, 5.95, 0.9,
          "Art. 55(3) obliges the access body to segregate assessing applications, preparing datasets "
          "and running the environment. Read the other way round, that is a list of exactly what can be industrialised.")
+    sources(s, "Regulation (EU) 2025/327, Art. 55(3), 57, 62, 63, 68, 73, 74, 77, 78  ·  GDPR Art. 28")
 
     # 4 -----------------------------------------------------------------
     s = frame(
@@ -224,48 +242,39 @@ def build(prs):
     band(s, 6.05, 0.85,
          "Holders owe the data within three months, with a penalty for every day late. The body owes a "
          "decision in three. Descriptions are re-verified yearly. The clocks are the job.")
+    sources(s, "Reg. (EU) 2025/327, Art. 57, 60, 62, 63, 73, 77, 78, 82, 105  ·  Catena-X, 'How: Data Space Operations'")
 
     # 5 -----------------------------------------------------------------
     s = frame(
-        prs, "The dates are not negotiable",
+        prs, "The dates, and the money",
+        "Two constraints that decide the shape of whatever gets built, and neither is ours to set.",
+    )
+    card(s, 0.6, 1.85, 6.0, 4.1, "The dates are not negotiable", NAVY, [
+        ("Mar 2027   ", "Access bodies and the national contact point"),
+        ("               ", "designated and notified.   Art. 55(6), Art. 75(1)"),
+        "",
+        ("Mar 2029   ", "Chapter IV in full: permits, holders' duties,"),
+        ("               ", "secure environments, HealthData@EU."),
+        "",
+        ("Mar 2031   ", "The wider data categories in Art. 51(1)."),
+        "",
+        ("Mar 2035   ", "Third countries join HealthData@EU.   Art. 75(5)"),
+        "",
         "Counting procurement, March 2029 is about two release years away.",
-    )
-    phase(s, 1.9, 1.15, "Mar 2027", TEAL, "Designate, and tell the Commission",
-          "The Regulation applies. Health data access bodies and the national contact point for "
-          "secondary use are designated and notified.   Art. 55(6), Art. 75(1)")
-    phase(s, 3.17, 1.15, "Mar 2029", GREEN, "Chapter IV goes live in full",
-          "Permits, data holders' duties, secure processing environments, HealthData@EU. Everything "
-          "in today's demonstration becomes an obligation.")
-    phase(s, 4.44, 1.15, "Mar 2031", AMBER, "The wider data categories",
-          "Art. 51(1)(b), (f), (g), (m) and (p) join the scope, and Chapter III reaches EHR systems "
-          "already in service.")
-    phase(s, 5.71, 1.15, "Mar 2035", NAVY, "Third countries join HealthData@EU",
-          "Art. 75(5). Only then does the infrastructure open beyond the Union, under Commission "
-          "compliance checks.")
-
-    # 6 -----------------------------------------------------------------
-    s = frame(
-        prs, "Cost recovery, not a platform business",
-        "Art. 62 caps the business model. Better said now than discovered in year two.",
-    )
-    card(s, 0.6, 1.85, 6.0, 3.7, "What Art. 62 fixes", NAVY, [
-        "•  Fees proportionate to the cost of making data available",
-        "•  They must not restrict competition",
+    ], size=13)
+    card(s, 6.85, 1.85, 6.0, 4.1, "Cost recovery, not a platform business", TEAL, [
+        "•  Fees proportionate to cost, never restricting competition",
         "•  Transparent and non-discriminatory, without exception",
         "•  Reduced rates for public bodies, universities, small firms",
         "•  Part of the fee passes through to the data holder",
         "•  If the parties disagree, the access body sets the price",
-    ], size=14)
-    card(s, 6.85, 1.85, 6.0, 3.7, "Which forms survive it", TEAL, [
-        "•  An in-house entity of the ministry or the access body",
-        "•  A public-private joint venture, which is what Cofinity-X is",
-        "•  A competitively tendered concession, for a fixed term",
         "",
-        "The commercial upside is not the operating company. It is the layer above it: connectors, pipelines, secure-environment technology, analytics applications.",
-    ], size=14)
-    band(s, 5.75, 1.05,
+        "So: an in-house entity, a public-private joint venture as Cofinity-X is, or a tendered concession. The commercial upside is the enablement layer above the operator, not the operator.",
+    ], size=13)
+    band(s, 6.15, 0.75,
          "Keeping the operator out of the application market is exactly what keeps that market open. "
          "Saying so plainly makes the proposition more credible, not less.", accent=TEAL)
+    sources(s, "Reg. (EU) 2025/327, Art. 62 and Art. 105  ·  fee-policy implementing acts still pending, Art. 62(6)")
 
 
 def move_before(prs, count, target_title):
@@ -301,7 +310,7 @@ def main() -> int:
                 return 0
     before = len(prs.slides)
     build(prs)
-    move_before(prs, 6, "The conversation we want to start")
+    move_before(prs, 5, "The conversation we want to start")
     prs.save(str(DECK))
     print(f"{DECK.name}: {before} slides -> {len(Presentation(str(DECK)).slides)}")
     return 0
