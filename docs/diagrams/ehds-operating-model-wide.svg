@@ -1,62 +1,23 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="2400" height="880" viewBox="0 0 2400 880" font-family="Inter, Helvetica Neue, Helvetica, Arial, sans-serif">
-<defs><marker id="tip" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#8FA0AE"/></marker></defs>
-<rect width="2400" height="880" fill="#F7F9FB"/>
-<rect x="40" y="40" width="2320" height="180" rx="12" fill="#EDF3F9" stroke="#2471A3" stroke-opacity="0.3"/>
-<path d="M53 40 h-5 a8 8 0 0 0 -8 8 v164 a8 8 0 0 0 8 8 h5 z" fill="#2471A3"/>
-<text x="80.0" y="90.0" font-size="32" fill="#16324F" font-weight="700" font-style="normal" text-anchor="start">Union level: closed by law</text>
-<text x="2340.0" y="86.0" font-size="17" fill="#8FA0AE" font-weight="normal" font-style="normal" text-anchor="end">Catena-X: the Association and CSP-B</text>
-<text x="80.0" y="126.0" font-size="19" fill="#5A6B7B" font-weight="normal" font-style="normal" text-anchor="start">The Commission builds and operates the central platform. The Board and the steering group govern it.</text>
-<rect x="80.0" y="146" width="260.0" height="48" rx="24" fill="#FFFFFF" stroke="#2471A3" stroke-opacity="0.45"/>
-<text x="210.0" y="177.0" font-size="20" fill="#16324F" font-weight="600" font-style="normal" text-anchor="middle">EU dataset catalogue</text>
-<rect x="356.0" y="146" width="260.0" height="48" rx="24" fill="#FFFFFF" stroke="#2471A3" stroke-opacity="0.45"/>
-<text x="486.0" y="177.0" font-size="20" fill="#16324F" font-weight="600" font-style="normal" text-anchor="middle">Cross-border routing</text>
-<rect x="632.0" y="146" width="228.5" height="48" rx="24" fill="#FFFFFF" stroke="#2471A3" stroke-opacity="0.45"/>
-<text x="746.2" y="177.0" font-size="20" fill="#16324F" font-weight="600" font-style="normal" text-anchor="middle">Compliance checks</text>
-<text x="2340.0" y="177.0" font-size="18" fill="#2471A3" font-weight="600" font-style="normal" text-anchor="end">Art. 79, 92 to 96</text>
-<line x1="1200.0" y1="224" x2="1200.0" y2="244" stroke="#8FA0AE" stroke-width="2" marker-end="url(#tip)"/>
-<rect x="40" y="252" width="2320" height="180" rx="12" fill="#EBF6F2" stroke="#148F77" stroke-opacity="0.3"/>
-<path d="M53 252 h-5 a8 8 0 0 0 -8 8 v164 a8 8 0 0 0 8 8 h5 z" fill="#148F77"/>
-<text x="80.0" y="302.0" font-size="32" fill="#16324F" font-weight="700" font-style="normal" text-anchor="start">Member State: the decision, and it cannot be delegated</text>
-<text x="2340.0" y="298.0" font-size="17" fill="#8FA0AE" font-weight="normal" font-style="normal" text-anchor="end">Catena-X: nothing, this is what EHDS adds</text>
-<text x="80.0" y="338.0" font-size="19" fill="#5A6B7B" font-weight="normal" font-style="normal" text-anchor="start">The access body issues, refuses and revokes the permit, enforces it, and sets the fee. It is the controller.</text>
-<rect x="80.0" y="358" width="165.5" height="48" rx="24" fill="#FFFFFF" stroke="#148F77" stroke-opacity="0.45"/>
-<text x="162.8" y="389.0" font-size="20" fill="#16324F" font-weight="600" font-style="normal" text-anchor="middle">Data permit</text>
-<rect x="261.5" y="358" width="165.5" height="48" rx="24" fill="#FFFFFF" stroke="#148F77" stroke-opacity="0.45"/>
-<text x="344.2" y="389.0" font-size="20" fill="#16324F" font-weight="600" font-style="normal" text-anchor="middle">Enforcement</text>
-<rect x="443.0" y="358" width="92.0" height="48" rx="24" fill="#FFFFFF" stroke="#148F77" stroke-opacity="0.45"/>
-<text x="489.0" y="389.0" font-size="20" fill="#16324F" font-weight="600" font-style="normal" text-anchor="middle">Fees</text>
-<rect x="551.0" y="358" width="155.0" height="48" rx="24" fill="#FFFFFF" stroke="#148F77" stroke-opacity="0.45"/>
-<text x="628.5" y="389.0" font-size="20" fill="#16324F" font-weight="600" font-style="normal" text-anchor="middle">Controller</text>
-<text x="2340.0" y="389.0" font-size="18" fill="#148F77" font-weight="600" font-style="normal" text-anchor="end">Art. 55, 62, 63, 68, 74</text>
-<line x1="1200.0" y1="436" x2="1200.0" y2="456" stroke="#8FA0AE" stroke-width="2" marker-end="url(#tip)"/>
-<text x="1218.0" y="453.0" font-size="17" fill="#5A6B7B" font-weight="normal" font-style="italic" text-anchor="start">Art. 55(3) obliges the body to segregate the work below. That is what makes room for an operator.</text>
-<rect x="40" y="464" width="2320" height="180" rx="12" fill="#FBF0E4" stroke="#CA6F1E" stroke-opacity="0.3"/>
-<path d="M53 464 h-5 a8 8 0 0 0 -8 8 v164 a8 8 0 0 0 8 8 h5 z" fill="#CA6F1E"/>
-<text x="80.0" y="514.0" font-size="32" fill="#16324F" font-weight="700" font-style="normal" text-anchor="start">The Operating Company: everything else</text>
-<text x="2340.0" y="510.0" font-size="17" fill="#8FA0AE" font-weight="normal" font-style="normal" text-anchor="end">Catena-X: Cofinity-X</text>
-<text x="80.0" y="550.0" font-size="19" fill="#5A6B7B" font-weight="normal" font-style="normal" text-anchor="start">Processor for the access body under Art. 28 GDPR. It runs the lot, and it decides nothing.</text>
-<rect x="80.0" y="570" width="155.0" height="48" rx="24" fill="#FFFFFF" stroke="#CA6F1E" stroke-opacity="0.45"/>
-<text x="157.5" y="601.0" font-size="20" fill="#16324F" font-weight="600" font-style="normal" text-anchor="middle">Onboarding</text>
-<rect x="251.0" y="570" width="249.5" height="48" rx="24" fill="#FFFFFF" stroke="#CA6F1E" stroke-opacity="0.45"/>
-<text x="375.8" y="601.0" font-size="20" fill="#16324F" font-weight="600" font-style="normal" text-anchor="middle">Catalogue and label</text>
-<rect x="516.5" y="570" width="239.0" height="48" rx="24" fill="#FFFFFF" stroke="#CA6F1E" stroke-opacity="0.45"/>
-<text x="636.0" y="601.0" font-size="20" fill="#16324F" font-weight="600" font-style="normal" text-anchor="middle">Secure environment</text>
-<rect x="771.5" y="570" width="144.5" height="48" rx="24" fill="#FFFFFF" stroke="#CA6F1E" stroke-opacity="0.45"/>
-<text x="843.8" y="601.0" font-size="20" fill="#16324F" font-weight="600" font-style="normal" text-anchor="middle">Incidents</text>
-<rect x="932.0" y="570" width="123.5" height="48" rx="24" fill="#FFFFFF" stroke="#CA6F1E" stroke-opacity="0.45"/>
-<text x="993.8" y="601.0" font-size="20" fill="#16324F" font-weight="600" font-style="normal" text-anchor="middle">Support</text>
-<text x="2340.0" y="601.0" font-size="18" fill="#CA6F1E" font-weight="600" font-style="normal" text-anchor="end">Art. 57, 60, 73, 77, 82</text>
-<line x1="1200.0" y1="648" x2="1200.0" y2="668" stroke="#8FA0AE" stroke-width="2" marker-end="url(#tip)"/>
-<rect x="40" y="676" width="2320" height="150" rx="12" fill="#F3EDF7" stroke="#7D3C98" stroke-opacity="0.3"/>
-<path d="M53 676 h-5 a8 8 0 0 0 -8 8 v134 a8 8 0 0 0 8 8 h5 z" fill="#7D3C98"/>
-<text x="80.0" y="726.0" font-size="32" fill="#16324F" font-weight="700" font-style="normal" text-anchor="start">Who it serves</text>
-<text x="2340.0" y="722.0" font-size="17" fill="#8FA0AE" font-weight="normal" font-style="normal" text-anchor="end">Catena-X: data provider and consumer</text>
-<rect x="80.0" y="756" width="249.5" height="48" rx="24" fill="#FFFFFF" stroke="#7D3C98" stroke-opacity="0.45"/>
-<text x="204.8" y="787.0" font-size="20" fill="#16324F" font-weight="600" font-style="normal" text-anchor="middle">Health data holders</text>
-<rect x="345.5" y="756" width="323.0" height="48" rx="24" fill="#FFFFFF" stroke="#7D3C98" stroke-opacity="0.45"/>
-<text x="507.0" y="787.0" font-size="20" fill="#16324F" font-weight="600" font-style="normal" text-anchor="middle">Researchers and regulators</text>
-<rect x="684.5" y="756" width="134.0" height="48" rx="24" fill="#FFFFFF" stroke="#7D3C98" stroke-opacity="0.45"/>
-<text x="751.5" y="787.0" font-size="20" fill="#16324F" font-weight="600" font-style="normal" text-anchor="middle">Citizens</text>
-<text x="2340.0" y="787.0" font-size="18" fill="#7D3C98" font-weight="600" font-style="normal" text-anchor="end">Art. 58, 60, 61, 71</text>
-<text x="40.0" y="862.0" font-size="16" fill="#8FA0AE" font-weight="normal" font-style="normal" text-anchor="start">Regulation (EU) 2025/327, Chapter IV, article numbers as adopted   ·   Catena-X operating model, catenax-ev.github.io   ·   detail in docs/diagrams/ehds-operating-model.svg</text>
+<svg xmlns="http://www.w3.org/2000/svg" width="2400" height="780" viewBox="0 0 2400 780" font-family="Inter, Helvetica Neue, Helvetica, Arial, sans-serif">
+<rect width="2400" height="780" fill="#F7F9FB"/>
+<rect x="50" y="40" width="2300" height="170" rx="16" fill="#EDF3F9" stroke="#2471A3" stroke-opacity="0.28" stroke-width="1.5"/>
+<rect x="50" y="40" width="14" height="170" rx="7" fill="#2471A3"/>
+<text x="110" y="112" font-size="42" fill="#16324F" font-weight="700" font-style="normal" text-anchor="start">European Union</text>
+<text x="110" y="158" font-size="26" fill="#5A6B7B" font-weight="normal" font-style="normal" text-anchor="start">The Commission builds and runs the central platform.</text>
+<text x="2290" y="110" font-size="30" fill="#2471A3" font-weight="700" font-style="normal" text-anchor="end">Closed by law</text>
+<text x="2290" y="152" font-size="20" fill="#9AA7B3" font-weight="normal" font-style="normal" text-anchor="end">Catena-X: the Association and CSP-B</text>
+<rect x="50" y="230" width="2300" height="170" rx="16" fill="#EBF6F2" stroke="#148F77" stroke-opacity="0.28" stroke-width="1.5"/>
+<rect x="50" y="230" width="14" height="170" rx="7" fill="#148F77"/>
+<text x="110" y="302" font-size="42" fill="#16324F" font-weight="700" font-style="normal" text-anchor="start">Member State</text>
+<text x="110" y="348" font-size="26" fill="#5A6B7B" font-weight="normal" font-style="normal" text-anchor="start">The access body decides every permit, and enforces it.</text>
+<text x="2290" y="300" font-size="30" fill="#148F77" font-weight="700" font-style="normal" text-anchor="end">Cannot be delegated</text>
+<text x="2290" y="342" font-size="20" fill="#9AA7B3" font-weight="normal" font-style="normal" text-anchor="end">Catena-X: nothing. This is what EHDS adds.</text>
+<rect x="50" y="420" width="2300" height="200" rx="16" fill="#FBEFE1" stroke="#CA6F1E" stroke-opacity="0.9" stroke-width="3"/>
+<rect x="50" y="420" width="14" height="200" rx="7" fill="#CA6F1E"/>
+<text x="110" y="498" font-size="48" fill="#16324F" font-weight="700" font-style="normal" text-anchor="start">The Operating Company</text>
+<text x="110" y="548" font-size="26" fill="#5A6B7B" font-weight="normal" font-style="normal" text-anchor="start">Onboarding, the catalogue, the secure environment, incidents, support.</text>
+<text x="2290" y="496" font-size="52" fill="#CA6F1E" font-weight="700" font-style="normal" text-anchor="end">OPEN</text>
+<text x="2290" y="544" font-size="20" fill="#9AA7B3" font-weight="normal" font-style="normal" text-anchor="end">Catena-X: Cofinity-X</text>
+<text x="1200" y="685" font-size="24" fill="#5A6B7B" font-weight="normal" font-style="normal" text-anchor="middle">serving health data holders   ·   researchers and regulators   ·   citizens</text>
+<text x="1200" y="740" font-size="19" fill="#9AA7B3" font-weight="normal" font-style="normal" text-anchor="middle">Regulation (EU) 2025/327, Chapter IV   ·   detail in docs/ehds-operating-company.md</text>
 </svg>
