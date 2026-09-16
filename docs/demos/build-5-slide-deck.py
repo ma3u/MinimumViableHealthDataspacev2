@@ -2,9 +2,9 @@
 """Builds docs/demos/spain-ehds-5-slides.pptx, the whole pitch in five slides.
 
 The 24-slide deck is the full story and stays as it is. This is the version for
-a short slot, and it is about **primary use**: one record that follows the
-citizen across the 17 regions and across a border. Secondary use is the long
-deck's subject and issue #27's; it is not this one's.
+a short slot, and it is about **secondary use**: turning 17 regional datasets
+into one research resource, under one permit, without raw data ever leaving a
+secure environment.
 
 Illustrations are deliberately large. The header is compressed to about 1.4in so
 every image gets the full remaining height, and the operating-model diagram is
@@ -38,8 +38,8 @@ HERE = Path(__file__).resolve().parent
 DIAGRAMS = HERE.parent / "diagrams"
 LONG_DECK = HERE / "spain-ehds-ministry-deck.pptx"
 OUT = HERE / "spain-ehds-5-slides.pptx"
+MODEL = DIAGRAMS / "ehds-operating-model-wide.png"
 JOURNEY = DIAGRAMS / "ehds-secondary-journey-bilingual.png"
-MODEL = DIAGRAMS / "ehds-operating-model-primary.png"
 
 NAVY = RGBColor(0x14, 0x3D, 0x59)
 TEAL = RGBColor(0x2A, 0x9D, 0x8F)
@@ -140,16 +140,17 @@ def slide_1(prs):
     shape(s, MSO_SHAPE.RECTANGLE, 0, 4.2, 13.33, 0.25, AMBER)
     shape(s, MSO_SHAPE.RECTANGLE, 0, 4.45, 13.33, 0.08, RED)
     textbox(s, 0.8, 1.25, 11.7, 1.0, ["A Connected Health System for Spain"], 42, WHITE, bold=True)
-    textbox(s, 0.8, 2.45, 11.7, 0.5, ["One health record that follows the citizen"], 22, WHITE)
-    textbox(s, 0.8, 3.05, 11.7, 0.5, ["across the 17 regions of Spain"], 20, AMBER, bold=True)
+    textbox(s, 0.8, 2.45, 11.7, 0.5, ["Seventeen regional datasets, one research resource"], 22, WHITE)
+    textbox(s, 0.8, 3.05, 11.7, 0.5, ["secondary use of health data under the EHDS"], 20, AMBER, bold=True)
 
     problems = [
-        (RED, "Patients", "A citizen who lives in Madrid and falls ill in Seville cannot share "
-                          "their medical history easily.", "Art. 3: their own record, at once"),
-        (AMBER, "Doctors", "Hospitals in another region cannot see the care a patient already "
-                           "received, so tests are repeated.", "Art. 11: access at the bedside"),
-        (TEAL, "Across Europe", "A prescription issued in Spain should be dispensable in any "
-                                "Member State. Today it usually is not.", "Art. 23: MyHealth@EU"),
+        (TEAL, "Researchers", "Studying a rare disease across Spain means asking 17 separate "
+                              "regions for permission and for data.", "Art. 67: one application"),
+        (AMBER, "Data holders", "Hospitals and registries hold the data with no way to publish "
+                                "what they hold, or to deliver it on a deadline.",
+         "Art. 60: three months to deliver"),
+        (RED, "The regulator", "Every approval is bespoke, and nobody outside can see which "
+                               "permits were issued, or why.", "Art. 68: one permit, published"),
     ]
     for i, (accent, title, text, kind) in enumerate(problems):
         x = 0.6 + i * 4.12
@@ -162,55 +163,38 @@ def slide_1(prs):
     textbox(s, 0.6, 6.65, 8.0, 0.3,
             ["Spain's strength is regional autonomy. The cost is fragmentation."], 13, NAVY, bold=True)
     textbox(s, 0.6, 7.05, 5.6, 0.3, [FOOTER], 10, BODY)
-    sources(s, "Primary use, Chapter II of Regulation (EU) 2025/327  ·  data.europa.eu/eli/reg/2025/327/oj")
+    sources(s, "Secondary use, Chapter IV of Regulation (EU) 2025/327  ·  data.europa.eu/eli/reg/2025/327/oj")
 
 
 def slide_2(prs):
-    s = tight_frame(prs, "When care does not follow the citizen",
-                    "Primary use. Continuous, safe care across all 17 regions, and across the border.")
-    s.shapes.add_picture(deck_image(2), Inches(0.6), Inches(1.45), Inches(7.2), Inches(5.4))
-    card(s, 8.05, 1.45, 4.68, 3.5, "What the citizen gets, by right", NAVY, [
-        "•  See their own record, at once and free   Art. 3",
-        "•  Add their own information to it   Art. 5",
-        "•  Have what is wrong corrected   Art. 6",
-        "•  Take a copy anywhere in the Union   Art. 7",
-        "•  Restrict who is allowed to look   Art. 8",
-        "•  See who actually did look   Art. 9",
-        "•  Opt out of primary use entirely   Art. 10",
+    s = tight_frame(prs, "One question, asked once",
+                    "What the Regulation requires for secondary use, and what it puts in place to make it work.")
+    s.shapes.add_picture(deck_image(4), Inches(0.6), Inches(1.45), Inches(7.2), Inches(5.4))
+    card(s, 8.05, 1.45, 4.68, 3.5, "What EHDS puts in place", NAVY, [
+        "•  One application, however many regions   Art. 67",
+        "•  A permit decision in three months   Art. 68(4)",
+        "•  Holders deliver within three months   Art. 60(2)",
+        "•  Analysis inside a secure environment   Art. 73",
+        "•  Only results leave, never the rows   Art. 73(2)",
+        "•  Every permit published, with reasons   Art. 57(1)(j)",
     ], size=12.5, head_size=15)
-    card(s, 8.05, 5.1, 4.68, 1.75, "And it has to actually work", TEAL, [
-        "One European exchange format, Art. 15. Identification that holds across a "
-        "border, Art. 16. A national gateway into MyHealth@EU, Art. 23.",
+    card(s, 8.05, 5.1, 4.68, 1.75, "And the price is fixed by law", TEAL, [
+        "Fees recover cost only, transparent and non-discriminatory, with reduced rates "
+        "for public bodies and university researchers. Art. 62.",
     ], size=12, head_size=15)
-    sources(s, "Reg. (EU) 2025/327, Art. 3 to 10, 15, 16, 23")
+    sources(s, "Reg. (EU) 2025/327, Art. 57, 60, 62, 67, 68, 73")
 
 
 def slide_3(prs):
-    s = tight_frame(prs, "Already working, on synthetic data",
-                    "The demonstrator's own patient view, and the six data categories Chapter II turns on.")
-    s.shapes.add_picture(deck_image(9), Inches(0.6), Inches(1.45), Inches(4.29), Inches(5.4))
-    card(s, 5.2, 1.45, 7.53, 2.9, "The six priority categories, and when they must be live", NAVY, [
-        ("2029    ", "Patient summaries · electronic prescriptions · electronic dispensations"),
-        "",
-        ("2031    ", "Medical imaging and reports · test results including laboratory ·"),
-        ("              ", "discharge reports"),
-        "",
-        "Art. 14(1) and Annex I. Every right on the previous slide attaches to these six.",
-    ], size=13, head_size=16)
-    card(s, 5.2, 4.55, 7.53, 2.3, "What you are looking at", TEAL, [
-        "The patient view of the demonstrator. The page labels itself EHDS Art. 3 and "
-        "GDPR Art. 15, shows HL7 FHIR R4 events mapped to OMOP concepts on one clinical "
-        "timeline, and logs every access.",
-        "",
-        "Live at ehds.mabu.red with real sign-in, or on the static mirror that cannot fail "
-        "on the day.",
-    ], size=12, head_size=16)
-    sources(s, "Reg. (EU) 2025/327, Art. 14(1), Annex I, Art. 105  ·  github.com/ma3u/MinimumViableHealthDataspacev2")
+    s = tight_frame(prs, "What the demonstration shows",
+                    "The whole journey, from registration to an audited result. Synthetic data, real protocols.")
+    s.shapes.add_picture(str(JOURNEY), Inches(1.8), Inches(1.45), Inches(9.73), Inches(5.4))
+    sources(s, "Live: ehds.mabu.red  ·  Mirror: ma3u.github.io/MinimumViableHealthDataspacev2  ·  issue #27")
 
 
 def slide_4(prs):
-    s = tight_frame(prs, "A proposed operating model for primary use",
-                    "Chapter II cut the way Catena-X cuts a dataspace. Two of the three layers are already law.")
+    s = tight_frame(prs, "A proposed operating model for the EHDS",
+                    "The Catena-X operating model, re-cut for Regulation (EU) 2025/327. Two of the three layers are already law.")
     s.shapes.add_picture(str(MODEL), Inches(0.6), Inches(1.5), Inches(12.13), Inches(5.2))
     sources(s, "catenax-ev.github.io/docs/operating-model  ·  data.europa.eu/eli/reg/2025/327/oj  ·  cofinity-x.com")
 
@@ -219,11 +203,11 @@ def slide_5(prs):
     s = frame(prs, "The conversation we want to start",
               "Working together with the Ministry and the regions.")
     card(s, 0.6, 1.85, 6.0, 4.0, "Questions for the Ministry", NAVY, [
-        "•  Which body is the digital health authority, and is it staffed?   Art. 19",
-        "•  Which body is the national contact point for digital health?   Art. 23",
-        "•  Are the 17 regions able to register the six categories?   Art. 13, 14",
-        "•  Who converts records into the European format, and who pays?   Art. 15",
-        "•  In-house entity, joint venture, or tendered concession, decided by when?",
+        "•  One access body, or several with a coordinator?   Art. 55(1)",
+        "•  Is the national contact point that same body, or separate?   Art. 75(1)",
+        "•  Does the March 2027 designation have an owner and a budget line?",
+        "•  Who holds the inventory of the Art. 51 data categories?",
+        "•  In-house entity, joint venture, or tendered concession, and by when?",
     ], size=12.5)
     card(s, 6.85, 1.85, 6.0, 4.0, "What we bring to the table", TEAL, [
         "•  A working live demonstration with realistic data.",
@@ -233,10 +217,10 @@ def slide_5(prs):
         "•  A team that has done this before, ready to support each region.",
     ], size=13)
     band(s, 6.05, 0.85,
-         "Better care for every citizen. Patient summaries, prescriptions and dispensations have "
-         "to be live in March 2029, and counting procurement that is about two release years away.",
-         accent=AMBER)
-    sources(s, "Full deck: spain-ehds-ministry-deck.pptx  ·  Paper: docs/ehds-operating-company.md")
+         "The access body and the national contact point must be designated by March 2027, and "
+         "Chapter IV applies in full from March 2029. Counting procurement, that is about two "
+         "release years away.", accent=AMBER)
+    sources(s, "Reg. (EU) 2025/327, Art. 55(6), 75(1), 105  ·  Paper: docs/ehds-operating-company.md")
 
 
 def main() -> int:

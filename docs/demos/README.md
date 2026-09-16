@@ -5,23 +5,24 @@ decks, two guides, two generators.
 
 ## Decks
 
-| File                                                             | Slides | When to use it                                                                                                                                               |
-| ---------------------------------------------------------------- | -----: | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| [`spain-ehds-5-slides.pptx`](spain-ehds-5-slides.pptx)           |  **5** | A short slot, or leaving something behind. **Primary use**: the problem, the citizen's rights, what already runs, the proposed operating model, the ask.     |
-| [`spain-ehds-ministry-deck.pptx`](spain-ehds-ministry-deck.pptx) | **24** | The full story, primary and secondary use: personas, the federated architecture, integration, outcomes, roadmap, and five closing slides on who operates it. |
+| File                                                             | Slides | When to use it                                                                                                                                                                 |
+| ---------------------------------------------------------------- | -----: | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| [`spain-ehds-5-slides.pptx`](spain-ehds-5-slides.pptx)           |  **5** | A short slot, or leaving something behind. **Secondary use**: the problem, what the Regulation puts in place, the demonstrated journey, the proposed operating model, the ask. |
+| [`spain-ehds-ministry-deck.pptx`](spain-ehds-ministry-deck.pptx) | **24** | The full story, primary and secondary use: personas, the federated architecture, integration, outcomes, roadmap, and five closing slides on who operates it.                   |
 
 The five-slide deck is not a subset of the long one. It is a separate file built
 by a generator, so the long deck is never edited to produce it and nothing gets
-lost either way. It also has a narrower subject: **primary use**, a record that
-follows the citizen. Secondary use, permits and secure processing are the long
-deck's ground, and issue #27's.
+lost either way. It also has a narrower subject: **secondary use**, seventeen
+regional datasets becoming one research resource. Primary use is the long deck's
+ground.
 
 Its illustrations are deliberately large. The header is compressed to about
 1.4in so each image gets the remaining height, and the operating-model diagram
 on slide 4 is the wide 2.3:1 rendering,
-[`ehds-operating-model-primary.svg`](../diagrams/ehds-operating-model-primary.svg),
-rather than the 1.3:1 secondary-use one, which on a 16:9 slide can only be shown
-at half width and is then unreadable from the back of a room.
+[`ehds-operating-model-wide.svg`](../diagrams/ehds-operating-model-wide.svg),
+rather than the 1.3:1 original, which on a 16:9 slide can only be shown at half
+width and is then unreadable from the back of a room. The 1.3:1 version stays
+the right one for a document or an issue, where height is free.
 
 | Generator                                                        | What it does                                                                             |
 | ---------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
