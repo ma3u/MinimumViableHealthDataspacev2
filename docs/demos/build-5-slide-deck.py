@@ -193,9 +193,9 @@ def slide_3(prs):
 
 
 def slide_4(prs):
-    s = tight_frame(prs, "A proposed operating model for the EHDS",
-                    "The Catena-X operating model, re-cut for Regulation (EU) 2025/327. One of the three layers is open.")
-    s.shapes.add_picture(str(MODEL), Inches(0.6), Inches(2.23), Inches(12.13), Inches(3.94))
+    s = tight_frame(prs, "What Catena-X teaches an EHDS operating company",
+                    "Six lessons from running the automotive dataspace, and where each one lands in the Regulation.")
+    s.shapes.add_picture(str(MODEL), Inches(0.665), Inches(1.48), Inches(12.0), Inches(5.37))
     sources(s, "catenax-ev.github.io/docs/operating-model  ·  data.europa.eu/eli/reg/2025/327/oj  ·  cofinity-x.com")
 
 
