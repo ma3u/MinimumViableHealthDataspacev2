@@ -144,6 +144,7 @@ function NegotiateContent() {
   const [dspBase] = useState("http://controlplane:8082/api/dsp");
   const [catalogLoading, setCatalogLoading] = useState(false);
   const [catalogError, setCatalogError] = useState<string | null>(null);
+  const [catalogNote, setCatalogNote] = useState<string | null>(null);
   const [offers, setOffers] = useState<CatalogOffer[]>([]);
   const [selectedOffer, setSelectedOffer] = useState<CatalogOffer | null>(null);
 
@@ -201,6 +202,7 @@ function NegotiateContent() {
     if (!selectedCtx || (!providerDid && !providerCtxId)) return;
     setCatalogLoading(true);
     setCatalogError(null);
+    setCatalogNote(null);
     setOffers([]);
     setSelectedOffer(null);
 
@@ -228,7 +230,15 @@ function NegotiateContent() {
         return;
       }
 
-      const parsed = parseOffers(data as Record<string, unknown>);
+      const payload = data as Record<string, unknown>;
+      if (payload.demo === true) {
+        setCatalogNote(
+          (payload.demoReason as string) ||
+            "These offers come from the demonstrator's own catalogue, not from a live DSP request.",
+        );
+      }
+
+      const parsed = parseOffers(payload);
       setOffers(parsed);
       if (parsed.length === 0) {
         setCatalogError(
@@ -383,6 +393,7 @@ function NegotiateContent() {
                 setOffers([]);
                 setSelectedOffer(null);
                 setCatalogError(null);
+                setCatalogNote(null);
               }}
               className="w-full max-w-md px-3 py-2 bg-[var(--surface-2)] border border-[var(--border-ui)] rounded text-sm"
               disabled={participants.length === 0}
@@ -419,6 +430,13 @@ function NegotiateContent() {
             <div className="mt-3 p-3 rounded bg-red-100 dark:bg-red-900/30 border border-red-300 dark:border-red-700 text-red-800 dark:text-red-300 text-xs flex gap-2">
               <AlertCircle size={14} className="shrink-0 mt-0.5" />
               <span>{catalogError}</span>
+            </div>
+          )}
+
+          {catalogNote && (
+            <div className="mt-3 p-3 rounded bg-amber-100 dark:bg-amber-900/30 border border-amber-300 dark:border-amber-700 text-amber-900 dark:text-amber-200 text-xs flex gap-2">
+              <AlertCircle size={14} className="shrink-0 mt-0.5" />
+              <span>{catalogNote}</span>
             </div>
           )}
 

@@ -23,6 +23,76 @@ async function loadMockNegotiations(): Promise<unknown[]> {
 }
 
 /**
+ * Build a DSP catalog from the bundled demo assets.
+ *
+ * Why this exists: `/api/participants` falls back to `public/mock/participants.json`
+ * whenever the connector reports no ACTIVATED participant contexts, which is the
+ * state of the Azure deployment today (issue #25, a deliberate scope split under
+ * ADR-022). The negotiate page then took one of those demo context ids and sent
+ * it to the live connector, which answered `404 Not Found` because no such
+ * context exists there. The id was never real, so the request could not have
+ * succeeded.
+ *
+ * Serving the matching demo catalog keeps the walkthrough usable and, because the
+ * response carries `demo: true`, the page says plainly where the data came from
+ * rather than presenting it as a live catalog.
+ */
+async function loadDemoCatalog(
+  providerDid: string,
+): Promise<Record<string, unknown> | null> {
+  try {
+    const raw = await fs.readFile(
+      path.join(process.cwd(), "public", "mock", "assets.json"),
+      "utf-8",
+    );
+    const entries = JSON.parse(raw) as {
+      participantId?: string;
+      identity?: string;
+      assets?: Record<string, unknown>[];
+    }[];
+
+    const wanted = decodeURIComponent(providerDid).toLowerCase();
+    const entry = entries.find(
+      (e) =>
+        decodeURIComponent(e.identity ?? "").toLowerCase() === wanted ||
+        e.participantId === providerDid,
+    );
+    if (!entry || !(entry.assets ?? []).length) return null;
+
+    const dataset = (entry.assets ?? []).map((asset) => {
+      const props = (asset.properties ?? {}) as Record<string, unknown>;
+      const assetId = (asset["@id"] ?? props.id ?? "") as string;
+      return {
+        "@id": assetId,
+        "@type": "dcat:Dataset",
+        name: props.name ?? assetId,
+        description: props.description ?? "",
+        contenttype: props.contenttype ?? "",
+        hasPolicy: [
+          {
+            "@id": `demo-offer:${assetId}`,
+            "@type": "odrl:Offer",
+            assigner: entry.identity ?? providerDid,
+            target: assetId,
+            permission: [{ action: "use" }],
+          },
+        ],
+      };
+    });
+
+    return {
+      "@context": [EDC_CONTEXT],
+      "@type": "dcat:Catalog",
+      participantId: entry.identity ?? providerDid,
+      dataset,
+      demo: true,
+    };
+  } catch {
+    return null;
+  }
+}
+
+/**
  * DSP protocol version required by EDC-V (must include version suffix)
  * @see seed-contract-negotiation.sh DSP_PROTOCOL variable
  */
@@ -95,6 +165,22 @@ export async function GET(req: NextRequest) {
     } catch (err) {
       console.error("Failed to fetch provider catalog:", err);
       const msg = err instanceof Error ? err.message : String(err);
+
+      // The connector has no participant context for this id. That is expected
+      // while the Azure EDC stack is unseeded, because the id came from the demo
+      // participant list in the first place. Serve the demo catalog and label it.
+      const demo = await loadDemoCatalog(providerDid);
+      if (demo) {
+        return NextResponse.json({
+          ...demo,
+          demoReason:
+            "The connector has no participant context for this id, so these offers " +
+            "come from the demonstrator's own catalogue rather than from a live DSP " +
+            "request. Tracked in issue #25.",
+          upstreamError: msg,
+        });
+      }
+
       return NextResponse.json(
         { error: "Failed to fetch provider catalog", detail: msg },
         { status: 502 },
