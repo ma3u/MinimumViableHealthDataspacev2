@@ -1,23 +1,52 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="2400" height="780" viewBox="0 0 2400 780" font-family="Inter, Helvetica Neue, Helvetica, Arial, sans-serif">
-<rect width="2400" height="780" fill="#F7F9FB"/>
-<rect x="50" y="40" width="2300" height="170" rx="16" fill="#EDF3F9" stroke="#2471A3" stroke-opacity="0.28" stroke-width="1.5"/>
-<rect x="50" y="40" width="14" height="170" rx="7" fill="#2471A3"/>
-<text x="110" y="112" font-size="42" fill="#16324F" font-weight="700" font-style="normal" text-anchor="start">European Union</text>
-<text x="110" y="158" font-size="26" fill="#5A6B7B" font-weight="normal" font-style="normal" text-anchor="start">The Commission builds and runs the central platform.</text>
-<text x="2290" y="110" font-size="30" fill="#2471A3" font-weight="700" font-style="normal" text-anchor="end">Closed by law</text>
-<text x="2290" y="152" font-size="20" fill="#9AA7B3" font-weight="normal" font-style="normal" text-anchor="end">Catena-X: the Association and CSP-B</text>
-<rect x="50" y="230" width="2300" height="170" rx="16" fill="#EBF6F2" stroke="#148F77" stroke-opacity="0.28" stroke-width="1.5"/>
-<rect x="50" y="230" width="14" height="170" rx="7" fill="#148F77"/>
-<text x="110" y="302" font-size="42" fill="#16324F" font-weight="700" font-style="normal" text-anchor="start">Member State</text>
-<text x="110" y="348" font-size="26" fill="#5A6B7B" font-weight="normal" font-style="normal" text-anchor="start">The access body decides every permit, and enforces it.</text>
-<text x="2290" y="300" font-size="30" fill="#148F77" font-weight="700" font-style="normal" text-anchor="end">Cannot be delegated</text>
-<text x="2290" y="342" font-size="20" fill="#9AA7B3" font-weight="normal" font-style="normal" text-anchor="end">Catena-X: nothing. This is what EHDS adds.</text>
-<rect x="50" y="420" width="2300" height="200" rx="16" fill="#FBEFE1" stroke="#CA6F1E" stroke-opacity="0.9" stroke-width="3"/>
-<rect x="50" y="420" width="14" height="200" rx="7" fill="#CA6F1E"/>
-<text x="110" y="498" font-size="48" fill="#16324F" font-weight="700" font-style="normal" text-anchor="start">The Operating Company</text>
-<text x="110" y="548" font-size="26" fill="#5A6B7B" font-weight="normal" font-style="normal" text-anchor="start">Onboarding, the catalogue, the secure environment, incidents, support.</text>
-<text x="2290" y="496" font-size="52" fill="#CA6F1E" font-weight="700" font-style="normal" text-anchor="end">OPEN</text>
-<text x="2290" y="544" font-size="20" fill="#9AA7B3" font-weight="normal" font-style="normal" text-anchor="end">Catena-X: Cofinity-X</text>
-<text x="1200" y="685" font-size="24" fill="#5A6B7B" font-weight="normal" font-style="normal" text-anchor="middle">serving health data holders   ·   researchers and regulators   ·   citizens</text>
-<text x="1200" y="740" font-size="19" fill="#9AA7B3" font-weight="normal" font-style="normal" text-anchor="middle">Regulation (EU) 2025/327, Chapter IV   ·   detail in docs/ehds-operating-company.md</text>
+<svg xmlns="http://www.w3.org/2000/svg" width="2400" height="1074" viewBox="0 0 2400 1074" font-family="Inter, Helvetica Neue, Helvetica, Arial, sans-serif">
+<rect width="2400" height="1074" fill="#FFFFFF"/>
+<text x="150" y="74" font-size="21" fill="#9AA7B3" font-weight="700" font-style="normal" text-anchor="start">WHAT CATENA-X LEARNED</text>
+<text x="1150" y="74" font-size="21" fill="#9AA7B3" font-weight="700" font-style="normal" text-anchor="start">WHAT IT MEANS FOR AN EHDS OPERATING COMPANY</text>
+<line x1="50" y1="94" x2="2350" y2="94" stroke="#DCE3EA" stroke-width="2"/>
+<rect x="50" y="108" width="2300" height="150" fill="#F7F9FB"/>
+<circle cx="102" cy="170" r="27" fill="#2471A3"/>
+<text x="102" y="179" font-size="27" fill="#FFFFFF" font-weight="700" font-style="normal" text-anchor="middle">1</text>
+<text x="150" y="168" font-size="28" fill="#16324F" font-weight="700" font-style="normal" text-anchor="start">Standards alone do not make a dataspace</text>
+<line x1="1070" y1="134" x2="1070" y2="232" stroke="#DCE3EA" stroke-width="2"/>
+<text x="1150" y="160" font-size="22" fill="#5A6B7B" font-weight="normal" font-style="normal" text-anchor="start">Catena-X became real when one company was made accountable for running it,</text>
+<text x="1150" y="192" font-size="22" fill="#5A6B7B" font-weight="normal" font-style="normal" text-anchor="start">not when the standards were published. EHDS has rules and dates, and no operator.</text>
+<text x="2320" y="228" font-size="20" fill="#2471A3" font-weight="700" font-style="normal" text-anchor="end">Art. 55(2)</text>
+<circle cx="102" cy="320" r="27" fill="#148F77"/>
+<text x="102" y="329" font-size="27" fill="#FFFFFF" font-weight="700" font-style="normal" text-anchor="middle">2</text>
+<text x="150" y="318" font-size="28" fill="#16324F" font-weight="700" font-style="normal" text-anchor="start">Keep governance and operation in different hands</text>
+<line x1="1070" y1="284" x2="1070" y2="382" stroke="#DCE3EA" stroke-width="2"/>
+<text x="1150" y="310" font-size="22" fill="#5A6B7B" font-weight="normal" font-style="normal" text-anchor="start">The association writes the rules, the operating company runs the services.</text>
+<text x="1150" y="342" font-size="22" fill="#5A6B7B" font-weight="normal" font-style="normal" text-anchor="start">Here: the access body decides the permit, an operator runs everything else.</text>
+<text x="2320" y="378" font-size="20" fill="#148F77" font-weight="700" font-style="normal" text-anchor="end">Art. 55(3), 74</text>
+<rect x="50" y="408" width="2300" height="150" fill="#F7F9FB"/>
+<circle cx="102" cy="470" r="27" fill="#CA6F1E"/>
+<text x="102" y="479" font-size="27" fill="#FFFFFF" font-weight="700" font-style="normal" text-anchor="middle">3</text>
+<text x="150" y="468" font-size="28" fill="#16324F" font-weight="700" font-style="normal" text-anchor="start">Onboarding is the product, not a phase</text>
+<line x1="1070" y1="434" x2="1070" y2="532" stroke="#DCE3EA" stroke-width="2"/>
+<text x="1150" y="460" font-size="22" fill="#5A6B7B" font-weight="normal" font-style="normal" text-anchor="start">A catalogue with no participants is worth nothing. Holders owe data within three</text>
+<text x="1150" y="492" font-size="22" fill="#5A6B7B" font-weight="normal" font-style="normal" text-anchor="start">months with a penalty for every day late, so they must be connected in 2027.</text>
+<text x="2320" y="528" font-size="20" fill="#CA6F1E" font-weight="700" font-style="normal" text-anchor="end">Art. 60(2), 63(4)</text>
+<circle cx="102" cy="620" r="27" fill="#1E8449"/>
+<text x="102" y="629" font-size="27" fill="#FFFFFF" font-weight="700" font-style="normal" text-anchor="middle">4</text>
+<text x="150" y="618" font-size="28" fill="#16324F" font-weight="700" font-style="normal" text-anchor="start">Publish a service map, and certify against it</text>
+<line x1="1070" y1="584" x2="1070" y2="682" stroke="#DCE3EA" stroke-width="2"/>
+<text x="1150" y="610" font-size="22" fill="#5A6B7B" font-weight="normal" font-style="normal" text-anchor="start">Every service has a named owner and a role that can be assessed. Onboarding, core</text>
+<text x="1150" y="642" font-size="22" fill="#5A6B7B" font-weight="normal" font-style="normal" text-anchor="start">services per Member State, secure processing, and a market above them.</text>
+<text x="2320" y="678" font-size="20" fill="#1E8449" font-weight="700" font-style="normal" text-anchor="end">Art. 57, 73</text>
+<rect x="50" y="708" width="2300" height="150" fill="#F7F9FB"/>
+<circle cx="102" cy="770" r="27" fill="#7D3C98"/>
+<text x="102" y="779" font-size="27" fill="#FFFFFF" font-weight="700" font-style="normal" text-anchor="middle">5</text>
+<text x="150" y="768" font-size="28" fill="#16324F" font-weight="700" font-style="normal" text-anchor="start">Run a release train, not a project</text>
+<line x1="1070" y1="734" x2="1070" y2="832" stroke="#DCE3EA" stroke-width="2"/>
+<text x="1150" y="760" font-size="22" fill="#5A6B7B" font-weight="normal" font-style="normal" text-anchor="start">One cadence, two supported versions, a published deprecation window, a sandbox.</text>
+<text x="1150" y="792" font-size="22" fill="#5A6B7B" font-weight="normal" font-style="normal" text-anchor="start">The difference here is that the dates are statutory: 2027 designate, 2029 live.</text>
+<text x="2320" y="828" font-size="20" fill="#7D3C98" font-weight="700" font-style="normal" text-anchor="end">Art. 105</text>
+<circle cx="102" cy="920" r="27" fill="#B03A2E"/>
+<text x="102" y="929" font-size="27" fill="#FFFFFF" font-weight="700" font-style="normal" text-anchor="middle">6</text>
+<text x="150" y="918" font-size="28" fill="#16324F" font-weight="700" font-style="normal" text-anchor="start">The operator must not compete with its own market</text>
+<line x1="1070" y1="884" x2="1070" y2="982" stroke="#DCE3EA" stroke-width="2"/>
+<text x="1150" y="910" font-size="22" fill="#5A6B7B" font-weight="normal" font-style="normal" text-anchor="start">Catena-X separates the operator from the application providers. EHDS goes further:</text>
+<text x="1150" y="942" font-size="22" fill="#5A6B7B" font-weight="normal" font-style="normal" text-anchor="start">fees recover cost only and may not restrict competition.</text>
+<text x="2320" y="978" font-size="20" fill="#B03A2E" font-weight="700" font-style="normal" text-anchor="end">Art. 62</text>
+<text x="50" y="1048" font-size="19" fill="#9AA7B3" font-weight="normal" font-style="normal" text-anchor="start">Catena-X operating model, catenax-ev.github.io   ·   Cofinity-X, the operating company   ·   Regulation (EU) 2025/327, Chapter IV   ·   the full model in docs/ehds-operating-company.md</text>
 </svg>
