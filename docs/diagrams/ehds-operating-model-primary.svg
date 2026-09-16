@@ -1,0 +1,143 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2400" height="1030" viewBox="0 0 2400 1030" font-family="Inter, Helvetica Neue, Helvetica, Arial, sans-serif">
+<defs><marker id="tip" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#8FA0AE"/></marker></defs>
+<rect width="2400" height="1030" fill="#F7F9FB"/>
+<text x="44.0" y="40.0" font-size="23" fill="#16324F" font-weight="700" font-style="normal" text-anchor="start">Who operates primary use: one record that follows the citizen</text>
+<text x="44.0" y="60.0" font-size="12.5" fill="#5A6B7B" font-weight="normal" font-style="italic" text-anchor="start">Quién opera el uso primario: una historia clínica que acompaña al ciudadano</text>
+<text x="44.0" y="80.0" font-size="11" fill="#5A6B7B" font-weight="normal" font-style="normal" text-anchor="start">Chapter II of Regulation (EU) 2025/327, cut the way Catena-X cuts a dataspace. Grey chips name the Catena-X role each layer replaces.</text>
+<rect x="44" y="92" width="2312" height="150" rx="9" fill="#EEF4F9" stroke="#2471A3" stroke-opacity="0.28"/>
+<path d="M55 92 h-4 a6 6 0 0 0 -7 6 v138 a6 6 0 0 0 7 6 h4 z" fill="#2471A3"/>
+<text x="69.0" y="116.0" font-size="16" fill="#16324F" font-weight="700" font-style="normal" text-anchor="start">Union level: governance and the central platform</text>
+<text x="69.0" y="133.0" font-size="11" fill="#5A6B7B" font-weight="normal" font-style="italic" text-anchor="start">Nivel de la Unión: gobernanza y plataforma central</text>
+<rect x="1966" y="105" width="372" height="22" rx="11" fill="#FFFFFF" stroke="#8FA0AE" stroke-opacity="0.6"/>
+<text x="2152.0" y="120.0" font-size="10.5" fill="#5A6B7B" font-weight="normal" font-style="normal" text-anchor="middle">Catena-X analogue: Association e.V. and CSP-B</text>
+<rect x="69.0" y="140" width="749.0" height="88" rx="6" fill="#FFFFFF" stroke="#2471A3" stroke-opacity="0.35"/>
+<text x="83.0" y="163.0" font-size="13.5" fill="#16324F" font-weight="600" font-style="normal" text-anchor="start">EHDS Board and the steering group</text>
+<text x="83.0" y="183.0" font-size="10.5" fill="#5A6B7B" font-weight="normal" font-style="normal" text-anchor="start">Member States and the Commission. The MyHealth@EU steering group takes the</text>
+<text x="83.0" y="198.0" font-size="10.5" fill="#5A6B7B" font-weight="normal" font-style="normal" text-anchor="start">operational decisions, one seat per national contact point, consensus or two thirds.</text>
+<text x="83.0" y="217.0" font-size="9.5" fill="#2471A3" font-weight="600" font-style="normal" text-anchor="start">Art. 92, 94, 95</text>
+<rect x="838.0" y="140" width="749.0" height="88" rx="6" fill="#FFFFFF" stroke="#2471A3" stroke-opacity="0.35"/>
+<text x="852.0" y="163.0" font-size="13.5" fill="#16324F" font-weight="600" font-style="normal" text-anchor="start">Commission central services</text>
+<text x="852.0" y="183.0" font-size="10.5" fill="#5A6B7B" font-weight="normal" font-style="normal" text-anchor="start">Develops, hosts and operates the central platform for MyHealth@EU, plus the</text>
+<text x="852.0" y="198.0" font-size="10.5" fill="#5A6B7B" font-weight="normal" font-style="normal" text-anchor="start">cross-border identification and authentication of patients and professionals.</text>
+<text x="852.0" y="217.0" font-size="9.5" fill="#2471A3" font-weight="600" font-style="normal" text-anchor="start">Art. 96(1)(a), (b)</text>
+<rect x="1607.0" y="140" width="749.0" height="88" rx="6" fill="#FFFFFF" stroke="#2471A3" stroke-opacity="0.35"/>
+<text x="1621.0" y="163.0" font-size="13.5" fill="#16324F" font-weight="600" font-style="normal" text-anchor="start">Conformity and the EU database</text>
+<text x="1621.0" y="183.0" font-size="10.5" fill="#5A6B7B" font-weight="normal" font-style="normal" text-anchor="start">Common specifications, a European digital testing environment, and the public</text>
+<text x="1621.0" y="198.0" font-size="10.5" fill="#5A6B7B" font-weight="normal" font-style="normal" text-anchor="start">register of every EHR system placed on the Union market.</text>
+<text x="1621.0" y="217.0" font-size="9.5" fill="#2471A3" font-weight="600" font-style="normal" text-anchor="start">Art. 36, 40, 49</text>
+<line x1="1200.0" y1="245" x2="1200.0" y2="261" stroke="#8FA0AE" stroke-width="1.5" marker-end="url(#tip)"/>
+<text x="1213.0" y="259.0" font-size="10.5" fill="#5A6B7B" font-weight="normal" font-style="italic" text-anchor="start">connect, after a Commission compliance check, Art. 23(9)</text>
+<rect x="44" y="268" width="2312" height="162" rx="9" fill="#EDF6F3" stroke="#148F77" stroke-opacity="0.28"/>
+<path d="M55 268 h-4 a6 6 0 0 0 -7 6 v150 a6 6 0 0 0 7 6 h4 z" fill="#148F77"/>
+<text x="69.0" y="292.0" font-size="16" fill="#16324F" font-weight="700" font-style="normal" text-anchor="start">Member State: the sovereign functions</text>
+<text x="69.0" y="309.0" font-size="11" fill="#5A6B7B" font-weight="normal" font-style="italic" text-anchor="start">Estado miembro: las funciones soberanas</text>
+<rect x="1966" y="281" width="372" height="22" rx="11" fill="#FFFFFF" stroke="#8FA0AE" stroke-opacity="0.6"/>
+<text x="2152.0" y="296.0" font-size="10.5" fill="#5A6B7B" font-weight="normal" font-style="normal" text-anchor="middle">Catena-X analogue: none, this is what EHDS adds</text>
+<text x="69.0" y="417.0" font-size="10.5" fill="#148F77" font-weight="normal" font-style="italic" text-anchor="start">Art. 19 names the authority and Art. 23 names the gateway. Neither article says a word about who builds or runs them.</text>
+<rect x="69.0" y="316" width="749.0" height="88" rx="6" fill="#FFFFFF" stroke="#148F77" stroke-opacity="0.35"/>
+<text x="83.0" y="339.0" font-size="13.5" fill="#16324F" font-weight="600" font-style="normal" text-anchor="start">Digital health authority</text>
+<text x="83.0" y="359.0" font-size="10.5" fill="#5A6B7B" font-weight="normal" font-style="normal" text-anchor="start">Enforces Chapter II, takes the citizen&#x27;s complaint, reports every year. One per</text>
+<text x="83.0" y="374.0" font-size="10.5" fill="#5A6B7B" font-weight="normal" font-style="normal" text-anchor="start">Member State, and the address a citizen writes to when a right is denied.</text>
+<text x="83.0" y="393.0" font-size="9.5" fill="#148F77" font-weight="600" font-style="normal" text-anchor="start">Art. 19, 20, 21</text>
+<rect x="838.0" y="316" width="749.0" height="88" rx="6" fill="#FFFFFF" stroke="#148F77" stroke-opacity="0.35"/>
+<text x="852.0" y="339.0" font-size="13.5" fill="#16324F" font-weight="600" font-style="normal" text-anchor="start">National contact point for digital health</text>
+<text x="852.0" y="359.0" font-size="10.5" fill="#5A6B7B" font-weight="normal" font-style="normal" text-anchor="start">The gateway into MyHealth@EU. Designated, notified, and checked by the</text>
+<text x="852.0" y="374.0" font-size="10.5" fill="#5A6B7B" font-weight="normal" font-style="normal" text-anchor="start">Commission before it is allowed to connect to anything.</text>
+<text x="852.0" y="393.0" font-size="9.5" fill="#148F77" font-weight="600" font-style="normal" text-anchor="start">Art. 23</text>
+<rect x="1607.0" y="316" width="749.0" height="88" rx="6" fill="#FFFFFF" stroke="#148F77" stroke-opacity="0.35"/>
+<text x="1621.0" y="339.0" font-size="13.5" fill="#16324F" font-weight="600" font-style="normal" text-anchor="start">Market surveillance</text>
+<text x="1621.0" y="359.0" font-size="10.5" fill="#5A6B7B" font-weight="normal" font-style="normal" text-anchor="start">Watches the EHR systems on the national market, handles serious incidents, and</text>
+<text x="1621.0" y="374.0" font-size="10.5" fill="#5A6B7B" font-weight="normal" font-style="normal" text-anchor="start">can restrict or withdraw a product that does not comply.</text>
+<text x="1621.0" y="393.0" font-size="9.5" fill="#148F77" font-weight="600" font-style="normal" text-anchor="start">Art. 43, 44, 45</text>
+<line x1="1200.0" y1="433" x2="1200.0" y2="449" stroke="#8FA0AE" stroke-width="1.5" marker-end="url(#tip)"/>
+<text x="1213.0" y="447.0" font-size="10.5" fill="#5A6B7B" font-weight="normal" font-style="italic" text-anchor="start">delegates the operation, keeps the decision and the enforcement</text>
+<rect x="44" y="456" width="2312" height="178" rx="9" fill="#FBF1E6" stroke="#CA6F1E" stroke-opacity="0.28"/>
+<path d="M55 456 h-4 a6 6 0 0 0 -7 6 v166 a6 6 0 0 0 7 6 h4 z" fill="#CA6F1E"/>
+<text x="69.0" y="480.0" font-size="16" fill="#16324F" font-weight="700" font-style="normal" text-anchor="start">The Operating Company: processor for the authority, Art. 28 GDPR</text>
+<text x="69.0" y="497.0" font-size="11" fill="#5A6B7B" font-weight="normal" font-style="italic" text-anchor="start">La sociedad operadora: encargada del tratamiento por cuenta de la autoridad</text>
+<rect x="1966" y="469" width="372" height="22" rx="11" fill="#FFFFFF" stroke="#8FA0AE" stroke-opacity="0.6"/>
+<text x="2152.0" y="484.0" font-size="10.5" fill="#5A6B7B" font-weight="normal" font-style="normal" text-anchor="middle">Catena-X analogue: Cofinity-X</text>
+<text x="69.0" y="621.0" font-size="10.5" fill="#CA6F1E" font-weight="normal" font-style="italic" text-anchor="start">It never enforces a right and never decides a complaint. Those stay with the digital health authority.</text>
+<rect x="69.0" y="504" width="444.6" height="100" rx="6" fill="#FFFFFF" stroke="#CA6F1E" stroke-opacity="0.35"/>
+<text x="83.0" y="527.0" font-size="13.5" fill="#16324F" font-weight="600" font-style="normal" text-anchor="start">Planning and roadmap</text>
+<text x="83.0" y="547.0" font-size="10.5" fill="#5A6B7B" font-weight="normal" font-style="normal" text-anchor="start">Patient summaries and prescriptions</text>
+<text x="83.0" y="562.0" font-size="10.5" fill="#5A6B7B" font-weight="normal" font-style="normal" text-anchor="start">live in 2029, imaging, labs and</text>
+<text x="83.0" y="577.0" font-size="10.5" fill="#5A6B7B" font-weight="normal" font-style="normal" text-anchor="start">discharge reports in 2031.</text>
+<text x="83.0" y="593.0" font-size="9.5" fill="#CA6F1E" font-weight="600" font-style="normal" text-anchor="start">Art. 105</text>
+<rect x="529.6" y="504" width="444.6" height="100" rx="6" fill="#FFFFFF" stroke="#CA6F1E" stroke-opacity="0.35"/>
+<text x="543.6" y="527.0" font-size="13.5" fill="#16324F" font-weight="600" font-style="normal" text-anchor="start">Providers and onboarding</text>
+<text x="543.6" y="547.0" font-size="10.5" fill="#5A6B7B" font-weight="normal" font-style="normal" text-anchor="start">Every hospital, practice, pharmacy</text>
+<text x="543.6" y="562.0" font-size="10.5" fill="#5A6B7B" font-weight="normal" font-style="normal" text-anchor="start">and lab that has to register data.</text>
+<text x="543.6" y="577.0" font-size="10.5" fill="#5A6B7B" font-weight="normal" font-style="normal" text-anchor="start">Conformance tested before it connects.</text>
+<text x="543.6" y="593.0" font-size="9.5" fill="#CA6F1E" font-weight="600" font-style="normal" text-anchor="start">Art. 13, 17</text>
+<rect x="990.2" y="504" width="444.6" height="100" rx="6" fill="#FFFFFF" stroke="#CA6F1E" stroke-opacity="0.35"/>
+<text x="1004.2" y="527.0" font-size="13.5" fill="#16324F" font-weight="600" font-style="normal" text-anchor="start">The exchange services</text>
+<text x="1004.2" y="547.0" font-size="10.5" fill="#5A6B7B" font-weight="normal" font-style="normal" text-anchor="start">Conversion into and out of the</text>
+<text x="1004.2" y="562.0" font-size="10.5" fill="#5A6B7B" font-weight="normal" font-style="normal" text-anchor="start">European exchange format, terminology,</text>
+<text x="1004.2" y="577.0" font-size="10.5" fill="#5A6B7B" font-weight="normal" font-style="normal" text-anchor="start">identification management.</text>
+<text x="1004.2" y="593.0" font-size="9.5" fill="#CA6F1E" font-weight="600" font-style="normal" text-anchor="start">Art. 4, 12, 15, 16</text>
+<rect x="1450.8" y="504" width="444.6" height="100" rx="6" fill="#FFFFFF" stroke="#CA6F1E" stroke-opacity="0.35"/>
+<text x="1464.8" y="527.0" font-size="13.5" fill="#16324F" font-weight="600" font-style="normal" text-anchor="start">Incidents</text>
+<text x="1464.8" y="547.0" font-size="10.5" fill="#5A6B7B" font-weight="normal" font-style="normal" text-anchor="start">One timeline across provider, converter,</text>
+<text x="1464.8" y="562.0" font-size="10.5" fill="#5A6B7B" font-weight="normal" font-style="normal" text-anchor="start">contact point and platform. A wrong</text>
+<text x="1464.8" y="577.0" font-size="10.5" fill="#5A6B7B" font-weight="normal" font-style="normal" text-anchor="start">record at a bedside is a safety event.</text>
+<text x="1464.8" y="593.0" font-size="9.5" fill="#CA6F1E" font-weight="600" font-style="normal" text-anchor="start">Art. 44</text>
+<rect x="1911.4" y="504" width="444.6" height="100" rx="6" fill="#FFFFFF" stroke="#CA6F1E" stroke-opacity="0.35"/>
+<text x="1925.4" y="527.0" font-size="13.5" fill="#16324F" font-weight="600" font-style="normal" text-anchor="start">Support</text>
+<text x="1925.4" y="547.0" font-size="10.5" fill="#5A6B7B" font-weight="normal" font-style="normal" text-anchor="start">L1 in the national language, for</text>
+<text x="1925.4" y="562.0" font-size="10.5" fill="#5A6B7B" font-weight="normal" font-style="normal" text-anchor="start">citizens and clinicians both. A doctor</text>
+<text x="1925.4" y="577.0" font-size="10.5" fill="#5A6B7B" font-weight="normal" font-style="normal" text-anchor="start">blocked at the bedside cannot queue.</text>
+<text x="1925.4" y="593.0" font-size="9.5" fill="#CA6F1E" font-weight="600" font-style="normal" text-anchor="start">Art. 82, 83</text>
+<line x1="1200.0" y1="637" x2="1200.0" y2="653" stroke="#8FA0AE" stroke-width="1.5" marker-end="url(#tip)"/>
+<text x="1213.0" y="651.0" font-size="10.5" fill="#5A6B7B" font-weight="normal" font-style="italic" text-anchor="start">operates and is measured on</text>
+<rect x="44" y="660" width="2312" height="146" rx="9" fill="#EDF6F0" stroke="#1E8449" stroke-opacity="0.28"/>
+<path d="M55 660 h-4 a6 6 0 0 0 -7 6 v134 a6 6 0 0 0 7 6 h4 z" fill="#1E8449"/>
+<text x="69.0" y="684.0" font-size="16" fill="#16324F" font-weight="700" font-style="normal" text-anchor="start">What it runs: the primary-use service map</text>
+<text x="69.0" y="701.0" font-size="11" fill="#5A6B7B" font-weight="normal" font-style="italic" text-anchor="start">Lo que opera: el mapa de servicios del uso primario</text>
+<rect x="1966" y="673" width="372" height="22" rx="11" fill="#FFFFFF" stroke="#8FA0AE" stroke-opacity="0.6"/>
+<text x="2152.0" y="688.0" font-size="10.5" fill="#5A6B7B" font-weight="normal" font-style="normal" text-anchor="middle">Catena-X analogue: the Service Map</text>
+<rect x="69.0" y="708" width="558.2" height="86" rx="6" fill="#FFFFFF" stroke="#1E8449" stroke-opacity="0.35"/>
+<text x="83.0" y="731.0" font-size="13.5" fill="#16324F" font-weight="600" font-style="normal" text-anchor="start">Citizen-facing services</text>
+<text x="83.0" y="751.0" font-size="10.5" fill="#5A6B7B" font-weight="normal" font-style="normal" text-anchor="start">Access for a person and their representative,</text>
+<text x="83.0" y="766.0" font-size="10.5" fill="#5A6B7B" font-weight="normal" font-style="normal" text-anchor="start">rectification, portability, restriction, opt-out.</text>
+<text x="83.0" y="783.0" font-size="9.5" fill="#1E8449" font-weight="600" font-style="normal" text-anchor="start">Art. 3 to 10</text>
+<rect x="645.2" y="708" width="558.2" height="86" rx="6" fill="#FFFFFF" stroke="#1E8449" stroke-opacity="0.35"/>
+<text x="659.2" y="731.0" font-size="13.5" fill="#16324F" font-weight="600" font-style="normal" text-anchor="start">Professional-facing services</text>
+<text x="659.2" y="751.0" font-size="10.5" fill="#5A6B7B" font-weight="normal" font-style="normal" text-anchor="start">The health professional access service, with</text>
+<text x="659.2" y="766.0" font-size="10.5" fill="#5A6B7B" font-weight="normal" font-style="normal" text-anchor="start">identification and purpose-bound access.</text>
+<text x="659.2" y="783.0" font-size="9.5" fill="#1E8449" font-weight="600" font-style="normal" text-anchor="start">Art. 11, 12, 16</text>
+<rect x="1221.5" y="708" width="558.2" height="86" rx="6" fill="#FFFFFF" stroke="#1E8449" stroke-opacity="0.35"/>
+<text x="1235.5" y="731.0" font-size="13.5" fill="#16324F" font-weight="600" font-style="normal" text-anchor="start">Interoperability services</text>
+<text x="1235.5" y="751.0" font-size="10.5" fill="#5A6B7B" font-weight="normal" font-style="normal" text-anchor="start">Conversion both ways into the European format,</text>
+<text x="1235.5" y="766.0" font-size="10.5" fill="#5A6B7B" font-weight="normal" font-style="normal" text-anchor="start">terminology, quality at the point of registration.</text>
+<text x="1235.5" y="783.0" font-size="9.5" fill="#1E8449" font-weight="600" font-style="normal" text-anchor="start">Art. 13, 15, 17</text>
+<rect x="1797.8" y="708" width="558.2" height="86" rx="6" fill="#FFFFFF" stroke="#1E8449" stroke-opacity="0.35"/>
+<text x="1811.8" y="731.0" font-size="13.5" fill="#16324F" font-weight="600" font-style="normal" text-anchor="start">Cross-border services</text>
+<text x="1811.8" y="751.0" font-size="10.5" fill="#5A6B7B" font-weight="normal" font-style="normal" text-anchor="start">The contact point&#x27;s connection to MyHealth@EU,</text>
+<text x="1811.8" y="766.0" font-size="10.5" fill="#5A6B7B" font-weight="normal" font-style="normal" text-anchor="start">and whatever supplementary services are added.</text>
+<text x="1811.8" y="783.0" font-size="9.5" fill="#1E8449" font-weight="600" font-style="normal" text-anchor="start">Art. 23, 24</text>
+<line x1="1200.0" y1="809" x2="1200.0" y2="825" stroke="#8FA0AE" stroke-width="1.5" marker-end="url(#tip)"/>
+<text x="1213.0" y="823.0" font-size="10.5" fill="#5A6B7B" font-weight="normal" font-style="italic" text-anchor="start">serves</text>
+<rect x="44" y="832" width="2312" height="146" rx="9" fill="#F4EEF7" stroke="#7D3C98" stroke-opacity="0.28"/>
+<path d="M55 832 h-4 a6 6 0 0 0 -7 6 v134 a6 6 0 0 0 7 6 h4 z" fill="#7D3C98"/>
+<text x="69.0" y="856.0" font-size="16" fill="#16324F" font-weight="700" font-style="normal" text-anchor="start">Who it serves</text>
+<text x="69.0" y="873.0" font-size="11" fill="#5A6B7B" font-weight="normal" font-style="italic" text-anchor="start">A quién sirve</text>
+<rect x="1966" y="845" width="372" height="22" rx="11" fill="#FFFFFF" stroke="#8FA0AE" stroke-opacity="0.6"/>
+<text x="2152.0" y="860.0" font-size="10.5" fill="#5A6B7B" font-weight="normal" font-style="normal" text-anchor="middle">Catena-X analogue: data provider and consumer</text>
+<rect x="69.0" y="880" width="749.0" height="86" rx="6" fill="#FFFFFF" stroke="#7D3C98" stroke-opacity="0.35"/>
+<text x="83.0" y="903.0" font-size="13.5" fill="#16324F" font-weight="600" font-style="normal" text-anchor="start">Natural persons</text>
+<text x="83.0" y="923.0" font-size="10.5" fill="#5A6B7B" font-weight="normal" font-style="normal" text-anchor="start">Immediate access to their own record, at no cost. They can see who looked at it,</text>
+<text x="83.0" y="938.0" font-size="10.5" fill="#5A6B7B" font-weight="normal" font-style="normal" text-anchor="start">restrict access, and opt out.</text>
+<text x="83.0" y="955.0" font-size="9.5" fill="#7D3C98" font-weight="600" font-style="normal" text-anchor="start">Art. 3, 8, 9, 10</text>
+<rect x="838.0" y="880" width="749.0" height="86" rx="6" fill="#FFFFFF" stroke="#7D3C98" stroke-opacity="0.35"/>
+<text x="852.0" y="903.0" font-size="13.5" fill="#16324F" font-weight="600" font-style="normal" text-anchor="start">Health professionals</text>
+<text x="852.0" y="923.0" font-size="10.5" fill="#5A6B7B" font-weight="normal" font-style="normal" text-anchor="start">The record follows the patient, across a region and across a border, in a format</text>
+<text x="852.0" y="938.0" font-size="10.5" fill="#5A6B7B" font-weight="normal" font-style="normal" text-anchor="start">the clinician&#x27;s own system can read.</text>
+<text x="852.0" y="955.0" font-size="9.5" fill="#7D3C98" font-weight="600" font-style="normal" text-anchor="start">Art. 11, 12</text>
+<rect x="1607.0" y="880" width="749.0" height="86" rx="6" fill="#FFFFFF" stroke="#7D3C98" stroke-opacity="0.35"/>
+<text x="1621.0" y="903.0" font-size="13.5" fill="#16324F" font-weight="600" font-style="normal" text-anchor="start">EHR system manufacturers</text>
+<text x="1621.0" y="923.0" font-size="10.5" fill="#5A6B7B" font-weight="normal" font-style="normal" text-anchor="start">Harmonised software components, self-certification and CE marking, and a testing</text>
+<text x="1621.0" y="938.0" font-size="10.5" fill="#5A6B7B" font-weight="normal" font-style="normal" text-anchor="start">environment to prove it before going to market.</text>
+<text x="1621.0" y="955.0" font-size="9.5" fill="#7D3C98" font-weight="600" font-style="normal" text-anchor="start">Chapter III</text>
+<text x="44.0" y="1006.0" font-size="10" fill="#8FA0AE" font-weight="normal" font-style="normal" text-anchor="start">Regulation (EU) 2025/327, Chapter II, article numbers as adopted   ·   Catena-X operating model, catenax-ev.github.io   ·   MinimumViableHealthDataspacev2, issue #27</text>
+</svg>
