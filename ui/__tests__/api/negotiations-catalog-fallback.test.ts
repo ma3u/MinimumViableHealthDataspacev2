@@ -1,0 +1,134 @@
+/**
+ * The catalog request falls back to the demo catalogue when the connector has
+ * no participant context for the id it was given.
+ *
+ * That is not a hypothetical: /api/participants serves public/mock/participants.json
+ * whenever the connector reports no ACTIVATED contexts, so the negotiate page
+ * offers demo context ids and then asks the live connector about them. The
+ * connector answers 404, correctly, because the id was never real. Before this
+ * fallback the page showed the raw EDC error and the demo stopped dead.
+ *
+ * Its own file rather than a case in negotiations.test.ts, because that file
+ * mocks fs to reject for every read and these tests need it to succeed.
+ */
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import { NextRequest } from "next/server";
+
+vi.mock("@/lib/edc", () => ({
+  edcClient: { management: vi.fn() },
+  EDC_CONTEXT: "https://w3id.org/edc/connector/management/v2",
+}));
+
+const readFile = vi.fn();
+vi.mock("fs", () => ({
+  default: { promises: { readFile: (...a: unknown[]) => readFile(...a) } },
+  promises: { readFile: (...a: unknown[]) => readFile(...a) },
+}));
+
+vi.mock("@/lib/auth-guard", () => ({
+  requireAuth: vi.fn().mockResolvedValue({ user: { name: "test" } }),
+  isAuthError: () => false,
+}));
+
+import { edcClient } from "@/lib/edc";
+import { GET } from "@/app/api/negotiations/route";
+
+const mockManagement = vi.mocked(edcClient.management);
+
+const ASSETS = JSON.stringify([
+  {
+    participantId: "24be78bf13fc4873b503844d908fcbd2",
+    identity: "did:web:identityhub%3A7083:alpha-klinik",
+    assets: [
+      {
+        "@id": "fhir-patient-search",
+        properties: {
+          name: "FHIR Patient Search",
+          description: "Search FHIR R4 patients",
+          contenttype: "application/fhir+json",
+        },
+      },
+    ],
+  },
+  {
+    participantId: "09f8face6982493d82c9c997079c2b4e",
+    identity: "did:web:identityhub%3A7083:irs",
+    assets: [],
+  },
+]);
+
+function catalogRequest(did: string) {
+  return new NextRequest(
+    "http://localhost:3000/api/negotiations?participantId=24be78bf13fc4873b503844d908fcbd2" +
+      `&catalog=true&providerDid=${encodeURIComponent(did)}`,
+  );
+}
+
+describe("/api/negotiations catalog fallback", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    readFile.mockResolvedValue(ASSETS);
+  });
+
+  it("serves the demo catalogue when the connector 404s on the context", async () => {
+    mockManagement.mockRejectedValue(
+      new Error("EDC API error [management] POST /v1alpha/... 404 Not Found"),
+    );
+
+    const res = await GET(
+      catalogRequest("did:web:identityhub%3A7083:alpha-klinik"),
+    );
+    expect(res.status).toBe(200);
+
+    const body = await res.json();
+    expect(body.demo).toBe(true);
+    expect(body.demoReason).toContain("demonstrator");
+    expect(body.upstreamError).toContain("404");
+    expect(body.dataset).toHaveLength(1);
+    expect(body.dataset[0]["@id"]).toBe("fhir-patient-search");
+    expect(body.dataset[0].hasPolicy[0]["@id"]).toBe(
+      "demo-offer:fhir-patient-search",
+    );
+    expect(body.dataset[0].hasPolicy[0].assigner).toBe(
+      "did:web:identityhub%3A7083:alpha-klinik",
+    );
+  });
+
+  it("never labels a live catalogue as demo data", async () => {
+    mockManagement.mockResolvedValue({
+      "@type": "dcat:Catalog",
+      dataset: [{ "@id": "real-asset", hasPolicy: [{ "@id": "real-offer" }] }],
+    });
+
+    const res = await GET(
+      catalogRequest("did:web:identityhub%3A7083:alpha-klinik"),
+    );
+    const body = await res.json();
+
+    expect(res.status).toBe(200);
+    expect(body.demo).toBeUndefined();
+    expect(body.dataset[0]["@id"]).toBe("real-asset");
+    expect(readFile).not.toHaveBeenCalled();
+  });
+
+  it("still fails when the provider has no demo assets either", async () => {
+    mockManagement.mockRejectedValue(new Error("404 Not Found"));
+
+    const res = await GET(catalogRequest("did:web:identityhub%3A7083:irs"));
+    expect(res.status).toBe(502);
+
+    const body = await res.json();
+    expect(body.error).toContain("Failed to fetch provider catalog");
+    expect(body.demo).toBeUndefined();
+  });
+
+  it("matches a provider by participant id as well as by DID", async () => {
+    mockManagement.mockRejectedValue(new Error("404 Not Found"));
+
+    const res = await GET(catalogRequest("24be78bf13fc4873b503844d908fcbd2"));
+    const body = await res.json();
+
+    expect(res.status).toBe(200);
+    expect(body.demo).toBe(true);
+  });
+});
