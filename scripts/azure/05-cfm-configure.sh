@@ -20,7 +20,9 @@
 # stack uses, with the values pointed at the Azure services: NATS at
 # mvhd-nats:4222 and Postgres at mvhd-postgres:5432/cfm.
 #
-# Idempotent: re-running updates the secret and leaves the mount alone.
+# Idempotent: re-running updates the secret and leaves the mount alone. When
+# ACA provisions no new revision for that, the running one is restarted, so the
+# file in the container always matches the secret.
 #
 # Usage:  bash scripts/azure/05-cfm-configure.sh
 # Needs:  az (logged in), python3 with PyYAML. No TTY required — pure ARM, no
@@ -122,19 +124,34 @@ for c in tpl['containers']:
     mounts.append({'volumeName': volume_name, 'mountPath': '/etc/appname'})
     c['volumeMounts'] = mounts
 
-# `containerapp show` returns every secret with its value redacted, and feeding
-# that straight back replaces the real values with the placeholder, which leaves
-# the mounted file empty and the manager reporting the very same "missing
-# parameters" panic. Drop the block instead: an update that does not mention
-# secrets leaves the store alone.
+# `containerapp show` returns every secret without its value. Whether feeding
+# that back would clear the store was never proven (the revision built from
+# such a document did start), but an update that does not mention secrets is
+# known to leave them alone, so the block is dropped and the value is read
+# back below.
 doc['properties']['configuration'].pop('secrets', None)
 
 with open(path, 'w') as f:
     yaml.safe_dump(doc, f)
 PY
 
+  local rev_before rev_after
+  rev_before=$(az containerapp show --name "$app" --resource-group "$RG" \
+    --query "properties.latestRevisionName" -o tsv)
   az containerapp update --name "$app" --resource-group "$RG" --yaml "$yaml" -o none
   rm -f "$yaml"
+  rev_after=$(az containerapp show --name "$app" --resource-group "$RG" \
+    --query "properties.latestRevisionName" -o tsv)
+  if [ "$rev_before" = "$rev_after" ]; then
+    # The template was already in this shape, so ACA provisioned nothing and
+    # the running container still holds the file it started with. A changed
+    # secret reaches the mount only through a restart; `secret set` says so.
+    log "  no new revision; restarting ${rev_after} so the mount picks up the secret"
+    az containerapp revision restart --name "$app" --resource-group "$RG" \
+      --revision "$rev_after" -o none
+  else
+    log "  new revision ${rev_after}"
+  fi
 
   # Verify rather than assume: read the secret back, and confirm the mount is
   # really on the container. An empty secret here is the failure above.
