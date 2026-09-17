@@ -14,8 +14,11 @@ vi.mock("@/lib/edc", () => ({
   EDC_CONTEXT: "https://w3id.org/edc/connector/management/v2",
 }));
 
-const mockFetch = vi.fn();
-vi.stubGlobal("fetch", mockFetch);
+// Neo4j goes over Bolt through runQuery(); the HTTP port 7474 the route once
+// used is not reachable on Azure Container Apps (issue #205).
+vi.mock("@/lib/neo4j", () => ({
+  runQuery: vi.fn(),
+}));
 
 const mockReadFile = vi.fn();
 vi.mock("fs", () => ({
@@ -29,31 +32,15 @@ vi.mock("fs", () => ({
   },
 }));
 
+import { runQuery } from "@/lib/neo4j";
 import { GET, POST } from "@/app/api/admin/policies/route";
 
-// ── Helpers ──────────────────────────────────────────────────────────
-function neo4jOk(results: unknown[] = []) {
-  return {
-    ok: true,
-    json: () => Promise.resolve({ results, errors: [] }),
-  } as unknown as Response;
-}
-
-function neo4jHttpError(status = 500) {
-  return { ok: false, status } as unknown as Response;
-}
-
-function neo4jCypherError(msg = "syntax error") {
-  return {
-    ok: true,
-    json: () => Promise.resolve({ results: [], errors: [{ message: msg }] }),
-  } as unknown as Response;
-}
+const mockRunQuery = vi.mocked(runQuery);
 
 // ── Setup ────────────────────────────────────────────────────────────
 beforeEach(() => {
   vi.clearAllMocks();
-  mockFetch.mockReset();
+  mockRunQuery.mockReset();
   mockReadFile.mockReset();
 });
 
@@ -120,16 +107,9 @@ describe("GET /api/admin/policies", () => {
 
   it("should fall back to Neo4j when EDC is offline (no participantId)", async () => {
     mockManagement.mockRejectedValue(new Error("ECONNREFUSED"));
-    mockFetch.mockResolvedValue(
-      neo4jOk([
-        {
-          columns: ["policy"],
-          data: [
-            { row: [{ id: "pol-neo4j", participantName: "AlphaKlinik" }] },
-          ],
-        },
-      ]),
-    );
+    mockRunQuery.mockResolvedValue([
+      { policy: { id: "pol-neo4j", participantName: "AlphaKlinik Berlin" } },
+    ]);
 
     const req = new NextRequest("http://localhost:3000/api/admin/policies");
     const res = await GET(req);
@@ -144,14 +124,7 @@ describe("GET /api/admin/policies", () => {
 
   it("should fall back to Neo4j with participantId filter", async () => {
     mockManagement.mockRejectedValue(new Error("ECONNREFUSED"));
-    mockFetch.mockResolvedValue(
-      neo4jOk([
-        {
-          columns: ["policy"],
-          data: [{ row: [{ id: "pol-filtered" }] }],
-        },
-      ]),
-    );
+    mockRunQuery.mockResolvedValue([{ policy: { id: "pol-filtered" } }]);
 
     const req = new NextRequest(
       "http://localhost:3000/api/admin/policies?participantId=ctx-1",
@@ -162,14 +135,14 @@ describe("GET /api/admin/policies", () => {
     expect(res.status).toBe(200);
     expect(data.source).toBe("neo4j");
     // Verify the participantId parameter was passed to Neo4j
-    const fetchCall = mockFetch.mock.calls[0];
-    const body = JSON.parse(fetchCall[1].body);
-    expect(body.statements[0].parameters).toEqual({ participantId: "ctx-1" });
+    const [cypher, params] = mockRunQuery.mock.calls[0];
+    expect(cypher).toContain("pol.participantId = $participantId");
+    expect(params).toEqual({ participantId: "ctx-1" });
   });
 
   it("should return empty policies array when Neo4j has no results", async () => {
     mockManagement.mockRejectedValue(new Error("ECONNREFUSED"));
-    mockFetch.mockResolvedValue(neo4jOk([{ columns: ["policy"], data: [] }]));
+    mockRunQuery.mockResolvedValue([]);
 
     const req = new NextRequest("http://localhost:3000/api/admin/policies");
     const res = await GET(req);
@@ -184,7 +157,9 @@ describe("GET /api/admin/policies", () => {
 
   it("should serve bundled mock data when both EDC and Neo4j are offline", async () => {
     mockManagement.mockRejectedValue(new Error("ECONNREFUSED"));
-    mockFetch.mockResolvedValue(neo4jHttpError(500));
+    mockRunQuery.mockRejectedValue(
+      new Error("Neo4j unreachable: ECONNREFUSED"),
+    );
     mockReadFile.mockResolvedValue(
       JSON.stringify({ policies: [{ id: "mock-pol" }], source: "mock" }),
     );
@@ -199,7 +174,7 @@ describe("GET /api/admin/policies", () => {
 
   it("should serve mock data when Neo4j returns Cypher errors", async () => {
     mockManagement.mockRejectedValue(new Error("ECONNREFUSED"));
-    mockFetch.mockResolvedValue(neo4jCypherError("syntax error"));
+    mockRunQuery.mockRejectedValue(new Error("Cypher error: syntax error"));
     mockReadFile.mockResolvedValue(
       JSON.stringify({ policies: [], source: "mock" }),
     );
@@ -216,7 +191,9 @@ describe("GET /api/admin/policies", () => {
 
   it("should return 502 when EDC, Neo4j, and mock file all fail", async () => {
     mockManagement.mockRejectedValue(new Error("ECONNREFUSED"));
-    mockFetch.mockResolvedValue(neo4jHttpError(503));
+    mockRunQuery.mockRejectedValue(
+      new Error("Neo4j unreachable: ECONNREFUSED"),
+    );
     mockReadFile.mockRejectedValue(new Error("ENOENT"));
 
     const req = new NextRequest("http://localhost:3000/api/admin/policies");
@@ -230,19 +207,23 @@ describe("GET /api/admin/policies", () => {
 
   it("should include Neo4j error detail in 502 response", async () => {
     mockManagement.mockRejectedValue(new Error("ECONNREFUSED"));
-    mockFetch.mockResolvedValue(neo4jHttpError(503));
+    mockRunQuery.mockRejectedValue(
+      new Error("Neo4j unreachable: ECONNREFUSED"),
+    );
     mockReadFile.mockRejectedValue(new Error("ENOENT"));
 
     const req = new NextRequest("http://localhost:3000/api/admin/policies");
     const res = await GET(req);
     const data = await res.json();
 
-    expect(data.detail).toContain("Neo4j HTTP API error");
+    expect(data.detail).toContain("ECONNREFUSED");
   });
 
   it("should return 502 with participantId when all fallbacks fail", async () => {
     mockManagement.mockRejectedValue(new Error("ECONNREFUSED"));
-    mockFetch.mockResolvedValue(neo4jHttpError(404));
+    mockRunQuery.mockRejectedValue(
+      new Error("Neo4j unreachable: ECONNREFUSED"),
+    );
     mockReadFile.mockRejectedValue(new Error("ENOENT"));
 
     const req = new NextRequest(
@@ -334,7 +315,7 @@ describe("POST /api/admin/policies", () => {
 
   it("should persist policy in Neo4j when EDC is offline (policy has @id)", async () => {
     mockManagement.mockRejectedValue(new Error("ECONNREFUSED"));
-    mockFetch.mockResolvedValue(neo4jOk());
+    mockRunQuery.mockResolvedValue([]);
 
     const res = await POST(
       postReq({
@@ -352,7 +333,7 @@ describe("POST /api/admin/policies", () => {
 
   it("should use policy.id when @id is not present", async () => {
     mockManagement.mockRejectedValue(new Error("ECONNREFUSED"));
-    mockFetch.mockResolvedValue(neo4jOk());
+    mockRunQuery.mockResolvedValue([]);
 
     const res = await POST(
       postReq({
@@ -367,7 +348,7 @@ describe("POST /api/admin/policies", () => {
 
   it("should generate local policyId when neither @id nor id is present", async () => {
     mockManagement.mockRejectedValue(new Error("ECONNREFUSED"));
-    mockFetch.mockResolvedValue(neo4jOk());
+    mockRunQuery.mockResolvedValue([]);
 
     const res = await POST(
       postReq({
@@ -382,7 +363,7 @@ describe("POST /api/admin/policies", () => {
 
   it("should send correct Cypher parameters to Neo4j for persist", async () => {
     mockManagement.mockRejectedValue(new Error("ECONNREFUSED"));
-    mockFetch.mockResolvedValue(neo4jOk());
+    mockRunQuery.mockResolvedValue([]);
 
     await POST(
       postReq({
@@ -391,9 +372,7 @@ describe("POST /api/admin/policies", () => {
       }),
     );
 
-    const fetchCall = mockFetch.mock.calls[0];
-    const body = JSON.parse(fetchCall[1].body);
-    const params = body.statements[0].parameters;
+    const params = mockRunQuery.mock.calls[0][1] as Record<string, string>;
 
     expect(params.policyId).toBe("pol-99");
     expect(params.participantId).toBe("ctx-1");
@@ -405,7 +384,9 @@ describe("POST /api/admin/policies", () => {
 
   it("should return 502 when both EDC and Neo4j fail on POST", async () => {
     mockManagement.mockRejectedValue(new Error("ECONNREFUSED"));
-    mockFetch.mockResolvedValue(neo4jHttpError(500));
+    mockRunQuery.mockRejectedValue(
+      new Error("Neo4j unreachable: ECONNREFUSED"),
+    );
 
     const res = await POST(
       postReq({
@@ -421,7 +402,9 @@ describe("POST /api/admin/policies", () => {
 
   it("should return 502 when Neo4j returns Cypher errors on POST", async () => {
     mockManagement.mockRejectedValue(new Error("ECONNREFUSED"));
-    mockFetch.mockResolvedValue(neo4jCypherError("constraint violation"));
+    mockRunQuery.mockRejectedValue(
+      new Error("Cypher error: constraint violation"),
+    );
 
     const res = await POST(
       postReq({

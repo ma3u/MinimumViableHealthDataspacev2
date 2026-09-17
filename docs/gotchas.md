@@ -3,6 +3,29 @@
 Non-obvious pitfalls across the stack. Ordered newest first; add a new
 entry at the top when you hit something that cost you more than 30 minutes.
 
+## 2026-09-17: Neo4j's HTTP port 7474 does not exist on Azure
+
+`/admin/audit` was blank on https://ehds.mabu.red on every revision (issue
+#205). The route rewrote `NEO4J_URI` (`bolt://mvhd-neo4j:7687`) into
+`http://mvhd-neo4j:7474/db/neo4j/tx/commit` and called the transactional HTTP
+API. The compose stack publishes 7474 next to 7687, so it worked locally. On
+ACA `mvhd-neo4j` has TCP ingress on 7687 and nothing else, so the call died
+with `TypeError: fetch failed`, and the page stored the 502 body as if it were
+data.
+
+Rules that follow:
+
+- Reach Neo4j from the UI only through `runQuery()` in `ui/src/lib/neo4j.ts`
+  (Bolt). Grep for `tx/commit` and `:7474` before adding a route; the policies
+  route carried the same copy.
+- `NEO4J_HTTP_URL` on `mvhd-ui` points at the TCP ingress and serves no HTTP.
+  Nothing reads it. `scripts/azure/status.sh` and `08-compliance-runner.sh`
+  still assume 7474; they are on the follow-up list in #205.
+- A client that does `r.json()` and stores the result must check `r.ok` or
+  `body.error` first, or a 502 renders as an empty page instead of an error.
+- Bolt wants `neo4j.int()` for `LIMIT` and `SKIP` parameters; a plain JS
+  number arrives as a float and Cypher rejects it.
+
 ## 2026-09-17: ACA internal ingress, job logs, and stale-revision panics
 
 Each of these cost one run of `cfm-seed.yml` while bringing the CFM managers up

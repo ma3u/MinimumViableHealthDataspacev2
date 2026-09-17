@@ -1,15 +1,18 @@
+import neo4j from "neo4j-driver";
 import { getServerSession } from "next-auth/next";
 import { NextRequest, NextResponse } from "next/server";
 
 import { authOptions } from "@/lib/auth";
+import { runQuery } from "@/lib/neo4j";
 
 export const dynamic = "force-dynamic";
 
 /**
- * Audit & Provenance is the regulator's supervision toolkit (EHDS Art. 37
- * tasks & powers, Art. 38 DPA cooperation, Art. 53 penalties), not just a
- * dataspace-operator dashboard. Allow EDC_ADMIN and HDAB_AUTHORITY (BSI C5
- * IAM-01 / OWASP A01).
+ * Audit & Provenance is the regulator's supervision toolkit (Regulation (EU)
+ * 2025/327: Art. 57 tasks of the health data access body, Art. 63 and 64
+ * enforcement and fines, Art. 65 cooperation with the GDPR supervisory
+ * authorities), not just a dataspace-operator dashboard. Allow EDC_ADMIN and
+ * HDAB_AUTHORITY (BSI C5 IAM-01 / OWASP A01).
  */
 async function requireAuditAccess(): Promise<NextResponse | null> {
   const session = await getServerSession(authOptions);
@@ -23,12 +26,18 @@ async function requireAuditAccess(): Promise<NextResponse | null> {
   return null;
 }
 
-const NEO4J_URL =
-  process.env.NEO4J_URI ||
-  process.env.NEO4J_BOLT_URL ||
-  "bolt://localhost:7687";
-const NEO4J_USER = process.env.NEO4J_USER || "neo4j";
-const NEO4J_PASSWORD = process.env.NEO4J_PASSWORD || "healthdataspace";
+/**
+ * Every query goes over Bolt through the shared driver in lib/neo4j.ts, the
+ * same path the graph and catalog routes use. Until 2026-09-17 this route
+ * called Neo4j's transactional HTTP API on port 7474 instead. The compose
+ * stack publishes that port, Azure Container Apps does not (mvhd-neo4j has
+ * TCP ingress on 7687 only), so on the live site every request failed with
+ * "fetch failed" and the page stayed blank. See docs/gotchas.md.
+ *
+ * LIMIT wants a Neo4j integer: the driver sends a plain JS number as a float,
+ * which Cypher rejects.
+ */
+type Row = Record<string, unknown>;
 
 interface AuditFilters {
   status: string;
@@ -82,41 +91,6 @@ function buildWhere(
 }
 
 /**
- * Helper: execute Cypher via Neo4j HTTP API (transactional endpoint).
- */
-async function runCypher(
-  query: string,
-  parameters: Record<string, unknown> = {},
-) {
-  const httpUrl = NEO4J_URL.replace("bolt://", "http://").replace(
-    ":7687",
-    ":7474",
-  );
-  const txUrl = `${httpUrl}/db/neo4j/tx/commit`;
-
-  const res = await fetch(txUrl, {
-    method: "POST",
-    cache: "no-store",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization:
-        "Basic " +
-        Buffer.from(`${NEO4J_USER}:${NEO4J_PASSWORD}`).toString("base64"),
-    },
-    body: JSON.stringify({ statements: [{ statement: query, parameters }] }),
-  });
-
-  if (!res.ok) {
-    throw new Error(`Neo4j HTTP API error: ${res.status} ${res.statusText}`);
-  }
-  const data = await res.json();
-  if (data.errors?.length > 0) {
-    throw new Error(`Cypher error: ${JSON.stringify(data.errors)}`);
-  }
-  return data.results;
-}
-
-/**
  * GET /api/admin/audit — Query the provenance & audit graph from Neo4j.
  *
  * Query params:
@@ -137,6 +111,7 @@ export async function GET(request: NextRequest) {
   const sp = request.nextUrl.searchParams;
   const type = sp.get("type") || "all";
   const limit = Math.min(parseInt(sp.get("limit") || "50", 10), 200);
+  const limitParam = neo4j.int(limit);
   const filters: AuditFilters = {
     status: sp.get("status") || "",
     dateFrom: sp.get("dateFrom") || "",
@@ -149,7 +124,7 @@ export async function GET(request: NextRequest) {
   try {
     // ── Participants list (includes compliance officer + EDC endpoint) ────
     if (type === "participants") {
-      const rows = await runCypher(
+      const participants = await runQuery<Row>(
         `MATCH (p:Participant)
          RETURN p.participantId           AS did,
                 p.name                    AS name,
@@ -160,20 +135,6 @@ export async function GET(request: NextRequest) {
                 p.edcEndpoint             AS edcEndpoint
          ORDER BY p.name ASC`,
       );
-      const participants =
-        rows[0]?.data?.map(
-          (r: {
-            row: [string, string, string, string, string, string, string];
-          }) => ({
-            did: r.row[0],
-            name: r.row[1],
-            country: r.row[2],
-            complianceOfficerName: r.row[3],
-            complianceOfficerEmail: r.row[4],
-            complianceOfficerPhone: r.row[5],
-            edcEndpoint: r.row[6],
-          }),
-        ) || [];
       return NextResponse.json({ participants });
     }
 
@@ -182,7 +143,7 @@ export async function GET(request: NextRequest) {
     // ── Data Transfers ────────────────────────────────────────────────────
     if (type === "all" || type === "transfers") {
       const { clause: where, params: filterParams } = buildWhere("t", filters);
-      const transfers = await runCypher(
+      const transfers = await runQuery<{ transfer: Row }>(
         `MATCH (t:DataTransfer)
          ${where}
          OPTIONAL MATCH (consumer:Participant {participantId: t.consumerDid})
@@ -205,16 +166,15 @@ export async function GET(request: NextRequest) {
          } AS transfer
          ORDER BY transfer.timestamp DESC
          LIMIT $limit`,
-        { limit, ...filterParams },
+        { limit: limitParam, ...filterParams },
       );
-      results.transfers =
-        transfers[0]?.data?.map((r: { row: unknown[] }) => r.row[0]) || [];
+      results.transfers = transfers.map((r) => r.transfer);
     }
 
     // ── Contract Negotiations ─────────────────────────────────────────────
     if (type === "all" || type === "negotiations") {
       const { clause: where, params: filterParams } = buildWhere("n", filters);
-      const negotiations = await runCypher(
+      const negotiations = await runQuery<{ negotiation: Row }>(
         `MATCH (n:ContractNegotiation)
          ${where}
          OPTIONAL MATCH (consumer:Participant {participantId: n.consumerDid})
@@ -239,15 +199,14 @@ export async function GET(request: NextRequest) {
          } AS negotiation
          ORDER BY negotiation.timestamp DESC
          LIMIT $limit`,
-        { limit, ...filterParams },
+        { limit: limitParam, ...filterParams },
       );
-      results.negotiations =
-        negotiations[0]?.data?.map((r: { row: unknown[] }) => r.row[0]) || [];
+      results.negotiations = negotiations.map((r) => r.negotiation);
     }
 
     // ── Access Logs ───────────────────────────────────────────────────────
     if (type === "accesslogs") {
-      const logParams: Record<string, unknown> = { limit };
+      const logParams: Record<string, unknown> = { limit: limitParam };
       const logConditions: string[] = [];
       if (filters.consumerDid) {
         logConditions.push("a.consumerDid = $filterConsumerDid");
@@ -260,7 +219,7 @@ export async function GET(request: NextRequest) {
       }
       const logWhere =
         logConditions.length > 0 ? `WHERE ${logConditions.join(" AND ")}` : "";
-      const logs = await runCypher(
+      const logs = await runQuery<{ log: Row }>(
         `MATCH (a:DataAccessLog)
          ${logWhere}
          OPTIONAL MATCH (consumer:Participant {participantId: a.consumerDid})
@@ -276,35 +235,38 @@ export async function GET(request: NextRequest) {
          LIMIT $limit`,
         logParams,
       );
-      results.accesslogs =
-        logs[0]?.data?.map((r: { row: unknown[] }) => r.row[0]) || [];
+      results.accesslogs = logs.map((r) => r.log);
       return NextResponse.json({ type, limit, ...results });
     }
 
     // ── Verifiable Credentials ────────────────────────────────────────────
     if (type === "all" || type === "credentials") {
-      const credentials = await runCypher(
+      const credentials = await runQuery<{ credential: Row }>(
         `MATCH (vc:VerifiableCredential)
          OPTIONAL MATCH (p:Participant)-[:HOLDS_CREDENTIAL]->(vc)
          RETURN vc { .*, participant: p.name } AS credential
          ORDER BY vc.issuedAt DESC
          LIMIT $limit`,
-        { limit },
+        { limit: limitParam },
       );
-      results.credentials =
-        credentials[0]?.data?.map((r: { row: unknown[] }) => r.row[0]) || [];
+      results.credentials = credentials.map((r) => r.credential);
     }
 
     // ── Summary statistics ────────────────────────────────────────────────
     if (type === "all") {
-      const stats = await runCypher(
+      const stats = await runQuery<{ label: string; count: number }>(
         `MATCH (n)
          WHERE n:DataTransfer OR n:ContractNegotiation OR n:VerifiableCredential
            OR n:Participant OR n:DataAsset OR n:HealthDataset OR n:DataAccessLog
          RETURN labels(n)[0] AS label, count(n) AS count
          ORDER BY count DESC`,
       );
-      const accessStats = await runCypher(
+      const accessByConsumer = await runQuery<{
+        consumerName: string | null;
+        totalAccesses: number;
+        totalBytes: number | null;
+        lastAccess: string | null;
+      }>(
         `MATCH (a:DataAccessLog)
          OPTIONAL MATCH (consumer:Participant {participantId: a.consumerDid})
          RETURN consumer.name          AS consumerName,
@@ -314,23 +276,14 @@ export async function GET(request: NextRequest) {
          ORDER BY totalAccesses DESC`,
       );
       results.summary = {
-        nodeCounts:
-          stats[0]?.data?.reduce(
-            (acc: Record<string, number>, r: { row: [string, number] }) => {
-              acc[r.row[0]] = r.row[1];
-              return acc;
-            },
-            {} as Record<string, number>,
-          ) || {},
-        accessByConsumer:
-          accessStats[0]?.data?.map(
-            (r: { row: [string, number, number, string] }) => ({
-              consumerName: r.row[0],
-              totalAccesses: r.row[1],
-              totalBytes: r.row[2],
-              lastAccess: r.row[3],
-            }),
-          ) || [],
+        nodeCounts: stats.reduce(
+          (acc: Record<string, number>, r) => {
+            acc[r.label] = r.count;
+            return acc;
+          },
+          {} as Record<string, number>,
+        ),
+        accessByConsumer,
       };
     }
 

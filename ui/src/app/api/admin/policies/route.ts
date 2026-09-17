@@ -5,6 +5,7 @@ import { promises as fs } from "fs";
 import path from "path";
 
 import { authOptions } from "@/lib/auth";
+import { runQuery } from "@/lib/neo4j";
 
 /**
  * Policies are visible to both EDC_ADMIN (dataspace operator) and
@@ -38,39 +39,11 @@ async function requirePoliciesWrite(): Promise<NextResponse | null> {
 
 export const dynamic = "force-dynamic";
 
-// ── Neo4j fallback helpers ─────────────────────────────────────────────────
-
-const NEO4J_URL =
-  process.env.NEO4J_BOLT_URL || "bolt://health-dataspace-neo4j:7687";
-const NEO4J_USER = process.env.NEO4J_USER || "neo4j";
-const NEO4J_PASSWORD = process.env.NEO4J_PASSWORD || "healthdataspace";
-
-async function neo4jCypher(
-  query: string,
-  parameters: Record<string, unknown> = {},
-) {
-  const httpUrl = NEO4J_URL.replace("bolt://", "http://").replace(
-    ":7687",
-    ":7474",
-  );
-  const txUrl = `${httpUrl}/db/neo4j/tx/commit`;
-  const res = await fetch(txUrl, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization:
-        "Basic " +
-        Buffer.from(`${NEO4J_USER}:${NEO4J_PASSWORD}`).toString("base64"),
-    },
-    body: JSON.stringify({ statements: [{ statement: query, parameters }] }),
-  });
-  if (!res.ok) throw new Error(`Neo4j HTTP API error: ${res.status}`);
-  const data = await res.json();
-  if (data.errors?.length > 0) {
-    throw new Error(`Cypher error: ${JSON.stringify(data.errors)}`);
-  }
-  return data.results;
-}
+// ── Neo4j fallback ──────────────────────────────────────────────────────────
+// Bolt through the shared driver in lib/neo4j.ts, like every other route. The
+// transactional HTTP API on port 7474 that used to live here is not reachable
+// on Azure Container Apps (mvhd-neo4j exposes 7687 only), so this fallback
+// never worked on the live site. See docs/gotchas.md, 2026-09-17.
 
 /**
  * GET /api/admin/policies?participantId=xxx — List policy definitions.
@@ -133,7 +106,7 @@ export async function GET(request: NextRequest) {
     // EDC-V is offline — read from Neo4j local registry
     console.warn("EDC-V offline, reading policies from Neo4j");
     try {
-      const rows = await neo4jCypher(
+      const rows = await runQuery<{ policy: Record<string, unknown> }>(
         `MATCH (pol:OdrlPolicy)
          ${participantId ? "WHERE pol.participantId = $participantId" : ""}
          OPTIONAL MATCH (pol)-[:BELONGS_TO]->(p:Participant)
@@ -141,8 +114,7 @@ export async function GET(request: NextRequest) {
          ORDER BY pol.createdAt DESC`,
         participantId ? { participantId } : {},
       );
-      const policies =
-        rows[0]?.data?.map((r: { row: unknown[] }) => r.row[0]) || [];
+      const policies = rows.map((r) => r.policy);
       return NextResponse.json({ policies, source: "neo4j", offline: true });
     } catch (neo4jErr) {
       // Fall back to bundled mock data so the UI works offline
@@ -209,7 +181,7 @@ export async function POST(request: NextRequest) {
         `policy:local:${Date.now()}`;
       const now = new Date().toISOString();
 
-      await neo4jCypher(
+      await runQuery(
         `MERGE (pol:OdrlPolicy {id: $policyId})
          SET pol.participantId = $participantId,
              pol.policyJson    = $policyJson,
@@ -288,7 +260,7 @@ export async function PUT(request: NextRequest) {
         (policy["@id"] as string) || policyId || `policy:local:${Date.now()}`;
       const now = new Date().toISOString();
 
-      await neo4jCypher(
+      await runQuery(
         `MERGE (pol:OdrlPolicy {id: $policyId})
          SET pol.participantId = $participantId,
              pol.policyJson    = $policyJson,
@@ -345,7 +317,7 @@ export async function DELETE(request: NextRequest) {
     } catch {
       // EDC-V offline — delete from Neo4j
       console.warn("EDC-V offline, deleting policy from Neo4j local registry");
-      await neo4jCypher(
+      await runQuery(
         `MATCH (pol:OdrlPolicy {id: $policyId})
          DETACH DELETE pol`,
         { policyId },
