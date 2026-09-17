@@ -62,10 +62,16 @@ jobs:
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       # The TenantManager gets DATABASE_URL=.../cfm from 05-cfm-ui.sh, and that
-      # database is created in phase 6 (06-post-deploy.sh), whose creates used to
-      # end in a tolerant warning. If it is absent the manager cannot serve, and
-      # the seed below would fail with a confusing timeout rather than the real
-      # reason. So check, create if missing, and say which it was.
+      # database is created in phase 6 (06-post-deploy.sh). On the live
+      # environment it is absent, and `az containerapp exec` could not create it
+      # either: the first run of this workflow reported "still missing after
+      # CREATE DATABASE". Phase 6 drives psql through the same exec, so either
+      # the exec never worked or its tolerant `|| warn` hid the failure.
+      #
+      # So do not trust exec here. Print what it actually returns for the
+      # diagnosis, then create the database from inside the environment with a
+      # one-shot job on the postgres image, which reaches mvhd-postgres over the
+      # internal TCP ingress and needs no exec shell at all.
       - name: Ensure the cfm database exists
         run: |
           PG_APP=mvhd-postgres
@@ -75,27 +81,116 @@ jobs:
           PG_ADMIN="${PG_ADMIN:-mvhdadmin}"
           echo "postgres user: $PG_ADMIN"
 
-          check() {
-            az containerapp exec -n "$PG_APP" -g "$RESOURCE_GROUP" \
-              --command "psql -U ${PG_ADMIN} -d postgres -tAc \"SELECT 'DBFOUND' FROM pg_database WHERE datname='cfm';\"" \
-              2>/dev/null | grep -q DBFOUND
-          }
+          echo "=== diagnosis: what does containerapp exec return? ==="
+          az containerapp exec -n "$PG_APP" -g "$RESOURCE_GROUP" \
+            --command "psql -U ${PG_ADMIN} -d postgres -tAc \"SELECT datname FROM pg_database;\"" \
+            2>&1 | tr -d '\r' | sed 's/^/  exec| /' | head -30 || true
 
-          if check; then
-            echo "cfm database already present"
-          else
-            echo "cfm database missing, creating it"
-            az containerapp exec -n "$PG_APP" -g "$RESOURCE_GROUP" \
-              --command "psql -U ${PG_ADMIN} -d postgres -c \"CREATE DATABASE cfm;\"" \
-              2>/dev/null || true
-            if check; then
-              echo "cfm database created"
-            else
-              echo "::error::cfm database is still missing after CREATE DATABASE."
-              echo "The TenantManager cannot boot without it. Check mvhd-postgres."
-              exit 1
-            fi
+          # The password is a secret on the app, so read it from the secret store
+          # rather than the env var (which is a secretref, not a value).
+          PG_PASSWORD=$(az containerapp secret show -n "$PG_APP" -g "$RESOURCE_GROUP" \
+            --secret-name pg-password --query value -o tsv 2>/dev/null || echo "")
+          if [ -z "$PG_PASSWORD" ]; then
+            echo "::error::could not read the pg-password secret from $PG_APP"
+            exit 1
           fi
+          echo "read pg-password secret (${#PG_PASSWORD} chars)"
+
+          ENV_ID=$(az containerapp env show -n "$ACA_ENV" -g "$RESOURCE_GROUP" --query "id" -o tsv)
+          PG_IMAGE=$(az containerapp show -n "$PG_APP" -g "$RESOURCE_GROUP" \
+            --query "properties.template.containers[0].image" -o tsv)
+          echo "postgres image: $PG_IMAGE"
+
+          REGISTRY=${PG_IMAGE%%/*}
+          ACR_NAME=${REGISTRY%%.*}
+          ACR_PASSWORD=$(az acr credential show --name "$ACR_NAME" --query "passwords[0].value" -o tsv)
+
+          cat > /tmp/pg-createdb-job.yaml <<EOF
+          type: Microsoft.App/jobs
+          properties:
+            configuration:
+              triggerType: Manual
+              replicaTimeout: 300
+              replicaRetryLimit: 0
+              manualTriggerConfig:
+                replicaCompletionCount: 1
+                parallelism: 1
+              registries:
+                - server: ${REGISTRY}
+                  username: ${ACR_NAME}
+                  passwordSecretRef: acr-password
+              secrets:
+                - name: acr-password
+                  value: ${ACR_PASSWORD}
+                - name: pg-password
+                  value: ${PG_PASSWORD}
+            environmentId: ${ENV_ID}
+            template:
+              containers:
+                - name: createdb
+                  image: ${PG_IMAGE}
+                  resources: { cpu: 0.25, memory: 0.5Gi }
+                  env:
+                    - { name: PGPASSWORD, secretRef: pg-password }
+                    - { name: PGUSER,     value: "${PG_ADMIN}" }
+                    - { name: PGHOST,     value: "${PG_APP}" }
+                    - { name: PGPORT,     value: "5432" }
+                  command: ["/bin/bash", "-c"]
+                  args:
+                    - |
+                      exec >/proc/1/fd/1 2>/proc/1/fd/2
+                      set -x
+                      echo "=== databases before ==="
+                      psql -d postgres -tAc 'SELECT datname FROM pg_database ORDER BY datname'
+                      for db in controlplane dataplane dataplane_omop identityhub issuerservice cfm; do
+                        if psql -d postgres -tAc "SELECT 1 FROM pg_database WHERE datname='\$db'" | grep -q 1; then
+                          echo "\$db already present"
+                        else
+                          echo "creating \$db"
+                          createdb "\$db" && echo "  created \$db" || echo "  FAILED \$db"
+                        fi
+                      done
+                      echo "=== databases after ==="
+                      psql -d postgres -tAc 'SELECT datname FROM pg_database ORDER BY datname'
+                      psql -d postgres -tAc "SELECT 'CFM_PRESENT' FROM pg_database WHERE datname='cfm'"
+          EOF
+
+          if az containerapp job show -n mvhd-pg-createdb -g "$RESOURCE_GROUP" -o none 2>/dev/null; then
+            az containerapp job delete -n mvhd-pg-createdb -g "$RESOURCE_GROUP" --yes -o none
+          fi
+          az containerapp job create -n mvhd-pg-createdb -g "$RESOURCE_GROUP" --yaml /tmp/pg-createdb-job.yaml -o none
+
+          EXEC=$(az containerapp job start -n mvhd-pg-createdb -g "$RESOURCE_GROUP" --query "name" -o tsv)
+          echo "started createdb exec: $EXEC"
+          STATUS=Pending
+          for i in $(seq 1 60); do
+            STATUS=$(az containerapp job execution show -n mvhd-pg-createdb -g "$RESOURCE_GROUP" \
+              --job-execution-name "$EXEC" --query "properties.status" -o tsv 2>/dev/null || echo Pending)
+            echo "[$i] createdb status: $STATUS"
+            case "$STATUS" in
+              Succeeded) break ;;
+              Failed|Canceled) break ;;
+            esac
+            sleep 5
+          done
+
+          WS_ID=$(az containerapp env show -n "$ACA_ENV" -g "$RESOURCE_GROUP" \
+                  --query "properties.appLogsConfiguration.logAnalyticsConfiguration.customerId" -o tsv 2>/dev/null)
+          if [ -n "$WS_ID" ]; then
+            echo "=== createdb job logs ==="
+            sleep 20
+            az monitor log-analytics query -w "$WS_ID" --analytics-query \
+              "ContainerAppConsoleLogs_CL | where ContainerAppName_s == 'mvhd-pg-createdb' | order by TimeGenerated asc | project TimeGenerated, Log_s | take 200" \
+              -o tsv 2>&1 | head -200 || echo "(no logs returned)"
+          fi
+
+          az containerapp job delete -n mvhd-pg-createdb -g "$RESOURCE_GROUP" --yes -o none || true
+
+          if [ "$STATUS" != "Succeeded" ]; then
+            echo "::error::the createdb job did not succeed (status $STATUS)"
+            exit 1
+          fi
+          echo "createdb job succeeded"
 
       # ADR-022 parked both managers at min-replicas=0. A scale-to-zero app does
       # cold-start on an internal request, but the seed's own probe loop would
