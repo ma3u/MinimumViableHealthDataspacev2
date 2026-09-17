@@ -150,6 +150,11 @@ start, and you can show it: refuse, switch to the researcher, start the
 transfer, and the connector answers 403 with the article. Issue the permit and
 the same transfer goes through, stamped with the permit id on the audit page.
 
+One thing to know before the room: a permit issued earlier stays valid, and a
+refusal of a new application revokes nothing (revocation is Art. 63(3), not yet
+built). On a stack where PharmaCo already holds a permit for the Synthea
+cohort, show the refusal on an application for another dataset.
+
 ### 5. Extract and upload, pseudonymised
 
 | Link                                                                                                               |

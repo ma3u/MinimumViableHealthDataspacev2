@@ -9,7 +9,10 @@
  * starts, and the audit trail shows the transfer under that permit.
  *
  * Every run leaves one application, one decision and one transfer in the
- * graph, which is what a demo needs to show anyway.
+ * graph, which is what a demo needs to show anyway. The dataset id is unique
+ * per run: a permit an earlier run issued stays valid (refusing a new
+ * application revokes nothing, Art. 63(3) is a separate act), so a second run
+ * against the same graph could not be blocked for the same dataset.
  *
  *   PLAYWRIGHT_BASE_URL=https://ehds.mabu.red \
  *   KEYCLOAK_PUBLIC_URL=https://<the deployment's Keycloak> \
@@ -20,7 +23,7 @@ import { apiGet, loginAs, skipIfKeycloakDown } from "./helpers";
 
 test.describe.configure({ mode: "serial" });
 
-const DATASET = "dataset:synthea-fhir-r4-mvd";
+const DATASET = `dataset:journey40-${Date.now().toString(36)}`;
 const TRANSFER = {
   participantId: "pharmaco-ctx",
   contractId: "demo-agreement:fhir-cohort-bundle",
