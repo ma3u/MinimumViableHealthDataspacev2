@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { runQuery } from "@/lib/neo4j";
 import { edcClient } from "@/lib/edc";
 import { requireAuth, isAuthError } from "@/lib/auth-guard";
+import { decisionClock } from "@/lib/permits";
 
 export const dynamic = "force-dynamic";
 
@@ -64,13 +65,29 @@ export async function GET(req: Request) {
         datasetTitle: string | null;
         hasContract: boolean;
         ehdsArticle: string | null;
+        applicationId: string | null;
+        applicationName: string | null;
+        submittedAt: string | null;
+        requestedPurpose: string | null;
+        requestedDatasetId: string | null;
+        requestedDatasetTitle: string | null;
+        justification: string | null;
+        ethicsCommitteeRef: string | null;
+        approvalId: string | null;
+        decidedAt: string | null;
+        validUntil: string | null;
+        decisionJustification: string | null;
       }>(
+        // One row per application, plus one for a participant without any, so
+        // the access body's inbox shows every case it has to decide (Art. 57(1)(e)).
         `MATCH (p:Participant)
          WHERE p.name IS NOT NULL AND p.name <> ''
          WITH DISTINCT p
          OPTIONAL MATCH (p)-[:SUBMITTED]->(app:AccessApplication)
          OPTIONAL MATCH (approval:HDABApproval)-[:APPROVES]->(app)
          OPTIONAL MATCH (approval)-[:GRANTS_ACCESS_TO]->(ds:HealthDataset)
+         OPTIONAL MATCH (requested:HealthDataset)
+           WHERE coalesce(requested.datasetId, requested.id) = app.datasetId
          OPTIONAL MATCH (contract:Contract)-[:GOVERNS]->(dp:DataProduct)-[:DESCRIBED_BY]->(ds)
          RETURN coalesce(p.participantId, p.id) AS consumerId,
                 p.name                          AS consumerName,
@@ -82,10 +99,34 @@ export async function GET(req: Request) {
                 coalesce(ds.id, ds.datasetId)   AS datasetId,
                 coalesce(ds.title, ds.name)     AS datasetTitle,
                 contract IS NOT NULL            AS hasContract,
-                approval.ehdsArticle            AS ehdsArticle
-         ORDER BY p.name`,
+                approval.ehdsArticle            AS ehdsArticle,
+                app.applicationId               AS applicationId,
+                app.name                        AS applicationName,
+                toString(app.submittedAt)       AS submittedAt,
+                app.requestedPurpose            AS requestedPurpose,
+                app.datasetId                   AS requestedDatasetId,
+                coalesce(requested.title, requested.name) AS requestedDatasetTitle,
+                app.justification               AS justification,
+                app.ethicsCommitteeRef          AS ethicsCommitteeRef,
+                approval.approvalId             AS approvalId,
+                toString(coalesce(approval.decidedAt, approval.approvedAt)) AS decidedAt,
+                toString(approval.validUntil)   AS validUntil,
+                approval.justification          AS decisionJustification
+         ORDER BY p.name, app.submittedAt`,
       ),
     ]);
+
+    // The Art. 68(4) clock: three months from submission to a decision.
+    const now = Date.now();
+    const matrix = (matrixRows ?? []).map((row) => {
+      const undecided =
+        row.hasApplication &&
+        !row.hasApproval &&
+        !["APPROVED", "REJECTED"].includes(
+          (row.applicationStatus ?? "").toUpperCase(),
+        );
+      return { ...row, ...decisionClock(row.submittedAt, undecided, now) };
+    });
 
     // If Neo4j has no consumers, fall back to EDC-V activated participants
     let finalConsumers = consumers;
@@ -129,7 +170,7 @@ export async function GET(req: Request) {
     return NextResponse.json({
       consumers: finalConsumers,
       datasets: finalDatasets,
-      matrix: matrixRows,
+      matrix,
     });
   }
 

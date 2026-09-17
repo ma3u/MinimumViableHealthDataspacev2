@@ -31,6 +31,25 @@ vi.mock("@/lib/auth-guard", () => ({
   isAuthError: () => false,
 }));
 
+// The data permit gate (issue #206) is exercised in transfers-permit-gate.test.ts;
+// here it lets every transfer through.
+vi.mock("@/lib/permit-gate", () => ({
+  PERMIT_ARTICLE: "Regulation (EU) 2025/327, Art. 61(1) and Art. 68",
+  checkPermit: vi.fn().mockResolvedValue({
+    allowed: true,
+    consumerDid: "did:web:pharmaco.de:research",
+    permitId: "permit-test",
+    datasetId: null,
+    datasetMatched: false,
+    validUntil: null,
+    purpose: null,
+    reason: "test",
+    article: "test",
+  }),
+  didFromCounterParty: () => null,
+  recordPermittedTransfer: vi.fn().mockResolvedValue(undefined),
+}));
+
 import { edcClient } from "@/lib/edc";
 import { __resetDemoRecordsForTests } from "@/lib/demo-records";
 import { GET, POST } from "@/app/api/transfers/route";
