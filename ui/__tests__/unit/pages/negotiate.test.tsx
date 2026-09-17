@@ -351,6 +351,121 @@ describe("NegotiatePage", () => {
     });
   });
 
+  // ── Demo negotiations (issue #25) ──
+  //
+  // The connector has no participant context, so a negotiation against an offer
+  // from the demo catalogue is recorded by the API rather than sent. The page has
+  // to carry that through honestly and without losing the row.
+  describe("a negotiation the API recorded rather than sent", () => {
+    const demoNegotiation = {
+      "@id": "demo-negotiation:fhir-patient-bundle",
+      state: "FINALIZED",
+      contractAgreementId: "demo-agreement:fhir-patient-bundle",
+      counterPartyId: "did:web:example.com:alpha-klinik",
+      assetId: "fhir-patient-bundle",
+      demo: true,
+      demoReason: "No DSP agreement was signed with anyone.",
+    };
+
+    async function negotiateDemoOffer(refetch: Record<string, unknown>[]) {
+      setupDefaultMocks();
+      const user = userEvent.setup();
+      render(<NegotiatePage />);
+
+      await waitFor(() => {
+        expect(screen.getByText("Discover Offers")).toBeTruthy();
+      });
+      await user.click(screen.getByText("Discover Offers"));
+      await waitFor(() => {
+        expect(screen.getByText("FHIR Patient Bundle")).toBeTruthy();
+      });
+      await user.click(screen.getByText("FHIR Patient Bundle"));
+      await waitFor(() => {
+        expect(screen.getByText("Selected:")).toBeTruthy();
+      });
+
+      mockFetchApi.mockImplementation((url: string, init?: RequestInit) => {
+        if (url === "/api/negotiations" && init?.method === "POST") {
+          return mockResponse(demoNegotiation);
+        }
+        if (url.includes("/api/negotiations?participantId=")) {
+          return mockResponse(refetch);
+        }
+        if (url.includes("/api/participants")) {
+          return mockResponse(sampleParticipants);
+        }
+        return mockResponse([]);
+      });
+
+      await user.click(screen.getByText("Start Negotiation"));
+      return user;
+    }
+
+    it("says the negotiation was recorded, not initiated", async () => {
+      await negotiateDemoOffer([demoNegotiation]);
+
+      await waitFor(() => {
+        expect(
+          screen.getByText(/Demo negotiation recorded: demo-negotiation:/),
+        ).toBeTruthy();
+      });
+      expect(screen.queryByText(/Negotiation initiated/)).toBeNull();
+    });
+
+    it("keeps the row exactly once when the refetch carries it too", async () => {
+      await negotiateDemoOffer([demoNegotiation]);
+
+      // The API now returns the recorded negotiation, and the page also holds the
+      // POST response. Prepending unconditionally duplicated the row and its key.
+      await waitFor(() => {
+        expect(screen.getAllByText("Demo")).toHaveLength(1);
+      });
+    });
+
+    it("keeps the row when the refetch has dropped it", async () => {
+      await negotiateDemoOffer([]);
+
+      // A vanishing row reads as a failure, so the POST response stands in.
+      await waitFor(() => {
+        expect(screen.getAllByText("Demo")).toHaveLength(1);
+      });
+    });
+
+    it("marks the row as demo, since nobody signed that agreement", async () => {
+      await negotiateDemoOffer([demoNegotiation]);
+
+      await waitFor(() => {
+        expect(screen.getByText("Demo")).toBeTruthy();
+      });
+      // An unmarked FINALIZED badge would claim an agreement that never existed.
+      expect(screen.getByTitle(/No DSP agreement was signed/)).toBeTruthy();
+    });
+
+    it("offers the transfer step, with the agreement id url-encoded", async () => {
+      await negotiateDemoOffer([demoNegotiation]);
+
+      await waitFor(() => {
+        const link = screen
+          .getAllByText(/Transfer/)
+          .map((el) => el.closest("a"))
+          .find((a) => a?.getAttribute("href")?.includes("demo-agreement"));
+        expect(link?.getAttribute("href")).toContain(
+          "contractId=demo-agreement%3Afhir-patient-bundle",
+        );
+      });
+    });
+
+    it("never marks a live negotiation as demo", async () => {
+      setupDefaultMocks();
+      render(<NegotiatePage />);
+
+      await waitFor(() => {
+        expect(screen.getByText("Fhir Patient Bundle")).toBeTruthy();
+      });
+      expect(screen.queryByText("Demo")).toBeNull();
+    });
+  });
+
   it("shows error result on negotiation failure", async () => {
     setupDefaultMocks();
     const user = userEvent.setup();

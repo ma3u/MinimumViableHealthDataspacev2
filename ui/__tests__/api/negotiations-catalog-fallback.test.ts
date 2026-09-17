@@ -31,6 +31,7 @@ vi.mock("@/lib/auth-guard", () => ({
 }));
 
 import { edcClient } from "@/lib/edc";
+import { __resetDemoRecordsForTests } from "@/lib/demo-records";
 import { GET, POST } from "@/app/api/negotiations/route";
 
 const mockManagement = vi.mocked(edcClient.management);
@@ -136,6 +137,7 @@ describe("/api/negotiations catalog fallback", () => {
 describe("/api/negotiations demo offers", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    __resetDemoRecordsForTests();
     readFile.mockResolvedValue(ASSETS);
   });
 
@@ -162,9 +164,87 @@ describe("/api/negotiations demo offers", () => {
     const body = await res.json();
     expect(body.demo).toBe(true);
     expect(body["@id"]).toBe("demo-negotiation:fhir-patient-search");
-    expect(body.state).toBe("REQUESTED");
     expect(body.demoReason).toContain("demonstrator");
     expect(body.upstreamError).toContain("404");
+  });
+
+  // The transfer page builds its agreement list from finalized negotiations that
+  // carry an agreement id. A demo negotiation without one is a dead end: nothing
+  // exists that could ever advance it, so the walkthrough stops one click later.
+  it("finalizes the demo negotiation and gives it an agreement to transfer under", async () => {
+    mockManagement.mockRejectedValue(new Error("404 Not Found"));
+
+    const body = await (
+      await POST(negotiate("demo-offer:fhir-patient-search"))
+    ).json();
+
+    expect(body.state).toBe("FINALIZED");
+    expect(body.contractAgreementId).toBe("demo-agreement:fhir-patient-search");
+    // The prefix is what stops a later step treating it as connector-issued.
+    expect(body.contractAgreementId.startsWith("demo-agreement:")).toBe(true);
+  });
+
+  it("says plainly that no agreement was signed with anyone", async () => {
+    mockManagement.mockRejectedValue(new Error("404 Not Found"));
+
+    const body = await (
+      await POST(negotiate("demo-offer:fhir-patient-search"))
+    ).json();
+
+    expect(body.demoReason).toMatch(/no dsp agreement was signed/i);
+  });
+
+  it("returns the recorded demo negotiation on the next list read", async () => {
+    mockManagement.mockRejectedValue(new Error("404 Not Found"));
+    await POST(negotiate("demo-offer:fhir-patient-search"));
+
+    readFile.mockResolvedValue("[]"); // no bundled negotiations
+    const list = await (
+      await GET(
+        new NextRequest(
+          "http://localhost:3000/api/negotiations?participantId=24be78bf13fc4873b503844d908fcbd2",
+        ),
+      )
+    ).json();
+
+    // Nothing reached the connector, so this read is the only way the transfer
+    // page can ever see it.
+    expect(list).toHaveLength(1);
+    expect(list[0]["@id"]).toBe("demo-negotiation:fhir-patient-search");
+    expect(list[0].demo).toBe(true);
+  });
+
+  it("does not leak one participant's demo negotiation into another's list", async () => {
+    mockManagement.mockRejectedValue(new Error("404 Not Found"));
+    await POST(negotiate("demo-offer:fhir-patient-search"));
+
+    readFile.mockResolvedValue("[]");
+    const list = await (
+      await GET(
+        new NextRequest(
+          "http://localhost:3000/api/negotiations?participantId=someone-else",
+        ),
+      )
+    ).json();
+
+    expect(list).toHaveLength(0);
+  });
+
+  it("records a demo negotiation once, however often the offer is negotiated", async () => {
+    mockManagement.mockRejectedValue(new Error("404 Not Found"));
+    await POST(negotiate("demo-offer:fhir-patient-search"));
+    await POST(negotiate("demo-offer:fhir-patient-search"));
+
+    readFile.mockResolvedValue("[]");
+    const list = await (
+      await GET(
+        new NextRequest(
+          "http://localhost:3000/api/negotiations?participantId=24be78bf13fc4873b503844d908fcbd2",
+        ),
+      )
+    ).json();
+
+    expect(list).toHaveLength(1);
   });
 
   it("does not invent a negotiation for a real offer that fails", async () => {

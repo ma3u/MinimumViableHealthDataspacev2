@@ -766,6 +766,10 @@ function DataTransferContent() {
     setResult(null);
 
     const results: string[] = [];
+    // A transfer the API recorded rather than sent, because the contract exists
+    // only in this demonstrator. Reported separately: "started" would claim a
+    // DSP transfer that never happened.
+    const demoResults: string[] = [];
     for (const agrId of Array.from(selectedAgreements)) {
       const agr = agreements.find((a) => a["@id"] === agrId);
       const assetId = agr ? f(agr as Record<string, unknown>, "assetId") : "";
@@ -786,7 +790,16 @@ function DataTransferContent() {
         });
 
         if (res.ok) {
-          results.push(assetLabel(assetId || agrId.slice(0, 12)));
+          const data = (await res.json().catch(() => ({}))) as Record<
+            string,
+            unknown
+          >;
+          const label = assetLabel(assetId || agrId.slice(0, 12));
+          if (data.demo === true) {
+            demoResults.push(label);
+          } else {
+            results.push(label);
+          }
         } else {
           const err = await res.json().catch(() => ({}));
           const detail =
@@ -805,12 +818,24 @@ function DataTransferContent() {
     }
 
     const errors = results.filter((r) => r.startsWith("Error"));
+    const started = results.filter((r) => !r.startsWith("Error"));
     if (errors.length === 0) {
-      setResult(
-        results.length === 1
-          ? `Transfer started for ${results[0]}`
-          : `${results.length} transfers started successfully`,
-      );
+      const lines: string[] = [];
+      if (started.length === 1) {
+        lines.push(`Transfer started for ${started[0]}`);
+      } else if (started.length > 1) {
+        lines.push(`${started.length} transfers started successfully`);
+      }
+      if (demoResults.length > 0) {
+        lines.push(
+          `Demo transfer recorded for ${demoResults.join(
+            ", ",
+          )}: the contract ` +
+            "exists only in this demonstrator, so nothing was sent to the " +
+            "connector and the FHIR payload below is the demonstrator's own.",
+        );
+      }
+      setResult(lines.join("\n"));
     } else {
       setResult(errors.join("\n"));
     }

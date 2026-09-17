@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { edcClient, EDC_CONTEXT } from "@/lib/edc";
 import { requireAuth, isAuthError } from "@/lib/auth-guard";
+import { recordDemo, listDemo } from "@/lib/demo-records";
 import { promises as fs } from "fs";
 import path from "path";
 
@@ -205,15 +206,21 @@ export async function GET(req: NextRequest) {
     );
   }
 
+  // Negotiations this process recorded because the connector could not take
+  // them (see lib/demo-records.ts). They come first: the newest is the one the
+  // user just made, and the transfer page reads its agreements from this list.
+  const demoNegotiations = listDemo("negotiation", participantId);
+
   // Merge with demo negotiations so the full workflow is always demonstrable
   const mockNegotiations = await loadMockNegotiations();
   const realIds = new Set(
     realNegotiations.map((n) => (n as Record<string, unknown>)["@id"]),
   );
+  const taken = new Set([...realIds, ...demoNegotiations.map((d) => d["@id"])]);
   const deduped = mockNegotiations.filter(
-    (m) => !realIds.has((m as Record<string, unknown>)["@id"]),
+    (m) => !taken.has((m as Record<string, unknown>)["@id"]),
   );
-  const merged = [...realNegotiations, ...deduped];
+  const merged = [...demoNegotiations, ...realNegotiations, ...deduped];
 
   return NextResponse.json(merged);
 }
@@ -298,25 +305,38 @@ export async function POST(req: NextRequest) {
       const msg = err instanceof Error ? err.message : String(err);
       console.warn("Demo offer negotiated without a connector:", msg);
 
-      return NextResponse.json(
-        {
-          "@id": `demo-negotiation:${assetId}`,
-          "@type": "ContractNegotiation",
-          state: "REQUESTED",
-          counterPartyId: counterPartyId || "",
-          counterPartyAddress: dspEndpoint,
-          protocol: DSP_PROTOCOL,
-          assetId,
-          offerId: offer,
-          demo: true,
-          demoReason:
-            "This offer came from the demonstrator's catalogue, so the request was " +
-            "recorded here rather than sent to the connector, which has no participant " +
-            "context for it. Tracked in issue #25.",
-          upstreamError: msg,
-        },
-        { status: 201 },
-      );
+      const negotiation = {
+        "@id": `demo-negotiation:${assetId}`,
+        "@type": "ContractNegotiation",
+        // Finalized, and carrying an agreement, because the next step of the
+        // walkthrough builds its list from finalized negotiations that have one.
+        // A demo negotiation left at REQUESTED is a dead end: nothing exists that
+        // could ever advance it, so the transfer page never sees it and the flow
+        // dies one click later. Both ids keep the demo- prefix so no later step
+        // mistakes them for something a connector issued.
+        state: "FINALIZED",
+        contractAgreementId: `demo-agreement:${assetId}`,
+        counterPartyId: counterPartyId || "",
+        counterPartyAddress: dspEndpoint,
+        protocol: DSP_PROTOCOL,
+        assetId,
+        offerId: offer,
+        createdAt: Date.now(),
+        demo: true,
+        demoReason:
+          "This offer came from the demonstrator's catalogue, so the request was " +
+          "recorded here rather than sent to the connector, which has no participant " +
+          "context for it. No DSP agreement was signed with anyone: the record is " +
+          "finalized so that the transfer step has a contract to work with. " +
+          "Tracked in issue #25.",
+        upstreamError: msg,
+      };
+
+      // Nothing was written to the connector, so this process is the only place
+      // the record can live until the next read (lib/demo-records.ts).
+      recordDemo("negotiation", participantId, negotiation);
+
+      return NextResponse.json(negotiation, { status: 201 });
     }
   } catch (err) {
     console.error("Failed to initiate negotiation:", err);
