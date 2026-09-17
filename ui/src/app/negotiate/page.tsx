@@ -281,13 +281,25 @@ function NegotiateContent() {
       if (res.ok) {
         const data = (await res.json()) as Record<string, unknown>;
         setResult(
-          `Negotiation initiated: ${data["@id"] || JSON.stringify(data)}`,
+          data.demo === true
+            ? `Demo negotiation recorded: ${data["@id"]}. ${
+                data.demoReason ?? ""
+              }`
+            : `Negotiation initiated: ${data["@id"] || JSON.stringify(data)}`,
         );
         const updated = await fetchApi(
           `/api/negotiations?participantId=${selectedCtx}`,
         );
         const ud = await updated.json();
-        setNegotiations(Array.isArray(ud) ? ud : ud.negotiations ?? []);
+        const list = (Array.isArray(ud) ? ud : ud.negotiations ?? []) as
+          | Negotiation[]
+          | [];
+        // A demo negotiation lives only in this page: nothing was written to the
+        // connector, so a refetch would drop it and the step would look like it
+        // had failed. Keep it at the top of the list for the rest of the session.
+        setNegotiations(
+          data.demo === true ? [data as unknown as Negotiation, ...list] : list,
+        );
       } else {
         const err = (await res.json()) as Record<string, unknown>;
         setResult(

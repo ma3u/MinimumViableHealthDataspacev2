@@ -31,7 +31,7 @@ vi.mock("@/lib/auth-guard", () => ({
 }));
 
 import { edcClient } from "@/lib/edc";
-import { GET } from "@/app/api/negotiations/route";
+import { GET, POST } from "@/app/api/negotiations/route";
 
 const mockManagement = vi.mocked(edcClient.management);
 
@@ -130,5 +130,65 @@ describe("/api/negotiations catalog fallback", () => {
 
     expect(res.status).toBe(200);
     expect(body.demo).toBe(true);
+  });
+});
+
+describe("/api/negotiations demo offers", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    readFile.mockResolvedValue(ASSETS);
+  });
+
+  function negotiate(offerId: string) {
+    return new NextRequest("http://localhost:3000/api/negotiations", {
+      method: "POST",
+      body: JSON.stringify({
+        participantId: "24be78bf13fc4873b503844d908fcbd2",
+        counterPartyAddress: "http://controlplane:8082/api/dsp",
+        counterPartyId: "772f6576b2a6472cb2e373dabc928517",
+        providerDid: "did:web:identityhub%3A7083:alpha-klinik",
+        assetId: "fhir-patient-search",
+        offerId,
+      }),
+    });
+  }
+
+  it("records a demo negotiation when the offer came from the demo catalogue", async () => {
+    mockManagement.mockRejectedValue(new Error("404 Not Found"));
+
+    const res = await POST(negotiate("demo-offer:fhir-patient-search"));
+    expect(res.status).toBe(201);
+
+    const body = await res.json();
+    expect(body.demo).toBe(true);
+    expect(body["@id"]).toBe("demo-negotiation:fhir-patient-search");
+    expect(body.state).toBe("REQUESTED");
+    expect(body.demoReason).toContain("demonstrator");
+    expect(body.upstreamError).toContain("404");
+  });
+
+  it("does not invent a negotiation for a real offer that fails", async () => {
+    mockManagement.mockRejectedValue(new Error("500 Internal Server Error"));
+
+    const res = await POST(negotiate("urn:uuid:a-real-offer"));
+    expect(res.status).toBe(502);
+
+    const body = await res.json();
+    expect(body.demo).toBeUndefined();
+    expect(body.error).toContain("Failed to initiate contract negotiation");
+  });
+
+  it("never labels a real negotiation as demo", async () => {
+    mockManagement.mockResolvedValue({
+      "@id": "real-negotiation-id",
+      state: "REQUESTED",
+    });
+
+    const res = await POST(negotiate("demo-offer:fhir-patient-search"));
+    const body = await res.json();
+
+    expect(res.status).toBe(201);
+    expect(body["@id"]).toBe("real-negotiation-id");
+    expect(body.demo).toBeUndefined();
   });
 });
