@@ -20,6 +20,21 @@ ACR_PASSWORD=$(az acr credential show --name "$ACR_NAME" --query "passwords[0].v
 # that reports "databases ensured" while a database is missing is worse than one
 # that fails: `cfm` missing is enough to stop the CFM TenantManager booting,
 # which is what onboarding needs (issue #203).
+#
+# And `az containerapp exec` needs a TTY. Headless it dies inside the CLI with
+# `termios.error: (25, 'Inappropriate ioctl for device')`, which the old `|| warn`
+# swallowed, so every create here was a no-op in CI while the phase still
+# reported success. That is the likeliest reason `cfm` was absent on the live
+# environment for months. 11-claude-federation.sh already documents the same
+# TTY limitation. Refuse up front rather than pretend.
+if [ ! -t 0 ]; then
+  err "no TTY on stdin: 'az containerapp exec' cannot run here, so these"
+  err "databases would be silently skipped. Run this phase from a terminal,"
+  err "or use the .github/workflows/cfm-seed.yml job, which creates them from"
+  err "a one-shot job on the postgres image instead of through exec."
+  exit 1
+fi
+
 log "Creating additional Postgres databases..."
 MISSING_DBS=()
 for db in controlplane dataplane dataplane_omop identityhub issuerservice cfm; do
