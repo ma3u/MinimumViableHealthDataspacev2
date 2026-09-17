@@ -187,7 +187,9 @@ test.describe("Issue #206 · the data permit gates the transfer", () => {
       .click();
     const panel = regulator.getByTestId("application-panel");
     await expect(panel).toBeVisible();
-    await expect(panel.getByText(/Art\. 68/)).toBeVisible();
+    await expect(
+      panel.getByText("Criteria assessed, Art. 68(1)"),
+    ).toBeVisible();
     await regulator.context().close();
   });
 });
