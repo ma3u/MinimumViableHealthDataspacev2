@@ -279,13 +279,45 @@ export async function POST(req: NextRequest) {
       },
     };
 
-    const result = await edcClient.management(
-      `/v5alpha/participants/${participantId}/contractnegotiations`,
-      "POST",
-      negotiationPayload,
-    );
+    try {
+      const result = await edcClient.management(
+        `/v5alpha/participants/${participantId}/contractnegotiations`,
+        "POST",
+        negotiationPayload,
+      );
+      return NextResponse.json(result, { status: 201 });
+    } catch (err) {
+      // An offer that came from the demo catalogue cannot be negotiated against
+      // the connector: neither the participant context nor the offer exists
+      // there. Record it as a demo negotiation and label it, rather than ending
+      // the walkthrough on a 502 the audience cannot act on. A real offer that
+      // fails still fails, because that is a genuine fault worth seeing.
+      const offer = String(offerId || policyId || "");
+      if (!offer.startsWith("demo-offer:")) throw err;
 
-    return NextResponse.json(result, { status: 201 });
+      const msg = err instanceof Error ? err.message : String(err);
+      console.warn("Demo offer negotiated without a connector:", msg);
+
+      return NextResponse.json(
+        {
+          "@id": `demo-negotiation:${assetId}`,
+          "@type": "ContractNegotiation",
+          state: "REQUESTED",
+          counterPartyId: counterPartyId || "",
+          counterPartyAddress: dspEndpoint,
+          protocol: DSP_PROTOCOL,
+          assetId,
+          offerId: offer,
+          demo: true,
+          demoReason:
+            "This offer came from the demonstrator's catalogue, so the request was " +
+            "recorded here rather than sent to the connector, which has no participant " +
+            "context for it. Tracked in issue #25.",
+          upstreamError: msg,
+        },
+        { status: 201 },
+      );
+    }
   } catch (err) {
     console.error("Failed to initiate negotiation:", err);
     const msg = err instanceof Error ? err.message : String(err);
