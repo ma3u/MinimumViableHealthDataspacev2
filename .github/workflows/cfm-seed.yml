@@ -41,10 +41,11 @@ concurrency:
 env:
   RESOURCE_GROUP: rg-mvhd-dev
   ACA_ENV: mvhd-env
-  # ACA internal ingress answers on 443/80 at the FQDN, not the container's
-  # target port, so no port appears in these URLs.
-  TM_INTERNAL_URL: http://mvhd-tenant-mgr/api
-  PM_INTERNAL_URL: http://mvhd-provision-mgr/api
+  # Short app name plus the container's target port, which is the form
+  # edc-seed-participants.yml already proves works between apps inside the
+  # environment. The portless FQDN form failed to answer on the first run.
+  TM_INTERNAL_URL: http://mvhd-tenant-mgr:8080/api
+  PM_INTERNAL_URL: http://mvhd-provision-mgr:8080/api
 
 jobs:
   seed:
@@ -192,6 +193,26 @@ jobs:
           fi
           echo "createdb job succeeded"
 
+          # Succeeded only means the container exited 0, and the creates inside
+          # it end in `|| echo FAILED`, so confirm from the logs that cfm is
+          # really there before anything downstream depends on it.
+          if [ -n "$WS_ID" ]; then
+            for attempt in 1 2 3 4 5 6; do
+              FOUND=$(az monitor log-analytics query -w "$WS_ID" --analytics-query \
+                "ContainerAppConsoleLogs_CL | where ContainerAppName_s == 'mvhd-pg-createdb' | where Log_s contains 'CFM_PRESENT' | take 1" \
+                -o tsv 2>/dev/null | head -5)
+              if [ -n "$FOUND" ]; then
+                echo "confirmed from logs: cfm database present"
+                break
+              fi
+              echo "[$attempt] waiting for Log Analytics to ingest the job logs..."
+              sleep 30
+            done
+            if [ -z "$FOUND" ]; then
+              echo "::warning::could not confirm cfm from the job logs (ingestion lag). The seed below will show whether the manager can serve."
+            fi
+          fi
+
       # ADR-022 parked both managers at min-replicas=0. A scale-to-zero app does
       # cold-start on an internal request, but the seed's own probe loop would
       # then be racing the boot, and onboarding needs them warm afterwards
@@ -227,6 +248,31 @@ jobs:
             STATUS=$(az containerapp show -n "$app" -g "$RESOURCE_GROUP" \
               --query "properties.runningStatus" -o tsv 2>/dev/null || echo unknown)
             echo "$app: runningStatus=$STATUS"
+          done
+
+      # If the TenantManager cannot serve, the seed below fails on a probe
+      # timeout and says nothing about why. Its own logs do. The cfm database
+      # was missing until minutes ago, so a crash-looping manager is the first
+      # thing to rule out.
+      - name: Show the TenantManager's recent logs
+        run: |
+          WS_ID=$(az containerapp env show -n "$ACA_ENV" -g "$RESOURCE_GROUP" \
+                  --query "properties.appLogsConfiguration.logAnalyticsConfiguration.customerId" -o tsv 2>/dev/null)
+          if [ -z "$WS_ID" ]; then
+            echo "no Log Analytics workspace reachable; skipping"
+            exit 0
+          fi
+          for app in mvhd-tenant-mgr mvhd-provision-mgr; do
+            echo "=== $app (last 40 console lines) ==="
+            az monitor log-analytics query -w "$WS_ID" --analytics-query \
+              "ContainerAppConsoleLogs_CL | where ContainerAppName_s == '$app' | order by TimeGenerated desc | project TimeGenerated, Log_s | take 40" \
+              -o tsv 2>&1 | head -40 || echo "(no logs returned)"
+            echo ""
+            echo "=== $app system logs (last 15) ==="
+            az monitor log-analytics query -w "$WS_ID" --analytics-query \
+              "ContainerAppSystemLogs_CL | where ContainerAppName_s == '$app' | order by TimeGenerated desc | project TimeGenerated, Log_s | take 15" \
+              -o tsv 2>&1 | head -15 || echo "(no logs returned)"
+            echo ""
           done
 
       - name: Run seed as one-shot ACA Job
@@ -314,10 +360,18 @@ jobs:
               echo "## Container logs (Log Analytics)"
               echo ""
               echo '```'
-              sleep 15
-              az monitor log-analytics query -w "$WS_ID" --analytics-query \
-                "ContainerAppConsoleLogs_CL | where ContainerAppName_s == 'mvhd-cfm-seed' | order by TimeGenerated asc | project TimeGenerated, Log_s | take 300" \
-                -o tsv 2>&1 | head -300 || echo "(no logs returned)"
+              # Ingestion lags by a minute or more: the first run queried after
+              # 15 seconds and printed an empty block, which is how a failing
+              # seed managed to say nothing at all.
+              LOGS=""
+              for _ in 1 2 3 4 5 6; do
+                sleep 30
+                LOGS=$(az monitor log-analytics query -w "$WS_ID" --analytics-query \
+                  "ContainerAppConsoleLogs_CL | where ContainerAppName_s == 'mvhd-cfm-seed' | order by TimeGenerated asc | project TimeGenerated, Log_s | take 300" \
+                  -o tsv 2>&1 | head -300)
+                [ -n "$LOGS" ] && break
+              done
+              printf '%s\n' "${LOGS:-(no logs returned after 3 minutes)}"
               echo '```'
             else
               echo '> No Log Analytics workspace reachable from the SP.'
