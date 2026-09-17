@@ -1,0 +1,248 @@
+name: CFM Seed (cell + dataspace profile) (issue #203)
+
+# Seeds the CFM control objects the /onboarding form reads before it can create
+# anything: a cell, a dataspace profile with a deployment onto that cell, the
+# five provisioning activity definitions, and the deploy/dispose orchestration.
+#
+# Why: POST /api/participants reads a cell and a profile from the TenantManager
+# first. Both objects were only ever created by jad/seed-jad.sh against the local
+# Docker stack, so on Azure those reads came back empty and onboarding died on a
+# bare "Failed to create participant". ADR-024 Phase 3, issue #203.
+#
+# Architecture: both CFM managers are internal-ingress only, so the seed runs as
+# a one-shot ACA Job inside the environment. The job inlines
+# scripts/azure/05-cfm-seed.sh (the canonical source) — keep them in sync.
+#
+# Ceiling: this seeds control objects, not workers. The four CFM agents are not
+# on Azure, so a new participant's VPAs stay pending. Separate work.
+#
+# Manual trigger only.
+
+on:
+  workflow_dispatch:
+    inputs:
+      cell_environment:
+        description: "Value for the cell's environment property"
+        type: string
+        default: "health-dataspace-azure"
+      keep_apps_warm:
+        description: "Leave the CFM managers at min=1 after seeding (needed for onboarding to work)"
+        type: boolean
+        default: true
+
+permissions:
+  id-token: write
+  contents: read
+
+concurrency:
+  group: "azure-cfm-seed"
+  cancel-in-progress: false
+
+env:
+  RESOURCE_GROUP: rg-mvhd-dev
+  ACA_ENV: mvhd-env
+  # ACA internal ingress answers on 443/80 at the FQDN, not the container's
+  # target port, so no port appears in these URLs.
+  TM_INTERNAL_URL: http://mvhd-tenant-mgr/api
+  PM_INTERNAL_URL: http://mvhd-provision-mgr/api
+
+jobs:
+  seed:
+    name: Seed CFM cell + dataspace profile
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Azure Login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      # The TenantManager gets DATABASE_URL=.../cfm from 05-cfm-ui.sh, and that
+      # database is created in phase 6 (06-post-deploy.sh), whose creates used to
+      # end in a tolerant warning. If it is absent the manager cannot serve, and
+      # the seed below would fail with a confusing timeout rather than the real
+      # reason. So check, create if missing, and say which it was.
+      - name: Ensure the cfm database exists
+        run: |
+          PG_APP=mvhd-postgres
+          PG_ADMIN=$(az containerapp show -n "$PG_APP" -g "$RESOURCE_GROUP" \
+            --query "properties.template.containers[0].env[?name=='POSTGRES_USER'].value" \
+            -o tsv | head -1)
+          PG_ADMIN="${PG_ADMIN:-mvhdadmin}"
+          echo "postgres user: $PG_ADMIN"
+
+          check() {
+            az containerapp exec -n "$PG_APP" -g "$RESOURCE_GROUP" \
+              --command "psql -U ${PG_ADMIN} -d postgres -tAc \"SELECT 'DBFOUND' FROM pg_database WHERE datname='cfm';\"" \
+              2>/dev/null | grep -q DBFOUND
+          }
+
+          if check; then
+            echo "cfm database already present"
+          else
+            echo "cfm database missing, creating it"
+            az containerapp exec -n "$PG_APP" -g "$RESOURCE_GROUP" \
+              --command "psql -U ${PG_ADMIN} -d postgres -c \"CREATE DATABASE cfm;\"" \
+              2>/dev/null || true
+            if check; then
+              echo "cfm database created"
+            else
+              echo "::error::cfm database is still missing after CREATE DATABASE."
+              echo "The TenantManager cannot boot without it. Check mvhd-postgres."
+              exit 1
+            fi
+          fi
+
+      # ADR-022 parked both managers at min-replicas=0. A scale-to-zero app does
+      # cold-start on an internal request, but the seed's own probe loop would
+      # then be racing the boot, and onboarding needs them warm afterwards
+      # anyway, so bring them up explicitly and wait.
+      - name: Scale the CFM managers up
+        run: |
+          SCALED=0
+          for app in mvhd-tenant-mgr mvhd-provision-mgr; do
+            if ! az containerapp show -n "$app" -g "$RESOURCE_GROUP" -o none 2>/dev/null; then
+              echo "::error::$app does not exist in $RESOURCE_GROUP."
+              echo "Run scripts/azure/05-cfm-ui.sh to create it (it creates both managers)."
+              exit 1
+            fi
+            MIN=$(az containerapp show -n "$app" -g "$RESOURCE_GROUP" \
+              --query "properties.template.scale.minReplicas" -o tsv)
+            if [ "$MIN" != "1" ]; then
+              echo "Scaling $app to min=1 (was $MIN)"
+              az containerapp update -n "$app" -g "$RESOURCE_GROUP" \
+                --min-replicas 1 --max-replicas 1 -o none
+              SCALED=1
+            else
+              echo "$app already at min=1"
+            fi
+          done
+          if [ "$SCALED" = "1" ]; then
+            echo "Waiting 60s for the managers to boot..."
+            sleep 60
+          fi
+
+      - name: Report manager health
+        run: |
+          for app in mvhd-tenant-mgr mvhd-provision-mgr; do
+            STATUS=$(az containerapp show -n "$app" -g "$RESOURCE_GROUP" \
+              --query "properties.runningStatus" -o tsv 2>/dev/null || echo unknown)
+            echo "$app: runningStatus=$STATUS"
+          done
+
+      - name: Run seed as one-shot ACA Job
+        run: |
+          ENV_ID=$(az containerapp env show -n "$ACA_ENV" -g "$RESOURCE_GROUP" \
+                     --query "id" -o tsv)
+          # Same approach as edc-seed-participants.yml: inline the canonical
+          # script via base64 and run it on Microsoft's azure-cli image, which
+          # already has bash, curl and python3.
+          SCRIPT_B64=$(base64 < scripts/azure/05-cfm-seed.sh | tr -d '\n')
+
+          cat > /tmp/cfm-seed-job.yaml <<EOF
+          type: Microsoft.App/jobs
+          properties:
+            configuration:
+              triggerType: Manual
+              replicaTimeout: 600
+              replicaRetryLimit: 0
+              manualTriggerConfig:
+                replicaCompletionCount: 1
+                parallelism: 1
+            environmentId: ${ENV_ID}
+            template:
+              containers:
+                - name: seed
+                  image: mcr.microsoft.com/azure-cli:latest
+                  resources: { cpu: 0.5, memory: 1Gi }
+                  env:
+                    - { name: TM,               value: "${TM_INTERNAL_URL}" }
+                    - { name: PM,               value: "${PM_INTERNAL_URL}" }
+                    - { name: CELL_ENVIRONMENT, value: "${{ github.event.inputs.cell_environment }}" }
+                    - { name: SCRIPT_B64,       value: "${SCRIPT_B64}" }
+                  command: ["/bin/bash", "-c"]
+                  args:
+                    - |
+                      # Unbuffered stdout, so a fast-failing container still
+                      # leaves its output in Log Analytics.
+                      exec >/proc/1/fd/1 2>/proc/1/fd/2
+                      set -x
+                      echo "=== cfm-seed env ==="
+                      echo "TM=\$TM"
+                      echo "PM=\$PM"
+                      mkdir -p /tmp/seed
+                      printf '%s' "\$SCRIPT_B64" | base64 -d > /tmp/seed/run.sh
+                      chmod +x /tmp/seed/run.sh
+                      head -3 /tmp/seed/run.sh
+                      echo "=== running /tmp/seed/run.sh ==="
+                      bash /tmp/seed/run.sh
+                      EXIT=\$?
+                      echo "=== cfm-seed exited with \$EXIT ==="
+                      exit \$EXIT
+          EOF
+
+          if az containerapp job show -n mvhd-cfm-seed -g "$RESOURCE_GROUP" -o none 2>/dev/null; then
+            az containerapp job delete -n mvhd-cfm-seed -g "$RESOURCE_GROUP" --yes -o none
+          fi
+          az containerapp job create -n mvhd-cfm-seed -g "$RESOURCE_GROUP" --yaml /tmp/cfm-seed-job.yaml -o none
+
+          EXEC=$(az containerapp job start -n mvhd-cfm-seed -g "$RESOURCE_GROUP" --query "name" -o tsv)
+          echo "started exec: $EXEC"
+          STATUS=Pending
+          for i in $(seq 1 90); do
+            STATUS=$(az containerapp job execution show -n mvhd-cfm-seed -g "$RESOURCE_GROUP" \
+              --job-execution-name "$EXEC" --query "properties.status" -o tsv 2>/dev/null || echo Pending)
+            echo "[$i] cfm-seed status: $STATUS"
+            case "$STATUS" in
+              Succeeded) echo "cfm-seed Succeeded"; break ;;
+              Failed|Canceled) echo "cfm-seed $STATUS"; break ;;
+            esac
+            sleep 5
+          done
+
+          WS_ID=$(az containerapp env show -n "$ACA_ENV" -g "$RESOURCE_GROUP" \
+                  --query "properties.appLogsConfiguration.logAnalyticsConfiguration.customerId" -o tsv 2>/dev/null)
+          if [ -z "$WS_ID" ]; then
+            WS_ID=$(az monitor log-analytics workspace list --query "[0].customerId" -o tsv 2>/dev/null)
+          fi
+          echo "Log Analytics workspace: ${WS_ID:-<not found>}"
+          {
+            echo "## CFM seed execution"
+            echo ""
+            echo "status: **${STATUS}**"
+            echo ""
+            if [ -n "$WS_ID" ]; then
+              echo "## Container logs (Log Analytics)"
+              echo ""
+              echo '```'
+              sleep 15
+              az monitor log-analytics query -w "$WS_ID" --analytics-query \
+                "ContainerAppConsoleLogs_CL | where ContainerAppName_s == 'mvhd-cfm-seed' | order by TimeGenerated asc | project TimeGenerated, Log_s | take 300" \
+                -o tsv 2>&1 | head -300 || echo "(no logs returned)"
+              echo '```'
+            else
+              echo '> No Log Analytics workspace reachable from the SP.'
+            fi
+          } | tee -a "$GITHUB_STEP_SUMMARY"
+
+          [ "$STATUS" = "Succeeded" ] || exit 1
+
+      - name: Cleanup seed job
+        if: always()
+        run: |
+          az containerapp job delete -n mvhd-cfm-seed -g "$RESOURCE_GROUP" --yes -o none || true
+
+      # Onboarding calls the TenantManager on every request, so scaling back to
+      # zero re-breaks it on the next cold start. Off only if explicitly asked.
+      - name: Scale the CFM managers back to zero
+        if: ${{ github.event.inputs.keep_apps_warm != 'true' }}
+        run: |
+          for app in mvhd-tenant-mgr mvhd-provision-mgr; do
+            az containerapp update -n "$app" -g "$RESOURCE_GROUP" \
+              --min-replicas 0 --max-replicas 1 -o none
+            echo "$app scaled to min=0"
+          done

@@ -14,14 +14,38 @@ ACR_PASSWORD=$(az acr credential show --name "$ACR_NAME" --query "passwords[0].v
 # ── Create additional Postgres databases (Workaround B — ADR-018) ───────────
 # Postgres auto-creates "keycloak" via POSTGRES_DB. Create the remaining 6 via
 # a one-shot exec into the running container.
+#
+# Each create is followed by a read-back, because the previous version ended in
+# `|| warn "may have failed (check manually)"` and nothing ever checked. A phase
+# that reports "databases ensured" while a database is missing is worse than one
+# that fails: `cfm` missing is enough to stop the CFM TenantManager booting,
+# which is what onboarding needs (issue #203).
 log "Creating additional Postgres databases..."
+MISSING_DBS=()
 for db in controlplane dataplane dataplane_omop identityhub issuerservice cfm; do
   log "  creating ${db}..."
   az containerapp exec \
     --name "$PG_APP" --resource-group "$RG" \
     --command "psql -U ${PG_ADMIN} -d postgres -tAc \"SELECT 1 FROM pg_database WHERE datname='${db}';\" | grep -q 1 || psql -U ${PG_ADMIN} -d postgres -c \"CREATE DATABASE ${db};\"" \
-    2>/dev/null || warn "db ${db} create may have failed (check manually)"
+    2>/dev/null || warn "db ${db} create reported a failure, verifying..."
+
+  # Read back. `containerapp exec` wraps the output in terminal chrome, so match
+  # the marker loosely rather than expecting a bare "1".
+  if az containerapp exec \
+      --name "$PG_APP" --resource-group "$RG" \
+      --command "psql -U ${PG_ADMIN} -d postgres -tAc \"SELECT 'DBFOUND' FROM pg_database WHERE datname='${db}';\"" \
+      2>/dev/null | grep -q DBFOUND; then
+    log "  ✓ ${db} present"
+  else
+    warn "  ✗ ${db} NOT present after create"
+    MISSING_DBS+=("${db}")
+  fi
 done
+
+if [ ${#MISSING_DBS[@]} -gt 0 ]; then
+  err "these databases are missing: ${MISSING_DBS[*]}"
+  exit 1
+fi
 ok "Postgres databases ensured"
 
 # ── Build and run Neo4j seed job ─────────────────────────────────────────────
