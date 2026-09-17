@@ -55,6 +55,12 @@ test.describe("Issue #205 · access logs are recorded and shown", () => {
   test("J910 a researcher query is recorded with the researcher's DID", async ({
     browser,
   }) => {
+    // Two Keycloak logins plus one NLQ call. On Azure the neo4j-proxy runs
+    // at zero minimum replicas, so the first question after an idle period
+    // waits for a cold start of 20 to 30 seconds; the default 30 s budget
+    // ended the test mid-request.
+    test.setTimeout(150_000);
+
     // The researcher asks one question. The proxy answers it and records
     // the request; nothing else in this test writes to the graph.
     const researcher = await browser.newContext();
@@ -63,6 +69,7 @@ test.describe("Issue #205 · access logs are recorded and shown", () => {
     const startedAt = Date.now();
     const q = await rPage.request.post("/api/nlq", {
       data: { question: QUESTION },
+      timeout: 90_000,
     });
     expect(q.status(), "NLQ must answer, or nothing gets recorded").toBe(200);
     await researcher.close();
