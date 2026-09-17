@@ -161,9 +161,10 @@ jobs:
                       psql -d postgres -tAc 'SELECT datname FROM pg_database ORDER BY datname'
                       psql -d postgres -tAc "SELECT 'CFM_PRESENT' FROM pg_database WHERE datname='cfm'"
                       # A container that exits within a second or two of starting
-                      # leaves nothing in Log Analytics: the collector never picks
-                      # its output up. Every execution of this job so far ran that
-                      # fast and none of them logged a line. Linger first.
+                      # can leave nothing in Log Analytics: the collector does not
+                      # always pick its output up in time. Of the five executions
+                      # of this job on 2026-09-17, all at one to two seconds, two
+                      # logged nothing. Linger first.
                       sleep 20
           EOF
 
@@ -418,10 +419,11 @@ jobs:
                       EXIT=\$?
                       echo "=== cfm-seed exited with \$EXIT ==="
                       # A container that exits within a second or two of starting
-                      # leaves nothing in Log Analytics: the collector never picks
-                      # its output up. The execution of 2026-09-17 19:27 succeeded
-                      # in under a second and logged nothing, while the failing
-                      # ones, at 100 seconds each, all did. Linger first.
+                      # can leave nothing in Log Analytics: the collector does not
+                      # always pick its output up in time. The execution of
+                      # 2026-09-17 19:27 succeeded in under a second and logged
+                      # nothing, while the failing ones, at 100 seconds each, all
+                      # did. Linger first.
                       sleep 20
                       exit \$EXIT
           EOF
