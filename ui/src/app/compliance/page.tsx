@@ -1,6 +1,15 @@
 "use client";
 
 import { fetchApi } from "@/lib/api";
+import {
+  CRITERIA,
+  CRITERIA_LABELS,
+  PURPOSES,
+  PURPOSE_LABELS,
+  type Criterion,
+} from "@/lib/permits";
+import { useDemoPersona } from "@/lib/use-demo-persona";
+import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import {
   ShieldCheck,
@@ -59,6 +68,347 @@ interface MatrixRow {
   datasetTitle: string | null;
   hasContract: boolean;
   ehdsArticle: string | null;
+}
+
+/**
+ * The application behind a matrix row and the Art. 68(4) clock on it. Merged
+ * into MatrixRow; every field is null for a participant without an application.
+ */
+interface MatrixRow {
+  applicationId?: string | null;
+  applicationName?: string | null;
+  submittedAt?: string | null;
+  requestedPurpose?: string | null;
+  requestedDatasetId?: string | null;
+  requestedDatasetTitle?: string | null;
+  justification?: string | null;
+  ethicsCommitteeRef?: string | null;
+  approvalId?: string | null;
+  decidedAt?: string | null;
+  validUntil?: string | null;
+  decisionJustification?: string | null;
+  decisionDue?: string | null;
+  daysToDecision?: number | null;
+}
+
+interface DecisionResult {
+  permitId: string;
+  decision: "APPROVED" | "REJECTED";
+  validUntil: string | null;
+  publishBy: string;
+  article: string;
+}
+
+const IS_STATIC = process.env.NEXT_PUBLIC_STATIC_EXPORT === "true";
+
+function rowKey(row: Pick<MatrixRow, "applicationId" | "consumerId">): string {
+  return row.applicationId ?? row.consumerId;
+}
+
+function isUndecided(row: MatrixRow): boolean {
+  return (
+    row.hasApplication &&
+    !row.hasApproval &&
+    !["APPROVED", "REJECTED"].includes(
+      (row.applicationStatus ?? "").toUpperCase(),
+    )
+  );
+}
+
+function shortDate(iso: string | null | undefined): string {
+  return iso ? iso.slice(0, 10) : "";
+}
+
+/** The Art. 68(4) clock as the access body reads it. */
+function DecisionClock({ row }: { row: MatrixRow }) {
+  if (!row.hasApplication) {
+    return <span className="text-[var(--text-secondary)]">—</span>;
+  }
+  if (isUndecided(row) && typeof row.daysToDecision === "number") {
+    const overdue = row.daysToDecision < 0;
+    return (
+      <span
+        className={
+          overdue ? "text-[var(--danger-text)]" : "text-[var(--text-primary)]"
+        }
+        title={`Submitted ${shortDate(
+          row.submittedAt,
+        )}; three months to decide (Art. 68(4))`}
+      >
+        {shortDate(row.decisionDue)}
+        {" · "}
+        {overdue
+          ? `${-row.daysToDecision} days overdue`
+          : `${row.daysToDecision} days left`}
+      </span>
+    );
+  }
+  if (row.decidedAt) {
+    return (
+      <span className="text-[var(--text-secondary)]">
+        decided {shortDate(row.decidedAt)}
+      </span>
+    );
+  }
+  return <span className="text-[var(--text-secondary)]">—</span>;
+}
+
+/**
+ * The application as submitted and, for the access body, the decision form:
+ * the Art. 68(1) criteria, the Art. 53(1) purpose, validity, conditions, and
+ * the written justification a refusal must carry (Art. 57(1)(j)(iii)).
+ */
+function ApplicationPanel({
+  row,
+  canDecide,
+  onDecided,
+}: {
+  row: MatrixRow;
+  canDecide: boolean;
+  onDecided: () => Promise<void>;
+}) {
+  const [purpose, setPurpose] = useState<string>(
+    row.requestedPurpose &&
+      (PURPOSES as readonly string[]).includes(row.requestedPurpose)
+      ? row.requestedPurpose
+      : "SCIENTIFIC_RESEARCH",
+  );
+  const [validUntil, setValidUntil] = useState<string>(() => {
+    const d = new Date();
+    d.setUTCFullYear(d.getUTCFullYear() + 1);
+    return d.toISOString().slice(0, 10);
+  });
+  const [conditions, setConditions] = useState<string>(
+    "Access only in the secure processing environment (Art. 73)\nAggregate output only; no re-identification (Art. 61(3))",
+  );
+  const [justification, setJustification] = useState<string>("");
+  const [criteria, setCriteria] = useState<Record<Criterion, boolean>>(
+    () =>
+      Object.fromEntries(CRITERIA.map((c) => [c, true])) as Record<
+        Criterion,
+        boolean
+      >,
+  );
+  const [busy, setBusy] = useState<"APPROVED" | "REJECTED" | null>(null);
+  const [result, setResult] = useState<DecisionResult | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  if (!row.hasApplication || !row.applicationId) {
+    return null;
+  }
+
+  const decide = async (decision: "APPROVED" | "REJECTED") => {
+    setBusy(decision);
+    setError(null);
+    try {
+      const r = await fetchApi("/api/compliance/permits", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          applicationId: row.applicationId,
+          decision,
+          purpose,
+          validUntil: `${validUntil}T23:59:59Z`,
+          conditions,
+          justification,
+          criteria,
+          datasetId: row.requestedDatasetId ?? undefined,
+        }),
+      });
+      const body = (await r.json().catch(() => ({}))) as Record<
+        string,
+        unknown
+      >;
+      if (!r.ok) {
+        setError(String(body.error ?? `HTTP ${r.status}`));
+        return;
+      }
+      setResult(body as unknown as DecisionResult);
+      await onDecided();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e));
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  const undecided = isUndecided(row);
+
+  return (
+    <div className="mb-4 space-y-3" data-testid="application-panel">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-1 text-xs">
+        <div>
+          <span className="text-[var(--text-secondary)]">Application </span>
+          <span className="font-mono">{row.applicationId}</span>
+        </div>
+        <div>
+          <span className="text-[var(--text-secondary)]">Submitted </span>
+          {shortDate(row.submittedAt) || "—"}
+          {row.decisionDue && (
+            <span className="text-[var(--text-secondary)]">
+              {" "}
+              · decision due {shortDate(row.decisionDue)} (Art. 68(4))
+            </span>
+          )}
+        </div>
+        <div>
+          <span className="text-[var(--text-secondary)]">Purpose </span>
+          {row.requestedPurpose ?? "—"}
+        </div>
+        <div>
+          <span className="text-[var(--text-secondary)]">Dataset </span>
+          {row.requestedDatasetTitle ?? row.requestedDatasetId ?? "—"}
+        </div>
+        <div className="md:col-span-2">
+          <span className="text-[var(--text-secondary)]">Justification </span>
+          {row.justification ?? "—"}
+        </div>
+        {row.ethicsCommitteeRef && (
+          <div>
+            <span className="text-[var(--text-secondary)]">Ethics </span>
+            {row.ethicsCommitteeRef}
+          </div>
+        )}
+        {row.hasApproval && (
+          <div className="md:col-span-2">
+            <span className="text-[var(--text-secondary)]">Decision </span>
+            {row.approvalStatus === "REJECTED"
+              ? "refused"
+              : "data permit issued"}
+            {row.decidedAt ? ` on ${shortDate(row.decidedAt)}` : ""}
+            {row.validUntil ? `, valid until ${shortDate(row.validUntil)}` : ""}
+            {row.decisionJustification ? ` · ${row.decisionJustification}` : ""}
+          </div>
+        )}
+      </div>
+
+      {canDecide && (
+        <form
+          className="rounded-lg border border-[var(--border)] bg-[var(--bg)] p-3 space-y-3 text-xs"
+          onSubmit={(e) => e.preventDefault()}
+          aria-label="Data permit decision"
+        >
+          <div className="font-semibold text-[var(--text-primary)]">
+            {undecided ? "Decide this application" : "Decide again"}
+            <span className="font-normal text-[var(--text-secondary)]">
+              {" "}
+              · Regulation (EU) 2025/327, Art. 68
+            </span>
+          </div>
+          <fieldset className="space-y-1">
+            <legend className="text-[var(--text-secondary)] mb-1">
+              Criteria assessed, Art. 68(1)
+            </legend>
+            {CRITERIA.map((c) => (
+              <label key={c} className="flex items-start gap-2">
+                <input
+                  id={`criterion-${row.applicationId}-${c}`}
+                  type="checkbox"
+                  checked={criteria[c]}
+                  onChange={(e) =>
+                    setCriteria({ ...criteria, [c]: e.target.checked })
+                  }
+                />
+                <span>
+                  ({c}) {CRITERIA_LABELS[c]}
+                </span>
+              </label>
+            ))}
+          </fieldset>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <label className="flex flex-col gap-1">
+              <span className="text-[var(--text-secondary)]">
+                Purpose, Art. 53(1)
+              </span>
+              <select
+                id={`purpose-${row.applicationId}`}
+                value={purpose}
+                onChange={(e) => setPurpose(e.target.value)}
+                className="rounded border border-[var(--border)] bg-[var(--surface)] px-2 py-1"
+              >
+                {PURPOSES.map((p) => (
+                  <option key={p} value={p}>
+                    {PURPOSE_LABELS[p]}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="flex flex-col gap-1">
+              <span className="text-[var(--text-secondary)]">Valid until</span>
+              <input
+                id={`valid-until-${row.applicationId}`}
+                type="date"
+                value={validUntil}
+                onChange={(e) => setValidUntil(e.target.value)}
+                className="rounded border border-[var(--border)] bg-[var(--surface)] px-2 py-1"
+              />
+            </label>
+          </div>
+          <label className="flex flex-col gap-1">
+            <span className="text-[var(--text-secondary)]">
+              Conditions, one per line
+            </span>
+            <textarea
+              id={`conditions-${row.applicationId}`}
+              rows={2}
+              value={conditions}
+              onChange={(e) => setConditions(e.target.value)}
+              className="rounded border border-[var(--border)] bg-[var(--surface)] px-2 py-1 font-mono"
+            />
+          </label>
+          <label className="flex flex-col gap-1">
+            <span className="text-[var(--text-secondary)]">
+              Justification (required for a refusal; published with the
+              decision, Art. 57(1)(j)(iii))
+            </span>
+            <textarea
+              id={`justification-${row.applicationId}`}
+              rows={2}
+              value={justification}
+              onChange={(e) => setJustification(e.target.value)}
+              className="rounded border border-[var(--border)] bg-[var(--surface)] px-2 py-1"
+            />
+          </label>
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              disabled={busy !== null}
+              onClick={() => decide("APPROVED")}
+              className="px-3 py-1.5 rounded font-semibold bg-[var(--accent)] text-white disabled:opacity-60"
+            >
+              {busy === "APPROVED" ? "Issuing…" : "Issue data permit"}
+            </button>
+            <button
+              type="button"
+              disabled={busy !== null || !justification.trim()}
+              onClick={() => decide("REJECTED")}
+              className="px-3 py-1.5 rounded font-semibold border border-[var(--danger-text)] text-[var(--danger-text)] disabled:opacity-50"
+              title={
+                justification.trim() ? "" : "A refusal needs a justification"
+              }
+            >
+              {busy === "REJECTED" ? "Refusing…" : "Refuse"}
+            </button>
+          </div>
+          {error && (
+            <p className="text-[var(--danger-text)]" role="alert">
+              {error}
+            </p>
+          )}
+          {result && (
+            <p className="text-[var(--success-text)]" role="status">
+              {result.decision === "APPROVED"
+                ? `Data permit ${
+                    result.permitId
+                  } issued, valid until ${shortDate(result.validUntil)}.`
+                : `Application refused; ${result.permitId} records the justification.`}{" "}
+              Publish by {result.publishBy} (Art. 57(1)(j)(iii)).
+            </p>
+          )}
+        </form>
+      )}
+    </div>
+  );
 }
 
 interface ChainEntry {
@@ -140,6 +490,31 @@ export default function CompliancePage() {
   const [detailResult, setDetailResult] = useState<Result | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
 
+  // Only the access body decides (Art. 57(1)(a)); everyone else with access
+  // to this page reads. Static demo: the persona carries the roles.
+  const { data: session } = useSession();
+  const demoPersona = useDemoPersona();
+  const roles: readonly string[] = IS_STATIC
+    ? demoPersona?.roles ?? []
+    : (session as { roles?: string[] } | null)?.roles ?? [];
+  const canDecide = roles.includes("HDAB_AUTHORITY");
+
+  // After a decision the matrix and the open row are re-read from the graph.
+  const reloadMatrix = async () => {
+    try {
+      const d = await fetchApi("/api/compliance").then((r) => r.json());
+      const rows: MatrixRow[] = d.matrix ?? [];
+      setMatrix(rows);
+      setDetailRow((current) =>
+        current
+          ? rows.find((r) => rowKey(r) === rowKey(current)) ?? current
+          : current,
+      );
+    } catch {
+      // keep what is on screen
+    }
+  };
+
   // Load matrix, credentials, and trust centers on mount
   useEffect(() => {
     Promise.all([
@@ -194,7 +569,7 @@ export default function CompliancePage() {
         <div className="mb-8">
           <h1 className="page-header">EHDS Compliance Overview</h1>
           <p className="text-[var(--text-secondary)] text-lg mt-1">
-            HDAB approval chain · EHDS Art. 45–53
+            HDAB approval chain · Regulation (EU) 2025/327, Art. 67 to 73
           </p>
           <div className="flex gap-4 mt-4 text-sm">
             <Link
@@ -220,41 +595,40 @@ export default function CompliancePage() {
               EHDS Compliance Matrix
             </strong>{" "}
             shows the approval chain status for every dataspace participant.
-            Under EHDS Articles 45–53, secondary use of health data requires a
-            complete chain:
+            Under Regulation (EU) 2025/327, secondary use of health data
+            requires a complete chain:
           </p>
           <ol className="list-decimal list-inside space-y-1 ml-2">
             <li>
               <strong className="text-[var(--text-primary)]">
                 Access Application
               </strong>{" "}
-              — data user submits a request with purpose, justification, and
-              ethics approval (Art. 45)
+              · the data user applies with purpose, justification and ethics
+              assessment (Art. 67)
             </li>
             <li>
               <strong className="text-[var(--text-primary)]">
-                HDAB Review &amp; Approval
+                HDAB decision
               </strong>{" "}
-              — the national Health Data Access Body evaluates the request (Art.
-              46)
+              · the health data access body assesses the Art. 68(1) criteria and
+              issues or refuses a data permit within three months (Art. 68)
             </li>
             <li>
               <strong className="text-[var(--text-primary)]">
                 Dataset Grant
               </strong>{" "}
-              — approval is linked to a specific dataset via GRANTS_ACCESS_TO
-              (Art. 49)
+              · the permit names the dataset it grants access to (Art. 68(3))
             </li>
             <li>
-              <strong className="text-[var(--text-primary)]">Contract</strong> —
-              a data usage contract governs the DataProduct described by the
-              dataset (Art. 53)
+              <strong className="text-[var(--text-primary)]">Contract</strong> ·
+              the data user accesses the data only under that permit, in a
+              secure processing environment (Art. 61(1), Art. 73)
             </li>
           </ol>
           <p>
-            Click any row to see the detailed approval chain breakdown. HDAB
-            authorities (MedReg, HealthGov) review applications rather than
-            submitting them.
+            Click a row for the application and the chain. Signed in as the
+            access body, the row also carries the decision: a refused or missing
+            permit blocks the transfer in step 5.
           </p>
         </div>
 
@@ -286,6 +660,9 @@ export default function CompliancePage() {
                     <th className="text-center px-3 py-2 font-medium">
                       HDAB Approval
                     </th>
+                    <th className="text-left px-3 py-2 font-medium">
+                      Decision due
+                    </th>
                     <th className="text-left px-3 py-2 font-medium">Dataset</th>
                     <th className="text-center px-3 py-2 font-medium">
                       Contract
@@ -299,7 +676,9 @@ export default function CompliancePage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {/* Deduplicate by consumerId — show the best compliance row per participant */}
+                  {/* One row per application, one per participant without any.
+                      The access body's inbox: undecided applications first,
+                      the nearest Art. 68(4) deadline on top. */}
                   {(() => {
                     const LEVEL_RANK: Record<ComplianceLevel, number> = {
                       full: 6,
@@ -312,22 +691,35 @@ export default function CompliancePage() {
                     };
                     const seen = new Map<string, MatrixRow>();
                     for (const row of matrix) {
-                      const existing = seen.get(row.consumerId);
+                      const key = rowKey(row);
+                      const existing = seen.get(key);
                       if (
                         !existing ||
                         LEVEL_RANK[complianceLevel(row)] >
                           LEVEL_RANK[complianceLevel(existing)]
                       ) {
-                        seen.set(row.consumerId, row);
+                        seen.set(key, row);
                       }
                     }
-                    return [...seen.values()];
+                    return [...seen.values()].sort((a, b) => {
+                      const ua = isUndecided(a);
+                      const ub = isUndecided(b);
+                      if (ua !== ub) return ua ? -1 : 1;
+                      if (ua && ub) {
+                        return (
+                          (a.daysToDecision ?? Infinity) -
+                          (b.daysToDecision ?? Infinity)
+                        );
+                      }
+                      return a.consumerName.localeCompare(b.consumerName);
+                    });
                   })().map((row) => {
                     const level = complianceLevel(row);
-                    const isSelected = detailRow?.consumerId === row.consumerId;
+                    const isSelected =
+                      detailRow !== null && rowKey(detailRow) === rowKey(row);
                     return (
                       <tr
-                        key={row.consumerId}
+                        key={rowKey(row)}
                         onClick={() => showDetail(row)}
                         className={`border-t border-[var(--border)] cursor-pointer transition-colors ${
                           isSelected
@@ -394,6 +786,9 @@ export default function CompliancePage() {
                               —
                             </span>
                           )}
+                        </td>
+                        <td className="px-3 py-2 whitespace-nowrap">
+                          <DecisionClock row={row} />
                         </td>
                         <td className="px-3 py-2 text-[var(--text-primary)]">
                           {row.datasetTitle ? (
@@ -475,6 +870,13 @@ export default function CompliancePage() {
                   Close
                 </button>
               </div>
+
+              <ApplicationPanel
+                key={rowKey(detailRow)}
+                row={detailRow}
+                canDecide={canDecide}
+                onDecided={reloadMatrix}
+              />
 
               {detailLoading ? (
                 <div className="text-[var(--text-secondary)] text-xs">

@@ -24,6 +24,25 @@ vi.mock("fs", () => ({
   },
 }));
 
+// The data permit gate (issue #206) is exercised in transfers-permit-gate.test.ts;
+// here it lets every transfer through.
+vi.mock("@/lib/permit-gate", () => ({
+  PERMIT_ARTICLE: "Regulation (EU) 2025/327, Art. 61(1) and Art. 68",
+  checkPermit: vi.fn().mockResolvedValue({
+    allowed: true,
+    consumerDid: "did:web:pharmaco.de:research",
+    permitId: "permit-test",
+    datasetId: null,
+    datasetMatched: false,
+    validUntil: null,
+    purpose: null,
+    reason: "test",
+    article: "test",
+  }),
+  didFromCounterParty: () => null,
+  recordPermittedTransfer: vi.fn().mockResolvedValue(undefined),
+}));
+
 import { edcClient } from "@/lib/edc";
 import { GET, POST } from "@/app/api/transfers/route";
 
@@ -112,7 +131,8 @@ describe("/api/transfers", () => {
       const data = await response.json();
 
       expect(response.status).toBe(201);
-      expect(data).toEqual(mockResult);
+      // The permit stamp (issue #206) rides along with the connector's answer.
+      expect(data).toMatchObject(mockResult);
       expect(mockManagement).toHaveBeenCalledWith(
         "/v5alpha/participants/spe-1/transferprocesses",
         "POST",

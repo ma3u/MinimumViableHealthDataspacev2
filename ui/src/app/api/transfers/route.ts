@@ -1,7 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { edcClient, EDC_CONTEXT } from "@/lib/edc";
-import { requireAuth, isAuthError } from "@/lib/auth-guard";
+import { requireAuth, isAuthError, type AuthSession } from "@/lib/auth-guard";
 import { recordDemo, listDemo, DemoRecord } from "@/lib/demo-records";
+import { userToParticipantId } from "@/lib/odrl-engine";
+import {
+  PERMIT_ARTICLE,
+  checkPermit,
+  didFromCounterParty,
+  recordPermittedTransfer,
+  type PermitCheck,
+} from "@/lib/permit-gate";
 import { promises as fs } from "fs";
 import path from "path";
 
@@ -131,6 +139,59 @@ async function isFixtureAgreement(contractId: string): Promise<boolean> {
   });
 }
 
+/**
+ * The consumer a transfer serves, whose data permit the gate checks. A data
+ * user transfers for itself. A data holder transfers for the counterparty of
+ * the agreement, which the demo records and the fixtures name. A caller may
+ * also name the consumer outright. Null when none of that resolves, and the
+ * gate then refuses, because a permit cannot be verified for nobody.
+ */
+async function consumerForTransfer(
+  session: AuthSession | undefined,
+  body: Record<string, unknown>,
+  participantId: string,
+  contractId: string,
+): Promise<string | null> {
+  if (typeof body.consumerDid === "string" && body.consumerDid.trim()) {
+    return body.consumerDid.trim();
+  }
+  const roles = session?.roles ?? [];
+  const user = session?.user;
+  const callerDid = user
+    ? userToParticipantId(user.email ?? user.name ?? user.id, roles)
+    : null;
+  if (roles.includes("DATA_USER") && callerDid) return callerDid;
+
+  const recorded = listDemo("negotiation", participantId).find(
+    (n) => n.contractAgreementId === contractId,
+  );
+  const fixture = (await loadMockNegotiations()).find((n) => {
+    const r = n as Record<string, unknown>;
+    return (
+      r.contractAgreementId === contractId ||
+      r["edc:contractAgreementId"] === contractId
+    );
+  }) as Record<string, unknown> | undefined;
+  const agreement = recorded ?? fixture;
+  if (agreement) {
+    // A negotiation the caller ran as consumer, or one this demonstrator
+    // recorded for the caller (always the consumer side), names the caller.
+    if (
+      (agreement.type === "CONSUMER" || agreement.demo === true) &&
+      callerDid
+    ) {
+      return callerDid;
+    }
+    const did = didFromCounterParty(
+      agreement.counterPartyId as string | undefined,
+    );
+    if (did) return did;
+  }
+  return callerDid && !callerDid.startsWith("did:web:unknown:")
+    ? callerDid
+    : null;
+}
+
 /** The transfer process recorded for a contract no connector can act on. */
 function buildDemoTransfer(
   contractId: string,
@@ -186,20 +247,83 @@ export async function POST(req: NextRequest) {
     const asset = assetId || "";
     const resolvedType = transferType || "HttpData-PULL";
 
+    // The data permit gate (Regulation (EU) 2025/327, Art. 61(1)): a data user
+    // may access data for secondary use only under a permit the access body
+    // issued (Art. 68). Whichever path below would carry the transfer, none
+    // starts without one. This is what makes step 4b of the journey a gate
+    // rather than a status word. Issue #206, M3.
+    let permit: PermitCheck;
+    try {
+      const consumerDid = await consumerForTransfer(
+        auth.session,
+        body as Record<string, unknown>,
+        participantId,
+        contractId,
+      );
+      permit = await checkPermit({
+        consumerDid,
+        datasetId: typeof body.datasetId === "string" ? body.datasetId : null,
+        assetId: asset,
+      });
+    } catch (err) {
+      return NextResponse.json(
+        {
+          error:
+            "The data permit register is unreachable; a transfer is not allowed without it",
+          detail: err instanceof Error ? err.message : String(err),
+          article: PERMIT_ARTICLE,
+        },
+        { status: 503 },
+      );
+    }
+    if (!permit.allowed) {
+      return NextResponse.json(
+        {
+          error: "No data permit covers this transfer",
+          reason: permit.reason,
+          article: permit.article,
+          consumerDid: permit.consumerDid,
+          permitId: permit.permitId,
+        },
+        { status: 403 },
+      );
+    }
+    const permitStamp = {
+      permitId: permit.permitId,
+      permitDataset: permit.datasetId,
+      permitDatasetMatched: permit.datasetMatched,
+      permitValidUntil: permit.validUntil,
+      permitArticle: permit.article,
+    };
+    const audit = (transferId: string, demo: boolean) =>
+      void recordPermittedTransfer({
+        transferId,
+        contractId,
+        assetId: asset,
+        consumerDid: permit.consumerDid as string,
+        permitId: permit.permitId as string,
+        datasetId: permit.datasetId,
+        demo,
+      });
+
     // Demo-mode: a contract this demonstrator minted itself cannot exist in any
     // connector, so there is nothing to ask. Record the transfer and label it.
     if (isInventedContractId(contractId)) {
-      const demo = buildDemoTransfer(
-        contractId,
-        asset,
-        resolvedType,
-        counterPartyAddress,
-        "This contract was recorded by the demonstrator rather than agreed over DSP, " +
-          "so the transfer was recorded here too instead of being sent to the " +
-          "connector, which has never seen the contract. The FHIR payload below is " +
-          "the demonstrator's own. Tracked in issue #25.",
-      );
+      const demo = {
+        ...buildDemoTransfer(
+          contractId,
+          asset,
+          resolvedType,
+          counterPartyAddress,
+          "This contract was recorded by the demonstrator rather than agreed over DSP, " +
+            "so the transfer was recorded here too instead of being sent to the " +
+            "connector, which has never seen the contract. The FHIR payload below is " +
+            "the demonstrator's own. Tracked in issue #25.",
+        ),
+        ...permitStamp,
+      };
       recordDemo("transfer", participantId, demo);
+      audit(demo["@id"], true);
       return NextResponse.json(demo, { status: 201 });
     }
 
@@ -218,12 +342,17 @@ export async function POST(req: NextRequest) {
     };
 
     try {
-      const result = await edcClient.management(
+      const result = await edcClient.management<Record<string, unknown>>(
         `/v5alpha/participants/${participantId}/transferprocesses`,
         "POST",
         transferPayload,
       );
-      return NextResponse.json(result, { status: 201 });
+      const id =
+        result && typeof result["@id"] === "string"
+          ? (result["@id"] as string)
+          : `transfer:${contractId}`;
+      audit(id, false);
+      return NextResponse.json({ ...result, ...permitStamp }, { status: 201 });
     } catch (err) {
       // An agreement that only exists in the bundled fixtures looks real (two of
       // them are UUIDs from an old seeded run), so it is tried against the
@@ -235,18 +364,22 @@ export async function POST(req: NextRequest) {
       const msg = err instanceof Error ? err.message : String(err);
       console.warn("Demo agreement transferred without a connector:", msg);
 
-      const demo = buildDemoTransfer(
-        contractId,
-        asset,
-        resolvedType,
-        counterPartyAddress,
-        "This agreement comes from the demonstrator's own negotiation history, so " +
-          "the connector has no contract to transfer under. The transfer was " +
-          "recorded here and the FHIR payload below is the demonstrator's own. " +
-          "Tracked in issue #25.",
-        msg,
-      );
+      const demo = {
+        ...buildDemoTransfer(
+          contractId,
+          asset,
+          resolvedType,
+          counterPartyAddress,
+          "This agreement comes from the demonstrator's own negotiation history, so " +
+            "the connector has no contract to transfer under. The transfer was " +
+            "recorded here and the FHIR payload below is the demonstrator's own. " +
+            "Tracked in issue #25.",
+          msg,
+        ),
+        ...permitStamp,
+      };
       recordDemo("transfer", participantId, demo);
+      audit(demo["@id"], true);
       return NextResponse.json(demo, { status: 201 });
     }
   } catch (err) {

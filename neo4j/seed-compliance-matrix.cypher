@@ -133,3 +133,29 @@ MERGE (appRiverside:AccessApplication {applicationId: 'app-riverside-medreg-2026
       appRiverside.dataMinimisationStatement = 'Aggregate cohort-level statistics only; k-anonymity ≥ 5 enforced.'
 MERGE (riverside)-[:SUBMITTED]->(appRiverside)
 MERGE (medreg)-[:REVIEWED]->(appRiverside);
+
+// ── PharmaCo's pending application (issue #206, M2) ──────────────────────────
+// The researcher persona is PharmaCo. Journey step 4b needs an undecided
+// application for the HDAB to decide on; on stacks where the older
+// app-medreg-2025-001 never seeded (Azure), PharmaCo had none at all.
+// Adopted numbering: Art. 67 application, Art. 68 permit, Art. 68(4) clock.
+MATCH (pharmaco:Participant {participantId: 'did:web:pharmaco.de:research'})
+MATCH (medreg:Participant {participantId: 'did:web:medreg.de:hdab'})
+MERGE (appPharma:AccessApplication {applicationId: 'app-pharmaco-medreg-2026-002'})
+  SET appPharma.name = 'PharmaCo T2D Outcomes Study',
+      appPharma.applicantId = pharmaco.participantId,
+      appPharma.datasetId = 'dataset:synthea-fhir-r4-mvd',
+      appPharma.requestedPurpose = 'SCIENTIFIC_RESEARCH',
+      appPharma.submittedAt = datetime('2026-09-01T09:00:00'),
+      appPharma.decisionDue = datetime('2026-12-01T09:00:00'),
+      appPharma.status = 'PENDING',
+      appPharma.justification = 'Real-world outcomes of second-line type 2 diabetes therapies; pseudonymised cohort analysis in the SPE, aggregate output only.',
+      appPharma.ethicsCommitteeRef = 'EC-PharmaCo-2026-011',
+      appPharma.dataMinimisationStatement = 'Cohort restricted to adults with a T2D diagnosis; no direct identifiers leave the SPE.',
+      appPharma.processingPeriodMonths = 12,
+      appPharma.ehdsArticle = 'Art. 67'
+MERGE (pharmaco)-[:SUBMITTED]->(appPharma)
+MERGE (medreg)-[:REVIEWED]->(appPharma)
+WITH appPharma
+MATCH (synthea:HealthDataset {datasetId: 'dataset:synthea-fhir-r4-mvd'})
+MERGE (appPharma)-[:REQUESTS]->(synthea);
