@@ -12,6 +12,17 @@ az acr login --name "$ACR_NAME"
 ACR_PASSWORD=$(az acr credential show --name "$ACR_NAME" --query "passwords[0].value" -o tsv)
 
 # ── Tenant Manager ──────────────────────────────────────────────────────────
+# NOTE: DATABASE_URL below is inert. These managers are Go binaries that read a
+# flat Viper file at /etc/appname/tm.env (and pm.env), which is what the compose
+# stack mounts from jad/tenant-manager-config.yaml. Without it the Tenant Manager
+# panics in its own launcher:
+#
+#   panic: error launching Tenant Manager: missing parameters:
+#          tm.uri is empty, tm.bucket is empty, tm.stream is empty
+#
+# which is why /onboarding answered "Failed to create participant" on the live
+# deployment (issue #203). 05-cfm-configure.sh mounts that file as a secret
+# volume and is run right after these two apps are created, below.
 log "Creating Tenant Manager container app..."
 az containerapp create \
   --name "$TENANT_MGR_APP" --resource-group "$RG" --environment "$ACA_ENV" \
@@ -44,6 +55,11 @@ az containerapp create \
     "VAULT_TOKEN=${VAULT_ROOT_TOKEN}" \
   -o none
 ok "Provision Manager"
+
+# ── CFM manager config (the file they actually read) ────────────────────────
+log "Mounting the CFM manager config files..."
+bash "${SCRIPT_DIR}/05-cfm-configure.sh"
+ok "CFM managers configured"
 
 # ── EDC internal endpoints (ACA internal ingress uses 443/80 on FQDN,
 # not the container targetPort) ─────────────────────────────────────────────

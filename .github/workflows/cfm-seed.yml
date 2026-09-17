@@ -250,6 +250,46 @@ jobs:
             echo "$app: runningStatus=$STATUS"
           done
 
+      # The managers read a flat Viper file at /etc/appname/{tm,pm}.env, not the
+      # DATABASE_URL env var 05-cfm-ui.sh passed, so the Tenant Manager has been
+      # crash-looping since it was deployed:
+      #   panic: ... missing parameters: tm.uri is empty, tm.bucket is empty ...
+      # This mounts that file as a secret volume before anything tries to talk
+      # to them. Pure ARM, so no TTY is needed.
+      - name: Configure the CFM managers
+        run: |
+          python3 -m pip install --quiet pyyaml
+          bash scripts/azure/05-cfm-configure.sh
+
+      - name: Wait for the managers to come up clean
+        run: |
+          WS_ID=$(az containerapp env show -n "$ACA_ENV" -g "$RESOURCE_GROUP" \
+                  --query "properties.appLogsConfiguration.logAnalyticsConfiguration.customerId" -o tsv 2>/dev/null)
+          echo "giving the new revisions time to start..."
+          sleep 90
+          for app in mvhd-tenant-mgr mvhd-provision-mgr; do
+            STATUS=$(az containerapp show -n "$app" -g "$RESOURCE_GROUP" \
+              --query "properties.runningStatus" -o tsv 2>/dev/null || echo unknown)
+            echo "$app: runningStatus=$STATUS"
+          done
+          if [ -z "$WS_ID" ]; then
+            echo "no Log Analytics workspace reachable; skipping the panic check"
+            exit 0
+          fi
+          # A manager that still panics has to fail the run here rather than
+          # leave the seed to time out with no explanation.
+          for app in mvhd-tenant-mgr mvhd-provision-mgr; do
+            echo "=== $app, last 20 console lines ==="
+            LOGS=$(az monitor log-analytics query -w "$WS_ID" --analytics-query \
+              "ContainerAppConsoleLogs_CL | where ContainerAppName_s == '$app' | where TimeGenerated > ago(5m) | order by TimeGenerated desc | project TimeGenerated, Log_s | take 20" \
+              -o tsv 2>&1 | head -20)
+            printf '%s\n' "${LOGS:-(no logs yet)}"
+            if printf '%s' "$LOGS" | grep -q "missing parameters"; then
+              echo "::error::$app is still missing its config parameters."
+              exit 1
+            fi
+          done
+
       # If the TenantManager cannot serve, the seed below fails on a probe
       # timeout and says nothing about why. Its own logs do. The cfm database
       # was missing until minutes ago, so a crash-looping manager is the first
