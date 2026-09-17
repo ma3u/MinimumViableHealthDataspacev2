@@ -3,6 +3,41 @@
 Non-obvious pitfalls across the stack. Ordered newest first; add a new
 entry at the top when you hit something that cost you more than 30 minutes.
 
+## 2026-09-17: ACA internal ingress, job logs, and stale-revision panics
+
+Each of these cost one run of `cfm-seed.yml` while bringing the CFM managers up
+on Azure (issue #203).
+
+**1. Internal ingress answers on 80/443 of the FQDN only.** The short name plus
+target port, `http://mvhd-tenant-mgr:8080`, connects to nothing. The bare short
+name, `http://mvhd-tenant-mgr`, connects and then hangs while the upstream is
+unhealthy, which looks like the address being wrong. The form that works is
+`https://<app>.internal.<domain>/api`, the one `05-cfm-ui.sh` already puts in
+`EDC_TENANT_URL`; its certificate is publicly trusted, so no `-k`. The identity
+hub's `http://mvhd-identityhub:7082` in `edc-seed-participants.yml` works only
+because that app carries an `additionalPortMappings` entry for 7082. Binary
+protocols are the other special case (`--transport tcp`, NATS entry below).
+
+**2. Job console logs have an empty `ContainerAppName_s`.** Rows from an ACA
+Job land in `ContainerAppConsoleLogs_CL` with `ContainerJobName_s` set and
+`ContainerAppName_s` empty, so `where ContainerAppName_s == 'mvhd-cfm-seed'`
+returns nothing and a failing job looks as if it printed nothing. Ingestion
+also lags one to three minutes.
+
+**3. A revision being deactivated keeps logging its panics** for minutes after
+the new one is up, under its own `RevisionName_s`. A health check that greps
+the app's newest lines fails on the old revision. Filter by
+`properties.latestRevisionName`, and look at
+`az containerapp replica list --revision <rev>` (ready, restartCount) first,
+which has no ingestion lag.
+
+Two smaller ones from the same session: `CODE=$(curl -w '%{http_code}' ... ||
+echo 000)` yields `000000` on failure, because curl prints 000 through `-w`
+before the fallback runs; write `CODE=$(curl ...) || CODE=000`. And when
+`az containerapp update --yaml` finds the template unchanged it provisions no
+revision, so a changed secret never reaches a secret volume until the running
+revision is restarted (`05-cfm-configure.sh` now does that).
+
 ## 2026-09-13: CFM participant provisioning had three independent breaks
 
 Symptom: every VPA stays `pending`, `bootstrap-jad.sh` still prints "ready".

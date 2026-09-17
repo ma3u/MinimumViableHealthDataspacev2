@@ -41,11 +41,17 @@ concurrency:
 env:
   RESOURCE_GROUP: rg-mvhd-dev
   ACA_ENV: mvhd-env
-  # Short app name plus the container's target port, which is the form
-  # edc-seed-participants.yml already proves works between apps inside the
-  # environment. The portless FQDN form failed to answer on the first run.
-  TM_INTERNAL_URL: http://mvhd-tenant-mgr:8080/api
-  PM_INTERNAL_URL: http://mvhd-provision-mgr:8080/api
+  TM_APP: mvhd-tenant-mgr
+  PM_APP: mvhd-provision-mgr
+  # The seed reaches both managers the way mvhd-ui does (EDC_TENANT_URL in
+  # 05-cfm-ui.sh): https on the internal-ingress FQDN, read from each app's
+  # ingress at run time. Two forms that look right do not work:
+  #   http://mvhd-tenant-mgr:8080  connects to nothing. Internal ingress
+  #     listens on 80/443 of the FQDN only; the identity-hub seed's :7082
+  #     works because that app carries an additional port mapping.
+  #   http://mvhd-tenant-mgr  connects, then hangs: allowInsecure is off, and
+  #     while a manager is crash-looping Envoy has no upstream to answer with.
+  #     That hang is what looked like "the portless form never answers".
 
 jobs:
   seed:
@@ -177,11 +183,13 @@ jobs:
 
           WS_ID=$(az containerapp env show -n "$ACA_ENV" -g "$RESOURCE_GROUP" \
                   --query "properties.appLogsConfiguration.logAnalyticsConfiguration.customerId" -o tsv 2>/dev/null)
+          # Job console rows name the job in ContainerJobName_s and leave
+          # ContainerAppName_s empty, so a query by app name finds nothing.
           if [ -n "$WS_ID" ]; then
             echo "=== createdb job logs ==="
             sleep 20
             az monitor log-analytics query -w "$WS_ID" --analytics-query \
-              "ContainerAppConsoleLogs_CL | where ContainerAppName_s == 'mvhd-pg-createdb' | order by TimeGenerated asc | project TimeGenerated, Log_s | take 200" \
+              "ContainerAppConsoleLogs_CL | where ContainerJobName_s == 'mvhd-pg-createdb' | order by TimeGenerated asc | project TimeGenerated, Log_s | take 200" \
               -o tsv 2>&1 | head -200 || echo "(no logs returned)"
           fi
 
@@ -199,7 +207,7 @@ jobs:
           if [ -n "$WS_ID" ]; then
             for attempt in 1 2 3 4 5 6; do
               FOUND=$(az monitor log-analytics query -w "$WS_ID" --analytics-query \
-                "ContainerAppConsoleLogs_CL | where ContainerAppName_s == 'mvhd-pg-createdb' | where Log_s contains 'CFM_PRESENT' | take 1" \
+                "ContainerAppConsoleLogs_CL | where ContainerJobName_s == 'mvhd-pg-createdb' | where Log_s contains 'CFM_PRESENT' | take 1" \
                 -o tsv 2>/dev/null | head -5)
               if [ -n "$FOUND" ]; then
                 echo "confirmed from logs: cfm database present"
@@ -267,28 +275,56 @@ jobs:
                   --query "properties.appLogsConfiguration.logAnalyticsConfiguration.customerId" -o tsv 2>/dev/null)
           echo "giving the new revisions time to start..."
           sleep 90
+          FAILED=0
           for app in mvhd-tenant-mgr mvhd-provision-mgr; do
             STATUS=$(az containerapp show -n "$app" -g "$RESOURCE_GROUP" \
               --query "properties.runningStatus" -o tsv 2>/dev/null || echo unknown)
-            echo "$app: runningStatus=$STATUS"
-          done
-          if [ -z "$WS_ID" ]; then
-            echo "no Log Analytics workspace reachable; skipping the panic check"
-            exit 0
-          fi
-          # A manager that still panics has to fail the run here rather than
-          # leave the seed to time out with no explanation.
-          for app in mvhd-tenant-mgr mvhd-provision-mgr; do
-            echo "=== $app, last 20 console lines ==="
+            REV=$(az containerapp show -n "$app" -g "$RESOURCE_GROUP" \
+              --query "properties.latestRevisionName" -o tsv 2>/dev/null || echo "")
+            echo "$app: runningStatus=$STATUS latestRevision=${REV:-?}"
+
+            # The replica's own state comes first: it has no ingestion lag, and
+            # a manager whose launcher panics never becomes ready.
+            REPLICAS=$(az containerapp replica list -n "$app" -g "$RESOURCE_GROUP" \
+              --revision "$REV" \
+              --query "[].[properties.containers[0].ready, properties.containers[0].restartCount]" \
+              -o tsv 2>/dev/null || echo "")
+            if [ -z "$REPLICAS" ]; then
+              echo "::error::$app has no replica of $REV after 90s"
+              FAILED=1
+              continue
+            fi
+            while IFS=$'\t' read -r ready restarts; do
+              [ -n "$ready" ] || continue
+              echo "  replica: ready=$ready restarts=${restarts:-0}"
+              case "$ready" in
+                True|true) ;;
+                *) echo "::error::$app: a replica of $REV is not ready"; FAILED=1 ;;
+              esac
+              if [ "${restarts:-0}" != "0" ]; then
+                echo "::warning::$app: a replica of $REV restarted ${restarts} time(s)"
+              fi
+            done <<< "$REPLICAS"
+
+            # Then the launcher's own words, from this revision only. Revisions
+            # being deactivated keep logging their panics for a while, and the
+            # run of 2026-09-17 18:44 failed on one of those while the new
+            # revision had already started.
+            if [ -z "$WS_ID" ]; then
+              echo "  no Log Analytics workspace reachable; skipping the panic check"
+              continue
+            fi
+            echo "  === $app, $REV, last 20 console lines ==="
             LOGS=$(az monitor log-analytics query -w "$WS_ID" --analytics-query \
-              "ContainerAppConsoleLogs_CL | where ContainerAppName_s == '$app' | where TimeGenerated > ago(5m) | order by TimeGenerated desc | project TimeGenerated, Log_s | take 20" \
+              "ContainerAppConsoleLogs_CL | where ContainerAppName_s == '$app' | where RevisionName_s == '$REV' | where TimeGenerated > ago(15m) | order by TimeGenerated desc | project TimeGenerated, Log_s | take 20" \
               -o tsv 2>&1 | head -20)
-            printf '%s\n' "${LOGS:-(no logs yet)}"
+            printf '%s\n' "${LOGS:-  (no logs ingested yet)}"
             if printf '%s' "$LOGS" | grep -q "missing parameters"; then
               echo "::error::$app is still missing its config parameters."
-              exit 1
+              FAILED=1
             fi
           done
+          [ "$FAILED" = "0" ] || exit 1
 
       # If the TenantManager cannot serve, the seed below fails on a probe
       # timeout and says nothing about why. Its own logs do. The cfm database
@@ -305,7 +341,7 @@ jobs:
           for app in mvhd-tenant-mgr mvhd-provision-mgr; do
             echo "=== $app (last 40 console lines) ==="
             az monitor log-analytics query -w "$WS_ID" --analytics-query \
-              "ContainerAppConsoleLogs_CL | where ContainerAppName_s == '$app' | order by TimeGenerated desc | project TimeGenerated, Log_s | take 40" \
+              "ContainerAppConsoleLogs_CL | where ContainerAppName_s == '$app' | order by TimeGenerated desc | project TimeGenerated, RevisionName_s, Log_s | take 40" \
               -o tsv 2>&1 | head -40 || echo "(no logs returned)"
             echo ""
             echo "=== $app system logs (last 15) ==="
@@ -319,6 +355,17 @@ jobs:
         run: |
           ENV_ID=$(az containerapp env show -n "$ACA_ENV" -g "$RESOURCE_GROUP" \
                      --query "id" -o tsv)
+          # The managers answer on https at their internal-ingress FQDN, the
+          # address mvhd-ui uses too. The env block above lists the forms that
+          # do not work.
+          TM_FQDN=$(az containerapp ingress show -n "$TM_APP" -g "$RESOURCE_GROUP" --query fqdn -o tsv)
+          PM_FQDN=$(az containerapp ingress show -n "$PM_APP" -g "$RESOURCE_GROUP" --query fqdn -o tsv)
+          [ -n "$TM_FQDN" ] || { echo "::error::$TM_APP has no ingress FQDN"; exit 1; }
+          [ -n "$PM_FQDN" ] || { echo "::error::$PM_APP has no ingress FQDN"; exit 1; }
+          TM_INTERNAL_URL="https://${TM_FQDN}/api"
+          PM_INTERNAL_URL="https://${PM_FQDN}/api"
+          echo "TenantManager:    $TM_INTERNAL_URL"
+          echo "ProvisionManager: $PM_INTERNAL_URL"
           # Same approach as edc-seed-participants.yml: inline the canonical
           # script via base64 and run it on Microsoft's azure-cli image, which
           # already has bash, curl and python3.
@@ -402,12 +449,14 @@ jobs:
               echo '```'
               # Ingestion lags by a minute or more: the first run queried after
               # 15 seconds and printed an empty block, which is how a failing
-              # seed managed to say nothing at all.
+              # seed managed to say nothing at all. Job rows name the job in
+              # ContainerJobName_s and leave ContainerAppName_s empty, which
+              # was the other way it said nothing.
               LOGS=""
               for _ in 1 2 3 4 5 6; do
                 sleep 30
                 LOGS=$(az monitor log-analytics query -w "$WS_ID" --analytics-query \
-                  "ContainerAppConsoleLogs_CL | where ContainerAppName_s == 'mvhd-cfm-seed' | order by TimeGenerated asc | project TimeGenerated, Log_s | take 300" \
+                  "ContainerAppConsoleLogs_CL | where ContainerJobName_s == 'mvhd-cfm-seed' | order by TimeGenerated asc | project TimeGenerated, Log_s | take 300" \
                   -o tsv 2>&1 | head -300)
                 [ -n "$LOGS" ] && break
               done

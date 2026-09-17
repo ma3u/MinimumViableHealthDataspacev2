@@ -26,17 +26,21 @@
 # Usage (needs curl + python3; both managers are internal-ingress only, so in
 # practice this runs as a one-shot ACA Job inside the environment):
 #
-#   TM=http://mvhd-tenant-mgr/api      \
-#   PM=http://mvhd-provision-mgr/api   \
+#   TM=https://mvhd-tenant-mgr.internal.<aca-domain>/api      \
+#   PM=https://mvhd-provision-mgr.internal.<aca-domain>/api   \
 #   bash scripts/azure/05-cfm-seed.sh
+#
+# Those are the internal-ingress FQDNs, the addresses mvhd-ui uses. The short
+# name with the target port (http://mvhd-tenant-mgr:8080) connects to nothing:
+# ACA internal ingress listens on 80/443 of the FQDN only.
 #
 # In CI: .github/workflows/cfm-seed.yml inlines this file, which stays the
 # canonical source. Keep the two in sync.
 # =============================================================================
 set -euo pipefail
 
-TM="${TM:?TM must be set, e.g. http://mvhd-tenant-mgr/api}"
-PM="${PM:?PM must be set, e.g. http://mvhd-provision-mgr/api}"
+TM="${TM:?TM must be set, e.g. https://mvhd-tenant-mgr.internal.<aca-domain>/api}"
+PM="${PM:?PM must be set, e.g. https://mvhd-provision-mgr.internal.<aca-domain>/api}"
 CELL_ENVIRONMENT="${CELL_ENVIRONMENT:-health-dataspace-azure}"
 
 # The credential specs a participant is expected to hold. Same shape as
@@ -77,6 +81,28 @@ if isinstance(data, list) and data and isinstance(data[0], dict):
 "
 }
 
+# POST a JSON body. Prints the HTTP status and leaves the response body in the
+# file named by $3, so the caller can check the one and read the id from the
+# other. On a failed request curl still prints 000 through -w, so the fallback
+# is an assignment, not a second echo (which made it 000000).
+post_json() {
+  local url="$1" body="$2" out="$3" code
+  code=$(curl -sS --max-time 30 -o "$out" -w '%{http_code}' -X POST "$url" \
+    -H 'Content-Type: application/json' -d "$body") || code=000
+  printf '%s' "$code"
+}
+
+# The id field of the JSON object in a file, empty when the file holds none.
+json_id() {
+  python3 -c "
+import json, sys
+try:
+    print(json.load(open(sys.argv[1])).get('id', ''))
+except Exception:
+    print('')
+" "$1"
+}
+
 # ── 1. Wait for both managers ───────────────────────────────────────────────
 for pair in "TenantManager|$TM/v1alpha1/cells" "ProvisionManager|$PM/v1alpha1/activity-definitions"; do
   NAME="${pair%%|*}"
@@ -84,15 +110,23 @@ for pair in "TenantManager|$TM/v1alpha1/cells" "ProvisionManager|$PM/v1alpha1/ac
   log "Probing $NAME at $URL ..."
   CODE=000
   for i in $(seq 1 30); do
-    CODE=$(curl -sS --max-time 15 -o /dev/null -w '%{http_code}' "$URL" || echo 000)
-    if [ "$CODE" != "000" ]; then
-      log "  $NAME responding (HTTP $CODE)"
-      break
-    fi
-    log "  attempt $i: not yet, sleeping 5s"
-    sleep 5
+    # A 5xx here is Envoy with no healthy upstream yet, so it counts as not
+    # answering, the same as a connection failure (000).
+    CODE=$(curl -sS --max-time 15 -o /dev/null -w '%{http_code}' "$URL") || CODE=000
+    case "$CODE" in
+      000|5??)
+        log "  attempt $i: HTTP $CODE, sleeping 5s"
+        sleep 5
+        ;;
+      *)
+        log "  $NAME responding (HTTP $CODE)"
+        break
+        ;;
+    esac
   done
-  [ "$CODE" = "000" ] && fail "$NAME never responded at $URL"
+  case "$CODE" in
+    000|5??) fail "$NAME never responded at $URL (last HTTP $CODE)" ;;
+  esac
 done
 
 # ── 2. Cell ─────────────────────────────────────────────────────────────────
@@ -102,13 +136,20 @@ if [ -n "$CELL_ID" ]; then
   log "cell already present: $CELL_ID"
 else
   log "creating cell (environment=$CELL_ENVIRONMENT) ..."
-  CELL_ID=$(curl -sS --max-time 30 -X POST "$TM/v1alpha1/cells" \
-    -H 'Content-Type: application/json' \
-    -d "{
+  HTTP=$(post_json "$TM/v1alpha1/cells" "{
       \"properties\": { \"environment\": \"${CELL_ENVIRONMENT}\" },
       \"state\": \"active\",
       \"stateTimestamp\": \"$(date -u +"%Y-%m-%dT%H:%M:%SZ")\"
-    }" | python3 -c "import json,sys; print(json.load(sys.stdin).get('id',''))")
+    }" /tmp/cfm-cell.out)
+  case "$HTTP" in
+    2*) ;;
+    *)
+      head -c 500 /tmp/cfm-cell.out 2>/dev/null || true
+      printf '\n'
+      fail "cell creation failed (HTTP $HTTP)"
+      ;;
+  esac
+  CELL_ID=$(json_id /tmp/cfm-cell.out)
   [ -z "$CELL_ID" ] && fail "cell creation returned no id"
   log "  cell created: $CELL_ID"
 fi
@@ -120,9 +161,7 @@ if [ -n "$PROFILE_ID" ]; then
   log "dataspace profile already present: $PROFILE_ID"
 else
   log "creating dataspace profile (dsp-2025-1 + dcp-2025-1) ..."
-  PROFILE_ID=$(curl -sS --max-time 30 -X POST "$TM/v1alpha1/dataspace-profiles" \
-    -H 'Content-Type: application/json' \
-    -d "{
+  HTTP=$(post_json "$TM/v1alpha1/dataspace-profiles" "{
       \"artifacts\": [],
       \"properties\": {},
       \"dataspaceSpec\": {
@@ -143,7 +182,16 @@ else
           }
         ]
       }
-    }" | python3 -c "import json,sys; print(json.load(sys.stdin).get('id',''))")
+    }" /tmp/cfm-profile.out)
+  case "$HTTP" in
+    2*) ;;
+    *)
+      head -c 500 /tmp/cfm-profile.out 2>/dev/null || true
+      printf '\n'
+      fail "dataspace profile creation failed (HTTP $HTTP)"
+      ;;
+  esac
+  PROFILE_ID=$(json_id /tmp/cfm-profile.out)
   [ -z "$PROFILE_ID" ] && fail "dataspace profile creation returned no id"
   log "  profile created: $PROFILE_ID"
 fi
