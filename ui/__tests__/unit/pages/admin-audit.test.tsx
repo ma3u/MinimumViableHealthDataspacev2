@@ -303,6 +303,27 @@ describe("AdminAuditPage", () => {
         ).toBeInTheDocument();
       });
     });
+
+    it("treats a 502 error body as a failure and shows the reason", async () => {
+      // On Azure the route answered 502 { error, detail } and the page stored
+      // that body as data, which rendered as a blank page (issue #205).
+      mockFetchApi.mockImplementation((url: string) => {
+        if (url.includes("type=participants")) {
+          return mockResponse(MOCK_PARTICIPANTS);
+        }
+        return mockResponse(
+          { error: "Failed to query audit log", detail: "fetch failed" },
+          false,
+        );
+      });
+      render(<AdminAuditPage />);
+      await waitFor(() => {
+        expect(
+          screen.getByText("Failed to load audit data"),
+        ).toBeInTheDocument();
+      });
+      expect(screen.getByText("fetch failed")).toBeInTheDocument();
+    });
   });
 
   // ── Page header ──
@@ -312,7 +333,7 @@ describe("AdminAuditPage", () => {
       setupMocks();
       await renderAndWait();
       expect(screen.getByText("Audit & Provenance")).toBeInTheDocument();
-      // Component subtitle: "Tamper-evident audit trail · EHDS Art. 32 · GDPR Art. 30"
+      // Component subtitle: "Tamper-evident audit trail · EHDS Art. 73 · Art. 59 · GDPR Art. 30"
       expect(
         screen.getByText(/Tamper-evident audit trail/),
       ).toBeInTheDocument();

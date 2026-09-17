@@ -25,6 +25,13 @@ vi.mock("fs", () => ({
   },
 }));
 
+// Neo4j is the route's second fallback. Without this mock the real Bolt driver
+// reaches a Neo4j running on the developer's machine and the 502 case below
+// answers 200 with live data (issue #205).
+vi.mock("@/lib/neo4j", () => ({
+  runQuery: vi.fn().mockRejectedValue(new Error("Neo4j unreachable")),
+}));
+
 import { edcClient } from "@/lib/edc";
 import { GET, POST } from "@/app/api/admin/policies/route";
 import { getServerSession } from "next-auth/next";

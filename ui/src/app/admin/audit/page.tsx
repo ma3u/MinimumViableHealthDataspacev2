@@ -451,6 +451,7 @@ export default function AdminAuditPage() {
   const [filters, setFilters] = useState<AuditFilters>(EMPTY_FILTERS);
   const [data, setData] = useState<AuditData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [expandedNeg, setExpandedNeg] = useState<Set<string>>(new Set());
 
@@ -473,12 +474,26 @@ export default function AdminAuditPage() {
     if (filters.crossBorder) p.set("crossBorder", filters.crossBorder);
 
     fetchApi(`/api/admin/audit?${p.toString()}`)
-      .then((r) => r.json())
+      .then(async (r) => {
+        // The route answers 502 with { error, detail } when Neo4j is out of
+        // reach. Storing that body as data left the page blank on Azure;
+        // treat it as the failure it is and show the reason.
+        const body = await r.json();
+        if (!r.ok || body?.error) {
+          throw new Error(body?.detail || body?.error || `HTTP ${r.status}`);
+        }
+        return body as AuditData;
+      })
       .then((d) => {
         setData(d);
+        setError(null);
         setLoading(false);
       })
-      .catch(() => setLoading(false));
+      .catch((e: unknown) => {
+        setData(null);
+        setError(e instanceof Error ? e.message : String(e));
+        setLoading(false);
+      });
   }, [activeTab, filters]);
 
   useEffect(() => {
@@ -496,7 +511,7 @@ export default function AdminAuditPage() {
           <div>
             <h1 className="page-header">Audit &amp; Provenance</h1>
             <p className="text-[var(--text-secondary)] text-lg mt-1">
-              Tamper-evident audit trail · EHDS Art. 32 · GDPR Art. 30
+              Tamper-evident audit trail · EHDS Art. 73 · Art. 59 · GDPR Art. 30
             </p>
           </div>
           <div className="flex items-center gap-2 px-4 py-2 bg-[var(--success)]/10 text-[var(--success-text)] rounded-full border border-[var(--success)]/20 text-sm font-bold tracking-tight">
@@ -543,9 +558,16 @@ export default function AdminAuditPage() {
             Querying Neo4j…
           </div>
         ) : !data ? (
-          <p className="text-[var(--text-secondary)] mt-6">
-            Failed to load audit data
-          </p>
+          <div className="mt-6 space-y-1">
+            <p className="text-[var(--text-secondary)]">
+              Failed to load audit data
+            </p>
+            {error && (
+              <p className="text-xs font-mono text-[var(--text-secondary)]">
+                {error}
+              </p>
+            )}
+          </div>
         ) : (
           <>
             {/* Overview summary cards */}
