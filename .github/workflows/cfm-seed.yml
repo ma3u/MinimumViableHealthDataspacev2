@@ -184,12 +184,14 @@ jobs:
           WS_ID=$(az containerapp env show -n "$ACA_ENV" -g "$RESOURCE_GROUP" \
                   --query "properties.appLogsConfiguration.logAnalyticsConfiguration.customerId" -o tsv 2>/dev/null)
           # Job console rows name the job in ContainerJobName_s and leave
-          # ContainerAppName_s empty, so a query by app name finds nothing.
+          # ContainerAppName_s empty, so a query by app name finds nothing. Rows
+          # from earlier executions stay under the same job name, so scope to
+          # this one: its replica (ContainerGroupName_s) is named after it.
           if [ -n "$WS_ID" ]; then
             echo "=== createdb job logs ==="
             sleep 20
             az monitor log-analytics query -w "$WS_ID" --analytics-query \
-              "ContainerAppConsoleLogs_CL | where ContainerJobName_s == 'mvhd-pg-createdb' | order by TimeGenerated asc | project TimeGenerated, Log_s | take 200" \
+              "ContainerAppConsoleLogs_CL | where ContainerJobName_s == 'mvhd-pg-createdb' | where ContainerGroupName_s startswith '$EXEC' | order by TimeGenerated asc | project TimeGenerated, Log_s | take 200" \
               -o tsv 2>&1 | head -200 || echo "(no logs returned)"
           fi
 
@@ -207,7 +209,7 @@ jobs:
           if [ -n "$WS_ID" ]; then
             for attempt in 1 2 3 4 5 6; do
               FOUND=$(az monitor log-analytics query -w "$WS_ID" --analytics-query \
-                "ContainerAppConsoleLogs_CL | where ContainerJobName_s == 'mvhd-pg-createdb' | where Log_s contains 'CFM_PRESENT' | take 1" \
+                "ContainerAppConsoleLogs_CL | where ContainerJobName_s == 'mvhd-pg-createdb' | where ContainerGroupName_s startswith '$EXEC' | where Log_s contains 'CFM_PRESENT' | take 1" \
                 -o tsv 2>/dev/null | head -5)
               if [ -n "$FOUND" ]; then
                 echo "confirmed from logs: cfm database present"
@@ -451,12 +453,14 @@ jobs:
               # 15 seconds and printed an empty block, which is how a failing
               # seed managed to say nothing at all. Job rows name the job in
               # ContainerJobName_s and leave ContainerAppName_s empty, which
-              # was the other way it said nothing.
+              # was the other way it said nothing. And rows from earlier
+              # executions stay under the same job name, which is how a run
+              # that succeeded printed the previous run's failure.
               LOGS=""
               for _ in 1 2 3 4 5 6; do
                 sleep 30
                 LOGS=$(az monitor log-analytics query -w "$WS_ID" --analytics-query \
-                  "ContainerAppConsoleLogs_CL | where ContainerJobName_s == 'mvhd-cfm-seed' | order by TimeGenerated asc | project TimeGenerated, Log_s | take 300" \
+                  "ContainerAppConsoleLogs_CL | where ContainerJobName_s == 'mvhd-cfm-seed' | where ContainerGroupName_s startswith '$EXEC' | order by TimeGenerated asc | project TimeGenerated, Log_s | take 300" \
                   -o tsv 2>&1 | head -300)
                 [ -n "$LOGS" ] && break
               done
