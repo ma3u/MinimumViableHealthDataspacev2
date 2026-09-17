@@ -294,11 +294,14 @@ function NegotiateContent() {
         const list = (Array.isArray(ud) ? ud : ud.negotiations ?? []) as
           | Negotiation[]
           | [];
-        // A demo negotiation lives only in this page: nothing was written to the
-        // connector, so a refetch would drop it and the step would look like it
-        // had failed. Keep it at the top of the list for the rest of the session.
+        // The API now keeps a demo negotiation in memory and returns it from this
+        // refetch, so prepend it only if the refetch did not carry it: the row can
+        // then neither vanish (which looks like a failure) nor appear twice.
+        const missing =
+          data.demo === true &&
+          !list.some((n) => n["@id"] === (data["@id"] as string));
         setNegotiations(
-          data.demo === true ? [data as unknown as Negotiation, ...list] : list,
+          missing ? [data as unknown as Negotiation, ...list] : list,
         );
       } else {
         const err = (await res.json()) as Record<string, unknown>;
@@ -609,6 +612,18 @@ function NegotiateContent() {
                     </p>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
+                    {/* A demo negotiation is finalized by this demonstrator, not
+                        by a DSP counter-party. The row has to say so: an
+                        unmarked FINALIZED badge in front of a regulator would
+                        claim an agreement that nobody ever signed. */}
+                    {n.demo === true && (
+                      <span
+                        title={(n.demoReason as string) ?? ""}
+                        className="text-xs px-2 py-0.5 rounded-full bg-[var(--surface-2)] text-[var(--text-secondary)] border border-[var(--border)]"
+                      >
+                        Demo
+                      </span>
+                    )}
                     <span
                       className={`text-xs px-2 py-0.5 rounded-full ${
                         state.includes("FINALIZED")
@@ -622,7 +637,9 @@ function NegotiateContent() {
                     </span>
                     {agreementId && (
                       <a
-                        href={`/data/transfer?participantId=${selectedCtx}&contractId=${agreementId}`}
+                        href={`/data/transfer?participantId=${encodeURIComponent(
+                          selectedCtx,
+                        )}&contractId=${encodeURIComponent(agreementId)}`}
                         className="flex items-center gap-1 text-xs text-teal-800 dark:text-teal-300 hover:underline"
                       >
                         Transfer <ArrowRight size={12} />

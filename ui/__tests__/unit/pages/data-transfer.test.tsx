@@ -462,6 +462,48 @@ describe("DataTransferPage", () => {
     });
   });
 
+  // A transfer under a contract that exists only in this demonstrator is recorded
+  // by the API rather than sent (issue #25). "Transfer started" would claim a DSP
+  // transfer that never happened, so the page has to say which one it was.
+  it("reports a recorded demo transfer as recorded, not started", async () => {
+    mockFetchApi.mockImplementation((url: string, init?: RequestInit) => {
+      if (url === "/api/participants") return mockResponse(PARTICIPANTS);
+      if (url === "/api/transfers" && init?.method === "POST") {
+        return mockResponse({
+          "@id": "demo-transfer:agr-002",
+          state: "STARTED",
+          contractId: "agr-002",
+          demo: true,
+          demoReason: "The connector has never seen the contract.",
+        });
+      }
+      if (url.startsWith("/api/transfers")) return mockResponse([]);
+      if (url.startsWith("/api/negotiations")) {
+        return mockResponse(NEGOTIATIONS_FINALIZED);
+      }
+      return mockResponse({});
+    });
+    const user = userEvent.setup();
+    render(<DataTransferPage />);
+
+    await waitFor(() => {
+      expect(
+        screen.getByText("Start Transfer from Agreement"),
+      ).toBeInTheDocument();
+    });
+
+    const checkboxes = screen.getAllByRole("checkbox");
+    await user.click(checkboxes[2]);
+    await user.click(screen.getByRole("button", { name: /Start Transfer/i }));
+
+    await waitFor(() => {
+      expect(
+        screen.getByText(/Demo transfer recorded for Omop Cohort Data/),
+      ).toBeInTheDocument();
+    });
+    expect(screen.queryByText(/Transfer started for/)).toBeNull();
+  });
+
   it("shows error message when transfer initiation fails", async () => {
     mockFetchApi.mockImplementation((url: string, init?: RequestInit) => {
       if (url === "/api/participants") return mockResponse(PARTICIPANTS);
