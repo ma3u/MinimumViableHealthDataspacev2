@@ -27,6 +27,13 @@ const USERNAME_TO_DID: Record<string, string> = {
   "dr.janssen@lmc.nl": "did:web:lmc.nl:clinic",
   "patient.mueller@demo.ehds": "did:web:alpha-klinik.de:participant",
   "tc.operator@medreg.de": "did:web:medreg.de:hdab",
+  // The realm the deployments import (jad/keycloak-realm.json). Without these
+  // the access log named the HDAB "did:web:unknown:regulator@..." (issue #205).
+  "admin@health-dataspace.local": "did:web:alpha-klinik.de:participant",
+  "clinic@health-dataspace.local": "did:web:alpha-klinik.de:participant",
+  "lmc@limburg-mc.nl": "did:web:lmc.nl:clinic",
+  "regulator@health-dataspace.local": "did:web:medreg.de:hdab",
+  "regulator-es@health-dataspace.local": "did:web:medreg.es:hdab",
 };
 
 /**

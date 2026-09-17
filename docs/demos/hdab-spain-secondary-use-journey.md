@@ -134,12 +134,21 @@ agreement here still does not release data.
 | [/compliance as HDAB](https://ma3u.github.io/MinimumViableHealthDataspacev2/compliance?persona=hdab) |
 
 **Say:** this is the control the regulator in the room actually cares about.
-EHDS Articles 46 to 53. A contract between two participants is not sufficient;
-the access body issues a permit, and the permit is what unlocks the transfer.
-Two independent gates, and the regulator holds one of them.
+Regulation (EU) 2025/327, Art. 67 (the application), Art. 68 (the decision,
+within three months) and Art. 61(1) (access only under a permit). A contract
+between two participants is not sufficient; the access body issues a permit,
+and the permit is what unlocks the transfer. Two independent gates, and the
+regulator holds one of them.
+
+**Do:** signed in as the access body, click PharmaCo's pending row. The panel
+shows the application and the Art. 68(1) criteria; "Refuse" needs a written
+justification, "Issue data permit" sets purpose, validity and conditions. The
+"Decision due" column is the three-month clock.
 
 **Expect the question:** "what happens if we refuse?" Answer: step 5 cannot
-start. The permit is a precondition of the transfer, not a record of it.
+start, and you can show it: refuse, switch to the researcher, start the
+transfer, and the connector answers 403 with the article. Issue the permit and
+the same transfer goes through, stamped with the permit id on the audit page.
 
 ### 5. Extract and upload, pseudonymised
 
