@@ -42,6 +42,9 @@ interface Tenant {
     organization?: string;
   };
   participantProfiles: ParticipantProfile[];
+  /** false for a registration nothing could provision (issue #203). */
+  provisioned?: boolean;
+  demoReason?: string;
 }
 
 type RegistrationStep = "form" | "submitting" | "done";
@@ -157,7 +160,14 @@ const EHDS_ROLES = [
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
-function deriveStatus(tenant: Tenant): "active" | "provisioning" | "pending" {
+function deriveStatus(
+  tenant: Tenant,
+): "active" | "provisioning" | "pending" | "not-provisioned" {
+  // Nothing provisioned this one and nothing will, so it is not pending either:
+  // saying "pending" would promise a DID and a credential that are not coming.
+  if (tenant.provisioned === false) {
+    return "not-provisioned";
+  }
   const profiles = tenant.participantProfiles || [];
   if (profiles.length === 0) return "pending";
   // Check both live EDC-V format (identifier) and mock format (did + state)
@@ -190,9 +200,21 @@ function fallbackContact(org: string) {
 // ---------------------------------------------------------------------------
 function StatusBadge({
   status,
+  title,
 }: {
-  status: "active" | "provisioning" | "pending";
+  status: "active" | "provisioning" | "pending" | "not-provisioned";
+  title?: string;
 }) {
+  if (status === "not-provisioned") {
+    return (
+      <span
+        title={title}
+        className="flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-[var(--surface-2)] text-[var(--text-secondary)] border border-[var(--border)]"
+      >
+        <Circle size={10} /> Not provisioned
+      </span>
+    );
+  }
   if (status === "active")
     return (
       <span className="flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-[var(--role-user-bg)] text-[var(--role-user-text)] border border-[var(--role-user-border)]">
@@ -361,7 +383,7 @@ function ParticipantCard({
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
             <p className="font-medium text-[var(--text-primary)]">{name}</p>
-            <StatusBadge status={status} />
+            <StatusBadge status={status} title={tenant.demoReason} />
           </div>
           <p className="text-xs text-[var(--text-secondary)] mt-0.5">
             {org} · {role} · {tenant.participantProfiles?.length || 0}{" "}
@@ -549,6 +571,9 @@ function OnboardingContent() {
   const [loading, setLoading] = useState(true);
   const [step, setStep] = useState<RegistrationStep>("form");
   const [error, setError] = useState<string | null>(null);
+  // Set when the registration was recorded without being provisioned, so the
+  // success screen can say so instead of promising a DID (issue #203).
+  const [notProvisioned, setNotProvisioned] = useState<string | null>(null);
 
   const [displayName, setDisplayName] = useState("");
   const [organization, setOrganization] = useState("");
@@ -573,6 +598,7 @@ function OnboardingContent() {
     e.preventDefault();
     setStep("submitting");
     setError(null);
+    setNotProvisioned(null);
 
     try {
       const res = await fetchApi("/api/participants", {
@@ -588,7 +614,17 @@ function OnboardingContent() {
 
       if (!res.ok) {
         const err = await res.json();
-        throw new Error(err.error || "Registration failed");
+        // detail first: "Failed to create participant" on its own told the user
+        // nothing and read as though their input were at fault (issue #203).
+        throw new Error(err.detail || err.error || "Registration failed");
+      }
+
+      const data = (await res.json()) as Record<string, unknown>;
+      if (data.provisioned === false) {
+        setNotProvisioned(
+          (data.demoReason as string) ||
+            "This deployment cannot provision a participant, so the registration was recorded for the demonstration only.",
+        );
       }
 
       setStep("done");
@@ -641,15 +677,27 @@ function OnboardingContent() {
         {/* Registration form / success */}
         {step === "done" ? (
           <div className="flex flex-col items-center gap-4 py-12 text-center border border-[var(--border)] rounded-xl">
-            <CheckCircle2 size={48} className="text-[var(--role-user-text)]" />
-            <h2 className="text-xl font-semibold">Registration Submitted</h2>
+            {notProvisioned ? (
+              <Circle size={48} className="text-[var(--text-secondary)]" />
+            ) : (
+              <CheckCircle2
+                size={48}
+                className="text-[var(--role-user-text)]"
+              />
+            )}
+            <h2 className="text-xl font-semibold">
+              {notProvisioned
+                ? "Registration Recorded"
+                : "Registration Submitted"}
+            </h2>
             <p className="text-[var(--text-secondary)] text-sm max-w-md">
-              Your participant context has been created. DID provisioning and
-              credential issuance will proceed automatically via CFM agents.
+              {notProvisioned ??
+                "Your participant context has been created. DID provisioning and credential issuance will proceed automatically via CFM agents."}
             </p>
             <button
               onClick={() => {
                 setStep("form");
+                setNotProvisioned(null);
                 setDisplayName("");
                 setOrganization("");
                 setRole("data-holder");
