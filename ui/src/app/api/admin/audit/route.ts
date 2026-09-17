@@ -103,6 +103,9 @@ function buildWhere(
  *   providerDid  – exact DID of provider participant
  *   crossBorder  – "true" | "false" | "" (all)
  *   contractId   – (accesslogs only) filter by contract ID
+ *
+ * accesslogs honours consumerDid, providerDid, dateFrom, dateTo and
+ * contractId; status and crossBorder do not apply to access events.
  */
 export async function GET(request: NextRequest) {
   const authError = await requireAuditAccess();
@@ -149,8 +152,8 @@ export async function GET(request: NextRequest) {
          OPTIONAL MATCH (consumer:Participant {participantId: t.consumerDid})
          OPTIONAL MATCH (provider:Participant {participantId: t.providerDid})
          OPTIONAL MATCH (t)-[:TRANSFERS]->(a)
-         OPTIONAL MATCH (al:DataAccessLog)-[:VIA_TRANSFER]->(t)
-         WITH t, consumer, provider, a, count(al) AS logCount
+         OPTIONAL MATCH (te:TransferEvent {contractId: t.contractId})
+         WITH t, consumer, provider, a, count(te) AS logCount
          RETURN t {
            .*,
            consumerName:             consumer.name,
@@ -180,8 +183,8 @@ export async function GET(request: NextRequest) {
          OPTIONAL MATCH (consumer:Participant {participantId: n.consumerDid})
          OPTIONAL MATCH (provider:Participant {participantId: n.providerDid})
          OPTIONAL MATCH (n)-[:FOR_ASSET]->(a)
-         OPTIONAL MATCH (al:DataAccessLog)-[:UNDER_CONTRACT]->(n)
-         WITH n, consumer, provider, a, count(al) AS logCount
+         OPTIONAL MATCH (te:TransferEvent {contractId: n.contractId})
+         WITH n, consumer, provider, a, count(te) AS logCount
          RETURN n {
            .*,
            consumerName:             consumer.name,
@@ -205,38 +208,83 @@ export async function GET(request: NextRequest) {
     }
 
     // ── Access Logs ───────────────────────────────────────────────────────
+    // The recorder is the neo4j-proxy: every FHIR, OMOP, catalog, NLQ and
+    // federated request it serves becomes a TransferEvent ("individual data
+    // access event" in init-schema.cypher), with the caller's DID from the
+    // X-Participant header. Until 2026-09-17 this tab read a DataAccessLog
+    // label that nothing has ever written, so it was empty on every stack
+    // (issue #205). Seeded events carry consumerDid, providerDid, contractId,
+    // datasetId, purpose and responseBytes; proxy-written ones carry
+    // participant, endpoint, method, statusCode and resultCount. The map
+    // below serves both shapes.
     if (type === "accesslogs") {
       const logParams: Record<string, unknown> = { limit: limitParam };
       const logConditions: string[] = [];
       if (filters.consumerDid) {
-        logConditions.push("a.consumerDid = $filterConsumerDid");
+        logConditions.push(
+          "coalesce(te.consumerDid, te.participant) = $filterConsumerDid",
+        );
         logParams.filterConsumerDid = filters.consumerDid;
+      }
+      if (filters.providerDid) {
+        logConditions.push("te.providerDid = $filterProviderDid");
+        logParams.filterProviderDid = filters.providerDid;
+      }
+      if (filters.dateFrom) {
+        logConditions.push("toString(te.timestamp) >= $filterDateFrom");
+        logParams.filterDateFrom = filters.dateFrom;
+      }
+      if (filters.dateTo) {
+        logConditions.push("toString(te.timestamp) <= $filterDateTo");
+        logParams.filterDateTo = filters.dateTo + "T23:59:59Z";
       }
       const contractId = sp.get("contractId");
       if (contractId) {
-        logConditions.push("a.contractId = $filterContractId");
+        logConditions.push("te.contractId = $filterContractId");
         logParams.filterContractId = contractId;
       }
       const logWhere =
         logConditions.length > 0 ? `WHERE ${logConditions.join(" AND ")}` : "";
       const logs = await runQuery<{ log: Row }>(
-        `MATCH (a:DataAccessLog)
+        `MATCH (te:TransferEvent)
          ${logWhere}
-         OPTIONAL MATCH (consumer:Participant {participantId: a.consumerDid})
-         OPTIONAL MATCH (provider:Participant {participantId: a.providerDid})
-         RETURN a {
-           .*,
+         WITH te, coalesce(te.consumerDid, te.participant) AS consumerDid
+         OPTIONAL MATCH (consumer:Participant {participantId: consumerDid})
+         OPTIONAL MATCH (provider:Participant {participantId: te.providerDid})
+         OPTIONAL MATCH (te)-[:ACCESSED]->(ds:HealthDataset)
+         RETURN {
+           id:              te.eventId,
+           accessedAt:      toString(te.timestamp),
+           consumerDid:     consumerDid,
            consumerName:    consumer.name,
            consumerCountry: consumer.country,
-           providerName:    provider.name,
-           providerCountry: provider.country
+           providerDid:     te.providerDid,
+           providerName:    coalesce(provider.name, ds.publisher),
+           providerCountry: provider.country,
+           assetId:         coalesce(te.datasetId, ds.datasetId, ds.title),
+           contractId:      te.contractId,
+           accessType:      CASE
+                              WHEN te.accessType IS NOT NULL THEN te.accessType
+                              WHEN te.endpoint STARTS WITH '/nlq'
+                                OR te.endpoint STARTS WITH '/federated'
+                                OR te.endpoint STARTS WITH '/catalog'
+                                OR te.endpoint = '/omop/cohort' THEN 'QUERY'
+                              ELSE 'DATA_READ'
+                            END,
+           purpose:         coalesce(te.purpose, te.name,
+                                     te.method + ' ' + te.endpoint),
+           bytesAccessed:   te.responseBytes,
+           endpoint:        te.endpoint,
+           method:          te.method,
+           statusCode:      te.statusCode,
+           resultCount:     te.resultCount
          } AS log
-         ORDER BY a.accessedAt DESC
+         ORDER BY te.timestamp DESC
          LIMIT $limit`,
         logParams,
       );
       results.accesslogs = logs.map((r) => r.log);
-      return NextResponse.json({ type, limit, ...results });
+      return NextResponse.json({ type, limit, filters, ...results });
     }
 
     // ── Verifiable Credentials ────────────────────────────────────────────
@@ -257,7 +305,7 @@ export async function GET(request: NextRequest) {
       const stats = await runQuery<{ label: string; count: number }>(
         `MATCH (n)
          WHERE n:DataTransfer OR n:ContractNegotiation OR n:VerifiableCredential
-           OR n:Participant OR n:DataAsset OR n:HealthDataset OR n:DataAccessLog
+           OR n:Participant OR n:DataAsset OR n:HealthDataset OR n:TransferEvent
          RETURN labels(n)[0] AS label, count(n) AS count
          ORDER BY count DESC`,
       );
@@ -267,12 +315,13 @@ export async function GET(request: NextRequest) {
         totalBytes: number | null;
         lastAccess: string | null;
       }>(
-        `MATCH (a:DataAccessLog)
-         OPTIONAL MATCH (consumer:Participant {participantId: a.consumerDid})
-         RETURN consumer.name          AS consumerName,
-                count(a)               AS totalAccesses,
-                sum(a.bytesAccessed)   AS totalBytes,
-                max(a.accessedAt)      AS lastAccess
+        `MATCH (te:TransferEvent)
+         WITH te, coalesce(te.consumerDid, te.participant) AS consumerDid
+         OPTIONAL MATCH (consumer:Participant {participantId: consumerDid})
+         RETURN coalesce(consumer.name, consumerDid) AS consumerName,
+                count(te)                            AS totalAccesses,
+                sum(te.responseBytes)                AS totalBytes,
+                max(toString(te.timestamp))          AS lastAccess
          ORDER BY totalAccesses DESC`,
       );
       results.summary = {

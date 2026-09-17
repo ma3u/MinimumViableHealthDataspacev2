@@ -25,6 +25,12 @@ Rules that follow:
   `body.error` first, or a 502 renders as an empty page instead of an error.
 - Bolt wants `neo4j.int()` for `LIMIT` and `SKIP` parameters; a plain JS
   number arrives as a float and Cypher rejects it.
+- The Access Logs tab of the same page was empty on every stack for a second
+  reason: it read a `DataAccessLog` label that nothing writes. The recorder
+  is the neo4j-proxy, which stores every data request as a `TransferEvent`
+  (the label `init-schema.cypher` documents as the access event). When a tab
+  is empty everywhere, compare the reader's label with the writer's before
+  suspecting the seed.
 
 ## 2026-09-17: ACA internal ingress, job logs, and stale-revision panics
 
