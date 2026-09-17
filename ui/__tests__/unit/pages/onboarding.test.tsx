@@ -704,6 +704,120 @@ describe("OnboardingPage", () => {
     });
   });
 
+  // ─── 11b. A registration nothing could provision (issue #203) ──────
+  //
+  // The Azure deployment runs no CFM provisioning stack, so the API records the
+  // registration and says so. The page must pass that on rather than promise a
+  // DID: claiming provisioning that never happened is worse in front of a
+  // regulator than the "Failed to create participant" dead end it replaces.
+  describe("a registration that was recorded but not provisioned", () => {
+    async function submit(response: unknown) {
+      const user = userEvent.setup();
+      mockFetchApi
+        .mockReturnValueOnce(mockResponse([]))
+        .mockReturnValueOnce(mockResponse(response))
+        .mockReturnValueOnce(mockResponse([]));
+
+      render(<OnboardingPage />);
+      await waitFor(() => {
+        expect(
+          screen.getByText("New Participant Registration"),
+        ).toBeInTheDocument();
+      });
+
+      await user.type(
+        screen.getByPlaceholderText("e.g. University Hospital Berlin"),
+        "Testklinik",
+      );
+      await user.type(
+        screen.getByPlaceholderText(
+          "e.g. AlphaKlinik Berlin University Hospital",
+        ),
+        "Testklinik",
+      );
+      await user.click(screen.getByText("Register Participant"));
+    }
+
+    const recorded = {
+      id: "demo-tenant:testklinik",
+      provisioned: false,
+      demo: true,
+      demoReason:
+        "This deployment does not run the CFM provisioning stack, so the registration was recorded for the demonstration only. No DID was registered.",
+    };
+
+    it("says the registration was recorded, not submitted for provisioning", async () => {
+      await submit(recorded);
+
+      await waitFor(() => {
+        expect(screen.getByText("Registration Recorded")).toBeInTheDocument();
+      });
+      expect(screen.queryByText("Registration Submitted")).toBeNull();
+    });
+
+    it("never claims a DID or credential was issued", async () => {
+      await submit(recorded);
+
+      await waitFor(() => {
+        expect(screen.getByText(/No DID was registered/)).toBeInTheDocument();
+      });
+      expect(
+        screen.queryByText(/DID provisioning and credential issuance/),
+      ).toBeNull();
+    });
+
+    it("still promises provisioning when the participant really was provisioned", async () => {
+      await submit({ id: "tenant-real", provisioned: true });
+
+      await waitFor(() => {
+        expect(screen.getByText("Registration Submitted")).toBeInTheDocument();
+      });
+      expect(
+        screen.getByText(/DID provisioning and credential issuance/),
+      ).toBeInTheDocument();
+    });
+  });
+
+  // ─── 11c. The cause of a real failure reaches the user (issue #203) ─
+  describe("error detail", () => {
+    it("shows the detail rather than the generic sentence", async () => {
+      const user = userEvent.setup();
+      mockFetchApi.mockReturnValueOnce(mockResponse([])).mockReturnValueOnce(
+        mockResponse(
+          {
+            error: "Failed to create participant",
+            detail: "422 duplicate tenant",
+          },
+          false,
+        ),
+      );
+
+      render(<OnboardingPage />);
+      await waitFor(() => {
+        expect(
+          screen.getByText("New Participant Registration"),
+        ).toBeInTheDocument();
+      });
+
+      await user.type(
+        screen.getByPlaceholderText("e.g. University Hospital Berlin"),
+        "Testklinik",
+      );
+      await user.type(
+        screen.getByPlaceholderText(
+          "e.g. AlphaKlinik Berlin University Hospital",
+        ),
+        "Testklinik",
+      );
+      await user.click(screen.getByText("Register Participant"));
+
+      await waitFor(() => {
+        expect(screen.getByText("422 duplicate tenant")).toBeInTheDocument();
+      });
+      expect(screen.queryByText("Failed to create participant")).toBeNull();
+    });
+  });
+
   // ─── 12. Form submission network error ─────────────────────────────
   describe("form submission network error", () => {
     it('shows "Registration failed" on network failure', async () => {

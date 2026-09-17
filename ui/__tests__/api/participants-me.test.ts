@@ -57,13 +57,16 @@ describe("GET /api/participants/me", () => {
     expect(data[0].participantProfiles).toEqual([]);
   });
 
-  it("should return 502 when tenant list fails", async () => {
+  // Issue #203: the Azure deployment runs no CFM Tenant Manager, so an
+  // unreachable manager is the expected state rather than a fault of this
+  // request. The onboarding page renders a non-ok answer as an empty list and
+  // says nothing at all, so a 502 here cost information and gained none.
+  it("lists what it has instead of 502ing when the tenant list fails", async () => {
     mockTenant.mockRejectedValue(new Error("Connection refused"));
 
     const response = await GET();
 
-    expect(response.status).toBe(502);
-    const data = await response.json();
-    expect(data.error).toContain("Failed to get participant profile");
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual([]);
   });
 });

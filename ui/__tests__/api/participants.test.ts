@@ -27,7 +27,9 @@ vi.mock("fs", () => ({
 }));
 
 import { edcClient } from "@/lib/edc";
+import { __resetDemoRecordsForTests } from "@/lib/demo-records";
 import { GET, POST } from "@/app/api/participants/route";
+import { GET as ME_GET } from "@/app/api/participants/me/route";
 
 const mockManagement = vi.mocked(edcClient.management);
 const mockTenant = vi.mocked(edcClient.tenant);
@@ -35,6 +37,7 @@ const mockTenant = vi.mocked(edcClient.tenant);
 describe("/api/participants", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    __resetDemoRecordsForTests();
   });
 
   describe("GET", () => {
@@ -82,38 +85,78 @@ describe("/api/participants", () => {
       expect(response.status).toBe(400);
     });
 
-    it("should return 503 when no cells found", async () => {
+    // Issue #203. On the Azure deployment there is no cell, no dataspace
+    // profile and possibly no Tenant Manager at all, because nothing outside
+    // jad/seed-jad.sh creates them and the cfm database is never created. That
+    // is the expected state there, not a failed registration, and it must never
+    // be reported as a provisioned participant either.
+    function register(displayName = "Test Clinic") {
+      return new NextRequest("http://localhost:3000/api/participants", {
+        method: "POST",
+        body: JSON.stringify({
+          displayName,
+          organization: "Test Org",
+          role: "data_holder",
+        }),
+      });
+    }
+
+    it("records the registration when the TenantManager has no cell", async () => {
       mockTenant.mockResolvedValue([]);
 
-      const req = new NextRequest("http://localhost:3000/api/participants", {
-        method: "POST",
-        body: JSON.stringify({
-          displayName: "Test Clinic",
-          role: "data_holder",
-        }),
-      });
-      const response = await POST(req);
-      expect(response.status).toBe(503);
+      const response = await POST(register());
+      expect(response.status).toBe(201);
+
       const data = await response.json();
-      expect(data.error).toContain("cells");
+      expect(data.provisioned).toBe(false);
+      expect(data.demo).toBe(true);
+      expect(data.demoReason).toMatch(/no did was registered/i);
+      expect(data.upstreamError).toContain("cell");
     });
 
-    it("should return 503 when no dataspace profiles found", async () => {
+    it("records the registration when there is no dataspace profile", async () => {
       mockTenant
         .mockResolvedValueOnce([{ id: "cell-1" }]) // cells
-        .mockResolvedValueOnce([]); // profiles — empty
+        .mockResolvedValueOnce([]); // profiles, empty
 
-      const req = new NextRequest("http://localhost:3000/api/participants", {
-        method: "POST",
-        body: JSON.stringify({
-          displayName: "Test Clinic",
-          role: "data_holder",
-        }),
-      });
-      const response = await POST(req);
-      expect(response.status).toBe(503);
+      const response = await POST(register());
+      expect(response.status).toBe(201);
+
       const data = await response.json();
-      expect(data.error).toContain("profiles");
+      expect(data.provisioned).toBe(false);
+      expect(data.upstreamError).toContain("dataspace profile");
+    });
+
+    it("records the registration when the TenantManager is unreachable", async () => {
+      mockTenant.mockRejectedValue(new Error("dial tcp: connection refused"));
+
+      const response = await POST(register());
+      expect(response.status).toBe(201);
+
+      const data = await response.json();
+      expect(data.provisioned).toBe(false);
+      // The cause travels with the answer, which is the whole point of #203.
+      expect(data.upstreamError).toContain("connection refused");
+      // Nothing was created, so nothing may be claimed.
+      expect(data.participantProfiles).toEqual([]);
+      expect(mockTenant).not.toHaveBeenCalledWith(
+        "/v1alpha1/tenants",
+        "POST",
+        expect.anything(),
+      );
+    });
+
+    it("keeps the recorded registration in the list the page reloads", async () => {
+      mockTenant.mockRejectedValue(new Error("connection refused"));
+      await POST(register("Recorded Clinic"));
+
+      const listed = await (await ME_GET()).json();
+
+      // The page calls loadTenants() straight after submitting; a registration
+      // that vanished there would look like it had failed.
+      expect(listed).toHaveLength(1);
+      expect(listed[0].properties.displayName).toBe("Recorded Clinic");
+      expect(listed[0].provisioned).toBe(false);
     });
 
     it("should create tenant + participant and return 201", async () => {
@@ -162,19 +205,36 @@ describe("/api/participants", () => {
     });
 
     it("should return 502 when tenant creation fails", async () => {
-      mockTenant.mockRejectedValue(new Error("Service unavailable"));
+      // The cell and the profile are there, so this deployment can provision:
+      // a refusal of the write is then a real fault and must stay visible. The
+      // previous version of this test rejected the very first call, so it never
+      // reached tenant creation at all.
+      mockTenant
+        .mockResolvedValueOnce([{ id: "cell-1" }]) // cells
+        .mockResolvedValueOnce([{ id: "profile-1" }]) // profiles
+        .mockRejectedValueOnce(new Error("422 duplicate tenant"));
 
-      const req = new NextRequest("http://localhost:3000/api/participants", {
-        method: "POST",
-        body: JSON.stringify({
-          displayName: "Test Clinic",
-          role: "data_holder",
-        }),
-      });
-      const response = await POST(req);
+      const response = await POST(register());
       expect(response.status).toBe(502);
+
       const data = await response.json();
       expect(data.error).toContain("Failed to create participant");
+      // "Failed to create participant" on its own was all the UI ever got.
+      expect(data.detail).toContain("422 duplicate tenant");
+      expect(data.provisioned).toBeUndefined();
+    });
+
+    it("marks a genuinely provisioned participant as provisioned", async () => {
+      mockTenant
+        .mockResolvedValueOnce([{ id: "cell-1" }])
+        .mockResolvedValueOnce([{ id: "profile-1" }])
+        .mockResolvedValueOnce({ id: "tenant-abc" })
+        .mockResolvedValueOnce({ id: "participant-xyz" });
+
+      const data = await (await POST(register())).json();
+
+      expect(data.provisioned).toBe(true);
+      expect(data.demo).toBeUndefined();
     });
   });
 });

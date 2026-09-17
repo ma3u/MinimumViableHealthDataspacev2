@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { edcClient } from "@/lib/edc";
 import { requireAuth, isAuthError } from "@/lib/auth-guard";
+import {
+  recordDemo,
+  DEMO_ONBOARDING_SCOPE,
+  type DemoRecord,
+} from "@/lib/demo-records";
 import { promises as fs } from "fs";
 import path from "path";
 
@@ -162,6 +167,109 @@ export async function GET() {
 }
 
 /**
+ * Can this deployment provision a participant?
+ *
+ * Onboarding needs a CFM cell and a dataspace profile to attach the new tenant
+ * to. On the Azure deployment neither exists and the Tenant Manager may not be
+ * running at all: `scripts/azure/02-data-layer.sh` creates only the `keycloak`
+ * database, so the manager's `cfm` database is missing; nothing outside
+ * `jad/seed-jad.sh` ever creates a cell or a profile; and CI deploys only the UI
+ * and the proxy. That is the scope split of ADR-022, now superseded by ADR-024
+ * but still the live state. Issue #203.
+ *
+ * So "no" is the expected answer on Azure rather than an error, and it is the
+ * same answer whether the manager refuses the call or answers with an empty
+ * list. `unavailable` carries the reason for the response to pass on; it is
+ * empty when provisioning can go ahead.
+ */
+async function canProvision(): Promise<{
+  cellId: string;
+  profileId: string;
+  unavailable: string;
+}> {
+  try {
+    const cells = await edcClient.tenant<{ id: string }[]>("/v1alpha1/cells");
+    const cellId = Array.isArray(cells) && cells.length ? cells[0].id : "";
+    if (!cellId) {
+      return {
+        cellId: "",
+        profileId: "",
+        unavailable:
+          "The CFM Tenant Manager has no cell to attach a tenant to.",
+      };
+    }
+
+    const profiles = await edcClient.tenant<{ id: string }[]>(
+      "/v1alpha1/dataspace-profiles",
+    );
+    const profileId =
+      Array.isArray(profiles) && profiles.length ? profiles[0].id : "";
+    if (!profileId) {
+      return {
+        cellId,
+        profileId: "",
+        unavailable: "The CFM Tenant Manager has no dataspace profile.",
+      };
+    }
+
+    return { cellId, profileId, unavailable: "" };
+  } catch (err) {
+    return {
+      cellId: "",
+      profileId: "",
+      unavailable: err instanceof Error ? err.message : String(err),
+    };
+  }
+}
+
+/**
+ * The registration recorded when nothing can provision it.
+ *
+ * Shaped like a CFM tenant so `/api/participants/me` can list it beside the real
+ * ones, but with an empty `participantProfiles` and `provisioned: false`: no DID
+ * was registered, no key pair generated and no credential issued, and the page
+ * must not claim otherwise. The demo- prefix on the id keeps it distinguishable
+ * from anything the Tenant Manager issued.
+ */
+function buildDemoParticipant(
+  displayName: string,
+  organization: string,
+  role: string,
+  ehdsParticipantType: string,
+  reason: string,
+): DemoRecord {
+  const slug = displayName
+    .toLowerCase()
+    .replace(/\s+/g, "-")
+    .replace(/[^a-z0-9-]/g, "");
+
+  return {
+    "@id": `demo-tenant:${slug}`,
+    id: `demo-tenant:${slug}`,
+    version: 0,
+    properties: {
+      displayName,
+      organization: organization || displayName,
+      role,
+      ehdsParticipantType: ehdsParticipantType || role,
+    },
+    participantProfiles: [],
+    displayName,
+    role,
+    status: "not-provisioned",
+    provisioned: false,
+    demo: true,
+    demoReason:
+      "This deployment does not run the CFM provisioning stack, so the " +
+      "registration was recorded for the demonstration only. No DID was " +
+      "registered, no key pair generated and no credential issued. The five " +
+      "seeded participants are unaffected. Tracked in issue #203.",
+    upstreamError: reason,
+    createdAt: Date.now(),
+  };
+}
+
+/**
  * POST /api/participants — Create a new tenant + participant context.
  *
  * Body: { displayName, organization, role, ehdsParticipantType }
@@ -185,27 +293,23 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 1. Get the cell ID (there is typically one cell in dev)
-    const cells = await edcClient.tenant<{ id: string }[]>("/v1alpha1/cells");
-    if (!cells || cells.length === 0) {
-      return NextResponse.json(
-        { error: "No cells found in TenantManager" },
-        { status: 503 },
-      );
-    }
-    const cellId = cells[0].id;
+    // 1+2. The cell and the dataspace profile a tenant has to be attached to.
+    // Read together because they answer one question: can this deployment
+    // provision a participant at all? See canProvision() for why that is not a
+    // given, and why an answer of "no" is not a failed registration.
+    const { cellId, profileId, unavailable } = await canProvision();
 
-    // 2. Get the dataspace profile ID
-    const profiles = await edcClient.tenant<{ id: string }[]>(
-      "/v1alpha1/dataspace-profiles",
-    );
-    if (!profiles || profiles.length === 0) {
-      return NextResponse.json(
-        { error: "No dataspace profiles found" },
-        { status: 503 },
+    if (unavailable) {
+      const participant = buildDemoParticipant(
+        displayName,
+        organization,
+        role,
+        ehdsParticipantType,
+        unavailable,
       );
+      recordDemo("participant", DEMO_ONBOARDING_SCOPE, participant);
+      return NextResponse.json(participant, { status: 201 });
     }
-    const profileId = profiles[0].id;
 
     // 3. Create tenant
     const tenantPayload = {
@@ -242,13 +346,19 @@ export async function POST(req: NextRequest) {
         displayName,
         role,
         status: "provisioning",
+        provisioned: true,
       },
       { status: 201 },
     );
   } catch (err) {
+    // A TenantManager that answered the two reads and then refused the write is
+    // a genuine fault: report it, with the reason. Swallowing it was the whole
+    // problem (issue #203) — the page had nothing to show but "Failed to create
+    // participant", which reads as though the form input were at fault.
     console.error("Failed to create participant:", err);
+    const detail = err instanceof Error ? err.message : String(err);
     return NextResponse.json(
-      { error: "Failed to create participant" },
+      { error: "Failed to create participant", detail },
       { status: 502 },
     );
   }
