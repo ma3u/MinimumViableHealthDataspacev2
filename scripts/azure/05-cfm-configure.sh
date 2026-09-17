@@ -45,6 +45,15 @@ if [ -z "$PG_PASSWORD_LIVE" ]; then
 fi
 log "read pg-password from ${PG_APP} (${#PG_PASSWORD_LIVE} chars)"
 
+# The password goes into a postgres:// URL, so percent-encode it. A raw @ / : ?
+# # or % would silently produce a DSN pointing somewhere else, and the manager
+# would then report a connection error rather than a parse error.
+PG_PASSWORD_ENC=$(python3 -c '
+import sys
+from urllib.parse import quote
+print(quote(sys.argv[1], safe=""))
+' "$PG_PASSWORD_LIVE")
+
 # ── NATS must exist: the managers refuse to launch without a JetStream uri ──
 if ! az containerapp show --name "$NATS_APP" --resource-group "$RG" -o none 2>/dev/null; then
   err "${NATS_APP} does not exist. The CFM managers cannot launch without it."
@@ -75,7 +84,7 @@ bucket: cfm-bucket
 stream: cfm-stream
 httpport: 8080
 postgres: true
-dsn: postgres://${PG_ADMIN}:${PG_PASSWORD_LIVE}@${PG_APP}:5432/cfm?sslmode=disable
+dsn: postgres://${PG_ADMIN}:${PG_PASSWORD_ENC}@${PG_APP}:5432/cfm?sslmode=disable
 CONFIG
 )
 
@@ -113,13 +122,52 @@ for c in tpl['containers']:
     mounts.append({'volumeName': volume_name, 'mountPath': '/etc/appname'})
     c['volumeMounts'] = mounts
 
+# `containerapp show` returns every secret with its value redacted, and feeding
+# that straight back replaces the real values with the placeholder, which leaves
+# the mounted file empty and the manager reporting the very same "missing
+# parameters" panic. Drop the block instead: an update that does not mention
+# secrets leaves the store alone.
+doc['properties']['configuration'].pop('secrets', None)
+
 with open(path, 'w') as f:
     yaml.safe_dump(doc, f)
 PY
 
   az containerapp update --name "$app" --resource-group "$RG" --yaml "$yaml" -o none
   rm -f "$yaml"
-  ok "  ${app}: ${file_name} mounted at /etc/appname"
+
+  # Verify rather than assume: read the secret back, and confirm the mount is
+  # really on the container. An empty secret here is the failure above.
+  local readback
+  readback=$(az containerapp secret show --name "$app" --resource-group "$RG" \
+    --secret-name "$secret_name" --query value -o tsv 2>/dev/null || echo "")
+  case "$readback" in
+    *"nats://"*)
+      log "  secret ${secret_name} reads back intact (${#readback} chars)"
+      ;;
+    *)
+      err "  secret ${secret_name} did not survive the update (${#readback} chars)"
+      err "  re-setting it, then restarting the app to remount it"
+      az containerapp secret set --name "$app" --resource-group "$RG" \
+        --secrets "${secret_name}=${config}" -o none
+      local rev
+      rev=$(az containerapp show --name "$app" --resource-group "$RG" \
+        --query "properties.latestRevisionName" -o tsv)
+      az containerapp revision restart --name "$app" --resource-group "$RG" \
+        --revision "$rev" -o none
+      ;;
+  esac
+
+  local mounted
+  mounted=$(az containerapp show --name "$app" --resource-group "$RG" \
+    --query "properties.template.containers[0].volumeMounts[?volumeName=='cfm-config'].mountPath | [0]" \
+    -o tsv 2>/dev/null || echo "")
+  if [ "$mounted" = "/etc/appname" ]; then
+    ok "  ${app}: ${file_name} mounted at /etc/appname"
+  else
+    err "  ${app}: the cfm-config volume is not mounted (got '${mounted}')"
+    exit 1
+  fi
 
   # The managers are only useful warm: onboarding calls the TenantManager on
   # every request, and a cold start would repeat the whole discovery.
