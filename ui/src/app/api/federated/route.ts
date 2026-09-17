@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { requireAuth, isAuthError } from "@/lib/auth-guard";
+import { userToParticipantId } from "@/lib/odrl-engine";
 
 export const dynamic = "force-dynamic";
 
@@ -10,7 +11,17 @@ export async function GET() {
   if (isAuthError(auth)) return auth;
 
   try {
-    const resp = await fetch(`${PROXY_URL}/federated/stats`);
+    // The proxy records every request it serves as a TransferEvent, the
+    // access log behind /admin/audit. Without this header the entry says
+    // "unknown" instead of who asked (issue #205).
+    const { session } = auth;
+    const participantId = userToParticipantId(
+      session.user.email ?? session.user.name ?? session.user.id,
+      session.roles,
+    );
+    const resp = await fetch(`${PROXY_URL}/federated/stats`, {
+      headers: { "X-Participant": participantId },
+    });
     const data = await resp.json();
     return NextResponse.json(data);
   } catch (err: unknown) {

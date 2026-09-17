@@ -62,7 +62,7 @@ DCP flow:  Wallet ──HTTP──► CredentialService ──► TrustCenter
 
 | ID   | Threat                      | Component       | Demo Mitigation                        | Production Mitigation                 |
 | ---- | --------------------------- | --------------- | -------------------------------------- | ------------------------------------- |
-| R-01 | Deny data transfer occurred | Neo4j audit log | `DataTransfer` + `DataAccessLog` nodes | Append-only log + digital signature   |
+| R-01 | Deny data transfer occurred | Neo4j audit log | `DataTransfer` + `TransferEvent` nodes | Append-only log + digital signature   |
 | R-02 | Deny contract acceptance    | DSP             | Contract node with timestamp + DID     | Countersigned contract hash on ledger |
 
 ### Information Disclosure

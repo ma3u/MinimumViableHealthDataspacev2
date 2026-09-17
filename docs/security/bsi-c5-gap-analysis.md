@@ -76,14 +76,14 @@
 
 ### DIP — Data Integrity and Protection
 
-| Control | Requirement         | Demo Status | Gap / Mitigation                         |
-| ------- | ------------------- | ----------- | ---------------------------------------- |
-| DIP-01  | Data classification | ✅          | Threat model assets table                |
-| DIP-02  | Encryption at rest  | ⚠️          | Neo4j data not encrypted at rest in demo |
-| DIP-03  | Backup and recovery | ⚠️          | No backup for Neo4j volume in demo       |
-| DIP-04  | Data minimisation   | ✅          | FHIR only returns requested fields       |
-| DIP-05  | Audit logging       | ✅          | `DataAccessLog` nodes in Neo4j           |
-| DIP-06  | Log integrity       | ⚠️          | Logs are mutable in Neo4j                |
+| Control | Requirement         | Demo Status | Gap / Mitigation                                  |
+| ------- | ------------------- | ----------- | ------------------------------------------------- |
+| DIP-01  | Data classification | ✅          | Threat model assets table                         |
+| DIP-02  | Encryption at rest  | ⚠️          | Neo4j data not encrypted at rest in demo          |
+| DIP-03  | Backup and recovery | ⚠️          | No backup for Neo4j volume in demo                |
+| DIP-04  | Data minimisation   | ✅          | FHIR only returns requested fields                |
+| DIP-05  | Audit logging       | ✅          | `TransferEvent` nodes, written by the neo4j-proxy |
+| DIP-06  | Log integrity       | ⚠️          | Logs are mutable in Neo4j                         |
 
 ### LOG — Logging and Monitoring
 

@@ -56,8 +56,15 @@ describe("/api/federated", () => {
 
     expect(response.status).toBe(200);
     expect(data.participants).toBe(3);
+    // The proxy records the request as a TransferEvent; the header is what
+    // names the caller in the audit trail (issue #205).
     expect(mockFetch).toHaveBeenCalledWith(
       expect.stringContaining("/federated/stats"),
+      expect.objectContaining({
+        headers: expect.objectContaining({
+          "X-Participant": expect.stringMatching(/^did:web:/),
+        }),
+      }),
     );
   });
 

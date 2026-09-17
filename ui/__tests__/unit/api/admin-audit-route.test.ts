@@ -246,8 +246,38 @@ describe("/api/admin/audit GET", () => {
     expect(data.accesslogs).toHaveLength(1);
     expect(data.accesslogs[0].logId).toBe("al-1");
     const [cypher, params] = mockRunQuery.mock.calls[0];
-    expect(cypher).toContain("a.contractId = $filterContractId");
+    // The recorder (neo4j-proxy) writes TransferEvent; the tab read a label
+    // nothing writes until issue #205.
+    expect(cypher).toContain("MATCH (te:TransferEvent)");
+    expect(cypher).not.toContain("DataAccessLog");
+    expect(cypher).toContain("te.contractId = $filterContractId");
     expect(params).toMatchObject({ filterContractId: "c-1" });
+  });
+
+  it("filters access logs by consumer, provider and date", async () => {
+    mockRunQuery.mockResolvedValue([]);
+
+    const req = new NextRequest(
+      "http://localhost/api/admin/audit?type=accesslogs" +
+        "&consumerDid=did:web:pharmaco.de:research" +
+        "&providerDid=did:web:alpha-klinik.de:participant" +
+        "&dateFrom=2026-09-01&dateTo=2026-09-17",
+    );
+    const res = await AuditGET(req);
+    expect(res.status).toBe(200);
+
+    const [cypher, params] = mockRunQuery.mock.calls[0];
+    expect(cypher).toContain(
+      "coalesce(te.consumerDid, te.participant) = $filterConsumerDid",
+    );
+    expect(cypher).toContain("te.providerDid = $filterProviderDid");
+    expect(cypher).toContain("toString(te.timestamp) >= $filterDateFrom");
+    expect(params).toMatchObject({
+      filterConsumerDid: "did:web:pharmaco.de:research",
+      filterProviderDid: "did:web:alpha-klinik.de:participant",
+      filterDateFrom: "2026-09-01",
+      filterDateTo: "2026-09-17T23:59:59Z",
+    });
   });
 
   it("never touches Neo4j's HTTP port", async () => {
