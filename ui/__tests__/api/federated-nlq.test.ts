@@ -17,6 +17,16 @@ vi.mock("@/lib/permit-gate", () => ({
     "X-Permit": "permit-test",
     "X-Dataset": "dataset:synthea-fhir-r4-mvd",
   }),
+  // POST /api/nlq stands behind the secondary-use gate (Art. 61(1)); by
+  // default it lets the caller through with the permit's audit headers.
+  gateSecondaryUse: vi.fn().mockResolvedValue({
+    allowed: true,
+    check: null,
+    headers: {
+      "X-Permit": "permit-test",
+      "X-Dataset": "dataset:synthea-fhir-r4-mvd",
+    },
+  }),
 }));
 
 // POST /api/nlq resolves the caller's ODRL scope before it proxies, and that
@@ -158,5 +168,89 @@ describe("/api/nlq", () => {
     const response = await POST(req);
 
     expect(response.status).toBe(502);
+  });
+
+  it("POST forwards the gate's permit headers to the proxy", async () => {
+    mockFetch.mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => ({ results: [] }),
+    });
+
+    const { POST } = await import("@/app/api/nlq/route");
+    const req = new NextRequest("http://localhost:3000/api/nlq", {
+      method: "POST",
+      body: JSON.stringify({ question: "How many patients?" }),
+    });
+    await POST(req);
+
+    expect(mockFetch).toHaveBeenCalledWith(
+      expect.stringContaining("/nlq"),
+      expect.objectContaining({
+        headers: expect.objectContaining({
+          "X-Participant": expect.stringMatching(/^did:web:/),
+          "X-Permit": "permit-test",
+          "X-Dataset": "dataset:synthea-fhir-r4-mvd",
+        }),
+      }),
+    );
+  });
+
+  it("POST refuses a data user without a permit and never reaches the proxy (Art. 61(1))", async () => {
+    const { gateSecondaryUse } = await import("@/lib/permit-gate");
+    vi.mocked(gateSecondaryUse).mockResolvedValueOnce({
+      allowed: false,
+      status: 403,
+      body: {
+        error: "No data permit covers this query",
+        reason:
+          "did:web:pharmaco.de:research holds no data permit: no health data access body has decided on an access application for this participant.",
+        article: "Regulation (EU) 2025/327, Art. 61(1) and Art. 68",
+        consumerDid: "did:web:pharmaco.de:research",
+        permitId: null,
+        odrlEnforced: true,
+      },
+    });
+
+    const { POST } = await import("@/app/api/nlq/route");
+    const req = new NextRequest("http://localhost:3000/api/nlq", {
+      method: "POST",
+      body: JSON.stringify({ question: "How many patients?" }),
+    });
+    const response = await POST(req);
+    const data = await response.json();
+
+    expect(response.status).toBe(403);
+    expect(data.error).toBe("No data permit covers this query");
+    expect(data.article).toContain("Art. 61(1)");
+    expect(data.odrlEnforced).toBe(true);
+    expect(mockFetch).not.toHaveBeenCalled();
+  });
+
+  it("POST checks the dataset the caller names, as a transfer would", async () => {
+    const { gateSecondaryUse } = await import("@/lib/permit-gate");
+    mockFetch.mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => ({ results: [] }),
+    });
+
+    const { POST } = await import("@/app/api/nlq/route");
+    const req = new NextRequest("http://localhost:3000/api/nlq", {
+      method: "POST",
+      body: JSON.stringify({
+        question: "How many patients?",
+        datasetId: "dataset:journey40-x",
+      }),
+    });
+    await POST(req);
+
+    expect(gateSecondaryUse).toHaveBeenCalledWith(
+      expect.objectContaining({
+        datasetId: "dataset:journey40-x",
+        what: "query",
+        roles: expect.any(Array),
+      }),
+    );
   });
 });

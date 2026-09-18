@@ -19,5 +19,14 @@
   "temporalLimit": "2027-12-31T23:59:59",
   "policyIds": ["policy-ehds-art53-synthetic-2026"],
   "hasActiveContract": true,
-  "hdabApproved": true
+  "hdabApproved": true,
+  "permits": [
+    {
+      "permitId": "hdab-decision-medreg-2025-001",
+      "datasetId": "dataset:synthea-fhir-r4-mvd",
+      "datasetTitle": "Synthea Synthetic FHIR R4 Patient Cohort",
+      "purpose": "SCIENTIFIC_RESEARCH",
+      "validUntil": "2027-12-31T23:59:59.000Z"
+    }
+  ]
 }

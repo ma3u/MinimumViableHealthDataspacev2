@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAuth, isAuthError } from "@/lib/auth-guard";
 import { resolveOdrlScope, userToParticipantId } from "@/lib/odrl-engine";
-import { activePermitHeaders } from "@/lib/permit-gate";
+import { gateSecondaryUse } from "@/lib/permit-gate";
 
 export const dynamic = "force-dynamic";
 
@@ -20,17 +20,29 @@ export async function POST(request: NextRequest) {
       session.user.email ?? session.user.name ?? session.user.id,
       session.roles,
     );
+    // Art. 61(1): a data user queries the secure processing environment only
+    // under a data permit. The access body's refusal or revocation stops the
+    // query here, with the article (issue #206, M3). A dataset named in the
+    // body is checked strictly, as for a transfer.
+    const gate = await gateSecondaryUse({
+      consumerDid: participantId,
+      roles: session.roles,
+      datasetId: typeof body.datasetId === "string" ? body.datasetId : null,
+      what: "query",
+    });
+    if (!gate.allowed) {
+      return NextResponse.json(gate.body, { status: gate.status });
+    }
     const odrlScope = await resolveOdrlScope(participantId);
-    // The proxy records the query as a TransferEvent; these headers give the
-    // record its permit, dataset and purpose (issue #206, M3).
-    const permitHeaders = await activePermitHeaders(participantId);
 
+    // The proxy records the query as a TransferEvent; the gate's headers give
+    // the record its permit, dataset and purpose.
     const resp = await fetch(`${PROXY_URL}/nlq`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         "X-Participant": participantId,
-        ...permitHeaders,
+        ...gate.headers,
       },
       body: JSON.stringify({ ...body, odrlScope }),
     });
