@@ -29,6 +29,7 @@ export const LABEL_LAYER: Record<string, number> = {
   Contract: 1,
   AccessApplication: 1,
   HDABApproval: 1,
+  HealthDataRequest: 1,
   ContractNegotiation: 1,
   DataTransfer: 1,
   Catalog: 1,
@@ -96,6 +97,7 @@ export const NODE_ROLE_COLORS: Record<string, string> = {
   Participant: "#F97316", // orange-500  — dataspace actors
   TrustCenter: "#EF4444", // red-500     — HDAB-designated pseudonym authority
   HDABApproval: "#EC4899", // pink-500    — approval authority
+  HealthDataRequest: "#DB2777", // pink-600    — Art. 69 statistical request
   SPESession: "#F59E0B", // amber-500   — active secure processing sessions
   PatientConsent: "#A855F7", // purple-500  — GDPR Art. 15-22 patient consent
   ResearchInsight: "#06B6D4", // cyan-500    — personalised research findings
@@ -188,6 +190,7 @@ export const NODE_DISPLAY_NAMES: Record<string, string> = {
   Contract: "Access Agreement",
   AccessApplication: "Access Request",
   HDABApproval: "Access Decision",
+  HealthDataRequest: "Statistical Request",
   ContractNegotiation: "Negotiation",
   DataTransfer: "Data Transfer",
   Catalog: "Catalog",
@@ -237,7 +240,10 @@ export const NODE_TOOLTIPS: Record<string, string> = {
     "DSP DataProduct — a dataset offered for sharing under usage policies",
   Contract:
     "DSP Contract — a signed data access agreement between two participants",
-  HDABApproval: "EHDS Art. 46 — Health Data Access Body approval decision",
+  HDABApproval:
+    "EHDS Art. 68 — data permit issued or refused by the health data access body",
+  HealthDataRequest:
+    "EHDS Art. 69 — request for a statistic, answered in anonymised form only",
   TrustCenter:
     "EHDS Art. 50/51 — pseudonymisation authority for secure processing",
   SPESession: "EHDS Art. 50 — an active Secure Processing Environment session",
@@ -280,6 +286,7 @@ export const LABEL_SORT_ORDER: Record<string, number> = {
   Contract: 4,
   HDABApproval: 5,
   AccessApplication: 6,
+  HealthDataRequest: 6,
   ContractNegotiation: 7,
   DataTransfer: 8,
   Catalog: 9,
