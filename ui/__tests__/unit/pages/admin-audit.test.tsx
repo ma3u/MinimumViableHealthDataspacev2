@@ -324,6 +324,69 @@ describe("AdminAuditPage", () => {
       });
       expect(screen.getByText("fetch failed")).toBeInTheDocument();
     });
+
+    it("opens an access log row into its full record", async () => {
+      setupMocks({
+        ...MOCK_AUDIT_DATA,
+        accesslogs: [
+          {
+            id: "te-demo-002",
+            accessedAt: "2026-09-18T03:00:00Z",
+            consumerDid: "did:web:pharmaco.de:research",
+            consumerName: "PharmaCo Research AG",
+            consumerCountry: "DE",
+            providerDid: "did:web:alpha-klinik.de:participant",
+            providerName: "AlphaKlinik Berlin",
+            providerCountry: "DE",
+            assetId: "dataset:synthea-fhir-r4-mvd",
+            assetTitle: "Synthea Synthetic FHIR R4 Patient Cohort",
+            contractId: "contract-fhir-t2d-001",
+            permitId: "hdab-decision-medreg-2025-001",
+            permitStatus: "APPROVED",
+            permitValidUntil: "2027-02-20T23:59:59Z",
+            accessType: "DATA_READ",
+            purpose: "SCIENTIFIC_RESEARCH",
+            bytesAccessed: 125000,
+            name: "PharmaCo pulls the T2D patient bundle",
+            endpoint: "/fhir/Patient",
+            method: "GET",
+            statusCode: 200,
+            resultCount: 42,
+            durationMs: 340,
+            contentType: "application/fhir+json",
+            protocol: "HTTP-PULL",
+            demo: true,
+          },
+        ],
+      });
+      const user = userEvent.setup();
+      await renderAndWait();
+      await user.click(screen.getByRole("button", { name: /Access Logs/ }));
+      const row = await screen.findByTestId("access-log-row");
+      expect(within(row).getByText(/AlphaKlinik Berlin/)).toBeInTheDocument();
+      expect(within(row).getByText(/122 KB/)).toBeInTheDocument();
+      expect(screen.queryByTestId("access-log-detail")).not.toBeInTheDocument();
+
+      await user.click(row);
+      const detail = await screen.findByTestId("access-log-detail");
+      expect(
+        within(detail).getByText("PharmaCo pulls the T2D patient bundle"),
+      ).toBeInTheDocument();
+      expect(
+        within(detail).getByText("Data permit, Art. 68"),
+      ).toBeInTheDocument();
+      expect(
+        within(detail).getByText(
+          /hdab-decision-medreg-2025-001 \(APPROVED, valid until 2027-02-20\)/,
+        ),
+      ).toBeInTheDocument();
+      expect(within(detail).getByText("GET /fhir/Patient")).toBeInTheDocument();
+      expect(within(detail).getByText("340 ms")).toBeInTheDocument();
+      expect(within(detail).getByText("seeded demo event")).toBeInTheDocument();
+
+      await user.click(row);
+      expect(screen.queryByTestId("access-log-detail")).not.toBeInTheDocument();
+    });
   });
 
   // ── Page header ──

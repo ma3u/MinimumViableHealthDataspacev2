@@ -121,6 +121,27 @@ test.describe("Issue #205 · access logs are recorded and shown", () => {
     ).toBeVisible();
   });
 
+  test("J913 the researcher's newest event names its permit and dataset", async ({
+    page,
+  }) => {
+    // Since issue #206 the UI sends X-Permit and X-Dataset with every query
+    // it forwards, and the proxy stores them on the event. PharmaCo holds a
+    // permit on every stack that ran journey 40 or the seed.
+    await loginAsAdmin(page);
+    const newest = await newestResearcherLog(page);
+    expect(newest, "J910 recorded an event").toBeDefined();
+    const row = newest as AccessLog & {
+      permitId?: string | null;
+      assetId?: string | null;
+      bytesAccessed?: number | null;
+    };
+    expect(row.permitId, "the event carries the permit it ran under").toMatch(
+      /^(permit-|hdab-)/,
+    );
+    expect(row.assetId, "the event carries the dataset").toMatch(/^dataset:/);
+    expect(typeof row.bytesAccessed).toBe("number");
+  });
+
   test("J912 the overview counts access events per consumer", async ({
     page,
   }) => {
