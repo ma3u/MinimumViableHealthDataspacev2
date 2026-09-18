@@ -96,7 +96,9 @@ describe("POST /api/compliance/requests", () => {
 });
 
 describe("GET /api/compliance/requests", () => {
-  beforeEach(() => mockRunQuery.mockReset());
+  beforeEach(() => {
+    mockRunQuery.mockReset();
+  });
 
   it("shows a data user only its own requests, parsing the stored answer", async () => {
     mockRequireAuth.mockResolvedValue(RESEARCHER as never);

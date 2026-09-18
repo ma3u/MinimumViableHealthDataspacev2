@@ -41,6 +41,9 @@ npx vitest run __tests__/unit/components/Navigation.test.tsx  # single file
 
 - Global setup in `ui/__tests__/setup.ts` — initialises MSW (Mock Service Worker).
 - API calls in unit tests are intercepted by MSW handlers; do not mock `fetch` directly.
+- Hooks that reset a mock use braces, `beforeEach(() => { m.mockReset(); })`: `mockReset()`
+  returns the mock and Vitest 4 runs a function returned from a hook as the test's teardown
+  (see `docs/gotchas.md`, 2026-09-18).
 - Coverage provider: v8. Minimum thresholds not yet enforced; aim for critical-path coverage.
 
 ### Pre-push gate

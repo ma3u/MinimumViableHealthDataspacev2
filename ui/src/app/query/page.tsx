@@ -19,6 +19,14 @@ import {
   AlertTriangle,
 } from "lucide-react";
 
+interface ScopePermit {
+  permitId: string;
+  datasetId: string | null;
+  datasetTitle: string | null;
+  purpose: string | null;
+  validUntil: string | null;
+}
+
 interface OdrlScope {
   participantId: string;
   permissions: string[];
@@ -28,6 +36,8 @@ interface OdrlScope {
   policyIds: string[];
   hasActiveContract: boolean;
   hdabApproved: boolean;
+  /** The data permits the scope is derived from (Art. 68), issue #206. */
+  permits?: ScopePermit[];
 }
 
 interface PharmaRole {
@@ -90,6 +100,9 @@ interface NlqResult {
   results: Record<string, any>[];
   totalRows: number;
   error?: string;
+  /** Why the gate refused, with the article (Art. 61(1)), issue #206. */
+  reason?: string;
+  article?: string;
   message?: string;
   odrlEnforced?: boolean;
   interpretation?: NlqInterpretation;
@@ -487,6 +500,34 @@ export default function NlqPage() {
                 )}
               </div>
             </div>
+            {/* The permits the scope is derived from (Art. 68); a data user
+                without one is refused at the gate (Art. 61(1)). */}
+            {odrlScope.permits && odrlScope.permits.length > 0 && (
+              <div
+                className="mt-3 pt-3 border-t border-[var(--border)] text-xs"
+                data-testid="scope-permits"
+              >
+                <div className="text-[var(--text-secondary)] mb-1">
+                  Data permits (Art. 68)
+                </div>
+                <ul className="space-y-0.5">
+                  {odrlScope.permits.map((p) => (
+                    <li key={p.permitId} className="text-[var(--text-primary)]">
+                      <span className="font-mono">{p.permitId}</span>
+                      {p.datasetId && (
+                        <span> for {p.datasetTitle ?? p.datasetId}</span>
+                      )}
+                      {p.validUntil && (
+                        <span className="text-[var(--text-secondary)]">
+                          {" "}
+                          · valid until {p.validUntil.slice(0, 10)}
+                        </span>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
         )}
 
@@ -924,10 +965,21 @@ export default function NlqPage() {
                 )
               ))}
 
-            {/* Error */}
+            {/* Error, with the gate's reason and article when it refused */}
             {result.error && (
-              <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-3 text-sm text-red-300">
-                {result.error}
+              <div
+                className="bg-red-500/10 border border-red-500/30 rounded-lg p-3 text-sm text-red-300"
+                data-testid="nlq-error"
+              >
+                <div>{result.error}</div>
+                {result.reason && (
+                  <div className="mt-1 text-red-200/80">{result.reason}</div>
+                )}
+                {result.article && (
+                  <div className="mt-1 text-xs text-red-200/60">
+                    {result.article}
+                  </div>
+                )}
               </div>
             )}
 

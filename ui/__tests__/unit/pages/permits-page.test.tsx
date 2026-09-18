@@ -33,7 +33,9 @@ function response(data: unknown, ok = true) {
 }
 
 describe("/permits", () => {
-  beforeEach(() => mockFetchApi.mockReset());
+  beforeEach(() => {
+    mockFetchApi.mockReset();
+  });
 
   it("shows decisions with their outcome and pending applications with the clock, from the public route", async () => {
     const fixture = JSON.parse(

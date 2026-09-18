@@ -224,6 +224,15 @@ export async function checkPermit(input: {
   };
 }
 
+/** The audit headers a permitted access carries to the neo4j-proxy. */
+function permitHeaders(check: PermitCheck): Record<string, string> {
+  if (!check.allowed || !check.permitId) return {};
+  const headers: Record<string, string> = { "X-Permit": check.permitId };
+  if (check.datasetId) headers["X-Dataset"] = check.datasetId;
+  if (check.purpose) headers["X-Purpose"] = check.purpose;
+  return headers;
+}
+
 /**
  * Headers that tell the neo4j-proxy which permit, dataset and purpose an
  * access runs under, so its audit record (TransferEvent) says more than the
@@ -235,15 +244,112 @@ export async function activePermitHeaders(
 ): Promise<Record<string, string>> {
   if (!consumerDid) return {};
   try {
-    const check = await checkPermit({ consumerDid });
-    if (!check.allowed || !check.permitId) return {};
-    const headers: Record<string, string> = { "X-Permit": check.permitId };
-    if (check.datasetId) headers["X-Dataset"] = check.datasetId;
-    if (check.purpose) headers["X-Purpose"] = check.purpose;
-    return headers;
+    return permitHeaders(await checkPermit({ consumerDid }));
   } catch {
     return {};
   }
+}
+
+/**
+ * Whether Art. 61(1) applies to this caller. A health data user (DATA_USER)
+ * accesses data for secondary use and needs a permit. A data holder looking
+ * at its own data, the access body supervising, the trust centre operator
+ * and the dataspace operator are not data users in that sense.
+ */
+const EXEMPT_ROLES = [
+  "EDC_ADMIN",
+  "DATA_HOLDER",
+  "HDAB_AUTHORITY",
+  "TRUST_CENTER_OPERATOR",
+];
+
+export function needsPermit(roles: string[]): boolean {
+  return (
+    roles.includes("DATA_USER") && !roles.some((r) => EXEMPT_ROLES.includes(r))
+  );
+}
+
+export type SecondaryUseGate =
+  | {
+      allowed: true;
+      /** The permit the access runs under; null when the caller is exempt. */
+      check: PermitCheck | null;
+      headers: Record<string, string>;
+    }
+  | {
+      allowed: false;
+      status: 403 | 503;
+      body: {
+        error: string;
+        reason: string;
+        article: string;
+        consumerDid: string;
+        permitId: string | null;
+        odrlEnforced: true;
+      };
+    };
+
+/**
+ * The gate in front of the secure processing environment (Art. 73): the
+ * query and analytics routes call it before they touch any data. A data
+ * user without an approved, unexpired permit is refused with the article
+ * (Art. 61(1)); the body's refusal or revocation on /compliance therefore
+ * stops the next query, not only the next transfer (issue #206, M3 and M4).
+ * When the caller names a dataset the check is strict on it, as it is for
+ * transfers. An exempt caller passes and still gets the audit headers of
+ * any permit it happens to hold.
+ */
+export async function gateSecondaryUse(input: {
+  consumerDid: string;
+  roles: string[];
+  datasetId?: string | null;
+  /** The word the refusal uses: "query", "analysis". */
+  what: string;
+  now?: Date;
+}): Promise<SecondaryUseGate> {
+  if (!needsPermit(input.roles)) {
+    return {
+      allowed: true,
+      check: null,
+      headers: await activePermitHeaders(input.consumerDid),
+    };
+  }
+  let check: PermitCheck;
+  try {
+    check = await checkPermit({
+      consumerDid: input.consumerDid,
+      datasetId: input.datasetId ?? null,
+      now: input.now,
+    });
+  } catch (err) {
+    return {
+      allowed: false,
+      status: 503,
+      body: {
+        error: `The data permit register is unreachable; a ${input.what} is not allowed without it`,
+        reason: err instanceof Error ? err.message : String(err),
+        article: PERMIT_ARTICLE,
+        consumerDid: input.consumerDid,
+        permitId: null,
+        odrlEnforced: true,
+      },
+    };
+  }
+  if (!check.allowed) {
+    return {
+      allowed: false,
+      status: 403,
+      body: {
+        error: `No data permit covers this ${input.what}`,
+        reason: check.reason,
+        article: check.article,
+        consumerDid: input.consumerDid,
+        permitId: check.permitId,
+        odrlEnforced: true,
+      },
+    };
+  }
+  return { allowed: true, check, headers: permitHeaders(check) };
 }
 
 const SLUG_TO_DID: Record<string, string> = {

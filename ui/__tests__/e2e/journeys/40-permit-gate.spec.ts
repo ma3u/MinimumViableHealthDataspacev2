@@ -3,10 +3,11 @@
  *
  * Regulation (EU) 2025/327: the data user applies (Art. 67), the health data
  * access body decides within three months (Art. 68), and the user accesses
- * data only under the permit (Art. 61(1)). This journey walks it end to end:
- * the PharmaCo researcher applies, the MedReg regulator refuses and the
- * transfer is blocked, the regulator issues the permit and the transfer
- * starts, and the audit trail shows the transfer under that permit.
+ * data only under the permit (Art. 61(1)), in the secure processing
+ * environment (Art. 73). This journey walks it end to end: the PharmaCo
+ * researcher applies, the MedReg regulator refuses and both the transfer and
+ * a query on the dataset are blocked, the regulator issues the permit and
+ * both go through, and the audit trail shows the transfer under that permit.
  *
  * Every run leaves one application, one decision and one transfer in the
  * graph, which is what a demo needs to show anyway. The dataset id is unique
@@ -71,7 +72,7 @@ test.describe("Issue #206 · the data permit gates the transfer", () => {
     await researcher.context().close();
   });
 
-  test("J921 a refusal blocks the transfer (Art. 61(1))", async ({
+  test("J921 a refusal blocks the transfer and the query (Art. 61(1))", async ({
     browser,
   }) => {
     test.setTimeout(120_000);
@@ -95,11 +96,23 @@ test.describe("Issue #206 · the data permit gates the transfer", () => {
     const body = await transfer.json();
     expect(body.error).toBe("No data permit covers this transfer");
     expect(body.article).toContain("Art. 61(1)");
+
+    // The secure processing environment stands behind the same permit: a
+    // query that names the dataset is refused before it reaches the proxy.
+    const query = await researcher.request.post("/api/nlq", {
+      data: { question: "How many patients are there?", datasetId: DATASET },
+    });
+    expect(query.status(), await query.text()).toBe(403);
+    const refused = await query.json();
+    expect(refused.error).toBe("No data permit covers this query");
+    expect(refused.article).toContain("Art. 61(1)");
     await researcher.context().close();
   });
 
-  test("J922 the permit unlocks it (Art. 68(3))", async ({ browser }) => {
-    test.setTimeout(120_000);
+  test("J922 the permit unlocks the transfer and the query (Art. 68(3))", async ({
+    browser,
+  }) => {
+    test.setTimeout(150_000);
     const regulator = await signedInAs(browser, "regulator");
     const validUntil = new Date();
     validUntil.setUTCFullYear(validUntil.getUTCFullYear() + 1);
@@ -141,6 +154,17 @@ test.describe("Issue #206 · the data permit gates the transfer", () => {
     const body = await transfer.json();
     expect(body.permitId).toBe(permitId);
     expect(body.permitDatasetMatched).toBe(true);
+
+    // The same question now runs under the permit. The proxy scales to zero
+    // on Azure and needs a moment to wake.
+    const query = await researcher.request.post("/api/nlq", {
+      data: { question: "How many patients are there?", datasetId: DATASET },
+      timeout: 90_000,
+    });
+    expect(query.status(), await query.text()).toBe(200);
+    const answered = await query.json();
+    expect(answered.error).toBeUndefined();
+    expect(answered.totalRows).toBeGreaterThan(0);
     await researcher.context().close();
   });
 

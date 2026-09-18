@@ -3,6 +3,25 @@
 Non-obvious pitfalls across the stack. Ordered newest first; add a new
 entry at the top when you hit something that cost you more than 30 minutes.
 
+## 2026-09-18: a Vitest hook that returns the mock calls it after the test
+
+`beforeEach(() => mockRunQuery.mockReset())` looks harmless. `mockReset()`
+returns the mock, so the arrow returns a function, and Vitest 4 runs a
+function returned from a hook as that test's teardown. Every test in the
+block therefore called `runQuery()` once more after it finished. That is
+invisible until a test installs a throwing or rejecting implementation: the
+teardown call throws, and Vitest fails the test with the mock's own error,
+although the code under test caught it. It looked like Vitest attributing a
+"swallowed rejection" to the test; the earlier workaround (no hook, reset
+inside the first test) treated the symptom.
+
+Rules that follow:
+
+- Hooks that touch a mock use braces: `beforeEach(() => { m.mockReset(); })`.
+  Same for `mockClear()` and `mockRestore()`, which also return the mock.
+- When a test fails with an error the code under test demonstrably catches,
+  look for a hook or callback that returns something.
+
 ## 2026-09-17: Neo4j's HTTP port 7474 does not exist on Azure
 
 `/admin/audit` was blank on https://ehds.mabu.red on every revision (issue

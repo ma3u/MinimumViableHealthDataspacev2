@@ -1,8 +1,19 @@
 import { runQuery } from "@/lib/neo4j";
+import { findPermits, type PermitRow } from "@/lib/permit-gate";
+import { parseGraphTime } from "@/lib/permits";
 
 const IS_STATIC = process.env.NEXT_PUBLIC_STATIC_EXPORT === "true";
 
 /* ── Types ─────────────────────────────────────────────────────── */
+
+/** A data permit the scope was derived from (Art. 68); only valid ones. */
+export interface ScopePermit {
+  permitId: string;
+  datasetId: string | null;
+  datasetTitle: string | null;
+  purpose: string | null;
+  validUntil: string | null;
+}
 
 export interface OdrlScope {
   participantId: string;
@@ -14,6 +25,13 @@ export interface OdrlScope {
   policyIds: string[];
   hasActiveContract: boolean;
   hdabApproved: boolean;
+  /**
+   * The approved, unexpired data permits of the participant. Their datasets
+   * are in accessibleDatasets, their purposes in permissions, the latest
+   * validity end in temporalLimit (issue #206, M3). Empty for a participant
+   * that never applied, for instance a data holder querying its own data.
+   */
+  permits: ScopePermit[];
 }
 
 /* ── Participant mapping ───────────────────────────────────────── */
@@ -71,7 +89,54 @@ const STATIC_SCOPE: OdrlScope = {
   policyIds: ["policy-ehds-art53-synthetic-2026"],
   hasActiveContract: true,
   hdabApproved: true,
+  permits: [
+    {
+      permitId: "hdab-decision-medreg-2025-001",
+      datasetId: "dataset:synthea-fhir-r4-mvd",
+      datasetTitle: "Synthea FHIR R4 cohort",
+      purpose: "SCIENTIFIC_RESEARCH",
+      validUntil: "2027-12-31T23:59:59",
+    },
+  ],
 };
+
+/** Neo4j's toString(datetime) has nine fractional digits; keep an ISO value. */
+function isoOrNull(value: string | null | undefined): string | null {
+  const t = parseGraphTime(value);
+  return t === null ? null : new Date(t).toISOString();
+}
+
+/** The permits that still count: status APPROVED and not past validUntil. */
+function validPermits(rows: PermitRow[], now: number): ScopePermit[] {
+  return rows
+    .filter((r) => r.status === "APPROVED")
+    .filter((r) => {
+      const t = parseGraphTime(r.validUntil);
+      return t === null || t >= now;
+    })
+    .map((r) => ({
+      permitId: r.permitId,
+      datasetId: r.datasetId,
+      datasetTitle: r.datasetTitle,
+      purpose: r.purpose,
+      validUntil: isoOrNull(r.validUntil),
+    }));
+}
+
+function emptyScope(participantId: string): OdrlScope {
+  return {
+    participantId,
+    participantName: participantId,
+    permissions: [],
+    prohibitions: [],
+    accessibleDatasets: [],
+    temporalLimit: null,
+    policyIds: [],
+    hasActiveContract: false,
+    hdabApproved: false,
+    permits: [],
+  };
+}
 
 /* ── Core resolver ─────────────────────────────────────────────── */
 
@@ -81,9 +146,13 @@ const STATIC_SCOPE: OdrlScope = {
  * Walks the Neo4j graph:
  *   Participant → Contract → DataProduct → GOVERNED_BY → OdrlPolicy
  *   HDABApproval → GRANTS_ACCESS_TO → HealthDataset
+ * and, since issue #206, the participant's own data permits:
+ *   Participant → SUBMITTED → AccessApplication ← APPROVES ← HDABApproval
  *
  * Returns the union of all permissions, prohibitions, and accessible
- * datasets for the caller's active contracts.
+ * datasets for the caller's active contracts and valid permits. A permit
+ * the access body revoked or that has run out contributes nothing, so the
+ * scope shrinks the moment the body acts (Art. 63(3), Art. 68(3)).
  */
 export async function resolveOdrlScope(
   participantId: string,
@@ -121,18 +190,10 @@ export async function resolveOdrlScope(
       { participantId },
     );
 
-    if (rows.length === 0) {
-      return {
-        participantId,
-        participantName: participantId,
-        permissions: [],
-        prohibitions: [],
-        accessibleDatasets: [],
-        temporalLimit: null,
-        policyIds: [],
-        hasActiveContract: false,
-        hdabApproved: false,
-      };
+    const permits = validPermits(await findPermits(participantId), Date.now());
+
+    if (rows.length === 0 && permits.length === 0) {
+      return emptyScope(participantId);
     }
 
     // Aggregate across all matching rows
@@ -153,7 +214,25 @@ export async function resolveOdrlScope(
       if (row.datasetId) datasetSet.add(row.datasetId);
       if (row.temporalLimit) temporalLimit = row.temporalLimit;
       if (row.contractStatus === "ACTIVE") hasActiveContract = true;
-      if (row.approvalStatus === "approved") hdabApproved = true;
+      if ((row.approvalStatus ?? "").toUpperCase() === "APPROVED") {
+        hdabApproved = true;
+      }
+    }
+
+    // The permits decide what the data user may touch and until when. The
+    // latest validity end of a valid permit is the period; a permit without
+    // an end date leaves the policy's limit in place.
+    if (permits.length > 0) {
+      hdabApproved = true;
+      for (const permit of permits) {
+        if (permit.datasetId) datasetSet.add(permit.datasetId);
+        if (permit.purpose) permissionSet.add(permit.purpose.toLowerCase());
+      }
+      const ends = permits
+        .map((p) => p.validUntil)
+        .filter((v): v is string => Boolean(v))
+        .sort();
+      if (ends.length > 0) temporalLimit = ends[ends.length - 1];
     }
 
     return {
@@ -166,19 +245,10 @@ export async function resolveOdrlScope(
       policyIds: [...policySet],
       hasActiveContract,
       hdabApproved,
+      permits,
     };
   } catch (err) {
     console.error("resolveOdrlScope error:", err);
-    return {
-      participantId,
-      participantName: participantId,
-      permissions: [],
-      prohibitions: [],
-      accessibleDatasets: [],
-      temporalLimit: null,
-      policyIds: [],
-      hasActiveContract: false,
-      hdabApproved: false,
-    };
+    return emptyScope(participantId);
   }
 }

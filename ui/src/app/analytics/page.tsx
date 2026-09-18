@@ -27,6 +27,29 @@ interface AnalyticsData {
   topMeasurements: { label: string; count: number }[];
   topProcedures: { label: string; count: number }[];
   genderBreakdown: { gender: string; count: number }[];
+  /** The data permit a data user's analysis ran under (Art. 68); null for exempt roles. */
+  permit?: {
+    permitId: string | null;
+    datasetId: string | null;
+    purpose: string | null;
+    validUntil: string | null;
+    article: string;
+  } | null;
+}
+
+/** The message of a refusal at the permit gate, or the plain status. */
+async function describeFailure(r: Response): Promise<string> {
+  const body = (await r.json().catch(() => null)) as {
+    error?: string;
+    reason?: string;
+    article?: string;
+  } | null;
+  if (body?.error && body.reason) {
+    return `${body.error}. ${body.reason}${
+      body.article ? ` (${body.article})` : ""
+    }`;
+  }
+  return body?.error ?? `HTTP ${r.status}`;
 }
 
 const LAYER_COLORS = {
@@ -122,8 +145,8 @@ export default function AnalyticsPage() {
 
   useEffect(() => {
     fetchApi("/api/analytics")
-      .then((r) => {
-        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      .then(async (r) => {
+        if (!r.ok) throw new Error(await describeFailure(r));
         return r.json();
       })
       .then((d) => {
@@ -195,8 +218,28 @@ export default function AnalyticsPage() {
         />
 
         {error && (
-          <div className="mb-6 p-3 rounded bg-[var(--role-admin-bg)] border border-[var(--role-admin-border)] text-[var(--role-admin-text)] text-sm">
+          <div
+            className="mb-6 p-3 rounded bg-[var(--role-admin-bg)] border border-[var(--role-admin-border)] text-[var(--role-admin-text)] text-sm"
+            data-testid="analytics-error"
+          >
             {error}
+          </div>
+        )}
+
+        {data?.permit && (
+          <div
+            className="mb-6 p-3 rounded bg-[var(--surface)] border border-[var(--border)] text-xs text-[var(--text-secondary)]"
+            data-testid="analytics-permit"
+          >
+            Under data permit{" "}
+            <span className="font-mono text-[var(--text-primary)]">
+              {data.permit.permitId}
+            </span>
+            {data.permit.datasetId && <> for {data.permit.datasetId}</>}
+            {data.permit.validUntil && (
+              <>, valid until {data.permit.validUntil.slice(0, 10)}</>
+            )}{" "}
+            ({data.permit.article})
           </div>
         )}
 

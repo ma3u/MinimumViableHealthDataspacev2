@@ -475,6 +475,60 @@ describe("AnalyticsPage", () => {
       expect(screen.getByText("100")).toBeInTheDocument();
     });
   });
+
+  it("names the data permit the analysis ran under (Art. 68)", async () => {
+    mockFetchApi.mockReturnValue(
+      mockResponse({
+        summary: {
+          persons: 1,
+          conditions: 0,
+          drugs: 0,
+          measurements: 0,
+          procedures: 0,
+          visits: 0,
+        },
+        topConditions: [],
+        topDrugs: [],
+        topMeasurements: [],
+        topProcedures: [],
+        genderBreakdown: [],
+        permit: {
+          permitId: "permit-app-1",
+          datasetId: "dataset:synthea-fhir-r4-mvd",
+          purpose: "SCIENTIFIC_RESEARCH",
+          validUntil: "2027-09-17T23:59:59.000Z",
+          article: "Regulation (EU) 2025/327, Art. 61(1) and Art. 68",
+        },
+      }),
+    );
+    render(<AnalyticsPage />);
+    const line = await screen.findByTestId("analytics-permit");
+    expect(line).toHaveTextContent("Under data permit permit-app-1");
+    expect(line).toHaveTextContent("valid until 2027-09-17");
+    expect(line).toHaveTextContent("Art. 68");
+  });
+
+  it("shows the gate's reason when a data user holds no permit (Art. 61(1))", async () => {
+    mockFetchApi.mockReturnValue(
+      Promise.resolve({
+        ok: false,
+        status: 403,
+        json: () =>
+          Promise.resolve({
+            error: "No data permit covers this analysis",
+            reason:
+              "did:web:pharmaco.de:research holds no data permit: no health data access body has decided on an access application for this participant.",
+            article: "Regulation (EU) 2025/327, Art. 61(1) and Art. 68",
+          }),
+      }),
+    );
+    render(<AnalyticsPage />);
+    const box = await screen.findByTestId("analytics-error");
+    expect(box).toHaveTextContent("No data permit covers this analysis");
+    expect(box).toHaveTextContent("holds no data permit");
+    expect(box).toHaveTextContent("Art. 61(1)");
+    expect(screen.queryByTestId("analytics-permit")).not.toBeInTheDocument();
+  });
 });
 
 describe("EehrxfPage", () => {

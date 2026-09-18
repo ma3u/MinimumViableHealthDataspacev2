@@ -145,16 +145,19 @@ shows the application and the Art. 68(1) criteria; "Refuse" needs a written
 justification, "Issue data permit" sets purpose, validity and conditions. The
 "Decision due" column is the three-month clock.
 
-**Expect the question:** "what happens if we refuse?" Answer: step 5 cannot
-start, and you can show it: refuse, switch to the researcher, start the
-transfer, and the connector answers 403 with the article. Issue the permit and
-the same transfer goes through, stamped with the permit id on the audit page.
+**Expect the question:** "what happens if we refuse?" Answer: neither step 5
+nor step 6 can start, and you can show it: refuse, switch to the researcher,
+start the transfer, and the connector answers 403 with the article; ask a
+question on `/query` and the secure processing environment refuses the same
+way, with the reason and the article (Art. 61(1)). Issue the permit and both
+go through, the transfer stamped with the permit id on the audit page and the
+query listed under "Data permits" in the policy scope.
 
 One thing to know before the room: a permit issued earlier stays valid, and a
 refusal of a new application revokes nothing. Revocation is its own measure
 (Art. 63(3)): on a row with an issued permit the access body has "Revoke
-permit", with a reason; the next transfer under that permit answers 403 and
-names the article. On a stack where PharmaCo already holds a permit for the
+permit", with a reason; the next transfer and the next query under that permit
+answer 403 and name the article and the reason. On a stack where PharmaCo already holds a permit for the
 Synthea cohort, show the refusal on an application for another dataset, or
 revoke first.
 
@@ -190,7 +193,10 @@ is possible only through the Trust Center, and only for a named authority.
 
 **Say:** analysis happens where the data is, in an OMOP CDM 5.4 shape. The
 researcher gets cohort counts and aggregates out; the row-level data does not
-leave the environment. This is the shape of Article 50.
+leave the environment. This is the secure processing environment of Art. 73,
+and it opens only under the permit from step 4b (Art. 61(1)): `/analytics`
+names the permit it runs under, `/query` lists the permits its policy scope
+comes from, and a data user without one is refused with the article.
 
 ### 7. Results
 

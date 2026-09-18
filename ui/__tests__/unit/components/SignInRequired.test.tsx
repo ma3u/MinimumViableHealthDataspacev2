@@ -14,7 +14,9 @@ vi.mock("next-auth/react", () => ({
 import { SignInRequired } from "@/components/SignInRequired";
 
 describe("SignInRequired", () => {
-  beforeEach(() => signInMock.mockReset());
+  beforeEach(() => {
+    signInMock.mockReset();
+  });
 
   it("renders the default title when none is provided", () => {
     render(<SignInRequired description="Please log in to continue." />);

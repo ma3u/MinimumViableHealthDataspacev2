@@ -264,5 +264,12 @@
       "gender": "Male",
       "count": 75
     }
-  ]
+  ],
+  "permit": {
+    "permitId": "hdab-decision-medreg-2025-001",
+    "datasetId": "dataset:synthea-fhir-r4-mvd",
+    "purpose": "SCIENTIFIC_RESEARCH",
+    "validUntil": "2027-12-31T23:59:59.000Z",
+    "article": "Regulation (EU) 2025/327, Art. 61(1) and Art. 68"
+  }
 }

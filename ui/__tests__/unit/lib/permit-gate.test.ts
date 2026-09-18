@@ -12,6 +12,8 @@ import { runQuery } from "@/lib/neo4j";
 import {
   checkPermit,
   didFromCounterParty,
+  gateSecondaryUse,
+  needsPermit,
   recordPermittedTransfer,
   type PermitRow,
 } from "@/lib/permit-gate";
@@ -34,8 +36,14 @@ function permit(over: Partial<PermitRow> = {}): PermitRow {
   };
 }
 
+// Braces matter in these hooks: mockReset() returns the mock, and vitest 4
+// runs a function a hook returns as the test's teardown. A bare arrow hook
+// therefore called runQuery() after every test, which is harmless until a
+// test gives it a throwing implementation.
 describe("checkPermit", () => {
-  beforeEach(() => mockRunQuery.mockReset());
+  beforeEach(() => {
+    mockRunQuery.mockReset();
+  });
 
   it("refuses when the consumer cannot be identified, without asking the graph", async () => {
     const r = await checkPermit({ consumerDid: null, now: NOW });
@@ -189,11 +197,11 @@ describe("didFromCounterParty", () => {
 });
 
 describe("recordPermittedTransfer", () => {
-  // No mockReset() in a beforeEach here: with the console spy below, vitest 4
-  // then attributes the swallowed rejection to the test and fails it.
+  beforeEach(() => {
+    mockRunQuery.mockReset();
+  });
 
   it("writes the transfer with its permit into the audit graph", async () => {
-    mockRunQuery.mockReset();
     mockRunQuery.mockResolvedValue([]);
     await recordPermittedTransfer({
       transferId: "demo-transfer:x",
@@ -232,5 +240,122 @@ describe("recordPermittedTransfer", () => {
     expect(outcome).toBe("resolved");
     expect(warn).toHaveBeenCalledTimes(1);
     warn.mockRestore();
+  });
+});
+
+describe("needsPermit", () => {
+  it("applies Art. 61(1) to a data user", () => {
+    expect(needsPermit(["EDC_USER_PARTICIPANT", "DATA_USER"])).toBe(true);
+  });
+
+  it("exempts holders, the access body, the trust centre and the operator", () => {
+    expect(needsPermit(["DATA_HOLDER"])).toBe(false);
+    expect(needsPermit(["HDAB_AUTHORITY"])).toBe(false);
+    expect(needsPermit(["TRUST_CENTER_OPERATOR"])).toBe(false);
+    expect(needsPermit(["EDC_ADMIN", "DATA_USER"])).toBe(false);
+    expect(needsPermit([])).toBe(false);
+  });
+});
+
+describe("gateSecondaryUse (issue #206, M3)", () => {
+  beforeEach(() => {
+    mockRunQuery.mockReset();
+  });
+
+  it("refuses a data user without a permit, naming the article", async () => {
+    mockRunQuery.mockResolvedValue([]);
+    const g = await gateSecondaryUse({
+      consumerDid: PHARMACO,
+      roles: ["DATA_USER"],
+      what: "query",
+      now: NOW,
+    });
+    expect(g.allowed).toBe(false);
+    if (g.allowed) return;
+    expect(g.status).toBe(403);
+    expect(g.body.error).toBe("No data permit covers this query");
+    expect(g.body.reason).toContain("holds no data permit");
+    expect(g.body.article).toContain("Art. 61(1)");
+    expect(g.body.odrlEnforced).toBe(true);
+  });
+
+  it("refuses after the access body revoked the permit for the dataset", async () => {
+    mockRunQuery.mockResolvedValue([
+      permit({
+        status: "REVOKED",
+        revokedAt: "2026-09-16T08:00:00Z",
+        revocationReason: "Output left the SPE with identifiers.",
+      }),
+    ]);
+    const g = await gateSecondaryUse({
+      consumerDid: PHARMACO,
+      roles: ["DATA_USER"],
+      datasetId: SYNTHEA,
+      what: "query",
+      now: NOW,
+    });
+    expect(g.allowed).toBe(false);
+    if (g.allowed) return;
+    expect(g.body.reason).toContain("revoked on 2026-09-16 (Art. 63(3))");
+    expect(g.body.permitId).toBe("permit-app-1");
+  });
+
+  it("lets a permitted data user through with the audit headers", async () => {
+    mockRunQuery.mockResolvedValue([permit()]);
+    const g = await gateSecondaryUse({
+      consumerDid: PHARMACO,
+      roles: ["DATA_USER"],
+      datasetId: SYNTHEA,
+      what: "analysis",
+      now: NOW,
+    });
+    expect(g.allowed).toBe(true);
+    if (!g.allowed) return;
+    expect(g.check?.permitId).toBe("permit-app-1");
+    expect(g.check?.datasetMatched).toBe(true);
+    expect(g.headers).toEqual({
+      "X-Permit": "permit-app-1",
+      "X-Dataset": SYNTHEA,
+      "X-Purpose": "SCIENTIFIC_RESEARCH",
+    });
+  });
+
+  it("answers 503 when the register cannot be read", async () => {
+    mockRunQuery.mockRejectedValue(new Error("Bolt down"));
+    const g = await gateSecondaryUse({
+      consumerDid: PHARMACO,
+      roles: ["DATA_USER"],
+      what: "query",
+    });
+    expect(g.allowed).toBe(false);
+    if (g.allowed) return;
+    expect(g.status).toBe(503);
+    expect(g.body.error).toContain("register is unreachable");
+    expect(g.body.reason).toBe("Bolt down");
+  });
+
+  it("passes an exempt caller and still attaches the permit it holds", async () => {
+    mockRunQuery.mockResolvedValue([permit()]);
+    const g = await gateSecondaryUse({
+      consumerDid: "did:web:alpha-klinik.de:participant",
+      roles: ["DATA_HOLDER"],
+      what: "query",
+    });
+    expect(g.allowed).toBe(true);
+    if (!g.allowed) return;
+    expect(g.check).toBeNull();
+    expect(g.headers["X-Permit"]).toBe("permit-app-1");
+  });
+
+  it("passes an exempt caller even when the register is down", async () => {
+    mockRunQuery.mockRejectedValue(new Error("Bolt down"));
+    const g = await gateSecondaryUse({
+      consumerDid: "did:web:medreg.de:hdab",
+      roles: ["HDAB_AUTHORITY"],
+      what: "query",
+    });
+    expect(g.allowed).toBe(true);
+    if (!g.allowed) return;
+    expect(g.headers).toEqual({});
   });
 });

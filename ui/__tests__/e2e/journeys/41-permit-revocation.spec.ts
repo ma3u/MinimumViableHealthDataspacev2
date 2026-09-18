@@ -4,8 +4,9 @@
  * Regulation (EU) 2025/327: a permit stays valid until the access body revokes
  * it (Art. 63(3)); the body publishes applications, decisions and measures
  * (Art. 57(1)(j)) for everyone, sign-in or not (Art. 58(1)(f)). This journey
- * issues a permit, transfers under it, revokes it, sees the same transfer
- * refused, and reads it all back on /permits without a session.
+ * issues a permit, transfers under it, revokes it, sees the same transfer and
+ * a query on the dataset refused, and reads it all back on /permits without
+ * a session.
  *
  * The dataset id is unique per run for the same reason as in journey 40.
  *
@@ -89,7 +90,7 @@ test.describe("Issue #206 · revocation and the public register", () => {
     await again.context().close();
   });
 
-  test("J931 the access body revokes it and the next transfer is refused (Art. 63(3))", async ({
+  test("J931 the access body revokes it and the next transfer and query are refused (Art. 63(3))", async ({
     browser,
   }) => {
     test.setTimeout(120_000);
@@ -112,6 +113,16 @@ test.describe("Issue #206 · revocation and the public register", () => {
     const body = await transfer.json();
     expect(body.reason).toContain("revoked");
     expect(body.reason).toContain("Art. 63(3)");
+
+    // The secure processing environment closes with the permit.
+    const query = await researcher.request.post("/api/nlq", {
+      data: { question: "How many patients are there?", datasetId: DATASET },
+    });
+    expect(query.status(), await query.text()).toBe(403);
+    const refused = await query.json();
+    expect(refused.error).toBe("No data permit covers this query");
+    expect(refused.reason).toContain(`Data permit ${permitId}`);
+    expect(refused.reason).toContain("Art. 63(3)");
     await researcher.context().close();
   });
 
