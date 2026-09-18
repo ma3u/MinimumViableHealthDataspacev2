@@ -80,21 +80,65 @@ const ROWS = [
   },
 ];
 
+const REQUEST_ROWS = [
+  {
+    requestId: "req-lmc-1",
+    applicant: "Limburg Medical Centre",
+    applicantDid: "did:web:lmc.nl:clinic",
+    applicantCountry: "NL",
+    accessBody: "Institut de Recherche Santé",
+    purpose: "PUBLIC_HEALTH",
+    datasetId: "dataset:synthea-fhir-r4-mvd",
+    datasetTitle: "Synthea Synthetic FHIR R4 Patient Cohort",
+    submittedAt: "2026-02-10T10:00:00Z",
+    status: "ANSWERED",
+    decidedAt: "2026-02-24T15:00:00Z",
+    justification: null,
+    publishBy: "2026-04-07",
+    statisticalContent: "Cohort size by gender.",
+  },
+];
+
+/** The route asks the graph twice: applications, then Art. 69 requests. */
+function graphAnswers(
+  applications: unknown[],
+  requests: unknown[] = REQUEST_ROWS,
+) {
+  mockRunQuery.mockImplementation(async (cypher: string) =>
+    cypher.includes("HealthDataRequest") ? requests : applications,
+  );
+}
+
 describe("GET /api/permits", () => {
   beforeEach(() => {
     mockRunQuery.mockReset();
     vi.mocked(requireAuth).mockClear();
   });
 
+  it("lists health data requests next to applications, marked as such", async () => {
+    graphAnswers(ROWS);
+    const body = await (await GET()).json();
+    const req = body.entries.find(
+      (e: { applicationId: string }) => e.applicationId === "req-lmc-1",
+    );
+    expect(req.kind).toBe("request");
+    expect(req.outcome).toBe("request approved");
+    expect(req.conditions).toEqual(["Statistic: Cohort size by gender."]);
+    expect(req.publishBy).toBe("2026-04-07");
+    expect(
+      body.entries.filter((e: { kind: string }) => e.kind === "application"),
+    ).toHaveLength(3);
+  });
+
   it("needs no session: the register is public", async () => {
-    mockRunQuery.mockResolvedValue(ROWS);
+    graphAnswers(ROWS, []);
     const res = await GET();
     expect(res.status).toBe(200);
     expect(requireAuth).not.toHaveBeenCalled();
   });
 
   it("lists decisions with outcome, deadline and conditions, and pending applications with the clock", async () => {
-    mockRunQuery.mockResolvedValue(ROWS);
+    graphAnswers(ROWS, []);
     const res = await GET();
     const body = await res.json();
     expect(body.entries).toHaveLength(3);
@@ -127,7 +171,7 @@ describe("GET /api/permits", () => {
   });
 
   it("publishes nothing the articles do not ask for", async () => {
-    mockRunQuery.mockResolvedValue(ROWS);
+    graphAnswers(ROWS, []);
     const res = await GET();
     const body = await res.json();
     const cypher = mockRunQuery.mock.calls[0][0] as string;

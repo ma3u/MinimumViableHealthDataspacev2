@@ -158,6 +158,13 @@ names the article. On a stack where PharmaCo already holds a permit for the
 Synthea cohort, show the refusal on an application for another dataset, or
 revoke first.
 
+**Show the other door, Art. 69:** on `/requests` the researcher asks for a
+statistic instead of the data ("How many patients are there?"), the access
+body approves, and the researcher gets a count and nothing else: no records,
+no identifiers, counts below five suppressed. Approve the seeded PharmaCo
+request in the room; then approve one that asks for a patient's timeline and
+show that it yields no answer. Both decisions land on the public register.
+
 **Show the public side:** `/permits` needs no sign-in. It lists every
 application received, every permit and refusal with its justification and
 the 30-working-day publication deadline, and every revocation with its reason

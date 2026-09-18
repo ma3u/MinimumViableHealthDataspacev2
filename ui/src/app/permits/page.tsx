@@ -14,6 +14,7 @@ import { ScrollText, ShieldCheck, AlertCircle } from "lucide-react";
  */
 
 interface Entry {
+  kind?: "application" | "request";
   applicationId: string;
   applicant: string | null;
   applicantDid: string | null;
@@ -23,7 +24,12 @@ interface Entry {
   datasetId: string | null;
   datasetTitle: string | null;
   submittedAt: string | null;
-  outcome: "permit issued" | "refused" | "permit revoked" | "pending";
+  outcome:
+    | "permit issued"
+    | "refused"
+    | "permit revoked"
+    | "request approved"
+    | "pending";
   permitId: string | null;
   decidedAt: string | null;
   validUntil: string | null;
@@ -52,7 +58,7 @@ function purposeLabel(p: string | null): string {
 
 function OutcomeBadge({ outcome }: { outcome: Entry["outcome"] }) {
   const cls =
-    outcome === "permit issued"
+    outcome === "permit issued" || outcome === "request approved"
       ? "bg-[var(--badge-active-bg)] text-[var(--badge-active-text)] border-[var(--badge-active-border)]"
       : outcome === "pending"
         ? "bg-[var(--role-hdab-bg)] text-[var(--role-hdab-text)] border-[var(--role-hdab-border)]"
@@ -61,7 +67,7 @@ function OutcomeBadge({ outcome }: { outcome: Entry["outcome"] }) {
     <span
       className={`inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded border whitespace-nowrap ${cls}`}
     >
-      {outcome === "permit issued" ? (
+      {outcome === "permit issued" || outcome === "request approved" ? (
         <ShieldCheck size={12} />
       ) : (
         <AlertCircle size={12} />
@@ -196,11 +202,14 @@ export default function PermitsRegisterPage() {
                             <div className="font-medium">
                               {e.applicant ?? e.applicantDid ?? "—"}
                             </div>
-                            {e.applicantCountry && (
-                              <div className="text-[var(--text-secondary)]">
-                                {e.applicantCountry}
-                              </div>
-                            )}
+                            <div className="text-[var(--text-secondary)]">
+                              {e.kind === "request"
+                                ? "statistical request, Art. 69"
+                                : "access application, Art. 67"}
+                              {e.applicantCountry
+                                ? ` · ${e.applicantCountry}`
+                                : ""}
+                            </div>
                           </td>
                           <td className="px-3 py-2">
                             <span title={e.datasetId ?? ""}>
@@ -225,7 +234,8 @@ export default function PermitsRegisterPage() {
                                 {e.justification}
                               </div>
                             )}
-                            {e.outcome === "permit issued" &&
+                            {(e.outcome === "permit issued" ||
+                              e.outcome === "request approved") &&
                               e.conditions.length > 0 && (
                                 <ul className="mt-1 list-disc list-inside text-[var(--text-secondary)]">
                                   {e.conditions.map((c, i) => (

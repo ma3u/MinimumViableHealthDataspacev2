@@ -159,3 +159,22 @@ MERGE (medreg)-[:REVIEWED]->(appPharma)
 WITH appPharma
 MATCH (synthea:HealthDataset {datasetId: 'dataset:synthea-fhir-r4-mvd'})
 MERGE (appPharma)-[:REQUESTS]->(synthea);
+
+// ── PharmaCo's pending statistical request (issue #206, M5, Art. 69) ─────────
+MATCH (pharmaco:Participant {participantId: 'did:web:pharmaco.de:research'})
+MERGE (req:HealthDataRequest {requestId: 'req-pharmaco-20260901-demo'})
+  SET req.applicantId = pharmaco.participantId,
+      req.question = 'How many patients are there?',
+      req.purpose = 'SCIENTIFIC_RESEARCH',
+      req.datasetId = 'dataset:synthea-fhir-r4-mvd',
+      req.statisticalContent = 'One count of the cohort, no breakdown.',
+      req.safeguards = 'No record leaves the environment; counts below 5 are suppressed.',
+      req.legalBasis = 'GDPR Art. 6(1)(e), Regulation (EU) 2025/327 Art. 53(1)',
+      req.status = CASE WHEN req.status IS NULL THEN 'PENDING' ELSE req.status END,
+      req.submittedAt = datetime('2026-09-01T09:30:00'),
+      req.decisionDue = datetime('2026-12-01T09:30:00'),
+      req.ehdsArticle = 'Art. 69'
+MERGE (pharmaco)-[:SUBMITTED]->(req)
+WITH req
+MATCH (synthea:HealthDataset {datasetId: 'dataset:synthea-fhir-r4-mvd'})
+MERGE (req)-[:REQUESTS]->(synthea);

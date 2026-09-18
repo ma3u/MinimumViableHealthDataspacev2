@@ -25,6 +25,30 @@
       "revokedAt": null,
       "revocationReason": null,
       "decisionDue": "2026-05-01T08:30:00Z",
+      "daysToDecision": null,
+      "kind": "application"
+    },
+    {
+      "kind": "request",
+      "applicationId": "req-lmc-20260210-demo",
+      "applicant": "Limburg Medical Centre",
+      "applicantDid": "did:web:lmc.nl:clinic",
+      "applicantCountry": "NL",
+      "accessBody": "Institut de Recherche Santé",
+      "purpose": "PUBLIC_HEALTH",
+      "datasetId": "dataset:synthea-fhir-r4-mvd",
+      "datasetTitle": "Synthea Synthetic FHIR R4 Patient Cohort",
+      "submittedAt": "2026-02-10T10:00:00Z",
+      "outcome": "request approved",
+      "permitId": null,
+      "decidedAt": "2026-02-24T15:00:00Z",
+      "validUntil": null,
+      "conditions": ["Statistic: Cohort size by gender."],
+      "justification": null,
+      "publishBy": "2026-04-07",
+      "revokedAt": null,
+      "revocationReason": null,
+      "decisionDue": "2026-05-10T10:00:00Z",
       "daysToDecision": null
     },
     {
@@ -47,7 +71,8 @@
       "revokedAt": null,
       "revocationReason": null,
       "decisionDue": "2026-04-20T14:00:00Z",
-      "daysToDecision": null
+      "daysToDecision": null,
+      "kind": "application"
     },
     {
       "applicationId": "app-trialcorp-healthgov-2025-001",
@@ -69,7 +94,8 @@
       "revokedAt": null,
       "revocationReason": null,
       "decisionDue": "2026-02-03T09:00:00Z",
-      "daysToDecision": null
+      "daysToDecision": null,
+      "kind": "application"
     },
     {
       "applicationId": "app-pharmaco-medreg-2026-002",
@@ -91,7 +117,8 @@
       "revokedAt": null,
       "revocationReason": null,
       "decisionDue": "2026-12-01T09:00:00Z",
-      "daysToDecision": 75
+      "daysToDecision": 75,
+      "kind": "application"
     },
     {
       "applicationId": "app-riverside-medreg-2026-001",
@@ -113,7 +140,8 @@
       "revokedAt": null,
       "revocationReason": null,
       "decisionDue": "2026-07-01T09:00:00Z",
-      "daysToDecision": -78
+      "daysToDecision": -78,
+      "kind": "application"
     },
     {
       "applicationId": "app-alpha-medreg-2026-001",
@@ -135,13 +163,15 @@
       "revokedAt": null,
       "revocationReason": null,
       "decisionDue": "2026-06-15T10:00:00Z",
-      "daysToDecision": -94
+      "daysToDecision": -94,
+      "kind": "application"
     }
   ],
   "articles": {
     "applications": "Art. 57(1)(j)(ii)",
     "decisions": "Art. 57(1)(j)(iii), within 30 working days",
     "revocations": "Art. 57(1)(j)(iv), Art. 63(3)",
-    "naturalPersons": "Art. 58(1)(f)"
+    "naturalPersons": "Art. 58(1)(f)",
+    "requests": "Art. 69, published under Art. 57(1)(j)(ii) and (iii)"
   }
 }

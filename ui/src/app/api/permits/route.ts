@@ -80,7 +80,81 @@ export async function GET() {
        ORDER BY coalesce(permit.decidedAt, permit.approvedAt, app.submittedAt) DESC`,
     );
 
+    // Health data requests (Art. 69) are published alongside applications.
+    const requestRows = await runQuery<{
+      requestId: string;
+      applicant: string | null;
+      applicantDid: string | null;
+      applicantCountry: string | null;
+      accessBody: string | null;
+      purpose: string | null;
+      datasetId: string | null;
+      datasetTitle: string | null;
+      submittedAt: string | null;
+      status: string;
+      decidedAt: string | null;
+      justification: string | null;
+      publishBy: string | null;
+      statisticalContent: string | null;
+    }>(
+      `MATCH (r:HealthDataRequest)
+       OPTIONAL MATCH (p:Participant)-[:SUBMITTED]->(r)
+       OPTIONAL MATCH (ds:HealthDataset)
+         WHERE coalesce(ds.datasetId, ds.id) = r.datasetId
+       OPTIONAL MATCH (hdab:Participant)
+         WHERE r.decidedBy IS NOT NULL AND coalesce(hdab.participantId, hdab.id) = r.decidedBy
+       RETURN r.requestId                     AS requestId,
+              p.name                          AS applicant,
+              coalesce(p.participantId, p.id) AS applicantDid,
+              p.country                       AS applicantCountry,
+              hdab.name                       AS accessBody,
+              r.purpose                       AS purpose,
+              r.datasetId                     AS datasetId,
+              coalesce(ds.title, ds.name)     AS datasetTitle,
+              toString(r.submittedAt)         AS submittedAt,
+              toUpper(coalesce(r.status, '')) AS status,
+              toString(r.decidedAt)           AS decidedAt,
+              r.justification                 AS justification,
+              toString(r.publishBy)           AS publishBy,
+              r.statisticalContent            AS statisticalContent
+       ORDER BY coalesce(r.decidedAt, r.submittedAt) DESC`,
+    );
+
     const now = Date.now();
+    const requestEntries = requestRows.map((r) => {
+      const undecided = r.status === "PENDING";
+      const outcome =
+        r.status === "ANSWERED" || r.status === "APPROVED"
+          ? "request approved"
+          : r.status === "REJECTED"
+            ? "refused"
+            : "pending";
+      return {
+        kind: "request" as const,
+        applicationId: r.requestId,
+        applicant: r.applicant,
+        applicantDid: r.applicantDid,
+        applicantCountry: r.applicantCountry,
+        accessBody: r.accessBody,
+        purpose: r.purpose,
+        datasetId: r.datasetId,
+        datasetTitle: r.datasetTitle,
+        submittedAt: r.submittedAt,
+        outcome,
+        permitId: null,
+        decidedAt: r.decidedAt,
+        validUntil: null,
+        conditions: r.statisticalContent
+          ? [`Statistic: ${r.statisticalContent}`]
+          : [],
+        justification: r.justification,
+        publishBy: r.publishBy ? r.publishBy.slice(0, 10) : null,
+        revokedAt: null,
+        revocationReason: null,
+        ...decisionClock(r.submittedAt, undecided, now),
+      };
+    });
+
     const entries = rows.map((r) => {
       const decided = ["APPROVED", "REJECTED", "REVOKED"].includes(r.decision);
       const undecided =
@@ -101,6 +175,7 @@ export async function GET() {
               ? "permit revoked"
               : "pending";
       return {
+        kind: "application" as const,
         applicationId: r.applicationId,
         applicant: r.applicant,
         applicantDid: r.applicantDid,
@@ -130,10 +205,17 @@ export async function GET() {
       };
     });
 
+    const all = [...entries, ...requestEntries].sort((a, b) =>
+      (b.decidedAt ?? b.submittedAt ?? "").localeCompare(
+        a.decidedAt ?? a.submittedAt ?? "",
+      ),
+    );
+
     return NextResponse.json({
       generatedAt: new Date(now).toISOString(),
-      entries,
+      entries: all,
       articles: {
+        requests: "Art. 69, published under Art. 57(1)(j)(ii) and (iii)",
         applications: "Art. 57(1)(j)(ii)",
         decisions: "Art. 57(1)(j)(iii), within 30 working days",
         revocations: "Art. 57(1)(j)(iv), Art. 63(3)",

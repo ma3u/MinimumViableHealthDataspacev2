@@ -119,6 +119,12 @@ const governanceGroup: NavGroup = {
       roles: ["EDC_ADMIN", "HDAB_AUTHORITY"],
     },
     {
+      href: "/requests",
+      label: "Statistical Requests",
+      icon: BarChart2,
+      roles: ["EDC_ADMIN", "HDAB_AUTHORITY"],
+    },
+    {
       href: "/compliance/tck",
       label: "Protocol TCK",
       icon: ShieldCheck,
@@ -234,6 +240,12 @@ const myResearchesGroup: NavGroup = {
       href: "/negotiate",
       label: "Request Access",
       icon: FileSignature,
+      roles: ["DATA_USER"],
+    },
+    {
+      href: "/requests",
+      label: "Statistical Requests",
+      icon: BarChart2,
       roles: ["DATA_USER"],
     },
     {

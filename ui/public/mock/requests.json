@@ -1,0 +1,90 @@
+{
+  "scope": "all",
+  "article": "Regulation (EU) 2025/327, Art. 69: statistical answers only; Art. 69(4): three months to decide",
+  "requests": [
+    {
+      "requestId": "req-pharmaco-20260901-demo",
+      "applicant": "did:web:pharmaco.de:research",
+      "applicantName": "PharmaCo Research AG",
+      "question": "How many patients are there?",
+      "purpose": "SCIENTIFIC_RESEARCH",
+      "datasetId": "dataset:synthea-fhir-r4-mvd",
+      "datasetTitle": "Synthea Synthetic FHIR R4 Patient Cohort",
+      "statisticalContent": "One count of the cohort, no breakdown.",
+      "safeguards": "No record leaves the environment; counts below 5 are suppressed.",
+      "legalBasis": "GDPR Art. 6(1)(e), Regulation (EU) 2025/327 Art. 53(1)",
+      "status": "PENDING",
+      "submittedAt": "2026-09-01T09:30:00Z",
+      "decidedAt": null,
+      "decidedBy": null,
+      "justification": null,
+      "answer": null,
+      "answerTemplate": null,
+      "answerError": null,
+      "answeredAt": null,
+      "suppressedCells": null,
+      "decisionDue": "2026-12-01T09:30:00Z",
+      "daysToDecision": 75,
+      "undecided": true
+    },
+    {
+      "requestId": "req-lmc-20260210-demo",
+      "applicant": "did:web:lmc.nl:clinic",
+      "applicantName": "Limburg Medical Centre",
+      "question": "Patients by gender",
+      "purpose": "PUBLIC_HEALTH",
+      "datasetId": "dataset:synthea-fhir-r4-mvd",
+      "datasetTitle": "Synthea Synthetic FHIR R4 Patient Cohort",
+      "statisticalContent": "Cohort size by gender.",
+      "safeguards": "Aggregate only.",
+      "legalBasis": "GDPR Art. 6(1)(e), Regulation (EU) 2025/327 Art. 53(1)",
+      "status": "ANSWERED",
+      "submittedAt": "2026-02-10T10:00:00Z",
+      "decidedAt": "2026-02-24T15:00:00Z",
+      "decidedBy": "did:web:irs.fr:hdab",
+      "justification": null,
+      "answer": [
+        {
+          "gender": "female",
+          "count": 112
+        },
+        {
+          "gender": "male",
+          "count": 102
+        }
+      ],
+      "answerTemplate": "patient_by_gender",
+      "answerError": null,
+      "answeredAt": "2026-02-24T15:00:05Z",
+      "suppressedCells": 0,
+      "decisionDue": "2026-05-10T10:00:00Z",
+      "daysToDecision": null,
+      "undecided": false
+    },
+    {
+      "requestId": "req-irs-20260120-demo",
+      "applicant": "did:web:irs.fr:hdab",
+      "applicantName": "Institut de Recherche Santé",
+      "question": "Show me the patient journey of patient 17",
+      "purpose": "PUBLIC_HEALTH",
+      "datasetId": "dataset:synthea-fhir-r4-mvd",
+      "datasetTitle": "Synthea Synthetic FHIR R4 Patient Cohort",
+      "statisticalContent": "A single patient's timeline.",
+      "safeguards": "None stated.",
+      "legalBasis": "GDPR Art. 6(1)(e)",
+      "status": "REJECTED",
+      "submittedAt": "2026-01-20T14:30:00Z",
+      "decidedAt": "2026-02-03T11:00:00Z",
+      "decidedBy": "did:web:medreg.de:hdab",
+      "justification": "A single patient's timeline is not a statistic; Art. 69 answers only in anonymised statistical format.",
+      "answer": null,
+      "answerTemplate": null,
+      "answerError": null,
+      "answeredAt": null,
+      "suppressedCells": null,
+      "decisionDue": "2026-04-20T14:30:00Z",
+      "daysToDecision": null,
+      "undecided": false
+    }
+  ]
+}
