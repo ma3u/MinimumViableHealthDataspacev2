@@ -161,6 +161,14 @@ answer 403 and name the article and the reason. On a stack where PharmaCo alread
 Synthea cohort, show the refusal on an application for another dataset, or
 revoke first.
 
+**Show the shelf, Art. 59:** `/activity-report` is the access body's
+biennial activity report, generated from the graph and public without a
+sign-in: the applications and permits, the purposes and the data accessed,
+the measures taken, the access events in the secure processing environment,
+the days from application to access and the quality labels, item by item from
+(a) to (k), with a Markdown and a JSON export. Where the graph records
+nothing for an item, the report says so.
+
 **Show the other door, Art. 69:** on `/requests` the researcher asks for a
 statistic instead of the data ("How many patients are there?"), the access
 body approves, and the researcher gets a count and nothing else: no records,
