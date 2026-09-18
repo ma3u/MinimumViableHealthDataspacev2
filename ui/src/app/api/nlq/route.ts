@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAuth, isAuthError } from "@/lib/auth-guard";
 import { resolveOdrlScope, userToParticipantId } from "@/lib/odrl-engine";
+import { activePermitHeaders } from "@/lib/permit-gate";
 
 export const dynamic = "force-dynamic";
 
@@ -20,12 +21,16 @@ export async function POST(request: NextRequest) {
       session.roles,
     );
     const odrlScope = await resolveOdrlScope(participantId);
+    // The proxy records the query as a TransferEvent; these headers give the
+    // record its permit, dataset and purpose (issue #206, M3).
+    const permitHeaders = await activePermitHeaders(participantId);
 
     const resp = await fetch(`${PROXY_URL}/nlq`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         "X-Participant": participantId,
+        ...permitHeaders,
       },
       body: JSON.stringify({ ...body, odrlScope }),
     });

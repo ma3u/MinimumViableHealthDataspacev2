@@ -156,6 +156,29 @@ export async function checkPermit(input: {
   if (wanted) {
     const hit = valid.find((r) => norm(r.datasetId) === wanted);
     if (!hit) {
+      // A permit for exactly this dataset that the body took back is the
+      // reason that matters, not the other permits the consumer still holds.
+      const revokedHere = rows.find(
+        (r) => r.status === "REVOKED" && norm(r.datasetId) === wanted,
+      );
+      if (revokedHere) {
+        return {
+          ...base,
+          allowed: false,
+          permitId: revokedHere.permitId,
+          datasetId: input.datasetId ?? null,
+          reason: `Data permit ${revokedHere.permitId} for ${
+            input.datasetId
+          } was revoked on ${(revokedHere.revokedAt ?? "").slice(
+            0,
+            10,
+          )} (Art. 63(3))${
+            revokedHere.revocationReason
+              ? `: ${revokedHere.revocationReason}`
+              : ""
+          }.`,
+        };
+      }
       return {
         ...base,
         allowed: false,
@@ -199,6 +222,28 @@ export async function checkPermit(input: {
           chosen.datasetId ?? "(none)"
         } was not checked against it.`,
   };
+}
+
+/**
+ * Headers that tell the neo4j-proxy which permit, dataset and purpose an
+ * access runs under, so its audit record (TransferEvent) says more than the
+ * endpoint. Empty when the consumer holds no valid permit. Never throws: an
+ * audit detail must not break the query it describes.
+ */
+export async function activePermitHeaders(
+  consumerDid: string | null,
+): Promise<Record<string, string>> {
+  if (!consumerDid) return {};
+  try {
+    const check = await checkPermit({ consumerDid });
+    if (!check.allowed || !check.permitId) return {};
+    const headers: Record<string, string> = { "X-Permit": check.permitId };
+    if (check.datasetId) headers["X-Dataset"] = check.datasetId;
+    if (check.purpose) headers["X-Purpose"] = check.purpose;
+    return headers;
+  } catch {
+    return {};
+  }
 }
 
 const SLUG_TO_DID: Record<string, string> = {

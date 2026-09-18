@@ -1,0 +1,153 @@
+name: Neo4j seed (Azure)
+
+# Rebuilds the seed image from the current neo4j/*.cypher files and runs the
+# mvhd-neo4j-seed job against the Azure graph. Every seed file is MERGE-only,
+# so a run is safe to repeat; it adds what is missing and refreshes the demo
+# access events (seed-transfer-events.cypher).
+#
+# Why this exists: the job's replica timeout was 600 s and the full pipeline
+# (FHIR to OMOP transform, embeddings) takes longer on 0.5 CPU, so every
+# execution since 8 September 2026 died part-way and the later seed files
+# never ran on Azure (issue #205, #206). The timeout is now 3600 s here and in
+# scripts/azure/06-post-deploy.sh.
+#
+# The job can only be started by the CI service principal, hence a workflow.
+
+on:
+  workflow_dispatch:
+    inputs:
+      phase:
+        description: "full: every seed file. phase26-only: the Phase 26 fast path."
+        type: choice
+        default: full
+        options:
+          - full
+          - phase26-only
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  ACR_NAME: acrmvhdehds
+  ACR_LOGIN_SERVER: acrmvhdehds.azurecr.io
+  RESOURCE_GROUP: rg-mvhd-dev
+  SEED_JOB: mvhd-neo4j-seed
+  WORKSPACE_ID: 6c5814cc-e63f-4f4c-b996-83c6686b048e
+
+jobs:
+  seed:
+    runs-on: ubuntu-latest
+    timeout-minutes: 80
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Azure Login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: ACR Login
+        run: az acr login --name ${{ env.ACR_NAME }}
+
+      - name: Rebuild the seed image from the current cypher files
+        run: |
+          SEED_DIR=$(mktemp -d)
+          cp neo4j/*.cypher "$SEED_DIR/"
+          cp neo4j/seed.sh "$SEED_DIR/seed.sh"
+          cat > "$SEED_DIR/Dockerfile" <<'DOCKERFILE'
+          FROM neo4j:5-community
+          USER root
+          RUN apt-get update && apt-get install -y --no-install-recommends bash curl jq \
+              && rm -rf /var/lib/apt/lists/*
+          COPY *.cypher /seed/
+          COPY seed.sh /seed/seed.sh
+          RUN chmod +x /seed/seed.sh \
+              && ln -sf /var/lib/neo4j/bin/cypher-shell /usr/local/bin/cypher-shell
+          ENTRYPOINT ["/bin/bash", "/seed/seed.sh"]
+          DOCKERFILE
+          docker buildx build --platform linux/amd64 \
+            -t ${{ env.ACR_LOGIN_SERVER }}/mvhd-neo4j-seed:${{ github.sha }} \
+            -t ${{ env.ACR_LOGIN_SERVER }}/mvhd-neo4j-seed:latest \
+            --push "$SEED_DIR"
+          rm -rf "$SEED_DIR"
+
+      - name: Point the job at this image, with time to finish
+        run: |
+          # The sha tag defeats the :latest cache (docs/gotchas.md); 3600 s is
+          # the budget the full pipeline needs at 0.5 CPU.
+          if [ "${{ inputs.phase }}" = "phase26-only" ]; then
+            PHASE_ARGS=(--set-env-vars "SEED_PHASE=phase26-only")
+          else
+            PHASE_ARGS=(--remove-env-vars SEED_PHASE)
+          fi
+          az containerapp job update \
+            --name "${{ env.SEED_JOB }}" \
+            --resource-group "${{ env.RESOURCE_GROUP }}" \
+            --image ${{ env.ACR_LOGIN_SERVER }}/mvhd-neo4j-seed:${{ github.sha }} \
+            --replica-timeout 3600 \
+            "${PHASE_ARGS[@]}" \
+            -o none
+
+      - name: Start the seed job
+        id: start
+        run: |
+          EXEC=$(az containerapp job start \
+            --name "${{ env.SEED_JOB }}" \
+            --resource-group "${{ env.RESOURCE_GROUP }}" \
+            --query name -o tsv)
+          echo "execution=$EXEC" >> "$GITHUB_OUTPUT"
+          echo "execution $EXEC"
+
+      - name: Wait for the seed job to finish
+        run: |
+          EXEC="${{ steps.start.outputs.execution }}"
+          prev=""
+          for i in $(seq 1 130); do   # 130 * 30 s = 65 min
+            st=$(az containerapp job execution show \
+              --name "${{ env.SEED_JOB }}" \
+              --resource-group "${{ env.RESOURCE_GROUP }}" \
+              --job-execution-name "$EXEC" \
+              --query "properties.status" -o tsv 2>/dev/null)
+            if [ "$st" != "$prev" ] && [ -n "$st" ]; then
+              echo "$(date -u +%H:%M:%S) status=$st"
+              prev="$st"
+            fi
+            case "$st" in
+              Succeeded) echo "seed OK"; exit 0;;
+              Failed|Stopped|Cancelled|Degraded)
+                echo "::error::Seed job ended with status=$st"
+                exit 1;;
+            esac
+            sleep 30
+          done
+          echo "::error::Seed job still running after 65 min"
+          exit 1
+
+      - name: Show the seed job's step log
+        if: always()
+        run: |
+          EXEC="${{ steps.start.outputs.execution }}"
+          sleep 60   # Log Analytics ingestion lag
+          az monitor log-analytics query -w "${{ env.WORKSPACE_ID }}" \
+            --analytics-query "ContainerAppConsoleLogs_CL
+              | where ContainerJobName_s == '${{ env.SEED_JOB }}'
+              | where ContainerGroupName_s startswith '${EXEC}'
+              | where Log_s contains '===' or Log_s contains 'OK ' or Log_s contains 'WARN' or Log_s contains 'ERROR' or Log_s contains 'complete'
+              | project TimeGenerated, Log_s
+              | order by TimeGenerated asc
+              | take 200" \
+            --query "[].[TimeGenerated, Log_s]" -o tsv || echo "::warning::could not read the job log"
+
+      - name: Revert to the :latest tag for the next deploy
+        if: always()
+        run: |
+          az containerapp job update \
+            --name "${{ env.SEED_JOB }}" \
+            --resource-group "${{ env.RESOURCE_GROUP }}" \
+            --image ${{ env.ACR_LOGIN_SERVER }}/mvhd-neo4j-seed:latest \
+            --remove-env-vars SEED_PHASE \
+            -o none || true

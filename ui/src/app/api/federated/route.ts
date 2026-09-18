@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { requireAuth, isAuthError } from "@/lib/auth-guard";
 import { userToParticipantId } from "@/lib/odrl-engine";
+import { activePermitHeaders } from "@/lib/permit-gate";
 
 export const dynamic = "force-dynamic";
 
@@ -19,8 +20,9 @@ export async function GET() {
       session.user.email ?? session.user.name ?? session.user.id,
       session.roles,
     );
+    const permitHeaders = await activePermitHeaders(participantId);
     const resp = await fetch(`${PROXY_URL}/federated/stats`, {
-      headers: { "X-Participant": participantId },
+      headers: { "X-Participant": participantId, ...permitHeaders },
     });
     const data = await resp.json();
     return NextResponse.json(data);
