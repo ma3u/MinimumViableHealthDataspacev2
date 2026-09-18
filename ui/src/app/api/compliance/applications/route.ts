@@ -228,7 +228,8 @@ export async function GET() {
   const now = Date.now();
   const applications = rows.map((r) => {
     const undecided =
-      !r.permitId && !["APPROVED", "REJECTED"].includes(r.status ?? "");
+      !r.permitId &&
+      !["APPROVED", "REJECTED", "REVOKED"].includes(r.status ?? "");
     return { ...r, ...decisionClock(r.submittedAt, undecided, now), undecided };
   });
   applications.sort((a, b) => {
