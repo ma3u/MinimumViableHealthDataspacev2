@@ -98,7 +98,7 @@ if az containerapp job show --name "$NEO4J_SEED_JOB" --resource-group "$RG" -o n
     --name "$NEO4J_SEED_JOB" --resource-group "$RG" \
     --image "${ACR_LOGIN_SERVER}/mvhd-neo4j-seed:latest" \
     --cpu 0.5 --memory 1Gi \
-    --replica-timeout 600 \
+    --replica-timeout 3600 \
     --set-env-vars \
       "NEO4J_HOST=${NEO4J_APP}" \
       "NEO4J_PORT=7687" \
@@ -114,7 +114,7 @@ else
     --registry-username "$ACR_NAME" \
     --registry-password "$ACR_PASSWORD" \
     --cpu 0.5 --memory 1Gi \
-    --trigger-type Manual --replica-timeout 600 \
+    --trigger-type Manual --replica-timeout 3600 \
     --env-vars \
       "NEO4J_HOST=${NEO4J_APP}" \
       "NEO4J_PORT=7687" \

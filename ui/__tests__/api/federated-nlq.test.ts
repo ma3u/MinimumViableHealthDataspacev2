@@ -10,6 +10,15 @@ import { NextRequest } from "next/server";
 const mockFetch = vi.fn();
 vi.stubGlobal("fetch", mockFetch);
 
+// The permit headers come from the graph (issue #206); the routes must not
+// reach a real Neo4j from a unit test.
+vi.mock("@/lib/permit-gate", () => ({
+  activePermitHeaders: vi.fn().mockResolvedValue({
+    "X-Permit": "permit-test",
+    "X-Dataset": "dataset:synthea-fhir-r4-mvd",
+  }),
+}));
+
 // POST /api/nlq resolves the caller's ODRL scope before it proxies, and that
 // goes to Neo4j over Bolt, not through fetch. Without this mock the test hangs
 // on a real connection attempt until vitest times out at 5s.

@@ -245,24 +245,40 @@ export async function GET(request: NextRequest) {
       }
       const logWhere =
         logConditions.length > 0 ? `WHERE ${logConditions.join(" AND ")}` : "";
+      // Provider and dataset come from the event when the recorder knew them
+      // (seeded events, and proxy events since the UI sends X-Permit and
+      // X-Dataset), else from the ACCESSED dataset and whoever OFFERS it.
       const logs = await runQuery<{ log: Row }>(
         `MATCH (te:TransferEvent)
          ${logWhere}
          WITH te, coalesce(te.consumerDid, te.participant) AS consumerDid
          OPTIONAL MATCH (consumer:Participant {participantId: consumerDid})
-         OPTIONAL MATCH (provider:Participant {participantId: te.providerDid})
-         OPTIONAL MATCH (te)-[:ACCESSED]->(ds:HealthDataset)
+         OPTIONAL MATCH (te)-[:ACCESSED]->(ds0:HealthDataset)
+         WITH te, consumerDid, consumer, collect(ds0)[0] AS ds
+         OPTIONAL MATCH (holder0:Participant)-[:OFFERS]->(:DataProduct)-[:DESCRIBED_BY]->(ds)
+         WITH te, consumerDid, consumer, ds, collect(holder0)[0] AS holder
+         WITH te, consumerDid, consumer, ds,
+              coalesce(te.providerDid, holder.participantId, holder.id) AS providerDid
+         OPTIONAL MATCH (provider:Participant)
+           WHERE providerDid IS NOT NULL
+             AND coalesce(provider.participantId, provider.id) = providerDid
+         OPTIONAL MATCH (permit:HDABApproval)
+           WHERE te.permitId IS NOT NULL AND permit.approvalId = te.permitId
          RETURN {
            id:              te.eventId,
            accessedAt:      toString(te.timestamp),
            consumerDid:     consumerDid,
            consumerName:    consumer.name,
            consumerCountry: consumer.country,
-           providerDid:     te.providerDid,
+           providerDid:     providerDid,
            providerName:    coalesce(provider.name, ds.publisher),
            providerCountry: provider.country,
-           assetId:         coalesce(te.datasetId, ds.datasetId, ds.title),
-           contractId:      te.contractId,
+           assetId:         coalesce(te.datasetId, ds.datasetId, ds.id),
+           assetTitle:      coalesce(ds.title, ds.name),
+           contractId:      coalesce(te.contractId, te.permitId),
+           permitId:        te.permitId,
+           permitStatus:    permit.status,
+           permitValidUntil: toString(permit.validUntil),
            accessType:      CASE
                               WHEN te.accessType IS NOT NULL THEN te.accessType
                               WHEN te.endpoint STARTS WITH '/nlq'
@@ -274,10 +290,16 @@ export async function GET(request: NextRequest) {
            purpose:         coalesce(te.purpose, te.name,
                                      te.method + ' ' + te.endpoint),
            bytesAccessed:   te.responseBytes,
+           name:            te.name,
            endpoint:        te.endpoint,
            method:          te.method,
            statusCode:      te.statusCode,
-           resultCount:     te.resultCount
+           resultCount:     te.resultCount,
+           durationMs:      te.duration,
+           contentType:     te.contentType,
+           protocol:        te.protocol,
+           errorMessage:    te.errorMessage,
+           demo:            te.demo
          } AS log
          ORDER BY te.timestamp DESC
          LIMIT $limit`,

@@ -140,10 +140,25 @@ interface AccessLogRow {
   providerName?: string;
   providerCountry?: string;
   assetId?: string;
+  assetTitle?: string;
   accessedAt?: string;
-  accessType?: string; // "INITIAL_TRANSFER" | "QUERY"
+  accessType?: string; // "INITIAL_TRANSFER" | "QUERY" | "DATA_READ"
   bytesAccessed?: number;
   purpose?: string;
+  // The recorder's own fields (issue #206): what was asked, under which permit
+  permitId?: string | null;
+  permitStatus?: string | null;
+  permitValidUntil?: string | null;
+  name?: string | null;
+  endpoint?: string | null;
+  method?: string | null;
+  statusCode?: number | null;
+  resultCount?: number | null;
+  durationMs?: number | null;
+  contentType?: string | null;
+  protocol?: string | null;
+  errorMessage?: string | null;
+  demo?: boolean | null;
 }
 
 interface AuditData {
@@ -454,6 +469,7 @@ export default function AdminAuditPage() {
   const [error, setError] = useState<string | null>(null);
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [expandedNeg, setExpandedNeg] = useState<Set<string>>(new Set());
+  const [expandedLog, setExpandedLog] = useState<Set<string>>(new Set());
 
   // Load participant list once for filter dropdowns
   useEffect(() => {
@@ -1143,54 +1159,181 @@ export default function AdminAuditPage() {
                         </tr>
                       </thead>
                       <tbody>
-                        {data.accesslogs.map((a, i) => (
-                          <tr
-                            key={i}
-                            className="border-b border-[var(--border)] hover:bg-[var(--surface-2)]/50"
-                          >
-                            <td className="py-2 px-2 text-[var(--text-primary)]">
-                              {a.consumerName ?? a.consumerDid ?? "—"}
-                              {a.consumerCountry && (
-                                <span className="text-[var(--text-secondary)]">
-                                  {" "}
-                                  ({a.consumerCountry})
-                                </span>
+                        {data.accesslogs.map((a, i) => {
+                          const logKey = a.id ?? `log-${i}`;
+                          const isOpen = expandedLog.has(logKey);
+                          const detail: [
+                            string,
+                            string | number | null | undefined,
+                          ][] = [
+                            ["Event", a.id],
+                            ["Recorded", a.accessedAt],
+                            ["Consumer", a.consumerDid],
+                            ["Provider", a.providerDid],
+                            [
+                              "Dataset",
+                              a.assetTitle
+                                ? `${a.assetTitle} (${a.assetId})`
+                                : a.assetId,
+                            ],
+                            [
+                              "Request",
+                              a.endpoint
+                                ? `${a.method ?? ""} ${a.endpoint}`.trim()
+                                : null,
+                            ],
+                            ["Status", a.statusCode],
+                            ["Results", a.resultCount],
+                            ["Bytes", a.bytesAccessed],
+                            [
+                              "Duration",
+                              a.durationMs != null
+                                ? `${a.durationMs} ms`
+                                : null,
+                            ],
+                            ["Content type", a.contentType],
+                            ["Protocol", a.protocol],
+                            ["Purpose, Art. 53(1)", a.purpose],
+                            [
+                              "Data permit, Art. 68",
+                              a.permitId
+                                ? `${a.permitId}${
+                                    a.permitStatus
+                                      ? ` (${a.permitStatus}${
+                                          a.permitValidUntil
+                                            ? `, valid until ${a.permitValidUntil.slice(
+                                                0,
+                                                10,
+                                              )}`
+                                            : ""
+                                        })`
+                                      : ""
+                                  }`
+                                : null,
+                            ],
+                            ["Contract", a.contractId],
+                            ["Transfer", a.transferId],
+                            ["Error", a.errorMessage],
+                            [
+                              "Origin",
+                              a.demo
+                                ? "seeded demo event"
+                                : "recorded by the neo4j-proxy",
+                            ],
+                          ];
+                          return (
+                            <Fragment key={logKey}>
+                              <tr
+                                onClick={() =>
+                                  setExpandedLog((prev) => {
+                                    const next = new Set(prev);
+                                    if (next.has(logKey)) next.delete(logKey);
+                                    else next.add(logKey);
+                                    return next;
+                                  })
+                                }
+                                aria-expanded={isOpen}
+                                data-testid="access-log-row"
+                                className="border-b border-[var(--border)] hover:bg-[var(--surface-2)]/50 cursor-pointer"
+                              >
+                                <td className="py-2 px-2 text-[var(--text-primary)]">
+                                  <span className="inline-flex items-center gap-1">
+                                    {isOpen ? (
+                                      <ChevronDown size={11} />
+                                    ) : (
+                                      <ChevronRight size={11} />
+                                    )}
+                                    {a.consumerName ?? a.consumerDid ?? "—"}
+                                  </span>
+                                  {a.consumerCountry && (
+                                    <span className="text-[var(--text-secondary)]">
+                                      {" "}
+                                      ({a.consumerCountry})
+                                    </span>
+                                  )}
+                                </td>
+                                <td className="py-2 px-2 text-[var(--text-primary)]">
+                                  {a.providerName ?? a.providerDid ?? "—"}
+                                  {a.providerCountry && (
+                                    <span className="text-[var(--text-secondary)]">
+                                      {" "}
+                                      ({a.providerCountry})
+                                    </span>
+                                  )}
+                                </td>
+                                <td
+                                  className="py-2 px-2 text-[var(--text-secondary)] max-w-[180px] truncate"
+                                  title={a.assetId ?? ""}
+                                >
+                                  {a.assetTitle ?? a.assetId ?? "—"}
+                                </td>
+                                <td className="py-2 px-2">
+                                  {accessTypeBadge(a.accessType)}
+                                </td>
+                                <td
+                                  className="py-2 px-2 text-[var(--text-secondary)] max-w-[140px] truncate"
+                                  title={a.purpose}
+                                >
+                                  {a.purpose ?? "—"}
+                                </td>
+                                <td className="py-2 px-2 text-[var(--text-secondary)]">
+                                  {a.accessedAt
+                                    ? a.accessedAt.slice(0, 10)
+                                    : "—"}
+                                </td>
+                                <td className="py-2 px-2 text-[var(--text-secondary)]">
+                                  {formatBytes(a.bytesAccessed)}
+                                </td>
+                                <td
+                                  className="py-2 px-2 font-mono text-[var(--text-secondary)] text-[10px]"
+                                  title={a.contractId ?? ""}
+                                >
+                                  {a.contractId
+                                    ? a.contractId.length > 14
+                                      ? a.contractId.slice(0, 12) + "…"
+                                      : a.contractId
+                                    : "—"}
+                                </td>
+                              </tr>
+                              {isOpen && (
+                                <tr
+                                  className="border-b border-[var(--border)] bg-[var(--surface)]"
+                                  data-testid="access-log-detail"
+                                >
+                                  <td colSpan={8} className="px-4 py-3">
+                                    {a.name && (
+                                      <div className="text-xs font-semibold text-[var(--text-primary)] mb-2">
+                                        {a.name}
+                                      </div>
+                                    )}
+                                    <dl className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-1 text-xs">
+                                      {detail
+                                        .filter(
+                                          ([, v]) =>
+                                            v !== null &&
+                                            v !== undefined &&
+                                            v !== "",
+                                        )
+                                        .map(([label, value]) => (
+                                          <div
+                                            key={label}
+                                            className="flex gap-2 min-w-0"
+                                          >
+                                            <dt className="text-[var(--text-secondary)] shrink-0">
+                                              {label}
+                                            </dt>
+                                            <dd className="font-mono text-[var(--text-primary)] break-all">
+                                              {String(value)}
+                                            </dd>
+                                          </div>
+                                        ))}
+                                    </dl>
+                                  </td>
+                                </tr>
                               )}
-                            </td>
-                            <td className="py-2 px-2 text-[var(--text-primary)]">
-                              {a.providerName ?? a.providerDid ?? "—"}
-                              {a.providerCountry && (
-                                <span className="text-[var(--text-secondary)]">
-                                  {" "}
-                                  ({a.providerCountry})
-                                </span>
-                              )}
-                            </td>
-                            <td className="py-2 px-2 text-[var(--text-secondary)]">
-                              {a.assetId ?? "—"}
-                            </td>
-                            <td className="py-2 px-2">
-                              {accessTypeBadge(a.accessType)}
-                            </td>
-                            <td
-                              className="py-2 px-2 text-[var(--text-secondary)] max-w-[140px] truncate"
-                              title={a.purpose}
-                            >
-                              {a.purpose ?? "—"}
-                            </td>
-                            <td className="py-2 px-2 text-[var(--text-secondary)]">
-                              {a.accessedAt ? a.accessedAt.slice(0, 10) : "—"}
-                            </td>
-                            <td className="py-2 px-2 text-[var(--text-secondary)]">
-                              {formatBytes(a.bytesAccessed)}
-                            </td>
-                            <td className="py-2 px-2 font-mono text-[var(--text-secondary)] text-[10px]">
-                              {a.contractId
-                                ? a.contractId.slice(0, 12) + "…"
-                                : "—"}
-                            </td>
-                          </tr>
-                        ))}
+                            </Fragment>
+                          );
+                        })}
                       </tbody>
                     </table>
                   </div>

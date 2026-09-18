@@ -77,6 +77,27 @@ describe("checkPermit", () => {
     expect(r.reason).toContain("direct identifiers");
   });
 
+  it("names the revoked permit for the dataset even when other permits stand", async () => {
+    mockRunQuery.mockResolvedValue([
+      permit({ permitId: "permit-other", datasetId: "dataset:other" }),
+      permit({
+        permitId: "permit-j41",
+        datasetId: "dataset:journey41-x",
+        status: "REVOKED",
+        revokedAt: "2026-09-18T05:20:00Z",
+        revocationReason: "Output left the SPE.",
+      }),
+    ]);
+    const r = await checkPermit({
+      consumerDid: PHARMACO,
+      datasetId: "dataset:journey41-x",
+      now: NOW,
+    });
+    expect(r.allowed).toBe(false);
+    expect(r.permitId).toBe("permit-j41");
+    expect(r.reason).toContain("revoked on 2026-09-18 (Art. 63(3))");
+  });
+
   it("refuses an expired permit", async () => {
     mockRunQuery.mockResolvedValue([
       permit({ validUntil: "2026-01-01T00:00:00Z" }),
