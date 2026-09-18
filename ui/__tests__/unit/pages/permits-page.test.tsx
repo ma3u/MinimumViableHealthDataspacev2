@@ -49,9 +49,13 @@ describe("/permits", () => {
       await screen.findByText("Data permits register"),
     ).toBeInTheDocument();
     expect(mockFetchApi).toHaveBeenCalledWith("/api/permits");
-    expect(screen.getByText(/Decisions \(3\)/)).toBeInTheDocument();
+    expect(screen.getByText(/Decisions \(4\)/)).toBeInTheDocument();
     expect(screen.getByText(/awaiting a decision \(3\)/)).toBeInTheDocument();
     expect(screen.getAllByText("permit issued").length).toBeGreaterThan(0);
+    expect(screen.getByText("request approved")).toBeInTheDocument();
+    expect(
+      screen.getByText(/statistical request, Art\. 69/),
+    ).toBeInTheDocument();
     expect(screen.getByText("refused")).toBeInTheDocument();
     expect(
       screen.getByText(/Insufficient data minimisation plan/),
