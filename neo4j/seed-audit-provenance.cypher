@@ -5,7 +5,10 @@
 // =============================================================================
 
 // ── 1. Ensure provenance indexes ─────────────────────────────────────────────
-CREATE INDEX data_transfer_id    IF NOT EXISTS FOR (t:DataTransfer)          ON (t.id);
+// DataTransfer.id is covered by the uniqueness constraint data_transfer_id in
+// init-schema.cypher (which always runs first); an index of the same name
+// here made every re-run report "There already exists an index called
+// 'data_transfer_id'" (issue #206).
 CREATE INDEX negotiation_id      IF NOT EXISTS FOR (n:ContractNegotiation)   ON (n.id);
 CREATE INDEX transfer_status     IF NOT EXISTS FOR (t:DataTransfer)          ON (t.status);
 CREATE INDEX negotiation_status  IF NOT EXISTS FOR (n:ContractNegotiation)   ON (n.status);
