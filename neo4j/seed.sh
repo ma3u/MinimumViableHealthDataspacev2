@@ -72,6 +72,34 @@ if [ "${SEED_PHASE:-}" = "phase26-only" ]; then
   exit 0
 fi
 
+# Demo fast-path: the governance and audit seeds only (applications, permits,
+# statistical requests, access events, trust centre). MERGE-idempotent and
+# done in under a minute, for when the full pipeline's FHIR to OMOP transform
+# is not worth waiting for. SEED_PHASE=demo-only. Issue #206.
+if [ "${SEED_PHASE:-}" = "demo-only" ]; then
+  echo ""
+  echo "=== SEED_PHASE=demo-only — running the governance and audit seeds ==="
+  run_file /seed/init-schema.cypher "schema (idempotent)"
+  run_file /seed/seed-audit-provenance.cypher "audit provenance"
+  run_file /seed/seed-transfer-events.cypher "transfer events"
+  run_file /seed/seed-trust-center.cypher "trust center"
+  run_file /seed/seed-compliance-matrix.cypher "compliance matrix"
+  echo ""
+  echo "=== Verifying ==="
+  cypher-shell -a "$NEO4J_URI" -u "$NEO4J_USER" -p "$NEO4J_PASSWORD" \
+    --non-interactive --format plain \
+    "MATCH (te:TransferEvent) WHERE te.demo = true RETURN count(te) AS demoAccessEvents;"
+  cypher-shell -a "$NEO4J_URI" -u "$NEO4J_USER" -p "$NEO4J_PASSWORD" \
+    --non-interactive --format plain \
+    "MATCH (te:TransferEvent) WHERE te.participant STARTS WITH 'did:web:unknown:' RETURN count(te) AS unknownCallersLeft;"
+  cypher-shell -a "$NEO4J_URI" -u "$NEO4J_USER" -p "$NEO4J_PASSWORD" \
+    --non-interactive --format plain \
+    "MATCH (a:AccessApplication) OPTIONAL MATCH (r:HealthDataRequest) RETURN count(DISTINCT a) AS applications, count(DISTINCT r) AS requests;"
+  echo ""
+  echo "SEED_COMPLETE"
+  exit 0
+fi
+
 run_file /seed/init-schema.cypher "schema"
 run_file /seed/insert-synthetic-schema-data.cypher "synthetic data"
 run_file /seed/register-dsp-marketplace.cypher "DSP marketplace"

@@ -17,11 +17,12 @@ on:
   workflow_dispatch:
     inputs:
       phase:
-        description: "full: every seed file. phase26-only: the Phase 26 fast path."
+        description: "full: every seed file. demo-only: governance and audit seeds, under a minute. phase26-only: the Phase 26 fast path."
         type: choice
         default: full
         options:
           - full
+          - demo-only
           - phase26-only
 
 permissions:
@@ -79,8 +80,8 @@ jobs:
         run: |
           # The sha tag defeats the :latest cache (docs/gotchas.md); 3600 s is
           # the budget the full pipeline needs at 0.5 CPU.
-          if [ "${{ inputs.phase }}" = "phase26-only" ]; then
-            PHASE_ARGS=(--set-env-vars "SEED_PHASE=phase26-only")
+          if [ "${{ inputs.phase }}" != "full" ]; then
+            PHASE_ARGS=(--set-env-vars "SEED_PHASE=${{ inputs.phase }}")
           else
             PHASE_ARGS=(--remove-env-vars SEED_PHASE)
           fi
