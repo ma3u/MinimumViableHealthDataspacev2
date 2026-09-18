@@ -344,4 +344,77 @@ describe("NlqPage", () => {
     // After clicking, the button should have the active styles
     expect(federatedBtn.closest("button")).toHaveClass("bg-blue-500/20");
   });
+
+  it("shows the gate's reason and article when the query is refused (Art. 61(1))", async () => {
+    mockFetchApiResponses();
+    render(<NlqPage />);
+    const input = screen.getByPlaceholderText(
+      /ask a question about the health data/i,
+    );
+
+    mockFetchApi.mockImplementation(
+      (url: string, opts?: { method?: string }) => {
+        if (url === "/api/nlq" && opts?.method === "POST") {
+          return Promise.resolve({
+            ok: false,
+            status: 403,
+            json: () =>
+              Promise.resolve({
+                error: "No data permit covers this query",
+                reason:
+                  "Data permit permit-app-1 for dataset:synthea-fhir-r4-mvd was revoked on 2026-09-16 (Art. 63(3)): output left the SPE with identifiers.",
+                article: "Regulation (EU) 2025/327, Art. 61(1) and Art. 68",
+                odrlEnforced: true,
+              }),
+          });
+        }
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve({ templates: [] }),
+        });
+      },
+    );
+
+    await userEvent.type(input, "How many patients?");
+    await userEvent.click(screen.getByText("Ask"));
+
+    const box = await screen.findByTestId("nlq-error");
+    expect(box).toHaveTextContent("No data permit covers this query");
+    expect(box).toHaveTextContent("revoked on 2026-09-16 (Art. 63(3))");
+    expect(box).toHaveTextContent("Art. 61(1)");
+  });
+
+  it("lists the data permits the scope is derived from (Art. 68)", async () => {
+    mockFetchApiResponses({
+      "/api/odrl/scope": {
+        participantId: "did:web:pharmaco.de:research",
+        participantName: "PharmaCo Research AG",
+        permissions: ["scientific_research"],
+        prohibitions: [],
+        accessibleDatasets: ["dataset:synthea-fhir-r4-mvd"],
+        temporalLimit: "2027-12-31T23:59:59.000Z",
+        policyIds: [],
+        hasActiveContract: false,
+        hdabApproved: true,
+        permits: [
+          {
+            permitId: "hdab-decision-medreg-2025-001",
+            datasetId: "dataset:synthea-fhir-r4-mvd",
+            datasetTitle: "Synthea Synthetic FHIR R4 Patient Cohort",
+            purpose: "SCIENTIFIC_RESEARCH",
+            validUntil: "2027-12-31T23:59:59.000Z",
+          },
+        ],
+      },
+    });
+    render(<NlqPage />);
+
+    const permits = await screen.findByTestId("scope-permits");
+    expect(permits).toHaveTextContent("Data permits (Art. 68)");
+    expect(permits).toHaveTextContent("hdab-decision-medreg-2025-001");
+    expect(permits).toHaveTextContent(
+      "for Synthea Synthetic FHIR R4 Patient Cohort",
+    );
+    expect(permits).toHaveTextContent("valid until 2027-12-31");
+  });
 });

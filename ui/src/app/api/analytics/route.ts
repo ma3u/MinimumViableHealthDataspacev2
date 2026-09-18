@@ -1,12 +1,41 @@
 import { NextResponse } from "next/server";
 import { runQuery } from "@/lib/neo4j";
 import { requireAuth, isAuthError } from "@/lib/auth-guard";
+import { userToParticipantId } from "@/lib/odrl-engine";
+import { gateSecondaryUse } from "@/lib/permit-gate";
 
 export const dynamic = "force-dynamic";
 
 export async function GET() {
   const auth = await requireAuth();
   if (isAuthError(auth)) return auth;
+
+  // The cohort statistics are secondary use; a data user sees them only
+  // under a data permit (Art. 61(1), issue #206 M3). The response names the
+  // permit it ran under so the page can show it.
+  const { session } = auth;
+  const participantId = userToParticipantId(
+    session.user.email ?? session.user.name ?? session.user.id,
+    session.roles,
+  );
+  const gate = await gateSecondaryUse({
+    consumerDid: participantId,
+    roles: session.roles,
+    what: "analysis",
+  });
+  if (!gate.allowed) {
+    return NextResponse.json(gate.body, { status: gate.status });
+  }
+  const permit = gate.check
+    ? {
+        permitId: gate.check.permitId,
+        datasetId: gate.check.datasetId,
+        purpose: gate.check.purpose,
+        validUntil: gate.check.validUntil,
+        article: gate.check.article,
+      }
+    : null;
+
   try {
     const [
       summary,
@@ -88,6 +117,7 @@ export async function GET() {
       topMeasurements,
       topProcedures,
       genderBreakdown,
+      permit,
     });
   } catch (err) {
     console.error("GET /api/analytics error:", err);

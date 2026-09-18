@@ -10,17 +10,40 @@ vi.mock("@/lib/neo4j", () => ({
   runQuery: vi.fn(),
 }));
 
+// The scope is also derived from the participant's data permits (issue #206);
+// those come from the permit gate, mocked here so the policy rows above are
+// not mistaken for permit rows.
+vi.mock("@/lib/permit-gate", () => ({
+  findPermits: vi.fn().mockResolvedValue([]),
+}));
+
 // Unmock odrl-engine to test the real implementation
 vi.unmock("@/lib/odrl-engine");
 
 import { runQuery } from "@/lib/neo4j";
+import { findPermits, type PermitRow } from "@/lib/permit-gate";
 import { userToParticipantId, resolveOdrlScope } from "@/lib/odrl-engine";
 
 const mockRunQuery = vi.mocked(runQuery);
+const mockFindPermits = vi.mocked(findPermits);
+
+function permitRow(over: Partial<PermitRow> = {}): PermitRow {
+  return {
+    permitId: "permit-app-pharmaco-1",
+    status: "APPROVED",
+    datasetId: "dataset:synthea-fhir-r4-mvd",
+    datasetTitle: "Synthea Synthetic FHIR R4 Patient Cohort",
+    validUntil: "2099-12-31T23:59:59.000000000Z",
+    purpose: "SCIENTIFIC_RESEARCH",
+    applicationId: "app-pharmaco-1",
+    ...over,
+  };
+}
 
 describe("odrl-engine", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockFindPermits.mockResolvedValue([]);
   });
 
   describe("userToParticipantId()", () => {
@@ -243,6 +266,99 @@ describe("odrl-engine", () => {
       const scope = await resolveOdrlScope("did:web:test:org");
       // Last non-null temporal limit wins
       expect(scope.temporalLimit).toBe("2027-12-31");
+    });
+  });
+
+  describe("resolveOdrlScope() and the data permits (issue #206, M3)", () => {
+    it("derives datasets, purpose, period and approval from a valid permit", async () => {
+      mockRunQuery.mockResolvedValue([]);
+      mockFindPermits.mockResolvedValue([permitRow()]);
+
+      const scope = await resolveOdrlScope("did:web:pharmaco.de:research");
+
+      expect(mockFindPermits).toHaveBeenCalledWith(
+        "did:web:pharmaco.de:research",
+      );
+      expect(scope.hdabApproved).toBe(true);
+      expect(scope.accessibleDatasets).toEqual(["dataset:synthea-fhir-r4-mvd"]);
+      expect(scope.permissions).toContain("scientific_research");
+      // Nine fractional digits from the graph become an ISO value.
+      expect(scope.temporalLimit).toBe("2099-12-31T23:59:59.000Z");
+      expect(scope.permits).toHaveLength(1);
+      expect(scope.permits[0].permitId).toBe("permit-app-pharmaco-1");
+    });
+
+    it("gives a revoked or expired permit no scope at all", async () => {
+      mockRunQuery.mockResolvedValue([]);
+      mockFindPermits.mockResolvedValue([
+        permitRow({ status: "REVOKED", permitId: "permit-revoked" }),
+        permitRow({
+          permitId: "permit-expired",
+          validUntil: "2020-01-01T00:00:00Z",
+        }),
+      ]);
+
+      const scope = await resolveOdrlScope("did:web:pharmaco.de:research");
+
+      expect(scope.hdabApproved).toBe(false);
+      expect(scope.accessibleDatasets).toEqual([]);
+      expect(scope.permits).toEqual([]);
+      expect(scope.temporalLimit).toBeNull();
+    });
+
+    it("adds the permit's dataset to the contract datasets and takes the latest end", async () => {
+      mockRunQuery.mockResolvedValue([
+        {
+          participantName: "PharmaCo Research AG",
+          policyId: "policy-1",
+          permissions: ["statistics"],
+          prohibitions: ["re_identification"],
+          temporalLimit: "2026-12-31",
+          datasetId: "ds-contract",
+          contractStatus: "ACTIVE",
+          approvalStatus: null,
+        },
+      ]);
+      mockFindPermits.mockResolvedValue([
+        permitRow({ validUntil: "2027-06-30T00:00:00Z" }),
+        permitRow({
+          permitId: "permit-2",
+          datasetId: "dataset:omop-cdm-v54-analytics",
+          validUntil: "2028-01-31T00:00:00Z",
+        }),
+      ]);
+
+      const scope = await resolveOdrlScope("did:web:pharmaco.de:research");
+
+      expect(scope.accessibleDatasets).toEqual([
+        "ds-contract",
+        "dataset:synthea-fhir-r4-mvd",
+        "dataset:omop-cdm-v54-analytics",
+      ]);
+      expect(scope.temporalLimit).toBe("2028-01-31T00:00:00.000Z");
+      expect(scope.hasActiveContract).toBe(true);
+      expect(scope.hdabApproved).toBe(true);
+      expect(scope.permits.map((p) => p.permitId)).toEqual([
+        "permit-app-pharmaco-1",
+        "permit-2",
+      ]);
+    });
+
+    it("counts an upper-case APPROVED on the contract chain as approved", async () => {
+      mockRunQuery.mockResolvedValue([
+        {
+          participantName: "Test Org",
+          policyId: null,
+          permissions: [],
+          prohibitions: [],
+          temporalLimit: null,
+          datasetId: null,
+          contractStatus: null,
+          approvalStatus: "APPROVED",
+        },
+      ]);
+      const scope = await resolveOdrlScope("did:web:test:org");
+      expect(scope.hdabApproved).toBe(true);
     });
   });
 });
