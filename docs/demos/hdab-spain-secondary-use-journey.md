@@ -151,9 +151,18 @@ transfer, and the connector answers 403 with the article. Issue the permit and
 the same transfer goes through, stamped with the permit id on the audit page.
 
 One thing to know before the room: a permit issued earlier stays valid, and a
-refusal of a new application revokes nothing (revocation is Art. 63(3), not yet
-built). On a stack where PharmaCo already holds a permit for the Synthea
-cohort, show the refusal on an application for another dataset.
+refusal of a new application revokes nothing. Revocation is its own measure
+(Art. 63(3)): on a row with an issued permit the access body has "Revoke
+permit", with a reason; the next transfer under that permit answers 403 and
+names the article. On a stack where PharmaCo already holds a permit for the
+Synthea cohort, show the refusal on an application for another dataset, or
+revoke first.
+
+**Show the public side:** `/permits` needs no sign-in. It lists every
+application received, every permit and refusal with its justification and
+the 30-working-day publication deadline, and every revocation with its reason
+(Art. 57(1)(j), Art. 58(1)(f)). That is the page a natural person or a
+journalist gets; the access body's own view is `/compliance`.
 
 ### 5. Extract and upload, pseudonymised
 

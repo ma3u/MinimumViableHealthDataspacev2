@@ -101,6 +101,8 @@ const exploreGroup: NavGroup = {
       roles: ["EDC_ADMIN", "HDAB_AUTHORITY"],
     },
     { href: "/eehrxf", label: "EEHRxF Profiles", icon: Heart },
+    // Art. 57(1)(j) and 58(1)(f): the access body's decisions are public.
+    { href: "/permits", label: "Permits Register", icon: ScrollText },
   ],
 };
 

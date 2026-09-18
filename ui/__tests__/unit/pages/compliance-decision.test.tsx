@@ -224,6 +224,54 @@ describe("/compliance as the access body", () => {
     );
   });
 
+  it("revokes an issued permit with a reason (Art. 63(3))", async () => {
+    setupMocks();
+    mockFetchApi.mockImplementation((url: string, init?: RequestInit) => {
+      if (url === "/api/compliance/permits/revoke" && init?.method === "POST") {
+        return response({
+          permitId: "hdab-irs-lmc-2026-001",
+          decision: "REVOKED",
+          article: "Regulation (EU) 2025/327, Art. 63(3): data permit revoked",
+        });
+      }
+      if (url.startsWith("/api/compliance?")) {
+        return response({ compliant: false, chain: [] });
+      }
+      if (url.startsWith("/api/compliance")) {
+        return response({
+          consumers: [],
+          datasets: [],
+          matrix: [APPROVED, NONE, PENDING],
+        });
+      }
+      return response({});
+    });
+    const user = userEvent.setup();
+    render(<CompliancePage />);
+    await user.click(await screen.findByText("Limburg Medical Centre"));
+    const panel = await screen.findByTestId("application-panel");
+    const revoke = within(panel).getByRole("button", { name: "Revoke permit" });
+    expect(revoke).toBeDisabled();
+    await user.type(
+      within(panel).getByLabelText(/Reason/),
+      "Output left the SPE with direct identifiers.",
+    );
+    await user.click(revoke);
+    await waitFor(() => {
+      expect(
+        within(panel).getByText(/Data permit hdab-irs-lmc-2026-001 revoked/),
+      ).toBeInTheDocument();
+    });
+    const call = mockFetchApi.mock.calls.find(
+      (c) => c[0] === "/api/compliance/permits/revoke",
+    );
+    const sent = JSON.parse((call![1] as RequestInit).body as string);
+    expect(sent).toEqual({
+      permitId: "hdab-irs-lmc-2026-001",
+      reason: "Output left the SPE with direct identifiers.",
+    });
+  });
+
   it("cites the adopted regulation, not the 2022 proposal", () => {
     const src = readFileSync(
       path.join(process.cwd(), "src/app/compliance/page.tsx"),

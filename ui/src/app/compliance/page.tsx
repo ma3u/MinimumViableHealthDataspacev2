@@ -89,6 +89,8 @@ interface MatrixRow {
   decisionJustification?: string | null;
   decisionDue?: string | null;
   daysToDecision?: number | null;
+  revokedAt?: string | null;
+  revocationReason?: string | null;
 }
 
 interface DecisionResult {
@@ -109,7 +111,7 @@ function isUndecided(row: MatrixRow): boolean {
   return (
     row.hasApplication &&
     !row.hasApproval &&
-    !["APPROVED", "REJECTED"].includes(
+    !["APPROVED", "REJECTED", "REVOKED"].includes(
       (row.applicationStatus ?? "").toUpperCase(),
     )
   );
@@ -151,6 +153,99 @@ function DecisionClock({ row }: { row: MatrixRow }) {
     );
   }
   return <span className="text-[var(--text-secondary)]">—</span>;
+}
+
+/**
+ * Revocation of an issued permit (Art. 63(3)). A refusal of a later
+ * application changes nothing for a permit already issued; only this stops
+ * the transfers, and the public register lists it (Art. 57(1)(j)(iv)).
+ */
+function RevokeForm({
+  permitId,
+  onDone,
+}: {
+  permitId: string;
+  onDone: () => Promise<void>;
+}) {
+  const [reason, setReason] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [done, setDone] = useState<string | null>(null);
+
+  const revoke = async () => {
+    setBusy(true);
+    setError(null);
+    try {
+      const r = await fetchApi("/api/compliance/permits/revoke", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ permitId, reason }),
+      });
+      const body = (await r.json().catch(() => ({}))) as Record<
+        string,
+        unknown
+      >;
+      if (!r.ok) {
+        setError(String(body.error ?? `HTTP ${r.status}`));
+        return;
+      }
+      setDone(
+        `Data permit ${permitId} revoked; transfers under it stop now and the register lists the measure (Art. 63(3)).`,
+      );
+      await onDone();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <form
+      className="rounded-lg border border-[var(--danger-text)]/40 bg-[var(--bg)] p-3 space-y-2 text-xs"
+      onSubmit={(e) => e.preventDefault()}
+      aria-label="Revoke data permit"
+    >
+      <div className="font-semibold text-[var(--text-primary)]">
+        Revoke this permit
+        <span className="font-normal text-[var(--text-secondary)]">
+          {" "}
+          · Art. 63(3), on non-compliance by the data user
+        </span>
+      </div>
+      <label className="flex flex-col gap-1">
+        <span className="text-[var(--text-secondary)]">
+          Reason (published with the measure, Art. 57(1)(j)(iv))
+        </span>
+        <textarea
+          id={`revoke-reason-${permitId}`}
+          rows={2}
+          value={reason}
+          onChange={(e) => setReason(e.target.value)}
+          className="rounded border border-[var(--border)] bg-[var(--surface)] px-2 py-1"
+        />
+      </label>
+      <button
+        type="button"
+        disabled={busy || !reason.trim() || done !== null}
+        onClick={revoke}
+        className="px-3 py-1.5 rounded font-semibold border border-[var(--danger-text)] text-[var(--danger-text)] disabled:opacity-50"
+        title={reason.trim() ? "" : "A revocation needs a reason"}
+      >
+        {busy ? "Revoking…" : "Revoke permit"}
+      </button>
+      {error && (
+        <p className="text-[var(--danger-text)]" role="alert">
+          {error}
+        </p>
+      )}
+      {done && (
+        <p className="text-[var(--success-text)]" role="status">
+          {done}
+        </p>
+      )}
+    </form>
+  );
 }
 
 /**
@@ -274,10 +369,17 @@ function ApplicationPanel({
             <span className="text-[var(--text-secondary)]">Decision </span>
             {row.approvalStatus === "REJECTED"
               ? "refused"
-              : "data permit issued"}
+              : row.approvalStatus === "REVOKED"
+                ? "data permit revoked"
+                : "data permit issued"}
             {row.decidedAt ? ` on ${shortDate(row.decidedAt)}` : ""}
             {row.validUntil ? `, valid until ${shortDate(row.validUntil)}` : ""}
             {row.decisionJustification ? ` · ${row.decisionJustification}` : ""}
+            {row.revokedAt
+              ? ` · revoked ${shortDate(row.revokedAt)}${
+                  row.revocationReason ? `: ${row.revocationReason}` : ""
+                }`
+              : ""}
           </div>
         )}
       </div>
@@ -407,6 +509,13 @@ function ApplicationPanel({
           )}
         </form>
       )}
+
+      {canDecide &&
+        row.hasApproval &&
+        row.approvalStatus === "APPROVED" &&
+        row.approvalId && (
+          <RevokeForm permitId={row.approvalId} onDone={onDecided} />
+        )}
     </div>
   );
 }
@@ -453,11 +562,15 @@ type ComplianceLevel =
   | "rejected"
   | "review"
   | "governance"
+  | "revoked"
   | "none";
 
 function complianceLevel(row: MatrixRow): ComplianceLevel {
   // HDAB authorities review others — they don't submit applications
   if (row.consumerType === "HDAB" && !row.hasApplication) return "governance";
+  if (row.approvalStatus === "REVOKED" || row.applicationStatus === "REVOKED") {
+    return "revoked";
+  }
   if (row.approvalStatus === "REJECTED" || row.applicationStatus === "REJECTED")
     return "rejected";
   if (row.applicationStatus === "UNDER_REVIEW") return "review";
@@ -475,6 +588,7 @@ const COMPLIANCE_LABELS: Record<ComplianceLevel, string> = {
   rejected: "Rejected",
   review: "Under Review",
   governance: "HDAB Authority",
+  revoked: "Revoked",
   none: "No chain",
 };
 
@@ -584,6 +698,12 @@ export default function CompliancePage() {
             >
               Protocol TCK →
             </Link>
+            <Link
+              href="/permits"
+              className="font-bold text-[var(--accent)] hover:underline"
+            >
+              Public register →
+            </Link>
           </div>
         </div>
 
@@ -688,6 +808,7 @@ export default function CompliancePage() {
                       governance: 2,
                       none: 1,
                       rejected: 0,
+                      revoked: 0,
                     };
                     const seen = new Map<string, MatrixRow>();
                     for (const row of matrix) {
@@ -769,7 +890,8 @@ export default function CompliancePage() {
                               className={
                                 row.approvalStatus === "APPROVED"
                                   ? "text-[var(--success-text)]"
-                                  : row.approvalStatus === "REJECTED"
+                                  : row.approvalStatus === "REJECTED" ||
+                                      row.approvalStatus === "REVOKED"
                                     ? "text-[var(--danger-text)]"
                                     : "text-[var(--warning-text)]"
                               }
@@ -779,7 +901,9 @@ export default function CompliancePage() {
                                 ? "✓ Approved"
                                 : row.approvalStatus === "REJECTED"
                                   ? "✗ Denied"
-                                  : row.approvalStatus ?? "—"}
+                                  : row.approvalStatus === "REVOKED"
+                                    ? "✗ Revoked"
+                                    : row.approvalStatus ?? "—"}
                             </span>
                           ) : (
                             <span className="text-[var(--text-secondary)]">
@@ -826,7 +950,8 @@ export default function CompliancePage() {
                                     ? "bg-[var(--role-hdab-bg)] text-[var(--role-hdab-text)] border-[var(--role-hdab-border)]"
                                     : level === "review"
                                       ? "bg-[var(--role-hdab-bg)] text-[var(--role-hdab-text)] border-[var(--role-hdab-border)]"
-                                      : level === "rejected"
+                                      : level === "rejected" ||
+                                          level === "revoked"
                                         ? "bg-[var(--badge-inactive-bg)] text-[var(--badge-inactive-text)] border-[var(--badge-inactive-border)]"
                                         : level === "governance"
                                           ? "bg-[var(--role-trust-bg)] text-[var(--role-trust-text)] border-[var(--role-trust-border)]"
@@ -837,7 +962,9 @@ export default function CompliancePage() {
                             {(level === "pending" || level === "review") && (
                               <AlertCircle size={12} />
                             )}
-                            {level === "rejected" && <AlertCircle size={12} />}
+                            {(level === "rejected" || level === "revoked") && (
+                              <AlertCircle size={12} />
+                            )}
                             {level === "governance" && (
                               <ShieldCheck size={12} />
                             )}
