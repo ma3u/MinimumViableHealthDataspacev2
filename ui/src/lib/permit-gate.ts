@@ -32,6 +32,8 @@ export interface PermitRow {
   validUntil: string | null;
   purpose: string | null;
   applicationId: string | null;
+  revokedAt?: string | null;
+  revocationReason?: string | null;
 }
 
 export interface PermitCheck {
@@ -59,7 +61,9 @@ export async function findPermits(consumerDid: string): Promise<PermitRow[]> {
             coalesce(ds.title, ds.name)                             AS datasetTitle,
             toString(permit.validUntil)                             AS validUntil,
             coalesce(permit.permittedPurpose, app.requestedPurpose) AS purpose,
-            app.applicationId                                       AS applicationId
+            app.applicationId                                       AS applicationId,
+            toString(permit.revokedAt)                              AS revokedAt,
+            permit.revocationReason                                 AS revocationReason
      ORDER BY permit.validUntil DESC`,
     { consumerDid },
   );
@@ -112,6 +116,19 @@ export async function checkPermit(input: {
   }
   const approved = rows.filter((r) => r.status === "APPROVED");
   if (approved.length === 0) {
+    const revoked = rows.find((r) => r.status === "REVOKED");
+    if (revoked) {
+      return {
+        ...base,
+        allowed: false,
+        permitId: revoked.permitId,
+        reason: `Data permit ${revoked.permitId} was revoked on ${(
+          revoked.revokedAt ?? ""
+        ).slice(0, 10)} (Art. 63(3))${
+          revoked.revocationReason ? `: ${revoked.revocationReason}` : ""
+        }.`,
+      };
+    }
     return {
       ...base,
       allowed: false,

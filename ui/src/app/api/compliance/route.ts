@@ -77,6 +77,8 @@ export async function GET(req: Request) {
         decidedAt: string | null;
         validUntil: string | null;
         decisionJustification: string | null;
+        revokedAt: string | null;
+        revocationReason: string | null;
       }>(
         // One row per application, plus one for a participant without any, so
         // the access body's inbox shows every case it has to decide (Art. 57(1)(e)).
@@ -111,7 +113,9 @@ export async function GET(req: Request) {
                 approval.approvalId             AS approvalId,
                 toString(coalesce(approval.decidedAt, approval.approvedAt)) AS decidedAt,
                 toString(approval.validUntil)   AS validUntil,
-                approval.justification          AS decisionJustification
+                approval.justification          AS decisionJustification,
+                toString(approval.revokedAt)    AS revokedAt,
+                approval.revocationReason       AS revocationReason
          ORDER BY p.name, app.submittedAt`,
       ),
     ]);
@@ -122,7 +126,7 @@ export async function GET(req: Request) {
       const undecided =
         row.hasApplication &&
         !row.hasApproval &&
-        !["APPROVED", "REJECTED"].includes(
+        !["APPROVED", "REJECTED", "REVOKED"].includes(
           (row.applicationStatus ?? "").toUpperCase(),
         );
       return { ...row, ...decisionClock(row.submittedAt, undecided, now) };

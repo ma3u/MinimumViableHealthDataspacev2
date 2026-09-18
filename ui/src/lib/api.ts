@@ -4,6 +4,7 @@ const STATIC_MOCK_MAP: Record<string, string> = {
   "/api/graph": "/mock/graph.json",
   "/api/compliance": "/mock/compliance.json",
   "/api/compliance/tck": "/mock/compliance_tck.json",
+  "/api/permits": "/mock/permits.json",
   "/api/patient": "/mock/patient.json",
   "/api/patient/profile": "/mock/patient_profile_list.json",
   "/api/patient/insights": "/mock/patient_insights.json",

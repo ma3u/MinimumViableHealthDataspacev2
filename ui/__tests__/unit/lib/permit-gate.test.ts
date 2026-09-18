@@ -62,6 +62,21 @@ describe("checkPermit", () => {
     expect(r.permitId).toBe("permit-app-1");
   });
 
+  it("refuses a revoked permit and says when and why (Art. 63(3))", async () => {
+    mockRunQuery.mockResolvedValue([
+      permit({
+        status: "REVOKED",
+        revokedAt: "2026-09-18T05:20:00Z",
+        revocationReason: "Output left the SPE with direct identifiers.",
+      }),
+    ]);
+    const r = await checkPermit({ consumerDid: PHARMACO, now: NOW });
+    expect(r.allowed).toBe(false);
+    expect(r.reason).toContain("revoked on 2026-09-18");
+    expect(r.reason).toContain("Art. 63(3)");
+    expect(r.reason).toContain("direct identifiers");
+  });
+
   it("refuses an expired permit", async () => {
     mockRunQuery.mockResolvedValue([
       permit({ validUntil: "2026-01-01T00:00:00Z" }),
