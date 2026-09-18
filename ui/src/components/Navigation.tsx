@@ -23,6 +23,7 @@ import {
   Code2,
   Layers,
   ScrollText,
+  FileBarChart,
   ClipboardList,
   Edit3,
   Lightbulb,
@@ -103,6 +104,8 @@ const exploreGroup: NavGroup = {
     { href: "/eehrxf", label: "EEHRxF Profiles", icon: Heart },
     // Art. 57(1)(j) and 58(1)(f): the access body's decisions are public.
     { href: "/permits", label: "Permits Register", icon: ScrollText },
+    // Art. 59: the access body's activity report is public too.
+    { href: "/activity-report", label: "Activity Report", icon: FileBarChart },
   ],
 };
 
@@ -122,6 +125,12 @@ const governanceGroup: NavGroup = {
       href: "/requests",
       label: "Statistical Requests",
       icon: BarChart2,
+      roles: ["EDC_ADMIN", "HDAB_AUTHORITY"],
+    },
+    {
+      href: "/activity-report",
+      label: "Activity Report",
+      icon: FileBarChart,
       roles: ["EDC_ADMIN", "HDAB_AUTHORITY"],
     },
     {

@@ -1,0 +1,167 @@
+{
+  "article": "Regulation (EU) 2025/327, Art. 59(1)",
+  "generatedAt": "2026-09-18T12:00:00.000Z",
+  "period": {
+    "from": "2024-09-18T12:00:00.000Z",
+    "to": "2026-09-18T12:00:00.000Z",
+    "months": 24
+  },
+  "accessBodies": [
+    {
+      "name": "Institut de Recherche Santé",
+      "did": "did:web:irs.fr:hdab",
+      "country": "FR"
+    },
+    { "name": "MedReg DE", "did": "did:web:medreg.de:hdab", "country": "DE" }
+  ],
+  "items": {
+    "a": {
+      "title": "Applications for access, permits and the data accessed",
+      "applications": 6,
+      "byApplicantType": {
+        "research organisation": 2,
+        "healthcare provider": 3,
+        "health data access body": 1
+      },
+      "permitsIssued": 3,
+      "refused": 1,
+      "revoked": 0,
+      "pending": 2,
+      "byPurpose": {
+        "Scientific research": 4,
+        "Public health": 1,
+        "Policy making": 1
+      },
+      "dataCategoriesAccessed": [
+        {
+          "datasetId": "dataset:synthea-fhir-r4-mvd",
+          "title": "Synthea Synthetic FHIR R4 Patient Cohort",
+          "permits": 2
+        },
+        {
+          "datasetId": "urn:uuid:alphaklinik:dataset:diab-001",
+          "title": "AlphaKlinik Diabetes Cohort",
+          "permits": 1
+        }
+      ],
+      "healthDataRequests": 1,
+      "healthDataRequestsAnswered": 0,
+      "resultsCommunicated": 0,
+      "note": "Results of the uses (Art. 61(4)) are not yet communicated by data users in this demo."
+    },
+    "b": {
+      "title": "Fulfilment of obligations by data users and holders; fines",
+      "measures": [],
+      "administrativeFines": { "count": 0, "amountEur": 0 },
+      "note": "Measures are permit revocations under Art. 63(3). No administrative fine has been imposed; fines are not modelled."
+    },
+    "c": {
+      "title": "Audits of data users in the secure processing environment",
+      "accessEvents": 60,
+      "underPermit": 9,
+      "refused": 1,
+      "byUser": [
+        {
+          "consumer": "did:web:pharmaco.de:research",
+          "consumerName": "PharmaCo Research AG",
+          "events": 41,
+          "underPermit": 7,
+          "refused": 1,
+          "permits": 1
+        },
+        {
+          "consumer": "did:web:lmc.nl:clinic",
+          "consumerName": "Limburg Medical Centre",
+          "events": 12,
+          "underPermit": 2,
+          "refused": 0,
+          "permits": 1
+        },
+        {
+          "consumer": "did:web:medreg.de:hdab",
+          "consumerName": "MedReg DE",
+          "events": 7,
+          "underPermit": 0,
+          "refused": 0,
+          "permits": 0
+        }
+      ],
+      "note": "Every access in the secure processing environment is recorded (Art. 73(1)(e)); the figures count the recorded events, those carrying a permit and those refused."
+    },
+    "d": {
+      "title": "Audits of the secure processing environment itself",
+      "audits": [],
+      "note": "No internal or third-party conformity audit of the secure processing environment is recorded in the graph; the security documentation of the demo is in the repository."
+    },
+    "e": {
+      "title": "Requests from natural persons exercising their rights",
+      "requests": 0,
+      "note": "The opt-out of the patient portal (Art. 71) is exercised in the browser of the demo; no request from a natural person reaches the graph."
+    },
+    "f": {
+      "title": "Engagement with stakeholders",
+      "activities": [],
+      "note": "Stakeholder engagement is not recorded in the graph."
+    },
+    "g": {
+      "title": "Revenues from data permits and health data requests",
+      "amountEur": 0,
+      "note": "Fees (Art. 62) are not modelled; no revenue is recorded."
+    },
+    "h": {
+      "title": "Average days between application and access",
+      "averageDays": 14,
+      "basis": 1,
+      "detail": [
+        {
+          "applicationId": "app-lmc-irs-2026-001",
+          "applicant": "Limburg Medical Centre",
+          "submittedAt": "2026-02-01T08:30:00.000Z",
+          "accessAt": "2026-02-15T09:30:00.000Z",
+          "days": 14
+        }
+      ],
+      "note": "From the submission of the application to the first recorded access under the permit; permits without a recorded access are not counted."
+    },
+    "i": {
+      "title": "Data quality labels issued by data holders",
+      "total": 2,
+      "byCoverage": { "partial": 1, "full": 1 },
+      "labels": [
+        {
+          "credentialId": "vc:data-quality-label:clinic-alphaklinik",
+          "datasetId": "dataset:synthea-fhir-r4-mvd",
+          "holder": "AlphaKlinik Berlin",
+          "completeness": 0.95,
+          "conformance": 0.92,
+          "timeliness": 0.98,
+          "coverage": "partial",
+          "assessmentDate": "2025-07-24",
+          "status": "active"
+        },
+        {
+          "credentialId": "vc:data-quality-label:clinic-lmc",
+          "datasetId": "dataset:prostate-cancer-registry",
+          "holder": "Limburg Medical Centre",
+          "completeness": 0.88,
+          "conformance": 0.9,
+          "timeliness": 0.94,
+          "coverage": "full",
+          "assessmentDate": "2025-08-10",
+          "status": "active"
+        }
+      ],
+      "note": "Labels are DataQualityLabelCredential records issued to data holders (Art. 78); the breakdown is by EEHRxF coverage, the category the label records."
+    },
+    "j": {
+      "title": "Publications, policy documents and regulatory procedures using the data",
+      "entries": [],
+      "note": "No publication, policy document or regulatory procedure has been reported by a data user."
+    },
+    "k": {
+      "title": "IT products developed using the data",
+      "entries": [],
+      "note": "No IT product has been reported by a data user."
+    }
+  }
+}
