@@ -13,6 +13,11 @@ CREATE CONSTRAINT contract_id IF NOT EXISTS FOR (c:Contract) REQUIRE c.contractI
 CREATE CONSTRAINT access_application_id IF NOT EXISTS FOR (aa:AccessApplication) REQUIRE aa.applicationId IS UNIQUE;
 CREATE INDEX access_application_status IF NOT EXISTS FOR (aa:AccessApplication) ON (aa.status);
 CREATE CONSTRAINT hdab_approval_id IF NOT EXISTS FOR (ha:HDABApproval) REQUIRE ha.approvalId IS UNIQUE;
+CREATE INDEX hdab_approval_status IF NOT EXISTS FOR (ha:HDABApproval) ON (ha.status);
+// HealthDataRequest — Regulation (EU) 2025/327 Art. 69: a request for a
+// statistic, answered only in anonymised statistical format (issue #206)
+CREATE CONSTRAINT health_data_request_id IF NOT EXISTS FOR (r:HealthDataRequest) REQUIRE r.requestId IS UNIQUE;
+CREATE INDEX health_data_request_status IF NOT EXISTS FOR (r:HealthDataRequest) ON (r.status);
 
 // ============================================================
 // Layer 2: HealthDCAT-AP Metadata (W3C HealthDCAT-AP vocabulary)
@@ -141,6 +146,8 @@ CREATE CONSTRAINT transfer_event_id IF NOT EXISTS FOR (te:TransferEvent) REQUIRE
 CREATE INDEX transfer_event_timestamp IF NOT EXISTS FOR (te:TransferEvent) ON (te.timestamp);
 CREATE INDEX transfer_event_endpoint IF NOT EXISTS FOR (te:TransferEvent) ON (te.endpoint);
 CREATE INDEX transfer_event_participant IF NOT EXISTS FOR (te:TransferEvent) ON (te.participant);
+// The permit an access event ran under (Art. 73(1)(e) logs, issue #206)
+CREATE INDEX transfer_event_permit IF NOT EXISTS FOR (te:TransferEvent) ON (te.permitId);
 
 // ============================================================
 // Phase 24: ODRL Policy Enforcement & GraphRAG

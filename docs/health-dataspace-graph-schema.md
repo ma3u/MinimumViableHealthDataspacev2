@@ -157,7 +157,7 @@ CREATE CONSTRAINT contract_id IF NOT EXISTS FOR (c:Contract) REQUIRE c.contractI
 
 #### `AccessApplication`
 
-Represents a formal data access request submitted to an HDAB by a data consumer, as required by **EHDS Articles 45–52**. An `AccessApplication` is a prerequisite for contract negotiation — the HDAB must approve the stated purpose before a `Contract` can be formed.
+Represents a health data access application submitted to a health data access body by a data user, **Regulation (EU) 2025/327 Art. 67**. The body decides on it within three months (Art. 68(4)); without an approved permit no transfer starts (Art. 61(1)), which `POST /api/transfers` enforces.
 
 **Properties:**
 
@@ -166,10 +166,13 @@ Represents a formal data access request submitted to an HDAB by a data consumer,
 - `datasetId: String!` — URI of the requested `HealthDataset`
 - `requestedPurpose: String!` — EHDS Article 53 permitted purpose (e.g., `SCIENTIFIC_RESEARCH`)
 - `submittedAt: DateTime!` — Submission timestamp
-- `status: String!` — One of: `SUBMITTED`, `UNDER_REVIEW`, `APPROVED`, `REJECTED`, `REVOKED`
+- `status: String!` — One of: `PENDING`, `UNDER_REVIEW`, `APPROVED`, `REJECTED`, `REVOKED`
 - `justification: String` — Scientific or public-interest justification text
 - `ethicsCommitteeRef: String` — Reference to ethics committee approval
 - `dataMinimisationStatement: String` — GDPR Art. 5(1)(c) justification
+- `decisionDue: DateTime` — Three months after submission (Art. 68(4))
+- `processingPeriodMonths: Integer` — Period the data are needed for (Art. 67(2)(h))
+- `decidedAt: DateTime` — Set by the decision
 
 **Indexes:**
 
@@ -182,7 +185,7 @@ CREATE INDEX access_application_status IF NOT EXISTS FOR (aa:AccessApplication) 
 
 #### `HDABApproval`
 
-An approval decision issued by a Health Data Access Body authorising a specific data consumer to access a dataset for a stated purpose. Bridges the `AccessApplication` to a `Contract` and provides the formal legal basis for data exchange under EHDS.
+The data permit (or the refusal) a health data access body issues on an application, **Regulation (EU) 2025/327 Art. 68**. It is the only lawful basis for a data user to access data for secondary use (Art. 61(1)); the body can revoke it (Art. 63(3)); permits, refusals and revocations are published on `/permits` (Art. 57(1)(j)).
 
 **Properties:**
 
@@ -190,15 +193,49 @@ An approval decision issued by a Health Data Access Body authorising a specific 
 - `applicationId: String!` — Reference back to the `AccessApplication`
 - `approvedAt: DateTime!` — Date of formal HDAB decision
 - `validUntil: DateTime!` — Approval expiry date
-- `permittedPurpose: String!` — Granted EHDS Article 53 purpose (must match `AccessApplication.requestedPurpose`)
+- `permittedPurpose: String!` — Granted Art. 53(1) purpose (must match `AccessApplication.requestedPurpose`)
 - `conditions: String[]` — Any conditions or restrictions attached to the approval
 - `hdabOfficer: String` — Name or ID of the issuing HDAB officer
-- `legalBasisArticle: String` — EHDS legal basis (e.g., `EHDS_Art_46`, `GDPR_Art_9_2_j`)
+- `legalBasisArticle: String` — EHDS legal basis (e.g., `Art. 68`, `GDPR_Art_9_2_j`)
+- `status: String!` — `APPROVED`, `REJECTED` or `REVOKED`
+- `decidedAt: DateTime`, `validFrom: DateTime` — Set by the decision (Art. 68(3))
+- `criteria: String` — JSON of the Art. 68(1)(a) to (h) criteria as assessed
+- `justification: String` — Written justification, required for a refusal (Art. 57(1)(j)(iii))
+- `decidedBy: String` — DID of the access body
+- `publishBy: Date` — 30 working days after the decision (Art. 57(1)(j)(iii))
+- `revokedAt: DateTime`, `revocationReason: String`, `revokedBy: String` — Set by a revocation (Art. 63(3))
 
 **Indexes:**
 
 ```cypher
 CREATE CONSTRAINT hdab_approval_id IF NOT EXISTS FOR (ha:HDABApproval) REQUIRE ha.approvalId IS UNIQUE;
+CREATE INDEX hdab_approval_status IF NOT EXISTS FOR (ha:HDABApproval) ON (ha.status);
+```
+
+---
+
+#### `HealthDataRequest`
+
+A request for a statistic instead of the data, **Regulation (EU) 2025/327 Art. 69**. The access body decides within three months (Art. 69(4)); on approval the question runs once in the applicant's name and only an anonymised statistical result is kept (aggregate templates only, identifier columns refused, counts below five suppressed). The applicant never sees the data behind it (Art. 69(1)).
+
+**Properties:**
+
+- `requestId: String!` — Unique request reference
+- `applicantId: String!` — DID of the data user
+- `question: String!` — The question, answered through the NLQ path
+- `purpose: String!` — Art. 53(1) purpose
+- `datasetId: String` — Dataset the statistic is about, if named
+- `statisticalContent: String!` — Description of the statistical content (Art. 69(2)(d))
+- `safeguards: String`, `legalBasis: String` — Art. 69(2)(e) and (f)
+- `status: String!` — `PENDING`, `APPROVED` (no statistic could be produced), `ANSWERED`, `REJECTED`
+- `submittedAt: DateTime!`, `decisionDue: DateTime!`, `decidedAt: DateTime`, `decidedBy: String`, `justification: String`, `publishBy: Date`
+- `answer: String` — JSON rows of the anonymised statistic; `answerTemplate: String`; `answerError: String`; `answeredAt: DateTime`; `suppressedCells: Integer`; `kAnonymity: Integer`
+
+**Indexes:**
+
+```cypher
+CREATE CONSTRAINT health_data_request_id IF NOT EXISTS FOR (r:HealthDataRequest) REQUIRE r.requestId IS UNIQUE;
+CREATE INDEX health_data_request_status IF NOT EXISTS FOR (r:HealthDataRequest) ON (r.status);
 ```
 
 ---
@@ -212,12 +249,26 @@ CREATE CONSTRAINT hdab_approval_id IF NOT EXISTS FOR (ha:HDABApproval) REQUIRE h
 (:Contract)-[:PROVIDER {participantId}]->(:Participant)
 (:Contract)-[:CONSUMER {participantId}]->(:Participant)
 
-// EHDS HDAB approval chain (Articles 45–52)
+// EHDS access body chain (Regulation (EU) 2025/327, Art. 67 to 69, 61, 63)
 (:Participant)-[:SUBMITTED]->(:AccessApplication)
 (:AccessApplication)-[:REQUESTS_ACCESS_TO]->(:DataProduct)
+(:AccessApplication)-[:REQUESTS]->(:HealthDataset)
 (:Participant {participantType: 'HDAB'})-[:REVIEWED]->(:AccessApplication)
 (:HDABApproval)-[:APPROVES]->(:AccessApplication)
+(:HDABApproval)-[:GRANTS_ACCESS_TO]->(:HealthDataset)
+(:HDABApproval)-[:ISSUED_BY]->(:Participant {participantType: 'HDAB'})
 (:HDABApproval)-[:APPROVED {approvalId, permittedPurpose}]->(:Contract)
+(:Participant)-[:SUBMITTED]->(:HealthDataRequest)
+(:HealthDataRequest)-[:REQUESTS]->(:HealthDataset)
+(:Participant {participantType: 'HDAB'})-[:DECIDED]->(:HealthDataRequest)
+
+// Audit trail under the permit (Art. 73(1)(e))
+(:DataTransfer)-[:UNDER_PERMIT]->(:HDABApproval)
+(:DataTransfer)-[:TRANSFERRED_BY]->(:Participant)
+(:TransferEvent)-[:UNDER_PERMIT]->(:HDABApproval)
+(:TransferEvent)-[:REQUESTED_BY]->(:Participant)
+(:TransferEvent)-[:PROVIDED_BY]->(:Participant)
+(:TransferEvent)-[:ACCESSED]->(:HealthDataset)
 ```
 
 ---
