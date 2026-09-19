@@ -101,10 +101,33 @@ as a decimal point, since no German grouping produces that.
 
 ## Coverage
 
-~30 analytes, cardiovascular-first: the lipid panel (total/LDL/HDL, triglycerides, **Lp(a)**,
+68 analytes, cardiovascular-first: the lipid panel (total/LDL/HDL, triglycerides, **Lp(a)**,
 **ApoB**, ApoA1), inflammation and cardiac (**hs-CRP** distinct from CRP, NT-proBNP,
 homocysteine), glucose metabolism (HbA1c both scales, glucose), renal (creatinine, eGFR,
-urate), liver (ALT/AST/GGT), TSH, ferritin, B12, vitamin D, electrolytes and basic haematology.
+urate), liver (ALT/AST/GGT), TSH, ferritin, B12, vitamin D, electrolytes, and the blood count
+with its differential (erythrocytes, haematocrit, MCV/MCH/MCHC, RDW-CV, MPV, neutrophils,
+lymphocytes, monocytes, eosinophils, basophils, immature granulocytes, nucleated erythrocytes,
+reticulocytes), each white-cell line coded as a count or as a share by its printed unit, plus
+coagulation (Quick, fibrinogen, aPTT) and the chemistry two real Berlin sheets printed (urea,
+transferrin and its saturation, cortisol, albumin, bilirubin, total protein, LDH), and what a
+German SI-unit report adds on top (calcium and albumin-corrected calcium, iron, alkaline
+phosphatase, amylase, lipase, IgG, non-HDL cholesterol, estimated average glucose), plus the
+trace elements and vitamins a German check-up panel prints (magnesium, copper, zinc, folate).
+
+Units follow what laboratories print rather than one convention: `Gpt/l` and `Tpt/l` for cell
+counts, `fmol` for a molar MCH, `µkat/l` for enzyme activity, `µU/ml` for TSH, `l/l` for a
+haematocrit. Nothing is ever converted, because the unit selects the code.
+
+Two folds absorb what a recogniser does to a page rather than what a laboratory printed.
+Homoglyphs (`МСH` with a Cyrillic Em and Es) fold to Latin. A unit that is not a unit is
+repaired across the characters that share a glyph, `U/I` and `UII` to `U/L`, but only when the
+printed spelling is not already a unit, only when the token holds something unconfusable, and
+only when exactly one UCUM code comes out. Anything ambiguous is refused.
+
+A label is matched strictly first and then with its umlaut digraphs collapsed, because OCR
+reads `Hämoglobin` as `Hamoglobin`; the dictionary refuses to load if two analytes would meet
+under that looser key. `G/l` and `T/l` are decided by case before anything is lowercased: a
+giga count is not a gram.
 
 `src/analytes.ts` is a plain table, adding an analyte is one entry.
 
@@ -140,6 +163,7 @@ each file at **25 MB**.
 
 ```
 src/analytes.ts      German label + unit → LOINC + UCUM (the table)
+src/reference-ranges.ts  published guideline and optimal ranges, each with its source
 src/parse-lab.ts     "Analyt  Wert  Einheit  Referenz" → RawLabValue[]   (no deps)
 src/code-values.ts   RawLabValue[] → coded + unmapped                     (no deps)
 src/to-fhir.ts       CodedLabValue[] → FHIR R4 collection bundle          (no deps)

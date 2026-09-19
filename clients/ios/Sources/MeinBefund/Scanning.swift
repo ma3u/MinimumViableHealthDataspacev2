@@ -1,5 +1,5 @@
-import SwiftUI
 import Shared
+import SwiftUI
 import Vision
 import VisionKit
 
@@ -40,10 +40,23 @@ struct DocumentScanner: UIViewControllerRepresentable {
     func documentCameraViewController(
       _ controller: VNDocumentCameraViewController, didFailWithError error: Error
     ) {
+      Log.scan.error("scanner failed: \(error.localizedDescription, privacy: .public)")
       parent.onCancel()
     }
   }
 }
+
+/// Everything one scan or import produced, before the person has reviewed it.
+///
+/// Nothing is stored until they confirm, and nothing is thrown away before
+/// then either: the pages, the recognised text, what the sheet says about
+/// itself, and the diagnostics all travel together to the review screen.
+///
+/// The same type for both inputs on purpose. A photographed report and a
+/// laboratory's own PDF differ in exactly one thing that matters downstream,
+/// their provenance, and that is carried inside the extraction rather than by
+/// having two shapes.
+typealias ScanProduct = LabImport.Result
 
 /// On-device OCR. Nothing leaves the phone.
 enum TextRecognizer {
@@ -68,29 +81,7 @@ enum TextRecognizer {
   ///
   /// A photographed report is `ocrTranscribed`, never `labIssuedDigital`, so
   /// every value it produces is `preliminary`.
-  static func extract(from images: [UIImage]) async throws -> ExtractionResult {
-    var merged = ExtractionResult.empty(source: .ocrTranscribed)
-
-    for (index, image) in images.enumerated() {
-      guard let cgImage = image.cgImage else { continue }
-      let reading = try await VisionDocumentReader.read(cgImage, page: index + 1)
-
-      if reading.rows.isEmpty {
-        merged = merged.merging(
-          LabLineParser.extract(reading.plainText, source: .ocrTranscribed))
-        continue
-      }
-
-      merged = merged.merging(
-        LabLineParser.extract(rows: reading.rows, source: .ocrTranscribed))
-
-      let leftovers = VisionDocumentReader.readingOrder(reading.orphanedFragments)
-      if !leftovers.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-        merged = merged.merging(
-          LabLineParser.extract(leftovers, source: .ocrTranscribed))
-      }
-    }
-
-    return merged
+  static func extract(from images: [UIImage]) async throws -> ScanProduct {
+    try await LabImport.images(images.compactMap(\.cgImage))
   }
 }

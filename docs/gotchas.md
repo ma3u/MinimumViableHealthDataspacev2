@@ -3,6 +3,143 @@
 Non-obvious pitfalls across the stack. Ordered newest first; add a new
 entry at the top when you hit something that cost you more than 30 minutes.
 
+## 2026-09-19: a letter that is not the letter it looks like
+
+A scanned report came back with `МСH` where the sheet printed `MCH`. The glyphs
+are identical on screen; the code points are Cyrillic Em and Es. `normaliseLabel`
+keeps only `a-z0-9` after folding, so both were stripped and the key became
+`h`. The row was reported as an unknown analyte, which to a reader looks exactly
+like an analyte nobody had added yet.
+
+Homoglyphs are now folded to Latin before normalising, because in a German
+laboratory's analyte name a Cyrillic letter is never anything but damage.
+
+The same sheet showed the mirror case in units: `U/l` came back as `U/I` and as
+`UII`, and `µIU/ml` as `ulU/ml`. Capital i, lower-case L, lower-case i, the
+digit one, a pipe and a slash are one glyph as far as a recogniser is
+concerned. A repair now tries those substitutions, under three guards that keep
+it from inventing units:
+
+- it runs **only** when the printed spelling is not already a unit, so a real
+  unit is never rewritten;
+- the token must contain at least one character that is not itself confusable,
+  so a run of `III` cannot become `l/l`, which is a haematocrit;
+- the substitutions must lead to exactly one UCUM code, or the repair is
+  refused rather than guessed.
+
+## 2026-09-19: Vision reads a downsampled copy, so a tall image loses its small print
+
+A photograph of a practice-software printout coded **nothing**: 0 of about 40
+values. The dictionary was not the problem and neither was the layout. The file
+held **two A4 pages stacked in one image** (1206x2098), and at that size the
+recogniser never read the result column at all.
+
+Measured, which is the only way this was ever going to be found:
+
+| Input              | Fragments | Decimal values |
+| ------------------ | --------- | -------------- |
+| Whole image        | 152       | 7              |
+| Its top half alone | 165       | 12             |
+
+Half the page yields more text than the whole page. Vision works on a
+downsampled copy, so thin digits fall below what it can resolve, while headings
+survive. Nothing in the output says so: the rows come back with their labels,
+units and reference ranges, missing only the number.
+
+A page taller than A4 is therefore read in overlapping bands, with each band's
+coordinates lifted back onto the full page so a citation still points at the
+right row. An ordinary page is untouched, which keeps the skew and degradation
+measurements in `ScanningTests` comparable.
+
+The lesson generalises past Vision: **when a recogniser returns less than the
+page contains, measure a crop before blaming the parser.** A missing column
+looks exactly like a parser bug from the outside.
+
+## 2026-09-19: the first number on a line is not always the measurement
+
+A real German report prints `HDL-Cholesterin Gen. 4 (SE) - 0.96 mmol/l`. The
+line grammar's first match takes `4` as the value and `(SE)` as the unit, the
+unit check fails, and the whole row was thrown away as unreadable. Two of the
+five lipids on the sheet were lost this way, and the value that was lost is the
+one a cardiologist reads first.
+
+A regex that is anchored cannot backtrack on semantics, so the parser now
+retries: a match whose unit is not a unit is not a failure, the search moves
+past that number and tries again, and whatever was skipped becomes part of the
+label. Four attempts, then the line is reported as unread.
+
+The same sheet also explains why the label is not simply cut at the first
+bracket: `Lp(a)` is an analyte and `Kreatinin (n. Jaffe) i. S. (SI) (SE)` is
+creatinine. The dictionary arbitrates, full spelling first.
+
+## 2026-09-19: the measurement that justified the OCR hybrid was taken on the wrong OS
+
+`DocumentReconciler` exists because two Vision engines read a lab sheet
+differently: the new document recogniser drops a lone `%`, the legacy
+`VNRecognizeTextRequest` reads it, and reconciling them recovers the character
+that decides HbA1c's LOINC code. That was measured with `swift test`, which
+runs on **macOS**.
+
+On **iOS 26.5** both passes lose it. A diagnostics record pulled from the
+simulator shows 42 recognised fragments on the page and not one containing a
+`%`, with the document pass's unit cell empty as well. The app had been
+shipping a recovery that cannot fire on the only platform it runs on.
+
+Worse, the row then vanished: an empty unit cell was skipped, and the
+"does this look like a measurement" check needs a unit to say yes, so an
+HbA1c row reached neither the coded list, the unmatched list nor the unread
+list. 8 printed rows became 7 with nothing to show for the eighth.
+
+Rules that follow:
+
+- **A measurement row must always land in one of the three buckets.** The
+  self-test now asserts conservation (`coded + unmapped + unread >= printed`),
+  which is the check that would have caught this on day one.
+- **A cross-platform claim needs a measurement on each platform.** `swift test`
+  on this repository is macOS Vision, not iPhone Vision. Anything about what
+  the recogniser reads has to be confirmed from a device or simulator
+  diagnostics record.
+- **Never fill in a missing unit.** `%` is 4548-4 and `mmol/mol` is 59261-8, so
+  a guessed unit is a wrong code on a real measurement. Report the row instead.
+
+## 2026-09-19: a parser fallback that rescues one layout can misread another
+
+`LabLineParser` gained a rule for `HbA1c mmol/mol Hb  34,3  < 42.0`: when the
+token after the value is not a unit but the label contains one, take the unit
+from the label. Correct for that row. On the study centre's sheet, which
+prints `Analyt  Einheit  Referenz  Wert`, the same rule turned
+`Natrium [P]  mmol/l  136 - 145  141` from "unread" into a coded value of
+**136**, the lower reference bound. Every unit test passed. The replay of a
+real record (`swift run ScanReplay`) was what showed it, before the build
+reached the phone.
+
+Two rules that follow:
+
+- A fallback that makes a previously refused line parse must be run against
+  the layouts it was **not** written for, and a real sheet's record is the
+  cheapest way to do that. Refused was safe; parsed-wrong is the one outcome
+  the pipeline exists to prevent.
+- On the line path the fallback now fires only when the label is one printed
+  cell (no two-space column separator inside it) and the remainder is exactly
+  a reference range. Unit-before-value layouts belong to the table path,
+  which reads them by column role.
+
+## 2026-09-19: a generator that scrapes its source loses whatever Prettier reformats
+
+`generate-swift-analytes.ts` recovered the unit map by regex over
+`analytes.ts`, matching quoted keys (`"fl": "fL",`). Prettier's default
+`quoteProps: "as-needed"` unquoted `fl` and `pg`, the regex no longer saw
+them, and the generated Swift table silently lost two units. `--check`
+reported the table current, because the committed file matched a generation
+that was itself wrong. Labels built by a helper (`differential(...)`) were
+missed the same way, since there was no `labels: [...]` literal to scrape.
+
+The fix is the general rule: a generator reads **data the source module
+exports** (`UNIT_SPELLINGS`, `ANALYTE_LABELS`), never the source text.
+Data cannot be reformatted away, and a test now asserts every analyte key
+and the once-lost units appear in the emitted table. Same class as ADR-031:
+a check that cannot fail is not a check.
+
 ## 2026-09-18: a Vitest hook that returns the mock calls it after the test
 
 `beforeEach(() => mockRunQuery.mockReset())` looks harmless. `mockReset()`

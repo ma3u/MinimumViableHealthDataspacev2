@@ -147,3 +147,54 @@
     }
   }
 #endif
+
+#if canImport(CoreGraphics)
+  /// How many bands a page is recognised in.
+  ///
+  /// Vision works on a downsampled copy, so small print on a tall image falls
+  /// below what it can resolve. Measured on a photograph holding two A4 pages
+  /// in one file (#186): the whole image gave 152 fragments and 7 decimal
+  /// values, its top half alone 165 and 12, and not one value on the sheet
+  /// could be coded.
+  @Suite("Reading a tall page in bands")
+  struct BandingTests {
+
+    private static func image(width: Int, height: Int) -> CGImage {
+      let context = CGContext(
+        data: nil, width: width, height: height, bitsPerComponent: 8, bytesPerRow: 0,
+        space: CGColorSpace(name: CGColorSpace.sRGB)!,
+        bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue)!
+      return context.makeImage()!
+    }
+
+    @Test("an ordinary page is read whole, so the existing measurements still mean what they said")
+    func singlePageIsUnbanded() {
+      #expect(VisionDocumentReader.bandCount(for: Self.image(width: 1240, height: 1754)) == 1)
+      #expect(VisionDocumentReader.bandCount(for: Self.image(width: 3024, height: 4032)) == 1)
+      #expect(VisionDocumentReader.bandCount(for: Self.image(width: 1754, height: 1240)) == 1)
+    }
+
+    @Test("a file holding two pages is read in two")
+    func twoPagesAreBanded() {
+      #expect(VisionDocumentReader.bandCount(for: Self.image(width: 1206, height: 2098)) == 2)
+      #expect(VisionDocumentReader.bandCount(for: Self.image(width: 1000, height: 4300)) >= 3)
+      // Bounded, so a pathological strip cannot ask for a hundred passes.
+      #expect(VisionDocumentReader.bandCount(for: Self.image(width: 100, height: 20000)) == 6)
+    }
+
+    @Test("the overlap's duplicates are dropped, keeping the more confident reading")
+    func duplicatesAreDropped() {
+      let region = SourceRegion(page: 1, x: 0.1, y: 0.5, width: 0.2, height: 0.02)
+      let nearby = SourceRegion(page: 1, x: 0.104, y: 0.502, width: 0.2, height: 0.02)
+      let elsewhere = SourceRegion(page: 1, x: 0.1, y: 0.2, width: 0.2, height: 0.02)
+      let kept = VisionDocumentReader.deduplicated([
+        DocumentReconciler.TextFragment(text: "Ferritin", region: region, confidence: 0.6),
+        DocumentReconciler.TextFragment(text: "Ferritin", region: nearby, confidence: 0.9),
+        DocumentReconciler.TextFragment(text: "Ferritin", region: elsewhere, confidence: 0.8),
+      ])
+
+      #expect(kept.count == 2, "the same text in the same place is one fragment")
+      #expect(kept.first?.confidence == 0.9, "the more confident reading survives")
+    }
+  }
+#endif

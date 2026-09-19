@@ -1,4 +1,4 @@
-#if canImport(CoreImage)
+#if DEBUG && canImport(CoreImage)
   import CoreGraphics
   import CoreImage
   import CoreText
@@ -15,23 +15,33 @@
   /// night, with a flash the app cannot control (VisionKit exposes no flash
   /// API), so skew, glare, underexposure, noise and motion blur are the normal
   /// case and not the edge case.
-  enum SyntheticSheet {
+  public enum SyntheticSheet {
 
     /// One printed row, and the truth it stands for.
-    struct Expectation {
-      let label: String
-      let value: Double
-      let unit: String
-      let referenceText: String
+    public struct Expectation: Sendable {
+      public let label: String
+      public let value: Double
+      public let unit: String
+      public let referenceText: String
       /// The LOINC code a correct extraction must produce, or nil when the
       /// analyte is deliberately outside the dictionary.
-      let loinc: String?
+      public let loinc: String?
+
+      public init(
+        label: String, value: Double, unit: String, referenceText: String, loinc: String?
+      ) {
+        self.label = label
+        self.value = value
+        self.unit = unit
+        self.referenceText = referenceText
+        self.loinc = loinc
+      }
     }
 
     /// The panel every test renders. Chosen to exercise what breaks:
     /// a German thousands separator, a decimal comma, a unit that selects the
     /// code, a bare `%`, and an analyte the dictionary does not know.
-    static let panel: [Expectation] = [
+    public static let panel: [Expectation] = [
       Expectation(
         label: "Cholesterin gesamt", value: 212, unit: "mg/dl", referenceText: "< 200",
         loinc: "2093-3"),
@@ -58,25 +68,37 @@
     ]
 
     /// How badly the scan went.
-    struct Condition {
-      var name: String
+    public struct Condition: Sendable {
+      public var name: String
       /// Degrees of skew. A sheet on a table, photographed by hand.
-      var rotation: Double = 0
+      public var rotation: Double = 0
       /// 1.0 leaves contrast alone; below 1 is a dim room, above 1 is glare.
-      var contrast: Double = 1.0
+      public var contrast: Double = 1.0
       /// 1.0 leaves brightness alone; negative is underexposed, positive is
       /// the flash firing straight back off glossy paper.
-      var brightness: Double = 0
+      public var brightness: Double = 0
       /// Gaussian blur radius in pixels. Motion, or a missed focus.
-      var blur: Double = 0
+      public var blur: Double = 0
       /// Multiplier on the rendered resolution. Below 1 is a distant or
       /// low-megapixel capture.
-      var scale: Double = 1.0
+      public var scale: Double = 1.0
 
-      static let clean = Condition(name: "clean 150 dpi scan")
+      public static let clean = Condition(name: "clean 150 dpi scan")
+
+      public init(
+        name: String, rotation: Double = 0, contrast: Double = 1.0, brightness: Double = 0,
+        blur: Double = 0, scale: Double = 1.0
+      ) {
+        self.name = name
+        self.rotation = rotation
+        self.contrast = contrast
+        self.brightness = brightness
+        self.blur = blur
+        self.scale = scale
+      }
     }
 
-    static func formatted(_ value: Double) -> String {
+    public static func formatted(_ value: Double) -> String {
       if value == value.rounded() {
         // German thousands separator, the rule that turns 1.240 into 1240.
         return value >= 1000
@@ -89,9 +111,34 @@
     }
 
     /// Renders the panel, page `page` of `pageCount`, under `condition`.
-    static func render(
+    /// The header block a real sheet carries above its table: who issued it,
+    /// for whom, and on which dates. All fictional.
+    ///
+    /// Opt-in, and deliberately not the default. The skew measurements in
+    /// `ScanningTests` were taken on a bare table, and a header changes them:
+    /// on a sheet skewed by one degree it costs two of eight rows. That is
+    /// worth knowing, and it is not worth silently rewriting what those
+    /// numbers mean.
+    public struct Header: Sendable {
+      public let collected: String
+      public let received: String
+      public let reported: String
+
+      public init(
+        collected: String = "12.09.2026", received: String = "12.09.2026",
+        reported: String = "14.09.2026"
+      ) {
+        self.collected = collected
+        self.received = received
+        self.reported = reported
+      }
+
+      public static let standard = Header()
+    }
+
+    public static func render(
       _ condition: Condition = .clean, rows: [Expectation]? = nil,
-      page: Int = 1, freeTextOnly: Bool = false
+      page: Int = 1, freeTextOnly: Bool = false, header: Header? = nil
     ) -> CGImage {
       let entries = rows ?? panel
       let width = Int(1240 * condition.scale)
@@ -117,8 +164,19 @@
       }
 
       draw("Laborbefund", x: 90, y: 1754 - 120, size: 34)
-      draw("Praxis Dr. Muster, Musterstadt", x: 90, y: 1754 - 165, size: 22)
+      draw("MVZ Labor Musterstadt GmbH", x: 90, y: 1754 - 165, size: 22)
       draw("Seite \(page)", x: 1000, y: 1754 - 165, size: 22)
+      // The header the metadata reader works on: a collection date, a receipt
+      // date it must not prefer, an issue date it must not prefer either, and
+      // a birth date it must never take.
+      if let header {
+        draw("Patient: Muster, Max   geb. 03.04.1975", x: 90, y: 1754 - 205, size: 20)
+        draw("Auftragsnr.: 2609123456   Einsender: Dr. med. Erika Beispiel", x: 90,
+             y: 1754 - 235, size: 20)
+        draw("Entnahme: \(header.collected)   Eingang: \(header.received)", x: 90,
+             y: 1754 - 265, size: 20)
+        draw("Befunddatum: \(header.reported)", x: 90, y: 1754 - 295, size: 20)
+      }
 
       if freeTextOnly {
         // A doctor's letter: prose, no table. Must not crash the table path.
@@ -128,14 +186,14 @@
           "Die Befunde waren unauffaellig, eine Kontrolle empfehlen wir",
           "in sechs Monaten. Mit freundlichen kollegialen Gruessen.",
         ]
-        var y: CGFloat = 1754 - 300
+        var y: CGFloat = 1754 - (header == nil ? 300 : 370)
         for line in lines {
           draw(line, x: 90, y: y, size: 24)
           y -= 48
         }
       } else {
         let columns: [CGFloat] = [90, 560, 760, 950]
-        var y: CGFloat = 1754 - 290
+        var y: CGFloat = 1754 - (header == nil ? 290 : 360)
         draw("Analyt", x: columns[0], y: y)
         draw("Ergebnis", x: columns[1], y: y)
         draw("Einheit", x: columns[2], y: y)
