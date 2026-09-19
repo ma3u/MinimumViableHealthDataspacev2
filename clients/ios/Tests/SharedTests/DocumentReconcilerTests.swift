@@ -208,3 +208,43 @@ struct RegionPassThroughTests {
     #expect(result.coded[0].raw.region == nil)
   }
 }
+
+@Suite("A cell whose text wrapped onto two lines")
+struct WrappedCellTests {
+
+  private static func cell(_ text: String, row: Int, column: Int) -> DocumentReconciler.Cell {
+    DocumentReconciler.Cell(
+      text: text,
+      region: SourceRegion(
+        page: 1, x: Double(column) * 0.25, y: 0.9 - Double(row) * 0.05, width: 0.24, height: 0.04),
+      row: row, column: column)
+  }
+
+  /// Measured on a real sheet (#186): Vision reports a wrapped cell with the
+  /// break in it, the row's rendered line then carries a newline, and the line
+  /// grammar splits on newlines and sees two half-rows. Both `Hämoglobin` and
+  /// `Retikulozyten` were lost exactly this way.
+  @Test("the break is collapsed, so the row stays one row")
+  func wrappedCellStaysOneRow() {
+    let cells = [
+      Self.cell("Analyt", row: 0, column: 0), Self.cell("Ergebnis", row: 0, column: 1),
+      Self.cell("Einheit", row: 0, column: 2), Self.cell("Referenzbereich", row: 0, column: 3),
+      Self.cell("Hamoglobin", row: 1, column: 0), Self.cell("15,7\n", row: 1, column: 1),
+      Self.cell("g/dl", row: 1, column: 2), Self.cell("13,5 - 17,5", row: 1, column: 3),
+      Self.cell("Retikulozyten\nabsolut", row: 2, column: 0), Self.cell("52,3", row: 2, column: 1),
+      Self.cell("/nl", row: 2, column: 2), Self.cell("25,0 - 100,0", row: 2, column: 3),
+      Self.cell("Kreatinin", row: 3, column: 0), Self.cell("0,92", row: 3, column: 1),
+      Self.cell("mg/dl", row: 3, column: 2), Self.cell("0,70 - 1,20", row: 3, column: 3),
+    ]
+    let reconciled = DocumentReconciler.reconcile(cells: cells, fragments: [])
+
+    for row in reconciled.rows {
+      #expect(!row.line.contains("\n"), "a row must be one line: \(row.line)")
+    }
+    let result = LabLineParser.extract(rows: reconciled.rows, source: .ocrTranscribed)
+    let codes = Set(result.coded.map(\.coding.loinc))
+    #expect(codes.contains("718-7"), "haemoglobin, whose value cell wrapped")
+    #expect(codes.contains("60474-4"), "reticulocytes, whose label wrapped")
+    #expect(result.suspiciousLines.isEmpty)
+  }
+}

@@ -13,6 +13,8 @@ let package = Package(
   targets: [
     .target(name: "Shared", path: "Sources/Shared"),
     .executableTarget(name: "AnalyteParity", dependencies: ["Shared"], path: "Tools/AnalyteParity"),
+    .executableTarget(name: "ScanReplay", dependencies: ["Shared"], path: "Tools/ScanReplay"),
+    .executableTarget(name: "LabFile", dependencies: ["Shared"], path: "Tools/LabFile"),
     .testTarget(name: "SharedTests", dependencies: ["Shared"], path: "Tests/SharedTests"),
     .executableTarget(name: "IconGen", path: "Tools/IconGen"),
   ]

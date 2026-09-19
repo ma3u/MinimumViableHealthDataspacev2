@@ -13,8 +13,16 @@
 import { readFile, writeFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import { dirname, resolve } from "node:path";
+import { REFERENCE_RANGES } from "./reference-ranges.js";
+import {
+  renderSwift as renderRanges,
+  validate as validateRanges,
+} from "./generate-swift-reference-ranges.js";
 import {
   ANALYTE_KEYS,
+  ANALYTE_LABELS,
+  UNIT_SPELLINGS,
+  looseLabelKey,
   lookupAnalyte,
   normaliseLabel,
   normaliseUnit,
@@ -25,37 +33,23 @@ export const SWIFT_TARGET = resolve(
   HERE,
   "../../../clients/ios/Sources/Shared/Analytes.generated.swift",
 );
+export const RANGES_TARGET = resolve(
+  HERE,
+  "../../../clients/ios/Sources/Shared/ReferenceRanges.generated.swift",
+);
 const SOURCE_REL = "services/epa-ingest/src/analytes.ts";
 
 /**
- * Recovers the (label, unit) → coding table by re-reading the source module's
- * own declarations.
+ * The (label, unit) space the table is generated over.
  *
- * The dictionary's internal shape is private to `analytes.ts`, and exporting it
- * just to generate from it would widen the module's API for the benefit of a
- * build step. Reading the declarations back keeps the public surface as it is.
+ * Taken from the module's own exports rather than scraped from its source. The
+ * scrape looked for quoted keys, Prettier unquoted `fl` and `pg`, and the Swift
+ * table silently lost two units while `--check` reported it current, because
+ * the generated file matched a generation that was itself wrong. Data cannot
+ * be reformatted away.
  */
-async function readDefinitions(): Promise<{
-  labels: string[];
-  units: string[];
-}> {
-  const src = await readFile(resolve(HERE, "analytes.ts"), "utf8");
-
-  const labels: string[] = [];
-  for (const block of src.matchAll(/labels:\s*\[([^\]]*)\]/g)) {
-    for (const quoted of block[1].matchAll(/"([^"]+)"/g))
-      labels.push(quoted[1]);
-  }
-
-  const units = new Set<string>();
-  for (const quoted of src.matchAll(/"([^"]+)":\s*c\(/g)) units.add(quoted[1]);
-  // The UCUM codes appear as byUnit keys; the printed forms come from the unit
-  // map, so round-trip every printed spelling we know how to normalise.
-  for (const quoted of src.matchAll(/"([^"]+)":\s*"([^"]+)",/g)) {
-    if (normaliseUnit(quoted[1]) !== null) units.add(quoted[1]);
-  }
-
-  return { labels: [...new Set(labels)], units: [...units] };
+function readDefinitions(): { labels: string[]; units: string[] } {
+  return { labels: [...ANALYTE_LABELS], units: [...UNIT_SPELLINGS] };
 }
 
 interface SwiftEntry {
@@ -167,29 +161,111 @@ ${units}
 ${rows}
   ]
 
+  /// Latin letters OCR returns as their Cyrillic or Greek twins. Mirrors
+  /// \`HOMOGLYPHS\`: a recogniser produced \`МСH\` for \`MCH\`, identical on
+  /// screen and a different code point, which \`normaliseLabel\` then stripped.
+  static let homoglyphs: [Character: Character] = [
+    "А": "A", "В": "B", "С": "C", "Е": "E", "Н": "H", "І": "I", "Ј": "J", "К": "K", "М": "M",
+    "О": "O", "Р": "P", "Ѕ": "S", "Т": "T", "Х": "X", "У": "Y", "а": "a", "в": "b", "с": "c",
+    "е": "e", "о": "o", "р": "p", "у": "y", "х": "x", "Α": "A", "Β": "B", "Ε": "E", "Ζ": "Z",
+    "Η": "H", "Ι": "I", "Κ": "K", "Μ": "M", "Ν": "N", "Ο": "O", "Ρ": "P", "Τ": "T", "Υ": "Y",
+    "Χ": "X", "ο": "o", "ρ": "p", "ν": "v",
+  ]
+
+  /// Replaces every homoglyph with the Latin letter it imitates.
+  public static func foldHomoglyphs(_ raw: String) -> String {
+    String(raw.map { homoglyphs[$0] ?? $0 })
+  }
+
   /// Folds case, spacing, punctuation and German diacritics. Mirrors \`normaliseLabel\`.
   public static func normaliseLabel(_ raw: String) -> String {
-    let folded = raw.lowercased()
+    let folded = foldHomoglyphs(raw).lowercased()
       .replacingOccurrences(of: "ä", with: "ae")
       .replacingOccurrences(of: "ö", with: "oe")
       .replacingOccurrences(of: "ü", with: "ue")
       .replacingOccurrences(of: "ß", with: "ss")
-    return String(folded.unicodeScalars.filter { CharacterSet.alphanumerics.contains($0) })
+    // ASCII letters and digits only, as the TypeScript fold does. Unicode
+    // alphanumerics kept the accented letter of a method name here and the
+    // two keys never met.
+    return String(folded.unicodeScalars.filter { asciiAlphanumerics.contains($0) })
+  }
+
+  private static let asciiAlphanumerics = CharacterSet(
+    charactersIn: "abcdefghijklmnopqrstuvwxyz0123456789")
+
+  /// The strict key with the umlaut digraphs collapsed. Mirrors \`looseLabelKey\`.
+  ///
+  /// OCR drops diacritics: \`Hämoglobin\` arrives as \`Hamoglobin\`, which the
+  /// strict key never matches. Both sides are collapsed, so the printed and the
+  /// dropped spelling meet. The TypeScript source refuses to load if two
+  /// different analytes share a loose key, so the fallback cannot mis-code.
+  public static func looseLabelKey(_ raw: String) -> String {
+    normaliseLabel(raw)
+      .replacingOccurrences(of: "ae", with: "a")
+      .replacingOccurrences(of: "oe", with: "o")
+      .replacingOccurrences(of: "ue", with: "u")
   }
 
   public static func normaliseUnit(_ raw: String) -> String? {
-    let key = raw.replacingOccurrences(of: "µ", with: "u")
+    let compact = raw.replacingOccurrences(of: "µ", with: "u")
       .replacingOccurrences(of: "μ", with: "u")
-      .components(separatedBy: .whitespaces).joined()
-      .lowercased()
-    return unitMap[key]
+      .components(separatedBy: .whitespacesAndNewlines).joined()
+    // Case decides before anything is lowercased: \`G/l\` is giga per litre, a
+    // cell count, and \`g/l\` is a gram per litre, a haemoglobin. Same in
+    // \`normaliseUnit\` on the TypeScript side.
+    if compact == "G/l" || compact == "G/L" { return "10*9/L" }
+    if compact == "T/l" || compact == "T/L" { return "10*12/L" }
+    return unitMap[compact.lowercased()] ?? repairUnit(raw)
+  }
+
+  /// Characters a recogniser confuses with one another. Mirrors \`CONFUSABLE\`.
+  static let confusable: Set<Character> = ["I", "l", "i", "1", "|", "!", "/"]
+  static let confusableTargets: [Character] = ["l", "i", "/"]
+
+  /// Repairs a unit a recogniser mangled, or nil. Mirrors \`repairUnit\`.
+  ///
+  /// Measured on a real sheet (#186): \`U/l\` came back as \`U/I\` and as
+  /// \`UII\`, and \`uIU/ml\` as \`ulU/ml\`. It runs only when the printed
+  /// spelling is not already a unit, the token must hold one character that is
+  /// not itself confusable, and the substitutions must lead to exactly one
+  /// UCUM code, so nothing ambiguous is ever guessed.
+  public static func repairUnit(_ raw: String) -> String? {
+    let compact = Array(
+      raw.replacingOccurrences(of: "µ", with: "u").replacingOccurrences(of: "μ", with: "u")
+        .components(separatedBy: .whitespacesAndNewlines).joined())
+    guard compact.count >= 2, compact.count <= 12 else { return nil }
+    var positions: [Int] = []
+    var hasAnchor = false
+    for (index, character) in compact.enumerated() {
+      if confusable.contains(character) { positions.append(index) } else { hasAnchor = true }
+    }
+    guard hasAnchor, !positions.isEmpty, positions.count <= 3 else { return nil }
+
+    var found: Set<String> = []
+    let total = Int(pow(Double(confusableTargets.count), Double(positions.count)))
+    for mask in 0..<total {
+      var characters = compact
+      var rest = mask
+      for position in positions {
+        characters[position] = confusableTargets[rest % confusableTargets.count]
+        rest /= confusableTargets.count
+      }
+      if let candidate = unitMap[String(characters).lowercased()] { found.insert(candidate) }
+    }
+    return found.count == 1 ? found.first : nil
   }
 
   /// Resolves a printed label and unit to a coding, or nil, never a guess.
+  ///
+  /// Strict key first; the loose key only when the strict one finds nothing.
   public static func lookup(label: String, unit: String) -> AnalyteCoding? {
     guard let ucum = normaliseUnit(unit) else { return nil }
     let key = normaliseLabel(label)
-    return codings.first { $0.labelKey == key && $0.ucum == ucum }
+    if let exact = codings.first(where: { $0.labelKey == key && $0.ucum == ucum }) {
+      return exact
+    }
+    let loose = looseLabelKey(label)
+    return codings.first { looseLabelKey($0.labelKey) == loose && $0.ucum == ucum }
   }
 
   /// True when the dictionary knows this analyte in *some* unit.
@@ -199,20 +275,39 @@ ${rows}
   /// in the dictionary or a unit the lab reported unusually.
   public static func knowsLabel(_ label: String) -> Bool {
     let key = normaliseLabel(label)
-    return codings.contains { $0.labelKey == key }
+    if codings.contains(where: { $0.labelKey == key }) { return true }
+    let loose = looseLabelKey(label)
+    return codings.contains { looseLabelKey($0.labelKey) == loose }
+  }
+
+  /// The analyte a label names, in whatever unit, or nil.
+  ///
+  /// Used to decide whether two spellings on one printed row mean the same
+  /// measurement: practice software prints its own short code in front of the
+  /// name, \`hdl Cholesterin-HDL\`, and the code may only be dropped when both
+  /// halves agree. \`HDL Cholesterin\` is the counter-example that makes the
+  /// check necessary rather than decorative.
+  public static func analyteKey(forLabel label: String) -> String? {
+    let key = normaliseLabel(label)
+    if let hit = codings.first(where: { $0.labelKey == key }) { return hit.analyteKey }
+    let loose = looseLabelKey(label)
+    return codings.first { looseLabelKey($0.labelKey) == loose }?.analyteKey
   }
 
   /// The units this analyte is defined for, for an actionable error message.
   public static func expectedUnits(forLabel label: String) -> [String] {
     let key = normaliseLabel(label)
-    return codings.filter { $0.labelKey == key }.map { $0.ucum }
+    let strict = codings.filter { $0.labelKey == key }.map { $0.ucum }
+    if !strict.isEmpty { return strict }
+    let loose = looseLabelKey(label)
+    return codings.filter { looseLabelKey($0.labelKey) == loose }.map { $0.ucum }
   }
 }
 `;
 }
 
 export async function generate(): Promise<string> {
-  const { labels, units } = await readDefinitions();
+  const { labels, units } = readDefinitions();
   const entries = buildEntries(labels, units);
   if (entries.length === 0) {
     throw new Error(
@@ -220,25 +315,69 @@ export async function generate(): Promise<string> {
     );
   }
 
+  // The Swift fold is a transliteration of the TypeScript one. Prove on every
+  // label that the loose key derives from the strict key the way the template
+  // derives it, so a change to one side without the other fails here.
+  for (const label of labels) {
+    const derived = normaliseLabel(label)
+      .replace(/ae/g, "a")
+      .replace(/oe/g, "o")
+      .replace(/ue/g, "u");
+    if (derived !== looseLabelKey(label)) {
+      throw new Error(
+        `looseLabelKey("${label}") is not derivable from its strict key; update the Swift template`,
+      );
+    }
+  }
+
   const unitMap: [string, string][] = [];
   for (const unit of units) {
     const ucum = normaliseUnit(unit);
-    if (ucum)
-      unitMap.push([
-        unit.replace(/µ|μ/g, "u").replace(/\s+/g, "").toLowerCase(),
-        ucum,
-      ]);
+    const key = unit.replace(/µ|μ/g, "u").replace(/\s+/g, "").toLowerCase();
+    // A spelling that only case tells apart (`G/l` versus `g/l`) is decided in
+    // code on both sides, before the map. Writing it into the map under its
+    // lowercase key would overwrite the gram-per-litre entry with a count.
+    if (ucum && normaliseUnit(key) === ucum) unitMap.push([key, ucum]);
   }
   unitMap.sort((a, b) => a[0].localeCompare(b[0]));
 
   return renderSwift(entries, [...new Map(unitMap).entries()]);
 }
 
+/** The reference-range table, validated against the analyte dictionary. */
+export function generateRanges(): string {
+  const problems = validateRanges(REFERENCE_RANGES);
+  if (problems.length > 0) {
+    throw new Error(
+      `reference-ranges.ts does not agree with the analyte dictionary:\n  ${problems.join(
+        "\n  ",
+      )}`,
+    );
+  }
+  return renderRanges(REFERENCE_RANGES);
+}
+
 async function main(): Promise<void> {
   const check = process.argv.includes("--check");
   const rendered = await generate();
+  const renderedRanges = generateRanges();
 
   if (check) {
+    let currentRanges = "";
+    try {
+      currentRanges = await readFile(RANGES_TARGET, "utf8");
+    } catch {
+      currentRanges = "";
+    }
+    if (currentRanges !== renderedRanges) {
+      process.stderr.write(
+        "The generated Swift reference-range table is out of date with " +
+          "services/epa-ingest/src/reference-ranges.ts.\n" +
+          "Run: cd services/epa-ingest && npm run generate:swift\n",
+      );
+      process.exitCode = 1;
+      return;
+    }
     let current = "";
     try {
       current = await readFile(SWIFT_TARGET, "utf8");
@@ -262,6 +401,10 @@ async function main(): Promise<void> {
   }
 
   await writeFile(SWIFT_TARGET, rendered, "utf8");
+  await writeFile(RANGES_TARGET, renderedRanges, "utf8");
+  process.stdout.write(
+    `${REFERENCE_RANGES.length} reference ranges → ${RANGES_TARGET}\n`,
+  );
   const count = (rendered.match(/AnalyteCoding\(labelKey:/g) ?? []).length;
   process.stdout.write(
     `${count} codings across ${ANALYTE_KEYS.length} analytes → ${SWIFT_TARGET}\n`,

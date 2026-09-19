@@ -1,4 +1,5 @@
 import Foundation
+import PDFKit
 import Shared
 import UIKit
 
@@ -18,6 +19,11 @@ import UIKit
 /// One artefact would be tidier, and a PDF with a JSON attachment is what #186
 /// describes, but a practice system that strips attachments would silently drop
 /// the half that carries the codes. Two files cannot be silently halved.
+///
+/// The PDF carries the original scan after the summary, when the store has it.
+/// A transcription a doctor can check against the source on the next page is
+/// worth more than one they have to take on trust, and the ePA takes the
+/// pages anyway. The 25 MB limit is asserted on the whole.
 enum ReportExport {
 
   /// The ePA's per-file limit. Asserted rather than assumed: a scan-heavy
@@ -48,12 +54,12 @@ enum ReportExport {
     }
   }
 
-  static func write(_ report: ReportStore.StoredReport) throws -> Artefacts {
+  static func write(_ report: LabReport, scan: Data? = nil) throws -> Artefacts {
     guard !report.extraction.coded.isEmpty else { throw ExportError.nothingToExport }
 
     let stamp = ISO8601DateFormatter()
     stamp.formatOptions = [.withYear, .withMonth, .withDay, .withDashSeparatorInDate]
-    let day = stamp.string(from: report.collectedOn ?? report.scannedAt)
+    let day = stamp.string(from: report.effectiveDate)
     let base = "Laborbefund-\(day)"
     let dir = FileManager.default.temporaryDirectory
       .appendingPathComponent("export-\(report.id.uuidString)", isDirectory: true)
@@ -61,7 +67,16 @@ enum ReportExport {
     try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
 
     let pdfURL = dir.appendingPathComponent("\(base).pdf")
-    let pdfData = renderPDF(report)
+    var pdfData = renderPDF(report, hasScan: scan != nil)
+    if let scan, let summary = PDFDocument(data: pdfData), let original = PDFDocument(data: scan) {
+      for index in 0..<original.pageCount {
+        if let page = original.page(at: index) { summary.insert(page, at: summary.pageCount) }
+      }
+      if let merged = summary.dataRepresentation() { pdfData = merged }
+    }
+    let scanNote = scan == nil ? "absent" : "appended"
+    Log.export.info(
+      "export built: \(pdfData.count, privacy: .public) bytes, scan \(scanNote, privacy: .public)")
     guard pdfData.count <= epaFileSizeLimit else {
       throw ExportError.tooLarge(pdfData.count)
     }
@@ -76,7 +91,7 @@ enum ReportExport {
 
   // MARK: - FHIR
 
-  static func fhirJSON(_ report: ReportStore.StoredReport) -> String {
+  static func fhirJSON(_ report: LabReport) -> String {
     let date = ISO8601DateFormatter()
     date.formatOptions = [.withYear, .withMonth, .withDay, .withDashSeparatorInDate]
     let bundle = FhirWriter.buildBundle(
@@ -86,7 +101,8 @@ enum ReportExport {
         // whose record it is; repeating it here would add an identifier to a
         // file that travels.
         patientId: "meinbefund-local",
-        effectiveDateTime: date.string(from: report.collectedOn ?? report.scannedAt),
+        effectiveDateTime: date.string(from: report.effectiveDate),
+        performer: report.metadata.laboratory,
         title: report.title),
       source: FhirWriter.TextSource(
         kind: report.extraction.source,
@@ -104,7 +120,7 @@ enum ReportExport {
   /// from a photograph and a doctor is entitled to know that before acting on
   /// it. The printed reference range is reproduced as the lab wrote it, never
   /// a standard range substituted for it (ADR-033 rule 1).
-  static func renderPDF(_ report: ReportStore.StoredReport) -> Data {
+  static func renderPDF(_ report: LabReport, hasScan: Bool = false) -> Data {
     let pageWidth: CGFloat = 595, pageHeight: CGFloat = 842  // A4 at 72 dpi
     let margin: CGFloat = 48
     let renderer = UIGraphicsPDFRenderer(
@@ -145,10 +161,19 @@ enum ReportExport {
 
       draw(report.title, title, x: margin)
       y += 6
-      draw(
-        String(
-          localized: "Collected \(dates.string(from: report.collectedOn ?? report.scannedAt))"),
-        body, x: margin)
+      if let laboratory = report.metadata.laboratory {
+        draw(String(localized: "Laboratory: \(laboratory)"), body, x: margin)
+      }
+      draw(String(localized: "Collected \(dates.string(from: report.effectiveDate))"), body, x: margin)
+      if let received = report.metadata.receivedOn {
+        draw(String(localized: "Received \(dates.string(from: received))"), body, x: margin)
+      }
+      if let reported = report.metadata.reportedOn {
+        draw(String(localized: "Issued \(dates.string(from: reported))"), body, x: margin)
+      }
+      if let number = report.metadata.reportNumber {
+        draw(String(localized: "Report number \(number)"), body, x: margin)
+      }
       y += 14
 
       // The provenance banner. First thing on the page, because it changes how
@@ -218,6 +243,11 @@ enum ReportExport {
           localized:
             "Produced by Klarbefund on this device. Not a diagnosis and not a medical device. A machine-readable FHIR R4 bundle accompanies this document."),
         small, x: margin, colour: .darkGray)
+      if hasScan {
+        y += 4
+        draw(String(localized: "The original scan follows on the next pages."), small, x: margin,
+             colour: .darkGray)
+      }
     }
   }
 

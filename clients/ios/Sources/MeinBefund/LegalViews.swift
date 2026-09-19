@@ -23,10 +23,12 @@ struct PrivacySummary: View {
               .font(.headline)
             Text(
               """
-              The photographs never leave this device. The values read from them \
-              are encrypted individually, with a key that is unavailable while \
-              the phone is locked and is never restored onto another device. \
-              The store is excluded from iCloud Backup.
+              The photographs never leave this device. They are kept as a PDF \
+              next to the values read from them, so a reading can be checked \
+              against the original, and both are encrypted individually, with \
+              a key that is unavailable while the phone is locked and is never \
+              restored onto another device. The store is excluded from iCloud \
+              Backup.
               """)
           }
 
@@ -37,9 +39,21 @@ struct PrivacySummary: View {
               """
               When you ask for an explanation you choose the values, see them \
               listed, and confirm. Only those values and your question travel. \
-              Your name, date of birth and insurance number are never sent, \
-              because the app does not hold them. The scanned image is never \
-              sent either.
+              Your name, date of birth and insurance number are never sent. \
+              They may be printed on the scanned page, which stays on this \
+              device and is never sent either.
+              """)
+          }
+
+          Group {
+            Text("Diagnostics you can export")
+              .font(.headline)
+            Text(
+              """
+              To improve how reports are read, you can export a diagnostics \
+              archive from the menu. It contains your scanned pages, every \
+              value and the recognised text, unencrypted, and goes only where \
+              you send it. Nothing is exported unless you choose to.
               """)
           }
 

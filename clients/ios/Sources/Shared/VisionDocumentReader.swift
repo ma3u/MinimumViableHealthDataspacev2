@@ -26,6 +26,13 @@ public enum VisionDocumentReader {
     /// fallback when a page holds no table at all.
     public let plainText: String
     public let tableCount: Int
+    /// What the table pass saw, before reconciliation. Kept so a scan can be
+    /// replayed on a Mac from its diagnostics record without the image.
+    public let cells: [DocumentReconciler.Cell]
+    /// What the text pass saw, before reconciliation. Same reason.
+    public let fragments: [DocumentReconciler.TextFragment]
+    public let imageWidth: Int
+    public let imageHeight: Int
 
     public var repairedCellCount: Int {
       rows.reduce(0) { $0 + $1.cells.filter { $0.origin != .document }.count }
@@ -49,7 +56,11 @@ public enum VisionDocumentReader {
       rows: result.rows,
       orphanedFragments: result.orphanedFragments,
       plainText: readingOrder(text),
-      tableCount: tableCount
+      tableCount: tableCount,
+      cells: cells,
+      fragments: text,
+      imageWidth: image.width,
+      imageHeight: image.height
     )
   }
 
@@ -122,6 +133,84 @@ public enum VisionDocumentReader {
   private static func recogniseFragments(
     _ image: CGImage, page: Int
   ) async throws -> [DocumentReconciler.TextFragment] {
+    let bands = bandCount(for: image)
+    guard bands > 1 else { return try recogniseBand(image, page: page) }
+
+    // Overlapping bands, so a line sitting on a boundary is read whole in at
+    // least one of them.
+    var collected: [DocumentReconciler.TextFragment] = []
+    let height = Double(image.height)
+    let bandHeight = height / Double(bands)
+    let overlap = bandHeight * 0.12
+    for index in 0..<bands {
+      let top = max(0, Double(index) * bandHeight - overlap)
+      let bottom = min(height, Double(index + 1) * bandHeight + overlap)
+      let rect = CGRect(x: 0, y: top, width: Double(image.width), height: bottom - top)
+      guard let cropped = image.cropping(to: rect) else { continue }
+      let fragments = try recogniseBand(cropped, page: page)
+      // Vision's origin is the bottom left of whatever it was given, so a
+      // band's coordinates have to be lifted back onto the whole page. Getting
+      // this wrong puts a citation on a different analyte, which on a lab sheet
+      // is a different test.
+      let scale = rect.height / height
+      let offset = (height - rect.maxY) / height
+      collected.append(
+        contentsOf: fragments.map { fragment in
+          DocumentReconciler.TextFragment(
+            text: fragment.text,
+            region: SourceRegion(
+              page: page,
+              x: fragment.region.x,
+              y: offset + fragment.region.y * scale,
+              width: fragment.region.width,
+              height: fragment.region.height * scale),
+            confidence: fragment.confidence)
+        })
+    }
+    return deduplicated(collected)
+  }
+
+  /// How many horizontal bands a page should be read in.
+  ///
+  /// Vision works on a downsampled copy, so on a tall image small print falls
+  /// below what it can resolve. Measured on a photograph holding **two A4
+  /// pages in one file** (#186, 1206x2098): the whole image yielded 152
+  /// fragments and 7 decimal values, its top half alone 165 fragments and 12.
+  /// The result column of the upper page was not read at all, and not one
+  /// value on the sheet could be coded.
+  ///
+  /// A4 is 1.41 tall, and a hand-held photograph of one page stays near that,
+  /// so anything meaningfully taller is more page than Vision is being given
+  /// credit for. An ordinary single page is unaffected, which keeps the skew
+  /// and degradation measurements in `ScanningTests` comparable.
+  static func bandCount(for image: CGImage) -> Int {
+    guard image.width > 0 else { return 1 }
+    let aspect = Double(image.height) / Double(image.width)
+    guard aspect > 1.5 else { return 1 }
+    return min(6, Int((aspect / 1.2).rounded(.up)))
+  }
+
+  /// Drops the duplicates the overlap produces, keeping the more confident.
+  static func deduplicated(_ fragments: [DocumentReconciler.TextFragment])
+    -> [DocumentReconciler.TextFragment]
+  {
+    var kept: [DocumentReconciler.TextFragment] = []
+    for fragment in fragments.sorted(by: { ($0.confidence ?? 0) > ($1.confidence ?? 0) }) {
+      let duplicate = kept.contains { other in
+        other.text == fragment.text
+          && abs(other.region.midY - fragment.region.midY)
+            < max(other.region.height, fragment.region.height)
+          && abs(other.region.midX - fragment.region.midX)
+            < max(other.region.width, fragment.region.width)
+      }
+      if !duplicate { kept.append(fragment) }
+    }
+    return kept
+  }
+
+  private static func recogniseBand(
+    _ image: CGImage, page: Int
+  ) throws -> [DocumentReconciler.TextFragment] {
     let request = VNRecognizeTextRequest()
     request.recognitionLevel = .accurate
     request.usesLanguageCorrection = false
@@ -154,6 +243,26 @@ public enum VisionDocumentReader {
     )
   }
 
+  /// How close two fragments must be vertically to belong to the same row.
+  ///
+  /// A fixed fraction of the image height cannot be right for every input, and
+  /// getting it wrong loses whole columns. Measured on a photograph of a
+  /// practice-software printout holding **two pages in one image** (#186): at
+  /// the old fixed 0.01, one page's line spacing was smaller than the
+  /// tolerance, neighbouring rows merged, and the result column ended up on
+  /// the wrong line for most of the sheet. Not one value was coded.
+  ///
+  /// The scale-free answer is the text itself: a line is about as tall as the
+  /// characters on it, so the median fragment height is the unit to measure in,
+  /// whatever the page count or the resolution. The bounds keep a page of
+  /// enormous headings or of noise from producing something absurd.
+  static func rowTolerance(_ fragments: [DocumentReconciler.TextFragment]) -> Double {
+    let heights = fragments.map(\.region.height).filter { $0 > 0 }.sorted()
+    guard !heights.isEmpty else { return 0.01 }
+    let median = heights[heights.count / 2]
+    return min(0.012, max(0.002, median * 0.6))
+  }
+
   /// Groups fragments into lines the way the text-only path does.
   ///
   /// Only used when a page has no table. Vision returns text in reading order
@@ -161,8 +270,9 @@ public enum VisionDocumentReader {
   /// its unit arrive as three separate lines and the grammar sees no
   /// measurement at all.
   public static func readingOrder(
-    _ fragments: [DocumentReconciler.TextFragment], tolerance: Double = 0.01
+    _ fragments: [DocumentReconciler.TextFragment], tolerance: Double? = nil
   ) -> String {
+    let tolerance = tolerance ?? rowTolerance(fragments)
     var rows: [(y: Double, parts: [(x: Double, text: String)])] = []
     for fragment in fragments.sorted(by: { $0.region.midY > $1.region.midY }) {
       let y = fragment.region.midY

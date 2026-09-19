@@ -6,6 +6,11 @@ import {
   generate,
   renderSwift,
 } from "../src/generate-swift-analytes.js";
+import {
+  ANALYTE_KEYS,
+  ANALYTE_LABELS,
+  UNIT_SPELLINGS,
+} from "../src/analytes.js";
 
 describe("buildEntries", () => {
   it("emits one entry per (label synonym, unit) pair the dictionary resolves", () => {
@@ -68,6 +73,35 @@ describe("renderSwift", () => {
 
   it("carries the rule the table exists to enforce", () => {
     expect(swift).toContain("The unit selects the LOINC code, never the label");
+  });
+});
+
+describe("the generated table covers the whole dictionary", () => {
+  it("emits at least one coding for every analyte key", () => {
+    const entries = buildEntries([...ANALYTE_LABELS], [...UNIT_SPELLINGS]);
+    const covered = new Set(entries.map((e) => e.analyteKey));
+    for (const key of ANALYTE_KEYS) expect(covered.has(key), key).toBe(true);
+  });
+
+  it("emits the differential, whose labels are built rather than written", () => {
+    const entries = buildEntries([...ANALYTE_LABELS], [...UNIT_SPELLINGS]);
+    const neutrophils = entries.filter((e) => e.analyteKey === "neutrophils");
+    expect(new Set(neutrophils.map((e) => e.loinc))).toEqual(
+      new Set(["751-8", "770-8"]),
+    );
+  });
+
+  it("keeps g/l a mass in the Swift map, G/l being decided in code", async () => {
+    const swift = await generate();
+    expect(swift).toContain('"g/l": "g/L"');
+    expect(swift).not.toContain('"g/l": "10*9/L"');
+  });
+
+  it("keeps the units a formatter once unquoted", async () => {
+    const swift = await generate();
+    for (const unit of ['"fl": "fL"', '"pg": "pg"', '"/pl": "10*12/L"']) {
+      expect(swift).toContain(unit);
+    }
   });
 });
 
