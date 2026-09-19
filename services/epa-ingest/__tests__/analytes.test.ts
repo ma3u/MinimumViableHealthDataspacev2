@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
+  buildIndexes,
+  repairUnit,
+  looseLabelKey,
   lookupAnalyte,
   normaliseLabel,
   normaliseUnit,
@@ -12,6 +15,8 @@ describe("normaliseLabel", () => {
     );
     expect(normaliseLabel("Harnsäure")).toBe("harnsaeure");
     expect(normaliseLabel("Lp(a)")).toBe("lpa");
+    // Any letter outside a-z is dropped, and the Swift fold must do the same.
+    expect(normaliseLabel("Kreatinin (Jaffé)")).toBe("kreatininjaff");
   });
 });
 
@@ -85,5 +90,173 @@ describe("lookupAnalyte", () => {
     expect(lookupAnalyte("Ferritin", "Titer")).toEqual({
       status: "unknown-unit",
     });
+  });
+});
+
+describe("the blood count (#186, first real scan)", () => {
+  it("codes the differential by the printed unit: count versus share", () => {
+    const count = lookupAnalyte("Neutrophile absolut", "/nl");
+    const share = lookupAnalyte("Neutrophile", "%");
+    expect(count.status === "ok" && count.coding.loincNumber).toBe("751-8");
+    expect(count.status === "ok" && count.coding.ucum).toBe("10*9/L");
+    expect(share.status === "ok" && share.coding.loincNumber).toBe("770-8");
+  });
+
+  it("knows the label suffixes German sheets print", () => {
+    for (const label of [
+      "Lymphozyten abs.",
+      "Lymphozyten absolut",
+      "Lymphozyten",
+      "LYMPH",
+    ]) {
+      const hit = lookupAnalyte(label, "/nl");
+      expect(hit.status === "ok" && hit.coding.loincNumber, label).toBe(
+        "731-0",
+      );
+    }
+    const ig = lookupAnalyte("unreife Granulozyten absolut", "/nl");
+    expect(ig.status === "ok" && ig.coding.loincNumber).toBe("53115-2");
+  });
+
+  it("codes the red-cell indices in their own units", () => {
+    expect(
+      lookupAnalyte("MCV", "fl").status === "ok" &&
+        (lookupAnalyte("MCV", "fl") as { coding: { loincNumber: string } })
+          .coding.loincNumber,
+    ).toBe("787-2");
+    const mch = lookupAnalyte("MCH", "pg");
+    const mchc = lookupAnalyte("MCHC", "g/dl");
+    const rdw = lookupAnalyte("RDW-CV", "%");
+    const hct = lookupAnalyte("Hämatokrit", "%");
+    expect(mch.status === "ok" && mch.coding.loincNumber).toBe("785-6");
+    expect(mchc.status === "ok" && mchc.coding.loincNumber).toBe("786-4");
+    expect(rdw.status === "ok" && rdw.coding.loincNumber).toBe("788-0");
+    expect(hct.status === "ok" && hct.coding.loincNumber).toBe("4544-3");
+  });
+
+  it("leaves RDW-SD uncoded because its LOINC codes are deprecated", () => {
+    expect(lookupAnalyte("RDW-SD", "fl")).toEqual({
+      status: "unknown-analyte",
+    });
+  });
+
+  it("reads reticulocytes in per mille as well as percent", () => {
+    const perMille = lookupAnalyte("Retikulozyten", "‰");
+    expect(perMille.status === "ok" && perMille.coding.ucum).toBe("[ppth]");
+    expect(perMille.status === "ok" && perMille.coding.loincNumber).toBe(
+      "17849-1",
+    );
+  });
+});
+
+describe("units that only case can tell apart", () => {
+  it("reads G/l as a giga count and g/l as a gram mass", () => {
+    expect(normaliseUnit("G/l")).toBe("10*9/L");
+    expect(normaliseUnit("T/l")).toBe("10*12/L");
+    expect(normaliseUnit("g/l")).toBe("g/L");
+    const leukocytes = lookupAnalyte("Leukozyten", "G/l");
+    const haemoglobin = lookupAnalyte("Hämoglobin", "g/l");
+    expect(leukocytes.status === "ok" && leukocytes.coding.loincNumber).toBe(
+      "6690-2",
+    );
+    expect(haemoglobin.status === "ok" && haemoglobin.coding.loincNumber).toBe(
+      "718-7",
+    );
+  });
+
+  it("maps the count units a German haematology sheet prints", () => {
+    expect(normaliseUnit("/pl")).toBe("10*12/L");
+    expect(normaliseUnit("Mio/µl")).toBe("10*6/uL");
+    expect(normaliseUnit("Tsd/µl")).toBe("10*3/uL");
+    expect(normaliseUnit("fl")).toBe("fL");
+    expect(normaliseUnit("pg")).toBe("pg");
+  });
+});
+
+describe("OCR that drops the umlaut", () => {
+  it("collapses ae, oe and ue on both sides", () => {
+    expect(looseLabelKey("Hämoglobin")).toBe(looseLabelKey("Hamoglobin"));
+    expect(looseLabelKey("Harnsäure")).toBe(looseLabelKey("Harnsaure"));
+    // The strict key stays what it was; only the fallback is new.
+    expect(normaliseLabel("Hämoglobin")).toBe("haemoglobin");
+  });
+
+  it("codes Hamoglobin, the spelling the first real scan produced", () => {
+    const hit = lookupAnalyte("Hamoglobin", "g/dl");
+    expect(hit).toMatchObject({ status: "ok", analyteKey: "haemoglobin" });
+    if (hit.status === "ok") expect(hit.coding.loincNumber).toBe("718-7");
+  });
+
+  it("still refuses an analyte it has never heard of", () => {
+    expect(lookupAnalyte("Hamatologie", "g/dl")).toEqual({
+      status: "unknown-analyte",
+    });
+  });
+
+  it("refuses to build a dictionary where two analytes share a loose key", () => {
+    const coding = { loincNumber: "0-0", display: "x", ucum: "%" };
+    expect(() =>
+      buildIndexes([
+        { key: "a", labels: ["Härte"], byUnit: { "%": coding } },
+        { key: "b", labels: ["Harte"], byUnit: { "%": coding } },
+      ]),
+    ).toThrow(/same loose key/);
+  });
+});
+
+describe("the rows two real Berlin sheets refused (#186)", () => {
+  it("codes the coagulation and chemistry batch", () => {
+    const cases: [string, string, string][] = [
+      ["Quick (TPZ)", "%", "5894-1"],
+      ["Fibrinogen", "g/l", "3255-7"],
+      ["Harnstoff", "mg/dl", "3091-6"],
+      ["Glucose im Fluorid", "mg/dl", "2345-7"],
+      ["Kreatinin (Jaffé)", "mg/dl", "2160-0"],
+      ["Reti% gemessen", "%", "17849-1"],
+      ["Erythroblasten absolut", "/nl", "771-6"],
+      ["Transferrin", "g/l", "3034-6"],
+      ["Transferrin-Sättigung", "%", "2502-3"],
+      ["Kortisol", "nmol/l", "14675-3"],
+      ["Lp(a)", "g/l", "10835-7"],
+      ["aPTT", "sec", "3173-2"],
+    ];
+    for (const [label, unit, loinc] of cases) {
+      const hit = lookupAnalyte(label, unit);
+      expect(
+        hit.status === "ok" && hit.coding.loincNumber,
+        `${label} [${unit}]`,
+      ).toBe(loinc);
+    }
+  });
+});
+
+describe("a unit the recogniser mangled", () => {
+  it("repairs the confusions a real sheet produced", () => {
+    expect(repairUnit("U/I")).toBe("U/L");
+    expect(repairUnit("UII")).toBe("U/L");
+    expect(repairUnit("ulU/ml")).toBe("u[IU]/mL");
+    expect(repairUnit("f1")).toBe("fL");
+  });
+
+  it("never rewrites a unit that is already a unit", () => {
+    // The guard that makes this safe: a real spelling is resolved before any
+    // repair is attempted, so mg/dL can never become something else.
+    expect(normaliseUnit("mg/dl")).toBe("mg/dL");
+    expect(normaliseUnit("/nl")).toBe("10*9/L");
+    expect(normaliseUnit("G/l")).toBe("10*9/L");
+  });
+
+  it("refuses a token made only of confusable characters", () => {
+    // `III` could be repaired into `l/l`, which is a haematocrit. A token with
+    // nothing recognisable in it is not evidence of anything.
+    expect(repairUnit("III")).toBeNull();
+    expect(repairUnit("ll")).toBeNull();
+    expect(repairUnit("|||")).toBeNull();
+  });
+
+  it("refuses an ambiguous repair rather than picking one", () => {
+    expect(repairUnit("Titer")).toBeNull();
+    expect(repairUnit("")).toBeNull();
+    expect(repairUnit("negativ")).toBeNull();
   });
 });

@@ -27,6 +27,10 @@
     /// does not, and the screenshots stay reproducible as the layout changes.
     enum Screen: String {
       case list, detail, consent, settings, privacy
+      /// The stored pages of the first report, as the app shows them back.
+      case scan
+      /// The timeline across reports, and the published ranges behind it.
+      case trends, reference
     }
 
     static var screen: Screen? {
@@ -54,7 +58,7 @@
         source: .ocrTranscribed)
     }
 
-    static var reports: [ReportStore.StoredReport] {
+    static var reports: [LabReport] {
       let panel = ExtractionResult(
         coded: [
           coded("Cholesterin gesamt", 212, "mg/dl", "mg/dL", "2093-3",
@@ -100,15 +104,23 @@
       let march = calendar.date(from: DateComponents(year: 2026, month: 3, day: 11))!
       let september = calendar.date(from: DateComponents(year: 2026, month: 9, day: 4))!
 
+      func metadata(_ date: Date) -> ReportMetadata {
+        ReportMetadata(
+          laboratory: "Praxis Dr. Muster", collectedOn: date, reportedOn: date,
+          reportNumber: "2609000001", labDate: date, labDateRole: .collection,
+          dateSource: .printed)
+      }
       return [
-        ReportStore.StoredReport(
+        LabReport(
           id: UUID(uuidString: "00000000-0000-0000-0000-0000000000A1")!,
           scannedAt: september, collectedOn: september,
-          title: String(localized: "Lipid panel, Praxis Dr. Muster"), extraction: panel),
-        ReportStore.StoredReport(
+          title: String(localized: "Lipid panel, Praxis Dr. Muster"), extraction: panel,
+          metadata: metadata(september)),
+        LabReport(
           id: UUID(uuidString: "00000000-0000-0000-0000-0000000000A2")!,
           scannedAt: march, collectedOn: march,
-          title: String(localized: "Check-up, Praxis Dr. Muster"), extraction: second),
+          title: String(localized: "Check-up, Praxis Dr. Muster"), extraction: second,
+          metadata: metadata(march)),
       ]
     }
   }

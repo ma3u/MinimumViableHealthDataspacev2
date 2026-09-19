@@ -2,23 +2,69 @@ import Shared
 import SwiftUI
 
 /// Review before saving. Nothing is stored until the user has seen what was read.
+///
+/// The report's own date is confirmed here, every time. The first real scan
+/// (#186) was filed under the day it was photographed; a stack of paper going
+/// back years is not a stack of results from this month. The date read from
+/// the sheet is offered, its evidence shown, and the person decides.
 struct ReviewSheet: View {
-  let extraction: ExtractionResult
-  let onConfirm: (String) -> Void
+  let product: ScanProduct
+  let onConfirm: (_ title: String, _ labDate: Date, _ laboratory: String) -> Void
   let onDiscard: () -> Void
 
   @State private var title = ""
+  @State private var laboratory: String
+  @State private var labDate: Date
+
+  init(
+    product: ScanProduct,
+    onConfirm: @escaping (_ title: String, _ labDate: Date, _ laboratory: String) -> Void,
+    onDiscard: @escaping () -> Void
+  ) {
+    self.product = product
+    self.onConfirm = onConfirm
+    self.onDiscard = onDiscard
+    _laboratory = State(initialValue: product.metadata.laboratory ?? "")
+    _labDate = State(initialValue: product.metadata.labDate ?? Date())
+  }
+
+  private var defaultTitle: String {
+    let lab = laboratory.trimmingCharacters(in: .whitespaces)
+    return lab.isEmpty ? String(localized: "Lab report") : lab
+  }
 
   var body: some View {
     NavigationStack {
       Form {
         Section {
-          TextField("Title", text: $title, prompt: Text("Lab report"))
+          TextField("Title", text: $title, prompt: Text(defaultTitle))
+          TextField("Laboratory", text: $laboratory, prompt: Text("Laboratory or practice"))
+          DatePicker("Lab date", selection: $labDate, in: ...Date(), displayedComponents: .date)
+        } header: {
+          Text("Report")
         } footer: {
-          Text("These values were read from a photo and are preliminary, not confirmed.")
+          VStack(alignment: .leading, spacing: 6) {
+            if let evidence = product.metadata.labDateEvidence {
+              Text("Read from the sheet: \(evidence.line)")
+            } else {
+              Text(
+                "No date was found on the sheet. Set the date printed on the report; the day of the scan is not the day of the result."
+              )
+            }
+            // What the values are worth depends on where they came from, and
+            // saying "read from a photo" over a laboratory's own PDF would be
+            // false in the direction that matters.
+            if product.extraction.source == .labIssuedDigital {
+              Text(
+                "These values come from the laboratory's own document, so they are final rather than a transcription."
+              )
+            } else {
+              Text("These values were read from a photo and are preliminary, not confirmed.")
+            }
+          }
         }
 
-        ResultSections(extraction: extraction)
+        ResultSections(extraction: product.extraction)
       }
       .navigationTitle("Reviewed?")
       .navigationBarTitleDisplayMode(.inline)
@@ -27,7 +73,9 @@ struct ReviewSheet: View {
           Button("Discard", role: .destructive, action: onDiscard)
         }
         ToolbarItem(placement: .confirmationAction) {
-          Button("Save") { onConfirm(title) }
+          Button("Save") {
+            onConfirm(title.isEmpty ? defaultTitle : title, labDate, laboratory)
+          }
         }
       }
     }
@@ -35,20 +83,65 @@ struct ReviewSheet: View {
 }
 
 struct ResultList: View {
-  let extraction: ExtractionResult
-  let title: String
+  let report: LabReport
+  /// Opens the stored pages; nil when the record has none.
+  let onOpenScan: (() -> Void)?
 
   var body: some View {
     Form {
-      ResultSections(extraction: extraction)
+      ReportDetails(report: report, onOpenScan: onOpenScan)
+      ResultSections(extraction: report.extraction)
       // Guideline 1.4.1 asks that a medical app remind people to check with a
       // doctor before acting. The moment that matters is while they are looking
       // at their own numbers, so it lives here rather than in a settings screen
       // nobody opens.
       Section { DoctorReminder() }
     }
-    .navigationTitle(title)
+    .navigationTitle(report.title)
     .navigationBarTitleDisplayMode(.inline)
+  }
+}
+
+/// What the sheet said about itself, and the way back to the sheet.
+private struct ReportDetails: View {
+  let report: LabReport
+  let onOpenScan: (() -> Void)?
+
+  private func day(_ date: Date) -> String {
+    date.formatted(date: .abbreviated, time: .omitted)
+  }
+
+  var body: some View {
+    Section {
+      if let laboratory = report.metadata.laboratory {
+        LabeledContent("Laboratory", value: laboratory)
+      }
+      LabeledContent("Lab date", value: day(report.effectiveDate))
+      if let received = report.metadata.receivedOn {
+        LabeledContent("Received", value: day(received))
+      }
+      if let reported = report.metadata.reportedOn {
+        LabeledContent("Issued", value: day(reported))
+      }
+      if let number = report.metadata.reportNumber {
+        LabeledContent("Report number", value: number)
+      }
+      if let physician = report.metadata.orderingPhysician {
+        LabeledContent("Ordered by", value: physician)
+      }
+      LabeledContent("Scanned", value: day(report.scannedAt))
+      if let scan = report.scan, let onOpenScan {
+        Button(action: onOpenScan) {
+          Label("Original scan, \(scan.pageCount) page(s)", systemImage: "doc.richtext")
+        }
+      }
+    } header: {
+      Text("Report")
+    } footer: {
+      if report.dateIsScanFallback {
+        Text("The scan date stands in for a lab date that was never confirmed.")
+      }
+    }
   }
 }
 
@@ -146,8 +239,29 @@ private struct CodedRow: View {
       }
       .font(.caption)
       .foregroundStyle(.secondary)
+
+      // The published band, *alongside* the printed range and never in place
+      // of it (ADR-033 rule 1). Named, sourced, and never called normal or
+      // abnormal: it is a comparison to a number somebody published.
+      if let range = published, let optimal = range.optimalText(formatter: Measurement.text) {
+        HStack(spacing: 6) {
+          Image(systemName: "text.book.closed")
+          Text("Optimal \(optimal) · \(placement.label)")
+        }
+        .font(.caption2)
+        .foregroundStyle(placement == .withinOptimal ? Color.secondary : Color.orange)
+      }
     }
     .padding(.vertical, 2)
+  }
+
+  private var published: ReferenceRange? {
+    ReferenceRanges.range(
+      analyteKey: value.coding.analyteKey, ucum: value.coding.ucum, sex: RangePreferences.sex)
+  }
+
+  private var placement: RangePlacement {
+    published?.placement(of: value.raw.value) ?? .noRange
   }
 
   /// Turns a normalised y into a human row number counted from the top.

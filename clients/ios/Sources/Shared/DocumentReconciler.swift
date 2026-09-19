@@ -34,6 +34,24 @@ import Foundation
 /// So this is not one engine cross-checking itself, which would recover nothing.
 /// It is structure from the new engine and characters from the old one.
 ///
+/// ## Correction, 2026-09-19: that measurement was taken on macOS
+///
+/// The three-way comparison above comes from `swift test`, which runs on macOS.
+/// A diagnostics record from the **iPhone simulator** (iOS 26.5) shows the
+/// legacy pass losing the same `%`: of 42 recognised fragments on the page, not
+/// one contains a `%`, and the document pass's unit cell for that row is empty
+/// too. On iOS, both engines lose it.
+///
+/// The hybrid still earns its keep, for structure and for the characters the
+/// two engines do disagree about. What it cannot do is recover a character
+/// neither pass read. Nothing downstream may invent it either: the unit selects
+/// the LOINC code, so an HbA1c row whose `%` is gone must be **reported as
+/// unread**, which is what `LabLineParser` does with an empty unit cell.
+///
+/// This is why the diagnostics record exists. The claim was believed for six
+/// days because the only measurement ever taken ran on the wrong operating
+/// system.
+///
 /// ## The rules, and why they are this conservative
 ///
 /// The table pass is treated as the authority on structure and the text pass as
@@ -68,7 +86,7 @@ import Foundation
 public enum DocumentReconciler {
 
   /// One run of recognised text, with no structural claim attached.
-  public struct TextFragment: Sendable, Equatable {
+  public struct TextFragment: Sendable, Equatable, Codable {
     public let text: String
     public let region: SourceRegion
     /// Recogniser confidence, carried through for triage, never for gating.
@@ -82,7 +100,7 @@ public enum DocumentReconciler {
   }
 
   /// One cell as the table pass saw it.
-  public struct Cell: Sendable, Equatable {
+  public struct Cell: Sendable, Equatable, Codable {
     public let text: String
     public let region: SourceRegion
     public let row: Int
@@ -105,7 +123,7 @@ public enum DocumentReconciler {
     case recovered
   }
 
-  public struct ReconciledCell: Sendable, Equatable {
+  public struct ReconciledCell: Sendable, Equatable, Codable {
     public let text: String
     public let region: SourceRegion
     public let column: Int
@@ -120,7 +138,7 @@ public enum DocumentReconciler {
   }
 
   /// One table row, cells left to right.
-  public struct Row: Sendable, Equatable {
+  public struct Row: Sendable, Equatable, Codable {
     public let cells: [ReconciledCell]
     /// Union of the row's cells, for highlighting the whole row on the page.
     public let region: SourceRegion
@@ -160,6 +178,20 @@ public enum DocumentReconciler {
     }
   }
 
+  /// Collapses every run of whitespace, newlines included, to one space.
+  ///
+  /// A recognised cell's transcript can contain a line break: a long analyte
+  /// name wraps inside its own cell, and Vision reports the wrap. The row is
+  /// still one row, but `Row.line` then carries the break into the line
+  /// grammar, which splits on newlines and sees two half-rows, neither of
+  /// which parses. Measured on a real sheet (#186): `Hämoglobin` and
+  /// `Retikulozyten` were both lost this way, each stored as a line with a
+  /// newline in the middle.
+  static func collapsingWhitespace(_ text: String) -> String {
+    text.split(whereSeparator: { $0.isWhitespace || $0.isNewline })
+      .joined(separator: " ")
+  }
+
   /// Reconciles one page.
   public static func reconcile(cells: [Cell], fragments: [TextFragment]) -> Result {
     guard !cells.isEmpty else {
@@ -183,12 +215,8 @@ public enum DocumentReconciler {
       inside.sort { $0.fragment.region.x < $1.fragment.region.x }
       for entry in inside { claimed.insert(entry.index) }
 
-      let fromText =
-        inside
-        .map(\.fragment.text)
-        .joined(separator: " ")
-        .trimmingCharacters(in: .whitespaces)
-      let fromCell = cell.text.trimmingCharacters(in: .whitespaces)
+      let fromText = collapsingWhitespace(inside.map(\.fragment.text).joined(separator: " "))
+      let fromCell = collapsingWhitespace(cell.text)
 
       // Only an empty cell is ever filled in. See the type's documentation for
       // the measurement that removed the second rule.

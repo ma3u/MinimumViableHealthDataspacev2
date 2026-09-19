@@ -94,8 +94,6 @@
 "The document is %lld MB, over the 25 MB the ePA accepts." = "Das Dokument ist %lld MB groß, mehr als die 25 MB, die die ePA akzeptiert.";
 "The region of your resource decides where the values are processed. The app cannot check that." = "Die Region Ihrer Ressource bestimmt, wo die Werte verarbeitet werden. Die App kann das nicht prüfen.";
 "The key stays on this device, in the keychain, and is never sent to the provider of this app. The values go straight from your iPhone to your own service." = "Der Schlüssel bleibt auf diesem Gerät, in der Schlüsselbund-Ablage, und wird niemals an den Anbieter dieser App gesendet. Die Werte gehen direkt von Ihrem iPhone an Ihren Dienst.";
-"The photographs never leave this device. The values read from them are encrypted individually, with a key that is unavailable while the phone is locked and is never restored onto another device. The store is excluded from iCloud Backup." = "Die Fotos verlassen dieses Gerät nie. Die daraus gelesenen Werte werden einzeln verschlüsselt, mit einem Schlüssel, der bei gesperrtem iPhone nicht verfügbar ist und nie auf ein anderes Gerät übertragen wird. Der Speicher ist vom iCloud-Backup ausgenommen.";
-"When you ask for an explanation you choose the values, see them listed, and confirm. Only those values and your question travel. Your name, date of birth and insurance number are never sent, because the app does not hold them. The scanned image is never sent either." = "Wenn Sie eine Erklärung anfordern, wählen Sie die Werte aus, sehen sie aufgelistet und bestätigen. Nur diese Werte und Ihre Frage werden übertragen. Name, Geburtsdatum und Versichertennummer werden nie gesendet, weil die App sie gar nicht speichert. Das gescannte Bild wird ebenfalls nie gesendet.";
 "By default the model on this iPhone answers, so your question never reaches a network at all. You may instead choose the Klarbefund service, which processes in the EU, or your own Azure resource or Anthropic key, in which case your phone talks to your service directly and neither your key nor your values reach the app provider at all. Whichever is in use is named on the screen before you send.\n\nNo model vendor uses your values for training." = "Standardmäßig antwortet das Modell auf diesem iPhone, Ihre Frage erreicht also gar kein Netz. Sie können stattdessen den Klarbefund-Dienst wählen, der in der EU verarbeitet, oder Ihre eigene Azure-Ressource oder Ihren Anthropic-Schlüssel. Dann spricht Ihr iPhone direkt mit Ihrem Dienst, und weder Ihr Schlüssel noch Ihre Werte erreichen den Anbieter dieser App. Was gerade verwendet wird, steht vor dem Senden auf dem Bildschirm.\n\nKein Modellanbieter nutzt Ihre Werte für Training.";
 "Only the default service asks you to sign in, and only so the limit of 20 explanations a day can be counted per person. The counter stores a one-way hash and a number, not your name. With your own provider there is no sign-in and no limit." = "Nur der voreingestellte Dienst verlangt eine Anmeldung, und zwar allein, damit das Limit von 20 Erklärungen pro Tag je Person gezählt werden kann. Der Zähler speichert einen Einweg-Hash und eine Zahl, nicht Ihren Namen. Mit einem eigenen Anbieter gibt es weder Anmeldung noch Limit.";
 "Klarbefund explains what a measurement is. It does not diagnose, does not assess your risk and does not recommend treatment. Values read from a photograph can be misread and are marked preliminary until you check them against the paper. Reference ranges are shown exactly as your laboratory printed them.\n\nAlways consult a doctor before making any decision about your health." = "Klarbefund erklärt, was ein Messwert ist. Die App stellt keine Diagnose, bewertet kein Risiko und empfiehlt keine Behandlung. Aus einem Foto gelesene Werte können falsch erkannt werden und gelten als vorläufig, bis Sie sie mit dem Papier abgleichen. Referenzbereiche werden genau so angezeigt, wie Ihr Labor sie gedruckt hat.\n\nFragen Sie immer eine Ärztin oder einen Arzt, bevor Sie eine Entscheidung über Ihre Gesundheit treffen.";
@@ -109,3 +107,101 @@
 "unit has no UCUM mapping" = "Einheit hat keine UCUM-Zuordnung";
 "unit does not belong to this analyte" = "Einheit gehört nicht zu diesem Analyten";
 "specimen is not blood, plasma or serum" = "Material ist weder Blut noch Plasma oder Serum";
+
+/* The report's own date and details (#186). */
+"Report" = "Befund";
+"Laboratory" = "Labor";
+"Laboratory or practice" = "Labor oder Praxis";
+"Lab date" = "Labordatum";
+"Read from the sheet: %@" = "Vom Blatt gelesen: %@";
+"No date was found on the sheet. Set the date printed on the report; the day of the scan is not the day of the result." = "Auf dem Blatt wurde kein Datum gefunden. Tragen Sie das auf dem Befund gedruckte Datum ein; der Tag des Scans ist nicht der Tag des Ergebnisses.";
+"Received" = "Eingang";
+"Issued" = "Befunddatum";
+"Report number" = "Auftragsnummer";
+"Ordered by" = "Einsender";
+"Scanned" = "Gescannt";
+"Original scan, %lld page(s)" = "Original-Scan, %lld Seite(n)";
+"Original scan" = "Original-Scan";
+"The scan date stands in for a lab date that was never confirmed." = "Das Scandatum steht für ein Labordatum, das nie bestätigt wurde.";
+"The scanned pages of this report are not stored." = "Die gescannten Seiten dieses Befunds sind nicht gespeichert.";
+"Laboratory: %@" = "Labor: %@";
+"Received %@" = "Eingang %@";
+"Issued %@" = "Befund vom %@";
+"Report number %@" = "Auftragsnummer %@";
+"The original scan follows on the next pages." = "Der Original-Scan folgt auf den nächsten Seiten.";
+
+/* Diagnostics export (ADR-038). */
+"Export diagnostics" = "Diagnosedaten exportieren";
+"Export diagnostics for this report" = "Diagnosedaten dieses Befunds exportieren";
+"Export diagnostics?" = "Diagnosedaten exportieren?";
+"Export" = "Exportieren";
+"The archive contains your scanned pages, every value and the recognised text, unencrypted. Share it only with yourself." = "Das Archiv enthält Ihre gescannten Seiten, alle Werte und den erkannten Text, unverschlüsselt. Geben Sie es nur an sich selbst weiter.";
+"Building the diagnostics archive…" = "Diagnosearchiv wird erstellt…";
+
+/* Privacy summary, rewritten for the stored scan. */
+"The photographs never leave this device. They are kept as a PDF next to the values read from them, so a reading can be checked against the original, and both are encrypted individually, with a key that is unavailable while the phone is locked and is never restored onto another device. The store is excluded from iCloud Backup." = "Die Aufnahmen verlassen dieses Gerät nie. Sie werden als PDF neben den daraus gelesenen Werten aufbewahrt, damit ein Wert am Original geprüft werden kann, und beides ist einzeln verschlüsselt, mit einem Schlüssel, der bei gesperrtem Telefon nicht verfügbar ist und nie auf ein anderes Gerät übertragen wird. Der Speicher ist vom iCloud-Backup ausgeschlossen.";
+"When you ask for an explanation you choose the values, see them listed, and confirm. Only those values and your question travel. Your name, date of birth and insurance number are never sent. They may be printed on the scanned page, which stays on this device and is never sent either." = "Wenn Sie eine Erklärung anfordern, wählen Sie die Werte aus, sehen sie aufgelistet und bestätigen. Nur diese Werte und Ihre Frage werden übertragen. Ihr Name, Ihr Geburtsdatum und Ihre Versichertennummer werden nie gesendet. Sie können auf der gescannten Seite stehen, die auf diesem Gerät bleibt und ebenfalls nie gesendet wird.";
+"Diagnostics you can export" = "Diagnosedaten, die Sie exportieren können";
+"To improve how reports are read, you can export a diagnostics archive from the menu. It contains your scanned pages, every value and the recognised text, unencrypted, and goes only where you send it. Nothing is exported unless you choose to." = "Um das Lesen von Befunden zu verbessern, können Sie über das Menü ein Diagnosearchiv exportieren. Es enthält Ihre gescannten Seiten, alle Werte und den erkannten Text, unverschlüsselt, und geht nur dorthin, wohin Sie es senden. Ohne Ihr Zutun wird nichts exportiert.";
+
+/* Importing a file the person already has (#186). */
+"Add report" = "Befund hinzufügen";
+"Import a PDF or photo" = "PDF oder Foto importieren";
+"Reading the document…" = "Dokument wird gelesen…";
+"These values come from the laboratory's own document, so they are final rather than a transcription." = "Diese Werte stammen aus dem Originaldokument des Labors und sind daher endgültig, keine Abschrift.";
+"%@ could not be opened." = "%@ konnte nicht geöffnet werden.";
+"%@ files are not supported. Use a PDF or a photo." = "%@-Dateien werden nicht unterstützt. Verwenden Sie ein PDF oder ein Foto.";
+"No text could be read from this document." = "Aus diesem Dokument konnte kein Text gelesen werden.";
+"Lab-issued, final" = "Vom Labor, endgültig";
+"Self-test store" = "Selbsttest-Speicher";
+
+/* Reference values and trends (#186). */
+"Reference values" = "Referenzwerte";
+"Trends" = "Verlauf";
+"Ranges for" = "Bereiche für";
+"Not specified" = "Keine Angabe";
+"Female" = "Weiblich";
+"Male" = "Männlich";
+"Some published ranges differ by sex. Without an answer only the ranges that apply to everyone are shown. This stays on your device." = "Manche veröffentlichten Bereiche unterscheiden sich nach Geschlecht. Ohne Angabe werden nur die Bereiche gezeigt, die für alle gelten. Diese Angabe bleibt auf Ihrem Gerät.";
+"These are published thresholds for adults, not targets set for you. The range printed on your own report comes from your laboratory's own method and population, and it is the one your doctor reads." = "Dies sind veröffentlichte Schwellenwerte für Erwachsene, keine für Sie festgelegten Zielwerte. Der auf Ihrem Befund gedruckte Bereich stammt aus der Methode und der Population Ihres Labors, und er ist der, den Ihre Ärztin oder Ihr Arzt liest.";
+"Guideline" = "Leitlinie";
+"Consensus statement" = "Konsenspapier";
+"Cohort study" = "Kohortenstudie";
+
+/* Where a value sits. Never "normal" or "abnormal": that is a clinical finding. */
+"in the optimal band" = "im optimalen Bereich";
+"outside the optimal band" = "außerhalb des optimalen Bereichs";
+"outside the guideline range" = "außerhalb des Leitlinienbereichs";
+"no published range" = "kein veröffentlichter Bereich";
+"Optimal %@ %@. Latest value is %@." = "Optimal %@ %@. Der letzte Wert liegt %@.";
+"Your laboratory printed %@ beside the latest value." = "Ihr Labor hat neben dem letzten Wert %@ gedruckt.";
+"No published range is quoted for this analyte." = "Für diesen Parameter wird kein veröffentlichter Bereich zitiert.";
+"Hollow points were read from a photograph and are preliminary." = "Offene Punkte wurden aus einem Foto gelesen und sind vorläufig.";
+"Nothing to plot yet" = "Noch nichts darzustellen";
+"Add a second report and the values that appear in both will show a trend." = "Fügen Sie einen zweiten Befund hinzu, dann zeigen die Werte, die in beiden vorkommen, einen Verlauf.";
+"Only analytes measured more than once" = "Nur mehrfach gemessene Parameter";
+"%lld analytes: %lld in the optimal band, %lld outside it, %lld with no published range." = "%lld Parameter: %lld im optimalen Bereich, %lld außerhalb, %lld ohne veröffentlichten Bereich.";
+"%@, %lld measurements, latest %@" = "%@, %lld Messungen, zuletzt %@";
+"Date" = "Datum";
+"Value" = "Wert";
+"from" = "von";
+"to" = "bis";
+
+/* Panels. */
+"Cardiovascular" = "Herz und Kreislauf";
+"Metabolic" = "Stoffwechsel";
+"Kidney" = "Niere";
+"Liver" = "Leber";
+"Blood count and iron" = "Blutbild und Eisen";
+"Vitamins" = "Vitamine";
+
+/* Analyte names a person reads, as opposed to the LOINC display strings. */
+"Total cholesterol" = "Gesamtcholesterin";
+"LDL cholesterol" = "LDL-Cholesterin";
+"HDL cholesterol" = "HDL-Cholesterin";
+"Non-HDL cholesterol" = "Non-HDL-Cholesterin";
+"Triglycerides" = "Triglyceride";
+"Homocysteine" = "Homocystein";
+"Glucose" = "Glukose";
+"Creatinine" = "Kreatinin";
+"Haemoglobin" = "Hämoglobin";

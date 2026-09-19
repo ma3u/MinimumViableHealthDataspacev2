@@ -30,7 +30,7 @@
   struct ScanningTests {
 
     /// Every value a correct extraction may produce, by LOINC code.
-    private static let truth: [String: Double] = {
+    static let truth: [String: Double] = {
       var table: [String: Double] = [:]
       for row in SyntheticSheet.panel {
         if let loinc = row.loinc { table[loinc] = row.value }
@@ -55,7 +55,7 @@
     }
 
     /// The safety invariant, checked under every condition.
-    private static func assertNoWrongValues(
+    static func assertNoWrongValues(
       _ result: ExtractionResult, condition: String
     ) {
       for value in result.coded {
@@ -272,6 +272,69 @@
         #expect(region.width > 0 && region.height > 0)
         #expect(region.x >= 0 && region.maxX <= 1.0001)
       }
+    }
+  }
+#endif
+
+#if canImport(Vision)
+  /// The report's own dates and details, read through real OCR rather than
+  /// from a string.
+  ///
+  /// `ReportMetadataTests` pins the rules on text the test wrote itself. This
+  /// asserts the rules survive the recogniser: the header is rendered,
+  /// photographed and read back, which is where a keyword lost to a dropped
+  /// umlaut or a date split across fragments would show up.
+  @Suite("Reading a printed header through Vision", .serialized)
+  struct HeaderReadingTests {
+
+    private static func metadata(
+      _ condition: SyntheticSheet.Condition = .clean
+    ) async throws -> ReportMetadata {
+      let image = SyntheticSheet.render(condition, header: .standard)
+      let reading = try await VisionDocumentReader.read(image, page: 1)
+      // "Now" is fixed so the future-date rule cannot drift with the calendar.
+      return ReportMetadataExtractor.extract(
+        pages: [reading.plainText], now: ReportMetadataExtractor.day(2026, 9, 30)!)
+    }
+
+    @Test("the collection date is read from the sheet, not the receipt or the issue date")
+    func readsTheCollectionDate() async throws {
+      let metadata = try await Self.metadata()
+
+      #expect(metadata.labDate == ReportMetadataExtractor.day(2026, 9, 12))
+      #expect(metadata.labDateRole == .collection)
+      #expect(metadata.dateSource == .printed)
+      #expect(metadata.reportedOn == ReportMetadataExtractor.day(2026, 9, 14))
+    }
+
+    @Test("the birth date is kept as evidence and never becomes the lab date")
+    func birthDateIsNeverTheLabDate() async throws {
+      let metadata = try await Self.metadata()
+
+      #expect(metadata.dates.contains { $0.role == .birth })
+      #expect(metadata.labDate != ReportMetadataExtractor.day(1975, 4, 3))
+    }
+
+    @Test("the laboratory and the order number come off the header")
+    func readsTheLaboratory() async throws {
+      let metadata = try await Self.metadata()
+
+      // The issuer, not the document's own title. "Laborbefund" is the first
+      // line on the page and contains "Labor", so it won until it was excluded.
+      #expect(metadata.laboratory?.contains("MVZ") == true, "got \(metadata.laboratory ?? "nil")")
+      #expect(metadata.reportNumber == "2609123456")
+    }
+
+    /// A header is text above the table, and a skewed page is where the two
+    /// can collide. The values must stay right even if the header is lost.
+    @Test("a header does not put a wrong value in the table")
+    func headerDoesNotCorruptTheTable() async throws {
+      let image = SyntheticSheet.render(
+        SyntheticSheet.Condition(name: "skewed 1 degree", rotation: 1), header: .standard)
+      let reading = try await VisionDocumentReader.read(image, page: 1)
+      let result = LabLineParser.extract(rows: reading.rows, source: .ocrTranscribed)
+
+      ScanningTests.assertNoWrongValues(result, condition: "header, skew 1")
     }
   }
 #endif

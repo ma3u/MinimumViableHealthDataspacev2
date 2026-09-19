@@ -29,6 +29,13 @@ same_in_both = {
     "Shared", "MeinBefund", "Klarbefund", "Anthropic", "Azure OpenAI", "OK", "·",
     "LOINC %@", "Ref. %@", "%@ · %@", "%@%@ %@", "%@  %@ %@",
     "%@ %@ · LOINC %@", "https://<name>.openai.azure.com",
+    "%@: %@", "Optimal", "Optimal %@ · %@",
+    # Analyte names and abbreviations a German report prints exactly as the
+    # English one does. Listed rather than pattern-matched, so a new sentence
+    # still has to be translated.
+    "ALT (GPT)", "AST (GOT)", "Apolipoprotein A1", "Apolipoprotein B", "CRP",
+    "Ferritin", "Gamma-GT", "HbA1c", "Lipoprotein(a)", "Vitamin B12",
+    "Vitamin D (25-OH)", "eGFR", "hs-CRP",
 }
 
 missing, german_in_base, total = [], [], 0

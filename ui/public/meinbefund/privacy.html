@@ -1,112 +1,258 @@
 <!doctype html>
 <html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Klarbefund, Privacy Policy</title>
-<style>
-  :root { color-scheme: light dark; }
-  body { font: 16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
-         max-width: 46rem; margin: 0 auto; padding: 2rem 1.25rem 4rem; }
-  h1 { font-size: 1.6rem; } h2 { font-size: 1.15rem; margin-top: 2.2rem; }
-  code { font-size: 0.9em; }
-  table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
-  th, td { text-align: left; padding: 0.45rem 0.6rem; border-bottom: 1px solid #8884; vertical-align: top; }
-  .updated { opacity: 0.7; font-size: 0.9rem; }
-</style>
-</head>
-<body>
-<h1>Klarbefund, Privacy Policy</h1>
-<p class="updated">Last updated 13 September 2026. Controller: Matthias Buchhorn. Contact: the repository issue tracker at
-<a href="https://github.com/ma3u/MinimumViableHealthDataspacev2/issues">github.com/ma3u/MinimumViableHealthDataspacev2</a>.</p>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Klarbefund, Privacy Policy</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+      }
+      body {
+        font:
+          16px/1.6 -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          system-ui,
+          sans-serif;
+        max-width: 46rem;
+        margin: 0 auto;
+        padding: 2rem 1.25rem 4rem;
+      }
+      h1 {
+        font-size: 1.6rem;
+      }
+      h2 {
+        font-size: 1.15rem;
+        margin-top: 2.2rem;
+      }
+      code {
+        font-size: 0.9em;
+      }
+      table {
+        border-collapse: collapse;
+        width: 100%;
+        margin: 1rem 0;
+      }
+      th,
+      td {
+        text-align: left;
+        padding: 0.45rem 0.6rem;
+        border-bottom: 1px solid #8884;
+        vertical-align: top;
+      }
+      .updated {
+        opacity: 0.7;
+        font-size: 0.9rem;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Klarbefund, Privacy Policy</h1>
+    <p class="updated">
+      Last updated 19 September 2026. Controller: Matthias Buchhorn. Contact:
+      the repository issue tracker at
+      <a href="https://github.com/ma3u/MinimumViableHealthDataspacev2/issues"
+        >github.com/ma3u/MinimumViableHealthDataspacev2</a
+      >.
+    </p>
 
-<p><strong>Klarbefund reads your paper laboratory reports and keeps the values on your
-phone.</strong> Nothing is sent anywhere unless you choose, per question, to have a value
-explained, and you are shown exactly which values would leave before anything does.</p>
+    <p>
+      <strong
+        >Klarbefund reads your paper laboratory reports and keeps the values on
+        your phone.</strong
+      >
+      Nothing is sent anywhere unless you choose, per question, to have a value
+      explained, and you are shown exactly which values would leave before
+      anything does.
+    </p>
 
-<h2>What the app holds, and where</h2>
-<table>
-<tr><th>Data</th><th>Where it is kept</th><th>Leaves the device?</th></tr>
-<tr><td>Photographs of your reports</td><td>On the device only</td><td>Never</td></tr>
-<tr><td>Extracted values, units, reference ranges, dates</td><td>On the device, each record individually encrypted (AES-GCM)</td><td>Only the values you select, only when you ask a question</td></tr>
-<tr><td>The encryption key</td><td>iOS Keychain, marked so it is unavailable while the device is locked and is never restored onto another device</td><td>Never</td></tr>
-</table>
+    <h2>What the app holds, and where</h2>
+    <table>
+      <tr>
+        <th>Data</th>
+        <th>Where it is kept</th>
+        <th>Leaves the device?</th>
+      </tr>
+      <tr>
+        <td>The scanned pages of your reports, as a PDF</td>
+        <td>
+          On the device, encrypted (AES-GCM), so a value can be checked against
+          the original
+        </td>
+        <td>Only inside a diagnostics archive you build and send yourself</td>
+      </tr>
+      <tr>
+        <td>
+          Extracted values, units, reference ranges, the dates and details
+          printed on the report, and the recognised text
+        </td>
+        <td>On the device, each record individually encrypted (AES-GCM)</td>
+        <td>
+          Only the values you select, only when you ask a question; or inside a
+          diagnostics archive you build and send yourself
+        </td>
+      </tr>
+      <tr>
+        <td>The encryption key</td>
+        <td>
+          iOS Keychain, marked so it is unavailable while the device is locked
+          and is never restored onto another device
+        </td>
+        <td>Never</td>
+      </tr>
+    </table>
 
-<p>The store is excluded from iCloud Backup. Health data is not written to iCloud
-and is not written to Apple Health.</p>
+    <p>
+      The store is excluded from iCloud Backup. Health data is not written to
+      iCloud and is not written to Apple Health.
+    </p>
 
-<h2>Special category data</h2>
-<p>Laboratory values are data concerning health, a special category under
-Art. 9 GDPR. Processing on your device happens because you chose to scan the
-report. Sending values for an explanation happens only on your explicit consent,
-given for each individual request, under Art. 9(2)(a).</p>
+    <h2>Special category data</h2>
+    <p>
+      Laboratory values are data concerning health, a special category under
+      Art. 9 GDPR. Processing on your device happens because you chose to scan
+      the report. Sending values for an explanation happens only on your
+      explicit consent, given for each individual request, under Art. 9(2)(a).
+    </p>
 
-<h2>When you ask for an explanation</h2>
-<p>You pick the values, you see them listed, and you confirm. Only those values
-travel, together with your question. Your name, date of birth, insurance number
-and the scanned image are never sent, because the app does not hold the first
-three at all and does not transmit the fourth.</p>
+    <h2>When you ask for an explanation</h2>
+    <p>
+      You pick the values, you see them listed, and you confirm. Only those
+      values travel, together with your question. Your name, date of birth and
+      insurance number are never sent. They may be printed on the scanned page,
+      which stays on the device and is never sent either.
+    </p>
 
-<table>
-<tr><th>Provider</th><th>Who pays</th><th>Where processed</th><th>How it is reached</th></tr>
-<tr><td>This iPhone (default)</td><td>Nobody</td><td>On the device</td><td>No network is used at all</td></tr>
-<tr><td>Klarbefund service (optional)</td><td>The app provider</td><td>Azure OpenAI, EU data zone</td><td>Via the provider's service, which sees the selected values</td></tr>
-<tr><td>Your own Azure OpenAI (optional)</td><td>You</td><td>The region of your own resource</td><td>Directly from your phone. The app provider never sees the values or your key</td></tr>
-<tr><td>Your own Anthropic key (optional)</td><td>You</td><td>United States</td><td>Directly from your phone. The app provider never sees the values or your key</td></tr>
-</table>
+    <h2>Diagnostics you can export</h2>
+    <p>
+      To improve how reports are read, you can export a diagnostics archive from
+      the app's menu. It contains your scanned pages, every value and the
+      recognised text, unencrypted, and it goes only where you send it, through
+      the system share sheet. Nothing is exported unless you choose to, and the
+      app asks you to confirm in words each time. The archive is deleted from
+      the phone once shared.
+    </p>
 
-<p>The default asks nothing of anyone: the model on the device answers, so no
-request leaves the phone and no account is needed. Where you choose a request
-that does go through the app provider's service, the provider is a processor
-and the model vendor a sub-processor. Neither uses your values to train models.
-Choosing a provider that processes in the United States is an international
-transfer, and the app names the destination at the moment you choose it.</p>
+    <table>
+      <tr>
+        <th>Provider</th>
+        <th>Who pays</th>
+        <th>Where processed</th>
+        <th>How it is reached</th>
+      </tr>
+      <tr>
+        <td>This iPhone (default)</td>
+        <td>Nobody</td>
+        <td>On the device</td>
+        <td>No network is used at all</td>
+      </tr>
+      <tr>
+        <td>Klarbefund service (optional)</td>
+        <td>The app provider</td>
+        <td>Azure OpenAI, EU data zone</td>
+        <td>Via the provider's service, which sees the selected values</td>
+      </tr>
+      <tr>
+        <td>Your own Azure OpenAI (optional)</td>
+        <td>You</td>
+        <td>The region of your own resource</td>
+        <td>
+          Directly from your phone. The app provider never sees the values or
+          your key
+        </td>
+      </tr>
+      <tr>
+        <td>Your own Anthropic key (optional)</td>
+        <td>You</td>
+        <td>United States</td>
+        <td>
+          Directly from your phone. The app provider never sees the values or
+          your key
+        </td>
+      </tr>
+    </table>
 
-<h2>Signing in, and why</h2>
-<p>Signing in is required only for the Klarbefund service, and only so that the
-daily limit of 20 analyses can be counted per person. The counter stores a
-one-way hash of your account identifier and a number. It does not store your
-name or email.</p>
-<p>The default costs the app provider nothing and is not metered, so it asks
-for no sign-in. Neither does your own provider: there is nothing to meter when
-you are the one paying.</p>
+    <p>
+      The default asks nothing of anyone: the model on the device answers, so no
+      request leaves the phone and no account is needed. Where you choose a
+      request that does go through the app provider's service, the provider is a
+      processor and the model vendor a sub-processor. Neither uses your values
+      to train models. Choosing a provider that processes in the United States
+      is an international transfer, and the app names the destination at the
+      moment you choose it.
+    </p>
 
-<h2>Logs</h2>
-<p>The service logs the number of values in a request and their LOINC codes, so
-faults can be diagnosed. It does not log the measured values, your question, or
-the answer.</p>
+    <h2>Signing in, and why</h2>
+    <p>
+      Signing in is required only for the Klarbefund service, and only so that
+      the daily limit of 20 analyses can be counted per person. The counter
+      stores a one-way hash of your account identifier and a number. It does not
+      store your name or email.
+    </p>
+    <p>
+      The default costs the app provider nothing and is not metered, so it asks
+      for no sign-in. Neither does your own provider: there is nothing to meter
+      when you are the one paying.
+    </p>
 
-<h2>What the app never does</h2>
-<ul>
-<li>No advertising, no analytics, no tracking, no advertising identifiers.</li>
-<li>No sale or sharing of health data, and no use of it for data mining.</li>
-<li>No storage of health data in iCloud.</li>
-<li>No account is needed to scan, read and keep your reports.</li>
-</ul>
+    <h2>Logs</h2>
+    <p>
+      The service logs the number of values in a request and their LOINC codes,
+      so faults can be diagnosed. It does not log the measured values, your
+      question, or the answer.
+    </p>
 
-<h2>Accuracy, and what this app is not</h2>
-<p>Values are read from a photograph by optical character recognition and can be
-misread. They are marked <em>preliminary</em> until you check them against the
-paper. Reference ranges are shown exactly as your laboratory printed them and
-are never replaced with ranges from elsewhere.</p>
-<p><strong>Klarbefund does not diagnose, does not assess risk and does not
-recommend treatment.</strong> It explains what a measurement is. It is not a
-medical device and it is not a substitute for your doctor. Always consult a
-qualified healthcare professional before making any decision about your health.</p>
+    <h2>What the app never does</h2>
+    <ul>
+      <li>
+        No advertising, no analytics, no tracking, no advertising identifiers.
+      </li>
+      <li>
+        No sale or sharing of health data, and no use of it for data mining.
+      </li>
+      <li>No storage of health data in iCloud.</li>
+      <li>No account is needed to scan, read and keep your reports.</li>
+    </ul>
 
-<h2>Your rights</h2>
-<p>Because the data lives on your device, you exercise most rights directly:
-delete a report in the app and it is gone. For anything held by the service, the
-daily counter, contact the address above. You have the rights of access,
-rectification, erasure, restriction, portability and objection under Arts. 15 to
-21 GDPR, and the right to complain to a supervisory authority.</p>
+    <h2>Accuracy, and what this app is not</h2>
+    <p>
+      Values are read from a photograph by optical character recognition and can
+      be misread. They are marked <em>preliminary</em> until you check them
+      against the paper. Reference ranges are shown exactly as your laboratory
+      printed them and are never replaced with ranges from elsewhere.
+    </p>
+    <p>
+      <strong
+        >Klarbefund does not diagnose, does not assess risk and does not
+        recommend treatment.</strong
+      >
+      It explains what a measurement is. It is not a medical device and it is
+      not a substitute for your doctor. Always consult a qualified healthcare
+      professional before making any decision about your health.
+    </p>
 
-<h2>Retention</h2>
-<p>Reports stay until you delete them or delete the app. The daily counter holds
-a hash and a number per day and is not needed beyond the day it counts.</p>
+    <h2>Your rights</h2>
+    <p>
+      Because the data lives on your device, you exercise most rights directly:
+      delete a report in the app and it is gone. For anything held by the
+      service, the daily counter, contact the address above. You have the rights
+      of access, rectification, erasure, restriction, portability and objection
+      under Arts. 15 to 21 GDPR, and the right to complain to a supervisory
+      authority.
+    </p>
 
-<h2>Children</h2>
-<p>Klarbefund is not directed at children and is intended for adults managing
-their own laboratory results.</p>
-</body>
+    <h2>Retention</h2>
+    <p>
+      Reports stay until you delete them or delete the app. The daily counter
+      holds a hash and a number per day and is not needed beyond the day it
+      counts.
+    </p>
+
+    <h2>Children</h2>
+    <p>
+      Klarbefund is not directed at children and is intended for adults managing
+      their own laboratory results.
+    </p>
+  </body>
 </html>

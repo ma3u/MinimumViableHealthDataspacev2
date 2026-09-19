@@ -12,20 +12,25 @@ import Shared
 ///   - the file is unreadable while the device is locked
 ///   - the key never leaves this device and never reaches iCloud Keychain
 ///   - each record is sealed individually, so a leaked file is not a leaked panel
+///
+/// A report is up to three sealed files under one id: the record, the scanned
+/// pages as a PDF, and the scan's diagnostics. Each is sealed on its own, under
+/// the same key, so the record can be opened without decrypting megabytes of
+/// pages, and a missing attachment is a missing attachment rather than a
+/// corrupt report.
 public actor ReportStore {
 
-  public struct StoredReport: Codable, Sendable, Identifiable, Equatable {
-    public let id: UUID
-    public let scannedAt: Date
-    /// Collection date as printed on the report, when the user confirms one.
-    public var collectedOn: Date?
-    public var title: String
-    public let extraction: ExtractionResult
+  /// The record type kept its old name at every call site.
+  public typealias StoredReport = LabReport
+
+  private enum Attachment: String {
+    case scan
+    case diagnostics = "diag"
   }
 
   private let directory: URL
   private let keyTag = "red.mabu.meinbefund.storekey"
-  private var cached: [StoredReport] = []
+  private var cached: [LabReport] = []
   private var loaded = false
 
   public init(directory: URL? = nil) {
@@ -67,6 +72,7 @@ public actor ReportStore {
     ]
     let addStatus = SecItemAdd(add as CFDictionary, nil)
     guard addStatus == errSecSuccess else { throw StoreError.keychain(addStatus) }
+    Log.store.notice("store key created")
     return key
   }
 
@@ -123,21 +129,63 @@ public actor ReportStore {
     directory.appendingPathComponent("\(id.uuidString).sealed")
   }
 
-  public func save(_ report: StoredReport) throws {
-    try ensureDirectory()
-    let plain = try JSONEncoder().encode(report)
+  private func url(for id: UUID, _ attachment: Attachment) -> URL {
+    directory.appendingPathComponent("\(id.uuidString).\(attachment.rawValue).sealed")
+  }
+
+  /// Seals and writes. Complete protection: unreadable while the device is
+  /// locked. Any future background work must downgrade this deliberately, not
+  /// by accident.
+  private func seal(_ plain: Data, to url: URL) throws {
     let sealed = try AES.GCM.seal(plain, using: storeKey()).combined!
-    // Complete protection: unreadable while the device is locked. Any future
-    // background work must downgrade this deliberately, not by accident.
-    try sealed.write(to: url(for: report.id), options: [.atomic, .completeFileProtection])
+    try sealed.write(to: url, options: [.atomic, .completeFileProtection])
+  }
+
+  /// Opens a sealed file, or returns nil when there is none.
+  private func open(_ url: URL) throws -> Data? {
+    guard FileManager.default.fileExists(atPath: url.path) else { return nil }
+    let box = try AES.GCM.SealedBox(combined: Data(contentsOf: url))
+    return try AES.GCM.open(box, using: storeKey())
+  }
+
+  public func save(_ report: LabReport) throws {
+    try ensureDirectory()
+    try seal(try JSONEncoder().encode(report), to: url(for: report.id))
     cached.removeAll { $0.id == report.id }
     cached.append(report)
-    cached.sort { $0.scannedAt > $1.scannedAt }
+    cached.sort { $0.effectiveDate > $1.effectiveDate }
+    Log.store.info(
+      "report saved: \(report.extraction.coded.count, privacy: .public) coded, \(report.extraction.needsReview, privacy: .public) to review, date \(report.metadata.dateSource.rawValue, privacy: .public)"
+    )
+  }
+
+  /// Keeps the scanned pages, as one PDF, sealed next to the record.
+  public func saveScan(_ pdf: Data, for id: UUID) throws {
+    try ensureDirectory()
+    try seal(pdf, to: url(for: id, .scan))
+    Log.store.info("scan sealed: \(pdf.count, privacy: .public) bytes")
+  }
+
+  public func scan(for id: UUID) throws -> Data? {
+    try open(url(for: id, .scan))
+  }
+
+  public func saveDiagnostics(_ diagnostics: ScanDiagnostics, for id: UUID) throws {
+    try ensureDirectory()
+    try seal(try JSONEncoder().encode(diagnostics), to: url(for: id, .diagnostics))
+  }
+
+  public func diagnostics(for id: UUID) throws -> ScanDiagnostics? {
+    guard let plain = try open(url(for: id, .diagnostics)) else { return nil }
+    return try JSONDecoder().decode(ScanDiagnostics.self, from: plain)
   }
 
   public func delete(_ id: UUID) throws {
     try? FileManager.default.removeItem(at: url(for: id))
+    try? FileManager.default.removeItem(at: url(for: id, .scan))
+    try? FileManager.default.removeItem(at: url(for: id, .diagnostics))
     cached.removeAll { $0.id == id }
+    Log.store.notice("report deleted")
   }
 
   /// Loads every stored report.
@@ -145,31 +193,36 @@ public actor ReportStore {
   /// A file that fails to decrypt is reported rather than skipped: silently
   /// dropping a report the user believes they saved is the one outcome worse
   /// than an error.
-  public func load() throws -> [StoredReport] {
+  public func load() throws -> [LabReport] {
     if loaded { return cached }
     try ensureDirectory()
     let key = try storeKey()
-    var reports: [StoredReport] = []
+    var reports: [LabReport] = []
     var failures: [UUID] = []
 
     let files =
       (try? FileManager.default.contentsOfDirectory(at: directory, includingPropertiesForKeys: nil))
       ?? []
     for file in files where file.pathExtension == "sealed" {
+      // Attachments are `<id>.scan.sealed` and `<id>.diag.sealed`; only the
+      // bare `<id>.sealed` is a record.
       guard let id = UUID(uuidString: file.deletingPathExtension().lastPathComponent) else {
         continue
       }
       do {
         let box = try AES.GCM.SealedBox(combined: Data(contentsOf: file))
         let plain = try AES.GCM.open(box, using: key)
-        reports.append(try JSONDecoder().decode(StoredReport.self, from: plain))
+        reports.append(try JSONDecoder().decode(LabReport.self, from: plain))
       } catch {
         failures.append(id)
       }
     }
 
-    cached = reports.sorted { $0.scannedAt > $1.scannedAt }
+    cached = reports.sorted { $0.effectiveDate > $1.effectiveDate }
     loaded = true
+    Log.store.info(
+      "loaded \(reports.count, privacy: .public) report(s), \(failures.count, privacy: .public) unreadable"
+    )
     if let first = failures.first { throw StoreError.corrupt(first) }
     return cached
   }
@@ -178,7 +231,7 @@ public actor ReportStore {
   public func timeline() throws -> [(date: Date, value: CodedLabValue)] {
     try load()
       .flatMap { report in
-        report.extraction.coded.map { (report.collectedOn ?? report.scannedAt, $0) }
+        report.extraction.coded.map { (report.effectiveDate, $0) }
       }
       .sorted { $0.0 < $1.0 }
   }

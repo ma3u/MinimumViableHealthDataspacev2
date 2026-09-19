@@ -48,7 +48,7 @@ public enum TableRoles {
     case other
   }
 
-  public struct Layout: Sendable, Equatable {
+  public struct Layout: Sendable, Equatable, Codable {
     public let label: Int
     public let value: Int
     public let unit: Int
@@ -69,9 +69,13 @@ public enum TableRoles {
     let stripped = text
       .replacingOccurrences(of: "^\\s*(<=?|>=?|≤|≥)\\s*", with: "", options: .regularExpression)
       .trimmingCharacters(in: .whitespaces)
-    // A trailing flag (`+`, `*`, `H`, `L`) is still a value cell.
-    let withoutFlag = stripped
-      .replacingOccurrences(of: "\\s*[*+!↑↓HL]{1,2}$", with: "", options: .regularExpression)
+    // A trailing flag (`+`, `*`, `H`, `L`, `-`) or a glued `%` is still a
+    // value cell.
+    let withoutFlag = LabLineParser.splitGluedUnit(
+      stripped.replacingOccurrences(
+        of: LabLineParser.trailingFlag, with: "", options: .regularExpression)
+    ).value.replacingOccurrences(
+      of: LabLineParser.trailingFlag, with: "", options: .regularExpression)
     return LabLineParser.parseNumber(withoutFlag) != nil
   }
 
