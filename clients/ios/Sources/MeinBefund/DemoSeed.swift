@@ -16,8 +16,11 @@
   /// does not know, and a line that could not be read.
   enum DemoSeed {
 
+    /// `-MBDevData` implies it: the larger corpus is demo data too, and every
+    /// guard that keeps demo data away from the store has to cover both.
     static var isRequested: Bool {
-      ProcessInfo.processInfo.arguments.contains("-MBDemoSeed")
+      let args = ProcessInfo.processInfo.arguments
+      return args.contains("-MBDemoSeed") || args.contains("-MBDevData")
     }
 
     /// What the demo is currently showing, including anything saved since
