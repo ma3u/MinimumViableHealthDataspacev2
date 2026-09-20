@@ -210,7 +210,7 @@ enum ReportExport {
         y = startY
         draw(referenceText(value) ?? String(localized: "none printed"), body, x: columns[3])
         y = startY + max(rowHeight, 13)
-        draw("LOINC \(value.coding.loinc)", small, x: columns[0], colour: .darkGray)
+        draw(value.coding.codeLabel, small, x: columns[0], colour: .darkGray)
         y += 4
       }
 

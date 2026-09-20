@@ -241,3 +241,4 @@
 "from your reports" = "aus Ihren Befunden";
 "Opens the report this measurement came from" = "Öffnet den Befund, aus dem dieser Messwert stammt";
 "Tap a point to see what it was. Tap the card to open that report." = "Tippen Sie einen Punkt an, um zu sehen, was er war. Ein Tipp auf die Karte öffnet den zugehörigen Befund.";
+"No LOINC code for this quantity" = "Für diese Größe gibt es keinen LOINC-Code";

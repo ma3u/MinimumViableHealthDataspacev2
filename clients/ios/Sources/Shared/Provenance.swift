@@ -173,3 +173,21 @@ public struct ExtractionResult: Sendable, Equatable, Codable {
     )
   }
 }
+
+
+extension AnalyteCoding {
+
+  /// How to name this coding on screen and in an export.
+  ///
+  /// `nil` had been interpolated straight into a string, which prints
+  /// `LOINC Optional("2093-3")` on a report a person is asked to check
+  /// against their own paper. A quantity LOINC does not code says so instead
+  /// of showing an empty code, which would read as a lookup that failed.
+  public var codeLabel: String {
+    if let loinc { return String(localized: "LOINC \(loinc)") }
+    return String(localized: "No LOINC code for this quantity")
+  }
+
+  /// A stable key for one coding, for selection lists.
+  public var codeKey: String { loinc ?? "uncoded:\(analyteKey)|\(ucum)" }
+}

@@ -333,6 +333,13 @@ final class AppModel: ObservableObject {
   }
 
   func openScan(_ report: LabReport) async {
+    #if DEBUG
+      // Demo reports never reached the store, so their pages are not in it.
+      if DemoSeed.isRequested, let pages = DemoSeed.scanPDF {
+        viewingScan = pages
+        return
+      }
+    #endif
     do {
       guard let pdf = try await store.scan(for: report.id) else {
         error = String(localized: "The scanned pages of this report are not stored.")

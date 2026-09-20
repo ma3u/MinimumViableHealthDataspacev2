@@ -237,7 +237,7 @@ private struct CodedRow: View {
           .font(.body.monospacedDigit().weight(.medium))
       }
       HStack(spacing: 6) {
-        Text("LOINC \(value.coding.loinc)")
+        Text(value.coding.codeLabel)
         if let range = referenceText {
           Text("·")
           // Printed verbatim, never normalised: a reference range is lab- and

@@ -147,12 +147,19 @@ private struct PointCallout: View {
     }
     .padding(.horizontal, 10)
     .padding(.vertical, 7)
+    .frame(width: PointCallout.width, height: PointCallout.height, alignment: .leading)
     .background(.regularMaterial, in: .rect(cornerRadius: 10))
     .overlay(
       RoundedRectangle(cornerRadius: 10).strokeBorder(.quaternary))
     .shadow(radius: 3, y: 1)
-    .frame(maxWidth: 210, alignment: .leading)
   }
+
+  /// Fixed, so keeping the card inside the chart is arithmetic rather than a
+  /// measurement. Measuring it took a render to arrive, and the first render
+  /// placed the card at the point with a width of zero, which put it half
+  /// outside the chart and clipped at the card's edge.
+  static let width: CGFloat = 186
+  static let height: CGFloat = 62
 
   var body: some View {
     if let onOpen {
@@ -248,11 +255,19 @@ private struct SeriesChart: View {
   let series: TrendSeries
   var onOpenReport: ((UUID) -> Void)?
 
-  /// The point whose card is showing. Nothing is selected until a tap.
-  @State private var selected: TrendPoint.ID?
+  /// Where on the date axis the last tap landed, and so which measurement is
+  /// showing its card. Nothing is selected until a tap.
+  ///
+  /// `chartXSelection` rather than a tap gesture of our own: inside a `List`
+  /// row a plain `onTapGesture`, and even a high-priority spatial one, never
+  /// fired. Swift Charts does its own hit-testing here and it works.
+  @State private var selectedDate: Date?
 
   private var selectedPoint: TrendPoint? {
-    series.points.first { $0.id == selected }
+    guard let selectedDate else { return nil }
+    return series.points.min {
+      abs($0.date.timeIntervalSince(selectedDate)) < abs($1.date.timeIntervalSince(selectedDate))
+    }
   }
 
   /// The band to draw: the published optimal one, or the laboratory's own.
@@ -298,7 +313,7 @@ private struct SeriesChart: View {
         PointMark(x: .value("Date", point.date), y: .value("Value", point.value))
           .foregroundStyle(point.source == .labIssuedDigital ? .blue : .orange)
           .symbol(point.source == .labIssuedDigital ? .circle : .diamond)
-          .symbolSize(point.id == selected ? 160 : 60)
+          .symbolSize(point.id == selectedPoint?.id ? 160 : 60)
       }
     }
     .chartYScale(domain: bounds.low...bounds.high)
@@ -315,26 +330,18 @@ private struct SeriesChart: View {
         }
       }
     }
+    .chartXSelection(value: $selectedDate)
     .chartOverlay { proxy in
       GeometryReader { geometry in
-        // Two layers, in this order on purpose. The clear rectangle takes a
-        // tap anywhere on the plot and picks the nearest measurement. The
-        // card sits above it, so its own button gets the second tap rather
-        // than the rectangle underneath swallowing it.
-        ZStack(alignment: .topLeading) {
-          Rectangle()
-            .fill(.clear)
-            .contentShape(Rectangle())
-            .onTapGesture { location in
-              select(near: location, proxy: proxy, in: geometry)
-            }
-          if let point = selectedPoint,
-            let anchor = position(of: point, proxy: proxy, in: geometry)
-          {
-            PointCallout(point: point, series: series, onOpen: onOpenReport)
-              .fixedSize()
-              .modifier(CalloutPlacement(anchor: anchor, bounds: geometry.size))
-          }
+        // Only the card. Selecting is `chartXSelection`'s job, and anything
+        // laid over the plot to catch taps would take the card's own tap
+        // before its button ever saw it.
+        if let point = selectedPoint,
+          let anchor = position(of: point, proxy: proxy, in: geometry)
+        {
+          PointCallout(point: point, series: series, onOpen: onOpenReport)
+            .fixedSize()
+            .modifier(CalloutPlacement(anchor: anchor, bounds: geometry.size))
         }
       }
     }
@@ -356,65 +363,30 @@ private struct SeriesChart: View {
     else { return nil }
     return CGPoint(x: plot.minX + x, y: plot.minY + y)
   }
-
-  /// Selects the measurement nearest the tap, or clears it when that one was
-  /// already showing, so a second tap on the same dot puts the card away.
-  private func select(near location: CGPoint, proxy: ChartProxy, in geometry: GeometryProxy) {
-    guard let plotAnchor = proxy.plotFrame else { return }
-    let plot = geometry[plotAnchor]
-    guard let tapped = proxy.value(atX: location.x - plot.minX, as: Date.self) else { return }
-    let nearest = series.points.min {
-      abs($0.date.timeIntervalSince(tapped)) < abs($1.date.timeIntervalSince(tapped))
-    }
-    withAnimation(.easeOut(duration: 0.15)) {
-      selected = (nearest?.id == selected) ? nil : nearest?.id
-    }
-  }
 }
 
 /// Keeps the card beside its point and inside the chart.
 ///
-/// Above the point where there is room, below it near the top edge, and
-/// nudged sideways so neither end runs off: a card half off the screen names
-/// a measurement nobody can read.
+/// The row clips at the chart's edge, so a card that hangs over it loses the
+/// text that hangs over. Above the point where there is room, below it near
+/// the top, and pushed sideways so both ends stay in.
 private struct CalloutPlacement: ViewModifier {
   let anchor: CGPoint
   let bounds: CGSize
 
   func body(content: Content) -> some View {
-    content.background(
-      GeometryReader { card in
-        Color.clear.preference(key: CalloutSizeKey.self, value: card.size)
-      }
-    )
-    .modifier(CalloutOffset(anchor: anchor, bounds: bounds))
-  }
-}
-
-private struct CalloutSizeKey: PreferenceKey {
-  static let defaultValue = CGSize.zero
-  static func reduce(value: inout CGSize, nextValue: () -> CGSize) { value = nextValue() }
-}
-
-private struct CalloutOffset: ViewModifier {
-  let anchor: CGPoint
-  let bounds: CGSize
-  @State private var size = CGSize.zero
-
-  func body(content: Content) -> some View {
-    content
-      .onPreferenceChange(CalloutSizeKey.self) { size = $0 }
-      .offset(x: clampedX, y: offsetY)
+    content.offset(x: x, y: y)
   }
 
-  private var clampedX: CGFloat {
-    let wanted = anchor.x - size.width / 2
-    return min(max(4, wanted), max(4, bounds.width - size.width - 4))
+  private var x: CGFloat {
+    let wanted = anchor.x - PointCallout.width / 2
+    let last = max(0, bounds.width - PointCallout.width)
+    return min(max(0, wanted), last)
   }
 
-  /// Above the point, unless that would leave the top of the chart.
-  private var offsetY: CGFloat {
-    let above = anchor.y - size.height - 10
-    return above < 0 ? anchor.y + 12 : above
+  private var y: CGFloat {
+    let above = anchor.y - PointCallout.height - 8
+    if above >= 0 { return above }
+    return min(anchor.y + 10, max(0, bounds.height - PointCallout.height))
   }
 }

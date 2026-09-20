@@ -55,7 +55,14 @@ extension ReferenceRange {
 
 /// One measurement on a timeline.
 public struct TrendPoint: Sendable, Equatable, Identifiable {
-  public let id: UUID
+  /// Derived, never a fresh `UUID`.
+  ///
+  /// The series is recomputed on every render, so an identity minted at
+  /// construction is a different one each time. A chart that remembers which
+  /// point was tapped then forgets it on the very next pass, which looked
+  /// exactly like a tap that had not registered at all.
+  public var id: String { "\(reportId.uuidString)|\(date.timeIntervalSince1970)" }
+
   /// The report this value came from, so a point on a chart can be followed
   /// back to the document it was read from.
   public let reportId: UUID
@@ -72,10 +79,9 @@ public struct TrendPoint: Sendable, Equatable, Identifiable {
   public let reportTitle: String
 
   public init(
-    id: UUID, reportId: UUID, date: Date, value: Double, comparator: Comparator?,
+    reportId: UUID, date: Date, value: Double, comparator: Comparator?,
     source: SourceKind, printedLow: Double?, printedHigh: Double?, reportTitle: String
   ) {
-    self.id = id
     self.reportId = reportId
     self.date = date
     self.value = value
@@ -183,7 +189,7 @@ public enum Trends {
         let key = "\(value.coding.analyteKey)|\(value.coding.ucum)"
         byKey[key, default: []].append(
           TrendPoint(
-            id: UUID(), reportId: report.id, date: report.effectiveDate, value: value.raw.value,
+            reportId: report.id, date: report.effectiveDate, value: value.raw.value,
             comparator: value.raw.comparator, source: value.source,
             printedLow: value.raw.referenceLow, printedHigh: value.raw.referenceHigh,
             reportTitle: report.title))

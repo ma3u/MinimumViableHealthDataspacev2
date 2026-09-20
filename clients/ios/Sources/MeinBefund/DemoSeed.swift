@@ -117,18 +117,36 @@
           reportNumber: "2609000001", labDate: date, labDateRole: .collection,
           dateSource: .printed)
       }
-      return [
-        LabReport(
-          id: UUID(uuidString: "00000000-0000-0000-0000-0000000000A1")!,
-          scannedAt: september, collectedOn: september,
-          title: String(localized: "Lipid panel, Praxis Dr. Muster"), extraction: panel,
-          metadata: metadata(september)),
-        LabReport(
-          id: UUID(uuidString: "00000000-0000-0000-0000-0000000000A2")!,
-          scannedAt: march, collectedOn: march,
-          title: String(localized: "Check-up, Praxis Dr. Muster"), extraction: second,
-          metadata: metadata(march)),
-      ]
+      var first = LabReport(
+        id: UUID(uuidString: "00000000-0000-0000-0000-0000000000A1")!,
+        scannedAt: september, collectedOn: september,
+        title: String(localized: "Lipid panel, Praxis Dr. Muster"), extraction: panel,
+        metadata: metadata(september))
+      var secondReport = LabReport(
+        id: UUID(uuidString: "00000000-0000-0000-0000-0000000000A2")!,
+        scannedAt: march, collectedOn: march,
+        title: String(localized: "Check-up, Praxis Dr. Muster"), extraction: second,
+        metadata: metadata(march))
+      // Demo reports carry pages too. Without them "Original scan" is absent
+      // and the demo looks like an app that forgets what it read from, which
+      // is the opposite of the point.
+      if let pages = scanPDF {
+        let attachment = LabReport.ScanAttachment(
+          pageCount: 1, bytes: pages.count, sourcePixelWidth: 1240)
+        first.scan = attachment
+        secondReport.scan = attachment
+      }
+      return [first, secondReport]
     }
+
+    /// One rendered sheet, as the stored pages of every demo report.
+    ///
+    /// Built rather than shipped: an image in the bundle would be another
+    /// binary nobody can review in a diff, and `SyntheticSheet` already draws
+    /// the sheet the tests read.
+    static let scanPDF: Data? = {
+      guard isRequested else { return nil }
+      return try? ScanDocument.pdf(pages: [SyntheticSheet.render()])
+    }()
   }
 #endif
