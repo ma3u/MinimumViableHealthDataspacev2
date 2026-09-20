@@ -66,8 +66,37 @@ xcodebuild archive \
   CODE_SIGN_STYLE=Automatic \
   -allowProvisioningUpdates
 
+# Export needs a **distribution** profile, and automatic signing only creates
+# one by asking App Store Connect, which needs credentials the archive step
+# did not. So when a distribution profile for this bundle id is already
+# installed, name it and sign manually; that is the case as soon as the app has
+# been exported once, and it turns a failing export into a working one.
+#
+#   error: exportArchive No profiles for 'red.mabu.meinbefund' were found
+#
+# is what the automatic path says when it cannot reach the account.
+BUNDLE_ID="${BUNDLE_ID:-red.mabu.meinbefund}"
+profile_name=""
+for p in ~/Library/Developer/Xcode/UserData/Provisioning\ Profiles/*.mobileprovision; do
+  [ -e "$p" ] || continue
+  plist="$(mktemp)"
+  security cms -D -i "$p" >"$plist" 2>/dev/null || { rm -f "$plist"; continue; }
+  name="$(python3 - "$plist" "$BUNDLE_ID" "$TEAM_ID" <<'PY'
+import plistlib, sys
+d = plistlib.load(open(sys.argv[1], "rb"))
+app_id = d.get("Entitlements", {}).get("application-identifier", "")
+# A distribution profile provisions no specific devices.
+if app_id == f"{sys.argv[3]}.{sys.argv[2]}" and not d.get("ProvisionedDevices"):
+    print(d.get("Name", ""))
+PY
+)"
+  rm -f "$plist"
+  [ -n "$name" ] && { profile_name="$name"; break; }
+done
+
 echo "==> Exporting .ipa"
-cat > "$BUILD_DIR/ExportOptions.plist" <<PLIST
+{
+  cat <<PLIST
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
@@ -76,9 +105,21 @@ cat > "$BUILD_DIR/ExportOptions.plist" <<PLIST
   <key>teamID</key><string>${TEAM_ID}</string>
   <key>uploadSymbols</key><true/>
   <key>destination</key><string>export</string>
-</dict>
-</plist>
 PLIST
+  if [ -n "$profile_name" ]; then
+    echo "    using the installed distribution profile: $profile_name" >&2
+    cat <<PLIST
+  <key>signingStyle</key><string>manual</string>
+  <key>signingCertificate</key><string>Apple Distribution</string>
+  <key>provisioningProfiles</key>
+  <dict>
+    <key>${BUNDLE_ID}</key><string>${profile_name}</string>
+  </dict>
+PLIST
+  fi
+  echo "</dict>"
+  echo "</plist>"
+} > "$BUILD_DIR/ExportOptions.plist"
 
 rm -rf "$IPA_DIR"
 xcodebuild -exportArchive \
