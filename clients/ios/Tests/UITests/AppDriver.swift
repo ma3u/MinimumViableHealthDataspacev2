@@ -37,6 +37,29 @@ enum AppDriver {
     return element
   }
 
+  /// Scrolls until an element exists, because a `List` does not build a row
+  /// nobody has looked at and a test that assumes otherwise fails on the
+  /// eleventh analyte and not on the second.
+  @discardableResult
+  static func scrollTo(
+    _ element: XCUIElement, in app: XCUIApplication, tries: Int = 12,
+    file: StaticString = #filePath, line: UInt = #line
+  ) -> XCUIElement {
+    for _ in 0..<tries {
+      if element.exists { return element }
+      app.swipeUp()
+    }
+    XCTAssertTrue(element.exists, "never scrolled into view", file: file, line: line)
+    return element
+  }
+
+  /// Any text containing this, because a row often prints a label, a value
+  /// and a unit as one string and an exact match then finds nothing.
+  static func text(containing needle: String, in app: XCUIApplication) -> XCUIElement {
+    app.staticTexts.containing(NSPredicate(format: "label CONTAINS[c] %@", needle))
+      .firstMatch
+  }
+
   /// Every string on screen, for the checks that are about what a person can
   /// read rather than about one element.
   static func visibleText(_ app: XCUIApplication) -> String {

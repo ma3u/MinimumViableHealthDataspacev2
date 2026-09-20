@@ -58,6 +58,14 @@ final class AppModel: ObservableObject {
     #if DEBUG
       // Screenshot mode: fictional reports, never persisted, so nothing here
       // can reach a real store or a real person's device.
+      if DevDataset.isRequested {
+        if DemoSeed.live.count <= DemoSeed.reports.count {
+          DemoSeed.live = DevDataset.reports
+        }
+        reports = DemoSeed.live
+        profile = DemoSeed.liveProfile
+        return
+      }
       if DemoSeed.isRequested {
         reports = DemoSeed.live
         profile = DemoSeed.liveProfile
@@ -350,6 +358,10 @@ final class AppModel: ObservableObject {
   func openScan(_ report: LabReport) async {
     #if DEBUG
       // Demo reports never reached the store, so their pages are not in it.
+      if DevDataset.isRequested, let pages = DevDataset.scans[report.id] {
+        viewingScan = pages
+        return
+      }
       if DemoSeed.isRequested, let pages = DemoSeed.scanPDF {
         viewingScan = pages
         return

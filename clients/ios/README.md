@@ -47,6 +47,29 @@ own paper. A waist that could be typed and was then thrown away by the obvious
 Save button. Each was obvious the moment the app was driven and invisible to
 everything else.
 
+## A test database
+
+```bash
+xcrun simctl launch <udid> red.mabu.meinbefund -MBDevData
+```
+
+`-MBDemoSeed` carries two reports, which is enough for a screenshot and not
+enough to work on. `-MBDevData` carries seven, across three years and four
+sources: two practice printouts, two laboratory documents, a study centre, and
+two readings from a body-composition scale. Enough that a trend has shape, the
+unmatched list has something in it, the profile has a body measurement to read
+back, and every report has pages to open.
+
+It is built, not stored. A row states the label, the value, the unit and the
+range the laboratory printed, and `Analytes.lookup` codes it exactly as it
+codes a scan. So no code in the dataset can be wrong, a row the dictionary
+cannot code lands in the unmatched list of its own accord, and the dataset
+follows the dictionary when the dictionary changes. The pages are drawn by
+`SyntheticSheet`, the same renderer the tests read.
+
+Every laboratory in it is invented and every value is made up. A real report
+lives outside this repository, always.
+
 So `Tests/UITests/` drives it. Every test launches with `-MBDemoSeed`, so the
 data is two fictional reports held in memory and no real report is ever
 involved. `-MBShot <screen>` opens a screen directly, which keeps a test about

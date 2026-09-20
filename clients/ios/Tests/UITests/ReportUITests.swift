@@ -60,3 +60,81 @@ final class ReportUITests: XCTestCase {
       "a scanned report says its values are preliminary")
   }
 }
+
+/// The developer corpus: three years, seven reports, four sources.
+///
+/// It exists so a question about a trend, an unmatched value or a body
+/// measurement can be answered by looking rather than by first building the
+/// data to look at.
+final class DevDatasetUITests: XCTestCase {
+
+  override func setUp() {
+    continueAfterFailure = false
+  }
+
+  private func launch(_ screen: AppDriver.Screen? = nil) -> XCUIApplication {
+    let app = XCUIApplication()
+    app.launchArguments = ["-MBDevData"]
+    if let screen { app.launchArguments += ["-MBShot", screen.rawValue] }
+    app.launch()
+    return app
+  }
+
+  func testTheCorpusIsThere() {
+    let app = launch()
+    AppDriver.require(
+      app.staticTexts["Lipidprofil, Labor Musterstadt"], "the newest report")
+    XCTAssertGreaterThanOrEqual(
+      app.cells.count, 5, "several years of reports, not two")
+  }
+
+  func testEveryLaboratoryIsInvented() {
+    // A real report lives outside the repository, always.
+    let app = launch()
+    let text = AppDriver.visibleText(app)
+    for real in ["Charité", "Limbach", "Synlab", "Amedes", "Sonic"] {
+      XCTAssertFalse(text.contains(real), "\(real) has no business in test data")
+    }
+    XCTAssertTrue(text.contains("Muster"), "the fictional ones are there")
+  }
+
+  func testATrendHasEnoughPointsToBeATrend() {
+    let app = launch(.trends)
+    AppDriver.require(app.navigationBars["Trends"], "the Trends screen")
+    AppDriver.scrollTo(
+      app.buttons.matching(identifier: "trend-point-cholesterol-ldl").firstMatch, in: app)
+    let points = app.buttons.matching(identifier: "trend-point-cholesterol-ldl")
+    XCTAssertGreaterThanOrEqual(
+      points.count, 5, "LDL was measured on five dates, and all five are plotted")
+  }
+
+  func testTheUnmatchedListHasSomethingInIt() {
+    // A dataset with nothing unmatched hides the screen that exists to show
+    // what the app could not read.
+    let app = launch()
+    AppDriver.scrollTo(
+      app.staticTexts["Studienlabor, Studienzentrum Musterklinik"], in: app).tap()
+    AppDriver.scrollTo(AppDriver.text(containing: "Omega-3-Index", in: app), in: app)
+    XCTAssertTrue(
+      AppDriver.text(containing: "unmatched", in: app).exists,
+      "and the section says how many were not matched")
+  }
+
+  func testAScaleReadingIsCarriedWithoutALoincCode() {
+    let app = launch()
+    AppDriver.scrollTo(
+      app.staticTexts["Körperzusammensetzung"].firstMatch, in: app).tap()
+    AppDriver.scrollTo(AppDriver.text(containing: "Viszeralfett", in: app), in: app)
+    XCTAssertFalse(
+      AppDriver.visibleText(app).contains("Optional("),
+      "and it is not printed as an optional")
+  }
+
+  func testEveryReportKeepsItsPages() {
+    let app = launch()
+    AppDriver.require(app.staticTexts["Lipidprofil, Labor Musterstadt"], "a report").tap()
+    AppDriver.scrollTo(
+      app.buttons.containing(NSPredicate(format: "label CONTAINS 'Original scan'")).firstMatch,
+      in: app)
+  }
+}
