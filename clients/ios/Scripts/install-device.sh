@@ -31,17 +31,30 @@ if [[ -z "$device" ]]; then
   device="$(xcrun devicectl list devices 2>/dev/null |
     awk '/available \(paired\)/ && /iPhone/ {print $3; exit}')"
 fi
-if [[ -z "$device" ]]; then
-  echo "No paired iPhone found. Connect one, or set DEVICE_ID." >&2
-  exit 1
-fi
 
+# Built for a generic device rather than for this one.
+#
+# Two reasons. `-destination "id=..."` fails with
+#
+#   error: Unable to find a destination matching the provided destination
+#   specifier
+#
+# whenever the phone is asleep or off the network, which reads like a bad
+# argument and is really an absent phone. And building generically means the
+# .app is ready before the phone is, so reconnecting it costs an install
+# rather than a rebuild.
 derived="${DERIVED_DATA:-$(mktemp -d)}"
-echo "building for $device, team $team"
+echo "building, team $team"
 xcodebuild -project MeinBefund.xcodeproj -scheme MeinBefund \
-  -destination "id=$device" -derivedDataPath "$derived" \
+  -destination 'generic/platform=iOS' -derivedDataPath "$derived" \
   DEVELOPMENT_TEAM="$team" -allowProvisioningUpdates build |
   tail -3
+
+if [[ -z "$device" ]]; then
+  echo "Built, but no iPhone is reachable: connect one by cable, unlock it," >&2
+  echo "or set DEVICE_ID. Re-run to install without rebuilding." >&2
+  exit 1
+fi
 
 app="$(find "$derived/Build/Products" -maxdepth 2 -name "MeinBefund.app" |
   grep iphoneos | head -1)"
