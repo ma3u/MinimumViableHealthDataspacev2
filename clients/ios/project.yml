@@ -86,8 +86,19 @@ targets:
         CODE_SIGN_ENTITLEMENTS: Sources/MeinBefund/MeinBefund.entitlements
         TARGETED_DEVICE_FAMILY: "1"
     info:
+      # Generated, so Info.plist must never be hand-edited: `xcodegen generate`
+      # silently overwrites it, and the edit reappears as a mystery regression.
       path: Sources/MeinBefund/Info.plist
       properties:
+        # Export compliance, declared with the build rather than answered per
+        # upload. The app encrypts only with Apple's own platform
+        # cryptography: CryptoKit AES-GCM sealing each stored record, the
+        # Keychain holding the key as ThisDeviceOnly, and
+        # NSFileProtectionComplete on the file. No cryptography of its own, no
+        # protocol of its own, and no key ever leaves the device. Without this
+        # a build processes to VALID and then sits at "Missing Compliance",
+        # where no tester can install it until someone answers by hand.
+        ITSAppUsesNonExemptEncryption: false
         MBOIDCIssuer: $(MB_OIDC_ISSUER)
         MBOIDCClientID: $(MB_OIDC_CLIENT_ID)
         MBOIDCRedirectScheme: $(MB_OIDC_REDIRECT_SCHEME)
