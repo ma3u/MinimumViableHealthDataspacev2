@@ -169,7 +169,7 @@ BETA_DESCRIPTION = {
 # being asked to look at, not a changelog.
 WHAT_TO_TEST = {
     "en-GB": (
-        "First build. Worth trying, in this order:\n\n"
+        "Build 2. Worth trying, in this order:\n\n"
         "1. Scan a real lab report, or import one as a PDF. Check every value "
         "against the paper; each one names the page and line it came from.\n"
         "2. Look at what it could not read. Unmatched values and unread lines "
@@ -177,15 +177,17 @@ WHAT_TO_TEST = {
         "report.\n"
         "3. Fill in the profile. Sex and date of birth pick the published "
         "ranges that apply to you; height makes the waist figure mean "
-        "something.\n"
-        "4. Scan a second report from another date and open Trends.\n"
+        "something. Each measurement keeps its own date.\n"
+        "4. Scan a second report from another date and open Trends. Tap a "
+        "point to see what that measurement was, and tap the card to open the "
+        "report it came from.\n"
         "5. Photograph a body-composition scale's screen, if you pass one.\n"
         "6. Export the PDF, the FHIR bundle and the OMOP tables.\n\n"
         "A misread value is the most useful thing you can find. The app can "
         "produce a diagnostics archive of what it saw."
     ),
     "de-DE": (
-        "Erster Build. Lohnt sich in dieser Reihenfolge:\n\n"
+        "Build 2. Lohnt sich in dieser Reihenfolge:\n\n"
         "1. Einen echten Laborbefund scannen oder als PDF importieren. Jeden "
         "Wert mit dem Papier abgleichen; zu jedem stehen Seite und Zeile.\n"
         "2. Ansehen, was nicht gelesen werden konnte. Nicht zugeordnete Werte "
@@ -193,9 +195,11 @@ WHAT_TO_TEST = {
         "diese Liste ist die nützliche Fehlermeldung.\n"
         "3. Das Profil ausfüllen. Geschlecht und Geburtsdatum wählen die "
         "veröffentlichten Bereiche aus, die für Sie gelten; die Körpergröße "
-        "macht den Taillenwert aussagekräftig.\n"
+        "macht den Taillenwert aussagekräftig. Jeder Messwert behält sein "
+        "eigenes Datum.\n"
         "4. Einen zweiten Befund von einem anderen Datum scannen und den "
-        "Verlauf öffnen.\n"
+        "Verlauf öffnen. Ein Tipp auf einen Punkt zeigt, was dieser Messwert "
+        "war; ein Tipp auf die Karte öffnet den zugehörigen Befund.\n"
         "5. Das Display einer Körperanalysewaage fotografieren, falls Sie an "
         "einer vorbeikommen.\n"
         "6. PDF, FHIR-Bundle und OMOP-Tabellen exportieren.\n\n"
