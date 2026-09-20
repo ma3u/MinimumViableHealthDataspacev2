@@ -853,3 +853,52 @@ struct RepeatedValueTests {
     #expect(result.suspiciousLines.isEmpty)
   }
 }
+
+/// A microbiome panel, carried without codes LOINC does not have.
+@Suite("The gut microbiome is recognised, and says why it has no code")
+struct MicrobiomeTests {
+
+  @Test("an organism is recognised rather than left unmatched")
+  func taxaAreKnown() throws {
+    // Seventy-six real measurements of a person's own gut used to sit in a
+    // list called "unmatched", where nothing could plot them, export them or
+    // ask about them.
+    for label in [
+      "Firmicutes", "Bacteroidetes", "Akkermansia muciniphila",
+      "Faecalibacterium prausnitzii", "Clostridium difficile", "Candida albicans",
+      "Prevotella copri", "Lactobacillus spp.",
+    ] {
+      let coding = try #require(Analytes.lookup(label: label, unit: "%"), "\(label)")
+      #expect(coding.ucum == "%")
+      #expect(coding.loinc == nil, "\(label) has no LOINC code and does not pretend to")
+      #expect(coding.uncodedReason?.contains("organism") == true, "\(label)")
+    }
+  }
+
+  @Test("a functional share is recognised too, with its own reason")
+  func functionsAreKnown() throws {
+    let coding = try #require(Analytes.lookup(label: "Butyratproduktion", unit: "%"))
+    #expect(coding.loinc == nil)
+    #expect(coding.uncodedReason?.contains("functional capacity") == true)
+  }
+
+  @Test("the one thing LOINC does code here is coded")
+  func stoolPhIsCoded() throws {
+    // Checked against the NLM clinical tables API: a term for the pH of
+    // stool, and none for the abundance of a genus.
+    let coding = try #require(Analytes.lookup(label: "Stuhl-pH-Wert", unit: "pH"))
+    #expect(coding.loinc == "2755-7")
+  }
+
+  @Test("the tail of a sentence is not an organism")
+  func sentenceTailsAreRefused() {
+    // `Landbau), 20% resistentes Dextrin` came from a paragraph about where a
+    // fibre is grown, and arrived as a measurement of 20 %. A label that
+    // closes a bracket it never opened is not the name of anything.
+    let result = LabLineParser.extract(
+      "Landbau), 20% resistentes Dextrin aus Mais", source: .labIssuedDigital)
+    #expect(result.coded.isEmpty)
+    #expect(result.unmapped.isEmpty)
+    #expect(result.suspiciousLines.count == 1, "reported as unread, never as a measurement")
+  }
+}
