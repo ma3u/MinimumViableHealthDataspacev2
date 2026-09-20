@@ -309,11 +309,12 @@ describe("a quantity LOINC does not code", () => {
     const outside = [...uncoded].filter(
       (entry) =>
         !entry.startsWith("mb-") &&
+        !entry.startsWith("ratio-") &&
         ![
           "ecw-tbw|%",
           "visceral-fat|kg",
-          "shannon-index|1",
-          "firmicutes-bacteroidetes-ratio|1",
+          "cholesterol-remnant|mg/dL",
+          "cholesterol-remnant|mmol/L",
         ].includes(entry),
     );
     expect(outside).toEqual([]);

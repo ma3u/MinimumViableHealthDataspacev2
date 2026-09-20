@@ -29,11 +29,17 @@ struct TrendsView: View {
   var onOpenReport: ((UUID) -> Void)?
   let onClose: () -> Void
   @State private var onlyWithHistory = false
+  @State private var order: Trends.Order = .attention
+  @State private var places: Set<RangePlacement> = []
 
   private var series: [TrendSeries] {
-    let all = Trends.series(from: reports, sex: sex)
-    return onlyWithHistory ? Trends.withHistory(all) : all
+    var all = Trends.series(from: reports, sex: sex, order: order)
+    if onlyWithHistory { all = Trends.withHistory(all) }
+    return Trends.placed(all, in: places)
   }
+
+  /// How many of everything sits where, whatever the filter is showing.
+  private var everything: [TrendSeries] { Trends.series(from: reports, sex: sex, order: order) }
 
   var body: some View {
     NavigationStack {
@@ -47,9 +53,15 @@ struct TrendsView: View {
         } else {
           List {
             Section {
+              Picker("Order", selection: $order) {
+                Text("Furthest from its range").tag(Trends.Order.attention)
+                Text("Most measured").tag(Trends.Order.history)
+                Text("By name").tag(Trends.Order.name)
+              }
               Toggle("Only analytes measured more than once", isOn: $onlyWithHistory)
+              PlacementFilter(all: everything, places: $places)
             } footer: {
-              Tally(series: Trends.series(from: reports, sex: sex))
+              Tally(series: everything)
             }
 
             ForEach(series) { item in
@@ -114,6 +126,50 @@ private struct SeriesHeader: View {
         .font(.caption.monospacedDigit())
         .foregroundStyle(RangePalette.colour(for: series.placement))
       }
+    }
+  }
+}
+
+/// Which places to show, with how many sit in each.
+///
+/// The counts are of everything, not of what is currently showing, so turning
+/// a filter on does not change the numbers next to the filters.
+private struct PlacementFilter: View {
+  let all: [TrendSeries]
+  @Binding var places: Set<RangePlacement>
+
+  private var counts: [RangePlacement: Int] { Trends.tally(all) }
+
+  var body: some View {
+    VStack(alignment: .leading, spacing: 6) {
+      Text("Show").font(.caption).foregroundStyle(.secondary)
+      // A row of toggles rather than a menu: with four of them the whole
+      // choice is visible, and so is how many are in each.
+      ViewThatFits(in: .horizontal) {
+        HStack(spacing: 6) { chips }
+        VStack(alignment: .leading, spacing: 6) { chips }
+      }
+    }
+  }
+
+  private var chips: some View {
+    ForEach(RangePlacement.byAttention, id: \.self) { place in
+      let count = counts[place] ?? 0
+      Button {
+        if places.contains(place) { places.remove(place) } else { places.insert(place) }
+      } label: {
+        Text("\(place.label) \(count)")
+          .font(.caption)
+          .padding(.horizontal, 8)
+          .padding(.vertical, 5)
+          .background(
+            places.contains(place) ? RangePalette.colour(for: place).opacity(0.25) : Color.clear,
+            in: .capsule)
+          .overlay(Capsule().strokeBorder(.quaternary))
+      }
+      .buttonStyle(.plain)
+      .disabled(count == 0)
+      .opacity(count == 0 ? 0.4 : 1)
     }
   }
 }
