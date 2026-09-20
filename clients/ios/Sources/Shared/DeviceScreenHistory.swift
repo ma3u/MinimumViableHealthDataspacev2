@@ -39,7 +39,7 @@ extension DeviceScreen {
       (["juli", "jul", "july"], 7),
       (["august", "aug", "aug."], 8),
       (["september", "sept", "sep"], 9),
-      (["oktober", "okt", "oct"], 10),
+      (["oktober", "okt", "oct", "0kt", "okt", "0ct"], 10),
       (["november", "nov"], 11),
       (["dezember", "dez", "dec"], 12),
     ]
@@ -73,42 +73,68 @@ extension DeviceScreen {
 
     /// The months along the bottom of the chart, left to right.
     ///
-    /// Years come from walking backwards from the update date rather than
-    /// from the label, because a month name carries no year. The rightmost
-    /// label is the month the screen was updated in; each one to its left is
-    /// the month before.
+    /// Fitted, not listed. The recogniser drops a label, merges two into
+    /// `März Apr-`, and reads `Okt.` as `0kt.`, so demanding twelve clean
+    /// labels in a row gets none. Months are evenly spaced, so three good
+    /// ones give the spacing and the rest follow.
+    ///
+    /// Years come from walking backwards from the update date, because a
+    /// month name carries none. The rightmost column is the month the screen
+    /// was updated in.
     public static func axis(
       in fragments: [DocumentReconciler.TextFragment], updatedOn: Date
     ) -> [(x: Double, month: Date)] {
-      let labelled = fragments.compactMap { fragment -> (Double, Int, Double)? in
+      var calendar = Calendar(identifier: .gregorian)
+      calendar.timeZone = TimeZone(identifier: "UTC") ?? .current
+      let current = calendar.dateComponents([.year, .month], from: updatedOn)
+      guard let currentMonth = current.month,
+        let currentStart = calendar.date(
+          from: DateComponents(year: current.year, month: currentMonth, day: 1))
+      else { return [] }
+
+      let labelled = fragments.compactMap { fragment -> (x: Double, back: Int, y: Double)? in
         guard let number = month(of: fragment.text) else { return nil }
-        return (fragment.region.x + fragment.region.width / 2, number, fragment.region.y)
+        // How many months before the update month this label is, taking the
+        // reading that lands inside the year the chart shows.
+        let back = ((currentMonth - number) % 12 + 12) % 12
+        return (fragment.region.x + fragment.region.width / 2, back, fragment.region.y)
       }
       guard labelled.count >= 3 else { return [] }
 
-      // They sit in one band along the axis. Anything else that happens to
-      // read as a month name is somewhere else on the screen.
-      let median = labelled.map(\.2).sorted()[labelled.count / 2]
-      let band = labelled.filter { abs($0.2 - median) < 0.06 }.sorted { $0.0 < $1.0 }
+      // They sit in one band along the axis. Anything else that reads as a
+      // month name is somewhere else on the screen.
+      let median = labelled.map(\.y).sorted()[labelled.count / 2]
+      let band = labelled.filter { abs($0.y - median) < 0.06 }
       guard band.count >= 3 else { return [] }
 
-      var calendar = Calendar(identifier: .gregorian)
-      calendar.timeZone = TimeZone(identifier: "UTC") ?? .current
-      var cursor = calendar.dateComponents([.year, .month], from: updatedOn)
-      var result: [(x: Double, month: Date)] = []
-      for entry in band.reversed() {
-        guard let year = cursor.year, let monthNumber = cursor.month else { break }
-        // The label has to agree with where walking backwards has arrived,
-        // or the axis is not what this thinks it is and nothing is claimed.
-        guard entry.1 == monthNumber else { return [] }
-        guard let date = calendar.date(from: DateComponents(year: year, month: monthNumber, day: 1))
-        else { return [] }
-        result.append((entry.0, date))
-        cursor = calendar.dateComponents(
-          [.year, .month],
-          from: calendar.date(byAdding: .month, value: -1, to: date) ?? date)
+      // x = intercept + slope * (-back), by least squares.
+      let n = Double(band.count)
+      let xs = band.map { -Double($0.back) }
+      let ys = band.map(\.x)
+      let meanX = xs.reduce(0, +) / n
+      let meanY = ys.reduce(0, +) / n
+      let covariance = zip(xs, ys).map { ($0 - meanX) * ($1 - meanY) }.reduce(0, +)
+      let variance = xs.map { ($0 - meanX) * ($0 - meanX) }.reduce(0, +)
+      guard variance > 0.0001 else { return [] }
+      let slope = covariance / variance
+      let intercept = meanY - slope * meanX
+      // Months run left to right and a chart is wider than it is empty.
+      guard slope > 0.01, slope < 0.25 else { return [] }
+      // A label far from where the fit puts it means this is not an axis.
+      for entry in band where abs(intercept + slope * -Double(entry.back) - entry.x) > slope * 0.6 {
+        return []
       }
-      return result.reversed()
+
+      var result: [(x: Double, month: Date)] = []
+      for back in 0...11 {
+        guard let date = calendar.date(byAdding: .month, value: -back, to: currentStart) else {
+          continue
+        }
+        let x = intercept + slope * -Double(back)
+        guard x > -0.05, x < 1.05 else { continue }
+        result.append((x, date))
+      }
+      return result.sorted { $0.x < $1.x }
     }
 
     /// Numbers that label the value axis rather than a measurement.

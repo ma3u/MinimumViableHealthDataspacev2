@@ -463,7 +463,7 @@ struct PerDayMeasurementTests {
 @Suite("A chart's own history, and not counting it twice")
 struct ChartHistoryTests {
 
-  static func fragment(_ text: String, x: Double, y: Double, w: Double = 0.04)
+  public static func fragment(_ text: String, x: Double, y: Double, w: Double = 0.04)
     -> DocumentReconciler.TextFragment
   {
     DocumentReconciler.TextFragment(
@@ -604,5 +604,85 @@ struct DuplicateTests {
     let stripped = try #require(Duplicates.strip(mixed, known: known))
     #expect(stripped.extraction.coded.count == 1)
     #expect(stripped.extraction.coded.first?.raw.label == "Taillenumfang")
+  }
+}
+
+/// Measuring a value off a drawing, where the scale printed no number.
+@Suite("Values measured off a chart")
+struct ChartPlotTests {
+
+  typealias Plot = DeviceScreen.ChartHistory.Plot
+
+  @Test("the value axis is read from the column of numbers at the edge")
+  func scaleIsFound() throws {
+    let card = ChartHistoryTests.card
+    let scale = try #require(Plot.scale(in: card, above: 0.117))
+    #expect(scale.lowValue == 37)
+    #expect(scale.highValue == 40)
+    // A height between two marks is the value between them.
+    #expect(abs(scale.value(atY: (scale.lowY + scale.highY) / 2) - 38.5) < 0.1)
+  }
+
+  @Test("a chart whose axis the recogniser missed yields nothing")
+  func noAxisNoValues() {
+    // Two of five sample cards print their axis too small to be read. A
+    // height without a scale is not a measurement, so nothing is claimed.
+    let noAxis = [
+      ChartHistoryTests.fragment("Juli", x: 0.082, y: 0.141),
+      ChartHistoryTests.fragment("Aug.", x: 0.151, y: 0.139),
+      ChartHistoryTests.fragment("Sept.", x: 0.214, y: 0.139),
+      ChartHistoryTests.fragment("0kt.", x: 0.289, y: 0.139),
+      ChartHistoryTests.fragment("Nov.", x: 0.358, y: 0.139),
+      ChartHistoryTests.fragment("1,6", x: 0.833, y: 0.259),
+    ]
+    #expect(Plot.scale(in: noAxis, above: 0.144) == nil)
+  }
+
+  @Test("a value measured off a drawing keeps two decimals and no more")
+  func precisionIsNotInvented() {
+    // A circle found in a photograph of a screen does not earn a third.
+    #expect(Plot.rounded(23.78431) == 23.78)
+    #expect(Plot.rounded(1.6666) == 1.67)
+  }
+
+  @Test("the axis survives a dropped, merged or mangled month label")
+  func axisIsFitted() throws {
+    // Measured from a real card: `März Apr-` came back as one fragment and
+    // `Okt.` as `0kt.`, so demanding twelve clean labels in a row gets none.
+    let updated = ReportMetadataExtractor.day(2026, 6, 15)!
+    let mangled = [
+      ChartHistoryTests.fragment("Juli", x: 0.086, y: 0.087),
+      ChartHistoryTests.fragment("Aug.", x: 0.140, y: 0.082),
+      ChartHistoryTests.fragment("Sept.", x: 0.198, y: 0.079),
+      ChartHistoryTests.fragment("0kt.", x: 0.271, y: 0.077),
+      ChartHistoryTests.fragment("Nov.", x: 0.336, y: 0.074),
+      ChartHistoryTests.fragment("Dez.", x: 0.401, y: 0.069),
+      ChartHistoryTests.fragment("Jan.", x: 0.464, y: 0.066),
+      ChartHistoryTests.fragment("Feb.", x: 0.532, y: 0.064),
+      ChartHistoryTests.fragment("März Apr-", x: 0.598, y: 0.057, w: 0.108),
+      ChartHistoryTests.fragment("Mai", x: 0.737, y: 0.056),
+      ChartHistoryTests.fragment("Juni", x: 0.804, y: 0.056),
+    ]
+    let axis = DeviceScreen.ChartHistory.axis(in: mangled, updatedOn: updated)
+    #expect(axis.count == 12, "the months the recogniser lost are fitted back in")
+
+    let calendar = Calendar(identifier: .gregorian)
+    let march = try #require(axis.first { calendar.component(.month, from: $0.month) == 3 })
+    // Between February at 0.532 and May at 0.737, two months apart from each.
+    #expect(abs(march.x - 0.60) < 0.03, "and land where they belong")
+  }
+
+  @Test("a run of labels that is not an axis is refused")
+  func nonsenseIsRefused() {
+    // Three month names scattered over a page are not twelve months in a row,
+    // and a fit through them would invent an axis that is not there.
+    let scattered = [
+      ChartHistoryTests.fragment("Mai", x: 0.10, y: 0.80),
+      ChartHistoryTests.fragment("Juni", x: 0.70, y: 0.80),
+      ChartHistoryTests.fragment("Juli", x: 0.30, y: 0.79),
+    ]
+    let axis = DeviceScreen.ChartHistory.axis(
+      in: scattered, updatedOn: ReportMetadataExtractor.day(2026, 6, 15)!)
+    #expect(axis.isEmpty)
   }
 }

@@ -142,6 +142,21 @@ private struct ReportDetails: View {
         LabeledContent("Ordered by", value: physician)
       }
       LabeledContent("Scanned", value: day(report.scannedAt))
+      // A value recovered from a chart is worth less than one the screen
+      // named, and the report says which it is holding rather than leaving a
+      // reader to work it out from the dates.
+      switch report.metadata.dateSource {
+      case .chartMonth:
+        Text("Read from the chart on a device's screen. Each value is known to the month it sits over, not to the day.")
+          .font(.caption)
+          .foregroundStyle(.secondary)
+      case .chartEstimate:
+        Text("Measured off the chart on a device's screen, which printed no number beside these points. The values are estimates and are known to the month, not to the day.")
+          .font(.caption)
+          .foregroundStyle(.secondary)
+      default:
+        EmptyView()
+      }
       if let scan = report.scan, let onOpenScan {
         Button(action: onOpenScan) {
           Label("Original scan, \(scan.pageCount) page(s)", systemImage: "doc.richtext")
