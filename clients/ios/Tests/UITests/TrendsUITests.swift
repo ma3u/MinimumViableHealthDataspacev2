@@ -20,8 +20,14 @@ final class TrendsUITests: XCTestCase {
   }
 
   /// The measurements of one analyte, oldest first.
+  ///
+  /// Scrolled to first: the default order puts whatever sits furthest from
+  /// its published range at the top, so ferritin is no longer the first
+  /// chart, and a `List` does not build a row nobody has looked at.
   private func points(_ app: XCUIApplication, _ analyte: String = "ferritin") -> XCUIElementQuery {
-    app.buttons.matching(identifier: "trend-point-\(analyte)")
+    AppDriver.scrollTo(
+      app.buttons.matching(identifier: "trend-point-\(analyte)").firstMatch, in: app)
+    return app.buttons.matching(identifier: "trend-point-\(analyte)")
   }
 
   private var callout: (XCUIApplication) -> XCUIElement {
@@ -61,11 +67,11 @@ final class TrendsUITests: XCTestCase {
     // put a card of zero width at the point, half of it over the chart's
     // right edge, where the row clips and the text is lost.
     let app = openTrends()
-    let chart = AppDriver.require(
-      app.otherElements["trend-chart-ferritin"], "the ferritin chart")
     // The last measurement sits hard against the right edge, which is where
     // a card that is not held in would hang over.
     points(app).element(boundBy: 1).tap()
+    let chart = AppDriver.require(
+      app.otherElements["trend-chart-ferritin"], "the ferritin chart")
 
     let card = AppDriver.require(callout(app), "the card").frame
     XCTAssertGreaterThanOrEqual(card.minX, chart.frame.minX - 1, "starts inside")

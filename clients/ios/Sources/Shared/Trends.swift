@@ -167,6 +167,29 @@ public struct TrendSeries: Sendable, Equatable, Identifiable {
   }
 }
 
+extension RangePlacement {
+
+  /// How far from its published band a value sits, as an order.
+  ///
+  /// Deliberately not a risk. A risk is a statement about a person, which is
+  /// the line §5 of #186 draws and this app stays on one side of. This says
+  /// only where a number sits against a range somebody published, which is a
+  /// comparison the app can show its working for.
+  public var attention: Int {
+    switch self {
+    case .outsideGuideline: return 0
+    case .outsideOptimal: return 1
+    case .withinOptimal: return 2
+    case .noRange: return 3
+    }
+  }
+
+  /// The order a person reading a long list wants them in.
+  public static let byAttention: [RangePlacement] = [
+    .outsideGuideline, .outsideOptimal, .withinOptimal, .noRange,
+  ]
+}
+
 /// Builds timelines out of stored reports.
 ///
 /// This is the whole reason the store is a time series keyed by analyte rather
@@ -179,13 +202,17 @@ public enum Trends {
   /// A value with a comparator (`<0.1`) is plotted at the bound it names,
   /// which is the only number there is, and the comparator travels with the
   /// point so the chart can mark it rather than pretending it was measured.
-  public static func series(from reports: [LabReport], sex: RangeSex = .any) -> [TrendSeries] {
+  public static func series(
+    from reports: [LabReport], sex: RangeSex = .any, order: Order = .attention
+  ) -> [TrendSeries] {
     var byKey: [String: [TrendPoint]] = [:]
     var meta:
       [String: (analyteKey: String, loinc: String?, ucum: String, label: String, date: Date)] = [:]
 
     for report in reports {
-      for value in report.extraction.coded {
+      // Values the sheet did not print but its numbers imply, worked out here
+      // rather than stored, so they follow the values they came from.
+      for value in report.extraction.coded + DerivedValues.from(report.extraction.coded) {
         let key = "\(value.coding.analyteKey)|\(value.coding.ucum)"
         byKey[key, default: []].append(
           TrendPoint(
@@ -209,16 +236,52 @@ public enum Trends {
         points: points.sorted { $0.date < $1.date },
         range: ReferenceRanges.range(analyteKey: info.analyteKey, ucum: info.ucum, sex: sex))
     }
-    .sorted {
-      // Most points first, because a timeline is the point; then alphabetical
-      // so the order does not shuffle between launches.
-      ($0.points.count, $1.label.lowercased()) > ($1.points.count, $0.label.lowercased())
+    .sorted(by: order.comparator)
+  }
+
+  /// How a list of a hundred analytes is arranged.
+  public enum Order: String, Sendable, CaseIterable {
+    /// Furthest from its published band first, then most measured.
+    ///
+    /// A hundred and one analytes in alphabetical order is a list nobody
+    /// reads to the end, and the seven that sit outside a published range are
+    /// the seven worth seeing first.
+    case attention
+    /// Most measurements first: the ones with a shape to them.
+    case history
+    /// By name, for finding one.
+    case name
+
+    var comparator: (TrendSeries, TrendSeries) -> Bool {
+      switch self {
+      case .attention:
+        return {
+          ($0.placement.attention, -$0.points.count, $0.label.lowercased())
+            < ($1.placement.attention, -$1.points.count, $1.label.lowercased())
+        }
+      case .history:
+        return {
+          (-$0.points.count, $0.label.lowercased()) < (-$1.points.count, $1.label.lowercased())
+        }
+      case .name:
+        return { $0.label.lowercased() < $1.label.lowercased() }
+      }
     }
   }
 
   /// Series with more than one measurement, which are the ones with a trend.
   public static func withHistory(_ series: [TrendSeries]) -> [TrendSeries] {
     series.filter { $0.points.count >= 2 }
+  }
+
+  /// Only the series whose latest value sits in one of these places.
+  ///
+  /// An empty selection means all of them: a filter that can hide everything
+  /// is a filter people get stuck in.
+  public static func placed(
+    _ series: [TrendSeries], in places: Set<RangePlacement>
+  ) -> [TrendSeries] {
+    places.isEmpty ? series : series.filter { places.contains($0.placement) }
   }
 
   /// A short count of where the latest values sit, for a summary line.

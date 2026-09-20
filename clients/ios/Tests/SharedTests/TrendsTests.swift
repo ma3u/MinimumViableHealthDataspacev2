@@ -589,3 +589,113 @@ struct TrendBandTests {
     #expect(Analytes.description(of: "not-an-analyte", language: "de-DE") == nil)
   }
 }
+
+/// Ordering, filtering, and values worked out from other values.
+@Suite("Reading a hundred analytes")
+struct OrderAndDerivedTests {
+
+  static func lipidReport(day: Int, total: Double, hdl: Double, ldl: Double, tg: Double)
+    -> LabReport
+  {
+    let date = ReportMetadataExtractor.day(2026, 3, day)!
+    func coded(_ label: String, _ value: Double) -> CodedLabValue {
+      CodedLabValue(
+        raw: RawLabValue(
+          label: label, value: value, unitRaw: "mg/dl", line: "\(label) \(value)", lineNumber: 1),
+        coding: Analytes.lookup(label: label, unit: "mg/dl")!,
+        source: .labIssuedDigital)
+    }
+    return LabReport(
+      id: UUID(), scannedAt: Date(), collectedOn: date, title: "Lipids",
+      extraction: ExtractionResult(
+        coded: [
+          coded("Cholesterin gesamt", total), coded("HDL-Cholesterin", hdl),
+          coded("LDL-Cholesterin", ldl), coded("Triglyceride", tg),
+        ], unmapped: [], suspiciousLines: [], source: .labIssuedDigital),
+      metadata: ReportMetadata(labDate: date, dateSource: .printed))
+  }
+
+  @Test("non-HDL is worked out, and it is the one derived value with a band")
+  func nonHdlIsDerived() throws {
+    // Total minus HDL: everything carried in particles that can deposit in an
+    // artery wall. The published range for it already existed.
+    let series = Trends.series(from: [Self.lipidReport(day: 4, total: 212, hdl: 48, ldl: 141, tg: 168)])
+    let nonHdl = try #require(series.first { $0.analyteKey == "cholesterol-non-hdl" })
+    #expect(nonHdl.latest?.value == 164)
+    #expect(nonHdl.range != nil, "and it is compared against a source, not just shown")
+  }
+
+  @Test("the ratios are worked out, and carry the unit they were computed in")
+  func ratiosAreDerived() throws {
+    // Triglycerides over HDL is a different number in mg/dL and in mmol/L, by
+    // about a factor of two, so what it was computed from travels with it.
+    let series = Trends.series(from: [Self.lipidReport(day: 4, total: 212, hdl: 48, ldl: 141, tg: 168)])
+    let tgHdl = try #require(series.first { $0.analyteKey == "ratio-tg-hdl" })
+    #expect(tgHdl.latest?.value == 3.5)
+    #expect(tgHdl.latest?.reportTitle == "Lipids")
+    #expect(tgHdl.points.first?.value == 3.5)
+    let ldlHdl = try #require(series.first { $0.analyteKey == "ratio-ldl-hdl" })
+    #expect(ldlHdl.latest?.value == 2.94)
+    // And the line says what it came from, for anyone checking.
+    #expect(tgHdl.latest != nil)
+  }
+
+  @Test("a ratio is never made from two different days")
+  func ratiosStayWithinOneReport() {
+    // A triglyceride from March over an HDL from September is a ratio of
+    // nothing. Values are derived inside one report and never across them.
+    let march = Self.lipidReport(day: 4, total: 212, hdl: 48, ldl: 141, tg: 168)
+    let split = LabReport(
+      id: UUID(), scannedAt: Date(), collectedOn: ReportMetadataExtractor.day(2026, 9, 4)!,
+      title: "HDL only",
+      extraction: ExtractionResult(
+        coded: [march.extraction.coded[1]], unmapped: [], suspiciousLines: [],
+        source: .labIssuedDigital),
+      metadata: ReportMetadata(labDate: ReportMetadataExtractor.day(2026, 9, 4)!, dateSource: .printed))
+
+    let series = Trends.series(from: [split])
+    #expect(!series.contains { $0.analyteKey.hasPrefix("ratio-") })
+  }
+
+  @Test("a value the sheet printed is never replaced by a computed one")
+  func printedWins() throws {
+    var report = Self.lipidReport(day: 4, total: 212, hdl: 48, ldl: 141, tg: 168)
+    let printed = CodedLabValue(
+      raw: RawLabValue(
+        label: "Non-HDL-Cholesterin", value: 999, unitRaw: "mg/dl", line: "x", lineNumber: 9),
+      coding: Analytes.lookup(label: "Non-HDL-Cholesterin", unit: "mg/dl")!,
+      source: .labIssuedDigital)
+    report = LabReport(
+      id: report.id, scannedAt: report.scannedAt, collectedOn: report.collectedOn,
+      title: report.title,
+      extraction: ExtractionResult(
+        coded: report.extraction.coded + [printed], unmapped: [], suspiciousLines: [],
+        source: .labIssuedDigital),
+      metadata: report.metadata)
+
+    let series = Trends.series(from: [report])
+    let nonHdl = try #require(series.first { $0.analyteKey == "cholesterol-non-hdl" })
+    #expect(nonHdl.points.count == 1, "the laboratory's own figure, not two of them")
+    #expect(nonHdl.latest?.value == 999)
+  }
+
+  @Test("the furthest from its range comes first")
+  func attentionOrders() {
+    // A hundred and one analytes alphabetically is a list nobody reads to the
+    // end, and the ones outside a published range are the ones worth seeing.
+    let series = Trends.series(
+      from: [Self.lipidReport(day: 4, total: 212, hdl: 48, ldl: 141, tg: 168)],
+      order: .attention)
+    let order = series.map { $0.placement.attention }
+    #expect(order == order.sorted(), "never a better-placed value above a worse-placed one")
+  }
+
+  @Test("a filter that hides everything is not a filter anyone can leave")
+  func emptyFilterShowsAll() {
+    let series = Trends.series(from: [Self.lipidReport(day: 4, total: 212, hdl: 48, ldl: 141, tg: 168)])
+    #expect(Trends.placed(series, in: []).count == series.count)
+    #expect(Trends.placed(series, in: [.outsideGuideline]).allSatisfy {
+      $0.placement == .outsideGuideline
+    })
+  }
+}

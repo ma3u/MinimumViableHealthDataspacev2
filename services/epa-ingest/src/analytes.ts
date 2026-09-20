@@ -116,6 +116,8 @@ export function looseLabelKey(raw: string): string {
  */
 /** Printed unit spelling, lowercased and without spaces, → UCUM. */
 const UNIT_MAP: Record<string, string> = {
+  "{ratio}": "{ratio}",
+  ratio: "{ratio}",
   ph: "[pH]",
   "mg/dl": "mg/dL",
   "mg/l": "mg/L",
@@ -197,6 +199,8 @@ const UNIT_MAP: Record<string, string> = {
  * keys and the scraped table silently lost `fl` and `pg`.
  */
 export const UNIT_SPELLINGS: readonly string[] = [
+  "{ratio}",
+  "Ratio",
   "pH",
   "ph",
   ...Object.keys(UNIT_MAP),
@@ -1337,6 +1341,73 @@ const DEFINITIONS: AnalyteDefinition[] = [
   // Coded like anything else, so they join the timeline and the OMOP export.
   // Their provenance is `self-tracked`, which is already `preliminary`: a tape
   // measure is not a laboratory.
+  // ---- Values computed from other values ----
+  //
+  // Not printed on any sheet: worked out from what is. A ratio has no unit,
+  // and the dictionary is keyed by unit, so `1` is the UCUM code for a pure
+  // number.
+  //
+  // LOINC has terms near these and not these. `55607-6` is a **molar** ratio
+  // of triglyceride to HDL and these are computed from whatever unit the
+  // sheet printed; `16616-5` runs HDL over LDL, the other way round; and
+  // `9340-1` is a percentile rather than a ratio. A code that is nearly right
+  // is wrong, so they are carried uncoded and say so.
+  {
+    key: "ratio-tg-hdl",
+    description:
+      "Triglycerides divided by HDL cholesterol, both in the unit the sheet printed. The figure differs between mg/dL and mmol/L, so the unit it was computed in travels with it.",
+    labels: ["Triglyzeride/HDL", "TG/HDL", "Triglyceride zu HDL"],
+    byUnit: {
+      "{ratio}": uncoded(
+        "Triglyceride to HDL cholesterol ratio",
+        "{ratio}",
+        "LOINC's nearest term (55607-6) is a molar ratio, and this is computed in whatever unit the sheet printed.",
+      ),
+    },
+  },
+  {
+    key: "ratio-ldl-hdl",
+    description: "LDL cholesterol divided by HDL cholesterol.",
+    labels: ["LDL/HDL", "LDL zu HDL"],
+    byUnit: {
+      "{ratio}": uncoded(
+        "LDL to HDL cholesterol ratio",
+        "{ratio}",
+        "LOINC's nearest term (16616-5) is HDL over LDL, the other way round.",
+      ),
+    },
+  },
+  {
+    key: "ratio-apob-apoa1",
+    description:
+      "Apolipoprotein B divided by apolipoprotein A1: the particles that deposit cholesterol against the particles that remove it.",
+    labels: ["ApoB/ApoA1", "Apo B/Apo A1"],
+    byUnit: {
+      "{ratio}": uncoded(
+        "Apolipoprotein B to apolipoprotein A1 ratio",
+        "{ratio}",
+        "LOINC's nearest term (9340-1) is a percentile rather than a ratio.",
+      ),
+    },
+  },
+  {
+    key: "cholesterol-remnant",
+    description:
+      "Total cholesterol minus HDL minus LDL: what is carried in the triglyceride-rich particles and their remnants.",
+    labels: ["Remnant-Cholesterin", "Remnant Cholesterol"],
+    byUnit: {
+      "mg/dL": uncoded(
+        "Remnant cholesterol [Mass/volume] in Serum or Plasma",
+        "mg/dL",
+        "LOINC has no term for remnant cholesterol computed from a standard lipid panel.",
+      ),
+      "mmol/L": uncoded(
+        "Remnant cholesterol [Moles/volume] in Serum or Plasma",
+        "mmol/L",
+        "LOINC has no term for remnant cholesterol computed from a standard lipid panel.",
+      ),
+    },
+  },
   // ---- The gut microbiome, as a stool report prints it ----
   //
   // Almost none of this is coded by LOINC, checked against the NLM clinical
@@ -2962,6 +3033,13 @@ export const ANALYTE_DESCRIPTIONS_DE: Readonly<Record<string, string>> = {
     "Das Hämoglobin in den jüngsten roten Blutkörperchen; es bildet ab, wie viel Eisen dem Knochenmark in den letzten Tagen zur Verfügung stand.",
   "mb-acetat-und-propionatproduktion":
     "Der Anteil der gefundenen Bakterien, die Essigsäure und Propionsäure bilden.",
+  "ratio-tg-hdl":
+    "Triglyzeride geteilt durch HDL-Cholesterin, beide in der Einheit, die der Befund gedruckt hat. Die Zahl unterscheidet sich zwischen mg/dl und mmol/l, deshalb wandert die Einheit mit.",
+  "ratio-ldl-hdl": "LDL-Cholesterin geteilt durch HDL-Cholesterin.",
+  "ratio-apob-apoa1":
+    "Apolipoprotein B geteilt durch Apolipoprotein A1: die Partikel, die Cholesterin ablagern, gegen die, die es abtransportieren.",
+  "cholesterol-remnant":
+    "Gesamtcholesterin minus HDL minus LDL: was in den triglyzeridreichen Partikeln und ihren Resten transportiert wird.",
   "mb-actinobacteria":
     "Ein Bakterienstamm des Darmmikrobioms; angegeben ist sein Anteil an allen gefundenen Bakterien.",
   "mb-akkermansia-muciniphila":
