@@ -54,13 +54,12 @@ struct TrendsView: View {
 
             ForEach(series) { item in
               Section {
-                SeriesChart(series: item)
-                // Every point, with the day it was measured and the report it
-                // came from. A chart shows the shape; this says which
-                // measurement each dot is, which the chart cannot.
-                ForEach(item.points.reversed()) { point in
-                  PointRow(point: point, series: item, onOpen: onOpenReport)
-                }
+                // Tapping a point names that measurement; tapping the card
+                // that appears opens the report it came from. This used to be
+                // a row per point under the chart, which pushed the next
+                // analyte off the screen on anything measured more than a few
+                // times.
+                SeriesChart(series: item, onOpenReport: onOpenReport)
               } header: {
                 SeriesHeader(series: item)
               } footer: {
@@ -119,35 +118,49 @@ private struct SeriesHeader: View {
   }
 }
 
-/// One measurement: the day, the value, where it came from.
-private struct PointRow: View {
+/// What one measurement was, shown beside the point when it is tapped.
+///
+/// The whole card is the button: a person aiming at a dot on a chart has
+/// already been precise enough once, and asking them to then hit a small
+/// chevron would be asking twice.
+private struct PointCallout: View {
   let point: TrendPoint
   let series: TrendSeries
   let onOpen: ((UUID) -> Void)?
 
-  private var body_: some View {
-    HStack(alignment: .firstTextBaseline) {
-      VStack(alignment: .leading, spacing: 2) {
-        Text(point.date.formatted(date: .abbreviated, time: .omitted))
-        HStack(spacing: 4) {
-          ProvenanceMark(source: point.source)
-          Text(point.reportTitle).lineLimit(1)
-        }
-        .font(.caption2)
-        .foregroundStyle(.secondary)
-      }
-      Spacer()
+  private var card: some View {
+    VStack(alignment: .leading, spacing: 2) {
       Text("\(point.comparator?.rawValue ?? "")\(Measurement.text(point.value)) \(series.ucum)")
-        .font(.callout.monospacedDigit())
+        .font(.callout.monospacedDigit().weight(.medium))
+      Text(point.date.formatted(date: .abbreviated, time: .omitted))
+        .font(.caption2)
+      HStack(spacing: 4) {
+        ProvenanceMark(source: point.source)
+        Text("·")
+        Text(point.reportTitle).lineLimit(1)
+        if onOpen != nil {
+          Image(systemName: "chevron.right").font(.caption2.weight(.semibold))
+        }
+      }
+      .font(.caption2)
+      .foregroundStyle(.secondary)
     }
+    .padding(.horizontal, 10)
+    .padding(.vertical, 7)
+    .background(.regularMaterial, in: .rect(cornerRadius: 10))
+    .overlay(
+      RoundedRectangle(cornerRadius: 10).strokeBorder(.quaternary))
+    .shadow(radius: 3, y: 1)
+    .frame(maxWidth: 210, alignment: .leading)
   }
 
   var body: some View {
     if let onOpen {
-      Button { onOpen(point.reportId) } label: { body_ }
+      Button { onOpen(point.reportId) } label: { card }
         .buttonStyle(.plain)
+        .accessibilityHint(Text("Opens the report this measurement came from"))
     } else {
-      body_
+      card
     }
   }
 }
@@ -215,6 +228,8 @@ private struct SeriesFooter: View {
       if !series.allLabIssued {
         Text("Hollow points were read from a photograph and are preliminary.")
       }
+      // The points are the only way to reach a measurement now, so say so.
+      Text("Tap a point to see what it was. Tap the card to open that report.")
     }
   }
 
@@ -231,6 +246,14 @@ private struct SeriesFooter: View {
 
 private struct SeriesChart: View {
   let series: TrendSeries
+  var onOpenReport: ((UUID) -> Void)?
+
+  /// The point whose card is showing. Nothing is selected until a tap.
+  @State private var selected: TrendPoint.ID?
+
+  private var selectedPoint: TrendPoint? {
+    series.points.first { $0.id == selected }
+  }
 
   /// The band to draw: the published optimal one, or the laboratory's own.
   ///
@@ -275,6 +298,7 @@ private struct SeriesChart: View {
         PointMark(x: .value("Date", point.date), y: .value("Value", point.value))
           .foregroundStyle(point.source == .labIssuedDigital ? .blue : .orange)
           .symbol(point.source == .labIssuedDigital ? .circle : .diamond)
+          .symbolSize(point.id == selected ? 160 : 60)
       }
     }
     .chartYScale(domain: bounds.low...bounds.high)
@@ -291,11 +315,106 @@ private struct SeriesChart: View {
         }
       }
     }
+    .chartOverlay { proxy in
+      GeometryReader { geometry in
+        // Two layers, in this order on purpose. The clear rectangle takes a
+        // tap anywhere on the plot and picks the nearest measurement. The
+        // card sits above it, so its own button gets the second tap rather
+        // than the rectangle underneath swallowing it.
+        ZStack(alignment: .topLeading) {
+          Rectangle()
+            .fill(.clear)
+            .contentShape(Rectangle())
+            .onTapGesture { location in
+              select(near: location, proxy: proxy, in: geometry)
+            }
+          if let point = selectedPoint,
+            let anchor = position(of: point, proxy: proxy, in: geometry)
+          {
+            PointCallout(point: point, series: series, onOpen: onOpenReport)
+              .fixedSize()
+              .modifier(CalloutPlacement(anchor: anchor, bounds: geometry.size))
+          }
+        }
+      }
+    }
     .frame(height: 170)
     .padding(.vertical, 6)
     .accessibilityLabel(
       Text(
         "\(AnalyteNames.title(series.analyteKey)), \(series.points.count) measurements, latest \(series.placement.label)"
       ))
+  }
+
+  /// Where one measurement sits, in the overlay's own coordinates.
+  private func position(
+    of point: TrendPoint, proxy: ChartProxy, in geometry: GeometryProxy
+  ) -> CGPoint? {
+    guard let plotAnchor = proxy.plotFrame else { return nil }
+    let plot = geometry[plotAnchor]
+    guard let x = proxy.position(forX: point.date), let y = proxy.position(forY: point.value)
+    else { return nil }
+    return CGPoint(x: plot.minX + x, y: plot.minY + y)
+  }
+
+  /// Selects the measurement nearest the tap, or clears it when that one was
+  /// already showing, so a second tap on the same dot puts the card away.
+  private func select(near location: CGPoint, proxy: ChartProxy, in geometry: GeometryProxy) {
+    guard let plotAnchor = proxy.plotFrame else { return }
+    let plot = geometry[plotAnchor]
+    guard let tapped = proxy.value(atX: location.x - plot.minX, as: Date.self) else { return }
+    let nearest = series.points.min {
+      abs($0.date.timeIntervalSince(tapped)) < abs($1.date.timeIntervalSince(tapped))
+    }
+    withAnimation(.easeOut(duration: 0.15)) {
+      selected = (nearest?.id == selected) ? nil : nearest?.id
+    }
+  }
+}
+
+/// Keeps the card beside its point and inside the chart.
+///
+/// Above the point where there is room, below it near the top edge, and
+/// nudged sideways so neither end runs off: a card half off the screen names
+/// a measurement nobody can read.
+private struct CalloutPlacement: ViewModifier {
+  let anchor: CGPoint
+  let bounds: CGSize
+
+  func body(content: Content) -> some View {
+    content.background(
+      GeometryReader { card in
+        Color.clear.preference(key: CalloutSizeKey.self, value: card.size)
+      }
+    )
+    .modifier(CalloutOffset(anchor: anchor, bounds: bounds))
+  }
+}
+
+private struct CalloutSizeKey: PreferenceKey {
+  static let defaultValue = CGSize.zero
+  static func reduce(value: inout CGSize, nextValue: () -> CGSize) { value = nextValue() }
+}
+
+private struct CalloutOffset: ViewModifier {
+  let anchor: CGPoint
+  let bounds: CGSize
+  @State private var size = CGSize.zero
+
+  func body(content: Content) -> some View {
+    content
+      .onPreferenceChange(CalloutSizeKey.self) { size = $0 }
+      .offset(x: clampedX, y: offsetY)
+  }
+
+  private var clampedX: CGFloat {
+    let wanted = anchor.x - size.width / 2
+    return min(max(4, wanted), max(4, bounds.width - size.width - 4))
+  }
+
+  /// Above the point, unless that would leave the top of the chart.
+  private var offsetY: CGFloat {
+    let above = anchor.y - size.height - 10
+    return above < 0 ? anchor.y + 12 : above
   }
 }
