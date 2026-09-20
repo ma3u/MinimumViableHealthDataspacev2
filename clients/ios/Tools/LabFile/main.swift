@@ -47,14 +47,20 @@ func shown(_ value: Double, _ unit: String) -> String {
 /// It is how a shelf of body-composition cards photographed in one go is read,
 /// and the only way to see the grouping by measurement date.
 let result: LabImport.Result
-if paths.count > 1 {
-  let images = paths.compactMap { path -> CGImage? in
-    guard let data = try? Data(contentsOf: URL(fileURLWithPath: path)) else { return nil }
-    return LabImport.decodeImage(data)
+do {
+  if paths.count > 1 {
+    let images = paths.compactMap { path -> CGImage? in
+      guard let data = try? Data(contentsOf: URL(fileURLWithPath: path)) else { return nil }
+      return LabImport.decodeImage(data)
+    }
+    result = try await LabImport.images(images)
+  } else {
+    result = try await LabImport.file(at: url)
   }
-  result = try await LabImport.images(images)
-} else {
-  result = try await LabImport.file(at: url)
+} catch let error as LabImport.ImportError {
+  // A refusal is an answer, not a crash. The app shows the same sentence.
+  print("refused: \(error.errorDescription ?? "\(error)")")
+  exit(1)
 }
 let extraction = result.extraction
 

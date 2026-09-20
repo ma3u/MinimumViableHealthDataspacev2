@@ -758,3 +758,50 @@ struct AminogramTests {
     #expect(result.suspiciousLines.count == 1)
   }
 }
+
+/// Refusing a document that is an article rather than a report.
+@Suite("An article is not a lab report")
+struct ProseRefusalTests {
+
+  static func article(_ sentences: Int) -> String {
+    (1...sentences).map { index in
+      "Die ketogene Ernährung verursacht eine tiefgreifende biochemische Umstellung im Darm, "
+        + "die die mikrobielle Landschaft erheblich verändert, Abschnitt \(index)."
+    }.joined(separator: "\n")
+  }
+
+  static func report(_ rows: Int) -> String {
+    (1...rows).map { index in "Cholesterin gesamt  \(180 + index)  mg/dl  < 200" }
+      .joined(separator: "\n")
+  }
+
+  @Test("pages of sentences with almost no values are prose")
+  func proseIsRecognised() {
+    // Measured on the real documents: a laboratory's own PDF scores 0.06 on
+    // this and a five-page piece of dietary advice 0.44.
+    #expect(LabImport.looksLikeProse([Self.article(30)], values: 2))
+  }
+
+  @Test("a sheet of values is not prose, however many rows it has")
+  func aReportIsNotProse() {
+    #expect(!LabImport.looksLikeProse([Self.report(40)], values: 40))
+    // Nor is one where the dictionary happened to code almost nothing: a
+    // refusal must turn on the shape of the page, not on the app's own luck.
+    #expect(!LabImport.looksLikeProse([Self.report(40)], values: 1))
+  }
+
+  @Test("a document with real results is never refused for its prose")
+  func resultsWin() {
+    // An aminogram carries a paragraph of description under every value. Any
+    // document that yielded results is kept whatever else is on the page.
+    let mixed = Self.article(30) + "\n" + Self.report(10)
+    #expect(!LabImport.looksLikeProse([mixed], values: 10))
+  }
+
+  @Test("a short document is never refused")
+  func shortIsSafe() {
+    // Two sentences are not enough to judge, and a scale's screen is a
+    // handful of short lines.
+    #expect(!LabImport.looksLikeProse([Self.article(3)], values: 0))
+  }
+}
