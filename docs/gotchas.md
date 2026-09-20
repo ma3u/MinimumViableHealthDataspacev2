@@ -3,6 +3,24 @@
 Non-obvious pitfalls across the stack. Ordered newest first; add a new
 entry at the top when you hit something that cost you more than 30 minutes.
 
+## 2026-09-20: on a device screen, the nearest word above a value is not its name
+
+A gym scale's card prints the metric, then a red verdict badge, then the value:
+
+    Körperfett
+    A Niedrig
+    10,6 kg
+
+Taking the nearest line above the value as the label makes the analyte
+"A Niedrig", and the row codes as nothing. The cure is the same one the printed
+short-code rule uses: **let the dictionary arbitrate.** Walk upwards, take the
+first line it knows as an analyte, and fall back to the nearest line that is
+neither a unit nor one of the device's own verdict words.
+
+The badge is worth ignoring for its own sake as well. `< 12.3 Niedrig` is the
+manufacturer's band, not a guideline's, and the app compares only against
+ranges it can cite (ADR-039).
+
 ## 2026-09-20: a lone leading zero is not a thousands separator
 
 The German number rule says `.` before exactly three digits groups thousands,

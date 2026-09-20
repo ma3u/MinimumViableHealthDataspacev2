@@ -31,6 +31,15 @@ public enum LabImport {
     /// otherwise the images assembled into one.
     public let pdf: Data
     public let pages: [ScanDiagnostics.Page]
+    /// Further reports the same import produced, for other measurement dates.
+    ///
+    /// A scale's screens are photographed several at a time and a scale
+    /// updates its metrics at different times, so one import can carry two
+    /// days. They are separate reports because they are separate days.
+    public let extraReports: [LabReport]
+    /// What to call this report, when the document says. The laboratory that
+    /// issued it, or the kind of screen it came from.
+    public let suggestedTitle: String?
     public var source: SourceKind { extraction.source }
 
     /// The widest page's pixel width, when the pages were recognised as
@@ -42,13 +51,16 @@ public enum LabImport {
 
     public init(
       extraction: ExtractionResult, metadata: ReportMetadata, pageTexts: [String], pdf: Data,
-      pages: [ScanDiagnostics.Page]
+      pages: [ScanDiagnostics.Page], extraReports: [LabReport] = [],
+      suggestedTitle: String? = nil
     ) {
       self.extraction = extraction
       self.metadata = metadata
       self.pageTexts = pageTexts
       self.pdf = pdf
       self.pages = pages
+      self.extraReports = extraReports
+      self.suggestedTitle = suggestedTitle
     }
   }
 
@@ -200,16 +212,35 @@ public enum LabImport {
   private static func finish(
     extraction: ExtractionResult, pageTexts: [String], pdf: Data, pages: [ScanDiagnostics.Page]
   ) -> Result {
+    // A body-composition scale's screen is not a lab sheet and has its own
+    // reader. It is tried only when the ordinary parse found no values, so a
+    // report that happens to carry the word "aktualisiert" is unaffected.
+    if extraction.coded.isEmpty {
+      let readings = pageTexts.enumerated().compactMap { index, text in
+        DeviceScreen.looksLikeDeviceScreen(text) ? DeviceScreen.read(text, page: index + 1) : nil
+      }
+      let reports = DeviceScreen.reports(from: readings)
+      if let first = reports.first {
+        Log.scan.notice(
+          "device screen: \(readings.count, privacy: .public) reading(s) on \(reports.count, privacy: .public) day(s)"
+        )
+        return Result(
+          extraction: first.extraction, metadata: first.metadata, pageTexts: pageTexts, pdf: pdf,
+          pages: pages, extraReports: Array(reports.dropFirst()), suggestedTitle: first.title)
+      }
+    }
+
     let metadata = ReportMetadataExtractor.extract(pages: pageTexts)
     let dateRole = metadata.labDate == nil ? "not found" : (metadata.labDateRole?.rawValue ?? "found")
     Log.scan.notice(
       "import complete: \(extraction.source.rawValue, privacy: .public), \(extraction.coded.count, privacy: .public) coded, \(extraction.unmapped.count, privacy: .public) unmapped, \(extraction.suspiciousLines.count, privacy: .public) unread, lab date \(dateRole, privacy: .public), pdf \(pdf.count, privacy: .public) bytes"
     )
     return Result(
-      extraction: extraction, metadata: metadata, pageTexts: pageTexts, pdf: pdf, pages: pages)
+      extraction: extraction, metadata: metadata, pageTexts: pageTexts, pdf: pdf, pages: pages,
+      suggestedTitle: metadata.laboratory)
   }
 
-  static func decodeImage(_ data: Data) -> CGImage? {
+  public static func decodeImage(_ data: Data) -> CGImage? {
     guard let source = CGImageSourceCreateWithData(data as CFData, nil) else { return nil }
     return CGImageSourceCreateImageAtIndex(source, 0, nil)
   }

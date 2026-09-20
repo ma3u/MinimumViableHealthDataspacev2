@@ -231,3 +231,5 @@
 "Body" = "Körper";
 "Colour repeats what the words say. It is a comparison to a published number, not a finding." = "Die Farbe wiederholt, was die Worte sagen. Sie ist ein Vergleich mit einer veröffentlichten Zahl, kein Befund.";
 "Some published ranges differ by sex. Without an answer only the ranges that apply to everyone are shown. Set it in your profile; it stays on your device." = "Manche veröffentlichten Bereiche unterscheiden sich nach Geschlecht. Ohne Angabe werden nur die Bereiche gezeigt, die für alle gelten. Stellen Sie es im Profil ein; es bleibt auf Ihrem Gerät.";
+"Body composition" = "Körperzusammensetzung";
+"%lld further report(s) carry a different measurement date and will be saved alongside this one." = "%lld weitere(r) Befund(e) tragen ein anderes Messdatum und werden zusammen mit diesem gespeichert.";

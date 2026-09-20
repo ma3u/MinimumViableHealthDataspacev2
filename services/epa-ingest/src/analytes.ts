@@ -1242,6 +1242,51 @@ const DEFINITIONS: AnalyteDefinition[] = [
       cm2: c("73707-2", "Visceral fat [Area] Measured", "cm2"),
     },
   },
+  // ---- Body composition, as a bioimpedance scale reports it ----
+  {
+    key: "body-fat",
+    labels: [
+      "Körperfett",
+      "Körperfettmasse",
+      "Körperfettanteil",
+      "Body fat",
+      "Fat mass",
+      "KFA",
+    ],
+    byUnit: {
+      // The unit selects the code, as everywhere else: the same word on a
+      // scale's screen means a mass on one card and a proportion on the next.
+      kg: c("73708-0", "Body fat [Mass] Calculated", "kg"),
+      "%": c("41982-0", "Percentage of body fat Measured", "%"),
+    },
+  },
+  {
+    key: "muscle-mass",
+    labels: [
+      "Muskelmasse",
+      "Skelettmuskelmasse",
+      "Muscle mass",
+      "Skeletal muscle mass",
+    ],
+    byUnit: {
+      kg: c("73964-9", "Body muscle mass Calculated", "kg"),
+    },
+  },
+  {
+    key: "lean-body-mass",
+    labels: ["Magermasse", "Fettfreie Masse", "Lean body mass", "FFM"],
+    byUnit: {
+      kg: c("88334-8", "Lean body weight Calculated", "kg"),
+    },
+  },
+  {
+    key: "body-water",
+    labels: ["Körperwasser", "Gesamtkörperwasser", "Body water", "TBW"],
+    byUnit: {
+      kg: c("101683-1", "Body water mass", "kg"),
+      "%": c("101684-9", "Percentage of body water", "%"),
+    },
+  },
   // ---- Coagulation ----
   {
     key: "quick",

@@ -36,6 +36,24 @@ plus a FHIR R4 bundle → on-device or cloud explanation on explicit consent.
 
 Not yet: trends over time on screen.
 
+## Three kinds of document
+
+A **lab sheet**, scanned or imported, which is the main path.
+
+A **body-composition scale's screen**, photographed in a gym. That is a
+dashboard, not a report: a metric's name, the current value in large type, the
+day it was measured, and a twelve-month chart. It has its own reader, tried
+only when the ordinary parse finds nothing, and it deliberately reads only the
+headline value. The chart's labelled points are real measurements whose dates
+the screen does not give, and a value carrying a date we inferred is worse than
+a value we did not take. The device's own verdict badges (`Niedrig`, `Normal`)
+are ignored too: those are the manufacturer's bands, not a guideline's.
+
+Cards photographed in one go can carry two measurement days, because a scale
+updates its metrics at different times, so they become one report per day.
+Provenance is `self-tracked`, which the enum defines as a value from a consumer
+device.
+
 ## Two ways in
 
 **Scan** (VisionKit) for paper, which is the starting condition for most
