@@ -94,7 +94,7 @@ public struct TrendPoint: Sendable, Equatable, Identifiable {
 /// on one axis would draw a trend that does not exist.
 public struct TrendSeries: Sendable, Equatable, Identifiable {
   public let analyteKey: String
-  public let loinc: String
+  public let loinc: String?
   public let ucum: String
   /// The label as the most recent report printed it.
   public let label: String
@@ -149,7 +149,7 @@ public struct TrendSeries: Sendable, Equatable, Identifiable {
   public var allLabIssued: Bool { points.allSatisfy { $0.source == .labIssuedDigital } }
 
   public init(
-    analyteKey: String, loinc: String, ucum: String, label: String, points: [TrendPoint],
+    analyteKey: String, loinc: String?, ucum: String, label: String, points: [TrendPoint],
     range: ReferenceRange?
   ) {
     self.analyteKey = analyteKey
@@ -175,8 +175,8 @@ public enum Trends {
   /// point so the chart can mark it rather than pretending it was measured.
   public static func series(from reports: [LabReport], sex: RangeSex = .any) -> [TrendSeries] {
     var byKey: [String: [TrendPoint]] = [:]
-    var meta: [String: (analyteKey: String, loinc: String, ucum: String, label: String, date: Date)] =
-      [:]
+    var meta:
+      [String: (analyteKey: String, loinc: String?, ucum: String, label: String, date: Date)] = [:]
 
     for report in reports {
       for value in report.extraction.coded {

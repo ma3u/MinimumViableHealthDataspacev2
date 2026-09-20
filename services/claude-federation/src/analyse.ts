@@ -9,7 +9,8 @@ export interface SharedValue {
   label: string;
   value: number;
   unit: string;
-  loinc: string;
+  /** Absent for a quantity LOINC does not code, such as visceral fat mass. */
+  loinc?: string | null;
   referenceLow?: number;
   referenceHigh?: number;
   /** FHIR Observation status, so the model can see what it is being given. */
@@ -118,10 +119,12 @@ export function vet(request: AnalyseRequest): {
     if (typeof value.value !== "number" || !Number.isFinite(value.value)) {
       throw new RefusedError("refused: a value is not a finite number");
     }
-    if (!value.loinc || !value.unit || !value.label) {
-      throw new RefusedError(
-        "refused: a value is missing its code, unit or label",
-      );
+    // A LOINC code is not required: the dictionary knows quantities LOINC
+    // does not code, and refusing them here would mean a person could not ask
+    // about a reading their own device produced. The unit and the label are
+    // required, because without them there is nothing to explain.
+    if (!value.unit || !value.label) {
+      throw new RefusedError("refused: a value is missing its unit or label");
     }
   }
 
@@ -174,7 +177,10 @@ export function renderValues(values: SharedValue[]): string {
           : v.referenceLow !== undefined
             ? `> ${v.referenceLow}`
             : "none printed";
-    return `- ${v.label} (LOINC ${v.loinc}): ${v.value} ${v.unit}; printed reference ${range}; ${v.status}`;
+    // No code is stated rather than an empty one, so the model is not handed
+    // a blank LOINC that looks like a lookup failure.
+    const code = v.loinc ? ` (LOINC ${v.loinc})` : "";
+    return `- ${v.label}${code}: ${v.value} ${v.unit}; printed reference ${range}; ${v.status}`;
   });
   return ["Selected values:", ...lines].join("\n");
 }

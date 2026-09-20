@@ -91,13 +91,38 @@ describe("vet", () => {
     ).toThrow(/no values/);
   });
 
-  it("refuses a value with no code, unit or label", () => {
+  it("refuses a value with no unit or label", () => {
     expect(() =>
       vet({
         consent: { provider: "anthropic" },
-        values: [{ ...value, loinc: "" }],
+        values: [{ ...value, unit: "" }],
       }),
-    ).toThrow(/missing its code/);
+    ).toThrow(/missing its unit or label/);
+    expect(() =>
+      vet({
+        consent: { provider: "anthropic" },
+        values: [{ ...value, label: "" }],
+      }),
+    ).toThrow(/missing its unit or label/);
+  });
+
+  it("accepts a quantity LOINC does not code", () => {
+    // A bioimpedance scale's visceral fat mass has no LOINC term. Refusing it
+    // here would mean a person could not ask about a reading their own device
+    // produced, so only the unit and the label are required.
+    const uncoded = {
+      ...value,
+      loinc: null,
+      label: "Viszeralfett",
+      unit: "kg",
+    };
+    expect(() =>
+      vet({ consent: { provider: "anthropic" }, values: [uncoded] }),
+    ).not.toThrow();
+    // And the rendered prompt says no code rather than an empty one.
+    const rendered = renderValues([uncoded]);
+    expect(rendered).toContain("- Viszeralfett:");
+    expect(rendered).not.toContain("LOINC");
   });
 
   it("refuses a non-finite number", () => {

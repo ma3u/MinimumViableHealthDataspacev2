@@ -230,7 +230,7 @@ struct ProfileTests {
   func measurementsBecomeAReport() throws {
     let profile = Profile(sex: .male, heightCm: 180)
     let entries = BodyMeasurements.entries(
-      waistCm: 94, weightKg: 81, visceralFatCm2: 72, heightCm: 180, profile: profile)
+      waistCm: 94, weightKg: 81, visceralFat: 72, heightCm: 180, profile: profile)
     let report = try #require(
       BodyMeasurements.report(entries: entries, on: ReportMetadataExtractor.day(2026, 3, 3)!))
 
@@ -251,7 +251,7 @@ struct ProfileTests {
   @Test("nothing entered means no report rather than an empty one")
   func nothingEntered() {
     let entries = BodyMeasurements.entries(
-      waistCm: nil, weightKg: nil, visceralFatCm2: nil, heightCm: nil, profile: .empty)
+      waistCm: nil, weightKg: nil, visceralFat: nil, heightCm: nil, profile: .empty)
     #expect(entries.isEmpty)
     #expect(BodyMeasurements.report(entries: entries, on: Date()) == nil)
   }
@@ -278,11 +278,11 @@ struct ProfileTests {
     let profile = Profile(sex: .male, heightCm: 180)
     let march = BodyMeasurements.report(
       entries: BodyMeasurements.entries(
-        waistCm: 96, weightKg: nil, visceralFatCm2: nil, heightCm: nil, profile: profile),
+        waistCm: 96, weightKg: nil, visceralFat: nil, heightCm: nil, profile: profile),
       on: ReportMetadataExtractor.day(2026, 3, 3)!)!
     let june = BodyMeasurements.report(
       entries: BodyMeasurements.entries(
-        waistCm: 92, weightKg: nil, visceralFatCm2: nil, heightCm: nil, profile: profile),
+        waistCm: 92, weightKg: nil, visceralFat: nil, heightCm: nil, profile: profile),
       on: ReportMetadataExtractor.day(2026, 6, 3)!)!
 
     let series = try #require(
@@ -388,20 +388,49 @@ struct DeviceScreenTests {
     #expect(report.extraction.coded.first?.coding.ucum == "kg/m2")
   }
 
-  @Test("a reading with no LOINC code is reported, never coded as something else")
+  @Test("a reading with no LOINC code is kept, never coded as something else")
   func noCodeIsReported() throws {
-    // A scale reports the ratio of extracellular to total body water. There
-    // is no LOINC code for it, so it is not given one.
+    // A scale reports the ratio of extracellular to total body water, and
+    // LOINC has no term for it. It used to be filed as an unknown analyte,
+    // which lost it from the trends and the export. The dictionary now knows
+    // the quantity and its unit while stating that no code applies, which is
+    // a better answer than either a wrong code or nothing at all.
     let card = """
       ECW/TBW
       38,4%
       Aktualisiert: Donnerstag, 14. Mai 2026
       """
     let report = try #require(DeviceScreen.reports(from: [DeviceScreen.read(card)!]).first)
+    let value = try #require(report.extraction.coded.first)
 
-    #expect(report.extraction.coded.isEmpty)
-    #expect(report.extraction.unmapped.first?.reason == .unknownAnalyte)
-    #expect(report.extraction.unmapped.first?.raw.label == "ECW/TBW")
+    #expect(report.extraction.unmapped.isEmpty)
+    #expect(value.raw.label == "ECW/TBW")
+    #expect(value.raw.value == 38.4)
+    #expect(value.coding.ucum == "%")
+    #expect(value.coding.loinc == nil)
+    #expect(value.coding.uncodedReason?.isEmpty == false)
+  }
+
+  @Test("the device's own verdict never becomes part of the reading")
+  func verdictBadgeIsStripped() throws {
+    // Whether the badge gets its own line depends on how much of the screen
+    // is in frame. A photo of the scale alone splits them; one that also
+    // catches the phone's chrome merges them into `1,6 kg Normal`, and the
+    // reading was lost entirely.
+    let card = """
+      Viszeralfett
+      1,6 kg Normal
+      Aktualisiert: Montag, 15. Juni 2026
+      """
+    let reading = try #require(DeviceScreen.read(card))
+    #expect(reading.value == 1.6)
+    #expect(reading.unitRaw == "kg")
+    #expect(reading.label == "Viszeralfett")
+
+    // And the badge is not mistaken for the metric's name when it does stand
+    // on its own line.
+    #expect(DeviceScreen.strippingVerdict("1,6 kg") == "1,6 kg")
+    #expect(DeviceScreen.strippingVerdict("38,4 %") == "38,4 %")
   }
 
   @Test("cards from different days become different reports")

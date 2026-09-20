@@ -217,6 +217,25 @@ the same command as the analyte dictionary, and the generator refuses to emit a
 range whose analyte the dictionary does not know or whose unit that analyte is
 not defined in.
 
+## When LOINC has no code
+
+A bioimpedance scale prints visceral fat as a mass in kilograms. LOINC codes
+visceral fat as an **area** and has no term for the mass, and the two are not
+convertible. Putting the area code on a mass would be a wrong code on a real
+measurement, so the dictionary carries such a quantity with its unit and no
+code at all, plus a required reason saying why.
+
+This is meant to stay rare, and a test asserts the whole set: visceral fat in
+kilograms, and the extracellular-to-total body water ratio, both checked
+against LOINC before being added. The absence travels rather than being
+swallowed. FHIR gets a CodeableConcept with text and a `data-absent-reason`
+extension. OMOP puts the printed label in `measurement_source_value`, which is
+what that column means. The prompt sent to a model states no code rather than
+an empty one.
+
+The unit still decides, as everywhere else: the same label in cm² codes to
+`73707-2`, and in kg does not.
+
 ## Exports
 
 | Action                     | For             | Contents                                                                |

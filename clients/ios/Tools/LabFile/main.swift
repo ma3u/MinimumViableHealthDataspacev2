@@ -99,7 +99,7 @@ print("")
 print("coded      \(extraction.coded.count)")
 for value in extraction.coded {
   let comparator = value.raw.comparator?.rawValue ?? ""
-  print("  \(value.coding.loinc.padding(toLength: 9, withPad: " ", startingAt: 0)) \(value.raw.label)  \(comparator)\(shown(value.raw.value, value.raw.unitRaw))")
+  print("  \((value.coding.loinc ?? "uncoded").padding(toLength: 9, withPad: " ", startingAt: 0)) \(value.raw.label)  \(comparator)\(shown(value.raw.value, value.raw.unitRaw))")
 }
 print("")
 print("unmapped   \(extraction.unmapped.count)")
@@ -115,7 +115,7 @@ if !result.extraReports.isEmpty {
       "  \(report.effectiveDate.formatted(date: .abbreviated, time: .omitted)): "
         + "\(report.extraction.coded.count) coded, \(report.extraction.unmapped.count) unmatched")
     for value in report.extraction.coded {
-      print("    \(value.coding.loinc.padding(toLength: 9, withPad: " ", startingAt: 0)) \(value.raw.label)  \(shown(value.raw.value, value.raw.unitRaw))")
+      print("    \((value.coding.loinc ?? "uncoded").padding(toLength: 9, withPad: " ", startingAt: 0)) \(value.raw.label)  \(shown(value.raw.value, value.raw.unitRaw))")
     }
   }
 }

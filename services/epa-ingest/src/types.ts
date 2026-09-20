@@ -87,10 +87,25 @@ export interface RawLabValue {
 
 /** A LOINC coding plus the UCUM unit it is expressed in. */
 export interface AnalyteCoding {
-  loincNumber: string;
+  /**
+   * The LOINC code, or `null` where LOINC has none for this quantity.
+   *
+   * Body-composition devices report quantities LOINC has never coded. Visceral
+   * fat is the clearest case: LOINC has `73707-2 Visceral fat [Area] Measured`
+   * and nothing for the **mass** that a bioimpedance scale prints in kilograms.
+   * Putting the area code on a mass would be a wrong code on a real
+   * measurement, which is the failure the unit-selects-the-code rule exists to
+   * prevent, so the value is carried with its unit and no code at all.
+   *
+   * A null code must carry `uncodedReason`; the generator refuses to emit
+   * without one, so nobody reaches for this to avoid looking a code up.
+   */
+  loincNumber: string | null;
   display: string;
   /** UCUM unit code, e.g. `mg/dL`. */
   ucum: string;
+  /** Why LOINC has no code. Required when `loincNumber` is null. */
+  uncodedReason?: string;
 }
 
 /** A raw value that has been matched to a coded analyte. */

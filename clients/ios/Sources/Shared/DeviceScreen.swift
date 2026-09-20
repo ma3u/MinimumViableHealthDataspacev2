@@ -169,9 +169,15 @@ public enum DeviceScreen {
 
     for index in stride(from: limit - 1, through: 0, by: -1) {
       let line = lines[index]
+      // The badge sits beside the value, and whether the recogniser gives it
+      // its own line depends on how much is in frame: a photo of the scale
+      // alone splits them, one that also catches the phone's chrome merges
+      // them into `1,6 kg Normal`. Strip the verdict rather than refuse the
+      // line, because the reading is right there.
       guard
         let match = firstMatch(
-          #"^(\d[\d.,]*)\s*([%‰]|[A-Za-zÄÖÜäöü][A-Za-zÄÖÜäöü0-9/²^]*)$"#, in: line)
+          #"^(\d[\d.,]*)\s*([%‰]|[A-Za-zÄÖÜäöü][A-Za-zÄÖÜäöü0-9/²^]*)$"#,
+          in: strippingVerdict(line))
       else { continue }
       guard let value = LabLineParser.parseNumber(match[1]) else { continue }
       let unit = match[2]
@@ -192,6 +198,18 @@ public enum DeviceScreen {
     "niedrig", "normal", "erhoht", "hoch", "gut", "optimal", "low", "high", "elevated",
     "healthy", "under", "over",
   ]
+
+  /// Removes a trailing verdict badge, leaving the number and its unit.
+  ///
+  /// Only a whole trailing word from `verdictWords`, so a unit is never
+  /// truncated and no label is trimmed into something the dictionary would
+  /// then match by accident.
+  static func strippingVerdict(_ line: String) -> String {
+    let parts = line.split(separator: " ")
+    guard parts.count > 1, let last = parts.last else { return line }
+    guard verdictWords.contains(ReportMetadataExtractor.fold(String(last))) else { return line }
+    return parts.dropLast().joined(separator: " ")
+  }
 
   /// The metric's name: the nearest line above the headline that names one.
   ///

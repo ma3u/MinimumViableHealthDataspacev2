@@ -91,15 +91,25 @@ final class AppModel: ObservableObject {
   /// second path to keep in step. A tape measure is not a laboratory, and the
   /// provenance already says so.
   func saveBodyMeasurements(
-    waistCm: Double?, weightKg: Double?, visceralFatCm2: Double?, on date: Date
+    waistCm: Double?, weightKg: Double?, visceralFat: Double?,
+    visceralFatUnit: BodyMeasurements.VisceralFatUnit, on date: Date
   ) async {
     let entries = BodyMeasurements.entries(
-      waistCm: waistCm, weightKg: weightKg, visceralFatCm2: visceralFatCm2,
-      heightCm: profile.heightCm, profile: profile)
+      waistCm: waistCm, weightKg: weightKg, visceralFat: visceralFat,
+      visceralFatUnit: visceralFatUnit, heightCm: profile.heightCm, profile: profile)
+    let day = ReportMetadata.calendarDay(date)
+    let title = String(localized: "Body measurements")
+    // Saving the same day again corrects that measurement instead of stacking
+    // a second one beside it. Without this, opening the profile, changing one
+    // figure and saving left two reports for one morning, and the trend showed
+    // both.
+    let existing = reports.first {
+      $0.extraction.source == .selfTracked && $0.title == title
+        && ReportMetadata.calendarDay($0.effectiveDate) == day
+    }
     guard
       let report = BodyMeasurements.report(
-        entries: entries, on: ReportMetadata.calendarDay(date),
-        title: String(localized: "Body measurements"))
+        entries: entries, on: day, id: existing?.id ?? UUID(), title: title)
     else { return }
     do {
       try await store.save(report)
@@ -951,11 +961,13 @@ private struct AppDialogs: ViewModifier {
       .sheet(isPresented: $model.showingProfile) {
       ProfileView(
         profile: model.profile,
+        latest: BodyMeasurements.latest(from: model.reports),
         onSave: { updated in Task { await model.saveProfile(updated) } },
-        onMeasurements: { waist, weight, visceral, date in
+        onMeasurements: { waist, weight, visceral, unit, date in
           Task {
             await model.saveBodyMeasurements(
-              waistCm: waist, weightKg: weight, visceralFatCm2: visceral, on: date)
+              waistCm: waist, weightKg: weight, visceralFat: visceral,
+              visceralFatUnit: unit, on: date)
           }
         },
         onClose: { model.showingProfile = false })

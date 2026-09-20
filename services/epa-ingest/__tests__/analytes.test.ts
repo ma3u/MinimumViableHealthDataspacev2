@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
+  ANALYTE_LABELS,
+  UNIT_SPELLINGS,
   buildIndexes,
   repairUnit,
   looseLabelKey,
@@ -258,5 +260,64 @@ describe("a unit the recogniser mangled", () => {
     expect(repairUnit("Titer")).toBeNull();
     expect(repairUnit("")).toBeNull();
     expect(repairUnit("negativ")).toBeNull();
+  });
+});
+
+describe("a quantity LOINC does not code", () => {
+  // A bioimpedance scale prints visceral fat as a mass in kilograms. LOINC
+  // codes it as an area (73707-2) and has no term for the mass, and the two
+  // are not convertible. The unit therefore decides whether there is a code
+  // at all, which is the same rule as everywhere else in this table.
+  it("codes visceral fat in cm² and refuses to code it in kg", () => {
+    const area = lookupAnalyte("Viszeralfett", "cm²");
+    expect(area.status).toBe("ok");
+    if (area.status !== "ok") return;
+    expect(area.coding.loincNumber).toBe("73707-2");
+    expect(area.coding.uncodedReason).toBeUndefined();
+
+    const mass = lookupAnalyte("Viszeralfett", "kg");
+    expect(mass.status).toBe("ok");
+    if (mass.status !== "ok") return;
+    expect(mass.analyteKey).toBe(area.analyteKey);
+    expect(mass.coding.loincNumber).toBeNull();
+    expect(mass.coding.uncodedReason).toMatch(/73707-2/);
+  });
+
+  it("reads the label a scale prints, which is one word", () => {
+    // "Viszeralfett", not "Viszerales Fett", is what the gym scale shows, and
+    // the dictionary matched only the two-word form.
+    for (const label of ["Viszeralfett", "Viszerales Fett", "Visceral fat"]) {
+      expect(lookupAnalyte(label, "kg").status).toBe("ok");
+    }
+  });
+
+  it("is the only uncoded coding in the whole table", () => {
+    // Uncoded is meant to stay rare. If this count moves, the reason had
+    // better be that LOINC genuinely has no term, not that nobody looked.
+    const uncoded = new Set<string>();
+    for (const label of ANALYTE_LABELS) {
+      for (const unit of UNIT_SPELLINGS) {
+        const hit = lookupAnalyte(label, unit);
+        if (hit.status === "ok" && hit.coding.loincNumber === null) {
+          uncoded.add(`${hit.analyteKey}|${hit.coding.ucum}`);
+        }
+      }
+    }
+    expect([...uncoded].sort()).toEqual(["ecw-tbw|%", "visceral-fat|kg"]);
+  });
+
+  it("never leaves a null code without a reason", () => {
+    for (const label of ANALYTE_LABELS) {
+      for (const unit of UNIT_SPELLINGS) {
+        const hit = lookupAnalyte(label, unit);
+        if (hit.status !== "ok") continue;
+        expect(
+          hit.coding.loincNumber === null
+            ? typeof hit.coding.uncodedReason === "string" &&
+                hit.coding.uncodedReason.length > 20
+            : hit.coding.uncodedReason === undefined,
+        ).toBe(true);
+      }
+    }
   });
 });
