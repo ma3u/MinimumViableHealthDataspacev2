@@ -1,3 +1,4 @@
+import CoreGraphics
 import Foundation
 
 /// Reads one card off a body-composition scale's screen.
@@ -39,12 +40,16 @@ public enum DeviceScreen {
     /// over, and a record that does not say so is a record that overstates
     /// what it knows.
     public let datePrecision: ReportMetadata.DatePrecision
+    /// Measured off the drawing rather than read from it, because the scale
+    /// printed no number beside this point.
+    public let estimated: Bool
 
     public init(
       label: String, value: Double, unitRaw: String, measuredOn: Date?, line: String, page: Int,
-      datePrecision: ReportMetadata.DatePrecision = .day
+      datePrecision: ReportMetadata.DatePrecision = .day, estimated: Bool = false
     ) {
       self.datePrecision = datePrecision
+      self.estimated = estimated
       self.label = label
       self.value = value
       self.unitRaw = unitRaw
@@ -88,18 +93,29 @@ public enum DeviceScreen {
   /// each point; where it draws only a circle, there is nothing to read and
   /// nothing is claimed.
   public static func read(
-    _ text: String, fragments: [DocumentReconciler.TextFragment], page: Int = 1
+    _ text: String, fragments: [DocumentReconciler.TextFragment],
+    image: CGImage? = nil, page: Int = 1
   ) -> (current: Reading, history: [Reading])? {
     guard let current = read(text, page: page) else { return nil }
     guard let updatedOn = current.measuredOn else { return (current, []) }
-    let plotted = ChartHistory.points(
+    var plotted = ChartHistory.points(
       in: fragments, updatedOn: updatedOn, headline: current.value)
+    // Where the scale prints no number beside a point, the value is not on
+    // the picture and can only be measured off the drawing. Those are
+    // estimates and are marked as estimates.
+    var estimated = false
+    if plotted.isEmpty, let image {
+      plotted = ChartHistory.Plot.measured(
+        in: image, fragments: fragments, updatedOn: updatedOn, headline: current.value)
+      estimated = !plotted.isEmpty
+    }
     let history = plotted.map {
       Reading(
         label: current.label, value: $0.value, unitRaw: current.unitRaw,
         measuredOn: $0.month,
-        line: "\(current.label)  \($0.value) \(current.unitRaw)  (chart)",
-        page: page, datePrecision: .month)
+        line: "\(current.label)  \($0.value) \(current.unitRaw)"
+          + (estimated ? "  (measured off the chart)" : "  (chart)"),
+        page: page, datePrecision: .month, estimated: estimated)
     }
     return (current, history)
   }
@@ -181,7 +197,9 @@ public enum DeviceScreen {
   /// printed date, because it is precise to a month and a reader that assumes
   /// otherwise will put a measurement on a day nobody stood on the scale.
   static func dateSource(of group: [Reading]) -> ReportMetadata.DateSource {
-    if group.allSatisfy({ $0.datePrecision == .month }) { return .chartMonth }
+    if group.allSatisfy({ $0.datePrecision == .month }) {
+      return group.contains { $0.estimated } ? .chartEstimate : .chartMonth
+    }
     if group.contains(where: { $0.measuredOn != nil }) { return .printed }
     return .scan
   }

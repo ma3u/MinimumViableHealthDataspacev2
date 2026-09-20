@@ -102,8 +102,13 @@ if showHistory {
   for page in result.pages {
     let updated = result.metadata.labDate ?? Date()
     let headline = result.extraction.coded.first?.raw.value
-    let points = DeviceScreen.ChartHistory.points(
+    var points = DeviceScreen.ChartHistory.points(
       in: page.fragments, updatedOn: updated, headline: headline)
+    if points.isEmpty, let image = LabImport.decodeImage(try Data(contentsOf: url)) {
+      points = DeviceScreen.ChartHistory.Plot.measured(
+        in: image, fragments: page.fragments, updatedOn: updated, headline: headline)
+      if !points.isEmpty { print("  (measured off the drawn points)") }
+    }
     print("page \(page.page): \(points.count) plotted value(s)")
     for point in points {
       print("    \(point.month.formatted(.dateTime.month().year()))  \(point.value)")
