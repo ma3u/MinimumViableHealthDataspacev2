@@ -124,3 +124,14 @@ describe("parseLabReport", () => {
     expect(values.some((v) => v.label.startsWith("Troponin"))).toBe(false);
   });
 });
+
+describe("a lone leading zero", () => {
+  it("makes the dot decimal, whatever follows it", () => {
+    // No German grouping produces `0.300`, and a real sheet prints Lp(a) that
+    // way. Reading it as 300 rather than 0.3 is a thousandfold error.
+    expect(parseNumber("0.300")).toBe(0.3);
+    expect(parseNumber("0.100")).toBe(0.1);
+    expect(parseNumber("1.240")).toBe(1240);
+    expect(parseNumber("10.300")).toBe(10300);
+  });
+});

@@ -26,6 +26,8 @@ struct Options {
   var path: String?
   var ocr = false
   var json = false
+  /// Build the OMOP CDM tables from every report in the export.
+  var omop = false
 }
 
 var options = Options()
@@ -33,6 +35,7 @@ for argument in CommandLine.arguments.dropFirst() {
   switch argument {
   case "--ocr": options.ocr = true
   case "--json": options.json = true
+  case "--omop": options.omop = true
   default: options.path = argument
   }
 }
@@ -176,6 +179,34 @@ func compare(phone: ExtractionResult, now: ExtractionResult) {
 #endif
 
 let decoder = DiagnosticsBundle.decoder()
+
+/// The OMOP CDM tables for every report in the export.
+///
+/// The same `OmopExport` the app runs, against the records a phone actually
+/// holds, which is the only way to see what a real shelf of reports produces.
+if options.omop {
+  // `FileManager`'s enumerator cannot be iterated from an async context, so
+  // the walk is materialised first.
+  let files: [URL] =
+    (FileManager.default.enumerator(at: root, includingPropertiesForKeys: nil)?
+      .compactMap { $0 as? URL } ?? [])
+    .filter { $0.lastPathComponent == "report.json" }
+    .sorted { $0.path < $1.path }
+  let reports: [LabReport] = files.compactMap { url in
+    guard let data = try? Data(contentsOf: url) else { return nil }
+    return try? decoder.decode(LabReport.self, from: data)
+  }
+  let bundle = OmopExport.bundle(from: reports)
+  let out = root.appendingPathComponent("omop", isDirectory: true)
+  try FileManager.default.createDirectory(at: out, withIntermediateDirectories: true)
+  for (name, contents) in bundle.files.sorted(by: { $0.key < $1.key }) {
+    try Data(contents.utf8).write(to: out.appendingPathComponent(name))
+    print("  \(name): \(contents.split(separator: "\n").count) line(s)")
+  }
+  print("\(bundle.measurementCount) measurements from \(reports.count) report(s) → \(out.path)")
+  exit(0)
+}
+
 let found = records(under: root)
 if found.isEmpty {
   FileHandle.standardError.write(Data("no diagnostics.json under \(root.path)\n".utf8))

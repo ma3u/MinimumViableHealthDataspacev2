@@ -205,3 +205,8 @@
 "Glucose" = "Glukose";
 "Creatinine" = "Kreatinin";
 "Haemoglobin" = "Hämoglobin";
+"Read again with this version" = "Mit dieser Version neu auswerten";
+"This report has no stored pages to read again." = "Zu diesem Befund sind keine Seiten gespeichert, die neu ausgewertet werden könnten.";
+"Reading again found %lld values where %lld are stored, so the stored ones were kept." = "Beim erneuten Lesen wurden %lld Werte gefunden, gespeichert sind %lld; die gespeicherten wurden behalten.";
+"Export for research (OMOP)" = "Für die Forschung exportieren (OMOP)";
+"This report could not be read again." = "Dieser Befund konnte nicht erneut ausgewertet werden.";

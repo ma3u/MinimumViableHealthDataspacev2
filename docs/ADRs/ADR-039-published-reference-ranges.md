@@ -88,6 +88,17 @@ does not know, or whose unit that analyte is not defined in, fails the build.
   scoring, risk estimation or advice, that is a different decision and a
   different regulatory position, and it needs its own ADR.
 
+## Postscript, 2026-09-20: the OMOP export follows the same rule
+
+An OMOP CDM export was added, and it raises the same question in another
+vocabulary: what do you write when you do not have the mapping? The answer is
+the one this repository already gives in `fhir-to-omop-transform.cypher`:
+`measurement_concept_id = 0` with the LOINC code preserved in
+`measurement_source_value`. The phone has no Athena vocabulary, inventing a
+concept id would put a wrong identifier on a real measurement, and a second
+mapping maintained on a phone is the divergence the generated analyte table
+exists to prevent.
+
 ## Alternatives considered
 
 - **Copying a longevity site's table.** Rejected: unsourced numbers cannot be

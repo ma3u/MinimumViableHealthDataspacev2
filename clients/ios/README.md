@@ -166,6 +166,34 @@ the same command as the analyte dictionary, and the generator refuses to emit a
 range whose analyte the dictionary does not know or whose unit that analyte is
 not defined in.
 
+## Exports
+
+| Action                     | For             | Contents                                                                |
+| -------------------------- | --------------- | ----------------------------------------------------------------------- |
+| Share for my doctor        | a practice      | PDF summary with the original pages appended, plus a FHIR R4 bundle     |
+| Export for research (OMOP) | analytics       | OMOP CDM v5.4 `measurement.csv`, `person.csv`, `observation_period.csv` |
+| Export diagnostics         | this repository | the record, both Vision passes, the pages, the session log              |
+
+The OMOP tables carry `measurement_concept_id = 0` throughout, deliberately.
+Mapping LOINC to an OMOP concept needs the Athena vocabulary, which is not on a
+phone, and inventing an id would put a wrong identifier on a real measurement.
+OMOP's convention for that is concept id 0 with the original code in
+`measurement_source_value`, which is exactly what `neo4j/fhir-to-omop-transform.cypher`
+already does. Mapping belongs where the vocabulary is; doing it twice is how
+two mappings drift apart.
+
+`range_low` and `range_high` carry the range **your laboratory printed**, which
+is what those columns mean in the CDM.
+
+## Reading a report again
+
+A report keeps its pages, so it can be read again after the parser improves:
+the action is on the report itself. Two rules make that safe rather than
+destructive. A re-read reproduces the resolution the pages were first
+recognised at, because rasterising a stored PDF at a fixed density upsamples a
+phone photograph and reads worse. And a re-read that finds fewer values than
+are stored is discarded, never saved over the better reading.
+
 ## Store layout
 
 Three sealed files per report under `Application Support/Reports`, each

@@ -1,3 +1,4 @@
+import CoreGraphics
 import UIKit
 import Shared
 import SwiftUI
@@ -117,7 +118,9 @@ final class AppModel: ObservableObject {
       id: id, scannedAt: Date(), collectedOn: day,
       title: title.isEmpty ? String(localized: "Lab report") : title,
       extraction: product.extraction, metadata: metadata, pageTexts: product.pageTexts,
-      scan: LabReport.ScanAttachment(pageCount: product.pages.count, bytes: product.pdf.count),
+      scan: LabReport.ScanAttachment(
+              pageCount: product.pages.count, bytes: product.pdf.count,
+              sourcePixelWidth: product.sourcePixelWidth),
       hasDiagnostics: true)
     let diagnostics = ScanDiagnostics(
       reportId: id, createdAt: Date(), environment: ScanDiagnostics.Environment.current,
@@ -128,6 +131,136 @@ final class AppModel: ObservableObject {
       try await store.saveDiagnostics(diagnostics, for: id)
       pending = nil
       await refresh()
+    } catch {
+      self.error = error.localizedDescription
+    }
+  }
+
+  /// Reads a stored report again with the current version of the app.
+  ///
+  /// The pages are kept precisely so that a value can be recovered when the
+  /// parser improves. An audit of seven real reports found a reference bound
+  /// stored as 50 where the sheet printed 0.050, and a chemistry panel that
+  /// read nothing because its column order was refused; both are fixed in
+  /// code, and neither correction reaches a record that was extracted before.
+  ///
+  /// What the person decided is kept: the title, and the lab date they
+  /// confirmed. What the machine read is replaced.
+  func reextract(_ report: LabReport) async {
+    busy = true
+    defer { busy = false }
+    do {
+      guard let pdf = try await store.scan(for: report.id) else {
+        error = String(localized: "This report has no stored pages to read again.")
+        return
+      }
+      // At the resolution the values were first read at.
+      //
+      // A stored PDF carries no resolution of its own, so a re-read has to
+      // choose one. Measured on a real practice printout: rasterising its
+      // stored pages at a fixed 300 dpi upsamples a 1206 pixel photograph and
+      // reads *worse*, 11 coded values where 19 were stored. Records written
+      // from now on say what resolution they were read at; older ones are
+      // tried at two, and the better reading wins.
+      let attempts: [CGFloat] =
+        report.scan?.sourcePixelWidth.map { width in
+          [max(72, min(600, CGFloat(width) / (ScanDocument.pageWidth / 72)))]
+        } ?? [150, 300]
+
+      var best: LabImport.Result?
+      for dpi in attempts {
+        let attempt = try await LabImport.pdf(pdf, dpi: dpi)
+        if attempt.extraction.coded.count > (best?.extraction.coded.count ?? -1) {
+          best = attempt
+        }
+      }
+      guard let product = best else {
+        error = String(localized: "This report could not be read again.")
+        return
+      }
+
+      // A re-read must never cost the person values. The pages that survive a
+      // round trip through PDF and back are not always the pages the
+      // recogniser first saw, so a worse reading is discarded rather than
+      // saved over a better one.
+      let before = report.extraction.coded.count
+      let after = product.extraction.coded.count
+      guard after >= before else {
+        error = String(
+          localized:
+            "Reading again found \(after) values where \(before) are stored, so the stored ones were kept."
+        )
+        Log.store.notice(
+          "re-read discarded: \(after, privacy: .public) coded against \(before, privacy: .public) stored"
+        )
+        return
+      }
+
+      var metadata = product.metadata
+      // A date the person confirmed outranks one read from the sheet again.
+      if report.metadata.dateSource == .user {
+        metadata.labDate = report.collectedOn
+        metadata.dateSource = .user
+      }
+      let updated = LabReport(
+        id: report.id, scannedAt: report.scannedAt, collectedOn: metadata.labDate ?? report.collectedOn,
+        title: report.title, extraction: product.extraction, metadata: metadata,
+        pageTexts: product.pageTexts,
+        scan: report.scan.map {
+          LabReport.ScanAttachment(
+            pageCount: $0.pageCount, bytes: $0.bytes, contentType: $0.contentType,
+            sourcePixelWidth: $0.sourcePixelWidth ?? product.sourcePixelWidth)
+        },
+        hasDiagnostics: true)
+      try await store.save(updated)
+      try await store.saveDiagnostics(
+        ScanDiagnostics(
+          reportId: report.id, createdAt: Date(),
+          environment: ScanDiagnostics.Environment.current, pages: product.pages,
+          extraction: product.extraction, metadata: metadata),
+        for: report.id)
+      Log.store.notice(
+        "re-read: \(report.extraction.coded.count, privacy: .public) coded before, \(product.extraction.coded.count, privacy: .public) now"
+      )
+      await refresh()
+    } catch {
+      self.error = error.localizedDescription
+    }
+  }
+
+  /// Every stored report as OMOP CDM v5.4 tables, zipped for the share sheet.
+  ///
+  /// A research format rather than a clinical one, so it is a separate action
+  /// from the document for a doctor. Concept ids are 0 and the LOINC codes
+  /// travel as source values, which is the convention the graph in this
+  /// repository already follows: mapping belongs where the vocabulary is, and
+  /// doing it twice is how two mappings drift apart.
+  func exportOmop() async {
+    busy = true
+    defer { busy = false }
+    do {
+      let bundle = OmopExport.bundle(from: reports, sex: RangePreferences.sex)
+      let count = reports.count
+      let day = ISO8601DateFormatter()
+      day.formatOptions = [.withYear, .withMonth, .withDay, .withDashSeparatorInDate]
+      let name = "klarbefund-omop-\(day.string(from: Date()))"
+      let folder = FileManager.default.temporaryDirectory
+        .appendingPathComponent(name, isDirectory: true)
+      try? FileManager.default.removeItem(at: folder)
+      try FileManager.default.createDirectory(
+        at: folder, withIntermediateDirectories: true,
+        attributes: [.protectionKey: FileProtectionType.complete])
+      for (file, contents) in bundle.files {
+        try Data(contents.utf8).write(
+          to: folder.appendingPathComponent(file), options: [.atomic, .completeFileProtection])
+      }
+      let zip = FileManager.default.temporaryDirectory.appendingPathComponent("\(name).zip")
+      try DiagnosticsBundle.zip(directory: folder, to: zip)
+      try? FileManager.default.removeItem(at: folder)
+      Log.export.notice(
+        "omop export: \(bundle.measurementCount, privacy: .public) measurements from \(count, privacy: .public) report(s)"
+      )
+      sharingOmop = zip
     } catch {
       self.error = error.localizedDescription
     }
@@ -224,6 +357,7 @@ final class AppModel: ObservableObject {
   @Published var showingPrivacy = false
   @Published var showingTrends = false
   @Published var showingReference = false
+  @Published var sharingOmop: URL?
   @Published var sharing: ReportExport.Artefacts?
 
   /// Builds the PDF and FHIR bundle for one report. Entirely local: this is
@@ -348,6 +482,15 @@ struct ContentView: View {
                     }
                   }
                 }
+                if report.scan != nil {
+                  ToolbarItem(placement: .secondaryAction) {
+                    Button {
+                      Task { await model.reextract(report) }
+                    } label: {
+                      Label("Read again with this version", systemImage: "arrow.clockwise")
+                    }
+                  }
+                }
                 ToolbarItem(placement: .secondaryAction) {
                   Button {
                     model.diagnosticsRequest = .report(report.id)
@@ -394,6 +537,11 @@ struct ContentView: View {
               } label: {
                 Label("Trends", systemImage: "chart.xyaxis.line")
               }
+              Button {
+                Task { await model.exportOmop() }
+              } label: {
+                Label("Export for research (OMOP)", systemImage: "tablecells")
+              }
             }
             Button {
               model.showingReference = true
@@ -418,18 +566,6 @@ struct ContentView: View {
         }
       }
     }
-    .fileImporter(
-      isPresented: $model.picking,
-      allowedContentTypes: [.pdf, .image],
-      allowsMultipleSelection: false
-    ) { outcome in
-      switch outcome {
-      case .success(let urls):
-        if let url = urls.first { Task { await model.importFile(url) } }
-      case .failure(let error):
-        model.error = error.localizedDescription
-      }
-    }
     .fullScreenCover(isPresented: $scanning) {
       DocumentScanner(
         onScan: { images in
@@ -440,86 +576,7 @@ struct ContentView: View {
       )
       .ignoresSafeArea()
     }
-    .sheet(item: Binding(get: { model.pending.map(PendingBox.init) }, set: { _ in })) { box in
-      ReviewSheet(product: box.product) { title, labDate, laboratory in
-        Task { await model.confirm(title: title, labDate: labDate, laboratory: laboratory) }
-      } onDiscard: {
-        model.pending = nil
-      }
-    }
-    .sheet(item: Binding(get: { model.viewingScan.map(ScanBox.init) }, set: { _ in })) { box in
-      ScanViewer(pdf: box.pdf) { model.viewingScan = nil }
-    }
-    .sheet(item: Binding(get: { model.sharingDiagnostics.map(ArchiveBox.init) }, set: { _ in })) {
-      box in
-      ShareSheet(items: [box.url]) {
-        // Plain health data in the temporary directory has no reason to
-        // outlive the share sheet.
-        try? FileManager.default.removeItem(at: box.url)
-        model.sharingDiagnostics = nil
-      }
-    }
-    // Asked every time, in words: the archive is the person's health data in
-    // the clear, and the share sheet cannot tell them that.
-    .confirmationDialog(
-      "Export diagnostics?",
-      isPresented: Binding(
-        get: { model.diagnosticsRequest != nil },
-        set: { if !$0 { model.diagnosticsRequest = nil } }),
-      titleVisibility: .visible
-    ) {
-      Button("Export") {
-        if let request = model.diagnosticsRequest {
-          model.diagnosticsRequest = nil
-          Task { await model.exportDiagnostics(request) }
-        }
-      }
-      Button("Cancel", role: .cancel) { model.diagnosticsRequest = nil }
-    } message: {
-      Text(
-        "The archive contains your scanned pages, every value and the recognised text, unencrypted. Share it only with yourself."
-      )
-    }
-    .sheet(item: Binding(get: { model.consenting.map(ConsentBox.init) }, set: { _ in })) { box in
-      CloudConsentSheet(
-        candidates: box.values,
-        provider: model.providerConfig.kind,
-        onSend: { values, question in
-          Task { await model.askCloud(values, question: question) }
-        },
-        onCancel: { model.consenting = nil })
-    }
-    .sheet(item: Binding(get: { model.reply.map(ReplyBox.init) }, set: { _ in })) { box in
-      CloudReplySheet(reply: box.reply) { model.reply = nil }
-    }
-    .sheet(isPresented: $model.showingSettings) {
-      ProviderSettings(configuration: $model.providerConfig) {
-        model.showingSettings = false
-      }
-    }
-    .sheet(isPresented: $model.showingPrivacy) {
-      PrivacySummary { model.showingPrivacy = false }
-    }
-    .sheet(isPresented: $model.showingTrends) {
-      TrendsView(reports: model.reports) { model.showingTrends = false }
-    }
-    .sheet(isPresented: $model.showingReference) {
-      ReferenceValuesView { model.showingReference = false }
-    }
-    .sheet(item: Binding(get: { model.sharing.map(ShareBox.init) }, set: { _ in })) { box in
-      ShareSheet(items: [box.artefacts.pdf, box.artefacts.fhir]) {
-        model.sharing = nil
-      }
-    }
-    .overlay { if model.asking { ProgressView("Waiting for an answer…").padding().background(.regularMaterial, in: .rect(cornerRadius: 12)) } }
-    .overlay { if model.importing { ProgressView("Reading the document…").padding().background(.regularMaterial, in: .rect(cornerRadius: 12)) } }
-    .overlay { if model.busy { ProgressView("Recognising text…").padding().background(.regularMaterial, in: .rect(cornerRadius: 12)) } }
-    .overlay { if model.buildingDiagnostics { ProgressView("Building the diagnostics archive…").padding().background(.regularMaterial, in: .rect(cornerRadius: 12)) } }
-    .alert("Error", isPresented: Binding(get: { model.error != nil }, set: { _ in model.error = nil })) {
-      Button("OK", role: .cancel) {}
-    } message: {
-      Text(model.error ?? "")
-    }
+    .modifier(AppSheets(model: model))
     .task {
       // Plain archives from an interrupted share, or a pull that never came,
       // have no reason to survive a launch.
@@ -530,6 +587,7 @@ struct ContentView: View {
         // one a screenshot should open, and it does not exist until it has run.
         await model.runSelfTestIfRequested()
         await model.debugImportIfRequested()
+        await model.reextractAllIfRequested()
         await openScreenshotScreen()
         await model.debugExportIfRequested()
       #endif
@@ -700,5 +758,134 @@ struct ProvenanceBadge: View {
       .padding(.vertical, 2)
       .background(tint.opacity(0.15), in: .rect(cornerRadius: 4))
       .foregroundStyle(tint)
+  }
+}
+
+/// Every sheet, dialog, overlay and alert the model drives.
+///
+/// Pulled out of `ContentView.body` because the compiler gave up on it: a
+/// chain of a dozen modifiers, each with a closure and a `Binding` built
+/// inline, is more than the type checker will infer in reasonable time. The
+/// error it gives ("unable to type-check this expression in reasonable time")
+/// names no line, so the cure is structural rather than a smaller edit.
+private struct AppSheets: ViewModifier {
+  @ObservedObject var model: AppModel
+
+  func body(content: Content) -> some View {
+    content
+      .fileImporter(
+      isPresented: $model.picking,
+      allowedContentTypes: [.pdf, .image],
+      allowsMultipleSelection: false
+    ) { outcome in
+      switch outcome {
+      case .success(let urls):
+        if let url = urls.first { Task { await model.importFile(url) } }
+      case .failure(let error):
+        model.error = error.localizedDescription
+      }
+    }
+      .sheet(item: Binding(get: { model.pending.map(PendingBox.init) }, set: { _ in })) { box in
+      ReviewSheet(product: box.product) { title, labDate, laboratory in
+        Task { await model.confirm(title: title, labDate: labDate, laboratory: laboratory) }
+      } onDiscard: {
+        model.pending = nil
+      }
+    }
+      .sheet(item: Binding(get: { model.viewingScan.map(ScanBox.init) }, set: { _ in })) { box in
+      ScanViewer(pdf: box.pdf) { model.viewingScan = nil }
+    }
+      .sheet(item: Binding(get: { model.sharingOmop.map(ArchiveBox.init) }, set: { _ in })) { box in
+      ShareSheet(items: [box.url]) {
+        // Plain health data in the temporary directory has no reason to
+        // outlive the share sheet.
+        try? FileManager.default.removeItem(at: box.url)
+        model.sharingOmop = nil
+      }
+    }
+      .sheet(item: Binding(get: { model.sharingDiagnostics.map(ArchiveBox.init) }, set: { _ in })) {
+      box in
+      ShareSheet(items: [box.url]) {
+        // Plain health data in the temporary directory has no reason to
+        // outlive the share sheet.
+        try? FileManager.default.removeItem(at: box.url)
+        model.sharingDiagnostics = nil
+      }
+    }
+      .modifier(AppDialogs(model: model))
+  }
+}
+
+/// The dialog, the progress overlays and the error alert.
+///
+/// Split from `AppSheets` for the same reason that one was split from the
+/// view: one chain of a dozen modifiers, each carrying a closure and an
+/// inline `Binding`, is past what the type checker will infer.
+private struct AppDialogs: ViewModifier {
+  @ObservedObject var model: AppModel
+
+  func body(content: Content) -> some View {
+    content
+    // Asked every time, in words: the archive is the person's health data in
+    // the clear, and the share sheet cannot tell them that.
+      .confirmationDialog(
+      "Export diagnostics?",
+      isPresented: Binding(
+        get: { model.diagnosticsRequest != nil },
+        set: { if !$0 { model.diagnosticsRequest = nil } }),
+      titleVisibility: .visible
+    ) {
+      Button("Export") {
+        if let request = model.diagnosticsRequest {
+          model.diagnosticsRequest = nil
+          Task { await model.exportDiagnostics(request) }
+        }
+      }
+      Button("Cancel", role: .cancel) { model.diagnosticsRequest = nil }
+    } message: {
+      Text(
+        "The archive contains your scanned pages, every value and the recognised text, unencrypted. Share it only with yourself."
+      )
+    }
+      .sheet(item: Binding(get: { model.consenting.map(ConsentBox.init) }, set: { _ in })) { box in
+      CloudConsentSheet(
+        candidates: box.values,
+        provider: model.providerConfig.kind,
+        onSend: { values, question in
+          Task { await model.askCloud(values, question: question) }
+        },
+        onCancel: { model.consenting = nil })
+    }
+      .sheet(item: Binding(get: { model.reply.map(ReplyBox.init) }, set: { _ in })) { box in
+      CloudReplySheet(reply: box.reply) { model.reply = nil }
+    }
+      .sheet(isPresented: $model.showingSettings) {
+      ProviderSettings(configuration: $model.providerConfig) {
+        model.showingSettings = false
+      }
+    }
+      .sheet(isPresented: $model.showingPrivacy) {
+      PrivacySummary { model.showingPrivacy = false }
+    }
+      .sheet(isPresented: $model.showingTrends) {
+      TrendsView(reports: model.reports) { model.showingTrends = false }
+    }
+      .sheet(isPresented: $model.showingReference) {
+      ReferenceValuesView { model.showingReference = false }
+    }
+      .sheet(item: Binding(get: { model.sharing.map(ShareBox.init) }, set: { _ in })) { box in
+      ShareSheet(items: [box.artefacts.pdf, box.artefacts.fhir]) {
+        model.sharing = nil
+      }
+    }
+      .overlay { if model.asking { ProgressView("Waiting for an answer…").padding().background(.regularMaterial, in: .rect(cornerRadius: 12)) } }
+      .overlay { if model.importing { ProgressView("Reading the document…").padding().background(.regularMaterial, in: .rect(cornerRadius: 12)) } }
+      .overlay { if model.busy { ProgressView("Recognising text…").padding().background(.regularMaterial, in: .rect(cornerRadius: 12)) } }
+      .overlay { if model.buildingDiagnostics { ProgressView("Building the diagnostics archive…").padding().background(.regularMaterial, in: .rect(cornerRadius: 12)) } }
+      .alert("Error", isPresented: Binding(get: { model.error != nil }, set: { _ in model.error = nil })) {
+      Button("OK", role: .cancel) {}
+    } message: {
+      Text(model.error ?? "")
+    }
   }
 }

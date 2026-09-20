@@ -17,11 +17,35 @@ public struct LabReport: Codable, Sendable, Identifiable, Equatable {
     public let pageCount: Int
     public let bytes: Int
     public let contentType: String
+    /// Width in pixels of the widest page as it was recognised.
+    ///
+    /// Kept so that reading the report again reproduces the resolution the
+    /// values were first read at. Without it a re-read rasterises the stored
+    /// PDF at a fixed 300 dpi, which upsamples a phone photograph and reads
+    /// *worse*: measured on a real practice printout, 19 coded values became
+    /// 11. Absent on records written before this existed.
+    public let sourcePixelWidth: Int?
 
-    public init(pageCount: Int, bytes: Int, contentType: String = "application/pdf") {
+    public init(
+      pageCount: Int, bytes: Int, contentType: String = "application/pdf",
+      sourcePixelWidth: Int? = nil
+    ) {
       self.pageCount = pageCount
       self.bytes = bytes
       self.contentType = contentType
+      self.sourcePixelWidth = sourcePixelWidth
+    }
+
+    private enum CodingKeys: String, CodingKey {
+      case pageCount, bytes, contentType, sourcePixelWidth
+    }
+
+    public init(from decoder: Decoder) throws {
+      let c = try decoder.container(keyedBy: CodingKeys.self)
+      pageCount = try c.decode(Int.self, forKey: .pageCount)
+      bytes = try c.decode(Int.self, forKey: .bytes)
+      contentType = try c.decodeIfPresent(String.self, forKey: .contentType) ?? "application/pdf"
+      sourcePixelWidth = try c.decodeIfPresent(Int.self, forKey: .sourcePixelWidth)
     }
   }
 

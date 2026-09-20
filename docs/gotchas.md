@@ -3,6 +3,42 @@
 Non-obvious pitfalls across the stack. Ordered newest first; add a new
 entry at the top when you hit something that cost you more than 30 minutes.
 
+## 2026-09-20: a lone leading zero is not a thousands separator
+
+The German number rule says `.` before exactly three digits groups thousands,
+so `1.240` pg/mL is 1240. A real sheet prints Lp(a) as `< 0.300 g/l`, and the
+same rule read that as **300**, a thousandfold error on the value that decides
+a cardiovascular referral. It also stored a reference bound of `< 0.050` as 50.
+
+No grouping ever produces a leading lone zero, so `0.` now always starts a
+decimal. Both parsers were fixed, because the rule is mirrored in Swift and
+TypeScript, and an audit of the reports already on the phone found one stored
+reference bound that had to be re-read.
+
+## 2026-09-20: re-reading a stored scan loses the resolution it was read at
+
+Keeping the pages lets a report be read again after the parser improves. A
+stored PDF carries no resolution of its own, so the re-read picked 300 dpi,
+which **upsampled** a 1206 pixel phone photograph to 2479 and read it worse:
+19 coded values became 11, and the worse reading was saved over the better one.
+
+Three changes, and the second is the one that matters:
+
+- a record now stores the pixel width its pages were recognised at, so a
+  re-read reproduces it;
+- a re-read that finds fewer values than are stored is **discarded**, not
+  saved. A repair that can lose data is not a repair;
+- an older record with no resolution recorded is tried at two, and the better
+  reading wins.
+
+## 2026-09-20: an incremental device build can leave the app unsigned
+
+`xcodebuild` reported BUILD SUCCEEDED and `devicectl` refused the result with
+`No code signature found`. `codesign -dv` on the product said "code object is
+not signed at all": the incremental build had skipped the signing phase after a
+Swift-only change. A `clean build` fixed it. Worth checking the signature
+rather than the build log when an install fails on integrity.
+
 ## 2026-09-19: a letter that is not the letter it looks like
 
 A scanned report came back with `МСH` where the sheet printed `MCH`. The glyphs

@@ -45,10 +45,15 @@ export function parseNumber(raw: string): number | null {
   } else if (hasComma) {
     normalised = t.replace(/\./g, "").replace(",", ".");
   } else if (hasDot) {
-    const afterDot = t.slice(t.lastIndexOf(".") + 1);
+    const lastDot = t.lastIndexOf(".");
+    const beforeDot = t.slice(0, lastDot);
+    const afterDot = t.slice(lastDot + 1);
     // `.` + exactly three digits is thousands grouping (1.234 -> 1234);
     // anything else is a decimal point (0.92 -> 0.92, 1.2345 -> 1.2345).
-    normalised = afterDot.length === 3 ? t.replace(/\./g, "") : t;
+    // Except after a lone zero: no grouping produces `0.300`, and a real sheet
+    // prints Lp(a) that way, where 300 instead of 0.3 is a thousandfold error.
+    normalised =
+      afterDot.length === 3 && beforeDot !== "0" ? t.replace(/\./g, "") : t;
   } else {
     normalised = t;
   }
