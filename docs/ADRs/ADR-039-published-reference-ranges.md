@@ -134,6 +134,43 @@ concept id would put a wrong identifier on a real measurement, and a second
 mapping maintained on a phone is the divergence the generated analyte table
 exists to prevent.
 
+## Postscript, 2026-09-20: the printed range is a band, not a footnote
+
+The decision above left most charts with no band at all. Seventeen analytes
+have a citable published range; the dictionary codes seventy-seven, and a real
+report carries forty. So a person looking at their ferritin saw a line floating
+in empty space, and the range their laboratory had actually printed sat in the
+footer as text.
+
+That is the wrong way round. ADR-033 rule 1 already says the printed interval
+is the one that describes the assay the person was measured with. It is
+therefore the better band to draw when no guideline band exists, not the
+consolation prize.
+
+So the chart now draws whichever applies, in two different colours, and the
+footer names which one it is: "No guideline range is published for this one,
+so the band is the range your laboratory printed." Two different claims, drawn
+differently and said out loud, rather than one claim silently standing in for
+the other.
+
+Two things follow from the same session:
+
+**Each series says what it measures.** One or two sentences, generated from the
+analyte dictionary in English and German, defining the test: "The average mass
+of haemoglobin in one red cell. Read with MCV to tell one kind of anaemia from
+another." A definition of the measurement is not a reading of a result, so this
+stays on the permitted side of the §5 line. The distinction is enforced rather
+than trusted: a unit test rejects any description containing "your value",
+"a high value", "means you" and their kind, and the generator refuses to emit
+unless every analyte has both languages, so a new one cannot ship with an
+English-only paragraph.
+
+**Every point names its own measurement.** A chart shows a shape; it cannot say
+which dot is which. Under each chart is a row per measurement with the date, the
+kind of evidence it is, and the title of the report it came from. Tapping a row
+opens that report. The dates are also drawn as axis marks, so the gaps between
+draws are visible rather than implied by even spacing.
+
 ## Alternatives considered
 
 - **Copying a longevity site's table.** Rejected: unsourced numbers cannot be

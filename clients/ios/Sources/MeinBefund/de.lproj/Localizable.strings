@@ -233,3 +233,8 @@
 "Some published ranges differ by sex. Without an answer only the ranges that apply to everyone are shown. Set it in your profile; it stays on your device." = "Manche veröffentlichten Bereiche unterscheiden sich nach Geschlecht. Ohne Angabe werden nur die Bereiche gezeigt, die für alle gelten. Stellen Sie es im Profil ein; es bleibt auf Ihrem Gerät.";
 "Body composition" = "Körperzusammensetzung";
 "%lld further report(s) carry a different measurement date and will be saved alongside this one." = "%lld weitere(r) Befund(e) tragen ein anderes Messdatum und werden zusammen mit diesem gespeichert.";
+"No guideline range is published for this one, so the band is the range your laboratory printed." = "Für diesen Parameter ist kein Leitlinienbereich veröffentlicht, deshalb zeigt das Band den von Ihrem Labor gedruckten Bereich.";
+"Read from a photo" = "Aus einem Foto gelesen";
+"Entered or from a device" = "Eingetragen oder vom Gerät";
+"Lab-issued" = "Vom Labor";
+"%1$@ %2$@ %3$@ since the previous measurement" = "%1$@ %2$@ %3$@ seit der vorigen Messung";

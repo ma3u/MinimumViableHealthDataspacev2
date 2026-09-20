@@ -412,6 +412,8 @@ final class AppModel: ObservableObject {
   @Published var sharingOmop: URL?
   @Published var profile: Profile = .empty
   @Published var showingProfile = false
+  /// A report the person asked to see, from a point on a chart.
+  @Published var openReport: UUID?
   @Published var sharing: ReportExport.Artefacts?
 
   /// Builds the PDF and FHIR bundle for one report. Entirely local: this is
@@ -636,6 +638,12 @@ struct ContentView: View {
       .ignoresSafeArea()
     }
     .modifier(AppSheets(model: model))
+    .onChange(of: model.openReport) { _, id in
+      // Following a point on a chart back to the document it was read from.
+      guard let id else { return }
+      path = [id]
+      model.openReport = nil
+    }
     .task {
       // Plain archives from an interrupted share, or a pull that never came,
       // have no reason to survive a launch.
@@ -927,7 +935,13 @@ private struct AppDialogs: ViewModifier {
       PrivacySummary { model.showingPrivacy = false }
     }
       .sheet(isPresented: $model.showingTrends) {
-      TrendsView(reports: model.reports, sex: model.profile.sex) {
+      TrendsView(
+        reports: model.reports, sex: model.profile.sex,
+        onOpenReport: { id in
+          model.showingTrends = false
+          model.openReport = id
+        }
+      ) {
         model.showingTrends = false
       }
     }

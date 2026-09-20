@@ -429,3 +429,134 @@ struct DeviceScreenTests {
     #expect(DeviceScreen.looksLikeDeviceScreen(Self.weightCard))
   }
 }
+
+/// What a chart draws when no guideline band exists, and where a point came from.
+@Suite("Trends: the laboratory's own range, and provenance per point")
+struct TrendBandTests {
+
+  static func report(
+    day: Int, label: String, key: String, loinc: String, value: Double, unit: String,
+    low: Double?, high: Double?, source: SourceKind = .labIssuedDigital, title: String
+  ) -> LabReport {
+    let date = ReportMetadataExtractor.day(2026, 3, day)!
+    let coded = CodedLabValue(
+      raw: RawLabValue(
+        label: label, value: value, unitRaw: unit, referenceLow: low, referenceHigh: high,
+        line: "\(label) \(value) \(unit)", lineNumber: 1),
+      coding: AnalyteCoding(
+        labelKey: Analytes.normaliseLabel(label), ucum: unit, loinc: loinc, display: label,
+        analyteKey: key),
+      source: source)
+    return LabReport(
+      id: UUID(), scannedAt: Date(), collectedOn: date, title: title,
+      extraction: ExtractionResult(
+        coded: [coded], unmapped: [], suspiciousLines: [], source: source),
+      metadata: ReportMetadata(labDate: date, dateSource: .printed))
+  }
+
+  @Test("an analyte with no guideline band still has the laboratory's own range")
+  func printedRangeIsAvailable() throws {
+    // Sodium and MCH have no guideline target, only an assay's reference
+    // interval, and that interval is on the report. A chart that drew nothing
+    // for them would be blank for most of a blood count.
+    let sodium = Self.report(
+      day: 3, label: "Natrium", key: "sodium", loinc: "2951-2", value: 140, unit: "mmol/L",
+      low: 136, high: 145, title: "March")
+    let series = try #require(Trends.series(from: [sodium]).first)
+
+    #expect(series.range == nil, "no guideline band is published for sodium")
+    #expect(series.printedRange?.low == 136)
+    #expect(series.printedRange?.high == 145)
+    #expect(series.withinPrintedRange == true)
+    #expect(series.placement == .noRange, "which is still not a judgement")
+  }
+
+  @Test("outside the laboratory's own range is stated as that, and nothing more")
+  func outsidePrintedRange() throws {
+    let mch = Self.report(
+      day: 3, label: "MCH", key: "mch", loinc: "785-6", value: 34.2, unit: "pg",
+      low: 27, high: 33.5, title: "March")
+    let series = try #require(Trends.series(from: [mch]).first)
+
+    #expect(series.withinPrintedRange == false)
+    #expect(series.range == nil)
+  }
+
+  @Test("a value with no printed range and no published one says so")
+  func neitherRange() throws {
+    let series = try #require(
+      Trends.series(from: [
+        Self.report(
+          day: 3, label: "MCH", key: "mch", loinc: "785-6", value: 32, unit: "pg", low: nil,
+          high: nil, title: "March")
+      ]).first)
+
+    #expect(series.printedRange == nil)
+    #expect(series.withinPrintedRange == nil)
+  }
+
+  @Test("every point knows the report it came from")
+  func pointsCarryTheirReport() throws {
+    // So a dot on a chart can be followed back to the document it was read
+    // from, which is the only way to check a number against the paper.
+    let march = Self.report(
+      day: 3, label: "Natrium", key: "sodium", loinc: "2951-2", value: 140, unit: "mmol/L",
+      low: 136, high: 145, title: "March")
+    let june = Self.report(
+      day: 20, label: "Natrium", key: "sodium", loinc: "2951-2", value: 142, unit: "mmol/L",
+      low: 136, high: 145, source: .ocrTranscribed, title: "June")
+    let series = try #require(Trends.series(from: [march, june]).first)
+
+    #expect(series.points.map(\.reportId) == [march.id, june.id])
+    #expect(series.points.map(\.reportTitle) == ["March", "June"])
+    #expect(series.points.map(\.source) == [.labIssuedDigital, .ocrTranscribed])
+    #expect(series.points.map(\.date) == [march.effectiveDate, june.effectiveDate])
+  }
+
+  @Test("every coded analyte can say what it measures")
+  func descriptionsExist() {
+    // A definition of the test, never a reading of the person's value.
+    for key in Set(Analytes.codings.map(\.analyteKey)) {
+      #expect(Analytes.descriptions[key] != nil, "\(key) has no description")
+    }
+    #expect(Analytes.descriptions["mch"]?.contains("red cell") == true)
+    // And none of them interprets a result.
+    for text in Analytes.descriptions.values {
+      // Phrases that read the person's own result. "a high protein intake"
+      // is about diet and stays; "a high value means" would be a finding.
+      for forbidden in [
+        "your value", "your result", "you should", "too high", "too low",
+        "a high value", "a low value", "means you", "suggests you",
+      ] {
+        #expect(!text.lowercased().contains(forbidden), "\(forbidden) in: \(text)")
+      }
+    }
+  }
+
+  @Test("every definition exists in German too")
+  func descriptionsAreTranslated() {
+    // The generator refuses to emit when the two disagree, so this is the
+    // same rule asserted on the shipped table: a German phone must not show
+    // one English paragraph among the translated ones.
+    #expect(Set(Analytes.descriptions.keys) == Set(Analytes.descriptionsDe.keys))
+    for (key, german) in Analytes.descriptionsDe {
+      #expect(german != Analytes.descriptions[key], "\(key) was not translated")
+      #expect(german.count > 20, "\(key) German is too short to be a definition")
+    }
+    for text in Analytes.descriptionsDe.values {
+      for forbidden in ["ihr wert", "sie sollten", "zu hoch", "zu niedrig", "auffällig"] {
+        #expect(!text.lowercased().contains(forbidden), "\(forbidden) in: \(text)")
+      }
+    }
+  }
+
+  @Test("the reader's language picks the definition")
+  func descriptionFollowsLanguage() {
+    #expect(Analytes.description(of: "mch", language: "en-GB") == Analytes.descriptions["mch"])
+    #expect(Analytes.description(of: "mch", language: "de-DE") == Analytes.descriptionsDe["mch"])
+    // Austrian and Swiss German read the German sentence.
+    #expect(Analytes.description(of: "ferritin", language: "de-CH")?.contains("Eisen") == true)
+    // An analyte the dictionary does not describe has no sentence in either.
+    #expect(Analytes.description(of: "not-an-analyte", language: "de-DE") == nil)
+  }
+}

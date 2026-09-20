@@ -21,6 +21,10 @@ xcodebuild -project MeinBefund.xcodeproj -scheme MeinBefund \
   CODE_SIGN_IDENTITY="-" CODE_SIGNING_REQUIRED=YES build
 ```
 
+Onto a connected iPhone: `Scripts/install-device.sh`. The generated project
+carries no signing team, so a plain `xcodebuild` for a device fails; the script
+supplies one from `TEAM_ID` or from the keychain, and installs what it built.
+
 TestFlight: `Scripts/archive-and-upload.sh`, see its header for the four things
 that must exist in your Apple Developer account first.
 
@@ -187,6 +191,17 @@ tables this was modelled on, which give numbers nobody can check.
 the recogniser is drawn differently from one that came from a laboratory's own
 document, because they are not the same evidence, and the range your laboratory
 printed is named under each series alongside the published band.
+
+Three things make a chart answerable rather than decorative. Only seventeen
+analytes have a citable published band, so for all the others the band drawn is
+**the range your own laboratory printed**, in its own colour and named as such
+in the footer: it describes the assay you were actually measured with, and it
+is a range rather than nothing. Under the chart every point is listed with the
+day it was measured, whether it came from a laboratory's document, a photograph
+or a device, and the report it belongs to; tapping one opens that report. And
+each series states in a sentence **what the measurement is** — a definition of
+the test, generated from the dictionary in English and German, never a reading
+of the person's own value.
 
 Colour marks the bands: green for the optimal band, amber outside it, orange
 outside the guideline range. It never appears alone, always beside the same
