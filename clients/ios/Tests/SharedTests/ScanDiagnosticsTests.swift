@@ -120,3 +120,38 @@ struct ScanDiagnosticsTests {
     #expect(report.effectiveDate == report.scannedAt)
   }
 }
+
+/// Reading a stored report again, after the parser has improved.
+@Suite("Re-reading a stored report")
+struct ReextractionTests {
+
+  @Test("a record written before the resolution was recorded still decodes")
+  func attachmentWithoutResolution() throws {
+    let old = """
+      {"id":"00000000-0000-0000-0000-0000000000B1","scannedAt":780000000,"title":"Old",
+       "extraction":{"coded":[],"unmapped":[],"suspiciousLines":[],"source":"ocr-transcribed"},
+       "scan":{"pageCount":2,"bytes":1234,"contentType":"application/pdf"}}
+      """
+    let report = try JSONDecoder().decode(LabReport.self, from: Data(old.utf8))
+
+    #expect(report.scan?.pageCount == 2)
+    #expect(report.scan?.sourcePixelWidth == nil, "absent, so a re-read falls back")
+  }
+
+  @Test("the resolution a scan was read at is what a re-read should use")
+  func resolutionRoundTrips() throws {
+    let attachment = LabReport.ScanAttachment(
+      pageCount: 1, bytes: 400_000, sourcePixelWidth: 1206)
+    let data = try JSONEncoder().encode(attachment)
+    let decoded = try JSONDecoder().decode(LabReport.ScanAttachment.self, from: data)
+
+    #expect(decoded.sourcePixelWidth == 1206)
+
+    // Measured on a real practice printout: rasterising its stored PDF at a
+    // fixed 300 dpi upsamples a 1206 pixel photograph to 2479 and reads
+    // worse, 11 coded values against 19. The page is 595 points wide, so the
+    // resolution that reproduces the original is what the record now carries.
+    let dpi = Double(decoded.sourcePixelWidth!) / (ScanDocument.pageWidth / 72.0)
+    #expect(abs(dpi - 146.0) < 1.0, "got \(dpi)")
+  }
+}

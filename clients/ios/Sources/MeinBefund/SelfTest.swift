@@ -105,7 +105,8 @@
             extraction: product.extraction, metadata: product.metadata,
             pageTexts: product.pageTexts,
             scan: LabReport.ScanAttachment(
-              pageCount: product.pages.count, bytes: product.pdf.count),
+              pageCount: product.pages.count, bytes: product.pdf.count,
+              sourcePixelWidth: product.sourcePixelWidth),
             hasDiagnostics: true)
           try await store.save(report)
           try await store.saveScan(product.pdf, for: id)
@@ -126,6 +127,22 @@
         }
       }
       await refresh()
+    }
+
+    /// `-MBReextract`: reads every report that has stored pages again.
+    ///
+    /// The same work the per-report button does, for a shelf of reports at
+    /// once after a parser fix, without tapping through them.
+    func reextractAllIfRequested() async {
+      guard ProcessInfo.processInfo.arguments.contains("-MBReextract") else { return }
+      for report in reports where report.scan != nil {
+        let before = report.extraction.coded.count
+        await reextract(report)
+        let after = reports.first { $0.id == report.id }?.extraction.coded.count ?? before
+        Log.diagnostics.notice(
+          "re-read one report: \(before, privacy: .public) coded before, \(after, privacy: .public) now"
+        )
+      }
     }
 
     func runSelfTestIfRequested() async {
