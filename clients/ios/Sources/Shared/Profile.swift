@@ -133,6 +133,58 @@ public enum BodyMeasurements {
     public var ucum: String { rawValue }
   }
 
+  /// A measurement and the day it was taken.
+  ///
+  /// Each body measurement carries its own date because they rarely share
+  /// one: a tape measure comes out at home, the scale stands in a gym, and a
+  /// laboratory weighs you on a third day. One date across the screen would
+  /// put two of the three on a day they were not measured.
+  public struct Reading: Sendable, Equatable {
+    public let value: Double
+    public let measuredOn: Date
+
+    public init(value: Double, measuredOn: Date) {
+      self.value = value
+      self.measuredOn = measuredOn
+    }
+  }
+
+  /// The entries to write, grouped by the day each was measured on.
+  ///
+  /// One report per day, which is how a scan of several scale cards already
+  /// files itself. BMI travels with the weight it was computed from.
+  public static func entriesByDay(
+    waist: Reading?, weight: Reading?, visceralFat: Reading?,
+    visceralFatUnit: VisceralFatUnit = .area, profile: Profile
+  ) -> [(day: Date, entries: [Entry])] {
+    var byDay: [Date: [Entry]] = [:]
+
+    if let weight {
+      let day = ReportMetadata.calendarDay(weight.measuredOn)
+      byDay[day, default: []].append(
+        Entry(analyteKey: "body-weight", label: "Körpergewicht", value: weight.value, ucum: "kg"))
+      if let bmi = profile.bodyMassIndex(weightKg: weight.value) {
+        byDay[day, default: []].append(
+          Entry(analyteKey: "bmi", label: "BMI", value: (bmi * 10).rounded() / 10, ucum: "kg/m2"))
+      }
+    }
+    if let waist {
+      let day = ReportMetadata.calendarDay(waist.measuredOn)
+      byDay[day, default: []].append(
+        Entry(
+          analyteKey: "waist-circumference", label: "Taillenumfang", value: waist.value,
+          ucum: "cm"))
+    }
+    if let visceralFat {
+      let day = ReportMetadata.calendarDay(visceralFat.measuredOn)
+      byDay[day, default: []].append(
+        Entry(
+          analyteKey: "visceral-fat", label: "Viszerales Fett", value: visceralFat.value,
+          ucum: visceralFatUnit.ucum))
+    }
+    return byDay.map { (day: $0.key, entries: $0.value) }.sorted { $0.day < $1.day }
+  }
+
   /// The measurements the profile screen offers, in the order it shows them.
   public static func entries(
     waistCm: Double?, weightKg: Double?, visceralFat: Double?,
@@ -182,11 +234,27 @@ public enum BodyMeasurements {
   /// already recorded on the value itself.
   public static func latest(from reports: [LabReport]) -> [String: (value: Double, ucum: String, date: Date)] {
     var newest: [String: (value: Double, ucum: String, date: Date)] = [:]
+
+    func offer(_ key: String, _ value: Double, _ ucum: String, _ date: Date) {
+      guard bodyKeys.contains(key) else { return }
+      if let existing = newest[key], existing.date >= date { return }
+      newest[key] = (value, ucum, date)
+    }
+
     for report in reports {
-      for value in report.extraction.coded where bodyKeys.contains(value.coding.analyteKey) {
-        let key = value.coding.analyteKey
-        if let existing = newest[key], existing.date >= report.effectiveDate { continue }
-        newest[key] = (value.raw.value, value.coding.ucum, report.effectiveDate)
+      for value in report.extraction.coded {
+        offer(value.coding.analyteKey, value.raw.value, value.coding.ucum, report.effectiveDate)
+      }
+      // A value stored before the dictionary knew it is retried against the
+      // dictionary as it stands now. A scale's visceral fat in kilograms was
+      // filed as an unknown analyte for exactly as long as no entry existed
+      // for it, and re-reading every old report by hand to recover it is not
+      // something anyone should have to think of.
+      for value in report.extraction.unmapped {
+        guard let coding = Analytes.lookup(label: value.raw.label, unit: value.raw.unitRaw) else {
+          continue
+        }
+        offer(coding.analyteKey, value.raw.value, coding.ucum, report.effectiveDate)
       }
     }
     return newest
