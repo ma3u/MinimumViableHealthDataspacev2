@@ -20,14 +20,27 @@
 #   export ASC_KEY_ID=XXXXXXXXXX ASC_ISSUER_ID=aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee
 #   export ASC_KEY_PATH=~/private_keys/AuthKey_XXXXXXXXXX.p8
 #   ./Scripts/archive-and-upload.sh
+#
+# `--upload-only` sends an .ipa this script already built, for the common case
+# where the build is fine and the one missing thing was the issuer id. The
+# issuer id lives only on the App Store Connect **website**, under Users and
+# Access → Integrations → App Store Connect API; the App Store Connect app on
+# iPhone does not show API keys at all.
+#
+#   ASC_ISSUER_ID=... ./Scripts/archive-and-upload.sh --upload-only
 set -euo pipefail
 
 cd "$(dirname "${BASH_SOURCE[0]}")/.."
 
-: "${TEAM_ID:?Set TEAM_ID to your Apple Developer team id}"
+UPLOAD_ONLY=false
+[ "${1:-}" = "--upload-only" ] && UPLOAD_ONLY=true
+
+: "${TEAM_ID:=38R8Z4P7S8}"
 BUILD_DIR="${BUILD_DIR:-.build/release}"
 ARCHIVE="$BUILD_DIR/MeinBefund.xcarchive"
 IPA_DIR="$BUILD_DIR/ipa"
+
+if [ "$UPLOAD_ONLY" = false ]; then
 
 echo "==> Regenerating the Xcode project"
 command -v xcodegen >/dev/null || { echo "xcodegen not found: brew install xcodegen"; exit 1; }
@@ -128,8 +141,13 @@ xcodebuild -exportArchive \
   -exportPath "$IPA_DIR" \
   -allowProvisioningUpdates
 
+fi  # end of the build half
+
 IPA="$(find "$IPA_DIR" -name '*.ipa' -maxdepth 1 | head -1)"
-[ -n "$IPA" ] || { echo "No .ipa produced"; exit 1; }
+if [ -z "$IPA" ]; then
+  echo "No .ipa in $IPA_DIR. Run without --upload-only to build one." >&2
+  exit 1
+fi
 echo "    $IPA"
 
 if [ -z "${ASC_KEY_ID:-}" ] || [ -z "${ASC_ISSUER_ID:-}" ]; then
@@ -158,7 +176,13 @@ xcrun altool --upload-app \
 
 cat <<'DONE'
 
-Uploaded. The build takes a few minutes to finish processing, then:
+Uploaded. The build takes a few minutes to finish processing. Once it has,
+give the testers something to read:
+
+  ASC_APP_ID=6811688174 python3 appstore/push.py --testflight-only
+
+which writes the TestFlight description and What to Test, in both languages.
+Then:
 
   App Store Connect → your app → TestFlight → Internal Testing
   → add your team members → the build appears in their TestFlight app.

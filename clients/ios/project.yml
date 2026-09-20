@@ -12,7 +12,11 @@ settings:
     SWIFT_VERSION: "6.0"
     SWIFT_STRICT_CONCURRENCY: complete
     ENABLE_USER_SCRIPT_SANDBOXING: YES
-    MARKETING_VERSION: "0.1.0"
+    # Matches the App Store Connect record, which was created as "Version 1.0".
+    # A build whose CFBundleShortVersionString differs lands in its own
+    # TestFlight train and cannot be attached to that version later, so the
+    # two are kept identical rather than nearly so.
+    MARKETING_VERSION: "1.0"
     CURRENT_PROJECT_VERSION: "1"
 
 targets:
