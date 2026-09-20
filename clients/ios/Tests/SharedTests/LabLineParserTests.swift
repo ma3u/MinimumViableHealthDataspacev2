@@ -805,3 +805,51 @@ struct ProseRefusalTests {
     #expect(!LabImport.looksLikeProse([Self.article(3)], values: 0))
   }
 }
+
+/// A table flattened onto one line, as a microbiome report prints it.
+@Suite("Several values on one line")
+struct RepeatedValueTests {
+
+  @Test("a group of a table on one line becomes one value per organism")
+  func aGroupIsSplit() {
+    // Measured on a real report: sixty organisms arrived as nineteen values,
+    // most of them carrying two names and one number.
+    let line =
+      "Akkermansia muciniphila 1,402 % Prevotella spp. 12,845 % Prevotella copri 11,873 % "
+      + "Mukosaprotektive Mikrobiota"
+    let parts = LabLineParser.splitRepeatedValues(line)
+    #expect(parts.count == 3)
+    #expect(parts.map(\.label) == ["Akkermansia muciniphila", "Prevotella spp.", "Prevotella copri"])
+    #expect(parts.map(\.value) == [1.402, 12.845, 11.873])
+    // The heading that follows the last value has no number and is not one.
+    #expect(!parts.contains { $0.label.contains("Mukosaprotektive") })
+  }
+
+  @Test("an ordinary row is left alone")
+  func oneValueStaysOne() {
+    // A value and its reference range are one measurement, not three.
+    #expect(LabLineParser.splitRepeatedValues("Cholesterin gesamt 212 mg/dl < 200").isEmpty)
+    #expect(LabLineParser.splitRepeatedValues("HbA1c 5,4 % 4,0 - 6,0").isEmpty)
+  }
+
+  @Test("a sentence with two percentages in it is not two measurements")
+  func proseIsNotSplit() {
+    let sentence =
+      "Eine dauerhaft strenge ketogene Ernährung mit weniger als 5 % Kohlenhydraten "
+      + "führte bei 20 % der Teilnehmenden zu einem Anstieg."
+    // Labels are names, not sentences: nothing here is five words or fewer
+    // and also a plausible analyte.
+    let parts = LabLineParser.splitRepeatedValues(sentence)
+    #expect(parts.allSatisfy { $0.label.split(separator: " ").count <= 5 })
+  }
+
+  @Test("the whole report reads one value per organism")
+  func theWholeLineReads() {
+    let line =
+      "Firmicutes 41,238 % Bacteroidetes 38,114 % Proteobacteria 4,271 % "
+      + "Actinobacteria 6,903 % Verrucomicrobia 1,482 %"
+    let result = LabLineParser.extract(line, source: .labIssuedDigital)
+    #expect(result.coded.count + result.unmapped.count == 5)
+    #expect(result.suspiciousLines.isEmpty)
+  }
+}
