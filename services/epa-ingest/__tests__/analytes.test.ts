@@ -291,9 +291,12 @@ describe("a quantity LOINC does not code", () => {
     }
   });
 
-  it("is the only uncoded coding in the whole table", () => {
-    // Uncoded is meant to stay rare. If this count moves, the reason had
-    // better be that LOINC genuinely has no term, not that nobody looked.
+  it("carries only quantities LOINC genuinely has no term for", () => {
+    // Uncoded is deliberate, never a shortcut. Two classes qualify, both
+    // checked against the NLM clinical tables API before being added:
+    // body-composition quantities LOINC codes in another dimension or not at
+    // all, and the gut microbiome, where LOINC names tests and an organism
+    // needs naming instead.
     const uncoded = new Set<string>();
     for (const label of ANALYTE_LABELS) {
       for (const unit of UNIT_SPELLINGS) {
@@ -303,7 +306,22 @@ describe("a quantity LOINC does not code", () => {
         }
       }
     }
-    expect([...uncoded].sort()).toEqual(["ecw-tbw|%", "visceral-fat|kg"]);
+    const outside = [...uncoded].filter(
+      (entry) =>
+        !entry.startsWith("mb-") &&
+        ![
+          "ecw-tbw|%",
+          "visceral-fat|kg",
+          "shannon-index|1",
+          "firmicutes-bacteroidetes-ratio|1",
+        ].includes(entry),
+    );
+    expect(outside).toEqual([]);
+    // And the microbiome is the bulk of it, which is the honest shape: a
+    // whole panel LOINC does not reach.
+    expect(
+      [...uncoded].filter((e) => e.startsWith("mb-")).length,
+    ).toBeGreaterThan(50);
   });
 
   it("never leaves a null code without a reason", () => {
