@@ -606,3 +606,17 @@ already extracted.
 
 Worth remembering when a line looks perfectly ordinary in a diagnostics dump
 and still refuses to parse: print the scalars, not the string.
+
+## 2026-09-21 — `State(initialValue:)` in an initialiser undoes what a person typed
+
+A weight typed into the profile reverted to the one read from the reports a
+moment later. The fields were seeded with `State(initialValue:)` inside
+`ProfileView.init`, and a sheet's content closure is rebuilt more than once:
+each rebuild re-ran the initialiser and put the stored value back over the
+edit.
+
+Seed once, in `.onAppear`, guarded by a flag. The initialiser stores the
+`let`s and nothing else.
+
+The symptom is easy to misread as a binding problem, because the field accepts
+the keystrokes and shows them until the next redraw.
