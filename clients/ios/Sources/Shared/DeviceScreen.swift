@@ -34,10 +34,17 @@ public enum DeviceScreen {
     /// The lines this was read from, for the reviewer.
     public let line: String
     public let page: Int
+    /// How exact the date is. A value the screen names carries the day it
+    /// says; one recovered from the chart carries only the month it sits
+    /// over, and a record that does not say so is a record that overstates
+    /// what it knows.
+    public let datePrecision: ReportMetadata.DatePrecision
 
     public init(
-      label: String, value: Double, unitRaw: String, measuredOn: Date?, line: String, page: Int
+      label: String, value: Double, unitRaw: String, measuredOn: Date?, line: String, page: Int,
+      datePrecision: ReportMetadata.DatePrecision = .day
     ) {
+      self.datePrecision = datePrecision
       self.label = label
       self.value = value
       self.unitRaw = unitRaw
@@ -71,6 +78,30 @@ public enum DeviceScreen {
     let lines = Self.lines(of: text)
     guard lines.contains(where: { hasUpdatedWord($0) }) else { return false }
     return headline(in: lines) != nil
+  }
+
+  /// The reading on one page, and the values plotted behind it.
+  ///
+  /// The screen names one value in words and draws a year of them. Reading
+  /// only the named one throws away eleven months that are on the picture.
+  /// The plotted ones are recovered where the scale prints a number beside
+  /// each point; where it draws only a circle, there is nothing to read and
+  /// nothing is claimed.
+  public static func read(
+    _ text: String, fragments: [DocumentReconciler.TextFragment], page: Int = 1
+  ) -> (current: Reading, history: [Reading])? {
+    guard let current = read(text, page: page) else { return nil }
+    guard let updatedOn = current.measuredOn else { return (current, []) }
+    let plotted = ChartHistory.points(
+      in: fragments, updatedOn: updatedOn, headline: current.value)
+    let history = plotted.map {
+      Reading(
+        label: current.label, value: $0.value, unitRaw: current.unitRaw,
+        measuredOn: $0.month,
+        line: "\(current.label)  \($0.value) \(current.unitRaw)  (chart)",
+        page: page, datePrecision: .month)
+    }
+    return (current, history)
   }
 
   /// The reading on one page, or nil.
@@ -140,8 +171,19 @@ public enum DeviceScreen {
           coded: coded, unmapped: unmapped, suspiciousLines: [], source: .selfTracked),
         metadata: ReportMetadata(
           labDate: day, labDateRole: .collection,
-          dateSource: group.contains { $0.measuredOn != nil } ? .printed : .scan))
+          dateSource: dateSource(of: group)))
     }
+  }
+
+  /// Where the day of a group of readings came from.
+  ///
+  /// A month recovered from a chart's axis says so rather than passing as a
+  /// printed date, because it is precise to a month and a reader that assumes
+  /// otherwise will put a measurement on a day nobody stood on the scale.
+  static func dateSource(of group: [Reading]) -> ReportMetadata.DateSource {
+    if group.allSatisfy({ $0.datePrecision == .month }) { return .chartMonth }
+    if group.contains(where: { $0.measuredOn != nil }) { return .printed }
+    return .scan
   }
 
   // MARK: - The pieces

@@ -209,15 +209,29 @@ final class AppModel: ObservableObject {
       try await store.save(report)
       try await store.saveScan(product.pdf, for: id)
       try await store.saveDiagnostics(diagnostics, for: id)
-      // One scan of a scale's screens can carry two measurement days, and a
-      // value belongs to the day it was measured on rather than to the day
-      // the rest of the photographs were taken.
+      // One scan of a scale's screens can carry a year of measurement days,
+      // and a value belongs to the day it was measured on rather than to the
+      // day the photographs were taken.
+      //
+      // A scale offers the same year again on the next photograph, and five
+      // cards photographed one morning offer the same months five times over,
+      // so anything already on the phone is dropped rather than stored twice.
+      var known = Duplicates.keys(of: reports)
+      known.formUnion(Duplicates.keys(of: report))
+      var saved = 0
+      var skipped = 0
       for extra in product.extraReports {
-        try await store.save(extra)
-        Log.store.notice(
-          "further report saved for another measurement date: \(extra.extraction.coded.count, privacy: .public) coded"
-        )
+        guard let fresh = Duplicates.strip(extra, known: known) else {
+          skipped += 1
+          continue
+        }
+        try await store.save(fresh)
+        known.formUnion(Duplicates.keys(of: fresh))
+        saved += 1
       }
+      Log.store.notice(
+        "further measurement dates: \(saved, privacy: .public) saved, \(skipped, privacy: .public) already known"
+      )
       pending = nil
       await refresh()
     } catch {

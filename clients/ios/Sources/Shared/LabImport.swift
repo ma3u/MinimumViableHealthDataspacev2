@@ -216,8 +216,16 @@ public enum LabImport {
     // reader. It is tried only when the ordinary parse found no values, so a
     // report that happens to carry the word "aktualisiert" is unaffected.
     if extraction.coded.isEmpty {
-      let readings = pageTexts.enumerated().compactMap { index, text in
-        DeviceScreen.looksLikeDeviceScreen(text) ? DeviceScreen.read(text, page: index + 1) : nil
+      // Both the value the screen names and the year of them it draws. The
+      // plotted ones carry a month, not a day, and say so.
+      var readings: [DeviceScreen.Reading] = []
+      for (index, text) in pageTexts.enumerated() where DeviceScreen.looksLikeDeviceScreen(text) {
+        let fragments = index < pages.count ? pages[index].fragments : []
+        guard let read = DeviceScreen.read(text, fragments: fragments, page: index + 1) else {
+          continue
+        }
+        readings.append(read.current)
+        readings.append(contentsOf: read.history)
       }
       let reports = DeviceScreen.reports(from: readings)
       if let first = reports.first {
