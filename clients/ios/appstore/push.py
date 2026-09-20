@@ -6,7 +6,7 @@ second run replaces rather than appends, and a text that is already correct is
 simply written again.
 
   export ASC_APP_ID=6811688174
-  python3 appstore/push.py [--texts-only | --screenshots-only]
+  python3 appstore/push.py [--texts-only | --screenshots-only | --testflight-only]
 
 Two traps this script exists to avoid:
 
@@ -17,6 +17,12 @@ Two traps this script exists to avoid:
     FAILED during processing. It stays visible in the set and is dropped at
     submission. So sizes are checked before sending, and the processing verdict
     is waited for afterwards.
+
+The TestFlight texts are separate resources from the App Store listing, and a
+tester sees those rather than these: `betaAppLocalizations` is the app's
+description on its TestFlight page, `betaBuildLocalizations` is the "What to
+Test" beside one build. The icon a tester sees comes from the build itself, so
+it is blank until one has been uploaded and processed.
 """
 import hashlib, os, sys, time, urllib.request
 
@@ -109,6 +115,67 @@ def push_version_texts(version):
                 "marketingUrl": texts.MARKETING_URL,
             }}})
         print(f"  {locale}: description, keywords, promotional text, URLs")
+
+
+def check_limit(field, locale, value):
+    """A text over its limit is a rejected PATCH, not a truncated field."""
+    limit = texts.LIMITS[field]
+    if len(value) > limit:
+        raise SystemExit(f"{locale} {field} is {len(value)} chars, limit is {limit}")
+    return value
+
+
+def push_testflight(app):
+    """The description and What to Test a tester actually reads.
+
+    Written against the newest build that App Store Connect has processed.
+    With no build there is nothing to attach What to Test to, which is also
+    why the tester's list shows no icon: that comes from the build.
+    """
+    existing = {d["attributes"]["locale"]: d["id"]
+                for d in call("GET", f"/v1/apps/{app}/betaAppLocalizations")["data"]}
+    print("TestFlight description:")
+    for locale, description in texts.BETA_DESCRIPTION.items():
+        attributes = {"description": check_limit("betaDescription", locale, description)}
+        # Only when the account has chosen one: App Store Connect shows this
+        # address to every tester.
+        if texts.FEEDBACK_EMAIL:
+            attributes["feedbackEmail"] = texts.FEEDBACK_EMAIL
+        if locale in existing:
+            call("PATCH", f"/v1/betaAppLocalizations/{existing[locale]}", {"data": {
+                "type": "betaAppLocalizations", "id": existing[locale],
+                "attributes": attributes}})
+            print(f"  {locale}: updated")
+        else:
+            attributes["locale"] = locale
+            call("POST", "/v1/betaAppLocalizations", {"data": {
+                "type": "betaAppLocalizations", "attributes": attributes,
+                "relationships": {"app": {"data": {"type": "apps", "id": app}}}}})
+            print(f"  {locale}: created")
+
+    builds = call("GET", f"/v1/builds?filter[app]={app}&sort=-uploadedDate&limit=1")["data"]
+    if not builds:
+        print("What to Test: no build uploaded yet, skipped")
+        return
+    build = builds[0]
+    version = build["attributes"].get("version", "?")
+    state = build["attributes"].get("processingState", "?")
+    print(f"What to Test, build {version} ({state}):")
+    on_build = {d["attributes"]["locale"]: d["id"] for d in call(
+        "GET", f"/v1/builds/{build['id']}/betaBuildLocalizations")["data"]}
+    for locale, whats_new in texts.WHAT_TO_TEST.items():
+        attributes = {"whatsNew": check_limit("whatToTest", locale, whats_new)}
+        if locale in on_build:
+            call("PATCH", f"/v1/betaBuildLocalizations/{on_build[locale]}", {"data": {
+                "type": "betaBuildLocalizations", "id": on_build[locale],
+                "attributes": attributes}})
+            print(f"  {locale}: updated")
+        else:
+            attributes["locale"] = locale
+            call("POST", "/v1/betaBuildLocalizations", {"data": {
+                "type": "betaBuildLocalizations", "attributes": attributes,
+                "relationships": {"build": {"data": {"type": "builds", "id": build["id"]}}}}})
+            print(f"  {locale}: created")
 
 
 def png_size(path):
@@ -217,10 +284,14 @@ def main(argv):
     version = current_version(app)
     folder = os.path.join(os.path.dirname(os.path.abspath(__file__)), "screenshots")
 
+    if only == "--testflight-only":
+        push_testflight(app)
+        return
     if only != "--screenshots-only":
         push_app_info(app)
         print("version texts:")
         push_version_texts(version)
+        push_testflight(app)
     if only != "--texts-only":
         push_screenshots(version, folder)
 

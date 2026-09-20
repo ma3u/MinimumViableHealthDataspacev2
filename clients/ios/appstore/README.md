@@ -10,8 +10,9 @@ export ASC_ISSUER_ID=aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee
 export ASC_APP_ID=6811688174
 
 ../Scripts/capture-screenshots.sh     # 5 PNGs at 1320x2868 into screenshots/
-python3 push.py                       # categories, texts, and screenshots
-python3 push.py --texts-only          # or just one half
+python3 push.py                       # categories, texts, TestFlight, screenshots
+python3 push.py --texts-only          # or just one part
+python3 push.py --testflight-only
 ```
 
 ## What is set
@@ -25,6 +26,29 @@ python3 push.py --texts-only          # or just one half
 | Privacy policy URL | `ma3u.github.io/.../meinbefund/privacy.html`            |
 | Support URL        | the GitHub issue tracker                                |
 | Screenshots        | 5, 6.9-inch, from `DemoSeed`, not committed (see below) |
+
+## What a tester sees, which is not the listing
+
+TestFlight shows its own texts, stored as different resources, and nothing was
+writing them:
+
+| What the tester sees    | Resource                 | Source in `texts.py` |
+| ----------------------- | ------------------------ | -------------------- |
+| The app's icon          | the uploaded build       | `AppIcon-1024.png`   |
+| Description on the app  | `betaAppLocalizations`   | `BETA_DESCRIPTION`   |
+| What to Test on a build | `betaBuildLocalizations` | `WHAT_TO_TEST`       |
+
+So a tester group with no build shows no icon and no description: both come
+from things that do not exist until an upload has been processed. `push.py`
+writes the description whether or not a build exists, and attaches What to Test
+to the newest build it finds.
+
+`WHAT_TO_TEST` is rewritten per upload. It is what a tester is being asked to
+look at, not a changelog.
+
+The feedback address is read from `ASC_FEEDBACK_EMAIL` and left alone when
+unset. App Store Connect shows it to every tester, and whose address that
+should be is not a decision for a file in a repository.
 
 The screenshot PNGs are deliberately absent from the repository.
 `clients/ios/.gitignore` blocks every image in this tree so a real lab report
