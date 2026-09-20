@@ -179,6 +179,7 @@ struct ProfileView: View {
           .keyboardType(.decimalPad)
           .multilineTextAlignment(.trailing)
           .labelsHidden()
+          .accessibilityIdentifier("profile-visceral-fat")
         Picker("Unit", selection: $visceralFatUnit) {
           Text("cm²").tag(BodyMeasurements.VisceralFatUnit.area)
           Text("kg").tag(BodyMeasurements.VisceralFatUnit.mass)
@@ -206,6 +207,7 @@ struct ProfileView: View {
           .keyboardType(.decimalPad)
           .multilineTextAlignment(.trailing)
           .labelsHidden()
+          .accessibilityIdentifier("profile-\(key)")
         Text(unit).foregroundStyle(.secondary)
       }
       dateRow(date, key: key)
