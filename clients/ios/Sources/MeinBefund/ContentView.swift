@@ -172,6 +172,15 @@ final class AppModel: ObservableObject {
       try await store.save(report)
       try await store.saveScan(product.pdf, for: id)
       try await store.saveDiagnostics(diagnostics, for: id)
+      // One scan of a scale's screens can carry two measurement days, and a
+      // value belongs to the day it was measured on rather than to the day
+      // the rest of the photographs were taken.
+      for extra in product.extraReports {
+        try await store.save(extra)
+        Log.store.notice(
+          "further report saved for another measurement date: \(extra.extraction.coded.count, privacy: .public) coded"
+        )
+      }
       pending = nil
       await refresh()
     } catch {

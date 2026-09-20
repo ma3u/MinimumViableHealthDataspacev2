@@ -30,7 +30,10 @@ struct ReviewSheet: View {
 
   private var defaultTitle: String {
     let lab = laboratory.trimmingCharacters(in: .whitespaces)
-    return lab.isEmpty ? String(localized: "Lab report") : lab
+    if !lab.isEmpty { return lab }
+    // What the document calls itself, when it says: a laboratory's name, or
+    // the kind of screen a reading came from.
+    return product.suggestedTitle ?? String(localized: "Lab report")
   }
 
   var body: some View {
@@ -59,7 +62,14 @@ struct ReviewSheet: View {
                 "These values come from the laboratory's own document, so they are final rather than a transcription."
               )
             } else {
-              Text("These values were read from a photo and are preliminary, not confirmed.")
+                Text("These values were read from a photo and are preliminary, not confirmed.")
+            }
+            if !product.extraReports.isEmpty {
+              // Saying so before the tap, because a person who saves one
+              // report and finds three should have been told.
+              Text(
+                "\(product.extraReports.count) further report(s) carry a different measurement date and will be saved alongside this one."
+              )
             }
           }
         }
