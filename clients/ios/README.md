@@ -28,6 +28,30 @@ supplies one from `TEAM_ID` or from the keychain, and installs what it built.
 TestFlight: `Scripts/archive-and-upload.sh`, see its header for the four things
 that must exist in your Apple Developer account first.
 
+## Two test suites, and what each is for
+
+```bash
+swift test                    # what the app computes
+Scripts/run-ui-tests.sh       # what it shows, and what a tap does
+```
+
+The unit suite is the larger one and catches the things that can be reasoned
+about: a unit that picks the wrong code, a date read from the wrong line, an
+export column in the wrong place.
+
+It caught none of the last several defects, because they were all on screen. A
+card clipped at the chart's edge. A selection that forgot itself on the next
+render, which looks exactly like a tap that never registered. `LOINC
+Optional("2093-3")` on the one screen a person is asked to compare with their
+own paper. A waist that could be typed and was then thrown away by the obvious
+Save button. Each was obvious the moment the app was driven and invisible to
+everything else.
+
+So `Tests/UITests/` drives it. Every test launches with `-MBDemoSeed`, so the
+data is two fictional reports held in memory and no real report is ever
+involved. `-MBShot <screen>` opens a screen directly, which keeps a test about
+what it checks rather than about how to get there.
+
 ## What works today
 
 Scan (VisionKit) → on-device OCR (two Vision passes reconciled, German + English,

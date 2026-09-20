@@ -12,13 +12,15 @@ globs:
 
 ## Frameworks
 
-| Scope            | Framework  | Config                      |
-| ---------------- | ---------- | --------------------------- |
-| Unit / component | Vitest 4   | `ui/vitest.config.ts`       |
-| E2E browser      | Playwright | `ui/playwright.config.ts`   |
-| Protocol (DSP)   | Custom TCK | `scripts/run-dsp-tck.sh`    |
-| Protocol (DCP)   | Custom     | `scripts/run-dcp-tests.sh`  |
-| EHDS domain      | Custom     | `scripts/run-ehds-tests.sh` |
+| Scope            | Framework     | Config                                |
+| ---------------- | ------------- | ------------------------------------- |
+| Unit / component | Vitest 4      | `ui/vitest.config.ts`                 |
+| E2E browser      | Playwright    | `ui/playwright.config.ts`             |
+| iOS unit         | Swift Testing | `cd clients/ios && swift test`        |
+| iOS on screen    | XCUITest      | `clients/ios/Scripts/run-ui-tests.sh` |
+| Protocol (DSP)   | Custom TCK    | `scripts/run-dsp-tck.sh`              |
+| Protocol (DCP)   | Custom        | `scripts/run-dcp-tests.sh`            |
+| EHDS domain      | Custom        | `scripts/run-ehds-tests.sh`           |
 
 ## Unit Tests (Vitest)
 
@@ -118,3 +120,28 @@ The spec `19-static-github-pages.spec.ts` (J221–J260) tests the static export:
 - Do not mock Neo4j driver internals in integration-style tests; use the mock JSON fixtures under `ui/public/mock/`.
 - Do not mock `next-auth/react` session in E2E tests; use the `setPersona` localStorage helper instead.
 - MSW is for unit tests only; Playwright tests hit the actual running server.
+
+## iOS UI Tests (XCUITest)
+
+`clients/ios/Tests/UITests/`, run with `Scripts/run-ui-tests.sh`. One class per
+screen, plus `AppDriver` for launching and waiting.
+
+Every test launches with `-MBDemoSeed`: two fictional reports held in memory,
+never the store, so no real report is involved and the numbers are the same on
+any machine. `-MBShot <screen>` opens a screen directly rather than tapping
+through a menu, so a test breaks when what it checks changes and not when a
+button moves.
+
+Three things learned the hard way, all in `docs/gotchas.md`:
+
+- An `accessibilityIdentifier` on a container renames everything inside it.
+  Put `.accessibilityElement(children: .contain)` before it.
+- A `Button` whose label is `Color.clear` is not in the accessibility tree at
+  all. Give it something to draw, at 0.001 opacity.
+- Swift Charts' `chartXSelection` answers a finger and not a synthesised tap,
+  so a UI test cannot reach it and neither can VoiceOver. Put real buttons
+  over the marks.
+
+Assert on what a person can see: labels, values, and the frames of elements
+when the question is whether something is clipped. Never on view hierarchy
+shape.

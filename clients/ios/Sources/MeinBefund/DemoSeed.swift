@@ -20,6 +20,26 @@
       ProcessInfo.processInfo.arguments.contains("-MBDemoSeed")
     }
 
+    /// What the demo is currently showing, including anything saved since
+    /// launch. In memory only: it never reaches the store, so a demo run
+    /// cannot touch a real person's reports.
+    ///
+    /// Without this, saving in demo mode looked like it worked and the next
+    /// refresh quietly put the original two reports back. A demo where saving
+    /// does nothing is a demo that lies, and it also left no way for a UI test
+    /// to check that anything is kept at all.
+    @MainActor static var live: [LabReport] = reports
+
+    /// The profile the demo is showing, likewise in memory only.
+    @MainActor static var liveProfile = Profile.empty
+
+    /// Replaces a report of the same id, or adds it, newest first.
+    @MainActor static func keep(_ report: LabReport) {
+      live.removeAll { $0.id == report.id }
+      live.append(report)
+      live.sort { $0.effectiveDate > $1.effectiveDate }
+    }
+
     /// Which screen to open on launch.
     ///
     /// Screenshots are taken by launching straight into a screen rather than by

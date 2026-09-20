@@ -27,7 +27,7 @@ ns = "{urn:oasis:names:tc:xliff:document:1.2}"
 # should fail the check, not slip through a clever regex.
 same_in_both = {
     "Shared", "MeinBefund", "Klarbefund", "Anthropic", "Azure OpenAI", "OK", "·",
-    "LOINC %@", "Ref. %@", "%@ · %@", "%@%@ %@", "%@  %@ %@", "%@ %@ · %@",
+    "LOINC %@", "Ref. %@", "%@ · %@", "%@%@ %@", "%@  %@ %@", "%@ %@ · %@", "%@ %@, %@",
     "%@ %@ · LOINC %@", "https://<name>.openai.azure.com",
     "%@: %@", "Optimal", "Optimal %@ · %@",
     # Analyte names and abbreviations a German report prints exactly as the

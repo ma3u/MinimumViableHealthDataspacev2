@@ -59,7 +59,8 @@ final class AppModel: ObservableObject {
       // Screenshot mode: fictional reports, never persisted, so nothing here
       // can reach a real store or a real person's device.
       if DemoSeed.isRequested {
-        reports = DemoSeed.reports
+        reports = DemoSeed.live
+        profile = DemoSeed.liveProfile
         return
       }
     #endif
@@ -76,9 +77,16 @@ final class AppModel: ObservableObject {
   }
 
   func saveProfile(_ updated: Profile) async {
+    var next = updated
+    next.updatedAt = Date()
+    #if DEBUG
+      if DemoSeed.isRequested {
+        DemoSeed.liveProfile = next
+        profile = next
+        return
+      }
+    #endif
     do {
-      var next = updated
-      next.updatedAt = Date()
       try await store.saveProfile(next)
       profile = next
     } catch { self.error = error.localizedDescription }
@@ -115,6 +123,13 @@ final class AppModel: ObservableObject {
           let report = BodyMeasurements.report(
             entries: entries, on: day, id: existing?.id ?? UUID(), title: title)
         else { continue }
+        #if DEBUG
+          if DemoSeed.isRequested {
+            DemoSeed.keep(report)
+            saved += 1
+            continue
+          }
+        #endif
         try await store.save(report)
         saved += 1
       }

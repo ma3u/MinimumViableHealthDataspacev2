@@ -162,13 +162,16 @@ private struct PointCallout: View {
   static let height: CGFloat = 62
 
   var body: some View {
-    if let onOpen {
-      Button { onOpen(point.reportId) } label: { card }
-        .buttonStyle(.plain)
-        .accessibilityHint(Text("Opens the report this measurement came from"))
-    } else {
-      card
+    Group {
+      if let onOpen {
+        Button { onOpen(point.reportId) } label: { card }
+          .buttonStyle(.plain)
+          .accessibilityHint(Text("Opens the report this measurement came from"))
+      } else {
+        card
+      }
     }
+    .accessibilityIdentifier("trend-callout")
   }
 }
 
@@ -258,9 +261,10 @@ private struct SeriesChart: View {
   /// Where on the date axis the last tap landed, and so which measurement is
   /// showing its card. Nothing is selected until a tap.
   ///
-  /// `chartXSelection` rather than a tap gesture of our own: inside a `List`
-  /// row a plain `onTapGesture`, and even a high-priority spatial one, never
-  /// fired. Swift Charts does its own hit-testing here and it works.
+  /// Set by the button over each measurement. A tap gesture of our own never
+  /// fired inside a `List` row, and Swift Charts' `chartXSelection` works for
+  /// a finger but is unreachable by VoiceOver and by a UI test, which left
+  /// this screen's only action available to sighted precise tapping alone.
   @State private var selectedDate: Date?
 
   private var selectedPoint: TrendPoint? {
@@ -330,23 +334,61 @@ private struct SeriesChart: View {
         }
       }
     }
-    .chartXSelection(value: $selectedDate)
     .chartOverlay { proxy in
       GeometryReader { geometry in
-        // Only the card. Selecting is `chartXSelection`'s job, and anything
-        // laid over the plot to catch taps would take the card's own tap
-        // before its button ever saw it.
-        if let point = selectedPoint,
-          let anchor = position(of: point, proxy: proxy, in: geometry)
-        {
-          PointCallout(point: point, series: series, onOpen: onOpenReport)
-            .fixedSize()
-            .modifier(CalloutPlacement(anchor: anchor, bounds: geometry.size))
+        ZStack(alignment: .topLeading) {
+          // A real button over each measurement, not just the chart's own
+          // selection gesture.
+          //
+          // Three reasons, and the third is the one that decides it. A drawn
+          // dot is about eight points across and a finger is not. Swift
+          // Charts' selection cannot be reached by VoiceOver or by a UI test
+          // at all, so the one way to this screen's only action was a
+          // sighted, precise tap. And a button is testable, which is how the
+          // card that hung off the chart's edge was found.
+          ForEach(series.points) { point in
+            if let anchor = position(of: point, proxy: proxy, in: geometry) {
+              Button {
+                withAnimation(.easeOut(duration: 0.15)) {
+                  selectedDate = (selectedPoint?.id == point.id) ? nil : point.date
+                }
+              } label: {
+                // Not `Color.clear`: a view with nothing to draw is dropped
+                // from the accessibility tree, so the button existed for a
+                // finger and for nothing else.
+                Circle()
+                  .fill(Color.primary.opacity(0.001))
+                  .frame(width: 40, height: 40)
+                  .contentShape(Circle())
+              }
+              .buttonStyle(.plain)
+              .accessibilityIdentifier("trend-point-\(series.analyteKey)")
+              .position(x: anchor.x, y: anchor.y)
+              .accessibilityLabel(
+                Text(
+                  "\(Measurement.text(point.value)) \(series.ucum), \(point.date.formatted(date: .abbreviated, time: .omitted))"
+                ))
+            }
+          }
+          // Above the buttons, so its own tap is not taken by the one
+          // underneath it.
+          if let point = selectedPoint,
+            let anchor = position(of: point, proxy: proxy, in: geometry)
+          {
+            PointCallout(point: point, series: series, onOpen: onOpenReport)
+              .fixedSize()
+              .modifier(CalloutPlacement(anchor: anchor, bounds: geometry.size))
+          }
         }
       }
     }
     .frame(height: 170)
     .padding(.vertical, 6)
+    // A container, not an element. A bare `accessibilityIdentifier` here
+    // replaces the identifier and the label of everything inside, so every
+    // point button inherited the chart's name and none could be told apart.
+    .accessibilityElement(children: .contain)
+    .accessibilityIdentifier("trend-chart-\(series.analyteKey)")
     .accessibilityLabel(
       Text(
         "\(AnalyteNames.title(series.analyteKey)), \(series.points.count) measurements, latest \(series.placement.label)"
