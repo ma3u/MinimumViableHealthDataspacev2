@@ -17,7 +17,9 @@ settings:
     # TestFlight train and cannot be attached to that version later, so the
     # two are kept identical rather than nearly so.
     MARKETING_VERSION: "1.0"
-    CURRENT_PROJECT_VERSION: "1"
+    # Rises with every upload: App Store Connect refuses a build number it has
+    # already seen, and it refuses it after the upload, having spent minutes.
+    CURRENT_PROJECT_VERSION: "2"
 
 targets:
   # Mirrors the SwiftPM `Shared` target so the app and the parity tool compile
