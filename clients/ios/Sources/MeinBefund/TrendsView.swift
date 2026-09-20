@@ -147,12 +147,19 @@ private struct PointCallout: View {
     }
     .padding(.horizontal, 10)
     .padding(.vertical, 7)
+    .frame(width: PointCallout.width, height: PointCallout.height, alignment: .leading)
     .background(.regularMaterial, in: .rect(cornerRadius: 10))
     .overlay(
       RoundedRectangle(cornerRadius: 10).strokeBorder(.quaternary))
     .shadow(radius: 3, y: 1)
-    .frame(maxWidth: 210, alignment: .leading)
   }
+
+  /// Fixed, so keeping the card inside the chart is arithmetic rather than a
+  /// measurement. Measuring it took a render to arrive, and the first render
+  /// placed the card at the point with a width of zero, which put it half
+  /// outside the chart and clipped at the card's edge.
+  static let width: CGFloat = 186
+  static let height: CGFloat = 62
 
   var body: some View {
     if let onOpen {
@@ -360,47 +367,26 @@ private struct SeriesChart: View {
 
 /// Keeps the card beside its point and inside the chart.
 ///
-/// Above the point where there is room, below it near the top edge, and
-/// nudged sideways so neither end runs off: a card half off the screen names
-/// a measurement nobody can read.
+/// The row clips at the chart's edge, so a card that hangs over it loses the
+/// text that hangs over. Above the point where there is room, below it near
+/// the top, and pushed sideways so both ends stay in.
 private struct CalloutPlacement: ViewModifier {
   let anchor: CGPoint
   let bounds: CGSize
 
   func body(content: Content) -> some View {
-    content.background(
-      GeometryReader { card in
-        Color.clear.preference(key: CalloutSizeKey.self, value: card.size)
-      }
-    )
-    .modifier(CalloutOffset(anchor: anchor, bounds: bounds))
-  }
-}
-
-private struct CalloutSizeKey: PreferenceKey {
-  static let defaultValue = CGSize.zero
-  static func reduce(value: inout CGSize, nextValue: () -> CGSize) { value = nextValue() }
-}
-
-private struct CalloutOffset: ViewModifier {
-  let anchor: CGPoint
-  let bounds: CGSize
-  @State private var size = CGSize.zero
-
-  func body(content: Content) -> some View {
-    content
-      .onPreferenceChange(CalloutSizeKey.self) { size = $0 }
-      .offset(x: clampedX, y: offsetY)
+    content.offset(x: x, y: y)
   }
 
-  private var clampedX: CGFloat {
-    let wanted = anchor.x - size.width / 2
-    return min(max(4, wanted), max(4, bounds.width - size.width - 4))
+  private var x: CGFloat {
+    let wanted = anchor.x - PointCallout.width / 2
+    let last = max(0, bounds.width - PointCallout.width)
+    return min(max(0, wanted), last)
   }
 
-  /// Above the point, unless that would leave the top of the chart.
-  private var offsetY: CGFloat {
-    let above = anchor.y - size.height - 10
-    return above < 0 ? anchor.y + 12 : above
+  private var y: CGFloat {
+    let above = anchor.y - PointCallout.height - 8
+    if above >= 0 { return above }
+    return min(anchor.y + 10, max(0, bounds.height - PointCallout.height))
   }
 }
