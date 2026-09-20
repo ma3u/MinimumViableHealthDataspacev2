@@ -36,6 +36,8 @@ same_in_both = {
     "ALT (GPT)", "AST (GOT)", "Apolipoprotein A1", "Apolipoprotein B", "CRP",
     "Ferritin", "Gamma-GT", "HbA1c", "Lipoprotein(a)", "Vitamin B12",
     "Vitamin D (25-OH)", "eGFR", "hs-CRP", "BMI", "cm",
+    # Unit symbols on the profile's measurement fields. Identical in German.
+    "kg", "cm\u00b2",
 }
 
 missing, german_in_base, total = [], [], 0

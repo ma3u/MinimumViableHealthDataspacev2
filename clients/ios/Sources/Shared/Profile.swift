@@ -119,9 +119,24 @@ public enum BodyMeasurements {
     }
   }
 
+  /// How a device reports visceral fat.
+  ///
+  /// Not a display preference. An area in square centimetres and a mass in
+  /// kilograms are different quantities that cannot be converted into one
+  /// another, and different body-composition devices report one or the other.
+  /// LOINC codes the area and has no term for the mass, so the choice decides
+  /// whether the reading carries a code at all.
+  public enum VisceralFatUnit: String, Sendable, Codable, CaseIterable {
+    case area = "cm2"
+    case mass = "kg"
+
+    public var ucum: String { rawValue }
+  }
+
   /// The measurements the profile screen offers, in the order it shows them.
   public static func entries(
-    waistCm: Double?, weightKg: Double?, visceralFatCm2: Double?, heightCm: Double?,
+    waistCm: Double?, weightKg: Double?, visceralFat: Double?,
+    visceralFatUnit: VisceralFatUnit = .area, heightCm: Double?,
     profile: Profile
   ) -> [Entry] {
     var entries: [Entry] = []
@@ -142,13 +157,39 @@ public enum BodyMeasurements {
       entries.append(
         Entry(analyteKey: "waist-circumference", label: "Taillenumfang", value: waistCm, ucum: "cm"))
     }
-    if let visceralFatCm2 {
+    if let visceralFat {
       entries.append(
         Entry(
-          analyteKey: "visceral-fat-area", label: "Viszerales Fett", value: visceralFatCm2,
-          ucum: "cm2"))
+          analyteKey: "visceral-fat", label: "Viszerales Fett", value: visceralFat,
+          ucum: visceralFatUnit.ucum))
     }
     return entries
+  }
+
+  /// The analyte keys this screen writes, newest value first when read back.
+  static let bodyKeys = [
+    "body-height", "body-weight", "bmi", "waist-circumference", "visceral-fat",
+  ]
+
+  /// The most recent value of each body measurement across every report.
+  ///
+  /// The profile screen was a one-way entry form: values were typed, saved and
+  /// gone, with no way to see or correct what had been entered, and no way for
+  /// a reading transferred from a scale's screen to show up as the current
+  /// figure. Reading the latest back fixes both, and it deliberately does not
+  /// care where a value came from: a photograph of a gym scale and a typed
+  /// number are the same measurement to this screen, and their provenance is
+  /// already recorded on the value itself.
+  public static func latest(from reports: [LabReport]) -> [String: (value: Double, ucum: String, date: Date)] {
+    var newest: [String: (value: Double, ucum: String, date: Date)] = [:]
+    for report in reports {
+      for value in report.extraction.coded where bodyKeys.contains(value.coding.analyteKey) {
+        let key = value.coding.analyteKey
+        if let existing = newest[key], existing.date >= report.effectiveDate { continue }
+        newest[key] = (value.raw.value, value.coding.ucum, report.effectiveDate)
+      }
+    }
+    return newest
   }
 
   /// Turns entries into a report, coded through the same dictionary as a scan.

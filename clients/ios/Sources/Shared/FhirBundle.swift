@@ -157,18 +157,10 @@ public enum FhirWriter {
             ])
           ]
         ]),
-        "code": [
-          "coding": .array([
-            [
-              "system": .string(loincSystem),
-              "code": .string(value.coding.loinc),
-              "display": .string(value.coding.display),
-            ]
-          ]),
-          // The label exactly as the lab printed it, so a reviewer can match the
-          // coded resource back to the sheet without trusting our dictionary.
-          "text": .string(value.raw.label),
-        ],
+        // A quantity LOINC does not code gets a CodeableConcept with `text`
+        // and no `coding`, which is valid FHIR and says plainly that no code
+        // applies. A near-enough code would be worse than saying nothing.
+        "code": codeableConcept(for: value),
         "subject": subject,
         "effectiveDateTime": .string(meta.effectiveDateTime),
         "valueQuantity": quantity(
@@ -284,6 +276,40 @@ public enum FhirWriter {
           ]
         }),
     ]
+  }
+
+  /// `Observation.code`, with a LOINC coding when one exists.
+  ///
+  /// FHIR allows a CodeableConcept carrying only `text`, and that is what an
+  /// uncoded quantity gets. The dictionary records why LOINC has no code for
+  /// it, and that reason travels as a `data-absent-reason` extension so a
+  /// consumer is told rather than left to guess.
+  private static func codeableConcept(for value: CodedLabValue) -> JSON {
+    var concept: JSON = [:]
+    if let loinc = value.coding.loinc {
+      concept["coding"] = .array([
+        [
+          "system": .string(loincSystem),
+          "code": .string(loinc),
+          "display": .string(value.coding.display),
+        ]
+      ])
+    } else if let reason = value.coding.uncodedReason {
+      concept["extension"] = .array([
+        [
+          "url": .string("http://hl7.org/fhir/StructureDefinition/data-absent-reason"),
+          "valueCode": .string("not-applicable"),
+          "_valueCode": ["extension": .array([
+            ["url": .string("http://hl7.org/fhir/StructureDefinition/rendered-value"),
+             "valueString": .string(reason)],
+          ])],
+        ]
+      ])
+    }
+    // The label exactly as the lab printed it, so a reviewer can match the
+    // resource back to the sheet without trusting our dictionary.
+    concept["text"] = .string(value.raw.label)
+    return concept
   }
 
   private static func quantity(_ value: Double, ucum: String, comparator: String?) -> JSON {

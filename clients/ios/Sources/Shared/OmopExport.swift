@@ -27,6 +27,12 @@ import Foundation
 ///   inventing them.
 /// - `observation_period.csv` spans the first to the last measurement.
 ///
+/// A quantity LOINC does not code, such as the visceral fat **mass** a
+/// bioimpedance scale reports, carries its printed label in
+/// `measurement_source_value` instead of a code. The column means the source's
+/// own value, so a label is the honest content, and a downstream mapper sees
+/// something unmappable rather than a plausible wrong code.
+///
 /// Provenance travels too: an OCR transcription is not the laboratory's own
 /// figure, so `value_source_value` carries the comparator and the reading, and
 /// every row names the source document it came from.
@@ -83,7 +89,11 @@ public enum OmopExport {
 
     struct Row {
       let date: Date
-      let loinc: String
+      /// What goes in `measurement_source_value`: the LOINC code, or the
+      /// printed label where LOINC has no code for the quantity. That column
+      /// means "the code as it appears in the source data", and for a
+      /// bioimpedance scale's visceral fat mass the label is that.
+      let sourceValue: String
       let value: CodedLabValue
       let reportTitle: String
     }
@@ -93,12 +103,14 @@ public enum OmopExport {
       for value in report.extraction.coded {
         rows.append(
           Row(
-            date: report.effectiveDate, loinc: value.coding.loinc, value: value,
+            date: report.effectiveDate,
+            sourceValue: value.coding.loinc ?? value.raw.label, value: value,
             reportTitle: report.title))
       }
     }
     rows.sort {
-      ($0.date, $0.loinc, $0.value.raw.label) < ($1.date, $1.loinc, $1.value.raw.label)
+      ($0.date, $0.sourceValue, $0.value.raw.label)
+        < ($1.date, $1.sourceValue, $1.value.raw.label)
     }
 
     var measurement = [measurementColumns.joined(separator: ",")]
@@ -121,7 +133,7 @@ public enum OmopExport {
           raw.referenceLow.map(number) ?? "",
           raw.referenceHigh.map(number) ?? "",
           "", "", "",
-          csv(row.loinc),
+          csv(row.sourceValue),
           "0",
           csv(row.value.coding.ucum),
           "0",
