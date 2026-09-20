@@ -157,7 +157,8 @@ public enum LabImport {
     }
 
     let document = try original ?? ScanDocument.pdf(pages: images)
-    return finish(extraction: merged, pageTexts: pageTexts, pdf: document, pages: pages)
+    return finish(
+      extraction: merged, pageTexts: pageTexts, pdf: document, pages: pages, images: images)
   }
 
   // MARK: - The text-layer path
@@ -210,7 +211,8 @@ public enum LabImport {
   // MARK: - Shared tail
 
   private static func finish(
-    extraction: ExtractionResult, pageTexts: [String], pdf: Data, pages: [ScanDiagnostics.Page]
+    extraction: ExtractionResult, pageTexts: [String], pdf: Data, pages: [ScanDiagnostics.Page],
+    images: [CGImage] = []
   ) -> Result {
     // A body-composition scale's screen is not a lab sheet and has its own
     // reader. It is tried only when the ordinary parse found no values, so a
@@ -221,9 +223,11 @@ public enum LabImport {
       var readings: [DeviceScreen.Reading] = []
       for (index, text) in pageTexts.enumerated() where DeviceScreen.looksLikeDeviceScreen(text) {
         let fragments = index < pages.count ? pages[index].fragments : []
-        guard let read = DeviceScreen.read(text, fragments: fragments, page: index + 1) else {
-          continue
-        }
+        let image = index < images.count ? images[index] : nil
+        guard
+          let read = DeviceScreen.read(
+            text, fragments: fragments, image: image, page: index + 1)
+        else { continue }
         readings.append(read.current)
         readings.append(contentsOf: read.history)
       }

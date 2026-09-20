@@ -26,6 +26,9 @@ public struct ReportMetadata: Sendable, Equatable, Codable {
     /// not to a day. A scale plots a year of readings and labels only the
     /// latest; the rest can be recovered, but only that far.
     case chartMonth = "read-from-a-chart-axis"
+    /// Measured off the drawing, because the chart printed no number beside
+    /// the point. An estimate, and never presented as anything else.
+    case chartEstimate = "measured-off-a-chart"
   }
 
   /// How exact a date is.
