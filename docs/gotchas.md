@@ -500,3 +500,23 @@ change transport in place — the recovery is delete + recreate. See
 
 Same class as `project_aca_tcp_ingress_shortname` (Neo4j/7687). Bolt, Postgres,
 NATS, Kafka — any binary protocol on ACA needs explicit `--transport tcp`.
+
+## 2026-09-20 — `xcodegen generate` drops the iOS signing team
+
+`clients/ios/MeinBefund.xcodeproj` is generated and git-ignored, and
+`project.yml` deliberately carries no `DEVELOPMENT_TEAM`, because the team id
+belongs to an account rather than to the repository. So every regeneration
+produces a project that builds for the simulator and fails for a device with:
+
+```
+error: Signing for "MeinBefund" requires a development team.
+```
+
+Adding a Swift file to `Sources/` needs a regeneration, so this appears after
+an ordinary change with nothing to do with signing.
+
+Fix: `clients/ios/Scripts/install-device.sh` builds and installs in one step.
+It reads `TEAM_ID` when set and otherwise takes the id from the Apple
+Distribution identity in the login keychain, so the id stays out of the repo
+and nobody has to rediscover it. `DEVICE_ID` overrides the device when more
+than one iPhone is paired.

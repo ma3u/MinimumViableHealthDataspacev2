@@ -56,6 +56,9 @@ extension ReferenceRange {
 /// One measurement on a timeline.
 public struct TrendPoint: Sendable, Equatable, Identifiable {
   public let id: UUID
+  /// The report this value came from, so a point on a chart can be followed
+  /// back to the document it was read from.
+  public let reportId: UUID
   /// The report's own date, never the day it was scanned.
   public let date: Date
   public let value: Double
@@ -69,10 +72,11 @@ public struct TrendPoint: Sendable, Equatable, Identifiable {
   public let reportTitle: String
 
   public init(
-    id: UUID, date: Date, value: Double, comparator: Comparator?, source: SourceKind,
-    printedLow: Double?, printedHigh: Double?, reportTitle: String
+    id: UUID, reportId: UUID, date: Date, value: Double, comparator: Comparator?,
+    source: SourceKind, printedLow: Double?, printedHigh: Double?, reportTitle: String
   ) {
     self.id = id
+    self.reportId = reportId
     self.date = date
     self.value = value
     self.comparator = comparator
@@ -101,6 +105,33 @@ public struct TrendSeries: Sendable, Equatable, Identifiable {
   public var id: String { "\(analyteKey)|\(ucum)" }
   public var latest: TrendPoint? { points.last }
   public var earliest: TrendPoint? { points.first }
+
+  /// What the measurement is, from the dictionary. A definition, not a
+  /// reading of this person's value.
+  public var description: String? { Analytes.description(of: analyteKey) }
+
+  /// The range the laboratory printed beside the most recent value.
+  ///
+  /// Most analytes have no published guideline band, and for those this is
+  /// the only range there is. It is also the one that describes the assay the
+  /// person was actually measured with (ADR-033 rule 1), so a chart draws it
+  /// whenever no published band applies rather than drawing nothing.
+  public var printedRange: (low: Double?, high: Double?)? {
+    guard let latest, latest.printedLow != nil || latest.printedHigh != nil else { return nil }
+    return (latest.printedLow, latest.printedHigh)
+  }
+
+  /// Where the latest value sits against the laboratory's own printed range.
+  ///
+  /// Used only when no published range applies. It is the laboratory's
+  /// interval, so the answer is "inside what your laboratory printed" or
+  /// "outside it", never a judgement of the person.
+  public var withinPrintedRange: Bool? {
+    guard let latest, let range = printedRange else { return nil }
+    if let low = range.low, latest.value < low { return false }
+    if let high = range.high, latest.value > high { return false }
+    return true
+  }
 
   /// Change from the previous measurement to the latest, or nil with one point.
   public var change: Double? {
@@ -152,7 +183,7 @@ public enum Trends {
         let key = "\(value.coding.analyteKey)|\(value.coding.ucum)"
         byKey[key, default: []].append(
           TrendPoint(
-            id: UUID(), date: report.effectiveDate, value: value.raw.value,
+            id: UUID(), reportId: report.id, date: report.effectiveDate, value: value.raw.value,
             comparator: value.raw.comparator, source: value.source,
             printedLow: value.raw.referenceLow, printedHigh: value.raw.referenceHigh,
             reportTitle: report.title))

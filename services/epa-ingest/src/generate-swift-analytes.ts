@@ -19,6 +19,8 @@ import {
   validate as validateRanges,
 } from "./generate-swift-reference-ranges.js";
 import {
+  ANALYTE_DESCRIPTIONS,
+  ANALYTE_DESCRIPTIONS_DE,
   ANALYTE_KEYS,
   ANALYTE_LABELS,
   UNIT_SPELLINGS,
@@ -97,6 +99,28 @@ export function renderSwift(
   entries: SwiftEntry[],
   unitMap: [string, string][],
 ): string {
+  // An analyte that can say what it measures in English must be able to say it
+  // in German too, or a German phone shows one English paragraph among the
+  // translated ones. Refused here rather than caught by a reader.
+  const english = Object.keys(ANALYTE_DESCRIPTIONS).sort();
+  const german = Object.keys(ANALYTE_DESCRIPTIONS_DE).sort();
+  const missing = english.filter((k) => !(k in ANALYTE_DESCRIPTIONS_DE));
+  const extra = german.filter((k) => !(k in ANALYTE_DESCRIPTIONS));
+  if (missing.length || extra.length) {
+    throw new Error(
+      `description languages disagree:${
+        missing.length ? ` no German for ${missing.join(", ")}` : ""
+      }` + `${extra.length ? ` German for unknown ${extra.join(", ")}` : ""}`,
+    );
+  }
+
+  const table = (source: Readonly<Record<string, string>>) =>
+    Object.entries(source)
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([key, text]) => `    ${swiftString(key)}: ${swiftString(text)},`)
+      .join("\n");
+  const descriptions = table(ANALYTE_DESCRIPTIONS);
+  const descriptionsDe = table(ANALYTE_DESCRIPTIONS_DE);
   const rows = entries
     .map(
       (e) =>
@@ -155,6 +179,25 @@ public enum Analytes {
   /// Printed unit spelling → UCUM code. Mirrors \`normaliseUnit\`.
   public static let unitMap: [String: String] = [
 ${units}
+  ]
+
+  /// What each analyte measures, in one or two sentences.
+  ///
+  /// A definition, never an interpretation of a person's own value: the app
+  /// describes the test and leaves the reading of a result to a doctor, or to
+  /// the consent-gated feature that asks a model (ADR-039, §5 of #186).
+  public static let descriptions: [String: String] = [
+${descriptions}
+  ]
+
+  /// The same definitions in German, for a phone set to German.
+  ///
+  /// Not in \`Localizable.strings\`: the English text is generated from the
+  /// TypeScript dictionary, so a translation kept anywhere else would drift
+  /// the moment an analyte is added. The generator refuses to emit unless
+  /// both languages cover exactly the same analytes.
+  public static let descriptionsDe: [String: String] = [
+${descriptionsDe}
   ]
 
   public static let codings: [AnalyteCoding] = [
