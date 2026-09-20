@@ -681,3 +681,80 @@ struct ScannedStudyReportTests {
     #expect(Self.extract("Ret-Hb  34,2  pg  28.0-36.0").coded.first?.coding.loinc == "71694-4")
   }
 }
+
+/// A home aminogram, and the two things that stopped it reading.
+@Suite("Amino acids, and a font's own icons")
+struct AminogramTests {
+
+  @Test("every essential amino acid codes, in micromoles per litre")
+  func essentialsAreCoded() throws {
+    // A home test names them in German; a laboratory sometimes uses the
+    // three-letter abbreviation. Both reach the same code.
+    let expected: [(String, String)] = [
+      ("Isoleucin", "20648-2"), ("Leucin", "20649-0"), ("Lysin", "20650-8"),
+      ("Methionin", "20651-6"), ("Phenylalanin", "14875-9"), ("Threonin", "20658-1"),
+      ("Tryptophan", "20659-9"), ("Valin", "20661-5"),
+    ]
+    for (label, loinc) in expected {
+      let coding = try #require(
+        Analytes.lookup(label: label, unit: "µmol/l"), "\(label) is in the dictionary")
+      #expect(coding.loinc == loinc, "\(label)")
+      #expect(coding.ucum == "umol/L")
+    }
+  }
+
+  @Test("the rest of an aminogram codes too")
+  func theRestAreCoded() throws {
+    // A fuller panel should not send anyone back to the dictionary.
+    for label in [
+      "Alanin", "Arginin", "Asparagin", "Aspartat", "Citrullin", "Cystein", "Glutamat",
+      "Glutamin", "Glycin", "Histidin", "Ornithin", "Prolin", "Serin", "Taurin", "Tyrosin",
+    ] {
+      #expect(Analytes.lookup(label: label, unit: "µmol/l") != nil, "\(label)")
+    }
+    // The two that have a second German name for the same substance.
+    #expect(
+      Analytes.lookup(label: "Glutaminsäure", unit: "µmol/l")?.analyteKey
+        == Analytes.lookup(label: "Glutamat", unit: "µmol/l")?.analyteKey)
+    #expect(
+      Analytes.lookup(label: "Asparaginsäure", unit: "µmol/l")?.analyteKey
+        == Analytes.lookup(label: "Aspartat", unit: "µmol/l")?.analyteKey)
+  }
+
+  @Test("an embedded font's icon does not hide a value")
+  func privateGlyphsAreRemoved() {
+    // A PDF's text layer hands over the code points an embedded font uses for
+    // its own pictures. This aminogram ends every value line with `U+E607`,
+    // the gauge beside it, and that one invisible character stopped the line
+    // parsing at all.
+    #expect(LabLineParser.withoutPrivateGlyphs("67,2 µmol/l \u{E607}") == "67,2 µmol/l")
+    #expect(LabLineParser.withoutPrivateGlyphs("Isoleucin\u{F0001} 67,2") == "Isoleucin 67,2")
+    // Nothing else is touched.
+    #expect(LabLineParser.withoutPrivateGlyphs("Isoleucin 67,2 µmol/l") == "Isoleucin 67,2 µmol/l")
+    #expect(LabLineParser.withoutPrivateGlyphs("Hämoglobin 15,4 g/dl") == "Hämoglobin 15,4 g/dl")
+  }
+
+  @Test("a value printed twice is read once")
+  func repeatsAreNotUnread() {
+    // The aminogram prints `Isoleucin 67,2 µmol/l` as a heading and `67,2
+    // µmol/l` again beside the gauge. The second has no label, so nothing can
+    // be made of it, and it used to arrive in the list of lines the app could
+    // not read. That list is the useful bug report; eight repeats of values
+    // that were read perfectly well make it useless.
+    let result = LabLineParser.extract(
+      "Isoleucin 67,2 µmol/l\n67,2 µmol/l \u{E607}\nLeucin 134 µmol/l\n134 µmol/l \u{E607}",
+      source: .labIssuedDigital)
+    #expect(result.coded.count == 2)
+    #expect(result.suspiciousLines.isEmpty)
+  }
+
+  @Test("a bare number that matches nothing is still reported")
+  func realMissesSurvive() {
+    // Only an exact repeat goes. A number that was genuinely missed stays in
+    // the list, because that list is what a fix is built from.
+    let result = LabLineParser.extract(
+      "Isoleucin 67,2 µmol/l\n99,9 µmol/l", source: .labIssuedDigital)
+    #expect(result.coded.count == 1)
+    #expect(result.suspiciousLines.count == 1)
+  }
+}

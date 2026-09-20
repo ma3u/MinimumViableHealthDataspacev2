@@ -590,3 +590,19 @@ Failed to get matching snapshot: No matches found for Element at index 150
 which says nothing about what the test was checking. `app.debugDescription`
 takes one snapshot and contains every label, and the suite got faster for it:
 387 seconds to 210.
+
+## 2026-09-20 — a PDF's text layer hands over an embedded font's own icons
+
+A home aminogram read as eight values coded and eight lines the app could not
+read. The unread eight were the same eight values, printed a second time
+beside a gauge, and what stopped them parsing was one invisible character:
+`U+E607`, in Unicode's private use area, where the embedded font keeps its
+pictures.
+
+No alphabet, no unit and no number lives in that range, so
+`LabLineParser.withoutPrivateGlyphs` takes those code points out before any
+line is parsed. The eight went from unread to recognised as repeats of values
+already extracted.
+
+Worth remembering when a line looks perfectly ordinary in a diagnostics dump
+and still refuses to parse: print the scalars, not the string.

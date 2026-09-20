@@ -383,6 +383,24 @@ import Shared
           Row("Muskelmasse", 29.38, "kg"),
         ], monthOnly: true, estimated: true),
 
+      // A home aminogram: eight essential amino acids, in micromoles per
+      // litre, with the ranges such a test prints. Invented values on a real
+      // layout, like everything else here.
+      Sheet(
+        id: "00000000-0000-0000-0000-00000000D009", year: 2026, month: 7, day: 8,
+        title: "Aminogramm, Labor Musterstadt", laboratory: "Labor Musterstadt",
+        source: .labIssuedDigital,
+        rows: [
+          Row("Isoleucin", 67.2, "µmol/l", 35, 100),
+          Row("Leucin", 134, "µmol/l", 70, 180),
+          Row("Lysin", 147, "µmol/l", 120, 280),
+          Row("Methionin", 24.6, "µmol/l", 15, 45),
+          Row("Phenylalanin", 58, "µmol/l", 35, 85),
+          Row("Threonin", 96.4, "µmol/l", 70, 200),
+          Row("Tryptophan", 48.9, "µmol/l", 30, 90),
+          Row("Valin", 212, "µmol/l", 150, 330),
+        ]),
+
       Sheet(
         id: "00000000-0000-0000-0000-00000000D007", year: 2026, month: 9, day: 4,
         title: "Lipidprofil, Labor Musterstadt", laboratory: "Labor Musterstadt",

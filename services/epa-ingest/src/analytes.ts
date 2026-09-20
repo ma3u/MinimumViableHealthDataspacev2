@@ -1334,6 +1334,307 @@ const DEFINITIONS: AnalyteDefinition[] = [
   // Coded like anything else, so they join the timeline and the OMOP export.
   // Their provenance is `self-tracked`, which is already `preliminary`: a tape
   // measure is not a laboratory.
+  // ---- Amino acids, as a home aminogram prints them ----
+  //
+  // Every code is the serum-or-plasma, moles-per-volume term, checked one by
+  // one against the NLM clinical tables API. A home test names them in
+  // German; a laboratory sometimes uses the three-letter abbreviation, and
+  // two of them have a second German name that is the same substance:
+  // Glutaminsäure is Glutamat and Asparaginsäure is Aspartat.
+  {
+    key: "isoleucine",
+    description:
+      "One of the three branched-chain essential amino acids. Metabolised in muscle rather than in the liver.",
+    labels: ["Isoleucin", "Ile"],
+    byUnit: {
+      "umol/L": c(
+        "20648-2",
+        "Isoleucine [Moles/volume] in Serum or Plasma",
+        "umol/L",
+      ),
+    },
+  },
+  {
+    key: "leucine",
+    description:
+      "The branched-chain amino acid with the strongest signal for muscle protein synthesis. Rises briefly after a protein-rich meal.",
+    labels: ["Leucin", "Leu"],
+    byUnit: {
+      "umol/L": c(
+        "20649-0",
+        "Leucine [Moles/volume] in Serum or Plasma",
+        "umol/L",
+      ),
+    },
+  },
+  {
+    key: "lysine",
+    description:
+      "Essential for making collagen and carnitine. The body cannot make it.",
+    labels: ["Lysin", "Lys"],
+    byUnit: {
+      "umol/L": c(
+        "20650-8",
+        "Lysine [Moles/volume] in Serum or Plasma",
+        "umol/L",
+      ),
+    },
+  },
+  {
+    key: "methionine",
+    description:
+      "The sulphur-bearing essential amino acid that homocysteine is made from and returns to.",
+    labels: ["Methionin", "Met"],
+    byUnit: {
+      "umol/L": c(
+        "20651-6",
+        "Methionine [Moles/volume] in Serum or Plasma",
+        "umol/L",
+      ),
+    },
+  },
+  {
+    key: "phenylalanine",
+    description:
+      "The precursor of tyrosine and so of the catecholamines. In phenylketonuria it cannot be broken down.",
+    labels: ["Phenylalanin", "Phe"],
+    byUnit: {
+      "umol/L": c(
+        "14875-9",
+        "Phenylalanine [Moles/volume] in Serum or Plasma",
+        "umol/L",
+      ),
+    },
+  },
+  {
+    key: "threonine",
+    description:
+      "Essential, a building block of connective tissue and of immunoglobulins.",
+    labels: ["Threonin", "Thr"],
+    byUnit: {
+      "umol/L": c(
+        "20658-1",
+        "Threonine [Moles/volume] in Serum or Plasma",
+        "umol/L",
+      ),
+    },
+  },
+  {
+    key: "tryptophan",
+    description:
+      "The starting point for serotonin and melatonin, and by another route for niacin.",
+    labels: ["Tryptophan", "Trp"],
+    byUnit: {
+      "umol/L": c(
+        "20659-9",
+        "Tryptophan [Moles/volume] in Serum or Plasma",
+        "umol/L",
+      ),
+    },
+  },
+  {
+    key: "valine",
+    description: "The third branched-chain essential amino acid.",
+    labels: ["Valin", "Val"],
+    byUnit: {
+      "umol/L": c(
+        "20661-5",
+        "Valine [Moles/volume] in Serum or Plasma",
+        "umol/L",
+      ),
+    },
+  },
+  {
+    key: "alanine",
+    description:
+      "Carries nitrogen from muscle to the liver, where it becomes glucose.",
+    labels: ["Alanin", "Ala"],
+    byUnit: {
+      "umol/L": c(
+        "20636-7",
+        "Alanine [Moles/volume] in Serum or Plasma",
+        "umol/L",
+      ),
+    },
+  },
+  {
+    key: "arginine",
+    description:
+      "The amino acid nitric oxide is made from, and a step of the urea cycle.",
+    labels: ["Arginin", "Arg"],
+    byUnit: {
+      "umol/L": c(
+        "20637-5",
+        "Arginine [Moles/volume] in Serum or Plasma",
+        "umol/L",
+      ),
+    },
+  },
+  {
+    key: "asparagine",
+    description: "Not essential, involved in moving nitrogen between tissues.",
+    labels: ["Asparagin", "Asn"],
+    byUnit: {
+      "umol/L": c(
+        "20638-3",
+        "Asparagine [Moles/volume] in Serum or Plasma",
+        "umol/L",
+      ),
+    },
+  },
+  {
+    key: "aspartate",
+    description:
+      "Not essential, part of the urea cycle and of making nucleotides.",
+    labels: ["Aspartat", "Asparaginsäure", "Asp"],
+    byUnit: {
+      "umol/L": c(
+        "20639-1",
+        "Aspartate [Moles/volume] in Serum or Plasma",
+        "umol/L",
+      ),
+    },
+  },
+  {
+    key: "citrulline",
+    description: "A step of the urea cycle, also produced by the gut.",
+    labels: ["Citrullin", "Cit"],
+    byUnit: {
+      "umol/L": c(
+        "20640-9",
+        "Citrulline [Moles/volume] in Serum or Plasma",
+        "umol/L",
+      ),
+    },
+  },
+  {
+    key: "cysteine",
+    description:
+      "The sulphur-bearing amino acid that supplies the rate-limiting building block of glutathione.",
+    labels: ["Cystein", "Cys"],
+    byUnit: {
+      "umol/L": c(
+        "20641-7",
+        "Cysteine [Moles/volume] in Serum or Plasma",
+        "umol/L",
+      ),
+    },
+  },
+  {
+    key: "glutamate",
+    description:
+      "The brain's main excitatory messenger and a junction of amino acid metabolism.",
+    labels: ["Glutamat", "Glutaminsäure", "Glu"],
+    byUnit: {
+      "umol/L": c(
+        "20642-5",
+        "Glutamate [Moles/volume] in Serum or Plasma",
+        "umol/L",
+      ),
+    },
+  },
+  {
+    key: "glutamine",
+    description:
+      "The most abundant free amino acid in blood. Fuel for the gut lining and for immune cells.",
+    labels: ["Glutamin", "Gln"],
+    byUnit: {
+      "umol/L": c(
+        "20643-3",
+        "Glutamine [Moles/volume] in Serum or Plasma",
+        "umol/L",
+      ),
+    },
+  },
+  {
+    key: "glycine",
+    description:
+      "The smallest amino acid, a third of collagen, and a building block of glutathione.",
+    labels: ["Glycin", "Glyzin", "Gly"],
+    byUnit: {
+      "umol/L": c(
+        "20644-1",
+        "Glycine [Moles/volume] in Serum or Plasma",
+        "umol/L",
+      ),
+    },
+  },
+  {
+    key: "histidine",
+    description:
+      "The precursor of histamine and carnosine. Essential in children.",
+    labels: ["Histidin", "His"],
+    byUnit: {
+      "umol/L": c(
+        "20645-8",
+        "Histidine [Moles/volume] in Serum or Plasma",
+        "umol/L",
+      ),
+    },
+  },
+  {
+    key: "ornithine",
+    description: "A step of the urea cycle, not used to build protein.",
+    labels: ["Ornithin", "Orn"],
+    byUnit: {
+      "umol/L": c(
+        "20652-4",
+        "Ornithine [Moles/volume] in Serum or Plasma",
+        "umol/L",
+      ),
+    },
+  },
+  {
+    key: "proline",
+    description: "After glycine, the most common building block of collagen.",
+    labels: ["Prolin", "Pro"],
+    byUnit: {
+      "umol/L": c(
+        "20655-7",
+        "Proline [Moles/volume] in Serum or Plasma",
+        "umol/L",
+      ),
+    },
+  },
+  {
+    key: "serine",
+    description:
+      "Not essential, a building block of cell membranes and the precursor of glycine.",
+    labels: ["Serin", "Ser"],
+    byUnit: {
+      "umol/L": c(
+        "20656-5",
+        "Serine [Moles/volume] in Serum or Plasma",
+        "umol/L",
+      ),
+    },
+  },
+  {
+    key: "taurine",
+    description:
+      "Not strictly an amino acid but an aminosulphonic acid. Plentiful in the heart and the retina.",
+    labels: ["Taurin", "Tau"],
+    byUnit: {
+      "umol/L": c(
+        "20657-3",
+        "Taurine [Moles/volume] in Serum or Plasma",
+        "umol/L",
+      ),
+    },
+  },
+  {
+    key: "tyrosine",
+    description:
+      "Made from phenylalanine, the precursor of dopamine, adrenaline and the thyroid hormones.",
+    labels: ["Tyrosin", "Tyr"],
+    byUnit: {
+      "umol/L": c(
+        "20660-7",
+        "Tyrosine [Moles/volume] in Serum or Plasma",
+        "umol/L",
+      ),
+    },
+  },
   {
     key: "body-height",
     description: "Standing height, entered by you.",
@@ -1835,6 +2136,47 @@ export const ANALYTE_DESCRIPTIONS_DE: Readonly<Record<string, string>> = {
     "Ein B-Vitamin für Zellteilung und Blutbildung, mit kleinen Speichern.",
   "reticulocyte-haemoglobin":
     "Das Hämoglobin in den jüngsten roten Blutkörperchen; es bildet ab, wie viel Eisen dem Knochenmark in den letzten Tagen zur Verfügung stand.",
+  isoleucine:
+    "Eine der drei verzweigtkettigen essenziellen Aminosäuren. Wird im Muskel selbst verstoffwechselt statt in der Leber.",
+  leucine:
+    "Die verzweigtkettige Aminosäure mit dem stärksten Signal für den Muskelaufbau. Steigt kurzfristig nach einer eiweißreichen Mahlzeit.",
+  lysine:
+    "Essenziell für die Bildung von Kollagen und Carnitin. Der Körper kann sie nicht selbst herstellen.",
+  methionine:
+    "Die schwefelhaltige essenzielle Aminosäure, aus der Homocystein entsteht und wieder zurückgebildet wird.",
+  phenylalanine:
+    "Vorstufe von Tyrosin und damit der Katecholamine. Bei Phenylketonurie kann sie nicht abgebaut werden.",
+  threonine: "Essenziell, Baustein von Bindegewebe und Immunglobulinen.",
+  tryptophan:
+    "Die Ausgangssubstanz für Serotonin und Melatonin, und über einen zweiten Weg für Niacin.",
+  valine: "Die dritte verzweigtkettige essenzielle Aminosäure.",
+  alanine: "Trägt Stickstoff aus dem Muskel zur Leber, wo daraus Glukose wird.",
+  arginine:
+    "Die Aminosäure, aus der der Körper Stickstoffmonoxid bildet, und ein Zwischenschritt des Harnstoffzyklus.",
+  asparagine:
+    "Nicht essenziell, am Stickstofftransport zwischen Geweben beteiligt.",
+  aspartate:
+    "Nicht essenziell, Teil des Harnstoffzyklus und der Bildung von Nukleotiden.",
+  citrulline:
+    "Ein Zwischenschritt des Harnstoffzyklus, der auch aus dem Darm stammt.",
+  cysteine:
+    "Die schwefelhaltige Aminosäure, die den geschwindigkeitsbestimmenden Baustein des Glutathions liefert.",
+  glutamate:
+    "Der wichtigste erregende Botenstoff im Gehirn und ein Knotenpunkt des Aminosäurestoffwechsels.",
+  glutamine:
+    "Die häufigste freie Aminosäure im Blut. Brennstoff für Darmschleimhaut und Immunzellen.",
+  glycine:
+    "Die kleinste Aminosäure, ein Drittel des Kollagens und Baustein des Glutathions.",
+  histidine: "Vorstufe von Histamin und Carnosin. Für Kinder essenziell.",
+  ornithine:
+    "Ein Zwischenschritt des Harnstoffzyklus, nicht am Eiweißaufbau beteiligt.",
+  proline: "Nach Glycin der häufigste Baustein des Kollagens.",
+  serine:
+    "Nicht essenziell, Baustein von Zellmembranen und Vorstufe des Glycins.",
+  taurine:
+    "Keine Aminosäure im engeren Sinn, sondern eine Aminosulfonsäure. Reichlich in Herz und Netzhaut.",
+  tyrosine:
+    "Aus Phenylalanin gebildet, Vorstufe von Dopamin, Adrenalin und der Schilddrüsenhormone.",
   "body-height": "Die Körpergröße im Stehen, von Ihnen eingetragen.",
   "body-weight":
     "Das Körpergewicht, von Ihnen eingetragen oder von einer Waage übernommen.",
