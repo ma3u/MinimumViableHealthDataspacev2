@@ -418,8 +418,12 @@ public enum LabLineParser {
       else { continue }
       let label = String(line[labelRange]).trimmingCharacters(
         in: CharacterSet(charactersIn: " -–,;:"))
-      // A label is a name, not a sentence.
-      guard !label.isEmpty, label.split(separator: " ").count <= 5 else { continue }
+      // A label is a name, not a sentence, and not the tail of one. A closing
+      // bracket with no opening one means the split landed inside something
+      // else: `Landbau),` came from a sentence about where a fibre is grown.
+      guard !label.isEmpty, label.split(separator: " ").count <= 5,
+        label.filter({ $0 == ")" }).count == label.filter({ $0 == "(" }).count
+      else { continue }
       found.append((label, value, String(line[unitRange])))
     }
     return found.count > 1 ? found : []
@@ -580,6 +584,13 @@ public enum LabLineParser {
       var label =
         (head.isEmpty ? matchedLabel : head + " " + matchedLabel)
         .trimmingCharacters(in: .whitespaces)
+      // A label that closes a bracket it never opened is the tail of a
+      // sentence, not the name of anything. `Landbau),` came from a paragraph
+      // about where a fibre is grown, and arrived as a measurement of 20 %.
+      if label.filter({ $0 == ")" }).count > label.filter({ $0 == "(" }).count {
+        suspicious.append(line)
+        continue
+      }
       var unitRaw = group("unit").trimmingCharacters(in: .whitespaces)
       var rest = group("rest")
       if unitRaw.isEmpty { unitRaw = group("glued") }

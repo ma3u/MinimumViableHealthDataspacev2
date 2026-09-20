@@ -116,6 +116,7 @@ export function looseLabelKey(raw: string): string {
  */
 /** Printed unit spelling, lowercased and without spaces, → UCUM. */
 const UNIT_MAP: Record<string, string> = {
+  ph: "[pH]",
   "mg/dl": "mg/dL",
   "mg/l": "mg/L",
   "g/dl": "g/dL",
@@ -196,6 +197,8 @@ const UNIT_MAP: Record<string, string> = {
  * keys and the scraped table silently lost `fl` and `pg`.
  */
 export const UNIT_SPELLINGS: readonly string[] = [
+  "pH",
+  "ph",
   ...Object.keys(UNIT_MAP),
   "G/l",
   "T/l",
@@ -1334,6 +1337,827 @@ const DEFINITIONS: AnalyteDefinition[] = [
   // Coded like anything else, so they join the timeline and the OMOP export.
   // Their provenance is `self-tracked`, which is already `preliminary`: a tape
   // measure is not a laboratory.
+  // ---- The gut microbiome, as a stool report prints it ----
+  //
+  // Almost none of this is coded by LOINC, checked against the NLM clinical
+  // tables API: there is a term for the pH of stool and none for the
+  // abundance of a genus, none for a diversity index, none for the ratio of
+  // two phyla. LOINC names tests; naming an organism is what NCBI Taxonomy is
+  // for, and that is not wired up here yet.
+  //
+  // The alternative to carrying them uncoded was leaving seventy-six real
+  // measurements of a person's own gut in a list called "unmatched", where
+  // nothing can plot them, export them or ask about them. An honest absence of
+  // a code is better than that, and far better than a code that is wrong.
+  {
+    key: "mb-acetat-und-propionatproduktion",
+    description:
+      "The share of the bacteria found that produce acetate and propionate.",
+    labels: ["Acetat- und Propionatproduktion"],
+    byUnit: {
+      "%": uncoded(
+        "Acetat- und Propionatproduktion [relative abundance] in Stool",
+        "%",
+        "LOINC has no term for the share of a microbiome's functional capacity that a stool report prints.",
+      ),
+    },
+  },
+  {
+    key: "mb-actinobacteria",
+    description:
+      "A phylum of the gut microbiome; the figure is its share of all the bacteria found.",
+    labels: ["Actinobacteria"],
+    byUnit: {
+      "%": uncoded(
+        "Actinobacteria [relative abundance] in Stool",
+        "%",
+        "LOINC names tests, not organisms: it has no term for the relative abundance of a taxon in stool. NCBI Taxonomy is what names an organism.",
+      ),
+    },
+  },
+  {
+    key: "mb-akkermansia-muciniphila",
+    description: "A species that lives on the gut's mucus layer.",
+    labels: ["Akkermansia muciniphila"],
+    byUnit: {
+      "%": uncoded(
+        "Akkermansia muciniphila [relative abundance] in Stool",
+        "%",
+        "LOINC names tests, not organisms: it has no term for the relative abundance of a taxon in stool. NCBI Taxonomy is what names an organism.",
+      ),
+    },
+  },
+  {
+    key: "mb-alistipes-spp",
+    description:
+      "A genus of gut bacteria; the figure is its share of all the bacteria found.",
+    labels: ["Alistipes spp.", "Alistipes species"],
+    byUnit: {
+      "%": uncoded(
+        "Alistipes spp. [relative abundance] in Stool",
+        "%",
+        "LOINC names tests, not organisms: it has no term for the relative abundance of a taxon in stool. NCBI Taxonomy is what names an organism.",
+      ),
+    },
+  },
+  {
+    key: "mb-anaerotruncus-colihominis",
+    description:
+      "A species of gut bacteria; the figure is its share of all the bacteria found.",
+    labels: ["Anaerotruncus colihominis"],
+    byUnit: {
+      "%": uncoded(
+        "Anaerotruncus colihominis [relative abundance] in Stool",
+        "%",
+        "LOINC names tests, not organisms: it has no term for the relative abundance of a taxon in stool. NCBI Taxonomy is what names an organism.",
+      ),
+    },
+  },
+  {
+    key: "mb-bacteroides-spp",
+    description:
+      "A genus of gut bacteria; the figure is its share of all the bacteria found.",
+    labels: ["Bacteroides spp.", "Bacteroides species"],
+    byUnit: {
+      "%": uncoded(
+        "Bacteroides spp. [relative abundance] in Stool",
+        "%",
+        "LOINC names tests, not organisms: it has no term for the relative abundance of a taxon in stool. NCBI Taxonomy is what names an organism.",
+      ),
+    },
+  },
+  {
+    key: "mb-bacteroides-vulgatus",
+    description:
+      "A species of gut bacteria; the figure is its share of all the bacteria found.",
+    labels: ["Bacteroides vulgatus"],
+    byUnit: {
+      "%": uncoded(
+        "Bacteroides vulgatus [relative abundance] in Stool",
+        "%",
+        "LOINC names tests, not organisms: it has no term for the relative abundance of a taxon in stool. NCBI Taxonomy is what names an organism.",
+      ),
+    },
+  },
+  {
+    key: "mb-bacteroidetes",
+    description:
+      "A phylum of the gut microbiome; the figure is its share of all the bacteria found.",
+    labels: ["Bacteroidetes"],
+    byUnit: {
+      "%": uncoded(
+        "Bacteroidetes [relative abundance] in Stool",
+        "%",
+        "LOINC names tests, not organisms: it has no term for the relative abundance of a taxon in stool. NCBI Taxonomy is what names an organism.",
+      ),
+    },
+  },
+  {
+    key: "mb-bifidobacterium-adolescentis",
+    description:
+      "A species of gut bacteria; the figure is its share of all the bacteria found.",
+    labels: ["Bifidobacterium adolescentis"],
+    byUnit: {
+      "%": uncoded(
+        "Bifidobacterium adolescentis [relative abundance] in Stool",
+        "%",
+        "LOINC names tests, not organisms: it has no term for the relative abundance of a taxon in stool. NCBI Taxonomy is what names an organism.",
+      ),
+    },
+  },
+  {
+    key: "mb-bifidobacterium-dentium",
+    description:
+      "A species of gut bacteria; the figure is its share of all the bacteria found.",
+    labels: ["Bifidobacterium dentium"],
+    byUnit: {
+      "%": uncoded(
+        "Bifidobacterium dentium [relative abundance] in Stool",
+        "%",
+        "LOINC names tests, not organisms: it has no term for the relative abundance of a taxon in stool. NCBI Taxonomy is what names an organism.",
+      ),
+    },
+  },
+  {
+    key: "mb-bifidobacterium-spp",
+    description:
+      "A genus of gut bacteria; the figure is its share of all the bacteria found.",
+    labels: ["Bifidobacterium spp.", "Bifidobacterium species"],
+    byUnit: {
+      "%": uncoded(
+        "Bifidobacterium spp. [relative abundance] in Stool",
+        "%",
+        "LOINC names tests, not organisms: it has no term for the relative abundance of a taxon in stool. NCBI Taxonomy is what names an organism.",
+      ),
+    },
+  },
+  {
+    key: "mb-bilophila-wadsworthia",
+    description: "A bile-tolerant, sulphate-reducing species.",
+    labels: ["Bilophila wadsworthia"],
+    byUnit: {
+      "%": uncoded(
+        "Bilophila wadsworthia [relative abundance] in Stool",
+        "%",
+        "LOINC names tests, not organisms: it has no term for the relative abundance of a taxon in stool. NCBI Taxonomy is what names an organism.",
+      ),
+    },
+  },
+  {
+    key: "mb-butyratproduktion",
+    description: "The share of the bacteria found that produce butyrate.",
+    labels: ["Butyratproduktion"],
+    byUnit: {
+      "%": uncoded(
+        "Butyratproduktion [relative abundance] in Stool",
+        "%",
+        "LOINC has no term for the share of a microbiome's functional capacity that a stool report prints.",
+      ),
+    },
+  },
+  {
+    key: "mb-butyrivibrio-crossotus",
+    description:
+      "A species of gut bacteria; the figure is its share of all the bacteria found.",
+    labels: ["Butyrivibrio crossotus"],
+    byUnit: {
+      "%": uncoded(
+        "Butyrivibrio crossotus [relative abundance] in Stool",
+        "%",
+        "LOINC names tests, not organisms: it has no term for the relative abundance of a taxon in stool. NCBI Taxonomy is what names an organism.",
+      ),
+    },
+  },
+  {
+    key: "mb-candida-albicans",
+    description:
+      "A yeast of the gut; the figure is its share of the flora found.",
+    labels: ["Candida albicans"],
+    byUnit: {
+      "%": uncoded(
+        "Candida albicans [relative abundance] in Stool",
+        "%",
+        "LOINC names tests, not organisms: it has no term for the relative abundance of a taxon in stool. NCBI Taxonomy is what names an organism.",
+      ),
+    },
+  },
+  {
+    key: "mb-candida-spp",
+    description:
+      "A yeast of the gut; the figure is its share of the flora found.",
+    labels: ["Candida spp.", "Candida species"],
+    byUnit: {
+      "%": uncoded(
+        "Candida spp. [relative abundance] in Stool",
+        "%",
+        "LOINC names tests, not organisms: it has no term for the relative abundance of a taxon in stool. NCBI Taxonomy is what names an organism.",
+      ),
+    },
+  },
+  {
+    key: "mb-citrobacter-spp",
+    description:
+      "A genus of gut bacteria; the figure is its share of all the bacteria found.",
+    labels: ["Citrobacter spp.", "Citrobacter species"],
+    byUnit: {
+      "%": uncoded(
+        "Citrobacter spp. [relative abundance] in Stool",
+        "%",
+        "LOINC names tests, not organisms: it has no term for the relative abundance of a taxon in stool. NCBI Taxonomy is what names an organism.",
+      ),
+    },
+  },
+  {
+    key: "mb-clostridium-difficile",
+    description: "A species that can take over after a course of antibiotics.",
+    labels: ["Clostridium difficile"],
+    byUnit: {
+      "%": uncoded(
+        "Clostridium difficile [relative abundance] in Stool",
+        "%",
+        "LOINC names tests, not organisms: it has no term for the relative abundance of a taxon in stool. NCBI Taxonomy is what names an organism.",
+      ),
+    },
+  },
+  {
+    key: "mb-clostridium-scindens",
+    description:
+      "A species of gut bacteria; the figure is its share of all the bacteria found.",
+    labels: ["Clostridium scindens"],
+    byUnit: {
+      "%": uncoded(
+        "Clostridium scindens [relative abundance] in Stool",
+        "%",
+        "LOINC names tests, not organisms: it has no term for the relative abundance of a taxon in stool. NCBI Taxonomy is what names an organism.",
+      ),
+    },
+  },
+  {
+    key: "mb-clostridium-spp",
+    description:
+      "A genus of gut bacteria; the figure is its share of all the bacteria found.",
+    labels: ["Clostridium spp.", "Clostridium species"],
+    byUnit: {
+      "%": uncoded(
+        "Clostridium spp. [relative abundance] in Stool",
+        "%",
+        "LOINC names tests, not organisms: it has no term for the relative abundance of a taxon in stool. NCBI Taxonomy is what names an organism.",
+      ),
+    },
+  },
+  {
+    key: "mb-cyanobacteria",
+    description:
+      "A phylum of the gut microbiome; the figure is its share of all the bacteria found.",
+    labels: ["Cyanobacteria"],
+    byUnit: {
+      "%": uncoded(
+        "Cyanobacteria [relative abundance] in Stool",
+        "%",
+        "LOINC names tests, not organisms: it has no term for the relative abundance of a taxon in stool. NCBI Taxonomy is what names an organism.",
+      ),
+    },
+  },
+  {
+    key: "mb-desulfobacter-spp",
+    description:
+      "A genus of gut bacteria; the figure is its share of all the bacteria found.",
+    labels: ["Desulfobacter spp.", "Desulfobacter species"],
+    byUnit: {
+      "%": uncoded(
+        "Desulfobacter spp. [relative abundance] in Stool",
+        "%",
+        "LOINC names tests, not organisms: it has no term for the relative abundance of a taxon in stool. NCBI Taxonomy is what names an organism.",
+      ),
+    },
+  },
+  {
+    key: "mb-desulfovibrio-spp",
+    description:
+      "A genus of gut bacteria; the figure is its share of all the bacteria found.",
+    labels: ["Desulfovibrio spp.", "Desulfovibrio species"],
+    byUnit: {
+      "%": uncoded(
+        "Desulfovibrio spp. [relative abundance] in Stool",
+        "%",
+        "LOINC names tests, not organisms: it has no term for the relative abundance of a taxon in stool. NCBI Taxonomy is what names an organism.",
+      ),
+    },
+  },
+  {
+    key: "mb-desulfuromonas-spp",
+    description:
+      "A genus of gut bacteria; the figure is its share of all the bacteria found.",
+    labels: ["Desulfuromonas spp.", "Desulfuromonas species"],
+    byUnit: {
+      "%": uncoded(
+        "Desulfuromonas spp. [relative abundance] in Stool",
+        "%",
+        "LOINC names tests, not organisms: it has no term for the relative abundance of a taxon in stool. NCBI Taxonomy is what names an organism.",
+      ),
+    },
+  },
+  {
+    key: "mb-dorea-spp",
+    description:
+      "A genus of gut bacteria; the figure is its share of all the bacteria found.",
+    labels: ["Dorea spp.", "Dorea species"],
+    byUnit: {
+      "%": uncoded(
+        "Dorea spp. [relative abundance] in Stool",
+        "%",
+        "LOINC names tests, not organisms: it has no term for the relative abundance of a taxon in stool. NCBI Taxonomy is what names an organism.",
+      ),
+    },
+  },
+  {
+    key: "mb-enterobacter-spp",
+    description:
+      "A genus of gut bacteria; the figure is its share of all the bacteria found.",
+    labels: ["Enterobacter spp.", "Enterobacter species"],
+    byUnit: {
+      "%": uncoded(
+        "Enterobacter spp. [relative abundance] in Stool",
+        "%",
+        "LOINC names tests, not organisms: it has no term for the relative abundance of a taxon in stool. NCBI Taxonomy is what names an organism.",
+      ),
+    },
+  },
+  {
+    key: "mb-enterococcus-spp",
+    description:
+      "A genus of gut bacteria; the figure is its share of all the bacteria found.",
+    labels: ["Enterococcus spp.", "Enterococcus species"],
+    byUnit: {
+      "%": uncoded(
+        "Enterococcus spp. [relative abundance] in Stool",
+        "%",
+        "LOINC names tests, not organisms: it has no term for the relative abundance of a taxon in stool. NCBI Taxonomy is what names an organism.",
+      ),
+    },
+  },
+  {
+    key: "mb-escherichia-spp",
+    description:
+      "A genus of gut bacteria; the figure is its share of all the bacteria found.",
+    labels: ["Escherichia spp.", "Escherichia species"],
+    byUnit: {
+      "%": uncoded(
+        "Escherichia spp. [relative abundance] in Stool",
+        "%",
+        "LOINC names tests, not organisms: it has no term for the relative abundance of a taxon in stool. NCBI Taxonomy is what names an organism.",
+      ),
+    },
+  },
+  {
+    key: "mb-eubacterium-spp",
+    description:
+      "A genus of gut bacteria; the figure is its share of all the bacteria found.",
+    labels: ["Eubacterium spp.", "Eubacterium species"],
+    byUnit: {
+      "%": uncoded(
+        "Eubacterium spp. [relative abundance] in Stool",
+        "%",
+        "LOINC names tests, not organisms: it has no term for the relative abundance of a taxon in stool. NCBI Taxonomy is what names an organism.",
+      ),
+    },
+  },
+  {
+    key: "mb-euryarchaeota",
+    description:
+      "A phylum of the gut microbiome; the figure is its share of all the bacteria found.",
+    labels: ["Euryarchaeota"],
+    byUnit: {
+      "%": uncoded(
+        "Euryarchaeota [relative abundance] in Stool",
+        "%",
+        "LOINC names tests, not organisms: it has no term for the relative abundance of a taxon in stool. NCBI Taxonomy is what names an organism.",
+      ),
+    },
+  },
+  {
+    key: "mb-faecalibacterium-prausnitzii",
+    description:
+      "One of the most common butyrate-producing species of the colon.",
+    labels: ["Faecalibacterium prausnitzii"],
+    byUnit: {
+      "%": uncoded(
+        "Faecalibacterium prausnitzii [relative abundance] in Stool",
+        "%",
+        "LOINC names tests, not organisms: it has no term for the relative abundance of a taxon in stool. NCBI Taxonomy is what names an organism.",
+      ),
+    },
+  },
+  {
+    key: "mb-firmicutes",
+    description:
+      "A phylum of the gut microbiome; the figure is its share of all the bacteria found.",
+    labels: ["Firmicutes"],
+    byUnit: {
+      "%": uncoded(
+        "Firmicutes [relative abundance] in Stool",
+        "%",
+        "LOINC names tests, not organisms: it has no term for the relative abundance of a taxon in stool. NCBI Taxonomy is what names an organism.",
+      ),
+    },
+  },
+  {
+    key: "mb-fusobacteria",
+    description:
+      "A phylum of the gut microbiome; the figure is its share of all the bacteria found.",
+    labels: ["Fusobacteria"],
+    byUnit: {
+      "%": uncoded(
+        "Fusobacteria [relative abundance] in Stool",
+        "%",
+        "LOINC names tests, not organisms: it has no term for the relative abundance of a taxon in stool. NCBI Taxonomy is what names an organism.",
+      ),
+    },
+  },
+  {
+    key: "mb-fusobacterium-nucleatum",
+    description:
+      "A species of gut bacteria; the figure is its share of all the bacteria found.",
+    labels: ["Fusobacterium nucleatum"],
+    byUnit: {
+      "%": uncoded(
+        "Fusobacterium nucleatum [relative abundance] in Stool",
+        "%",
+        "LOINC names tests, not organisms: it has no term for the relative abundance of a taxon in stool. NCBI Taxonomy is what names an organism.",
+      ),
+    },
+  },
+  {
+    key: "mb-geotrichum-candidum",
+    description:
+      "A yeast of the gut; the figure is its share of the flora found.",
+    labels: ["Geotrichum candidum"],
+    byUnit: {
+      "%": uncoded(
+        "Geotrichum candidum [relative abundance] in Stool",
+        "%",
+        "LOINC names tests, not organisms: it has no term for the relative abundance of a taxon in stool. NCBI Taxonomy is what names an organism.",
+      ),
+    },
+  },
+  {
+    key: "mb-hafnia-alveii",
+    description:
+      "A species of gut bacteria; the figure is its share of all the bacteria found.",
+    labels: ["Hafnia alveii"],
+    byUnit: {
+      "%": uncoded(
+        "Hafnia alveii [relative abundance] in Stool",
+        "%",
+        "LOINC names tests, not organisms: it has no term for the relative abundance of a taxon in stool. NCBI Taxonomy is what names an organism.",
+      ),
+    },
+  },
+  {
+    key: "mb-klebsiella-spp",
+    description:
+      "A genus of gut bacteria; the figure is its share of all the bacteria found.",
+    labels: ["Klebsiella spp.", "Klebsiella species"],
+    byUnit: {
+      "%": uncoded(
+        "Klebsiella spp. [relative abundance] in Stool",
+        "%",
+        "LOINC names tests, not organisms: it has no term for the relative abundance of a taxon in stool. NCBI Taxonomy is what names an organism.",
+      ),
+    },
+  },
+  {
+    key: "mb-lps-tragende-bakterien",
+    description:
+      "The share of the bacteria found that carry lipopolysaccharide in their cell wall.",
+    labels: ["LPS-tragende Bakterien"],
+    byUnit: {
+      "%": uncoded(
+        "LPS-tragende Bakterien [relative abundance] in Stool",
+        "%",
+        "LOINC has no term for the share of a microbiome's functional capacity that a stool report prints.",
+      ),
+    },
+  },
+  {
+    key: "mb-lactobacillus-brevis",
+    description:
+      "A species of gut bacteria; the figure is its share of all the bacteria found.",
+    labels: ["Lactobacillus brevis"],
+    byUnit: {
+      "%": uncoded(
+        "Lactobacillus brevis [relative abundance] in Stool",
+        "%",
+        "LOINC names tests, not organisms: it has no term for the relative abundance of a taxon in stool. NCBI Taxonomy is what names an organism.",
+      ),
+    },
+  },
+  {
+    key: "mb-lactobacillus-paracasei",
+    description:
+      "A species of gut bacteria; the figure is its share of all the bacteria found.",
+    labels: ["Lactobacillus paracasei"],
+    byUnit: {
+      "%": uncoded(
+        "Lactobacillus paracasei [relative abundance] in Stool",
+        "%",
+        "LOINC names tests, not organisms: it has no term for the relative abundance of a taxon in stool. NCBI Taxonomy is what names an organism.",
+      ),
+    },
+  },
+  {
+    key: "mb-lactobacillus-plantarum",
+    description:
+      "A species of gut bacteria; the figure is its share of all the bacteria found.",
+    labels: ["Lactobacillus plantarum"],
+    byUnit: {
+      "%": uncoded(
+        "Lactobacillus plantarum [relative abundance] in Stool",
+        "%",
+        "LOINC names tests, not organisms: it has no term for the relative abundance of a taxon in stool. NCBI Taxonomy is what names an organism.",
+      ),
+    },
+  },
+  {
+    key: "mb-lactobacillus-spp",
+    description:
+      "A genus of gut bacteria; the figure is its share of all the bacteria found.",
+    labels: ["Lactobacillus spp.", "Lactobacillus species"],
+    byUnit: {
+      "%": uncoded(
+        "Lactobacillus spp. [relative abundance] in Stool",
+        "%",
+        "LOINC names tests, not organisms: it has no term for the relative abundance of a taxon in stool. NCBI Taxonomy is what names an organism.",
+      ),
+    },
+  },
+  {
+    key: "mb-laktatproduktion",
+    description: "The share of the bacteria found that produce lactate.",
+    labels: ["Laktatproduktion"],
+    byUnit: {
+      "%": uncoded(
+        "Laktatproduktion [relative abundance] in Stool",
+        "%",
+        "LOINC has no term for the share of a microbiome's functional capacity that a stool report prints.",
+      ),
+    },
+  },
+  {
+    key: "mb-methanobacteria",
+    description:
+      "A species of gut bacteria; the figure is its share of all the bacteria found.",
+    labels: ["Methanobacteria"],
+    byUnit: {
+      "%": uncoded(
+        "Methanobacteria [relative abundance] in Stool",
+        "%",
+        "LOINC names tests, not organisms: it has no term for the relative abundance of a taxon in stool. NCBI Taxonomy is what names an organism.",
+      ),
+    },
+  },
+  {
+    key: "mb-methanobrevibacter-spp",
+    description:
+      "A genus of gut bacteria; the figure is its share of all the bacteria found.",
+    labels: ["Methanobrevibacter spp.", "Methanobrevibacter species"],
+    byUnit: {
+      "%": uncoded(
+        "Methanobrevibacter spp. [relative abundance] in Stool",
+        "%",
+        "LOINC names tests, not organisms: it has no term for the relative abundance of a taxon in stool. NCBI Taxonomy is what names an organism.",
+      ),
+    },
+  },
+  {
+    key: "mb-mucindegradation",
+    description:
+      "The share of the bacteria found that break down the gut's mucus layer.",
+    labels: ["Mucindegradation"],
+    byUnit: {
+      "%": uncoded(
+        "Mucindegradation [relative abundance] in Stool",
+        "%",
+        "LOINC has no term for the share of a microbiome's functional capacity that a stool report prints.",
+      ),
+    },
+  },
+  {
+    key: "mb-oscillibacter-spp",
+    description:
+      "A genus of gut bacteria; the figure is its share of all the bacteria found.",
+    labels: ["Oscillibacter spp.", "Oscillibacter species"],
+    byUnit: {
+      "%": uncoded(
+        "Oscillibacter spp. [relative abundance] in Stool",
+        "%",
+        "LOINC names tests, not organisms: it has no term for the relative abundance of a taxon in stool. NCBI Taxonomy is what names an organism.",
+      ),
+    },
+  },
+  {
+    key: "mb-oxalobacter-formigenes",
+    description:
+      "A species of gut bacteria; the figure is its share of all the bacteria found.",
+    labels: ["Oxalobacter formigenes"],
+    byUnit: {
+      "%": uncoded(
+        "Oxalobacter formigenes [relative abundance] in Stool",
+        "%",
+        "LOINC names tests, not organisms: it has no term for the relative abundance of a taxon in stool. NCBI Taxonomy is what names an organism.",
+      ),
+    },
+  },
+  {
+    key: "mb-prevotella-copri",
+    description: "A species associated with a fibre-rich diet.",
+    labels: ["Prevotella copri"],
+    byUnit: {
+      "%": uncoded(
+        "Prevotella copri [relative abundance] in Stool",
+        "%",
+        "LOINC names tests, not organisms: it has no term for the relative abundance of a taxon in stool. NCBI Taxonomy is what names an organism.",
+      ),
+    },
+  },
+  {
+    key: "mb-prevotella-spp",
+    description:
+      "A genus of gut bacteria; the figure is its share of all the bacteria found.",
+    labels: ["Prevotella spp.", "Prevotella species"],
+    byUnit: {
+      "%": uncoded(
+        "Prevotella spp. [relative abundance] in Stool",
+        "%",
+        "LOINC names tests, not organisms: it has no term for the relative abundance of a taxon in stool. NCBI Taxonomy is what names an organism.",
+      ),
+    },
+  },
+  {
+    key: "mb-proteobacteria",
+    description:
+      "A phylum of the gut microbiome; the figure is its share of all the bacteria found.",
+    labels: ["Proteobacteria"],
+    byUnit: {
+      "%": uncoded(
+        "Proteobacteria [relative abundance] in Stool",
+        "%",
+        "LOINC names tests, not organisms: it has no term for the relative abundance of a taxon in stool. NCBI Taxonomy is what names an organism.",
+      ),
+    },
+  },
+  {
+    key: "mb-providencia-spp",
+    description:
+      "A genus of gut bacteria; the figure is its share of all the bacteria found.",
+    labels: ["Providencia spp.", "Providencia species"],
+    byUnit: {
+      "%": uncoded(
+        "Providencia spp. [relative abundance] in Stool",
+        "%",
+        "LOINC names tests, not organisms: it has no term for the relative abundance of a taxon in stool. NCBI Taxonomy is what names an organism.",
+      ),
+    },
+  },
+  {
+    key: "mb-pseudomonas-spp",
+    description:
+      "A genus of gut bacteria; the figure is its share of all the bacteria found.",
+    labels: ["Pseudomonas spp.", "Pseudomonas species"],
+    byUnit: {
+      "%": uncoded(
+        "Pseudomonas spp. [relative abundance] in Stool",
+        "%",
+        "LOINC names tests, not organisms: it has no term for the relative abundance of a taxon in stool. NCBI Taxonomy is what names an organism.",
+      ),
+    },
+  },
+  {
+    key: "mb-roseburia-spp",
+    description:
+      "A genus of gut bacteria; the figure is its share of all the bacteria found.",
+    labels: ["Roseburia spp.", "Roseburia species"],
+    byUnit: {
+      "%": uncoded(
+        "Roseburia spp. [relative abundance] in Stool",
+        "%",
+        "LOINC names tests, not organisms: it has no term for the relative abundance of a taxon in stool. NCBI Taxonomy is what names an organism.",
+      ),
+    },
+  },
+  {
+    key: "mb-ruminococcus-spp",
+    description:
+      "A genus of gut bacteria; the figure is its share of all the bacteria found.",
+    labels: ["Ruminococcus spp.", "Ruminococcus species"],
+    byUnit: {
+      "%": uncoded(
+        "Ruminococcus spp. [relative abundance] in Stool",
+        "%",
+        "LOINC names tests, not organisms: it has no term for the relative abundance of a taxon in stool. NCBI Taxonomy is what names an organism.",
+      ),
+    },
+  },
+  {
+    key: "mb-saccharomyces-cerevisiae",
+    description:
+      "A yeast of the gut; the figure is its share of the flora found.",
+    labels: ["Saccharomyces cerevisiae"],
+    byUnit: {
+      "%": uncoded(
+        "Saccharomyces cerevisiae [relative abundance] in Stool",
+        "%",
+        "LOINC names tests, not organisms: it has no term for the relative abundance of a taxon in stool. NCBI Taxonomy is what names an organism.",
+      ),
+    },
+  },
+  {
+    key: "mb-serratia-spp",
+    description:
+      "A genus of gut bacteria; the figure is its share of all the bacteria found.",
+    labels: ["Serratia spp.", "Serratia species"],
+    byUnit: {
+      "%": uncoded(
+        "Serratia spp. [relative abundance] in Stool",
+        "%",
+        "LOINC names tests, not organisms: it has no term for the relative abundance of a taxon in stool. NCBI Taxonomy is what names an organism.",
+      ),
+    },
+  },
+  {
+    key: "mb-streptococcus-spp",
+    description:
+      "A genus of gut bacteria; the figure is its share of all the bacteria found.",
+    labels: ["Streptococcus spp.", "Streptococcus species"],
+    byUnit: {
+      "%": uncoded(
+        "Streptococcus spp. [relative abundance] in Stool",
+        "%",
+        "LOINC names tests, not organisms: it has no term for the relative abundance of a taxon in stool. NCBI Taxonomy is what names an organism.",
+      ),
+    },
+  },
+  {
+    key: "mb-sutterella-spp",
+    description:
+      "A genus of gut bacteria; the figure is its share of all the bacteria found.",
+    labels: ["Sutterella spp.", "Sutterella species"],
+    byUnit: {
+      "%": uncoded(
+        "Sutterella spp. [relative abundance] in Stool",
+        "%",
+        "LOINC names tests, not organisms: it has no term for the relative abundance of a taxon in stool. NCBI Taxonomy is what names an organism.",
+      ),
+    },
+  },
+  {
+    key: "mb-tenericutes",
+    description:
+      "A phylum of the gut microbiome; the figure is its share of all the bacteria found.",
+    labels: ["Tenericutes"],
+    byUnit: {
+      "%": uncoded(
+        "Tenericutes [relative abundance] in Stool",
+        "%",
+        "LOINC names tests, not organisms: it has no term for the relative abundance of a taxon in stool. NCBI Taxonomy is what names an organism.",
+      ),
+    },
+  },
+  {
+    key: "mb-veillonella-spp",
+    description:
+      "A genus of gut bacteria; the figure is its share of all the bacteria found.",
+    labels: ["Veillonella spp.", "Veillonella species"],
+    byUnit: {
+      "%": uncoded(
+        "Veillonella spp. [relative abundance] in Stool",
+        "%",
+        "LOINC names tests, not organisms: it has no term for the relative abundance of a taxon in stool. NCBI Taxonomy is what names an organism.",
+      ),
+    },
+  },
+  {
+    key: "mb-verrucomicrobia",
+    description:
+      "A phylum of the gut microbiome; the figure is its share of all the bacteria found.",
+    labels: ["Verrucomicrobia"],
+    byUnit: {
+      "%": uncoded(
+        "Verrucomicrobia [relative abundance] in Stool",
+        "%",
+        "LOINC names tests, not organisms: it has no term for the relative abundance of a taxon in stool. NCBI Taxonomy is what names an organism.",
+      ),
+    },
+  },
+  {
+    key: "stool-ph",
+    description:
+      "How acid or alkaline the stool is. The acids that gut bacteria produce lower it.",
+    labels: ["Stuhl-pH-Wert", "Stuhl-pH", "pH-Wert Stuhl"],
+    byUnit: {
+      "[pH]": c("2755-7", "pH of Stool", "[pH]"),
+    },
+  },
   // ---- Amino acids, as a home aminogram prints them ----
   //
   // Every code is the serum-or-plasma, moles-per-volume term, checked one by
@@ -2136,6 +2960,132 @@ export const ANALYTE_DESCRIPTIONS_DE: Readonly<Record<string, string>> = {
     "Ein B-Vitamin für Zellteilung und Blutbildung, mit kleinen Speichern.",
   "reticulocyte-haemoglobin":
     "Das Hämoglobin in den jüngsten roten Blutkörperchen; es bildet ab, wie viel Eisen dem Knochenmark in den letzten Tagen zur Verfügung stand.",
+  "mb-acetat-und-propionatproduktion":
+    "Der Anteil der gefundenen Bakterien, die Essigsäure und Propionsäure bilden.",
+  "mb-actinobacteria":
+    "Ein Bakterienstamm des Darmmikrobioms; angegeben ist sein Anteil an allen gefundenen Bakterien.",
+  "mb-akkermansia-muciniphila":
+    "Eine Art, die von der Schleimschicht des Darms lebt.",
+  "mb-alistipes-spp":
+    "Eine Bakteriengattung des Darms; angegeben ist ihr Anteil an allen gefundenen Bakterien.",
+  "mb-anaerotruncus-colihominis":
+    "Eine Bakterienart des Darms; angegeben ist ihr Anteil an allen gefundenen Bakterien.",
+  "mb-bacteroides-spp":
+    "Eine Bakteriengattung des Darms; angegeben ist ihr Anteil an allen gefundenen Bakterien.",
+  "mb-bacteroides-vulgatus":
+    "Eine Bakterienart des Darms; angegeben ist ihr Anteil an allen gefundenen Bakterien.",
+  "mb-bacteroidetes":
+    "Ein Bakterienstamm des Darmmikrobioms; angegeben ist sein Anteil an allen gefundenen Bakterien.",
+  "mb-bifidobacterium-adolescentis":
+    "Eine Bakterienart des Darms; angegeben ist ihr Anteil an allen gefundenen Bakterien.",
+  "mb-bifidobacterium-dentium":
+    "Eine Bakterienart des Darms; angegeben ist ihr Anteil an allen gefundenen Bakterien.",
+  "mb-bifidobacterium-spp":
+    "Eine Bakteriengattung des Darms; angegeben ist ihr Anteil an allen gefundenen Bakterien.",
+  "mb-bilophila-wadsworthia":
+    "Eine gallensäuretolerante, sulfatreduzierende Art.",
+  "mb-butyratproduktion":
+    "Der Anteil der gefundenen Bakterien, die Buttersäure bilden.",
+  "mb-butyrivibrio-crossotus":
+    "Eine Bakterienart des Darms; angegeben ist ihr Anteil an allen gefundenen Bakterien.",
+  "mb-candida-albicans":
+    "Ein Hefepilz des Darms; angegeben ist sein Anteil an der gefundenen Flora.",
+  "mb-candida-spp":
+    "Ein Hefepilz des Darms; angegeben ist sein Anteil an der gefundenen Flora.",
+  "mb-citrobacter-spp":
+    "Eine Bakteriengattung des Darms; angegeben ist ihr Anteil an allen gefundenen Bakterien.",
+  "mb-clostridium-difficile":
+    "Eine Art, die nach einer Antibiotikatherapie überhandnehmen kann.",
+  "mb-clostridium-scindens":
+    "Eine Bakterienart des Darms; angegeben ist ihr Anteil an allen gefundenen Bakterien.",
+  "mb-clostridium-spp":
+    "Eine Bakteriengattung des Darms; angegeben ist ihr Anteil an allen gefundenen Bakterien.",
+  "mb-cyanobacteria":
+    "Ein Bakterienstamm des Darmmikrobioms; angegeben ist sein Anteil an allen gefundenen Bakterien.",
+  "mb-desulfobacter-spp":
+    "Eine Bakteriengattung des Darms; angegeben ist ihr Anteil an allen gefundenen Bakterien.",
+  "mb-desulfovibrio-spp":
+    "Eine Bakteriengattung des Darms; angegeben ist ihr Anteil an allen gefundenen Bakterien.",
+  "mb-desulfuromonas-spp":
+    "Eine Bakteriengattung des Darms; angegeben ist ihr Anteil an allen gefundenen Bakterien.",
+  "mb-dorea-spp":
+    "Eine Bakteriengattung des Darms; angegeben ist ihr Anteil an allen gefundenen Bakterien.",
+  "mb-enterobacter-spp":
+    "Eine Bakteriengattung des Darms; angegeben ist ihr Anteil an allen gefundenen Bakterien.",
+  "mb-enterococcus-spp":
+    "Eine Bakteriengattung des Darms; angegeben ist ihr Anteil an allen gefundenen Bakterien.",
+  "mb-escherichia-spp":
+    "Eine Bakteriengattung des Darms; angegeben ist ihr Anteil an allen gefundenen Bakterien.",
+  "mb-eubacterium-spp":
+    "Eine Bakteriengattung des Darms; angegeben ist ihr Anteil an allen gefundenen Bakterien.",
+  "mb-euryarchaeota":
+    "Ein Bakterienstamm des Darmmikrobioms; angegeben ist sein Anteil an allen gefundenen Bakterien.",
+  "mb-faecalibacterium-prausnitzii":
+    "Eine der häufigsten buttersäurebildenden Arten des Dickdarms.",
+  "mb-firmicutes":
+    "Ein Bakterienstamm des Darmmikrobioms; angegeben ist sein Anteil an allen gefundenen Bakterien.",
+  "mb-fusobacteria":
+    "Ein Bakterienstamm des Darmmikrobioms; angegeben ist sein Anteil an allen gefundenen Bakterien.",
+  "mb-fusobacterium-nucleatum":
+    "Eine Bakterienart des Darms; angegeben ist ihr Anteil an allen gefundenen Bakterien.",
+  "mb-geotrichum-candidum":
+    "Ein Hefepilz des Darms; angegeben ist sein Anteil an der gefundenen Flora.",
+  "mb-hafnia-alveii":
+    "Eine Bakterienart des Darms; angegeben ist ihr Anteil an allen gefundenen Bakterien.",
+  "mb-klebsiella-spp":
+    "Eine Bakteriengattung des Darms; angegeben ist ihr Anteil an allen gefundenen Bakterien.",
+  "mb-lps-tragende-bakterien":
+    "Der Anteil der gefundenen Bakterien, die Lipopolysaccharid in ihrer Zellwand tragen.",
+  "mb-lactobacillus-brevis":
+    "Eine Bakterienart des Darms; angegeben ist ihr Anteil an allen gefundenen Bakterien.",
+  "mb-lactobacillus-paracasei":
+    "Eine Bakterienart des Darms; angegeben ist ihr Anteil an allen gefundenen Bakterien.",
+  "mb-lactobacillus-plantarum":
+    "Eine Bakterienart des Darms; angegeben ist ihr Anteil an allen gefundenen Bakterien.",
+  "mb-lactobacillus-spp":
+    "Eine Bakteriengattung des Darms; angegeben ist ihr Anteil an allen gefundenen Bakterien.",
+  "mb-laktatproduktion":
+    "Der Anteil der gefundenen Bakterien, die Milchsäure bilden.",
+  "mb-methanobacteria":
+    "Eine Bakterienart des Darms; angegeben ist ihr Anteil an allen gefundenen Bakterien.",
+  "mb-methanobrevibacter-spp":
+    "Eine Bakteriengattung des Darms; angegeben ist ihr Anteil an allen gefundenen Bakterien.",
+  "mb-mucindegradation":
+    "Der Anteil der gefundenen Bakterien, die die Schleimschicht des Darms abbauen.",
+  "mb-oscillibacter-spp":
+    "Eine Bakteriengattung des Darms; angegeben ist ihr Anteil an allen gefundenen Bakterien.",
+  "mb-oxalobacter-formigenes":
+    "Eine Bakterienart des Darms; angegeben ist ihr Anteil an allen gefundenen Bakterien.",
+  "mb-prevotella-copri":
+    "Eine Art, die mit ballaststoffreicher Ernährung in Verbindung gebracht wird.",
+  "mb-prevotella-spp":
+    "Eine Bakteriengattung des Darms; angegeben ist ihr Anteil an allen gefundenen Bakterien.",
+  "mb-proteobacteria":
+    "Ein Bakterienstamm des Darmmikrobioms; angegeben ist sein Anteil an allen gefundenen Bakterien.",
+  "mb-providencia-spp":
+    "Eine Bakteriengattung des Darms; angegeben ist ihr Anteil an allen gefundenen Bakterien.",
+  "mb-pseudomonas-spp":
+    "Eine Bakteriengattung des Darms; angegeben ist ihr Anteil an allen gefundenen Bakterien.",
+  "mb-roseburia-spp":
+    "Eine Bakteriengattung des Darms; angegeben ist ihr Anteil an allen gefundenen Bakterien.",
+  "mb-ruminococcus-spp":
+    "Eine Bakteriengattung des Darms; angegeben ist ihr Anteil an allen gefundenen Bakterien.",
+  "mb-saccharomyces-cerevisiae":
+    "Ein Hefepilz des Darms; angegeben ist sein Anteil an der gefundenen Flora.",
+  "mb-serratia-spp":
+    "Eine Bakteriengattung des Darms; angegeben ist ihr Anteil an allen gefundenen Bakterien.",
+  "mb-streptococcus-spp":
+    "Eine Bakteriengattung des Darms; angegeben ist ihr Anteil an allen gefundenen Bakterien.",
+  "mb-sutterella-spp":
+    "Eine Bakteriengattung des Darms; angegeben ist ihr Anteil an allen gefundenen Bakterien.",
+  "mb-tenericutes":
+    "Ein Bakterienstamm des Darmmikrobioms; angegeben ist sein Anteil an allen gefundenen Bakterien.",
+  "mb-veillonella-spp":
+    "Eine Bakteriengattung des Darms; angegeben ist ihr Anteil an allen gefundenen Bakterien.",
+  "mb-verrucomicrobia":
+    "Ein Bakterienstamm des Darmmikrobioms; angegeben ist sein Anteil an allen gefundenen Bakterien.",
+  "stool-ph":
+    "Wie sauer oder basisch der Stuhl ist. Die Säuren, die Darmbakterien bilden, senken ihn.",
   isoleucine:
     "Eine der drei verzweigtkettigen essenziellen Aminosäuren. Wird im Muskel selbst verstoffwechselt statt in der Leber.",
   leucine:
