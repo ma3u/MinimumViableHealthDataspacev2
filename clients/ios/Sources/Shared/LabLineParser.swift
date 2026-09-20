@@ -396,6 +396,35 @@ public enum LabLineParser {
     return ParseResult(values: values, suspiciousLines: suspicious)
   }
 
+  /// Splits a line that carries several `label value unit` groups.
+  ///
+  /// Only where the same unit repeats, which is what a table flattened into
+  /// one line looks like. Two or more groups are needed, so an ordinary row
+  /// with a value and a reference range is untouched, and a label longer than
+  /// a few words is refused, so a sentence with two percentages in it does not
+  /// become two measurements.
+  static func splitRepeatedValues(_ line: String) -> [(label: String, value: Double, unit: String)] {
+    guard let expression = try? NSRegularExpression(
+      pattern: #"([A-Za-zÄÖÜäöüß][A-Za-zÄÖÜäöüß0-9 .()/\-]{1,44}?)\s+(\d{1,4}(?:[.,]\d+)?)\s*(%|‰)"#)
+    else { return [] }
+
+    let range = NSRange(line.startIndex..<line.endIndex, in: line)
+    var found: [(label: String, value: Double, unit: String)] = []
+    for match in expression.matches(in: line, range: range) {
+      guard let labelRange = Range(match.range(at: 1), in: line),
+        let valueRange = Range(match.range(at: 2), in: line),
+        let unitRange = Range(match.range(at: 3), in: line),
+        let value = parseNumber(String(line[valueRange]))
+      else { continue }
+      let label = String(line[labelRange]).trimmingCharacters(
+        in: CharacterSet(charactersIn: " -–,;:"))
+      // A label is a name, not a sentence.
+      guard !label.isEmpty, label.split(separator: " ").count <= 5 else { continue }
+      found.append((label, value, String(line[unitRange])))
+    }
+    return found.count > 1 ? found : []
+  }
+
   /// Splits a printed label into its analyte name and its specimen matrix.
   ///
   /// German reports mark the matrix in brackets: `Cholesterin [P]` is plasma,
@@ -465,6 +494,22 @@ public enum LabLineParser {
       let line = entry.line
       let lineNumber = entry.lineNumber
       guard !line.trimmingCharacters(in: .whitespaces).isEmpty else { continue }
+
+      // A microbiome report puts a whole group of a table on one line:
+      // `Akkermansia muciniphila 0,123 % Prevotella spp. 12,345 % Prevotella
+      // copri 10,123 %`. The grammar below reads one value from a line, so
+      // sixty organisms arrived as nineteen, most of them carrying two
+      // names and one number. Lines like that are split first.
+      let several = splitRepeatedValues(line)
+      if several.count > 1 {
+        for (index, part) in several.enumerated() {
+          values.append(
+            RawLabValue(
+              label: part.label, value: part.value, unitRaw: part.unit,
+              line: line, lineNumber: lineNumber * 100 + index, region: entry.region))
+        }
+        continue
+      }
 
       // The first number on a line is not always the measurement. This
       // laboratory prints `HDL-Cholesterin Gen. 4 (SE) - 0.96 mmol/l`, where

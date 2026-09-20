@@ -383,6 +383,34 @@ import Shared
           Row("Muskelmasse", 29.38, "kg"),
         ], monthOnly: true, estimated: true),
 
+      // A stool microbiome report. Relative abundances, in percent, which
+      // LOINC does not code: checked against the NLM clinical tables API,
+      // there is a term for the pH of stool and none for the abundance of a
+      // genus. So every organism here arrives in the unmatched list with its
+      // name and its value intact, which is the honest place for it until
+      // there is a way to identify an organism rather than a test.
+      //
+      // Invented organisms would be worse than useless in a test fixture, so
+      // the names are the real genera and the numbers are made up.
+      Sheet(
+        id: "00000000-0000-0000-0000-00000000D010", year: 2026, month: 8, day: 19,
+        title: "Mikrobiom-Analyse, Labor Musterstadt", laboratory: "Labor Musterstadt",
+        source: .labIssuedDigital,
+        rows: [
+          Row("Firmicutes", 41.238, "%"),
+          Row("Bacteroidetes", 38.114, "%"),
+          Row("Proteobacteria", 4.271, "%"),
+          Row("Actinobacteria", 6.903, "%"),
+          Row("Verrucomicrobia", 1.482, "%"),
+          Row("Akkermansia muciniphila", 1.402, "%"),
+          Row("Faecalibacterium prausnitzii", 5.118, "%"),
+          Row("Bifidobacterium adolescentis", 2.264, "%"),
+          Row("Prevotella copri", 11.873, "%"),
+          Row("Bilophila wadsworthia", 0.318, "%"),
+          Row("Clostridium difficile", 0.004, "%"),
+          Row("Candida albicans", 0.011, "%"),
+        ]),
+
       // A home aminogram: eight essential amino acids, in micromoles per
       // litre, with the ranges such a test prints. Invented values on a real
       // layout, like everything else here.
