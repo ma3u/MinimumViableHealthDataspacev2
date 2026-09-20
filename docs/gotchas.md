@@ -555,3 +555,24 @@ help; they were installed by an earlier session that has since gone.
 `clients/ios/Scripts/archive-and-upload.sh` now takes this path whenever no
 API key is in the environment, instead of stopping with the .ipa and telling
 you to find Transporter.
+
+## 2026-09-20 — an accessibilityIdentifier on a chart renames everything inside it
+
+`.accessibilityIdentifier("trend-chart-ferritin")` on a SwiftUI `Chart` gave
+that identifier, and that label, to every element inside it. Each point button
+came back as `trend-chart-ferritin` labelled "Ferritin, 2 measurements", so no
+two points could be told apart and a UI test could not tap one.
+
+`.accessibilityElement(children: .contain)` before the identifier makes the
+chart a container instead of an element: it keeps its own name and the
+children keep theirs.
+
+Two more from the same afternoon:
+
+- A `Button` whose label is `Color.clear` is dropped from the accessibility
+  tree. It exists for a finger and for nothing else. `Circle().fill(
+Color.primary.opacity(0.001))` draws something, so it is exposed.
+- Swift Charts' `chartXSelection` responds to a finger and not to a
+  synthesised tap, so neither XCUITest nor a `CGEvent` click can reach it.
+  That is a testing problem and an accessibility problem at once: VoiceOver
+  cannot reach it either. Real buttons over the points fix both.

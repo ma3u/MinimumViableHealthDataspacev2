@@ -106,3 +106,40 @@ targets:
         CFBundleURLTypes:
           - CFBundleURLName: red.mabu.meinbefund.oidc
             CFBundleURLSchemes: [$(MB_OIDC_REDIRECT_SCHEME)]
+
+  # Drives the app in a simulator the way a person does.
+  #
+  # The unit suite checks what the app computes; this checks what it shows and
+  # what a tap does, which is where this project's last several defects lived:
+  # a card clipped at the chart's edge, a selection that forgot itself on the
+  # next render, `LOINC Optional("2093-3")` on the report screen. None of them
+  # was reachable from a unit test and every one was obvious on screen.
+  #
+  # Every test launches with `-MBDemoSeed`, so no real report is ever involved
+  # and the data is the same on any machine.
+  MeinBefundUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources:
+      - path: Tests/UITests
+    dependencies:
+      - target: MeinBefund
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: red.mabu.meinbefund.uitests
+        GENERATE_INFOPLIST_FILE: YES
+        TEST_TARGET_NAME: MeinBefund
+
+schemes:
+  MeinBefund:
+    build:
+      targets:
+        MeinBefund: all
+        MeinBefundUITests: [test]
+    run:
+      config: Debug
+    test:
+      config: Debug
+      gatherCoverageData: false
+      targets:
+        - MeinBefundUITests
