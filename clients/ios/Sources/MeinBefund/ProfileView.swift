@@ -35,18 +35,49 @@ struct ProfileView: View {
     ) -> Void
   let onClose: () -> Void
 
-  @State private var sex: RangeSex
-  @State private var hasBirthDate: Bool
-  @State private var birthDate: Date
-  @State private var height: String
+  // Seeded once, when the screen appears, and never again.
+  //
+  // These used to be filled by `State(initialValue:)` in the initialiser.
+  // That runs every time the sheet's content is rebuilt, and SwiftUI then
+  // puts the stored value back: a weight typed by hand reverted to the one
+  // from the reports a moment later, which is the opposite of what a field
+  // is for.
+  @State private var seeded = false
+  @State private var sex: RangeSex = .any
+  @State private var hasBirthDate = false
+  @State private var birthDate = Date()
+  @State private var height = ""
 
-  @State private var waist: String
-  @State private var waistDate: Date
-  @State private var weight: String
-  @State private var weightDate: Date
-  @State private var visceralFat: String
-  @State private var visceralFatDate: Date
-  @State private var visceralFatUnit: BodyMeasurements.VisceralFatUnit
+  @State private var waist = Entry()
+  @State private var weight = Entry()
+  @State private var visceralFat = Entry()
+  @State private var visceralFatUnit: BodyMeasurements.VisceralFatUnit = .area
+
+  /// One measurement being edited: what it says, when it was measured, and
+  /// whether the person changed it here.
+  struct Entry: Equatable {
+    var text = ""
+    var date = Date()
+    /// Entered on this screen rather than read from a report. A value changed
+    /// by hand was measured now, not when the old one was, so its date moves
+    /// to today and says who put it there.
+    var manual = false
+    /// What it was seeded with, to tell an edit from a redraw.
+    var seededText = ""
+
+    mutating func edited(to newText: String) {
+      guard newText != text else { return }
+      text = newText
+      if newText == seededText {
+        manual = false
+      } else {
+        manual = true
+        date = ReportMetadata.calendarDay(Date())
+      }
+    }
+
+    var binding: Binding<String> { .constant(text) }
+  }
 
   init(
     profile: Profile,
@@ -63,26 +94,28 @@ struct ProfileView: View {
     self.onSave = onSave
     self.onMeasurements = onMeasurements
     self.onClose = onClose
-    _sex = State(initialValue: profile.sex)
-    _hasBirthDate = State(initialValue: profile.birthDate != nil)
-    _birthDate = State(
-      initialValue: profile.birthDate ?? ReportMetadataExtractor.day(1980, 1, 1) ?? Date())
-    _height = State(initialValue: profile.heightCm.map { Measurement.text($0) } ?? "")
+  }
 
-    // Prefilled from the most recent measurement of each, with the day it was
-    // taken, so the screen opens on what is true and every part is editable.
-    let waistFound = latest["waist-circumference"]
-    let weightFound = latest["body-weight"]
-    let fatFound = latest["visceral-fat"]
-    _waist = State(initialValue: waistFound.map { Measurement.text($0.value) } ?? "")
-    _waistDate = State(initialValue: waistFound?.date ?? Date())
-    _weight = State(initialValue: weightFound.map { Measurement.text($0.value) } ?? "")
-    _weightDate = State(initialValue: weightFound?.date ?? Date())
-    _visceralFat = State(initialValue: fatFound.map { Measurement.text($0.value) } ?? "")
-    _visceralFatDate = State(initialValue: fatFound?.date ?? Date())
-    _visceralFatUnit = State(
-      initialValue: fatFound.flatMap { BodyMeasurements.VisceralFatUnit(rawValue: $0.ucum) }
-        ?? .area)
+  /// Fills the screen from the profile and the most recent measurements.
+  private func seed() {
+    guard !seeded else { return }
+    seeded = true
+    sex = profile.sex
+    hasBirthDate = profile.birthDate != nil
+    birthDate = profile.birthDate ?? ReportMetadataExtractor.day(1980, 1, 1) ?? Date()
+    height = profile.heightCm.map { Measurement.text($0) } ?? ""
+
+    func fill(_ key: String) -> Entry {
+      guard let found = latest[key] else { return Entry() }
+      let text = Measurement.text(found.value)
+      return Entry(text: text, date: found.date, manual: false, seededText: text)
+    }
+    waist = fill("waist-circumference")
+    weight = fill("body-weight")
+    visceralFat = fill("visceral-fat")
+    visceralFatUnit =
+      latest["visceral-fat"].flatMap { BodyMeasurements.VisceralFatUnit(rawValue: $0.ucum) }
+      ?? .area
   }
 
   private var edited: Profile {
@@ -92,13 +125,13 @@ struct ProfileView: View {
   }
 
   private var waistReading: BodyMeasurements.Reading? {
-    number(waist).map { .init(value: $0, measuredOn: waistDate) }
+    number(waist.text).map { .init(value: $0, measuredOn: waist.date) }
   }
   private var weightReading: BodyMeasurements.Reading? {
-    number(weight).map { .init(value: $0, measuredOn: weightDate) }
+    number(weight.text).map { .init(value: $0, measuredOn: weight.date) }
   }
   private var visceralReading: BodyMeasurements.Reading? {
-    number(visceralFat).map { .init(value: $0, measuredOn: visceralFatDate) }
+    number(visceralFat.text).map { .init(value: $0, measuredOn: visceralFat.date) }
   }
 
   var body: some View {
@@ -126,13 +159,16 @@ struct ProfileView: View {
         }
 
         Section {
-          measurementRow("Waist", text: $waist, unit: "cm", date: $waistDate, key: "waist-circumference")
-          measurementRow("Weight", text: $weight, unit: "kg", date: $weightDate, key: "body-weight")
+          measurementRow("Waist", entry: $waist, unit: "cm", key: "waist-circumference")
+          measurementRow("Weight", entry: $weight, unit: "kg", key: "body-weight")
           visceralFatRow
-          if let waistValue = number(waist), let ratio = edited.waistToHeight(waistCm: waistValue) {
+          if let waistValue = number(waist.text),
+            let ratio = edited.waistToHeight(waistCm: waistValue)
+          {
             LabeledContent("Waist to height", value: String(format: "%.2f", ratio))
           }
-          if let weightValue = number(weight), let bmi = edited.bodyMassIndex(weightKg: weightValue)
+          if let weightValue = number(weight.text),
+            let bmi = edited.bodyMassIndex(weightKg: weightValue)
           {
             LabeledContent("BMI", value: String(format: "%.1f", bmi))
           }
@@ -151,6 +187,7 @@ struct ProfileView: View {
           }
         }
       }
+      .onAppear(perform: seed)
       .navigationTitle("Profile")
       .navigationBarTitleDisplayMode(.inline)
       .toolbar {
@@ -175,7 +212,7 @@ struct ProfileView: View {
       HStack {
         Text("Visceral fat")
         Spacer(minLength: 12)
-        TextField(text: $visceralFat, prompt: nil) { Text("Visceral fat") }
+        TextField(text: text(of: $visceralFat), prompt: nil) { Text("Visceral fat") }
           .keyboardType(.decimalPad)
           .multilineTextAlignment(.trailing)
           .labelsHidden()
@@ -187,7 +224,7 @@ struct ProfileView: View {
         .pickerStyle(.menu)
         .labelsHidden()
       }
-      dateRow($visceralFatDate, key: "visceral-fat")
+      dateRow($visceralFat)
     }
   }
 
@@ -197,30 +234,49 @@ struct ProfileView: View {
   /// its content as a value to read, and a text field inside one is easy to
   /// miss as something you can tap.
   private func measurementRow(
-    _ title: String, text: Binding<String>, unit: String, date: Binding<Date>, key: String
+    _ title: String, entry: Binding<Entry>, unit: String, key: String
   ) -> some View {
     VStack(alignment: .leading, spacing: 6) {
       HStack {
         Text(title)
         Spacer(minLength: 12)
-        TextField(text: text, prompt: nil) { Text(title) }
+        TextField(text: text(of: entry), prompt: nil) { Text(title) }
           .keyboardType(.decimalPad)
           .multilineTextAlignment(.trailing)
           .labelsHidden()
           .accessibilityIdentifier("profile-\(key)")
         Text(unit).foregroundStyle(.secondary)
       }
-      dateRow(date, key: key)
+      dateRow(entry)
     }
   }
 
+  /// A text binding that records an edit as an edit.
+  ///
+  /// Typing a figure here means it was measured now, so its date moves to
+  /// today and stops claiming to have come from a report. Typing the old
+  /// figure back puts both claims back as they were.
+  private func text(of entry: Binding<Entry>) -> Binding<String> {
+    Binding(
+      get: { entry.wrappedValue.text },
+      set: { entry.wrappedValue.edited(to: $0) })
+  }
+
   /// The day one measurement was taken, and where that day came from.
-  private func dateRow(_ date: Binding<Date>, key: String) -> some View {
+  private func dateRow(_ entry: Binding<Entry>) -> some View {
     HStack {
-      DatePicker("Measured", selection: date, in: ...Date(), displayedComponents: .date)
-        .datePickerStyle(.compact)
-        .font(.caption)
-      if let found = latest[key], ReportMetadata.calendarDay(found.date) == ReportMetadata.calendarDay(date.wrappedValue) {
+      DatePicker(
+        "Measured",
+        selection: Binding(
+          get: { entry.wrappedValue.date },
+          set: { entry.wrappedValue.date = $0 }),
+        in: ...Date(), displayedComponents: .date
+      )
+      .datePickerStyle(.compact)
+      .font(.caption)
+      if entry.wrappedValue.manual {
+        Text("entered by you").font(.caption2).foregroundStyle(.secondary)
+      } else if !entry.wrappedValue.text.isEmpty {
         Text("from your reports").font(.caption2).foregroundStyle(.secondary)
       }
     }
