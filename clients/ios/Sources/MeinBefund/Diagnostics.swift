@@ -83,6 +83,7 @@ enum DiagnosticsExport {
       at: tmp, includingPropertiesForKeys: nil)) ?? []
     for file in files
     where file.lastPathComponent.hasPrefix("klarbefund-diagnostics-")
+      || file.lastPathComponent.hasPrefix("klarbefund-omop-")
       || file.lastPathComponent == "pull-diagnostics.zip"
     {
       try? FileManager.default.removeItem(at: file)

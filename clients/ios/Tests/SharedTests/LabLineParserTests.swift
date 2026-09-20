@@ -11,6 +11,18 @@ struct NumberTests {
     #expect(LabLineParser.parseNumber("1.240") == 1240)
   }
 
+  @Test("a lone leading zero means the dot is decimal, whatever follows it")
+  func leadingZeroIsNeverGrouping() {
+    // No German grouping produces `0.300`. A real sheet prints Lp(a) that way,
+    // and reading it as 300 g/L rather than 0.3 is a thousandfold error on the
+    // value that decides a cardiovascular referral.
+    #expect(LabLineParser.parseNumber("0.300") == 0.3)
+    #expect(LabLineParser.parseNumber("0.100") == 0.1)
+    // The grouping rule itself is untouched.
+    #expect(LabLineParser.parseNumber("1.240") == 1240)
+    #expect(LabLineParser.parseNumber("10.300") == 10300)
+  }
+
   @Test("a dot before one or two digits is a decimal point")
   func decimalPoint() {
     #expect(LabLineParser.parseNumber("0.92") == 0.92)
@@ -317,24 +329,70 @@ struct BerlinSheetTests {
     #expect(result.coded.map(\.coding.loinc).contains("2823-3"))
   }
 
-  @Test("unit before value, on the line path, is refused rather than misread")
-  func unitBeforeValueStaysUnread() {
-    // The study centre's layout. The line grammar cannot tell 141 from 136
-    // here; the table path can, by column role. A wrong number is the one
-    // outcome this pipeline exists to prevent, so the line path must refuse.
-    let lines = [
-      "Natrium [P]  mmol/l  136 - 145  141",
-      "Kalium [P]  mmol/l  3.4 - 4.5  4.3",
-      "NT-proBNP [P]  pg/ml  <125  <35",
-      "Ferritin [P]  ug/l  22 -322  169",
-      "Cholesterin [P]  mmol/l  < 5.18  6.5 +  250mgldL",
+  @Test("unit before value is read, and read correctly")
+  func unitBeforeValue() {
+    // The study centre's and the institute's layout: `Analyt Einheit
+    // Referenz Wert`. The ordinary grammar takes the lower bound as the
+    // result here, so it refuses the shape, and this path reads it only
+    // because a unit follows the label directly, which the ordinary layout
+    // never does.
+    let cases: [(String, Double, String, String)] = [
+      ("Natrium [P]  mmol/l  136 - 145  141", 141, "mmol/l", "2951-2"),
+      ("Kalium [P]  mmol/l  3.4 - 4.5  4.3", 4.3, "mmol/l", "2823-3"),
+      ("NT-proBNP [P]  pg/ml  <125  <35", 35, "pg/ml", "33762-6"),
+      ("Ferritin [P]  ug/l  22 -322  169", 169, "ug/l", "2276-4"),
+      ("Transferrin-Sättigung [P]  %  16 - 45  46.1 +", 46.1, "%", "2502-3"),
+      ("Cholesterin [P]  mmol/l  < 5.18  6.5 +  250mgldL", 6.5, "mmol/l", "14647-2"),
+      ("LDL-Cholesterin [P]  mmol/l  < 3.34  4.51  +  173 mgldL", 4.51, "mmol/l", "22748-8"),
+      ("HDL-Cholesterin [P]  mmol/l  > 1.03  1.63  62 mgldL", 1.63, "mmol/l", "14646-4"),
+      ("Kortisol [P]  nmol/l  145 - 619  432.5", 432.5, "nmol/l", "14675-3"),
+      ("Apolipoprotein B [P]  g/l  0.46 - 1.74  1.05", 1.05, "g/l", "1884-6"),
+      ("TSH [P]  mU/l  0.27 - 4.20  1.43", 1.43, "mU/l", "3016-3"),
     ]
-    for line in lines {
-      let result = LabLineParser.extract(line, source: .ocrTranscribed)
-      #expect(result.coded.isEmpty, "must not code on the line path: \(line)")
-      #expect(result.unmapped.isEmpty, "must not yield a value on the line path: \(line)")
-      #expect(result.suspiciousLines == [line])
+    for (line, expected, unit, loinc) in cases {
+      let result = LabLineParser.extract(line, source: .labIssuedDigital)
+      let coded = result.coded.first
+      #expect(coded?.raw.value == expected, "\(line) read as \(coded?.raw.value ?? -1)")
+      #expect(coded?.raw.unitRaw == unit, "\(line)")
+      #expect(coded?.coding.loinc == loinc, "\(line)")
     }
+  }
+
+  @Test("the reference range of a unit-first row is kept, and the value is not it")
+  func unitFirstKeepsItsRange() {
+    let result = LabLineParser.extract(
+      "Kortisol [P]  nmol/l  145 - 619  432.5", source: .labIssuedDigital)
+    let coded = result.coded.first
+    #expect(coded?.raw.referenceLow == 145)
+    #expect(coded?.raw.referenceHigh == 619)
+    #expect(coded?.raw.value == 432.5)
+
+    // A comparator on the value survives, and is not confused with the bound.
+    let lpa = LabLineParser.extract(
+      "Lp(a) [P]  g/l  < 0.300  <0.100", source: .labIssuedDigital)
+    #expect(lpa.coded.first?.raw.value == 0.1)
+    #expect(lpa.coded.first?.raw.comparator == .lessThan)
+    #expect(lpa.coded.first?.raw.referenceHigh == 0.3)
+  }
+
+  @Test("a urine row in that layout is still refused")
+  func unitFirstStillRefusesUrine() {
+    for line in ["Albumin [U]  mg/l  < 30  3.9", "Kreatinin [U]  mmol/l  1- 26  19.92"] {
+      let result = LabLineParser.extract(line, source: .labIssuedDigital)
+      #expect(result.coded.isEmpty, "\(line) must not code")
+      #expect(result.unmapped.first?.reason == .specimenNotSupported, "\(line)")
+    }
+  }
+
+  @Test("one number after a unit is not enough to tell a range from a result")
+  func unitFirstNeedsBothNumbers() {
+    // `eGFR ml/min 90` could be either, so it is refused rather than guessed.
+    #expect(LabLineParser.parseUnitFirst("eGFR  ml/min  90") == nil)
+    // A label that is itself a number is not a label.
+    #expect(LabLineParser.parseUnitFirst("36  mg/dl  17-48") == nil)
+    // And the ordinary layout is never routed here: its token after the label
+    // is a number, not a unit.
+    #expect(LabLineParser.parseUnitFirst("Ferritin  210  ug/l  30 - 400") == nil)
   }
 
   @Test("a result still in progress is reported as unread, never as a number")

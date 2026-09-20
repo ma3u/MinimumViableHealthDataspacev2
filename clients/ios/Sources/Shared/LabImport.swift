@@ -33,6 +33,13 @@ public enum LabImport {
     public let pages: [ScanDiagnostics.Page]
     public var source: SourceKind { extraction.source }
 
+    /// The widest page's pixel width, when the pages were recognised as
+    /// images. Nil for a text-layer import, which has no resolution.
+    public var sourcePixelWidth: Int? {
+      let widths = pages.map(\.imageWidth).filter { $0 > 0 }
+      return widths.max()
+    }
+
     public init(
       extraction: ExtractionResult, metadata: ReportMetadata, pageTexts: [String], pdf: Data,
       pages: [ScanDiagnostics.Page]

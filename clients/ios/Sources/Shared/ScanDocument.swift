@@ -30,7 +30,10 @@ public enum ScanDocument {
   }
 
   /// Points across the width of a page; the height follows the image.
-  static let pageWidth: CGFloat = 595  // A4 at 72 dpi
+  ///
+  /// Public because a re-read has to work out which resolution reproduces the
+  /// pixels the recogniser first saw, and that is this width and the page's.
+  public static let pageWidth: CGFloat = 595  // A4 at 72 dpi
 
   /// Assembles the pages into a PDF.
   ///

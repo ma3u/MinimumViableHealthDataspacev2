@@ -44,10 +44,17 @@ public enum LabLineParser {
     } else if hasComma {
       normalised = t.replacingOccurrences(of: ",", with: ".")
     } else if hasDot {
-      let afterDot = t[t.index(after: t.lastIndex(of: ".")!)...]
+      let lastDot = t.lastIndex(of: ".")!
+      let beforeDot = t[..<lastDot]
+      let afterDot = t[t.index(after: lastDot)...]
       // `.` + exactly three digits is thousands grouping; anything else is a
-      // decimal point.
-      normalised = afterDot.count == 3 ? t.replacingOccurrences(of: ".", with: "") : t
+      // decimal point. Except after a lone zero: no grouping produces `0.300`,
+      // and a real sheet prints Lp(a) that way, where reading it as 300 g/L
+      // instead of 0.3 is a thousandfold error on a value that decides a
+      // cardiovascular referral (#186).
+      normalised =
+        (afterDot.count == 3 && beforeDot != "0")
+        ? t.replacingOccurrences(of: ".", with: "") : t
     }
 
     return Double(normalised)
@@ -164,6 +171,55 @@ public enum LabLineParser {
       guard let r = Range(m.range(at: i), in: text) else { return "" }
       return String(text[r])
     }
+  }
+
+  /// `Analyt [P]  Einheit  Referenzbereich  Wert`, the order a Berlin study
+  /// centre and a university institute both print.
+  ///
+  /// The line grammar cannot read this. Asked for `Natrium [P] mmol/l 136 -
+  /// 145 141` it takes 136, the lower bound, as the result, so it was made to
+  /// refuse the shape outright rather than publish a wrong number. That was
+  /// right, and it cost two whole chemistry panels: on a photograph where the
+  /// table recogniser finds no table, every row of such a sheet was reported
+  /// as unread.
+  ///
+  /// What makes it readable without guessing is the discriminator between the
+  /// two layouts: **in the ordinary one the token after the label is a number,
+  /// and here it is a unit.** So this runs only after the ordinary grammar has
+  /// failed on the line, and only when a unit follows the label directly, a
+  /// reference range follows the unit, and a value follows the range. Anything
+  /// less is refused, because a single number after a unit could be either.
+  static func parseUnitFirst(_ line: String) -> RawLabValue? {
+    let tokens = line.split(whereSeparator: { $0.isWhitespace }).map(String.init)
+    guard tokens.count >= 3 else { return nil }
+    guard
+      let unitIndex = tokens.indices.first(where: { index in
+        index > 0 && Analytes.normaliseUnit(tokens[index]) != nil
+      })
+    else { return nil }
+
+    let label = tokens[..<unitIndex].joined(separator: " ")
+    guard let first = label.first, first.isLetter || first == "(" else { return nil }
+
+    let tail = tokens[(unitIndex + 1)...].joined(separator: " ")
+    let bound = #"(?:<=?|>=?|≤|≥)\s*\d[\d.,]*"#
+    let interval = #"\d[\d.,]*\s*(?:-|–|—|bis)\s*\d[\d.,]*"#
+    guard
+      let reference = firstMatch(
+        "^\\s*(" + bound + "|" + interval + ")\\s+(.*)$", in: tail, caseInsensitive: true)
+    else { return nil }
+    guard let measured = firstMatch(#"^\s*([<>]=?|≤|≥)?\s*(\d[\d.,]*)"#, in: reference[2]),
+      let value = parseNumber(measured[2])
+    else { return nil }
+
+    let range = parseReferenceRange(reference[1])
+    let comparator = measured[1].replacingOccurrences(of: "≤", with: "<=")
+      .replacingOccurrences(of: "≥", with: ">=")
+    return RawLabValue(
+      label: label, value: value, unitRaw: tokens[unitIndex],
+      comparator: Comparator(rawValue: comparator),
+      referenceLow: range.low, referenceHigh: range.high,
+      line: line.trimmingCharacters(in: .whitespaces), lineNumber: 0, region: nil)
   }
 
   public struct ParseResult: Sendable, Equatable {
@@ -418,7 +474,22 @@ public enum LabLineParser {
           searchFrom, offsetBy: segment.distance(from: segment.startIndex, to: valueRange.upperBound))
       }
 
+      /// The other column order, tried wherever the ordinary grammar gives
+      /// up: it can "match" a unit-first line and only then fail on the unit,
+      /// so trying this at one failure site alone leaves the other unread.
+      func fallback() -> Bool {
+        guard let unitFirst = parseUnitFirst(line) else { return false }
+        values.append(
+          RawLabValue(
+            label: unitFirst.label, value: unitFirst.value, unitRaw: unitFirst.unitRaw,
+            comparator: unitFirst.comparator, referenceLow: unitFirst.referenceLow,
+            referenceHigh: unitFirst.referenceHigh, line: unitFirst.line,
+            lineNumber: lineNumber, region: entry.region))
+        return true
+      }
+
       guard let (m, segment) = matched else {
+        if fallback() { continue }
         if looksLikeMeasurement(line) { suspicious.append(line) }
         continue
       }
@@ -465,6 +536,7 @@ public enum LabLineParser {
       // The unit column must actually be a unit; otherwise we have matched the
       // reference range or a comment and should not pretend otherwise.
       guard let value = parseNumber(group("value")), Analytes.normaliseUnit(unitRaw) != nil else {
+        if fallback() { continue }
         if looksLikeMeasurement(line) { suspicious.append(line) }
         continue
       }
