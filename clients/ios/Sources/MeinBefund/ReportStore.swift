@@ -125,6 +125,25 @@ public actor ReportStore {
     try url.setResourceValues(values)
   }
 
+  /// The profile, sealed beside the reports.
+  ///
+  /// In the store rather than in `UserDefaults` because a date of birth and a
+  /// height are health data, and a plist in the container is readable by
+  /// anything that can read the container.
+  private var profileURL: URL { directory.appendingPathComponent("profile.sealed") }
+
+  public func profile() throws -> Profile {
+    try ensureDirectory()
+    guard let plain = try open(profileURL) else { return .empty }
+    return try JSONDecoder().decode(Profile.self, from: plain)
+  }
+
+  public func saveProfile(_ profile: Profile) throws {
+    try ensureDirectory()
+    try seal(try JSONEncoder().encode(profile), to: profileURL)
+    Log.store.notice("profile saved")
+  }
+
   private func url(for id: UUID) -> URL {
     directory.appendingPathComponent("\(id.uuidString).sealed")
   }
@@ -204,8 +223,8 @@ public actor ReportStore {
       (try? FileManager.default.contentsOfDirectory(at: directory, includingPropertiesForKeys: nil))
       ?? []
     for file in files where file.pathExtension == "sealed" {
-      // Attachments are `<id>.scan.sealed` and `<id>.diag.sealed`; only the
-      // bare `<id>.sealed` is a record.
+      // Attachments are `<id>.scan.sealed` and `<id>.diag.sealed`, and the
+      // profile is `profile.sealed`; only a bare UUID is a record.
       guard let id = UUID(uuidString: file.deletingPathExtension().lastPathComponent) else {
         continue
       }

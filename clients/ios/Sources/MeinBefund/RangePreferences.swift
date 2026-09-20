@@ -11,17 +11,20 @@ import Shared
 /// Kept in `UserDefaults`, on the device, and never sent anywhere. The
 /// analysis request carries values and their codes, never anything about the
 /// person (ADR-034).
-enum RangePreferences {
+/// The sex the app used to keep in `UserDefaults`, for one migration.
+///
+/// It moved into the sealed profile, where the rest of the person's own data
+/// belongs. This reads the old key once so nobody has to answer the question
+/// twice, and clears it.
+enum LegacyRangePreference {
   private static let key = "range-sex"
 
-  static var sex: RangeSex {
-    get {
-      guard let raw = UserDefaults.standard.string(forKey: key),
-        let value = RangeSex(rawValue: raw)
-      else { return .any }
-      return value
-    }
-    set { UserDefaults.standard.set(newValue.rawValue, forKey: key) }
+  static func take() -> RangeSex? {
+    guard let raw = UserDefaults.standard.string(forKey: key),
+      let value = RangeSex(rawValue: raw), value != .any
+    else { return nil }
+    UserDefaults.standard.removeObject(forKey: key)
+    return value
   }
 }
 
@@ -44,6 +47,7 @@ extension RangeGroup {
     case .liver: return String(localized: "Liver")
     case .haematology: return String(localized: "Blood count and iron")
     case .vitamins: return String(localized: "Vitamins")
+    case .body: return String(localized: "Body")
     }
   }
 }

@@ -35,7 +35,7 @@ same_in_both = {
     # still has to be translated.
     "ALT (GPT)", "AST (GOT)", "Apolipoprotein A1", "Apolipoprotein B", "CRP",
     "Ferritin", "Gamma-GT", "HbA1c", "Lipoprotein(a)", "Vitamin B12",
-    "Vitamin D (25-OH)", "eGFR", "hs-CRP",
+    "Vitamin D (25-OH)", "eGFR", "hs-CRP", "BMI", "cm",
 }
 
 missing, german_in_base, total = [], [], 0

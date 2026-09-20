@@ -41,6 +41,7 @@ public enum RangeGroup: String, Sendable, Equatable, Codable, CaseIterable {
     case liver
     case haematology
     case vitamins
+    case body
 }
 
 public struct ReferenceRange: Sendable, Equatable, Codable, Identifiable {
@@ -371,6 +372,26 @@ public enum ReferenceRanges {
       source: RangeSource(
         label: "WHO guideline on ferritin concentrations to assess iron status (2020)",
         url: "https://www.who.int/publications/i/item/9789240000124")),
+    ReferenceRange(
+      analyteKey: "waist-circumference", ucum: "cm",
+      group: .body, sex: .male,
+      guidelineLow: nil, guidelineHigh: 102,
+      optimalLow: nil, optimalHigh: 94,
+      basis: .guideline,
+      summary: "In men, 94 cm marks increased risk and 102 cm substantially increased risk. The thresholds are population-specific; these are the ones for people of European descent.",
+      source: RangeSource(
+        label: "Waist circumference and waist-hip ratio: report of a WHO expert consultation (2011)",
+        url: "https://www.who.int/publications/i/item/9789241501491")),
+    ReferenceRange(
+      analyteKey: "waist-circumference", ucum: "cm",
+      group: .body, sex: .female,
+      guidelineLow: nil, guidelineHigh: 88,
+      optimalLow: nil, optimalHigh: 80,
+      basis: .guideline,
+      summary: "In women, 80 cm marks increased risk and 88 cm substantially increased risk. The thresholds are population-specific; these are the ones for people of European descent.",
+      source: RangeSource(
+        label: "Waist circumference and waist-hip ratio: report of a WHO expert consultation (2011)",
+        url: "https://www.who.int/publications/i/item/9789241501491")),
     ReferenceRange(
       analyteKey: "vitamin-d", ucum: "ng/mL",
       group: .vitamins, sex: .any,

@@ -63,7 +63,50 @@ final class AppModel: ObservableObject {
         return
       }
     #endif
-    do { reports = try await store.load() } catch { self.error = error.localizedDescription }
+    do {
+      reports = try await store.load()
+      var loaded = try await store.profile()
+      // One migration: the sex used to be a preference in UserDefaults.
+      if loaded.sex == .any, let legacy = LegacyRangePreference.take() {
+        loaded.sex = legacy
+        try await store.saveProfile(loaded)
+      }
+      profile = loaded
+    } catch { self.error = error.localizedDescription }
+  }
+
+  func saveProfile(_ updated: Profile) async {
+    do {
+      var next = updated
+      next.updatedAt = Date()
+      try await store.saveProfile(next)
+      profile = next
+    } catch { self.error = error.localizedDescription }
+  }
+
+  /// Stores entered body measurements as a report of their own.
+  ///
+  /// The same shape a scan produces, with `self-tracked` provenance, so they
+  /// join the timeline, the doctor's document and the OMOP export without a
+  /// second path to keep in step. A tape measure is not a laboratory, and the
+  /// provenance already says so.
+  func saveBodyMeasurements(
+    waistCm: Double?, weightKg: Double?, visceralFatCm2: Double?, on date: Date
+  ) async {
+    let entries = BodyMeasurements.entries(
+      waistCm: waistCm, weightKg: weightKg, visceralFatCm2: visceralFatCm2,
+      heightCm: profile.heightCm, profile: profile)
+    guard
+      let report = BodyMeasurements.report(
+        entries: entries, on: ReportMetadata.calendarDay(date),
+        title: String(localized: "Body measurements"))
+    else { return }
+    do {
+      try await store.save(report)
+      Log.store.notice(
+        "body measurements saved: \(report.extraction.coded.count, privacy: .public) coded")
+      await refresh()
+    } catch { self.error = error.localizedDescription }
   }
 
   func process(_ images: [UIImage]) async {
@@ -239,7 +282,7 @@ final class AppModel: ObservableObject {
     busy = true
     defer { busy = false }
     do {
-      let bundle = OmopExport.bundle(from: reports, sex: RangePreferences.sex)
+      let bundle = OmopExport.bundle(from: reports, profile: profile)
       let count = reports.count
       let day = ISO8601DateFormatter()
       day.formatOptions = [.withYear, .withMonth, .withDay, .withDashSeparatorInDate]
@@ -358,6 +401,8 @@ final class AppModel: ObservableObject {
   @Published var showingTrends = false
   @Published var showingReference = false
   @Published var sharingOmop: URL?
+  @Published var profile: Profile = .empty
+  @Published var showingProfile = false
   @Published var sharing: ReportExport.Artefacts?
 
   /// Builds the PDF and FHIR bundle for one report. Entirely local: this is
@@ -460,7 +505,7 @@ struct ContentView: View {
           .navigationDestination(for: UUID.self) { id in
             if let report = model.reports.first(where: { $0.id == id }) {
               ResultList(
-                report: report,
+                report: report, sex: model.profile.sex,
                 onOpenScan: report.scan == nil ? nil : { Task { await model.openScan(report) } }
               )
               .toolbar {
@@ -547,6 +592,11 @@ struct ContentView: View {
               model.showingReference = true
             } label: {
               Label("Reference values", systemImage: "text.book.closed")
+            }
+            Button {
+              model.showingProfile = true
+            } label: {
+              Label("Profile", systemImage: "person.text.rectangle")
             }
             Button {
               model.showingPrivacy = true
@@ -868,10 +918,24 @@ private struct AppDialogs: ViewModifier {
       PrivacySummary { model.showingPrivacy = false }
     }
       .sheet(isPresented: $model.showingTrends) {
-      TrendsView(reports: model.reports) { model.showingTrends = false }
+      TrendsView(reports: model.reports, sex: model.profile.sex) {
+        model.showingTrends = false
+      }
     }
       .sheet(isPresented: $model.showingReference) {
-      ReferenceValuesView { model.showingReference = false }
+      ReferenceValuesView(sex: model.profile.sex) { model.showingReference = false }
+    }
+      .sheet(isPresented: $model.showingProfile) {
+      ProfileView(
+        profile: model.profile,
+        onSave: { updated in Task { await model.saveProfile(updated) } },
+        onMeasurements: { waist, weight, visceral, date in
+          Task {
+            await model.saveBodyMeasurements(
+              waistCm: waist, weightKg: weight, visceralFatCm2: visceral, on: date)
+          }
+        },
+        onClose: { model.showingProfile = false })
     }
       .sheet(item: Binding(get: { model.sharing.map(ShareBox.init) }, set: { _ in })) { box in
       ShareSheet(items: [box.artefacts.pdf, box.artefacts.fhir]) {

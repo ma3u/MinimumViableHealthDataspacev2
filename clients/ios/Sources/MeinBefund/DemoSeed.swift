@@ -41,9 +41,15 @@
       return Screen(rawValue: args[index + 1])
     }
 
+    /// `analyteKey` is the dictionary's own key, not the label folded.
+    ///
+    /// It used to be `label.lowercased()`, which looks harmless and is not:
+    /// the key is what a published range is looked up by, so every demo value
+    /// silently had no range and the screenshots showed an app that never
+    /// compares anything.
     private static func coded(
       _ label: String, _ value: Double, _ unitRaw: String, _ ucum: String, _ loinc: String,
-      _ display: String, low: Double? = nil, high: Double? = nil, line: Int
+      _ display: String, key: String, low: Double? = nil, high: Double? = nil, line: Int
     ) -> CodedLabValue {
       CodedLabValue(
         raw: RawLabValue(
@@ -53,8 +59,8 @@
           region: SourceRegion(
             page: 1, x: 0.07, y: 0.82 - Double(line) * 0.04, width: 0.85, height: 0.03)),
         coding: AnalyteCoding(
-          labelKey: label.lowercased(), ucum: ucum, loinc: loinc, display: display,
-          analyteKey: label.lowercased()),
+          labelKey: Analytes.normaliseLabel(label), ucum: ucum, loinc: loinc, display: display,
+          analyteKey: key),
         source: .ocrTranscribed)
     }
 
@@ -62,22 +68,23 @@
       let panel = ExtractionResult(
         coded: [
           coded("Cholesterin gesamt", 212, "mg/dl", "mg/dL", "2093-3",
-                "Cholesterol [Mass/volume] in Serum or Plasma", high: 200, line: 2),
+                "Cholesterol [Mass/volume] in Serum or Plasma", key: "cholesterol-total",
+                high: 200, line: 2),
           coded("LDL-Cholesterin", 141, "mg/dl", "mg/dL", "2089-1",
-                "Cholesterol in LDL [Mass/volume]", high: 116, line: 3),
+                "Cholesterol in LDL [Mass/volume]", key: "cholesterol-ldl", high: 116, line: 3),
           coded("HDL-Cholesterin", 48, "mg/dl", "mg/dL", "2085-9",
-                "Cholesterol in HDL [Mass/volume]", low: 40, line: 4),
+                "Cholesterol in HDL [Mass/volume]", key: "cholesterol-hdl", low: 40, line: 4),
           coded("Triglyceride", 168, "mg/dl", "mg/dL", "2571-8",
-                "Triglyceride [Mass/volume]", high: 150, line: 5),
+                "Triglyceride [Mass/volume]", key: "triglycerides", high: 150, line: 5),
           coded("HbA1c", 5.4, "%", "%", "4548-4",
-                "Hemoglobin A1c/Hemoglobin.total in Blood", low: 4, high: 6, line: 6),
+                "Hemoglobin A1c/Hemoglobin.total in Blood", key: "hba1c", low: 4, high: 6, line: 6),
           coded("Kreatinin", 0.92, "mg/dl", "mg/dL", "2160-0",
-                "Creatinine [Mass/volume]", low: 0.7, high: 1.2, line: 7),
+                "Creatinine [Mass/volume]", key: "creatinine", low: 0.7, high: 1.2, line: 7),
           // The German thousands rule, visible: 1.240 pg/mL is 1240.
           coded("NT-proBNP", 1240, "pg/ml", "pg/mL", "33762-6",
-                "Natriuretic peptide.B prohormone N-Terminal", high: 125, line: 8),
+                "Natriuretic peptide.B prohormone N-Terminal", key: "nt-probnp", high: 125, line: 8),
           coded("Ferritin", 210, "ug/l", "ug/L", "2276-4",
-                "Ferritin [Mass/volume]", low: 30, high: 400, line: 9),
+                "Ferritin [Mass/volume]", key: "ferritin", low: 30, high: 400, line: 9),
         ],
         unmapped: [
           UnmappedLabValue(
@@ -92,11 +99,11 @@
       let second = ExtractionResult(
         coded: [
           coded("LDL-Cholesterin", 128, "mg/dl", "mg/dL", "2089-1",
-                "Cholesterol in LDL [Mass/volume]", high: 116, line: 3),
+                "Cholesterol in LDL [Mass/volume]", key: "cholesterol-ldl", high: 116, line: 3),
           coded("HbA1c", 5.2, "%", "%", "4548-4",
-                "Hemoglobin A1c/Hemoglobin.total in Blood", low: 4, high: 6, line: 4),
+                "Hemoglobin A1c/Hemoglobin.total in Blood", key: "hba1c", low: 4, high: 6, line: 4),
           coded("Ferritin", 188, "ug/l", "ug/L", "2276-4",
-                "Ferritin [Mass/volume]", low: 30, high: 400, line: 5),
+                "Ferritin [Mass/volume]", key: "ferritin", low: 30, high: 400, line: 5),
         ],
         unmapped: [], suspiciousLines: [], source: .ocrTranscribed)
 

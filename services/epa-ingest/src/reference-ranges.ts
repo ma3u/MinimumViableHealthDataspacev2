@@ -62,7 +62,8 @@ export type RangeGroup =
   | "kidney"
   | "liver"
   | "haematology"
-  | "vitamins";
+  | "vitamins"
+  | "body";
 
 /** The groups, in the order a reader should meet them. */
 export const RANGE_GROUPS: readonly RangeGroup[] = [
@@ -72,6 +73,7 @@ export const RANGE_GROUPS: readonly RangeGroup[] = [
   "liver",
   "haematology",
   "vitamins",
+  "body",
 ];
 
 const ESC_2019: RangeSource = {
@@ -123,6 +125,11 @@ const WHO_FERRITIN_2020: RangeSource = {
   label:
     "WHO guideline on ferritin concentrations to assess iron status (2020)",
   url: "https://www.who.int/publications/i/item/9789240000124",
+};
+const WHO_WAIST_2011: RangeSource = {
+  label:
+    "Waist circumference and waist-hip ratio: report of a WHO expert consultation (2011)",
+  url: "https://www.who.int/publications/i/item/9789241501491",
 };
 const WHO_HAEMOGLOBIN_2024: RangeSource = {
   label: "WHO guideline on haemoglobin cutoffs to define anaemia (2024)",
@@ -488,6 +495,32 @@ export const REFERENCE_RANGES: readonly ReferenceRange[] = [
     summary:
       "Numerically the same as µg/L. Below 15 indicates depleted iron stores; ferritin rises with inflammation.",
     source: WHO_FERRITIN_2020,
+  },
+
+  // ---- Body ----
+  {
+    analyteKey: "waist-circumference",
+    ucum: "cm",
+    group: "body",
+    sex: "male",
+    guidelineHigh: 102,
+    optimalHigh: 94,
+    basis: "guideline",
+    summary:
+      "In men, 94 cm marks increased risk and 102 cm substantially increased risk. The thresholds are population-specific; these are the ones for people of European descent.",
+    source: WHO_WAIST_2011,
+  },
+  {
+    analyteKey: "waist-circumference",
+    ucum: "cm",
+    group: "body",
+    sex: "female",
+    guidelineHigh: 88,
+    optimalHigh: 80,
+    basis: "guideline",
+    summary:
+      "In women, 80 cm marks increased risk and 88 cm substantially increased risk. The thresholds are population-specific; these are the ones for people of European descent.",
+    source: WHO_WAIST_2011,
   },
 
   // ---- Vitamins ----

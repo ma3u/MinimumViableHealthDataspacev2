@@ -23,9 +23,9 @@ import SwiftUI
 /// measured with.
 struct TrendsView: View {
   let reports: [LabReport]
+  /// From the profile, so a sex-specific band appears only once asked for.
+  var sex: RangeSex = .any
   let onClose: () -> Void
-
-  @State private var sex: RangeSex = RangePreferences.sex
   @State private var onlyWithHistory = false
 
   private var series: [TrendSeries] {
@@ -60,7 +60,10 @@ struct TrendsView: View {
               }
             }
 
-            Section { DoctorReminder() }
+            Section {
+              RangeLegend()
+              DoctorReminder()
+            }
           }
         }
       }
@@ -95,10 +98,14 @@ private struct SeriesHeader: View {
       Text(AnalyteNames.title(series.analyteKey))
       Spacer()
       if let latest = series.latest {
-        Text(
-          "\(latest.comparator?.rawValue ?? "")\(Measurement.text(latest.value)) \(series.ucum)"
-        )
+        HStack(spacing: 4) {
+          Image(systemName: RangePalette.symbol(for: series.placement))
+          Text(
+            "\(latest.comparator?.rawValue ?? "")\(Measurement.text(latest.value)) \(series.ucum)"
+          )
+        }
         .font(.caption.monospacedDigit())
+        .foregroundStyle(RangePalette.colour(for: series.placement))
       }
     }
   }
@@ -168,7 +175,7 @@ private struct SeriesChart: View {
           yStart: .value("from", range.optimalLow ?? bounds.low),
           yEnd: .value("to", range.optimalHigh ?? bounds.high)
         )
-        .foregroundStyle(.green.opacity(0.12))
+        .foregroundStyle(RangePalette.optimal.opacity(0.12))
       }
 
       ForEach(series.points) { point in

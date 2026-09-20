@@ -84,13 +84,15 @@ struct ReviewSheet: View {
 
 struct ResultList: View {
   let report: LabReport
+  /// Which sex-specific published ranges apply, from the profile.
+  var sex: RangeSex = .any
   /// Opens the stored pages; nil when the record has none.
   let onOpenScan: (() -> Void)?
 
   var body: some View {
     Form {
       ReportDetails(report: report, onOpenScan: onOpenScan)
-      ResultSections(extraction: report.extraction)
+      ResultSections(extraction: report.extraction, sex: sex)
       // Guideline 1.4.1 asks that a medical app remind people to check with a
       // doctor before acting. The moment that matters is while they are looking
       // at their own numbers, so it lives here rather than in a settings screen
@@ -152,6 +154,7 @@ private struct ReportDetails: View {
 /// the person holding the paper is the only one who can tell the difference.
 struct ResultSections: View {
   let extraction: ExtractionResult
+  var sex: RangeSex = .any
 
   /// `UnmappedReason.explanation` is the wire wording, shared with
   /// `services/epa-ingest` and written into a PDF export, so it stays English
@@ -170,7 +173,7 @@ struct ResultSections: View {
   var body: some View {
     Section {
       ForEach(Array(extraction.coded.enumerated()), id: \.offset) { _, value in
-        CodedRow(value: value)
+        CodedRow(value: value, sex: sex)
       }
     } header: {
       Label("\(extraction.coded.count) recognised", systemImage: "checkmark.circle")
@@ -213,6 +216,7 @@ struct ResultSections: View {
 
 private struct CodedRow: View {
   let value: CodedLabValue
+  var sex: RangeSex = .any
 
   var body: some View {
     VStack(alignment: .leading, spacing: 4) {
@@ -245,11 +249,14 @@ private struct CodedRow: View {
       // abnormal: it is a comparison to a number somebody published.
       if let range = published, let optimal = range.optimalText(formatter: Measurement.text) {
         HStack(spacing: 6) {
-          Image(systemName: "text.book.closed")
+          // A symbol as well as a colour, so the distinction survives for a
+          // reader who cannot tell the hues apart, and the words carry the
+          // same information either way.
+          Image(systemName: RangePalette.symbol(for: placement))
           Text("Optimal \(optimal) · \(placement.label)")
         }
         .font(.caption2)
-        .foregroundStyle(placement == .withinOptimal ? Color.secondary : Color.orange)
+        .foregroundStyle(RangePalette.colour(for: placement))
       }
     }
     .padding(.vertical, 2)
@@ -257,7 +264,7 @@ private struct CodedRow: View {
 
   private var published: ReferenceRange? {
     ReferenceRanges.range(
-      analyteKey: value.coding.analyteKey, ucum: value.coding.ucum, sex: RangePreferences.sex)
+      analyteKey: value.coding.analyteKey, ucum: value.coding.ucum, sex: sex)
   }
 
   private var placement: RangePlacement {

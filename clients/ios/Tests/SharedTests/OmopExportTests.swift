@@ -119,13 +119,14 @@ struct OmopExportTests {
 
   @Test("the person row holds no identity, because the app holds none")
   func personIsAPlaceholder() throws {
-    let bundle = OmopExport.bundle(from: Self.reports, sex: .female)
+    let bundle = OmopExport.bundle(from: Self.reports, profile: Profile(sex: .female, birthDate: ReportMetadataExtractor.day(1976, 3, 8)))
     let rows = Self.rows(try #require(bundle.files["person.csv"]))
     let header = rows[0]
     let person = rows[1]
 
     #expect(header == OmopExport.personColumns)
-    #expect(person[header.firstIndex(of: "year_of_birth")!] == "")
+    #expect(person[header.firstIndex(of: "year_of_birth")!] == "1976", "the year the CDM asks for")
+    #expect(person[header.firstIndex(of: "day_of_birth")!] == "", "the day it does not")
     #expect(person[header.firstIndex(of: "gender_concept_id")!] == "0")
     #expect(person[header.firstIndex(of: "gender_source_value")!] == "female")
     #expect(person[header.firstIndex(of: "person_source_value")!] == "klarbefund-local")

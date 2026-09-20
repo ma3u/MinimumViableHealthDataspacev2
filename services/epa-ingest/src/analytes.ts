@@ -173,6 +173,15 @@ const UNIT_MAP: Record<string, string> = {
   // not the same printed unit, and this table never converts.
   "uu/ml": "u[IU]/mL",
   "uiu/ml": "u[IU]/mL",
+  // Body measurements a person enters themselves. Deliberately no bare `m`:
+  // a stray `M` on a lab sheet lowercases to it, and a metre is not a unit any
+  // German report prints for a body height.
+  cm: "cm",
+  kg: "kg",
+  "kg/m2": "kg/m2",
+  "kg/m²": "kg/m2",
+  cm2: "cm2",
+  "cm²": "cm2",
   // A haematocrit printed as a percentage by volume, and an eGFR whose
   // superscript the recogniser drops.
   "vol%": "%",
@@ -1182,6 +1191,55 @@ const DEFINITIONS: AnalyteDefinition[] = [
         "Hemoglobin [Entitic mass] in Reticulocytes by Automated count",
         "fmol",
       ),
+    },
+  },
+  // ---- Body measurements, entered rather than assayed ----
+  //
+  // Coded like anything else, so they join the timeline and the OMOP export.
+  // Their provenance is `self-tracked`, which is already `preliminary`: a tape
+  // measure is not a laboratory.
+  {
+    key: "body-height",
+    labels: ["Körpergröße", "Koerpergroesse", "Größe", "Body height", "Height"],
+    byUnit: {
+      cm: c("8302-2", "Body height", "cm"),
+    },
+  },
+  {
+    key: "body-weight",
+    labels: ["Körpergewicht", "Gewicht", "Body weight", "Weight"],
+    byUnit: {
+      kg: c("29463-7", "Body weight", "kg"),
+    },
+  },
+  {
+    key: "bmi",
+    labels: ["BMI", "Body-Mass-Index", "Body mass index", "Körpermasseindex"],
+    byUnit: {
+      "kg/m2": c("39156-5", "Body mass index (BMI) [Ratio]", "kg/m2"),
+    },
+  },
+  {
+    key: "waist-circumference",
+    labels: ["Taillenumfang", "Bauchumfang", "Waist circumference", "Waist"],
+    byUnit: {
+      cm: c("8280-0", "Waist Circumference at umbilicus by Tape measure", "cm"),
+    },
+  },
+  {
+    key: "visceral-fat-area",
+    labels: [
+      "Viszerales Fett",
+      "Viszerale Fettfläche",
+      "Visceral fat",
+      "Visceral fat area",
+      "VFA",
+    ],
+    byUnit: {
+      // An **area**, as a body-composition device or a scan reports it. A
+      // consumer scale's 1-to-59 "visceral fat rating" is a different quantity
+      // with no LOINC code of its own, and is not this.
+      cm2: c("73707-2", "Visceral fat [Area] Measured", "cm2"),
     },
   },
   // ---- Coagulation ----
