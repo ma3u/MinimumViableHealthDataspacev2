@@ -76,7 +76,7 @@ public enum OmopExport {
   /// Rows are ordered by date and then by LOINC code, so two exports of the
   /// same data are byte-identical and a diff between them means something.
   public static func bundle(
-    from reports: [LabReport], sex: RangeSex = .any, generatedAt: Date = Date()
+    from reports: [LabReport], profile: Profile = .empty, generatedAt: Date = Date()
   ) -> Bundle {
     let day = DateFormatter.omopDay
     let stamp = DateFormatter.omopStamp
@@ -130,16 +130,20 @@ public enum OmopExport {
         ].joined(separator: ","))
     }
 
+    // What the profile knows, and nothing more. The year of birth is what the
+    // CDM asks for and what an age-adjusted analysis needs; the day is not,
+    // so the day is not written.
     let person =
       [
         personColumns.joined(separator: ","),
         [
           String(personId),
           "0",  // gender_concept_id: see gender_source_value
-          "", "", "", "",
+          profile.birthYear.map(String.init) ?? "",
+          "", "", "",
           "0", "0", "", "", "",
           csv("klarbefund-local"),
-          csv(sex == .any ? "" : sex.rawValue),
+          csv(profile.sex == .any ? "" : profile.sex.rawValue),
           "0", "", "0", "", "0",
         ].joined(separator: ","),
       ].joined(separator: "\n") + "\n"

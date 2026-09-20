@@ -188,3 +188,109 @@ struct TrendsTests {
     #expect(series.points.first?.date == ReportMetadataExtractor.day(2026, 3, 3))
   }
 }
+
+/// The profile: the few facts a published range needs, and nothing else.
+@Suite("Profile")
+struct ProfileTests {
+
+  @Test("age comes from the birth date, and an impossible one yields none")
+  func age() {
+    let born = ReportMetadataExtractor.day(1976, 3, 8)!
+    let profile = Profile(sex: .male, birthDate: born, heightCm: 183)
+
+    #expect(profile.age(on: ReportMetadataExtractor.day(2026, 3, 7)!) == 49)
+    #expect(profile.age(on: ReportMetadataExtractor.day(2026, 3, 8)!) == 50)
+    #expect(profile.birthYear == 1976)
+    // A birth date in the future is not an age.
+    #expect(Profile(birthDate: ReportMetadataExtractor.day(2030, 1, 1)!).age() == nil)
+  }
+
+  @Test("the derived figures need a height, and say nothing without one")
+  func derived() {
+    let withHeight = Profile(heightCm: 180)
+    #expect(withHeight.waistToHeight(waistCm: 90) == 0.5)
+    #expect(abs((withHeight.bodyMassIndex(weightKg: 81) ?? 0) - 25) < 0.01)
+
+    let without = Profile()
+    #expect(without.waistToHeight(waistCm: 90) == nil)
+    #expect(without.bodyMassIndex(weightKg: 81) == nil)
+  }
+
+  @Test("a profile written by an older version still opens")
+  func decodesOldProfile() throws {
+    let old = #"{"sex":"male"}"#
+    let profile = try JSONDecoder().decode(Profile.self, from: Data(old.utf8))
+
+    #expect(profile.sex == .male)
+    #expect(profile.birthDate == nil)
+    #expect(profile.heightCm == nil)
+  }
+
+  @Test("entered measurements become a self-tracked report, coded like any other")
+  func measurementsBecomeAReport() throws {
+    let profile = Profile(sex: .male, heightCm: 180)
+    let entries = BodyMeasurements.entries(
+      waistCm: 94, weightKg: 81, visceralFatCm2: 72, heightCm: 180, profile: profile)
+    let report = try #require(
+      BodyMeasurements.report(entries: entries, on: ReportMetadataExtractor.day(2026, 3, 3)!))
+
+    let codes = report.extraction.coded.map(\.coding.loinc)
+    #expect(codes.contains("8302-2"), "height")
+    #expect(codes.contains("29463-7"), "weight")
+    #expect(codes.contains("39156-5"), "BMI, derived from the two")
+    #expect(codes.contains("8280-0"), "waist")
+    #expect(codes.contains("73707-2"), "visceral fat as an area")
+    #expect(report.extraction.unmapped.isEmpty)
+
+    // A tape measure is not a laboratory, and the provenance already says so.
+    #expect(report.extraction.source == .selfTracked)
+    #expect(report.extraction.source.observationStatus == "preliminary")
+    #expect(report.collectedOn == ReportMetadataExtractor.day(2026, 3, 3))
+  }
+
+  @Test("nothing entered means no report rather than an empty one")
+  func nothingEntered() {
+    let entries = BodyMeasurements.entries(
+      waistCm: nil, weightKg: nil, visceralFatCm2: nil, heightCm: nil, profile: .empty)
+    #expect(entries.isEmpty)
+    #expect(BodyMeasurements.report(entries: entries, on: Date()) == nil)
+  }
+
+  @Test("the waist thresholds are the sex-specific ones, and are never guessed")
+  func waistRanges() throws {
+    #expect(ReferenceRanges.range(analyteKey: "waist-circumference", ucum: "cm") == nil)
+    let male = try #require(
+      ReferenceRanges.range(analyteKey: "waist-circumference", ucum: "cm", sex: .male))
+    let female = try #require(
+      ReferenceRanges.range(analyteKey: "waist-circumference", ucum: "cm", sex: .female))
+
+    #expect(male.optimalHigh == 94)
+    #expect(male.guidelineHigh == 102)
+    #expect(female.optimalHigh == 80)
+    #expect(female.guidelineHigh == 88)
+    #expect(male.placement(of: 92) == .withinOptimal)
+    #expect(male.placement(of: 98) == .outsideOptimal)
+    #expect(male.placement(of: 105) == .outsideGuideline)
+  }
+
+  @Test("a body measurement joins the timeline like a laboratory value")
+  func measurementsJoinTrends() throws {
+    let profile = Profile(sex: .male, heightCm: 180)
+    let march = BodyMeasurements.report(
+      entries: BodyMeasurements.entries(
+        waistCm: 96, weightKg: nil, visceralFatCm2: nil, heightCm: nil, profile: profile),
+      on: ReportMetadataExtractor.day(2026, 3, 3)!)!
+    let june = BodyMeasurements.report(
+      entries: BodyMeasurements.entries(
+        waistCm: 92, weightKg: nil, visceralFatCm2: nil, heightCm: nil, profile: profile),
+      on: ReportMetadataExtractor.day(2026, 6, 3)!)!
+
+    let series = try #require(
+      Trends.series(from: [march, june], sex: .male).first { $0.analyteKey == "waist-circumference" }
+    )
+    #expect(series.points.map(\.value) == [96, 92])
+    #expect(series.change == -4)
+    #expect(series.placement == .withinOptimal, "92 cm is under the 94 cm threshold")
+    #expect(series.allLabIssued == false, "entered by the person, not issued by a laboratory")
+  }
+}
