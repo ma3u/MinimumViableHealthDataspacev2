@@ -68,6 +68,9 @@ import Shared
       /// always have some, and a dataset without any hides the screen that
       /// exists to show them.
       var unread: [String] = []
+      /// Recovered from a chart's month axis, so the day is not known and the
+      /// record says so.
+      var monthOnly: Bool = false
     }
 
     static func date(_ s: Sheet) -> Date {
@@ -105,7 +108,8 @@ import Shared
         metadata: ReportMetadata(
           laboratory: sheet.laboratory, collectedOn: day, reportedOn: day,
           reportNumber: "D\(sheet.year)\(String(format: "%02d", sheet.month))\(String(format: "%02d", sheet.day))",
-          labDate: day, labDateRole: .collection, dateSource: .printed))
+          labDate: day, labDateRole: .collection,
+          dateSource: sheet.monthOnly ? .chartMonth : .printed))
       // Pages, so "Original scan" is there. A report that cannot show what it
       // was read from is the one thing this app is meant not to be.
       if let pages = scan(for: sheet) {
@@ -246,6 +250,55 @@ import Shared
           Row("Viszeralfett", 1.6, "kg"),
           Row("ECW/TBW", 38.2, "%"),
           Row("Taillenumfang", 86, "cm"),
+        ]),
+
+      // What one card's chart gives up when the scale prints a number beside
+      // each point: a year of readings, each precise to the month it sits
+      // over and to nothing finer. Six months of the extracellular water
+      // share, recovered from a single photograph.
+      Sheet(
+        id: "00000000-0000-0000-0000-00000000D101", year: 2025, month: 10, day: 1,
+        title: "Körperzusammensetzung, aus dem Verlauf",
+        laboratory: "Körperanalysewaage", source: .selfTracked,
+        rows: [Row("ECW/TBW", 38.1, "%")], monthOnly: true),
+      Sheet(
+        id: "00000000-0000-0000-0000-00000000D102", year: 2025, month: 11, day: 1,
+        title: "Körperzusammensetzung, aus dem Verlauf",
+        laboratory: "Körperanalysewaage", source: .selfTracked,
+        rows: [Row("ECW/TBW", 38.3, "%")], monthOnly: true),
+      Sheet(
+        id: "00000000-0000-0000-0000-00000000D103", year: 2026, month: 1, day: 1,
+        title: "Körperzusammensetzung, aus dem Verlauf",
+        laboratory: "Körperanalysewaage", source: .selfTracked,
+        rows: [Row("ECW/TBW", 38.4, "%")], monthOnly: true),
+      Sheet(
+        id: "00000000-0000-0000-0000-00000000D104", year: 2026, month: 2, day: 1,
+        title: "Körperzusammensetzung, aus dem Verlauf",
+        laboratory: "Körperanalysewaage", source: .selfTracked,
+        rows: [Row("ECW/TBW", 38.2, "%")], monthOnly: true),
+      Sheet(
+        id: "00000000-0000-0000-0000-00000000D105", year: 2026, month: 3, day: 1,
+        title: "Körperzusammensetzung, aus dem Verlauf",
+        laboratory: "Körperanalysewaage", source: .selfTracked,
+        rows: [Row("ECW/TBW", 38.0, "%")], monthOnly: true),
+      Sheet(
+        id: "00000000-0000-0000-0000-00000000D106", year: 2026, month: 4, day: 1,
+        title: "Körperzusammensetzung, aus dem Verlauf",
+        laboratory: "Körperanalysewaage", source: .selfTracked,
+        rows: [Row("ECW/TBW", 38.3, "%")], monthOnly: true),
+
+      // The five cards a gym scale shows on one morning, as photographed on
+      // 15 June 2026: body fat as a share and as a mass, muscle mass, visceral
+      // fat and the body-mass index. One card each, one value each named in
+      // words, and a year of them drawn behind.
+      Sheet(
+        id: "00000000-0000-0000-0000-00000000D008", year: 2026, month: 6, day: 15,
+        title: "Körperzusammensetzung", laboratory: "Körperanalysewaage",
+        source: .selfTracked,
+        rows: [
+          Row("Körperfett %", 14.8, "%"),
+          Row("Muskelmasse", 29, "kg"),
+          Row("Body-Mass-Index", 23.8, "kg/m2"),
         ]),
 
       Sheet(

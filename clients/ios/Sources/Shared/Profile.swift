@@ -289,3 +289,70 @@ public enum BodyMeasurements {
       metadata: ReportMetadata(labDate: date, labDateRole: .collection, dateSource: .user))
   }
 }
+
+/// Whether a measurement is already on the phone.
+///
+/// A scale's screen carries a year of readings, so photographing the same
+/// card twice offers the same eleven months again. Photographing five cards
+/// on one morning offers the same five months five times over. And a chart's
+/// last point is the reading the screen also names in words.
+///
+/// Without a check, each of those becomes another report and every trend
+/// grows a cluster of identical dots on one date. So a measurement is the
+/// same measurement when the analyte, the unit, the value and the day agree,
+/// whatever document it arrived in.
+public enum Duplicates {
+
+  /// One measurement, as a key.
+  public struct Key: Hashable, Sendable {
+    public let analyteKey: String
+    public let ucum: String
+    public let value: Double
+    public let day: Date
+
+    public init(analyteKey: String, ucum: String, value: Double, day: Date) {
+      self.analyteKey = analyteKey
+      self.ucum = ucum
+      // Rounded, because a value recovered from a chart and the same value
+      // typed by hand differ in the last place that nobody can see.
+      self.value = (value * 1000).rounded() / 1000
+      self.day = day
+    }
+  }
+
+  public static func keys(of report: LabReport) -> Set<Key> {
+    let day = ReportMetadata.calendarDay(report.effectiveDate)
+    return Set(
+      report.extraction.coded.map {
+        Key(analyteKey: $0.coding.analyteKey, ucum: $0.coding.ucum, value: $0.raw.value, day: day)
+      })
+  }
+
+  public static func keys(of reports: [LabReport]) -> Set<Key> {
+    reports.reduce(into: Set<Key>()) { $0.formUnion(keys(of: $1)) }
+  }
+
+  /// The report with anything already stored taken out of it, or nil when
+  /// nothing new was left.
+  ///
+  /// The whole report is dropped rather than half-saved when every value in
+  /// it is already known: a report with no values is a row in a list that
+  /// says nothing and cannot be opened usefully.
+  public static func strip(_ report: LabReport, known: Set<Key>) -> LabReport? {
+    let day = ReportMetadata.calendarDay(report.effectiveDate)
+    let fresh = report.extraction.coded.filter {
+      !known.contains(
+        Key(analyteKey: $0.coding.analyteKey, ucum: $0.coding.ucum, value: $0.raw.value, day: day))
+    }
+    guard !fresh.isEmpty || !report.extraction.unmapped.isEmpty else { return nil }
+    guard fresh.count != report.extraction.coded.count else { return report }
+
+    return LabReport(
+      id: report.id, scannedAt: report.scannedAt, collectedOn: report.collectedOn,
+      title: report.title,
+      extraction: ExtractionResult(
+        coded: fresh, unmapped: report.extraction.unmapped,
+        suspiciousLines: report.extraction.suspiciousLines, source: report.extraction.source),
+      metadata: report.metadata, scan: report.scan)
+  }
+}

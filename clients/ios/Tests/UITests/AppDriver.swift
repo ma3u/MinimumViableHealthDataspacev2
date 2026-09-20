@@ -62,12 +62,13 @@ enum AppDriver {
 
   /// Every string on screen, for the checks that are about what a person can
   /// read rather than about one element.
+  /// One snapshot, not four hundred lookups.
+  ///
+  /// Walking the elements one at a time asks the app for each in turn, and a
+  /// list that recycles a row between two of those asks fails the test with
+  /// "No matches found for Element at index 150" about nothing at all.
   static func visibleText(_ app: XCUIApplication) -> String {
-    app.descendants(matching: .any)
-      .allElementsBoundByIndex
-      .prefix(400)
-      .map { "\($0.label) \($0.value as? String ?? "")" }
-      .joined(separator: "\n")
+    app.debugDescription
   }
 }
 
