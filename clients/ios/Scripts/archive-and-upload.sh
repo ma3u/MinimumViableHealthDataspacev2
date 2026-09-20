@@ -148,18 +148,36 @@ if [ -z "$IPA" ]; then
   echo "No .ipa in $IPA_DIR. Run without --upload-only to build one." >&2
   exit 1
 fi
+if [ ! -f "$BUILD_DIR/ExportOptions.plist" ]; then
+  echo "No $BUILD_DIR/ExportOptions.plist. Run without --upload-only once." >&2
+  exit 1
+fi
 echo "    $IPA"
 
+# No API key: upload with the Apple ID signed into Xcode instead.
+#
+# This is the path that needs nothing extra, and it is the one to reach for
+# first. `destination: upload` makes xcodebuild send the build itself, using
+# Xcode's own account session, so there is no issuer id to find. The issuer id
+# is the part people get stuck on: it exists only on the App Store Connect
+# website, under Users and Access → Integrations → App Store Connect API, and
+# the App Store Connect app on iPhone does not show API keys at all.
+#
+# Requires an Apple ID in Xcode → Settings → Accounts. Without one the whole
+# chain fails, and the first symptom is the export a few lines above saying
+# "No profiles for <bundle id> were found", which reads like a signing problem
+# and is really a sign-in problem.
 if [ -z "${ASC_KEY_ID:-}" ] || [ -z "${ASC_ISSUER_ID:-}" ]; then
-  cat <<MSG
-
-Archive exported but NOT uploaded: no App Store Connect API key in the
-environment. Either set ASC_KEY_ID / ASC_ISSUER_ID / ASC_KEY_PATH and re-run,
-or upload "$IPA" with the Transporter app from the Mac App Store.
-
-MSG
-  exit 0
-fi
+  echo "==> Uploading with the Apple ID signed into Xcode"
+  sed 's|<string>export</string>|<string>upload</string>|' \
+    "$BUILD_DIR/ExportOptions.plist" > "$BUILD_DIR/UploadOptions.plist"
+  rm -rf "$BUILD_DIR/upload"
+  xcodebuild -exportArchive \
+    -archivePath "$ARCHIVE" \
+    -exportOptionsPlist "$BUILD_DIR/UploadOptions.plist" \
+    -exportPath "$BUILD_DIR/upload" \
+    -allowProvisioningUpdates
+else
 
 echo "==> Uploading to App Store Connect"
 # The private key must sit where altool looks for it.
@@ -173,6 +191,7 @@ xcrun altool --upload-app \
   --file "$IPA" \
   --apiKey "$ASC_KEY_ID" \
   --apiIssuer "$ASC_ISSUER_ID"
+fi
 
 cat <<'DONE'
 

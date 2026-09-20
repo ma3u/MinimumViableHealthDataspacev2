@@ -520,3 +520,38 @@ It reads `TEAM_ID` when set and otherwise takes the id from the Apple
 Distribution identity in the login keychain, so the id stays out of the repo
 and nobody has to rediscover it. `DEVICE_ID` overrides the device when more
 than one iPhone is paired.
+
+## 2026-09-20 — a TestFlight upload needs no issuer id, only a signed-in Xcode
+
+An afternoon went into looking for the App Store Connect **issuer id** so that
+`xcrun altool --upload-app` could authenticate. It was nowhere: not in the
+shell, not in the keychain, not in `~/.appstoreconnect`, and not in the
+TwoBreath repository either, where `scripts/upload.sh` and the Fastfile both
+take it as an argument. Nor is it in the App Store Connect app on iPhone,
+which does not show API keys at all. It lives only on the website, under Users
+and Access → Integrations → App Store Connect API.
+
+None of that is needed. `ExportOptions.plist` with
+
+```xml
+<key>destination</key><string>upload</string>
+```
+
+makes `xcodebuild -exportArchive` send the build itself, using the Apple ID
+signed into Xcode. No key, no issuer id.
+
+The prerequisite is that Apple ID: Xcode → Settings → Accounts. With none, the
+first failure is not a login error but
+
+```
+error: exportArchive No profiles for 'red.mabu.meinbefund' were found
+```
+
+which reads like a signing problem and is really a sign-in problem, because
+automatic signing can only fetch a distribution profile by asking App Store
+Connect. The certificates and profiles being present on the machine does not
+help; they were installed by an earlier session that has since gone.
+
+`clients/ios/Scripts/archive-and-upload.sh` now takes this path whenever no
+API key is in the environment, instead of stopping with the .ipa and telling
+you to find Transporter.
