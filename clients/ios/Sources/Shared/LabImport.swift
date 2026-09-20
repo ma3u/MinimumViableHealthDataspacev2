@@ -68,6 +68,7 @@ public enum LabImport {
     case unreadable(String)
     case unsupported(String)
     case nothingRecognised
+    case notALabReport
 
     public var errorDescription: String? {
       switch self {
@@ -77,6 +78,11 @@ public enum LabImport {
         return String(localized: "\(ext) files are not supported. Use a PDF or a photo.")
       case .nothingRecognised:
         return String(localized: "No text could be read from this document.")
+      case .notALabReport:
+        return String(
+          localized:
+            "This reads as an article rather than a lab report: pages of sentences and no table of values. Nothing was stored, because the few numbers in it are parts of sentences, not measurements."
+        )
       }
     }
   }
@@ -115,7 +121,7 @@ public enum LabImport {
     if let texts = textLayer(of: data) {
       Log.scan.notice(
         "pdf has a text layer: \(texts.count, privacy: .public) page(s), lab-issued")
-      return fromText(texts, pdf: data)
+      return try fromText(texts, pdf: data)
     }
     Log.scan.notice("pdf has no usable text layer, recognising the pages")
     let pageCount = ScanDocument.pageCount(of: data)
@@ -157,7 +163,7 @@ public enum LabImport {
     }
 
     let document = try original ?? ScanDocument.pdf(pages: images)
-    return finish(
+    return try finish(
       extraction: merged, pageTexts: pageTexts, pdf: document, pages: pages, images: images)
   }
 
@@ -192,7 +198,7 @@ public enum LabImport {
     #endif
   }
 
-  static func fromText(_ texts: [String], pdf: Data) -> Result {
+  static func fromText(_ texts: [String], pdf: Data) throws -> Result {
     var merged = ExtractionResult.empty(source: .labIssuedDigital)
     var pages: [ScanDiagnostics.Page] = []
     for (index, text) in texts.enumerated() {
@@ -205,7 +211,38 @@ public enum LabImport {
           page: index + 1, imageWidth: 0, imageHeight: 0, tableCount: 0, cells: [], fragments: [],
           rows: [], orphanedFragments: [], layout: nil, plainText: text, recognitionSeconds: 0))
     }
-    return finish(extraction: merged, pageTexts: texts, pdf: pdf, pages: pages)
+    return try finish(extraction: merged, pageTexts: texts, pdf: pdf, pages: pages)
+  }
+
+  /// Whether a document is prose rather than a report.
+  ///
+  /// A five-page article about diet and the microbiome yielded two
+  /// measurements: `Quark mit 20 %` from a meal plan, and `5 %` from the tail
+  /// of a sentence about a study. Neither is a measurement of anything, and a
+  /// health record that accepts them is worse than one that accepts nothing.
+  ///
+  /// A lab sheet is short lines in columns. An article is long sentences. The
+  /// two are told apart by how much of the page reads as prose and by how
+  /// little of it yields values: a real report that this refused would have to
+  /// be both almost entirely sentences and almost entirely without results.
+  static func looksLikeProse(_ pageTexts: [String], values: Int) -> Bool {
+    guard values <= 3 else { return false }
+    let lines =
+      pageTexts
+      .flatMap { $0.components(separatedBy: .newlines) }
+      .map { $0.trimmingCharacters(in: .whitespaces) }
+      .filter { $0.count > 2 }
+    guard lines.count >= 20 else { return false }
+
+    // A sentence is long and made of words. Measured on three real documents
+    // and one article: the aminogram scores 0.00, a laboratory's own PDF
+    // 0.06, and a five-page piece of dietary advice 0.44. A quarter sits far
+    // from both, so a real report would have to become seven times more
+    // wordy before this refused it.
+    let sentences = lines.filter { line in
+      line.count > 60 && line.split(separator: " ").count >= 9
+    }
+    return Double(sentences.count) / Double(lines.count) > 0.25
   }
 
   // MARK: - Shared tail
@@ -213,7 +250,7 @@ public enum LabImport {
   private static func finish(
     extraction: ExtractionResult, pageTexts: [String], pdf: Data, pages: [ScanDiagnostics.Page],
     images: [CGImage] = []
-  ) -> Result {
+  ) throws -> Result {
     // A body-composition scale's screen is not a lab sheet and has its own
     // reader. It is tried only when the ordinary parse found no values, so a
     // report that happens to carry the word "aktualisiert" is unaffected.
@@ -240,6 +277,16 @@ public enum LabImport {
           extraction: first.extraction, metadata: first.metadata, pageTexts: pageTexts, pdf: pdf,
           pages: pages, extraReports: Array(reports.dropFirst()), suggestedTitle: first.title)
       }
+    }
+
+    // An article is refused rather than mined for the numbers inside its
+    // sentences. Checked after the scale's screens, which are short lines and
+    // never look like prose, and only when almost nothing was extracted.
+    let found = extraction.coded.count + extraction.unmapped.count
+    if looksLikeProse(pageTexts, values: found) {
+      Log.scan.notice(
+        "import refused: reads as prose, \(found, privacy: .public) stray value(s) ignored")
+      throw ImportError.notALabReport
     }
 
     let metadata = ReportMetadataExtractor.extract(pages: pageTexts)
