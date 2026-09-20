@@ -11,12 +11,15 @@
 // A lab report is health data. It lives outside this repository, always
 // (README, rule 1), and this tool refuses a path inside it. Values are withheld
 // unless asked for, so the default output can be pasted into an issue.
+import CoreGraphics
 import Foundation
 import Shared
 
 let arguments = CommandLine.arguments.dropFirst()
-guard let path = arguments.first(where: { !$0.hasPrefix("--") }) else {
-  FileHandle.standardError.write(Data("usage: swift run LabFile <file.pdf|image> [--values]\n".utf8))
+let paths = arguments.filter { !$0.hasPrefix("--") }
+guard let path = paths.first else {
+  FileHandle.standardError.write(
+    Data("usage: swift run LabFile <file.pdf|image> [more images…] [--values] [--rows] [--omop]\n".utf8))
   exit(2)
 }
 let showValues = arguments.contains("--values")
@@ -38,7 +41,19 @@ func shown(_ value: Double, _ unit: String) -> String {
   showValues ? "\(number(value)) \(unit)" : "\(String(number(value).map { $0.isNumber ? "#" : $0 })) \(unit)"
 }
 
-let result = try await LabImport.file(at: url)
+/// Several images are one scan, the way the camera hands over several pages.
+/// It is how a shelf of body-composition cards photographed in one go is read,
+/// and the only way to see the grouping by measurement date.
+let result: LabImport.Result
+if paths.count > 1 {
+  let images = paths.compactMap { path -> CGImage? in
+    guard let data = try? Data(contentsOf: URL(fileURLWithPath: path)) else { return nil }
+    return LabImport.decodeImage(data)
+  }
+  result = try await LabImport.images(images)
+} else {
+  result = try await LabImport.file(at: url)
+}
 let extraction = result.extraction
 
 /// What the recogniser and the layout inference made of each page.
@@ -92,6 +107,18 @@ for item in extraction.unmapped {
   print("  \(item.reason.rawValue.padding(toLength: 24, withPad: " ", startingAt: 0)) \(item.raw.label)  \(shown(item.raw.value, item.raw.unitRaw))")
 }
 print("")
+if !result.extraReports.isEmpty {
+  print("")
+  print("further reports, one per measurement date:")
+  for report in result.extraReports {
+    print(
+      "  \(report.effectiveDate.formatted(date: .abbreviated, time: .omitted)): "
+        + "\(report.extraction.coded.count) coded, \(report.extraction.unmapped.count) unmatched")
+    for value in report.extraction.coded {
+      print("    \(value.coding.loinc.padding(toLength: 9, withPad: " ", startingAt: 0)) \(value.raw.label)  \(shown(value.raw.value, value.raw.unitRaw))")
+    }
+  }
+}
 print("unread     \(extraction.suspiciousLines.count)")
 for line in extraction.suspiciousLines {
   print("  \(showValues ? line : String(line.map { $0.isNumber ? "#" : $0 }))")

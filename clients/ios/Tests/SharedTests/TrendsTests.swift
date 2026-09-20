@@ -294,3 +294,138 @@ struct ProfileTests {
     #expect(series.allLabIssued == false, "entered by the person, not issued by a laboratory")
   }
 }
+
+/// A body-composition scale's screen, photographed.
+///
+/// Invented values throughout; the shapes are a real gym scale's.
+@Suite("A scale's screen")
+struct DeviceScreenTests {
+
+  static let weightCard = """
+    Gewicht
+    71,1 kg
+    Aktualisiert: Donnerstag, 14. Mai 2026
+    1 Day  7 Days  30 Days  12 Months
+    < 01.06.25 - 14.05.26 >
+    74
+    70,7
+    71,6  72,6  70,4  72,7
+    68,7  71,1
+    Juni  Juli  Aug.  Sept.  Okt.  Nov.  Dez.  Jan.  Feb.  März  Apr.  Mai
+    """
+
+  static let fatCard = """
+    Körperfett
+    A Niedrig
+    10,6 kg
+    Aktualisiert: Montag, 15. Juni 2026
+    1 Tag  7 Tage  30 Tage  12 Monate
+    < 01.07.25 - 15.06.26 >
+    14
+    10,6  8
+    < 12.3 Niedrig  • 12.3 - 24 Normal  > 24 Erhöht
+    """
+
+  @Test("a card yields its headline value, its unit and the day it was measured")
+  func readsOneCard() throws {
+    let reading = try #require(DeviceScreen.read(Self.weightCard))
+
+    #expect(reading.label == "Gewicht")
+    #expect(reading.value == 71.1)
+    #expect(reading.unitRaw == "kg")
+    #expect(reading.measuredOn == ReportMetadataExtractor.day(2026, 5, 14))
+  }
+
+  @Test("the chart is not read, because its points have no dates on the screen")
+  func chartIsIgnored() throws {
+    // The labelled points are real measurements whose dates the screen does
+    // not give: the axis says "Nov." and the year is implied. A value with a
+    // date we inferred is worse than a value we did not take.
+    let reports = DeviceScreen.reports(
+      from: [DeviceScreen.read(Self.weightCard)].compactMap { $0 })
+    let report = try #require(reports.first)
+
+    #expect(report.extraction.coded.count == 1, "one card, one reading")
+    #expect(report.extraction.coded.first?.raw.value == 71.1)
+  }
+
+  @Test("the device's own verdict badge is not mistaken for the metric's name")
+  func verdictIsNotALabel() throws {
+    // `A Niedrig` sits between the title and the value. It is the scale's own
+    // band, not a guideline's, and the app quotes only ranges it can cite.
+    let reading = try #require(DeviceScreen.read(Self.fatCard))
+
+    #expect(reading.label == "Körperfett")
+    #expect(reading.value == 10.6)
+    #expect(reading.unitRaw == "kg")
+  }
+
+  @Test("the unit decides the code, on a scale's screen as everywhere else")
+  func unitSelectsTheCode() throws {
+    let mass = try #require(
+      DeviceScreen.reports(from: [DeviceScreen.read(Self.fatCard)!]).first)
+    #expect(mass.extraction.coded.first?.coding.loinc == "73708-0", "body fat as a mass")
+
+    let percent = """
+      Körperfett %
+      14,8%
+      Aktualisiert: Montag, 15. Juni 2026
+      """
+    let share = try #require(DeviceScreen.reports(from: [DeviceScreen.read(percent)!]).first)
+    #expect(share.extraction.coded.first?.coding.loinc == "41982-0", "and as a proportion")
+  }
+
+  @Test("a metric printed as its own unit is read, BMI being the one")
+  func bmiCard() throws {
+    let card = """
+      Body-Mass-Index
+      23,8 BMI
+      Aktualisiert: Montag, 15. Juni 2026
+      """
+    let report = try #require(DeviceScreen.reports(from: [DeviceScreen.read(card)!]).first)
+
+    #expect(report.extraction.coded.first?.coding.loinc == "39156-5")
+    #expect(report.extraction.coded.first?.coding.ucum == "kg/m2")
+  }
+
+  @Test("a reading with no LOINC code is reported, never coded as something else")
+  func noCodeIsReported() throws {
+    // A scale reports the ratio of extracellular to total body water. There
+    // is no LOINC code for it, so it is not given one.
+    let card = """
+      ECW/TBW
+      38,4%
+      Aktualisiert: Donnerstag, 14. Mai 2026
+      """
+    let report = try #require(DeviceScreen.reports(from: [DeviceScreen.read(card)!]).first)
+
+    #expect(report.extraction.coded.isEmpty)
+    #expect(report.extraction.unmapped.first?.reason == .unknownAnalyte)
+    #expect(report.extraction.unmapped.first?.raw.label == "ECW/TBW")
+  }
+
+  @Test("cards from different days become different reports")
+  func groupedByDay() {
+    let readings = [DeviceScreen.read(Self.weightCard), DeviceScreen.read(Self.fatCard)]
+      .compactMap { $0 }
+    let reports = DeviceScreen.reports(from: readings)
+
+    #expect(reports.count == 2, "14 May and 15 June are not one measurement")
+    #expect(reports.first?.effectiveDate == ReportMetadataExtractor.day(2026, 6, 15), "newest first")
+    #expect(reports.allSatisfy { $0.extraction.source == .selfTracked })
+    #expect(reports.allSatisfy { $0.extraction.source.observationStatus == "preliminary" })
+  }
+
+  @Test("a lab sheet is never routed to this reader")
+  func labSheetIsNotADeviceScreen() {
+    let sheet = """
+      Laborbefund
+      MVZ Labor Musterstadt GmbH
+      Entnahme: 12.09.2026
+      LDL-Cholesterin  141  mg/dl  < 116
+      """
+    #expect(DeviceScreen.looksLikeDeviceScreen(sheet) == false)
+    // And a card is recognised as one.
+    #expect(DeviceScreen.looksLikeDeviceScreen(Self.weightCard))
+  }
+}

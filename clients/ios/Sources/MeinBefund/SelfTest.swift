@@ -98,7 +98,7 @@
           let id = UUID()
           // The laboratory names the report when the sheet said who it was.
           let title =
-            product.metadata.laboratory
+            product.metadata.laboratory ?? product.suggestedTitle
             ?? url.deletingPathExtension().lastPathComponent
           let report = LabReport(
             id: id, scannedAt: Date(), collectedOn: product.metadata.labDate, title: title,
@@ -116,6 +116,7 @@
               environment: ScanDiagnostics.Environment.current, pages: product.pages,
               extraction: product.extraction, metadata: product.metadata),
             for: id)
+          for extra in product.extraReports { try await store.save(extra) }
           try? FileManager.default.removeItem(at: url)
           Log.diagnostics.notice(
             "imported one file: \(product.extraction.source.rawValue, privacy: .public), \(product.extraction.coded.count, privacy: .public) coded, \(product.extraction.unmapped.count, privacy: .public) unmapped, \(product.extraction.suspiciousLines.count, privacy: .public) unread"
