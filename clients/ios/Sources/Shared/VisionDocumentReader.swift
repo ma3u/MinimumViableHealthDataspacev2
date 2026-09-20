@@ -208,6 +208,86 @@ public enum VisionDocumentReader {
     return kept
   }
 
+  /// Reads one small part of a page again, enlarged.
+  ///
+  /// A body-composition scale prints its value axis as single digits a few
+  /// pixels tall. The ordinary pass walks straight past them, and without the
+  /// axis a chart has no scale, so its points cannot be turned into values at
+  /// all. Cropping that strip and enlarging it four times over gives the
+  /// recogniser something it can read, and the coordinates are mapped back so
+  /// the rest of the pipeline never knows the difference.
+  public static func reread(
+    _ image: CGImage, x: Double, y: Double, width: Double, height: Double,
+    page: Int, magnification: Int = 6
+  ) -> [DocumentReconciler.TextFragment] {
+    let pixelWidth = Int(Double(image.width) * width)
+    let pixelHeight = Int(Double(image.height) * height)
+    guard pixelWidth > 8, pixelHeight > 8 else { return [] }
+    // Vision's y counts from the bottom; a CGImage crop counts from the top.
+    let crop = CGRect(
+      x: Double(image.width) * x, y: Double(image.height) * (1 - y - height),
+      width: Double(pixelWidth), height: Double(pixelHeight))
+    guard let cut = image.cropping(to: crop) else { return [] }
+
+    let bigWidth = pixelWidth * magnification
+    let bigHeight = pixelHeight * magnification
+    guard
+      let context = CGContext(
+        data: nil, width: bigWidth, height: bigHeight, bitsPerComponent: 8, bytesPerRow: 0,
+        space: CGColorSpaceCreateDeviceGray(), bitmapInfo: CGImageAlphaInfo.none.rawValue)
+    else { return [] }
+    context.interpolationQuality = .high
+    context.draw(cut, in: CGRect(x: 0, y: 0, width: bigWidth, height: bigHeight))
+    guard var enlarged = context.makeImage() else { return [] }
+    // A value axis is printed light grey on white. Enlarging it does not make
+    // it darker, and the recogniser walks past faint digits whatever size
+    // they are, so the crop's own range is stretched to black and white.
+    if let stretched = contrastStretched(enlarged, width: bigWidth, height: bigHeight) {
+      enlarged = stretched
+    }
+
+    let found = (try? recogniseBand(enlarged, page: page)) ?? []
+    return found.map { fragment in
+      DocumentReconciler.TextFragment(
+        text: fragment.text,
+        region: SourceRegion(
+          page: page,
+          x: x + fragment.region.x * width,
+          y: y + fragment.region.y * height,
+          width: fragment.region.width * width,
+          height: fragment.region.height * height),
+        confidence: fragment.confidence)
+    }
+  }
+
+  /// Pulls the darkest tenth of a crop to black and the lightest to white.
+  private static func contrastStretched(_ image: CGImage, width: Int, height: Int) -> CGImage? {
+    var pixels = [UInt8](repeating: 0, count: width * height)
+    guard
+      let reader = CGContext(
+        data: &pixels, width: width, height: height, bitsPerComponent: 8, bytesPerRow: width,
+        space: CGColorSpaceCreateDeviceGray(), bitmapInfo: CGImageAlphaInfo.none.rawValue)
+    else { return nil }
+    reader.draw(image, in: CGRect(x: 0, y: 0, width: width, height: height))
+
+    var sorted = pixels
+    sorted.sort()
+    guard sorted.count > 100 else { return nil }
+    let dark = Double(sorted[sorted.count / 10])
+    let light = Double(sorted[sorted.count * 9 / 10])
+    guard light - dark > 4 else { return nil }
+    for index in pixels.indices {
+      let scaled = (Double(pixels[index]) - dark) / (light - dark) * 255
+      pixels[index] = UInt8(max(0, min(255, scaled)))
+    }
+    guard
+      let writer = CGContext(
+        data: &pixels, width: width, height: height, bitsPerComponent: 8, bytesPerRow: width,
+        space: CGColorSpaceCreateDeviceGray(), bitmapInfo: CGImageAlphaInfo.none.rawValue)
+    else { return nil }
+    return writer.makeImage()
+  }
+
   private static func recogniseBand(
     _ image: CGImage, page: Int
   ) throws -> [DocumentReconciler.TextFragment] {
