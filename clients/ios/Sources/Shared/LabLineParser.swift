@@ -261,8 +261,34 @@ public enum LabLineParser {
   public static func parse(_ text: String) -> ParseResult {
     let lines = text.components(separatedBy: .newlines)
       .enumerated()
-      .map { (line: $0.element, lineNumber: $0.offset + 1, region: SourceRegion?.none) }
+      .map {
+        (line: withoutPrivateGlyphs($0.element), lineNumber: $0.offset + 1,
+          region: SourceRegion?.none)
+      }
     return parse(lines: lines)
+  }
+
+  /// Removes characters from Unicode's private use area.
+  ///
+  /// An embedded font uses those code points for its own icons, and a PDF's
+  /// text layer hands them over as if they were text. A home aminogram ends
+  /// every value line with `U+E607`, the little gauge beside it, and that one
+  /// invisible character was enough to stop the line parsing as a number and
+  /// to put eight readings that had been extracted perfectly well into the
+  /// list of lines the app could not read.
+  ///
+  /// They are never content: no alphabet, no unit and no number lives there.
+  public static func withoutPrivateGlyphs(_ text: String) -> String {
+    guard text.unicodeScalars.contains(where: isPrivateUse) else { return text }
+    return String(String.UnicodeScalarView(text.unicodeScalars.filter { !isPrivateUse($0) }))
+      .trimmingCharacters(in: .whitespaces)
+  }
+
+  private static func isPrivateUse(_ scalar: Unicode.Scalar) -> Bool {
+    switch scalar.value {
+    case 0xE000...0xF8FF, 0xF0000...0xFFFFD, 0x100000...0x10FFFD: return true
+    default: return false
+    }
   }
 
   /// Parses rows a table recogniser already separated, keeping their geometry.
@@ -763,6 +789,45 @@ public enum LabLineParser {
     }
 
     return ExtractionResult(
-      coded: coded, unmapped: unmapped, suspiciousLines: parsed.suspiciousLines, source: source)
+      coded: coded, unmapped: unmapped,
+      suspiciousLines: withoutRepeats(parsed.suspiciousLines, of: coded, and: unmapped),
+      source: source)
+  }
+
+  /// Drops lines that only say again what a value above them already said.
+  ///
+  /// A home aminogram prints `Isoleucin 48,3 µmol/l` as a heading and then
+  /// `48,3 µmol/l` again beside the gauge. The second has no label, so
+  /// nothing can be made of it, and it arrived in the list of lines the app
+  /// could not read. That list is the useful bug report; filling it with
+  /// eight repeats of values that were read perfectly well makes it useless.
+  ///
+  /// Only an exact repeat goes: the same number and the same unit as
+  /// something already extracted. A bare number that matches nothing stays,
+  /// because that one really was missed.
+  static func withoutRepeats(
+    _ lines: [String], of coded: [CodedLabValue], and unmapped: [UnmappedLabValue]
+  ) -> [String] {
+    let known = Set(
+      (coded.map(\.raw) + unmapped.map(\.raw)).map {
+        "\(($0.value * 1000).rounded() / 1000)|\(normaliseUnitForRepeat($0.unitRaw))"
+      })
+    guard !known.isEmpty else { return lines }
+
+    return lines.filter { line in
+      let trimmed = line.trimmingCharacters(in: .whitespaces)
+      // A repeat is the value and its unit and nothing else. A line with a
+      // label is a different claim and stays whatever it says.
+      guard let match = firstMatch(#"^([<>≤≥]?\s*[\d.,]+)\s*([^\d\s][^\d]*)$"#, in: trimmed),
+        let value = parseNumber(match[1])
+      else { return true }
+      let key = "\((value * 1000).rounded() / 1000)|\(normaliseUnitForRepeat(match[2]))"
+      return !known.contains(key)
+    }
+  }
+
+  private static func normaliseUnitForRepeat(_ unit: String) -> String {
+    Analytes.normaliseUnit(unit)
+      ?? unit.trimmingCharacters(in: .whitespaces).lowercased()
   }
 }
