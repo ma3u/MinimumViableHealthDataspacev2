@@ -59,10 +59,13 @@
       _ result: ExtractionResult, condition: String
     ) {
       for value in result.coded {
-        guard let expected = truth[value.coding.loinc] else {
+        // A synthetic sheet carries only LOINC-coded analytes, so a codeless
+        // coding here means the wrong analyte was matched, not a quantity
+        // LOINC has no term for.
+        guard let loinc = value.coding.loinc, let expected = truth[loinc] else {
           Issue.record(
             Comment(rawValue:
-              "\(condition): coded \(value.coding.loinc) (\(value.raw.label) = "
+              "\(condition): coded \(value.coding.loinc ?? "uncoded") (\(value.raw.label) = "
               + "\(value.raw.value) \(value.raw.unitRaw)) which is not on the sheet"))
           continue
         }

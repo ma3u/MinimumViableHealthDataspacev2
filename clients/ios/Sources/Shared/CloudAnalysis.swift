@@ -34,7 +34,7 @@ public enum CloudAnalysis {
     public let label: String
     public let value: Double
     public let unit: String
-    public let loinc: String
+    public let loinc: String?
     public let referenceLow: Double?
     public let referenceHigh: Double?
     /// FHIR Observation status, so the model can see what it is being handed.
@@ -53,7 +53,7 @@ public enum CloudAnalysis {
     }
 
     public init(
-      label: String, value: Double, unit: String, loinc: String,
+      label: String, value: Double, unit: String, loinc: String?,
       referenceLow: Double? = nil, referenceHigh: Double? = nil, status: String
     ) {
       self.label = label

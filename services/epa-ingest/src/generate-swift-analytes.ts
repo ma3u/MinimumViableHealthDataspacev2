@@ -57,7 +57,8 @@ function readDefinitions(): { labels: string[]; units: string[] } {
 interface SwiftEntry {
   labelKey: string;
   ucum: string;
-  loinc: string;
+  loinc: string | null;
+  uncodedReason?: string;
   display: string;
   analyteKey: string;
 }
@@ -78,6 +79,7 @@ export function buildEntries(labels: string[], units: string[]): SwiftEntry[] {
         labelKey: normaliseLabel(label),
         ucum: hit.coding.ucum,
         loinc: hit.coding.loincNumber,
+        uncodedReason: hit.coding.uncodedReason,
         display: hit.coding.display,
         analyteKey: hit.analyteKey,
       });
@@ -121,14 +123,30 @@ export function renderSwift(
       .join("\n");
   const descriptions = table(ANALYTE_DESCRIPTIONS);
   const descriptionsDe = table(ANALYTE_DESCRIPTIONS_DE);
+  // A codeless coding must say why, or a reader of the data cannot tell a
+  // deliberate absence from a lookup nobody got round to.
+  for (const e of entries) {
+    if (e.loinc === null && !e.uncodedReason) {
+      throw new Error(
+        `${e.analyteKey} in ${e.ucum} has no LOINC code and no reason for it`,
+      );
+    }
+  }
+
   const rows = entries
     .map(
       (e) =>
         `    AnalyteCoding(labelKey: ${swiftString(
           e.labelKey,
         )}, ucum: ${swiftString(e.ucum)}, ` +
-        `loinc: ${swiftString(e.loinc)}, display: ${swiftString(e.display)}, ` +
-        `analyteKey: ${swiftString(e.analyteKey)}),`,
+        `loinc: ${e.loinc === null ? "nil" : swiftString(e.loinc)}, ` +
+        `display: ${swiftString(e.display)}, ` +
+        `analyteKey: ${swiftString(e.analyteKey)}` +
+        `${
+          e.uncodedReason
+            ? `, uncodedReason: ${swiftString(e.uncodedReason)}`
+            : ""
+        }),`,
     )
     .join("\n");
 
@@ -157,21 +175,36 @@ public struct AnalyteCoding: Sendable, Equatable, Codable {
   public let labelKey: String
   /// UCUM unit code this coding applies to.
   public let ucum: String
-  public let loinc: String
+  /// The LOINC code, or nil where LOINC has none for this quantity.
+  ///
+  /// Body-composition devices report quantities LOINC has never coded.
+  /// Visceral fat is the clearest: LOINC has an area code and nothing for the
+  /// mass a bioimpedance scale prints in kilograms, and the two are not
+  /// convertible. Putting the area code on a mass would be a wrong code on a
+  /// real measurement, so such a value is carried with its unit and no code.
+  /// \`uncodedReason\` then says why, and travels with it into the export.
+  public let loinc: String?
   public let display: String
   /// Canonical key of the analyte definition, stable across units.
   public let analyteKey: String
+  /// Why LOINC has no code. Non-nil exactly when \`loinc\` is nil.
+  public let uncodedReason: String?
+
+  /// True when a code applies and the app may quote one.
+  public var isCoded: Bool { loinc != nil }
 
   /// Explicit because the synthesised memberwise initialiser is internal, so
   /// another module cannot construct one. The app target needs to.
   public init(
-    labelKey: String, ucum: String, loinc: String, display: String, analyteKey: String
+    labelKey: String, ucum: String, loinc: String?, display: String, analyteKey: String,
+    uncodedReason: String? = nil
   ) {
     self.labelKey = labelKey
     self.ucum = ucum
     self.loinc = loinc
     self.display = display
     self.analyteKey = analyteKey
+    self.uncodedReason = uncodedReason
   }
 }
 

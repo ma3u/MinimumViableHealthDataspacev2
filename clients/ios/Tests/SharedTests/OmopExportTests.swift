@@ -159,3 +159,170 @@ struct OmopExportTests {
     #expect(bundle.files["measurement.csv"]?.split(separator: "\n").count == 1, "header only")
   }
 }
+
+/// A quantity LOINC does not code, on every path that carries a value out.
+@Suite("Visceral fat in kilograms, which LOINC has no term for")
+struct UncodedQuantityTests {
+
+  static func scaleReport() -> LabReport {
+    let entries = BodyMeasurements.entries(
+      waistCm: nil, weightKg: 70, visceralFat: 1.6, visceralFatUnit: .mass,
+      heightCm: nil, profile: .empty)
+    return BodyMeasurements.report(
+      entries: entries, on: ReportMetadataExtractor.day(2026, 6, 15)!,
+      title: "Body measurements")!
+  }
+
+  @Test("the unit decides whether there is a code, and the label never does")
+  func unitDecides() throws {
+    let area = try #require(Analytes.lookup(label: "Viszeralfett", unit: "cm²"))
+    #expect(area.loinc == "73707-2")
+    #expect(area.uncodedReason == nil)
+    #expect(area.isCoded)
+
+    let mass = try #require(Analytes.lookup(label: "Viszeralfett", unit: "kg"))
+    #expect(mass.loinc == nil)
+    #expect(!mass.isCoded)
+    #expect(mass.uncodedReason?.contains("73707-2") == true)
+    // Same analyte either way: it is one quantity reported two ways, not two
+    // analytes that happen to share a name.
+    #expect(mass.analyteKey == area.analyteKey)
+  }
+
+  @Test("a kilogram reading is coded and kept, not pushed into unmapped")
+  func keptAsCoded() throws {
+    let report = Self.scaleReport()
+    let fat = try #require(report.extraction.coded.first { $0.coding.analyteKey == "visceral-fat" })
+    #expect(fat.raw.value == 1.6)
+    #expect(fat.coding.ucum == "kg")
+    #expect(report.extraction.unmapped.isEmpty)
+  }
+
+  @Test("OMOP carries the printed label where a code would go")
+  func omopSourceValue() throws {
+    // `measurement_source_value` means the code as it appears in the source
+    // data. With no code, the label is that, and a downstream mapper sees
+    // something unmappable rather than a plausible wrong code.
+    let bundle = OmopExport.bundle(from: [Self.scaleReport()])
+    let measurement = try #require(bundle.files["measurement.csv"])
+    let header = measurement.split(separator: "\n")[0].components(separatedBy: ",")
+    let column = try #require(header.firstIndex(of: "measurement_source_value"))
+    let unitColumn = try #require(header.firstIndex(of: "unit_source_value"))
+
+    let row = try #require(
+      measurement.split(separator: "\n").dropFirst()
+        .map { $0.components(separatedBy: ",") }
+        .first { $0[unitColumn].contains("kg") && $0.contains { $0.contains("1.6") } })
+    #expect(row[column].contains("Viszerales Fett"))
+    // And never the area code, which would be a wrong code on a real value.
+    #expect(!row[column].contains("73707-2"))
+  }
+
+  @Test("FHIR states that no code applies rather than inventing one")
+  func fhirCodeableConcept() throws {
+    let report = Self.scaleReport()
+    let bundle = FhirWriter.buildBundle(
+      values: report.extraction.coded,
+      meta: FhirWriter.ReportMeta(
+        patientId: "p1", effectiveDateTime: "2026-06-15", performer: nil, title: "Waage"),
+      source: FhirWriter.TextSource(
+        kind: .selfTracked, sourceDocument: "waage.jpg", ocrConfidence: nil, extractor: "test"),
+      now: "2026-06-15T08:00:00Z")
+    let text = bundle.canonical()
+
+    #expect(text.contains("data-absent-reason"))
+    // Never the area code **as a coding**, which would be a wrong code on a
+    // real measurement. It does appear inside the reason, which is the point:
+    // the resource says which code exists and why it does not apply.
+    #expect(!text.contains("{\"code\":\"73707-2\""))
+    #expect(text.contains("has no term for the mass"))
+    // The label is still there, so the resource can be matched to the reading.
+    #expect(text.contains("\"text\":\"Viszerales Fett\""))
+    // The weight beside it is coded as usual: one uncoded quantity does not
+    // make the bundle uncoded.
+    #expect(text.contains("{\"code\":\"29463-7\""))
+  }
+
+  @Test("the prompt says no code rather than an empty one")
+  func promptOmitsTheCode() throws {
+    let report = Self.scaleReport()
+    let fat = try #require(report.extraction.coded.first { $0.coding.analyteKey == "visceral-fat" })
+    let rendered = PromptText.values([CloudAnalysis.SharedValue(from: fat)])
+    #expect(rendered.contains("- Viszerales Fett: 1.6 kg"))
+    #expect(!rendered.contains("LOINC"))
+  }
+}
+
+/// Reading the current body measurements back, so the profile can show them.
+@Suite("The profile shows what was measured, from wherever it came")
+struct LatestBodyMeasurementsTests {
+
+  static func report(day: Int, entries: [BodyMeasurements.Entry]) -> LabReport {
+    BodyMeasurements.report(
+      entries: entries, on: ReportMetadataExtractor.day(2026, 6, day)!,
+      title: "Body measurements")!
+  }
+
+  @Test("the most recent value of each measurement wins")
+  func newestWins() {
+    let older = Self.report(
+      day: 1,
+      entries: BodyMeasurements.entries(
+        waistCm: 90, weightKg: 72, visceralFat: nil, heightCm: nil, profile: .empty))
+    let newer = Self.report(
+      day: 15,
+      entries: BodyMeasurements.entries(
+        waistCm: nil, weightKg: 70, visceralFat: 1.6, visceralFatUnit: .mass,
+        heightCm: nil, profile: .empty))
+
+    let latest = BodyMeasurements.latest(from: [older, newer])
+    #expect(latest["body-weight"]?.value == 70)
+    // The waist was not measured again, so the older reading is still current.
+    #expect(latest["waist-circumference"]?.value == 90)
+    #expect(latest["visceral-fat"]?.value == 1.6)
+    // And the unit travels, so the screen reopens on the one the device used.
+    #expect(latest["visceral-fat"]?.ucum == "kg")
+  }
+
+  @Test("a value read from a scale's screen is current like any other")
+  func provenanceDoesNotMatter() {
+    // The point of reading these back: a photograph of a gym scale updates
+    // what the profile shows, without a second path that could disagree.
+    let scanned = LabReport(
+      id: UUID(), scannedAt: Date(),
+      collectedOn: ReportMetadataExtractor.day(2026, 6, 20)!, title: "Waage",
+      extraction: ExtractionResult(
+        coded: [
+          CodedLabValue(
+            raw: RawLabValue(
+              label: "Viszeralfett", value: 1.4, unitRaw: "kg",
+              line: "Viszeralfett 1,4 kg", lineNumber: 1),
+            coding: Analytes.lookup(label: "Viszeralfett", unit: "kg")!,
+            source: .ocrTranscribed)
+        ], unmapped: [], suspiciousLines: [], source: .ocrTranscribed),
+      metadata: ReportMetadata(labDate: ReportMetadataExtractor.day(2026, 6, 20)!, dateSource: .printed))
+
+    let latest = BodyMeasurements.latest(from: [Self.report(
+      day: 15,
+      entries: BodyMeasurements.entries(
+        waistCm: nil, weightKg: 70, visceralFat: 1.6, visceralFatUnit: .mass,
+        heightCm: nil, profile: .empty)), scanned])
+    #expect(latest["visceral-fat"]?.value == 1.4)
+  }
+
+  @Test("saving under an existing id replaces that measurement")
+  func sameIdReplaces() throws {
+    // Opening the profile, correcting one figure and saving left two reports
+    // for one morning, and the trend drew both.
+    let id = UUID()
+    let first = BodyMeasurements.report(
+      entries: BodyMeasurements.entries(
+        waistCm: 86, weightKg: 70, visceralFat: nil, heightCm: nil, profile: .empty),
+      on: ReportMetadataExtractor.day(2026, 6, 15)!, id: id, title: "Body measurements")
+    let corrected = BodyMeasurements.report(
+      entries: BodyMeasurements.entries(
+        waistCm: 84, weightKg: 70, visceralFat: nil, heightCm: nil, profile: .empty),
+      on: ReportMetadataExtractor.day(2026, 6, 15)!, id: id, title: "Body measurements")
+    #expect(try #require(first).id == #require(corrected).id)
+  }
+}

@@ -287,6 +287,24 @@ const c = (
 });
 
 /**
+ * A quantity the dictionary knows and LOINC does not code.
+ *
+ * Rare and meant to stay rare: the reason is required and is carried all the
+ * way into the export, so a reader of the data sees why a row has no code
+ * rather than assuming the app failed to look one up.
+ */
+const uncoded = (
+  display: string,
+  ucum: string,
+  uncodedReason: string,
+): AnalyteCoding => ({
+  loincNumber: null,
+  display,
+  ucum,
+  uncodedReason,
+});
+
+/**
  * One white-cell line of the differential, as German sheets print it.
  *
  * The label carries `absolut` / `abs.` or `relativ` / `rel.` (or nothing) and
@@ -1351,11 +1369,13 @@ const DEFINITIONS: AnalyteDefinition[] = [
     },
   },
   {
-    key: "visceral-fat-area",
+    key: "visceral-fat",
     description:
-      "The cross-sectional area of fat around the organs, as a body-composition device estimates it.",
+      "Fat stored around the organs, as a body-composition device estimates it. Some devices report an area and others a mass, which are different quantities and are not convertible into one another.",
     labels: [
       "Viszerales Fett",
+      "Viszeralfett",
+      "Viszeralfettfläche",
       "Viszerale Fettfläche",
       "Visceral fat",
       "Visceral fat area",
@@ -1366,9 +1386,42 @@ const DEFINITIONS: AnalyteDefinition[] = [
       // consumer scale's 1-to-59 "visceral fat rating" is a different quantity
       // with no LOINC code of its own, and is not this.
       cm2: c("73707-2", "Visceral fat [Area] Measured", "cm2"),
+      // The same label, in kilograms, is a **mass**, which many bioimpedance
+      // scales print instead. LOINC codes the area and not the mass, and the
+      // two are not convertible into one another, so this one carries no code.
+      // The label alone must never decide: it is the `kg` that sends a reading
+      // here rather than to the area code above.
+      kg: uncoded(
+        "Visceral fat mass estimated by bioimpedance",
+        "kg",
+        "LOINC codes visceral fat as an area (73707-2) and has no term for the mass a bioimpedance scale reports.",
+      ),
     },
   },
   // ---- Body composition, as a bioimpedance scale reports it ----
+  {
+    key: "ecw-tbw",
+    description:
+      "The share of total body water that lies outside the cells, as a bioimpedance device estimates it.",
+    labels: [
+      "ECW/TBW",
+      "ECW/TBW-Verhältnis",
+      "ECW-TBW",
+      "Extrazellulärwasser-Anteil",
+      "Extracellular water ratio",
+    ],
+    byUnit: {
+      // LOINC codes body water as a mass and a percentage, and has no term
+      // for the extracellular share of it that a bioimpedance device reports.
+      // It read correctly off a gym scale and was filed as an unknown analyte,
+      // which is a worse answer than carrying it with its unit and no code.
+      "%": uncoded(
+        "Extracellular to total body water ratio by bioimpedance",
+        "%",
+        "LOINC has no term for the extracellular share of total body water that a bioimpedance device reports.",
+      ),
+    },
+  },
   {
     key: "body-fat",
     description:
@@ -1788,8 +1841,10 @@ export const ANALYTE_DESCRIPTIONS_DE: Readonly<Record<string, string>> = {
   bmi: "Gewicht geteilt durch Größe im Quadrat. Ein Maß für Bevölkerungen; es sagt nichts darüber, woraus das Gewicht besteht.",
   "waist-circumference":
     "Der Bauchumfang, der das Fett um die Organe besser abbildet als das Gewicht.",
-  "visceral-fat-area":
-    "Die Querschnittsfläche des Fetts um die Organe, wie ein Körperanalysegerät sie schätzt.",
+  "visceral-fat":
+    "Das Fett um die Organe, wie ein Körperanalysegerät es schätzt. Manche Geräte geben eine Fläche an, andere eine Masse; das sind verschiedene Größen und nicht ineinander umrechenbar.",
+  "ecw-tbw":
+    "Der Anteil des Körperwassers, der außerhalb der Zellen liegt, wie ihn ein Bioimpedanzgerät schätzt.",
   "body-fat":
     "Die Fettmasse oder ihr Anteil am Körpergewicht, wie ein Bioimpedanzgerät sie schätzt.",
   "muscle-mass": "Die Muskelmasse, wie ein Bioimpedanzgerät sie schätzt.",

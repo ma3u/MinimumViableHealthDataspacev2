@@ -171,6 +171,47 @@ kind of evidence it is, and the title of the report it came from. Tapping a row
 opens that report. The dates are also drawn as axis marks, so the gaps between
 draws are visible rather than implied by even spacing.
 
+## Postscript, 2026-09-20: a quantity LOINC does not code
+
+A gym scale prints `Viszeralfett 1,6 kg`. LOINC has `73707-2 Visceral fat
+[Area] Measured` and nothing for the **mass**, and the two are not convertible
+into one another. Checked against the NLM clinical tables API: a search for
+visceral fat returns exactly one term, the area.
+
+Three ways out, and only one of them is honest:
+
+1. Put the area code on a mass. That is a wrong code on a real measurement,
+   the precise failure the unit-selects-the-code rule exists to prevent.
+2. Refuse the reading. The person's own device produces it, and refusing means
+   they cannot record or ask about a number they can see on a screen.
+3. Carry the quantity with its unit and no code.
+
+So `AnalyteCoding.loinc` became optional, with a required `uncodedReason`
+beside it. The generator refuses to emit a null code without a reason, so
+nobody reaches for this to avoid looking a code up, and a test asserts the
+whole set of uncoded codings is exactly two: visceral fat in kilograms and the
+extracellular-to-total body water ratio a bioimpedance scale prints as a
+percentage. Both were verified absent from LOINC before being added.
+
+The absence travels rather than being swallowed:
+
+- **FHIR** gets a CodeableConcept with `text` and no `coding`, which is valid,
+  plus a `data-absent-reason` extension carrying the reason. A consumer is
+  told, not left to guess.
+- **OMOP** puts the printed label in `measurement_source_value`, which means
+  the code as it appears in the source data. A downstream mapper then sees
+  something unmappable rather than a plausible wrong code.
+- **The prompt** states no code rather than an empty one, and the federation
+  service stopped requiring a LOINC code to accept a value. It still requires
+  a unit and a label, because without those there is nothing to explain.
+
+The same reading also exposed the profile as write-only: measurements could be
+typed and saved but never seen again or corrected, and a value transferred
+from a scale's screen never appeared there at all. The section now loads the
+latest of each measurement whatever its source, shows the date each one was
+measured underneath it, and saving on the same date corrects that measurement
+instead of stacking a second one beside it.
+
 ## Alternatives considered
 
 - **Copying a longevity site's table.** Rejected: unsourced numbers cannot be

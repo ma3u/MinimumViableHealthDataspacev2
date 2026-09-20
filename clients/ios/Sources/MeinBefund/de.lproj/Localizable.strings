@@ -227,7 +227,6 @@
 "Visceral fat" = "Viszerales Fett";
 "Waist to height" = "Taille zu Größe";
 "Save these measurements" = "Diese Messwerte sichern";
-"Saved as their own report, marked as entered by you rather than measured by a laboratory, so they appear in your trends and exports. Visceral fat is an area in square centimetres, as a body-composition device reports it; a scale's rating from 1 to 59 is a different quantity and does not belong here." = "Werden als eigener Befund gespeichert, gekennzeichnet als von Ihnen eingetragen und nicht von einem Labor gemessen, damit sie in Verlauf und Export erscheinen. Viszerales Fett ist eine Fläche in Quadratzentimetern, wie sie ein Körperanalysegerät angibt; die Bewertung von 1 bis 59 einer Waage ist eine andere Größe und gehört nicht hierher.";
 "Body" = "Körper";
 "Colour repeats what the words say. It is a comparison to a published number, not a finding." = "Die Farbe wiederholt, was die Worte sagen. Sie ist ein Vergleich mit einer veröffentlichten Zahl, kein Befund.";
 "Some published ranges differ by sex. Without an answer only the ranges that apply to everyone are shown. Set it in your profile; it stays on your device." = "Manche veröffentlichten Bereiche unterscheiden sich nach Geschlecht. Ohne Angabe werden nur die Bereiche gezeigt, die für alle gelten. Stellen Sie es im Profil ein; es bleibt auf Ihrem Gerät.";
@@ -238,3 +237,6 @@
 "Entered or from a device" = "Eingetragen oder vom Gerät";
 "Lab-issued" = "Vom Labor";
 "%1$@ %2$@ %3$@ since the previous measurement" = "%1$@ %2$@ %3$@ seit der vorigen Messung";
+"Saved as their own report, marked as entered by you rather than measured by a laboratory, so they appear in your trends and exports. Saving on the same date corrects that measurement; move the date to record a new one." = "Werden als eigener Befund gespeichert, gekennzeichnet als von Ihnen eingetragen und nicht von einem Labor gemessen, damit sie in Verlauf und Export erscheinen. Ein Speichern am selben Datum korrigiert diese Messung; verschieben Sie das Datum, um eine neue zu erfassen.";
+"An area in square centimetres and a mass in kilograms are different quantities, so pick the one your device shows. LOINC has a code for the area and none for the mass, and a reading in kilograms is exported with its label instead of a code rather than with a code that would be wrong." = "Eine Fläche in Quadratzentimetern und eine Masse in Kilogramm sind verschiedene Größen; wählen Sie die, die Ihr Gerät anzeigt. LOINC hat einen Code für die Fläche und keinen für die Masse, deshalb wird ein Wert in Kilogramm mit seiner Bezeichnung statt mit einem Code exportiert, und nicht mit einem Code, der falsch wäre.";
+"Last measured %@" = "Zuletzt gemessen am %@";

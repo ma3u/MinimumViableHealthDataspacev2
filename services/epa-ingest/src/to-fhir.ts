@@ -177,13 +177,20 @@ export function buildBundle(
       },
     ],
     code: {
-      coding: [
-        {
-          system: LOINC,
-          code: v.coding.loincNumber,
-          display: v.coding.display,
-        } satisfies Coding,
-      ],
+      // A quantity LOINC does not code gets a CodeableConcept with text only,
+      // which is valid FHIR and says plainly that no code applies. Inventing
+      // a near-enough code would be worse than saying nothing.
+      ...(v.coding.loincNumber !== null
+        ? {
+            coding: [
+              {
+                system: LOINC,
+                code: v.coding.loincNumber,
+                display: v.coding.display,
+              } satisfies Coding,
+            ],
+          }
+        : {}),
       // The label exactly as the lab printed it, so a reviewer can match the
       // coded resource back to the sheet without trusting our dictionary.
       text: v.label,

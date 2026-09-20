@@ -17,21 +17,36 @@ public struct AnalyteCoding: Sendable, Equatable, Codable {
   public let labelKey: String
   /// UCUM unit code this coding applies to.
   public let ucum: String
-  public let loinc: String
+  /// The LOINC code, or nil where LOINC has none for this quantity.
+  ///
+  /// Body-composition devices report quantities LOINC has never coded.
+  /// Visceral fat is the clearest: LOINC has an area code and nothing for the
+  /// mass a bioimpedance scale prints in kilograms, and the two are not
+  /// convertible. Putting the area code on a mass would be a wrong code on a
+  /// real measurement, so such a value is carried with its unit and no code.
+  /// `uncodedReason` then says why, and travels with it into the export.
+  public let loinc: String?
   public let display: String
   /// Canonical key of the analyte definition, stable across units.
   public let analyteKey: String
+  /// Why LOINC has no code. Non-nil exactly when `loinc` is nil.
+  public let uncodedReason: String?
+
+  /// True when a code applies and the app may quote one.
+  public var isCoded: Bool { loinc != nil }
 
   /// Explicit because the synthesised memberwise initialiser is internal, so
   /// another module cannot construct one. The app target needs to.
   public init(
-    labelKey: String, ucum: String, loinc: String, display: String, analyteKey: String
+    labelKey: String, ucum: String, loinc: String?, display: String, analyteKey: String,
+    uncodedReason: String? = nil
   ) {
     self.labelKey = labelKey
     self.ucum = ucum
     self.loinc = loinc
     self.display = display
     self.analyteKey = analyteKey
+    self.uncodedReason = uncodedReason
   }
 }
 
@@ -135,6 +150,7 @@ public enum Analytes {
     "creatinine": "A waste product of muscle, cleared by the kidney. Depends on muscle mass, which is why eGFR is calculated from it.",
     "crp": "A protein the liver makes during inflammation. Rises within hours of an infection or injury.",
     "crp-hs": "C-reactive protein measured by a sensitive method, which resolves the low range where it reflects vascular inflammation rather than infection.",
+    "ecw-tbw": "The share of total body water that lies outside the cells, as a bioimpedance device estimates it.",
     "egfr": "The kidney's filtration rate, estimated from creatinine with age and sex. An estimate, not a measurement.",
     "eosinophils": "White cells involved in allergy and in parasitic infection.",
     "erythrocytes": "The number of red cells per volume of blood.",
@@ -181,7 +197,7 @@ public enum Analytes {
     "tsh": "The pituitary's signal to the thyroid. It moves opposite to thyroid hormone, so it is the first test of thyroid function.",
     "urate": "The end product of purine breakdown. Crystallises in joints above its solubility, which is what gout is.",
     "urea": "A waste product of protein breakdown, cleared by the kidney. Also rises with dehydration and a high protein intake.",
-    "visceral-fat-area": "The cross-sectional area of fat around the organs, as a body-composition device estimates it.",
+    "visceral-fat": "Fat stored around the organs, as a body-composition device estimates it. Some devices report an area and others a mass, which are different quantities and are not convertible into one another.",
     "vitamin-b12": "A vitamin needed for blood formation and for nerves, stored in the liver for years.",
     "vitamin-d": "The storage form of vitamin D, which reflects supply from sun and diet over weeks.",
     "waist-circumference": "Abdominal girth, which tracks the fat around the organs better than weight does.",
@@ -221,6 +237,7 @@ public enum Analytes {
     "creatinine": "Ein Abbauprodukt der Muskulatur, das die Niere ausscheidet. Hängt von der Muskelmasse ab, weshalb daraus die eGFR berechnet wird.",
     "crp": "Ein Protein, das die Leber bei Entzündung bildet. Steigt innerhalb von Stunden nach einer Infektion oder Verletzung.",
     "crp-hs": "C-reaktives Protein, mit einem empfindlichen Verfahren gemessen, das den niedrigen Bereich auflöst, in dem es eher Gefäßentzündung als Infektion abbildet.",
+    "ecw-tbw": "Der Anteil des Körperwassers, der außerhalb der Zellen liegt, wie ihn ein Bioimpedanzgerät schätzt.",
     "egfr": "Die Filtrationsleistung der Niere, aus dem Kreatinin mit Alter und Geschlecht geschätzt. Eine Schätzung, keine Messung.",
     "eosinophils": "Weiße Blutkörperchen, die bei Allergien und bei Parasitenbefall eine Rolle spielen.",
     "erythrocytes": "Die Zahl der roten Blutkörperchen je Blutvolumen.",
@@ -267,7 +284,7 @@ public enum Analytes {
     "tsh": "Das Signal der Hirnanhangsdrüse an die Schilddrüse. Es bewegt sich gegenläufig zum Schilddrüsenhormon und ist daher der erste Test der Schilddrüsenfunktion.",
     "urate": "Das Endprodukt des Purinabbaus. Kristallisiert oberhalb seiner Löslichkeit in Gelenken, und genau das ist Gicht.",
     "urea": "Ein Abbauprodukt des Eiweißstoffwechsels, das die Niere ausscheidet. Steigt auch bei Flüssigkeitsmangel und hoher Eiweißzufuhr.",
-    "visceral-fat-area": "Die Querschnittsfläche des Fetts um die Organe, wie ein Körperanalysegerät sie schätzt.",
+    "visceral-fat": "Das Fett um die Organe, wie ein Körperanalysegerät es schätzt. Manche Geräte geben eine Fläche an, andere eine Masse; das sind verschiedene Größen und nicht ineinander umrechenbar.",
     "vitamin-b12": "Ein Vitamin für Blutbildung und Nerven, das die Leber über Jahre speichert.",
     "vitamin-d": "Die Speicherform des Vitamin D; sie bildet die Versorgung aus Sonne und Nahrung über Wochen ab.",
     "waist-circumference": "Der Bauchumfang, der das Fett um die Organe besser abbildet als das Gewicht.",
@@ -461,6 +478,8 @@ public enum Analytes {
     AnalyteCoding(labelKey: "crphochsensitiv", ucum: "mg/L", loinc: "30522-7", display: "C reactive protein [Mass/volume] in Serum or Plasma by High sensitivity method", analyteKey: "crp-hs"),
     AnalyteCoding(labelKey: "eag", ucum: "mg/dL", loinc: "27353-2", display: "Glucose mean value [Mass/volume] in Blood Estimated from glycated hemoglobin", analyteKey: "glucose-mean-estimated"),
     AnalyteCoding(labelKey: "eag", ucum: "mmol/L", loinc: "53553-4", display: "Glucose mean value [Moles/volume] in Blood Estimated from glycated hemoglobin", analyteKey: "glucose-mean-estimated"),
+    AnalyteCoding(labelKey: "ecwtbw", ucum: "%", loinc: nil, display: "Extracellular to total body water ratio by bioimpedance", analyteKey: "ecw-tbw", uncodedReason: "LOINC has no term for the extracellular share of total body water that a bioimpedance device reports."),
+    AnalyteCoding(labelKey: "ecwtbwverhaeltnis", ucum: "%", loinc: nil, display: "Extracellular to total body water ratio by bioimpedance", analyteKey: "ecw-tbw", uncodedReason: "LOINC has no term for the extracellular share of total body water that a bioimpedance device reports."),
     AnalyteCoding(labelKey: "egfr", ucum: "mL/min/{1.73_m2}", loinc: "62238-1", display: "Glomerular filtration rate/1.73 sq M.predicted [Volume Rate/Area] ... by Creatinine-based formula (CKD-EPI)", analyteKey: "egfr"),
     AnalyteCoding(labelKey: "egfrckdepi", ucum: "mL/min/{1.73_m2}", loinc: "62238-1", display: "Glomerular filtration rate/1.73 sq M.predicted [Volume Rate/Area] ... by Creatinine-based formula (CKD-EPI)", analyteKey: "egfr"),
     AnalyteCoding(labelKey: "egfrnckdepi", ucum: "mL/min/{1.73_m2}", loinc: "62238-1", display: "Glomerular filtration rate/1.73 sq M.predicted [Volume Rate/Area] ... by Creatinine-based formula (CKD-EPI)", analyteKey: "egfr"),
@@ -565,6 +584,8 @@ public enum Analytes {
     AnalyteCoding(labelKey: "erythrozytenzahl", ucum: "10*12/L", loinc: "789-8", display: "Erythrocytes [#/volume] in Blood by Automated count", analyteKey: "erythrocytes"),
     AnalyteCoding(labelKey: "erythrozytenzahl", ucum: "10*6/uL", loinc: "789-8", display: "Erythrocytes [#/volume] in Blood by Automated count", analyteKey: "erythrocytes"),
     AnalyteCoding(labelKey: "evb", ucum: "%", loinc: "788-0", display: "Erythrocyte [DistWidth] in Blood by Automated count", analyteKey: "rdw"),
+    AnalyteCoding(labelKey: "extracellularwaterratio", ucum: "%", loinc: nil, display: "Extracellular to total body water ratio by bioimpedance", analyteKey: "ecw-tbw", uncodedReason: "LOINC has no term for the extracellular share of total body water that a bioimpedance device reports."),
+    AnalyteCoding(labelKey: "extrazellulaerwasseranteil", ucum: "%", loinc: nil, display: "Extracellular to total body water ratio by bioimpedance", analyteKey: "ecw-tbw", uncodedReason: "LOINC has no term for the extracellular share of total body water that a bioimpedance device reports."),
     AnalyteCoding(labelKey: "fatmass", ucum: "%", loinc: "41982-0", display: "Percentage of body fat Measured", analyteKey: "body-fat"),
     AnalyteCoding(labelKey: "fatmass", ucum: "kg", loinc: "73708-0", display: "Body fat [Mass] Calculated", analyteKey: "body-fat"),
     AnalyteCoding(labelKey: "fe", ucum: "ug/dL", loinc: "2498-4", display: "Iron [Mass/volume] in Serum or Plasma", analyteKey: "iron"),
@@ -1197,11 +1218,20 @@ public enum Analytes {
     AnalyteCoding(labelKey: "urat", ucum: "umol/L", loinc: "14933-6", display: "Urate [Moles/volume] in Serum or Plasma", analyteKey: "urate"),
     AnalyteCoding(labelKey: "urea", ucum: "mg/dL", loinc: "3091-6", display: "Urea [Mass/volume] in Serum or Plasma", analyteKey: "urea"),
     AnalyteCoding(labelKey: "urea", ucum: "mmol/L", loinc: "22664-7", display: "Urea [Moles/volume] in Serum or Plasma", analyteKey: "urea"),
-    AnalyteCoding(labelKey: "vfa", ucum: "cm2", loinc: "73707-2", display: "Visceral fat [Area] Measured", analyteKey: "visceral-fat-area"),
-    AnalyteCoding(labelKey: "visceralfat", ucum: "cm2", loinc: "73707-2", display: "Visceral fat [Area] Measured", analyteKey: "visceral-fat-area"),
-    AnalyteCoding(labelKey: "visceralfatarea", ucum: "cm2", loinc: "73707-2", display: "Visceral fat [Area] Measured", analyteKey: "visceral-fat-area"),
-    AnalyteCoding(labelKey: "viszeralefettflaeche", ucum: "cm2", loinc: "73707-2", display: "Visceral fat [Area] Measured", analyteKey: "visceral-fat-area"),
-    AnalyteCoding(labelKey: "viszeralesfett", ucum: "cm2", loinc: "73707-2", display: "Visceral fat [Area] Measured", analyteKey: "visceral-fat-area"),
+    AnalyteCoding(labelKey: "vfa", ucum: "cm2", loinc: "73707-2", display: "Visceral fat [Area] Measured", analyteKey: "visceral-fat"),
+    AnalyteCoding(labelKey: "vfa", ucum: "kg", loinc: nil, display: "Visceral fat mass estimated by bioimpedance", analyteKey: "visceral-fat", uncodedReason: "LOINC codes visceral fat as an area (73707-2) and has no term for the mass a bioimpedance scale reports."),
+    AnalyteCoding(labelKey: "visceralfat", ucum: "cm2", loinc: "73707-2", display: "Visceral fat [Area] Measured", analyteKey: "visceral-fat"),
+    AnalyteCoding(labelKey: "visceralfat", ucum: "kg", loinc: nil, display: "Visceral fat mass estimated by bioimpedance", analyteKey: "visceral-fat", uncodedReason: "LOINC codes visceral fat as an area (73707-2) and has no term for the mass a bioimpedance scale reports."),
+    AnalyteCoding(labelKey: "visceralfatarea", ucum: "cm2", loinc: "73707-2", display: "Visceral fat [Area] Measured", analyteKey: "visceral-fat"),
+    AnalyteCoding(labelKey: "visceralfatarea", ucum: "kg", loinc: nil, display: "Visceral fat mass estimated by bioimpedance", analyteKey: "visceral-fat", uncodedReason: "LOINC codes visceral fat as an area (73707-2) and has no term for the mass a bioimpedance scale reports."),
+    AnalyteCoding(labelKey: "viszeralefettflaeche", ucum: "cm2", loinc: "73707-2", display: "Visceral fat [Area] Measured", analyteKey: "visceral-fat"),
+    AnalyteCoding(labelKey: "viszeralefettflaeche", ucum: "kg", loinc: nil, display: "Visceral fat mass estimated by bioimpedance", analyteKey: "visceral-fat", uncodedReason: "LOINC codes visceral fat as an area (73707-2) and has no term for the mass a bioimpedance scale reports."),
+    AnalyteCoding(labelKey: "viszeralesfett", ucum: "cm2", loinc: "73707-2", display: "Visceral fat [Area] Measured", analyteKey: "visceral-fat"),
+    AnalyteCoding(labelKey: "viszeralesfett", ucum: "kg", loinc: nil, display: "Visceral fat mass estimated by bioimpedance", analyteKey: "visceral-fat", uncodedReason: "LOINC codes visceral fat as an area (73707-2) and has no term for the mass a bioimpedance scale reports."),
+    AnalyteCoding(labelKey: "viszeralfett", ucum: "cm2", loinc: "73707-2", display: "Visceral fat [Area] Measured", analyteKey: "visceral-fat"),
+    AnalyteCoding(labelKey: "viszeralfett", ucum: "kg", loinc: nil, display: "Visceral fat mass estimated by bioimpedance", analyteKey: "visceral-fat", uncodedReason: "LOINC codes visceral fat as an area (73707-2) and has no term for the mass a bioimpedance scale reports."),
+    AnalyteCoding(labelKey: "viszeralfettflaeche", ucum: "cm2", loinc: "73707-2", display: "Visceral fat [Area] Measured", analyteKey: "visceral-fat"),
+    AnalyteCoding(labelKey: "viszeralfettflaeche", ucum: "kg", loinc: nil, display: "Visceral fat mass estimated by bioimpedance", analyteKey: "visceral-fat", uncodedReason: "LOINC codes visceral fat as an area (73707-2) and has no term for the mass a bioimpedance scale reports."),
     AnalyteCoding(labelKey: "vitaminb12", ucum: "ng/L", loinc: "2132-9", display: "Cobalamin (Vitamin B12) [Mass/volume] in Serum or Plasma", analyteKey: "vitamin-b12"),
     AnalyteCoding(labelKey: "vitaminb12", ucum: "pg/mL", loinc: "2132-9", display: "Cobalamin (Vitamin B12) [Mass/volume] in Serum or Plasma", analyteKey: "vitamin-b12"),
     AnalyteCoding(labelKey: "vitaminb12", ucum: "pmol/L", loinc: "16695-9", display: "Cobalamin (Vitamin B12) [Moles/volume] in Serum or Plasma", analyteKey: "vitamin-b12"),

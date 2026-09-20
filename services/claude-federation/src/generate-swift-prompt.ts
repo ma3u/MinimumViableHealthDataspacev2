@@ -85,7 +85,8 @@ public enum PromptText {
         range = "none printed"
       }
       lines.append(
-        "- \\(v.label) (LOINC \\(v.loinc)): \\(trim(v.value)) \\(v.unit); "
+        "- \\(v.label)\\(v.loinc.map { " (LOINC \\($0))" } ?? ""): "
+          + "\\(trim(v.value)) \\(v.unit); "
           + "printed reference \\(range); \\(v.status)")
     }
     return lines.joined(separator: "\\n")
