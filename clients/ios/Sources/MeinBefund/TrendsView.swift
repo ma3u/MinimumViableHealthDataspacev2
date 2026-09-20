@@ -25,6 +25,8 @@ struct TrendsView: View {
   let reports: [LabReport]
   /// From the profile, so a sex-specific band appears only once asked for.
   var sex: RangeSex = .any
+  /// Opens the report a point came from.
+  var onOpenReport: ((UUID) -> Void)?
   let onClose: () -> Void
   @State private var onlyWithHistory = false
 
@@ -53,6 +55,12 @@ struct TrendsView: View {
             ForEach(series) { item in
               Section {
                 SeriesChart(series: item)
+                // Every point, with the day it was measured and the report it
+                // came from. A chart shows the shape; this says which
+                // measurement each dot is, which the chart cannot.
+                ForEach(item.points.reversed()) { point in
+                  PointRow(point: point, series: item, onOpen: onOpenReport)
+                }
               } header: {
                 SeriesHeader(series: item)
               } footer: {
@@ -111,17 +119,77 @@ private struct SeriesHeader: View {
   }
 }
 
+/// One measurement: the day, the value, where it came from.
+private struct PointRow: View {
+  let point: TrendPoint
+  let series: TrendSeries
+  let onOpen: ((UUID) -> Void)?
+
+  private var body_: some View {
+    HStack(alignment: .firstTextBaseline) {
+      VStack(alignment: .leading, spacing: 2) {
+        Text(point.date.formatted(date: .abbreviated, time: .omitted))
+        HStack(spacing: 4) {
+          ProvenanceMark(source: point.source)
+          Text(point.reportTitle).lineLimit(1)
+        }
+        .font(.caption2)
+        .foregroundStyle(.secondary)
+      }
+      Spacer()
+      Text("\(point.comparator?.rawValue ?? "")\(Measurement.text(point.value)) \(series.ucum)")
+        .font(.callout.monospacedDigit())
+    }
+  }
+
+  var body: some View {
+    if let onOpen {
+      Button { onOpen(point.reportId) } label: { body_ }
+        .buttonStyle(.plain)
+    } else {
+      body_
+    }
+  }
+}
+
+/// Which kind of evidence one point is, in a word.
+private struct ProvenanceMark: View {
+  let source: SourceKind
+
+  private var label: String {
+    switch source {
+    case .labIssuedDigital: String(localized: "Lab-issued")
+    case .ocrTranscribed: String(localized: "Read from a photo")
+    case .selfTracked: String(localized: "Entered or from a device")
+    }
+  }
+
+  var body: some View {
+    Text(label)
+  }
+}
+
 private struct SeriesFooter: View {
   let series: TrendSeries
 
   private var changeText: String? {
     guard let change = series.change, change != 0 else { return nil }
     let arrow = change > 0 ? "↑" : "↓"
-    return "\(arrow) \(Measurement.text(abs(change))) \(series.ucum) since the previous measurement"
+    // Built through `String(localized:)` rather than interpolated: an
+    // interpolated sentence is invisible to the localisation extractor, and
+    // this one shipped in English to German phones because of that.
+    return String(
+      format: String(localized: "%1$@ %2$@ %3$@ since the previous measurement"),
+      arrow, Measurement.text(abs(change)), series.ucum)
   }
 
   var body: some View {
     VStack(alignment: .leading, spacing: 4) {
+      // What the measurement is. A definition of the test, not a reading of
+      // this person's value.
+      if let description = series.description {
+        Text(description).padding(.bottom, 2)
+      }
       if let range = series.range {
         // The published band, named and sourced. Never presented as a verdict.
         if let optimal = range.optimalText(formatter: Measurement.text) {
@@ -129,6 +197,13 @@ private struct SeriesFooter: View {
         }
         Link(range.source.label, destination: URL(string: range.source.url)!)
           .font(.caption2)
+      } else if series.printedRange != nil {
+        // Most analytes have no guideline band. The laboratory's own interval
+        // is then the only range there is, and it is the one that describes
+        // the assay this person was measured with.
+        Text(
+          "No guideline range is published for this one, so the band is the range your laboratory printed."
+        )
       } else {
         Text("No published range is quoted for this analyte.")
       }
@@ -157,10 +232,25 @@ private struct SeriesFooter: View {
 private struct SeriesChart: View {
   let series: TrendSeries
 
+  /// The band to draw: the published optimal one, or the laboratory's own.
+  ///
+  /// Two different things, drawn in two different colours and named in the
+  /// footer, because a guideline's target and an assay's reference interval
+  /// are not the same claim.
+  private var band: (low: Double?, high: Double?, colour: Color)? {
+    if let range = series.range, range.optimalLow != nil || range.optimalHigh != nil {
+      return (range.optimalLow, range.optimalHigh, RangePalette.optimal)
+    }
+    if let printed = series.printedRange {
+      return (printed.low, printed.high, RangePalette.guideline)
+    }
+    return nil
+  }
+
   private var bounds: (low: Double, high: Double) {
     var values = series.points.map(\.value)
-    if let low = series.range?.optimalLow { values.append(low) }
-    if let high = series.range?.optimalHigh { values.append(high) }
+    if let low = band?.low { values.append(low) }
+    if let high = band?.high { values.append(high) }
     let minimum = values.min() ?? 0
     let maximum = values.max() ?? 1
     let padding = Swift.max((maximum - minimum) * 0.15, Swift.max(abs(maximum) * 0.05, 0.1))
@@ -169,13 +259,13 @@ private struct SeriesChart: View {
 
   var body: some View {
     Chart {
-      if let range = series.range {
-        // The optimal band, behind everything else.
+      if let band {
+        // The band, behind everything else.
         RectangleMark(
-          yStart: .value("from", range.optimalLow ?? bounds.low),
-          yEnd: .value("to", range.optimalHigh ?? bounds.high)
+          yStart: .value("from", band.low ?? bounds.low),
+          yEnd: .value("to", band.high ?? bounds.high)
         )
-        .foregroundStyle(RangePalette.optimal.opacity(0.12))
+        .foregroundStyle(band.colour.opacity(0.12))
       }
 
       ForEach(series.points) { point in
@@ -188,7 +278,19 @@ private struct SeriesChart: View {
       }
     }
     .chartYScale(domain: bounds.low...bounds.high)
-    .chartXAxis { AxisMarks(values: .automatic(desiredCount: 3)) }
+    // A mark per measurement rather than an automatic scale: with one or two
+    // points an automatic axis draws no date at all, and a chart whose points
+    // have no date is the thing this app exists to avoid.
+    .chartXAxis {
+      AxisMarks(values: series.points.map(\.date)) { value in
+        AxisGridLine()
+        AxisValueLabel {
+          if let date = value.as(Date.self) {
+            Text(date.formatted(.dateTime.month(.abbreviated).year(.twoDigits)))
+          }
+        }
+      }
+    }
     .frame(height: 170)
     .padding(.vertical, 6)
     .accessibilityLabel(
