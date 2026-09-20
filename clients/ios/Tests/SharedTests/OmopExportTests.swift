@@ -243,6 +243,25 @@ struct UncodedQuantityTests {
     #expect(text.contains("{\"code\":\"29463-7\""))
   }
 
+  @Test("a codeless coding never prints as an Optional")
+  func codeLabelIsReadable() throws {
+    // `LOINC Optional("2093-3")` appeared on the report screen a person is
+    // asked to check against their own paper, because a now-optional code was
+    // interpolated straight into a string.
+    let coded = try #require(Analytes.lookup(label: "Cholesterin", unit: "mg/dL"))
+    #expect(coded.codeLabel.contains("2093-3"))
+    #expect(!coded.codeLabel.contains("Optional"))
+
+    let uncoded = try #require(Analytes.lookup(label: "Viszeralfett", unit: "kg"))
+    #expect(!uncoded.codeLabel.contains("Optional"))
+    // It names no code at all. Checked by the absence of digits rather than
+    // of the word LOINC, which the sentence saying there is none contains.
+    #expect(uncoded.codeLabel.rangeOfCharacter(from: .decimalDigits) == nil)
+    // And the key that selection lists use stays unique without a code.
+    #expect(uncoded.codeKey != coded.codeKey)
+    #expect(!uncoded.codeKey.isEmpty)
+  }
+
   @Test("the prompt says no code rather than an empty one")
   func promptOmitsTheCode() throws {
     let report = Self.scaleReport()

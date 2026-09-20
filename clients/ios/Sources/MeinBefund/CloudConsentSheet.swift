@@ -34,7 +34,7 @@ struct CloudConsentSheet: View {
   }
 
   private func key(for value: CodedLabValue) -> String {
-    "\(value.coding.loinc)-\(value.raw.lineNumber)"
+    "\(value.coding.codeKey)-\(value.raw.lineNumber)"
   }
 
   var body: some View {
@@ -72,7 +72,7 @@ struct CloudConsentSheet: View {
                 .foregroundStyle(selected.contains(key(for: value)) ? Color.accentColor : .secondary)
                 VStack(alignment: .leading, spacing: 2) {
                   Text(value.raw.label)
-                  Text("\(formatted(value.raw.value)) \(value.coding.ucum) · LOINC \(value.coding.loinc)")
+                  Text("\(formatted(value.raw.value)) \(value.coding.ucum) · \(value.coding.codeLabel)")
                     .font(.caption)
                     .foregroundStyle(.secondary)
                 }

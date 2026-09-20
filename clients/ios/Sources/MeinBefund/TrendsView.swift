@@ -248,11 +248,19 @@ private struct SeriesChart: View {
   let series: TrendSeries
   var onOpenReport: ((UUID) -> Void)?
 
-  /// The point whose card is showing. Nothing is selected until a tap.
-  @State private var selected: TrendPoint.ID?
+  /// Where on the date axis the last tap landed, and so which measurement is
+  /// showing its card. Nothing is selected until a tap.
+  ///
+  /// `chartXSelection` rather than a tap gesture of our own: inside a `List`
+  /// row a plain `onTapGesture`, and even a high-priority spatial one, never
+  /// fired. Swift Charts does its own hit-testing here and it works.
+  @State private var selectedDate: Date?
 
   private var selectedPoint: TrendPoint? {
-    series.points.first { $0.id == selected }
+    guard let selectedDate else { return nil }
+    return series.points.min {
+      abs($0.date.timeIntervalSince(selectedDate)) < abs($1.date.timeIntervalSince(selectedDate))
+    }
   }
 
   /// The band to draw: the published optimal one, or the laboratory's own.
@@ -298,7 +306,7 @@ private struct SeriesChart: View {
         PointMark(x: .value("Date", point.date), y: .value("Value", point.value))
           .foregroundStyle(point.source == .labIssuedDigital ? .blue : .orange)
           .symbol(point.source == .labIssuedDigital ? .circle : .diamond)
-          .symbolSize(point.id == selected ? 160 : 60)
+          .symbolSize(point.id == selectedPoint?.id ? 160 : 60)
       }
     }
     .chartYScale(domain: bounds.low...bounds.high)
@@ -315,26 +323,18 @@ private struct SeriesChart: View {
         }
       }
     }
+    .chartXSelection(value: $selectedDate)
     .chartOverlay { proxy in
       GeometryReader { geometry in
-        // Two layers, in this order on purpose. The clear rectangle takes a
-        // tap anywhere on the plot and picks the nearest measurement. The
-        // card sits above it, so its own button gets the second tap rather
-        // than the rectangle underneath swallowing it.
-        ZStack(alignment: .topLeading) {
-          Rectangle()
-            .fill(.clear)
-            .contentShape(Rectangle())
-            .onTapGesture { location in
-              select(near: location, proxy: proxy, in: geometry)
-            }
-          if let point = selectedPoint,
-            let anchor = position(of: point, proxy: proxy, in: geometry)
-          {
-            PointCallout(point: point, series: series, onOpen: onOpenReport)
-              .fixedSize()
-              .modifier(CalloutPlacement(anchor: anchor, bounds: geometry.size))
-          }
+        // Only the card. Selecting is `chartXSelection`'s job, and anything
+        // laid over the plot to catch taps would take the card's own tap
+        // before its button ever saw it.
+        if let point = selectedPoint,
+          let anchor = position(of: point, proxy: proxy, in: geometry)
+        {
+          PointCallout(point: point, series: series, onOpen: onOpenReport)
+            .fixedSize()
+            .modifier(CalloutPlacement(anchor: anchor, bounds: geometry.size))
         }
       }
     }
@@ -355,20 +355,6 @@ private struct SeriesChart: View {
     guard let x = proxy.position(forX: point.date), let y = proxy.position(forY: point.value)
     else { return nil }
     return CGPoint(x: plot.minX + x, y: plot.minY + y)
-  }
-
-  /// Selects the measurement nearest the tap, or clears it when that one was
-  /// already showing, so a second tap on the same dot puts the card away.
-  private func select(near location: CGPoint, proxy: ChartProxy, in geometry: GeometryProxy) {
-    guard let plotAnchor = proxy.plotFrame else { return }
-    let plot = geometry[plotAnchor]
-    guard let tapped = proxy.value(atX: location.x - plot.minX, as: Date.self) else { return }
-    let nearest = series.points.min {
-      abs($0.date.timeIntervalSince(tapped)) < abs($1.date.timeIntervalSince(tapped))
-    }
-    withAnimation(.easeOut(duration: 0.15)) {
-      selected = (nearest?.id == selected) ? nil : nearest?.id
-    }
   }
 }
 
