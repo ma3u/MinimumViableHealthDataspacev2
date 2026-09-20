@@ -91,30 +91,34 @@ final class AppModel: ObservableObject {
   /// second path to keep in step. A tape measure is not a laboratory, and the
   /// provenance already says so.
   func saveBodyMeasurements(
-    waistCm: Double?, weightKg: Double?, visceralFat: Double?,
-    visceralFatUnit: BodyMeasurements.VisceralFatUnit, on date: Date
+    waist: BodyMeasurements.Reading?, weight: BodyMeasurements.Reading?,
+    visceralFat: BodyMeasurements.Reading?,
+    visceralFatUnit: BodyMeasurements.VisceralFatUnit
   ) async {
-    let entries = BodyMeasurements.entries(
-      waistCm: waistCm, weightKg: weightKg, visceralFat: visceralFat,
-      visceralFatUnit: visceralFatUnit, heightCm: profile.heightCm, profile: profile)
-    let day = ReportMetadata.calendarDay(date)
+    let byDay = BodyMeasurements.entriesByDay(
+      waist: waist, weight: weight, visceralFat: visceralFat,
+      visceralFatUnit: visceralFatUnit, profile: profile)
+    guard !byDay.isEmpty else { return }
     let title = String(localized: "Body measurements")
-    // Saving the same day again corrects that measurement instead of stacking
-    // a second one beside it. Without this, opening the profile, changing one
-    // figure and saving left two reports for one morning, and the trend showed
-    // both.
-    let existing = reports.first {
-      $0.extraction.source == .selfTracked && $0.title == title
-        && ReportMetadata.calendarDay($0.effectiveDate) == day
-    }
-    guard
-      let report = BodyMeasurements.report(
-        entries: entries, on: day, id: existing?.id ?? UUID(), title: title)
-    else { return }
+    var saved = 0
     do {
-      try await store.save(report)
-      Log.store.notice(
-        "body measurements saved: \(report.extraction.coded.count, privacy: .public) coded")
+      for (day, entries) in byDay {
+        // Saving the same day again corrects that measurement instead of
+        // stacking a second one beside it. Without this, opening the profile,
+        // changing one figure and saving left two reports for one morning,
+        // and the trend drew both.
+        let existing = reports.first {
+          $0.extraction.source == .selfTracked && $0.title == title
+            && ReportMetadata.calendarDay($0.effectiveDate) == day
+        }
+        guard
+          let report = BodyMeasurements.report(
+            entries: entries, on: day, id: existing?.id ?? UUID(), title: title)
+        else { continue }
+        try await store.save(report)
+        saved += 1
+      }
+      Log.store.notice("body measurements saved across \(saved, privacy: .public) day(s)")
       await refresh()
     } catch { self.error = error.localizedDescription }
   }
@@ -963,11 +967,10 @@ private struct AppDialogs: ViewModifier {
         profile: model.profile,
         latest: BodyMeasurements.latest(from: model.reports),
         onSave: { updated in Task { await model.saveProfile(updated) } },
-        onMeasurements: { waist, weight, visceral, unit, date in
+        onMeasurements: { waist, weight, visceral, unit in
           Task {
             await model.saveBodyMeasurements(
-              waistCm: waist, weightKg: weight, visceralFat: visceral,
-              visceralFatUnit: unit, on: date)
+              waist: waist, weight: weight, visceralFat: visceral, visceralFatUnit: unit)
           }
         },
         onClose: { model.showingProfile = false })

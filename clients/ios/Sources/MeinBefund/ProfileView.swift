@@ -10,23 +10,29 @@ import SwiftUI
 /// store rather than kept in `UserDefaults`, where anything that can read the
 /// container could read it.
 ///
-/// Body measurements are entered here too, and become an ordinary report with
-/// `self-tracked` provenance. That way they appear in the timeline, the
-/// document for a doctor and the OMOP export through the same path as a
-/// laboratory's values, and are never mistaken for them.
+/// Body measurements are entered here too, and become ordinary reports with
+/// `self-tracked` provenance, so they appear in the timeline, the document for
+/// a doctor and the OMOP export through the same path as a laboratory's
+/// values, and are never mistaken for them.
 ///
-/// The section shows the **current** figures rather than an empty form. It was
-/// write-only before: a value could be typed and saved but never seen again or
-/// corrected, and a reading transferred from a scale's screen never appeared
-/// here at all. Now the latest of each measurement is loaded whatever its
-/// source, so photographing a gym scale updates what this screen shows.
+/// Two things this screen got wrong and no longer does. It was write-only: a
+/// value could be typed and saved but never seen again or corrected, and a
+/// reading transferred from a scale's screen never appeared here at all. And
+/// it carried **one** date for every measurement, which is almost never true:
+/// the tape measure comes out at home, the scale stands in a gym, and the
+/// laboratory weighs you on a third day. Each field now shows what was last
+/// measured, when, and lets both be changed.
 struct ProfileView: View {
   let profile: Profile
   /// Latest value per body analyte, from every stored report.
   let latest: [String: (value: Double, ucum: String, date: Date)]
   let onSave: (Profile) -> Void
+  /// Each measurement with its own day, so they can be filed apart.
   let onMeasurements:
-    (Double?, Double?, Double?, BodyMeasurements.VisceralFatUnit, Date) -> Void
+    (
+      BodyMeasurements.Reading?, BodyMeasurements.Reading?, BodyMeasurements.Reading?,
+      BodyMeasurements.VisceralFatUnit
+    ) -> Void
   let onClose: () -> Void
 
   @State private var sex: RangeSex
@@ -34,24 +40,22 @@ struct ProfileView: View {
   @State private var birthDate: Date
   @State private var height: String
 
-  @State private var measuredOn: Date
   @State private var waist: String
+  @State private var waistDate: Date
   @State private var weight: String
+  @State private var weightDate: Date
   @State private var visceralFat: String
+  @State private var visceralFatDate: Date
   @State private var visceralFatUnit: BodyMeasurements.VisceralFatUnit
-
-  /// What each field was prefilled with, so the note under it can vanish the
-  /// moment the person types something else. A date under a number they just
-  /// changed would be a claim about when that number was measured, which
-  /// would be false.
-  private let prefilled: [String: String]
 
   init(
     profile: Profile,
     latest: [String: (value: Double, ucum: String, date: Date)] = [:],
     onSave: @escaping (Profile) -> Void,
-    onMeasurements: @escaping
-      (Double?, Double?, Double?, BodyMeasurements.VisceralFatUnit, Date) -> Void,
+    onMeasurements: @escaping (
+      BodyMeasurements.Reading?, BodyMeasurements.Reading?, BodyMeasurements.Reading?,
+      BodyMeasurements.VisceralFatUnit
+    ) -> Void,
     onClose: @escaping () -> Void
   ) {
     self.profile = profile
@@ -65,35 +69,20 @@ struct ProfileView: View {
       initialValue: profile.birthDate ?? ReportMetadataExtractor.day(1980, 1, 1) ?? Date())
     _height = State(initialValue: profile.heightCm.map { Measurement.text($0) } ?? "")
 
-    // Prefilled from the most recent measurement of each, so the screen opens
-    // on what is true today and every field can be corrected in place.
-    _waist = State(initialValue: latest["waist-circumference"].map { Measurement.text($0.value) } ?? "")
-    _weight = State(initialValue: latest["body-weight"].map { Measurement.text($0.value) } ?? "")
-    let fat = latest["visceral-fat"]
-    _visceralFat = State(initialValue: fat.map { Measurement.text($0.value) } ?? "")
+    // Prefilled from the most recent measurement of each, with the day it was
+    // taken, so the screen opens on what is true and every part is editable.
+    let waistFound = latest["waist-circumference"]
+    let weightFound = latest["body-weight"]
+    let fatFound = latest["visceral-fat"]
+    _waist = State(initialValue: waistFound.map { Measurement.text($0.value) } ?? "")
+    _waistDate = State(initialValue: waistFound?.date ?? Date())
+    _weight = State(initialValue: weightFound.map { Measurement.text($0.value) } ?? "")
+    _weightDate = State(initialValue: weightFound?.date ?? Date())
+    _visceralFat = State(initialValue: fatFound.map { Measurement.text($0.value) } ?? "")
+    _visceralFatDate = State(initialValue: fatFound?.date ?? Date())
     _visceralFatUnit = State(
-      initialValue: fat.flatMap { BodyMeasurements.VisceralFatUnit(rawValue: $0.ucum) } ?? .area)
-    // The day those figures were measured, so saving corrects that reading
-    // rather than silently redating it. Moving the date forward records a new
-    // measurement instead.
-    let newest = [latest["waist-circumference"], latest["body-weight"], fat]
-      .compactMap { $0?.date }.max()
-    _measuredOn = State(initialValue: newest ?? Date())
-
-    prefilled = [
-      "waist-circumference": latest["waist-circumference"].map { Measurement.text($0.value) } ?? "",
-      "body-weight": latest["body-weight"].map { Measurement.text($0.value) } ?? "",
-      "visceral-fat": fat.map { Measurement.text($0.value) } ?? "",
-    ]
-  }
-
-  /// When the value still showing in a field was measured, or nil once it has
-  /// been edited or was never found.
-  private func measuredNote(_ key: String, current: String) -> String? {
-    guard let found = latest[key], prefilled[key] == current, !current.isEmpty else { return nil }
-    return String(
-      format: String(localized: "Last measured %@"),
-      found.date.formatted(date: .abbreviated, time: .omitted))
+      initialValue: fatFound.flatMap { BodyMeasurements.VisceralFatUnit(rawValue: $0.ucum) }
+        ?? .area)
   }
 
   private var edited: Profile {
@@ -102,10 +91,14 @@ struct ProfileView: View {
       heightCm: number(height), updatedAt: profile.updatedAt)
   }
 
-  private var enteredMeasurements: [BodyMeasurements.Entry] {
-    BodyMeasurements.entries(
-      waistCm: number(waist), weightKg: number(weight), visceralFat: number(visceralFat),
-      visceralFatUnit: visceralFatUnit, heightCm: nil, profile: edited)
+  private var waistReading: BodyMeasurements.Reading? {
+    number(waist).map { .init(value: $0, measuredOn: waistDate) }
+  }
+  private var weightReading: BodyMeasurements.Reading? {
+    number(weight).map { .init(value: $0, measuredOn: weightDate) }
+  }
+  private var visceralReading: BodyMeasurements.Reading? {
+    number(visceralFat).map { .init(value: $0, measuredOn: visceralFatDate) }
   }
 
   var body: some View {
@@ -123,7 +116,7 @@ struct ProfileView: View {
               LabeledContent("Age", value: "\(age)")
             }
           }
-          entryField("Height", text: $height, unit: "cm")
+          numberRow("Height", text: $height, unit: "cm")
         } header: {
           Text("You")
         } footer: {
@@ -133,14 +126,9 @@ struct ProfileView: View {
         }
 
         Section {
-          DatePicker("Measured", selection: $measuredOn, in: ...Date(), displayedComponents: .date)
-          entryField(
-            "Waist", text: $waist, unit: "cm",
-            note: measuredNote("waist-circumference", current: waist))
-          entryField(
-            "Weight", text: $weight, unit: "kg",
-            note: measuredNote("body-weight", current: weight))
-          visceralFatField
+          measurementRow("Waist", text: $waist, unit: "cm", date: $waistDate, key: "waist-circumference")
+          measurementRow("Weight", text: $weight, unit: "kg", date: $weightDate, key: "body-weight")
+          visceralFatRow
           if let waistValue = number(waist), let ratio = edited.waistToHeight(waistCm: waistValue) {
             LabeledContent("Waist to height", value: String(format: "%.2f", ratio))
           }
@@ -148,17 +136,12 @@ struct ProfileView: View {
           {
             LabeledContent("BMI", value: String(format: "%.1f", bmi))
           }
-          Button("Save these measurements") {
-            onMeasurements(
-              number(waist), number(weight), number(visceralFat), visceralFatUnit, measuredOn)
-          }
-          .disabled(enteredMeasurements.isEmpty)
         } header: {
           Text("Body measurements")
         } footer: {
           VStack(alignment: .leading, spacing: 4) {
             Text(
-              "Saved as their own report, marked as entered by you rather than measured by a laboratory, so they appear in your trends and exports. Saving on the same date corrects that measurement; move the date to record a new one."
+              "Each measurement keeps its own date, because they are rarely taken on the same day. Save stores them as reports marked entered by you rather than measured by a laboratory, one per date, so they appear in your trends and exports."
             )
             if visceralFatUnit == .mass {
               Text(
@@ -173,8 +156,12 @@ struct ProfileView: View {
       .toolbar {
         ToolbarItem(placement: .cancellationAction) { Button("Cancel", action: onClose) }
         ToolbarItem(placement: .confirmationAction) {
+          // Saves everything on the screen. There used to be a second button
+          // for the measurements alone, and a waist typed above it was thrown
+          // away by the obvious button up here.
           Button("Save") {
             onSave(edited)
+            onMeasurements(waistReading, weightReading, visceralReading, visceralFatUnit)
             onClose()
           }
         }
@@ -183,49 +170,70 @@ struct ProfileView: View {
   }
 
   /// Visceral fat, with the unit as a choice rather than an assumption.
-  private var visceralFatField: some View {
-    VStack(alignment: .leading, spacing: 2) {
-      LabeledContent("Visceral fat") {
-        HStack {
-          TextField(text: $visceralFat, prompt: nil) { Text("Visceral fat") }
-            .keyboardType(.decimalPad)
-            .multilineTextAlignment(.trailing)
-            .labelsHidden()
-          Picker("Unit", selection: $visceralFatUnit) {
-            Text("cm²").tag(BodyMeasurements.VisceralFatUnit.area)
-            Text("kg").tag(BodyMeasurements.VisceralFatUnit.mass)
-          }
-          .pickerStyle(.menu)
+  private var visceralFatRow: some View {
+    VStack(alignment: .leading, spacing: 6) {
+      HStack {
+        Text("Visceral fat")
+        Spacer(minLength: 12)
+        TextField(text: $visceralFat, prompt: nil) { Text("Visceral fat") }
+          .keyboardType(.decimalPad)
+          .multilineTextAlignment(.trailing)
           .labelsHidden()
+        Picker("Unit", selection: $visceralFatUnit) {
+          Text("cm²").tag(BodyMeasurements.VisceralFatUnit.area)
+          Text("kg").tag(BodyMeasurements.VisceralFatUnit.mass)
         }
+        .pickerStyle(.menu)
+        .labelsHidden()
       }
-      if let note = measuredNote("visceral-fat", current: visceralFat) {
-        Text(note).font(.caption2).foregroundStyle(.secondary)
+      dateRow($visceralFatDate, key: "visceral-fat")
+    }
+  }
+
+  /// A number, its unit, and the day it was measured.
+  ///
+  /// A plain `HStack` rather than `LabeledContent`: that container presents
+  /// its content as a value to read, and a text field inside one is easy to
+  /// miss as something you can tap.
+  private func measurementRow(
+    _ title: String, text: Binding<String>, unit: String, date: Binding<Date>, key: String
+  ) -> some View {
+    VStack(alignment: .leading, spacing: 6) {
+      HStack {
+        Text(title)
+        Spacer(minLength: 12)
+        TextField(text: text, prompt: nil) { Text(title) }
+          .keyboardType(.decimalPad)
+          .multilineTextAlignment(.trailing)
+          .labelsHidden()
+        Text(unit).foregroundStyle(.secondary)
+      }
+      dateRow(date, key: key)
+    }
+  }
+
+  /// The day one measurement was taken, and where that day came from.
+  private func dateRow(_ date: Binding<Date>, key: String) -> some View {
+    HStack {
+      DatePicker("Measured", selection: date, in: ...Date(), displayedComponents: .date)
+        .datePickerStyle(.compact)
+        .font(.caption)
+      if let found = latest[key], ReportMetadata.calendarDay(found.date) == ReportMetadata.calendarDay(date.wrappedValue) {
+        Text("from your reports").font(.caption2).foregroundStyle(.secondary)
       }
     }
   }
 
-  /// A number with its unit beside it.
-  ///
-  /// The unit is not also used as the field's placeholder: an empty field then
-  /// reads as though it already held the text "cm²", which is what made this
-  /// screen look uneditable.
-  private func entryField(
-    _ title: String, text: Binding<String>, unit: String, note: String? = nil
-  ) -> some View {
-    VStack(alignment: .leading, spacing: 2) {
-      LabeledContent(title) {
-        HStack {
-          TextField(text: text, prompt: nil) { Text(title) }
-            .keyboardType(.decimalPad)
-            .multilineTextAlignment(.trailing)
-            .labelsHidden()
-          Text(unit).foregroundStyle(.secondary)
-        }
-      }
-      if let note {
-        Text(note).font(.caption2).foregroundStyle(.secondary)
-      }
+  /// A plain number with its unit, for the profile's own fields.
+  private func numberRow(_ title: String, text: Binding<String>, unit: String) -> some View {
+    HStack {
+      Text(title)
+      Spacer(minLength: 12)
+      TextField(text: text, prompt: nil) { Text(title) }
+        .keyboardType(.decimalPad)
+        .multilineTextAlignment(.trailing)
+        .labelsHidden()
+      Text(unit).foregroundStyle(.secondary)
     }
   }
 

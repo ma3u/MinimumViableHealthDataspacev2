@@ -326,3 +326,116 @@ struct LatestBodyMeasurementsTests {
     #expect(try #require(first).id == #require(corrected).id)
   }
 }
+
+
+/// Each body measurement carries its own day.
+@Suite("Body measurements are filed on the day each was taken")
+struct PerDayMeasurementTests {
+
+  static func day(_ d: Int) -> Date { ReportMetadataExtractor.day(2026, 6, d)! }
+
+  @Test("three measurements on three days become three reports")
+  func groupedByDay() {
+    // One date for the whole screen put two of the three on a day they were
+    // not measured: the tape measure comes out at home, the scale stands in a
+    // gym, and a laboratory weighs you on a third day.
+    let byDay = BodyMeasurements.entriesByDay(
+      waist: .init(value: 86, measuredOn: Self.day(1)),
+      weight: .init(value: 71.1, measuredOn: Self.day(10)),
+      visceralFat: .init(value: 1.6, measuredOn: Self.day(15)),
+      visceralFatUnit: .mass, profile: .empty)
+
+    #expect(byDay.map(\.day) == [Self.day(1), Self.day(10), Self.day(15)])
+    #expect(byDay[0].entries.map(\.analyteKey) == ["waist-circumference"])
+    #expect(byDay[1].entries.map(\.analyteKey) == ["body-weight"])
+    #expect(byDay[2].entries.map(\.analyteKey) == ["visceral-fat"])
+    #expect(byDay[2].entries[0].ucum == "kg")
+  }
+
+  @Test("BMI is filed with the weight it was computed from")
+  func bmiFollowsWeight() throws {
+    let profile = Profile(sex: .male, birthDate: nil, heightCm: 170)
+    let byDay = BodyMeasurements.entriesByDay(
+      waist: .init(value: 86, measuredOn: Self.day(1)),
+      weight: .init(value: 71.1, measuredOn: Self.day(10)),
+      visceralFat: nil, profile: profile)
+
+    let weightDay = try #require(byDay.first { $0.day == Self.day(10) })
+    #expect(weightDay.entries.map(\.analyteKey).sorted() == ["bmi", "body-weight"])
+    // And never onto the waist's day, where no weight was measured.
+    let waistDay = try #require(byDay.first { $0.day == Self.day(1) })
+    #expect(!waistDay.entries.contains { $0.analyteKey == "bmi" })
+  }
+
+  @Test("measurements on one day stay one report")
+  func sameDayStaysTogether() {
+    let byDay = BodyMeasurements.entriesByDay(
+      waist: .init(value: 86, measuredOn: Self.day(5)),
+      weight: .init(value: 71, measuredOn: Self.day(5)),
+      visceralFat: nil, profile: .empty)
+    #expect(byDay.count == 1)
+    #expect(byDay[0].entries.count == 2)
+  }
+
+  @Test("a waist on its own is saved, and is not lost with the others")
+  func waistAlone() throws {
+    // The waist could be typed and then thrown away, because the obvious
+    // Save button saved only the profile.
+    let byDay = BodyMeasurements.entriesByDay(
+      waist: .init(value: 86, measuredOn: Self.day(5)), weight: nil, visceralFat: nil,
+      profile: .empty)
+    let report = try #require(
+      BodyMeasurements.report(entries: byDay[0].entries, on: byDay[0].day))
+    let value = try #require(report.extraction.coded.first)
+    #expect(value.coding.analyteKey == "waist-circumference")
+    #expect(value.raw.value == 86)
+    #expect(value.coding.loinc == "8280-0")
+  }
+
+  @Test("a value an older dictionary could not code is found again")
+  func unmappedIsRescued() throws {
+    // A scale's visceral fat in kilograms was filed as an unknown analyte for
+    // exactly as long as no entry existed for it. Re-reading every old report
+    // by hand to recover it is not something anyone should have to think of.
+    let stale = LabReport(
+      id: UUID(), scannedAt: Date(), collectedOn: Self.day(15), title: "Körperzusammensetzung",
+      extraction: ExtractionResult(
+        coded: [], unmapped: [
+          UnmappedLabValue(
+            raw: RawLabValue(
+              label: "Viszeralfett", value: 1.6, unitRaw: "kg",
+              line: "Viszeralfett 1,6 kg", lineNumber: 1),
+            reason: .unknownAnalyte)
+        ], suspiciousLines: [], source: .selfTracked),
+      metadata: ReportMetadata(labDate: Self.day(15), dateSource: .printed))
+
+    let latest = BodyMeasurements.latest(from: [stale])
+    let fat = try #require(latest["visceral-fat"])
+    #expect(fat.value == 1.6)
+    #expect(fat.ucum == "kg")
+    #expect(fat.date == Self.day(15))
+  }
+
+  @Test("a rescued value never beats a newer coded one")
+  func codedStillWinsOnDate() throws {
+    let stale = LabReport(
+      id: UUID(), scannedAt: Date(), collectedOn: Self.day(1), title: "Alt",
+      extraction: ExtractionResult(
+        coded: [], unmapped: [
+          UnmappedLabValue(
+            raw: RawLabValue(
+              label: "Viszeralfett", value: 9.9, unitRaw: "kg", line: "x", lineNumber: 1),
+            reason: .unknownAnalyte)
+        ], suspiciousLines: [], source: .selfTracked),
+      metadata: ReportMetadata(labDate: Self.day(1), dateSource: .printed))
+    let fresh = BodyMeasurements.report(
+      entries: BodyMeasurements.entries(
+        waistCm: nil, weightKg: nil, visceralFat: 1.6, visceralFatUnit: .mass,
+        heightCm: nil, profile: .empty),
+      on: Self.day(20), title: "Neu")!
+
+    let latest = BodyMeasurements.latest(from: [stale, fresh])
+    #expect(latest["visceral-fat"]?.value == 1.6)
+    #expect(latest["visceral-fat"]?.date == Self.day(20))
+  }
+}
