@@ -88,6 +88,41 @@ does not know, or whose unit that analyte is not defined in, fails the build.
   scoring, risk estimation or advice, that is a different decision and a
   different regulatory position, and it needs its own ADR.
 
+## Postscript, 2026-09-20: colour, and a profile
+
+Two changes that touch the line this ADR draws, both asked for by the platform
+owner after seeing the screens.
+
+**A profile.** Sex, date of birth and height, sealed in the store rather than
+kept in `UserDefaults`, because a date of birth with a height is closer to
+identifying a person than a preference is. Each field exists because a
+published range needs it: haemoglobin, HDL, ALT and waist circumference are all
+sex-specific, and a waist reading means little without a height. It never
+leaves the device, and it is not part of the analysis request.
+
+Body measurements entered there (waist, weight, visceral fat area) become an
+ordinary report with `self-tracked` provenance, so they reach the timeline, the
+document for a doctor and the OMOP tables through the same path as a
+laboratory's values, and are never mistaken for them.
+
+**Colour.** This ADR originally rejected colouring values, because flagging is
+one of the two features §5 of #186 names as crossing into IVDR. The decision
+is reversed, narrowly, and these are the guardrails that keep it on the same
+side of the line:
+
+- colour never carries meaning alone. Every coloured figure has the same
+  information in words beside it and a distinct symbol, which is also what
+  makes it legible without hue;
+- there is no red and no pass or fail. Green is the band a source calls
+  lowest-risk, amber is outside it, orange is outside the guideline range, and
+  none of them says normal, abnormal, good or bad;
+- nothing is scored, ranked or summed. A colour restates a comparison to a
+  published number and adds no judgement of its own;
+- a legend states exactly that, on both screens that use colour.
+
+What would cross the line is unchanged: a risk score, a recommendation, a
+"your result is abnormal", or a colour standing where a word used to be.
+
 ## Postscript, 2026-09-20: the OMOP export follows the same rule
 
 An OMOP CDM export was added, and it raises the same question in another
@@ -104,8 +139,8 @@ exists to prevent.
 - **Copying a longevity site's table.** Rejected: unsourced numbers cannot be
   checked, and presenting them as the app's own would be exactly the
   app-generated judgement §5 rules out.
-- **Colouring values red or green against the optimal band.** Rejected as
-  flagging. The placement is stated in words, in a secondary line.
+- **Colouring values red or green against the optimal band.** Rejected at
+  first as flagging, then adopted under guardrails; see the postscript below.
 - **Deriving ranges by converting units.** Rejected: the unit selects the LOINC
   code, so a converted threshold describes a different measurement. Each unit
   gets its own quoted range or none.

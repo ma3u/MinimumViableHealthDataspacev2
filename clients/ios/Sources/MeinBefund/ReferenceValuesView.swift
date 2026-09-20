@@ -13,21 +13,19 @@ import SwiftUI
 /// report, next to the range your laboratory printed, which stays the primary
 /// one (ADR-033 rule 1).
 struct ReferenceValuesView: View {
+  /// Which sex-specific ranges apply, from the profile. Changed there rather
+  /// than here: it is a fact about the person, not a setting of one screen.
+  let sex: RangeSex
   let onClose: () -> Void
-
-  @State private var sex: RangeSex = RangePreferences.sex
 
   var body: some View {
     NavigationStack {
       List {
         Section {
-          Picker("Ranges for", selection: $sex) {
-            ForEach(RangeSex.allCases, id: \.self) { Text($0.label).tag($0) }
-          }
-          .onChange(of: sex) { _, value in RangePreferences.sex = value }
+          LabeledContent("Ranges for", value: sex.label)
         } footer: {
           Text(
-            "Some published ranges differ by sex. Without an answer only the ranges that apply to everyone are shown. This stays on your device."
+            "Some published ranges differ by sex. Without an answer only the ranges that apply to everyone are shown. Set it in your profile; it stays on your device."
           )
         }
 
@@ -40,6 +38,7 @@ struct ReferenceValuesView: View {
         }
 
         Section {
+          RangeLegend()
           DoctorReminder()
         } footer: {
           Text(
@@ -75,12 +74,15 @@ private struct RangeRow: View {
 
       HStack(spacing: 18) {
         if let guideline = range.guidelineText(formatter: Measurement.text) {
-          Labelled(title: String(localized: "Guideline"), value: guideline)
+          Labelled(
+            title: String(localized: "Guideline"), value: guideline,
+            tint: RangePalette.guideline)
         }
         if let optimal = range.optimalText(formatter: Measurement.text),
           optimal != range.guidelineText(formatter: Measurement.text)
         {
-          Labelled(title: String(localized: "Optimal"), value: optimal, tint: .green)
+          Labelled(
+            title: String(localized: "Optimal"), value: optimal, tint: RangePalette.optimal)
         }
       }
 

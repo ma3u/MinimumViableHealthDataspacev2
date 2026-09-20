@@ -139,6 +139,21 @@ HbA1c row went missing on iOS (see `docs/gotchas.md`, 2026-09-19).
 Add `-MBShot detail` or `-MBShot scan` to open the saved report or its stored
 pages, which is how the screenshots of a real stored scan are taken.
 
+## Profile
+
+Sex, date of birth and height, sealed in the store like a report rather than
+kept in `UserDefaults`, where anything that can read the container could read
+them. Each field is there because a published range needs it, and none of it
+is part of the analysis request or any export but the OMOP `person` row, which
+carries the year of birth the CDM asks for and not the day it does not.
+
+Waist, weight and visceral fat area are entered there too and become an
+ordinary report with `self-tracked` provenance, so they join the timeline and
+the exports through the same path as a laboratory's values. Visceral fat is an
+**area** in cm², as a body-composition device reports it; a consumer scale's
+rating from 1 to 59 is a different quantity with no LOINC code, and is refused
+rather than stored as if it were the same thing.
+
 ## Reference values and trends
 
 The app shows two things beside your own numbers, and both are deliberately
@@ -155,7 +170,10 @@ the recogniser is drawn differently from one that came from a laboratory's own
 document, because they are not the same evidence, and the range your laboratory
 printed is named under each series alongside the published band.
 
-Neither screen says normal or abnormal, scores anything, or advises. A value is
+Colour marks the bands: green for the optimal band, amber outside it, orange
+outside the guideline range. It never appears alone, always beside the same
+statement in words and a distinct symbol, and there is no red and no pass or
+fail. Neither screen says normal or abnormal, scores anything, or advises. A value is
 `withinOptimal`, `outsideOptimal`, `outsideGuideline` or `noRange`, which is a
 comparison to a published number and not a finding. Interpretation is the IVDR
 line that section 5 of #186 draws, and staying on this side of it is a product
