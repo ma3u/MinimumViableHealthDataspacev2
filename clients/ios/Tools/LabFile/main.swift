@@ -24,6 +24,8 @@ guard let path = paths.first else {
 }
 let showValues = arguments.contains("--values")
 let showRows = arguments.contains("--rows")
+let showFragments = arguments.contains("--fragments")
+let showHistory = arguments.contains("--history")
 let url = URL(fileURLWithPath: path).standardizedFileURL
 if url.path.contains("/clients/ios/") {
   FileHandle.standardError.write(
@@ -66,6 +68,14 @@ if showRows {
       "label \($0.label), value \($0.value), unit \($0.unit), reference \($0.reference.map(String.init) ?? "none"), from \($0.rowsConsidered) rows"
     } ?? "none inferred, falling back to the line grammar"
     print("page \(page.page): \(page.rows.count) rows, \(page.cells.count) cells, \(page.fragments.count) fragments, layout: \(layout)")
+  if showFragments {
+    // Position is what a chart needs: a value and a month are related by
+    // where they sit, not by the order the recogniser happens to emit them.
+    for f in page.fragments.sorted(by: { $0.region.y < $1.region.y }) {
+      let r = f.region
+      print(String(format: "    x=%.3f y=%.3f w=%.3f h=%.3f  %@", r.x, r.y, r.width, r.height, f.text))
+    }
+  }
     for (index, row) in page.rows.enumerated() {
       let cells = row.cells.map { cell -> String in
         let text = showValues ? cell.text : String(cell.text.map { $0.isNumber ? "#" : $0 })
@@ -88,6 +98,18 @@ if showRows {
 print("file       \(url.lastPathComponent)")
 print("provenance \(extraction.source.rawValue) → Observation.status \"\(extraction.source.observationStatus)\"")
 print("pages      \(result.pages.count), document \(result.pdf.count) bytes")
+if showHistory {
+  for page in result.pages {
+    let updated = result.metadata.labDate ?? Date()
+    let headline = result.extraction.coded.first?.raw.value
+    let points = DeviceScreen.ChartHistory.points(
+      in: page.fragments, updatedOn: updated, headline: headline)
+    print("page \(page.page): \(points.count) plotted value(s)")
+    for point in points {
+      print("    \(point.month.formatted(.dateTime.month().year()))  \(point.value)")
+    }
+  }
+}
 if let lab = result.metadata.laboratory { print("laboratory \(lab)") }
 if let date = result.metadata.labDate {
   print("lab date   \(date.formatted(date: .long, time: .omitted)) (\(result.metadata.labDateRole?.rawValue ?? "?"), \(result.metadata.dateSource.rawValue))")

@@ -22,6 +22,21 @@ public struct ReportMetadata: Sendable, Equatable, Codable {
     case user = "confirmed-by-user"
     /// Nothing usable was found on the page; the scan date stands in.
     case scan = "scan-date-fallback"
+    /// Read off the month axis of a chart, so it is precise to a month and
+    /// not to a day. A scale plots a year of readings and labels only the
+    /// latest; the rest can be recovered, but only that far.
+    case chartMonth = "read-from-a-chart-axis"
+  }
+
+  /// How exact a date is.
+  ///
+  /// A month is as far as a chart's axis goes, and a value dated to the first
+  /// of a month it was measured somewhere inside is not a value measured on
+  /// the first. Saying which of the two a date is costs one field and stops
+  /// every reader downstream from having to guess.
+  public enum DatePrecision: String, Sendable, Codable {
+    case day
+    case month
   }
 
   /// What a printed date is the date of.

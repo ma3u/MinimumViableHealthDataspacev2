@@ -576,3 +576,17 @@ Color.primary.opacity(0.001))` draws something, so it is exposed.
   synthesised tap, so neither XCUITest nor a `CGEvent` click can reach it.
   That is a testing problem and an accessibility problem at once: VoiceOver
   cannot reach it either. Real buttons over the points fix both.
+
+## 2026-09-20 — walking XCUITest elements one at a time races a recycling list
+
+`app.descendants(matching: .any).allElementsBoundByIndex` asks the app for
+each element in turn. A `List` that recycles a row between two of those asks
+fails the test with
+
+```
+Failed to get matching snapshot: No matches found for Element at index 150
+```
+
+which says nothing about what the test was checking. `app.debugDescription`
+takes one snapshot and contains every label, and the suite got faster for it:
+387 seconds to 210.

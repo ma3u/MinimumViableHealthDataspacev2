@@ -458,3 +458,151 @@ struct PerDayMeasurementTests {
     #expect(latest["visceral-fat"]?.date == Self.day(20))
   }
 }
+
+/// The values a scale plots behind the one it names.
+@Suite("A chart's own history, and not counting it twice")
+struct ChartHistoryTests {
+
+  static func fragment(_ text: String, x: Double, y: Double, w: Double = 0.04)
+    -> DocumentReconciler.TextFragment
+  {
+    DocumentReconciler.TextFragment(
+      text: text,
+      region: SourceRegion(page: 1, x: x, y: y, width: w, height: 0.02))
+  }
+
+  /// The ECW/TBW card, at the positions a real photograph produced.
+  static var card: [DocumentReconciler.TextFragment] {
+    [
+      fragment("Juni", x: 0.089, y: 0.066), fragment("Juli", x: 0.165, y: 0.073),
+      fragment("Aug.", x: 0.236, y: 0.079), fragment("Sept.", x: 0.301, y: 0.082),
+      fragment("Okt.", x: 0.379, y: 0.089), fragment("Nov.", x: 0.444, y: 0.095),
+      fragment("Dez.", x: 0.512, y: 0.098), fragment("gan.", x: 0.575, y: 0.101),
+      fragment("Feb.", x: 0.642, y: 0.108), fragment("Marz", x: 0.702, y: 0.111),
+      fragment("Apr.", x: 0.767, y: 0.111), fragment("Mal", x: 0.827, y: 0.117),
+      fragment("37%", x: 0.886, y: 0.139), fragment("38%", x: 0.886, y: 0.247),
+      fragment("39%", x: 0.886, y: 0.351), fragment("40%", x: 0.883, y: 0.453),
+      fragment("38", x: 0.705, y: 0.294), fragment("38,1", x: 0.377, y: 0.297),
+      fragment("38,2", x: 0.634, y: 0.313), fragment("38,3", x: 0.442, y: 0.320),
+      fragment("38,3", x: 0.756, y: 0.326), fragment("38,4", x: 0.572, y: 0.332),
+      fragment("38,4", x: 0.816, y: 0.339),
+      fragment("< 01.06.25 - 14.05.26", x: 0.384, y: 0.502, w: 0.25),
+      fragment("38,4%", x: 0.073, y: 0.706, w: 0.165),
+    ]
+  }
+
+  static let updated = ReportMetadataExtractor.day(2026, 5, 14)!
+
+  @Test("the months carry years, walked back from the day the screen was updated")
+  func monthsCarryYears() throws {
+    // A month label carries no year. The rightmost is the month the screen
+    // was updated in, and each one to its left is the month before.
+    let axis = DeviceScreen.ChartHistory.axis(in: Self.card, updatedOn: Self.updated)
+    #expect(axis.count == 12)
+    let calendar = Calendar(identifier: .gregorian)
+    let first = try #require(axis.first).month
+    let last = try #require(axis.last).month
+    #expect(calendar.component(.year, from: first) == 2025)
+    #expect(calendar.component(.month, from: first) == 6)
+    #expect(calendar.component(.year, from: last) == 2026)
+    #expect(calendar.component(.month, from: last) == 5)
+  }
+
+  @Test("the recogniser's mangled month names are still months")
+  func manglesAreRead() {
+    // Measured, not guessed: `Mai` comes back as `Mal`, `Jan.` as `gan.`.
+    #expect(DeviceScreen.ChartHistory.month(of: "Mal") == 5)
+    #expect(DeviceScreen.ChartHistory.month(of: "gan.") == 1)
+    #expect(DeviceScreen.ChartHistory.month(of: "Marz") == 3)
+    #expect(DeviceScreen.ChartHistory.month(of: "Sept.") == 9)
+    #expect(DeviceScreen.ChartHistory.month(of: "Ferritin") == nil)
+  }
+
+  @Test("every plotted value is recovered, over the month it sits on")
+  func pointsAreRecovered() throws {
+    let points = DeviceScreen.ChartHistory.points(
+      in: Self.card, updatedOn: Self.updated, headline: 38.4)
+    #expect(points.count == 6)
+    #expect(points.map(\.value) == [38.1, 38.3, 38.4, 38.2, 38.0, 38.3])
+
+    let calendar = Calendar(identifier: .gregorian)
+    #expect(points.map { calendar.component(.month, from: $0.month) } == [10, 11, 1, 2, 3, 4])
+  }
+
+  @Test("the value the screen names is not also taken from the chart")
+  func theHeadlineIsNotCountedTwice() {
+    // Its own point is on the chart too. One measurement recorded twice, once
+    // with a day and once with only a month, is two measurements to a trend.
+    let withHeadline = DeviceScreen.ChartHistory.points(
+      in: Self.card, updatedOn: Self.updated, headline: 38.4)
+    let without = DeviceScreen.ChartHistory.points(in: Self.card, updatedOn: Self.updated)
+    #expect(without.count == withHeadline.count + 1)
+    let calendar = Calendar(identifier: .gregorian)
+    #expect(!withHeadline.contains { calendar.component(.month, from: $0.month) == 5 })
+  }
+
+  @Test("the axis is not mistaken for a measurement")
+  func theScaleIsNotData() {
+    // 37, 38, 39 and 40 label the value axis. They stand in one column at the
+    // edge; a data label sits beside its own point and shares its x with
+    // nothing.
+    let points = DeviceScreen.ChartHistory.points(in: Self.card, updatedOn: Self.updated)
+    #expect(!points.contains { $0.value == 37 || $0.value == 40 })
+  }
+
+  @Test("nothing is claimed from a chart with no numbers on it")
+  func noNumbersMeansNoHistory() {
+    // Most of this scale's cards draw circles and print no number beside any
+    // of them. There is nothing to read there, so nothing is read.
+    let bare = [
+      Self.fragment("Juli", x: 0.086, y: 0.087), Self.fragment("Aug.", x: 0.140, y: 0.082),
+      Self.fragment("Sept.", x: 0.198, y: 0.079), Self.fragment("Okt.", x: 0.271, y: 0.077),
+      Self.fragment("Nov.", x: 0.336, y: 0.074), Self.fragment("Dez.", x: 0.401, y: 0.069),
+      Self.fragment("Jan.", x: 0.464, y: 0.066), Self.fragment("Feb.", x: 0.532, y: 0.064),
+      Self.fragment("Mai", x: 0.737, y: 0.056), Self.fragment("Juni", x: 0.804, y: 0.056),
+      Self.fragment("22", x: 0.877, y: 0.092), Self.fragment("23", x: 0.881, y: 0.205),
+      Self.fragment("24", x: 0.883, y: 0.321), Self.fragment("25", x: 0.887, y: 0.433),
+      Self.fragment("23,8", x: 0.802, y: 0.223),
+    ]
+    let points = DeviceScreen.ChartHistory.points(
+      in: bare, updatedOn: ReportMetadataExtractor.day(2026, 6, 15)!, headline: 23.8)
+    #expect(points.isEmpty, "a badge beside the newest point is not a year of history")
+  }
+}
+
+/// Not storing the same measurement twice.
+@Suite("Duplicates")
+struct DuplicateTests {
+
+  static func report(day: Int, values: [(String, Double, String)]) -> LabReport {
+    let date = ReportMetadataExtractor.day(2026, 6, day)!
+    let entries = values.map {
+      BodyMeasurements.Entry(analyteKey: $0.0, label: $0.0, value: $0.1, ucum: $0.2)
+    }
+    return BodyMeasurements.report(entries: entries, on: date, title: "x")!
+  }
+
+  @Test("the same measurement on the same day is recognised whatever it arrived in")
+  func sameIsSame() throws {
+    let first = Self.report(day: 15, values: [("Körpergewicht", 71.1, "kg")])
+    let again = Self.report(day: 15, values: [("Körpergewicht", 71.1, "kg")])
+    #expect(Duplicates.strip(again, known: Duplicates.keys(of: first)) == nil)
+  }
+
+  @Test("a different day, a different value or a different unit is a different measurement")
+  func differencesSurvive() throws {
+    let known = Duplicates.keys(of: Self.report(day: 15, values: [("Körpergewicht", 71.1, "kg")]))
+    #expect(Duplicates.strip(Self.report(day: 16, values: [("Körpergewicht", 71.1, "kg")]), known: known) != nil)
+    #expect(Duplicates.strip(Self.report(day: 15, values: [("Körpergewicht", 71.2, "kg")]), known: known) != nil)
+  }
+
+  @Test("a report half of which is known keeps the half that is not")
+  func partIsKept() throws {
+    let known = Duplicates.keys(of: Self.report(day: 15, values: [("Körpergewicht", 71.1, "kg")]))
+    let mixed = Self.report(
+      day: 15, values: [("Körpergewicht", 71.1, "kg"), ("Taillenumfang", 86, "cm")])
+    let stripped = try #require(Duplicates.strip(mixed, known: known))
+    #expect(stripped.extraction.coded.count == 1)
+    #expect(stripped.extraction.coded.first?.raw.label == "Taillenumfang")
+  }
+}
