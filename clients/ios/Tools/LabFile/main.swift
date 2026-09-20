@@ -105,6 +105,14 @@ if showHistory {
     var points = DeviceScreen.ChartHistory.points(
       in: page.fragments, updatedOn: updated, headline: headline)
     if points.isEmpty, let image = LabImport.decodeImage(try Data(contentsOf: url)) {
+      if ProcessInfo.processInfo.environment["MB_AXIS_DEBUG"] != nil {
+        let extra = DeviceScreen.ChartHistory.Plot.axisStrip(
+          in: image, fragments: page.fragments, page: page.page)
+        print("  [axis] re-read found \(extra.count):")
+        for f in extra {
+          print(String(format: "    x=%.3f y=%.3f  %@", f.region.x, f.region.y, f.text))
+        }
+      }
       points = DeviceScreen.ChartHistory.Plot.measured(
         in: image, fragments: page.fragments, updatedOn: updated, headline: headline)
       if !points.isEmpty { print("  (measured off the drawn points)") }

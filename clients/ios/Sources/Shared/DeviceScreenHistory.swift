@@ -147,8 +147,16 @@ extension DeviceScreen {
         let bucket = Int((number.x * 50).rounded())
         columns[bucket, default: []].append(index)
       }
-      guard let biggest = columns.values.max(by: { $0.count < $1.count }), biggest.count >= 3
-      else { return [] }
+      // Most members wins, and where two columns tie the rightmost one does:
+      // a value axis is printed at the edge of the plot, while two tab labels
+      // that happen to line up are in the middle of the card.
+      let ranked = columns.values.sorted { left, right in
+        if left.count != right.count { return left.count > right.count }
+        let leftX = left.map { numbers[$0].x }.max() ?? 0
+        let rightX = right.map { numbers[$0].x }.max() ?? 0
+        return leftX > rightX
+      }
+      guard let biggest = ranked.first, biggest.count >= 3 else { return [] }
       return Set(biggest)
     }
 

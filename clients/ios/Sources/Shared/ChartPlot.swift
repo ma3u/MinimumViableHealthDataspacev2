@@ -40,6 +40,11 @@ extension DeviceScreen.ChartHistory {
         guard fragment.region.y > floor, let value = numeric(fragment.text) else { return nil }
         return (fragment.region.x + fragment.region.width / 2, fragment.region.y, value)
       }
+      // Three marks, never two. A scale built from two uncertain readings
+      // of a light grey axis turned circles into 1.0 and 7.0 kilograms of
+      // visceral fat on an axis that stops at 4: plausible-looking numbers
+      // that are wrong by a factor, which is the failure this whole reader
+      // exists to avoid.
       let column = axisColumn(numbers)
       guard column.count >= 3 else { return nil }
       let marks = column.map { (y: numbers[$0].y, value: numbers[$0].value) }
@@ -47,8 +52,50 @@ extension DeviceScreen.ChartHistory {
       guard let first = marks.first, let last = marks.last, last.value > first.value else {
         return nil
       }
+      // An axis rises evenly. Three numbers that happen to share a column
+      // while saying 1, 12 and 30 are the day tabs and the date range, and a
+      // scale built from those turns every circle into a plausible number
+      // that is wrong by a factor.
+      let gaps = zip(marks, marks.dropFirst()).map { $1.y - $0.y }
+      let steps = zip(marks, marks.dropFirst()).map { $1.value - $0.value }
+      guard let widest = gaps.max(), let narrowest = gaps.min(), narrowest > 0.001,
+        widest / narrowest < 2.5
+      else { return nil }
+      guard steps.allSatisfy({ $0 > 0 }), let biggest = steps.max(),
+        let smallest = steps.min(), biggest / smallest < 2.5
+      else { return nil }
       return Scale(
         lowValue: first.value, lowY: first.y, highValue: last.value, highY: last.y)
+    }
+
+    /// The value axis, read again from an enlarged crop when the first pass
+    /// missed it.
+    ///
+    /// Two of five sample cards print `1 2 3 4` or `5 8 11 14` small enough
+    /// that the ordinary pass walks past them, and a chart with no scale
+    /// yields nothing at all. The strip to the right of the last month, over
+    /// the height of the plot, is the only place those digits can be.
+    public static func axisStrip(
+      in image: CGImage, fragments: [DocumentReconciler.TextFragment], page: Int
+    ) -> [DocumentReconciler.TextFragment] {
+      let monthY = fragments.compactMap { month(of: $0.text) != nil ? $0.region.y : nil }
+      let monthX = fragments.compactMap {
+        month(of: $0.text) != nil ? $0.region.x + $0.region.width : nil
+      }
+      guard let floor = monthY.max(), let rightmost = monthX.max() else { return [] }
+      // The plot ends where the first **wide** thing above it begins: the
+      // date range, the tabs, the title. Narrow things are inside it, and the
+      // badge naming the current reading sits in the middle of the plot, so
+      // taking the lowest fragment of any width put the ceiling a quarter of
+      // the way up and cropped away the axis this is looking for.
+      let above =
+        fragments
+        .filter { $0.region.y > floor + 0.05 && $0.region.width > 0.15 }
+        .map(\.region.y).min() ?? 0.95
+      let left = min(0.95, rightmost + 0.01)
+      let height = max(0.05, above - floor - 0.02)
+      return VisionDocumentReader.reread(
+        image, x: left, y: floor + 0.01, width: 1 - left, height: height, page: page)
     }
 
     /// The circles, one per month, measured against the axis.
@@ -63,10 +110,14 @@ extension DeviceScreen.ChartHistory {
       guard months.count >= 3 else { return [] }
       let monthY = fragments.compactMap { month(of: $0.text) != nil ? $0.region.y : nil }
       guard let floor = monthY.max() else { return [] }
-      // Without a readable value axis there is no scale, and a height
-      // without a scale is not a measurement. Two of five sample cards print
-      // their axis too small for the recogniser, and those give nothing.
-      guard let scale = scale(in: fragments, above: floor) else { return [] }
+      // Without a value axis there is no scale, and a height without a scale
+      // is not a measurement. Where the first pass missed the digits, the
+      // strip they must be in is read again, enlarged.
+      var readable = fragments
+      if scale(in: fragments, above: floor) == nil {
+        readable += axisStrip(in: image, fragments: fragments, page: 1)
+      }
+      guard let scale = scale(in: readable, above: floor) else { return [] }
       guard let grey = Greyscale(image) else { return [] }
 
       let spacing = months[1].x - months[0].x
@@ -81,19 +132,34 @@ extension DeviceScreen.ChartHistory {
       // at all came back with the value of the nearest grid line, which is
       // the worst kind of wrong: plausible.
       let maximumRun = Int(stripPixels * 0.8)
+      // Exactly the printed axis, and not a hair beyond it.
+      //
+      // Reaching past the outermost marks does recover a circle that sits
+      // hard against the top of the plot, and it also invents one in a month
+      // that has no circle at all, out of a border crossing a grid line. A
+      // point that is not there is worse than a point that is missed, so the
+      // search stops where the axis does.
+      let searchLow = scale.lowY
+      let searchHeight = scale.highY - scale.lowY
       let threshold = grey.inkThreshold(
         x: months[0].x - spacing / 2, width: Double(months.count) * spacing,
-        y: scale.lowY, height: scale.highY - scale.lowY)
+        y: searchLow, height: searchHeight)
 
+      // Nothing outside the printed axis, give or take a little. A ring found
+      // below the plot, in the legend or in the badge, otherwise arrives as a
+      // measurement no scale supports.
+      let margin = (scale.highValue - scale.lowValue) * 0.25
       var found: [Point] = []
       for month in months {
         guard
           let centre = grey.circleCentre(
             x: month.x - stripWidth / 2, width: stripWidth,
-            y: scale.lowY, height: scale.highY - scale.lowY,
+            y: searchLow, height: searchHeight,
             threshold: threshold, minimumRun: minimumRun, maximumRun: maximumRun)
         else { continue }
-        found.append(Point(value: rounded(scale.value(atY: centre)), month: month.month, x: month.x))
+        let value = scale.value(atY: centre)
+        guard value >= scale.lowValue - margin, value <= scale.highValue + margin else { continue }
+        found.append(Point(value: rounded(value), month: month.month, x: month.x))
       }
 
       var calendar = Calendar(identifier: .gregorian)

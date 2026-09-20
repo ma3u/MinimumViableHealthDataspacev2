@@ -71,6 +71,9 @@ import Shared
       /// Recovered from a chart's month axis, so the day is not known and the
       /// record says so.
       var monthOnly: Bool = false
+      /// Measured off the drawing rather than read from it, because the chart
+      /// printed no number beside the point.
+      var estimated: Bool = false
     }
 
     static func date(_ s: Sheet) -> Date {
@@ -109,7 +112,8 @@ import Shared
           laboratory: sheet.laboratory, collectedOn: day, reportedOn: day,
           reportNumber: "D\(sheet.year)\(String(format: "%02d", sheet.month))\(String(format: "%02d", sheet.day))",
           labDate: day, labDateRole: .collection,
-          dateSource: sheet.monthOnly ? .chartMonth : .printed))
+          dateSource: sheet.monthOnly
+            ? (sheet.estimated ? .chartEstimate : .chartMonth) : .printed))
       // Pages, so "Original scan" is there. A report that cannot show what it
       // was read from is the one thing this app is meant not to be.
       if let pages = scan(for: sheet) {
@@ -300,6 +304,84 @@ import Shared
           Row("Muskelmasse", 29, "kg"),
           Row("Body-Mass-Index", 23.8, "kg/m2"),
         ]),
+
+
+      // Twelve months of three metrics, measured off the circles on three of
+      // the scale's cards. The scale prints no number beside these points, so
+      // each is an estimate taken from where the circle sits against the
+      // printed axis, and each is known to its month and no finer.
+      //
+      // The fourth card, visceral fat, gives nothing: its axis is printed too
+      // small for the recogniser, and a height without a scale is not a
+      // measurement.
+      Sheet(
+        id: "00000000-0000-0000-0000-00000000D201", year: 2025, month: 10, day: 1,
+        title: "Körperzusammensetzung, aus dem Verlauf",
+        laboratory: "Körperanalysewaage", source: .selfTracked,
+        rows: [
+          Row("Body-Mass-Index", 24.24, "kg/m2"),
+          Row("Muskelmasse", 29.18, "kg"),
+          Row("Körperfett %", 17.93, "%"),
+        ], monthOnly: true, estimated: true),
+
+      Sheet(
+        id: "00000000-0000-0000-0000-00000000D202", year: 2025, month: 11, day: 1,
+        title: "Körperzusammensetzung, aus dem Verlauf",
+        laboratory: "Körperanalysewaage", source: .selfTracked,
+        rows: [
+          Row("Body-Mass-Index", 23.89, "kg/m2"),
+          Row("Muskelmasse", 29.36, "kg"),
+          Row("Körperfett %", 13.67, "%"),
+        ], monthOnly: true, estimated: true),
+
+      Sheet(
+        id: "00000000-0000-0000-0000-00000000D203", year: 2026, month: 1, day: 1,
+        title: "Körperzusammensetzung, aus dem Verlauf",
+        laboratory: "Körperanalysewaage", source: .selfTracked,
+        rows: [
+          Row("Body-Mass-Index", 24.47, "kg/m2"),
+          Row("Muskelmasse", 29.84, "kg"),
+          Row("Körperfett %", 17.0, "%"),
+        ], monthOnly: true, estimated: true),
+
+      Sheet(
+        id: "00000000-0000-0000-0000-00000000D204", year: 2026, month: 2, day: 1,
+        title: "Körperzusammensetzung, aus dem Verlauf",
+        laboratory: "Körperanalysewaage", source: .selfTracked,
+        rows: [
+          Row("Body-Mass-Index", 23.78, "kg/m2"),
+          Row("Muskelmasse", 29.17, "kg"),
+          Row("Körperfett %", 16.06, "%"),
+        ], monthOnly: true, estimated: true),
+
+      Sheet(
+        id: "00000000-0000-0000-0000-00000000D205", year: 2026, month: 3, day: 1,
+        title: "Körperzusammensetzung, aus dem Verlauf",
+        laboratory: "Körperanalysewaage", source: .selfTracked,
+        rows: [
+          Row("Body-Mass-Index", 24.55, "kg/m2"),
+          Row("Muskelmasse", 29.52, "kg"),
+          Row("Körperfett %", 16.49, "%"),
+        ], monthOnly: true, estimated: true),
+
+      Sheet(
+        id: "00000000-0000-0000-0000-00000000D206", year: 2026, month: 4, day: 1,
+        title: "Körperzusammensetzung, aus dem Verlauf",
+        laboratory: "Körperanalysewaage", source: .selfTracked,
+        rows: [
+          Row("Body-Mass-Index", 23.15, "kg/m2"),
+          Row("Muskelmasse", 28.77, "kg"),
+          Row("Körperfett %", 12.36, "%"),
+        ], monthOnly: true, estimated: true),
+
+      Sheet(
+        id: "00000000-0000-0000-0000-00000000D207", year: 2026, month: 5, day: 1,
+        title: "Körperzusammensetzung, aus dem Verlauf",
+        laboratory: "Körperanalysewaage", source: .selfTracked,
+        rows: [
+          Row("Body-Mass-Index", 23.92, "kg/m2"),
+          Row("Muskelmasse", 29.38, "kg"),
+        ], monthOnly: true, estimated: true),
 
       Sheet(
         id: "00000000-0000-0000-0000-00000000D007", year: 2026, month: 9, day: 4,
