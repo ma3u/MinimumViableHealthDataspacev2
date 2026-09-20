@@ -15,6 +15,32 @@ final class ProfileUITests: XCTestCase {
     return app
   }
 
+  func testAnEditedValueKeepsWhatWasTypedAndMovesItsDate() {
+    // Typing a figure means it was measured now. It used to revert to the one
+    // from the reports a moment later, because the fields were seeded in the
+    // initialiser and the sheet's content is rebuilt more than once.
+    let app = openProfile()
+    let weight = AppDriver.require(app.textFields["profile-body-weight"], "the weight field")
+    weight.tap()
+    // Clear whatever was prefilled, then type.
+    weight.press(forDuration: 1.0)
+    if app.menuItems["Select All"].waitForExistence(timeout: 2) {
+      app.menuItems["Select All"].tap()
+    }
+    weight.typeText("70,4")
+    XCTAssertEqual(weight.value as? String, "70,4", "the field holds what was typed")
+
+    // The date says it was entered here rather than read from a report.
+    XCTAssertTrue(
+      AppDriver.visibleText(app).contains("entered by you"),
+      "an edited value stops claiming to have come from a report")
+
+    // And it is still there after the screen has been rebuilt.
+    app.swipeUp()
+    app.swipeDown()
+    XCTAssertEqual(weight.value as? String, "70,4", "and it survives a redraw")
+  }
+
   func testTheWaistCanBeTypedAndIsKept() {
     // It could be typed, and then the obvious Save button at the top of the
     // sheet threw it away, because a second button further down was the one
