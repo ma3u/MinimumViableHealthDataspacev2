@@ -127,9 +127,26 @@ final class AppModel: ObservableObject {
     visceralFat: BodyMeasurements.Reading?,
     visceralFatUnit: BodyMeasurements.VisceralFatUnit
   ) async {
-    let byDay = BodyMeasurements.entriesByDay(
-      waist: waist, weight: weight, visceralFat: visceralFat,
-      visceralFatUnit: visceralFatUnit, profile: profile)
+    await writeMeasurements(
+      BodyMeasurements.entriesByDay(
+        waist: waist, weight: weight, visceralFat: visceralFat,
+        visceralFatUnit: visceralFatUnit, profile: profile))
+  }
+
+  /// Stores a run of past days entered at once.
+  ///
+  /// A year of weights read off a notebook is one save, not one save per
+  /// morning with the date changed in between.
+  func saveMeasurementHistory(
+    _ days: [BodyMeasurements.DayReading],
+    visceralFatUnit: BodyMeasurements.VisceralFatUnit = .area
+  ) async {
+    await writeMeasurements(
+      BodyMeasurements.entriesByDay(days, visceralFatUnit: visceralFatUnit, profile: profile))
+  }
+
+  /// One report per day, corrected in place where that day already has one.
+  private func writeMeasurements(_ byDay: [(day: Date, entries: [BodyMeasurements.Entry])]) async {
     guard !byDay.isEmpty else { return }
     let title = String(localized: "Body measurements")
     var saved = 0
@@ -145,7 +162,8 @@ final class AppModel: ObservableObject {
         }
         guard
           let report = BodyMeasurements.report(
-            entries: entries, on: day, id: existing?.id ?? UUID(), title: title)
+            entries: BodyMeasurements.carryForward(existing, replacedBy: entries),
+            on: day, id: existing?.id ?? UUID(), title: title)
         else { continue }
         #if DEBUG
           if DemoSeed.isRequested {
@@ -577,6 +595,8 @@ final class AppModel: ObservableObject {
   @Published var sharingOmop: URL?
   @Published var profile: Profile = .empty
   @Published var showingProfile = false
+  /// The sheet for entering a run of past measurements at once.
+  @Published var showingHistory = false
   /// A report the person asked to see, from a point on a chart.
   @Published var openReport: UUID?
   @Published var sharing: ReportExport.Artefacts?
@@ -783,6 +803,11 @@ struct ContentView: View {
               Label("Profile", systemImage: "person.text.rectangle")
             }
             Button {
+              model.showingHistory = true
+            } label: {
+              Label("Earlier measurements", systemImage: "calendar.badge.plus")
+            }
+            Button {
               model.showingPrivacy = true
             } label: {
               Label("Privacy and safety", systemImage: "hand.raised")
@@ -874,6 +899,8 @@ struct ContentView: View {
         model.showingTrends = true
       case .reference:
         model.showingReference = true
+      case .history:
+        model.showingHistory = true
       case .list, nil:
         break
       }
@@ -1147,6 +1174,12 @@ private struct AppDialogs: ViewModifier {
       ) {
         model.showingTrends = false
       }
+    }
+      .sheet(isPresented: $model.showingHistory) {
+      MeasurementHistoryView(
+        profile: model.profile,
+        onSave: { days in Task { await model.saveMeasurementHistory(days) } },
+        onClose: { model.showingHistory = false })
     }
       .sheet(isPresented: $model.showingReference) {
       ReferenceValuesView(sex: model.profile.sex) { model.showingReference = false }

@@ -41,6 +41,8 @@ same_in_both = {
     # Analyte names on the reference screen that German prints the same way.
     "NT-proBNP", "TSH", "LDH", "Amylase", "Calcium", "Magnesium", "MCV", "MCH", "MCHC",
     "RDW", "MPV", "Albumin", "IgG", "Tryptophan",
+    # A measurement and its number, identical in both.
+    "BMI %@",
 }
 
 missing, german_in_base, total = [], [], 0
