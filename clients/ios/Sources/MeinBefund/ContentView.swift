@@ -1,13 +1,21 @@
 import CoreGraphics
 import UIKit
 import Shared
+import PhotosUI
 import SwiftUI
 import UniformTypeIdentifiers
 
 @main
 struct KlarbefundApp: App {
+  @Environment(\.scenePhase) private var scenePhase
+
   var body: some Scene {
     WindowGroup { ContentView() }
+      .onChange(of: scenePhase) { _, phase in
+        // `.inactive` is the moment the switcher snapshot is taken;
+        // `.background` is already too late to cover it.
+        if phase == .active { PrivacyCover.hide() } else { PrivacyCover.show() }
+      }
   }
 }
 
@@ -17,12 +25,20 @@ final class AppModel: ObservableObject {
   @Published var pending: ScanProduct?
   @Published var busy = false
   @Published var importing = false
+  /// Photographs chosen from the library, waiting to be read.
+  @Published var photos: [PhotosPickerItem] = []
+  @Published var pickingPhotos = false
   @Published var picking = false
   @Published var error: String?
   @Published var viewingScan: Data?
   @Published var diagnosticsRequest: DiagnosticsExport.Request?
   @Published var buildingDiagnostics = false
   @Published var sharingDiagnostics: URL?
+  /// The person's own copy of everything, once built.
+  @Published var sharingData: URL?
+  @Published var buildingData = false
+  /// True while the "delete everything" question is on screen.
+  @Published var erasing = false
 
   /// Internal rather than private so the DEBUG self-test can reach it, and a
   /// `let` set once at init so the self-test's own store cannot be swapped in
@@ -164,6 +180,41 @@ final class AppModel: ObservableObject {
   /// its values are `final`; anything else goes through the recogniser and
   /// stays `preliminary`. The file is never copied anywhere but the sealed
   /// store.
+  /// Reads photographs straight from the library.
+  ///
+  /// The file picker does not show the photo library at all, so a card
+  /// photographed with the Camera app could only be imported by first saving
+  /// it into Files. Several at once, because a shelf of body-composition
+  /// cards is one scan of several pages and the app already groups them by
+  /// the day each was measured.
+  ///
+  /// `PhotosPicker` runs outside this app, so it needs no access to the
+  /// library and asks for no permission: what comes back is only what was
+  /// chosen.
+  func importPhotos(_ items: [PhotosPickerItem]) async {
+    guard !items.isEmpty else { return }
+    importing = true
+    defer {
+      importing = false
+      photos = []
+    }
+    do {
+      var images: [CGImage] = []
+      for item in items {
+        guard let data = try await item.loadTransferable(type: Data.self) else { continue }
+        guard let image = LabImport.decodeImage(data) else { continue }
+        images.append(image)
+      }
+      guard !images.isEmpty else {
+        error = String(localized: "Those photographs could not be read.")
+        return
+      }
+      pending = try await LabImport.images(images)
+    } catch {
+      self.error = error.localizedDescription
+    }
+  }
+
   func importFile(_ url: URL) async {
     importing = true
     defer { importing = false }
@@ -369,20 +420,21 @@ final class AppModel: ObservableObject {
     }
   }
 
-  func openScan(_ report: LabReport) async {
+  /// The scanned pages of a report, from wherever they are kept.
+  ///
+  /// The store, for a report a person scanned. A debug build's demo reports
+  /// never reached the store, so their pages come from the seed beside it.
+  func pages(of report: LabReport) async throws -> Data? {
     #if DEBUG
-      // Demo reports never reached the store, so their pages are not in it.
-      if DevDataset.isRequested, let pages = DevDataset.scans[report.id] {
-        viewingScan = pages
-        return
-      }
-      if DemoSeed.isRequested, let pages = DemoSeed.scanPDF {
-        viewingScan = pages
-        return
-      }
+      if DevDataset.isRequested, let pages = DevDataset.scans[report.id] { return pages }
+      if DemoSeed.isRequested, let pages = DemoSeed.scanPDF { return pages }
     #endif
+    return try await store.scan(for: report.id)
+  }
+
+  func openScan(_ report: LabReport) async {
     do {
-      guard let pdf = try await store.scan(for: report.id) else {
+      guard let pdf = try await pages(of: report) else {
         error = String(localized: "The scanned pages of this report are not stored.")
         return
       }
@@ -406,6 +458,35 @@ final class AppModel: ObservableObject {
     } catch {
       self.error = error.localizedDescription
     }
+  }
+
+  /// Builds the person's own copy of everything the app holds.
+  ///
+  /// Not gated behind a confirmation dialog the way diagnostics are. The
+  /// dialog there exists because a tester exporting a bug report does not
+  /// expect to be handing over their scans; somebody asking for all their data
+  /// is asking for exactly that, and being warned about it would be strange.
+  /// What it is and that it leaves the encryption behind is written on the
+  /// first page of the archive instead.
+  func exportData() async {
+    buildingData = true
+    defer { buildingData = false }
+    do {
+      sharingData = try await DataExport.build(
+        reports: reports, profile: profile, provider: providerConfig.kind, pages: pages(of:))
+    } catch {
+      self.error = error.localizedDescription
+    }
+  }
+
+  /// Article 17, locally: every sealed file and the key that opens them.
+  func eraseEverything() async {
+    do {
+      try await store.deleteEverything()
+      profile = .empty
+      await refresh()
+      Log.store.notice("all data erased on request")
+    } catch { self.error = error.localizedDescription }
   }
 
   func delete(_ id: UUID) async {
@@ -438,6 +519,28 @@ final class AppModel: ObservableObject {
           [.protectionKey: FileProtectionType.completeUntilFirstUserAuthentication],
           ofItemAtPath: pulled.path)
         Log.diagnostics.notice("diagnostics archive ready for pull")
+      } catch {
+        self.error = error.localizedDescription
+      }
+    }
+
+    /// `-MBExportData`: the same for the person's own archive, so that a test
+    /// can open what a share sheet would have handed over and check that
+    /// every report, every page and the profile are really in it. Debug builds
+    /// only.
+    func debugExportDataIfRequested() async {
+      guard ProcessInfo.processInfo.arguments.contains("-MBExportData") else { return }
+      do {
+        let zip = try await DataExport.build(
+          reports: reports, profile: profile, provider: providerConfig.kind, pages: pages(of:))
+        let pulled = FileManager.default.temporaryDirectory
+          .appendingPathComponent("pull-my-data.zip")
+        try? FileManager.default.removeItem(at: pulled)
+        try FileManager.default.moveItem(at: zip, to: pulled)
+        try FileManager.default.setAttributes(
+          [.protectionKey: FileProtectionType.completeUntilFirstUserAuthentication],
+          ofItemAtPath: pulled.path)
+        Log.export.notice("data archive ready for pull")
       } catch {
         self.error = error.localizedDescription
       }
@@ -638,6 +741,14 @@ struct ContentView: View {
             } label: {
               Label("Import a PDF or photo", systemImage: "folder")
             }
+            // The file picker does not show the photo library, so a card
+            // photographed with the Camera app needed saving into Files
+            // first. Several at once: a shelf of cards is one scan.
+            Button {
+              model.pickingPhotos = true
+            } label: {
+              Label("Import from Photos", systemImage: "photo.on.rectangle")
+            }
           } label: {
             Label("Add report", systemImage: "plus")
           }
@@ -677,10 +788,24 @@ struct ContentView: View {
               Label("Privacy and safety", systemImage: "hand.raised")
             }
             if !model.reports.isEmpty {
+              // Above diagnostics and phrased for a person rather than a
+              // tester: this is the one a person looking for their data is
+              // looking for, and "diagnostics" reads like something for
+              // somebody else.
+              Button {
+                Task { await model.exportData() }
+              } label: {
+                Label("Export all my data", systemImage: "square.and.arrow.up.on.square")
+              }
               Button {
                 model.diagnosticsRequest = .everything
               } label: {
                 Label("Export diagnostics", systemImage: "ladybug")
+              }
+              Button(role: .destructive) {
+                model.erasing = true
+              } label: {
+                Label("Delete all my data", systemImage: "trash")
               }
             }
           } label: {
@@ -710,6 +835,7 @@ struct ContentView: View {
       // Plain archives from an interrupted share, or a pull that never came,
       // have no reason to survive a launch.
       DiagnosticsExport.removeLeftovers()
+      DataExport.removeLeftovers()
       await model.refresh()
       #if DEBUG
         // The self-test first: with `-MBSelfTest` the report it saves is the
@@ -719,6 +845,7 @@ struct ContentView: View {
         await model.reextractAllIfRequested()
         await openScreenshotScreen()
         await model.debugExportIfRequested()
+        await model.debugExportDataIfRequested()
       #endif
     }
   }
@@ -902,6 +1029,13 @@ private struct AppSheets: ViewModifier {
 
   func body(content: Content) -> some View {
     content
+      .photosPicker(
+      isPresented: $model.pickingPhotos, selection: $model.photos, maxSelectionCount: 12,
+      matching: .images
+    )
+      .onChange(of: model.photos) { _, chosen in
+      Task { await model.importPhotos(chosen) }
+    }
       .fileImporter(
       isPresented: $model.picking,
       allowedContentTypes: [.pdf, .image],
@@ -932,6 +1066,14 @@ private struct AppSheets: ViewModifier {
         model.sharingOmop = nil
       }
     }
+      .sheet(item: Binding(get: { model.sharingData.map(ArchiveBox.init) }, set: { _ in })) { box in
+      ShareSheet(items: [box.url]) {
+        // Plain health data in the temporary directory has no reason to
+        // outlive the share sheet.
+        try? FileManager.default.removeItem(at: box.url)
+        model.sharingData = nil
+      }
+    }
       .sheet(item: Binding(get: { model.sharingDiagnostics.map(ArchiveBox.init) }, set: { _ in })) {
       box in
       ShareSheet(items: [box.url]) {
@@ -957,12 +1099,11 @@ private struct AppDialogs: ViewModifier {
     content
     // Asked every time, in words: the archive is the person's health data in
     // the clear, and the share sheet cannot tell them that.
-      .confirmationDialog(
+      .alert(
       "Export diagnostics?",
       isPresented: Binding(
         get: { model.diagnosticsRequest != nil },
-        set: { if !$0 { model.diagnosticsRequest = nil } }),
-      titleVisibility: .visible
+        set: { if !$0 { model.diagnosticsRequest = nil } })
     ) {
       Button("Export") {
         if let request = model.diagnosticsRequest {
@@ -1025,6 +1166,13 @@ private struct AppDialogs: ViewModifier {
     }
       .sheet(item: Binding(get: { model.sharing.map(ShareBox.init) }, set: { _ in })) { box in
       ShareSheet(items: [box.artefacts.pdf, box.artefacts.fhir]) {
+        // The share sheet needs real files, so a lab report is written to the
+        // container's temporary directory to be handed over. Found there,
+        // days later, by a look inside the container: two reports still
+        // sitting in `tmp/export-…`. Protected at rest, because the app's
+        // entitlement puts every file it writes under complete protection,
+        // and still one copy more of a person's results than anything needs.
+        ReportExport.discard(model.sharing)
         model.sharing = nil
       }
     }
@@ -1032,6 +1180,26 @@ private struct AppDialogs: ViewModifier {
       .overlay { if model.importing { ProgressView("Reading the document…").padding().background(.regularMaterial, in: .rect(cornerRadius: 12)) } }
       .overlay { if model.busy { ProgressView("Recognising text…").padding().background(.regularMaterial, in: .rect(cornerRadius: 12)) } }
       .overlay { if model.buildingDiagnostics { ProgressView("Building the diagnostics archive…").padding().background(.regularMaterial, in: .rect(cornerRadius: 12)) } }
+      .overlay { if model.buildingData { ProgressView("Collecting your data…").padding().background(.regularMaterial, in: .rect(cornerRadius: 12)) } }
+      // Asked in words, because there is no undo and no copy anywhere else.
+      //
+      // An alert and not a `confirmationDialog`. Raised from a menu, that one
+      // renders the destructive action alone and leaves "Cancel" out of the
+      // view hierarchy entirely (measured: the sheet holds one button), so
+      // the only way back is to tap somewhere else and hope. For a deletion
+      // with no undo, the way out has to be a button.
+      .alert(
+        "Delete all your data?", isPresented: $model.erasing
+      ) {
+        Button("Delete everything", role: .destructive) {
+          Task { await model.eraseEverything() }
+        }
+        Button("Cancel", role: .cancel) {}
+      } message: {
+        Text(
+          "Every report, every scanned page and your profile will be removed from this phone, along with the key that opens them. They are stored nowhere else, so this cannot be undone. Export your data first if you want to keep a copy."
+        )
+      }
       .alert("Error", isPresented: Binding(get: { model.error != nil }, set: { _ in model.error = nil })) {
       Button("OK", role: .cancel) {}
     } message: {
