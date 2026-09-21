@@ -54,6 +54,8 @@
       case scan
       /// The timeline across reports, and the published ranges behind it.
       case trends, reference
+      /// Entering a run of past measurements.
+      case history
     }
 
     static var screen: Screen? {
