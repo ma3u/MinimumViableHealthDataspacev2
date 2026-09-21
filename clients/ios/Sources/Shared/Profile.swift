@@ -185,6 +185,88 @@ public enum BodyMeasurements {
     return byDay.map { (day: $0.key, entries: $0.value) }.sorted { $0.day < $1.day }
   }
 
+  /// One day of entered measurements, as a history is written down.
+  ///
+  /// The other `entriesByDay` takes one reading per quantity, each with its
+  /// own date, which is what the profile screen collects: today's weight and
+  /// last week's waist. This is the other way round, one date carrying
+  /// several quantities, which is what a person reads off a notebook when
+  /// they enter a year at a time.
+  public struct DayReading: Sendable, Equatable, Identifiable {
+    public var id: UUID
+    public var measuredOn: Date
+    public var waistCm: Double?
+    public var weightKg: Double?
+    public var visceralFat: Double?
+
+    public init(
+      id: UUID = UUID(), measuredOn: Date, waistCm: Double? = nil, weightKg: Double? = nil,
+      visceralFat: Double? = nil
+    ) {
+      self.id = id
+      self.measuredOn = measuredOn
+      self.waistCm = waistCm
+      self.weightKg = weightKg
+      self.visceralFat = visceralFat
+    }
+
+    public var isEmpty: Bool { waistCm == nil && weightKg == nil && visceralFat == nil }
+  }
+
+  /// Several days at once, merged by day and ordered oldest first.
+  ///
+  /// Built on the single-reading form rather than beside it, so the BMI is
+  /// computed in one place and a day entered twice on the screen lands as one
+  /// report rather than two.
+  public static func entriesByDay(
+    _ days: [DayReading], visceralFatUnit: VisceralFatUnit = .area, profile: Profile
+  ) -> [(day: Date, entries: [Entry])] {
+    var byDay: [Date: [Entry]] = [:]
+    for day in days where !day.isEmpty {
+      let one = entriesByDay(
+        waist: day.waistCm.map { Reading(value: $0, measuredOn: day.measuredOn) },
+        weight: day.weightKg.map { Reading(value: $0, measuredOn: day.measuredOn) },
+        visceralFat: day.visceralFat.map { Reading(value: $0, measuredOn: day.measuredOn) },
+        visceralFatUnit: visceralFatUnit, profile: profile)
+      for (date, entries) in one { byDay[date, default: []].append(contentsOf: entries) }
+    }
+    return byDay.map { (day: $0.key, entries: $0.value) }.sorted { $0.day < $1.day }
+  }
+
+  /// What a stored report already holds for a day, as entries again.
+  ///
+  /// Saving one quantity for a day used to rewrite that day's report with
+  /// only that quantity: entering a waist for a morning the scale had already
+  /// been on took the weight with it. The values already there are carried
+  /// forward unless the new entries name the same analyte.
+  public static func carryForward(
+    _ existing: LabReport?, replacedBy entries: [Entry]
+  ) -> [Entry] {
+    guard let existing else { return entries }
+    var replaced = Set(entries.map(\.analyteKey))
+    let replacedLabels = Set(entries.map(\.label))
+    // BMI belongs to the weight it was computed from. A corrected weight with
+    // the old BMI left beside it would be two figures that contradict each
+    // other, and the stale one looks as current as the new one.
+    if replaced.contains("body-weight") { replaced.insert("bmi") }
+    var kept: [Entry] = []
+    for value in existing.extraction.coded where !replaced.contains(value.coding.analyteKey) {
+      kept.append(
+        Entry(
+          analyteKey: value.coding.analyteKey, label: value.raw.label, value: value.raw.value,
+          ucum: value.coding.ucum))
+    }
+    // A line the dictionary could not code has no key to compare, so the
+    // printed label stands in for one.
+    for value in existing.extraction.unmapped where !replacedLabels.contains(value.raw.label) {
+      kept.append(
+        Entry(
+          analyteKey: value.raw.label, label: value.raw.label, value: value.raw.value,
+          ucum: value.raw.unitRaw))
+    }
+    return entries + kept
+  }
+
   /// The measurements the profile screen offers, in the order it shows them.
   public static func entries(
     waistCm: Double?, weightKg: Double?, visceralFat: Double?,

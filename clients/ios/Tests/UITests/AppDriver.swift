@@ -11,7 +11,7 @@ enum AppDriver {
   /// Screens `-MBShot` can open directly, which saves a test from tapping its
   /// way there and breaking when a menu moves.
   enum Screen: String {
-    case detail, scan, consent, settings, privacy, trends, reference
+    case detail, scan, consent, settings, privacy, trends, reference, history
   }
 
   static func launch(_ screen: Screen? = nil) -> XCUIApplication {

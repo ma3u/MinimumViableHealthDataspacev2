@@ -18,20 +18,51 @@ struct ReferenceValuesView: View {
   let sex: RangeSex
   let onClose: () -> Void
 
+  /// Which category to show, or all of them.
+  ///
+  /// Ten groups and 175 entries: a person who came to look up one figure from
+  /// their blood count should not have to scroll past the lipids and the
+  /// amino acids to reach it. A menu rather than a row of chips, which is
+  /// what the trends screen uses for its four placements; ten of those would
+  /// be taller than the list they filter.
+  @State private var group: RangeGroup?
+
+  /// Only the groups that have a range applying to this person, so the menu
+  /// never offers a category that would come up empty.
+  private var available: [(group: RangeGroup, ranges: [ReferenceRange])] {
+    ReferenceRanges.groups().compactMap { group, ranges in
+      let shown = applicable(ranges)
+      return shown.isEmpty ? nil : (group, shown)
+    }
+  }
+
+  private var shown: [(group: RangeGroup, ranges: [ReferenceRange])] {
+    guard let group else { return available }
+    return available.filter { $0.group == group }
+  }
+
   var body: some View {
     NavigationStack {
       List {
         Section {
           LabeledContent("Ranges for", value: sex.label)
+          Picker("Category", selection: $group) {
+            Text("All categories").tag(RangeGroup?.none)
+            ForEach(available, id: \.group) { group, ranges in
+              Text("\(group.title) (\(ranges.count))").tag(RangeGroup?.some(group))
+            }
+          }
+          .pickerStyle(.menu)
+          .accessibilityIdentifier("reference-category")
         } footer: {
           Text(
             "Some published ranges differ by sex. Without an answer only the ranges that apply to everyone are shown. Set it in your profile; it stays on your device."
           )
         }
 
-        ForEach(ReferenceRanges.groups(), id: \.group) { group, ranges in
+        ForEach(shown, id: \.group) { group, ranges in
           Section(group.title) {
-            ForEach(applicable(ranges)) { range in
+            ForEach(ranges) { range in
               RangeRow(range: range)
             }
           }

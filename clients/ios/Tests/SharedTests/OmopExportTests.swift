@@ -411,6 +411,77 @@ struct PerDayMeasurementTests {
     #expect(value.coding.loinc == "8280-0")
   }
 
+  @Test("a run of past days is saved in one go, each with its own BMI")
+  func historyByDay() throws {
+    // A notebook of monthly weights used to mean saving, reopening, moving
+    // the date and saving again for every morning, with the profile screen
+    // re-seeding itself from the newest value in between.
+    let profile = Profile(sex: .male, birthDate: nil, heightCm: 180)
+    let byDay = BodyMeasurements.entriesByDay(
+      [
+        .init(measuredOn: Self.day(3), waistCm: 94, weightKg: 77),
+        .init(measuredOn: Self.day(10), waistCm: 91, weightKg: 75),
+        .init(measuredOn: Self.day(20), waistCm: 89),
+      ], profile: profile)
+
+    #expect(byDay.map(\.day) == [Self.day(3), Self.day(10), Self.day(20)])
+    #expect(byDay[0].entries.map(\.analyteKey).sorted() == ["bmi", "body-weight", "waist-circumference"])
+    let bmi = try #require(byDay[0].entries.first { $0.analyteKey == "bmi" })
+    #expect(bmi.value == 23.8, "77 kg at 180 cm")
+    // A day with no weight gets no BMI rather than the one from another day.
+    #expect(!byDay[2].entries.contains { $0.analyteKey == "bmi" })
+  }
+
+  @Test("an empty line in the history is not a day")
+  func emptyRowsAreSkipped() {
+    let byDay = BodyMeasurements.entriesByDay(
+      [.init(measuredOn: Self.day(3)), .init(measuredOn: Self.day(4), weightKg: 70)],
+      profile: .empty)
+    #expect(byDay.map(\.day) == [Self.day(4)])
+  }
+
+  @Test("the same day entered twice is one report, not two")
+  func oneDayEnteredTwice() {
+    let byDay = BodyMeasurements.entriesByDay(
+      [
+        .init(measuredOn: Self.day(3), waistCm: 94),
+        .init(measuredOn: Self.day(3), weightKg: 77),
+      ], profile: .empty)
+    #expect(byDay.count == 1)
+    #expect(byDay[0].entries.map(\.analyteKey).sorted() == ["body-weight", "waist-circumference"])
+  }
+
+  @Test("saving one measurement for a day keeps what that day already had")
+  func carryForwardKeepsTheRest() throws {
+    // Entering a waist for a morning the scale had already been on rewrote
+    // that day's report with the waist alone, and the weight went with it.
+    let existing = try #require(
+      BodyMeasurements.report(
+        entries: BodyMeasurements.entriesByDay(
+          [.init(measuredOn: Self.day(3), weightKg: 77)],
+          profile: Profile(sex: .male, birthDate: nil, heightCm: 180))[0].entries,
+        on: Self.day(3)))
+    let waist = BodyMeasurements.entriesByDay(
+      [.init(measuredOn: Self.day(3), waistCm: 94)], profile: .empty)[0].entries
+
+    let merged = BodyMeasurements.carryForward(existing, replacedBy: waist)
+    #expect(merged.map(\.analyteKey).sorted() == ["bmi", "body-weight", "waist-circumference"])
+
+    // And a value entered again replaces the old one rather than joining it.
+    let newWeight = BodyMeasurements.entriesByDay(
+      [.init(measuredOn: Self.day(3), weightKg: 75)],
+      profile: Profile(sex: .male, birthDate: nil, heightCm: 180))[0].entries
+    let corrected = BodyMeasurements.carryForward(existing, replacedBy: newWeight)
+    #expect(corrected.filter { $0.analyteKey == "body-weight" }.map(\.value) == [75])
+    #expect(corrected.filter { $0.analyteKey == "bmi" }.map(\.value) == [23.1], "recomputed, not the old one")
+
+    // A weight corrected on a phone whose profile has lost its height takes
+    // the BMI with it rather than leaving one that describes the old weight.
+    let noHeight = BodyMeasurements.entriesByDay(
+      [.init(measuredOn: Self.day(3), weightKg: 75)], profile: .empty)[0].entries
+    #expect(!BodyMeasurements.carryForward(existing, replacedBy: noHeight).contains { $0.analyteKey == "bmi" })
+  }
+
   @Test("a value an older dictionary could not code is found again")
   func unmappedIsRescued() throws {
     // A scale's visceral fat in kilograms was filed as an unknown analyte for

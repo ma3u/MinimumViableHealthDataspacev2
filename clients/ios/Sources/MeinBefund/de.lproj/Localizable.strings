@@ -312,3 +312,13 @@
 "Tyrosine" = "Tyrosin";
 "Body fat" = "Körperfett";
 "Waist circumference" = "Taillenumfang";
+"Add a date" = "Datum hinzufügen";
+"All categories" = "Alle Kategorien";
+"Category" = "Kategorie";
+"Earlier measurements" = "Frühere Messwerte";
+"Measurements by date" = "Messwerte nach Datum";
+"BMI %@" = "BMI %@";
+"Waist to height %@" = "Taille zu Größe %@";
+"%@ (%lld)" = "%1$@ (%2$lld)";
+"One date per line, with whatever you measured that day. Saving stores them as reports marked entered by you, one per date, so they appear in your trends and exports beside everything else." = "Eine Zeile je Datum, mit dem, was Sie an dem Tag gemessen haben. Beim Sichern entstehen daraus Befunde, gekennzeichnet als von Ihnen eingetragen, einer je Datum, damit sie neben allem anderen in Verlauf und Export erscheinen.";
+"Set your height in the profile and a BMI is worked out for every weight." = "Tragen Sie Ihre Größe im Profil ein, dann wird zu jedem Gewicht ein BMI berechnet.";
