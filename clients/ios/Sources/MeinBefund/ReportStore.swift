@@ -207,6 +207,30 @@ public actor ReportStore {
     Log.store.notice("report deleted")
   }
 
+  /// Removes every stored file, and the key that opens them.
+  ///
+  /// Article 17 in one call. Deleting the sealed files is already enough in
+  /// practice; the key goes too, so that a block of flash recovered later has
+  /// nothing on the device to open it with. The next save makes a new one.
+  public func deleteEverything() throws {
+    let files =
+      (try? FileManager.default.contentsOfDirectory(at: directory, includingPropertiesForKeys: nil))
+      ?? []
+    var removed = 0
+    for file in files where file.pathExtension == "sealed" {
+      try? FileManager.default.removeItem(at: file)
+      removed += 1
+    }
+    cached = []
+    loaded = true
+    SecItemDelete(
+      [
+        kSecClass as String: kSecClassGenericPassword,
+        kSecAttrAccount as String: keyTag,
+      ] as CFDictionary)
+    Log.store.notice("erased \(removed, privacy: .public) sealed file(s) and the store key")
+  }
+
   /// Loads every stored report.
   ///
   /// A file that fails to decrypt is reported rather than skipped: silently

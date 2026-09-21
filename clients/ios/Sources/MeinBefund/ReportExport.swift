@@ -54,9 +54,23 @@ enum ReportExport {
     }
   }
 
+  /// Removes the files handed to the share sheet, once it has closed.
+  ///
+  /// The sheet needs real files on disk; nothing needs them afterwards.
+  /// Leaving them is one more copy of a person's results in a place that was
+  /// only ever a hand-over.
+  static func discard(_ artefacts: Artefacts?) {
+    guard let artefacts else { return }
+    let dir = artefacts.pdf.deletingLastPathComponent()
+    guard dir.lastPathComponent.hasPrefix("export-") else { return }
+    try? FileManager.default.removeItem(at: dir)
+  }
+
   static func write(_ report: LabReport, scan: Data? = nil) throws -> Artefacts {
     guard !report.extraction.coded.isEmpty else { throw ExportError.nothingToExport }
 
+    // Anything left from a previous share of this report goes first, and
+    // `discard` takes it away again when the sheet closes.
     let stamp = ISO8601DateFormatter()
     stamp.formatOptions = [.withYear, .withMonth, .withDay, .withDashSeparatorInDate]
     let day = stamp.string(from: report.effectiveDate)
