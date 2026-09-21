@@ -11,11 +11,16 @@ import Foundation
 /// **Only from one report.** A ratio of a triglyceride measured in March and
 /// an HDL measured in September is a ratio of nothing.
 ///
-/// **Only in one unit.** Triglycerides over HDL is a different number in
-/// mg/dL and in mmol/L, by a factor of about two. The unit the sheet printed
-/// travels with the result, and two values in different units are not
-/// combined at all.
+/// **Only in one unit.** Two values printed in different units are never
+/// combined. Triglycerides over HDL is the one place a unit is changed first:
+/// the ratio is a different number in mg/dL and in mmol/L, by a factor of
+/// about 2.3, and the published cut-point is stated in mg/dL, so a panel in
+/// mmol/L is converted to that basis before dividing.
 public enum DerivedValues {
+
+  /// mg/dL per mmol/L, for the two lipids the ratio is made of.
+  static let triglyceridesMgPerMmol = 88.57
+  static let cholesterolMgPerMmol = 38.67
 
   /// What a derived value is computed from, for the audit trail.
   static func line(_ parts: [String], _ result: Double, _ unit: String) -> String {
@@ -70,8 +75,11 @@ public enum DerivedValues {
             from: ["Cholesterin gesamt", "HDL", "LDL"])
       }
       if let triglycerides, let hdl, hdl > 0 {
-        add("ratio-tg-hdl", "{ratio}", triglycerides / hdl, "TG/HDL",
-            from: ["Triglyzeride (\(unit))", "HDL"])
+        // On a mg/dL basis whatever the sheet printed, because that is the
+        // basis the cut-point (3.0, McLaughlin 2003) is stated in.
+        let basis = unit == "mmol/L" ? triglyceridesMgPerMmol / cholesterolMgPerMmol : 1
+        add("ratio-tg-hdl", "{ratio}", triglycerides / hdl * basis, "TG/HDL",
+            from: ["Triglyzeride (\(unit), mg/dL basis)", "HDL"])
       }
       if let ldl, let hdl, hdl > 0 {
         add("ratio-ldl-hdl", "{ratio}", ldl / hdl, "LDL/HDL", from: ["LDL", "HDL"])
