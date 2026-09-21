@@ -485,27 +485,27 @@ struct TrendBandTests {
 
   @Test("an analyte with no guideline band still has the laboratory's own range")
   func printedRangeIsAvailable() throws {
-    // Sodium and MCH have no guideline target, only an assay's reference
-    // interval, and that interval is on the report. A chart that drew nothing
-    // for them would be blank for most of a blood count.
-    let sodium = Self.report(
-      day: 3, label: "Natrium", key: "sodium", loinc: "2951-2", value: 140, unit: "mmol/L",
-      low: 136, high: 145, title: "March")
-    let series = try #require(Trends.series(from: [sodium]).first)
+    // Lipase has no published band here, only an assay's reference interval,
+    // and that interval is on the report. A chart that drew nothing for such
+    // an analyte would be blank for a good part of a chemistry panel.
+    let lipase = Self.report(
+      day: 3, label: "Lipase", key: "lipase", loinc: "3040-3", value: 40, unit: "U/L",
+      low: 13, high: 60, title: "March")
+    let series = try #require(Trends.series(from: [lipase]).first)
 
-    #expect(series.range == nil, "no guideline band is published for sodium")
-    #expect(series.printedRange?.low == 136)
-    #expect(series.printedRange?.high == 145)
+    #expect(series.range == nil, "no band is published for lipase")
+    #expect(series.printedRange?.low == 13)
+    #expect(series.printedRange?.high == 60)
     #expect(series.withinPrintedRange == true)
     #expect(series.placement == .noRange, "which is still not a judgement")
   }
 
   @Test("outside the laboratory's own range is stated as that, and nothing more")
   func outsidePrintedRange() throws {
-    let mch = Self.report(
-      day: 3, label: "MCH", key: "mch", loinc: "785-6", value: 34.2, unit: "pg",
-      low: 27, high: 33.5, title: "March")
-    let series = try #require(Trends.series(from: [mch]).first)
+    let fibrinogen = Self.report(
+      day: 3, label: "Fibrinogen", key: "fibrinogen", loinc: "3255-7", value: 4.6, unit: "g/L",
+      low: 2, high: 4, title: "March")
+    let series = try #require(Trends.series(from: [fibrinogen]).first)
 
     #expect(series.withinPrintedRange == false)
     #expect(series.range == nil)
@@ -516,7 +516,7 @@ struct TrendBandTests {
     let series = try #require(
       Trends.series(from: [
         Self.report(
-          day: 3, label: "MCH", key: "mch", loinc: "785-6", value: 32, unit: "pg", low: nil,
+          day: 3, label: "Lipase", key: "lipase", loinc: "3040-3", value: 32, unit: "U/L", low: nil,
           high: nil, title: "March")
       ]).first)
 
@@ -625,10 +625,36 @@ struct OrderAndDerivedTests {
     #expect(nonHdl.range != nil, "and it is compared against a source, not just shown")
   }
 
+  @Test("a lipid panel in mmol/L gives the same TG/HDL ratio as the same panel in mg/dL")
+  func tgHdlRatioIsOnAMilligramBasis() throws {
+    // 1.90 mmol/L of triglycerides is 168 mg/dL and 1.24 mmol/L of HDL is 48,
+    // so both panels are one panel and the ratio has to come out the same
+    // number, 3.5. Divided as printed it would be 1.53, which is a different
+    // figure against the same published cut-point of 3.0.
+    let date = ReportMetadataExtractor.day(2026, 3, 4)!
+    func coded(_ label: String, _ value: Double) -> CodedLabValue {
+      CodedLabValue(
+        raw: RawLabValue(
+          label: label, value: value, unitRaw: "mmol/l", line: "\(label) \(value)", lineNumber: 1),
+        coding: Analytes.lookup(label: label, unit: "mmol/l")!,
+        source: .labIssuedDigital)
+    }
+    let metric = LabReport(
+      id: UUID(), scannedAt: Date(), collectedOn: date, title: "Lipids",
+      extraction: ExtractionResult(
+        coded: [coded("HDL-Cholesterin", 1.24), coded("Triglyceride", 1.90)],
+        unmapped: [], suspiciousLines: [], source: .labIssuedDigital),
+      metadata: ReportMetadata(labDate: date, dateSource: .printed))
+    let series = Trends.series(from: [metric])
+    let tgHdl = try #require(series.first { $0.analyteKey == "ratio-tg-hdl" })
+    #expect(tgHdl.latest?.value == 3.51)
+    #expect(tgHdl.range?.guidelineHigh == 3.0, "and it is placed against the published cut-point")
+  }
+
   @Test("the ratios are worked out, and carry the unit they were computed in")
   func ratiosAreDerived() throws {
-    // Triglycerides over HDL is a different number in mg/dL and in mmol/L, by
-    // about a factor of two, so what it was computed from travels with it.
+    // Triglycerides over HDL is computed on a mg/dL basis whatever the sheet
+    // printed, so a panel in mg/dL divides as it stands.
     let series = Trends.series(from: [Self.lipidReport(day: 4, total: 212, hdl: 48, ldl: 141, tg: 168)])
     let tgHdl = try #require(series.first { $0.analyteKey == "ratio-tg-hdl" })
     #expect(tgHdl.latest?.value == 3.5)

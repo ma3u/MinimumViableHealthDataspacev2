@@ -38,6 +38,9 @@ same_in_both = {
     "Vitamin D (25-OH)", "eGFR", "hs-CRP", "BMI", "cm",
     # Unit symbols on the profile's measurement fields. Identical in German.
     "kg", "cm\u00b2",
+    # Analyte names on the reference screen that German prints the same way.
+    "NT-proBNP", "TSH", "LDH", "Amylase", "Calcium", "Magnesium", "MCV", "MCH", "MCHC",
+    "RDW", "MPV", "Albumin", "IgG", "Tryptophan",
 }
 
 missing, german_in_base, total = [], [], 0

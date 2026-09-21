@@ -44,9 +44,12 @@ extension RangeGroup {
     case .cardiovascular: return String(localized: "Cardiovascular")
     case .metabolic: return String(localized: "Metabolic")
     case .kidney: return String(localized: "Kidney")
-    case .liver: return String(localized: "Liver")
+    case .liver: return String(localized: "Liver and pancreas")
+    case .electrolytes: return String(localized: "Electrolytes and minerals")
     case .haematology: return String(localized: "Blood count and iron")
+    case .proteins: return String(localized: "Proteins and immunity")
     case .vitamins: return String(localized: "Vitamins")
+    case .aminoAcids: return String(localized: "Amino acids")
     case .body: return String(localized: "Body")
     }
   }

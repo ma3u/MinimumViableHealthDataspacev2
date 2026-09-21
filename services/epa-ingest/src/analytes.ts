@@ -1348,20 +1348,20 @@ const DEFINITIONS: AnalyteDefinition[] = [
   // number.
   //
   // LOINC has terms near these and not these. `55607-6` is a **molar** ratio
-  // of triglyceride to HDL and these are computed from whatever unit the
-  // sheet printed; `16616-5` runs HDL over LDL, the other way round; and
-  // `9340-1` is a percentile rather than a ratio. A code that is nearly right
-  // is wrong, so they are carried uncoded and say so.
+  // of triglyceride to HDL and this one is a mass ratio, the form the
+  // published cut-point takes; `16616-5` runs HDL over LDL, the other way
+  // round; and `9340-1` is a percentile rather than a ratio. A code that is
+  // nearly right is wrong, so they are carried uncoded and say so.
   {
     key: "ratio-tg-hdl",
     description:
-      "Triglycerides divided by HDL cholesterol, both in the unit the sheet printed. The figure differs between mg/dL and mmol/L, so the unit it was computed in travels with it.",
+      "Triglycerides divided by HDL cholesterol, both taken in mg/dL. The published cut-point is stated in that unit, so a panel printed in mmol/L is converted before dividing; the figure would otherwise differ by a factor of about 2.3.",
     labels: ["Triglyzeride/HDL", "TG/HDL", "Triglyceride zu HDL"],
     byUnit: {
       "{ratio}": uncoded(
         "Triglyceride to HDL cholesterol ratio",
         "{ratio}",
-        "LOINC's nearest term (55607-6) is a molar ratio, and this is computed in whatever unit the sheet printed.",
+        "LOINC's nearest term (55607-6) is a molar ratio, and this is the mass ratio on a mg/dL basis that the published cut-point uses.",
       ),
     },
   },
@@ -3034,7 +3034,7 @@ export const ANALYTE_DESCRIPTIONS_DE: Readonly<Record<string, string>> = {
   "mb-acetat-und-propionatproduktion":
     "Der Anteil der gefundenen Bakterien, die Essigsäure und Propionsäure bilden.",
   "ratio-tg-hdl":
-    "Triglyzeride geteilt durch HDL-Cholesterin, beide in der Einheit, die der Befund gedruckt hat. Die Zahl unterscheidet sich zwischen mg/dl und mmol/l, deshalb wandert die Einheit mit.",
+    "Triglyzeride geteilt durch HDL-Cholesterin, beide in mg/dl. Der veröffentlichte Grenzwert ist in dieser Einheit angegeben, deshalb wird ein in mmol/l gedrucktes Lipidprofil vor dem Teilen umgerechnet; sonst unterschiede sich die Zahl um etwa den Faktor 2,3.",
   "ratio-ldl-hdl": "LDL-Cholesterin geteilt durch HDL-Cholesterin.",
   "ratio-apob-apoa1":
     "Apolipoprotein B geteilt durch Apolipoprotein A1: die Partikel, die Cholesterin ablagern, gegen die, die es abtransportieren.",
