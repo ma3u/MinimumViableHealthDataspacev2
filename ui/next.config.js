@@ -43,6 +43,21 @@ const nextConfig = {
   ...(isStaticExport && {
     basePath: "/MinimumViableHealthDataspacev2",
   }),
+  // A self-contained deck under public/presentations/<name>/ is reached by
+  // its folder URL on GitHub Pages, which serves directory indexes, but the
+  // Next.js server does not, so the folder URL 404s on the live platform.
+  // Skipped for static export, where the rewrite is neither supported nor
+  // needed.
+  ...(!isStaticExport && {
+    async rewrites() {
+      return [
+        {
+          source: "/presentations/:deck",
+          destination: "/presentations/:deck/index.html",
+        },
+      ];
+    },
+  }),
   // Security headers (BSI C5 DEV-07 / OWASP A05) — skipped for static export
   // because GitHub Pages serves pre-built HTML without a Next.js server.
   //
