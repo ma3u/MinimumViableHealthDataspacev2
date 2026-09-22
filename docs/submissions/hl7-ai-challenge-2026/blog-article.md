@@ -114,12 +114,4 @@ The platform runs at [ehds.mabu.red](https://ehds.mabu.red) on synthetic data, a
 and the whole stack runs on a laptop. Source, decisions, runbooks and the app guide:
 [github.com/ma3u/MinimumViableHealthDataspacev2](https://github.com/ma3u/MinimumViableHealthDataspacev2),
 Apache 2.0. The slides from the Winners Showcase are at
-[ehds.mabu.red/presentations/hl7-showcase-2026](https://ehds.mabu.red/presentations/hl7-showcase-2026). Pull requests are welcome, and so are answers to the five questions above.
-
----
-
-Images for the article, all showing invented data:
-
-- `img/klarbefund-tour.gif`: the app, screen by screen (animated); stills in `docs/klarbefund/img/`
-- `img/ehds-researcher-journey.gif`: the researcher on the platform (animated)
-- `docs/images/screenshots/omop-cdm-analytics-dashboard.png`: OMOP analytics, if a still is preferred
+[ehds.mabu.red/presentations/hl7-showcase-2026](https://ehds.mabu.red/presentations/hl7-showcase-2026). Pull requests are welcome! 
