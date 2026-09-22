@@ -762,6 +762,9 @@
           player.src = "audio/slide-" + (h + 1) + ".mp3";
           state.textContent = "";
           player.play().catch(function (err) {
+            // AbortError is the previous file being cut off by the next slide:
+            // expected, and not worth a message.
+            if (err && err.name === "AbortError") return;
             state.textContent =
               err && err.name === "NotAllowedError"
                 ? "click once more to allow audio"
