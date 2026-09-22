@@ -7,15 +7,13 @@ October 2026 Winners Showcase; images are listed at the end._
 ## Two people, one gap
 
 I am a participant in a cardiovascular prevention study. My results reach me as most
-people's do in Europe: as a PDF, or on paper. Nothing pushes them into my national patient
-record. Only the provider who ordered a test may write to it, and a cohort study is not
-treatment, so the person is the only integration point that exists.
+people's do in Europe: as paper. Nothing pushes them into my national patient
+record. Only the provider who ordered a test may write to it, and a cohort study is not treatment, so the person is the only integration point that exists.
 
 A researcher in the same field has the opposite problem. Under Chapter IV of the European
 Health Data Space, secondary use runs on a permit from a Health Data Access Body plus a
 citizen opt-out. Finding datasets across institutions, obtaining the permit, agreeing terms
-with each holder and analysing in a secure environment all need the data to mean the same
-thing at both ends.
+with each holder and analysing in a secure environment all need the data to mean the same thing at both ends.
 
 The [EHDS Demo & Integration Platform](https://github.com/ma3u/MinimumViableHealthDataspacev2)
 is an open-source reference implementation of both regimes on one standards stack. This is what happened when we took HL7 FHIR and LOINC down to a piece of paper and
