@@ -28,12 +28,12 @@ PDF. The table is read on the device, every value is matched to a LOINC code and
 unit, and the report is kept encrypted with its pages. Nothing leaves the phone unless the
 person sends it.
 
-What makes a value trustworthy is not the code alone. Under each measurement the app shows
-the reference range the laboratory printed, verbatim, and the page and line it was read
-from, so anyone can check the number against the paper. A PDF carrying the laboratory's
-own text layer yields final observations; anything that went through a recogniser is
-preliminary until the person confirms it. Lines that matched nothing, and lines that could
-not be read, are listed rather than dropped.
+The code alone does not make a value trustworthy. Under each measurement the app shows the
+range the laboratory printed, verbatim, and the page and line it was read from, so anyone
+can check the number against the paper. A PDF with the laboratory's own text layer yields
+final observations; anything that went through a recogniser is preliminary until the
+person confirms it. Lines that matched nothing, or could not be read, are listed rather
+than dropped.
 
 For someone in a study, the payoff is the timeline: results from the study centre, the
 family doctor and a gym scale on one chart per measurement, with the guideline's band where
@@ -50,13 +50,12 @@ appended, the patient record gets the bundle, research gets OMOP tables.
 ## Secondary use: the researcher's path
 
 The dataspace half runs on the Eclipse Dataspace Components stack with the EHDS roles on
-top. A data user discovers datasets across holders through HealthDCAT-AP metadata, applies
-for a permit from the HDAB, negotiates and transfers over the Dataspace Protocol with ODRL
-policies and verifiable credentials, and analyses on OMOP CDM 5.4. Underneath is a
-five-layer knowledge graph: dataspace, catalogue, FHIR R4, OMOP, terminology, populated
-with 127 synthetic patients. A natural-language layer turns a question into a graph query
-and answers only from what the graph holds. Grounding on a standard is what keeps it
-honest.
+top. A data user discovers datasets through HealthDCAT-AP metadata, applies for a permit
+from the HDAB, negotiates and transfers over the Dataspace Protocol with ODRL policies and
+verifiable credentials, and analyses on OMOP CDM 5.4. Underneath is a five-layer knowledge
+graph (dataspace, catalogue, FHIR R4, OMOP, terminology) with 127 synthetic patients. A
+natural-language layer turns a question into a graph query and answers only from what the
+graph holds. Grounding on a standard is what keeps it honest.
 
 ## Why FHIR with LOINC
 
@@ -75,9 +74,8 @@ written once.
 - **Refusing is a feature.** Both LOINC codes for RDW-SD are deprecated, so the value is
   carried unmatched rather than mis-coded. A wrong code is worse than no code.
 - **LOINC names tests, not organisms.** A stool report lists 57 taxa with no LOINC term.
-  They now carry their NCBI Taxonomy id, verified against NCBI, as an Observation component
-  under LOINC 41852-5, while the abundance itself stays a text-only code with a
-  data-absent-reason.
+  They carry their NCBI Taxonomy id as an Observation component under LOINC 41852-5; the
+  abundance stays a text-only code with a data-absent-reason.
 - **A printed range is assay-specific.** It travels unchanged. Replacing it with a
   published band destroys what a clinician needs.
 - **Provenance must be first-class.** Final versus preliminary is decided by the document,
