@@ -8,7 +8,7 @@ The deck's "Narration" button plays them as the slides come up.
 The key comes from ELEVENLABS_API_KEY in the environment, or from the
 repository's git-ignored .env, and is never written anywhere. The voice is
 ELEVENLABS_VOICE_ID, or else the account's voice named ELEVENLABS_VOICE_NAME
-("Matthi German" by default), looked up through the API.
+("Mabu Engaged" by default), looked up through the API.
 
 Run from the repository root:
 
@@ -50,7 +50,7 @@ HEADERS = {"xi-api-key": key, "Content-Type": "application/json"}
 voice = os.environ.get("ELEVENLABS_VOICE_ID")
 if not voice:
     # Resolve the voice by its name in the account, "Matthias" unless told otherwise.
-    wanted = os.environ.get("ELEVENLABS_VOICE_NAME", "Matthi German").lower()
+    wanted = os.environ.get("ELEVENLABS_VOICE_NAME", "Mabu Engaged").lower()
     req = urllib.request.Request("https://api.elevenlabs.io/v1/voices", headers=HEADERS)
     with urllib.request.urlopen(req, timeout=60) as r:
         voices = json.load(r)["voices"]
