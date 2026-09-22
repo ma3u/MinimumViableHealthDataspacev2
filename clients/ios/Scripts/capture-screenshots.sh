@@ -5,6 +5,13 @@
 # a re-shoot after a layout change needs no new coordinates. The data comes
 # from DemoSeed, which is `#if DEBUG` and entirely fictional: these images get
 # published to the App Store, so nothing real may ever appear in them.
+#
+# The same script shoots the documentation. `SEED=-MBDevData` swaps the two
+# demo reports for the seven-report dev dataset (also fictional, also in
+# memory only), `SCREENS` names the screens, and `OUT` points outside
+# `appstore/`, which skips the App Store size check:
+#
+#   SEED=-MBDevData OUT=/tmp/shots SCREENS="list detail trends" Scripts/capture-screenshots.sh
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
@@ -14,7 +21,8 @@ NAME="${NAME:-MB-Shots-69}"
 BUNDLE=red.mabu.meinbefund
 LOCALE="${LOCALE:-en}"
 OUT="${OUT:-appstore/screenshots/$LOCALE}"
-SCREENS=(list detail consent settings privacy)
+SEED="${SEED:--MBDemoSeed}"
+read -r -a SCREENS <<<"${SCREENS:-list detail consent settings privacy}"
 
 settle() { python3 -c "import time; time.sleep($1)"; }
 
@@ -53,7 +61,7 @@ for screen in "${SCREENS[@]}"; do
   settle 1
   # -AppleLanguages picks the app's language per launch, so both listings are
   # shot from one simulator instead of one per locale.
-  xcrun simctl launch "$sim" "$BUNDLE" -MBDemoSeed -MBShot "$screen" \
+  xcrun simctl launch "$sim" "$BUNDLE" "$SEED" -MBShot "$screen" \
     -AppleLanguages "($LOCALE)" -AppleLocale "$LOCALE" >/dev/null
   settle 4
   xcrun simctl io "$sim" screenshot --type=png "$OUT/$screen.png" >/dev/null 2>&1
@@ -61,9 +69,15 @@ for screen in "${SCREENS[@]}"; do
   height="$(sips -g pixelHeight "$OUT/$screen.png" | awk '/pixelHeight/{print $2}')"
   size="${width}x${height}"
   echo "    $screen.png  $size"
-  case "$size" in
-    1320x2868|1290x2796) ;;
-    *) echo "    unusable: APP_IPHONE_67 accepts 1320x2868 or 1290x2796 only"; exit 1 ;;
+  case "$OUT" in
+    appstore/*)
+      case "$size" in
+        1320x2868|1290x2796) ;;
+        *) echo "    unusable: APP_IPHONE_67 accepts 1320x2868 or 1290x2796 only"; exit 1 ;;
+      esac ;;
   esac
 done
-echo "==> $OUT is ready; upload with: python3 appstore/push.py --screenshots-only"
+echo "==> $OUT is ready"
+case "$OUT" in
+  appstore/*) echo "    upload with: python3 appstore/push.py --screenshots-only" ;;
+esac

@@ -901,6 +901,8 @@ struct ContentView: View {
         model.showingReference = true
       case .history:
         model.showingHistory = true
+      case .profile:
+        model.showingProfile = true
       case .list, nil:
         break
       }
