@@ -39,6 +39,12 @@
       // contracts, catalogue metadata, FHIR R4 clinical resources, OMOP CDM,
       // terminology. Nothing here is data; it is the shape of the store.
       (function () {
+        // ?bright=1 lifts the veil for a slide with less text over the graph.
+        var bright = /[?&]bright=1/.test(location.search);
+        if (bright) {
+          document.querySelector(".veil").style.background =
+            "linear-gradient(100deg, rgba(20,33,61,0.82) 0%, rgba(20,33,61,0.55) 40%, rgba(20,33,61,0.08) 70%, rgba(20,33,61,0) 100%)";
+        }
         var canvas = document.getElementById("g");
         var ctx = canvas.getContext("2d");
         var LAYERS = [
@@ -65,7 +71,7 @@
               z: Math.sin(a) * r,
               c: L.c,
               l: li,
-              r: 2.5 + rnd() * 4,
+              r: (bright ? 3.5 : 2.5) + rnd() * 4,
             });
           }
         });
@@ -185,7 +191,7 @@
             ctx.arc(px, py, 2.6, 0, Math.PI * 2);
             ctx.fill();
           }
-          t += 0.0022;
+          t += bright ? 0.0032 : 0.0022;
         }
         function loop() {
           draw();
