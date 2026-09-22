@@ -56,6 +56,8 @@
       case trends, reference
       /// Entering a run of past measurements.
       case history
+      /// Sex, date of birth, height and the body measurements.
+      case profile
     }
 
     static var screen: Screen? {
