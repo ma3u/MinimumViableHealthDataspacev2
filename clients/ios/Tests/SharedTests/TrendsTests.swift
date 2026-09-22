@@ -190,6 +190,87 @@ struct TrendsTests {
 }
 
 /// The profile: the few facts a published range needs, and nothing else.
+/// What the reference screen shows, as opposed to what the table stores.
+@Suite("A measurement appears once, however many units it is published in")
+struct ReferenceDisplayTests {
+
+  @Test("the two units of vitamin D are one card, not two")
+  func vitaminDIsOneCard() throws {
+    // Screenshotted with "Vitamin D (25-OH)" filling the screen twice, once
+    // in ng/mL and once in nmol/L, which reads as a duplicate rather than as
+    // the same threshold stated in the other unit.
+    let all = ReferenceRanges.forAnalyte("vitamin-d")
+    #expect(all.count == 2, "the table still states a range per unit")
+
+    let cards = ReferenceRanges.byAnalyte(all)
+    #expect(cards.count == 1)
+    let lines = ReferenceRanges.unitLines(try #require(cards.first))
+    #expect(lines.map(\.unitText) == ["ng/mL", "nmol/L"])
+    #expect(lines[0].range.guidelineLow == 30)
+    #expect(lines[1].range.guidelineLow == 75)
+  }
+
+  @Test("one unit spelled two ways is one line")
+  func synonymUnitsShareALine() throws {
+    // A nanogram per litre and a picogram per millilitre are the same unit,
+    // so B12 in both is the same number printed twice.
+    let lines = ReferenceRanges.unitLines(ReferenceRanges.forAnalyte("vitamin-b12"))
+    #expect(lines.count == 2)
+    #expect(lines[0].units == ["ng/L", "pg/mL"])
+    #expect(lines[0].range.guidelineLow == 180)
+    #expect(lines[1].units == ["pmol/L"])
+    #expect(lines[1].range.guidelineLow == 133)
+  }
+
+  @Test("units that are different measurements keep their own line")
+  func differentQuantitiesStaySeparate() {
+    // Lipoprotein(a) by mass and by particle count are not a conversion of
+    // one another, and their thresholds are stated separately.
+    let lines = ReferenceRanges.unitLines(ReferenceRanges.forAnalyte("lipoprotein-a"))
+    #expect(lines.map(\.units) == [["mg/dL"], ["nmol/L"], ["g/L"]])
+  }
+
+  @Test("a sex-specific range never shares a card with a sex-neutral one")
+  func sexIsPartOfTheCard() {
+    let cards = ReferenceRanges.byAnalyte(ReferenceRanges.forAnalyte("haemoglobin"))
+    #expect(cards.count == 2, "one for men, one for women")
+    for card in cards {
+      #expect(Set(card.map(\.sex)).count == 1)
+    }
+  }
+
+  @Test("every card quotes one source and one kind of evidence")
+  func aCardHasOneSource() {
+    // The card prints the summary and the citation once, under lines that may
+    // come from several table rows. That is only honest if the rows agree.
+    for card in ReferenceRanges.byAnalyte(ReferenceRanges.all) {
+      #expect(Set(card.map { $0.source.url }).count == 1, "\(card[0].analyteKey)")
+      #expect(Set(card.map(\.basis)).count == 1, "\(card[0].analyteKey)")
+    }
+  }
+
+  @Test("175 rows are 99 cards")
+  func everythingIsCovered() {
+    let cards = ReferenceRanges.byAnalyte(ReferenceRanges.all)
+    #expect(ReferenceRanges.all.count == 175)
+    #expect(cards.count == 99)
+    #expect(cards.flatMap { $0 }.count == 175, "and no row is dropped on the way")
+  }
+
+  @Test("a unit is shown the way it is written, not the way it is coded")
+  func unitsAreSpelledForAReader() {
+    // UCUM selects a LOINC code and travels in a FHIR bundle. Nobody writes
+    // `10*9/L` on paper.
+    #expect(UnitText.display("10*9/L") == "10⁹/L")
+    #expect(UnitText.display("umol/L") == "µmol/L")
+    #expect(UnitText.display("u[IU]/mL") == "µIU/mL")
+    #expect(UnitText.display("kg/m2") == "kg/m²")
+    #expect(UnitText.display("{ratio}") == "", "a ratio has no unit to print")
+    #expect(UnitText.display("mg/dL") == "mg/dL", "and what is already readable is untouched")
+  }
+}
+
+
 @Suite("Profile")
 struct ProfileTests {
 
