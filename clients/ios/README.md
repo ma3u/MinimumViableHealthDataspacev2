@@ -2,7 +2,9 @@
 
 The iPhone health-document scanner ([#186](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/186)).
 Scan a paper lab report, get structured values with their provenance intact, keep
-them encrypted on the device.
+them encrypted on the device. What a person sees, screen by screen with
+screenshots, is in [`docs/klarbefund/README.md`](../../docs/klarbefund/README.md);
+this file is the developer side.
 
 ```bash
 brew install xcodegen          # once

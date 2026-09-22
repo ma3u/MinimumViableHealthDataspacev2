@@ -261,7 +261,9 @@ MinimumViableHealthDataspacev2/
 ├── docker-compose.jad.yml        # JAD stack: 19 EDC-V/CFM/DCore services
 ├── docker-compose.live.yml       # Live-mode UI override (port 3003)
 ├── LICENSE
+├── clients/ios/                  # Klarbefund, the iPhone lab-report scanner (issue #186)
 ├── docs/
+│   ├── klarbefund/README.md              # The iPhone app screen by screen, with screenshots
 │   ├── planning-health-dataspace-v2.md   # 7-phase implementation roadmap
 │   ├── health-dataspace-graph-schema.md  # 5-layer Neo4j schema reference
 │   └── images/
