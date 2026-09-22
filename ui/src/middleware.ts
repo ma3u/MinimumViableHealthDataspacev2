@@ -183,6 +183,9 @@ export const config = {
   // mock JSON fixtures. CSP is applied to HTML responses; auth checks
   // only fire on the PROTECTED_PATHS list.
   matcher: [
-    "/((?!api|_next/static|_next/image|favicon.ico|swagger-ui|mock|static).*)",
+    // presentations/ holds self-contained reveal.js decks served as static
+    // files; like swagger-ui they carry their own scripts, which the nonce
+    // CSP would block.
+    "/((?!api|_next/static|_next/image|favicon.ico|swagger-ui|presentations|mock|static).*)",
   ],
 };
