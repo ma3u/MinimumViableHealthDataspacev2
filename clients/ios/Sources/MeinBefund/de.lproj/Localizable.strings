@@ -242,6 +242,7 @@
 "Opens the report this measurement came from" = "Öffnet den Befund, aus dem dieser Messwert stammt";
 "Tap a point to see what it was. Tap the card to open that report." = "Tippen Sie einen Punkt an, um zu sehen, was er war. Ein Tipp auf die Karte öffnet den zugehörigen Befund.";
 "No LOINC code for this quantity" = "Für diese Größe gibt es keinen LOINC-Code";
+"NCBI Taxonomy %@" = "NCBI-Taxonomie %@";
 "Read from the chart on a device's screen. Each value is known to the month it sits over, not to the day." = "Aus dem Diagramm auf einem Gerätedisplay gelesen. Jeder Wert ist auf den Monat genau bekannt, über dem er steht, nicht auf den Tag.";
 "Measured off the chart on a device's screen, which printed no number beside these points. The values are estimates and are known to the month, not to the day." = "Aus dem Diagramm auf einem Gerätedisplay ausgemessen, das neben diese Punkte keine Zahl geschrieben hat. Die Werte sind Schätzungen und auf den Monat genau, nicht auf den Tag.";
 "This reads as an article rather than a lab report: pages of sentences and no table of values. Nothing was stored, because the few numbers in it are parts of sentences, not measurements." = "Das liest sich wie ein Artikel und nicht wie ein Befund: seitenweise Sätze und keine Wertetabelle. Es wurde nichts gespeichert, denn die wenigen Zahlen darin sind Satzteile und keine Messwerte.";

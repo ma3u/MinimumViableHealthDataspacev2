@@ -100,6 +100,29 @@ export const GOLDEN_VALUES: CodedLabValue[] = [
       ucum: "ug/L",
     },
   },
+  {
+    // An organism from a stool report: no LOINC code, with the reason, and
+    // the NCBI Taxonomy id as a component. Pins the uncoded rendering too,
+    // which nothing did while every golden value had a code.
+    label: "Akkermansia muciniphila",
+    value: 3.2,
+    unitRaw: "%",
+    line: "Akkermansia muciniphila  3,2  %",
+    lineNumber: 14,
+    analyteKey: "mb-akkermansia-muciniphila",
+    coding: {
+      loincNumber: null,
+      display: "Akkermansia muciniphila [relative abundance] in Stool",
+      ucum: "%",
+      uncodedReason:
+        "LOINC names tests, not organisms: it has no term for the relative abundance of a taxon in stool. The organism is named by its NCBI Taxonomy id instead.",
+      taxon: {
+        ncbiTaxId: "239935",
+        scientificName: "Akkermansia muciniphila",
+        rank: "species",
+      },
+    },
+  },
 ];
 
 const GOLDEN_META = {

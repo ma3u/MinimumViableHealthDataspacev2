@@ -29,6 +29,7 @@ import {
   normaliseLabel,
   normaliseUnit,
 } from "./analytes.js";
+import type { Taxon } from "./types.js";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 export const SWIFT_TARGET = resolve(
@@ -59,6 +60,7 @@ interface SwiftEntry {
   ucum: string;
   loinc: string | null;
   uncodedReason?: string;
+  taxon?: Taxon;
   display: string;
   analyteKey: string;
 }
@@ -80,6 +82,7 @@ export function buildEntries(labels: string[], units: string[]): SwiftEntry[] {
         ucum: hit.coding.ucum,
         loinc: hit.coding.loincNumber,
         uncodedReason: hit.coding.uncodedReason,
+        taxon: hit.coding.taxon,
         display: hit.coding.display,
         analyteKey: hit.analyteKey,
       });
@@ -146,6 +149,15 @@ export function renderSwift(
           e.uncodedReason
             ? `, uncodedReason: ${swiftString(e.uncodedReason)}`
             : ""
+        }` +
+        `${
+          e.taxon
+            ? `, taxon: Taxon(ncbiTaxId: ${swiftString(
+                e.taxon.ncbiTaxId,
+              )}, scientificName: ${swiftString(
+                e.taxon.scientificName,
+              )}, rank: ${swiftString(e.taxon.rank)})`
+            : ""
         }),`,
     )
     .join("\n");
@@ -189,6 +201,13 @@ public struct AnalyteCoding: Sendable, Equatable, Codable {
   public let analyteKey: String
   /// Why LOINC has no code. Non-nil exactly when \`loinc\` is nil.
   public let uncodedReason: String?
+  /// The organism, where the quantity is the relative abundance of one.
+  ///
+  /// LOINC names tests, not organisms, so a stool report's taxa have no LOINC
+  /// code. NCBI Taxonomy is what names an organism, and its id survives the
+  /// renamings taxonomy goes through: the sheet prints Firmicutes, NCBI now
+  /// says Bacillota, and id 1239 is both. Set exactly on the microbiome taxa.
+  public let taxon: Taxon?
 
   /// True when a code applies and the app may quote one.
   public var isCoded: Bool { loinc != nil }
@@ -197,7 +216,7 @@ public struct AnalyteCoding: Sendable, Equatable, Codable {
   /// another module cannot construct one. The app target needs to.
   public init(
     labelKey: String, ucum: String, loinc: String?, display: String, analyteKey: String,
-    uncodedReason: String? = nil
+    uncodedReason: String? = nil, taxon: Taxon? = nil
   ) {
     self.labelKey = labelKey
     self.ucum = ucum
@@ -205,6 +224,23 @@ public struct AnalyteCoding: Sendable, Equatable, Codable {
     self.display = display
     self.analyteKey = analyteKey
     self.uncodedReason = uncodedReason
+    self.taxon = taxon
+  }
+}
+
+/// One entry of the NCBI Taxonomy database, verified against its API.
+public struct Taxon: Sendable, Equatable, Codable {
+  /// The numeric NCBI Taxonomy id, e.g. 239935 for Akkermansia muciniphila.
+  public let ncbiTaxId: String
+  /// NCBI's current scientific name, which may differ from what the sheet prints.
+  public let scientificName: String
+  /// phylum, class, genus or species.
+  public let rank: String
+
+  public init(ncbiTaxId: String, scientificName: String, rank: String) {
+    self.ncbiTaxId = ncbiTaxId
+    self.scientificName = scientificName
+    self.rank = rank
   }
 }
 

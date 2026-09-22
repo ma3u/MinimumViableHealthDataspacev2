@@ -127,3 +127,18 @@ describe("generate", () => {
     expect(current).toBe(await generate());
   });
 });
+
+describe("organisms in the Swift table", () => {
+  it("carry their NCBI Taxonomy entry, and coded analytes carry none", () => {
+    const swift = renderSwift(
+      buildEntries(["Akkermansia muciniphila", "LDL"], ["%", "mg/dl"]),
+      [],
+    );
+    expect(swift).toContain(
+      'taxon: Taxon(ncbiTaxId: "239935", scientificName: "Akkermansia muciniphila", rank: "species")',
+    );
+    const ldl = swift.split("\n").find((l) => l.includes('loinc: "2089-1"'));
+    expect(ldl).toBeDefined();
+    expect(ldl).not.toContain("taxon:");
+  });
+});
