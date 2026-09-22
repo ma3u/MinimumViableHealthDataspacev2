@@ -16,7 +16,7 @@
  * table against an official LOINC release before anyone treats its output as a
  * clinical document, see README, "What this is not".
  */
-import type { AnalyteCoding } from "./types.js";
+import type { AnalyteCoding, Taxon } from "./types.js";
 
 /**
  * Latin letters that OCR sometimes returns as their Cyrillic or Greek twins.
@@ -309,6 +309,40 @@ const uncoded = (
   display,
   ucum,
   uncodedReason,
+});
+
+const ORGANISM_UNCODED =
+  "LOINC names tests, not organisms: it has no term for the relative abundance of a taxon in stool. The organism is named by its NCBI Taxonomy id instead.";
+
+/**
+ * One organism of the gut microbiome, as a stool report prints it.
+ *
+ * The share stays uncoded, with the reason attached, because LOINC has no
+ * term for it. What names the organism is NCBI Taxonomy, and every id was
+ * checked against its API: the sheet's spelling may be a synonym (NCBI has
+ * renamed Firmicutes to Bacillota and Prevotella copri to Segatella copri),
+ * the id is the same organism either way, and `scientificName` records what
+ * NCBI calls it today so a reader is not left to reconcile the two.
+ */
+const organism = (spec: {
+  key: string;
+  labels: string[];
+  description: string;
+  taxon: Taxon;
+}): AnalyteDefinition => ({
+  key: spec.key,
+  description: spec.description,
+  labels: spec.labels,
+  byUnit: {
+    "%": {
+      ...uncoded(
+        `${spec.labels[0]} [relative abundance] in Stool`,
+        "%",
+        ORGANISM_UNCODED,
+      ),
+      taxon: spec.taxon,
+    },
+  },
 });
 
 /**
@@ -1414,7 +1448,10 @@ const DEFINITIONS: AnalyteDefinition[] = [
   // tables API: there is a term for the pH of stool and none for the
   // abundance of a genus, none for a diversity index, none for the ratio of
   // two phyla. LOINC names tests; naming an organism is what NCBI Taxonomy is
-  // for, and that is not wired up here yet.
+  // for, so every organism below carries its NCBI Taxonomy id, verified
+  // against the NCBI E-utilities API on 2026-09-22, while the share itself
+  // stays uncoded with the reason attached. A functional share (butyrate
+  // production, mucin degradation) is not an organism and carries no id.
   //
   // The alternative to carrying them uncoded was leaving seventy-six real
   // measurements of a person's own gut in a list called "unmatched", where
@@ -1433,147 +1470,113 @@ const DEFINITIONS: AnalyteDefinition[] = [
       ),
     },
   },
-  {
+  organism({
     key: "mb-actinobacteria",
     description:
       "A phylum of the gut microbiome; the figure is its share of all the bacteria found.",
     labels: ["Actinobacteria"],
-    byUnit: {
-      "%": uncoded(
-        "Actinobacteria [relative abundance] in Stool",
-        "%",
-        "LOINC names tests, not organisms: it has no term for the relative abundance of a taxon in stool. NCBI Taxonomy is what names an organism.",
-      ),
+    taxon: {
+      ncbiTaxId: "201174",
+      scientificName: "Actinomycetota",
+      rank: "phylum",
     },
-  },
-  {
+  }),
+  organism({
     key: "mb-akkermansia-muciniphila",
     description: "A species that lives on the gut's mucus layer.",
     labels: ["Akkermansia muciniphila"],
-    byUnit: {
-      "%": uncoded(
-        "Akkermansia muciniphila [relative abundance] in Stool",
-        "%",
-        "LOINC names tests, not organisms: it has no term for the relative abundance of a taxon in stool. NCBI Taxonomy is what names an organism.",
-      ),
+    taxon: {
+      ncbiTaxId: "239935",
+      scientificName: "Akkermansia muciniphila",
+      rank: "species",
     },
-  },
-  {
+  }),
+  organism({
     key: "mb-alistipes-spp",
     description:
       "A genus of gut bacteria; the figure is its share of all the bacteria found.",
     labels: ["Alistipes spp.", "Alistipes species"],
-    byUnit: {
-      "%": uncoded(
-        "Alistipes spp. [relative abundance] in Stool",
-        "%",
-        "LOINC names tests, not organisms: it has no term for the relative abundance of a taxon in stool. NCBI Taxonomy is what names an organism.",
-      ),
-    },
-  },
-  {
+    taxon: { ncbiTaxId: "239759", scientificName: "Alistipes", rank: "genus" },
+  }),
+  organism({
     key: "mb-anaerotruncus-colihominis",
     description:
       "A species of gut bacteria; the figure is its share of all the bacteria found.",
     labels: ["Anaerotruncus colihominis"],
-    byUnit: {
-      "%": uncoded(
-        "Anaerotruncus colihominis [relative abundance] in Stool",
-        "%",
-        "LOINC names tests, not organisms: it has no term for the relative abundance of a taxon in stool. NCBI Taxonomy is what names an organism.",
-      ),
+    taxon: {
+      ncbiTaxId: "169435",
+      scientificName: "Anaerotruncus colihominis",
+      rank: "species",
     },
-  },
-  {
+  }),
+  organism({
     key: "mb-bacteroides-spp",
     description:
       "A genus of gut bacteria; the figure is its share of all the bacteria found.",
     labels: ["Bacteroides spp.", "Bacteroides species"],
-    byUnit: {
-      "%": uncoded(
-        "Bacteroides spp. [relative abundance] in Stool",
-        "%",
-        "LOINC names tests, not organisms: it has no term for the relative abundance of a taxon in stool. NCBI Taxonomy is what names an organism.",
-      ),
-    },
-  },
-  {
+    taxon: { ncbiTaxId: "816", scientificName: "Bacteroides", rank: "genus" },
+  }),
+  organism({
     key: "mb-bacteroides-vulgatus",
     description:
       "A species of gut bacteria; the figure is its share of all the bacteria found.",
     labels: ["Bacteroides vulgatus"],
-    byUnit: {
-      "%": uncoded(
-        "Bacteroides vulgatus [relative abundance] in Stool",
-        "%",
-        "LOINC names tests, not organisms: it has no term for the relative abundance of a taxon in stool. NCBI Taxonomy is what names an organism.",
-      ),
+    taxon: {
+      ncbiTaxId: "821",
+      scientificName: "Phocaeicola vulgatus",
+      rank: "species",
     },
-  },
-  {
+  }),
+  organism({
     key: "mb-bacteroidetes",
     description:
       "A phylum of the gut microbiome; the figure is its share of all the bacteria found.",
     labels: ["Bacteroidetes"],
-    byUnit: {
-      "%": uncoded(
-        "Bacteroidetes [relative abundance] in Stool",
-        "%",
-        "LOINC names tests, not organisms: it has no term for the relative abundance of a taxon in stool. NCBI Taxonomy is what names an organism.",
-      ),
-    },
-  },
-  {
+    taxon: { ncbiTaxId: "976", scientificName: "Bacteroidota", rank: "phylum" },
+  }),
+  organism({
     key: "mb-bifidobacterium-adolescentis",
     description:
       "A species of gut bacteria; the figure is its share of all the bacteria found.",
     labels: ["Bifidobacterium adolescentis"],
-    byUnit: {
-      "%": uncoded(
-        "Bifidobacterium adolescentis [relative abundance] in Stool",
-        "%",
-        "LOINC names tests, not organisms: it has no term for the relative abundance of a taxon in stool. NCBI Taxonomy is what names an organism.",
-      ),
+    taxon: {
+      ncbiTaxId: "1680",
+      scientificName: "Bifidobacterium adolescentis",
+      rank: "species",
     },
-  },
-  {
+  }),
+  organism({
     key: "mb-bifidobacterium-dentium",
     description:
       "A species of gut bacteria; the figure is its share of all the bacteria found.",
     labels: ["Bifidobacterium dentium"],
-    byUnit: {
-      "%": uncoded(
-        "Bifidobacterium dentium [relative abundance] in Stool",
-        "%",
-        "LOINC names tests, not organisms: it has no term for the relative abundance of a taxon in stool. NCBI Taxonomy is what names an organism.",
-      ),
+    taxon: {
+      ncbiTaxId: "1689",
+      scientificName: "Bifidobacterium dentium",
+      rank: "species",
     },
-  },
-  {
+  }),
+  organism({
     key: "mb-bifidobacterium-spp",
     description:
       "A genus of gut bacteria; the figure is its share of all the bacteria found.",
     labels: ["Bifidobacterium spp.", "Bifidobacterium species"],
-    byUnit: {
-      "%": uncoded(
-        "Bifidobacterium spp. [relative abundance] in Stool",
-        "%",
-        "LOINC names tests, not organisms: it has no term for the relative abundance of a taxon in stool. NCBI Taxonomy is what names an organism.",
-      ),
+    taxon: {
+      ncbiTaxId: "1678",
+      scientificName: "Bifidobacterium",
+      rank: "genus",
     },
-  },
-  {
+  }),
+  organism({
     key: "mb-bilophila-wadsworthia",
     description: "A bile-tolerant, sulphate-reducing species.",
     labels: ["Bilophila wadsworthia"],
-    byUnit: {
-      "%": uncoded(
-        "Bilophila wadsworthia [relative abundance] in Stool",
-        "%",
-        "LOINC names tests, not organisms: it has no term for the relative abundance of a taxon in stool. NCBI Taxonomy is what names an organism.",
-      ),
+    taxon: {
+      ncbiTaxId: "35833",
+      scientificName: "Bilophila wadsworthia",
+      rank: "species",
     },
-  },
+  }),
   {
     key: "mb-butyratproduktion",
     description: "The share of the bacteria found that produce butyrate.",
@@ -1586,317 +1589,225 @@ const DEFINITIONS: AnalyteDefinition[] = [
       ),
     },
   },
-  {
+  organism({
     key: "mb-butyrivibrio-crossotus",
     description:
       "A species of gut bacteria; the figure is its share of all the bacteria found.",
     labels: ["Butyrivibrio crossotus"],
-    byUnit: {
-      "%": uncoded(
-        "Butyrivibrio crossotus [relative abundance] in Stool",
-        "%",
-        "LOINC names tests, not organisms: it has no term for the relative abundance of a taxon in stool. NCBI Taxonomy is what names an organism.",
-      ),
+    taxon: {
+      ncbiTaxId: "45851",
+      scientificName: "Eshraghiella crossota",
+      rank: "species",
     },
-  },
-  {
+  }),
+  organism({
     key: "mb-candida-albicans",
     description:
       "A yeast of the gut; the figure is its share of the flora found.",
     labels: ["Candida albicans"],
-    byUnit: {
-      "%": uncoded(
-        "Candida albicans [relative abundance] in Stool",
-        "%",
-        "LOINC names tests, not organisms: it has no term for the relative abundance of a taxon in stool. NCBI Taxonomy is what names an organism.",
-      ),
+    taxon: {
+      ncbiTaxId: "5476",
+      scientificName: "Candida albicans",
+      rank: "species",
     },
-  },
-  {
+  }),
+  organism({
     key: "mb-candida-spp",
     description:
       "A yeast of the gut; the figure is its share of the flora found.",
     labels: ["Candida spp.", "Candida species"],
-    byUnit: {
-      "%": uncoded(
-        "Candida spp. [relative abundance] in Stool",
-        "%",
-        "LOINC names tests, not organisms: it has no term for the relative abundance of a taxon in stool. NCBI Taxonomy is what names an organism.",
-      ),
-    },
-  },
-  {
+    taxon: { ncbiTaxId: "5475", scientificName: "Candida", rank: "genus" },
+  }),
+  organism({
     key: "mb-citrobacter-spp",
     description:
       "A genus of gut bacteria; the figure is its share of all the bacteria found.",
     labels: ["Citrobacter spp.", "Citrobacter species"],
-    byUnit: {
-      "%": uncoded(
-        "Citrobacter spp. [relative abundance] in Stool",
-        "%",
-        "LOINC names tests, not organisms: it has no term for the relative abundance of a taxon in stool. NCBI Taxonomy is what names an organism.",
-      ),
-    },
-  },
-  {
+    taxon: { ncbiTaxId: "544", scientificName: "Citrobacter", rank: "genus" },
+  }),
+  organism({
     key: "mb-clostridium-difficile",
     description: "A species that can take over after a course of antibiotics.",
     labels: ["Clostridium difficile"],
-    byUnit: {
-      "%": uncoded(
-        "Clostridium difficile [relative abundance] in Stool",
-        "%",
-        "LOINC names tests, not organisms: it has no term for the relative abundance of a taxon in stool. NCBI Taxonomy is what names an organism.",
-      ),
+    taxon: {
+      ncbiTaxId: "1496",
+      scientificName: "Clostridioides difficile",
+      rank: "species",
     },
-  },
-  {
+  }),
+  organism({
     key: "mb-clostridium-scindens",
     description:
       "A species of gut bacteria; the figure is its share of all the bacteria found.",
     labels: ["Clostridium scindens"],
-    byUnit: {
-      "%": uncoded(
-        "Clostridium scindens [relative abundance] in Stool",
-        "%",
-        "LOINC names tests, not organisms: it has no term for the relative abundance of a taxon in stool. NCBI Taxonomy is what names an organism.",
-      ),
+    taxon: {
+      ncbiTaxId: "29347",
+      scientificName: "[Clostridium] scindens",
+      rank: "species",
     },
-  },
-  {
+  }),
+  organism({
     key: "mb-clostridium-spp",
     description:
       "A genus of gut bacteria; the figure is its share of all the bacteria found.",
     labels: ["Clostridium spp.", "Clostridium species"],
-    byUnit: {
-      "%": uncoded(
-        "Clostridium spp. [relative abundance] in Stool",
-        "%",
-        "LOINC names tests, not organisms: it has no term for the relative abundance of a taxon in stool. NCBI Taxonomy is what names an organism.",
-      ),
-    },
-  },
-  {
+    taxon: { ncbiTaxId: "1485", scientificName: "Clostridium", rank: "genus" },
+  }),
+  organism({
     key: "mb-cyanobacteria",
     description:
       "A phylum of the gut microbiome; the figure is its share of all the bacteria found.",
     labels: ["Cyanobacteria"],
-    byUnit: {
-      "%": uncoded(
-        "Cyanobacteria [relative abundance] in Stool",
-        "%",
-        "LOINC names tests, not organisms: it has no term for the relative abundance of a taxon in stool. NCBI Taxonomy is what names an organism.",
-      ),
+    taxon: {
+      ncbiTaxId: "1117",
+      scientificName: "Cyanobacteriota",
+      rank: "phylum",
     },
-  },
-  {
+  }),
+  organism({
     key: "mb-desulfobacter-spp",
     description:
       "A genus of gut bacteria; the figure is its share of all the bacteria found.",
     labels: ["Desulfobacter spp.", "Desulfobacter species"],
-    byUnit: {
-      "%": uncoded(
-        "Desulfobacter spp. [relative abundance] in Stool",
-        "%",
-        "LOINC names tests, not organisms: it has no term for the relative abundance of a taxon in stool. NCBI Taxonomy is what names an organism.",
-      ),
+    taxon: {
+      ncbiTaxId: "2289",
+      scientificName: "Desulfobacter",
+      rank: "genus",
     },
-  },
-  {
+  }),
+  organism({
     key: "mb-desulfovibrio-spp",
     description:
       "A genus of gut bacteria; the figure is its share of all the bacteria found.",
     labels: ["Desulfovibrio spp.", "Desulfovibrio species"],
-    byUnit: {
-      "%": uncoded(
-        "Desulfovibrio spp. [relative abundance] in Stool",
-        "%",
-        "LOINC names tests, not organisms: it has no term for the relative abundance of a taxon in stool. NCBI Taxonomy is what names an organism.",
-      ),
-    },
-  },
-  {
+    taxon: { ncbiTaxId: "872", scientificName: "Desulfovibrio", rank: "genus" },
+  }),
+  organism({
     key: "mb-desulfuromonas-spp",
     description:
       "A genus of gut bacteria; the figure is its share of all the bacteria found.",
     labels: ["Desulfuromonas spp.", "Desulfuromonas species"],
-    byUnit: {
-      "%": uncoded(
-        "Desulfuromonas spp. [relative abundance] in Stool",
-        "%",
-        "LOINC names tests, not organisms: it has no term for the relative abundance of a taxon in stool. NCBI Taxonomy is what names an organism.",
-      ),
+    taxon: {
+      ncbiTaxId: "890",
+      scientificName: "Desulfuromonas",
+      rank: "genus",
     },
-  },
-  {
+  }),
+  organism({
     key: "mb-dorea-spp",
     description:
       "A genus of gut bacteria; the figure is its share of all the bacteria found.",
     labels: ["Dorea spp.", "Dorea species"],
-    byUnit: {
-      "%": uncoded(
-        "Dorea spp. [relative abundance] in Stool",
-        "%",
-        "LOINC names tests, not organisms: it has no term for the relative abundance of a taxon in stool. NCBI Taxonomy is what names an organism.",
-      ),
-    },
-  },
-  {
+    taxon: { ncbiTaxId: "189330", scientificName: "Dorea", rank: "genus" },
+  }),
+  organism({
     key: "mb-enterobacter-spp",
     description:
       "A genus of gut bacteria; the figure is its share of all the bacteria found.",
     labels: ["Enterobacter spp.", "Enterobacter species"],
-    byUnit: {
-      "%": uncoded(
-        "Enterobacter spp. [relative abundance] in Stool",
-        "%",
-        "LOINC names tests, not organisms: it has no term for the relative abundance of a taxon in stool. NCBI Taxonomy is what names an organism.",
-      ),
-    },
-  },
-  {
+    taxon: { ncbiTaxId: "547", scientificName: "Enterobacter", rank: "genus" },
+  }),
+  organism({
     key: "mb-enterococcus-spp",
     description:
       "A genus of gut bacteria; the figure is its share of all the bacteria found.",
     labels: ["Enterococcus spp.", "Enterococcus species"],
-    byUnit: {
-      "%": uncoded(
-        "Enterococcus spp. [relative abundance] in Stool",
-        "%",
-        "LOINC names tests, not organisms: it has no term for the relative abundance of a taxon in stool. NCBI Taxonomy is what names an organism.",
-      ),
-    },
-  },
-  {
+    taxon: { ncbiTaxId: "1350", scientificName: "Enterococcus", rank: "genus" },
+  }),
+  organism({
     key: "mb-escherichia-spp",
     description:
       "A genus of gut bacteria; the figure is its share of all the bacteria found.",
     labels: ["Escherichia spp.", "Escherichia species"],
-    byUnit: {
-      "%": uncoded(
-        "Escherichia spp. [relative abundance] in Stool",
-        "%",
-        "LOINC names tests, not organisms: it has no term for the relative abundance of a taxon in stool. NCBI Taxonomy is what names an organism.",
-      ),
-    },
-  },
-  {
+    taxon: { ncbiTaxId: "561", scientificName: "Escherichia", rank: "genus" },
+  }),
+  organism({
     key: "mb-eubacterium-spp",
     description:
       "A genus of gut bacteria; the figure is its share of all the bacteria found.",
     labels: ["Eubacterium spp.", "Eubacterium species"],
-    byUnit: {
-      "%": uncoded(
-        "Eubacterium spp. [relative abundance] in Stool",
-        "%",
-        "LOINC names tests, not organisms: it has no term for the relative abundance of a taxon in stool. NCBI Taxonomy is what names an organism.",
-      ),
-    },
-  },
-  {
+    taxon: { ncbiTaxId: "1730", scientificName: "Eubacterium", rank: "genus" },
+  }),
+  organism({
     key: "mb-euryarchaeota",
     description:
       "A phylum of the gut microbiome; the figure is its share of all the bacteria found.",
     labels: ["Euryarchaeota"],
-    byUnit: {
-      "%": uncoded(
-        "Euryarchaeota [relative abundance] in Stool",
-        "%",
-        "LOINC names tests, not organisms: it has no term for the relative abundance of a taxon in stool. NCBI Taxonomy is what names an organism.",
-      ),
+    taxon: {
+      ncbiTaxId: "28890",
+      scientificName: "Methanobacteriota",
+      rank: "phylum",
     },
-  },
-  {
+  }),
+  organism({
     key: "mb-faecalibacterium-prausnitzii",
     description:
       "One of the most common butyrate-producing species of the colon.",
     labels: ["Faecalibacterium prausnitzii"],
-    byUnit: {
-      "%": uncoded(
-        "Faecalibacterium prausnitzii [relative abundance] in Stool",
-        "%",
-        "LOINC names tests, not organisms: it has no term for the relative abundance of a taxon in stool. NCBI Taxonomy is what names an organism.",
-      ),
+    taxon: {
+      ncbiTaxId: "853",
+      scientificName: "Faecalibacterium prausnitzii",
+      rank: "species",
     },
-  },
-  {
+  }),
+  organism({
     key: "mb-firmicutes",
     description:
       "A phylum of the gut microbiome; the figure is its share of all the bacteria found.",
     labels: ["Firmicutes"],
-    byUnit: {
-      "%": uncoded(
-        "Firmicutes [relative abundance] in Stool",
-        "%",
-        "LOINC names tests, not organisms: it has no term for the relative abundance of a taxon in stool. NCBI Taxonomy is what names an organism.",
-      ),
-    },
-  },
-  {
+    taxon: { ncbiTaxId: "1239", scientificName: "Bacillota", rank: "phylum" },
+  }),
+  organism({
     key: "mb-fusobacteria",
     description:
       "A phylum of the gut microbiome; the figure is its share of all the bacteria found.",
     labels: ["Fusobacteria"],
-    byUnit: {
-      "%": uncoded(
-        "Fusobacteria [relative abundance] in Stool",
-        "%",
-        "LOINC names tests, not organisms: it has no term for the relative abundance of a taxon in stool. NCBI Taxonomy is what names an organism.",
-      ),
+    taxon: {
+      ncbiTaxId: "32066",
+      scientificName: "Fusobacteriota",
+      rank: "phylum",
     },
-  },
-  {
+  }),
+  organism({
     key: "mb-fusobacterium-nucleatum",
     description:
       "A species of gut bacteria; the figure is its share of all the bacteria found.",
     labels: ["Fusobacterium nucleatum"],
-    byUnit: {
-      "%": uncoded(
-        "Fusobacterium nucleatum [relative abundance] in Stool",
-        "%",
-        "LOINC names tests, not organisms: it has no term for the relative abundance of a taxon in stool. NCBI Taxonomy is what names an organism.",
-      ),
+    taxon: {
+      ncbiTaxId: "851",
+      scientificName: "Fusobacterium nucleatum",
+      rank: "species",
     },
-  },
-  {
+  }),
+  organism({
     key: "mb-geotrichum-candidum",
     description:
       "A yeast of the gut; the figure is its share of the flora found.",
     labels: ["Geotrichum candidum"],
-    byUnit: {
-      "%": uncoded(
-        "Geotrichum candidum [relative abundance] in Stool",
-        "%",
-        "LOINC names tests, not organisms: it has no term for the relative abundance of a taxon in stool. NCBI Taxonomy is what names an organism.",
-      ),
+    taxon: {
+      ncbiTaxId: "1173061",
+      scientificName: "Geotrichum candidum",
+      rank: "species",
     },
-  },
-  {
+  }),
+  organism({
     key: "mb-hafnia-alveii",
     description:
       "A species of gut bacteria; the figure is its share of all the bacteria found.",
     labels: ["Hafnia alveii"],
-    byUnit: {
-      "%": uncoded(
-        "Hafnia alveii [relative abundance] in Stool",
-        "%",
-        "LOINC names tests, not organisms: it has no term for the relative abundance of a taxon in stool. NCBI Taxonomy is what names an organism.",
-      ),
+    taxon: {
+      ncbiTaxId: "569",
+      scientificName: "Hafnia alvei",
+      rank: "species",
     },
-  },
-  {
+  }),
+  organism({
     key: "mb-klebsiella-spp",
     description:
       "A genus of gut bacteria; the figure is its share of all the bacteria found.",
     labels: ["Klebsiella spp.", "Klebsiella species"],
-    byUnit: {
-      "%": uncoded(
-        "Klebsiella spp. [relative abundance] in Stool",
-        "%",
-        "LOINC names tests, not organisms: it has no term for the relative abundance of a taxon in stool. NCBI Taxonomy is what names an organism.",
-      ),
-    },
-  },
+    taxon: { ncbiTaxId: "570", scientificName: "Klebsiella", rank: "genus" },
+  }),
   {
     key: "mb-lps-tragende-bakterien",
     description:
@@ -1910,58 +1821,50 @@ const DEFINITIONS: AnalyteDefinition[] = [
       ),
     },
   },
-  {
+  organism({
     key: "mb-lactobacillus-brevis",
     description:
       "A species of gut bacteria; the figure is its share of all the bacteria found.",
     labels: ["Lactobacillus brevis"],
-    byUnit: {
-      "%": uncoded(
-        "Lactobacillus brevis [relative abundance] in Stool",
-        "%",
-        "LOINC names tests, not organisms: it has no term for the relative abundance of a taxon in stool. NCBI Taxonomy is what names an organism.",
-      ),
+    taxon: {
+      ncbiTaxId: "1580",
+      scientificName: "Levilactobacillus brevis",
+      rank: "species",
     },
-  },
-  {
+  }),
+  organism({
     key: "mb-lactobacillus-paracasei",
     description:
       "A species of gut bacteria; the figure is its share of all the bacteria found.",
     labels: ["Lactobacillus paracasei"],
-    byUnit: {
-      "%": uncoded(
-        "Lactobacillus paracasei [relative abundance] in Stool",
-        "%",
-        "LOINC names tests, not organisms: it has no term for the relative abundance of a taxon in stool. NCBI Taxonomy is what names an organism.",
-      ),
+    taxon: {
+      ncbiTaxId: "1597",
+      scientificName: "Lacticaseibacillus paracasei",
+      rank: "species",
     },
-  },
-  {
+  }),
+  organism({
     key: "mb-lactobacillus-plantarum",
     description:
       "A species of gut bacteria; the figure is its share of all the bacteria found.",
     labels: ["Lactobacillus plantarum"],
-    byUnit: {
-      "%": uncoded(
-        "Lactobacillus plantarum [relative abundance] in Stool",
-        "%",
-        "LOINC names tests, not organisms: it has no term for the relative abundance of a taxon in stool. NCBI Taxonomy is what names an organism.",
-      ),
+    taxon: {
+      ncbiTaxId: "1590",
+      scientificName: "Lactiplantibacillus plantarum",
+      rank: "species",
     },
-  },
-  {
+  }),
+  organism({
     key: "mb-lactobacillus-spp",
     description:
       "A genus of gut bacteria; the figure is its share of all the bacteria found.",
     labels: ["Lactobacillus spp.", "Lactobacillus species"],
-    byUnit: {
-      "%": uncoded(
-        "Lactobacillus spp. [relative abundance] in Stool",
-        "%",
-        "LOINC names tests, not organisms: it has no term for the relative abundance of a taxon in stool. NCBI Taxonomy is what names an organism.",
-      ),
+    taxon: {
+      ncbiTaxId: "1578",
+      scientificName: "Lactobacillus",
+      rank: "genus",
     },
-  },
+  }),
   {
     key: "mb-laktatproduktion",
     description: "The share of the bacteria found that produce lactate.",
@@ -1974,32 +1877,28 @@ const DEFINITIONS: AnalyteDefinition[] = [
       ),
     },
   },
-  {
+  organism({
     key: "mb-methanobacteria",
     description:
       "A species of gut bacteria; the figure is its share of all the bacteria found.",
     labels: ["Methanobacteria"],
-    byUnit: {
-      "%": uncoded(
-        "Methanobacteria [relative abundance] in Stool",
-        "%",
-        "LOINC names tests, not organisms: it has no term for the relative abundance of a taxon in stool. NCBI Taxonomy is what names an organism.",
-      ),
+    taxon: {
+      ncbiTaxId: "183925",
+      scientificName: "Methanobacteria",
+      rank: "class",
     },
-  },
-  {
+  }),
+  organism({
     key: "mb-methanobrevibacter-spp",
     description:
       "A genus of gut bacteria; the figure is its share of all the bacteria found.",
     labels: ["Methanobrevibacter spp.", "Methanobrevibacter species"],
-    byUnit: {
-      "%": uncoded(
-        "Methanobrevibacter spp. [relative abundance] in Stool",
-        "%",
-        "LOINC names tests, not organisms: it has no term for the relative abundance of a taxon in stool. NCBI Taxonomy is what names an organism.",
-      ),
+    taxon: {
+      ncbiTaxId: "2172",
+      scientificName: "Methanobrevibacter",
+      rank: "genus",
     },
-  },
+  }),
   {
     key: "mb-mucindegradation",
     description:
@@ -2013,213 +1912,149 @@ const DEFINITIONS: AnalyteDefinition[] = [
       ),
     },
   },
-  {
+  organism({
     key: "mb-oscillibacter-spp",
     description:
       "A genus of gut bacteria; the figure is its share of all the bacteria found.",
     labels: ["Oscillibacter spp.", "Oscillibacter species"],
-    byUnit: {
-      "%": uncoded(
-        "Oscillibacter spp. [relative abundance] in Stool",
-        "%",
-        "LOINC names tests, not organisms: it has no term for the relative abundance of a taxon in stool. NCBI Taxonomy is what names an organism.",
-      ),
+    taxon: {
+      ncbiTaxId: "459786",
+      scientificName: "Oscillibacter",
+      rank: "genus",
     },
-  },
-  {
+  }),
+  organism({
     key: "mb-oxalobacter-formigenes",
     description:
       "A species of gut bacteria; the figure is its share of all the bacteria found.",
     labels: ["Oxalobacter formigenes"],
-    byUnit: {
-      "%": uncoded(
-        "Oxalobacter formigenes [relative abundance] in Stool",
-        "%",
-        "LOINC names tests, not organisms: it has no term for the relative abundance of a taxon in stool. NCBI Taxonomy is what names an organism.",
-      ),
+    taxon: {
+      ncbiTaxId: "847",
+      scientificName: "Oxalobacter formigenes",
+      rank: "species",
     },
-  },
-  {
+  }),
+  organism({
     key: "mb-prevotella-copri",
     description: "A species associated with a fibre-rich diet.",
     labels: ["Prevotella copri"],
-    byUnit: {
-      "%": uncoded(
-        "Prevotella copri [relative abundance] in Stool",
-        "%",
-        "LOINC names tests, not organisms: it has no term for the relative abundance of a taxon in stool. NCBI Taxonomy is what names an organism.",
-      ),
+    taxon: {
+      ncbiTaxId: "165179",
+      scientificName: "Segatella copri",
+      rank: "species",
     },
-  },
-  {
+  }),
+  organism({
     key: "mb-prevotella-spp",
     description:
       "A genus of gut bacteria; the figure is its share of all the bacteria found.",
     labels: ["Prevotella spp.", "Prevotella species"],
-    byUnit: {
-      "%": uncoded(
-        "Prevotella spp. [relative abundance] in Stool",
-        "%",
-        "LOINC names tests, not organisms: it has no term for the relative abundance of a taxon in stool. NCBI Taxonomy is what names an organism.",
-      ),
-    },
-  },
-  {
+    taxon: { ncbiTaxId: "838", scientificName: "Prevotella", rank: "genus" },
+  }),
+  organism({
     key: "mb-proteobacteria",
     description:
       "A phylum of the gut microbiome; the figure is its share of all the bacteria found.",
     labels: ["Proteobacteria"],
-    byUnit: {
-      "%": uncoded(
-        "Proteobacteria [relative abundance] in Stool",
-        "%",
-        "LOINC names tests, not organisms: it has no term for the relative abundance of a taxon in stool. NCBI Taxonomy is what names an organism.",
-      ),
+    taxon: {
+      ncbiTaxId: "1224",
+      scientificName: "Pseudomonadota",
+      rank: "phylum",
     },
-  },
-  {
+  }),
+  organism({
     key: "mb-providencia-spp",
     description:
       "A genus of gut bacteria; the figure is its share of all the bacteria found.",
     labels: ["Providencia spp.", "Providencia species"],
-    byUnit: {
-      "%": uncoded(
-        "Providencia spp. [relative abundance] in Stool",
-        "%",
-        "LOINC names tests, not organisms: it has no term for the relative abundance of a taxon in stool. NCBI Taxonomy is what names an organism.",
-      ),
-    },
-  },
-  {
+    taxon: { ncbiTaxId: "586", scientificName: "Providencia", rank: "genus" },
+  }),
+  organism({
     key: "mb-pseudomonas-spp",
     description:
       "A genus of gut bacteria; the figure is its share of all the bacteria found.",
     labels: ["Pseudomonas spp.", "Pseudomonas species"],
-    byUnit: {
-      "%": uncoded(
-        "Pseudomonas spp. [relative abundance] in Stool",
-        "%",
-        "LOINC names tests, not organisms: it has no term for the relative abundance of a taxon in stool. NCBI Taxonomy is what names an organism.",
-      ),
-    },
-  },
-  {
+    taxon: { ncbiTaxId: "286", scientificName: "Pseudomonas", rank: "genus" },
+  }),
+  organism({
     key: "mb-roseburia-spp",
     description:
       "A genus of gut bacteria; the figure is its share of all the bacteria found.",
     labels: ["Roseburia spp.", "Roseburia species"],
-    byUnit: {
-      "%": uncoded(
-        "Roseburia spp. [relative abundance] in Stool",
-        "%",
-        "LOINC names tests, not organisms: it has no term for the relative abundance of a taxon in stool. NCBI Taxonomy is what names an organism.",
-      ),
-    },
-  },
-  {
+    taxon: { ncbiTaxId: "841", scientificName: "Roseburia", rank: "genus" },
+  }),
+  organism({
     key: "mb-ruminococcus-spp",
     description:
       "A genus of gut bacteria; the figure is its share of all the bacteria found.",
     labels: ["Ruminococcus spp.", "Ruminococcus species"],
-    byUnit: {
-      "%": uncoded(
-        "Ruminococcus spp. [relative abundance] in Stool",
-        "%",
-        "LOINC names tests, not organisms: it has no term for the relative abundance of a taxon in stool. NCBI Taxonomy is what names an organism.",
-      ),
-    },
-  },
-  {
+    taxon: { ncbiTaxId: "1263", scientificName: "Ruminococcus", rank: "genus" },
+  }),
+  organism({
     key: "mb-saccharomyces-cerevisiae",
     description:
       "A yeast of the gut; the figure is its share of the flora found.",
     labels: ["Saccharomyces cerevisiae"],
-    byUnit: {
-      "%": uncoded(
-        "Saccharomyces cerevisiae [relative abundance] in Stool",
-        "%",
-        "LOINC names tests, not organisms: it has no term for the relative abundance of a taxon in stool. NCBI Taxonomy is what names an organism.",
-      ),
+    taxon: {
+      ncbiTaxId: "4932",
+      scientificName: "Saccharomyces cerevisiae",
+      rank: "species",
     },
-  },
-  {
+  }),
+  organism({
     key: "mb-serratia-spp",
     description:
       "A genus of gut bacteria; the figure is its share of all the bacteria found.",
     labels: ["Serratia spp.", "Serratia species"],
-    byUnit: {
-      "%": uncoded(
-        "Serratia spp. [relative abundance] in Stool",
-        "%",
-        "LOINC names tests, not organisms: it has no term for the relative abundance of a taxon in stool. NCBI Taxonomy is what names an organism.",
-      ),
-    },
-  },
-  {
+    taxon: { ncbiTaxId: "613", scientificName: "Serratia", rank: "genus" },
+  }),
+  organism({
     key: "mb-streptococcus-spp",
     description:
       "A genus of gut bacteria; the figure is its share of all the bacteria found.",
     labels: ["Streptococcus spp.", "Streptococcus species"],
-    byUnit: {
-      "%": uncoded(
-        "Streptococcus spp. [relative abundance] in Stool",
-        "%",
-        "LOINC names tests, not organisms: it has no term for the relative abundance of a taxon in stool. NCBI Taxonomy is what names an organism.",
-      ),
+    taxon: {
+      ncbiTaxId: "1301",
+      scientificName: "Streptococcus",
+      rank: "genus",
     },
-  },
-  {
+  }),
+  organism({
     key: "mb-sutterella-spp",
     description:
       "A genus of gut bacteria; the figure is its share of all the bacteria found.",
     labels: ["Sutterella spp.", "Sutterella species"],
-    byUnit: {
-      "%": uncoded(
-        "Sutterella spp. [relative abundance] in Stool",
-        "%",
-        "LOINC names tests, not organisms: it has no term for the relative abundance of a taxon in stool. NCBI Taxonomy is what names an organism.",
-      ),
-    },
-  },
-  {
+    taxon: { ncbiTaxId: "40544", scientificName: "Sutterella", rank: "genus" },
+  }),
+  organism({
     key: "mb-tenericutes",
     description:
       "A phylum of the gut microbiome; the figure is its share of all the bacteria found.",
     labels: ["Tenericutes"],
-    byUnit: {
-      "%": uncoded(
-        "Tenericutes [relative abundance] in Stool",
-        "%",
-        "LOINC names tests, not organisms: it has no term for the relative abundance of a taxon in stool. NCBI Taxonomy is what names an organism.",
-      ),
+    taxon: {
+      ncbiTaxId: "544448",
+      scientificName: "Mycoplasmatota",
+      rank: "phylum",
     },
-  },
-  {
+  }),
+  organism({
     key: "mb-veillonella-spp",
     description:
       "A genus of gut bacteria; the figure is its share of all the bacteria found.",
     labels: ["Veillonella spp.", "Veillonella species"],
-    byUnit: {
-      "%": uncoded(
-        "Veillonella spp. [relative abundance] in Stool",
-        "%",
-        "LOINC names tests, not organisms: it has no term for the relative abundance of a taxon in stool. NCBI Taxonomy is what names an organism.",
-      ),
-    },
-  },
-  {
+    taxon: { ncbiTaxId: "29465", scientificName: "Veillonella", rank: "genus" },
+  }),
+  organism({
     key: "mb-verrucomicrobia",
     description:
       "A phylum of the gut microbiome; the figure is its share of all the bacteria found.",
     labels: ["Verrucomicrobia"],
-    byUnit: {
-      "%": uncoded(
-        "Verrucomicrobia [relative abundance] in Stool",
-        "%",
-        "LOINC names tests, not organisms: it has no term for the relative abundance of a taxon in stool. NCBI Taxonomy is what names an organism.",
-      ),
+    taxon: {
+      ncbiTaxId: "74201",
+      scientificName: "Verrucomicrobiota",
+      rank: "phylum",
     },
-  },
+  }),
   {
     key: "stool-ph",
     description:

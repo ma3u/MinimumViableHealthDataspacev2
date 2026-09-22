@@ -7,10 +7,12 @@ import {
   EXT_OCR_CONFIDENCE,
   EXT_SOURCE_KIND,
   EXT_SOURCE_LINE,
+  NCBI_TAXONOMY,
   buildBundle,
   statusForSource,
 } from "../src/to-fhir.js";
-import type { TextSource } from "../src/types.js";
+import { lookupAnalyte } from "../src/analytes.js";
+import type { CodedLabValue, TextSource } from "../src/types.js";
 
 const FIXTURE = readFileSync(
   join(__dirname, "fixtures/lab-report-de.txt"),
@@ -164,5 +166,69 @@ describe("buildBundle with OCR provenance", () => {
   it("says in the provenance that a machine read the pixels", () => {
     const [prov] = ofType(bundle, "Provenance");
     expect((prov.activity as { text: string }).text).toMatch(/OCR/i);
+  });
+});
+
+describe("an organism from a stool report", () => {
+  const value = (): CodedLabValue => {
+    const hit = lookupAnalyte("Akkermansia muciniphila", "%");
+    if (hit.status !== "ok") throw new Error(hit.status);
+    return {
+      label: "Akkermansia muciniphila",
+      value: 3.2,
+      unitRaw: "%",
+      line: "Akkermansia muciniphila  3,2  %",
+      lineNumber: 14,
+      analyteKey: hit.analyteKey,
+      coding: hit.coding,
+    };
+  };
+  const observation = () => {
+    const bundle = buildBundle([value()], {
+      meta: { patientId: "self", effectiveDateTime: "2026-08-14" },
+      source: digitalSource,
+      now: NOW,
+    });
+    return ofType(bundle, "Observation")[0] as Record<string, any>;
+  };
+
+  it("has a code with text, no LOINC coding, and the reason why", () => {
+    const code = observation().code;
+    expect(code.coding).toBeUndefined();
+    expect(code.text).toBe("Akkermansia muciniphila");
+    expect(code.extension[0].url).toBe(
+      "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+    );
+    expect(code.extension[0].valueCode).toBe("not-applicable");
+    expect(code.extension[0]._valueCode.extension[0].valueString).toMatch(
+      /NCBI Taxonomy/,
+    );
+  });
+
+  it("names the organism by its NCBI Taxonomy id in a component", () => {
+    const [component] = observation().component;
+    expect(component.code.coding[0]).toEqual({
+      system: "http://loinc.org",
+      code: "41852-5",
+      display: "Microorganism or agent identified in Specimen",
+    });
+    expect(component.valueCodeableConcept).toEqual({
+      coding: [
+        {
+          system: NCBI_TAXONOMY,
+          code: "239935",
+          display: "Akkermansia muciniphila",
+        },
+      ],
+      text: "Akkermansia muciniphila",
+    });
+  });
+
+  it("gives a coded analyte no component and no absent reason", () => {
+    const bundle = build(digitalSource);
+    for (const obs of ofType(bundle, "Observation") as Record<string, any>[]) {
+      expect(obs.component).toBeUndefined();
+      expect(obs.code.extension).toBeUndefined();
+    }
   });
 });

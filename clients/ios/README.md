@@ -283,6 +283,21 @@ an empty one.
 The unit still decides, as everywhere else: the same label in cm² codes to
 `73707-2`, and in kg does not.
 
+The gut microbiome is the one large exception, and it is uncoded for a
+different reason: LOINC names tests, not organisms, so the share of
+_Akkermansia muciniphila_ in a stool sample has no LOINC code and never will.
+What names an organism is NCBI Taxonomy, so every organism in the dictionary
+carries its NCBI Taxonomy id, each one checked against NCBI's own API. The id
+survives the renamings taxonomy goes through: the sheet prints _Firmicutes_,
+NCBI now calls the phylum _Bacillota_, and id 1239 is both, so the table keeps
+the printed name as the label and records NCBI's current name beside the id.
+The report screen prints `NCBI Taxonomy 239935` where a coded value prints its
+LOINC code. In FHIR the share stays a text-only code with the reason attached,
+and the organism is a component of the observation: LOINC `41852-5`
+"Microorganism or agent identified in Specimen" as the component's code and
+the taxon as its value. A functional share such as butyrate production is not
+an organism and carries no id.
+
 ## Exports
 
 | Action                     | For             | Contents                                                                |

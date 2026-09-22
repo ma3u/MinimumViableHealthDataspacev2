@@ -185,6 +185,9 @@ extension AnalyteCoding {
   /// of showing an empty code, which would read as a lookup that failed.
   public var codeLabel: String {
     if let loinc { return String(localized: "LOINC \(loinc)") }
+    // An organism has no LOINC code and never will; what names it is its
+    // NCBI Taxonomy id, and that is what a reader can look up.
+    if let taxon { return String(localized: "NCBI Taxonomy \(taxon.ncbiTaxId)") }
     return String(localized: "No LOINC code for this quantity")
   }
 

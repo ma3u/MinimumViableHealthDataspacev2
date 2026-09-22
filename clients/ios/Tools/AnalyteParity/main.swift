@@ -68,6 +68,9 @@ let cases: [Case] = [
   // Homoglyphs: the same glyph from another alphabet.
   Case(label: "МСH", unit: "pg", loinc: "785-6", why: "Cyrillic M and C fold to Latin"),
 
+  // An organism: NCBI Taxonomy names it, LOINC does not, and the table says so.
+  Case(label: "Akkermansia muciniphila", unit: "%", loinc: nil, why: "an organism has no LOINC code; its NCBI Taxonomy id travels instead"),
+
   // Refusals, a wrong code is worse than no code.
   Case(label: "Omega-3-Index", unit: "%", loinc: nil, why: "not in the dictionary"),
   Case(label: "HbA1c", unit: "mg/dl", loinc: nil, why: "unit does not belong to this analyte"),

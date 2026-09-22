@@ -340,3 +340,76 @@ describe("a quantity LOINC does not code", () => {
     }
   });
 });
+
+describe("the microbiome names its organisms", () => {
+  const FUNCTIONAL = new Set([
+    "mb-acetat-und-propionatproduktion",
+    "mb-butyratproduktion",
+    "mb-laktatproduktion",
+    "mb-mucindegradation",
+    "mb-lps-tragende-bakterien",
+  ]);
+
+  it("gives every organism an NCBI Taxonomy id, and nothing else one", () => {
+    const seen = new Map<string, string>();
+    for (const label of ANALYTE_LABELS) {
+      for (const unit of UNIT_SPELLINGS) {
+        const hit = lookupAnalyte(label, unit);
+        if (hit.status !== "ok") continue;
+        const organism =
+          hit.analyteKey.startsWith("mb-") && !FUNCTIONAL.has(hit.analyteKey);
+        expect(hit.coding.taxon !== undefined, hit.analyteKey).toBe(organism);
+        if (!hit.coding.taxon) continue;
+        // A share of the bacteria found is always uncoded: LOINC names tests.
+        expect(hit.coding.loincNumber).toBeNull();
+        expect(hit.coding.taxon.ncbiTaxId).toMatch(/^\d+$/);
+        expect(hit.coding.taxon.scientificName.length).toBeGreaterThan(3);
+        expect(["phylum", "class", "genus", "species"]).toContain(
+          hit.coding.taxon.rank,
+        );
+        seen.set(hit.analyteKey, hit.coding.taxon.ncbiTaxId);
+      }
+    }
+    expect(seen.size).toBe(57);
+    // One id per organism: two rows of a sheet never resolve to one taxon.
+    expect(new Set(seen.values()).size).toBe(seen.size);
+  });
+
+  it("keeps the printed name and records NCBI's current one where they differ", () => {
+    const taxon = (label: string) => {
+      const hit = lookupAnalyte(label, "%");
+      if (hit.status !== "ok") throw new Error(`${label}: ${hit.status}`);
+      return hit.coding.taxon;
+    };
+    // NCBI renamed the phylum; the id did not move, and the sheet's word is
+    // still the label a person searches for.
+    expect(taxon("Firmicutes")).toEqual({
+      ncbiTaxId: "1239",
+      scientificName: "Bacillota",
+      rank: "phylum",
+    });
+    expect(taxon("Prevotella copri")).toEqual({
+      ncbiTaxId: "165179",
+      scientificName: "Segatella copri",
+      rank: "species",
+    });
+    expect(taxon("Clostridium difficile")).toEqual({
+      ncbiTaxId: "1496",
+      scientificName: "Clostridioides difficile",
+      rank: "species",
+    });
+    expect(taxon("Akkermansia muciniphila")).toEqual({
+      ncbiTaxId: "239935",
+      scientificName: "Akkermansia muciniphila",
+      rank: "species",
+    });
+    // `spp.` on the sheet is the genus.
+    expect(taxon("Lactobacillus spp.")).toEqual({
+      ncbiTaxId: "1578",
+      scientificName: "Lactobacillus",
+      rank: "genus",
+    });
+    // The sheet's misspelling still finds the organism.
+    expect(taxon("Hafnia alveii")?.scientificName).toBe("Hafnia alvei");
+  });
+});

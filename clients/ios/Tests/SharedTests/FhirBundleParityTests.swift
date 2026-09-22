@@ -35,9 +35,11 @@ struct FhirBundleParityTests {
       let extractor: String
     }
     struct Coding: Decodable {
-      let loincNumber: String
+      let loincNumber: String?
       let display: String
       let ucum: String
+      let uncodedReason: String?
+      let taxon: Taxon?
     }
     struct Region: Decodable {
       let page: Int
@@ -97,7 +99,9 @@ struct FhirBundleParityTests {
           ucum: value.coding.ucum,
           loinc: value.coding.loincNumber,
           display: value.coding.display,
-          analyteKey: value.analyteKey
+          analyteKey: value.analyteKey,
+          uncodedReason: value.coding.uncodedReason,
+          taxon: value.coding.taxon
         ),
         source: SourceKind(rawValue: fixture.source.kind)!
       )

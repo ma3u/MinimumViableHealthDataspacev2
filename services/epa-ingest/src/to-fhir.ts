@@ -36,6 +36,18 @@ export const EXT_SOURCE_REGION = `${EXT_BASE}/epa-ingest-source-region`;
 
 const UCUM = "http://unitsofmeasure.org";
 const LOINC = "http://loinc.org";
+/**
+ * NCBI Taxonomy as a FHIR code system: the numeric taxon id is the code and
+ * the scientific name the display, the convention HL7's Clinical Genomics
+ * work uses for the same database.
+ */
+export const NCBI_TAXONOMY = "http://www.ncbi.nlm.nih.gov/taxonomy";
+/** LOINC's term for the organism an observation is about. */
+const ORGANISM_IDENTIFIED: Coding = {
+  system: LOINC,
+  code: "41852-5",
+  display: "Microorganism or agent identified in Specimen",
+};
 
 /**
  * Observation status by provenance.
@@ -179,7 +191,10 @@ export function buildBundle(
     code: {
       // A quantity LOINC does not code gets a CodeableConcept with text only,
       // which is valid FHIR and says plainly that no code applies. Inventing
-      // a near-enough code would be worse than saying nothing.
+      // a near-enough code would be worse than saying nothing. The dictionary
+      // records why LOINC has no code, and that reason travels as a
+      // `data-absent-reason` extension so a consumer is told, not left to
+      // guess whether a lookup failed.
       ...(v.coding.loincNumber !== null
         ? {
             coding: [
@@ -190,7 +205,24 @@ export function buildBundle(
               } satisfies Coding,
             ],
           }
-        : {}),
+        : v.coding.uncodedReason
+          ? {
+              extension: [
+                {
+                  url: "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                  valueCode: "not-applicable",
+                  _valueCode: {
+                    extension: [
+                      {
+                        url: "http://hl7.org/fhir/StructureDefinition/rendered-value",
+                        valueString: v.coding.uncodedReason,
+                      },
+                    ],
+                  },
+                },
+              ],
+            }
+          : {}),
       // The label exactly as the lab printed it, so a reviewer can match the
       // coded resource back to the sheet without trusting our dictionary.
       text: v.label,
@@ -198,6 +230,30 @@ export function buildBundle(
     subject,
     effectiveDateTime: meta.effectiveDateTime,
     valueQuantity: quantity(v.value, v.coding.ucum, v.comparator),
+    // The organism, where the quantity is the relative abundance of one. The
+    // test has no LOINC code and says so above; the organism is a different
+    // thing and has a registry of its own, so it is a component: LOINC's
+    // "organism identified" as the code, the NCBI Taxonomy entry as the value.
+    ...(v.coding.taxon
+      ? {
+          component: [
+            {
+              code: { coding: [ORGANISM_IDENTIFIED] },
+              valueCodeableConcept: {
+                coding: [
+                  {
+                    system: NCBI_TAXONOMY,
+                    code: v.coding.taxon.ncbiTaxId,
+                    display: v.coding.taxon.scientificName,
+                  } satisfies Coding,
+                ],
+                // As printed, which may be a synonym NCBI has since renamed.
+                text: v.label,
+              },
+            },
+          ],
+        }
+      : {}),
     ...(v.referenceLow !== undefined || v.referenceHigh !== undefined
       ? {
           referenceRange: [

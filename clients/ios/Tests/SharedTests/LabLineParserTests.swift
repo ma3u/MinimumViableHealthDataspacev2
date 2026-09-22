@@ -875,6 +875,37 @@ struct MicrobiomeTests {
     }
   }
 
+  @Test("an organism is named by its NCBI Taxonomy id, and a functional share is not")
+  func taxaAreNamed() throws {
+    let akkermansia = try #require(Analytes.lookup(label: "Akkermansia muciniphila", unit: "%"))
+    #expect(
+      akkermansia.taxon
+        == Taxon(ncbiTaxId: "239935", scientificName: "Akkermansia muciniphila", rank: "species"))
+    // What the report screen prints in place of a LOINC code.
+    #expect(akkermansia.codeLabel.contains("239935"))
+
+    // NCBI renamed the phylum; the id did not move, and the sheet's word is
+    // still the label.
+    let firmicutes = try #require(Analytes.lookup(label: "Firmicutes", unit: "%"))
+    #expect(firmicutes.taxon?.ncbiTaxId == "1239")
+    #expect(firmicutes.taxon?.scientificName == "Bacillota")
+    #expect(firmicutes.taxon?.rank == "phylum")
+
+    // `spp.` on the sheet is the genus.
+    #expect(Analytes.lookup(label: "Lactobacillus spp.", unit: "%")?.taxon?.rank == "genus")
+
+    // A share of what the bacteria do is not an organism.
+    let butyrate = try #require(Analytes.lookup(label: "Butyratproduktion", unit: "%"))
+    #expect(butyrate.taxon == nil)
+
+    // Every organism, and nothing else, carries one; one id per organism.
+    let named = Analytes.codings.filter { $0.taxon != nil }
+    #expect(named.allSatisfy { $0.analyteKey.hasPrefix("mb-") && $0.loinc == nil })
+    let keys = Set(named.map(\.analyteKey))
+    #expect(keys.count == 57)
+    #expect(Set(named.compactMap { $0.taxon?.ncbiTaxId }).count == keys.count)
+  }
+
   @Test("a functional share is recognised too, with its own reason")
   func functionsAreKnown() throws {
     let coding = try #require(Analytes.lookup(label: "Butyratproduktion", unit: "%"))
