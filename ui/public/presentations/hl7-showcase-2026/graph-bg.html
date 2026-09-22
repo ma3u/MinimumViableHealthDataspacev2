@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Five-layer health graph, animated</title>
+    <style>
+      html,
+      body {
+        margin: 0;
+        height: 100%;
+        background: #14213d;
+        overflow: hidden;
+      }
+      canvas {
+        display: block;
+        width: 100%;
+        height: 100%;
+      }
+      .veil {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+          100deg,
+          rgba(20, 33, 61, 0.96) 0%,
+          rgba(20, 33, 61, 0.86) 38%,
+          rgba(20, 33, 61, 0.35) 62%,
+          rgba(20, 33, 61, 0.15) 100%
+        );
+        pointer-events: none;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="g"></canvas>
+    <div class="veil"></div>
+    <script>
+      // A five-layer health knowledge graph, drawn in 3D on a canvas and
+      // slowly turning. The layers are the ones the platform stores: dataspace
+      // contracts, catalogue metadata, FHIR R4 clinical resources, OMOP CDM,
+      // terminology. Nothing here is data; it is the shape of the store.
+      (function () {
+        var canvas = document.getElementById("g");
+        var ctx = canvas.getContext("2d");
+        var LAYERS = [
+          { c: [36, 113, 163], y: -260, n: 26, name: "dataspace" },
+          { c: [20, 143, 119], y: -130, n: 18, name: "catalogue" },
+          { c: [30, 132, 73], y: 0, n: 56, name: "FHIR R4" },
+          { c: [202, 111, 30], y: 130, n: 34, name: "OMOP CDM" },
+          { c: [125, 60, 152], y: 260, n: 24, name: "terminology" },
+        ];
+        // Deterministic pseudo-random, so the picture is the same every time.
+        var seed = 7;
+        function rnd() {
+          seed = (seed * 16807) % 2147483647;
+          return (seed - 1) / 2147483646;
+        }
+        var nodes = [];
+        LAYERS.forEach(function (L, li) {
+          for (var i = 0; i < L.n; i++) {
+            var a = rnd() * Math.PI * 2;
+            var r = 120 + Math.sqrt(rnd()) * 460;
+            nodes.push({
+              x: Math.cos(a) * r,
+              y: L.y + (rnd() - 0.5) * 50,
+              z: Math.sin(a) * r,
+              c: L.c,
+              l: li,
+              r: 2.5 + rnd() * 4,
+            });
+          }
+        });
+        var edges = [];
+        nodes.forEach(function (n, i) {
+          var cands = [];
+          nodes.forEach(function (m, j) {
+            if (j === i || Math.abs(m.l - n.l) > 1) return;
+            var d = (n.x - m.x) * (n.x - m.x) + (n.y - m.y) * (n.y - m.y) + (n.z - m.z) * (n.z - m.z);
+            cands.push({ j: j, d: d, cross: m.l !== n.l });
+          });
+          cands.sort(function (a, b) {
+            return a.d - b.d;
+          });
+          var k = 0;
+          for (var c = 0; c < cands.length && k < 3; c++) {
+            if (cands[c].j > i || cands[c].cross) {
+              edges.push([i, cands[c].j, cands[c].cross]);
+              k++;
+            }
+          }
+        });
+        // Packets: a value travelling down the layers, over and over.
+        var packets = [];
+        for (var p = 0; p < 14; p++) {
+          packets.push({ e: Math.floor(rnd() * edges.length), t: rnd(), v: 0.004 + rnd() * 0.006 });
+        }
+
+        var W, H, DPR;
+        function resize() {
+          DPR = Math.min(window.devicePixelRatio || 1, 2);
+          W = canvas.clientWidth;
+          H = canvas.clientHeight;
+          canvas.width = W * DPR;
+          canvas.height = H * DPR;
+          ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+        }
+        window.addEventListener("resize", resize);
+        resize();
+
+        var t = 0;
+        var TILT = 0.42;
+        function project(n) {
+          var cs = Math.cos(t),
+            sn = Math.sin(t);
+          var x = n.x * cs - n.z * sn;
+          var z = n.x * sn + n.z * cs;
+          var y = n.y * Math.cos(TILT) - z * Math.sin(TILT);
+          var z2 = n.y * Math.sin(TILT) + z * Math.cos(TILT);
+          var f = 900 / (900 + z2);
+          var s = Math.min(W / 1600, H / 900);
+          return {
+            x: W * 0.64 + x * f * s,
+            y: H * 0.5 + y * f * s,
+            f: f,
+            depth: z2,
+          };
+        }
+        function draw() {
+          ctx.clearRect(0, 0, W, H);
+          var P = nodes.map(project);
+          // edges
+          for (var i = 0; i < edges.length; i++) {
+            var a = P[edges[i][0]],
+              b = P[edges[i][1]];
+            var depth = (a.depth + b.depth) / 2;
+            var alpha = 0.06 + 0.22 * (1 - (depth + 700) / 1400);
+            ctx.strokeStyle = edges[i][2]
+              ? "rgba(251,251,248," + alpha.toFixed(3) + ")"
+              : "rgba(180,232,220," + (alpha * 0.8).toFixed(3) + ")";
+            ctx.lineWidth = edges[i][2] ? 1.1 : 0.8;
+            ctx.beginPath();
+            ctx.moveTo(a.x, a.y);
+            ctx.lineTo(b.x, b.y);
+            ctx.stroke();
+          }
+          // nodes, far ones first
+          var order = P.map(function (p, i) {
+            return i;
+          }).sort(function (i, j) {
+            return P[j].depth - P[i].depth;
+          });
+          for (var k = 0; k < order.length; k++) {
+            var idx = order[k],
+              p = P[idx],
+              n = nodes[idx];
+            var near = 1 - (p.depth + 700) / 1400;
+            var alpha = 0.35 + 0.65 * near;
+            var r = n.r * p.f;
+            var c = n.c;
+            var glow = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, r * 3.2);
+            glow.addColorStop(0, "rgba(" + c[0] + "," + c[1] + "," + c[2] + "," + (0.35 * alpha).toFixed(3) + ")");
+            glow.addColorStop(1, "rgba(" + c[0] + "," + c[1] + "," + c[2] + ",0)");
+            ctx.fillStyle = glow;
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, r * 3.2, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = "rgba(" + (c[0] + 60) + "," + (c[1] + 60) + "," + (c[2] + 60) + "," + alpha.toFixed(3) + ")";
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, r, 0, Math.PI * 2);
+            ctx.fill();
+          }
+          // packets
+          for (var q = 0; q < packets.length; q++) {
+            var pk = packets[q];
+            pk.t += pk.v;
+            if (pk.t >= 1) {
+              pk.t = 0;
+              pk.e = Math.floor(rnd() * edges.length);
+            }
+            var ea = P[edges[pk.e][0]],
+              eb = P[edges[pk.e][1]];
+            var px = ea.x + (eb.x - ea.x) * pk.t,
+              py = ea.y + (eb.y - ea.y) * pk.t;
+            ctx.fillStyle = "rgba(251,251,248,0.9)";
+            ctx.beginPath();
+            ctx.arc(px, py, 2.6, 0, Math.PI * 2);
+            ctx.fill();
+          }
+          t += 0.0022;
+        }
+        function loop() {
+          draw();
+          requestAnimationFrame(loop);
+        }
+        loop();
+      })();
+    </script>
+  </body>
+</html>
