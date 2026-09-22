@@ -298,6 +298,56 @@
         height: 700px;
         width: auto;
       }
+      .reveal .split {
+        display: flex;
+        gap: 40px;
+        align-items: center;
+        height: 900px;
+      }
+      .reveal .split .left {
+        flex: 1;
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        gap: 12px;
+      }
+      .reveal .split .right {
+        flex: 0 0 auto;
+        display: flex;
+        align-items: center;
+      }
+      .reveal .phone.full {
+        height: 860px;
+        width: auto;
+      }
+      .reveal .split h2 {
+        margin-bottom: 0.2em;
+      }
+      .narration {
+        position: fixed;
+        left: 18px;
+        bottom: 18px;
+        z-index: 40;
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        font: 600 14px "Public Sans", Arial, sans-serif;
+        color: #aab4bf;
+      }
+      .narration button {
+        background: rgba(255, 255, 255, 0.08);
+        color: #eef2f1;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 999px;
+        padding: 6px 14px;
+        font: inherit;
+        cursor: pointer;
+      }
+      .narration button.on {
+        background: #148f77;
+        border-color: #148f77;
+      }
       .reveal .progress {
         color: var(--teal);
       }
@@ -400,17 +450,17 @@
 
         <!-- 4 Klarbefund, 1:30 -->
         <section>
-          <p class="eyebrow">Demo 1 · the app</p>
-          <h2 style="font-size: 1.3em">Klarbefund: every value coded, every value checkable against the paper</h2>
-          <div class="cols" style="align-items: stretch">
-            <div style="display: flex; flex-direction: column; gap: 12px; justify-content: center">
+          <div class="split">
+            <div class="left">
+              <p class="eyebrow">Demo 1 · the app</p>
+              <h2 style="font-size: 1.3em">Klarbefund: every value coded, every value checkable against the paper</h2>
               <div class="card teal"><h3>LOINC, chosen by the unit</h3><p>Lp(a) in mg/dL and in nmol/L are different measurements with different codes. The label never decides alone.</p></div>
               <div class="card teal"><h3>The range the laboratory printed, page and line</h3><p>Verbatim, never normalised, with where on the paper it came from, so a clinician verifies rather than trusts.</p></div>
               <div class="card teal"><h3>Final or preliminary, decided by the document</h3><p>A laboratory's own PDF text is final; anything through the recogniser is preliminary until the person checks it.</p></div>
               <div class="card amber"><h3>Definition, never interpretation</h3><p>The app says what a test measures, with a source. It never says what a person's value means. That is the medical-device line.</p></div>
               <p class="tiny muted">Invented laboratory, invented values. <a href="https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docs/klarbefund/README.md" target="_blank" rel="noopener">Screen by screen</a> · <a href="https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/clients/ios/README.md" target="_blank" rel="noopener">run it in the iOS Simulator</a></p>
             </div>
-            <div class="narrow"><img class="phone tall" src="img/klarbefund-tour.gif" alt="A tour through the app's screens: reports, a report's values, the original scan, trends, reference values, profile, earlier measurements, consent, privacy" /></div>
+            <div class="right"><img class="phone full" src="img/klarbefund-tour.gif" alt="A tour through the app's screens: reports, a report's values, the original scan, trends, reference values, profile, earlier measurements, consent, privacy" /></div>
           </div>
           <aside class="notes">
             3:00. The app runs on the phone, no account, no network. The tour on the right cycles through the screens. Four rules: the unit selects the code; the printed range and the page and line travel with the value; provenance is decided by the document; and the app defines, never interprets. Nothing vanishes either: lines that matched nothing are listed, not dropped.
@@ -419,10 +469,10 @@
 
         <!-- 5 FHIR bundle, 1:30 -->
         <section>
-          <p class="eyebrow">Demo 1 · what leaves the phone</p>
-          <h2 style="font-size: 1.3em">What leaves the phone is FHIR R4, with its provenance attached</h2>
-          <div class="cols" style="align-items: center">
-            <div>
+          <div class="split">
+            <div class="left">
+              <p class="eyebrow">Demo 1 · what leaves the phone</p>
+              <h2 style="font-size: 1.3em">What leaves the phone is FHIR R4, with its provenance attached</h2>
               <table>
                 <tr><th style="width: 30%">Observation element</th><th>What it carries</th></tr>
                 <tr><td>code</td><td>LOINC coding, or text only with a data-absent-reason saying why LOINC has no term</td></tr>
@@ -432,12 +482,12 @@
                 <tr><td>extension</td><td>source kind, source line, page and box on the page, OCR confidence</td></tr>
                 <tr><td>component</td><td>for a stool report, the organism as an NCBI Taxonomy entry under LOINC 41852-5</td></tr>
               </table>
-              <p class="small muted fragment">Plus a DiagnosticReport, a DocumentReference for the paper, and a Provenance. The analyte dictionary exists once, in TypeScript; the phone's Swift table is generated from it, and one golden bundle pins both FHIR writers, so the person's copy and the dataspace's copy are the same data.</p>
+              <p class="small muted">Plus a DiagnosticReport, a DocumentReference for the paper, and a Provenance. The analyte dictionary exists once, in TypeScript; the phone's Swift table is generated from it, and one golden bundle pins both FHIR writers, so the person's copy and the dataspace's copy are the same data.</p>
             </div>
-            <div class="narrow"><img class="phone tall" src="img/phone-consent.png" alt="Send for analysis: the values with their codes, and the statement that they stay on this iPhone" /></div>
+            <div class="right"><img class="phone full" src="img/klarbefund-share.gif" alt="Sending values for analysis with their codes, choosing where an answer comes from, and the privacy screen" /></div>
           </div>
           <aside class="notes">
-            4:30. This is the FHIR part. A receiving system can tell a transcription from a laboratory's result from the status alone, and can still find the line on the paper. The consent screen on the right is the same principle: the person sees exactly which coded values would leave before anything does.
+            4:30. This is the FHIR part. A receiving system can tell a transcription from a laboratory's result from the status alone, and can still find the line on the paper. On the right: the person sees exactly which coded values would leave before anything does, chooses where an answer comes from, and reads what stays on the phone.
           </aside>
         </section>
 
@@ -612,17 +662,19 @@
 
         <!-- 9 Asks, 1:30 -->
         <section data-background-gradient="linear-gradient(135deg, #14213d 0%, #0d3b3a 100%)">
-          <p class="eyebrow">What we need from the FHIR community</p>
-          <h2 style="font-size: 1.3em">Five things that would make a person's own lab result first-class in FHIR, each with the case from the app</h2>
-          <div class="cols" style="align-items: center">
-            <ol class="asks compact">
+          <div class="split">
+            <div class="left">
+              <p class="eyebrow">What we need from the FHIR community</p>
+              <h2 style="font-size: 1.3em">Five things that would make a person's own lab result first-class in FHIR, each with the case from the app</h2>
+              <ol class="asks compact">
               <li class="fragment"><b>An agreed extension for transcribed observations.</b> Source kind, source line, page and box, recogniser confidence.<span class="ex">In the app: every value carries "p. 1, line 6" and its OCR confidence; the bundle carries them as our own extensions.</span></li>
               <li class="fragment"><b>A pattern for microbiome relative abundance.</b> Text-only code with a data-absent-reason, plus a component with the NCBI Taxonomy entry under LOINC 41852-5.<span class="ex">In the app: Akkermansia muciniphila 3.2 % becomes taxon 239935; 57 organisms, no LOINC term for any of them.</span></li>
               <li class="fragment"><b>LOINC terms consumer devices need.</b> Visceral fat as a mass, the extracellular-to-total water ratio, remnant cholesterol, the triglyceride-to-HDL ratio.<span class="ex">In the app: visceral fat 1.6 kg from a scale is exported with its label and no code, because LOINC only has the area.</span></li>
               <li class="fragment"><b>A citizen-upload profile in the EEHRxF laboratory result.</b> What a person-submitted, possibly transcribed result must carry so a record system and a GP can read it.<span class="ex">In the app: "Share for my doctor" is a PDF with the pages plus the bundle, under the ePA's 25 MB, marked preliminary where it was transcribed.</span></li>
               <li class="fragment"><b>FHIR-to-OMOP conventions for the uncoded case.</b> Concept id 0 with the original code or label in the source value, mapped where the vocabulary lives.<span class="ex">In the app: measurement.csv carries concept 0 and the LOINC code, or the label, in measurement_source_value.</span></li>
             </ol>
-            <div class="narrow"><img class="phone tall" src="img/phone-profile.png" alt="The profile screen, explaining that visceral fat in kilograms has no LOINC code and is exported with its label" /></div>
+            </div>
+            <div class="right"><img class="phone full" src="img/klarbefund-evidence.gif" alt="The profile explaining why visceral fat in kilograms has no LOINC code, a report value by value, the published reference values, and the trends" /></div>
           </div>
           <aside class="notes">
             9:30. These are asks, not complaints. Each is a place where we had to decide alone and would rather have decided with you, and each has a concrete case in the app on the right: the profile screen explains why a visceral-fat mass leaves without a code. The first and the fourth decide whether a person's own scanned result can ever be trusted downstream.
@@ -630,7 +682,7 @@
         </section>
 
         <!-- 10 Demo and close, 1:00 -->
-        <section data-background-iframe="graph-bg.html">
+        <section data-background-iframe="graph-bg.html?bright=1">
           <p class="eyebrow">Live, open source, yours to run</p>
           <h2 style="font-size: 1.3em; max-width: 1000px">Two minutes of demo, then your questions</h2>
           <div class="cols" style="max-width: 1120px">
@@ -663,6 +715,10 @@
       </div>
     </div>
 
+    <div class="narration" aria-label="Narration">
+      <button type="button" id="narrate">▶ Narration</button>
+      <span id="narrate-state"></span>
+    </div>
     <script src="reveal/reveal.js"></script>
     <script src="reveal/plugin/notes/notes.js"></script>
     <script>
@@ -680,6 +736,33 @@
         progress: true,
         plugins: [RevealNotes],
       });
+      // Narration: one audio file per top-level slide under audio/, generated by
+      // scripts/narrate-hl7-deck.py from the speaker notes in the presenter's
+      // own voice. Off by default, so a live talk is never talked over; on,
+      // each slide's file plays as it comes up.
+      (function () {
+        var on = false;
+        var player = new Audio();
+        var btn = document.getElementById("narrate");
+        var state = document.getElementById("narrate-state");
+        function play() {
+          player.pause();
+          if (!on) return;
+          var h = Reveal.getIndices().h;
+          player.src = "audio/slide-" + (h + 1) + ".mp3";
+          player.play().catch(function () {
+            state.textContent = "no narration for this slide";
+          });
+          state.textContent = "";
+        }
+        btn.addEventListener("click", function () {
+          on = !on;
+          btn.classList.toggle("on", on);
+          btn.textContent = on ? "■ Narration" : "▶ Narration";
+          play();
+        });
+        Reveal.on("slidechanged", play);
+      })();
       // One switch for every deep link: the live platform, or the static
       // simulation on GitHub Pages that needs no sign-in.
       document.querySelectorAll(".toggle button").forEach(function (btn) {
