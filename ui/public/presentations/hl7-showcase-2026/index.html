@@ -158,6 +158,24 @@
       .reveal .asks b {
         color: var(--teal-light);
       }
+      .reveal .asks.compact li {
+        font-size: 0.66em;
+        margin-bottom: 0.5em;
+        line-height: 1.3;
+      }
+      .reveal .asks .ex {
+        display: block;
+        color: var(--amber-light);
+        font-size: 0.88em;
+        margin-top: 2px;
+      }
+      .reveal .card p.small {
+        font-size: 1em;
+        margin: 0;
+      }
+      .reveal .card a {
+        overflow-wrap: anywhere;
+      }
       .reveal .btn {
         display: inline-block;
         padding: 14px 22px;
@@ -383,27 +401,27 @@
         <!-- 4 Klarbefund, 1:30 -->
         <section>
           <p class="eyebrow">Demo 1 · the app</p>
-          <h2>Klarbefund: every value coded, every value checkable against the paper</h2>
-          <div class="cols">
-            <div class="narrow"><img class="phone tall" src="img/klarbefund-tour.gif" alt="A tour through the app's screens: reports, a report's values, the original scan, trends, reference values, profile, earlier measurements, consent, privacy" /></div>
-            <div>
-              <div class="card teal fragment"><h3>LOINC, chosen by the unit</h3><p>Lp(a) in mg/dL and in nmol/L are different measurements with different codes. The label never decides alone.</p></div>
-              <div class="card teal fragment" style="margin-top: 12px"><h3>The range the laboratory printed, page and line</h3><p>Verbatim, never normalised, with where on the paper it came from, so a clinician verifies rather than trusts.</p></div>
-              <div class="card teal fragment" style="margin-top: 12px"><h3>Final or preliminary, decided by the document</h3><p>A laboratory's own PDF text is final; anything through the recogniser is preliminary until the person checks it.</p></div>
-              <div class="card amber fragment" style="margin-top: 12px"><h3>Definition, never interpretation</h3><p>The app says what a test measures, with a source. It never says what a person's value means. That is the medical-device line.</p></div>
-              <p class="tiny muted" style="margin-top: 10px">Invented laboratory, invented values. <a href="https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docs/klarbefund/README.md" target="_blank" rel="noopener">Screen by screen</a></p>
+          <h2 style="font-size: 1.3em">Klarbefund: every value coded, every value checkable against the paper</h2>
+          <div class="cols" style="align-items: stretch">
+            <div style="display: flex; flex-direction: column; gap: 12px; justify-content: center">
+              <div class="card teal"><h3>LOINC, chosen by the unit</h3><p>Lp(a) in mg/dL and in nmol/L are different measurements with different codes. The label never decides alone.</p></div>
+              <div class="card teal"><h3>The range the laboratory printed, page and line</h3><p>Verbatim, never normalised, with where on the paper it came from, so a clinician verifies rather than trusts.</p></div>
+              <div class="card teal"><h3>Final or preliminary, decided by the document</h3><p>A laboratory's own PDF text is final; anything through the recogniser is preliminary until the person checks it.</p></div>
+              <div class="card amber"><h3>Definition, never interpretation</h3><p>The app says what a test measures, with a source. It never says what a person's value means. That is the medical-device line.</p></div>
+              <p class="tiny muted">Invented laboratory, invented values. <a href="https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docs/klarbefund/README.md" target="_blank" rel="noopener">Screen by screen</a> · <a href="https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/clients/ios/README.md" target="_blank" rel="noopener">run it in the iOS Simulator</a></p>
             </div>
+            <div class="narrow"><img class="phone tall" src="img/klarbefund-tour.gif" alt="A tour through the app's screens: reports, a report's values, the original scan, trends, reference values, profile, earlier measurements, consent, privacy" /></div>
           </div>
           <aside class="notes">
-            3:00. The app runs on the phone, no account, no network. The tour on the left cycles through the screens. Four rules: the unit selects the code; the printed range and the page and line travel with the value; provenance is decided by the document; and the app defines, never interprets. Nothing vanishes either: lines that matched nothing are listed, not dropped.
+            3:00. The app runs on the phone, no account, no network. The tour on the right cycles through the screens. Four rules: the unit selects the code; the printed range and the page and line travel with the value; provenance is decided by the document; and the app defines, never interprets. Nothing vanishes either: lines that matched nothing are listed, not dropped.
           </aside>
         </section>
 
         <!-- 5 FHIR bundle, 1:30 -->
         <section>
           <p class="eyebrow">Demo 1 · what leaves the phone</p>
-          <h2>What leaves the phone is FHIR R4, with its provenance attached</h2>
-          <div class="cols">
+          <h2 style="font-size: 1.3em">What leaves the phone is FHIR R4, with its provenance attached</h2>
+          <div class="cols" style="align-items: center">
             <div>
               <table>
                 <tr><th style="width: 30%">Observation element</th><th>What it carries</th></tr>
@@ -416,7 +434,7 @@
               </table>
               <p class="small muted fragment">Plus a DiagnosticReport, a DocumentReference for the paper, and a Provenance. The analyte dictionary exists once, in TypeScript; the phone's Swift table is generated from it, and one golden bundle pins both FHIR writers, so the person's copy and the dataspace's copy are the same data.</p>
             </div>
-            <div class="narrow"><img class="phone" src="img/phone-consent.png" alt="Send for analysis: the values with their codes, and the statement that they stay on this iPhone" /></div>
+            <div class="narrow"><img class="phone tall" src="img/phone-consent.png" alt="Send for analysis: the values with their codes, and the statement that they stay on this iPhone" /></div>
           </div>
           <aside class="notes">
             4:30. This is the FHIR part. A receiving system can tell a transcription from a laboratory's result from the status alone, and can still find the line on the paper. The consent screen on the right is the same principle: the person sees exactly which coded values would leave before anything does.
@@ -595,42 +613,48 @@
         <!-- 9 Asks, 1:30 -->
         <section data-background-gradient="linear-gradient(135deg, #14213d 0%, #0d3b3a 100%)">
           <p class="eyebrow">What we need from the FHIR community</p>
-          <h2>Five things that would make a person's own lab result first-class in FHIR</h2>
-          <ol class="asks">
-            <li class="fragment"><b>An agreed extension for transcribed observations.</b> Source kind, source line, page and box, recogniser confidence. We define ours; a shared one would let any receiver treat a scanned value with the right caution.</li>
-            <li class="fragment"><b>A pattern for microbiome relative abundance.</b> A text-only code with a data-absent-reason and a component carrying the NCBI Taxonomy entry under LOINC 41852-5. Is that the shape you want?</li>
-            <li class="fragment"><b>LOINC terms consumer devices need.</b> Visceral fat as a mass, the extracellular-to-total water ratio, remnant cholesterol, the triglyceride-to-HDL ratio.</li>
-            <li class="fragment"><b>A citizen-upload profile in the EEHRxF laboratory result.</b> What a person-submitted, possibly transcribed result must carry so a record system and a GP can read it with its provenance intact.</li>
-            <li class="fragment"><b>FHIR-to-OMOP conventions for the uncoded case.</b> Concept id 0 with the original code or label in the source value, mapped where the vocabulary lives.</li>
-          </ol>
+          <h2 style="font-size: 1.3em">Five things that would make a person's own lab result first-class in FHIR, each with the case from the app</h2>
+          <div class="cols" style="align-items: center">
+            <ol class="asks compact">
+              <li class="fragment"><b>An agreed extension for transcribed observations.</b> Source kind, source line, page and box, recogniser confidence.<span class="ex">In the app: every value carries "p. 1, line 6" and its OCR confidence; the bundle carries them as our own extensions.</span></li>
+              <li class="fragment"><b>A pattern for microbiome relative abundance.</b> Text-only code with a data-absent-reason, plus a component with the NCBI Taxonomy entry under LOINC 41852-5.<span class="ex">In the app: Akkermansia muciniphila 3.2 % becomes taxon 239935; 57 organisms, no LOINC term for any of them.</span></li>
+              <li class="fragment"><b>LOINC terms consumer devices need.</b> Visceral fat as a mass, the extracellular-to-total water ratio, remnant cholesterol, the triglyceride-to-HDL ratio.<span class="ex">In the app: visceral fat 1.6 kg from a scale is exported with its label and no code, because LOINC only has the area.</span></li>
+              <li class="fragment"><b>A citizen-upload profile in the EEHRxF laboratory result.</b> What a person-submitted, possibly transcribed result must carry so a record system and a GP can read it.<span class="ex">In the app: "Share for my doctor" is a PDF with the pages plus the bundle, under the ePA's 25 MB, marked preliminary where it was transcribed.</span></li>
+              <li class="fragment"><b>FHIR-to-OMOP conventions for the uncoded case.</b> Concept id 0 with the original code or label in the source value, mapped where the vocabulary lives.<span class="ex">In the app: measurement.csv carries concept 0 and the LOINC code, or the label, in measurement_source_value.</span></li>
+            </ol>
+            <div class="narrow"><img class="phone tall" src="img/phone-profile.png" alt="The profile screen, explaining that visceral fat in kilograms has no LOINC code and is exported with its label" /></div>
+          </div>
           <aside class="notes">
-            9:30. These are asks, not complaints. Each is a place where we had to decide alone and would rather have decided with you. The first and the fourth decide whether a person's own scanned result can ever be trusted downstream.
+            9:30. These are asks, not complaints. Each is a place where we had to decide alone and would rather have decided with you, and each has a concrete case in the app on the right: the profile screen explains why a visceral-fat mass leaves without a code. The first and the fourth decide whether a person's own scanned result can ever be trusted downstream.
           </aside>
         </section>
 
         <!-- 10 Demo and close, 1:00 -->
         <section data-background-iframe="graph-bg.html">
           <p class="eyebrow">Live, open source, yours to run</p>
-          <h2 style="max-width: 1000px">Two minutes of demo, then your questions</h2>
-          <div class="cols" style="max-width: 1100px">
+          <h2 style="font-size: 1.3em; max-width: 1000px">Two minutes of demo, then your questions</h2>
+          <div class="cols" style="max-width: 1120px">
             <div class="card amber">
-              <h3>The researcher</h3>
+              <h3>Demo · the researcher</h3>
               <a class="btn amber" href="https://ehds.mabu.red/data/discover" data-path="/data/discover" target="_blank" rel="noopener">Discover</a>
               <a class="btn amber" href="https://ehds.mabu.red/negotiate" data-path="/negotiate" target="_blank" rel="noopener">Negotiate</a>
               <a class="btn amber" href="https://ehds.mabu.red/analytics" data-path="/analytics" target="_blank" rel="noopener">OMOP</a>
               <a class="btn amber" href="https://ehds.mabu.red/query" data-path="/query" target="_blank" rel="noopener">Ask</a>
             </div>
             <div class="card teal">
-              <h3>The person</h3>
+              <h3>Demo · the person</h3>
               <a class="btn" href="https://ehds.mabu.red/patient/profile" data-path="/patient/profile" target="_blank" rel="noopener">My record</a>
               <a class="btn" href="https://ehds.mabu.red/patient/research" data-path="/patient/research" target="_blank" rel="noopener">My consents</a>
               <a class="btn" href="https://ehds.mabu.red/patient/insights" data-path="/patient/insights" target="_blank" rel="noopener">What came back</a>
+              <p class="small muted" style="margin: 10px 0 0">Deep links: <span class="toggle"><button type="button" data-base="https://ehds.mabu.red" class="on">live</button><button type="button" data-base="https://ma3u.github.io/MinimumViableHealthDataspacev2">static</button></span></p>
             </div>
           </div>
-          <p class="tiny muted" style="margin-top: 1em; max-width: 1100px">
-            <span class="toggle"><button type="button" data-base="https://ehds.mabu.red" class="on">live</button><button type="button" data-base="https://ma3u.github.io/MinimumViableHealthDataspacev2">static</button></span> · static simulation without sign-in: <a href="https://ma3u.github.io/MinimumViableHealthDataspacev2/" target="_blank" rel="noopener">ma3u.github.io/MinimumViableHealthDataspacev2</a> · source, Apache 2.0: <a href="https://github.com/ma3u/MinimumViableHealthDataspacev2" target="_blank" rel="noopener">github.com/ma3u/MinimumViableHealthDataspacev2</a> · the app: <a href="https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docs/klarbefund/README.md" target="_blank" rel="noopener">screen by screen</a>, <a href="https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/clients/ios/README.md" target="_blank" rel="noopener">run it in the iOS Simulator</a> · this deck: ehds.mabu.red/presentations/hl7-showcase-2026
-          </p>
-          <p class="small muted" style="margin-top: 0.8em">Matthias Buchhorn · linkedin.com/in/mbuchhorn · Thank you, HL7.</p>
+          <div class="cols" style="max-width: 1120px; margin-top: 16px">
+            <div class="card"><h3 class="kicker">Platform</h3><p class="small"><a href="https://ehds.mabu.red" target="_blank" rel="noopener">ehds.mabu.red</a>, seven personas, synthetic data<br /><a href="https://ma3u.github.io/MinimumViableHealthDataspacev2/" target="_blank" rel="noopener">Static simulation</a>, no sign-in</p></div>
+            <div class="card"><h3 class="kicker">Source</h3><p class="small"><a href="https://github.com/ma3u/MinimumViableHealthDataspacev2" target="_blank" rel="noopener">github.com/ma3u/Minimum&shy;Viable&shy;Health&shy;Dataspace&shy;v2</a><br />Apache 2.0 · this deck: <a href="https://ehds.mabu.red/presentations/hl7-showcase-2026" target="_blank" rel="noopener">ehds.mabu.red/presentations</a></p></div>
+            <div class="card"><h3 class="kicker">Klarbefund</h3><p class="small"><a href="https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docs/klarbefund/README.md" target="_blank" rel="noopener">Screen by screen</a><br /><a href="https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/clients/ios/README.md" target="_blank" rel="noopener">Run it in the iOS Simulator</a></p></div>
+          </div>
+          <p class="small muted" style="margin-top: 0.9em">Matthias Buchhorn · <a href="https://linkedin.com/in/mbuchhorn" target="_blank" rel="noopener">linkedin.com/in/mbuchhorn</a> · Thank you, HL7.</p>
           <aside class="notes">
             11:00. Browser: researcher, discover, the OMOP dashboard, one plain-language question. Phone: open the lipid panel, tap Original scan, open Trends. Two minutes, then questions. If the network fails, the static simulation has every screen on fixtures.
           </aside>
