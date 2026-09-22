@@ -13,13 +13,13 @@ not treatment, so the person is the only integration point that exists.
 
 A researcher in the same field has the opposite problem. Under Chapter IV of the European
 Health Data Space, secondary use runs on a permit from a Health Data Access Body plus a
-citizen opt-out. The researcher needs to find datasets across institutions, obtain the
-permit, agree terms with each holder, and analyse in a secure environment. Every step
-needs the data to mean the same thing at both ends.
+citizen opt-out. Finding datasets across institutions, obtaining the permit, agreeing terms
+with each holder and analysing in a secure environment all need the data to mean the same
+thing at both ends.
 
 The platform is an open-source reference implementation of both regimes on one standards
-stack. This article is about what happened when we took HL7 FHIR and LOINC all the way down
-to a piece of paper, and all the way up to a federated dataspace.
+stack. This is what happened when we took HL7 FHIR and LOINC down to a piece of paper and
+up to a federated dataspace.
 
 ## Primary use: the person's own copy
 
@@ -37,17 +37,15 @@ not be read, are listed rather than dropped.
 
 For someone in a study, the payoff is the timeline: results from the study centre, the
 family doctor and a gym scale on one chart per measurement, with the guideline's band where
-a guideline names one and the laboratory's own range everywhere else. What the app never
-does is interpret. It defines the test, with a source, and leaves the reading of a value to
-a doctor. That is the medical-device line, and staying on the right side of it is a product
-decision.
+one exists and the laboratory's own range everywhere else. What the app never does is
+interpret. It defines the test, with a source, and leaves the reading of a value to a
+doctor. That is the medical-device line.
 
 What leaves the phone is a FHIR R4 bundle: one Observation per value with its LOINC
-coding, UCUM quantity, printed referenceRange, and a status of final or preliminary;
-extensions for the source kind, the source line and the box on the page; a
-DiagnosticReport, a DocumentReference standing for the paper, and a Provenance tying them
-together. A doctor gets a PDF with the original pages appended, the patient record gets the
-bundle, and research gets OMOP CDM tables.
+coding, UCUM quantity, printed referenceRange and a status of final or preliminary,
+extensions for the source kind, line and box on the page, plus a DiagnosticReport, a
+DocumentReference for the paper and a Provenance. A doctor gets a PDF with the pages
+appended, the patient record gets the bundle, research gets OMOP tables.
 
 ## Secondary use: the researcher's path
 
@@ -64,11 +62,10 @@ honest.
 
 Because it is the one place where the person's copy and the researcher's copy are the
 same data. The analyte dictionary exists once, in TypeScript; the Swift table on the phone
-is generated from it, and CI fails when it drifts. The two FHIR writers, one on the phone
-and one in the service, must reproduce a single golden bundle byte for byte. A value coded
-on an iPhone in Berlin and a value loaded into the graph from a hospital's FHIR server carry
-the same code, the same unit and the same meaning, and the transform to OMOP is written
-once.
+is generated from it, and CI fails when it drifts. The two FHIR writers must reproduce a
+single golden bundle byte for byte. A value coded on an iPhone and a value loaded from a
+hospital's FHIR server carry the same code, unit and meaning, and the transform to OMOP is
+written once.
 
 ## What we found
 
@@ -89,11 +86,10 @@ once.
 ## Where OMOP comes in
 
 OMOP is where analysis happens, and the phone writes it too: measurement, person and
-observation_period tables with the printed range in range_low and range_high. Every row
-carries measurement_concept_id 0 with the LOINC code in the source value, deliberately.
-Mapping to OMOP concepts needs the Athena vocabulary, which is not on a phone, and
-inventing an id would put a wrong identifier on a real measurement. The mapping lives
-where the vocabulary lives, in the dataspace, and is written once.
+observation_period tables, with the printed range in range_low and range_high. Every row
+carries measurement_concept_id 0 with the LOINC code in the source value, deliberately:
+mapping needs the Athena vocabulary, which is not on a phone, and an invented id would be a
+wrong identifier on a real measurement. The mapping lives where the vocabulary lives.
 
 ## What we need from the FHIR community
 
@@ -112,9 +108,9 @@ where the vocabulary lives, in the dataspace, and is written once.
 ## Try it
 
 The platform runs at ehds.mabu.red with seven demo personas on synthetic data, and the whole
-stack runs on a laptop. Source, architecture decisions, runbooks and the app guide are at
-github.com/ma3u/MinimumViableHealthDataspacev2 under Apache 2.0. Issues and pull requests
-are welcome, and so are the five questions above.
+stack runs on a laptop. Source, decisions, runbooks and the app guide are at
+github.com/ma3u/MinimumViableHealthDataspacev2 under Apache 2.0. Pull requests are welcome,
+and so are answers to the five questions above.
 
 ---
 
