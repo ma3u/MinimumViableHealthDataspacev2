@@ -17,14 +17,16 @@ citizen opt-out. Finding datasets across institutions, obtaining the permit, agr
 with each holder and analysing in a secure environment all need the data to mean the same
 thing at both ends.
 
-The platform is an open-source reference implementation of both regimes on one standards
-stack. This is what happened when we took HL7 FHIR and LOINC down to a piece of paper and
+The [EHDS Demo & Integration Platform](https://github.com/ma3u/MinimumViableHealthDataspacev2)
+is an open-source reference implementation of both regimes on one standards stack. This is what happened when we took HL7 FHIR and LOINC down to a piece of paper and
 up to a federated dataspace.
 
 ## Primary use: the person's own copy
 
-Klarbefund is an iPhone app. Point the camera at a lab sheet, or import the laboratory's
-PDF. The table is read on the device, every value is matched to a LOINC code and a UCUM
+![A tour through Klarbefund: the reports, a report value by value with its LOINC code and the page it was read from, the original scan, trends, reference values, the profile. Every value is invented.](img/klarbefund-tour.gif)
+
+[Klarbefund](https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docs/klarbefund/README.md)
+is an iPhone app. Point the camera at a lab sheet, or import the laboratory's PDF. The table is read on the device, every value is matched to a LOINC code and a UCUM
 unit, and the report is kept encrypted with its pages. Nothing leaves the phone unless the
 person sends it.
 
@@ -49,13 +51,17 @@ appended, the patient record gets the bundle, research gets OMOP tables.
 
 ## Secondary use: the researcher's path
 
+![The researcher on the platform: discovering datasets across holders, the negotiation history, and the OMOP analytics over the synthetic cohort.](img/ehds-researcher-journey.gif)
+
 The dataspace half runs on the Eclipse Dataspace Components stack with the EHDS roles on
-top. A data user discovers datasets through HealthDCAT-AP metadata, applies for a permit
-from the HDAB, negotiates and transfers over the Dataspace Protocol with ODRL policies and
-verifiable credentials, and analyses on OMOP CDM 5.4. Underneath is a five-layer knowledge
+top. A data user [discovers datasets](https://ehds.mabu.red/data/discover) through
+HealthDCAT-AP metadata, applies for a permit from the HDAB,
+[negotiates](https://ehds.mabu.red/negotiate) and transfers over the Dataspace Protocol with
+ODRL policies and verifiable credentials, and [analyses](https://ehds.mabu.red/analytics) on
+OMOP CDM 5.4. Underneath is a five-layer knowledge
 graph (dataspace, catalogue, FHIR R4, OMOP, terminology) with 127 synthetic patients. A
-natural-language layer turns a question into a graph query and answers only from what the
-graph holds. Grounding on a standard is what keeps it honest.
+[natural-language layer](https://ehds.mabu.red/query) turns a question into a graph query
+and answers only from what the graph holds. Grounding on a standard is what keeps it honest.
 
 ## Why FHIR with LOINC
 
@@ -74,7 +80,8 @@ written once.
 - **Refusing is a feature.** Both LOINC codes for RDW-SD are deprecated, so the value is
   carried unmatched rather than mis-coded. A wrong code is worse than no code.
 - **LOINC names tests, not organisms.** A stool report lists 57 taxa with no LOINC term.
-  They carry their NCBI Taxonomy id as an Observation component under LOINC 41852-5; the
+  They carry their [NCBI Taxonomy](https://www.ncbi.nlm.nih.gov/taxonomy) id as an
+  Observation component under LOINC 41852-5; the
   abundance stays a text-only code with a data-absent-reason.
 - **A printed range is assay-specific.** It travels unchanged. Replacing it with a
   published band destroys what a clinician needs.
@@ -98,21 +105,23 @@ wrong identifier on a real measurement. The mapping lives where the vocabulary l
    component the shape the community wants?
 3. LOINC terms for what consumer devices print: visceral fat as a mass, the
    extracellular-to-total water ratio, remnant cholesterol, the triglyceride-to-HDL ratio.
-4. A citizen-upload profile in the HL7 Europe laboratory result: what a person-submitted
+4. A citizen-upload profile in the [HL7 Europe](https://hl7europe.org/) laboratory result: what a person-submitted
    result must carry so a record system and a GP can read it with its provenance intact.
 5. Written FHIR-to-OMOP conventions for the uncoded case, so two mappings never drift.
 
 ## Try it
 
-The platform runs at ehds.mabu.red on synthetic data, and the whole stack runs on a laptop.
-Source, decisions, runbooks and the app guide: github.com/ma3u/MinimumViableHealthDataspacev2,
-Apache 2.0. Pull requests are welcome, and so are answers to the five questions above.
+The platform runs at [ehds.mabu.red](https://ehds.mabu.red) on synthetic data, a
+[static simulation](https://ma3u.github.io/MinimumViableHealthDataspacev2/) needs no sign-in,
+and the whole stack runs on a laptop. Source, decisions, runbooks and the app guide:
+[github.com/ma3u/MinimumViableHealthDataspacev2](https://github.com/ma3u/MinimumViableHealthDataspacev2),
+Apache 2.0. The slides from the Winners Showcase are at
+[ehds.mabu.red/presentations/hl7-showcase-2026](https://ehds.mabu.red/presentations/hl7-showcase-2026). Pull requests are welcome, and so are answers to the five questions above.
 
 ---
 
 Images for the article, all showing invented data:
 
-- `docs/klarbefund/img/detail.png`: a report on the phone, value by value
-- `docs/klarbefund/img/trends.png`: a measurement across reports
-- `docs/images/screenshots/ehds-federated-catalog-discovery.png`: dataset discovery
-- `docs/images/screenshots/omop-cdm-analytics-dashboard.png`: OMOP analytics
+- `img/klarbefund-tour.gif`: the app, screen by screen (animated); stills in `docs/klarbefund/img/`
+- `img/ehds-researcher-journey.gif`: the researcher on the platform (animated)
+- `docs/images/screenshots/omop-cdm-analytics-dashboard.png`: OMOP analytics, if a still is preferred
