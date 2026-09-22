@@ -91,6 +91,25 @@
         "display": "Ferritin [Mass/volume] in Serum or Plasma",
         "ucum": "ug/L"
       }
+    },
+    {
+      "label": "Akkermansia muciniphila",
+      "value": 3.2,
+      "unitRaw": "%",
+      "line": "Akkermansia muciniphila  3,2  %",
+      "lineNumber": 14,
+      "analyteKey": "mb-akkermansia-muciniphila",
+      "coding": {
+        "loincNumber": null,
+        "display": "Akkermansia muciniphila [relative abundance] in Stool",
+        "ucum": "%",
+        "uncodedReason": "LOINC names tests, not organisms: it has no term for the relative abundance of a taxon in stool. The organism is named by its NCBI Taxonomy id instead.",
+        "taxon": {
+          "ncbiTaxId": "239935",
+          "scientificName": "Akkermansia muciniphila",
+          "rank": "species"
+        }
+      }
     }
   ],
   "bundle": {
@@ -175,6 +194,9 @@
             },
             {
               "reference": "Observation/obs-4"
+            },
+            {
+              "reference": "Observation/obs-5"
             }
           ],
           "presentedForm": [
@@ -456,6 +478,89 @@
         }
       },
       {
+        "fullUrl": "urn:uuid:Observation-obs-5",
+        "resource": {
+          "resourceType": "Observation",
+          "id": "obs-5",
+          "status": "preliminary",
+          "extension": [
+            {
+              "url": "https://ehds.mabu.red/fhir/StructureDefinition/epa-ingest-source-kind",
+              "valueCode": "ocr-transcribed"
+            },
+            {
+              "url": "https://ehds.mabu.red/fhir/StructureDefinition/epa-ingest-source-line",
+              "valueString": "Akkermansia muciniphila  3,2  %"
+            },
+            {
+              "url": "https://ehds.mabu.red/fhir/StructureDefinition/epa-ingest-ocr-confidence",
+              "valueDecimal": 0.94
+            }
+          ],
+          "category": [
+            {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                  "code": "laboratory",
+                  "display": "Laboratory"
+                }
+              ]
+            }
+          ],
+          "code": {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                "valueCode": "not-applicable",
+                "_valueCode": {
+                  "extension": [
+                    {
+                      "url": "http://hl7.org/fhir/StructureDefinition/rendered-value",
+                      "valueString": "LOINC names tests, not organisms: it has no term for the relative abundance of a taxon in stool. The organism is named by its NCBI Taxonomy id instead."
+                    }
+                  ]
+                }
+              }
+            ],
+            "text": "Akkermansia muciniphila"
+          },
+          "subject": {
+            "reference": "Patient/example-patient"
+          },
+          "effectiveDateTime": "2026-09-04",
+          "valueQuantity": {
+            "value": 3.2,
+            "unit": "%",
+            "system": "http://unitsofmeasure.org",
+            "code": "%"
+          },
+          "component": [
+            {
+              "code": {
+                "coding": [
+                  {
+                    "system": "http://loinc.org",
+                    "code": "41852-5",
+                    "display": "Microorganism or agent identified in Specimen"
+                  }
+                ]
+              },
+              "valueCodeableConcept": {
+                "coding": [
+                  {
+                    "system": "http://www.ncbi.nlm.nih.gov/taxonomy",
+                    "code": "239935",
+                    "display": "Akkermansia muciniphila"
+                  }
+                ],
+                "text": "Akkermansia muciniphila"
+              }
+            }
+          ]
+        }
+      },
+      {
         "fullUrl": "urn:uuid:Provenance-provenance-1",
         "resource": {
           "resourceType": "Provenance",
@@ -475,6 +580,9 @@
             },
             {
               "reference": "Observation/obs-4"
+            },
+            {
+              "reference": "Observation/obs-5"
             }
           ],
           "recorded": "2026-09-13T12:00:00.000Z",

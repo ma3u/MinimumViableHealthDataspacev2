@@ -106,6 +106,26 @@ export interface AnalyteCoding {
   ucum: string;
   /** Why LOINC has no code. Required when `loincNumber` is null. */
   uncodedReason?: string;
+  /**
+   * The organism, where the quantity is the relative abundance of one.
+   *
+   * LOINC names tests, not organisms, so a stool report's taxa have no LOINC
+   * code and never will. NCBI Taxonomy is the registry that names organisms,
+   * and its numeric id is stable across the renamings taxonomy goes through:
+   * the sheet prints `Firmicutes`, NCBI now calls the phylum `Bacillota`, and
+   * id 1239 is both. Present exactly on the microbiome taxa, never on a
+   * functional share such as butyrate production, which is not an organism.
+   */
+  taxon?: Taxon;
+}
+
+/** One entry of the NCBI Taxonomy database, as verified against its API. */
+export interface Taxon {
+  /** The numeric NCBI Taxonomy id, e.g. `239935` for Akkermansia muciniphila. */
+  ncbiTaxId: string;
+  /** NCBI's current scientific name, which may differ from what the sheet prints. */
+  scientificName: string;
+  rank: "phylum" | "class" | "genus" | "species";
 }
 
 /** A raw value that has been matched to a coded analyte. */

@@ -33,6 +33,10 @@ public enum FhirWriter {
 
   static let ucumSystem = "http://unitsofmeasure.org"
   static let loincSystem = "http://loinc.org"
+  /// NCBI Taxonomy as a FHIR code system: the numeric taxon id is the code
+  /// and the scientific name the display, as HL7's Clinical Genomics work
+  /// uses the same database.
+  public static let ncbiTaxonomySystem = "http://www.ncbi.nlm.nih.gov/taxonomy"
 
   /// Everything the writer needs that is not in the values themselves.
   public struct ReportMeta: Sendable, Equatable {
@@ -176,6 +180,37 @@ public enum FhirWriter {
           range["high"] = quantity(high, ucum: value.coding.ucum, comparator: nil)
         }
         observation["referenceRange"] = .array([range])
+      }
+
+      // The organism, where the quantity is the relative abundance of one.
+      // The test has no LOINC code and the code above says so; the organism
+      // is a different thing with a registry of its own, so it is a
+      // component: LOINC's "organism identified" as the code, the NCBI
+      // Taxonomy entry as the value, the printed name as its text.
+      if let taxon = value.coding.taxon {
+        observation["component"] = .array([
+          [
+            "code": [
+              "coding": .array([
+                [
+                  "system": .string(loincSystem),
+                  "code": "41852-5",
+                  "display": "Microorganism or agent identified in Specimen",
+                ]
+              ])
+            ],
+            "valueCodeableConcept": [
+              "coding": .array([
+                [
+                  "system": .string(ncbiTaxonomySystem),
+                  "code": .string(taxon.ncbiTaxId),
+                  "display": .string(taxon.scientificName),
+                ]
+              ]),
+              "text": .string(value.raw.label),
+            ],
+          ]
+        ])
       }
 
       observations.append(observation)
