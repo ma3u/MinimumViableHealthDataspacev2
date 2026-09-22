@@ -5,13 +5,12 @@ Reads the speaker notes of every top-level slide in the deck, sends each to
 ElevenLabs, and writes ui/public/presentations/hl7-showcase-2026/audio/slide-N.mp3.
 The deck's "Narration" button plays them as the slides come up.
 
-The credentials come from the environment and are never written anywhere:
+The key comes from ELEVENLABS_API_KEY in the environment, or from the
+repository's git-ignored .env, and is never written anywhere. The voice is
+ELEVENLABS_VOICE_ID, or else the account's voice named ELEVENLABS_VOICE_NAME
+("Mabu Engaged" by default), looked up through the API.
 
-    ELEVENLABS_API_KEY   the account's API key
-    ELEVENLABS_VOICE_ID  the cloned voice to speak with
-
-Run from the repository root, for example with the TwoBreath environment loaded
-into this shell first (set -a; . <path to that .env>; set +a):
+Run from the repository root:
 
     python3 scripts/narrate-hl7-deck.py            # every slide
     python3 scripts/narrate-hl7-deck.py 3 7        # only slides 3 and 7
@@ -23,10 +22,44 @@ DECK = ROOT / "ui/public/presentations/hl7-showcase-2026/index.html"
 OUT = ROOT / "ui/public/presentations/hl7-showcase-2026/audio"
 MODEL = os.environ.get("ELEVENLABS_MODEL", "eleven_multilingual_v2")
 
+def load_dotenv(path: pathlib.Path) -> None:
+    """Loads KEY=VALUE lines into the environment without printing anything.
+
+    The repository's .env is git-ignored and holds the ElevenLabs key; values
+    already in the environment win, so a shell export still overrides it.
+    """
+    if not path.is_file():
+        return
+    for line in path.read_text().splitlines():
+        line = line.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        k, v = line.split("=", 1)
+        k = k.strip().removeprefix("export ").strip()
+        v = v.strip().strip('"').strip("'")
+        os.environ.setdefault(k, v)
+
+
+for candidate in (ROOT / ".env", ROOT / "docs/.env", ROOT / "ui/.env"):
+    load_dotenv(candidate)
 key = os.environ.get("ELEVENLABS_API_KEY")
+if not key:
+    sys.exit("no ELEVENLABS_API_KEY in the environment or in .env")
+HEADERS = {"xi-api-key": key, "Content-Type": "application/json"}
+
 voice = os.environ.get("ELEVENLABS_VOICE_ID")
-if not key or not voice:
-    sys.exit("set ELEVENLABS_API_KEY and ELEVENLABS_VOICE_ID in the environment first")
+if not voice:
+    # Resolve the voice by its name in the account, "Matthias" unless told otherwise.
+    wanted = os.environ.get("ELEVENLABS_VOICE_NAME", "Mabu Engaged").lower()
+    req = urllib.request.Request("https://api.elevenlabs.io/v1/voices", headers=HEADERS)
+    with urllib.request.urlopen(req, timeout=60) as r:
+        voices = json.load(r)["voices"]
+    match = [v for v in voices if v["name"].strip().lower() == wanted] or \
+            [v for v in voices if wanted in v["name"].lower()]
+    if not match:
+        sys.exit(f"no voice named {wanted!r}; the account has: " + ", ".join(v["name"] for v in voices))
+    voice = match[0]["voice_id"]
+    print(f"voice: {match[0]['name']} ({match[0].get('category', '')})")
 
 html = DECK.read_text()
 slides = re.search(r'<div class="slides">(.*)</div>\s*</div>\s*<div class="narration"', html, re.S).group(1)
@@ -49,7 +82,7 @@ for n, text in enumerate(notes, 1):
         f"https://api.elevenlabs.io/v1/text-to-speech/{voice}?output_format=mp3_44100_128",
         data=json.dumps({"text": text, "model_id": MODEL,
                          "voice_settings": {"stability": 0.5, "similarity_boost": 0.8, "style": 0.2}}).encode(),
-        headers={"xi-api-key": key, "Content-Type": "application/json", "Accept": "audio/mpeg"},
+        headers={**HEADERS, "Accept": "audio/mpeg"},
     )
     try:
         with urllib.request.urlopen(req, timeout=120) as r:
