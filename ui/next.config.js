@@ -45,15 +45,18 @@ const nextConfig = {
   }),
   // A self-contained deck under public/presentations/<name>/ is reached by
   // its folder URL on GitHub Pages, which serves directory indexes, but the
-  // Next.js server does not, so the folder URL 404s on the live platform.
-  // Skipped for static export, where the rewrite is neither supported nor
-  // needed.
+  // Next.js server does not, so the folder URL 404s on the live platform. A
+  // rewrite does not help: a rewritten path is not matched against the public
+  // folder (measured 2026-09-22, still 404 after deploy), so this is a
+  // redirect, which the browser follows to the file itself. Skipped for the
+  // static export, where it is neither supported nor needed.
   ...(!isStaticExport && {
-    async rewrites() {
+    async redirects() {
       return [
         {
           source: "/presentations/:deck",
           destination: "/presentations/:deck/index.html",
+          permanent: false,
         },
       ];
     },

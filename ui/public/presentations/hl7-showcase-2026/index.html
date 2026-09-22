@@ -222,6 +222,64 @@
         width: 100%;
         margin: 0;
       }
+      .reveal .anim .n {
+        opacity: 0;
+      }
+      .reveal section.present .anim .n {
+        animation: popin 0.5s ease-out forwards;
+      }
+      .reveal .anim .e {
+        stroke-dasharray: 1400;
+        stroke-dashoffset: 1400;
+      }
+      .reveal section.present .anim .e {
+        animation: draw 1.1s ease-out forwards;
+      }
+      @keyframes popin {
+        from { opacity: 0; transform: translateY(8px); }
+        to { opacity: 1; transform: none; }
+      }
+      @keyframes draw {
+        to { stroke-dashoffset: 0; }
+      }
+      .reveal .flowsvg {
+        width: 100%;
+        height: auto;
+        margin: 0;
+      }
+      .reveal .flowsvg a:hover rect {
+        filter: brightness(1.35);
+      }
+      .reveal .kgsvg {
+        width: 100%;
+        height: auto;
+        margin: 0;
+      }
+      .reveal .toggle {
+        display: inline-flex;
+        gap: 0;
+        border: 1px solid var(--card-border);
+        border-radius: 999px;
+        overflow: hidden;
+        font-size: 0.55em;
+        vertical-align: middle;
+      }
+      .reveal .toggle button {
+        background: transparent;
+        color: var(--muted);
+        border: 0;
+        padding: 6px 14px;
+        font: inherit;
+        cursor: pointer;
+      }
+      .reveal .toggle button.on {
+        background: var(--teal);
+        color: #fbfbf8;
+      }
+      .reveal .tall {
+        height: 760px;
+        width: auto;
+      }
       .reveal .progress {
         color: var(--teal);
       }
@@ -295,6 +353,131 @@
           </aside>
         </section>
 
+        <!-- 2b The two demo flows -->
+        <section>
+          <section data-background-gradient="linear-gradient(135deg, #0d3b3a 0%, #14213d 70%)">
+            <p class="eyebrow">Demo flow 1 · primary use</p>
+            <h2 style="font-size: 1.25em">The person's journey: from a paper result to a record they control</h2>
+            <svg class="anim flowsvg" viewBox="0 0 1600 650" role="img" aria-label="Swimlane flow">
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="rgba(255,255,255,0.7)"/></marker></defs>
+<rect x="0" y="20" width="1600" height="116" rx="10" fill="rgba(255,255,255,0.035)" stroke="rgba(255,255,255,0.10)"/>
+<rect x="0" y="20" width="8" height="116" rx="4" fill="#f0b27a"/>
+<text x="22" y="54" fill="#f0b27a" font-size="19" font-weight="600" font-family="Public Sans, Arial, sans-serif">The person</text>
+<rect x="0" y="144" width="1600" height="116" rx="10" fill="rgba(255,255,255,0.035)" stroke="rgba(255,255,255,0.10)"/>
+<rect x="0" y="144" width="8" height="116" rx="4" fill="#e07a5f"/>
+<text x="22" y="178" fill="#e07a5f" font-size="19" font-weight="600" font-family="Public Sans, Arial, sans-serif">Study centre</text>
+<text x="22" y="202" fill="#e07a5f" font-size="19" font-weight="600" font-family="Public Sans, Arial, sans-serif">or laboratory</text>
+<rect x="0" y="268" width="1600" height="116" rx="10" fill="rgba(255,255,255,0.035)" stroke="rgba(255,255,255,0.10)"/>
+<rect x="0" y="268" width="8" height="116" rx="4" fill="#7fb3e6"/>
+<text x="22" y="302" fill="#7fb3e6" font-size="19" font-weight="600" font-family="Public Sans, Arial, sans-serif">Klarbefund</text>
+<text x="22" y="326" fill="#7fb3e6" font-size="19" font-weight="600" font-family="Public Sans, Arial, sans-serif">on the phone</text>
+<rect x="0" y="392" width="1600" height="116" rx="10" fill="rgba(255,255,255,0.035)" stroke="rgba(255,255,255,0.10)"/>
+<rect x="0" y="392" width="8" height="116" rx="4" fill="#7fd1bf"/>
+<text x="22" y="426" fill="#7fd1bf" font-size="19" font-weight="600" font-family="Public Sans, Arial, sans-serif">Doctor and</text>
+<text x="22" y="450" fill="#7fd1bf" font-size="19" font-weight="600" font-family="Public Sans, Arial, sans-serif">patient record</text>
+<rect x="0" y="516" width="1600" height="116" rx="10" fill="rgba(255,255,255,0.035)" stroke="rgba(255,255,255,0.10)"/>
+<rect x="0" y="516" width="8" height="116" rx="4" fill="#c9a0dc"/>
+<text x="22" y="550" fill="#c9a0dc" font-size="19" font-weight="600" font-family="Public Sans, Arial, sans-serif">Dataspace</text>
+<text x="22" y="574" fill="#c9a0dc" font-size="19" font-weight="600" font-family="Public Sans, Arial, sans-serif">in the cloud</text>
+<path class="e" d="M320.0,235.0 L320.0,285.0" fill="none" stroke="rgba(255,255,255,0.55)" stroke-width="2.5" marker-end="url(#arrow)" style="animation-delay:0.55s"/>
+<text class="n" x="330" y="254" text-anchor="start" font-size="15" font-family="Public Sans, Arial, sans-serif" fill="#aab4bf" style="animation-delay:0.75s">hands over</text>
+<path class="e" d="M425.0,326.0 L467.0,326.0" fill="none" stroke="rgba(255,255,255,0.55)" stroke-width="2.5" marker-end="url(#arrow)" style="animation-delay:0.90s"/>
+<path class="e" d="M685.0,326.0 L727.0,326.0" fill="none" stroke="rgba(255,255,255,0.55)" stroke-width="2.5" marker-end="url(#arrow)" style="animation-delay:1.25s"/>
+<path class="e" d="M945.0,326.0 L987.0,326.0" fill="none" stroke="rgba(255,255,255,0.55)" stroke-width="2.5" marker-end="url(#arrow)" style="animation-delay:1.60s"/>
+<path class="e" d="M1100.0,359.0 L1100.0,409.0" fill="none" stroke="rgba(255,255,255,0.55)" stroke-width="2.5" marker-end="url(#arrow)" style="animation-delay:1.95s"/>
+<text class="n" x="1110" y="378" text-anchor="start" font-size="15" font-family="Public Sans, Arial, sans-serif" fill="#aab4bf" style="animation-delay:2.15s">the person shares</text>
+<path class="e" d="M1156.0,359.0 L1156.0,527.0 L1380.0,527.0 L1380.0,533.0" fill="none" stroke="rgba(255,255,255,0.55)" stroke-width="2.5" marker-end="url(#arrow)" style="animation-delay:3.00s" stroke-dasharray="8 6"/>
+<text class="n" x="1166" y="396" text-anchor="start" font-size="15" font-family="Public Sans, Arial, sans-serif" fill="#aab4bf" style="animation-delay:3.20s">bundle loaded</text>
+<path class="e" d="M685.0,78.0 L827.0,78.0" fill="none" stroke="rgba(255,255,255,0.55)" stroke-width="2.5" marker-end="url(#arrow)" style="animation-delay:2.65s"/>
+<path class="e" d="M940.0,111.0 L940.0,527.0 L1380.0,527.0 L1380.0,533.0" fill="none" stroke="rgba(255,255,255,0.55)" stroke-width="2.5" marker-end="url(#arrow)" style="animation-delay:3.00s"/>
+<text class="n" x="950" y="130" text-anchor="start" font-size="15" font-family="Public Sans, Arial, sans-serif" fill="#aab4bf" style="animation-delay:3.20s">honoured at extraction</text>
+<path class="e" d="M1380.0,541.0 L1380.0,119.0" fill="none" stroke="rgba(255,255,255,0.55)" stroke-width="2.5" marker-end="url(#arrow)" style="animation-delay:3.35s"/>
+<text class="n" x="1390" y="531" text-anchor="start" font-size="15" font-family="Public Sans, Arial, sans-serif" fill="#aab4bf" style="animation-delay:3.55s">findings return</text>
+<g class="n" style="animation-delay:0.20s"><rect x="215.0" y="169.0" width="210" height="66" rx="12" fill="#0d162b" stroke="#e07a5f" stroke-width="2"/><text x="320.0" y="198" text-anchor="middle" fill="#fbfbf8" font-size="17" font-weight="600" font-family="Public Sans, Arial, sans-serif">1 · Result on paper</text><text x="320.0" y="218" text-anchor="middle" fill="#aab4bf" font-size="15" font-weight="400" font-family="Public Sans, Arial, sans-serif">or as a PDF, no API</text></g>
+<g class="n" style="animation-delay:0.55s"><rect x="215.0" y="293.0" width="210" height="66" rx="12" fill="#0d162b" stroke="#7fb3e6" stroke-width="2"/><text x="320.0" y="322" text-anchor="middle" fill="#fbfbf8" font-size="17" font-weight="600" font-family="Public Sans, Arial, sans-serif">2 · Scan or import</text><text x="320.0" y="342" text-anchor="middle" fill="#aab4bf" font-size="15" font-weight="400" font-family="Public Sans, Arial, sans-serif">read on the device</text></g>
+<g class="n" style="animation-delay:0.90s"><rect x="475.0" y="293.0" width="210" height="66" rx="12" fill="#0d162b" stroke="#7fb3e6" stroke-width="2"/><text x="580.0" y="322" text-anchor="middle" fill="#fbfbf8" font-size="17" font-weight="600" font-family="Public Sans, Arial, sans-serif">3 · Coded, checkable</text><text x="580.0" y="342" text-anchor="middle" fill="#aab4bf" font-size="15" font-weight="400" font-family="Public Sans, Arial, sans-serif">LOINC, UCUM, page and line</text></g>
+<g class="n" style="animation-delay:1.25s"><rect x="735.0" y="293.0" width="210" height="66" rx="12" fill="#0d162b" stroke="#7fb3e6" stroke-width="2"/><text x="840.0" y="322" text-anchor="middle" fill="#fbfbf8" font-size="17" font-weight="600" font-family="Public Sans, Arial, sans-serif">4 · Trend and band</text><text x="840.0" y="342" text-anchor="middle" fill="#aab4bf" font-size="15" font-weight="400" font-family="Public Sans, Arial, sans-serif">published range, sourced</text></g>
+<g class="n" style="animation-delay:1.60s"><rect x="995.0" y="293.0" width="210" height="66" rx="12" fill="#0d162b" stroke="#7fb3e6" stroke-width="2"/><text x="1100.0" y="322" text-anchor="middle" fill="#fbfbf8" font-size="17" font-weight="600" font-family="Public Sans, Arial, sans-serif">5 · Export</text><text x="1100.0" y="342" text-anchor="middle" fill="#aab4bf" font-size="15" font-weight="400" font-family="Public Sans, Arial, sans-serif">FHIR R4 bundle + PDF</text></g>
+<g class="n" style="animation-delay:1.95s"><rect x="995.0" y="417.0" width="210" height="66" rx="12" fill="#0d162b" stroke="#7fd1bf" stroke-width="2"/><text x="1100.0" y="446" text-anchor="middle" fill="#fbfbf8" font-size="17" font-weight="600" font-family="Public Sans, Arial, sans-serif">6 · To the ePA, the GP</text><text x="1100.0" y="466" text-anchor="middle" fill="#aab4bf" font-size="15" font-weight="400" font-family="Public Sans, Arial, sans-serif">the person uploads</text></g>
+<a href="https://ehds.mabu.red/patient/profile" data-path="/patient/profile" target="_blank" rel="noopener"><g class="n" style="animation-delay:2.30s"><rect x="475.0" y="45.0" width="210" height="66" rx="12" fill="#0d162b" stroke="#f0b27a" stroke-width="2"/><text x="580.0" y="74" text-anchor="middle" fill="#fbfbf8" font-size="17" font-weight="600" font-family="Public Sans, Arial, sans-serif">7 · Sign in with the wallet</text><text x="580.0" y="94" text-anchor="middle" fill="#aab4bf" font-size="15" font-weight="400" font-family="Public Sans, Arial, sans-serif">see the own record</text></g></a>
+<a href="https://ehds.mabu.red/patient/research" data-path="/patient/research" target="_blank" rel="noopener"><g class="n" style="animation-delay:2.65s"><rect x="835.0" y="45.0" width="210" height="66" rx="12" fill="#0d162b" stroke="#f0b27a" stroke-width="2"/><text x="940.0" y="74" text-anchor="middle" fill="#fbfbf8" font-size="17" font-weight="600" font-family="Public Sans, Arial, sans-serif">8 · Consent or opt out</text><text x="940.0" y="94" text-anchor="middle" fill="#aab4bf" font-size="15" font-weight="400" font-family="Public Sans, Arial, sans-serif">for research, revocable</text></g></a>
+<a href="https://ehds.mabu.red/graph" data-path="/graph" target="_blank" rel="noopener"><g class="n" style="animation-delay:3.00s"><rect x="1275.0" y="541.0" width="210" height="66" rx="12" fill="#0d162b" stroke="#c9a0dc" stroke-width="2"/><text x="1380.0" y="570" text-anchor="middle" fill="#fbfbf8" font-size="17" font-weight="600" font-family="Public Sans, Arial, sans-serif">9 · FHIR record in the graph</text><text x="1380.0" y="590" text-anchor="middle" fill="#aab4bf" font-size="15" font-weight="400" font-family="Public Sans, Arial, sans-serif">layers 3 to 5, coded</text></g></a>
+<a href="https://ehds.mabu.red/patient/insights" data-path="/patient/insights" target="_blank" rel="noopener"><g class="n" style="animation-delay:3.35s"><rect x="1275.0" y="45.0" width="210" height="66" rx="12" fill="#0d162b" stroke="#f0b27a" stroke-width="2"/><text x="1380.0" y="74" text-anchor="middle" fill="#fbfbf8" font-size="17" font-weight="600" font-family="Public Sans, Arial, sans-serif">10 · What came back</text><text x="1380.0" y="94" text-anchor="middle" fill="#aab4bf" font-size="15" font-weight="400" font-family="Public Sans, Arial, sans-serif">aggregate only, k ≥ 5</text></g></a>
+</svg>
+            <p class="tiny muted" style="margin-top: 6px">Boxes with a link open the live demo page in a new tab. Toggle <span class="toggle"><button type="button" data-base="https://ehds.mabu.red" class="on">live</button><button type="button" data-base="https://ma3u.github.io/MinimumViableHealthDataspacev2">static</button></span> to point every deep link at the static simulation instead.</p>
+            <aside class="notes">
+              Read the lanes top to bottom: the person, the lab, the phone, the doctor and the record, the cloud. Steps one to six are the primary-use path Klarbefund covers today; seven to ten are what the platform adds once the person signs in with the wallet: their own record, a consent or an opt-out that is honoured where data leaves the holder, and the aggregate findings that come back. Down for the researcher's flow.
+            </aside>
+          </section>
+          <section data-background-gradient="linear-gradient(135deg, #3a2a10 0%, #14213d 70%)">
+            <p class="eyebrow amber">Demo flow 2 · secondary use</p>
+            <h2 style="font-size: 1.25em">The researcher's journey: from registration to an audited result</h2>
+            <svg class="anim flowsvg" viewBox="0 0 1600 650" role="img" aria-label="Swimlane flow">
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="rgba(255,255,255,0.7)"/></marker></defs>
+<rect x="0" y="20" width="1600" height="116" rx="10" fill="rgba(255,255,255,0.035)" stroke="rgba(255,255,255,0.10)"/>
+<rect x="0" y="20" width="8" height="116" rx="4" fill="#f0b27a"/>
+<text x="22" y="54" fill="#f0b27a" font-size="19" font-weight="600" font-family="Public Sans, Arial, sans-serif">Registration</text>
+<text x="22" y="78" fill="#f0b27a" font-size="19" font-weight="600" font-family="Public Sans, Arial, sans-serif">and trust</text>
+<rect x="0" y="144" width="1600" height="116" rx="10" fill="rgba(255,255,255,0.035)" stroke="rgba(255,255,255,0.10)"/>
+<rect x="0" y="144" width="8" height="116" rx="4" fill="#e07a5f"/>
+<text x="22" y="178" fill="#e07a5f" font-size="19" font-weight="600" font-family="Public Sans, Arial, sans-serif">Data holder</text>
+<text x="22" y="202" fill="#e07a5f" font-size="19" font-weight="600" font-family="Public Sans, Arial, sans-serif">(hospital)</text>
+<rect x="0" y="268" width="1600" height="116" rx="10" fill="rgba(255,255,255,0.035)" stroke="rgba(255,255,255,0.10)"/>
+<rect x="0" y="268" width="8" height="116" rx="4" fill="#7fb3e6"/>
+<text x="22" y="302" fill="#7fb3e6" font-size="19" font-weight="600" font-family="Public Sans, Arial, sans-serif">Data user</text>
+<text x="22" y="326" fill="#7fb3e6" font-size="19" font-weight="600" font-family="Public Sans, Arial, sans-serif">(researcher)</text>
+<rect x="0" y="392" width="1600" height="116" rx="10" fill="rgba(255,255,255,0.035)" stroke="rgba(255,255,255,0.10)"/>
+<rect x="0" y="392" width="8" height="116" rx="4" fill="#7fd1bf"/>
+<text x="22" y="426" fill="#7fd1bf" font-size="19" font-weight="600" font-family="Public Sans, Arial, sans-serif">Health Data</text>
+<text x="22" y="450" fill="#7fd1bf" font-size="19" font-weight="600" font-family="Public Sans, Arial, sans-serif">Access Body</text>
+<rect x="0" y="516" width="1600" height="116" rx="10" fill="rgba(255,255,255,0.035)" stroke="rgba(255,255,255,0.10)"/>
+<rect x="0" y="516" width="8" height="116" rx="4" fill="#c9a0dc"/>
+<text x="22" y="550" fill="#c9a0dc" font-size="19" font-weight="600" font-family="Public Sans, Arial, sans-serif">Secure processing</text>
+<text x="22" y="574" fill="#c9a0dc" font-size="19" font-weight="600" font-family="Public Sans, Arial, sans-serif">environment</text>
+<path class="e" d="M300.0,111.0 L300.0,161.0" fill="none" stroke="rgba(255,255,255,0.55)" stroke-width="2.5" marker-end="url(#arrow)" style="animation-delay:1.25s"/>
+<text class="n" x="310" y="130" text-anchor="start" font-size="15" font-family="Public Sans, Arial, sans-serif" fill="#aab4bf" style="animation-delay:1.45s">registers</text>
+<path class="e" d="M620.0,111.0 L620.0,285.0" fill="none" stroke="rgba(255,255,255,0.55)" stroke-width="2.5" marker-end="url(#arrow)" style="animation-delay:1.60s"/>
+<text class="n" x="630" y="130" text-anchor="start" font-size="15" font-family="Public Sans, Arial, sans-serif" fill="#aab4bf" style="animation-delay:1.80s">registers</text>
+<path class="e" d="M1240.0,111.0 L1240.0,403.0 L980.0,403.0 L980.0,409.0" fill="none" stroke="rgba(255,255,255,0.55)" stroke-width="2.5" marker-end="url(#arrow)" style="animation-delay:2.30s"/>
+<text class="n" x="1250" y="130" text-anchor="start" font-size="15" font-family="Public Sans, Arial, sans-serif" fill="#aab4bf" style="animation-delay:2.50s">registers</text>
+<path class="e" d="M300.0,235.0 L300.0,279.0 L620.0,279.0 L620.0,285.0" fill="none" stroke="rgba(255,255,255,0.55)" stroke-width="2.5" marker-end="url(#arrow)" style="animation-delay:1.60s"/>
+<text class="n" x="310" y="254" text-anchor="start" font-size="15" font-family="Public Sans, Arial, sans-serif" fill="#aab4bf" style="animation-delay:1.80s">publishes DCAT</text>
+<path class="e" d="M725.0,326.0 L777.0,326.0" fill="none" stroke="rgba(255,255,255,0.55)" stroke-width="2.5" marker-end="url(#arrow)" style="animation-delay:1.95s"/>
+<text class="n" x="755" y="377" text-anchor="middle" font-size="15" font-family="Public Sans, Arial, sans-serif" fill="#aab4bf" style="animation-delay:2.15s">requests access</text>
+<path class="e" d="M890.0,359.0 L890.0,409.0" fill="none" stroke="rgba(255,255,255,0.55)" stroke-width="2.5" marker-end="url(#arrow)" style="animation-delay:2.30s"/>
+<text class="n" x="900" y="378" text-anchor="start" font-size="15" font-family="Public Sans, Arial, sans-serif" fill="#aab4bf" style="animation-delay:2.50s">requests permit</text>
+<path class="e" d="M980.0,417.0 L980.0,243.0" fill="none" stroke="rgba(255,255,255,0.55)" stroke-width="2.5" marker-end="url(#arrow)" style="animation-delay:2.65s"/>
+<text class="n" x="990" y="407" text-anchor="start" font-size="15" font-family="Public Sans, Arial, sans-serif" fill="#aab4bf" style="animation-delay:2.85s">authorises access</text>
+<path class="e" d="M980.0,235.0 L980.0,527.0 L1240.0,527.0 L1240.0,533.0" fill="none" stroke="rgba(255,255,255,0.55)" stroke-width="2.5" marker-end="url(#arrow)" style="animation-delay:3.00s"/>
+<text class="n" x="990" y="254" text-anchor="start" font-size="15" font-family="Public Sans, Arial, sans-serif" fill="#aab4bf" style="animation-delay:3.20s">uploads FHIR</text>
+<path class="e" d="M980.0,483.0 L980.0,527.0 L1240.0,527.0 L1240.0,533.0" fill="none" stroke="rgba(255,255,255,0.55)" stroke-width="2.5" marker-end="url(#arrow)" style="animation-delay:3.00s" stroke-dasharray="8 6"/>
+<text class="n" x="990" y="502" text-anchor="start" font-size="15" font-family="Public Sans, Arial, sans-serif" fill="#aab4bf" style="animation-delay:3.20s">authorises SPE</text>
+<path class="e" d="M1240.0,541.0 L1240.0,367.0" fill="none" stroke="rgba(255,255,255,0.55)" stroke-width="2.5" marker-end="url(#arrow)" style="animation-delay:3.35s"/>
+<text class="n" x="1250" y="531" text-anchor="start" font-size="15" font-family="Public Sans, Arial, sans-serif" fill="#aab4bf" style="animation-delay:3.55s">enables analysis</text>
+<path class="e" d="M1345.0,326.0 L1367.0,326.0" fill="none" stroke="rgba(255,255,255,0.55)" stroke-width="2.5" marker-end="url(#arrow)" style="animation-delay:3.70s"/>
+<text class="n" x="1360" y="377" text-anchor="middle" font-size="15" font-family="Public Sans, Arial, sans-serif" fill="#aab4bf" style="animation-delay:3.90s">OMOP results</text>
+<path class="e" d="M1480.0,359.0 L1480.0,409.0" fill="none" stroke="rgba(255,255,255,0.55)" stroke-width="2.5" marker-end="url(#arrow)" style="animation-delay:4.05s" stroke-dasharray="8 6"/>
+<text class="n" x="1490" y="378" text-anchor="start" font-size="15" font-family="Public Sans, Arial, sans-serif" fill="#aab4bf" style="animation-delay:4.25s">reports use</text>
+<a href="https://ehds.mabu.red/onboarding" data-path="/onboarding" target="_blank" rel="noopener"><g class="n" style="animation-delay:0.20s"><rect x="195.0" y="45.0" width="210" height="66" rx="12" fill="#0d162b" stroke="#f0b27a" stroke-width="2"/><text x="300.0" y="74" text-anchor="middle" fill="#fbfbf8" font-size="17" font-weight="600" font-family="Public Sans, Arial, sans-serif">1a · Hospital registers</text><text x="300.0" y="94" text-anchor="middle" fill="#aab4bf" font-size="15" font-weight="400" font-family="Public Sans, Arial, sans-serif">did:web + credential</text></g></a>
+<a href="https://ehds.mabu.red/onboarding" data-path="/onboarding" target="_blank" rel="noopener"><g class="n" style="animation-delay:0.55s"><rect x="515.0" y="45.0" width="210" height="66" rx="12" fill="#0d162b" stroke="#f0b27a" stroke-width="2"/><text x="620.0" y="74" text-anchor="middle" fill="#fbfbf8" font-size="17" font-weight="600" font-family="Public Sans, Arial, sans-serif">1b · Researcher registers</text><text x="620.0" y="94" text-anchor="middle" fill="#aab4bf" font-size="15" font-weight="400" font-family="Public Sans, Arial, sans-serif">did:web + credential</text></g></a>
+<a href="https://ehds.mabu.red/onboarding" data-path="/onboarding" target="_blank" rel="noopener"><g class="n" style="animation-delay:0.90s"><rect x="1135.0" y="45.0" width="210" height="66" rx="12" fill="#0d162b" stroke="#f0b27a" stroke-width="2"/><text x="1240.0" y="74" text-anchor="middle" fill="#fbfbf8" font-size="17" font-weight="600" font-family="Public Sans, Arial, sans-serif">1c · HDAB registers</text><text x="1240.0" y="94" text-anchor="middle" fill="#aab4bf" font-size="15" font-weight="400" font-family="Public Sans, Arial, sans-serif">did:web + credential</text></g></a>
+<a href="https://ehds.mabu.red/data/share" data-path="/data/share" target="_blank" rel="noopener"><g class="n" style="animation-delay:1.25s"><rect x="195.0" y="169.0" width="210" height="66" rx="12" fill="#0d162b" stroke="#e07a5f" stroke-width="2"/><text x="300.0" y="198" text-anchor="middle" fill="#fbfbf8" font-size="17" font-weight="600" font-family="Public Sans, Arial, sans-serif">2 · Publish data</text><text x="300.0" y="218" text-anchor="middle" fill="#aab4bf" font-size="15" font-weight="400" font-family="Public Sans, Arial, sans-serif">HealthDCAT-AP catalogue</text></g></a>
+<a href="https://ehds.mabu.red/data/discover" data-path="/data/discover" target="_blank" rel="noopener"><g class="n" style="animation-delay:1.60s"><rect x="515.0" y="293.0" width="210" height="66" rx="12" fill="#0d162b" stroke="#7fb3e6" stroke-width="2"/><text x="620.0" y="322" text-anchor="middle" fill="#fbfbf8" font-size="17" font-weight="600" font-family="Public Sans, Arial, sans-serif">3 · Discover data</text><text x="620.0" y="342" text-anchor="middle" fill="#aab4bf" font-size="15" font-weight="400" font-family="Public Sans, Arial, sans-serif">federated catalogue</text></g></a>
+<a href="https://ehds.mabu.red/negotiate" data-path="/negotiate" target="_blank" rel="noopener"><g class="n" style="animation-delay:1.95s"><rect x="785.0" y="293.0" width="210" height="66" rx="12" fill="#0d162b" stroke="#7fb3e6" stroke-width="2"/><text x="890.0" y="322" text-anchor="middle" fill="#fbfbf8" font-size="17" font-weight="600" font-family="Public Sans, Arial, sans-serif">4 · Negotiate contract</text><text x="890.0" y="342" text-anchor="middle" fill="#aab4bf" font-size="15" font-weight="400" font-family="Public Sans, Arial, sans-serif">DSP offer, accept, finalise</text></g></a>
+<a href="https://ehds.mabu.red/compliance" data-path="/compliance" target="_blank" rel="noopener"><g class="n" style="animation-delay:2.30s"><rect x="875.0" y="417.0" width="210" height="66" rx="12" fill="#0d162b" stroke="#7fd1bf" stroke-width="2"/><text x="980.0" y="446" text-anchor="middle" fill="#fbfbf8" font-size="17" font-weight="600" font-family="Public Sans, Arial, sans-serif">4b · Approve data permit</text><text x="980.0" y="466" text-anchor="middle" fill="#aab4bf" font-size="15" font-weight="400" font-family="Public Sans, Arial, sans-serif">Art. 68, opt-out checked</text></g></a>
+<a href="https://ehds.mabu.red/data/transfer" data-path="/data/transfer" target="_blank" rel="noopener"><g class="n" style="animation-delay:2.65s"><rect x="875.0" y="169.0" width="210" height="66" rx="12" fill="#0d162b" stroke="#e07a5f" stroke-width="2"/><text x="980.0" y="198" text-anchor="middle" fill="#fbfbf8" font-size="17" font-weight="600" font-family="Public Sans, Arial, sans-serif">5 · Extract and upload</text><text x="980.0" y="218" text-anchor="middle" fill="#aab4bf" font-size="15" font-weight="400" font-family="Public Sans, Arial, sans-serif">FHIR, pseudonymised</text></g></a>
+<a href="https://ehds.mabu.red/data/transfer" data-path="/data/transfer" target="_blank" rel="noopener"><g class="n" style="animation-delay:3.00s"><rect x="1135.0" y="541.0" width="210" height="66" rx="12" fill="#0d162b" stroke="#c9a0dc" stroke-width="2"/><text x="1240.0" y="570" text-anchor="middle" fill="#fbfbf8" font-size="17" font-weight="600" font-family="Public Sans, Arial, sans-serif">Provision SPE</text><text x="1240.0" y="590" text-anchor="middle" fill="#aab4bf" font-size="15" font-weight="400" font-family="Public Sans, Arial, sans-serif">and ingest the data</text></g></a>
+<a href="https://ehds.mabu.red/analytics" data-path="/analytics" target="_blank" rel="noopener"><g class="n" style="animation-delay:3.35s"><rect x="1135.0" y="293.0" width="210" height="66" rx="12" fill="#0d162b" stroke="#7fb3e6" stroke-width="2"/><text x="1240.0" y="322" text-anchor="middle" fill="#fbfbf8" font-size="17" font-weight="600" font-family="Public Sans, Arial, sans-serif">6 · Analyse in the SPE</text><text x="1240.0" y="342" text-anchor="middle" fill="#aab4bf" font-size="15" font-weight="400" font-family="Public Sans, Arial, sans-serif">OMOP and FHIR</text></g></a>
+<a href="https://ehds.mabu.red/query" data-path="/query" target="_blank" rel="noopener"><g class="n" style="animation-delay:3.70s"><rect x="1375.0" y="293.0" width="210" height="66" rx="12" fill="#0d162b" stroke="#7fb3e6" stroke-width="2"/><text x="1480.0" y="322" text-anchor="middle" fill="#fbfbf8" font-size="17" font-weight="600" font-family="Public Sans, Arial, sans-serif">7 · Share results</text><text x="1480.0" y="342" text-anchor="middle" fill="#aab4bf" font-size="15" font-weight="400" font-family="Public Sans, Arial, sans-serif">OMOP output, plain-language</text></g></a>
+<a href="https://ehds.mabu.red/admin/audit" data-path="/admin/audit" target="_blank" rel="noopener"><g class="n" style="animation-delay:4.05s"><rect x="1375.0" y="417.0" width="210" height="66" rx="12" fill="#0d162b" stroke="#7fd1bf" stroke-width="2"/><text x="1480.0" y="446" text-anchor="middle" fill="#fbfbf8" font-size="17" font-weight="600" font-family="Public Sans, Arial, sans-serif">8 · Receive audit report</text><text x="1480.0" y="466" text-anchor="middle" fill="#aab4bf" font-size="15" font-weight="400" font-family="Public Sans, Arial, sans-serif">every access logged</text></g></a>
+</svg>
+            <p class="tiny muted" style="margin-top: 6px">Every box is a deep link into the live demo. Synthetic data, real protocols: DSP 2025-1, DCP 1.0, HealthDCAT-AP 2.1, ODRL 2.2, FHIR R4, OMOP CDM 5.4. Toggle <span class="toggle"><button type="button" data-base="https://ehds.mabu.red" class="on">live</button><button type="button" data-base="https://ma3u.github.io/MinimumViableHealthDataspacev2">static</button></span>.</p>
+            <aside class="notes">
+              The same swimlane the Spanish ministry saw. Three registrations, a catalogue entry, discovery, a negotiation, the permit, the pseudonymised extract into the secure processing environment, the analysis, the shared result, and the audit report the access body receives. Each box opens the page in the demo.
+            </aside>
+          </section>
+        </section>
+
         <!-- 3 Primary use: tour -->
         <section>
           <section data-background-gradient="linear-gradient(135deg, #0d3b3a 0%, #14213d 70%)">
@@ -302,7 +485,7 @@
             <h2>Klarbefund: the person's own copy, structured and kept</h2>
             <div class="cols">
               <div class="narrow">
-                <img class="phone" style="width: 300px" src="img/klarbefund-tour.gif" alt="A tour through the app's screens: reports, a report's values, the original scan, trends, reference values, profile, earlier measurements, consent, privacy" />
+                <img class="phone tall" src="img/klarbefund-tour.gif" alt="A tour through the app's screens: reports, a report's values, the original scan, trends, reference values, profile, earlier measurements, consent, privacy" />
               </div>
               <div>
                 <p class="fragment">
@@ -468,6 +651,77 @@
           </section>
         </section>
 
+        <!-- 5b Knowledge graph -->
+        <section data-background-gradient="linear-gradient(135deg, #0d162b 0%, #14213d 60%, #1a1040 100%)">
+          <p class="eyebrow">Stored once, in the cloud</p>
+          <h2 style="font-size: 1.25em">Everything lands in one FHIR-based knowledge graph, five layers, every clinical node coded</h2>
+          <div class="cols">
+            <div style="flex: 2"><svg class="anim kgsvg" viewBox="0 0 1000 660" role="img" aria-label="The five-layer knowledge graph">
+<defs><marker id="karrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="rgba(255,255,255,0.6)"/></marker></defs>
+<g class="n" style="animation-delay:0.20s"><rect x="0" y="20" width="1000" height="118" rx="14" fill="#2471A3" fill-opacity="0.16" stroke="#2471A3" stroke-opacity="0.7"/><text x="18" y="48" fill="#2471A3" font-size="18" font-weight="600" font-family="Public Sans, Arial, sans-serif" style="filter:brightness(1.6)">L1 · Dataspace marketplace</text></g>
+<g class="n" style="animation-delay:0.45s"><circle cx="100" cy="102" r="22" fill="#2471A3" stroke="#fbfbf8" stroke-width="1.5"/><text x="100" y="142" text-anchor="middle" fill="#eef2f1" font-size="14" font-family="Public Sans, Arial, sans-serif">Participant</text></g>
+<g class="n" style="animation-delay:0.53s"><circle cx="260" cy="102" r="22" fill="#2471A3" stroke="#fbfbf8" stroke-width="1.5"/><text x="260" y="142" text-anchor="middle" fill="#eef2f1" font-size="14" font-family="Public Sans, Arial, sans-serif">DataProduct</text></g>
+<g class="n" style="animation-delay:0.61s"><circle cx="420" cy="102" r="22" fill="#2471A3" stroke="#fbfbf8" stroke-width="1.5"/><text x="420" y="142" text-anchor="middle" fill="#eef2f1" font-size="14" font-family="Public Sans, Arial, sans-serif">OdrlPolicy</text></g>
+<g class="n" style="animation-delay:0.69s"><circle cx="580" cy="102" r="22" fill="#2471A3" stroke="#fbfbf8" stroke-width="1.5"/><text x="580" y="142" text-anchor="middle" fill="#eef2f1" font-size="14" font-family="Public Sans, Arial, sans-serif">HDABApproval</text></g>
+<g class="n" style="animation-delay:0.77s"><circle cx="740" cy="102" r="22" fill="#2471A3" stroke="#fbfbf8" stroke-width="1.5"/><text x="740" y="142" text-anchor="middle" fill="#eef2f1" font-size="14" font-family="Public Sans, Arial, sans-serif">Contract</text></g>
+<g class="n" style="animation-delay:0.85s"><circle cx="900" cy="102" r="22" fill="#2471A3" stroke="#fbfbf8" stroke-width="1.5"/><text x="900" y="142" text-anchor="middle" fill="#eef2f1" font-size="14" font-family="Public Sans, Arial, sans-serif">TransferEvent</text></g>
+<g class="n" style="animation-delay:0.75s"><rect x="0" y="148" width="1000" height="118" rx="14" fill="#148F77" fill-opacity="0.16" stroke="#148F77" stroke-opacity="0.7"/><text x="18" y="176" fill="#148F77" font-size="18" font-weight="600" font-family="Public Sans, Arial, sans-serif" style="filter:brightness(1.6)">L2 · HealthDCAT-AP metadata</text></g>
+<g class="n" style="animation-delay:1.00s"><circle cx="180" cy="230" r="22" fill="#148F77" stroke="#fbfbf8" stroke-width="1.5"/><text x="180" y="270" text-anchor="middle" fill="#eef2f1" font-size="14" font-family="Public Sans, Arial, sans-serif">Catalogue</text></g>
+<g class="n" style="animation-delay:1.08s"><circle cx="500" cy="230" r="22" fill="#148F77" stroke="#fbfbf8" stroke-width="1.5"/><text x="500" y="270" text-anchor="middle" fill="#eef2f1" font-size="14" font-family="Public Sans, Arial, sans-serif">HealthDataset</text></g>
+<g class="n" style="animation-delay:1.16s"><circle cx="820" cy="230" r="22" fill="#148F77" stroke="#fbfbf8" stroke-width="1.5"/><text x="820" y="270" text-anchor="middle" fill="#eef2f1" font-size="14" font-family="Public Sans, Arial, sans-serif">Distribution</text></g>
+<g class="n" style="animation-delay:1.30s"><rect x="0" y="276" width="1000" height="118" rx="14" fill="#1E8449" fill-opacity="0.16" stroke="#1E8449" stroke-opacity="0.7"/><text x="18" y="304" fill="#1E8449" font-size="18" font-weight="600" font-family="Public Sans, Arial, sans-serif" style="filter:brightness(1.6)">L3 · FHIR R4 clinical</text></g>
+<g class="n" style="animation-delay:1.55s"><circle cx="116" cy="358" r="22" fill="#1E8449" stroke="#fbfbf8" stroke-width="1.5"/><text x="116" y="398" text-anchor="middle" fill="#eef2f1" font-size="14" font-family="Public Sans, Arial, sans-serif">Patient</text></g>
+<g class="n" style="animation-delay:1.63s"><circle cx="308" cy="358" r="22" fill="#1E8449" stroke="#fbfbf8" stroke-width="1.5"/><text x="308" y="398" text-anchor="middle" fill="#eef2f1" font-size="14" font-family="Public Sans, Arial, sans-serif">Condition</text></g>
+<g class="n" style="animation-delay:1.71s"><circle cx="500" cy="358" r="22" fill="#1E8449" stroke="#fbfbf8" stroke-width="1.5"/><text x="500" y="398" text-anchor="middle" fill="#eef2f1" font-size="14" font-family="Public Sans, Arial, sans-serif">Observation</text></g>
+<g class="n" style="animation-delay:1.79s"><circle cx="692" cy="358" r="22" fill="#1E8449" stroke="#fbfbf8" stroke-width="1.5"/><text x="692" y="398" text-anchor="middle" fill="#eef2f1" font-size="14" font-family="Public Sans, Arial, sans-serif">MedicationRequest</text></g>
+<g class="n" style="animation-delay:1.87s"><circle cx="884" cy="358" r="22" fill="#1E8449" stroke="#fbfbf8" stroke-width="1.5"/><text x="884" y="398" text-anchor="middle" fill="#eef2f1" font-size="14" font-family="Public Sans, Arial, sans-serif">DiagnosticReport</text></g>
+<g class="n" style="animation-delay:1.85s"><rect x="0" y="404" width="1000" height="118" rx="14" fill="#CA6F1E" fill-opacity="0.16" stroke="#CA6F1E" stroke-opacity="0.7"/><text x="18" y="432" fill="#CA6F1E" font-size="18" font-weight="600" font-family="Public Sans, Arial, sans-serif" style="filter:brightness(1.6)">L4 · OMOP CDM analytics</text></g>
+<g class="n" style="animation-delay:2.10s"><circle cx="140" cy="486" r="22" fill="#CA6F1E" stroke="#fbfbf8" stroke-width="1.5"/><text x="140" y="526" text-anchor="middle" fill="#eef2f1" font-size="14" font-family="Public Sans, Arial, sans-serif">OMOPPerson</text></g>
+<g class="n" style="animation-delay:2.18s"><circle cx="380" cy="486" r="22" fill="#CA6F1E" stroke="#fbfbf8" stroke-width="1.5"/><text x="380" y="526" text-anchor="middle" fill="#eef2f1" font-size="14" font-family="Public Sans, Arial, sans-serif">ConditionOccurrence</text></g>
+<g class="n" style="animation-delay:2.26s"><circle cx="620" cy="486" r="22" fill="#CA6F1E" stroke="#fbfbf8" stroke-width="1.5"/><text x="620" y="526" text-anchor="middle" fill="#eef2f1" font-size="14" font-family="Public Sans, Arial, sans-serif">Measurement</text></g>
+<g class="n" style="animation-delay:2.34s"><circle cx="860" cy="486" r="22" fill="#CA6F1E" stroke="#fbfbf8" stroke-width="1.5"/><text x="860" y="526" text-anchor="middle" fill="#eef2f1" font-size="14" font-family="Public Sans, Arial, sans-serif">DrugExposure</text></g>
+<g class="n" style="animation-delay:2.40s"><rect x="0" y="532" width="1000" height="118" rx="14" fill="#7D3C98" fill-opacity="0.16" stroke="#7D3C98" stroke-opacity="0.7"/><text x="18" y="560" fill="#7D3C98" font-size="18" font-weight="600" font-family="Public Sans, Arial, sans-serif" style="filter:brightness(1.6)">L5 · Terminology</text></g>
+<g class="n" style="animation-delay:2.65s"><circle cx="140" cy="614" r="22" fill="#7D3C98" stroke="#fbfbf8" stroke-width="1.5"/><text x="140" y="654" text-anchor="middle" fill="#eef2f1" font-size="14" font-family="Public Sans, Arial, sans-serif">SnomedConcept</text></g>
+<g class="n" style="animation-delay:2.73s"><circle cx="380" cy="614" r="22" fill="#7D3C98" stroke="#fbfbf8" stroke-width="1.5"/><text x="380" y="654" text-anchor="middle" fill="#eef2f1" font-size="14" font-family="Public Sans, Arial, sans-serif">ICD10Code</text></g>
+<g class="n" style="animation-delay:2.81s"><circle cx="620" cy="614" r="22" fill="#7D3C98" stroke="#fbfbf8" stroke-width="1.5"/><text x="620" y="654" text-anchor="middle" fill="#eef2f1" font-size="14" font-family="Public Sans, Arial, sans-serif">LoincCode</text></g>
+<g class="n" style="animation-delay:2.89s"><circle cx="860" cy="614" r="22" fill="#7D3C98" stroke="#fbfbf8" stroke-width="1.5"/><text x="860" y="654" text-anchor="middle" fill="#eef2f1" font-size="14" font-family="Public Sans, Arial, sans-serif">RxNormConcept</text></g>
+<path class="e" d="M124,102 L234,102" fill="none" stroke="rgba(255,255,255,0.35)" stroke-width="1.5" marker-end="url(#karrow)" style="animation-delay:1.20s"/>
+<path class="e" d="M284,102 L394,102" fill="none" stroke="rgba(255,255,255,0.35)" stroke-width="1.5" marker-end="url(#karrow)" style="animation-delay:1.32s"/>
+<path class="e" d="M284,102 L554,102" fill="none" stroke="rgba(255,255,255,0.35)" stroke-width="1.5" marker-end="url(#karrow)" style="animation-delay:1.44s"/>
+<path class="e" d="M716,102 L286,102" fill="none" stroke="rgba(255,255,255,0.35)" stroke-width="1.5" marker-end="url(#karrow)" style="animation-delay:1.56s"/>
+<path class="e" d="M876,102 L766,102" fill="none" stroke="rgba(255,255,255,0.35)" stroke-width="1.5" marker-end="url(#karrow)" style="animation-delay:1.68s"/>
+<path class="e" d="M204,230 L474,230" fill="none" stroke="rgba(255,255,255,0.35)" stroke-width="1.5" marker-end="url(#karrow)" style="animation-delay:1.80s"/>
+<path class="e" d="M524,230 L794,230" fill="none" stroke="rgba(255,255,255,0.35)" stroke-width="1.5" marker-end="url(#karrow)" style="animation-delay:1.92s"/>
+<path class="e" d="M140,358 L282,358" fill="none" stroke="rgba(255,255,255,0.35)" stroke-width="1.5" marker-end="url(#karrow)" style="animation-delay:2.04s"/>
+<path class="e" d="M140,358 L474,358" fill="none" stroke="rgba(255,255,255,0.35)" stroke-width="1.5" marker-end="url(#karrow)" style="animation-delay:2.16s"/>
+<path class="e" d="M140,358 L666,358" fill="none" stroke="rgba(255,255,255,0.35)" stroke-width="1.5" marker-end="url(#karrow)" style="animation-delay:2.28s"/>
+<path class="e" d="M860,358 L526,358" fill="none" stroke="rgba(255,255,255,0.35)" stroke-width="1.5" marker-end="url(#karrow)" style="animation-delay:2.40s"/>
+<path class="e" d="M164,486 L354,486" fill="none" stroke="rgba(255,255,255,0.35)" stroke-width="1.5" marker-end="url(#karrow)" style="animation-delay:2.52s"/>
+<path class="e" d="M164,486 L594,486" fill="none" stroke="rgba(255,255,255,0.35)" stroke-width="1.5" marker-end="url(#karrow)" style="animation-delay:2.64s"/>
+<path class="e" d="M164,486 L834,486" fill="none" stroke="rgba(255,255,255,0.35)" stroke-width="1.5" marker-end="url(#karrow)" style="animation-delay:2.76s"/>
+<path class="e" d="M113,122 L166,208" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="2" marker-end="url(#karrow)" style="animation-delay:2.88s"/>
+<path class="e" d="M477,238 L141,350" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="2" marker-end="url(#karrow)" style="animation-delay:3.00s"/>
+<path class="e" d="M120,382 L135,460" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="2" marker-end="url(#karrow)" style="animation-delay:3.12s"/>
+<path class="e" d="M516,376 L602,467" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="2" marker-end="url(#karrow)" style="animation-delay:3.24s"/>
+<path class="e" d="M295,378 L154,592" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="2" marker-end="url(#karrow)" style="animation-delay:3.36s"/>
+<path class="e" d="M314,381 L373,589" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="2" marker-end="url(#karrow)" style="animation-delay:3.48s"/>
+<path class="e" d="M510,380 L609,590" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="2" marker-end="url(#karrow)" style="animation-delay:3.60s"/>
+<path class="e" d="M705,378 L846,592" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="2" marker-end="url(#karrow)" style="animation-delay:3.72s"/>
+<path class="e" d="M620,510 L620,588" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="2" marker-end="url(#karrow)" style="animation-delay:3.84s"/>
+<circle r="7" fill="#fbfbf8" opacity="0.95"><animateMotion dur="4.5s" repeatCount="indefinite" begin="3s" path="M116,358 L500,358 L620,614 L620,486 L140,486"/></circle>
+</svg></div>
+            <div style="flex: 1">
+              <p class="small">A Neo4j graph on Azure Container Apps, persistent on Azure Files. FHIR R4 comes in as resources from a hospital's server or from the phone's bundle, and stays FHIR: Patient, Condition, Observation, MedicationRequest as nodes and relationships.</p>
+              <p class="small">The FHIR-to-OMOP transform is one Cypher script over the same graph, so a person's Observation and its OMOP Measurement share the LOINC code node they are both coded by.</p>
+              <p class="small">127 synthetic patients, more than 5,300 nodes. The moving dot is the path a lab value takes: Patient, Observation, its LOINC code, the OMOP Measurement, the OMOP Person.</p>
+              <p><a class="btn" href="https://ehds.mabu.red/graph" data-path="/graph" target="_blank" rel="noopener">Open the Graph Explorer</a> <a class="btn ghost" href="https://ma3u.github.io/MinimumViableHealthDataspacev2/graph" target="_blank" rel="noopener">static</a></p>
+            </div>
+          </div>
+          <aside class="notes">
+            This is the storage story. One graph, five layers, and the layers are the standards: the dataspace contracts on top, the catalogue, FHIR, OMOP, terminology. Nothing is stored twice; OMOP is a view computed over the FHIR nodes, and both point at the same code. The Graph Explorer shows the same picture live, per persona.
+          </aside>
+        </section>
+
         <!-- 6 Standards -->
         <section>
           <p class="eyebrow">One stack</p>
@@ -534,21 +788,22 @@
             <div class="card amber">
               <h3>The researcher</h3>
               <p class="tiny muted">Sign in as <b>researcher</b> on the live platform.</p>
-              <a class="btn amber" href="https://ehds.mabu.red/data/discover" target="_blank" rel="noopener">Discover datasets</a>
-              <a class="btn amber" href="https://ehds.mabu.red/negotiate" target="_blank" rel="noopener">Negotiate</a>
-              <a class="btn amber" href="https://ehds.mabu.red/analytics" target="_blank" rel="noopener">OMOP analytics</a>
-              <a class="btn amber" href="https://ehds.mabu.red/query" target="_blank" rel="noopener">Ask in plain language</a>
+              <a class="btn amber" href="https://ehds.mabu.red/data/discover" data-path="/data/discover" target="_blank" rel="noopener">Discover datasets</a>
+              <a class="btn amber" href="https://ehds.mabu.red/negotiate" data-path="/negotiate" target="_blank" rel="noopener">Negotiate</a>
+              <a class="btn amber" href="https://ehds.mabu.red/analytics" data-path="/analytics" target="_blank" rel="noopener">OMOP analytics</a>
+              <a class="btn amber" href="https://ehds.mabu.red/query" data-path="/query" target="_blank" rel="noopener">Ask in plain language</a>
             </div>
             <div class="card teal">
               <h3>The person</h3>
               <p class="tiny muted">Sign in as <b>patient1</b>, or pick up the phone.</p>
-              <a class="btn" href="https://ehds.mabu.red/patient/profile" target="_blank" rel="noopener">Health profile</a>
-              <a class="btn" href="https://ehds.mabu.red/patient/research" target="_blank" rel="noopener">Research programmes</a>
-              <a class="btn" href="https://ehds.mabu.red/patient/insights" target="_blank" rel="noopener">What came back</a>
+              <a class="btn" href="https://ehds.mabu.red/patient/profile" data-path="/patient/profile" target="_blank" rel="noopener">Health profile</a>
+              <a class="btn" href="https://ehds.mabu.red/patient/research" data-path="/patient/research" target="_blank" rel="noopener">Research programmes</a>
+              <a class="btn" href="https://ehds.mabu.red/patient/insights" data-path="/patient/insights" target="_blank" rel="noopener">What came back</a>
               <a class="btn ghost" href="https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docs/klarbefund/README.md" target="_blank" rel="noopener">Klarbefund, screen by screen</a>
             </div>
           </div>
           <p class="tiny muted" style="margin-top: 1em">
+            Point every deep link at <span class="toggle"><button type="button" data-base="https://ehds.mabu.red" class="on">live</button><button type="button" data-base="https://ma3u.github.io/MinimumViableHealthDataspacev2">static</button></span>.
             No network on the day? The static demo at
             <a href="https://ma3u.github.io/MinimumViableHealthDataspacev2/" target="_blank" rel="noopener">ma3u.github.io/MinimumViableHealthDataspacev2</a>
             runs the same screens on fixtures, and the recordings in this deck were made there.
@@ -568,8 +823,12 @@
           <div class="cols" style="margin-top: 1em">
             <div class="card"><h3 class="kicker">Live platform</h3><p><a href="https://ehds.mabu.red">ehds.mabu.red</a><br />seven demo personas, synthetic data</p></div>
             <div class="card"><h3 class="kicker">Source and docs</h3><p><a href="https://github.com/ma3u/MinimumViableHealthDataspacev2">github.com/ma3u/MinimumViableHealthDataspacev2</a><br />Apache 2.0, ADRs, runbooks, the app guide</p></div>
-            <div class="card"><h3 class="kicker">Klarbefund</h3><p>iPhone, TestFlight internal testing<br />English and German</p></div>
+            <div class="card"><h3 class="kicker">Klarbefund</h3><p>iPhone, TestFlight internal testing, English and German.<br /><a href="https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docs/klarbefund/README.md">Screen by screen</a> · <a href="https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/clients/ios/README.md">run it in the iOS Simulator</a></p></div>
           </div>
+          <p class="tiny muted" style="margin-top: 1em">
+            Deep links, live: <a href="https://ehds.mabu.red/data/discover">discover</a> · <a href="https://ehds.mabu.red/negotiate">negotiate</a> · <a href="https://ehds.mabu.red/compliance">permits</a> · <a href="https://ehds.mabu.red/analytics">OMOP analytics</a> · <a href="https://ehds.mabu.red/query">plain-language query</a> · <a href="https://ehds.mabu.red/graph">graph explorer</a> · <a href="https://ehds.mabu.red/patient/profile">my record</a> · <a href="https://ehds.mabu.red/patient/research">my consents</a> · <a href="https://ehds.mabu.red/patient/insights">what came back</a><br />
+            Static simulation, no sign-in: <a href="https://ma3u.github.io/MinimumViableHealthDataspacev2/">ma3u.github.io/MinimumViableHealthDataspacev2</a> with the same paths · this deck: <a href="https://ehds.mabu.red/presentations/hl7-showcase-2026/index.html">ehds.mabu.red/presentations/hl7-showcase-2026</a>
+          </p>
           <p class="small muted" style="margin-top: 1.4em">Matthias Buchhorn · linkedin.com/in/mbuchhorn · Thank you, HL7.</p>
           <aside class="notes">Questions welcome.</aside>
         </section>
@@ -592,6 +851,19 @@
         controls: true,
         progress: true,
         plugins: [RevealNotes],
+      });
+      // One switch for every deep link: the live platform, or the static
+      // simulation on GitHub Pages that needs no sign-in.
+      document.querySelectorAll(".toggle button").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          var base = btn.getAttribute("data-base");
+          document.querySelectorAll("a[data-path]").forEach(function (a) {
+            a.setAttribute("href", base + a.getAttribute("data-path"));
+          });
+          document.querySelectorAll(".toggle button").forEach(function (b) {
+            b.classList.toggle("on", b.getAttribute("data-base") === base);
+          });
+        });
       });
     </script>
   </body>
