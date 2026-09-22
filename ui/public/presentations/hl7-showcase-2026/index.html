@@ -298,11 +298,18 @@
         height: 700px;
         width: auto;
       }
+      /* reveal.js runs with margin 0, so the slide canvas is the viewport;
+         the sections carry their own padding, and a split slide cancels it
+         to let the phone stand the full height at the right edge. */
+      .reveal .slides section {
+        padding: 24px 60px;
+      }
       .reveal .split {
         display: flex;
         gap: 40px;
         align-items: center;
         height: 900px;
+        margin: -24px -60px -24px 0;
       }
       .reveal .split .left {
         flex: 1;
@@ -318,8 +325,10 @@
         align-items: center;
       }
       .reveal .phone.full {
-        height: 860px;
+        height: 900px;
         width: auto;
+        border-radius: 22px 0 0 22px;
+        border-right: 0;
       }
       .reveal .split h2 {
         margin-bottom: 0.2em;
@@ -731,7 +740,7 @@
         autoAnimateDuration: 0.8,
         width: 1600,
         height: 900,
-        margin: 0.06,
+        margin: 0,
         controls: true,
         progress: true,
         plugins: [RevealNotes],
