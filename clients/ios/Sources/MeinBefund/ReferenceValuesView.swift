@@ -62,8 +62,8 @@ struct ReferenceValuesView: View {
 
         ForEach(shown, id: \.group) { group, ranges in
           Section(group.title) {
-            ForEach(ranges) { range in
-              RangeRow(range: range)
+            ForEach(ReferenceRanges.byAnalyte(ranges), id: \.first?.id) { card in
+              AnalyteCard(ranges: card)
             }
           }
         }
@@ -91,56 +91,76 @@ struct ReferenceValuesView: View {
   }
 }
 
-private struct RangeRow: View {
-  let range: ReferenceRange
+/// One measurement, with a line per unit it is published in.
+///
+/// It used to be one card per table row, so vitamin D appeared twice, once in
+/// ng/mL and once in nmol/L, and B12 three times. The same measurement listed
+/// again under a different unit reads as a mistake rather than as a choice,
+/// and on a screen of 175 rows it is the difference between a reference and a
+/// dump. The table itself still states a range per unit, because that is what
+/// matches a value to a threshold.
+private struct AnalyteCard: View {
+  let ranges: [ReferenceRange]
+
+  private var lines: [RangeUnitLine] { ReferenceRanges.unitLines(ranges) }
+  private var primary: ReferenceRange { ranges[0] }
+
+  /// Whether any line names an optimal band distinct from the guideline. When
+  /// none does, the column is left out rather than repeating the same figure.
+  private var showsOptimal: Bool {
+    lines.contains { optimal(of: $0.range) != nil }
+  }
+
+  private func optimal(of range: ReferenceRange) -> String? {
+    guard let optimal = range.optimalText(formatter: Measurement.text),
+      optimal != range.guidelineText(formatter: Measurement.text)
+    else { return nil }
+    return optimal
+  }
 
   var body: some View {
-    VStack(alignment: .leading, spacing: 6) {
-      HStack(alignment: .firstTextBaseline) {
-        Text(AnalyteNames.title(range.analyteKey))
-          .font(.body.weight(.medium))
-        Spacer()
-        Text(range.ucum).font(.caption).foregroundStyle(.secondary)
+    VStack(alignment: .leading, spacing: 8) {
+      Text(AnalyteNames.title(primary.analyteKey))
+        .font(.body.weight(.medium))
+
+      Grid(alignment: .leading, horizontalSpacing: 14, verticalSpacing: 4) {
+        if lines.count > 1 || showsOptimal {
+          GridRow {
+            Text(verbatim: "")
+            Text("Guideline").font(.caption2).foregroundStyle(.secondary)
+            if showsOptimal { Text("Optimal").font(.caption2).foregroundStyle(.secondary) }
+          }
+        }
+        ForEach(lines) { line in
+          GridRow {
+            Text(line.unitText)
+              .font(.caption)
+              .foregroundStyle(.secondary)
+            Text(line.range.guidelineText(formatter: Measurement.text) ?? "")
+              .font(.callout.monospacedDigit().weight(.medium))
+              .foregroundStyle(RangePalette.guideline)
+            if showsOptimal {
+              Text(optimal(of: line.range) ?? "")
+                .font(.callout.monospacedDigit().weight(.medium))
+                .foregroundStyle(RangePalette.optimal)
+            }
+          }
+        }
       }
 
-      HStack(spacing: 18) {
-        if let guideline = range.guidelineText(formatter: Measurement.text) {
-          Labelled(
-            title: String(localized: "Guideline"), value: guideline,
-            tint: RangePalette.guideline)
-        }
-        if let optimal = range.optimalText(formatter: Measurement.text),
-          optimal != range.guidelineText(formatter: Measurement.text)
-        {
-          Labelled(
-            title: String(localized: "Optimal"), value: optimal, tint: RangePalette.optimal)
-        }
-      }
+      // One summary and one source for the card: every unit of a measurement
+      // quotes the same statement, which a test holds to.
+      Text(primary.summary).font(.caption).foregroundStyle(.secondary)
 
-      Text(range.summary).font(.caption).foregroundStyle(.secondary)
-
-      Link(destination: URL(string: range.source.url)!) {
+      Link(destination: URL(string: primary.source.url)!) {
         HStack(spacing: 4) {
           Image(systemName: "text.book.closed")
-          Text("\(range.basis.label): \(range.source.label)")
+          Text("\(primary.basis.label): \(primary.source.label)")
         }
         .font(.caption2)
       }
     }
     .padding(.vertical, 4)
-  }
-}
-
-private struct Labelled: View {
-  let title: String
-  let value: String
-  var tint: Color = .primary
-
-  var body: some View {
-    VStack(alignment: .leading, spacing: 1) {
-      Text(title).font(.caption2).foregroundStyle(.secondary)
-      Text(value).font(.callout.monospacedDigit().weight(.medium)).foregroundStyle(tint)
-    }
   }
 }
 

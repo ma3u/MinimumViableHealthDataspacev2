@@ -248,7 +248,9 @@ private struct CodedRow: View {
       HStack {
         Text(value.raw.label).font(.body)
         Spacer()
-        Text("\(value.raw.comparator?.rawValue ?? "")\(formatted(value.raw.value)) \(value.coding.ucum)")
+        Text(
+          "\(value.raw.comparator?.rawValue ?? "")\(formatted(value.raw.value)) \(UnitText.display(value.coding.ucum))"
+        )
           .font(.body.monospacedDigit().weight(.medium))
       }
       HStack(spacing: 6) {
