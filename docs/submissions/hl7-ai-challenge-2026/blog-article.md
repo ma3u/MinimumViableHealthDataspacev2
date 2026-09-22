@@ -6,10 +6,10 @@ October 2026 Winners Showcase; images are listed at the end._
 
 ## Two people, one gap
 
-I am a participant in a cardiovascular prevention study. My results reach me the way they
-reach most people in Europe: as a PDF, or on paper. Nothing pushes them into my national
-patient record. Only the provider who ordered a test may write to it, and a cohort study is
-not treatment, so the person is the only integration point that exists.
+I am a participant in a cardiovascular prevention study. My results reach me as most
+people's do in Europe: as a PDF, or on paper. Nothing pushes them into my national patient
+record. Only the provider who ordered a test may write to it, and a cohort study is not
+treatment, so the person is the only integration point that exists.
 
 A researcher in the same field has the opposite problem. Under Chapter IV of the European
 Health Data Space, secondary use runs on a permit from a Health Data Access Body plus a
@@ -92,23 +92,21 @@ wrong identifier on a real measurement. The mapping lives where the vocabulary l
 ## What we need from the FHIR community
 
 1. An agreed extension for transcribed observations: source kind, source line, page and
-   box, recogniser confidence. We define ours; a shared one would let any receiver treat a
-   scanned value with the right caution.
+   box, recogniser confidence, so any receiver can treat a scanned value with the right
+   caution.
 2. A pattern for microbiome relative abundance. Is a text-only code plus an NCBI Taxonomy
    component the shape the community wants?
 3. LOINC terms for what consumer devices print: visceral fat as a mass, the
    extracellular-to-total water ratio, remnant cholesterol, the triglyceride-to-HDL ratio.
-4. A citizen-upload profile in the HL7 Europe laboratory result: what a person-submitted,
-   possibly transcribed result must carry so a record system and a GP can read it with its
-   provenance intact.
+4. A citizen-upload profile in the HL7 Europe laboratory result: what a person-submitted
+   result must carry so a record system and a GP can read it with its provenance intact.
 5. Written FHIR-to-OMOP conventions for the uncoded case, so two mappings never drift.
 
 ## Try it
 
-The platform runs at ehds.mabu.red with seven demo personas on synthetic data, and the whole
-stack runs on a laptop. Source, decisions, runbooks and the app guide are at
-github.com/ma3u/MinimumViableHealthDataspacev2 under Apache 2.0. Pull requests are welcome,
-and so are answers to the five questions above.
+The platform runs at ehds.mabu.red on synthetic data, and the whole stack runs on a laptop.
+Source, decisions, runbooks and the app guide: github.com/ma3u/MinimumViableHealthDataspacev2,
+Apache 2.0. Pull requests are welcome, and so are answers to the five questions above.
 
 ---
 
