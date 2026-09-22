@@ -14,6 +14,7 @@ Tracked in **issue #66**.
 | `submission.html`                         | The source document (edit this).                                    |
 | `HL7-AI-Challenge-2026-EHDS-Platform.pdf` | The generated 4-page PDF uploaded to the challenge (≤10 pages).     |
 | `make_pdf.js`                             | Regenerates the PDF from `submission.html` via Playwright/Chromium. |
+| `blog-article.md`                         | Guest article for the HL7 blog (Winners Showcase, Oct 2026, #252).  |
 
 ## Regenerate the PDF
 

@@ -42,6 +42,13 @@ concurrency:
 
 env:
   RESOURCE_GROUP: rg-mvhd-dev
+  # Dates (Europe/Berlin) on which the evening stop is skipped, so the stack
+  # runs through the night into the next scheduled stop. One reason per date:
+  #   2026-10-14  HL7 AI Challenge Winners Showcase webinar, 11:00 EDT
+  #               (17:00 Berlin), and the demo must still answer at 20:00 EDT
+  #               (02:00 Berlin, 15 Oct) for anyone who opens it afterwards.
+  #               The next stop is 15 Oct 18:00 UTC as usual.
+  KEEP_UP_DATES: "2026-10-14"
   # Workaround B (ADR-018): Postgres runs as an ACA Container App
   # (mvhd-postgres), not a Flexible Server. Stop = scale to 0/0; start =
   # scale to 1/1 like every other app.
@@ -75,7 +82,16 @@ jobs:
               echo "action=start" >> "$GITHUB_OUTPUT"
             fi
           else
-            echo "action=stop" >> "$GITHUB_OUTPUT"
+            # A date on the keep-up list skips the evening stop: the stack
+            # stays up until the next scheduled stop, which is the following
+            # evening. A manual "stop" dispatch still works on such a day.
+            TODAY=$(TZ=Europe/Berlin date +%F)
+            if [[ " $KEEP_UP_DATES " == *" $TODAY "* ]]; then
+              echo "Keep-up date ($TODAY) — skipping the evening stop"
+              echo "action=noop" >> "$GITHUB_OUTPUT"
+            else
+              echo "action=stop" >> "$GITHUB_OUTPUT"
+            fi
           fi
 
   stop:

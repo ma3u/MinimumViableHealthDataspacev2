@@ -1,0 +1,126 @@
+# From a paper lab report to a governed dataspace: what FHIR and LOINC gave us, and what we still need
+
+_Guest article for the HL7 blog, by Matthias Buchhorn, Berlin. The EHDS Demo & Integration
+Platform received the Open Solution Award in the 2026 HL7 AI Challenge. Draft for the
+October 2026 Winners Showcase; images are listed at the end._
+
+## Two people, one gap
+
+I am a participant in a cardiovascular prevention study. My results reach me the way they
+reach most people in Europe: as a PDF, or on paper. Nothing pushes them into my national
+patient record. Only the provider who ordered a test may write to it, and a cohort study is
+not treatment, so the person is the only integration point that exists.
+
+A researcher in the same field has the opposite problem. Under Chapter IV of the European
+Health Data Space, secondary use runs on a permit from a Health Data Access Body plus a
+citizen opt-out. The researcher needs to find datasets across institutions, obtain the
+permit, agree terms with each holder, and analyse in a secure environment. Every step
+needs the data to mean the same thing at both ends.
+
+The platform is an open-source reference implementation of both regimes on one standards
+stack. This article is about what happened when we took HL7 FHIR and LOINC all the way down
+to a piece of paper, and all the way up to a federated dataspace.
+
+## Primary use: the person's own copy
+
+Klarbefund is an iPhone app. Point the camera at a lab sheet, or import the laboratory's
+PDF. The table is read on the device, every value is matched to a LOINC code and a UCUM
+unit, and the report is kept encrypted with its pages. Nothing leaves the phone unless the
+person sends it.
+
+What makes a value trustworthy is not the code alone. Under each measurement the app shows
+the reference range the laboratory printed, verbatim, and the page and line it was read
+from, so anyone can check the number against the paper. A PDF carrying the laboratory's
+own text layer yields final observations; anything that went through a recogniser is
+preliminary until the person confirms it. Lines that matched nothing, and lines that could
+not be read, are listed rather than dropped.
+
+For someone in a study, the payoff is the timeline: results from the study centre, the
+family doctor and a gym scale on one chart per measurement, with the guideline's band where
+a guideline names one and the laboratory's own range everywhere else. What the app never
+does is interpret. It defines the test, with a source, and leaves the reading of a value to
+a doctor. That is the medical-device line, and staying on the right side of it is a product
+decision.
+
+What leaves the phone is a FHIR R4 bundle: one Observation per value with its LOINC
+coding, UCUM quantity, printed referenceRange, and a status of final or preliminary;
+extensions for the source kind, the source line and the box on the page; a
+DiagnosticReport, a DocumentReference standing for the paper, and a Provenance tying them
+together. A doctor gets a PDF with the original pages appended, the patient record gets the
+bundle, and research gets OMOP CDM tables.
+
+## Secondary use: the researcher's path
+
+The dataspace half runs on the Eclipse Dataspace Components stack with the EHDS roles on
+top. A data user discovers datasets across holders through HealthDCAT-AP metadata, applies
+for a permit from the HDAB, negotiates and transfers over the Dataspace Protocol with ODRL
+policies and verifiable credentials, and analyses on OMOP CDM 5.4. Underneath is a
+five-layer knowledge graph: dataspace, catalogue, FHIR R4, OMOP, terminology, populated
+with 127 synthetic patients. A natural-language layer turns a question into a graph query
+and answers only from what the graph holds. Grounding on a standard is what keeps it
+honest.
+
+## Why FHIR with LOINC
+
+Because it is the one place where the person's copy and the researcher's copy are the
+same data. The analyte dictionary exists once, in TypeScript; the Swift table on the phone
+is generated from it, and CI fails when it drifts. The two FHIR writers, one on the phone
+and one in the service, must reproduce a single golden bundle byte for byte. A value coded
+on an iPhone in Berlin and a value loaded into the graph from a hospital's FHIR server carry
+the same code, the same unit and the same meaning, and the transform to OMOP is written
+once.
+
+## What we found
+
+- **The unit selects the code.** Lipoprotein(a) in mg/dL and in nmol/L are two
+  measurements with two codes. Trusting the label alone put wrong codes on real values until
+  the rule became absolute.
+- **Refusing is a feature.** Both LOINC codes for RDW-SD are deprecated, so the value is
+  carried unmatched rather than mis-coded. A wrong code is worse than no code.
+- **LOINC names tests, not organisms.** A stool report lists 57 taxa with no LOINC term.
+  They now carry their NCBI Taxonomy id, verified against NCBI, as an Observation component
+  under LOINC 41852-5, while the abundance itself stays a text-only code with a
+  data-absent-reason.
+- **A printed range is assay-specific.** It travels unchanged. Replacing it with a
+  published band destroys what a clinician needs.
+- **Provenance must be first-class.** Final versus preliminary is decided by the document,
+  never by its file extension. Marking a transcription final is the failure that matters.
+
+## Where OMOP comes in
+
+OMOP is where analysis happens, and the phone writes it too: measurement, person and
+observation_period tables with the printed range in range_low and range_high. Every row
+carries measurement_concept_id 0 with the LOINC code in the source value, deliberately.
+Mapping to OMOP concepts needs the Athena vocabulary, which is not on a phone, and
+inventing an id would put a wrong identifier on a real measurement. The mapping lives
+where the vocabulary lives, in the dataspace, and is written once.
+
+## What we need from the FHIR community
+
+1. An agreed extension for transcribed observations: source kind, source line, page and
+   box, recogniser confidence. We define ours; a shared one would let any receiver treat a
+   scanned value with the right caution.
+2. A pattern for microbiome relative abundance. Is a text-only code plus an NCBI Taxonomy
+   component the shape the community wants?
+3. LOINC terms for what consumer devices print: visceral fat as a mass, the
+   extracellular-to-total water ratio, remnant cholesterol, the triglyceride-to-HDL ratio.
+4. A citizen-upload profile in the HL7 Europe laboratory result: what a person-submitted,
+   possibly transcribed result must carry so a record system and a GP can read it with its
+   provenance intact.
+5. Written FHIR-to-OMOP conventions for the uncoded case, so two mappings never drift.
+
+## Try it
+
+The platform runs at ehds.mabu.red with seven demo personas on synthetic data, and the whole
+stack runs on a laptop. Source, architecture decisions, runbooks and the app guide are at
+github.com/ma3u/MinimumViableHealthDataspacev2 under Apache 2.0. Issues and pull requests
+are welcome, and so are the five questions above.
+
+---
+
+Images for the article, all showing invented data:
+
+- `docs/klarbefund/img/detail.png`: a report on the phone, value by value
+- `docs/klarbefund/img/trends.png`: a measurement across reports
+- `docs/images/screenshots/ehds-federated-catalog-discovery.png`: dataset discovery
+- `docs/images/screenshots/omop-cdm-analytics-dashboard.png`: OMOP analytics
