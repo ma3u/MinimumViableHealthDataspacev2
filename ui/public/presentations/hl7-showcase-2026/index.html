@@ -303,6 +303,7 @@
          to let the phone stand the full height at the right edge. */
       .reveal .slides section {
         padding: 24px 60px;
+        box-sizing: border-box;
       }
       .reveal .split {
         display: flex;
@@ -586,59 +587,59 @@
           <p class="eyebrow">Stored once, in the cloud</p>
           <h2 style="font-size: 1.25em">Everything lands in one FHIR-based knowledge graph, five layers, every clinical node coded</h2>
           <div class="cols">
-            <div style="flex: 2"><svg class="anim kgsvg" viewBox="0 0 1000 660" role="img" aria-label="The five-layer knowledge graph">
+            <div style="flex: 2"><svg class="anim kgsvg" viewBox="0 0 1000 700" role="img" aria-label="The five-layer knowledge graph">
 <defs><marker id="karrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="rgba(255,255,255,0.6)"/></marker></defs>
-<g class="n" style="animation-delay:0.20s"><rect x="0" y="20" width="1000" height="118" rx="14" fill="#2471A3" fill-opacity="0.16" stroke="#2471A3" stroke-opacity="0.7"/><text x="18" y="48" fill="#2471A3" font-size="18" font-weight="600" font-family="Public Sans, Arial, sans-serif" style="filter:brightness(1.6)">L1 · Dataspace marketplace</text></g>
-<g class="n" style="animation-delay:0.45s"><circle cx="100" cy="102" r="22" fill="#2471A3" stroke="#fbfbf8" stroke-width="1.5"/><text x="100" y="142" text-anchor="middle" fill="#eef2f1" font-size="14" font-family="Public Sans, Arial, sans-serif">Participant</text></g>
-<g class="n" style="animation-delay:0.53s"><circle cx="260" cy="102" r="22" fill="#2471A3" stroke="#fbfbf8" stroke-width="1.5"/><text x="260" y="142" text-anchor="middle" fill="#eef2f1" font-size="14" font-family="Public Sans, Arial, sans-serif">DataProduct</text></g>
-<g class="n" style="animation-delay:0.61s"><circle cx="420" cy="102" r="22" fill="#2471A3" stroke="#fbfbf8" stroke-width="1.5"/><text x="420" y="142" text-anchor="middle" fill="#eef2f1" font-size="14" font-family="Public Sans, Arial, sans-serif">OdrlPolicy</text></g>
-<g class="n" style="animation-delay:0.69s"><circle cx="580" cy="102" r="22" fill="#2471A3" stroke="#fbfbf8" stroke-width="1.5"/><text x="580" y="142" text-anchor="middle" fill="#eef2f1" font-size="14" font-family="Public Sans, Arial, sans-serif">HDABApproval</text></g>
-<g class="n" style="animation-delay:0.77s"><circle cx="740" cy="102" r="22" fill="#2471A3" stroke="#fbfbf8" stroke-width="1.5"/><text x="740" y="142" text-anchor="middle" fill="#eef2f1" font-size="14" font-family="Public Sans, Arial, sans-serif">Contract</text></g>
-<g class="n" style="animation-delay:0.85s"><circle cx="900" cy="102" r="22" fill="#2471A3" stroke="#fbfbf8" stroke-width="1.5"/><text x="900" y="142" text-anchor="middle" fill="#eef2f1" font-size="14" font-family="Public Sans, Arial, sans-serif">TransferEvent</text></g>
-<g class="n" style="animation-delay:0.75s"><rect x="0" y="148" width="1000" height="118" rx="14" fill="#148F77" fill-opacity="0.16" stroke="#148F77" stroke-opacity="0.7"/><text x="18" y="176" fill="#148F77" font-size="18" font-weight="600" font-family="Public Sans, Arial, sans-serif" style="filter:brightness(1.6)">L2 · HealthDCAT-AP metadata</text></g>
-<g class="n" style="animation-delay:1.00s"><circle cx="180" cy="230" r="22" fill="#148F77" stroke="#fbfbf8" stroke-width="1.5"/><text x="180" y="270" text-anchor="middle" fill="#eef2f1" font-size="14" font-family="Public Sans, Arial, sans-serif">Catalogue</text></g>
-<g class="n" style="animation-delay:1.08s"><circle cx="500" cy="230" r="22" fill="#148F77" stroke="#fbfbf8" stroke-width="1.5"/><text x="500" y="270" text-anchor="middle" fill="#eef2f1" font-size="14" font-family="Public Sans, Arial, sans-serif">HealthDataset</text></g>
-<g class="n" style="animation-delay:1.16s"><circle cx="820" cy="230" r="22" fill="#148F77" stroke="#fbfbf8" stroke-width="1.5"/><text x="820" y="270" text-anchor="middle" fill="#eef2f1" font-size="14" font-family="Public Sans, Arial, sans-serif">Distribution</text></g>
-<g class="n" style="animation-delay:1.30s"><rect x="0" y="276" width="1000" height="118" rx="14" fill="#1E8449" fill-opacity="0.16" stroke="#1E8449" stroke-opacity="0.7"/><text x="18" y="304" fill="#1E8449" font-size="18" font-weight="600" font-family="Public Sans, Arial, sans-serif" style="filter:brightness(1.6)">L3 · FHIR R4 clinical</text></g>
-<g class="n" style="animation-delay:1.55s"><circle cx="116" cy="358" r="22" fill="#1E8449" stroke="#fbfbf8" stroke-width="1.5"/><text x="116" y="398" text-anchor="middle" fill="#eef2f1" font-size="14" font-family="Public Sans, Arial, sans-serif">Patient</text></g>
-<g class="n" style="animation-delay:1.63s"><circle cx="308" cy="358" r="22" fill="#1E8449" stroke="#fbfbf8" stroke-width="1.5"/><text x="308" y="398" text-anchor="middle" fill="#eef2f1" font-size="14" font-family="Public Sans, Arial, sans-serif">Condition</text></g>
-<g class="n" style="animation-delay:1.71s"><circle cx="500" cy="358" r="22" fill="#1E8449" stroke="#fbfbf8" stroke-width="1.5"/><text x="500" y="398" text-anchor="middle" fill="#eef2f1" font-size="14" font-family="Public Sans, Arial, sans-serif">Observation</text></g>
-<g class="n" style="animation-delay:1.79s"><circle cx="692" cy="358" r="22" fill="#1E8449" stroke="#fbfbf8" stroke-width="1.5"/><text x="692" y="398" text-anchor="middle" fill="#eef2f1" font-size="14" font-family="Public Sans, Arial, sans-serif">MedicationRequest</text></g>
-<g class="n" style="animation-delay:1.87s"><circle cx="884" cy="358" r="22" fill="#1E8449" stroke="#fbfbf8" stroke-width="1.5"/><text x="884" y="398" text-anchor="middle" fill="#eef2f1" font-size="14" font-family="Public Sans, Arial, sans-serif">DiagnosticReport</text></g>
-<g class="n" style="animation-delay:1.85s"><rect x="0" y="404" width="1000" height="118" rx="14" fill="#CA6F1E" fill-opacity="0.16" stroke="#CA6F1E" stroke-opacity="0.7"/><text x="18" y="432" fill="#CA6F1E" font-size="18" font-weight="600" font-family="Public Sans, Arial, sans-serif" style="filter:brightness(1.6)">L4 · OMOP CDM analytics</text></g>
-<g class="n" style="animation-delay:2.10s"><circle cx="140" cy="486" r="22" fill="#CA6F1E" stroke="#fbfbf8" stroke-width="1.5"/><text x="140" y="526" text-anchor="middle" fill="#eef2f1" font-size="14" font-family="Public Sans, Arial, sans-serif">OMOPPerson</text></g>
-<g class="n" style="animation-delay:2.18s"><circle cx="380" cy="486" r="22" fill="#CA6F1E" stroke="#fbfbf8" stroke-width="1.5"/><text x="380" y="526" text-anchor="middle" fill="#eef2f1" font-size="14" font-family="Public Sans, Arial, sans-serif">ConditionOccurrence</text></g>
-<g class="n" style="animation-delay:2.26s"><circle cx="620" cy="486" r="22" fill="#CA6F1E" stroke="#fbfbf8" stroke-width="1.5"/><text x="620" y="526" text-anchor="middle" fill="#eef2f1" font-size="14" font-family="Public Sans, Arial, sans-serif">Measurement</text></g>
-<g class="n" style="animation-delay:2.34s"><circle cx="860" cy="486" r="22" fill="#CA6F1E" stroke="#fbfbf8" stroke-width="1.5"/><text x="860" y="526" text-anchor="middle" fill="#eef2f1" font-size="14" font-family="Public Sans, Arial, sans-serif">DrugExposure</text></g>
-<g class="n" style="animation-delay:2.40s"><rect x="0" y="532" width="1000" height="118" rx="14" fill="#7D3C98" fill-opacity="0.16" stroke="#7D3C98" stroke-opacity="0.7"/><text x="18" y="560" fill="#7D3C98" font-size="18" font-weight="600" font-family="Public Sans, Arial, sans-serif" style="filter:brightness(1.6)">L5 · Terminology</text></g>
-<g class="n" style="animation-delay:2.65s"><circle cx="140" cy="614" r="22" fill="#7D3C98" stroke="#fbfbf8" stroke-width="1.5"/><text x="140" y="654" text-anchor="middle" fill="#eef2f1" font-size="14" font-family="Public Sans, Arial, sans-serif">SnomedConcept</text></g>
-<g class="n" style="animation-delay:2.73s"><circle cx="380" cy="614" r="22" fill="#7D3C98" stroke="#fbfbf8" stroke-width="1.5"/><text x="380" y="654" text-anchor="middle" fill="#eef2f1" font-size="14" font-family="Public Sans, Arial, sans-serif">ICD10Code</text></g>
-<g class="n" style="animation-delay:2.81s"><circle cx="620" cy="614" r="22" fill="#7D3C98" stroke="#fbfbf8" stroke-width="1.5"/><text x="620" y="654" text-anchor="middle" fill="#eef2f1" font-size="14" font-family="Public Sans, Arial, sans-serif">LoincCode</text></g>
-<g class="n" style="animation-delay:2.89s"><circle cx="860" cy="614" r="22" fill="#7D3C98" stroke="#fbfbf8" stroke-width="1.5"/><text x="860" y="654" text-anchor="middle" fill="#eef2f1" font-size="14" font-family="Public Sans, Arial, sans-serif">RxNormConcept</text></g>
-<path class="e" d="M124,102 L234,102" fill="none" stroke="rgba(255,255,255,0.35)" stroke-width="1.5" marker-end="url(#karrow)" style="animation-delay:1.20s"/>
-<path class="e" d="M284,102 L394,102" fill="none" stroke="rgba(255,255,255,0.35)" stroke-width="1.5" marker-end="url(#karrow)" style="animation-delay:1.32s"/>
-<path class="e" d="M284,102 L554,102" fill="none" stroke="rgba(255,255,255,0.35)" stroke-width="1.5" marker-end="url(#karrow)" style="animation-delay:1.44s"/>
-<path class="e" d="M716,102 L286,102" fill="none" stroke="rgba(255,255,255,0.35)" stroke-width="1.5" marker-end="url(#karrow)" style="animation-delay:1.56s"/>
-<path class="e" d="M876,102 L766,102" fill="none" stroke="rgba(255,255,255,0.35)" stroke-width="1.5" marker-end="url(#karrow)" style="animation-delay:1.68s"/>
-<path class="e" d="M204,230 L474,230" fill="none" stroke="rgba(255,255,255,0.35)" stroke-width="1.5" marker-end="url(#karrow)" style="animation-delay:1.80s"/>
-<path class="e" d="M524,230 L794,230" fill="none" stroke="rgba(255,255,255,0.35)" stroke-width="1.5" marker-end="url(#karrow)" style="animation-delay:1.92s"/>
-<path class="e" d="M140,358 L282,358" fill="none" stroke="rgba(255,255,255,0.35)" stroke-width="1.5" marker-end="url(#karrow)" style="animation-delay:2.04s"/>
-<path class="e" d="M140,358 L474,358" fill="none" stroke="rgba(255,255,255,0.35)" stroke-width="1.5" marker-end="url(#karrow)" style="animation-delay:2.16s"/>
-<path class="e" d="M140,358 L666,358" fill="none" stroke="rgba(255,255,255,0.35)" stroke-width="1.5" marker-end="url(#karrow)" style="animation-delay:2.28s"/>
-<path class="e" d="M860,358 L526,358" fill="none" stroke="rgba(255,255,255,0.35)" stroke-width="1.5" marker-end="url(#karrow)" style="animation-delay:2.40s"/>
-<path class="e" d="M164,486 L354,486" fill="none" stroke="rgba(255,255,255,0.35)" stroke-width="1.5" marker-end="url(#karrow)" style="animation-delay:2.52s"/>
-<path class="e" d="M164,486 L594,486" fill="none" stroke="rgba(255,255,255,0.35)" stroke-width="1.5" marker-end="url(#karrow)" style="animation-delay:2.64s"/>
-<path class="e" d="M164,486 L834,486" fill="none" stroke="rgba(255,255,255,0.35)" stroke-width="1.5" marker-end="url(#karrow)" style="animation-delay:2.76s"/>
-<path class="e" d="M113,122 L166,208" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="2" marker-end="url(#karrow)" style="animation-delay:2.88s"/>
-<path class="e" d="M477,238 L141,350" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="2" marker-end="url(#karrow)" style="animation-delay:3.00s"/>
-<path class="e" d="M120,382 L135,460" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="2" marker-end="url(#karrow)" style="animation-delay:3.12s"/>
-<path class="e" d="M516,376 L602,467" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="2" marker-end="url(#karrow)" style="animation-delay:3.24s"/>
-<path class="e" d="M295,378 L154,592" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="2" marker-end="url(#karrow)" style="animation-delay:3.36s"/>
-<path class="e" d="M314,381 L373,589" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="2" marker-end="url(#karrow)" style="animation-delay:3.48s"/>
-<path class="e" d="M510,380 L609,590" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="2" marker-end="url(#karrow)" style="animation-delay:3.60s"/>
-<path class="e" d="M705,378 L846,592" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="2" marker-end="url(#karrow)" style="animation-delay:3.72s"/>
-<path class="e" d="M620,510 L620,588" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="2" marker-end="url(#karrow)" style="animation-delay:3.84s"/>
-<circle r="7" fill="#fbfbf8" opacity="0.95"><animateMotion dur="4.5s" repeatCount="indefinite" begin="3s" path="M116,358 L500,358 L620,614 L620,486 L140,486"/></circle>
+<g class="n" style="animation-delay:0.20s"><rect x="0" y="20" width="1000" height="124" rx="14" fill="#2471A3" fill-opacity="0.16" stroke="#2471A3" stroke-opacity="0.7"/><text x="18" y="46" fill="#2471A3" font-size="17" font-weight="600" font-family="Public Sans, Arial, sans-serif" style="filter:brightness(1.6)">L1 · Dataspace marketplace</text></g>
+<g class="n" style="animation-delay:0.45s"><circle cx="100" cy="88" r="20" fill="#2471A3" stroke="#fbfbf8" stroke-width="1.5"/><text x="100" y="126" text-anchor="middle" fill="#eef2f1" font-size="13" font-family="Public Sans, Arial, sans-serif">Participant</text></g>
+<g class="n" style="animation-delay:0.53s"><circle cx="260" cy="88" r="20" fill="#2471A3" stroke="#fbfbf8" stroke-width="1.5"/><text x="260" y="126" text-anchor="middle" fill="#eef2f1" font-size="13" font-family="Public Sans, Arial, sans-serif">DataProduct</text></g>
+<g class="n" style="animation-delay:0.61s"><circle cx="420" cy="88" r="20" fill="#2471A3" stroke="#fbfbf8" stroke-width="1.5"/><text x="420" y="126" text-anchor="middle" fill="#eef2f1" font-size="13" font-family="Public Sans, Arial, sans-serif">OdrlPolicy</text></g>
+<g class="n" style="animation-delay:0.69s"><circle cx="580" cy="88" r="20" fill="#2471A3" stroke="#fbfbf8" stroke-width="1.5"/><text x="580" y="126" text-anchor="middle" fill="#eef2f1" font-size="13" font-family="Public Sans, Arial, sans-serif">HDABApproval</text></g>
+<g class="n" style="animation-delay:0.77s"><circle cx="740" cy="88" r="20" fill="#2471A3" stroke="#fbfbf8" stroke-width="1.5"/><text x="740" y="126" text-anchor="middle" fill="#eef2f1" font-size="13" font-family="Public Sans, Arial, sans-serif">Contract</text></g>
+<g class="n" style="animation-delay:0.85s"><circle cx="900" cy="88" r="20" fill="#2471A3" stroke="#fbfbf8" stroke-width="1.5"/><text x="900" y="126" text-anchor="middle" fill="#eef2f1" font-size="13" font-family="Public Sans, Arial, sans-serif">TransferEvent</text></g>
+<g class="n" style="animation-delay:0.75s"><rect x="0" y="156" width="1000" height="124" rx="14" fill="#148F77" fill-opacity="0.16" stroke="#148F77" stroke-opacity="0.7"/><text x="18" y="182" fill="#148F77" font-size="17" font-weight="600" font-family="Public Sans, Arial, sans-serif" style="filter:brightness(1.6)">L2 · HealthDCAT-AP metadata</text></g>
+<g class="n" style="animation-delay:1.00s"><circle cx="180" cy="224" r="20" fill="#148F77" stroke="#fbfbf8" stroke-width="1.5"/><text x="180" y="262" text-anchor="middle" fill="#eef2f1" font-size="13" font-family="Public Sans, Arial, sans-serif">Catalogue</text></g>
+<g class="n" style="animation-delay:1.08s"><circle cx="500" cy="224" r="20" fill="#148F77" stroke="#fbfbf8" stroke-width="1.5"/><text x="500" y="262" text-anchor="middle" fill="#eef2f1" font-size="13" font-family="Public Sans, Arial, sans-serif">HealthDataset</text></g>
+<g class="n" style="animation-delay:1.16s"><circle cx="820" cy="224" r="20" fill="#148F77" stroke="#fbfbf8" stroke-width="1.5"/><text x="820" y="262" text-anchor="middle" fill="#eef2f1" font-size="13" font-family="Public Sans, Arial, sans-serif">Distribution</text></g>
+<g class="n" style="animation-delay:1.30s"><rect x="0" y="292" width="1000" height="124" rx="14" fill="#1E8449" fill-opacity="0.16" stroke="#1E8449" stroke-opacity="0.7"/><text x="18" y="318" fill="#1E8449" font-size="17" font-weight="600" font-family="Public Sans, Arial, sans-serif" style="filter:brightness(1.6)">L3 · FHIR R4 clinical</text></g>
+<g class="n" style="animation-delay:1.55s"><circle cx="116" cy="360" r="20" fill="#1E8449" stroke="#fbfbf8" stroke-width="1.5"/><text x="116" y="398" text-anchor="middle" fill="#eef2f1" font-size="13" font-family="Public Sans, Arial, sans-serif">Patient</text></g>
+<g class="n" style="animation-delay:1.63s"><circle cx="308" cy="360" r="20" fill="#1E8449" stroke="#fbfbf8" stroke-width="1.5"/><text x="308" y="398" text-anchor="middle" fill="#eef2f1" font-size="13" font-family="Public Sans, Arial, sans-serif">Condition</text></g>
+<g class="n" style="animation-delay:1.71s"><circle cx="500" cy="360" r="20" fill="#1E8449" stroke="#fbfbf8" stroke-width="1.5"/><text x="500" y="398" text-anchor="middle" fill="#eef2f1" font-size="13" font-family="Public Sans, Arial, sans-serif">Observation</text></g>
+<g class="n" style="animation-delay:1.79s"><circle cx="692" cy="360" r="20" fill="#1E8449" stroke="#fbfbf8" stroke-width="1.5"/><text x="692" y="398" text-anchor="middle" fill="#eef2f1" font-size="13" font-family="Public Sans, Arial, sans-serif">MedicationRequest</text></g>
+<g class="n" style="animation-delay:1.87s"><circle cx="884" cy="360" r="20" fill="#1E8449" stroke="#fbfbf8" stroke-width="1.5"/><text x="884" y="398" text-anchor="middle" fill="#eef2f1" font-size="13" font-family="Public Sans, Arial, sans-serif">DiagnosticReport</text></g>
+<g class="n" style="animation-delay:1.85s"><rect x="0" y="428" width="1000" height="124" rx="14" fill="#CA6F1E" fill-opacity="0.16" stroke="#CA6F1E" stroke-opacity="0.7"/><text x="18" y="454" fill="#CA6F1E" font-size="17" font-weight="600" font-family="Public Sans, Arial, sans-serif" style="filter:brightness(1.6)">L4 · OMOP CDM analytics</text></g>
+<g class="n" style="animation-delay:2.10s"><circle cx="140" cy="496" r="20" fill="#CA6F1E" stroke="#fbfbf8" stroke-width="1.5"/><text x="140" y="534" text-anchor="middle" fill="#eef2f1" font-size="13" font-family="Public Sans, Arial, sans-serif">OMOPPerson</text></g>
+<g class="n" style="animation-delay:2.18s"><circle cx="380" cy="496" r="20" fill="#CA6F1E" stroke="#fbfbf8" stroke-width="1.5"/><text x="380" y="534" text-anchor="middle" fill="#eef2f1" font-size="13" font-family="Public Sans, Arial, sans-serif">ConditionOccurrence</text></g>
+<g class="n" style="animation-delay:2.26s"><circle cx="620" cy="496" r="20" fill="#CA6F1E" stroke="#fbfbf8" stroke-width="1.5"/><text x="620" y="534" text-anchor="middle" fill="#eef2f1" font-size="13" font-family="Public Sans, Arial, sans-serif">Measurement</text></g>
+<g class="n" style="animation-delay:2.34s"><circle cx="860" cy="496" r="20" fill="#CA6F1E" stroke="#fbfbf8" stroke-width="1.5"/><text x="860" y="534" text-anchor="middle" fill="#eef2f1" font-size="13" font-family="Public Sans, Arial, sans-serif">DrugExposure</text></g>
+<g class="n" style="animation-delay:2.40s"><rect x="0" y="564" width="1000" height="124" rx="14" fill="#7D3C98" fill-opacity="0.16" stroke="#7D3C98" stroke-opacity="0.7"/><text x="18" y="590" fill="#7D3C98" font-size="17" font-weight="600" font-family="Public Sans, Arial, sans-serif" style="filter:brightness(1.6)">L5 · Terminology</text></g>
+<g class="n" style="animation-delay:2.65s"><circle cx="140" cy="632" r="20" fill="#7D3C98" stroke="#fbfbf8" stroke-width="1.5"/><text x="140" y="670" text-anchor="middle" fill="#eef2f1" font-size="13" font-family="Public Sans, Arial, sans-serif">SnomedConcept</text></g>
+<g class="n" style="animation-delay:2.73s"><circle cx="380" cy="632" r="20" fill="#7D3C98" stroke="#fbfbf8" stroke-width="1.5"/><text x="380" y="670" text-anchor="middle" fill="#eef2f1" font-size="13" font-family="Public Sans, Arial, sans-serif">ICD10Code</text></g>
+<g class="n" style="animation-delay:2.81s"><circle cx="620" cy="632" r="20" fill="#7D3C98" stroke="#fbfbf8" stroke-width="1.5"/><text x="620" y="670" text-anchor="middle" fill="#eef2f1" font-size="13" font-family="Public Sans, Arial, sans-serif">LoincCode</text></g>
+<g class="n" style="animation-delay:2.89s"><circle cx="860" cy="632" r="20" fill="#7D3C98" stroke="#fbfbf8" stroke-width="1.5"/><text x="860" y="670" text-anchor="middle" fill="#eef2f1" font-size="13" font-family="Public Sans, Arial, sans-serif">RxNormConcept</text></g>
+<path class="e" d="M122,88 L236,88" fill="none" stroke="rgba(255,255,255,0.35)" stroke-width="1.5" marker-end="url(#karrow)" style="animation-delay:1.20s"/>
+<path class="e" d="M282,88 L396,88" fill="none" stroke="rgba(255,255,255,0.35)" stroke-width="1.5" marker-end="url(#karrow)" style="animation-delay:1.32s"/>
+<path class="e" d="M282,88 L556,88" fill="none" stroke="rgba(255,255,255,0.35)" stroke-width="1.5" marker-end="url(#karrow)" style="animation-delay:1.44s"/>
+<path class="e" d="M718,88 L284,88" fill="none" stroke="rgba(255,255,255,0.35)" stroke-width="1.5" marker-end="url(#karrow)" style="animation-delay:1.56s"/>
+<path class="e" d="M878,88 L764,88" fill="none" stroke="rgba(255,255,255,0.35)" stroke-width="1.5" marker-end="url(#karrow)" style="animation-delay:1.68s"/>
+<path class="e" d="M202,224 L476,224" fill="none" stroke="rgba(255,255,255,0.35)" stroke-width="1.5" marker-end="url(#karrow)" style="animation-delay:1.80s"/>
+<path class="e" d="M522,224 L796,224" fill="none" stroke="rgba(255,255,255,0.35)" stroke-width="1.5" marker-end="url(#karrow)" style="animation-delay:1.92s"/>
+<path class="e" d="M138,360 L284,360" fill="none" stroke="rgba(255,255,255,0.35)" stroke-width="1.5" marker-end="url(#karrow)" style="animation-delay:2.04s"/>
+<path class="e" d="M138,360 L476,360" fill="none" stroke="rgba(255,255,255,0.35)" stroke-width="1.5" marker-end="url(#karrow)" style="animation-delay:2.16s"/>
+<path class="e" d="M138,360 L668,360" fill="none" stroke="rgba(255,255,255,0.35)" stroke-width="1.5" marker-end="url(#karrow)" style="animation-delay:2.28s"/>
+<path class="e" d="M862,360 L524,360" fill="none" stroke="rgba(255,255,255,0.35)" stroke-width="1.5" marker-end="url(#karrow)" style="animation-delay:2.40s"/>
+<path class="e" d="M162,496 L356,496" fill="none" stroke="rgba(255,255,255,0.35)" stroke-width="1.5" marker-end="url(#karrow)" style="animation-delay:2.52s"/>
+<path class="e" d="M162,496 L596,496" fill="none" stroke="rgba(255,255,255,0.35)" stroke-width="1.5" marker-end="url(#karrow)" style="animation-delay:2.64s"/>
+<path class="e" d="M162,496 L836,496" fill="none" stroke="rgba(255,255,255,0.35)" stroke-width="1.5" marker-end="url(#karrow)" style="animation-delay:2.76s"/>
+<path class="e" d="M111,107 L168,203" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="2" marker-end="url(#karrow)" style="animation-delay:2.88s"/>
+<path class="e" d="M479,231 L139,352" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="2" marker-end="url(#karrow)" style="animation-delay:3.00s"/>
+<path class="e" d="M120,382 L136,472" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="2" marker-end="url(#karrow)" style="animation-delay:3.12s"/>
+<path class="e" d="M515,376 L604,478" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="2" marker-end="url(#karrow)" style="animation-delay:3.24s"/>
+<path class="e" d="M296,379 L153,612" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="2" marker-end="url(#karrow)" style="animation-delay:3.36s"/>
+<path class="e" d="M314,381 L374,609" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="2" marker-end="url(#karrow)" style="animation-delay:3.48s"/>
+<path class="e" d="M509,380 L610,610" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="2" marker-end="url(#karrow)" style="animation-delay:3.60s"/>
+<path class="e" d="M704,379 L847,612" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="2" marker-end="url(#karrow)" style="animation-delay:3.72s"/>
+<path class="e" d="M620,518 L620,608" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="2" marker-end="url(#karrow)" style="animation-delay:3.84s"/>
+<circle r="7" fill="#fbfbf8" opacity="0.95"><animateMotion dur="4.5s" repeatCount="indefinite" begin="3s" path="M116,360 L500,360 L620,632 L620,496 L140,496"/></circle>
 </svg></div>
             <div style="flex: 1">
               <p class="small">A Neo4j graph on Azure Container Apps, persistent on Azure Files. FHIR R4 comes in from a hospital's server or from the phone's bundle and stays FHIR: Patient, Condition, Observation, MedicationRequest as nodes and relationships.</p>
@@ -759,10 +760,13 @@
           if (!on) return;
           var h = Reveal.getIndices().h;
           player.src = "audio/slide-" + (h + 1) + ".mp3";
-          player.play().catch(function () {
-            state.textContent = "no narration for this slide";
-          });
           state.textContent = "";
+          player.play().catch(function (err) {
+            state.textContent =
+              err && err.name === "NotAllowedError"
+                ? "click once more to allow audio"
+                : "no narration for this slide";
+          });
         }
         btn.addEventListener("click", function () {
           on = !on;
