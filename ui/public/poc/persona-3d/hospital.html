@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Data holder view · Persona graph POC</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" href="../../favicon.svg" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div id="app">
+      <header class="top"></header>
+      <main>
+        <aside class="panel" id="panel"><h1>Data holder view</h1><div class="question">Loading fixtures…</div></aside>
+        <div id="graph"></div>
+      </main>
+    </div>
+    <script type="module">
+import { mountPersona, renderTop, loadJson, fmtDate, daysUntil } from "./engine.js";
+renderTop("hospital");
+
+const ME = "AlphaKlinik Berlin", MYDID = "did:web:alpha-klinik.de:participant";
+const [catalog, comp, creds, audit, permits] = await Promise.all([loadJson("catalog"), loadJson("compliance"), loadJson("credentials"), loadJson("admin_audit"), loadJson("permits")]);
+
+const layers = [
+  { id: "cons", name: "Who takes our data, and how far we trust them", z: 2, color: "#f97316" },
+  { id: "chain", name: "Permits and contracts covering our data", z: 1, color: "#94a3b8" },
+  { id: "data", name: "Our datasets (Art. 60 duties)", z: 0, color: "#7dd3c8" },
+  { id: "trust", name: "Credentials and quality labels", z: -1, color: "#a5b4fc" },
+];
+const nodes = [], links = [], signals = [];
+const add = (n) => (nodes.push(n), n);
+const link = (s, t, o = {}) => links.push({ source: s, target: t, ...o });
+const has = (id) => nodes.some((n) => n.id === id);
+const nameOf = (x) => (typeof x === "string" ? x : x?.name);
+const rank = { none: 0, ok: 1, info: 1, warn: 2, bad: 3 };
+const mark = (id, s) => { const n = nodes.find((x) => x.id === id); if (n && rank[s] > rank[n.status ?? "none"]) { n.status = s; n.pulse = s === "bad"; } };
+
+add({ id: "me", label: ME, layer: "data", size: 4, color: "#fbbf24", pin: [0, 0], detail: { title: ME, sub: "health data holder (Art. 60 duties: describe, make available, log)", links: [{ href: "../../data/share", text: "Share data (live)" }, { href: "../../catalog", text: "Catalog (live)" }] } });
+
+// our datasets
+const norm = (t) => t.toLowerCase().replace(/\s*\(.*?\)/g, "").replace(/[^a-z0-9]+/g, "-");
+const ds = new Map();
+for (const c of catalog) { const ours = c.publisher.startsWith(ME) || (c.providers ?? []).map(nameOf).includes(ME); if (!ours) continue; const k = norm(c.title); if (!ds.has(k)) ds.set(k, { ...c, key: k, ids: [c.id], consumers: [...(c.consumers ?? [])] }); else { ds.get(k).ids.push(c.id); ds.get(k).consumers.push(...(c.consumers ?? [])); } }
+const dsByAny = (id) => [...ds.values()].find((d) => d.ids.includes(id) || d.title === id);
+const labels = creds.credentials.filter((c) => c.credentialType === "DataQualityLabelCredential" && c.subjectDid.endsWith("alphaklinik"));
+for (const d of ds.values()) {
+  const id = `ds:${d.key}`, cons = [...new Set(d.consumers.map(nameOf))];
+  const label = labels.find((l) => l.datasetId && d.ids.includes(l.datasetId));
+  add({ id, label: d.title.replace(/ Patient Cohort| Dataset/g, ""), layer: "data", size: 1.3 + Math.log10(d.recordCount || 10) / 2, color: "#7dd3c8", status: cons.length ? "ok" : "none", detail: { title: d.title, sub: `${d.theme}, ${Number(d.recordCount).toLocaleString()} records`, facts: [["consumers", cons.join(", ") || "none yet"], ["FHIR resources listed", (d.fhirResources ?? []).length], ["quality label", label ? `${label.credentialId} to ${fmtDate(label.expiresAt)}` : "none"]], article: "Art. 60(1): make data available under a permit; Art. 77 description; Art. 78 label" } });
+  link("me", id, { color: "#7dd3c8", distance: 70 });
+}
+signals.push({ severity: "info", nodeId: "me", text: `${[...ds.values()].filter((d) => !d.consumers.length).length} of ${ds.size} datasets are described and published without a consumer yet`, article: "Art. 60 duty met, Art. 77 description" });
+
+// quality labels and credentials of ours
+for (const c of creds.credentials.filter((c) => c.subjectDid.endsWith("alphaklinik"))) { const d = daysUntil(c.expiresAt), sev = d < 0 ? "warn" : d < 90 ? "warn" : "ok", id = `vc:${c.credentialId}`; add({ id, label: `${c.credentialType.replace("Credential", "")} ${d < 0 ? "expired" : "valid"}`, layer: "trust", size: 1.4, status: sev, detail: { title: c.credentialType, sub: `expires ${fmtDate(c.expiresAt)} (${d} days), wallet says "${c.status}"`, facts: [["issuer", c.issuerDid], ["conformance", c.conformance ?? "n/a"], ["completeness", c.completeness ?? "n/a"], ["timeliness", c.timeliness ?? "n/a"], ["cites", c.ehdsArticle ?? "n/a"]], article: c.credentialType.startsWith("DataQuality") ? "Art. 78 data quality and utility label" : "DCP v1.0 participant credential" } }); link("me", id, { status: sev, distance: 60 }); if (d < 0) signals.push({ severity: "warn", nodeId: id, text: `Our ${c.credentialType} expired ${fmtDate(c.expiresAt)} (${-d} days ago) and still reads "${c.status}" in the wallet`, article: "Art. 78 label kept current; Art. 60" }); }
+
+// consumers and their trust
+const consumers = new Map();
+const addConsumer = (name, did) => { if (!name || name === ME) return null; const id = `c:${norm(name)}`; if (!consumers.has(id)) { consumers.set(id, { name, did }); add({ id, label: name, layer: "cons", size: 2.2, status: "none", color: "#f97316", detail: { title: name, sub: did ?? "", facts: [] } }); } return id; };
+const walletOf = (name) => creds.credentials.filter((c) => c.subjectDid.split(":").pop().replace(/[^a-z]/g, "").includes(name.toLowerCase().replace(/[^a-z]/g, "").slice(0, 5)) || (c.subjectDid.includes("pharmaco") && name.startsWith("PharmaCo")) || (c.subjectDid.includes("lmc") && name.startsWith("Limburg")) || (c.subjectDid.includes("irs") && name.startsWith("Institut")));
+for (const row of comp.matrix) {
+  if (row.consumerName === ME) continue;
+  const cid = addConsumer(row.consumerName, row.consumerId); if (!cid) continue;
+  const n = nodes.find((x) => x.id === cid);
+  const wallet = walletOf(row.consumerName), member = wallet.find((c) => c.credentialType === "MembershipCredential"), part = wallet.find((c) => c.credentialType === "EHDSParticipantCredential"), purpose = wallet.find((c) => c.credentialType === "DataProcessingPurposeCredential");
+  n.detail.facts.push(["membership", member ? `valid to ${fmtDate(member.expiresAt)}` : "none presented"], ["participant credential", part ? `${part.participantRole}, to ${fmtDate(part.expiresAt)}` : "none presented"], ["purpose credential", purpose ? `${purpose.credentialType} to ${fmtDate(purpose.expiresAt)}` : "none"], ["application", row.applicationStatus ?? "none"], ["permit", row.approvalStatus ?? "none"], ["contract", row.hasContract ? "yes" : "no"]);
+  n.detail.article = "Trust = DCP credentials (membership, participant, purpose) + Art. 68 permit + DSP contract";
+  const ourTouch = audit.transfers.some((t) => t.providerDid === MYDID && (t.consumerDid === row.consumerId || t.consumerName === row.consumerName)) || audit.accesslogs.some((l) => l.providerDid === MYDID && l.consumerName === row.consumerName) || [...ds.values()].some((d) => d.consumers.map(nameOf).includes(row.consumerName));
+  if (!member && !part && row.consumerType !== "HDAB") { mark(cid, "warn"); signals.push({ severity: "warn", nodeId: cid, text: `${row.consumerName}: no membership or participant credential in the wallet, application ${row.applicationStatus ?? "none"}`, article: "DCP v1.0 attestation before any DSP negotiation" }); }
+  if (purpose && daysUntil(purpose.expiresAt) < 0) { const later = audit.accesslogs.filter((l) => l.providerDid === MYDID && l.consumerName === row.consumerName && new Date(l.accessedAt) > new Date(purpose.expiresAt)); mark(cid, "bad"); signals.push({ severity: "bad", nodeId: cid, text: `${row.consumerName}: purpose credential expired ${fmtDate(purpose.expiresAt)}, ${later.length} accesses to our data logged since`, article: "Art. 61 duties of users; Art. 60(1)(d) holder must not release outside the permit" }); }
+  if (row.applicationStatus === "REJECTED") { const attempts = audit.transfers.filter((t) => t.providerDid === MYDID && t.consumerName === row.consumerName).length + audit.accesslogs.filter((l) => l.consumerName === row.consumerName && l.statusCode !== 200).length; mark(cid, attempts ? "bad" : "info"); if (attempts) signals.push({ severity: "bad", nodeId: cid, text: `${row.consumerName}: permit refused, still ${attempts} transfer or access attempts on our data`, article: "Art. 63 enforcement by the access body; report it" }); }
+  if (row.approvalStatus === "APPROVED" && !row.hasContract && audit.transfers.some((t) => t.providerDid === MYDID && t.consumerName === row.consumerName && t.status === "IN_PROGRESS")) { mark(cid, "warn"); signals.push({ severity: "warn", nodeId: cid, text: `${row.consumerName}: permit issued, transfer in progress, no contract signed`, article: "DSP agreement required before the data plane starts" }); }
+  if (row.hasContract && row.approvalStatus === "APPROVED" && member && part && (!purpose || daysUntil(purpose.expiresAt) >= 0)) mark(cid, "ok");
+  if (!ourTouch && (n.status ?? "none") === "none") n.size = 1.4;
+  // chain nodes
+  if (row.hasApplication) { const a = `app:${cid}`; const sev = { APPROVED: "ok", PENDING: "warn", UNDER_REVIEW: "info", REJECTED: "none" }[row.applicationStatus] ?? "info"; add({ id: a, label: `application ${row.applicationStatus.toLowerCase().replace("_", " ")}`, layer: "chain", size: 1.3, status: sev, detail: { title: row.applicationName ?? row.applicationId ?? "application", sub: `${row.consumerName}, ${fmtDate(row.submittedAt)}`, article: "Art. 67" } }); link(cid, a, { status: sev, distance: 90 }); let last = a; if (row.hasApproval) { const p = `apr:${cid}`; const s2 = row.approvalStatus === "APPROVED" ? "ok" : "info"; add({ id: p, label: row.approvalStatus === "APPROVED" ? "permit issued" : "permit refused", layer: "chain", size: 1.3, status: s2, detail: { title: `Permit decision, ${row.consumerName}`, sub: row.approvalStatus, article: "Art. 68" } }); link(last, p, { status: s2, distance: 45, arrow: true }); last = p; } if (row.hasContract) { const c = `ct:${cid}`; add({ id: c, label: "contract", layer: "chain", size: 1.3, status: "ok", detail: { title: `Contract, ${row.consumerName}`, sub: row.datasetTitle ?? "" } }); link(last, c, { status: "ok", distance: 45, arrow: true }); last = c; } const d = dsByAny(row.datasetId) ?? dsByAny(row.datasetTitle); if (d) link(last, `ds:${d.key}`, { status: "none", distance: 90, arrow: true }); }
+}
+// permits on our datasets from the register
+for (const e of permits.entries) { const d = dsByAny(e.datasetId); if (!d || e.applicant === ME) continue; const cid = addConsumer(e.applicant, e.applicantDid); const id = `permit:${e.applicationId}`; const sev = e.outcome.includes("issued") || e.outcome.includes("approved") ? "ok" : e.outcome === "pending" ? "warn" : "info"; if (!has(id)) { add({ id, label: `${e.kind ?? "application"}: ${e.outcome}`, layer: "chain", size: 1.2, status: sev, detail: { title: e.applicationId, sub: `${e.applicant} → ${e.accessBody ?? "no access body yet"}, ${e.purpose}`, facts: [["submitted", fmtDate(e.submittedAt)], ["valid until", fmtDate(e.validUntil)], ["conditions", (e.conditions ?? []).length]], article: `${permits.articles.applications}; ${permits.articles.decisions}` } }); if (cid) link(cid, id, { status: sev, distance: 90 }); link(id, `ds:${d.key}`, { status: sev, distance: 80, arrow: true }); } }
+
+// flows on our data
+for (const t of audit.transfers.filter((t) => t.providerDid === MYDID)) { const id = `tr:${t.id}`, sev = { COMPLETED: "ok", IN_PROGRESS: "info", ERROR: "bad" }[t.status] ?? "info"; const cid = addConsumer(t.consumerName, t.consumerDid); add({ id, label: `${t.id} ${t.status.toLowerCase()}`, layer: "chain", size: 1.1, status: sev, pulse: sev === "bad", detail: { title: t.asset, sub: `to ${t.consumerName}, ${t.transferDate}, ${t.protocol}${t.crossBorder ? ", cross-border" : ""}`, facts: [["bytes", t.byteSize?.toLocaleString() ?? "0"], ["error", t.errorMessage ?? "none"], ["contract", t.contractId ?? "none"]], article: "Logged under Art. 73(1)(e); DSP transfer process" } }); const d = dsByAny(t.assetId) ?? dsByAny(t.asset); if (d) link(`ds:${d.key}`, id, { status: sev, particles: sev === "ok" ? 2 : 0, distance: 60 }); if (cid) link(id, cid, { status: sev, particles: sev === "ok" ? 2 : 0, distance: 110 }); }
+for (const l of audit.accesslogs.filter((l) => l.providerDid === MYDID)) { const id = `log:${l.id}`, sev = l.statusCode === 200 ? "ok" : "bad"; const cid = addConsumer(l.consumerName, l.consumerDid); add({ id, label: l.name, layer: "chain", size: 0.9, status: sev, detail: { title: l.name, sub: `${l.method} ${l.endpoint} → ${l.statusCode}, ${fmtDate(l.accessedAt)}`, facts: [["permit", l.permitId ? `${l.permitId} (${l.permitStatus})` : "none"], ["bytes", l.bytesAccessed], ["error", l.errorMessage ?? "none"]], article: "Art. 73(1)(e) log, visible to the patient under Art. 8" } }); if (cid) link(cid, id, { status: sev, distance: 110 }); const d = dsByAny(l.assetId); if (d) link(id, `ds:${d.key}`, { status: sev, distance: 60 }); }
+signals.push({ severity: "ok", nodeId: `log:${audit.accesslogs.find((l) => l.providerDid === MYDID)?.id}`, text: `${audit.accesslogs.filter((l) => l.providerDid === MYDID && l.statusCode === 200).length} accesses served under a valid permit, ${audit.accesslogs.filter((l) => l.providerDid === MYDID && l.statusCode !== 200).length} refused, all logged`, article: "Art. 73(1)(e)" });
+
+mountPersona({ persona: "hospital", title: "Our data and who we trust, in one view", question: "Which consumers are untrusted or out of permit, which contracts are missing, and are our own labels and descriptions in order?", article: "Regulation (EU) 2025/327 Art. 60, 61, 63, 67, 68, 73, 77, 78", layers, nodes, links, signals,
+  legend: [{ color: "#ef4444", text: "untrusted / violation" }, { color: "#f59e0b", text: "gap to close" }, { color: "#22c55e", text: "trusted, in order" }, { color: "#38bdf8", text: "in progress" }, { color: "#f97316", text: "consumer" }, { color: "#7dd3c8", text: "our dataset" }],
+  dataNote: "Holder persona = AlphaKlinik Berlin (fictional)." });
+    </script>
+  </body>
+</html>

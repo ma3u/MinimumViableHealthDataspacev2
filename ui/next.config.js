@@ -58,6 +58,11 @@ const nextConfig = {
           destination: "/presentations/:deck/index.html",
           permanent: false,
         },
+        {
+          source: "/poc/:name",
+          destination: "/poc/:name/index.html",
+          permanent: false,
+        },
       ];
     },
   }),

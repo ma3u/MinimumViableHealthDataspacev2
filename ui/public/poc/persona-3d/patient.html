@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Patient view · Persona graph POC</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" href="../../favicon.svg" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div id="app">
+      <header class="top"></header>
+      <main>
+        <aside class="panel" id="panel"><h1>Patient view</h1><div class="question">Loading fixtures…</div></aside>
+        <div id="graph"></div>
+      </main>
+    </div>
+    <script type="module">
+import { mountPersona, renderTop, loadJson, fmtDate } from "./engine.js";
+renderTop("patient");
+
+const [profile, insights, research] = await Promise.all([
+  loadJson("patient_profile_patient1"),
+  loadJson("patient_insights"),
+  loadJson("patient_research"),
+]);
+
+const layers = [
+  { id: "prevent", name: "Prevention: what to do next", z: 2, color: "#fbbf24" },
+  { id: "risk", name: "My risks and the parameters behind them", z: 1, color: "#f97316" },
+  { id: "me", name: "My record (FHIR R4)", z: 0, color: "#86efac" },
+  { id: "use", name: "Who uses my data, under which consent", z: -1, color: "#a78bfa" },
+];
+const nodes = [];
+const links = [];
+const signals = [];
+const add = (n) => (nodes.push(n), n);
+const link = (s, t, o = {}) => links.push({ source: s, target: t, ...o });
+const lvl = { high: "bad", moderate: "warn", low: "ok" };
+
+// centre: me
+add({
+  id: "me", label: profile.patient.name, layer: "me", size: 4, color: "#fbbf24", pin: [0, 0],
+  detail: { title: profile.patient.name, sub: `born ${profile.patient.birthDate}, ${profile.totalConditionCount} diagnoses on record`,
+    facts: [["Access", profile.gdprRights.ehdsAccess], ["Portability", profile.gdprRights.rightToPortability]],
+    article: "Regulation (EU) 2025/327 Art. 3: access to my own electronic health data (adopted numbering)",
+    links: [{ href: "../../patient/profile", text: "My profile (live)" }, { href: "../../patient/insights", text: "My insights (live)" }] },
+});
+
+// risk domains and their factors
+const factorIds = {};
+for (const [key, r] of Object.entries(profile.riskScores)) {
+  const id = `risk:${key}`;
+  add({ id, label: `${key} risk ${Math.round(r.score * 100)} %`, layer: "risk", size: 3, status: lvl[r.level] ?? "info", pulse: r.level === "high",
+    detail: { title: `${key[0].toUpperCase()}${key.slice(1)} risk`, sub: `score ${r.score}, level ${r.level}`,
+      facts: r.factors.map((f, i) => [`factor ${i + 1}`, f]), article: "Derived from my own record (primary use). Not a diagnosis." } });
+  link("me", id, { status: lvl[r.level], width: 1.4, distance: 70 });
+  signals.push({ severity: lvl[r.level] ?? "info", nodeId: id, text: `${key} risk is ${r.level} (${Math.round(r.score * 100)} %): ${r.factors.join(", ")}`, article: "Art. 3 access, Art. 14 priority data categories" });
+  for (const f of r.factors) {
+    const fid = `fac:${f.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`;
+    if (!factorIds[fid]) { factorIds[fid] = f; add({ id: fid, label: f, layer: "risk", size: 1.4, status: "warn", detail: { title: f, sub: "risk parameter", facts: [["drives", key + " risk"]] } }); }
+    link(fid, id, { status: "warn", distance: 40 });
+  }
+}
+
+// record: conditions and medications
+const condByWord = {};
+for (const c of profile.conditions) {
+  const id = `cond:${c.code}`;
+  add({ id, label: c.display, layer: "me", size: 1.2, color: "#86efac", detail: { title: c.display, sub: `since ${c.onsetDate ?? "n/a"}`, facts: [["code", c.code]], article: "FHIR R4 Condition, SNOMED CT / ICD-10 coded" } });
+  link("me", id, { color: "#4ade80", distance: 55 });
+  condByWord[c.display.toLowerCase()] = id;
+}
+const matchCond = (text) => Object.entries(condByWord).find(([w]) => text.toLowerCase().includes(w.split(" ")[0].replace(/[()]/g, "")))?.[1];
+// a factor that is also a diagnosis links down to it: the parameter behind the risk
+for (const [fid, f] of Object.entries(factorIds)) {
+  const cid = matchCond(f) ?? (f.includes("T2D") ? "cond:73211009" : f.includes("BMI") ? "cond:414916001" : null);
+  if (cid) link(cid, fid, { color: "#fb923c", distance: 60, particles: 1 });
+}
+const medTarget = { Metformin: "cond:73211009", Lisinopril: "cond:38341003", Salbutamol: "cond:195967001", Atorvastatin: "risk:cardiovascular" };
+for (const m of profile.medications) {
+  const id = `med:${m.code}`;
+  add({ id, label: m.display.split(" ")[0], layer: "me", size: 1, color: "#c4b5fd", detail: { title: m.display, sub: "FHIR R4 MedicationRequest", facts: [["RxNorm", m.code]] } });
+  const t = Object.entries(medTarget).find(([k]) => m.display.startsWith(k))?.[1];
+  link(id, t ?? "me", { color: "#a78bfa", distance: 45 });
+}
+
+// prevention layer: recommendations and findings
+insights.recommendations.forEach((r, i) => {
+  const id = `rec:${i}`;
+  const sev = r.priority === "high" ? "warn" : "info";
+  add({ id, label: r.action.replace(/\.$/, ""), layer: "prevent", size: 2.4, status: sev, pulse: r.priority === "high",
+    detail: { title: r.action, sub: `${r.category}, priority ${r.priority}`, facts: [["based on", r.basedOn]], article: "Aggregate finding from a secure processing environment, Art. 73 (adopted numbering); the fixture still says Art. 50" } });
+  const target = /cardio|statin/i.test(r.basedOn + r.action) ? "risk:cardiovascular" : "risk:diabetes";
+  link(id, target, { status: sev, distance: 80, arrow: true });
+  signals.push({ severity: sev, nodeId: id, text: `${r.priority} priority: ${r.action}`, article: "Art. 73 SPE result, Art. 58 obligations towards natural persons" });
+});
+for (const f of insights.findings) {
+  const id = `find:${f.insightId}`;
+  add({ id, label: f.recommendation.replace(/\.$/, ""), layer: "prevent", size: 1.8, status: "info",
+    detail: { title: f.finding, sub: `evidence ${f.evidenceLevel}, from ${f.studyId}`, facts: [["applies to", f.relevantConditions.join(", ")]], article: insights.privacyNote } });
+  link(id, `study:${f.studyId}`, { color: "#a78bfa", distance: 120 });
+  for (const c of f.relevantConditions) { const cid = matchCond(c); if (cid) link(cid, id, { color: "#38bdf8", distance: 90 }); }
+  if (f.evidenceLevel === "strong") signals.push({ severity: "info", nodeId: id, text: `Strong evidence: ${f.recommendation}`, article: "Art. 58: access bodies inform the public of results" });
+}
+
+// who uses my data
+for (const p of research.programs) {
+  const id = `study:${p.studyId}`;
+  const consent = research.consents.find((c) => c.studyId === p.studyId);
+  add({ id, label: p.studyName, layer: "use", size: 2.2, status: consent ? "ok" : "info",
+    detail: { title: p.studyName, sub: `${p.institution}, ${p.participantCount.toLocaleString()} participants in ${p.countries.join(", ")}`, facts: [["needs", p.dataNeeded], ["status", p.status], ["ethics", p.ethicsApproval]], article: consent ? "My consent is on file and can be withdrawn (Art. 71 opt-out from secondary use)" : "Not joined. Art. 71: secondary use continues unless I opt out; a study invitation is a separate consent",
+      links: [{ href: "../../patient/research", text: "Research programmes (live)" }] } });
+  const org = `org:${p.institution}`;
+  if (!nodes.find((n) => n.id === org)) add({ id: org, label: p.institution, layer: "use", size: 1.6, color: "#f97316", detail: { title: p.institution, sub: "health data user" } });
+  link(id, org, { color: "#f97316", distance: 45 });
+  if (consent) {
+    const cid = `consent:${consent.consentId}`;
+    add({ id: cid, label: `consent ${fmtDate(consent.grantedAt)}`, layer: "use", size: 1.2, status: consent.revoked ? "none" : "ok",
+      detail: { title: consent.consentId, sub: consent.dataScope, facts: [["granted", fmtDate(consent.grantedAt)], ["pseudonymised by", consent.trustCenterDid]], article: research.gdprBasis } });
+    link("me", cid, { status: "ok", particles: 2, distance: 90 });
+    link(cid, id, { status: "ok", particles: 2, distance: 50 });
+    const tc = `tc:${consent.trustCenterDid}`;
+    if (!nodes.find((n) => n.id === tc)) add({ id: tc, label: consent.trustCenterDid.split(":")[2], layer: "use", size: 1.1, color: "#ef4444", detail: { title: "Trust centre", sub: consent.trustCenterDid, article: "Pseudonymisation before the SPE, Art. 73" } });
+    link(cid, tc, { color: "#ef4444", distance: 40 });
+  } else {
+    const rel = matchCond(p.dataNeeded) ?? (p.dataNeeded.match(/asthma/i) ? "cond:195967001" : null);
+    if (rel) { link(rel, id, { status: "info", distance: 130 }); signals.push({ severity: "info", nodeId: id, text: `${p.studyName} is ${p.status} and matches my ${nodes.find((n) => n.id === rel).label}`, article: "Art. 71 opt-out, GDPR Art. 9(2)(j)" }); }
+  }
+}
+signals.push({ severity: "ok", nodeId: "consent:CONSENT-001", text: `${research.consents.filter((c) => !c.revoked).length} consents active, both revocable; ${insights.privacyNote.split(".")[0]}`, article: "Art. 8: who accessed my data, Art. 71 opt-out" });
+signals.push({ severity: "info", nodeId: "me", text: "Gap: this fixture carries no measured values (LDL, HbA1c, blood pressure). The Klarbefund app delivers them as FHIR Observations with LOINC codes and the lab's own reference range.", article: "Art. 14 priority category: laboratory results" });
+
+mountPersona({
+  persona: "patient", title: "My health, in one view", question: "Which parameters put me at risk, what should I do about them, and who is using my data?",
+  article: "Regulation (EU) 2025/327 Art. 3, 8, 14, 71, 73", layers, nodes, links, signals,
+  legend: [{ color: "#ef4444", text: "high risk / act" }, { color: "#f59e0b", text: "moderate / watch" }, { color: "#38bdf8", text: "information" }, { color: "#22c55e", text: "consented, in order" }, { color: "#86efac", text: "diagnosis" }, { color: "#c4b5fd", text: "medication" }],
+  dataNote: "Patient P1 is fictional (Anna Müller).",
+});
+    </script>
+  </body>
+</html>
