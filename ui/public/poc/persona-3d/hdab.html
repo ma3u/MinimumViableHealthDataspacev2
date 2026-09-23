@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Access body view · Persona graph POC</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" href="../../favicon.svg" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div id="app">
+      <header class="top"></header>
+      <main>
+        <aside class="panel" id="panel"><h1>Access body view</h1><div class="question">Loading fixtures…</div></aside>
+        <div id="graph"></div>
+      </main>
+    </div>
+    <script type="module">
+import { mountPersona, renderTop, loadJson, fmtDate, daysUntil, ASOF } from "./engine.js";
+renderTop("hdab");
+
+const ME = "MedReg DE";
+const [comp, permits, requests, audit, creds, catalog] = await Promise.all([
+  loadJson("compliance"), loadJson("permits"), loadJson("requests"), loadJson("admin_audit"), loadJson("credentials"), loadJson("catalog"),
+]);
+
+const layers = [
+  { id: "users", name: "Participants: users, holders, bodies", z: 2, color: "#f97316" },
+  { id: "chain", name: "Applications, permits, contracts (the chain)", z: 1, color: "#94a3b8" },
+  { id: "data", name: "Regulated datasets", z: 0, color: "#7dd3c8" },
+  { id: "ops", name: "Operations: transfers, accesses, requests", z: -1, color: "#a5b4fc" },
+];
+const nodes = [], links = [], signals = [];
+const add = (n) => (nodes.push(n), n);
+const link = (s, t, o = {}) => links.push({ source: s, target: t, ...o });
+const has = (id) => nodes.some((n) => n.id === id);
+const didSlug = (did) => did.split(":").slice(1, 3).join(":");
+
+add({ id: "me", label: ME, layer: "chain", size: 4, color: "#fbbf24", pin: [0, 0], detail: { title: ME, sub: "health data access body (Art. 55, tasks Art. 57)", links: [{ href: "../../compliance", text: "Compliance (live)" }, { href: "../../admin/audit", text: "Audit (live)" }, { href: "../../permits", text: "Permit register (live)" }] } });
+
+// participants
+const partId = {};
+for (const c of comp.consumers) { const id = `p:${c.id}`; partId[c.name] = id; partId[c.id] = id; add({ id, label: c.name, layer: "users", size: 2, color: { DATA_HOLDER: "#7dd3c8", DATA_USER: "#f97316", HDAB: "#ec4899", CLINIC: "#7dd3c8", CRO: "#f97316" }[c.type] ?? "#94a3b8", status: "none", detail: { title: c.name, sub: `${c.type}, ${c.id}` } }); }
+const byDidTail = (did) => Object.keys(partId).find((k) => k.startsWith("did:") && (k === did || didSlug(k) === didSlug(did)));
+const partOf = (nameOrDid) => partId[nameOrDid] ?? partId[byDidTail(nameOrDid) ?? ""];
+
+// datasets
+const dsId = {};
+for (const d of comp.datasets) { const id = `ds:${d.id}`; dsId[d.id] = id; const cat = catalog.find((c) => c.id === d.id) ?? catalog.find((c) => c.title === d.title); add({ id, label: d.title, layer: "data", size: 2.2, color: "#7dd3c8", detail: { title: d.title, sub: d.id, facts: [["publisher", cat?.publisher ?? "n/a"], ["records", cat?.recordCount?.toLocaleString() ?? "n/a"], ["legal basis", cat?.legalBasis ?? "n/a"]], article: "Art. 77 dataset description, Art. 78 quality label" } }); const pub = partOf(cat?.publisher ?? ""); if (pub) link(pub, id, { color: "#7dd3c8", distance: 120 }); }
+for (const a of audit.transfers) if (!dsId[a.assetId]) { const id = `ds:${a.assetId}`; dsId[a.assetId] = id; add({ id, label: a.asset, layer: "data", size: 2, color: "#7dd3c8", detail: { title: a.asset, sub: a.assetId } }); const pub = partOf(a.providerDid); if (pub) link(pub, id, { color: "#7dd3c8", distance: 120 }); }
+
+// the chain from the compliance matrix
+const mark = (id, status) => { const n = nodes.find((x) => x.id === id); if (n && ({ bad: 3, warn: 2, info: 1, ok: 1, none: 0 }[status] > { bad: 3, warn: 2, info: 1, ok: 1, none: 0 }[n.status ?? "none"])) { n.status = status; n.pulse = status === "bad"; } };
+for (const r of comp.matrix) {
+  const p = partOf(r.consumerId) ?? partOf(r.consumerName); if (!p) continue;
+  if (!r.hasApplication) continue;
+  const app = `app:${r.applicationId ?? r.consumerName}`;
+  const sevApp = { APPROVED: "ok", PENDING: "warn", UNDER_REVIEW: "info", REJECTED: "none" }[r.applicationStatus] ?? "info";
+  add({ id: app, label: `application ${r.applicationStatus.toLowerCase().replace("_", " ")}`, layer: "chain", size: 1.5, status: sevApp, detail: { title: r.applicationName ?? r.applicationId ?? "application", sub: `${r.consumerName}, ${r.applicationStatus}, submitted ${fmtDate(r.submittedAt)}`, article: "Art. 67 health data access application" } });
+  link(p, app, { status: sevApp, distance: 90 });
+  let last = app;
+  if (r.hasApproval) { const ap = `apr:${r.consumerName}`; const sev = r.approvalStatus === "APPROVED" ? "ok" : "info"; add({ id: ap, label: r.approvalStatus === "APPROVED" ? "permit issued" : "permit refused", layer: "chain", size: 1.5, status: sev, detail: { title: `Decision for ${r.consumerName}`, sub: r.approvalStatus, article: `${r.ehdsArticle ?? "Art. 68"} (proposal numbering in the fixture; adopted Art. 68)` } }); link(app, ap, { status: sev, distance: 50, arrow: true }); last = ap; }
+  if (r.hasContract) { const ct = `ct:${r.consumerName}`; add({ id: ct, label: "contract", layer: "chain", size: 1.5, status: "ok", detail: { title: `Contract for ${r.consumerName}`, sub: r.datasetTitle ?? "", article: "DSP 2025-1 contract agreement under the permit" } }); link(last, ct, { status: "ok", distance: 50, arrow: true }); last = ct; }
+  if (r.datasetId && dsId[r.datasetId]) link(last, dsId[r.datasetId], { status: "none", distance: 100, arrow: true });
+  // findings on the chain
+  if (r.hasContract && r.applicationStatus === "PENDING") { mark(app, "warn"); signals.push({ severity: "warn", nodeId: app, text: `${r.consumerName}: a contract exists while the application is still PENDING; the permit must precede the contract`, article: "Art. 68(1): data made available only under a permit" }); }
+  if (r.approvalStatus === "APPROVED" && !r.hasContract) { const running = audit.transfers.find((t) => byDidTail(t.consumerDid) === r.consumerId && t.status === "IN_PROGRESS"); if (running) { mark(`apr:${r.consumerName}`, "bad"); signals.push({ severity: "bad", nodeId: `tr:${running.id}`, text: `${r.consumerName}: transfer ${running.id} is running with a permit but without a contract`, article: "Art. 68(3) permit conditions; DSP agreement missing" }); } }
+}
+// pending applications past their decision date: my own duty
+for (const e of permits.entries.filter((e) => e.outcome === "pending" && e.decisionDue)) { const d = daysUntil(e.decisionDue); const id = `app:${e.applicationId}`; if (!has(id)) { add({ id, label: `application pending`, layer: "chain", size: 1.5, status: "warn", detail: { title: e.applicationId, sub: `${e.applicant}, ${e.purpose}, submitted ${fmtDate(e.submittedAt)}` } }); const p = partOf(e.applicant); if (p) link(p, id, { status: "warn", distance: 90 }); if (dsId[e.datasetId]) link(id, dsId[e.datasetId], { status: "none", distance: 100 }); } if (d < 0) { mark(id, "bad"); signals.push({ severity: "bad", nodeId: id, text: `My decision on ${e.applicationId} (${e.applicant}) is ${-d} days overdue (due ${fmtDate(e.decisionDue)})`, article: "Art. 68(4): decision within 3 months of a complete application; Art. 57(1)(j) publish it" }); } }
+// permits expiring
+for (const e of permits.entries.filter((e) => e.validUntil)) { const d = daysUntil(e.validUntil); if (d < 120) { const id = `apr:${e.applicant}`; mark(id, "warn"); signals.push({ severity: d < 0 ? "bad" : "warn", nodeId: has(id) ? id : partOf(e.applicant), text: `Permit ${e.permitId} for ${e.applicant} ${d < 0 ? "expired" : `expires in ${d} days`} (${fmtDate(e.validUntil)})`, article: "Art. 68(9): permit for the period needed, max 10 years; renewal on request" }); } }
+
+// operations
+for (const t of audit.transfers) { const id = `tr:${t.id}`, sev = { COMPLETED: "ok", IN_PROGRESS: "info", ERROR: "bad" }[t.status] ?? "info"; add({ id, label: `${t.id} ${t.status.toLowerCase()}${t.crossBorder ? " · cross-border" : ""}`, layer: "ops", size: 1.4, status: sev, pulse: sev === "bad", detail: { title: t.asset, sub: `${t.providerName} → ${t.consumerName} (${t.consumerCountry ?? t.consumerCountryCode}), ${t.transferDate}`, facts: [["status", t.status], ["error", t.errorMessage ?? "none"], ["bytes", t.byteSize?.toLocaleString() ?? "0"], ["contract", t.contractId ?? "none"]], article: t.crossBorder ? "Art. 75 HealthData@EU cross-border" : "Domestic transfer" } }); if (dsId[t.assetId]) link(dsId[t.assetId], id, { status: sev, particles: sev === "ok" ? 2 : 0, distance: 70 }); const c = partOf(t.consumerDid); if (c) link(id, c, { status: sev, particles: sev === "ok" ? 2 : 0, distance: 160 }); if (sev === "bad") signals.push({ severity: "bad", nodeId: id, text: `${t.consumerName}: transfer ${t.id} failed (${t.errorMessage}) although its permit was refused`, article: "Art. 63 enforcement: revoke, fine, exclude up to 5 years" }); }
+for (const l of audit.accesslogs) { const id = `log:${l.id}`, sev = l.statusCode === 200 ? "ok" : "bad"; add({ id, label: l.name, layer: "ops", size: 1, status: sev, pulse: sev === "bad", detail: { title: l.name, sub: `${l.consumerName} on ${l.providerName}, ${l.method} ${l.endpoint} → ${l.statusCode}`, facts: [["at", l.accessedAt], ["permit", l.permitId ? `${l.permitId} (${l.permitStatus})` : "none"], ["error", l.errorMessage ?? "none"]], article: "Art. 73(1)(e) access logged; Art. 61(1) users act only under the permit" } }); const c = partOf(l.consumerDid); if (c) link(c, id, { status: sev, distance: 170 }); if (dsId[l.assetId]) link(id, dsId[l.assetId], { status: sev, distance: 70 }); if (sev === "bad") signals.push({ severity: "bad", nodeId: id, text: `${l.consumerName}: access refused (${l.statusCode}) on ${fmtDate(l.accessedAt)}: ${l.errorMessage}`, article: "Art. 61(1), Art. 63" }); }
+for (const r of requests.requests) { const id = `req:${r.requestId}`, sev = { PENDING: "warn", ANSWERED: "ok", REJECTED: "info" }[r.status] ?? "info"; add({ id, label: `request ${r.status.toLowerCase()}: ${r.question}`, layer: "ops", size: 1.2, status: sev, detail: { title: r.question, sub: `${r.applicantName}, ${r.status}`, facts: [["content", r.statisticalContent], ["safeguards", r.safeguards]], article: r.legalBasis } }); const c = partOf(r.applicant) ?? partOf(r.applicantName); if (c) link(c, id, { status: sev, distance: 170 }); if (dsId[r.datasetId]) link(id, dsId[r.datasetId], { status: sev, distance: 70 }); if (r.status === "REJECTED") signals.push({ severity: "ok", nodeId: id, text: `Blocked correctly: ${r.applicantName} asked "${r.question}", which is record-level, not statistical`, article: "Art. 69: anonymised statistical answers only" }); if (r.status === "PENDING") signals.push({ severity: "warn", nodeId: id, text: `Open request from ${r.applicantName}: "${r.question}"`, article: "Art. 69, answered within the Art. 68 timeline" }); }
+
+// credentials: expired purpose or quality label while still active in the wallet
+for (const c of creds.credentials) { const d = daysUntil(c.expiresAt); if (d >= 0) continue; const holder = Object.keys(partId).find((k) => !k.startsWith("did:") && k.toLowerCase().replace(/[^a-z]/g, "").includes(c.subjectDid.split("-").pop().replace(/[^a-z]/g, "").slice(0, 5))); const p = holder ? partId[holder] : null; const id = `vc:${c.credentialId}`; add({ id, label: `${c.credentialType.replace("Credential", "")} expired`, layer: "chain", size: 1.2, status: c.credentialType.startsWith("DataProcessingPurpose") ? "bad" : "warn", pulse: c.credentialType.startsWith("DataProcessingPurpose"), detail: { title: c.credentialType, sub: `${c.subjectDid}, expired ${fmtDate(c.expiresAt)} (${-d} days ago), wallet status "${c.status}"`, facts: [["issuer", c.issuerDid], ["dataset", c.datasetId ?? "n/a"], ["conformance", c.conformance ?? "n/a"], ["completeness", c.completeness ?? "n/a"]], article: c.credentialType.startsWith("DataProcessingPurpose") ? "Art. 61: purpose bound; Art. 53 purposes" : "Art. 78 data quality and utility label" } }); if (p) { link(p, id, { status: "bad", distance: 80 }); mark(p, c.credentialType.startsWith("DataProcessingPurpose") ? "bad" : "warn"); } if (c.credentialType.startsWith("DataProcessingPurpose")) { const later = audit.accesslogs.filter((l) => l.consumerDid.includes("pharmaco") && new Date(l.accessedAt) > new Date(c.expiresAt)); signals.push({ severity: "bad", nodeId: id, text: `${holder ?? c.subjectDid}: purpose credential expired ${fmtDate(c.expiresAt)}, yet ${later.length} accesses were logged after that date`, article: "Art. 61 duties of users, Art. 63 enforcement" }); } else signals.push({ severity: "warn", nodeId: id, text: `${holder ?? c.subjectDid}: data quality label expired ${fmtDate(c.expiresAt)}`, article: "Art. 78 label to be kept current" }); }
+
+signals.push({ severity: "info", nodeId: "me", text: `${audit.transfers.filter((t) => t.crossBorder).length} of ${audit.transfers.length} transfers are cross-border (NL, FR)`, article: "Art. 75 HealthData@EU; Art. 59 annual activity report" });
+
+mountPersona({ persona: "hdab", title: "Non-compliant operations, in one view", question: "Which chains are broken, which accesses were refused or should not have happened, and which of my own decisions are overdue?", article: "Regulation (EU) 2025/327 Art. 55, 57, 61, 63, 67, 68, 69, 73, 78", layers, nodes, links, signals,
+  legend: [{ color: "#ef4444", text: "violation / blocked" }, { color: "#f59e0b", text: "pending / expiring" }, { color: "#22c55e", text: "compliant" }, { color: "#38bdf8", text: "in progress / info" }, { color: "#f97316", text: "data user" }, { color: "#7dd3c8", text: "data holder / dataset" }, { color: "#ec4899", text: "access body" }],
+  dataNote: "Access body persona = MedReg DE (fictional). Article numbers are the adopted ones; several fixture fields still carry proposal numbers (Art. 46, 51, 53)." });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Researcher view · Persona graph POC</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" href="../../favicon.svg" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div id="app">
+      <header class="top"></header>
+      <main>
+        <aside class="panel" id="panel"><h1>Researcher view</h1><div class="question">Loading fixtures…</div></aside>
+        <div id="graph"></div>
+      </main>
+    </div>
+    <script type="module">
+import { mountPersona, renderTop, loadJson, fmtDate, daysUntil } from "./engine.js";
+renderTop("researcher");
+
+const ME = "PharmaCo Research AG";
+const [catalog, permits, requests, analytics, research, audit, creds] = await Promise.all([
+  loadJson("catalog"), loadJson("permits"), loadJson("requests"), loadJson("analytics"), loadJson("patient_research"), loadJson("admin_audit"), loadJson("credentials"),
+]);
+
+const layers = [
+  { id: "studies", name: "My studies, and other studies near them", z: 2, color: "#fbbf24" },
+  { id: "access", name: "My permits, requests, contracts, credentials", z: 1, color: "#94a3b8" },
+  { id: "mine", name: "Datasets I use or publish", z: 0, color: "#7dd3c8" },
+  { id: "other", name: "Relevant datasets I do not use yet", z: -1, color: "#a5b4fc" },
+];
+const nodes = [], links = [], signals = [];
+const add = (n) => (nodes.push(n), n);
+const link = (s, t, o = {}) => links.push({ source: s, target: t, ...o });
+const has = (id) => nodes.some((n) => n.id === id);
+
+add({ id: "me", label: ME, layer: "access", size: 4, color: "#fbbf24", pin: [0, 0], detail: { title: ME, sub: "health data user (Art. 61 duties)", links: [{ href: "../../data/discover", text: "Discover datasets (live)" }, { href: "../../analytics", text: "Analytics (live)" }] } });
+
+// datasets: dedupe the catalog by normalised title
+const norm = (t) => t.toLowerCase().replace(/\s*\(.*?\)|dataset:|-detail|urn:uuid:\w+:dataset:/g, "").replace(/[^a-z0-9]+/g, "-");
+const ds = new Map();
+for (const c of catalog) { const k = norm(c.title); if (!ds.has(k)) ds.set(k, { ...c, key: k, consumers: [...(c.consumers ?? [])], providers: [...(c.providers ?? [])], ids: [c.id] }); else { const d = ds.get(k); d.ids.push(c.id); d.consumers.push(...(c.consumers ?? [])); d.providers.push(...(c.providers ?? [])); } }
+const nameOf = (x) => (typeof x === "string" ? x : x?.name);
+const myStudy = research.programs.find((p) => p.institution === ME);
+const need = (myStudy.dataNeeded + " conditions observations medications cohort journey").toLowerCase();
+const words = (s) => new Set(s.toLowerCase().split(/[^a-z0-9]+/).filter((w) => w.length > 3).map((w) => w.slice(0, 5)));
+const relevance = (d) => { const a = words(need), b = words(`${d.title} ${d.theme} ${d.description ?? ""}`); let n = 0; a.forEach((w) => b.has(w) && n++); return n / Math.max(4, Math.min(a.size, b.size)); };
+
+for (const d of ds.values()) {
+  const uses = d.consumers.map(nameOf).includes(ME), pub = d.providers.map(nameOf).includes(ME) || d.publisher.startsWith(ME);
+  const rel = relevance(d);
+  if (!uses && !pub && rel < 0.15) continue;
+  const id = `ds:${d.key}`;
+  add({ id, label: d.title.replace(/ Patient Cohort| Dataset/g, ""), layer: uses || pub ? "mine" : "other", size: 1.4 + Math.log10(d.recordCount || 10) / 2, status: uses ? "ok" : pub ? "none" : "info", color: pub && !uses ? "#7dd3c8" : undefined,
+    detail: { title: d.title, sub: `${d.theme}, ${Number(d.recordCount).toLocaleString()} records, published by ${d.publisher}`, facts: [["licence", d.license], ["conforms to", d.conformsTo], ["providers", d.providers.map(nameOf).join(", ")], ["consumers", [...new Set(d.consumers.map(nameOf))].join(", ") || "none yet"]], article: `${d.legalBasis} (adopted: Art. 53 purposes, Art. 77 dataset description)`, links: [{ href: "../../catalog", text: "Catalog (live)" }] } });
+  if (uses) link("me", id, { status: "ok", distance: 90, particles: 2 });
+  else if (pub) link("me", id, { color: "#7dd3c8", distance: 90 });
+  else { link(`study:${myStudy.studyId}`, id, { status: "info", width: 0.6 + rel * 3, distance: 150, arrow: true }); signals.push({ severity: "info", nodeId: id, text: `Relevant, not used yet: ${d.title} (${Number(d.recordCount).toLocaleString()} records, ${d.theme}), relevance ${Math.round(rel * 100)} %`, article: "Art. 67 application, or Art. 72 trusted holder for a single source" }); }
+}
+
+// analytics content of the permitted OMOP dataset
+const omop = [...ds.values()].find((d) => d.key.includes("omop"));
+if (omop) for (const c of analytics.topConditions.slice(0, 5)) { const id = `cond:${c.label}`; add({ id, label: `${c.label.replace(/ \(.*\)/, "")} · ${c.count}`, layer: "mine", size: 1, color: "#a5b4fc", detail: { title: c.label, sub: `${c.count} condition occurrences in ${omop.title}`, article: `Permit ${analytics.permit.permitId}: ${analytics.permit.article}` } }); link(`ds:${omop.key}`, id, { color: "#a5b4fc", distance: 35 }); }
+
+// studies
+for (const p of research.programs) {
+  const id = `study:${p.studyId}`, mine = p.institution === ME;
+  add({ id, label: p.studyName, layer: "studies", size: mine ? 3.2 : 2, status: mine ? "ok" : "info", pulse: false,
+    detail: { title: p.studyName, sub: `${p.institution}, ${p.participantCount.toLocaleString()} participants, ${p.countries.join(", ")}, ${p.status}`, facts: [["needs", p.dataNeeded], ["ethics", p.ethicsApproval]], article: mine ? "My study" : "Another study in the same field: candidate for a joint application or a federated query" } });
+  if (mine) link("me", id, { status: "ok", distance: 80, width: 1.6 });
+  else { const w = words(p.dataNeeded), n = [...words(need)].filter((x) => w.has(x)).length; link(`study:${myStudy.studyId}`, id, { status: "info", width: 0.6 + n * 0.5, distance: 120 }); signals.push({ severity: "info", nodeId: id, text: `Near my study: ${p.studyName} (${p.institution}) shares ${n} data needs, ${p.participantCount.toLocaleString()} participants`, article: "Art. 75 HealthData@EU for cross-border cohorts" }); }
+}
+
+// permits, requests, negotiations, transfers, access log for me
+for (const e of permits.entries.filter((e) => e.applicant === ME)) {
+  const id = `app:${e.applicationId}`, pending = e.outcome === "pending", due = e.decisionDue ? daysUntil(e.decisionDue) : null;
+  const sev = e.outcome.includes("issued") ? "ok" : pending ? (due != null && due < 0 ? "bad" : "warn") : "info";
+  add({ id, label: `${e.outcome}: ${e.datasetTitle.split(" ").slice(0, 3).join(" ")}`, layer: "access", size: 2, status: sev, pulse: sev === "bad",
+    detail: { title: e.applicationId, sub: `${e.purpose}, to ${e.accessBody ?? "access body not yet assigned"}`, facts: [["submitted", fmtDate(e.submittedAt)], ["decision due", fmtDate(e.decisionDue)], ["outcome", e.outcome], ["conditions", (e.conditions ?? []).length]], article: `${permits.articles.applications} application; ${permits.articles.decisions}` } });
+  link("me", id, { status: sev, distance: 70 });
+  const target = [...ds.values()].find((d) => d.ids.includes(e.datasetId)); if (target) link(id, `ds:${target.key}`, { status: sev, distance: 100, arrow: true });
+  signals.push({ severity: sev, nodeId: id, text: pending ? `Application ${e.applicationId} pending, decision ${due < 0 ? `overdue by ${-due} days` : `due in ${due} days`} (${fmtDate(e.decisionDue)})` : `${e.applicationId}: ${e.outcome}`, article: "Art. 68 data permit; decision within 3 months of a complete application" });
+}
+{ const p = analytics.permit, id = `permit:${p.permitId}`; add({ id, label: `permit valid to ${fmtDate(p.validUntil)}`, layer: "access", size: 2.2, status: "ok", detail: { title: p.permitId, sub: p.purpose, facts: [["dataset", p.datasetId], ["valid until", fmtDate(p.validUntil)]], article: p.article } }); link("me", id, { status: "ok", distance: 70 }); const t = [...ds.values()].find((d) => d.ids.includes(p.datasetId)); if (t) link(id, `ds:${t.key}`, { status: "ok", distance: 100, arrow: true, particles: 1 }); signals.push({ severity: "ok", nodeId: id, text: `Permit ${p.permitId} valid until ${fmtDate(p.validUntil)} (${daysUntil(p.validUntil)} days)`, article: p.article }); }
+for (const r of requests.requests.filter((r) => r.applicantName === ME)) { const id = `req:${r.requestId}`, sev = r.status === "PENDING" ? "warn" : r.status === "ANSWERED" ? "ok" : "info"; add({ id, label: `request: ${r.question}`, layer: "access", size: 1.6, status: sev, detail: { title: r.question, sub: `${r.status}, submitted ${fmtDate(r.submittedAt)}`, facts: [["statistical content", r.statisticalContent], ["safeguards", r.safeguards]], article: r.legalBasis } }); link("me", id, { status: sev, distance: 60 }); signals.push({ severity: sev, nodeId: id, text: `Statistical request "${r.question}" is ${r.status}`, article: "Art. 69 health data request: anonymised statistics only" }); }
+const myDid = "did:web:pharmaco.de:research";
+for (const t of audit.transfers.filter((t) => t.consumerDid === myDid)) { const id = `tr:${t.id}`, sev = t.status === "COMPLETED" ? "ok" : t.status === "ERROR" ? "bad" : "info"; add({ id, label: `${t.id} ${t.status.toLowerCase()} ${(t.byteSize / 1e6).toFixed(1)} MB`, layer: "access", size: 1.3, status: sev, detail: { title: t.asset, sub: `${t.protocol} transfer on ${t.transferDate} from ${t.providerName}`, facts: [["contract", t.contractId], ["bytes", t.byteSize?.toLocaleString()], ["cross-border", t.crossBorder]], article: "DSP 2025-1 transfer process; logged under Art. 73(1)(e)" } }); const d = [...ds.values()].find((x) => x.ids.includes(t.assetId)); if (d) link(`ds:${d.key}`, id, { status: sev, particles: 3, distance: 80 }); link(id, "me", { status: sev, particles: 3, distance: 60 }); }
+for (const l of audit.accesslogs.filter((l) => l.consumerDid === myDid)) { const id = `log:${l.id}`; add({ id, label: l.name, layer: "access", size: 1, status: l.statusCode === 200 ? "ok" : "bad", detail: { title: l.name, sub: `${l.method} ${l.endpoint} → ${l.statusCode}, ${l.resultCount} results, ${l.durationMs} ms`, facts: [["at", l.accessedAt], ["permit", `${l.permitId} (${l.permitStatus}, valid to ${fmtDate(l.permitValidUntil)})`], ["bytes", l.bytesAccessed]], article: "Every access is logged and visible to the holder, the access body and the patient (Art. 8, Art. 73(1)(e))" } }); link("me", id, { status: "ok", distance: 45 }); }
+signals.push({ severity: "ok", nodeId: `tr:${audit.transfers.find((t) => t.consumerDid === myDid)?.id}`, text: `${audit.transfers.filter((t) => t.consumerDid === myDid && t.status === "COMPLETED").length} transfers completed, ${audit.accesslogs.filter((l) => l.consumerDid === myDid).length} accesses logged`, article: "Art. 73(1)(e) access log" });
+
+// credentials in my wallet
+for (const c of creds.credentials.filter((c) => c.subjectDid.endsWith("cro-pharmaco"))) { const id = `vc:${c.credentialId}`, d = daysUntil(c.expiresAt), sev = d < 0 ? "bad" : d < 90 ? "warn" : "ok"; add({ id, label: c.credentialType.replace("Credential", ""), layer: "access", size: 1.4, status: sev, pulse: sev === "bad", detail: { title: c.credentialType, sub: `issued ${fmtDate(c.issuedAt)}, expires ${fmtDate(c.expiresAt)} (${d} days)`, facts: [["issuer", c.issuerDid], ["status flag in wallet", c.status], ["cites", c.ehdsArticle ?? "n/a"]], article: "DCP v1.0 verifiable credential presented at every DSP negotiation" } }); link(id, "me", { status: sev, distance: 50 }); if (sev !== "ok") signals.push({ severity: sev, nodeId: id, text: `${c.credentialType} ${d < 0 ? `expired ${-d} days ago` : `expires in ${d} days`}; the wallet still flags it "${c.status}"`, article: "Art. 61 duties of health data users; DCP presentation will fail" }); }
+
+mountPersona({ persona: "researcher", title: "My research, in one view", question: "What am I allowed to use today, what is stuck, and which datasets and studies near mine am I missing?", article: "Regulation (EU) 2025/327 Art. 53, 61, 67, 68, 69, 73, 75", layers, nodes, links, signals,
+  legend: [{ color: "#22c55e", text: "in force / usable" }, { color: "#f59e0b", text: "pending" }, { color: "#ef4444", text: "expired / overdue" }, { color: "#38bdf8", text: "relevant, not mine" }, { color: "#7dd3c8", text: "I publish it" }, { color: "#a5b4fc", text: "content of a dataset" }],
+  dataNote: "Researcher persona = PharmaCo Research AG (fictional)." });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Persona graph POC · one view per role</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" href="../../favicon.svg" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="home">
+      <h1>One view per persona: 3D layered graph prototypes</h1>
+      <p class="lead">
+        The current <a href="../../graph">knowledge graph page</a> shows the same hairball to everyone. These four
+        prototypes turn the graph on its side: one question per role, the answer as a short stack of labelled
+        layers, alerts pulsing, data flows animated. Built on
+        <a href="https://github.com/vasturiano/3d-force-graph" rel="noopener" target="_blank">3d-force-graph</a>
+        (three.js) from the same mock fixtures the live pages use.
+        Discussion: <a href="https://github.com/ma3u/MinimumViableHealthDataspacev2/discussions/265" rel="noopener" target="_blank">GitHub Discussions</a>.
+      </p>
+      <div class="cards">
+        <a class="card" href="patient.html"><h2>Patient</h2><p>Which parameters put me at risk, what should I do next, and who uses my data under which consent?</p><span class="art">Art. 3, 8, 14, 71, 73</span></a>
+        <a class="card" href="researcher.html"><h2>Researcher</h2><p>What am I allowed to use today, what is stuck, and which datasets and studies near mine am I missing?</p><span class="art">Art. 53, 61, 67, 68, 69, 73, 75</span></a>
+        <a class="card" href="hdab.html"><h2>Health data access body</h2><p>Which chains are broken, which accesses were refused or should not have happened, which of my decisions are overdue?</p><span class="art">Art. 55, 57, 61, 63, 67, 68, 69, 73, 78</span></a>
+        <a class="card" href="hospital.html"><h2>Hospital / data holder</h2><p>Which consumers are untrusted or out of permit, which contracts are missing, are our labels and descriptions in order?</p><span class="art">Art. 60, 61, 63, 67, 68, 73, 77, 78</span></a>
+      </div>
+      <h2>How to read a view</h2>
+      <table>
+        <tr><th>Element</th><th>Meaning</th></tr>
+        <tr><td>Layer disc</td><td>One question-sized slice of the 5-layer graph, in the persona's words, not the Neo4j label's.</td></tr>
+        <tr><td>Node colour and halo</td><td>Red pulsing: act now or a violation. Amber: pending or expiring. Green: in order. Blue: information.</td></tr>
+        <tr><td>Moving particles on a link</td><td>Data actually flowing (a completed transfer, a consented study).</td></tr>
+        <tr><td>"In one view" list</td><td>The same signals as text, sorted by severity, each citing the article of Regulation (EU) 2025/327 it rests on (adopted numbering).</td></tr>
+        <tr><td>Selected panel</td><td>Facts of the clicked node and deep links to the live page that owns the record.</td></tr>
+      </table>
+      <p class="lead">Fixtures are dated 2026-09-23. Article numbers follow <code>docs/ehds-article-numbering.md</code>; where a fixture field still carries a proposal number (Art. 46, 50, 51) the panel says so.</p>
+    </div>
+  </body>
+</html>
