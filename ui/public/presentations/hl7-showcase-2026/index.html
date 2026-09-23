@@ -378,9 +378,15 @@
         height: 900px;
         z-index: 0;
       }
+      /* reveal.js sets display: block on the current slide, so the centring
+         happens inside the overlay rather than on the section. */
       .reveal .graph-slide .over {
         position: relative;
         z-index: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        height: 852px;
       }
       .reveal .progress {
         color: var(--teal);
