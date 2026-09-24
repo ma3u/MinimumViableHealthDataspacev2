@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import { runQuery } from "@/lib/neo4j";
 import { rowsToBundle, type ObservationRow } from "@/lib/overview/observations";
-import { ownPatientId } from "@/lib/overview/patient";
+import { ownPatientIdForSession } from "@/lib/overview/patient";
 
 export const dynamic = "force-dynamic";
 
@@ -38,7 +38,7 @@ export async function GET(req: Request) {
     );
   }
   if (roles.includes("PATIENT") && !roles.includes("EDC_ADMIN")) {
-    const own = ownPatientId(session.user?.name);
+    const own = ownPatientIdForSession(session);
     if (!own || own !== patientId) {
       return NextResponse.json(
         {

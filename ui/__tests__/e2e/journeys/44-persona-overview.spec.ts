@@ -17,7 +17,7 @@
  *     npx playwright test __tests__/e2e/journeys/44-persona-overview.spec.ts
  */
 import { test, expect, type Page } from "@playwright/test";
-import { apiGet, loginAsAdmin, skipIfNeo4jDown } from "./helpers";
+import { apiGet, loginAs, loginAsAdmin, skipIfNeo4jDown } from "./helpers";
 
 const P1 = "P1";
 const PHARMACO = "did:web:pharmaco.de:research";
@@ -401,5 +401,47 @@ test.describe("Issue #271 · M6 the data behind the views", () => {
       (s: { code: string }) => s.code === "catalogue",
     );
     expect(cat.text).toMatch(/\d+ fully described/);
+  });
+});
+
+// ── The roles themselves, not the admin ────────────────────────────────────
+// Every journey above logs in as edcadmin, which is why a 403 for the patient
+// login and a scene that threw on Azure went unseen.
+
+test.describe("Issue #271 · the roles open their own overview", () => {
+  test("J979 the patient login opens its own overview, no Forbidden", async ({
+    page,
+  }) => {
+    await skipIfSeedMissing(page);
+    await loginAs(page, "patient1", "patient1");
+    const res = await page.request.get("/api/overview");
+    expect(res.status(), await res.text()).toBe(200);
+    const view = await res.json();
+    expect(view.persona).toBe("patient");
+    expect(view.me.id).toBe(P1);
+    await page.goto("/overview");
+    await expect(page.getByTestId("overview-question")).toBeVisible({
+      timeout: 45_000,
+    });
+    await expect(page.getByTestId("overview-error")).toHaveCount(0);
+  });
+
+  test("J980 the researcher login renders its scene without a page error", async ({
+    page,
+  }) => {
+    const pageErrors: string[] = [];
+    page.on("pageerror", (e) => pageErrors.push(e.message));
+    await loginAs(page, "researcher", "researcher");
+    await page.goto("/overview");
+    await expect(page.getByTestId("overview-question")).toBeVisible({
+      timeout: 45_000,
+    });
+    await expect(
+      page.getByTestId("overview-canvas").locator("canvas"),
+    ).toHaveCount(1, { timeout: 30_000 });
+    await page.waitForTimeout(3000);
+    expect(
+      pageErrors.filter((m) => /tick|three|WebGL|undefined/i.test(m)),
+    ).toEqual([]);
   });
 });

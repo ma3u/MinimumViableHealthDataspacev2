@@ -31,7 +31,7 @@ import {
 } from "@/lib/overview/researcher";
 import {
   buildPatientView,
-  ownPatientId,
+  ownPatientIdForSession,
   type AccessLogEntry,
   type ConsentShape,
   type InsightsShape,
@@ -93,7 +93,10 @@ export async function GET(req: Request): Promise<Response> {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
   const roles = (session as { roles?: string[] }).roles ?? [];
-  const username = session.user?.name ?? null;
+  const username =
+    (session as { preferredUsername?: string }).preferredUsername ||
+    session.user?.name ||
+    null;
   const url = new URL(req.url);
   const requested = url.searchParams.get("persona");
   const derived = derivePersonaId(roles, username);
@@ -132,7 +135,9 @@ export async function GET(req: Request): Promise<Response> {
 
   // The patient a PATIENT session owns; anyone else picks one, P1 by default.
   const own =
-    roles.includes("PATIENT") && !isAdmin ? ownPatientId(username) : null;
+    roles.includes("PATIENT") && !isAdmin
+      ? ownPatientIdForSession(session)
+      : null;
   const patientId = own ?? url.searchParams.get("patientId") ?? "P1";
   const since = new Date(asOf);
   since.setUTCMonth(since.getUTCMonth() - 12);
