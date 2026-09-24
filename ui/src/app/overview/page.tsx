@@ -14,8 +14,7 @@ import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { Layers, Loader2 } from "lucide-react";
-import PageIntro from "@/components/PageIntro";
+import { Loader2 } from "lucide-react";
 import OverviewDetail from "@/components/overview/OverviewDetail";
 import { fetchApi } from "@/lib/api";
 import { derivePersonaId } from "@/lib/auth";
@@ -166,17 +165,19 @@ function OverviewContent() {
 
   return (
     <div className="min-h-screen bg-[var(--bg)]">
-      <div className="w-full px-4 py-6">
-        <PageIntro
-          title={view?.title ?? "In one view"}
-          icon={Layers}
-          description={
-            view?.question ??
-            "Each persona sees the state that matters to them: what is out of range, what is due, what is broken, and what to do next."
-          }
-          infoText="The list on the left is the complete view; the scene is the same information in three dimensions and can be switched off. Article numbers follow Regulation (EU) 2025/327 as adopted."
-          docLink={{ href: "/docs/user-guide", label: "User guide" }}
-        />
+      <div className="w-full px-4 py-3">
+        <header
+          className="mb-3 flex flex-wrap items-baseline gap-x-4 gap-y-1"
+          title="The list on the left is the complete view; the scene is the same information in three dimensions and can be switched off. Article numbers follow Regulation (EU) 2025/327 as adopted."
+        >
+          <h1 className="text-lg font-semibold leading-tight">
+            {view?.title ?? "In one view"}
+          </h1>
+          <p className="text-sm text-[var(--text-secondary)]">
+            {view?.question ??
+              "Each persona sees the state that matters to them: what is out of range, what is due, what is broken, and what to do next."}
+          </p>
+        </header>
 
         {isAdmin && (
           <nav
@@ -236,12 +237,12 @@ function OverviewContent() {
           <div
             className={`grid gap-4 ${
               selected
-                ? "lg:grid-cols-[340px_minmax(0,1fr)_380px]"
-                : "lg:grid-cols-[340px_minmax(0,1fr)]"
+                ? "lg:grid-cols-[300px_minmax(0,1fr)_360px]"
+                : "lg:grid-cols-[300px_minmax(0,1fr)]"
             }`}
           >
             {/* ── left: the view as a list ───────────────────────────────── */}
-            <aside className="rounded-lg border border-[var(--border)] bg-[var(--surface-2)] p-4 text-sm lg:max-h-[calc(100vh-200px)] lg:overflow-auto">
+            <aside className="rounded-lg border border-[var(--border)] bg-[var(--surface-2)] p-4 text-sm lg:max-h-[calc(100vh-120px)] lg:overflow-auto">
               <p className="font-medium" data-testid="overview-question">
                 {view.question}
               </p>
@@ -305,7 +306,7 @@ function OverviewContent() {
             </aside>
 
             {/* ── centre: the scene ──────────────────────────────────────── */}
-            <section className="relative min-h-[520px] lg:h-[calc(100vh-200px)] rounded-lg border border-[var(--border)] overflow-hidden bg-[#0b1220]">
+            <section className="relative min-h-[520px] lg:h-[calc(100vh-120px)] rounded-lg border border-[var(--border)] overflow-hidden bg-[#0b1220]">
               <div className="absolute left-3 top-3 z-10 flex flex-col gap-1 pointer-events-none">
                 {[...view.layers]
                   .sort((a, b) => b.z - a.z)
