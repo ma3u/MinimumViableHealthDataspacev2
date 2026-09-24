@@ -2353,7 +2353,7 @@
       "severity": "info",
       "code": "decision-due",
       "nodeId": "app:app-pharmaco-medreg-2026-002",
-      "text": "My application for Synthea Synthetic FHIR R4 Patient Cohort is pending; decision due 2026-12-01, 69 days left.",
+      "text": "My application for Synthea Synthetic FHIR R4 Patient Cohort (submitted 2026-09-01) awaits the access body's permit decision, due 2026-12-01, three months after the application; 69 days left.",
       "article": "Art. 68(4)"
     },
     {

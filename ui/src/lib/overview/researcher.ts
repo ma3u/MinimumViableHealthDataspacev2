@@ -420,14 +420,20 @@ export function buildResearcherView(input: ResearcherViewInput): OverviewView {
         code: clock.overdue ? "decision-overdue" : "decision-due",
         nodeId: id,
         text: clock.overdue
-          ? `${
-              e.accessBody ?? "The access body"
-            } is ${-clock.daysLeft} days past the deadline on my ${
+          ? `${e.accessBody ?? "The access body"} has not decided on my ${
               isRequest ? "request" : "application"
-            } for ${e.datasetTitle ?? e.datasetId}.`
+            } for ${e.datasetTitle ?? e.datasetId} (submitted ${fmtDate(
+              e.submittedAt,
+            )}). Its ${isRequest ? "answer" : "permit decision"} was due ${
+              clock.dueAt
+            }, three months later, and is ${-clock.daysLeft} days late. I may not access the data until it decides.`
           : `My ${isRequest ? "request" : "application"} for ${
               e.datasetTitle ?? e.datasetId
-            } is pending; decision due ${clock.dueAt}, ${
+            } (submitted ${fmtDate(e.submittedAt)}) awaits ${
+              e.accessBody ?? "the access body"
+            }'s ${isRequest ? "answer" : "permit decision"}, due ${
+              clock.dueAt
+            }, three months after the application; ${
               clock.daysLeft
             } days left.`,
         article: isRequest ? "Art. 69(4)" : "Art. 68(4)",

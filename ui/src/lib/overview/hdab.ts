@@ -291,9 +291,23 @@ export function buildHdabView(input: HdabViewInput): OverviewView {
     nodeId: "me",
     text: `${
       queue[queue.length - 1].value
-    } applications open at the end of ${months[11].slice(0, 7)}; ${
-      mine.filter((e) => !e.decidedAt).length
-    } undecided today.`,
+    } applications were waiting for my permit decision at the end of ${months[11].slice(
+      0,
+      7,
+    )}; ${mine.filter((e) => !e.decidedAt).length} are undecided today, ${
+      mine.filter(
+        (e) =>
+          !e.decidedAt &&
+          decisionClock(
+            {
+              submittedAt: e.submittedAt ?? asOf,
+              decidedAt: e.decidedAt,
+              decisionDue: e.decisionDue,
+            },
+            asOf,
+          ).overdue,
+      ).length
+    } of them past the three-month deadline.`,
     article: "Art. 68(4); click to see the queue by month",
   });
 
@@ -479,10 +493,15 @@ export function buildHdabView(input: HdabViewInput): OverviewView {
       size: 1.6,
       status,
       pulse: clock.overdue,
-      title: e.applicationId,
-      sub: `${e.applicant ?? ""}, ${e.purpose ?? ""}, ${
-        e.datasetTitle ?? e.datasetId ?? ""
+      title: `${isRequest ? "Health data request" : "Access application"} by ${
+        e.applicant ?? e.applicantDid ?? "unknown"
       }`,
+      sub: `${e.applicationId}: ${e.purpose ?? ""}, ${
+        e.datasetTitle ?? e.datasetId ?? ""
+      }${isMine ? "" : `, decided by ${e.accessBody}`}`,
+      description: isRequest
+        ? "A health data request asks the access body for an answer in anonymised statistical format only. The body answers within three months (Art. 69(4))."
+        : "An access application asks the access body for a data permit. The body assesses the Art. 68(1) criteria and issues or refuses the permit within three months of a complete application (Art. 68(4)); the applicant may access data only under the permit (Art. 61(1)). The clock below is the body's own duty.",
       facts: [
         ["submitted", fmtDate(e.submittedAt)],
         [
@@ -519,14 +538,20 @@ export function buildHdabView(input: HdabViewInput): OverviewView {
         code: clock.overdue ? "decision-overdue" : "decision-due",
         nodeId: id,
         text: clock.overdue
-          ? `${
-              e.applicant ?? e.applicationId
-            }: my decision is ${-clock.daysLeft} days past the Art. 68(4) deadline of ${
+          ? `${e.applicant ?? e.applicationId} applied on ${fmtDate(
+              e.submittedAt,
+            )} for ${e.datasetTitle ?? e.datasetId ?? "data"}${
+              e.purpose
+                ? ` (${e.purpose.toLowerCase().replace(/_/g, " ")})`
+                : ""
+            }. My ${isRequest ? "answer" : "permit decision"} was due ${
               clock.dueAt
-            }.`
-          : `${e.applicant ?? e.applicationId}: decision due ${clock.dueAt}, ${
-              clock.daysLeft
-            } days left.`,
+            }, three months later, and is ${-clock.daysLeft} days late: neither issued nor refused. The applicant may not access any data until I decide.`
+          : `${e.applicant ?? e.applicationId} applied on ${fmtDate(
+              e.submittedAt,
+            )} for ${e.datasetTitle ?? e.datasetId ?? "data"}. My ${
+              isRequest ? "answer" : "permit decision"
+            } is due ${clock.dueAt}, ${clock.daysLeft} days left.`,
         article: isRequest ? "Art. 69(4)" : "Art. 68(4), Art. 57(1)(j)",
       });
     }
