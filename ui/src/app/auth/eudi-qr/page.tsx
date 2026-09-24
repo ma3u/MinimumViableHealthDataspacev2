@@ -31,7 +31,7 @@ function EudiQrContent() {
   const IS_STATIC = process.env.NEXT_PUBLIC_STATIC_EXPORT === "true";
   const searchParams = useSearchParams();
   const router = useRouter();
-  const callbackUrl = searchParams.get("callbackUrl") || "/patient";
+  const callbackUrl = searchParams.get("callbackUrl") || "/overview";
   const mode = searchParams.get("mode") === "login" ? "login" : "register";
 
   const [phase, setPhase] = useState<Phase>(
