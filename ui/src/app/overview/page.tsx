@@ -166,7 +166,7 @@ function OverviewContent() {
 
   return (
     <div className="min-h-screen bg-[var(--bg)]">
-      <div className="max-w-[1600px] mx-auto px-4 py-6">
+      <div className="w-full px-4 py-6">
         <PageIntro
           title={view?.title ?? "In one view"}
           icon={Layers}
@@ -241,7 +241,7 @@ function OverviewContent() {
             }`}
           >
             {/* ── left: the view as a list ───────────────────────────────── */}
-            <aside className="rounded-lg border border-[var(--border)] bg-[var(--surface-2)] p-4 text-sm">
+            <aside className="rounded-lg border border-[var(--border)] bg-[var(--surface-2)] p-4 text-sm lg:max-h-[calc(100vh-200px)] lg:overflow-auto">
               <p className="font-medium" data-testid="overview-question">
                 {view.question}
               </p>
@@ -305,7 +305,7 @@ function OverviewContent() {
             </aside>
 
             {/* ── centre: the scene ──────────────────────────────────────── */}
-            <section className="relative min-h-[520px] rounded-lg border border-[var(--border)] overflow-hidden bg-[#0b1220]">
+            <section className="relative min-h-[520px] lg:h-[calc(100vh-200px)] rounded-lg border border-[var(--border)] overflow-hidden bg-[#0b1220]">
               <div className="absolute left-3 top-3 z-10 flex flex-col gap-1 pointer-events-none">
                 {[...view.layers]
                   .sort((a, b) => b.z - a.z)
