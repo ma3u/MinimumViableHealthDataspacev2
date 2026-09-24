@@ -328,10 +328,13 @@ export function mountPersona(cfg) {
     { x: 0, y: 0, z: zMid },
     0,
   );
+  let selectedId = null;
   const pause = () => {
     orbiting = false;
     clearTimeout(idleTimer);
-    idleTimer = setTimeout(() => (orbiting = true), 12000);
+    idleTimer = setTimeout(() => {
+      if (!selectedId) orbiting = true;
+    }, 12000);
   };
   root.addEventListener("pointerdown", pause);
   root.addEventListener("wheel", pause, { passive: true });
@@ -404,7 +407,9 @@ export function mountPersona(cfg) {
         x.classList.toggle("active", x === li || x.dataset.node === id),
       );
     focused = true;
-    pause();
+    selectedId = id;
+    orbiting = false;
+    clearTimeout(idleTimer);
     toggleExpand(n);
     const dist = 230;
     const from = cam.position
@@ -532,6 +537,8 @@ export function mountPersona(cfg) {
     if (!n) {
       right.classList.add("hidden");
       mainEl.classList.add("no-right");
+      selectedId = null;
+      pause();
       return;
     }
     right.classList.remove("hidden");
