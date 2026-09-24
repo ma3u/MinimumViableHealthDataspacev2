@@ -80,5 +80,9 @@ fetch_mock "/api/graph?persona=edc-admin" "graph_edc_admin.json"
 fetch_mock "/api/graph?persona=hdab" "graph_hdab.json"
 fetch_mock "/api/graph?persona=trust-center" "graph_trust_center.json"
 
+# Persona overview (issue #271)
+fetch_mock "/api/patient/observations?patientId=P1" "patient_observations.json"
+fetch_mock "/api/overview?persona=patient&patientId=P1&asOf=2026-09-23" "overview_patient.json"
+
 echo ""
 echo "✅ Mock refresh complete. $(ls "${MOCK_DIR}"/*.json | wc -l | tr -d ' ') files in ${MOCK_DIR}"

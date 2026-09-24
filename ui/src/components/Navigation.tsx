@@ -81,6 +81,12 @@ const exploreGroup: NavGroup = {
   hideForRoles: ["DATA_USER", "PATIENT"],
   links: [
     { href: "/graph", label: "Graph Explorer", icon: Network },
+    {
+      href: "/overview",
+      label: "Persona Overview",
+      icon: Layers,
+      roles: ["EDC_ADMIN", "HDAB_AUTHORITY", "DATA_HOLDER"],
+    },
     { href: "/catalog", label: "Dataset Catalog", icon: BookOpen },
     {
       href: "/catalog/editor",
@@ -303,6 +309,12 @@ const myHealthGroup: NavGroup = {
   icon: Heart,
   roles: ["PATIENT"],
   links: [
+    {
+      href: "/overview",
+      label: "My Health in One View",
+      icon: Layers,
+      roles: ["PATIENT"],
+    },
     {
       href: "/patient",
       label: "My Health Records",

@@ -9,9 +9,9 @@
  * What runs today is the data: the seed puts Anna Müller (P1) with 48
  * LOINC-coded measurements, her consents, twelve months of access events
  * and the quarterly quality assessments into the graph, and the existing
- * routes show it. The `/api/overview` route and the `/overview` page arrive
- * with milestones M1 to M5 of #271; their cases are `test.fixme` until then
- * and are un-fixed with the milestone that makes them pass.
+ * routes show it. M1 (the patient overview, `/api/overview?persona=patient`,
+ * `/api/patient/observations`, `/overview`) is in. The cases of M2 to M5 are
+ * `test.fixme` until each milestone lands and are un-fixed with it.
  *
  *   PLAYWRIGHT_BASE_URL=https://ehds.mabu.red \
  *     npx playwright test __tests__/e2e/journeys/44-persona-overview.spec.ts
@@ -126,7 +126,6 @@ test.describe("Issue #271 · M1 patient overview", () => {
   test("J964 /api/patient/observations returns a FHIR searchset with reference ranges", async ({
     page,
   }) => {
-    test.fixme(true, "M1: the route does not exist yet (#271)");
     await loginAsAdmin(page);
     const bundle = await apiGet(
       page,
@@ -145,7 +144,6 @@ test.describe("Issue #271 · M1 patient overview", () => {
   test("J965 /api/overview?persona=patient names HbA1c as the first, red signal", async ({
     page,
   }) => {
-    test.fixme(true, "M1: the route does not exist yet (#271)");
     await loginAsAdmin(page);
     const view = await apiGet(
       page,
@@ -165,7 +163,6 @@ test.describe("Issue #271 · M1 patient overview", () => {
   test("J966 the patient view never contains another patient's name or a Neo4j label", async ({
     page,
   }) => {
-    test.fixme(true, "M1: the route does not exist yet (#271)");
     await loginAsAdmin(page);
     const view = await apiGet(
       page,
@@ -184,7 +181,6 @@ test.describe("Issue #271 · M1 patient overview", () => {
   test("J967 /overview: the list is readable without the canvas, a click opens the panel", async ({
     page,
   }) => {
-    test.fixme(true, "M1: the page does not exist yet (#271)");
     await page.emulateMedia({ reducedMotion: "reduce" });
     await loginAsAdmin(page);
     await page.goto(`/overview?persona=patient&patientId=${P1}`);

@@ -1,0 +1,3289 @@
+{
+  "persona": "patient",
+  "asOf": "2026-09-23",
+  "me": {
+    "id": "P1",
+    "name": "Anna Müller"
+  },
+  "title": "My health, in one view",
+  "question": "Which parameters put me at risk, what should I do about them, and who is using my data?",
+  "article": "Regulation (EU) 2025/327 Art. 3, 8, 14, 71, 73",
+  "layers": [
+    {
+      "id": "prevent",
+      "name": "Prevention: what to do next",
+      "z": 2,
+      "color": "#fbbf24"
+    },
+    {
+      "id": "risk",
+      "name": "My risks and the parameters behind them",
+      "z": 1,
+      "color": "#f97316"
+    },
+    {
+      "id": "me",
+      "name": "My record (FHIR R4)",
+      "z": 0,
+      "color": "#86efac"
+    },
+    {
+      "id": "use",
+      "name": "Who uses my data, under which consent",
+      "z": -1,
+      "color": "#a78bfa"
+    }
+  ],
+  "nodes": [
+    {
+      "id": "me",
+      "label": "Anna Müller",
+      "layer": "me",
+      "kind": "Patient",
+      "size": 4,
+      "color": "#fbbf24",
+      "pin": [0, 0],
+      "title": "Anna Müller",
+      "sub": "born 1979-03-15, 8 diagnoses on record",
+      "facts": [
+        [
+          "rightToAccess",
+          "GDPR Art. 15 — request a copy of your electronic health record"
+        ],
+        [
+          "rightToPortability",
+          "GDPR Art. 20 — export your data in FHIR R4 format"
+        ],
+        [
+          "rightToErasure",
+          "GDPR Art. 17 — request deletion of non-mandatory records"
+        ],
+        [
+          "ehdsAccess",
+          "EHDS Art. 3 — access your EHR via the EU national contact point"
+        ]
+      ],
+      "article": "Art. 3: access to my own electronic health data",
+      "links": [
+        {
+          "href": "/patient/profile",
+          "text": "My profile"
+        },
+        {
+          "href": "/patient/insights",
+          "text": "My insights"
+        }
+      ]
+    },
+    {
+      "id": "risk:cardiovascular",
+      "label": "cardiovascular risk 42 %",
+      "layer": "risk",
+      "kind": "Risk",
+      "size": 3,
+      "status": "warn",
+      "pulse": false,
+      "title": "Cardiovascular risk",
+      "sub": "score 0.42, level moderate",
+      "facts": [
+        ["factor 1", "Hypertension"],
+        ["factor 2", "Type 2 Diabetes"],
+        ["factor 3", "Chronic stress"],
+        ["factor 4", "BMI 31.2"]
+      ],
+      "article": "Derived from my own record (primary use). Not a diagnosis."
+    },
+    {
+      "id": "fac:hypertension",
+      "label": "Hypertension",
+      "layer": "risk",
+      "kind": "Risk factor",
+      "size": 1.4,
+      "status": "warn",
+      "title": "Hypertension",
+      "sub": "risk factor",
+      "facts": [["drives", "cardiovascular risk"]]
+    },
+    {
+      "id": "fac:type-2-diabetes",
+      "label": "Type 2 Diabetes",
+      "layer": "risk",
+      "kind": "Risk factor",
+      "size": 1.4,
+      "status": "warn",
+      "title": "Type 2 Diabetes",
+      "sub": "risk factor",
+      "facts": [["drives", "cardiovascular risk"]]
+    },
+    {
+      "id": "fac:chronic-stress",
+      "label": "Chronic stress",
+      "layer": "risk",
+      "kind": "Risk factor",
+      "size": 1.4,
+      "status": "warn",
+      "title": "Chronic stress",
+      "sub": "risk factor",
+      "facts": [["drives", "cardiovascular risk"]]
+    },
+    {
+      "id": "fac:bmi-31-2",
+      "label": "BMI 31.2",
+      "layer": "risk",
+      "kind": "Risk factor",
+      "size": 1.4,
+      "status": "warn",
+      "title": "BMI 31.2",
+      "sub": "risk factor",
+      "facts": [["drives", "cardiovascular risk"]]
+    },
+    {
+      "id": "risk:diabetes",
+      "label": "diabetes risk 65 %",
+      "layer": "risk",
+      "kind": "Risk",
+      "size": 3,
+      "status": "bad",
+      "pulse": true,
+      "title": "Diabetes risk",
+      "sub": "score 0.65, level high",
+      "facts": [
+        ["factor 1", "Active T2D diagnosis"],
+        ["factor 2", "Obesity BMI 31.2"],
+        ["factor 3", "Elevated HbA1c trend"]
+      ],
+      "article": "Derived from my own record (primary use). Not a diagnosis."
+    },
+    {
+      "id": "fac:active-t2d-diagnosis",
+      "label": "Active T2D diagnosis",
+      "layer": "risk",
+      "kind": "Risk factor",
+      "size": 1.4,
+      "status": "warn",
+      "title": "Active T2D diagnosis",
+      "sub": "risk factor",
+      "facts": [["drives", "diabetes risk"]]
+    },
+    {
+      "id": "fac:obesity-bmi-31-2",
+      "label": "Obesity BMI 31.2",
+      "layer": "risk",
+      "kind": "Risk factor",
+      "size": 1.4,
+      "status": "warn",
+      "title": "Obesity BMI 31.2",
+      "sub": "risk factor",
+      "facts": [["drives", "diabetes risk"]]
+    },
+    {
+      "id": "fac:elevated-hba1c-trend",
+      "label": "Elevated HbA1c trend",
+      "layer": "risk",
+      "kind": "Risk factor",
+      "size": 1.4,
+      "status": "warn",
+      "title": "Elevated HbA1c trend",
+      "sub": "risk factor",
+      "facts": [["drives", "diabetes risk"]]
+    },
+    {
+      "id": "cond:73211009",
+      "label": "Diabetes mellitus type 2",
+      "layer": "me",
+      "kind": "Diagnosis",
+      "size": 1.2,
+      "color": "#86efac",
+      "title": "Diabetes mellitus type 2",
+      "sub": "since 2018-04-10",
+      "facts": [["code", "73211009"]],
+      "article": "FHIR R4 Condition, SNOMED CT or ICD-10 coded"
+    },
+    {
+      "id": "cond:38341003",
+      "label": "Hypertension",
+      "layer": "me",
+      "kind": "Diagnosis",
+      "size": 1.2,
+      "color": "#86efac",
+      "title": "Hypertension",
+      "sub": "since 2015-11-02",
+      "facts": [["code", "38341003"]],
+      "article": "FHIR R4 Condition, SNOMED CT or ICD-10 coded"
+    },
+    {
+      "id": "cond:73595000",
+      "label": "Stress (finding)",
+      "layer": "me",
+      "kind": "Diagnosis",
+      "size": 1.2,
+      "color": "#86efac",
+      "title": "Stress (finding)",
+      "sub": "since 2020-01-15",
+      "facts": [["code", "73595000"]],
+      "article": "FHIR R4 Condition, SNOMED CT or ICD-10 coded"
+    },
+    {
+      "id": "cond:E11.9",
+      "label": "T2D without complications",
+      "layer": "me",
+      "kind": "Diagnosis",
+      "size": 1.2,
+      "color": "#86efac",
+      "title": "T2D without complications",
+      "sub": "since 2018-04-10",
+      "facts": [["code", "E11.9"]],
+      "article": "FHIR R4 Condition, SNOMED CT or ICD-10 coded"
+    },
+    {
+      "id": "cond:414916001",
+      "label": "Obesity (BMI 31.2)",
+      "layer": "me",
+      "kind": "Diagnosis",
+      "size": 1.2,
+      "color": "#86efac",
+      "title": "Obesity (BMI 31.2)",
+      "sub": "since 2017-06-20",
+      "facts": [["code", "414916001"]],
+      "article": "FHIR R4 Condition, SNOMED CT or ICD-10 coded"
+    },
+    {
+      "id": "cond:271825005",
+      "label": "Respiratory distress",
+      "layer": "me",
+      "kind": "Diagnosis",
+      "size": 1.2,
+      "color": "#86efac",
+      "title": "Respiratory distress",
+      "sub": "since 2021-03-08",
+      "facts": [["code", "271825005"]],
+      "article": "FHIR R4 Condition, SNOMED CT or ICD-10 coded"
+    },
+    {
+      "id": "cond:40055000",
+      "label": "Chronic sinusitis",
+      "layer": "me",
+      "kind": "Diagnosis",
+      "size": 1.2,
+      "color": "#86efac",
+      "title": "Chronic sinusitis",
+      "sub": "since 2013-09-14",
+      "facts": [["code", "40055000"]],
+      "article": "FHIR R4 Condition, SNOMED CT or ICD-10 coded"
+    },
+    {
+      "id": "cond:195967001",
+      "label": "Asthma",
+      "layer": "me",
+      "kind": "Diagnosis",
+      "size": 1.2,
+      "color": "#86efac",
+      "title": "Asthma",
+      "sub": "since 2009-02-27",
+      "facts": [["code", "195967001"]],
+      "article": "FHIR R4 Condition, SNOMED CT or ICD-10 coded"
+    },
+    {
+      "id": "med:860975",
+      "label": "Metformin",
+      "layer": "me",
+      "kind": "Medication",
+      "size": 1,
+      "color": "#c4b5fd",
+      "title": "Metformin 500 mg oral tablet",
+      "sub": "FHIR R4 MedicationRequest",
+      "facts": [["RxNorm", "860975"]]
+    },
+    {
+      "id": "med:197361",
+      "label": "Lisinopril",
+      "layer": "me",
+      "kind": "Medication",
+      "size": 1,
+      "color": "#c4b5fd",
+      "title": "Lisinopril 10 mg oral tablet",
+      "sub": "FHIR R4 MedicationRequest",
+      "facts": [["RxNorm", "197361"]]
+    },
+    {
+      "id": "med:308460",
+      "label": "Salbutamol",
+      "layer": "me",
+      "kind": "Medication",
+      "size": 1,
+      "color": "#c4b5fd",
+      "title": "Salbutamol 100 mcg inhaler",
+      "sub": "FHIR R4 MedicationRequest",
+      "facts": [["RxNorm", "308460"]]
+    },
+    {
+      "id": "med:209459",
+      "label": "Atorvastatin",
+      "layer": "me",
+      "kind": "Medication",
+      "size": 1,
+      "color": "#c4b5fd",
+      "title": "Atorvastatin 20 mg oral tablet",
+      "sub": "FHIR R4 MedicationRequest",
+      "facts": [["RxNorm", "209459"]]
+    },
+    {
+      "id": "rec:0",
+      "label": "Increase cardiovascular monitoring frequency to every 6 months",
+      "layer": "prevent",
+      "kind": "Recommendation",
+      "size": 2.4,
+      "status": "warn",
+      "pulse": true,
+      "title": "Increase cardiovascular monitoring frequency to every 6 months.",
+      "sub": "Monitoring, priority high",
+      "facts": [
+        [
+          "based on",
+          "T2D + Hypertension co-morbidity pattern (n=847 across EHDS SPEs)"
+        ]
+      ],
+      "article": "Aggregate finding from a secure processing environment, Art. 73",
+      "links": [
+        {
+          "href": "/patient/insights",
+          "text": "My insights"
+        }
+      ]
+    },
+    {
+      "id": "rec:1",
+      "label": "Enrol in a certified stress-management programme",
+      "layer": "prevent",
+      "kind": "Recommendation",
+      "size": 2.4,
+      "status": "info",
+      "pulse": false,
+      "title": "Enrol in a certified stress-management programme.",
+      "sub": "Lifestyle, priority moderate",
+      "facts": [
+        [
+          "based on",
+          "Stress biomarker correlation with HbA1c elevation (n=1,203)"
+        ]
+      ],
+      "article": "Aggregate finding from a secure processing environment, Art. 73",
+      "links": [
+        {
+          "href": "/patient/insights",
+          "text": "My insights"
+        }
+      ]
+    },
+    {
+      "id": "find:INS-001",
+      "label": "Request HbA1c test every 3 months instead of every 6 months",
+      "layer": "prevent",
+      "kind": "Study finding",
+      "size": 1.8,
+      "status": "info",
+      "title": "Patients with T2D and chronic stress show 23% faster HbA1c progression compared to matched controls.",
+      "sub": "evidence moderate, from STUDY-DIAB-2023",
+      "facts": [["applies to", "Diabetes mellitus type 2, Stress (finding)"]],
+      "article": "All findings are aggregate results (k ≥ 5 participants per cohort). Your data contributed pseudonymously via the Trust Center under EHDS Art. 50 Secure Processing Environment protections."
+    },
+    {
+      "id": "find:INS-002",
+      "label": "Discuss statin therapy review with your cardiologist",
+      "layer": "prevent",
+      "kind": "Study finding",
+      "size": 1.8,
+      "status": "info",
+      "title": "Patients with hypertension + obesity (BMI > 30) have 31% higher 10-year cardiovascular event probability.",
+      "sub": "evidence strong, from STUDY-CARDIO-2024",
+      "facts": [["applies to", "Hypertension, Obesity"]],
+      "article": "All findings are aggregate results (k ≥ 5 participants per cohort). Your data contributed pseudonymously via the Trust Center under EHDS Art. 50 Secure Processing Environment protections."
+    },
+    {
+      "id": "study:STUDY-CARDIO-2024",
+      "label": "European Cardiovascular Risk Study",
+      "layer": "use",
+      "kind": "Study",
+      "size": 2.2,
+      "status": "ok",
+      "title": "European Cardiovascular Risk Study",
+      "sub": "PharmaCo Research AG, 4,821 participants, DE, NL, FR, ES",
+      "description": "Multi-centre cohort study of cardiovascular risk factors across EHDS member states. Aims to improve 10-year event prediction models.",
+      "facts": [
+        [
+          "needs",
+          "FHIR Conditions, Observations (blood pressure, cholesterol), Medications"
+        ],
+        ["status", "open"],
+        ["ethics", "EK-Berlin-2024-0041"]
+      ],
+      "article": "My consent is on file and can be withdrawn (Art. 71 opt-out from secondary use)",
+      "links": [
+        {
+          "href": "/patient/research",
+          "text": "Research programmes"
+        }
+      ]
+    },
+    {
+      "id": "org:pharmaco-research-ag",
+      "label": "PharmaCo Research AG",
+      "layer": "use",
+      "kind": "Organisation",
+      "size": 1.6,
+      "color": "#f97316",
+      "title": "PharmaCo Research AG",
+      "sub": "health data user"
+    },
+    {
+      "id": "consent:CONSENT-001",
+      "label": "consent 2024-03-10",
+      "layer": "use",
+      "kind": "Consent",
+      "size": 1.2,
+      "status": "ok",
+      "title": "CONSENT-001",
+      "sub": "FHIR Conditions + Observations",
+      "facts": [
+        ["granted", "2024-03-10"],
+        ["state", "active"],
+        ["pseudonymised by", "did:web:rki.de:trust-center"]
+      ],
+      "article": "GDPR Art. 9(2)(j) — scientific research with appropriate safeguards"
+    },
+    {
+      "id": "tc:did-web-rki-de-trust-center",
+      "label": "did:web:rki.de:trust-center",
+      "layer": "use",
+      "kind": "Trust centre",
+      "size": 1.1,
+      "color": "#ef4444",
+      "title": "Trust centre",
+      "sub": "did:web:rki.de:trust-center",
+      "article": "Pseudonymisation before the SPE, Art. 73"
+    },
+    {
+      "id": "study:STUDY-DIAB-2023",
+      "label": "T2D Progression Biomarkers",
+      "layer": "use",
+      "kind": "Study",
+      "size": 2.2,
+      "status": "ok",
+      "title": "T2D Progression Biomarkers",
+      "sub": "Institut de Recherche Santé, 2,103 participants, FR, DE, BE",
+      "description": "Identifying biomarker patterns predicting Type 2 Diabetes complication onset using longitudinal EHR data.",
+      "facts": [
+        [
+          "needs",
+          "OMOP Drug Exposures, Condition Occurrences, Measurements (HbA1c, eGFR)"
+        ],
+        ["status", "open"],
+        ["ethics", "CPP-IDF-2023-0178"]
+      ],
+      "article": "My consent is on file and can be withdrawn (Art. 71 opt-out from secondary use)",
+      "links": [
+        {
+          "href": "/patient/research",
+          "text": "Research programmes"
+        }
+      ]
+    },
+    {
+      "id": "org:institut-de-recherche-sant",
+      "label": "Institut de Recherche Santé",
+      "layer": "use",
+      "kind": "Organisation",
+      "size": 1.6,
+      "color": "#f97316",
+      "title": "Institut de Recherche Santé",
+      "sub": "health data user"
+    },
+    {
+      "id": "consent:CONSENT-002",
+      "label": "consent 2023-11-15",
+      "layer": "use",
+      "kind": "Consent",
+      "size": 1.2,
+      "status": "ok",
+      "title": "CONSENT-002",
+      "sub": "OMOP Drug Exposures + Conditions",
+      "facts": [
+        ["granted", "2023-11-15"],
+        ["state", "active"],
+        ["pseudonymised by", "did:web:rivm.nl:trust-center"]
+      ],
+      "article": "GDPR Art. 9(2)(j) — scientific research with appropriate safeguards"
+    },
+    {
+      "id": "tc:did-web-rivm-nl-trust-center",
+      "label": "did:web:rivm.nl:trust-center",
+      "layer": "use",
+      "kind": "Trust centre",
+      "size": 1.1,
+      "color": "#ef4444",
+      "title": "Trust centre",
+      "sub": "did:web:rivm.nl:trust-center",
+      "article": "Pseudonymisation before the SPE, Art. 73"
+    },
+    {
+      "id": "study:STUDY-RESP-2025",
+      "label": "Respiratory EHDS Cohort",
+      "layer": "use",
+      "kind": "Study",
+      "size": 2.2,
+      "status": "info",
+      "title": "Respiratory EHDS Cohort",
+      "sub": "MedReg DE, 890 participants, DE, AT, CH",
+      "description": "Cross-border respiratory disease surveillance leveraging EHDS priority datasets (COPD, asthma).",
+      "facts": [
+        [
+          "needs",
+          "FHIR Conditions (asthma, COPD), Observation spirometry values"
+        ],
+        ["status", "recruiting"],
+        ["ethics", "BfArM-2025-0022"]
+      ],
+      "article": "Not joined. Art. 71: secondary use continues unless I opt out; a study invitation is a separate consent",
+      "links": [
+        {
+          "href": "/patient/research",
+          "text": "Research programmes"
+        }
+      ]
+    },
+    {
+      "id": "org:medreg-de",
+      "label": "MedReg DE",
+      "layer": "use",
+      "kind": "Organisation",
+      "size": 1.6,
+      "color": "#f97316",
+      "title": "MedReg DE",
+      "sub": "health data user"
+    },
+    {
+      "id": "holder:did-web-alpha-klinik-de-participant",
+      "label": "AlphaKlinik Berlin",
+      "layer": "use",
+      "kind": "Health data holder",
+      "size": 1.8,
+      "color": "#38bdf8",
+      "title": "AlphaKlinik Berlin",
+      "sub": "keeps my record and the access log",
+      "article": "Art. 60 duties of health data holders, Art. 73(1)(e) access log"
+    },
+    {
+      "id": "access:did-web-pharmaco-de-research",
+      "label": "PharmaCo Research AG",
+      "layer": "use",
+      "kind": "Data user",
+      "size": 1.4,
+      "status": "info",
+      "title": "PharmaCo Research AG",
+      "sub": "2 accesses to my holder's data in the last 12 months",
+      "series": [
+        {
+          "date": "2025-10-01",
+          "value": 0
+        },
+        {
+          "date": "2025-11-01",
+          "value": 0
+        },
+        {
+          "date": "2025-12-01",
+          "value": 0
+        },
+        {
+          "date": "2026-01-01",
+          "value": 0
+        },
+        {
+          "date": "2026-02-01",
+          "value": 0
+        },
+        {
+          "date": "2026-03-01",
+          "value": 0
+        },
+        {
+          "date": "2026-04-01",
+          "value": 0
+        },
+        {
+          "date": "2026-05-01",
+          "value": 0
+        },
+        {
+          "date": "2026-06-01",
+          "value": 0
+        },
+        {
+          "date": "2026-07-01",
+          "value": 0
+        },
+        {
+          "date": "2026-08-01",
+          "value": 0
+        },
+        {
+          "date": "2026-09-01",
+          "value": 2
+        }
+      ],
+      "unit": "accesses",
+      "measure": "Accesses per month",
+      "higherIsWorse": true,
+      "facts": [["did", "did:web:pharmaco.de:research"]],
+      "article": "Art. 8: information on who accessed my data. The log is the holder's, per dataset; a per-record log is still missing (#271)."
+    },
+    {
+      "id": "access:did-web-lmc-nl-clinic",
+      "label": "Limburg Medical Centre",
+      "layer": "use",
+      "kind": "Data user",
+      "size": 1.4,
+      "status": "info",
+      "title": "Limburg Medical Centre",
+      "sub": "1 accesses to my holder's data in the last 12 months",
+      "series": [
+        {
+          "date": "2025-10-01",
+          "value": 0
+        },
+        {
+          "date": "2025-11-01",
+          "value": 0
+        },
+        {
+          "date": "2025-12-01",
+          "value": 0
+        },
+        {
+          "date": "2026-01-01",
+          "value": 0
+        },
+        {
+          "date": "2026-02-01",
+          "value": 0
+        },
+        {
+          "date": "2026-03-01",
+          "value": 0
+        },
+        {
+          "date": "2026-04-01",
+          "value": 0
+        },
+        {
+          "date": "2026-05-01",
+          "value": 0
+        },
+        {
+          "date": "2026-06-01",
+          "value": 0
+        },
+        {
+          "date": "2026-07-01",
+          "value": 0
+        },
+        {
+          "date": "2026-08-01",
+          "value": 0
+        },
+        {
+          "date": "2026-09-01",
+          "value": 1
+        }
+      ],
+      "unit": "accesses",
+      "measure": "Accesses per month",
+      "higherIsWorse": true,
+      "facts": [["did", "did:web:lmc.nl:clinic"]],
+      "article": "Art. 8: information on who accessed my data. The log is the holder's, per dataset; a per-record log is still missing (#271)."
+    },
+    {
+      "id": "param:4548-4",
+      "label": "HbA1c 7.6 %",
+      "layer": "risk",
+      "kind": "Parameter",
+      "size": 2,
+      "status": "bad",
+      "pulse": true,
+      "series": [
+        {
+          "date": "2024-09-12",
+          "value": 6.4
+        },
+        {
+          "date": "2025-01-20",
+          "value": 6.6
+        },
+        {
+          "date": "2025-05-15",
+          "value": 6.9
+        },
+        {
+          "date": "2025-09-18",
+          "value": 7.1
+        },
+        {
+          "date": "2026-02-10",
+          "value": 7.3
+        },
+        {
+          "date": "2026-08-21",
+          "value": 7.6
+        }
+      ],
+      "unit": "%",
+      "measure": "HbA1c",
+      "range": {
+        "low": 4,
+        "high": 6,
+        "text": "4.0 - 6.0 % (as printed on the report)"
+      },
+      "higherIsWorse": true,
+      "title": "Hemoglobin A1c/Hemoglobin.total in Blood",
+      "sub": "LOINC 4548-4, 6 measurements, AlphaKlinik Berlin, Zentrallabor (fictional)",
+      "description": "The share of haemoglobin with glucose bound to it, which reflects the average blood glucose of the last two to three months. The parameter behind the HbA1c factor of my diabetes risk.",
+      "facts": [
+        ["latest", "7.6 % on 2026-08-21"],
+        ["first", "6.4 % on 2024-09-12"],
+        ["reference", "4.0 - 6.0 % (as printed on the report)"]
+      ],
+      "article": "Art. 14 priority category: laboratory results. FHIR R4 Observation with LOINC code; the range is the one printed on the report, never app-generated.",
+      "links": [
+        {
+          "href": "/patient/profile",
+          "text": "My profile"
+        }
+      ],
+      "expand": {
+        "nodes": [
+          {
+            "id": "obs:obs-p1-4548-4-2024-09-12",
+            "label": "2024-09 · 6.4",
+            "layer": "me",
+            "kind": "Measurement",
+            "size": 0.9,
+            "color": "#f59e0b",
+            "title": "HbA1c on 2024-09-12",
+            "sub": "6.4 %, outside the printed range",
+            "facts": [
+              ["LOINC", "4548-4"],
+              ["reference", "4.0 - 6.0 % (as printed on the report)"],
+              ["source", "AlphaKlinik Berlin, Zentrallabor (fictional)"],
+              ["resource", "Observation/obs-p1-4548-4-2024-09-12"]
+            ],
+            "article": "One FHIR R4 Observation. Art. 3: I can read and export it; Art. 6: portable."
+          },
+          {
+            "id": "obs:obs-p1-4548-4-2025-01-20",
+            "label": "2025-01 · 6.6",
+            "layer": "me",
+            "kind": "Measurement",
+            "size": 0.9,
+            "color": "#f59e0b",
+            "title": "HbA1c on 2025-01-20",
+            "sub": "6.6 %, outside the printed range",
+            "facts": [
+              ["LOINC", "4548-4"],
+              ["reference", "4.0 - 6.0 % (as printed on the report)"],
+              ["source", "AlphaKlinik Berlin, Zentrallabor (fictional)"],
+              ["resource", "Observation/obs-p1-4548-4-2025-01-20"]
+            ],
+            "article": "One FHIR R4 Observation. Art. 3: I can read and export it; Art. 6: portable."
+          },
+          {
+            "id": "obs:obs-p1-4548-4-2025-05-15",
+            "label": "2025-05 · 6.9",
+            "layer": "me",
+            "kind": "Measurement",
+            "size": 0.9,
+            "color": "#f59e0b",
+            "title": "HbA1c on 2025-05-15",
+            "sub": "6.9 %, outside the printed range",
+            "facts": [
+              ["LOINC", "4548-4"],
+              ["reference", "4.0 - 6.0 % (as printed on the report)"],
+              ["source", "AlphaKlinik Berlin, Zentrallabor (fictional)"],
+              ["resource", "Observation/obs-p1-4548-4-2025-05-15"]
+            ],
+            "article": "One FHIR R4 Observation. Art. 3: I can read and export it; Art. 6: portable."
+          },
+          {
+            "id": "obs:obs-p1-4548-4-2025-09-18",
+            "label": "2025-09 · 7.1",
+            "layer": "me",
+            "kind": "Measurement",
+            "size": 0.9,
+            "color": "#f59e0b",
+            "title": "HbA1c on 2025-09-18",
+            "sub": "7.1 %, outside the printed range",
+            "facts": [
+              ["LOINC", "4548-4"],
+              ["reference", "4.0 - 6.0 % (as printed on the report)"],
+              ["source", "AlphaKlinik Berlin, Zentrallabor (fictional)"],
+              ["resource", "Observation/obs-p1-4548-4-2025-09-18"]
+            ],
+            "article": "One FHIR R4 Observation. Art. 3: I can read and export it; Art. 6: portable."
+          },
+          {
+            "id": "obs:obs-p1-4548-4-2026-02-10",
+            "label": "2026-02 · 7.3",
+            "layer": "me",
+            "kind": "Measurement",
+            "size": 0.9,
+            "color": "#f59e0b",
+            "title": "HbA1c on 2026-02-10",
+            "sub": "7.3 %, outside the printed range",
+            "facts": [
+              ["LOINC", "4548-4"],
+              ["reference", "4.0 - 6.0 % (as printed on the report)"],
+              ["source", "AlphaKlinik Berlin, Zentrallabor (fictional)"],
+              ["resource", "Observation/obs-p1-4548-4-2026-02-10"]
+            ],
+            "article": "One FHIR R4 Observation. Art. 3: I can read and export it; Art. 6: portable."
+          },
+          {
+            "id": "obs:obs-p1-4548-4-2026-08-21",
+            "label": "2026-08 · 7.6",
+            "layer": "me",
+            "kind": "Measurement",
+            "size": 0.9,
+            "color": "#f59e0b",
+            "title": "HbA1c on 2026-08-21",
+            "sub": "7.6 %, outside the printed range",
+            "facts": [
+              ["LOINC", "4548-4"],
+              ["reference", "4.0 - 6.0 % (as printed on the report)"],
+              ["source", "AlphaKlinik Berlin, Zentrallabor (fictional)"],
+              ["resource", "Observation/obs-p1-4548-4-2026-08-21"]
+            ],
+            "article": "One FHIR R4 Observation. Art. 3: I can read and export it; Art. 6: portable."
+          }
+        ],
+        "links": [
+          {
+            "source": "param:4548-4",
+            "target": "obs:obs-p1-4548-4-2024-09-12",
+            "kind": "measured",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "param:4548-4",
+            "target": "obs:obs-p1-4548-4-2025-01-20",
+            "kind": "measured",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "obs:obs-p1-4548-4-2024-09-12",
+            "target": "obs:obs-p1-4548-4-2025-01-20",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          },
+          {
+            "source": "param:4548-4",
+            "target": "obs:obs-p1-4548-4-2025-05-15",
+            "kind": "measured",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "obs:obs-p1-4548-4-2025-01-20",
+            "target": "obs:obs-p1-4548-4-2025-05-15",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          },
+          {
+            "source": "param:4548-4",
+            "target": "obs:obs-p1-4548-4-2025-09-18",
+            "kind": "measured",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "obs:obs-p1-4548-4-2025-05-15",
+            "target": "obs:obs-p1-4548-4-2025-09-18",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          },
+          {
+            "source": "param:4548-4",
+            "target": "obs:obs-p1-4548-4-2026-02-10",
+            "kind": "measured",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "obs:obs-p1-4548-4-2025-09-18",
+            "target": "obs:obs-p1-4548-4-2026-02-10",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          },
+          {
+            "source": "param:4548-4",
+            "target": "obs:obs-p1-4548-4-2026-08-21",
+            "kind": "measured",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "obs:obs-p1-4548-4-2026-02-10",
+            "target": "obs:obs-p1-4548-4-2026-08-21",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "param:2339-0",
+      "label": "Fasting glucose 142 mg/dL",
+      "layer": "risk",
+      "kind": "Parameter",
+      "size": 2,
+      "status": "bad",
+      "pulse": true,
+      "series": [
+        {
+          "date": "2024-09-12",
+          "value": 118
+        },
+        {
+          "date": "2025-01-20",
+          "value": 124
+        },
+        {
+          "date": "2025-05-15",
+          "value": 131
+        },
+        {
+          "date": "2025-09-18",
+          "value": 129
+        },
+        {
+          "date": "2026-02-10",
+          "value": 138
+        },
+        {
+          "date": "2026-08-21",
+          "value": 142
+        }
+      ],
+      "unit": "mg/dL",
+      "measure": "Fasting glucose",
+      "range": {
+        "low": 70,
+        "high": 99,
+        "text": "70 - 99 mg/dL (as printed on the report)"
+      },
+      "higherIsWorse": true,
+      "title": "Glucose [Mass/volume] in Blood",
+      "sub": "LOINC 2339-0, 6 measurements, AlphaKlinik Berlin, Zentrallabor (fictional)",
+      "description": "Blood sugar at the moment of the draw. Only interpretable fasting, since it rises after any meal.",
+      "facts": [
+        ["latest", "142 mg/dL on 2026-08-21"],
+        ["first", "118 mg/dL on 2024-09-12"],
+        ["reference", "70 - 99 mg/dL (as printed on the report)"]
+      ],
+      "article": "Art. 14 priority category: laboratory results. FHIR R4 Observation with LOINC code; the range is the one printed on the report, never app-generated.",
+      "links": [
+        {
+          "href": "/patient/profile",
+          "text": "My profile"
+        }
+      ],
+      "expand": {
+        "nodes": [
+          {
+            "id": "obs:obs-p1-2339-0-2024-09-12",
+            "label": "2024-09 · 118",
+            "layer": "me",
+            "kind": "Measurement",
+            "size": 0.9,
+            "color": "#f59e0b",
+            "title": "Fasting glucose on 2024-09-12",
+            "sub": "118 mg/dL, outside the printed range",
+            "facts": [
+              ["LOINC", "2339-0"],
+              ["reference", "70 - 99 mg/dL (as printed on the report)"],
+              ["source", "AlphaKlinik Berlin, Zentrallabor (fictional)"],
+              ["resource", "Observation/obs-p1-2339-0-2024-09-12"]
+            ],
+            "article": "One FHIR R4 Observation. Art. 3: I can read and export it; Art. 6: portable."
+          },
+          {
+            "id": "obs:obs-p1-2339-0-2025-01-20",
+            "label": "2025-01 · 124",
+            "layer": "me",
+            "kind": "Measurement",
+            "size": 0.9,
+            "color": "#f59e0b",
+            "title": "Fasting glucose on 2025-01-20",
+            "sub": "124 mg/dL, outside the printed range",
+            "facts": [
+              ["LOINC", "2339-0"],
+              ["reference", "70 - 99 mg/dL (as printed on the report)"],
+              ["source", "AlphaKlinik Berlin, Zentrallabor (fictional)"],
+              ["resource", "Observation/obs-p1-2339-0-2025-01-20"]
+            ],
+            "article": "One FHIR R4 Observation. Art. 3: I can read and export it; Art. 6: portable."
+          },
+          {
+            "id": "obs:obs-p1-2339-0-2025-05-15",
+            "label": "2025-05 · 131",
+            "layer": "me",
+            "kind": "Measurement",
+            "size": 0.9,
+            "color": "#f59e0b",
+            "title": "Fasting glucose on 2025-05-15",
+            "sub": "131 mg/dL, outside the printed range",
+            "facts": [
+              ["LOINC", "2339-0"],
+              ["reference", "70 - 99 mg/dL (as printed on the report)"],
+              ["source", "AlphaKlinik Berlin, Zentrallabor (fictional)"],
+              ["resource", "Observation/obs-p1-2339-0-2025-05-15"]
+            ],
+            "article": "One FHIR R4 Observation. Art. 3: I can read and export it; Art. 6: portable."
+          },
+          {
+            "id": "obs:obs-p1-2339-0-2025-09-18",
+            "label": "2025-09 · 129",
+            "layer": "me",
+            "kind": "Measurement",
+            "size": 0.9,
+            "color": "#f59e0b",
+            "title": "Fasting glucose on 2025-09-18",
+            "sub": "129 mg/dL, outside the printed range",
+            "facts": [
+              ["LOINC", "2339-0"],
+              ["reference", "70 - 99 mg/dL (as printed on the report)"],
+              ["source", "AlphaKlinik Berlin, Zentrallabor (fictional)"],
+              ["resource", "Observation/obs-p1-2339-0-2025-09-18"]
+            ],
+            "article": "One FHIR R4 Observation. Art. 3: I can read and export it; Art. 6: portable."
+          },
+          {
+            "id": "obs:obs-p1-2339-0-2026-02-10",
+            "label": "2026-02 · 138",
+            "layer": "me",
+            "kind": "Measurement",
+            "size": 0.9,
+            "color": "#f59e0b",
+            "title": "Fasting glucose on 2026-02-10",
+            "sub": "138 mg/dL, outside the printed range",
+            "facts": [
+              ["LOINC", "2339-0"],
+              ["reference", "70 - 99 mg/dL (as printed on the report)"],
+              ["source", "AlphaKlinik Berlin, Zentrallabor (fictional)"],
+              ["resource", "Observation/obs-p1-2339-0-2026-02-10"]
+            ],
+            "article": "One FHIR R4 Observation. Art. 3: I can read and export it; Art. 6: portable."
+          },
+          {
+            "id": "obs:obs-p1-2339-0-2026-08-21",
+            "label": "2026-08 · 142",
+            "layer": "me",
+            "kind": "Measurement",
+            "size": 0.9,
+            "color": "#f59e0b",
+            "title": "Fasting glucose on 2026-08-21",
+            "sub": "142 mg/dL, outside the printed range",
+            "facts": [
+              ["LOINC", "2339-0"],
+              ["reference", "70 - 99 mg/dL (as printed on the report)"],
+              ["source", "AlphaKlinik Berlin, Zentrallabor (fictional)"],
+              ["resource", "Observation/obs-p1-2339-0-2026-08-21"]
+            ],
+            "article": "One FHIR R4 Observation. Art. 3: I can read and export it; Art. 6: portable."
+          }
+        ],
+        "links": [
+          {
+            "source": "param:2339-0",
+            "target": "obs:obs-p1-2339-0-2024-09-12",
+            "kind": "measured",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "param:2339-0",
+            "target": "obs:obs-p1-2339-0-2025-01-20",
+            "kind": "measured",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "obs:obs-p1-2339-0-2024-09-12",
+            "target": "obs:obs-p1-2339-0-2025-01-20",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          },
+          {
+            "source": "param:2339-0",
+            "target": "obs:obs-p1-2339-0-2025-05-15",
+            "kind": "measured",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "obs:obs-p1-2339-0-2025-01-20",
+            "target": "obs:obs-p1-2339-0-2025-05-15",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          },
+          {
+            "source": "param:2339-0",
+            "target": "obs:obs-p1-2339-0-2025-09-18",
+            "kind": "measured",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "obs:obs-p1-2339-0-2025-05-15",
+            "target": "obs:obs-p1-2339-0-2025-09-18",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          },
+          {
+            "source": "param:2339-0",
+            "target": "obs:obs-p1-2339-0-2026-02-10",
+            "kind": "measured",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "obs:obs-p1-2339-0-2025-09-18",
+            "target": "obs:obs-p1-2339-0-2026-02-10",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          },
+          {
+            "source": "param:2339-0",
+            "target": "obs:obs-p1-2339-0-2026-08-21",
+            "kind": "measured",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "obs:obs-p1-2339-0-2026-02-10",
+            "target": "obs:obs-p1-2339-0-2026-08-21",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "param:2089-1",
+      "label": "LDL cholesterol 132 mg/dL",
+      "layer": "risk",
+      "kind": "Parameter",
+      "size": 2,
+      "status": "warn",
+      "pulse": false,
+      "series": [
+        {
+          "date": "2024-09-12",
+          "value": 158
+        },
+        {
+          "date": "2025-01-20",
+          "value": 149
+        },
+        {
+          "date": "2025-05-15",
+          "value": 141
+        },
+        {
+          "date": "2025-09-18",
+          "value": 136
+        },
+        {
+          "date": "2026-02-10",
+          "value": 134
+        },
+        {
+          "date": "2026-08-21",
+          "value": 132
+        }
+      ],
+      "unit": "mg/dL",
+      "measure": "LDL cholesterol",
+      "range": {
+        "low": 0,
+        "high": 116,
+        "text": "0 - 116 mg/dL (as printed on the report)"
+      },
+      "higherIsWorse": true,
+      "title": "Cholesterol in LDL [Mass/volume] in Serum or Plasma",
+      "sub": "LOINC 2089-1, 6 measurements, AlphaKlinik Berlin, Zentrallabor (fictional)",
+      "description": "Cholesterol in low-density lipoproteins, the particles that deposit it in artery walls. The primary target in lipid guidelines, and what the atorvastatin is for.",
+      "facts": [
+        ["latest", "132 mg/dL on 2026-08-21"],
+        ["first", "158 mg/dL on 2024-09-12"],
+        ["reference", "0 - 116 mg/dL (as printed on the report)"]
+      ],
+      "article": "Art. 14 priority category: laboratory results. FHIR R4 Observation with LOINC code; the range is the one printed on the report, never app-generated.",
+      "links": [
+        {
+          "href": "/patient/profile",
+          "text": "My profile"
+        }
+      ],
+      "expand": {
+        "nodes": [
+          {
+            "id": "obs:obs-p1-2089-1-2024-09-12",
+            "label": "2024-09 · 158",
+            "layer": "me",
+            "kind": "Measurement",
+            "size": 0.9,
+            "color": "#f59e0b",
+            "title": "LDL cholesterol on 2024-09-12",
+            "sub": "158 mg/dL, outside the printed range",
+            "facts": [
+              ["LOINC", "2089-1"],
+              ["reference", "0 - 116 mg/dL (as printed on the report)"],
+              ["source", "AlphaKlinik Berlin, Zentrallabor (fictional)"],
+              ["resource", "Observation/obs-p1-2089-1-2024-09-12"]
+            ],
+            "article": "One FHIR R4 Observation. Art. 3: I can read and export it; Art. 6: portable."
+          },
+          {
+            "id": "obs:obs-p1-2089-1-2025-01-20",
+            "label": "2025-01 · 149",
+            "layer": "me",
+            "kind": "Measurement",
+            "size": 0.9,
+            "color": "#f59e0b",
+            "title": "LDL cholesterol on 2025-01-20",
+            "sub": "149 mg/dL, outside the printed range",
+            "facts": [
+              ["LOINC", "2089-1"],
+              ["reference", "0 - 116 mg/dL (as printed on the report)"],
+              ["source", "AlphaKlinik Berlin, Zentrallabor (fictional)"],
+              ["resource", "Observation/obs-p1-2089-1-2025-01-20"]
+            ],
+            "article": "One FHIR R4 Observation. Art. 3: I can read and export it; Art. 6: portable."
+          },
+          {
+            "id": "obs:obs-p1-2089-1-2025-05-15",
+            "label": "2025-05 · 141",
+            "layer": "me",
+            "kind": "Measurement",
+            "size": 0.9,
+            "color": "#f59e0b",
+            "title": "LDL cholesterol on 2025-05-15",
+            "sub": "141 mg/dL, outside the printed range",
+            "facts": [
+              ["LOINC", "2089-1"],
+              ["reference", "0 - 116 mg/dL (as printed on the report)"],
+              ["source", "AlphaKlinik Berlin, Zentrallabor (fictional)"],
+              ["resource", "Observation/obs-p1-2089-1-2025-05-15"]
+            ],
+            "article": "One FHIR R4 Observation. Art. 3: I can read and export it; Art. 6: portable."
+          },
+          {
+            "id": "obs:obs-p1-2089-1-2025-09-18",
+            "label": "2025-09 · 136",
+            "layer": "me",
+            "kind": "Measurement",
+            "size": 0.9,
+            "color": "#f59e0b",
+            "title": "LDL cholesterol on 2025-09-18",
+            "sub": "136 mg/dL, outside the printed range",
+            "facts": [
+              ["LOINC", "2089-1"],
+              ["reference", "0 - 116 mg/dL (as printed on the report)"],
+              ["source", "AlphaKlinik Berlin, Zentrallabor (fictional)"],
+              ["resource", "Observation/obs-p1-2089-1-2025-09-18"]
+            ],
+            "article": "One FHIR R4 Observation. Art. 3: I can read and export it; Art. 6: portable."
+          },
+          {
+            "id": "obs:obs-p1-2089-1-2026-02-10",
+            "label": "2026-02 · 134",
+            "layer": "me",
+            "kind": "Measurement",
+            "size": 0.9,
+            "color": "#f59e0b",
+            "title": "LDL cholesterol on 2026-02-10",
+            "sub": "134 mg/dL, outside the printed range",
+            "facts": [
+              ["LOINC", "2089-1"],
+              ["reference", "0 - 116 mg/dL (as printed on the report)"],
+              ["source", "AlphaKlinik Berlin, Zentrallabor (fictional)"],
+              ["resource", "Observation/obs-p1-2089-1-2026-02-10"]
+            ],
+            "article": "One FHIR R4 Observation. Art. 3: I can read and export it; Art. 6: portable."
+          },
+          {
+            "id": "obs:obs-p1-2089-1-2026-08-21",
+            "label": "2026-08 · 132",
+            "layer": "me",
+            "kind": "Measurement",
+            "size": 0.9,
+            "color": "#f59e0b",
+            "title": "LDL cholesterol on 2026-08-21",
+            "sub": "132 mg/dL, outside the printed range",
+            "facts": [
+              ["LOINC", "2089-1"],
+              ["reference", "0 - 116 mg/dL (as printed on the report)"],
+              ["source", "AlphaKlinik Berlin, Zentrallabor (fictional)"],
+              ["resource", "Observation/obs-p1-2089-1-2026-08-21"]
+            ],
+            "article": "One FHIR R4 Observation. Art. 3: I can read and export it; Art. 6: portable."
+          }
+        ],
+        "links": [
+          {
+            "source": "param:2089-1",
+            "target": "obs:obs-p1-2089-1-2024-09-12",
+            "kind": "measured",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "param:2089-1",
+            "target": "obs:obs-p1-2089-1-2025-01-20",
+            "kind": "measured",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "obs:obs-p1-2089-1-2024-09-12",
+            "target": "obs:obs-p1-2089-1-2025-01-20",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          },
+          {
+            "source": "param:2089-1",
+            "target": "obs:obs-p1-2089-1-2025-05-15",
+            "kind": "measured",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "obs:obs-p1-2089-1-2025-01-20",
+            "target": "obs:obs-p1-2089-1-2025-05-15",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          },
+          {
+            "source": "param:2089-1",
+            "target": "obs:obs-p1-2089-1-2025-09-18",
+            "kind": "measured",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "obs:obs-p1-2089-1-2025-05-15",
+            "target": "obs:obs-p1-2089-1-2025-09-18",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          },
+          {
+            "source": "param:2089-1",
+            "target": "obs:obs-p1-2089-1-2026-02-10",
+            "kind": "measured",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "obs:obs-p1-2089-1-2025-09-18",
+            "target": "obs:obs-p1-2089-1-2026-02-10",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          },
+          {
+            "source": "param:2089-1",
+            "target": "obs:obs-p1-2089-1-2026-08-21",
+            "kind": "measured",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "obs:obs-p1-2089-1-2026-02-10",
+            "target": "obs:obs-p1-2089-1-2026-08-21",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "param:2093-3",
+      "label": "Total cholesterol 205 mg/dL",
+      "layer": "risk",
+      "kind": "Parameter",
+      "size": 2,
+      "status": "warn",
+      "pulse": false,
+      "series": [
+        {
+          "date": "2024-09-12",
+          "value": 232
+        },
+        {
+          "date": "2025-01-20",
+          "value": 221
+        },
+        {
+          "date": "2025-05-15",
+          "value": 214
+        },
+        {
+          "date": "2025-09-18",
+          "value": 208
+        },
+        {
+          "date": "2026-02-10",
+          "value": 206
+        },
+        {
+          "date": "2026-08-21",
+          "value": 205
+        }
+      ],
+      "unit": "mg/dL",
+      "measure": "Total cholesterol",
+      "range": {
+        "low": 0,
+        "high": 200,
+        "text": "0 - 200 mg/dL (as printed on the report)"
+      },
+      "higherIsWorse": true,
+      "title": "Cholesterol [Mass/volume] in Serum or Plasma",
+      "sub": "LOINC 2093-3, 6 measurements, AlphaKlinik Berlin, Zentrallabor (fictional)",
+      "description": "All cholesterol carried in the blood, in every particle type. A screening figure; LDL carries the risk information.",
+      "facts": [
+        ["latest", "205 mg/dL on 2026-08-21"],
+        ["first", "232 mg/dL on 2024-09-12"],
+        ["reference", "0 - 200 mg/dL (as printed on the report)"]
+      ],
+      "article": "Art. 14 priority category: laboratory results. FHIR R4 Observation with LOINC code; the range is the one printed on the report, never app-generated.",
+      "links": [
+        {
+          "href": "/patient/profile",
+          "text": "My profile"
+        }
+      ],
+      "expand": {
+        "nodes": [
+          {
+            "id": "obs:obs-p1-2093-3-2024-09-12",
+            "label": "2024-09 · 232",
+            "layer": "me",
+            "kind": "Measurement",
+            "size": 0.9,
+            "color": "#f59e0b",
+            "title": "Total cholesterol on 2024-09-12",
+            "sub": "232 mg/dL, outside the printed range",
+            "facts": [
+              ["LOINC", "2093-3"],
+              ["reference", "0 - 200 mg/dL (as printed on the report)"],
+              ["source", "AlphaKlinik Berlin, Zentrallabor (fictional)"],
+              ["resource", "Observation/obs-p1-2093-3-2024-09-12"]
+            ],
+            "article": "One FHIR R4 Observation. Art. 3: I can read and export it; Art. 6: portable."
+          },
+          {
+            "id": "obs:obs-p1-2093-3-2025-01-20",
+            "label": "2025-01 · 221",
+            "layer": "me",
+            "kind": "Measurement",
+            "size": 0.9,
+            "color": "#f59e0b",
+            "title": "Total cholesterol on 2025-01-20",
+            "sub": "221 mg/dL, outside the printed range",
+            "facts": [
+              ["LOINC", "2093-3"],
+              ["reference", "0 - 200 mg/dL (as printed on the report)"],
+              ["source", "AlphaKlinik Berlin, Zentrallabor (fictional)"],
+              ["resource", "Observation/obs-p1-2093-3-2025-01-20"]
+            ],
+            "article": "One FHIR R4 Observation. Art. 3: I can read and export it; Art. 6: portable."
+          },
+          {
+            "id": "obs:obs-p1-2093-3-2025-05-15",
+            "label": "2025-05 · 214",
+            "layer": "me",
+            "kind": "Measurement",
+            "size": 0.9,
+            "color": "#f59e0b",
+            "title": "Total cholesterol on 2025-05-15",
+            "sub": "214 mg/dL, outside the printed range",
+            "facts": [
+              ["LOINC", "2093-3"],
+              ["reference", "0 - 200 mg/dL (as printed on the report)"],
+              ["source", "AlphaKlinik Berlin, Zentrallabor (fictional)"],
+              ["resource", "Observation/obs-p1-2093-3-2025-05-15"]
+            ],
+            "article": "One FHIR R4 Observation. Art. 3: I can read and export it; Art. 6: portable."
+          },
+          {
+            "id": "obs:obs-p1-2093-3-2025-09-18",
+            "label": "2025-09 · 208",
+            "layer": "me",
+            "kind": "Measurement",
+            "size": 0.9,
+            "color": "#f59e0b",
+            "title": "Total cholesterol on 2025-09-18",
+            "sub": "208 mg/dL, outside the printed range",
+            "facts": [
+              ["LOINC", "2093-3"],
+              ["reference", "0 - 200 mg/dL (as printed on the report)"],
+              ["source", "AlphaKlinik Berlin, Zentrallabor (fictional)"],
+              ["resource", "Observation/obs-p1-2093-3-2025-09-18"]
+            ],
+            "article": "One FHIR R4 Observation. Art. 3: I can read and export it; Art. 6: portable."
+          },
+          {
+            "id": "obs:obs-p1-2093-3-2026-02-10",
+            "label": "2026-02 · 206",
+            "layer": "me",
+            "kind": "Measurement",
+            "size": 0.9,
+            "color": "#f59e0b",
+            "title": "Total cholesterol on 2026-02-10",
+            "sub": "206 mg/dL, outside the printed range",
+            "facts": [
+              ["LOINC", "2093-3"],
+              ["reference", "0 - 200 mg/dL (as printed on the report)"],
+              ["source", "AlphaKlinik Berlin, Zentrallabor (fictional)"],
+              ["resource", "Observation/obs-p1-2093-3-2026-02-10"]
+            ],
+            "article": "One FHIR R4 Observation. Art. 3: I can read and export it; Art. 6: portable."
+          },
+          {
+            "id": "obs:obs-p1-2093-3-2026-08-21",
+            "label": "2026-08 · 205",
+            "layer": "me",
+            "kind": "Measurement",
+            "size": 0.9,
+            "color": "#f59e0b",
+            "title": "Total cholesterol on 2026-08-21",
+            "sub": "205 mg/dL, outside the printed range",
+            "facts": [
+              ["LOINC", "2093-3"],
+              ["reference", "0 - 200 mg/dL (as printed on the report)"],
+              ["source", "AlphaKlinik Berlin, Zentrallabor (fictional)"],
+              ["resource", "Observation/obs-p1-2093-3-2026-08-21"]
+            ],
+            "article": "One FHIR R4 Observation. Art. 3: I can read and export it; Art. 6: portable."
+          }
+        ],
+        "links": [
+          {
+            "source": "param:2093-3",
+            "target": "obs:obs-p1-2093-3-2024-09-12",
+            "kind": "measured",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "param:2093-3",
+            "target": "obs:obs-p1-2093-3-2025-01-20",
+            "kind": "measured",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "obs:obs-p1-2093-3-2024-09-12",
+            "target": "obs:obs-p1-2093-3-2025-01-20",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          },
+          {
+            "source": "param:2093-3",
+            "target": "obs:obs-p1-2093-3-2025-05-15",
+            "kind": "measured",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "obs:obs-p1-2093-3-2025-01-20",
+            "target": "obs:obs-p1-2093-3-2025-05-15",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          },
+          {
+            "source": "param:2093-3",
+            "target": "obs:obs-p1-2093-3-2025-09-18",
+            "kind": "measured",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "obs:obs-p1-2093-3-2025-05-15",
+            "target": "obs:obs-p1-2093-3-2025-09-18",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          },
+          {
+            "source": "param:2093-3",
+            "target": "obs:obs-p1-2093-3-2026-02-10",
+            "kind": "measured",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "obs:obs-p1-2093-3-2025-09-18",
+            "target": "obs:obs-p1-2093-3-2026-02-10",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          },
+          {
+            "source": "param:2093-3",
+            "target": "obs:obs-p1-2093-3-2026-08-21",
+            "kind": "measured",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "obs:obs-p1-2093-3-2026-02-10",
+            "target": "obs:obs-p1-2093-3-2026-08-21",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "param:8480-6",
+      "label": "Systolic blood pressure 138 mm[Hg]",
+      "layer": "risk",
+      "kind": "Parameter",
+      "size": 2,
+      "status": "warn",
+      "pulse": false,
+      "series": [
+        {
+          "date": "2024-09-12",
+          "value": 146
+        },
+        {
+          "date": "2025-01-20",
+          "value": 142
+        },
+        {
+          "date": "2025-05-15",
+          "value": 139
+        },
+        {
+          "date": "2025-09-18",
+          "value": 141
+        },
+        {
+          "date": "2026-02-10",
+          "value": 137
+        },
+        {
+          "date": "2026-08-21",
+          "value": 138
+        }
+      ],
+      "unit": "mm[Hg]",
+      "measure": "Systolic blood pressure",
+      "range": {
+        "low": 100,
+        "high": 130,
+        "text": "100 - 130 mm[Hg] (as printed on the report)"
+      },
+      "higherIsWorse": true,
+      "title": "Systolic blood pressure",
+      "sub": "LOINC 8480-6, 6 measurements, AlphaKlinik Berlin, Zentrallabor (fictional)",
+      "description": "Pressure in the arteries when the heart contracts. The parameter behind the hypertension diagnosis, and what the lisinopril is for.",
+      "facts": [
+        ["latest", "138 mm[Hg] on 2026-08-21"],
+        ["first", "146 mm[Hg] on 2024-09-12"],
+        ["reference", "100 - 130 mm[Hg] (as printed on the report)"]
+      ],
+      "article": "Art. 14 priority category: laboratory results. FHIR R4 Observation with LOINC code; the range is the one printed on the report, never app-generated.",
+      "links": [
+        {
+          "href": "/patient/profile",
+          "text": "My profile"
+        }
+      ],
+      "expand": {
+        "nodes": [
+          {
+            "id": "obs:obs-p1-8480-6-2024-09-12",
+            "label": "2024-09 · 146",
+            "layer": "me",
+            "kind": "Measurement",
+            "size": 0.9,
+            "color": "#f59e0b",
+            "title": "Systolic blood pressure on 2024-09-12",
+            "sub": "146 mm[Hg], outside the printed range",
+            "facts": [
+              ["LOINC", "8480-6"],
+              ["reference", "100 - 130 mm[Hg] (as printed on the report)"],
+              ["source", "AlphaKlinik Berlin, Zentrallabor (fictional)"],
+              ["resource", "Observation/obs-p1-8480-6-2024-09-12"]
+            ],
+            "article": "One FHIR R4 Observation. Art. 3: I can read and export it; Art. 6: portable."
+          },
+          {
+            "id": "obs:obs-p1-8480-6-2025-01-20",
+            "label": "2025-01 · 142",
+            "layer": "me",
+            "kind": "Measurement",
+            "size": 0.9,
+            "color": "#f59e0b",
+            "title": "Systolic blood pressure on 2025-01-20",
+            "sub": "142 mm[Hg], outside the printed range",
+            "facts": [
+              ["LOINC", "8480-6"],
+              ["reference", "100 - 130 mm[Hg] (as printed on the report)"],
+              ["source", "AlphaKlinik Berlin, Zentrallabor (fictional)"],
+              ["resource", "Observation/obs-p1-8480-6-2025-01-20"]
+            ],
+            "article": "One FHIR R4 Observation. Art. 3: I can read and export it; Art. 6: portable."
+          },
+          {
+            "id": "obs:obs-p1-8480-6-2025-05-15",
+            "label": "2025-05 · 139",
+            "layer": "me",
+            "kind": "Measurement",
+            "size": 0.9,
+            "color": "#f59e0b",
+            "title": "Systolic blood pressure on 2025-05-15",
+            "sub": "139 mm[Hg], outside the printed range",
+            "facts": [
+              ["LOINC", "8480-6"],
+              ["reference", "100 - 130 mm[Hg] (as printed on the report)"],
+              ["source", "AlphaKlinik Berlin, Zentrallabor (fictional)"],
+              ["resource", "Observation/obs-p1-8480-6-2025-05-15"]
+            ],
+            "article": "One FHIR R4 Observation. Art. 3: I can read and export it; Art. 6: portable."
+          },
+          {
+            "id": "obs:obs-p1-8480-6-2025-09-18",
+            "label": "2025-09 · 141",
+            "layer": "me",
+            "kind": "Measurement",
+            "size": 0.9,
+            "color": "#f59e0b",
+            "title": "Systolic blood pressure on 2025-09-18",
+            "sub": "141 mm[Hg], outside the printed range",
+            "facts": [
+              ["LOINC", "8480-6"],
+              ["reference", "100 - 130 mm[Hg] (as printed on the report)"],
+              ["source", "AlphaKlinik Berlin, Zentrallabor (fictional)"],
+              ["resource", "Observation/obs-p1-8480-6-2025-09-18"]
+            ],
+            "article": "One FHIR R4 Observation. Art. 3: I can read and export it; Art. 6: portable."
+          },
+          {
+            "id": "obs:obs-p1-8480-6-2026-02-10",
+            "label": "2026-02 · 137",
+            "layer": "me",
+            "kind": "Measurement",
+            "size": 0.9,
+            "color": "#f59e0b",
+            "title": "Systolic blood pressure on 2026-02-10",
+            "sub": "137 mm[Hg], outside the printed range",
+            "facts": [
+              ["LOINC", "8480-6"],
+              ["reference", "100 - 130 mm[Hg] (as printed on the report)"],
+              ["source", "AlphaKlinik Berlin, Zentrallabor (fictional)"],
+              ["resource", "Observation/obs-p1-8480-6-2026-02-10"]
+            ],
+            "article": "One FHIR R4 Observation. Art. 3: I can read and export it; Art. 6: portable."
+          },
+          {
+            "id": "obs:obs-p1-8480-6-2026-08-21",
+            "label": "2026-08 · 138",
+            "layer": "me",
+            "kind": "Measurement",
+            "size": 0.9,
+            "color": "#f59e0b",
+            "title": "Systolic blood pressure on 2026-08-21",
+            "sub": "138 mm[Hg], outside the printed range",
+            "facts": [
+              ["LOINC", "8480-6"],
+              ["reference", "100 - 130 mm[Hg] (as printed on the report)"],
+              ["source", "AlphaKlinik Berlin, Zentrallabor (fictional)"],
+              ["resource", "Observation/obs-p1-8480-6-2026-08-21"]
+            ],
+            "article": "One FHIR R4 Observation. Art. 3: I can read and export it; Art. 6: portable."
+          }
+        ],
+        "links": [
+          {
+            "source": "param:8480-6",
+            "target": "obs:obs-p1-8480-6-2024-09-12",
+            "kind": "measured",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "param:8480-6",
+            "target": "obs:obs-p1-8480-6-2025-01-20",
+            "kind": "measured",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "obs:obs-p1-8480-6-2024-09-12",
+            "target": "obs:obs-p1-8480-6-2025-01-20",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          },
+          {
+            "source": "param:8480-6",
+            "target": "obs:obs-p1-8480-6-2025-05-15",
+            "kind": "measured",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "obs:obs-p1-8480-6-2025-01-20",
+            "target": "obs:obs-p1-8480-6-2025-05-15",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          },
+          {
+            "source": "param:8480-6",
+            "target": "obs:obs-p1-8480-6-2025-09-18",
+            "kind": "measured",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "obs:obs-p1-8480-6-2025-05-15",
+            "target": "obs:obs-p1-8480-6-2025-09-18",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          },
+          {
+            "source": "param:8480-6",
+            "target": "obs:obs-p1-8480-6-2026-02-10",
+            "kind": "measured",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "obs:obs-p1-8480-6-2025-09-18",
+            "target": "obs:obs-p1-8480-6-2026-02-10",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          },
+          {
+            "source": "param:8480-6",
+            "target": "obs:obs-p1-8480-6-2026-08-21",
+            "kind": "measured",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "obs:obs-p1-8480-6-2026-02-10",
+            "target": "obs:obs-p1-8480-6-2026-08-21",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "param:8462-4",
+      "label": "Diastolic blood pressure 87 mm[Hg]",
+      "layer": "risk",
+      "kind": "Parameter",
+      "size": 2,
+      "status": "warn",
+      "pulse": false,
+      "series": [
+        {
+          "date": "2024-09-12",
+          "value": 92
+        },
+        {
+          "date": "2025-01-20",
+          "value": 90
+        },
+        {
+          "date": "2025-05-15",
+          "value": 88
+        },
+        {
+          "date": "2025-09-18",
+          "value": 89
+        },
+        {
+          "date": "2026-02-10",
+          "value": 86
+        },
+        {
+          "date": "2026-08-21",
+          "value": 87
+        }
+      ],
+      "unit": "mm[Hg]",
+      "measure": "Diastolic blood pressure",
+      "range": {
+        "low": 60,
+        "high": 85,
+        "text": "60 - 85 mm[Hg] (as printed on the report)"
+      },
+      "higherIsWorse": true,
+      "title": "Diastolic blood pressure",
+      "sub": "LOINC 8462-4, 6 measurements, AlphaKlinik Berlin, Zentrallabor (fictional)",
+      "description": "Pressure in the arteries between heartbeats.",
+      "facts": [
+        ["latest", "87 mm[Hg] on 2026-08-21"],
+        ["first", "92 mm[Hg] on 2024-09-12"],
+        ["reference", "60 - 85 mm[Hg] (as printed on the report)"]
+      ],
+      "article": "Art. 14 priority category: laboratory results. FHIR R4 Observation with LOINC code; the range is the one printed on the report, never app-generated.",
+      "links": [
+        {
+          "href": "/patient/profile",
+          "text": "My profile"
+        }
+      ],
+      "expand": {
+        "nodes": [
+          {
+            "id": "obs:obs-p1-8462-4-2024-09-12",
+            "label": "2024-09 · 92",
+            "layer": "me",
+            "kind": "Measurement",
+            "size": 0.9,
+            "color": "#f59e0b",
+            "title": "Diastolic blood pressure on 2024-09-12",
+            "sub": "92 mm[Hg], outside the printed range",
+            "facts": [
+              ["LOINC", "8462-4"],
+              ["reference", "60 - 85 mm[Hg] (as printed on the report)"],
+              ["source", "AlphaKlinik Berlin, Zentrallabor (fictional)"],
+              ["resource", "Observation/obs-p1-8462-4-2024-09-12"]
+            ],
+            "article": "One FHIR R4 Observation. Art. 3: I can read and export it; Art. 6: portable."
+          },
+          {
+            "id": "obs:obs-p1-8462-4-2025-01-20",
+            "label": "2025-01 · 90",
+            "layer": "me",
+            "kind": "Measurement",
+            "size": 0.9,
+            "color": "#f59e0b",
+            "title": "Diastolic blood pressure on 2025-01-20",
+            "sub": "90 mm[Hg], outside the printed range",
+            "facts": [
+              ["LOINC", "8462-4"],
+              ["reference", "60 - 85 mm[Hg] (as printed on the report)"],
+              ["source", "AlphaKlinik Berlin, Zentrallabor (fictional)"],
+              ["resource", "Observation/obs-p1-8462-4-2025-01-20"]
+            ],
+            "article": "One FHIR R4 Observation. Art. 3: I can read and export it; Art. 6: portable."
+          },
+          {
+            "id": "obs:obs-p1-8462-4-2025-05-15",
+            "label": "2025-05 · 88",
+            "layer": "me",
+            "kind": "Measurement",
+            "size": 0.9,
+            "color": "#f59e0b",
+            "title": "Diastolic blood pressure on 2025-05-15",
+            "sub": "88 mm[Hg], outside the printed range",
+            "facts": [
+              ["LOINC", "8462-4"],
+              ["reference", "60 - 85 mm[Hg] (as printed on the report)"],
+              ["source", "AlphaKlinik Berlin, Zentrallabor (fictional)"],
+              ["resource", "Observation/obs-p1-8462-4-2025-05-15"]
+            ],
+            "article": "One FHIR R4 Observation. Art. 3: I can read and export it; Art. 6: portable."
+          },
+          {
+            "id": "obs:obs-p1-8462-4-2025-09-18",
+            "label": "2025-09 · 89",
+            "layer": "me",
+            "kind": "Measurement",
+            "size": 0.9,
+            "color": "#f59e0b",
+            "title": "Diastolic blood pressure on 2025-09-18",
+            "sub": "89 mm[Hg], outside the printed range",
+            "facts": [
+              ["LOINC", "8462-4"],
+              ["reference", "60 - 85 mm[Hg] (as printed on the report)"],
+              ["source", "AlphaKlinik Berlin, Zentrallabor (fictional)"],
+              ["resource", "Observation/obs-p1-8462-4-2025-09-18"]
+            ],
+            "article": "One FHIR R4 Observation. Art. 3: I can read and export it; Art. 6: portable."
+          },
+          {
+            "id": "obs:obs-p1-8462-4-2026-02-10",
+            "label": "2026-02 · 86",
+            "layer": "me",
+            "kind": "Measurement",
+            "size": 0.9,
+            "color": "#f59e0b",
+            "title": "Diastolic blood pressure on 2026-02-10",
+            "sub": "86 mm[Hg], outside the printed range",
+            "facts": [
+              ["LOINC", "8462-4"],
+              ["reference", "60 - 85 mm[Hg] (as printed on the report)"],
+              ["source", "AlphaKlinik Berlin, Zentrallabor (fictional)"],
+              ["resource", "Observation/obs-p1-8462-4-2026-02-10"]
+            ],
+            "article": "One FHIR R4 Observation. Art. 3: I can read and export it; Art. 6: portable."
+          },
+          {
+            "id": "obs:obs-p1-8462-4-2026-08-21",
+            "label": "2026-08 · 87",
+            "layer": "me",
+            "kind": "Measurement",
+            "size": 0.9,
+            "color": "#f59e0b",
+            "title": "Diastolic blood pressure on 2026-08-21",
+            "sub": "87 mm[Hg], outside the printed range",
+            "facts": [
+              ["LOINC", "8462-4"],
+              ["reference", "60 - 85 mm[Hg] (as printed on the report)"],
+              ["source", "AlphaKlinik Berlin, Zentrallabor (fictional)"],
+              ["resource", "Observation/obs-p1-8462-4-2026-08-21"]
+            ],
+            "article": "One FHIR R4 Observation. Art. 3: I can read and export it; Art. 6: portable."
+          }
+        ],
+        "links": [
+          {
+            "source": "param:8462-4",
+            "target": "obs:obs-p1-8462-4-2024-09-12",
+            "kind": "measured",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "param:8462-4",
+            "target": "obs:obs-p1-8462-4-2025-01-20",
+            "kind": "measured",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "obs:obs-p1-8462-4-2024-09-12",
+            "target": "obs:obs-p1-8462-4-2025-01-20",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          },
+          {
+            "source": "param:8462-4",
+            "target": "obs:obs-p1-8462-4-2025-05-15",
+            "kind": "measured",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "obs:obs-p1-8462-4-2025-01-20",
+            "target": "obs:obs-p1-8462-4-2025-05-15",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          },
+          {
+            "source": "param:8462-4",
+            "target": "obs:obs-p1-8462-4-2025-09-18",
+            "kind": "measured",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "obs:obs-p1-8462-4-2025-05-15",
+            "target": "obs:obs-p1-8462-4-2025-09-18",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          },
+          {
+            "source": "param:8462-4",
+            "target": "obs:obs-p1-8462-4-2026-02-10",
+            "kind": "measured",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "obs:obs-p1-8462-4-2025-09-18",
+            "target": "obs:obs-p1-8462-4-2026-02-10",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          },
+          {
+            "source": "param:8462-4",
+            "target": "obs:obs-p1-8462-4-2026-08-21",
+            "kind": "measured",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "obs:obs-p1-8462-4-2026-02-10",
+            "target": "obs:obs-p1-8462-4-2026-08-21",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "param:39156-5",
+      "label": "BMI 31.2 kg/m2",
+      "layer": "risk",
+      "kind": "Parameter",
+      "size": 2,
+      "status": "warn",
+      "pulse": false,
+      "series": [
+        {
+          "date": "2024-09-12",
+          "value": 30.4
+        },
+        {
+          "date": "2025-01-20",
+          "value": 30.8
+        },
+        {
+          "date": "2025-05-15",
+          "value": 31
+        },
+        {
+          "date": "2025-09-18",
+          "value": 31.2
+        },
+        {
+          "date": "2026-02-10",
+          "value": 31.2
+        },
+        {
+          "date": "2026-08-21",
+          "value": 31.2
+        }
+      ],
+      "unit": "kg/m2",
+      "measure": "BMI",
+      "range": {
+        "low": 18.5,
+        "high": 25,
+        "text": "18.5 - 25.0 kg/m2 (as printed on the report)"
+      },
+      "higherIsWorse": true,
+      "title": "Body mass index (BMI) [Ratio]",
+      "sub": "LOINC 39156-5, 6 measurements, AlphaKlinik Berlin, Zentrallabor (fictional)",
+      "description": "Weight divided by height squared. A population measure; it says nothing about what the weight is made of. The parameter behind the obesity factor.",
+      "facts": [
+        ["latest", "31.2 kg/m2 on 2026-08-21"],
+        ["first", "30.4 kg/m2 on 2024-09-12"],
+        ["reference", "18.5 - 25.0 kg/m2 (as printed on the report)"]
+      ],
+      "article": "Art. 14 priority category: laboratory results. FHIR R4 Observation with LOINC code; the range is the one printed on the report, never app-generated.",
+      "links": [
+        {
+          "href": "/patient/profile",
+          "text": "My profile"
+        }
+      ],
+      "expand": {
+        "nodes": [
+          {
+            "id": "obs:obs-p1-39156-5-2024-09-12",
+            "label": "2024-09 · 30.4",
+            "layer": "me",
+            "kind": "Measurement",
+            "size": 0.9,
+            "color": "#f59e0b",
+            "title": "BMI on 2024-09-12",
+            "sub": "30.4 kg/m2, outside the printed range",
+            "facts": [
+              ["LOINC", "39156-5"],
+              ["reference", "18.5 - 25.0 kg/m2 (as printed on the report)"],
+              ["source", "AlphaKlinik Berlin, Zentrallabor (fictional)"],
+              ["resource", "Observation/obs-p1-39156-5-2024-09-12"]
+            ],
+            "article": "One FHIR R4 Observation. Art. 3: I can read and export it; Art. 6: portable."
+          },
+          {
+            "id": "obs:obs-p1-39156-5-2025-01-20",
+            "label": "2025-01 · 30.8",
+            "layer": "me",
+            "kind": "Measurement",
+            "size": 0.9,
+            "color": "#f59e0b",
+            "title": "BMI on 2025-01-20",
+            "sub": "30.8 kg/m2, outside the printed range",
+            "facts": [
+              ["LOINC", "39156-5"],
+              ["reference", "18.5 - 25.0 kg/m2 (as printed on the report)"],
+              ["source", "AlphaKlinik Berlin, Zentrallabor (fictional)"],
+              ["resource", "Observation/obs-p1-39156-5-2025-01-20"]
+            ],
+            "article": "One FHIR R4 Observation. Art. 3: I can read and export it; Art. 6: portable."
+          },
+          {
+            "id": "obs:obs-p1-39156-5-2025-05-15",
+            "label": "2025-05 · 31",
+            "layer": "me",
+            "kind": "Measurement",
+            "size": 0.9,
+            "color": "#f59e0b",
+            "title": "BMI on 2025-05-15",
+            "sub": "31 kg/m2, outside the printed range",
+            "facts": [
+              ["LOINC", "39156-5"],
+              ["reference", "18.5 - 25.0 kg/m2 (as printed on the report)"],
+              ["source", "AlphaKlinik Berlin, Zentrallabor (fictional)"],
+              ["resource", "Observation/obs-p1-39156-5-2025-05-15"]
+            ],
+            "article": "One FHIR R4 Observation. Art. 3: I can read and export it; Art. 6: portable."
+          },
+          {
+            "id": "obs:obs-p1-39156-5-2025-09-18",
+            "label": "2025-09 · 31.2",
+            "layer": "me",
+            "kind": "Measurement",
+            "size": 0.9,
+            "color": "#f59e0b",
+            "title": "BMI on 2025-09-18",
+            "sub": "31.2 kg/m2, outside the printed range",
+            "facts": [
+              ["LOINC", "39156-5"],
+              ["reference", "18.5 - 25.0 kg/m2 (as printed on the report)"],
+              ["source", "AlphaKlinik Berlin, Zentrallabor (fictional)"],
+              ["resource", "Observation/obs-p1-39156-5-2025-09-18"]
+            ],
+            "article": "One FHIR R4 Observation. Art. 3: I can read and export it; Art. 6: portable."
+          },
+          {
+            "id": "obs:obs-p1-39156-5-2026-02-10",
+            "label": "2026-02 · 31.2",
+            "layer": "me",
+            "kind": "Measurement",
+            "size": 0.9,
+            "color": "#f59e0b",
+            "title": "BMI on 2026-02-10",
+            "sub": "31.2 kg/m2, outside the printed range",
+            "facts": [
+              ["LOINC", "39156-5"],
+              ["reference", "18.5 - 25.0 kg/m2 (as printed on the report)"],
+              ["source", "AlphaKlinik Berlin, Zentrallabor (fictional)"],
+              ["resource", "Observation/obs-p1-39156-5-2026-02-10"]
+            ],
+            "article": "One FHIR R4 Observation. Art. 3: I can read and export it; Art. 6: portable."
+          },
+          {
+            "id": "obs:obs-p1-39156-5-2026-08-21",
+            "label": "2026-08 · 31.2",
+            "layer": "me",
+            "kind": "Measurement",
+            "size": 0.9,
+            "color": "#f59e0b",
+            "title": "BMI on 2026-08-21",
+            "sub": "31.2 kg/m2, outside the printed range",
+            "facts": [
+              ["LOINC", "39156-5"],
+              ["reference", "18.5 - 25.0 kg/m2 (as printed on the report)"],
+              ["source", "AlphaKlinik Berlin, Zentrallabor (fictional)"],
+              ["resource", "Observation/obs-p1-39156-5-2026-08-21"]
+            ],
+            "article": "One FHIR R4 Observation. Art. 3: I can read and export it; Art. 6: portable."
+          }
+        ],
+        "links": [
+          {
+            "source": "param:39156-5",
+            "target": "obs:obs-p1-39156-5-2024-09-12",
+            "kind": "measured",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "param:39156-5",
+            "target": "obs:obs-p1-39156-5-2025-01-20",
+            "kind": "measured",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "obs:obs-p1-39156-5-2024-09-12",
+            "target": "obs:obs-p1-39156-5-2025-01-20",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          },
+          {
+            "source": "param:39156-5",
+            "target": "obs:obs-p1-39156-5-2025-05-15",
+            "kind": "measured",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "obs:obs-p1-39156-5-2025-01-20",
+            "target": "obs:obs-p1-39156-5-2025-05-15",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          },
+          {
+            "source": "param:39156-5",
+            "target": "obs:obs-p1-39156-5-2025-09-18",
+            "kind": "measured",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "obs:obs-p1-39156-5-2025-05-15",
+            "target": "obs:obs-p1-39156-5-2025-09-18",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          },
+          {
+            "source": "param:39156-5",
+            "target": "obs:obs-p1-39156-5-2026-02-10",
+            "kind": "measured",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "obs:obs-p1-39156-5-2025-09-18",
+            "target": "obs:obs-p1-39156-5-2026-02-10",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          },
+          {
+            "source": "param:39156-5",
+            "target": "obs:obs-p1-39156-5-2026-08-21",
+            "kind": "measured",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "obs:obs-p1-39156-5-2026-02-10",
+            "target": "obs:obs-p1-39156-5-2026-08-21",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "param:33914-3",
+      "label": "eGFR 88 mL/min/{1.73_m2}",
+      "layer": "risk",
+      "kind": "Parameter",
+      "size": 2,
+      "status": "bad",
+      "pulse": true,
+      "series": [
+        {
+          "date": "2024-09-12",
+          "value": 96
+        },
+        {
+          "date": "2025-01-20",
+          "value": 94
+        },
+        {
+          "date": "2025-05-15",
+          "value": 93
+        },
+        {
+          "date": "2025-09-18",
+          "value": 91
+        },
+        {
+          "date": "2026-02-10",
+          "value": 90
+        },
+        {
+          "date": "2026-08-21",
+          "value": 88
+        }
+      ],
+      "unit": "mL/min/{1.73_m2}",
+      "measure": "eGFR",
+      "range": {
+        "low": 90,
+        "high": null,
+        "text": "> 90 mL/min/{1.73_m2} (as printed on the report)"
+      },
+      "higherIsWorse": false,
+      "title": "Glomerular filtration rate/1.73 sq M.predicted",
+      "sub": "LOINC 33914-3, 6 measurements, AlphaKlinik Berlin, Zentrallabor (fictional)",
+      "description": "The kidney's filtration rate, estimated from creatinine with age and sex. An estimate, not a measurement. Watched because diabetes and hypertension both wear on the kidney.",
+      "facts": [
+        ["latest", "88 mL/min/{1.73_m2} on 2026-08-21"],
+        ["first", "96 mL/min/{1.73_m2} on 2024-09-12"],
+        ["reference", "> 90 mL/min/{1.73_m2} (as printed on the report)"]
+      ],
+      "article": "Art. 14 priority category: laboratory results. FHIR R4 Observation with LOINC code; the range is the one printed on the report, never app-generated.",
+      "links": [
+        {
+          "href": "/patient/profile",
+          "text": "My profile"
+        }
+      ],
+      "expand": {
+        "nodes": [
+          {
+            "id": "obs:obs-p1-33914-3-2024-09-12",
+            "label": "2024-09 · 96",
+            "layer": "me",
+            "kind": "Measurement",
+            "size": 0.9,
+            "color": "#86efac",
+            "title": "eGFR on 2024-09-12",
+            "sub": "96 mL/min/{1.73_m2}, within the printed range",
+            "facts": [
+              ["LOINC", "33914-3"],
+              ["reference", "> 90 mL/min/{1.73_m2} (as printed on the report)"],
+              ["source", "AlphaKlinik Berlin, Zentrallabor (fictional)"],
+              ["resource", "Observation/obs-p1-33914-3-2024-09-12"]
+            ],
+            "article": "One FHIR R4 Observation. Art. 3: I can read and export it; Art. 6: portable."
+          },
+          {
+            "id": "obs:obs-p1-33914-3-2025-01-20",
+            "label": "2025-01 · 94",
+            "layer": "me",
+            "kind": "Measurement",
+            "size": 0.9,
+            "color": "#86efac",
+            "title": "eGFR on 2025-01-20",
+            "sub": "94 mL/min/{1.73_m2}, within the printed range",
+            "facts": [
+              ["LOINC", "33914-3"],
+              ["reference", "> 90 mL/min/{1.73_m2} (as printed on the report)"],
+              ["source", "AlphaKlinik Berlin, Zentrallabor (fictional)"],
+              ["resource", "Observation/obs-p1-33914-3-2025-01-20"]
+            ],
+            "article": "One FHIR R4 Observation. Art. 3: I can read and export it; Art. 6: portable."
+          },
+          {
+            "id": "obs:obs-p1-33914-3-2025-05-15",
+            "label": "2025-05 · 93",
+            "layer": "me",
+            "kind": "Measurement",
+            "size": 0.9,
+            "color": "#86efac",
+            "title": "eGFR on 2025-05-15",
+            "sub": "93 mL/min/{1.73_m2}, within the printed range",
+            "facts": [
+              ["LOINC", "33914-3"],
+              ["reference", "> 90 mL/min/{1.73_m2} (as printed on the report)"],
+              ["source", "AlphaKlinik Berlin, Zentrallabor (fictional)"],
+              ["resource", "Observation/obs-p1-33914-3-2025-05-15"]
+            ],
+            "article": "One FHIR R4 Observation. Art. 3: I can read and export it; Art. 6: portable."
+          },
+          {
+            "id": "obs:obs-p1-33914-3-2025-09-18",
+            "label": "2025-09 · 91",
+            "layer": "me",
+            "kind": "Measurement",
+            "size": 0.9,
+            "color": "#86efac",
+            "title": "eGFR on 2025-09-18",
+            "sub": "91 mL/min/{1.73_m2}, within the printed range",
+            "facts": [
+              ["LOINC", "33914-3"],
+              ["reference", "> 90 mL/min/{1.73_m2} (as printed on the report)"],
+              ["source", "AlphaKlinik Berlin, Zentrallabor (fictional)"],
+              ["resource", "Observation/obs-p1-33914-3-2025-09-18"]
+            ],
+            "article": "One FHIR R4 Observation. Art. 3: I can read and export it; Art. 6: portable."
+          },
+          {
+            "id": "obs:obs-p1-33914-3-2026-02-10",
+            "label": "2026-02 · 90",
+            "layer": "me",
+            "kind": "Measurement",
+            "size": 0.9,
+            "color": "#86efac",
+            "title": "eGFR on 2026-02-10",
+            "sub": "90 mL/min/{1.73_m2}, within the printed range",
+            "facts": [
+              ["LOINC", "33914-3"],
+              ["reference", "> 90 mL/min/{1.73_m2} (as printed on the report)"],
+              ["source", "AlphaKlinik Berlin, Zentrallabor (fictional)"],
+              ["resource", "Observation/obs-p1-33914-3-2026-02-10"]
+            ],
+            "article": "One FHIR R4 Observation. Art. 3: I can read and export it; Art. 6: portable."
+          },
+          {
+            "id": "obs:obs-p1-33914-3-2026-08-21",
+            "label": "2026-08 · 88",
+            "layer": "me",
+            "kind": "Measurement",
+            "size": 0.9,
+            "color": "#f59e0b",
+            "title": "eGFR on 2026-08-21",
+            "sub": "88 mL/min/{1.73_m2}, outside the printed range",
+            "facts": [
+              ["LOINC", "33914-3"],
+              ["reference", "> 90 mL/min/{1.73_m2} (as printed on the report)"],
+              ["source", "AlphaKlinik Berlin, Zentrallabor (fictional)"],
+              ["resource", "Observation/obs-p1-33914-3-2026-08-21"]
+            ],
+            "article": "One FHIR R4 Observation. Art. 3: I can read and export it; Art. 6: portable."
+          }
+        ],
+        "links": [
+          {
+            "source": "param:33914-3",
+            "target": "obs:obs-p1-33914-3-2024-09-12",
+            "kind": "measured",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "param:33914-3",
+            "target": "obs:obs-p1-33914-3-2025-01-20",
+            "kind": "measured",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "obs:obs-p1-33914-3-2024-09-12",
+            "target": "obs:obs-p1-33914-3-2025-01-20",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          },
+          {
+            "source": "param:33914-3",
+            "target": "obs:obs-p1-33914-3-2025-05-15",
+            "kind": "measured",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "obs:obs-p1-33914-3-2025-01-20",
+            "target": "obs:obs-p1-33914-3-2025-05-15",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          },
+          {
+            "source": "param:33914-3",
+            "target": "obs:obs-p1-33914-3-2025-09-18",
+            "kind": "measured",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "obs:obs-p1-33914-3-2025-05-15",
+            "target": "obs:obs-p1-33914-3-2025-09-18",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          },
+          {
+            "source": "param:33914-3",
+            "target": "obs:obs-p1-33914-3-2026-02-10",
+            "kind": "measured",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "obs:obs-p1-33914-3-2025-09-18",
+            "target": "obs:obs-p1-33914-3-2026-02-10",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          },
+          {
+            "source": "param:33914-3",
+            "target": "obs:obs-p1-33914-3-2026-08-21",
+            "kind": "measured",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "obs:obs-p1-33914-3-2026-02-10",
+            "target": "obs:obs-p1-33914-3-2026-08-21",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          }
+        ]
+      }
+    }
+  ],
+  "links": [
+    {
+      "source": "me",
+      "target": "risk:cardiovascular",
+      "kind": "carries",
+      "status": "warn",
+      "width": 1.4,
+      "distance": 70
+    },
+    {
+      "source": "fac:hypertension",
+      "target": "risk:cardiovascular",
+      "kind": "drives",
+      "status": "warn",
+      "distance": 40
+    },
+    {
+      "source": "fac:type-2-diabetes",
+      "target": "risk:cardiovascular",
+      "kind": "drives",
+      "status": "warn",
+      "distance": 40
+    },
+    {
+      "source": "fac:chronic-stress",
+      "target": "risk:cardiovascular",
+      "kind": "drives",
+      "status": "warn",
+      "distance": 40
+    },
+    {
+      "source": "fac:bmi-31-2",
+      "target": "risk:cardiovascular",
+      "kind": "drives",
+      "status": "warn",
+      "distance": 40
+    },
+    {
+      "source": "me",
+      "target": "risk:diabetes",
+      "kind": "carries",
+      "status": "bad",
+      "width": 1.4,
+      "distance": 70
+    },
+    {
+      "source": "fac:active-t2d-diagnosis",
+      "target": "risk:diabetes",
+      "kind": "drives",
+      "status": "warn",
+      "distance": 40
+    },
+    {
+      "source": "fac:obesity-bmi-31-2",
+      "target": "risk:diabetes",
+      "kind": "drives",
+      "status": "warn",
+      "distance": 40
+    },
+    {
+      "source": "fac:elevated-hba1c-trend",
+      "target": "risk:diabetes",
+      "kind": "drives",
+      "status": "warn",
+      "distance": 40
+    },
+    {
+      "source": "me",
+      "target": "cond:73211009",
+      "kind": "diagnosis",
+      "color": "#4ade80",
+      "distance": 55
+    },
+    {
+      "source": "me",
+      "target": "cond:38341003",
+      "kind": "diagnosis",
+      "color": "#4ade80",
+      "distance": 55
+    },
+    {
+      "source": "me",
+      "target": "cond:73595000",
+      "kind": "diagnosis",
+      "color": "#4ade80",
+      "distance": 55
+    },
+    {
+      "source": "me",
+      "target": "cond:E11.9",
+      "kind": "diagnosis",
+      "color": "#4ade80",
+      "distance": 55
+    },
+    {
+      "source": "me",
+      "target": "cond:414916001",
+      "kind": "diagnosis",
+      "color": "#4ade80",
+      "distance": 55
+    },
+    {
+      "source": "me",
+      "target": "cond:271825005",
+      "kind": "diagnosis",
+      "color": "#4ade80",
+      "distance": 55
+    },
+    {
+      "source": "me",
+      "target": "cond:40055000",
+      "kind": "diagnosis",
+      "color": "#4ade80",
+      "distance": 55
+    },
+    {
+      "source": "me",
+      "target": "cond:195967001",
+      "kind": "diagnosis",
+      "color": "#4ade80",
+      "distance": 55
+    },
+    {
+      "source": "cond:38341003",
+      "target": "fac:hypertension",
+      "kind": "behind",
+      "color": "#fb923c",
+      "distance": 60,
+      "particles": 1
+    },
+    {
+      "source": "cond:73211009",
+      "target": "fac:type-2-diabetes",
+      "kind": "behind",
+      "color": "#fb923c",
+      "distance": 60,
+      "particles": 1
+    },
+    {
+      "source": "cond:73595000",
+      "target": "fac:chronic-stress",
+      "kind": "behind",
+      "color": "#fb923c",
+      "distance": 60,
+      "particles": 1
+    },
+    {
+      "source": "cond:414916001",
+      "target": "fac:bmi-31-2",
+      "kind": "behind",
+      "color": "#fb923c",
+      "distance": 60,
+      "particles": 1
+    },
+    {
+      "source": "cond:73211009",
+      "target": "fac:active-t2d-diagnosis",
+      "kind": "behind",
+      "color": "#fb923c",
+      "distance": 60,
+      "particles": 1
+    },
+    {
+      "source": "cond:414916001",
+      "target": "fac:obesity-bmi-31-2",
+      "kind": "behind",
+      "color": "#fb923c",
+      "distance": 60,
+      "particles": 1
+    },
+    {
+      "source": "med:860975",
+      "target": "cond:73211009",
+      "kind": "treats",
+      "color": "#a78bfa",
+      "distance": 45
+    },
+    {
+      "source": "med:197361",
+      "target": "cond:38341003",
+      "kind": "treats",
+      "color": "#a78bfa",
+      "distance": 45
+    },
+    {
+      "source": "med:308460",
+      "target": "cond:195967001",
+      "kind": "treats",
+      "color": "#a78bfa",
+      "distance": 45
+    },
+    {
+      "source": "med:209459",
+      "target": "risk:cardiovascular",
+      "kind": "treats",
+      "color": "#a78bfa",
+      "distance": 45
+    },
+    {
+      "source": "rec:0",
+      "target": "risk:cardiovascular",
+      "kind": "addresses",
+      "status": "warn",
+      "distance": 80,
+      "arrow": true
+    },
+    {
+      "source": "rec:1",
+      "target": "risk:diabetes",
+      "kind": "addresses",
+      "status": "info",
+      "distance": 80,
+      "arrow": true
+    },
+    {
+      "source": "cond:73211009",
+      "target": "find:INS-001",
+      "kind": "informs",
+      "color": "#38bdf8",
+      "distance": 90
+    },
+    {
+      "source": "cond:73595000",
+      "target": "find:INS-001",
+      "kind": "informs",
+      "color": "#38bdf8",
+      "distance": 90
+    },
+    {
+      "source": "cond:38341003",
+      "target": "find:INS-002",
+      "kind": "informs",
+      "color": "#38bdf8",
+      "distance": 90
+    },
+    {
+      "source": "cond:414916001",
+      "target": "find:INS-002",
+      "kind": "informs",
+      "color": "#38bdf8",
+      "distance": 90
+    },
+    {
+      "source": "find:INS-002",
+      "target": "study:STUDY-CARDIO-2024",
+      "kind": "from",
+      "color": "#a78bfa",
+      "distance": 120
+    },
+    {
+      "source": "study:STUDY-CARDIO-2024",
+      "target": "org:pharmaco-research-ag",
+      "kind": "conducted by",
+      "color": "#f97316",
+      "distance": 45
+    },
+    {
+      "source": "me",
+      "target": "consent:CONSENT-001",
+      "kind": "consent",
+      "status": "ok",
+      "particles": 2,
+      "distance": 90
+    },
+    {
+      "source": "consent:CONSENT-001",
+      "target": "study:STUDY-CARDIO-2024",
+      "kind": "consent",
+      "status": "ok",
+      "particles": 2,
+      "distance": 50
+    },
+    {
+      "source": "consent:CONSENT-001",
+      "target": "tc:did-web-rki-de-trust-center",
+      "kind": "pseudonymised by",
+      "color": "#ef4444",
+      "distance": 40
+    },
+    {
+      "source": "find:INS-001",
+      "target": "study:STUDY-DIAB-2023",
+      "kind": "from",
+      "color": "#a78bfa",
+      "distance": 120
+    },
+    {
+      "source": "study:STUDY-DIAB-2023",
+      "target": "org:institut-de-recherche-sant",
+      "kind": "conducted by",
+      "color": "#f97316",
+      "distance": 45
+    },
+    {
+      "source": "me",
+      "target": "consent:CONSENT-002",
+      "kind": "consent",
+      "status": "ok",
+      "particles": 2,
+      "distance": 90
+    },
+    {
+      "source": "consent:CONSENT-002",
+      "target": "study:STUDY-DIAB-2023",
+      "kind": "consent",
+      "status": "ok",
+      "particles": 2,
+      "distance": 50
+    },
+    {
+      "source": "consent:CONSENT-002",
+      "target": "tc:did-web-rivm-nl-trust-center",
+      "kind": "pseudonymised by",
+      "color": "#ef4444",
+      "distance": 40
+    },
+    {
+      "source": "study:STUDY-RESP-2025",
+      "target": "org:medreg-de",
+      "kind": "conducted by",
+      "color": "#f97316",
+      "distance": 45
+    },
+    {
+      "source": "cond:195967001",
+      "target": "study:STUDY-RESP-2025",
+      "kind": "matches",
+      "status": "info",
+      "distance": 130
+    },
+    {
+      "source": "me",
+      "target": "holder:did-web-alpha-klinik-de-participant",
+      "kind": "treated at",
+      "color": "#38bdf8",
+      "distance": 70
+    },
+    {
+      "source": "holder:did-web-alpha-klinik-de-participant",
+      "target": "access:did-web-pharmaco-de-research",
+      "kind": "accessed by",
+      "color": "#38bdf8",
+      "distance": 60,
+      "particles": 1
+    },
+    {
+      "source": "holder:did-web-alpha-klinik-de-participant",
+      "target": "access:did-web-lmc-nl-clinic",
+      "kind": "accessed by",
+      "color": "#38bdf8",
+      "distance": 60,
+      "particles": 1
+    },
+    {
+      "source": "param:4548-4",
+      "target": "fac:elevated-hba1c-trend",
+      "kind": "behind",
+      "status": "bad",
+      "distance": 40,
+      "particles": 1
+    },
+    {
+      "source": "param:2339-0",
+      "target": "risk:diabetes",
+      "kind": "drives",
+      "status": "bad",
+      "distance": 60,
+      "particles": 1
+    },
+    {
+      "source": "param:2089-1",
+      "target": "risk:cardiovascular",
+      "kind": "drives",
+      "status": "warn",
+      "distance": 60,
+      "particles": 1
+    },
+    {
+      "source": "param:2093-3",
+      "target": "risk:cardiovascular",
+      "kind": "drives",
+      "status": "warn",
+      "distance": 60,
+      "particles": 1
+    },
+    {
+      "source": "param:8480-6",
+      "target": "fac:hypertension",
+      "kind": "behind",
+      "status": "warn",
+      "distance": 40,
+      "particles": 1
+    },
+    {
+      "source": "param:8462-4",
+      "target": "fac:hypertension",
+      "kind": "behind",
+      "status": "warn",
+      "distance": 40,
+      "particles": 1
+    },
+    {
+      "source": "param:39156-5",
+      "target": "fac:bmi-31-2",
+      "kind": "behind",
+      "status": "warn",
+      "distance": 40,
+      "particles": 1
+    },
+    {
+      "source": "param:33914-3",
+      "target": "risk:diabetes",
+      "kind": "drives",
+      "status": "bad",
+      "distance": 60,
+      "particles": 1
+    }
+  ],
+  "signals": [
+    {
+      "severity": "bad",
+      "code": "parameter-out-of-range",
+      "nodeId": "param:4548-4",
+      "text": "HbA1c rising from 6.4 to 7.6 %, outside the printed range",
+      "article": "Art. 14 laboratory results; click to see the trend and unfold the measurements"
+    },
+    {
+      "severity": "bad",
+      "code": "parameter-out-of-range",
+      "nodeId": "param:2339-0",
+      "text": "Fasting glucose rising from 118 to 142 mg/dL, outside the printed range",
+      "article": "Art. 14 laboratory results; click to see the trend and unfold the measurements"
+    },
+    {
+      "severity": "bad",
+      "code": "parameter-out-of-range",
+      "nodeId": "param:33914-3",
+      "text": "eGFR falling from 96 to 88 mL/min/{1.73_m2}, outside the printed range",
+      "article": "Art. 14 laboratory results; click to see the trend and unfold the measurements"
+    },
+    {
+      "severity": "bad",
+      "code": "risk-diabetes",
+      "nodeId": "risk:diabetes",
+      "text": "diabetes risk is high (65 %): Active T2D diagnosis, Obesity BMI 31.2, Elevated HbA1c trend",
+      "article": "Art. 3 access, Art. 14 priority data categories"
+    },
+    {
+      "severity": "warn",
+      "code": "parameter-out-of-range",
+      "nodeId": "param:2089-1",
+      "text": "LDL cholesterol falling from 158 to 132 mg/dL, outside the printed range",
+      "article": "Art. 14 laboratory results; click to see the trend and unfold the measurements"
+    },
+    {
+      "severity": "warn",
+      "code": "parameter-out-of-range",
+      "nodeId": "param:2093-3",
+      "text": "Total cholesterol stable, outside the printed range",
+      "article": "Art. 14 laboratory results; click to see the trend and unfold the measurements"
+    },
+    {
+      "severity": "warn",
+      "code": "parameter-out-of-range",
+      "nodeId": "param:8480-6",
+      "text": "Systolic blood pressure falling from 146 to 138 mm[Hg], outside the printed range",
+      "article": "Art. 14 laboratory results; click to see the trend and unfold the measurements"
+    },
+    {
+      "severity": "warn",
+      "code": "parameter-out-of-range",
+      "nodeId": "param:8462-4",
+      "text": "Diastolic blood pressure falling from 92 to 87 mm[Hg], outside the printed range",
+      "article": "Art. 14 laboratory results; click to see the trend and unfold the measurements"
+    },
+    {
+      "severity": "warn",
+      "code": "parameter-out-of-range",
+      "nodeId": "param:39156-5",
+      "text": "BMI stable, outside the printed range",
+      "article": "Art. 14 laboratory results; click to see the trend and unfold the measurements"
+    },
+    {
+      "severity": "warn",
+      "code": "risk-cardiovascular",
+      "nodeId": "risk:cardiovascular",
+      "text": "cardiovascular risk is moderate (42 %): Hypertension, Type 2 Diabetes, Chronic stress, BMI 31.2",
+      "article": "Art. 3 access, Art. 14 priority data categories"
+    },
+    {
+      "severity": "warn",
+      "code": "recommendation",
+      "nodeId": "rec:0",
+      "text": "high priority: Increase cardiovascular monitoring frequency to every 6 months.",
+      "article": "Art. 73 SPE result, Art. 58 obligations towards natural persons"
+    },
+    {
+      "severity": "info",
+      "code": "recommendation",
+      "nodeId": "rec:1",
+      "text": "moderate priority: Enrol in a certified stress-management programme.",
+      "article": "Art. 73 SPE result, Art. 58 obligations towards natural persons"
+    },
+    {
+      "severity": "info",
+      "code": "study-match",
+      "nodeId": "study:STUDY-RESP-2025",
+      "text": "Respiratory EHDS Cohort is recruiting and matches my Asthma",
+      "article": "Art. 71 opt-out, GDPR Art. 9(2)(j)"
+    },
+    {
+      "severity": "info",
+      "code": "access-log",
+      "nodeId": "holder:did-web-alpha-klinik-de-participant",
+      "text": "2 organisations read data from AlphaKlinik Berlin in the last 12 months (3 accesses). Click to see who.",
+      "article": "Art. 8 information on access, Art. 73(1)(e) log"
+    },
+    {
+      "severity": "info",
+      "code": "parameters",
+      "nodeId": "param:4548-4",
+      "text": "8 parameters from 48 FHIR Observations. Click a parameter to see its trend and unfold the single measurements.",
+      "article": "Art. 14 priority category: laboratory results; Art. 6 portability"
+    },
+    {
+      "severity": "ok",
+      "code": "consent-summary",
+      "nodeId": "consent:CONSENT-001",
+      "text": "2 consents active, all revocable. All findings are aggregate results (k ≥ 5 participants per cohort)",
+      "article": "Art. 8: who accessed my data, Art. 71 opt-out"
+    }
+  ],
+  "legend": [
+    {
+      "color": "#ef4444",
+      "text": "high risk / act"
+    },
+    {
+      "color": "#f59e0b",
+      "text": "moderate / watch"
+    },
+    {
+      "color": "#38bdf8",
+      "text": "information"
+    },
+    {
+      "color": "#22c55e",
+      "text": "consented, in order"
+    },
+    {
+      "color": "#86efac",
+      "text": "diagnosis"
+    },
+    {
+      "color": "#c4b5fd",
+      "text": "medication"
+    }
+  ],
+  "dataNote": "Every patient and organisation shown is fictional."
+}
