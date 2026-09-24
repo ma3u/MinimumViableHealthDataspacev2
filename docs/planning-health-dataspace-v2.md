@@ -109,38 +109,39 @@ All three core specifications are now final or near-final:
 
 > **Note:** ADRs are maintained as standalone documents in [`docs/ADRs/`](ADRs/). Click any row below to read the full context, decision, and consequences for each ADR.
 
-| ADR                                                          | Title                                          | Date       | Status     |
-| ------------------------------------------------------------ | ---------------------------------------------- | ---------- | ---------- |
-| [001](ADRs/ADR-001-postgresql-neo4j-split.md)                | PostgreSQL vs Neo4j Data Storage Split         | 2025-07-24 | Accepted   |
-| [002](ADRs/ADR-002-edc-data-plane-architecture.md)           | EDC Data Plane Architecture                    | 2025-07-24 | Accepted   |
-| [003](ADRs/ADR-003-healthdcat-ap-alignment.md)               | W3C HealthDCAT-AP Alignment                    | 2025-07-24 | Accepted   |
-| [004](ADRs/ADR-004-nextjs-unified-frontend.md)               | Next.js 14 as Unified Frontend                 | 2025-07-25 | Accepted   |
-| [005](ADRs/ADR-005-jad-cfm-source-builds.md)                 | JAD + CFM Source Builds                        | 2026-03-09 | Accepted   |
-| [006](ADRs/ADR-006-ghcr-image-publishing.md)                 | GHCR Image Publishing                          | 2026-03-10 | Accepted   |
-| [007](ADRs/ADR-007-did-web-dsp-negotiation.md)               | DID:web Resolution & DSP Contract Negotiation  | 2026-07-08 | Accepted   |
-| [008](ADRs/ADR-008-testing-strategy.md)                      | Comprehensive Testing Strategy                 | 2026-03-11 | Accepted   |
-| [009](ADRs/ADR-009-issuerservice-credential-fix.md)          | IssuerService DCP Credential Issuance Fix      | 2026-07-12 | Accepted   |
-| [010](ADRs/ADR-010-wcag-accessibility.md)                    | WCAG 2.2 AA Accessibility Compliance           | 2026-04-01 | Accepted   |
-| [011](ADRs/ADR-011-security-testing.md)                      | Security Penetration Testing Strategy          | 2026-04-01 | Accepted   |
-| [012](ADRs/ADR-012-azure-container-apps.md)                  | Azure Container Apps Deployment                | 2026-04-10 | Accepted   |
-| [013](ADRs/ADR-013-simpl-open-alignment.md)                  | SIMPL-Open EU Programme Alignment              | 2026-04-05 | Accepted   |
-| [014](ADRs/ADR-014-weekly-demo-reset.md)                     | Weekly Demo Environment Reset                  | 2026-04-12 | Accepted   |
-| [015](ADRs/ADR-015-single-vm-dev-deployment.md)              | Single-VM Dev Deployment (VS Subscription)     | 2026-04-13 | Superseded |
-| [016](ADRs/ADR-016-aca-off-hours-scaledown.md)               | ACA Off-Hours Scale-Down                       | 2026-04-13 | Accepted   |
-| [017](ADRs/ADR-017-persistent-storage-aca.md)                | Persistent Storage for Stateful ACA Services   | 2026-04-14 | Accepted   |
-| [018](ADRs/ADR-018-24x7-workaround-b.md)                     | 24×7 Operation + Postgres-on-ACA Workaround B  | 2026-04-14 | Accepted   |
-| [019](ADRs/ADR-019-gds-apoc-azure-ai-foundry-graphrag.md)    | GDS + APOC + Azure AI Foundry GraphRAG         | 2026-04-15 | Proposed   |
-| [020](ADRs/ADR-020-cross-participant-dataset-discovery.md)   | Cross-Participant Dataset Discovery (Issue #8) | 2026-04-18 | Accepted   |
-| [021](ADRs/ADR-021-docling-leitlinien-ingestion.md)          | Docling AWMF Leitlinien Ingestion (Issue #20)  | 2026-04-26 | Accepted   |
-| [022](ADRs/ADR-022-edc-connector-cost-vs-function.md)        | EDC Connector: Function vs Cost (Issue #25)    | 2026-05-03 | Superseded |
-| [023](ADRs/ADR-023-reinstate-off-hours-scaledown.md)         | Reinstate Off-Hours ACA Scale-Down             | 2026-05-01 | Accepted   |
-| [024](ADRs/ADR-024-full-edc-provisioning-per-participant.md) | Full EDC Provisioning per Participant on Azure | 2026-05-04 | Accepted   |
-| [025](ADRs/ADR-025-keycloak-custom-domain.md)                | Keycloak Custom Domain (auth.ehds.mabu.red)    | 2026-05-10 | Accepted   |
-| [026](ADRs/ADR-026-token-efficient-planning-structure.md)    | Token-Efficient Planning & ADR Structure       | 2026-05-17 | Accepted   |
-| [027](ADRs/ADR-027-edc-stack-off-hours-scaledown.md)         | EDC Stack in Off-Hours Scale-Down (FinOps)     | 2026-05-18 | Accepted   |
-| [028](ADRs/ADR-028-patient-qr-login-eudi-wallet.md)          | Patient QR Login via EUDI Wallet (OpenID4VP)   | 2026-06-04 | Accepted   |
-| [029](ADRs/ADR-029-dependency-version-pinning.md)            | Dependency Version Pinning & Refresh Cadence   | 2026-07-15 | Accepted   |
-| [030](ADRs/ADR-030-neo4j-2025-lts-migration.md)              | Neo4j 5.26 → 2025.x Migration Readiness        | 2026-07-16 | Proposed   |
-| [031](ADRs/ADR-031-checks-must-assert.md)                    | Checks must assert and exit non-zero           | 2026-09-09 | Proposed   |
+| ADR                                                          | Title                                           | Date       | Status     |
+| ------------------------------------------------------------ | ----------------------------------------------- | ---------- | ---------- |
+| [001](ADRs/ADR-001-postgresql-neo4j-split.md)                | PostgreSQL vs Neo4j Data Storage Split          | 2025-07-24 | Accepted   |
+| [002](ADRs/ADR-002-edc-data-plane-architecture.md)           | EDC Data Plane Architecture                     | 2025-07-24 | Accepted   |
+| [003](ADRs/ADR-003-healthdcat-ap-alignment.md)               | W3C HealthDCAT-AP Alignment                     | 2025-07-24 | Accepted   |
+| [004](ADRs/ADR-004-nextjs-unified-frontend.md)               | Next.js 14 as Unified Frontend                  | 2025-07-25 | Accepted   |
+| [005](ADRs/ADR-005-jad-cfm-source-builds.md)                 | JAD + CFM Source Builds                         | 2026-03-09 | Accepted   |
+| [006](ADRs/ADR-006-ghcr-image-publishing.md)                 | GHCR Image Publishing                           | 2026-03-10 | Accepted   |
+| [007](ADRs/ADR-007-did-web-dsp-negotiation.md)               | DID:web Resolution & DSP Contract Negotiation   | 2026-07-08 | Accepted   |
+| [008](ADRs/ADR-008-testing-strategy.md)                      | Comprehensive Testing Strategy                  | 2026-03-11 | Accepted   |
+| [009](ADRs/ADR-009-issuerservice-credential-fix.md)          | IssuerService DCP Credential Issuance Fix       | 2026-07-12 | Accepted   |
+| [010](ADRs/ADR-010-wcag-accessibility.md)                    | WCAG 2.2 AA Accessibility Compliance            | 2026-04-01 | Accepted   |
+| [011](ADRs/ADR-011-security-testing.md)                      | Security Penetration Testing Strategy           | 2026-04-01 | Accepted   |
+| [012](ADRs/ADR-012-azure-container-apps.md)                  | Azure Container Apps Deployment                 | 2026-04-10 | Accepted   |
+| [013](ADRs/ADR-013-simpl-open-alignment.md)                  | SIMPL-Open EU Programme Alignment               | 2026-04-05 | Accepted   |
+| [014](ADRs/ADR-014-weekly-demo-reset.md)                     | Weekly Demo Environment Reset                   | 2026-04-12 | Accepted   |
+| [015](ADRs/ADR-015-single-vm-dev-deployment.md)              | Single-VM Dev Deployment (VS Subscription)      | 2026-04-13 | Superseded |
+| [016](ADRs/ADR-016-aca-off-hours-scaledown.md)               | ACA Off-Hours Scale-Down                        | 2026-04-13 | Accepted   |
+| [017](ADRs/ADR-017-persistent-storage-aca.md)                | Persistent Storage for Stateful ACA Services    | 2026-04-14 | Accepted   |
+| [018](ADRs/ADR-018-24x7-workaround-b.md)                     | 24×7 Operation + Postgres-on-ACA Workaround B   | 2026-04-14 | Accepted   |
+| [019](ADRs/ADR-019-gds-apoc-azure-ai-foundry-graphrag.md)    | GDS + APOC + Azure AI Foundry GraphRAG          | 2026-04-15 | Proposed   |
+| [020](ADRs/ADR-020-cross-participant-dataset-discovery.md)   | Cross-Participant Dataset Discovery (Issue #8)  | 2026-04-18 | Accepted   |
+| [021](ADRs/ADR-021-docling-leitlinien-ingestion.md)          | Docling AWMF Leitlinien Ingestion (Issue #20)   | 2026-04-26 | Accepted   |
+| [022](ADRs/ADR-022-edc-connector-cost-vs-function.md)        | EDC Connector: Function vs Cost (Issue #25)     | 2026-05-03 | Superseded |
+| [023](ADRs/ADR-023-reinstate-off-hours-scaledown.md)         | Reinstate Off-Hours ACA Scale-Down              | 2026-05-01 | Accepted   |
+| [024](ADRs/ADR-024-full-edc-provisioning-per-participant.md) | Full EDC Provisioning per Participant on Azure  | 2026-05-04 | Accepted   |
+| [025](ADRs/ADR-025-keycloak-custom-domain.md)                | Keycloak Custom Domain (auth.ehds.mabu.red)     | 2026-05-10 | Accepted   |
+| [026](ADRs/ADR-026-token-efficient-planning-structure.md)    | Token-Efficient Planning & ADR Structure        | 2026-05-17 | Accepted   |
+| [027](ADRs/ADR-027-edc-stack-off-hours-scaledown.md)         | EDC Stack in Off-Hours Scale-Down (FinOps)      | 2026-05-18 | Accepted   |
+| [028](ADRs/ADR-028-patient-qr-login-eudi-wallet.md)          | Patient QR Login via EUDI Wallet (OpenID4VP)    | 2026-06-04 | Accepted   |
+| [029](ADRs/ADR-029-dependency-version-pinning.md)            | Dependency Version Pinning & Refresh Cadence    | 2026-07-15 | Accepted   |
+| [030](ADRs/ADR-030-neo4j-2025-lts-migration.md)              | Neo4j 5.26 → 2025.x Migration Readiness         | 2026-07-16 | Proposed   |
+| [031](ADRs/ADR-031-checks-must-assert.md)                    | Checks must assert and exit non-zero            | 2026-09-09 | Proposed   |
+| [040](ADRs/ADR-040-derived-compliance-state-in-the-api.md)   | Derived compliance state is computed in the API | 2026-09-24 | Proposed   |
 
 > **Note:** The full text of ADR-1 through ADR-9 has been moved into the standalone ADR documents linked in the table above. Click any row to read the full context, decision, and consequences.

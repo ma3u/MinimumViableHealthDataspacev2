@@ -16,3 +16,8 @@ J221–J260 static journeys assert on it. Registry: `STATIC_MOCK_MAP` in
 `ui/src/lib/api.ts`; persona-specific variants use suffixed files
 (`patient_profile_patient1.json`). Adding a route without a fixture breaks the
 published github.io demo silently (CLAUDE.md gotcha #3).
+
+The persona overviews (#271) add `overview_{patient,hdab,hospital,researcher}.json`
+and `patient_observations.json`; `ui/scripts/generate-overview-fixture.ts`
+rebuilds the four views from the other fixtures without a server, see
+[persona-overview](persona-overview.md).

@@ -14,4 +14,5 @@ status in the ADR table of
 [`docs/planning-health-dataspace-v2.md`](../../planning-health-dataspace-v2.md).
 Process + template: [`docs/adr/0001-record-architecture-decisions.md`](../../adr/0001-record-architecture-decisions.md).
 Notable chains: off-hours scale-down ADR-016 → ADR-023 → ADR-027 (supersession
-in action); federation ADR-020 (issue #8); token budget ADR-026.
+in action); federation ADR-020 (issue #8); token budget ADR-026; derived
+compliance state in the API, never persisted, ADR-040 (issue #271).

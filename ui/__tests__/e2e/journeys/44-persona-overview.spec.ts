@@ -11,8 +11,7 @@
  * and the quarterly quality assessments into the graph, and the existing
  * routes show it. M1 (the patient overview, `/api/overview?persona=patient`,
  * `/api/patient/observations`, `/overview`), M2 (the access body), M3 (the
- * holder) and M4 (the researcher) are in. The M5 case is `test.fixme` until
- * the static site carries all four fixtures.
+ * holder), M4 (the researcher) and M5 (the static export) are in.
  *
  *   PLAYWRIGHT_BASE_URL=https://ehds.mabu.red \
  *     npx playwright test __tests__/e2e/journeys/44-persona-overview.spec.ts
@@ -327,7 +326,6 @@ test.describe("Issue #271 · M5 static export", () => {
   test("J975 the four overview fixtures exist for the static site", async ({
     page,
   }) => {
-    test.fixme(true, "M5: the fixtures do not exist yet (#271)");
     for (const persona of ["patient", "researcher", "hdab", "hospital"]) {
       const res = await page.request.get(`/mock/overview_${persona}.json`);
       expect(res.ok(), persona).toBe(true);
