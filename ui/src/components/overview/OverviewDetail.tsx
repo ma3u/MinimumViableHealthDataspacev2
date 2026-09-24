@@ -134,7 +134,7 @@ export default function OverviewDetail({
       : null;
   return (
     <aside
-      className="rounded-lg border border-[var(--border)] bg-[var(--surface-2)] p-4 text-sm overflow-auto lg:max-h-[calc(100vh-200px)]"
+      className="rounded-lg border border-[var(--border)] bg-[var(--surface-2)] p-4 text-sm overflow-auto lg:max-h-[calc(100vh-120px)]"
       data-testid="overview-detail"
       aria-label={`Details: ${node.title ?? node.label}`}
     >

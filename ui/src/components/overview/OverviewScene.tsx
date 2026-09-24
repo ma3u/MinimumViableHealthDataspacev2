@@ -264,7 +264,7 @@ export default function OverviewScene({
       .onNodeClick((n) => onSelectRef.current(n.id))
       .onBackgroundClick(() => onSelectRef.current(null))
       .graphData({ nodes: [...nodes.values()], links });
-    graph.d3Force("charge")?.strength(-110);
+    graph.d3Force("charge")?.strength(-80);
     graph.d3Force("link")?.distance((l: SceneLink) => l.distance ?? 60);
 
     const planes: Record<string, THREE.Group> = {};
@@ -289,7 +289,7 @@ export default function OverviewScene({
       raf: 0,
       maxR: 100,
       zMid,
-      D: 460 + zSpan * 50,
+      D: 400 + zSpan * 40,
     };
     state.current = st;
     lastUnfold.current = "";
@@ -310,7 +310,7 @@ export default function OverviewScene({
         g.children[1].scale.set(k, k, 1);
         g.children[2].position.x = r + 10;
       }
-      st.D = Math.max(460 + zSpan * 50, st.maxR * 1.8);
+      st.D = Math.max(400 + zSpan * 40, st.maxR * 1.6);
     };
     fitPlanes();
     graph.onEngineStop(fitPlanes);
