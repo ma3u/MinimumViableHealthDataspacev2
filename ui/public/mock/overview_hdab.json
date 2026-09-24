@@ -1936,8 +1936,9 @@
       "size": 1.6,
       "status": "ok",
       "pulse": false,
-      "title": "app-lmc-irs-2026-001",
-      "sub": "Limburg Medical Centre, SCIENTIFIC_RESEARCH, Synthea Synthetic FHIR R4 Patient Cohort",
+      "title": "Access application by Limburg Medical Centre",
+      "sub": "app-lmc-irs-2026-001: SCIENTIFIC_RESEARCH, Synthea Synthetic FHIR R4 Patient Cohort, decided by Institut de Recherche Santé",
+      "description": "An access application asks the access body for a data permit. The body assesses the Art. 68(1) criteria and issues or refuses the permit within three months of a complete application (Art. 68(4)); the applicant may access data only under the permit (Art. 61(1)). The clock below is the body's own duty.",
       "facts": [
         ["submitted", "2026-02-01"],
         ["decision due", "2026-05-01 (decided 2026-02-20)"],
@@ -1981,8 +1982,9 @@
       "size": 1.6,
       "status": "ok",
       "pulse": false,
-      "title": "req-lmc-20260210-demo",
-      "sub": "Limburg Medical Centre, PUBLIC_HEALTH, Synthea Synthetic FHIR R4 Patient Cohort",
+      "title": "Health data request by Limburg Medical Centre",
+      "sub": "req-lmc-20260210-demo: PUBLIC_HEALTH, Synthea Synthetic FHIR R4 Patient Cohort, decided by Institut de Recherche Santé",
+      "description": "A health data request asks the access body for an answer in anonymised statistical format only. The body answers within three months (Art. 69(4)).",
       "facts": [
         ["submitted", "2026-02-10"],
         ["decision due", "2026-05-10 (decided 2026-02-24)"],
@@ -2004,8 +2006,9 @@
       "size": 1.6,
       "status": "warn",
       "pulse": false,
-      "title": "app-irs-medreg-2026-001",
-      "sub": "Institut de Recherche Santé, PUBLIC_HEALTH, Prostate Cancer Registry",
+      "title": "Access application by Institut de Recherche Santé",
+      "sub": "app-irs-medreg-2026-001: PUBLIC_HEALTH, Prostate Cancer Registry",
+      "description": "An access application asks the access body for a data permit. The body assesses the Art. 68(1) criteria and issues or refuses the permit within three months of a complete application (Art. 68(4)); the applicant may access data only under the permit (Art. 61(1)). The clock below is the body's own duty.",
       "facts": [
         ["submitted", "2026-01-20"],
         ["decision due", "2026-04-20 (decided 2026-02-10)"],
@@ -2053,8 +2056,9 @@
       "size": 1.6,
       "status": "ok",
       "pulse": false,
-      "title": "app-trialcorp-healthgov-2025-001",
-      "sub": "TrialCorp Research (CRO), SCIENTIFIC_RESEARCH, Riverside Diabetes Cohort",
+      "title": "Access application by TrialCorp Research (CRO)",
+      "sub": "app-trialcorp-healthgov-2025-001: SCIENTIFIC_RESEARCH, Riverside Diabetes Cohort, decided by HealthGov (HDAB)",
+      "description": "An access application asks the access body for a data permit. The body assesses the Art. 68(1) criteria and issues or refuses the permit within three months of a complete application (Art. 68(4)); the applicant may access data only under the permit (Art. 61(1)). The clock below is the body's own duty.",
       "facts": [
         ["submitted", "2025-11-03"],
         ["decision due", "2026-02-03 (decided 2025-11-28)"],
@@ -2098,8 +2102,9 @@
       "size": 1.6,
       "status": "info",
       "pulse": false,
-      "title": "app-pharmaco-medreg-2026-002",
-      "sub": "PharmaCo Research AG, SCIENTIFIC_RESEARCH, Synthea Synthetic FHIR R4 Patient Cohort",
+      "title": "Access application by PharmaCo Research AG",
+      "sub": "app-pharmaco-medreg-2026-002: SCIENTIFIC_RESEARCH, Synthea Synthetic FHIR R4 Patient Cohort",
+      "description": "An access application asks the access body for a data permit. The body assesses the Art. 68(1) criteria and issues or refuses the permit within three months of a complete application (Art. 68(4)); the applicant may access data only under the permit (Art. 61(1)). The clock below is the body's own duty.",
       "facts": [
         ["submitted", "2026-09-01"],
         ["decision due", "2026-12-01 (69 days left)"],
@@ -2121,8 +2126,9 @@
       "size": 1.6,
       "status": "bad",
       "pulse": true,
-      "title": "app-riverside-medreg-2026-001",
-      "sub": "Riverside General (CLINIC), SCIENTIFIC_RESEARCH, OMOP CDM v5.4 Analytics",
+      "title": "Access application by Riverside General (CLINIC)",
+      "sub": "app-riverside-medreg-2026-001: SCIENTIFIC_RESEARCH, OMOP CDM v5.4 Analytics",
+      "description": "An access application asks the access body for a data permit. The body assesses the Art. 68(1) criteria and issues or refuses the permit within three months of a complete application (Art. 68(4)); the applicant may access data only under the permit (Art. 61(1)). The clock below is the body's own duty.",
       "facts": [
         ["submitted", "2026-04-01"],
         ["decision due", "2026-07-01 (84 days overdue)"],
@@ -2144,8 +2150,9 @@
       "size": 1.6,
       "status": "bad",
       "pulse": true,
-      "title": "app-alpha-medreg-2026-001",
-      "sub": "AlphaKlinik Berlin, PUBLIC_HEALTH, Synthea Synthetic FHIR R4 Patient Cohort",
+      "title": "Access application by AlphaKlinik Berlin",
+      "sub": "app-alpha-medreg-2026-001: PUBLIC_HEALTH, Synthea Synthetic FHIR R4 Patient Cohort",
+      "description": "An access application asks the access body for a data permit. The body assesses the Art. 68(1) criteria and issues or refuses the permit within three months of a complete application (Art. 68(4)); the applicant may access data only under the permit (Art. 61(1)). The clock below is the body's own duty.",
       "facts": [
         ["submitted", "2026-03-15"],
         ["decision due", "2026-06-15 (100 days overdue)"],
@@ -3259,7 +3266,7 @@
       "severity": "bad",
       "code": "pending-queue",
       "nodeId": "me",
-      "text": "3 applications open at the end of 2026-09; 3 undecided today.",
+      "text": "3 applications were waiting for my permit decision at the end of 2026-09; 3 are undecided today, 2 of them past the three-month deadline.",
       "article": "Art. 68(4); click to see the queue by month"
     },
     {
@@ -3301,14 +3308,14 @@
       "severity": "bad",
       "code": "decision-overdue",
       "nodeId": "app:app-riverside-medreg-2026-001",
-      "text": "Riverside General (CLINIC): my decision is 84 days past the Art. 68(4) deadline of 2026-07-01.",
+      "text": "Riverside General (CLINIC) applied on 2026-04-01 for OMOP CDM v5.4 Analytics (scientific research). My permit decision was due 2026-07-01, three months later, and is 84 days late: neither issued nor refused. The applicant may not access any data until I decide.",
       "article": "Art. 68(4), Art. 57(1)(j)"
     },
     {
       "severity": "bad",
       "code": "decision-overdue",
       "nodeId": "app:app-alpha-medreg-2026-001",
-      "text": "AlphaKlinik Berlin: my decision is 100 days past the Art. 68(4) deadline of 2026-06-15.",
+      "text": "AlphaKlinik Berlin applied on 2026-03-15 for Synthea Synthetic FHIR R4 Patient Cohort (public health). My permit decision was due 2026-06-15, three months later, and is 100 days late: neither issued nor refused. The applicant may not access any data until I decide.",
       "article": "Art. 68(4), Art. 57(1)(j)"
     },
     {
@@ -3336,7 +3343,7 @@
       "severity": "info",
       "code": "decision-due",
       "nodeId": "app:app-pharmaco-medreg-2026-002",
-      "text": "PharmaCo Research AG: decision due 2026-12-01, 69 days left.",
+      "text": "PharmaCo Research AG applied on 2026-09-01 for Synthea Synthetic FHIR R4 Patient Cohort. My permit decision is due 2026-12-01, 69 days left.",
       "article": "Art. 68(4), Art. 57(1)(j)"
     },
     {

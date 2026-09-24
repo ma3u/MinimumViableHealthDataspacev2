@@ -133,14 +133,25 @@ function DecisionClock({ row }: { row: MatrixRow }) {
         className={
           overdue ? "text-[var(--danger-text)]" : "text-[var(--text-primary)]"
         }
-        title={`Submitted ${shortDate(
-          row.submittedAt,
-        )}; three months to decide (Art. 68(4))`}
+        title={
+          overdue
+            ? `The access body's decision on the data permit was due ${shortDate(
+                row.decisionDue,
+              )}, three months after the application of ${shortDate(
+                row.submittedAt,
+              )} (Art. 68(4)). It has neither issued nor refused the permit; the applicant may not access any data until it does (Art. 61(1)).`
+            : `The access body must issue or refuse the data permit by ${shortDate(
+                row.decisionDue,
+              )}, three months after the application of ${shortDate(
+                row.submittedAt,
+              )} (Art. 68(4)).`
+        }
       >
+        {overdue ? "permit decision was due " : "permit decision due "}
         {shortDate(row.decisionDue)}
         {" · "}
         {overdue
-          ? `${-row.daysToDecision} days overdue`
+          ? `${-row.daysToDecision} days late, not decided`
           : `${row.daysToDecision} days left`}
       </span>
     );
@@ -342,7 +353,9 @@ function ApplicationPanel({
           {row.decisionDue && (
             <span className="text-[var(--text-secondary)]">
               {" "}
-              · decision due {shortDate(row.decisionDue)} (Art. 68(4))
+              · the access body&apos;s permit decision is due{" "}
+              {shortDate(row.decisionDue)}, three months after the application
+              (Art. 68(4))
             </span>
           )}
         </div>
@@ -745,6 +758,15 @@ export default function CompliancePage() {
               secure processing environment (Art. 61(1), Art. 73)
             </li>
           </ol>
+          <p>
+            <strong>Decision due:</strong> the date by which the access body
+            must issue or refuse the data permit: three months after it received
+            the application (Art. 68(4)). <strong>Late</strong> means the body
+            has done neither by that date. The applicant may not access any data
+            until it decides (Art. 61(1)), and the application and the decision
+            must be published (Art. 57(1)(j)). The delay is the access
+            body&apos;s compliance issue, not the applicant&apos;s.
+          </p>
           <p>
             Click a row for the application and the chain. Signed in as the
             access body, the row also carries the decision: a refused or missing
