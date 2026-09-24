@@ -32,6 +32,43 @@ const FILTERED_DISPLAYS = [
   "sudden cardiac death",
 ] as const;
 
+interface TimelineRow {
+  fhirType: string;
+  fhirId: string;
+  date: string;
+  display: string;
+  omopType: string;
+  omopId: string;
+}
+
+/** One patient's clinical events with their OMOP mappings, oldest first. */
+async function loadTimeline(patientId: string): Promise<TimelineRow[]> {
+  const rows = await runQuery<TimelineRow>(
+    `MATCH (p:Patient)
+     WHERE coalesce(p.id, p.resourceId) = $patientId
+     MATCH (p)-[:HAS_ENCOUNTER|HAS_CONDITION|HAS_OBSERVATION|HAS_MEDICATION|HAS_MEDICATION_REQUEST|HAS_PROCEDURE]->(fhir)
+     OPTIONAL MATCH (fhir)-[:MAPPED_TO]->(omop)
+     RETURN labels(fhir)[0]                                                          AS fhirType,
+            coalesce(fhir.id, fhir.resourceId)                                       AS fhirId,
+            coalesce(fhir.date, fhir.onsetDate, fhir.dateTime, fhir.performedStart)  AS date,
+            coalesce(fhir.display, fhir.name, fhir.code)                             AS display,
+            labels(omop)[0]                                                          AS omopType,
+            coalesce(omop.id, omop.personId, omop.visitOccurrenceId,
+                     omop.conditionOccurrenceId, omop.measurementId,
+                     omop.drugExposureId)                                            AS omopId
+     ORDER BY date`,
+    { patientId },
+  );
+  // Filter out sensitive end-of-life entries (death certificates, hospice,
+  // autopsy) that Synthea generates for deceased synthetic patients. They are
+  // inappropriate for patient-facing EHR views.
+  return rows.filter((row) => {
+    if (!row.display) return true;
+    const lower = row.display.toLowerCase();
+    return !FILTERED_DISPLAYS.some((term) => lower.includes(term));
+  });
+}
+
 export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
@@ -111,7 +148,8 @@ export async function GET(req: Request) {
               procedures: 0,
             }),
           },
-          timeline: [],
+          // The page renders this timeline directly for the own record.
+          timeline: myId ? await loadTimeline(myId) : [],
           restricted: true, // signal to the UI that patient selector should be hidden
         });
       }
@@ -185,39 +223,7 @@ export async function GET(req: Request) {
       }
     }
 
-    const rows = await runQuery<{
-      fhirType: string;
-      fhirId: string;
-      date: string;
-      display: string;
-      omopType: string;
-      omopId: string;
-    }>(
-      `MATCH (p:Patient)
-       WHERE coalesce(p.id, p.resourceId) = $patientId
-       MATCH (p)-[:HAS_ENCOUNTER|HAS_CONDITION|HAS_OBSERVATION|HAS_MEDICATION|HAS_MEDICATION_REQUEST|HAS_PROCEDURE]->(fhir)
-       OPTIONAL MATCH (fhir)-[:MAPPED_TO]->(omop)
-       RETURN labels(fhir)[0]                                                          AS fhirType,
-              coalesce(fhir.id, fhir.resourceId)                                       AS fhirId,
-              coalesce(fhir.date, fhir.onsetDate, fhir.dateTime, fhir.performedStart)  AS date,
-              coalesce(fhir.display, fhir.name, fhir.code)                             AS display,
-              labels(omop)[0]                                                          AS omopType,
-              coalesce(omop.id, omop.personId, omop.visitOccurrenceId,
-                       omop.conditionOccurrenceId, omop.measurementId,
-                       omop.drugExposureId)                                            AS omopId
-       ORDER BY date`,
-      { patientId },
-    );
-
-    // Filter out sensitive end-of-life entries (death certificates, hospice, autopsy)
-    // that Synthea generates for deceased synthetic patients.
-    // These are inappropriate for patient-facing EHR views.
-    const filtered = rows.filter((row) => {
-      if (!row.display) return true;
-      const lower = row.display.toLowerCase();
-      return !FILTERED_DISPLAYS.some((term) => lower.includes(term));
-    });
-
+    const filtered = await loadTimeline(patientId);
     return NextResponse.json({ timeline: filtered });
   } catch (err) {
     console.error("GET /api/patient error:", err);
