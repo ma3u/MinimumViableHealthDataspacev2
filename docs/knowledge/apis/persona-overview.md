@@ -125,7 +125,7 @@ facts, series table, links). Persona from the role; `?persona=` for admins.
 - Tests: `ui/__tests__/unit/lib/overview-*.test.ts`,
   `unit/api/overview-route.test.ts`, `unit/api/patient-observations-route.test.ts`,
   `unit/pages/overview.test.tsx`, `unit/config/persona-overview-seed.test.ts`;
-  journey `44-persona-overview.spec.ts` (J960 to J975), which runs against
+  journey `44-persona-overview.spec.ts` (J960 to J983), which runs against
   https://ehds.mabu.red with `PLAYWRIGHT_BASE_URL`.
 - Since M6: the reads that touched a patient's record are `TransferEvent
 -[:READ]-> Patient` edges (the patient view names who read the record,

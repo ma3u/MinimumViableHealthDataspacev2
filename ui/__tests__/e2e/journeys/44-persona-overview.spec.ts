@@ -426,6 +426,62 @@ test.describe("Issue #271 · the roles open their own overview", () => {
     await expect(page.getByTestId("overview-error")).toHaveCount(0);
   });
 
+  test("J982 the patient page says when the record was last synced", async ({
+    page,
+  }) => {
+    await skipIfSeedMissing(page);
+    await loginAs(page, "patient1", "patient1");
+    const res = await page.request.get("/api/patient");
+    expect(res.status(), await res.text()).toBe(200);
+    const list = await res.json();
+    expect(list.restricted).toBe(true);
+    // the seed pins the sync to the evening before the demo date, and the
+    // "Request EHR data" flow stamps a later one; either way an instant
+    expect(list.lastEhrSync?.at).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/);
+    await page.goto("/patient");
+    const line = page.getByTestId("last-ehr-sync");
+    await expect(line).toContainText("Last EHR sync:", { timeout: 45_000 });
+    await expect(line.locator("time")).toHaveAttribute(
+      "datetime",
+      list.lastEhrSync.at,
+    );
+    // date and time, in the browser's locale
+    await expect(line.locator("time")).toHaveText(/\d{4}.*\d{1,2}:\d{2}/);
+  });
+
+  test("J983 finishing the Request EHR data flow stamps a fresh sync", async ({
+    page,
+  }) => {
+    await skipIfSeedMissing(page);
+    await loginAs(page, "patient1", "patient1");
+    const before = (await (await page.request.get("/api/patient")).json())
+      .lastEhrSync?.at as string | undefined;
+    await page.goto("/patient");
+    await page.getByRole("button", { name: /Request EHR data/i }).click();
+    await expect(page.getByRole("dialog")).toBeVisible({ timeout: 45_000 });
+    const tap = (name: string) =>
+      page.getByRole("button", { name, exact: true }).first().click();
+    await tap("Authenticate");
+    await tap("Allow access");
+    await expect(page.getByRole("button", { name: "Done" })).toBeVisible({
+      timeout: 45_000,
+    });
+    await tap("Done");
+    await expect(
+      page.getByText(/was transferred into the portal as FHIR R4/i),
+    ).toBeVisible({ timeout: 45_000 });
+    // the line now shows the moment the flow completed, and the graph agrees
+    const time = page.getByTestId("last-ehr-sync").locator("time");
+    await expect(time).not.toHaveAttribute("datetime", before ?? "", {
+      timeout: 15_000,
+    });
+    const shown = await time.getAttribute("datetime");
+    const after = (await (await page.request.get("/api/patient")).json())
+      .lastEhrSync.at as string;
+    expect(after).toBe(shown);
+    expect(Date.now() - new Date(after).getTime()).toBeLessThan(120_000);
+  });
+
   test("J980 the researcher login renders its scene without a page error", async ({
     page,
   }) => {
