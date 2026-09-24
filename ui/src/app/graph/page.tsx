@@ -1076,6 +1076,16 @@ function GraphContent() {
   // ── Render ────────────────────────────────────────────────────────────────
   return (
     <div className="relative flex h-[calc(100vh-44px)]">
+      <div
+        className="absolute left-1/2 top-2 z-20 -translate-x-1/2 rounded-md border border-amber-400 bg-amber-50 px-3 py-1 text-xs text-amber-900 dark:bg-amber-900/30 dark:text-amber-200"
+        role="note"
+      >
+        This explorer is retired. The persona views live at{" "}
+        <a href="/overview" className="underline font-medium">
+          /overview
+        </a>
+        .
+      </div>
       {/* Left sidebar — collapsible */}
       <aside
         className={`flex shrink-0 flex-col gap-4 overflow-y-auto border-r border-[var(--border)] bg-[var(--surface)] transition-all duration-200 ${

@@ -80,13 +80,7 @@ const exploreGroup: NavGroup = {
   // DATA_USER sees "My Researches" instead; PATIENT sees "My Health" instead
   hideForRoles: ["DATA_USER", "PATIENT"],
   links: [
-    { href: "/graph", label: "Graph Explorer", icon: Network },
-    {
-      href: "/overview",
-      label: "Persona Overview",
-      icon: Layers,
-      roles: ["EDC_ADMIN", "HDAB_AUTHORITY", "DATA_HOLDER"],
-    },
+    { href: "/overview", label: "Persona Overview", icon: Layers },
     { href: "/catalog", label: "Dataset Catalog", icon: BookOpen },
     {
       href: "/catalog/editor",
@@ -237,12 +231,6 @@ const myResearchesGroup: NavGroup = {
       href: "/overview",
       label: "My Research in One View",
       icon: Layers,
-      roles: ["DATA_USER"],
-    },
-    {
-      href: "/graph?persona=researcher",
-      label: "Research Overview",
-      icon: Network,
       roles: ["DATA_USER"],
     },
     {

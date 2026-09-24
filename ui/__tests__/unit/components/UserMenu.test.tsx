@@ -101,7 +101,7 @@ describe("UserMenu", () => {
       await user.click(screen.getByText("edcadmin"));
       expect(mockSignIn).toHaveBeenCalledWith(
         "keycloak",
-        { callbackUrl: "/graph?persona=edc-admin" },
+        { callbackUrl: "/overview" },
         { login_hint: "edcadmin" },
       );
     });

@@ -369,13 +369,11 @@ export function deriveParticipantType(
  * Used to auto-redirect to the correct graph view after login.
  */
 /**
- * Where a login lands (issue #271): the persona overview for the four
- * personas that have one, the graph explorer for the rest.
+ * Where a login lands (issue #271): the persona overview, for every
+ * persona. The graph explorer is retired from the navigation.
  */
-export function landingFor(personaId: string): string {
-  return ["patient", "researcher", "hdab", "hospital"].includes(personaId)
-    ? "/overview"
-    : `/graph?persona=${personaId}`;
+export function landingFor(_personaId: string): string {
+  return "/overview";
 }
 
 export function derivePersonaId(
