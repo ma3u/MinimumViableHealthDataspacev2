@@ -1,0 +1,2938 @@
+{
+  "persona": "hospital",
+  "asOf": "2026-09-23",
+  "me": {
+    "id": "did:web:alpha-klinik.de:participant",
+    "name": "AlphaKlinik Berlin"
+  },
+  "title": "My data, in one view",
+  "question": "Which consumers are trusted, what is flowing without cover, and are my own duties in order?",
+  "article": "Regulation (EU) 2025/327 Art. 60, 61, 73, 77, 78",
+  "layers": [
+    {
+      "id": "me",
+      "name": "My duties: catalogue, label, log",
+      "z": 2,
+      "color": "#fbbf24"
+    },
+    {
+      "id": "chain",
+      "name": "Permits, contracts, credentials",
+      "z": 1,
+      "color": "#f97316"
+    },
+    {
+      "id": "consumers",
+      "name": "Who reads my data",
+      "z": 0,
+      "color": "#38bdf8"
+    },
+    {
+      "id": "data",
+      "name": "My datasets",
+      "z": -1,
+      "color": "#a78bfa"
+    },
+    {
+      "id": "time",
+      "name": "Over time: unfolded months",
+      "z": -2,
+      "color": "#93c5fd"
+    }
+  ],
+  "nodes": [
+    {
+      "id": "me",
+      "label": "AlphaKlinik Berlin",
+      "layer": "me",
+      "kind": "Health data holder",
+      "size": 4,
+      "color": "#fbbf24",
+      "pin": [0, 0],
+      "title": "AlphaKlinik Berlin",
+      "sub": "health data holder, 2 datasets in the catalogue, 1 quality label",
+      "facts": [
+        ["did", "did:web:alpha-klinik.de:participant"],
+        [
+          "datasets",
+          "Synthea Synthetic FHIR R4 Patient Cohort, Prostate Cancer Registry 2024"
+        ],
+        ["log", "3 accesses served, 1 refused in 12 months"]
+      ],
+      "article": "Art. 60 duties of health data holders: make data available under a permit, describe the datasets (Art. 77), keep the access log (Art. 73(1)(e)), carry the quality label (Art. 78)",
+      "links": [
+        {
+          "href": "/catalog",
+          "text": "My catalogue entries"
+        },
+        {
+          "href": "/credentials",
+          "text": "My credentials"
+        },
+        {
+          "href": "/admin/audit",
+          "text": "Access log"
+        }
+      ],
+      "series": [
+        {
+          "date": "2025-10-01",
+          "value": 0
+        },
+        {
+          "date": "2025-11-01",
+          "value": 0
+        },
+        {
+          "date": "2025-12-01",
+          "value": 0
+        },
+        {
+          "date": "2026-01-01",
+          "value": 0
+        },
+        {
+          "date": "2026-02-01",
+          "value": 0
+        },
+        {
+          "date": "2026-03-01",
+          "value": 0
+        },
+        {
+          "date": "2026-04-01",
+          "value": 0
+        },
+        {
+          "date": "2026-05-01",
+          "value": 0
+        },
+        {
+          "date": "2026-06-01",
+          "value": 0
+        },
+        {
+          "date": "2026-07-01",
+          "value": 0
+        },
+        {
+          "date": "2026-08-01",
+          "value": 0
+        },
+        {
+          "date": "2026-09-01",
+          "value": 0.13
+        }
+      ],
+      "unit": "MB",
+      "measure": "Data made available per month",
+      "range": null,
+      "higherIsWorse": false,
+      "expand": {
+        "nodes": [
+          {
+            "id": "pt:me:2025-10-01",
+            "label": "2025-10 · 0",
+            "layer": "time",
+            "kind": "Month",
+            "size": 0.9,
+            "color": "#93c5fd",
+            "title": "AlphaKlinik Berlin, 2025-10",
+            "sub": "0 MB",
+            "facts": [
+              ["measure", "Data made available per month"],
+              ["band", "none"]
+            ]
+          },
+          {
+            "id": "pt:me:2025-11-01",
+            "label": "2025-11 · 0",
+            "layer": "time",
+            "kind": "Month",
+            "size": 0.9,
+            "color": "#93c5fd",
+            "title": "AlphaKlinik Berlin, 2025-11",
+            "sub": "0 MB",
+            "facts": [
+              ["measure", "Data made available per month"],
+              ["band", "none"]
+            ]
+          },
+          {
+            "id": "pt:me:2025-12-01",
+            "label": "2025-12 · 0",
+            "layer": "time",
+            "kind": "Month",
+            "size": 0.9,
+            "color": "#93c5fd",
+            "title": "AlphaKlinik Berlin, 2025-12",
+            "sub": "0 MB",
+            "facts": [
+              ["measure", "Data made available per month"],
+              ["band", "none"]
+            ]
+          },
+          {
+            "id": "pt:me:2026-01-01",
+            "label": "2026-01 · 0",
+            "layer": "time",
+            "kind": "Month",
+            "size": 0.9,
+            "color": "#93c5fd",
+            "title": "AlphaKlinik Berlin, 2026-01",
+            "sub": "0 MB",
+            "facts": [
+              ["measure", "Data made available per month"],
+              ["band", "none"]
+            ]
+          },
+          {
+            "id": "pt:me:2026-02-01",
+            "label": "2026-02 · 0",
+            "layer": "time",
+            "kind": "Month",
+            "size": 0.9,
+            "color": "#93c5fd",
+            "title": "AlphaKlinik Berlin, 2026-02",
+            "sub": "0 MB",
+            "facts": [
+              ["measure", "Data made available per month"],
+              ["band", "none"]
+            ]
+          },
+          {
+            "id": "pt:me:2026-03-01",
+            "label": "2026-03 · 0",
+            "layer": "time",
+            "kind": "Month",
+            "size": 0.9,
+            "color": "#93c5fd",
+            "title": "AlphaKlinik Berlin, 2026-03",
+            "sub": "0 MB",
+            "facts": [
+              ["measure", "Data made available per month"],
+              ["band", "none"]
+            ]
+          },
+          {
+            "id": "pt:me:2026-04-01",
+            "label": "2026-04 · 0",
+            "layer": "time",
+            "kind": "Month",
+            "size": 0.9,
+            "color": "#93c5fd",
+            "title": "AlphaKlinik Berlin, 2026-04",
+            "sub": "0 MB",
+            "facts": [
+              ["measure", "Data made available per month"],
+              ["band", "none"]
+            ]
+          },
+          {
+            "id": "pt:me:2026-05-01",
+            "label": "2026-05 · 0",
+            "layer": "time",
+            "kind": "Month",
+            "size": 0.9,
+            "color": "#93c5fd",
+            "title": "AlphaKlinik Berlin, 2026-05",
+            "sub": "0 MB",
+            "facts": [
+              ["measure", "Data made available per month"],
+              ["band", "none"]
+            ]
+          },
+          {
+            "id": "pt:me:2026-06-01",
+            "label": "2026-06 · 0",
+            "layer": "time",
+            "kind": "Month",
+            "size": 0.9,
+            "color": "#93c5fd",
+            "title": "AlphaKlinik Berlin, 2026-06",
+            "sub": "0 MB",
+            "facts": [
+              ["measure", "Data made available per month"],
+              ["band", "none"]
+            ]
+          },
+          {
+            "id": "pt:me:2026-07-01",
+            "label": "2026-07 · 0",
+            "layer": "time",
+            "kind": "Month",
+            "size": 0.9,
+            "color": "#93c5fd",
+            "title": "AlphaKlinik Berlin, 2026-07",
+            "sub": "0 MB",
+            "facts": [
+              ["measure", "Data made available per month"],
+              ["band", "none"]
+            ]
+          },
+          {
+            "id": "pt:me:2026-08-01",
+            "label": "2026-08 · 0",
+            "layer": "time",
+            "kind": "Month",
+            "size": 0.9,
+            "color": "#93c5fd",
+            "title": "AlphaKlinik Berlin, 2026-08",
+            "sub": "0 MB",
+            "facts": [
+              ["measure", "Data made available per month"],
+              ["band", "none"]
+            ]
+          },
+          {
+            "id": "pt:me:2026-09-01",
+            "label": "2026-09 · 0.13",
+            "layer": "time",
+            "kind": "Month",
+            "size": 0.9,
+            "color": "#93c5fd",
+            "title": "AlphaKlinik Berlin, 2026-09",
+            "sub": "0.13 MB",
+            "facts": [
+              ["measure", "Data made available per month"],
+              ["band", "none"]
+            ]
+          }
+        ],
+        "links": [
+          {
+            "source": "me",
+            "target": "pt:me:2025-10-01",
+            "kind": "month",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "me",
+            "target": "pt:me:2025-11-01",
+            "kind": "month",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "pt:me:2025-10-01",
+            "target": "pt:me:2025-11-01",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          },
+          {
+            "source": "me",
+            "target": "pt:me:2025-12-01",
+            "kind": "month",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "pt:me:2025-11-01",
+            "target": "pt:me:2025-12-01",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          },
+          {
+            "source": "me",
+            "target": "pt:me:2026-01-01",
+            "kind": "month",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "pt:me:2025-12-01",
+            "target": "pt:me:2026-01-01",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          },
+          {
+            "source": "me",
+            "target": "pt:me:2026-02-01",
+            "kind": "month",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "pt:me:2026-01-01",
+            "target": "pt:me:2026-02-01",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          },
+          {
+            "source": "me",
+            "target": "pt:me:2026-03-01",
+            "kind": "month",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "pt:me:2026-02-01",
+            "target": "pt:me:2026-03-01",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          },
+          {
+            "source": "me",
+            "target": "pt:me:2026-04-01",
+            "kind": "month",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "pt:me:2026-03-01",
+            "target": "pt:me:2026-04-01",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          },
+          {
+            "source": "me",
+            "target": "pt:me:2026-05-01",
+            "kind": "month",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "pt:me:2026-04-01",
+            "target": "pt:me:2026-05-01",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          },
+          {
+            "source": "me",
+            "target": "pt:me:2026-06-01",
+            "kind": "month",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "pt:me:2026-05-01",
+            "target": "pt:me:2026-06-01",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          },
+          {
+            "source": "me",
+            "target": "pt:me:2026-07-01",
+            "kind": "month",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "pt:me:2026-06-01",
+            "target": "pt:me:2026-07-01",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          },
+          {
+            "source": "me",
+            "target": "pt:me:2026-08-01",
+            "kind": "month",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "pt:me:2026-07-01",
+            "target": "pt:me:2026-08-01",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          },
+          {
+            "source": "me",
+            "target": "pt:me:2026-09-01",
+            "kind": "month",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "pt:me:2026-08-01",
+            "target": "pt:me:2026-09-01",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "c:did:web:irs.fr:hdab",
+      "label": "Institut de Recherche Santé",
+      "layer": "consumers",
+      "kind": "Access body",
+      "size": 2.4,
+      "status": "bad",
+      "pulse": true,
+      "title": "Institut de Recherche Santé",
+      "sub": "not trusted: the chain of trust is broken",
+      "facts": [
+        ["did", "did:web:irs.fr:hdab"],
+        ["credentials", "2 presented"],
+        ["permits", "hdab-medreg-irs-2026-001 refused"],
+        ["on my data", "0 accesses served, 1 refused"]
+      ],
+      "article": "Art. 60(1): I make data available only under a permit; Art. 61(1): the user accesses only under it; the DSP contract carries the terms",
+      "links": [
+        {
+          "href": "/admin/audit?consumerDid=did%3Aweb%3Airs.fr%3Ahdab",
+          "text": "Access log"
+        }
+      ],
+      "series": [
+        {
+          "date": "2025-10-01",
+          "value": 0
+        },
+        {
+          "date": "2025-11-01",
+          "value": 0
+        },
+        {
+          "date": "2025-12-01",
+          "value": 0
+        },
+        {
+          "date": "2026-01-01",
+          "value": 0
+        },
+        {
+          "date": "2026-02-01",
+          "value": 0
+        },
+        {
+          "date": "2026-03-01",
+          "value": 0
+        },
+        {
+          "date": "2026-04-01",
+          "value": 0
+        },
+        {
+          "date": "2026-05-01",
+          "value": 0
+        },
+        {
+          "date": "2026-06-01",
+          "value": 0
+        },
+        {
+          "date": "2026-07-01",
+          "value": 0
+        },
+        {
+          "date": "2026-08-01",
+          "value": 0
+        },
+        {
+          "date": "2026-09-01",
+          "value": 1
+        }
+      ],
+      "unit": "refusals",
+      "measure": "Refused attempts per month",
+      "range": {
+        "low": 0,
+        "high": 0,
+        "text": "0 refusals expected"
+      },
+      "higherIsWorse": true,
+      "expand": {
+        "nodes": [
+          {
+            "id": "pt:c:did:web:irs.fr:hdab:2025-10-01",
+            "label": "2025-10 · 0",
+            "layer": "time",
+            "kind": "Month",
+            "size": 0.9,
+            "color": "#93c5fd",
+            "title": "Institut de Recherche Santé, 2025-10",
+            "sub": "0 refusals",
+            "facts": [
+              ["measure", "Refused attempts per month"],
+              ["band", "0 refusals expected"]
+            ]
+          },
+          {
+            "id": "pt:c:did:web:irs.fr:hdab:2025-11-01",
+            "label": "2025-11 · 0",
+            "layer": "time",
+            "kind": "Month",
+            "size": 0.9,
+            "color": "#93c5fd",
+            "title": "Institut de Recherche Santé, 2025-11",
+            "sub": "0 refusals",
+            "facts": [
+              ["measure", "Refused attempts per month"],
+              ["band", "0 refusals expected"]
+            ]
+          },
+          {
+            "id": "pt:c:did:web:irs.fr:hdab:2025-12-01",
+            "label": "2025-12 · 0",
+            "layer": "time",
+            "kind": "Month",
+            "size": 0.9,
+            "color": "#93c5fd",
+            "title": "Institut de Recherche Santé, 2025-12",
+            "sub": "0 refusals",
+            "facts": [
+              ["measure", "Refused attempts per month"],
+              ["band", "0 refusals expected"]
+            ]
+          },
+          {
+            "id": "pt:c:did:web:irs.fr:hdab:2026-01-01",
+            "label": "2026-01 · 0",
+            "layer": "time",
+            "kind": "Month",
+            "size": 0.9,
+            "color": "#93c5fd",
+            "title": "Institut de Recherche Santé, 2026-01",
+            "sub": "0 refusals",
+            "facts": [
+              ["measure", "Refused attempts per month"],
+              ["band", "0 refusals expected"]
+            ]
+          },
+          {
+            "id": "pt:c:did:web:irs.fr:hdab:2026-02-01",
+            "label": "2026-02 · 0",
+            "layer": "time",
+            "kind": "Month",
+            "size": 0.9,
+            "color": "#93c5fd",
+            "title": "Institut de Recherche Santé, 2026-02",
+            "sub": "0 refusals",
+            "facts": [
+              ["measure", "Refused attempts per month"],
+              ["band", "0 refusals expected"]
+            ]
+          },
+          {
+            "id": "pt:c:did:web:irs.fr:hdab:2026-03-01",
+            "label": "2026-03 · 0",
+            "layer": "time",
+            "kind": "Month",
+            "size": 0.9,
+            "color": "#93c5fd",
+            "title": "Institut de Recherche Santé, 2026-03",
+            "sub": "0 refusals",
+            "facts": [
+              ["measure", "Refused attempts per month"],
+              ["band", "0 refusals expected"]
+            ]
+          },
+          {
+            "id": "pt:c:did:web:irs.fr:hdab:2026-04-01",
+            "label": "2026-04 · 0",
+            "layer": "time",
+            "kind": "Month",
+            "size": 0.9,
+            "color": "#93c5fd",
+            "title": "Institut de Recherche Santé, 2026-04",
+            "sub": "0 refusals",
+            "facts": [
+              ["measure", "Refused attempts per month"],
+              ["band", "0 refusals expected"]
+            ]
+          },
+          {
+            "id": "pt:c:did:web:irs.fr:hdab:2026-05-01",
+            "label": "2026-05 · 0",
+            "layer": "time",
+            "kind": "Month",
+            "size": 0.9,
+            "color": "#93c5fd",
+            "title": "Institut de Recherche Santé, 2026-05",
+            "sub": "0 refusals",
+            "facts": [
+              ["measure", "Refused attempts per month"],
+              ["band", "0 refusals expected"]
+            ]
+          },
+          {
+            "id": "pt:c:did:web:irs.fr:hdab:2026-06-01",
+            "label": "2026-06 · 0",
+            "layer": "time",
+            "kind": "Month",
+            "size": 0.9,
+            "color": "#93c5fd",
+            "title": "Institut de Recherche Santé, 2026-06",
+            "sub": "0 refusals",
+            "facts": [
+              ["measure", "Refused attempts per month"],
+              ["band", "0 refusals expected"]
+            ]
+          },
+          {
+            "id": "pt:c:did:web:irs.fr:hdab:2026-07-01",
+            "label": "2026-07 · 0",
+            "layer": "time",
+            "kind": "Month",
+            "size": 0.9,
+            "color": "#93c5fd",
+            "title": "Institut de Recherche Santé, 2026-07",
+            "sub": "0 refusals",
+            "facts": [
+              ["measure", "Refused attempts per month"],
+              ["band", "0 refusals expected"]
+            ]
+          },
+          {
+            "id": "pt:c:did:web:irs.fr:hdab:2026-08-01",
+            "label": "2026-08 · 0",
+            "layer": "time",
+            "kind": "Month",
+            "size": 0.9,
+            "color": "#93c5fd",
+            "title": "Institut de Recherche Santé, 2026-08",
+            "sub": "0 refusals",
+            "facts": [
+              ["measure", "Refused attempts per month"],
+              ["band", "0 refusals expected"]
+            ]
+          },
+          {
+            "id": "pt:c:did:web:irs.fr:hdab:2026-09-01",
+            "label": "2026-09 · 1",
+            "layer": "time",
+            "kind": "Month",
+            "size": 0.9,
+            "color": "#f59e0b",
+            "title": "Institut de Recherche Santé, 2026-09",
+            "sub": "1 refusals, outside the expected band",
+            "facts": [
+              ["measure", "Refused attempts per month"],
+              ["band", "0 refusals expected"]
+            ]
+          }
+        ],
+        "links": [
+          {
+            "source": "c:did:web:irs.fr:hdab",
+            "target": "pt:c:did:web:irs.fr:hdab:2025-10-01",
+            "kind": "month",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "c:did:web:irs.fr:hdab",
+            "target": "pt:c:did:web:irs.fr:hdab:2025-11-01",
+            "kind": "month",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "pt:c:did:web:irs.fr:hdab:2025-10-01",
+            "target": "pt:c:did:web:irs.fr:hdab:2025-11-01",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          },
+          {
+            "source": "c:did:web:irs.fr:hdab",
+            "target": "pt:c:did:web:irs.fr:hdab:2025-12-01",
+            "kind": "month",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "pt:c:did:web:irs.fr:hdab:2025-11-01",
+            "target": "pt:c:did:web:irs.fr:hdab:2025-12-01",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          },
+          {
+            "source": "c:did:web:irs.fr:hdab",
+            "target": "pt:c:did:web:irs.fr:hdab:2026-01-01",
+            "kind": "month",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "pt:c:did:web:irs.fr:hdab:2025-12-01",
+            "target": "pt:c:did:web:irs.fr:hdab:2026-01-01",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          },
+          {
+            "source": "c:did:web:irs.fr:hdab",
+            "target": "pt:c:did:web:irs.fr:hdab:2026-02-01",
+            "kind": "month",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "pt:c:did:web:irs.fr:hdab:2026-01-01",
+            "target": "pt:c:did:web:irs.fr:hdab:2026-02-01",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          },
+          {
+            "source": "c:did:web:irs.fr:hdab",
+            "target": "pt:c:did:web:irs.fr:hdab:2026-03-01",
+            "kind": "month",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "pt:c:did:web:irs.fr:hdab:2026-02-01",
+            "target": "pt:c:did:web:irs.fr:hdab:2026-03-01",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          },
+          {
+            "source": "c:did:web:irs.fr:hdab",
+            "target": "pt:c:did:web:irs.fr:hdab:2026-04-01",
+            "kind": "month",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "pt:c:did:web:irs.fr:hdab:2026-03-01",
+            "target": "pt:c:did:web:irs.fr:hdab:2026-04-01",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          },
+          {
+            "source": "c:did:web:irs.fr:hdab",
+            "target": "pt:c:did:web:irs.fr:hdab:2026-05-01",
+            "kind": "month",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "pt:c:did:web:irs.fr:hdab:2026-04-01",
+            "target": "pt:c:did:web:irs.fr:hdab:2026-05-01",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          },
+          {
+            "source": "c:did:web:irs.fr:hdab",
+            "target": "pt:c:did:web:irs.fr:hdab:2026-06-01",
+            "kind": "month",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "pt:c:did:web:irs.fr:hdab:2026-05-01",
+            "target": "pt:c:did:web:irs.fr:hdab:2026-06-01",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          },
+          {
+            "source": "c:did:web:irs.fr:hdab",
+            "target": "pt:c:did:web:irs.fr:hdab:2026-07-01",
+            "kind": "month",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "pt:c:did:web:irs.fr:hdab:2026-06-01",
+            "target": "pt:c:did:web:irs.fr:hdab:2026-07-01",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          },
+          {
+            "source": "c:did:web:irs.fr:hdab",
+            "target": "pt:c:did:web:irs.fr:hdab:2026-08-01",
+            "kind": "month",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "pt:c:did:web:irs.fr:hdab:2026-07-01",
+            "target": "pt:c:did:web:irs.fr:hdab:2026-08-01",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          },
+          {
+            "source": "c:did:web:irs.fr:hdab",
+            "target": "pt:c:did:web:irs.fr:hdab:2026-09-01",
+            "kind": "month",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "pt:c:did:web:irs.fr:hdab:2026-08-01",
+            "target": "pt:c:did:web:irs.fr:hdab:2026-09-01",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "permit:hdab-medreg-irs-2026-001",
+      "label": "refusal hdab-medreg-irs-2026-001",
+      "layer": "chain",
+      "kind": "Refusal",
+      "size": 1.4,
+      "status": "warn",
+      "title": "hdab-medreg-irs-2026-001",
+      "sub": "Institut de Recherche Santé, refused",
+      "facts": [["state", "refused"]],
+      "article": "Art. 68 data permit issued by the access body; Art. 61(1) access only under it",
+      "links": [
+        {
+          "href": "/permits",
+          "text": "Public register"
+        }
+      ]
+    },
+    {
+      "id": "vc:vc:ehds-participant:hdab-irs",
+      "label": "EHDSParticipant active",
+      "layer": "chain",
+      "kind": "Credential",
+      "size": 1.1,
+      "status": "ok",
+      "title": "EHDSParticipantCredential",
+      "sub": "Institut de Recherche Santé, active",
+      "facts": [
+        ["id", "vc:ehds-participant:hdab-irs"],
+        ["expires", "2027-03-22"]
+      ],
+      "article": "DCP v1.0 credential presented before access; Art. 53 purpose"
+    },
+    {
+      "id": "vc:vc:membership:hdab-irs",
+      "label": "Membership active",
+      "layer": "chain",
+      "kind": "Credential",
+      "size": 1.1,
+      "status": "ok",
+      "title": "MembershipCredential",
+      "sub": "Institut de Recherche Santé, active",
+      "facts": [
+        ["id", "vc:membership:hdab-irs"],
+        ["expires", "2027-03-22"]
+      ],
+      "article": "DCP v1.0 credential presented before access; Art. 53 purpose"
+    },
+    {
+      "id": "c:did:web:lmc.nl:clinic",
+      "label": "Limburg Medical Centre",
+      "layer": "consumers",
+      "kind": "Data holder",
+      "size": 2.4,
+      "status": "warn",
+      "pulse": false,
+      "title": "Limburg Medical Centre",
+      "sub": "trusted: credentials, permit, contract and log agree",
+      "facts": [
+        ["did", "did:web:lmc.nl:clinic"],
+        ["credentials", "3 presented"],
+        ["permits", "hdab-irs-lmc-2026-001 valid"],
+        ["on my data", "1 accesses served, 0 refused"]
+      ],
+      "article": "Art. 60(1): I make data available only under a permit; Art. 61(1): the user accesses only under it; the DSP contract carries the terms",
+      "links": [
+        {
+          "href": "/admin/audit?consumerDid=did%3Aweb%3Almc.nl%3Aclinic",
+          "text": "Access log"
+        }
+      ],
+      "series": [
+        {
+          "date": "2025-10-01",
+          "value": 0
+        },
+        {
+          "date": "2025-11-01",
+          "value": 0
+        },
+        {
+          "date": "2025-12-01",
+          "value": 0
+        },
+        {
+          "date": "2026-01-01",
+          "value": 0
+        },
+        {
+          "date": "2026-02-01",
+          "value": 0
+        },
+        {
+          "date": "2026-03-01",
+          "value": 0
+        },
+        {
+          "date": "2026-04-01",
+          "value": 0
+        },
+        {
+          "date": "2026-05-01",
+          "value": 0
+        },
+        {
+          "date": "2026-06-01",
+          "value": 0
+        },
+        {
+          "date": "2026-07-01",
+          "value": 0
+        },
+        {
+          "date": "2026-08-01",
+          "value": 0
+        },
+        {
+          "date": "2026-09-01",
+          "value": 1
+        }
+      ],
+      "unit": "accesses",
+      "measure": "Accesses per month",
+      "range": null,
+      "higherIsWorse": false,
+      "expand": {
+        "nodes": [
+          {
+            "id": "pt:c:did:web:lmc.nl:clinic:2025-10-01",
+            "label": "2025-10 · 0",
+            "layer": "time",
+            "kind": "Month",
+            "size": 0.9,
+            "color": "#93c5fd",
+            "title": "Limburg Medical Centre, 2025-10",
+            "sub": "0 accesses",
+            "facts": [
+              ["measure", "Accesses per month"],
+              ["band", "none"]
+            ]
+          },
+          {
+            "id": "pt:c:did:web:lmc.nl:clinic:2025-11-01",
+            "label": "2025-11 · 0",
+            "layer": "time",
+            "kind": "Month",
+            "size": 0.9,
+            "color": "#93c5fd",
+            "title": "Limburg Medical Centre, 2025-11",
+            "sub": "0 accesses",
+            "facts": [
+              ["measure", "Accesses per month"],
+              ["band", "none"]
+            ]
+          },
+          {
+            "id": "pt:c:did:web:lmc.nl:clinic:2025-12-01",
+            "label": "2025-12 · 0",
+            "layer": "time",
+            "kind": "Month",
+            "size": 0.9,
+            "color": "#93c5fd",
+            "title": "Limburg Medical Centre, 2025-12",
+            "sub": "0 accesses",
+            "facts": [
+              ["measure", "Accesses per month"],
+              ["band", "none"]
+            ]
+          },
+          {
+            "id": "pt:c:did:web:lmc.nl:clinic:2026-01-01",
+            "label": "2026-01 · 0",
+            "layer": "time",
+            "kind": "Month",
+            "size": 0.9,
+            "color": "#93c5fd",
+            "title": "Limburg Medical Centre, 2026-01",
+            "sub": "0 accesses",
+            "facts": [
+              ["measure", "Accesses per month"],
+              ["band", "none"]
+            ]
+          },
+          {
+            "id": "pt:c:did:web:lmc.nl:clinic:2026-02-01",
+            "label": "2026-02 · 0",
+            "layer": "time",
+            "kind": "Month",
+            "size": 0.9,
+            "color": "#93c5fd",
+            "title": "Limburg Medical Centre, 2026-02",
+            "sub": "0 accesses",
+            "facts": [
+              ["measure", "Accesses per month"],
+              ["band", "none"]
+            ]
+          },
+          {
+            "id": "pt:c:did:web:lmc.nl:clinic:2026-03-01",
+            "label": "2026-03 · 0",
+            "layer": "time",
+            "kind": "Month",
+            "size": 0.9,
+            "color": "#93c5fd",
+            "title": "Limburg Medical Centre, 2026-03",
+            "sub": "0 accesses",
+            "facts": [
+              ["measure", "Accesses per month"],
+              ["band", "none"]
+            ]
+          },
+          {
+            "id": "pt:c:did:web:lmc.nl:clinic:2026-04-01",
+            "label": "2026-04 · 0",
+            "layer": "time",
+            "kind": "Month",
+            "size": 0.9,
+            "color": "#93c5fd",
+            "title": "Limburg Medical Centre, 2026-04",
+            "sub": "0 accesses",
+            "facts": [
+              ["measure", "Accesses per month"],
+              ["band", "none"]
+            ]
+          },
+          {
+            "id": "pt:c:did:web:lmc.nl:clinic:2026-05-01",
+            "label": "2026-05 · 0",
+            "layer": "time",
+            "kind": "Month",
+            "size": 0.9,
+            "color": "#93c5fd",
+            "title": "Limburg Medical Centre, 2026-05",
+            "sub": "0 accesses",
+            "facts": [
+              ["measure", "Accesses per month"],
+              ["band", "none"]
+            ]
+          },
+          {
+            "id": "pt:c:did:web:lmc.nl:clinic:2026-06-01",
+            "label": "2026-06 · 0",
+            "layer": "time",
+            "kind": "Month",
+            "size": 0.9,
+            "color": "#93c5fd",
+            "title": "Limburg Medical Centre, 2026-06",
+            "sub": "0 accesses",
+            "facts": [
+              ["measure", "Accesses per month"],
+              ["band", "none"]
+            ]
+          },
+          {
+            "id": "pt:c:did:web:lmc.nl:clinic:2026-07-01",
+            "label": "2026-07 · 0",
+            "layer": "time",
+            "kind": "Month",
+            "size": 0.9,
+            "color": "#93c5fd",
+            "title": "Limburg Medical Centre, 2026-07",
+            "sub": "0 accesses",
+            "facts": [
+              ["measure", "Accesses per month"],
+              ["band", "none"]
+            ]
+          },
+          {
+            "id": "pt:c:did:web:lmc.nl:clinic:2026-08-01",
+            "label": "2026-08 · 0",
+            "layer": "time",
+            "kind": "Month",
+            "size": 0.9,
+            "color": "#93c5fd",
+            "title": "Limburg Medical Centre, 2026-08",
+            "sub": "0 accesses",
+            "facts": [
+              ["measure", "Accesses per month"],
+              ["band", "none"]
+            ]
+          },
+          {
+            "id": "pt:c:did:web:lmc.nl:clinic:2026-09-01",
+            "label": "2026-09 · 1",
+            "layer": "time",
+            "kind": "Month",
+            "size": 0.9,
+            "color": "#93c5fd",
+            "title": "Limburg Medical Centre, 2026-09",
+            "sub": "1 accesses",
+            "facts": [
+              ["measure", "Accesses per month"],
+              ["band", "none"]
+            ]
+          }
+        ],
+        "links": [
+          {
+            "source": "c:did:web:lmc.nl:clinic",
+            "target": "pt:c:did:web:lmc.nl:clinic:2025-10-01",
+            "kind": "month",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "c:did:web:lmc.nl:clinic",
+            "target": "pt:c:did:web:lmc.nl:clinic:2025-11-01",
+            "kind": "month",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "pt:c:did:web:lmc.nl:clinic:2025-10-01",
+            "target": "pt:c:did:web:lmc.nl:clinic:2025-11-01",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          },
+          {
+            "source": "c:did:web:lmc.nl:clinic",
+            "target": "pt:c:did:web:lmc.nl:clinic:2025-12-01",
+            "kind": "month",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "pt:c:did:web:lmc.nl:clinic:2025-11-01",
+            "target": "pt:c:did:web:lmc.nl:clinic:2025-12-01",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          },
+          {
+            "source": "c:did:web:lmc.nl:clinic",
+            "target": "pt:c:did:web:lmc.nl:clinic:2026-01-01",
+            "kind": "month",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "pt:c:did:web:lmc.nl:clinic:2025-12-01",
+            "target": "pt:c:did:web:lmc.nl:clinic:2026-01-01",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          },
+          {
+            "source": "c:did:web:lmc.nl:clinic",
+            "target": "pt:c:did:web:lmc.nl:clinic:2026-02-01",
+            "kind": "month",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "pt:c:did:web:lmc.nl:clinic:2026-01-01",
+            "target": "pt:c:did:web:lmc.nl:clinic:2026-02-01",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          },
+          {
+            "source": "c:did:web:lmc.nl:clinic",
+            "target": "pt:c:did:web:lmc.nl:clinic:2026-03-01",
+            "kind": "month",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "pt:c:did:web:lmc.nl:clinic:2026-02-01",
+            "target": "pt:c:did:web:lmc.nl:clinic:2026-03-01",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          },
+          {
+            "source": "c:did:web:lmc.nl:clinic",
+            "target": "pt:c:did:web:lmc.nl:clinic:2026-04-01",
+            "kind": "month",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "pt:c:did:web:lmc.nl:clinic:2026-03-01",
+            "target": "pt:c:did:web:lmc.nl:clinic:2026-04-01",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          },
+          {
+            "source": "c:did:web:lmc.nl:clinic",
+            "target": "pt:c:did:web:lmc.nl:clinic:2026-05-01",
+            "kind": "month",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "pt:c:did:web:lmc.nl:clinic:2026-04-01",
+            "target": "pt:c:did:web:lmc.nl:clinic:2026-05-01",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          },
+          {
+            "source": "c:did:web:lmc.nl:clinic",
+            "target": "pt:c:did:web:lmc.nl:clinic:2026-06-01",
+            "kind": "month",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "pt:c:did:web:lmc.nl:clinic:2026-05-01",
+            "target": "pt:c:did:web:lmc.nl:clinic:2026-06-01",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          },
+          {
+            "source": "c:did:web:lmc.nl:clinic",
+            "target": "pt:c:did:web:lmc.nl:clinic:2026-07-01",
+            "kind": "month",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "pt:c:did:web:lmc.nl:clinic:2026-06-01",
+            "target": "pt:c:did:web:lmc.nl:clinic:2026-07-01",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          },
+          {
+            "source": "c:did:web:lmc.nl:clinic",
+            "target": "pt:c:did:web:lmc.nl:clinic:2026-08-01",
+            "kind": "month",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "pt:c:did:web:lmc.nl:clinic:2026-07-01",
+            "target": "pt:c:did:web:lmc.nl:clinic:2026-08-01",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          },
+          {
+            "source": "c:did:web:lmc.nl:clinic",
+            "target": "pt:c:did:web:lmc.nl:clinic:2026-09-01",
+            "kind": "month",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "pt:c:did:web:lmc.nl:clinic:2026-08-01",
+            "target": "pt:c:did:web:lmc.nl:clinic:2026-09-01",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "permit:hdab-irs-lmc-2026-001",
+      "label": "permit hdab-irs-lmc-2026-001",
+      "layer": "chain",
+      "kind": "Data permit",
+      "size": 1.4,
+      "status": "ok",
+      "title": "hdab-irs-lmc-2026-001",
+      "sub": "Limburg Medical Centre, valid, valid until 2027-02-20",
+      "facts": [["state", "valid"]],
+      "article": "Art. 68 data permit issued by the access body; Art. 61(1) access only under it",
+      "links": [
+        {
+          "href": "/permits",
+          "text": "Public register"
+        }
+      ]
+    },
+    {
+      "id": "vc:vc:ehds-participant:clinic-lmc",
+      "label": "EHDSParticipant active",
+      "layer": "chain",
+      "kind": "Credential",
+      "size": 1.1,
+      "status": "ok",
+      "title": "EHDSParticipantCredential",
+      "sub": "Limburg Medical Centre, active",
+      "facts": [
+        ["id", "vc:ehds-participant:clinic-lmc"],
+        ["expires", "2027-03-22"]
+      ],
+      "article": "DCP v1.0 credential presented before access; Art. 53 purpose"
+    },
+    {
+      "id": "vc:vc:membership:clinic-lmc",
+      "label": "Membership active",
+      "layer": "chain",
+      "kind": "Credential",
+      "size": 1.1,
+      "status": "ok",
+      "title": "MembershipCredential",
+      "sub": "Limburg Medical Centre, active",
+      "facts": [
+        ["id", "vc:membership:clinic-lmc"],
+        ["expires", "2027-03-22"]
+      ],
+      "article": "DCP v1.0 credential presented before access; Art. 53 purpose"
+    },
+    {
+      "id": "c:did:web:pharmaco.de:research",
+      "label": "PharmaCo Research AG",
+      "layer": "consumers",
+      "kind": "Data user",
+      "size": 2.4,
+      "status": "bad",
+      "pulse": true,
+      "title": "PharmaCo Research AG",
+      "sub": "not trusted: the chain of trust is broken",
+      "facts": [
+        ["did", "did:web:pharmaco.de:research"],
+        ["credentials", "3 presented"],
+        ["permits", "app-pharmaco-medreg-2026-002 pending"],
+        ["on my data", "2 accesses served, 0 refused"]
+      ],
+      "article": "Art. 60(1): I make data available only under a permit; Art. 61(1): the user accesses only under it; the DSP contract carries the terms",
+      "links": [
+        {
+          "href": "/admin/audit?consumerDid=did%3Aweb%3Apharmaco.de%3Aresearch",
+          "text": "Access log"
+        }
+      ],
+      "series": [
+        {
+          "date": "2025-10-01",
+          "value": 0
+        },
+        {
+          "date": "2025-11-01",
+          "value": 0
+        },
+        {
+          "date": "2025-12-01",
+          "value": 0
+        },
+        {
+          "date": "2026-01-01",
+          "value": 0
+        },
+        {
+          "date": "2026-02-01",
+          "value": 0
+        },
+        {
+          "date": "2026-03-01",
+          "value": 0
+        },
+        {
+          "date": "2026-04-01",
+          "value": 0
+        },
+        {
+          "date": "2026-05-01",
+          "value": 0
+        },
+        {
+          "date": "2026-06-01",
+          "value": 0
+        },
+        {
+          "date": "2026-07-01",
+          "value": 0
+        },
+        {
+          "date": "2026-08-01",
+          "value": 0
+        },
+        {
+          "date": "2026-09-01",
+          "value": 2
+        }
+      ],
+      "unit": "accesses",
+      "measure": "Accesses per month",
+      "range": null,
+      "higherIsWorse": false,
+      "expand": {
+        "nodes": [
+          {
+            "id": "pt:c:did:web:pharmaco.de:research:2025-10-01",
+            "label": "2025-10 · 0",
+            "layer": "time",
+            "kind": "Month",
+            "size": 0.9,
+            "color": "#93c5fd",
+            "title": "PharmaCo Research AG, 2025-10",
+            "sub": "0 accesses",
+            "facts": [
+              ["measure", "Accesses per month"],
+              ["band", "none"]
+            ]
+          },
+          {
+            "id": "pt:c:did:web:pharmaco.de:research:2025-11-01",
+            "label": "2025-11 · 0",
+            "layer": "time",
+            "kind": "Month",
+            "size": 0.9,
+            "color": "#93c5fd",
+            "title": "PharmaCo Research AG, 2025-11",
+            "sub": "0 accesses",
+            "facts": [
+              ["measure", "Accesses per month"],
+              ["band", "none"]
+            ]
+          },
+          {
+            "id": "pt:c:did:web:pharmaco.de:research:2025-12-01",
+            "label": "2025-12 · 0",
+            "layer": "time",
+            "kind": "Month",
+            "size": 0.9,
+            "color": "#93c5fd",
+            "title": "PharmaCo Research AG, 2025-12",
+            "sub": "0 accesses",
+            "facts": [
+              ["measure", "Accesses per month"],
+              ["band", "none"]
+            ]
+          },
+          {
+            "id": "pt:c:did:web:pharmaco.de:research:2026-01-01",
+            "label": "2026-01 · 0",
+            "layer": "time",
+            "kind": "Month",
+            "size": 0.9,
+            "color": "#93c5fd",
+            "title": "PharmaCo Research AG, 2026-01",
+            "sub": "0 accesses",
+            "facts": [
+              ["measure", "Accesses per month"],
+              ["band", "none"]
+            ]
+          },
+          {
+            "id": "pt:c:did:web:pharmaco.de:research:2026-02-01",
+            "label": "2026-02 · 0",
+            "layer": "time",
+            "kind": "Month",
+            "size": 0.9,
+            "color": "#93c5fd",
+            "title": "PharmaCo Research AG, 2026-02",
+            "sub": "0 accesses",
+            "facts": [
+              ["measure", "Accesses per month"],
+              ["band", "none"]
+            ]
+          },
+          {
+            "id": "pt:c:did:web:pharmaco.de:research:2026-03-01",
+            "label": "2026-03 · 0",
+            "layer": "time",
+            "kind": "Month",
+            "size": 0.9,
+            "color": "#93c5fd",
+            "title": "PharmaCo Research AG, 2026-03",
+            "sub": "0 accesses",
+            "facts": [
+              ["measure", "Accesses per month"],
+              ["band", "none"]
+            ]
+          },
+          {
+            "id": "pt:c:did:web:pharmaco.de:research:2026-04-01",
+            "label": "2026-04 · 0",
+            "layer": "time",
+            "kind": "Month",
+            "size": 0.9,
+            "color": "#93c5fd",
+            "title": "PharmaCo Research AG, 2026-04",
+            "sub": "0 accesses",
+            "facts": [
+              ["measure", "Accesses per month"],
+              ["band", "none"]
+            ]
+          },
+          {
+            "id": "pt:c:did:web:pharmaco.de:research:2026-05-01",
+            "label": "2026-05 · 0",
+            "layer": "time",
+            "kind": "Month",
+            "size": 0.9,
+            "color": "#93c5fd",
+            "title": "PharmaCo Research AG, 2026-05",
+            "sub": "0 accesses",
+            "facts": [
+              ["measure", "Accesses per month"],
+              ["band", "none"]
+            ]
+          },
+          {
+            "id": "pt:c:did:web:pharmaco.de:research:2026-06-01",
+            "label": "2026-06 · 0",
+            "layer": "time",
+            "kind": "Month",
+            "size": 0.9,
+            "color": "#93c5fd",
+            "title": "PharmaCo Research AG, 2026-06",
+            "sub": "0 accesses",
+            "facts": [
+              ["measure", "Accesses per month"],
+              ["band", "none"]
+            ]
+          },
+          {
+            "id": "pt:c:did:web:pharmaco.de:research:2026-07-01",
+            "label": "2026-07 · 0",
+            "layer": "time",
+            "kind": "Month",
+            "size": 0.9,
+            "color": "#93c5fd",
+            "title": "PharmaCo Research AG, 2026-07",
+            "sub": "0 accesses",
+            "facts": [
+              ["measure", "Accesses per month"],
+              ["band", "none"]
+            ]
+          },
+          {
+            "id": "pt:c:did:web:pharmaco.de:research:2026-08-01",
+            "label": "2026-08 · 0",
+            "layer": "time",
+            "kind": "Month",
+            "size": 0.9,
+            "color": "#93c5fd",
+            "title": "PharmaCo Research AG, 2026-08",
+            "sub": "0 accesses",
+            "facts": [
+              ["measure", "Accesses per month"],
+              ["band", "none"]
+            ]
+          },
+          {
+            "id": "pt:c:did:web:pharmaco.de:research:2026-09-01",
+            "label": "2026-09 · 2",
+            "layer": "time",
+            "kind": "Month",
+            "size": 0.9,
+            "color": "#93c5fd",
+            "title": "PharmaCo Research AG, 2026-09",
+            "sub": "2 accesses",
+            "facts": [
+              ["measure", "Accesses per month"],
+              ["band", "none"]
+            ]
+          }
+        ],
+        "links": [
+          {
+            "source": "c:did:web:pharmaco.de:research",
+            "target": "pt:c:did:web:pharmaco.de:research:2025-10-01",
+            "kind": "month",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "c:did:web:pharmaco.de:research",
+            "target": "pt:c:did:web:pharmaco.de:research:2025-11-01",
+            "kind": "month",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "pt:c:did:web:pharmaco.de:research:2025-10-01",
+            "target": "pt:c:did:web:pharmaco.de:research:2025-11-01",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          },
+          {
+            "source": "c:did:web:pharmaco.de:research",
+            "target": "pt:c:did:web:pharmaco.de:research:2025-12-01",
+            "kind": "month",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "pt:c:did:web:pharmaco.de:research:2025-11-01",
+            "target": "pt:c:did:web:pharmaco.de:research:2025-12-01",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          },
+          {
+            "source": "c:did:web:pharmaco.de:research",
+            "target": "pt:c:did:web:pharmaco.de:research:2026-01-01",
+            "kind": "month",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "pt:c:did:web:pharmaco.de:research:2025-12-01",
+            "target": "pt:c:did:web:pharmaco.de:research:2026-01-01",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          },
+          {
+            "source": "c:did:web:pharmaco.de:research",
+            "target": "pt:c:did:web:pharmaco.de:research:2026-02-01",
+            "kind": "month",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "pt:c:did:web:pharmaco.de:research:2026-01-01",
+            "target": "pt:c:did:web:pharmaco.de:research:2026-02-01",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          },
+          {
+            "source": "c:did:web:pharmaco.de:research",
+            "target": "pt:c:did:web:pharmaco.de:research:2026-03-01",
+            "kind": "month",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "pt:c:did:web:pharmaco.de:research:2026-02-01",
+            "target": "pt:c:did:web:pharmaco.de:research:2026-03-01",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          },
+          {
+            "source": "c:did:web:pharmaco.de:research",
+            "target": "pt:c:did:web:pharmaco.de:research:2026-04-01",
+            "kind": "month",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "pt:c:did:web:pharmaco.de:research:2026-03-01",
+            "target": "pt:c:did:web:pharmaco.de:research:2026-04-01",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          },
+          {
+            "source": "c:did:web:pharmaco.de:research",
+            "target": "pt:c:did:web:pharmaco.de:research:2026-05-01",
+            "kind": "month",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "pt:c:did:web:pharmaco.de:research:2026-04-01",
+            "target": "pt:c:did:web:pharmaco.de:research:2026-05-01",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          },
+          {
+            "source": "c:did:web:pharmaco.de:research",
+            "target": "pt:c:did:web:pharmaco.de:research:2026-06-01",
+            "kind": "month",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "pt:c:did:web:pharmaco.de:research:2026-05-01",
+            "target": "pt:c:did:web:pharmaco.de:research:2026-06-01",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          },
+          {
+            "source": "c:did:web:pharmaco.de:research",
+            "target": "pt:c:did:web:pharmaco.de:research:2026-07-01",
+            "kind": "month",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "pt:c:did:web:pharmaco.de:research:2026-06-01",
+            "target": "pt:c:did:web:pharmaco.de:research:2026-07-01",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          },
+          {
+            "source": "c:did:web:pharmaco.de:research",
+            "target": "pt:c:did:web:pharmaco.de:research:2026-08-01",
+            "kind": "month",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "pt:c:did:web:pharmaco.de:research:2026-07-01",
+            "target": "pt:c:did:web:pharmaco.de:research:2026-08-01",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          },
+          {
+            "source": "c:did:web:pharmaco.de:research",
+            "target": "pt:c:did:web:pharmaco.de:research:2026-09-01",
+            "kind": "month",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "pt:c:did:web:pharmaco.de:research:2026-08-01",
+            "target": "pt:c:did:web:pharmaco.de:research:2026-09-01",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "permit:app-pharmaco-medreg-2026-002",
+      "label": "permit app-pharmaco-medreg-2026-002",
+      "layer": "chain",
+      "kind": "Data permit",
+      "size": 1.4,
+      "status": "info",
+      "title": "app-pharmaco-medreg-2026-002",
+      "sub": "PharmaCo Research AG, pending",
+      "facts": [["state", "pending"]],
+      "article": "Art. 68 data permit issued by the access body; Art. 61(1) access only under it",
+      "links": [
+        {
+          "href": "/permits",
+          "text": "Public register"
+        }
+      ]
+    },
+    {
+      "id": "vc:vc:data-processing-purpose:cro-pharmaco",
+      "label": "DataProcessingPurpose expired",
+      "layer": "chain",
+      "kind": "Credential",
+      "size": 1.1,
+      "status": "bad",
+      "title": "DataProcessingPurposeCredential",
+      "sub": "PharmaCo Research AG, expired",
+      "facts": [
+        ["id", "vc:data-processing-purpose:cro-pharmaco"],
+        ["expires", "2026-06-20"],
+        ["purpose", "Scientific research on therapeutic outcomes"]
+      ],
+      "article": "DCP v1.0 credential presented before access; Art. 53 purpose"
+    },
+    {
+      "id": "vc:vc:ehds-participant:cro-pharmaco",
+      "label": "EHDSParticipant active",
+      "layer": "chain",
+      "kind": "Credential",
+      "size": 1.1,
+      "status": "ok",
+      "title": "EHDSParticipantCredential",
+      "sub": "PharmaCo Research AG, active",
+      "facts": [
+        ["id", "vc:ehds-participant:cro-pharmaco"],
+        ["expires", "2027-03-22"]
+      ],
+      "article": "DCP v1.0 credential presented before access; Art. 53 purpose"
+    },
+    {
+      "id": "vc:vc:membership:cro-pharmaco",
+      "label": "Membership active",
+      "layer": "chain",
+      "kind": "Credential",
+      "size": 1.1,
+      "status": "ok",
+      "title": "MembershipCredential",
+      "sub": "PharmaCo Research AG, active",
+      "facts": [
+        ["id", "vc:membership:cro-pharmaco"],
+        ["expires", "2027-03-22"]
+      ],
+      "article": "DCP v1.0 credential presented before access; Art. 53 purpose"
+    },
+    {
+      "id": "vc:vc:data-quality-label:clinic-alphaklinik",
+      "label": "quality label expired",
+      "layer": "me",
+      "kind": "Quality label",
+      "size": 2,
+      "status": "bad",
+      "pulse": true,
+      "title": "Data quality and utility label",
+      "sub": "expired, since 2026-09-18, conformance 0.92",
+      "description": "The label the access body's assessor issues for a dataset's quality and utility: conformance to the eEHRxF profiles, completeness and timeliness. It is renewed while the conformance score stays within the band; below it the assessor withholds renewal and the dataset is offered without a label.",
+      "facts": [
+        ["id", "vc:data-quality-label:clinic-alphaklinik"],
+        ["issued", "2026-03-22"],
+        ["expires", "2026-09-18"],
+        ["dataset", "Synthea Synthetic FHIR R4 Patient Cohort"]
+      ],
+      "article": "Art. 78 data quality and utility label; Art. 57(1)(d) the access body's assessment",
+      "links": [
+        {
+          "href": "/credentials",
+          "text": "My credentials"
+        }
+      ],
+      "series": [
+        {
+          "date": "2024-12-31",
+          "value": 0.95
+        },
+        {
+          "date": "2025-03-31",
+          "value": 0.94
+        },
+        {
+          "date": "2025-06-30",
+          "value": 0.93
+        },
+        {
+          "date": "2025-09-30",
+          "value": 0.92
+        },
+        {
+          "date": "2025-12-31",
+          "value": 0.91
+        },
+        {
+          "date": "2026-03-31",
+          "value": 0.9
+        },
+        {
+          "date": "2026-06-30",
+          "value": 0.89
+        },
+        {
+          "date": "2026-09-23",
+          "value": 0.88
+        }
+      ],
+      "unit": "",
+      "measure": "Label conformance score",
+      "range": {
+        "low": 0.9,
+        "high": 1,
+        "text": "0.90 to 1.00, the band the assessor renews the label in"
+      },
+      "higherIsWorse": false,
+      "expand": {
+        "nodes": [
+          {
+            "id": "pt:vc:vc:data-quality-label:clinic-alphaklinik:2024-12-31",
+            "label": "2024-12 · 0.95",
+            "layer": "time",
+            "kind": "Month",
+            "size": 0.9,
+            "color": "#93c5fd",
+            "title": "quality label expired, 2024-12",
+            "sub": "0.95 ",
+            "facts": [
+              ["measure", "Label conformance score"],
+              [
+                "band",
+                "0.90 to 1.00, the band the assessor renews the label in"
+              ]
+            ]
+          },
+          {
+            "id": "pt:vc:vc:data-quality-label:clinic-alphaklinik:2025-03-31",
+            "label": "2025-03 · 0.94",
+            "layer": "time",
+            "kind": "Month",
+            "size": 0.9,
+            "color": "#93c5fd",
+            "title": "quality label expired, 2025-03",
+            "sub": "0.94 ",
+            "facts": [
+              ["measure", "Label conformance score"],
+              [
+                "band",
+                "0.90 to 1.00, the band the assessor renews the label in"
+              ]
+            ]
+          },
+          {
+            "id": "pt:vc:vc:data-quality-label:clinic-alphaklinik:2025-06-30",
+            "label": "2025-06 · 0.93",
+            "layer": "time",
+            "kind": "Month",
+            "size": 0.9,
+            "color": "#93c5fd",
+            "title": "quality label expired, 2025-06",
+            "sub": "0.93 ",
+            "facts": [
+              ["measure", "Label conformance score"],
+              [
+                "band",
+                "0.90 to 1.00, the band the assessor renews the label in"
+              ]
+            ]
+          },
+          {
+            "id": "pt:vc:vc:data-quality-label:clinic-alphaklinik:2025-09-30",
+            "label": "2025-09 · 0.92",
+            "layer": "time",
+            "kind": "Month",
+            "size": 0.9,
+            "color": "#93c5fd",
+            "title": "quality label expired, 2025-09",
+            "sub": "0.92 ",
+            "facts": [
+              ["measure", "Label conformance score"],
+              [
+                "band",
+                "0.90 to 1.00, the band the assessor renews the label in"
+              ]
+            ]
+          },
+          {
+            "id": "pt:vc:vc:data-quality-label:clinic-alphaklinik:2025-12-31",
+            "label": "2025-12 · 0.91",
+            "layer": "time",
+            "kind": "Month",
+            "size": 0.9,
+            "color": "#93c5fd",
+            "title": "quality label expired, 2025-12",
+            "sub": "0.91 ",
+            "facts": [
+              ["measure", "Label conformance score"],
+              [
+                "band",
+                "0.90 to 1.00, the band the assessor renews the label in"
+              ]
+            ]
+          },
+          {
+            "id": "pt:vc:vc:data-quality-label:clinic-alphaklinik:2026-03-31",
+            "label": "2026-03 · 0.9",
+            "layer": "time",
+            "kind": "Month",
+            "size": 0.9,
+            "color": "#93c5fd",
+            "title": "quality label expired, 2026-03",
+            "sub": "0.9 ",
+            "facts": [
+              ["measure", "Label conformance score"],
+              [
+                "band",
+                "0.90 to 1.00, the band the assessor renews the label in"
+              ]
+            ]
+          },
+          {
+            "id": "pt:vc:vc:data-quality-label:clinic-alphaklinik:2026-06-30",
+            "label": "2026-06 · 0.89",
+            "layer": "time",
+            "kind": "Month",
+            "size": 0.9,
+            "color": "#f59e0b",
+            "title": "quality label expired, 2026-06",
+            "sub": "0.89 , outside the expected band",
+            "facts": [
+              ["measure", "Label conformance score"],
+              [
+                "band",
+                "0.90 to 1.00, the band the assessor renews the label in"
+              ]
+            ]
+          },
+          {
+            "id": "pt:vc:vc:data-quality-label:clinic-alphaklinik:2026-09-23",
+            "label": "2026-09 · 0.88",
+            "layer": "time",
+            "kind": "Month",
+            "size": 0.9,
+            "color": "#f59e0b",
+            "title": "quality label expired, 2026-09",
+            "sub": "0.88 , outside the expected band",
+            "facts": [
+              ["measure", "Label conformance score"],
+              [
+                "band",
+                "0.90 to 1.00, the band the assessor renews the label in"
+              ]
+            ]
+          }
+        ],
+        "links": [
+          {
+            "source": "vc:vc:data-quality-label:clinic-alphaklinik",
+            "target": "pt:vc:vc:data-quality-label:clinic-alphaklinik:2024-12-31",
+            "kind": "month",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "vc:vc:data-quality-label:clinic-alphaklinik",
+            "target": "pt:vc:vc:data-quality-label:clinic-alphaklinik:2025-03-31",
+            "kind": "month",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "pt:vc:vc:data-quality-label:clinic-alphaklinik:2024-12-31",
+            "target": "pt:vc:vc:data-quality-label:clinic-alphaklinik:2025-03-31",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          },
+          {
+            "source": "vc:vc:data-quality-label:clinic-alphaklinik",
+            "target": "pt:vc:vc:data-quality-label:clinic-alphaklinik:2025-06-30",
+            "kind": "month",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "pt:vc:vc:data-quality-label:clinic-alphaklinik:2025-03-31",
+            "target": "pt:vc:vc:data-quality-label:clinic-alphaklinik:2025-06-30",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          },
+          {
+            "source": "vc:vc:data-quality-label:clinic-alphaklinik",
+            "target": "pt:vc:vc:data-quality-label:clinic-alphaklinik:2025-09-30",
+            "kind": "month",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "pt:vc:vc:data-quality-label:clinic-alphaklinik:2025-06-30",
+            "target": "pt:vc:vc:data-quality-label:clinic-alphaklinik:2025-09-30",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          },
+          {
+            "source": "vc:vc:data-quality-label:clinic-alphaklinik",
+            "target": "pt:vc:vc:data-quality-label:clinic-alphaklinik:2025-12-31",
+            "kind": "month",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "pt:vc:vc:data-quality-label:clinic-alphaklinik:2025-09-30",
+            "target": "pt:vc:vc:data-quality-label:clinic-alphaklinik:2025-12-31",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          },
+          {
+            "source": "vc:vc:data-quality-label:clinic-alphaklinik",
+            "target": "pt:vc:vc:data-quality-label:clinic-alphaklinik:2026-03-31",
+            "kind": "month",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "pt:vc:vc:data-quality-label:clinic-alphaklinik:2025-12-31",
+            "target": "pt:vc:vc:data-quality-label:clinic-alphaklinik:2026-03-31",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          },
+          {
+            "source": "vc:vc:data-quality-label:clinic-alphaklinik",
+            "target": "pt:vc:vc:data-quality-label:clinic-alphaklinik:2026-06-30",
+            "kind": "month",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "pt:vc:vc:data-quality-label:clinic-alphaklinik:2026-03-31",
+            "target": "pt:vc:vc:data-quality-label:clinic-alphaklinik:2026-06-30",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          },
+          {
+            "source": "vc:vc:data-quality-label:clinic-alphaklinik",
+            "target": "pt:vc:vc:data-quality-label:clinic-alphaklinik:2026-09-23",
+            "kind": "month",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "pt:vc:vc:data-quality-label:clinic-alphaklinik:2026-06-30",
+            "target": "pt:vc:vc:data-quality-label:clinic-alphaklinik:2026-09-23",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "ds:dataset:prostate-cancer-registry",
+      "label": "Prostate Cancer Registry 2024",
+      "layer": "data",
+      "kind": "Dataset",
+      "size": 1.8,
+      "color": "#a78bfa",
+      "title": "Prostate Cancer Registry 2024",
+      "sub": "described in the national catalogue",
+      "facts": [["id", "dataset:prostate-cancer-registry"]],
+      "article": "Art. 77 dataset description; Art. 60(1) available under a permit; Art. 51 minimum categories",
+      "links": [
+        {
+          "href": "/catalog",
+          "text": "Catalogue entry"
+        }
+      ]
+    },
+    {
+      "id": "ds:dataset:synthea-fhir-r4-mvd",
+      "label": "Synthea Synthetic FHIR R4 Patient Cohort",
+      "layer": "data",
+      "kind": "Dataset",
+      "size": 1.8,
+      "color": "#a78bfa",
+      "title": "Synthea Synthetic FHIR R4 Patient Cohort",
+      "sub": "described in the national catalogue",
+      "facts": [["id", "dataset:synthea-fhir-r4-mvd"]],
+      "article": "Art. 77 dataset description; Art. 60(1) available under a permit; Art. 51 minimum categories",
+      "links": [
+        {
+          "href": "/catalog",
+          "text": "Catalogue entry"
+        }
+      ],
+      "series": [
+        {
+          "date": "2025-10-01",
+          "value": 0
+        },
+        {
+          "date": "2025-11-01",
+          "value": 0
+        },
+        {
+          "date": "2025-12-01",
+          "value": 0
+        },
+        {
+          "date": "2026-01-01",
+          "value": 0
+        },
+        {
+          "date": "2026-02-01",
+          "value": 0
+        },
+        {
+          "date": "2026-03-01",
+          "value": 0
+        },
+        {
+          "date": "2026-04-01",
+          "value": 0
+        },
+        {
+          "date": "2026-05-01",
+          "value": 0
+        },
+        {
+          "date": "2026-06-01",
+          "value": 0
+        },
+        {
+          "date": "2026-07-01",
+          "value": 0
+        },
+        {
+          "date": "2026-08-01",
+          "value": 0
+        },
+        {
+          "date": "2026-09-01",
+          "value": 3
+        }
+      ],
+      "unit": "accesses",
+      "measure": "Accesses per month",
+      "range": null,
+      "higherIsWorse": false,
+      "expand": {
+        "nodes": [
+          {
+            "id": "pt:ds:dataset:synthea-fhir-r4-mvd:2025-10-01",
+            "label": "2025-10 · 0",
+            "layer": "time",
+            "kind": "Month",
+            "size": 0.9,
+            "color": "#93c5fd",
+            "title": "Synthea Synthetic FHIR R4 Patient Cohort, 2025-10",
+            "sub": "0 accesses",
+            "facts": [
+              ["measure", "Accesses per month"],
+              ["band", "none"]
+            ]
+          },
+          {
+            "id": "pt:ds:dataset:synthea-fhir-r4-mvd:2025-11-01",
+            "label": "2025-11 · 0",
+            "layer": "time",
+            "kind": "Month",
+            "size": 0.9,
+            "color": "#93c5fd",
+            "title": "Synthea Synthetic FHIR R4 Patient Cohort, 2025-11",
+            "sub": "0 accesses",
+            "facts": [
+              ["measure", "Accesses per month"],
+              ["band", "none"]
+            ]
+          },
+          {
+            "id": "pt:ds:dataset:synthea-fhir-r4-mvd:2025-12-01",
+            "label": "2025-12 · 0",
+            "layer": "time",
+            "kind": "Month",
+            "size": 0.9,
+            "color": "#93c5fd",
+            "title": "Synthea Synthetic FHIR R4 Patient Cohort, 2025-12",
+            "sub": "0 accesses",
+            "facts": [
+              ["measure", "Accesses per month"],
+              ["band", "none"]
+            ]
+          },
+          {
+            "id": "pt:ds:dataset:synthea-fhir-r4-mvd:2026-01-01",
+            "label": "2026-01 · 0",
+            "layer": "time",
+            "kind": "Month",
+            "size": 0.9,
+            "color": "#93c5fd",
+            "title": "Synthea Synthetic FHIR R4 Patient Cohort, 2026-01",
+            "sub": "0 accesses",
+            "facts": [
+              ["measure", "Accesses per month"],
+              ["band", "none"]
+            ]
+          },
+          {
+            "id": "pt:ds:dataset:synthea-fhir-r4-mvd:2026-02-01",
+            "label": "2026-02 · 0",
+            "layer": "time",
+            "kind": "Month",
+            "size": 0.9,
+            "color": "#93c5fd",
+            "title": "Synthea Synthetic FHIR R4 Patient Cohort, 2026-02",
+            "sub": "0 accesses",
+            "facts": [
+              ["measure", "Accesses per month"],
+              ["band", "none"]
+            ]
+          },
+          {
+            "id": "pt:ds:dataset:synthea-fhir-r4-mvd:2026-03-01",
+            "label": "2026-03 · 0",
+            "layer": "time",
+            "kind": "Month",
+            "size": 0.9,
+            "color": "#93c5fd",
+            "title": "Synthea Synthetic FHIR R4 Patient Cohort, 2026-03",
+            "sub": "0 accesses",
+            "facts": [
+              ["measure", "Accesses per month"],
+              ["band", "none"]
+            ]
+          },
+          {
+            "id": "pt:ds:dataset:synthea-fhir-r4-mvd:2026-04-01",
+            "label": "2026-04 · 0",
+            "layer": "time",
+            "kind": "Month",
+            "size": 0.9,
+            "color": "#93c5fd",
+            "title": "Synthea Synthetic FHIR R4 Patient Cohort, 2026-04",
+            "sub": "0 accesses",
+            "facts": [
+              ["measure", "Accesses per month"],
+              ["band", "none"]
+            ]
+          },
+          {
+            "id": "pt:ds:dataset:synthea-fhir-r4-mvd:2026-05-01",
+            "label": "2026-05 · 0",
+            "layer": "time",
+            "kind": "Month",
+            "size": 0.9,
+            "color": "#93c5fd",
+            "title": "Synthea Synthetic FHIR R4 Patient Cohort, 2026-05",
+            "sub": "0 accesses",
+            "facts": [
+              ["measure", "Accesses per month"],
+              ["band", "none"]
+            ]
+          },
+          {
+            "id": "pt:ds:dataset:synthea-fhir-r4-mvd:2026-06-01",
+            "label": "2026-06 · 0",
+            "layer": "time",
+            "kind": "Month",
+            "size": 0.9,
+            "color": "#93c5fd",
+            "title": "Synthea Synthetic FHIR R4 Patient Cohort, 2026-06",
+            "sub": "0 accesses",
+            "facts": [
+              ["measure", "Accesses per month"],
+              ["band", "none"]
+            ]
+          },
+          {
+            "id": "pt:ds:dataset:synthea-fhir-r4-mvd:2026-07-01",
+            "label": "2026-07 · 0",
+            "layer": "time",
+            "kind": "Month",
+            "size": 0.9,
+            "color": "#93c5fd",
+            "title": "Synthea Synthetic FHIR R4 Patient Cohort, 2026-07",
+            "sub": "0 accesses",
+            "facts": [
+              ["measure", "Accesses per month"],
+              ["band", "none"]
+            ]
+          },
+          {
+            "id": "pt:ds:dataset:synthea-fhir-r4-mvd:2026-08-01",
+            "label": "2026-08 · 0",
+            "layer": "time",
+            "kind": "Month",
+            "size": 0.9,
+            "color": "#93c5fd",
+            "title": "Synthea Synthetic FHIR R4 Patient Cohort, 2026-08",
+            "sub": "0 accesses",
+            "facts": [
+              ["measure", "Accesses per month"],
+              ["band", "none"]
+            ]
+          },
+          {
+            "id": "pt:ds:dataset:synthea-fhir-r4-mvd:2026-09-01",
+            "label": "2026-09 · 3",
+            "layer": "time",
+            "kind": "Month",
+            "size": 0.9,
+            "color": "#93c5fd",
+            "title": "Synthea Synthetic FHIR R4 Patient Cohort, 2026-09",
+            "sub": "3 accesses",
+            "facts": [
+              ["measure", "Accesses per month"],
+              ["band", "none"]
+            ]
+          }
+        ],
+        "links": [
+          {
+            "source": "ds:dataset:synthea-fhir-r4-mvd",
+            "target": "pt:ds:dataset:synthea-fhir-r4-mvd:2025-10-01",
+            "kind": "month",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "ds:dataset:synthea-fhir-r4-mvd",
+            "target": "pt:ds:dataset:synthea-fhir-r4-mvd:2025-11-01",
+            "kind": "month",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "pt:ds:dataset:synthea-fhir-r4-mvd:2025-10-01",
+            "target": "pt:ds:dataset:synthea-fhir-r4-mvd:2025-11-01",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          },
+          {
+            "source": "ds:dataset:synthea-fhir-r4-mvd",
+            "target": "pt:ds:dataset:synthea-fhir-r4-mvd:2025-12-01",
+            "kind": "month",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "pt:ds:dataset:synthea-fhir-r4-mvd:2025-11-01",
+            "target": "pt:ds:dataset:synthea-fhir-r4-mvd:2025-12-01",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          },
+          {
+            "source": "ds:dataset:synthea-fhir-r4-mvd",
+            "target": "pt:ds:dataset:synthea-fhir-r4-mvd:2026-01-01",
+            "kind": "month",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "pt:ds:dataset:synthea-fhir-r4-mvd:2025-12-01",
+            "target": "pt:ds:dataset:synthea-fhir-r4-mvd:2026-01-01",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          },
+          {
+            "source": "ds:dataset:synthea-fhir-r4-mvd",
+            "target": "pt:ds:dataset:synthea-fhir-r4-mvd:2026-02-01",
+            "kind": "month",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "pt:ds:dataset:synthea-fhir-r4-mvd:2026-01-01",
+            "target": "pt:ds:dataset:synthea-fhir-r4-mvd:2026-02-01",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          },
+          {
+            "source": "ds:dataset:synthea-fhir-r4-mvd",
+            "target": "pt:ds:dataset:synthea-fhir-r4-mvd:2026-03-01",
+            "kind": "month",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "pt:ds:dataset:synthea-fhir-r4-mvd:2026-02-01",
+            "target": "pt:ds:dataset:synthea-fhir-r4-mvd:2026-03-01",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          },
+          {
+            "source": "ds:dataset:synthea-fhir-r4-mvd",
+            "target": "pt:ds:dataset:synthea-fhir-r4-mvd:2026-04-01",
+            "kind": "month",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "pt:ds:dataset:synthea-fhir-r4-mvd:2026-03-01",
+            "target": "pt:ds:dataset:synthea-fhir-r4-mvd:2026-04-01",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          },
+          {
+            "source": "ds:dataset:synthea-fhir-r4-mvd",
+            "target": "pt:ds:dataset:synthea-fhir-r4-mvd:2026-05-01",
+            "kind": "month",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "pt:ds:dataset:synthea-fhir-r4-mvd:2026-04-01",
+            "target": "pt:ds:dataset:synthea-fhir-r4-mvd:2026-05-01",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          },
+          {
+            "source": "ds:dataset:synthea-fhir-r4-mvd",
+            "target": "pt:ds:dataset:synthea-fhir-r4-mvd:2026-06-01",
+            "kind": "month",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "pt:ds:dataset:synthea-fhir-r4-mvd:2026-05-01",
+            "target": "pt:ds:dataset:synthea-fhir-r4-mvd:2026-06-01",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          },
+          {
+            "source": "ds:dataset:synthea-fhir-r4-mvd",
+            "target": "pt:ds:dataset:synthea-fhir-r4-mvd:2026-07-01",
+            "kind": "month",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "pt:ds:dataset:synthea-fhir-r4-mvd:2026-06-01",
+            "target": "pt:ds:dataset:synthea-fhir-r4-mvd:2026-07-01",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          },
+          {
+            "source": "ds:dataset:synthea-fhir-r4-mvd",
+            "target": "pt:ds:dataset:synthea-fhir-r4-mvd:2026-08-01",
+            "kind": "month",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "pt:ds:dataset:synthea-fhir-r4-mvd:2026-07-01",
+            "target": "pt:ds:dataset:synthea-fhir-r4-mvd:2026-08-01",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          },
+          {
+            "source": "ds:dataset:synthea-fhir-r4-mvd",
+            "target": "pt:ds:dataset:synthea-fhir-r4-mvd:2026-09-01",
+            "kind": "month",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "pt:ds:dataset:synthea-fhir-r4-mvd:2026-08-01",
+            "target": "pt:ds:dataset:synthea-fhir-r4-mvd:2026-09-01",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          }
+        ]
+      },
+      "status": "ok",
+      "pulse": false
+    }
+  ],
+  "links": [
+    {
+      "source": "c:did:web:irs.fr:hdab",
+      "target": "ds:dataset:prostate-cancer-registry",
+      "kind": "refused",
+      "status": "bad",
+      "particles": 2,
+      "distance": 90
+    },
+    {
+      "source": "permit:hdab-medreg-irs-2026-001",
+      "target": "c:did:web:irs.fr:hdab",
+      "kind": "issued to",
+      "color": "#94a3b8",
+      "distance": 60
+    },
+    {
+      "source": "vc:vc:ehds-participant:hdab-irs",
+      "target": "c:did:web:irs.fr:hdab",
+      "kind": "presented by",
+      "status": "ok",
+      "distance": 45
+    },
+    {
+      "source": "vc:vc:membership:hdab-irs",
+      "target": "c:did:web:irs.fr:hdab",
+      "kind": "presented by",
+      "status": "ok",
+      "distance": 45
+    },
+    {
+      "source": "c:did:web:lmc.nl:clinic",
+      "target": "ds:dataset:synthea-fhir-r4-mvd",
+      "kind": "reads",
+      "status": "warn",
+      "particles": 2,
+      "distance": 90
+    },
+    {
+      "source": "permit:hdab-irs-lmc-2026-001",
+      "target": "c:did:web:lmc.nl:clinic",
+      "kind": "issued to",
+      "color": "#94a3b8",
+      "distance": 60
+    },
+    {
+      "source": "vc:vc:ehds-participant:clinic-lmc",
+      "target": "c:did:web:lmc.nl:clinic",
+      "kind": "presented by",
+      "status": "ok",
+      "distance": 45
+    },
+    {
+      "source": "vc:vc:membership:clinic-lmc",
+      "target": "c:did:web:lmc.nl:clinic",
+      "kind": "presented by",
+      "status": "ok",
+      "distance": 45
+    },
+    {
+      "source": "c:did:web:pharmaco.de:research",
+      "target": "ds:dataset:synthea-fhir-r4-mvd",
+      "kind": "reads",
+      "status": "bad",
+      "particles": 2,
+      "distance": 90
+    },
+    {
+      "source": "permit:app-pharmaco-medreg-2026-002",
+      "target": "c:did:web:pharmaco.de:research",
+      "kind": "issued to",
+      "color": "#94a3b8",
+      "distance": 60
+    },
+    {
+      "source": "vc:vc:data-processing-purpose:cro-pharmaco",
+      "target": "c:did:web:pharmaco.de:research",
+      "kind": "presented by",
+      "status": "bad",
+      "distance": 45
+    },
+    {
+      "source": "vc:vc:ehds-participant:cro-pharmaco",
+      "target": "c:did:web:pharmaco.de:research",
+      "kind": "presented by",
+      "status": "ok",
+      "distance": 45
+    },
+    {
+      "source": "vc:vc:membership:cro-pharmaco",
+      "target": "c:did:web:pharmaco.de:research",
+      "kind": "presented by",
+      "status": "ok",
+      "distance": 45
+    },
+    {
+      "source": "me",
+      "target": "vc:vc:data-quality-label:clinic-alphaklinik",
+      "kind": "carries",
+      "status": "bad",
+      "distance": 60
+    },
+    {
+      "source": "vc:vc:data-quality-label:clinic-alphaklinik",
+      "target": "ds:dataset:synthea-fhir-r4-mvd",
+      "kind": "labels",
+      "color": "#a78bfa",
+      "distance": 80
+    },
+    {
+      "source": "me",
+      "target": "ds:dataset:prostate-cancer-registry",
+      "kind": "provides",
+      "color": "#a78bfa",
+      "distance": 70
+    },
+    {
+      "source": "me",
+      "target": "ds:dataset:synthea-fhir-r4-mvd",
+      "kind": "provides",
+      "color": "#a78bfa",
+      "distance": 70
+    }
+  ],
+  "signals": [
+    {
+      "severity": "bad",
+      "code": "access-attempt-after-refusal",
+      "nodeId": "c:did:web:irs.fr:hdab",
+      "text": "Institut de Recherche Santé: 1 access attempts refused after the application was refused; a matter for enforcement.",
+      "article": "Art. 61(1), Art. 63"
+    },
+    {
+      "severity": "bad",
+      "code": "access-after-credential-expiry",
+      "nodeId": "c:did:web:pharmaco.de:research",
+      "text": "PharmaCo Research AG: 2 accesses served after the purpose credential expired on 2026-06-20.",
+      "article": "Art. 53(1), Art. 61(1)"
+    },
+    {
+      "severity": "bad",
+      "code": "access-without-permit",
+      "nodeId": "c:did:web:pharmaco.de:research",
+      "text": "PharmaCo Research AG: 2 accesses served with no valid permit as of today.",
+      "article": "Art. 61(1), Art. 68"
+    },
+    {
+      "severity": "bad",
+      "code": "label-expired",
+      "nodeId": "vc:vc:data-quality-label:clinic-alphaklinik",
+      "text": "My quality label expired on 2026-09-18; the last conformance score was 0.88, below the renewal band. My datasets are offered without a label.",
+      "article": "Art. 78, Art. 60; click to see the assessor's scores by quarter"
+    },
+    {
+      "severity": "warn",
+      "code": "transfer-without-contract",
+      "nodeId": "c:did:web:lmc.nl:clinic",
+      "text": "Limburg Medical Centre: 1 accesses served with no DSP contract on file.",
+      "article": "DSP 2025-1 contract agreement; Art. 60(1)"
+    },
+    {
+      "severity": "info",
+      "code": "access-log",
+      "nodeId": "me",
+      "text": "3 accesses served and 1 refused on my data in the last 12 months, by 3 organisations, all logged.",
+      "article": "Art. 73(1)(e) log; Art. 8 what my patients may ask to see"
+    },
+    {
+      "severity": "info",
+      "code": "catalogue",
+      "nodeId": "me",
+      "text": "2 datasets of mine in the national catalogue. A description completeness score (Art. 77) is still missing (#271).",
+      "article": "Art. 77, Art. 79"
+    }
+  ],
+  "legend": [
+    {
+      "color": "#ef4444",
+      "text": "untrusted / duty broken"
+    },
+    {
+      "color": "#f59e0b",
+      "text": "at risk / uncovered"
+    },
+    {
+      "color": "#38bdf8",
+      "text": "information"
+    },
+    {
+      "color": "#22c55e",
+      "text": "trusted, in order"
+    },
+    {
+      "color": "#a78bfa",
+      "text": "my dataset"
+    },
+    {
+      "color": "#93c5fd",
+      "text": "month (unfolded)"
+    }
+  ],
+  "dataNote": "Every organisation shown is fictional."
+}
