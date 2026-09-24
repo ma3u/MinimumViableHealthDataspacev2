@@ -247,6 +247,24 @@ describe("buildHdabView", () => {
     expect(text).not.toContain("HOLDS_CREDENTIAL");
   });
 
+  it("a refused applicant that also had a served access still shows its refusals", () => {
+    const v = buildHdabView(
+      input({
+        events: [
+          ...EVENTS,
+          ev(IRS, "2026-02-20T09:15:00Z", {
+            consumerName: "Institut de Recherche Santé",
+            datasetId: SYNTHEA,
+            statusCode: 200,
+          }),
+        ],
+      }),
+    );
+    const irs = v.nodes.find((n) => n.id === `p:${IRS}`)!;
+    expect(irs.measure).toContain("Refused");
+    expect(irs.series!.at(-1)!.value).toBe(1);
+  });
+
   it("a consumer with a contract on file and a valid permit is in order", () => {
     const v = buildHdabView(
       input({
