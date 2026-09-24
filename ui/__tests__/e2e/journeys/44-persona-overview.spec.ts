@@ -265,10 +265,13 @@ test.describe("Issue #271 · M3 holder overview", () => {
     const view = await apiGet(page, "/api/overview?persona=hospital");
     const codes = view.signals.map((s: { code: string }) => s.code);
     expect(codes).toContain("transfer-without-contract");
+    // Limburg's monthly accesses carry no contract reference; the two demo
+    // events of the audit seed do, so on Azure the finding is "partly".
     const lmc = view.signals.find(
-      (s: { code: string }) => s.code === "transfer-without-contract",
+      (s: { code: string; nodeId: string }) =>
+        /^transfer-.*without-contract$/.test(s.code) && s.nodeId === `c:${LMC}`,
     );
-    expect(lmc.nodeId).toBe(`c:${LMC}`);
+    expect(lmc?.severity).toBe("warn");
     const label = view.nodes.find((n: { id: string }) =>
       n.id.startsWith("vc:vc:data-quality-label"),
     );
