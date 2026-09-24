@@ -49,6 +49,10 @@ const STATIC_MOCK_PREFIX: [string, string][] = [
   ["/api/patient/insights?", "/mock/patient_insights.json"],
   ["/api/patient/research?", "/mock/patient_research.json"],
   ["/api/patient/observations?", "/mock/patient_observations.json"],
+  // Persona overview (issue #271): the patient view is served, the rest say so
+  ["/api/overview?persona=patient", "/mock/overview_patient.json"],
+  ["/api/overview?persona=", "/mock/overview_not_implemented.json"],
+  ["/api/overview", "/mock/overview_patient.json"],
   // Legacy patient endpoint
   ["/api/patient?", "/mock/patient_default.json"],
   // Other prefixes
