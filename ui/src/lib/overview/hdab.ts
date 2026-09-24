@@ -393,23 +393,28 @@ export function buildHdabView(input: HdabViewInput): OverviewView {
         article: f.article,
       });
     }
-    const monthly =
-      served.length > 0
+    // The refusals are the series that matters once an applicant was refused
+    // and keeps trying; otherwise the served accesses.
+    const showRefused =
+      refused.length > 0 &&
+      (served.length === 0 ||
+        chain.findings.some((f) => f.code === "access-attempt-after-refusal"));
+    const monthly = showRefused
+      ? {
+          series: aggregateMonthly(refused, months, () => "x")["x"],
+          unit: "refusals",
+          measure: "Refused accesses per month",
+          range: { low: 0, high: 0, text: "0 refusals expected" },
+          higherIsWorse: true,
+        }
+      : served.length > 0
         ? {
             series: aggregateMonthly(served, months, () => "x")["x"],
             unit: "accesses",
             measure: "Accesses per month",
             higherIsWorse: false,
           }
-        : refused.length > 0
-          ? {
-              series: aggregateMonthly(refused, months, () => "x")["x"],
-              unit: "refusals",
-              measure: "Refused accesses per month",
-              range: { low: 0, high: 0, text: "0 refusals expected" },
-              higherIsWorse: true,
-            }
-          : null;
+        : null;
     if (monthly) raiseStatus(node, attachSeries(node, monthly, "time"));
     // flows to the datasets
     const pairs = new Map<string, { served: number; refused: number }>();
