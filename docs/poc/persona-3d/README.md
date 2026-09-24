@@ -3,7 +3,11 @@
 Four 3D "one view per role" prototypes of the knowledge graph, discussed in
 [discussion #265](https://github.com/ma3u/MinimumViableHealthDataspacev2/discussions/265).
 
-- Live: https://ehds.mabu.red/poc/persona-3d/
+- Product page since issue #271: https://ehds.mabu.red/overview (one route,
+  `GET /api/overview?persona=`, four builders under `ui/src/lib/overview/`;
+  see [persona-overview](../../knowledge/apis/persona-overview.md)). The
+  prototypes stay as the design reference for the scene and the panel.
+- Live prototypes: https://ehds.mabu.red/poc/persona-3d/
 - Source: `ui/public/poc/persona-3d/` (`engine.js` shared, one page per persona)
 - Data: the static fixtures under `ui/public/mock/`, pinned to 2026-09-23
 - Screenshots in `img/` are referenced from the discussion

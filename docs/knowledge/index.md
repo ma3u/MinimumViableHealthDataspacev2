@@ -32,7 +32,8 @@ frontmatter. Spec:
 
 [nextjs-api-routes](apis/nextjs-api-routes.md) ·
 [neo4j-proxy-endpoints](apis/neo4j-proxy-endpoints.md) ·
-[mock-fixtures](apis/mock-fixtures.md)
+[mock-fixtures](apis/mock-fixtures.md) ·
+[persona-overview](apis/persona-overview.md)
 
 ## runbooks/ — operational procedures
 
