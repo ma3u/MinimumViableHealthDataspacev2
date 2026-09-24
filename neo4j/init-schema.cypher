@@ -107,6 +107,18 @@ CREATE CONSTRAINT research_insight_id IF NOT EXISTS FOR (ri:ResearchInsight) REQ
 CREATE INDEX research_insight_study IF NOT EXISTS FOR (ri:ResearchInsight) ON (ri.studyId);
 
 // ============================================================
+// Persona overview (discussion #265): studies with enrolment, quality label
+// assessments per quarter. Seeded by seed-persona-overview.cypher.
+// ============================================================
+CREATE CONSTRAINT research_study_id IF NOT EXISTS FOR (rs:ResearchStudy) REQUIRE rs.studyId IS UNIQUE;
+CREATE INDEX research_study_institution IF NOT EXISTS FOR (rs:ResearchStudy) ON (rs.institutionDid);
+CREATE CONSTRAINT study_enrolment_id IF NOT EXISTS FOR (se:StudyEnrolment) REQUIRE se.enrolmentId IS UNIQUE;
+CREATE INDEX study_enrolment_study IF NOT EXISTS FOR (se:StudyEnrolment) ON (se.studyId);
+CREATE CONSTRAINT quality_assessment_id IF NOT EXISTS FOR (qa:QualityAssessment) REQUIRE qa.assessmentId IS UNIQUE;
+CREATE INDEX quality_assessment_period IF NOT EXISTS FOR (qa:QualityAssessment) ON (qa.period);
+CREATE INDEX transfer_event_month IF NOT EXISTS FOR (te:TransferEvent) ON (te.timestamp);
+
+// ============================================================
 // Phase 18: Trust Center & Federated Pseudonym Resolution
 // EHDS Art. 50 (Secure Processing Environment) + Art. 51 (Cross-Border)
 // ============================================================

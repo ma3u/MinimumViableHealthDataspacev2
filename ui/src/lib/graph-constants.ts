@@ -42,6 +42,9 @@ export const LABEL_LAYER: Record<string, number> = {
   // L1 Phase 20: Patient Portal (EHDS Chapter II / GDPR Art. 15-22)
   PatientConsent: 1,
   ResearchInsight: 1,
+  // L1 discussion #265: persona overview
+  ResearchStudy: 1,
+  StudyEnrolment: 1,
   // L2: HealthDCAT-AP Metadata
   HealthDataset: 2,
   Distribution: 2,
@@ -69,6 +72,7 @@ export const LABEL_LAYER: Record<string, number> = {
   ICD10Code: 5,
   RxNormConcept: 5,
   VerifiableCredential: 5,
+  QualityAssessment: 5,
   TransferEvent: 5,
 };
 
@@ -200,6 +204,9 @@ export const NODE_DISPLAY_NAMES: Record<string, string> = {
   ProviderPseudonym: "Provider Pseudonym",
   PatientConsent: "My Consent",
   ResearchInsight: "Research Finding",
+  ResearchStudy: "Study",
+  StudyEnrolment: "Enrolment",
+  QualityAssessment: "Quality Assessment",
   // L2 Catalog
   HealthDataset: "Dataset Description",
   Distribution: "Data Format",

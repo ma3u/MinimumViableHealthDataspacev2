@@ -9,15 +9,15 @@
       "series": [
         {
           "date": "2025-10-01",
-          "value": 5
+          "value": 4
         },
         {
           "date": "2025-11-01",
-          "value": 6
+          "value": 5
         },
         {
           "date": "2025-12-01",
-          "value": 7
+          "value": 6
         },
         {
           "date": "2026-01-01",
@@ -25,11 +25,11 @@
         },
         {
           "date": "2026-02-01",
-          "value": 8
+          "value": 7
         },
         {
           "date": "2026-03-01",
-          "value": 9
+          "value": 8
         },
         {
           "date": "2026-04-01",
@@ -240,51 +240,51 @@
       "series": [
         {
           "date": "2025-10-01",
-          "value": 4
+          "value": 3
         },
         {
           "date": "2025-11-01",
-          "value": 5
+          "value": 4
         },
         {
           "date": "2025-12-01",
-          "value": 6
+          "value": 4
         },
         {
           "date": "2026-01-01",
-          "value": 6
+          "value": 4
         },
         {
           "date": "2026-02-01",
-          "value": 7
+          "value": 5
         },
         {
           "date": "2026-03-01",
-          "value": 8
+          "value": 7
         },
         {
           "date": "2026-04-01",
-          "value": 8
+          "value": 7
         },
         {
           "date": "2026-05-01",
-          "value": 9
+          "value": 7
         },
         {
           "date": "2026-06-01",
-          "value": 10
+          "value": 9
         },
         {
           "date": "2026-07-01",
-          "value": 12
+          "value": 10
         },
         {
           "date": "2026-08-01",
-          "value": 13
+          "value": 11
         },
         {
           "date": "2026-09-01",
-          "value": 14
+          "value": 12
         }
       ],
       "description": "All accesses to the Synthea FHIR cohort across users. The most used dataset in the space; two permits and one refused application point at it.",
@@ -309,11 +309,11 @@
         },
         {
           "date": "2026-01-01",
-          "value": 3
+          "value": 2
         },
         {
           "date": "2026-02-01",
-          "value": 1
+          "value": 2
         },
         {
           "date": "2026-03-01",
@@ -329,7 +329,7 @@
         },
         {
           "date": "2026-06-01",
-          "value": 2
+          "value": 3
         },
         {
           "date": "2026-07-01",
@@ -337,7 +337,7 @@
         },
         {
           "date": "2026-08-01",
-          "value": 3
+          "value": 4
         },
         {
           "date": "2026-09-01",
@@ -358,15 +358,15 @@
         },
         {
           "date": "2025-11-01",
-          "value": 1
+          "value": 0
         },
         {
           "date": "2025-12-01",
-          "value": 1
+          "value": 0
         },
         {
           "date": "2026-01-01",
-          "value": 1
+          "value": 0
         },
         {
           "date": "2026-02-01",
@@ -374,11 +374,11 @@
         },
         {
           "date": "2026-03-01",
-          "value": 1
+          "value": 0
         },
         {
           "date": "2026-04-01",
-          "value": 1
+          "value": 0
         },
         {
           "date": "2026-05-01",
@@ -386,19 +386,19 @@
         },
         {
           "date": "2026-06-01",
-          "value": 1
+          "value": 0
         },
         {
           "date": "2026-07-01",
-          "value": 1
+          "value": 0
         },
         {
           "date": "2026-08-01",
-          "value": 1
+          "value": 0
         },
         {
           "date": "2026-09-01",
-          "value": 1
+          "value": 0
         }
       ],
       "description": "Accesses to the prostate cancer registry, cross-border from MedReg DE to Limburg. The refused IRS application targeted this registry.",
@@ -465,5 +465,6 @@
       ],
       "description": "My own queue. Art. 68 gives three months from a complete application; two of the three open ones are already past that, which Art. 57(1)(j) obliges me to publish."
     }
-  ]
+  ],
+  "source": "neo4j/seed-persona-overview.cypher via scripts/generate-persona-overview-seed.py"
 }

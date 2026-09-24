@@ -1,23 +1,36 @@
 {
   "resourceType": "Bundle",
-  "id": "bundle-p1-observations",
+  "id": "observations-p1",
   "type": "searchset",
-  "total": 48,
   "meta": {
-    "lastUpdated": "2026-09-23T00:00:00Z",
     "tag": [
       {
-        "code": "fictional",
-        "display": "Synthetic demo data for a fictional patient. Reference ranges are those printed on the (fictional) report, never app-generated (ADR-039)."
+        "system": "https://ehds.mabu.red/tag",
+        "code": "fictional"
       }
     ]
   },
+  "total": 48,
+  "link": [
+    {
+      "relation": "self",
+      "url": "/api/patient/observations?patientId=P1"
+    }
+  ],
   "entry": [
     {
       "fullUrl": "urn:uuid:obs-p1-4548-4-2024-09-12",
       "resource": {
         "resourceType": "Observation",
         "id": "obs-p1-4548-4-2024-09-12",
+        "meta": {
+          "tag": [
+            {
+              "system": "https://ehds.mabu.red/tag",
+              "code": "fictional"
+            }
+          ]
+        },
         "status": "final",
         "category": [
           {
@@ -36,7 +49,8 @@
               "code": "4548-4",
               "display": "Hemoglobin A1c/Hemoglobin.total in Blood"
             }
-          ]
+          ],
+          "text": "Hemoglobin A1c/Hemoglobin.total in Blood"
         },
         "subject": {
           "reference": "Patient/P1",
@@ -74,6 +88,14 @@
       "resource": {
         "resourceType": "Observation",
         "id": "obs-p1-4548-4-2025-01-20",
+        "meta": {
+          "tag": [
+            {
+              "system": "https://ehds.mabu.red/tag",
+              "code": "fictional"
+            }
+          ]
+        },
         "status": "final",
         "category": [
           {
@@ -92,7 +114,8 @@
               "code": "4548-4",
               "display": "Hemoglobin A1c/Hemoglobin.total in Blood"
             }
-          ]
+          ],
+          "text": "Hemoglobin A1c/Hemoglobin.total in Blood"
         },
         "subject": {
           "reference": "Patient/P1",
@@ -130,6 +153,14 @@
       "resource": {
         "resourceType": "Observation",
         "id": "obs-p1-4548-4-2025-05-15",
+        "meta": {
+          "tag": [
+            {
+              "system": "https://ehds.mabu.red/tag",
+              "code": "fictional"
+            }
+          ]
+        },
         "status": "final",
         "category": [
           {
@@ -148,7 +179,8 @@
               "code": "4548-4",
               "display": "Hemoglobin A1c/Hemoglobin.total in Blood"
             }
-          ]
+          ],
+          "text": "Hemoglobin A1c/Hemoglobin.total in Blood"
         },
         "subject": {
           "reference": "Patient/P1",
@@ -186,6 +218,14 @@
       "resource": {
         "resourceType": "Observation",
         "id": "obs-p1-4548-4-2025-09-18",
+        "meta": {
+          "tag": [
+            {
+              "system": "https://ehds.mabu.red/tag",
+              "code": "fictional"
+            }
+          ]
+        },
         "status": "final",
         "category": [
           {
@@ -204,7 +244,8 @@
               "code": "4548-4",
               "display": "Hemoglobin A1c/Hemoglobin.total in Blood"
             }
-          ]
+          ],
+          "text": "Hemoglobin A1c/Hemoglobin.total in Blood"
         },
         "subject": {
           "reference": "Patient/P1",
@@ -242,6 +283,14 @@
       "resource": {
         "resourceType": "Observation",
         "id": "obs-p1-4548-4-2026-02-10",
+        "meta": {
+          "tag": [
+            {
+              "system": "https://ehds.mabu.red/tag",
+              "code": "fictional"
+            }
+          ]
+        },
         "status": "final",
         "category": [
           {
@@ -260,7 +309,8 @@
               "code": "4548-4",
               "display": "Hemoglobin A1c/Hemoglobin.total in Blood"
             }
-          ]
+          ],
+          "text": "Hemoglobin A1c/Hemoglobin.total in Blood"
         },
         "subject": {
           "reference": "Patient/P1",
@@ -298,6 +348,14 @@
       "resource": {
         "resourceType": "Observation",
         "id": "obs-p1-4548-4-2026-08-21",
+        "meta": {
+          "tag": [
+            {
+              "system": "https://ehds.mabu.red/tag",
+              "code": "fictional"
+            }
+          ]
+        },
         "status": "final",
         "category": [
           {
@@ -316,7 +374,8 @@
               "code": "4548-4",
               "display": "Hemoglobin A1c/Hemoglobin.total in Blood"
             }
-          ]
+          ],
+          "text": "Hemoglobin A1c/Hemoglobin.total in Blood"
         },
         "subject": {
           "reference": "Patient/P1",
@@ -354,6 +413,14 @@
       "resource": {
         "resourceType": "Observation",
         "id": "obs-p1-2339-0-2024-09-12",
+        "meta": {
+          "tag": [
+            {
+              "system": "https://ehds.mabu.red/tag",
+              "code": "fictional"
+            }
+          ]
+        },
         "status": "final",
         "category": [
           {
@@ -372,7 +439,8 @@
               "code": "2339-0",
               "display": "Glucose [Mass/volume] in Blood"
             }
-          ]
+          ],
+          "text": "Glucose [Mass/volume] in Blood"
         },
         "subject": {
           "reference": "Patient/P1",
@@ -410,6 +478,14 @@
       "resource": {
         "resourceType": "Observation",
         "id": "obs-p1-2339-0-2025-01-20",
+        "meta": {
+          "tag": [
+            {
+              "system": "https://ehds.mabu.red/tag",
+              "code": "fictional"
+            }
+          ]
+        },
         "status": "final",
         "category": [
           {
@@ -428,7 +504,8 @@
               "code": "2339-0",
               "display": "Glucose [Mass/volume] in Blood"
             }
-          ]
+          ],
+          "text": "Glucose [Mass/volume] in Blood"
         },
         "subject": {
           "reference": "Patient/P1",
@@ -466,6 +543,14 @@
       "resource": {
         "resourceType": "Observation",
         "id": "obs-p1-2339-0-2025-05-15",
+        "meta": {
+          "tag": [
+            {
+              "system": "https://ehds.mabu.red/tag",
+              "code": "fictional"
+            }
+          ]
+        },
         "status": "final",
         "category": [
           {
@@ -484,7 +569,8 @@
               "code": "2339-0",
               "display": "Glucose [Mass/volume] in Blood"
             }
-          ]
+          ],
+          "text": "Glucose [Mass/volume] in Blood"
         },
         "subject": {
           "reference": "Patient/P1",
@@ -522,6 +608,14 @@
       "resource": {
         "resourceType": "Observation",
         "id": "obs-p1-2339-0-2025-09-18",
+        "meta": {
+          "tag": [
+            {
+              "system": "https://ehds.mabu.red/tag",
+              "code": "fictional"
+            }
+          ]
+        },
         "status": "final",
         "category": [
           {
@@ -540,7 +634,8 @@
               "code": "2339-0",
               "display": "Glucose [Mass/volume] in Blood"
             }
-          ]
+          ],
+          "text": "Glucose [Mass/volume] in Blood"
         },
         "subject": {
           "reference": "Patient/P1",
@@ -578,6 +673,14 @@
       "resource": {
         "resourceType": "Observation",
         "id": "obs-p1-2339-0-2026-02-10",
+        "meta": {
+          "tag": [
+            {
+              "system": "https://ehds.mabu.red/tag",
+              "code": "fictional"
+            }
+          ]
+        },
         "status": "final",
         "category": [
           {
@@ -596,7 +699,8 @@
               "code": "2339-0",
               "display": "Glucose [Mass/volume] in Blood"
             }
-          ]
+          ],
+          "text": "Glucose [Mass/volume] in Blood"
         },
         "subject": {
           "reference": "Patient/P1",
@@ -634,6 +738,14 @@
       "resource": {
         "resourceType": "Observation",
         "id": "obs-p1-2339-0-2026-08-21",
+        "meta": {
+          "tag": [
+            {
+              "system": "https://ehds.mabu.red/tag",
+              "code": "fictional"
+            }
+          ]
+        },
         "status": "final",
         "category": [
           {
@@ -652,7 +764,8 @@
               "code": "2339-0",
               "display": "Glucose [Mass/volume] in Blood"
             }
-          ]
+          ],
+          "text": "Glucose [Mass/volume] in Blood"
         },
         "subject": {
           "reference": "Patient/P1",
@@ -690,6 +803,14 @@
       "resource": {
         "resourceType": "Observation",
         "id": "obs-p1-2089-1-2024-09-12",
+        "meta": {
+          "tag": [
+            {
+              "system": "https://ehds.mabu.red/tag",
+              "code": "fictional"
+            }
+          ]
+        },
         "status": "final",
         "category": [
           {
@@ -708,7 +829,8 @@
               "code": "2089-1",
               "display": "Cholesterol in LDL [Mass/volume] in Serum or Plasma"
             }
-          ]
+          ],
+          "text": "Cholesterol in LDL [Mass/volume] in Serum or Plasma"
         },
         "subject": {
           "reference": "Patient/P1",
@@ -746,6 +868,14 @@
       "resource": {
         "resourceType": "Observation",
         "id": "obs-p1-2089-1-2025-01-20",
+        "meta": {
+          "tag": [
+            {
+              "system": "https://ehds.mabu.red/tag",
+              "code": "fictional"
+            }
+          ]
+        },
         "status": "final",
         "category": [
           {
@@ -764,7 +894,8 @@
               "code": "2089-1",
               "display": "Cholesterol in LDL [Mass/volume] in Serum or Plasma"
             }
-          ]
+          ],
+          "text": "Cholesterol in LDL [Mass/volume] in Serum or Plasma"
         },
         "subject": {
           "reference": "Patient/P1",
@@ -802,6 +933,14 @@
       "resource": {
         "resourceType": "Observation",
         "id": "obs-p1-2089-1-2025-05-15",
+        "meta": {
+          "tag": [
+            {
+              "system": "https://ehds.mabu.red/tag",
+              "code": "fictional"
+            }
+          ]
+        },
         "status": "final",
         "category": [
           {
@@ -820,7 +959,8 @@
               "code": "2089-1",
               "display": "Cholesterol in LDL [Mass/volume] in Serum or Plasma"
             }
-          ]
+          ],
+          "text": "Cholesterol in LDL [Mass/volume] in Serum or Plasma"
         },
         "subject": {
           "reference": "Patient/P1",
@@ -858,6 +998,14 @@
       "resource": {
         "resourceType": "Observation",
         "id": "obs-p1-2089-1-2025-09-18",
+        "meta": {
+          "tag": [
+            {
+              "system": "https://ehds.mabu.red/tag",
+              "code": "fictional"
+            }
+          ]
+        },
         "status": "final",
         "category": [
           {
@@ -876,7 +1024,8 @@
               "code": "2089-1",
               "display": "Cholesterol in LDL [Mass/volume] in Serum or Plasma"
             }
-          ]
+          ],
+          "text": "Cholesterol in LDL [Mass/volume] in Serum or Plasma"
         },
         "subject": {
           "reference": "Patient/P1",
@@ -914,6 +1063,14 @@
       "resource": {
         "resourceType": "Observation",
         "id": "obs-p1-2089-1-2026-02-10",
+        "meta": {
+          "tag": [
+            {
+              "system": "https://ehds.mabu.red/tag",
+              "code": "fictional"
+            }
+          ]
+        },
         "status": "final",
         "category": [
           {
@@ -932,7 +1089,8 @@
               "code": "2089-1",
               "display": "Cholesterol in LDL [Mass/volume] in Serum or Plasma"
             }
-          ]
+          ],
+          "text": "Cholesterol in LDL [Mass/volume] in Serum or Plasma"
         },
         "subject": {
           "reference": "Patient/P1",
@@ -970,6 +1128,14 @@
       "resource": {
         "resourceType": "Observation",
         "id": "obs-p1-2089-1-2026-08-21",
+        "meta": {
+          "tag": [
+            {
+              "system": "https://ehds.mabu.red/tag",
+              "code": "fictional"
+            }
+          ]
+        },
         "status": "final",
         "category": [
           {
@@ -988,7 +1154,8 @@
               "code": "2089-1",
               "display": "Cholesterol in LDL [Mass/volume] in Serum or Plasma"
             }
-          ]
+          ],
+          "text": "Cholesterol in LDL [Mass/volume] in Serum or Plasma"
         },
         "subject": {
           "reference": "Patient/P1",
@@ -1026,6 +1193,14 @@
       "resource": {
         "resourceType": "Observation",
         "id": "obs-p1-2093-3-2024-09-12",
+        "meta": {
+          "tag": [
+            {
+              "system": "https://ehds.mabu.red/tag",
+              "code": "fictional"
+            }
+          ]
+        },
         "status": "final",
         "category": [
           {
@@ -1044,7 +1219,8 @@
               "code": "2093-3",
               "display": "Cholesterol [Mass/volume] in Serum or Plasma"
             }
-          ]
+          ],
+          "text": "Cholesterol [Mass/volume] in Serum or Plasma"
         },
         "subject": {
           "reference": "Patient/P1",
@@ -1082,6 +1258,14 @@
       "resource": {
         "resourceType": "Observation",
         "id": "obs-p1-2093-3-2025-01-20",
+        "meta": {
+          "tag": [
+            {
+              "system": "https://ehds.mabu.red/tag",
+              "code": "fictional"
+            }
+          ]
+        },
         "status": "final",
         "category": [
           {
@@ -1100,7 +1284,8 @@
               "code": "2093-3",
               "display": "Cholesterol [Mass/volume] in Serum or Plasma"
             }
-          ]
+          ],
+          "text": "Cholesterol [Mass/volume] in Serum or Plasma"
         },
         "subject": {
           "reference": "Patient/P1",
@@ -1138,6 +1323,14 @@
       "resource": {
         "resourceType": "Observation",
         "id": "obs-p1-2093-3-2025-05-15",
+        "meta": {
+          "tag": [
+            {
+              "system": "https://ehds.mabu.red/tag",
+              "code": "fictional"
+            }
+          ]
+        },
         "status": "final",
         "category": [
           {
@@ -1156,7 +1349,8 @@
               "code": "2093-3",
               "display": "Cholesterol [Mass/volume] in Serum or Plasma"
             }
-          ]
+          ],
+          "text": "Cholesterol [Mass/volume] in Serum or Plasma"
         },
         "subject": {
           "reference": "Patient/P1",
@@ -1194,6 +1388,14 @@
       "resource": {
         "resourceType": "Observation",
         "id": "obs-p1-2093-3-2025-09-18",
+        "meta": {
+          "tag": [
+            {
+              "system": "https://ehds.mabu.red/tag",
+              "code": "fictional"
+            }
+          ]
+        },
         "status": "final",
         "category": [
           {
@@ -1212,7 +1414,8 @@
               "code": "2093-3",
               "display": "Cholesterol [Mass/volume] in Serum or Plasma"
             }
-          ]
+          ],
+          "text": "Cholesterol [Mass/volume] in Serum or Plasma"
         },
         "subject": {
           "reference": "Patient/P1",
@@ -1250,6 +1453,14 @@
       "resource": {
         "resourceType": "Observation",
         "id": "obs-p1-2093-3-2026-02-10",
+        "meta": {
+          "tag": [
+            {
+              "system": "https://ehds.mabu.red/tag",
+              "code": "fictional"
+            }
+          ]
+        },
         "status": "final",
         "category": [
           {
@@ -1268,7 +1479,8 @@
               "code": "2093-3",
               "display": "Cholesterol [Mass/volume] in Serum or Plasma"
             }
-          ]
+          ],
+          "text": "Cholesterol [Mass/volume] in Serum or Plasma"
         },
         "subject": {
           "reference": "Patient/P1",
@@ -1306,6 +1518,14 @@
       "resource": {
         "resourceType": "Observation",
         "id": "obs-p1-2093-3-2026-08-21",
+        "meta": {
+          "tag": [
+            {
+              "system": "https://ehds.mabu.red/tag",
+              "code": "fictional"
+            }
+          ]
+        },
         "status": "final",
         "category": [
           {
@@ -1324,7 +1544,8 @@
               "code": "2093-3",
               "display": "Cholesterol [Mass/volume] in Serum or Plasma"
             }
-          ]
+          ],
+          "text": "Cholesterol [Mass/volume] in Serum or Plasma"
         },
         "subject": {
           "reference": "Patient/P1",
@@ -1362,6 +1583,14 @@
       "resource": {
         "resourceType": "Observation",
         "id": "obs-p1-8480-6-2024-09-12",
+        "meta": {
+          "tag": [
+            {
+              "system": "https://ehds.mabu.red/tag",
+              "code": "fictional"
+            }
+          ]
+        },
         "status": "final",
         "category": [
           {
@@ -1380,7 +1609,8 @@
               "code": "8480-6",
               "display": "Systolic blood pressure"
             }
-          ]
+          ],
+          "text": "Systolic blood pressure"
         },
         "subject": {
           "reference": "Patient/P1",
@@ -1418,6 +1648,14 @@
       "resource": {
         "resourceType": "Observation",
         "id": "obs-p1-8480-6-2025-01-20",
+        "meta": {
+          "tag": [
+            {
+              "system": "https://ehds.mabu.red/tag",
+              "code": "fictional"
+            }
+          ]
+        },
         "status": "final",
         "category": [
           {
@@ -1436,7 +1674,8 @@
               "code": "8480-6",
               "display": "Systolic blood pressure"
             }
-          ]
+          ],
+          "text": "Systolic blood pressure"
         },
         "subject": {
           "reference": "Patient/P1",
@@ -1474,6 +1713,14 @@
       "resource": {
         "resourceType": "Observation",
         "id": "obs-p1-8480-6-2025-05-15",
+        "meta": {
+          "tag": [
+            {
+              "system": "https://ehds.mabu.red/tag",
+              "code": "fictional"
+            }
+          ]
+        },
         "status": "final",
         "category": [
           {
@@ -1492,7 +1739,8 @@
               "code": "8480-6",
               "display": "Systolic blood pressure"
             }
-          ]
+          ],
+          "text": "Systolic blood pressure"
         },
         "subject": {
           "reference": "Patient/P1",
@@ -1530,6 +1778,14 @@
       "resource": {
         "resourceType": "Observation",
         "id": "obs-p1-8480-6-2025-09-18",
+        "meta": {
+          "tag": [
+            {
+              "system": "https://ehds.mabu.red/tag",
+              "code": "fictional"
+            }
+          ]
+        },
         "status": "final",
         "category": [
           {
@@ -1548,7 +1804,8 @@
               "code": "8480-6",
               "display": "Systolic blood pressure"
             }
-          ]
+          ],
+          "text": "Systolic blood pressure"
         },
         "subject": {
           "reference": "Patient/P1",
@@ -1586,6 +1843,14 @@
       "resource": {
         "resourceType": "Observation",
         "id": "obs-p1-8480-6-2026-02-10",
+        "meta": {
+          "tag": [
+            {
+              "system": "https://ehds.mabu.red/tag",
+              "code": "fictional"
+            }
+          ]
+        },
         "status": "final",
         "category": [
           {
@@ -1604,7 +1869,8 @@
               "code": "8480-6",
               "display": "Systolic blood pressure"
             }
-          ]
+          ],
+          "text": "Systolic blood pressure"
         },
         "subject": {
           "reference": "Patient/P1",
@@ -1642,6 +1908,14 @@
       "resource": {
         "resourceType": "Observation",
         "id": "obs-p1-8480-6-2026-08-21",
+        "meta": {
+          "tag": [
+            {
+              "system": "https://ehds.mabu.red/tag",
+              "code": "fictional"
+            }
+          ]
+        },
         "status": "final",
         "category": [
           {
@@ -1660,7 +1934,8 @@
               "code": "8480-6",
               "display": "Systolic blood pressure"
             }
-          ]
+          ],
+          "text": "Systolic blood pressure"
         },
         "subject": {
           "reference": "Patient/P1",
@@ -1698,6 +1973,14 @@
       "resource": {
         "resourceType": "Observation",
         "id": "obs-p1-8462-4-2024-09-12",
+        "meta": {
+          "tag": [
+            {
+              "system": "https://ehds.mabu.red/tag",
+              "code": "fictional"
+            }
+          ]
+        },
         "status": "final",
         "category": [
           {
@@ -1716,7 +1999,8 @@
               "code": "8462-4",
               "display": "Diastolic blood pressure"
             }
-          ]
+          ],
+          "text": "Diastolic blood pressure"
         },
         "subject": {
           "reference": "Patient/P1",
@@ -1754,6 +2038,14 @@
       "resource": {
         "resourceType": "Observation",
         "id": "obs-p1-8462-4-2025-01-20",
+        "meta": {
+          "tag": [
+            {
+              "system": "https://ehds.mabu.red/tag",
+              "code": "fictional"
+            }
+          ]
+        },
         "status": "final",
         "category": [
           {
@@ -1772,7 +2064,8 @@
               "code": "8462-4",
               "display": "Diastolic blood pressure"
             }
-          ]
+          ],
+          "text": "Diastolic blood pressure"
         },
         "subject": {
           "reference": "Patient/P1",
@@ -1810,6 +2103,14 @@
       "resource": {
         "resourceType": "Observation",
         "id": "obs-p1-8462-4-2025-05-15",
+        "meta": {
+          "tag": [
+            {
+              "system": "https://ehds.mabu.red/tag",
+              "code": "fictional"
+            }
+          ]
+        },
         "status": "final",
         "category": [
           {
@@ -1828,7 +2129,8 @@
               "code": "8462-4",
               "display": "Diastolic blood pressure"
             }
-          ]
+          ],
+          "text": "Diastolic blood pressure"
         },
         "subject": {
           "reference": "Patient/P1",
@@ -1866,6 +2168,14 @@
       "resource": {
         "resourceType": "Observation",
         "id": "obs-p1-8462-4-2025-09-18",
+        "meta": {
+          "tag": [
+            {
+              "system": "https://ehds.mabu.red/tag",
+              "code": "fictional"
+            }
+          ]
+        },
         "status": "final",
         "category": [
           {
@@ -1884,7 +2194,8 @@
               "code": "8462-4",
               "display": "Diastolic blood pressure"
             }
-          ]
+          ],
+          "text": "Diastolic blood pressure"
         },
         "subject": {
           "reference": "Patient/P1",
@@ -1922,6 +2233,14 @@
       "resource": {
         "resourceType": "Observation",
         "id": "obs-p1-8462-4-2026-02-10",
+        "meta": {
+          "tag": [
+            {
+              "system": "https://ehds.mabu.red/tag",
+              "code": "fictional"
+            }
+          ]
+        },
         "status": "final",
         "category": [
           {
@@ -1940,7 +2259,8 @@
               "code": "8462-4",
               "display": "Diastolic blood pressure"
             }
-          ]
+          ],
+          "text": "Diastolic blood pressure"
         },
         "subject": {
           "reference": "Patient/P1",
@@ -1978,6 +2298,14 @@
       "resource": {
         "resourceType": "Observation",
         "id": "obs-p1-8462-4-2026-08-21",
+        "meta": {
+          "tag": [
+            {
+              "system": "https://ehds.mabu.red/tag",
+              "code": "fictional"
+            }
+          ]
+        },
         "status": "final",
         "category": [
           {
@@ -1996,7 +2324,8 @@
               "code": "8462-4",
               "display": "Diastolic blood pressure"
             }
-          ]
+          ],
+          "text": "Diastolic blood pressure"
         },
         "subject": {
           "reference": "Patient/P1",
@@ -2034,6 +2363,14 @@
       "resource": {
         "resourceType": "Observation",
         "id": "obs-p1-39156-5-2024-09-12",
+        "meta": {
+          "tag": [
+            {
+              "system": "https://ehds.mabu.red/tag",
+              "code": "fictional"
+            }
+          ]
+        },
         "status": "final",
         "category": [
           {
@@ -2052,7 +2389,8 @@
               "code": "39156-5",
               "display": "Body mass index (BMI) [Ratio]"
             }
-          ]
+          ],
+          "text": "Body mass index (BMI) [Ratio]"
         },
         "subject": {
           "reference": "Patient/P1",
@@ -2090,6 +2428,14 @@
       "resource": {
         "resourceType": "Observation",
         "id": "obs-p1-39156-5-2025-01-20",
+        "meta": {
+          "tag": [
+            {
+              "system": "https://ehds.mabu.red/tag",
+              "code": "fictional"
+            }
+          ]
+        },
         "status": "final",
         "category": [
           {
@@ -2108,7 +2454,8 @@
               "code": "39156-5",
               "display": "Body mass index (BMI) [Ratio]"
             }
-          ]
+          ],
+          "text": "Body mass index (BMI) [Ratio]"
         },
         "subject": {
           "reference": "Patient/P1",
@@ -2146,6 +2493,14 @@
       "resource": {
         "resourceType": "Observation",
         "id": "obs-p1-39156-5-2025-05-15",
+        "meta": {
+          "tag": [
+            {
+              "system": "https://ehds.mabu.red/tag",
+              "code": "fictional"
+            }
+          ]
+        },
         "status": "final",
         "category": [
           {
@@ -2164,7 +2519,8 @@
               "code": "39156-5",
               "display": "Body mass index (BMI) [Ratio]"
             }
-          ]
+          ],
+          "text": "Body mass index (BMI) [Ratio]"
         },
         "subject": {
           "reference": "Patient/P1",
@@ -2202,6 +2558,14 @@
       "resource": {
         "resourceType": "Observation",
         "id": "obs-p1-39156-5-2025-09-18",
+        "meta": {
+          "tag": [
+            {
+              "system": "https://ehds.mabu.red/tag",
+              "code": "fictional"
+            }
+          ]
+        },
         "status": "final",
         "category": [
           {
@@ -2220,7 +2584,8 @@
               "code": "39156-5",
               "display": "Body mass index (BMI) [Ratio]"
             }
-          ]
+          ],
+          "text": "Body mass index (BMI) [Ratio]"
         },
         "subject": {
           "reference": "Patient/P1",
@@ -2258,6 +2623,14 @@
       "resource": {
         "resourceType": "Observation",
         "id": "obs-p1-39156-5-2026-02-10",
+        "meta": {
+          "tag": [
+            {
+              "system": "https://ehds.mabu.red/tag",
+              "code": "fictional"
+            }
+          ]
+        },
         "status": "final",
         "category": [
           {
@@ -2276,7 +2649,8 @@
               "code": "39156-5",
               "display": "Body mass index (BMI) [Ratio]"
             }
-          ]
+          ],
+          "text": "Body mass index (BMI) [Ratio]"
         },
         "subject": {
           "reference": "Patient/P1",
@@ -2314,6 +2688,14 @@
       "resource": {
         "resourceType": "Observation",
         "id": "obs-p1-39156-5-2026-08-21",
+        "meta": {
+          "tag": [
+            {
+              "system": "https://ehds.mabu.red/tag",
+              "code": "fictional"
+            }
+          ]
+        },
         "status": "final",
         "category": [
           {
@@ -2332,7 +2714,8 @@
               "code": "39156-5",
               "display": "Body mass index (BMI) [Ratio]"
             }
-          ]
+          ],
+          "text": "Body mass index (BMI) [Ratio]"
         },
         "subject": {
           "reference": "Patient/P1",
@@ -2370,6 +2753,14 @@
       "resource": {
         "resourceType": "Observation",
         "id": "obs-p1-33914-3-2024-09-12",
+        "meta": {
+          "tag": [
+            {
+              "system": "https://ehds.mabu.red/tag",
+              "code": "fictional"
+            }
+          ]
+        },
         "status": "final",
         "category": [
           {
@@ -2388,7 +2779,8 @@
               "code": "33914-3",
               "display": "Glomerular filtration rate/1.73 sq M.predicted"
             }
-          ]
+          ],
+          "text": "Glomerular filtration rate/1.73 sq M.predicted"
         },
         "subject": {
           "reference": "Patient/P1",
@@ -2422,6 +2814,14 @@
       "resource": {
         "resourceType": "Observation",
         "id": "obs-p1-33914-3-2025-01-20",
+        "meta": {
+          "tag": [
+            {
+              "system": "https://ehds.mabu.red/tag",
+              "code": "fictional"
+            }
+          ]
+        },
         "status": "final",
         "category": [
           {
@@ -2440,7 +2840,8 @@
               "code": "33914-3",
               "display": "Glomerular filtration rate/1.73 sq M.predicted"
             }
-          ]
+          ],
+          "text": "Glomerular filtration rate/1.73 sq M.predicted"
         },
         "subject": {
           "reference": "Patient/P1",
@@ -2474,6 +2875,14 @@
       "resource": {
         "resourceType": "Observation",
         "id": "obs-p1-33914-3-2025-05-15",
+        "meta": {
+          "tag": [
+            {
+              "system": "https://ehds.mabu.red/tag",
+              "code": "fictional"
+            }
+          ]
+        },
         "status": "final",
         "category": [
           {
@@ -2492,7 +2901,8 @@
               "code": "33914-3",
               "display": "Glomerular filtration rate/1.73 sq M.predicted"
             }
-          ]
+          ],
+          "text": "Glomerular filtration rate/1.73 sq M.predicted"
         },
         "subject": {
           "reference": "Patient/P1",
@@ -2526,6 +2936,14 @@
       "resource": {
         "resourceType": "Observation",
         "id": "obs-p1-33914-3-2025-09-18",
+        "meta": {
+          "tag": [
+            {
+              "system": "https://ehds.mabu.red/tag",
+              "code": "fictional"
+            }
+          ]
+        },
         "status": "final",
         "category": [
           {
@@ -2544,7 +2962,8 @@
               "code": "33914-3",
               "display": "Glomerular filtration rate/1.73 sq M.predicted"
             }
-          ]
+          ],
+          "text": "Glomerular filtration rate/1.73 sq M.predicted"
         },
         "subject": {
           "reference": "Patient/P1",
@@ -2578,6 +2997,14 @@
       "resource": {
         "resourceType": "Observation",
         "id": "obs-p1-33914-3-2026-02-10",
+        "meta": {
+          "tag": [
+            {
+              "system": "https://ehds.mabu.red/tag",
+              "code": "fictional"
+            }
+          ]
+        },
         "status": "final",
         "category": [
           {
@@ -2596,7 +3023,8 @@
               "code": "33914-3",
               "display": "Glomerular filtration rate/1.73 sq M.predicted"
             }
-          ]
+          ],
+          "text": "Glomerular filtration rate/1.73 sq M.predicted"
         },
         "subject": {
           "reference": "Patient/P1",
@@ -2630,6 +3058,14 @@
       "resource": {
         "resourceType": "Observation",
         "id": "obs-p1-33914-3-2026-08-21",
+        "meta": {
+          "tag": [
+            {
+              "system": "https://ehds.mabu.red/tag",
+              "code": "fictional"
+            }
+          ]
+        },
         "status": "final",
         "category": [
           {
@@ -2648,7 +3084,8 @@
               "code": "33914-3",
               "display": "Glomerular filtration rate/1.73 sq M.predicted"
             }
-          ]
+          ],
+          "text": "Glomerular filtration rate/1.73 sq M.predicted"
         },
         "subject": {
           "reference": "Patient/P1",

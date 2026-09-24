@@ -80,3 +80,11 @@ ui/public/journey/tk-transfer.png
 ui/public/journey/whoop-fitness.png
 ui/public/journey/bloodtest-labs.png
 sbom/*.cdx.json
+
+# Local EUDI wallet backend dev trust anchors (scripts/eudi/gen-dev-certs.sh)
+services/eudi-wallet-backend/certs/
+
+# sphin-X tender (iGW-NeX) — confidential procurement documents and the Sopra Steria bid.
+# The tender pack carries a Vertraulichkeitsvermerk: use restricted to preparing the offer,
+# no disclosure to third parties without written consent. Never commit anything under it.
+docs/sphin-x/

@@ -10,27 +10,27 @@
       "series": [
         {
           "date": "2025-10-01",
-          "value": 1
-        },
-        {
-          "date": "2025-11-01",
-          "value": 2
-        },
-        {
-          "date": "2025-12-01",
-          "value": 2
-        },
-        {
-          "date": "2026-01-01",
           "value": 3
         },
         {
-          "date": "2026-02-01",
+          "date": "2025-11-01",
           "value": 4
         },
         {
-          "date": "2026-03-01",
+          "date": "2025-12-01",
           "value": 4
+        },
+        {
+          "date": "2026-01-01",
+          "value": 4
+        },
+        {
+          "date": "2026-02-01",
+          "value": 5
+        },
+        {
+          "date": "2026-03-01",
+          "value": 6
         },
         {
           "date": "2026-04-01",
@@ -38,7 +38,7 @@
         },
         {
           "date": "2026-05-01",
-          "value": 6
+          "value": 5
         },
         {
           "date": "2026-06-01",
@@ -50,11 +50,11 @@
         },
         {
           "date": "2026-08-01",
-          "value": 8
+          "value": 7
         },
         {
           "date": "2026-09-01",
-          "value": 9
+          "value": 8
         }
       ],
       "description": "My accesses to this dataset inside the secure processing environment, counted from the access log. Every one of them is visible to the holder, the access body and, per patient, under Art. 8."
@@ -67,51 +67,51 @@
       "series": [
         {
           "date": "2025-10-01",
-          "value": 0
+          "value": 0.04
         },
         {
           "date": "2025-11-01",
-          "value": 0
+          "value": 0.04
         },
         {
           "date": "2025-12-01",
-          "value": 14
+          "value": 0.05
         },
         {
           "date": "2026-01-01",
-          "value": 41
+          "value": 0.05
         },
         {
           "date": "2026-02-01",
-          "value": 0
+          "value": 0.05
         },
         {
           "date": "2026-03-01",
-          "value": 5
+          "value": 0.05
         },
         {
           "date": "2026-04-01",
-          "value": 8
+          "value": 0.05
         },
         {
           "date": "2026-05-01",
-          "value": 12
+          "value": 0.1
         },
         {
           "date": "2026-06-01",
-          "value": 6
+          "value": 0.1
         },
         {
           "date": "2026-07-01",
-          "value": 9
+          "value": 0.1
         },
         {
           "date": "2026-08-01",
-          "value": 11
+          "value": 0.1
         },
         {
           "date": "2026-09-01",
-          "value": 10
+          "value": 0.1
         }
       ],
       "description": "Volume transferred under the permit for the OMOP analytics cohort. Pulls stay inside the SPE; the figure is what the data plane logged."
@@ -377,5 +377,6 @@
       ],
       "description": "Hours of analysis run inside the secure processing environment against permitted data (Art. 73). No record leaves the environment; results are released as aggregates with k of at least 5."
     }
-  ]
+  ],
+  "source": "neo4j/seed-persona-overview.cypher via scripts/generate-persona-overview-seed.py"
 }
