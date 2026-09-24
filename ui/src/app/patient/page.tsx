@@ -380,25 +380,29 @@ export default function PatientPage() {
                     "My own fitness, lab and nutrition data — plus my ePA on request."
                   )}
                 </p>
-                <p
-                  className="text-xs text-[var(--text-secondary)] mt-0.5"
-                  data-testid="last-ehr-sync"
-                >
-                  {lastEhrSync ? (
-                    <>
-                      Last EHR sync:{" "}
-                      <time
-                        dateTime={lastEhrSync.at}
-                        className="font-semibold text-[var(--text-primary)]"
-                      >
-                        {formatEhrSync(lastEhrSync.at)}
-                      </time>
-                      {lastEhrSync.source ? ` · ${lastEhrSync.source}` : ""}
-                    </>
-                  ) : (
-                    "No EHR sync yet: your ePA has not been transferred into the portal."
-                  )}
-                </p>
+                {/* Only once the record is known: a sync, or none yet on the
+                    own record. Other roles have no record of their own. */}
+                {!loading && (lastEhrSync || restricted) && (
+                  <p
+                    className="text-xs text-[var(--text-secondary)] mt-0.5"
+                    data-testid="last-ehr-sync"
+                  >
+                    {lastEhrSync ? (
+                      <>
+                        Last EHR sync:{" "}
+                        <time
+                          dateTime={lastEhrSync.at}
+                          className="font-semibold text-[var(--text-primary)]"
+                        >
+                          {formatEhrSync(lastEhrSync.at)}
+                        </time>
+                        {lastEhrSync.source ? ` · ${lastEhrSync.source}` : ""}
+                      </>
+                    ) : (
+                      "No EHR sync yet: your ePA has not been transferred into the portal."
+                    )}
+                  </p>
+                )}
               </div>
             </div>
             <button
