@@ -1,6 +1,6 @@
 <mxfile host="65bd71144e">
     <diagram id="ehds-user-journey" name="EHDS Secondary Use User Journey">
-        <mxGraphModel dx="54" dy="11" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1800" pageHeight="1100" math="0" shadow="0">
+        <mxGraphModel dx="2330" dy="967" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1800" pageHeight="1100" math="0" shadow="0">
             <root>
                 <mxCell id="0"/>
                 <mxCell id="1" parent="0"/>
@@ -68,28 +68,19 @@
                 </mxCell>
                 <mxCell id="e0b_label" value="registers" style="edgeLabel;html=1;align=center;verticalAlign=middle;fontSize=10;fontColor=#92400e;backgroundColor=#fef3c7;" parent="e0b" vertex="1" connectable="0">
                     <mxGeometry x="-0.2" relative="1" as="geometry">
-                        <mxPoint x="30" y="-8" as="offset"/>
+                        <mxPoint x="100" y="-8" as="offset"/>
                     </mxGeometry>
                 </mxCell>
                 <mxCell id="e0c" style="edgeStyle=none;html=1;strokeColor=#d97706;strokeWidth=2;endArrow=block;exitX=0.5;exitY=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" parent="1" source="step0c" target="step4b" edge="1">
-                    <mxGeometry relative="1" as="geometry">
-                        <Array as="points">
-                            <mxPoint x="1240" y="250"/>
-                            <mxPoint x="1100" y="250"/>
-                        </Array>
-                    </mxGeometry>
+                    <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
                 <mxCell id="e0c_label" value="registers" style="edgeLabel;html=1;align=center;verticalAlign=middle;fontSize=10;fontColor=#92400e;backgroundColor=#fef3c7;" parent="e0c" vertex="1" connectable="0">
                     <mxGeometry x="-0.2" relative="1" as="geometry">
                         <mxPoint x="100" y="-8" as="offset"/>
                     </mxGeometry>
                 </mxCell>
-                <mxCell id="e1" style="edgeStyle=none;html=1;strokeColor=#ea580c;strokeWidth=2;endArrow=block;exitX=0.5;exitY=1;entryX=0;entryY=0.5;exitDx=0;exitDy=0;" parent="1" source="step2" target="step3" edge="1">
-                    <mxGeometry relative="1" as="geometry">
-                        <Array as="points">
-                            <mxPoint x="210" y="430"/>
-                        </Array>
-                    </mxGeometry>
+                <mxCell id="e1" style="edgeStyle=none;html=1;strokeColor=#ea580c;strokeWidth=2;endArrow=block;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" parent="1" source="step2" target="step3" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
                 <mxCell id="e1_label" value="publishes DCAT" style="edgeLabel;html=1;align=center;verticalAlign=middle;fontSize=10;fontColor=#9a3412;backgroundColor=#fff7ed;" parent="e1" vertex="1" connectable="0">
                     <mxGeometry x="-0.2" relative="1" as="geometry">
@@ -105,11 +96,7 @@
                     </mxGeometry>
                 </mxCell>
                 <mxCell id="e3" style="edgeStyle=none;html=1;strokeColor=#2563eb;strokeWidth=2;endArrow=block;exitX=0.5;exitY=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="step4" target="step4b" edge="1">
-                    <mxGeometry relative="1" as="geometry">
-                        <Array as="points">
-                            <mxPoint x="760" y="590"/>
-                        </Array>
-                    </mxGeometry>
+                    <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
                 <mxCell id="e3_label" value="requests permit" style="edgeLabel;html=1;align=center;verticalAlign=middle;fontSize=10;fontColor=#1e40af;backgroundColor=#eff6ff;" parent="e3" vertex="1" connectable="0">
                     <mxGeometry x="-0.2" relative="1" as="geometry">
@@ -117,11 +104,7 @@
                     </mxGeometry>
                 </mxCell>
                 <mxCell id="e4" style="edgeStyle=none;html=1;strokeColor=#16a34a;strokeWidth=2;endArrow=block;exitX=0.435;exitY=0.017;entryX=0.5;entryY=1;exitDx=0;exitDy=0;exitPerimeter=0;" parent="1" source="step4b" target="step5" edge="1">
-                    <mxGeometry relative="1" as="geometry">
-                        <Array as="points">
-                            <mxPoint x="935" y="420"/>
-                        </Array>
-                    </mxGeometry>
+                    <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
                 <mxCell id="e4_label" value="authorizes access" style="edgeLabel;html=1;align=center;verticalAlign=middle;fontSize=10;fontColor=#166534;backgroundColor=#f0fdf4;" parent="e4" vertex="1" connectable="0">
                     <mxGeometry x="-0.2" relative="1" as="geometry">
@@ -129,11 +112,7 @@
                     </mxGeometry>
                 </mxCell>
                 <mxCell id="e5" style="edgeStyle=none;html=1;strokeColor=#ea580c;strokeWidth=2;endArrow=block;exitX=1;exitY=0.5;entryX=0.5;entryY=0;" parent="1" source="step5" target="step6" edge="1">
-                    <mxGeometry relative="1" as="geometry">
-                        <Array as="points">
-                            <mxPoint x="1120" y="270"/>
-                        </Array>
-                    </mxGeometry>
+                    <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
                 <mxCell id="e5_label" value="uploads FHIR data" style="edgeLabel;html=1;align=center;verticalAlign=middle;fontSize=10;fontColor=#9a3412;backgroundColor=#fff7ed;" parent="e5" vertex="1" connectable="0">
                     <mxGeometry x="-0.2" relative="1" as="geometry">
@@ -165,15 +144,11 @@
                     </mxGeometry>
                 </mxCell>
                 <mxCell id="e9" style="edgeStyle=none;html=1;strokeColor=#16a34a;strokeWidth=1.5;dashed=1;endArrow=block;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" parent="1" source="step4b" target="step6" edge="1">
-                    <mxGeometry relative="1" as="geometry">
-                        <Array as="points">
-                            <mxPoint x="1190" y="590"/>
-                        </Array>
-                    </mxGeometry>
+                    <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
                 <mxCell id="e9_label" value="authorizes SPE" style="edgeLabel;html=1;align=center;verticalAlign=middle;fontSize=10;fontColor=#166534;backgroundColor=#f0fdf4;" parent="e9" vertex="1" connectable="0">
                     <mxGeometry x="-0.2" relative="1" as="geometry">
-                        <mxPoint x="-36" y="16" as="offset"/>
+                        <mxPoint x="50" y="-4" as="offset"/>
                     </mxGeometry>
                 </mxCell>
             </root>

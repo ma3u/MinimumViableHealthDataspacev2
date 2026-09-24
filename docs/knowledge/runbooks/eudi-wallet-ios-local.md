@@ -2,7 +2,7 @@
 type: runbook
 title: German national EUDI wallet iOS app — build it from the mirror and run it on a simulator
 description: What the published iOS mirror strips, the four scripts that make it buildable, and how to point a source build at a locally-run wallet backend.
-resource: scripts/eudi/build-ios.sh, build-ios-device.sh, archive-ios-testflight.sh, patch-ios-spm.py, patch-ios-resources.sh, configure-ios-dev.sh, trust-ca-simulator.sh
+resource: scripts/eudi/build-ios.sh, build-ios-device.sh, patch-ios-spm.py, patch-ios-resources.sh, configure-ios-dev.sh, trust-ca-simulator.sh
 tags: [runbook, eudi-wallet, issue-182, ios, xcode]
 timestamp: 2026-09-10T00:00:00Z
 ---
@@ -275,55 +275,6 @@ and the MDVM flow is then doing what it does in production.
 
 `allow-app-attest-dev-environment` stays `true`: a development-signed build
 produces sandbox attestations.
-
-## TestFlight: rebrand first, and mind what the build points at
-
-```bash
-BACKEND_URL=https://<a publicly reachable backend> \
-  scripts/eudi/archive-ios-testflight.sh
-```
-
-Produces an `.xcarchive` and an `.ipa`. It does **not** upload — that stays a
-deliberate act.
-
-### The rebrand is not cosmetic
-
-The published project builds as **"EUDI Wallet DE"**, the name of the German
-government's national identity wallet. EUPL-1.2 grants rights to the _code_; it
-grants nothing over the name or the identity. A build under that name from a
-private developer account is a government ID wallet on TestFlight that did not
-come from the government, and Apple rejects it (Guidelines 4.1 Copycats, 5.2
-Intellectual Property).
-
-The script overrides `INFOPLIST_KEY_CFBundleDisplayName` and
-`PRODUCT_BUNDLE_IDENTIFIER`. Both are build settings, so the vendored mirror is
-never modified. The icon needs no change — the mirror ships a neutral
-placeholder (a plain circle with a DEV ribbon), not the federal branding.
-
-### A LAN address makes a dead build
-
-Testers are not on your network. A build carrying `http://192.168.x.x:8081`
-cannot register, ever. The script refuses private addresses rather than let you
-find out after the upload.
-
-This is the real prerequisite, and it is not free: the backend has to be
-reachable _and_ worth exposing. As configured it is not — software HSM, PINs of
-`1234`, and a `build-docs` fallback that signs nothing verifiable. Putting that
-on the public internet to satisfy a TestFlight build would be a bad trade. Host
-it properly, or keep the demo device-local.
-
-### What you must do yourself
-
-1. **Distribution certificate** — Xcode → Settings → Accounts → Manage
-   Certificates → + → Apple Distribution.
-2. **App Store Connect record** — Apps → + → New App, matching bundle id.
-3. **Upload** — `xcrun altool --upload-app -f <ipa> -t ios --apiKey … --apiIssuer …`,
-   or Xcode Organizer → Distribute App.
-4. **TestFlight → Internal Testing** → add team members.
-
-Internal testing (≤100 of your own team) needs no Beta App Review. External does,
-and an app that reads national ID cards gets read closely — say plainly in the
-review notes that it is a demo against a test backend issuing nothing usable.
 
 ## What you get
 
