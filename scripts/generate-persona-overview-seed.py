@@ -31,6 +31,10 @@ POC = ROOT / "ui" / "public" / "poc" / "persona-3d" / "data"
 MOCK = ROOT / "ui" / "public" / "mock"
 
 AS_OF = date(2026, 9, 23)
+# The last ePA transfer into the portal: the evening before AS_OF, so the
+# patient page can show when the record was last synced.
+EHR_SYNCED_AT = "2026-09-22T18:05:00Z"
+EHR_SYNC_SOURCE = "ePA transfer, GesundheitsID-authenticated"
 
 # ── Participants (DIDs from .claude/rules/api-conventions.md) ────────────────
 ALPHA = "did:web:alpha-klinik.de:participant"
@@ -272,7 +276,10 @@ def cypher() -> str:
     w("    p.city = 'Berlin',")
     w("    p.country = 'DE',")
     w("    p.demo = true,")
-    w("    p.fictional = true")
+    w("    p.fictional = true,")
+    w("    // when her ePA was last transferred into the portal (Art. 3 record access)")
+    w(f"    p.ehrSyncedAt = datetime({q(EHR_SYNCED_AT)}),")
+    w(f"    p.ehrSyncSource = {q(EHR_SYNC_SOURCE)}")
     w("WITH p")
     w(f"MATCH (holder:Participant {{participantId: {q(ALPHA)}}})")
     w("MERGE (p)-[:TREATED_AT]->(holder)")

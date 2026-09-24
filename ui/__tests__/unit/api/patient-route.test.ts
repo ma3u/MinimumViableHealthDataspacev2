@@ -36,6 +36,8 @@ const STATS = [
     observations: 48,
     medications: 4,
     procedures: 0,
+    ehrSyncedAt: "2026-09-22T18:05:00Z",
+    ehrSyncSource: "ePA transfer, GesundheitsID-authenticated",
   },
 ];
 const TIMELINE = [
@@ -86,11 +88,28 @@ describe("GET /api/patient as a PATIENT", () => {
     expect(data.restricted).toBe(true);
     expect(data.patients).toEqual([PATIENTS[1]]);
     expect(data.stats.encounters).toBe(6);
+    expect(data.stats).not.toHaveProperty("ehrSyncedAt");
+    // when the ePA was last transferred into the portal
+    expect(data.lastEhrSync).toEqual({
+      at: "2026-09-22T18:05:00Z",
+      source: "ePA transfer, GesundheitsID-authenticated",
+    });
     // the timeline is embedded, end-of-life entries filtered out
     expect(data.timeline).toHaveLength(2);
     expect(data.timeline[0].display).toBe("Asthma");
     const timelineParams = mockRunQuery.mock.calls[2][1];
     expect(timelineParams).toEqual({ patientId: "P1" });
+  });
+
+  it("says so when the record was never synced", async () => {
+    mockRunQuery
+      .mockResolvedValueOnce(PATIENTS)
+      .mockResolvedValueOnce([
+        { ...STATS[0], ehrSyncedAt: null, ehrSyncSource: null },
+      ])
+      .mockResolvedValueOnce([]);
+    const res = await GET(new Request("http://localhost/api/patient"));
+    expect((await res.json()).lastEhrSync).toBeNull();
   });
 
   it("serves the owned record's timeline in timeline mode too", async () => {
