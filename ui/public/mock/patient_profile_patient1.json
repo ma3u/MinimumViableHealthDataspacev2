@@ -1,7 +1,7 @@
 {
   "patient": {
     "id": "P1",
-    "name": "Anna Müller",
+    "name": "Maria Schmidt",
     "gender": "female",
     "birthDate": "1979-03-15"
   },

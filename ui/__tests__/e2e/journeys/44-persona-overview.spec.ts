@@ -6,7 +6,7 @@
  * permits and clocks, the access body's broken chains of trust, the holder's
  * untrusted consumers and its own duties. Everything is fictional.
  *
- * What runs today is the data: the seed puts Anna Müller (P1) with 48
+ * What runs today is the data: the seed puts Maria Schmidt (P1) with 48
  * LOINC-coded measurements, her consents, twelve months of access events
  * and the quarterly quality assessments into the graph, and the existing
  * routes show it. M1 (the patient overview, `/api/overview?persona=patient`,
@@ -33,7 +33,7 @@ async function skipIfSeedMissing(page: Page) {
   const list = await page.request.get("/api/patient");
   const data = list.ok() ? await list.json() : { patients: [] };
   const p1 = (data.patients ?? []).find((p: { id: string }) => p.id === P1);
-  if (!p1 || p1.name !== "Anna Müller") {
+  if (!p1 || p1.name !== "Maria Schmidt") {
     test.skip(true, "seed-persona-overview.cypher not applied (no P1)");
   }
 }
@@ -41,13 +41,13 @@ async function skipIfSeedMissing(page: Page) {
 // ── The seeded data through the routes that exist today ────────────────────
 
 test.describe("Issue #271 · M0 the seed is visible through today's routes", () => {
-  test("J960 P1 is Anna Müller with her eight diagnoses and four medications", async ({
+  test("J960 P1 is Maria Schmidt with her eight diagnoses and four medications", async ({
     page,
   }) => {
     await skipIfSeedMissing(page);
     await loginAsAdmin(page);
     const data = await apiGet(page, `/api/patient/profile?patientId=${P1}`);
-    expect(data.patient.name).toBe("Anna Müller");
+    expect(data.patient.name).toBe("Maria Schmidt");
     expect(data.conditions.length).toBeGreaterThanOrEqual(8);
     expect(data.conditions.map((c: { code: string }) => c.code)).toContain(
       "73211009",
@@ -172,7 +172,7 @@ test.describe("Issue #271 · M1 patient overview", () => {
       (n: { kind: string }) => n.kind === "Patient",
     );
     expect(people).toHaveLength(1);
-    expect(people[0].label).toBe("Anna Müller");
+    expect(people[0].label).toBe("Maria Schmidt");
   });
 
   test("J967 /overview: the list is readable without the canvas, a click opens the panel", async ({
