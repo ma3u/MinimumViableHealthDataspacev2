@@ -196,13 +196,6 @@ export function mountPersona(cfg) {
       sig.append(li);
     });
   panel.append(sig);
-  panel.append(el("h2", null, "Selected"));
-  const detail = el(
-    "div",
-    "detail",
-    `<span class="empty">Click a node or a signal.</span>`,
-  );
-  panel.append(detail);
   panel.append(el("h2", null, "Legend"));
   const leg = el("div", "legend");
   (cfg.legend ?? []).forEach((l) => {
@@ -365,6 +358,43 @@ export function mountPersona(cfg) {
     requestAnimationFrame(frame);
   })(t0);
 
+  const right = document.getElementById("right");
+  const mainEl = document.querySelector("main");
+  const expanded = new Map(); // parent id -> { nodes, links }
+  let allNodes = cfg.nodes;
+  let allLinks = links;
+
+  function toggleExpand(n) {
+    if (typeof n.expand !== "function") return;
+    if (expanded.has(n.id)) {
+      const ex = expanded.get(n.id);
+      const ids = new Set(ex.nodes.map((x) => x.id));
+      allNodes = allNodes.filter((x) => !ids.has(x.id));
+      allLinks = allLinks.filter(
+        (l) =>
+          !ids.has(l.source.id ?? l.source) &&
+          !ids.has(l.target.id ?? l.target),
+      );
+      ids.forEach((id) => byId.delete(id));
+      expanded.delete(n.id);
+    } else {
+      const ex = n.expand(n) ?? { nodes: [], links: [] };
+      ex.nodes.forEach((x, i) => {
+        x.fz = layerZ[x.layer] ?? n.fz;
+        x.x = n.x + Math.cos(i) * 30;
+        x.y = n.y + Math.sin(i) * 30;
+        byId.set(x.id, x);
+      });
+      allNodes = allNodes.concat(ex.nodes);
+      allLinks = allLinks.concat(
+        ex.links.filter((l) => byId.has(l.source) && byId.has(l.target)),
+      );
+      expanded.set(n.id, ex);
+    }
+    Graph.graphData({ nodes: allNodes, links: allLinks });
+    Graph.d3ReheatSimulation();
+  }
+
   function focusNode(id, li) {
     const n = byId.get(id);
     if (!n) return;
@@ -375,7 +405,8 @@ export function mountPersona(cfg) {
       );
     focused = true;
     pause();
-    const dist = 140;
+    toggleExpand(n);
+    const dist = 230;
     const from = cam.position
       .clone()
       .sub(new THREE.Vector3(n.x, n.y, n.z))
@@ -393,11 +424,118 @@ export function mountPersona(cfg) {
     showDetail(n);
   }
 
+  function trendOf(n) {
+    const v = n.series.map((p) => p.value);
+    const first = v[0];
+    const last = v[v.length - 1];
+    const lo = n.range?.low;
+    const hi = n.range?.high;
+    const width =
+      lo != null && hi != null ? hi - lo : Math.abs(first) * 0.2 || 1;
+    const rel = (last - first) / width;
+    const dir =
+      Math.abs(rel) < 0.15 ? "stable" : rel > 0 ? "rising" : "falling";
+    const out = (hi != null && last > hi) || (lo != null && last < lo);
+    const worse =
+      n.higherIsWorse === false ? dir === "falling" : dir === "rising";
+    const sev =
+      dir === "stable"
+        ? out
+          ? "warn"
+          : "ok"
+        : worse
+          ? out
+            ? "bad"
+            : "warn"
+          : "ok";
+    const months = Math.round(
+      (new Date(n.series[n.series.length - 1].date) -
+        new Date(n.series[0].date)) /
+        2629800000,
+    );
+    return { dir, sev, first, last, out, months };
+  }
+
+  function chartSvg(n) {
+    const W = 340;
+    const H = 170;
+    const L = 38;
+    const R = 14;
+    const T = 14;
+    const B = 26;
+    const pts = n.series;
+    const xs = pts.map((p) => new Date(p.date).getTime());
+    const vs = pts.map((p) => p.value);
+    const lo = n.range?.low;
+    const hi = n.range?.high;
+    let ymin = Math.min(...vs, lo ?? Infinity);
+    let ymax = Math.max(...vs, hi ?? -Infinity);
+    const pad = (ymax - ymin || 1) * 0.15;
+    ymin -= pad;
+    ymax += pad;
+    const x = (t) =>
+      L + ((t - xs[0]) / (xs[xs.length - 1] - xs[0] || 1)) * (W - L - R);
+    const y = (v) => T + (1 - (v - ymin) / (ymax - ymin)) * (H - T - B);
+    const bandTop = y(hi ?? ymax);
+    const bandBot = y(lo ?? ymin);
+    const line = pts
+      .map(
+        (p) =>
+          `${x(new Date(p.date).getTime()).toFixed(1)},${y(p.value).toFixed(
+            1,
+          )}`,
+      )
+      .join(" ");
+    const dots = pts
+      .map((p) => {
+        const out =
+          (hi != null && p.value > hi) || (lo != null && p.value < lo);
+        return `<circle cx="${x(new Date(p.date).getTime()).toFixed(
+          1,
+        )}" cy="${y(p.value).toFixed(1)}" r="4" fill="${
+          out ? "#f59e0b" : "#22c55e"
+        }" stroke="#0b1220" stroke-width="1.5"><title>${esc(p.date)}: ${
+          p.value
+        } ${esc(n.unit ?? "")}</title></circle>`;
+      })
+      .join("");
+    const fmt = (d) => d.slice(0, 7);
+    const yl = (v, label) =>
+      v == null
+        ? ""
+        : `<text x="${L - 4}" y="${(y(v) + 4).toFixed(
+            1,
+          )}" text-anchor="end" font-size="10" fill="#9ca3af">${label}</text>`;
+    return `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(
+      n.label,
+    )} over time">
+      <rect x="${L}" y="${Math.min(bandTop, bandBot).toFixed(1)}" width="${
+        W - L - R
+      }" height="${Math.abs(bandBot - bandTop).toFixed(
+        1,
+      )}" fill="#22c55e" opacity="0.12"/>
+      ${yl(hi, hi)}${yl(lo, lo)}
+      <polyline points="${line}" fill="none" stroke="#93c5fd" stroke-width="2"/>
+      ${dots}
+      <text x="${L}" y="${H - 8}" font-size="10" fill="#9ca3af">${fmt(
+        pts[0].date,
+      )}</text>
+      <text x="${W - R}" y="${
+        H - 8
+      }" font-size="10" fill="#9ca3af" text-anchor="end">${fmt(
+        pts[pts.length - 1].date,
+      )}</text>
+    </svg>`;
+  }
+
   function showDetail(n) {
     if (!n) {
-      detail.innerHTML = `<span class="empty">Click a node or a signal.</span>`;
+      right.classList.add("hidden");
+      mainEl.classList.add("no-right");
       return;
     }
+    right.classList.remove("hidden");
+    mainEl.classList.remove("no-right");
     const d = n.detail ?? {};
     const facts = (d.facts ?? [])
       .map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`)
@@ -410,20 +548,54 @@ export function mountPersona(cfg) {
           )}</a>`,
       )
       .join("");
-    detail.innerHTML = `<h3>${esc(
+    let series = "";
+    if (Array.isArray(n.series) && n.series.length > 1) {
+      const t = trendOf(n);
+      const rows = [...n.series]
+        .reverse()
+        .map((p) => {
+          const out =
+            (n.range?.high != null && p.value > n.range.high) ||
+            (n.range?.low != null && p.value < n.range.low);
+          return `<tr><td>${esc(p.date)}</td><td class="${out ? "out" : ""}">${
+            p.value
+          } ${esc(n.unit ?? "")}</td></tr>`;
+        })
+        .join("");
+      const foldHint = expanded.has(n.id)
+        ? "The measurements are unfolded as nodes on the record layer; click the node again to fold them."
+        : "Click the node again to unfold the measurements as nodes.";
+      series = `<div class="trend"><span class="val">${t.last} ${esc(
+        n.unit ?? "",
+      )}</span><span class="dir ${t.sev}">${t.dir}${
+        t.dir === "stable" ? "" : ` from ${t.first} over ${t.months} months`
+      }</span></div>
+        ${chartSvg(n)}
+        <div class="hintrow">Reference ${esc(
+          n.range?.text ?? "n/a",
+        )}. Green band = printed range. ${foldHint}</div>
+        <table class="series"><tr><th>Date</th><th>Value</th></tr>${rows}</table>`;
+    }
+    right.innerHTML = `<span class="close" title="close" role="button" tabindex="0">×</span><h3>${esc(
       d.title ?? n.label,
-    )}</h3><div class="sub">${esc(d.sub ?? "")}</div><dl>${facts}</dl>${
+    )}</h3><div class="sub">${esc(d.sub ?? "")}</div>${
+      d.description ? `<div class="desc">${esc(d.description)}</div>` : ""
+    }${series}<dl>${facts}</dl>${
       d.article
         ? `<div class="sub" style="margin-top:8px">${esc(d.article)}</div>`
         : ""
     }${links ? `<div class="links">${links}</div>` : ""}`;
+    right
+      .querySelector(".close")
+      .addEventListener("click", () => showDetail(null));
   }
+  showDetail(null);
 
   window.addEventListener("resize", () =>
     Graph.width(root.clientWidth).height(root.clientHeight),
   );
-  window.__poc = { Graph, nodes: cfg.nodes, links };
-  return Graph;
+  window.__poc = { Graph, nodes: cfg.nodes, links, focusNode };
+  return { Graph, focusNode };
 }
 
 /** Shared page chrome: top bar with the four persona links. */
