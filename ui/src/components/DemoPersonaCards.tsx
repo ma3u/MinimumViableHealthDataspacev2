@@ -2,7 +2,7 @@
 
 import { signIn, useSession } from "next-auth/react";
 import { Shield, LogIn } from "lucide-react";
-import { DEMO_PERSONAS, ROLE_LABELS } from "@/lib/auth";
+import { DEMO_PERSONAS, ROLE_LABELS, landingFor } from "@/lib/auth";
 
 const IS_STATIC = process.env.NEXT_PUBLIC_STATIC_EXPORT === "true";
 
@@ -44,10 +44,10 @@ export function DemoPersonaCards() {
             onClick={() => {
               if (IS_STATIC) {
                 localStorage.setItem("demo-persona", persona.username);
-                window.location.href = `/graph?persona=${persona.personaId}`;
+                window.location.href = landingFor(persona.personaId);
               } else {
                 signIn("keycloak", {
-                  callbackUrl: `/graph?persona=${persona.personaId}`,
+                  callbackUrl: landingFor(persona.personaId),
                 });
               }
             }}

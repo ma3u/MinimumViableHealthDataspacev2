@@ -368,6 +368,16 @@ export function deriveParticipantType(
  * Derives the graph persona ID for a user.
  * Used to auto-redirect to the correct graph view after login.
  */
+/**
+ * Where a login lands (issue #271): the persona overview for the four
+ * personas that have one, the graph explorer for the rest.
+ */
+export function landingFor(personaId: string): string {
+  return ["patient", "researcher", "hdab", "hospital"].includes(personaId)
+    ? "/overview"
+    : `/graph?persona=${personaId}`;
+}
+
 export function derivePersonaId(
   roles: string[],
   username?: string | null,

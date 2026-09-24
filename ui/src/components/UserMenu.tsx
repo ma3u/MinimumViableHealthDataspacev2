@@ -11,7 +11,12 @@ import {
   Users,
 } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
-import { ROLE_LABELS, DEMO_PERSONAS, deriveParticipantType } from "@/lib/auth";
+import {
+  ROLE_LABELS,
+  DEMO_PERSONAS,
+  deriveParticipantType,
+  landingFor,
+} from "@/lib/auth";
 import {
   useDemoPersona,
   setDemoPersona,
@@ -341,7 +346,7 @@ export default function UserMenu() {
                       setOpen(false);
                       signIn(
                         "keycloak",
-                        { callbackUrl: `/graph?persona=${persona.personaId}` },
+                        { callbackUrl: landingFor(persona.personaId) },
                         { login_hint: persona.username },
                       );
                     }}

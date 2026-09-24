@@ -4,7 +4,7 @@ import { signIn } from "next-auth/react";
 import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 import { ShieldCheck, Shield, Smartphone } from "lucide-react";
-import { DEMO_PERSONAS, ROLE_LABELS } from "@/lib/auth";
+import { DEMO_PERSONAS, ROLE_LABELS, landingFor } from "@/lib/auth";
 
 /** EUDI Wallet QR sign-in needs server API routes — absent in the static export. */
 const IS_STATIC = process.env.NEXT_PUBLIC_STATIC_EXPORT === "true";
@@ -97,7 +97,7 @@ function SignInContent() {
               key={persona.username}
               onClick={() =>
                 signIn("keycloak", {
-                  callbackUrl: `/graph?persona=${persona.personaId}`,
+                  callbackUrl: landingFor(persona.personaId),
                 })
               }
               className={`group text-left rounded-lg border p-3 bg-[var(--surface-2)]/60 hover:bg-[var(--surface-2)] transition-colors ${

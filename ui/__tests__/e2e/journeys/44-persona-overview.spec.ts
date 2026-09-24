@@ -445,3 +445,30 @@ test.describe("Issue #271 · the roles open their own overview", () => {
     ).toEqual([]);
   });
 });
+
+// ── After login, the overview ──────────────────────────────────────────────
+
+test.describe("Issue #271 · the persona buttons land on the overview", () => {
+  test("J981 signing in as patient1 from the sign-in page lands on /overview", async ({
+    page,
+  }) => {
+    await page.goto("/auth/signin", { waitUntil: "networkidle" });
+    await page
+      .getByRole("button", { name: /patient1/i })
+      .first()
+      .click();
+    await page.waitForURL(/protocol\/openid-connect\/auth/, {
+      timeout: 20_000,
+    });
+    await page.getByLabel(/username or email/i).fill("patient1");
+    await page.locator("#password").fill("patient1");
+    await page.getByRole("button", { name: /sign in/i }).click();
+    await expect(page).toHaveURL(/\/overview(\?|$)/, { timeout: 30_000 });
+    await expect(page.getByTestId("overview-question")).toBeVisible({
+      timeout: 45_000,
+    });
+    await expect(page.getByTestId("overview-question")).toContainText(
+      "Which parameters put me at risk",
+    );
+  });
+});
