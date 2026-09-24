@@ -87,6 +87,11 @@ describe("seed-persona-overview.cypher", () => {
     expect(seed).toContain("MERGE (obs)-[:PART_OF]->(enc)");
   });
 
+  it("records when her ePA was last transferred into the portal", () => {
+    expect(seed).toMatch(/p\.ehrSyncedAt = datetime\('2026-09-22T18:05:00Z'\)/);
+    expect(seed).toMatch(/p\.ehrSyncSource = 'ePA transfer/);
+  });
+
   it("links the patient to the holder, her record and her consents", () => {
     expect(seed).toContain("MERGE (p)-[:TREATED_AT]->(holder)");
     expect(seed).toContain("MERGE (p)-[:HAS_CONDITION]->(cond)");

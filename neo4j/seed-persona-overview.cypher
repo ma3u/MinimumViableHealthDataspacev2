@@ -30,7 +30,10 @@ SET p.id = 'P1',
     p.city = 'Berlin',
     p.country = 'DE',
     p.demo = true,
-    p.fictional = true
+    p.fictional = true,
+    // when her ePA was last transferred into the portal (Art. 3 record access)
+    p.ehrSyncedAt = datetime('2026-09-22T18:05:00Z'),
+    p.ehrSyncSource = 'ePA transfer, GesundheitsID-authenticated'
 WITH p
 MATCH (holder:Participant {participantId: 'did:web:alpha-klinik.de:participant'})
 MERGE (p)-[:TREATED_AT]->(holder)

@@ -134,5 +134,12 @@ facts, series table, links). Persona from the role; `?persona=` for admins.
   catalogue entry's Art. 77 description over nine fields (holder and researcher
   datasets carry the fact, the holder is warned below 0.8); the demo login
   `patient1` owns P1 in `/api/patient` as it does in the overview.
+- Last EHR sync: the Patient node carries `ehrSyncedAt` and `ehrSyncSource`
+  (seeded 2026-09-22T18:05:00Z for P1). `/api/patient` returns them to the
+  owner as `lastEhrSync: { at, source }` (null when never synced), the
+  patient page shows the date and time under the name, and finishing the
+  "Request EHR data" flow calls `POST /api/patient/ehr-sync`, which stamps the
+  own record with now. Helper `ui/src/lib/patient/ehr-sync.ts`; fixture
+  `patient_restricted.json`.
 - Still missing: variable-level descriptions for real relevance, SPE session
   state, contract timestamps relative to the permit, the Art. 63 record (#206).

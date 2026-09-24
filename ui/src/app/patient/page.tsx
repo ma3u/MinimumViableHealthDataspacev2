@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { fetchApi } from "@/lib/api";
+import { formatEhrSync, type EhrSync } from "@/lib/patient/ehr-sync";
 import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import {
   Activity,
@@ -229,6 +230,7 @@ export default function PatientPage() {
   const [patients, setPatients] = useState<PatientListItem[]>([]);
   const [ehrModal, setEhrModal] = useState(false);
   const [ehrReceived, setEhrReceived] = useState(false);
+  const [lastEhrSync, setLastEhrSync] = useState<EhrSync | null>(null);
   const [detailSource, setDetailSource] = useState<PersonalHealthSource | null>(
     null,
   );
@@ -251,6 +253,7 @@ export default function PatientPage() {
         setRestricted(d.restricted === true);
         // The restricted (own-record) response embeds the patient's timeline.
         if (Array.isArray(d.timeline)) setTimeline(d.timeline);
+        setLastEhrSync(d.lastEhrSync ?? null);
         if (d.restricted && d.patients?.length === 1) {
           setSelected(d.patients[0].id);
         }
@@ -283,6 +286,19 @@ export default function PatientPage() {
   }, [selected, restricted]);
 
   const selectedPatient = patients.find((p) => p.id === selected);
+
+  /* The "Request EHR data" flow just completed: stamp the sync on the own
+     record. Without a record of our own (or in the static demo) the moment
+     the flow completed is the sync time. */
+  const recordEhrSync = () => {
+    const now = new Date().toISOString();
+    fetchApi("/api/patient/ehr-sync", { method: "POST" })
+      .then(async (r) => (r.ok ? r.json() : null))
+      .then((d) => {
+        setLastEhrSync(d?.lastEhrSync ?? { at: now, source: null });
+      })
+      .catch(() => setLastEhrSync({ at: now, source: null }));
+  };
 
   /* Group timeline entries by year+month, newest first. Events within each
      month are also sorted newest first so the reader scans most recent → oldest. */
@@ -364,6 +380,25 @@ export default function PatientPage() {
                     "My own fitness, lab and nutrition data — plus my ePA on request."
                   )}
                 </p>
+                <p
+                  className="text-xs text-[var(--text-secondary)] mt-0.5"
+                  data-testid="last-ehr-sync"
+                >
+                  {lastEhrSync ? (
+                    <>
+                      Last EHR sync:{" "}
+                      <time
+                        dateTime={lastEhrSync.at}
+                        className="font-semibold text-[var(--text-primary)]"
+                      >
+                        {formatEhrSync(lastEhrSync.at)}
+                      </time>
+                      {lastEhrSync.source ? ` · ${lastEhrSync.source}` : ""}
+                    </>
+                  ) : (
+                    "No EHR sync yet: your ePA has not been transferred into the portal."
+                  )}
+                </p>
               </div>
             </div>
             <button
@@ -426,6 +461,7 @@ export default function PatientPage() {
             onComplete={() => {
               setEhrModal(false);
               setEhrReceived(true);
+              recordEhrSync();
             }}
           />
         )}

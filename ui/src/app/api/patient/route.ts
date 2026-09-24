@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import { runQuery } from "@/lib/neo4j";
 import { ownPatientIdForSession } from "@/lib/overview/patient";
+import { ehrSyncFromRow } from "@/lib/patient/ehr-sync";
 
 export const dynamic = "force-dynamic";
 
@@ -121,6 +122,8 @@ export async function GET(req: Request) {
               observations: number;
               medications: number;
               procedures: number;
+              ehrSyncedAt: string | null;
+              ehrSyncSource: string | null;
             }>(
               `MATCH (p:Patient) WHERE coalesce(p.id, p.resourceId) = $myId
                OPTIONAL MATCH (p)-[:HAS_ENCOUNTER]->(e:Encounter)
@@ -132,24 +135,28 @@ export async function GET(req: Request) {
                OPTIONAL MATCH (p)-[:HAS_MEDICATION|HAS_MEDICATION_REQUEST]->(m:MedicationRequest)
                WITH p, encounters, conditions, observations, count(m) AS medications
                OPTIONAL MATCH (p)-[:HAS_PROCEDURE]->(pr:Procedure)
-               RETURN encounters, conditions, observations, medications, count(pr) AS procedures`,
+               RETURN encounters, conditions, observations, medications, count(pr) AS procedures,
+                      toString(p.ehrSyncedAt) AS ehrSyncedAt,
+                      p.ehrSyncSource         AS ehrSyncSource`,
               { myId },
             )
           : [];
+        const { ehrSyncedAt, ehrSyncSource, ...counts } = myStats[0] ?? {
+          encounters: 0,
+          conditions: 0,
+          observations: 0,
+          medications: 0,
+          procedures: 0,
+          ehrSyncedAt: null,
+          ehrSyncSource: null,
+        };
         return NextResponse.json({
           patients: myPatient,
-          stats: {
-            patients: 1,
-            ...(myStats[0] ?? {
-              encounters: 0,
-              conditions: 0,
-              observations: 0,
-              medications: 0,
-              procedures: 0,
-            }),
-          },
+          stats: { patients: 1, ...counts },
           // The page renders this timeline directly for the own record.
           timeline: myId ? await loadTimeline(myId) : [],
+          // When the ePA was last transferred into the portal, if ever.
+          lastEhrSync: ehrSyncFromRow({ ehrSyncedAt, ehrSyncSource }),
           restricted: true, // signal to the UI that patient selector should be hidden
         });
       }
