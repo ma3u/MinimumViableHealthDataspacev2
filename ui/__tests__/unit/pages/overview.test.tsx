@@ -99,7 +99,8 @@ describe("OverviewPage", () => {
         "Which parameters put me at risk",
       ),
     );
-    expect(mockFetchApi).toHaveBeenCalledWith("/api/overview?persona=patient");
+    // the test session is EDC_ADMIN, whose default view is the access body
+    expect(mockFetchApi).toHaveBeenCalledWith("/api/overview?persona=hdab");
     const signals = screen.getAllByTestId("overview-signal");
     expect(signals.length).toBe(VIEW.signals.length);
     expect(signals[0]).toHaveAttribute("data-severity", "bad");

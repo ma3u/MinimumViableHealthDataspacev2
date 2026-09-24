@@ -848,7 +848,7 @@ export default function UserGuidePage() {
       <section className="mb-12" id="explore">
         <h2 className="text-2xl font-semibold mb-4">Explore</h2>
         <div className="space-y-6">
-          <FeatureCard href="/graph" title="Graph Explorer" icon={Globe}>
+          <FeatureCard href="/overview" title="Persona Overview" icon={Globe}>
             <p className="text-[var(--text-secondary)] text-sm mb-2">
               The force-directed graph visualisation displays all five
               architecture layers of the knowledge graph. Nodes are colour-coded
