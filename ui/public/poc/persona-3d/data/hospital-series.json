@@ -1,0 +1,453 @@
+{
+  "asOf": "2026-09-23",
+  "note": "Fictional monthly figures for the holder persona (AlphaKlinik Berlin), in the shape of the access log filtered by provider DID and the quality label history.",
+  "items": [
+    {
+      "match": "ds:synthea",
+      "measure": "Accesses per month",
+      "unit": "accesses",
+      "higherIsWorse": false,
+      "series": [
+        {
+          "date": "2025-10-01",
+          "value": 4
+        },
+        {
+          "date": "2025-11-01",
+          "value": 5
+        },
+        {
+          "date": "2025-12-01",
+          "value": 6
+        },
+        {
+          "date": "2026-01-01",
+          "value": 6
+        },
+        {
+          "date": "2026-02-01",
+          "value": 7
+        },
+        {
+          "date": "2026-03-01",
+          "value": 8
+        },
+        {
+          "date": "2026-04-01",
+          "value": 8
+        },
+        {
+          "date": "2026-05-01",
+          "value": 9
+        },
+        {
+          "date": "2026-06-01",
+          "value": 10
+        },
+        {
+          "date": "2026-07-01",
+          "value": 12
+        },
+        {
+          "date": "2026-08-01",
+          "value": 13
+        },
+        {
+          "date": "2026-09-01",
+          "value": 14
+        }
+      ],
+      "description": "Accesses to our Synthea FHIR cohort by all users, from our own access log (Art. 73(1)(e)). Served only under a permit; refused attempts are counted on the consumer."
+    },
+    {
+      "match": "ds:omop",
+      "measure": "Accesses per month",
+      "unit": "accesses",
+      "higherIsWorse": false,
+      "series": [
+        {
+          "date": "2025-10-01",
+          "value": 1
+        },
+        {
+          "date": "2025-11-01",
+          "value": 1
+        },
+        {
+          "date": "2025-12-01",
+          "value": 2
+        },
+        {
+          "date": "2026-01-01",
+          "value": 3
+        },
+        {
+          "date": "2026-02-01",
+          "value": 1
+        },
+        {
+          "date": "2026-03-01",
+          "value": 2
+        },
+        {
+          "date": "2026-04-01",
+          "value": 2
+        },
+        {
+          "date": "2026-05-01",
+          "value": 3
+        },
+        {
+          "date": "2026-06-01",
+          "value": 2
+        },
+        {
+          "date": "2026-07-01",
+          "value": 3
+        },
+        {
+          "date": "2026-08-01",
+          "value": 3
+        },
+        {
+          "date": "2026-09-01",
+          "value": 4
+        }
+      ],
+      "description": "Accesses to our OMOP analytics warehouse, permitted to PharmaCo."
+    },
+    {
+      "match": "ds:synthetic-type-2-diabetes",
+      "measure": "Accesses per month",
+      "unit": "accesses",
+      "higherIsWorse": false,
+      "series": [
+        {
+          "date": "2025-10-01",
+          "value": 3
+        },
+        {
+          "date": "2025-11-01",
+          "value": 3
+        },
+        {
+          "date": "2025-12-01",
+          "value": 4
+        },
+        {
+          "date": "2026-01-01",
+          "value": 4
+        },
+        {
+          "date": "2026-02-01",
+          "value": 5
+        },
+        {
+          "date": "2026-03-01",
+          "value": 5
+        },
+        {
+          "date": "2026-04-01",
+          "value": 4
+        },
+        {
+          "date": "2026-05-01",
+          "value": 6
+        },
+        {
+          "date": "2026-06-01",
+          "value": 6
+        },
+        {
+          "date": "2026-07-01",
+          "value": 7
+        },
+        {
+          "date": "2026-08-01",
+          "value": 7
+        },
+        {
+          "date": "2026-09-01",
+          "value": 8
+        }
+      ],
+      "description": "Accesses to the T2D patient journey dataset we co-provide with Riverside General."
+    },
+    {
+      "match": "c:pharmaco",
+      "measure": "Accesses per month",
+      "unit": "accesses",
+      "series": [
+        {
+          "date": "2025-10-01",
+          "value": 5
+        },
+        {
+          "date": "2025-11-01",
+          "value": 6
+        },
+        {
+          "date": "2025-12-01",
+          "value": 7
+        },
+        {
+          "date": "2026-01-01",
+          "value": 6
+        },
+        {
+          "date": "2026-02-01",
+          "value": 8
+        },
+        {
+          "date": "2026-03-01",
+          "value": 9
+        },
+        {
+          "date": "2026-04-01",
+          "value": 7
+        },
+        {
+          "date": "2026-05-01",
+          "value": 8
+        },
+        {
+          "date": "2026-06-01",
+          "value": 9
+        },
+        {
+          "date": "2026-07-01",
+          "value": 10
+        },
+        {
+          "date": "2026-08-01",
+          "value": 11
+        },
+        {
+          "date": "2026-09-01",
+          "value": 12
+        }
+      ],
+      "description": "PharmaCo Research AG on our data. Their purpose credential expired on 2026-06-20; everything from July on was served without a valid one, which is our exposure under Art. 60(1)(d)."
+    },
+    {
+      "match": "c:institut",
+      "measure": "Refused attempts per month",
+      "unit": "refusals",
+      "range": {
+        "low": 0,
+        "high": 0,
+        "text": "0 refusals expected"
+      },
+      "series": [
+        {
+          "date": "2025-10-01",
+          "value": 0
+        },
+        {
+          "date": "2025-11-01",
+          "value": 0
+        },
+        {
+          "date": "2025-12-01",
+          "value": 0
+        },
+        {
+          "date": "2026-01-01",
+          "value": 0
+        },
+        {
+          "date": "2026-02-01",
+          "value": 0
+        },
+        {
+          "date": "2026-03-01",
+          "value": 0
+        },
+        {
+          "date": "2026-04-01",
+          "value": 1
+        },
+        {
+          "date": "2026-05-01",
+          "value": 0
+        },
+        {
+          "date": "2026-06-01",
+          "value": 2
+        },
+        {
+          "date": "2026-07-01",
+          "value": 1
+        },
+        {
+          "date": "2026-08-01",
+          "value": 3
+        },
+        {
+          "date": "2026-09-01",
+          "value": 2
+        }
+      ],
+      "description": "Institut de Recherche Santé keeps trying after the refused permit: a failed transfer with an integrity error and reads the data plane refused. Report to the access body under Art. 63."
+    },
+    {
+      "match": "c:limburg",
+      "measure": "Accesses per month",
+      "unit": "accesses",
+      "series": [
+        {
+          "date": "2025-10-01",
+          "value": 0
+        },
+        {
+          "date": "2025-11-01",
+          "value": 0
+        },
+        {
+          "date": "2025-12-01",
+          "value": 0
+        },
+        {
+          "date": "2026-01-01",
+          "value": 0
+        },
+        {
+          "date": "2026-02-01",
+          "value": 0
+        },
+        {
+          "date": "2026-03-01",
+          "value": 1
+        },
+        {
+          "date": "2026-04-01",
+          "value": 2
+        },
+        {
+          "date": "2026-05-01",
+          "value": 2
+        },
+        {
+          "date": "2026-06-01",
+          "value": 3
+        },
+        {
+          "date": "2026-07-01",
+          "value": 3
+        },
+        {
+          "date": "2026-08-01",
+          "value": 4
+        },
+        {
+          "date": "2026-09-01",
+          "value": 4
+        }
+      ],
+      "description": "Limburg Medical Centre under a valid permit, but no contract has been signed with us; the transfer that is running should not have started."
+    },
+    {
+      "match": "vc:vc:data-quality-label",
+      "measure": "Label conformance score",
+      "unit": "",
+      "range": {
+        "low": 0.9,
+        "high": 1.0,
+        "text": "0.90 to 1.00, the band the assessor renews the label in"
+      },
+      "higherIsWorse": false,
+      "series": [
+        {
+          "date": "2024-12-31",
+          "value": 0.95
+        },
+        {
+          "date": "2025-03-31",
+          "value": 0.94
+        },
+        {
+          "date": "2025-06-30",
+          "value": 0.93
+        },
+        {
+          "date": "2025-09-30",
+          "value": 0.92
+        },
+        {
+          "date": "2025-12-31",
+          "value": 0.91
+        },
+        {
+          "date": "2026-03-31",
+          "value": 0.9
+        },
+        {
+          "date": "2026-06-30",
+          "value": 0.89
+        },
+        {
+          "date": "2026-09-23",
+          "value": 0.88
+        }
+      ],
+      "description": "Conformance of our datasets to the eEHRxF profiles as assessed for the Art. 78 data quality and utility label. Slipping below 0.90 is why the label was not renewed on 2026-09-18."
+    },
+    {
+      "match": "me",
+      "measure": "Data made available per month",
+      "unit": "MB",
+      "higherIsWorse": false,
+      "series": [
+        {
+          "date": "2025-10-01",
+          "value": 12
+        },
+        {
+          "date": "2025-11-01",
+          "value": 15
+        },
+        {
+          "date": "2025-12-01",
+          "value": 9
+        },
+        {
+          "date": "2026-01-01",
+          "value": 41
+        },
+        {
+          "date": "2026-02-01",
+          "value": 0
+        },
+        {
+          "date": "2026-03-01",
+          "value": 14
+        },
+        {
+          "date": "2026-04-01",
+          "value": 8
+        },
+        {
+          "date": "2026-05-01",
+          "value": 12
+        },
+        {
+          "date": "2026-06-01",
+          "value": 6
+        },
+        {
+          "date": "2026-07-01",
+          "value": 9
+        },
+        {
+          "date": "2026-08-01",
+          "value": 11
+        },
+        {
+          "date": "2026-09-01",
+          "value": 13
+        }
+      ],
+      "description": "Volume our data plane served under permits, our Art. 60(1) duty in numbers."
+    }
+  ]
+}

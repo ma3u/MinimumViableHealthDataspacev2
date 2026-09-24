@@ -27,6 +27,119 @@ export async function loadJson(name) {
 }
 
 const LAYER_GAP = 110;
+export function trendOf(n) {
+  const v = n.series.map((p) => p.value);
+  const first = v[0];
+  const last = v[v.length - 1];
+  const lo = n.range?.low;
+  const hi = n.range?.high;
+  const width = lo != null && hi != null ? hi - lo : Math.abs(first) * 0.2 || 1;
+  const rel = (last - first) / width;
+  const dir = Math.abs(rel) < 0.15 ? "stable" : rel > 0 ? "rising" : "falling";
+  const out = (hi != null && last > hi) || (lo != null && last < lo);
+  const worse =
+    n.higherIsWorse === false ? dir === "falling" : dir === "rising";
+  const sev =
+    dir === "stable"
+      ? out
+        ? "warn"
+        : "ok"
+      : worse
+        ? out
+          ? "bad"
+          : "warn"
+        : "ok";
+  const months = Math.round(
+    (new Date(n.series[n.series.length - 1].date) -
+      new Date(n.series[0].date)) /
+      2629800000,
+  );
+  return { dir, sev, first, last, out, months };
+}
+
+/**
+ * Give a node a time series: trend, chart and description in the right panel,
+ * and a click that unfolds the single points as chained nodes on `layer`.
+ * item = { measure, unit, range?, higherIsWorse?, description?, series: [{date, value}] }
+ */
+export function attachSeries(n, item, layer) {
+  n.series = [...item.series].sort((a, b) => a.date.localeCompare(b.date));
+  n.unit = item.unit ?? "";
+  n.range = item.range ?? null;
+  n.higherIsWorse = item.higherIsWorse !== false;
+  n.measure = item.measure;
+  n.detail = n.detail ?? {};
+  if (item.description) n.detail.description = item.description;
+  const t = trendOf(n);
+  n.detail.facts = [
+    [
+      item.measure,
+      `${t.last} ${n.unit}, ${t.dir}${
+        t.dir === "stable" ? "" : ` from ${t.first} over ${t.months} months`
+      }`,
+    ],
+    ...(n.detail.facts ?? []),
+  ];
+  n.expand = (parent) => {
+    const lo = n.range?.low;
+    const hi = n.range?.high;
+    const nodes = n.series.map((p) => {
+      const out = (hi != null && p.value > hi) || (lo != null && p.value < lo);
+      return {
+        id: `pt:${parent.id}:${p.date}`,
+        label: `${p.date.slice(0, 7)} · ${p.value}`,
+        layer,
+        size: 0.8,
+        color: out ? "#f59e0b" : "#93c5fd",
+        detail: {
+          title: `${item.measure}, ${p.date.slice(0, 7)}`,
+          sub: `${p.value} ${n.unit}${
+            out ? ", outside the expected band" : ""
+          }`,
+          facts: [
+            ["of", parent.label],
+            ["reference", n.range?.text ?? "none"],
+          ],
+        },
+      };
+    });
+    const links = [];
+    nodes.forEach((x, i) => {
+      links.push({
+        source: parent.id,
+        target: x.id,
+        color: "#64748b",
+        distance: 45,
+      });
+      if (i > 0)
+        links.push({
+          source: nodes[i - 1].id,
+          target: x.id,
+          color: "#93c5fd",
+          distance: 26,
+          arrow: true,
+          particles: 1,
+        });
+    });
+    return { nodes, links };
+  };
+  return t;
+}
+
+/** Attach every item of a series file to the nodes whose id contains its `match`. Returns the trends found. */
+export function attachSeriesFile(file, nodes, layer) {
+  const out = [];
+  for (const item of file.items ?? []) {
+    const targets = nodes.filter(
+      (n) =>
+        n.id === item.match ||
+        (item.match !== "me" && n.id.startsWith(item.match)),
+    );
+    for (const n of targets)
+      out.push({ node: n, item, trend: attachSeries(n, item, layer) });
+  }
+  return out;
+}
 
 function textSprite(text, { size = 22, color = "#e5e7eb", bg = null } = {}) {
   const c = document.createElement("canvas");
@@ -427,38 +540,6 @@ export function mountPersona(cfg) {
     );
     setTimeout(() => (focused = false), 12000);
     showDetail(n);
-  }
-
-  function trendOf(n) {
-    const v = n.series.map((p) => p.value);
-    const first = v[0];
-    const last = v[v.length - 1];
-    const lo = n.range?.low;
-    const hi = n.range?.high;
-    const width =
-      lo != null && hi != null ? hi - lo : Math.abs(first) * 0.2 || 1;
-    const rel = (last - first) / width;
-    const dir =
-      Math.abs(rel) < 0.15 ? "stable" : rel > 0 ? "rising" : "falling";
-    const out = (hi != null && last > hi) || (lo != null && last < lo);
-    const worse =
-      n.higherIsWorse === false ? dir === "falling" : dir === "rising";
-    const sev =
-      dir === "stable"
-        ? out
-          ? "warn"
-          : "ok"
-        : worse
-          ? out
-            ? "bad"
-            : "warn"
-          : "ok";
-    const months = Math.round(
-      (new Date(n.series[n.series.length - 1].date) -
-        new Date(n.series[0].date)) /
-        2629800000,
-    );
-    return { dir, sev, first, last, out, months };
   }
 
   function chartSvg(n) {

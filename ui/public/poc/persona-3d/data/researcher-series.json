@@ -1,0 +1,381 @@
+{
+  "asOf": "2026-09-23",
+  "note": "Fictional monthly figures for the researcher persona (PharmaCo Research AG). Shapes mirror what an access log (Art. 73(1)(e)) and a study registry would yield.",
+  "items": [
+    {
+      "match": "ds:synthea",
+      "measure": "Accesses per month",
+      "unit": "accesses",
+      "higherIsWorse": false,
+      "series": [
+        {
+          "date": "2025-10-01",
+          "value": 1
+        },
+        {
+          "date": "2025-11-01",
+          "value": 2
+        },
+        {
+          "date": "2025-12-01",
+          "value": 2
+        },
+        {
+          "date": "2026-01-01",
+          "value": 3
+        },
+        {
+          "date": "2026-02-01",
+          "value": 4
+        },
+        {
+          "date": "2026-03-01",
+          "value": 4
+        },
+        {
+          "date": "2026-04-01",
+          "value": 5
+        },
+        {
+          "date": "2026-05-01",
+          "value": 6
+        },
+        {
+          "date": "2026-06-01",
+          "value": 6
+        },
+        {
+          "date": "2026-07-01",
+          "value": 7
+        },
+        {
+          "date": "2026-08-01",
+          "value": 8
+        },
+        {
+          "date": "2026-09-01",
+          "value": 9
+        }
+      ],
+      "description": "My accesses to this dataset inside the secure processing environment, counted from the access log. Every one of them is visible to the holder, the access body and, per patient, under Art. 8."
+    },
+    {
+      "match": "ds:omop",
+      "measure": "Data pulled per month",
+      "unit": "MB",
+      "higherIsWorse": false,
+      "series": [
+        {
+          "date": "2025-10-01",
+          "value": 0
+        },
+        {
+          "date": "2025-11-01",
+          "value": 0
+        },
+        {
+          "date": "2025-12-01",
+          "value": 14
+        },
+        {
+          "date": "2026-01-01",
+          "value": 41
+        },
+        {
+          "date": "2026-02-01",
+          "value": 0
+        },
+        {
+          "date": "2026-03-01",
+          "value": 5
+        },
+        {
+          "date": "2026-04-01",
+          "value": 8
+        },
+        {
+          "date": "2026-05-01",
+          "value": 12
+        },
+        {
+          "date": "2026-06-01",
+          "value": 6
+        },
+        {
+          "date": "2026-07-01",
+          "value": 9
+        },
+        {
+          "date": "2026-08-01",
+          "value": 11
+        },
+        {
+          "date": "2026-09-01",
+          "value": 10
+        }
+      ],
+      "description": "Volume transferred under the permit for the OMOP analytics cohort. Pulls stay inside the SPE; the figure is what the data plane logged."
+    },
+    {
+      "match": "ds:synthetic-type-2-diabetes",
+      "measure": "Accesses per month",
+      "unit": "accesses",
+      "higherIsWorse": false,
+      "series": [
+        {
+          "date": "2025-10-01",
+          "value": 3
+        },
+        {
+          "date": "2025-11-01",
+          "value": 3
+        },
+        {
+          "date": "2025-12-01",
+          "value": 4
+        },
+        {
+          "date": "2026-01-01",
+          "value": 4
+        },
+        {
+          "date": "2026-02-01",
+          "value": 5
+        },
+        {
+          "date": "2026-03-01",
+          "value": 5
+        },
+        {
+          "date": "2026-04-01",
+          "value": 4
+        },
+        {
+          "date": "2026-05-01",
+          "value": 6
+        },
+        {
+          "date": "2026-06-01",
+          "value": 6
+        },
+        {
+          "date": "2026-07-01",
+          "value": 7
+        },
+        {
+          "date": "2026-08-01",
+          "value": 7
+        },
+        {
+          "date": "2026-09-01",
+          "value": 8
+        }
+      ],
+      "description": "Accesses to the patient journey dataset, the one my cardiovascular study pulls conditions, observations and medications from."
+    },
+    {
+      "match": "study:STUDY-CARDIO-2024",
+      "measure": "Participants enrolled",
+      "unit": "participants",
+      "higherIsWorse": false,
+      "series": [
+        {
+          "date": "2024-06-30",
+          "value": 600
+        },
+        {
+          "date": "2024-09-30",
+          "value": 1100
+        },
+        {
+          "date": "2024-12-31",
+          "value": 1500
+        },
+        {
+          "date": "2025-03-31",
+          "value": 2100
+        },
+        {
+          "date": "2025-06-30",
+          "value": 2700
+        },
+        {
+          "date": "2025-09-30",
+          "value": 3300
+        },
+        {
+          "date": "2025-12-31",
+          "value": 3900
+        },
+        {
+          "date": "2026-03-31",
+          "value": 4400
+        },
+        {
+          "date": "2026-06-30",
+          "value": 4700
+        },
+        {
+          "date": "2026-09-23",
+          "value": 4821
+        }
+      ],
+      "description": "Cumulative enrolment of my multi-centre cohort across DE, NL, FR and ES. Consents are held per participant and can be withdrawn; the Art. 71 opt-out is checked at every pull."
+    },
+    {
+      "match": "study:STUDY-DIAB-2023",
+      "measure": "Participants enrolled",
+      "unit": "participants",
+      "higherIsWorse": false,
+      "series": [
+        {
+          "date": "2024-06-30",
+          "value": 400
+        },
+        {
+          "date": "2024-09-30",
+          "value": 800
+        },
+        {
+          "date": "2024-12-31",
+          "value": 1100
+        },
+        {
+          "date": "2025-03-31",
+          "value": 1400
+        },
+        {
+          "date": "2025-06-30",
+          "value": 1700
+        },
+        {
+          "date": "2025-09-30",
+          "value": 1900
+        },
+        {
+          "date": "2025-12-31",
+          "value": 2000
+        },
+        {
+          "date": "2026-03-31",
+          "value": 2080
+        },
+        {
+          "date": "2026-06-30",
+          "value": 2100
+        },
+        {
+          "date": "2026-09-23",
+          "value": 2103
+        }
+      ],
+      "description": "Enrolment of the Institut de Recherche Santé biomarker cohort, now closed. Shares the T2D condition set and the HbA1c and eGFR measurements my study uses: a candidate for a joint federated query."
+    },
+    {
+      "match": "study:STUDY-RESP-2025",
+      "measure": "Participants enrolled",
+      "unit": "participants",
+      "higherIsWorse": false,
+      "series": [
+        {
+          "date": "2024-06-30",
+          "value": 0
+        },
+        {
+          "date": "2024-09-30",
+          "value": 0
+        },
+        {
+          "date": "2024-12-31",
+          "value": 0
+        },
+        {
+          "date": "2025-03-31",
+          "value": 0
+        },
+        {
+          "date": "2025-06-30",
+          "value": 0
+        },
+        {
+          "date": "2025-09-30",
+          "value": 0
+        },
+        {
+          "date": "2025-12-31",
+          "value": 120
+        },
+        {
+          "date": "2026-03-31",
+          "value": 340
+        },
+        {
+          "date": "2026-06-30",
+          "value": 610
+        },
+        {
+          "date": "2026-09-23",
+          "value": 890
+        }
+      ],
+      "description": "MedReg DE's respiratory cohort, still recruiting. Overlaps with my study on conditions and observations; different disease area."
+    },
+    {
+      "match": "me",
+      "measure": "SPE compute hours per month",
+      "unit": "h",
+      "higherIsWorse": false,
+      "series": [
+        {
+          "date": "2025-10-01",
+          "value": 0
+        },
+        {
+          "date": "2025-11-01",
+          "value": 0
+        },
+        {
+          "date": "2025-12-01",
+          "value": 4
+        },
+        {
+          "date": "2026-01-01",
+          "value": 12
+        },
+        {
+          "date": "2026-02-01",
+          "value": 9
+        },
+        {
+          "date": "2026-03-01",
+          "value": 15
+        },
+        {
+          "date": "2026-04-01",
+          "value": 18
+        },
+        {
+          "date": "2026-05-01",
+          "value": 14
+        },
+        {
+          "date": "2026-06-01",
+          "value": 22
+        },
+        {
+          "date": "2026-07-01",
+          "value": 25
+        },
+        {
+          "date": "2026-08-01",
+          "value": 21
+        },
+        {
+          "date": "2026-09-01",
+          "value": 27
+        }
+      ],
+      "description": "Hours of analysis run inside the secure processing environment against permitted data (Art. 73). No record leaves the environment; results are released as aggregates with k of at least 5."
+    }
+  ]
+}
