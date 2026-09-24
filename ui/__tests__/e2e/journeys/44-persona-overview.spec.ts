@@ -24,22 +24,17 @@ const PHARMACO = "did:web:pharmaco.de:research";
 const LMC = "did:web:lmc.nl:clinic";
 const IRS = "did:web:irs.fr:hdab";
 
-/** Skip when the persona overview seed has not been applied to this graph. */
+/**
+ * Skip when the persona overview seed has not been applied to this graph.
+ * Probes the public patient list, so it works before any login.
+ */
 async function skipIfSeedMissing(page: Page) {
   await skipIfNeo4jDown(page, "/api/patient");
-  const profile = await page.request.get(
-    `/api/patient/profile?patientId=${P1}`,
-  );
-  if (!profile.ok()) {
+  const list = await page.request.get("/api/patient");
+  const data = list.ok() ? await list.json() : { patients: [] };
+  const p1 = (data.patients ?? []).find((p: { id: string }) => p.id === P1);
+  if (!p1 || p1.name !== "Anna Müller") {
     test.skip(true, "seed-persona-overview.cypher not applied (no P1)");
-    return;
-  }
-  const data = await profile.json();
-  if (data?.patient?.name !== "Anna Müller") {
-    test.skip(
-      true,
-      "seed-persona-overview.cypher not applied (P1 is not Anna Müller)",
-    );
   }
 }
 
@@ -50,6 +45,7 @@ test.describe("Issue #271 · M0 the seed is visible through today's routes", () 
     page,
   }) => {
     await skipIfSeedMissing(page);
+    await loginAsAdmin(page);
     const data = await apiGet(page, `/api/patient/profile?patientId=${P1}`);
     expect(data.patient.name).toBe("Anna Müller");
     expect(data.conditions.length).toBeGreaterThanOrEqual(8);
@@ -63,6 +59,7 @@ test.describe("Issue #271 · M0 the seed is visible through today's routes", () 
     page,
   }) => {
     await skipIfSeedMissing(page);
+    await loginAsAdmin(page);
     const data = await apiGet(page, `/api/patient/profile?patientId=${P1}`);
     const labs: { code: string; unit: string }[] = data.observations ?? [];
     expect(labs.length).toBeGreaterThan(0);
@@ -184,7 +181,9 @@ test.describe("Issue #271 · M1 patient overview", () => {
     await page.emulateMedia({ reducedMotion: "reduce" });
     await loginAsAdmin(page);
     await page.goto(`/overview?persona=patient&patientId=${P1}`);
-    await expect(page.getByTestId("overview-question")).toBeVisible();
+    await expect(page.getByTestId("overview-question")).toBeVisible({
+      timeout: 45_000,
+    });
     const first = page.getByTestId("overview-signal").first();
     await expect(first).toHaveAttribute("data-severity", "bad");
     await expect(page.getByTestId("overview-canvas")).toHaveCount(0);

@@ -653,7 +653,13 @@ export function buildPatientView(input: PatientViewInput): OverviewView {
   }
 
   // ── measured values over time ─────────────────────────────────────────────
-  const params = bundleToParameters(observations);
+  // In the order of PARAMETER_META, so HbA1c leads whatever the Bundle's order
+  const byCode = new Map(
+    bundleToParameters(observations).map((p) => [p.code, p]),
+  );
+  const params = Object.keys(PARAMETER_META)
+    .map((code) => byCode.get(code))
+    .filter((p): p is NonNullable<typeof p> => Boolean(p));
   let paramCount = 0;
   let firstParam: string | null = null;
   for (const p of params) {
