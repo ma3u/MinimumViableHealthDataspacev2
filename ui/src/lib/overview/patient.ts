@@ -863,3 +863,30 @@ export function ownPatientId(username?: string | null): string | null {
   if (username === "patient2") return "P2";
   return null;
 }
+
+/**
+ * The patient a session owns. Keycloak puts the display name ("Maria
+ * Schmidt") in `user.name` and the login name in `preferredUsername`; the
+ * static demo and the unit tests carry the login name in `user.name`.
+ */
+export function ownPatientIdForSession(
+  session:
+    | {
+        preferredUsername?: string | null;
+        user?: { name?: string | null; email?: string | null } | null;
+      }
+    | null
+    | undefined,
+): string | null {
+  if (!session) return null;
+  const candidates = [
+    session.preferredUsername,
+    session.user?.name,
+    session.user?.email?.split("@")[0],
+  ];
+  for (const c of candidates) {
+    const id = ownPatientId(c ?? null);
+    if (id) return id;
+  }
+  return null;
+}

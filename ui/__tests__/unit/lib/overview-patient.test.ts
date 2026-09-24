@@ -12,6 +12,7 @@ import { join } from "node:path";
 import {
   buildPatientView,
   ownPatientId,
+  ownPatientIdForSession,
   type PatientViewInput,
 } from "@/lib/overview/patient";
 
@@ -300,6 +301,33 @@ describe("buildPatientView, M6", () => {
       (l) => l.source === "me" && l.target === consent.id,
     )!;
     expect(flow.particles).toBe(0);
+  });
+});
+
+describe("ownPatientIdForSession", () => {
+  it("reads the login name Keycloak carries, not the display name", () => {
+    // Keycloak: display name in user.name, login name in preferredUsername
+    expect(
+      ownPatientIdForSession({
+        preferredUsername: "patient1",
+        user: {
+          name: "Maria Schmidt",
+          email: "patient1@health-dataspace.local",
+        },
+      }),
+    ).toBe("P1");
+    // the static demo and the unit tests: login name in user.name
+    expect(ownPatientIdForSession({ user: { name: "patient2" } })).toBe("P2");
+    // the mail's local part as the last resort
+    expect(
+      ownPatientIdForSession({
+        user: { name: "Anna", email: "patient1@x.example" },
+      }),
+    ).toBe("P1");
+    expect(
+      ownPatientIdForSession({ user: { name: "Maria Schmidt" } }),
+    ).toBeNull();
+    expect(ownPatientIdForSession(null)).toBeNull();
   });
 });
 
