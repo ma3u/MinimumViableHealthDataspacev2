@@ -98,6 +98,19 @@ describe("GET /api/patient/observations", () => {
     expect(own.status).toBe(200);
   });
 
+  it("recognises the patient by the Keycloak login name behind a display name", async () => {
+    vi.mocked(getServerSession).mockResolvedValue({
+      user: { name: "Maria Schmidt", email: "patient1@health-dataspace.local" },
+      roles: ["PATIENT"],
+      preferredUsername: "patient1",
+    } as unknown as Session);
+    mockRunQuery
+      .mockResolvedValueOnce([{ id: "P1", name: "Anna Müller" }])
+      .mockResolvedValueOnce(ROWS);
+    const res = await GET(makeReq("?patientId=P1"));
+    expect(res.status).toBe(200);
+  });
+
   it("returns 404 for an unknown patient", async () => {
     mockRunQuery.mockResolvedValueOnce([]).mockResolvedValueOnce([]);
     const res = await GET(makeReq("?patientId=nobody"));

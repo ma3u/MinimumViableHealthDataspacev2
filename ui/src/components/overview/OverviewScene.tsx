@@ -292,6 +292,7 @@ export default function OverviewScene({
       D: 520 + zSpan * 60,
     };
     state.current = st;
+    lastUnfold.current = "";
 
     const fitPlanes = () => {
       st.maxR = 100;
@@ -384,9 +385,17 @@ export default function OverviewScene({
   }, [view]);
 
   // ── unfold / fold ─────────────────────────────────────────────────────────
+  // Runs only when something was unfolded or folded. On mount the graph
+  // already holds the base data; a second graphData() right away raced the
+  // force layout's initialisation in production and left the scene black
+  // ("Cannot read properties of undefined (reading 'tick')").
+  const unfoldKey = expandedIds.join("|");
+  const lastUnfold = useRef("");
   useEffect(() => {
     const st = state.current;
     if (!st) return;
+    if (unfoldKey === lastUnfold.current) return;
+    lastUnfold.current = unfoldKey;
     const base = view.nodes.map((n) => st.nodes.get(n.id)!).filter(Boolean);
     const extra: SceneNode[] = [];
     const extraLinks: OverviewLink[] = [];
@@ -414,8 +423,12 @@ export default function OverviewScene({
       .filter((l) => known.has(l.source) && known.has(l.target))
       .map((l) => ({ ...l }));
     st.graph.graphData({ nodes: all, links });
-    st.graph.d3ReheatSimulation();
-  }, [view, expandedIds]);
+    try {
+      st.graph.d3ReheatSimulation();
+    } catch {
+      /* the layout is not up yet; the new data warms up on its own */
+    }
+  }, [view, expandedIds, unfoldKey]);
 
   // ── focus ─────────────────────────────────────────────────────────────────
   const selectedRef = useRef<string | null>(selectedId);
