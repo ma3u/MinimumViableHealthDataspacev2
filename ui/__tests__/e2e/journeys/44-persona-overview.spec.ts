@@ -10,8 +10,8 @@
  * LOINC-coded measurements, her consents, twelve months of access events
  * and the quarterly quality assessments into the graph, and the existing
  * routes show it. M1 (the patient overview, `/api/overview?persona=patient`,
- * `/api/patient/observations`, `/overview`) is in. The cases of M2 to M5 are
- * `test.fixme` until each milestone lands and are un-fixed with it.
+ * `/api/patient/observations`, `/overview`) and M2 (the access body) are in.
+ * The cases of M3 to M5 are `test.fixme` until each milestone lands.
  *
  *   PLAYWRIGHT_BASE_URL=https://ehds.mabu.red \
  *     npx playwright test __tests__/e2e/journeys/44-persona-overview.spec.ts
@@ -201,7 +201,6 @@ test.describe("Issue #271 · M2 access body overview", () => {
   test("J968 PharmaCo's accesses after credential expiry are a bad signal", async ({
     page,
   }) => {
-    test.fixme(true, "M2: the route does not exist yet (#271)");
     await loginAsAdmin(page);
     const view = await apiGet(page, "/api/overview?persona=hdab");
     const codes = view.signals.map((s: { code: string }) => s.code);
@@ -217,7 +216,6 @@ test.describe("Issue #271 · M2 access body overview", () => {
   test("J969 the refused applicant's attempts are a matter for Art. 63", async ({
     page,
   }) => {
-    test.fixme(true, "M2: the route does not exist yet (#271)");
     await loginAsAdmin(page);
     const view = await apiGet(page, "/api/overview?persona=hdab");
     const s = view.signals.find(
@@ -233,7 +231,6 @@ test.describe("Issue #271 · M2 access body overview", () => {
   test("J970 my own overdue decisions are listed against the Art. 68(4) clock", async ({
     page,
   }) => {
-    test.fixme(true, "M2: the route does not exist yet (#271)");
     await loginAsAdmin(page);
     const view = await apiGet(page, "/api/overview?persona=hdab");
     const overdue = view.signals.filter(
@@ -247,7 +244,6 @@ test.describe("Issue #271 · M2 access body overview", () => {
   });
 
   test("J971 the signals are ordered bad, warn, info, ok", async ({ page }) => {
-    test.fixme(true, "M2: the route does not exist yet (#271)");
     await loginAsAdmin(page);
     const view = await apiGet(page, "/api/overview?persona=hdab");
     const rank: Record<string, number> = { bad: 3, warn: 2, info: 1, ok: 0 };

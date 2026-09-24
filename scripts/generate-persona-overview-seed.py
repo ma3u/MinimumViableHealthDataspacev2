@@ -502,6 +502,16 @@ def cypher() -> str:
     w("  AND coalesce(vc.status, 'active') = 'active'")
     w("SET vc.status = 'expired';")
     w("")
+    w("// ── 9. Pin the credential dates the stories rest on ─────────────────────────")
+    w("// The credential seed dates expiry relative to its run; the overview stories")
+    w("// need PharmaCo's purpose credential expired on 2026-06-20 (accesses after it)")
+    w("// and the two quality labels expired on 2026-09-18 (Art. 78 renewal due).")
+    w("MATCH (vc:VerifiableCredential {credentialId: 'vc:data-processing-purpose:cro-pharmaco'})")
+    w("SET vc.expiresAt = datetime('2026-06-20T00:06:57Z'), vc.status = 'expired';")
+    w("MATCH (vc:VerifiableCredential)")
+    w("WHERE vc.credentialId IN ['vc:data-quality-label:clinic-alphaklinik', 'vc:data-quality-label:clinic-lmc']")
+    w("SET vc.expiresAt = datetime('2026-09-18T00:06:57Z'), vc.status = 'expired';")
+    w("")
     return "\n".join(L)
 
 

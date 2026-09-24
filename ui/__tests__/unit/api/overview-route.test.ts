@@ -44,6 +44,9 @@ vi.mock("@/app/api/patient/research/route", () => stub("patient_research"));
 vi.mock("@/app/api/patient/observations/route", () =>
   stub("patient_observations"),
 );
+vi.mock("@/app/api/compliance/route", () => stub("compliance"));
+vi.mock("@/app/api/permits/route", () => stub("permits"));
+vi.mock("@/app/api/credentials/route", () => stub("credentials"));
 
 import { GET } from "@/app/api/overview/route";
 
@@ -56,8 +59,9 @@ const PHARMACO = "did:web:pharmaco.de:research";
 
 function graphAnswers() {
   mockRunQuery.mockImplementation(async (cypher: string) => {
-    if (cypher.includes("TREATED_AT"))
+    if (cypher.includes("TREATED_AT")) {
       return [{ did: ALPHA, name: "AlphaKlinik Berlin" }];
+    }
     if (cypher.includes("ResearchStudy")) {
       return [
         {
@@ -82,6 +86,10 @@ function graphAnswers() {
           trustCenter: "MedReg DE Trust Centre",
         },
       ];
+    }
+    if (cypher.includes("MATCH (c:Contract)")) return [];
+    if (cypher.includes("Participant {participantId: $did}")) {
+      return [{ did: "did:web:medreg.de:hdab", name: "MedReg DE" }];
     }
     if (cypher.includes("TransferEvent")) {
       return [
@@ -132,7 +140,7 @@ describe("GET /api/overview", () => {
   });
 
   it("answers 501 for the personas of later milestones", async () => {
-    for (const p of ["researcher", "hdab", "hospital"]) {
+    for (const p of ["researcher", "hospital"]) {
       const res = await GET(makeReq(`?persona=${p}`));
       expect(res.status, p).toBe(501);
       expect((await res.json()).issue).toContain("/issues/271");
@@ -140,7 +148,7 @@ describe("GET /api/overview", () => {
   });
 
   it("derives the persona from the role when none is given", async () => {
-    vi.mocked(getServerSession).mockResolvedValue(session(["HDAB_AUTHORITY"]));
+    vi.mocked(getServerSession).mockResolvedValue(session(["DATA_HOLDER"]));
     expect((await GET(makeReq(""))).status).toBe(501);
     vi.mocked(getServerSession).mockResolvedValue(
       session(["PATIENT"], "patient1"),
@@ -220,6 +228,37 @@ describe("GET /api/overview", () => {
     const res = await GET(makeReq("?persona=patient&patientId=nobody"));
     expect(res.status).toBe(404);
     expect((await res.json()).error).toBe("Patient not found");
+  });
+
+  it("assembles the access body view from the register, the matrix, the wallet and the log", async () => {
+    vi.mocked(getServerSession).mockResolvedValue(
+      session(["HDAB_AUTHORITY"], "regulator@health-dataspace.local"),
+    );
+    const res = await GET(makeReq("?asOf=2026-09-23"));
+    expect(res.status).toBe(200);
+    const view = await res.json();
+    expect(view.persona).toBe("hdab");
+    expect(view.me).toEqual({
+      id: "did:web:medreg.de:hdab",
+      name: "MedReg DE",
+    });
+    expect(calls).toEqual([
+      "/api/compliance",
+      "/api/permits",
+      "/api/credentials",
+    ]);
+    const codes = view.signals.map((s: { code: string }) => s.code);
+    expect(codes).toContain("decision-overdue");
+    expect(codes).toContain("pending-queue");
+    const me = view.nodes.find((n: { id: string }) => n.id === "me");
+    expect(me.measure).toContain("Pending applications");
+    expect(me.range.high).toBe(2);
+    // PharmaCo's access from the log, its expired purpose credential from the wallet
+    const pharmaco = view.nodes.find(
+      (n: { id: string }) => n.id === `p:${PHARMACO}`,
+    );
+    expect(pharmaco.status).toBe("bad");
+    expect(codes).toContain("access-after-credential-expiry");
   });
 
   it("returns 502 when the graph is down", async () => {
