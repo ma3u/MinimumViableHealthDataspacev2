@@ -21,7 +21,8 @@ header.top nav a { padding: 5px 10px; border-radius: 999px; border: 1px solid va
 header.top nav a.active { background: #1e3a8a; color: #fff; border-color: #3b82f6; }
 header.top .spacer { flex: 1; }
 header.top .note { color: var(--muted); font-size: 12px; }
-main { display: grid; grid-template-columns: 340px 1fr; min-height: 0; }
+main { display: grid; grid-template-columns: 340px 1fr 380px; min-height: 0; }
+main.no-right { grid-template-columns: 340px 1fr; }
 aside.panel { background: var(--panel); border-right: 1px solid var(--line); overflow: auto; padding: 16px; }
 aside.panel h1 { font-size: 18px; margin: 0 0 2px; }
 aside.panel .question { color: var(--muted); font-size: 13px; margin-bottom: 4px; }
@@ -67,6 +68,24 @@ table { border-collapse: collapse; width: 100%; font-size: 13px; }
 th, td { border-bottom: 1px solid var(--line); padding: 6px 8px; text-align: left; vertical-align: top; }
 th { color: var(--muted); font-weight: 600; }
 @media (max-width: 900px) {
-  main { grid-template-columns: 1fr; grid-template-rows: 40vh 1fr; }
+  main, main.no-right { grid-template-columns: 1fr; grid-template-rows: 40vh 1fr auto; }
+  aside.right { order: 3; border-left: 0; border-top: 1px solid var(--line); }
   aside.panel { border-right: 0; border-top: 1px solid var(--line); order: 2; }
 }
+
+aside.right { background: var(--panel); border-left: 1px solid var(--line); overflow: auto; padding: 16px; }
+aside.right.hidden { display: none; }
+aside.right h3 { margin: 0 0 2px; font-size: 16px; }
+aside.right .sub { color: var(--muted); font-size: 12px; margin-bottom: 10px; }
+aside.right .desc { font-size: 13px; line-height: 1.5; margin: 10px 0; }
+aside.right .trend { display: flex; align-items: baseline; gap: 10px; margin: 6px 0 2px; }
+aside.right .trend .val { font-size: 26px; font-weight: 700; }
+aside.right .trend .dir { font-size: 13px; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--line); }
+aside.right .trend .dir.bad { color: var(--bad); border-color: var(--bad); }
+aside.right .trend .dir.warn { color: var(--warn); border-color: var(--warn); }
+aside.right .trend .dir.ok { color: var(--ok); border-color: var(--ok); }
+aside.right svg.chart { width: 100%; height: 170px; display: block; margin: 6px 0 4px; }
+aside.right table.series { margin-top: 8px; font-size: 12px; }
+aside.right table.series td.out { color: var(--warn); }
+aside.right .close { float: right; color: var(--muted); cursor: pointer; font-size: 18px; line-height: 1; }
+aside.right .hintrow { font-size: 12px; color: var(--muted); margin-top: 8px; }
