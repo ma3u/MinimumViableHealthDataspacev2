@@ -10,51 +10,51 @@
       "series": [
         {
           "date": "2025-10-01",
-          "value": 4
+          "value": 3
         },
         {
           "date": "2025-11-01",
-          "value": 5
+          "value": 4
         },
         {
           "date": "2025-12-01",
-          "value": 6
+          "value": 4
         },
         {
           "date": "2026-01-01",
-          "value": 6
+          "value": 4
         },
         {
           "date": "2026-02-01",
-          "value": 7
+          "value": 5
         },
         {
           "date": "2026-03-01",
-          "value": 8
+          "value": 7
         },
         {
           "date": "2026-04-01",
-          "value": 8
+          "value": 7
         },
         {
           "date": "2026-05-01",
-          "value": 9
+          "value": 7
         },
         {
           "date": "2026-06-01",
-          "value": 10
+          "value": 9
         },
         {
           "date": "2026-07-01",
-          "value": 12
+          "value": 10
         },
         {
           "date": "2026-08-01",
-          "value": 13
+          "value": 11
         },
         {
           "date": "2026-09-01",
-          "value": 14
+          "value": 12
         }
       ],
       "description": "Accesses to our Synthea FHIR cohort by all users, from our own access log (Art. 73(1)(e)). Served only under a permit; refused attempts are counted on the consumer."
@@ -79,11 +79,11 @@
         },
         {
           "date": "2026-01-01",
-          "value": 3
+          "value": 2
         },
         {
           "date": "2026-02-01",
-          "value": 1
+          "value": 2
         },
         {
           "date": "2026-03-01",
@@ -99,7 +99,7 @@
         },
         {
           "date": "2026-06-01",
-          "value": 2
+          "value": 3
         },
         {
           "date": "2026-07-01",
@@ -107,7 +107,7 @@
         },
         {
           "date": "2026-08-01",
-          "value": 3
+          "value": 4
         },
         {
           "date": "2026-09-01",
@@ -180,15 +180,15 @@
       "series": [
         {
           "date": "2025-10-01",
-          "value": 5
+          "value": 4
         },
         {
           "date": "2025-11-01",
-          "value": 6
+          "value": 5
         },
         {
           "date": "2025-12-01",
-          "value": 7
+          "value": 6
         },
         {
           "date": "2026-01-01",
@@ -196,11 +196,11 @@
         },
         {
           "date": "2026-02-01",
-          "value": 8
+          "value": 7
         },
         {
           "date": "2026-03-01",
-          "value": 9
+          "value": 8
         },
         {
           "date": "2026-04-01",
@@ -400,54 +400,55 @@
       "series": [
         {
           "date": "2025-10-01",
-          "value": 12
+          "value": 0.17
         },
         {
           "date": "2025-11-01",
-          "value": 15
+          "value": 0.3
         },
         {
           "date": "2025-12-01",
-          "value": 9
+          "value": 0.3
         },
         {
           "date": "2026-01-01",
-          "value": 41
+          "value": 0.3
         },
         {
           "date": "2026-02-01",
-          "value": 0
+          "value": 0.31
         },
         {
           "date": "2026-03-01",
-          "value": 14
+          "value": 0.43
         },
         {
           "date": "2026-04-01",
-          "value": 8
+          "value": 0.43
         },
         {
           "date": "2026-05-01",
-          "value": 12
+          "value": 0.48
         },
         {
           "date": "2026-06-01",
-          "value": 6
+          "value": 0.48
         },
         {
           "date": "2026-07-01",
-          "value": 9
+          "value": 0.61
         },
         {
           "date": "2026-08-01",
-          "value": 11
+          "value": 0.74
         },
         {
           "date": "2026-09-01",
-          "value": 13
+          "value": 0.74
         }
       ],
       "description": "Volume our data plane served under permits, our Art. 60(1) duty in numbers."
     }
-  ]
+  ],
+  "source": "neo4j/seed-persona-overview.cypher via scripts/generate-persona-overview-seed.py"
 }
