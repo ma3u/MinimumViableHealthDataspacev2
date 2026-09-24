@@ -11,6 +11,7 @@ const STATIC_MOCK_MAP: Record<string, string> = {
   "/api/patient/profile": "/mock/patient_profile_list.json",
   "/api/patient/insights": "/mock/patient_insights.json",
   "/api/patient/research": "/mock/patient_research.json",
+  "/api/patient/observations": "/mock/patient_observations.json",
   "/api/analytics": "/mock/analytics.json",
   "/api/eehrxf": "/mock/eehrxf.json",
   "/api/nlq": "/mock/nlq_templates.json",
@@ -47,6 +48,7 @@ const STATIC_MOCK_PREFIX: [string, string][] = [
   // Patient sub-routes with query params
   ["/api/patient/insights?", "/mock/patient_insights.json"],
   ["/api/patient/research?", "/mock/patient_research.json"],
+  ["/api/patient/observations?", "/mock/patient_observations.json"],
   // Legacy patient endpoint
   ["/api/patient?", "/mock/patient_default.json"],
   // Other prefixes

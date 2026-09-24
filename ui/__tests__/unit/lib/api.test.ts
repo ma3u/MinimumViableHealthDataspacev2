@@ -58,6 +58,20 @@ describe("fetchApi", () => {
       );
     });
 
+    it("should route /api/patient/observations to /mock/patient_observations.json", async () => {
+      vi.stubEnv("NEXT_PUBLIC_STATIC_EXPORT", "true");
+
+      mockFetch.mockResolvedValue(new Response("{}"));
+
+      const { fetchApi } = await import("@/lib/api");
+      await fetchApi("/api/patient/observations?patientId=P1");
+
+      expect(mockFetch).toHaveBeenCalledWith(
+        "/MinimumViableHealthDataspacev2/mock/patient_observations.json",
+        undefined,
+      );
+    });
+
     it("should route /api/graph to /mock/graph.json", async () => {
       vi.stubEnv("NEXT_PUBLIC_STATIC_EXPORT", "true");
 
