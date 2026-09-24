@@ -165,6 +165,7 @@ function graphAnswers() {
           },
         ];
       }
+      if (cypher.includes("[:READ]->(p:Patient)")) return [];
       if (cypher.includes("TransferEvent")) {
         return [
           {

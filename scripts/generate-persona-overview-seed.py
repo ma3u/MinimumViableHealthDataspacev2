@@ -138,10 +138,14 @@ ENROLMENT_DATES = [
 ]
 
 CONSENTS = [
+    # id, study, granted, scope, trust centre, revoked at (Art. 71 opt-out)
     ("CONSENT-001", "STUDY-CARDIO-2024", "2024-03-10T09:00:00Z",
-     "FHIR Conditions + Observations", "MedReg DE Trust Centre"),
+     "FHIR Conditions + Observations", "MedReg DE Trust Centre", None),
     ("CONSENT-002", "STUDY-DIAB-2023", "2023-11-15T14:30:00Z",
-     "OMOP Drug Exposures + Conditions", "Limburg Trust Centre NL"),
+     "OMOP Drug Exposures + Conditions", "Limburg Trust Centre NL", None),
+    ("CONSENT-003", "STUDY-RESP-2025", "2026-01-12T10:00:00Z",
+     "FHIR Conditions + spirometry Observations", "MedReg DE Trust Centre",
+     "2026-05-01T08:00:00Z"),
 ]
 
 # ── 3. Twelve months of access events ───────────────────────────────────────
@@ -215,7 +219,9 @@ def events() -> list[dict]:
                 day = 2 + (i * 7) % 26
                 hour = 8 + (i * 3) % 10
                 ts = datetime(month.year, month.month, day, hour, 15)
+                reads = ["P1"] if ep == "/fhir/Patient" and status == 200 and i % 3 == 0 else []
                 out.append({
+                    "reads": reads,
                     "id": f"te-m-{short}-{dataset.split(':')[1][:8]}-{month:%Y-%m}-{i + 1:02d}",
                     "ts": ts.strftime("%Y-%m-%dT%H:%M:00Z"),
                     "ep": ep, "m": method, "ct": ct,
@@ -245,6 +251,7 @@ def cypher() -> str:
     w("//   ResearchStudy <-CONDUCTS- Participant (PharmaCo, IRS, MedReg)")
     w("//     -HAS_ENROLMENT-> StudyEnrolment, one per quarter")
     w("//   TransferEvent, one per access, twelve months, per consumer and dataset")
+    w("//     -READ-> Patient for the reads that touched P1's record (Art. 8 log)")
     w("//     -REQUESTED_BY-> consumer, -PROVIDED_BY-> AlphaKlinik, -ACCESSED-> dataset,")
     w("//     -UNDER_PERMIT-> HDABApproval (issued by MedReg DE / IRS)")
     w("//   VerifiableCredential (quality label) -HAS_ASSESSMENT-> QualityAssessment")
@@ -393,15 +400,16 @@ def cypher() -> str:
     w("MATCH (p:Patient {resourceId: 'P1'})")
     w("UNWIND [")
     rows = []
-    for cid, study, granted, scope, tc in CONSENTS:
-        rows.append(f"  {{id: {q(cid)}, study: {q(study)}, at: {q(granted)}, scope: {q(scope)}, tc: {q(tc)}}}")
+    for cid, study, granted, scope, tc, revoked in CONSENTS:
+        rows.append(f"  {{id: {q(cid)}, study: {q(study)}, at: {q(granted)}, scope: {q(scope)}, tc: {q(tc)}, revokedAt: {q(revoked)}}}")
     w(",\n".join(rows))
     w("] AS c")
     w("MERGE (pc:PatientConsent {consentId: c.id})")
     w("SET pc.patientId = 'P1',")
     w("    pc.studyId = c.study,")
     w("    pc.grantedAt = datetime(c.at),")
-    w("    pc.revoked = false,")
+    w("    pc.revoked = c.revokedAt IS NOT NULL,")
+    w("    pc.revokedAt = CASE WHEN c.revokedAt IS NULL THEN null ELSE datetime(c.revokedAt) END,")
     w("    pc.purpose = 'secondary-use',")
     w("    pc.dataScope = c.scope,")
     w("    pc.ehdsArticle = 'Art. 71',")
@@ -427,7 +435,8 @@ def cypher() -> str:
             f"  {{id: {q(e['id'])}, ts: {q(e['ts'])}, ep: {q(e['ep'])}, m: {q(e['m'])}, sc: {e['sc']}, "
             f"n: {e['n']}, b: {e['b']}, dur: {e['dur']}, ct: {q(e['ct'])}, c: {q(e['c'])}, p: {q(e['p'])}, "
             f"ds: {q(e['ds'])}, permit: {q(e['permit'])}, contract: {q(e['contract'])}, "
-            f"purpose: {q(e['purpose'])}, name: {q(e['name'])}}}")
+            f"purpose: {q(e['purpose'])}, name: {q(e['name'])}, "
+            f"reads: [{', '.join(q(r) for r in e['reads'])}]}}")
     w(",\n".join(rows))
     w("] AS e")
     w("MERGE (te:TransferEvent {eventId: e.id})")
@@ -449,8 +458,10 @@ def cypher() -> str:
     w("    te.contractId = e.contract,")
     w("    te.purpose = e.purpose,")
     w("    te.errorMessage = CASE WHEN e.sc = 403 THEN 'No data permit covers this access (Art. 61(1))' ELSE null END,")
+    w("    te.patientIds = e.reads,")
     w("    te.demo = true,")
     w("    te.monthly = true")
+    w("FOREACH (pid IN e.reads | MERGE (pat:Patient {resourceId: pid}) MERGE (te)-[:READ]->(pat))")
     w("WITH te, e")
     w("OPTIONAL MATCH (c:Participant {participantId: e.c})")
     w("FOREACH (_ IN CASE WHEN c IS NOT NULL THEN [1] ELSE [] END | MERGE (te)-[:REQUESTED_BY]->(c))")
