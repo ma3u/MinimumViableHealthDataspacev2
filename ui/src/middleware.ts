@@ -47,6 +47,7 @@ const PROTECTED_PATHS = [
   "/patient/research",
   "/patient/insights",
   "/requests",
+  "/overview",
 ] as const;
 
 function generateNonce(): string {
