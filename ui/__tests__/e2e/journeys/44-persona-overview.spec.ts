@@ -10,8 +10,9 @@
  * LOINC-coded measurements, her consents, twelve months of access events
  * and the quarterly quality assessments into the graph, and the existing
  * routes show it. M1 (the patient overview, `/api/overview?persona=patient`,
- * `/api/patient/observations`, `/overview`) and M2 (the access body) are in.
- * The cases of M3 to M5 are `test.fixme` until each milestone lands.
+ * `/api/patient/observations`, `/overview`), M2 (the access body) and M3
+ * (the holder) are in. The cases of M4 and M5 are `test.fixme` until each
+ * milestone lands.
  *
  *   PLAYWRIGHT_BASE_URL=https://ehds.mabu.red \
  *     npx playwright test __tests__/e2e/journeys/44-persona-overview.spec.ts
@@ -260,7 +261,6 @@ test.describe("Issue #271 · M3 holder overview", () => {
   test("J972 Limburg's flow without a contract and the label below its band", async ({
     page,
   }) => {
-    test.fixme(true, "M3: the route does not exist yet (#271)");
     await loginAsAdmin(page);
     const view = await apiGet(page, "/api/overview?persona=hospital");
     const codes = view.signals.map((s: { code: string }) => s.code);

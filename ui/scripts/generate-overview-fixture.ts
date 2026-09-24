@@ -13,6 +13,7 @@ import { join } from "node:path";
 import { buildPatientView } from "../src/lib/overview/patient";
 import type { AccessLogEntry } from "../src/lib/overview/patient";
 import { buildHdabView } from "../src/lib/overview/hdab";
+import { buildHospitalView } from "../src/lib/overview/hospital";
 
 const MOCK = join(__dirname, "..", "public", "mock");
 const read = (name: string) =>
@@ -61,9 +62,45 @@ const hdab = buildHdabView({
   events: allEvents,
 });
 
+// The assessor's quarterly scores behind AlphaKlinik's label, as the seed has them
+const labelSeries = JSON.parse(
+  readFileSync(
+    join(
+      __dirname,
+      "..",
+      "public",
+      "poc",
+      "persona-3d",
+      "data",
+      "hospital-series.json",
+    ),
+    "utf-8",
+  ),
+).items.find((i: { match: string }) => i.match.startsWith("vc:")).series as {
+  date: string;
+  value: number;
+}[];
+const hospital = buildHospitalView({
+  asOf: "2026-09-23",
+  me: { did: ALPHA, name: "AlphaKlinik Berlin" },
+  consumers: compliance.consumers,
+  datasets: compliance.datasets,
+  matrix: compliance.matrix,
+  register: read("permits").entries,
+  credentials: read("credentials").credentials,
+  contracts: [],
+  events: accessLog,
+  assessments: labelSeries.map((p) => ({
+    credentialId: "vc:data-quality-label:clinic-alphaklinik",
+    date: p.date,
+    conformance: p.value,
+  })),
+});
+
 for (const [name, v] of [
   ["overview_patient", view],
   ["overview_hdab", hdab],
+  ["overview_hospital", hospital],
 ] as const) {
   const out = join(MOCK, `${name}.json`);
   writeFileSync(out, JSON.stringify(v, null, 2) + "\n");

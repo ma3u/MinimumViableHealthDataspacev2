@@ -118,7 +118,7 @@ const fmtDate = (iso?: string | null) =>
 const compact = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, "");
 
 /** The permit register's outcome words as a permit state input. */
-function registerPermit(e: RegisterEntry): PermitLike {
+export function registerPermit(e: RegisterEntry): PermitLike {
   const o = (e.outcome ?? "").toLowerCase();
   const status = e.revokedAt
     ? "REVOKED"
@@ -156,7 +156,7 @@ export function holderOf(
   return null;
 }
 
-const KIND: Record<string, string> = {
+export const KIND: Record<string, string> = {
   DATA_USER: "Data user",
   DATA_HOLDER: "Data holder",
   HDAB: "Access body",
