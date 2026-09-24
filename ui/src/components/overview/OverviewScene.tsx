@@ -289,7 +289,7 @@ export default function OverviewScene({
       raf: 0,
       maxR: 100,
       zMid,
-      D: 520 + zSpan * 60,
+      D: 460 + zSpan * 50,
     };
     state.current = st;
     lastUnfold.current = "";
@@ -310,7 +310,7 @@ export default function OverviewScene({
         g.children[1].scale.set(k, k, 1);
         g.children[2].position.x = r + 10;
       }
-      st.D = Math.max(520 + zSpan * 60, st.maxR * 2.2);
+      st.D = Math.max(460 + zSpan * 50, st.maxR * 1.8);
     };
     fitPlanes();
     graph.onEngineStop(fitPlanes);
