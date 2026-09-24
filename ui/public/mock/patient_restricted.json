@@ -21,7 +21,7 @@
       "fhirType": "Observation",
       "fhirId": "obs-vo2-2025q2",
       "date": "2025-05-18",
-      "display": "VO₂max 47 ml/kg/min",
+      "display": "VO\u2082max 47 ml/kg/min",
       "omopType": "Measurement",
       "omopId": "3022318"
     },
@@ -85,7 +85,7 @@
       "fhirType": "Encounter",
       "fhirId": "enc-2025-02",
       "date": "2025-02-26",
-      "display": "GP follow-up — cardiometabolic",
+      "display": "GP follow-up \u2014 cardiometabolic",
       "omopType": "VisitOccurrence",
       "omopId": "9202"
     },
@@ -109,7 +109,7 @@
       "fhirType": "Observation",
       "fhirId": "obs-bmi-2024q4",
       "date": "2024-11-19",
-      "display": "BMI 24.8 kg/m²",
+      "display": "BMI 24.8 kg/m\u00b2",
       "omopType": "Measurement",
       "omopId": "3038553"
     },
@@ -149,7 +149,7 @@
       "fhirType": "Encounter",
       "fhirId": "enc-2024-08",
       "date": "2024-08-07",
-      "display": "GP consultation — fatigue",
+      "display": "GP consultation \u2014 fatigue",
       "omopType": "VisitOccurrence",
       "omopId": "9202"
     },
@@ -205,7 +205,7 @@
       "fhirType": "Encounter",
       "fhirId": "enc-2023-10",
       "date": "2023-10-02",
-      "display": "GP consultation — metabolic screen",
+      "display": "GP consultation \u2014 metabolic screen",
       "omopType": "VisitOccurrence",
       "omopId": "9202"
     },
@@ -269,7 +269,7 @@
       "fhirType": "Condition",
       "fhirId": "cond-flu-2024",
       "date": "2024-12-03",
-      "display": "Influenza (seasonal) — resolved",
+      "display": "Influenza (seasonal) \u2014 resolved",
       "omopType": "ConditionOccurrence",
       "omopId": "4266367"
     },
@@ -285,7 +285,7 @@
       "fhirType": "Condition",
       "fhirId": "cond-bronchitis-2023",
       "date": "2023-03-20",
-      "display": "Acute bronchitis — resolved",
+      "display": "Acute bronchitis \u2014 resolved",
       "omopType": "ConditionOccurrence",
       "omopId": "260139"
     },
@@ -293,7 +293,7 @@
       "fhirType": "Condition",
       "fhirId": "cond-covid-2022",
       "date": "2022-11-08",
-      "display": "COVID-19, mild — recovered",
+      "display": "COVID-19, mild \u2014 recovered",
       "omopType": "ConditionOccurrence",
       "omopId": "37311061"
     },
@@ -321,5 +321,9 @@
       "omopType": "ProcedureOccurrence",
       "omopId": "4232476"
     }
-  ]
+  ],
+  "lastEhrSync": {
+    "at": "2026-09-22T18:05:00Z",
+    "source": "ePA transfer, GesundheitsID-authenticated"
+  }
 }
