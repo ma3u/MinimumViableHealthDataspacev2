@@ -53,6 +53,7 @@ const STATIC_MOCK_PREFIX: [string, string][] = [
   ["/api/overview?persona=patient", "/mock/overview_patient.json"],
   ["/api/overview?persona=hdab", "/mock/overview_hdab.json"],
   ["/api/overview?persona=hospital", "/mock/overview_hospital.json"],
+  ["/api/overview?persona=researcher", "/mock/overview_researcher.json"],
   ["/api/overview?persona=", "/mock/overview_not_implemented.json"],
   ["/api/overview", "/mock/overview_patient.json"],
   // Legacy patient endpoint

@@ -23,6 +23,7 @@ import {
 import {
   holderOf,
   KIND,
+  matrixPermit,
   registerPermit,
   type ContractShape,
   type CredentialEntry,
@@ -122,7 +123,6 @@ export function buildHospitalView(input: HospitalViewInput): OverviewView {
       });
     }
   }
-  const nameOf = (did: string) => participants.get(did)?.name ?? did;
   const events = input.events.filter(
     (e) => !e.providerDid || e.providerDid === me.did,
   );
@@ -232,16 +232,12 @@ export function buildHospitalView(input: HospitalViewInput): OverviewView {
     const permits = input.register
       .filter((e) => e.kind === "application" && e.applicantDid === did)
       .map(registerPermit);
+    const fromMatrix = matrixPermit(row);
     if (
-      row?.hasApproval &&
-      row.approvalId &&
-      !permits.some((x) => x.permitId === row.approvalId)
+      fromMatrix &&
+      !permits.some((x) => x.permitId === fromMatrix.permitId)
     ) {
-      permits.push({
-        permitId: row.approvalId,
-        status: row.approvalStatus ?? "APPROVED",
-        validUntil: row.validUntil ?? null,
-      });
+      permits.push(fromMatrix);
     }
     const contracts = [
       ...input.contracts.filter((c) => !c.consumerDid || c.consumerDid === did),

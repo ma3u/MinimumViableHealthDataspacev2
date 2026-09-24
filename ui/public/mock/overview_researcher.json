@@ -1,0 +1,2404 @@
+{
+  "persona": "researcher",
+  "asOf": "2026-09-23",
+  "me": {
+    "id": "did:web:pharmaco.de:research",
+    "name": "PharmaCo Research AG"
+  },
+  "title": "My research, in one view",
+  "question": "What am I allowed to use today, what is pending or blocked, and what am I missing?",
+  "article": "Regulation (EU) 2025/327 Art. 53, 61, 67, 68, 69, 73",
+  "layers": [
+    {
+      "id": "mine",
+      "name": "My permits, applications, requests",
+      "z": 2,
+      "color": "#fbbf24"
+    },
+    {
+      "id": "allowed",
+      "name": "What I may use today",
+      "z": 1,
+      "color": "#22c55e"
+    },
+    {
+      "id": "me",
+      "name": "My studies and my wallet",
+      "z": 0,
+      "color": "#38bdf8"
+    },
+    {
+      "id": "other",
+      "name": "Other studies and datasets near mine",
+      "z": -1,
+      "color": "#a78bfa"
+    },
+    {
+      "id": "time",
+      "name": "Over time: unfolded months",
+      "z": -2,
+      "color": "#93c5fd"
+    }
+  ],
+  "nodes": [
+    {
+      "id": "me",
+      "label": "PharmaCo Research AG",
+      "layer": "me",
+      "kind": "Health data user",
+      "size": 4,
+      "color": "#fbbf24",
+      "pin": [0, 0],
+      "title": "PharmaCo Research AG",
+      "sub": "health data user, 1 studies, 3 credentials in the wallet",
+      "facts": [
+        ["did", "did:web:pharmaco.de:research"],
+        ["accesses", "2 served, 0 refused in 12 months"]
+      ],
+      "article": "Art. 53 permitted purposes, Art. 54 prohibited ones, Art. 61 duties of health data users, Art. 66 minimisation",
+      "links": [
+        {
+          "href": "/data/discover",
+          "text": "Discover datasets"
+        },
+        {
+          "href": "/tasks",
+          "text": "My applications"
+        },
+        {
+          "href": "/query",
+          "text": "Secure processing environment"
+        }
+      ],
+      "series": [
+        {
+          "date": "2025-10-01",
+          "value": 0
+        },
+        {
+          "date": "2025-11-01",
+          "value": 0
+        },
+        {
+          "date": "2025-12-01",
+          "value": 0
+        },
+        {
+          "date": "2026-01-01",
+          "value": 0
+        },
+        {
+          "date": "2026-02-01",
+          "value": 0
+        },
+        {
+          "date": "2026-03-01",
+          "value": 0
+        },
+        {
+          "date": "2026-04-01",
+          "value": 0
+        },
+        {
+          "date": "2026-05-01",
+          "value": 0
+        },
+        {
+          "date": "2026-06-01",
+          "value": 0
+        },
+        {
+          "date": "2026-07-01",
+          "value": 0
+        },
+        {
+          "date": "2026-08-01",
+          "value": 0
+        },
+        {
+          "date": "2026-09-01",
+          "value": 2
+        }
+      ],
+      "unit": "accesses",
+      "measure": "My accesses per month",
+      "range": null,
+      "higherIsWorse": false,
+      "expand": {
+        "nodes": [
+          {
+            "id": "pt:me:2025-10-01",
+            "label": "2025-10 · 0",
+            "layer": "time",
+            "kind": "Month",
+            "size": 0.9,
+            "color": "#93c5fd",
+            "title": "PharmaCo Research AG, 2025-10",
+            "sub": "0 accesses",
+            "facts": [
+              ["measure", "My accesses per month"],
+              ["band", "none"]
+            ]
+          },
+          {
+            "id": "pt:me:2025-11-01",
+            "label": "2025-11 · 0",
+            "layer": "time",
+            "kind": "Month",
+            "size": 0.9,
+            "color": "#93c5fd",
+            "title": "PharmaCo Research AG, 2025-11",
+            "sub": "0 accesses",
+            "facts": [
+              ["measure", "My accesses per month"],
+              ["band", "none"]
+            ]
+          },
+          {
+            "id": "pt:me:2025-12-01",
+            "label": "2025-12 · 0",
+            "layer": "time",
+            "kind": "Month",
+            "size": 0.9,
+            "color": "#93c5fd",
+            "title": "PharmaCo Research AG, 2025-12",
+            "sub": "0 accesses",
+            "facts": [
+              ["measure", "My accesses per month"],
+              ["band", "none"]
+            ]
+          },
+          {
+            "id": "pt:me:2026-01-01",
+            "label": "2026-01 · 0",
+            "layer": "time",
+            "kind": "Month",
+            "size": 0.9,
+            "color": "#93c5fd",
+            "title": "PharmaCo Research AG, 2026-01",
+            "sub": "0 accesses",
+            "facts": [
+              ["measure", "My accesses per month"],
+              ["band", "none"]
+            ]
+          },
+          {
+            "id": "pt:me:2026-02-01",
+            "label": "2026-02 · 0",
+            "layer": "time",
+            "kind": "Month",
+            "size": 0.9,
+            "color": "#93c5fd",
+            "title": "PharmaCo Research AG, 2026-02",
+            "sub": "0 accesses",
+            "facts": [
+              ["measure", "My accesses per month"],
+              ["band", "none"]
+            ]
+          },
+          {
+            "id": "pt:me:2026-03-01",
+            "label": "2026-03 · 0",
+            "layer": "time",
+            "kind": "Month",
+            "size": 0.9,
+            "color": "#93c5fd",
+            "title": "PharmaCo Research AG, 2026-03",
+            "sub": "0 accesses",
+            "facts": [
+              ["measure", "My accesses per month"],
+              ["band", "none"]
+            ]
+          },
+          {
+            "id": "pt:me:2026-04-01",
+            "label": "2026-04 · 0",
+            "layer": "time",
+            "kind": "Month",
+            "size": 0.9,
+            "color": "#93c5fd",
+            "title": "PharmaCo Research AG, 2026-04",
+            "sub": "0 accesses",
+            "facts": [
+              ["measure", "My accesses per month"],
+              ["band", "none"]
+            ]
+          },
+          {
+            "id": "pt:me:2026-05-01",
+            "label": "2026-05 · 0",
+            "layer": "time",
+            "kind": "Month",
+            "size": 0.9,
+            "color": "#93c5fd",
+            "title": "PharmaCo Research AG, 2026-05",
+            "sub": "0 accesses",
+            "facts": [
+              ["measure", "My accesses per month"],
+              ["band", "none"]
+            ]
+          },
+          {
+            "id": "pt:me:2026-06-01",
+            "label": "2026-06 · 0",
+            "layer": "time",
+            "kind": "Month",
+            "size": 0.9,
+            "color": "#93c5fd",
+            "title": "PharmaCo Research AG, 2026-06",
+            "sub": "0 accesses",
+            "facts": [
+              ["measure", "My accesses per month"],
+              ["band", "none"]
+            ]
+          },
+          {
+            "id": "pt:me:2026-07-01",
+            "label": "2026-07 · 0",
+            "layer": "time",
+            "kind": "Month",
+            "size": 0.9,
+            "color": "#93c5fd",
+            "title": "PharmaCo Research AG, 2026-07",
+            "sub": "0 accesses",
+            "facts": [
+              ["measure", "My accesses per month"],
+              ["band", "none"]
+            ]
+          },
+          {
+            "id": "pt:me:2026-08-01",
+            "label": "2026-08 · 0",
+            "layer": "time",
+            "kind": "Month",
+            "size": 0.9,
+            "color": "#93c5fd",
+            "title": "PharmaCo Research AG, 2026-08",
+            "sub": "0 accesses",
+            "facts": [
+              ["measure", "My accesses per month"],
+              ["band", "none"]
+            ]
+          },
+          {
+            "id": "pt:me:2026-09-01",
+            "label": "2026-09 · 2",
+            "layer": "time",
+            "kind": "Month",
+            "size": 0.9,
+            "color": "#93c5fd",
+            "title": "PharmaCo Research AG, 2026-09",
+            "sub": "2 accesses",
+            "facts": [
+              ["measure", "My accesses per month"],
+              ["band", "none"]
+            ]
+          }
+        ],
+        "links": [
+          {
+            "source": "me",
+            "target": "pt:me:2025-10-01",
+            "kind": "month",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "me",
+            "target": "pt:me:2025-11-01",
+            "kind": "month",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "pt:me:2025-10-01",
+            "target": "pt:me:2025-11-01",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          },
+          {
+            "source": "me",
+            "target": "pt:me:2025-12-01",
+            "kind": "month",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "pt:me:2025-11-01",
+            "target": "pt:me:2025-12-01",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          },
+          {
+            "source": "me",
+            "target": "pt:me:2026-01-01",
+            "kind": "month",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "pt:me:2025-12-01",
+            "target": "pt:me:2026-01-01",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          },
+          {
+            "source": "me",
+            "target": "pt:me:2026-02-01",
+            "kind": "month",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "pt:me:2026-01-01",
+            "target": "pt:me:2026-02-01",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          },
+          {
+            "source": "me",
+            "target": "pt:me:2026-03-01",
+            "kind": "month",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "pt:me:2026-02-01",
+            "target": "pt:me:2026-03-01",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          },
+          {
+            "source": "me",
+            "target": "pt:me:2026-04-01",
+            "kind": "month",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "pt:me:2026-03-01",
+            "target": "pt:me:2026-04-01",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          },
+          {
+            "source": "me",
+            "target": "pt:me:2026-05-01",
+            "kind": "month",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "pt:me:2026-04-01",
+            "target": "pt:me:2026-05-01",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          },
+          {
+            "source": "me",
+            "target": "pt:me:2026-06-01",
+            "kind": "month",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "pt:me:2026-05-01",
+            "target": "pt:me:2026-06-01",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          },
+          {
+            "source": "me",
+            "target": "pt:me:2026-07-01",
+            "kind": "month",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "pt:me:2026-06-01",
+            "target": "pt:me:2026-07-01",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          },
+          {
+            "source": "me",
+            "target": "pt:me:2026-08-01",
+            "kind": "month",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "pt:me:2026-07-01",
+            "target": "pt:me:2026-08-01",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          },
+          {
+            "source": "me",
+            "target": "pt:me:2026-09-01",
+            "kind": "month",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "pt:me:2026-08-01",
+            "target": "pt:me:2026-09-01",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          }
+        ]
+      },
+      "status": "bad",
+      "pulse": true
+    },
+    {
+      "id": "vc:vc:data-processing-purpose:cro-pharmaco",
+      "label": "DataProcessingPurpose expired",
+      "layer": "me",
+      "kind": "Credential",
+      "size": 1.3,
+      "status": "bad",
+      "pulse": true,
+      "title": "DataProcessingPurposeCredential",
+      "sub": "expired, since 2026-06-20",
+      "facts": [
+        ["id", "vc:data-processing-purpose:cro-pharmaco"],
+        ["issued", "2026-03-22"],
+        ["expires", "2026-06-20"],
+        ["purpose", "Scientific research on therapeutic outcomes"]
+      ],
+      "article": "Art. 53(1): the purpose I may process data for; presented before every access (DCP v1.0)",
+      "links": [
+        {
+          "href": "/credentials",
+          "text": "My wallet"
+        }
+      ]
+    },
+    {
+      "id": "vc:vc:ehds-participant:cro-pharmaco",
+      "label": "EHDSParticipant active",
+      "layer": "me",
+      "kind": "Credential",
+      "size": 1.3,
+      "status": "ok",
+      "pulse": false,
+      "title": "EHDSParticipantCredential",
+      "sub": "active, until 2027-03-22",
+      "facts": [
+        ["id", "vc:ehds-participant:cro-pharmaco"],
+        ["issued", "2026-03-22"],
+        ["expires", "2027-03-22"]
+      ],
+      "article": "DCP v1.0 credential: who I am in the dataspace",
+      "links": [
+        {
+          "href": "/credentials",
+          "text": "My wallet"
+        }
+      ]
+    },
+    {
+      "id": "vc:vc:membership:cro-pharmaco",
+      "label": "Membership active",
+      "layer": "me",
+      "kind": "Credential",
+      "size": 1.3,
+      "status": "ok",
+      "pulse": false,
+      "title": "MembershipCredential",
+      "sub": "active, until 2027-03-22",
+      "facts": [
+        ["id", "vc:membership:cro-pharmaco"],
+        ["issued", "2026-03-22"],
+        ["expires", "2027-03-22"]
+      ],
+      "article": "DCP v1.0 credential: who I am in the dataspace",
+      "links": [
+        {
+          "href": "/credentials",
+          "text": "My wallet"
+        }
+      ]
+    },
+    {
+      "id": "app:app-pharmaco-medreg-2026-002",
+      "label": "application Synthea Synthetic FHIR R4 Patient Cohort",
+      "layer": "mine",
+      "kind": "Access application",
+      "size": 1.8,
+      "status": "info",
+      "pulse": false,
+      "title": "app-pharmaco-medreg-2026-002",
+      "sub": "access body, pending",
+      "facts": [
+        ["submitted", "2026-09-01"],
+        ["decision due", "2026-12-01 (69 days left)"],
+        ["purpose", "SCIENTIFIC_RESEARCH"],
+        ["dataset", "Synthea Synthetic FHIR R4 Patient Cohort"]
+      ],
+      "article": "Art. 67 application, Art. 68 permit: the access body decides within three months of a complete application",
+      "links": [
+        {
+          "href": "/tasks",
+          "text": "My applications"
+        },
+        {
+          "href": "/permits",
+          "text": "Public register"
+        }
+      ]
+    },
+    {
+      "id": "permit:approval:did:web:pharmaco.de:research",
+      "label": "permit Synthetic Type 2 Diabetes Patient Journey",
+      "layer": "mine",
+      "kind": "Data permit",
+      "size": 1.8,
+      "status": "ok",
+      "title": "approval:did:web:pharmaco.de:research",
+      "sub": "valid",
+      "facts": [
+        ["state", "valid"],
+        ["dataset", "Synthetic Type 2 Diabetes Patient Journey"]
+      ],
+      "article": "Art. 68 data permit",
+      "links": [
+        {
+          "href": "/permits",
+          "text": "Public register"
+        }
+      ]
+    },
+    {
+      "id": "ds:dataset:omop-cdm-v54-analytics",
+      "label": "OMOP CDM v5.4 Analytics Cohort",
+      "layer": "other",
+      "kind": "Dataset",
+      "size": 1.4,
+      "color": "#a78bfa",
+      "status": "none",
+      "title": "OMOP CDM v5.4 Analytics Cohort",
+      "sub": "held by AlphaKlinik Berlin, not permitted to me",
+      "description": "OMOP Common Data Model v5.4 analytics warehouse with standardized clinical data from FHIR R4 sources.",
+      "facts": [
+        ["id", "dataset:omop-cdm-v54-analytics"],
+        ["records", "49657"]
+      ],
+      "article": "Art. 67: an application names the datasets; Art. 77 describes them in the national catalogue",
+      "links": [
+        {
+          "href": "/catalog",
+          "text": "Catalogue entry"
+        },
+        {
+          "href": "/data/discover",
+          "text": "Discover"
+        }
+      ]
+    },
+    {
+      "id": "ds:dataset:prostate-cancer-registry",
+      "label": "Prostate Cancer Registry 2024",
+      "layer": "other",
+      "kind": "Dataset",
+      "size": 1.4,
+      "color": "#a78bfa",
+      "status": "none",
+      "title": "Prostate Cancer Registry 2024",
+      "sub": "held by Limburg Medical Centre, not permitted to me",
+      "description": "Federated registry of prostate cancer outcomes with TNM staging, Gleason scores, treatment protocols in FHIR R4.",
+      "facts": [
+        ["id", "dataset:prostate-cancer-registry"],
+        ["records", "3842"]
+      ],
+      "article": "Art. 67: an application names the datasets; Art. 77 describes them in the national catalogue",
+      "links": [
+        {
+          "href": "/catalog",
+          "text": "Catalogue entry"
+        },
+        {
+          "href": "/data/discover",
+          "text": "Discover"
+        }
+      ]
+    },
+    {
+      "id": "ds:dataset:synthea-fhir-r4-mvd",
+      "label": "Synthea Synthetic FHIR R4 Patient Cohort",
+      "layer": "allowed",
+      "kind": "Dataset",
+      "size": 2,
+      "color": "#22c55e",
+      "status": "ok",
+      "title": "Synthea Synthetic FHIR R4 Patient Cohort",
+      "sub": "permitted to me today, held by AlphaKlinik Berlin",
+      "description": "Synthetic longitudinal patient records generated by Synthea 3.3.0 for Massachusetts. Includes demographics, encounters, conditions, observations, and medication requests in FHIR R4 format, transformed to OMOP CDM Layer 4.",
+      "facts": [
+        ["id", "dataset:synthea-fhir-r4-mvd"],
+        ["records", "127"],
+        ["shares", "condi, obser, medic"]
+      ],
+      "article": "Art. 61(1): I access it in the secure processing environment under my permit (Art. 73)",
+      "links": [
+        {
+          "href": "/catalog",
+          "text": "Catalogue entry"
+        },
+        {
+          "href": "/data/discover",
+          "text": "Discover"
+        }
+      ],
+      "series": [
+        {
+          "date": "2025-10-01",
+          "value": 0
+        },
+        {
+          "date": "2025-11-01",
+          "value": 0
+        },
+        {
+          "date": "2025-12-01",
+          "value": 0
+        },
+        {
+          "date": "2026-01-01",
+          "value": 0
+        },
+        {
+          "date": "2026-02-01",
+          "value": 0
+        },
+        {
+          "date": "2026-03-01",
+          "value": 0
+        },
+        {
+          "date": "2026-04-01",
+          "value": 0
+        },
+        {
+          "date": "2026-05-01",
+          "value": 0
+        },
+        {
+          "date": "2026-06-01",
+          "value": 0
+        },
+        {
+          "date": "2026-07-01",
+          "value": 0
+        },
+        {
+          "date": "2026-08-01",
+          "value": 0
+        },
+        {
+          "date": "2026-09-01",
+          "value": 2
+        }
+      ],
+      "unit": "accesses",
+      "measure": "My accesses per month",
+      "range": null,
+      "higherIsWorse": false,
+      "expand": {
+        "nodes": [
+          {
+            "id": "pt:ds:dataset:synthea-fhir-r4-mvd:2025-10-01",
+            "label": "2025-10 · 0",
+            "layer": "time",
+            "kind": "Month",
+            "size": 0.9,
+            "color": "#93c5fd",
+            "title": "Synthea Synthetic FHIR R4 Patient Cohort, 2025-10",
+            "sub": "0 accesses",
+            "facts": [
+              ["measure", "My accesses per month"],
+              ["band", "none"]
+            ]
+          },
+          {
+            "id": "pt:ds:dataset:synthea-fhir-r4-mvd:2025-11-01",
+            "label": "2025-11 · 0",
+            "layer": "time",
+            "kind": "Month",
+            "size": 0.9,
+            "color": "#93c5fd",
+            "title": "Synthea Synthetic FHIR R4 Patient Cohort, 2025-11",
+            "sub": "0 accesses",
+            "facts": [
+              ["measure", "My accesses per month"],
+              ["band", "none"]
+            ]
+          },
+          {
+            "id": "pt:ds:dataset:synthea-fhir-r4-mvd:2025-12-01",
+            "label": "2025-12 · 0",
+            "layer": "time",
+            "kind": "Month",
+            "size": 0.9,
+            "color": "#93c5fd",
+            "title": "Synthea Synthetic FHIR R4 Patient Cohort, 2025-12",
+            "sub": "0 accesses",
+            "facts": [
+              ["measure", "My accesses per month"],
+              ["band", "none"]
+            ]
+          },
+          {
+            "id": "pt:ds:dataset:synthea-fhir-r4-mvd:2026-01-01",
+            "label": "2026-01 · 0",
+            "layer": "time",
+            "kind": "Month",
+            "size": 0.9,
+            "color": "#93c5fd",
+            "title": "Synthea Synthetic FHIR R4 Patient Cohort, 2026-01",
+            "sub": "0 accesses",
+            "facts": [
+              ["measure", "My accesses per month"],
+              ["band", "none"]
+            ]
+          },
+          {
+            "id": "pt:ds:dataset:synthea-fhir-r4-mvd:2026-02-01",
+            "label": "2026-02 · 0",
+            "layer": "time",
+            "kind": "Month",
+            "size": 0.9,
+            "color": "#93c5fd",
+            "title": "Synthea Synthetic FHIR R4 Patient Cohort, 2026-02",
+            "sub": "0 accesses",
+            "facts": [
+              ["measure", "My accesses per month"],
+              ["band", "none"]
+            ]
+          },
+          {
+            "id": "pt:ds:dataset:synthea-fhir-r4-mvd:2026-03-01",
+            "label": "2026-03 · 0",
+            "layer": "time",
+            "kind": "Month",
+            "size": 0.9,
+            "color": "#93c5fd",
+            "title": "Synthea Synthetic FHIR R4 Patient Cohort, 2026-03",
+            "sub": "0 accesses",
+            "facts": [
+              ["measure", "My accesses per month"],
+              ["band", "none"]
+            ]
+          },
+          {
+            "id": "pt:ds:dataset:synthea-fhir-r4-mvd:2026-04-01",
+            "label": "2026-04 · 0",
+            "layer": "time",
+            "kind": "Month",
+            "size": 0.9,
+            "color": "#93c5fd",
+            "title": "Synthea Synthetic FHIR R4 Patient Cohort, 2026-04",
+            "sub": "0 accesses",
+            "facts": [
+              ["measure", "My accesses per month"],
+              ["band", "none"]
+            ]
+          },
+          {
+            "id": "pt:ds:dataset:synthea-fhir-r4-mvd:2026-05-01",
+            "label": "2026-05 · 0",
+            "layer": "time",
+            "kind": "Month",
+            "size": 0.9,
+            "color": "#93c5fd",
+            "title": "Synthea Synthetic FHIR R4 Patient Cohort, 2026-05",
+            "sub": "0 accesses",
+            "facts": [
+              ["measure", "My accesses per month"],
+              ["band", "none"]
+            ]
+          },
+          {
+            "id": "pt:ds:dataset:synthea-fhir-r4-mvd:2026-06-01",
+            "label": "2026-06 · 0",
+            "layer": "time",
+            "kind": "Month",
+            "size": 0.9,
+            "color": "#93c5fd",
+            "title": "Synthea Synthetic FHIR R4 Patient Cohort, 2026-06",
+            "sub": "0 accesses",
+            "facts": [
+              ["measure", "My accesses per month"],
+              ["band", "none"]
+            ]
+          },
+          {
+            "id": "pt:ds:dataset:synthea-fhir-r4-mvd:2026-07-01",
+            "label": "2026-07 · 0",
+            "layer": "time",
+            "kind": "Month",
+            "size": 0.9,
+            "color": "#93c5fd",
+            "title": "Synthea Synthetic FHIR R4 Patient Cohort, 2026-07",
+            "sub": "0 accesses",
+            "facts": [
+              ["measure", "My accesses per month"],
+              ["band", "none"]
+            ]
+          },
+          {
+            "id": "pt:ds:dataset:synthea-fhir-r4-mvd:2026-08-01",
+            "label": "2026-08 · 0",
+            "layer": "time",
+            "kind": "Month",
+            "size": 0.9,
+            "color": "#93c5fd",
+            "title": "Synthea Synthetic FHIR R4 Patient Cohort, 2026-08",
+            "sub": "0 accesses",
+            "facts": [
+              ["measure", "My accesses per month"],
+              ["band", "none"]
+            ]
+          },
+          {
+            "id": "pt:ds:dataset:synthea-fhir-r4-mvd:2026-09-01",
+            "label": "2026-09 · 2",
+            "layer": "time",
+            "kind": "Month",
+            "size": 0.9,
+            "color": "#93c5fd",
+            "title": "Synthea Synthetic FHIR R4 Patient Cohort, 2026-09",
+            "sub": "2 accesses",
+            "facts": [
+              ["measure", "My accesses per month"],
+              ["band", "none"]
+            ]
+          }
+        ],
+        "links": [
+          {
+            "source": "ds:dataset:synthea-fhir-r4-mvd",
+            "target": "pt:ds:dataset:synthea-fhir-r4-mvd:2025-10-01",
+            "kind": "month",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "ds:dataset:synthea-fhir-r4-mvd",
+            "target": "pt:ds:dataset:synthea-fhir-r4-mvd:2025-11-01",
+            "kind": "month",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "pt:ds:dataset:synthea-fhir-r4-mvd:2025-10-01",
+            "target": "pt:ds:dataset:synthea-fhir-r4-mvd:2025-11-01",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          },
+          {
+            "source": "ds:dataset:synthea-fhir-r4-mvd",
+            "target": "pt:ds:dataset:synthea-fhir-r4-mvd:2025-12-01",
+            "kind": "month",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "pt:ds:dataset:synthea-fhir-r4-mvd:2025-11-01",
+            "target": "pt:ds:dataset:synthea-fhir-r4-mvd:2025-12-01",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          },
+          {
+            "source": "ds:dataset:synthea-fhir-r4-mvd",
+            "target": "pt:ds:dataset:synthea-fhir-r4-mvd:2026-01-01",
+            "kind": "month",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "pt:ds:dataset:synthea-fhir-r4-mvd:2025-12-01",
+            "target": "pt:ds:dataset:synthea-fhir-r4-mvd:2026-01-01",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          },
+          {
+            "source": "ds:dataset:synthea-fhir-r4-mvd",
+            "target": "pt:ds:dataset:synthea-fhir-r4-mvd:2026-02-01",
+            "kind": "month",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "pt:ds:dataset:synthea-fhir-r4-mvd:2026-01-01",
+            "target": "pt:ds:dataset:synthea-fhir-r4-mvd:2026-02-01",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          },
+          {
+            "source": "ds:dataset:synthea-fhir-r4-mvd",
+            "target": "pt:ds:dataset:synthea-fhir-r4-mvd:2026-03-01",
+            "kind": "month",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "pt:ds:dataset:synthea-fhir-r4-mvd:2026-02-01",
+            "target": "pt:ds:dataset:synthea-fhir-r4-mvd:2026-03-01",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          },
+          {
+            "source": "ds:dataset:synthea-fhir-r4-mvd",
+            "target": "pt:ds:dataset:synthea-fhir-r4-mvd:2026-04-01",
+            "kind": "month",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "pt:ds:dataset:synthea-fhir-r4-mvd:2026-03-01",
+            "target": "pt:ds:dataset:synthea-fhir-r4-mvd:2026-04-01",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          },
+          {
+            "source": "ds:dataset:synthea-fhir-r4-mvd",
+            "target": "pt:ds:dataset:synthea-fhir-r4-mvd:2026-05-01",
+            "kind": "month",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "pt:ds:dataset:synthea-fhir-r4-mvd:2026-04-01",
+            "target": "pt:ds:dataset:synthea-fhir-r4-mvd:2026-05-01",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          },
+          {
+            "source": "ds:dataset:synthea-fhir-r4-mvd",
+            "target": "pt:ds:dataset:synthea-fhir-r4-mvd:2026-06-01",
+            "kind": "month",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "pt:ds:dataset:synthea-fhir-r4-mvd:2026-05-01",
+            "target": "pt:ds:dataset:synthea-fhir-r4-mvd:2026-06-01",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          },
+          {
+            "source": "ds:dataset:synthea-fhir-r4-mvd",
+            "target": "pt:ds:dataset:synthea-fhir-r4-mvd:2026-07-01",
+            "kind": "month",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "pt:ds:dataset:synthea-fhir-r4-mvd:2026-06-01",
+            "target": "pt:ds:dataset:synthea-fhir-r4-mvd:2026-07-01",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          },
+          {
+            "source": "ds:dataset:synthea-fhir-r4-mvd",
+            "target": "pt:ds:dataset:synthea-fhir-r4-mvd:2026-08-01",
+            "kind": "month",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "pt:ds:dataset:synthea-fhir-r4-mvd:2026-07-01",
+            "target": "pt:ds:dataset:synthea-fhir-r4-mvd:2026-08-01",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          },
+          {
+            "source": "ds:dataset:synthea-fhir-r4-mvd",
+            "target": "pt:ds:dataset:synthea-fhir-r4-mvd:2026-09-01",
+            "kind": "month",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "pt:ds:dataset:synthea-fhir-r4-mvd:2026-08-01",
+            "target": "pt:ds:dataset:synthea-fhir-r4-mvd:2026-09-01",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "ds:urn:uuid:alphaklinik:dataset:diab-001",
+      "label": "Synthetic Type 2 Diabetes Patient Journey",
+      "layer": "allowed",
+      "kind": "Dataset",
+      "size": 2,
+      "color": "#22c55e",
+      "status": "ok",
+      "title": "Synthetic Type 2 Diabetes Patient Journey",
+      "sub": "permitted to me today, held by AlphaKlinik Berlin",
+      "description": "End-to-end patient journey dataset for Type 2 Diabetes including diagnosis, HbA1c monitoring, medication titration, and complication tracking.",
+      "facts": [
+        ["id", "urn:uuid:alphaklinik:dataset:diab-001"],
+        ["records", "2156"],
+        ["shares", "medic"]
+      ],
+      "article": "Art. 61(1): I access it in the secure processing environment under my permit (Art. 73)",
+      "links": [
+        {
+          "href": "/catalog",
+          "text": "Catalogue entry"
+        },
+        {
+          "href": "/data/discover",
+          "text": "Discover"
+        }
+      ]
+    },
+    {
+      "id": "study:STUDY-CARDIO-2024",
+      "label": "European Cardiovascular Risk Study",
+      "layer": "me",
+      "kind": "Study",
+      "size": 2.4,
+      "status": "ok",
+      "title": "European Cardiovascular Risk Study",
+      "sub": "PharmaCo Research AG, open, 4,821 participants, DE, NL, FR, ES",
+      "description": "Multi-centre cohort study of cardiovascular risk factors across EHDS member states. Aims to improve 10-year event prediction models.",
+      "facts": [
+        [
+          "needs",
+          "FHIR Conditions, Observations (blood pressure, cholesterol), Medications"
+        ]
+      ],
+      "article": "My study; Art. 61(4): I publish the results within 18 months",
+      "links": [
+        {
+          "href": "/patient/research",
+          "text": "Research programmes"
+        }
+      ],
+      "series": [
+        {
+          "date": "2024-06-30",
+          "value": 600
+        },
+        {
+          "date": "2024-09-30",
+          "value": 1100
+        },
+        {
+          "date": "2024-12-31",
+          "value": 1500
+        },
+        {
+          "date": "2025-03-31",
+          "value": 2100
+        },
+        {
+          "date": "2025-06-30",
+          "value": 2700
+        },
+        {
+          "date": "2025-09-30",
+          "value": 3300
+        },
+        {
+          "date": "2025-12-31",
+          "value": 3900
+        },
+        {
+          "date": "2026-03-31",
+          "value": 4400
+        },
+        {
+          "date": "2026-06-30",
+          "value": 4700
+        },
+        {
+          "date": "2026-09-23",
+          "value": 4821
+        }
+      ],
+      "unit": "participants",
+      "measure": "Participants enrolled",
+      "range": null,
+      "higherIsWorse": false,
+      "expand": {
+        "nodes": [
+          {
+            "id": "pt:study:STUDY-CARDIO-2024:2024-06-30",
+            "label": "2024-06 · 600",
+            "layer": "time",
+            "kind": "Month",
+            "size": 0.9,
+            "color": "#93c5fd",
+            "title": "European Cardiovascular Risk Study, 2024-06",
+            "sub": "600 participants",
+            "facts": [
+              ["measure", "Participants enrolled"],
+              ["band", "none"]
+            ]
+          },
+          {
+            "id": "pt:study:STUDY-CARDIO-2024:2024-09-30",
+            "label": "2024-09 · 1100",
+            "layer": "time",
+            "kind": "Month",
+            "size": 0.9,
+            "color": "#93c5fd",
+            "title": "European Cardiovascular Risk Study, 2024-09",
+            "sub": "1100 participants",
+            "facts": [
+              ["measure", "Participants enrolled"],
+              ["band", "none"]
+            ]
+          },
+          {
+            "id": "pt:study:STUDY-CARDIO-2024:2024-12-31",
+            "label": "2024-12 · 1500",
+            "layer": "time",
+            "kind": "Month",
+            "size": 0.9,
+            "color": "#93c5fd",
+            "title": "European Cardiovascular Risk Study, 2024-12",
+            "sub": "1500 participants",
+            "facts": [
+              ["measure", "Participants enrolled"],
+              ["band", "none"]
+            ]
+          },
+          {
+            "id": "pt:study:STUDY-CARDIO-2024:2025-03-31",
+            "label": "2025-03 · 2100",
+            "layer": "time",
+            "kind": "Month",
+            "size": 0.9,
+            "color": "#93c5fd",
+            "title": "European Cardiovascular Risk Study, 2025-03",
+            "sub": "2100 participants",
+            "facts": [
+              ["measure", "Participants enrolled"],
+              ["band", "none"]
+            ]
+          },
+          {
+            "id": "pt:study:STUDY-CARDIO-2024:2025-06-30",
+            "label": "2025-06 · 2700",
+            "layer": "time",
+            "kind": "Month",
+            "size": 0.9,
+            "color": "#93c5fd",
+            "title": "European Cardiovascular Risk Study, 2025-06",
+            "sub": "2700 participants",
+            "facts": [
+              ["measure", "Participants enrolled"],
+              ["band", "none"]
+            ]
+          },
+          {
+            "id": "pt:study:STUDY-CARDIO-2024:2025-09-30",
+            "label": "2025-09 · 3300",
+            "layer": "time",
+            "kind": "Month",
+            "size": 0.9,
+            "color": "#93c5fd",
+            "title": "European Cardiovascular Risk Study, 2025-09",
+            "sub": "3300 participants",
+            "facts": [
+              ["measure", "Participants enrolled"],
+              ["band", "none"]
+            ]
+          },
+          {
+            "id": "pt:study:STUDY-CARDIO-2024:2025-12-31",
+            "label": "2025-12 · 3900",
+            "layer": "time",
+            "kind": "Month",
+            "size": 0.9,
+            "color": "#93c5fd",
+            "title": "European Cardiovascular Risk Study, 2025-12",
+            "sub": "3900 participants",
+            "facts": [
+              ["measure", "Participants enrolled"],
+              ["band", "none"]
+            ]
+          },
+          {
+            "id": "pt:study:STUDY-CARDIO-2024:2026-03-31",
+            "label": "2026-03 · 4400",
+            "layer": "time",
+            "kind": "Month",
+            "size": 0.9,
+            "color": "#93c5fd",
+            "title": "European Cardiovascular Risk Study, 2026-03",
+            "sub": "4400 participants",
+            "facts": [
+              ["measure", "Participants enrolled"],
+              ["band", "none"]
+            ]
+          },
+          {
+            "id": "pt:study:STUDY-CARDIO-2024:2026-06-30",
+            "label": "2026-06 · 4700",
+            "layer": "time",
+            "kind": "Month",
+            "size": 0.9,
+            "color": "#93c5fd",
+            "title": "European Cardiovascular Risk Study, 2026-06",
+            "sub": "4700 participants",
+            "facts": [
+              ["measure", "Participants enrolled"],
+              ["band", "none"]
+            ]
+          },
+          {
+            "id": "pt:study:STUDY-CARDIO-2024:2026-09-23",
+            "label": "2026-09 · 4821",
+            "layer": "time",
+            "kind": "Month",
+            "size": 0.9,
+            "color": "#93c5fd",
+            "title": "European Cardiovascular Risk Study, 2026-09",
+            "sub": "4821 participants",
+            "facts": [
+              ["measure", "Participants enrolled"],
+              ["band", "none"]
+            ]
+          }
+        ],
+        "links": [
+          {
+            "source": "study:STUDY-CARDIO-2024",
+            "target": "pt:study:STUDY-CARDIO-2024:2024-06-30",
+            "kind": "month",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "study:STUDY-CARDIO-2024",
+            "target": "pt:study:STUDY-CARDIO-2024:2024-09-30",
+            "kind": "month",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "pt:study:STUDY-CARDIO-2024:2024-06-30",
+            "target": "pt:study:STUDY-CARDIO-2024:2024-09-30",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          },
+          {
+            "source": "study:STUDY-CARDIO-2024",
+            "target": "pt:study:STUDY-CARDIO-2024:2024-12-31",
+            "kind": "month",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "pt:study:STUDY-CARDIO-2024:2024-09-30",
+            "target": "pt:study:STUDY-CARDIO-2024:2024-12-31",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          },
+          {
+            "source": "study:STUDY-CARDIO-2024",
+            "target": "pt:study:STUDY-CARDIO-2024:2025-03-31",
+            "kind": "month",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "pt:study:STUDY-CARDIO-2024:2024-12-31",
+            "target": "pt:study:STUDY-CARDIO-2024:2025-03-31",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          },
+          {
+            "source": "study:STUDY-CARDIO-2024",
+            "target": "pt:study:STUDY-CARDIO-2024:2025-06-30",
+            "kind": "month",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "pt:study:STUDY-CARDIO-2024:2025-03-31",
+            "target": "pt:study:STUDY-CARDIO-2024:2025-06-30",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          },
+          {
+            "source": "study:STUDY-CARDIO-2024",
+            "target": "pt:study:STUDY-CARDIO-2024:2025-09-30",
+            "kind": "month",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "pt:study:STUDY-CARDIO-2024:2025-06-30",
+            "target": "pt:study:STUDY-CARDIO-2024:2025-09-30",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          },
+          {
+            "source": "study:STUDY-CARDIO-2024",
+            "target": "pt:study:STUDY-CARDIO-2024:2025-12-31",
+            "kind": "month",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "pt:study:STUDY-CARDIO-2024:2025-09-30",
+            "target": "pt:study:STUDY-CARDIO-2024:2025-12-31",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          },
+          {
+            "source": "study:STUDY-CARDIO-2024",
+            "target": "pt:study:STUDY-CARDIO-2024:2026-03-31",
+            "kind": "month",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "pt:study:STUDY-CARDIO-2024:2025-12-31",
+            "target": "pt:study:STUDY-CARDIO-2024:2026-03-31",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          },
+          {
+            "source": "study:STUDY-CARDIO-2024",
+            "target": "pt:study:STUDY-CARDIO-2024:2026-06-30",
+            "kind": "month",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "pt:study:STUDY-CARDIO-2024:2026-03-31",
+            "target": "pt:study:STUDY-CARDIO-2024:2026-06-30",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          },
+          {
+            "source": "study:STUDY-CARDIO-2024",
+            "target": "pt:study:STUDY-CARDIO-2024:2026-09-23",
+            "kind": "month",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "pt:study:STUDY-CARDIO-2024:2026-06-30",
+            "target": "pt:study:STUDY-CARDIO-2024:2026-09-23",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "study:STUDY-DIAB-2023",
+      "label": "T2D Progression Biomarkers",
+      "layer": "other",
+      "kind": "Study",
+      "size": 1.6,
+      "status": "none",
+      "color": "#c4b5fd",
+      "title": "T2D Progression Biomarkers",
+      "sub": "Institut de Recherche Santé, open, 2,103 participants, FR, DE, BE",
+      "description": "Identifying biomarker patterns predicting Type 2 Diabetes complication onset using longitudinal EHR data.",
+      "facts": [
+        [
+          "needs",
+          "OMOP Drug Exposures, Condition Occurrences, Measurements (HbA1c, eGFR)"
+        ],
+        ["shares with mine", "condi"]
+      ],
+      "article": "Another user's study in the space; Art. 57(1)(j)(v) results are published",
+      "links": [
+        {
+          "href": "/patient/research",
+          "text": "Research programmes"
+        }
+      ],
+      "series": [
+        {
+          "date": "2024-06-30",
+          "value": 400
+        },
+        {
+          "date": "2024-09-30",
+          "value": 800
+        },
+        {
+          "date": "2024-12-31",
+          "value": 1100
+        },
+        {
+          "date": "2025-03-31",
+          "value": 1400
+        },
+        {
+          "date": "2025-06-30",
+          "value": 1700
+        },
+        {
+          "date": "2025-09-30",
+          "value": 1900
+        },
+        {
+          "date": "2025-12-31",
+          "value": 2000
+        },
+        {
+          "date": "2026-03-31",
+          "value": 2080
+        },
+        {
+          "date": "2026-06-30",
+          "value": 2100
+        },
+        {
+          "date": "2026-09-23",
+          "value": 2103
+        }
+      ],
+      "unit": "participants",
+      "measure": "Participants enrolled",
+      "range": null,
+      "higherIsWorse": false,
+      "expand": {
+        "nodes": [
+          {
+            "id": "pt:study:STUDY-DIAB-2023:2024-06-30",
+            "label": "2024-06 · 400",
+            "layer": "time",
+            "kind": "Month",
+            "size": 0.9,
+            "color": "#93c5fd",
+            "title": "T2D Progression Biomarkers, 2024-06",
+            "sub": "400 participants",
+            "facts": [
+              ["measure", "Participants enrolled"],
+              ["band", "none"]
+            ]
+          },
+          {
+            "id": "pt:study:STUDY-DIAB-2023:2024-09-30",
+            "label": "2024-09 · 800",
+            "layer": "time",
+            "kind": "Month",
+            "size": 0.9,
+            "color": "#93c5fd",
+            "title": "T2D Progression Biomarkers, 2024-09",
+            "sub": "800 participants",
+            "facts": [
+              ["measure", "Participants enrolled"],
+              ["band", "none"]
+            ]
+          },
+          {
+            "id": "pt:study:STUDY-DIAB-2023:2024-12-31",
+            "label": "2024-12 · 1100",
+            "layer": "time",
+            "kind": "Month",
+            "size": 0.9,
+            "color": "#93c5fd",
+            "title": "T2D Progression Biomarkers, 2024-12",
+            "sub": "1100 participants",
+            "facts": [
+              ["measure", "Participants enrolled"],
+              ["band", "none"]
+            ]
+          },
+          {
+            "id": "pt:study:STUDY-DIAB-2023:2025-03-31",
+            "label": "2025-03 · 1400",
+            "layer": "time",
+            "kind": "Month",
+            "size": 0.9,
+            "color": "#93c5fd",
+            "title": "T2D Progression Biomarkers, 2025-03",
+            "sub": "1400 participants",
+            "facts": [
+              ["measure", "Participants enrolled"],
+              ["band", "none"]
+            ]
+          },
+          {
+            "id": "pt:study:STUDY-DIAB-2023:2025-06-30",
+            "label": "2025-06 · 1700",
+            "layer": "time",
+            "kind": "Month",
+            "size": 0.9,
+            "color": "#93c5fd",
+            "title": "T2D Progression Biomarkers, 2025-06",
+            "sub": "1700 participants",
+            "facts": [
+              ["measure", "Participants enrolled"],
+              ["band", "none"]
+            ]
+          },
+          {
+            "id": "pt:study:STUDY-DIAB-2023:2025-09-30",
+            "label": "2025-09 · 1900",
+            "layer": "time",
+            "kind": "Month",
+            "size": 0.9,
+            "color": "#93c5fd",
+            "title": "T2D Progression Biomarkers, 2025-09",
+            "sub": "1900 participants",
+            "facts": [
+              ["measure", "Participants enrolled"],
+              ["band", "none"]
+            ]
+          },
+          {
+            "id": "pt:study:STUDY-DIAB-2023:2025-12-31",
+            "label": "2025-12 · 2000",
+            "layer": "time",
+            "kind": "Month",
+            "size": 0.9,
+            "color": "#93c5fd",
+            "title": "T2D Progression Biomarkers, 2025-12",
+            "sub": "2000 participants",
+            "facts": [
+              ["measure", "Participants enrolled"],
+              ["band", "none"]
+            ]
+          },
+          {
+            "id": "pt:study:STUDY-DIAB-2023:2026-03-31",
+            "label": "2026-03 · 2080",
+            "layer": "time",
+            "kind": "Month",
+            "size": 0.9,
+            "color": "#93c5fd",
+            "title": "T2D Progression Biomarkers, 2026-03",
+            "sub": "2080 participants",
+            "facts": [
+              ["measure", "Participants enrolled"],
+              ["band", "none"]
+            ]
+          },
+          {
+            "id": "pt:study:STUDY-DIAB-2023:2026-06-30",
+            "label": "2026-06 · 2100",
+            "layer": "time",
+            "kind": "Month",
+            "size": 0.9,
+            "color": "#93c5fd",
+            "title": "T2D Progression Biomarkers, 2026-06",
+            "sub": "2100 participants",
+            "facts": [
+              ["measure", "Participants enrolled"],
+              ["band", "none"]
+            ]
+          },
+          {
+            "id": "pt:study:STUDY-DIAB-2023:2026-09-23",
+            "label": "2026-09 · 2103",
+            "layer": "time",
+            "kind": "Month",
+            "size": 0.9,
+            "color": "#93c5fd",
+            "title": "T2D Progression Biomarkers, 2026-09",
+            "sub": "2103 participants",
+            "facts": [
+              ["measure", "Participants enrolled"],
+              ["band", "none"]
+            ]
+          }
+        ],
+        "links": [
+          {
+            "source": "study:STUDY-DIAB-2023",
+            "target": "pt:study:STUDY-DIAB-2023:2024-06-30",
+            "kind": "month",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "study:STUDY-DIAB-2023",
+            "target": "pt:study:STUDY-DIAB-2023:2024-09-30",
+            "kind": "month",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "pt:study:STUDY-DIAB-2023:2024-06-30",
+            "target": "pt:study:STUDY-DIAB-2023:2024-09-30",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          },
+          {
+            "source": "study:STUDY-DIAB-2023",
+            "target": "pt:study:STUDY-DIAB-2023:2024-12-31",
+            "kind": "month",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "pt:study:STUDY-DIAB-2023:2024-09-30",
+            "target": "pt:study:STUDY-DIAB-2023:2024-12-31",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          },
+          {
+            "source": "study:STUDY-DIAB-2023",
+            "target": "pt:study:STUDY-DIAB-2023:2025-03-31",
+            "kind": "month",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "pt:study:STUDY-DIAB-2023:2024-12-31",
+            "target": "pt:study:STUDY-DIAB-2023:2025-03-31",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          },
+          {
+            "source": "study:STUDY-DIAB-2023",
+            "target": "pt:study:STUDY-DIAB-2023:2025-06-30",
+            "kind": "month",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "pt:study:STUDY-DIAB-2023:2025-03-31",
+            "target": "pt:study:STUDY-DIAB-2023:2025-06-30",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          },
+          {
+            "source": "study:STUDY-DIAB-2023",
+            "target": "pt:study:STUDY-DIAB-2023:2025-09-30",
+            "kind": "month",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "pt:study:STUDY-DIAB-2023:2025-06-30",
+            "target": "pt:study:STUDY-DIAB-2023:2025-09-30",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          },
+          {
+            "source": "study:STUDY-DIAB-2023",
+            "target": "pt:study:STUDY-DIAB-2023:2025-12-31",
+            "kind": "month",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "pt:study:STUDY-DIAB-2023:2025-09-30",
+            "target": "pt:study:STUDY-DIAB-2023:2025-12-31",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          },
+          {
+            "source": "study:STUDY-DIAB-2023",
+            "target": "pt:study:STUDY-DIAB-2023:2026-03-31",
+            "kind": "month",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "pt:study:STUDY-DIAB-2023:2025-12-31",
+            "target": "pt:study:STUDY-DIAB-2023:2026-03-31",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          },
+          {
+            "source": "study:STUDY-DIAB-2023",
+            "target": "pt:study:STUDY-DIAB-2023:2026-06-30",
+            "kind": "month",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "pt:study:STUDY-DIAB-2023:2026-03-31",
+            "target": "pt:study:STUDY-DIAB-2023:2026-06-30",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          },
+          {
+            "source": "study:STUDY-DIAB-2023",
+            "target": "pt:study:STUDY-DIAB-2023:2026-09-23",
+            "kind": "month",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "pt:study:STUDY-DIAB-2023:2026-06-30",
+            "target": "pt:study:STUDY-DIAB-2023:2026-09-23",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "study:STUDY-RESP-2025",
+      "label": "Respiratory EHDS Cohort",
+      "layer": "other",
+      "kind": "Study",
+      "size": 1.6,
+      "status": "none",
+      "color": "#c4b5fd",
+      "title": "Respiratory EHDS Cohort",
+      "sub": "MedReg DE, recruiting, 890 participants, DE, AT, CH",
+      "description": "Cross-border respiratory disease surveillance leveraging EHDS priority datasets (COPD, asthma).",
+      "facts": [
+        [
+          "needs",
+          "FHIR Conditions (asthma, COPD), Observation spirometry values"
+        ],
+        ["shares with mine", "condi, obser"]
+      ],
+      "article": "Another user's study in the space; Art. 57(1)(j)(v) results are published",
+      "links": [
+        {
+          "href": "/patient/research",
+          "text": "Research programmes"
+        }
+      ],
+      "series": [
+        {
+          "date": "2024-06-30",
+          "value": 0
+        },
+        {
+          "date": "2024-09-30",
+          "value": 0
+        },
+        {
+          "date": "2024-12-31",
+          "value": 0
+        },
+        {
+          "date": "2025-03-31",
+          "value": 0
+        },
+        {
+          "date": "2025-06-30",
+          "value": 0
+        },
+        {
+          "date": "2025-09-30",
+          "value": 0
+        },
+        {
+          "date": "2025-12-31",
+          "value": 120
+        },
+        {
+          "date": "2026-03-31",
+          "value": 340
+        },
+        {
+          "date": "2026-06-30",
+          "value": 610
+        },
+        {
+          "date": "2026-09-23",
+          "value": 890
+        }
+      ],
+      "unit": "participants",
+      "measure": "Participants enrolled",
+      "range": null,
+      "higherIsWorse": false,
+      "expand": {
+        "nodes": [
+          {
+            "id": "pt:study:STUDY-RESP-2025:2024-06-30",
+            "label": "2024-06 · 0",
+            "layer": "time",
+            "kind": "Month",
+            "size": 0.9,
+            "color": "#93c5fd",
+            "title": "Respiratory EHDS Cohort, 2024-06",
+            "sub": "0 participants",
+            "facts": [
+              ["measure", "Participants enrolled"],
+              ["band", "none"]
+            ]
+          },
+          {
+            "id": "pt:study:STUDY-RESP-2025:2024-09-30",
+            "label": "2024-09 · 0",
+            "layer": "time",
+            "kind": "Month",
+            "size": 0.9,
+            "color": "#93c5fd",
+            "title": "Respiratory EHDS Cohort, 2024-09",
+            "sub": "0 participants",
+            "facts": [
+              ["measure", "Participants enrolled"],
+              ["band", "none"]
+            ]
+          },
+          {
+            "id": "pt:study:STUDY-RESP-2025:2024-12-31",
+            "label": "2024-12 · 0",
+            "layer": "time",
+            "kind": "Month",
+            "size": 0.9,
+            "color": "#93c5fd",
+            "title": "Respiratory EHDS Cohort, 2024-12",
+            "sub": "0 participants",
+            "facts": [
+              ["measure", "Participants enrolled"],
+              ["band", "none"]
+            ]
+          },
+          {
+            "id": "pt:study:STUDY-RESP-2025:2025-03-31",
+            "label": "2025-03 · 0",
+            "layer": "time",
+            "kind": "Month",
+            "size": 0.9,
+            "color": "#93c5fd",
+            "title": "Respiratory EHDS Cohort, 2025-03",
+            "sub": "0 participants",
+            "facts": [
+              ["measure", "Participants enrolled"],
+              ["band", "none"]
+            ]
+          },
+          {
+            "id": "pt:study:STUDY-RESP-2025:2025-06-30",
+            "label": "2025-06 · 0",
+            "layer": "time",
+            "kind": "Month",
+            "size": 0.9,
+            "color": "#93c5fd",
+            "title": "Respiratory EHDS Cohort, 2025-06",
+            "sub": "0 participants",
+            "facts": [
+              ["measure", "Participants enrolled"],
+              ["band", "none"]
+            ]
+          },
+          {
+            "id": "pt:study:STUDY-RESP-2025:2025-09-30",
+            "label": "2025-09 · 0",
+            "layer": "time",
+            "kind": "Month",
+            "size": 0.9,
+            "color": "#93c5fd",
+            "title": "Respiratory EHDS Cohort, 2025-09",
+            "sub": "0 participants",
+            "facts": [
+              ["measure", "Participants enrolled"],
+              ["band", "none"]
+            ]
+          },
+          {
+            "id": "pt:study:STUDY-RESP-2025:2025-12-31",
+            "label": "2025-12 · 120",
+            "layer": "time",
+            "kind": "Month",
+            "size": 0.9,
+            "color": "#93c5fd",
+            "title": "Respiratory EHDS Cohort, 2025-12",
+            "sub": "120 participants",
+            "facts": [
+              ["measure", "Participants enrolled"],
+              ["band", "none"]
+            ]
+          },
+          {
+            "id": "pt:study:STUDY-RESP-2025:2026-03-31",
+            "label": "2026-03 · 340",
+            "layer": "time",
+            "kind": "Month",
+            "size": 0.9,
+            "color": "#93c5fd",
+            "title": "Respiratory EHDS Cohort, 2026-03",
+            "sub": "340 participants",
+            "facts": [
+              ["measure", "Participants enrolled"],
+              ["band", "none"]
+            ]
+          },
+          {
+            "id": "pt:study:STUDY-RESP-2025:2026-06-30",
+            "label": "2026-06 · 610",
+            "layer": "time",
+            "kind": "Month",
+            "size": 0.9,
+            "color": "#93c5fd",
+            "title": "Respiratory EHDS Cohort, 2026-06",
+            "sub": "610 participants",
+            "facts": [
+              ["measure", "Participants enrolled"],
+              ["band", "none"]
+            ]
+          },
+          {
+            "id": "pt:study:STUDY-RESP-2025:2026-09-23",
+            "label": "2026-09 · 890",
+            "layer": "time",
+            "kind": "Month",
+            "size": 0.9,
+            "color": "#93c5fd",
+            "title": "Respiratory EHDS Cohort, 2026-09",
+            "sub": "890 participants",
+            "facts": [
+              ["measure", "Participants enrolled"],
+              ["band", "none"]
+            ]
+          }
+        ],
+        "links": [
+          {
+            "source": "study:STUDY-RESP-2025",
+            "target": "pt:study:STUDY-RESP-2025:2024-06-30",
+            "kind": "month",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "study:STUDY-RESP-2025",
+            "target": "pt:study:STUDY-RESP-2025:2024-09-30",
+            "kind": "month",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "pt:study:STUDY-RESP-2025:2024-06-30",
+            "target": "pt:study:STUDY-RESP-2025:2024-09-30",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          },
+          {
+            "source": "study:STUDY-RESP-2025",
+            "target": "pt:study:STUDY-RESP-2025:2024-12-31",
+            "kind": "month",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "pt:study:STUDY-RESP-2025:2024-09-30",
+            "target": "pt:study:STUDY-RESP-2025:2024-12-31",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          },
+          {
+            "source": "study:STUDY-RESP-2025",
+            "target": "pt:study:STUDY-RESP-2025:2025-03-31",
+            "kind": "month",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "pt:study:STUDY-RESP-2025:2024-12-31",
+            "target": "pt:study:STUDY-RESP-2025:2025-03-31",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          },
+          {
+            "source": "study:STUDY-RESP-2025",
+            "target": "pt:study:STUDY-RESP-2025:2025-06-30",
+            "kind": "month",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "pt:study:STUDY-RESP-2025:2025-03-31",
+            "target": "pt:study:STUDY-RESP-2025:2025-06-30",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          },
+          {
+            "source": "study:STUDY-RESP-2025",
+            "target": "pt:study:STUDY-RESP-2025:2025-09-30",
+            "kind": "month",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "pt:study:STUDY-RESP-2025:2025-06-30",
+            "target": "pt:study:STUDY-RESP-2025:2025-09-30",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          },
+          {
+            "source": "study:STUDY-RESP-2025",
+            "target": "pt:study:STUDY-RESP-2025:2025-12-31",
+            "kind": "month",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "pt:study:STUDY-RESP-2025:2025-09-30",
+            "target": "pt:study:STUDY-RESP-2025:2025-12-31",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          },
+          {
+            "source": "study:STUDY-RESP-2025",
+            "target": "pt:study:STUDY-RESP-2025:2026-03-31",
+            "kind": "month",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "pt:study:STUDY-RESP-2025:2025-12-31",
+            "target": "pt:study:STUDY-RESP-2025:2026-03-31",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          },
+          {
+            "source": "study:STUDY-RESP-2025",
+            "target": "pt:study:STUDY-RESP-2025:2026-06-30",
+            "kind": "month",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "pt:study:STUDY-RESP-2025:2026-03-31",
+            "target": "pt:study:STUDY-RESP-2025:2026-06-30",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          },
+          {
+            "source": "study:STUDY-RESP-2025",
+            "target": "pt:study:STUDY-RESP-2025:2026-09-23",
+            "kind": "month",
+            "color": "#64748b",
+            "distance": 45
+          },
+          {
+            "source": "pt:study:STUDY-RESP-2025:2026-06-30",
+            "target": "pt:study:STUDY-RESP-2025:2026-09-23",
+            "kind": "next",
+            "color": "#93c5fd",
+            "distance": 28,
+            "arrow": true,
+            "particles": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "org:did:web:irs.fr:hdab",
+      "label": "Institut de Recherche Santé",
+      "layer": "other",
+      "kind": "Organisation",
+      "size": 1.2,
+      "color": "#f97316",
+      "title": "Institut de Recherche Santé",
+      "sub": "another participant"
+    },
+    {
+      "id": "org:did:web:medreg.de:hdab",
+      "label": "MedReg DE",
+      "layer": "other",
+      "kind": "Organisation",
+      "size": 1.2,
+      "color": "#f97316",
+      "title": "MedReg DE",
+      "sub": "another participant"
+    }
+  ],
+  "links": [
+    {
+      "source": "me",
+      "target": "vc:vc:data-processing-purpose:cro-pharmaco",
+      "kind": "holds",
+      "status": "bad",
+      "distance": 45
+    },
+    {
+      "source": "me",
+      "target": "vc:vc:ehds-participant:cro-pharmaco",
+      "kind": "holds",
+      "status": "ok",
+      "distance": 45
+    },
+    {
+      "source": "me",
+      "target": "vc:vc:membership:cro-pharmaco",
+      "kind": "holds",
+      "status": "ok",
+      "distance": 45
+    },
+    {
+      "source": "me",
+      "target": "app:app-pharmaco-medreg-2026-002",
+      "kind": "applied",
+      "color": "#94a3b8",
+      "distance": 90,
+      "arrow": true
+    },
+    {
+      "source": "app:app-pharmaco-medreg-2026-002",
+      "target": "ds:dataset:synthea-fhir-r4-mvd",
+      "kind": "requested",
+      "status": "info",
+      "distance": 80
+    },
+    {
+      "source": "me",
+      "target": "permit:approval:did:web:pharmaco.de:research",
+      "kind": "holds",
+      "color": "#94a3b8",
+      "distance": 90
+    },
+    {
+      "source": "permit:approval:did:web:pharmaco.de:research",
+      "target": "ds:urn:uuid:alphaklinik:dataset:diab-001",
+      "kind": "covers",
+      "status": "ok",
+      "distance": 80
+    },
+    {
+      "source": "me",
+      "target": "study:STUDY-CARDIO-2024",
+      "kind": "conducts",
+      "status": "ok",
+      "distance": 70
+    },
+    {
+      "source": "study:STUDY-DIAB-2023",
+      "target": "me",
+      "kind": "near",
+      "color": "#a78bfa",
+      "distance": 130
+    },
+    {
+      "source": "study:STUDY-RESP-2025",
+      "target": "me",
+      "kind": "near",
+      "color": "#a78bfa",
+      "distance": 130
+    },
+    {
+      "source": "study:STUDY-DIAB-2023",
+      "target": "org:did:web:irs.fr:hdab",
+      "kind": "conducted by",
+      "color": "#f97316",
+      "distance": 45
+    },
+    {
+      "source": "study:STUDY-RESP-2025",
+      "target": "org:did:web:medreg.de:hdab",
+      "kind": "conducted by",
+      "color": "#f97316",
+      "distance": 45
+    }
+  ],
+  "signals": [
+    {
+      "severity": "bad",
+      "code": "access-after-credential-expiry",
+      "nodeId": "me",
+      "text": "My chain of trust: 2 accesses served after the purpose credential expired on 2026-06-20.",
+      "article": "Art. 53(1), Art. 61(1)"
+    },
+    {
+      "severity": "info",
+      "code": "decision-due",
+      "nodeId": "app:app-pharmaco-medreg-2026-002",
+      "text": "My application for Synthea Synthetic FHIR R4 Patient Cohort is pending; decision due 2026-12-01, 69 days left.",
+      "article": "Art. 68(4)"
+    },
+    {
+      "severity": "info",
+      "code": "study-match",
+      "nodeId": "study:STUDY-DIAB-2023",
+      "text": "T2D Progression Biomarkers (Institut de Recherche Santé) needs condi like mine; a candidate for a joint application or a shared cohort.",
+      "article": "Art. 53(1)(e), Art. 67"
+    },
+    {
+      "severity": "info",
+      "code": "study-match",
+      "nodeId": "study:STUDY-RESP-2025",
+      "text": "Respiratory EHDS Cohort (MedReg DE) needs condi, obser like mine; a candidate for a joint application or a shared cohort.",
+      "article": "Art. 53(1)(e), Art. 67"
+    },
+    {
+      "severity": "info",
+      "code": "allowed-today",
+      "nodeId": "ds:urn:uuid:alphaklinik:dataset:diab-001",
+      "text": "2 datasets permitted to me today; 2 accesses served in 12 months, 0 refused.",
+      "article": "Art. 61(1), Art. 73(1)(e)"
+    }
+  ],
+  "legend": [
+    {
+      "color": "#ef4444",
+      "text": "blocked / expired"
+    },
+    {
+      "color": "#f59e0b",
+      "text": "pending / due"
+    },
+    {
+      "color": "#38bdf8",
+      "text": "information"
+    },
+    {
+      "color": "#22c55e",
+      "text": "permitted today"
+    },
+    {
+      "color": "#a78bfa",
+      "text": "near my needs"
+    },
+    {
+      "color": "#93c5fd",
+      "text": "month (unfolded)"
+    }
+  ],
+  "dataNote": "Every organisation and study shown is fictional."
+}

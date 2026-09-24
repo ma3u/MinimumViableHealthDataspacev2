@@ -14,6 +14,7 @@ import { buildPatientView } from "../src/lib/overview/patient";
 import type { AccessLogEntry } from "../src/lib/overview/patient";
 import { buildHdabView } from "../src/lib/overview/hdab";
 import { buildHospitalView } from "../src/lib/overview/hospital";
+import { buildResearcherView } from "../src/lib/overview/researcher";
 
 const MOCK = join(__dirname, "..", "public", "mock");
 const read = (name: string) =>
@@ -97,10 +98,91 @@ const hospital = buildHospitalView({
   })),
 });
 
+// The researcher: PharmaCo, its studies from the programme fixture with the
+// enrolment series of the prototype, the catalogue for descriptions.
+const PHARMACO = "did:web:pharmaco.de:research";
+const researcherSeries = JSON.parse(
+  readFileSync(
+    join(
+      __dirname,
+      "..",
+      "public",
+      "poc",
+      "persona-3d",
+      "data",
+      "researcher-series.json",
+    ),
+    "utf-8",
+  ),
+).items as { match: string; series: { date: string; value: number }[] }[];
+const catalog = read("catalog") as {
+  id: string;
+  title: string;
+  description?: string;
+  publisher?: string;
+  theme?: string;
+  recordCount?: number;
+}[];
+const catalogByKey = new Map<string, (typeof catalog)[number]>();
+for (const c of catalog) {
+  catalogByKey.set(c.id, c);
+  catalogByKey.set(c.title, c);
+}
+const researcher = buildResearcherView({
+  asOf: "2026-09-23",
+  me: { did: PHARMACO, name: "PharmaCo Research AG" },
+  consumers: compliance.consumers,
+  datasets: compliance.datasets.map((d: { id: string; title: string }) => {
+    const c = catalogByKey.get(d.id) ?? catalogByKey.get(d.title);
+    return {
+      id: d.id,
+      title: d.title,
+      description: c?.description ?? null,
+      publisher: c?.publisher ?? null,
+      theme: c?.theme ?? null,
+      recordCount: c?.recordCount ?? null,
+    };
+  }),
+  matrix: compliance.matrix,
+  register: read("permits").entries,
+  credentials: read("credentials").credentials,
+  contracts: [],
+  events: allEvents.filter((e) => e.consumerDid === PHARMACO),
+  studies: read("patient_research").programs.map(
+    (p: {
+      studyId: string;
+      studyName: string;
+      institution: string;
+      status: string;
+      dataNeeded: string;
+      description: string;
+      countries: string[];
+      participantCount: number;
+    }) => ({
+      studyId: p.studyId,
+      studyName: p.studyName,
+      institution: p.institution,
+      institutionDid:
+        (compliance.consumers as { id: string; name: string }[]).find(
+          (c) => c.name === p.institution,
+        )?.id ?? null,
+      status: p.status,
+      dataNeeded: p.dataNeeded,
+      description: p.description,
+      countries: p.countries,
+      participantCount: p.participantCount,
+      enrolment:
+        researcherSeries.find((i) => i.match === `study:${p.studyId}`)
+          ?.series ?? null,
+    }),
+  ),
+});
+
 for (const [name, v] of [
   ["overview_patient", view],
   ["overview_hdab", hdab],
   ["overview_hospital", hospital],
+  ["overview_researcher", researcher],
 ] as const) {
   const out = join(MOCK, `${name}.json`);
   writeFileSync(out, JSON.stringify(v, null, 2) + "\n");

@@ -23,6 +23,12 @@ import {
   buildHospitalView,
   type LabelAssessment,
 } from "@/lib/overview/hospital";
+import { GET as catalogGET } from "@/app/api/catalog/route";
+import {
+  buildResearcherView,
+  type CatalogDataset,
+  type StudyRecord,
+} from "@/lib/overview/researcher";
 import {
   buildPatientView,
   ownPatientId,
@@ -79,8 +85,7 @@ async function call<T>(
  * graph and never persisted. The persona defaults to the session's role;
  * a role may only open its own persona, EDC_ADMIN any.
  *
- * M1 serves the patient, M2 the access body, M3 the holder; the researcher
- * answers 501 until M4 lands.
+ * M1 the patient, M2 the access body, M3 the holder, M4 the researcher.
  */
 export async function GET(req: Request): Promise<Response> {
   const session = await getServerSession(authOptions);
@@ -113,16 +118,6 @@ export async function GET(req: Request): Promise<Response> {
       { status: 403 },
     );
   }
-  if (persona === "researcher") {
-    return NextResponse.json(
-      {
-        error: `The ${persona} overview is not implemented yet`,
-        issue:
-          "https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/271",
-      },
-      { status: 501 },
-    );
-  }
   const asOf =
     url.searchParams.get("asOf") ?? new Date().toISOString().slice(0, 10);
   if (persona === "hdab") {
@@ -130,6 +125,9 @@ export async function GET(req: Request): Promise<Response> {
   }
   if (persona === "hospital") {
     return hospitalView(url, roles, username, asOf);
+  }
+  if (persona === "researcher") {
+    return researcherView(url, roles, username, asOf);
   }
 
   // The patient a PATIENT session owns; anyone else picks one, P1 by default.
@@ -482,6 +480,156 @@ async function hospitalView(
       contracts: contractRows.filter((c) => c.contractId),
       events,
       assessments,
+    });
+    return NextResponse.json(view);
+  } catch (err) {
+    if (err instanceof SubRouteError) {
+      return NextResponse.json(err.body, { status: err.status });
+    }
+    return NextResponse.json(
+      {
+        error: "Neo4j unavailable",
+        detail: err instanceof Error ? err.message : String(err),
+      },
+      { status: 502 },
+    );
+  }
+}
+
+const DEFAULT_USER = {
+  did: "did:web:pharmaco.de:research",
+  name: "PharmaCo Research AG",
+};
+
+/** The researcher's own view: what is permitted, pending, blocked, missing. */
+async function researcherView(
+  url: URL,
+  roles: string[],
+  username: string | null,
+  asOf: string,
+): Promise<Response> {
+  const requestedMe = url.searchParams.get("me");
+  const fromUser = username ? userToParticipantId(username, roles) : "";
+  const meDid =
+    requestedMe ??
+    (fromUser &&
+    !fromUser.startsWith("did:web:unknown") &&
+    !fromUser.endsWith(":hdab")
+      ? fromUser
+      : DEFAULT_USER.did);
+  const since = new Date(asOf);
+  since.setUTCMonth(since.getUTCMonth() - 12);
+  since.setUTCDate(1);
+  try {
+    const origin = url.origin;
+    const [
+      compliance,
+      register,
+      credentials,
+      catalog,
+      contractRows,
+      events,
+      meRows,
+      studyRows,
+    ] = await Promise.all([
+      call<{
+        consumers: ParticipantShape[];
+        datasets: { id: string; title: string }[];
+        matrix: MatrixRow[];
+      }>(complianceGET, origin, "/api/compliance"),
+      call<{ entries: RegisterEntry[] }>(permitsGET, origin, "/api/permits"),
+      call<{ credentials: CredentialEntry[] }>(
+        credentialsGET,
+        origin,
+        "/api/credentials",
+      ),
+      call<CatalogDataset[]>(catalogGET, origin, "/api/catalog"),
+      runQuery<ContractShape>(
+        `MATCH (c:Contract)
+           OPTIONAL MATCH (consumer:Participant)-[:PARTY_TO|CONSUMER_OF|SIGNED]->(c)
+           OPTIONAL MATCH (c)-[:GOVERNS|COVERS]->(dp:DataProduct)
+           OPTIONAL MATCH (dp)-[:DESCRIBED_BY]->(ds:HealthDataset)
+           RETURN c.contractId AS contractId,
+                  coalesce(c.consumerDid, consumer.participantId) AS consumerDid,
+                  coalesce(c.datasetId, ds.datasetId, dp.productId) AS datasetId,
+                  toString(c.validUntil) AS validUntil,
+                  c.status AS status
+           LIMIT 200`,
+      ),
+      runQuery<HdabAccessEvent>(
+        `MATCH (te:TransferEvent)
+           WHERE te.timestamp >= datetime($since)
+             AND coalesce(te.consumerDid, te.participant) = $did
+           OPTIONAL MATCH (ds:HealthDataset {datasetId: te.datasetId})
+           RETURN te.eventId AS id,
+                  toString(te.timestamp) AS accessedAt,
+                  $did AS consumerDid,
+                  te.providerDid AS providerDid,
+                  te.datasetId AS datasetId,
+                  ds.title AS assetTitle,
+                  te.statusCode AS statusCode,
+                  te.permitId AS permitId,
+                  te.contractId AS contractId,
+                  te.responseBytes AS responseBytes
+           ORDER BY te.timestamp DESC
+           LIMIT 5000`,
+        { since: since.toISOString(), did: meDid },
+      ),
+      runQuery<{ did: string; name: string }>(
+        `MATCH (p:Participant {participantId: $did})
+           RETURN p.participantId AS did, coalesce(p.name, p.participantId) AS name`,
+        { did: meDid },
+      ),
+      runQuery<StudyRecord>(
+        `MATCH (st:ResearchStudy)
+           OPTIONAL MATCH (inst:Participant)-[:CONDUCTS]->(st)
+           OPTIONAL MATCH (st)-[:HAS_ENROLMENT]->(en:StudyEnrolment)
+           WITH st, inst, en ORDER BY en.asOf
+           RETURN st.studyId AS studyId,
+                  coalesce(st.name, st.studyId) AS studyName,
+                  coalesce(inst.name, st.institutionDid, '') AS institution,
+                  coalesce(inst.participantId, st.institutionDid) AS institutionDid,
+                  st.status AS status,
+                  st.dataNeeded AS dataNeeded,
+                  st.description AS description,
+                  st.countries AS countries,
+                  st.participantCount AS participantCount,
+                  [x IN collect(CASE WHEN en IS NULL THEN null ELSE {date: toString(en.asOf), value: en.participants} END) WHERE x IS NOT NULL] AS enrolment
+           ORDER BY st.studyId
+           LIMIT 100`,
+      ),
+    ]);
+    const me =
+      meRows[0] ??
+      (meDid === DEFAULT_USER.did ? DEFAULT_USER : { did: meDid, name: meDid });
+    // The catalogue's descriptions, keyed by dataset id or title
+    const byKey = new Map<string, CatalogDataset>();
+    for (const c of Array.isArray(catalog) ? catalog : []) {
+      byKey.set(c.id, c);
+      byKey.set(c.title, c);
+    }
+    const datasets: CatalogDataset[] = (compliance.datasets ?? []).map((d) => {
+      const c = byKey.get(d.id) ?? byKey.get(d.title);
+      return {
+        id: d.id,
+        title: d.title,
+        description: c?.description ?? null,
+        publisher: c?.publisher ?? null,
+        theme: c?.theme ?? null,
+        recordCount: c?.recordCount ?? null,
+      };
+    });
+    const view: OverviewView = buildResearcherView({
+      asOf,
+      me,
+      consumers: compliance.consumers ?? [],
+      datasets,
+      matrix: compliance.matrix ?? [],
+      register: register.entries ?? [],
+      credentials: credentials.credentials ?? [],
+      contracts: contractRows.filter((c) => c.contractId),
+      events,
+      studies: studyRows,
     });
     return NextResponse.json(view);
   } catch (err) {
