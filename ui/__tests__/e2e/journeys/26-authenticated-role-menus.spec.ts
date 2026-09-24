@@ -98,11 +98,11 @@ test.describe("A - edcadmin (EDC_ADMIN)", () => {
     await expectNoNavGroups(page, ["My Researches", "My Health"]);
   });
 
-  test("J482 Explore menu has Graph Explorer, Dataset Catalog, DCAT-AP Editor, Patient Journey, OMOP Analytics, NLQ/Federated, EEHRxF", async ({
+  test("J482 Explore menu has Persona Overview, Dataset Catalog, DCAT-AP Editor, Patient Journey, OMOP Analytics, NLQ/Federated, EEHRxF", async ({
     page,
   }) => {
     await expectMenuItems(page, "Explore", [
-      "Graph Explorer",
+      "Persona Overview",
       "Dataset Catalog",
       "DCAT-AP Editor",
       "Patient Journey",
@@ -204,11 +204,11 @@ test.describe("B - clinicuser (DATA_HOLDER)", () => {
     ]);
   });
 
-  test("J492 Explore menu has Graph Explorer, Dataset Catalog, DCAT-AP Editor, Patient Journey, EEHRxF but NOT NLQ or OMOP Analytics", async ({
+  test("J492 Explore menu has Persona Overview, Dataset Catalog, DCAT-AP Editor, Patient Journey, EEHRxF but NOT NLQ or OMOP Analytics", async ({
     page,
   }) => {
     await expectMenuItems(page, "Explore", [
-      "Graph Explorer",
+      "Persona Overview",
       "Dataset Catalog",
       "DCAT-AP Editor",
       "Patient Journey",
@@ -384,11 +384,11 @@ test.describe("D - regulator (HDAB_AUTHORITY)", () => {
     await expectNoNavGroups(page, ["My Researches", "My Health"]);
   });
 
-  test("J512 Explore menu has Graph Explorer, Dataset Catalog, Patient Journey, OMOP Analytics, NLQ, EEHRxF (no DCAT-AP Editor)", async ({
+  test("J512 Explore menu has Persona Overview, Dataset Catalog, Patient Journey, OMOP Analytics, NLQ, EEHRxF (no DCAT-AP Editor)", async ({
     page,
   }) => {
     await expectMenuItems(page, "Explore", [
-      "Graph Explorer",
+      "Persona Overview",
       "Dataset Catalog",
       "Patient Journey",
       "OMOP Analytics",
@@ -478,11 +478,11 @@ test.describe("E - lmcuser (DATA_HOLDER)", () => {
     ]);
   });
 
-  test("J522 Explore menu has Graph Explorer, Dataset Catalog, DCAT-AP Editor, Patient Journey, EEHRxF", async ({
+  test("J522 Explore menu has Persona Overview, Dataset Catalog, DCAT-AP Editor, Patient Journey, EEHRxF", async ({
     page,
   }) => {
     await expectMenuItems(page, "Explore", [
-      "Graph Explorer",
+      "Persona Overview",
       "Dataset Catalog",
       "DCAT-AP Editor",
       "Patient Journey",

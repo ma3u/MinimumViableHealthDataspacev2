@@ -579,7 +579,9 @@ test.describe("U5: Start Page — Tablet Viewport", () => {
     if (IS_STATIC) await setPersona(page, "edcadmin");
 
     // Wait for feature cards
-    await expect(page.getByText(/Graph Explorer/i)).toBeVisible({ timeout: T });
+    await expect(page.getByText(/Persona Overview/i)).toBeVisible({
+      timeout: T,
+    });
     // Find the Explore section by its heading id
     const exploreSection = page.locator(
       "section[aria-labelledby='explore-title']",

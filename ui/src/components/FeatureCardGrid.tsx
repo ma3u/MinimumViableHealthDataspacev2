@@ -29,9 +29,9 @@ const IS_STATIC = process.env.NEXT_PUBLIC_STATIC_EXPORT === "true";
 
 /** Routes that are most relevant for each role. */
 const ROLE_PATHS: Record<string, string[]> = {
-  PATIENT: ["/patient", "/graph", "/eehrxf"],
+  PATIENT: ["/patient", "/overview", "/eehrxf"],
   DATA_HOLDER: [
-    "/graph",
+    "/overview",
     "/catalog",
     "/eehrxf",
     "/data/share",
@@ -42,7 +42,7 @@ const ROLE_PATHS: Record<string, string[]> = {
     "/settings",
   ],
   DATA_USER: [
-    "/graph",
+    "/overview",
     "/catalog",
     "/analytics",
     "/query",
@@ -53,9 +53,9 @@ const ROLE_PATHS: Record<string, string[]> = {
     "/credentials",
     "/settings",
   ],
-  HDAB_AUTHORITY: ["/graph", "/compliance", "/credentials"],
+  HDAB_AUTHORITY: ["/overview", "/compliance", "/credentials"],
   EDC_ADMIN: [
-    "/graph",
+    "/overview",
     "/catalog",
     "/patient",
     "/analytics",
@@ -73,7 +73,7 @@ const ROLE_PATHS: Record<string, string[]> = {
     "/admin",
     "/docs",
   ],
-  TRUST_CENTER_OPERATOR: ["/graph", "/compliance", "/credentials"],
+  TRUST_CENTER_OPERATOR: ["/overview", "/compliance", "/credentials"],
 };
 
 interface FeatureCard {
@@ -86,10 +86,10 @@ interface FeatureCard {
 
 const exploreCards: FeatureCard[] = [
   {
-    href: "/graph",
+    href: "/overview",
     icon: Network,
-    label: "Graph Explorer",
-    desc: "Force-directed visualisation of all 5 architecture layers",
+    label: "Persona Overview",
+    desc: "One view per persona: what is out of range, due, broken, and what to do next",
     color: "border-layer1 hover:bg-layer1/10",
   },
   {

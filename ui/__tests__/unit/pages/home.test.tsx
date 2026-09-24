@@ -105,7 +105,7 @@ describe("Home Page", () => {
 
   it("renders Explore section cards", () => {
     render(<Home />);
-    expect(screen.getByText("Graph Explorer")).toBeInTheDocument();
+    expect(screen.getByText("Persona Overview")).toBeInTheDocument();
     expect(screen.getByText("Dataset Catalog")).toBeInTheDocument();
     expect(screen.getByText("Patient Journey")).toBeInTheDocument();
     expect(screen.getByText("OMOP Analytics")).toBeInTheDocument();
@@ -121,9 +121,9 @@ describe("Home Page", () => {
 
   it("renders correct links for explore cards", () => {
     render(<Home />);
-    expect(screen.getByText("Graph Explorer").closest("a")).toHaveAttribute(
+    expect(screen.getByText("Persona Overview").closest("a")).toHaveAttribute(
       "href",
-      "/graph",
+      "/overview",
     );
     expect(screen.getByText("Dataset Catalog").closest("a")).toHaveAttribute(
       "href",

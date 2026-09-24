@@ -52,6 +52,7 @@ const ROLE_PERSONA: Record<string, Persona> = {
   PATIENT: "patient",
   DATA_USER: "researcher",
   HDAB_AUTHORITY: "hdab",
+  TRUST_CENTER_OPERATOR: "hdab",
   DATA_HOLDER: "hospital",
 };
 

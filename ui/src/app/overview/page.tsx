@@ -69,7 +69,11 @@ function OverviewContent() {
   const urlPersona = searchParams.get("persona") as Persona | null;
   const persona: Persona =
     urlPersona ??
-    (PERSONAS.some((p) => p.id === derived) ? (derived as Persona) : "patient");
+    (PERSONAS.some((p) => p.id === derived)
+      ? (derived as Persona)
+      : roles.includes("TRUST_CENTER_OPERATOR") || isAdmin
+        ? "hdab"
+        : "patient");
   const patientId = searchParams.get("patientId");
   const sceneParam = searchParams.get("scene");
 

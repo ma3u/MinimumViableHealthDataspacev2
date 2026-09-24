@@ -152,7 +152,7 @@ describe("Navigation Component", () => {
   });
 
   it("should highlight the active group based on current pathname", () => {
-    mockPathname.mockReturnValue("/graph");
+    mockPathname.mockReturnValue("/overview");
     render(<Navigation />);
 
     // Active button gets border-b-2 accent underline (Vitalis Blue design)
@@ -188,10 +188,11 @@ describe("Navigation Component", () => {
     expect(screen.getByText("Onboarding")).toBeInTheDocument();
   });
 
-  it("should show Graph Explorer and Catalog inside Explore dropdown", async () => {
+  it("should show Persona Overview and Catalog inside Explore dropdown", async () => {
     render(<Navigation />);
     await openDropdown("Explore");
-    expect(screen.getByText("Graph Explorer")).toBeInTheDocument();
+    expect(screen.getByText("Persona Overview")).toBeInTheDocument();
+    expect(screen.queryByText("Graph Explorer")).not.toBeInTheDocument();
     expect(screen.getByText("Dataset Catalog")).toBeInTheDocument();
   });
 
