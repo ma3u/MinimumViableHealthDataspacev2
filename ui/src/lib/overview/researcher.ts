@@ -33,6 +33,11 @@ import {
   type ParticipantShape,
   type RegisterEntry,
 } from "./hdab";
+import {
+  completenessFact,
+  descriptionCompleteness,
+  type CatalogEntryLike,
+} from "./completeness";
 import { attachSeries, raiseStatus } from "./series";
 import type {
   OverviewLayer,
@@ -42,13 +47,9 @@ import type {
   OverviewView,
 } from "./types";
 
-export interface CatalogDataset {
+export interface CatalogDataset extends CatalogEntryLike {
   id: string;
   title: string;
-  description?: string | null;
-  publisher?: string | null;
-  theme?: string | null;
-  recordCount?: number | null;
 }
 
 export interface StudyRecord {
@@ -542,6 +543,7 @@ export function buildResearcherView(input: ResearcherViewInput): OverviewView {
       description: d.description ?? undefined,
       facts: [
         ["id", d.id],
+        completenessFact(descriptionCompleteness(d)),
         ...(d.recordCount != null
           ? [["records", String(d.recordCount)] as [string, string]]
           : []),

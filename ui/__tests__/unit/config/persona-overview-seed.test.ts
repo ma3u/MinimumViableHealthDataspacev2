@@ -88,7 +88,10 @@ describe("seed-persona-overview.cypher", () => {
     expect(seed).toContain("MERGE (pc)-[:FOR_STUDY]->(st)");
     expect(seed.match(/\{id: 'cond-p1-/g)).toHaveLength(8);
     expect(seed.match(/\{id: 'med-p1-/g)).toHaveLength(4);
-    expect(seed.match(/\{id: 'CONSENT-\d+'/g)).toHaveLength(2);
+    expect(seed.match(/\{id: 'CONSENT-\d+'/g)).toHaveLength(3);
+    // one consent is withdrawn: the Art. 71 opt-out state
+    expect(seed).toMatch(/CONSENT-003[^\n]*revokedAt: '2026-05-01/);
+    expect(seed).toContain("pc.revoked = c.revokedAt IS NOT NULL");
   });
 
   it("seeds the three studies, who conducts them, and ten enrolment points each", () => {
@@ -148,6 +151,15 @@ describe("seed-persona-overview.cypher", () => {
       expect(r).toContain("permit: 'hdab-irs-lmc-2026-001'");
       expect(r).toContain("contract: null");
     }
+  });
+
+  it("records which accesses read the patient's record (Art. 8)", () => {
+    const reads = seed.match(/reads: \['P1'\]/g) ?? [];
+    expect(reads.length).toBeGreaterThan(10);
+    expect(seed).toContain("MERGE (te)-[:READ]->(pat)");
+    // only served FHIR reads touch a record; refused attempts never do
+    const refusedWithReads = seed.match(/sc: 403[^\n]*reads: \['P1'\]/g) ?? [];
+    expect(refusedWithReads).toHaveLength(0);
   });
 
   it("attaches the events to consumer, provider, dataset, permit and contract", () => {

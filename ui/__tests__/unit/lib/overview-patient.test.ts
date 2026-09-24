@@ -220,6 +220,89 @@ describe("buildPatientView", () => {
   });
 });
 
+describe("buildPatientView, M6", () => {
+  it("names who read my record when the log knows (Art. 8)", () => {
+    const v = buildPatientView(
+      input({
+        recordLog: [
+          {
+            id: "r-1",
+            accessedAt: "2026-07-03T09:15:00Z",
+            consumerDid: PHARMACO,
+            consumerName: "PharmaCo Research AG",
+            providerDid: ALPHA,
+            statusCode: 200,
+          },
+          {
+            id: "r-2",
+            accessedAt: "2026-09-03T09:15:00Z",
+            consumerDid: PHARMACO,
+            consumerName: "PharmaCo Research AG",
+            providerDid: ALPHA,
+            statusCode: 200,
+          },
+        ],
+      }),
+    );
+    const reader = v.nodes.find(
+      (n) => n.id === "access:did-web-pharmaco-de-research",
+    )!;
+    expect(reader.sub).toBe("read my record 2 times in the last 12 months");
+    expect(reader.measure).toBe("Reads of my record per month");
+    expect(reader.article).not.toContain("still missing");
+    const s = v.signals.find((x) => x.code === "access-log")!;
+    expect(s.text).toContain("1 organisations read my record 2 times");
+    // the holder's other readers are not shown as readers of my record
+    expect(v.nodes.some((n) => n.id === "access:did-web-irs-fr-hdab")).toBe(
+      false,
+    );
+  });
+
+  it("falls back to the holder's log and says so when no read touched my record", () => {
+    const v = buildPatientView(input({ recordLog: [] }));
+    const s = v.signals.find((x) => x.code === "access-log")!;
+    expect(s.text).toContain("no read of my record is on file");
+  });
+
+  it("shows an opted-out study with the withdrawal date (Art. 71)", () => {
+    const research = read("patient_research");
+    const v = buildPatientView(
+      input({
+        research: {
+          ...research,
+          consents: [
+            ...research.consents,
+            {
+              consentId: "CONSENT-003",
+              studyId: "STUDY-RESP-2025",
+              grantedAt: "2026-01-12T10:00:00Z",
+              revoked: true,
+              revokedAt: "2026-05-01T08:00:00Z",
+              purpose: "secondary-use",
+            },
+          ],
+        },
+      }),
+    );
+    const consent = v.nodes.find((n) => n.id === "consent:CONSENT-003")!;
+    expect(consent.label).toBe("opted out 2026-05-01");
+    expect(consent.status).toBe("none");
+    expect(consent.facts!.find(([k]) => k === "state")?.[1]).toContain(
+      "Art. 71",
+    );
+    const s = v.signals.find((x) => x.code === "opt-out")!;
+    expect(s.nodeId).toBe(consent.id);
+    expect(s.text).toContain("Respiratory EHDS Cohort");
+    expect(v.signals.find((x) => x.code === "consent-summary")?.text).toContain(
+      "2 consents active",
+    );
+    const flow = v.links.find(
+      (l) => l.source === "me" && l.target === consent.id,
+    )!;
+    expect(flow.particles).toBe(0);
+  });
+});
+
 describe("ownPatientId", () => {
   it("maps the demo logins to their seeded records", () => {
     expect(ownPatientId("patient1")).toBe("P1");

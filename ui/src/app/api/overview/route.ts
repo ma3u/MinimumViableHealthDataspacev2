@@ -206,6 +206,26 @@ export async function GET(req: Request): Promise<Response> {
     ]);
 
     const holder = holderRows[0] ?? null;
+    const recordLog = await runQuery<AccessLogEntry>(
+      `MATCH (te:TransferEvent)-[:READ]->(p:Patient)
+       WHERE coalesce(p.id, p.resourceId, elementId(p)) = $patientId
+         AND te.timestamp >= datetime($since)
+       WITH te, coalesce(te.consumerDid, te.participant) AS consumerDid
+       OPTIONAL MATCH (c:Participant {participantId: consumerDid})
+       RETURN te.eventId AS id,
+              toString(te.timestamp) AS accessedAt,
+              consumerDid,
+              c.name AS consumerName,
+              te.providerDid AS providerDid,
+              te.datasetId AS datasetId,
+              te.statusCode AS statusCode,
+              te.permitId AS permitId,
+              te.contractId AS contractId,
+              te.responseBytes AS responseBytes
+       ORDER BY te.timestamp DESC
+       LIMIT 2000`,
+      { patientId, since: since.toISOString() },
+    );
     const accessLog = holder
       ? await runQuery<AccessLogEntry>(
           `MATCH (te:TransferEvent)
@@ -250,6 +270,7 @@ export async function GET(req: Request): Promise<Response> {
       research: { ...research, programs, consents },
       observations,
       accessLog,
+      recordLog,
       holder,
     });
     return NextResponse.json(view);
@@ -398,6 +419,7 @@ async function hospitalView(
       compliance,
       register,
       credentials,
+      catalog,
       contractRows,
       events,
       meRows,
@@ -414,6 +436,7 @@ async function hospitalView(
         origin,
         "/api/credentials",
       ),
+      call<CatalogDataset[]>(catalogGET, origin, "/api/catalog"),
       runQuery<ContractShape>(
         `MATCH (c:Contract)
            OPTIONAL MATCH (consumer:Participant)-[:PARTY_TO|CONSUMER_OF|SIGNED]->(c)
@@ -480,6 +503,7 @@ async function hospitalView(
       contracts: contractRows.filter((c) => c.contractId),
       events,
       assessments,
+      catalog: Array.isArray(catalog) ? catalog : [],
     });
     return NextResponse.json(view);
   } catch (err) {
@@ -610,14 +634,7 @@ async function researcherView(
     }
     const datasets: CatalogDataset[] = (compliance.datasets ?? []).map((d) => {
       const c = byKey.get(d.id) ?? byKey.get(d.title);
-      return {
-        id: d.id,
-        title: d.title,
-        description: c?.description ?? null,
-        publisher: c?.publisher ?? null,
-        theme: c?.theme ?? null,
-        recordCount: c?.recordCount ?? null,
-      };
+      return { ...(c ?? {}), id: d.id, title: d.title };
     });
     const view: OverviewView = buildResearcherView({
       asOf,

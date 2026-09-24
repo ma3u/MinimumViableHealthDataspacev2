@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import { runQuery } from "@/lib/neo4j";
+import { ownPatientId } from "@/lib/overview/patient";
 
 export const dynamic = "force-dynamic";
 
@@ -63,9 +64,15 @@ export async function GET(req: Request) {
            ORDER BY p.name
            LIMIT 200`,
         );
-        // Pick only the patient's own record
-        const myPatient =
-          patientIndex < allPatients.length
+        // Pick only the patient's own record: the seeded one the login owns
+        // (patient1 is P1, issue #271), else the older name-order fallback.
+        const owned = ownPatientId(username);
+        const ownRecord = owned
+          ? allPatients.find((p) => p.id === owned)
+          : undefined;
+        const myPatient = ownRecord
+          ? [ownRecord]
+          : patientIndex < allPatients.length
             ? [allPatients[patientIndex]]
             : allPatients.slice(0, 1);
         // Stats for just this patient

@@ -67,14 +67,18 @@ export async function GET(req: Request) {
           studyId: string;
           grantedAt: string;
           revoked: boolean;
+          revokedAt: string | null;
           purpose: string;
+          dataScope: string | null;
         }>(
           `MATCH (pc:PatientConsent {patientId: $patientId})
            RETURN pc.consentId AS consentId,
                   pc.studyId AS studyId,
                   toString(pc.grantedAt) AS grantedAt,
-                  pc.revoked AS revoked,
-                  coalesce(pc.purpose, 'RESEARCH') AS purpose
+                  coalesce(pc.revoked, false) AS revoked,
+                  toString(pc.revokedAt) AS revokedAt,
+                  coalesce(pc.purpose, 'RESEARCH') AS purpose,
+                  pc.dataScope AS dataScope
            ORDER BY pc.grantedAt DESC`,
           { patientId },
         )

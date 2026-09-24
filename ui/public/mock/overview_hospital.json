@@ -2311,9 +2311,13 @@
       "kind": "Dataset",
       "size": 1.8,
       "color": "#a78bfa",
+      "status": "none",
       "title": "Prostate Cancer Registry 2024",
-      "sub": "described in the national catalogue",
-      "facts": [["id", "dataset:prostate-cancer-registry"]],
+      "sub": "described in the national catalogue, 9 of 9 fields",
+      "facts": [
+        ["id", "dataset:prostate-cancer-registry"],
+        ["description (Art. 77)", "9 of 9 fields"]
+      ],
       "article": "Art. 77 dataset description; Art. 60(1) available under a permit; Art. 51 minimum categories",
       "links": [
         {
@@ -2329,9 +2333,13 @@
       "kind": "Dataset",
       "size": 1.8,
       "color": "#a78bfa",
+      "status": "ok",
       "title": "Synthea Synthetic FHIR R4 Patient Cohort",
-      "sub": "described in the national catalogue",
-      "facts": [["id", "dataset:synthea-fhir-r4-mvd"]],
+      "sub": "described in the national catalogue, 9 of 9 fields",
+      "facts": [
+        ["id", "dataset:synthea-fhir-r4-mvd"],
+        ["description (Art. 77)", "9 of 9 fields"]
+      ],
       "article": "Art. 77 dataset description; Art. 60(1) available under a permit; Art. 51 minimum categories",
       "links": [
         {
@@ -2750,7 +2758,6 @@
           }
         ]
       },
-      "status": "ok",
       "pulse": false
     }
   ],
@@ -2925,7 +2932,7 @@
       "severity": "info",
       "code": "catalogue",
       "nodeId": "me",
-      "text": "2 datasets of mine in the national catalogue. A description completeness score (Art. 77) is still missing (#271).",
+      "text": "2 datasets of mine in the national catalogue, 2 fully described (Art. 77).",
       "article": "Art. 77, Art. 79"
     }
   ],

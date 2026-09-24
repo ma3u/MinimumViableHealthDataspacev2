@@ -91,6 +91,7 @@ const hospital = buildHospitalView({
   credentials: read("credentials").credentials,
   contracts: [],
   events: accessLog,
+  catalog: read("catalog"),
   assessments: labelSeries.map((p) => ({
     credentialId: "vc:data-quality-label:clinic-alphaklinik",
     date: p.date,
@@ -134,14 +135,7 @@ const researcher = buildResearcherView({
   consumers: compliance.consumers,
   datasets: compliance.datasets.map((d: { id: string; title: string }) => {
     const c = catalogByKey.get(d.id) ?? catalogByKey.get(d.title);
-    return {
-      id: d.id,
-      title: d.title,
-      description: c?.description ?? null,
-      publisher: c?.publisher ?? null,
-      theme: c?.theme ?? null,
-      recordCount: c?.recordCount ?? null,
-    };
+    return { ...(c ?? {}), id: d.id, title: d.title };
   }),
   matrix: compliance.matrix,
   register: read("permits").entries,

@@ -180,6 +180,53 @@ describe("buildHospitalView", () => {
     expect(byId.has("vc:vc:data-quality-label:clinic-lmc")).toBe(false);
   });
 
+  it("scores each dataset's Art. 77 description and warns below the band", () => {
+    const v = buildHospitalView(
+      input({
+        catalog: [
+          {
+            id: SYNTHEA,
+            title: "Synthea Synthetic FHIR R4 Patient Cohort",
+            description:
+              "A synthetic cohort of 127 patients generated with Synthea in FHIR R4 for the demo.",
+            publisher: "AlphaKlinik Berlin",
+            license: "CC-BY-4.0",
+            conformsTo: ["http://hl7.org/fhir/R4"],
+            theme: "health",
+            datasetType: "EHR",
+            legalBasis: "Art. 53(1)(e)",
+            recordCount: 127,
+          },
+          {
+            id: "dataset:prostate-cancer-registry",
+            title: "Prostate Cancer Registry 2024",
+            description: "Registry",
+            publisher: "Limburg Medical Centre",
+          },
+        ],
+      }),
+    );
+    const synthea = v.nodes.find((n) => n.id === `ds:${SYNTHEA}`)!;
+    expect(synthea.facts).toContainEqual([
+      "description (Art. 77)",
+      "9 of 9 fields",
+    ]);
+    expect(synthea.status).not.toBe("warn");
+    const registry = v.nodes.find(
+      (n) => n.id === "ds:dataset:prostate-cancer-registry",
+    )!;
+    expect(registry.status).toBe("warn");
+    expect(
+      registry.facts!.find(([k]) => k.startsWith("description"))?.[1],
+    ).toContain("missing");
+    const s = v.signals.find((x) => x.code === "description-incomplete")!;
+    expect(s.nodeId).toBe(registry.id);
+    expect(s.article).toContain("Art. 77");
+    expect(v.signals.find((x) => x.code === "catalogue")?.text).toMatch(
+      /1 fully described/,
+    );
+  });
+
   it("warns when I carry no label at all", () => {
     const v = buildHospitalView(
       input({

@@ -635,7 +635,7 @@
       "measure": "Accesses per month",
       "higherIsWorse": true,
       "facts": [["did", "did:web:pharmaco.de:research"]],
-      "article": "Art. 8: information on who accessed my data. The log is the holder's, per dataset; a per-record log is still missing (#271)."
+      "article": "Art. 8: information on who accessed my data. The log is the holder's, per dataset; no read of my record is on file."
     },
     {
       "id": "access:did-web-lmc-nl-clinic",
@@ -700,7 +700,7 @@
       "measure": "Accesses per month",
       "higherIsWorse": true,
       "facts": [["did", "did:web:lmc.nl:clinic"]],
-      "article": "Art. 8: information on who accessed my data. The log is the holder's, per dataset; a per-record log is still missing (#271)."
+      "article": "Art. 8: information on who accessed my data. The log is the holder's, per dataset; no read of my record is on file."
     },
     {
       "id": "param:4548-4",
@@ -3241,7 +3241,7 @@
       "severity": "info",
       "code": "access-log",
       "nodeId": "holder:did-web-alpha-klinik-de-participant",
-      "text": "2 organisations read data from AlphaKlinik Berlin in the last 12 months (3 accesses). Click to see who.",
+      "text": "2 organisations read data from AlphaKlinik Berlin in the last 12 months (3 accesses); no read of my record is on file. Click to see who.",
       "article": "Art. 8 information on access, Art. 73(1)(e) log"
     },
     {
