@@ -10,9 +10,9 @@
  * LOINC-coded measurements, her consents, twelve months of access events
  * and the quarterly quality assessments into the graph, and the existing
  * routes show it. M1 (the patient overview, `/api/overview?persona=patient`,
- * `/api/patient/observations`, `/overview`), M2 (the access body) and M3
- * (the holder) are in. The cases of M4 and M5 are `test.fixme` until each
- * milestone lands.
+ * `/api/patient/observations`, `/overview`), M2 (the access body), M3 (the
+ * holder) and M4 (the researcher) are in. The M5 case is `test.fixme` until
+ * the static site carries all four fixtures.
  *
  *   PLAYWRIGHT_BASE_URL=https://ehds.mabu.red \
  *     npx playwright test __tests__/e2e/journeys/44-persona-overview.spec.ts
@@ -288,7 +288,6 @@ test.describe("Issue #271 · M4 researcher overview", () => {
   test("J973 my pending application shows its clock and my expired credential is red", async ({
     page,
   }) => {
-    test.fixme(true, "M4: the route does not exist yet (#271)");
     await loginAsAdmin(page);
     const view = await apiGet(page, "/api/overview?persona=researcher");
     const app = view.nodes.find((n: { id: string }) =>
@@ -302,7 +301,7 @@ test.describe("Issue #271 · M4 researcher overview", () => {
     );
     expect(cred.status).toBe("bad");
     const studies = view.nodes.filter(
-      (n: { kind: string }) => n.kind === "ResearchStudy",
+      (n: { kind: string }) => n.kind === "Study",
     );
     expect(studies.length).toBeGreaterThanOrEqual(3);
     expect(

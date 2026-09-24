@@ -234,6 +234,12 @@ const myResearchesGroup: NavGroup = {
   roles: ["DATA_USER"],
   links: [
     {
+      href: "/overview",
+      label: "My Research in One View",
+      icon: Layers,
+      roles: ["DATA_USER"],
+    },
+    {
       href: "/graph?persona=researcher",
       label: "Research Overview",
       icon: Network,

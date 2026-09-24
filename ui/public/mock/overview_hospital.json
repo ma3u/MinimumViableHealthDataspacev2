@@ -1469,7 +1469,10 @@
       "facts": [
         ["did", "did:web:pharmaco.de:research"],
         ["credentials", "3 presented"],
-        ["permits", "app-pharmaco-medreg-2026-002 pending"],
+        [
+          "permits",
+          "app-pharmaco-medreg-2026-002 pending, approval:did:web:pharmaco.de:research valid"
+        ],
         ["on my data", "2 accesses served, 0 refused"]
       ],
       "article": "Art. 60(1): I make data available only under a permit; Art. 61(1): the user accesses only under it; the DSP contract carries the terms",
@@ -1901,6 +1904,24 @@
       "title": "app-pharmaco-medreg-2026-002",
       "sub": "PharmaCo Research AG, pending",
       "facts": [["state", "pending"]],
+      "article": "Art. 68 data permit issued by the access body; Art. 61(1) access only under it",
+      "links": [
+        {
+          "href": "/permits",
+          "text": "Public register"
+        }
+      ]
+    },
+    {
+      "id": "permit:approval:did:web:pharmaco.de:research",
+      "label": "permit approval:did:web:pharmaco.de:research",
+      "layer": "chain",
+      "kind": "Data permit",
+      "size": 1.4,
+      "status": "ok",
+      "title": "approval:did:web:pharmaco.de:research",
+      "sub": "PharmaCo Research AG, valid",
+      "facts": [["state", "valid"]],
       "article": "Art. 68 data permit issued by the access body; Art. 61(1) access only under it",
       "links": [
         {
@@ -2808,6 +2829,13 @@
       "distance": 60
     },
     {
+      "source": "permit:approval:did:web:pharmaco.de:research",
+      "target": "c:did:web:pharmaco.de:research",
+      "kind": "issued to",
+      "color": "#94a3b8",
+      "distance": 60
+    },
+    {
       "source": "vc:vc:data-processing-purpose:cro-pharmaco",
       "target": "c:did:web:pharmaco.de:research",
       "kind": "presented by",
@@ -2871,13 +2899,6 @@
       "nodeId": "c:did:web:pharmaco.de:research",
       "text": "PharmaCo Research AG: 2 accesses served after the purpose credential expired on 2026-06-20.",
       "article": "Art. 53(1), Art. 61(1)"
-    },
-    {
-      "severity": "bad",
-      "code": "access-without-permit",
-      "nodeId": "c:did:web:pharmaco.de:research",
-      "text": "PharmaCo Research AG: 2 accesses served with no valid permit as of today.",
-      "article": "Art. 61(1), Art. 68"
     },
     {
       "severity": "bad",
