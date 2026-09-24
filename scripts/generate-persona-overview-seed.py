@@ -16,7 +16,7 @@ Run from the repository root:
 
 Everything here is fictional: AlphaKlinik Berlin, PharmaCo Research AG,
 MedReg DE, Limburg Medical Centre, Institut de Recherche Santé and the demo
-patient Anna Müller (P1). No real organisation, person or record.
+patient Maria Schmidt (P1, the patient1 login). No real organisation, person or record.
 """
 
 from __future__ import annotations
@@ -244,7 +244,8 @@ def cypher() -> str:
     w("// Persona overview seed (discussion #265, issue #271): the data the four persona")
     w("// views need, and the relations between the personas.")
     w("//")
-    w("//   patient P1 (Anna Müller) -TREATED_AT-> AlphaKlinik Berlin (holder)")
+    w("//   patient P1 (Maria Schmidt, the patient1 login) -TREATED_AT-> AlphaKlinik Berlin (holder)")
+    w("//     -HAS_ENCOUNTER-> one laboratory visit per measurement date")
     w("//     -HAS_OBSERVATION-> 48 LOINC-coded measurements with reference ranges")
     w("//     -HAS_CONDITION / HAS_MEDICATION_REQUEST-> her record")
     w("//     -GAVE_CONSENT-> PatientConsent -FOR_STUDY-> ResearchStudy")
@@ -265,7 +266,7 @@ def cypher() -> str:
     w("// ── 1. The demo patient, treated at AlphaKlinik Berlin ──────────────────────")
     w("MERGE (p:Patient {resourceId: 'P1'})")
     w("SET p.id = 'P1',")
-    w("    p.name = 'Anna Müller',")
+    w("    p.name = 'Maria Schmidt',")
     w("    p.gender = 'female',")
     w("    p.birthDate = date('1979-03-15'),")
     w("    p.city = 'Berlin',")
@@ -316,6 +317,25 @@ def cypher() -> str:
     w("    med.fictional = true")
     w("MERGE (p)-[:HAS_MEDICATION_REQUEST]->(med);")
     w("")
+    w("// ── 2b. Her visits: one laboratory visit per measurement date ─────────────")
+    w("MATCH (p:Patient {resourceId: 'P1'})")
+    w("UNWIND [")
+    rows = []
+    for i, visit in enumerate(VISITS):
+        rows.append(f"  {{id: 'enc-p1-{visit}', at: {q(visit)}, n: {i + 1}}}")
+    w(",\n".join(rows))
+    w("] AS e")
+    w("MERGE (enc:Encounter {resourceId: e.id})")
+    w("SET enc.name = 'Laboratory visit ' + toString(e.n) + ' of 6',")
+    w("    enc.display = 'Laboratory visit, AlphaKlinik Berlin (fictional)',")
+    w("    enc.class = 'ambulatory',")
+    w("    enc.status = 'finished',")
+    w("    enc.date = e.at + 'T08:00:00Z',")
+    w("    enc.period = e.at,")
+    w("    enc.serviceProvider = 'AlphaKlinik Berlin',")
+    w("    enc.fictional = true")
+    w("MERGE (p)-[:HAS_ENCOUNTER]->(enc);")
+    w("")
     w("// ── 3. Her measurements: 8 LOINC parameters, 6 visits, lab reference ranges ─")
     w("// The values behind the risk scores of the profile: HbA1c and glucose drift")
     w("// up, LDL falls under atorvastatin, blood pressure improves under lisinopril,")
@@ -350,6 +370,10 @@ def cypher() -> str:
     w("    obs.performer = 'AlphaKlinik Berlin, Zentrallabor (fictional)',")
     w("    obs.fictional = true")
     w("MERGE (p)-[:HAS_OBSERVATION]->(obs)")
+    w("WITH p, obs, o")
+    w("MATCH (enc:Encounter {resourceId: 'enc-p1-' + o.at})")
+    w("MERGE (obs)-[:PART_OF]->(enc)")
+    w("WITH obs, o")
     w("MERGE (lc:LoincCode {loincNumber: o.code})")
     w("  ON CREATE SET lc.name = o.display + ' (LOINC ' + o.code + ')',")
     w("                lc.longCommonName = o.display")
@@ -553,7 +577,7 @@ def observations_bundle() -> dict:
                         "code": cat}]}],
                     "code": {"coding": [{"system": "http://loinc.org", "code": code, "display": display}],
                              "text": display},
-                    "subject": {"reference": "Patient/P1", "display": "Anna Müller"},
+                    "subject": {"reference": "Patient/P1", "display": "Maria Schmidt"},
                     "effectiveDateTime": f"{visit}T08:30:00Z",
                     "performer": [{"display": "AlphaKlinik Berlin, Zentrallabor (fictional)"}],
                     "valueQuantity": {"value": value, "unit": unit, "system": "http://unitsofmeasure.org", "code": unit},

@@ -609,7 +609,7 @@ test.describe("S · Patient1 — My Health pages with mock data", () => {
     "Requires NEXT_PUBLIC_STATIC_EXPORT=true",
   );
 
-  test("J261 — /patient/profile shows Anna Müller demographics", async ({
+  test("J261 — /patient/profile shows Maria Schmidt demographics", async ({
     page,
   }) => {
     await gotoAs(page, "/patient/profile", "patient1");
@@ -803,7 +803,7 @@ test.describe("S · Patient2 — cross-border NL patient", () => {
     page,
   }) => {
     await gotoAs(page, "/patient/profile", "patient2");
-    // Patient selector defaults to first patient (Anna Müller)
+    // Patient selector defaults to first patient (Maria Schmidt)
     await expect(
       page.getByRole("heading", { name: /Health Profile/ }),
     ).toBeVisible({ timeout: T });
