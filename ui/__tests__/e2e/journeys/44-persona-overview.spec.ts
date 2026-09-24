@@ -335,3 +335,71 @@ test.describe("Issue #271 · M5 static export", () => {
     }
   });
 });
+
+// ── M6 The data behind the views ───────────────────────────────────────────
+
+test.describe("Issue #271 · M6 the data behind the views", () => {
+  test("J976 the patient's access log names who read her record (Art. 8)", async ({
+    page,
+  }) => {
+    await skipIfSeedMissing(page);
+    await loginAsAdmin(page);
+    const view = await apiGet(
+      page,
+      `/api/overview?persona=patient&patientId=${P1}`,
+    );
+    const log = view.signals.find(
+      (s: { code: string }) => s.code === "access-log",
+    );
+    expect(log.text).toContain("read my record");
+    expect(log.article).toContain("Art. 8");
+    const readers = view.nodes.filter((n: { id: string }) =>
+      n.id.startsWith("access:"),
+    );
+    expect(readers.length).toBeGreaterThan(0);
+    expect(
+      readers.every((n: { sub: string }) => n.sub.includes("read my record")),
+    ).toBe(true);
+  });
+
+  test("J977 an opted-out study shows the withdrawal date (Art. 71)", async ({
+    page,
+  }) => {
+    await skipIfSeedMissing(page);
+    await loginAsAdmin(page);
+    const view = await apiGet(
+      page,
+      `/api/overview?persona=patient&patientId=${P1}`,
+    );
+    const consent = view.nodes.find(
+      (n: { id: string }) => n.id === "consent:CONSENT-003",
+    );
+    expect(consent.status).toBe("none");
+    expect(consent.label).toContain("opted out");
+    const s = view.signals.find((x: { code: string }) => x.code === "opt-out");
+    expect(s.nodeId).toBe("consent:CONSENT-003");
+    expect(s.article).toContain("Art. 71");
+  });
+
+  test("J978 the holder's datasets carry their Art. 77 description completeness", async ({
+    page,
+  }) => {
+    await loginAsAdmin(page);
+    const view = await apiGet(page, "/api/overview?persona=hospital");
+    const datasets = view.nodes.filter(
+      (n: { kind: string }) => n.kind === "Dataset",
+    );
+    expect(datasets.length).toBeGreaterThan(0);
+    for (const d of datasets) {
+      const fact = d.facts.find(([k]: [string, string]) =>
+        k.startsWith("description (Art. 77)"),
+      );
+      expect(fact, d.id).toBeDefined();
+      expect(fact[1]).toMatch(/^\d of 9 fields/);
+    }
+    const cat = view.signals.find(
+      (s: { code: string }) => s.code === "catalogue",
+    );
+    expect(cat.text).toMatch(/\d+ fully described/);
+  });
+});

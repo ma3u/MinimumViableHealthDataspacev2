@@ -78,22 +78,24 @@ Pure functions over plain records; 29 unit cases in `overview-derive.test.ts`.
 
 Signal codes the builders emit, with the article they rest on:
 
-| Code                                                                                                                          | Severity | Meaning                                                             | Article                |
-| ----------------------------------------------------------------------------------------------------------------------------- | -------- | ------------------------------------------------------------------- | ---------------------- |
-| `access-after-credential-expiry`                                                                                              | bad      | accesses served after the purpose credential expired                | 53(1), 61(1)           |
-| `access-attempt-after-refusal`                                                                                                | bad      | refused attempts after the application was refused                  | 61(1), 63              |
-| `access-without-permit`                                                                                                       | bad      | accesses served with no valid permit                                | 61(1), 68              |
-| `no-membership-credential`                                                                                                    | bad      | nothing in the wallet says who the consumer is                      | DCP; 61(1)             |
-| `transfer-without-contract`                                                                                                   | warn/bad | every served access lacks a contract on file (bad without a permit) | DSP; 60(1)             |
-| `transfer-partly-without-contract`                                                                                            | warn     | some served accesses carry no contract reference                    | DSP                    |
-| `credential-expired`, `-expiring`                                                                                             | warn     | purpose credential lapsed or lapsing, no access after it            | 53(1)                  |
-| `permit-expiring`                                                                                                             | warn     | permit lapses within 30 days                                        | 68(6)                  |
-| `decision-overdue`, `decision-due`                                                                                            | bad/info | the body's own clock on an application or request                   | 68(4), 69(4), 57(1)(j) |
-| `pending-queue`                                                                                                               | by trend | open applications at month end against a band of 0 to 2             | 68(4)                  |
-| `label-expired`, `label-below-band`, `label-missing`                                                                          | bad/warn | the holder's quality label against the 0.90 renewal band            | 78, 57(1)(d)           |
-| `parameter-out-of-range`, `parameter-trend`                                                                                   | by trend | a patient's measured parameter against the printed range            | 14, 3                  |
-| `risk-<domain>`                                                                                                               | by level | the profile's risk score with its factors                           | 3, 14                  |
-| `recommendation`, `study-match`, `dataset-match`, `consent-summary`, `access-log`, `allowed-today`, `catalogue`, `parameters` | info/ok  | what to do next, what is near, what is in order                     | 58, 71, 73, 8, 77      |
+| Code                                                                                                                          | Severity | Meaning                                                                        | Article                |
+| ----------------------------------------------------------------------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------ | ---------------------- |
+| `access-after-credential-expiry`                                                                                              | bad      | accesses served after the purpose credential expired                           | 53(1), 61(1)           |
+| `access-attempt-after-refusal`                                                                                                | bad      | refused attempts after the application was refused                             | 61(1), 63              |
+| `access-without-permit`                                                                                                       | bad      | accesses served with no valid permit                                           | 61(1), 68              |
+| `no-membership-credential`                                                                                                    | bad      | nothing in the wallet says who the consumer is                                 | DCP; 61(1)             |
+| `transfer-without-contract`                                                                                                   | warn/bad | every served access lacks a contract on file (bad without a permit)            | DSP; 60(1)             |
+| `transfer-partly-without-contract`                                                                                            | warn     | some served accesses carry no contract reference                               | DSP                    |
+| `credential-expired`, `-expiring`                                                                                             | warn     | purpose credential lapsed or lapsing, no access after it                       | 53(1)                  |
+| `permit-expiring`                                                                                                             | warn     | permit lapses within 30 days                                                   | 68(6)                  |
+| `decision-overdue`, `decision-due`                                                                                            | bad/info | the body's own clock on an application or request                              | 68(4), 69(4), 57(1)(j) |
+| `pending-queue`                                                                                                               | by trend | open applications at month end against a band of 0 to 2                        | 68(4)                  |
+| `label-expired`, `label-below-band`, `label-missing`                                                                          | bad/warn | the holder's quality label against the 0.90 renewal band                       | 78, 57(1)(d)           |
+| `parameter-out-of-range`, `parameter-trend`                                                                                   | by trend | a patient's measured parameter against the printed range                       | 14, 3                  |
+| `opt-out`                                                                                                                     | info     | a study the patient withdrew from, with the date                               | 71                     |
+| `description-incomplete`, `description-missing`                                                                               | warn     | a holder's dataset below 8 of 9 catalogue fields, or absent from the catalogue | 77, 79                 |
+| `risk-<domain>`                                                                                                               | by level | the profile's risk score with its factors                                      | 3, 14                  |
+| `recommendation`, `study-match`, `dataset-match`, `consent-summary`, `access-log`, `allowed-today`, `catalogue`, `parameters` | info/ok  | what to do next, what is near, what is in order                                | 58, 71, 73, 8, 77      |
 
 The compliance matrix's approval counts as a permit even without an id
 (`matrixPermit`); a refused applicant that keeps trying shows its refusals per
@@ -125,6 +127,12 @@ facts, series table, links). Persona from the role; `?persona=` for admins.
   `unit/pages/overview.test.tsx`, `unit/config/persona-overview-seed.test.ts`;
   journey `44-persona-overview.spec.ts` (J960 to J975), which runs against
   https://ehds.mabu.red with `PLAYWRIGHT_BASE_URL`.
-- Still missing, tracked in #271's "Data" section: a per-patient access log
-  (Art. 8), an Art. 77 description completeness score, variable-level
-  descriptions for real relevance, SPE session state.
+- Since M6: the reads that touched a patient's record are `TransferEvent
+-[:READ]-> Patient` edges (the patient view names who read the record,
+  Art. 8, and falls back to the holder's log when none is on file); a
+  withdrawn consent carries `revokedAt` (Art. 71); `completeness.ts` scores a
+  catalogue entry's Art. 77 description over nine fields (holder and researcher
+  datasets carry the fact, the holder is warned below 0.8); the demo login
+  `patient1` owns P1 in `/api/patient` as it does in the overview.
+- Still missing: variable-level descriptions for real relevance, SPE session
+  state, contract timestamps relative to the permit, the Art. 63 record (#206).

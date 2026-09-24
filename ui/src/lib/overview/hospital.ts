@@ -32,6 +32,12 @@ import {
   type ParticipantShape,
   type RegisterEntry,
 } from "./hdab";
+import {
+  COMPLETENESS_BAND,
+  completenessFact,
+  descriptionCompleteness,
+  type CatalogEntryLike,
+} from "./completeness";
 import { attachSeries, raiseStatus } from "./series";
 import type {
   OverviewLayer,
@@ -64,6 +70,8 @@ export interface HospitalViewInput {
   events: HdabAccessEvent[];
   /** The assessor's quarterly scores behind the holder's quality labels */
   assessments: LabelAssessment[];
+  /** The national catalogue's entries, for the Art. 77 description completeness */
+  catalog?: CatalogEntryLike[];
 }
 
 const fmtDate = (iso?: string | null) =>
@@ -547,18 +555,31 @@ export function buildHospitalView(input: HospitalViewInput): OverviewView {
     months,
     (e) => e.datasetId ?? null,
   );
+  const catalogByKey = new Map<string, CatalogEntryLike>();
+  for (const c of input.catalog ?? []) {
+    if (c.id) catalogByKey.set(c.id, c);
+    if (c.title) catalogByKey.set(c.title, c);
+  }
+  let fullyDescribed = 0;
   for (const dsId of [...myDatasets].sort()) {
     const id = `ds:${dsId}`;
+    const title = datasetTitle.get(dsId) ?? dsId;
+    const entry = catalogByKey.get(dsId) ?? catalogByKey.get(title);
+    const completeness = descriptionCompleteness(entry ?? { id: dsId, title });
+    if (completeness.score >= COMPLETENESS_BAND.low) fullyDescribed++;
     const node = add({
       id,
-      label: datasetTitle.get(dsId) ?? dsId,
+      label: title,
       layer: "data",
       kind: "Dataset",
       size: 1.8,
       color: "#a78bfa",
-      title: datasetTitle.get(dsId) ?? dsId,
-      sub: "described in the national catalogue",
-      facts: [["id", dsId]],
+      status: completeness.score < COMPLETENESS_BAND.low ? "warn" : "none",
+      title,
+      sub: entry
+        ? `described in the national catalogue, ${completeness.filled} of ${completeness.total} fields`
+        : "not found in the national catalogue",
+      facts: [["id", dsId], completenessFact(completeness)],
       article:
         "Art. 77 dataset description; Art. 60(1) available under a permit; Art. 51 minimum categories",
       links: [{ href: "/catalog", text: "Catalogue entry" }],
@@ -580,6 +601,21 @@ export function buildHospitalView(input: HospitalViewInput): OverviewView {
       );
     }
     link("me", id, { kind: "provides", color: "#a78bfa", distance: 70 });
+    if (completeness.score < COMPLETENESS_BAND.low) {
+      signals.push({
+        severity: "warn",
+        code: entry ? "description-incomplete" : "description-missing",
+        nodeId: id,
+        text: entry
+          ? `${title}: the catalogue description carries ${
+              completeness.filled
+            } of ${
+              completeness.total
+            } fields; missing ${completeness.missing.join(", ")}.`
+          : `${title} is not described in the national catalogue.`,
+        article: "Art. 77 dataset description; Art. 79 catalogue",
+      });
+    }
   }
 
   signals.push({
@@ -593,9 +629,11 @@ export function buildHospitalView(input: HospitalViewInput): OverviewView {
     severity: "info",
     code: "catalogue",
     nodeId: "me",
-    text: `${myDatasets.size} datasets of mine in the national catalogue${
+    text: `${
+      myDatasets.size
+    } datasets of mine in the national catalogue, ${fullyDescribed} fully described (Art. 77)${
       labelSignalled ? "" : ", labelled"
-    }. A description completeness score (Art. 77) is still missing (#271).`,
+    }.`,
     article: "Art. 77, Art. 79",
   });
 

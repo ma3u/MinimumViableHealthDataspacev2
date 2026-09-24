@@ -77,6 +77,7 @@ export interface ConsentShape {
   studyId: string;
   grantedAt: string;
   revoked: boolean;
+  revokedAt?: string | null;
   purpose?: string;
   dataScope?: string;
   trustCenterDid?: string;
@@ -106,6 +107,8 @@ export interface PatientViewInput {
   accessLog?: AccessLogEntry[];
   /** The holder that treats the patient */
   holder?: { did: string; name: string } | null;
+  /** The accesses that read this patient's record (Art. 8), when the log knows */
+  recordLog?: AccessLogEntry[];
 }
 
 /**
@@ -514,7 +517,9 @@ export function buildPatientView(input: PatientViewInput): OverviewView {
       if (!consent.revoked) activeConsents++;
       add({
         id: cid,
-        label: `consent ${fmtDate(consent.grantedAt)}`,
+        label: consent.revoked
+          ? `opted out ${fmtDate(consent.revokedAt)}`
+          : `consent ${fmtDate(consent.grantedAt)}`,
         layer: "use",
         kind: "Consent",
         size: 1.2,
@@ -523,7 +528,12 @@ export function buildPatientView(input: PatientViewInput): OverviewView {
         sub: consent.dataScope ?? consent.purpose ?? "",
         facts: [
           ["granted", fmtDate(consent.grantedAt)],
-          ["state", consent.revoked ? "withdrawn" : "active"],
+          [
+            "state",
+            consent.revoked
+              ? `withdrawn on ${fmtDate(consent.revokedAt)} (Art. 71 opt-out)`
+              : "active",
+          ],
           [
             "pseudonymised by",
             consent.trustCenter ?? consent.trustCenterDid ?? "trust centre",
@@ -533,16 +543,27 @@ export function buildPatientView(input: PatientViewInput): OverviewView {
       });
       link("me", cid, {
         kind: "consent",
-        status: "ok",
-        particles: 2,
+        status: consent.revoked ? "none" : "ok",
+        particles: consent.revoked ? 0 : 2,
         distance: 90,
       });
       link(cid, id, {
         kind: "consent",
-        status: "ok",
-        particles: 2,
+        status: consent.revoked ? "none" : "ok",
+        particles: consent.revoked ? 0 : 2,
         distance: 50,
       });
+      if (consent.revoked) {
+        signals.push({
+          severity: "info",
+          code: "opt-out",
+          nodeId: cid,
+          text: `I opted out of ${p.studyName} on ${fmtDate(
+            consent.revokedAt,
+          )}; nothing new of mine reaches it.`,
+          article: "Art. 71 opt-out from secondary use",
+        });
+      }
       const tcName = consent.trustCenter ?? consent.trustCenterDid;
       if (tcName) {
         const tc = `tc:${slug(tcName)}`;
@@ -591,6 +612,8 @@ export function buildPatientView(input: PatientViewInput): OverviewView {
 
   // ── the access log of my holder (Art. 8) ──────────────────────────────────
   const log = input.accessLog ?? [];
+  const record = input.recordLog ?? [];
+  const useRecord = record.length > 0;
   if (input.holder) {
     const hid = `holder:${slug(input.holder.did)}`;
     add({
@@ -607,7 +630,9 @@ export function buildPatientView(input: PatientViewInput): OverviewView {
     });
     link("me", hid, { kind: "treated at", color: "#38bdf8", distance: 70 });
     const months = monthRange(input.asOf, 12);
-    const served = log.filter((e) => (e.statusCode ?? 200) < 400);
+    const served = (useRecord ? record : log).filter(
+      (e) => (e.statusCode ?? 200) < 400,
+    );
     const byConsumer = aggregateMonthly(served, months, (e) => e.consumerDid);
     const names = new Map(
       served.map((e) => [e.consumerDid, e.consumerName ?? e.consumerDid]),
@@ -623,14 +648,19 @@ export function buildPatientView(input: PatientViewInput): OverviewView {
         size: 1.4,
         status: "info",
         title: names.get(did) ?? did,
-        sub: `${total} accesses to my holder's data in the last 12 months`,
+        sub: useRecord
+          ? `read my record ${total} times in the last 12 months`
+          : `${total} accesses to my holder's data in the last 12 months`,
         series,
-        unit: "accesses",
-        measure: "Accesses per month",
+        unit: useRecord ? "reads" : "accesses",
+        measure: useRecord
+          ? "Reads of my record per month"
+          : "Accesses per month",
         higherIsWorse: true,
         facts: [["did", did]],
-        article:
-          "Art. 8: information on who accessed my data. The log is the holder's, per dataset; a per-record log is still missing (#271).",
+        article: useRecord
+          ? "Art. 8: information on who accessed my data, from the reads of my record in the holder's Art. 73(1)(e) log"
+          : "Art. 8: information on who accessed my data. The log is the holder's, per dataset; no read of my record is on file.",
       });
       link(hid, id, {
         kind: "accessed by",
@@ -644,9 +674,10 @@ export function buildPatientView(input: PatientViewInput): OverviewView {
       severity: "info",
       code: "access-log",
       nodeId: hid,
-      text:
-        consumers > 0
-          ? `${consumers} organisations read data from ${input.holder.name} in the last 12 months (${served.length} accesses). Click to see who.`
+      text: useRecord
+        ? `${consumers} organisations read my record ${served.length} times in the last 12 months. Click to see who.`
+        : consumers > 0
+          ? `${consumers} organisations read data from ${input.holder.name} in the last 12 months (${served.length} accesses); no read of my record is on file. Click to see who.`
           : `No access to ${input.holder.name}'s data recorded in the last 12 months.`,
       article: "Art. 8 information on access, Art. 73(1)(e) log",
     });
