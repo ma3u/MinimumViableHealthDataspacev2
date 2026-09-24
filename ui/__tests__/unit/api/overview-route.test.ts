@@ -58,57 +58,80 @@ const ALPHA = "did:web:alpha-klinik.de:participant";
 const PHARMACO = "did:web:pharmaco.de:research";
 
 function graphAnswers() {
-  mockRunQuery.mockImplementation(async (cypher: string) => {
-    if (cypher.includes("TREATED_AT")) {
-      return [{ did: ALPHA, name: "AlphaKlinik Berlin" }];
-    }
-    if (cypher.includes("ResearchStudy")) {
-      return [
-        {
-          studyId: "STUDY-CARDIO-2024",
-          studyName: "European Cardiovascular Risk Study",
-          institution: "PharmaCo Research AG",
-          purpose: "secondary-use",
-          description: "Multi-centre cohort study.",
-          dataNeeded: "FHIR Conditions, Observations",
-          status: "open",
-          participantCount: 4821,
-          countries: ["DE", "NL"],
-          ethicsApproval: "EK-Berlin-2024-0041",
-        },
-      ];
-    }
-    if (cypher.includes("PatientConsent")) {
-      return [
-        {
-          consentId: "CONSENT-001",
-          dataScope: "FHIR Conditions + Observations",
-          trustCenter: "MedReg DE Trust Centre",
-        },
-      ];
-    }
-    if (cypher.includes("MATCH (c:Contract)")) return [];
-    if (cypher.includes("Participant {participantId: $did}")) {
-      return [{ did: "did:web:medreg.de:hdab", name: "MedReg DE" }];
-    }
-    if (cypher.includes("TransferEvent")) {
-      return [
-        {
-          id: "te-1",
-          accessedAt: "2026-09-02T09:15:00Z",
-          consumerDid: PHARMACO,
-          consumerName: "PharmaCo Research AG",
-          providerDid: ALPHA,
-          datasetId: "dataset:synthea-fhir-r4-mvd",
-          statusCode: 200,
-          permitId: "p",
-          contractId: "c",
-          responseBytes: 100,
-        },
-      ];
-    }
-    return [];
-  });
+  mockRunQuery.mockImplementation(
+    async (cypher: string, params?: Record<string, unknown>) => {
+      if (cypher.includes("TREATED_AT")) {
+        return [{ did: ALPHA, name: "AlphaKlinik Berlin" }];
+      }
+      if (cypher.includes("ResearchStudy")) {
+        return [
+          {
+            studyId: "STUDY-CARDIO-2024",
+            studyName: "European Cardiovascular Risk Study",
+            institution: "PharmaCo Research AG",
+            purpose: "secondary-use",
+            description: "Multi-centre cohort study.",
+            dataNeeded: "FHIR Conditions, Observations",
+            status: "open",
+            participantCount: 4821,
+            countries: ["DE", "NL"],
+            ethicsApproval: "EK-Berlin-2024-0041",
+          },
+        ];
+      }
+      if (cypher.includes("PatientConsent")) {
+        return [
+          {
+            consentId: "CONSENT-001",
+            dataScope: "FHIR Conditions + Observations",
+            trustCenter: "MedReg DE Trust Centre",
+          },
+        ];
+      }
+      if (cypher.includes("MATCH (c:Contract)")) return [];
+      if (cypher.includes("QualityAssessment")) {
+        return [
+          {
+            credentialId: "vc:data-quality-label:clinic-alphaklinik",
+            date: "2026-06-30",
+            conformance: 0.89,
+          },
+          {
+            credentialId: "vc:data-quality-label:clinic-alphaklinik",
+            date: "2026-09-23",
+            conformance: 0.88,
+          },
+        ];
+      }
+
+      if (cypher.includes("Participant {participantId: $did}")) {
+        const did = String(params?.did ?? "");
+        return [
+          {
+            did,
+            name: did.includes("medreg") ? "MedReg DE" : "AlphaKlinik Berlin",
+          },
+        ];
+      }
+      if (cypher.includes("TransferEvent")) {
+        return [
+          {
+            id: "te-1",
+            accessedAt: "2026-09-02T09:15:00Z",
+            consumerDid: PHARMACO,
+            consumerName: "PharmaCo Research AG",
+            providerDid: ALPHA,
+            datasetId: "dataset:synthea-fhir-r4-mvd",
+            statusCode: 200,
+            permitId: "p",
+            contractId: "c",
+            responseBytes: 100,
+          },
+        ];
+      }
+      return [];
+    },
+  );
 }
 
 function makeReq(qs = ""): Request {
@@ -140,7 +163,7 @@ describe("GET /api/overview", () => {
   });
 
   it("answers 501 for the personas of later milestones", async () => {
-    for (const p of ["researcher", "hospital"]) {
+    for (const p of ["researcher"]) {
       const res = await GET(makeReq(`?persona=${p}`));
       expect(res.status, p).toBe(501);
       expect((await res.json()).issue).toContain("/issues/271");
@@ -148,7 +171,7 @@ describe("GET /api/overview", () => {
   });
 
   it("derives the persona from the role when none is given", async () => {
-    vi.mocked(getServerSession).mockResolvedValue(session(["DATA_HOLDER"]));
+    vi.mocked(getServerSession).mockResolvedValue(session(["DATA_USER"]));
     expect((await GET(makeReq(""))).status).toBe(501);
     vi.mocked(getServerSession).mockResolvedValue(
       session(["PATIENT"], "patient1"),
@@ -259,6 +282,25 @@ describe("GET /api/overview", () => {
     );
     expect(pharmaco.status).toBe("bad");
     expect(codes).toContain("access-after-credential-expiry");
+  });
+
+  it("assembles the holder view for a DATA_HOLDER session", async () => {
+    vi.mocked(getServerSession).mockResolvedValue(
+      session(["DATA_HOLDER"], "admin@health-dataspace.local"),
+    );
+    const res = await GET(makeReq("?asOf=2026-09-23"));
+    expect(res.status).toBe(200);
+    const view = await res.json();
+    expect(view.persona).toBe("hospital");
+    expect(view.me.id).toBe("did:web:alpha-klinik.de:participant");
+    const label = view.nodes.find((n: { id: string }) =>
+      n.id.startsWith("vc:vc:data-quality-label:clinic-alphaklinik"),
+    );
+    expect(label.series).toHaveLength(2);
+    expect(label.status).toBe("bad");
+    expect(view.signals.map((s: { code: string }) => s.code)).toContain(
+      "label-expired",
+    );
   });
 
   it("returns 502 when the graph is down", async () => {

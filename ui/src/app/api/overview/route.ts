@@ -20,6 +20,10 @@ import {
   type RegisterEntry,
 } from "@/lib/overview/hdab";
 import {
+  buildHospitalView,
+  type LabelAssessment,
+} from "@/lib/overview/hospital";
+import {
   buildPatientView,
   ownPatientId,
   type AccessLogEntry,
@@ -75,8 +79,8 @@ async function call<T>(
  * graph and never persisted. The persona defaults to the session's role;
  * a role may only open its own persona, EDC_ADMIN any.
  *
- * M1 serves the patient, M2 the access body; researcher and holder answer
- * 501 until M3 and M4 land.
+ * M1 serves the patient, M2 the access body, M3 the holder; the researcher
+ * answers 501 until M4 lands.
  */
 export async function GET(req: Request): Promise<Response> {
   const session = await getServerSession(authOptions);
@@ -109,7 +113,7 @@ export async function GET(req: Request): Promise<Response> {
       { status: 403 },
     );
   }
-  if (persona === "researcher" || persona === "hospital") {
+  if (persona === "researcher") {
     return NextResponse.json(
       {
         error: `The ${persona} overview is not implemented yet`,
@@ -123,6 +127,9 @@ export async function GET(req: Request): Promise<Response> {
     url.searchParams.get("asOf") ?? new Date().toISOString().slice(0, 10);
   if (persona === "hdab") {
     return hdabView(url, roles, username, asOf);
+  }
+  if (persona === "hospital") {
+    return hospitalView(url, roles, username, asOf);
   }
 
   // The patient a PATIENT session owns; anyone else picks one, P1 by default.
@@ -347,6 +354,134 @@ async function hdabView(
       credentials: credentials.credentials ?? [],
       contracts: contractRows.filter((c) => c.contractId),
       events,
+    });
+    return NextResponse.json(view);
+  } catch (err) {
+    if (err instanceof SubRouteError) {
+      return NextResponse.json(err.body, { status: err.status });
+    }
+    return NextResponse.json(
+      {
+        error: "Neo4j unavailable",
+        detail: err instanceof Error ? err.message : String(err),
+      },
+      { status: 502 },
+    );
+  }
+}
+
+const DEFAULT_HOLDER = {
+  did: "did:web:alpha-klinik.de:participant",
+  name: "AlphaKlinik Berlin",
+};
+
+/** The holder's own view: who reads its data with what cover, its own duties. */
+async function hospitalView(
+  url: URL,
+  roles: string[],
+  username: string | null,
+  asOf: string,
+): Promise<Response> {
+  const requestedMe = url.searchParams.get("me");
+  const fromUser = username ? userToParticipantId(username, roles) : "";
+  const meDid =
+    requestedMe ??
+    (fromUser &&
+    !fromUser.startsWith("did:web:unknown") &&
+    !fromUser.endsWith(":hdab")
+      ? fromUser
+      : DEFAULT_HOLDER.did);
+  const since = new Date(asOf);
+  since.setUTCMonth(since.getUTCMonth() - 12);
+  since.setUTCDate(1);
+  try {
+    const origin = url.origin;
+    const [
+      compliance,
+      register,
+      credentials,
+      contractRows,
+      events,
+      meRows,
+      assessments,
+    ] = await Promise.all([
+      call<{
+        consumers: ParticipantShape[];
+        datasets: { id: string; title: string }[];
+        matrix: MatrixRow[];
+      }>(complianceGET, origin, "/api/compliance"),
+      call<{ entries: RegisterEntry[] }>(permitsGET, origin, "/api/permits"),
+      call<{ credentials: CredentialEntry[] }>(
+        credentialsGET,
+        origin,
+        "/api/credentials",
+      ),
+      runQuery<ContractShape>(
+        `MATCH (c:Contract)
+           OPTIONAL MATCH (consumer:Participant)-[:PARTY_TO|CONSUMER_OF|SIGNED]->(c)
+           OPTIONAL MATCH (c)-[:GOVERNS|COVERS]->(dp:DataProduct)
+           OPTIONAL MATCH (dp)-[:DESCRIBED_BY]->(ds:HealthDataset)
+           RETURN c.contractId AS contractId,
+                  coalesce(c.consumerDid, consumer.participantId) AS consumerDid,
+                  coalesce(c.datasetId, ds.datasetId, dp.productId) AS datasetId,
+                  toString(c.validUntil) AS validUntil,
+                  c.status AS status
+           LIMIT 200`,
+      ),
+      runQuery<HdabAccessEvent>(
+        `MATCH (te:TransferEvent)
+           WHERE te.timestamp >= datetime($since) AND te.providerDid = $did
+           WITH te, coalesce(te.consumerDid, te.participant) AS consumerDid
+           OPTIONAL MATCH (c:Participant {participantId: consumerDid})
+           OPTIONAL MATCH (ds:HealthDataset {datasetId: te.datasetId})
+           RETURN te.eventId AS id,
+                  toString(te.timestamp) AS accessedAt,
+                  consumerDid,
+                  c.name AS consumerName,
+                  te.providerDid AS providerDid,
+                  te.datasetId AS datasetId,
+                  ds.title AS assetTitle,
+                  te.statusCode AS statusCode,
+                  te.permitId AS permitId,
+                  te.contractId AS contractId,
+                  te.responseBytes AS responseBytes
+           ORDER BY te.timestamp DESC
+           LIMIT 5000`,
+        { since: since.toISOString(), did: meDid },
+      ),
+      runQuery<{ did: string; name: string }>(
+        `MATCH (p:Participant {participantId: $did})
+           RETURN p.participantId AS did, coalesce(p.name, p.participantId) AS name`,
+        { did: meDid },
+      ),
+      runQuery<LabelAssessment>(
+        `MATCH (p:Participant {participantId: $did})-[:HOLDS_CREDENTIAL]->(vc:VerifiableCredential)-[:HAS_ASSESSMENT]->(qa:QualityAssessment)
+           RETURN vc.credentialId AS credentialId,
+                  toString(qa.assessedAt) AS date,
+                  qa.conformance AS conformance,
+                  qa.completeness AS completeness,
+                  qa.timeliness AS timeliness,
+                  qa.period AS period
+           ORDER BY qa.assessedAt`,
+        { did: meDid },
+      ),
+    ]);
+    const me =
+      meRows[0] ??
+      (meDid === DEFAULT_HOLDER.did
+        ? DEFAULT_HOLDER
+        : { did: meDid, name: meDid });
+    const view: OverviewView = buildHospitalView({
+      asOf,
+      me,
+      consumers: compliance.consumers ?? [],
+      datasets: compliance.datasets ?? [],
+      matrix: compliance.matrix ?? [],
+      register: register.entries ?? [],
+      credentials: credentials.credentials ?? [],
+      contracts: contractRows.filter((c) => c.contractId),
+      events,
+      assessments,
     });
     return NextResponse.json(view);
   } catch (err) {
