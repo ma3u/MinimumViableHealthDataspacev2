@@ -348,7 +348,9 @@ function OverviewContent() {
                 </div>
               )}
               <div className="absolute bottom-2 right-3 z-10 text-[11px] text-slate-400 pointer-events-none">
-                drag to orbit · wheel to zoom · click a node
+                drag to orbit · wheel to zoom · click a node · arrows move ·
+                shift + arrows rotate · + and - zoom · space pauses · orbits on
+                its own after 30 s
               </div>
             </section>
 

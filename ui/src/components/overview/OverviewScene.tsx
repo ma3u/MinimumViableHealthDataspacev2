@@ -18,6 +18,17 @@
 import { useEffect, useRef } from "react";
 import ForceGraph3D, { type ForceGraph3DInstance } from "3d-force-graph";
 import * as THREE from "three";
+import {
+  applyToOffset,
+  isTypingTarget,
+  keyAction,
+  length,
+  ORBIT_IDLE_MS,
+  ORBIT_SPEED,
+  panShift,
+  rotateAroundZ,
+  type Vec3,
+} from "@/lib/overview/camera";
 import type {
   OverviewLayer,
   OverviewLink,
@@ -191,7 +202,8 @@ interface SceneState {
   layerZ: Record<string, number>;
   planes: Record<string, THREE.Group>;
   orbiting: boolean;
-  angle: number;
+  /** Set once the person moved the camera; stops the easing to the fitted distance */
+  userAdjusted: boolean;
   focused: boolean;
   idleTimer: ReturnType<typeof setTimeout> | null;
   raf: number;
@@ -283,7 +295,7 @@ export default function OverviewScene({
       layerZ,
       planes,
       orbiting: true,
-      angle: 0,
+      userAdjusted: false,
       focused: false,
       idleTimer: null,
       raf: 0,
@@ -325,15 +337,80 @@ export default function OverviewScene({
       0,
     );
 
-    const pause = () => {
-      st.orbiting = false;
+    const offsetNow = (): Vec3 => ({
+      x: cam.position.x - controls.target.x,
+      y: cam.position.y - controls.target.y,
+      z: cam.position.z - controls.target.z,
+    });
+    const applyOffset = (off: Vec3) => {
+      cam.position.set(
+        controls.target.x + off.x,
+        controls.target.y + off.y,
+        controls.target.z + off.z,
+      );
+      cam.lookAt(controls.target);
+    };
+    // After ORBIT_IDLE_MS without input the scene orbits on its own again.
+    const armIdle = () => {
       if (st.idleTimer) clearTimeout(st.idleTimer);
       st.idleTimer = setTimeout(() => {
-        if (!selectedRef.current) st.orbiting = true;
-      }, 12000);
+        st.orbiting = true;
+      }, ORBIT_IDLE_MS);
+    };
+    const pause = () => {
+      st.orbiting = false;
+      st.userAdjusted = true;
+      armIdle();
     };
     root.addEventListener("pointerdown", pause);
     root.addEventListener("wheel", pause, { passive: true });
+    // Keys: arrows move, Shift + arrows rotate, + and - zoom, Space pauses
+    // or resumes the orbit, Home resets.
+    const onKey = (e: KeyboardEvent) => {
+      if (isTypingTarget(e.target)) return;
+      const action = keyAction(e);
+      if (!action) return;
+      e.preventDefault();
+      if (action === "toggle-orbit") {
+        st.orbiting = !st.orbiting;
+        st.userAdjusted = true;
+        if (st.orbiting && st.idleTimer) clearTimeout(st.idleTimer);
+        else armIdle();
+        return;
+      }
+      st.orbiting = false;
+      armIdle();
+      if (action === "reset") {
+        st.userAdjusted = false;
+        graph.cameraPosition(
+          { x: 0, y: -st.D, z: zMid + st.D * 0.6 },
+          { x: 0, y: 0, z: zMid },
+          600,
+        );
+        return;
+      }
+      st.userAdjusted = true;
+      if (
+        action === "pan-left" ||
+        action === "pan-right" ||
+        action === "pan-up" ||
+        action === "pan-down"
+      ) {
+        const right = new THREE.Vector3().setFromMatrixColumn(cam.matrix, 0);
+        const up = new THREE.Vector3().setFromMatrixColumn(cam.matrix, 1);
+        const shift = panShift(right, up, length(offsetNow()), action);
+        controls.target.x += shift.x;
+        controls.target.y += shift.y;
+        controls.target.z += shift.z;
+        cam.position.x += shift.x;
+        cam.position.y += shift.y;
+        cam.position.z += shift.z;
+        cam.lookAt(controls.target);
+        return;
+      }
+      applyOffset(applyToOffset(offsetNow(), action));
+    };
+    window.addEventListener("keydown", onKey);
 
     let t0 = performance.now();
     let frameNo = 0;
@@ -341,16 +418,21 @@ export default function OverviewScene({
       const dt = (t - t0) / 1000;
       t0 = t;
       if (st.orbiting && !st.focused) {
-        st.angle += dt * 0.12;
-        const p = cam.position;
-        // The layout grows after the first frames; ease the orbit radius and
-        // height out to the fitted distance so the discs stay in view.
-        const rad = Math.hypot(p.x, p.y) || st.D;
-        const r = rad + (st.D - rad) * Math.min(1, dt * 1.5);
-        const zTarget = st.zMid + st.D * 0.6;
-        const z = p.z + (zTarget - p.z) * Math.min(1, dt * 1.5);
-        cam.position.set(Math.sin(st.angle) * r, -Math.cos(st.angle) * r, z);
-        cam.lookAt(controls.target);
+        // Orbit around whatever the camera looks at, from left to right.
+        let off = rotateAroundZ(offsetNow(), ORBIT_SPEED * dt);
+        if (!st.userAdjusted) {
+          // The layout grows after the first frames; until someone moves the
+          // camera, ease the distance and height out to the fitted values.
+          const r = length(off) || st.D;
+          const k = (r + (st.D - r) * Math.min(1, dt * 1.5)) / r;
+          const zTarget = st.D * 0.6;
+          off = {
+            x: off.x * k,
+            y: off.y * k,
+            z: off.z + (zTarget - off.z) * Math.min(1, dt * 1.5),
+          };
+        }
+        applyOffset(off);
       }
       if (frameNo++ % 30 === 0) fitPlanes();
       const s = 1 + 0.18 * Math.sin(t / 380);
@@ -378,6 +460,7 @@ export default function OverviewScene({
       if (st.idleTimer) clearTimeout(st.idleTimer);
       root.removeEventListener("pointerdown", pause);
       root.removeEventListener("wheel", pause);
+      window.removeEventListener("keydown", onKey);
       document.removeEventListener("visibilitychange", onVisible);
       ro.disconnect();
       graph._destructor();
@@ -440,14 +523,20 @@ export default function OverviewScene({
     if (!selectedId) {
       st.orbiting = false;
       if (st.idleTimer) clearTimeout(st.idleTimer);
-      st.idleTimer = setTimeout(() => (st.orbiting = true), 3000);
+      st.idleTimer = setTimeout(() => {
+        st.orbiting = true;
+      }, ORBIT_IDLE_MS);
       return;
     }
     const n = st.nodes.get(selectedId);
     if (!n) return;
     st.focused = true;
     st.orbiting = false;
+    st.userAdjusted = true;
     if (st.idleTimer) clearTimeout(st.idleTimer);
+    st.idleTimer = setTimeout(() => {
+      st.orbiting = true;
+    }, ORBIT_IDLE_MS);
     const dist = 230;
     const cam = st.graph.camera();
     const nx = n.x ?? 0;
