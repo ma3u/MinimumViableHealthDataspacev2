@@ -444,3 +444,13 @@ MATCH (vc:VerifiableCredential)
 WHERE vc.expiresAt IS NOT NULL AND datetime(toString(vc.expiresAt)) < datetime()
   AND coalesce(vc.status, 'active') = 'active'
 SET vc.status = 'expired';
+
+// ── 9. Pin the credential dates the stories rest on ─────────────────────────
+// The credential seed dates expiry relative to its run; the overview stories
+// need PharmaCo's purpose credential expired on 2026-06-20 (accesses after it)
+// and the two quality labels expired on 2026-09-18 (Art. 78 renewal due).
+MATCH (vc:VerifiableCredential {credentialId: 'vc:data-processing-purpose:cro-pharmaco'})
+SET vc.expiresAt = datetime('2026-06-20T00:06:57Z'), vc.status = 'expired';
+MATCH (vc:VerifiableCredential)
+WHERE vc.credentialId IN ['vc:data-quality-label:clinic-alphaklinik', 'vc:data-quality-label:clinic-lmc']
+SET vc.expiresAt = datetime('2026-09-18T00:06:57Z'), vc.status = 'expired';

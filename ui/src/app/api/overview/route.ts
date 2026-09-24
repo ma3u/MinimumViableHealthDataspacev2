@@ -6,6 +6,19 @@ import { GET as profileGET } from "@/app/api/patient/profile/route";
 import { GET as insightsGET } from "@/app/api/patient/insights/route";
 import { GET as researchGET } from "@/app/api/patient/research/route";
 import { GET as observationsGET } from "@/app/api/patient/observations/route";
+import { GET as complianceGET } from "@/app/api/compliance/route";
+import { GET as permitsGET } from "@/app/api/permits/route";
+import { GET as credentialsGET } from "@/app/api/credentials/route";
+import { userToParticipantId } from "@/lib/odrl-engine";
+import {
+  buildHdabView,
+  type ContractShape,
+  type CredentialEntry,
+  type HdabAccessEvent,
+  type MatrixRow,
+  type ParticipantShape,
+  type RegisterEntry,
+} from "@/lib/overview/hdab";
 import {
   buildPatientView,
   ownPatientId,
@@ -62,7 +75,8 @@ async function call<T>(
  * graph and never persisted. The persona defaults to the session's role;
  * a role may only open its own persona, EDC_ADMIN any.
  *
- * M1 serves the patient; the other three answer 501 until M2 to M4 land.
+ * M1 serves the patient, M2 the access body; researcher and holder answer
+ * 501 until M3 and M4 land.
  */
 export async function GET(req: Request): Promise<Response> {
   const session = await getServerSession(authOptions);
@@ -95,7 +109,7 @@ export async function GET(req: Request): Promise<Response> {
       { status: 403 },
     );
   }
-  if (persona !== "patient") {
+  if (persona === "researcher" || persona === "hospital") {
     return NextResponse.json(
       {
         error: `The ${persona} overview is not implemented yet`,
@@ -105,13 +119,16 @@ export async function GET(req: Request): Promise<Response> {
       { status: 501 },
     );
   }
+  const asOf =
+    url.searchParams.get("asOf") ?? new Date().toISOString().slice(0, 10);
+  if (persona === "hdab") {
+    return hdabView(url, roles, username, asOf);
+  }
 
   // The patient a PATIENT session owns; anyone else picks one, P1 by default.
   const own =
     roles.includes("PATIENT") && !isAdmin ? ownPatientId(username) : null;
   const patientId = own ?? url.searchParams.get("patientId") ?? "P1";
-  const asOf =
-    url.searchParams.get("asOf") ?? new Date().toISOString().slice(0, 10);
   const since = new Date(asOf);
   since.setUTCMonth(since.getUTCMonth() - 12);
   since.setUTCDate(1);
@@ -229,6 +246,107 @@ export async function GET(req: Request): Promise<Response> {
       observations,
       accessLog,
       holder,
+    });
+    return NextResponse.json(view);
+  } catch (err) {
+    if (err instanceof SubRouteError) {
+      return NextResponse.json(err.body, { status: err.status });
+    }
+    return NextResponse.json(
+      {
+        error: "Neo4j unavailable",
+        detail: err instanceof Error ? err.message : String(err),
+      },
+      { status: 502 },
+    );
+  }
+}
+
+const DEFAULT_HDAB = { did: "did:web:medreg.de:hdab", name: "MedReg DE" };
+
+/** The access body's own view: chains of trust per consumer, its own clocks. */
+async function hdabView(
+  url: URL,
+  roles: string[],
+  username: string | null,
+  asOf: string,
+): Promise<Response> {
+  const requestedMe = url.searchParams.get("me");
+  const fromUser = username ? userToParticipantId(username, roles) : "";
+  const meDid =
+    requestedMe ?? (fromUser.endsWith(":hdab") ? fromUser : DEFAULT_HDAB.did);
+  const since = new Date(asOf);
+  since.setUTCMonth(since.getUTCMonth() - 12);
+  since.setUTCDate(1);
+  try {
+    const origin = url.origin;
+    const [compliance, register, credentials, contractRows, events, meRows] =
+      await Promise.all([
+        call<{
+          consumers: ParticipantShape[];
+          datasets: { id: string; title: string }[];
+          matrix: MatrixRow[];
+        }>(complianceGET, origin, "/api/compliance"),
+        call<{ entries: RegisterEntry[] }>(permitsGET, origin, "/api/permits"),
+        call<{ credentials: CredentialEntry[] }>(
+          credentialsGET,
+          origin,
+          "/api/credentials",
+        ),
+        runQuery<ContractShape>(
+          `MATCH (c:Contract)
+           OPTIONAL MATCH (consumer:Participant)-[:PARTY_TO|CONSUMER_OF|SIGNED]->(c)
+           OPTIONAL MATCH (c)-[:GOVERNS|COVERS]->(dp:DataProduct)
+           OPTIONAL MATCH (dp)-[:DESCRIBED_BY]->(ds:HealthDataset)
+           RETURN c.contractId AS contractId,
+                  coalesce(c.consumerDid, consumer.participantId) AS consumerDid,
+                  coalesce(c.datasetId, ds.datasetId, dp.productId) AS datasetId,
+                  toString(c.validUntil) AS validUntil,
+                  c.status AS status
+           LIMIT 200`,
+        ),
+        runQuery<HdabAccessEvent>(
+          `MATCH (te:TransferEvent)
+           WHERE te.timestamp >= datetime($since)
+           WITH te, coalesce(te.consumerDid, te.participant) AS consumerDid
+           OPTIONAL MATCH (c:Participant {participantId: consumerDid})
+           OPTIONAL MATCH (p:Participant {participantId: te.providerDid})
+           OPTIONAL MATCH (ds:HealthDataset {datasetId: te.datasetId})
+           RETURN te.eventId AS id,
+                  toString(te.timestamp) AS accessedAt,
+                  consumerDid,
+                  c.name AS consumerName,
+                  te.providerDid AS providerDid,
+                  p.name AS providerName,
+                  te.datasetId AS datasetId,
+                  ds.title AS assetTitle,
+                  te.statusCode AS statusCode,
+                  te.permitId AS permitId,
+                  te.contractId AS contractId,
+                  te.responseBytes AS responseBytes
+           ORDER BY te.timestamp DESC
+           LIMIT 5000`,
+          { since: since.toISOString() },
+        ),
+        runQuery<{ did: string; name: string }>(
+          `MATCH (p:Participant {participantId: $did})
+           RETURN p.participantId AS did, coalesce(p.name, p.participantId) AS name`,
+          { did: meDid },
+        ),
+      ]);
+    const me =
+      meRows[0] ??
+      (meDid === DEFAULT_HDAB.did ? DEFAULT_HDAB : { did: meDid, name: meDid });
+    const view: OverviewView = buildHdabView({
+      asOf,
+      me,
+      consumers: compliance.consumers ?? [],
+      datasets: compliance.datasets ?? [],
+      matrix: compliance.matrix ?? [],
+      register: register.entries ?? [],
+      credentials: credentials.credentials ?? [],
+      contracts: contractRows.filter((c) => c.contractId),
+      events,
     });
     return NextResponse.json(view);
   } catch (err) {
