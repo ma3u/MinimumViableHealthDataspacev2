@@ -1,0 +1,469 @@
+{
+  "asOf": "2026-09-23",
+  "note": "Fictional monthly figures for the access body persona (MedReg DE), derived in shape from the access log, the permit register and the application queue.",
+  "items": [
+    {
+      "match": "p:did:web:pharmaco",
+      "measure": "Accesses per month",
+      "unit": "accesses",
+      "series": [
+        {
+          "date": "2025-10-01",
+          "value": 5
+        },
+        {
+          "date": "2025-11-01",
+          "value": 6
+        },
+        {
+          "date": "2025-12-01",
+          "value": 7
+        },
+        {
+          "date": "2026-01-01",
+          "value": 6
+        },
+        {
+          "date": "2026-02-01",
+          "value": 8
+        },
+        {
+          "date": "2026-03-01",
+          "value": 9
+        },
+        {
+          "date": "2026-04-01",
+          "value": 7
+        },
+        {
+          "date": "2026-05-01",
+          "value": 8
+        },
+        {
+          "date": "2026-06-01",
+          "value": 9
+        },
+        {
+          "date": "2026-07-01",
+          "value": 10
+        },
+        {
+          "date": "2026-08-01",
+          "value": 11
+        },
+        {
+          "date": "2026-09-01",
+          "value": 12
+        }
+      ],
+      "description": "Accesses by PharmaCo Research AG across all permitted datasets. The purpose credential expired on 2026-06-20; the accesses from July on happened without a valid one."
+    },
+    {
+      "match": "p:did:web:irs",
+      "measure": "Refused accesses per month",
+      "unit": "refusals",
+      "range": {
+        "low": 0,
+        "high": 0,
+        "text": "0 refusals expected"
+      },
+      "series": [
+        {
+          "date": "2025-10-01",
+          "value": 0
+        },
+        {
+          "date": "2025-11-01",
+          "value": 0
+        },
+        {
+          "date": "2025-12-01",
+          "value": 0
+        },
+        {
+          "date": "2026-01-01",
+          "value": 0
+        },
+        {
+          "date": "2026-02-01",
+          "value": 0
+        },
+        {
+          "date": "2026-03-01",
+          "value": 0
+        },
+        {
+          "date": "2026-04-01",
+          "value": 1
+        },
+        {
+          "date": "2026-05-01",
+          "value": 0
+        },
+        {
+          "date": "2026-06-01",
+          "value": 2
+        },
+        {
+          "date": "2026-07-01",
+          "value": 1
+        },
+        {
+          "date": "2026-08-01",
+          "value": 3
+        },
+        {
+          "date": "2026-09-01",
+          "value": 2
+        }
+      ],
+      "description": "Attempts by Institut de Recherche Santé that the data plane refused because no permit covers them (Art. 61(1)). A rising count after a refused application is a matter for Art. 63 enforcement."
+    },
+    {
+      "match": "p:did:web:lmc",
+      "measure": "Accesses per month",
+      "unit": "accesses",
+      "series": [
+        {
+          "date": "2025-10-01",
+          "value": 0
+        },
+        {
+          "date": "2025-11-01",
+          "value": 0
+        },
+        {
+          "date": "2025-12-01",
+          "value": 0
+        },
+        {
+          "date": "2026-01-01",
+          "value": 0
+        },
+        {
+          "date": "2026-02-01",
+          "value": 0
+        },
+        {
+          "date": "2026-03-01",
+          "value": 1
+        },
+        {
+          "date": "2026-04-01",
+          "value": 2
+        },
+        {
+          "date": "2026-05-01",
+          "value": 2
+        },
+        {
+          "date": "2026-06-01",
+          "value": 3
+        },
+        {
+          "date": "2026-07-01",
+          "value": 3
+        },
+        {
+          "date": "2026-08-01",
+          "value": 4
+        },
+        {
+          "date": "2026-09-01",
+          "value": 4
+        }
+      ],
+      "description": "Accesses by Limburg Medical Centre under permit hdab-irs-lmc-2026-001, including federated counts across two SPEs. No contract is on file yet.",
+      "higherIsWorse": false
+    },
+    {
+      "match": "p:did:web:alpha-klinik",
+      "measure": "Accesses per month",
+      "unit": "accesses",
+      "series": [
+        {
+          "date": "2025-10-01",
+          "value": 0
+        },
+        {
+          "date": "2025-11-01",
+          "value": 0
+        },
+        {
+          "date": "2025-12-01",
+          "value": 0
+        },
+        {
+          "date": "2026-01-01",
+          "value": 0
+        },
+        {
+          "date": "2026-02-01",
+          "value": 0
+        },
+        {
+          "date": "2026-03-01",
+          "value": 0
+        },
+        {
+          "date": "2026-04-01",
+          "value": 0
+        },
+        {
+          "date": "2026-05-01",
+          "value": 0
+        },
+        {
+          "date": "2026-06-01",
+          "value": 0
+        },
+        {
+          "date": "2026-07-01",
+          "value": 0
+        },
+        {
+          "date": "2026-08-01",
+          "value": 0
+        },
+        {
+          "date": "2026-09-01",
+          "value": 0
+        }
+      ],
+      "description": "AlphaKlinik Berlin as a user: its own application for public-health use is pending and past its decision date; no access has been served, correctly.",
+      "higherIsWorse": false
+    },
+    {
+      "match": "ds:dataset:synthea",
+      "measure": "Accesses per month",
+      "unit": "accesses",
+      "series": [
+        {
+          "date": "2025-10-01",
+          "value": 4
+        },
+        {
+          "date": "2025-11-01",
+          "value": 5
+        },
+        {
+          "date": "2025-12-01",
+          "value": 6
+        },
+        {
+          "date": "2026-01-01",
+          "value": 6
+        },
+        {
+          "date": "2026-02-01",
+          "value": 7
+        },
+        {
+          "date": "2026-03-01",
+          "value": 8
+        },
+        {
+          "date": "2026-04-01",
+          "value": 8
+        },
+        {
+          "date": "2026-05-01",
+          "value": 9
+        },
+        {
+          "date": "2026-06-01",
+          "value": 10
+        },
+        {
+          "date": "2026-07-01",
+          "value": 12
+        },
+        {
+          "date": "2026-08-01",
+          "value": 13
+        },
+        {
+          "date": "2026-09-01",
+          "value": 14
+        }
+      ],
+      "description": "All accesses to the Synthea FHIR cohort across users. The most used dataset in the space; two permits and one refused application point at it.",
+      "higherIsWorse": false
+    },
+    {
+      "match": "ds:dataset:omop",
+      "measure": "Accesses per month",
+      "unit": "accesses",
+      "series": [
+        {
+          "date": "2025-10-01",
+          "value": 1
+        },
+        {
+          "date": "2025-11-01",
+          "value": 1
+        },
+        {
+          "date": "2025-12-01",
+          "value": 2
+        },
+        {
+          "date": "2026-01-01",
+          "value": 3
+        },
+        {
+          "date": "2026-02-01",
+          "value": 1
+        },
+        {
+          "date": "2026-03-01",
+          "value": 2
+        },
+        {
+          "date": "2026-04-01",
+          "value": 2
+        },
+        {
+          "date": "2026-05-01",
+          "value": 3
+        },
+        {
+          "date": "2026-06-01",
+          "value": 2
+        },
+        {
+          "date": "2026-07-01",
+          "value": 3
+        },
+        {
+          "date": "2026-08-01",
+          "value": 3
+        },
+        {
+          "date": "2026-09-01",
+          "value": 4
+        }
+      ],
+      "description": "Accesses to the OMOP analytics cohort, permitted to PharmaCo under hdab-decision-medreg-2025-001.",
+      "higherIsWorse": false
+    },
+    {
+      "match": "ds:dataset:prostate",
+      "measure": "Accesses per month",
+      "unit": "accesses",
+      "series": [
+        {
+          "date": "2025-10-01",
+          "value": 0
+        },
+        {
+          "date": "2025-11-01",
+          "value": 1
+        },
+        {
+          "date": "2025-12-01",
+          "value": 1
+        },
+        {
+          "date": "2026-01-01",
+          "value": 1
+        },
+        {
+          "date": "2026-02-01",
+          "value": 0
+        },
+        {
+          "date": "2026-03-01",
+          "value": 1
+        },
+        {
+          "date": "2026-04-01",
+          "value": 1
+        },
+        {
+          "date": "2026-05-01",
+          "value": 0
+        },
+        {
+          "date": "2026-06-01",
+          "value": 1
+        },
+        {
+          "date": "2026-07-01",
+          "value": 1
+        },
+        {
+          "date": "2026-08-01",
+          "value": 1
+        },
+        {
+          "date": "2026-09-01",
+          "value": 1
+        }
+      ],
+      "description": "Accesses to the prostate cancer registry, cross-border from MedReg DE to Limburg. The refused IRS application targeted this registry.",
+      "higherIsWorse": false
+    },
+    {
+      "match": "me",
+      "measure": "Pending applications at month end",
+      "unit": "applications",
+      "range": {
+        "low": 0,
+        "high": 2,
+        "text": "0 to 2 open applications, the load one case officer clears within the Art. 68 deadline"
+      },
+      "series": [
+        {
+          "date": "2025-10-01",
+          "value": 0
+        },
+        {
+          "date": "2025-11-01",
+          "value": 0
+        },
+        {
+          "date": "2025-12-01",
+          "value": 1
+        },
+        {
+          "date": "2026-01-01",
+          "value": 1
+        },
+        {
+          "date": "2026-02-01",
+          "value": 1
+        },
+        {
+          "date": "2026-03-01",
+          "value": 2
+        },
+        {
+          "date": "2026-04-01",
+          "value": 2
+        },
+        {
+          "date": "2026-05-01",
+          "value": 2
+        },
+        {
+          "date": "2026-06-01",
+          "value": 3
+        },
+        {
+          "date": "2026-07-01",
+          "value": 3
+        },
+        {
+          "date": "2026-08-01",
+          "value": 3
+        },
+        {
+          "date": "2026-09-01",
+          "value": 3
+        }
+      ],
+      "description": "My own queue. Art. 68 gives three months from a complete application; two of the three open ones are already past that, which Art. 57(1)(j) obliges me to publish."
+    }
+  ]
+}

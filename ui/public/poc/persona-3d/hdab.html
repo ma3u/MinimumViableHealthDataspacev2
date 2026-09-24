@@ -17,7 +17,7 @@
       </main>
     </div>
     <script type="module">
-import { mountPersona, renderTop, loadJson, fmtDate, daysUntil, ASOF } from "./engine.js";
+import { mountPersona, renderTop, loadJson, fmtDate, daysUntil, ASOF, attachSeriesFile } from "./engine.js";
 renderTop("hdab");
 
 const ME = "MedReg DE";
@@ -47,7 +47,7 @@ const partOf = (nameOrDid) => partId[nameOrDid] ?? partId[byDidTail(nameOrDid) ?
 
 // datasets
 const dsId = {};
-for (const d of comp.datasets) { const id = `ds:${d.id}`; dsId[d.id] = id; const cat = catalog.find((c) => c.id === d.id) ?? catalog.find((c) => c.title === d.title); add({ id, label: d.title, layer: "data", size: 2.2, color: "#7dd3c8", detail: { title: d.title, sub: d.id, facts: [["publisher", cat?.publisher ?? "n/a"], ["records", cat?.recordCount?.toLocaleString() ?? "n/a"], ["legal basis", cat?.legalBasis ?? "n/a"]], article: "Art. 77 dataset description, Art. 78 quality label" } }); const pub = partOf(cat?.publisher ?? ""); if (pub) link(pub, id, { color: "#7dd3c8", distance: 120 }); }
+for (const d of comp.datasets) { const id = `ds:${d.id}`; dsId[d.id] = id; const cat = catalog.find((c) => c.id === d.id) ?? catalog.find((c) => c.title === d.title); add({ id, label: d.title, layer: "data", size: 2.2, color: "#7dd3c8", detail: { title: d.title, description: cat?.description, sub: d.id, facts: [["publisher", cat?.publisher ?? "n/a"], ["records", cat?.recordCount?.toLocaleString() ?? "n/a"], ["legal basis", cat?.legalBasis ?? "n/a"]], article: "Art. 77 dataset description, Art. 78 quality label" } }); const pub = partOf(cat?.publisher ?? ""); if (pub) link(pub, id, { color: "#7dd3c8", distance: 120 }); }
 for (const a of audit.transfers) if (!dsId[a.assetId]) { const id = `ds:${a.assetId}`; dsId[a.assetId] = id; add({ id, label: a.asset, layer: "data", size: 2, color: "#7dd3c8", detail: { title: a.asset, sub: a.assetId } }); const pub = partOf(a.providerDid); if (pub) link(pub, id, { color: "#7dd3c8", distance: 120 }); }
 
 // the chain from the compliance matrix
@@ -81,6 +81,18 @@ for (const r of requests.requests) { const id = `req:${r.requestId}`, sev = { PE
 for (const c of creds.credentials) { const d = daysUntil(c.expiresAt); if (d >= 0) continue; const holder = Object.keys(partId).find((k) => !k.startsWith("did:") && k.toLowerCase().replace(/[^a-z]/g, "").includes(c.subjectDid.split("-").pop().replace(/[^a-z]/g, "").slice(0, 5))); const p = holder ? partId[holder] : null; const id = `vc:${c.credentialId}`; add({ id, label: `${c.credentialType.replace("Credential", "")} expired`, layer: "chain", size: 1.2, status: c.credentialType.startsWith("DataProcessingPurpose") ? "bad" : "warn", pulse: c.credentialType.startsWith("DataProcessingPurpose"), detail: { title: c.credentialType, sub: `${c.subjectDid}, expired ${fmtDate(c.expiresAt)} (${-d} days ago), wallet status "${c.status}"`, facts: [["issuer", c.issuerDid], ["dataset", c.datasetId ?? "n/a"], ["conformance", c.conformance ?? "n/a"], ["completeness", c.completeness ?? "n/a"]], article: c.credentialType.startsWith("DataProcessingPurpose") ? "Art. 61: purpose bound; Art. 53 purposes" : "Art. 78 data quality and utility label" } }); if (p) { link(p, id, { status: "bad", distance: 80 }); mark(p, c.credentialType.startsWith("DataProcessingPurpose") ? "bad" : "warn"); } if (c.credentialType.startsWith("DataProcessingPurpose")) { const later = audit.accesslogs.filter((l) => l.consumerDid.includes("pharmaco") && new Date(l.accessedAt) > new Date(c.expiresAt)); signals.push({ severity: "bad", nodeId: id, text: `${holder ?? c.subjectDid}: purpose credential expired ${fmtDate(c.expiresAt)}, yet ${later.length} accesses were logged after that date`, article: "Art. 61 duties of users, Art. 63 enforcement" }); } else signals.push({ severity: "warn", nodeId: id, text: `${holder ?? c.subjectDid}: data quality label expired ${fmtDate(c.expiresAt)}`, article: "Art. 78 label to be kept current" }); }
 
 signals.push({ severity: "info", nodeId: "me", text: `${audit.transfers.filter((t) => t.crossBorder).length} of ${audit.transfers.length} transfers are cross-border (NL, FR)`, article: "Art. 75 HealthData@EU; Art. 59 annual activity report" });
+
+// monthly series: trend, chart and description on the right, months unfold on click
+const seriesFile = await (await fetch("data/hdab-series.json")).json();
+layers.push({ id: "time", name: "Over time: unfolded series", z: -2, color: "#93c5fd" });
+const rankOf = { none: 0, ok: 1, info: 1, warn: 2, bad: 3 };
+let seriesCount = 0;
+for (const { node, item, trend } of attachSeriesFile(seriesFile, nodes, "time")) {
+  seriesCount++;
+  if (rankOf[trend.sev] > rankOf[node.status ?? "none"]) { node.status = trend.sev; node.pulse = trend.sev === "bad"; }
+  if (trend.sev === "bad" || trend.sev === "warn") signals.push({ severity: trend.sev, nodeId: node.id, text: `${node.label}: ${item.measure.toLowerCase()} ${trend.dir}${trend.dir === "stable" ? "" : ` from ${trend.first} to ${trend.last} ${node.unit}`}${trend.out ? ", outside the expected band" : ""}`.trim(), article: "Art. 57 tasks, Art. 63 enforcement; click to see the trend and unfold the months" });
+}
+signals.push({ severity: "info", nodeId: "me", text: `${seriesCount} nodes carry a monthly series (fictional). Click one for trend, chart and description on the right; click again to fold the months.`, article: "Art. 73(1)(e) access log as the source" });
 
 mountPersona({ persona: "hdab", title: "Non-compliant operations, in one view", question: "Which chains are broken, which accesses were refused or should not have happened, and which of my own decisions are overdue?", article: "Regulation (EU) 2025/327 Art. 55, 57, 61, 63, 67, 68, 69, 73, 78", layers, nodes, links, signals,
   legend: [{ color: "#ef4444", text: "violation / blocked" }, { color: "#f59e0b", text: "pending / expiring" }, { color: "#22c55e", text: "compliant" }, { color: "#38bdf8", text: "in progress / info" }, { color: "#f97316", text: "data user" }, { color: "#7dd3c8", text: "data holder / dataset" }, { color: "#ec4899", text: "access body" }],

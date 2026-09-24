@@ -17,7 +17,7 @@
       </main>
     </div>
     <script type="module">
-import { mountPersona, renderTop, loadJson, fmtDate, daysUntil } from "./engine.js";
+import { mountPersona, renderTop, loadJson, fmtDate, daysUntil, attachSeriesFile } from "./engine.js";
 renderTop("researcher");
 
 const ME = "PharmaCo Research AG";
@@ -54,7 +54,7 @@ for (const d of ds.values()) {
   if (!uses && !pub && rel < 0.15) continue;
   const id = `ds:${d.key}`;
   add({ id, label: d.title.replace(/ Patient Cohort| Dataset/g, ""), layer: uses || pub ? "mine" : "other", size: 1.4 + Math.log10(d.recordCount || 10) / 2, status: uses ? "ok" : pub ? "none" : "info", color: pub && !uses ? "#7dd3c8" : undefined,
-    detail: { title: d.title, sub: `${d.theme}, ${Number(d.recordCount).toLocaleString()} records, published by ${d.publisher}`, facts: [["licence", d.license], ["conforms to", d.conformsTo], ["providers", d.providers.map(nameOf).join(", ")], ["consumers", [...new Set(d.consumers.map(nameOf))].join(", ") || "none yet"]], article: `${d.legalBasis} (adopted: Art. 53 purposes, Art. 77 dataset description)`, links: [{ href: "../../catalog", text: "Catalog (live)" }] } });
+    detail: { title: d.title, description: d.description, sub: `${d.theme}, ${Number(d.recordCount).toLocaleString()} records, published by ${d.publisher}`, facts: [["licence", d.license], ["conforms to", d.conformsTo], ["providers", d.providers.map(nameOf).join(", ")], ["consumers", [...new Set(d.consumers.map(nameOf))].join(", ") || "none yet"]], article: `${d.legalBasis} (adopted: Art. 53 purposes, Art. 77 dataset description)`, links: [{ href: "../../catalog", text: "Catalog (live)" }] } });
   if (uses) link("me", id, { status: "ok", distance: 90, particles: 2 });
   else if (pub) link("me", id, { color: "#7dd3c8", distance: 90 });
   else { link(`study:${myStudy.studyId}`, id, { status: "info", width: 0.6 + rel * 3, distance: 150, arrow: true }); signals.push({ severity: "info", nodeId: id, text: `Relevant, not used yet: ${d.title} (${Number(d.recordCount).toLocaleString()} records, ${d.theme}), relevance ${Math.round(rel * 100)} %`, article: "Art. 67 application, or Art. 72 trusted holder for a single source" }); }
@@ -68,7 +68,7 @@ if (omop) for (const c of analytics.topConditions.slice(0, 5)) { const id = `con
 for (const p of research.programs) {
   const id = `study:${p.studyId}`, mine = p.institution === ME;
   add({ id, label: p.studyName, layer: "studies", size: mine ? 3.2 : 2, status: mine ? "ok" : "info", pulse: false,
-    detail: { title: p.studyName, sub: `${p.institution}, ${p.participantCount.toLocaleString()} participants, ${p.countries.join(", ")}, ${p.status}`, facts: [["needs", p.dataNeeded], ["ethics", p.ethicsApproval]], article: mine ? "My study" : "Another study in the same field: candidate for a joint application or a federated query" } });
+    detail: { title: p.studyName, description: p.description, sub: `${p.institution}, ${p.participantCount.toLocaleString()} participants, ${p.countries.join(", ")}, ${p.status}`, facts: [["needs", p.dataNeeded], ["ethics", p.ethicsApproval]], article: mine ? "My study" : "Another study in the same field: candidate for a joint application or a federated query" } });
   if (mine) link("me", id, { status: "ok", distance: 80, width: 1.6 });
   else { const w = words(p.dataNeeded), n = [...words(need)].filter((x) => w.has(x)).length; link(`study:${myStudy.studyId}`, id, { status: "info", width: 0.6 + n * 0.5, distance: 120 }); signals.push({ severity: "info", nodeId: id, text: `Near my study: ${p.studyName} (${p.institution}) shares ${n} data needs, ${p.participantCount.toLocaleString()} participants`, article: "Art. 75 HealthData@EU for cross-border cohorts" }); }
 }
@@ -92,6 +92,18 @@ signals.push({ severity: "ok", nodeId: `tr:${audit.transfers.find((t) => t.consu
 
 // credentials in my wallet
 for (const c of creds.credentials.filter((c) => c.subjectDid.endsWith("cro-pharmaco"))) { const id = `vc:${c.credentialId}`, d = daysUntil(c.expiresAt), sev = d < 0 ? "bad" : d < 90 ? "warn" : "ok"; add({ id, label: c.credentialType.replace("Credential", ""), layer: "access", size: 1.4, status: sev, pulse: sev === "bad", detail: { title: c.credentialType, sub: `issued ${fmtDate(c.issuedAt)}, expires ${fmtDate(c.expiresAt)} (${d} days)`, facts: [["issuer", c.issuerDid], ["status flag in wallet", c.status], ["cites", c.ehdsArticle ?? "n/a"]], article: "DCP v1.0 verifiable credential presented at every DSP negotiation" } }); link(id, "me", { status: sev, distance: 50 }); if (sev !== "ok") signals.push({ severity: sev, nodeId: id, text: `${c.credentialType} ${d < 0 ? `expired ${-d} days ago` : `expires in ${d} days`}; the wallet still flags it "${c.status}"`, article: "Art. 61 duties of health data users; DCP presentation will fail" }); }
+
+// monthly series: trend, chart and description on the right, months unfold on click
+const seriesFile = await (await fetch("data/researcher-series.json")).json();
+layers.push({ id: "time", name: "Over time: unfolded series", z: -2, color: "#93c5fd" });
+const rankOf = { none: 0, ok: 1, info: 1, warn: 2, bad: 3 };
+let seriesCount = 0;
+for (const { node, item, trend } of attachSeriesFile(seriesFile, nodes, "time")) {
+  seriesCount++;
+  if (rankOf[trend.sev] > rankOf[node.status ?? "none"]) { node.status = trend.sev; node.pulse = trend.sev === "bad"; }
+  if (trend.sev === "bad" || trend.sev === "warn") signals.push({ severity: trend.sev, nodeId: node.id, text: `${node.label}: ${item.measure.toLowerCase()} ${trend.dir}${trend.dir === "stable" ? "" : ` from ${trend.first} to ${trend.last} ${node.unit}`}${trend.out ? ", outside the expected band" : ""}`.trim(), article: "Art. 73(1)(e) access log; click to see the trend and unfold the months" });
+}
+signals.push({ severity: "info", nodeId: "me", text: `${seriesCount} nodes carry a monthly series (fictional). Click one for trend, chart and description on the right; click again to fold the months.`, article: "Art. 73(1)(e) access log as the source" });
 
 mountPersona({ persona: "researcher", title: "My research, in one view", question: "What am I allowed to use today, what is stuck, and which datasets and studies near mine am I missing?", article: "Regulation (EU) 2025/327 Art. 53, 61, 67, 68, 69, 73, 75", layers, nodes, links, signals,
   legend: [{ color: "#22c55e", text: "in force / usable" }, { color: "#f59e0b", text: "pending" }, { color: "#ef4444", text: "expired / overdue" }, { color: "#38bdf8", text: "relevant, not mine" }, { color: "#7dd3c8", text: "I publish it" }, { color: "#a5b4fc", text: "content of a dataset" }],

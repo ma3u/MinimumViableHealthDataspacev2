@@ -17,7 +17,7 @@
       </main>
     </div>
     <script type="module">
-import { mountPersona, renderTop, loadJson, fmtDate, daysUntil } from "./engine.js";
+import { mountPersona, renderTop, loadJson, fmtDate, daysUntil, attachSeriesFile } from "./engine.js";
 renderTop("hospital");
 
 const ME = "AlphaKlinik Berlin", MYDID = "did:web:alpha-klinik.de:participant";
@@ -48,7 +48,7 @@ const labels = creds.credentials.filter((c) => c.credentialType === "DataQuality
 for (const d of ds.values()) {
   const id = `ds:${d.key}`, cons = [...new Set(d.consumers.map(nameOf))];
   const label = labels.find((l) => l.datasetId && d.ids.includes(l.datasetId));
-  add({ id, label: d.title.replace(/ Patient Cohort| Dataset/g, ""), layer: "data", size: 1.3 + Math.log10(d.recordCount || 10) / 2, color: "#7dd3c8", status: cons.length ? "ok" : "none", detail: { title: d.title, sub: `${d.theme}, ${Number(d.recordCount).toLocaleString()} records`, facts: [["consumers", cons.join(", ") || "none yet"], ["FHIR resources listed", (d.fhirResources ?? []).length], ["quality label", label ? `${label.credentialId} to ${fmtDate(label.expiresAt)}` : "none"]], article: "Art. 60(1): make data available under a permit; Art. 77 description; Art. 78 label" } });
+  add({ id, label: d.title.replace(/ Patient Cohort| Dataset/g, ""), layer: "data", size: 1.3 + Math.log10(d.recordCount || 10) / 2, color: "#7dd3c8", status: cons.length ? "ok" : "none", detail: { title: d.title, description: d.description, sub: `${d.theme}, ${Number(d.recordCount).toLocaleString()} records`, facts: [["consumers", cons.join(", ") || "none yet"], ["FHIR resources listed", (d.fhirResources ?? []).length], ["quality label", label ? `${label.credentialId} to ${fmtDate(label.expiresAt)}` : "none"]], article: "Art. 60(1): make data available under a permit; Art. 77 description; Art. 78 label" } });
   link("me", id, { color: "#7dd3c8", distance: 70 });
 }
 signals.push({ severity: "info", nodeId: "me", text: `${[...ds.values()].filter((d) => !d.consumers.length).length} of ${ds.size} datasets are described and published without a consumer yet`, article: "Art. 60 duty met, Art. 77 description" });
@@ -84,6 +84,18 @@ for (const e of permits.entries) { const d = dsByAny(e.datasetId); if (!d || e.a
 for (const t of audit.transfers.filter((t) => t.providerDid === MYDID)) { const id = `tr:${t.id}`, sev = { COMPLETED: "ok", IN_PROGRESS: "info", ERROR: "bad" }[t.status] ?? "info"; const cid = addConsumer(t.consumerName, t.consumerDid); add({ id, label: `${t.id} ${t.status.toLowerCase()}`, layer: "chain", size: 1.1, status: sev, pulse: sev === "bad", detail: { title: t.asset, sub: `to ${t.consumerName}, ${t.transferDate}, ${t.protocol}${t.crossBorder ? ", cross-border" : ""}`, facts: [["bytes", t.byteSize?.toLocaleString() ?? "0"], ["error", t.errorMessage ?? "none"], ["contract", t.contractId ?? "none"]], article: "Logged under Art. 73(1)(e); DSP transfer process" } }); const d = dsByAny(t.assetId) ?? dsByAny(t.asset); if (d) link(`ds:${d.key}`, id, { status: sev, particles: sev === "ok" ? 2 : 0, distance: 60 }); if (cid) link(id, cid, { status: sev, particles: sev === "ok" ? 2 : 0, distance: 110 }); }
 for (const l of audit.accesslogs.filter((l) => l.providerDid === MYDID)) { const id = `log:${l.id}`, sev = l.statusCode === 200 ? "ok" : "bad"; const cid = addConsumer(l.consumerName, l.consumerDid); add({ id, label: l.name, layer: "chain", size: 0.9, status: sev, detail: { title: l.name, sub: `${l.method} ${l.endpoint} → ${l.statusCode}, ${fmtDate(l.accessedAt)}`, facts: [["permit", l.permitId ? `${l.permitId} (${l.permitStatus})` : "none"], ["bytes", l.bytesAccessed], ["error", l.errorMessage ?? "none"]], article: "Art. 73(1)(e) log, visible to the patient under Art. 8" } }); if (cid) link(cid, id, { status: sev, distance: 110 }); const d = dsByAny(l.assetId); if (d) link(id, `ds:${d.key}`, { status: sev, distance: 60 }); }
 signals.push({ severity: "ok", nodeId: `log:${audit.accesslogs.find((l) => l.providerDid === MYDID)?.id}`, text: `${audit.accesslogs.filter((l) => l.providerDid === MYDID && l.statusCode === 200).length} accesses served under a valid permit, ${audit.accesslogs.filter((l) => l.providerDid === MYDID && l.statusCode !== 200).length} refused, all logged`, article: "Art. 73(1)(e)" });
+
+// monthly series: trend, chart and description on the right, months unfold on click
+const seriesFile = await (await fetch("data/hospital-series.json")).json();
+layers.push({ id: "time", name: "Over time: unfolded series", z: -2, color: "#93c5fd" });
+const rankOf = { none: 0, ok: 1, info: 1, warn: 2, bad: 3 };
+let seriesCount = 0;
+for (const { node, item, trend } of attachSeriesFile(seriesFile, nodes, "time")) {
+  seriesCount++;
+  if (rankOf[trend.sev] > rankOf[node.status ?? "none"]) { node.status = trend.sev; node.pulse = trend.sev === "bad"; }
+  if (trend.sev === "bad" || trend.sev === "warn") signals.push({ severity: trend.sev, nodeId: node.id, text: `${node.label}: ${item.measure.toLowerCase()} ${trend.dir}${trend.dir === "stable" ? "" : ` from ${trend.first} to ${trend.last} ${node.unit}`}${trend.out ? ", outside the expected band" : ""}`.trim(), article: "Art. 60 duties, Art. 73(1)(e) access log; click to see the trend and unfold the months" });
+}
+signals.push({ severity: "info", nodeId: "me", text: `${seriesCount} nodes carry a monthly series (fictional). Click one for trend, chart and description on the right; click again to fold the months.`, article: "Art. 73(1)(e) access log as the source" });
 
 mountPersona({ persona: "hospital", title: "Our data and who we trust, in one view", question: "Which consumers are untrusted or out of permit, which contracts are missing, and are our own labels and descriptions in order?", article: "Regulation (EU) 2025/327 Art. 60, 61, 63, 67, 68, 73, 77, 78", layers, nodes, links, signals,
   legend: [{ color: "#ef4444", text: "untrusted / violation" }, { color: "#f59e0b", text: "gap to close" }, { color: "#22c55e", text: "trusted, in order" }, { color: "#38bdf8", text: "in progress" }, { color: "#f97316", text: "consumer" }, { color: "#7dd3c8", text: "our dataset" }],
