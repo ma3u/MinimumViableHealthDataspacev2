@@ -343,12 +343,13 @@ export default function OverviewScene({
       if (st.orbiting && !st.focused) {
         st.angle += dt * 0.12;
         const p = cam.position;
+        // The layout grows after the first frames; ease the orbit radius and
+        // height out to the fitted distance so the discs stay in view.
         const rad = Math.hypot(p.x, p.y) || st.D;
-        cam.position.set(
-          Math.sin(st.angle) * rad,
-          -Math.cos(st.angle) * rad,
-          p.z,
-        );
+        const r = rad + (st.D - rad) * Math.min(1, dt * 1.5);
+        const zTarget = st.zMid + st.D * 0.6;
+        const z = p.z + (zTarget - p.z) * Math.min(1, dt * 1.5);
+        cam.position.set(Math.sin(st.angle) * r, -Math.cos(st.angle) * r, z);
         cam.lookAt(controls.target);
       }
       if (frameNo++ % 30 === 0) fitPlanes();
