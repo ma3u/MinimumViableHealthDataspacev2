@@ -3,7 +3,7 @@
  *
  * The persona overviews show derived state: a value against its band, a
  * trend over months, a consumer's chain of trust, the Art. 68 decision clock.
- * These tests pin the derivation to the seed's stories (Anna Müller's HbA1c,
+ * These tests pin the derivation to the seed's stories (Maria Schmidt's HbA1c,
  * PharmaCo's expired purpose credential, Limburg's permit without a contract,
  * the refused Institut de Recherche Santé still attempting the registry).
  *
@@ -30,7 +30,7 @@ const PHARMACO = "did:web:pharmaco.de:research";
 const LMC = "did:web:lmc.nl:clinic";
 const IRS = "did:web:irs.fr:hdab";
 
-/** Anna Müller's HbA1c as the seed records it (fictional). */
+/** Maria Schmidt's HbA1c as the seed records it (fictional). */
 const HBA1C = [
   { date: "2024-09-12", value: 6.4 },
   { date: "2025-01-20", value: 6.6 },

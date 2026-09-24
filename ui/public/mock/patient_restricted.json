@@ -1,19 +1,19 @@
 {
   "patients": [
     {
-      "id": "14b9ebcd-e969-3704-476b-c5897c3c8d8a",
-      "name": "Maria Lindqvist",
+      "id": "P1",
+      "name": "Maria Schmidt",
       "gender": "female",
-      "birthDate": "1984-03-12"
+      "birthDate": "1979-03-15"
     }
   ],
   "stats": {
     "patients": 1,
-    "encounters": 12,
-    "conditions": 9,
-    "observations": 24,
+    "encounters": 6,
+    "conditions": 8,
+    "observations": 48,
     "medications": 4,
-    "procedures": 7
+    "procedures": 0
   },
   "restricted": true,
   "timeline": [

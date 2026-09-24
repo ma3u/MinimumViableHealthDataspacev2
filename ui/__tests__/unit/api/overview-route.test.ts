@@ -238,7 +238,7 @@ describe("GET /api/overview", () => {
     const view = await res.json();
     expect(view.persona).toBe("patient");
     expect(view.asOf).toBe("2026-09-23");
-    expect(view.me.name).toBe("Anna Müller");
+    expect(view.me.name).toBe("Maria Schmidt");
     expect(calls).toEqual([
       "/api/patient/profile?patientId=P1",
       "/api/patient/insights?patientId=P1",

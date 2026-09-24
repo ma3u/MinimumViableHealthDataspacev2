@@ -2,7 +2,8 @@
 // Persona overview seed (discussion #265, issue #271): the data the four persona
 // views need, and the relations between the personas.
 //
-//   patient P1 (Anna Müller) -TREATED_AT-> AlphaKlinik Berlin (holder)
+//   patient P1 (Maria Schmidt, the patient1 login) -TREATED_AT-> AlphaKlinik Berlin (holder)
+//     -HAS_ENCOUNTER-> one laboratory visit per measurement date
 //     -HAS_OBSERVATION-> 48 LOINC-coded measurements with reference ranges
 //     -HAS_CONDITION / HAS_MEDICATION_REQUEST-> her record
 //     -GAVE_CONSENT-> PatientConsent -FOR_STUDY-> ResearchStudy
@@ -23,7 +24,7 @@
 // ── 1. The demo patient, treated at AlphaKlinik Berlin ──────────────────────
 MERGE (p:Patient {resourceId: 'P1'})
 SET p.id = 'P1',
-    p.name = 'Anna Müller',
+    p.name = 'Maria Schmidt',
     p.gender = 'female',
     p.birthDate = date('1979-03-15'),
     p.city = 'Berlin',
@@ -77,6 +78,27 @@ SET med.medicationCode = m.code,
     med.date = m.since,
     med.fictional = true
 MERGE (p)-[:HAS_MEDICATION_REQUEST]->(med);
+
+// ── 2b. Her visits: one laboratory visit per measurement date ─────────────
+MATCH (p:Patient {resourceId: 'P1'})
+UNWIND [
+  {id: 'enc-p1-2024-09-12', at: '2024-09-12', n: 1},
+  {id: 'enc-p1-2025-01-20', at: '2025-01-20', n: 2},
+  {id: 'enc-p1-2025-05-15', at: '2025-05-15', n: 3},
+  {id: 'enc-p1-2025-09-18', at: '2025-09-18', n: 4},
+  {id: 'enc-p1-2026-02-10', at: '2026-02-10', n: 5},
+  {id: 'enc-p1-2026-08-21', at: '2026-08-21', n: 6}
+] AS e
+MERGE (enc:Encounter {resourceId: e.id})
+SET enc.name = 'Laboratory visit ' + toString(e.n) + ' of 6',
+    enc.display = 'Laboratory visit, AlphaKlinik Berlin (fictional)',
+    enc.class = 'ambulatory',
+    enc.status = 'finished',
+    enc.date = e.at + 'T08:00:00Z',
+    enc.period = e.at,
+    enc.serviceProvider = 'AlphaKlinik Berlin',
+    enc.fictional = true
+MERGE (p)-[:HAS_ENCOUNTER]->(enc);
 
 // ── 3. Her measurements: 8 LOINC parameters, 6 visits, lab reference ranges ─
 // The values behind the risk scores of the profile: HbA1c and glucose drift
@@ -152,6 +174,10 @@ SET obs.code = o.code,
     obs.performer = 'AlphaKlinik Berlin, Zentrallabor (fictional)',
     obs.fictional = true
 MERGE (p)-[:HAS_OBSERVATION]->(obs)
+WITH p, obs, o
+MATCH (enc:Encounter {resourceId: 'enc-p1-' + o.at})
+MERGE (obs)-[:PART_OF]->(enc)
+WITH obs, o
 MERGE (lc:LoincCode {loincNumber: o.code})
   ON CREATE SET lc.name = o.display + ' (LOINC ' + o.code + ')',
                 lc.longCommonName = o.display

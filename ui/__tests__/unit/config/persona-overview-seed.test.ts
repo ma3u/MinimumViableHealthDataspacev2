@@ -80,6 +80,13 @@ describe("seed-persona-overview.cypher", () => {
     expect(seed).toContain("MERGE (obs)-[:CODED_BY]->(lc)");
   });
 
+  it("names the patient after the patient1 login and gives her one visit per measurement date", () => {
+    expect(seed).toContain("p.name = 'Maria Schmidt'");
+    expect(seed.match(/\{id: 'enc-p1-\d{4}-\d{2}-\d{2}'/g)).toHaveLength(6);
+    expect(seed).toContain("MERGE (p)-[:HAS_ENCOUNTER]->(enc)");
+    expect(seed).toContain("MERGE (obs)-[:PART_OF]->(enc)");
+  });
+
   it("links the patient to the holder, her record and her consents", () => {
     expect(seed).toContain("MERGE (p)-[:TREATED_AT]->(holder)");
     expect(seed).toContain("MERGE (p)-[:HAS_CONDITION]->(cond)");

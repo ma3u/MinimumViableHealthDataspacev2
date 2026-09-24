@@ -168,10 +168,15 @@ export async function GET(req: Request) {
          RETURN coalesce(p.id, p.resourceId) AS id
          ORDER BY p.name LIMIT 200`,
       );
+      // The seeded record the login owns (patient1 is P1, issue #271), else
+      // the older name-order fallback.
+      const owned = ownPatientIdForSession(session);
       const myId =
-        patientIndex < allPatients.length
-          ? allPatients[patientIndex].id
-          : allPatients[0]?.id;
+        owned && allPatients.some((p) => p.id === owned)
+          ? owned
+          : patientIndex < allPatients.length
+            ? allPatients[patientIndex].id
+            : allPatients[0]?.id;
       if (patientId !== myId) {
         return NextResponse.json(
           { error: "Access denied — you can only view your own health data" },

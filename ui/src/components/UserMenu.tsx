@@ -182,7 +182,7 @@ export default function UserMenu() {
     IS_STATIC && demoPersona
       ? {
           user: {
-            // Friendly display name (e.g. "Maria Lindqvist") in the nav chip.
+            // Friendly display name (e.g. "Maria Schmidt") in the nav chip.
             name: demoPersona.displayName,
             email: `${demoPersona.username}@demo.ehds.eu`,
           },
