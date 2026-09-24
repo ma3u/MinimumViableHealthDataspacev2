@@ -57,7 +57,7 @@ const BADGE: Record<Severity, string> = {
 
 function OverviewContent() {
   const searchParams = useSearchParams();
-  const { data: session } = useSession();
+  const { data: session, status: sessionStatus } = useSession();
   const demoPersona = useDemoPersona();
   const roles: string[] = IS_STATIC
     ? [...(demoPersona?.roles ?? [])]
@@ -98,6 +98,10 @@ function OverviewContent() {
   }, []);
 
   useEffect(() => {
+    // Until the session is known the persona is a guess; a fetch made then
+    // can come back 403 after the real one and leave a stale banner.
+    if (!IS_STATIC && sessionStatus === "loading") return;
+    let cancelled = false;
     setLoading(true);
     setError(null);
     setSelectedId(null);
@@ -107,6 +111,7 @@ function OverviewContent() {
     fetchApi(`/api/overview?${qs.toString()}`)
       .then(async (r) => {
         const data = await r.json();
+        if (cancelled) return;
         if (!r.ok || data?.error) {
           setError({
             message: data?.error ?? `HTTP ${r.status}`,
@@ -114,14 +119,21 @@ function OverviewContent() {
           });
           setView(null);
         } else {
+          setError(null);
           setView(data as OverviewView);
         }
       })
-      .catch((e) =>
-        setError({ message: e instanceof Error ? e.message : String(e) }),
-      )
-      .finally(() => setLoading(false));
-  }, [persona, patientId]);
+      .catch((e) => {
+        if (cancelled) return;
+        setError({ message: e instanceof Error ? e.message : String(e) });
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [persona, patientId, sessionStatus]);
 
   const showScene =
     sceneOn ??
