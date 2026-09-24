@@ -135,6 +135,20 @@ export function registerPermit(e: RegisterEntry): PermitLike {
   };
 }
 
+/**
+ * The approval the compliance matrix records for a consumer, as a permit.
+ * Older approvals have no register entry and sometimes no id; the matrix's
+ * word still stands, keyed by the consumer when the id is missing.
+ */
+export function matrixPermit(row: MatrixRow | undefined): PermitLike | null {
+  if (!row?.hasApproval) return null;
+  return {
+    permitId: row.approvalId ?? `approval:${row.consumerId}`,
+    status: row.approvalStatus ?? "APPROVED",
+    validUntil: row.validUntil ?? null,
+  };
+}
+
 /** The participant a credential belongs to: by holder name, else by the id's tail. */
 export function holderOf(
   cred: CredentialEntry,
@@ -319,16 +333,12 @@ export function buildHdabView(input: HdabViewInput): OverviewView {
     const permits = input.register
       .filter((e) => e.kind === "application" && e.applicantDid === did)
       .map(registerPermit);
+    const fromMatrix = matrixPermit(row);
     if (
-      row?.hasApproval &&
-      row.approvalId &&
-      !permits.some((x) => x.permitId === row.approvalId)
+      fromMatrix &&
+      !permits.some((x) => x.permitId === fromMatrix.permitId)
     ) {
-      permits.push({
-        permitId: row.approvalId,
-        status: row.approvalStatus ?? "APPROVED",
-        validUntil: row.validUntil ?? null,
-      });
+      permits.push(fromMatrix);
     }
     const contracts = [
       ...input.contracts.filter((c) => !c.consumerDid || c.consumerDid === did),

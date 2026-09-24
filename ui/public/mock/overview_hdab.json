@@ -1431,7 +1431,10 @@
       "facts": [
         ["did", "did:web:pharmaco.de:research"],
         ["credentials", "3 in the wallet"],
-        ["permits", "app-pharmaco-medreg-2026-002 pending"],
+        [
+          "permits",
+          "app-pharmaco-medreg-2026-002 pending, approval:did:web:pharmaco.de:research valid"
+        ],
         ["accesses", "2 served, 0 refused in 12 months"]
       ],
       "article": "Trust is a chain: DCP credentials, an Art. 68 permit, a DSP contract, and a log that agrees with all three (Art. 61(1), 73(1)(e))",
@@ -1914,7 +1917,7 @@
       "facts": [
         ["did", "did:web:trialcorp.example:research"],
         ["credentials", "0 in the wallet"],
-        ["permits", "none"],
+        ["permits", "approval:did:web:trialcorp.example:research valid"],
         ["accesses", "0 served, 0 refused in 12 months"]
       ],
       "article": "Trust is a chain: DCP credentials, an Art. 68 permit, a DSP contract, and a log that agrees with all three (Art. 61(1), 73(1)(e))",
@@ -3272,13 +3275,6 @@
       "nodeId": "p:did:web:pharmaco.de:research",
       "text": "PharmaCo Research AG: 2 accesses served after the purpose credential expired on 2026-06-20.",
       "article": "Art. 53(1), Art. 61(1)"
-    },
-    {
-      "severity": "bad",
-      "code": "access-without-permit",
-      "nodeId": "p:did:web:pharmaco.de:research",
-      "text": "PharmaCo Research AG: 2 accesses served with no valid permit as of today.",
-      "article": "Art. 61(1), Art. 68"
     },
     {
       "severity": "bad",

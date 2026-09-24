@@ -47,6 +47,7 @@ vi.mock("@/app/api/patient/observations/route", () =>
 vi.mock("@/app/api/compliance/route", () => stub("compliance"));
 vi.mock("@/app/api/permits/route", () => stub("permits"));
 vi.mock("@/app/api/credentials/route", () => stub("credentials"));
+vi.mock("@/app/api/catalog/route", () => stub("catalog"));
 
 import { GET } from "@/app/api/overview/route";
 
@@ -63,6 +64,57 @@ function graphAnswers() {
       if (cypher.includes("TREATED_AT")) {
         return [{ did: ALPHA, name: "AlphaKlinik Berlin" }];
       }
+      if (cypher.includes("HAS_ENROLMENT"))
+        return [
+          {
+            studyId: "STUDY-CARDIO-2024",
+            studyName: "European Cardiovascular Risk Study",
+            institution: "PharmaCo Research AG",
+            institutionDid: PHARMACO,
+            status: "open",
+            dataNeeded:
+              "FHIR Conditions, Observations (blood pressure, cholesterol), Medications",
+            description: "Cohort study.",
+            countries: ["DE"],
+            participantCount: 4821,
+            enrolment: Array.from({ length: 10 }, (_, i) => ({
+              date: `2024-${String(i + 1).padStart(2, "0")}-01`,
+              value: i * 100,
+            })),
+          },
+          {
+            studyId: "STUDY-DIAB-2023",
+            studyName: "T2D Progression Biomarkers",
+            institution: "Institut de Recherche Santé",
+            institutionDid: "did:web:irs.fr:hdab",
+            status: "open",
+            dataNeeded:
+              "OMOP Drug Exposures, Condition Occurrences, Measurements (HbA1c, eGFR)",
+            description: "Biomarkers.",
+            countries: ["FR"],
+            participantCount: 2103,
+            enrolment: Array.from({ length: 10 }, (_, i) => ({
+              date: `2024-${String(i + 1).padStart(2, "0")}-01`,
+              value: i * 50,
+            })),
+          },
+          {
+            studyId: "STUDY-RESP-2025",
+            studyName: "Respiratory EHDS Cohort",
+            institution: "MedReg DE",
+            institutionDid: "did:web:medreg.de:hdab",
+            status: "recruiting",
+            dataNeeded:
+              "FHIR Conditions (asthma, COPD), Observation spirometry values",
+            description: "Surveillance.",
+            countries: ["DE"],
+            participantCount: 890,
+            enrolment: Array.from({ length: 10 }, (_, i) => ({
+              date: `2024-${String(i + 1).padStart(2, "0")}-01`,
+              value: i * 10,
+            })),
+          },
+        ];
       if (cypher.includes("ResearchStudy")) {
         return [
           {
@@ -162,17 +214,13 @@ describe("GET /api/overview", () => {
     expect((await GET(makeReq("?persona=auditor"))).status).toBe(400);
   });
 
-  it("answers 501 for the personas of later milestones", async () => {
-    for (const p of ["researcher"]) {
-      const res = await GET(makeReq(`?persona=${p}`));
-      expect(res.status, p).toBe(501);
-      expect((await res.json()).issue).toContain("/issues/271");
-    }
-  });
-
   it("derives the persona from the role when none is given", async () => {
-    vi.mocked(getServerSession).mockResolvedValue(session(["DATA_USER"]));
-    expect((await GET(makeReq(""))).status).toBe(501);
+    vi.mocked(getServerSession).mockResolvedValue(
+      session(["DATA_USER"], "researcher@pharmaco.de"),
+    );
+    const r = await GET(makeReq(""));
+    expect(r.status).toBe(200);
+    expect((await r.json()).persona).toBe("researcher");
     vi.mocked(getServerSession).mockResolvedValue(
       session(["PATIENT"], "patient1"),
     );
@@ -301,6 +349,40 @@ describe("GET /api/overview", () => {
     expect(view.signals.map((s: { code: string }) => s.code)).toContain(
       "label-expired",
     );
+  });
+
+  it("assembles the researcher view for a DATA_USER session", async () => {
+    vi.mocked(getServerSession).mockResolvedValue(
+      session(["DATA_USER"], "researcher@pharmaco.de"),
+    );
+    const res = await GET(makeReq("?asOf=2026-09-23"));
+    expect(res.status).toBe(200);
+    const view = await res.json();
+    expect(view.persona).toBe("researcher");
+    expect(view.me.id).toBe(PHARMACO);
+    expect(calls).toEqual([
+      "/api/compliance",
+      "/api/permits",
+      "/api/credentials",
+      "/api/catalog",
+    ]);
+    const app = view.nodes.find((n: { id: string }) =>
+      n.id.startsWith("app:app-pharmaco-medreg-2026-002"),
+    );
+    expect(
+      app.facts.some(([k]: [string, string]) => k === "decision due"),
+    ).toBe(true);
+    const cred = view.nodes.find((n: { id: string }) =>
+      n.id.startsWith("vc:vc:data-processing-purpose"),
+    );
+    expect(cred.status).toBe("bad");
+    const studies = view.nodes.filter(
+      (n: { kind: string }) => n.kind === "Study",
+    );
+    expect(studies).toHaveLength(3);
+    expect(
+      studies.every((s: { series: unknown[] }) => s.series.length === 10),
+    ).toBe(true);
   });
 
   it("returns 502 when the graph is down", async () => {
