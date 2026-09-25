@@ -149,7 +149,7 @@ test.describe("Issue #206 · supervision (Art. 63) and retention (Art. 73(1)(e))
       );
     await card.getByRole("button", { name: "Send views" }).click();
     await expect(card.getByRole("status")).toContainText("on record", {
-      timeout: 15_000,
+      timeout: 45_000,
     });
     await expect(card.getByTestId("supervision-status")).toHaveText(
       /views received/,
@@ -252,8 +252,9 @@ test.describe("Issue #206 · supervision (Art. 63) and retention (Art. 73(1)(e))
         "Journey 46: two aggregate tables, both on record in the audit trail.",
       );
     await card.getByRole("button", { name: "Send answer" }).click();
+    // Azure's proxy and graph wake slowly; the write can take a while.
     await expect(card.getByRole("status")).toContainText("on record", {
-      timeout: 15_000,
+      timeout: 45_000,
     });
     const own = await apiGet(
       researcher,
