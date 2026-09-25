@@ -49,7 +49,7 @@ appended, the patient record gets the bundle, research gets OMOP tables.
 
 ## Secondary use: the researcher's path
 
-![The researcher on the platform: discovering datasets across holders, the negotiation history, and the OMOP analytics over the synthetic cohort.](img/ehds-researcher-journey.gif)
+![The researcher on the platform: the one view the login lands on, with what is allowed today, pending or blocked, then discovering datasets across holders, the negotiation history, and the OMOP analytics over the synthetic cohort.](img/ehds-researcher-journey.gif)
 
 The dataspace half runs on the Eclipse Dataspace Components stack with the EHDS roles on
 top. A data user [discovers datasets](https://ehds.mabu.red/data/discover) through
@@ -114,4 +114,4 @@ The platform runs at [ehds.mabu.red](https://ehds.mabu.red) on synthetic data, a
 and the whole stack runs on a laptop. Source, decisions, runbooks and the app guide:
 [github.com/ma3u/MinimumViableHealthDataspacev2](https://github.com/ma3u/MinimumViableHealthDataspacev2),
 Apache 2.0. The slides from the Winners Showcase are at
-[ehds.mabu.red/presentations/hl7-showcase-2026](https://ehds.mabu.red/presentations/hl7-showcase-2026). Pull requests are welcome! 
+[ehds.mabu.red/presentations/hl7-showcase-2026](https://ehds.mabu.red/presentations/hl7-showcase-2026). Pull requests are welcome!

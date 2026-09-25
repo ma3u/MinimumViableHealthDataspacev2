@@ -27,6 +27,23 @@ NODE_PATH=ui/node_modules node docs/submissions/hl7-ai-challenge-2026/make_pdf.j
 The PDF is written next to the script. Keep it **≤10 pages** — the challenge does not
 evaluate pages beyond the tenth.
 
+## Regenerate the animations
+
+`img/ehds-researcher-journey.gif` (also shown in the deck under
+`ui/public/presentations/hl7-showcase-2026/img/`) is recorded on the live platform as the
+researcher persona: the overview the login lands on, dataset discovery, the negotiation
+history, the OMOP analytics. From `ui/`:
+
+```bash
+PLAYWRIGHT_BASE_URL=https://ehds.mabu.red OUT=/tmp/researcher npx tsx scripts/record-researcher-journey.ts
+python3 scripts/frames-to-gif.py /tmp/researcher ../docs/submissions/hl7-ai-challenge-2026/img/ehds-researcher-journey.gif
+cp ../docs/submissions/hl7-ai-challenge-2026/img/ehds-researcher-journey.gif public/presentations/hl7-showcase-2026/img/
+```
+
+The frames are screenshots taken at chosen moments, so loading time never ends up in the
+animation; about 57 frames, 22 seconds, under 2 MB. `img/klarbefund-tour.gif` is built
+from the app screenshots in `docs/klarbefund/img/` (fictional dev dataset).
+
 ## Notes
 
 - Figures in the document are drawn from this repository and marked approximate; verify
