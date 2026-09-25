@@ -108,7 +108,13 @@ describe("POST /api/compliance/permits", () => {
     expect(body.publishBy).toMatch(/^\d{4}-\d{2}-\d{2}$/);
     expect(body.decidedBy).toBe("did:web:medreg.de:hdab");
 
-    const [cypher, params] = mockRunQuery.mock.calls[0];
+    // the first query reads the application for the fee (Art. 62); the
+    // second writes the decision
+    expect(String(mockRunQuery.mock.calls[0][0])).toContain(
+      "applicantCategory",
+    );
+    const [cypher, params] = mockRunQuery.mock.calls[1];
+    expect((params as Record<string, unknown>).feeEur).toBe(4350);
     expect(cypher).toContain(
       "MERGE (permit:HDABApproval {approvalId: $permitId})",
     );

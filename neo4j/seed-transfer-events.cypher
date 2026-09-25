@@ -267,3 +267,10 @@ SET te.participant = fixed, te.consumerDid = fixed
 WITH te, fixed
 MATCH (c:Participant {participantId: fixed})
 MERGE (te)-[:REQUESTED_BY]->(c);
+
+// ── Art. 73(1)(e): every access event is kept for at least one year ──────
+// Seeded and proxy-written events alike; the purge on /admin/audit deletes
+// nothing before retainUntil, and nothing without it (issue #206, M3).
+MATCH (te:TransferEvent)
+WHERE te.retainUntil IS NULL AND te.timestamp IS NOT NULL
+SET te.retainUntil = datetime(toString(te.timestamp)) + duration({months: 12});

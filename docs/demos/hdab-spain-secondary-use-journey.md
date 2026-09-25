@@ -161,6 +161,30 @@ answer 403 and name the article and the reason. On a stack where PharmaCo alread
 Synthea cohort, show the refusal on an application for another dataset, or
 revoke first.
 
+**The application itself, Art. 67(2):** on `/applications` the researcher
+files the eleven items (who will access the data, purpose, intended use, the
+data with time range and formats, pseudonymised or anonymised and why,
+datasets brought in, safeguards, period, SPE tools, ethics, any Art. 71(4)
+exception); the form is prefilled, one click files a complete application.
+The seeded second PharmaCo application was sent back as incomplete: the panel
+on `/compliance` lists the items with what is missing, "Notify incomplete"
+stops the three-month clock and gives four weeks, "Extend by three months"
+is the one extension Art. 68(4) allows, with reasons; the researcher
+completes it on `/applications` and the clock runs again from that day. With
+a refusal, tick "offer an anonymised statistical answer instead" (Art.
+68(3)). Under the items the panel shows the fee estimate (Art. 62): access
+body plus data holder, reduced for a public body, an academic or a
+micro-enterprise (Art. 62(3)); the schedule is public on `/information`.
+
+**Supervision, Art. 63:** on `/supervision` the access body records a
+finding against a party (with the permit it concerns and, if suspected, the
+GDPR breach that informs the supervisory authority); the party has four weeks
+to state its views on the same page; the body closes it with a measure:
+warning, revocation of the permit (the next transfer and query fail at
+once), exclusion, or a fine (Art. 64). The measure is on the audit page's
+Supervision tab and on the public register. The same page carries requests
+for information and their answers (Art. 63(1)).
+
 **Show the shelf, Art. 59:** `/activity-report` is the access body's
 biennial activity report, generated from the graph and public without a
 sign-in: the applications and permits, the purposes and the data accessed,
@@ -178,9 +202,20 @@ show that it yields no answer. Both decisions land on the public register.
 
 **Show the public side:** `/permits` needs no sign-in. It lists every
 application received, every permit and refusal with its justification and
-the 30-working-day publication deadline, and every revocation with its reason
-(Art. 57(1)(j), Art. 58(1)(f)). That is the page a natural person or a
-journalist gets; the access body's own view is `/compliance`.
+the 30-working-day publication deadline, every revocation with its reason,
+the measures taken on non-compliance, and the results data users communicated
+(Art. 57(1)(j), Art. 58(1)(f)). `/information` is what the access body tells
+the public under Art. 58(1): the legal basis, the safeguards, the rights of
+natural persons and how to exercise them, the body's contact, who has access
+to which datasets and why, the results, and the fee schedule. That is what a
+natural person or a journalist gets; the access body's own view is
+`/compliance`.
+
+**The trusted holder, Art. 72:** AlphaKlinik Berlin is seeded as a trusted
+data holder. A statistical request on the dataset it offers (the Synthetic
+Type 2 Diabetes Patient Journey) can be decided by the clinic user on
+`/requests`, under the body's supervision; the register says "answered by the
+trusted data holder (Art. 72)".
 
 ### 5. Extract and upload, pseudonymised
 
@@ -215,6 +250,12 @@ comes from, and a data user without one is refused with the article.
 **Say:** what leaves the environment is aggregate output, and it leaves under
 the same policy that governed the input.
 
+**Do:** on `/applications`, under the issued permit, "Communicate results"
+files a publication, a policy document, a regulatory procedure or an IT
+product (Art. 61(4)); the register shows it against the 18-month deadline,
+`/information` lists it under (g), and the activity report counts it under
+(a), (j) and (k).
+
 ### 8. The audit report
 
 | Link                                                                                                   |
@@ -223,7 +264,10 @@ the same policy that governed the input.
 
 **Say:** every step above left a record: who asked, who approved, what moved,
 when, under which contract and which permit. The regulator can reconstruct the
-chain without asking either participant for their logs.
+chain without asking either participant for their logs. The Access Logs tab
+states the retention: every event is kept at least one year (Art. 73(1)(e)),
+and "Delete expired records" removes only what is past that date, which on
+a demo graph is nothing.
 
 **Close on this.** It is the answer to "how would we supervise this".
 

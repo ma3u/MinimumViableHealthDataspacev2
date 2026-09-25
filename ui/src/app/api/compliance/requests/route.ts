@@ -54,6 +54,8 @@ export interface HealthDataRequestRow {
   answerError: string | null;
   answeredAt: string | null;
   suppressedCells: number | null;
+  decidedUnder?: string | null;
+  feeEur?: number | null;
 }
 
 export async function POST(req: NextRequest) {
@@ -194,13 +196,29 @@ export async function GET() {
     session.roles,
   );
 
-  const rows = await runQuery<HealthDataRequestRow>(
+  // Art. 72: a trusted data holder also sees, and decides, the requests on
+  // the datasets it offers.
+  const holder = await runQuery<{ trusted: boolean }>(
+    `OPTIONAL MATCH (h:Participant)
+       WHERE coalesce(h.participantId, h.id) = $callerDid
+     RETURN coalesce(h.trustedHolder, false) AS trusted`,
+    { callerDid },
+  );
+  const trustedHolder =
+    session.roles.includes("DATA_HOLDER") && holder[0]?.trusted === true;
+
+  const rows = await runQuery<HealthDataRequestRow & { holder: string | null }>(
     `MATCH (r:HealthDataRequest)
-     WHERE $all OR r.applicantId = $callerDid
      OPTIONAL MATCH (p:Participant)-[:SUBMITTED]->(r)
      OPTIONAL MATCH (ds:HealthDataset)
        WHERE coalesce(ds.datasetId, ds.id) = r.datasetId
+     OPTIONAL MATCH (offers:Participant)-[:OFFERS]->(:DataProduct)-[:DESCRIBED_BY]->(ds)
+     WITH r, p, ds, collect(DISTINCT coalesce(offers.participantId, offers.id)) AS holders
+     WHERE $all OR r.applicantId = $callerDid OR ($trustedHolder AND $callerDid IN holders)
      RETURN r.requestId                     AS requestId,
+            head(holders)                   AS holder,
+            r.decidedUnder                  AS decidedUnder,
+            r.feeEur                        AS feeEur,
             coalesce(p.participantId, p.id) AS applicant,
             p.name                          AS applicantName,
             r.question                      AS question,
@@ -221,7 +239,7 @@ export async function GET() {
             toString(r.answeredAt)          AS answeredAt,
             r.suppressedCells               AS suppressedCells
      ORDER BY r.submittedAt DESC`,
-    { all: isBody, callerDid },
+    { all: isBody, callerDid, trustedHolder },
   );
 
   const now = Date.now();
@@ -248,9 +266,17 @@ export async function GET() {
   });
 
   return NextResponse.json({
-    requests,
-    scope: isBody ? "all" : "own",
+    requests: requests.map((r) => ({
+      ...r,
+      // whether this caller may decide it: the body always, a trusted holder
+      // for its own datasets (Art. 72)
+      canDecide:
+        session.roles.includes("HDAB_AUTHORITY") ||
+        (trustedHolder && r.holder === callerDid),
+    })),
+    scope: isBody ? "all" : trustedHolder ? "holder" : "own",
+    trustedHolder,
     article:
-      "Regulation (EU) 2025/327, Art. 69: statistical answers only; Art. 69(4): three months to decide",
+      "Regulation (EU) 2025/327, Art. 69: statistical answers only; Art. 69(4): three months to decide; Art. 72: trusted holders answer for their own datasets",
   });
 }
