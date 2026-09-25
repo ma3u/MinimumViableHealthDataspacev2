@@ -275,3 +275,8 @@ MATCH (n:ContractNegotiation)
 WITH count(n) AS neg_count
 MATCH (t:DataTransfer)
 RETURN neg_count, count(t) AS trn_count;
+
+// ── Art. 73(1)(e): recorded transfers are kept for at least one year ─────
+MATCH (t:DataTransfer)
+WHERE t.retainUntil IS NULL AND t.timestamp IS NOT NULL
+SET t.retainUntil = toString(datetime(t.timestamp) + duration({months: 12}));

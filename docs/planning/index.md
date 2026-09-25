@@ -29,6 +29,7 @@ Groom with `/plan`. Token budget per ADR-026: keep this index small.
 
 ## done/
 
+- [issue-206-hdab-tasks](done/issue-206-hdab-tasks.md) — the access body's tasks under Regulation (EU) 2025/327, M0 to M7 (2026-09-25)
 - [issue-8-federated-discovery](done/issue-8-federated-discovery.md) — Phase 26 complete (2026-07-15)
 - [issue-10-azure-deployment](done/issue-10-azure-deployment.md) — ACA deployment (ADR-012)
 - [issue-1-trust-center](done/issue-1-trust-center.md) — pseudonym resolution (EHDS Art. 50/51)

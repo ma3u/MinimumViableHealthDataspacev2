@@ -1,0 +1,20 @@
+{
+  "results": [
+    {
+      "resultId": "result-lmc-irs-2026-001-20260901",
+      "permitId": "hdab-irs-lmc-2026-001",
+      "applicant": "did:web:lmc.nl:clinic",
+      "applicantName": "Limburg Medical Centre",
+      "datasetId": "dataset:cardiac-outcomes-eu-2025",
+      "datasetTitle": "EU Cardiac Outcomes Registry 2025",
+      "kind": "PUBLICATION",
+      "title": "Readmission after cardiac surgery in a cross-border cohort: a synthetic-data feasibility study",
+      "summary": "Aggregate readmission rates by procedure and age band; no record left the secure processing environment.",
+      "url": "https://example.org/lmc/readmission-feasibility-2026",
+      "communicatedAt": "2026-09-01T10:00:00Z",
+      "deadline": "2028-08-01T08:30:00Z",
+      "onTime": true
+    }
+  ],
+  "article": "Regulation (EU) 2025/327, Art. 61(4); published under Art. 57(1)(j)(v)"
+}

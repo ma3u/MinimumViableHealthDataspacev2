@@ -30,6 +30,9 @@ export const LABEL_LAYER: Record<string, number> = {
   AccessApplication: 1,
   HDABApproval: 1,
   HealthDataRequest: 1,
+  NonComplianceFinding: 1,
+  InformationRequest: 1,
+  ResultCommunication: 1,
   ContractNegotiation: 1,
   DataTransfer: 1,
   Catalog: 1,
@@ -102,6 +105,9 @@ export const NODE_ROLE_COLORS: Record<string, string> = {
   TrustCenter: "#EF4444", // red-500     — HDAB-designated pseudonym authority
   HDABApproval: "#EC4899", // pink-500    — approval authority
   HealthDataRequest: "#DB2777", // pink-600    — Art. 69 statistical request
+  NonComplianceFinding: "#B91C1C", // red-700     — Art. 63 finding of non-compliance
+  InformationRequest: "#F97316", // orange-500  — Art. 63(1) request for information
+  ResultCommunication: "#0891B2", // cyan-600    — Art. 61(4) results of the use
   SPESession: "#F59E0B", // amber-500   — active secure processing sessions
   PatientConsent: "#A855F7", // purple-500  — GDPR Art. 15-22 patient consent
   ResearchInsight: "#06B6D4", // cyan-500    — personalised research findings
@@ -195,6 +201,9 @@ export const NODE_DISPLAY_NAMES: Record<string, string> = {
   AccessApplication: "Access Request",
   HDABApproval: "Access Decision",
   HealthDataRequest: "Statistical Request",
+  NonComplianceFinding: "Non-Compliance Finding",
+  InformationRequest: "Information Request",
+  ResultCommunication: "Results of Use",
   ContractNegotiation: "Negotiation",
   DataTransfer: "Data Transfer",
   Catalog: "Catalog",
@@ -251,6 +260,12 @@ export const NODE_TOOLTIPS: Record<string, string> = {
     "EHDS Art. 68 — data permit issued or refused by the health data access body",
   HealthDataRequest:
     "EHDS Art. 69 — request for a statistic, answered in anonymised form only",
+  NonComplianceFinding:
+    "EHDS Art. 63 — a finding of non-compliance, the party's views within four weeks, the measure taken",
+  InformationRequest:
+    "EHDS Art. 63(1) — the access body's request for information and the party's answer",
+  ResultCommunication:
+    "EHDS Art. 61(4) — the results a data user communicates within 18 months of the end of processing",
   TrustCenter:
     "EHDS Art. 50/51 — pseudonymisation authority for secure processing",
   SPESession: "EHDS Art. 50 — an active Secure Processing Environment session",
@@ -294,6 +309,9 @@ export const LABEL_SORT_ORDER: Record<string, number> = {
   HDABApproval: 5,
   AccessApplication: 6,
   HealthDataRequest: 6,
+  NonComplianceFinding: 6,
+  InformationRequest: 6,
+  ResultCommunication: 6,
   ContractNegotiation: 7,
   DataTransfer: 8,
   Catalog: 9,

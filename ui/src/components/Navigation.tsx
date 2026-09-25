@@ -20,6 +20,8 @@ import {
   Heart,
   Activity,
   FileText,
+  Gavel,
+  Info,
   Code2,
   Layers,
   ScrollText,
@@ -88,6 +90,19 @@ const exploreGroup: NavGroup = {
       icon: Edit3,
       roles: ["EDC_ADMIN", "DATA_HOLDER", "EDC_USER_PARTICIPANT"],
     },
+    // Art. 72: a trusted holder answers statistical requests on its datasets.
+    {
+      href: "/requests",
+      label: "Statistical Requests",
+      icon: BarChart2,
+      roles: ["DATA_HOLDER"],
+    },
+    {
+      href: "/supervision",
+      label: "Supervision",
+      icon: Gavel,
+      roles: ["DATA_HOLDER"],
+    },
     { href: "/patient", label: "Patient Journey", icon: User },
     {
       href: "/analytics",
@@ -106,6 +121,8 @@ const exploreGroup: NavGroup = {
     { href: "/permits", label: "Permits Register", icon: ScrollText },
     // Art. 59: the access body's activity report is public too.
     { href: "/activity-report", label: "Activity Report", icon: FileBarChart },
+    // Art. 58(1): what the public is told about secondary use.
+    { href: "/information", label: "Secondary Use Info", icon: Info },
   ],
 };
 
@@ -125,6 +142,13 @@ const governanceGroup: NavGroup = {
       href: "/requests",
       label: "Statistical Requests",
       icon: BarChart2,
+      roles: ["EDC_ADMIN", "HDAB_AUTHORITY"],
+    },
+    // Art. 63: findings, views, measures and requests for information.
+    {
+      href: "/supervision",
+      label: "Supervision",
+      icon: Gavel,
       roles: ["EDC_ADMIN", "HDAB_AUTHORITY"],
     },
     {
@@ -251,10 +275,23 @@ const myResearchesGroup: NavGroup = {
       icon: FileSignature,
       roles: ["DATA_USER"],
     },
+    // Art. 67: the application for a data permit, with its eleven items.
+    {
+      href: "/applications",
+      label: "Apply for a Permit",
+      icon: FileText,
+      roles: ["DATA_USER"],
+    },
     {
       href: "/requests",
       label: "Statistical Requests",
       icon: BarChart2,
+      roles: ["DATA_USER"],
+    },
+    {
+      href: "/supervision",
+      label: "Supervision",
+      icon: Gavel,
       roles: ["DATA_USER"],
     },
     {

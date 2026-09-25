@@ -3,6 +3,7 @@ import { requireAuth, isAuthError } from "@/lib/auth-guard";
 import { runQuery } from "@/lib/neo4j";
 import { resolveOdrlScope, userToParticipantId } from "@/lib/odrl-engine";
 import { PUBLISH_WORKING_DAYS, addWorkingDays } from "@/lib/permits";
+import { REQUEST_FEE_EUR } from "@/lib/fees";
 import { toStatisticalAnswer, type NlqAnswer } from "@/lib/statistics";
 
 export const dynamic = "force-dynamic";
@@ -20,7 +21,9 @@ const PROXY_URL = process.env.NEO4J_PROXY_URL ?? "http://localhost:9090";
  * the proxy as an access event under the request id. Issue #206, M5.
  */
 export async function POST(req: NextRequest) {
-  const auth = await requireAuth(["HDAB_AUTHORITY"]);
+  // The access body decides (Art. 69(3)); so does a trusted data holder for a
+  // request on its own dataset, under the body's supervision (Art. 72).
+  const auth = await requireAuth(["HDAB_AUTHORITY", "DATA_HOLDER"]);
   if (isAuthError(auth)) return auth;
 
   let body: Record<string, unknown>;
@@ -58,6 +61,41 @@ export async function POST(req: NextRequest) {
     .toISOString()
     .slice(0, 10);
 
+  const isBody = session.roles.includes("HDAB_AUTHORITY");
+  let decidedUnder = "Art. 69(3)";
+  if (!isBody) {
+    // Art. 72: a trusted data holder answers requests on the datasets it
+    // offers; anything else stays with the access body.
+    const trusted = await runQuery<{ trusted: boolean; own: boolean }>(
+      `MATCH (r:HealthDataRequest {requestId: $requestId})
+       OPTIONAL MATCH (holder:Participant)
+         WHERE coalesce(holder.participantId, holder.id) = $decidedBy
+       OPTIONAL MATCH (holder)-[:OFFERS]->(:DataProduct)-[:DESCRIBED_BY]->(ds:HealthDataset)
+         WHERE coalesce(ds.datasetId, ds.id) = r.datasetId
+       RETURN coalesce(holder.trustedHolder, false) AS trusted,
+              count(ds) > 0 AS own
+       LIMIT 1`,
+      { requestId, decidedBy },
+    );
+    if (trusted.length === 0) {
+      return NextResponse.json(
+        { error: `Health data request ${requestId} is not in the graph` },
+        { status: 404 },
+      );
+    }
+    if (!trusted[0].trusted || !trusted[0].own) {
+      return NextResponse.json(
+        {
+          error: trusted[0].trusted
+            ? "A trusted data holder decides only on requests for the datasets it offers (Art. 72)"
+            : "Only the health data access body, or a trusted data holder for its own datasets, decides (Art. 69(3), Art. 72)",
+        },
+        { status: 403 },
+      );
+    }
+    decidedUnder = "Art. 72";
+  }
+
   const found = await runQuery<{
     requestId: string;
     applicantId: string | null;
@@ -69,8 +107,11 @@ export async function POST(req: NextRequest) {
      SET r.status        = $decision,
          r.decidedAt     = datetime($decidedAt),
          r.decidedBy     = $decidedBy,
+         r.decidedUnder  = $decidedUnder,
+         r.simplifiedProcedure = $decidedUnder = 'Art. 72',
          r.officer       = $officer,
          r.justification = $justification,
+         r.feeEur        = CASE WHEN $decision = 'APPROVED' THEN $feeEur ELSE null END,
          r.publishBy     = date($publishBy)
      WITH r
      OPTIONAL MATCH (hdab:Participant)
@@ -85,8 +126,10 @@ export async function POST(req: NextRequest) {
       decision,
       decidedAt: decidedAt.toISOString(),
       decidedBy,
+      decidedUnder,
       officer,
       justification,
+      feeEur: REQUEST_FEE_EUR,
       publishBy,
     },
   );
@@ -104,9 +147,13 @@ export async function POST(req: NextRequest) {
       decision,
       decidedAt: decidedAt.toISOString(),
       decidedBy,
+      decidedUnder,
       justification,
       publishBy,
-      article: "Regulation (EU) 2025/327, Art. 69(3): request refused",
+      article:
+        decidedUnder === "Art. 72"
+          ? "Regulation (EU) 2025/327, Art. 72: request refused by the trusted data holder"
+          : "Regulation (EU) 2025/327, Art. 69(3): request refused",
     });
   }
 
@@ -178,6 +225,8 @@ export async function POST(req: NextRequest) {
     decision,
     decidedAt: decidedAt.toISOString(),
     decidedBy,
+    decidedUnder,
+    feeEur: REQUEST_FEE_EUR,
     publishBy,
     answered: stat.ok,
     answer: stat.ok ? stat.rows : null,
@@ -186,7 +235,11 @@ export async function POST(req: NextRequest) {
     suppressedCells: stat.suppressedCells,
     kAnonymity: stat.kAnonymity,
     article: stat.ok
-      ? "Regulation (EU) 2025/327, Art. 69(1): answered in anonymised statistical format"
+      ? `Regulation (EU) 2025/327, Art. 69(1): answered in anonymised statistical format${
+          decidedUnder === "Art. 72"
+            ? " by the trusted data holder (Art. 72)"
+            : ""
+        }`
       : "Regulation (EU) 2025/327, Art. 69(1): approved, but the question yields no statistical answer",
   });
 }

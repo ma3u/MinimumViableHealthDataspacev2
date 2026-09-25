@@ -309,6 +309,49 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ type, limit, filters, ...results });
     }
 
+    // ── Supervision: findings and information requests (Art. 63) ──────────
+    if (type === "supervision") {
+      const [findings, informationRequests] = await Promise.all([
+        runQuery<{ finding: Row }>(
+          `MATCH (f:NonComplianceFinding)
+           OPTIONAL MATCH (f)-[:AGAINST]->(party:Participant)
+           OPTIONAL MATCH (f)-[:LED_TO]->(permit:HDABApproval)
+           RETURN f {
+             .findingId, .partyId, .permitId, .description, .gdprBreach,
+             .supervisoryAuthorityInformed, .status, .views, .measure,
+             .measureNote, .exclusionMonths, .fineEur, .foundBy,
+             partyName:   party.name,
+             notifiedAt:  toString(f.notifiedAt),
+             respondBy:   toString(f.respondBy),
+             respondedAt: toString(f.respondedAt),
+             closedAt:    toString(f.closedAt),
+             revokedPermit: permit.approvalId
+           } AS finding
+           ORDER BY f.notifiedAt DESC
+           LIMIT $limit`,
+          { limit: limitParam },
+        ),
+        runQuery<{ request: Row }>(
+          `MATCH (i:InformationRequest)
+           OPTIONAL MATCH (i)-[:ASKED_OF]->(party:Participant)
+           RETURN i {
+             .requestId, .partyId, .permitId, .findingId, .question, .status,
+             .answer, .requestedBy,
+             partyName:   party.name,
+             requestedAt: toString(i.requestedAt),
+             answerBy:    toString(i.answerBy),
+             answeredAt:  toString(i.answeredAt)
+           } AS request
+           ORDER BY i.requestedAt DESC
+           LIMIT $limit`,
+          { limit: limitParam },
+        ),
+      ]);
+      results.findings = findings.map((r) => r.finding);
+      results.informationRequests = informationRequests.map((r) => r.request);
+      return NextResponse.json({ type, limit, filters, ...results });
+    }
+
     // ── Verifiable Credentials ────────────────────────────────────────────
     if (type === "all" || type === "credentials") {
       const credentials = await runQuery<{ credential: Row }>(

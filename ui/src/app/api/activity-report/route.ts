@@ -8,7 +8,9 @@ import {
   type ApplicationRow,
   type BodyRow,
   type LabelRow,
+  type MeasureRow,
   type RequestRow,
+  type ResultReportRow,
 } from "@/lib/activity-report";
 
 export const dynamic = "force-dynamic";
@@ -28,17 +30,18 @@ export async function GET(request: NextRequest) {
   const window = { from: from.toISOString(), to: to.toISOString() };
 
   try {
-    const [bodies, applications, requests, access, labels] = await Promise.all([
-      runQuery<BodyRow>(
-        `MATCH (h:Participant)
+    const [bodies, applications, requests, access, labels, results, measures] =
+      await Promise.all([
+        runQuery<BodyRow>(
+          `MATCH (h:Participant)
            WHERE toUpper(coalesce(h.participantType, '')) = 'HDAB'
            RETURN h.name AS name,
                   coalesce(h.participantId, h.id) AS did,
                   h.country AS country
            ORDER BY h.name`,
-      ),
-      runQuery<ApplicationRow>(
-        `MATCH (app:AccessApplication)
+        ),
+        runQuery<ApplicationRow>(
+          `MATCH (app:AccessApplication)
            OPTIONAL MATCH (p:Participant)-[:SUBMITTED]->(app)
            OPTIONAL MATCH (permit:HDABApproval)-[:APPROVES]->(app)
            OPTIONAL MATCH (permit)-[:GRANTS_ACCESS_TO]->(granted:HealthDataset)
@@ -60,20 +63,22 @@ export async function GET(request: NextRequest) {
                   permit.revocationReason AS revocationReason,
                   coalesce(granted.datasetId, granted.id, app.datasetId) AS datasetId,
                   coalesce(granted.title, requested.title, granted.name, requested.name) AS datasetTitle,
+                  permit.feeEur AS feeEur,
                   reduce(m = null, x IN accessTimes |
                     CASE WHEN x IS NULL OR x = 'null' THEN m
                          WHEN m IS NULL OR x < m THEN x ELSE m END) AS firstAccessAt
            ORDER BY app.submittedAt`,
-      ),
-      runQuery<RequestRow>(
-        `MATCH (r:HealthDataRequest)
+        ),
+        runQuery<RequestRow>(
+          `MATCH (r:HealthDataRequest)
            RETURN r.requestId AS requestId,
                   r.status AS status,
                   r.purpose AS purpose,
-                  toString(r.submittedAt) AS submittedAt`,
-      ),
-      runQuery<AccessRow>(
-        `MATCH (te:TransferEvent)
+                  toString(r.submittedAt) AS submittedAt,
+                  r.feeEur AS feeEur`,
+        ),
+        runQuery<AccessRow>(
+          `MATCH (te:TransferEvent)
            WHERE te.timestamp IS NULL
               OR (datetime(toString(te.timestamp)) >= datetime($from)
                   AND datetime(toString(te.timestamp)) <= datetime($to))
@@ -87,10 +92,10 @@ export async function GET(request: NextRequest) {
                   count(CASE WHEN toInteger(te.statusCode) = 403 THEN 1 END) AS refused,
                   count(DISTINCT te.permitId) AS permits
            ORDER BY events DESC`,
-        window,
-      ),
-      runQuery<LabelRow>(
-        `MATCH (vc:VerifiableCredential {credentialType: 'DataQualityLabelCredential'})
+          window,
+        ),
+        runQuery<LabelRow>(
+          `MATCH (vc:VerifiableCredential {credentialType: 'DataQualityLabelCredential'})
            OPTIONAL MATCH (holder:Participant)-[:HOLDS_CREDENTIAL]->(vc)
            RETURN vc.credentialId AS credentialId,
                   vc.datasetId AS datasetId,
@@ -102,8 +107,29 @@ export async function GET(request: NextRequest) {
                   toString(vc.assessmentDate) AS assessmentDate,
                   vc.status AS status
            ORDER BY vc.credentialId`,
-      ),
-    ]);
+        ),
+        // Art. 61(4): results communicated by data users, for (a), (j) and (k)
+        runQuery<ResultReportRow>(
+          `MATCH (rc:ResultCommunication)
+           OPTIONAL MATCH (p:Participant)
+             WHERE coalesce(p.participantId, p.id) = rc.applicantId
+           RETURN rc.resultId AS resultId, rc.permitId AS permitId,
+                  p.name AS applicant, rc.kind AS kind, rc.title AS title,
+                  rc.url AS url, toString(rc.communicatedAt) AS communicatedAt,
+                  rc.onTime AS onTime
+           ORDER BY rc.communicatedAt`,
+        ),
+        // Art. 63(3), Art. 64: measures on closed findings, for (b)
+        runQuery<MeasureRow>(
+          `MATCH (f:NonComplianceFinding)
+           WHERE toUpper(coalesce(f.status, '')) = 'CLOSED'
+           OPTIONAL MATCH (f)-[:AGAINST]->(party:Participant)
+           RETURN f.findingId AS findingId, party.name AS party,
+                  f.measure AS measure, f.measureNote AS note,
+                  f.fineEur AS fineEur, toString(f.closedAt) AS closedAt
+           ORDER BY f.closedAt`,
+        ),
+      ]);
 
     const report = buildActivityReport({
       bodies,
@@ -111,6 +137,8 @@ export async function GET(request: NextRequest) {
       requests,
       access,
       labels,
+      results,
+      measures,
       from,
       to,
     });

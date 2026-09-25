@@ -1,0 +1,22 @@
+{
+  "requests": [
+    {
+      "requestId": "info-pharmaco-20260921-demo",
+      "party": "did:web:pharmaco.de:research",
+      "partyName": "PharmaCo Research AG",
+      "permitId": null,
+      "findingId": "finding-pharmaco-20260918-demo",
+      "question": "Which persons accessed the data under the permit in the last quarter, and which outputs left the environment?",
+      "status": "OPEN",
+      "requestedAt": "2026-09-21T09:00:00Z",
+      "answerBy": "2026-10-19T09:00:00Z",
+      "daysToAnswer": 24,
+      "answer": null,
+      "answeredAt": null,
+      "requestedBy": "did:web:medreg.de:hdab",
+      "accessBody": "MedReg DE"
+    }
+  ],
+  "scope": "own",
+  "article": "Regulation (EU) 2025/327, Art. 63(1)"
+}

@@ -2,7 +2,8 @@ import { NextResponse } from "next/server";
 import { runQuery } from "@/lib/neo4j";
 import { edcClient } from "@/lib/edc";
 import { requireAuth, isAuthError } from "@/lib/auth-guard";
-import { decisionClock } from "@/lib/permits";
+import { applicationClock, applicationCompleteness } from "@/lib/permits";
+import { APPLICATION_FIELDS, type InboxRow } from "@/lib/applications";
 
 export const dynamic = "force-dynamic";
 
@@ -53,33 +54,36 @@ export async function GET(req: Request) {
          ORDER BY title`,
       ),
       // Compliance matrix: for every participant, check what chain elements exist
-      runQuery<{
-        consumerId: string;
-        consumerName: string;
-        consumerType: string;
-        hasApplication: boolean;
-        applicationStatus: string | null;
-        hasApproval: boolean;
-        approvalStatus: string | null;
-        datasetId: string | null;
-        datasetTitle: string | null;
-        hasContract: boolean;
-        ehdsArticle: string | null;
-        applicationId: string | null;
-        applicationName: string | null;
-        submittedAt: string | null;
-        requestedPurpose: string | null;
-        requestedDatasetId: string | null;
-        requestedDatasetTitle: string | null;
-        justification: string | null;
-        ethicsCommitteeRef: string | null;
-        approvalId: string | null;
-        decidedAt: string | null;
-        validUntil: string | null;
-        decisionJustification: string | null;
-        revokedAt: string | null;
-        revocationReason: string | null;
-      }>(
+      runQuery<
+        {
+          consumerId: string;
+          consumerName: string;
+          consumerType: string;
+          hasApplication: boolean;
+          applicationStatus: string | null;
+          hasApproval: boolean;
+          approvalStatus: string | null;
+          datasetId: string | null;
+          datasetTitle: string | null;
+          hasContract: boolean;
+          ehdsArticle: string | null;
+          applicationId: string | null;
+          applicationName: string | null;
+          submittedAt: string | null;
+          requestedPurpose: string | null;
+          requestedDatasetId: string | null;
+          requestedDatasetTitle: string | null;
+          justification: string | null;
+          ethicsCommitteeRef: string | null;
+          approvalId: string | null;
+          decidedAt: string | null;
+          validUntil: string | null;
+          decisionJustification: string | null;
+          revokedAt: string | null;
+          revocationReason: string | null;
+          statisticalAlternativeOffered: boolean | null;
+        } & Partial<InboxRow>
+      >(
         // One row per application, plus one for a participant without any, so
         // the access body's inbox shows every case it has to decide (Art. 57(1)(e)).
         `MATCH (p:Participant)
@@ -115,12 +119,17 @@ export async function GET(req: Request) {
                 toString(approval.validUntil)   AS validUntil,
                 approval.justification          AS decisionJustification,
                 toString(approval.revokedAt)    AS revokedAt,
-                approval.revocationReason       AS revocationReason
+                approval.revocationReason       AS revocationReason,
+                approval.statisticalAlternativeOffered AS statisticalAlternativeOffered,
+                app.processingPeriodMonths      AS processingPeriodMonths,
+                ${APPLICATION_FIELDS}
          ORDER BY p.name, app.submittedAt`,
       ),
     ]);
 
-    // The Art. 68(4) clock: three months from submission to a decision.
+    // The Art. 68(4) clock: three months from a complete application to a
+    // decision, stopped by an incompleteness notice, extended once at most;
+    // and which of the eleven Art. 67(2) items the application carries.
     const now = Date.now();
     const matrix = (matrixRows ?? []).map((row) => {
       const undecided =
@@ -129,7 +138,16 @@ export async function GET(req: Request) {
         !["APPROVED", "REJECTED", "REVOKED"].includes(
           (row.applicationStatus ?? "").toUpperCase(),
         );
-      return { ...row, ...decisionClock(row.submittedAt, undecided, now) };
+      return {
+        ...row,
+        ...applicationClock(row, undecided, now),
+        completeness: row.hasApplication
+          ? applicationCompleteness({
+              ...row,
+              requestedPurpose: row.requestedPurpose,
+            })
+          : null,
+      };
     });
 
     // If Neo4j has no consumers, fall back to EDC-V activated participants

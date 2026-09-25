@@ -40,12 +40,66 @@ interface Entry {
   revocationReason: string | null;
   decisionDue: string | null;
   daysToDecision: number | null;
+  decidedUnder?: string | null;
+  feeEur?: number | null;
+  results?: {
+    deadline: string | null;
+    communicatedAt: string | null;
+    count: number;
+    onTime: boolean | null;
+  } | null;
+}
+
+interface ResultEntry {
+  resultId: string;
+  permitId: string | null;
+  applicantName: string | null;
+  datasetTitle: string | null;
+  datasetId: string | null;
+  kind: string;
+  title: string;
+  summary: string | null;
+  url: string | null;
+  communicatedAt: string | null;
+  deadline: string | null;
+  onTime: boolean | null;
+}
+
+interface MeasureEntry {
+  findingId: string;
+  party: string | null;
+  partyDid: string | null;
+  permitId: string | null;
+  measure: string;
+  note: string | null;
+  exclusionMonths: number | null;
+  fineEur: number | null;
+  notifiedAt: string | null;
+  closedAt: string | null;
+  accessBody: string | null;
 }
 
 interface Register {
   generatedAt: string;
   entries: Entry[];
+  measures?: MeasureEntry[];
+  results?: ResultEntry[];
 }
+
+const RESULT_WORDS: Record<string, string> = {
+  PUBLICATION: "publication",
+  POLICY_DOCUMENT: "policy document",
+  REGULATORY_PROCEDURE: "regulatory procedure",
+  IT_PRODUCT: "IT product",
+  OTHER: "other result",
+};
+
+const MEASURE_WORDS: Record<string, string> = {
+  WARNING: "written warning",
+  REVOCATION: "data permit revoked",
+  EXCLUSION: "excluded from access",
+  FINE: "administrative fine",
+};
 
 function shortDate(iso: string | null | undefined): string {
   return iso ? iso.slice(0, 10) : "—";
@@ -234,6 +288,36 @@ export default function PermitsRegisterPage() {
                                 {e.justification}
                               </div>
                             )}
+                            {e.kind === "request" &&
+                              e.decidedUnder === "Art. 72" && (
+                                <div className="mt-1 text-[var(--text-secondary)]">
+                                  answered by the trusted data holder (Art. 72)
+                                </div>
+                              )}
+                            {e.feeEur ? (
+                              <div className="mt-1 text-[var(--text-secondary)]">
+                                fee {e.feeEur.toLocaleString("en-GB")} EUR (Art.
+                                62)
+                              </div>
+                            ) : null}
+                            {e.results && (
+                              <div
+                                className="mt-1 text-[var(--text-secondary)]"
+                                data-testid="results-status"
+                              >
+                                {e.results.count > 0
+                                  ? `results communicated ${shortDate(
+                                      e.results.communicatedAt,
+                                    )}${
+                                      e.results.onTime === false
+                                        ? ", after the 18 months"
+                                        : ", within the 18 months"
+                                    } (Art. 61(4))`
+                                  : `results due by ${shortDate(
+                                      e.results.deadline,
+                                    )} (Art. 61(4))`}
+                              </div>
+                            )}
                             {(e.outcome === "permit issued" ||
                               e.outcome === "request approved") &&
                               e.conditions.length > 0 && (
@@ -326,6 +410,167 @@ export default function PermitsRegisterPage() {
                                   : ` · ${e.daysToDecision} days left`}
                               </span>
                             )}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </section>
+
+            <section className="mt-10" data-testid="results-section">
+              <h2 className="text-sm font-semibold mb-3 text-[var(--text-primary)]">
+                Results communicated by data users, Art. 61(4) (
+                {register?.results?.length ?? 0})
+              </h2>
+              {!register?.results || register.results.length === 0 ? (
+                <p className="text-[var(--text-secondary)] text-sm">
+                  No result communicated yet
+                </p>
+              ) : (
+                <div className="overflow-x-auto rounded-lg border border-[var(--border)]">
+                  <table className="text-xs w-full border-collapse">
+                    <thead>
+                      <tr className="bg-[var(--surface)] text-[var(--text-secondary)]">
+                        <th className="text-left px-3 py-2 font-medium">
+                          Data user
+                        </th>
+                        <th className="text-left px-3 py-2 font-medium">
+                          Result
+                        </th>
+                        <th className="text-left px-3 py-2 font-medium">
+                          Dataset
+                        </th>
+                        <th className="text-left px-3 py-2 font-medium">
+                          Communicated
+                        </th>
+                        <th className="text-left px-3 py-2 font-medium">
+                          Deadline
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {register.results.map((r) => (
+                        <tr
+                          key={r.resultId}
+                          className="border-t border-[var(--border)] align-top"
+                          data-testid="result-row"
+                        >
+                          <td className="px-3 py-2 font-medium text-[var(--text-primary)]">
+                            {r.applicantName ?? "—"}
+                          </td>
+                          <td className="px-3 py-2">
+                            <div>
+                              {RESULT_WORDS[r.kind] ?? r.kind}:{" "}
+                              {r.url ? (
+                                <a
+                                  href={r.url}
+                                  className="text-[var(--accent)] hover:underline"
+                                  rel="noopener noreferrer"
+                                  target="_blank"
+                                >
+                                  {r.title}
+                                </a>
+                              ) : (
+                                r.title
+                              )}
+                            </div>
+                            {r.summary && (
+                              <div className="text-[var(--text-secondary)]">
+                                {r.summary}
+                              </div>
+                            )}
+                          </td>
+                          <td className="px-3 py-2">
+                            {r.datasetTitle ?? r.datasetId ?? "—"}
+                          </td>
+                          <td className="px-3 py-2 whitespace-nowrap">
+                            {shortDate(r.communicatedAt)}
+                          </td>
+                          <td className="px-3 py-2 whitespace-nowrap">
+                            {shortDate(r.deadline)}
+                            {r.onTime === false ? (
+                              <span className="text-[var(--danger-text)]">
+                                {" "}
+                                · late
+                              </span>
+                            ) : r.onTime === true ? (
+                              <span className="text-[var(--text-secondary)]">
+                                {" "}
+                                · met
+                              </span>
+                            ) : null}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </section>
+
+            <section className="mt-10" data-testid="measures-section">
+              <h2 className="text-sm font-semibold mb-3 text-[var(--text-primary)]">
+                Measures taken on non-compliance, Art. 63 (
+                {register?.measures?.length ?? 0})
+              </h2>
+              {!register?.measures || register.measures.length === 0 ? (
+                <p className="text-[var(--text-secondary)] text-sm">
+                  No measure taken
+                </p>
+              ) : (
+                <div className="overflow-x-auto rounded-lg border border-[var(--border)]">
+                  <table className="text-xs w-full border-collapse">
+                    <thead>
+                      <tr className="bg-[var(--surface)] text-[var(--text-secondary)]">
+                        <th className="text-left px-3 py-2 font-medium">
+                          Party
+                        </th>
+                        <th className="text-left px-3 py-2 font-medium">
+                          Measure
+                        </th>
+                        <th className="text-left px-3 py-2 font-medium">
+                          Reason
+                        </th>
+                        <th className="text-left px-3 py-2 font-medium">
+                          Notified
+                        </th>
+                        <th className="text-left px-3 py-2 font-medium">
+                          Decided
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {register.measures.map((m) => (
+                        <tr
+                          key={m.findingId}
+                          className="border-t border-[var(--border)] align-top"
+                          data-testid="measure-row"
+                        >
+                          <td className="px-3 py-2 font-medium text-[var(--text-primary)]">
+                            {m.party ?? m.partyDid ?? "—"}
+                          </td>
+                          <td className="px-3 py-2">
+                            {MEASURE_WORDS[m.measure] ?? m.measure}
+                            {m.measure === "EXCLUSION" && m.exclusionMonths
+                              ? ` for ${m.exclusionMonths} months`
+                              : ""}
+                            {m.measure === "FINE" && m.fineEur
+                              ? `, ${m.fineEur.toLocaleString("en-GB")} EUR`
+                              : ""}
+                            {m.permitId ? (
+                              <div className="font-mono text-[var(--text-secondary)]">
+                                {m.permitId}
+                              </div>
+                            ) : null}
+                          </td>
+                          <td className="px-3 py-2">{m.note ?? "—"}</td>
+                          <td className="px-3 py-2 whitespace-nowrap">
+                            {shortDate(m.notifiedAt)}
+                          </td>
+                          <td className="px-3 py-2 whitespace-nowrap">
+                            {shortDate(m.closedAt)}
                           </td>
                         </tr>
                       ))}

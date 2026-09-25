@@ -3,25 +3,37 @@ import { requireAuth, isAuthError } from "@/lib/auth-guard";
 import { runQuery } from "@/lib/neo4j";
 import { userToParticipantId } from "@/lib/odrl-engine";
 import {
+  APPLICANT_CATEGORIES,
   DECISION_MONTHS,
   PURPOSES,
   addMonths,
-  decisionClock,
+  applicationClock,
+  applicationCompleteness,
 } from "@/lib/permits";
+import {
+  APPLICATION_FIELDS,
+  itemsFromBody,
+  text,
+  type InboxRow,
+} from "@/lib/applications";
 
 export const dynamic = "force-dynamic";
 
 /**
  * Health data access applications (Regulation (EU) 2025/327, Art. 67).
  *
- * POST: a data user applies for access. This is the minimal application of
- * issue #206 M1: applicant, purpose, dataset, period and justification, the
- * four items the Art. 68 decision needs, plus the ethics reference and the
- * minimisation statement the seed already carries. The remaining Art. 67(2)
- * items follow with the researcher's form.
+ * POST: a data user applies for access with the eleven items of Art. 67(2):
+ * the applicant and the persons who will access the data, the purpose, the
+ * intended use, the requested data, pseudonymised or anonymised, datasets
+ * brought in, safeguards, the processing period, the SPE tools, the ethics
+ * assessment and any Art. 71(4) exception. Dataset, purpose and
+ * justification are the minimum the route accepts; what is missing is
+ * reported as such, and the access body can send the applicant back for it
+ * (Art. 68(4), the four-week completion window).
  *
- * GET: the access body's inbox, every application with its decision and the
- * Art. 68(4) clock (three months from submission to decide).
+ * GET: the access body's inbox, every application with its decision, the
+ * Art. 68(4) clock and its completeness; an applicant sees its own.
+ * Issue #206, M1 and M2.
  */
 
 function slugOf(did: string): string {
@@ -50,11 +62,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Body must be JSON" }, { status: 400 });
   }
 
-  const datasetId =
-    typeof body.datasetId === "string" ? body.datasetId.trim() : "";
-  const purpose = typeof body.purpose === "string" ? body.purpose.trim() : "";
-  const justification =
-    typeof body.justification === "string" ? body.justification.trim() : "";
+  const datasetId = text(body, "datasetId") ?? "";
+  const purpose = text(body, "purpose") ?? "";
+  const justification = text(body, "justification") ?? "";
   if (!datasetId || !purpose || !justification) {
     return NextResponse.json(
       {
@@ -74,18 +84,15 @@ export async function POST(req: NextRequest) {
       { status: 400 },
     );
   }
-  const periodMonths = Math.min(
-    60,
-    Math.max(1, Math.round(Number(body.periodMonths ?? 12)) || 12),
-  );
-  const ethicsCommitteeRef =
-    typeof body.ethicsCommitteeRef === "string"
-      ? body.ethicsCommitteeRef.trim()
-      : "";
+  const items = itemsFromBody(body);
+  const periodMonths = items.processingPeriodMonths ?? 12;
+  const category = text(body, "applicantCategory")?.toUpperCase() ?? null;
+  const applicantCategory =
+    category && (APPLICANT_CATEGORIES as readonly string[]).includes(category)
+      ? category
+      : "COMMERCIAL";
   const dataMinimisationStatement =
-    typeof body.dataMinimisationStatement === "string"
-      ? body.dataMinimisationStatement.trim()
-      : "";
+    text(body, "dataMinimisationStatement") ?? "";
 
   const { session } = auth;
   const applicantDid = userToParticipantId(
@@ -99,9 +106,13 @@ export async function POST(req: NextRequest) {
     .toString(36)
     .slice(2, 6)}`;
   const name =
-    typeof body.name === "string" && body.name.trim()
-      ? body.name.trim()
-      : `${purpose.toLowerCase().replace(/_/g, " ")} on ${datasetId}`;
+    text(body, "name") ??
+    `${purpose.toLowerCase().replace(/_/g, " ")} on ${datasetId}`;
+  const completeness = applicationCompleteness({
+    ...items,
+    requestedPurpose: purpose,
+    processingPeriodMonths: periodMonths,
+  });
 
   const rows = await runQuery<{
     applicationId: string;
@@ -111,18 +122,32 @@ export async function POST(req: NextRequest) {
     `MATCH (p:Participant)
      WHERE coalesce(p.participantId, p.id) = $applicantDid
      MERGE (app:AccessApplication {applicationId: $applicationId})
-     SET app.name                      = $name,
-         app.applicantId               = $applicantDid,
-         app.datasetId                 = $datasetId,
-         app.requestedPurpose          = $purpose,
-         app.submittedAt               = datetime($submittedAt),
-         app.decisionDue               = datetime($decisionDue),
-         app.status                    = 'PENDING',
-         app.justification             = $justification,
-         app.processingPeriodMonths    = $periodMonths,
-         app.ethicsCommitteeRef        = $ethicsCommitteeRef,
-         app.dataMinimisationStatement = $dataMinimisationStatement,
-         app.ehdsArticle               = 'Art. 67'
+     SET app.name                          = $name,
+         app.applicantId                   = $applicantDid,
+         app.applicantCategory             = $applicantCategory,
+         app.datasetId                     = $datasetId,
+         app.requestedPurpose              = $purpose,
+         app.submittedAt                   = datetime($submittedAt),
+         app.decisionDue                   = datetime($decisionDue),
+         app.status                        = 'PENDING',
+         app.justification                 = $justification,
+         app.processingPeriodMonths        = $periodMonths,
+         app.ethicsCommitteeRef            = $ethicsCommitteeRef,
+         app.dataMinimisationStatement     = $dataMinimisationStatement,
+         app.namedPersons                  = $namedPersons,
+         app.intendedUse                   = $intendedUse,
+         app.requestedData                 = $requestedData,
+         app.dataTimeRange                 = $dataTimeRange,
+         app.dataFormats                   = $dataFormats,
+         app.identifiability               = $identifiability,
+         app.pseudonymisationJustification = $pseudonymisationJustification,
+         app.datasetsBroughtIn             = $datasetsBroughtIn,
+         app.safeguards                    = $safeguards,
+         app.speTools                      = $speTools,
+         app.art71Exception                = $art71Exception,
+         app.art71ExceptionJustification   = $art71ExceptionJustification,
+         app.complete                      = $complete,
+         app.ehdsArticle                   = 'Art. 67'
      MERGE (p)-[:SUBMITTED]->(app)
      WITH app, p
      OPTIONAL MATCH (ds:HealthDataset)
@@ -135,6 +160,7 @@ export async function POST(req: NextRequest) {
      LIMIT 1`,
     {
       applicantDid,
+      applicantCategory,
       applicationId,
       name,
       datasetId,
@@ -143,8 +169,21 @@ export async function POST(req: NextRequest) {
       decisionDue: decisionDue.toISOString(),
       justification,
       periodMonths,
-      ethicsCommitteeRef,
+      ethicsCommitteeRef: items.ethicsCommitteeRef ?? "",
       dataMinimisationStatement,
+      namedPersons: items.namedPersons,
+      intendedUse: items.intendedUse,
+      requestedData: items.requestedData,
+      dataTimeRange: items.dataTimeRange,
+      dataFormats: items.dataFormats,
+      identifiability: items.identifiability,
+      pseudonymisationJustification: items.pseudonymisationJustification,
+      datasetsBroughtIn: items.datasetsBroughtIn,
+      safeguards: items.safeguards,
+      speTools: items.speTools,
+      art71Exception: items.art71Exception,
+      art71ExceptionJustification: items.art71ExceptionJustification,
+      complete: completeness.complete,
     },
   );
 
@@ -162,6 +201,7 @@ export async function POST(req: NextRequest) {
       applicationId,
       applicant: applicantDid,
       applicantName: rows[0].applicantName,
+      applicantCategory,
       datasetId,
       datasetKnown: rows[0].datasetKnown,
       purpose,
@@ -169,38 +209,32 @@ export async function POST(req: NextRequest) {
       status: "PENDING",
       submittedAt: submittedAt.toISOString(),
       decisionDue: decisionDue.toISOString(),
-      article:
-        "Regulation (EU) 2025/327, Art. 67(2); the access body decides within three months (Art. 68(4))",
+      completeness,
+      article: completeness.complete
+        ? "Regulation (EU) 2025/327, Art. 67(2): complete application; the access body decides within three months (Art. 68(4))"
+        : `Regulation (EU) 2025/327, Art. 67(2): ${completeness.missing.length} of the eleven items missing; the access body may ask for them and the three months run from the complete application (Art. 68(4))`,
     },
     { status: 201 },
   );
 }
 
 export async function GET() {
-  const auth = await requireAuth(["HDAB_AUTHORITY", "EDC_ADMIN"]);
+  const auth = await requireAuth();
   if (isAuthError(auth)) return auth;
+  const { session } = auth;
+  const isBody =
+    session.roles.includes("HDAB_AUTHORITY") ||
+    session.roles.includes("EDC_ADMIN");
+  const callerDid = userToParticipantId(
+    session.user.email ?? session.user.name ?? session.user.id,
+    session.roles,
+  );
 
-  const rows = await runQuery<{
-    applicationId: string;
-    name: string | null;
-    applicant: string | null;
-    applicantName: string | null;
-    datasetId: string | null;
-    datasetTitle: string | null;
-    purpose: string | null;
-    status: string | null;
-    submittedAt: string | null;
-    justification: string | null;
-    ethicsCommitteeRef: string | null;
-    periodMonths: number | null;
-    permitId: string | null;
-    decision: string | null;
-    decidedAt: string | null;
-    validUntil: string | null;
-    decisionJustification: string | null;
-  }>(
+  const rows = await runQuery<InboxRow>(
     `MATCH (app:AccessApplication)
      OPTIONAL MATCH (p:Participant)-[:SUBMITTED]->(app)
+     WITH app, p
+     WHERE $all OR coalesce(app.applicantId, p.participantId, p.id) = $callerDid
      OPTIONAL MATCH (permit:HDABApproval)-[:APPROVES]->(app)
      OPTIONAL MATCH (permit)-[:GRANTS_ACCESS_TO]->(granted:HealthDataset)
      OPTIONAL MATCH (requested:HealthDataset)
@@ -212,17 +246,22 @@ export async function GET() {
             coalesce(granted.datasetId, granted.id, app.datasetId) AS datasetId,
             coalesce(granted.title, requested.title)            AS datasetTitle,
             app.requestedPurpose                                AS purpose,
+            app.requestedPurpose                                AS requestedPurpose,
             toUpper(coalesce(app.status, ''))                   AS status,
             toString(app.submittedAt)                           AS submittedAt,
             app.justification                                   AS justification,
             app.ethicsCommitteeRef                              AS ethicsCommitteeRef,
             app.processingPeriodMonths                          AS periodMonths,
+            app.processingPeriodMonths                          AS processingPeriodMonths,
+            ${APPLICATION_FIELDS},
             permit.approvalId                                   AS permitId,
             toUpper(coalesce(permit.status, ''))                AS decision,
             toString(coalesce(permit.decidedAt, permit.approvedAt)) AS decidedAt,
             toString(permit.validUntil)                         AS validUntil,
-            permit.justification                                AS decisionJustification
+            permit.justification                                AS decisionJustification,
+            permit.statisticalAlternativeOffered                AS statisticalAlternativeOffered
      ORDER BY app.submittedAt ASC`,
+    { all: isBody, callerDid },
   );
 
   const now = Date.now();
@@ -230,7 +269,12 @@ export async function GET() {
     const undecided =
       !r.permitId &&
       !["APPROVED", "REJECTED", "REVOKED"].includes(r.status ?? "");
-    return { ...r, ...decisionClock(r.submittedAt, undecided, now), undecided };
+    return {
+      ...r,
+      ...applicationClock(r, undecided, now),
+      completeness: applicationCompleteness(r),
+      undecided,
+    };
   });
   applications.sort((a, b) => {
     if (a.undecided !== b.undecided) return a.undecided ? -1 : 1;
@@ -239,7 +283,8 @@ export async function GET() {
 
   return NextResponse.json({
     applications,
+    scope: isBody ? "all" : "own",
     article:
-      "Regulation (EU) 2025/327, Art. 57(1)(e) register; Art. 68(4) three months to decide",
+      "Regulation (EU) 2025/327, Art. 57(1)(e) register; Art. 67(2) eleven items; Art. 68(4) three months to decide from a complete application",
   });
 }

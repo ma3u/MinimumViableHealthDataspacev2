@@ -47,6 +47,8 @@ const PROTECTED_PATHS = [
   "/patient/research",
   "/patient/insights",
   "/requests",
+  "/applications",
+  "/supervision",
   "/overview",
 ] as const;
 

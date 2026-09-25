@@ -59,6 +59,51 @@ describe("POST /api/compliance/applications", () => {
     expect(res.status).toBe(400);
   });
 
+  it("carries the eleven items of Art. 67(2) and reports what is missing", async () => {
+    mockRunQuery.mockResolvedValue([
+      {
+        applicationId: "x",
+        applicantName: "PharmaCo Research AG",
+        datasetKnown: true,
+      },
+    ]);
+    const res = await POST(
+      post({
+        datasetId: "dataset:synthea-fhir-r4-mvd",
+        purpose: "SCIENTIFIC_RESEARCH",
+        justification: "Outcomes.",
+        applicantCategory: "commercial",
+        namedPersons: "Dr A. Weber",
+        intendedUse: "Compare trajectories",
+        requestedData: "Adults with T2D",
+        dataTimeRange: "2019 to 2026",
+        dataFormats: "FHIR R4",
+        identifiability: "pseudonymised",
+        pseudonymisationJustification: "linkage",
+        datasetsBroughtIn: "None",
+        safeguards: "SPE only",
+        processingPeriodMonths: 12,
+        speTools: "R 4.4",
+        ethicsCommitteeRef: "EC-1",
+        art71Exception: false,
+      }),
+    );
+    expect(res.status).toBe(201);
+    const body = await res.json();
+    expect(body.completeness).toEqual({
+      complete: true,
+      present: 11,
+      total: 11,
+      missing: [],
+    });
+    expect(body.applicantCategory).toBe("COMMERCIAL");
+    const params = mockRunQuery.mock.calls[0][1] as Record<string, unknown>;
+    expect(params.identifiability).toBe("PSEUDONYMISED");
+    expect(params.speTools).toBe("R 4.4");
+    expect(params.art71Exception).toBe(false);
+    expect(params.complete).toBe(true);
+  });
+
   it("files the application for the caller's participant with a three-month clock", async () => {
     mockRunQuery.mockResolvedValue([
       {
@@ -155,9 +200,42 @@ describe("GET /api/compliance/applications", () => {
     expect(overdue.undecided).toBe(true);
     expect(overdue.daysToDecision).toBeLessThan(0);
     expect(body.applications[2].daysToDecision).toBeNull();
-    expect(mockRequireAuth).toHaveBeenCalledWith([
-      "HDAB_AUTHORITY",
-      "EDC_ADMIN",
+    expect(body.scope).toBe("all");
+    expect(body.applications[1].completeness.complete).toBe(false);
+    expect(body.applications[1].clockState).toBe("running");
+    const params = mockRunQuery.mock.calls[0][1] as { all: boolean };
+    expect(params.all).toBe(true);
+  });
+
+  it("shows a data user its own applications only", async () => {
+    mockRequireAuth.mockResolvedValue(RESEARCHER as never);
+    mockRunQuery.mockResolvedValue([]);
+    const res = await GET();
+    expect(res.status).toBe(200);
+    expect((await res.json()).scope).toBe("own");
+    const params = mockRunQuery.mock.calls[0][1] as {
+      all: boolean;
+      callerDid: string;
+    };
+    expect(params.all).toBe(false);
+    expect(params.callerDid).toBe("did:web:pharmaco.de:research");
+  });
+
+  it("marks a stopped clock as paused with the four-week deadline", async () => {
+    mockRunQuery.mockResolvedValue([
+      {
+        applicationId: "app-inc",
+        status: "INCOMPLETE",
+        submittedAt: "2026-09-10T10:00:00Z",
+        incompleteNoticeAt: "2026-09-15T09:00:00Z",
+        completeBy: "2026-10-13T09:00:00Z",
+        permitId: null,
+        decision: "",
+      },
     ]);
+    const body = await (await GET()).json();
+    expect(body.applications[0].clockState).toBe("paused");
+    expect(body.applications[0].completeBy).toBe("2026-10-13T09:00:00.000Z");
+    expect(body.applications[0].undecided).toBe(true);
   });
 });

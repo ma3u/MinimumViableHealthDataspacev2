@@ -408,6 +408,7 @@ export async function recordPermittedTransfer(t: {
            t.consumerDid  = $consumerDid,
            t.permitId     = $permitId,
            t.protocol     = 'dataspace-protocol-http:2025-1',
+           t.retainUntil  = toString(datetime() + duration({months: 12})),
            t.demo         = $demo
        WITH t
        OPTIONAL MATCH (consumer:Participant)

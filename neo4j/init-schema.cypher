@@ -18,6 +18,16 @@ CREATE INDEX hdab_approval_status IF NOT EXISTS FOR (ha:HDABApproval) ON (ha.sta
 // statistic, answered only in anonymised statistical format (issue #206)
 CREATE CONSTRAINT health_data_request_id IF NOT EXISTS FOR (r:HealthDataRequest) REQUIRE r.requestId IS UNIQUE;
 CREATE INDEX health_data_request_status IF NOT EXISTS FOR (r:HealthDataRequest) ON (r.status);
+// NonComplianceFinding, InformationRequest — Regulation (EU) 2025/327 Art. 63:
+// the access body's supervision of data users and holders (issue #206, M4).
+CREATE CONSTRAINT non_compliance_finding_id IF NOT EXISTS FOR (f:NonComplianceFinding) REQUIRE f.findingId IS UNIQUE;
+CREATE INDEX non_compliance_finding_status IF NOT EXISTS FOR (f:NonComplianceFinding) ON (f.status);
+CREATE CONSTRAINT information_request_id IF NOT EXISTS FOR (i:InformationRequest) REQUIRE i.requestId IS UNIQUE;
+// ResultCommunication — Art. 61(4): the results a data user communicates
+// within 18 months of the end of processing (issue #206, M6).
+CREATE CONSTRAINT result_communication_id IF NOT EXISTS FOR (rc:ResultCommunication) REQUIRE rc.resultId IS UNIQUE;
+// TransferEvent.retainUntil — Art. 73(1)(e): logs kept at least one year (M3).
+CREATE INDEX transfer_event_retain_until IF NOT EXISTS FOR (te:TransferEvent) ON (te.retainUntil);
 
 // ============================================================
 // Layer 2: HealthDCAT-AP Metadata (W3C HealthDCAT-AP vocabulary)

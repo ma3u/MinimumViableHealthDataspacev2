@@ -2,12 +2,18 @@
 
 import { fetchApi } from "@/lib/api";
 import {
+  APPLICATION_ITEMS,
   CRITERIA,
   CRITERIA_LABELS,
   PURPOSES,
   PURPOSE_LABELS,
+  hasApplicationItem,
+  type ApplicationClock,
+  type ApplicationItems,
+  type Completeness,
   type Criterion,
 } from "@/lib/permits";
+import { estimateFee } from "@/lib/fees";
 import { useDemoPersona } from "@/lib/use-demo-persona";
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
@@ -74,9 +80,16 @@ interface MatrixRow {
  * The application behind a matrix row and the Art. 68(4) clock on it. Merged
  * into MatrixRow; every field is null for a participant without an application.
  */
-interface MatrixRow {
+interface MatrixRow extends ApplicationItems, Partial<ApplicationClock> {
   applicationId?: string | null;
   applicationName?: string | null;
+  applicantCategory?: string | null;
+  completeness?: Completeness | null;
+  completedAt?: string | null;
+  extensionReason?: string | null;
+  incompleteNoticeAt?: string | null;
+  incompleteReason?: string | null;
+  statisticalAlternativeOffered?: boolean | null;
   submittedAt?: string | null;
   requestedPurpose?: string | null;
   requestedDatasetId?: string | null;
@@ -99,6 +112,7 @@ interface DecisionResult {
   validUntil: string | null;
   publishBy: string;
   article: string;
+  statisticalAlternative?: boolean;
 }
 
 const IS_STATIC = process.env.NEXT_PUBLIC_STATIC_EXPORT === "true";
@@ -126,6 +140,23 @@ function DecisionClock({ row }: { row: MatrixRow }) {
   if (!row.hasApplication) {
     return <span className="text-[var(--text-secondary)]">—</span>;
   }
+  if (isUndecided(row) && row.clockState === "paused") {
+    return (
+      <span
+        className="text-[var(--text-primary)]"
+        title={`The access body found the application incomplete on ${shortDate(
+          row.incompleteNoticeAt,
+        )}; the applicant has four weeks to complete it, and the three months of Art. 68(4) run again from the complete application.`}
+      >
+        clock stopped · applicant completes by {shortDate(row.completeBy)}
+        {typeof row.daysToComplete === "number"
+          ? row.daysToComplete < 0
+            ? ` · ${-row.daysToComplete} days late`
+            : ` · ${row.daysToComplete} days left`
+          : ""}
+      </span>
+    );
+  }
   if (isUndecided(row) && typeof row.daysToDecision === "number") {
     const overdue = row.daysToDecision < 0;
     return (
@@ -149,6 +180,7 @@ function DecisionClock({ row }: { row: MatrixRow }) {
       >
         {overdue ? "permit decision was due " : "permit decision due "}
         {shortDate(row.decisionDue)}
+        {row.extended ? " (extended once)" : ""}
         {" · "}
         {overdue
           ? `${-row.daysToDecision} days late, not decided`
@@ -264,6 +296,227 @@ function RevokeForm({
  * the Art. 68(1) criteria, the Art. 53(1) purpose, validity, conditions, and
  * the written justification a refusal must carry (Art. 57(1)(j)(iii)).
  */
+/** The eleven items of Art. 67(2) as the application carries them. */
+function ApplicationItemsList({ row }: { row: MatrixRow }) {
+  const value = (item: (typeof APPLICATION_ITEMS)[number]["item"]): string => {
+    switch (item) {
+      case "a":
+        return row.namedPersons ?? "";
+      case "b":
+        return row.requestedPurpose ?? "";
+      case "c":
+        return row.intendedUse ?? "";
+      case "d":
+        return [row.requestedData, row.dataTimeRange, row.dataFormats]
+          .filter(Boolean)
+          .join(" · ");
+      case "e":
+        return row.identifiability
+          ? `${row.identifiability.toLowerCase()}${
+              row.pseudonymisationJustification
+                ? `: ${row.pseudonymisationJustification}`
+                : ""
+            }`
+          : "";
+      case "f":
+        return row.datasetsBroughtIn ?? "";
+      case "g":
+        return row.safeguards ?? "";
+      case "h":
+        return row.processingPeriodMonths
+          ? `${row.processingPeriodMonths} months`
+          : "";
+      case "i":
+        return row.speTools ?? "";
+      case "j":
+        return row.ethicsCommitteeRef ?? "";
+      case "k":
+        return typeof row.art71Exception === "boolean"
+          ? row.art71Exception
+            ? `invoked: ${row.art71ExceptionJustification ?? ""}`
+            : "not invoked"
+          : "";
+    }
+  };
+  const c = row.completeness;
+  return (
+    <details
+      className="text-xs rounded-lg border border-[var(--border)] bg-[var(--bg)] p-3"
+      data-testid="application-items"
+    >
+      <summary className="cursor-pointer font-semibold text-[var(--text-primary)]">
+        Art. 67(2) items:{" "}
+        {c
+          ? c.complete
+            ? `complete, ${c.present} of ${c.total}`
+            : `incomplete, ${c.present} of ${c.total}`
+          : "—"}
+      </summary>
+      <ol className="mt-2 space-y-1">
+        {APPLICATION_ITEMS.map((i) => {
+          const present = hasApplicationItem(row, i.item);
+          return (
+            <li key={i.item} className="flex gap-2">
+              <span
+                className={
+                  present
+                    ? "text-[var(--success-text)]"
+                    : "text-[var(--danger-text)]"
+                }
+                aria-label={present ? "present" : "missing"}
+              >
+                {present ? "✓" : "✗"}
+              </span>
+              <span>
+                <span className="text-[var(--text-secondary)]">
+                  ({i.item}) {i.label}:{" "}
+                </span>
+                {present ? value(i.item) : "missing"}
+              </span>
+            </li>
+          );
+        })}
+      </ol>
+    </details>
+  );
+}
+
+/**
+ * The access body's two actions on the Art. 68(4) clock: send the applicant
+ * back for the missing items (four weeks), or extend the three months once.
+ */
+function ClockActions({
+  row,
+  onDone,
+}: {
+  row: MatrixRow;
+  onDone: () => Promise<void>;
+}) {
+  const [reason, setReason] = useState<string>(
+    row.completeness && !row.completeness.complete
+      ? `Missing: ${row.completeness.missing
+          .map((m) => `(${m.item}) ${m.label}`)
+          .join("; ")}`
+      : "",
+  );
+  const [busy, setBusy] = useState<string | null>(null);
+  const [msg, setMsg] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  if (!row.applicationId) return null;
+
+  const act = async (action: "INCOMPLETE" | "EXTEND") => {
+    setBusy(action);
+    setError(null);
+    setMsg(null);
+    try {
+      const r = await fetchApi("/api/compliance/applications/clock", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          applicationId: row.applicationId,
+          action,
+          reason,
+        }),
+      });
+      const body = (await r.json().catch(() => ({}))) as Record<
+        string,
+        unknown
+      >;
+      if (!r.ok) {
+        setError(String(body.error ?? `HTTP ${r.status}`));
+        return;
+      }
+      setMsg(
+        action === "EXTEND"
+          ? `Extended once by three months; the decision is now due ${shortDate(
+              String(body.decisionDue ?? ""),
+            )} (Art. 68(4)).`
+          : `Applicant notified; the application must be completed by ${shortDate(
+              String(body.completeBy ?? ""),
+            )}; the three months run again from the complete application (Art. 68(4)).`,
+      );
+      await onDone();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e));
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  const paused = row.clockState === "paused";
+  return (
+    <div
+      className="rounded-lg border border-[var(--border)] bg-[var(--bg)] p-3 space-y-2 text-xs"
+      data-testid="clock-actions"
+    >
+      <div className="font-semibold text-[var(--text-primary)]">
+        The clock, Art. 68(4)
+        <span className="font-normal text-[var(--text-secondary)]">
+          {" "}
+          ·{" "}
+          {paused
+            ? `stopped since ${shortDate(row.incompleteNoticeAt)}: ${
+                row.incompleteReason ?? "incomplete"
+              }`
+            : row.extended
+              ? `extended once: ${row.extensionReason ?? ""}`
+              : "running"}
+        </span>
+      </div>
+      <label className="flex flex-col gap-1">
+        <span className="text-[var(--text-secondary)]">
+          Reasons (what is missing, or why the extension)
+        </span>
+        <textarea
+          id={`clock-reason-${row.applicationId}`}
+          rows={2}
+          value={reason}
+          onChange={(e) => setReason(e.target.value)}
+          className="rounded border border-[var(--border)] bg-[var(--surface)] px-2 py-1"
+        />
+      </label>
+      <div className="flex flex-wrap gap-2">
+        <button
+          type="button"
+          disabled={busy !== null || paused || !reason.trim()}
+          onClick={() => act("INCOMPLETE")}
+          className="px-3 py-1.5 rounded font-semibold border border-[var(--border)] disabled:opacity-50"
+          title={
+            paused
+              ? "The applicant has already been asked to complete the application"
+              : "Send the applicant back for the missing items; four weeks"
+          }
+        >
+          {busy === "INCOMPLETE" ? "Notifying…" : "Notify incomplete"}
+        </button>
+        <button
+          type="button"
+          disabled={busy !== null || paused || row.extended || !reason.trim()}
+          onClick={() => act("EXTEND")}
+          className="px-3 py-1.5 rounded font-semibold border border-[var(--border)] disabled:opacity-50"
+          title={
+            row.extended
+              ? "Art. 68(4) allows one extension"
+              : "Extend the three months once, by three, with reasons"
+          }
+        >
+          {busy === "EXTEND" ? "Extending…" : "Extend by three months"}
+        </button>
+      </div>
+      {error && (
+        <p className="text-[var(--danger-text)]" role="alert">
+          {error}
+        </p>
+      )}
+      {msg && (
+        <p className="text-[var(--success-text)]" role="status">
+          {msg}
+        </p>
+      )}
+    </div>
+  );
+}
+
 function ApplicationPanel({
   row,
   canDecide,
@@ -295,6 +548,7 @@ function ApplicationPanel({
         boolean
       >,
   );
+  const [statisticalAlternative, setStatisticalAlternative] = useState(false);
   const [busy, setBusy] = useState<"APPROVED" | "REJECTED" | null>(null);
   const [result, setResult] = useState<DecisionResult | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -318,6 +572,7 @@ function ApplicationPanel({
           conditions,
           justification,
           criteria,
+          statisticalAlternative,
           datasetId: row.requestedDatasetId ?? undefined,
         }),
       });
@@ -377,6 +632,16 @@ function ApplicationPanel({
             {row.ethicsCommitteeRef}
           </div>
         )}
+        {row.completedAt && (
+          <div>
+            <span className="text-[var(--text-secondary)]">Completed </span>
+            {shortDate(row.completedAt)}
+            <span className="text-[var(--text-secondary)]">
+              {" "}
+              · the three months run from here (Art. 68(4))
+            </span>
+          </div>
+        )}
         {row.hasApproval && (
           <div className="md:col-span-2">
             <span className="text-[var(--text-secondary)]">Decision </span>
@@ -393,9 +658,38 @@ function ApplicationPanel({
                   row.revocationReason ? `: ${row.revocationReason}` : ""
                 }`
               : ""}
+            {row.statisticalAlternativeOffered
+              ? " · an anonymised statistical answer was offered instead (Art. 68(3))"
+              : ""}
           </div>
         )}
       </div>
+
+      <ApplicationItemsList row={row} />
+
+      {undecided && (
+        <p className="text-xs" data-testid="fee-estimate">
+          <span className="text-[var(--text-secondary)]">
+            Fee estimate, Art. 62:{" "}
+          </span>
+          {(() => {
+            const f = estimateFee(row);
+            return `${f.totalEur.toLocaleString(
+              "en-GB",
+            )} EUR, access body ${f.bodyEur.toLocaleString(
+              "en-GB",
+            )} and data holder ${f.holderEur.toLocaleString("en-GB")}${
+              f.reduction > 0
+                ? `, reduced by ${Math.round(f.reduction * 100)}% for a ${
+                    f.categoryLabel
+                  } (Art. 62(3))`
+                : ""
+            }`;
+          })()}
+        </p>
+      )}
+
+      {canDecide && undecided && <ClockActions row={row} onDone={onDecided} />}
 
       {canDecide && (
         <form
@@ -484,6 +778,18 @@ function ApplicationPanel({
               className="rounded border border-[var(--border)] bg-[var(--surface)] px-2 py-1"
             />
           </label>
+          <label className="flex items-start gap-2">
+            <input
+              id={`statistical-alternative-${row.applicationId}`}
+              type="checkbox"
+              checked={statisticalAlternative}
+              onChange={(e) => setStatisticalAlternative(e.target.checked)}
+            />
+            <span>
+              With a refusal, offer an anonymised statistical answer instead of
+              the data (Art. 68(3); the applicant files a request under Art. 69)
+            </span>
+          </label>
           <div className="flex flex-wrap gap-2">
             <button
               type="button"
@@ -516,7 +822,13 @@ function ApplicationPanel({
                 ? `Data permit ${
                     result.permitId
                   } issued, valid until ${shortDate(result.validUntil)}.`
-                : `Application refused; ${result.permitId} records the justification.`}{" "}
+                : `Application refused; ${
+                    result.permitId
+                  } records the justification${
+                    result.statisticalAlternative
+                      ? ", and an anonymised statistical answer is offered instead (Art. 68(3))"
+                      : ""
+                  }.`}{" "}
               Publish by {result.publishBy} (Art. 57(1)(j)(iii)).
             </p>
           )}
@@ -863,6 +1175,7 @@ export default function CompliancePage() {
                     return (
                       <tr
                         key={rowKey(row)}
+                        data-application-id={row.applicationId ?? undefined}
                         onClick={() => showDetail(row)}
                         className={`border-t border-[var(--border)] cursor-pointer transition-colors ${
                           isSelected
@@ -898,7 +1211,9 @@ export default function CompliancePage() {
                                     ? "◔ Under Review"
                                     : row.applicationStatus === "PENDING"
                                       ? "◔ Pending"
-                                      : row.applicationStatus ?? "✓"}
+                                      : row.applicationStatus === "INCOMPLETE"
+                                        ? "◔ Incomplete"
+                                        : row.applicationStatus ?? "✓"}
                             </span>
                           ) : (
                             <span className="text-[var(--text-secondary)]">

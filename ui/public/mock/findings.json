@@ -1,0 +1,29 @@
+{
+  "findings": [
+    {
+      "findingId": "finding-pharmaco-20260918-demo",
+      "party": "did:web:pharmaco.de:research",
+      "partyName": "PharmaCo Research AG",
+      "partyType": null,
+      "permitId": "permit-app-pharmaco-20260917-ozwg",
+      "description": "Output left the secure processing environment with direct identifiers (Art. 61(2)).",
+      "gdprBreach": true,
+      "supervisoryAuthorityInformed": true,
+      "status": "CLOSED",
+      "notifiedAt": "2026-09-18T09:00:00Z",
+      "respondBy": "2026-10-16T09:00:00Z",
+      "daysToRespond": null,
+      "views": "The export was a test file with synthetic identifiers; the procedure has been corrected.",
+      "respondedAt": "2026-09-19T14:00:00Z",
+      "measure": "REVOCATION",
+      "measureNote": "Direct identifiers left the environment; the permit is revoked (Art. 63(3)).",
+      "exclusionMonths": null,
+      "fineEur": null,
+      "closedAt": "2026-09-20T10:00:00Z",
+      "foundBy": "did:web:medreg.de:hdab",
+      "accessBody": "MedReg DE"
+    }
+  ],
+  "scope": "own",
+  "article": "Regulation (EU) 2025/327, Art. 63: findings, four weeks to state views (63(2)), measures (63(3))"
+}

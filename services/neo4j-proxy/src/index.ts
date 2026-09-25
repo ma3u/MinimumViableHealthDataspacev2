@@ -197,6 +197,8 @@ async function logTransferEvent(
       CREATE (te:TransferEvent {
         eventId: randomUUID(),
         timestamp: datetime(),
+        // Art. 73(1)(e): kept for at least one year; nothing deletes it before
+        retainUntil: datetime() + duration({months: 12}),
         endpoint: $endpoint,
         method: $method,
         participant: $participant,

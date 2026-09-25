@@ -9,6 +9,7 @@ import {
   addMonths,
   addWorkingDays,
 } from "@/lib/permits";
+import { estimateFee, type FeeEstimate } from "@/lib/fees";
 
 export const dynamic = "force-dynamic";
 
@@ -111,6 +112,10 @@ export async function POST(req: NextRequest) {
 
   const riskNote =
     typeof body.riskNote === "string" ? body.riskNote.trim() : "";
+  // Art. 68(3): with a refusal the body may offer an anonymised statistical
+  // answer instead of the data (a health data request under Art. 69).
+  const statisticalAlternative =
+    decision === "REJECTED" && body.statisticalAlternative === true;
   const datasetId =
     typeof body.datasetId === "string" && body.datasetId.trim()
       ? body.datasetId.trim()
@@ -124,6 +129,32 @@ export async function POST(req: NextRequest) {
   const officer = session.user.name ?? session.user.email ?? session.user.id;
   const permitId = `permit-${applicationId}`;
   const publishBy = addWorkingDays(decidedAt, PUBLISH_WORKING_DAYS);
+
+  // Art. 62: the fee on an issued permit, from what the application says
+  // about the applicant, the period and the form of the data; reduced for
+  // the categories of Art. 62(3).
+  let fee: FeeEstimate | null = null;
+  if (decision === "APPROVED") {
+    const app = await runQuery<{
+      applicantCategory: string | null;
+      processingPeriodMonths: number | null;
+      identifiability: string | null;
+    }>(
+      `MATCH (app:AccessApplication {applicationId: $applicationId})
+       RETURN app.applicantCategory AS applicantCategory,
+              app.processingPeriodMonths AS processingPeriodMonths,
+              app.identifiability AS identifiability
+       LIMIT 1`,
+      { applicationId },
+    );
+    if (app.length > 0) {
+      fee = estimateFee({
+        applicantCategory: app[0].applicantCategory,
+        processingPeriodMonths: app[0].processingPeriodMonths,
+        identifiability: app[0].identifiability,
+      });
+    }
+  }
 
   const rows = await runQuery<{
     applicant: string | null;
@@ -146,6 +177,12 @@ export async function POST(req: NextRequest) {
          permit.justification    = $justification,
          permit.criteria         = $criteria,
          permit.riskNote         = $riskNote,
+         permit.statisticalAlternativeOffered = $statisticalAlternative,
+         permit.feeEur           = $feeEur,
+         permit.feeBodyEur       = $feeBodyEur,
+         permit.feeHolderEur     = $feeHolderEur,
+         permit.feeCategory      = $feeCategory,
+         permit.feeReduction     = $feeReduction,
          permit.hdabOfficer      = $officer,
          permit.decidedBy        = $deciderDid,
          permit.ehdsArticle      = 'Art. 68',
@@ -188,6 +225,12 @@ export async function POST(req: NextRequest) {
       justification,
       criteria: criteria ? JSON.stringify(criteria) : null,
       riskNote,
+      statisticalAlternative,
+      feeEur: fee ? fee.totalEur : null,
+      feeBodyEur: fee ? fee.bodyEur : null,
+      feeHolderEur: fee ? fee.holderEur : null,
+      feeCategory: fee ? fee.category : null,
+      feeReduction: fee ? fee.reduction : null,
       officer,
       deciderDid,
       datasetId,
@@ -217,10 +260,14 @@ export async function POST(req: NextRequest) {
     conditions,
     justification,
     criteria,
+    statisticalAlternative,
+    fee,
     publishBy: publishBy.toISOString().slice(0, 10),
     article:
       decision === "APPROVED"
         ? "Regulation (EU) 2025/327, Art. 68(3): data permit issued"
-        : "Regulation (EU) 2025/327, Art. 68(3): application refused",
+        : statisticalAlternative
+          ? "Regulation (EU) 2025/327, Art. 68(3): application refused; an anonymised statistical answer is offered instead (Art. 69)"
+          : "Regulation (EU) 2025/327, Art. 68(3): application refused",
   });
 }
