@@ -53,8 +53,8 @@ export async function loadView(persona) {
 
 /**
  * Mount one view into `root` (1600 x 900, the slide canvas), slowly orbiting.
- * opts.shiftX moves the stack to the right, in slide pixels, so it sits
- * beside the text; opts.zoom scales the camera distance.
+ * opts.shiftX and opts.shiftY move the stack right and down, in slide
+ * pixels, so it sits beside the text; opts.zoom scales the camera distance.
  * Returns { pause, resume, source }.
  */
 export async function mountBackground(root, persona, opts = {}) {
@@ -141,9 +141,16 @@ export async function mountBackground(root, persona, opts = {}) {
   const zMid = ((Math.max(...zs) + Math.min(...zs)) / 2) * LAYER_GAP;
   const D = Math.max(380 + zSpan * 45, maxR * 1.9) * (opts.zoom ?? 1);
   const target = new THREE.Vector3(0, 0, zMid);
-  // The host slides right by shiftX; the slide's frame clips what spills over.
+  // The host slides right by shiftX and down by shiftY; the slide's frame
+  // clips what spills over.
   root.style.left = `${opts.shiftX ?? 0}px`;
-  Graph.cameraPosition({ x: 0, y: -D, z: zMid + D * 0.6 }, target, 0);
+  root.style.top = `${opts.shiftY ?? 0}px`;
+  // opts.elev raises the camera above the stack; 0.6 is the prototype's angle.
+  Graph.cameraPosition(
+    { x: 0, y: -D, z: zMid + D * (opts.elev ?? 0.6) },
+    target,
+    0,
+  );
 
   let angle = 0;
   let running = true;
