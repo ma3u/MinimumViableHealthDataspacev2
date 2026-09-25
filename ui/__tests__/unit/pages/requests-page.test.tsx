@@ -151,3 +151,61 @@ describe("/requests", () => {
     expect(middleware).toContain('"/requests"');
   });
 });
+
+describe("/requests as a trusted data holder (Art. 72)", () => {
+  beforeEach(() => {
+    mockFetchApi.mockReset();
+    roles = ["EDC_USER_PARTICIPANT", "DATA_HOLDER"];
+  });
+
+  it("shows the note, decides its own dataset's request and names the article", async () => {
+    const pending = {
+      ...FIXTURE.requests[0],
+      requestId: "req-own-1",
+      status: "PENDING",
+      canDecide: true,
+    };
+    const decided = {
+      ...FIXTURE.requests[0],
+      requestId: "req-own-2",
+      status: "ANSWERED",
+      decidedAt: "2026-09-20T10:00:00Z",
+      decidedUnder: "Art. 72",
+      feeEur: 300,
+      answer: [{ patientCount: 112 }],
+      undecided: false,
+    };
+    mockFetchApi.mockImplementation((url: string, init?: RequestInit) => {
+      if (
+        url === "/api/compliance/requests/decide" &&
+        init?.method === "POST"
+      ) {
+        return response({ answered: true, suppressedCells: 0 });
+      }
+      return response({
+        requests: [pending, decided],
+        scope: "holder",
+        trustedHolder: true,
+      });
+    });
+    render(<RequestsPage />);
+    expect(
+      await screen.findByTestId("trusted-holder-note"),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/Requests on my datasets, as a trusted holder/),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText("Decide as the trusted data holder · Art. 72"),
+    ).toBeInTheDocument();
+    expect(screen.getByTestId("decided-under")).toHaveTextContent(
+      "decided by the trusted data holder, Art. 72 · fee 300 EUR (Art. 62)",
+    );
+    await userEvent.click(screen.getByRole("button", { name: /approve/i }));
+    await waitFor(() =>
+      expect(
+        screen.getByText(/Answered in anonymised statistical format/),
+      ).toBeInTheDocument(),
+    );
+  });
+});
