@@ -505,7 +505,10 @@ export default function RequestsPage() {
                           : ""}
                       </div>
                     </div>
-                    <StatusBadge status={r.status} />
+                    <div className="flex flex-col items-end gap-1">
+                      <StatusBadge status={r.status} />
+                      <DecidedUnder r={r} />
+                    </div>
                   </div>
                   <div className="text-xs text-[var(--text-secondary)] grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-1 mb-2">
                     <div>
