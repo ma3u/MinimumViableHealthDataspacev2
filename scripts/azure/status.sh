@@ -83,20 +83,35 @@ fi
 echo ""
 
 # ── Neo4j node count ─────────────────────────────────────────────────────────
-if [[ -n "${NEO4J_HTTP_URL:-}" ]]; then
-  echo "── Neo4j Graph ────────────────────────────────────────────────────"
-  AUTH=$(printf '%s:%s' "$NEO4J_USER" "$NEO4J_PASSWORD" | base64)
-  RESULT=$(curl -sf -X POST "${NEO4J_HTTP_URL}:7474/db/neo4j/tx/commit" \
-    -H "Authorization: Basic ${AUTH}" \
-    -H "Content-Type: application/json" \
-    -d '{"statements":[{"statement":"MATCH (n) RETURN count(n) as total"}]}' 2>/dev/null || echo "")
-  if [[ -n "$RESULT" ]]; then
-    TOTAL=$(echo "$RESULT" | jq -r '.results[0].data[0].row[0] // "unavailable"')
+# Through cypher-shell inside the container, over Bolt. The POST to
+# ${NEO4J_HTTP_URL}:7474/db/neo4j/tx/commit that used to sit here could never
+# answer: mvhd-neo4j has TCP ingress with targetPort and exposedPort 7687 and
+# no additionalPortMappings, so the transactional HTTP API is not served, and
+# the internal ingress is not reachable from a workstation on any port either.
+# This section therefore printed "(Neo4j not reachable from this network)"
+# every single time (issue #205).
+#
+# `az containerapp exec` needs a TTY — headless it dies inside the CLI with
+# `termios.error: (25, 'Inappropriate ioctl for device')`, the same limitation
+# 06-post-deploy.sh and 11-claude-federation.sh document. Say so rather than
+# print a wrong number.
+echo "── Neo4j Graph ────────────────────────────────────────────────────"
+if [[ ! -t 0 ]]; then
+  echo "  (no TTY: 'az containerapp exec' cannot run here — skipped)"
+else
+  # exec wraps the output in terminal chrome, so carry a marker through the
+  # query and pull the number out of that rather than expecting a bare line.
+  RESULT=$(az containerapp exec \
+    --name "$NEO4J_APP" --resource-group "$RG" \
+    --command "cypher-shell -a bolt://localhost:7687 -u ${NEO4J_USER} -p ${NEO4J_PASSWORD} --non-interactive --format plain \"MATCH (n) RETURN 'NODECOUNT=' + toString(count(n)) AS c\"" \
+    2>/dev/null || echo "")
+  TOTAL=$(printf '%s' "$RESULT" | sed -n 's/.*NODECOUNT=\([0-9][0-9]*\).*/\1/p' | head -1)
+  if [[ -n "$TOTAL" ]]; then
     echo "  Total nodes: ${TOTAL}"
   else
-    echo "  (Neo4j not reachable from this network)"
+    echo "  (Neo4j did not answer — check the app's logs)"
   fi
-  echo ""
 fi
+echo ""
 
 echo "══════════════════════════════════════════════════════════════════"

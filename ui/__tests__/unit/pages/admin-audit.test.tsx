@@ -396,10 +396,22 @@ describe("AdminAuditPage", () => {
       setupMocks();
       await renderAndWait();
       expect(screen.getByText("Audit & Provenance")).toBeInTheDocument();
-      // Component subtitle: "Tamper-evident audit trail · EHDS Art. 73 · Art. 59 · GDPR Art. 30"
+      // Component subtitle: "Access and provenance records · EHDS Art. 73 ·
+      // Art. 59 · GDPR Art. 30". It said "Tamper-evident audit trail" until
+      // issue #205: nothing hashes, chains or seals these records.
       expect(
-        screen.getByText(/Tamper-evident audit trail/),
+        screen.getByText(/Access and provenance records/),
       ).toBeInTheDocument();
+      expect(screen.queryByText(/Tamper-evident/)).not.toBeInTheDocument();
+    });
+
+    it("states that the records carry no integrity seal, and claims no HIPAA", async () => {
+      setupMocks();
+      await renderAndWait();
+      expect(screen.getByTestId("integrity-notice")).toHaveTextContent(
+        "Records are not sealed",
+      );
+      expect(screen.queryByText(/HIPAA/)).not.toBeInTheDocument();
     });
   });
 

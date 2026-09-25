@@ -20,7 +20,6 @@ import {
   Database,
   Eye,
   AlertTriangle,
-  CheckCircle2,
 } from "lucide-react";
 
 // ── Types ──────────────────────────────────────────────────────────────────────
@@ -648,13 +647,25 @@ export default function AdminAuditPage() {
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div>
             <h1 className="page-header">Audit &amp; Provenance</h1>
+            {/*
+              The subtitle read "Tamper-evident audit trail" and the badge next
+              to it read "HIPAA COMPLIANT". Neither was backed by anything in
+              the code: the records below are plain Neo4j properties with no
+              hash, chain or seal, and HIPAA is a US statute that nothing here
+              checks (issue #205). Sealed evidence is issue #204.
+            */}
             <p className="text-[var(--text-secondary)] text-lg mt-1">
-              Tamper-evident audit trail · EHDS Art. 73 · Art. 59 · GDPR Art. 30
+              Access and provenance records · EHDS Art. 73 · Art. 59 · GDPR Art.
+              30
             </p>
           </div>
-          <div className="flex items-center gap-2 px-4 py-2 bg-[var(--success)]/10 text-[var(--success-text)] rounded-full border border-[var(--success)]/20 text-sm font-bold tracking-tight">
-            <CheckCircle2 size={14} />
-            HIPAA COMPLIANT
+          <div
+            data-testid="integrity-notice"
+            title="Transfers, negotiations, credentials and access events are stored as ordinary Neo4j properties. Detached eIDAS seals over contract agreements are issue #204."
+            className="flex items-center gap-2 px-4 py-2 bg-[var(--warning)]/10 text-[var(--warning-text)] rounded-full border border-[var(--warning)]/20 text-sm font-bold tracking-tight"
+          >
+            <AlertTriangle size={14} />
+            Records are not sealed
           </div>
         </div>
 
