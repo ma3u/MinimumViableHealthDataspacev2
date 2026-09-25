@@ -173,6 +173,9 @@ Represents a health data access application submitted to a health data access bo
 - `decisionDue: DateTime` — Three months after submission (Art. 68(4))
 - `processingPeriodMonths: Integer` — Period the data are needed for (Art. 67(2)(h))
 - `decidedAt: DateTime` — Set by the decision
+- The other items of Art. 67(2) (issue #206, M1): `namedPersons` (a), `intendedUse` (c), `requestedData`, `dataTimeRange`, `dataFormats` (d), `identifiability` (`PSEUDONYMISED` or `ANONYMISED`) and `pseudonymisationJustification` (e), `datasetsBroughtIn` (f), `safeguards` (g), `speTools` (i), `art71Exception: Boolean` and `art71ExceptionJustification` (k); `complete: Boolean` says whether all eleven are present
+- `applicantCategory: String` — `PUBLIC_SECTOR`, `ACADEMIC`, `MICRO_ENTERPRISE` or `COMMERCIAL`, for the reduced fees of Art. 62(3)
+- The Art. 68(4) clock (M2): `incompleteNoticeAt`, `incompleteReason`, `completeBy` (four weeks) when the body sends the applicant back, then `completedAt` when the complete application arrives and the three months run again; `extendedAt`, `extensionReason` for the one extension by three months. `status` is `INCOMPLETE` while the clock is stopped.
 
 **Indexes:**
 
@@ -203,7 +206,9 @@ The data permit (or the refusal) a health data access body issues on an applicat
 - `justification: String` — Written justification, required for a refusal (Art. 57(1)(j)(iii))
 - `decidedBy: String` — DID of the access body
 - `publishBy: Date` — 30 working days after the decision (Art. 57(1)(j)(iii))
-- `revokedAt: DateTime`, `revocationReason: String`, `revokedBy: String` — Set by a revocation (Art. 63(3))
+- `revokedAt: DateTime`, `revocationReason: String`, `revokedBy: String` — Set by a revocation (Art. 63(3)); `revokedByFinding: String` when a closed `NonComplianceFinding` took the measure
+- `statisticalAlternativeOffered: Boolean` — With a refusal, the body offers an anonymised statistical answer instead (Art. 68(3))
+- `feeEur: Integer`, `feeBodyEur`, `feeHolderEur`, `feeCategory`, `feeReduction` — The fee on an issued permit (Art. 62), from `ui/src/lib/fees.ts`
 
 **Indexes:**
 
@@ -239,6 +244,48 @@ CREATE INDEX health_data_request_status IF NOT EXISTS FOR (r:HealthDataRequest) 
 ```
 
 ---
+
+#### `NonComplianceFinding`
+
+A finding that a data user or holder failed to comply, **Regulation (EU) 2025/327 Art. 63** (issue #206, M4). The party states its views within four weeks (Art. 63(2)); the body closes the finding with a measure (Art. 63(3), fines under Art. 64), which the public register publishes (Art. 57(1)(j)(iv)).
+
+**Properties:**
+
+- `findingId: String!`, `partyId: String!`, `permitId: String` — The party and, if any, the permit concerned
+- `description: String!`, `gdprBreach: Boolean`, `supervisoryAuthorityInformed: Boolean`
+- `status: String!` — `OPEN`, `VIEWS_RECEIVED`, `CLOSED`
+- `notifiedAt: DateTime!`, `respondBy: DateTime!` (four weeks), `views: String`, `respondedAt: DateTime`
+- `measure: String` — `NONE`, `WARNING`, `REVOCATION`, `EXCLUSION` (with `exclusionMonths`, up to 60), `FINE` (with `fineEur`); `measureNote`, `closedAt`, `closedBy`, `foundBy`
+
+**Relationships:** `(hdab:Participant)-[:FOUND]->(f)`, `(f)-[:AGAINST]->(party:Participant)`, `(f)-[:CONCERNS]->(permit:HDABApproval)`, `(f)-[:LED_TO]->(permit)` when the measure revoked it.
+
+#### `InformationRequest`
+
+The access body's request for information to a data user or holder, **Art. 63(1)**, and the answer on record (issue #206, M4).
+
+**Properties:** `requestId: String!`, `partyId: String!`, `permitId`, `findingId`, `question: String!`, `status` (`OPEN`, `ANSWERED`), `requestedAt`, `answerBy` (four weeks), `answer`, `answeredAt`, `requestedBy`.
+
+**Relationships:** `(hdab)-[:ASKED]->(i)`, `(i)-[:ASKED_OF]->(party)`, `(i)-[:ABOUT]->(f:NonComplianceFinding)`.
+
+#### `ResultCommunication`
+
+What a data user communicates about the results of its use, **Art. 61(4)**, within 18 months of the end of the processing under the permit (issue #206, M6). Published on the register (Art. 57(1)(j)(v)) and reported in the activity report (Art. 59(1)(j) and (k)).
+
+**Properties:** `resultId: String!`, `permitId: String!`, `applicantId`, `kind` (`PUBLICATION`, `POLICY_DOCUMENT`, `REGULATORY_PROCEDURE`, `IT_PRODUCT`, `OTHER`), `title: String!`, `summary`, `url`, `communicatedAt`, `deadline` (the permit's `validUntil` plus 18 months), `onTime: Boolean`.
+
+**Relationships:** `(rc)-[:RESULT_OF]->(permit:HDABApproval)`, `(user:Participant)-[:COMMUNICATED]->(rc)`.
+
+**Indexes:**
+
+```cypher
+CREATE CONSTRAINT non_compliance_finding_id IF NOT EXISTS FOR (f:NonComplianceFinding) REQUIRE f.findingId IS UNIQUE;
+CREATE INDEX non_compliance_finding_status IF NOT EXISTS FOR (f:NonComplianceFinding) ON (f.status);
+CREATE CONSTRAINT information_request_id IF NOT EXISTS FOR (i:InformationRequest) REQUIRE i.requestId IS UNIQUE;
+CREATE CONSTRAINT result_communication_id IF NOT EXISTS FOR (rc:ResultCommunication) REQUIRE rc.resultId IS UNIQUE;
+CREATE INDEX transfer_event_retain_until IF NOT EXISTS FOR (te:TransferEvent) ON (te.retainUntil);
+```
+
+Two properties elsewhere belong to the same work: `TransferEvent.retainUntil` and `DataTransfer.retainUntil` (Art. 73(1)(e), one year after the record; nothing is deleted before it, nothing without it, `POST /api/admin/audit/retention`), and `Participant.trustedHolder: Boolean` with `trustedHolderSince` (Art. 72: the holder answers health data requests on the datasets it offers, `decidedUnder = 'Art. 72'` on the `HealthDataRequest`).
 
 ### 2.2 Relationships
 

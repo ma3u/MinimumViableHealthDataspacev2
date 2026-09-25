@@ -29,6 +29,8 @@ export interface ApplicationRow {
   datasetId: string | null;
   datasetTitle: string | null;
   firstAccessAt: string | null;
+  /** Art. 62: the fee on the permit, EUR. */
+  feeEur?: number | null;
 }
 
 export interface RequestRow {
@@ -36,6 +38,29 @@ export interface RequestRow {
   status: string | null;
   purpose: string | null;
   submittedAt: string | null;
+  feeEur?: number | null;
+}
+
+/** Art. 61(4): a result a data user communicated. */
+export interface ResultReportRow {
+  resultId: string;
+  permitId: string | null;
+  applicant: string | null;
+  kind: string | null;
+  title: string | null;
+  url: string | null;
+  communicatedAt: string | null;
+  onTime: boolean | null;
+}
+
+/** Art. 63(3), Art. 64: a measure other than a revocation, with any fine. */
+export interface MeasureRow {
+  findingId: string;
+  party: string | null;
+  measure: string | null;
+  note: string | null;
+  fineEur: number | null;
+  closedAt: string | null;
 }
 
 export interface AccessRow {
@@ -71,6 +96,8 @@ export interface ReportInput {
   requests: RequestRow[];
   access: AccessRow[];
   labels: LabelRow[];
+  results?: ResultReportRow[];
+  measures?: MeasureRow[];
   from: Date;
   to: Date;
   now?: Date;
@@ -111,6 +138,7 @@ export interface ActivityReport {
         revokedAt: string | null;
         reason: string | null;
       }[];
+      otherMeasures: MeasureRow[];
       administrativeFines: { count: number; amountEur: number };
       note: string;
     };
@@ -125,7 +153,13 @@ export interface ActivityReport {
     d: { title: string; audits: string[]; note: string };
     e: { title: string; requests: number; note: string };
     f: { title: string; activities: string[]; note: string };
-    g: { title: string; amountEur: number; note: string };
+    g: {
+      title: string;
+      amountEur: number;
+      permitsEur: number;
+      requestsEur: number;
+      note: string;
+    };
     h: {
       title: string;
       averageDays: number | null;
@@ -297,6 +331,35 @@ export function buildActivityReport(input: ReportInput): ActivityReport {
     count(byCoverage, label.coverage ?? "not assessed");
   }
 
+  const results = (input.results ?? []).filter((r) =>
+    inPeriod(r.communicatedAt, from, to),
+  );
+  const resultLine = (r: ResultReportRow): string =>
+    `${r.title ?? r.resultId}${r.applicant ? ` (${r.applicant}` : ""}${
+      r.communicatedAt
+        ? `${r.applicant ? ", " : " ("}${day(r.communicatedAt)}`
+        : ""
+    }${r.applicant || r.communicatedAt ? ")" : ""}${r.url ? ` ${r.url}` : ""}`;
+  const publications = results
+    .filter((r) => r.kind !== "IT_PRODUCT")
+    .map(resultLine);
+  const itProducts = results
+    .filter((r) => r.kind === "IT_PRODUCT")
+    .map(resultLine);
+
+  const otherMeasures = (input.measures ?? []).filter(
+    (m) => inPeriod(m.closedAt, from, to) && m.measure && m.measure !== "NONE",
+  );
+  const fines = otherMeasures.filter((m) => m.measure === "FINE");
+  const finesEur = fines.reduce((n, m) => n + Number(m.fineEur ?? 0), 0);
+
+  const permitsEur = apps
+    .filter((a) =>
+      ["APPROVED", "REVOKED"].includes((a.permitStatus ?? "").toUpperCase()),
+    )
+    .reduce((n, a) => n + Number(a.feeEur ?? 0), 0);
+  const requestsEur = requests.reduce((n, r) => n + Number(r.feeEur ?? 0), 0);
+
   const averageDays =
     detail.length > 0
       ? Math.round(
@@ -330,14 +393,22 @@ export function buildActivityReport(input: ReportInput): ActivityReport {
         healthDataRequestsAnswered: requests.filter((r) =>
           ["APPROVED", "ANSWERED"].includes((r.status ?? "").toUpperCase()),
         ).length,
-        resultsCommunicated: 0,
-        note: "Results of the uses (Art. 61(4)) are not yet communicated by data users in this demo.",
+        resultsCommunicated: results.length,
+        note:
+          results.length === 0
+            ? "No data user has communicated results of its use (Art. 61(4)) in the period."
+            : `Results communicated under Art. 61(4): ${
+                results.length
+              }, of which ${
+                results.filter((r) => r.onTime === false).length
+              } after the 18 months.`,
       },
       b: {
         title: ITEM_TITLES.b,
         measures,
-        administrativeFines: { count: 0, amountEur: 0 },
-        note: "Measures are permit revocations under Art. 63(3). No administrative fine has been imposed; fines are not modelled.",
+        otherMeasures,
+        administrativeFines: { count: fines.length, amountEur: finesEur },
+        note: "Measures are permit revocations under Art. 63(3), and the warnings, exclusions and fines (Art. 64) recorded on closed findings of non-compliance.",
       },
       c: {
         title: ITEM_TITLES.c,
@@ -364,8 +435,10 @@ export function buildActivityReport(input: ReportInput): ActivityReport {
       },
       g: {
         title: ITEM_TITLES.g,
-        amountEur: 0,
-        note: "Fees (Art. 62) are not modelled; no revenue is recorded.",
+        amountEur: permitsEur + requestsEur,
+        permitsEur,
+        requestsEur,
+        note: "Fees under Art. 62 on the data permits issued and the health data requests approved in the period, reduced for the categories of Art. 62(3); the schedule is public on the information page.",
       },
       h: {
         title: ITEM_TITLES.h,
@@ -383,13 +456,19 @@ export function buildActivityReport(input: ReportInput): ActivityReport {
       },
       j: {
         title: ITEM_TITLES.j,
-        entries: [],
-        note: "No publication, policy document or regulatory procedure has been reported by a data user.",
+        entries: publications,
+        note:
+          publications.length === 0
+            ? "No publication, policy document or regulatory procedure has been reported by a data user."
+            : "As communicated by data users under Art. 61(4).",
       },
       k: {
         title: ITEM_TITLES.k,
-        entries: [],
-        note: "No IT product has been reported by a data user.",
+        entries: itProducts,
+        note:
+          itProducts.length === 0
+            ? "No IT product has been reported by a data user."
+            : "As communicated by data users under Art. 61(4).",
       },
     },
   };
@@ -453,6 +532,12 @@ export function toMarkdown(report: ActivityReport): string {
               m.revokedAt,
             )}: ${m.reason ?? "no reason recorded"}`,
         )),
+    ...items.b.otherMeasures.map(
+      (m) =>
+        `- ${m.measure}${m.fineEur ? ` (EUR ${m.fineEur})` : ""}: ${
+          m.party ?? "unknown party"
+        }, ${day(m.closedAt)}${m.note ? `: ${m.note}` : ""}`,
+    ),
     `- Administrative fines: ${items.b.administrativeFines.count}, EUR ${items.b.administrativeFines.amountEur}. ${items.b.note}`,
     ``,
     `## (c) ${items.c.title}`,

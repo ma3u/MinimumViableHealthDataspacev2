@@ -113,8 +113,10 @@ describe("GET /api/compliance/requests", () => {
     const res = await GET();
     const body = await res.json();
     expect(body.scope).toBe("own");
-    expect(mockRunQuery.mock.calls[0][1]).toEqual({
+    // the first query asks whether the caller is a trusted holder (Art. 72)
+    expect(mockRunQuery.mock.calls[1][1]).toEqual({
       all: false,
+      trustedHolder: false,
       callerDid: "did:web:pharmaco.de:research",
     });
     expect(body.requests[0].answer).toEqual([{ patientCount: 214 }]);

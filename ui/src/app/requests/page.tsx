@@ -40,6 +40,10 @@ interface HealthDataRequest {
   decisionDue: string | null;
   daysToDecision: number | null;
   undecided: boolean;
+  holder?: string | null;
+  decidedUnder?: string | null;
+  feeEur?: number | null;
+  canDecide?: boolean;
 }
 
 const EXAMPLES = [
@@ -56,6 +60,21 @@ function shortDate(iso: string | null | undefined): string {
 function purposeLabel(p: string | null): string {
   if (!p) return "—";
   return (PURPOSE_LABELS as Record<string, string>)[p as Purpose] ?? p;
+}
+
+function DecidedUnder({ r }: { r: HealthDataRequest }) {
+  if (!r.decidedUnder || !r.decidedAt) return null;
+  return (
+    <span
+      className="text-xs text-[var(--text-secondary)]"
+      data-testid="decided-under"
+    >
+      {r.decidedUnder === "Art. 72"
+        ? "decided by the trusted data holder, Art. 72"
+        : "decided by the access body, Art. 69(3)"}
+      {r.feeEur ? ` · fee ${r.feeEur} EUR (Art. 62)` : ""}
+    </span>
+  );
 }
 
 function StatusBadge({ status }: { status: string }) {
@@ -136,7 +155,8 @@ export default function RequestsPage() {
   const roles: readonly string[] = IS_STATIC
     ? demoPersona?.roles ?? []
     : (session as { roles?: string[] } | null)?.roles ?? [];
-  const canDecide = roles.includes("HDAB_AUTHORITY");
+  const isBody = roles.includes("HDAB_AUTHORITY");
+  const [trustedHolder, setTrustedHolder] = useState(false);
   const canSubmit =
     roles.includes("DATA_USER") ||
     roles.includes("EDC_USER_PARTICIPANT") ||
@@ -172,6 +192,7 @@ export default function RequestsPage() {
       }
       setRequests(body.requests ?? []);
       setScope(body.scope ?? "own");
+      setTrustedHolder(body.trustedHolder === true);
       setError(null);
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
@@ -306,6 +327,17 @@ export default function RequestsPage() {
           </p>
         </div>
 
+        {trustedHolder && (
+          <p
+            className="mb-6 text-sm text-[var(--text-secondary)]"
+            data-testid="trusted-holder-note"
+          >
+            You are a trusted data holder (Art. 72): requests for the datasets
+            you offer are answered here, under the supervision of the access
+            body; the decision is published like any other.
+          </p>
+        )}
+
         {canSubmit && (
           <section className="mb-10 rounded-lg border border-[var(--border)] bg-[var(--surface)] p-4">
             <h2 className="text-sm font-semibold mb-3 text-[var(--text-primary)]">
@@ -419,8 +451,12 @@ export default function RequestsPage() {
 
         <section>
           <h2 className="text-sm font-semibold mb-3 text-[var(--text-primary)]">
-            {scope === "all" ? "All requests" : "My requests"} (
-            {requests.length})
+            {scope === "all"
+              ? "All requests"
+              : scope === "holder"
+                ? "Requests on my datasets, as a trusted holder (Art. 72)"
+                : "My requests"}{" "}
+            ({requests.length})
           </h2>
           {loading ? (
             <p className="text-[var(--text-secondary)] text-sm">
@@ -446,6 +482,7 @@ export default function RequestsPage() {
                   key={r.requestId}
                   className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-4 text-sm"
                   data-testid="request-card"
+                  data-request-id={r.requestId}
                 >
                   <div className="flex flex-wrap items-start justify-between gap-2 mb-2">
                     <div>
@@ -512,53 +549,56 @@ export default function RequestsPage() {
                     </p>
                   )}
 
-                  {canDecide && r.status === "PENDING" && (
-                    <div className="mt-2 rounded border border-[var(--border)] bg-[var(--bg)] p-3 space-y-2 text-xs">
-                      <div className="font-semibold text-[var(--text-primary)]">
-                        Decide · Art. 69(3)
+                  {(isBody || r.canDecide === true) &&
+                    r.status === "PENDING" && (
+                      <div className="mt-2 rounded border border-[var(--border)] bg-[var(--bg)] p-3 space-y-2 text-xs">
+                        <div className="font-semibold text-[var(--text-primary)]">
+                          {isBody
+                            ? "Decide · Art. 69(3)"
+                            : "Decide as the trusted data holder · Art. 72"}
+                        </div>
+                        <label className="flex flex-col gap-1">
+                          <span className="text-[var(--text-secondary)]">
+                            Justification (required for a refusal)
+                          </span>
+                          <textarea
+                            id={`justification-${r.requestId}`}
+                            rows={2}
+                            value={justifications[r.requestId] ?? ""}
+                            onChange={(e) =>
+                              setJustifications((j) => ({
+                                ...j,
+                                [r.requestId]: e.target.value,
+                              }))
+                            }
+                            className="rounded border border-[var(--border)] bg-[var(--surface)] px-2 py-1"
+                          />
+                        </label>
+                        <div className="flex flex-wrap gap-2">
+                          <button
+                            type="button"
+                            disabled={busy === r.requestId}
+                            onClick={() => void decide(r.requestId, "APPROVED")}
+                            className="px-3 py-1.5 rounded font-semibold bg-[var(--accent)] text-white disabled:opacity-60"
+                          >
+                            {busy === r.requestId
+                              ? "Working…"
+                              : "Approve and answer"}
+                          </button>
+                          <button
+                            type="button"
+                            disabled={
+                              busy === r.requestId ||
+                              !(justifications[r.requestId] ?? "").trim()
+                            }
+                            onClick={() => void decide(r.requestId, "REJECTED")}
+                            className="px-3 py-1.5 rounded font-semibold border border-[var(--danger-text)] text-[var(--danger-text)] disabled:opacity-50"
+                          >
+                            Refuse
+                          </button>
+                        </div>
                       </div>
-                      <label className="flex flex-col gap-1">
-                        <span className="text-[var(--text-secondary)]">
-                          Justification (required for a refusal)
-                        </span>
-                        <textarea
-                          id={`justification-${r.requestId}`}
-                          rows={2}
-                          value={justifications[r.requestId] ?? ""}
-                          onChange={(e) =>
-                            setJustifications((j) => ({
-                              ...j,
-                              [r.requestId]: e.target.value,
-                            }))
-                          }
-                          className="rounded border border-[var(--border)] bg-[var(--surface)] px-2 py-1"
-                        />
-                      </label>
-                      <div className="flex flex-wrap gap-2">
-                        <button
-                          type="button"
-                          disabled={busy === r.requestId}
-                          onClick={() => void decide(r.requestId, "APPROVED")}
-                          className="px-3 py-1.5 rounded font-semibold bg-[var(--accent)] text-white disabled:opacity-60"
-                        >
-                          {busy === r.requestId
-                            ? "Working…"
-                            : "Approve and answer"}
-                        </button>
-                        <button
-                          type="button"
-                          disabled={
-                            busy === r.requestId ||
-                            !(justifications[r.requestId] ?? "").trim()
-                          }
-                          onClick={() => void decide(r.requestId, "REJECTED")}
-                          className="px-3 py-1.5 rounded font-semibold border border-[var(--danger-text)] text-[var(--danger-text)] disabled:opacity-50"
-                        >
-                          Refuse
-                        </button>
-                      </div>
-                    </div>
-                  )}
+                    )}
                   {decideMsg[r.requestId] && (
                     <p
                       className="text-xs text-[var(--text-secondary)] mt-2"

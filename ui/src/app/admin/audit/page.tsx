@@ -30,7 +30,126 @@ type AuditType =
   | "transfers"
   | "negotiations"
   | "credentials"
-  | "accesslogs";
+  | "accesslogs"
+  | "supervision";
+
+/** A finding of non-compliance (Art. 63) as the audit view lists it. */
+interface FindingRow {
+  findingId: string;
+  partyId: string | null;
+  partyName: string | null;
+  permitId: string | null;
+  description: string | null;
+  gdprBreach: boolean | null;
+  supervisoryAuthorityInformed: boolean | null;
+  status: string | null;
+  notifiedAt: string | null;
+  respondBy: string | null;
+  respondedAt: string | null;
+  views: string | null;
+  measure: string | null;
+  measureNote: string | null;
+  closedAt: string | null;
+  revokedPermit: string | null;
+}
+
+interface InformationRequestRow {
+  requestId: string;
+  partyId: string | null;
+  partyName: string | null;
+  permitId: string | null;
+  findingId: string | null;
+  question: string | null;
+  status: string | null;
+  requestedAt: string | null;
+  answerBy: string | null;
+  answeredAt: string | null;
+  answer: string | null;
+}
+
+interface RetentionState {
+  policy: { months: number; article: string; rule: string };
+  events: {
+    total: number;
+    withRetention: number;
+    expired: number;
+    protectedCount: number;
+    oldest: string | null;
+  };
+  transfers: {
+    total: number;
+    withRetention: number;
+    expired: number;
+    protectedCount: number;
+    oldest: string | null;
+  };
+}
+
+/**
+ * Art. 73(1)(e): the logs are kept at least one year. Shows the state of
+ * the records and lets the access body delete only what is past its date.
+ */
+function RetentionLine() {
+  const [state, setState] = useState<RetentionState | null>(null);
+  const [msg, setMsg] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+  const load = useCallback(() => {
+    fetchApi("/api/admin/audit/retention")
+      .then((r) => r.json())
+      .then((d) => (d?.policy && d?.events ? setState(d) : setState(null)))
+      .catch(() => setState(null));
+  }, []);
+  useEffect(() => {
+    load();
+  }, [load]);
+  if (!state?.policy || !state.events) return null;
+  const purge = async () => {
+    setBusy(true);
+    setMsg(null);
+    try {
+      const r = await fetchApi("/api/admin/audit/retention", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ confirm: true }),
+      });
+      const d = await r.json();
+      if (!r.ok) throw new Error(d.error ?? `HTTP ${r.status}`);
+      setMsg(
+        `Deleted ${d.deleted.events} event(s) and ${d.deleted.transfers} transfer(s) past their retention date; ${d.events.protectedCount} event(s) kept.`,
+      );
+      load();
+    } catch (e) {
+      setMsg(e instanceof Error ? e.message : String(e));
+    } finally {
+      setBusy(false);
+    }
+  };
+  return (
+    <div
+      className="mb-4 rounded-lg border border-[var(--border)] bg-[var(--surface)] p-3 text-xs flex flex-wrap items-center gap-x-4 gap-y-2"
+      data-testid="retention-line"
+    >
+      <span>
+        <strong>Retention:</strong> at least {state.policy.months} months (
+        {state.policy.article.replace("Regulation (EU) 2025/327, ", "")}) ·{" "}
+        {state.events.total} access event(s), oldest{" "}
+        {state.events.oldest ? state.events.oldest.slice(0, 10) : "—"} ·{" "}
+        {state.events.expired} past their date, {state.events.protectedCount}{" "}
+        protected
+      </span>
+      <button
+        type="button"
+        onClick={purge}
+        disabled={busy}
+        className="px-2 py-1 rounded border border-[var(--border)] disabled:opacity-50"
+        title={state.policy.rule}
+      >
+        {busy ? "Deleting…" : "Delete expired records"}
+      </button>
+      {msg && <span role="status">{msg}</span>}
+    </div>
+  );
+}
 
 interface Participant {
   did: string;
@@ -168,6 +287,8 @@ interface AuditData {
   negotiations?: NegotiationRow[];
   credentials?: CredentialRow[];
   accesslogs?: AccessLogRow[];
+  findings?: FindingRow[];
+  informationRequests?: InformationRequestRow[];
   summary?: {
     nodeCounts: Record<string, number>;
     accessByConsumer?: {
@@ -187,6 +308,7 @@ const TABS: { key: AuditType; label: string; icon: typeof ScrollText }[] = [
   { key: "negotiations", label: "Negotiations", icon: FileSignature },
   { key: "credentials", label: "Credentials", icon: ShieldCheck },
   { key: "accesslogs", label: "Access Logs", icon: Eye },
+  { key: "supervision", label: "Supervision", icon: AlertTriangle },
 ];
 
 const TRANSFER_STATUSES = ["COMPLETED", "IN_PROGRESS", "ERROR"];
@@ -1133,12 +1255,142 @@ export default function AdminAuditPage() {
                 </section>
               )}
             {/* ── Access Logs ────────────────────────────────────────────── */}
+            {activeTab === "supervision" && (
+              <section className="mb-8" data-testid="supervision-section">
+                <h2 className="font-semibold text-sm mb-3 flex items-center gap-2">
+                  <AlertTriangle
+                    size={14}
+                    className="text-amber-700 dark:text-amber-300"
+                  />
+                  Findings of non-compliance, Art. 63 (
+                  {data.findings?.length ?? 0})
+                </h2>
+                {!data.findings || data.findings.length === 0 ? (
+                  <p className="text-[var(--text-secondary)] text-sm mb-6">
+                    No finding recorded
+                  </p>
+                ) : (
+                  <div className="overflow-auto mb-6">
+                    <table className="w-full text-xs">
+                      <thead>
+                        <tr className="text-[var(--text-secondary)] border-b border-[var(--border)]">
+                          <th className="text-left py-2 px-2">Party</th>
+                          <th className="text-left py-2 px-2">Finding</th>
+                          <th className="text-left py-2 px-2">Status</th>
+                          <th className="text-left py-2 px-2">Notified</th>
+                          <th className="text-left py-2 px-2">Views by</th>
+                          <th className="text-left py-2 px-2">Measure</th>
+                          <th className="text-left py-2 px-2">GDPR</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {data.findings.map((f) => (
+                          <tr
+                            key={f.findingId}
+                            className="border-b border-[var(--border)] align-top"
+                            data-testid="finding-row"
+                          >
+                            <td className="py-2 px-2">
+                              <div>{f.partyName ?? f.partyId}</div>
+                              {f.permitId && (
+                                <div className="font-mono text-[var(--text-secondary)]">
+                                  {f.permitId}
+                                </div>
+                              )}
+                            </td>
+                            <td className="py-2 px-2">
+                              <div>{f.description}</div>
+                              <div className="font-mono text-[var(--text-secondary)]">
+                                {f.findingId}
+                              </div>
+                              {f.views && (
+                                <div className="text-[var(--text-secondary)]">
+                                  Views: {f.views}
+                                </div>
+                              )}
+                            </td>
+                            <td className="py-2 px-2">{f.status}</td>
+                            <td className="py-2 px-2 whitespace-nowrap">
+                              {f.notifiedAt?.slice(0, 10)}
+                            </td>
+                            <td className="py-2 px-2 whitespace-nowrap">
+                              {f.respondBy?.slice(0, 10)}
+                            </td>
+                            <td className="py-2 px-2">
+                              {f.measure ?? "—"}
+                              {f.revokedPermit ? ` (${f.revokedPermit})` : ""}
+                              {f.measureNote ? `: ${f.measureNote}` : ""}
+                            </td>
+                            <td className="py-2 px-2">
+                              {f.gdprBreach ? "authority informed" : "—"}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+                <h2 className="font-semibold text-sm mb-3 flex items-center gap-2">
+                  <Mail
+                    size={14}
+                    className="text-teal-800 dark:text-teal-300"
+                  />
+                  Requests for information, Art. 63(1) (
+                  {data.informationRequests?.length ?? 0})
+                </h2>
+                {!data.informationRequests ||
+                data.informationRequests.length === 0 ? (
+                  <p className="text-[var(--text-secondary)] text-sm">
+                    No request recorded
+                  </p>
+                ) : (
+                  <div className="overflow-auto">
+                    <table className="w-full text-xs">
+                      <thead>
+                        <tr className="text-[var(--text-secondary)] border-b border-[var(--border)]">
+                          <th className="text-left py-2 px-2">Party</th>
+                          <th className="text-left py-2 px-2">Question</th>
+                          <th className="text-left py-2 px-2">Status</th>
+                          <th className="text-left py-2 px-2">Asked</th>
+                          <th className="text-left py-2 px-2">Answer by</th>
+                          <th className="text-left py-2 px-2">Answer</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {data.informationRequests.map((r) => (
+                          <tr
+                            key={r.requestId}
+                            className="border-b border-[var(--border)] align-top"
+                            data-testid="information-request-row"
+                          >
+                            <td className="py-2 px-2">
+                              {r.partyName ?? r.partyId}
+                            </td>
+                            <td className="py-2 px-2">{r.question}</td>
+                            <td className="py-2 px-2">{r.status}</td>
+                            <td className="py-2 px-2 whitespace-nowrap">
+                              {r.requestedAt?.slice(0, 10)}
+                            </td>
+                            <td className="py-2 px-2 whitespace-nowrap">
+                              {r.answerBy?.slice(0, 10)}
+                            </td>
+                            <td className="py-2 px-2">{r.answer ?? "—"}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </section>
+            )}
+
             {activeTab === "accesslogs" && (
               <section className="mb-8">
                 <h2 className="font-semibold text-sm mb-3 flex items-center gap-2">
                   <Eye size={14} className="text-teal-800 dark:text-teal-300" />
                   Data Access Logs ({data.accesslogs?.length ?? 0})
                 </h2>
+                <RetentionLine />
                 {!data.accesslogs || data.accesslogs.length === 0 ? (
                   <p className="text-[var(--text-secondary)] text-sm">
                     No access logs recorded

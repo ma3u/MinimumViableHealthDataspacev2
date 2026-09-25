@@ -93,6 +93,32 @@ function graphAnswers() {
         },
       ];
     }
+    if (cypher.includes("ResultCommunication")) {
+      return [
+        {
+          resultId: "result-lmc-irs-2026-001-20260901",
+          permitId: "hdab-irs-lmc-2026-001",
+          applicant: "Limburg Medical Centre",
+          kind: "PUBLICATION",
+          title: "Readmission after cardiac surgery",
+          url: "https://example.org/lmc/readmission",
+          communicatedAt: "2026-09-01T10:00:00.000000000Z",
+          onTime: true,
+        },
+      ];
+    }
+    if (cypher.includes("NonComplianceFinding")) {
+      return [
+        {
+          findingId: "finding-1",
+          party: "PharmaCo Research AG",
+          measure: "FINE",
+          note: "Late reporting",
+          fineEur: 25000,
+          closedAt: "2026-09-20T10:00:00.000000000Z",
+        },
+      ];
+    }
     throw new Error(`unexpected query: ${cypher.slice(0, 60)}`);
   });
 }
@@ -137,7 +163,7 @@ describe("GET /api/activity-report", () => {
     expect(body.items.c.accessEvents).toBe(41);
     expect(body.items.h.averageDays).toBe(14);
     expect(body.items.i.total).toBe(1);
-    expect(mockRunQuery).toHaveBeenCalledTimes(5);
+    expect(mockRunQuery).toHaveBeenCalledTimes(7);
   });
 
   it("passes the period to the access-event query and honours ?from and ?to", async () => {
