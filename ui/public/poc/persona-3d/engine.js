@@ -6,6 +6,10 @@
 import ForceGraph3D from "https://cdn.jsdelivr.net/npm/3d-force-graph@1.80.0/+esm";
 import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.183.2/+esm";
 
+// The drawing helpers below are shared with the HL7 showcase deck, which
+// paints the patient and researcher overview behind its cover and close.
+export { ForceGraph3D, THREE };
+
 export const STATUS_COLOR = {
   ok: "#22c55e",
   warn: "#f59e0b",
@@ -26,7 +30,7 @@ export async function loadJson(name) {
   return r.json();
 }
 
-const LAYER_GAP = 110;
+export const LAYER_GAP = 110;
 export function trendOf(n) {
   const v = n.series.map((p) => p.value);
   const first = v[0];
@@ -196,7 +200,7 @@ function glowSprite(color, scale) {
   return sp;
 }
 
-function nodeObject(n) {
+export function nodeObject(n) {
   const g = new THREE.Group();
   const r = 3 + (n.size ?? 1) * 1.6;
   const color = n.color ?? STATUS_COLOR[n.status ?? "none"];
@@ -227,7 +231,7 @@ function nodeObject(n) {
   return g;
 }
 
-function layerPlane(layer, radius) {
+export function layerPlane(layer, radius) {
   const grp = new THREE.Group();
   const disc = new THREE.Mesh(
     new THREE.CircleGeometry(radius, 72),

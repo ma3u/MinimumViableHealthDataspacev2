@@ -365,22 +365,70 @@
         background: #148f77;
         border-color: #148f77;
       }
-      /* The 3D graph is drawn on a canvas inside the slide, not in an iframe
-         background: the platform sends X-Frame-Options: DENY for every path,
-         which a browser honours even for a same-origin frame. */
+      /* The cover shows the patient's overview and the close the researcher's,
+         the same scene as /overview, drawn by scene.js with the prototype
+         engine into a div inside the slide, not an iframe background: the
+         platform sends X-Frame-Options: DENY for every path, which a browser
+         honours even for a same-origin frame. Until the scene is up, and if
+         it never comes, the canvas draws the shape of the store instead. */
       .reveal .graph-slide {
         height: 900px;
         display: flex;
         flex-direction: column;
         justify-content: center;
       }
-      .reveal .graph-slide .kg3d {
+      .reveal .graph-slide .kg3d,
+      .reveal .graph-slide .kg3d-live,
+      .reveal .graph-slide .veil {
         position: absolute;
         left: 0;
         top: 0;
         width: 1600px;
         height: 900px;
         z-index: 0;
+      }
+      .reveal .graph-slide .kg3d-live,
+      .reveal .graph-slide .veil {
+        display: none;
+        pointer-events: none;
+      }
+      .reveal .graph-slide.live .kg3d-live,
+      .reveal .graph-slide.live .veil {
+        display: block;
+      }
+      .reveal .graph-slide.live canvas.kg3d {
+        display: none;
+      }
+      /* The veil keeps the text on the left readable. */
+      .reveal .graph-slide .veil {
+        background: linear-gradient(
+          90deg,
+          rgba(20, 33, 61, 0.96) 0%,
+          rgba(20, 33, 61, 0.86) 38%,
+          rgba(20, 33, 61, 0.35) 62%,
+          rgba(20, 33, 61, 0.12) 100%
+        );
+      }
+      .reveal .graph-slide .veil.bright {
+        background: linear-gradient(
+          90deg,
+          rgba(20, 33, 61, 0.84) 0%,
+          rgba(20, 33, 61, 0.6) 40%,
+          rgba(20, 33, 61, 0.1) 70%,
+          rgba(20, 33, 61, 0) 100%
+        );
+      }
+      .reveal .graph-slide .caption {
+        position: absolute;
+        right: 130px;
+        bottom: 22px;
+        z-index: 2;
+        margin: 0;
+        font-size: 0.45em;
+        color: var(--muted);
+      }
+      .reveal .graph-slide .caption a {
+        color: var(--muted);
       }
       /* reveal.js sets display: block on the current slide, so the centring
          happens inside the overlay rather than on the section. */
@@ -406,6 +454,9 @@
         <!-- 1 Cover, 0:30 -->
         <section class="graph-slide" data-background-color="#14213d">
           <canvas class="kg3d" aria-hidden="true"></canvas>
+          <div class="kg3d-live" data-persona="patient" data-shift="340" data-zoom="1.3" aria-hidden="true"></div>
+          <div class="veil" aria-hidden="true"></div>
+          <p class="caption">Behind: one patient's health in one view · <a href="https://ehds.mabu.red/overview" target="_blank" rel="noopener">ehds.mabu.red/overview</a></p>
           <div class="over">
           <p class="eyebrow">HL7 AI Challenge 2026 · Open Solution Award</p>
           <h1 style="max-width: 1000px">From my own lab report to a governed dataspace, on HL7 FHIR</h1>
@@ -421,7 +472,7 @@
           <p class="tiny muted">World Standards Day, 14 October 2026 · press <b>S</b> for notes, <b>F</b> for full screen</p>
           </div>
           <aside class="notes">
-            0:00. Thank you, Dan, and thank you HL7. Behind me is the shape of what we store: five layers, dataspace on top, then the catalogue, then FHIR, OMOP, terminology. Twelve minutes: a personal story, the two demos, what we learned about FHIR and LOINC, and five things we would ask of this community.
+            0:00. Thank you, and thank you HL7. Behind me is one person's health in one view, as the platform shows it to her today: her record in FHIR, the parameters behind her risks, what to do next, and who uses her data under which consent. Twelve minutes: a personal story, the two demos, what we learned about FHIR and LOINC, and five things we would ask of this community.
           </aside>
         </section>
 
@@ -731,6 +782,9 @@
         <!-- 10 Demo and close, 1:00 -->
         <section class="graph-slide" data-background-color="#14213d">
           <canvas class="kg3d" data-bright="1" aria-hidden="true"></canvas>
+          <div class="kg3d-live" data-persona="researcher" data-shift="380" data-zoom="1.15" aria-hidden="true"></div>
+          <div class="veil bright" aria-hidden="true"></div>
+          <p class="caption">Behind: the researcher's view · <a href="https://ehds.mabu.red/overview?persona=researcher" target="_blank" rel="noopener">ehds.mabu.red/overview</a></p>
           <div class="over">
           <p class="eyebrow">Live, open source, yours to run</p>
           <h2 style="font-size: 1.3em; max-width: 1000px">Two minutes of demo, then your questions</h2>
@@ -758,7 +812,7 @@
           <p class="small muted" style="margin-top: 0.9em">Matthias Buchhorn · <a href="https://linkedin.com/in/mbuchhorn" target="_blank" rel="noopener">linkedin.com/in/mbuchhorn</a> · Thank you, HL7.</p>
           </div>
           <aside class="notes">
-            11:00. Browser: researcher, discover, the OMOP dashboard, one plain-language question. Phone: open the lipid panel, tap Original scan, open Trends. Two minutes, then questions. If the network fails, the static simulation has every screen on fixtures.
+            11:00. Behind me now is the researcher's view: permits, what they may use today, their studies and the datasets near them. Browser: researcher, discover, the OMOP dashboard, one plain-language question. Phone: open the lipid panel, tap Original scan, open Trends. Two minutes, then questions. If the network fails, the static simulation has every screen on fixtures.
           </aside>
         </section>
 
@@ -895,7 +949,7 @@
           var drew = false;
           canvases.forEach(function (cv) {
             var sec = cv.closest("section");
-            if (sec && sec.classList.contains("present")) {
+            if (sec && sec.classList.contains("present") && !sec.classList.contains("live")) {
               draw(cv, cv.getAttribute("data-bright") === "1");
               drew = true;
             }
@@ -904,6 +958,49 @@
           requestAnimationFrame(loop);
         }
         loop();
+      })();
+      // The persona overviews behind the cover and the close (scene.js). Each
+      // mounts once its slide is first shown, and is paused while it is away.
+      (function () {
+        var scenes = {};
+        var loading = null;
+        function ensure(sec) {
+          var host = sec.querySelector(".kg3d-live");
+          if (!host || host.dataset.state) return;
+          host.dataset.state = "loading";
+          loading = loading || import("./scene.js");
+          loading
+            .then(function (mod) {
+              sec.classList.add("live");
+              return mod.mountBackground(host, host.dataset.persona, {
+                shiftX: Number(host.dataset.shift || 0),
+                zoom: Number(host.dataset.zoom || 1),
+              });
+            })
+            .then(function (scene) {
+              host.dataset.state = "on";
+              host.dataset.source = scene.source;
+              scenes[host.dataset.persona] = { sec: sec, scene: scene };
+              if (!sec.classList.contains("present")) scene.pause();
+            })
+            .catch(function (err) {
+              // The canvas drawing stays: the deck never depends on the CDN.
+              host.dataset.state = "failed";
+              sec.classList.remove("live");
+              console.warn("overview scene", host.dataset.persona, err);
+            });
+        }
+        function sync() {
+          document.querySelectorAll("section.graph-slide.present").forEach(ensure);
+          Object.keys(scenes).forEach(function (k) {
+            var s = scenes[k];
+            if (s.sec.classList.contains("present")) s.scene.resume();
+            else s.scene.pause();
+          });
+        }
+        Reveal.on("ready", sync);
+        Reveal.on("slidechanged", sync);
+        if (Reveal.isReady()) sync();
       })();
       // Narration: one audio file per top-level slide under audio/, generated by
       // scripts/narrate-hl7-deck.py from the speaker notes in the presenter's
