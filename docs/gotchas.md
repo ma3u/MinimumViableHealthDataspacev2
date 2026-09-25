@@ -620,3 +620,15 @@ Seed once, in `.onAppear`, guarded by a flag. The initialiser stores the
 
 The symptom is easy to misread as a binding problem, because the field accepts
 the keystrokes and shows them until the next redraw.
+
+## 2026-09-25: two traps in verifying a deploy with the journeys
+
+- `gh pr checks <n>` prints "No checks reported" for a minute or so after a
+  push, before the workflows register. A script that treats an empty list as
+  "all green" merges before CI ran (it happened to PR #298; the suite passed
+  afterwards). Wait until at least one check is listed, then until none is
+  pending.
+- `KEYCLOAK_PUBLIC_URL` for a live journey run is the host,
+  `https://auth.ehds.mabu.red`; the helper appends `/realms/edcv` itself. With
+  the realm URL the probe 404s and every test skips as "Keycloak unavailable",
+  which reads like a clean run.
