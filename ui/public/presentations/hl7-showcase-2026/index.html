@@ -449,7 +449,7 @@
       <div class="slides">
         <!-- 1 Cover, 0:30 -->
         <section class="graph-slide" data-background-color="#14213d">
-          <div class="kg3d-live" data-persona="patient" data-shift="520" data-zoom="1.35" aria-hidden="true"></div>
+          <div class="kg3d-live" data-persona="patient" data-shift="540" data-zoom="1.1" aria-hidden="true"></div>
           <div class="veil" aria-hidden="true"></div>
           <p class="caption">Behind: one patient's health in one view · <a href="https://ehds.mabu.red/overview" target="_blank" rel="noopener">ehds.mabu.red/overview</a></p>
           <div class="over">
@@ -778,7 +778,7 @@
 
         <!-- 10 Demo and close, 1:00 -->
         <section class="graph-slide" data-background-color="#14213d">
-          <div class="kg3d-live" data-persona="researcher" data-shift="450" data-zoom="1.02" aria-hidden="true"></div>
+          <div class="kg3d-live" data-persona="researcher" data-shift="600" data-shifty="110" data-elev="0.75" data-zoom="0.85" aria-hidden="true"></div>
           <div class="veil bright" aria-hidden="true"></div>
           <p class="caption">Behind: the researcher's view · <a href="https://ehds.mabu.red/overview?persona=researcher" target="_blank" rel="noopener">ehds.mabu.red/overview</a></p>
           <div class="over">
@@ -866,6 +866,8 @@
               sec.classList.add("live");
               return mod.mountBackground(host, host.dataset.persona, {
                 shiftX: Number(host.dataset.shift || 0),
+                shiftY: Number(host.dataset.shifty || 0),
+                elev: Number(host.dataset.elev || 0.6),
                 zoom: Number(host.dataset.zoom || 1),
               });
             })
