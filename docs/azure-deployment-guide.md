@@ -123,8 +123,7 @@ cd MinimumViableHealthDataspacev2
 
 | Service               | Internal FQDN                                                                       | Port  | Protocol |
 | --------------------- | ----------------------------------------------------------------------------------- | ----- | -------- |
-| **Neo4j** (HTTP)      | `mvhd-neo4j.internal.blackforest-0a04f26e.westeurope.azurecontainerapps.io`         | 7474  | HTTP     |
-| **Neo4j** (Bolt)      | `mvhd-neo4j.internal.blackforest-0a04f26e.westeurope.azurecontainerapps.io`         | 7687  | TCP      |
+| **Neo4j** (Bolt)      | `mvhd-neo4j` (short app name — see note)                                            | 7687  | TCP      |
 | **Neo4j Proxy**       | `mvhd-neo4j-proxy.internal.blackforest-0a04f26e.westeurope.azurecontainerapps.io`   | 9090  | HTTP     |
 | **Vault**             | `mvhd-vault.internal.blackforest-0a04f26e.westeurope.azurecontainerapps.io`         | 8200  | HTTP     |
 | **NATS**              | `mvhd-nats.internal.blackforest-0a04f26e.westeurope.azurecontainerapps.io`          | 4222  | TCP      |
@@ -135,6 +134,15 @@ cd MinimumViableHealthDataspacev2
 | **Issuer Service**    | `mvhd-issuerservice.internal.blackforest-0a04f26e.westeurope.azurecontainerapps.io` | 10013 | HTTP     |
 | **Tenant Manager**    | `mvhd-tenant-mgr.internal.blackforest-0a04f26e.westeurope.azurecontainerapps.io`    | 8080  | HTTP     |
 | **Provision Manager** | `mvhd-provision-mgr.internal.blackforest-0a04f26e.westeurope.azurecontainerapps.io` | 8080  | HTTP     |
+
+Neo4j is the exception in that table: it has TCP ingress with `targetPort` and
+`exposedPort` 7687 and no `additionalPortMappings`, so there is no HTTP endpoint
+on 7474 — a row for one stood here and cost issue #205. (An
+`additionalPortMappings: [7474]` experiment was tried and reverted on
+2026-04-13; ADR-017 is about what that revert destroyed.) ACA routes
+environment-local TCP by short app name only, so `bolt://mvhd-neo4j:7687` is the
+address; the `*.internal.<domain>` FQDN is the HTTP ingress name and times out
+on TCP. `scripts/azure/env.sh` exports it as `NEO4J_BOLT_URI`.
 
 ### Database endpoints (private)
 

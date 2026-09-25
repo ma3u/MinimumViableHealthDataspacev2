@@ -30,9 +30,13 @@ fix is `cypher-shell` over Bolt in each of them.
   against the local graph, `count(c) AS cnt, collect(c.name) AS names` came back
   as `{names, cnt}`, which would have silently swapped every `row[0]`.
 - `NEO4J_HTTP_URL` and `NEO4J_INTERNAL_URL` are gone from `scripts/azure/env.sh`
-  and off `mvhd-ui`. Both were the `*.internal.<domain>` FQDN, which is the HTTP
-  ingress name and serves neither Bolt nor HTTP for this app. `NEO4J_BOLT_URI`
-  replaces them.
+  and off `mvhd-ui`, and `docs/azure-deployment-guide.md` no longer lists a
+  Neo4j HTTP row. All of them were the `*.internal.<domain>` FQDN, which is the
+  HTTP ingress name and serves neither Bolt nor HTTP for this app.
+  `NEO4J_BOLT_URI` replaces them.
+- Do not reach for `additionalPortMappings: [7474]`. It was tried on
+  2026-04-13, and reverting it produced a new revision that wiped the graph —
+  that incident is what ADR-017 was written about.
 - `.github/workflows/reset-demo.yml` still POSTs to `https://<neo4j fqdn>:7474`
   for its dirty check. That call cannot answer either, so the `|| echo "-1"`
   fallback fires and every scheduled run resets the environment as "assumed
