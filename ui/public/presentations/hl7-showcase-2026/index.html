@@ -491,7 +491,8 @@
         </section>
 
         <!-- 3 Flow 1, 1:00 -->
-        <section data-background-gradient="linear-gradient(135deg, #0d3b3a 0%, #14213d 70%)">
+        <section>
+          <section data-background-gradient="linear-gradient(135deg, #0d3b3a 0%, #14213d 70%)">
           <p class="eyebrow">Demo 1 · primary use</p>
           <h2 style="font-size: 1.25em">The person's journey: from a paper result to a record they control</h2>
           <svg class="anim flowsvg" viewBox="0 0 1600 650" role="img" aria-label="Swimlane flow">
@@ -537,13 +538,19 @@
 <g class="n" style="animation-delay:1.95s"><rect x="995.0" y="417.0" width="210" height="66" rx="12" fill="#0d162b" stroke="#7fd1bf" stroke-width="2"/><text x="1100.0" y="446" text-anchor="middle" fill="#fbfbf8" font-size="17" font-weight="600" font-family="Public Sans, Arial, sans-serif">6 · To the ePA, the GP</text><text x="1100.0" y="466" text-anchor="middle" fill="#aab4bf" font-size="15" font-weight="400" font-family="Public Sans, Arial, sans-serif">the person uploads</text></g>
 <g class="n link" data-path="/patient/profile" role="link" tabindex="0" style="animation-delay:2.30s"><rect x="475.0" y="45.0" width="210" height="66" rx="12" fill="#0d162b" stroke="#f0b27a" stroke-width="2"/><text x="580.0" y="74" text-anchor="middle" fill="#fbfbf8" font-size="17" font-weight="600" font-family="Public Sans, Arial, sans-serif">7 · Sign in with the wallet</text><text x="580.0" y="94" text-anchor="middle" fill="#aab4bf" font-size="15" font-weight="400" font-family="Public Sans, Arial, sans-serif">see the own record</text></g>
 <g class="n link" data-path="/patient/research" role="link" tabindex="0" style="animation-delay:2.65s"><rect x="835.0" y="45.0" width="210" height="66" rx="12" fill="#0d162b" stroke="#f0b27a" stroke-width="2"/><text x="940.0" y="74" text-anchor="middle" fill="#fbfbf8" font-size="17" font-weight="600" font-family="Public Sans, Arial, sans-serif">8 · Consent or opt out</text><text x="940.0" y="94" text-anchor="middle" fill="#aab4bf" font-size="15" font-weight="400" font-family="Public Sans, Arial, sans-serif">for research, revocable</text></g>
-<g class="n link" data-path="/graph" role="link" tabindex="0" style="animation-delay:3.00s"><rect x="1275.0" y="541.0" width="210" height="66" rx="12" fill="#0d162b" stroke="#c9a0dc" stroke-width="2"/><text x="1380.0" y="570" text-anchor="middle" fill="#fbfbf8" font-size="17" font-weight="600" font-family="Public Sans, Arial, sans-serif">9 · Record in the graph</text><text x="1380.0" y="590" text-anchor="middle" fill="#aab4bf" font-size="15" font-weight="400" font-family="Public Sans, Arial, sans-serif">layers 3 to 5, coded</text></g>
+<g class="n link" data-path="/overview" role="link" tabindex="0" style="animation-delay:3.00s"><rect x="1275.0" y="541.0" width="210" height="66" rx="12" fill="#0d162b" stroke="#c9a0dc" stroke-width="2"/><text x="1380.0" y="570" text-anchor="middle" fill="#fbfbf8" font-size="17" font-weight="600" font-family="Public Sans, Arial, sans-serif">9 · Record in the graph</text><text x="1380.0" y="590" text-anchor="middle" fill="#aab4bf" font-size="15" font-weight="400" font-family="Public Sans, Arial, sans-serif">layers 3 to 5, coded</text></g>
 <g class="n link" data-path="/patient/insights" role="link" tabindex="0" style="animation-delay:3.35s"><rect x="1275.0" y="45.0" width="210" height="66" rx="12" fill="#0d162b" stroke="#f0b27a" stroke-width="2"/><text x="1380.0" y="74" text-anchor="middle" fill="#fbfbf8" font-size="17" font-weight="600" font-family="Public Sans, Arial, sans-serif">10 · What came back</text><text x="1380.0" y="94" text-anchor="middle" fill="#aab4bf" font-size="15" font-weight="400" font-family="Public Sans, Arial, sans-serif">aggregate only, k ≥ 5</text></g>
 </svg>
-          <p class="tiny muted" style="margin-top: 6px">Boxes with a link open the demo. <span class="toggle"><button type="button" data-base="https://ehds.mabu.red" class="on">live</button><button type="button" data-base="https://ma3u.github.io/MinimumViableHealthDataspacev2">static</button></span> switches every deep link between the live platform and the static simulation that needs no sign-in.</p>
+          <p class="tiny muted" style="margin-top: 6px">Boxes with a link open the demo. <span class="toggle"><button type="button" data-base="https://ehds.mabu.red" class="on">live</button><button type="button" data-base="https://ma3u.github.io/MinimumViableHealthDataspacev2">static</button></span> switches every deep link between the live platform and the static simulation that needs no sign-in. · press down for the recording, in case the network fails.</p>
           <aside class="notes">
-            2:00. Lanes top to bottom: the person, the lab, the phone, the doctor and the record, the cloud. Steps one to six are what the app does today. Seven to ten are the platform once the person signs in with the EU wallet: their own record, a consent or an opt-out honoured where data leaves the holder, and aggregate findings coming back.
+            2:00. Lanes top to bottom: the person, the lab, the phone, the doctor and the record, the cloud. Steps one to six are what the app does today. Seven to ten are the platform once the person signs in with the EU wallet: their own record, a consent or an opt-out honoured where data leaves the holder, and aggregate findings coming back. The recording below is the backup.
           </aside>
+          </section>
+          <section>
+            <p class="eyebrow">Backup · the person on the platform, recorded</p>
+            <div class="gifwrap" style="max-width: 1240px"><img src="img/ehds-patient-journey.gif" alt="A recording of the person's journey on the platform: the one view the login lands on, the own record, the research programmes with revocable consent, and the aggregate findings that came back" /></div>
+            <aside class="notes">Only if the live demo fails: the one view, the record, the consents, what came back.</aside>
+          </section>
         </section>
 
         <!-- 4 Klarbefund, 1:30 -->
@@ -653,20 +660,15 @@
 <g class="n link" data-path="/query" role="link" tabindex="0" style="animation-delay:3.70s"><rect x="1375.0" y="293.0" width="210" height="66" rx="12" fill="#0d162b" stroke="#7fb3e6" stroke-width="2"/><text x="1480.0" y="322" text-anchor="middle" fill="#fbfbf8" font-size="17" font-weight="600" font-family="Public Sans, Arial, sans-serif">7 · Share results</text><text x="1480.0" y="342" text-anchor="middle" fill="#aab4bf" font-size="15" font-weight="400" font-family="Public Sans, Arial, sans-serif">OMOP output, plain-language</text></g>
 <g class="n link" data-path="/admin/audit" role="link" tabindex="0" style="animation-delay:4.05s"><rect x="1375.0" y="417.0" width="210" height="66" rx="12" fill="#0d162b" stroke="#7fd1bf" stroke-width="2"/><text x="1480.0" y="446" text-anchor="middle" fill="#fbfbf8" font-size="17" font-weight="600" font-family="Public Sans, Arial, sans-serif">8 · Receive audit report</text><text x="1480.0" y="466" text-anchor="middle" fill="#aab4bf" font-size="15" font-weight="400" font-family="Public Sans, Arial, sans-serif">every access logged</text></g>
 </svg>
-            <p class="tiny muted" style="margin-top: 6px">Every box is a deep link into the demo. Synthetic data, real protocols: DSP 2025-1, DCP 1.0, HealthDCAT-AP 2.1, ODRL 2.2, FHIR R4, OMOP CDM 5.4. <span class="toggle"><button type="button" data-base="https://ehds.mabu.red" class="on">live</button><button type="button" data-base="https://ma3u.github.io/MinimumViableHealthDataspacev2">static</button></span> · press down for recordings, in case the network fails.</p>
+            <p class="tiny muted" style="margin-top: 6px">Every box is a deep link into the demo. Synthetic data, real protocols: DSP 2025-1, DCP 1.0, HealthDCAT-AP 2.1, ODRL 2.2, FHIR R4, OMOP CDM 5.4. <span class="toggle"><button type="button" data-base="https://ehds.mabu.red" class="on">live</button><button type="button" data-base="https://ma3u.github.io/MinimumViableHealthDataspacev2">static</button></span> · press down for the recording, in case the network fails.</p>
             <aside class="notes">
-              6:00. The researcher's half runs on the Eclipse Dataspace Components with the EHDS roles on top. Three registrations, a catalogue entry, discovery, a negotiation, the permit with the opt-out checked, the pseudonymised extract into the secure environment, the analysis on OMOP, and the audit report. Each box opens the page. The recordings below are the backup.
+              6:00. The researcher's half runs on the Eclipse Dataspace Components with the EHDS roles on top. Three registrations, a catalogue entry, discovery, a negotiation, the permit with the opt-out checked, the pseudonymised extract into the secure environment, the analysis on OMOP, and the audit report. Each box opens the page. The recording below is the backup.
             </aside>
           </section>
           <section>
             <p class="eyebrow amber">Backup · the researcher, recorded</p>
             <div class="gifwrap" style="max-width: 1240px"><img src="img/ehds-researcher-journey.gif" alt="A recording of the researcher's journey on the platform: the one view the login lands on, discovering datasets, the negotiation history, and the OMOP analytics" /></div>
             <aside class="notes">Only if the live demo fails: discovery, negotiation history, OMOP dashboard.</aside>
-          </section>
-          <section>
-            <p class="eyebrow amber">Backup · the person on the platform, recorded</p>
-            <div class="gifwrap" style="max-width: 1240px"><img src="img/ehds-patient-journey.gif" alt="A recording of the patient persona: the health profile, the research programmes with revocable consent, and the aggregate findings that came back" /></div>
-            <aside class="notes">Only if the live demo fails: the profile, the consents, what came back.</aside>
           </section>
         </section>
 

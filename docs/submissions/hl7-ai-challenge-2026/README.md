@@ -40,6 +40,15 @@ python3 scripts/frames-to-gif.py /tmp/researcher ../docs/submissions/hl7-ai-chal
 cp ../docs/submissions/hl7-ai-challenge-2026/img/ehds-researcher-journey.gif public/presentations/hl7-showcase-2026/img/
 ```
 
+The person's journey on the platform, shown in the deck under the person's swimlane, is
+recorded the same way as the patient persona: the overview the login lands on, the own
+record, the research programmes with their consents, the findings that came back.
+
+```bash
+PLAYWRIGHT_BASE_URL=https://ehds.mabu.red OUT=/tmp/patient npx tsx scripts/record-patient-journey.ts
+python3 scripts/frames-to-gif.py /tmp/patient public/presentations/hl7-showcase-2026/img/ehds-patient-journey.gif
+```
+
 The frames are screenshots taken at chosen moments, so loading time never ends up in the
 animation; about 57 frames, 22 seconds, under 2 MB. `img/klarbefund-tour.gif` is built
 from the app screenshots in `docs/klarbefund/img/` (fictional dev dataset).
