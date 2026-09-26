@@ -94,14 +94,25 @@ created=0; existed=0; failed=0
 while read -r ctx did; do
   [ -n "$ctx" ] && [ -n "$did" ] || continue
 
-  body=$(python3 - "$ctx" "$did" <<'PY'
+  # The service endpoints are what make the DID document usable: the issuer
+  # delivers a credential to the CredentialService endpoint, and a counterparty
+  # sends DSP messages to the ProtocolEndpoint. CFM writes both; the first
+  # version of this seed wrote neither, and in CI the issuer approved every
+  # request and then sat at APPROVED with nowhere to deliver (#345, run
+  # 36266312446: "<no CredentialService in DID document>"). Shapes copied from
+  # a CFM-made participant's did.json on the local stack.
+  body=$(python3 - "$ctx" "$did" "${CREDENTIALS_BASE:-http://identityhub:7082/api/credentials/v1/participants}" "${PROTOCOL_BASE:-http://controlplane:8082/api/dsp}" <<'PY'
 import json, sys
-ctx, did = sys.argv[1], sys.argv[2]
+ctx, did, cred_base, proto_base = sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4]
 print(json.dumps({
     "participantContextId": ctx,
     "did": did,
     "active": True,
     "roles": ["participant"],
+    "serviceEndpoints": [
+        {"type": "CredentialService", "serviceEndpoint": f"{cred_base}/{ctx}", "id": f"{ctx}-credentialservice"},
+        {"type": "ProtocolEndpoint",  "serviceEndpoint": f"{proto_base}/{ctx}/2025-1", "id": f"{ctx}-dsp"},
+    ],
     "keys": [{
         "keyId": f"{did}#key1",
         "privateKeyAlias": f"{did}#key1",
