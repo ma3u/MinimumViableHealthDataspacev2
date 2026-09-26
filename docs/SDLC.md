@@ -413,25 +413,27 @@ three suites died at participant discovery (#307, fixed in #314).
 
 > ⚠️ **Read this before citing the tier as evidence.** Every suite step is
 > `continue-on-error: true`, so a green **Protocol Compliance** run means the
-> workflow finished, not that anything conformed. Measured on 2026-09-26,
-> commit `3336b1a`, on both targets:
+> workflow finished, not that anything conformed. Measured on 2026-09-26:
 >
-> | Suite          | Local ephemeral stack                | Azure deployment                    |
-> | -------------- | ------------------------------------ | ----------------------------------- |
-> | EHDS domain    | 1 passed, 13 failed, 11 skipped / 25 | 20 passed, 0 failed, 5 skipped / 25 |
-> | DSP 2025-1 TCK | ends at discovery                    | ends at discovery                   |
-> | DCP v1.0       | ends at discovery                    | ends at discovery                   |
+> | Suite          | Local ephemeral stack                | Azure deployment                     |
+> | -------------- | ------------------------------------ | ------------------------------------ |
+> | EHDS domain    | 1 passed, 13 failed, 11 skipped / 25 | 20 passed, 0 failed, 5 skipped / 25  |
+> | DSP 2025-1 TCK | ends at discovery                    | 23 passed, 0 failed, 10 skipped / 33 |
+> | DCP v1.0       | ends at discovery                    | 10 passed, 1 failed, 11 skipped / 22 |
 >
-> **Neither target produces a DSP 2025-1 or DCP v1.0 verdict.** Both end at
-> `Missing required participant contexts`, because neither control plane has
-> any: Azure is seeded into the identity hub only, and `compliance.yml` starts
-> the JAD stack with `docker compose up -d` but never runs `jad/seed-jad.sh`
-> (#316). The DSP and DCP conformance claims elsewhere in this repository rest
-> on manual local runs against a seeded stack, not on this pipeline.
+> The Azure column is the state after #316 seeded five participant contexts
+> onto the control plane, which it had never had. Before that, all three suites
+> ended at `Missing required participant contexts` and the DSP and DCP columns
+> were empty in the literal sense: neither had produced a verdict on any target,
+> ever. They now do, on Azure.
 >
-> EHDS is the one suite that produces a verdict, and only on Azure, whose Neo4j
-> carries the real graph. The same suite scores 1/25 against the ephemeral CI
-> stack because that database is empty.
+> The local column is still unseeded at the time of writing. `compliance.yml`
+> gained the same seeding step in the same issue, so the next run there should
+> move too; the numbers above predate it. EHDS scores 1/25 locally because the
+> ephemeral Neo4j is empty, which is a separate gap from the participant one.
+>
+> What has not changed: no suite can fail this workflow, so treat the numbers
+> as a report and not as a gate.
 
 ### 6.4 GitHub Pages (static demo) — [`.github/workflows/pages.yml`](https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/.github/workflows/pages.yml)
 
