@@ -62,6 +62,84 @@ wait_for_service() {
 }
 
 # ---------------------------------------------------------------------------
+# JetStream round trip
+# ---------------------------------------------------------------------------
+# Issue #191. A `nats_data` volume written by an older server can leave
+# JetStream in a state where every publish fails with
+#
+#   nats: invalid jetstream publish response
+#
+# while the server logs nothing, `docker ps` shows it healthy and
+# /healthz returns 200. The only symptom a human sees is a CFM participant
+# whose VPAs go straight to `error`, several services away from the cause.
+#
+# Measured in #191: 2.14.3 on the existing volume fails, 2.11.17 on a fresh
+# volume works, and 2.14.3 on a fresh volume works. So the pinned version is
+# fine and the stale volume is the fault.
+#
+# A round trip is the check, not a heuristic on stream metadata: the broken
+# volume's streams looked unremarkable from the outside (KV_cfm-bucket held
+# 53 messages between first_seq 26 and last_seq 243439, and an empty stream
+# legitimately reports first_seq = last_seq + 1), so there is nothing
+# reliable to pattern-match. Publishing a message and reading it back is
+# unambiguous.
+assert_jetstream_roundtrip() {
+  local network="${1:-health-dataspace-edcv}"
+  local stream="bootstrap_probe_$$"
+  local subject="bootstrap.probe.$$"
+
+  log "Checking a JetStream publish round trip ..."
+  if ! docker image inspect natsio/nats-box:latest >/dev/null 2>&1; then
+    log "  pulling natsio/nats-box (first run only)"
+    docker pull -q natsio/nats-box:latest >/dev/null 2>&1 || {
+      log "  WARNING: could not pull natsio/nats-box; skipping the round trip."
+      log "  If CFM orchestrations later fail with 'invalid jetstream publish"
+      log "  response', the nats_data volume is the first thing to suspect (#191)."
+      return 0
+    }
+  fi
+
+  local out rc
+  set +e
+  out=$(docker run --rm --network "$network" natsio/nats-box:latest sh -c "
+    set -e
+    # --defaults, because the CLI prompts for every unset option and there
+    # is no terminal here: without it the probe dies with 'cannot ask for
+    # confirmation without a terminal' and looks like a JetStream fault.
+    nats --server nats://nats:4222 stream add '$stream' \
+      --subjects '$subject' --storage file --defaults >/dev/null
+    nats --server nats://nats:4222 pub '$subject' 'bootstrap-probe' >/dev/null
+    nats --server nats://nats:4222 stream info '$stream' --json \
+      | grep -q '\"messages\": *1'
+  " 2>&1)
+  rc=$?
+  docker run --rm --network "$network" natsio/nats-box:latest \
+    nats --server nats://nats:4222 stream rm "$stream" -f >/dev/null 2>&1 || true
+  set -e
+
+  if [ "$rc" -eq 0 ]; then
+    ok "JetStream round trip succeeded"
+    return 0
+  fi
+
+  error "JetStream cannot store a message. Every CFM orchestration will fail"
+  error "with 'invalid jetstream publish response' and each participant's VPAs"
+  error "will go straight to 'error', with nothing in the NATS log to say why."
+  error ""
+  error "This is almost always a stale nats_data volume (issue #191). Recover:"
+  error "  docker compose \$COMPOSE_FILES stop nats"
+  error "  docker compose \$COMPOSE_FILES rm -f nats"
+  error "  docker volume rm \$(docker volume ls -q | grep nats_data)"
+  error "  docker compose \$COMPOSE_FILES up -d nats"
+  error "The managers recreate cfm-stream and KV_cfm-bucket on startup, so"
+  error "losing the volume costs nothing."
+  error ""
+  error "nats-box said:"
+  printf '%s\n' "$out" | sed 's/^/    /' >&2
+  return 1
+}
+
+# ---------------------------------------------------------------------------
 # Pre-flight checks
 # ---------------------------------------------------------------------------
 preflight() {
@@ -145,6 +223,9 @@ start_stack() {
   wait_for_service "Vault" "http://localhost:8200/v1/sys/health" 15 3
   wait_for_service "Keycloak" "http://localhost:9000/health/ready" 30 5
   wait_for_service "NATS" "http://localhost:8222/healthz" 10 3
+  # /healthz says the server is up, not that JetStream can store anything —
+  # the #191 failure passes that check and fails every publish.
+  assert_jetstream_roundtrip || exit 1
   ok "Infrastructure services are healthy"
 
   log "=== Phase 2: Running Vault bootstrap ==="

@@ -3,6 +3,45 @@
 Non-obvious pitfalls across the stack. Ordered newest first; add a new
 entry at the top when you hit something that cost you more than 30 minutes.
 
+## 2026-09-26: a healthy NATS that cannot store a single message
+
+`/healthz` returns 200, `docker ps` says healthy, the server log is clean, and
+every JetStream publish fails with `nats: invalid jetstream publish response`.
+The only thing a human sees is a CFM participant whose VPAs go straight to
+`error`, several services away from the cause (#191).
+
+It is the `nats_data` volume, not the server version. Both arms were run
+rather than assumed:
+
+| NATS server | volume   | result              |
+| ----------- | -------- | ------------------- |
+| 2.14.3      | existing | every publish fails |
+| 2.11.17     | fresh    | works               |
+| 2.14.3      | fresh    | works               |
+
+So the pin from #100 is fine and should stay. Recovery is to drop the volume;
+the managers recreate `cfm-stream` and `KV_cfm-bucket` on startup, so it costs
+nothing.
+
+`bootstrap-jad.sh` now does a JetStream **round trip** during bring-up —
+create a stream, publish, read the count back — rather than trusting
+`/healthz`. It has to be a round trip and not a check on stream metadata: the
+broken volume's streams looked unremarkable from outside, with
+`KV_cfm-bucket` holding 53 messages between `first_seq` 26 and `last_seq`
+243439, and an empty stream legitimately reporting `first_seq = last_seq + 1`.
+There is nothing there to pattern-match; publishing a message and reading it
+back is unambiguous.
+
+Two things the probe itself taught, both caught by running it rather than
+reasoning about it:
+
+- **`nats stream add` prompts for every unset option** and dies with `cannot
+ask for confirmation without a terminal` in a non-interactive shell, which
+  reads exactly like a JetStream fault. `--defaults` is required.
+- **A server with JetStream disabled answers `no responders available for
+request`**, not a clear "JetStream is off". Any check that greps for a
+  friendly message will miss it.
+
 ## 2026-09-26: one ACA app, one reachable port, and the version is a path segment
 
 Three compliance suites failed at the EDC Management API for months and cost
