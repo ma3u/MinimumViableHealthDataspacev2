@@ -438,7 +438,7 @@ three suites died at participant discovery (#307, fixed in #314).
 > | -------------------- | --------------------------------------- | ------------------------------------ |
 > | EHDS domain          | **18 passed, 0 failed, 7 skipped / 25** | 20 passed, 0 failed, 5 skipped / 25  |
 > | EHDS dataspace (DSP) | **21 passed, 6 failed, 6 skipped / 33** | 23 passed, 0 failed, 10 skipped / 33 |
-> | EHDS identity (DCP)  | **20 passed, 2 failed / 22 verdicts**   | 10 passed, 1 failed, 11 skipped / 22 |
+> | EHDS identity (DCP)  | **22 passed, 0 failed / 22 verdicts**   | 10 passed, 1 failed, 11 skipped / 22 |
 >
 > Re-measured 2026-09-26 from runs
 > [36250029604](https://github.com/ma3u/MinimumViableHealthDataspacev2/actions/runs/36250029604)
@@ -457,17 +457,22 @@ three suites died at participant discovery (#307, fixed in #314).
 > exposes per-participant DSP is the open question on #345 and #328; every
 > counterparty DSP figure ever published from this tier was the weak branch.
 >
-> **DCP went 14/0 → 11/7 → 19/2 in one day, and each move was the suite
-> getting more honest.** #341 gave ten checks a reachable failure; they found
-> that the **CI IdentityHub held zero participants**, that the **IssuerService
-> had no identity of its own**, and that no participant was registered as a
-> holder (#345). Until then CI had been reporting an empty identity layer as
-> fully passing, and the null stub scored exactly the same 11 / 7. Seeding
-> those stores from the same sources the local stack uses moved it to 19 / 2.
-> The two rows left, `VC-3.2`/`VC-3.3`, wait on a credential actually being
-> issued over DCP, which no environment has yet done: CI's request ends in
-> `ERROR` for a reason under investigation, and the local stack cannot sign
-> at all since a Vault restart (gotchas, 2026-09-26). **EHDS went 1/13 → 18/0**
+> **DCP went 14/0 → 11/7 → 19/2 → 22/0 in one day, and each move was the
+> suite getting more honest.** #341 gave ten checks a reachable failure; they
+> found that the **CI IdentityHub held zero participants**, that the
+> **IssuerService had no identity of its own**, and that no participant was
+> registered as a holder (#345). Until then CI had been reporting an empty
+> identity layer as fully passing, and the null stub scored exactly the same
+> 11 / 7. Seeding those stores from the same sources the local stack uses
+> moved it to 19 / 2. The last two rows, `VC-3.2`/`VC-3.3`, needed a credential
+> actually issued over DCP: the hub's DID documents had no `CredentialService`
+> endpoint, so the issuer had nowhere to deliver and every request sat at
+> `APPROVED`. With the endpoint in the participant manifest (run
+> [36267331316](https://github.com/ma3u/MinimumViableHealthDataspacev2/actions/runs/36267331316))
+> all five CI participants receive a `MembershipCredential` inside the job and
+> the suite scores 22 / 0 on issued credentials, not planted ones. The local
+> stack does the same for eight participants since its Vault became
+> file-backed (gotchas, 2026-09-26). **EHDS went 1/13 → 18/0**
 > once the job seeds the graph `docs/developer-guide.md` tells a developer to
 > load, plus `seed-compliance-matrix.cypher` for the `ART53-1.4` access chain.
 >

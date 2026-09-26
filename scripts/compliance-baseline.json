@@ -21,10 +21,9 @@
       "note": "LOWERED 2026-09-26 from 25/0, run 36266621990. The 25/0 was false: CAT-1.1 x3, CAT-1.3 and CAT-1.4 passed on Jetty HTML error pages (500 and 404) that the suite's fall-through branch accepted as catalogs. edc_reject_errors now refuses non-JSON bodies and CAT-1.1 fails on anything without an @type, so 21/6 is what the CI stack actually does: no participant context has a working DSP endpoint in either environment (#345, #328). Short review date until that is understood."
     },
     "dcp-compliance-results": {
-      "min_passed": 19,
-      "max_failed": 2,
-      "review_by": "2026-10-27",
-      "note": "run 36258702281, raised from 11/7. The two failures left are VC-3.2/VC-3.3: the DCP credential request the CI hub sends ends in ERROR for a reason under investigation on #345 (the hub's record carries no errorDetail; the next run dumps both services' logs). A seeded local stack scores 21/0 on its planted credentials, and cannot currently issue either (Vault lost the keys, see gotchas). Short review date stays until the request succeeds somewhere."
+      "min_passed": 22,
+      "max_failed": 0,
+      "note": "run 36267331316, raised from 19/2 (which came from 11/7). All five CI participants now receive a MembershipCredential over DCP in the job itself: the hub's DID documents carry a CredentialService endpoint, the issuer resolves the definition by id, and VC-3.2/VC-3.3 pass on issued credentials, not planted ones. KEY-2.4 confirms private key material in Vault. No review_by override any more: this floor is healthy, so the global date applies."
     },
     "ehds-compliance-results": {
       "min_passed": 18,
