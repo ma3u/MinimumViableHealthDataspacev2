@@ -88,8 +88,14 @@ Think of these as inspectors who never get tired and never skip a step:
 - **Accessibility checks.** Confirm the interface is usable by people with
   disabilities.
 
-If any inspector raises a red flag, the change simply cannot go live until it's
-fixed. There's no "just this once."
+One of these inspectors is a **gatekeeper**: the platform itself refuses to let
+the change through until it is happy. It checks tidiness, obvious mistakes,
+leaked passwords and the like — the fast ones. The slower inspectors (the full
+test run, the security scans, the accessibility audit) still run on every
+change and are read before anything is merged, but they advise rather than
+block, because they only run when they are relevant to what changed. Promoting
+them to gatekeepers too is a known next step, written down in the
+[technical guide](https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docs/SDLC.md).
 
 ---
 
@@ -128,8 +134,16 @@ These are exactly the properties regulators, hospitals, and patients expect.
 ## "But it's a one-person project?"
 
 Yes — today it's one maintainer plus an AI assistant. The trick is that the
-**automatic checkpoints replace what a large team's reviewers would do.** A team
-of 10–30 would add mandatory human peer-review and a few more guard-rails; the
+**automatic checkpoints replace what a large team's reviewers would do.**
+
+Since September 2026 the official version is also **locked**: nobody, including
+the maintainer, can change it directly. Every change has to arrive as a
+proposal, pass the gatekeeper, and be merged — and the history cannot be
+rewritten afterwards, which is what makes the audit trail worth anything. There
+is an emergency override for the maintainer, and using it leaves a record.
+
+A team of 10–30 would add mandatory human peer-review and a few more
+guard-rails; the
 [technical guide](https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docs/SDLC.md)
 lists exactly which ones would be re-introduced as the project grows. The
 _rigour_ is kept; only the _people-coordination overhead_ is trimmed.
