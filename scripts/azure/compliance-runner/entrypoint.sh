@@ -9,12 +9,14 @@ set -euo pipefail
 log() { printf '[compliance-runner] %s\n' "$*"; }
 
 log "DEMO_MODE=${DEMO_MODE} SUITES=${SUITES} REPORT_DIR=${REPORT_DIR}"
+# Defaulted so that `set -u` does not kill the banner before the suites have
+# a chance to say which target they could not reach.
 log "targets:"
-log "  mgmt:      ${EDC_MANAGEMENT_URL}"
-log "  identity:  ${EDC_IDENTITY_URL}"
-log "  issuer:    ${EDC_ISSUER_URL}"
-log "  keycloak:  ${KEYCLOAK_URL}"
-log "  neo4j:     ${NEO4J_URL}"
+log "  mgmt:      ${EDC_MANAGEMENT_URL:-(unset)}"
+log "  identity:  ${EDC_IDENTITY_URL:-(unset)}"
+log "  issuer:    ${EDC_ISSUER_URL:-(unset)}"
+log "  keycloak:  ${KEYCLOAK_URL:-(unset)}"
+log "  neo4j:     ${NEO4J_BOLT_URI:-(unset)}"
 
 mkdir -p "${REPORT_DIR}"
 cd /work
