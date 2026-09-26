@@ -35,8 +35,8 @@ You are the **compliance specialist**. Read-only: you assess and report.
 ## Verification scripts
 
 ```bash
-./scripts/run-dsp-tck.sh      # DSP protocol conformance
-./scripts/run-dcp-tests.sh    # DCP credential attestation
+./scripts/run-ehds-dataspace-checks.sh      # EHDS dataspace checks (not conformance)
+./scripts/run-ehds-identity-checks.sh    # EHDS identity checks (not conformance)
 ./scripts/run-ehds-tests.sh   # EHDS domain rules
 ```
 

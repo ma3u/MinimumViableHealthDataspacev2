@@ -49,7 +49,7 @@ Inventory performed 2026-07-15 (registry manifests + live instances):
    and bounded to the major version.
 5. **Refresh cadence:** patch/minor bumps land as deliberate PRs, one service
    per PR, at most monthly, gated by the standard suites
-   (`run-dsp-tck.sh`, `run-dcp-tests.sh`, `run-ehds-tests.sh`, Vitest,
+   (`run-ehds-dataspace-checks.sh`, `run-ehds-identity-checks.sh`, `run-ehds-tests.sh`, Vitest,
    Playwright live). Exceptions: security advisories (immediate) and the
    `npm audit --audit-level=high` pre-push gate that already exists.
 6. `traefik:v3.4` keeps its bounded minor tag (patch tags for that line are no

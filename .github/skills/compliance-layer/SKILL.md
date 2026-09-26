@@ -20,7 +20,7 @@ Sources: `docs/health-dataspace-graph-schema.md`, `.github/instructions/api-conv
 5. Federated queries enforce dual-side k-anonymity (`MIN_COHORT_SIZE`, default 5)
    and caller-side ODRL — rules and rationale in `docs/architecture/federation.md`.
 6. After any compliance-layer change run `./scripts/run-ehds-tests.sh`
-   (plus `run-dsp-tck.sh` / `run-dcp-tests.sh` when the protocol surface changed).
+   (plus `run-ehds-dataspace-checks.sh` / `run-ehds-identity-checks.sh` when the protocol surface changed).
 
 ## Output contract
 

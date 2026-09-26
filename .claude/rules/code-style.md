@@ -65,7 +65,7 @@ globs:
 - First line after shebang: `set -euo pipefail`.
 - Quote all variable expansions: `"$var"`, `"${array[@]}"`.
 - shellcheck runs at error severity in pre-commit — fix all shellcheck errors before committing.
-- Scripts in `scripts/` follow naming pattern: `verb-noun.sh` (e.g., `run-dsp-tck.sh`, `generate-synthea.sh`).
+- Scripts in `scripts/` follow naming pattern: `verb-noun.sh` (e.g., `run-ehds-dataspace-checks.sh`, `generate-synthea.sh`).
 
 ## Prettier (enforced by pre-commit)
 

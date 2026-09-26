@@ -162,8 +162,8 @@ PLAYWRIGHT_BASE_URL=http://localhost:3003 npm run test:e2e  # JAD stack
 ### Protocol Compliance
 
 ```bash
-./scripts/run-dsp-tck.sh     # DSP 2025-1 TCK
-./scripts/run-dcp-tests.sh   # DCP v1.0
+./scripts/run-ehds-dataspace-checks.sh     # EHDS dataspace checks (not a TCK, see #338)
+./scripts/run-ehds-identity-checks.sh   # EHDS identity checks (not a TCK)
 ./scripts/run-ehds-tests.sh  # EHDS domain
 ```
 

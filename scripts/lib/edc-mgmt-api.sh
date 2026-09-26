@@ -2,7 +2,7 @@
 # ---------------------------------------------------------------------------
 # Shared EDC Management API access for the compliance suites
 # ---------------------------------------------------------------------------
-# Sourced by scripts/run-dsp-tck.sh, scripts/run-dcp-tests.sh and
+# Sourced by scripts/run-ehds-dataspace-checks.sh, scripts/run-ehds-identity-checks.sh and
 # scripts/run-ehds-tests.sh. It exists because all three opened with
 #
 #   participants_json=$(curl -sf ... "${MGMT_API}/${MGMT_V}/participants") || {

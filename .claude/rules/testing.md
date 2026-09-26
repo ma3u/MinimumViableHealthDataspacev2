@@ -12,15 +12,15 @@ globs:
 
 ## Frameworks
 
-| Scope            | Framework     | Config                                |
-| ---------------- | ------------- | ------------------------------------- |
-| Unit / component | Vitest 4      | `ui/vitest.config.ts`                 |
-| E2E browser      | Playwright    | `ui/playwright.config.ts`             |
-| iOS unit         | Swift Testing | `cd clients/ios && swift test`        |
-| iOS on screen    | XCUITest      | `clients/ios/Scripts/run-ui-tests.sh` |
-| Protocol (DSP)   | Custom TCK    | `scripts/run-dsp-tck.sh`              |
-| Protocol (DCP)   | Custom        | `scripts/run-dcp-tests.sh`            |
-| EHDS domain      | Custom        | `scripts/run-ehds-tests.sh`           |
+| Scope            | Framework      | Config                                 |
+| ---------------- | -------------- | -------------------------------------- |
+| Unit / component | Vitest 4       | `ui/vitest.config.ts`                  |
+| E2E browser      | Playwright     | `ui/playwright.config.ts`              |
+| iOS unit         | Swift Testing  | `cd clients/ios && swift test`         |
+| iOS on screen    | XCUITest       | `clients/ios/Scripts/run-ui-tests.sh`  |
+| EHDS dataspace   | Our own checks | `scripts/run-ehds-dataspace-checks.sh` |
+| EHDS identity    | Our own checks | `scripts/run-ehds-identity-checks.sh`  |
+| EHDS domain      | Custom         | `scripts/run-ehds-tests.sh`            |
 
 ## Unit Tests (Vitest)
 

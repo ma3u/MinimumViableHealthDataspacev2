@@ -9,13 +9,13 @@ Mirror of `.claude/rules/testing.md` — change both together.
 
 ## Frameworks
 
-| Scope            | Framework  | Config                      |
-| ---------------- | ---------- | --------------------------- |
-| Unit / component | Vitest 4   | `ui/vitest.config.ts`       |
-| E2E browser      | Playwright | `ui/playwright.config.ts`   |
-| Protocol (DSP)   | Custom TCK | `scripts/run-dsp-tck.sh`    |
-| Protocol (DCP)   | Custom     | `scripts/run-dcp-tests.sh`  |
-| EHDS domain      | Custom     | `scripts/run-ehds-tests.sh` |
+| Scope            | Framework      | Config                                 |
+| ---------------- | -------------- | -------------------------------------- |
+| Unit / component | Vitest 4       | `ui/vitest.config.ts`                  |
+| E2E browser      | Playwright     | `ui/playwright.config.ts`              |
+| EHDS dataspace   | Our own checks | `scripts/run-ehds-dataspace-checks.sh` |
+| EHDS identity    | Our own checks | `scripts/run-ehds-identity-checks.sh`  |
+| EHDS domain      | Custom         | `scripts/run-ehds-tests.sh`            |
 
 ## Unit tests (Vitest)
 

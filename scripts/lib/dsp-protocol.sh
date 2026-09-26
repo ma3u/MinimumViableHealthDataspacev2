@@ -22,7 +22,7 @@
 #
 # It explains a lot that looked unrelated: catalog discovery returning zero
 # datasets, every negotiation seeded since the upgrade going TERMINATED, and
-# run-dsp-tck.sh's FINALIZED assertions skipping rather than passing.
+# run-ehds-dataspace-checks.sh's FINALIZED assertions skipping rather than passing.
 #
 # One definition, because eleven independently edited copies are how it drifted
 # in the first place. The UI has the matching constant in

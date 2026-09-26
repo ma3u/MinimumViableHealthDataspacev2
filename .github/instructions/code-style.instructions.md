@@ -72,7 +72,7 @@ Source: `scripts/`, `.pre-commit-config.yaml` (shellcheck at error severity).
 - First line after the shebang: `set -euo pipefail`.
 - Quote every expansion: `"$var"`, `"${array[@]}"`.
 - Fix all shellcheck errors before committing; naming pattern is `verb-noun.sh`
-  (`run-dsp-tck.sh`, `generate-synthea.sh`).
+  (`run-ehds-dataspace-checks.sh`, `generate-synthea.sh`).
 
 ## Markdown & Prettier
 

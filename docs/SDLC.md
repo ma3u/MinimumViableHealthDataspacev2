@@ -469,9 +469,9 @@ three suites died at participant discovery (#307, fixed in #314).
 > ```bash
 > python3 scripts/tck/null-connector-stub.py &
 > S=http://localhost:18099
-> EDC_MANAGEMENT_URL=$S ./scripts/run-dsp-tck.sh 2>&1 | tail -5
+> EDC_MANAGEMENT_URL=$S ./scripts/run-ehds-dataspace-checks.sh 2>&1 | tail -5
 > EDC_MANAGEMENT_URL=$S EDC_IDENTITY_URL=$S EDC_ISSUER_URL=$S \
->   ./scripts/run-dcp-tests.sh 2>&1 | tail -5
+>   ./scripts/run-ehds-identity-checks.sh 2>&1 | tail -5
 > kill %1
 > ```
 >

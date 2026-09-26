@@ -57,8 +57,8 @@ When assessing tests:
 
 ### Compliance scripts
 
-- `scripts/run-dsp-tck.sh` — DSP 2025-1 TCK (run weekly by `compliance.yml`)
-- `scripts/run-dcp-tests.sh` — DCP v1.0
+- `scripts/run-ehds-dataspace-checks.sh` — EHDS dataspace checks over the EDC Management API (run weekly by `compliance.yml`). NOT a TCK: see #338.
+- `scripts/run-ehds-identity-checks.sh` — EHDS identity checks over the IdentityHub and IssuerService admin APIs. NOT a TCK.
 - `scripts/run-ehds-tests.sh` — EHDS domain
 
 ## Common Failure Patterns

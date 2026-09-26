@@ -23,11 +23,11 @@ cd /work
 
 if [[ "${SUITES}" == *"dsp"* ]]; then
   log "→ DSP 2025-1 TCK"
-  ./scripts/run-dsp-tck.sh || log "  (dsp suite finished with failures)"
+  ./scripts/run-ehds-dataspace-checks.sh || log "  (dsp suite finished with failures)"
 fi
 if [[ "${SUITES}" == *"dcp"* ]]; then
   log "→ DCP v1.0 Compliance"
-  ./scripts/run-dcp-tests.sh || log "  (dcp suite finished with failures)"
+  ./scripts/run-ehds-identity-checks.sh || log "  (dcp suite finished with failures)"
 fi
 if [[ "${SUITES}" == *"ehds"* ]]; then
   log "→ EHDS Domain Compliance"

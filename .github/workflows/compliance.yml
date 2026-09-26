@@ -131,11 +131,11 @@ jobs:
 
       - name: Run DSP TCK
         run: |
-          chmod +x scripts/run-dsp-tck.sh
+          chmod +x scripts/run-ehds-dataspace-checks.sh
           REPORT_DIR=${{ env.REPORT_DIR }}/dsp-tck \
           KEYCLOAK_URL=http://localhost:8080 \
           EDC_MANAGEMENT_URL=http://localhost:11003/api/mgmt \
-            ./scripts/run-dsp-tck.sh
+            ./scripts/run-ehds-dataspace-checks.sh
         continue-on-error: true
 
       - name: Upload TCK results
@@ -227,13 +227,13 @@ jobs:
 
       - name: Run DCP compliance suite
         run: |
-          chmod +x scripts/run-dcp-tests.sh
+          chmod +x scripts/run-ehds-identity-checks.sh
           REPORT_DIR=${{ env.REPORT_DIR }}/dcp \
           KEYCLOAK_URL=http://localhost:8080 \
           EDC_IDENTITY_URL=http://localhost:11005/api/identity \
           EDC_ISSUER_URL=http://localhost:10013/api/admin \
           EDC_MANAGEMENT_URL=http://localhost:11003/api/mgmt \
-            ./scripts/run-dcp-tests.sh
+            ./scripts/run-ehds-identity-checks.sh
         continue-on-error: true
 
       - name: Upload DCP results

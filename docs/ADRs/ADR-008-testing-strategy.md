@@ -20,6 +20,10 @@ since an accepted ADR is not edited.
   [eclipse-dataspacetck](https://github.com/eclipse-dataspacetck). They are EHDS **domain checks**,
   not conformance. The distinction, and the plan to add the real Eclipse TCKs alongside them, is
   [discussion #110](https://github.com/ma3u/MinimumViableHealthDataspacev2/discussions/110).
+  Both were renamed on 2026-09-26 to say so: `run-dsp-tck.sh` is now
+  `run-ehds-dataspace-checks.sh` and `run-dcp-tests.sh` is now `run-ehds-identity-checks.sh`.
+  The References below keep the original names, as the ADR recorded them. Deprecated shims at
+  the old paths delegate to the new ones and will be removed when the Eclipse TCKs land.
 
 Both are consequences of the same gap [ADR-031](ADR-031-checks-must-assert.md) names: a check, or a
 claim about a check, that nothing re-verifies.
