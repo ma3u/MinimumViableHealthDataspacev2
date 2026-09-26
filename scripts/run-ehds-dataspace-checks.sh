@@ -202,13 +202,13 @@ run_catalog_tests() {
       pass "$test_id: CatalogRequestMessage accepted for ${slug}"
       record_result "$test_id" "catalog" "passed"
     elif [ -n "$resp" ]; then
-      # Catalog may return data in different format. This branch is the weak
-      # one: it passes on any non-error body, and CI has been passing here
-      # while the local stack fails one step earlier with a real 502. Until it
-      # asserts a catalog shape, at least show what it accepted, so a green
-      # row can be read for what it is (#345).
-      pass "$test_id: Catalog endpoint responded for ${slug} (no @type; body: $(printf '%s' "$resp" | tr -d '\n' | cut -c1-120))"
-      record_result "$test_id" "catalog" "passed" "non-standard format"
+      # A catalog is a JSON-LD object with an @type. Anything else is not a
+      # catalog, and this branch used to call it one: CI passed here for weeks
+      # on a Jetty "Error 500" HTML page, and the DSP floor of 25/0 was
+      # recorded on that (#345). The helper now rejects non-JSON before we get
+      # here; what remains is JSON that is still not a catalog, and it fails.
+      fail "$test_id: response for ${slug} is not a catalog (no @type): $(printf '%s' "$resp" | tr -d '\n' | cut -c1-120)"
+      record_result "$test_id" "catalog" "failed" "not a catalog"
     else
       fail "$test_id: CatalogRequestMessage failed for ${slug}"
       record_result "$test_id" "catalog" "failed" "no response"

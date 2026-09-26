@@ -169,5 +169,14 @@ edc_reject_errors() {
       "$what" "$(printf '%s' "$body" | tr -d '\n' | cut -c1-200)" >&2
     return 1
   fi
+  # A body that is not JSON at all is not a result either. CI's CAT-1.1 passed
+  # for weeks on a Jetty "Error 500 Internal Server Error" HTML page: not
+  # empty, not an error envelope, so every caller's `[ -n "$resp" ]` took it
+  # as a catalog. The DSP floor of 25/0 was recorded on that (#345).
+  if [ -n "$body" ] && ! printf '%s' "$body" | jq -e . >/dev/null 2>&1; then
+    printf '  %s returned a non-JSON body: %s\n' \
+      "$what" "$(printf '%s' "$body" | tr -d '\n' | sed 's/<[^>]*>/ /g' | tr -s ' ' | cut -c1-160)" >&2
+    return 1
+  fi
   printf '%s' "$body"
 }
