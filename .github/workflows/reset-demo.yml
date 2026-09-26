@@ -238,12 +238,39 @@ jobs:
             sleep 5
           done
 
-          # Admin credentials are wired into the Keycloak container as
-          # KEYCLOAK_ADMIN / KEYCLOAK_ADMIN_PASSWORD env vars (currently
-          # admin / admin on the demo target). If you rotate them, also
-          # update this workflow.
-          KC_ADMIN_USER=admin
-          KC_ADMIN_PASS=admin
+          # Admin credentials come from the Keycloak container app itself,
+          # never from a literal here. KEYCLOAK_ADMIN is a plain env var on the
+          # app; KEYCLOAK_ADMIN_PASSWORD is a secretRef to the ACA secret
+          # keycloak-admin-password, which 03-identity.sh populates from Key
+          # Vault.
+          #
+          # This block read `admin` / `admin` until 2026-09-26. That matched
+          # when it was written and stopped matching once the password was
+          # rotated, and from then on every run burned six token attempts on
+          # HTTP 400 `invalid_grant` and the realm was never re-imported (run
+          # 34809610773, 2026-09-14). Reading it from the app means a rotation
+          # cannot desynchronise it again.
+          #
+          # Read from the container app and not from Key Vault: the CI service
+          # principal (mvhd-github-actions) is Contributor on the resource
+          # group, which carries Microsoft.App/containerApps/listSecrets, but
+          # it is not Key Vault Secrets User and the vault is RBAC-mode. A
+          # direct `az keyvault secret show` fails here, which is exactly what
+          # breaks the same lookup in aca-schedule.yml.
+          KC_ADMIN_USER=$(az containerapp show --name mvhd-keycloak \
+            --resource-group ${{ env.RESOURCE_GROUP }} \
+            --query "properties.template.containers[0].env[?name=='KEYCLOAK_ADMIN'].value | [0]" \
+            -o tsv 2>/dev/null || echo "")
+          KC_ADMIN_USER="${KC_ADMIN_USER:-admin}"
+          KC_ADMIN_PASS=$(az containerapp secret show --name mvhd-keycloak \
+            --resource-group ${{ env.RESOURCE_GROUP }} \
+            --secret-name keycloak-admin-password --query value -o tsv 2>/dev/null || echo "")
+          if [ -z "$KC_ADMIN_PASS" ]; then
+            echo "::error::Could not read the ACA secret keycloak-admin-password on mvhd-keycloak. Check that the secret exists and that the CI service principal has Microsoft.App/containerApps/listSecrets/action (Contributor on the resource group covers it)."
+            exit 1
+          fi
+          echo "::add-mask::$KC_ADMIN_PASS"
+          echo "Admin user: ${KC_ADMIN_USER} (password read from the ACA secret, ${#KC_ADMIN_PASS} chars)"
 
           # A 200 on the master well-known endpoint does not guarantee the
           # token endpoint is serving yet (observed during ACA replica churn,
@@ -251,22 +278,34 @@ jobs:
           # answered fine minutes later) — so retry the token call itself.
           TOKEN=""
           for i in $(seq 1 6); do
+            # --data-urlencode, not one packed -d string: the password is no
+            # longer a literal `admin` but a generated secret, and a rotation
+            # that produced a `+`, `&` or `=` would otherwise be mangled into
+            # a different password with no sign of why the login failed.
             http=$(curl -sS -o /tmp/kc-token.json -w "%{http_code}" -X POST \
               "$KC/realms/master/protocol/openid-connect/token" \
               -H "Content-Type: application/x-www-form-urlencoded" \
-              -d "username=${KC_ADMIN_USER}&password=${KC_ADMIN_PASS}&grant_type=password&client_id=admin-cli" \
+              --data-urlencode "username=${KC_ADMIN_USER}" \
+              --data-urlencode "password=${KC_ADMIN_PASS}" \
+              -d "grant_type=password" -d "client_id=admin-cli" \
               || echo "000")
             TOKEN=$(python3 -c "import json,sys; print(json.load(sys.stdin).get('access_token',''))" \
               < /tmp/kc-token.json 2>/dev/null || true)
             if [ -n "$TOKEN" ]; then
               break
             fi
-            echo "  token attempt $i: HTTP $http, retrying in 10s..."
+            # Say why, not just the status code. This printed a bare "HTTP 400"
+            # until 2026-09-26, which is why a wrong password read as a flaky
+            # endpoint for two weeks. A failed token response carries an error
+            # code and description, no token and no credential.
+            ERR=$(python3 -c "import json,sys; d=json.load(sys.stdin); print((d.get('error') or '') + ((': ' + d['error_description']) if d.get('error_description') else ''))" \
+              < /tmp/kc-token.json 2>/dev/null || true)
+            echo "  token attempt $i: HTTP $http${ERR:+ ($ERR)}, retrying in 10s..."
             sleep 10
           done
           rm -f /tmp/kc-token.json
           if [ -z "$TOKEN" ]; then
-            echo "::error::Could not obtain Keycloak admin token after 6 attempts (last HTTP $http)"
+            echo "::error::Could not obtain Keycloak admin token after 6 attempts (last HTTP $http${ERR:+, $ERR}). An invalid_grant here means the admin password on mvhd-keycloak does not match the ACA secret keycloak-admin-password."
             exit 1
           fi
           echo "::add-mask::$TOKEN"
