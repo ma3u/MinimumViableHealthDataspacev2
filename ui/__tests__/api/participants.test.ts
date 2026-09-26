@@ -224,6 +224,47 @@ describe("/api/participants", () => {
       expect(data.provisioned).toBeUndefined();
     });
 
+    it("reports the provisioning activities rather than promising a DID", async () => {
+      // The Tenant Manager answers the profile create with three pending
+      // activities. Whether an agent will complete them is not knowable here,
+      // so the response names them and claims nothing further (issue #203).
+      mockTenant
+        .mockResolvedValueOnce([{ id: "cell-1" }])
+        .mockResolvedValueOnce([{ id: "profile-1" }])
+        .mockResolvedValueOnce({ id: "tenant-abc" })
+        .mockResolvedValueOnce({
+          id: "participant-xyz",
+          vpas: [
+            { type: "cfm.connector", state: "pending" },
+            { type: "cfm.credentialservice", state: "pending" },
+            { type: "cfm.dataplane", state: "pending" },
+          ],
+        });
+
+      const data = await (await POST(register())).json();
+
+      expect(data.activitiesPending).toBe(3);
+      expect(data.activityTypes).toEqual([
+        "cfm.connector",
+        "cfm.credentialservice",
+        "cfm.dataplane",
+      ]);
+      expect(data.vpas).toHaveLength(3);
+    });
+
+    it("copes with a Tenant Manager that returns no activities", async () => {
+      mockTenant
+        .mockResolvedValueOnce([{ id: "cell-1" }])
+        .mockResolvedValueOnce([{ id: "profile-1" }])
+        .mockResolvedValueOnce({ id: "tenant-abc" })
+        .mockResolvedValueOnce({ id: "participant-xyz" });
+
+      const data = await (await POST(register())).json();
+
+      expect(data.activitiesPending).toBe(0);
+      expect(data.activityTypes).toEqual([]);
+    });
+
     it("marks a genuinely provisioned participant as provisioned", async () => {
       mockTenant
         .mockResolvedValueOnce([{ id: "cell-1" }])
@@ -235,6 +276,81 @@ describe("/api/participants", () => {
 
       expect(data.provisioned).toBe(true);
       expect(data.demo).toBeUndefined();
+    });
+  });
+
+  describe("GET /me provisioning state", () => {
+    const stale = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+
+    it("marks a tenant stalled when every activity is still pending", async () => {
+      // The live state of the two participants registered through the form on
+      // 2026-09-17 and 2026-09-18: tenant and profile real, all three
+      // activities pending ever since, because this deployment runs no CFM
+      // provisioning agents (issue #203).
+      mockTenant
+        .mockResolvedValueOnce([
+          { id: "tenant-1", version: 0, properties: { displayName: "Clinic" } },
+        ])
+        .mockResolvedValueOnce([
+          {
+            id: "profile-1",
+            vpas: [
+              {
+                type: "cfm.connector",
+                state: "pending",
+                stateTimestamp: stale,
+              },
+              {
+                type: "cfm.dataplane",
+                state: "pending",
+                stateTimestamp: stale,
+              },
+            ],
+          },
+        ]);
+
+      const listed = await (await ME_GET()).json();
+
+      expect(listed[0].provisioningStalled).toBe(true);
+      expect(listed[0].vpaSummary.pending).toBe(2);
+      expect(listed[0].stalledReason).toContain("no DID was registered");
+    });
+
+    it("leaves a fresh registration alone", async () => {
+      mockTenant
+        .mockResolvedValueOnce([
+          { id: "tenant-1", version: 0, properties: { displayName: "Clinic" } },
+        ])
+        .mockResolvedValueOnce([
+          {
+            id: "profile-1",
+            vpas: [
+              {
+                type: "cfm.connector",
+                state: "pending",
+                stateTimestamp: new Date().toISOString(),
+              },
+            ],
+          },
+        ]);
+
+      const listed = await (await ME_GET()).json();
+
+      expect(listed[0].provisioningStalled).toBe(false);
+      expect(listed[0].stalledReason).toBeUndefined();
+    });
+
+    it("says nothing about provisioning when the profile lookup fails", async () => {
+      mockTenant
+        .mockResolvedValueOnce([
+          { id: "tenant-1", version: 0, properties: { displayName: "Clinic" } },
+        ])
+        .mockRejectedValueOnce(new Error("profiles unreachable"));
+
+      const listed = await (await ME_GET()).json();
+
+      expect(listed[0].participantProfiles).toEqual([]);
+      expect(listed[0].provisioningStalled).toBe(false);
     });
   });
 });

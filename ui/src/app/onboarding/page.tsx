@@ -4,6 +4,7 @@ import { fetchApi } from "@/lib/api";
 import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import {
+  AlertTriangle,
   Building2,
   CheckCircle2,
   ChevronDown,
@@ -19,6 +20,7 @@ import {
   UserPlus,
 } from "lucide-react";
 import PageIntro from "@/components/PageIntro";
+import type { VpaSummary } from "@/lib/provisioning";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -45,9 +47,20 @@ interface Tenant {
   /** false for a registration nothing could provision (issue #203). */
   provisioned?: boolean;
   demoReason?: string;
+  /** Every provisioning activity still pending long past creation (#203). */
+  provisioningStalled?: boolean;
+  stalledReason?: string;
+  vpaSummary?: VpaSummary;
 }
 
 type RegistrationStep = "form" | "submitting" | "done";
+
+type TenantStatus =
+  | "active"
+  | "provisioning"
+  | "stalled"
+  | "pending"
+  | "not-provisioned";
 
 // ---------------------------------------------------------------------------
 // Fictive contact database for demo participants
@@ -160,9 +173,7 @@ const EHDS_ROLES = [
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
-function deriveStatus(
-  tenant: Tenant,
-): "active" | "provisioning" | "pending" | "not-provisioned" {
+function deriveStatus(tenant: Tenant): TenantStatus {
   // Nothing provisioned this one and nothing will, so it is not pending either:
   // saying "pending" would promise a DID and a credential that are not coming.
   if (tenant.provisioned === false) {
@@ -170,6 +181,10 @@ function deriveStatus(
   }
   const profiles = tenant.participantProfiles || [];
   if (profiles.length === 0) return "pending";
+  // The tenant and the profile are real, the activities were created, and
+  // nothing has completed one since. An animated "Provisioning" clock here
+  // promises a DID that is not coming (issue #203, lib/provisioning.ts).
+  if (tenant.provisioningStalled) return "stalled";
   // Check both live EDC-V format (identifier) and mock format (did + state)
   const hasIdentity = profiles.some(
     (p) =>
@@ -202,7 +217,7 @@ function StatusBadge({
   status,
   title,
 }: {
-  status: "active" | "provisioning" | "pending" | "not-provisioned";
+  status: TenantStatus;
   title?: string;
 }) {
   if (status === "not-provisioned") {
@@ -212,6 +227,16 @@ function StatusBadge({
         className="flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-[var(--surface-2)] text-[var(--text-secondary)] border border-[var(--border)]"
       >
         <Circle size={10} /> Not provisioned
+      </span>
+    );
+  }
+  if (status === "stalled") {
+    return (
+      <span
+        title={title}
+        className="flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-[var(--surface-2)] text-[var(--text-secondary)] border border-[var(--border)]"
+      >
+        <AlertTriangle size={10} /> Provisioning stalled
       </span>
     );
   }
@@ -383,7 +408,10 @@ function ParticipantCard({
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
             <p className="font-medium text-[var(--text-primary)]">{name}</p>
-            <StatusBadge status={status} title={tenant.demoReason} />
+            <StatusBadge
+              status={status}
+              title={tenant.stalledReason ?? tenant.demoReason}
+            />
           </div>
           <p className="text-xs text-[var(--text-secondary)] mt-0.5">
             {org} · {role} · {tenant.participantProfiles?.length || 0}{" "}
@@ -574,6 +602,10 @@ function OnboardingContent() {
   // Set when the registration was recorded without being provisioned, so the
   // success screen can say so instead of promising a DID (issue #203).
   const [notProvisioned, setNotProvisioned] = useState<string | null>(null);
+  // The provisioning activities the Tenant Manager created, so the success
+  // screen can name them instead of promising what they will produce. This
+  // request cannot know whether an agent will complete them (issue #203).
+  const [activityTypes, setActivityTypes] = useState<string[]>([]);
 
   const [displayName, setDisplayName] = useState("");
   const [organization, setOrganization] = useState("");
@@ -599,6 +631,7 @@ function OnboardingContent() {
     setStep("submitting");
     setError(null);
     setNotProvisioned(null);
+    setActivityTypes([]);
 
     try {
       const res = await fetchApi("/api/participants", {
@@ -625,6 +658,8 @@ function OnboardingContent() {
           (data.demoReason as string) ||
             "This deployment cannot provision a participant, so the registration was recorded for the demonstration only.",
         );
+      } else if (Array.isArray(data.activityTypes)) {
+        setActivityTypes(data.activityTypes as string[]);
       }
 
       setStep("done");
@@ -692,12 +727,25 @@ function OnboardingContent() {
             </h2>
             <p className="text-[var(--text-secondary)] text-sm max-w-md">
               {notProvisioned ??
-                "Your participant context has been created. DID provisioning and credential issuance will proceed automatically via CFM agents."}
+                // Not "will proceed automatically": the tenant and the profile
+                // are real, the activities are pending, and whether an agent
+                // completes them is not something this page can promise.
+                // Issue #203.
+                `The tenant and the participant profile were created, and ${
+                  activityTypes.length
+                    ? `${
+                        activityTypes.length
+                      } provisioning activities (${activityTypes.join(
+                        ", ",
+                      )}) are`
+                    : "the provisioning activities are"
+                } pending. A DID and a credential appear on the participant card only once an agent completes them; if they stay pending, the card says so.`}
             </p>
             <button
               onClick={() => {
                 setStep("form");
                 setNotProvisioned(null);
+                setActivityTypes([]);
                 setDisplayName("");
                 setOrganization("");
                 setRole("data-holder");

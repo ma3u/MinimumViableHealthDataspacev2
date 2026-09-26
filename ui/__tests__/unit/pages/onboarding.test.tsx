@@ -311,6 +311,32 @@ describe("OnboardingPage", () => {
       });
     });
 
+    it('shows "Provisioning stalled" when nothing completed the activities', async () => {
+      // The live Azure state: tenant and profile real, every activity pending
+      // since creation, no CFM agent to complete them. An animated
+      // "Provisioning" here would promise a DID that is not coming (#203).
+      const stalledTenant = {
+        ...provisioningTenant,
+        provisioningStalled: true,
+        stalledReason:
+          "no provisioning agent has completed them ... no DID was registered",
+        vpaSummary: {
+          total: 3,
+          pending: 3,
+          pendingTypes: ["cfm.connector"],
+          oldestPendingSince: "2026-09-17T19:53:20Z",
+          stalled: true,
+        },
+      };
+      mockFetchApi.mockReturnValue(mockResponse([stalledTenant]));
+      render(<OnboardingPage />);
+      await waitFor(() => {
+        expect(screen.getByText("Provisioning stalled")).toBeInTheDocument();
+      });
+      expect(screen.queryByText("Provisioning")).toBeNull();
+      expect(screen.getByTitle(/no DID was registered/)).toBeInTheDocument();
+    });
+
     it("renders all three statuses side-by-side for mixed tenants", async () => {
       mockFetchApi.mockReturnValue(mockResponse(allTenants));
       render(<OnboardingPage />);
@@ -596,10 +622,16 @@ describe("OnboardingPage", () => {
       await user.click(screen.getByText("Register Participant"));
 
       await waitFor(() => {
+        // Not "DID provisioning will proceed automatically": whether an agent
+        // completes the activities is not something this screen can promise,
+        // and on Azure none does (issue #203).
         expect(
-          screen.getByText(/DID provisioning and credential issuance/),
+          screen.getByText(/the provisioning activities are pending/),
         ).toBeInTheDocument();
       });
+      expect(
+        screen.getByText(/only once an agent completes them/),
+      ).toBeInTheDocument();
     });
 
     it("reloads tenants after successful submission", async () => {
@@ -766,15 +798,22 @@ describe("OnboardingPage", () => {
       ).toBeNull();
     });
 
-    it("still promises provisioning when the participant really was provisioned", async () => {
-      await submit({ id: "tenant-real", provisioned: true });
+    it("names the pending activities when the profile really was created", async () => {
+      // A real create still does not promise a DID: the activities are
+      // pending and nothing here knows whether an agent will complete them.
+      await submit({
+        id: "tenant-real",
+        provisioned: true,
+        activityTypes: ["cfm.connector", "cfm.dataplane"],
+      });
 
       await waitFor(() => {
         expect(screen.getByText("Registration Submitted")).toBeInTheDocument();
       });
       expect(
-        screen.getByText(/DID provisioning and credential issuance/),
+        screen.getByText(/cfm.connector, cfm.dataplane/),
       ).toBeInTheDocument();
+      expect(screen.queryByText(/will proceed automatically/)).toBeNull();
     });
   });
 
