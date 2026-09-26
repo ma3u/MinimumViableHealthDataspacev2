@@ -309,16 +309,22 @@ run_keypair_tests() {
   local resp
   resp=$(identity_get "/v1alpha/participants/${PROVIDER_CTX}/keypairs") || resp=""
 
-  if [ -n "$resp" ] && echo "$resp" | jq -e '[.[] | select(.state == "ACTIVATED")] | length > 0' >/dev/null 2>&1; then
+  # IdentityHub serialises KeyPairState as its ordinal, not its name:
+  # 100 CREATED, 200 ACTIVATED, 300 ROTATED, 400 REVOKED. Comparing against
+  # the string "ACTIVATED" never matches, which is why this check used to
+  # fall through to a skip on a perfectly healthy stack. Accept both, because
+  # the wire format has changed before.
+  local activated='[.[] | select(.state == 200 or .state == "ACTIVATED")]'
+  if [ -n "$resp" ] && echo "$resp" | jq -e "${activated} | length > 0" >/dev/null 2>&1; then
     local active_count
-    active_count=$(echo "$resp" | jq '[.[] | select(.state == "ACTIVATED")] | length')
+    active_count=$(echo "$resp" | jq "${activated} | length")
     pass "$test_id: ${active_count} ACTIVATED key pairs (provider: alpha-klinik)"
     record_result "$test_id" "keypair" "passed" "${active_count} active"
   elif [ -n "$resp" ] && echo "$resp" | jq -e 'length > 0' >/dev/null 2>&1; then
     # Key pairs that exist but are not ACTIVATED cannot sign anything. That is
     # a failure of the property, not a reason to skip it.
     local states
-    states=$(echo "$resp" | jq -r '[.[].state] | unique | join(", ")')
+    states=$(echo "$resp" | jq -r '[.[].state | tostring] | unique | join(", ")')
     fail "$test_id: key pairs exist but none is ACTIVATED (states: ${states})"
     record_result "$test_id" "keypair" "failed" "states: ${states}"
   elif [ -n "$resp" ]; then
@@ -332,19 +338,25 @@ run_keypair_tests() {
   # 2.3 — Key pairs use Ed25519 or EC algorithm
   local test_id="KEY-2.3"
   if [ -n "$resp" ] && echo "$resp" | jq -e 'length > 0' >/dev/null 2>&1; then
+    # There is no `algorithm` field on a key pair. The record carries
+    # `serializedPublicKey`, a JWK, and the algorithm lives in its `kty` and
+    # `crv`. The previous version asked for a field that has never existed and
+    # then passed itself on "algorithm field not exposed", which is how a
+    # missing assertion disguises itself as a lenient one.
     local algo
-    algo=$(echo "$resp" | jq -r '.[0].keyGeneratorParams.algorithm // .[0].algorithm // "unknown"') || algo="unknown"
+    algo=$(echo "$resp" | jq -r '
+      .[0].serializedPublicKey
+      | (if type == "string" then (fromjson? // {}) else (. // {}) end)
+      | (.crv // .kty // "unknown")' 2>/dev/null) || algo="unknown"
 
-    # The check is named "Ed25519 or EC", so assert that set. Passing on any
-    # value at all, or on the field being absent, asserts nothing.
     case "$algo" in
-      Ed25519 | EdDSA | EC | ES256 | ES384 | P-256 | P-384 | secp256r1 | secp384r1)
+      Ed25519 | Ed448 | OKP | EC | P-256 | P-384 | P-521 | secp256k1 | secp256r1 | secp384r1)
         pass "$test_id: Key algorithm: ${algo}"
         record_result "$test_id" "keypair" "passed" "algorithm: ${algo}"
         ;;
       unknown | null | "")
-        fail "$test_id: key pairs expose no algorithm, so it cannot be verified"
-        record_result "$test_id" "keypair" "failed" "algorithm absent"
+        fail "$test_id: serializedPublicKey carries no kty/crv, so the algorithm cannot be read"
+        record_result "$test_id" "keypair" "failed" "algorithm unreadable"
         ;;
       *)
         fail "$test_id: key algorithm is '${algo}', expected Ed25519 or an EC curve"
@@ -512,28 +524,23 @@ run_issuer_tests() {
     record_result "$test_id" "issuer" "skipped" "issuer api unreachable"
   fi
 
-  # 4.4 — Issuer DID is configured
-  local test_id="ISS-4.4"
-  local issuer_did=""
-  if [ -n "$resp" ] && echo "$resp" | jq -e '.[0].issuerDid // .[0].issuerId' >/dev/null 2>&1; then
-    issuer_did=$(echo "$resp" | jq -r '.[0].issuerDid // .[0].issuerId // empty')
-  fi
-
-  if [[ "$issuer_did" == did:web:* ]]; then
-    pass "$test_id: Issuer DID: ${issuer_did}"
-    record_result "$test_id" "issuer" "passed" "DID: ${issuer_did}"
-  elif [ -n "$issuer_did" ]; then
-    # DCP requires the issuer be identified by a resolvable DID. An opaque id
-    # is not one, and passing on it was the check contradicting its own name.
-    fail "$test_id: issuer id '${issuer_did}' is not a did:web"
-    record_result "$test_id" "issuer" "failed" "non-did:web: ${issuer_did}"
-  elif [ -n "$resp" ]; then
-    fail "$test_id: credential definitions carry no issuer DID"
-    record_result "$test_id" "issuer" "failed" "no issuer DID"
-  else
-    skip "$test_id: IssuerService not reachable"
-    record_result "$test_id" "issuer" "skipped" "issuer api unreachable"
-  fi
+  # 4.4 — RETIRED 2026-09-26.
+  #
+  # This asserted that a credential definition carries an issuer DID. The
+  # IssuerService credential-definition schema has no such field and never
+  # has: the record holds additionalContext, attestations, createdAt,
+  # credentialType, format, id, jsonSchema, jsonSchemaUrl, mappings,
+  # participantContextId, rules and validity. The check therefore asked the
+  # wrong resource, and the only reason it looked healthy for so long is that
+  # every one of its branches was a pass.
+  #
+  # ADR-031: an assertion that turns out to be untestable is retired with the
+  # reason rather than carried as a permanent pass. Coverage is not lost -
+  # SCOPE-5.3 already asserts the trusted issuer configured on the control
+  # plane is a did:web. Reinstate this against the IssuerService DID document
+  # (web.http.did.port=10016) if that port is ever published; today it is
+  # reachable only from inside the Docker network, so neither this suite on
+  # the host nor the CI job could call it.
 }
 
 # ---------------------------------------------------------------------------

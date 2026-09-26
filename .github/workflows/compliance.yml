@@ -454,3 +454,22 @@ jobs:
           name: compliance-report
           path: compliance-report.md
           retention-days: 90
+
+      # Phase 0 of #338. Every suite step above is continue-on-error, so until
+      # now a green run meant only that the workflow finished. This step is the
+      # one that can say no.
+      #
+      # It gates on a recorded baseline rather than on green. The suites do not
+      # pass today, so gating on green would block every merge until an
+      # unbounded remediation finishes; gating on nothing is where we came in.
+      # A suite that scores worse than it did fails the build. A suite with no
+      # recorded baseline is reported and not failed, so the first run records
+      # real numbers instead of a guess.
+      #
+      # Deliberately last: the report artifact uploads first, so a red build
+      # still leaves the evidence behind.
+      - name: Compliance baseline (blocking)
+        run: |
+          set -euo pipefail
+          python3 scripts/check-compliance-baseline.py --results test-results \
+            | tee -a "$GITHUB_STEP_SUMMARY"
