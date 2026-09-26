@@ -220,14 +220,14 @@ regulated domain the difference matters. A [repository
 ruleset](https://docs.github.com/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/about-rulesets)
 now targets the default branch:
 
-| Rule                                | Effect                                                                                                           |
-| ----------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| **Require a pull request**          | No direct pushes to `main`. **Zero approvals required** — see the note below.                                    |
-| **Require conversation resolution** | Every review thread must be resolved before merge, so AI-review findings are answered rather than scrolled past. |
-| **Require status checks**           | **PR Gate** must be green. The list is deliberately one item long — see below.                                   |
-| **Require linear history**          | Merge commits are rejected; squash (the existing habit) and rebase are fine.                                     |
-| **Block force pushes**              | `main` history cannot be rewritten.                                                                              |
-| **Restrict deletions**              | `main` cannot be deleted.                                                                                        |
+| Rule                                | Effect                                                                                                                                                                                                                                                            |
+| ----------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Require a pull request**          | No direct pushes to `main`. **Zero approvals required** — see the note below.                                                                                                                                                                                     |
+| **Require conversation resolution** | Every review thread must be resolved before merge, so AI-review findings are answered rather than scrolled past.                                                                                                                                                  |
+| **Require status checks**           | **PR Gate** must be green. The list is deliberately one item long — see below.                                                                                                                                                                                    |
+| **Require linear history**          | Merge commits are rejected; squash (the existing habit) and rebase are fine. The ruleset pins `allowed_merge_methods` to squash and rebase, and merge commits are switched off in the repository settings, so the UI cannot offer a button the rule would refuse. |
+| **Block force pushes**              | `main` history cannot be rewritten.                                                                                                                                                                                                                               |
+| **Restrict deletions**              | `main` cannot be deleted.                                                                                                                                                                                                                                         |
 
 **Zero required approvals is deliberate, not an oversight.** On a one-person
 project, requiring an approving review would mean requiring a second account,
@@ -238,11 +238,29 @@ direct push, no force push, no merge on red — are the part a solo maintainer
 genuinely cannot provide by discipline, so those are the part that is enforced.
 The moment a second contributor joins, raise this to 1.
 
-**Repository admins can bypass.** This is a demo that is also a live public
-deployment, and being unable to land a hotfix because a required check is stuck
-is a worse failure than a bypassed rule. The bypass is an emergency hatch: use
-it and the bypass is recorded in the ruleset's insights, which is the property
-that makes it acceptable.
+**Repository admins can bypass, but only on a pull request.** The bypass mode
+is `pull_request`, not `always`: an admin can force a PR through when a required
+check is stuck — this is a demo that is also a live public deployment, and being
+unable to land a hotfix is a worse failure than a bypassed check — but a direct
+push to `main` is refused for everyone, including the owner. Verified:
+
+```
+$ git push origin main
+remote: error: GH013: Repository rule violations found for refs/heads/main.
+remote: - Changes must be made through a pull request.
+remote: - Required status check "PR Gate" is expected.
+ ! [remote rejected] main -> main (push declined due to repository rule violations)
+```
+
+That is the half a solo maintainer cannot supply by discipline, so that is the
+half with no escape hatch. Bypasses that do happen are recorded in the ruleset's
+insights.
+
+One default worth knowing about: GitHub switches
+`require_extra_approval_for_unattributed_changes` **on** when you create a
+`pull_request` rule. Combined with zero required approvals it would demand an
+approval nobody can give as soon as a commit's author email is not linked to a
+GitHub account. It is explicitly off here.
 
 ### Why exactly one required status check
 
@@ -489,7 +507,7 @@ mock the Neo4j driver — use the JSON fixtures under [`ui/public/mock/`](https:
 | A 10–30 dev team has…                      | This project does instead                                                                              | Why it's acceptable _for now_                                                                       |
 | ------------------------------------------ | ------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------- |
 | Mandatory peer review on every PR          | **AI review** (`/review`, specialist sub-agents) + **CI gates**; maintainer self-merges                | Deterministic gates catch the regressions a second human would; the AI provides a first-pass review |
-| Branch-protection blocking merge on red CI | **Enforced** since 2026-09-26 (Section 4.1): PR required, PR Gate green, linear history, no force push | Admin bypass stays available as an emergency hatch, and is recorded when used                       |
+| Branch-protection blocking merge on red CI | **Enforced** since 2026-09-26 (Section 4.1): PR required, PR Gate green, linear history, no force push | Admin bypass is limited to pull requests and is recorded; direct pushes are refused for everyone    |
 | Dedicated QA / release manager             | The testing pyramid + the Release workflow                                                             | Automation replaces the role, not the rigour                                                        |
 | Sprint/ceremony overhead                   | Issues + ADRs + planning index                                                                         | Lightweight, async, written-down                                                                    |
 
