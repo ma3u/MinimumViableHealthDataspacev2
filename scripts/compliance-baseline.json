@@ -1,0 +1,16 @@
+{
+  "_comment": [
+    "Phase 0 of #338. What each compliance suite scored, so the workflow can",
+    "fail on a regression instead of never failing at all. Checked by",
+    "scripts/check-compliance-baseline.py in the compliance-report job.",
+    "",
+    "This is a floor, not a target. Raise it whenever the suites improve;",
+    "lowering it is a deliberate act that a reviewer should question.",
+    "",
+    "'suites' is empty on purpose. The first workflow run records real numbers",
+    "and reports them without failing, because guessing a floor would either",
+    "block main wrongly or enshrine a bad run. Paste that run's output here."
+  ],
+  "review_by": "2026-12-26",
+  "suites": {}
+}
