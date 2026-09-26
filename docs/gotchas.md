@@ -40,7 +40,7 @@ fix is `cypher-shell` over Bolt in each of them.
 - `.github/workflows/reset-demo.yml` still POSTs to `https://<neo4j fqdn>:7474`
   for its dirty check. That call cannot answer either, so the `|| echo "-1"`
   fallback fires and every scheduled run resets the environment as "assumed
-  dirty". Fail-safe, but not free. Not fixed here.
+  dirty". Fail-safe, but not free. Not fixed here — issue #304.
 
 Two claims on `/admin/audit` went with it: the subtitle said "Tamper-evident
 audit trail" and a green badge said "HIPAA COMPLIANT". The records are ordinary
