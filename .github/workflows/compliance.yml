@@ -69,17 +69,65 @@ jobs:
 
       - name: Wait for services
         run: |
-          echo "Waiting for Control Plane..."
+          # Probe the Management API, which is what the suite actually needs.
+          # The old probe called /api/check/readiness on 11003, but 11003 maps
+          # to the container's 8081, which serves /api/mgmt; the health context
+          # is on 8080 and docker-compose does not publish it. So the probe
+          # could only ever 404, and every run waited the full five minutes and
+          # then said "proceeding anyway" — including runs where the stack was
+          # healthy in 26 seconds. Same family as #307.
+          #
+          # 401 counts as ready: it means the API is listening and asking for a
+          # token, which is all this needs to know.
+          echo "Waiting for the Control Plane Management API..."
           for i in $(seq 1 60); do
-            if curl -sf http://localhost:11003/api/check/readiness >/dev/null 2>&1; then
-              echo "Control Plane ready (attempt $i)"
+            CODE=$(curl -s -o /dev/null -w '%{http_code}' --max-time 5 \
+              http://localhost:11003/api/mgmt/v5beta/participants 2>/dev/null || echo 000)
+            if [ "$CODE" != "000" ]; then
+              echo "Control Plane Management API answering (HTTP $CODE, attempt $i)"
               break
             fi
             if [ "$i" -eq 60 ]; then
-              echo "Control Plane not ready after 5 min — proceeding anyway"
+              echo "Control Plane Management API silent after 5 min — proceeding anyway"
             fi
             sleep 5
           done
+
+      # The ephemeral stack comes up empty: this workflow starts it with
+      # `docker compose up -d` and never runs jad/seed-all.sh, so the control
+      # plane has no participant contexts and every participant-scoped check
+      # ends at "Missing required participant contexts" (#316). The suites have
+      # said so out loud since #314; before that they said nothing at all.
+      #
+      # Seeding the contexts directly through the Management API is enough for
+      # the suites, and far cheaper than the full seven-phase JAD seed, which
+      # wants 8 GB of Docker and does not fit a standard runner.
+      #
+      # provisioner, not admin: the two clients carry the same six scopes and
+      # differ only in a `role` claim, and the control plane refuses a
+      # participant-context create from `admin` with HTTP 403 "Required user
+      # role not satisfied". Measured on the live control plane, #316.
+      #
+      # continue-on-error while this is new: an unseeded stack is the status quo
+      # and the suites report it clearly, whereas a flaky seed turning main red
+      # would be a regression. Make it a hard failure once it has been seen to
+      # work — the tier having no way to fail is exactly what #316 is about.
+      - name: Seed participant contexts on the control plane (#316)
+        continue-on-error: true
+        run: |
+          TOKEN=$(curl -sS --max-time 20 -X POST \
+            "http://localhost:8080/realms/edcv/protocol/openid-connect/token" \
+            -H "Content-Type: application/x-www-form-urlencoded" \
+            -d "grant_type=client_credentials&client_id=provisioner&client_secret=provisioner-secret" \
+            2>/dev/null \
+            | python3 -c "import json,sys; print(json.load(sys.stdin).get('access_token',''))" \
+            2>/dev/null || true)
+          if [ -z "$TOKEN" ]; then
+            echo "::warning::No Keycloak token, so the participant contexts cannot be seeded. The suites will report an empty control plane (#316)."
+            exit 1
+          fi
+          CP=http://localhost:11003/api/mgmt TOKEN="$TOKEN" \
+            bash scripts/azure/05-cp-participants.sh
 
       - name: Run DSP TCK
         run: |
@@ -140,6 +188,42 @@ jobs:
             fi
             sleep 5
           done
+
+      # The ephemeral stack comes up empty: this workflow starts it with
+      # `docker compose up -d` and never runs jad/seed-all.sh, so the control
+      # plane has no participant contexts and every participant-scoped check
+      # ends at "Missing required participant contexts" (#316). The suites have
+      # said so out loud since #314; before that they said nothing at all.
+      #
+      # Seeding the contexts directly through the Management API is enough for
+      # the suites, and far cheaper than the full seven-phase JAD seed, which
+      # wants 8 GB of Docker and does not fit a standard runner.
+      #
+      # provisioner, not admin: the two clients carry the same six scopes and
+      # differ only in a `role` claim, and the control plane refuses a
+      # participant-context create from `admin` with HTTP 403 "Required user
+      # role not satisfied". Measured on the live control plane, #316.
+      #
+      # continue-on-error while this is new: an unseeded stack is the status quo
+      # and the suites report it clearly, whereas a flaky seed turning main red
+      # would be a regression. Make it a hard failure once it has been seen to
+      # work — the tier having no way to fail is exactly what #316 is about.
+      - name: Seed participant contexts on the control plane (#316)
+        continue-on-error: true
+        run: |
+          TOKEN=$(curl -sS --max-time 20 -X POST \
+            "http://localhost:8080/realms/edcv/protocol/openid-connect/token" \
+            -H "Content-Type: application/x-www-form-urlencoded" \
+            -d "grant_type=client_credentials&client_id=provisioner&client_secret=provisioner-secret" \
+            2>/dev/null \
+            | python3 -c "import json,sys; print(json.load(sys.stdin).get('access_token',''))" \
+            2>/dev/null || true)
+          if [ -z "$TOKEN" ]; then
+            echo "::warning::No Keycloak token, so the participant contexts cannot be seeded. The suites will report an empty control plane (#316)."
+            exit 1
+          fi
+          CP=http://localhost:11003/api/mgmt TOKEN="$TOKEN" \
+            bash scripts/azure/05-cp-participants.sh
 
       - name: Run DCP compliance suite
         run: |
@@ -205,8 +289,47 @@ jobs:
 
       - name: Initialize Neo4j schema
         run: |
-          cat neo4j/init-schema.cypher | docker exec -i health-dataspace-neo4j \
-            cypher-shell -u neo4j -p healthdataspace || true
+          # Redirect rather than `cat |`: CI's actionlint runs shellcheck at a
+          # stricter level than a local one and fails the gate on SC2002.
+          docker exec -i health-dataspace-neo4j \
+            cypher-shell -u neo4j -p healthdataspace \
+            < neo4j/init-schema.cypher || true
+
+      # The ephemeral stack comes up empty: this workflow starts it with
+      # `docker compose up -d` and never runs jad/seed-all.sh, so the control
+      # plane has no participant contexts and every participant-scoped check
+      # ends at "Missing required participant contexts" (#316). The suites have
+      # said so out loud since #314; before that they said nothing at all.
+      #
+      # Seeding the contexts directly through the Management API is enough for
+      # the suites, and far cheaper than the full seven-phase JAD seed, which
+      # wants 8 GB of Docker and does not fit a standard runner.
+      #
+      # provisioner, not admin: the two clients carry the same six scopes and
+      # differ only in a `role` claim, and the control plane refuses a
+      # participant-context create from `admin` with HTTP 403 "Required user
+      # role not satisfied". Measured on the live control plane, #316.
+      #
+      # continue-on-error while this is new: an unseeded stack is the status quo
+      # and the suites report it clearly, whereas a flaky seed turning main red
+      # would be a regression. Make it a hard failure once it has been seen to
+      # work — the tier having no way to fail is exactly what #316 is about.
+      - name: Seed participant contexts on the control plane (#316)
+        continue-on-error: true
+        run: |
+          TOKEN=$(curl -sS --max-time 20 -X POST \
+            "http://localhost:8080/realms/edcv/protocol/openid-connect/token" \
+            -H "Content-Type: application/x-www-form-urlencoded" \
+            -d "grant_type=client_credentials&client_id=provisioner&client_secret=provisioner-secret" \
+            2>/dev/null \
+            | python3 -c "import json,sys; print(json.load(sys.stdin).get('access_token',''))" \
+            2>/dev/null || true)
+          if [ -z "$TOKEN" ]; then
+            echo "::warning::No Keycloak token, so the participant contexts cannot be seeded. The suites will report an empty control plane (#316)."
+            exit 1
+          fi
+          CP=http://localhost:11003/api/mgmt TOKEN="$TOKEN" \
+            bash scripts/azure/05-cp-participants.sh
 
       - name: Run EHDS compliance tests
         run: |
