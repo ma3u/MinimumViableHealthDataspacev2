@@ -1,0 +1,211 @@
+name: EDC Seed Control-Plane Participants (issue #316)
+
+# Creates the five participant contexts on the EDC control plane.
+#
+# Why: scripts/azure/05-edc-seed.sh seeds the IdentityHub; nothing ever seeded
+# the control plane, so GET /api/mgmt/<v>/participants returned [] and the DSP
+# 2025-1 and DCP v1.0 suites both ended at "Missing required participant
+# contexts". Neither has ever produced a verdict on Azure (#316, behind #307).
+#
+# Locally these contexts are a side effect of the CFM agents provisioning a
+# cfm.connector activity, and those agents are not on Azure at all (#318). The
+# Management API exposes a direct create, so this does not wait for them.
+#
+# Architecture: the Management API is on the control plane's port 8081, which
+# ACA exposes only as an additionalPortMapping, so it is reachable as
+# http://mvhd-controlplane:8081 from inside the environment and not at all from
+# a runner. The seed therefore runs as a one-shot ACA Job, inlining
+# scripts/azure/05-cp-participants.sh (the canonical source) via base64 the way
+# cfm-seed.yml does. Keep the two in sync.
+#
+# Idempotent: a context whose identity already matches is left alone, so
+# re-running is a no-op.
+#
+# Manual trigger only: it mutates the live control plane.
+
+on:
+  workflow_dispatch:
+    inputs:
+      keep_cp_warm:
+        description: "Leave mvhd-controlplane at min=1 after seeding"
+        type: boolean
+        default: false
+
+permissions:
+  id-token: write
+  contents: read
+
+concurrency:
+  group: "azure-cp-participant-seed"
+  cancel-in-progress: false
+
+env:
+  RESOURCE_GROUP: rg-mvhd-dev
+  ACA_ENV: mvhd-env
+  CP_APP: mvhd-controlplane
+  KEYCLOAK_HOST: auth.ehds.mabu.red
+
+jobs:
+  seed:
+    name: Seed control-plane participant contexts
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Azure Login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      # ADR-027 scales the EDC stack to 0 off-hours and all weekend, and a
+      # control plane at 0 replicas cannot answer the seed. Bring it up and
+      # wait for a running replica before starting the job.
+      - name: Ensure the control plane is running
+        run: |
+          # Remember what it was. ADR-027 has it at 0 off-hours and at 1 during
+          # the day, so restoring a hardcoded 0 afterwards would take the
+          # control plane down in the middle of a working day.
+          WAS=$(az containerapp show -n "$CP_APP" -g "$RESOURCE_GROUP" \
+            --query "properties.template.scale.minReplicas" -o tsv)
+          echo "min-replicas before: ${WAS:-unknown}"
+          echo "CP_MIN_BEFORE=${WAS:-0}" >> "$GITHUB_ENV"
+          az containerapp update -n "$CP_APP" -g "$RESOURCE_GROUP" \
+            --min-replicas 1 --max-replicas 1 -o none
+          REV=$(az containerapp revision list -n "$CP_APP" -g "$RESOURCE_GROUP" \
+            --query "[?properties.active] | [0].name" -o tsv)
+          echo "active revision: $REV"
+          for i in $(seq 1 30); do
+            RUNNING=$(az containerapp replica list -n "$CP_APP" -g "$RESOURCE_GROUP" \
+              --revision "$REV" \
+              --query "length([?properties.runningState=='Running'])" -o tsv 2>/dev/null || echo 0)
+            echo "[$i] running replicas: ${RUNNING:-0}"
+            [ "${RUNNING:-0}" -gt 0 ] 2>/dev/null && break
+            sleep 10
+          done
+          # The connector is a JVM: a running replica is not yet a listening
+          # Management API. The seed's own version detection retries, but give
+          # it a head start.
+          sleep 30
+
+      - name: Get a Keycloak bearer token
+        id: kc
+        run: |
+          T=$(curl -sS -X POST \
+            "https://${KEYCLOAK_HOST}/realms/edcv/protocol/openid-connect/token" \
+            -H "Content-Type: application/x-www-form-urlencoded" \
+            -d "grant_type=client_credentials&client_id=admin&client_secret=edc-v-admin-secret" \
+            | python3 -c "import json,sys; print(json.load(sys.stdin)['access_token'])")
+          if [ -z "$T" ]; then
+            echo "::error::Could not get a token from ${KEYCLOAK_HOST}. If the realm is missing, run aca-schedule (start) first."
+            exit 1
+          fi
+          echo "::add-mask::$T"
+          echo "tok=$T" >> "$GITHUB_OUTPUT"
+          echo "token acquired (${#T} chars)"
+
+      - name: Seed the participant contexts
+        env:
+          TOK: ${{ steps.kc.outputs.tok }}
+        run: |
+          ENV_ID=$(az containerapp env show -n "$ACA_ENV" -g "$RESOURCE_GROUP" --query id -o tsv)
+          SCRIPT_B64=$(base64 -w0 < scripts/azure/05-cp-participants.sh)
+
+          cat > /tmp/cp-seed-job.yaml <<EOF
+          type: Microsoft.App/jobs
+          properties:
+            configuration:
+              triggerType: Manual
+              replicaTimeout: 600
+              replicaRetryLimit: 0
+              manualTriggerConfig:
+                replicaCompletionCount: 1
+                parallelism: 1
+              secrets:
+                - { name: tok, value: "${TOK}" }
+            environmentId: ${ENV_ID}
+            template:
+              containers:
+                - name: seed
+                  image: mcr.microsoft.com/azure-cli:latest
+                  resources: { cpu: 0.5, memory: 1Gi }
+                  env:
+                    - { name: CP,         value: "http://${CP_APP}:8081/api/mgmt" }
+                    - { name: TOKEN,      secretRef: tok }
+                    - { name: SCRIPT_B64, value: "${SCRIPT_B64}" }
+                  command: ["/bin/bash", "-c"]
+                  args:
+                    - |
+                      exec >/proc/1/fd/1 2>/proc/1/fd/2
+                      echo "=== cp-participant-seed, CP=\$CP ==="
+                      printf '%s' "\$SCRIPT_B64" | base64 -d > /tmp/run.sh
+                      bash /tmp/run.sh
+                      EXIT=\$?
+                      echo "=== cp-participant-seed exited with \$EXIT ==="
+                      # A container that exits within a second or two can leave
+                      # nothing in Log Analytics at all; linger so the verdict
+                      # is readable (docs/gotchas.md, 2026-09-17).
+                      sleep 20
+                      exit \$EXIT
+          EOF
+
+          if az containerapp job show -n mvhd-cp-seed -g "$RESOURCE_GROUP" -o none 2>/dev/null; then
+            az containerapp job delete -n mvhd-cp-seed -g "$RESOURCE_GROUP" --yes -o none
+          fi
+          az containerapp job create -n mvhd-cp-seed -g "$RESOURCE_GROUP" --yaml /tmp/cp-seed-job.yaml -o none
+
+          EXEC=$(az containerapp job start -n mvhd-cp-seed -g "$RESOURCE_GROUP" --query "name" -o tsv)
+          echo "exec=$EXEC"
+          echo "EXEC=$EXEC" >> "$GITHUB_ENV"
+
+          STATUS=Pending
+          for i in $(seq 1 60); do
+            STATUS=$(az containerapp job execution show -n mvhd-cp-seed -g "$RESOURCE_GROUP" \
+              --job-execution-name "$EXEC" --query "properties.status" -o tsv 2>/dev/null || echo Pending)
+            echo "[$i] $STATUS"
+            case "$STATUS" in Succeeded|Failed|Canceled) break ;; esac
+            sleep 10
+          done
+          echo "SEED_STATUS=$STATUS" >> "$GITHUB_ENV"
+
+      - name: Show the seed log
+        if: always()
+        run: |
+          WS=$(az monitor log-analytics workspace list -g "$RESOURCE_GROUP" \
+            --query "[0].customerId" -o tsv 2>/dev/null || true)
+          if [ -z "$WS" ]; then
+            echo "::warning::no Log Analytics workspace found; cannot show the seed output"
+            exit 0
+          fi
+          # Job console rows carry ContainerJobName_s and leave
+          # ContainerAppName_s empty (docs/gotchas.md, 2026-09-17).
+          sleep 20
+          az monitor log-analytics query -w "$WS" --analytics-query \
+            "ContainerAppConsoleLogs_CL | where ContainerJobName_s == 'mvhd-cp-seed' and TimeGenerated > ago(30m) | order by TimeGenerated asc | project Log_s" \
+            -o tsv 2>&1 | sed 's/\tPrimaryResult$//' | head -80
+
+      - name: Restore the control plane scale profile
+        if: always() && github.event.inputs.keep_cp_warm != 'true'
+        run: |
+          # Back to whatever it was, not to a hardcoded 0: during working hours
+          # ADR-027 keeps this app at 1 and scaling it to 0 here would take the
+          # live demo down.
+          BEFORE="${CP_MIN_BEFORE:-1}"
+          if [ "$BEFORE" = "1" ]; then
+            echo "$CP_APP was already at min=1, leaving it alone"
+            exit 0
+          fi
+          echo "restoring $CP_APP to min=$BEFORE"
+          az containerapp update -n "$CP_APP" -g "$RESOURCE_GROUP" \
+            --min-replicas "$BEFORE" --max-replicas 1 -o none || \
+            echo "::warning::could not restore $CP_APP to min=$BEFORE"
+
+      - name: Verdict
+        run: |
+          echo "seed execution status: ${SEED_STATUS:-unknown}"
+          [ "${SEED_STATUS:-}" = "Succeeded" ] || {
+            echo "::error::the seed job did not succeed (${SEED_STATUS:-unknown}); see the log above"
+            exit 1
+          }
