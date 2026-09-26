@@ -1,0 +1,28 @@
+meta {
+  name: 11 The party answers
+  type: http
+  seq: 11
+}
+
+post {
+  url: {{baseUrl}}/api/compliance/information-requests/answer
+  body: json
+  auth: inherit
+}
+
+headers {
+  Content-Type: application/json
+  Cookie: {{cookieName}}={{sessionTokenResearcher}}
+}
+
+body:json {
+  {
+    "requestId": "{{infoRequestId}}",
+    "answer": "An aggregate count table; output check reference OC-2026-118"
+  }
+}
+
+assert {
+  res.status: eq 200
+  res.body.status: eq ANSWERED
+}

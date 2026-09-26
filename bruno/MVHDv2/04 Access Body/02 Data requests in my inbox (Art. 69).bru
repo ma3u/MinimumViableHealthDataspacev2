@@ -1,0 +1,20 @@
+meta {
+  name: 02 Data requests in my inbox (Art. 69)
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/api/compliance/requests
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}={{sessionTokenRegulator}}
+}
+
+assert {
+  res.status: eq 200
+  res.body.requests: isArray
+}

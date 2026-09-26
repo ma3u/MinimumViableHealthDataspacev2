@@ -1,0 +1,34 @@
+meta {
+  name: 04 Access body approves it
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{baseUrl}}/api/compliance/requests/decide
+  body: json
+  auth: inherit
+}
+
+headers {
+  Content-Type: application/json
+  Cookie: {{cookieName}}={{sessionTokenRegulator}}
+}
+
+body:json {
+  {
+    "requestId": "{{dataRequestId}}",
+    "decision": "APPROVED",
+    "justification": "An anonymised statistic within Art. 69"
+  }
+}
+
+assert {
+  res.status: eq 200
+  res.body.decision: eq APPROVED
+  res.body.publishBy: isDefined
+}
+
+docs {
+  `answered` is false when the statistical service is unreachable; that is the proxy's state, not the decision's, so it is not asserted.
+}

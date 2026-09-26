@@ -1,0 +1,27 @@
+meta {
+  name: 16 Data user cannot register a participant (403)
+  type: http
+  seq: 16
+}
+
+post {
+  url: {{baseUrl}}/api/admin/participants
+  body: json
+  auth: inherit
+}
+
+headers {
+  Content-Type: application/json
+  Cookie: {{cookieName}}={{sessionTokenResearcher}}
+}
+
+body:json {
+  {
+    "participantId": "did:web:bruno.example:sneak",
+    "name": "should never exist"
+  }
+}
+
+assert {
+  res.status: eq 403
+}

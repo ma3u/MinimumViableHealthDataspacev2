@@ -1,0 +1,24 @@
+meta {
+  name: 02 The demo DSP catalogue a partner would fetch
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/api/mock-dsp/alpha-klinik/catalog/request
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}=not-a-session
+}
+
+assert {
+  res.status: eq 200
+  res.body['@type']: eq dcat:Catalog
+}
+
+docs {
+  The provider endpoint the walkthrough uses while the connector's own DSP endpoint does not answer (#345).
+}

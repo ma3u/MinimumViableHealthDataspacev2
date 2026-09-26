@@ -1,0 +1,17 @@
+meta {
+  name: 04 Diagnose one component
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{baseUrl}}/api/admin/components/controlplane/diagnosis
+  body: none
+  auth: inherit
+}
+
+assert {
+  res.status: eq 200
+  res.body.name: eq controlplane
+  res.body.severity: isDefined
+}

@@ -1,0 +1,28 @@
+meta {
+  name: 06 The EDC assets behind my datasets
+  type: http
+  seq: 6
+}
+
+get {
+  url: {{baseUrl}}/api/assets
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}={{sessionTokenClinic}}
+}
+
+assert {
+  res.status: eq 200
+  res.body: isArray
+}
+
+tests {
+  test("captures my participant context id", function () {
+    const rows = res.getBody();
+    const mine = rows.find((r) => JSON.stringify(r).includes("alpha-klinik")) || rows[0];
+    if (mine) bru.setVar("uiParticipantId", mine.participantId || mine.identity);
+  });
+}

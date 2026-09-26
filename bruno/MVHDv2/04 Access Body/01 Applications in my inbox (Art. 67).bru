@@ -1,0 +1,21 @@
+meta {
+  name: 01 Applications in my inbox (Art. 67)
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/api/compliance/applications
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}={{sessionTokenRegulator}}
+}
+
+assert {
+  res.status: eq 200
+  res.body.applications: isArray
+  res.body.article: isDefined
+}

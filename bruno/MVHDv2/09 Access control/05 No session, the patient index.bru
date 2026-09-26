@@ -1,0 +1,27 @@
+meta {
+  name: 05 No session, the patient index
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{baseUrl}}/api/patient
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}=not-a-session
+}
+
+tests {
+  // Known red, #349. /api/patient calls getServerSession and then never acts on
+  // a null session, so an anonymous caller receives the patient index and the
+  // cohort statistics. The data is synthetic and the same index is published as a
+  // fixture on GitHub Pages, so nothing real is exposed, but it is the one route
+  // in the inventory that reads a session without enforcing it and the role
+  // matrix says it is gated. The assertion states what the matrix claims.
+  test("the patient index needs a session", function () {
+    expect(res.getStatus()).to.equal(401);
+  });
+}

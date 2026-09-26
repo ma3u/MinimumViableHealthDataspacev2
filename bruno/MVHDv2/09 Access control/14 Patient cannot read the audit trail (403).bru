@@ -1,0 +1,19 @@
+meta {
+  name: 14 Patient cannot read the audit trail (403)
+  type: http
+  seq: 14
+}
+
+get {
+  url: {{baseUrl}}/api/admin/audit
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}={{sessionTokenPatient}}
+}
+
+assert {
+  res.status: eq 403
+}

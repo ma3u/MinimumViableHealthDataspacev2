@@ -1,0 +1,27 @@
+meta {
+  name: 11 Data user cannot publish a dataset (403)
+  type: http
+  seq: 11
+}
+
+post {
+  url: {{baseUrl}}/api/catalog
+  body: json
+  auth: inherit
+}
+
+headers {
+  Content-Type: application/json
+  Cookie: {{cookieName}}={{sessionTokenResearcher}}
+}
+
+body:json {
+  {
+    "id": "dataset:bruno-forbidden",
+    "title": "should never exist"
+  }
+}
+
+assert {
+  res.status: eq 403
+}

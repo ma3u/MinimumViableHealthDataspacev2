@@ -1,0 +1,19 @@
+meta {
+  name: 07 Data holder cannot read a patient record (403)
+  type: http
+  seq: 7
+}
+
+get {
+  url: {{baseUrl}}/api/patient/profile?patientId={{patientId}}
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}={{sessionTokenClinic}}
+}
+
+assert {
+  res.status: eq 403
+}

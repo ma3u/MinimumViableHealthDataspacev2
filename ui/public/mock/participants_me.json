@@ -1,115 +1,113 @@
-{
-  "tenants": [
-    {
-      "id": "dataspace-operator-id",
-      "version": 1,
-      "properties": {
-        "displayName": "Health Dataspace Operator",
-        "role": "operator",
-        "ehdsParticipantType": "dataspace-operator",
-        "organization": "European Health Dataspace Association",
-        "contactPerson": "Admin",
-        "email": "admin@health-dataspace.local",
-        "country": "EU",
-        "website": "https://health-dataspace.eu"
-      },
-      "participantProfiles": [
-        {
-          "participantContextId": "f6a7b8c9d0e162f3a4b5c6d7e8f9a0b1",
-          "did": "did:web:health-dataspace.eu:operator",
-          "state": "ACTIVATED"
-        }
-      ]
+[
+  {
+    "id": "dataspace-operator-id",
+    "version": 1,
+    "properties": {
+      "displayName": "Health Dataspace Operator",
+      "role": "operator",
+      "ehdsParticipantType": "dataspace-operator",
+      "organization": "European Health Dataspace Association",
+      "contactPerson": "Admin",
+      "email": "admin@health-dataspace.local",
+      "country": "EU",
+      "website": "https://health-dataspace.eu"
     },
-    {
-      "id": "alpha-klinik-id",
-      "version": 1,
-      "properties": {
-        "displayName": "AlphaKlinik Berlin",
-        "role": "provider",
-        "ehdsParticipantType": "data-holder",
-        "organization": "AlphaKlinik Berlin GmbH",
-        "country": "DE"
-      },
-      "participantProfiles": [
-        {
-          "participantContextId": "a1b2c3d4e5f647a0b1c2d3e4f5a6b7c8",
-          "did": "did:web:alpha-klinik.de:participant",
-          "state": "ACTIVATED"
-        }
-      ]
+    "participantProfiles": [
+      {
+        "participantContextId": "f6a7b8c9d0e162f3a4b5c6d7e8f9a0b1",
+        "did": "did:web:health-dataspace.eu:operator",
+        "state": "ACTIVATED"
+      }
+    ]
+  },
+  {
+    "id": "alpha-klinik-id",
+    "version": 1,
+    "properties": {
+      "displayName": "AlphaKlinik Berlin",
+      "role": "provider",
+      "ehdsParticipantType": "data-holder",
+      "organization": "AlphaKlinik Berlin GmbH",
+      "country": "DE"
     },
-    {
-      "id": "pharmaco-research-id",
-      "version": 1,
-      "properties": {
-        "displayName": "PharmaCo Research AG",
-        "role": "consumer",
-        "ehdsParticipantType": "data-user",
-        "organization": "PharmaCo Research AG",
-        "country": "DE"
-      },
-      "participantProfiles": [
-        {
-          "participantContextId": "b2c3d4e5f6a748b1c2d3e4f5a6b7c8d9",
-          "did": "did:web:pharmaco.de:research",
-          "state": "ACTIVATED"
-        }
-      ]
+    "participantProfiles": [
+      {
+        "participantContextId": "a1b2c3d4e5f647a0b1c2d3e4f5a6b7c8",
+        "did": "did:web:alpha-klinik.de:participant",
+        "state": "ACTIVATED"
+      }
+    ]
+  },
+  {
+    "id": "pharmaco-research-id",
+    "version": 1,
+    "properties": {
+      "displayName": "PharmaCo Research AG",
+      "role": "consumer",
+      "ehdsParticipantType": "data-user",
+      "organization": "PharmaCo Research AG",
+      "country": "DE"
     },
-    {
-      "id": "medreg-de-id",
-      "version": 1,
-      "properties": {
-        "displayName": "MedReg DE",
-        "role": "operator",
-        "ehdsParticipantType": "health-data-access-body",
-        "organization": "MedReg DE — National Medicines Regulatory Authority",
-        "country": "DE"
-      },
-      "participantProfiles": [
-        {
-          "participantContextId": "c3d4e5f6a7b849c1d2e3f4a5b6c7d8e9",
-          "did": "did:web:medreg.de:hdab",
-          "state": "ACTIVATED"
-        }
-      ]
+    "participantProfiles": [
+      {
+        "participantContextId": "b2c3d4e5f6a748b1c2d3e4f5a6b7c8d9",
+        "did": "did:web:pharmaco.de:research",
+        "state": "ACTIVATED"
+      }
+    ]
+  },
+  {
+    "id": "medreg-de-id",
+    "version": 1,
+    "properties": {
+      "displayName": "MedReg DE",
+      "role": "operator",
+      "ehdsParticipantType": "health-data-access-body",
+      "organization": "MedReg DE — National Medicines Regulatory Authority",
+      "country": "DE"
     },
-    {
-      "id": "limburg-mc-id",
-      "version": 1,
-      "properties": {
-        "displayName": "Limburg Medical Centre",
-        "role": "provider",
-        "ehdsParticipantType": "data-holder",
-        "organization": "Limburg Medical Centre",
-        "country": "NL"
-      },
-      "participantProfiles": [
-        {
-          "participantContextId": "d4e5f6a7b8c950d1e2f3a4b5c6d7e8f9",
-          "did": "did:web:lmc.nl:clinic",
-          "state": "ACTIVATED"
-        }
-      ]
+    "participantProfiles": [
+      {
+        "participantContextId": "c3d4e5f6a7b849c1d2e3f4a5b6c7d8e9",
+        "did": "did:web:medreg.de:hdab",
+        "state": "ACTIVATED"
+      }
+    ]
+  },
+  {
+    "id": "limburg-mc-id",
+    "version": 1,
+    "properties": {
+      "displayName": "Limburg Medical Centre",
+      "role": "provider",
+      "ehdsParticipantType": "data-holder",
+      "organization": "Limburg Medical Centre",
+      "country": "NL"
     },
-    {
-      "id": "irs-fr-id",
-      "version": 1,
-      "properties": {
-        "displayName": "Institut de Recherche Santé",
-        "role": "operator",
-        "ehdsParticipantType": "health-data-access-body",
-        "organization": "Institut de Recherche Santé",
-        "country": "FR"
-      },
-      "participantProfiles": [
-        {
-          "participantContextId": "e5f6a7b8c9d051e2f3a4b5c6d7e8f9a0",
-          "did": "did:web:irs.fr:hdab",
-          "state": "ACTIVATED"
-        }
-      ]
-    }
-  ]
-}
+    "participantProfiles": [
+      {
+        "participantContextId": "d4e5f6a7b8c950d1e2f3a4b5c6d7e8f9",
+        "did": "did:web:lmc.nl:clinic",
+        "state": "ACTIVATED"
+      }
+    ]
+  },
+  {
+    "id": "irs-fr-id",
+    "version": 1,
+    "properties": {
+      "displayName": "Institut de Recherche Santé",
+      "role": "operator",
+      "ehdsParticipantType": "health-data-access-body",
+      "organization": "Institut de Recherche Santé",
+      "country": "FR"
+    },
+    "participantProfiles": [
+      {
+        "participantContextId": "e5f6a7b8c9d051e2f3a4b5c6d7e8f9a0",
+        "did": "did:web:irs.fr:hdab",
+        "state": "ACTIVATED"
+      }
+    ]
+  }
+]

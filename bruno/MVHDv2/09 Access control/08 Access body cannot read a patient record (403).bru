@@ -1,0 +1,23 @@
+meta {
+  name: 08 Access body cannot read a patient record (403)
+  type: http
+  seq: 8
+}
+
+get {
+  url: {{baseUrl}}/api/patient/profile?patientId={{patientId}}
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}={{sessionTokenRegulator}}
+}
+
+assert {
+  res.status: eq 403
+}
+
+docs {
+  Secondary use never reaches an identified record: the access body sees applications and permits, not patients.
+}

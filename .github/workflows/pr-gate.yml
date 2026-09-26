@@ -79,6 +79,13 @@ jobs:
           python -m pip install --quiet pyyaml
           python3 scripts/check-api-spec-drift.py
 
+      # The persona-organised API collection must cover every route and every
+      # request must be able to fail (ADR-032, ADR-031).
+      - name: API collection covers every route
+        run: |
+          set -euo pipefail
+          python3 scripts/check-bruno-coverage.py
+
       # gitleaks' pre-commit hook is `gitleaks protect --staged`, which sees
       # nothing in CI because nothing is staged. Scan the PR's commits instead.
       - name: Secret scan (PR commits)

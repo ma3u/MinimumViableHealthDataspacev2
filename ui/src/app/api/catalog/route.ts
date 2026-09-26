@@ -120,8 +120,16 @@ export async function POST(request: NextRequest) {
              d.dctSpatial                  = $spatial,
              d.modifiedAt                  = datetime()
          WITH d
-         MERGE (p:Participant {name: $publisher})
-         MERGE (p)-[:PUBLISHES]->(d)`,
+         // Link to the publisher only when a participant of that name already
+         // exists. MERGE on the display name used to create one whenever the
+         // name did not match exactly, leaving a :Participant carrying nothing
+         // but a name: no DID, no relationships. One of those broke
+         // /api/overview for the access body, because the HDAB view compacts
+         // every participant id and a null id has no toLowerCase (#349).
+         OPTIONAL MATCH (p:Participant)
+           WHERE $publisher <> '' AND p.name = $publisher
+         FOREACH (_ IN CASE WHEN p IS NULL THEN [] ELSE [1] END |
+           MERGE (p)-[:PUBLISHES]->(d))`,
         {
           id,
           title,

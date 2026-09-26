@@ -1,0 +1,20 @@
+meta {
+  name: 05 I withdraw it
+  type: http
+  seq: 5
+}
+
+delete {
+  url: {{baseUrl}}/api/catalog?id=dataset:bruno-smoke
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}={{sessionTokenClinic}}
+}
+
+assert {
+  res.status: eq 200
+  res.body.ok: eq true
+}

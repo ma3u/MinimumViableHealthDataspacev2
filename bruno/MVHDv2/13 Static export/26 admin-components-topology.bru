@@ -1,0 +1,24 @@
+meta {
+  name: 26 admin/components/topology
+  type: http
+  seq: 26
+}
+
+get {
+  url: {{baseUrl}}/mock/admin_components_topology.json
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}=not-a-session
+}
+
+assert {
+  res.status: eq 200
+  res.body: isJson
+}
+
+docs {
+  ui/public/mock/admin_components_topology.json stands in for /api/admin/components/topology in the static build.
+}

@@ -1,0 +1,27 @@
+meta {
+  name: 10 Ask a question in natural language
+  type: http
+  seq: 10
+}
+
+post {
+  url: {{baseUrl}}/api/nlq
+  body: json
+  auth: inherit
+}
+
+headers {
+  Content-Type: application/json
+  Cookie: {{cookieName}}={{sessionTokenResearcher}}
+}
+
+body:json {
+  {
+    "question": "How many patients have a diagnosis of type 2 diabetes?"
+  }
+}
+
+assert {
+  res.status: eq 200
+  res.body: isJson
+}

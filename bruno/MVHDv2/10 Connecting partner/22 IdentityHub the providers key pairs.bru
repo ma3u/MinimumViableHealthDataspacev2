@@ -1,0 +1,29 @@
+meta {
+  name: 22 IdentityHub the provider's key pairs
+  type: http
+  seq: 12
+}
+
+get {
+  url: {{identityUrl}}/v1alpha/participants/{{providerCtx}}/keypairs
+  body: none
+  auth: bearer
+}
+
+headers {
+  Cookie: {{cookieName}}=not-a-session
+}
+
+auth:bearer {
+  token: {{edcToken}}
+}
+
+assert {
+  res.status: eq 200
+  res.body: isArray
+  res.body[0].keyId: isDefined
+}
+
+docs {
+  A key record here is not key material in Vault; KEY-2.4 of the identity suite checks the material (#345).
+}

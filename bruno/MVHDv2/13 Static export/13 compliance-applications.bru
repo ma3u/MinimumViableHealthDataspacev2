@@ -1,0 +1,25 @@
+meta {
+  name: 13 compliance/applications
+  type: http
+  seq: 13
+}
+
+get {
+  url: {{baseUrl}}/mock/applications.json
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}=not-a-session
+}
+
+assert {
+  res.status: eq 200
+  res.body.applications: isArray
+  res.body.scope: isDefined
+}
+
+docs {
+  ui/public/mock/applications.json stands in for /api/compliance/applications in the static build.
+}

@@ -1,0 +1,38 @@
+meta {
+  name: 08 Access body opens a finding (Art. 63)
+  type: http
+  seq: 8
+}
+
+post {
+  url: {{baseUrl}}/api/compliance/findings
+  body: json
+  auth: inherit
+}
+
+headers {
+  Content-Type: application/json
+  Cookie: {{cookieName}}={{sessionTokenRegulator}}
+}
+
+body:json {
+  {
+    "permitId": "{{permitId}}",
+    "partyDid": "did:web:pharmaco.de:research",
+    "description": "An export attempt was logged by the secure processing environment",
+    "gdprBreach": false
+  }
+}
+
+assert {
+  res.status: eq 201
+  res.body.findingId: isDefined
+  res.body.status: eq OPEN
+  res.body.respondBy: isDefined
+}
+
+tests {
+  test("captures findingId", function () {
+    bru.setVar("findingId", res.getBody().findingId);
+  });
+}

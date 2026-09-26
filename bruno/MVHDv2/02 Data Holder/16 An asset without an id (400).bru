@@ -1,0 +1,27 @@
+meta {
+  name: 16 An asset without an id (400)
+  type: http
+  seq: 16
+}
+
+post {
+  url: {{baseUrl}}/api/assets
+  body: json
+  auth: inherit
+}
+
+headers {
+  Content-Type: application/json
+  Cookie: {{cookieName}}={{sessionTokenClinic}}
+}
+
+body:json {
+  {
+    "participantId": "{{uiParticipantId}}"
+  }
+}
+
+assert {
+  res.status: eq 400
+  res.body.error: contains assetId
+}

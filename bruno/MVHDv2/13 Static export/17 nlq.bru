@@ -1,0 +1,24 @@
+meta {
+  name: 17 nlq
+  type: http
+  seq: 17
+}
+
+get {
+  url: {{baseUrl}}/mock/nlq_templates.json
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}=not-a-session
+}
+
+assert {
+  res.status: eq 200
+  res.body: isJson
+}
+
+docs {
+  ui/public/mock/nlq_templates.json stands in for /api/nlq in the static build.
+}

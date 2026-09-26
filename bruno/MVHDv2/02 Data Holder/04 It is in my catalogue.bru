@@ -1,0 +1,27 @@
+meta {
+  name: 04 It is in my catalogue
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{baseUrl}}/api/catalog
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}={{sessionTokenClinic}}
+}
+
+assert {
+  res.status: eq 200
+  res.body: isArray
+}
+
+tests {
+  test("the dataset just described is listed", function () {
+    const ids = res.getBody().map((d) => d.id);
+    expect(ids, "the dataset published in the previous request is not in the catalogue").to.include("dataset:bruno-smoke");
+  });
+}

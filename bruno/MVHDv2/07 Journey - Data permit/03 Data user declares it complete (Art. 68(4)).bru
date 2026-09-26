@@ -1,0 +1,29 @@
+meta {
+  name: 03 Data user declares it complete (Art. 68(4))
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/api/compliance/applications/complete
+  body: json
+  auth: inherit
+}
+
+headers {
+  Content-Type: application/json
+  Cookie: {{cookieName}}={{sessionTokenResearcher}}
+}
+
+body:json {
+  {
+    "applicationId": "{{applicationId}}"
+  }
+}
+
+assert {
+  res.status: eq 200
+  res.body.completeness.complete: eq true
+  res.body.clockState: eq running
+  res.body.daysToDecision: isDefined
+}

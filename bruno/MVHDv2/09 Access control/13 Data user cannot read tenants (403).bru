@@ -1,0 +1,19 @@
+meta {
+  name: 13 Data user cannot read tenants (403)
+  type: http
+  seq: 13
+}
+
+get {
+  url: {{baseUrl}}/api/admin/tenants
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}={{sessionTokenResearcher}}
+}
+
+assert {
+  res.status: eq 403
+}

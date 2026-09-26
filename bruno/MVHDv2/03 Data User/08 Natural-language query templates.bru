@@ -1,0 +1,20 @@
+meta {
+  name: 08 Natural-language query templates
+  type: http
+  seq: 8
+}
+
+get {
+  url: {{baseUrl}}/api/nlq
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}={{sessionTokenResearcher}}
+}
+
+assert {
+  res.status: eq 200
+  res.body: isJson
+}

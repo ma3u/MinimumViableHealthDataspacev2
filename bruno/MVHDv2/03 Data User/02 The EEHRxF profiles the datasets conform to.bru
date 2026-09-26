@@ -1,0 +1,21 @@
+meta {
+  name: 02 The EEHRxF profiles the datasets conform to
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/api/eehrxf
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}={{sessionTokenResearcher}}
+}
+
+assert {
+  res.status: eq 200
+  res.body.categories: isArray
+  res.body.summary: isDefined
+}

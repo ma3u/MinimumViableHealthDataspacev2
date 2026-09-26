@@ -1,0 +1,25 @@
+meta {
+  name: 25 admin/components
+  type: http
+  seq: 25
+}
+
+get {
+  url: {{baseUrl}}/mock/admin_components.json
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}=not-a-session
+}
+
+assert {
+  res.status: eq 200
+  res.body.components: isDefined
+  res.body.deploymentTarget: isDefined
+}
+
+docs {
+  ui/public/mock/admin_components.json stands in for /api/admin/components in the static build.
+}

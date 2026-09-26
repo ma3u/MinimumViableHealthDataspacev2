@@ -1,0 +1,34 @@
+# What scripts/run-api-tests.sh Static-mock runs: the fixtures the GitHub Pages
+# export actually publishes under /mock/. The export serves no /api/ route at
+# all, so sending one at it answers 404 (#349).
+# scripts/check-bruno-coverage.py checks every line still exists.
+13 Static export/01 information.bru
+13 Static export/02 permits.bru
+13 Static export/03 compliance-results.bru
+13 Static export/04 activity-report.bru
+13 Static export/05 patient-observations.bru
+13 Static export/06 patient-insights.bru
+13 Static export/07 patient-research.bru
+13 Static export/08 participants-me.bru
+13 Static export/09 catalog.bru
+13 Static export/10 assets.bru
+13 Static export/11 eehrxf.bru
+13 Static export/12 odrl-scope.bru
+13 Static export/13 compliance-applications.bru
+13 Static export/14 credentials.bru
+13 Static export/15 analytics.bru
+13 Static export/16 federated.bru
+13 Static export/17 nlq.bru
+13 Static export/18 compliance-requests.bru
+13 Static export/19 compliance-findings.bru
+13 Static export/20 compliance-information-requests.bru
+13 Static export/21 compliance.bru
+13 Static export/22 compliance-tck.bru
+13 Static export/23 admin-policies.bru
+13 Static export/24 admin-tenants.bru
+13 Static export/25 admin-components.bru
+13 Static export/26 admin-components-topology.bru
+13 Static export/27 admin-participants.bru
+13 Static export/28 participants.bru
+13 Static export/29 patient.bru
+13 Static export/30 graph.bru

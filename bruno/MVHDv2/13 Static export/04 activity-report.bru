@@ -1,0 +1,26 @@
+meta {
+  name: 04 activity-report
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{baseUrl}}/mock/activity_report.json
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}=not-a-session
+}
+
+assert {
+  res.status: eq 200
+  res.body.article: isDefined
+  res.body.accessBodies: isArray
+  res.body.items: isDefined
+}
+
+docs {
+  ui/public/mock/activity_report.json stands in for /api/activity-report in the static build.
+}

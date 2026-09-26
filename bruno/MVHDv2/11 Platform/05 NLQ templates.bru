@@ -1,0 +1,20 @@
+meta {
+  name: 05 NLQ templates
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{proxyUrl}}/nlq/templates
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}=not-a-session
+}
+
+assert {
+  res.status: eq 200
+  res.body: isJson
+}

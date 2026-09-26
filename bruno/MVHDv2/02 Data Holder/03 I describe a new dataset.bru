@@ -1,0 +1,32 @@
+meta {
+  name: 03 I describe a new dataset
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/api/catalog
+  body: json
+  auth: inherit
+}
+
+headers {
+  Content-Type: application/json
+  Cookie: {{cookieName}}={{sessionTokenClinic}}
+}
+
+body:json {
+  {
+    "id": "dataset:bruno-smoke",
+    "title": "Bruno smoke dataset",
+    "description": "Published by the API collection; withdrawn two requests later.",
+    "publisher": "AlphaKlinik Berlin",
+    "license": "https://creativecommons.org/licenses/by/4.0/"
+  }
+}
+
+assert {
+  res.status: eq 200
+  res.body.ok: eq true
+  res.body.id: eq dataset:bruno-smoke
+}
