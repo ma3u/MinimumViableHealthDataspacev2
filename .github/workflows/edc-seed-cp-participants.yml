@@ -44,6 +44,16 @@ env:
   ACA_ENV: mvhd-env
   CP_APP: mvhd-controlplane
   KEYCLOAK_HOST: auth.ehds.mabu.red
+  # provisioner, not admin. Both clients carry the same six scopes, including
+  # management-api:write, and differ only in a hardcoded `role` claim. The
+  # control plane accepts reads from either and refuses a participant-context
+  # create from `admin` with "Required user role not satisfied" (HTTP 403),
+  # measured on the live control plane. The CFM edcv-agent, which is what
+  # creates these contexts on the local stack, authenticates as provisioner
+  # (jad/edcv-agent-config.yaml). Dev-default credentials, as everywhere else
+  # in this repository.
+  KC_CLIENT_ID: provisioner
+  KC_CLIENT_SECRET: provisioner-secret
 
 jobs:
   seed:
@@ -96,7 +106,7 @@ jobs:
           T=$(curl -sS -X POST \
             "https://${KEYCLOAK_HOST}/realms/edcv/protocol/openid-connect/token" \
             -H "Content-Type: application/x-www-form-urlencoded" \
-            -d "grant_type=client_credentials&client_id=admin&client_secret=edc-v-admin-secret" \
+            -d "grant_type=client_credentials&client_id=${KC_CLIENT_ID}&client_secret=${KC_CLIENT_SECRET}" \
             | python3 -c "import json,sys; print(json.load(sys.stdin)['access_token'])")
           if [ -z "$T" ]; then
             echo "::error::Could not get a token from ${KEYCLOAK_HOST}. If the realm is missing, run aca-schedule (start) first."

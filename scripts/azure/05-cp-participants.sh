@@ -82,6 +82,20 @@ detect_version() {
   return 1
 }
 
+# Which role the token carries, for the 403 diagnosis below. The control
+# plane refuses participant-context creation with "Required user role not
+# satisfied" and does not say which role it wanted, so say which one we have.
+TOKEN_ROLE=$(printf '%s' "$TOKEN" | python3 -c "
+import sys, json, base64
+try:
+    payload = sys.stdin.read().split('.')[1]
+    payload += '=' * (-len(payload) % 4)
+    print(json.loads(base64.urlsafe_b64decode(payload)).get('role') or '')
+except Exception:
+    print('')
+" 2>/dev/null || true)
+log "Token role claim: ${TOKEN_ROLE:-(none)}"
+
 log "Detecting the Management API version at $CP ..."
 detect_version || fail "no candidate version answered 200; the control plane is unreachable or the token is not accepted"
 log "Management API is $MGMT_V"
@@ -142,6 +156,17 @@ print(json.dumps({
       # script does not read back. Not a failure.
       log "skip   $SLUG -> HTTP 409, already present"
       SKIPPED=$((SKIPPED + 1))
+      ;;
+    403)
+      log "FAILED $SLUG -> HTTP 403"
+      log "       $(head -c 300 "$RESP" | tr '\n' ' ')"
+      log "       the token's role claim is '${TOKEN_ROLE:-none}'. Creating a"
+      log "       participant context needs the 'provisioner' role, not 'admin':"
+      log "       the two Keycloak clients differ only in that claim, and the"
+      log "       CFM edcv-agent, which creates these contexts locally, uses"
+      log "       'provisioner' (jad/edcv-agent-config.yaml). Set"
+      log "       KC_CLIENT_ID=provisioner."
+      FAILED=$((FAILED + 1))
       ;;
     *)
       log "FAILED $SLUG -> HTTP $CODE"
