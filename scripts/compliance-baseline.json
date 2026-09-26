@@ -15,9 +15,10 @@
   "review_by": "2026-12-26",
   "suites": {
     "dsp-tck-results": {
-      "min_passed": 25,
-      "max_failed": 0,
-      "note": "run 36250029604. Zero failures: the CAT-1.3 querySpec @type fix in #336 resolved the one that was failing."
+      "min_passed": 21,
+      "max_failed": 6,
+      "review_by": "2026-10-27",
+      "note": "LOWERED 2026-09-26 from 25/0, run 36266621990. The 25/0 was false: CAT-1.1 x3, CAT-1.3 and CAT-1.4 passed on Jetty HTML error pages (500 and 404) that the suite's fall-through branch accepted as catalogs. edc_reject_errors now refuses non-JSON bodies and CAT-1.1 fails on anything without an @type, so 21/6 is what the CI stack actually does: no participant context has a working DSP endpoint in either environment (#345, #328). Short review date until that is understood."
     },
     "dcp-compliance-results": {
       "min_passed": 19,

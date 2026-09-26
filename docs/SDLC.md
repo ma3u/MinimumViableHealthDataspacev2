@@ -437,8 +437,8 @@ three suites died at participant discovery (#307, fixed in #314).
 > | Suite                | CI ephemeral stack                      | Azure deployment                     |
 > | -------------------- | --------------------------------------- | ------------------------------------ |
 > | EHDS domain          | **18 passed, 0 failed, 7 skipped / 25** | 20 passed, 0 failed, 5 skipped / 25  |
-> | EHDS dataspace (DSP) | **25 passed, 0 failed, 8 skipped / 33** | 23 passed, 0 failed, 10 skipped / 33 |
-> | EHDS identity (DCP)  | **19 passed, 2 failed / 21 verdicts**   | 10 passed, 1 failed, 11 skipped / 22 |
+> | EHDS dataspace (DSP) | **21 passed, 6 failed, 6 skipped / 33** | 23 passed, 0 failed, 10 skipped / 33 |
+> | EHDS identity (DCP)  | **20 passed, 2 failed / 22 verdicts**   | 10 passed, 1 failed, 11 skipped / 22 |
 >
 > Re-measured 2026-09-26 from runs
 > [36250029604](https://github.com/ma3u/MinimumViableHealthDataspacev2/actions/runs/36250029604)
@@ -446,8 +446,16 @@ three suites died at participant discovery (#307, fixed in #314).
 > which agree exactly. Two rows moved, in opposite directions and for opposite
 > reasons.
 >
-> **DSP reached zero failures.** The `querySpec` `@type` fix in #336 resolved
-> `CAT-1.3`, which was the one failing row.
+> **DSP's 25 / 0 was false, and 21 / 6 is what the stack does.** The DSP suite's
+> `CAT-1.1` branch accepted any non-empty, non-envelope body as a catalog, and
+> in CI that body was a Jetty "Error 500" HTML page: the provider's DSP endpoint
+> does not answer at `/api/dsp/<ctx>/2025-1/…` for any participant context, in
+> CI (500) or locally (404), activated or not. The shared helper now rejects
+> non-JSON bodies and `CAT-1.1` fails on anything without an `@type`, which is
+> where the six failures come from. The floor was lowered to match, with the
+> reason recorded in `scripts/compliance-baseline.json`. How this control plane
+> exposes per-participant DSP is the open question on #345 and #328; every
+> counterparty DSP figure ever published from this tier was the weak branch.
 >
 > **DCP went 14/0 → 11/7 → 19/2 in one day, and each move was the suite
 > getting more honest.** #341 gave ten checks a reachable failure; they found
