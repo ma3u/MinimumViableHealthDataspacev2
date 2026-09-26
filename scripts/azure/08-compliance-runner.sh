@@ -28,19 +28,41 @@ docker buildx build --platform linux/amd64 \
   -t "${IMAGE}" --push "${REPO_ROOT}"
 ok "Image pushed: ${IMAGE}"
 
-# Internal-FQDN service URLs, with no explicit port — the addressing mvhd-ui
-# uses and which is known to work (05-cfm-ui.sh). These carried the local
-# compose ports until now, and ACA does not serve them: mvhd-controlplane's
-# HTTP ingress targets 8080 and mvhd-identityhub's 7081, not 11003 and 11005,
-# and an HTTP ingress answers on 80/443 whatever the target is. The EHDS suite
-# exits in discover_participants() when the Management API does not answer, so
-# every run ended before its first Neo4j check with "Cannot fetch participant
-# list from Management API". Same family as issue #205.
+# Service URLs. An EDC connector serves each web context on its own port, and
+# ACA gives an app exactly one ingress FQDN: https://<app>.internal.<domain>
+# reaches the ingress targetPort and nothing else. Every other port has to be
+# an entry in additionalPortMappings and is addressed as
+# http://<short-app-name>:<port> (04-edc-services.sh patches those in).
+#
+# That is what issue #307 was. The runner addressed the internal FQDN, which
+# is the controlplane's targetPort 8080 (web.http, /api) and the identity
+# hub's 7081 (web.http) — not 8081 (/api/mgmt) and 7082 (/api/identity). The
+# Management API was never on the path being called, so all three suites died
+# in discover_participants(). The fix is the same addressing
+# .github/workflows/edc-probe-cp.yml has used since May 2026.
+#
+# Keycloak keeps its public FQDN: the token endpoint is on the main ingress
+# and the issuer claim has to match what the connector validates against.
+# The issuer service has no additional ports — its admin API is on 10013,
+# which is its ingress targetPort — so the internal FQDN is right for it.
 eval "$(get_aca_fqdns)"
-MGMT_URL="https://${CONTROLPLANE_APP}.internal.${ACA_DOMAIN}/api/mgmt"
-IDENTITY_URL="https://${IDENTITYHUB_APP}.internal.${ACA_DOMAIN}/api/identity"
+MGMT_URL="http://${CONTROLPLANE_APP}:8081/api/mgmt"
+IDENTITY_URL="http://${IDENTITYHUB_APP}:7082/api/identity"
 ISSUER_URL="https://${ISSUER_APP}.internal.${ACA_DOMAIN}/api/admin"
 KC_URL="https://${KEYCLOAK_APP}.${ACA_DOMAIN}"
+# Management API version segment. Measured, not assumed: against the image
+# deployed here (jad-controlplane:2026-04-14), with a Keycloak bearer token,
+#
+#   /api/mgmt/v5beta/participants   404
+#   /api/mgmt/v5alpha/participants  404
+#   /api/mgmt/v4alpha/participants  200  []
+#
+# so this environment is two version segments behind the 0.18 launchers in
+# docker-compose.jad.yml that the suites default to (v5beta). The suites fall
+# back across the candidates on a 404 (scripts/lib/edc-mgmt-api.sh), so this
+# is not load-bearing — but it saves two wasted requests and records which
+# version the deployed control plane is actually on.
+MGMT_API_VERSION="${EDC_MGMT_API_VERSION:-v4alpha}"
 # Bolt, not the transactional HTTP API: mvhd-neo4j has TCP ingress with
 # targetPort and exposedPort 7687 and no additionalPortMappings, so
 # http://mvhd-neo4j:7474 is not routable from inside the environment and every
@@ -54,6 +76,7 @@ ENV_VARS=(
   "SUITES=${SUITES}"
   "REPORT_DIR=/work/test-results"
   "EDC_MANAGEMENT_URL=${MGMT_URL}"
+  "EDC_MGMT_API_VERSION=${MGMT_API_VERSION}"
   "EDC_IDENTITY_URL=${IDENTITY_URL}"
   "EDC_ISSUER_URL=${ISSUER_URL}"
   "KEYCLOAK_URL=${KC_URL}"

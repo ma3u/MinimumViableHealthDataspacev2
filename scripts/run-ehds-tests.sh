@@ -47,6 +47,12 @@ CLIENT_SECRET="${EDC_CLIENT_SECRET:-edc-v-admin-secret}"
 REPORT_DIR="${REPORT_DIR:-test-results/ehds}"
 PROVIDER_CTX=""  # populated by discover_participants()
 
+# The participant-list fetch and its diagnosis are shared with the other two
+# compliance suites: all three used to die on the same silent `curl -sf`
+# (issue #307).
+# shellcheck source=scripts/lib/edc-mgmt-api.sh
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/lib/edc-mgmt-api.sh"
+
 TOTAL=0
 PASSED=0
 FAILED=0
@@ -160,11 +166,8 @@ mgmt_post() {
 discover_participants() {
   log "Discovering participant context UUIDs..."
   local participants_json
-  participants_json=$(curl -sf -H "$(auth_header)" \
-    "${MGMT_API}/${MGMT_V}/participants") || {
-    log "ERROR: Cannot fetch participant list from Management API"
-    exit 1
-  }
+  mgmt_fetch_participants || exit 1
+  participants_json="$MGMT_PARTICIPANTS_JSON"
 
   for slug in "alpha-klinik" "pharmaco" "medreg"; do
     local uuid

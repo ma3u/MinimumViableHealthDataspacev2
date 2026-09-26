@@ -38,6 +38,12 @@ PARTICIPANT_SLUGS=("alpha-klinik" "pharmaco" "medreg")
 PARTICIPANT_CTXS=()  # populated by discover_participants()
 PARTICIPANT_DIDS=()  # populated by discover_participants()
 
+# The participant-list fetch and its diagnosis are shared with the other two
+# compliance suites: all three used to die on the same silent `curl -sf`
+# (issue #307).
+# shellcheck source=scripts/lib/edc-mgmt-api.sh
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/lib/edc-mgmt-api.sh"
+
 # Counters
 TOTAL=0
 PASSED=0
@@ -120,10 +126,8 @@ mgmt_post() {
 discover_participants() {
   log "Discovering participant context UUIDs..."
   local participants_json
-  participants_json=$(mgmt_get "/${MGMT_V}/participants") || {
-    log "ERROR: Cannot fetch participant list from Management API"
-    exit 1
-  }
+  mgmt_fetch_participants || exit 1
+  participants_json="$MGMT_PARTICIPANTS_JSON"
 
   for slug in "${PARTICIPANT_SLUGS[@]}"; do
     local uuid
