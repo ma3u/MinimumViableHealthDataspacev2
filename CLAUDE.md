@@ -55,6 +55,9 @@ docs/                   — see "Knowledge & planning" below
 ## Top gotchas
 
 1. **Vault secrets lost on Docker restart** — in-memory only; re-run `./scripts/bootstrap-jad.sh`.
+   That restores the issuer and siglet only. Participant signing keys and STS client secrets are
+   NOT restored, and the identity checks keep passing without them; see `docs/gotchas.md`
+   (2026-09-26) for symptoms and the honest remedy.
 2. **JAD seed phases 1–7 are strictly ordered** — FHIR before OMOP (phase 4 needs phase 3).
 3. **Static export disables API routes** — CI renames `src/app/api/`; guard with
    `NEXT_PUBLIC_STATIC_EXPORT` and mirror every route in `ui/public/mock/*.json`.

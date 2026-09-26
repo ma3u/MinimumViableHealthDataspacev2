@@ -3,6 +3,63 @@
 Non-obvious pitfalls across the stack. Ordered newest first; add a new
 entry at the top when you hit something that cost you more than 30 minutes.
 
+## 2026-09-26: a Vault restart takes every participant's ability to sign, and the identity checks keep passing
+
+CLAUDE.md gotcha 1 says Vault is in-memory and to re-run `bootstrap-jad.sh`.
+Two things it does not say, both found while trying to issue a credential over
+DCP on the local stack (#345):
+
+**What is lost.** Per participant, the signing private key IdentityHub uses
+(`did:web:identityhub%3A7083:<slug>#key1`) and the STS client secret the
+control plane uses (`<contextId>-sts-client-secret`). The key and context
+_records_ survive in Postgres. The secrets do not. On this laptop Vault was
+restarted on 2026-09-24 (`docker inspect health-dataspace-vault` shows
+`server -dev`); the keys date from 2026-03-22.
+
+**How it shows.** In the services' own words, which is how it was confirmed:
+
+```
+identityhub   HolderCredentialRequest ... ERROR:
+              JWSSigner cannot be generated for private key 'did:web:identityhub%3A7083:irs#key1':
+              Private key with ID '...#key1' not found
+controlplane  HTTP 502 [{"type":"BadGateway","message":"Unable to obtain credentials:
+              Failed to fetch client secret from the vault with alias:
+              772f6576b2a6472cb2e373dabc928517-sts-client-secret"}]
+```
+
+So: every DSP catalog request fails (`run-ehds-dataspace-checks.sh` shows
+`CAT-1.1` x3, `CAT-1.2`, `CAT-1.3` red, 27/5/1 locally against 25/0/8 in CI),
+and every DCP credential request ends in `ERROR`.
+
+**What keeps passing, wrongly.** `KEY-2.2` reports the provider's key pair
+ACTIVATED, because it reads the record in Postgres. `VC-3.2`/`VC-3.3` pass on
+the credentials CFM planted in March, which are also in Postgres. Nothing
+asserts "this participant can sign", so the identity suite scored 21/0 on a
+stack where no participant could. The DSP suite _did_ catch it, and only since
+#333: before that the 502 envelope above scored `CAT-1.1` as a pass.
+
+**Remedy status, honestly.** `bootstrap-jad.sh` re-runs `jad-seed` and applies
+`jad/seed-issuer-identity.sql` for the _issuer_; it re-creates the siglet
+transit key. It does not restore participant keys or STS secrets. Two ad-hoc
+scripts exist for exactly this incident, `scripts/_provision_signing_keys.py`
+and `scripts/_rotate_keypairs.py`, and both hardcode participant context ids
+from a previous incarnation of the stack (`5c0ed83a...` against today's
+`24be78bf...`), so they are evidence that it has happened before rather than a
+fix. Until there is one, the reliable path after a Vault restart is a full
+`docker compose down -v` and re-bootstrap, which regenerates the participants
+and their secrets together. Verify afterwards with a request that has to sign:
+
+```bash
+ONLY=irs WAIT_SECONDS=60 ./scripts/request-participant-credentials.sh   # must not end in ERROR
+./scripts/run-ehds-dataspace-checks.sh 2>&1 | grep 'CAT-1.1'            # must be green
+```
+
+**The check that is missing** is proposed on #345 as `KEY-2.4`: obtain a
+self-issued token for the participant from the IdentityHub STS
+(`identityhub:7084/api/sts`, see the STS entry below), which signs with the
+participant key and fails exactly when the material is gone. That needs 7084
+published to the host, or the check run from inside the network.
+
 ## 2026-09-26: the `issuer` Keycloak client exists on every laptop and no CI runner
 
 `jad/seed-jad.sh` created it at runtime through the admin API, behind the
