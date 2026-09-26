@@ -146,22 +146,31 @@ def main():
             print("\nAdd these to scripts/compliance-baseline.json under \"suites\":")
             print(json.dumps(bootstrapped, indent=2))
 
-    review_by = baseline.get("review_by")
-    if review_by:
+    # A floor that records a known-bad state needs a shorter fuse than one
+    # recording a healthy suite, so a suite may carry its own review_by and it
+    # wins over the global one.
+    deadlines = [("baseline", baseline.get("review_by"))]
+    for artifact, base in recorded.items():
+        if base.get("review_by"):
+            deadlines.append((SUITES.get(artifact, artifact), base["review_by"]))
+
+    for what, when in deadlines:
+        if not when:
+            continue
         try:
-            due = dt.date.fromisoformat(review_by)
+            due = dt.date.fromisoformat(when)
         except ValueError:
-            print(f"\nreview_by is not a date: {review_by!r}")
+            print(f"\nreview_by for {what} is not a date: {when!r}")
             failed = True
-        else:
-            if dt.date.today() > due:
-                failed = True
-                print(
-                    f"\nFAIL: the baseline was due for review on {due}."
-                    "\n      Tighten the numbers to what the suites now score, or move"
-                    "\n      review_by on purpose. A ratchet nobody raises is just a"
-                    "\n      slower way of not fixing it."
-                )
+            continue
+        if dt.date.today() > due:
+            failed = True
+            print(
+                f"\nFAIL: the {what} floor was due for review on {due}."
+                "\n      Tighten it to what the suite now scores, or move review_by"
+                "\n      on purpose. A ratchet nobody raises is just a slower way of"
+                "\n      not fixing it."
+            )
 
     print("\nREGRESSION" if failed else "\nno regression against the recorded baseline")
     return 1 if failed else 0
