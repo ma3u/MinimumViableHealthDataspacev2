@@ -189,11 +189,16 @@ jobs:
             echo "::warning::no Log Analytics workspace found; cannot show the seed output"
             exit 0
           fi
-          # Job console rows carry ContainerJobName_s and leave
-          # ContainerAppName_s empty (docs/gotchas.md, 2026-09-17).
+          # Scope to THIS execution. Job console rows carry ContainerJobName_s
+          # and leave ContainerAppName_s empty, and rows from earlier
+          # executions stay under the same job name (docs/gotchas.md,
+          # 2026-09-17) — so a query filtered only by job name interleaves
+          # runs and is genuinely misleading. It cost a wrong reading of this
+          # very job on 2026-09-26. ContainerGroupName_s starts with the
+          # execution name.
           sleep 20
           az monitor log-analytics query -w "$WS" --analytics-query \
-            "ContainerAppConsoleLogs_CL | where ContainerJobName_s == 'mvhd-cp-seed' and TimeGenerated > ago(30m) | order by TimeGenerated asc | project Log_s" \
+            "ContainerAppConsoleLogs_CL | where ContainerGroupName_s startswith '${EXEC}' | order by TimeGenerated asc | project Log_s" \
             -o tsv 2>&1 | sed 's/\tPrimaryResult$//' | head -80
 
       - name: Restore the control plane scale profile
