@@ -61,11 +61,26 @@ log "Mounting the CFM manager config files..."
 bash "${SCRIPT_DIR}/05-cfm-configure.sh"
 ok "CFM managers configured"
 
-# ── EDC internal endpoints (ACA internal ingress uses 443/80 on FQDN,
-# not the container targetPort) ─────────────────────────────────────────────
-EDC_MANAGEMENT_URL="https://${CONTROLPLANE_APP}.internal.${ACA_DOMAIN}/api/mgmt"
-EDC_IDENTITY_URL="https://${IDENTITYHUB_APP}.internal.${ACA_DOMAIN}/api/identity"
+# ── EDC internal endpoints ──────────────────────────────────────────────────
+# The internal-ingress FQDN reaches the app's ingress targetPort and nothing
+# else. That is right for the issuer (10013) and both CFM managers (8080), and
+# wrong for the two apps that serve the API we want on a second port:
+#
+#   mvhd-controlplane  targetPort 8080 = web.http /api;  Management API on 8081
+#   mvhd-identityhub   targetPort 7081 = web.http;       Identity API on 7082
+#
+# Those are additionalPortMappings (04-edc-services.sh) and are addressed as
+# http://<short-app-name>:<port>. Pointing the UI at the FQDN meant every
+# Management API call 404'd, and GET /api/participants silently served
+# public/mock/participants.json instead — so the live site has been listing
+# fixtures, not the dataspace. Issue #317, same family as #307.
+EDC_MANAGEMENT_URL="http://${CONTROLPLANE_APP}:8081/api/mgmt"
+EDC_IDENTITY_URL="http://${IDENTITYHUB_APP}:7082/api/identity"
 EDC_ISSUER_URL="https://${ISSUER_APP}.internal.${ACA_DOMAIN}/api/admin"
+# Measured, not assumed: the deployed jad-controlplane:2026-04-14 serves
+# /v4alpha. The client defaults to v5alpha and rewrites the segment from this
+# (ui/src/lib/edc/client.ts), so without it every call is a 404.
+EDC_MGMT_API_VERSION="${EDC_MGMT_API_VERSION:-v4alpha}"
 EDC_TENANT_URL="https://${TENANT_MGR_APP}.internal.${ACA_DOMAIN}/api"
 EDC_PROVISION_URL="https://${PROVISION_MGR_APP}.internal.${ACA_DOMAIN}/api"
 # Keycloak has external ingress only — reach it via public FQDN, not :8080.
@@ -103,6 +118,7 @@ az containerapp create \
     "NEO4J_USER=${NEO4J_USER}" \
     "NEO4J_PASSWORD=${NEO4J_PASSWORD}" \
     "EDC_MANAGEMENT_URL=${EDC_MANAGEMENT_URL}" \
+    "EDC_MGMT_API_VERSION=${EDC_MGMT_API_VERSION}" \
     "EDC_IDENTITY_URL=${EDC_IDENTITY_URL}" \
     "EDC_ISSUER_URL=${EDC_ISSUER_URL}" \
     "EDC_TENANT_URL=${EDC_TENANT_URL}" \

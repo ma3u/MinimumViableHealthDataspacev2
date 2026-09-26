@@ -56,6 +56,52 @@ describe("/api/participants", () => {
       expect(mockManagement).toHaveBeenCalledWith("/v5alpha/participants");
     });
 
+    it("says the API answered but nothing is ACTIVATED, not that it failed", async () => {
+      // The live Azure state after #316: five real contexts, all CREATED,
+      // because a context cannot currently be activated (#328). That must not
+      // read the same as an unreachable Management API (#317).
+      const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+      mockManagement.mockResolvedValue([
+        { "@id": "ctx-1", identity: "did:web:alpha-klinik", state: "CREATED" },
+        { "@id": "ctx-2", identity: "did:web:pharmaco", state: "CREATED" },
+      ]);
+
+      await GET();
+
+      const said = warn.mock.calls.map((c) => String(c[0])).join("\n");
+      expect(said).toContain("2 participant context(s), none ACTIVATED");
+      expect(said).toContain("CREATED");
+      expect(said).toContain("#328");
+      warn.mockRestore();
+    });
+
+    it("says the list was empty when the control plane holds nothing", async () => {
+      const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+      mockManagement.mockResolvedValue([]);
+
+      await GET();
+
+      const said = warn.mock.calls.map((c) => String(c[0])).join("\n");
+      expect(said).toContain("empty participant list");
+      expect(said).toContain("#316");
+      warn.mockRestore();
+    });
+
+    it("names the two likely causes when the Management API is unreachable", async () => {
+      // A wrong port and a wrong version segment both land here, and both are
+      // what actually went wrong (#307, #317), so the log names them.
+      const err = vi.spyOn(console, "error").mockImplementation(() => {});
+      mockManagement.mockRejectedValue(new Error("404 Not Found"));
+
+      await GET();
+
+      const said = err.mock.calls.map((c) => String(c[0])).join("\n");
+      expect(said).toContain("EDC_MANAGEMENT_URL");
+      expect(said).toContain("EDC_MGMT_API_VERSION");
+      expect(said).toContain("8081");
+      err.mockRestore();
+    });
+
     it("should return 502 when EDC API fails", async () => {
       mockManagement.mockRejectedValue(new Error("Connection refused"));
 
