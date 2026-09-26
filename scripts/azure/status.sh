@@ -99,17 +99,46 @@ echo "── Neo4j Graph ──────────────────�
 if [[ ! -t 0 ]]; then
   echo "  (no TTY: 'az containerapp exec' cannot run here — skipped)"
 else
-  # exec wraps the output in terminal chrome, so carry a marker through the
-  # query and pull the number out of that rather than expecting a bare line.
-  RESULT=$(az containerapp exec \
-    --name "$NEO4J_APP" --resource-group "$RG" \
-    --command "cypher-shell -a bolt://localhost:7687 -u ${NEO4J_USER} -p ${NEO4J_PASSWORD} --non-interactive --format plain \"MATCH (n) RETURN 'NODECOUNT=' + toString(count(n)) AS c\"" \
-    2>/dev/null || echo "")
-  TOTAL=$(printf '%s' "$RESULT" | sed -n 's/.*NODECOUNT=\([0-9][0-9]*\).*/\1/p' | head -1)
-  if [[ -n "$TOTAL" ]]; then
-    echo "  Total nodes: ${TOTAL}"
+  # exec has to be told which revision to enter. It defaults to the latest,
+  # and the latest is not reliably the one serving: measured 2026-09-26,
+  # mvhd-neo4j--0000166 held 100% of the traffic in ActivationFailed with zero
+  # replicas while mvhd-neo4j--0000001 ran the database, and exec answered
+  # "Could not find a replica for this app". Walk the active revisions and
+  # take the first that has one running. minReplicas is 0, so having none at
+  # all is an ordinary state and worth saying rather than calling an error.
+  NEO4J_REV=""
+  NEO4J_REPLICA=""
+  while read -r rev; do
+    [[ -z "$rev" ]] && continue
+    NEO4J_REPLICA=$(az containerapp replica list \
+      --name "$NEO4J_APP" --resource-group "$RG" --revision "$rev" \
+      --query "[?properties.runningState=='Running'] | [0].name" -o tsv 2>/dev/null || echo "")
+    if [[ -n "$NEO4J_REPLICA" && "$NEO4J_REPLICA" != "None" ]]; then
+      NEO4J_REV="$rev"
+      break
+    fi
+  done < <(az containerapp revision list --name "$NEO4J_APP" --resource-group "$RG" \
+             --query "[?properties.active].name" -o tsv 2>/dev/null || true)
+
+  if [[ -z "$NEO4J_REV" ]]; then
+    echo "  (no running replica — scaled to zero, or the active revision failed to activate)"
   else
-    echo "  (Neo4j did not answer — check the app's logs)"
+    # exec wraps the output in terminal chrome, so carry a marker through the
+    # query and pull the number out of that rather than expecting a bare line.
+    # 2>&1, not 2>/dev/null: which stream the CLI relays the container's output
+    # on is not stable — from this script it lands on stderr, and discarding it
+    # printed "Neo4j did not answer" over a query that had just succeeded.
+    RESULT=$(az containerapp exec \
+      --name "$NEO4J_APP" --resource-group "$RG" \
+      --revision "$NEO4J_REV" --replica "$NEO4J_REPLICA" \
+      --command "cypher-shell -a bolt://localhost:7687 -u ${NEO4J_USER} -p ${NEO4J_PASSWORD} --non-interactive --format plain \"MATCH (n) RETURN 'NODECOUNT=' + toString(count(n)) AS c\"" \
+      2>&1 || echo "")
+    TOTAL=$(printf '%s' "$RESULT" | sed -n 's/.*NODECOUNT=\([0-9][0-9]*\).*/\1/p' | head -1)
+    if [[ -n "$TOTAL" ]]; then
+      echo "  Total nodes: ${TOTAL}  (revision ${NEO4J_REV})"
+    else
+      echo "  (Neo4j did not answer on ${NEO4J_REV} — check the app's logs)"
+    fi
   fi
 fi
 echo ""
