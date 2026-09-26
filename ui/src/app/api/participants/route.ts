@@ -139,10 +139,42 @@ export async function GET() {
       return NextResponse.json(enriched);
     }
 
-    // EDC-V returned no ACTIVATED participants — fall through to mock data
-    console.warn("EDC-V has no ACTIVATED participants — serving mock data");
+    // Say which of the two very different cases this is. Both used to end in
+    // the same mock fallback and the same shrug of a log line, which is how
+    // the live site listed fixtures for months without anyone noticing
+    // (#317). "The API answered and nothing is activated" is a seeding or
+    // lifecycle problem; "the API did not answer" is a transport one.
+    const total = Array.isArray(participants) ? participants.length : 0;
+    if (total > 0) {
+      const states = [
+        ...new Set(
+          (participants as Record<string, unknown>[]).map(
+            (p) => (p.state as string) ?? "unknown",
+          ),
+        ),
+      ].sort();
+      console.warn(
+        `Management API answered with ${total} participant context(s), none ACTIVATED ` +
+          `(states: ${states.join(
+            ", ",
+          )}). Serving mock data. A context created through ` +
+          `the Management API stays CREATED and cannot currently be activated — see #328.`,
+      );
+    } else {
+      console.warn(
+        "Management API answered with an empty participant list. Serving mock data. " +
+          "The control plane holds no contexts; see #316 for how they are seeded.",
+      );
+    }
   } catch (err) {
-    console.error("Failed to list participants:", err);
+    // A throw here is transport, not state: a wrong port or a wrong API
+    // version segment both land in this branch (#307, #317).
+    console.error(
+      "Management API unreachable, serving mock data. Check EDC_MANAGEMENT_URL " +
+        "(the Management API is on the control plane's 8081, not the ingress " +
+        "FQDN) and EDC_MGMT_API_VERSION (the deployment serves v4alpha):",
+      err,
+    );
   }
 
   // Fall back to bundled mock data so the UI works offline / pre-seed

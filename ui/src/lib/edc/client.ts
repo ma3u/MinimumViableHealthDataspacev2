@@ -220,10 +220,21 @@ async function apiRequest<T = unknown>(
 // ---------------------------------------------------------------------------
 
 /**
- * Management API version segment. EDC ≥0.18-era JAD serves v5beta; older
- * stacks (incl. the current Azure deployment) serve v5alpha. Callers keep
- * writing '/v5alpha/…' paths — the client rewrites the segment so the
- * cutover is a single env flip (issue #97 Phase B).
+ * Management API version segment. Callers keep writing '/v5alpha/…' paths and
+ * the client rewrites the segment, so the cutover is a single env flip
+ * (issue #97 Phase B).
+ *
+ * Measured on 2026-09-26 with a bearer token, not assumed:
+ *
+ *   deployed jad-controlplane:2026-04-14   /v4alpha   200
+ *   docker-compose.jad.yml (EDC 0.18)      /v5beta    200
+ *   this default                           /v5alpha   404 on both
+ *
+ * The default is wrong for every environment we actually run, which is why
+ * GET /api/participants 404'd on Azure and silently fell back to bundled mock
+ * data (#317). Set EDC_MGMT_API_VERSION per environment; 05-cfm-ui.sh does.
+ * The default stays v5alpha only because changing it would move the breakage
+ * rather than remove it — every deployment should be explicit.
  */
 const MGMT_API_VERSION = process.env.EDC_MGMT_API_VERSION || "v5alpha";
 
