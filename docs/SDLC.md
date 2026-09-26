@@ -280,6 +280,25 @@ at in CI. What it catches is precisely the case Section 5's bypass policy
 leaves open: a commit made with `--no-verify`, or from a clone where
 `pre-commit install` was never run — including a cloud agent's clone.
 
+It carries one check of its own, beyond the hooks: **API spec drift**
+([`scripts/check-api-spec-drift.py`](https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/scripts/check-api-spec-drift.py)).
+It rebuilds the path/method inventory from `ui/src/app/api/**/route.ts`, diffs
+it against `ui/public/openapi.yaml`, and fails on a new undocumented operation,
+on a documented operation with no route, or on a stale allowlist entry.
+
+The reason it exists: between 2026-08-03 and 2026-09-26, implemented operations
+grew 61 to 87 while the spec stayed at 49, so documented coverage fell from
+80 % to 56 % and no build ever went red, because nothing compared the two. This
+is a **ratchet, not a wall**: the 38 operations already undocumented when it was
+written are listed in
+[`docs/api-spec-drift-allowlist.txt`](https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docs/api-spec-drift-allowlist.txt)
+and tolerated, so the backlog can be paid down deliberately instead of blocking
+every merge. Documenting an operation requires deleting its line in the same
+commit, which the stale-entry rule enforces, so the list can only shrink. Adding
+a line is not a fix; it is a decision to ship an undocumented endpoint and a
+reviewer should ask why. Regenerate with `--update`. Tracked in
+[#338](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/338).
+
 It deliberately does **not** re-run the heavy suites. `test.yml` and the rest
 stay path-filtered and advisory, visible on the PR and read before merging. To
 promote one of them to required later, give that workflow a final job that
