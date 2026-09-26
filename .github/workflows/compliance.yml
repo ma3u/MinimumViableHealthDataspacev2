@@ -225,6 +225,31 @@ jobs:
           CP=http://localhost:11003/api/mgmt TOKEN="$TOKEN" \
             bash scripts/azure/05-cp-participants.sh
 
+      # #345. The control-plane seed above populates participant CONTEXTS on
+      # the connector; IdentityHub is a different store and has always been
+      # empty here. Locally it is filled by jad/seed-health-tenants.sh via the
+      # CFM TenantManager, which does not fit a standard runner, so this talks
+      # to the Identity API directly.
+      #
+      # Not continue-on-error. Before #341 an empty IdentityHub scored 14
+      # passed / 0 failed, so a silent seeding failure is exactly the thing
+      # that hid this for months. If the seed cannot run, the job should say
+      # so here rather than three suites later.
+      - name: Seed IdentityHub participants (#345)
+        run: |
+          KEYCLOAK_URL=http://localhost:8080 \
+          EDC_IDENTITY_URL=http://localhost:11005/api/identity \
+            ./scripts/seed-identityhub-participants.sh
+
+      # ISS-4.3 asserts the issuer defines an EHDS credential type. This seed
+      # needs only Keycloak and the IssuerService, no CFM.
+      - name: Seed issuer credential definitions (#345)
+        continue-on-error: true
+        run: |
+          KC_HOST=http://localhost:8080 \
+          ISSUER_API=http://localhost:10013 \
+            bash jad/seed-issuer-defs.sh
+
       - name: Run DCP compliance suite
         run: |
           chmod +x scripts/run-ehds-identity-checks.sh
