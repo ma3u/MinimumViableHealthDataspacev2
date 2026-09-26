@@ -109,47 +109,18 @@ auth_header() {
   fi
 }
 
-# An EDC error envelope is a 2xx-shaped body that means the opposite of
-# success: [{"message":"No provider dispatcher registered for protocol: …",
-# "type":"BadGateway","path":null,"invalidValue":null}].
-#
-# Most assertions in this suite are of the form `[ -n "$resp" ] && …`, with a
-# fall-through branch that passes on "non-standard format". That made them
-# pass on an error body. CAT-1.1 reported "Catalog endpoint responded" for
-# every participant while every catalog request was in fact 502ing on the
-# wrong protocol identifier (#180) — the run before that fix and the run after
-# it are byte-identical, because the suite could not tell the difference.
-#
-# Discriminating on `type` + `message`: EDC's ApiErrorDetail has both, and
-# every success body here uses the JSON-LD `@type` instead.
-mgmt_is_error() {
-  printf '%s' "$1" | jq -e '
-    if type == "array" then (.[0] | objects | has("type") and has("message"))
-    else (objects | has("type") and has("message")) end
-  ' >/dev/null 2>&1
-}
-
-# Print the envelope and return non-zero, so the caller's `|| resp=""` turns
-# an error into a failed assertion instead of a pass.
-mgmt_reject_errors() {
-  local body="$1" what="$2"
-  if [ -n "$body" ] && mgmt_is_error "$body"; then
-    log "  ${what} returned an EDC error: $(printf '%s' "$body" | tr -d '\n' | cut -c1-200)"
-    return 1
-  fi
-  printf '%s' "$body"
-}
-
+# Error-envelope rejection lives in scripts/lib/edc-mgmt-api.sh, shared with
+# the DCP suite.
 mgmt_get() {
   local body
   body=$(curl -sf -H "$(auth_header)" -H "Content-Type: application/json" "${MGMT_API}$1" 2>/dev/null) || return 1
-  mgmt_reject_errors "$body" "GET $1"
+  edc_reject_errors "$body" "GET $1"
 }
 
 mgmt_post() {
   local body
   body=$(curl -s --max-time 30 -X POST -H "$(auth_header)" -H "Content-Type: application/json" -d "$2" "${MGMT_API}$1" 2>/dev/null) || return 1
-  mgmt_reject_errors "$body" "POST $1"
+  edc_reject_errors "$body" "POST $1"
 }
 
 
