@@ -56,7 +56,7 @@ jobs:
           - name: neo4j-proxy
             path: services/neo4j-proxy
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Generate CycloneDX SBOM
         uses: anchore/sbom-action@v0
@@ -197,7 +197,7 @@ jobs:
     # new federated credential, not a workflow change.
     if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main')
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Azure Login (OIDC)
         uses: azure/login@v2
@@ -280,7 +280,7 @@ jobs:
     if: always() && github.event_name == 'workflow_dispatch' && github.event.inputs.fail_on_severity != 'none'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Fail on ${{ github.event.inputs.fail_on_severity }}+
         uses: anchore/scan-action@v6
         with:
