@@ -434,11 +434,29 @@ three suites died at participant discovery (#307, fixed in #314).
 > `continue-on-error: true`, so a green **Protocol Compliance** run means the
 > workflow finished, not that anything conformed. Measured on 2026-09-26:
 >
-> | Suite          | Local ephemeral stack                | Azure deployment                     |
-> | -------------- | ------------------------------------ | ------------------------------------ |
-> | EHDS domain    | 1 passed, 13 failed, 11 skipped / 25 | 20 passed, 0 failed, 5 skipped / 25  |
-> | DSP 2025-1 TCK | 24 passed, 1 failed, 8 skipped / 33  | 23 passed, 0 failed, 10 skipped / 33 |
-> | DCP v1.0       | 14 passed, 0 failed, 8 skipped / 22  | 10 passed, 1 failed, 11 skipped / 22 |
+> | Suite                | CI ephemeral stack                      | Azure deployment                     |
+> | -------------------- | --------------------------------------- | ------------------------------------ |
+> | EHDS domain          | 1 passed, 13 failed, 11 skipped / 25    | 20 passed, 0 failed, 5 skipped / 25  |
+> | EHDS dataspace (DSP) | **25 passed, 0 failed, 8 skipped / 33** | 23 passed, 0 failed, 10 skipped / 33 |
+> | EHDS identity (DCP)  | **11 passed, 7 failed / 18 verdicts**   | 10 passed, 1 failed, 11 skipped / 22 |
+>
+> Re-measured 2026-09-26 from runs
+> [36250029604](https://github.com/ma3u/MinimumViableHealthDataspacev2/actions/runs/36250029604)
+> and [36250153262](https://github.com/ma3u/MinimumViableHealthDataspacev2/actions/runs/36250153262),
+> which agree exactly. Two rows moved, in opposite directions and for opposite
+> reasons.
+>
+> **DSP reached zero failures.** The `querySpec` `@type` fix in #336 resolved
+> `CAT-1.3`, which was the one failing row.
+>
+> **DCP fell from 14 passed / 0 failed to 11 / 7, and that is the suite
+> improving rather than the stack degrading.** #341 gave ten checks a reachable
+> failure; they promptly found that the **CI IdentityHub holds zero
+> participants** (#345), so there are no DIDs, key pairs or credentials to
+> assert on. It had been reporting an empty IdentityHub as fully passing. A
+> seeded local stack scores 21 passed / 0 failed against the same suite, and
+> the null stub scores exactly the CI figure of 11 / 7, because for DCP
+> purposes the CI stack is a null implementation.
 >
 > The Azure column is the state after #316 seeded five participant contexts
 > onto the control plane, which it had never had. Before that, all three suites
