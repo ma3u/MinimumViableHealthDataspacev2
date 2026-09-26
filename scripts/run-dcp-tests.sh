@@ -1,8 +1,14 @@
 #!/usr/bin/env bash
 # ---------------------------------------------------------------------------
-# DCP v1.0 Compliance Tests — Health Dataspace v2
+# DCP v1.0 domain checks — Health Dataspace v2
 # ---------------------------------------------------------------------------
-# Verifies DCP (Decentralized Claims Protocol) compliance:
+# NOT a conformance suite. This is 16 of our own checks driving the IdentityHub
+# Identity API and the IssuerService admin API with curl; it never acts as a
+# DCP protocol peer, and no part of it comes from
+# https://github.com/eclipse-dataspacetck/dcp-tck. Real conformance needs
+# eclipsedataspacetck/dcp-tck-runtime; see discussion #110.
+#
+# Covers, against those admin APIs:
 #   - DID:web Document Resolution
 #   - Self-Issued Identity Token validation
 #   - Credential Presentation exchange

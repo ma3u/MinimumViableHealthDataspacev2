@@ -44,9 +44,28 @@ export async function POST(request: NextRequest): Promise<NextResponse> { ... }
 
 ### Authentication inside routes
 
-- Extract session via `getServerSession(authOptions)` from `next-auth/next`.
-- Extract roles from `(session as { roles?: string[] }).roles ?? []`.
-- Enforce role checks manually in routes that middleware does not protect (e.g., `/api/admin/*` checks for `EDC_ADMIN`).
+Route handlers call `requireAuth()` from `@/lib/auth-guard`, not `getServerSession()` directly.
+`requireAuth()` wraps `getServerSession(authOptions)`, extracts the roles, checks them against the
+roles you pass, and returns either `{ session }` or a ready-made `NextResponse` error. Narrow the
+union with the `isAuthError()` type guard:
+
+```typescript
+import { requireAuth, isAuthError } from "@/lib/auth-guard";
+
+export async function GET(request: NextRequest): Promise<NextResponse> {
+  const auth = await requireAuth(["EDC_ADMIN"]);
+  if (isAuthError(auth)) return auth;
+  const { roles, accessToken } = auth.session;
+  ...
+}
+```
+
+- No argument means "any authenticated user"; a role array means 401 when unauthenticated and 403
+  when the session holds none of the listed roles.
+- In static-export mode `requireAuth()` returns a synthetic `EDC_ADMIN` demo session rather than an
+  error, so guarded routes still render in the GitHub Pages build.
+- Reach for `getServerSession(authOptions)` directly only when you need something off the session
+  that `AuthSession` does not carry.
 
 ### Static export fallback
 

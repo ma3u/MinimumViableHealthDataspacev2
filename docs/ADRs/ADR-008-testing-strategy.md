@@ -1,8 +1,28 @@
 # ADR-008: Comprehensive Testing Strategy
 
 **Status:** Accepted
-**Date:** 2026-03-11
+**Date:** 2026-03-11 (original) · Amended 2026-09-26
 **Supersedes:** —
+
+## Amendment (2026-09-26)
+
+Two statements below had drifted from the code and are corrected here rather than in place,
+since an accepted ADR is not edited.
+
+- **Coverage thresholds are enforced.** The trade-off "Coverage thresholds are targets, not yet
+  enforced in CI gates" was true when written and is not true now. `ui/vitest.config.ts` sets
+  `thresholds: { statements: 78, branches: 69, functions: 79, lines: 80 }`, and the `vitest-ui`
+  pre-commit hook fails the commit when coverage drops below them.
+- **The custom TCK runners are not conformance suites.** "custom TCK runners validate protocol
+  compliance: DSP 2025-1, DCP v1.0" overstates what `scripts/run-dsp-tck.sh` and
+  `scripts/run-dcp-tests.sh` do. They drive the EDC Management API and the IdentityHub Identity
+  API with `curl`; they never act as a protocol peer, and no part of them comes from
+  [eclipse-dataspacetck](https://github.com/eclipse-dataspacetck). They are EHDS **domain checks**,
+  not conformance. The distinction, and the plan to add the real Eclipse TCKs alongside them, is
+  [discussion #110](https://github.com/ma3u/MinimumViableHealthDataspacev2/discussions/110).
+
+Both are consequences of the same gap [ADR-031](ADR-031-checks-must-assert.md) names: a check, or a
+claim about a check, that nothing re-verifies.
 
 ## Context
 
