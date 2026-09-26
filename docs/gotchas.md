@@ -34,6 +34,20 @@ fix is `cypher-shell` over Bolt in each of them.
   Neo4j HTTP row. All of them were the `*.internal.<domain>` FQDN, which is the
   HTTP ingress name and serves neither Bolt nor HTTP for this app.
   `NEO4J_BOLT_URI` replaces them.
+- Two live findings a local check could not have produced.
+  `az containerapp exec` enters the **latest** revision, and the latest is not
+  always the one serving: on 2026-09-26 `mvhd-neo4j--0000166` held 100% of the
+  traffic in `ActivationFailed` with zero replicas while `mvhd-neo4j--0000001`
+  ran the database. Resolve a revision that has a running replica and pass
+  `--revision` and `--replica`. And the CLI does not relay the container's
+  output on a stable stream — from `status.sh` it comes back on stderr, so
+  `2>/dev/null` swallowed a query that had succeeded.
+- The ACA environment's default domain is `happysand-37f82e30`, not
+  `blackforest-0a04f26e`. The old one is still written into
+  `docs/azure-deployment-guide.md` and `docs/azure-deployment-plan.md`, and was
+  `neo4j/seed.sh`'s default Bolt host until now — where it was doubly wrong,
+  since an `*.internal.<domain>` name is HTTP ingress and times out on Bolt
+  whatever the domain. Address Neo4j as `bolt://mvhd-neo4j:7687`.
 - Do not reach for `additionalPortMappings: [7474]`. It was tried on
   2026-04-13, and reverting it produced a new revision that wiped the graph —
   that incident is what ADR-017 was written about.
