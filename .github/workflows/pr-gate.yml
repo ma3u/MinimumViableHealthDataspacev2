@@ -69,6 +69,16 @@ jobs:
           pre-commit run --show-diff-on-failure --color=always \
             --from-ref "origin/${{ github.base_ref || 'main' }}" --to-ref HEAD
 
+      # Phase 2 of #338. The spec and the routes drifted from 80% to 56%
+      # coverage in seven weeks because nothing compared them. Ratcheted
+      # against docs/api-spec-drift-allowlist.txt, so the existing backlog does
+      # not block merges but no NEW undocumented route gets in.
+      - name: API spec drift
+        run: |
+          set -euo pipefail
+          python -m pip install --quiet pyyaml
+          python3 scripts/check-api-spec-drift.py
+
       # gitleaks' pre-commit hook is `gitleaks protect --staged`, which sees
       # nothing in CI because nothing is staged. Scan the PR's commits instead.
       - name: Secret scan (PR commits)

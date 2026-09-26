@@ -1,0 +1,49 @@
+# Operations implemented under ui/src/app/api/ that ui/public/openapi.yaml
+# does not document yet. Generated and checked by
+# scripts/check-api-spec-drift.py; see #338.
+#
+# This list may only shrink. Adding a line to it is not a fix, it is a
+# decision to ship an undocumented endpoint, and the reviewer should ask
+# why. Documenting an operation means deleting its line here in the same
+# commit, which the check enforces.
+#
+# Remaining: 38
+
+GET /api/activity-report
+GET /api/admin/audit/retention
+POST /api/admin/audit/retention
+GET /api/admin/components/{name}/diagnosis
+POST /api/admin/components/{name}/restart
+DELETE /api/admin/participants
+GET /api/admin/participants
+POST /api/admin/participants
+POST /api/auth/eudi/start
+GET /api/auth/eudi/status
+GET /api/compliance/applications
+POST /api/compliance/applications
+POST /api/compliance/applications/clock
+POST /api/compliance/applications/complete
+GET /api/compliance/findings
+POST /api/compliance/findings
+POST /api/compliance/findings/close
+POST /api/compliance/findings/respond
+GET /api/compliance/information-requests
+POST /api/compliance/information-requests
+POST /api/compliance/information-requests/answer
+POST /api/compliance/permits
+POST /api/compliance/permits/revoke
+GET /api/compliance/requests
+POST /api/compliance/requests
+POST /api/compliance/requests/decide
+GET /api/compliance/results
+POST /api/compliance/results
+GET /api/debug/phase26
+GET /api/information
+GET /api/keycloak-config
+GET /api/mock-dsp/{participant}/catalog/request
+POST /api/mock-dsp/{participant}/catalog/request
+GET /api/nlq/backend
+GET /api/overview
+POST /api/patient/ehr-sync
+GET /api/patient/observations
+GET /api/permits

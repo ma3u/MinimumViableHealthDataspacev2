@@ -106,6 +106,19 @@ repos:
         pass_filenames: false
         stages: [pre-commit]
 
+  # OpenAPI spec vs implemented routes (#338, Phase 2 of discussion #110).
+  # Ratcheted against docs/api-spec-drift-allowlist.txt: the existing backlog
+  # is tolerated, a new undocumented route is not.
+  - repo: local
+    hooks:
+      - id: api-spec-drift
+        name: API spec covers every route
+        language: system
+        entry: python3 scripts/check-api-spec-drift.py
+        files: ^(ui/src/app/api/.*route\.ts|ui/public/openapi\.yaml|docs/api-spec-drift-allowlist\.txt)$
+        pass_filenames: false
+        stages: [pre-commit]
+
   # npm dependency audit — HIGH/CRITICAL CVEs on pre-push (BSI C5 DEV-05)
   # Requires: node/npm in PATH
   - repo: local
