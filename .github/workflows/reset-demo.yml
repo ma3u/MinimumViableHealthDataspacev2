@@ -57,6 +57,9 @@ jobs:
       keycloak_realm: ${{ steps.check.outputs.keycloak_realm }}
       reason: ${{ steps.check.outputs.reason }}
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - name: Azure Login (OIDC)
         uses: azure/login@v2
         with:
@@ -66,8 +69,6 @@ jobs:
 
       - name: Check database state
         id: check
-        env:
-          NEO4J_PASSWORD: ${{ secrets.NEO4J_PASSWORD }}
         run: |
           # Force reset if manually requested
           if [ "${{ inputs.force_reset }}" = "true" ]; then
@@ -109,44 +110,37 @@ jobs:
             echo "::warning::Could not resolve mvhd-keycloak FQDN — skipping realm probe"
           fi
 
-          # Get Neo4j endpoint
-          NEO4J_FQDN=$(az containerapp show --name mvhd-neo4j \
-            --resource-group ${{ env.RESOURCE_GROUP }} \
-            --query "properties.configuration.ingress.fqdn" -o tsv 2>/dev/null || echo "")
+          # ── Neo4j dirty count ──
+          # This used to POST to https://<neo4j-fqdn>:7474/db/neo4j/tx/commit.
+          # mvhd-neo4j has TCP ingress on 7687 and nothing else, and the
+          # ingress is internal, so the request could not succeed from a
+          # runner on any port. Worse, it did not fail loudly: the pipeline's
+          # exit status was jq's, jq exits 0 on empty stdin, the `|| echo -1`
+          # fallback never fired, and the empty string fell through every
+          # branch into "Databases are clean". The check reported clean on a
+          # query that never ran, and the reset was skipped (run 34086755885,
+          # 2026-09-07). Issue #304.
+          #
+          # neo4j-dirty-check.sh runs the query inside the environment as a
+          # one-shot ACA job over Bolt and exits 0 for clean, 1 for dirty or
+          # unknown. Unknown counts as dirty, which is the fail-closed bias
+          # the old code intended and never had.
+          set +e
+          DIRTY_OUT=$(./scripts/azure/neo4j-dirty-check.sh)
+          DIRTY_RC=$?
+          set -e
+          echo "$DIRTY_OUT"
 
-          if [ -z "$NEO4J_FQDN" ]; then
-            echo "needs_reset=true" >> "$GITHUB_OUTPUT"
-            echo "reason=Cannot reach Neo4j — assuming dirty" >> "$GITHUB_OUTPUT"
-            echo "neo4j_dirty=unknown" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
+          DIRTY_COUNT=$(printf '%s\n' "$DIRTY_OUT" | sed -n 's/^dirty_count=//p' | head -1)
+          DIRTY_REASON=$(printf '%s\n' "$DIRTY_OUT" | sed -n 's/^reason=//p' | head -1)
+          echo "neo4j_dirty=${DIRTY_COUNT:-unknown}" >> "$GITHUB_OUTPUT"
 
-          # Query Neo4j for user-created data (local-registry policies, non-seed nodes).
-          # NEO4J_PASSWORD is passed via env to avoid inlining secrets in the
-          # curl command line (trips gitleaks curl-auth-user rule).
-          NEO4J_AUTH_HEADER="Authorization: Basic $(printf 'neo4j:%s' "$NEO4J_PASSWORD" | base64)"
-          DIRTY_COUNT=$(curl -sf -X POST "https://${NEO4J_FQDN}:7474/db/neo4j/tx/commit" \
-            -H "Content-Type: application/json" \
-            -H "$NEO4J_AUTH_HEADER" \
-            -d '{
-              "statements": [{
-                "statement": "MATCH (n) WHERE n.source = '\''local-registry'\'' OR (n.createdAt IS NOT NULL AND n:OdrlPolicy AND NOT exists(n.isSeed)) RETURN count(n) AS dirtyCount"
-              }]
-            }' 2>/dev/null | jq -r '.results[0].data[0].row[0] // "0"' 2>/dev/null || echo "-1")
-
-          echo "Neo4j dirty count: $DIRTY_COUNT"
-          echo "neo4j_dirty=$DIRTY_COUNT" >> "$GITHUB_OUTPUT"
-
-          if [ "$DIRTY_COUNT" = "-1" ]; then
-            # Query failed — be safe and run reset
-            echo "needs_reset=true" >> "$GITHUB_OUTPUT"
-            echo "reason=Neo4j query failed — assuming dirty" >> "$GITHUB_OUTPUT"
-          elif [ "$DIRTY_COUNT" -gt 0 ] 2>/dev/null; then
-            echo "needs_reset=true" >> "$GITHUB_OUTPUT"
-            echo "reason=Found $DIRTY_COUNT user-created nodes in Neo4j" >> "$GITHUB_OUTPUT"
-          else
+          if [ "$DIRTY_RC" = "0" ]; then
             echo "needs_reset=false" >> "$GITHUB_OUTPUT"
-            echo "reason=Databases are clean — no user data detected" >> "$GITHUB_OUTPUT"
+            echo "reason=${DIRTY_REASON:-Databases are clean}" >> "$GITHUB_OUTPUT"
+          else
+            echo "needs_reset=true" >> "$GITHUB_OUTPUT"
+            echo "reason=${DIRTY_REASON:-Neo4j state could not be established, assuming dirty}" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Dirty-check summary
@@ -197,18 +191,34 @@ jobs:
         run: |
           echo "Waiting 60s for services to initialize..."
           sleep 60
-          # Verify Neo4j is responding
-          NEO4J_FQDN=$(az containerapp show --name mvhd-neo4j \
+          # Wait for Neo4j to have a running replica.
+          # This used to curl https://<neo4j-fqdn> with no port and break out
+          # when the result was anything but "000". Two faults: there is no
+          # HTTP endpoint on that app at all (#304), and `curl -sf` writes the
+          # code via -w and *then* exits non-zero on an error status, so
+          # `|| echo "000"` appended to it and $code became "404000". Not
+          # "000", so the loop declared success on attempt 1 every time and
+          # the reset carried on into a Neo4j that might still be starting
+          # (run 34324347874: "Neo4j responding (HTTP 404000)").
+          #
+          # There is no route from a runner to this app on any port, so the
+          # readiness signal has to come from ACA rather than from Neo4j.
+          echo "Waiting for a running mvhd-neo4j replica..."
+          NEO4J_REV=$(az containerapp revision list --name mvhd-neo4j \
             --resource-group ${{ env.RESOURCE_GROUP }} \
-            --query "properties.configuration.ingress.fqdn" -o tsv 2>/dev/null || echo "")
-          if [ -n "$NEO4J_FQDN" ]; then
+            --query "[?properties.active] | [0].name" -o tsv 2>/dev/null || echo "")
+          if [ -z "$NEO4J_REV" ]; then
+            echo "::warning::mvhd-neo4j has no active revision; continuing, the seed job will fail loudly if it is really down"
+          else
             for i in $(seq 1 20); do
-              code=$(curl -sf -o /dev/null -w "%{http_code}" "https://${NEO4J_FQDN}" 2>/dev/null || echo "000")
-              if [ "$code" != "000" ]; then
-                echo "Neo4j responding (HTTP $code)"
+              RUNNING=$(az containerapp replica list --name mvhd-neo4j \
+                --resource-group ${{ env.RESOURCE_GROUP }} --revision "$NEO4J_REV" \
+                --query "length([?properties.runningState=='Running'])" -o tsv 2>/dev/null || echo "0")
+              if [ "${RUNNING:-0}" -gt 0 ] 2>/dev/null; then
+                echo "mvhd-neo4j has $RUNNING running replica(s) on $NEO4J_REV"
                 break
               fi
-              echo "  attempt $i: waiting..."
+              echo "  attempt $i: no running replica yet"
               sleep 10
             done
           fi
@@ -230,9 +240,15 @@ jobs:
 
           # Wait for Keycloak's master realm to answer (it needs ~30-60s
           # after restart to finish initialising before /admin/* works).
+          # `curl -s`, not `-sf`: with -f, curl writes the status via -w and
+          # then exits non-zero on a 4xx/5xx, so the `|| echo "000"` fallback
+          # appends and $code becomes "404000". This loop compares against
+          # "200" so it only logged a nonsense code, but the same shape at the
+          # Neo4j probe compared against "000" and broke out on attempt 1
+          # every time (#304).
           echo "Waiting for Keycloak master realm to be reachable..."
           for i in $(seq 1 30); do
-            code=$(curl -sf -o /dev/null -w "%{http_code}" \
+            code=$(curl -s -o /dev/null -w "%{http_code}" \
               "$KC/realms/master/.well-known/openid-configuration" 2>/dev/null || echo "000")
             if [ "$code" = "200" ]; then
               echo "  Keycloak ready (HTTP $code)"
@@ -514,7 +530,7 @@ jobs:
           echo "ui_url=https://${UI_FQDN}" >> "$GITHUB_OUTPUT"
           echo "Checking https://${UI_FQDN}..."
           for i in $(seq 1 15); do
-            code=$(curl -sf -o /dev/null -w "%{http_code}" "https://${UI_FQDN}" 2>/dev/null || echo "000")
+            code=$(curl -s -o /dev/null -w "%{http_code}" "https://${UI_FQDN}" 2>/dev/null || echo "000")
             if [ "$code" = "200" ]; then
               echo "UI is healthy (HTTP 200)"
               exit 0
