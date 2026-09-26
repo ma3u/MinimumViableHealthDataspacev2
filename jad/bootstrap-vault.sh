@@ -39,6 +39,11 @@ vault write auth/jwt/config \
 
 # Create KV v2 secrets engine for participants (idempotent — ignore "already in use")
 vault secrets enable -path=participants -version=2 kv 2>/dev/null || echo "Secrets engine already enabled, continuing..."
+# `vault server -dev` mounts secret/ (kv v2) by itself; a real server does not.
+# Every service here writes under secret/ (dataplane keys, aes-key-alias, STS
+# client secrets), and the first run against the file-backed Vault failed with
+# 404 on secret/data/aes-key-alias for exactly this reason (#345).
+vault secrets enable -path=secret -version=2 kv 2>/dev/null || echo "secret/ already enabled, continuing..."
 
 # Get accessor for entity aliases
 ACCESSOR=$(vault auth list | grep 'jwt/' | awk '{print $3}')
