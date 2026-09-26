@@ -27,6 +27,20 @@ get_token() {
     | python3 -c "import json,sys; print(json.load(sys.stdin)['access_token'])"
 }
 
+# The Management API version is a path segment and differs per environment:
+# this control plane serves v5beta, the one these seeds were written against
+# served v5alpha, and a wrong segment is a 404 that became an empty body and a
+# json.load crash (#345, the same class as #314). Probe once, in the order the
+# shared library uses, and use whatever answers.
+MGMT_V="${MGMT_V:-${EDC_MGMT_API_VERSION:-}}"
+if [ -z "$MGMT_V" ]; then
+  for _v in v5beta v5alpha v4alpha v3; do
+    if [ "$(curl -s -o /dev/null -w '%{http_code}' -H "Authorization: Bearer $(get_token)" "$CP_MGMT/${_v}/participants")" = "200" ]; then MGMT_V="$_v"; break; fi
+  done
+  [ -n "$MGMT_V" ] || { echo "ERROR: no Management API version answered at $CP_MGMT (tried v5beta v5alpha v4alpha v3)" >&2; exit 1; }
+fi
+echo "Management API version: $MGMT_V"
+
 create_policy() {
   local ctx_id="$1"
   local policy_id="$2"
@@ -47,7 +61,7 @@ print(json.dumps(p))
 ")
 
   local http_code response body
-  response=$(curl -s -w '\n%{http_code}' -X POST "$CP_MGMT/v5alpha/participants/$ctx_id/policydefinitions" \
+  response=$(curl -s -w '\n%{http_code}' -X POST "$CP_MGMT/${MGMT_V}/participants/$ctx_id/policydefinitions" \
     -H "Authorization: Bearer $token" \
     -H "Content-Type: application/json" \
     -d "$payload")
@@ -68,7 +82,7 @@ discover_ctx() {
   local slug="$1"
   local token
   token=$(get_token)
-  curl -sf -H "Authorization: Bearer $token" "$CP_MGMT/v5alpha/participants" \
+  curl -sf -H "Authorization: Bearer $token" "$CP_MGMT/${MGMT_V}/participants" \
     | python3 -c "
 import json, sys
 slug = '$slug'
@@ -148,7 +162,7 @@ TOKEN=$(get_token)
 for ctx_label in "$AK_CTX:AlphaKlinik" "$LMC_CTX:LMC" "$PC_CTX:PharmaCo" "$MR_CTX:MedReg" "$IRS_CTX:IRS"; do
   ctx="${ctx_label%%:*}"
   label="${ctx_label##*:}"
-  count=$(curl -sf -X POST "$CP_MGMT/v5alpha/participants/$ctx/policydefinitions/request" \
+  count=$(curl -sf -X POST "$CP_MGMT/${MGMT_V}/participants/$ctx/policydefinitions/request" \
     -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
     -d "{\"@context\":[\"$EDC_CTX\"],\"@type\":\"QuerySpec\",\"filterExpression\":[]}" \
     | python3 -c "import json,sys; d=json.load(sys.stdin); print(len(d) if isinstance(d,list) else 0)" 2>/dev/null)

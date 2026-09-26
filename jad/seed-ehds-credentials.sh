@@ -21,8 +21,13 @@
 
 set -e
 
-KC_HOST="${KC_HOST:-http://keycloak:8080}"
-ISSUER_HOST="${ISSUER_HOST:-http://issuerservice}"
+# Host-side defaults. jad/seed-all.sh runs this from the developer's machine
+# as step 2, and every other step defaults to localhost; this one defaulted to
+# the container names keycloak/issuerservice, which the host does not resolve,
+# so step 2 failed with "Failed to get issuer token" on every host-side run
+# (#345). Inside the jad-seed container, pass KC_HOST/ISSUER_HOST explicitly.
+KC_HOST="${KC_HOST:-http://localhost:8080}"
+ISSUER_HOST="${ISSUER_HOST:-http://localhost}"
 
 ok()   { echo "  ✓ $1"; }
 fail() { echo "  ✗ $1"; exit 1; }

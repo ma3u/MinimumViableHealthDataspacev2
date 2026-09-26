@@ -42,17 +42,27 @@ TOKEN="${TOKEN:?TOKEN must be set to a Keycloak bearer token for client 'admin'}
 # the same one jad/seed-data-assets.sh uses for every other management call.
 EDC_CTX="${EDC_CTX:-https://w3id.org/edc/connector/management/v2}"
 
-# The same five, with the same DIDs, as scripts/azure/05-edc-seed.sh. The three
-# the compliance suites require are alpha-klinik (provider), pharmaco (consumer)
-# and medreg (operator); lmc and irs are seeded too so the control plane and the
-# identity hub agree on who exists.
-PARTICIPANTS=(
-  "alpha-klinik|did:web:alpha-klinik.de:participant"
-  "pharmaco|did:web:pharmaco.de:research"
-  "medreg|did:web:medreg.de:hdab"
-  "lmc|did:web:lmc.nl:clinic"
-  "irs|did:web:irs.fr:hdab"
-)
+# The DID host is the IdentityHub's DID endpoint as other containers reach it,
+# because that is the only place these DIDs resolve. On the compose stack, and
+# therefore in CI, that is identityhub:7083 (percent-encoded in did:web). The
+# first version of this file used the did:web:alpha-klinik.de:participant form
+# from .claude/rules/api-conventions.md; those are graph-layer identifiers and
+# no host serves a did.json for them, so the IssuerService could never resolve
+# a holder and no credential could ever be issued in CI (#345). Locally, CFM
+# creates the contexts with the identityhub form, so this now matches it.
+# Azure has to pass DID_HOST consistently with whatever seeds its IdentityHub.
+DID_HOST="${DID_HOST:-identityhub%3A7083}"
+
+# The three the compliance suites require are alpha-klinik (provider),
+# pharmaco (consumer) and medreg (operator); lmc and irs are seeded too so the
+# control plane and the identity hub agree on who exists. Idempotency matches on
+# the slug inside the identity, so a context created under the old .de DID is
+# left alone rather than duplicated.
+SLUGS=(alpha-klinik pharmaco medreg lmc irs)
+PARTICIPANTS=()
+for _slug in "${SLUGS[@]}"; do
+  PARTICIPANTS+=("${_slug}|did:web:${DID_HOST}:${_slug}")
+done
 
 log()  { printf '[cp-seed] %s\n' "$*"; }
 fail() { printf '[cp-seed] ERROR: %s\n' "$*" >&2; exit 1; }

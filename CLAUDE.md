@@ -54,7 +54,11 @@ docs/                   — see "Knowledge & planning" below
 
 ## Top gotchas
 
-1. **Vault secrets lost on Docker restart** — in-memory only; re-run `./scripts/bootstrap-jad.sh`.
+1. **Vault is file-backed since 2026-09-26** (`jad/vault.hcl`, volumes `vault_data`/`vault_keys`,
+   `vault-unseal` sidecar); a container restart keeps every secret. Before that it was `-dev`,
+   in-memory, and a restart silently took every participant's signing key while the identity
+   checks kept passing. If IdentityHub logs `Private key ... not found`, check that
+   `health-dataspace-vault-unseal` reported `ready`; see `docs/gotchas.md` (2026-09-26).
 2. **JAD seed phases 1–7 are strictly ordered** — FHIR before OMOP (phase 4 needs phase 3).
 3. **Static export disables API routes** — CI renames `src/app/api/`; guard with
    `NEXT_PUBLIC_STATIC_EXPORT` and mirror every route in `ui/public/mock/*.json`.

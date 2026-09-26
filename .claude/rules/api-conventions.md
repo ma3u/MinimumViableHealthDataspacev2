@@ -163,7 +163,13 @@ When adding a new API route, always add a corresponding mock fixture.
 
 ## DID Conventions
 
-Participant DIDs follow the `did:web` method:
+Two `did:web` forms coexist, and they belong to different layers. Confusing them
+cost a day (#345): a seed copied the first form into the EDC layer, where no
+host serves a `did.json` for it, so the IssuerService could never resolve a
+holder and CI never issued a credential.
+
+**Graph and UI layer** (Neo4j seeds, mocks, UI tests, docs). Stable identifiers
+for the fictional organisations. Nothing resolves them and nothing needs to:
 
 ```
 did:web:alpha-klinik.de:participant   — AlphaKlinik Berlin (DATA_HOLDER)
@@ -172,3 +178,23 @@ did:web:medreg.de:hdab                — MedReg DE (HDAB_AUTHORITY)
 did:web:lmc.nl:clinic                 — Limburg Medical Centre (DATA_HOLDER)
 did:web:irs.fr:hdab                   — Institut de Recherche Santé (HDAB)
 ```
+
+**EDC layer** (control plane participant contexts, IdentityHub, IssuerService
+holders). The DID the connector actually resolves, hosted by the IdentityHub's
+DID endpoint as other containers reach it. On the compose stack and in CI:
+
+```
+did:web:identityhub%3A7083:alpha-klinik     → http://identityhub:7083/alpha-klinik/did.json
+did:web:identityhub%3A7083:pharmaco
+did:web:identityhub%3A7083:medreg
+did:web:identityhub%3A7083:lmc
+did:web:identityhub%3A7083:irs
+did:web:issuerservice%3A10016:issuer        (the issuer's own DID)
+```
+
+CFM creates the EDC-layer contexts locally; `scripts/azure/05-cp-participants.sh`
+(`DID_HOST`), `scripts/seed-identityhub-participants.sh` and
+`scripts/seed-issuer-holders.sh` create them where CFM is absent, and all three
+must carry the same id and DID for a participant or the suites cannot match
+them. The compliance suites match on the slug inside the identity, so either
+form satisfies them; only the EDC layer's protocol flows need the resolvable one.
