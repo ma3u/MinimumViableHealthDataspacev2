@@ -26,10 +26,9 @@
       "note": "run 36258702281, raised from 11/7. The two failures left are VC-3.2/VC-3.3: the DCP credential request the CI hub sends ends in ERROR for a reason under investigation on #345 (the hub's record carries no errorDetail; the next run dumps both services' logs). A seeded local stack scores 21/0 on its planted credentials, and cannot currently issue either (Vault lost the keys, see gotchas). Short review date stays until the request succeeds somewhere."
     },
     "ehds-compliance-results": {
-      "min_passed": 17,
-      "max_failed": 1,
-      "review_by": "2026-10-27",
-      "note": "run 36258702281, raised from 1/13 once CI seeds the graph the developer guide describes. The one failure left is ART53-1.4, the full Participant->AccessApplication<-HDABApproval->HealthDataset chain, which the minimal data set does not build (#345). Short review date stays until that chain is seeded or the check is re-scoped."
+      "min_passed": 18,
+      "max_failed": 0,
+      "note": "run 36259831503: 18 passed, 0 failed, 7 skipped, twice reproduced (fresh-DB proof and CI). At parity with what the seeded graph can show; the 7 skips are rows whose data the minimal set does not carry (OMOP drug/measurement/procedure links, vocabulary source values, VerifiableCredential nodes). No review_by override any more: this floor is healthy, so the global date applies."
     }
   }
 }

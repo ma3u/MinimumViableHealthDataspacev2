@@ -436,7 +436,7 @@ three suites died at participant discovery (#307, fixed in #314).
 >
 > | Suite                | CI ephemeral stack                      | Azure deployment                     |
 > | -------------------- | --------------------------------------- | ------------------------------------ |
-> | EHDS domain          | **17 passed, 1 failed, 7 skipped / 25** | 20 passed, 0 failed, 5 skipped / 25  |
+> | EHDS domain          | **18 passed, 0 failed, 7 skipped / 25** | 20 passed, 0 failed, 5 skipped / 25  |
 > | EHDS dataspace (DSP) | **25 passed, 0 failed, 8 skipped / 33** | 23 passed, 0 failed, 10 skipped / 33 |
 > | EHDS identity (DCP)  | **19 passed, 2 failed / 21 verdicts**   | 10 passed, 1 failed, 11 skipped / 22 |
 >
@@ -459,9 +459,9 @@ three suites died at participant discovery (#307, fixed in #314).
 > The two rows left, `VC-3.2`/`VC-3.3`, wait on a credential actually being
 > issued over DCP, which no environment has yet done: CI's request ends in
 > `ERROR` for a reason under investigation, and the local stack cannot sign
-> at all since a Vault restart (gotchas, 2026-09-26). **EHDS went 1/13 → 17/1**
+> at all since a Vault restart (gotchas, 2026-09-26). **EHDS went 1/13 → 18/0**
 > once the job seeds the graph `docs/developer-guide.md` tells a developer to
-> load; the one row left is the full `ART53-1.4` access chain.
+> load, plus `seed-compliance-matrix.cypher` for the `ART53-1.4` access chain.
 >
 > The Azure column is the state after #316 seeded five participant contexts
 > onto the control plane, which it had never had. Before that, all three suites

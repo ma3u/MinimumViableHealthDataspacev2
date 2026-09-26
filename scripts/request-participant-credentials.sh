@@ -34,6 +34,15 @@ CLIENT_SECRET="${EDC_CLIENT_SECRET:-edc-v-admin-secret}"
 ISSUER_DID="${ISSUER_DID:-did:web:issuerservice%3A10016:issuer}"
 CREDENTIAL_TYPE="${CREDENTIAL_TYPE:-MembershipCredential}"
 CREDENTIAL_FORMAT="${CREDENTIAL_FORMAT:-VC1_0_JWT}"
+# The issuer resolves a request by credential DEFINITION id, not by type. CI
+# run 36259831503 answered every request with 400 "A Credential definition ID
+# 'null' does not exist" because this script sent {type, format} only; the
+# vendored identity-api.yaml lists CredentialDescriptor.id as optional and the
+# issuer treats it as required. Resolved from the issuer by type, with a
+# fallback for when the admin API is not reachable from here.
+ISSUER_API="${EDC_ISSUER_URL:-http://localhost:10013/api/admin}"
+ISSUER_CTX="${ISSUER_CTX:-issuer}"
+CREDENTIAL_DEFINITION_ID="${CREDENTIAL_DEFINITION_ID:-}"
 WAIT_SECONDS="${WAIT_SECONDS:-90}"
 # Restrict to some slugs, space separated, e.g. ONLY="irs" for a local smoke test.
 ONLY="${ONLY:-}"
@@ -47,6 +56,23 @@ TOKEN=$(curl -sS --max-time 20 -X POST \
   -d "grant_type=client_credentials&client_id=${CLIENT_ID}&client_secret=${CLIENT_SECRET}" \
   2>/dev/null | python3 -c "import json,sys; print(json.load(sys.stdin).get('access_token',''))" 2>/dev/null || true)
 [ -n "$TOKEN" ] || { echo -e "${RED}ERROR${NC}: no Keycloak token from ${KEYCLOAK_URL}/realms/${REALM}." >&2; exit 1; }
+
+if [ -z "$CREDENTIAL_DEFINITION_ID" ]; then
+  CREDENTIAL_DEFINITION_ID=$(curl -sS --max-time 20 -X POST -H "Authorization: Bearer ${TOKEN}" \
+    -H "Content-Type: application/json" -d '{}' \
+    "${ISSUER_API}/v1alpha/participants/${ISSUER_CTX}/credentialdefinitions/query" 2>/dev/null \
+    | python3 -c "import json,sys
+t=sys.argv[1]
+try: rows=json.load(sys.stdin)
+except Exception: rows=[]
+ids=[r.get('id') for r in rows if isinstance(r,dict) and r.get('credentialType')==t and r.get('id')]
+print(ids[0] if ids else '')" "$CREDENTIAL_TYPE" 2>/dev/null || true)
+fi
+if [ -z "$CREDENTIAL_DEFINITION_ID" ]; then
+  echo -e "${RED}ERROR${NC}: the issuer has no credential definition of type ${CREDENTIAL_TYPE}; run jad/seed-issuer-defs.sh first." >&2
+  exit 1
+fi
+log "requesting ${CREDENTIAL_TYPE} as definition '${CREDENTIAL_DEFINITION_ID}' from ${ISSUER_DID}"
 
 PAIRS=""
 for v in $MGMT_V_CANDIDATES; do
@@ -86,7 +112,7 @@ while read -r ctx did; do
     case " $ONLY " in *" $slug "*) ;; *) continue ;; esac
   fi
   before=$(issued_count "$ctx")
-  body=$(python3 -c 'import json,sys; print(json.dumps({"issuerDid": sys.argv[1], "credentials": [{"type": sys.argv[2], "format": sys.argv[3]}]}))' "$ISSUER_DID" "$CREDENTIAL_TYPE" "$CREDENTIAL_FORMAT")
+  body=$(python3 -c 'import json,sys; print(json.dumps({"issuerDid": sys.argv[1], "credentials": [{"id": sys.argv[4], "type": sys.argv[2], "format": sys.argv[3]}]}))' "$ISSUER_DID" "$CREDENTIAL_TYPE" "$CREDENTIAL_FORMAT" "$CREDENTIAL_DEFINITION_ID")
   tmp=$(mktemp); hdr=$(mktemp)
   status=$(curl -sS --max-time 30 -o "$tmp" -D "$hdr" -w '%{http_code}' \
     -X POST "${IDENTITY_API}/v1alpha/participants/${ctx}/credentials/request" \
