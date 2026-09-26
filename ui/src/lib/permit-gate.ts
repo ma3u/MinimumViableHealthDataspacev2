@@ -19,6 +19,7 @@
  * that, any valid permit of the consumer; the result says which happened.
  */
 import { runQuery } from "@/lib/neo4j";
+import { DSP_PROTOCOL } from "@/lib/dsp-protocol";
 import { parseGraphTime } from "@/lib/permits";
 
 export const PERMIT_ARTICLE =
@@ -407,7 +408,7 @@ export async function recordPermittedTransfer(t: {
            t.assetId      = $assetId,
            t.consumerDid  = $consumerDid,
            t.permitId     = $permitId,
-           t.protocol     = 'dataspace-protocol-http:2025-1',
+           t.protocol     = $protocol,
            t.retainUntil  = toString(datetime() + duration({months: 12})),
            t.demo         = $demo
        WITH t
@@ -424,7 +425,10 @@ export async function recordPermittedTransfer(t: {
          WHERE $datasetId IS NOT NULL AND coalesce(ds.datasetId, ds.id) = $datasetId
        FOREACH (_ IN CASE WHEN ds IS NOT NULL THEN [1] ELSE [] END |
          MERGE (t)-[:TRANSFERS]->(ds))`,
-      t,
+      // protocol is not part of the caller's shape: it is the dataspace
+      // profile id the connector registers its dispatcher under, and it
+      // belongs to the audit record rather than to the request (#180).
+      { ...t, protocol: DSP_PROTOCOL },
     );
   } catch (err) {
     console.warn(

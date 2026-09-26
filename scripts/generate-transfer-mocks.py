@@ -91,7 +91,7 @@ for i in range(100):
         "@type": "ContractNegotiation",
         "@id": nid,
         "type": "CONSUMER",
-        "protocol": "dataspace-protocol-http:2025-1",
+        "protocol": "http-dsp-profile-2025-1",
         "state": "FINALIZED",
         "counterPartyId": provider["did"],
         "counterPartyAddress": f"https://{provider['domain']}/dsp/2025-1",

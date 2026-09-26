@@ -13,7 +13,7 @@
 #   5. Verify all negotiations and transfers
 #
 # Key learnings (root causes discovered during Phase 4b):
-#   - Protocol MUST be "dataspace-protocol-http:2025-1" (with version suffix)
+#   - Protocol is the dataspace profile id, not the DSP version string (#180)
 #   - @context MUST be array: ["https://w3id.org/edc/connector/management/v2"]
 #   - Data plane hostname MUST match docker-compose service name (dataplane-fhir)
 #   - Catalog uses v1alpha API; negotiation/transfer use ${MGMT_V} API
@@ -58,9 +58,11 @@ DATAPLANE_FHIR_URL="http://dataplane-fhir:8083/api/control/v1/dataflows"
 # JSON-LD context
 EDC_CTX="https://w3id.org/edc/connector/management/v2"
 
-# Protocol string (MUST include version suffix — "dataspace-protocol-http" alone returns
-# "No provider dispatcher registered" error)
-DSP_PROTOCOL="dataspace-protocol-http:2025-1"
+# Protocol identifier. Not the DSP version string: the connector registers its
+# dispatcher under the dataspace profile id (#180). Defined once in
+# scripts/lib/dsp-protocol.sh.
+# shellcheck source=scripts/lib/dsp-protocol.sh
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")/../scripts" && pwd)/lib/dsp-protocol.sh"
 
 # Polling
 MAX_POLL=30   # max seconds to wait for negotiation/transfer

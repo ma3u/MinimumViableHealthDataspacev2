@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { DSP_PROTOCOL } from "@/lib/dsp-protocol";
 import { edcClient, EDC_CONTEXT } from "@/lib/edc";
 import { requireAuth, isAuthError } from "@/lib/auth-guard";
 import { recordDemo, listDemo } from "@/lib/demo-records";
@@ -92,12 +93,6 @@ async function loadDemoCatalog(
     return null;
   }
 }
-
-/**
- * DSP protocol version required by EDC-V (must include version suffix)
- * @see seed-contract-negotiation.sh DSP_PROTOCOL variable
- */
-const DSP_PROTOCOL = "dataspace-protocol-http:2025-1";
 
 /**
  * Build the full per-participant DSP endpoint from a base URL + ctx ID.

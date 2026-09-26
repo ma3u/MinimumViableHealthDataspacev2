@@ -43,6 +43,8 @@ PARTICIPANT_DIDS=()  # populated by discover_participants()
 # (issue #307).
 # shellcheck source=scripts/lib/edc-mgmt-api.sh
 source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/lib/edc-mgmt-api.sh"
+# shellcheck source=scripts/lib/dsp-protocol.sh
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/lib/dsp-protocol.sh"
 
 # Counters
 TOTAL=0
@@ -181,7 +183,7 @@ run_catalog_tests() {
     local resp
     local catalog_body
     local provider_did="${PARTICIPANT_DIDS[$i]}"
-    catalog_body=$(printf '{"@context":["https://w3id.org/edc/connector/management/v2"],"@type":"CatalogRequest","counterPartyAddress":"http://controlplane:8082/api/dsp/%s/2025-1","counterPartyId":"%s","protocol":"dataspace-protocol-http:2025-1"}' "$ctx" "$provider_did")
+    catalog_body=$(printf '{"@context":["https://w3id.org/edc/connector/management/v2"],"@type":"CatalogRequest","counterPartyAddress":"http://controlplane:8082/api/dsp/%s/2025-1","counterPartyId":"%s","protocol":"'"$DSP_PROTOCOL"'"}' "$ctx" "$provider_did")
     resp=$(mgmt_post "/${MGMT_V}/participants/${CONSUMER_CTX}/catalog/request" "$catalog_body" 2>/dev/null) || resp=""
 
     if [ -n "$resp" ] && echo "$resp" | jq -e '.["@type"]' >/dev/null 2>&1; then
@@ -201,7 +203,7 @@ run_catalog_tests() {
   local test_id="CAT-1.2"
   local resp
   local cat12_body
-  cat12_body=$(printf '{"@context":["https://w3id.org/edc/connector/management/v2"],"@type":"CatalogRequest","counterPartyAddress":"http://controlplane:8082/api/dsp/%s/2025-1","counterPartyId":"%s","protocol":"dataspace-protocol-http:2025-1"}' "$PROVIDER_CTX" "$PROVIDER_DID")
+  cat12_body=$(printf '{"@context":["https://w3id.org/edc/connector/management/v2"],"@type":"CatalogRequest","counterPartyAddress":"http://controlplane:8082/api/dsp/%s/2025-1","counterPartyId":"%s","protocol":"'"$DSP_PROTOCOL"'"}' "$PROVIDER_CTX" "$PROVIDER_DID")
   resp=$(mgmt_post "/${MGMT_V}/participants/${CONSUMER_CTX}/catalog/request" "$cat12_body" 2>/dev/null) || resp=""
 
   if [ -n "$resp" ] && echo "$resp" | jq -e '.dataset' >/dev/null 2>&1; then
@@ -222,7 +224,7 @@ run_catalog_tests() {
   local test_id="CAT-1.3"
   local resp
   local cat13_body
-  cat13_body=$(printf '{"@context":["https://w3id.org/edc/connector/management/v2"],"@type":"CatalogRequest","counterPartyAddress":"http://controlplane:8082/api/dsp/%s/2025-1","counterPartyId":"%s","protocol":"dataspace-protocol-http:2025-1","querySpec":{"filterExpression":[]}}' "$PROVIDER_CTX" "$PROVIDER_DID")
+  cat13_body=$(printf '{"@context":["https://w3id.org/edc/connector/management/v2"],"@type":"CatalogRequest","counterPartyAddress":"http://controlplane:8082/api/dsp/%s/2025-1","counterPartyId":"%s","protocol":"'"$DSP_PROTOCOL"'","querySpec":{"filterExpression":[]}}' "$PROVIDER_CTX" "$PROVIDER_DID")
   resp=$(mgmt_post "/${MGMT_V}/participants/${CONSUMER_CTX}/catalog/request" "$cat13_body" 2>/dev/null) || resp=""
 
   if [ -n "$resp" ]; then

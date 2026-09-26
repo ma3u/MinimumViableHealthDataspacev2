@@ -35,7 +35,7 @@ RESPONSE=$(curl -s --max-time 60 -w "\n__HTTP_CODE__%{http_code}" \
     \"@type\": \"CatalogRequest\",
     \"counterPartyAddress\": \"${DSP_ADDR}\",
     \"counterPartyId\": \"did:web:identityhub%3A7083:alpha-klinik\",
-    \"protocol\": \"dataspace-protocol-http:2025-1\"
+    \"protocol\": \"${DSP_PROTOCOL:-http-dsp-profile-2025-1}\"
   }")
 
 HTTP_CODE=$(echo "$RESPONSE" | grep "__HTTP_CODE__" | sed 's/__HTTP_CODE__//')
