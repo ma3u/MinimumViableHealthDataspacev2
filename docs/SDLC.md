@@ -483,8 +483,32 @@ three suites died at participant discovery (#307, fixed in #314).
 > is Phase 1 of [#338](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/338)
 > ([discussion #110](https://github.com/ma3u/MinimumViableHealthDataspacev2/discussions/110)).
 >
-> What has not changed: no suite can fail this workflow, so treat the numbers
-> as a report and not as a gate.
+> **Since 2026-09-26 the workflow can fail.** The suite steps keep
+> `continue-on-error: true`, but the `compliance-report` job ends with a
+> blocking **Compliance baseline** step
+> ([`scripts/check-compliance-baseline.py`](https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/scripts/check-compliance-baseline.py)).
+> It compares each suite against
+> [`scripts/compliance-baseline.json`](https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/scripts/compliance-baseline.json)
+> and fails when `passed` drops below the recorded floor or `failed` rises
+> above it.
+>
+> It gates on a **recorded baseline, not on green** (Phase 0 of
+> [#338](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/338)).
+> The suites do not pass today, so gating on green would block every merge
+> until an unbounded remediation finished, while gating on nothing is the
+> state this section used to describe. A suite with no recorded baseline is
+> reported and not failed, so the first run records real numbers rather than a
+> guess. `review_by` in that file makes the floor expire: past it the check
+> fails until someone tightens the numbers or moves the date deliberately,
+> which is the answer to the objection that a ratchet nobody raises is just a
+> slower way of not fixing it.
+>
+> It is **not** a required status check on `main`. `compliance.yml` is
+> path-filtered and does not run on `pull_request`, so requiring it would leave
+> most PRs waiting forever on a check that never starts, which is the trap
+> Section 4.1 describes. **PR Gate** remains the only required check; this gate
+> blocks the push-to-`main` and scheduled runs, which is where the suites
+> actually execute.
 
 ### 6.4 GitHub Pages (static demo) — [`.github/workflows/pages.yml`](https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/.github/workflows/pages.yml)
 

@@ -1,9 +1,53 @@
 # ADR-031: Every automated check must assert its outcome and exit non-zero on failure
 
-**Status:** Proposed
-**Date:** 2026-09-09
+**Status:** Accepted
+**Date:** 2026-09-09 (proposed) · Accepted 2026-09-26
 **Relates to:** [ADR-026](ADR-026-token-efficient-planning-structure.md), [ADR-029](ADR-029-dependency-version-pinning.md)
-**Tracks:** [#115](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/115), [#116](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/116), [#169](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/169), [#170](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/170)
+**Tracks:** [#115](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/115), [#116](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/116), [#169](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/169), [#170](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/170), [#338](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/338)
+
+## Accepted 2026-09-26
+
+Accepted after the base rate this ADR called "unknown and probably higher" was
+measured. Seven more instances arrived in the seventeen days after it was
+proposed, none of them found by CI:
+
+|      | The check                        | What it never asserted                                                                                               |
+| ---- | -------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| #321 | `mgmt_request`                   | Anything. It died under `set -e` before recording a status, so every failure surfaced as an empty result.            |
+| #327 | Participant activation from #325 | That activation happened. It counted HTTP 204s; the contexts stayed `CREATED` (#328).                                |
+| #333 | DSP `CAT-1.1`                    | The body's meaning. A 502 error envelope, `[{"type":"BadGateway"}]`, scored as a pass.                               |
+| #336 | The #335 diagnostic itself       | That it was visible. All 24 call sites ended in `2>/dev/null)`, so the fix printed nothing in production.            |
+| #340 | Nothing compared spec to routes  | That every route is documented. Coverage fell 80% to 56% in seven weeks and no build went red.                       |
+| #341 | 10 of 16 DCP checks              | Anything: no reachable `fail` branch. A 50-line stub implementing no protocol scored the same as the real connector. |
+| #342 | Both suites' names               | That they were what they claimed. Neither is a TCK; the header advertised "140+ protocol conformance tests" over 21. |
+
+Two refinements the evidence forced, both now part of the decision:
+
+**A skip is not a denominator.** `skip()` incremented `TOTAL` as well as
+`SKIPPED` in both suites, so skipping more _raised_ the reported pass rate and
+a suite that reached nothing at all would have scored 100%. Report
+`passed / (passed + failed)` and list skips separately.
+
+**Prove the check discriminates, not merely that it fails.** Point 4 below says
+to distinguish "cannot run" from "ran and passed". #341 showed that is not
+enough on its own: every one of those ten checks ran, and passed, against
+nothing. The stronger test is to run the suite against a deliberate null
+implementation and require the pass count to drop.
+[`scripts/tck/null-connector-stub.py`](../../scripts/tck/null-connector-stub.py)
+exists for that. After #341 and its follow-up the local stack scores 21 passed
+/ 0 failed while the stub scores 11 passed / 7 failed; before, both scored
+14 / 0 / 8.
+
+**And verify the fix in situ.** #336's diagnostic was tested in isolation,
+worked, and was reported fixed while printing nothing where it mattered. A fix
+is verified through a real call site, against a deliberately failing input.
+
+One consequence worth budgeting for, as the original Consequences section
+warned: new assertions can be wrong in the other direction. Three of the
+checks repaired in #341 failed on a healthy stack because they read fields
+that do not exist, `state == "ACTIVATED"` against an ordinal `200` among them.
+An assertion is not trustworthy until it has been seen to pass against a known
+good system as well as fail against a known bad one.
 
 ## Context
 
