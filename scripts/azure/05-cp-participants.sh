@@ -228,7 +228,30 @@ for p in d if isinstance(d, list) else []:
     print('%s|%s|%s' % (p.get('@id') or '', p.get('identity') or '', p.get('state') or ''))
 " 2>/dev/null)
 EOF
-log "activated=$ACTIVATED activate_failed=$ACTIVATE_FAILED"
+log "activate requests accepted: $ACTIVATED, refused: $ACTIVATE_FAILED"
+
+# Do not trust the status code. Measured on the live control plane on
+# 2026-09-26: every PUT returned 204 and not one context changed state. A
+# 204 means the request was accepted, not that the field was applied, and
+# reporting "activated=5" off the back of it would be exactly the kind of
+# claim-without-evidence this script exists to stop making.
+STILL_CREATED=$(curl -sS --max-time 30 -H "Authorization: Bearer $TOKEN" \
+  "$CP/$MGMT_V/participants" 2>/dev/null | python3 -c "
+import json, sys
+try: d = json.load(sys.stdin)
+except Exception: print(-1); raise SystemExit
+print(sum(1 for p in (d if isinstance(d, list) else []) if p.get('state') != 'ACTIVATED'))
+" 2>/dev/null || echo -1)
+
+if [ "${STILL_CREATED:-0}" -gt 0 ] 2>/dev/null; then
+  log "WARNING: ${STILL_CREATED} context(s) are still not ACTIVATED after a 204."
+  log "         The control plane accepts the PUT and ignores the state. This"
+  log "         is a known gap: the compliance suites do not care, because"
+  log "         discovery matches on identity, but the UI lists only ACTIVATED"
+  log "         contexts (ui/src/app/api/participants/route.ts) so they will"
+  log "         not appear there. Tracked separately; do not read the 204s"
+  log "         above as activation."
+fi
 
 log "Final participant list:"
 curl -sS --max-time 30 -H "Authorization: Bearer $TOKEN" "$CP/$MGMT_V/participants" \
