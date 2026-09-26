@@ -1,8 +1,14 @@
 #!/usr/bin/env bash
 # ---------------------------------------------------------------------------
-# DSP 2025-1 Technology Compatibility Kit — Health Dataspace v2
+# DSP 2025-1 domain checks — Health Dataspace v2
 # ---------------------------------------------------------------------------
-# Executes 140+ protocol conformance tests against the EDC-V control plane:
+# NOT a conformance suite. This is 21 of our own checks driving the EDC
+# Management API with curl; it never acts as a DSP protocol peer, and no part
+# of it comes from https://github.com/eclipse-dataspacetck/dsp-tck. It tests
+# our reading of DSP 2025-1, so a misreading stays green here. Real conformance
+# needs eclipsedataspacetck/dsp-tck-runtime; see discussion #110.
+#
+# Covers, against the Management API:
 #   - Catalog Protocol (CatalogRequestMessage / CatalogAcknowledgementMessage)
 #   - Contract Negotiation (Offer → Event → Agreement lifecycle)
 #   - Transfer Process (Request → Start → Completion lifecycle)
