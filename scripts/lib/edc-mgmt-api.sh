@@ -156,10 +156,17 @@ edc_is_error() {
 
 # Echo the body, or log it and return non-zero when it is an error envelope,
 # so a caller's `|| resp=""` turns an error into a failed assertion.
+# The diagnostic goes to stderr, not through log(). Every caller runs this
+# inside `resp=$(mgmt_post ...)`, so anything on stdout is captured into the
+# response variable rather than printed — which silently swallowed the very
+# message this function exists to produce. Same trap as mgmt_fetch_participants
+# above and as detect_version in 05-cp-participants.sh; it is the default
+# outcome for any helper that both returns a value and wants to say something.
 edc_reject_errors() {
   local body="$1" what="$2"
   if [ -n "$body" ] && edc_is_error "$body"; then
-    log "  ${what} returned an EDC error: $(printf '%s' "$body" | tr -d '\n' | cut -c1-200)"
+    printf '  %s returned an EDC error: %s\n' \
+      "$what" "$(printf '%s' "$body" | tr -d '\n' | cut -c1-200)" >&2
     return 1
   fi
   printf '%s' "$body"
