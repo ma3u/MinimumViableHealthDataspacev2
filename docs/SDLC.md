@@ -409,17 +409,29 @@ A manual dispatch with `target: azure` runs the same three suites from an ACA
 job inside the deployment instead (`scripts/azure/08-compliance-runner.sh`).
 That target produced nothing at all until 2026-09-26: the runner addressed the
 control plane on its ingress port rather than the Management API port, so all
-three suites died at participant discovery (#307, fixed in #314). What it
-reports now, and what it still cannot:
+three suites died at participant discovery (#307, fixed in #314).
 
-| Suite          | Azure target                                                              |
-| -------------- | ------------------------------------------------------------------------- |
-| EHDS domain    | 20 passed, 0 failed, 5 skipped / 25 — the Neo4j half runs in full         |
-| DSP 2025-1 TCK | ends at discovery: the control plane holds no participant contexts (#316) |
-| DCP v1.0       | ends at discovery, same cause (#316)                                      |
-
-So the DSP and DCP claims on the compliance pages still rest on the local JAD
-run alone. The EHDS ones no longer do.
+> ⚠️ **Read this before citing the tier as evidence.** Every suite step is
+> `continue-on-error: true`, so a green **Protocol Compliance** run means the
+> workflow finished, not that anything conformed. Measured on 2026-09-26,
+> commit `3336b1a`, on both targets:
+>
+> | Suite          | Local ephemeral stack                | Azure deployment                    |
+> | -------------- | ------------------------------------ | ----------------------------------- |
+> | EHDS domain    | 1 passed, 13 failed, 11 skipped / 25 | 20 passed, 0 failed, 5 skipped / 25 |
+> | DSP 2025-1 TCK | ends at discovery                    | ends at discovery                   |
+> | DCP v1.0       | ends at discovery                    | ends at discovery                   |
+>
+> **Neither target produces a DSP 2025-1 or DCP v1.0 verdict.** Both end at
+> `Missing required participant contexts`, because neither control plane has
+> any: Azure is seeded into the identity hub only, and `compliance.yml` starts
+> the JAD stack with `docker compose up -d` but never runs `jad/seed-jad.sh`
+> (#316). The DSP and DCP conformance claims elsewhere in this repository rest
+> on manual local runs against a seeded stack, not on this pipeline.
+>
+> EHDS is the one suite that produces a verdict, and only on Azure, whose Neo4j
+> carries the real graph. The same suite scores 1/25 against the ephemeral CI
+> stack because that database is empty.
 
 ### 6.4 GitHub Pages (static demo) — [`.github/workflows/pages.yml`](https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/.github/workflows/pages.yml)
 
