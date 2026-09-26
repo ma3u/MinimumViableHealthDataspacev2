@@ -13,6 +13,7 @@ RUN curl -fsSL -o /tmp/cypher-shell.zip \
     && ln -sf "/opt/cypher-shell-${CYPHER_SHELL_VERSION}/bin/cypher-shell" /usr/local/bin/cypher-shell \
     && rm /tmp/cypher-shell.zip
 WORKDIR /work
+COPY scripts/lib/edc-mgmt-api.sh /work/scripts/lib/
 COPY scripts/run-compliance.sh /work/scripts/
 COPY scripts/run-dsp-tck.sh /work/scripts/
 COPY scripts/run-dcp-tests.sh /work/scripts/
@@ -30,6 +31,8 @@ RUN addgroup -g 10001 compliance \
     && adduser -D -H -u 10001 -G compliance compliance \
     && mkdir -p /work/test-results \
     && chown -R compliance:compliance /work
-USER compliance
+# Numeric, because hadolint DL3066 is right that a host cannot resolve a name
+# from the image's own /etc/passwd. Same uid:gid as the account created above.
+USER 10001:10001
 
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
