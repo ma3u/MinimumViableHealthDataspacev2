@@ -1,0 +1,21 @@
+meta {
+  name: 12 What my organisation is allowed to do (ODRL scope)
+  type: http
+  seq: 12
+}
+
+get {
+  url: {{baseUrl}}/api/odrl/scope
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}={{sessionTokenClinic}}
+}
+
+assert {
+  res.status: eq 200
+  res.body.permissions: isArray
+  res.body.prohibitions: isArray
+}

@@ -1,0 +1,25 @@
+meta {
+  name: 30 graph
+  type: http
+  seq: 30
+}
+
+get {
+  url: {{baseUrl}}/mock/graph.json
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}=not-a-session
+}
+
+assert {
+  res.status: eq 200
+  res.body.nodes: isArray
+  res.body.links: isArray
+}
+
+docs {
+  ui/public/mock/graph.json stands in for /api/graph in the static build.
+}

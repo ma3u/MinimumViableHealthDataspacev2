@@ -1,0 +1,44 @@
+meta {
+  name: 16 DSP the consumer asks for the provider's catalogue
+  type: http
+  seq: 9
+}
+
+post {
+  url: {{mgmtUrl}}/{{mgmtVersion}}/participants/{{consumerCtx}}/catalog/request
+  body: json
+  auth: bearer
+}
+
+headers {
+  Content-Type: application/json
+  Cookie: {{cookieName}}=not-a-session
+}
+
+auth:bearer {
+  token: {{edcToken}}
+}
+
+body:json {
+  {
+    "@context": [
+      "https://w3id.org/edc/connector/management/v2"
+    ],
+    "@type": "CatalogRequest",
+    "counterPartyAddress": "{{dspInternalUrl}}/{{providerCtx}}/2025-1",
+    "counterPartyId": "{{providerDid}}",
+    "protocol": "dataspace-protocol-http:2025-1"
+  }
+}
+
+assert {
+  res.status: eq 200
+  res.body['@type']: isDefined
+}
+
+docs {
+  Known red since 2026-09-26 in both environments: `No provider dispatcher registered for
+  protocol: dataspace-protocol-http:2025-1` (#345). The consumer control plane never sends the
+  message, so the provider's 404 was never the first problem. The request stays here so the
+  message stays visible until it is fixed.
+}

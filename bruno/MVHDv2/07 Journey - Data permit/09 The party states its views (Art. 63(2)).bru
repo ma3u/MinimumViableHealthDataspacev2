@@ -1,0 +1,28 @@
+meta {
+  name: 09 The party states its views (Art. 63(2))
+  type: http
+  seq: 9
+}
+
+post {
+  url: {{baseUrl}}/api/compliance/findings/respond
+  body: json
+  auth: inherit
+}
+
+headers {
+  Content-Type: application/json
+  Cookie: {{cookieName}}={{sessionTokenResearcher}}
+}
+
+body:json {
+  {
+    "findingId": "{{findingId}}",
+    "views": "The export was an aggregate table meeting the five-anonymity rule"
+  }
+}
+
+assert {
+  res.status: eq 200
+  res.body.status: eq VIEWS_RECEIVED
+}

@@ -1,0 +1,31 @@
+meta {
+  name: 06 I consent to one programme (Art. 10)
+  type: http
+  seq: 6
+}
+
+post {
+  url: {{baseUrl}}/api/patient/research
+  body: json
+  auth: inherit
+}
+
+headers {
+  Content-Type: application/json
+  Cookie: {{cookieName}}={{sessionTokenPatient}}
+}
+
+body:json {
+  {
+    "patientId": "{{patientId}}",
+    "studyId": "{{studyId}}",
+    "purpose": "RESEARCH"
+  }
+}
+
+assert {
+  res.status: eq 200
+  res.body.patientId: eq {{patientId}}
+  res.body.studyId: eq {{studyId}}
+  res.body.grantedAt: isDefined
+}

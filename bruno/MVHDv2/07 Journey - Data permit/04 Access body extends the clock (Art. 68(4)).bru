@@ -1,0 +1,30 @@
+meta {
+  name: 04 Access body extends the clock (Art. 68(4))
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{baseUrl}}/api/compliance/applications/clock
+  body: json
+  auth: inherit
+}
+
+headers {
+  Content-Type: application/json
+  Cookie: {{cookieName}}={{sessionTokenRegulator}}
+}
+
+body:json {
+  {
+    "applicationId": "{{applicationId}}",
+    "action": "EXTEND",
+    "reason": "High number of requests in the period"
+  }
+}
+
+assert {
+  res.status: eq 200
+  res.body.extended: eq true
+  res.body.clockState: eq extended
+}

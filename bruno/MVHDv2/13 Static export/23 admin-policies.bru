@@ -1,0 +1,24 @@
+meta {
+  name: 23 admin/policies
+  type: http
+  seq: 23
+}
+
+get {
+  url: {{baseUrl}}/mock/admin_policies.json
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}=not-a-session
+}
+
+assert {
+  res.status: eq 200
+  res.body.participants: isArray
+}
+
+docs {
+  ui/public/mock/admin_policies.json stands in for /api/admin/policies in the static build.
+}

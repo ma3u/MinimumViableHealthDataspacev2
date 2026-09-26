@@ -1,0 +1,42 @@
+meta {
+  name: 10 Participant contexts on the control plane
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{mgmtUrl}}/{{mgmtVersion}}/participants
+  body: none
+  auth: bearer
+}
+
+headers {
+  Cookie: {{cookieName}}=not-a-session
+}
+
+auth:bearer {
+  token: {{edcToken}}
+}
+
+assert {
+  res.status: eq 200
+  res.body: isArray
+  res.body[0].identity: isDefined
+}
+
+tests {
+  test("captures the provider and consumer contexts by their DID", function () {
+    const list = res.getBody();
+    const byDid = (slug) => list.find((p) => (p.identity || "").endsWith(":" + slug));
+    const provider = byDid("alpha-klinik"), consumer = byDid("pharmaco");
+    expect(provider, "no context whose DID ends in :alpha-klinik").to.not.equal(undefined);
+    expect(consumer, "no context whose DID ends in :pharmaco").to.not.equal(undefined);
+    bru.setVar("providerCtx", provider["@id"]);
+    bru.setVar("providerDid", provider.identity);
+    bru.setVar("consumerCtx", consumer["@id"]);
+  });
+}
+
+docs {
+  Context ids differ per stack: CFM mints hex ids on the compose stack, the CI seed uses slugs. Everything downstream keys on the DID, never on the id.
+}

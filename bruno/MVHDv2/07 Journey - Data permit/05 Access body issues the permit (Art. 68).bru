@@ -1,0 +1,43 @@
+meta {
+  name: 05 Access body issues the permit (Art. 68)
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{baseUrl}}/api/compliance/permits
+  body: json
+  auth: inherit
+}
+
+headers {
+  Content-Type: application/json
+  Cookie: {{cookieName}}={{sessionTokenRegulator}}
+}
+
+body:json {
+  {
+    "applicationId": "{{applicationId}}",
+    "decision": "APPROVED",
+    "justification": "Purpose within Art. 53(1)(e); pseudonymised data in the SPE is proportionate",
+    "validUntil": "2027-12-31",
+    "conditions": "Secure processing environment only; outputs checked before release",
+    "criteria": "Art. 53(1)(e), Art. 66(1)",
+    "purpose": "SCIENTIFIC_RESEARCH",
+    "datasetId": "{{datasetId}}",
+    "riskNote": "low",
+    "statisticalAlternative": "anonymised statistics would not support the longitudinal model"
+  }
+}
+
+assert {
+  res.status: eq 200
+  res.body.permitId: isDefined
+  res.body.decision: eq APPROVED
+}
+
+tests {
+  test("captures permitId", function () {
+    bru.setVar("permitId", res.getBody().permitId);
+  });
+}

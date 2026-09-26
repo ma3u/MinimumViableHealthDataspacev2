@@ -1,0 +1,24 @@
+meta {
+  name: 07 The policies governing them (ODRL)
+  type: http
+  seq: 7
+}
+
+get {
+  url: {{baseUrl}}/api/admin/policies?participantId={{uiParticipantId}}
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}={{sessionTokenClinic}}
+}
+
+tests {
+  // Policy administration is an access-body and operator surface. A data holder
+  // either sees its own policies or is refused; both are defensible, an error is
+  // not.
+  test("answers with my policies or refuses cleanly", function () {
+    expect([200, 403]).to.include(res.getStatus());
+  });
+}

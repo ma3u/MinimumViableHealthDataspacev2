@@ -1,0 +1,28 @@
+meta {
+  name: 02 Public information (Art. 56)
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/api/information
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}=not-a-session
+}
+
+assert {
+  res.status: eq 200
+  res.body.article: isDefined
+  res.body.bodies: isArray
+  res.body.access: isArray
+  res.body.optOut: isDefined
+  res.body.fees: isDefined
+}
+
+docs {
+  Access bodies, access conditions, results, the Art. 71(2) opt-out, retention and fees.
+}

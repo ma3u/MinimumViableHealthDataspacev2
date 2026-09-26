@@ -1,0 +1,58 @@
+meta {
+  name: 02 Data user applies (Art. 67(2), eleven items)
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/api/compliance/applications
+  body: json
+  auth: inherit
+}
+
+headers {
+  Content-Type: application/json
+  Cookie: {{cookieName}}={{sessionTokenResearcher}}
+}
+
+body:json {
+  {
+    "name": "Bruno: HbA1c trajectories in type 2 diabetes",
+    "datasetId": "{{datasetId}}",
+    "purpose": "SCIENTIFIC_RESEARCH",
+    "justification": "Retrospective cohort study of HbA1c trajectories under second-line therapy",
+    "namedPersons": "Dr. Klaus Berger (principal investigator), two data scientists",
+    "intendedUse": "Retrospective cohort analysis inside the secure processing environment",
+    "requestedData": "OMOP condition_occurrence, measurement and drug_exposure",
+    "dataTimeRange": "2018-01-01 to 2025-12-31",
+    "dataFormats": "OMOP CDM v5.4 parquet",
+    "identifiability": "PSEUDONYMISED",
+    "pseudonymisationJustification": "Longitudinal linkage across visits is required",
+    "datasetsBroughtIn": "none",
+    "safeguards": "Secure processing environment only; no record-level export",
+    "speTools": "R 4.3, Python 3.11",
+    "art71Exception": false,
+    "applicantCategory": "COMMERCIAL",
+    "dataMinimisationStatement": "Only the three OMOP tables named above",
+    "processingPeriodMonths": 12,
+    "ethicsCommitteeRef": "EK-2026-0412"
+  }
+}
+
+assert {
+  res.status: eq 201
+  res.body.applicationId: isDefined
+  res.body.status: eq PENDING
+  res.body.completeness.complete: eq true
+  res.body.decisionDue: isDefined
+}
+
+tests {
+  test("captures applicationId", function () {
+    bru.setVar("applicationId", res.getBody().applicationId);
+  });
+}
+
+docs {
+  A complete application carries all eleven items of Art. 67(2); the response names the missing ones when it does not.
+}

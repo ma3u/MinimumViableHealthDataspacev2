@@ -1,0 +1,17 @@
+meta {
+  name: 02 Components and their state
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/api/admin/components
+  body: none
+  auth: inherit
+}
+
+assert {
+  res.status: eq 200
+  res.body.components: isDefined
+  res.body.deploymentTarget: isDefined
+}

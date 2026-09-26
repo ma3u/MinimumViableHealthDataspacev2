@@ -1,0 +1,24 @@
+meta {
+  name: 04 Register of results (Art. 70)
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{baseUrl}}/api/compliance/results
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}=not-a-session
+}
+
+assert {
+  res.status: eq 200
+  res.body.results: isArray
+}
+
+docs {
+  What data users published from the data they were permitted.
+}

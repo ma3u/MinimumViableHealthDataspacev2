@@ -1,0 +1,26 @@
+meta {
+  name: 06 Cohort analytics (OMOP CDM)
+  type: http
+  seq: 6
+}
+
+get {
+  url: {{baseUrl}}/api/analytics
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}={{sessionTokenResearcher}}
+}
+
+assert {
+  res.status: eq 200
+  res.body.summary: isDefined
+  res.body.topConditions: isArray
+  res.body.permit: isDefined
+}
+
+docs {
+  The dashboard carries the permit it was computed under; analytics with no permit behind it is the failure this guards against.
+}

@@ -1,0 +1,33 @@
+meta {
+  name: 08 Negotiations my connector took part in
+  type: http
+  seq: 8
+}
+
+get {
+  url: {{baseUrl}}/api/negotiations?participantId={{uiParticipantId}}
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}={{sessionTokenClinic}}
+}
+
+assert {
+  res.status: eq 200
+  res.body: isArray
+}
+
+tests {
+  test("captures the first negotiation the hub shows me", function () {
+    const rows = res.getBody();
+    bru.setVar("negotiationId", rows.length ? rows[0]["@id"] : "");
+  });
+}
+
+docs {
+  The list merges what the control plane holds with the demo negotiations the walkthrough
+  records (`ui/src/lib/demo-records.ts`), so a row here is not always one the connector knows. Opening one by id
+  belongs to folder 10, where the id comes from the control plane itself.
+}

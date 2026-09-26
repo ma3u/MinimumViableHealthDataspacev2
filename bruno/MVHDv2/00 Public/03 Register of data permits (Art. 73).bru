@@ -1,0 +1,25 @@
+meta {
+  name: 03 Register of data permits (Art. 73)
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseUrl}}/api/permits
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}=not-a-session
+}
+
+assert {
+  res.status: eq 200
+  res.body.entries: isArray
+  res.body.articles: isDefined
+}
+
+docs {
+  Every permit the access body issued, with its purpose, its dataset and its conditions.
+}

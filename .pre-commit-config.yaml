@@ -119,6 +119,19 @@ repos:
         pass_filenames: false
         stages: [pre-commit]
 
+  # Bruno collection vs implemented routes (#349, ADR-032). Ratcheted against
+  # docs/bruno-coverage-allowlist.txt, and it also refuses a request that
+  # carries neither an assert nor a test (ADR-031).
+  - repo: local
+    hooks:
+      - id: bruno-coverage
+        name: API collection covers every route, and can fail
+        language: system
+        entry: python3 scripts/check-bruno-coverage.py
+        files: ^(ui/src/app/api/.*route\.ts|bruno/MVHDv2/.*|docs/bruno-coverage-allowlist\.txt)$
+        pass_filenames: false
+        stages: [pre-commit]
+
   # npm dependency audit — HIGH/CRITICAL CVEs on pre-push (BSI C5 DEV-05)
   # Requires: node/npm in PATH
   - repo: local

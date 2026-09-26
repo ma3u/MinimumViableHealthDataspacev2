@@ -1,0 +1,27 @@
+meta {
+  name: 09 Data user cannot issue a permit (403)
+  type: http
+  seq: 9
+}
+
+post {
+  url: {{baseUrl}}/api/compliance/permits
+  body: json
+  auth: inherit
+}
+
+headers {
+  Content-Type: application/json
+  Cookie: {{cookieName}}={{sessionTokenResearcher}}
+}
+
+body:json {
+  {
+    "applicationId": "app-whatever",
+    "decision": "APPROVED"
+  }
+}
+
+assert {
+  res.status: eq 403
+}

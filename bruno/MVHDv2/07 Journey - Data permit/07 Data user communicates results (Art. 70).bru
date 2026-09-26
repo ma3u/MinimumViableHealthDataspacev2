@@ -1,0 +1,32 @@
+meta {
+  name: 07 Data user communicates results (Art. 70)
+  type: http
+  seq: 7
+}
+
+post {
+  url: {{baseUrl}}/api/compliance/results
+  body: json
+  auth: inherit
+}
+
+headers {
+  Content-Type: application/json
+  Cookie: {{cookieName}}={{sessionTokenResearcher}}
+}
+
+body:json {
+  {
+    "permitId": "{{permitId}}",
+    "title": "HbA1c trajectories under second-line therapy, preprint",
+    "summary": "Aggregate results only; no record-level data left the secure processing environment",
+    "kind": "PUBLICATION",
+    "url": "https://example.org/preprints/hba1c-trajectories"
+  }
+}
+
+assert {
+  res.status: eq 201
+  res.body.resultId: isDefined
+  res.body.onTime: eq true
+}

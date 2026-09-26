@@ -1,0 +1,29 @@
+meta {
+  name: 32 IssuerService attestation definitions
+  type: http
+  seq: 16
+}
+
+post {
+  url: {{issuerUrl}}/v1alpha/participants/issuer/attestations/query
+  body: json
+  auth: bearer
+}
+
+headers {
+  Content-Type: application/json
+  Cookie: {{cookieName}}=not-a-session
+}
+
+auth:bearer {
+  token: {{issuerToken}}
+}
+
+body:json {
+  {}
+}
+
+assert {
+  res.status: eq 200
+  res.body: isArray
+}

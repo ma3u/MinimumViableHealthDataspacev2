@@ -1,0 +1,24 @@
+meta {
+  name: 01 Is the hub up
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/api/health
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}=not-a-session
+}
+
+assert {
+  res.status: eq 200
+  res.body: isJson
+}
+
+docs {
+  Liveness of the integration hub. No session needed.
+}

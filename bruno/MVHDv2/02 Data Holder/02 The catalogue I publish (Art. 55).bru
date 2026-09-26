@@ -1,0 +1,26 @@
+meta {
+  name: 02 The catalogue I publish (Art. 55)
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/api/catalog
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}={{sessionTokenClinic}}
+}
+
+assert {
+  res.status: eq 200
+  res.body: isArray
+  res.body[0].id: isDefined
+  res.body[0].title: isDefined
+}
+
+docs {
+  HealthDCAT-AP dataset descriptions. This is what a data user discovers.
+}

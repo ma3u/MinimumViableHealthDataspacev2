@@ -1,0 +1,24 @@
+meta {
+  name: 21 Updating a policy without one (400)
+  type: http
+  seq: 21
+}
+
+put {
+  url: {{baseUrl}}/api/admin/policies
+  body: json
+  auth: inherit
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {}
+}
+
+assert {
+  res.status: eq 400
+  res.body.error: contains policy
+}

@@ -1,0 +1,26 @@
+meta {
+  name: 21 compliance
+  type: http
+  seq: 21
+}
+
+get {
+  url: {{baseUrl}}/mock/compliance.json
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}=not-a-session
+}
+
+assert {
+  res.status: eq 200
+  res.body.matrix: isArray
+  res.body.datasets: isArray
+  res.body.consumers: isArray
+}
+
+docs {
+  ui/public/mock/compliance.json stands in for /api/compliance in the static build.
+}

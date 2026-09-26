@@ -141,7 +141,8 @@ All three core specifications are now final or near-final:
 | [028](ADRs/ADR-028-patient-qr-login-eudi-wallet.md)          | Patient QR Login via EUDI Wallet (OpenID4VP)    | 2026-06-04 | Accepted   |
 | [029](ADRs/ADR-029-dependency-version-pinning.md)            | Dependency Version Pinning & Refresh Cadence    | 2026-07-15 | Accepted   |
 | [030](ADRs/ADR-030-neo4j-2025-lts-migration.md)              | Neo4j 5.26 → 2025.x Migration Readiness         | 2026-07-16 | Proposed   |
-| [031](ADRs/ADR-031-checks-must-assert.md)                    | Checks must assert and exit non-zero            | 2026-09-09 | Proposed   |
+| [031](ADRs/ADR-031-checks-must-assert.md)                    | Checks must assert and exit non-zero            | 2026-09-09 | Accepted   |
+| [032](ADRs/ADR-032-persona-organised-api-collection.md)      | API collection organised by EHDS persona        | 2026-09-26 | Accepted   |
 | [040](ADRs/ADR-040-derived-compliance-state-in-the-api.md)   | Derived compliance state is computed in the API | 2026-09-24 | Proposed   |
 
 > **Note:** The full text of ADR-1 through ADR-9 has been moved into the standalone ADR documents linked in the table above. Click any row to read the full context, decision, and consequences.

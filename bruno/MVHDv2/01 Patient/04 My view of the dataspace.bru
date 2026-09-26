@@ -1,0 +1,21 @@
+meta {
+  name: 04 My view of the dataspace
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{baseUrl}}/api/overview
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}={{sessionTokenPatient}}
+}
+
+assert {
+  res.status: eq 200
+  res.body.persona: eq patient
+  res.body.layers: isDefined
+}

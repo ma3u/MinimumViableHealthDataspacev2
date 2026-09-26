@@ -1,0 +1,25 @@
+meta {
+  name: 02 permits
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/mock/permits.json
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}=not-a-session
+}
+
+assert {
+  res.status: eq 200
+  res.body.entries: isArray
+  res.body.articles: isDefined
+}
+
+docs {
+  ui/public/mock/permits.json stands in for /api/permits in the static build.
+}

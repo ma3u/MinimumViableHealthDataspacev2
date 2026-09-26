@@ -1,0 +1,30 @@
+meta {
+  name: 07 My consent is on record
+  type: http
+  seq: 7
+}
+
+get {
+  url: {{baseUrl}}/api/patient/research?patientId={{patientId}}
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}={{sessionTokenPatient}}
+}
+
+assert {
+  res.status: eq 200
+  res.body.consents: isArray
+}
+
+tests {
+  test("the consent just granted appears in my list", function () {
+    const consents = res.getBody().consents || [];
+    const studyId = bru.getVar("studyId") || bru.getEnvVar("studyId");
+    const mine = consents.find((c) => (c.studyId || c.study) === studyId);
+    expect(mine, "the consent granted in the previous request is not in the list").to.not.equal(undefined);
+    bru.setVar("consentId", mine.consentId || mine.id);
+  });
+}

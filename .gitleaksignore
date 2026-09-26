@@ -37,3 +37,18 @@ d8fcd02ceb57dc739a88f6c192cd387a9949b351:scripts/leitlinien/fetch_index.py:gener
 5b141340bf861538eac30984eed493ccd26d47b5:clients/ios/Sources/Shared/Analytes.generated.swift:generic-api-key:62
 5b141340bf861538eac30984eed493ccd26d47b5:clients/ios/Sources/Shared/Analytes.generated.swift:generic-api-key:125
 5b141340bf861538eac30984eed493ccd26d47b5:clients/ios/Sources/Shared/Analytes.generated.swift:generic-api-key:126
+
+# A forged NextAuth session cookie was committed in bruno/MVHDv2/environments/
+# Azure-Dev.bru (3ae4165, removed 2026-09-26, #349). Sessions are now forged per
+# run by scripts/run-api-tests.sh and never written to a file in git. No
+# fingerprint is allowlisted here: if a JWE appears in a .bru file again, the
+# scan should stop the commit.
+
+# The forged NextAuth session cookie that lived in Azure-Dev.bru from 2026-05-09
+# until #349 removed it. The `nextauth-session-jwe` rule added at the same time
+# finds it in history, which is correct and unavoidable: it is in commit
+# 3ae4165 forever. The token itself is dead, forged with an 8-hour lifetime on
+# 2026-05-09, so allowlisting the fingerprint costs nothing and keeps the rule
+# able to stop the NEXT one. What did need action is the secret that signed it:
+# see #349.
+3ae41653f1498dea3e673130366e17cb361cbe54:bruno/MVHDv2/environments/Azure-Dev.bru:nextauth-session-jwe:7

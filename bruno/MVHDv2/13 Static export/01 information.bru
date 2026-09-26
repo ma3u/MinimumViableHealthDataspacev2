@@ -1,0 +1,28 @@
+meta {
+  name: 01 information
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/mock/information.json
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}=not-a-session
+}
+
+assert {
+  res.status: eq 200
+  res.body.article: isDefined
+  res.body.bodies: isArray
+  res.body.access: isArray
+  res.body.optOut: isDefined
+  res.body.fees: isDefined
+}
+
+docs {
+  ui/public/mock/information.json stands in for /api/information in the static build.
+}

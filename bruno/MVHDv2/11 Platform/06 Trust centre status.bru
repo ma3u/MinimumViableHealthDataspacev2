@@ -1,0 +1,20 @@
+meta {
+  name: 06 Trust centre status
+  type: http
+  seq: 6
+}
+
+get {
+  url: {{proxyUrl}}/trust-center/status
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}=not-a-session
+}
+
+assert {
+  res.status: eq 200
+  res.body: isJson
+}

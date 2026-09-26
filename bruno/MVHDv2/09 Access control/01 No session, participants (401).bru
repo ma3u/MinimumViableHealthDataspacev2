@@ -1,0 +1,19 @@
+meta {
+  name: 01 No session, participants (401)
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/api/participants
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}=not-a-session
+}
+
+assert {
+  res.status: eq 401
+}

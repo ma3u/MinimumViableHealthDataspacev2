@@ -15,6 +15,7 @@ on:
     branches: [main]
     paths:
       - "scripts/run-*.sh"
+      - "bruno/MVHDv2/**"
       - "scripts/azure/compliance-runner/**"
       - "scripts/azure/08-compliance-runner.sh"
       - "docker-compose.jad.yml"
@@ -480,6 +481,106 @@ jobs:
           docker compose -f docker-compose.yml -f docker-compose.jad.yml down -v
 
   # -----------------------------------------------------------------------
+  # Bruno API collection — the persona-organised collection a partner uses to
+  # rehearse against this hub (ADR-032, #349). It runs against the same
+  # ephemeral stack as the other suites, with one forged NextAuth session per
+  # EHDS persona, and writes a result file the baseline gate reads.
+  # -----------------------------------------------------------------------
+  bruno-api:
+    name: EHDS API Collection (Bruno)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    if: github.event_name != 'workflow_dispatch' || inputs.target == 'local'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: ui/package-lock.json
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # next-auth, for ui/scripts/forge-bruno-session.mjs.
+      - name: Install UI dependencies
+        working-directory: ui
+        run: npm ci
+
+      - name: Start full stack (JAD + Neo4j + UI)
+        run: |
+          docker compose -f docker-compose.yml -f docker-compose.jad.yml up -d --timeout 120
+        continue-on-error: true
+        env:
+          COMPOSE_PROJECT_NAME: health-dataspace
+
+      - name: Wait for Neo4j and the hub
+        run: |
+          for i in $(seq 1 60); do
+            curl -sf http://localhost:7474 >/dev/null 2>&1 && break
+            [ "$i" -eq 60 ] && echo "Neo4j not ready after 5 min, proceeding"
+            sleep 5
+          done
+          for i in $(seq 1 60); do
+            curl -sf http://localhost:3000/api/health >/dev/null 2>&1 && break
+            [ "$i" -eq 60 ] && echo "the hub did not answer /api/health after 5 min, proceeding"
+            sleep 5
+          done
+
+      - name: Seed Neo4j with the documented minimal data set
+        continue-on-error: true
+        run: |
+          set -euo pipefail
+          docker exec -i health-dataspace-neo4j \
+            cypher-shell -u neo4j -p healthdataspace < neo4j/init-schema.cypher || true
+          for f in neo4j/insert-synthetic-schema-data.cypher \
+                   neo4j/register-eehrxf-profiles.cypher \
+                   neo4j/seed-compliance-matrix.cypher \
+                   neo4j/participant-source-init.cypher; do
+            echo "== $f"
+            docker exec -i health-dataspace-neo4j \
+              cypher-shell -u neo4j -p healthdataspace < "$f"
+          done
+
+      # Folder "10 Connecting partner" speaks to the EDC layer, which is empty
+      # on a fresh stack until the seven identity steps have run (#345).
+      - name: Seed the identity layer (#345)
+        continue-on-error: true
+        run: |
+          KEYCLOAK_URL=http://localhost:8080 \
+          EDC_MANAGEMENT_URL=http://localhost:11003/api/mgmt \
+          EDC_IDENTITY_URL=http://localhost:11005/api/identity \
+          EDC_ISSUER_URL=http://localhost:10013/api/admin \
+            bash scripts/seed-identity-layer.sh
+
+      # The suite step reports either way; the baseline gate in compliance-report
+      # is the assertion (ADR-031).
+      - name: Run the Bruno API collection
+        continue-on-error: true
+        run: |
+          BRUNO_REPORT_DIR=${{ env.REPORT_DIR }}/bruno \
+          BRUNO_UI_CONTAINER=health-dataspace-ui \
+            ./scripts/run-api-tests.sh Local
+
+      - name: Upload Bruno results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: bruno-api-results
+          path: test-results/bruno/
+          retention-days: 30
+
+      - name: Stop infrastructure
+        if: always()
+        run: |
+          docker compose -f docker-compose.yml -f docker-compose.jad.yml down -v
+
+  # -----------------------------------------------------------------------
   # Azure Demo — launches the in-cluster mvhd-compliance-runner ACA Job
   # (built by scripts/azure/08-compliance-runner.sh) and tails logs until
   # it finishes. Authenticates with OIDC, whose federated credential is bound
@@ -534,7 +635,7 @@ jobs:
   compliance-report:
     name: Compliance Report
     runs-on: ubuntu-latest
-    needs: [dsp-tck, dcp-compliance, ehds-compliance]
+    needs: [dsp-tck, dcp-compliance, ehds-compliance, bruno-api]
     if: always() && (github.event_name != 'workflow_dispatch' || inputs.target == 'local')
     steps:
       - uses: actions/checkout@v4
@@ -551,7 +652,7 @@ jobs:
           echo "| Suite | Status |" >> compliance-report.md
           echo "| ----- | ------ |" >> compliance-report.md
 
-          for suite in dsp-tck-results dcp-compliance-results ehds-compliance-results; do
+          for suite in dsp-tck-results dcp-compliance-results ehds-compliance-results bruno-api-results; do
             if [ -d "test-results/${suite}" ]; then
               latest=$(ls -t test-results/${suite}/*.json 2>/dev/null | head -1) || true
               if [ -n "$latest" ]; then

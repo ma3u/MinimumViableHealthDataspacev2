@@ -1,0 +1,27 @@
+meta {
+  name: 06 The permit is in the public register (Art. 73)
+  type: http
+  seq: 6
+}
+
+get {
+  url: {{baseUrl}}/api/permits
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}=not-a-session
+}
+
+assert {
+  res.status: eq 200
+  res.body.entries: isArray
+}
+
+tests {
+  test("the permit just issued is published", function () {
+    const ids = (res.getBody().entries || []).map((e) => e.permitId || e.id);
+    expect(ids, "the permit is not in the Art. 73 register").to.include(bru.getVar("permitId"));
+  });
+}

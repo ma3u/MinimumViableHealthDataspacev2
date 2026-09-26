@@ -1,0 +1,28 @@
+meta {
+  name: 12 Onboard a participant, without a name (400)
+  type: http
+  seq: 12
+}
+
+post {
+  url: {{baseUrl}}/api/participants
+  body: json
+  auth: inherit
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {}
+}
+
+assert {
+  res.status: eq 400
+  res.body.error: contains displayName
+}
+
+docs {
+  A full create provisions a CFM tenant and is not part of a smoke run; jad/seed-health-tenants.sh does that.
+}

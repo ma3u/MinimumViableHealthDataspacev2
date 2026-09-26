@@ -1,0 +1,25 @@
+meta {
+  name: 02 My observations as a FHIR Bundle
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/api/patient/observations?patientId={{patientId}}
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}={{sessionTokenPatient}}
+}
+
+assert {
+  res.status: eq 200
+  res.body.resourceType: eq Bundle
+  res.body.entry: isArray
+}
+
+docs {
+  Art. 3(2): the data in an interoperable format. This is the payload a patient app receives.
+}

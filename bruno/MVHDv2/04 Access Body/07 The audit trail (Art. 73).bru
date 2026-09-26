@@ -1,0 +1,22 @@
+meta {
+  name: 07 The audit trail (Art. 73)
+  type: http
+  seq: 7
+}
+
+get {
+  url: {{baseUrl}}/api/admin/audit?limit=20
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}={{sessionTokenRegulator}}
+}
+
+assert {
+  res.status: eq 200
+  res.body.summary: isDefined
+  res.body.transfers: isArray
+  res.body.negotiations: isArray
+}

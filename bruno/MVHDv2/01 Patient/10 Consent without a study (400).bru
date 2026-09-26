@@ -1,0 +1,25 @@
+meta {
+  name: 10 Consent without a study (400)
+  type: http
+  seq: 10
+}
+
+post {
+  url: {{baseUrl}}/api/patient/research
+  body: json
+  auth: inherit
+}
+
+headers {
+  Content-Type: application/json
+  Cookie: {{cookieName}}={{sessionTokenPatient}}
+}
+
+body:json {
+  {}
+}
+
+assert {
+  res.status: eq 400
+  res.body.error: contains patientId
+}

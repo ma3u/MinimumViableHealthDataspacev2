@@ -1,0 +1,34 @@
+meta {
+  name: 11 Consent to a programme that does not exist
+  type: http
+  seq: 11
+}
+
+post {
+  url: {{baseUrl}}/api/patient/research
+  body: json
+  auth: inherit
+}
+
+headers {
+  Content-Type: application/json
+  Cookie: {{cookieName}}={{sessionTokenPatient}}
+}
+
+body:json {
+  {
+    "patientId": "{{patientId}}",
+    "studyId": "study-does-not-exist",
+    "purpose": "RESEARCH"
+  }
+}
+
+tests {
+  // Known red, #349. The route MATCHes the DataProduct and MERGEs the consent
+  // inside that match, so an unknown study writes nothing and still answers 200
+  // with a grantedAt. A patient would be told their consent was registered when
+  // no consent exists. The assertion stays as it should behave.
+  test("a consent for an unknown programme is refused, not silently dropped", function () {
+    expect([400, 404]).to.include(res.getStatus());
+  });
+}

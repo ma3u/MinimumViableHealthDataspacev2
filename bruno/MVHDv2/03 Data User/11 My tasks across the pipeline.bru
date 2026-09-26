@@ -1,0 +1,21 @@
+meta {
+  name: 11 My tasks across the pipeline
+  type: http
+  seq: 11
+}
+
+get {
+  url: {{baseUrl}}/api/tasks
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}={{sessionTokenResearcher}}
+}
+
+assert {
+  res.status: eq 200
+  res.body.tasks: isArray
+  res.body.counts: isDefined
+}

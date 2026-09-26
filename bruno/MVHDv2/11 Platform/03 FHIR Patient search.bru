@@ -1,0 +1,20 @@
+meta {
+  name: 03 FHIR Patient search
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{proxyUrl}}/fhir/Patient
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}=not-a-session
+}
+
+assert {
+  res.status: eq 200
+  res.body.resourceType: eq Bundle
+}

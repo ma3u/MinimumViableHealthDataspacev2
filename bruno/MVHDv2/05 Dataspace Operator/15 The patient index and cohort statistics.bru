@@ -1,0 +1,17 @@
+meta {
+  name: 15 The patient index and cohort statistics
+  type: http
+  seq: 15
+}
+
+get {
+  url: {{baseUrl}}/api/patient
+  body: none
+  auth: inherit
+}
+
+assert {
+  res.status: eq 200
+  res.body.patients: isArray
+  res.body.stats: isDefined
+}

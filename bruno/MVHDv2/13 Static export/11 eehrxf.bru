@@ -1,0 +1,25 @@
+meta {
+  name: 11 eehrxf
+  type: http
+  seq: 11
+}
+
+get {
+  url: {{baseUrl}}/mock/eehrxf.json
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}=not-a-session
+}
+
+assert {
+  res.status: eq 200
+  res.body.categories: isArray
+  res.body.summary: isDefined
+}
+
+docs {
+  ui/public/mock/eehrxf.json stands in for /api/eehrxf in the static build.
+}

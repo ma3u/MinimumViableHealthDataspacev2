@@ -1,0 +1,36 @@
+meta {
+  name: 50 One contract negotiation, by a real id
+  type: http
+  seq: 20
+}
+
+get {
+  url: {{mgmtUrl}}/{{mgmtVersion}}/participants/{{consumerCtx}}/contractnegotiations/{{realNegotiationId}}
+  body: none
+  auth: bearer
+}
+
+headers {
+  Cookie: {{cookieName}}=not-a-session
+}
+
+auth:bearer {
+  token: {{edcToken}}
+}
+
+tests {
+  if (!bru.getVar("realNegotiationId")) {
+    test("SKIPPED: this stack holds no contract negotiation to open", function () {});
+  } else {
+    test("opens the negotiation captured from the query", function () {
+      expect(res.getStatus()).to.equal(200);
+      expect(res.getBody()["@type"]).to.equal("ContractNegotiation");
+    });
+  }
+}
+
+docs {
+  Deliberately not `/api/negotiations/<id>` through the hub: that list merges demo and bundled-mock
+  rows (`ui/src/lib/demo-records.ts`), so an id taken from it is often one the control plane never had and the detail route
+  answers 502. Here the id comes from the control plane itself.
+}

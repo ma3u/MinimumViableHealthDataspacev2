@@ -1,0 +1,26 @@
+meta {
+  name: 09 catalog
+  type: http
+  seq: 9
+}
+
+get {
+  url: {{baseUrl}}/mock/catalog.json
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}=not-a-session
+}
+
+assert {
+  res.status: eq 200
+  res.body: isArray
+  res.body[0].id: isDefined
+  res.body[0].title: isDefined
+}
+
+docs {
+  ui/public/mock/catalog.json stands in for /api/catalog in the static build.
+}

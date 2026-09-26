@@ -1,0 +1,15 @@
+meta {
+  name: 10 Deregistering someone who is not there (404)
+  type: http
+  seq: 10
+}
+
+delete {
+  url: {{baseUrl}}/api/admin/participants?id=did:web:nobody.example:x
+  body: none
+  auth: inherit
+}
+
+assert {
+  res.status: eq 404
+}

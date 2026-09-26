@@ -1,0 +1,10 @@
+# Operations under ui/src/app/api/ that no request in bruno/MVHDv2 sends.
+# Generated and checked by scripts/check-bruno-coverage.py; see #349 and
+# ADR-032.
+#
+# This list may only shrink. Adding a line is not a fix, it is a decision to
+# ship an endpoint a partner cannot rehearse, and the reviewer should ask why.
+# Writing the request means deleting its line in the same commit, which the
+# check enforces.
+#
+# Remaining: 0

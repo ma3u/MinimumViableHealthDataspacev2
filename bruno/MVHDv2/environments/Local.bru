@@ -1,7 +1,30 @@
 vars {
-  baseUrl: http://localhost:3000
+  baseUrl: http://localhost:3003
   proxyUrl: http://localhost:9090
-  participantId: alpha-clinic
+  keycloakUrl: http://localhost:8080
+  mgmtUrl: http://localhost:11003/api/mgmt
+  mgmtVersion: v5beta
+  identityUrl: http://localhost:11005/api/identity
+  issuerUrl: http://localhost:10013/api/admin
+  dspInternalUrl: http://controlplane:8082/api/dsp
+  issuerDid: did:web:issuerservice%3A10016:issuer
+  cookieName: next-auth.session-token
   patientId: P1
   studyId: study-001
+  edcClientId: admin
+  edcClientSecret: edc-v-admin-secret
+  issuerClientId: issuer
+  issuerClientSecret: issuer-secret
+  sessionToken:
+  sessionTokenRegulator:
+  sessionTokenResearcher:
+  sessionTokenPatient:
+  sessionTokenClinic:
 }
+vars:secret [
+  sessionToken,
+  sessionTokenRegulator,
+  sessionTokenResearcher,
+  sessionTokenPatient,
+  sessionTokenClinic
+]

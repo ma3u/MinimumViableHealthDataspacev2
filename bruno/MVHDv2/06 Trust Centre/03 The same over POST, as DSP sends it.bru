@@ -1,0 +1,30 @@
+meta {
+  name: 03 The same over POST, as DSP sends it
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/api/mock-dsp/alpha-klinik/catalog/request
+  body: json
+  auth: inherit
+}
+
+headers {
+  Content-Type: application/json
+  Cookie: {{cookieName}}=not-a-session
+}
+
+body:json {
+  {
+    "@context": {
+      "dspace": "https://w3id.org/dspace/2025/1/"
+    },
+    "@type": "dspace:CatalogRequestMessage"
+  }
+}
+
+assert {
+  res.status: eq 200
+  res.body['@type']: eq dcat:Catalog
+}

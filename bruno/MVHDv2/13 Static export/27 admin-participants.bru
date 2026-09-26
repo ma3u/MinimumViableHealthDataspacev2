@@ -1,0 +1,25 @@
+meta {
+  name: 27 admin/participants
+  type: http
+  seq: 27
+}
+
+get {
+  url: {{baseUrl}}/mock/admin_participants.json
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}=not-a-session
+}
+
+assert {
+  res.status: eq 200
+  res.body.participants: isArray
+  res.body.summary: isDefined
+}
+
+docs {
+  ui/public/mock/admin_participants.json stands in for /api/admin/participants in the static build.
+}

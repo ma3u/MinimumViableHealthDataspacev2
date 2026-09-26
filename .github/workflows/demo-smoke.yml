@@ -2,7 +2,7 @@
 # Demo Smoke — ehds.mabu.red
 # ---------------------------------------------------------------------------
 # Health checks for the public Azure demo:
-#   - Bruno API suite (Azure-Dev env, 49 requests)
+#   - Bruno API collection (Azure-Dev env, the persona folders, ADR-032)
 #   - Playwright public-route smoke (no auth)
 #   - ZAP baseline (anonymous)
 #
@@ -37,10 +37,30 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
-      - name: Run Bruno Azure-Dev collection
+      # ui/node_modules, for the session forge (next-auth's own encode()).
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: ui/package-lock.json
+      - name: Install UI dependencies
+        working-directory: ui
+        run: npm ci
+
+      # Until 2026-09-26 this step ran with no secret at all: every one of the
+      # 49 requests answered 401 Unauthorized and the job was red every day for
+      # weeks while the collection's only assertion (status < 500) passed
+      # (#349). The forge needs the deployment's own NEXTAUTH_SECRET.
+      - name: Run the Bruno API collection against the demo
         env:
           BRUNO_REPORT_DIR: ${{ github.workspace }}/bruno-report
+          NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
         run: |
+          set -euo pipefail
+          if [ -z "${NEXTAUTH_SECRET}" ]; then
+            echo "::error::NEXTAUTH_SECRET is not set, so no persona can sign in and every request would answer 401. Set the repository secret to the value the deployment runs with."
+            exit 1
+          fi
           chmod +x scripts/run-api-tests.sh
           mkdir -p "$BRUNO_REPORT_DIR"
           ./scripts/run-api-tests.sh Azure-Dev

@@ -1,0 +1,17 @@
+meta {
+  name: 26 Does the graph match its schema
+  type: http
+  seq: 26
+}
+
+get {
+  url: {{baseUrl}}/api/graph/validate
+  body: none
+  auth: inherit
+}
+
+assert {
+  res.status: eq 200
+  res.body.summary: isDefined
+  res.body.nodeCounts: isDefined
+}

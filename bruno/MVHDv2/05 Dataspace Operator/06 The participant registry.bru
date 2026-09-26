@@ -1,0 +1,17 @@
+meta {
+  name: 06 The participant registry
+  type: http
+  seq: 6
+}
+
+get {
+  url: {{baseUrl}}/api/admin/participants
+  body: none
+  auth: inherit
+}
+
+assert {
+  res.status: eq 200
+  res.body.participants: isArray
+  res.body.summary: isDefined
+}

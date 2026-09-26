@@ -1,0 +1,30 @@
+meta {
+  name: 12 Access body closes the finding with a measure
+  type: http
+  seq: 12
+}
+
+post {
+  url: {{baseUrl}}/api/compliance/findings/close
+  body: json
+  auth: inherit
+}
+
+headers {
+  Content-Type: application/json
+  Cookie: {{cookieName}}={{sessionTokenRegulator}}
+}
+
+body:json {
+  {
+    "findingId": "{{findingId}}",
+    "measure": "WARNING",
+    "note": "Closed after the party's explanation; the output check was confirmed"
+  }
+}
+
+assert {
+  res.status: eq 200
+  res.body.status: eq CLOSED
+  res.body.measure: eq WARNING
+}

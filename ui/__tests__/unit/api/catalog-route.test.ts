@@ -271,8 +271,31 @@ describe("POST /api/catalog", () => {
     expect(mockRunQuery).toHaveBeenCalledOnce();
     const cypher = mockRunQuery.mock.calls[0][0] as string;
     expect(cypher).toContain("MERGE (d:HealthDataset {id: $id})");
-    expect(cypher).toContain("MERGE (p:Participant {name: $publisher})");
     expect(cypher).toContain("MERGE (p)-[:PUBLISHES]->(d)");
+  });
+
+  /**
+   * Regression (#349): the publisher link used to be
+   * `MERGE (p:Participant {name: $publisher})`, which created a :Participant
+   * carrying nothing but a display name whenever the name did not match an
+   * existing node exactly. One of those, with no participantId, answered
+   * /api/overview with a 502 for the access body, because the HDAB view
+   * compacts every participant id. Publishing a dataset must never mint a
+   * participant.
+   */
+  it("never creates a participant out of the publisher's name", async () => {
+    mockRunQuery.mockResolvedValue([]);
+
+    const req = jsonBody({
+      id: "dataset:test",
+      title: "Test",
+      publisher: "A Name No Participant Has",
+    });
+    await POST(req);
+
+    const cypher = mockRunQuery.mock.calls[0][0] as string;
+    expect(cypher).not.toMatch(/MERGE\s*\(\s*\w*\s*:Participant/);
+    expect(cypher).toContain("OPTIONAL MATCH (p:Participant)");
   });
 
   it("passes all HealthDCAT-AP parameters to Neo4j", async () => {

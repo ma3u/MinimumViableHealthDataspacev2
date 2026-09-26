@@ -1,0 +1,26 @@
+meta {
+  name: 06 patient/insights
+  type: http
+  seq: 6
+}
+
+get {
+  url: {{baseUrl}}/mock/patient_insights.json
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}=not-a-session
+}
+
+assert {
+  res.status: eq 200
+  res.body.patientId: eq {{patientId}}
+  res.body.findings: isArray
+  res.body.ehdsArticles: isDefined
+}
+
+docs {
+  ui/public/mock/patient_insights.json stands in for /api/patient/insights in the static build.
+}

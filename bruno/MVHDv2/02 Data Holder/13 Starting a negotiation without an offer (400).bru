@@ -1,0 +1,29 @@
+meta {
+  name: 13 Starting a negotiation without an offer (400)
+  type: http
+  seq: 13
+}
+
+post {
+  url: {{baseUrl}}/api/negotiations
+  body: json
+  auth: inherit
+}
+
+headers {
+  Content-Type: application/json
+  Cookie: {{cookieName}}={{sessionTokenClinic}}
+}
+
+body:json {
+  {}
+}
+
+assert {
+  res.status: eq 400
+  res.body.error: contains counterPartyAddress
+}
+
+docs {
+  A real negotiation needs an offer id from the provider's catalogue, which folder 10 shows is not reachable yet (#345).
+}

@@ -1,0 +1,16 @@
+meta {
+  name: 03 How the components connect
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseUrl}}/api/admin/components/topology
+  body: none
+  auth: inherit
+}
+
+assert {
+  res.status: eq 200
+  res.body: isJson
+}

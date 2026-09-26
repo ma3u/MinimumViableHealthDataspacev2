@@ -1,0 +1,25 @@
+meta {
+  name: 24 admin/tenants
+  type: http
+  seq: 24
+}
+
+get {
+  url: {{baseUrl}}/mock/admin_tenants.json
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}=not-a-session
+}
+
+assert {
+  res.status: eq 200
+  res.body.tenants: isArray
+  res.body.summary: isDefined
+}
+
+docs {
+  ui/public/mock/admin_tenants.json stands in for /api/admin/tenants in the static build.
+}

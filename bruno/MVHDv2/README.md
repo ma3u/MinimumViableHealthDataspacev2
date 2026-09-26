@@ -1,486 +1,179 @@
-# MVHDv2 — Bruno API Collection
+# The EHDS integration hub, request by request
 
-A complete REST collection for the European Health Data Space integration
-hub. Every endpoint in `ui/src/app/api/*` and the Neo4j proxy in
-`services/neo4j-proxy/*` is exercised here.
+What a hospital, a health data access body or a research organisation can send to
+this hub, with synthetic data, before connecting anything real. Plain `.bru` files
+in git: the [Bruno](https://www.usebruno.com/) desktop app, the VS Code extension
+and the `bru` CLI all run them, and a pull request shows exactly what changed.
 
-This README covers:
+The collection is organised by **who you are**, not by which resource an endpoint
+touches. Open the folder for your role and read it top to bottom: it is that
+role's journey through Regulation (EU) 2025/327, in order, with real request
+bodies and real expectations. The reasoning is in
+[ADR-032](../../docs/ADRs/ADR-032-persona-organised-api-collection.md);
+the work is tracked in [#349](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/349).
 
-1. [Why Bruno](#why-bruno)
-2. [Prerequisites](#prerequisites)
-3. [Open the collection](#open-the-collection)
-4. [Pick an environment](#pick-an-environment)
-5. [Authenticate against Azure-Dev](#authenticate-against-azure-dev)
-6. [Send your first request](#send-your-first-request)
-7. [Tests, asserts, and chaining](#tests-asserts-and-chaining)
-8. [Automate with the Bruno CLI](#automate-with-the-bruno-cli)
-9. [GitHub Actions integration](#github-actions-integration)
-10. [Coverage](#coverage)
-11. [Adding a new endpoint](#adding-a-new-endpoint)
-12. [Troubleshooting](#troubleshooting)
+## The folders
 
----
+| Folder                      | Who                           | What it covers                                                                              |
+| --------------------------- | ----------------------------- | ------------------------------------------------------------------------------------------- |
+| `00 Public`                 | anyone, not signed in         | Art. 56 information duty, the Art. 73 permit and results registers, the activity report     |
+| `01 Patient`                | a natural person              | Art. 3 to 12: my record, a FHIR copy of it, insights, Art. 10 consent and its withdrawal    |
+| `02 Data Holder`            | a hospital                    | Art. 51, 52, 55: the catalogue I publish, the assets and policies behind it, my exchanges   |
+| `03 Data User`              | a research organisation       | Art. 53: discovery, what I am permitted today, cohort analytics, natural-language query     |
+| `04 Access Body`            | an HDAB                       | Art. 55 to 63, 71 to 73: my inbox, findings, the audit trail and its retention rule         |
+| `05 Dataspace Operator`     | whoever runs it               | tenants, components, the participant registry, credentials, the knowledge graph             |
+| `06 Trust Centre`           | the SPE operator              | Art. 73: trust centres, open SPE sessions, the demo DSP catalogue                           |
+| `07 Journey - Data permit`  | data user **and** access body | Art. 67 to 73 end to end: application, clock, permit, results, finding, closure, revocation |
+| `08 Journey - Data request` | data user **and** access body | Art. 69: a question answered in anonymised statistics                                       |
+| `09 Access control`         | all five roles                | one request per line of the role matrix, each expecting its refusal                         |
+| `10 Connecting partner`     | your own EDC connector        | DSP 2025-1 and DCP v1.0 against the Management API, IdentityHub and IssuerService           |
+| `11 Platform`               | the platform team             | the Neo4j proxy on port 9090                                                                |
+| `12 EUDI wallet`            | optional                      | wallet sign-in, needs `docker-compose.eudi.yml`                                             |
 
-## Why Bruno
+Two folders hold procedures rather than personas. A data permit is a two-sided
+procedure: the data user applies, the access body decides, the data user reports,
+the access body supervises. Splitting those requests between two folders would
+lose the order and the ids that pass between them, so they live together and each
+request names the persona sending it.
 
-Bruno collections are plain `.bru` files that live in git alongside the
-code. Unlike Postman, there is no cloud sync, no proprietary export, and
-the collection diffs cleanly in PRs. The same files work in the Bruno
-desktop app, the VS Code extension, and the `bru` CLI for CI runs.
-
-The `auth/[...nextauth]` route is intentionally not in the collection: it
-is a NextAuth internal handler, not a REST endpoint.
-
----
-
-## Prerequisites
-
-| Tool                    | Version         | Why                                     |
-| ----------------------- | --------------- | --------------------------------------- |
-| Bruno (desktop)         | v3.3.0 or later | Interactive request authoring           |
-| Node.js                 | v20 or later    | Forge script and Bruno CLI              |
-| `@usebruno/cli` (`bru`) | latest          | Run the collection in CI                |
-| Project repo            | this checkout   | The forge script lives in `ui/scripts/` |
-
-Install Bruno desktop from [usebruno.com](https://www.usebruno.com/) or
-`brew install --cask bruno` on macOS. Install the CLI with:
+## Run it
 
 ```bash
-npm install -g @usebruno/cli
+# the compose stack on localhost:3003
+./scripts/run-api-tests.sh Local
+
+# the GitHub Pages export: the 36 GET requests that have a fixture, no auth
+./scripts/run-api-tests.sh Static-mock
+
+# the live demo, needs the deployment's NEXTAUTH_SECRET
+NEXTAUTH_SECRET=... ./scripts/run-api-tests.sh Azure-Dev
+
+# one folder, or one request
+./scripts/run-api-tests.sh Local "07 Journey - Data permit"
+./scripts/run-api-tests.sh Local "01 Patient/06 I consent to one programme (Art. 10).bru"
+
+# include the EUDI wallet folder
+BRUNO_EUDI=1 ./scripts/run-api-tests.sh Local
 ```
 
----
+The runner forges one NextAuth session per persona, hands them to `bru` as
+environment variables, runs the folders the chosen environment can reach, and
+writes three reports into `test-results/bruno/`: an HTML page, a JUnit file and a
+summary in the shape the compliance baseline reads. Its exit status is `bru`'s: a
+failed assertion fails the run.
 
-## Open the collection
+Nothing signed is written to a file. On `Local` the signing secret is read from
+the running UI container; for `Azure-Dev` it comes from the environment, and
+`ui/scripts/forge-bruno-session.mjs` exits rather than fall back to a default.
 
-From the repo root:
+## The environments
+
+|          | `Local`                                                                | `Azure-Dev`                        | `Static-mock`                        |
+| -------- | ---------------------------------------------------------------------- | ---------------------------------- | ------------------------------------ |
+| base     | `http://localhost:3003`                                                | `https://ehds.mabu.red`            | the GitHub Pages export              |
+| cookie   | `next-auth.session-token`                                              | `__Secure-next-auth.session-token` | none needed                          |
+| sessions | forged from the UI container's secret                                  | forged from `NEXTAUTH_SECRET`      | none                                 |
+| folders  | all thirteen                                                           | `00` to `09`                       | the 36 requests in `static-mock.txt` |
+| needs    | `docker compose -f docker-compose.yml -f docker-compose.jad.yml up -d` | nothing local                      | nothing                              |
+
+`Azure-Dev` stops at folder 09 because the control plane, IdentityHub,
+IssuerService and the Neo4j proxy run on `.internal.` addresses in Azure
+Container Apps and are not reachable from outside the environment. The runner
+skips those folders for you rather than letting fifty requests time out.
+
+The demo deployment scales down outside Mon to Fri, 07:00 to 20:00 Europe/Berlin
+(ADR-016, ADR-023); outside that window expect cold-start 502s.
+
+## In the Bruno app
 
 ```bash
 open -a Bruno bruno/MVHDv2     # macOS
 xdg-open bruno/MVHDv2          # Linux
-explorer.exe bruno\MVHDv2      # Windows
 ```
 
-If Bruno opens to a previous workspace instead, click **Open Collection**
-in the Quick Actions panel and pick `bruno/MVHDv2/`.
-
----
-
-## Pick an environment
-
-Top-right dropdown of any open request:
-
-| Environment | Base URL                                                | Auth required | Use when                               |
-| ----------- | ------------------------------------------------------- | ------------- | -------------------------------------- |
-| Local       | `http://localhost:3000`                                 | Yes (browser) | Full local Docker stack is up          |
-| Static-mock | `https://ma3u.github.io/MinimumViableHealthDataspacev2` | No            | Quick UI / shape testing, no live data |
-| Azure-Dev   | `https://ehds.mabu.red`                                 | Yes (cookie)  | Live shared dev environment            |
-
-The cleanest path for first-time users is **Static-mock**: every GET
-endpoint serves a static JSON fixture from `ui/public/mock/*.json` and
-returns 200 without authentication.
-
-> **Note:** Azure-Dev is on an ACA off-hours scale-down schedule
-> (ADR-016 / ADR-023), reachable Mon–Fri 07:00–20:00 Europe/Berlin.
-> Outside that window, expect 502s from cold-starting services.
-
----
-
-## Authenticate against Azure-Dev
-
-The Azure deployment gates every `/api/*` route behind a NextAuth session
-cookie. Bruno does not share a cookie jar with your browser, so the usual
-"sign in via the UI first" pattern does not carry over. Two paths:
-
-### Path A — Forge a session cookie locally (recommended)
+Pick an environment in the top-right dropdown. For anything that needs a session,
+forge one and paste it into that environment's `sessionToken`, or the persona
+variable a request uses:
 
 ```bash
 cd ui
-node scripts/forge-bruno-session.mjs regulator
+NEXTAUTH_SECRET="$(docker exec health-dataspace-ui printenv NEXTAUTH_SECRET)" \
+  node scripts/forge-bruno-session.mjs regulator
 ```
 
-The script prints something like:
-
-```
-COOKIE_NAME=__Secure-next-auth.session-token
-COOKIE_VALUE=eyJhbGciOiJkaXIiLCJlbmMiOiJBMjU2R0NNIn0..…
-```
-
-In Bruno:
-
-1. Open **Environments → Azure-Dev** (top-right environment dropdown,
-   click the small edit icon).
-2. Find or add a variable named `sessionToken`.
-3. Paste the long `COOKIE_VALUE` string into its Value field. Save.
-4. Re-send any request. The collection-level Cookie header
-   (`Cookie: __Secure-next-auth.session-token={{sessionToken}}`)
-   picks it up automatically.
-
-The token is valid for 8 hours. Re-run the script when it expires.
-
-Available personas (each maps to a Keycloak role set):
-
-| Persona      | Role                                     |
-| ------------ | ---------------------------------------- |
-| `edcadmin`   | `EDC_ADMIN` (full admin)                 |
-| `regulator`  | `HDAB_AUTHORITY` (Health Data Authority) |
-| `clinicuser` | `DATA_HOLDER` (German clinic)            |
-| `lmcuser`    | `DATA_HOLDER` (Dutch clinic)             |
-| `researcher` | `DATA_USER` (pharma researcher)          |
-| `patient1`   | `PATIENT`                                |
-
-### Path B — Sign in through the browser, copy the cookie
-
-1. Sign in at https://ehds.mabu.red/auth/signin with one of the demo
-   personas (`username = password`, e.g. `regulator` / `regulator`).
-2. Open browser DevTools → Application → Cookies → `https://ehds.mabu.red`.
-3. Copy the value of `__Secure-next-auth.session-token`.
-4. Paste into the Bruno `sessionToken` variable as in Path A.
-
-This works without running anything, but requires manual repetition every
-8 hours, and you cannot easily script it.
-
----
-
-## Send your first request
-
-Pick **GET EEHRxF** (or **GET Compliance Status**) in the sidebar. The
-URL is `{{baseUrl}}/api/eehrxf`. Hit **Send**.
-
-- On `Static-mock`: immediate 200 with the FHIR profile catalogue.
-- On `Azure-Dev` with `sessionToken` set: live data (currently 6
-  categories, 14 profiles, ~93k resources).
-- On `Azure-Dev` without `sessionToken`: 401 plus a Bruno test failure
-  with the hint "run the forge script".
-
-### What success looks like
-
-![Bruno against Azure-Dev with a forged session cookie returning 200 OK](docs/screenshots/azure-dev-200-compliance.png)
-
-Things to verify in your own window:
-
-| Check                          | Where                                                                                                                 |
-| ------------------------------ | --------------------------------------------------------------------------------------------------------------------- |
-| Environment selector top-right | Should read **`Azure-Dev`**                                                                                           |
-| Response status                | **`200 OK`** (red `401 Unauthorized` means `sessionToken` is empty or expired)                                        |
-| `Headers` tab on the request   | Two collection-level rows: `Accept: application/json` and `Cookie: __Secure-next-auth.session-token={{sessionToken}}` |
-| `Vars` tab on the request      | `sessionToken` shows a long string starting `eyJhbGciOiJkaXIiLCJlbmMiOiJBMjU2R0NNIn0..`                               |
-| Response body                  | Real participant DIDs (`did:web:alpha-klinik.de:participant`, …) — not a mock object                                  |
-
-If you see 401 after setting `sessionToken`, Bruno may not have re-read
-the environment file. Use the in-app **Environments → Azure-Dev** panel
-to set the value (instead of editing the file from outside) — those
-edits take effect immediately.
-
----
-
-## Tests, asserts, and chaining
-
-Every request inherits the collection-level guards in `collection.bru`:
-
-```js
-test("response is not a server error", function () {
-  expect(res.getStatus()).to.be.below(500);
-});
-```
-
-Plus a 401-against-Azure-Dev hint that surfaces the forge command right
-next to the failing request.
-
-Add per-request asserts in the **Asserts** tab, e.g.:
-
-```
-res.status: eq 200
-res.body.summary.totalCategories: gte 6
-```
-
-Chain requests by writing values to environment variables in the
-**Tests** tab:
-
-```js
-test("save first patient id", function () {
-  const data = res.getBody();
-  bru.setVar("patientId", data.patients[0].id);
-});
-```
-
-Subsequent requests reference `{{patientId}}` in the URL, headers, or
-body.
-
----
-
-## Automate with the Bruno CLI
-
-The Bruno CLI (`bru`) runs a collection without the desktop UI. Useful
-for smoke tests and CI.
-
-### One-shot run against Static-mock (no auth needed)
-
-```bash
-cd bruno/MVHDv2
-bru run --env Static-mock --reporter-html report.html
-open report.html
-```
-
-### One-shot run against Azure-Dev (auth via env var)
-
-```bash
-# 1. Forge a token
-cd ui
-TOKEN=$(node scripts/forge-bruno-session.mjs regulator | awk -F= '/^COOKIE_VALUE/{print $2}')
-
-# 2. Run the collection, mapping the token onto the sessionToken variable
-cd ../bruno/MVHDv2
-bru run --env Azure-Dev --env-var sessionToken="$TOKEN" --reporter-html report.html
-```
-
-`bru run` flags worth knowing:
-
-| Flag                 | Purpose                                             |
-| -------------------- | --------------------------------------------------- |
-| `--env <name>`       | Pick environment (Local / Static-mock / Azure-Dev)  |
-| `--env-var k=v`      | Override or set a variable for this run             |
-| `-r / --recursive`   | Include sub-folders                                 |
-| `--reporter-html f`  | Write HTML report                                   |
-| `--reporter-junit f` | Write JUnit XML for CI test reporters               |
-| `--bail`             | Stop on first failing request                       |
-| `--insecure`         | Disable TLS verify (only for self-signed local dev) |
-
-Exit code is non-zero if any request fails its asserts or returns 5xx.
-
-### One-liner end-to-end smoke
-
-```bash
-( cd ui && TOKEN=$(node scripts/forge-bruno-session.mjs regulator \
-    | awk -F= '/^COOKIE_VALUE/{print $2}') ) && \
-( cd bruno/MVHDv2 && bru run --env Azure-Dev \
-    --env-var sessionToken="$TOKEN" --bail )
-```
-
----
-
-## GitHub Actions integration
-
-A workflow at `.github/workflows/bruno-smoke.yml` runs the collection on
-push and on demand. The relevant pieces:
-
-```yaml
-- name: Forge session token
-  env:
-    NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
-  run: |
-    cd ui
-    TOKEN=$(node scripts/forge-bruno-session.mjs regulator \
-            | awk -F= '/^COOKIE_VALUE/{print $2}')
-    echo "::add-mask::$TOKEN"
-    echo "BRUNO_TOKEN=$TOKEN" >> "$GITHUB_ENV"
-
-- name: Run Bruno collection
-  run: |
-    npm install -g @usebruno/cli
-    cd bruno/MVHDv2
-    bru run --env Azure-Dev \
-            --env-var sessionToken="$BRUNO_TOKEN" \
-            --reporter-html ../../bruno-report.html \
-            --reporter-junit ../../bruno-report.xml
-
-- uses: actions/upload-artifact@v4
-  if: always()
-  with:
-    name: bruno-report
-    path: bruno-report.*
-```
-
-### Required repository secret
-
-| Secret            | Value                                      |
-| ----------------- | ------------------------------------------ |
-| `NEXTAUTH_SECRET` | Same value as on the live Azure deployment |
-
-The `add-mask` line in the workflow ensures the token never appears in
-the run logs.
-
-### Setting the secret with the GitHub CLI
-
-The whole secret-and-trigger flow can be done from the terminal without
-opening the GitHub UI. The `gh` CLI handles secret management and
-workflow dispatch.
-
-```bash
-# Verify gh is authenticated against the right account
-gh auth status
-
-# Set (or rotate) the NEXTAUTH_SECRET repository secret
-gh secret set NEXTAUTH_SECRET \
-    --repo ma3u/MinimumViableHealthDataspacev2 \
-    --body 'mvhd-azure-secret-change-me'
-
-# For longer / multiline secrets, read from a file or stdin
-gh secret set NEXTAUTH_SECRET \
-    --repo ma3u/MinimumViableHealthDataspacev2 < secret.txt
-
-# List repository secrets (names + last-updated only — values aren't readable)
-gh secret list --repo ma3u/MinimumViableHealthDataspacev2
-
-# Delete a secret
-gh secret delete NEXTAUTH_SECRET --repo ma3u/MinimumViableHealthDataspacev2
-```
-
-The value to set must match the `NEXTAUTH_SECRET` env var on the live
-Azure Container App. Read it with:
-
-```bash
-az containerapp show -n mvhd-ui -g rg-mvhd-dev \
-    --query "properties.template.containers[0].env[?name=='NEXTAUTH_SECRET'].value" \
-    -o tsv
-```
-
-If the live secret is rotated, rotate the GitHub secret in the same
-window or the workflow's forge step will produce tokens that the live
-API rejects.
-
-### Triggering the workflow with the GitHub CLI
-
-```bash
-# Default run (Static-mock, no auth needed)
-gh workflow run bruno-smoke.yml --repo ma3u/MinimumViableHealthDataspacev2
-
-# Pick environment and persona explicitly
-gh workflow run bruno-smoke.yml \
-    --repo ma3u/MinimumViableHealthDataspacev2 \
-    -f environment=Azure-Dev \
-    -f persona=edcadmin
-
-# RBAC-focused smoke (regulator persona — admin write routes return 403)
-gh workflow run bruno-smoke.yml \
-    --repo ma3u/MinimumViableHealthDataspacev2 \
-    -f environment=Azure-Dev \
-    -f persona=regulator
-
-# List recent runs of this workflow
-gh run list --workflow=bruno-smoke.yml \
-    --repo ma3u/MinimumViableHealthDataspacev2 --limit 10
-
-# Watch the latest run interactively
-gh run watch --repo ma3u/MinimumViableHealthDataspacev2
-
-# View one run's step results
-RUN_ID=$(gh run list --workflow=bruno-smoke.yml \
-    --repo ma3u/MinimumViableHealthDataspacev2 \
-    --limit 1 --json databaseId --jq '.[0].databaseId')
-gh run view "$RUN_ID" --repo ma3u/MinimumViableHealthDataspacev2
-
-# Download the report artefact (HTML + JUnit) of the most recent run
-gh run download "$RUN_ID" \
-    --repo ma3u/MinimumViableHealthDataspacev2 \
-    --name "bruno-report-Azure-Dev"
-open bruno-report.html
-```
-
-Persona options accepted by the `-f persona=` input: `edcadmin`,
-`regulator`, `clinicuser`, `lmcuser`, `researcher`, `patient1`. See the
-table under [Authenticate against Azure-Dev](#authenticate-against-azure-dev)
-for the role each persona maps to.
-
----
-
-## Coverage
-
-| Folder       | Routes | Notes                                                  |
-| ------------ | ------ | ------------------------------------------------------ |
-| Health       | 1      | Liveness probe                                         |
-| Catalog      | 3      | HealthDCAT-AP datasets — list / create / delete        |
-| Graph        | 4      | 5-layer Neo4j graph queries                            |
-| Patient      | 6      | FHIR profile, insights, research consent (GDPR Art. 7) |
-| Compliance   | 2      | EHDS / GDPR / DSP status + TCK results                 |
-| Credentials  | 4      | DCP v1.0 W3C VCs                                       |
-| Negotiations | 3      | DSP 2025-1 contract negotiations                       |
-| Transfers    | 3      | DCore data plane transfers                             |
-| Assets       | 2      | EDC asset registration                                 |
-| Participants | 5      | DID:web participant CRUD                               |
-| Tasks        | 1      | Aggregated contract / transfer pipeline tasks          |
-| Trust Center | 1      | DID resolution + attestation chain                     |
-| Federated    | 1      | Cross-site cohort query (k-anonymity)                  |
-| NLQ          | 2      | Text2Cypher templates + run                            |
-| EEHRxF       | 1      | EEHRxF profile catalog (Layer 2b)                      |
-| Analytics    | 1      | OMOP-derived dashboard                                 |
-| ODRL Scope   | 1      | Effective ODRL scope for current participant           |
-| Admin        | 8      | Tenants, audit, components, topology, policies (CRUD)  |
-| **Total**    | **49** | + collection.bru, bruno.json, 3 environments           |
-
----
-
-## Adding a new endpoint
-
-1. Drop a new `.bru` file under the appropriate folder.
-2. Set `seq:` to the next number in that folder.
-3. Use `{{baseUrl}}` and any of the env vars (`{{participantId}}`,
-   `{{patientId}}`, `{{studyId}}`, `{{proxyUrl}}`).
-4. For request bodies, use `body:json { ... }`; the block contents are
-   valid JSON.
-5. Commit the file. PR diffs are readable.
-
-The collection-level Cookie header is already attached, so admin /
-gated routes work without per-request setup once `sessionToken` is in
-the active environment.
-
----
+| Persona argument | Role             | Variable the collection reads |
+| ---------------- | ---------------- | ----------------------------- |
+| `patient1`       | `PATIENT`        | `sessionTokenPatient`         |
+| `clinicuser`     | `DATA_HOLDER`    | `sessionTokenClinic`          |
+| `researcher`     | `DATA_USER`      | `sessionTokenResearcher`      |
+| `regulator`      | `HDAB_AUTHORITY` | `sessionTokenRegulator`       |
+| `edcadmin`       | `EDC_ADMIN`      | `sessionToken`                |
+
+Tokens last eight hours. Do not save them into the `.bru` file: the pre-commit
+check refuses a `.bru` carrying a session cookie, because gitleaks does not scan
+that extension and one sat in this directory for four months.
+
+## What a green run means, and what a red one does
+
+Every request asserts the status it expects and at least one property of the
+body. A 401, a 403 or a 404 is a failure unless the request exists to prove that
+boundary. The journeys carry ids between requests, so `07` and `08` genuinely
+exercise the procedure rather than nine independent calls.
+
+Measured on the compose stack on 2026-09-26: **135 passed, 14 failed, 0 skipped**
+over 149 requests. Those 14 are five real defects, each with a `docs` block on
+the request that says so:
+
+| Requests | Defect                                                                                                                                           |
+| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 9        | the Neo4j proxy image pinned in `docker-compose.jad.yml` is from March and predates nine routes, so four proxy calls 404 and five hub routes 502 |
+| 1        | the DSP catalogue request has no provider dispatcher ([#345](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/345))                 |
+| 1        | a consent for a study that does not exist answers 200 and writes nothing                                                                         |
+| 2        | negotiation and transfer rows the hub lists cannot be opened, because the list merges demo rows                                                  |
+| 1        | `/api/patient` answers an anonymous caller                                                                                                       |
+
+The floor lives in `scripts/compliance-baseline.json` and the compliance workflow
+fails when a run drops below it.
+
+## Adding a request
+
+1. Put it in the folder of the persona that sends it. If two personas send it,
+   it belongs in a journey folder, and the request name says who is acting.
+2. Name it `NN Something a person would say`, taking the next number.
+3. Use `{{baseUrl}}` and the persona's cookie variable; the collection header
+   already carries `sessionToken`, so only a different persona needs a `Cookie`
+   header of its own.
+4. Give it a real `assert`: the status, plus at least one property of the body.
+   A request with neither an assert nor a test fails the pre-commit check.
+5. If the GitHub Pages export can answer it, add its path to `static-mock.txt`.
+
+`scripts/check-bruno-coverage.py` compares the collection with
+`ui/src/app/api/**/route.ts` and fails on a new route with no request, a request
+whose route is gone, a request that cannot fail, or a credential in a `.bru`
+file. It runs in pre-commit and in the PR Gate.
 
 ## Troubleshooting
 
-### `401 Unauthorized` against Azure-Dev
+**Every request answers 401.** The session secret does not match the server's.
+On `Local`, the runner reads it from the container; if you are driving `bru` by
+hand, forge with the same secret. On `Azure-Dev`, `NEXTAUTH_SECRET` must be the
+value the deployment runs with.
 
-The `sessionToken` variable is empty or expired. Re-run the forge script
-and paste the new value into Environments → Azure-Dev → `sessionToken`.
+**Folder 10 fails from request 10 onwards.** The EDC layer is empty. Run
+`./scripts/seed-identity-layer.sh`; it is idempotent.
 
-### `403 Forbidden` against `/api/admin/*` as a non-admin persona
+**Folder 11 answers 404 and folder 03 answers 502.** The Neo4j proxy container is
+older than `services/neo4j-proxy/src/`. Known: the image is pinned by digest in
+`docker-compose.jad.yml`.
 
-Working as intended. Forge a token with the `edcadmin` persona instead,
-or use `regulator` for the read-only paths (`/api/admin/policies`,
-`/api/admin/audit`).
-
-### `502 Bad Gateway` on heavy queries
-
-The Azure proxy has a 30 s timeout. Some federated queries (`/api/nlq`,
-`/api/graph` with no filter) take longer on a cold Neo4j. Re-send after
-warming up with a small request first. Outside Mon–Fri 07:00–20:00
-Europe/Berlin, scaled-down services produce the same symptom.
-
-### `Cookie: __Secure-next-auth.session-token={{sessionToken}}` literally sent
-
-Bruno failed to substitute the variable. Check that the environment is
-actually selected in the top-right dropdown, and that the variable name
-matches exactly (`sessionToken`, no spaces).
-
-### Forge script crashes with `Cannot find package 'next-auth'`
-
-You ran the script from the wrong directory. The `ui/scripts/` location
-is required so Node ESM can resolve the `next-auth` package from
-`ui/node_modules/`.
-
-```bash
-cd ui                                    # from the repo root
-node scripts/forge-bruno-session.mjs regulator
-```
-
-### Bruno CLI complains about `--env-var` not setting the value
-
-Bruno CLI v1.x had a bug where `--env-var` with `=` in the value
-required quoting. Use single quotes around the whole arg:
-
-```bash
-bru run --env Azure-Dev --env-var 'sessionToken=eyJhbGc…'
-```
-
----
+**A journey request fails on a variable.** The journeys pass ids between
+requests, so they must run in one `bru run`. Running request 05 of folder 07 on
+its own has no `applicationId`.
 
 ## See also
 
-- `ui/src/app/api/**/route.ts`: source of truth for request and response
-  shapes.
-- `ui/public/mock/*.json`: fixture responses used by the static export.
-- `ui/scripts/forge-bruno-session.mjs`: NextAuth session forge script.
-- `.claude/rules/api-conventions.md`: protocol versions, role matrix,
-  data models.
-- `docs/ADRs/ADR-008-testing-strategy.md`: how Bruno fits alongside
-  Vitest and Playwright.
+- [ADR-032](../../docs/ADRs/ADR-032-persona-organised-api-collection.md): why the collection is shaped this way
+- [ADR-031](../../docs/ADRs/ADR-031-checks-must-assert.md): why every request must be able to fail
+- `.claude/rules/api-conventions.md`: the role matrix folder 09 asserts
+- `ui/public/openapi.yaml`: the machine-readable spec, kept honest by `scripts/check-api-spec-drift.py`
+- `scripts/run-api-tests.sh`: the runner

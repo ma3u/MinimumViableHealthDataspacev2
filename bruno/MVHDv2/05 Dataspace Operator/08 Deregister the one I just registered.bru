@@ -1,0 +1,22 @@
+meta {
+  name: 08 Deregister the one I just registered
+  type: http
+  seq: 8
+}
+
+delete {
+  url: {{baseUrl}}/api/admin/participants?id=did:web:bruno.example:probe
+  body: none
+  auth: inherit
+}
+
+assert {
+  res.status: eq 200
+  res.body.ok: eq true
+}
+
+docs {
+  Only ever the participant this folder created. A seeded participant is protected by a 409 that
+  keys on `p.source = "seed"`, which only neo4j/participant-source-init.cypher sets; on a stack where
+  that file has not run, deleting a seeded DID succeeds and orphans its graph (#349).
+}

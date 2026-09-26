@@ -1,0 +1,17 @@
+meta {
+  name: 01 Tenants
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/api/admin/tenants
+  body: none
+  auth: inherit
+}
+
+assert {
+  res.status: eq 200
+  res.body.tenants: isArray
+  res.body.summary: isDefined
+}

@@ -1,0 +1,19 @@
+meta {
+  name: 03 No session, a patient record (401)
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseUrl}}/api/patient/profile?patientId={{patientId}}
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}=not-a-session
+}
+
+assert {
+  res.status: eq 401
+}

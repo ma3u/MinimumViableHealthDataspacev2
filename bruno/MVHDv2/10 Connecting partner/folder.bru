@@ -1,0 +1,20 @@
+meta {
+  name: A partner's own connector: DSP 2025-1 and DCP v1.0
+  seq: 11
+}
+
+docs {
+  Not through the hub's web API. These are the EDC surfaces a hospital or a research
+  organisation speaks to when it connects its own connector: the Management API of the control
+  plane, the IdentityHub that holds its keys and credentials, and the IssuerService that issues
+  them. On Azure these run on internal addresses and are unreachable from outside, so the folder
+  runs against the compose stack and in CI only.
+
+    00-01  two client-credentials tokens, one for the Management API, one for the issuer
+    10-15  the provider's assets, policies and contract definitions; the consumer's exchanges
+    16     the DSP catalogue request, the row that is known to fail (#345)
+    20-23  IdentityHub: contexts, keys, credentials held
+    30-33  IssuerService: definitions, holders, attestations, issuance processes
+    40-41  DCP issuance end to end: request a MembershipCredential and watch it arrive
+    50     one contract negotiation, opened by an id the control plane really has
+}

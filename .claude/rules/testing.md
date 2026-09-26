@@ -20,7 +20,38 @@ globs:
 | iOS on screen    | XCUITest       | `clients/ios/Scripts/run-ui-tests.sh`  |
 | EHDS dataspace   | Our own checks | `scripts/run-ehds-dataspace-checks.sh` |
 | EHDS identity    | Our own checks | `scripts/run-ehds-identity-checks.sh`  |
+| EHDS API by role | Bruno          | `scripts/run-api-tests.sh <env>`       |
 | EHDS domain      | Custom         | `scripts/run-ehds-tests.sh`            |
+
+## API Collection (Bruno)
+
+`bruno/MVHDv2/` is organised by EHDS persona, one folder per role in Regulation
+(EU) 2025/327, plus two folders for the two-sided procedures of Chapter IV, one
+for the role boundaries, and three for the protocol and platform surfaces
+(ADR-032). It is what a partner uses to rehearse against the hub.
+
+```bash
+./scripts/run-api-tests.sh Local        # the compose stack, all thirteen folders
+./scripts/run-api-tests.sh Static-mock  # the GitHub Pages fixtures, GET only
+./scripts/run-api-tests.sh Azure-Dev    # the live demo, needs NEXTAUTH_SECRET
+./scripts/run-api-tests.sh Local "07 Journey - Data permit"
+```
+
+Rules a new request must follow:
+
+- It goes in the folder of the persona that sends it; a request two personas
+  send belongs in a journey folder and names the acting persona.
+- It asserts the status it expects **and** at least one property of the body.
+  `res.status: lt 500` as the only assertion is what ADR-031 is about, and it is
+  what the collection used to be.
+- A request whose subject cannot exist on this stack skips loudly with the
+  reason. It never passes silently.
+- No session cookie in a `.bru` file. The runner forges one per persona;
+  gitleaks does not scan `.bru`, so `scripts/check-bruno-coverage.py` does.
+
+`scripts/check-bruno-coverage.py` runs in pre-commit and the PR Gate: a new route
+with no request, a request whose route is gone, a request that cannot fail, or a
+credential in a `.bru` file all fail the build.
 
 ## Unit Tests (Vitest)
 

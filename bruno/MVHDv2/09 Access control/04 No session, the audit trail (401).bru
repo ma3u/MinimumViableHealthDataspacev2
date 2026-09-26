@@ -1,0 +1,19 @@
+meta {
+  name: 04 No session, the audit trail (401)
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{baseUrl}}/api/admin/audit
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}=not-a-session
+}
+
+assert {
+  res.status: eq 401
+}

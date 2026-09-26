@@ -1,0 +1,29 @@
+meta {
+  name: 01 Discover the catalogue (Art. 55)
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/api/catalog
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}={{sessionTokenResearcher}}
+}
+
+assert {
+  res.status: eq 200
+  res.body: isArray
+  res.body[0].id: isDefined
+}
+
+tests {
+  test("captures a dataset to work with", function () {
+    const sets = res.getBody();
+    const omop = sets.find((d) => (d.id || "").includes("omop")) || sets[0];
+    bru.setVar("datasetId", omop.id);
+  });
+}

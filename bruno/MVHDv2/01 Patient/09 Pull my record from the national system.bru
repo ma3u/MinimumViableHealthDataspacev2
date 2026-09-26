@@ -1,0 +1,25 @@
+meta {
+  name: 09 Pull my record from the national system
+  type: http
+  seq: 9
+}
+
+post {
+  url: {{baseUrl}}/api/patient/ehr-sync
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}={{sessionTokenPatient}}
+}
+
+assert {
+  res.status: eq 200
+  res.body.patientId: eq {{patientId}}
+  res.body.lastEhrSync: isDefined
+}
+
+docs {
+  Art. 3(5): the record is fetched from the national access service (here a German ePA transfer, GesundheitsID-authenticated).
+}

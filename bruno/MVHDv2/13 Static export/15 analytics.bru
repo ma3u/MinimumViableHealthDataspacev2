@@ -1,0 +1,26 @@
+meta {
+  name: 15 analytics
+  type: http
+  seq: 15
+}
+
+get {
+  url: {{baseUrl}}/mock/analytics.json
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}=not-a-session
+}
+
+assert {
+  res.status: eq 200
+  res.body.summary: isDefined
+  res.body.topConditions: isArray
+  res.body.permit: isDefined
+}
+
+docs {
+  ui/public/mock/analytics.json stands in for /api/analytics in the static build.
+}

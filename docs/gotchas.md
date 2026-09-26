@@ -981,3 +981,51 @@ the keystrokes and shows them until the next redraw.
   `https://auth.ehds.mabu.red`; the helper appends `/realms/edcv` itself. With
   the realm URL the probe 404s and every test skips as "Keycloak unavailable",
   which reads like a clean run.
+
+## 2026-09-26 — gitleaks does not scan `.bru` files at all
+
+A forged NextAuth session cookie sat in
+`bruno/MVHDv2/environments/Azure-Dev.bru` from 2026-05-09 (commit `3ae4165`,
+"demo env, weekly wipe") until #349 removed it. Every secret scan in the
+repository passed the whole time.
+
+Measured with gitleaks 8.30.1, a directory holding one `.bru` file containing a
+NextAuth JWE:
+
+```
+gitleaks detect --no-git --source <dir>   ->  scanned ~0 bytes (0), no leaks found
+cp leaktest.bru leaktest.txt && rerun     ->  scanned ~199 bytes, leaks found: 1
+```
+
+Same bytes, same rule, different extension. gitleaks skips the file, so no rule
+can catch it, including the `nextauth-session-jwe` rule this repository now
+carries in `.gitleaks.toml` (which does work on `.txt`, `.md`, `.json` and the
+rest).
+
+**What to do:** the check that reads `.bru` files is
+`scripts/check-bruno-coverage.py`, and it now refuses a `.bru` carrying a JWE, a
+signed JWT, or a `sessionToken`-looking value of 24 characters or more. It runs
+in pre-commit and in the PR Gate. If another tool ever needs to see inside a
+`.bru`, assume gitleaks is not doing it.
+
+**The wider lesson:** a scanner's silence is evidence about the scanner, not
+about the file. Before trusting that a file type is covered, put a known secret
+in one and watch the scan go red (ADR-031, "prove the check discriminates").
+
+## 2026-09-26 — the pinned Neo4j proxy image is six months older than its source
+
+`docker-compose.jad.yml` pins `neo4j-proxy` by digest
+(`ghcr.io/ma3u/health-dataspace/neo4j-proxy:latest@sha256:e64e5706…`) next to a
+`build:` context. The pinned image was built in March 2026;
+`services/neo4j-proxy/src/index.ts` last changed 2026-09-25. Nine routes exist
+in the source and answer 404 on the running container: `/fhir/Patient`,
+`/omop/cohort`, `/federated/stats`, `/nlq/templates`, `/nlq/backend`, `/tasks`,
+`/tck`, `/trust-center/*`, `/debug/phase26`. The hub routes that call them
+answer `502 {"error":"Unexpected token '<' … is not valid JSON"}`, which is the
+proxy's HTML 404 page being parsed as JSON.
+
+`docker compose build neo4j-proxy` refuses: **"refusing to create a tag with a
+digest reference"**. The digest pin and the build context cannot both be used;
+one has to go, which is a decision for ADR-029 rather than a local workaround.
+
+Nine of the fourteen failures in the first Bruno run are this one cause.

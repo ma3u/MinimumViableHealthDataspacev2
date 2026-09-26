@@ -1,0 +1,25 @@
+meta {
+  name: 14 Starting a transfer without a contract (400)
+  type: http
+  seq: 14
+}
+
+post {
+  url: {{baseUrl}}/api/transfers
+  body: json
+  auth: inherit
+}
+
+headers {
+  Content-Type: application/json
+  Cookie: {{cookieName}}={{sessionTokenClinic}}
+}
+
+body:json {
+  {}
+}
+
+assert {
+  res.status: eq 400
+  res.body.error: contains contractId
+}

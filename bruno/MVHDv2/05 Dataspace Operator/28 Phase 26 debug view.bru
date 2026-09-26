@@ -1,0 +1,16 @@
+meta {
+  name: 28 Phase 26 debug view
+  type: http
+  seq: 28
+}
+
+get {
+  url: {{baseUrl}}/api/debug/phase26
+  body: none
+  auth: inherit
+}
+
+assert {
+  res.status: eq 200
+  res.body: isJson
+}

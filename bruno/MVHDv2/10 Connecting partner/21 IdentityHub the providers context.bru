@@ -1,0 +1,29 @@
+meta {
+  name: 21 IdentityHub the provider's context
+  type: http
+  seq: 11
+}
+
+get {
+  url: {{identityUrl}}/v1alpha/participants/{{providerCtx}}
+  body: none
+  auth: bearer
+}
+
+headers {
+  Cookie: {{cookieName}}=not-a-session
+}
+
+auth:bearer {
+  token: {{edcToken}}
+}
+
+assert {
+  res.status: eq 200
+  res.body.did: isDefined
+  res.body.state: isDefined
+}
+
+docs {
+  The path takes the raw context id, not base64.
+}

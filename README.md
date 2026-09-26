@@ -865,7 +865,7 @@ available online at **[ma3u.github.io/MinimumViableHealthDataspacev2/docs](https
 | [Agentic AI Development with Claude Code](docs/AGENTIC-DEVELOPMENT-WITH-CLAUDE-CODE.md) | How AI-assisted development is kept deterministic, reviewable & safe. **[Plain-language version](docs/AGENTIC-AI-explained.md).**          |
 | [Full User Journey](docs/FULL_USER_JOURNEY.md)                                          | EHDS 8-step journey from onboarding to analytics with sequence diagram.                                                                    |
 | [OpenAPI Specs](jad/openapi/)                                                           | OpenAPI specs for all JAD services (Management, Identity, Issuer APIs).                                                                    |
-| [Bruno API Collection](bruno/MVHDv2/)                                                   | Bruno collection covering all 38 Next.js API routes with 3 environments.                                                                   |
+| [Bruno API Collection](bruno/MVHDv2/)                                                   | 151 requests organised by EHDS persona: one folder per role, two for the Chapter IV procedures, 100% of the API routes (ADR-032).          |
 | [Interactive API Reference](ui/public/openapi.yaml)                                     | OpenAPI 3.1 spec rendered as Swagger UI at `/docs/developer/api`.                                                                          |
 
 ---

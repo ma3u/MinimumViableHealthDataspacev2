@@ -1,0 +1,25 @@
+meta {
+  name: 06 Protocol conformance of the dataspace
+  type: http
+  seq: 6
+}
+
+get {
+  url: {{baseUrl}}/api/compliance/tck
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}={{sessionTokenRegulator}}
+}
+
+assert {
+  res.status: eq 200
+  res.body.summary: isDefined
+  res.body.suites: isDefined
+}
+
+docs {
+  The DSP, DCP and EHDS suite results as the Trust Center page shows them.
+}

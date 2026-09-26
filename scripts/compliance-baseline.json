@@ -29,6 +29,12 @@
       "min_passed": 18,
       "max_failed": 0,
       "note": "run 36259831503: 18 passed, 0 failed, 7 skipped, twice reproduced (fresh-DB proof and CI). At parity with what the seeded graph can show; the 7 skips are rows whose data the minimal set does not carry (OMOP drug/measurement/procedure links, vocabulary source values, VerifiableCredential nodes). No review_by override any more: this floor is healthy, so the global date applies."
+    },
+    "bruno-api-results": {
+      "min_passed": 135,
+      "max_failed": 14,
+      "review_by": "2026-10-27",
+      "note": "First run of the persona-organised collection (ADR-032, #349), measured on the local compose stack 2026-09-26: 135 passed, 14 failed, 0 skipped over 149 requests. The 14 are five real defects, not flakes: the Neo4j proxy image pinned in docker-compose.jad.yml is from March and predates nine routes (4 proxy 404s and 5 hub 502s); the DSP catalogue request has no provider dispatcher (#345); a consent for an unknown study answers 200 and writes nothing; two negotiation and transfer rows the hub lists cannot be opened because the list merges demo rows; and /api/patient answers an anonymous caller. Short review date until those are closed, then this floor rises."
     }
   }
 }

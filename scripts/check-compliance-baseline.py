@@ -42,6 +42,7 @@ SUITES = {
     "dsp-tck-results": "EHDS dataspace checks",
     "dcp-compliance-results": "EHDS identity checks",
     "ehds-compliance-results": "EHDS domain checks",
+    "bruno-api-results": "EHDS API collection (Bruno)",
 }
 
 

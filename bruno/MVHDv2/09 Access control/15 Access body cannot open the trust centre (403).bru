@@ -1,0 +1,19 @@
+meta {
+  name: 15 Access body cannot open the trust centre (403)
+  type: http
+  seq: 15
+}
+
+get {
+  url: {{baseUrl}}/api/trust-center
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}={{sessionTokenRegulator}}
+}
+
+assert {
+  res.status: eq 403
+}

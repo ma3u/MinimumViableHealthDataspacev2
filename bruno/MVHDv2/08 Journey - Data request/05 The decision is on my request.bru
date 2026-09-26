@@ -1,0 +1,28 @@
+meta {
+  name: 05 The decision is on my request
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{baseUrl}}/api/compliance/requests
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}={{sessionTokenResearcher}}
+}
+
+assert {
+  res.status: eq 200
+  res.body.requests: isArray
+}
+
+tests {
+  test("my request now carries the decision", function () {
+    const mine = (res.getBody().requests || []).find((r) => r.requestId === bru.getVar("dataRequestId"));
+    expect(mine, "the request just decided is not in my list").to.not.equal(undefined);
+    expect(mine.status, "the decision is not on the request").to.not.equal("PENDING");
+  });
+}

@@ -1,0 +1,27 @@
+meta {
+  name: 16 Revoking a permit that is not there (404)
+  type: http
+  seq: 16
+}
+
+post {
+  url: {{baseUrl}}/api/compliance/permits/revoke
+  body: json
+  auth: inherit
+}
+
+headers {
+  Content-Type: application/json
+  Cookie: {{cookieName}}={{sessionTokenRegulator}}
+}
+
+body:json {
+  {
+    "permitId": "permit-does-not-exist",
+    "reason": "probe"
+  }
+}
+
+assert {
+  res.status: eq 404
+}

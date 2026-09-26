@@ -4,7 +4,7 @@
  * live Azure deployment.
  *
  * Usage:
- *   cd ui && node ../scripts/forge-bruno-session.mjs <persona>
+ *   cd ui && NEXTAUTH_SECRET=... node scripts/forge-bruno-session.mjs <persona>
  *
  * Persona is one of: edcadmin, clinicuser, lmcuser, researcher, regulator,
  * patient1.  Matches the seeded Keycloak users in jad/keycloak-realm.json.
@@ -13,7 +13,8 @@
  * with what /api/auth/session returns after a real OIDC sign-in.  The
  * NEXTAUTH_SECRET must match the one set on the target deployment.
  *
- * Defaults to the Azure deployment's secret; override with NEXTAUTH_SECRET.
+ * NEXTAUTH_SECRET is required and must match the target deployment; COOKIE_NAME
+ * defaults to the https cookie name, the compose stack uses next-auth.session-token.
  *
  * Output:
  *   prints two lines —
@@ -71,8 +72,16 @@ if (!profile) {
   process.exit(1);
 }
 
-const NEXTAUTH_SECRET =
-  process.env.NEXTAUTH_SECRET || "mvhd-azure-secret-change-me";
+const NEXTAUTH_SECRET = process.env.NEXTAUTH_SECRET;
+if (!NEXTAUTH_SECRET) {
+  // No default. A default here was the live deployment's secret in plain text
+  // (#348); a forged session is only as private as the secret that signs it.
+  console.error(
+    "NEXTAUTH_SECRET is not set. Local stack: scripts/run-api-tests.sh reads it from the UI container; " +
+      "Azure: export the deployment's value first.",
+  );
+  process.exit(2);
+}
 const COOKIE_NAME =
   process.env.COOKIE_NAME || "__Secure-next-auth.session-token";
 const MAX_AGE_SECONDS = 8 * 60 * 60; // matches ui/src/lib/auth.ts session.maxAge

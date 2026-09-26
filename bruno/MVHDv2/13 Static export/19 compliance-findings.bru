@@ -1,0 +1,24 @@
+meta {
+  name: 19 compliance/findings
+  type: http
+  seq: 19
+}
+
+get {
+  url: {{baseUrl}}/mock/findings.json
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}=not-a-session
+}
+
+assert {
+  res.status: eq 200
+  res.body.findings: isArray
+}
+
+docs {
+  ui/public/mock/findings.json stands in for /api/compliance/findings in the static build.
+}

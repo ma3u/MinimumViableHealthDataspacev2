@@ -1,0 +1,37 @@
+meta {
+  name: 01 Token for the IssuerService admin API
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{keycloakUrl}}/realms/edcv/protocol/openid-connect/token
+  body: formUrlEncoded
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}=not-a-session
+}
+
+body:form-urlencoded {
+  grant_type: client_credentials
+  client_id: {{issuerClientId}}
+  client_secret: {{issuerClientSecret}}
+  scope: issuer-admin-api:read issuer-admin-api:write
+}
+
+assert {
+  res.status: eq 200
+  res.body.access_token: isDefined
+}
+
+tests {
+  test("stores the issuer token for this folder", function () {
+    bru.setVar("issuerToken", res.getBody().access_token);
+  });
+}
+
+docs {
+  The `issuer` client lives in jad/keycloak-realm.json and is pinned by a Vitest assertion (#345); without it every issuer request answers 401.
+}

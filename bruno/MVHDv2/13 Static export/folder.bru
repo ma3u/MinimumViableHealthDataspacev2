@@ -1,0 +1,12 @@
+meta {
+  name: What the GitHub Pages export publishes
+  seq: 14
+}
+
+docs {
+  The demo at ma3u.github.io serves no API: the build renames ui/src/app/api/ and the
+  UI reads a fixture under /mock/ instead. These requests fetch those fixtures and assert
+  the shape the corresponding endpoint promises, so a fixture that drifts from its
+  endpoint is caught. `scripts/run-api-tests.sh Static-mock` runs exactly this folder and
+  needs no stack and no session.
+}
