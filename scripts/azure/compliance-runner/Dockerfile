@@ -31,6 +31,8 @@ RUN addgroup -g 10001 compliance \
     && adduser -D -H -u 10001 -G compliance compliance \
     && mkdir -p /work/test-results \
     && chown -R compliance:compliance /work
-USER compliance
+# Numeric, because hadolint DL3066 is right that a host cannot resolve a name
+# from the image's own /etc/passwd. Same uid:gid as the account created above.
+USER 10001:10001
 
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
