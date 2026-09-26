@@ -3,6 +3,45 @@
 Non-obvious pitfalls across the stack. Ordered newest first; add a new
 entry at the top when you hit something that cost you more than 30 minutes.
 
+## 2026-09-26: the STS exists, on a port nothing publishes
+
+Phase 1 of #338 needs an STS for the DCP TCK, and the work plan in discussion
+#110 recorded it as unknown, because `run-ehds-identity-checks.sh`
+authenticates through Keycloak and never touches one. Both EDC services do run
+an STS. Neither port is published to the host, so nothing on the laptop can
+see it and `docker ps` does not hint that it exists:
+
+| service       | container port | path       | published to host? |
+| ------------- | -------------- | ---------- | ------------------ |
+| IdentityHub   | 7084           | `/api/sts` | no, only 7081      |
+| IssuerService | 10011          | `/api/sts` | no, only 10013     |
+
+Read them off the container rather than guessing:
+
+```bash
+docker inspect health-dataspace-identityhub | jq -r '.[0].Config.Env[]' | grep '^web.http.sts'
+```
+
+It is a working OAuth2 client-credentials endpoint. Probing it needs a
+sidecar on the `health-dataspace-edcv` network, and the method matters: `GET`
+gives 405 and a bodyless `POST` gives a bare Jetty 500, both of which read
+like a broken service. A well-formed request is what shows it is healthy:
+
+```bash
+docker run --rm --network health-dataspace-edcv curlimages/curl -s -X POST \
+  -H 'Content-Type: application/x-www-form-urlencoded' \
+  -d 'grant_type=client_credentials&client_id=x&client_secret=y&audience=did:web:example' \
+  http://health-dataspace-identityhub:7084/api/sts/token
+# {"error":"invalid_client","error_description":"Invalid client or Invalid client credentials"}
+```
+
+The consequence for the TCK is that the runtime has to **join
+`health-dataspace-edcv`**, not reach the stack through
+`--add-host host.docker.internal:host-gateway` as the #110 work plan assumed.
+On that network the callback direction is free as well, since the connector
+can address the TCK by container name. Publishing 7084 and 10011 to the host
+would be the alternative and is a compose change nobody has needed yet.
+
 ## 2026-09-26: a healthy NATS that cannot store a single message
 
 `/healthz` returns 200, `docker ps` says healthy, the server log is clean, and
