@@ -50,8 +50,8 @@ run_suite() {
 
 for suite in $SUITES; do
   case "$suite" in
-    dsp)  run_suite "DSP 2025-1 TCK"           "run-dsp-tck.sh"   "dsp-tck" ;;
-    dcp)  run_suite "DCP v1.0 Compliance"       "run-dcp-tests.sh" "dcp"     ;;
+    dsp)  run_suite "EHDS dataspace checks"    "run-ehds-dataspace-checks.sh"   "dsp-tck" ;;
+    dcp)  run_suite "EHDS identity checks"      "run-ehds-identity-checks.sh" "dcp"     ;;
     ehds) run_suite "EHDS Health-Domain"         "run-ehds-tests.sh" "ehds"   ;;
     *)    echo "Unknown suite: $suite (valid: dsp, dcp, ehds)" ;;
   esac

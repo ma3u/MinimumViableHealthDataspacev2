@@ -69,8 +69,8 @@
       "Bash(curl -s https://github.com:*)",
       "Bash(python3:*)",
       "Bash(pre-commit run:*)",
-      "Bash(./scripts/run-dsp-tck.sh)",
-      "Bash(./scripts/run-dcp-tests.sh)",
+      "Bash(./scripts/run-ehds-dataspace-checks.sh)",
+      "Bash(./scripts/run-ehds-identity-checks.sh)",
       "Bash(./scripts/run-ehds-tests.sh)",
       "WebFetch(domain:github.com)"
     ],

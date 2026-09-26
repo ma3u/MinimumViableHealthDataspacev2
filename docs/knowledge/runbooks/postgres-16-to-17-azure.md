@@ -51,7 +51,7 @@ change is a full data reset (recovery runbook above).
 6. **Restore:** `az containerapp exec … "psql -U mvhdadmin -f /var/lib/postgresql/data/all-pg16.sql postgres"`.
 7. **Verify:** the `PG_DATABASES` list from `env.sh` exists; row counts on
    `controlplane` contract tables match the pre-dump counts.
-8. **Scale services back up**; run `./scripts/run-dsp-tck.sh` and a login
+8. **Scale services back up**; run `./scripts/run-ehds-dataspace-checks.sh` and a login
    smoke test against https://ehds.mabu.red.
 9. **Rollback path:** revert image to 16.14 + `PGDATA` to the old directory —
    the 16 datadir was never modified.

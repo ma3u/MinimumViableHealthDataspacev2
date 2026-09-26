@@ -19,8 +19,8 @@ Optional, when the change warrants it:
 
 ```bash
 cd ui && npm run test:e2e                # needs UI + Neo4j running
-./scripts/run-dsp-tck.sh                 # DSP protocol conformance
-./scripts/run-dcp-tests.sh               # DCP credentials
+./scripts/run-ehds-dataspace-checks.sh   # EHDS dataspace checks (not conformance)
+./scripts/run-ehds-identity-checks.sh    # EHDS identity checks (not conformance)
 ./scripts/run-ehds-tests.sh              # EHDS domain rules
 ```
 
