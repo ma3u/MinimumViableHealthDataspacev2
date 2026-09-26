@@ -177,6 +177,59 @@ print(json.dumps({
   rm -f "$RESP"
 done
 
+# The control plane ignores the state on create: every context comes back
+# CREATED whatever the payload asked for, measured on the live control plane
+# on 2026-09-26. That matters twice over — the UI lists only ACTIVATED
+# contexts (ui/src/app/api/participants/route.ts), and a context that was
+# never activated is not a participant anyone can negotiate with. There is no
+# activate endpoint; PUT <v>/participants/{id} is the way.
+log "Activating any context that is not ACTIVATED ..."
+AFTER=$(curl -sS --max-time 30 -H "Authorization: Bearer $TOKEN" \
+  "$CP/$MGMT_V/participants" || echo '[]')
+
+ACTIVATED=0
+ACTIVATE_FAILED=0
+while IFS='|' read -r CTX_ID CTX_IDENTITY CTX_STATE; do
+  [ -n "$CTX_ID" ] || continue
+  [ "$CTX_STATE" = "ACTIVATED" ] && continue
+
+  PUT_BODY=$(python3 -c "
+import json, sys
+print(json.dumps({
+  '@context': [sys.argv[1]],
+  '@type': 'ParticipantContext',
+  '@id': sys.argv[2],
+  'identity': sys.argv[3],
+  'state': 'ACTIVATED',
+}))" "$EDC_CTX" "$CTX_ID" "$CTX_IDENTITY")
+
+  RESP=$(mktemp)
+  CODE=$(curl -sS --max-time 30 -o "$RESP" -w '%{http_code}' \
+    -X PUT -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' \
+    -d "$PUT_BODY" "$CP/$MGMT_V/participants/$CTX_ID" || echo 000)
+  case "$CODE" in
+    2??|204)
+      log "activate $CTX_IDENTITY -> HTTP $CODE"
+      ACTIVATED=$((ACTIVATED + 1))
+      ;;
+    *)
+      log "activate $CTX_IDENTITY -> HTTP $CODE (was $CTX_STATE)"
+      log "         $(head -c 200 "$RESP" | tr '\n' ' ')"
+      ACTIVATE_FAILED=$((ACTIVATE_FAILED + 1))
+      ;;
+  esac
+  rm -f "$RESP"
+done <<EOF
+$(printf '%s' "$AFTER" | python3 -c "
+import json, sys
+try: d = json.load(sys.stdin)
+except Exception: raise SystemExit
+for p in d if isinstance(d, list) else []:
+    print('%s|%s|%s' % (p.get('@id') or '', p.get('identity') or '', p.get('state') or ''))
+" 2>/dev/null)
+EOF
+log "activated=$ACTIVATED activate_failed=$ACTIVATE_FAILED"
+
 log "Final participant list:"
 curl -sS --max-time 30 -H "Authorization: Bearer $TOKEN" "$CP/$MGMT_V/participants" \
   | python3 -c "
