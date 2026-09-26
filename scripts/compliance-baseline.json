@@ -4,13 +4,31 @@
     "fail on a regression instead of never failing at all. Checked by",
     "scripts/check-compliance-baseline.py in the compliance-report job.",
     "",
-    "This is a floor, not a target. Raise it whenever the suites improve;",
-    "lowering it is a deliberate act that a reviewer should question.",
+    "A floor, not a target. Raise it whenever the suites improve. Lowering one",
+    "is a deliberate act a reviewer should question.",
     "",
-    "'suites' is empty on purpose. The first workflow run records real numbers",
-    "and reports them without failing, because guessing a floor would either",
-    "block main wrongly or enshrine a bad run. Paste that run's output here."
+    "Recorded from GitHub Actions run 36250029604 on 2026-09-26, the first run",
+    "after the blocking gate landed. These are the CI ephemeral stack's",
+    "numbers, which are NOT the same as a seeded local stack's."
   ],
   "review_by": "2026-12-26",
-  "suites": {}
+  "suites": {
+    "dsp-tck-results": {
+      "min_passed": 25,
+      "max_failed": 0,
+      "note": "run 36250029604. Zero failures: the CAT-1.3 querySpec @type fix in #336 resolved the one that was failing."
+    },
+    "dcp-compliance-results": {
+      "min_passed": 11,
+      "max_failed": 7,
+      "review_by": "2026-10-27",
+      "note": "KNOWN BAD FLOOR, see #345. All 7 failures are one cause: the CI IdentityHub holds 0 participants, so no DIDs, key pairs or credentials exist to check. This is not an acceptable resting state, it is a ratchet peg so the gap cannot widen while it is fixed. A seeded local stack scores 21 passed / 0 failed against the same suite. Short review date on purpose."
+    },
+    "ehds-compliance-results": {
+      "min_passed": 1,
+      "max_failed": 13,
+      "review_by": "2026-10-27",
+      "note": "KNOWN BAD FLOOR, see #345. The CI Neo4j is empty, so there are no HDABApproval, HealthDataset or access-chain nodes to assert on. Same reasoning and same short review date as the DCP row."
+    }
+  }
 }
