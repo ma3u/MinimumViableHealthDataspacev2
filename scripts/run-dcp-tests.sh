@@ -171,11 +171,11 @@ run_did_tests() {
     local test_id="DID-1.1-${slug}"
     local resp
     resp=$(mgmt_post "/${MGMT_V}/participants/${ctx}/did" \
-      '{"@context":["https://w3id.org/edc/connector/management/v2"]}' 2>/dev/null) || resp=""
+      '{"@context":["https://w3id.org/edc/connector/management/v2"]}') || resp=""
 
     # Try participant query instead if direct DID endpoint doesn't exist
     if [ -z "$resp" ]; then
-      resp=$(identity_get "/v1alpha/participants/${ctx}/keypairs" 2>/dev/null) || resp=""
+      resp=$(identity_get "/v1alpha/participants/${ctx}/keypairs") || resp=""
     fi
 
     if [ -n "$resp" ]; then
@@ -184,7 +184,7 @@ run_did_tests() {
     else
       # Try the participants endpoint on identity API
       local part_resp
-      part_resp=$(identity_get "/v1alpha/participants" 2>/dev/null) || part_resp=""
+      part_resp=$(identity_get "/v1alpha/participants") || part_resp=""
       if [ -n "$part_resp" ] && echo "$part_resp" | jq -e ".[] | select(.participantId == \"${ctx}\")" >/dev/null 2>&1; then
         pass "$test_id: Participant ${ctx} found in IdentityHub"
         record_result "$test_id" "did" "passed"
@@ -198,7 +198,7 @@ run_did_tests() {
   # 1.2 — IdentityHub participant query returns all 4 contexts
   local test_id="DID-1.2"
   local resp
-  resp=$(identity_get "/v1alpha/participants" 2>/dev/null) || resp=""
+  resp=$(identity_get "/v1alpha/participants") || resp=""
 
   if [ -n "$resp" ] && echo "$resp" | jq -e 'type == "array"' >/dev/null 2>&1; then
     local count
@@ -264,7 +264,7 @@ run_keypair_tests() {
     local ctx="${PARTICIPANT_CTXS[$i]}"
     local test_id="KEY-2.1-${slug}"
     local resp
-    resp=$(identity_get "/v1alpha/participants/${ctx}/keypairs" 2>/dev/null) || resp=""
+    resp=$(identity_get "/v1alpha/participants/${ctx}/keypairs") || resp=""
 
     if [ -n "$resp" ] && echo "$resp" | jq -e 'type == "array"' >/dev/null 2>&1; then
       local count
@@ -283,7 +283,7 @@ run_keypair_tests() {
   # 2.2 — Key pair state is ACTIVATED
   local test_id="KEY-2.2"
   local resp
-  resp=$(identity_get "/v1alpha/participants/${PROVIDER_CTX}/keypairs" 2>/dev/null) || resp=""
+  resp=$(identity_get "/v1alpha/participants/${PROVIDER_CTX}/keypairs") || resp=""
 
   if [ -n "$resp" ] && echo "$resp" | jq -e '[.[] | select(.state == "ACTIVATED")] | length > 0' >/dev/null 2>&1; then
     local active_count
@@ -331,7 +331,7 @@ run_credential_tests() {
     local ctx="${PARTICIPANT_CTXS[$i]}"
     local test_id="VC-3.1-${slug}"
     local resp
-    resp=$(identity_get "/v1alpha/participants/${ctx}/credentials" 2>/dev/null) || resp=""
+    resp=$(identity_get "/v1alpha/participants/${ctx}/credentials") || resp=""
 
     if [ -n "$resp" ] && echo "$resp" | jq -e 'type == "array"' >/dev/null 2>&1; then
       local count
@@ -350,7 +350,7 @@ run_credential_tests() {
   # 3.2 — Credentials include EHDS-specific types
   local test_id="VC-3.2"
   local resp
-  resp=$(identity_get "/v1alpha/participants/${PROVIDER_CTX}/credentials" 2>/dev/null) || resp=""
+  resp=$(identity_get "/v1alpha/participants/${PROVIDER_CTX}/credentials") || resp=""
 
   if [ -n "$resp" ] && echo "$resp" | jq -e 'length > 0' >/dev/null 2>&1; then
     local types
@@ -425,7 +425,7 @@ run_issuer_tests() {
   local resp
   # Issuer uses multi-tenant API: /v1alpha/participants/{ctxId}/credentialdefinitions/query
   resp=$(issuer_post "/v1alpha/participants/issuer/credentialdefinitions/query" \
-    '{"@context":["https://w3id.org/edc/connector/management/v2"],"@type":"QuerySpec"}' 2>/dev/null) || resp=""
+    '{"@context":["https://w3id.org/edc/connector/management/v2"],"@type":"QuerySpec"}') || resp=""
 
   # ISS-4.2 check: response may be either an error object or a valid array
   if [ -n "$resp" ] && echo "$resp" | jq -e 'type == "array"' >/dev/null 2>&1; then
