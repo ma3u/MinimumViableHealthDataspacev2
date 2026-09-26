@@ -26,6 +26,10 @@ on:
         description: "Force full reset even if databases are clean"
         type: boolean
         default: false
+      wipe_realm:
+        description: "DESTRUCTIVE: delete and re-import the edcv realm, losing every client and user not in jad/keycloak-realm.json (meinbefund-ios, real accounts)"
+        type: boolean
+        default: false
 
 permissions:
   id-token: write
@@ -311,15 +315,55 @@ jobs:
           echo "::add-mask::$TOKEN"
           echo "Got admin token (${#TOKEN} chars)"
 
-          # Idempotent: DELETE the realm first (204 if existed, 404 if
-          # not — we accept both), then POST the JSON to create it
-          # fresh. Using -o /dev/null + -w status to avoid leaking the
-          # bearer token in any error body that might come back.
-          DEL=$(curl -sS -o /dev/null -w "%{http_code}" -X DELETE \
-            "$KC/admin/realms/edcv" \
-            -H "Authorization: Bearer $TOKEN")
-          echo "DELETE /admin/realms/edcv → HTTP $DEL"
+          # This step used to DELETE the realm unconditionally and re-POST
+          # jad/keycloak-realm.json over it. That is the exact operation the
+          # schedule was disabled for on 2026-09-13: the realm now carries the
+          # `meinbefund-ios` client and real user accounts (ADR-034) and the
+          # quota counter (ADR-035), none of which are in the import file, so
+          # the re-import does not put them back. The iPhone simply stops
+          # signing in.
+          #
+          # Disabling the cron removed the weekly occurrence but left the
+          # operation one `workflow_dispatch` away, and until #310 a stale
+          # admin password happened to fail the login first, which hid it. So:
+          # the default path never deletes, and the wipe is an explicit opt-in.
+          REALM_CODE=$(curl -sS -o /dev/null -w "%{http_code}" \
+            "$KC/realms/edcv/.well-known/openid-configuration")
 
+          if [ "${{ inputs.wipe_realm }}" != "true" ]; then
+            if [ "$REALM_CODE" = "200" ]; then
+              echo "Realm edcv is present (HTTP $REALM_CODE). Leaving it alone."
+              echo "Re-run with wipe_realm=true to delete and re-import it, which"
+              echo "removes every client and user that jad/keycloak-realm.json"
+              echo "does not carry (ADR-034, ADR-035)."
+              exit 0
+            fi
+            echo "Realm edcv is missing (HTTP $REALM_CODE). Importing it, no delete."
+          else
+            # Name what is about to be lost, in the log, before losing it.
+            echo "::warning::wipe_realm=true: deleting and re-importing the edcv realm"
+            LIVE=$(curl -sS "$KC/admin/realms/edcv/clients" \
+              -H "Authorization: Bearer $TOKEN" \
+              | python3 -c "import json,sys; print(' '.join(sorted(c.get('clientId','') for c in json.load(sys.stdin))))" \
+              2>/dev/null || echo "")
+            SHIPPED=$(python3 -c "import json; print(' '.join(sorted(c.get('clientId','') for c in json.load(open('jad/keycloak-realm.json')).get('clients', []))))")
+            echo "  clients live now:        ${LIVE:-(could not list)}"
+            echo "  clients the import has:  ${SHIPPED}"
+            for c in $LIVE; do
+              case " $SHIPPED " in
+                *" $c "*) ;;
+                *) echo "::warning::client '$c' is not in jad/keycloak-realm.json and will NOT come back" ;;
+              esac
+            done
+
+            DEL=$(curl -sS -o /dev/null -w "%{http_code}" -X DELETE \
+              "$KC/admin/realms/edcv" \
+              -H "Authorization: Bearer $TOKEN")
+            echo "DELETE /admin/realms/edcv → HTTP $DEL"
+          fi
+
+          # -o /dev/null + -w status on the calls above avoids leaking the
+          # bearer token in any error body that might come back.
           POST=$(curl -sS -o /tmp/kc-import.out -w "%{http_code}" -X POST \
             "$KC/admin/realms" \
             -H "Authorization: Bearer $TOKEN" \
