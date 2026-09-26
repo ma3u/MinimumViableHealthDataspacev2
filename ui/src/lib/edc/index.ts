@@ -9,7 +9,7 @@
  *     '@context': [EDC_CONTEXT],
  *     '@type': 'QuerySpec',
  *     counterPartyAddress: 'http://health-dataspace-controlplane:8082/api/dsp',
- *     protocol: 'dataspace-protocol-http',
+ *     protocol: DSP_PROTOCOL,  // see lib/dsp-protocol.ts (#180)
  *   });
  */
 export { edcClient, EDC_CONTEXT } from "./client";

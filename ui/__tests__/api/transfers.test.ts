@@ -140,7 +140,7 @@ describe("/api/transfers", () => {
           "@type": "TransferRequest",
           contractId: "contract-123",
           counterPartyAddress: "http://counter.party:8081/api/dsp",
-          protocol: "dataspace-protocol-http:2025-1",
+          protocol: "http-dsp-profile-2025-1",
           transferType: "HttpData-PULL",
           dataDestination: expect.objectContaining({
             "@type": "DataAddress",

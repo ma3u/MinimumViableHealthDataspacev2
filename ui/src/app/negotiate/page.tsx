@@ -1,6 +1,7 @@
 "use client";
 
 import { fetchApi } from "@/lib/api";
+import { DSP_PROTOCOL } from "@/lib/dsp-protocol";
 import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import {
@@ -517,9 +518,7 @@ function NegotiateContent() {
               ContractRequest
             </code>{" "}
             with the selected ODRL offer. Protocol:{" "}
-            <code className="text-[var(--text-secondary)]">
-              dataspace-protocol-http:2025-1
-            </code>
+            <code className="text-[var(--text-secondary)]">{DSP_PROTOCOL}</code>
           </p>
 
           {result && (

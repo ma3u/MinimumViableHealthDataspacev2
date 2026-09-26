@@ -544,7 +544,7 @@ describe("POST /api/negotiations", () => {
       expect.any(String),
       "POST",
       expect.objectContaining({
-        protocol: "dataspace-protocol-http:2025-1",
+        protocol: "http-dsp-profile-2025-1",
         "@type": "ContractRequest",
       }),
     );

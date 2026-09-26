@@ -816,7 +816,7 @@ describe("NegotiatePage", () => {
 
     await waitFor(() => {
       expect(screen.getByText("ContractRequest")).toBeTruthy();
-      expect(screen.getByText("dataspace-protocol-http:2025-1")).toBeTruthy();
+      expect(screen.getByText("http-dsp-profile-2025-1")).toBeTruthy();
     });
   });
 
