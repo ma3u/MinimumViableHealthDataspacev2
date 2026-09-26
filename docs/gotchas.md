@@ -3,6 +3,24 @@
 Non-obvious pitfalls across the stack. Ordered newest first; add a new
 entry at the top when you hit something that cost you more than 30 minutes.
 
+## 2026-09-26: the `issuer` Keycloak client exists on every laptop and no CI runner
+
+`jad/seed-jad.sh` created it at runtime through the admin API, behind the
+compose profile `seed` that only `bootstrap-jad.sh` activates. CI never ran
+it, so every seed that logs in as `issuer` failed there, and the three DCP
+checks depending on them (`ISS-4.3`, `VC-3.2`, `VC-3.3`) could not fail until
+#341. The client is now in `jad/keycloak-realm.json` and pinned by
+`ui/__tests__/unit/config/keycloak-realm.test.ts`. Full write-up and the rule
+it adds: `docs/knowledge/runbooks/keycloak-realm-drift.md`. Quick check for
+the same class elsewhere:
+
+```bash
+grep -rn 'admin/realms/edcv/clients' --include='*.sh' jad scripts   # scripts that mint clients
+python3 -c "import json;print([c['clientId'] for c in json.load(open('jad/keycloak-realm.json'))['clients']])"
+```
+
+Every clientId a script POSTs must appear in that list.
+
 ## 2026-09-26: the STS exists, on a port nothing publishes
 
 Phase 1 of #338 needs an STS for the DCP TCK, and the work plan in discussion
