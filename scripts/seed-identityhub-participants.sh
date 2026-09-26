@@ -145,6 +145,33 @@ total=$(curl -sS --max-time 20 -H "Authorization: Bearer ${TOKEN}" \
   | python3 -c "import json,sys; print(len(json.load(sys.stdin)))" 2>/dev/null || echo 0)
 log "IdentityHub now reports ${total} participant context(s)"
 
+# A participant the hub lists is not yet a participant anyone can talk to: the
+# issuer resolves did:web:identityhub%3A7083:<slug> to
+# http://identityhub:7083/<slug>/did.json before it will issue anything. That
+# port is not published, so this probes from inside the network when Docker
+# is available. PROBE_DID_DOCS=0 skips it.
+if [ "${PROBE_DID_DOCS:-1}" = "1" ] && command -v docker >/dev/null 2>&1; then
+  unresolved=0
+  while read -r _ctx did; do
+    [ -n "$did" ] || continue
+    slug="${did##*:}"
+    code=$(docker run --rm --network "${COMPOSE_NETWORK:-health-dataspace-edcv}" "${CURL_IMAGE:-curlimages/curl:latest}" \
+      -s -o /dev/null -w '%{http_code}' "http://identityhub:7083/${slug}/did.json" 2>/dev/null || echo 000)
+    if [ "$code" = "200" ]; then
+      echo -e "  ${GREEN}✓${NC} ${did} resolves"
+    else
+      echo -e "  ${RED}!${NC} ${did} -> http://identityhub:7083/${slug}/did.json -> HTTP ${code}"
+      unresolved=$((unresolved + 1))
+    fi
+  done <<EOF
+$PAIRS
+EOF
+  if [ "$unresolved" -gt 0 ]; then
+    echo -e "${RED}FAIL${NC}: ${unresolved} participant DID document(s) do not resolve; nothing can issue to them." >&2
+    exit 1
+  fi
+fi
+
 if [ "$failed" -gt 0 ]; then
   echo -e "${RED}FAIL${NC}: ${failed} participant(s) could not be created." >&2
   exit 1

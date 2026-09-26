@@ -3,6 +3,41 @@
 Non-obvious pitfalls across the stack. Ordered newest first; add a new
 entry at the top when you hit something that cost you more than 30 minutes.
 
+## 2026-09-26: a readiness endpoint says nothing about identity
+
+`ISS-4.1: IssuerService readiness check passed` was true in CI on every run
+while the service had no participant context, no loaded signing key and no
+DID (#345). Readiness answers "the process is up"; the issuer's identity is
+three separate things `scripts/bootstrap-jad.sh` does after the process is up,
+and `docker compose up -d` does none of them:
+
+| piece                            | where it comes from                                                                                 |
+| -------------------------------- | --------------------------------------------------------------------------------------------------- |
+| signing key in Vault             | `vault-bootstrap` sidecar running `jad/bootstrap-vault.sh`                                          |
+| the `issuer` participant context | `jad/seed-jad.sh` Step 2, a POST to the issuer's own identity API on 10015, from inside the network |
+| activation records               | `jad/seed-issuer-identity.sql` through `psql`, then a restart                                       |
+
+How it showed: the `issuer` Keycloak client's token (claim
+`participant_context_id=issuer`) got **401** from the issuer admin API while
+the `admin` client's token got **404** `IdentityHubParticipantContext with
+ID=issuer was not found`, on the same fresh stack in the same minute. One
+accepted, one rejected, same signing key: not an auth or JWKS problem, the
+claim's referent was missing. `scripts/seed-issuer-identity.sh` reproduces the
+three pieces where CFM is absent and reads the DID document back.
+
+The check to reach for is the one that needs the identity to exist:
+
+```bash
+docker run --rm --network health-dataspace-edcv curlimages/curl -sf \
+  http://issuerservice:10016/issuer/did.json | python3 -c 'import json,sys; print(len(json.load(sys.stdin)["verificationMethod"]), "key(s)")'
+```
+
+Small shell trap from the same script, because it cost a run: under
+`set -o pipefail`, `docker logs c | grep -q pattern` fails on the very line
+it finds. `grep -q` exits on the first match and closes the pipe, `docker logs`
+gets SIGPIPE, and the pipeline's status is non-zero. Capture first, then
+match: `logs=$(docker logs c 2>&1 || true); case "$logs" in *pattern*) ...`.
+
 ## 2026-09-26: a Vault restart takes every participant's ability to sign, and the identity checks keep passing
 
 CLAUDE.md gotcha 1 says Vault is in-memory and to re-run `bootstrap-jad.sh`.

@@ -387,7 +387,9 @@ jobs:
       # cause. docs/developer-guide.md's quick start seeds a minimal stack with
       # init-schema.cypher and then insert-synthetic-schema-data.cypher, so CI
       # now seeds what the documentation says a minimal stack has, plus the
-      # EEHRxF profiles the EEHR-3.x rows need. Both files are MERGE-only;
+      # EEHRxF profiles the EEHR-3.x rows need, plus seed-compliance-matrix,
+      # which adds the GRANTS_ACCESS_TO edge the synthetic set leaves out and
+      # ART53-1.4's full access chain needs. All three are MERGE-only;
       # verified on a fresh neo4j:5.26.28: 141 nodes, and 141 again after a
       # second run. The count read-back is the assertion (ADR-031): a seed
       # that ran is not a seed that seeded.
@@ -398,7 +400,7 @@ jobs:
         continue-on-error: true
         run: |
           set -euo pipefail
-          for f in neo4j/insert-synthetic-schema-data.cypher neo4j/register-eehrxf-profiles.cypher; do
+          for f in neo4j/insert-synthetic-schema-data.cypher neo4j/register-eehrxf-profiles.cypher neo4j/seed-compliance-matrix.cypher; do
             echo "== $f"
             docker exec -i health-dataspace-neo4j \
               cypher-shell -u neo4j -p healthdataspace < "$f"

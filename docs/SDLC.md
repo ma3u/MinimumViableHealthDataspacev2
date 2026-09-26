@@ -436,9 +436,9 @@ three suites died at participant discovery (#307, fixed in #314).
 >
 > | Suite                | CI ephemeral stack                      | Azure deployment                     |
 > | -------------------- | --------------------------------------- | ------------------------------------ |
-> | EHDS domain          | 1 passed, 13 failed, 11 skipped / 25    | 20 passed, 0 failed, 5 skipped / 25  |
+> | EHDS domain          | **17 passed, 1 failed, 7 skipped / 25** | 20 passed, 0 failed, 5 skipped / 25  |
 > | EHDS dataspace (DSP) | **25 passed, 0 failed, 8 skipped / 33** | 23 passed, 0 failed, 10 skipped / 33 |
-> | EHDS identity (DCP)  | **11 passed, 7 failed / 18 verdicts**   | 10 passed, 1 failed, 11 skipped / 22 |
+> | EHDS identity (DCP)  | **19 passed, 2 failed / 21 verdicts**   | 10 passed, 1 failed, 11 skipped / 22 |
 >
 > Re-measured 2026-09-26 from runs
 > [36250029604](https://github.com/ma3u/MinimumViableHealthDataspacev2/actions/runs/36250029604)
@@ -449,14 +449,19 @@ three suites died at participant discovery (#307, fixed in #314).
 > **DSP reached zero failures.** The `querySpec` `@type` fix in #336 resolved
 > `CAT-1.3`, which was the one failing row.
 >
-> **DCP fell from 14 passed / 0 failed to 11 / 7, and that is the suite
-> improving rather than the stack degrading.** #341 gave ten checks a reachable
-> failure; they promptly found that the **CI IdentityHub holds zero
-> participants** (#345), so there are no DIDs, key pairs or credentials to
-> assert on. It had been reporting an empty IdentityHub as fully passing. A
-> seeded local stack scores 21 passed / 0 failed against the same suite, and
-> the null stub scores exactly the CI figure of 11 / 7, because for DCP
-> purposes the CI stack is a null implementation.
+> **DCP went 14/0 → 11/7 → 19/2 in one day, and each move was the suite
+> getting more honest.** #341 gave ten checks a reachable failure; they found
+> that the **CI IdentityHub held zero participants**, that the **IssuerService
+> had no identity of its own**, and that no participant was registered as a
+> holder (#345). Until then CI had been reporting an empty identity layer as
+> fully passing, and the null stub scored exactly the same 11 / 7. Seeding
+> those stores from the same sources the local stack uses moved it to 19 / 2.
+> The two rows left, `VC-3.2`/`VC-3.3`, wait on a credential actually being
+> issued over DCP, which no environment has yet done: CI's request ends in
+> `ERROR` for a reason under investigation, and the local stack cannot sign
+> at all since a Vault restart (gotchas, 2026-09-26). **EHDS went 1/13 → 17/1**
+> once the job seeds the graph `docs/developer-guide.md` tells a developer to
+> load; the one row left is the full `ART53-1.4` access chain.
 >
 > The Azure column is the state after #316 seeded five participant contexts
 > onto the control plane, which it had never had. Before that, all three suites

@@ -7,9 +7,10 @@
     "A floor, not a target. Raise it whenever the suites improve. Lowering one",
     "is a deliberate act a reviewer should question.",
     "",
-    "Recorded from GitHub Actions run 36250029604 on 2026-09-26, the first run",
-    "after the blocking gate landed. These are the CI ephemeral stack's",
-    "numbers, which are NOT the same as a seeded local stack's."
+    "Recorded from GitHub Actions run 36250029604 on 2026-09-26 (first run after the",
+    "gate landed), raised from run 36258702281 the same day once #345 gave the CI",
+    "stack an IdentityHub, an issuer identity and a seeded graph. These are the CI",
+    "ephemeral stack's numbers, which are NOT the same as a seeded local stack's."
   ],
   "review_by": "2026-12-26",
   "suites": {
@@ -19,16 +20,16 @@
       "note": "run 36250029604. Zero failures: the CAT-1.3 querySpec @type fix in #336 resolved the one that was failing."
     },
     "dcp-compliance-results": {
-      "min_passed": 11,
-      "max_failed": 7,
+      "min_passed": 19,
+      "max_failed": 2,
       "review_by": "2026-10-27",
-      "note": "KNOWN BAD FLOOR, see #345. All 7 failures are one cause: the CI IdentityHub holds 0 participants, so no DIDs, key pairs or credentials exist to check. This is not an acceptable resting state, it is a ratchet peg so the gap cannot widen while it is fixed. A seeded local stack scores 21 passed / 0 failed against the same suite. Short review date on purpose."
+      "note": "run 36258702281, raised from 11/7. The two failures left are VC-3.2/VC-3.3: the DCP credential request the CI hub sends ends in ERROR for a reason under investigation on #345 (the hub's record carries no errorDetail; the next run dumps both services' logs). A seeded local stack scores 21/0 on its planted credentials, and cannot currently issue either (Vault lost the keys, see gotchas). Short review date stays until the request succeeds somewhere."
     },
     "ehds-compliance-results": {
-      "min_passed": 1,
-      "max_failed": 13,
+      "min_passed": 17,
+      "max_failed": 1,
       "review_by": "2026-10-27",
-      "note": "KNOWN BAD FLOOR, see #345. The CI Neo4j is empty, so there are no HDABApproval, HealthDataset or access-chain nodes to assert on. Same reasoning and same short review date as the DCP row."
+      "note": "run 36258702281, raised from 1/13 once CI seeds the graph the developer guide describes. The one failure left is ART53-1.4, the full Participant->AccessApplication<-HDABApproval->HealthDataset chain, which the minimal data set does not build (#345). Short review date stays until that chain is seeded or the check is re-scoped."
     }
   }
 }

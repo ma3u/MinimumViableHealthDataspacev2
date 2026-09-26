@@ -75,6 +75,7 @@ for r in rows if isinstance(rows,list) else []:
 print(n)" "$CREDENTIAL_TYPE" 2>/dev/null || echo 0
 }
 
+started=$(date +%s)
 requested=0; already=0; failed=0
 declare -a WATCH_CTX=() WATCH_DID=() WATCH_BEFORE=() WATCH_HPID=()
 
@@ -134,7 +135,10 @@ if [ "${#WATCH_CTX[@]}" -gt 0 ]; then
 try: r=json.load(sys.stdin); print((r.get('status') or '')+'|'+(r.get('errorDetail') or ''))
 except Exception: print('|')" 2>/dev/null || echo '|')
         case "${st%%|*}" in
-          ERROR) ERRORED[$i]="${st#*|}"; continue ;;
+          # An empty errorDetail must still register as an error: the first CI
+          # run hit exactly that, and an empty string read as "not errored", so
+          # the wait ended after one pass and the reason never reached the log.
+          ERROR) ERRORED[$i]="${st#*|}"; [ -n "${ERRORED[$i]}" ] || ERRORED[$i]="(hub reports ERROR with no errorDetail)"; continue ;;
         esac
       fi
       pending=$((pending + 1))
@@ -143,6 +147,7 @@ except Exception: print('|')" 2>/dev/null || echo '|')
   done
 fi
 
+elapsed=$(( $(date +%s) - started ))
 missing=0
 for i in "${!WATCH_CTX[@]}"; do
   now=$(issued_count "${WATCH_CTX[$i]}")
@@ -153,10 +158,37 @@ for i in "${!WATCH_CTX[@]}"; do
   elif [ "$now" -gt "${WATCH_BEFORE[$i]}" ]; then
     echo -e "  ${GREEN}✓${NC} ${slug}: ${CREDENTIAL_TYPE} arrived over DCP (${WATCH_BEFORE[$i]} -> ${now})"
   else
-    echo -e "  ${RED}✗${NC} ${slug}: no new ${CREDENTIAL_TYPE} after ${WAIT_SECONDS}s (still ${now})"
+    echo -e "  ${RED}✗${NC} ${slug}: no new ${CREDENTIAL_TYPE} after ${elapsed}s (still ${now})"
     missing=$((missing + 1))
   fi
 done
+
+# When it did not work, put the evidence where a CI log can be read: the
+# hub's own request record, and the hub's log lines about the request. The
+# first CI run printed five failures and not one reason.
+if [ "$missing" -gt 0 ]; then
+  for i in "${!WATCH_CTX[@]}"; do
+    [ -n "${WATCH_HPID[$i]}" ] || continue
+    echo "  -- request record ${WATCH_DID[$i]##*:} / ${WATCH_HPID[$i]}:"
+    curl -sS --max-time 15 -H "Authorization: Bearer ${TOKEN}" \
+      "${IDENTITY_API}/v1alpha/participants/${WATCH_CTX[$i]}/credentials/request/${WATCH_HPID[$i]}" 2>/dev/null \
+      | head -c 600 | sed 's/^/     /'; echo
+  done
+  if command -v docker >/dev/null 2>&1 && docker ps --format '{{.Names}}' 2>/dev/null | grep -qx "${IDENTITYHUB_CONTAINER:-health-dataspace-identityhub}"; then
+    echo "  -- ${IDENTITYHUB_CONTAINER:-health-dataspace-identityhub} log, credential request lines, last 5 min:"
+    docker logs --since 5m "${IDENTITYHUB_CONTAINER:-health-dataspace-identityhub}" 2>&1 \
+      | grep -v otel.javaagent | grep -iE 'HolderCredentialRequest|CredentialRequest|issuer|ERROR|WARN' \
+      | grep -v CredentialWatchdog | tail -15 | sed 's/^/     /'
+  fi
+  # The other half of the conversation: if the hub did send, the issuer's
+  # reason for refusing is in its log, not the hub's.
+  if command -v docker >/dev/null 2>&1 && docker ps --format '{{.Names}}' 2>/dev/null | grep -qx "${ISSUER_CONTAINER:-health-dataspace-issuerservice}"; then
+    echo "  -- ${ISSUER_CONTAINER:-health-dataspace-issuerservice} log, issuance lines, last 5 min:"
+    docker logs --since 5m "${ISSUER_CONTAINER:-health-dataspace-issuerservice}" 2>&1 \
+      | grep -v otel.javaagent | grep -iE 'CredentialRequest|issuance|IssuanceProcess|attestation|holder|did:web|ERROR|WARN|SEVERE' \
+      | tail -15 | sed 's/^/     /'
+  fi
+fi
 
 if [ "$failed" -gt 0 ] || [ "$missing" -gt 0 ]; then
   echo -e "${RED}FAIL${NC}: ${failed} request(s) rejected, ${missing} credential(s) never arrived." >&2
