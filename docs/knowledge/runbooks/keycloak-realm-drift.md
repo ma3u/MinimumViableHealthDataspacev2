@@ -45,6 +45,40 @@ the realm, which picks up the whole file.
 `06-post-deploy.sh` now verifies redirect URIs and exits non-zero on drift;
 `ui/__tests__/unit/config/keycloak-realm.test.ts` pins the production URIs.
 
+## Recurrence 2026-09-26: a client that only ever existed at runtime
+
+Third instance, and a different mechanism from the two above. The realm file
+was imported correctly; a script then **added** to the realm afterwards, and
+only on some stacks.
+
+`jad/seed-jad.sh` created the `issuer` Keycloak client (Vault access and the
+issuer-admin API, claims `participant_context_id=issuer` and
+`role=participant`) through the admin API at runtime. It runs as the compose
+service `jad-seed`, which sits behind `profiles: [seed]` and is started only by
+`scripts/bootstrap-jad.sh`. CI's `compliance.yml` does
+`docker compose -f docker-compose.jad.yml up -d`, never activates the profile,
+and so has never had the client. Every seed that authenticates as `issuer`
+(`seed-issuer-defs.sh`, `seed-ehds-credentials.sh`, `issue-ehds-credentials.sh`)
+failed there with `Could not get issuer token from Keycloak`.
+
+Nobody noticed for the same reason as the other entries in #338: the three DCP
+checks that depend on those seeds (`ISS-4.3`, `VC-3.2`, `VC-3.3`) had no
+reachable failure branch until #341, so an IssuerService with no definitions
+and participants with no credentials scored as passes.
+
+**Fix:** the client is now declared in `jad/keycloak-realm.json`, field for
+field as the script created it, and pinned by
+`ui/__tests__/unit/config/keycloak-realm.test.ts`, which runs in the pre-commit
+Vitest hook and the PR Gate. Removing it fails the build. `seed-jad.sh` still
+runs its create; against an imported realm it now takes the "may already
+exist" branch, which is the correct one.
+
+**The rule this adds:** a realm object lives in the realm file. A script may
+_reconcile_ what the file declares, idempotently; it may not be the only place
+an object is defined. Anything created only by a script exists only where that
+script runs, and the environments where it does not run will pass every check
+that cannot fail and no check that can.
+
 ## The realm has vanished entirely
 
 Different failure from drift, same blast radius. Symptom:

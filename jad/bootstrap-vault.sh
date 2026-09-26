@@ -39,6 +39,11 @@ vault write auth/jwt/config \
 
 # Create KV v2 secrets engine for participants (idempotent — ignore "already in use")
 vault secrets enable -path=participants -version=2 kv 2>/dev/null || echo "Secrets engine already enabled, continuing..."
+# `vault server -dev` mounts secret/ (kv v2) by itself; a real server does not.
+# Every service here writes under secret/ (dataplane keys, aes-key-alias, STS
+# client secrets), and the first run against the file-backed Vault failed with
+# 404 on secret/data/aes-key-alias for exactly this reason (#345).
+vault secrets enable -path=secret -version=2 kv 2>/dev/null || echo "secret/ already enabled, continuing..."
 
 # Get accessor for entity aliases
 ACCESSOR=$(vault auth list | grep 'jwt/' | awk '{print $3}')
@@ -175,5 +180,17 @@ vault write secret/data/dataplane-omop-private -<<EOF || { echo "Failed to creat
     }
 }
 EOF
+
+# ---------------------------------------------------------------------------
+# Transit engine + signing key for siglet (EDC 0.18 dataplane cert-exchange)
+# ---------------------------------------------------------------------------
+# Used to live in scripts/bootstrap-jad.sh start_stack with the note "Vault is
+# in-memory, so this must run on every bootstrap". Vault is file-backed since
+# 2026-09-26; the bootstrap owns every mount the stack needs, once, here. Both
+# calls are idempotent: "path is already in use" and an existing key are fine.
+echo "=== Provisioning transit engine + signing-siglet key ==="
+vault secrets enable transit 2>/dev/null || echo "transit already enabled, continuing..."
+vault write -f transit/keys/signing-siglet type=ed25519 >/dev/null 2>&1 || echo "signing-siglet key already present, continuing..."
+echo "✓ transit/keys/signing-siglet ready"
 
 echo "=== Vault bootstrap completed successfully! ==="

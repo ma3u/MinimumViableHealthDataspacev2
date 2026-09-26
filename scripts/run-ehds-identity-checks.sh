@@ -367,8 +367,60 @@ run_keypair_tests() {
     skip "$test_id: IdentityHub not reachable"
     record_result "$test_id" "keypair" "skipped" "identity api unreachable"
   fi
+  # 2.4 — The key MATERIAL exists, not just the key record. #345
+  #
+  # KEY-2.2 reads keypair_resource in Postgres and reported ACTIVATED for two
+  # days on a stack where Vault, then in-memory, had lost every private key on
+  # a restart; nothing could sign, and this suite scored 21/0. IdentityHub
+  # stores a participant's private key in Vault at
+  #   participants/<ctx>/identityhub/<url-encoded privateKeyAlias>
+  # next to <ctx>-sts-client-secret. This asks Vault whether that entry exists
+  # (exit code only, never the value). Vault is reachable only through its
+  # container, so where Docker or the container is absent this skips and says
+  # so; it must not pass by default.
+  local test_id="KEY-2.4"
+  local vault_c="${VAULT_CONTAINER:-health-dataspace-vault}"
+  if ! command -v docker >/dev/null 2>&1 || ! docker ps --format '{{.Names}}' 2>/dev/null | grep -qx "$vault_c"; then
+    skip "$test_id: Vault container ${vault_c} not reachable from here, key material not checked"
+    record_result "$test_id" "keypair" "skipped" "vault container not reachable"
+  elif [ -z "$resp" ] || ! echo "$resp" | jq -e 'length > 0' >/dev/null 2>&1; then
+    skip "$test_id: no key pairs to check material for"
+    record_result "$test_id" "keypair" "skipped" "no key pairs"
+  else
+    local alias enc missing=0 checked=0
+    while IFS= read -r alias; do
+      [ -n "$alias" ] || continue
+      # EDC url-encodes the alias once more for the vault path: ':' -> %3A,
+      # an existing '%' -> %25, '#' -> %23 (observed: did%3Aweb%3Aidentityhub%253A7083%3Almc%23key1).
+      enc=$(printf '%s' "$alias" | sed -e 's/%/%25/g' -e 's/:/%3A/g' -e 's/#/%23/g')
+      checked=$((checked + 1))
+      # Where IdentityHub put it depends on the participant's Vault config:
+      # CFM-created participants carry edc.vault.hashicorp.config with a
+      # per-participant folder (participants/<ctx>/identityhub/...); one
+      # created through the Identity API without it lands under the hub's
+      # global vault, i.e. secret/<alias>. Either location is the property.
+      local found=0 path
+      for path in "participants/${PROVIDER_CTX}/identityhub/${enc}" "secret/${enc}"; do
+        if docker exec -e VAULT_ADDR=http://127.0.0.1:8200 -e VAULT_TOKEN="${VAULT_TOKEN:-root}" "$vault_c" \
+             vault kv get -field=content "$path" >/dev/null 2>&1; then found=1; break; fi
+      done
+      if [ "$found" -ne 1 ]; then
+        echo "    no material in Vault for alias ${alias} (looked in participants/${PROVIDER_CTX}/identityhub/ and secret/)" >&2
+        missing=$((missing + 1))
+      fi
+    done < <(echo "$resp" | jq -r '.[] | select(.state == 200 or .state == "ACTIVATED") | .privateKeyAlias // empty')
+    if [ "$checked" -eq 0 ]; then
+      fail "$test_id: provider has no ACTIVATED key pair whose alias could be checked"
+      record_result "$test_id" "keypair" "failed" "no activated alias"
+    elif [ "$missing" -gt 0 ]; then
+      fail "$test_id: ${missing} of ${checked} activated key pair(s) have no private key material in Vault, the participant cannot sign"
+      record_result "$test_id" "keypair" "failed" "${missing}/${checked} aliases without material"
+    else
+      pass "$test_id: private key material present in Vault for ${checked} activated key pair(s)"
+      record_result "$test_id" "keypair" "passed" "${checked} aliases"
+    fi
+  fi
 }
-
 # ---------------------------------------------------------------------------
 # Category 3: Verifiable Credential Tests (DCP §5)
 # ---------------------------------------------------------------------------

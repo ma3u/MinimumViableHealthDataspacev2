@@ -92,17 +92,26 @@ services:
   # ---------------------------------------------------------------------------
   # HashiCorp Vault — Secret management (dev mode)
   # ---------------------------------------------------------------------------
+  # File storage on a named volume, not `-dev`: dev mode is in-memory and a
+  # restart on 2026-09-24 took every participant's signing key and STS client
+  # secret with it, while every identity check kept passing (docs/gotchas.md,
+  # #345). vault-unseal below initialises on first start and unseals on every
+  # start. `vault status` exits 2 while sealed, so the healthcheck goes green
+  # only once the sidecar has done its job, and everything that depends on
+  # vault being healthy waits for a usable Vault rather than a sealed one.
   vault:
     image: hashicorp/vault:2.0
     container_name: health-dataspace-vault
+    command: ["vault", "server", "-config=/vault/config/vault.hcl"]
     environment:
-      VAULT_DEV_ROOT_TOKEN_ID: "root"
-      VAULT_DEV_LISTEN_ADDRESS: "0.0.0.0:8200"
       VAULT_ADDR: "http://127.0.0.1:8200"
     cap_add:
       - IPC_LOCK
     ports:
       - "8200:8200"
+    volumes:
+      - ./jad/vault.hcl:/vault/config/vault.hcl:ro
+      - vault_data:/vault/file
     networks:
       - edcv
     labels:
@@ -113,7 +122,30 @@ services:
       test: ["CMD", "vault", "status"]
       interval: 5s
       timeout: 5s
-      retries: 10
+      retries: 30
+    restart: unless-stopped
+
+  # Initialises Vault once (unseal share and root token kept in vault_keys,
+  # dev-grade) and unseals it on every start; then makes sure a token with the
+  # literal id "root" exists, which is what every service here is configured
+  # with. Same script as the Azure Vault, scripts/vault-init-or-unseal.sh.
+  vault-unseal:
+    image: hashicorp/vault:2.0
+    container_name: health-dataspace-vault-unseal
+    user: "0"
+    entrypoint:
+      ["/bin/sh", "-c", "sh /scripts/vault-init-or-unseal.sh && sleep infinity"]
+    environment:
+      VAULT_ADDR: "http://vault:8200"
+      VAULT_ENSURE_TOKEN_ID: "root"
+    volumes:
+      - ./scripts/vault-init-or-unseal.sh:/scripts/vault-init-or-unseal.sh:ro
+      - vault_keys:/vault
+    networks:
+      - edcv
+    depends_on:
+      vault:
+        condition: service_started
     restart: unless-stopped
 
   # ---------------------------------------------------------------------------
@@ -855,3 +887,5 @@ networks:
 volumes:
   postgres_data:
   nats_data:
+  vault_data:
+  vault_keys:

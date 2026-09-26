@@ -3,6 +3,133 @@
 Non-obvious pitfalls across the stack. Ordered newest first; add a new
 entry at the top when you hit something that cost you more than 30 minutes.
 
+## 2026-09-26: a readiness endpoint says nothing about identity
+
+`ISS-4.1: IssuerService readiness check passed` was true in CI on every run
+while the service had no participant context, no loaded signing key and no
+DID (#345). Readiness answers "the process is up"; the issuer's identity is
+three separate things `scripts/bootstrap-jad.sh` does after the process is up,
+and `docker compose up -d` does none of them:
+
+| piece                            | where it comes from                                                                                 |
+| -------------------------------- | --------------------------------------------------------------------------------------------------- |
+| signing key in Vault             | `vault-bootstrap` sidecar running `jad/bootstrap-vault.sh`                                          |
+| the `issuer` participant context | `jad/seed-jad.sh` Step 2, a POST to the issuer's own identity API on 10015, from inside the network |
+| activation records               | `jad/seed-issuer-identity.sql` through `psql`, then a restart                                       |
+
+How it showed: the `issuer` Keycloak client's token (claim
+`participant_context_id=issuer`) got **401** from the issuer admin API while
+the `admin` client's token got **404** `IdentityHubParticipantContext with
+ID=issuer was not found`, on the same fresh stack in the same minute. One
+accepted, one rejected, same signing key: not an auth or JWKS problem, the
+claim's referent was missing. `scripts/seed-issuer-identity.sh` reproduces the
+three pieces where CFM is absent and reads the DID document back.
+
+The check to reach for is the one that needs the identity to exist:
+
+```bash
+docker run --rm --network health-dataspace-edcv curlimages/curl -sf \
+  http://issuerservice:10016/issuer/did.json | python3 -c 'import json,sys; print(len(json.load(sys.stdin)["verificationMethod"]), "key(s)")'
+```
+
+Small shell trap from the same script, because it cost a run: under
+`set -o pipefail`, `docker logs c | grep -q pattern` fails on the very line
+it finds. `grep -q` exits on the first match and closes the pipe, `docker logs`
+gets SIGPIPE, and the pipeline's status is non-zero. Capture first, then
+match: `logs=$(docker logs c 2>&1 || true); case "$logs" in *pattern*) ...`.
+
+## 2026-09-26: a Vault restart takes every participant's ability to sign, and the identity checks keep passing
+
+CLAUDE.md gotcha 1 says Vault is in-memory and to re-run `bootstrap-jad.sh`.
+Two things it does not say, both found while trying to issue a credential over
+DCP on the local stack (#345):
+
+**What is lost.** Per participant, the signing private key IdentityHub uses
+(`did:web:identityhub%3A7083:<slug>#key1`) and the STS client secret the
+control plane uses (`<contextId>-sts-client-secret`). The key and context
+_records_ survive in Postgres. The secrets do not. On this laptop Vault was
+restarted on 2026-09-24 (`docker inspect health-dataspace-vault` shows
+`server -dev`); the keys date from 2026-03-22.
+
+**How it shows.** In the services' own words, which is how it was confirmed:
+
+```
+identityhub   HolderCredentialRequest ... ERROR:
+              JWSSigner cannot be generated for private key 'did:web:identityhub%3A7083:irs#key1':
+              Private key with ID '...#key1' not found
+controlplane  HTTP 502 [{"type":"BadGateway","message":"Unable to obtain credentials:
+              Failed to fetch client secret from the vault with alias:
+              772f6576b2a6472cb2e373dabc928517-sts-client-secret"}]
+```
+
+So: every DSP catalog request fails (`run-ehds-dataspace-checks.sh` shows
+`CAT-1.1` x3, `CAT-1.2`, `CAT-1.3` red, 27/5/1 locally against 25/0/8 in CI),
+and every DCP credential request ends in `ERROR`.
+
+**What keeps passing, wrongly.** `KEY-2.2` reports the provider's key pair
+ACTIVATED, because it reads the record in Postgres. `VC-3.2`/`VC-3.3` pass on
+the credentials CFM planted in March, which are also in Postgres. Nothing
+asserts "this participant can sign", so the identity suite scored 21/0 on a
+stack where no participant could. The DSP suite _did_ catch it, and only since
+#333: before that the 502 envelope above scored `CAT-1.1` as a pass.
+
+**Remedy status, honestly.** `bootstrap-jad.sh` re-runs `jad-seed` and applies
+`jad/seed-issuer-identity.sql` for the _issuer_; it re-creates the siglet
+transit key. It does not restore participant keys or STS secrets. Two ad-hoc
+scripts exist for exactly this incident, `scripts/_provision_signing_keys.py`
+and `scripts/_rotate_keypairs.py`, and both hardcode participant context ids
+from a previous incarnation of the stack (`5c0ed83a...` against today's
+`24be78bf...`), so they are evidence that it has happened before rather than a
+fix. Until there is one, the reliable path after a Vault restart is a full
+`docker compose down -v` and re-bootstrap, which regenerates the participants
+and their secrets together. Verify afterwards with a request that has to sign:
+
+```bash
+ONLY=irs WAIT_SECONDS=60 ./scripts/request-participant-credentials.sh   # must not end in ERROR
+./scripts/run-ehds-dataspace-checks.sh 2>&1 | grep 'CAT-1.1'            # must be green
+```
+
+**Fixed at the root on 2026-09-26.** The compose Vault now runs
+`vault server -config=/vault/config/vault.hcl` with file storage on the
+`vault_data` volume, and a `vault-unseal` sidecar (the Azure deployment's own
+`scripts/vault-init-or-unseal.sh`) initialises once and unseals on every start.
+`docker restart health-dataspace-vault` no longer loses anything; proven on a
+throwaway project across `restart` and `down`/`up`, then applied to the real
+stack. Two things the switch exposed, both fixed in the same PR:
+
+- `scripts/vault-init-or-unseal.sh` could not unseal: it grepped compact JSON,
+  `vault operator init -format=json` pretty-prints, the key came out empty and
+  `unseal` prompted on a terminal that was not there. Azure uses this script;
+  whether it has been failing there too is still to be checked.
+- `jad/bootstrap-vault.sh` assumed the `secret/` mount that only `-dev` mode
+  creates, and died at its first write (404 on `secret/data/aes-key-alias`),
+  which is also why siglet had been restarting for days. It now enables
+  `secret/` and the transit engine itself.
+
+**The check that is missing** is proposed on #345 as `KEY-2.4`: obtain a
+self-issued token for the participant from the IdentityHub STS
+(`identityhub:7084/api/sts`, see the STS entry below), which signs with the
+participant key and fails exactly when the material is gone. That needs 7084
+published to the host, or the check run from inside the network.
+
+## 2026-09-26: the `issuer` Keycloak client exists on every laptop and no CI runner
+
+`jad/seed-jad.sh` created it at runtime through the admin API, behind the
+compose profile `seed` that only `bootstrap-jad.sh` activates. CI never ran
+it, so every seed that logs in as `issuer` failed there, and the three DCP
+checks depending on them (`ISS-4.3`, `VC-3.2`, `VC-3.3`) could not fail until
+#341. The client is now in `jad/keycloak-realm.json` and pinned by
+`ui/__tests__/unit/config/keycloak-realm.test.ts`. Full write-up and the rule
+it adds: `docs/knowledge/runbooks/keycloak-realm-drift.md`. Quick check for
+the same class elsewhere:
+
+```bash
+grep -rn 'admin/realms/edcv/clients' --include='*.sh' jad scripts   # scripts that mint clients
+python3 -c "import json;print([c['clientId'] for c in json.load(open('jad/keycloak-realm.json'))['clients']])"
+```
+
+Every clientId a script POSTs must appear in that list.
+
 ## 2026-09-26: the STS exists, on a port nothing publishes
 
 Phase 1 of #338 needs an STS for the DCP TCK, and the work plan in discussion

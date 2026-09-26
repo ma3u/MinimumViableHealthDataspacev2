@@ -38,6 +38,20 @@ get_token() {
     | python3 -c "import json,sys; print(json.load(sys.stdin)['access_token'])"
 }
 
+# The Management API version is a path segment and differs per environment:
+# this control plane serves v5beta, the one these seeds were written against
+# served v5alpha, and a wrong segment is a 404 that became an empty body and a
+# json.load crash (#345, the same class as #314). Probe once, in the order the
+# shared library uses, and use whatever answers.
+MGMT_V="${MGMT_V:-${EDC_MGMT_API_VERSION:-}}"
+if [ -z "$MGMT_V" ]; then
+  for _v in v5beta v5alpha v4alpha v3; do
+    if [ "$(curl -s -o /dev/null -w '%{http_code}' -H "Authorization: Bearer $(get_token)" "${MGMT_URL}/api/mgmt/${_v}/participants")" = "200" ]; then MGMT_V="$_v"; break; fi
+  done
+  [ -n "$MGMT_V" ] || { echo "ERROR: no Management API version answered at ${MGMT_URL}/api/mgmt (tried v5beta v5alpha v4alpha v3)" >&2; exit 1; }
+fi
+echo "Management API version: $MGMT_V"
+
 catalog_request() {
   local consumer_ctx="$1"
   local provider_did="$2"
@@ -57,7 +71,7 @@ negotiate_contract() {
   local asset_id="$5"
   local token
   token=$(get_token)
-  curl -sf -X POST "${MGMT_URL}/api/mgmt/v5alpha/participants/${consumer_ctx}/contractnegotiations" \
+  curl -sf -X POST "${MGMT_URL}/api/mgmt/${MGMT_V}/participants/${consumer_ctx}/contractnegotiations" \
     -H "Authorization: Bearer ${token}" \
     -H "Content-Type: application/json" \
     -d "{
@@ -80,7 +94,7 @@ check_negotiation_state() {
   local negotiation_id="$2"
   local token
   token=$(get_token)
-  curl -sf "${MGMT_URL}/api/mgmt/v5alpha/participants/${consumer_ctx}/contractnegotiations/${negotiation_id}" \
+  curl -sf "${MGMT_URL}/api/mgmt/${MGMT_V}/participants/${consumer_ctx}/contractnegotiations/${negotiation_id}" \
     -H "Authorization: Bearer ${token}" \
     -H "Content-Type: application/json"
 }
@@ -89,7 +103,7 @@ check_negotiation_state() {
 # Matches the pattern used in seed-data-assets.sh — no hardcoded UUIDs or DIDs.
 discover_ctx() {
   local slug="$1"
-  curl -sf -H "Authorization: Bearer $(get_token)" "${MGMT_URL}/api/mgmt/v5alpha/participants" \
+  curl -sf -H "Authorization: Bearer $(get_token)" "${MGMT_URL}/api/mgmt/${MGMT_V}/participants" \
     | python3 -c "
 import json, sys
 slug = '$slug'
@@ -109,7 +123,7 @@ print('')
 
 discover_did() {
   local slug="$1"
-  curl -sf -H "Authorization: Bearer $(get_token)" "${MGMT_URL}/api/mgmt/v5alpha/participants" \
+  curl -sf -H "Authorization: Bearer $(get_token)" "${MGMT_URL}/api/mgmt/${MGMT_V}/participants" \
     | python3 -c "
 import json, sys
 slug = '$slug'
@@ -228,7 +242,7 @@ echo ""
 if [ "${STATE:-}" = "FINALIZED" ]; then
   echo "━━━ Step 6: HDAB initiates catalog metadata transfer ━━━"
   TOKEN=$(get_token)
-  TRANSFER_RESULT=$(curl -sf -X POST "${MGMT_URL}/api/mgmt/v5alpha/participants/${HDAB_CTX}/transferprocesses" \
+  TRANSFER_RESULT=$(curl -sf -X POST "${MGMT_URL}/api/mgmt/${MGMT_V}/participants/${HDAB_CTX}/transferprocesses" \
     -H "Authorization: Bearer ${TOKEN}" \
     -H "Content-Type: application/json" \
     -d "{
@@ -250,7 +264,7 @@ if [ "${STATE:-}" = "FINALIZED" ]; then
   for i in $(seq 1 15); do
     sleep 2
     TOKEN=$(get_token)
-    TP_JSON=$(curl -sf "${MGMT_URL}/api/mgmt/v5alpha/participants/${HDAB_CTX}/transferprocesses/${TRANSFER_ID}" \
+    TP_JSON=$(curl -sf "${MGMT_URL}/api/mgmt/${MGMT_V}/participants/${HDAB_CTX}/transferprocesses/${TRANSFER_ID}" \
       -H "Authorization: Bearer ${TOKEN}" 2>/dev/null || echo '{"state":"ERROR"}')
     TP_STATE=$(echo "$TP_JSON" | python3 -c "import json,sys; print(json.load(sys.stdin).get('state','UNKNOWN'))")
     echo "  [$i/15] Transfer state: ${TP_STATE}"

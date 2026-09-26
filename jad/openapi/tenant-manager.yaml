@@ -142,7 +142,8 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/V1Alpha1Tenant'
-  /api/v1alpha1/tenants/{id}:    get:
+  /api/v1alpha1/tenants/{id}:
+    get:
       summary: Get Tenant
       description: Retrieve a Tenant by ID
       parameters:

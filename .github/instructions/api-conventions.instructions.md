@@ -101,6 +101,10 @@ by middleware at the route level.
 
 ## DIDs
 
+Two forms, two layers. Confusing them cost a day (#345).
+
+Graph and UI layer (Neo4j seeds, mocks, tests, docs); nothing resolves these:
+
 ```
 did:web:alpha-klinik.de:participant   — AlphaKlinik Berlin (DATA_HOLDER)
 did:web:pharmaco.de:research          — PharmaCo Research AG (DATA_USER)
@@ -108,3 +112,15 @@ did:web:medreg.de:hdab                — MedReg DE (HDAB_AUTHORITY)
 did:web:lmc.nl:clinic                 — Limburg Medical Centre (DATA_HOLDER)
 did:web:irs.fr:hdab                   — Institut de Recherche Santé (HDAB)
 ```
+
+EDC layer (control plane, IdentityHub, IssuerService holders), the DID the
+connector resolves, served by the IdentityHub's DID endpoint on the compose
+network:
+
+```
+did:web:identityhub%3A7083:<slug>        → http://identityhub:7083/<slug>/did.json
+did:web:issuerservice%3A10016:issuer     (the issuer's own DID)
+```
+
+A participant must carry the same id and DID in all three EDC stores. Full
+version in `.claude/rules/api-conventions.md`.

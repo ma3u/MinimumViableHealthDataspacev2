@@ -225,6 +225,92 @@ jobs:
           CP=http://localhost:11003/api/mgmt TOKEN="$TOKEN" \
             bash scripts/azure/05-cp-participants.sh
 
+      # #345. The control-plane seed above populates participant CONTEXTS on
+      # the connector; IdentityHub is a different store and has always been
+      # empty here. Locally it is filled by jad/seed-health-tenants.sh via the
+      # CFM TenantManager, which does not fit a standard runner, so this talks
+      # to the Identity API directly.
+      #
+      # Not continue-on-error. Before #341 an empty IdentityHub scored 14
+      # passed / 0 failed, so a silent seeding failure is exactly the thing
+      # that hid this for months. If the seed cannot run, the job should say
+      # so here rather than three suites later.
+      - name: Seed IdentityHub participants (#345)
+        run: |
+          KEYCLOAK_URL=http://localhost:8080 \
+          EDC_IDENTITY_URL=http://localhost:11005/api/identity \
+            ./scripts/seed-identityhub-participants.sh
+
+      # #345. CI's IssuerService has never had an identity: no participant
+      # context, no signing key loaded, no DID. Locally bootstrap-jad.sh gives it
+      # one (vault-bootstrap sidecar, jad-seed Step 2, seed-issuer-identity.sql
+      # plus a restart); jad-seed cannot run here because it waits for CFM.
+      # This reproduces those pieces and reads the DID document back. Every
+      # issuer seed below depends on it, and the 401/404 pair the first runs
+      # produced was this missing.
+      - name: Give the issuer its identity (#345)
+        continue-on-error: true
+        run: |
+          KEYCLOAK_URL=http://localhost:8080 \
+            ./scripts/seed-issuer-identity.sh
+
+      # #345. Asserts the property the issuer seeds need, "a token this client
+      # obtains is accepted by the issuer admin API", and on timeout prints the
+      # answer body plus token kid vs JWKS kids. The first run after the realm
+      # fix got 401 for the `issuer` client while `admin` was accepted on the
+      # same stack: the issuer's own participant context did not exist yet, so
+      # the token's participant_context_id=issuer pointed at nothing. That is
+      # what the step above creates. continue-on-error so the suite still runs
+      # and ISS-4.3 stays the assertion; the diagnostic is what this is for.
+      - name: Wait until the issuer accepts Keycloak tokens (#345)
+        continue-on-error: true
+        run: |
+          KC_HOST=http://localhost:8080 \
+          ISSUER_API=http://localhost:10013 \
+          TIMEOUT=120 \
+            bash scripts/lib/wait-for-issuer-auth.sh
+
+      # ISS-4.3 asserts the issuer defines an EHDS credential type. This seed
+      # needs only Keycloak and the IssuerService, no CFM. The `issuer` client
+      # #345. The issuer only issues to a DID in its holders registry; CFM
+      # registers them locally, nothing did here. Mirrors the same control-plane
+      # participants the IdentityHub seed used, so all three stores agree.
+      - name: Register participants as holders on the issuer (#345)
+        continue-on-error: true
+        run: |
+          KEYCLOAK_URL=http://localhost:8080 \
+          EDC_ISSUER_URL=http://localhost:10013/api/admin \
+          EDC_MANAGEMENT_URL=http://localhost:11003/api/mgmt \
+            ./scripts/seed-issuer-holders.sh
+
+      # #345. The first run after the realm fix got a token and then 401 on
+      # every write: the issuer had cached JWKS from a Keycloak still importing
+      # the realm. A health endpoint cannot see that, so this asserts the
+      # property the seeds need, and on timeout prints token kid vs JWKS kids.
+      # continue-on-error so the suite still runs and ISS-4.3 stays the
+      # it logs in as arrives with the realm import since #345.
+      - name: Seed issuer credential definitions (#345)
+        continue-on-error: true
+        run: |
+          KC_HOST=http://localhost:8080 \
+          ISSUER_API=http://localhost:10013 \
+            bash jad/seed-issuer-defs.sh
+
+      # #345. VC-3.2/3.3 want credentials on the participants. The issuer does
+      # not issue on admin command; a credential arrives when the holder's
+      # IdentityHub requests it over DCP. So this asks, then waits for it to
+      # land, and prints the hub's errorDetail if it gives up. First place CI
+      # exercises DCP as a protocol between two services. continue-on-error on
+      # its first outing so the run reports what happened either way.
+      - name: Request participant credentials over DCP (#345)
+        continue-on-error: true
+        run: |
+          KEYCLOAK_URL=http://localhost:8080 \
+          EDC_IDENTITY_URL=http://localhost:11005/api/identity \
+          EDC_MANAGEMENT_URL=http://localhost:11003/api/mgmt \
+          WAIT_SECONDS=120 \
+            ./scripts/request-participant-credentials.sh
+
       - name: Run DCP compliance suite
         run: |
           chmod +x scripts/run-ehds-identity-checks.sh
@@ -294,6 +380,45 @@ jobs:
           docker exec -i health-dataspace-neo4j \
             cypher-shell -u neo4j -p healthdataspace \
             < neo4j/init-schema.cypher || true
+
+      # #345. The schema step creates constraints and indexes and no data, so
+      # every EHDS domain check that asks Neo4j for an HDABApproval, a
+      # HealthDataset or an EEHRxF profile found nothing: 13 failures, one
+      # cause. docs/developer-guide.md's quick start seeds a minimal stack with
+      # init-schema.cypher and then insert-synthetic-schema-data.cypher, so CI
+      # now seeds what the documentation says a minimal stack has, plus the
+      # EEHRxF profiles the EEHR-3.x rows need, plus seed-compliance-matrix,
+      # which adds the GRANTS_ACCESS_TO edge the synthetic set leaves out and
+      # ART53-1.4's full access chain needs. All three are MERGE-only;
+      # verified on a fresh neo4j:5.26.28: 141 nodes, and 141 again after a
+      # second run. The count read-back is the assertion (ADR-031): a seed
+      # that ran is not a seed that seeded.
+      #
+      # continue-on-error on this first outing so the suite still runs and
+      # reports; its rows remain the assertions.
+      - name: Seed Neo4j with the documented minimal data set (#345)
+        continue-on-error: true
+        run: |
+          set -euo pipefail
+          for f in neo4j/insert-synthetic-schema-data.cypher neo4j/register-eehrxf-profiles.cypher neo4j/seed-compliance-matrix.cypher; do
+            echo "== $f"
+            docker exec -i health-dataspace-neo4j \
+              cypher-shell -u neo4j -p healthdataspace < "$f"
+          done
+          counts=$(docker exec -i health-dataspace-neo4j \
+            cypher-shell -u neo4j -p healthdataspace --format plain \
+            "MATCH (n) WITH count(n) AS total
+             OPTIONAL MATCH (a:HDABApproval) WITH total, count(a) AS approvals
+             OPTIONAL MATCH (d:HealthDataset) WITH total, approvals, count(d) AS datasets
+             OPTIONAL MATCH (e:EEHRxFProfile) WITH total, approvals, datasets, count(e) AS profiles
+             OPTIONAL MATCH (o:OMOPPerson)
+             RETURN total, approvals, datasets, profiles, count(o) AS omop" | tail -1 | tr -d '"')
+          echo "nodes total, HDABApproval, HealthDataset, EEHRxFProfile, OMOPPerson = ${counts}"
+          IFS=', ' read -r total approvals datasets profiles omop <<<"${counts}"
+          if [ "${approvals:-0}" -eq 0 ] || [ "${datasets:-0}" -eq 0 ] || [ "${profiles:-0}" -eq 0 ]; then
+            echo "::error::Neo4j seed ran but the graph lacks approvals, datasets or EEHRxF profiles (#345)"
+            exit 1
+          fi
 
       # The ephemeral stack comes up empty: this workflow starts it with
       # `docker compose up -d` and never runs jad/seed-all.sh, so the control

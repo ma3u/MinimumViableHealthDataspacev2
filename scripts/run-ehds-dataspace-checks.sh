@@ -202,9 +202,13 @@ run_catalog_tests() {
       pass "$test_id: CatalogRequestMessage accepted for ${slug}"
       record_result "$test_id" "catalog" "passed"
     elif [ -n "$resp" ]; then
-      # Catalog may return data in different format
-      pass "$test_id: Catalog endpoint responded for ${slug}"
-      record_result "$test_id" "catalog" "passed" "non-standard format"
+      # A catalog is a JSON-LD object with an @type. Anything else is not a
+      # catalog, and this branch used to call it one: CI passed here for weeks
+      # on a Jetty "Error 500" HTML page, and the DSP floor of 25/0 was
+      # recorded on that (#345). The helper now rejects non-JSON before we get
+      # here; what remains is JSON that is still not a catalog, and it fails.
+      fail "$test_id: response for ${slug} is not a catalog (no @type): $(printf '%s' "$resp" | tr -d '\n' | cut -c1-120)"
+      record_result "$test_id" "catalog" "failed" "not a catalog"
     else
       fail "$test_id: CatalogRequestMessage failed for ${slug}"
       record_result "$test_id" "catalog" "failed" "no response"

@@ -252,6 +252,59 @@
       ]
     },
     {
+      "clientId": "issuer",
+      "name": "Issuer Client",
+      "description": "IssuerService identity: Vault access and issuer-admin API. Declared here so a fresh realm import has it; jad/seed-jad.sh only reconciles it (#345).",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "serviceAccountsEnabled": true,
+      "secret": "issuer-secret",
+      "standardFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "fullScopeAllowed": true,
+      "protocolMappers": [
+        {
+          "name": "participantContextId",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-hardcoded-claim-mapper",
+          "consentRequired": false,
+          "config": {
+            "claim.name": "participant_context_id",
+            "claim.value": "issuer",
+            "jsonType.label": "String",
+            "access.token.claim": "true",
+            "id.token.claim": "true",
+            "userinfo.token.claim": "true"
+          }
+        },
+        {
+          "name": "role",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-hardcoded-claim-mapper",
+          "consentRequired": false,
+          "config": {
+            "claim.name": "role",
+            "claim.value": "participant",
+            "jsonType.label": "String",
+            "access.token.claim": "true",
+            "id.token.claim": "true",
+            "userinfo.token.claim": "true"
+          }
+        }
+      ],
+      "defaultClientScopes": ["profile", "email"],
+      "optionalClientScopes": [
+        "issuer-admin-api:write",
+        "issuer-admin-api:read",
+        "identity-api:write",
+        "identity-api:read",
+        "management-api:write",
+        "management-api:read",
+        "offline_access"
+      ]
+    },
+    {
       "clientId": "health-dataspace-ui",
       "name": "Health Dataspace UI",
       "description": "Next.js UI client \u2014 confidential, Authorization Code Flow with client secret",

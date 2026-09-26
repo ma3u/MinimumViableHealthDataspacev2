@@ -78,6 +78,12 @@ fi
 echo "✓ Got Keycloak admin token"
 
 # Create Keycloak client for Vault access (issuer)
+#
+# Since #345 this client is declared in jad/keycloak-realm.json and arrives
+# with the realm import, so on a healthy stack this POST hits the "may already
+# exist" branch below. That is the intended path. The create stays so a stack
+# whose realm predates the change still gets the client, but the realm file is
+# the source of truth; do not add fields here without adding them there.
 echo "Creating Vault Access Client for issuer..."
 if curl -sf -X POST "$KC_HOST/admin/realms/edcv/clients" \
   -H "Authorization: Bearer $KC_TOKEN" \
