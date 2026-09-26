@@ -56,8 +56,16 @@ mgmt_request() {
   set -- -sS --max-time 30 -o "$tmp" -w '%{http_code}' \
     -X "$method" -H "$(auth_header)" -H "Content-Type: application/json"
   if [ -n "$body" ]; then set -- "$@" -d "$body"; fi
-  MGMT_LAST_STATUS=$(curl "$@" "${MGMT_API}${path}" 2>/dev/null)
-  MGMT_LAST_CURL_RC=$?
+  # `VAR=$(cmd)` is a simple command, so under `set -e` a curl that exits
+  # non-zero kills the caller before the next line runs — and the whole point
+  # of this function is to survive that and report it. It happens to work
+  # today only because every call site is inside an `if`, which suspends
+  # `set -e`; a direct call exits 7 with nothing printed. The `|| rc=$?` makes
+  # it an AND-OR list, which `set -e` leaves alone.
+  local status rc=0
+  status=$(curl "$@" "${MGMT_API}${path}" 2>/dev/null) || rc=$?
+  MGMT_LAST_STATUS="$status"
+  MGMT_LAST_CURL_RC="$rc"
   MGMT_LAST_BODY=$(head -c 4000 "$tmp" 2>/dev/null || true)
   rm -f "$tmp"
   [ "$MGMT_LAST_CURL_RC" -eq 0 ] || return 1
