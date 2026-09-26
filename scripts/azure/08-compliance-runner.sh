@@ -74,6 +74,7 @@ else
     --registry-password "$ACR_PASSWORD" \
     --cpu 0.5 --memory 1Gi \
     --trigger-type Manual --replica-timeout 1200 \
+    --replica-retry-limit 0 \
     --env-vars "${ENV_VARS[@]}" \
     -o none
   ok "Job created"
