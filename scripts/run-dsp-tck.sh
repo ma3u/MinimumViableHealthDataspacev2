@@ -190,7 +190,7 @@ run_catalog_tests() {
     local catalog_body
     local provider_did="${PARTICIPANT_DIDS[$i]}"
     catalog_body=$(printf '{"@context":["https://w3id.org/edc/connector/management/v2"],"@type":"CatalogRequest","counterPartyAddress":"http://controlplane:8082/api/dsp/%s/2025-1","counterPartyId":"%s","protocol":"'"$DSP_PROTOCOL"'"}' "$ctx" "$provider_did")
-    resp=$(mgmt_post "/${MGMT_V}/participants/${CONSUMER_CTX}/catalog/request" "$catalog_body" 2>/dev/null) || resp=""
+    resp=$(mgmt_post "/${MGMT_V}/participants/${CONSUMER_CTX}/catalog/request" "$catalog_body") || resp=""
 
     if [ -n "$resp" ] && echo "$resp" | jq -e '.["@type"]' >/dev/null 2>&1; then
       pass "$test_id: CatalogRequestMessage accepted for ${slug}"
@@ -210,7 +210,7 @@ run_catalog_tests() {
   local resp
   local cat12_body
   cat12_body=$(printf '{"@context":["https://w3id.org/edc/connector/management/v2"],"@type":"CatalogRequest","counterPartyAddress":"http://controlplane:8082/api/dsp/%s/2025-1","counterPartyId":"%s","protocol":"'"$DSP_PROTOCOL"'"}' "$PROVIDER_CTX" "$PROVIDER_DID")
-  resp=$(mgmt_post "/${MGMT_V}/participants/${CONSUMER_CTX}/catalog/request" "$cat12_body" 2>/dev/null) || resp=""
+  resp=$(mgmt_post "/${MGMT_V}/participants/${CONSUMER_CTX}/catalog/request" "$cat12_body") || resp=""
 
   if [ -n "$resp" ] && echo "$resp" | jq -e '.dataset' >/dev/null 2>&1; then
     pass "$test_id: Catalog response contains dataset"
@@ -230,8 +230,13 @@ run_catalog_tests() {
   local test_id="CAT-1.3"
   local resp
   local cat13_body
-  cat13_body=$(printf '{"@context":["https://w3id.org/edc/connector/management/v2"],"@type":"CatalogRequest","counterPartyAddress":"http://controlplane:8082/api/dsp/%s/2025-1","counterPartyId":"%s","protocol":"'"$DSP_PROTOCOL"'","querySpec":{"filterExpression":[]}}' "$PROVIDER_CTX" "$PROVIDER_DID")
-  resp=$(mgmt_post "/${MGMT_V}/participants/${CONSUMER_CTX}/catalog/request" "$cat13_body" 2>/dev/null) || resp=""
+  # The nested querySpec needs its own @type. The Management API schema
+  # marks it required on QuerySpec, and without it the JSON-LD expansion
+  # has nothing to bind the object to, so the connector rejects the whole
+  # request. This test had been sending it without one and passing anyway,
+  # because the suite scored the error envelope as a response (#333).
+  cat13_body=$(printf '{"@context":["https://w3id.org/edc/connector/management/v2"],"@type":"CatalogRequest","counterPartyAddress":"http://controlplane:8082/api/dsp/%s/2025-1","counterPartyId":"%s","protocol":"'"$DSP_PROTOCOL"'","querySpec":{"@type":"QuerySpec","filterExpression":[]}}' "$PROVIDER_CTX" "$PROVIDER_DID")
+  resp=$(mgmt_post "/${MGMT_V}/participants/${CONSUMER_CTX}/catalog/request" "$cat13_body") || resp=""
 
   if [ -n "$resp" ]; then
     pass "$test_id: CatalogRequest with querySpec accepted"
@@ -245,7 +250,7 @@ run_catalog_tests() {
   local test_id="CAT-1.4"
   local resp
   resp=$(mgmt_post "/${MGMT_V}/participants/${OPERATOR_CTX}/federatedcatalog/request" \
-    '{"@context":["https://w3id.org/edc/connector/management/v2"],"@type":"QuerySpec"}' 2>/dev/null) || resp=""
+    '{"@context":["https://w3id.org/edc/connector/management/v2"],"@type":"QuerySpec"}') || resp=""
 
   if [ -n "$resp" ] && echo "$resp" | jq -e 'length > 0' >/dev/null 2>&1; then
     local count
@@ -292,7 +297,7 @@ run_asset_tests() {
     local test_id="ASSET-2.1-${slug}"
     local resp
     resp=$(mgmt_post "/${MGMT_V}/participants/${ctx}/assets/request" \
-      '{"@context":["https://w3id.org/edc/connector/management/v2"],"@type":"QuerySpec"}' 2>/dev/null) || resp=""
+      '{"@context":["https://w3id.org/edc/connector/management/v2"],"@type":"QuerySpec"}') || resp=""
 
     if [ -n "$resp" ] && echo "$resp" | jq -e 'type == "array"' >/dev/null 2>&1; then
       local count
@@ -312,7 +317,7 @@ run_asset_tests() {
   local test_id="ASSET-2.2"
   local resp
   resp=$(mgmt_post "/${MGMT_V}/participants/${PROVIDER_CTX}/assets/request" \
-    '{"@context":["https://w3id.org/edc/connector/management/v2"],"@type":"QuerySpec","limit":1}' 2>/dev/null) || resp=""
+    '{"@context":["https://w3id.org/edc/connector/management/v2"],"@type":"QuerySpec","limit":1}') || resp=""
 
   if [ -n "$resp" ] && echo "$resp" | jq -e '.[0]["@id"]' >/dev/null 2>&1; then
     pass "$test_id: Asset has @id property"
@@ -339,7 +344,7 @@ run_negotiation_tests() {
     local test_id="NEG-3.1-${slug}"
     local resp
     resp=$(mgmt_post "/${MGMT_V}/participants/${ctx}/contractnegotiations/request" \
-      '{"@context":["https://w3id.org/edc/connector/management/v2"],"@type":"QuerySpec"}' 2>/dev/null) || resp=""
+      '{"@context":["https://w3id.org/edc/connector/management/v2"],"@type":"QuerySpec"}') || resp=""
 
     if [ -n "$resp" ] && echo "$resp" | jq -e 'type == "array"' >/dev/null 2>&1; then
       local count
@@ -359,7 +364,7 @@ run_negotiation_tests() {
   local test_id="NEG-3.2"
   local resp
   resp=$(mgmt_post "/${MGMT_V}/participants/${CONSUMER_CTX}/contractnegotiations/request" \
-    '{"@context":["https://w3id.org/edc/connector/management/v2"],"@type":"QuerySpec"}' 2>/dev/null) || resp=""
+    '{"@context":["https://w3id.org/edc/connector/management/v2"],"@type":"QuerySpec"}') || resp=""
 
   if [ -n "$resp" ] && echo "$resp" | jq -e '[.[] | select(.state == "FINALIZED")] | length > 0' >/dev/null 2>&1; then
     local count
@@ -383,7 +388,7 @@ run_negotiation_tests() {
 
   if [ -n "$neg_id" ]; then
     local agreement
-    agreement=$(mgmt_get "/${MGMT_V}/participants/${CONSUMER_CTX}/contractnegotiations/${neg_id}/agreement" 2>/dev/null) || agreement=""
+    agreement=$(mgmt_get "/${MGMT_V}/participants/${CONSUMER_CTX}/contractnegotiations/${neg_id}/agreement") || agreement=""
 
     if [ -n "$agreement" ] && echo "$agreement" | jq -e '.["@id"]' >/dev/null 2>&1; then
       pass "$test_id: Contract agreement has @id field"
@@ -433,7 +438,7 @@ run_transfer_tests() {
     local test_id="XFER-4.1-${slug}"
     local resp
     resp=$(mgmt_post "/${MGMT_V}/participants/${ctx}/transferprocesses/request" \
-      '{"@context":["https://w3id.org/edc/connector/management/v2"],"@type":"QuerySpec"}' 2>/dev/null) || resp=""
+      '{"@context":["https://w3id.org/edc/connector/management/v2"],"@type":"QuerySpec"}') || resp=""
 
     if [ -n "$resp" ] && echo "$resp" | jq -e 'type == "array"' >/dev/null 2>&1; then
       local count
@@ -453,7 +458,7 @@ run_transfer_tests() {
   local test_id="XFER-4.2"
   local resp
   resp=$(mgmt_post "/${MGMT_V}/participants/${CONSUMER_CTX}/transferprocesses/request" \
-    '{"@context":["https://w3id.org/edc/connector/management/v2"],"@type":"QuerySpec"}' 2>/dev/null) || resp=""
+    '{"@context":["https://w3id.org/edc/connector/management/v2"],"@type":"QuerySpec"}') || resp=""
 
   if [ -n "$resp" ] && echo "$resp" | jq -e '[.[] | select(.state == "STARTED" or .state == "COMPLETED")] | length > 0' >/dev/null 2>&1; then
     local states
@@ -503,7 +508,7 @@ run_policy_tests() {
     local test_id="POL-5.1-${slug}"
     local resp
     resp=$(mgmt_post "/${MGMT_V}/participants/${ctx}/policydefinitions/request" \
-      '{"@context":["https://w3id.org/edc/connector/management/v2"],"@type":"QuerySpec"}' 2>/dev/null) || resp=""
+      '{"@context":["https://w3id.org/edc/connector/management/v2"],"@type":"QuerySpec"}') || resp=""
 
     if [ -n "$resp" ] && echo "$resp" | jq -e 'type == "array"' >/dev/null 2>&1; then
       local count
@@ -523,7 +528,7 @@ run_policy_tests() {
   local test_id="POL-5.2"
   local resp
   resp=$(mgmt_post "/${MGMT_V}/participants/${PROVIDER_CTX}/policydefinitions/request" \
-    '{"@context":["https://w3id.org/edc/connector/management/v2"],"@type":"QuerySpec","limit":1}' 2>/dev/null) || resp=""
+    '{"@context":["https://w3id.org/edc/connector/management/v2"],"@type":"QuerySpec","limit":1}') || resp=""
 
   if [ -n "$resp" ] && echo "$resp" | jq -e '.[0].policy' >/dev/null 2>&1; then
     pass "$test_id: Policy definition contains ODRL policy object"
@@ -549,7 +554,7 @@ run_contract_def_tests() {
     local test_id="CDEF-6.1-${slug}"
     local resp
     resp=$(mgmt_post "/${MGMT_V}/participants/${ctx}/contractdefinitions/request" \
-      '{"@context":["https://w3id.org/edc/connector/management/v2"],"@type":"QuerySpec"}' 2>/dev/null) || resp=""
+      '{"@context":["https://w3id.org/edc/connector/management/v2"],"@type":"QuerySpec"}') || resp=""
 
     if [ -n "$resp" ] && echo "$resp" | jq -e 'type == "array"' >/dev/null 2>&1; then
       local count
@@ -614,7 +619,7 @@ run_schema_tests() {
   local test_id="SCHEMA-7.3"
   local resp
   resp=$(mgmt_post "/${MGMT_V}/participants/${PROVIDER_CTX}/assets/request" \
-    '{"@context":["https://w3id.org/edc/connector/management/v2"],"@type":"QuerySpec","limit":1}' 2>/dev/null) || resp=""
+    '{"@context":["https://w3id.org/edc/connector/management/v2"],"@type":"QuerySpec","limit":1}') || resp=""
 
   if [ -n "$resp" ] && echo "$resp" | jq -e '.[0]["@context"]' >/dev/null 2>&1; then
     pass "$test_id: Response includes @context JSON-LD"
