@@ -202,8 +202,12 @@ run_catalog_tests() {
       pass "$test_id: CatalogRequestMessage accepted for ${slug}"
       record_result "$test_id" "catalog" "passed"
     elif [ -n "$resp" ]; then
-      # Catalog may return data in different format
-      pass "$test_id: Catalog endpoint responded for ${slug}"
+      # Catalog may return data in different format. This branch is the weak
+      # one: it passes on any non-error body, and CI has been passing here
+      # while the local stack fails one step earlier with a real 502. Until it
+      # asserts a catalog shape, at least show what it accepted, so a green
+      # row can be read for what it is (#345).
+      pass "$test_id: Catalog endpoint responded for ${slug} (no @type; body: $(printf '%s' "$resp" | tr -d '\n' | cut -c1-120))"
       record_result "$test_id" "catalog" "passed" "non-standard format"
     else
       fail "$test_id: CatalogRequestMessage failed for ${slug}"
