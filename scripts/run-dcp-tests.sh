@@ -96,11 +96,31 @@ auth_header() {
   if [ -n "$TOKEN" ]; then echo "Authorization: Bearer $TOKEN"; else echo "X-No-Auth: true"; fi
 }
 
-identity_get() { curl -sf -H "$(auth_header)" -H "Content-Type: application/json" "${IDENTITY_API}$1" 2>/dev/null; }
-identity_post() { curl -sf -X POST -H "$(auth_header)" -H "Content-Type: application/json" -d "$2" "${IDENTITY_API}$1" 2>/dev/null; }
-issuer_get() { curl -s --max-time 10 -H "$(auth_header)" -H "Content-Type: application/json" "${ISSUER_API}$1" 2>/dev/null; }
-issuer_post() { curl -s --max-time 10 -X POST -H "$(auth_header)" -H "Content-Type: application/json" -d "$2" "${ISSUER_API}$1" 2>/dev/null; }
-mgmt_post() { curl -sf -X POST -H "$(auth_header)" -H "Content-Type: application/json" -d "$2" "${MGMT_API}$1" 2>/dev/null; }
+# Every one of these returns the body and lets the caller decide. An EDC
+# error envelope is a body, so `[ -n "$resp" ]` used to accept it as a pass —
+# the same defect found in the DSP suite (#180). edc_reject_errors, from
+# scripts/lib/edc-mgmt-api.sh, turns one into a non-zero return so the
+# caller's `|| resp=""` fails the assertion instead.
+identity_get() {
+  local b; b=$(curl -sf -H "$(auth_header)" -H "Content-Type: application/json" "${IDENTITY_API}$1" 2>/dev/null) || return 1
+  edc_reject_errors "$b" "GET identity $1"
+}
+identity_post() {
+  local b; b=$(curl -sf -X POST -H "$(auth_header)" -H "Content-Type: application/json" -d "$2" "${IDENTITY_API}$1" 2>/dev/null) || return 1
+  edc_reject_errors "$b" "POST identity $1"
+}
+issuer_get() {
+  local b; b=$(curl -s --max-time 10 -H "$(auth_header)" -H "Content-Type: application/json" "${ISSUER_API}$1" 2>/dev/null) || return 1
+  edc_reject_errors "$b" "GET issuer $1"
+}
+issuer_post() {
+  local b; b=$(curl -s --max-time 10 -X POST -H "$(auth_header)" -H "Content-Type: application/json" -d "$2" "${ISSUER_API}$1" 2>/dev/null) || return 1
+  edc_reject_errors "$b" "POST issuer $1"
+}
+mgmt_post() {
+  local b; b=$(curl -sf -X POST -H "$(auth_header)" -H "Content-Type: application/json" -d "$2" "${MGMT_API}$1" 2>/dev/null) || return 1
+  edc_reject_errors "$b" "POST mgmt $1"
+}
 
 
 # ---------------------------------------------------------------------------

@@ -129,3 +129,38 @@ mgmt_fetch_participants() {
   log "  versions tried:${tried}"
   return 1
 }
+
+# ---------------------------------------------------------------------------
+# EDC error envelopes
+# ---------------------------------------------------------------------------
+# An EDC error is a body that looks like data unless you check:
+#
+#   [{"message":"No provider dispatcher registered for protocol: …",
+#     "type":"BadGateway","path":null,"invalidValue":null}]
+#
+# The compliance suites assert with `[ -n "$resp" ] && …` and a fall-through
+# branch that passes on "non-standard format", so an error body scored as a
+# pass. In the DSP suite that meant CAT-1.1 reporting "Catalog endpoint
+# responded" while every catalog request was 502ing on the wrong protocol
+# identifier (#180): the runs before and after that fix were byte-identical.
+#
+# Discriminating on `type` and `message` together. EDC's ApiErrorDetail has
+# both; success bodies here use the JSON-LD `@type` instead, so an empty
+# catalog, an empty array and an asset list all pass through untouched.
+edc_is_error() {
+  printf '%s' "$1" | jq -e '
+    if type == "array" then (.[0] | objects | has("type") and has("message"))
+    else (objects | has("type") and has("message")) end
+  ' >/dev/null 2>&1
+}
+
+# Echo the body, or log it and return non-zero when it is an error envelope,
+# so a caller's `|| resp=""` turns an error into a failed assertion.
+edc_reject_errors() {
+  local body="$1" what="$2"
+  if [ -n "$body" ] && edc_is_error "$body"; then
+    log "  ${what} returned an EDC error: $(printf '%s' "$body" | tr -d '\n' | cut -c1-200)"
+    return 1
+  fi
+  printf '%s' "$body"
+}
