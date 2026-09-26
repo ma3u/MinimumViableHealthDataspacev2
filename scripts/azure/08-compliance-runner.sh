@@ -28,11 +28,19 @@ docker buildx build --platform linux/amd64 \
   -t "${IMAGE}" --push "${REPO_ROOT}"
 ok "Image pushed: ${IMAGE}"
 
-# Short-name service URLs (resolvable inside the ACA environment VNet).
-MGMT_URL="http://${CONTROLPLANE_APP}:11003/api/mgmt"
-IDENTITY_URL="http://${IDENTITYHUB_APP}:11005/api/identity"
-ISSUER_URL="http://${ISSUER_APP}:10013/api/admin"
-KC_URL="http://${KEYCLOAK_APP}:8080"
+# Internal-FQDN service URLs, with no explicit port — the addressing mvhd-ui
+# uses and which is known to work (05-cfm-ui.sh). These carried the local
+# compose ports until now, and ACA does not serve them: mvhd-controlplane's
+# HTTP ingress targets 8080 and mvhd-identityhub's 7081, not 11003 and 11005,
+# and an HTTP ingress answers on 80/443 whatever the target is. The EHDS suite
+# exits in discover_participants() when the Management API does not answer, so
+# every run ended before its first Neo4j check with "Cannot fetch participant
+# list from Management API". Same family as issue #205.
+eval "$(get_aca_fqdns)"
+MGMT_URL="https://${CONTROLPLANE_APP}.internal.${ACA_DOMAIN}/api/mgmt"
+IDENTITY_URL="https://${IDENTITYHUB_APP}.internal.${ACA_DOMAIN}/api/identity"
+ISSUER_URL="https://${ISSUER_APP}.internal.${ACA_DOMAIN}/api/admin"
+KC_URL="https://${KEYCLOAK_APP}.${ACA_DOMAIN}"
 # Bolt, not the transactional HTTP API: mvhd-neo4j has TCP ingress with
 # targetPort and exposedPort 7687 and no additionalPortMappings, so
 # http://mvhd-neo4j:7474 is not routable from inside the environment and every
