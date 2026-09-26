@@ -158,6 +158,14 @@ if [ "${PROBE_DID_DOCS:-1}" = "1" ] && command -v docker >/dev/null 2>&1; then
     code=$(docker run --rm --network "${COMPOSE_NETWORK:-health-dataspace-edcv}" "${CURL_IMAGE:-curlimages/curl:latest}" \
       -s -o /dev/null -w '%{http_code}' "http://identityhub:7083/${slug}/did.json" 2>/dev/null || echo 000)
     if [ "$code" = "200" ]; then
+      # The CredentialService endpoint is where the issuer delivers; print it
+      # once so a stuck delivery can be checked against what the hub advertises.
+      if [ -z "${_printed_cs:-}" ]; then
+        cs=$(docker run --rm --network "${COMPOSE_NETWORK:-health-dataspace-edcv}" "${CURL_IMAGE:-curlimages/curl:latest}" \
+          -s "http://identityhub:7083/${slug}/did.json" 2>/dev/null \
+          | python3 -c "import json,sys; d=json.load(sys.stdin); print(next((x.get('serviceEndpoint') for x in d.get('service',[]) if x.get('type')=='CredentialService'),'<no CredentialService in DID document>'))" 2>/dev/null || echo '<unreadable>')
+        echo "  CredentialService endpoint (from ${slug}'s DID document): ${cs}"; _printed_cs=1
+      fi
       echo -e "  ${GREEN}✓${NC} ${did} resolves"
     else
       echo -e "  ${RED}!${NC} ${did} -> http://identityhub:7083/${slug}/did.json -> HTTP ${code}"

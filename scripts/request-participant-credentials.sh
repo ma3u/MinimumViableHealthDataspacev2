@@ -203,8 +203,9 @@ if [ "$missing" -gt 0 ]; then
   if command -v docker >/dev/null 2>&1 && docker ps --format '{{.Names}}' 2>/dev/null | grep -qx "${IDENTITYHUB_CONTAINER:-health-dataspace-identityhub}"; then
     echo "  -- ${IDENTITYHUB_CONTAINER:-health-dataspace-identityhub} log, credential request lines, last 5 min:"
     docker logs --since 5m "${IDENTITYHUB_CONTAINER:-health-dataspace-identityhub}" 2>&1 \
-      | grep -v otel.javaagent | grep -iE 'HolderCredentialRequest|CredentialRequest|issuer|ERROR|WARN' \
-      | grep -v CredentialWatchdog | tail -15 | sed 's/^/     /'
+      | grep -v otel.javaagent \
+      | grep -iE 'HolderCredentialRequest|CredentialRequest|CredentialMessage|/api/credentials|Storage|deliver|issuerPid|issuer|ERROR|WARN|40[0-9] ' \
+      | grep -vE 'CredentialWatchdog|is now in state (CREATED|REQUESTING)' | tail -20 | sed 's/^/     /'
   fi
   # The other half of the conversation: if the hub did send, the issuer's
   # view is authoritative. Its issuance-process records carry the state and
@@ -218,7 +219,13 @@ if [ "$missing" -gt 0 ]; then
       | python3 -c "import json,sys
 try: rows=json.load(sys.stdin)
 except Exception: rows=[]
+if not isinstance(rows, list):
+    # An error envelope or anything unexpected: show it rather than printing
+    # nothing. CI run 36265045331 printed the header and no rows, and the
+    # reason was invisible because a non-list was treated as zero processes.
+    print('      issuer answered:', json.dumps(rows)[:300]); rows=[]
 rows=[r for r in rows if isinstance(r,dict)]
+if not rows: print('      (no issuance processes at all)')
 rows.sort(key=lambda r: r.get('timestamp') or 0, reverse=True)
 for r in rows[:6]:
     print('     ', r.get('state'), (r.get('holderId') or '')[-24:], 'pid', (r.get('holderPid') or '')[:8], '|', (r.get('errorDetail') or '(no errorDetail)')[:200])" 2>/dev/null || echo "     (issuer admin API not reachable)"
