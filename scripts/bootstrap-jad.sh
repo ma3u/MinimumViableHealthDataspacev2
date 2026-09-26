@@ -503,18 +503,34 @@ show_status() {
   echo "  Neo4j Browser:       http://localhost:7474"
   echo "  Live UI:             http://localhost:3003  (production build)"
   echo "  Traefik Dashboard:   http://localhost:8090"
-  echo "  Keycloak Admin:      http://keycloak.localhost  (admin/admin)"
-  echo "  Vault UI:            http://vault.localhost      (token: root)"
+  echo "  Keycloak Admin:      http://localhost:8080      (admin/admin)"
+  echo "  Vault UI:            http://localhost:8200      (token: root)"
   echo "  NATS Monitor:        http://localhost:8222"
-  echo "  Control Plane Mgmt:  http://cp.localhost        (port 11003 direct)"
-  echo "  Data Plane FHIR:     http://dp-fhir.localhost   (port 11002 direct)"
-  echo "  Data Plane OMOP:     http://dp-omop.localhost   (port 11012 direct)"
-  echo "  Neo4j Query Proxy:   http://proxy.localhost     (port 9090 direct)"
-  echo "  Identity Hub:        http://ih.localhost        (port 11005 direct)"
-  echo "  Issuer Service:      http://issuer.localhost    (port 10013 direct)"
-  echo "  Tenant Manager:      http://tm.localhost        (port 11006 direct)"
-  echo "  Provision Manager:   http://pm.localhost        (port 11007 direct)"
+  echo "  Control Plane Mgmt:  http://localhost:11003"
+  echo "  Data Plane FHIR:     http://localhost:11002"
+  echo "  Data Plane OMOP:     http://localhost:11012"
+  echo "  Neo4j Query Proxy:   http://localhost:9090"
+  echo "  Identity Hub:        http://localhost:11005"
+  echo "  Issuer Service:      http://localhost:10013"
+  echo "  Tenant Manager:      http://localhost:11006"
+  echo "  Provision Manager:   http://localhost:11007"
   echo ""
+
+  # The *.localhost names this used to print have never resolved (#190).
+  # Traefik v3 pins Docker API 1.24 and the daemon requires 1.40, so its
+  # Docker provider discovers nothing and every one of those URLs 404s. The
+  # direct ports above work, which is why it went unnoticed for months.
+  #
+  # Print the names only if a route actually answers, rather than printing a
+  # list and asserting nothing about it — the ADR-031 shape that #181 and this
+  # issue are both about.
+  local traefik_code
+  traefik_code=$(curl -s --max-time 3 -o /dev/null -w '%{http_code}' \
+    -H 'Host: keycloak.localhost' http://localhost:80 2>/dev/null || echo 000)
+  if [ "$traefik_code" = "200" ]; then
+    echo "  Traefik *.localhost routing is live (keycloak.localhost, cp.localhost, ...)"
+    echo ""
+  fi
 }
 
 # ---------------------------------------------------------------------------
