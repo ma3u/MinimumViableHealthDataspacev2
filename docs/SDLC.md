@@ -418,7 +418,7 @@ three suites died at participant discovery (#307, fixed in #314).
 > | Suite          | Local ephemeral stack                | Azure deployment                     |
 > | -------------- | ------------------------------------ | ------------------------------------ |
 > | EHDS domain    | 1 passed, 13 failed, 11 skipped / 25 | 20 passed, 0 failed, 5 skipped / 25  |
-> | DSP 2025-1 TCK | 25 passed, 0 failed, 8 skipped / 33  | 23 passed, 0 failed, 10 skipped / 33 |
+> | DSP 2025-1 TCK | 24 passed, 1 failed, 8 skipped / 33  | 23 passed, 0 failed, 10 skipped / 33 |
 > | DCP v1.0       | 14 passed, 0 failed, 8 skipped / 22  | 10 passed, 1 failed, 11 skipped / 22 |
 >
 > The Azure column is the state after #316 seeded five participant contexts
@@ -436,6 +436,26 @@ three suites died at participant discovery (#307, fixed in #314).
 > The two targets disagree slightly on DSP and DCP. That is expected — the
 > local stack has assets and policies from its own seeds, Azure does not — and
 > the difference is now visible rather than hidden behind a shared silence.
+>
+> **A 50-line stub scores the same.** `scripts/tck/null-connector-stub.py`
+> answers participant discovery and returns an empty JSON array to every other
+> request. It implements no protocol at all, and it scores **23 passed, 1
+> failed, 9 skipped** on the DSP suite and **17 passed, 0 failed, 5 skipped**
+> on DCP, which is better than either real deployment manages on DCP. The
+> suites are ours, they drive the Management API with `curl`, and they never
+> act as a protocol peer, so they cannot tell a conforming connector from a
+> stub. Treat these rows as liveness and shape checks on our own APIs, not as
+> conformance. Reproduce with:
+>
+> ```bash
+> python3 scripts/tck/null-connector-stub.py &
+> EDC_MANAGEMENT_URL=http://localhost:18099 ./scripts/run-dsp-tck.sh 2>&1 | tail -5
+> kill %1
+> ```
+>
+> Adopting the real [Eclipse DSP and DCP TCKs](https://github.com/eclipse-dataspacetck)
+> is Phase 1 of [#338](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/338)
+> ([discussion #110](https://github.com/ma3u/MinimumViableHealthDataspacev2/discussions/110)).
 >
 > What has not changed: no suite can fail this workflow, so treat the numbers
 > as a report and not as a gate.
