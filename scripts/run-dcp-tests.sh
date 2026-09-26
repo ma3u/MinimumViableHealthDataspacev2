@@ -38,6 +38,12 @@ REPORT_DIR="${REPORT_DIR:-test-results/dcp}"
 PARTICIPANT_SLUGS=("alpha-klinik" "pharmaco" "medreg")
 PARTICIPANT_CTXS=()  # populated by discover_participants()
 
+# The participant-list fetch and its diagnosis are shared with the other two
+# compliance suites: all three used to die on the same silent `curl -sf`
+# (issue #307).
+# shellcheck source=scripts/lib/edc-mgmt-api.sh
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/lib/edc-mgmt-api.sh"
+
 # Counters
 TOTAL=0
 PASSED=0
@@ -102,24 +108,9 @@ mgmt_post() { curl -sf -X POST -H "$(auth_header)" -H "Content-Type: application
 # ---------------------------------------------------------------------------
 discover_participants() {
   log "Discovering participant context UUIDs..."
-  local token_url
-  if curl -sf "${KEYCLOAK_URL}/realms/${REALM}" >/dev/null 2>&1; then
-    token_url="${KEYCLOAK_URL}/realms/${REALM}/protocol/openid-connect/token"
-  else
-    token_url="http://localhost:8080/realms/${REALM}/protocol/openid-connect/token"
-  fi
-  local tkn
-  tkn=$(curl -sf -X POST "$token_url" \
-    -H "Content-Type: application/x-www-form-urlencoded" \
-    -d "grant_type=client_credentials&client_id=${CLIENT_ID}&client_secret=${CLIENT_SECRET}" \
-    | jq -r '.access_token // empty') || tkn=""
-
   local participants_json
-  participants_json=$(curl -sf -H "Authorization: Bearer $tkn" \
-    "${MGMT_API}/${MGMT_V}/participants") || {
-    log "ERROR: Cannot fetch participant list from Management API"
-    exit 1
-  }
+  mgmt_fetch_participants || exit 1
+  participants_json="$MGMT_PARTICIPANTS_JSON"
 
   for slug in "${PARTICIPANT_SLUGS[@]}"; do
     local uuid

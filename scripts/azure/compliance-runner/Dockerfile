@@ -13,6 +13,7 @@ RUN curl -fsSL -o /tmp/cypher-shell.zip \
     && ln -sf "/opt/cypher-shell-${CYPHER_SHELL_VERSION}/bin/cypher-shell" /usr/local/bin/cypher-shell \
     && rm /tmp/cypher-shell.zip
 WORKDIR /work
+COPY scripts/lib/edc-mgmt-api.sh /work/scripts/lib/
 COPY scripts/run-compliance.sh /work/scripts/
 COPY scripts/run-dsp-tck.sh /work/scripts/
 COPY scripts/run-dcp-tests.sh /work/scripts/
