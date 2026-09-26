@@ -241,14 +241,54 @@ jobs:
           EDC_IDENTITY_URL=http://localhost:11005/api/identity \
             ./scripts/seed-identityhub-participants.sh
 
+      # #345. The issuer only issues to a DID in its holders registry; CFM
+      # registers them locally, nothing did here. Mirrors the same control-plane
+      # participants the IdentityHub seed used, so all three stores agree.
+      - name: Register participants as holders on the issuer (#345)
+        run: |
+          KEYCLOAK_URL=http://localhost:8080 \
+          EDC_ISSUER_URL=http://localhost:10013/api/admin \
+          EDC_MANAGEMENT_URL=http://localhost:11003/api/mgmt \
+            ./scripts/seed-issuer-holders.sh
+
+      # #345. The first run after the realm fix got a token and then 401 on
+      # every write: the issuer had cached JWKS from a Keycloak still importing
+      # the realm. A health endpoint cannot see that, so this asserts the
+      # property the seeds need, and on timeout prints token kid vs JWKS kids.
+      # continue-on-error so the suite still runs and ISS-4.3 stays the
+      # assertion; the diagnostic is what this step is for.
+      - name: Wait until the issuer accepts Keycloak tokens (#345)
+        continue-on-error: true
+        run: |
+          KC_HOST=http://localhost:8080 \
+          ISSUER_API=http://localhost:10013 \
+          TIMEOUT=120 \
+            bash scripts/lib/wait-for-issuer-auth.sh
+
       # ISS-4.3 asserts the issuer defines an EHDS credential type. This seed
-      # needs only Keycloak and the IssuerService, no CFM.
+      # needs only Keycloak and the IssuerService, no CFM. The `issuer` client
+      # it logs in as arrives with the realm import since #345.
       - name: Seed issuer credential definitions (#345)
         continue-on-error: true
         run: |
           KC_HOST=http://localhost:8080 \
           ISSUER_API=http://localhost:10013 \
             bash jad/seed-issuer-defs.sh
+
+      # #345. VC-3.2/3.3 want credentials on the participants. The issuer does
+      # not issue on admin command; a credential arrives when the holder's
+      # IdentityHub requests it over DCP. So this asks, then waits for it to
+      # land, and prints the hub's errorDetail if it gives up. First place CI
+      # exercises DCP as a protocol between two services. continue-on-error on
+      # its first outing so the run reports what happened either way.
+      - name: Request participant credentials over DCP (#345)
+        continue-on-error: true
+        run: |
+          KEYCLOAK_URL=http://localhost:8080 \
+          EDC_IDENTITY_URL=http://localhost:11005/api/identity \
+          EDC_MANAGEMENT_URL=http://localhost:11003/api/mgmt \
+          WAIT_SECONDS=120 \
+            ./scripts/request-participant-credentials.sh
 
       - name: Run DCP compliance suite
         run: |
