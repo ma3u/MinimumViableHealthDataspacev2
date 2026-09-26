@@ -89,6 +89,23 @@ ONLY=irs WAIT_SECONDS=60 ./scripts/request-participant-credentials.sh   # must n
 ./scripts/run-ehds-dataspace-checks.sh 2>&1 | grep 'CAT-1.1'            # must be green
 ```
 
+**Fixed at the root on 2026-09-26.** The compose Vault now runs
+`vault server -config=/vault/config/vault.hcl` with file storage on the
+`vault_data` volume, and a `vault-unseal` sidecar (the Azure deployment's own
+`scripts/vault-init-or-unseal.sh`) initialises once and unseals on every start.
+`docker restart health-dataspace-vault` no longer loses anything; proven on a
+throwaway project across `restart` and `down`/`up`, then applied to the real
+stack. Two things the switch exposed, both fixed in the same PR:
+
+- `scripts/vault-init-or-unseal.sh` could not unseal: it grepped compact JSON,
+  `vault operator init -format=json` pretty-prints, the key came out empty and
+  `unseal` prompted on a terminal that was not there. Azure uses this script;
+  whether it has been failing there too is still to be checked.
+- `jad/bootstrap-vault.sh` assumed the `secret/` mount that only `-dev` mode
+  creates, and died at its first write (404 on `secret/data/aes-key-alias`),
+  which is also why siglet had been restarting for days. It now enables
+  `secret/` and the transit engine itself.
+
 **The check that is missing** is proposed on #345 as `KEY-2.4`: obtain a
 self-issued token for the participant from the IdentityHub STS
 (`identityhub:7084/api/sts`, see the STS entry below), which signs with the

@@ -181,4 +181,16 @@ vault write secret/data/dataplane-omop-private -<<EOF || { echo "Failed to creat
 }
 EOF
 
+# ---------------------------------------------------------------------------
+# Transit engine + signing key for siglet (EDC 0.18 dataplane cert-exchange)
+# ---------------------------------------------------------------------------
+# Used to live in scripts/bootstrap-jad.sh start_stack with the note "Vault is
+# in-memory, so this must run on every bootstrap". Vault is file-backed since
+# 2026-09-26; the bootstrap owns every mount the stack needs, once, here. Both
+# calls are idempotent: "path is already in use" and an existing key are fine.
+echo "=== Provisioning transit engine + signing-siglet key ==="
+vault secrets enable transit 2>/dev/null || echo "transit already enabled, continuing..."
+vault write -f transit/keys/signing-siglet type=ed25519 >/dev/null 2>&1 || echo "signing-siglet key already present, continuing..."
+echo "✓ transit/keys/signing-siglet ready"
+
 echo "=== Vault bootstrap completed successfully! ==="

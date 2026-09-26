@@ -246,8 +246,9 @@ start_stack() {
   done
 
   # Siglet (EDC 0.18 dataplane cert-exchange — issue #97 Phase B) signs tokens
-  # via the Vault transit engine. Vault is in-memory, so this must run on
-  # every bootstrap. Both calls are idempotent (400 "path is in use" is fine).
+  # via the Vault transit engine. jad/bootstrap-vault.sh owns this since Vault
+  # became file-backed (2026-09-26); kept here as a harmless idempotent repeat
+  # for stacks whose vault-bootstrap sidecar predates that.
   log "Enabling Vault transit engine + signing-siglet key for siglet..."
   curl -s -X POST http://localhost:8200/v1/sys/mounts/transit \
     -H "X-Vault-Token: root" -d '{"type":"transit"}' -o /dev/null || true
