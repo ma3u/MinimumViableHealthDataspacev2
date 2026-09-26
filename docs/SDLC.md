@@ -459,8 +459,8 @@ three suites died at participant discovery (#307, fixed in #314).
 > **A 50-line stub scores the same.** `scripts/tck/null-connector-stub.py`
 > answers participant discovery and returns an empty JSON array to every other
 > request. It implements no protocol at all, and it scores **23 passed, 1
-> failed, 9 skipped** on the DSP suite and **17 passed, 0 failed, 5 skipped**
-> on DCP, which is better than either real deployment manages on DCP. The
+> failed, 9 skipped** on the DSP suite and **14 passed, 0 failed, 8 skipped**
+> on DCP, the latter identical to the local stack and better than Azure. The
 > suites are ours, they drive the Management API with `curl`, and they never
 > act as a protocol peer, so they cannot tell a conforming connector from a
 > stub. Treat these rows as liveness and shape checks on our own APIs, not as
@@ -468,9 +468,16 @@ three suites died at participant discovery (#307, fixed in #314).
 >
 > ```bash
 > python3 scripts/tck/null-connector-stub.py &
-> EDC_MANAGEMENT_URL=http://localhost:18099 ./scripts/run-dsp-tck.sh 2>&1 | tail -5
+> S=http://localhost:18099
+> EDC_MANAGEMENT_URL=$S ./scripts/run-dsp-tck.sh 2>&1 | tail -5
+> EDC_MANAGEMENT_URL=$S EDC_IDENTITY_URL=$S EDC_ISSUER_URL=$S \
+>   ./scripts/run-dcp-tests.sh 2>&1 | tail -5
 > kill %1
 > ```
+>
+> All three variables matter for DCP. Setting only `EDC_MANAGEMENT_URL` leaves
+> the suite talking to a real IdentityHub and IssuerService, which is how the
+> first published DCP figure for this stub came out too high.
 >
 > Adopting the real [Eclipse DSP and DCP TCKs](https://github.com/eclipse-dataspacetck)
 > is Phase 1 of [#338](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/338)
