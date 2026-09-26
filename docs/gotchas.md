@@ -3,6 +3,45 @@
 Non-obvious pitfalls across the stack. Ordered newest first; add a new
 entry at the top when you hit something that cost you more than 30 minutes.
 
+## 2026-09-26: one ACA app, one reachable port, and the version is a path segment
+
+Three compliance suites failed at the EDC Management API for months and cost
+three issues (#205, #303, #307) to narrow down, because the failure was a
+`curl -sf` that printed neither the status nor the body. Two independent
+causes, each sufficient on its own.
+
+- **An ACA app has exactly one address that works, and it is the ingress
+  `targetPort`.** `https://<app>.internal.<domain>` reaches that port and
+  nothing else. An EDC connector serves each web context on its own port, so
+  `mvhd-controlplane`'s `/api/mgmt` on 8081 and `mvhd-identityhub`'s
+  `/api/identity` on 7082 are reachable only as
+  `http://<short-app-name>:<port>`, through `additionalPortMappings`. The
+  runner was calling `<fqdn>/api/mgmt`, which is port 8080, where that path
+  does not exist. `edc-probe-cp.yml` had the right addressing since May 2026;
+  nothing else had copied it.
+
+- **The Management API version is a path segment and the environments differ.**
+  The deployed `jad-controlplane:2026-04-14` serves `/v4alpha`. The 0.18
+  launchers in `docker-compose.jad.yml` serve `/v5beta`, which is what the
+  suites defaulted to, and `/v5alpha` is what the UI route and the probe
+  workflow use. Two of those three are 404 on Azure at any given time. A
+  script that hardcodes one is wrong somewhere, so
+  `scripts/lib/edc-mgmt-api.sh` tries the candidates on a 404 and says which
+  one answered.
+
+The general lesson is about the error, not the ports: `curl -sf` turns a wrong
+path, a wrong version, a bad token and a refused connection into the same
+sentence. Print the status and the body, and name the case where there was no
+response at all by curl's exit code. Three issues were spent on elimination
+that one printed body would have ended.
+
+Related, from the same afternoon: the CFM tenant manager on Azure has held
+three `pending` provisioning activities per participant since 2026-09-17,
+because the four CFM agents were never deployed there. The onboarding page had
+been showing an animated "Provisioning" for nine days. A state that cannot
+progress is not the same as a slow one, and a UI that cannot tell them apart
+will always pick the flattering reading (#203, #318).
+
 ## 2026-09-26: repairing a broken step can re-arm the destructive thing it was blocking
 
 `reset-demo.yml`'s "Re-import Keycloak edcv realm" step hardcoded `admin` /
