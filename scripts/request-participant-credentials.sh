@@ -207,12 +207,28 @@ if [ "$missing" -gt 0 ]; then
       | grep -v CredentialWatchdog | tail -15 | sed 's/^/     /'
   fi
   # The other half of the conversation: if the hub did send, the issuer's
-  # reason for refusing is in its log, not the hub's.
+  # view is authoritative. Its issuance-process records carry the state and
+  # errorDetail; its log shows the first failure, which the retry backoff
+  # lines then bury (CI run 36260584125 showed five "retry #6" lines and not
+  # one reason).
+  if [ -n "${ISSUER_API:-}" ]; then
+    echo "  -- issuer issuance processes (state, errorDetail), newest first:"
+    curl -sS --max-time 20 -X POST -H "Authorization: Bearer ${TOKEN}" -H "Content-Type: application/json" -d '{}' \
+      "${ISSUER_API}/v1alpha/participants/${ISSUER_CTX}/issuanceprocesses/query" 2>/dev/null \
+      | python3 -c "import json,sys
+try: rows=json.load(sys.stdin)
+except Exception: rows=[]
+rows=[r for r in rows if isinstance(r,dict)]
+rows.sort(key=lambda r: r.get('timestamp') or 0, reverse=True)
+for r in rows[:6]:
+    print('     ', r.get('state'), (r.get('holderId') or '')[-24:], 'pid', (r.get('holderPid') or '')[:8], '|', (r.get('errorDetail') or '(no errorDetail)')[:200])" 2>/dev/null || echo "     (issuer admin API not reachable)"
+  fi
   if command -v docker >/dev/null 2>&1 && docker ps --format '{{.Names}}' 2>/dev/null | grep -qx "${ISSUER_CONTAINER:-health-dataspace-issuerservice}"; then
     echo "  -- ${ISSUER_CONTAINER:-health-dataspace-issuerservice} log, issuance lines, last 5 min:"
     docker logs --since 5m "${ISSUER_CONTAINER:-health-dataspace-issuerservice}" 2>&1 \
-      | grep -v otel.javaagent | grep -iE 'CredentialRequest|issuance|IssuanceProcess|attestation|holder|did:web|ERROR|WARN|SEVERE' \
-      | tail -15 | sed 's/^/     /'
+      | grep -v otel.javaagent | grep -vE 'retry #|will not be attempted' \
+      | grep -iE 'CredentialRequest|IssuanceProcess|attestation|deliver|holder|did:web|ERROR|WARN|SEVERE|Exception' \
+      | tail -20 | sed 's/^/     /'
   fi
 fi
 
