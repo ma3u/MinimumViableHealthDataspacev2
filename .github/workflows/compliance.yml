@@ -103,6 +103,11 @@ jobs:
       # the suites, and far cheaper than the full seven-phase JAD seed, which
       # wants 8 GB of Docker and does not fit a standard runner.
       #
+      # provisioner, not admin: the two clients carry the same six scopes and
+      # differ only in a `role` claim, and the control plane refuses a
+      # participant-context create from `admin` with HTTP 403 "Required user
+      # role not satisfied". Measured on the live control plane, #316.
+      #
       # continue-on-error while this is new: an unseeded stack is the status quo
       # and the suites report it clearly, whereas a flaky seed turning main red
       # would be a regression. Make it a hard failure once it has been seen to
@@ -113,7 +118,7 @@ jobs:
           TOKEN=$(curl -sS --max-time 20 -X POST \
             "http://localhost:8080/realms/edcv/protocol/openid-connect/token" \
             -H "Content-Type: application/x-www-form-urlencoded" \
-            -d "grant_type=client_credentials&client_id=admin&client_secret=edc-v-admin-secret" \
+            -d "grant_type=client_credentials&client_id=provisioner&client_secret=provisioner-secret" \
             2>/dev/null \
             | python3 -c "import json,sys; print(json.load(sys.stdin).get('access_token',''))" \
             2>/dev/null || true)
@@ -194,6 +199,11 @@ jobs:
       # the suites, and far cheaper than the full seven-phase JAD seed, which
       # wants 8 GB of Docker and does not fit a standard runner.
       #
+      # provisioner, not admin: the two clients carry the same six scopes and
+      # differ only in a `role` claim, and the control plane refuses a
+      # participant-context create from `admin` with HTTP 403 "Required user
+      # role not satisfied". Measured on the live control plane, #316.
+      #
       # continue-on-error while this is new: an unseeded stack is the status quo
       # and the suites report it clearly, whereas a flaky seed turning main red
       # would be a regression. Make it a hard failure once it has been seen to
@@ -204,7 +214,7 @@ jobs:
           TOKEN=$(curl -sS --max-time 20 -X POST \
             "http://localhost:8080/realms/edcv/protocol/openid-connect/token" \
             -H "Content-Type: application/x-www-form-urlencoded" \
-            -d "grant_type=client_credentials&client_id=admin&client_secret=edc-v-admin-secret" \
+            -d "grant_type=client_credentials&client_id=provisioner&client_secret=provisioner-secret" \
             2>/dev/null \
             | python3 -c "import json,sys; print(json.load(sys.stdin).get('access_token',''))" \
             2>/dev/null || true)
@@ -292,6 +302,11 @@ jobs:
       # the suites, and far cheaper than the full seven-phase JAD seed, which
       # wants 8 GB of Docker and does not fit a standard runner.
       #
+      # provisioner, not admin: the two clients carry the same six scopes and
+      # differ only in a `role` claim, and the control plane refuses a
+      # participant-context create from `admin` with HTTP 403 "Required user
+      # role not satisfied". Measured on the live control plane, #316.
+      #
       # continue-on-error while this is new: an unseeded stack is the status quo
       # and the suites report it clearly, whereas a flaky seed turning main red
       # would be a regression. Make it a hard failure once it has been seen to
@@ -302,7 +317,7 @@ jobs:
           TOKEN=$(curl -sS --max-time 20 -X POST \
             "http://localhost:8080/realms/edcv/protocol/openid-connect/token" \
             -H "Content-Type: application/x-www-form-urlencoded" \
-            -d "grant_type=client_credentials&client_id=admin&client_secret=edc-v-admin-secret" \
+            -d "grant_type=client_credentials&client_id=provisioner&client_secret=provisioner-secret" \
             2>/dev/null \
             | python3 -c "import json,sys; print(json.load(sys.stdin).get('access_token',''))" \
             2>/dev/null || true)
