@@ -26,15 +26,15 @@ that our own 2026-04-11 builds lacked. Opt-in overlay:
 
 ## Breaking changes mapped to our touchpoints
 
-| Change (release)                                        | Our exposure                                                                                               | Action                                                                         |
-| ------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
-| Data-plane signaling becomes DEFAULT (0.18 #5694)       | both dataplanes (`mvhd-dp-fhir`, `mvhd-dp-omop`) register via jad launcher config                          | validate DPS registration on stack bring-up; jad `config/` already targets DPS |
-| Identity carried in `sub` claim (0.18 #5813)            | DCP flows: IdentityHub ↔ IssuerService ↔ controlplane; `scripts/run-dcp-tests.sh` asserts token contents | re-run DCP suite; adjust assertions if they inspect claim layout               |
-| `conformsTo` adopted from dct (0.18 #5780)              | catalog JSON-LD consumed by `services/catalog-crawler` → enricher → `HealthDataset.conformsTo[]`           | enricher mapping must accept `dct:conformsTo`; add a fixture test              |
-| Token-exchange auth for HashiCorp Vault (0.18 #5821)    | controlplane ↔ Vault (`mvhd-vault`, now pinned 2.0)                                                       | review jad Vault config; aligns with the Vault 2.0 pin from Phase A            |
-| Well-known path config removed (0.17 #5527)             | jad launcher config only (our NextAuth never used EDC well-known)                                          | none expected; verify on bring-up                                              |
-| Claims stored in contract agreement (0.17 #5626)        | EDC Postgres store schema → migration on upgrade                                                           | fresh DBs locally; Azure `controlplane` DB will migrate — snapshot first       |
-| v5alpha management APIs ported (0.17 #5588/#5594/#5603) | our code already targets `/v5alpha/participants` (25 call sites) and `/api/mgmt/v5alpha` in `jad/*.sh`     | aligned — expected to work unchanged                                           |
+| Change (release)                                        | Our exposure                                                                                                          | Action                                                                         |
+| ------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
+| Data-plane signaling becomes DEFAULT (0.18 #5694)       | both dataplanes (`mvhd-dp-fhir`, `mvhd-dp-omop`) register via jad launcher config                                     | validate DPS registration on stack bring-up; jad `config/` already targets DPS |
+| Identity carried in `sub` claim (0.18 #5813)            | DCP flows: IdentityHub ↔ IssuerService ↔ controlplane; `scripts/run-ehds-identity-checks.sh` asserts token contents | re-run DCP suite; adjust assertions if they inspect claim layout               |
+| `conformsTo` adopted from dct (0.18 #5780)              | catalog JSON-LD consumed by `services/catalog-crawler` → enricher → `HealthDataset.conformsTo[]`                      | enricher mapping must accept `dct:conformsTo`; add a fixture test              |
+| Token-exchange auth for HashiCorp Vault (0.18 #5821)    | controlplane ↔ Vault (`mvhd-vault`, now pinned 2.0)                                                                  | review jad Vault config; aligns with the Vault 2.0 pin from Phase A            |
+| Well-known path config removed (0.17 #5527)             | jad launcher config only (our NextAuth never used EDC well-known)                                                     | none expected; verify on bring-up                                              |
+| Claims stored in contract agreement (0.17 #5626)        | EDC Postgres store schema → migration on upgrade                                                                      | fresh DBs locally; Azure `controlplane` DB will migrate — snapshot first       |
+| v5alpha management APIs ported (0.17 #5588/#5594/#5603) | our code already targets `/v5alpha/participants` (25 call sites) and `/api/mgmt/v5alpha` in `jad/*.sh`                | aligned — expected to work unchanged                                           |
 
 ## CFM status (lockstep caveat)
 
@@ -50,7 +50,7 @@ any CFM rebuild.`
 
 1. `docker compose -f docker-compose.yml -f docker-compose.jad.yml -f docker-compose.jad-edc018.yml up -d`
 2. `./scripts/bootstrap-jad.sh && ./jad/seed-all.sh` (phases 1–7)
-3. `./scripts/run-dcp-tests.sh` · `./scripts/run-dsp-tck.sh` · `./scripts/run-ehds-tests.sh`
+3. `./scripts/run-ehds-identity-checks.sh` · `./scripts/run-ehds-dataspace-checks.sh` · `./scripts/run-ehds-tests.sh`
 4. `PLAYWRIGHT_BASE_URL=http://localhost:3003 npx playwright test --project=live`
 5. Only then: swap the four image refs in `docker-compose.jad.yml` + Azure
    `scripts/azure/env.sh`, snapshot the Azure `controlplane` Postgres DB, roll out.
