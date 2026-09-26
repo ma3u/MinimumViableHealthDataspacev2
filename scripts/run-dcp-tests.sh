@@ -55,6 +55,7 @@ TOTAL=0
 PASSED=0
 FAILED=0
 SKIPPED=0
+rate=""
 
 # ---------------------------------------------------------------------------
 # Output helpers
@@ -72,7 +73,11 @@ NC='\033[0m'
 log() { echo -e "${CYAN}[DCP]${NC} $*"; }
 pass() { echo -e "  ${GREEN}✓${NC} $*"; PASSED=$((PASSED + 1)); TOTAL=$((TOTAL + 1)); }
 fail() { echo -e "  ${RED}✗${NC} $*"; FAILED=$((FAILED + 1)); TOTAL=$((TOTAL + 1)); }
-skip() { echo -e "  ${YELLOW}⊘${NC} $*"; SKIPPED=$((SKIPPED + 1)); TOTAL=$((TOTAL + 1)); }
+# A skip is a third outcome, not a pass (ADR-031). It used to increment TOTAL
+# as well, so every skip raised the reported pass rate: a suite that could
+# reach nothing at all scored 100%. TOTAL now counts only checks that reached
+# a verdict, and skips are reported alongside it.
+skip() { echo -e "  ${YELLOW}⊘${NC} $*"; SKIPPED=$((SKIPPED + 1)); }
 
 record_result() {
   local test_id="$1" category="$2" status="$3" detail="${4:-}"
@@ -184,20 +189,33 @@ run_did_tests() {
       resp=$(identity_get "/v1alpha/participants/${ctx}/keypairs") || resp=""
     fi
 
+    # Responding is not the property under test. DCP 3 requires a resolvable
+    # did:web for the participant, so assert that and nothing weaker.
+    local did=""
     if [ -n "$resp" ]; then
-      pass "$test_id: DID/KeyPair endpoint responds for ${slug}"
-      record_result "$test_id" "did" "passed"
-    else
-      # Try the participants endpoint on identity API
+      did=$(printf '%s' "$resp" | jq -r 'if type=="array" then (.[0].did // .[0].participantDid // empty) else (.did // .participantDid // empty) end' 2>/dev/null) || did=""
+    fi
+    if [ -z "$did" ]; then
       local part_resp
       part_resp=$(identity_get "/v1alpha/participants") || part_resp=""
-      if [ -n "$part_resp" ] && echo "$part_resp" | jq -e ".[] | select(.participantId == \"${ctx}\")" >/dev/null 2>&1; then
-        pass "$test_id: Participant ${ctx} found in IdentityHub"
-        record_result "$test_id" "did" "passed"
-      else
-        skip "$test_id: DID resolution endpoint not accessible for ${slug}"
-        record_result "$test_id" "did" "skipped" "endpoint not accessible"
+      if [ -n "$part_resp" ]; then
+        did=$(printf '%s' "$part_resp" | jq -r --arg c "$ctx" \
+          '[.[] | select((.participantContextId // .participantId // .["@id"]) == $c)] | .[0].did // empty' 2>/dev/null) || did=""
       fi
+    fi
+
+    if [ -z "$resp" ]; then
+      skip "$test_id: IdentityHub not reachable for ${slug}"
+      record_result "$test_id" "did" "skipped" "identity api unreachable"
+    elif [[ "$did" == did:web:* ]]; then
+      pass "$test_id: ${slug} resolves to ${did}"
+      record_result "$test_id" "did" "passed" "$did"
+    elif [ -n "$did" ]; then
+      fail "$test_id: ${slug} has DID '${did}', which is not a did:web"
+      record_result "$test_id" "did" "failed" "non-did:web: $did"
+    else
+      fail "$test_id: IdentityHub answered for ${slug} but exposes no DID"
+      record_result "$test_id" "did" "failed" "no did field"
     fi
   done
 
@@ -297,13 +315,18 @@ run_keypair_tests() {
     pass "$test_id: ${active_count} ACTIVATED key pairs (provider: alpha-klinik)"
     record_result "$test_id" "keypair" "passed" "${active_count} active"
   elif [ -n "$resp" ] && echo "$resp" | jq -e 'length > 0' >/dev/null 2>&1; then
+    # Key pairs that exist but are not ACTIVATED cannot sign anything. That is
+    # a failure of the property, not a reason to skip it.
     local states
     states=$(echo "$resp" | jq -r '[.[].state] | unique | join(", ")')
-    skip "$test_id: Key pair states: ${states}"
-    record_result "$test_id" "keypair" "skipped" "states: ${states}"
+    fail "$test_id: key pairs exist but none is ACTIVATED (states: ${states})"
+    record_result "$test_id" "keypair" "failed" "states: ${states}"
+  elif [ -n "$resp" ]; then
+    fail "$test_id: provider has no key pairs, so it cannot sign a presentation"
+    record_result "$test_id" "keypair" "failed" "no key pairs"
   else
-    skip "$test_id: No key pairs to verify"
-    record_result "$test_id" "keypair" "skipped"
+    skip "$test_id: IdentityHub not reachable"
+    record_result "$test_id" "keypair" "skipped" "identity api unreachable"
   fi
 
   # 2.3 — Key pairs use Ed25519 or EC algorithm
@@ -312,16 +335,25 @@ run_keypair_tests() {
     local algo
     algo=$(echo "$resp" | jq -r '.[0].keyGeneratorParams.algorithm // .[0].algorithm // "unknown"') || algo="unknown"
 
-    if [ "$algo" != "unknown" ] && [ "$algo" != "null" ]; then
-      pass "$test_id: Key algorithm: ${algo}"
-      record_result "$test_id" "keypair" "passed" "algorithm: ${algo}"
-    else
-      pass "$test_id: Key pairs present (algorithm field not exposed)"
-      record_result "$test_id" "keypair" "passed" "algorithm unknown"
-    fi
+    # The check is named "Ed25519 or EC", so assert that set. Passing on any
+    # value at all, or on the field being absent, asserts nothing.
+    case "$algo" in
+      Ed25519 | EdDSA | EC | ES256 | ES384 | P-256 | P-384 | secp256r1 | secp384r1)
+        pass "$test_id: Key algorithm: ${algo}"
+        record_result "$test_id" "keypair" "passed" "algorithm: ${algo}"
+        ;;
+      unknown | null | "")
+        fail "$test_id: key pairs expose no algorithm, so it cannot be verified"
+        record_result "$test_id" "keypair" "failed" "algorithm absent"
+        ;;
+      *)
+        fail "$test_id: key algorithm is '${algo}', expected Ed25519 or an EC curve"
+        record_result "$test_id" "keypair" "failed" "algorithm: ${algo}"
+        ;;
+    esac
   else
-    skip "$test_id: No key pairs to check algorithm"
-    record_result "$test_id" "keypair" "skipped"
+    skip "$test_id: IdentityHub not reachable"
+    record_result "$test_id" "keypair" "skipped" "identity api unreachable"
   fi
 }
 
@@ -362,19 +394,25 @@ run_credential_tests() {
     local types
     types=$(echo "$resp" | jq -r '[.[] | .verifiableCredential.credential.type // empty] | flatten | unique | join(", ")' 2>/dev/null) || types=""
 
+    # This check exists to assert an EHDS-relevant credential type. Any other
+    # type is a real answer and a real failure; no extractable type at all
+    # means the assertion could not be made, which is also not a pass.
     if echo "$types" | grep -qi "EHDS\|Membership\|Participant"; then
       pass "$test_id: EHDS credential types found: ${types}"
       record_result "$test_id" "credential" "passed" "types: ${types}"
     elif [ -n "$types" ]; then
-      pass "$test_id: Credential types present: ${types}"
-      record_result "$test_id" "credential" "passed" "types: ${types}"
+      fail "$test_id: no EHDS/Membership/Participant type among: ${types}"
+      record_result "$test_id" "credential" "failed" "types: ${types}"
     else
-      pass "$test_id: Credentials present (type extraction format differs)"
-      record_result "$test_id" "credential" "passed"
+      fail "$test_id: credentials present but no type could be extracted"
+      record_result "$test_id" "credential" "failed" "no type field"
     fi
+  elif [ -n "$resp" ]; then
+    fail "$test_id: provider holds no credentials"
+    record_result "$test_id" "credential" "failed" "empty credential list"
   else
-    skip "$test_id: No credentials to check types"
-    record_result "$test_id" "credential" "skipped"
+    skip "$test_id: IdentityHub not reachable"
+    record_result "$test_id" "credential" "skipped" "identity api unreachable"
   fi
 
   # 3.3 — Credential has valid issuance timestamp
@@ -383,11 +421,14 @@ run_credential_tests() {
     pass "$test_id: Credential has issuance timestamp"
     record_result "$test_id" "credential" "passed"
   elif [ -n "$resp" ] && echo "$resp" | jq -e 'length > 0' >/dev/null 2>&1; then
-    pass "$test_id: Credentials present (timestamp field may differ)"
-    record_result "$test_id" "credential" "passed"
+    fail "$test_id: credentials present but none carries an issuance timestamp"
+    record_result "$test_id" "credential" "failed" "no issuance timestamp"
+  elif [ -n "$resp" ]; then
+    fail "$test_id: provider holds no credentials"
+    record_result "$test_id" "credential" "failed" "empty credential list"
   else
-    skip "$test_id: No credential to check timestamp"
-    record_result "$test_id" "credential" "skipped"
+    skip "$test_id: IdentityHub not reachable"
+    record_result "$test_id" "credential" "skipped" "identity api unreachable"
   fi
 }
 
@@ -453,16 +494,22 @@ run_issuer_tests() {
     local types
     types=$(echo "$resp" | jq -r '[.[].credentialType // .[]["@id"]] | unique | join(", ")' 2>/dev/null) || types=""
 
-    if [ -n "$types" ]; then
+    if echo "$types" | grep -qi "EHDS\|Membership\|Participant"; then
       pass "$test_id: Credential types: ${types}"
       record_result "$test_id" "issuer" "passed" "types: ${types}"
+    elif [ -n "$types" ]; then
+      fail "$test_id: issuer defines no EHDS credential type, only: ${types}"
+      record_result "$test_id" "issuer" "failed" "types: ${types}"
     else
-      pass "$test_id: Definitions present (type field format unknown)"
-      record_result "$test_id" "issuer" "passed"
+      fail "$test_id: definitions present but no credential type could be read"
+      record_result "$test_id" "issuer" "failed" "no type field"
     fi
+  elif [ -n "$resp" ]; then
+    fail "$test_id: issuer has no credential definitions"
+    record_result "$test_id" "issuer" "failed" "empty definition list"
   else
-    skip "$test_id: No credential definitions to check types"
-    record_result "$test_id" "issuer" "skipped"
+    skip "$test_id: IssuerService not reachable"
+    record_result "$test_id" "issuer" "skipped" "issuer api unreachable"
   fi
 
   # 4.4 — Issuer DID is configured
@@ -476,11 +523,16 @@ run_issuer_tests() {
     pass "$test_id: Issuer DID: ${issuer_did}"
     record_result "$test_id" "issuer" "passed" "DID: ${issuer_did}"
   elif [ -n "$issuer_did" ]; then
-    pass "$test_id: Issuer ID configured: ${issuer_did}"
-    record_result "$test_id" "issuer" "passed" "ID: ${issuer_did}"
+    # DCP requires the issuer be identified by a resolvable DID. An opaque id
+    # is not one, and passing on it was the check contradicting its own name.
+    fail "$test_id: issuer id '${issuer_did}' is not a did:web"
+    record_result "$test_id" "issuer" "failed" "non-did:web: ${issuer_did}"
+  elif [ -n "$resp" ]; then
+    fail "$test_id: credential definitions carry no issuer DID"
+    record_result "$test_id" "issuer" "failed" "no issuer DID"
   else
-    skip "$test_id: Issuer DID not found in credential definitions"
-    record_result "$test_id" "issuer" "skipped"
+    skip "$test_id: IssuerService not reachable"
+    record_result "$test_id" "issuer" "skipped" "issuer api unreachable"
   fi
 }
 
@@ -490,48 +542,65 @@ run_issuer_tests() {
 run_scope_tests() {
   log "Category 5: DCP Scope Configuration Tests"
 
-  # 5.1 — Verify DCP scopes are configured on control plane
-  local test_id="SCOPE-5.1"
-  # Check via Docker environment if accessible
-  local scopes
-  scopes=$(docker inspect health-dataspace-controlplane 2>/dev/null | \
-    jq -r '.[0].Config.Env[] | select(startswith("edc.iam.dcp.scopes"))' 2>/dev/null) || scopes=""
+  # These three read the control plane's container environment, so they can
+  # only run where that container is visible. On Azure it never is, and they
+  # used to skip silently and still count toward the total. Establish
+  # reachability once, then assert properly or skip loudly with the reason.
+  local cp_env=""
+  local cp_reachable=0
+  if command -v docker >/dev/null 2>&1 &&
+    cp_env=$(docker inspect health-dataspace-controlplane 2>/dev/null | jq -r '.[0].Config.Env[]' 2>/dev/null) &&
+    [ -n "$cp_env" ]; then
+    cp_reachable=1
+  fi
 
-  if [ -n "$scopes" ]; then
-    local scope_count
-    scope_count=$(echo "$scopes" | wc -l | tr -d ' ')
-    pass "$test_id: ${scope_count} DCP scopes configured on control plane"
-    record_result "$test_id" "scope" "passed" "${scope_count} scopes"
+  # 5.1 — DCP scopes are configured on the control plane
+  local test_id="SCOPE-5.1"
+  local scopes=""
+  if [ "$cp_reachable" -eq 1 ]; then
+    scopes=$(printf '%s\n' "$cp_env" | grep '^edc\.iam\.dcp\.scopes' || true)
+    if [ -n "$scopes" ]; then
+      local scope_count
+      scope_count=$(printf '%s\n' "$scopes" | wc -l | tr -d ' ')
+      pass "$test_id: ${scope_count} DCP scopes configured on control plane"
+      record_result "$test_id" "scope" "passed" "${scope_count} scopes"
+    else
+      fail "$test_id: control plane defines no edc.iam.dcp.scopes"
+      record_result "$test_id" "scope" "failed" "no dcp scopes"
+    fi
   else
-    skip "$test_id: Cannot inspect DCP scopes (Docker inspect unavailable)"
-    record_result "$test_id" "scope" "skipped"
+    skip "$test_id: control plane container not inspectable (not a local stack)"
+    record_result "$test_id" "scope" "skipped" "container not inspectable"
   fi
 
   # 5.2 — EHDS participant scope present
   local test_id="SCOPE-5.2"
-  if echo "$scopes" | grep -qi "EHDSParticipant"; then
+  if [ "$cp_reachable" -ne 1 ]; then
+    skip "$test_id: control plane container not inspectable (not a local stack)"
+    record_result "$test_id" "scope" "skipped" "container not inspectable"
+  elif printf '%s\n' "$scopes" | grep -qi "EHDSParticipant"; then
     pass "$test_id: EHDSParticipantCredential scope configured"
     record_result "$test_id" "scope" "passed"
-  elif [ -n "$scopes" ]; then
-    skip "$test_id: EHDSParticipant scope not found in configured scopes"
-    record_result "$test_id" "scope" "skipped"
   else
-    skip "$test_id: Cannot verify scopes"
-    record_result "$test_id" "scope" "skipped"
+    fail "$test_id: EHDSParticipant scope missing from the configured scopes"
+    record_result "$test_id" "scope" "failed" "scope absent"
   fi
 
   # 5.3 — Trusted issuer configured
   local test_id="SCOPE-5.3"
-  local trusted_issuer
-  trusted_issuer=$(docker inspect health-dataspace-controlplane 2>/dev/null | \
-    jq -r '.[0].Config.Env[] | select(startswith("edc.iam.trusted-issuer"))' 2>/dev/null) || trusted_issuer=""
-
-  if [ -n "$trusted_issuer" ]; then
-    pass "$test_id: Trusted issuer configured: $(echo "$trusted_issuer" | head -1)"
-    record_result "$test_id" "scope" "passed"
+  if [ "$cp_reachable" -ne 1 ]; then
+    skip "$test_id: control plane container not inspectable (not a local stack)"
+    record_result "$test_id" "scope" "skipped" "container not inspectable"
   else
-    skip "$test_id: Cannot verify trusted issuer configuration"
-    record_result "$test_id" "scope" "skipped"
+    local trusted_issuer
+    trusted_issuer=$(printf '%s\n' "$cp_env" | grep '^edc\.iam\.trusted-issuer' || true)
+    if [ -n "$trusted_issuer" ]; then
+      pass "$test_id: Trusted issuer configured: $(printf '%s\n' "$trusted_issuer" | head -1)"
+      record_result "$test_id" "scope" "passed"
+    else
+      fail "$test_id: control plane defines no edc.iam.trusted-issuer"
+      record_result "$test_id" "scope" "failed" "no trusted issuer"
+    fi
   fi
 }
 
@@ -590,7 +659,11 @@ main() {
 
   echo ""
   echo "═══════════════════════════════════════════════════════════════"
-  echo -e "  Results: ${GREEN}${PASSED} passed${NC}, ${RED}${FAILED} failed${NC}, ${YELLOW}${SKIPPED} skipped${NC} / ${TOTAL} total"
+  # TOTAL counts checks that reached a verdict. Skips are reported next to it
+  # rather than inside it, so the rate cannot be improved by skipping more.
+  rate="n/a"
+  if [ "$TOTAL" -gt 0 ]; then rate="$((100 * PASSED / TOTAL))%"; fi
+  echo -e "  Results: ${GREEN}${PASSED} passed${NC}, ${RED}${FAILED} failed${NC} / ${TOTAL} verdicts (${rate}), ${YELLOW}${SKIPPED} skipped${NC}"
   echo "═══════════════════════════════════════════════════════════════"
   echo ""
 

@@ -10,13 +10,26 @@ every other request with an empty JSON array. It implements no protocol, holds
 no assets, negotiates nothing, and transfers nothing. Any check it passes is a
 check that is not measuring conformance.
 
-Measured 2026-09-26 against scripts/run-dsp-tck.sh:
+Measured 2026-09-26. Point ALL of EDC_MANAGEMENT_URL, EDC_IDENTITY_URL and
+EDC_ISSUER_URL at the stub; setting only the first leaves the DCP suite talking
+to a real IdentityHub and IssuerService, which is how the first published DCP
+figure for this stub came out wrong.
 
-    this stub          23 passed, 1 failed, 9 skipped / 33
-    real Azure stack   23 passed, 0 failed, 10 skipped / 33
+    DSP   this stub          23 passed,  1 failed,  9 skipped / 33
+          real Azure stack   23 passed,  0 failed, 10 skipped / 33
 
-The suite cannot tell them apart. That is the finding, and it is the reason
-Phase 1 of #338 adopts the Eclipse TCK.
+    DCP   this stub          14 passed,  0 failed,  8 skipped / 22
+          real local stack   14 passed,  0 failed,  8 skipped / 22
+          real Azure stack   10 passed,  1 failed, 11 skipped / 22
+
+Neither suite can tell the stub from a real connector; the DCP suite scores it
+identically to the local stack and better than Azure. That is the finding, and
+it is the reason Phase 1 of #338 adopts the Eclipse TCK.
+
+The DCP numbers move once the no-fail checks are fixed: the stub drops to
+11 passed / 8 failed. SCOPE-5.1 to 5.3 read the control plane's container
+environment rather than the API, so they still pass against a local stack no
+matter what the stub answers, and they skip where Docker is not visible.
 
 ADR-031 requires that a guard be exercised at least once against the failing
 condition. For the protocol suites, this is that exercise: run it after
