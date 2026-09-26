@@ -3,6 +3,52 @@
 Non-obvious pitfalls across the stack. Ordered newest first; add a new
 entry at the top when you hit something that cost you more than 30 minutes.
 
+## 2026-09-26: repairing a broken step can re-arm the destructive thing it was blocking
+
+`reset-demo.yml`'s "Re-import Keycloak edcv realm" step hardcoded `admin` /
+`admin`. That matched when it was written and stopped matching when the admin
+password was rotated into Key Vault (2026-09-13, ADR-034/ADR-036), so from then
+on every run spent six attempts on HTTP 400 and failed. Three things came out
+of fixing it, in increasing order of how much they matter.
+
+- **A credential literal in CI does not fail loudly when it rots.** The step
+  logged a bare `HTTP 400` and nothing else, so a wrong password read as a
+  flaky endpoint for two weeks. The token response says exactly what is wrong
+  (`{"error":"invalid_grant","error_description":"Invalid user credentials"}`)
+  and carries no token and no credential, so there is no reason not to print
+  it. Read the credential from the resource that owns it instead of copying
+  it: `az containerapp show`/`secret show` against `mvhd-keycloak`, never a
+  literal, so a rotation cannot desynchronise anything.
+
+- **Contributor grants nothing on an RBAC-mode Key Vault.** `kv-mvhd-b53a0449`
+  has `enableRbacAuthorization=true`. The CI service principal
+  `mvhd-github-actions` is Contributor on `rg-mvhd-dev`, whose definition is
+  `actions: ["*"]` with no relevant `notAction`, so it can call
+  `Microsoft.App/containerApps/listSecrets` and read an ACA secret, but it is
+  not Key Vault Secrets User and `az keyvault secret show` returns nothing.
+  This is why `aca-schedule.yml`'s realm restore had been failing on every run
+  behind `continue-on-error: true`: the thing added to restore a missing realm
+  could not read the password to do it. `kc_admin_password()` in
+  `scripts/azure/env.sh` now falls back from the vault to the ACA secret, which
+  holds the same value.
+
+- **The breakage was load-bearing.** The step continues into an unconditional
+  `DELETE /admin/realms/edcv` and a re-POST of `jad/keycloak-realm.json`, which
+  carries `admin`, `provisioner` and `health-dataspace-ui` and not the
+  `meinbefund-ios` client or the real accounts (ADR-034) or the quota counter
+  (ADR-035). The cron had been disabled on 2026-09-13 for exactly this reason,
+  but that removed the weekly occurrence and left the operation one
+  `workflow_dispatch` away. The failing login was the only thing stopping it,
+  and fixing the login removed that. The realm wipe is now behind an explicit
+  `wipe_realm` input that defaults to false, and the opt-in path lists the live
+  clients the import file will not restore before it deletes anything.
+
+  The general shape: before repairing a step that has been failing for a while,
+  read what it does _after_ the point it fails at. A failure can be the only
+  thing holding back something worse, and the repair is what releases it.
+
+See #310, #311 and #304.
+
 ## 2026-09-26: a bash suite that has to read Neo4j on Azure needs cypher-shell
 
 Closing out issue #205: `scripts/azure/status.sh` and the compliance-runner job

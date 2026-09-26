@@ -142,11 +142,13 @@ export KEY_VAULT_NAME="${KEY_VAULT_NAME:-kv-mvhd-b53a0449}"
 
 # Reads a secret from the vault. Returns empty and warns rather than failing, so
 # sourcing this file still works for the many scripts that need no secret at all.
+# A non-empty second argument suppresses the warning, for callers that have a
+# fallback of their own and would otherwise print a scare line before succeeding.
 kv_secret() {
-  local name="$1" value
+  local name="$1" quiet="${2:-}" value
   value=$(az keyvault secret show --vault-name "$KEY_VAULT_NAME" --name "$name" \
     --query value -o tsv 2>/dev/null) || true
-  if [ -z "$value" ]; then
+  if [ -z "$value" ] && [ -z "$quiet" ]; then
     echo "[env] WARNING: could not read '$name' from $KEY_VAULT_NAME." >&2
     echo "[env] Run 'az login' and check the Key Vault Secrets User role." >&2
   fi
@@ -160,7 +162,35 @@ export KC_ADMIN_USER="admin"
 # began gating access to paid inference (ADR-034, ADR-036). Resolved lazily so
 # sourcing env.sh does not require a vault round trip for scripts that never
 # touch Keycloak.
-kc_admin_password() { kv_secret keycloak-admin-password; }
+# Key Vault first, the container app's own secret second. Both hold the same
+# value: 03-identity.sh writes the ACA secret from the vault at deploy time.
+#
+# The fallback exists because the CI service principal cannot read the vault.
+# mvhd-github-actions is Contributor on the resource group, which carries
+# Microsoft.App/containerApps/listSecrets, but it is not Key Vault Secrets User
+# and kv-mvhd-b53a0449 has enableRbacAuthorization=true, so Contributor grants
+# nothing on the data plane. aca-schedule.yml's realm-restore step had been
+# failing on every run behind continue-on-error, printing "could not read
+# keycloak-admin-password", which means a realm that went missing would not
+# have been restored by the thing added to restore it.
+#
+# On a first deploy the app does not exist yet and both reads come back empty.
+# That is the same answer the vault-only version gave, and 03-identity.sh is
+# the caller that then creates the secret.
+kc_admin_password() {
+  local value
+  value=$(kv_secret keycloak-admin-password quiet)
+  if [ -z "$value" ]; then
+    value=$(az containerapp secret show --name "$KEYCLOAK_APP" --resource-group "$RG" \
+      --secret-name keycloak-admin-password --query value -o tsv 2>/dev/null) || true
+  fi
+  if [ -z "$value" ]; then
+    echo "[env] WARNING: no keycloak-admin-password from $KEY_VAULT_NAME or from" >&2
+    echo "[env] the ACA secret on $KEYCLOAK_APP. Run 'az login'. The caller needs" >&2
+    echo "[env] 'Key Vault Secrets User' on the vault, or Contributor on $RG." >&2
+  fi
+  printf '%s' "$value"
+}
 export KC_DB_NAME="keycloak"
 
 # ── Vault ────────────────────────────────────────────────────────────────────
