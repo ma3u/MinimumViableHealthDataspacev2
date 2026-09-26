@@ -129,3 +129,45 @@ mgmt_fetch_participants() {
   log "  versions tried:${tried}"
   return 1
 }
+
+# ---------------------------------------------------------------------------
+# EDC error envelopes
+# ---------------------------------------------------------------------------
+# An EDC error is a body that looks like data unless you check:
+#
+#   [{"message":"No provider dispatcher registered for protocol: …",
+#     "type":"BadGateway","path":null,"invalidValue":null}]
+#
+# The compliance suites assert with `[ -n "$resp" ] && …` and a fall-through
+# branch that passes on "non-standard format", so an error body scored as a
+# pass. In the DSP suite that meant CAT-1.1 reporting "Catalog endpoint
+# responded" while every catalog request was 502ing on the wrong protocol
+# identifier (#180): the runs before and after that fix were byte-identical.
+#
+# Discriminating on `type` and `message` together. EDC's ApiErrorDetail has
+# both; success bodies here use the JSON-LD `@type` instead, so an empty
+# catalog, an empty array and an asset list all pass through untouched.
+edc_is_error() {
+  printf '%s' "$1" | jq -e '
+    if type == "array" then (.[0] | objects | has("type") and has("message"))
+    else (objects | has("type") and has("message")) end
+  ' >/dev/null 2>&1
+}
+
+# Echo the body, or log it and return non-zero when it is an error envelope,
+# so a caller's `|| resp=""` turns an error into a failed assertion.
+# The diagnostic goes to stderr, not through log(). Every caller runs this
+# inside `resp=$(mgmt_post ...)`, so anything on stdout is captured into the
+# response variable rather than printed — which silently swallowed the very
+# message this function exists to produce. Same trap as mgmt_fetch_participants
+# above and as detect_version in 05-cp-participants.sh; it is the default
+# outcome for any helper that both returns a value and wants to say something.
+edc_reject_errors() {
+  local body="$1" what="$2"
+  if [ -n "$body" ] && edc_is_error "$body"; then
+    printf '  %s returned an EDC error: %s\n' \
+      "$what" "$(printf '%s' "$body" | tr -d '\n' | cut -c1-200)" >&2
+    return 1
+  fi
+  printf '%s' "$body"
+}
