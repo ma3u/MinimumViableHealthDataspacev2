@@ -13,6 +13,14 @@
 # even though ParticipantManifest is: the vendored spec is missing the
 # operation. Verified against the running service (#345).
 #
+# It MIRRORS THE CONTROL PLANE rather than inventing identifiers. On a stack
+# built by CFM the two stores agree exactly: alpha-klinik is context
+# 24be78bf... with did:web:identityhub%3A7083:alpha-klinik in both. The first
+# version of this script minted its own ids and DIDs, the two diverged, and
+# the suite could not match a control-plane context to an IdentityHub record,
+# so DID-1.1 and KEY-2.2 went on failing against a hub that was no longer
+# empty. Read the control plane and copy what it says.
+#
 # Idempotent: an existing DID answers 409 ObjectConflict and is treated as
 # success, so this is safe to re-run.
 #
@@ -21,8 +29,11 @@
 #   IDENTITY_API=http://localhost:11005/api/identity ./scripts/seed-identityhub-participants.sh
 # ---------------------------------------------------------------------------
 set -euo pipefail
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 IDENTITY_API="${EDC_IDENTITY_URL:-http://localhost:11005/api/identity}"
+MGMT_API="${EDC_MANAGEMENT_URL:-http://localhost:11003/api/mgmt}"
+MGMT_V_CANDIDATES="${EDC_MGMT_API_VERSION_CANDIDATES:-v5beta v5alpha v4alpha v3}"
 KEYCLOAK_URL="${KEYCLOAK_URL:-http://localhost:8080}"
 REALM="${KEYCLOAK_REALM:-edcv}"
 CLIENT_ID="${EDC_CLIENT_ID:-admin}"
@@ -54,14 +65,34 @@ if [ -z "$TOKEN" ]; then
   exit 1
 fi
 
+# --- What does the control plane call these participants? -------------------
+# Each line is "<contextId> <did>". Empty when the control plane is unseeded
+# or unreachable, in which case fall back to deriving ids from the slugs.
+PAIRS=""
+for v in $MGMT_V_CANDIDATES; do
+  cp_body=$(curl -sS --max-time 20 -H "Authorization: Bearer ${TOKEN}" \
+    "${MGMT_API}/${v}/participants" 2>/dev/null) || continue
+  PAIRS=$(printf '%s' "$cp_body" | python3 "${SCRIPT_DIR}/lib/cp-participant-pairs.py" 2>/dev/null) || PAIRS=""
+  if [ -n "$PAIRS" ]; then
+    log "mirroring $(printf '%s\n' "$PAIRS" | grep -c . ) participant(s) from the control plane (${v})"
+    break
+  fi
+done
+
+if [ -z "$PAIRS" ]; then
+  log "control plane has nothing to mirror; deriving ids from the slugs"
+  for slug in "${SLUGS[@]}"; do
+    ctx=$(printf '%s' "$slug" | md5sum 2>/dev/null | cut -c1-32) \
+      || ctx=$(printf '%s' "$slug" | md5 | cut -c1-32)
+    PAIRS="${PAIRS}${ctx} did:web:${DID_HOST}:${slug}
+"
+  done
+fi
+
 created=0; existed=0; failed=0
 
-for slug in "${SLUGS[@]}"; do
-  did="did:web:${DID_HOST}:${slug}"
-  # Deterministic context id, so a re-run addresses the same record rather
-  # than trying to mint a second one.
-  ctx=$(printf '%s' "$slug" | md5sum 2>/dev/null | cut -c1-32) \
-    || ctx=$(printf '%s' "$slug" | md5 | cut -c1-32)
+while read -r ctx did; do
+  [ -n "$ctx" ] && [ -n "$did" ] || continue
 
   body=$(python3 - "$ctx" "$did" <<'PY'
 import json, sys
@@ -92,16 +123,18 @@ PY
 
   case "$status" in
     2??)
-      echo -e "  ${GREEN}+${NC} ${slug} -> ${did}"
+      echo -e "  ${GREEN}+${NC} ${did}"
       created=$((created + 1)) ;;
     409)
-      echo -e "  ${YELLOW}=${NC} ${slug} already present"
+      echo -e "  ${YELLOW}=${NC} ${did} already present"
       existed=$((existed + 1)) ;;
     *)
-      echo -e "  ${RED}x${NC} ${slug}: HTTP ${status} ${detail}"
+      echo -e "  ${RED}x${NC} ${did}: HTTP ${status} ${detail}"
       failed=$((failed + 1)) ;;
   esac
-done
+done <<MIRROR_EOF
+$PAIRS
+MIRROR_EOF
 
 log "created ${created}, already present ${existed}, failed ${failed}"
 
