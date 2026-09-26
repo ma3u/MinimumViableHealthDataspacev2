@@ -418,8 +418,8 @@ three suites died at participant discovery (#307, fixed in #314).
 > | Suite          | Local ephemeral stack                | Azure deployment                     |
 > | -------------- | ------------------------------------ | ------------------------------------ |
 > | EHDS domain    | 1 passed, 13 failed, 11 skipped / 25 | 20 passed, 0 failed, 5 skipped / 25  |
-> | DSP 2025-1 TCK | ends at discovery                    | 23 passed, 0 failed, 10 skipped / 33 |
-> | DCP v1.0       | ends at discovery                    | 10 passed, 1 failed, 11 skipped / 22 |
+> | DSP 2025-1 TCK | 25 passed, 0 failed, 8 skipped / 33  | 23 passed, 0 failed, 10 skipped / 33 |
+> | DCP v1.0       | 14 passed, 0 failed, 8 skipped / 22  | 10 passed, 1 failed, 11 skipped / 22 |
 >
 > The Azure column is the state after #316 seeded five participant contexts
 > onto the control plane, which it had never had. Before that, all three suites
@@ -427,10 +427,15 @@ three suites died at participant discovery (#307, fixed in #314).
 > were empty in the literal sense: neither had produced a verdict on any target,
 > ever. They now do, on Azure.
 >
-> The local column is still unseeded at the time of writing. `compliance.yml`
-> gained the same seeding step in the same issue, so the next run there should
-> move too; the numbers above predate it. EHDS scores 1/25 locally because the
-> ephemeral Neo4j is empty, which is a separate gap from the participant one.
+> Both columns are post-seeding: `compliance.yml` seeds the ephemeral stack the
+> same way (#316), and the version fallback picks `v5beta` there against
+> `v4alpha` on Azure without being told. EHDS still scores 1/25 locally because
+> the ephemeral Neo4j is empty, which is a separate gap from the participant
+> one and the reason the two EHDS columns differ so widely.
+>
+> The two targets disagree slightly on DSP and DCP. That is expected — the
+> local stack has assets and policies from its own seeds, Azure does not — and
+> the difference is now visible rather than hidden behind a shared silence.
 >
 > What has not changed: no suite can fail this workflow, so treat the numbers
 > as a report and not as a gate.
