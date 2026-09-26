@@ -6,6 +6,7 @@ import {
   DEMO_ONBOARDING_SCOPE,
   type DemoRecord,
 } from "@/lib/demo-records";
+import { summariseVpas, type Vpa } from "@/lib/provisioning";
 import { promises as fs } from "fs";
 import path from "path";
 
@@ -333,11 +334,22 @@ export async function POST(req: NextRequest) {
       dataspaceProfileId: profileId,
     };
 
-    const participant = await edcClient.tenant<{ id: string }>(
+    const participant = await edcClient.tenant<{ id: string; vpas?: Vpa[] }>(
       `/v1alpha1/tenants/${tenant.id}/participant-profiles`,
       "POST",
       participantPayload,
     );
+
+    // What was actually created is a tenant, a participant profile and a set
+    // of provisioning activities, all of them pending. The DID and the
+    // credential arrive only when an agent completes those activities, and
+    // this request cannot know whether one will: a freshly created activity
+    // looks the same either way. So report the activities rather than promise
+    // their outcome, and let /api/participants/me call it stalled once they
+    // have sat pending past the point an agent would have taken them
+    // (lib/provisioning.ts). Issue #203.
+    const vpas = Array.isArray(participant?.vpas) ? participant.vpas : [];
+    const summary = summariseVpas([{ vpas }]);
 
     return NextResponse.json(
       {
@@ -347,6 +359,9 @@ export async function POST(req: NextRequest) {
         role,
         status: "provisioning",
         provisioned: true,
+        vpas,
+        activitiesPending: summary.pending,
+        activityTypes: summary.pendingTypes,
       },
       { status: 201 },
     );

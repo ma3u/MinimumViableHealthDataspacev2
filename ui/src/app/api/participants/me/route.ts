@@ -2,6 +2,11 @@ import { NextResponse } from "next/server";
 import { edcClient } from "@/lib/edc";
 import { requireAuth, isAuthError } from "@/lib/auth-guard";
 import { listDemo, DEMO_ONBOARDING_SCOPE } from "@/lib/demo-records";
+import {
+  summariseVpas,
+  stalledReason,
+  type ProfileWithVpas,
+} from "@/lib/provisioning";
 
 export const dynamic = "force-dynamic";
 
@@ -33,17 +38,31 @@ export async function GET() {
       }[]
     >("/v1alpha1/tenants");
 
-    // Enrich each tenant with its participant profiles
+    // Enrich each tenant with its participant profiles, and with a reading of
+    // how far their provisioning activities actually got. A profile whose
+    // activities are all still pending long after creation is not
+    // provisioning: nothing is going to complete it, and the page has to say
+    // that rather than animate a clock (issue #203).
     const enriched = await Promise.all(
       tenants.map(async (t) => {
+        let profiles: ProfileWithVpas[] = [];
         try {
-          const profiles = await edcClient.tenant<unknown[]>(
+          profiles = await edcClient.tenant<ProfileWithVpas[]>(
             `/v1alpha1/tenants/${t.id}/participant-profiles`,
           );
-          return { ...t, participantProfiles: profiles };
         } catch {
-          return { ...t, participantProfiles: [] };
+          profiles = [];
         }
+        const vpaSummary = summariseVpas(profiles);
+        return {
+          ...t,
+          participantProfiles: profiles,
+          vpaSummary,
+          provisioningStalled: vpaSummary.stalled,
+          ...(vpaSummary.stalled
+            ? { stalledReason: stalledReason(vpaSummary) }
+            : {}),
+        };
       }),
     );
 
