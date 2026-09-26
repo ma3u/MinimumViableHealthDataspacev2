@@ -289,8 +289,11 @@ jobs:
 
       - name: Initialize Neo4j schema
         run: |
-          cat neo4j/init-schema.cypher | docker exec -i health-dataspace-neo4j \
-            cypher-shell -u neo4j -p healthdataspace || true
+          # Redirect rather than `cat |`: CI's actionlint runs shellcheck at a
+          # stricter level than a local one and fails the gate on SC2002.
+          docker exec -i health-dataspace-neo4j \
+            cypher-shell -u neo4j -p healthdataspace \
+            < neo4j/init-schema.cypher || true
 
       # The ephemeral stack comes up empty: this workflow starts it with
       # `docker compose up -d` and never runs jad/seed-all.sh, so the control
