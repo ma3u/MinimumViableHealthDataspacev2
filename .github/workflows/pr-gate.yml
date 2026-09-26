@@ -1,0 +1,79 @@
+# ---------------------------------------------------------------------------
+# PR Gate — the one check that runs on every pull request
+# ---------------------------------------------------------------------------
+# Every other workflow here is path-filtered, which is right for cost but
+# useless for branch protection: a required check that never starts leaves the
+# PR unmergeable forever. #303 collected 28 checks and #305 collected none, and
+# both were ordinary changes. This workflow has no path filter, so the ruleset
+# on `main` has exactly one contract it can rely on.
+#
+# It runs the same pre-commit hooks the local hook runs, over the PR's diff
+# only, which is what catches a commit made with --no-verify or from a clone
+# where `pre-commit install` was never run. It deliberately does NOT duplicate
+# test.yml: the heavy suites stay path-filtered and advisory.
+# ---------------------------------------------------------------------------
+name: PR Gate
+
+on:
+  pull_request:
+  merge_group:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pr-gate-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  gate:
+    name: PR Gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: ui/package-lock.json
+
+      # tsc-ui and eslint-ui shell out to `npx` inside ui/, so the hooks need
+      # the dependency tree present before pre-commit runs.
+      - name: Install UI dependencies
+        run: npm ci --prefix ui --no-audit --fund=false
+
+      - name: Install gitleaks and actionlint
+        run: |
+          set -euo pipefail
+          gl=8.29.0
+          curl -fsSL "https://github.com/gitleaks/gitleaks/releases/download/v${gl}/gitleaks_${gl}_linux_x64.tar.gz" \
+            | sudo tar -xz -C /usr/local/bin gitleaks
+          bash <(curl -fsSL https://raw.githubusercontent.com/rhysd/actionlint/main/scripts/download-actionlint.bash) >/dev/null
+          sudo mv ./actionlint /usr/local/bin/
+
+      # The diff, not --all-files: the same scope the local hook sees, so CI
+      # and the laptop agree on what a change is responsible for.
+      - name: pre-commit (changed files)
+        run: |
+          set -euo pipefail
+          python -m pip install --quiet pre-commit
+          git fetch --no-tags --depth=1 origin "${{ github.base_ref || 'main' }}"
+          pre-commit run --show-diff-on-failure --color=always \
+            --from-ref "origin/${{ github.base_ref || 'main' }}" --to-ref HEAD
+
+      # gitleaks' pre-commit hook is `gitleaks protect --staged`, which sees
+      # nothing in CI because nothing is staged. Scan the PR's commits instead.
+      - name: Secret scan (PR commits)
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin "${{ github.base_ref || 'main' }}"
+          gitleaks detect --no-banner --redact \
+            --log-opts="origin/${{ github.base_ref || 'main' }}..HEAD"

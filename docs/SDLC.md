@@ -3,7 +3,7 @@
 - **Project:** Minimum Viable Health Dataspace v2 (EHDS reference implementation)
 - **Audience:** contributors, reviewers, and anyone curious how a one-person,
   AI-assisted project keeps a regulated-domain codebase shippable.
-- **Last updated:** 2026-06-01
+- **Last updated:** 2026-09-26
 - **Maintainer:** Matthias (`@ma3u`)
 
 > Companion document: **[Deterministic Agentic AI Development with Claude
@@ -211,6 +211,65 @@ ADR-022/024 (EDC connector cost vs. function).
 
 ---
 
+## 4.1 Branch protection on `main`
+
+Until 2026-09-26 none of the above was enforced: `main` was an unprotected
+branch and "don't merge red" was a habit. It was a well-kept habit — 39 of the
+last 40 commits arrived through a PR — but a habit is not a control, and in a
+regulated domain the difference matters. A [repository
+ruleset](https://docs.github.com/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/about-rulesets)
+now targets the default branch:
+
+| Rule                                | Effect                                                                                                           |
+| ----------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| **Require a pull request**          | No direct pushes to `main`. **Zero approvals required** — see the note below.                                    |
+| **Require conversation resolution** | Every review thread must be resolved before merge, so AI-review findings are answered rather than scrolled past. |
+| **Require status checks**           | **PR Gate** must be green. The list is deliberately one item long — see below.                                   |
+| **Require linear history**          | Merge commits are rejected; squash (the existing habit) and rebase are fine.                                     |
+| **Block force pushes**              | `main` history cannot be rewritten.                                                                              |
+| **Restrict deletions**              | `main` cannot be deleted.                                                                                        |
+
+**Zero required approvals is deliberate, not an oversight.** On a one-person
+project, requiring an approving review would mean requiring a second account,
+and the realistic outcome of that is a rubber stamp or a disabled rule. The
+review function is carried by the AI reviewers (`/review`, `/code-review`, the
+specialist sub-agents) and by the gates; the _mechanical_ protections — no
+direct push, no force push, no merge on red — are the part a solo maintainer
+genuinely cannot provide by discipline, so those are the part that is enforced.
+The moment a second contributor joins, raise this to 1.
+
+**Repository admins can bypass.** This is a demo that is also a live public
+deployment, and being unable to land a hotfix because a required check is stuck
+is a worse failure than a bypassed rule. The bypass is an emergency hatch: use
+it and the bypass is recorded in the ruleset's insights, which is the property
+that makes it acceptable.
+
+### Why exactly one required status check
+
+Every other workflow in this repository is **path-filtered**, which is correct
+for cost and wrong for branch protection. A required check that never _starts_
+does not fail — it stays pending, and the PR is unmergeable forever. This is
+not hypothetical: PR #303 collected 28 checks and PR #305, a one-line change to
+a shell script, collected none.
+
+So there is one workflow with no path filter,
+**[`pr-gate.yml`](https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/.github/workflows/pr-gate.yml)**,
+and it is the only required check. It runs the **same pre-commit hooks as the
+local hook, scoped to the PR's diff** (`pre-commit run --from-ref
+origin/main --to-ref HEAD`), plus a gitleaks scan across the PR's commits —
+because the local `gitleaks protect --staged` hook has nothing staged to look
+at in CI. What it catches is precisely the case Section 5's bypass policy
+leaves open: a commit made with `--no-verify`, or from a clone where
+`pre-commit install` was never run — including a cloud agent's clone.
+
+It deliberately does **not** re-run the heavy suites. `test.yml` and the rest
+stay path-filtered and advisory, visible on the PR and read before merging. To
+promote one of them to required later, give that workflow a final job that
+always runs (`if: always()`, depending on the real jobs) and require _that_ job
+— the standard way to make a path-filtered workflow safe to require.
+
+---
+
 ## 5. Local quality gate — the pre-commit hook
 
 The first deterministic gate runs **on your machine, the moment you create a
@@ -255,6 +314,11 @@ merged if it fails. Because CI runs on neutral [GitHub Actions](https://docs.git
 runners — not on anyone's laptop — it is the **authoritative, deterministic
 verdict** on whether a change is safe. The pipeline is split into several
 workflows by purpose.
+
+Exactly one of them, **PR Gate**, is a _blocking_ gate in the branch-protection
+sense (Section 4.1). Everything below is advisory: it runs, it is visible on the
+PR, and merging over a red one is a deliberate act rather than something the
+platform prevents.
 
 ### 6.1 Test Suite — [`.github/workflows/test.yml`](https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/.github/workflows/test.yml)
 
@@ -422,12 +486,12 @@ mock the Neo4j driver — use the JSON fixtures under [`ui/public/mock/`](https:
 
 ## 10. The single-maintainer adaptation (what is collapsed, and why)
 
-| A 10–30 dev team has…                      | This project does instead                                                               | Why it's acceptable _for now_                                                                       |
-| ------------------------------------------ | --------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
-| Mandatory peer review on every PR          | **AI review** (`/review`, specialist sub-agents) + **CI gates**; maintainer self-merges | Deterministic gates catch the regressions a second human would; the AI provides a first-pass review |
-| Branch-protection blocking merge on red CI | Maintainer discipline (don't merge red)                                                 | One person, one intent; **outlook: enforce**                                                        |
-| Dedicated QA / release manager             | The testing pyramid + the Release workflow                                              | Automation replaces the role, not the rigour                                                        |
-| Sprint/ceremony overhead                   | Issues + ADRs + planning index                                                          | Lightweight, async, written-down                                                                    |
+| A 10–30 dev team has…                      | This project does instead                                                                              | Why it's acceptable _for now_                                                                       |
+| ------------------------------------------ | ------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------- |
+| Mandatory peer review on every PR          | **AI review** (`/review`, specialist sub-agents) + **CI gates**; maintainer self-merges                | Deterministic gates catch the regressions a second human would; the AI provides a first-pass review |
+| Branch-protection blocking merge on red CI | **Enforced** since 2026-09-26 (Section 4.1): PR required, PR Gate green, linear history, no force push | Admin bypass stays available as an emergency hatch, and is recorded when used                       |
+| Dedicated QA / release manager             | The testing pyramid + the Release workflow                                                             | Automation replaces the role, not the rigour                                                        |
+| Sprint/ceremony overhead                   | Issues + ADRs + planning index                                                                         | Lightweight, async, written-down                                                                    |
 
 The point is to keep **rigour** while shedding **coordination cost**. The moment
 a second contributor joins, the Section 11 items move from "nice" to "required".
@@ -439,25 +503,25 @@ a second contributor joins, the Section 11 items move from "nice" to "required".
 Ordered roughly by leverage. These are the gates a growing team would expect, and
 the natural maturation path for this repo:
 
-1. **Branch protection on `main`** — require the blocking CI jobs to be green and
-   the branch up to date before merge. (Highest leverage: makes the gate
-   non-bypassable, including for AI commits.)
+1. **Promote a real suite to required.** Branch protection landed on
+   2026-09-26 (Section 4.1), but only **PR Gate** is required, because every
+   other workflow is path-filtered and a required check that never starts
+   blocks a PR forever. Give `test.yml` a final `if: always()` summary job that
+   reports the aggregate, require that job, and the unit/E2E suites become
+   genuinely non-bypassable too.
 2. **Enforce Conventional Commits** — a `commitlint` + commit-message hook so the
    format that drives release notes can't drift.
-3. **Guarantee the local gate is installed** — make `pre-commit install` part of
-   onboarding (and add a pre-push full-suite + coverage run) so every clone gets
-   the same checks, not just documented behaviour.
-4. **Enforce coverage thresholds** — start with critical paths, ratchet up.
-5. **Make report-only scanners blocking** — drive the WCAG contrast ratchet
+3. **Enforce coverage thresholds** — start with critical paths, ratchet up.
+4. **Make report-only scanners blocking** — drive the WCAG contrast ratchet
    (Issue #25) to zero and the pentest suite to green, then drop
    `continue-on-error`.
-6. **Automated versioning** — release-please / semantic-release for changelog +
+5. **Automated versioning** — release-please / semantic-release for changelog +
    semantic version from commit history.
-7. **Governance files** — `CONTRIBUTING.md`, `CODEOWNERS`, PR template, Issue
+6. **Governance files** — `CONTRIBUTING.md`, `CODEOWNERS`, PR template, Issue
    templates; **Dependabot/Renovate** for dependency PRs.
-8. **Make compliance suites blocking** once stable, and add **release provenance /
+7. **Make compliance suites blocking** once stable, and add **release provenance /
    SLSA attestation** to releases.
-9. **Promote the compliance + Lighthouse signals into PR status** so quality is
+8. **Promote the compliance + Lighthouse signals into PR status** so quality is
    visible before merge, not only after.
 
 ---

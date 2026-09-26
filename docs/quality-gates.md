@@ -1,7 +1,7 @@
 # Quality Gates — Health Dataspace v2
 
-**Last updated:** 2026-04-11
-**Version:** 1.1.0
+**Last updated:** 2026-09-26
+**Version:** 1.2.0
 
 This document describes every quality gate enforced in the Health Dataspace v2
 project — from local pre-commit hooks to CI/CD pipeline checks — and recommends
@@ -12,18 +12,30 @@ security, and OWASP application security standards.
 
 ## Overview
 
-Quality is enforced at four stages, each progressively stricter:
+Quality is enforced at five stages, each progressively stricter:
 
 ```
 Developer Workstation          CI/CD Pipeline
 ┌──────────────────┐           ┌───────────────────────────────────┐
-│ 1. Pre-commit    │    push   │ 3. Continuous Integration         │
-│    11 hooks      │ ────────► │    8 parallel jobs                │
+│ 1. Pre-commit    │    push   │ 3. PR Gate  ← the only BLOCKING   │
+│    11 hooks      │ ────────► │    check (branch protection)      │
 │                  │           │                                   │
-│ 2. Pre-push     │           │ 4. Compliance (weekly + on main)  │
-│    2 gates       │           │    3 protocol suites              │
+│ 2. Pre-push      │           │ 4. Continuous Integration         │
+│    2 gates       │           │    8 parallel jobs (advisory)     │
+│                  │           │                                   │
+│                  │           │ 5. Compliance (weekly + on main)  │
+│                  │           │    3 protocol suites (advisory)   │
 └──────────────────┘           └───────────────────────────────────┘
 ```
+
+**"Blocking" has a precise meaning here.** Only **PR Gate** is a required
+status check in the `main` ruleset, so it is the only one GitHub itself will
+refuse a merge over. Stages 4 and 5 run, are visible on the PR, and are read
+before merging — but every one of them is path-filtered, and a required check
+that never starts leaves a PR pending forever, so requiring them would break
+more than it protects. See
+[SDLC §4.1](./SDLC.md#41-branch-protection-on-main) for the ruleset and the
+route to promoting a suite to required.
 
 ---
 
@@ -68,12 +80,30 @@ Run before `git push`. Catch issues that are too slow for pre-commit.
 
 ---
 
-## Stage 3 — CI Pipeline (GitHub Actions)
+## Stage 3 — PR Gate (the required check)
+
+Workflow: `.github/workflows/pr-gate.yml`. Runs on **every** pull request, with
+no path filter — that is its whole purpose. It re-runs the Stage 1 pre-commit
+hooks against the PR's diff (`pre-commit run --from-ref origin/main --to-ref
+HEAD`) on a neutral runner, plus a gitleaks scan across the PR's commits, since
+the local `gitleaks protect --staged` hook has nothing staged to inspect in CI.
+
+| #   | Check                     | Tool              | Severity         | Why it is here                                            |
+| --- | ------------------------- | ----------------- | ---------------- | --------------------------------------------------------- |
+| 1   | Stage 1 hooks on the diff | pre-commit        | **Blocks merge** | Catches `--no-verify`, or a clone without hooks installed |
+| 2   | Secret scan on PR commits | gitleaks `detect` | **Blocks merge** | The staged-only local hook cannot see CI's history        |
+
+It does **not** re-run Stage 4. The heavy suites stay path-filtered so they
+cost nothing on changes they cannot affect.
+
+---
+
+## Stage 4 — CI Pipeline (GitHub Actions)
 
 Triggered on push to any branch (when `ui/**`, `services/**`, or workflow files
 change) and on pull requests to main. Workflow: `.github/workflows/test.yml`.
 
-### 3.1 Unit & Integration Tests
+### 4.1 Unit & Integration Tests
 
 | Job                   | Tests | Coverage                    | Gate             |
 | --------------------- | ----- | --------------------------- | ---------------- |
@@ -84,7 +114,7 @@ change) and on pull requests to main. Workflow: `.github/workflows/test.yml`.
 Coverage reports are uploaded as artifacts (30-day retention) and summarised in
 the GitHub job summary.
 
-### 3.2 Security Scanning
+### 4.2 Security Scanning
 
 | Job                  | Tool             | Standard                  | Gate                              |
 | -------------------- | ---------------- | ------------------------- | --------------------------------- |
@@ -102,7 +132,7 @@ the GitHub job summary.
 - Two dev-only secrets are allowlisted in `.gitleaksignore` (JAD stack
   in-memory Vault credentials).
 
-### 3.3 E2E Tests (Main Branch + Manual Dispatch)
+### 4.3 E2E Tests (Main Branch + Manual Dispatch)
 
 | Job                   | Tests | Tool                | Gate                                 |
 | --------------------- | ----- | ------------------- | ------------------------------------ |
@@ -119,7 +149,7 @@ EDC-V) is not available. Full results from the JAD stack run:
 | WCAG unauthenticated         | 26     | 0       | 0      |
 | WCAG authenticated (7 roles) | 67     | 0       | 0      |
 
-### 3.4 Security Headers (Runtime)
+### 4.4 Security Headers (Runtime)
 
 Configured in `ui/next.config.js` (BSI C5 DEV-07 / OWASP A05):
 
@@ -133,7 +163,7 @@ Configured in `ui/next.config.js` (BSI C5 DEV-07 / OWASP A05):
 
 ---
 
-## Stage 4 — Compliance Testing (Weekly + Main)
+## Stage 5 — Compliance Testing (Weekly + Main)
 
 Triggered on push to main (specific paths) and every Monday at 06:00 UTC.
 Workflow: `.github/workflows/compliance.yml`.
