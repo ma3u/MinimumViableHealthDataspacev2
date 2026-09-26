@@ -5,7 +5,7 @@
 #
 # Usage:
 #   scripts/run-api-tests.sh                      # Local (compose stack on :3003)
-#   scripts/run-api-tests.sh Static-mock          # GitHub Pages fixtures, GET only
+#   scripts/run-api-tests.sh Static-mock          # the GitHub Pages fixtures (folder 13)
 #   scripts/run-api-tests.sh Azure-Dev            # needs NEXTAUTH_SECRET of the deployment
 #   scripts/run-api-tests.sh Local "07 Journey - Data permit"   # one folder (or file) only
 #
@@ -67,6 +67,9 @@ PATHS=()
 if [ "$#" -gt 0 ]; then
   for p in "$@"; do PATHS+=("$p"); done
 elif [ "$ENV_NAME" = "Static-mock" ]; then
+  # The GitHub Pages export serves no /api/ route: it renames ui/src/app/api/
+  # before the build and publishes fixtures under /mock/. Folder 13 is the one
+  # that asks for those, and static-mock.txt lists it.
   while IFS= read -r line; do
     case "$line" in ''|'#'*) continue ;; esac
     PATHS+=("$line")
@@ -79,6 +82,9 @@ else
       # The EDC services and the Neo4j proxy are internal on Azure: unreachable
       # from outside the container environment, so they run on Local and in CI.
       "10 Connecting partner"*|"11 Platform"*) [ "$ENV_NAME" = "Local" ] || continue ;;
+      # Folder 13 asks GitHub Pages for its fixtures; it has nothing to say to
+      # a running stack, so only the Static-mock branch above selects it.
+      "13 Static export"*) continue ;;
     esac
     PATHS+=("$name")
   done
@@ -90,7 +96,10 @@ HTML_REPORT="$REPORT_DIR/bruno-$ENV_NAME-$STAMP.html"
 JUNIT_REPORT="$REPORT_DIR/bruno-$ENV_NAME-$STAMP.xml"
 set +e
 (
-  cd "$COLLECTION" && $BRUNO_BIN run "${PATHS[@]}" -r --env "$ENV_NAME" "${ENV_VARS[@]}" \
+  # ${arr[@]+"${arr[@]}"}: an empty array is an unbound variable under `set -u`
+  # on bash 3.2, which is what macOS ships. Static-mock passes no --env-var.
+  cd "$COLLECTION" && $BRUNO_BIN run "${PATHS[@]}" -r --env "$ENV_NAME" \
+    ${ENV_VARS[@]+"${ENV_VARS[@]}"} \
     --reporter-json "$JSON_REPORT" --reporter-html "$HTML_REPORT" \
     --reporter-junit "$JUNIT_REPORT"
 )

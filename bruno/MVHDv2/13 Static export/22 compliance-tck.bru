@@ -1,0 +1,25 @@
+meta {
+  name: 22 compliance/tck
+  type: http
+  seq: 22
+}
+
+get {
+  url: {{baseUrl}}/mock/compliance_tck.json
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}=not-a-session
+}
+
+assert {
+  res.status: eq 200
+  res.body.summary: isDefined
+  res.body.suites: isDefined
+}
+
+docs {
+  ui/public/mock/compliance_tck.json stands in for /api/compliance/tck in the static build.
+}

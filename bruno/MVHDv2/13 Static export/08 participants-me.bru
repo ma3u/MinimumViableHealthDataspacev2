@@ -1,0 +1,24 @@
+meta {
+  name: 08 participants/me
+  type: http
+  seq: 8
+}
+
+get {
+  url: {{baseUrl}}/mock/participants_me.json
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}=not-a-session
+}
+
+assert {
+  res.status: eq 200
+  res.body: isArray
+}
+
+docs {
+  ui/public/mock/participants_me.json stands in for /api/participants/me in the static build.
+}

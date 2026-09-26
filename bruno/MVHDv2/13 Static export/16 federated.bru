@@ -1,0 +1,24 @@
+meta {
+  name: 16 federated
+  type: http
+  seq: 16
+}
+
+get {
+  url: {{baseUrl}}/mock/federated_stats.json
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}=not-a-session
+}
+
+assert {
+  res.status: eq 200
+  res.body: isJson
+}
+
+docs {
+  ui/public/mock/federated_stats.json stands in for /api/federated in the static build.
+}

@@ -1,0 +1,26 @@
+meta {
+  name: 12 odrl/scope
+  type: http
+  seq: 12
+}
+
+get {
+  url: {{baseUrl}}/mock/odrl_scope.json
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}=not-a-session
+}
+
+assert {
+  res.status: eq 200
+  res.body.permissions: isArray
+  res.body.prohibitions: isArray
+  res.body.participantId: isDefined
+}
+
+docs {
+  ui/public/mock/odrl_scope.json stands in for /api/odrl/scope in the static build.
+}

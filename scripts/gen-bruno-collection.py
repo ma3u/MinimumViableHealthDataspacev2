@@ -868,6 +868,47 @@ req(f, "02 Poll a session that does not exist (404)", "get",
     asserts=["res.status: eq 404", "res.body.status: eq error"])
 
 # ===========================================================================
+# The GitHub Pages export has no API routes at all: the build renames
+# ui/src/app/api/ and ui/src/lib/api.ts rewrites every GET to a fixture under
+# /mock/. Sending {{baseUrl}}/api/... at it answers 404 for every request,
+# which the old collection reported as a pass because its only assertion was
+# status < 500: the Static-mock job had been green on 36 x 404 for months
+# (#349).
+#
+# So the static export gets a folder of its own, generated from the same map
+# the UI uses, asserting the shape of what the export really publishes. The
+# mock=True requests above name the endpoint; each becomes a fixture request
+# carrying the same body assertions.
+def mock_map(root):
+    """endpoint -> fixture path, read from ui/src/lib/api.ts so the two cannot
+    drift apart silently."""
+    src = open(os.path.join(root, "ui", "src", "lib", "api.ts"), encoding="utf-8").read()
+    return dict(re.findall(r'"(/api/[^"]+)":\s*"(/mock/[^"]+)"', src))
+
+
+MOCK = mock_map(ROOT)
+f = folder("13 Static export", "What the GitHub Pages export publishes",
+"""The demo at ma3u.github.io serves no API: the build renames ui/src/app/api/ and the
+UI reads a fixture under /mock/ instead. These requests fetch those fixtures and assert
+the shape the corresponding endpoint promises, so a fixture that drifts from its
+endpoint is caught. `scripts/run-api-tests.sh Static-mock` runs exactly this folder and
+needs no stack and no session.""")
+_seen = set()
+for _r in list(REQS):
+    if not _r["mock"]:
+        continue
+    _endpoint = re.sub(r"^\{\{baseUrl\}\}", "", _r["url"]).split("?")[0]
+    _fixture = MOCK.get(_endpoint)
+    if not _fixture or _fixture in _seen:
+        continue
+    _seen.add(_fixture)
+    _body = [a for a in _r["asserts"] if not a.startswith("res.status")]
+    req(f, _endpoint.replace("/api/", ""), "get", "{{baseUrl}}" + _fixture, persona="anon",
+        asserts=["res.status: eq 200"] + _body,
+        docs=f"ui/public{_fixture} stands in for {_endpoint} in the static build.")
+
+
+# ===========================================================================
 def display_name(r, seq):
     """The number in a request name is its position in the folder; the emitter
     owns it, so inserting a request never renumbers the rest by hand. The
@@ -913,7 +954,7 @@ def emit(r, seq):
 
 def safe(name):
     return (name.replace("/", "-").replace(":", "").replace("?", "")
-                .replace("&", "and").replace("'", ""))
+                .replace("&", "and").replace("'", "").lstrip("-"))
 
 for entry in os.listdir(OUT):
     p = os.path.join(OUT, entry)
@@ -936,13 +977,14 @@ for i, (dirname, title, docs) in enumerate(FOLDERS, start=1):
         fname = safe(display_name(r, seq)) + ".bru"
         with open(os.path.join(d, fname), "w", encoding="utf-8") as fh:
             fh.write(emit(r, seq))
-        if r["mock"]:
+        if dirname.startswith("13 Static export"):
             mock_paths.append(f"{dirname}/{fname}")
 
 with open(os.path.join(OUT, "static-mock.txt"), "w", encoding="utf-8") as fh:
-    fh.write("# Requests the GitHub Pages export can answer: GET routes that ui/src/lib/api.ts\n"
-             "# maps to a fixture under ui/public/mock/. scripts/run-api-tests.sh Static-mock runs\n"
-             "# exactly these, and scripts/check-bruno-coverage.py checks every line still exists.\n")
+    fh.write("# What scripts/run-api-tests.sh Static-mock runs: the fixtures the GitHub Pages\n"
+             "# export actually publishes under /mock/. The export serves no /api/ route at\n"
+             "# all, so sending one at it answers 404 (#349).\n"
+             "# scripts/check-bruno-coverage.py checks every line still exists.\n")
     for p in mock_paths:
         fh.write(p + "\n")
 

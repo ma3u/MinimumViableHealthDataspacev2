@@ -1,0 +1,24 @@
+meta {
+  name: 18 compliance/requests
+  type: http
+  seq: 18
+}
+
+get {
+  url: {{baseUrl}}/mock/requests.json
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}=not-a-session
+}
+
+assert {
+  res.status: eq 200
+  res.body.requests: isArray
+}
+
+docs {
+  ui/public/mock/requests.json stands in for /api/compliance/requests in the static build.
+}

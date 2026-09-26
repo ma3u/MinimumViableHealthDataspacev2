@@ -1,39 +1,34 @@
-# Requests the GitHub Pages export can answer: GET routes that ui/src/lib/api.ts
-# maps to a fixture under ui/public/mock/. scripts/run-api-tests.sh Static-mock runs
-# exactly these, and scripts/check-bruno-coverage.py checks every line still exists.
-00 Public/02 Public information (Art. 56).bru
-00 Public/03 Register of data permits (Art. 73).bru
-00 Public/04 Register of results (Art. 70).bru
-00 Public/05 Activity report (Art. 73).bru
-01 Patient/02 My observations as a FHIR Bundle.bru
-01 Patient/03 What my data tells me.bru
-01 Patient/05 Research programmes asking for my data.bru
-02 Data Holder/01 My organisation.bru
-02 Data Holder/02 The catalogue I publish (Art. 55).bru
-02 Data Holder/06 The EDC assets behind my datasets.bru
-02 Data Holder/08 Negotiations my connector took part in.bru
-02 Data Holder/09 Transfers my connector took part in.bru
-03 Data User/01 Discover the catalogue (Art. 55).bru
-03 Data User/02 The EEHRxF profiles the datasets conform to.bru
-03 Data User/03 What I am permitted today (ODRL).bru
-03 Data User/04 My applications and their clocks.bru
-03 Data User/05 My credentials (DCP).bru
-03 Data User/06 Cohort analytics (OMOP CDM).bru
-03 Data User/07 Federated cohort statistics.bru
-03 Data User/08 Natural-language query templates.bru
-03 Data User/11 My tasks across the pipeline.bru
-04 Access Body/01 Applications in my inbox (Art. 67).bru
-04 Access Body/02 Data requests in my inbox (Art. 69).bru
-04 Access Body/03 Findings I have opened (Art. 63).bru
-04 Access Body/04 Information I have requested (Art. 63(1)).bru
-04 Access Body/05 The compliance matrix I report from.bru
-04 Access Body/06 Protocol conformance of the dataspace.bru
-04 Access Body/10 Policies across participants.bru
-05 Dataspace Operator/01 Tenants.bru
-05 Dataspace Operator/02 Components and their state.bru
-05 Dataspace Operator/03 How the components connect.bru
-05 Dataspace Operator/06 The participant registry.bru
-05 Dataspace Operator/11 Participants as the hub lists them.bru
-05 Dataspace Operator/15 The patient index and cohort statistics.bru
-05 Dataspace Operator/17 Credentials held across the dataspace.bru
-05 Dataspace Operator/23 The graph behind all of it.bru
+# What scripts/run-api-tests.sh Static-mock runs: the fixtures the GitHub Pages
+# export actually publishes under /mock/. The export serves no /api/ route at
+# all, so sending one at it answers 404 (#349).
+# scripts/check-bruno-coverage.py checks every line still exists.
+13 Static export/01 information.bru
+13 Static export/02 permits.bru
+13 Static export/03 compliance-results.bru
+13 Static export/04 activity-report.bru
+13 Static export/05 patient-observations.bru
+13 Static export/06 patient-insights.bru
+13 Static export/07 patient-research.bru
+13 Static export/08 participants-me.bru
+13 Static export/09 catalog.bru
+13 Static export/10 assets.bru
+13 Static export/11 eehrxf.bru
+13 Static export/12 odrl-scope.bru
+13 Static export/13 compliance-applications.bru
+13 Static export/14 credentials.bru
+13 Static export/15 analytics.bru
+13 Static export/16 federated.bru
+13 Static export/17 nlq.bru
+13 Static export/18 compliance-requests.bru
+13 Static export/19 compliance-findings.bru
+13 Static export/20 compliance-information-requests.bru
+13 Static export/21 compliance.bru
+13 Static export/22 compliance-tck.bru
+13 Static export/23 admin-policies.bru
+13 Static export/24 admin-tenants.bru
+13 Static export/25 admin-components.bru
+13 Static export/26 admin-components-topology.bru
+13 Static export/27 admin-participants.bru
+13 Static export/28 participants.bru
+13 Static export/29 patient.bru
+13 Static export/30 graph.bru
