@@ -17,6 +17,10 @@
 
 set -euo pipefail
 
+# Protocol identifier, defined once (#180).
+# shellcheck source=scripts/lib/dsp-protocol.sh
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")/../scripts" && pwd)/lib/dsp-protocol.sh"
+
 # -- Config -------------------------------------------------------------------
 KEYCLOAK_URL="${KEYCLOAK_URL:-http://localhost:8080}"
 MGMT_URL="${MGMT_URL:-http://localhost:11003}"
@@ -60,7 +64,7 @@ negotiate_contract() {
       \"@context\": ${EDC_CTX},
       \"@type\": \"ContractRequest\",
       \"counterPartyAddress\": \"http://controlplane:8082/api/dsp/${provider_ctx}/2025-1\",
-      \"protocol\": \"dataspace-protocol-http:2025-1\",
+      \"protocol\": \"$DSP_PROTOCOL\",
       \"policy\": {
         \"@type\": \"Offer\",
         \"@id\": \"${offer_id}\",
@@ -230,7 +234,7 @@ if [ "${STATE:-}" = "FINALIZED" ]; then
     -d "{
       \"@context\": ${EDC_CTX},
       \"@type\": \"TransferRequest\",
-      \"protocol\": \"dataspace-protocol-http:2025-1\",
+      \"protocol\": \"$DSP_PROTOCOL\",
       \"counterPartyAddress\": \"http://controlplane:8082/api/dsp/${LMC_CTX}/2025-1\",
       \"contractId\": \"${AGREEMENT_ID}\",
       \"assetId\": \"healthdcatap-catalog\",

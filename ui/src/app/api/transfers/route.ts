@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { DSP_PROTOCOL } from "@/lib/dsp-protocol";
 import { edcClient, EDC_CONTEXT } from "@/lib/edc";
 import { requireAuth, isAuthError, type AuthSession } from "@/lib/auth-guard";
 import { recordDemo, listDemo, DemoRecord } from "@/lib/demo-records";
@@ -331,7 +332,7 @@ export async function POST(req: NextRequest) {
       "@context": [EDC_CONTEXT],
       "@type": "TransferRequest",
       counterPartyAddress,
-      protocol: "dataspace-protocol-http:2025-1",
+      protocol: DSP_PROTOCOL,
       contractId,
       assetId: asset,
       transferType: resolvedType,
