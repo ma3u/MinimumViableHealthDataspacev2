@@ -115,7 +115,11 @@ export interface HdabViewInput {
 
 const fmtDate = (iso?: string | null) =>
   iso ? String(iso).slice(0, 10) : "n/a";
-const compact = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, "");
+// Null-safe: a :Participant can reach the graph without an id (the catalog
+// route used to create one from a publisher's display name, #349), and a
+// crash here takes the whole access-body overview down with a 502.
+const compact = (s: string | null | undefined) =>
+  (s ?? "").toLowerCase().replace(/[^a-z0-9]/g, "");
 
 /** The permit register's outcome words as a permit state input. */
 export function registerPermit(e: RegisterEntry): PermitLike {

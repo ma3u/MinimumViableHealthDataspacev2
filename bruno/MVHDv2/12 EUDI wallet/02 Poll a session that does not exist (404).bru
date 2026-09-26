@@ -1,0 +1,20 @@
+meta {
+  name: 02 Poll a session that does not exist (404)
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/api/auth/eudi/status?session=does-not-exist
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}=not-a-session
+}
+
+assert {
+  res.status: eq 404
+  res.body.status: eq error
+}

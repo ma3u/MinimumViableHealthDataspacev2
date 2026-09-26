@@ -1,0 +1,32 @@
+meta {
+  name: 00 Token for the Management API
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{keycloakUrl}}/realms/edcv/protocol/openid-connect/token
+  body: formUrlEncoded
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}=not-a-session
+}
+
+body:form-urlencoded {
+  grant_type: client_credentials
+  client_id: {{edcClientId}}
+  client_secret: {{edcClientSecret}}
+}
+
+assert {
+  res.status: eq 200
+  res.body.access_token: isDefined
+}
+
+tests {
+  test("stores the token for this folder", function () {
+    bru.setVar("edcToken", res.getBody().access_token);
+  });
+}

@@ -68,13 +68,16 @@ jobs:
       - name: Install Bruno CLI
         run: npm install -g @usebruno/cli
 
-      # Forge step only runs for Azure-Dev; Static-mock needs no auth.
-      - name: Install ui dependencies (forge prerequisite)
+      # next-auth, for the session forge. Static-mock needs no session, but the
+      # runner is the same entry point for both environments.
+      - name: Install UI dependencies
         if: ${{ env.ENV_NAME == 'Azure-Dev' }}
         working-directory: ui
         run: npm ci
 
-      - name: Forge NextAuth session token
+      # scripts/run-api-tests.sh forges one session per persona; this step only
+      # proves the secret is present before the stack work starts.
+      - name: Check the session secret is available
         if: ${{ env.ENV_NAME == 'Azure-Dev' }}
         working-directory: ui
         env:
@@ -84,43 +87,24 @@ jobs:
             echo "::error::NEXTAUTH_SECRET secret not set; cannot forge a session for Azure-Dev"
             exit 1
           fi
-          TOKEN=$(node scripts/forge-bruno-session.mjs "$PERSONA" \
-                  | awk -F= '/^COOKIE_VALUE/{print $2}')
-          if [ -z "$TOKEN" ]; then
-            echo "::error::forge script did not emit a COOKIE_VALUE"
-            exit 1
-          fi
-          echo "::add-mask::$TOKEN"
-          echo "BRUNO_TOKEN=$TOKEN" >> "$GITHUB_ENV"
-          echo "Forged session token for persona '$PERSONA' (8h validity)"
+          echo "NEXTAUTH_SECRET is set; the runner forges one session per persona"
 
+      # No continue-on-error. The collection is organised by persona and every
+      # request asserts a status and a body shape (ADR-032); a failure here is
+      # a defect in the hub, not noise. The previous note about "7 known-fail
+      # requests" described a collection whose only assertion was status < 500
+      # (#349).
       - name: Run Bruno collection
-        # Smoke is informational. The collection currently has 7 known-fail
-        # requests on Azure-Dev (Audit Log 502, Delete Policy 502, Credential
-        # Definitions 502, etc.) tracked under the next round of fixes.
-        # Setting continue-on-error keeps the workflow green so the artefact
-        # uploads always run; the inline pass/fail count is published below.
-        # Remove this once the underlying 5xx issues are addressed.
-        continue-on-error: true
         id: bru
-        working-directory: bruno/MVHDv2
+        env:
+          NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
+          BRUNO_REPORT_DIR: ${{ github.workspace }}/bruno-report
         run: |
-          if [ "$ENV_NAME" = "Azure-Dev" ]; then
-            bru run \
-              --env Azure-Dev \
-              --env-var "sessionToken=$BRUNO_TOKEN" \
-              --reporter-html "$GITHUB_WORKSPACE/bruno-report.html" \
-              --reporter-junit "$GITHUB_WORKSPACE/bruno-report.xml" | tee bru.log
-          else
-            bru run \
-              --env Static-mock \
-              --reporter-html "$GITHUB_WORKSPACE/bruno-report.html" \
-              --reporter-junit "$GITHUB_WORKSPACE/bruno-report.xml" | tee bru.log
-          fi
+          set -euo pipefail
+          ./scripts/run-api-tests.sh "$ENV_NAME" | tee bru.log
 
       - name: Summarise Bruno result
         if: always()
-        working-directory: bruno/MVHDv2
         run: |
           {
             echo "## Bruno smoke (${ENV_NAME}) — persona \`${PERSONA}\`"
@@ -143,11 +127,11 @@ jobs:
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Publish JUnit results
-        if: ${{ always() && hashFiles('bruno-report.xml') != '' }}
+        if: ${{ always() && hashFiles('bruno-report/*.xml') != '' }}
         uses: dorny/test-reporter@v1
         with:
           name: Bruno results (${{ env.ENV_NAME }})
-          path: ${{ github.workspace }}/bruno-report.xml
+          path: ${{ github.workspace }}/bruno-report/*.xml
           reporter: java-junit
           fail-on-error: false
 
@@ -156,8 +140,6 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: bruno-report-${{ env.ENV_NAME }}
-          path: |
-            ${{ github.workspace }}/bruno-report.html
-            ${{ github.workspace }}/bruno-report.xml
+          path: ${{ github.workspace }}/bruno-report/
           retention-days: 14
           if-no-files-found: warn

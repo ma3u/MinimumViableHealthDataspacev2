@@ -1,0 +1,20 @@
+meta {
+  name: 01 Proxy health
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{proxyUrl}}/health
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}=not-a-session
+}
+
+assert {
+  res.status: eq 200
+  res.body.status: eq ok
+}

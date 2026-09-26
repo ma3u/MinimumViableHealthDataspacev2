@@ -1,0 +1,11 @@
+meta {
+  name: The Neo4j proxy behind the hub (port 9090)
+  seq: 12
+}
+
+docs {
+  The Express bridge the hub calls for FHIR, OMOP, catalogue, federated statistics and NLQ.
+  Its routes are in services/neo4j-proxy/src/index.ts. When the proxy container is older than
+  that file these answer 404 and the hub's own routes answer 502; that is the pinned-image
+  finding in #349, not a flaky test.
+}

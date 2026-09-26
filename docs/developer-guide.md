@@ -167,6 +167,24 @@ PLAYWRIGHT_BASE_URL=http://localhost:3003 npm run test:e2e  # JAD stack
 ./scripts/run-ehds-tests.sh  # EHDS domain
 ```
 
+### API Collection (Bruno)
+
+`bruno/MVHDv2/` is organised by EHDS persona: one folder per role in Regulation
+(EU) 2025/327, two for the two-sided procedures of Chapter IV, one for the role
+boundaries, three for the protocol and platform surfaces (ADR-032). 151
+requests, every route covered, every request asserting a status and a body
+property.
+
+```bash
+./scripts/run-api-tests.sh Local        # compose stack, all thirteen folders
+./scripts/run-api-tests.sh Static-mock  # GitHub Pages fixtures, GET only, no auth
+./scripts/run-api-tests.sh Azure-Dev    # live demo, needs NEXTAUTH_SECRET
+./scripts/run-api-tests.sh Local "07 Journey - Data permit"   # one folder
+```
+
+The runner forges one NextAuth session per persona and writes HTML, JUnit and
+baseline reports into `test-results/bruno/`. See `bruno/MVHDv2/README.md`.
+
 ## CI/CD Pipeline
 
 ### test.yml — Every Push (8 jobs)

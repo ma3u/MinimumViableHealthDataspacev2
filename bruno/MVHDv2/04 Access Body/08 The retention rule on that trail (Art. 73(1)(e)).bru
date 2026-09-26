@@ -1,0 +1,20 @@
+meta {
+  name: 08 The retention rule on that trail (Art. 73(1)(e))
+  type: http
+  seq: 8
+}
+
+get {
+  url: {{baseUrl}}/api/admin/audit/retention
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}={{sessionTokenRegulator}}
+}
+
+assert {
+  res.status: eq 200
+  res.body: isJson
+}

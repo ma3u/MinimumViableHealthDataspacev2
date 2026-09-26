@@ -1,0 +1,19 @@
+meta {
+  name: 08 I withdraw it (GDPR Art. 7(3))
+  type: http
+  seq: 8
+}
+
+delete {
+  url: {{baseUrl}}/api/patient/research?patientId={{patientId}}&consentId={{consentId}}
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}={{sessionTokenPatient}}
+}
+
+assert {
+  res.status: eq 200
+}

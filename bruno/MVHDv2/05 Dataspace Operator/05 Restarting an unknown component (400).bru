@@ -1,0 +1,28 @@
+meta {
+  name: 05 Restarting an unknown component (400)
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{baseUrl}}/api/admin/components/not-a-component/restart
+  body: json
+  auth: inherit
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {}
+}
+
+assert {
+  res.status: eq 400
+  res.body.error: isDefined
+}
+
+docs {
+  Restart acts on the Azure deployment; on a compose stack every component answers 400, which is the documented behaviour.
+}

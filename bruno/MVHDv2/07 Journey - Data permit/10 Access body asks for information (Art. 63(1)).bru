@@ -1,0 +1,37 @@
+meta {
+  name: 10 Access body asks for information (Art. 63(1))
+  type: http
+  seq: 10
+}
+
+post {
+  url: {{baseUrl}}/api/compliance/information-requests
+  body: json
+  auth: inherit
+}
+
+headers {
+  Content-Type: application/json
+  Cookie: {{cookieName}}={{sessionTokenRegulator}}
+}
+
+body:json {
+  {
+    "partyDid": "did:web:pharmaco.de:research",
+    "permitId": "{{permitId}}",
+    "findingId": "{{findingId}}",
+    "question": "Which table was exported and under which output check?"
+  }
+}
+
+assert {
+  res.status: eq 201
+  res.body.requestId: isDefined
+  res.body.status: eq OPEN
+}
+
+tests {
+  test("captures infoRequestId", function () {
+    bru.setVar("infoRequestId", res.getBody().requestId);
+  });
+}

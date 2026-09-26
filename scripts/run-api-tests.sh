@@ -1,87 +1,139 @@
 #!/usr/bin/env bash
-# run-api-tests.sh — Execute the Bruno API collection for MVHDv2.
-#
-# Wraps `bru run` so devs and CI can invoke the same entry point. Generates an
-# HTML report under bruno-report/ and exits non-zero on any failed request.
+# run-api-tests.sh: run the Bruno API collection (bruno/MVHDv2) against one
+# environment, with a forged NextAuth session per persona, and write a result
+# file the compliance baseline can read. #348
 #
 # Usage:
-#   ./scripts/run-api-tests.sh                     # default: Local env
-#   ./scripts/run-api-tests.sh Static-mock         # GitHub Pages mock JSON
-#   ./scripts/run-api-tests.sh Azure-Dev           # ACA stack
-#   ./scripts/run-api-tests.sh Local Catalog       # only Catalog folder
+#   scripts/run-api-tests.sh                      # Local (compose stack on :3003)
+#   scripts/run-api-tests.sh Static-mock          # GitHub Pages fixtures, GET only
+#   scripts/run-api-tests.sh Azure-Dev            # needs NEXTAUTH_SECRET of the deployment
+#   scripts/run-api-tests.sh Local "07 Journey - Data permit"   # one folder (or file) only
 #
-# Env vars:
-#   BRUNO_COOKIE       — value of next-auth.session-token cookie (Local/Azure)
-#   BRUNO_REPORT_DIR   — override report output directory
-#   BRUNO_BIN          — override bru binary (default: npx @usebruno/cli)
-
+# Environment:
+#   NEXTAUTH_SECRET     secret that signs the session cookies. Required for
+#                       Azure-Dev. For Local it is read from the UI container
+#                       (BRUNO_UI_CONTAINER, default health-dataspace-ui) when unset.
+#                       Never printed.
+#   BRUNO_REPORT_DIR    where reports go (default test-results/bruno)
+#   BRUNO_EUDI=1        include "12 EUDI wallet" (needs docker-compose.eudi.yml)
+#   BRUNO_BIN           bru binary (default: npx --yes @usebruno/cli)
+#
+# Exit status is bru's: non-zero when any request fails an assertion or a test.
 set -euo pipefail
 
-REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-COLLECTION_DIR="${REPO_ROOT}/bruno/MVHDv2"
-REPORT_DIR="${BRUNO_REPORT_DIR:-${REPO_ROOT}/bruno-report}"
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+COLLECTION="$ROOT/bruno/MVHDv2"
 ENV_NAME="${1:-Local}"
-FOLDER="${2:-}"
+shift || true
+REPORT_DIR="${BRUNO_REPORT_DIR:-$ROOT/test-results/bruno}"
+BRUNO_BIN="${BRUNO_BIN:-npx --yes @usebruno/cli}"
+UI_CONTAINER="${BRUNO_UI_CONTAINER:-health-dataspace-ui}"
+STAMP="$(date -u +%Y%m%dT%H%M%SZ)"
+mkdir -p "$REPORT_DIR"
 
-if [[ ! -d "${COLLECTION_DIR}" ]]; then
-  echo "ERROR: Bruno collection not found at ${COLLECTION_DIR}" >&2
-  exit 1
-fi
+case "$ENV_NAME" in
+  Local) COOKIE_NAME=next-auth.session-token ;;
+  Azure-Dev) COOKIE_NAME=__Secure-next-auth.session-token ;;
+  Static-mock) COOKIE_NAME=next-auth.session-token ;;
+  *) echo "unknown environment '$ENV_NAME' (Local | Static-mock | Azure-Dev)" >&2; exit 2 ;;
+esac
 
-if [[ ! -f "${COLLECTION_DIR}/environments/${ENV_NAME}.bru" ]]; then
-  echo "ERROR: Unknown environment '${ENV_NAME}'." >&2
-  echo "Available environments:" >&2
-  for f in "${COLLECTION_DIR}/environments"/*.bru; do
-    echo "  - $(basename "${f%.bru}")" >&2
+ENV_VARS=()
+if [ "$ENV_NAME" != "Static-mock" ]; then
+  if [ -z "${NEXTAUTH_SECRET:-}" ]; then
+    if [ "$ENV_NAME" = "Local" ] && command -v docker >/dev/null 2>&1; then
+      NEXTAUTH_SECRET="$(docker exec "$UI_CONTAINER" printenv NEXTAUTH_SECRET 2>/dev/null || true)"
+    fi
+  fi
+  if [ -z "${NEXTAUTH_SECRET:-}" ]; then
+    echo "NEXTAUTH_SECRET is not set and could not be read from container '$UI_CONTAINER'." >&2
+    echo "The collection cannot authenticate; every gated request would answer 401." >&2
+    exit 2
+  fi
+  export NEXTAUTH_SECRET
+  # one forged session per persona; the values go straight into bru's env vars
+  forge() { (cd "$ROOT/ui" && COOKIE_NAME="$COOKIE_NAME" node scripts/forge-bruno-session.mjs "$1" | awk -F= '/^COOKIE_VALUE=/{print substr($0, 14)}'); }
+  for pair in "sessionToken:edcadmin" "sessionTokenRegulator:regulator" "sessionTokenResearcher:researcher" "sessionTokenPatient:patient1" "sessionTokenClinic:clinicuser"; do
+    var="${pair%%:*}"; persona="${pair##*:}"
+    value="$(forge "$persona")"
+    if [ -z "$value" ]; then echo "forging a session for '$persona' produced nothing (is ui/node_modules installed?)" >&2; exit 2; fi
+    ENV_VARS+=(--env-var "$var=$value")
   done
-  exit 1
+  echo "[bruno] forged 5 persona sessions for $ENV_NAME (cookie $COOKIE_NAME, 8h)"
 fi
 
-if [[ -n "${BRUNO_BIN:-}" ]]; then
-  # shellcheck disable=SC2206
-  BRU_CMD=( ${BRUNO_BIN} )
-elif command -v bru >/dev/null 2>&1; then
-  BRU_CMD=( bru )
+# what to run
+PATHS=()
+if [ "$#" -gt 0 ]; then
+  for p in "$@"; do PATHS+=("$p"); done
+elif [ "$ENV_NAME" = "Static-mock" ]; then
+  while IFS= read -r line; do
+    case "$line" in ''|'#'*) continue ;; esac
+    PATHS+=("$line")
+  done < "$COLLECTION/static-mock.txt"
 else
-  BRU_CMD=( npx --yes @usebruno/cli )
+  for d in "$COLLECTION"/[0-9][0-9]\ */; do
+    name="$(basename "$d")"
+    case "$name" in
+      "12 EUDI wallet"*) [ "${BRUNO_EUDI:-0}" = "1" ] || continue ;;
+      # The EDC services and the Neo4j proxy are internal on Azure: unreachable
+      # from outside the container environment, so they run on Local and in CI.
+      "10 Connecting partner"*|"11 Platform"*) [ "$ENV_NAME" = "Local" ] || continue ;;
+    esac
+    PATHS+=("$name")
+  done
 fi
+echo "[bruno] environment $ENV_NAME, ${#PATHS[@]} path(s)"
 
-mkdir -p "${REPORT_DIR}"
-TIMESTAMP="$(date -u +%Y%m%dT%H%M%SZ)"
-HTML_REPORT="${REPORT_DIR}/${ENV_NAME}-${TIMESTAMP}.html"
-JSON_REPORT="${REPORT_DIR}/${ENV_NAME}-${TIMESTAMP}.json"
-
-echo "── MVHDv2 API tests ──────────────────────────────────"
-echo "  Collection : ${COLLECTION_DIR}"
-echo "  Environment: ${ENV_NAME}"
-[[ -n "${FOLDER}" ]] && echo "  Folder     : ${FOLDER}"
-echo "  HTML report: ${HTML_REPORT}"
-echo "  JSON report: ${JSON_REPORT}"
-echo "──────────────────────────────────────────────────────"
-
-CMD=( "${BRU_CMD[@]}" run )
-if [[ -n "${FOLDER}" ]]; then
-  CMD+=( "${FOLDER}" )
-fi
-CMD+=(
-  --env "${ENV_NAME}"
-  --reporter-html "${HTML_REPORT}"
-  --reporter-json "${JSON_REPORT}"
+JSON_REPORT="$REPORT_DIR/bruno-raw-$ENV_NAME-$STAMP.json"
+HTML_REPORT="$REPORT_DIR/bruno-$ENV_NAME-$STAMP.html"
+JUNIT_REPORT="$REPORT_DIR/bruno-$ENV_NAME-$STAMP.xml"
+set +e
+(
+  cd "$COLLECTION" && $BRUNO_BIN run "${PATHS[@]}" -r --env "$ENV_NAME" "${ENV_VARS[@]}" \
+    --reporter-json "$JSON_REPORT" --reporter-html "$HTML_REPORT" \
+    --reporter-junit "$JUNIT_REPORT"
 )
+BRU_EXIT=$?
+set -e
 
-if [[ -n "${BRUNO_COOKIE:-}" ]]; then
-  CMD+=( --env-var "sessionCookie=${BRUNO_COOKIE}" )
-fi
-
-cd "${COLLECTION_DIR}"
-"${CMD[@]}"
-EXIT_CODE=$?
-
-echo "──────────────────────────────────────────────────────"
-if [[ "${EXIT_CODE}" -eq 0 ]]; then
-  echo "PASS: Bruno run completed successfully."
-else
-  echo "FAIL: Bruno run exited with code ${EXIT_CODE}." >&2
-fi
-echo "Report: ${HTML_REPORT}"
-exit "${EXIT_CODE}"
+# Summarise into the shape scripts/check-compliance-baseline.py reads:
+# {"summary": {"passed", "failed", "skipped"}}. A request is skipped when its
+# only tests are named "SKIPPED: ..." (the collection's loud-skip convention).
+python3 - "$JSON_REPORT" "$REPORT_DIR/bruno-api-$ENV_NAME-$STAMP.json" "$ENV_NAME" <<'PY'
+import json, sys, datetime
+raw, out, env = sys.argv[1:4]
+try:
+    data = json.load(open(raw))
+except Exception as exc:
+    print(f"[bruno] no JSON report to summarise ({exc})"); sys.exit(0)
+passed = failed = skipped = 0
+rows = []
+for it in data:
+    for r in it.get("results", []):
+        name = r.get("test", {}).get("filename") or r.get("request", {}).get("url", "?")
+        asserts = r.get("assertionResults", []) or []
+        tests = r.get("testResults", []) or []
+        status = (r.get("response") or {}).get("status")
+        errs = [a for a in asserts if a.get("status") != "pass"] + [t for t in tests if t.get("status") != "pass"]
+        if r.get("error"):
+            errs.append({"error": str(r["error"])[:200]})
+        if errs:
+            failed += 1; verdict = "failed"
+        elif tests and all((t.get("description") or "").startswith("SKIPPED") for t in tests) and not asserts:
+            skipped += 1; verdict = "skipped"
+        else:
+            passed += 1; verdict = "passed"
+        rows.append({"request": name, "status": status, "verdict": verdict,
+                     "errors": [ (e.get("error") or e.get("lhsExpr","") + " " + e.get("rhsExpr","")) for e in errs ][:3]})
+summary = {"passed": passed, "failed": failed, "skipped": skipped, "total": passed + failed + skipped}
+json.dump({"suite": "bruno-api", "environment": env, "timestamp": datetime.datetime.utcnow().isoformat() + "Z",
+           "summary": summary, "requests": rows}, open(out, "w"), indent=2)
+print(f"[bruno] {env}: {passed} passed, {failed} failed, {skipped} skipped / {summary['total']} requests")
+for row in rows:
+    if row["verdict"] == "failed":
+        print(f"   FAIL [{row['status']}] {row['request']}")
+        for e in row["errors"]: print(f"        {e}")
+print(f"[bruno] report: {out}")
+PY
+exit "$BRU_EXIT"

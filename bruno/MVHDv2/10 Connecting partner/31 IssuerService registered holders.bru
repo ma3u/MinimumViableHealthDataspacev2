@@ -1,0 +1,34 @@
+meta {
+  name: 31 IssuerService registered holders
+  type: http
+  seq: 15
+}
+
+post {
+  url: {{issuerUrl}}/v1alpha/participants/issuer/holders/query
+  body: json
+  auth: bearer
+}
+
+headers {
+  Content-Type: application/json
+  Cookie: {{cookieName}}=not-a-session
+}
+
+auth:bearer {
+  token: {{issuerToken}}
+}
+
+body:json {
+  {}
+}
+
+assert {
+  res.status: eq 200
+  res.body: isArray
+  res.body[0].did: isDefined
+}
+
+docs {
+  The issuer only issues to a DID it knows; scripts/seed-issuer-holders.sh registers them.
+}

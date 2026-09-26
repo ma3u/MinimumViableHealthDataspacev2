@@ -1,0 +1,38 @@
+meta {
+  name: 11 The provider's assets
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{mgmtUrl}}/{{mgmtVersion}}/participants/{{providerCtx}}/assets/request
+  body: json
+  auth: bearer
+}
+
+headers {
+  Content-Type: application/json
+  Cookie: {{cookieName}}=not-a-session
+}
+
+auth:bearer {
+  token: {{edcToken}}
+}
+
+body:json {
+  {
+    "@context": [
+      "https://w3id.org/edc/connector/management/v2"
+    ],
+    "@type": "QuerySpec"
+  }
+}
+
+assert {
+  res.status: eq 200
+  res.body: isArray
+}
+
+docs {
+  `{}` is rejected: the Management API wants a JSON-LD QuerySpec carrying its @context.
+}

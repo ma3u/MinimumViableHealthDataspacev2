@@ -1,0 +1,27 @@
+meta {
+  name: 01 My record (Art. 3)
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/api/patient/profile?patientId={{patientId}}
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}={{sessionTokenPatient}}
+}
+
+assert {
+  res.status: eq 200
+  res.body.patient: isDefined
+  res.body.conditions: isArray
+  res.body.medications: isArray
+  res.body.gdprRights: isDefined
+}
+
+docs {
+  The FHIR R4 summary of one patient: conditions, medications, observations, and the GDPR rights that apply.
+}

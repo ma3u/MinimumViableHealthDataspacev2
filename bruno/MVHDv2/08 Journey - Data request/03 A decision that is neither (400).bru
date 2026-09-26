@@ -1,0 +1,28 @@
+meta {
+  name: 03 A decision that is neither (400)
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/api/compliance/requests/decide
+  body: json
+  auth: inherit
+}
+
+headers {
+  Content-Type: application/json
+  Cookie: {{cookieName}}={{sessionTokenRegulator}}
+}
+
+body:json {
+  {
+    "requestId": "{{dataRequestId}}",
+    "decision": "MAYBE"
+  }
+}
+
+assert {
+  res.status: eq 400
+  res.body.error: contains APPROVED or REJECTED
+}

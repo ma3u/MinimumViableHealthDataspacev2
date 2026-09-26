@@ -1,0 +1,29 @@
+meta {
+  name: 01 Data user picks the dataset
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/api/catalog
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}={{sessionTokenResearcher}}
+}
+
+assert {
+  res.status: eq 200
+  res.body: isArray
+}
+
+tests {
+  test("captures the dataset the application is for", function () {
+    const sets = res.getBody();
+    const omop = sets.find((d) => (d.id || "").includes("omop")) || sets[0];
+    expect(omop, "the catalogue is empty; seed the graph first").to.not.equal(undefined);
+    bru.setVar("datasetId", omop.id);
+  });
+}

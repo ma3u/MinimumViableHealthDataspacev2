@@ -1,0 +1,21 @@
+meta {
+  name: 04 My applications and their clocks
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{baseUrl}}/api/compliance/applications
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}={{sessionTokenResearcher}}
+}
+
+assert {
+  res.status: eq 200
+  res.body.applications: isArray
+  res.body.scope: isDefined
+}

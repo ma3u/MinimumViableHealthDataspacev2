@@ -1,0 +1,16 @@
+meta {
+  name: 27 A node that is not there (404)
+  type: http
+  seq: 27
+}
+
+get {
+  url: {{baseUrl}}/api/graph/node?id=does-not-exist
+  body: none
+  auth: inherit
+}
+
+assert {
+  res.status: eq 404
+  res.body.error: isDefined
+}

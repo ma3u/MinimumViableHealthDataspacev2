@@ -1,0 +1,22 @@
+meta {
+  name: 05 Activity report (Art. 73)
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{baseUrl}}/api/activity-report
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}=not-a-session
+}
+
+assert {
+  res.status: eq 200
+  res.body.article: isDefined
+  res.body.accessBodies: isArray
+  res.body.items: isDefined
+}

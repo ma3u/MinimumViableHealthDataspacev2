@@ -1,0 +1,20 @@
+meta {
+  name: 03 Findings I have opened (Art. 63)
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseUrl}}/api/compliance/findings
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}={{sessionTokenRegulator}}
+}
+
+assert {
+  res.status: eq 200
+  res.body.findings: isArray
+}

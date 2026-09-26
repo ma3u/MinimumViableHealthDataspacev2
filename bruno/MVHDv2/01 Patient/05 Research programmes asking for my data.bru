@@ -1,0 +1,35 @@
+meta {
+  name: 05 Research programmes asking for my data
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{baseUrl}}/api/patient/research?patientId={{patientId}}
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}={{sessionTokenPatient}}
+}
+
+assert {
+  res.status: eq 200
+  res.body.programs: isArray
+  res.body.consents: isArray
+  res.body.ehdsArticle: isDefined
+}
+
+tests {
+  test("captures a programme I could consent to", function () {
+    const programs = res.getBody().programs || [];
+    expect(programs.length, "no research programme is offered; seed the graph first").to.be.above(0);
+    bru.setVar("studyId", programs[0].studyId);
+    bru.setVar("studyName", programs[0].studyName || "");
+  });
+}
+
+docs {
+  The study id comes from this list, not from the environment: a consent for an id no programme carries is silently not written (see request 11).
+}

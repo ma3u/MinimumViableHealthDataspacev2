@@ -1,0 +1,24 @@
+meta {
+  name: 07 Federated cohort statistics
+  type: http
+  seq: 7
+}
+
+get {
+  url: {{baseUrl}}/api/federated
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}={{sessionTokenResearcher}}
+}
+
+assert {
+  res.status: eq 200
+  res.body: isJson
+}
+
+docs {
+  Cross-site counts with k-anonymity, through the Neo4j proxy. A 502 here means the proxy image is older than the route (#349).
+}

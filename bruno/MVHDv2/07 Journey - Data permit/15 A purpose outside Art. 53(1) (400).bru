@@ -1,0 +1,33 @@
+meta {
+  name: 15 A purpose outside Art. 53(1) (400)
+  type: http
+  seq: 15
+}
+
+post {
+  url: {{baseUrl}}/api/compliance/applications
+  body: json
+  auth: inherit
+}
+
+headers {
+  Content-Type: application/json
+  Cookie: {{cookieName}}={{sessionTokenResearcher}}
+}
+
+body:json {
+  {
+    "datasetId": "{{datasetId}}",
+    "purpose": "MARKETING",
+    "justification": "targeted advertising"
+  }
+}
+
+assert {
+  res.status: eq 400
+  res.body.purposes: isArray
+}
+
+docs {
+  Art. 54 prohibits advertising outright; the route accepts only the Art. 53(1) list and returns it.
+}

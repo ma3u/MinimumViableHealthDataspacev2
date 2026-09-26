@@ -1,0 +1,20 @@
+meta {
+  name: 10 Policies across participants
+  type: http
+  seq: 10
+}
+
+get {
+  url: {{baseUrl}}/api/admin/policies
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}={{sessionTokenRegulator}}
+}
+
+assert {
+  res.status: eq 200
+  res.body.participants: isArray
+}

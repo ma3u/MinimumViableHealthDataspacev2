@@ -1,0 +1,17 @@
+meta {
+  name: 25 Its neighbourhood
+  type: http
+  seq: 25
+}
+
+get {
+  url: {{baseUrl}}/api/graph/expand?id={{graphNodeId}}&depth=1
+  body: none
+  auth: inherit
+}
+
+assert {
+  res.status: eq 200
+  res.body.nodes: isArray
+  res.body.links: isArray
+}

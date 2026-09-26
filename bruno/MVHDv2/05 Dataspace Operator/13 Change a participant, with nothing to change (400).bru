@@ -1,0 +1,24 @@
+meta {
+  name: 13 Change a participant, with nothing to change (400)
+  type: http
+  seq: 13
+}
+
+patch {
+  url: {{baseUrl}}/api/participants/{{uiParticipantId}}
+  body: json
+  auth: inherit
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {}
+}
+
+assert {
+  res.status: eq 400
+  res.body.error: contains properties
+}

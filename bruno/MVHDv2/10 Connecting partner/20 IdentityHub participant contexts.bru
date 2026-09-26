@@ -1,0 +1,25 @@
+meta {
+  name: 20 IdentityHub participant contexts
+  type: http
+  seq: 10
+}
+
+get {
+  url: {{identityUrl}}/v1alpha/participants
+  body: none
+  auth: bearer
+}
+
+headers {
+  Cookie: {{cookieName}}=not-a-session
+}
+
+auth:bearer {
+  token: {{edcToken}}
+}
+
+assert {
+  res.status: eq 200
+  res.body: isArray
+  res.body[0].did: isDefined
+}

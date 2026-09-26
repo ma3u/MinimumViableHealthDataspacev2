@@ -1,0 +1,30 @@
+meta {
+  name: 09 Purging without confirmation (400)
+  type: http
+  seq: 9
+}
+
+post {
+  url: {{baseUrl}}/api/admin/audit/retention
+  body: json
+  auth: inherit
+}
+
+headers {
+  Content-Type: application/json
+  Cookie: {{cookieName}}={{sessionTokenRegulator}}
+}
+
+body:json {
+  {}
+}
+
+assert {
+  res.status: eq 400
+  res.body.error: contains confirm
+  res.body.policy: isDefined
+}
+
+docs {
+  Nothing is deleted before its retainUntil date, and never without an explicit confirm.
+}

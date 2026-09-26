@@ -1,0 +1,27 @@
+meta {
+  name: 09 Transfers my connector took part in
+  type: http
+  seq: 9
+}
+
+get {
+  url: {{baseUrl}}/api/transfers?participantId={{uiParticipantId}}
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}={{sessionTokenClinic}}
+}
+
+assert {
+  res.status: eq 200
+  res.body: isArray
+}
+
+tests {
+  test("captures the first transfer the hub shows me", function () {
+    const rows = res.getBody();
+    bru.setVar("transferId", rows.length ? rows[0]["@id"] : "");
+  });
+}

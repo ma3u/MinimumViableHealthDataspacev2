@@ -1,0 +1,24 @@
+# gitleaks configuration for this repository.
+#
+# The default rule set is kept in full; this file only adds what the default
+# misses. Added 2026-09-26 (#349): a forged NextAuth session cookie sat in
+# bruno/MVHDv2/environments/Azure-Dev.bru from 2026-05-09 until it was removed,
+# and no scan objected. A NextAuth JWE is a five-part compact token whose first
+# part decodes to {"alg":"dir","enc":"A256GCM"}, which the generic high-entropy
+# rules do not recognise, so it needs a rule of its own.
+
+title = "MinimumViableHealthDataspacev2"
+
+[extend]
+useDefault = true
+
+[[rules]]
+id = "nextauth-session-jwe"
+description = "NextAuth session cookie (JWE, dir + A256GCM)"
+# The header of every token ui/scripts/forge-bruno-session.mjs produces, in the
+# base64url form it takes in a cookie, followed by the rest of the compact
+# serialisation. Sessions are forged per run by scripts/run-api-tests.sh; one
+# in a file is a credential someone committed.
+regex = '''eyJhbGciOiJkaXIiLCJlbmMiOiJBMjU2R0NNIn0\.\.[A-Za-z0-9_-]{8,}'''
+keywords = ["eyJhbGciOiJkaXIiLCJlbmMiOiJBMjU2R0NNIn0"]
+tags = ["session", "nextauth", "jwe"]

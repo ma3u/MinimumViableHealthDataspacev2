@@ -1,0 +1,20 @@
+meta {
+  name: Art. 67 to 73: application, permit, results, supervision
+  seq: 8
+}
+
+docs {
+  The two-sided procedure the regulation defines, in the order it runs. The acting persona
+  changes from request to request; each request says which one it is and the collection carries
+  the ids between them. One run adds one application, one permit, one finding and one closed
+  supervision cycle to the graph.
+
+    data user   -> an application carrying the eleven Art. 67(2) items
+    data user   -> declares it complete, the three-month clock starts (Art. 68(4))
+    access body -> extends the clock, then issues the permit (Art. 68)
+    anyone      -> the permit appears in the Art. 73 register
+    data user   -> communicates its results (Art. 70)
+    access body -> opens a finding (Art. 63); the party states its views (Art. 63(2))
+    access body -> asks for information; the party answers (Art. 63(1))
+    access body -> closes the finding with a measure and revokes the permit (Art. 63(3))
+}

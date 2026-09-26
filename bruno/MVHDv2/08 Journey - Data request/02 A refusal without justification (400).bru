@@ -1,0 +1,32 @@
+meta {
+  name: 02 A refusal without justification (400)
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/api/compliance/requests/decide
+  body: json
+  auth: inherit
+}
+
+headers {
+  Content-Type: application/json
+  Cookie: {{cookieName}}={{sessionTokenRegulator}}
+}
+
+body:json {
+  {
+    "requestId": "{{dataRequestId}}",
+    "decision": "REJECTED"
+  }
+}
+
+assert {
+  res.status: eq 400
+  res.body.error: contains justification
+}
+
+docs {
+  Art. 57(1)(j)(iii): a refusal must be reasoned.
+}

@@ -37,3 +37,9 @@ d8fcd02ceb57dc739a88f6c192cd387a9949b351:scripts/leitlinien/fetch_index.py:gener
 5b141340bf861538eac30984eed493ccd26d47b5:clients/ios/Sources/Shared/Analytes.generated.swift:generic-api-key:62
 5b141340bf861538eac30984eed493ccd26d47b5:clients/ios/Sources/Shared/Analytes.generated.swift:generic-api-key:125
 5b141340bf861538eac30984eed493ccd26d47b5:clients/ios/Sources/Shared/Analytes.generated.swift:generic-api-key:126
+
+# A forged NextAuth session cookie was committed in bruno/MVHDv2/environments/
+# Azure-Dev.bru (3ae4165, removed 2026-09-26, #349). Sessions are now forged per
+# run by scripts/run-api-tests.sh and never written to a file in git. No
+# fingerprint is allowlisted here: if a JWE appears in a .bru file again, the
+# scan should stop the commit.

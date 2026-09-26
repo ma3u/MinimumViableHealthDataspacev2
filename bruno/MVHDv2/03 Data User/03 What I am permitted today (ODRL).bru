@@ -1,0 +1,22 @@
+meta {
+  name: 03 What I am permitted today (ODRL)
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseUrl}}/api/odrl/scope
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}={{sessionTokenResearcher}}
+}
+
+assert {
+  res.status: eq 200
+  res.body.permissions: isArray
+  res.body.prohibitions: isArray
+  res.body.participantId: isDefined
+}

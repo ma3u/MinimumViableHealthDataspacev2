@@ -1,0 +1,22 @@
+meta {
+  name: 03 What my data tells me
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseUrl}}/api/patient/insights?patientId={{patientId}}
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}={{sessionTokenPatient}}
+}
+
+assert {
+  res.status: eq 200
+  res.body.patientId: eq {{patientId}}
+  res.body.findings: isArray
+  res.body.ehdsArticles: isDefined
+}

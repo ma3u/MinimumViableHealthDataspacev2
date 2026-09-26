@@ -1,0 +1,29 @@
+meta {
+  name: 13 Access body revokes the permit (Art. 63(3))
+  type: http
+  seq: 13
+}
+
+post {
+  url: {{baseUrl}}/api/compliance/permits/revoke
+  body: json
+  auth: inherit
+}
+
+headers {
+  Content-Type: application/json
+  Cookie: {{cookieName}}={{sessionTokenRegulator}}
+}
+
+body:json {
+  {
+    "permitId": "{{permitId}}",
+    "reason": "End of the collection run; the permit is no longer needed"
+  }
+}
+
+assert {
+  res.status: eq 200
+  res.body.decision: eq REVOKED
+  res.body.revokedAt: isDefined
+}

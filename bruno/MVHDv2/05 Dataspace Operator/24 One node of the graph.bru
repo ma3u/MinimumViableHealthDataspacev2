@@ -1,0 +1,16 @@
+meta {
+  name: 24 One node of the graph
+  type: http
+  seq: 24
+}
+
+get {
+  url: {{baseUrl}}/api/graph/node?id={{graphNodeId}}
+  body: none
+  auth: inherit
+}
+
+assert {
+  res.status: eq 200
+  res.body: isJson
+}

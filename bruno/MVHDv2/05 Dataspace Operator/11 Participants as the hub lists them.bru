@@ -1,0 +1,17 @@
+meta {
+  name: 11 Participants as the hub lists them
+  type: http
+  seq: 11
+}
+
+get {
+  url: {{baseUrl}}/api/participants
+  body: none
+  auth: inherit
+}
+
+assert {
+  res.status: eq 200
+  res.body: isArray
+  res.body[0]: isDefined
+}

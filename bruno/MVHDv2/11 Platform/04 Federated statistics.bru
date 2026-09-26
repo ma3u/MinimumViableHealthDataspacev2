@@ -1,0 +1,20 @@
+meta {
+  name: 04 Federated statistics
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{proxyUrl}}/federated/stats
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}=not-a-session
+}
+
+assert {
+  res.status: eq 200
+  res.body: isJson
+}

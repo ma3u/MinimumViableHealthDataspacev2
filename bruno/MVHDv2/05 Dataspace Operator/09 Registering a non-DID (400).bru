@@ -1,0 +1,26 @@
+meta {
+  name: 09 Registering a non-DID (400)
+  type: http
+  seq: 9
+}
+
+post {
+  url: {{baseUrl}}/api/admin/participants
+  body: json
+  auth: inherit
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "participantId": "not-a-did"
+  }
+}
+
+assert {
+  res.status: eq 400
+  res.body.error: contains did:web
+}

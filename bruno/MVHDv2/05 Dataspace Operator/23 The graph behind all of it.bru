@@ -1,0 +1,25 @@
+meta {
+  name: 23 The graph behind all of it
+  type: http
+  seq: 23
+}
+
+get {
+  url: {{baseUrl}}/api/graph?layer=all&persona=edc-admin&limit=200
+  body: none
+  auth: inherit
+}
+
+assert {
+  res.status: eq 200
+  res.body.nodes: isArray
+  res.body.links: isArray
+}
+
+tests {
+  test("captures a node id", function () {
+    const nodes = res.getBody().nodes || [];
+    expect(nodes.length, "the graph returned no nodes").to.be.above(0);
+    bru.setVar("graphNodeId", nodes[0].id);
+  });
+}

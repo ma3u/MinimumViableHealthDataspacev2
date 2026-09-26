@@ -1,0 +1,21 @@
+meta {
+  name: 01 Trust centres and open SPE sessions
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/api/trust-center
+  body: none
+  auth: inherit
+}
+
+assert {
+  res.status: eq 200
+  res.body.trustCenters: isArray
+  res.body.speSessions: isArray
+}
+
+docs {
+  Sent as the dataspace operator: the compose realm has no dedicated trust-centre user and the route admits EDC_ADMIN.
+}

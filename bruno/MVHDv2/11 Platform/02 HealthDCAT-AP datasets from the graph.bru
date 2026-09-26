@@ -1,0 +1,20 @@
+meta {
+  name: 02 HealthDCAT-AP datasets from the graph
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{proxyUrl}}/catalog/datasets
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}=not-a-session
+}
+
+assert {
+  res.status: eq 200
+  res.body: isJson
+}

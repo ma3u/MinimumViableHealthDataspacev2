@@ -1,0 +1,25 @@
+meta {
+  name: 06 Where to sign in
+  type: http
+  seq: 6
+}
+
+get {
+  url: {{baseUrl}}/api/keycloak-config
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}=not-a-session
+}
+
+assert {
+  res.status: eq 200
+  res.body.clientId: eq health-dataspace-ui
+  res.body.publicUrl: isDefined
+}
+
+docs {
+  The OIDC issuer and client id a partner's own client needs.
+}
