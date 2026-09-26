@@ -405,6 +405,22 @@ Technology Compatibility Kit), **DCP v1.0** (Decentralised Claims Protocol), and
 report-heavy and currently `continue-on-error` — the weekly cadence catches
 protocol drift without blocking day-to-day PRs.
 
+A manual dispatch with `target: azure` runs the same three suites from an ACA
+job inside the deployment instead (`scripts/azure/08-compliance-runner.sh`).
+That target produced nothing at all until 2026-09-26: the runner addressed the
+control plane on its ingress port rather than the Management API port, so all
+three suites died at participant discovery (#307, fixed in #314). What it
+reports now, and what it still cannot:
+
+| Suite          | Azure target                                                              |
+| -------------- | ------------------------------------------------------------------------- |
+| EHDS domain    | 20 passed, 0 failed, 5 skipped / 25 — the Neo4j half runs in full         |
+| DSP 2025-1 TCK | ends at discovery: the control plane holds no participant contexts (#316) |
+| DCP v1.0       | ends at discovery, same cause (#316)                                      |
+
+So the DSP and DCP claims on the compliance pages still rest on the local JAD
+run alone. The EHDS ones no longer do.
+
 ### 6.4 GitHub Pages (static demo) — [`.github/workflows/pages.yml`](https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/.github/workflows/pages.yml)
 
 Triggers: **push to `main`**. This is the public demo deploy and a nice example
