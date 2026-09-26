@@ -3,6 +3,65 @@
 Non-obvious pitfalls across the stack. Ordered newest first; add a new
 entry at the top when you hit something that cost you more than 30 minutes.
 
+## 2026-09-26: a bash suite that has to read Neo4j on Azure needs cypher-shell
+
+Closing out issue #205: `scripts/azure/status.sh` and the compliance-runner job
+were the last two callers of Neo4j's transactional HTTP API on port 7474, which
+ACA does not serve. Both are shell, so neither could reuse `runQuery()`, and the
+fix is `cypher-shell` over Bolt in each of them.
+
+- **Inside the environment** (the `mvhd-compliance-runner` job): the image is
+  alpine, so cypher-shell needs a headless JRE and the zip from
+  `dist.neo4j.org`, the same install `pages.yml` does. `08-compliance-runner.sh`
+  now passes `NEO4J_BOLT_URI=bolt://mvhd-neo4j:7687` and the credentials.
+  Twenty-odd Neo4j checks in the EHDS suite had been failing on transport alone.
+- **From a workstation** (`status.sh`): the internal ingress is not reachable on
+  any port, Bolt included, so the query has to run inside the container through
+  `az containerapp exec`, which needs a TTY. The section had printed
+  "(Neo4j not reachable from this network)" on every run since it was written.
+- **cypher-shell has no JSON output**, and `--format plain` quotes like CSV.
+  To keep `run-ehds-tests.sh`'s existing `.results[0].data[0].row[N]` readers,
+  the Bolt helper sends two statements in one invocation: the query itself,
+  whose first output line names the columns in RETURN order, and the same query
+  wrapped in `apoc.cypher.run` + `apoc.convert.toJson`, which `--format plain`
+  prints as a JSON string literal that `jq fromjson` reads back exactly.
+  The column line is not optional: `apoc.convert.toJson` serialises a map, and
+  the key order it produces does **not** follow the RETURN clause — measured
+  against the local graph, `count(c) AS cnt, collect(c.name) AS names` came back
+  as `{names, cnt}`, which would have silently swapped every `row[0]`.
+- `NEO4J_HTTP_URL` and `NEO4J_INTERNAL_URL` are gone from `scripts/azure/env.sh`
+  and off `mvhd-ui`, and `docs/azure-deployment-guide.md` no longer lists a
+  Neo4j HTTP row. All of them were the `*.internal.<domain>` FQDN, which is the
+  HTTP ingress name and serves neither Bolt nor HTTP for this app.
+  `NEO4J_BOLT_URI` replaces them.
+- Two live findings a local check could not have produced.
+  `az containerapp exec` enters the **latest** revision, and the latest is not
+  always the one serving: on 2026-09-26 `mvhd-neo4j--0000166` held 100% of the
+  traffic in `ActivationFailed` with zero replicas while `mvhd-neo4j--0000001`
+  ran the database. Resolve a revision that has a running replica and pass
+  `--revision` and `--replica`. And the CLI does not relay the container's
+  output on a stable stream — from `status.sh` it comes back on stderr, so
+  `2>/dev/null` swallowed a query that had succeeded.
+- The ACA environment's default domain is `happysand-37f82e30`, not
+  `blackforest-0a04f26e`. The old one is still written into
+  `docs/azure-deployment-guide.md` and `docs/azure-deployment-plan.md`, and was
+  `neo4j/seed.sh`'s default Bolt host until now — where it was doubly wrong,
+  since an `*.internal.<domain>` name is HTTP ingress and times out on Bolt
+  whatever the domain. Address Neo4j as `bolt://mvhd-neo4j:7687`.
+- Do not reach for `additionalPortMappings: [7474]`. It was tried on
+  2026-04-13, and reverting it produced a new revision that wiped the graph —
+  that incident is what ADR-017 was written about.
+- `.github/workflows/reset-demo.yml` still POSTs to `https://<neo4j fqdn>:7474`
+  for its dirty check. That call cannot answer either, so the `|| echo "-1"`
+  fallback fires and every scheduled run resets the environment as "assumed
+  dirty". Fail-safe, but not free. Not fixed here — issue #304.
+
+Two claims on `/admin/audit` went with it: the subtitle said "Tamper-evident
+audit trail" and a green badge said "HIPAA COMPLIANT". The records are ordinary
+Neo4j properties with no hash, chain or seal (sealing them is #204), and HIPAA
+is a US statute that nothing in the codebase checks. A compliance page that
+asserts a control it does not have is worse than one that says nothing.
+
 ## 2026-09-20: on a device screen, the nearest word above a value is not its name
 
 A gym scale's card prints the metric, then a red verdict badge, then the value:
@@ -228,9 +287,9 @@ Rules that follow:
 - Reach Neo4j from the UI only through `runQuery()` in `ui/src/lib/neo4j.ts`
   (Bolt). Grep for `tx/commit` and `:7474` before adding a route; the policies
   route carried the same copy.
-- `NEO4J_HTTP_URL` on `mvhd-ui` points at the TCP ingress and serves no HTTP.
-  Nothing reads it. `scripts/azure/status.sh` and `08-compliance-runner.sh`
-  still assume 7474; they are on the follow-up list in #205.
+- `NEO4J_HTTP_URL` on `mvhd-ui` pointed at the TCP ingress and served no HTTP.
+  Nothing read it; it and `NEO4J_INTERNAL_URL` are gone, along with the last
+  two shell callers of port 7474 — see the 2026-09-26 entry at the top.
 - A client that does `r.json()` and stores the result must check `r.ok` or
   `body.error` first, or a 502 renders as an empty page instead of an error.
 - Bolt wants `neo4j.int()` for `LIMIT` and `SKIP` parameters; a plain JS

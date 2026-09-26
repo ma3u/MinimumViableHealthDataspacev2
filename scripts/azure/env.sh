@@ -128,6 +128,13 @@ export PROVISION_MGR_IMAGE="${ACR_LOGIN_SERVER}/cfm-pmanager:${CFM_VERSION}"
 # ── Neo4j ────────────────────────────────────────────────────────────────────
 export NEO4J_USER="neo4j"
 export NEO4J_PASSWORD="healthdataspace"
+# Bolt is the only way in. mvhd-neo4j has TCP ingress with targetPort and
+# exposedPort 7687 and no additionalPortMappings, and ACA routes environment-
+# local TCP by short app name only — the internal FQDN is HTTP ingress and
+# times out on TCP. NEO4J_INTERNAL_URL and NEO4J_HTTP_URL used to be derived
+# below as that FQDN and served neither Bolt nor HTTP; issue #205 is what they
+# cost. Reachable from inside the ACA environment only, not from a workstation.
+export NEO4J_BOLT_URI="bolt://${NEO4J_APP}:7687"
 
 # ── Azure Key Vault (ADR-036) ────────────────────────────────────────────────
 # Operator secrets live here and are referenced, never copied into this file.
@@ -171,8 +178,6 @@ get_aca_fqdns() {
   fi
   cat <<EOF
 export ACA_DOMAIN="${domain}"
-export NEO4J_INTERNAL_URL="https://${NEO4J_APP}.internal.${domain}"
-export NEO4J_HTTP_URL="https://${NEO4J_APP}.internal.${domain}"
 export NEO4J_PROXY_URL="https://${NEO4J_PROXY_APP}.internal.${domain}"
 export VAULT_URL="https://${VAULT_APP}.internal.${domain}"
 export KEYCLOAK_INTERNAL_URL="https://${KEYCLOAK_APP}.internal.${domain}"

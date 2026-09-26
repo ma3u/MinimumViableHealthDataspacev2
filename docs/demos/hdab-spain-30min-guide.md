@@ -109,7 +109,7 @@ Open these tabs in order so nothing cold-starts mid-demo.
 | 4   | [`/graph?persona=trust-center`](https://ehds.mabu.red/graph?persona=trust-center) | Pseudonym resolution view (Art. 50/51)       |
 | 5   | [`/compliance`](https://ehds.mabu.red/compliance)                                 | EHDS approval checker (after login)          |
 | 6   | [`/compliance/tck`](https://ehds.mabu.red/compliance/tck)                         | DSP 2025-1 / DCP v1.0 protocol scorecard     |
-| 7   | [`/admin/audit`](https://ehds.mabu.red/admin/audit)                               | Audit & Provenance (HIPAA-style)             |
+| 7   | [`/admin/audit`](https://ehds.mabu.red/admin/audit)                               | Audit & Provenance (Art. 73 access trail)    |
 | 8   | [`/catalog`](https://ehds.mabu.red/catalog)                                       | HealthDCAT-AP dataset catalogue              |
 | 9   | [`/credentials`](https://ehds.mabu.red/credentials)                               | DCP verifiable credentials                   |
 | 10  | [`/admin/policies`](https://ehds.mabu.red/admin/policies)                         | ODRL policy definitions per dataset          |

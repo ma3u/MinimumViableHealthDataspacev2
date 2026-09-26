@@ -1,6 +1,17 @@
 FROM alpine:3.24
+# cypher-shell is here because Neo4j on ACA answers on Bolt only: mvhd-neo4j
+# has TCP ingress with targetPort and exposedPort 7687 and no
+# additionalPortMappings, so the transactional HTTP API on 7474 that
+# run-ehds-tests.sh used to call is not routable from this job either
+# (issue #205). It is a JVM tool, hence the headless JRE.
 # hadolint ignore=DL3018
-RUN apk add --no-cache bash curl jq coreutils
+RUN apk add --no-cache bash curl jq coreutils openjdk21-jre-headless unzip
+ARG CYPHER_SHELL_VERSION=5.26.0
+RUN curl -fsSL -o /tmp/cypher-shell.zip \
+      "https://dist.neo4j.org/cypher-shell/cypher-shell-${CYPHER_SHELL_VERSION}.zip" \
+    && unzip -q /tmp/cypher-shell.zip -d /opt \
+    && ln -sf "/opt/cypher-shell-${CYPHER_SHELL_VERSION}/bin/cypher-shell" /usr/local/bin/cypher-shell \
+    && rm /tmp/cypher-shell.zip
 WORKDIR /work
 COPY scripts/run-compliance.sh /work/scripts/
 COPY scripts/run-dsp-tck.sh /work/scripts/

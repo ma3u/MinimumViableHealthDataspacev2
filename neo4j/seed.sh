@@ -3,7 +3,12 @@
 # primary transport for the mvhd-neo4j ACA ingress. No HTTP API dependency.
 set -uo pipefail
 
-NEO4J_HOST="${NEO4J_HOST:-mvhd-neo4j.internal.blackforest-0a04f26e.westeurope.azurecontainerapps.io}"
+# The short app name, not the internal FQDN. ACA routes environment-local TCP
+# by short name only; the *.internal.<domain> name is the HTTP ingress and
+# times out on Bolt, which is what 06-post-deploy.sh sets NEO4J_HOST to avoid.
+# It used to default to that FQDN, with a domain (blackforest-0a04f26e) the
+# environment no longer even has — see issue #205 and docs/gotchas.md.
+NEO4J_HOST="${NEO4J_HOST:-mvhd-neo4j}"
 NEO4J_PORT="${NEO4J_PORT:-7687}"
 NEO4J_USER="${NEO4J_USER:-neo4j}"
 NEO4J_PASSWORD="${NEO4J_PASSWORD:-healthdataspace}"

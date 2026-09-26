@@ -11,10 +11,13 @@
 # Usage:
 #   ./scripts/run-ehds-tests.sh
 #   REPORT_DIR=./reports ./scripts/run-ehds-tests.sh
+#   NEO4J_BOLT_URI=bolt://mvhd-neo4j:7687 ./scripts/run-ehds-tests.sh
 #
 # Prerequisites:
 #   - Docker Compose JAD stack + Neo4j running
 #   - curl, jq installed
+#   - cypher-shell on PATH when NEO4J_BOLT_URI is set (see the transport note
+#     under Configuration)
 # ---------------------------------------------------------------------------
 set -euo pipefail
 
@@ -25,6 +28,14 @@ MGMT_V="${EDC_MGMT_API_VERSION:-v5beta}"
 # ---------------------------------------------------------------------------
 # Configuration
 # ---------------------------------------------------------------------------
+# Neo4j transport. Azure Container Apps serves mvhd-neo4j on Bolt and nothing
+# else: the ingress is TCP with targetPort and exposedPort 7687 and no
+# additionalPortMappings, so the transactional HTTP API on 7474 is not routable
+# even from another app in the same environment, and every Neo4j check below
+# used to fail there (issue #205). Set NEO4J_BOLT_URI to run them through
+# cypher-shell over Bolt; leave it unset and the HTTP API is used, which is
+# what the compose stack publishes.
+NEO4J_BOLT_URI="${NEO4J_BOLT_URI:-}"
 NEO4J_URL="${NEO4J_URL:-http://localhost:7474}"
 NEO4J_USER="${NEO4J_USER:-neo4j}"
 NEO4J_PASSWORD="${NEO4J_PASSWORD:-healthdataspace}"
@@ -67,12 +78,55 @@ record_result() {
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
-neo4j_query() {
+neo4j_query_http() {
   local cypher="$1"
   curl -sf -X POST "${NEO4J_URL}/db/neo4j/tx/commit" \
     -H "Content-Type: application/json" \
     -u "${NEO4J_USER}:${NEO4J_PASSWORD}" \
     -d "{\"statements\":[{\"statement\":\"$cypher\"}]}" 2>/dev/null
+}
+
+# Bolt, through cypher-shell, reshaped into the envelope the HTTP API returns
+# so that every caller below keeps its .results[0].data[0].row[N] read.
+#
+# cypher-shell has no JSON output format, and --format plain quotes and escapes
+# like CSV, which is no fun to parse. Two statements go in one invocation
+# instead, so one JVM start covers both:
+#
+#   1. the query itself — its first output line names the columns in RETURN
+#      order, which is the part the envelope needs and which a map does not
+#      preserve;
+#   2. the same query inside apoc.cypher.run, collected and serialised by
+#      apoc.convert.toJson. --format plain prints that as a JSON string
+#      literal, so `jq fromjson` recovers the rows exactly.
+#
+# A query returning no rows prints no header; the row list is then empty too,
+# so the missing column names cost nothing.
+neo4j_query_bolt() {
+  local cypher="$1" esc out cols json
+  esc=${cypher//\\/\\\\}
+  esc=${esc//\'/\\\'}
+  out=$(cypher-shell -a "$NEO4J_BOLT_URI" -u "$NEO4J_USER" -p "$NEO4J_PASSWORD" \
+    --non-interactive --format plain \
+    "${cypher};
+     CALL apoc.cypher.run('${esc}', {}) YIELD value
+     RETURN apoc.convert.toJson(collect(value)) AS j;" 2>/dev/null) || return 1
+  cols=$(printf '%s\n' "$out" | head -1)
+  json=$(printf '%s\n' "$out" | tail -1)
+  printf '%s' "$json" | jq -c \
+    --argjson cols "$(printf '%s' "$cols" | jq -Rc 'split(", ")')" \
+    'fromjson
+     | {results: [{columns: $cols,
+                   data: map(. as $r | {row: ($cols | map($r[.]))})}]}' \
+    2>/dev/null
+}
+
+neo4j_query() {
+  if [ -n "$NEO4J_BOLT_URI" ]; then
+    neo4j_query_bolt "$1"
+  else
+    neo4j_query_http "$1"
+  fi
 }
 
 get_token() {

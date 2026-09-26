@@ -33,7 +33,13 @@ MGMT_URL="http://${CONTROLPLANE_APP}:11003/api/mgmt"
 IDENTITY_URL="http://${IDENTITYHUB_APP}:11005/api/identity"
 ISSUER_URL="http://${ISSUER_APP}:10013/api/admin"
 KC_URL="http://${KEYCLOAK_APP}:8080"
-NEO4J_HTTP_URL="http://${NEO4J_APP}:7474"
+# Bolt, not the transactional HTTP API: mvhd-neo4j has TCP ingress with
+# targetPort and exposedPort 7687 and no additionalPortMappings, so
+# http://mvhd-neo4j:7474 is not routable from inside the environment and every
+# Neo4j check in the EHDS suite failed on it (issue #205). The short app name
+# is required — the *.internal.<domain> FQDN is HTTP ingress and times out on
+# TCP, the same rule the Neo4j seed job follows.
+NEO4J_BOLT_URI="bolt://${NEO4J_APP}:7687"
 
 ENV_VARS=(
   "DEMO_MODE=azure"
@@ -43,7 +49,9 @@ ENV_VARS=(
   "EDC_IDENTITY_URL=${IDENTITY_URL}"
   "EDC_ISSUER_URL=${ISSUER_URL}"
   "KEYCLOAK_URL=${KC_URL}"
-  "NEO4J_URL=${NEO4J_HTTP_URL}"
+  "NEO4J_BOLT_URI=${NEO4J_BOLT_URI}"
+  "NEO4J_USER=${NEO4J_USER}"
+  "NEO4J_PASSWORD=${NEO4J_PASSWORD}"
 )
 
 if az containerapp job show --name "$COMPLIANCE_JOB" --resource-group "$RG" -o none 2>/dev/null; then
