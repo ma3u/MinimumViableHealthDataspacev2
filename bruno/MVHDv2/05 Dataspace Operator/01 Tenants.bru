@@ -22,10 +22,16 @@ tests {
   // that tenant's participant profiles, and a context id there lists no profiles
   // at all. Prefer a tenant that has profiles, so the request downstream has
   // something to answer with.
+  //
+  // Report the count. `tenants: isArray` is satisfied by an empty array, and on
+  // CI this request passes while request 14 answers 502, which reads as a bug in
+  // 14 rather than as "this stack was never given a tenant". Saying the number
+  // out loud is what tells the two apart (#375).
   test("captures a tenant id that has participant profiles", function () {
     const tenants = res.getBody().tenants || [];
     const withProfiles = tenants.find((t) => (t.participantProfiles || []).length > 0);
     const pick = withProfiles || tenants[0];
     if (pick) bru.setVar("tenantId", pick.id);
+    console.log(`[tenants] ${tenants.length} tenant(s), ${tenants.filter((t) => (t.participantProfiles || []).length > 0).length} with participant profiles`);
   });
 }
