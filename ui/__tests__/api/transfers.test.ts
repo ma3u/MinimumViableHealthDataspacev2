@@ -77,7 +77,15 @@ describe("/api/transfers", () => {
       const data = await response.json();
 
       expect(response.status).toBe(200);
-      expect(data).toEqual(mockTransfers);
+      // #358: every row carries where it came from and whether the detail
+      // route can serve it. These came from the control plane, so both.
+      expect(data).toEqual(
+        mockTransfers.map((t) => ({
+          ...t,
+          source: "controlplane",
+          openable: true,
+        })),
+      );
       expect(mockManagement).toHaveBeenCalledWith(
         "/v5alpha/participants/spe-1/transferprocesses/request",
         "POST",

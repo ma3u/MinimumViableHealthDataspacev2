@@ -16,6 +16,8 @@ import {
   BookOpen,
 } from "lucide-react";
 import PageIntro from "@/components/PageIntro";
+import RowSourceBadge from "@/components/RowSourceBadge";
+import type { RowSource } from "@/lib/row-provenance";
 
 interface ParticipantCtx {
   "@id": string;
@@ -611,18 +613,17 @@ function NegotiateContent() {
                     </p>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
-                    {/* A demo negotiation is finalized by this demonstrator, not
-                        by a DSP counter-party. The row has to say so: an
+                    {/* A demo or sample negotiation is not one a DSP
+                        counter-party agreed to. The row has to say so: an
                         unmarked FINALIZED badge in front of a regulator would
-                        claim an agreement that nobody ever signed. */}
-                    {n.demo === true && (
-                      <span
-                        title={(n.demoReason as string) ?? ""}
-                        className="text-xs px-2 py-0.5 rounded-full bg-[var(--surface-2)] text-[var(--text-secondary)] border border-[var(--border)]"
-                      >
-                        Demo
-                      </span>
-                    )}
+                        claim an agreement that nobody ever signed. #358 */}
+                    <RowSourceBadge
+                      source={
+                        (n.source as RowSource | undefined) ??
+                        (n.demo === true ? "demo" : undefined)
+                      }
+                      reason={n.demoReason as string | undefined}
+                    />
                     <span
                       className={`text-xs px-2 py-0.5 rounded-full ${
                         state.includes("FINALIZED")

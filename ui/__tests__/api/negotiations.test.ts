@@ -58,7 +58,15 @@ describe("/api/negotiations", () => {
       const data = await response.json();
 
       expect(response.status).toBe(200);
-      expect(data).toEqual(mockNegotiations);
+      // #358: every row carries where it came from and whether the detail
+      // route can serve it. These came from the control plane, so both.
+      expect(data).toEqual(
+        mockNegotiations.map((n) => ({
+          ...n,
+          source: "controlplane",
+          openable: true,
+        })),
+      );
       expect(mockManagement).toHaveBeenCalledWith(
         "/v5alpha/participants/spe-1/contractnegotiations/request",
         "POST",

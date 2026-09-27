@@ -190,9 +190,16 @@ req(f, "08 Negotiations my connector took part in", "get",
     f"{B}/api/negotiations?participantId={{{{uiParticipantId}}}}", persona="clinic", mock=True,
     asserts=["res.status: eq 200", "res.body: isArray"],
     tests="""
-test("captures the first negotiation the hub shows me", function () {
+test("every row says whether it can be opened (#358)", function () {
   const rows = res.getBody();
-  bru.setVar("negotiationId", rows.length ? rows[0]["@id"] : "");
+  rows.forEach((r) => {
+    expect(r, "a listed row carries no provenance").to.have.property("source");
+    expect(r).to.have.property("openable");
+  });
+  // Only a control-plane row can be opened; the list also carries demo and
+  // bundled-mock rows so the walkthrough stays demonstrable.
+  const openable = rows.find((r) => r.openable);
+  bru.setVar("negotiationId", openable ? openable["@id"] : "");
 });
 """,
     docs="""The list merges what the control plane holds with the demo negotiations the walkthrough
@@ -202,22 +209,25 @@ req(f, "09 Transfers my connector took part in", "get",
     f"{B}/api/transfers?participantId={{{{uiParticipantId}}}}", persona="clinic", mock=True,
     asserts=["res.status: eq 200", "res.body: isArray"],
     tests="""
-test("captures the first transfer the hub shows me", function () {
+test("every row says whether it can be opened (#358)", function () {
   const rows = res.getBody();
-  bru.setVar("transferId", rows.length ? rows[0]["@id"] : "");
+  rows.forEach((r) => {
+    expect(r, "a listed row carries no provenance").to.have.property("source");
+    expect(r).to.have.property("openable");
+  });
+  const openable = rows.find((r) => r.openable);
+  bru.setVar("transferId", openable ? openable["@id"] : "");
 });
 """)
 req(f, "10 Open one negotiation the hub showed me", "get",
     f"{B}/api/negotiations/{{{{negotiationId}}}}?participantId={{{{uiParticipantId}}}}", persona="clinic",
     tests="""
 if (!bru.getVar("negotiationId")) {
-  test("SKIPPED: the hub listed no negotiation to open", function () {});
+  test("SKIPPED: this stack holds no control-plane negotiation to open", function () {});
 } else {
-  // Known red, #349. The list in request 08 merges rows the control plane holds
-  // with demo and bundled-mock rows; this route asks the control plane alone, so
-  // a row that came from the mock file answers 502. A person looking at the list
-  // cannot tell which rows they may open, which is the defect.
-  test("a row the hub listed can be opened", function () {
+  // Only rows the control plane holds are captured now (#358), so this must
+  // open. A 502 here means the list marked a row openable that is not.
+  test("a row marked openable can be opened", function () {
     expect(res.getStatus()).to.equal(200);
   });
 }
@@ -226,14 +236,14 @@ req(f, "11 Open one transfer the hub showed me", "get",
     f"{B}/api/transfers/{{{{transferId}}}}?participantId={{{{uiParticipantId}}}}", persona="clinic",
     tests="""
 if (!bru.getVar("transferId")) {
-  test("SKIPPED: the hub listed no transfer to open", function () {});
+  test("SKIPPED: this stack holds no control-plane transfer to open", function () {});
 } else {
-  test("a row the hub listed can be opened", function () {
+  test("a row marked openable can be opened", function () {
     expect(res.getStatus()).to.equal(200);
   });
 }
 """,
-    docs="Same merge as request 10 (#349).")
+    docs="Same provenance rule as request 10 (#358).")
 req(f, "12 What my organisation is allowed to do (ODRL scope)", "get", f"{B}/api/odrl/scope", persona="clinic",
     asserts=["res.status: eq 200", "res.body.permissions: isArray", "res.body.prohibitions: isArray"])
 req(f, "13 Starting a negotiation without an offer (400)", "post", f"{B}/api/negotiations", persona="clinic",

@@ -16,14 +16,14 @@ headers {
 
 tests {
   if (!bru.getVar("transferId")) {
-    test("SKIPPED: the hub listed no transfer to open", function () {});
+    test("SKIPPED: this stack holds no control-plane transfer to open", function () {});
   } else {
-    test("a row the hub listed can be opened", function () {
+    test("a row marked openable can be opened", function () {
       expect(res.getStatus()).to.equal(200);
     });
   }
 }
 
 docs {
-  Same merge as request 10 (#349).
+  Same provenance rule as request 10 (#358).
 }

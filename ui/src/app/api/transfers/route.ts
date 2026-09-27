@@ -4,6 +4,7 @@ import { edcClient, EDC_CONTEXT } from "@/lib/edc";
 import { requireAuth, isAuthError, type AuthSession } from "@/lib/auth-guard";
 import { recordDemo, listDemo, DemoRecord } from "@/lib/demo-records";
 import { userToParticipantId } from "@/lib/odrl-engine";
+import { tagRows } from "@/lib/row-provenance";
 import {
   PERMIT_ARTICLE,
   checkPermit,
@@ -98,7 +99,13 @@ export async function GET(req: NextRequest) {
   const deduped = mockTransfers.filter(
     (m) => !taken.has((m as Record<string, unknown>)["@id"]),
   );
-  const merged = [...demoTransfers, ...realTransfers, ...deduped];
+  // See #358 and lib/row-provenance.ts: the list merges three sources, the
+  // detail route asks only the control plane, so every row says which it is.
+  const merged = [
+    ...tagRows(demoTransfers, "demo"),
+    ...tagRows(realTransfers, "controlplane"),
+    ...tagRows(deduped, "mock"),
+  ];
 
   return NextResponse.json(merged);
 }

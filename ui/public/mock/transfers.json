@@ -13,7 +13,9 @@
     "dataplaneMetadata": {
       "@type": "DataplaneMetadata"
     },
-    "@context": ["https://w3id.org/edc/connector/management/v2"]
+    "@context": ["https://w3id.org/edc/connector/management/v2"],
+    "source": "mock",
+    "openable": false
   },
   {
     "@id": "f58a04eb-ade5-4bde-8038-a1d8546456ea",
@@ -30,7 +32,9 @@
     "dataplaneMetadata": {
       "@type": "DataplaneMetadata"
     },
-    "@context": ["https://w3id.org/edc/connector/management/v2"]
+    "@context": ["https://w3id.org/edc/connector/management/v2"],
+    "source": "mock",
+    "openable": false
   },
   {
     "@id": "ecff9b3c-b56e-41ca-88ef-1a5ff850b620",
@@ -45,7 +49,9 @@
     "dataplaneMetadata": {
       "@type": "DataplaneMetadata"
     },
-    "@context": ["https://w3id.org/edc/connector/management/v2"]
+    "@context": ["https://w3id.org/edc/connector/management/v2"],
+    "source": "mock",
+    "openable": false
   },
   {
     "@id": "4c185fd2-62af-4589-9377-0dc162ba2761",
@@ -60,7 +66,9 @@
     "dataplaneMetadata": {
       "@type": "DataplaneMetadata"
     },
-    "@context": ["https://w3id.org/edc/connector/management/v2"]
+    "@context": ["https://w3id.org/edc/connector/management/v2"],
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "TransferProcess",
@@ -72,7 +80,9 @@
     "contractId": "agreement-fhir-diagnostic-report-065",
     "transferType": "HttpData-PULL",
     "counterPartyId": "did:web:lmc.nl:clinic",
-    "counterPartyAddress": "https://lmc.nl/dsp/2025-1"
+    "counterPartyAddress": "https://lmc.nl/dsp/2025-1",
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "TransferProcess",
@@ -99,7 +109,9 @@
       "provider": "AlphaKlinik Berlin",
       "transferredAt": "2026-03-20T19:52:00Z",
       "sizeBytes": 359366
-    }
+    },
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "TransferProcess",
@@ -126,7 +138,9 @@
       "provider": "AlphaKlinik Berlin",
       "transferredAt": "2026-03-20T19:43:00Z",
       "sizeBytes": 306603
-    }
+    },
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "TransferProcess",
@@ -153,7 +167,9 @@
       "provider": "Limburg Medical Centre",
       "transferredAt": "2026-03-20T19:35:00Z",
       "sizeBytes": 647136
-    }
+    },
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "TransferProcess",
@@ -180,7 +196,9 @@
       "provider": "Limburg Medical Centre",
       "transferredAt": "2026-03-20T19:31:00Z",
       "sizeBytes": 159115
-    }
+    },
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "TransferProcess",
@@ -207,7 +225,9 @@
       "provider": "AlphaKlinik Berlin",
       "transferredAt": "2026-03-20T19:19:00Z",
       "sizeBytes": 36450
-    }
+    },
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "TransferProcess",
@@ -234,7 +254,9 @@
       "provider": "Limburg Medical Centre",
       "transferredAt": "2026-03-20T19:11:00Z",
       "sizeBytes": 309760
-    }
+    },
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "TransferProcess",
@@ -261,7 +283,9 @@
       "provider": "AlphaKlinik Berlin",
       "transferredAt": "2026-03-20T19:11:00Z",
       "sizeBytes": 145494
-    }
+    },
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "TransferProcess",
@@ -273,7 +297,9 @@
     "contractId": "agreement-fhir-immunization-record-024",
     "transferType": "HttpData-PULL",
     "counterPartyId": "did:web:lmc.nl:clinic",
-    "counterPartyAddress": "https://lmc.nl/dsp/2025-1"
+    "counterPartyAddress": "https://lmc.nl/dsp/2025-1",
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "TransferProcess",
@@ -285,7 +311,9 @@
     "contractId": "agreement-fhir-medication-request-084",
     "transferType": "HttpData-PULL",
     "counterPartyId": "did:web:alpha-klinik.de:participant",
-    "counterPartyAddress": "https://alpha-klinik.de/dsp/2025-1"
+    "counterPartyAddress": "https://alpha-klinik.de/dsp/2025-1",
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "TransferProcess",
@@ -312,7 +340,9 @@
       "provider": "Limburg Medical Centre",
       "transferredAt": "2026-03-20T18:52:00Z",
       "sizeBytes": 279456
-    }
+    },
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "TransferProcess",
@@ -324,7 +354,9 @@
     "contractId": "agreement-fhir-cohort-bundle-085",
     "transferType": "HttpData-PULL",
     "counterPartyId": "did:web:lmc.nl:clinic",
-    "counterPartyAddress": "https://lmc.nl/dsp/2025-1"
+    "counterPartyAddress": "https://lmc.nl/dsp/2025-1",
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "TransferProcess",
@@ -351,7 +383,9 @@
       "provider": "Limburg Medical Centre",
       "transferredAt": "2026-03-20T18:30:00Z",
       "sizeBytes": 296672
-    }
+    },
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "TransferProcess",
@@ -378,7 +412,9 @@
       "provider": "AlphaKlinik Berlin",
       "transferredAt": "2026-03-20T18:10:00Z",
       "sizeBytes": 40392
-    }
+    },
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "TransferProcess",
@@ -405,7 +441,9 @@
       "provider": "AlphaKlinik Berlin",
       "transferredAt": "2026-03-20T18:06:00Z",
       "sizeBytes": 509675
-    }
+    },
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "TransferProcess",
@@ -432,7 +470,9 @@
       "provider": "AlphaKlinik Berlin",
       "transferredAt": "2026-03-20T18:06:00Z",
       "sizeBytes": 596313
-    }
+    },
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "TransferProcess",
@@ -469,7 +509,9 @@
       "provider": "Limburg Medical Centre",
       "transferredAt": "2026-03-20T17:52:00Z",
       "sizeBytes": 14539
-    }
+    },
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "TransferProcess",
@@ -496,7 +538,9 @@
       "provider": "Limburg Medical Centre",
       "transferredAt": "2026-03-20T17:39:00Z",
       "sizeBytes": 194568
-    }
+    },
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "TransferProcess",
@@ -533,7 +577,9 @@
       "provider": "Limburg Medical Centre",
       "transferredAt": "2026-03-20T17:37:00Z",
       "sizeBytes": 411156
-    }
+    },
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "TransferProcess",
@@ -560,7 +606,9 @@
       "provider": "AlphaKlinik Berlin",
       "transferredAt": "2026-03-20T17:34:00Z",
       "sizeBytes": 3774
-    }
+    },
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "TransferProcess",
@@ -587,7 +635,9 @@
       "provider": "Limburg Medical Centre",
       "transferredAt": "2026-03-20T17:28:00Z",
       "sizeBytes": 347880
-    }
+    },
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "TransferProcess",
@@ -614,7 +664,9 @@
       "provider": "AlphaKlinik Berlin",
       "transferredAt": "2026-03-20T17:27:00Z",
       "sizeBytes": 52305
-    }
+    },
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "TransferProcess",
@@ -641,7 +693,9 @@
       "provider": "AlphaKlinik Berlin",
       "transferredAt": "2026-03-20T17:26:00Z",
       "sizeBytes": 187187
-    }
+    },
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "TransferProcess",
@@ -653,7 +707,9 @@
     "contractId": "agreement-fhir-condition-list-037",
     "transferType": "HttpData-PULL",
     "counterPartyId": "did:web:alpha-klinik.de:participant",
-    "counterPartyAddress": "https://alpha-klinik.de/dsp/2025-1"
+    "counterPartyAddress": "https://alpha-klinik.de/dsp/2025-1",
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "TransferProcess",
@@ -665,7 +721,9 @@
     "contractId": "agreement-fhir-condition-list-018",
     "transferType": "HttpData-PULL",
     "counterPartyId": "did:web:lmc.nl:clinic",
-    "counterPartyAddress": "https://lmc.nl/dsp/2025-1"
+    "counterPartyAddress": "https://lmc.nl/dsp/2025-1",
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "TransferProcess",
@@ -692,7 +750,9 @@
       "provider": "Limburg Medical Centre",
       "transferredAt": "2026-03-20T17:11:00Z",
       "sizeBytes": 731328
-    }
+    },
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "TransferProcess",
@@ -719,7 +779,9 @@
       "provider": "Limburg Medical Centre",
       "transferredAt": "2026-03-20T17:09:00Z",
       "sizeBytes": 158010
-    }
+    },
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "TransferProcess",
@@ -746,7 +808,9 @@
       "provider": "Limburg Medical Centre",
       "transferredAt": "2026-03-20T17:05:00Z",
       "sizeBytes": 259055
-    }
+    },
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "TransferProcess",
@@ -773,7 +837,9 @@
       "provider": "AlphaKlinik Berlin",
       "transferredAt": "2026-03-20T16:49:00Z",
       "sizeBytes": 384426
-    }
+    },
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "TransferProcess",
@@ -800,7 +866,9 @@
       "provider": "Limburg Medical Centre",
       "transferredAt": "2026-03-20T16:40:00Z",
       "sizeBytes": 32781
-    }
+    },
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "TransferProcess",
@@ -827,7 +895,9 @@
       "provider": "AlphaKlinik Berlin",
       "transferredAt": "2026-03-20T16:32:00Z",
       "sizeBytes": 300076
-    }
+    },
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "TransferProcess",
@@ -854,7 +924,9 @@
       "provider": "Limburg Medical Centre",
       "transferredAt": "2026-03-20T16:20:00Z",
       "sizeBytes": 6290
-    }
+    },
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "TransferProcess",
@@ -881,7 +953,9 @@
       "provider": "AlphaKlinik Berlin",
       "transferredAt": "2026-03-20T16:06:00Z",
       "sizeBytes": 619679
-    }
+    },
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "TransferProcess",
@@ -908,7 +982,9 @@
       "provider": "AlphaKlinik Berlin",
       "transferredAt": "2026-03-20T15:58:00Z",
       "sizeBytes": 840492
-    }
+    },
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "TransferProcess",
@@ -920,7 +996,9 @@
     "contractId": "agreement-fhir-medication-request-079",
     "transferType": "HttpData-PULL",
     "counterPartyId": "did:web:alpha-klinik.de:participant",
-    "counterPartyAddress": "https://alpha-klinik.de/dsp/2025-1"
+    "counterPartyAddress": "https://alpha-klinik.de/dsp/2025-1",
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "TransferProcess",
@@ -947,7 +1025,9 @@
       "provider": "Limburg Medical Centre",
       "transferredAt": "2026-03-20T15:52:00Z",
       "sizeBytes": 47235
-    }
+    },
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "TransferProcess",
@@ -974,7 +1054,9 @@
       "provider": "Limburg Medical Centre",
       "transferredAt": "2026-03-20T15:47:00Z",
       "sizeBytes": 94605
-    }
+    },
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "TransferProcess",
@@ -1001,7 +1083,9 @@
       "provider": "Limburg Medical Centre",
       "transferredAt": "2026-03-20T15:45:00Z",
       "sizeBytes": 183288
-    }
+    },
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "TransferProcess",
@@ -1028,7 +1112,9 @@
       "provider": "AlphaKlinik Berlin",
       "transferredAt": "2026-03-20T15:30:00Z",
       "sizeBytes": 74440
-    }
+    },
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "TransferProcess",
@@ -1055,7 +1141,9 @@
       "provider": "AlphaKlinik Berlin",
       "transferredAt": "2026-03-20T15:26:00Z",
       "sizeBytes": 114750
-    }
+    },
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "TransferProcess",
@@ -1082,7 +1170,9 @@
       "provider": "AlphaKlinik Berlin",
       "transferredAt": "2026-03-20T15:26:00Z",
       "sizeBytes": 804328
-    }
+    },
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "TransferProcess",
@@ -1109,7 +1199,9 @@
       "provider": "AlphaKlinik Berlin",
       "transferredAt": "2026-03-20T15:21:00Z",
       "sizeBytes": 63360
-    }
+    },
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "TransferProcess",
@@ -1121,7 +1213,9 @@
     "contractId": "agreement-fhir-condition-list-027",
     "transferType": "HttpData-PULL",
     "counterPartyId": "did:web:lmc.nl:clinic",
-    "counterPartyAddress": "https://lmc.nl/dsp/2025-1"
+    "counterPartyAddress": "https://lmc.nl/dsp/2025-1",
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "TransferProcess",
@@ -1148,7 +1242,9 @@
       "provider": "AlphaKlinik Berlin",
       "transferredAt": "2026-03-20T15:10:00Z",
       "sizeBytes": 395300
-    }
+    },
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "TransferProcess",
@@ -1175,7 +1271,9 @@
       "provider": "AlphaKlinik Berlin",
       "transferredAt": "2026-03-20T15:09:00Z",
       "sizeBytes": 539110
-    }
+    },
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "TransferProcess",
@@ -1202,7 +1300,9 @@
       "provider": "AlphaKlinik Berlin",
       "transferredAt": "2026-03-20T15:01:00Z",
       "sizeBytes": 729858
-    }
+    },
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "TransferProcess",
@@ -1214,7 +1314,9 @@
     "contractId": "agreement-fhir-observation-bundle-025",
     "transferType": "HttpData-PULL",
     "counterPartyId": "did:web:alpha-klinik.de:participant",
-    "counterPartyAddress": "https://alpha-klinik.de/dsp/2025-1"
+    "counterPartyAddress": "https://alpha-klinik.de/dsp/2025-1",
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "TransferProcess",
@@ -1241,7 +1343,9 @@
       "provider": "AlphaKlinik Berlin",
       "transferredAt": "2026-03-20T14:53:00Z",
       "sizeBytes": 97123
-    }
+    },
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "TransferProcess",
@@ -1268,7 +1372,9 @@
       "provider": "AlphaKlinik Berlin",
       "transferredAt": "2026-03-20T14:52:00Z",
       "sizeBytes": 409343
-    }
+    },
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "TransferProcess",
@@ -1295,7 +1401,9 @@
       "provider": "Limburg Medical Centre",
       "transferredAt": "2026-03-20T14:48:00Z",
       "sizeBytes": 595292
-    }
+    },
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "TransferProcess",
@@ -1332,7 +1440,9 @@
       "provider": "Limburg Medical Centre",
       "transferredAt": "2026-03-20T14:32:00Z",
       "sizeBytes": 253650
-    }
+    },
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "TransferProcess",
@@ -1359,7 +1469,9 @@
       "provider": "AlphaKlinik Berlin",
       "transferredAt": "2026-03-20T14:31:00Z",
       "sizeBytes": 214592
-    }
+    },
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "TransferProcess",
@@ -1386,7 +1498,9 @@
       "provider": "AlphaKlinik Berlin",
       "transferredAt": "2026-03-20T14:18:00Z",
       "sizeBytes": 459450
-    }
+    },
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "TransferProcess",
@@ -1398,7 +1512,9 @@
     "contractId": "agreement-fhir-care-plan-003",
     "transferType": "HttpData-PULL",
     "counterPartyId": "did:web:alpha-klinik.de:participant",
-    "counterPartyAddress": "https://alpha-klinik.de/dsp/2025-1"
+    "counterPartyAddress": "https://alpha-klinik.de/dsp/2025-1",
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "TransferProcess",
@@ -1425,7 +1541,9 @@
       "provider": "Limburg Medical Centre",
       "transferredAt": "2026-03-20T14:02:00Z",
       "sizeBytes": 618600
-    }
+    },
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "TransferProcess",
@@ -1452,7 +1570,9 @@
       "provider": "Limburg Medical Centre",
       "transferredAt": "2026-03-20T13:58:00Z",
       "sizeBytes": 136828
-    }
+    },
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "TransferProcess",
@@ -1479,7 +1599,9 @@
       "provider": "Limburg Medical Centre",
       "transferredAt": "2026-03-20T13:38:00Z",
       "sizeBytes": 55195
-    }
+    },
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "TransferProcess",
@@ -1491,7 +1613,9 @@
     "contractId": "agreement-fhir-observation-bundle-074",
     "transferType": "HttpData-PULL",
     "counterPartyId": "did:web:lmc.nl:clinic",
-    "counterPartyAddress": "https://lmc.nl/dsp/2025-1"
+    "counterPartyAddress": "https://lmc.nl/dsp/2025-1",
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "TransferProcess",
@@ -1503,7 +1627,9 @@
     "contractId": "agreement-fhir-patient-search-051",
     "transferType": "HttpData-PULL",
     "counterPartyId": "did:web:alpha-klinik.de:participant",
-    "counterPartyAddress": "https://alpha-klinik.de/dsp/2025-1"
+    "counterPartyAddress": "https://alpha-klinik.de/dsp/2025-1",
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "TransferProcess",
@@ -1515,7 +1641,9 @@
     "contractId": "agreement-fhir-cohort-bundle-072",
     "transferType": "HttpData-PULL",
     "counterPartyId": "did:web:lmc.nl:clinic",
-    "counterPartyAddress": "https://lmc.nl/dsp/2025-1"
+    "counterPartyAddress": "https://lmc.nl/dsp/2025-1",
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "TransferProcess",
@@ -1542,7 +1670,9 @@
       "provider": "Limburg Medical Centre",
       "transferredAt": "2026-03-20T13:23:00Z",
       "sizeBytes": 923202
-    }
+    },
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "TransferProcess",
@@ -1569,7 +1699,9 @@
       "provider": "Limburg Medical Centre",
       "transferredAt": "2026-03-20T13:21:00Z",
       "sizeBytes": 367696
-    }
+    },
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "TransferProcess",
@@ -1596,7 +1728,9 @@
       "provider": "AlphaKlinik Berlin",
       "transferredAt": "2026-03-20T13:15:00Z",
       "sizeBytes": 90522
-    }
+    },
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "TransferProcess",
@@ -1623,7 +1757,9 @@
       "provider": "AlphaKlinik Berlin",
       "transferredAt": "2026-03-20T13:07:00Z",
       "sizeBytes": 268580
-    }
+    },
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "TransferProcess",
@@ -1650,7 +1786,9 @@
       "provider": "Limburg Medical Centre",
       "transferredAt": "2026-03-20T12:53:00Z",
       "sizeBytes": 138240
-    }
+    },
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "TransferProcess",
@@ -1677,7 +1815,9 @@
       "provider": "AlphaKlinik Berlin",
       "transferredAt": "2026-03-20T12:50:00Z",
       "sizeBytes": 464508
-    }
+    },
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "TransferProcess",
@@ -1704,7 +1844,9 @@
       "provider": "AlphaKlinik Berlin",
       "transferredAt": "2026-03-20T12:45:00Z",
       "sizeBytes": 597996
-    }
+    },
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "TransferProcess",
@@ -1716,7 +1858,9 @@
     "contractId": "agreement-fhir-observation-bundle-039",
     "transferType": "HttpData-PULL",
     "counterPartyId": "did:web:alpha-klinik.de:participant",
-    "counterPartyAddress": "https://alpha-klinik.de/dsp/2025-1"
+    "counterPartyAddress": "https://alpha-klinik.de/dsp/2025-1",
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "TransferProcess",
@@ -1743,7 +1887,9 @@
       "provider": "Limburg Medical Centre",
       "transferredAt": "2026-03-20T12:31:00Z",
       "sizeBytes": 446624
-    }
+    },
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "TransferProcess",
@@ -1755,7 +1901,9 @@
     "contractId": "agreement-fhir-diagnostic-report-097",
     "transferType": "HttpData-PULL",
     "counterPartyId": "did:web:alpha-klinik.de:participant",
-    "counterPartyAddress": "https://alpha-klinik.de/dsp/2025-1"
+    "counterPartyAddress": "https://alpha-klinik.de/dsp/2025-1",
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "TransferProcess",
@@ -1782,7 +1930,9 @@
       "provider": "Limburg Medical Centre",
       "transferredAt": "2026-03-20T12:20:00Z",
       "sizeBytes": 44436
-    }
+    },
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "TransferProcess",
@@ -1819,7 +1969,9 @@
       "provider": "Limburg Medical Centre",
       "transferredAt": "2026-03-20T12:15:00Z",
       "sizeBytes": 248192
-    }
+    },
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "TransferProcess",
@@ -1846,7 +1998,9 @@
       "provider": "Limburg Medical Centre",
       "transferredAt": "2026-03-20T12:13:00Z",
       "sizeBytes": 61596
-    }
+    },
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "TransferProcess",
@@ -1883,7 +2037,9 @@
       "provider": "Limburg Medical Centre",
       "transferredAt": "2026-03-20T12:12:00Z",
       "sizeBytes": 591909
-    }
+    },
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "TransferProcess",
@@ -1910,7 +2066,9 @@
       "provider": "AlphaKlinik Berlin",
       "transferredAt": "2026-03-20T12:06:00Z",
       "sizeBytes": 702675
-    }
+    },
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "TransferProcess",
@@ -1937,7 +2095,9 @@
       "provider": "AlphaKlinik Berlin",
       "transferredAt": "2026-03-20T12:04:00Z",
       "sizeBytes": 164628
-    }
+    },
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "TransferProcess",
@@ -1964,7 +2124,9 @@
       "provider": "AlphaKlinik Berlin",
       "transferredAt": "2026-03-20T11:50:00Z",
       "sizeBytes": 334305
-    }
+    },
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "TransferProcess",
@@ -2001,7 +2163,9 @@
       "provider": "Limburg Medical Centre",
       "transferredAt": "2026-03-20T11:42:00Z",
       "sizeBytes": 257672
-    }
+    },
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "TransferProcess",
@@ -2028,7 +2192,9 @@
       "provider": "Limburg Medical Centre",
       "transferredAt": "2026-03-20T11:14:00Z",
       "sizeBytes": 29925
-    }
+    },
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "TransferProcess",
@@ -2055,7 +2221,9 @@
       "provider": "AlphaKlinik Berlin",
       "transferredAt": "2026-03-20T11:02:00Z",
       "sizeBytes": 281163
-    }
+    },
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "TransferProcess",
@@ -2082,7 +2250,9 @@
       "provider": "AlphaKlinik Berlin",
       "transferredAt": "2026-03-20T11:00:00Z",
       "sizeBytes": 552156
-    }
+    },
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "TransferProcess",
@@ -2109,7 +2279,9 @@
       "provider": "AlphaKlinik Berlin",
       "transferredAt": "2026-03-20T10:51:00Z",
       "sizeBytes": 512772
-    }
+    },
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "TransferProcess",
@@ -2136,7 +2308,9 @@
       "provider": "Limburg Medical Centre",
       "transferredAt": "2026-03-20T10:48:00Z",
       "sizeBytes": 79184
-    }
+    },
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "TransferProcess",
@@ -2163,7 +2337,9 @@
       "provider": "AlphaKlinik Berlin",
       "transferredAt": "2026-03-20T10:46:00Z",
       "sizeBytes": 381250
-    }
+    },
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "TransferProcess",
@@ -2175,7 +2351,9 @@
     "contractId": "agreement-fhir-diagnostic-report-069",
     "transferType": "HttpData-PULL",
     "counterPartyId": "did:web:lmc.nl:clinic",
-    "counterPartyAddress": "https://lmc.nl/dsp/2025-1"
+    "counterPartyAddress": "https://lmc.nl/dsp/2025-1",
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "TransferProcess",
@@ -2202,7 +2380,9 @@
       "provider": "Limburg Medical Centre",
       "transferredAt": "2026-03-20T10:36:00Z",
       "sizeBytes": 376608
-    }
+    },
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "TransferProcess",
@@ -2229,7 +2409,9 @@
       "provider": "AlphaKlinik Berlin",
       "transferredAt": "2026-03-20T10:13:00Z",
       "sizeBytes": 307008
-    }
+    },
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "TransferProcess",
@@ -2256,7 +2438,9 @@
       "provider": "Limburg Medical Centre",
       "transferredAt": "2026-03-20T09:54:00Z",
       "sizeBytes": 196080
-    }
+    },
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "TransferProcess",
@@ -2283,7 +2467,9 @@
       "provider": "Limburg Medical Centre",
       "transferredAt": "2026-03-20T09:48:00Z",
       "sizeBytes": 253413
-    }
+    },
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "TransferProcess",
@@ -2310,7 +2496,9 @@
       "provider": "Limburg Medical Centre",
       "transferredAt": "2026-03-20T09:34:00Z",
       "sizeBytes": 413042
-    }
+    },
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "TransferProcess",
@@ -2337,7 +2525,9 @@
       "provider": "Limburg Medical Centre",
       "transferredAt": "2026-03-20T09:23:00Z",
       "sizeBytes": 106359
-    }
+    },
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "TransferProcess",
@@ -2364,7 +2554,9 @@
       "provider": "Limburg Medical Centre",
       "transferredAt": "2026-03-20T09:15:00Z",
       "sizeBytes": 230874
-    }
+    },
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "TransferProcess",
@@ -2391,7 +2583,9 @@
       "provider": "AlphaKlinik Berlin",
       "transferredAt": "2026-03-20T09:10:00Z",
       "sizeBytes": 406800
-    }
+    },
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "TransferProcess",
@@ -2403,7 +2597,9 @@
     "contractId": "agreement-fhir-immunization-record-091",
     "transferType": "HttpData-PULL",
     "counterPartyId": "did:web:lmc.nl:clinic",
-    "counterPartyAddress": "https://lmc.nl/dsp/2025-1"
+    "counterPartyAddress": "https://lmc.nl/dsp/2025-1",
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "TransferProcess",
@@ -2415,7 +2611,9 @@
     "contractId": "agreement-fhir-care-plan-029",
     "transferType": "HttpData-PULL",
     "counterPartyId": "did:web:alpha-klinik.de:participant",
-    "counterPartyAddress": "https://alpha-klinik.de/dsp/2025-1"
+    "counterPartyAddress": "https://alpha-klinik.de/dsp/2025-1",
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "TransferProcess",
@@ -2442,7 +2640,9 @@
       "provider": "Limburg Medical Centre",
       "transferredAt": "2026-03-20T08:48:00Z",
       "sizeBytes": 276029
-    }
+    },
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "TransferProcess",
@@ -2469,7 +2669,9 @@
       "provider": "Limburg Medical Centre",
       "transferredAt": "2026-03-20T08:29:00Z",
       "sizeBytes": 270637
-    }
+    },
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "TransferProcess",
@@ -2481,7 +2683,9 @@
     "contractId": "agreement-fhir-procedure-bundle-100",
     "transferType": "HttpData-PULL",
     "counterPartyId": "did:web:lmc.nl:clinic",
-    "counterPartyAddress": "https://lmc.nl/dsp/2025-1"
+    "counterPartyAddress": "https://lmc.nl/dsp/2025-1",
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "TransferProcess",
@@ -2508,7 +2712,9 @@
       "provider": "AlphaKlinik Berlin",
       "transferredAt": "2026-03-20T08:07:00Z",
       "sizeBytes": 70281
-    }
+    },
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "TransferProcess",
@@ -2520,6 +2726,8 @@
     "contractId": "agreement-fhir-allergy-intolerance-076",
     "transferType": "HttpData-PULL",
     "counterPartyId": "did:web:alpha-klinik.de:participant",
-    "counterPartyAddress": "https://alpha-klinik.de/dsp/2025-1"
+    "counterPartyAddress": "https://alpha-klinik.de/dsp/2025-1",
+    "source": "mock",
+    "openable": false
   }
 ]
