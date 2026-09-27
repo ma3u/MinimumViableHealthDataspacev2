@@ -53,7 +53,7 @@
       "accessLogCount": 0,
       "providerName": "AlphaKlinik Berlin",
       "providerDid": "did:web:alpha-klinik.de:participant",
-      "consumerName": "Institut de Recherche Santé",
+      "consumerName": "Institut de Recherche Sant\u00e9",
       "timestamp": "2026-02-18T21:03:00Z",
       "consumerCountry": "FR",
       "status": "ERROR"
@@ -181,7 +181,7 @@
       "accessLogCount": 0,
       "providerName": "PharmaCo Research AG",
       "providerDid": "did:web:pharmaco.de:research",
-      "consumerName": "Institut de Recherche Santé",
+      "consumerName": "Institut de Recherche Sant\u00e9",
       "timestamp": "2026-02-10T11:45:00Z",
       "consumerCountry": "FR",
       "status": "TERMINATED"
@@ -327,7 +327,7 @@
       "participant": null,
       "expiresAt": "2027-03-22T00:06:57.097Z",
       "credentialType": "EHDSParticipantCredential",
-      "hdabName": "Institut de Recherche Santé (IRS FR)",
+      "hdabName": "Institut de Recherche Sant\u00e9 (IRS FR)",
       "issuerDid": "did:web:issuerservice%3A10016:issuer",
       "registrationDate": "2025-03-15",
       "credentialId": "vc:ehds-participant:hdab-irs",
@@ -498,7 +498,7 @@
         "lastAccess": "2026-09-17T00:00:00Z"
       },
       {
-        "consumerName": "Institut de Recherche Santé",
+        "consumerName": "Institut de Recherche Sant\u00e9",
         "totalAccesses": 1,
         "totalBytes": 180,
         "lastAccess": "2026-09-13T01:00:00Z"
@@ -597,7 +597,7 @@
       "id": "te-demo-008",
       "accessedAt": "2026-09-13T01:00:00Z",
       "consumerDid": "did:web:irs.fr:hdab",
-      "consumerName": "Institut de Recherche Santé",
+      "consumerName": "Institut de Recherche Sant\u00e9",
       "consumerCountry": "FR",
       "providerDid": "did:web:alpha-klinik.de:participant",
       "providerName": "AlphaKlinik Berlin",

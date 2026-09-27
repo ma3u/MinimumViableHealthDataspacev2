@@ -119,6 +119,17 @@ repos:
         pass_filenames: false
         stages: [pre-commit]
 
+      # Covering a route is not the same as describing it correctly. The spec
+      # said /api/graph returns `edges` while the hub returned `links`, and
+      # the drift check above reported no drift the whole time (#338).
+      - id: api-spec-shapes
+        name: API spec describes the shape the hub answers with
+        language: system
+        entry: python3 scripts/check-openapi-shapes.py
+        files: ^(ui/public/openapi\.yaml|ui/public/mock/.*\.json|ui/src/lib/api\.ts|docs/openapi-shape-allowlist\.txt)$
+        pass_filenames: false
+        stages: [pre-commit]
+
   # Bruno collection vs implemented routes (#349, ADR-032). Ratcheted against
   # docs/bruno-coverage-allowlist.txt, and it also refuses a request that
   # carries neither an assert nor a test (ADR-031).

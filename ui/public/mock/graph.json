@@ -32,7 +32,7 @@
     },
     {
       "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113611",
-      "name": "Institut de Recherche Santé",
+      "name": "Institut de Recherche Sant\u00e9",
       "label": "Participant",
       "layer": 1,
       "color": "#F97316",
@@ -132,7 +132,7 @@
     },
     {
       "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33180",
-      "name": "EHDS Art. 53 Secondary Use — Synthetic Data",
+      "name": "EHDS Art. 53 Secondary Use \u2014 Synthetic Data",
       "label": "OdrlPolicy",
       "layer": 1,
       "color": "#94A3B8",
@@ -152,7 +152,7 @@
     },
     {
       "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:9",
-      "name": "EHDS Contract (PharmaCo Research AG↔AlphaKlinik Berlin)",
+      "name": "EHDS Contract (PharmaCo Research AG\u2194AlphaKlinik Berlin)",
       "label": "Contract",
       "layer": 1,
       "color": "#94A3B8",
@@ -162,7 +162,7 @@
     },
     {
       "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113650",
-      "name": "EHDS Contract (TrialCorp↔Riverside)",
+      "name": "EHDS Contract (TrialCorp\u2194Riverside)",
       "label": "Contract",
       "layer": 1,
       "color": "#94A3B8",
@@ -192,7 +192,7 @@
     },
     {
       "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33183",
-      "name": "MedReg HDAB Approval — Synthea Cohort 2026",
+      "name": "MedReg HDAB Approval \u2014 Synthea Cohort 2026",
       "label": "HDABApproval",
       "layer": 1,
       "color": "#EC4899",
@@ -202,7 +202,7 @@
     },
     {
       "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113616",
-      "name": "AlphaKlinik → LMC (In Progress)",
+      "name": "AlphaKlinik \u2192 LMC (In Progress)",
       "label": "ContractNegotiation",
       "layer": 1,
       "color": "#94A3B8",
@@ -212,7 +212,7 @@
     },
     {
       "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113612",
-      "name": "AlphaKlinik → PharmaCo (FHIR)",
+      "name": "AlphaKlinik \u2192 PharmaCo (FHIR)",
       "label": "ContractNegotiation",
       "layer": 1,
       "color": "#94A3B8",
@@ -222,7 +222,7 @@
     },
     {
       "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113613",
-      "name": "AlphaKlinik → PharmaCo (OMOP)",
+      "name": "AlphaKlinik \u2192 PharmaCo (OMOP)",
       "label": "ContractNegotiation",
       "layer": 1,
       "color": "#94A3B8",
@@ -232,7 +232,7 @@
     },
     {
       "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113614",
-      "name": "LMC → MedReg (Prostate)",
+      "name": "LMC \u2192 MedReg (Prostate)",
       "label": "ContractNegotiation",
       "layer": 1,
       "color": "#94A3B8",
@@ -242,7 +242,7 @@
     },
     {
       "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113615",
-      "name": "PharmaCo → IRS (Terminated)",
+      "name": "PharmaCo \u2192 IRS (Terminated)",
       "label": "ContractNegotiation",
       "layer": 1,
       "color": "#94A3B8",
@@ -3174,5 +3174,6 @@
     }
   ],
   "persona": "default",
-  "question": "What does the full 5-layer health dataspace look like?"
+  "question": "What does the full 5-layer health dataspace look like?",
+  "isolatedRemoved": 0
 }
