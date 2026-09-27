@@ -132,6 +132,16 @@ repos:
         pass_filenames: false
         stages: [pre-commit]
 
+      # A workflow whose paths filter misses a script it runs stops re-running
+      # when that script is fixed, and the last, stale, result stands.
+      - id: workflow-paths
+        name: Workflows re-run when what they run changes
+        language: system
+        entry: python3 scripts/check-workflow-paths.py .github/workflows/bruno-smoke.yml .github/workflows/catalog-crawler.yml .github/workflows/compliance.yml .github/workflows/demo-smoke.yml .github/workflows/security-scan.yml
+        files: ^(\.github/workflows/.*\.ya?ml|scripts/.*|jad/.*|ui/scripts/.*)$
+        pass_filenames: false
+        stages: [pre-commit]
+
   # npm dependency audit — HIGH/CRITICAL CVEs on pre-push (BSI C5 DEV-05)
   # Requires: node/npm in PATH
   - repo: local

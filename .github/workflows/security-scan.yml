@@ -30,6 +30,10 @@ on:
       - "services/*/package*.json"
       - "**/Dockerfile"
       - "docker-compose*.yml"
+      # The pin check this workflow runs, and the file it reads the expected
+      # versions from. Asserted by scripts/check-workflow-paths.py.
+      - "scripts/check-deployed-image-pins.sh"
+      - "scripts/azure/env.sh"
       - ".github/workflows/security-scan.yml"
 
 permissions:

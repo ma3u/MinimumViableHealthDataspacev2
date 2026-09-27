@@ -14,6 +14,8 @@ on:
     paths:
       - "services/catalog-crawler/**"
       - "scripts/azure/10-catalog-crawler.sh"
+      # Sourced by the deploy script above; see scripts/check-workflow-paths.py.
+      - "scripts/azure/env.sh"
       - ".github/workflows/catalog-crawler.yml"
 
 permissions:

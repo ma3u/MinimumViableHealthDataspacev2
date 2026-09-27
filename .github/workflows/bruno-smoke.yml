@@ -12,6 +12,13 @@ on:
       - "bruno/MVHDv2/**"
       - "ui/src/app/api/**"
       - "ui/scripts/forge-bruno-session.mjs"
+      # The runner and the realm it signs in against, asserted by
+      # scripts/check-workflow-paths.py.
+      - "scripts/run-api-tests.sh"
+      - "scripts/check-compliance-baseline.py"
+      - "scripts/compliance-baseline.json"
+      - "jad/seed-jad.sh"
+      - "jad/keycloak-realm.json"
       - ".github/workflows/bruno-smoke.yml"
   pull_request:
     paths:

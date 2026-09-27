@@ -13,13 +13,26 @@ name: Protocol Compliance
 on:
   push:
     branches: [main]
+    # Keep this covering everything the suites actually run.
+    # scripts/check-workflow-paths.py asserts it, in pre-commit: it follows
+    # every script reference from this file, transitively, and fails when one
+    # of them would not re-trigger the workflow. The filter used to name only
+    # scripts/run-*.sh, so a push to main fixing a seed script left the last,
+    # red, result standing.
     paths:
-      - "scripts/run-*.sh"
-      - "bruno/MVHDv2/**"
+      - "scripts/*.sh"
+      - "scripts/*.py"
+      - "scripts/lib/**"
+      - "scripts/compliance-baseline.json"
+      - "scripts/azure/env.sh"
+      - "scripts/azure/05-cp-participants.sh"
       - "scripts/azure/compliance-runner/**"
       - "scripts/azure/08-compliance-runner.sh"
-      - "docker-compose.jad.yml"
+      - "ui/scripts/forge-bruno-session.mjs"
+      - "bruno/MVHDv2/**"
+      - "jad/**"
       - "neo4j/**"
+      - "docker-compose.jad.yml"
       - ".github/workflows/compliance.yml"
   schedule:
     - cron: "0 6 * * 1" # Weekly Monday 6am UTC
