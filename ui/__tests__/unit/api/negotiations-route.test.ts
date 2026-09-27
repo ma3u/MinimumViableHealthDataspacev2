@@ -160,8 +160,19 @@ describe("GET /api/negotiations", () => {
 
     // neg-1 from mock is deduplicated, only real neg-1 + mock neg-2 remain
     expect(data).toHaveLength(2);
-    expect(data[0]).toEqual({ "@id": "neg-1", state: "CONFIRMED" });
-    expect(data[1]).toEqual({ "@id": "neg-2", state: "FINALIZED" });
+    expect(data[0]).toEqual({
+      "@id": "neg-1",
+      state: "CONFIRMED",
+      source: "controlplane",
+      openable: true,
+    });
+    // #358: the surviving mock row says so, and says it cannot be opened.
+    expect(data[1]).toEqual({
+      "@id": "neg-2",
+      state: "FINALIZED",
+      source: "mock",
+      openable: false,
+    });
   });
 
   it("should convert non-array EDC response to empty array", async () => {

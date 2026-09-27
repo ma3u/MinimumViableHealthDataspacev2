@@ -20,6 +20,8 @@ import {
   Network,
 } from "lucide-react";
 import PageIntro from "@/components/PageIntro";
+import RowSourceBadge from "@/components/RowSourceBadge";
+import type { RowSource } from "@/lib/row-provenance";
 
 /* ── Types ── */
 
@@ -1189,6 +1191,16 @@ function DataTransferContent() {
                       <span className="text-[10px] px-1.5 py-0.5 rounded bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200">
                         {transferType}
                       </span>
+                      {/* A demo or sample transfer moved no data and has no
+                          record in the control plane. Unmarked, a COMPLETED
+                          badge on it claims a transfer that never ran. #358 */}
+                      <RowSourceBadge
+                        source={
+                          (t.source as RowSource | undefined) ??
+                          (t.demo === true ? "demo" : undefined)
+                        }
+                        reason={t.demoReason as string | undefined}
+                      />
                     </div>
                     <div className="flex items-center gap-2">
                       <button

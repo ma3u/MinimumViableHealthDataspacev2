@@ -20,9 +20,16 @@ assert {
 }
 
 tests {
-  test("captures the first negotiation the hub shows me", function () {
+  test("every row says whether it can be opened (#358)", function () {
     const rows = res.getBody();
-    bru.setVar("negotiationId", rows.length ? rows[0]["@id"] : "");
+    rows.forEach((r) => {
+      expect(r, "a listed row carries no provenance").to.have.property("source");
+      expect(r).to.have.property("openable");
+    });
+    // Only a control-plane row can be opened; the list also carries demo and
+    // bundled-mock rows so the walkthrough stays demonstrable.
+    const openable = rows.find((r) => r.openable);
+    bru.setVar("negotiationId", openable ? openable["@id"] : "");
   });
 }
 
