@@ -85,12 +85,18 @@ def latest_report(results_dir, artifact):
         )
     if not files:
         return None
-    try:
-        with open(files[0], encoding="utf-8") as fh:
-            return json.load(fh)
-    except (OSError, json.JSONDecodeError) as exc:
-        print(f"  could not read {files[0]}: {exc}")
-        return None
+    # Newest first, but skip anything that is not a summary document: a suite
+    # directory can also hold a raw runner report, and bru's is a bare array.
+    for path in files:
+        try:
+            with open(path, encoding="utf-8") as fh:
+                doc = json.load(fh)
+        except (OSError, json.JSONDecodeError) as exc:
+            print(f"  could not read {path}: {exc}")
+            continue
+        if isinstance(doc, dict) and isinstance(doc.get("summary"), dict):
+            return doc
+    return None
 
 
 def load_baseline():
