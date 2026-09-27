@@ -18,3 +18,16 @@ assert {
   res.status: eq 200
   res.body.participants: isArray
 }
+
+tests {
+  // One shape whichever backend answered (#367); each group names its
+  // participant, so an empty envelope is not enough.
+  test("policies are grouped under a named participant", function () {
+    const groups = res.getBody().participants;
+    expect(groups, "participants").to.be.an("array").that.is.not.empty;
+    for (const g of groups) {
+      expect(g.participantId, "participantId").to.be.a("string");
+      expect(g.policies, "policies").to.be.an("array");
+    }
+  });
+}
