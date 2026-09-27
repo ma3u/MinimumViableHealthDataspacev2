@@ -342,7 +342,20 @@ Tenants, components and their health, the participant registry behind federated 
 policy and credential administration, and the knowledge graph underneath. The participant
 registered here is deregistered one request later.""")
 req(f, "01 Tenants", "get", f"{B}/api/admin/tenants", mock=True,
-    asserts=["res.status: eq 200", "res.body.tenants: isArray", "res.body.summary: isDefined"])
+    asserts=["res.status: eq 200", "res.body.tenants: isArray", "res.body.summary: isDefined"],
+    tests="""
+// Capture a CFM tenant id for request 14. A tenant id is not a participant
+// context id: /api/participants/{id}/credentials asks the Tenant Manager for
+// that tenant's participant profiles, and a context id there lists no profiles
+// at all. Prefer a tenant that has profiles, so the request downstream has
+// something to answer with.
+test("captures a tenant id that has participant profiles", function () {
+  const tenants = res.getBody().tenants || [];
+  const withProfiles = tenants.find((t) => (t.participantProfiles || []).length > 0);
+  const pick = withProfiles || tenants[0];
+  if (pick) bru.setVar("tenantId", pick.id);
+});
+""")
 req(f, "02 Components and their state", "get", f"{B}/api/admin/components", mock=True,
     asserts=["res.status: eq 200", "res.body.components: isDefined", "res.body.deploymentTarget: isDefined"])
 req(f, "03 How the components connect", "get", f"{B}/api/admin/components/topology", mock=True,
@@ -378,9 +391,27 @@ req(f, "12 Onboard a participant, without a name (400)", "post", f"{B}/api/parti
 req(f, "13 Change a participant, with nothing to change (400)", "patch",
     f"{B}/api/participants/{{{{uiParticipantId}}}}", body={},
     asserts=["res.status: eq 400", "res.body.error: contains properties"])
-req(f, "14 The credentials one participant holds", "get",
-    f"{B}/api/participants/{{{{uiParticipantId}}}}/credentials",
-    asserts=["res.status: eq 200", "res.body: isArray"])
+req(f, "14 The credentials a tenants participants hold", "get",
+    f"{B}/api/participants/{{{{tenantId}}}}/credentials",
+    asserts=["res.status: eq 200", "res.body: isArray"],
+    tests="""
+// This used to pass {{uiParticipantId}}, a participant context id, where the
+// route wants a CFM tenant id. The Tenant Manager listed no profiles for it,
+// so the route answered `[]` and `isArray` was satisfied by an empty array:
+// green while showing nothing. On the CI stack the same call threw instead and
+// the request went red at 502, which is how it was found.
+//
+// So assert the answer is populated, not merely an array.
+test("the tenant has at least one participant profile", function () {
+  expect(res.getBody()).to.be.an("array").that.is.not.empty;
+});
+test("each profile names its context and carries a credentials array", function () {
+  for (const entry of res.getBody()) {
+    expect(entry.participantContextId, "participantContextId").to.be.a("string");
+    expect(entry.credentials, "credentials").to.be.an("array");
+  }
+});
+""")
 req(f, "15 The patient index and cohort statistics", "get", f"{B}/api/patient", mock=True,
     asserts=["res.status: eq 200", "res.body.patients: isArray", "res.body.stats: isDefined"])
 req(f, "16 Credential definitions on the issuer", "get", f"{B}/api/credentials/definitions",

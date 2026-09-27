@@ -15,3 +15,17 @@ assert {
   res.body.tenants: isArray
   res.body.summary: isDefined
 }
+
+tests {
+  // Capture a CFM tenant id for request 14. A tenant id is not a participant
+  // context id: /api/participants/{id}/credentials asks the Tenant Manager for
+  // that tenant's participant profiles, and a context id there lists no profiles
+  // at all. Prefer a tenant that has profiles, so the request downstream has
+  // something to answer with.
+  test("captures a tenant id that has participant profiles", function () {
+    const tenants = res.getBody().tenants || [];
+    const withProfiles = tenants.find((t) => (t.participantProfiles || []).length > 0);
+    const pick = withProfiles || tenants[0];
+    if (pick) bru.setVar("tenantId", pick.id);
+  });
+}
