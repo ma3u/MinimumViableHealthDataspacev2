@@ -104,19 +104,25 @@ Roles are injected into the JWT by the Keycloak callback in `ui/src/lib/auth.ts`
 | `PATIENT`               | My Health     | `/patient/profile`, `/patient/research`, `/patient/insights` · Graph: "My Health"                           |
 | `EDC_USER_PARTICIPANT`  | Exchange      | Base authenticated user (implied by all above)                                                              |
 
-### The one route that is public on purpose
+Every route that reads a session enforces it through `requireAuth()`, with no
+exceptions. `/api/patient` was the one that did not, answering anonymous
+callers while the matrix said otherwise; #357 closed that, and `/patient`
+joined `PROTECTED_PATHS` in the same change so a visitor is sent to sign in
+rather than shown a page whose data call refuses.
 
-`/api/patient` answers a caller with no session, and that is intended (#357).
-`/patient` is the one patient page middleware leaves out of `PROTECTED_PATHS`,
-so an anonymous visitor can open it, and the page calls that route. Every
-record behind it is synthetic and the same index and profiles ship as static
-fixtures on GitHub Pages.
+On that route the session both admits and narrows: any authenticated
+participant sees the demo cohort, a `PATIENT` sees only their own record
+(EHDS Art. 3, GDPR Art. 15). `bruno/MVHDv2/09 Access control/05` asserts the
+401 and its `{ error }` body.
 
-The session there narrows rather than admits: a `PATIENT` sees only their own
-record (EHDS Art. 3, GDPR Art. 15), and anyone else, signed in or not, sees the
-demo cohort. `bruno/MVHDv2/09 Access control/05` asserts both halves, the 200
-and the narrowing. Every other route reading a session enforces it through
-`requireAuth()`.
+**Route tests do not check the gate.** `ui/__tests__/setup.ts` mocks
+`@/lib/auth-guard` open, so `requireAuth()` returns an `EDC_ADMIN` and
+`isAuthError()` returns false for every test that does not say otherwise. That
+is deliberate, so route tests exercise business logic, but it means a route
+that forgets `requireAuth()` passes its unit tests. A test that means to pin a
+gate must close the guard itself; see the no-session block in
+`ui/__tests__/unit/api/patient-route.test.ts`. The API collection's
+`09 Access control` folder is the check that runs against a real server.
 
 ## Data Models
 

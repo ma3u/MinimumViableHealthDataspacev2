@@ -43,6 +43,12 @@ const PROTECTED_PATHS = [
   "/settings",
   "/data",
   "/negotiate",
+  // #357 reopened: the patient landing page is gated too, so an anonymous
+  // visitor is sent to sign in rather than shown a page whose only data call
+  // now answers 401. The three below stay listed because requiresRole() keys
+  // off them for PATIENT / EDC_ADMIN; "/patient" alone needs a session and no
+  // particular role, which matches what /api/patient enforces.
+  "/patient",
   "/patient/profile",
   "/patient/research",
   "/patient/insights",
