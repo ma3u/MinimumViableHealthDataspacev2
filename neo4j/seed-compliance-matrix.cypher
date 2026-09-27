@@ -263,3 +263,42 @@ MERGE (rc:ResultCommunication {resultId: 'result-lmc-irs-2026-001-20260901'})
       rc.ehdsArticle = 'Art. 61(4)'
 MERGE (rc)-[:RESULT_OF]->(lmcPermit)
 MERGE (lmc)-[:COMMUNICATED]->(rc);
+
+// ── PharmaCo's standing data permit on the OMOP warehouse (Art. 68) ────────
+// Why this exists (#349): every permit-gated route (/api/analytics, /api/nlq)
+// runs checkPermit() for the calling participant, and the collection's data
+// user is PharmaCo. Nothing seeded a permit for that DID, so on a fresh graph
+// those routes correctly answered 403 and the API collection scored them as
+// failures in CI. They passed locally only on permits left behind by earlier
+// runs of the Art. 67-to-73 journey, which is accumulated state, not a seed.
+// This gives PharmaCo one deliberate, long-lived permit so the gated routes
+// have a defined answer on any freshly seeded stack.
+MATCH (pharmaco:Participant {participantId: 'did:web:pharmaco.de:research'})
+MATCH (medreg:Participant {participantId: 'did:web:medreg.de:hdab'})
+MATCH (omop:HealthDataset {datasetId: 'dataset:omop-cdm-v54-analytics'})
+
+MERGE (appPharma:AccessApplication {applicationId: 'app-pharmaco-medreg-omop-standing'})
+  SET appPharma.name = 'PharmaCo — OMOP secondary-use analytics',
+      appPharma.applicantId = pharmaco.participantId,
+      appPharma.datasetId = omop.datasetId,
+      appPharma.requestedPurpose = 'SCIENTIFIC_RESEARCH',
+      appPharma.status = 'APPROVED',
+      appPharma.submittedAt = datetime('2026-01-15T09:00:00'),
+      appPharma.applicantCategory = 'COMMERCIAL',
+      appPharma.dataMinimisationStatement = 'OMOP condition, measurement and drug tables only; aggregate output.',
+      appPharma.ehdsArticle = 'EHDS Art. 67'
+MERGE (pharmaco)-[:SUBMITTED]->(appPharma)
+MERGE (medreg)-[:REVIEWED]->(appPharma)
+
+MERGE (approvalPharma:HDABApproval {approvalId: 'hdab-medreg-pharmaco-2026-001'})
+  SET approvalPharma.name = 'MedReg DE Permit — PharmaCo OMOP Analytics',
+      approvalPharma.status = 'APPROVED',
+      approvalPharma.applicationId = appPharma.applicationId,
+      approvalPharma.approvedAt = datetime('2026-02-01T10:00:00'),
+      approvalPharma.validUntil = datetime('2028-12-31T23:59:59'),
+      approvalPharma.permittedPurpose = 'SCIENTIFIC_RESEARCH',
+      approvalPharma.conditions = ['Secure processing environment only', 'Aggregate output, k-anonymity 5', 'Results communicated under Art. 61(4)'],
+      approvalPharma.hdabOfficer = 'Anke Hoffmann (MedReg DE)',
+      approvalPharma.ehdsArticle = 'EHDS Art. 68'
+MERGE (approvalPharma)-[:APPROVES]->(appPharma)
+MERGE (approvalPharma)-[:GRANTS_ACCESS_TO]->(omop);
