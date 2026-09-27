@@ -30,6 +30,15 @@ on:
       - "scripts/azure/08-compliance-runner.sh"
       - "ui/scripts/forge-bruno-session.mjs"
       - "bruno/MVHDv2/**"
+      # The collection's subject, #371. This workflow is the only place the
+      # full 149-request Local run happens; bruno-smoke runs the 30 fixture
+      # requests of Static-mock. Without these, an API route change regresses
+      # the suite and nothing re-runs it, so the last result stands. They are
+      # what the collection exercises, not something this workflow executes,
+      # which is why check-workflow-paths.py cannot derive them.
+      - "ui/src/app/api/**"
+      - "ui/src/lib/**"
+      - "ui/Dockerfile"
       - "jad/**"
       - "neo4j/**"
       - "docker-compose.jad.yml"
