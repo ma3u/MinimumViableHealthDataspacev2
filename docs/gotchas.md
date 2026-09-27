@@ -1029,3 +1029,32 @@ digest reference"**. The digest pin and the build context cannot both be used;
 one has to go, which is a decision for ADR-029 rather than a local workaround.
 
 Nine of the fourteen failures in the first Bruno run are this one cause.
+
+## 2026-09-27 — a workflow does not re-run when the scripts it runs change
+
+`compliance.yml` triggered on `scripts/run-*.sh` and a few named files. The
+suites it runs also depend on every seed script, on `scripts/lib/`, and on most
+of `jad/`. So a push to main that fixed a seed script did not re-run the suite:
+the last result, red and stale, kept standing, and branch protection kept
+reporting it while the fix sat merged underneath.
+
+Measured across every workflow with a paths filter, counting real invocations
+and ignoring paths merely named in a comment:
+
+| workflow        | files it runs that did not re-trigger it |
+| --------------- | ---------------------------------------- |
+| compliance      | 30                                       |
+| bruno-smoke     | 3                                        |
+| demo-smoke      | 3                                        |
+| security-scan   | 2                                        |
+| catalog-crawler | 1                                        |
+
+Two things make this hard to spot. A green tick on a stale result is
+indistinguishable from a green tick on a fresh one. And the dependency is
+transitive: `compliance.yml` runs `seed-identity-layer.sh`, which runs
+`repair-cp-sts-secrets.sh` through `"${SCRIPT_DIR}/..."`, which no glob named
+and no plain grep for `scripts/` would have found.
+
+`scripts/check-workflow-paths.py` derives the set rather than listing it, and
+runs in pre-commit. When a workflow starts running something new, add the glob
+the checker asks for instead of assuming the filter is still complete (#364).

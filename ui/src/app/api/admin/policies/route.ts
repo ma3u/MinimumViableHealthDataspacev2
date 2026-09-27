@@ -114,8 +114,33 @@ export async function GET(request: NextRequest) {
          ORDER BY pol.createdAt DESC`,
         participantId ? { participantId } : {},
       );
-      const policies = rows.map((r) => r.policy);
-      return NextResponse.json({ policies, source: "neo4j", offline: true });
+      // Group by participant, so this answers in the same shape as the EDC
+      // path above. It used to return a bare `policies` array, and the two
+      // shapes cost twice: /admin/policies reads `participants` only, so the
+      // page was empty whenever the control plane was the thing that was down,
+      // which is exactly when an operator opens it; and a partner integrating
+      // against the endpoint could not write one parser. The bundled fixture
+      // ui/public/mock/admin_policies.json has always used `participants`.
+      const groups = new Map<
+        string,
+        { participantId: string; identity: string; policies: unknown[] }
+      >();
+      for (const { policy } of rows) {
+        const participantId = String(policy.participantId ?? "unknown");
+        const identity = String(policy.participantName ?? participantId);
+        const group = groups.get(participantId) ?? {
+          participantId,
+          identity,
+          policies: [],
+        };
+        group.policies.push(policy);
+        groups.set(participantId, group);
+      }
+      return NextResponse.json({
+        participants: [...groups.values()],
+        source: "neo4j",
+        offline: true,
+      });
     } catch (neo4jErr) {
       // Fall back to bundled mock data so the UI works offline
       try {
