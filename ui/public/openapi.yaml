@@ -85,15 +85,14 @@ components:
         nodes:
           type: array
           items: { $ref: "#/components/schemas/GraphNode" }
-        edges:
+        links:
           type: array
           items: { $ref: "#/components/schemas/GraphEdge" }
-        meta:
-          type: object
-          properties:
-            layer: { type: string }
-            totalNodes: { type: integer }
-            totalEdges: { type: integer }
+        persona: { type: string }
+        question: { type: string }
+        isolatedRemoved:
+          type: integer
+          description: Nodes dropped because the layer filter left them unconnected.
     GraphNode:
       type: object
       properties:
@@ -119,11 +118,20 @@ components:
         license: { type: string, format: uri }
         datasetType: { type: string, format: uri }
         legalBasis: { type: string }
-        recordCount: { type: integer }
-        personalData: { type: boolean }
-        sensitiveData: { type: boolean }
-        purpose: { type: string }
-        populationCoverage: { type: string }
+        recordCount: { type: integer, nullable: true }
+        theme: { type: string, nullable: true }
+        providers:
+          type: array
+          items: { type: string }
+        consumers:
+          type: array
+          items: { type: string }
+        transfers:
+          type: array
+          items: { type: object }
+        fhirResources:
+          type: array
+          items: { type: string }
         conformsTo:
           type: array
           items: { type: string, format: uri }
@@ -137,6 +145,57 @@ components:
         gender: { type: string }
         city: { type: string }
         country: { type: string }
+    PatientIndex:
+      type: object
+      description: >
+        What GET /api/patient answers. The session narrows it: a PATIENT sees
+        only their own record with `restricted` true (EHDS Art. 3, GDPR
+        Art. 15); any other authenticated participant sees the demo cohort.
+      properties:
+        patients:
+          type: array
+          items: { $ref: "#/components/schemas/Patient" }
+        stats: { type: object }
+        timeline: { type: array, items: { type: object } }
+        restricted:
+          type: boolean
+          description: True when the list was narrowed to the caller's own record.
+        lastEhrSync:
+          type: object
+          nullable: true
+          properties:
+            at: { type: string, format: date-time }
+            source: { type: string }
+
+    PatientProfileIndex:
+      type: object
+      description: What GET /api/patient/profile answers without a patientId.
+      properties:
+        patients:
+          type: array
+          items: { $ref: "#/components/schemas/Patient" }
+
+    Tenant:
+      type: object
+      description: A CFM tenant, as GET /api/participants/me lists them.
+      properties:
+        id: { type: string }
+        version: { type: integer }
+        properties: { type: object }
+        participantProfiles: { type: array, items: { type: object } }
+        provisioningStalled:
+          type: boolean
+          description: True when a VPA has been pending long enough to be stuck (#318).
+        vpaSummary:
+          type: object
+          properties:
+            total: { type: integer }
+            pending: { type: integer }
+            pendingTypes: { type: array, items: { type: string } }
+            oldestPendingSince:
+              { type: string, format: date-time, nullable: true }
+            stalled: { type: boolean }
+
     PatientProfile:
       type: object
       properties:
@@ -147,11 +206,19 @@ components:
         medications: { type: array, items: { type: object } }
     Participant:
       type: object
-      required: [id, displayName]
+      required: ["@id", displayName]
       properties:
-        id: { type: string }
+        "@context": { type: array, items: {} }
+        "@id": { type: string }
+        "@type": { type: string }
+        participantId: { type: string }
+        identity:
+          type: string
+          description: The participant's did:web, as the EDC layer resolves it.
+        slug: { type: string }
+        state: { type: string }
+        properties: { type: object }
         displayName: { type: string }
-        organization: { type: string }
         role:
           type: string
           enum:
@@ -164,8 +231,7 @@ components:
               TRUST_CENTER_OPERATOR,
               EDC_USER_PARTICIPANT,
             ]
-        ehdsParticipantType: { type: string }
-        did: { type: string }
+
     NegotiationRequest:
       type: object
       required: [participantId, counterPartyAddress, assetId]
@@ -198,8 +264,23 @@ components:
               FINALIZED,
               TERMINATED,
             ]
-        contractId: { type: string }
+        "@context": { type: array, items: {} }
+        type: { type: string }
+        assetId: { type: string }
+        contractAgreementId: { type: string }
+        correlationId: { type: string }
         counterPartyAddress: { type: string }
+        counterPartyId: { type: string }
+        protocol: { type: string }
+        callbackAddresses: { type: array, items: { type: object } }
+        createdAt: { type: integer, description: Epoch milliseconds. }
+        source:
+          type: string
+          enum: [controlplane, demo, mock]
+          description: Which of the three merged sources this row came from (#358).
+        openable:
+          type: boolean
+          description: Whether GET /api/negotiations/{id} can serve this row.
     TransferRequest:
       type: object
       required: [participantId, contractId, counterPartyAddress]
@@ -220,7 +301,19 @@ components:
         contractId: { type: string }
         assetId: { type: string }
         transferType: { type: string }
-        counterPartyAddress: { type: string }
+        "@context": { type: array, items: {} }
+        type: { type: string }
+        correlationId: { type: string }
+        callbackAddresses: { type: array, items: { type: object } }
+        dataplaneMetadata: { type: object }
+        stateTimestamp: { type: integer, description: Epoch milliseconds. }
+        source:
+          type: string
+          enum: [controlplane, demo, mock]
+          description: Which of the three merged sources this row came from (#358).
+        openable:
+          type: boolean
+          description: Whether GET /api/transfers/{id} can serve this row.
     Asset:
       type: object
       required: [participantId, assetId, name]
@@ -436,15 +529,14 @@ paths:
   /api/patient:
     get:
       tags: [Patient]
-      summary: List FHIR patients
+      summary: Patient index and cohort statistics
       responses:
         "200":
-          description: Patient list
+          description: Patient index and cohort statistics
           content:
             application/json:
-              schema:
-                type: array
-                items: { $ref: "#/components/schemas/Patient" }
+              schema: { $ref: "#/components/schemas/PatientIndex" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
 
   /api/patient/profile:
     get:
@@ -454,10 +546,15 @@ paths:
         - $ref: "#/components/parameters/PatientId"
       responses:
         "200":
-          description: Patient profile
+          description: >
+            With patientId, that patient's profile. Without it, the index of
+            patients the caller may choose from.
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/PatientProfile" }
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/PatientProfile"
+                  - $ref: "#/components/schemas/PatientProfileIndex"
         "404": { $ref: "#/components/responses/NotFound" }
 
   /api/patient/insights:
@@ -530,15 +627,18 @@ paths:
   /api/credentials:
     get:
       tags: [Credentials]
-      summary: List W3C Verifiable Credentials
+      summary: List W3C Verifiable Credentials held across the dataspace
       responses:
         "200":
           description: Credentials list
           content:
             application/json:
               schema:
-                type: array
-                items: { $ref: "#/components/schemas/Credential" }
+                type: object
+                properties:
+                  credentials:
+                    type: array
+                    items: { $ref: "#/components/schemas/Credential" }
 
   /api/credentials/definitions:
     get:
@@ -756,10 +856,12 @@ paths:
       summary: Current authenticated participant profile
       responses:
         "200":
-          description: Profile
+          description: The CFM tenants this login administers
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/Participant" }
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Tenant" }
         "401": { $ref: "#/components/responses/Unauthorized" }
 
   /api/participants/{id}/credentials:
@@ -787,12 +889,18 @@ paths:
       description: Scoped to the user's organisation; admins see all.
       responses:
         "200":
-          description: Task list
+          description: Task list with per-state counts
           content:
             application/json:
               schema:
-                type: array
-                items: { $ref: "#/components/schemas/Task" }
+                type: object
+                properties:
+                  tasks:
+                    type: array
+                    items: { $ref: "#/components/schemas/Task" }
+                  counts:
+                    type: object
+                    description: How many tasks sit in each state.
 
   /api/trust-center:
     get:
@@ -870,12 +978,45 @@ paths:
           schema: { type: integer, default: 100 }
       responses:
         "200":
-          description: Audit entries
+          description: >
+            The audit trail (EHDS Art. 73), grouped by what is being audited.
+            `type` echoes the filter in effect; `accesslogs` is present when
+            that filter asks for it.
           content:
             application/json:
               schema:
-                type: array
-                items: { $ref: "#/components/schemas/AuditEntry" }
+                type: object
+                properties:
+                  type:
+                    type: string
+                    enum:
+                      [
+                        all,
+                        transfers,
+                        negotiations,
+                        credentials,
+                        accesslogs,
+                        participants,
+                      ]
+                  limit: { type: integer }
+                  filters: { type: object }
+                  summary: { type: object }
+                  transfers:
+                    {
+                      type: array,
+                      items: { $ref: "#/components/schemas/AuditEntry" },
+                    }
+                  negotiations:
+                    {
+                      type: array,
+                      items: { $ref: "#/components/schemas/AuditEntry" },
+                    }
+                  credentials:
+                    {
+                      type: array,
+                      items: { $ref: "#/components/schemas/AuditEntry" },
+                    }
+                  accesslogs: { type: array, items: { type: object } }
         "403": { $ref: "#/components/responses/Forbidden" }
 
   /api/admin/components:
@@ -884,12 +1025,20 @@ paths:
       summary: System component catalog
       responses:
         "200":
-          description: Component list
+          description: Component list with the deployment it was read from
           content:
             application/json:
               schema:
-                type: array
-                items: { $ref: "#/components/schemas/Component" }
+                type: object
+                properties:
+                  timestamp: { type: string, format: date-time }
+                  dockerAvailable: { type: boolean }
+                  metricsSource: { type: string }
+                  deploymentTarget: { type: string }
+                  components:
+                    type: array
+                    items: { $ref: "#/components/schemas/Component" }
+                  participants: { type: array, items: { type: object } }
 
   /api/admin/components/topology:
     get:
@@ -906,12 +1055,24 @@ paths:
         - $ref: "#/components/parameters/ParticipantId"
       responses:
         "200":
-          description: Policy list
+          description: Policies grouped by participant (#367)
           content:
             application/json:
               schema:
-                type: array
-                items: { $ref: "#/components/schemas/OdrlPolicy" }
+                type: object
+                properties:
+                  participants:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        participantId: { type: string }
+                        identity: { type: string }
+                        policies:
+                          type: array
+                          items: { $ref: "#/components/schemas/OdrlPolicy" }
+                  source: { type: string, enum: [edc, neo4j] }
+                  offline: { type: boolean }
     post:
       tags: [Admin]
       summary: Create an ODRL policy

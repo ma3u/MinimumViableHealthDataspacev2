@@ -1,0 +1,11 @@
+# Accepted differences between ui/public/openapi.yaml and the fixtures in
+# ui/public/mock/, checked by scripts/check-openapi-shapes.py.
+#
+# One per line, as "<path> <kind>", where kind is one of:
+#   container        the spec's array/object choice differs from the fixture
+#   required-absent  the spec marks a field required that the fixture lacks
+#   undeclared       the fixture carries a field the spec does not declare
+#
+# Empty on purpose. A line here means a generated client will not match the
+# hub for that endpoint, so prefer fixing the schema. Optional fields a
+# fixture simply does not carry are reported as notes and need no entry.

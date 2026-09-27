@@ -18,7 +18,15 @@
         "did": "did:web:health-dataspace.eu:operator",
         "state": "ACTIVATED"
       }
-    ]
+    ],
+    "provisioningStalled": false,
+    "vpaSummary": {
+      "total": 3,
+      "pending": 0,
+      "pendingTypes": [],
+      "oldestPendingSince": null,
+      "stalled": false
+    }
   },
   {
     "id": "alpha-klinik-id",
@@ -36,7 +44,15 @@
         "did": "did:web:alpha-klinik.de:participant",
         "state": "ACTIVATED"
       }
-    ]
+    ],
+    "provisioningStalled": false,
+    "vpaSummary": {
+      "total": 3,
+      "pending": 0,
+      "pendingTypes": [],
+      "oldestPendingSince": null,
+      "stalled": false
+    }
   },
   {
     "id": "pharmaco-research-id",
@@ -54,7 +70,15 @@
         "did": "did:web:pharmaco.de:research",
         "state": "ACTIVATED"
       }
-    ]
+    ],
+    "provisioningStalled": false,
+    "vpaSummary": {
+      "total": 3,
+      "pending": 0,
+      "pendingTypes": [],
+      "oldestPendingSince": null,
+      "stalled": false
+    }
   },
   {
     "id": "medreg-de-id",
@@ -63,7 +87,7 @@
       "displayName": "MedReg DE",
       "role": "operator",
       "ehdsParticipantType": "health-data-access-body",
-      "organization": "MedReg DE — National Medicines Regulatory Authority",
+      "organization": "MedReg DE \u2014 National Medicines Regulatory Authority",
       "country": "DE"
     },
     "participantProfiles": [
@@ -72,7 +96,15 @@
         "did": "did:web:medreg.de:hdab",
         "state": "ACTIVATED"
       }
-    ]
+    ],
+    "provisioningStalled": false,
+    "vpaSummary": {
+      "total": 3,
+      "pending": 0,
+      "pendingTypes": [],
+      "oldestPendingSince": null,
+      "stalled": false
+    }
   },
   {
     "id": "limburg-mc-id",
@@ -90,16 +122,24 @@
         "did": "did:web:lmc.nl:clinic",
         "state": "ACTIVATED"
       }
-    ]
+    ],
+    "provisioningStalled": false,
+    "vpaSummary": {
+      "total": 3,
+      "pending": 0,
+      "pendingTypes": [],
+      "oldestPendingSince": null,
+      "stalled": false
+    }
   },
   {
     "id": "irs-fr-id",
     "version": 1,
     "properties": {
-      "displayName": "Institut de Recherche Santé",
+      "displayName": "Institut de Recherche Sant\u00e9",
       "role": "operator",
       "ehdsParticipantType": "health-data-access-body",
-      "organization": "Institut de Recherche Santé",
+      "organization": "Institut de Recherche Sant\u00e9",
       "country": "FR"
     },
     "participantProfiles": [
@@ -108,6 +148,14 @@
         "did": "did:web:irs.fr:hdab",
         "state": "ACTIVATED"
       }
-    ]
+    ],
+    "provisioningStalled": false,
+    "vpaSummary": {
+      "total": 3,
+      "pending": 0,
+      "pendingTypes": [],
+      "oldestPendingSince": null,
+      "stalled": false
+    }
   }
 ]
