@@ -465,12 +465,25 @@ req(f, "01 Tenants", "get", f"{B}/api/admin/tenants", mock=True,
 // CI this request passes while request 14 answers 502, which reads as a bug in
 // 14 rather than as "this stack was never given a tenant". Saying the number
 // out loud is what tells the two apart (#375).
-test("captures a tenant id that has participant profiles", function () {
-  const tenants = res.getBody().tenants || [];
-  const withProfiles = tenants.find((t) => (t.participantProfiles || []).length > 0);
-  const pick = withProfiles || tenants[0];
-  if (pick) bru.setVar("tenantId", pick.id);
-  console.log(`[tenants] ${tenants.length} tenant(s), ${tenants.filter((t) => (t.participantProfiles || []).length > 0).length} with participant profiles`);
+// `source` says which backend answered: "cfm" when the Tenant Manager is
+// reachable, "neo4j" when the route backfilled from the graph because it was
+// not. Nothing asserted it, so an unreachable Tenant Manager looked exactly
+// like a working one, and the backfilled rows carry graph-layer did:web ids
+// rather than CFM tenant UUIDs. Request 14 then asked the Tenant Manager for
+// a did:web, got the same unreachable service, and reported 502 as though the
+// route were broken (#380).
+test("the answer says which backend it came from", function () {
+  expect(res.getBody().source, "source").to.be.oneOf(["cfm", "neo4j", "mixed"]);
+});
+test("captures a tenant id only when CFM itself answered", function () {
+  const body = res.getBody();
+  const tenants = body.tenants || [];
+  const withProfiles = tenants.filter((t) => (t.participantProfiles || []).length > 0);
+  console.log(`[tenants] source=${body.source}, ${tenants.length} tenant(s), ${withProfiles.length} with participant profiles`);
+  if (body.source === "cfm") {
+    const pick = withProfiles[0] || tenants[0];
+    if (pick) bru.setVar("tenantId", pick.id);
+  }
 });
 """)
 req(f, "02 Components and their state", "get", f"{B}/api/admin/components", mock=True,
@@ -524,7 +537,7 @@ req(f, "14 The credentials a tenants participants hold", "get",
 // 502 that comes back. That is what it did on CI after #369, which made a
 // missing tenant look like a broken route.
 if (!bru.getVar("tenantId")) {
-  test("SKIPPED: this stack has no CFM tenant, so no participant profiles to read", function () {});
+  test("SKIPPED: the Tenant Manager did not answer request 01, so there is no CFM tenant to read", function () {});
 } else {
   test("the tenant has at least one participant profile", function () {
     expect(res.getStatus()).to.equal(200);
