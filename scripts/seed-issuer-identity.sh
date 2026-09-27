@@ -40,7 +40,15 @@ NET="${COMPOSE_NETWORK:-health-dataspace-edcv}"
 PG_CONTAINER="${PG_CONTAINER:-health-dataspace-postgres}"
 ISSUER_CONTAINER="${ISSUER_CONTAINER:-health-dataspace-issuerservice}"
 VAULT_BOOTSTRAP_CONTAINER="${VAULT_BOOTSTRAP_CONTAINER:-health-dataspace-vault-bootstrap}"
-ISSUER_READY_URL="${ISSUER_READY_URL:-http://localhost:10013/api/check/readiness}"
+# Readiness is taken from the container's own healthcheck, which
+# docker-compose.jad.yml already points at the right place:
+# http://127.0.0.1:10010/api/check/health, INSIDE the container. Port 10010 is
+# not published, so the old host-side probe at localhost:10013 answered 404
+# forever and this wait could never succeed on any machine. It went unnoticed
+# because the step carried continue-on-error; making it hard-fail is what
+# exposed it (#349). ISSUER_HEALTH_URL is the fallback for a container that
+# has no healthcheck defined.
+ISSUER_HEALTH_URL="${ISSUER_HEALTH_URL:-http://127.0.0.1:10010/api/check/readiness}"
 # Seconds to wait for the IssuerService after the restart that loads its
 # identity. Raise it on a slow or loaded host; CI needs more than a laptop.
 ISSUER_RESTART_TIMEOUT="${ISSUER_RESTART_TIMEOUT:-300}"
@@ -139,23 +147,32 @@ docker exec -i "$PG_CONTAINER" psql -v ON_ERROR_STOP=1 -q -U issuer -d issuerser
 if [ "$SKIP_RESTART" = "1" ]; then
   echo -e "  ${YELLOW}~${NC} SKIP_RESTART=1: not restarting ${ISSUER_CONTAINER}"
 else
+  # Ask the container, not the host: see the note on ISSUER_HEALTH_URL above.
+  issuer_ready() {
+    local state
+    state=$(docker inspect "$ISSUER_CONTAINER" \
+      --format '{{if .State.Health}}{{.State.Health.Status}}{{else}}none{{end}}' 2>/dev/null || echo none)
+    case "$state" in
+      healthy) return 0 ;;
+      none) docker exec "$ISSUER_CONTAINER" wget -q --spider "$ISSUER_HEALTH_URL" >/dev/null 2>&1 && return 0 ;;
+    esac
+    return 1
+  }
+
   log "restarting ${ISSUER_CONTAINER} to load the identity"
   docker restart "$ISSUER_CONTAINER" >/dev/null
-  # 120s was enough on a laptop and not on a GitHub runner carrying nineteen
-  # containers: on 2026-09-27 the issuer's records were all written correctly
-  # and only this wait timed out, failing the whole identity seed (#349).
-  # A JVM cold start under that load is the presumed cause, so the wait is
-  # longer and configurable, and says what it saw when it does give up.
   deadline=$(( $(date +%s) + ISSUER_RESTART_TIMEOUT )); ok=0
   while [ "$(date +%s)" -lt "$deadline" ]; do
-    curl -sf --max-time 5 "$ISSUER_READY_URL" >/dev/null 2>&1 && { ok=1; break; }
+    issuer_ready && { ok=1; break; }
     sleep 5
   done
   if [ "$ok" -ne 1 ]; then
-    echo "  ${ISSUER_CONTAINER} state: $(docker inspect "$ISSUER_CONTAINER" --format '{{.State.Status}} (exit {{.State.ExitCode}}, started {{.State.StartedAt}})' 2>/dev/null || echo unknown)" >&2
-    echo "  last lines of its log:" >&2
-    docker logs "$ISSUER_CONTAINER" --tail 15 2>&1 | sed 's/^/    /' >&2
-    die "${ISSUER_CONTAINER} did not become ready at ${ISSUER_READY_URL} within ${ISSUER_RESTART_TIMEOUT}s of the restart"
+    echo "  ${ISSUER_CONTAINER}: $(docker inspect "$ISSUER_CONTAINER" --format '{{.State.Status}}, health {{if .State.Health}}{{.State.Health.Status}}{{else}}none{{end}}, started {{.State.StartedAt}}' 2>/dev/null || echo unknown)" >&2
+    echo "  its last health probe said:" >&2
+    docker inspect "$ISSUER_CONTAINER" \
+      --format '{{if .State.Health}}{{range .State.Health.Log}}{{.Output}}{{end}}{{end}}' 2>/dev/null \
+      | tail -5 | sed 's/^/    /' >&2
+    die "${ISSUER_CONTAINER} did not become healthy within ${ISSUER_RESTART_TIMEOUT}s of the restart"
   fi
 fi
 
