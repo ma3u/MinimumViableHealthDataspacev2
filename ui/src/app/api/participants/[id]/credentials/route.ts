@@ -121,9 +121,15 @@ export async function GET(
 
     return NextResponse.json(results);
   } catch (err) {
+    // Carry the cause, the way /api/admin/policies already does. This route
+    // answers 502 on the CI stack and 200 locally, and the bare message says
+    // only that something upstream refused. The first guess, that CFM had
+    // provisioned no tenant there, was wrong: the collection logs 9 tenants,
+    // all 9 with participant profiles. Without the cause in the body the next
+    // person starts that guessing again from nothing.
     console.error("Failed to get credentials:", err);
     return NextResponse.json(
-      { error: "Failed to get credentials" },
+      { error: "Failed to get credentials", detail: String(err) },
       { status: 502 },
     );
   }
