@@ -526,12 +526,17 @@ services:
   # Only accessible from the Docker network (no host port by default).
   # ---------------------------------------------------------------------------
   neo4j-proxy:
+    # Built from ./services/neo4j-proxy, like the UI (graph-explorer): no image:
+    # line, so compose builds it and the CVE-scan coverage check leaves it to the
+    # source SBOM scan. The digest pin here used to be a 2026-04-11 image (EDC
+    # 0.16 era); by 2026-09-26 it was six months behind its own source and nine
+    # routes it should serve answered 404, taking the hub's /api/federated,
+    # /api/nlq and /api/trust-center to 502 (#349). This is our own code, so
+    # ADR-029 rule 3 applies: its identity is the source it is built from, not a
+    # frozen registry digest. bootstrap-jad.sh brings it up with --build.
     build:
       context: ./services/neo4j-proxy
       dockerfile: Dockerfile
-    # GHCR :latest pinned by digest (built 2026-04-11, EDC 0.16 era — ADR-029);
-    # Phase B of issue #97 replaces this with a versioned rebuild tag.
-    image: ghcr.io/ma3u/health-dataspace/neo4j-proxy:latest@sha256:e64e5706b7ddc1e4f094ca6ea295d1124e73e50988067cb6d90950591f8fd85f
     container_name: health-dataspace-neo4j-proxy
     environment:
       NODE_ENV: "production"

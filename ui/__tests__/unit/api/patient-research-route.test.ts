@@ -163,6 +163,27 @@ describe("/api/patient/research", () => {
       expect(drift).toBeLessThan(5_000);
     });
 
+    it("returns 404 when no programme carries the studyId (#349)", async () => {
+      // The route's MATCH (dp:DataProduct) yields no rows for an unknown study,
+      // so runQuery returns []. It used to answer 200 with a "registered"
+      // message anyway; a consent for a programme that does not exist is a 404.
+      mockRunQuery.mockResolvedValueOnce([]);
+
+      const res = await POST(
+        makeReq("", {
+          method: "POST",
+          body: JSON.stringify({
+            patientId: "p-1",
+            studyId: "does-not-exist",
+            purpose: "RESEARCH",
+          }),
+        }),
+      );
+      expect(res.status).toBe(404);
+      const data = await res.json();
+      expect(data.error).toContain("does-not-exist");
+    });
+
     it("defaults purpose to RESEARCH when not provided", async () => {
       mockRunQuery.mockResolvedValueOnce([{ consentId: "c-default" }]);
 
