@@ -668,6 +668,16 @@ services:
     # Pinned to the WORKING 2026-03-09 manager build (ADR-029). GHCR :latest
     # was overwritten 2026-04-11 by the shared CFM *agent* image, which
     # crash-loops in the manager role — found by the Phase B gate.
+    #
+    # ARM64 ONLY. This digest, and every other image under
+    # ghcr.io/ma3u/health-dataspace/, is a single-arch linux/arm64 manifest.
+    # On an amd64 host (every GitHub runner) compose prints a platform
+    # mismatch, reports "Started", and the process never serves: calls fail
+    # with `TypeError: fetch failed`. So CFM has never run in CI, and
+    # /api/admin/tenants quietly backfills from Neo4j instead. See
+    # docs/gotchas.md (2026-09-28) and #380. An amd64 build exists for Azure
+    # (GOARCH=amd64 from Metaform/cfm-fulcrum); publishing multi-arch tags to
+    # GHCR is what would let CI exercise this path.
     image: ghcr.io/ma3u/health-dataspace/cfm-tmanager:latest@sha256:fd096dc016d319faf85d25489b646d76df7c86c708f18c8facc84f3bbd41fa22
     container_name: health-dataspace-tenant-manager
     volumes:

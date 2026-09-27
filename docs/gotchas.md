@@ -1058,3 +1058,47 @@ and no plain grep for `scripts/` would have found.
 `scripts/check-workflow-paths.py` derives the set rather than listing it, and
 runs in pre-commit. When a workflow starts running something new, add the glob
 the checker asks for instead of assuming the filter is still complete (#364).
+
+## 2026-09-28 — every custom image is arm64-only, so CFM has never run in CI
+
+`/api/participants/<tenant>/credentials` answered 200 locally and 502 in CI
+for as long as anyone had looked. The cause is not the route.
+
+Every image in `ghcr.io/ma3u/health-dataspace/` is a **single-arch linux/arm64
+manifest**, built on an Apple Silicon machine and pushed without a second
+platform:
+
+```
+cfm-tmanager  cfm-pmanager  cfm-edcvagent  cfm-kcagent  cfm-obagent
+cfm-regagent  jad-controlplane  jad-dataplane  jad-identity-hub
+jad-issuerservice  neo4j-proxy        all linux/arm64
+```
+
+GitHub runners are amd64. Compose says so and carries on:
+
+```
+tenant-manager The requested image's platform (linux/arm64) does not match
+the detected host platform (linux/amd64/v4) and no specific platform was
+requested
+Container health-dataspace-tenant-manager  Started
+```
+
+"Started" is not "running": the Tenant Manager never serves, and calls to it
+fail with `TypeError: fetch failed` after a five-second timeout.
+
+Two things then hid it. `/api/admin/tenants` backfills from Neo4j when CFM is
+unreachable, so it answered 9 tenants and looked healthy; those rows carry
+graph-layer `did:web` ids rather than CFM tenant UUIDs. And nothing asserted
+the `source` field that says which backend replied. A whole subsystem was
+absent from every CI run and the suite reported green.
+
+An amd64 build does exist: `docs/azure-deployment-plan.md` records
+`GOARCH=amd64 go build` from `Metaform/cfm-fulcrum`, pushed to ACR for the
+Azure deployment. It was never pushed to GHCR, which is where compose pulls
+from. Publishing multi-arch tags there is what would actually fix it.
+
+Until then: the collection asserts `source` and captures a CFM tenant id only
+when CFM itself answered (#380), so a run states the absence instead of
+implying the opposite. When a service behaves differently in CI than on a
+laptop, check `docker image inspect --format '{{.Architecture}}'` before
+anything else.
