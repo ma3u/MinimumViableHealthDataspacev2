@@ -167,11 +167,23 @@ else
     sleep 5
   done
   if [ "$ok" -ne 1 ]; then
-    echo "  ${ISSUER_CONTAINER}: $(docker inspect "$ISSUER_CONTAINER" --format '{{.State.Status}}, health {{if .State.Health}}{{.State.Health.Status}}{{else}}none{{end}}, started {{.State.StartedAt}}' 2>/dev/null || echo unknown)" >&2
+    # Say why, not just that. On 2026-09-27 this failed on main with nothing but
+    # four `wget: server returned error: HTTP/1.1 404` lines, which is the health
+    # probe's own output and says only that the endpoint was not up yet. The
+    # container had been healthy BEFORE the restart, so the interesting evidence
+    # is in the service's own log and its restart count, neither of which was
+    # printed. Uninformative failure output turns a ten-minute diagnosis into an
+    # afternoon; print the three things that separate the likely causes.
+    echo "  ${ISSUER_CONTAINER}: $(docker inspect "$ISSUER_CONTAINER" --format '{{.State.Status}}, health {{if .State.Health}}{{.State.Health.Status}}{{else}}none{{end}}, restarts {{.RestartCount}}, exit {{.State.ExitCode}}, started {{.State.StartedAt}}' 2>/dev/null || echo unknown)" >&2
     echo "  its last health probe said:" >&2
     docker inspect "$ISSUER_CONTAINER" \
       --format '{{if .State.Health}}{{range .State.Health.Log}}{{.Output}}{{end}}{{end}}' 2>/dev/null \
       | tail -5 | sed 's/^/    /' >&2
+    echo "  the last 40 lines it logged since the restart:" >&2
+    docker logs --tail 40 "$ISSUER_CONTAINER" 2>&1 | sed 's/^/    /' >&2 || true
+    echo "  the ports it is listening on:" >&2
+    docker exec "$ISSUER_CONTAINER" sh -c \
+      '(netstat -ltn 2>/dev/null || ss -ltn 2>/dev/null) | tail -12' 2>&1 | sed 's/^/    /' >&2 || true
     die "${ISSUER_CONTAINER} did not become healthy within ${ISSUER_RESTART_TIMEOUT}s of the restart"
   fi
 fi
