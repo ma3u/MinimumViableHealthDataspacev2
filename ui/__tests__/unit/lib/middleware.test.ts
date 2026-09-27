@@ -193,11 +193,13 @@ describe("middleware — public paths", () => {
     vi.clearAllMocks();
   });
 
+  // "/patient" used to be here. #357 gated it: /api/patient, the page's only
+  // data call, now refuses an anonymous caller, so leaving the page public
+  // would show an empty shell instead of sending the visitor to sign in.
   const publicPaths = [
     "/",
     "/graph",
     "/catalog",
-    "/patient",
     "/analytics",
     "/about",
     "/some-random",
@@ -210,6 +212,11 @@ describe("middleware — public paths", () => {
       // getToken should not even be called for public paths
       expect(getTokenMock).not.toHaveBeenCalled();
     });
+  });
+
+  it("sends an anonymous visitor on /patient to sign in (#357)", async () => {
+    const res = await invoke("/patient", null);
+    expect(res.headers.get("location")).toContain("/auth/signin");
   });
 });
 
