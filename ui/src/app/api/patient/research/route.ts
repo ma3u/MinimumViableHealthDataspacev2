@@ -134,8 +134,20 @@ export async function POST(req: Request) {
     { patientId, studyId, purpose },
   );
 
+  // The MATCH above yields no rows when no DataProduct carries this studyId, so
+  // the MERGE never runs and nothing is written. This route used to answer 200
+  // with a "registered" message anyway, telling a patient their consent was
+  // recorded when it was not (#349). A consent for a study that does not exist
+  // is a 404, not a silent success.
+  if (result.length === 0 || !result[0]?.consentId) {
+    return NextResponse.json(
+      { error: `No research programme found for studyId '${studyId}'` },
+      { status: 404 },
+    );
+  }
+
   return NextResponse.json({
-    consentId: result[0]?.consentId,
+    consentId: result[0].consentId,
     patientId,
     studyId,
     purpose,

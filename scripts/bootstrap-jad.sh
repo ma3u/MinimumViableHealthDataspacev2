@@ -201,8 +201,11 @@ preflight() {
 pull_images() {
   log "Pulling JAD container images..."
   cd "$PROJECT_DIR"
-  docker compose $COMPOSE_FILES pull
-  ok "All images pulled"
+  # --ignore-buildable: the proxy and the UI build from in-repo source (ADR-029
+  # rule 3); only the third-party JAD/CFM images are pulled. Without this, pull
+  # errors trying to fetch the local-only mvhd-neo4j-proxy:dev tag (#349).
+  docker compose $COMPOSE_FILES pull --ignore-buildable
+  ok "All third-party images pulled"
 }
 
 # ---------------------------------------------------------------------------
@@ -270,7 +273,9 @@ start_stack() {
   ok "EDC-V / DCore services are healthy"
 
   log "=== Phase 4b: Starting Neo4j Query Proxy ==="
-  docker compose $COMPOSE_FILES up -d neo4j-proxy
+  # --build: the proxy is our code; build it from ./services/neo4j-proxy so the
+  # running container matches the source, not a stale image (#349, ADR-029 r3).
+  docker compose $COMPOSE_FILES up -d --build neo4j-proxy
   wait_for_service "Neo4j Query Proxy" "http://localhost:9090/health" 15 3
   ok "Neo4j Query Proxy is healthy"
 
