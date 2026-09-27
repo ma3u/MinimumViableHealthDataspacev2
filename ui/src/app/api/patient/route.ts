@@ -75,7 +75,17 @@ export async function GET(req: Request) {
     const { searchParams } = new URL(req.url);
     const patientId = searchParams.get("patientId") ?? "";
 
-    // Check session for PATIENT role restriction
+    // Deliberately public, decided in #357. `/patient` is the one patient page
+    // that middleware.ts leaves out of PROTECTED_PATHS, so a visitor who has
+    // not signed in can open it, and it calls this route. Gating it would
+    // blank that page. Every record behind it is synthetic and the same index
+    // and profiles ship as static fixtures on GitHub Pages, so a visitor can
+    // already download what this answers.
+    //
+    // The session narrows rather than admits: a PATIENT sees only their own
+    // record (EHDS Art. 3 / GDPR Art. 15), and anyone else, signed in or not,
+    // sees the demo cohort. If this route ever serves a real record, that
+    // decision has to be revisited before it does.
     const session = await getServerSession(authOptions);
     const roles = (session as { roles?: string[] } | null)?.roles ?? [];
     const username = session?.user?.name ?? "";

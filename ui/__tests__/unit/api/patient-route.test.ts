@@ -131,3 +131,34 @@ describe("GET /api/patient as a PATIENT", () => {
     expect(res.status).toBe(403);
   });
 });
+
+/**
+ * The decision recorded in #357: this route answers a caller with no session,
+ * because `/patient` is the one patient page middleware leaves public and it
+ * calls this route. What must not drift is the shape of that answer.
+ */
+describe("GET /api/patient with no session", () => {
+  beforeEach(() => {
+    mockRunQuery.mockReset();
+    vi.mocked(getServerSession).mockResolvedValue(null);
+  });
+
+  it("answers the anonymous caller rather than rejecting them", async () => {
+    mockRunQuery
+      .mockResolvedValueOnce(PATIENTS) // all patients by name
+      .mockResolvedValueOnce(STATS); // cohort stats
+    const res = await GET(new Request("http://localhost/api/patient"));
+    expect(res.status).toBe(200);
+  });
+
+  it("gives the demo cohort, never one person's own record", async () => {
+    mockRunQuery.mockResolvedValueOnce(PATIENTS).mockResolvedValueOnce(STATS);
+    const res = await GET(new Request("http://localhost/api/patient"));
+    const data = await res.json();
+    // `restricted` is what the page keys its own-record view off. An anonymous
+    // caller must never be handed that view, and must see every demo patient.
+    expect(data.restricted).not.toBe(true);
+    expect(data.patients).toEqual(PATIENTS);
+    expect(data.patients.length).toBeGreaterThan(1);
+  });
+});

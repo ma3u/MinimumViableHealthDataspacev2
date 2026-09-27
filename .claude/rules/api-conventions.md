@@ -104,6 +104,20 @@ Roles are injected into the JWT by the Keycloak callback in `ui/src/lib/auth.ts`
 | `PATIENT`               | My Health     | `/patient/profile`, `/patient/research`, `/patient/insights` · Graph: "My Health"                           |
 | `EDC_USER_PARTICIPANT`  | Exchange      | Base authenticated user (implied by all above)                                                              |
 
+### The one route that is public on purpose
+
+`/api/patient` answers a caller with no session, and that is intended (#357).
+`/patient` is the one patient page middleware leaves out of `PROTECTED_PATHS`,
+so an anonymous visitor can open it, and the page calls that route. Every
+record behind it is synthetic and the same index and profiles ship as static
+fixtures on GitHub Pages.
+
+The session there narrows rather than admits: a `PATIENT` sees only their own
+record (EHDS Art. 3, GDPR Art. 15), and anyone else, signed in or not, sees the
+demo cohort. `bruno/MVHDv2/09 Access control/05` asserts both halves, the 200
+and the narrowing. Every other route reading a session enforces it through
+`requireAuth()`.
+
 ## Data Models
 
 ### FHIR R4 node (Neo4j)
