@@ -30,6 +30,11 @@ BRUNO_BIN="${BRUNO_BIN:-npx --yes @usebruno/cli}"
 UI_CONTAINER="${BRUNO_UI_CONTAINER:-health-dataspace-ui}"
 STAMP="$(date -u +%Y%m%dT%H%M%SZ)"
 mkdir -p "$REPORT_DIR"
+# Absolutise before anything cd's into the collection dir to run bru: a relative
+# BRUNO_REPORT_DIR (as compliance.yml passes) would otherwise resolve against
+# bruno/MVHDv2 and the reports, and the JUnit/JSON the baseline gate reads, would
+# land there instead of the workspace, so the gate saw "no report produced" (#349).
+REPORT_DIR="$(cd "$REPORT_DIR" && pwd)"
 
 case "$ENV_NAME" in
   Local) COOKIE_NAME=next-auth.session-token ;;
