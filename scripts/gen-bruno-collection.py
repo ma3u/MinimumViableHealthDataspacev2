@@ -631,14 +631,23 @@ req(f, "04 No session, the audit trail (401)", "get", f"{B}/api/admin/audit", pe
     asserts=["res.status: eq 401"])
 req(f, "05 No session, the patient index", "get", f"{B}/api/patient", persona="anon",
     tests="""
-// Known red, #349. /api/patient calls getServerSession and then never acts on
-// a null session, so an anonymous caller receives the patient index and the
-// cohort statistics. The data is synthetic and the same index is published as a
-// fixture on GitHub Pages, so nothing real is exposed, but it is the one route
-// in the inventory that reads a session without enforcing it and the role
-// matrix says it is gated. The assertion states what the matrix claims.
-test("the patient index needs a session", function () {
-  expect(res.getStatus()).to.equal(401);
+// Deliberately public, decided in #357. /patient is the one patient page that
+// middleware.ts leaves out of PROTECTED_PATHS, so a visitor who has not signed
+// in can open it, and it calls this route. Every record behind it is synthetic
+// and the same index is published as a static fixture on GitHub Pages, so a
+// visitor can already download it. The session narrows rather than admits: a
+// PATIENT sees only their own record, anyone else sees the demo cohort.
+//
+// This asserts the narrowing still happens, not merely that the call answers:
+// an anonymous caller must not be handed a signed-in patient's own record.
+test("the patient index is public", function () {
+  expect(res.getStatus()).to.equal(200);
+});
+test("an anonymous caller gets the cohort, not one person's record", function () {
+  const body = res.getBody();
+  expect(body).to.be.an("object");
+  expect(body.patients, "patients").to.be.an("array");
+  expect(body.patients.length, "more than one patient").to.be.above(1);
 });
 """)
 req(f, "06 Data user cannot read a patient record (403)", "get",
