@@ -108,7 +108,13 @@ describe("GET /api/admin/policies", () => {
   it("should fall back to Neo4j when EDC is offline (no participantId)", async () => {
     mockManagement.mockRejectedValue(new Error("ECONNREFUSED"));
     mockRunQuery.mockResolvedValue([
-      { policy: { id: "pol-neo4j", participantName: "AlphaKlinik Berlin" } },
+      {
+        policy: {
+          id: "pol-neo4j",
+          participantId: "ctx-1",
+          participantName: "AlphaKlinik Berlin",
+        },
+      },
     ]);
 
     const req = new NextRequest("http://localhost:3000/api/admin/policies");
@@ -118,8 +124,43 @@ describe("GET /api/admin/policies", () => {
     expect(res.status).toBe(200);
     expect(data.source).toBe("neo4j");
     expect(data.offline).toBe(true);
-    expect(data.policies).toHaveLength(1);
-    expect(data.policies[0].id).toBe("pol-neo4j");
+    // The fallback answers in the shape the EDC path does, grouped by
+    // participant, so /admin/policies is not blank when the control plane is
+    // the thing that is down.
+    expect(data.participants).toHaveLength(1);
+    expect(data.participants[0].participantId).toBe("ctx-1");
+    expect(data.participants[0].identity).toBe("AlphaKlinik Berlin");
+    expect(data.participants[0].policies).toHaveLength(1);
+    expect(data.participants[0].policies[0].id).toBe("pol-neo4j");
+  });
+
+  it("groups the fallback rows by participant", async () => {
+    mockManagement.mockRejectedValue(new Error("ECONNREFUSED"));
+    mockRunQuery.mockResolvedValue([
+      { policy: { id: "a", participantId: "ctx-1", participantName: "One" } },
+      { policy: { id: "b", participantId: "ctx-2", participantName: "Two" } },
+      { policy: { id: "c", participantId: "ctx-1", participantName: "One" } },
+    ]);
+
+    const res = await GET(
+      new NextRequest("http://localhost:3000/api/admin/policies"),
+    );
+    const data = await res.json();
+
+    expect(data.participants).toHaveLength(2);
+    const byId = Object.fromEntries(
+      data.participants.map((g: { participantId: string }) => [
+        g.participantId,
+        g,
+      ]),
+    );
+    expect(byId["ctx-1"].policies.map((p: { id: string }) => p.id)).toEqual([
+      "a",
+      "c",
+    ]);
+    expect(byId["ctx-2"].policies.map((p: { id: string }) => p.id)).toEqual([
+      "b",
+    ]);
   });
 
   it("should fall back to Neo4j with participantId filter", async () => {
@@ -149,7 +190,8 @@ describe("GET /api/admin/policies", () => {
     const data = await res.json();
 
     expect(res.status).toBe(200);
-    expect(data.policies).toEqual([]);
+    // Still the grouped shape, so a caller never has to test which key is set.
+    expect(data.participants).toEqual([]);
     expect(data.source).toBe("neo4j");
   });
 
