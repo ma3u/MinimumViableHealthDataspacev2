@@ -16,13 +16,11 @@ headers {
 
 tests {
   if (!bru.getVar("negotiationId")) {
-    test("SKIPPED: the hub listed no negotiation to open", function () {});
+    test("SKIPPED: this stack holds no control-plane negotiation to open", function () {});
   } else {
-    // Known red, #349. The list in request 08 merges rows the control plane holds
-    // with demo and bundled-mock rows; this route asks the control plane alone, so
-    // a row that came from the mock file answers 502. A person looking at the list
-    // cannot tell which rows they may open, which is the defect.
-    test("a row the hub listed can be opened", function () {
+    // Only rows the control plane holds are captured now (#358), so this must
+    // open. A 502 here means the list marked a row openable that is not.
+    test("a row marked openable can be opened", function () {
       expect(res.getStatus()).to.equal(200);
     });
   }

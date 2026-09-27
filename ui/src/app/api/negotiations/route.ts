@@ -3,6 +3,7 @@ import { DSP_PROTOCOL } from "@/lib/dsp-protocol";
 import { edcClient, EDC_CONTEXT } from "@/lib/edc";
 import { requireAuth, isAuthError } from "@/lib/auth-guard";
 import { recordDemo, listDemo } from "@/lib/demo-records";
+import { tagRows } from "@/lib/row-provenance";
 import { promises as fs } from "fs";
 import path from "path";
 
@@ -215,7 +216,14 @@ export async function GET(req: NextRequest) {
   const deduped = mockNegotiations.filter(
     (m) => !taken.has((m as Record<string, unknown>)["@id"]),
   );
-  const merged = [...demoNegotiations, ...realNegotiations, ...deduped];
+  // Each row says where it came from and whether the detail route can serve
+  // it: the list merges three sources, the detail route asks only the control
+  // plane, and without this a person cannot tell which rows 502 (#358).
+  const merged = [
+    ...tagRows(demoNegotiations, "demo"),
+    ...tagRows(realNegotiations, "controlplane"),
+    ...tagRows(deduped, "mock"),
+  ];
 
   return NextResponse.json(merged);
 }

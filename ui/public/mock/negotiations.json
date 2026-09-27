@@ -12,7 +12,9 @@
     "assetId": "fhir-patient-search",
     "contractAgreementId": "d8aba283-5386-4bd7-994f-f9527785f37e",
     "correlationId": "0d6bfe34-9222-4fa0-8a5d-3d53264643a7",
-    "@context": ["https://w3id.org/edc/connector/management/v2"]
+    "@context": ["https://w3id.org/edc/connector/management/v2"],
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "ContractNegotiation",
@@ -27,7 +29,9 @@
     "assetId": "fhir-observation-bundle",
     "contractAgreementId": "87d86602-5229-4b30-9b73-c83c3b9b9259",
     "correlationId": "82a5d73d-43aa-4455-b7f3-fc8ae6bdfc08",
-    "@context": ["https://w3id.org/edc/connector/management/v2"]
+    "@context": ["https://w3id.org/edc/connector/management/v2"],
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "ContractNegotiation",
@@ -39,7 +43,9 @@
     "counterPartyAddress": "https://lmc.nl/dsp/2025-1",
     "assetId": "fhir-cohort-bundle",
     "contractAgreementId": "agreement-fhir-cohort-bundle-001",
-    "createdAt": 1774029718859
+    "createdAt": 1774029718859,
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "ContractNegotiation",
@@ -51,7 +57,9 @@
     "counterPartyAddress": "https://lmc.nl/dsp/2025-1",
     "assetId": "fhir-patient-everything",
     "contractAgreementId": "agreement-fhir-patient-everything-002",
-    "createdAt": 1774004784496
+    "createdAt": 1774004784496,
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "ContractNegotiation",
@@ -63,7 +71,9 @@
     "counterPartyAddress": "https://alpha-klinik.de/dsp/2025-1",
     "assetId": "fhir-care-plan",
     "contractAgreementId": "agreement-fhir-care-plan-003",
-    "createdAt": 1774011994949
+    "createdAt": 1774011994949,
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "ContractNegotiation",
@@ -75,7 +85,9 @@
     "counterPartyAddress": "https://lmc.nl/dsp/2025-1",
     "assetId": "fhir-immunization-record",
     "contractAgreementId": "agreement-fhir-immunization-record-004",
-    "createdAt": 1773992659735
+    "createdAt": 1773992659735,
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "ContractNegotiation",
@@ -87,7 +99,9 @@
     "counterPartyAddress": "https://alpha-klinik.de/dsp/2025-1",
     "assetId": "fhir-procedure-bundle",
     "contractAgreementId": "agreement-fhir-procedure-bundle-005",
-    "createdAt": 1774026139844
+    "createdAt": 1774026139844,
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "ContractNegotiation",
@@ -99,7 +113,9 @@
     "counterPartyAddress": "https://alpha-klinik.de/dsp/2025-1",
     "assetId": "fhir-allergy-intolerance",
     "contractAgreementId": "agreement-fhir-allergy-intolerance-006",
-    "createdAt": 1774023779884
+    "createdAt": 1774023779884,
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "ContractNegotiation",
@@ -111,7 +127,9 @@
     "counterPartyAddress": "https://lmc.nl/dsp/2025-1",
     "assetId": "fhir-procedure-bundle",
     "contractAgreementId": "agreement-fhir-procedure-bundle-007",
-    "createdAt": 1773996614160
+    "createdAt": 1773996614160,
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "ContractNegotiation",
@@ -123,7 +141,9 @@
     "counterPartyAddress": "https://alpha-klinik.de/dsp/2025-1",
     "assetId": "fhir-diagnostic-report",
     "contractAgreementId": "agreement-fhir-diagnostic-report-008",
-    "createdAt": 1774020127658
+    "createdAt": 1774020127658,
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "ContractNegotiation",
@@ -135,7 +155,9 @@
     "counterPartyAddress": "https://lmc.nl/dsp/2025-1",
     "assetId": "fhir-observation-bundle",
     "contractAgreementId": "agreement-fhir-observation-bundle-009",
-    "createdAt": 1773999130604
+    "createdAt": 1773999130604,
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "ContractNegotiation",
@@ -147,7 +169,9 @@
     "counterPartyAddress": "https://lmc.nl/dsp/2025-1",
     "assetId": "fhir-immunization-record",
     "contractAgreementId": "agreement-fhir-immunization-record-010",
-    "createdAt": 1774019559388
+    "createdAt": 1774019559388,
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "ContractNegotiation",
@@ -159,7 +183,9 @@
     "counterPartyAddress": "https://alpha-klinik.de/dsp/2025-1",
     "assetId": "fhir-condition-list",
     "contractAgreementId": "agreement-fhir-condition-list-011",
-    "createdAt": 1774004617418
+    "createdAt": 1774004617418,
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "ContractNegotiation",
@@ -171,7 +197,9 @@
     "counterPartyAddress": "https://lmc.nl/dsp/2025-1",
     "assetId": "fhir-observation-bundle",
     "contractAgreementId": "agreement-fhir-observation-bundle-012",
-    "createdAt": 1774022505372
+    "createdAt": 1774022505372,
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "ContractNegotiation",
@@ -183,7 +211,9 @@
     "counterPartyAddress": "https://lmc.nl/dsp/2025-1",
     "assetId": "fhir-procedure-bundle",
     "contractAgreementId": "agreement-fhir-procedure-bundle-013",
-    "createdAt": 1774005756308
+    "createdAt": 1774005756308,
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "ContractNegotiation",
@@ -195,7 +225,9 @@
     "counterPartyAddress": "https://lmc.nl/dsp/2025-1",
     "assetId": "fhir-cohort-bundle",
     "contractAgreementId": "agreement-fhir-cohort-bundle-014",
-    "createdAt": 1774014028441
+    "createdAt": 1774014028441,
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "ContractNegotiation",
@@ -207,7 +239,9 @@
     "counterPartyAddress": "https://lmc.nl/dsp/2025-1",
     "assetId": "fhir-diagnostic-report",
     "contractAgreementId": "agreement-fhir-diagnostic-report-015",
-    "createdAt": 1774004765492
+    "createdAt": 1774004765492,
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "ContractNegotiation",
@@ -219,7 +253,9 @@
     "counterPartyAddress": "https://alpha-klinik.de/dsp/2025-1",
     "assetId": "fhir-patient-search",
     "contractAgreementId": "agreement-fhir-patient-search-016",
-    "createdAt": 1773990298267
+    "createdAt": 1773990298267,
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "ContractNegotiation",
@@ -231,7 +267,9 @@
     "counterPartyAddress": "https://lmc.nl/dsp/2025-1",
     "assetId": "fhir-cohort-bundle",
     "contractAgreementId": "agreement-fhir-cohort-bundle-017",
-    "createdAt": 1774009970435
+    "createdAt": 1774009970435,
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "ContractNegotiation",
@@ -243,7 +281,9 @@
     "counterPartyAddress": "https://lmc.nl/dsp/2025-1",
     "assetId": "fhir-condition-list",
     "contractAgreementId": "agreement-fhir-condition-list-018",
-    "createdAt": 1774022564369
+    "createdAt": 1774022564369,
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "ContractNegotiation",
@@ -255,7 +295,9 @@
     "counterPartyAddress": "https://lmc.nl/dsp/2025-1",
     "assetId": "fhir-cohort-bundle",
     "contractAgreementId": "agreement-fhir-cohort-bundle-019",
-    "createdAt": 1774001128011
+    "createdAt": 1774001128011,
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "ContractNegotiation",
@@ -267,7 +309,9 @@
     "counterPartyAddress": "https://alpha-klinik.de/dsp/2025-1",
     "assetId": "fhir-medication-request",
     "contractAgreementId": "agreement-fhir-medication-request-020",
-    "createdAt": 1774018563198
+    "createdAt": 1774018563198,
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "ContractNegotiation",
@@ -279,7 +323,9 @@
     "counterPartyAddress": "https://alpha-klinik.de/dsp/2025-1",
     "assetId": "fhir-procedure-bundle",
     "contractAgreementId": "agreement-fhir-procedure-bundle-021",
-    "createdAt": 1774014545424
+    "createdAt": 1774014545424,
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "ContractNegotiation",
@@ -291,7 +337,9 @@
     "counterPartyAddress": "https://lmc.nl/dsp/2025-1",
     "assetId": "fhir-cohort-bundle",
     "contractAgreementId": "agreement-fhir-cohort-bundle-022",
-    "createdAt": 1774022437626
+    "createdAt": 1774022437626,
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "ContractNegotiation",
@@ -303,7 +351,9 @@
     "counterPartyAddress": "https://lmc.nl/dsp/2025-1",
     "assetId": "fhir-patient-everything",
     "contractAgreementId": "agreement-fhir-patient-everything-023",
-    "createdAt": 1774004775344
+    "createdAt": 1774004775344,
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "ContractNegotiation",
@@ -315,7 +365,9 @@
     "counterPartyAddress": "https://lmc.nl/dsp/2025-1",
     "assetId": "fhir-immunization-record",
     "contractAgreementId": "agreement-fhir-immunization-record-024",
-    "createdAt": 1774029944526
+    "createdAt": 1774029944526,
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "ContractNegotiation",
@@ -327,7 +379,9 @@
     "counterPartyAddress": "https://alpha-klinik.de/dsp/2025-1",
     "assetId": "fhir-observation-bundle",
     "contractAgreementId": "agreement-fhir-observation-bundle-025",
-    "createdAt": 1774014395260
+    "createdAt": 1774014395260,
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "ContractNegotiation",
@@ -339,7 +393,9 @@
     "counterPartyAddress": "https://lmc.nl/dsp/2025-1",
     "assetId": "fhir-cohort-bundle",
     "contractAgreementId": "agreement-fhir-cohort-bundle-026",
-    "createdAt": 1773999610614
+    "createdAt": 1773999610614,
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "ContractNegotiation",
@@ -351,7 +407,9 @@
     "counterPartyAddress": "https://lmc.nl/dsp/2025-1",
     "assetId": "fhir-condition-list",
     "contractAgreementId": "agreement-fhir-condition-list-027",
-    "createdAt": 1774015409689
+    "createdAt": 1774015409689,
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "ContractNegotiation",
@@ -363,7 +421,9 @@
     "counterPartyAddress": "https://lmc.nl/dsp/2025-1",
     "assetId": "fhir-patient-everything",
     "contractAgreementId": "agreement-fhir-patient-everything-028",
-    "createdAt": 1774003196082
+    "createdAt": 1774003196082,
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "ContractNegotiation",
@@ -375,7 +435,9 @@
     "counterPartyAddress": "https://alpha-klinik.de/dsp/2025-1",
     "assetId": "fhir-care-plan",
     "contractAgreementId": "agreement-fhir-care-plan-029",
-    "createdAt": 1773992500052
+    "createdAt": 1773992500052,
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "ContractNegotiation",
@@ -387,7 +449,9 @@
     "counterPartyAddress": "https://lmc.nl/dsp/2025-1",
     "assetId": "fhir-immunization-record",
     "contractAgreementId": "agreement-fhir-immunization-record-030",
-    "createdAt": 1774021068151
+    "createdAt": 1774021068151,
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "ContractNegotiation",
@@ -399,7 +463,9 @@
     "counterPartyAddress": "https://alpha-klinik.de/dsp/2025-1",
     "assetId": "fhir-allergy-intolerance",
     "contractAgreementId": "agreement-fhir-allergy-intolerance-031",
-    "createdAt": 1774014461825
+    "createdAt": 1774014461825,
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "ContractNegotiation",
@@ -411,7 +477,9 @@
     "counterPartyAddress": "https://alpha-klinik.de/dsp/2025-1",
     "assetId": "fhir-allergy-intolerance",
     "contractAgreementId": "agreement-fhir-allergy-intolerance-032",
-    "createdAt": 1774015348263
+    "createdAt": 1774015348263,
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "ContractNegotiation",
@@ -423,7 +491,9 @@
     "counterPartyAddress": "https://alpha-klinik.de/dsp/2025-1",
     "assetId": "fhir-condition-list",
     "contractAgreementId": "agreement-fhir-condition-list-033",
-    "createdAt": 1774004442765
+    "createdAt": 1774004442765,
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "ContractNegotiation",
@@ -435,7 +505,9 @@
     "counterPartyAddress": "https://lmc.nl/dsp/2025-1",
     "assetId": "fhir-procedure-bundle",
     "contractAgreementId": "agreement-fhir-procedure-bundle-034",
-    "createdAt": 1774009243934
+    "createdAt": 1774009243934,
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "ContractNegotiation",
@@ -447,7 +519,9 @@
     "counterPartyAddress": "https://lmc.nl/dsp/2025-1",
     "assetId": "fhir-patient-search",
     "contractAgreementId": "agreement-fhir-patient-search-035",
-    "createdAt": 1773993909542
+    "createdAt": 1773993909542,
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "ContractNegotiation",
@@ -459,7 +533,9 @@
     "counterPartyAddress": "https://alpha-klinik.de/dsp/2025-1",
     "assetId": "fhir-condition-list",
     "contractAgreementId": "agreement-fhir-condition-list-036",
-    "createdAt": 1773993752523
+    "createdAt": 1773993752523,
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "ContractNegotiation",
@@ -471,7 +547,9 @@
     "counterPartyAddress": "https://alpha-klinik.de/dsp/2025-1",
     "assetId": "fhir-condition-list",
     "contractAgreementId": "agreement-fhir-condition-list-037",
-    "createdAt": 1774022982788
+    "createdAt": 1774022982788,
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "ContractNegotiation",
@@ -483,7 +561,9 @@
     "counterPartyAddress": "https://alpha-klinik.de/dsp/2025-1",
     "assetId": "fhir-allergy-intolerance",
     "contractAgreementId": "agreement-fhir-allergy-intolerance-038",
-    "createdAt": 1774030402688
+    "createdAt": 1774030402688,
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "ContractNegotiation",
@@ -495,7 +575,9 @@
     "counterPartyAddress": "https://alpha-klinik.de/dsp/2025-1",
     "assetId": "fhir-observation-bundle",
     "contractAgreementId": "agreement-fhir-observation-bundle-039",
-    "createdAt": 1774006399139
+    "createdAt": 1774006399139,
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "ContractNegotiation",
@@ -507,7 +589,9 @@
     "counterPartyAddress": "https://alpha-klinik.de/dsp/2025-1",
     "assetId": "fhir-care-plan",
     "contractAgreementId": "agreement-fhir-care-plan-040",
-    "createdAt": 1774031590041
+    "createdAt": 1774031590041,
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "ContractNegotiation",
@@ -519,7 +603,9 @@
     "counterPartyAddress": "https://lmc.nl/dsp/2025-1",
     "assetId": "fhir-diagnostic-report",
     "contractAgreementId": "agreement-fhir-diagnostic-report-041",
-    "createdAt": 1773995289880
+    "createdAt": 1773995289880,
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "ContractNegotiation",
@@ -531,7 +617,9 @@
     "counterPartyAddress": "https://alpha-klinik.de/dsp/2025-1",
     "assetId": "fhir-patient-search",
     "contractAgreementId": "agreement-fhir-patient-search-042",
-    "createdAt": 1773997750570
+    "createdAt": 1773997750570,
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "ContractNegotiation",
@@ -543,7 +631,9 @@
     "counterPartyAddress": "https://alpha-klinik.de/dsp/2025-1",
     "assetId": "fhir-care-plan",
     "contractAgreementId": "agreement-fhir-care-plan-043",
-    "createdAt": 1774024301102
+    "createdAt": 1774024301102,
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "ContractNegotiation",
@@ -555,7 +645,9 @@
     "counterPartyAddress": "https://alpha-klinik.de/dsp/2025-1",
     "assetId": "fhir-care-plan",
     "contractAgreementId": "agreement-fhir-care-plan-044",
-    "createdAt": 1774012464713
+    "createdAt": 1774012464713,
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "ContractNegotiation",
@@ -567,7 +659,9 @@
     "counterPartyAddress": "https://alpha-klinik.de/dsp/2025-1",
     "assetId": "fhir-encounter-history",
     "contractAgreementId": "agreement-fhir-encounter-history-045",
-    "createdAt": 1774008464810
+    "createdAt": 1774008464810,
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "ContractNegotiation",
@@ -579,7 +673,9 @@
     "counterPartyAddress": "https://lmc.nl/dsp/2025-1",
     "assetId": "fhir-cohort-bundle",
     "contractAgreementId": "agreement-fhir-cohort-bundle-046",
-    "createdAt": 1774011233883
+    "createdAt": 1774011233883,
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "ContractNegotiation",
@@ -591,7 +687,9 @@
     "counterPartyAddress": "https://alpha-klinik.de/dsp/2025-1",
     "assetId": "fhir-allergy-intolerance",
     "contractAgreementId": "agreement-fhir-allergy-intolerance-047",
-    "createdAt": 1773999467678
+    "createdAt": 1773999467678,
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "ContractNegotiation",
@@ -603,7 +701,9 @@
     "counterPartyAddress": "https://alpha-klinik.de/dsp/2025-1",
     "assetId": "fhir-patient-search",
     "contractAgreementId": "agreement-fhir-patient-search-048",
-    "createdAt": 1774014939778
+    "createdAt": 1774014939778,
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "ContractNegotiation",
@@ -615,7 +715,9 @@
     "counterPartyAddress": "https://alpha-klinik.de/dsp/2025-1",
     "assetId": "fhir-condition-list",
     "contractAgreementId": "agreement-fhir-condition-list-049",
-    "createdAt": 1774012906446
+    "createdAt": 1774012906446,
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "ContractNegotiation",
@@ -627,7 +729,9 @@
     "counterPartyAddress": "https://lmc.nl/dsp/2025-1",
     "assetId": "fhir-cohort-bundle",
     "contractAgreementId": "agreement-fhir-cohort-bundle-050",
-    "createdAt": 1774011186248
+    "createdAt": 1774011186248,
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "ContractNegotiation",
@@ -639,7 +743,9 @@
     "counterPartyAddress": "https://alpha-klinik.de/dsp/2025-1",
     "assetId": "fhir-patient-search",
     "contractAgreementId": "agreement-fhir-patient-search-051",
-    "createdAt": 1774010027208
+    "createdAt": 1774010027208,
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "ContractNegotiation",
@@ -651,7 +757,9 @@
     "counterPartyAddress": "https://lmc.nl/dsp/2025-1",
     "assetId": "fhir-condition-list",
     "contractAgreementId": "agreement-fhir-condition-list-052",
-    "createdAt": 1774031292765
+    "createdAt": 1774031292765,
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "ContractNegotiation",
@@ -663,7 +771,9 @@
     "counterPartyAddress": "https://alpha-klinik.de/dsp/2025-1",
     "assetId": "fhir-patient-search",
     "contractAgreementId": "agreement-fhir-patient-search-053",
-    "createdAt": 1774000819885
+    "createdAt": 1774000819885,
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "ContractNegotiation",
@@ -675,7 +785,9 @@
     "counterPartyAddress": "https://lmc.nl/dsp/2025-1",
     "assetId": "fhir-observation-bundle",
     "contractAgreementId": "agreement-fhir-observation-bundle-054",
-    "createdAt": 1774008663735
+    "createdAt": 1774008663735,
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "ContractNegotiation",
@@ -687,7 +799,9 @@
     "counterPartyAddress": "https://lmc.nl/dsp/2025-1",
     "assetId": "fhir-observation-bundle",
     "contractAgreementId": "agreement-fhir-observation-bundle-055",
-    "createdAt": 1774005082761
+    "createdAt": 1774005082761,
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "ContractNegotiation",
@@ -699,7 +813,9 @@
     "counterPartyAddress": "https://alpha-klinik.de/dsp/2025-1",
     "assetId": "fhir-patient-search",
     "contractAgreementId": "agreement-fhir-patient-search-056",
-    "createdAt": 1774016053761
+    "createdAt": 1774016053761,
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "ContractNegotiation",
@@ -711,7 +827,9 @@
     "counterPartyAddress": "https://alpha-klinik.de/dsp/2025-1",
     "assetId": "fhir-allergy-intolerance",
     "contractAgreementId": "agreement-fhir-allergy-intolerance-057",
-    "createdAt": 1774007931769
+    "createdAt": 1774007931769,
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "ContractNegotiation",
@@ -723,7 +841,9 @@
     "counterPartyAddress": "https://alpha-klinik.de/dsp/2025-1",
     "assetId": "fhir-medication-request",
     "contractAgreementId": "agreement-fhir-medication-request-058",
-    "createdAt": 1774023519131
+    "createdAt": 1774023519131,
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "ContractNegotiation",
@@ -735,7 +855,9 @@
     "counterPartyAddress": "https://lmc.nl/dsp/2025-1",
     "assetId": "fhir-procedure-bundle",
     "contractAgreementId": "agreement-fhir-procedure-bundle-059",
-    "createdAt": 1774027314200
+    "createdAt": 1774027314200,
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "ContractNegotiation",
@@ -747,7 +869,9 @@
     "counterPartyAddress": "https://lmc.nl/dsp/2025-1",
     "assetId": "fhir-immunization-record",
     "contractAgreementId": "agreement-fhir-immunization-record-060",
-    "createdAt": 1774007182098
+    "createdAt": 1774007182098,
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "ContractNegotiation",
@@ -759,7 +883,9 @@
     "counterPartyAddress": "https://lmc.nl/dsp/2025-1",
     "assetId": "fhir-diagnostic-report",
     "contractAgreementId": "agreement-fhir-diagnostic-report-061",
-    "createdAt": 1774030903829
+    "createdAt": 1774030903829,
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "ContractNegotiation",
@@ -771,7 +897,9 @@
     "counterPartyAddress": "https://alpha-klinik.de/dsp/2025-1",
     "assetId": "fhir-care-plan",
     "contractAgreementId": "agreement-fhir-care-plan-062",
-    "createdAt": 1774006988530
+    "createdAt": 1774006988530,
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "ContractNegotiation",
@@ -783,7 +911,9 @@
     "counterPartyAddress": "https://alpha-klinik.de/dsp/2025-1",
     "assetId": "fhir-observation-bundle",
     "contractAgreementId": "agreement-fhir-observation-bundle-063",
-    "createdAt": 1774003585489
+    "createdAt": 1774003585489,
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "ContractNegotiation",
@@ -795,7 +925,9 @@
     "counterPartyAddress": "https://alpha-klinik.de/dsp/2025-1",
     "assetId": "fhir-patient-search",
     "contractAgreementId": "agreement-fhir-patient-search-064",
-    "createdAt": 1774019023635
+    "createdAt": 1774019023635,
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "ContractNegotiation",
@@ -807,7 +939,9 @@
     "counterPartyAddress": "https://lmc.nl/dsp/2025-1",
     "assetId": "fhir-diagnostic-report",
     "contractAgreementId": "agreement-fhir-diagnostic-report-065",
-    "createdAt": 1774032201608
+    "createdAt": 1774032201608,
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "ContractNegotiation",
@@ -819,7 +953,9 @@
     "counterPartyAddress": "https://alpha-klinik.de/dsp/2025-1",
     "assetId": "fhir-encounter-history",
     "contractAgreementId": "agreement-fhir-encounter-history-066",
-    "createdAt": 1774030088236
+    "createdAt": 1774030088236,
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "ContractNegotiation",
@@ -831,7 +967,9 @@
     "counterPartyAddress": "https://alpha-klinik.de/dsp/2025-1",
     "assetId": "fhir-encounter-history",
     "contractAgreementId": "agreement-fhir-encounter-history-067",
-    "createdAt": 1774032607343
+    "createdAt": 1774032607343,
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "ContractNegotiation",
@@ -843,7 +981,9 @@
     "counterPartyAddress": "https://lmc.nl/dsp/2025-1",
     "assetId": "fhir-immunization-record",
     "contractAgreementId": "agreement-fhir-immunization-record-068",
-    "createdAt": 1774017627289
+    "createdAt": 1774017627289,
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "ContractNegotiation",
@@ -855,7 +995,9 @@
     "counterPartyAddress": "https://lmc.nl/dsp/2025-1",
     "assetId": "fhir-diagnostic-report",
     "contractAgreementId": "agreement-fhir-diagnostic-report-069",
-    "createdAt": 1773999162268
+    "createdAt": 1773999162268,
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "ContractNegotiation",
@@ -867,7 +1009,9 @@
     "counterPartyAddress": "https://lmc.nl/dsp/2025-1",
     "assetId": "fhir-diagnostic-report",
     "contractAgreementId": "agreement-fhir-diagnostic-report-070",
-    "createdAt": 1774028551864
+    "createdAt": 1774028551864,
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "ContractNegotiation",
@@ -879,7 +1023,9 @@
     "counterPartyAddress": "https://alpha-klinik.de/dsp/2025-1",
     "assetId": "fhir-procedure-bundle",
     "contractAgreementId": "agreement-fhir-procedure-bundle-071",
-    "createdAt": 1774016640393
+    "createdAt": 1774016640393,
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "ContractNegotiation",
@@ -891,7 +1037,9 @@
     "counterPartyAddress": "https://lmc.nl/dsp/2025-1",
     "assetId": "fhir-cohort-bundle",
     "contractAgreementId": "agreement-fhir-cohort-bundle-072",
-    "createdAt": 1774009475509
+    "createdAt": 1774009475509,
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "ContractNegotiation",
@@ -903,7 +1051,9 @@
     "counterPartyAddress": "https://lmc.nl/dsp/2025-1",
     "assetId": "fhir-patient-everything",
     "contractAgreementId": "agreement-fhir-patient-everything-073",
-    "createdAt": 1774013235655
+    "createdAt": 1774013235655,
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "ContractNegotiation",
@@ -915,7 +1065,9 @@
     "counterPartyAddress": "https://lmc.nl/dsp/2025-1",
     "assetId": "fhir-observation-bundle",
     "contractAgreementId": "agreement-fhir-observation-bundle-074",
-    "createdAt": 1774009731443
+    "createdAt": 1774009731443,
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "ContractNegotiation",
@@ -927,7 +1079,9 @@
     "counterPartyAddress": "https://alpha-klinik.de/dsp/2025-1",
     "assetId": "fhir-encounter-history",
     "contractAgreementId": "agreement-fhir-encounter-history-075",
-    "createdAt": 1774015719520
+    "createdAt": 1774015719520,
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "ContractNegotiation",
@@ -939,7 +1093,9 @@
     "counterPartyAddress": "https://alpha-klinik.de/dsp/2025-1",
     "assetId": "fhir-allergy-intolerance",
     "contractAgreementId": "agreement-fhir-allergy-intolerance-076",
-    "createdAt": 1773989931155
+    "createdAt": 1773989931155,
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "ContractNegotiation",
@@ -951,7 +1107,9 @@
     "counterPartyAddress": "https://lmc.nl/dsp/2025-1",
     "assetId": "fhir-condition-list",
     "contractAgreementId": "agreement-fhir-condition-list-077",
-    "createdAt": 1774022768749
+    "createdAt": 1774022768749,
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "ContractNegotiation",
@@ -963,7 +1121,9 @@
     "counterPartyAddress": "https://alpha-klinik.de/dsp/2025-1",
     "assetId": "fhir-diagnostic-report",
     "contractAgreementId": "agreement-fhir-diagnostic-report-078",
-    "createdAt": 1774016292254
+    "createdAt": 1774016292254,
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "ContractNegotiation",
@@ -975,7 +1135,9 @@
     "counterPartyAddress": "https://alpha-klinik.de/dsp/2025-1",
     "assetId": "fhir-medication-request",
     "contractAgreementId": "agreement-fhir-medication-request-079",
-    "createdAt": 1774018486173
+    "createdAt": 1774018486173,
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "ContractNegotiation",
@@ -987,7 +1149,9 @@
     "counterPartyAddress": "https://alpha-klinik.de/dsp/2025-1",
     "assetId": "fhir-allergy-intolerance",
     "contractAgreementId": "agreement-fhir-allergy-intolerance-080",
-    "createdAt": 1774026271582
+    "createdAt": 1774026271582,
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "ContractNegotiation",
@@ -999,7 +1163,9 @@
     "counterPartyAddress": "https://lmc.nl/dsp/2025-1",
     "assetId": "fhir-observation-bundle",
     "contractAgreementId": "agreement-fhir-observation-bundle-081",
-    "createdAt": 1774017987207
+    "createdAt": 1774017987207,
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "ContractNegotiation",
@@ -1011,7 +1177,9 @@
     "counterPartyAddress": "https://lmc.nl/dsp/2025-1",
     "assetId": "fhir-encounter-history",
     "contractAgreementId": "agreement-fhir-encounter-history-082",
-    "createdAt": 1774017442458
+    "createdAt": 1774017442458,
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "ContractNegotiation",
@@ -1023,7 +1191,9 @@
     "counterPartyAddress": "https://lmc.nl/dsp/2025-1",
     "assetId": "fhir-condition-list",
     "contractAgreementId": "agreement-fhir-condition-list-083",
-    "createdAt": 1773994865385
+    "createdAt": 1773994865385,
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "ContractNegotiation",
@@ -1035,7 +1205,9 @@
     "counterPartyAddress": "https://alpha-klinik.de/dsp/2025-1",
     "assetId": "fhir-medication-request",
     "contractAgreementId": "agreement-fhir-medication-request-084",
-    "createdAt": 1774029927463
+    "createdAt": 1774029927463,
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "ContractNegotiation",
@@ -1047,7 +1219,9 @@
     "counterPartyAddress": "https://lmc.nl/dsp/2025-1",
     "assetId": "fhir-cohort-bundle",
     "contractAgreementId": "agreement-fhir-cohort-bundle-085",
-    "createdAt": 1774027849868
+    "createdAt": 1774027849868,
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "ContractNegotiation",
@@ -1059,7 +1233,9 @@
     "counterPartyAddress": "https://lmc.nl/dsp/2025-1",
     "assetId": "fhir-patient-everything",
     "contractAgreementId": "agreement-fhir-patient-everything-086",
-    "createdAt": 1774024072377
+    "createdAt": 1774024072377,
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "ContractNegotiation",
@@ -1071,7 +1247,9 @@
     "counterPartyAddress": "https://alpha-klinik.de/dsp/2025-1",
     "assetId": "fhir-care-plan",
     "contractAgreementId": "agreement-fhir-care-plan-087",
-    "createdAt": 1774000079904
+    "createdAt": 1774000079904,
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "ContractNegotiation",
@@ -1083,7 +1261,9 @@
     "counterPartyAddress": "https://lmc.nl/dsp/2025-1",
     "assetId": "fhir-patient-everything",
     "contractAgreementId": "agreement-fhir-patient-everything-088",
-    "createdAt": 1774025066463
+    "createdAt": 1774025066463,
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "ContractNegotiation",
@@ -1095,7 +1275,9 @@
     "counterPartyAddress": "https://alpha-klinik.de/dsp/2025-1",
     "assetId": "fhir-encounter-history",
     "contractAgreementId": "agreement-fhir-encounter-history-089",
-    "createdAt": 1774026045354
+    "createdAt": 1774026045354,
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "ContractNegotiation",
@@ -1107,7 +1289,9 @@
     "counterPartyAddress": "https://lmc.nl/dsp/2025-1",
     "assetId": "fhir-observation-bundle",
     "contractAgreementId": "agreement-fhir-observation-bundle-090",
-    "createdAt": 1774024315931
+    "createdAt": 1774024315931,
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "ContractNegotiation",
@@ -1119,7 +1303,9 @@
     "counterPartyAddress": "https://lmc.nl/dsp/2025-1",
     "assetId": "fhir-immunization-record",
     "contractAgreementId": "agreement-fhir-immunization-record-091",
-    "createdAt": 1773993782194
+    "createdAt": 1773993782194,
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "ContractNegotiation",
@@ -1131,7 +1317,9 @@
     "counterPartyAddress": "https://lmc.nl/dsp/2025-1",
     "assetId": "fhir-patient-search",
     "contractAgreementId": "agreement-fhir-patient-search-092",
-    "createdAt": 1773995937929
+    "createdAt": 1773995937929,
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "ContractNegotiation",
@@ -1143,7 +1331,9 @@
     "counterPartyAddress": "https://alpha-klinik.de/dsp/2025-1",
     "assetId": "fhir-care-plan",
     "contractAgreementId": "agreement-fhir-care-plan-093",
-    "createdAt": 1774000456799
+    "createdAt": 1774000456799,
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "ContractNegotiation",
@@ -1155,7 +1345,9 @@
     "counterPartyAddress": "https://alpha-klinik.de/dsp/2025-1",
     "assetId": "fhir-allergy-intolerance",
     "contractAgreementId": "agreement-fhir-allergy-intolerance-094",
-    "createdAt": 1774016418567
+    "createdAt": 1774016418567,
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "ContractNegotiation",
@@ -1167,7 +1359,9 @@
     "counterPartyAddress": "https://alpha-klinik.de/dsp/2025-1",
     "assetId": "fhir-medication-request",
     "contractAgreementId": "agreement-fhir-medication-request-095",
-    "createdAt": 1774006784291
+    "createdAt": 1774006784291,
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "ContractNegotiation",
@@ -1179,7 +1373,9 @@
     "counterPartyAddress": "https://lmc.nl/dsp/2025-1",
     "assetId": "fhir-diagnostic-report",
     "contractAgreementId": "agreement-fhir-diagnostic-report-096",
-    "createdAt": 1773991489328
+    "createdAt": 1773991489328,
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "ContractNegotiation",
@@ -1191,7 +1387,9 @@
     "counterPartyAddress": "https://alpha-klinik.de/dsp/2025-1",
     "assetId": "fhir-diagnostic-report",
     "contractAgreementId": "agreement-fhir-diagnostic-report-097",
-    "createdAt": 1774005486757
+    "createdAt": 1774005486757,
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "ContractNegotiation",
@@ -1203,7 +1401,9 @@
     "counterPartyAddress": "https://alpha-klinik.de/dsp/2025-1",
     "assetId": "fhir-allergy-intolerance",
     "contractAgreementId": "agreement-fhir-allergy-intolerance-098",
-    "createdAt": 1774021590229
+    "createdAt": 1774021590229,
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "ContractNegotiation",
@@ -1215,7 +1415,9 @@
     "counterPartyAddress": "https://lmc.nl/dsp/2025-1",
     "assetId": "fhir-cohort-bundle",
     "contractAgreementId": "agreement-fhir-cohort-bundle-099",
-    "createdAt": 1774023520781
+    "createdAt": 1774023520781,
+    "source": "mock",
+    "openable": false
   },
   {
     "@type": "ContractNegotiation",
@@ -1227,6 +1429,8 @@
     "counterPartyAddress": "https://lmc.nl/dsp/2025-1",
     "assetId": "fhir-procedure-bundle",
     "contractAgreementId": "agreement-fhir-procedure-bundle-100",
-    "createdAt": 1773990651472
+    "createdAt": 1773990651472,
+    "source": "mock",
+    "openable": false
   }
 ]

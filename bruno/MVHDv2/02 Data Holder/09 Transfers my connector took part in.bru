@@ -20,8 +20,13 @@ assert {
 }
 
 tests {
-  test("captures the first transfer the hub shows me", function () {
+  test("every row says whether it can be opened (#358)", function () {
     const rows = res.getBody();
-    bru.setVar("transferId", rows.length ? rows[0]["@id"] : "");
+    rows.forEach((r) => {
+      expect(r, "a listed row carries no provenance").to.have.property("source");
+      expect(r).to.have.property("openable");
+    });
+    const openable = rows.find((r) => r.openable);
+    bru.setVar("transferId", openable ? openable["@id"] : "");
   });
 }
