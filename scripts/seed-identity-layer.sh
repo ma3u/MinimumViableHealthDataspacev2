@@ -50,6 +50,15 @@ step "2/7 the same participants in IdentityHub"
 step "3/7 the IssuerService's own identity"
 "${SCRIPT_DIR}/seed-issuer-identity.sh" || fail "step 3"
 
+# The control plane reads each participant's STS client secret from its own
+# vault mount, under the alias on the participant context; the IdentityHub
+# keeps the authoritative copy in its per-participant folder. A Vault that
+# lost its contents comes back with only the IdentityHub's, and every
+# outbound DSP call then dies on "Failed to fetch client secret from the
+# vault" (#349). Copying costs nothing when they already agree.
+step "3b/7 the control plane's copy of each STS client secret"
+"${SCRIPT_DIR}/repair-cp-sts-secrets.sh" || fail "step 3b"
+
 step "4/7 the issuer accepts tokens"
 KC_HOST="$KEYCLOAK_URL" ISSUER_API="${EDC_ISSUER_URL%/api/admin}" TIMEOUT=120 \
   bash "${SCRIPT_DIR}/lib/wait-for-issuer-auth.sh" || fail "step 4"
