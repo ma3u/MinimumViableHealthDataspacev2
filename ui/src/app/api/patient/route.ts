@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
+import { requireAuth, isAuthError } from "@/lib/auth-guard";
 import { runQuery } from "@/lib/neo4j";
 import { ownPatientIdForSession } from "@/lib/overview/patient";
 import { ehrSyncFromRow } from "@/lib/patient/ehr-sync";
@@ -75,17 +76,25 @@ export async function GET(req: Request) {
     const { searchParams } = new URL(req.url);
     const patientId = searchParams.get("patientId") ?? "";
 
-    // Deliberately public, decided in #357. `/patient` is the one patient page
-    // that middleware.ts leaves out of PROTECTED_PATHS, so a visitor who has
-    // not signed in can open it, and it calls this route. Gating it would
-    // blank that page. Every record behind it is synthetic and the same index
-    // and profiles ship as static fixtures on GitHub Pages, so a visitor can
-    // already download what this answers.
+    // Gated, #357 reopened. This route used to answer a caller with no
+    // session, and it was the one route in the inventory reading a session
+    // without enforcing it. It now matches the role matrix: no session, no
+    // answer. `/patient` joins PROTECTED_PATHS in middleware.ts in the same
+    // change, so an anonymous visitor is sent to sign in rather than being
+    // shown an empty page.
     //
-    // The session narrows rather than admits: a PATIENT sees only their own
-    // record (EHDS Art. 3 / GDPR Art. 15), and anyone else, signed in or not,
-    // sees the demo cohort. If this route ever serves a real record, that
-    // decision has to be revisited before it does.
+    // No role argument: any authenticated participant may see the demo
+    // cohort. The session still narrows as well as admits, and that is the
+    // part the tests pin: a PATIENT sees only their own record (EHDS Art. 3,
+    // GDPR Art. 15), anyone else signed in sees the cohort.
+    const auth = await requireAuth();
+    if (isAuthError(auth)) return auth;
+
+    // requireAuth hands back an AuthSession, which carries no
+    // preferredUsername; ownPatientIdForSession needs it to resolve which
+    // seeded record a login owns (#271). So read the full session too. In the
+    // static export requireAuth returns a synthetic admin and this is null,
+    // which lands on the cohort branch, which is what the fixtures show.
     const session = await getServerSession(authOptions);
     const roles = (session as { roles?: string[] } | null)?.roles ?? [];
     const username = session?.user?.name ?? "";

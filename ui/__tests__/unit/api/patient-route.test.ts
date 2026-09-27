@@ -3,8 +3,10 @@
  * (issue #271): the record the login owns, its stats, and the timeline the
  * page renders straight from this answer.
  */
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { getServerSession } from "next-auth/next";
+import { NextResponse } from "next/server";
+import { requireAuth, isAuthError } from "@/lib/auth-guard";
 
 const mockRunQuery = vi.fn();
 vi.mock("@/lib/neo4j", () => ({
@@ -133,32 +135,59 @@ describe("GET /api/patient as a PATIENT", () => {
 });
 
 /**
- * The decision recorded in #357: this route answers a caller with no session,
- * because `/patient` is the one patient page middleware leaves public and it
- * calls this route. What must not drift is the shape of that answer.
+ * #357 reopened: the route is gated. It was the one route in the inventory
+ * that read a session and answered anyway, so the code and the role matrix
+ * disagreed. These pin the refusal, including that the graph is never touched,
+ * which is the part a later refactor could quietly lose.
  */
 describe("GET /api/patient with no session", () => {
   beforeEach(() => {
     mockRunQuery.mockReset();
     vi.mocked(getServerSession).mockResolvedValue(null);
+    // __tests__/setup.ts mocks @/lib/auth-guard open: requireAuth always
+    // returns an EDC_ADMIN and isAuthError always returns false, so route
+    // tests exercise business logic rather than the guard. That also means no
+    // route test can catch a missing gate unless it closes the guard itself,
+    // which is what these four do.
+    vi.mocked(requireAuth).mockResolvedValue(
+      NextResponse.json({ error: "Unauthorized" }, { status: 401 }),
+    );
+    vi.mocked(isAuthError).mockImplementation(
+      (r): r is NextResponse => r instanceof NextResponse,
+    );
   });
 
-  it("answers the anonymous caller rather than rejecting them", async () => {
-    mockRunQuery
-      .mockResolvedValueOnce(PATIENTS) // all patients by name
-      .mockResolvedValueOnce(STATS); // cohort stats
-    const res = await GET(new Request("http://localhost/api/patient"));
-    expect(res.status).toBe(200);
+  afterEach(() => {
+    vi.mocked(requireAuth).mockResolvedValue({
+      session: {
+        user: { id: "test-admin", name: "Test Admin" },
+        roles: ["EDC_ADMIN"],
+        accessToken: "test-token",
+      },
+    });
+    vi.mocked(isAuthError).mockReturnValue(false);
   });
 
-  it("gives the demo cohort, never one person's own record", async () => {
-    mockRunQuery.mockResolvedValueOnce(PATIENTS).mockResolvedValueOnce(STATS);
+  it("refuses the anonymous caller", async () => {
     const res = await GET(new Request("http://localhost/api/patient"));
-    const data = await res.json();
-    // `restricted` is what the page keys its own-record view off. An anonymous
-    // caller must never be handed that view, and must see every demo patient.
-    expect(data.restricted).not.toBe(true);
-    expect(data.patients).toEqual(PATIENTS);
-    expect(data.patients.length).toBeGreaterThan(1);
+    expect(res.status).toBe(401);
+  });
+
+  it("answers the refusal in the { error } shape every route uses", async () => {
+    const res = await GET(new Request("http://localhost/api/patient"));
+    expect(await res.json()).toEqual({ error: "Unauthorized" });
+  });
+
+  it("does not read the graph before refusing", async () => {
+    await GET(new Request("http://localhost/api/patient"));
+    expect(mockRunQuery).not.toHaveBeenCalled();
+  });
+
+  it("refuses a request for one named record too", async () => {
+    const res = await GET(
+      new Request("http://localhost/api/patient?patientId=P1"),
+    );
+    expect(res.status).toBe(401);
+    expect(mockRunQuery).not.toHaveBeenCalled();
   });
 });
