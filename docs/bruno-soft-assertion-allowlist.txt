@@ -1,0 +1,58 @@
+# Successful-path requests that would still pass if the hub answered with an
+# empty collection. Checked by scripts/check-bruno-strength.py (#375).
+#
+# A new soft request fails the build. Deleting a line is how progress is
+# recorded: strengthen the request, then remove it from here. This file is
+# meant to shrink to nothing.
+#
+# Regenerate with: ./scripts/check-bruno-strength.py --write
+00 Public/01 Is the hub up
+00 Public/02 Public information (Art. 56)
+00 Public/03 Register of data permits (Art. 73)
+00 Public/04 Register of results (Art. 70)
+00 Public/05 Activity report (Art. 73)
+01 Patient/01 My record (Art. 3)
+01 Patient/07 My consent is on record
+01 Patient/08 I withdraw it (GDPR Art. 7(3))
+02 Data Holder/01 My organisation
+02 Data Holder/06 The EDC assets behind my datasets
+02 Data Holder/12 What my organisation is allowed to do (ODRL scope)
+03 Data User/02 The EEHRxF profiles the datasets conform to
+03 Data User/03 What I am permitted today (ODRL)
+03 Data User/04 My applications and their clocks
+03 Data User/05 My credentials (DCP)
+03 Data User/06 Cohort analytics (OMOP CDM)
+03 Data User/07 Federated cohort statistics
+03 Data User/08 Natural-language query templates
+03 Data User/09 Which NLQ backend is answering
+03 Data User/10 Ask a question in natural language
+03 Data User/11 My tasks across the pipeline
+05 Dataspace Operator/02 Components and their state
+05 Dataspace Operator/03 How the components connect
+05 Dataspace Operator/06 The participant registry
+05 Dataspace Operator/15 The patient index and cohort statistics
+05 Dataspace Operator/16 Credential definitions on the issuer
+05 Dataspace Operator/17 Credentials held across the dataspace
+05 Dataspace Operator/24 One node of the graph
+05 Dataspace Operator/25 Its neighbourhood
+05 Dataspace Operator/26 Does the graph match its schema
+05 Dataspace Operator/28 Phase 26 debug view
+06 Trust Centre/01 Trust centres and open SPE sessions
+07 Journey - Data permit/01 Data user picks the dataset
+08 Journey - Data request/01 Data user asks a question (Art. 69)
+08 Journey - Data request/05 The decision is on my request
+10 Connecting partner/00 Token for the Management API
+10 Connecting partner/01 Token for the IssuerService admin API
+10 Connecting partner/11 The providers assets
+10 Connecting partner/12 The providers policy definitions (ODRL)
+10 Connecting partner/13 The providers contract definitions
+10 Connecting partner/15 The consumers transfer processes
+10 Connecting partner/21 IdentityHub the providers context
+10 Connecting partner/32 IssuerService attestation definitions
+10 Connecting partner/33 IssuerService issuance processes
+10 Connecting partner/40 DCP the provider requests a MembershipCredential
+11 Platform/02 HealthDCAT-AP datasets from the graph
+11 Platform/04 Federated statistics
+11 Platform/05 NLQ templates
+11 Platform/06 Trust centre status
+12 EUDI wallet/01 Start a wallet sign-in

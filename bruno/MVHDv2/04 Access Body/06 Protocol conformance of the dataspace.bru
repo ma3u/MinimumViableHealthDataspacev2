@@ -16,8 +16,16 @@ headers {
 
 assert {
   res.status: eq 200
+  res.body.timestamp: isDefined
   res.body.summary: isDefined
   res.body.suites: isDefined
+}
+
+tests {
+  test("at least one suite reported a result", function () {
+    const suites = res.getBody().suites;
+    expect(Object.keys(suites || {}), "suites").to.not.be.empty;
+  });
 }
 
 docs {

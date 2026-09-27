@@ -17,6 +17,7 @@ headers {
 assert {
   res.status: eq 200
   res.body.findings: isArray
+  res.body.article: contains 2025/327
 }
 
 docs {

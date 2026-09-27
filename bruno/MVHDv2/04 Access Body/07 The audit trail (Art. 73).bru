@@ -16,7 +16,18 @@ headers {
 
 assert {
   res.status: eq 200
-  res.body.summary: isDefined
-  res.body.transfers: isArray
-  res.body.negotiations: isArray
+  res.body.limit: eq 20
+}
+
+tests {
+  // The trail is the Art. 73 evidence. An empty one means nothing was recorded,
+  // which is the thing this request exists to notice.
+  test("the trail carries transfers and negotiations", function () {
+    const b = res.getBody();
+    expect(b.transfers, "transfers").to.be.an("array").that.is.not.empty;
+    expect(b.negotiations, "negotiations").to.be.an("array").that.is.not.empty;
+  });
+  test("the limit asked for is the limit honoured", function () {
+    expect(res.getBody().transfers.length).to.be.at.most(20);
+  });
 }

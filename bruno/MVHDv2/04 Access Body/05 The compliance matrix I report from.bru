@@ -20,3 +20,14 @@ assert {
   res.body.datasets: isArray
   res.body.consumers: isArray
 }
+
+tests {
+  // A matrix with no rows is not a matrix. This is the view the access body
+  // reports from, so an empty one is the failure, not a quiet pass.
+  test("the matrix has rows, datasets and consumers", function () {
+    const b = res.getBody();
+    expect(b.matrix, "matrix").to.be.an("array").that.is.not.empty;
+    expect(b.datasets, "datasets").to.be.an("array").that.is.not.empty;
+    expect(b.consumers, "consumers").to.be.an("array").that.is.not.empty;
+  });
+}

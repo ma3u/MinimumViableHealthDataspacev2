@@ -306,34 +306,119 @@ f = folder("04 Access Body", "A health data access body: MedReg DE (HDAB_AUTHORI
 findings it has opened under Art. 63, the audit trail it must keep and the retention rule
 that governs it (Art. 73(1)(e)), and the compliance matrix it reports from. Deciding an
 application is the journey in folder 07.""")
+# The ten below used to assert only that a container was an array, which an
+# empty one satisfies: an access body whose graph had been wiped would have
+# read green. #375. Each now asserts something an empty answer fails, and the
+# Chapter IV requests assert the article they claim to serve.
 req(f, "01 Applications in my inbox (Art. 67)", "get", f"{B}/api/compliance/applications", persona="regulator", mock=True,
-    asserts=["res.status: eq 200", "res.body.applications: isArray", "res.body.article: isDefined"])
+    asserts=["res.status: eq 200", "res.body.applications: isArray", "res.body.article: contains 2025/327"],
+    tests="""
+test("the inbox holds applications to decide", function () {
+  expect(res.getBody().applications, "applications").to.be.an("array").that.is.not.empty;
+});
+test("each names its dataset and the state it is in", function () {
+  for (const a of res.getBody().applications) {
+    expect(a.applicationId || a.id, "an id").to.be.a("string");
+    expect(a.status, "status").to.be.a("string");
+  }
+});
+""")
 req(f, "02 Data requests in my inbox (Art. 69)", "get", f"{B}/api/compliance/requests", persona="regulator", mock=True,
-    asserts=["res.status: eq 200", "res.body.requests: isArray"])
+    asserts=["res.status: eq 200", "res.body.requests: isArray", "res.body.article: contains 2025/327"],
+    tests="""
+test("the inbox holds data requests", function () {
+  expect(res.getBody().requests, "requests").to.be.an("array").that.is.not.empty;
+});
+""")
 req(f, "03 Findings I have opened (Art. 63)", "get", f"{B}/api/compliance/findings", persona="regulator", mock=True,
-    asserts=["res.status: eq 200", "res.body.findings: isArray"])
+    asserts=["res.status: eq 200", "res.body.findings: isArray", "res.body.article: contains 2025/327"],
+    tests="""
+test("the access body has findings on record", function () {
+  expect(res.getBody().findings, "findings").to.be.an("array").that.is.not.empty;
+});
+""")
 req(f, "04 Information I have requested (Art. 63(1))", "get", f"{B}/api/compliance/information-requests",
     persona="regulator", mock=True,
-    asserts=["res.status: eq 200", "res.body.requests: isArray"])
+    asserts=["res.status: eq 200", "res.body.requests: isArray", "res.body.article: contains 2025/327"],
+    tests="""
+test("information requests are on record", function () {
+  expect(res.getBody().requests, "requests").to.be.an("array").that.is.not.empty;
+});
+""")
 req(f, "05 The compliance matrix I report from", "get", f"{B}/api/compliance", persona="regulator", mock=True,
     asserts=["res.status: eq 200", "res.body.matrix: isArray", "res.body.datasets: isArray",
-             "res.body.consumers: isArray"])
+             "res.body.consumers: isArray"],
+    tests="""
+// A matrix with no rows is not a matrix. This is the view the access body
+// reports from, so an empty one is the failure, not a quiet pass.
+test("the matrix has rows, datasets and consumers", function () {
+  const b = res.getBody();
+  expect(b.matrix, "matrix").to.be.an("array").that.is.not.empty;
+  expect(b.datasets, "datasets").to.be.an("array").that.is.not.empty;
+  expect(b.consumers, "consumers").to.be.an("array").that.is.not.empty;
+});
+""")
 req(f, "06 Protocol conformance of the dataspace", "get", f"{B}/api/compliance/tck", persona="regulator", mock=True,
-    asserts=["res.status: eq 200", "res.body.summary: isDefined", "res.body.suites: isDefined"],
+    asserts=["res.status: eq 200", "res.body.timestamp: isDefined", "res.body.summary: isDefined",
+             "res.body.suites: isDefined"],
+    tests="""
+test("at least one suite reported a result", function () {
+  const suites = res.getBody().suites;
+  expect(Object.keys(suites || {}), "suites").to.not.be.empty;
+});
+""",
     docs="The DSP, DCP and EHDS suite results as the Trust Center page shows them.")
 req(f, "07 The audit trail (Art. 73)", "get", f"{B}/api/admin/audit?limit=20", persona="regulator",
-    asserts=["res.status: eq 200", "res.body.summary: isDefined", "res.body.transfers: isArray",
-             "res.body.negotiations: isArray"])
+    asserts=["res.status: eq 200", "res.body.limit: eq 20"],
+    tests="""
+// The trail is the Art. 73 evidence. An empty one means nothing was recorded,
+// which is the thing this request exists to notice.
+test("the trail carries transfers and negotiations", function () {
+  const b = res.getBody();
+  expect(b.transfers, "transfers").to.be.an("array").that.is.not.empty;
+  expect(b.negotiations, "negotiations").to.be.an("array").that.is.not.empty;
+});
+test("the limit asked for is the limit honoured", function () {
+  expect(res.getBody().transfers.length).to.be.at.most(20);
+});
+""")
 req(f, "08 The retention rule on that trail (Art. 73(1)(e))", "get", f"{B}/api/admin/audit/retention",
     persona="regulator",
-    asserts=["res.status: eq 200", "res.body: isJson"])
+    asserts=["res.status: eq 200"],
+    tests="""
+test("a retention policy is stated, not merely a JSON body", function () {
+  expect(res.getBody().policy, "policy").to.be.an("object");
+});
+""")
 req(f, "09 Purging without confirmation (400)", "post", f"{B}/api/admin/audit/retention", persona="regulator", body={},
     asserts=["res.status: eq 400", "res.body.error: contains confirm", "res.body.policy: isDefined"],
     docs="Nothing is deleted before its retainUntil date, and never without an explicit confirm.")
 req(f, "10 Policies across participants", "get", f"{B}/api/admin/policies", persona="regulator", mock=True,
-    asserts=["res.status: eq 200", "res.body.participants: isArray"])
+    asserts=["res.status: eq 200", "res.body.participants: isArray"],
+    tests="""
+// One shape whichever backend answered (#367); each group names its
+// participant, so an empty envelope is not enough.
+test("policies are grouped under a named participant", function () {
+  const groups = res.getBody().participants;
+  expect(groups, "participants").to.be.an("array").that.is.not.empty;
+  for (const g of groups) {
+    expect(g.participantId, "participantId").to.be.a("string");
+    expect(g.policies, "policies").to.be.an("array");
+  }
+});
+""")
 req(f, "11 My view of the dataspace", "get", f"{B}/api/overview", persona="regulator",
-    asserts=["res.status: eq 200", "res.body.persona: isDefined", "res.body.layers: isDefined"])
+    asserts=["res.status: eq 200", "res.body.persona: eq hdab"],
+    tests="""
+// layers, nodes and links are arrays, not counts. I asserted them as numbers
+// first and the run said so; the probe output I had read was array lengths.
+test("the access body's view is populated", function () {
+  const b = res.getBody();
+  expect(b.layers, "layers").to.be.an("array").with.lengthOf(5);
+  expect(b.nodes, "nodes").to.be.an("array").that.is.not.empty;
+  expect(b.links, "links").to.be.an("array").that.is.not.empty;
+});
+""")
 
 # ===========================================================================
 f = folder("05 Dataspace Operator", "The operator of the dataspace (EDC_ADMIN)",

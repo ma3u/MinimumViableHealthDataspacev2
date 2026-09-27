@@ -17,4 +17,11 @@ headers {
 assert {
   res.status: eq 200
   res.body.findings: isArray
+  res.body.article: contains 2025/327
+}
+
+tests {
+  test("the access body has findings on record", function () {
+    expect(res.getBody().findings, "findings").to.be.an("array").that.is.not.empty;
+  });
 }

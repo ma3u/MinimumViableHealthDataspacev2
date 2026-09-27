@@ -16,6 +16,16 @@ headers {
 
 assert {
   res.status: eq 200
-  res.body.persona: isDefined
-  res.body.layers: isDefined
+  res.body.persona: eq hdab
+}
+
+tests {
+  // layers, nodes and links are arrays, not counts. I asserted them as numbers
+  // first and the run said so; the probe output I had read was array lengths.
+  test("the access body's view is populated", function () {
+    const b = res.getBody();
+    expect(b.layers, "layers").to.be.an("array").with.lengthOf(5);
+    expect(b.nodes, "nodes").to.be.an("array").that.is.not.empty;
+    expect(b.links, "links").to.be.an("array").that.is.not.empty;
+  });
 }
