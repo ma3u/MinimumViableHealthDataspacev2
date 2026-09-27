@@ -17,5 +17,17 @@ headers {
 assert {
   res.status: eq 200
   res.body.applications: isArray
-  res.body.article: isDefined
+  res.body.article: contains 2025/327
+}
+
+tests {
+  test("the inbox holds applications to decide", function () {
+    expect(res.getBody().applications, "applications").to.be.an("array").that.is.not.empty;
+  });
+  test("each names its dataset and the state it is in", function () {
+    for (const a of res.getBody().applications) {
+      expect(a.applicationId || a.id, "an id").to.be.a("string");
+      expect(a.status, "status").to.be.a("string");
+    }
+  });
 }

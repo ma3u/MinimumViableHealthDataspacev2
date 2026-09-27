@@ -16,5 +16,10 @@ headers {
 
 assert {
   res.status: eq 200
-  res.body: isJson
+}
+
+tests {
+  test("a retention policy is stated, not merely a JSON body", function () {
+    expect(res.getBody().policy, "policy").to.be.an("object");
+  });
 }

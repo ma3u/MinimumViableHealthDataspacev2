@@ -17,4 +17,11 @@ headers {
 assert {
   res.status: eq 200
   res.body.requests: isArray
+  res.body.article: contains 2025/327
+}
+
+tests {
+  test("information requests are on record", function () {
+    expect(res.getBody().requests, "requests").to.be.an("array").that.is.not.empty;
+  });
 }

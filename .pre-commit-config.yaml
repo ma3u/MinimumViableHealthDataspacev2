@@ -143,6 +143,17 @@ repos:
         pass_filenames: false
         stages: [pre-commit]
 
+      # A 2xx request that only checks a container type passes when the hub
+      # answers with nothing. More than half the collection was in that state
+      # when this was added (#375); the allowlist is the ratchet.
+      - id: bruno-strength
+        name: A successful request cannot pass on an empty answer
+        language: system
+        entry: python3 scripts/check-bruno-strength.py
+        files: ^(bruno/MVHDv2/.*|docs/bruno-soft-assertion-allowlist\.txt)$
+        pass_filenames: false
+        stages: [pre-commit]
+
       # A workflow whose paths filter misses a script it runs stops re-running
       # when that script is fixed, and the last, stale, result stands.
       - id: workflow-paths
