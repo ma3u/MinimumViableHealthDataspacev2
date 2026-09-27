@@ -41,6 +41,9 @@ PG_CONTAINER="${PG_CONTAINER:-health-dataspace-postgres}"
 ISSUER_CONTAINER="${ISSUER_CONTAINER:-health-dataspace-issuerservice}"
 VAULT_BOOTSTRAP_CONTAINER="${VAULT_BOOTSTRAP_CONTAINER:-health-dataspace-vault-bootstrap}"
 ISSUER_READY_URL="${ISSUER_READY_URL:-http://localhost:10013/api/check/readiness}"
+# Seconds to wait for the IssuerService after the restart that loads its
+# identity. Raise it on a slow or loaded host; CI needs more than a laptop.
+ISSUER_RESTART_TIMEOUT="${ISSUER_RESTART_TIMEOUT:-300}"
 ISSUER_CLIENT_ID="${ISSUER_CLIENT_ID:-issuer}"
 ISSUER_CLIENT_SECRET="${ISSUER_CLIENT_SECRET:-issuer-secret}"
 CURL_IMAGE="${CURL_IMAGE:-curlimages/curl:latest}"
@@ -138,12 +141,22 @@ if [ "$SKIP_RESTART" = "1" ]; then
 else
   log "restarting ${ISSUER_CONTAINER} to load the identity"
   docker restart "$ISSUER_CONTAINER" >/dev/null
-  deadline=$(( $(date +%s) + 120 )); ok=0
+  # 120s was enough on a laptop and not on a GitHub runner carrying nineteen
+  # containers: on 2026-09-27 the issuer's records were all written correctly
+  # and only this wait timed out, failing the whole identity seed (#349).
+  # A JVM cold start under that load is the presumed cause, so the wait is
+  # longer and configurable, and says what it saw when it does give up.
+  deadline=$(( $(date +%s) + ISSUER_RESTART_TIMEOUT )); ok=0
   while [ "$(date +%s)" -lt "$deadline" ]; do
     curl -sf --max-time 5 "$ISSUER_READY_URL" >/dev/null 2>&1 && { ok=1; break; }
     sleep 5
   done
-  [ "$ok" -eq 1 ] || die "${ISSUER_CONTAINER} did not become ready at ${ISSUER_READY_URL} after restart"
+  if [ "$ok" -ne 1 ]; then
+    echo "  ${ISSUER_CONTAINER} state: $(docker inspect "$ISSUER_CONTAINER" --format '{{.State.Status}} (exit {{.State.ExitCode}}, started {{.State.StartedAt}})' 2>/dev/null || echo unknown)" >&2
+    echo "  last lines of its log:" >&2
+    docker logs "$ISSUER_CONTAINER" --tail 15 2>&1 | sed 's/^/    /' >&2
+    die "${ISSUER_CONTAINER} did not become ready at ${ISSUER_READY_URL} within ${ISSUER_RESTART_TIMEOUT}s of the restart"
+  fi
 fi
 
 # --- Read-back: the DID document must resolve, with a key in it --------------

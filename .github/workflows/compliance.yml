@@ -401,7 +401,7 @@ jobs:
         continue-on-error: true
         run: |
           set -euo pipefail
-          for f in neo4j/insert-synthetic-schema-data.cypher neo4j/register-eehrxf-profiles.cypher neo4j/seed-compliance-matrix.cypher; do
+          for f in neo4j/insert-synthetic-schema-data.cypher neo4j/register-eehrxf-profiles.cypher neo4j/seed-compliance-matrix.cypher neo4j/seed-persona-overview.cypher; do
             echo "== $f"
             docker exec -i health-dataspace-neo4j \
               cypher-shell -u neo4j -p healthdataspace < "$f"
@@ -538,10 +538,15 @@ jobs:
           set -euo pipefail
           docker exec -i health-dataspace-neo4j \
             cypher-shell -u neo4j -p healthdataspace < neo4j/init-schema.cypher || true
+          # seed-persona-overview.cypher carries patient P1 (Maria Schmidt) with
+          # her conditions and medications. Without it every request in the
+          # collection's Patient folder answered 404 on CI while passing locally,
+          # because only a fully seeded laptop had her (#349).
           for f in neo4j/insert-synthetic-schema-data.cypher \
                    neo4j/register-eehrxf-profiles.cypher \
                    neo4j/seed-compliance-matrix.cypher \
-                   neo4j/participant-source-init.cypher; do
+                   neo4j/participant-source-init.cypher \
+                   neo4j/seed-persona-overview.cypher; do
             echo "== $f"
             docker exec -i health-dataspace-neo4j \
               cypher-shell -u neo4j -p healthdataspace < "$f"
