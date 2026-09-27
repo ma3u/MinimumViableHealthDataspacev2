@@ -43,6 +43,22 @@ SUITES = {
     "dcp-compliance-results": "EHDS identity checks",
     "ehds-compliance-results": "EHDS domain checks",
     "bruno-api-results": "EHDS API collection (Bruno)",
+    # The live demo, measured by demo-smoke.yml. A separate floor from the
+    # CI stack's: the two environments hold different data and cannot score
+    # the same, and until #349 the live site had no ratchet at all.
+    "bruno-api-azure-results": "EHDS API collection (Bruno, Azure demo)",
+}
+
+
+# Where each suite writes when it is run locally rather than downloaded as a
+# CI artifact. Explicit, because a substring match cannot separate the two
+# Bruno suites.
+LOCAL_DIRS = {
+    "dsp-tck-results": "dsp-tck",
+    "dcp-compliance-results": "dcp",
+    "ehds-compliance-results": "ehds",
+    "bruno-api-results": "bruno",
+    "bruno-api-azure-results": "bruno-api-azure-results",
 }
 
 
@@ -54,12 +70,19 @@ def latest_report(results_dir, artifact):
     )
     if not files:
         # The workflow also writes straight into test-results/<suite>/ locally.
+        # Fall back to the directory the workflow writes into locally. This used
+        # to match on artifact.split("-")[0], which put every file containing
+        # "bruno" in front of BOTH bruno suites: adding the Azure one made the
+        # CI suite read the Azure result and call it a regression (#349). The
+        # alias is explicit so two suites can never claim the same file.
+        local_dir = LOCAL_DIRS.get(artifact)
+        if not local_dir:
+            return None
         files = sorted(
-            glob.glob(os.path.join(results_dir, "**", "*.json"), recursive=True),
+            glob.glob(os.path.join(results_dir, local_dir, "*.json")),
             key=os.path.getmtime,
             reverse=True,
         )
-        files = [f for f in files if artifact.split("-")[0] in f]
     if not files:
         return None
     try:
