@@ -87,6 +87,19 @@ EDC_PROVISION_URL="https://${PROVISION_MGR_APP}.internal.${ACA_DOMAIN}/api"
 KEYCLOAK_BASE_URL="https://${KEYCLOAK_APP}.${ACA_DOMAIN}"
 
 # ── Next.js UI ──────────────────────────────────────────────────────────────
+# NEXTAUTH_SECRET signs the session cookie; anyone who has it can forge a valid
+# session, including an EDC_ADMIN one, for the live UI. It used to be hardcoded
+# to "mvhd-azure-secret-change-me" here, which is the value the bruno README
+# published in a code block, so the public demo could be signed into by anyone
+# who read the repo (#349). It is now taken from the environment, or generated
+# if unset, and stored as a Container App secret rather than a plain env value.
+# Pass NEXTAUTH_SECRET in the environment to keep it stable across re-provisions;
+# CI passes secrets.NEXTAUTH_SECRET.
+if [ -z "${NEXTAUTH_SECRET:-}" ]; then
+  NEXTAUTH_SECRET="$(openssl rand -hex 32)"
+  log "NEXTAUTH_SECRET was not set; generated a fresh 256-bit one for this app."
+fi
+
 log "Creating UI container app..."
 az containerapp create \
   --name "$UI_APP" --resource-group "$RG" --environment "$ACA_ENV" \
@@ -94,6 +107,7 @@ az containerapp create \
   --registry-server "$ACR_LOGIN_SERVER" \
   --registry-username "$ACR_NAME" \
   --registry-password "$ACR_PASSWORD" \
+  --secrets "nextauth-secret=$NEXTAUTH_SECRET" \
   --cpu 0.5 --memory 1Gi \
   --min-replicas 1 --max-replicas 1 \
   --ingress external --target-port 3000 \
@@ -104,7 +118,7 @@ az containerapp create \
     "AZURE_SUBSCRIPTION_ID=${SUBSCRIPTION_ID}" \
     "AZURE_RESOURCE_GROUP=${RG}" \
     "NEXTAUTH_URL=${UI_PUBLIC_URL:-https://placeholder.azurecontainerapps.io}" \
-    "NEXTAUTH_SECRET=mvhd-azure-secret-change-me" \
+    "NEXTAUTH_SECRET=secretref:nextauth-secret" \
     "KEYCLOAK_ID=health-dataspace-ui" \
     "KEYCLOAK_SECRET=health-dataspace-ui-secret" \
     "KEYCLOAK_ISSUER=${KEYCLOAK_BASE_URL}/realms/edcv" \
