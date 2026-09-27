@@ -109,12 +109,11 @@ jobs:
       # participant-context create from `admin` with HTTP 403 "Required user
       # role not satisfied". Measured on the live control plane, #316.
       #
-      # continue-on-error while this is new: an unseeded stack is the status quo
-      # and the suites report it clearly, whereas a flaky seed turning main red
-      # would be a regression. Make it a hard failure once it has been seen to
-      # work — the tier having no way to fail is exactly what #316 is about.
+      # Hard-fails since #349: this has been seen to work, and a seed that
+      # silently does nothing is exactly what #316 is about. If it breaks, the
+      # run should stop here rather than let the suites report a number that
+      # measures the seeding instead of the platform.
       - name: Seed participant contexts on the control plane (#316)
-        continue-on-error: true
         run: |
           TOKEN=$(curl -sS --max-time 20 -X POST \
             "http://localhost:8080/realms/edcv/protocol/openid-connect/token" \
@@ -205,12 +204,11 @@ jobs:
       # participant-context create from `admin` with HTTP 403 "Required user
       # role not satisfied". Measured on the live control plane, #316.
       #
-      # continue-on-error while this is new: an unseeded stack is the status quo
-      # and the suites report it clearly, whereas a flaky seed turning main red
-      # would be a regression. Make it a hard failure once it has been seen to
-      # work — the tier having no way to fail is exactly what #316 is about.
+      # Hard-fails since #349: this has been seen to work, and a seed that
+      # silently does nothing is exactly what #316 is about. If it breaks, the
+      # run should stop here rather than let the suites report a number that
+      # measures the seeding instead of the platform.
       - name: Seed participant contexts on the control plane (#316)
-        continue-on-error: true
         run: |
           TOKEN=$(curl -sS --max-time 20 -X POST \
             "http://localhost:8080/realms/edcv/protocol/openid-connect/token" \
@@ -250,7 +248,6 @@ jobs:
       # issuer seed below depends on it, and the 401/404 pair the first runs
       # produced was this missing.
       - name: Give the issuer its identity (#345)
-        continue-on-error: true
         run: |
           KEYCLOAK_URL=http://localhost:8080 \
             ./scripts/seed-issuer-identity.sh
@@ -264,7 +261,6 @@ jobs:
       # what the step above creates. continue-on-error so the suite still runs
       # and ISS-4.3 stays the assertion; the diagnostic is what this is for.
       - name: Wait until the issuer accepts Keycloak tokens (#345)
-        continue-on-error: true
         run: |
           KC_HOST=http://localhost:8080 \
           ISSUER_API=http://localhost:10013 \
@@ -277,7 +273,6 @@ jobs:
       # registers them locally, nothing did here. Mirrors the same control-plane
       # participants the IdentityHub seed used, so all three stores agree.
       - name: Register participants as holders on the issuer (#345)
-        continue-on-error: true
         run: |
           KEYCLOAK_URL=http://localhost:8080 \
           EDC_ISSUER_URL=http://localhost:10013/api/admin \
@@ -291,7 +286,6 @@ jobs:
       # continue-on-error so the suite still runs and ISS-4.3 stays the
       # it logs in as arrives with the realm import since #345.
       - name: Seed issuer credential definitions (#345)
-        continue-on-error: true
         run: |
           KC_HOST=http://localhost:8080 \
           ISSUER_API=http://localhost:10013 \
@@ -302,9 +296,8 @@ jobs:
       # IdentityHub requests it over DCP. So this asks, then waits for it to
       # land, and prints the hub's errorDetail if it gives up. First place CI
       # exercises DCP as a protocol between two services. continue-on-error on
-      # its first outing so the run reports what happened either way.
+      # Hard-fails since #349; it has been seen to work.
       - name: Request participant credentials over DCP (#345)
-        continue-on-error: true
         run: |
           KEYCLOAK_URL=http://localhost:8080 \
           EDC_IDENTITY_URL=http://localhost:11005/api/identity \
@@ -395,10 +388,9 @@ jobs:
       # second run. The count read-back is the assertion (ADR-031): a seed
       # that ran is not a seed that seeded.
       #
-      # continue-on-error on this first outing so the suite still runs and
-      # reports; its rows remain the assertions.
+      # Hard-fails since #349: the seed has been seen to work, and its count
+      # read-back is the assertion.
       - name: Seed Neo4j with the documented minimal data set (#345)
-        continue-on-error: true
         run: |
           set -euo pipefail
           for f in neo4j/insert-synthetic-schema-data.cypher neo4j/register-eehrxf-profiles.cypher neo4j/seed-compliance-matrix.cypher neo4j/seed-persona-overview.cypher; do
@@ -436,12 +428,11 @@ jobs:
       # participant-context create from `admin` with HTTP 403 "Required user
       # role not satisfied". Measured on the live control plane, #316.
       #
-      # continue-on-error while this is new: an unseeded stack is the status quo
-      # and the suites report it clearly, whereas a flaky seed turning main red
-      # would be a regression. Make it a hard failure once it has been seen to
-      # work — the tier having no way to fail is exactly what #316 is about.
+      # Hard-fails since #349: this has been seen to work, and a seed that
+      # silently does nothing is exactly what #316 is about. If it breaks, the
+      # run should stop here rather than let the suites report a number that
+      # measures the seeding instead of the platform.
       - name: Seed participant contexts on the control plane (#316)
-        continue-on-error: true
         run: |
           TOKEN=$(curl -sS --max-time 20 -X POST \
             "http://localhost:8080/realms/edcv/protocol/openid-connect/token" \
@@ -533,7 +524,6 @@ jobs:
           done
 
       - name: Seed Neo4j with the documented minimal data set
-        continue-on-error: true
         run: |
           set -euo pipefail
           docker exec -i health-dataspace-neo4j \
@@ -555,7 +545,6 @@ jobs:
       # Folder "10 Connecting partner" speaks to the EDC layer, which is empty
       # on a fresh stack until the seven identity steps have run (#345).
       - name: Seed the identity layer (#345)
-        continue-on-error: true
         run: |
           KEYCLOAK_URL=http://localhost:8080 \
           EDC_MANAGEMENT_URL=http://localhost:11003/api/mgmt \
