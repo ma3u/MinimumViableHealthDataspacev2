@@ -53,7 +53,7 @@ jobs:
       # (#349). The forge needs the deployment's own NEXTAUTH_SECRET.
       - name: Run the Bruno API collection against the demo
         env:
-          BRUNO_REPORT_DIR: ${{ github.workspace }}/bruno-report
+          BRUNO_REPORT_DIR: ${{ github.workspace }}/test-results/bruno-api-azure-results
           NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
         run: |
           set -euo pipefail
@@ -64,11 +64,21 @@ jobs:
           chmod +x scripts/run-api-tests.sh
           mkdir -p "$BRUNO_REPORT_DIR"
           ./scripts/run-api-tests.sh Azure-Dev
+      # The floor lives in scripts/compliance-baseline.json under
+      # bruno-api-azure-results. On the first run there is no entry yet, so the
+      # gate prints the measured number and passes; commit that number to arm it.
+      - name: Compliance baseline (Azure demo)
+        if: always()
+        run: |
+          set -euo pipefail
+          python3 scripts/check-compliance-baseline.py --results test-results \
+            | tee -a "$GITHUB_STEP_SUMMARY"
+
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: bruno-azure-dev
-          path: bruno-report/
+          path: test-results/bruno-api-azure-results/
           retention-days: 14
 
   playwright-public:
