@@ -96,9 +96,16 @@ else
 fi
 echo "[bruno] environment $ENV_NAME, ${#PATHS[@]} path(s)"
 
-JSON_REPORT="$REPORT_DIR/bruno-raw-$ENV_NAME-$STAMP.json"
-HTML_REPORT="$REPORT_DIR/bruno-$ENV_NAME-$STAMP.html"
-JUNIT_REPORT="$REPORT_DIR/bruno-$ENV_NAME-$STAMP.xml"
+# Only the summary JSON goes directly in $REPORT_DIR. Everything else lives in
+# raw/, because consumers glob "$REPORT_DIR"/*.json and read .summary: the
+# compliance report step did `jq .summary.passed` on the newest match and hit
+# bru's raw report, which is a bare array, and died with "Cannot index array
+# with string" (#349).
+RAW_DIR="$REPORT_DIR/raw"
+mkdir -p "$RAW_DIR"
+JSON_REPORT="$RAW_DIR/bruno-raw-$ENV_NAME-$STAMP.json"
+HTML_REPORT="$RAW_DIR/bruno-$ENV_NAME-$STAMP.html"
+JUNIT_REPORT="$RAW_DIR/bruno-$ENV_NAME-$STAMP.xml"
 set +e
 (
   # ${arr[@]+"${arr[@]}"}: an empty array is an unbound variable under `set -u`
