@@ -85,7 +85,8 @@ jobs:
           mkdir -p "$BRUNO_REPORT_DIR"
           ./scripts/run-api-tests.sh Azure-Dev
       # The floor lives in scripts/compliance-baseline.json under
-      # bruno-api-azure-results, armed at 122/1 on 2026-09-28.
+      # bruno-api-azure-results, armed at 123/0 on 2026-09-28: the demo
+      # answers every request in the collection, so any red is a regression.
       - name: Compliance baseline (Azure demo)
         if: always()
         run: |
