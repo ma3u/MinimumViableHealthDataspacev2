@@ -3,6 +3,56 @@
 Non-obvious pitfalls across the stack. Ordered newest first; add a new
 entry at the top when you hit something that cost you more than 30 minutes.
 
+## 2026-09-28: an EDC web context you do not configure still binds, somewhere else
+
+`GET /api/credentials/definitions` answered **502** on the Azure demo and
+**200** on the local stack and in CI, for as long as the demo existed (#373).
+The guess in the issue was a missing issuer identity answering 401 or 404. It
+was not. The body said so all along, because the route reports its cause:
+
+```json
+{
+  "error": "Could not reach IssuerService",
+  "detail": "The operation was aborted due to timeout"
+}
+```
+
+An EDC launcher gives every web context its own port **and** path, and a
+context you do not configure does not fail to start: it quietly takes a
+built-in default. The ACA container app was created with one setting,
+`WEB_HTTP_PORT=10013`, so its own log recorded twelve fallbacks:
+
+```
+no setting found for 'web.http.issueradmin.port', falling back to default value '15152'
+no setting found for 'web.http.issueradmin.path', falling back to default value '/api/issuer'
+...
+HTTP context 'issueradmin' listening on port 15152
+HTTP context 'default'     listening on port 10013
+```
+
+ACA ingress publishes exactly one port, 10013, and the callers ask for
+`/api/admin`. So the admin API was listening on a port nothing could route to,
+at a path nobody requested, while the port that _was_ exposed served an
+unrelated context. `jad/issuerservice.env` sets all twelve values, which is
+why local and CI never saw it; `scripts/azure/04-edc-services.sh` carried one
+of them across.
+
+Two things to take from it:
+
+- **A timeout is not always a network problem.** Here ingress was healthy and
+  the process was up; the request reached a listener that had no such route.
+  `runningStatus: Running` and a bound ingress port say nothing about whether
+  the API you want is the one behind it.
+- **Grep the startup log for `falling back to default value`** after deploying
+  an EDC runtime anywhere its env file does not follow it. Every divergence
+  between an environment that works and one that does not is listed there, for
+  free, at DEBUG.
+
+```bash
+az containerapp logs show -n mvhd-issuerservice -g rg-mvhd-dev --tail 300 --format text \
+  | grep -E "falling back to default value|HTTP context .* listening"
+```
+
 ## 2026-09-26: a readiness endpoint says nothing about identity
 
 `ISS-4.1: IssuerService readiness check passed` was true in CI on every run

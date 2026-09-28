@@ -186,6 +186,20 @@ az containerapp create \
 ok "Identity Hub"
 
 # ── Issuer Service ───────────────────────────────────────────────────────────
+# The four WEB_HTTP_* settings below are not decoration: the launcher gives
+# every web context its own port and path, and anything not set here falls
+# back to a built-in default. Until 2026-09-28 only WEB_HTTP_PORT=10013 was
+# passed, so the deployment bound the issuer admin API where nobody looked:
+#
+#   web.http.issueradmin.port -> default 15152      (ingress exposes 10013)
+#   web.http.issueradmin.path -> default /api/issuer  (callers use /api/admin)
+#
+# ACA ingress publishes exactly one port, so the admin context must be the one
+# on it. The default context moves to 10010, as in jad/issuerservice.env,
+# rather than colliding. Both callers, 05-cfm-ui.sh and 08-compliance-runner.sh,
+# already build https://$ISSUER_APP.internal.$ACA_DOMAIN/api/admin, so the
+# server was the only side that disagreed. That is #373: the route answered
+# 502 on the demo and 200 everywhere else, for as long as the demo existed.
 log "Creating Issuer Service container app..."
 az containerapp create \
   --name "$ISSUER_APP" --resource-group "$RG" --environment "$ACA_ENV" \
@@ -205,7 +219,10 @@ az containerapp create \
     "EDC_VAULT_HASHICORP_TOKEN=${VAULT_ROOT_TOKEN}" \
     "EDC_ENCRYPTION_AES_KEY_ALIAS=aes-key-alias" \
     "EDC_IAM_OAUTH2_JWKS_URL=${KEYCLOAK_PUBLIC_URL:-}/realms/edcv/protocol/openid-connect/certs" \
-    "WEB_HTTP_PORT=10013" \
+    "WEB_HTTP_PORT=10010" \
+    "WEB_HTTP_PATH=/api" \
+    "WEB_HTTP_ISSUERADMIN_PORT=10013" \
+    "WEB_HTTP_ISSUERADMIN_PATH=/api/admin" \
   -o none
 ok "Issuer Service"
 

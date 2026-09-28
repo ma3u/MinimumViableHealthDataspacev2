@@ -25,13 +25,6 @@ test.describe("Explore Pages (public)", () => {
     ).toBeVisible({ timeout: TIMEOUT });
   });
 
-  test("Patient Journey renders heading", async ({ page }) => {
-    await page.goto("/patient");
-    await expect(
-      page.locator("h1", { hasText: "Patient Journey" }),
-    ).toBeVisible({ timeout: TIMEOUT });
-  });
-
   test("OMOP Analytics renders heading", async ({ page }) => {
     await page.goto("/analytics");
     await expect(
@@ -50,6 +43,15 @@ test.describe("Explore Pages (public)", () => {
 /* ── Protected pages redirect to sign-in ──────────────────────── */
 
 test.describe("Protected Pages (redirect to sign-in)", () => {
+  // Moved here from "Explore Pages (public)" on 2026-09-28. /patient joined
+  // PROTECTED_PATHS with #357/#376; it was listed as public because it used
+  // to be. The static export has no middleware, so this passed there either
+  // way, and the spec's workflows are continue-on-error, so nothing said.
+  test("Patient Journey redirects unauthenticated users", async ({ page }) => {
+    await page.goto("/patient");
+    await expect(page).toHaveURL(/signin/, { timeout: TIMEOUT });
+  });
+
   test("Compliance redirects unauthenticated users", async ({ page }) => {
     await page.goto("/compliance");
     await expect(page).toHaveURL(/signin/, { timeout: TIMEOUT });
