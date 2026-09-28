@@ -31,10 +31,10 @@
       "note": "run 36259831503: 18 passed, 0 failed, 7 skipped, twice reproduced (fresh-DB proof and CI). At parity with what the seeded graph can show; the 7 skips are rows whose data the minimal set does not carry (OMOP drug/measurement/procedure links, vocabulary source values, VerifiableCredential nodes). No review_by override any more: this floor is healthy, so the global date applies."
     },
     "bruno-api-results": {
-      "min_passed": 147,
+      "min_passed": 149,
       "max_failed": 2,
       "review_by": "2026-10-27",
-      "note": "runs 36347403681 on 6ee7590 and 36348302407 on b74a41c, both 147 passed, 2 failed, 0 skipped over 149. Raised from 146/3 on two consecutive measurements, not one. Closed since: /api/admin/policies answered in two shapes and the page was blank in one (#367). The 2 left: the DSP catalogue request with no provider dispatcher (#345), and the credentials request, which answers 502 on CI. #369 fixed that request to send a CFM tenant id rather than a participant context id, and it is green locally, but CI still 502s. The likely reason is that CFM never provisions a tenant on the ephemeral stack, so there is no id to capture; the request now skips loudly when that is the case and `01 Tenants` logs the tenant count, so the next run says which it is instead of leaving a missing tenant looking like a broken route."
+      "note": "run 36420315618 on 523538d: 149 passed, 2 failed, 0 skipped over 151. Raised from 147/2 by #377, which adds two requests that cannot flake: `09 Access control/17` asserts the 401 on /api/debug/phase26 with no session and `/18` the 403 for a signed-in data user. Both are pure auth assertions with no upstream, so the +2 is structural rather than a measurement that might drift back. Without the raise, both new gate assertions could vanish and the floor would still pass, which is the thing this ratchet exists to stop. The 2 left are unchanged: the DSP catalogue request with no provider dispatcher (#345), and the credentials request, which 502s because CFM provisions no tenant on the ephemeral stack (#318). Beware a neo4j-proxy readiness race: run 36418922439, twenty minutes earlier on the same commit, scored 138/13 because every 11 Platform request and every /api route that proxies to port 9090 was refused. The proxy built and started with no error in the log. Nothing in the suite waits for it to accept connections, so a slow start reads as a mass regression."
     },
     "bruno-api-azure-results": {
       "min_passed": 123,

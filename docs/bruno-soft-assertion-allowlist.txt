@@ -36,7 +36,6 @@
 05 Dataspace Operator/24 One node of the graph
 05 Dataspace Operator/25 Its neighbourhood
 05 Dataspace Operator/26 Does the graph match its schema
-05 Dataspace Operator/28 Phase 26 debug view
 06 Trust Centre/01 Trust centres and open SPE sessions
 07 Journey - Data permit/01 Data user picks the dataset
 08 Journey - Data request/01 Data user asks a question (Art. 69)

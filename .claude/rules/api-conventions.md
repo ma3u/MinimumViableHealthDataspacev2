@@ -115,6 +115,37 @@ participant sees the demo cohort, a `PATIENT` sees only their own record
 (EHDS Art. 3, GDPR Art. 15). `bruno/MVHDv2/09 Access control/05` asserts the
 401 and its `{ error }` body.
 
+### The two routes that answer without a session, and why
+
+#357 prompted a sweep: every handler was classified, then every
+public-looking GET was called with no session against a running stack.
+Ground truth, not a static scan, because several routes gate through a
+file-local helper and a scan reported them as open. It found one gap and one
+judgement call, both settled in #377.
+
+`/api/debug/phase26` was the gap. An operator diagnostic that answered
+anybody with participant, dataset and glossary counts, while this collection
+filed it under `05 Dataspace Operator`. Now `requireAuth(["EDC_ADMIN"])`.
+`09 Access control/17` asserts the 401 with no session and `/18` the 403 for
+a signed-in data user; `05 Dataspace Operator/28` asserts the operator still
+gets through.
+
+`/api/nlq/backend` stays public, deliberately. It is the one route in the
+inventory that answers anonymously by decision rather than by oversight. It
+reports which chat and embeddings providers are wired and which vector
+indexes exist: no secrets, no data. Against that,
+`__tests__/e2e/journeys/33-graphrag-nlp.spec.ts` probes it with no session
+seven times to decide which GraphRAG branches its environment can run, and
+its `fetchBackend()` feeds a null on any non-200 straight into
+`test.skip(...)`. Gating it would not fail those tests, it would silently
+stop them running, which is what ADR-031 exists to prevent, and section A of
+that spec is deliberately Keycloak-free so it runs where no login exists.
+Small disclosure against real coverage; the coverage wins. Revisit if that
+spec gains an authenticated request context.
+
+These two are the whole list. Any other route answering a caller with no
+session is a defect, not a policy.
+
 **Route tests do not check the gate.** `ui/__tests__/setup.ts` mocks
 `@/lib/auth-guard` open, so `requireAuth()` returns an `EDC_ADMIN` and
 `isAuthError()` returns false for every test that does not say otherwise. That

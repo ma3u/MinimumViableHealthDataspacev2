@@ -12,5 +12,14 @@ get {
 
 assert {
   res.status: eq 200
-  res.body: isJson
+  res.body.participants.total: isNumber
+  res.body.healthDatasets.total: isNumber
+  res.body.nlqGlossary.total: isNumber
+}
+
+docs {
+  Gated to EDC_ADMIN in #377: until then it answered anyone, while this
+  collection filed it under the operator persona. `09 Access control/17` and `/18` are
+  the requests that prove the refusal, for no session and for the wrong role. The three counts are asserted rather than `res.body: isJson`,
+  because an empty object is valid JSON and this used to pass on one.
 }

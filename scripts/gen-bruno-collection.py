@@ -585,7 +585,14 @@ req(f, "22 Does the graph match its schema", "get", f"{B}/api/graph/validate",
 req(f, "23 A node that is not there (404)", "get", f"{B}/api/graph/node?id=does-not-exist",
     asserts=["res.status: eq 404", "res.body.error: isDefined"])
 req(f, "24 Phase 26 debug view", "get", f"{B}/api/debug/phase26",
-    asserts=["res.status: eq 200", "res.body: isJson"])
+    asserts=["res.status: eq 200",
+             "res.body.participants.total: isNumber",
+             "res.body.healthDatasets.total: isNumber",
+             "res.body.nlqGlossary.total: isNumber"],
+    docs="""Gated to EDC_ADMIN in #377: until then it answered anyone, while this
+collection filed it under the operator persona. `09 Access control/17` and `/18` are
+the requests that prove the refusal, for no session and for the wrong role. The three counts are asserted rather than `res.body: isJson`,
+because an empty object is valid JSON and this used to pass on one.""")
 
 # ===========================================================================
 f = folder("06 Trust Centre", "The trust centre operator (TRUST_CENTER_OPERATOR)",
@@ -846,6 +853,34 @@ req(f, "14 Access body cannot open the trust centre (403)", "get", f"{B}/api/tru
 req(f, "15 Data user cannot register a participant (403)", "post", f"{B}/api/admin/participants",
     persona="researcher", body={"participantId": "did:web:bruno.example:sneak", "name": "should never exist"},
     asserts=["res.status: eq 403"])
+req(f, "16 No session, the operator debug view", "get", f"{B}/api/debug/phase26", persona="anon",
+    tests="""
+// #377. The anonymous sweep that followed #357 classified every handler and
+// then called each public-looking GET with no session, which is ground truth
+// rather than a static scan. This route was the one gap it found: an
+// operator diagnostic, filed in this collection under `05 Dataspace
+// Operator`, that answered anybody with participant, dataset and glossary
+// counts. Nothing personal, and the deployment is synthetic, but the code
+// and the persona model disagreed, which is the same defect #357 was.
+//
+// Assert the body as well as the status, for the reason request 05 gives:
+// every refusal in this hub is { error: string }, and a bare 401 is a
+// different contract a partner would have to special-case.
+test("the debug view needs a session", function () {
+  expect(res.getStatus()).to.equal(401);
+});
+test("the refusal says so in the body", function () {
+  expect(res.getBody(), "an { error } body").to.have.property("error");
+});
+""")
+req(f, "17 Data user cannot open the operator debug view (403)", "get",
+    f"{B}/api/debug/phase26", persona="researcher",
+    asserts=["res.status: eq 403"],
+    docs="""A session is not enough: the route is EDC_ADMIN. 17 proves it refuses no
+session, this proves it refuses the wrong role, and `05 Dataspace Operator/28` proves
+the operator still gets through. /api/nlq/backend stays public by the decision recorded
+in #377 and in that route's own comment, so there is deliberately no request here for
+it.""")
 
 # ===========================================================================
 f = folder("10 Connecting partner", "A partner's own connector: DSP 2025-1 and DCP v1.0",

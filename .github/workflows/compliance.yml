@@ -544,6 +544,18 @@ jobs:
             [ "$i" -eq 60 ] && echo "the hub did not answer /api/health after 5 min, proceeding"
             sleep 5
           done
+          # The proxy was missing from this list until 2026-09-28, and thirteen
+          # requests depend on it: the whole 11 Platform folder plus every UI
+          # route that forwards to port 9090. Run 36418922439 scored 138/13
+          # against a commit whose re-run scored 149/2, because the proxy had
+          # not started accepting connections yet. It logged a clean build and
+          # a clean start, so the failure looked like a mass regression in the
+          # hub rather than a race. Waiting costs nothing when it is already up.
+          for i in $(seq 1 60); do
+            curl -sf http://localhost:9090/health >/dev/null 2>&1 && break
+            [ "$i" -eq 60 ] && echo "the neo4j-proxy did not answer /health after 5 min, proceeding"
+            sleep 5
+          done
 
       - name: Seed Neo4j with the documented minimal data set
         run: |
