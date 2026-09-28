@@ -1,0 +1,35 @@
+meta {
+  name: 17 No session, the operator debug view
+  type: http
+  seq: 17
+}
+
+get {
+  url: {{baseUrl}}/api/debug/phase26
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}=not-a-session
+}
+
+tests {
+  // #377. The anonymous sweep that followed #357 classified every handler and
+  // then called each public-looking GET with no session, which is ground truth
+  // rather than a static scan. This route was the one gap it found: an
+  // operator diagnostic, filed in this collection under `05 Dataspace
+  // Operator`, that answered anybody with participant, dataset and glossary
+  // counts. Nothing personal, and the deployment is synthetic, but the code
+  // and the persona model disagreed, which is the same defect #357 was.
+  //
+  // Assert the body as well as the status, for the reason request 05 gives:
+  // every refusal in this hub is { error: string }, and a bare 401 is a
+  // different contract a partner would have to special-case.
+  test("the debug view needs a session", function () {
+    expect(res.getStatus()).to.equal(401);
+  });
+  test("the refusal says so in the body", function () {
+    expect(res.getBody(), "an { error } body").to.have.property("error");
+  });
+}

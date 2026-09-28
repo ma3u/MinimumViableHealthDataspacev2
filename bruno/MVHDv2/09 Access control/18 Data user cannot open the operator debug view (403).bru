@@ -1,0 +1,27 @@
+meta {
+  name: 18 Data user cannot open the operator debug view (403)
+  type: http
+  seq: 18
+}
+
+get {
+  url: {{baseUrl}}/api/debug/phase26
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}={{sessionTokenResearcher}}
+}
+
+assert {
+  res.status: eq 403
+}
+
+docs {
+  A session is not enough: the route is EDC_ADMIN. 17 proves it refuses no
+  session, this proves it refuses the wrong role, and `05 Dataspace Operator/28` proves
+  the operator still gets through. /api/nlq/backend stays public by the decision recorded
+  in #377 and in that route's own comment, so there is deliberately no request here for
+  it.
+}
