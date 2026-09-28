@@ -56,9 +56,11 @@ jobs:
       # 49 requests answered 401 Unauthorized and the job was red every day for
       # weeks while the collection's only assertion (status < 500) passed
       # (#349). The forge needs the deployment's own NEXTAUTH_SECRET.
-      - name: Run the Bruno API collection against the demo
+      # A missing secret is its own failure, and a hard one: without it every
+      # request answers 401 and the collection measures nothing. Kept separate
+      # from the run below so this message is what a reader sees.
+      - name: The demo's signing secret must be present
         env:
-          BRUNO_REPORT_DIR: ${{ github.workspace }}/test-results/bruno-api-azure-results
           NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
         run: |
           set -euo pipefail
@@ -66,12 +68,24 @@ jobs:
             echo "::error::NEXTAUTH_SECRET is not set, so no persona can sign in and every request would answer 401. Set the repository secret to the value the deployment runs with."
             exit 1
           fi
+
+      # The suite step reports either way; the baseline gate below is the
+      # assertion (ADR-031), the same split compliance.yml uses. Until
+      # 2026-09-28 this step failed the job on its own exit code, so the one
+      # known-red request (#373) kept Demo Smoke red on every run while the
+      # gate underneath it printed NO BASELINE and passed.
+      - name: Run the Bruno API collection against the demo
+        continue-on-error: true
+        env:
+          BRUNO_REPORT_DIR: ${{ github.workspace }}/test-results/bruno-api-azure-results
+          NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
+        run: |
+          set -euo pipefail
           chmod +x scripts/run-api-tests.sh
           mkdir -p "$BRUNO_REPORT_DIR"
           ./scripts/run-api-tests.sh Azure-Dev
       # The floor lives in scripts/compliance-baseline.json under
-      # bruno-api-azure-results. On the first run there is no entry yet, so the
-      # gate prints the measured number and passes; commit that number to arm it.
+      # bruno-api-azure-results, armed at 122/1 on 2026-09-28.
       - name: Compliance baseline (Azure demo)
         if: always()
         run: |
