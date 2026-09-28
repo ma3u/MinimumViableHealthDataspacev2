@@ -66,6 +66,58 @@ env:
 
 jobs:
   # -----------------------------------------------------------------------
+  # Image platforms (#380)
+  # -----------------------------------------------------------------------
+  # The CI stack started `tenant-manager` from an image with only a
+  # linux/arm64 manifest. Docker printed the mismatch and said "Started"
+  # anyway; the container never served, and the suite stayed green because
+  # /api/admin/tenants backfills from Neo4j when CFM is unreachable. CFM has
+  # therefore never run here, and nothing said so.
+  #
+  # This asks the registries what platforms each compose image really has, in
+  # a few seconds and without pulling anything. It does not fail the run: the
+  # DSP and DCP suites do not need CFM, and blocking every compliance run on
+  # an upstream image nobody in this repository builds would trade one silent
+  # state for a stuck one. It annotates instead, so the state is on the run
+  # rather than in someone's memory.
+  image-platforms:
+    name: Image platforms
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Ask each registry which platforms it serves
+        run: |
+          set +e
+          python3 scripts/check-image-platforms.py \
+            docker-compose.yml docker-compose.jad.yml > platforms.txt 2> platforms.err
+          code=$?
+          cat platforms.txt
+          cat platforms.err >&2
+
+          {
+            echo "### Compose image platforms"
+            echo ""
+            echo '```'
+            cat platforms.txt
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          case "$code" in
+            0) echo "every compose image serves linux/amd64" ;;
+            1)
+              while read -r ref; do
+                echo "::warning title=Image cannot run on this runner::${ref} has no linux/amd64 manifest. Compose will report it Started and it will never serve (#380)."
+              done < <(grep -oE 'ghcr\.io/[^ ]+|[a-z0-9._/-]+@sha256:[a-f0-9]{64}' platforms.err | sort -u)
+              echo "::warning title=CFM is not exercised here::The CFM images are linux/arm64 only, so the Tenant Manager does not serve on this runner and /api/admin/tenants answers from the Neo4j backfill (#380)."
+              ;;
+            *)
+              echo "::warning title=Image platforms unverified::A registry could not be asked, so this run proves nothing about image platforms."
+              ;;
+          esac
+
+  # -----------------------------------------------------------------------
   # DSP 2025-1 Technology Compatibility Kit
   # -----------------------------------------------------------------------
   dsp-tck:
