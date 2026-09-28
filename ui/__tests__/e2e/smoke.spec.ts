@@ -96,11 +96,18 @@ test.describe("Dataset Catalog", () => {
 });
 
 test.describe("Patient Journey", () => {
-  test("should load the patient page", async ({ page }) => {
+  // Gated since #357/#376: /patient is in PROTECTED_PATHS, so an anonymous
+  // visitor is sent to sign in and never sees the page. Until 2026-09-28 this
+  // test still asserted the page loads, and it was the whole Playwright half
+  // of Demo Smoke being red. What it pins now is the gate itself: reaching
+  // the patient page without a session is a regression, not a pass.
+  test("sends an anonymous visitor to sign in", async ({ page }) => {
     const errors = collectClientErrors(page);
     await page.goto("/patient");
-    await expect(page).toHaveURL(/\/patient/);
-    await expect(page.locator("text=Patient").first()).toBeVisible();
+    await expect(page).toHaveURL(/\/auth\/signin\?callbackUrl=%2Fpatient/);
+    await expect(
+      page.getByRole("button", { name: /Sign in with Keycloak/i }),
+    ).toBeVisible();
     expect(errors, `client errors on /patient:\n${errors.join("\n")}`).toEqual(
       [],
     );
@@ -132,10 +139,13 @@ test.describe("Navigation", () => {
     await nav.getByRole("menuitem", { name: /Dataset Catalog/ }).click();
     await expect(page).toHaveURL(/\/catalog/);
 
-    // Navigate to patient via nav dropdown
+    // Navigate to patient via nav dropdown. The item is still offered to an
+    // anonymous visitor, and choosing it lands on sign in rather than on the
+    // page, because /patient is gated (#357/#376). Asserting the redirect
+    // keeps this leg meaningful instead of deleting it.
     await explore.click();
     await nav.getByRole("menuitem", { name: /Patient Journey/ }).click();
-    await expect(page).toHaveURL(/\/patient/);
+    await expect(page).toHaveURL(/\/auth\/signin\?callbackUrl=%2Fpatient/);
     expect(
       errors,
       `client errors during navigation:\n${errors.join("\n")}`,

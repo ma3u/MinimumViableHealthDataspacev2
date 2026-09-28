@@ -35,6 +35,11 @@
       "max_failed": 2,
       "review_by": "2026-10-27",
       "note": "runs 36347403681 on 6ee7590 and 36348302407 on b74a41c, both 147 passed, 2 failed, 0 skipped over 149. Raised from 146/3 on two consecutive measurements, not one. Closed since: /api/admin/policies answered in two shapes and the page was blank in one (#367). The 2 left: the DSP catalogue request with no provider dispatcher (#345), and the credentials request, which answers 502 on CI. #369 fixed that request to send a CFM tenant id rather than a participant context id, and it is green locally, but CI still 502s. The likely reason is that CFM never provisions a tenant on the ephemeral stack, so there is no id to capture; the request now skips loudly when that is the case and `01 Tenants` logs the tenant count, so the next run says which it is instead of leaving a missing tenant looking like a broken route."
+    },
+    "bruno-api-azure-results": {
+      "min_passed": 123,
+      "max_failed": 0,
+      "note": "run 36383527116 on ff2bba5: 123 passed, 0 failed, 0 skipped over 123 against https://ehds.mabu.red. The live demo answers every request in the collection. ARMED 2026-09-28 at 122/1 and raised to 123/0 in the same change, once the dispatched run showed #373 closed: the entry the workflow comment asked for on the first run had never been committed, so for 100 consecutive runs the Bruno step failed on its own exit code while this gate printed NO BASELINE and passed. A full house is an unusual floor and a deliberate one: nothing here is known-broken any more, so any red is a real regression. Lower it only with a reason."
     }
   }
 }
