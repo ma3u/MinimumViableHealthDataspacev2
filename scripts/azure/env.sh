@@ -63,6 +63,16 @@ export IDENTITYHUB_APP="mvhd-identityhub"
 export ISSUER_APP="mvhd-issuerservice"
 export TENANT_MGR_APP="mvhd-tenant-mgr"
 export PROVISION_MGR_APP="mvhd-provision-mgr"
+# The four CFM provisioning agents (#318). Without them a participant created
+# through /onboarding keeps all three of its activities pending for ever:
+# cfm.connector, cfm.credentialservice, cfm.dataplane.
+export CFM_KC_AGENT_APP="mvhd-cfm-kcagent"
+export CFM_EDCV_AGENT_APP="mvhd-cfm-edcvagent"
+export CFM_REG_AGENT_APP="mvhd-cfm-regagent"
+export CFM_OB_AGENT_APP="mvhd-cfm-obagent"
+# nginx that rewrites the agents' compiled-in v5alpha management segment to
+# whatever this control plane serves. The local stack calls it cfm-cp-shim.
+export CFM_CP_SHIM_APP="mvhd-cfm-cp-shim"
 
 # ── ACA Jobs ─────────────────────────────────────────────────────────────────
 export NEO4J_SEED_JOB="mvhd-neo4j-seed"
@@ -124,6 +134,29 @@ export IDENTITYHUB_IMAGE="${ACR_LOGIN_SERVER}/jad-identity-hub:${JAD_VERSION}"
 export ISSUER_IMAGE="${ACR_LOGIN_SERVER}/jad-issuerservice:${JAD_VERSION}"
 export TENANT_MGR_IMAGE="${ACR_LOGIN_SERVER}/cfm-tmanager:${CFM_VERSION}"
 export PROVISION_MGR_IMAGE="${ACR_LOGIN_SERVER}/cfm-pmanager:${CFM_VERSION}"
+
+# The agents are pinned to the WORKING 2026-03-09 CFM build (ADR-029, #181),
+# by digest, because GHCR :latest was overwritten on 2026-04-11 by a build that
+# needs a Fulcrum job coordinator this stack does not run: every agent panics at
+# launch and no activity ever leaves `pending`. docker-compose.jad.yml pins the
+# same four digests; they must not drift apart.
+#
+# These are not built here. Import them from GHCR into ACR, which copies by
+# digest server side (scripts/azure/build-images.sh does it):
+#
+#   az acr import -n "$ACR_NAME" \
+#     --source ghcr.io/ma3u/health-dataspace/cfm-kcagent@${CFM_KC_AGENT_DIGEST} \
+#     --image cfm-kcagent:${CFM_AGENT_VERSION}
+export CFM_AGENT_VERSION="${CFM_AGENT_VERSION:-2026-03-09}"
+export CFM_KC_AGENT_DIGEST="sha256:f9b96f905c9f8bbdc38177c48d8a2eb5b13f8ae37471cf5db28f055d4beafac6"
+export CFM_EDCV_AGENT_DIGEST="sha256:78fbf70a14e1cc2f1f89700cdcd95cd3cef68dd647dd032a264fba34cbe34d39"
+export CFM_REG_AGENT_DIGEST="sha256:d0925810736087f10d74cd31f7d95a552518a99f8868b0f9303ce0c059605be7"
+export CFM_OB_AGENT_DIGEST="sha256:ffd7e5e1544c50e7a45f88b620656f31a0f118b2f3f305e55720d2762bcce3f3"
+export CFM_KC_AGENT_IMAGE="${ACR_LOGIN_SERVER}/cfm-kcagent:${CFM_AGENT_VERSION}"
+export CFM_EDCV_AGENT_IMAGE="${ACR_LOGIN_SERVER}/cfm-edcvagent:${CFM_AGENT_VERSION}"
+export CFM_REG_AGENT_IMAGE="${ACR_LOGIN_SERVER}/cfm-regagent:${CFM_AGENT_VERSION}"
+export CFM_OB_AGENT_IMAGE="${ACR_LOGIN_SERVER}/cfm-obagent:${CFM_AGENT_VERSION}"
+export CFM_CP_SHIM_IMAGE="${ACR_LOGIN_SERVER}/nginx:${NGINX_VERSION:-1.29-alpine}"
 
 # ── Neo4j ────────────────────────────────────────────────────────────────────
 export NEO4J_USER="neo4j"

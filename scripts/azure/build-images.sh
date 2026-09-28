@@ -44,6 +44,37 @@ pull_retag_push "Neo4j" "neo4j:${NEO4J_VERSION}" "$NEO4J_IMAGE"
 pull_retag_push "Keycloak" "quay.io/keycloak/keycloak:${KEYCLOAK_VERSION}" "$KEYCLOAK_IMAGE"
 pull_retag_push "Vault" "hashicorp/vault:${VAULT_VERSION}" "$VAULT_IMAGE"
 pull_retag_push "NATS" "nats:${NATS_VERSION}" "$NATS_IMAGE"
+pull_retag_push "nginx (CFM control-plane shim)" "nginx:${NGINX_VERSION:-1.29-alpine}" "$CFM_CP_SHIM_IMAGE"
+
+# ── CFM provisioning agents (imported from GHCR by digest) ──────────────────
+# Not built here and not pulled through this laptop either: `az acr import`
+# copies server side, so a multi-hundred-MB image never crosses the local
+# network and no `docker pull` of a foreign-arch manifest can pick the wrong
+# platform. The source is a digest, which is the whole point — GHCR `:latest`
+# for these four was overwritten on 2026-04-11 with a build that panics at
+# launch without a Fulcrum job coordinator (ADR-029, #181), and the digests
+# below are the 2026-03-09 build that works. They match docker-compose.jad.yml.
+#
+# Idempotent: an import onto a tag that already resolves to the same digest is
+# a no-op, so a re-run costs one API call per image.
+import_from_ghcr() {
+  local name="$1" repo="$2" digest="$3" tag="$4"
+  log "Importing ${name} from GHCR (${digest:0:19}...)..."
+  if az acr import --name "$ACR_NAME" \
+      --source "ghcr.io/ma3u/health-dataspace/${repo}@${digest}" \
+      --image "${repo}:${tag}" --force -o none; then
+    ok "${name} → ${ACR_LOGIN_SERVER}/${repo}:${tag}"
+  else
+    err "${name}: import failed. GHCR must serve this digest publicly, and the"
+    err "  account needs AcrPush on ${ACR_NAME}."
+    return 1
+  fi
+}
+
+import_from_ghcr "CFM Keycloak agent"     cfm-kcagent   "$CFM_KC_AGENT_DIGEST"   "$CFM_AGENT_VERSION"
+import_from_ghcr "CFM EDC-V agent"        cfm-edcvagent "$CFM_EDCV_AGENT_DIGEST" "$CFM_AGENT_VERSION"
+import_from_ghcr "CFM Registration agent" cfm-regagent  "$CFM_REG_AGENT_DIGEST"  "$CFM_AGENT_VERSION"
+import_from_ghcr "CFM Onboarding agent"   cfm-obagent   "$CFM_OB_AGENT_DIGEST"   "$CFM_AGENT_VERSION"
 
 # ── Summary ──────────────────────────────────────────────────────────────────
 log "All images pushed"
@@ -57,6 +88,13 @@ echo "    ${NEO4J_IMAGE}"
 echo "    ${KEYCLOAK_IMAGE}"
 echo "    ${VAULT_IMAGE}"
 echo "    ${NATS_IMAGE}"
+echo "    ${CFM_CP_SHIM_IMAGE}"
+echo ""
+echo "  CFM agents (imported from GHCR by digest, #318):"
+echo "    ${CFM_KC_AGENT_IMAGE}"
+echo "    ${CFM_EDCV_AGENT_IMAGE}"
+echo "    ${CFM_REG_AGENT_IMAGE}"
+echo "    ${CFM_OB_AGENT_IMAGE}"
 echo ""
 echo "  JAD / CFM images are built from their own repositories, not this one."
 echo "  They currently resolve to :latest, which ACA caches and will not re-pull"
