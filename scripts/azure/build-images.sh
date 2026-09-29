@@ -44,6 +44,72 @@ pull_retag_push "Neo4j" "neo4j:${NEO4J_VERSION}" "$NEO4J_IMAGE"
 pull_retag_push "Keycloak" "quay.io/keycloak/keycloak:${KEYCLOAK_VERSION}" "$KEYCLOAK_IMAGE"
 pull_retag_push "Vault" "hashicorp/vault:${VAULT_VERSION}" "$VAULT_IMAGE"
 pull_retag_push "NATS" "nats:${NATS_VERSION}" "$NATS_IMAGE"
+pull_retag_push "nginx (CFM control-plane shim)" "nginx:${NGINX_VERSION:-1.29-alpine}" "$CFM_CP_SHIM_IMAGE"
+
+# ── CFM provisioning agents (imported from GHCR by digest) ──────────────────
+# Not built here and not pulled through this laptop either: `az acr import`
+# copies server side, so a multi-hundred-MB image never crosses the local
+# network and no `docker pull` of a foreign-arch manifest can pick the wrong
+# platform. The source is a digest, which is the whole point — GHCR `:latest`
+# for these four was overwritten on 2026-04-11 with a build that panics at
+# launch without a Fulcrum job coordinator (ADR-029, #181), and the digests
+# below are the 2026-03-09 build that works. They match docker-compose.jad.yml.
+#
+# Idempotent: an import onto a tag that already resolves to the same digest is
+# a no-op, so a re-run costs one API call per image.
+# Azure Container Apps runs linux/amd64 and only linux/amd64. Importing an
+# arm64-only digest would put an image in ACR that ACA starts and never runs,
+# which is #380 happening a second time in a different place — there, compose
+# said "Started" for a linux/arm64 Tenant Manager on an amd64 runner and every
+# call to it failed for months without anything saying why. So check the
+# manifest before importing, and refuse rather than leave that trap in ACR.
+import_from_ghcr() {
+  local name="$1" repo="$2" digest="$3" tag="$4"
+
+  local ref="ghcr.io/ma3u/health-dataspace/${repo}@${digest}"
+  if ! python3 "${REPO_ROOT}/scripts/check-image-platforms.py" --ref "$ref" >/dev/null 2>&1; then
+    err "${name}: ${repo}@${digest:0:19}... has no linux/amd64 manifest."
+    err "  Azure Container Apps is amd64 only, so this image would be imported,"
+    err "  deployed, reported Started, and never serve. Not importing it."
+    err "  The working 2026-03-09 CFM build is arm64 only; GHCR :latest is amd64"
+    err "  but is the 2026-04-11 build that panics without a Fulcrum job"
+    err "  coordinator (ADR-029, #181). An amd64 build of the 2026-03-09 source"
+    err "  is what #318 and #380 both need. Run:"
+    err "    python3 scripts/check-image-platforms.py --ref ${ref}"
+    return 1
+  fi
+
+  log "Importing ${name} from GHCR (${digest:0:19}...)..."
+  if az acr import --name "$ACR_NAME" \
+      --source "ghcr.io/ma3u/health-dataspace/${repo}@${digest}" \
+      --image "${repo}:${tag}" --force -o none; then
+    ok "${name} → ${ACR_LOGIN_SERVER}/${repo}:${tag}"
+  else
+    err "${name}: import failed. GHCR must serve this digest publicly, and the"
+    err "  account needs AcrPush on ${ACR_NAME}."
+    return 1
+  fi
+}
+
+AGENTS_IMPORTED=0
+AGENTS_BLOCKED=0
+for _spec in \
+  "CFM Keycloak agent|cfm-kcagent|${CFM_KC_AGENT_DIGEST}" \
+  "CFM EDC-V agent|cfm-edcvagent|${CFM_EDCV_AGENT_DIGEST}" \
+  "CFM Registration agent|cfm-regagent|${CFM_REG_AGENT_DIGEST}" \
+  "CFM Onboarding agent|cfm-obagent|${CFM_OB_AGENT_DIGEST}"; do
+  IFS='|' read -r _name _repo _digest <<<"$_spec"
+  if import_from_ghcr "$_name" "$_repo" "$_digest" "$CFM_AGENT_VERSION"; then
+    AGENTS_IMPORTED=$((AGENTS_IMPORTED + 1))
+  else
+    AGENTS_BLOCKED=$((AGENTS_BLOCKED + 1))
+  fi
+done
+if [ "$AGENTS_BLOCKED" -gt 0 ]; then
+  err "${AGENTS_BLOCKED} of 4 CFM agent image(s) were not imported (see above)."
+  err "Every other image in this script still pushed; #318 stays blocked on an"
+  err "amd64 build, not on this script."
+fi
 
 # ── Summary ──────────────────────────────────────────────────────────────────
 log "All images pushed"
@@ -57,6 +123,13 @@ echo "    ${NEO4J_IMAGE}"
 echo "    ${KEYCLOAK_IMAGE}"
 echo "    ${VAULT_IMAGE}"
 echo "    ${NATS_IMAGE}"
+echo "    ${CFM_CP_SHIM_IMAGE}"
+echo ""
+echo "  CFM agents (imported from GHCR by digest, #318):"
+echo "    ${CFM_KC_AGENT_IMAGE}"
+echo "    ${CFM_EDCV_AGENT_IMAGE}"
+echo "    ${CFM_REG_AGENT_IMAGE}"
+echo "    ${CFM_OB_AGENT_IMAGE}"
 echo ""
 echo "  JAD / CFM images are built from their own repositories, not this one."
 echo "  They currently resolve to :latest, which ACA caches and will not re-pull"
@@ -77,3 +150,11 @@ done
 echo ""
 echo "  Current resolution:"
 echo "    JAD_VERSION=${JAD_VERSION}  CFM_VERSION=${CFM_VERSION}"
+
+# A partial run must not read as a complete one: the caller asked for every
+# image to be in ACR and four of them are not. The summary above still prints,
+# so the failure is informative rather than merely loud.
+if [ "${AGENTS_BLOCKED:-0}" -gt 0 ]; then
+  err "build-images.sh: ${AGENTS_BLOCKED} CFM agent image(s) could not be imported (#318, #380)"
+  exit 1
+fi
