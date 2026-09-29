@@ -192,7 +192,8 @@ done
 # on 2026-09-26. That matters twice over — the UI lists only ACTIVATED
 # contexts (ui/src/app/api/participants/route.ts), and a context that was
 # never activated is not a participant anyone can negotiate with. There is no
-# activate endpoint; PUT <v>/participants/{id} is the way.
+# activate endpoint - PUT <v>/participants/{id} is the way, and the transition
+# it asks for is applied asynchronously (see the wait below).
 log "Activating any context that is not ACTIVATED ..."
 AFTER=$(curl -sS --max-time 30 -H "Authorization: Bearer $TOKEN" \
   "$CP/$MGMT_V/participants" || echo '[]')
@@ -240,27 +241,57 @@ for p in d if isinstance(d, list) else []:
 EOF
 log "activate requests accepted: $ACTIVATED, refused: $ACTIVATE_FAILED"
 
-# Do not trust the status code. Measured on the live control plane on
-# 2026-09-26: every PUT returned 204 and not one context changed state. A
-# 204 means the request was accepted, not that the field was applied, and
-# reporting "activated=5" off the back of it would be exactly the kind of
-# claim-without-evidence this script exists to stop making.
-STILL_CREATED=$(curl -sS --max-time 30 -H "Authorization: Bearer $TOKEN" \
-  "$CP/$MGMT_V/participants" 2>/dev/null | python3 -c "
+# Activation is asynchronous, so poll for it rather than re-reading once.
+#
+# This script used to take a single immediate re-read as proof that the PUT had
+# been ignored. It had not been. Measured on the local compose stack on
+# 2026-09-26: eight contexts were PUT to ACTIVATED at 19:10, returned 204, still
+# read CREATED at 19:20, and all eight read ACTIVATED by ~19:40, with nothing
+# else touching them. A 204 still is not evidence that the field was applied,
+# which is why this polls and reports what it actually read back. But running
+# out of patience is a different finding from the field being dropped, and
+# reporting the second sent #328 hunting a bug that was never there.
+ACTIVATE_WAIT_SECS="${ACTIVATE_WAIT_SECS:-180}"
+ACTIVATE_POLL_SECS="${ACTIVATE_POLL_SECS:-10}"
+
+# -1 means the list could not be read or parsed, which is not the same as zero.
+count_unactivated() {
+  curl -sS --max-time 30 -H "Authorization: Bearer $TOKEN" \
+    "$CP/$MGMT_V/participants" 2>/dev/null | python3 -c "
 import json, sys
 try: d = json.load(sys.stdin)
 except Exception: print(-1); raise SystemExit
 print(sum(1 for p in (d if isinstance(d, list) else []) if p.get('state') != 'ACTIVATED'))
-" 2>/dev/null || echo -1)
+" 2>/dev/null || echo -1
+}
 
+WAITED=0
+STILL_CREATED=$(count_unactivated)
 if [ "${STILL_CREATED:-0}" -gt 0 ] 2>/dev/null; then
-  log "WARNING: ${STILL_CREATED} context(s) are still not ACTIVATED after a 204."
-  log "         The control plane accepts the PUT and ignores the state. This"
-  log "         is a known gap: the compliance suites do not care, because"
-  log "         discovery matches on identity, but the UI lists only ACTIVATED"
-  log "         contexts (ui/src/app/api/participants/route.ts) so they will"
-  log "         not appear there. Tracked separately; do not read the 204s"
-  log "         above as activation."
+  log "Waiting up to ${ACTIVATE_WAIT_SECS}s for the transition to be applied ..."
+  while [ "$WAITED" -lt "$ACTIVATE_WAIT_SECS" ]; do
+    sleep "$ACTIVATE_POLL_SECS"
+    WAITED=$((WAITED + ACTIVATE_POLL_SECS))
+    STILL_CREATED=$(count_unactivated)
+    if [ "${STILL_CREATED:-0}" -le 0 ] 2>/dev/null; then
+      break
+    fi
+  done
+fi
+
+if [ "${STILL_CREATED:-0}" -lt 0 ] 2>/dev/null; then
+  log "WARNING: could not read the participant list back, so activation is unverified."
+elif [ "${STILL_CREATED:-0}" -gt 0 ] 2>/dev/null; then
+  log "NOTE: ${STILL_CREATED} context(s) had not reached ACTIVATED after ${WAITED}s."
+  log "      Activation is applied asynchronously and has been measured taking"
+  log "      around half an hour (#328), so this is in flight, not refused. Do"
+  log "      not read it as the control plane ignoring the state."
+  log "      Nothing downstream fails on it: the compliance suites match"
+  log "      participants on identity, not on state. The UI list does filter on"
+  log "      ACTIVATED (ui/src/app/api/participants/route.ts), so it catches up"
+  log "      once the transition lands. Read the list again later to confirm."
+else
+  log "All contexts read ACTIVATED (after ${WAITED}s)."
 fi
 
 log "Final participant list:"
