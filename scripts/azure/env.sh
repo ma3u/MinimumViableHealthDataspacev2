@@ -135,23 +135,25 @@ export ISSUER_IMAGE="${ACR_LOGIN_SERVER}/jad-issuerservice:${JAD_VERSION}"
 export TENANT_MGR_IMAGE="${ACR_LOGIN_SERVER}/cfm-tmanager:${CFM_VERSION}"
 export PROVISION_MGR_IMAGE="${ACR_LOGIN_SERVER}/cfm-pmanager:${CFM_VERSION}"
 
-# The agents are pinned to the WORKING 2026-03-09 CFM build (ADR-029, #181),
-# by digest, because GHCR :latest was overwritten on 2026-04-11 by a build that
-# needs a Fulcrum job coordinator this stack does not run: every agent panics at
-# launch and no activity ever leaves `pending`. docker-compose.jad.yml pins the
-# same four digests; they must not drift apart.
+# Built from source by scripts/build-cfm-images.sh and pushed here as
+# multi-arch (linux/amd64 + linux/arm64), tag 2026-03-09, on 2026-09-29.
 #
-# These are not built here. Import them from GHCR into ACR, which copies by
-# digest server side (scripts/azure/build-images.sh does it):
+# They are NOT imported from GHCR any more. The six GHCR digests that
+# docker-compose.jad.yml pins are linux/arm64 only, and Azure Container Apps is
+# amd64 only, so importing them would have put images in ACR that ACA starts,
+# reports Started, and never runs (#318, #380). GHCR `:latest` is amd64 but is
+# a different program: the 2026-04-11 Fulcrum agent build that panics without a
+# job coordinator this stack does not run (ADR-029, #181).
 #
-#   az acr import -n "$ACR_NAME" \
-#     --source ghcr.io/ma3u/health-dataspace/cfm-kcagent@${CFM_KC_AGENT_DIGEST} \
-#     --image cfm-kcagent:${CFM_AGENT_VERSION}
+# Source of truth: https://github.com/Metaform/connector-fabric-manager at
+# commit 9aa627f38, the last before the original images' 2026-03-09T21:08Z
+# build. Each image carries that as an OCI revision label, so the next reader
+# does not have to work it out from timestamps the way #318 did.
+#
+# Rebuild and re-push with:
+#   scripts/build-cfm-images.sh --platform linux/amd64,linux/arm64 \
+#     --push "$ACR_LOGIN_SERVER" --tag "$CFM_AGENT_VERSION"
 export CFM_AGENT_VERSION="${CFM_AGENT_VERSION:-2026-03-09}"
-export CFM_KC_AGENT_DIGEST="sha256:f9b96f905c9f8bbdc38177c48d8a2eb5b13f8ae37471cf5db28f055d4beafac6"
-export CFM_EDCV_AGENT_DIGEST="sha256:78fbf70a14e1cc2f1f89700cdcd95cd3cef68dd647dd032a264fba34cbe34d39"
-export CFM_REG_AGENT_DIGEST="sha256:d0925810736087f10d74cd31f7d95a552518a99f8868b0f9303ce0c059605be7"
-export CFM_OB_AGENT_DIGEST="sha256:ffd7e5e1544c50e7a45f88b620656f31a0f118b2f3f305e55720d2762bcce3f3"
 export CFM_KC_AGENT_IMAGE="${ACR_LOGIN_SERVER}/cfm-kcagent:${CFM_AGENT_VERSION}"
 export CFM_EDCV_AGENT_IMAGE="${ACR_LOGIN_SERVER}/cfm-edcvagent:${CFM_AGENT_VERSION}"
 export CFM_REG_AGENT_IMAGE="${ACR_LOGIN_SERVER}/cfm-regagent:${CFM_AGENT_VERSION}"
