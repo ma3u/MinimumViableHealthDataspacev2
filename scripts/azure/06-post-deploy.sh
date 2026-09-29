@@ -179,6 +179,20 @@ vault_api PUT /sys/policies/acl/provisioner -d @/tmp/provisioner.json
 header "Create JWT role"
 vault_api POST /auth/jwt/role/participant '{"role_type":"jwt","bound_audiences":["account"],"user_claim":"sub","token_policies":["participant"],"token_ttl":"1h","claim_mappings":{"sub":"participant_id"}}'
 
+# The provisioner role, which this script created a POLICY for and then never
+# a ROLE. jad/bootstrap-vault.sh creates both; Azure had only the policy, so
+# every CFM agent that authenticates to Vault died at launch with
+#
+#   unable to authenticate with JWT: 400 Bad Request:
+#   role "provisioner" could not be found
+#
+# and that is #318's last blocker for the Keycloak and EDC-V agents. Measured
+# on the live stack 2026-09-29. Mirrors the local role: matched on the `role`
+# claim the provisioner client carries, keyed on `azp`, with the issuer as
+# this deployment presents it.
+header "Create provisioner JWT role"
+vault_api POST /auth/jwt/role/provisioner "{\"role_type\":\"jwt\",\"user_claim\":\"azp\",\"bound_issuer\":\"\${KC_URL}/realms/edcv\",\"bound_claims\":{\"role\":\"provisioner\"},\"token_policies\":[\"provisioner\"],\"clock_skew_leeway\":60}"
+
 header "Enable transit engine"
 vault_api POST /sys/mounts/transit '{"type":"transit"}'
 

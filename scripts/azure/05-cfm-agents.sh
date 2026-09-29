@@ -57,6 +57,17 @@ for app in "$NATS_APP" "$PG_APP" "$KEYCLOAK_APP" "$VAULT_APP" \
 done
 ok "every upstream service exists"
 
+# The registry password is not in env.sh; 04-edc-services.sh reads it at deploy
+# time and so does this. Fails loudly rather than creating apps that cannot
+# pull, which presents as an app stuck in Activating with no useful message.
+ACR_PASSWORD=$(az acr credential show --name "$ACR_NAME" --query "passwords[0].value" -o tsv 2>/dev/null || echo "")
+if [ -z "$ACR_PASSWORD" ]; then
+  err "could not read the ACR admin password for ${ACR_NAME}."
+  err "Check the admin user is enabled: az acr update -n ${ACR_NAME} --admin-enabled true"
+  exit 1
+fi
+log "read the ACR admin password (${#ACR_PASSWORD} chars)"
+
 # NATS must be warm: the agents hold a JetStream connection and will not
 # reconnect politely to an app that is scaled to zero.
 NATS_MIN=$(az containerapp show --name "$NATS_APP" --resource-group "$RG" \
@@ -240,6 +251,25 @@ deploy_shim
 # deployment never sets WEB_HTTP_STS_PORT at all, and the credentials context
 # has no port of its own here. If cfm.credentialservice activities stall, that
 # is where to look first, not at this script.
+# ── ACA internal addressing, learned the hard way ───────────────────────────
+# An app is reachable inside the environment on **port 80** unless the port is
+# declared in ingress.additionalPortMappings. An explicit port that is not an
+# exposedPort does not refuse, it hangs until the caller times out, which is
+# indistinguishable from a service being down. Measured 2026-09-29:
+#
+#   http://mvhd-vault/v1/sys/health        200 in 0.018s
+#   http://mvhd-vault:8200/v1/sys/health   no answer, 20s timeout
+#
+#   app                exposedPorts        address it as
+#   mvhd-identityhub   7082                :7082 or port 80
+#   mvhd-controlplane  8081, 8082, 8083    :8081 etc
+#   mvhd-issuerservice none                port 80
+#   mvhd-vault         none                port 80
+#   mvhd-cfm-cp-shim   none                port 80
+#
+# That is why the first deployment of the two Vault-using agents panicked with
+# `unable to authenticate with JWT: context deadline exceeded`: not a sealed
+# Vault and not a credential problem, just an unreachable port.
 COMMON="uri: ${NATS_URI}
 bucket: cfm-bucket
 stream: cfm-stream
@@ -248,7 +278,7 @@ postgres: true
 dsn: ${DSN}"
 
 deploy_agent "$CFM_KC_AGENT_APP" "$CFM_KC_AGENT_IMAGE" kcagent.env "${COMMON}
-vault.url: http://${VAULT_APP}:8200
+vault.url: http://${VAULT_APP}
 vault.path: secret
 vault.clientId: provisioner
 vault.clientSecret: ${PROV_SECRET}
@@ -260,7 +290,7 @@ keycloak.password: ${KC_ADMIN_PW}
 keycloak.clientId: admin-cli"
 
 deploy_agent "$CFM_EDCV_AGENT_APP" "$CFM_EDCV_AGENT_IMAGE" edcvagent.env "${COMMON}
-vault.url: http://${VAULT_APP}:8200
+vault.url: http://${VAULT_APP}
 vault.path: secret
 vault.clientId: provisioner
 vault.clientSecret: ${PROV_SECRET}
@@ -272,14 +302,14 @@ keycloak.tokenUrl: ${KC_TOKEN_URL}
 identityhub.url: http://${IDENTITYHUB_APP}:7082/api/identity
 identityhub.sts.url: http://${IDENTITYHUB_APP}:7084/api/sts/token
 identityhub.cs.url: http://${IDENTITYHUB_APP}:7082/api/credentials/v1/participants/%s
-controlplane.url: http://${CFM_CP_SHIM_APP}:8081/api/mgmt
+controlplane.url: http://${CFM_CP_SHIM_APP}/api/mgmt
 controlplane.protocol.url: http://${CONTROLPLANE_APP}:8082/api/dsp/%s/2025-1"
 
 deploy_agent "$CFM_REG_AGENT_APP" "$CFM_REG_AGENT_IMAGE" regagent.env "${COMMON}
 keycloak.tokenUrl: ${KC_TOKEN_URL}
 keycloak.clientId: provisioner
 keycloak.clientSecret: ${PROV_SECRET}
-issuerservice.url: http://${ISSUER_APP}:10013/api/admin
+issuerservice.url: http://${ISSUER_APP}/api/admin
 issuer.id: issuer"
 
 deploy_agent "$CFM_OB_AGENT_APP" "$CFM_OB_AGENT_IMAGE" obagent.env "${COMMON}
@@ -287,7 +317,7 @@ keycloak.tokenUrl: ${KC_TOKEN_URL}
 keycloak.clientId: provisioner
 keycloak.clientSecret: ${PROV_SECRET}
 identityhub.url: http://${IDENTITYHUB_APP}:7082/api/identity
-issuerservice.url: http://${ISSUER_APP}:10013/api/admin
+issuerservice.url: http://${ISSUER_APP}/api/admin
 issuer.id: issuer"
 
 ok "CFM agents deployed"
