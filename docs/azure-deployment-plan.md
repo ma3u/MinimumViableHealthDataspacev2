@@ -912,14 +912,35 @@ No custom Azure policies were found on the subscription (`PER-MSD-VS-MBUCHHORN-0
 | `jad-dataplane`     | `ma3u/jad` repo — Gradle shadow JAR (Java 21) | `./gradlew :launchers:dataplane:shadowJar` → Docker     |
 | `jad-identity-hub`  | `ma3u/jad` repo — Gradle shadow JAR (Java 21) | `./gradlew :launchers:identity-hub:shadowJar` → Docker  |
 | `jad-issuerservice` | `ma3u/jad` repo — Gradle shadow JAR (Java 21) | `./gradlew :launchers:issuerservice:shadowJar` → Docker |
-| `cfm-tmanager`      | `Metaform/cfm-fulcrum` repo — Go binary       | `GOARCH=amd64 go build` → Docker                        |
-| `cfm-pmanager`      | `Metaform/cfm-fulcrum` repo — Go binary       | `GOARCH=amd64 go build` → Docker                        |
+| `cfm-tmanager`      | `Metaform/connector-fabric-manager` — Go      | `scripts/build-cfm-images.sh`                           |
+| `cfm-pmanager`      | `Metaform/connector-fabric-manager` — Go      | `scripts/build-cfm-images.sh`                           |
+| `cfm-kcagent`       | `Metaform/connector-fabric-manager` — Go      | `scripts/build-cfm-images.sh`                           |
+| `cfm-edcvagent`     | `Metaform/connector-fabric-manager` — Go      | `scripts/build-cfm-images.sh`                           |
+| `cfm-regagent`      | `Metaform/connector-fabric-manager` — Go      | `scripts/build-cfm-images.sh`                           |
+| `cfm-obagent`       | `Metaform/connector-fabric-manager` — Go      | `scripts/build-cfm-images.sh`                           |
 | `keycloak`          | `quay.io/keycloak/keycloak:latest`            | Pulled amd64 manifest                                   |
 | `vault`             | `hashicorp/vault:latest`                      | Pulled amd64 manifest                                   |
 | `neo4j:5-community` | `neo4j:5-community`                           | Pulled amd64 manifest                                   |
 | `nats:alpine`       | `nats:alpine`                                 | Pulled amd64 manifest                                   |
 
 All custom images also pushed to GHCR (`ghcr.io/ma3u/`).
+
+> **Corrected 2026-09-29 (#318, #380).** This table named `Metaform/cfm-fulcrum`
+> for the two CFM managers. That repository builds a single binary, `fcfmagent`,
+> described by its own README as "a Fulcrum agent for CFM". It is the source of
+> the `:latest` CFM images built 2026-04-11, which panic at launch on
+> `cfm-agent.tmanager_url` because they want a Fulcrum job coordinator this
+> stack does not run (ADR-029, #181).
+>
+> The six images this stack actually uses come from
+> `Metaform/connector-fabric-manager` (Go module `github.com/eclipse-cfm/cfm`).
+> Run one with no config and it panics on its own parameters
+> (`kcagent.uri is empty`), from `eclipse-cfm/cfm/pmanager/natsagent`, which is
+> the correct program.
+>
+> `scripts/build-cfm-images.sh` builds all six from that repository, for a
+> platform you choose, and labels them with their source and revision so this
+> does not have to be worked out from the images again.
 
 ### 18.8 Post-Deployment Configuration
 
