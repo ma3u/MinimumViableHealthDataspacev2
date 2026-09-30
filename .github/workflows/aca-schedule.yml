@@ -4,7 +4,7 @@ name: ACA Off-Hours Scale (Mon-Fri 07-20 Europe/Berlin)
 # ADR-027: extend it to the full EDC stack. ADR-024 provisioned the 8 EDC
 # apps at min=1 (24/7) but this schedule still only covered the 7 "healthy"
 # apps — so the EDC stack billed nights + weekends, the cost surge flagged by
-# FinOps in May 2026. The schedule now scales all 15 Container Apps.
+# FinOps in May 2026. The schedule now scales all 21 Container Apps.
 #
 # INF-STG-EU_EHDS no longer requires 24/7 — the public ehds.mabu.red demo is
 # documented as a weekday-hours service in the README, so off-hours
@@ -110,12 +110,13 @@ jobs:
 
       - name: Scale all Container Apps to 0
         run: |
-          # All 15 Container Apps are scaled to 0 off-hours (ADR-027).
-          #  - 7 core apps: postgres, neo4j, keycloak, vault, proxy, ui,
-          #    catalog-enricher. Postgres is included because Workaround B
-          #    (ADR-018) made it an ACA app, not a Flexible Server.
+          # 18 of the 21 Container Apps are scaled to 0 off-hours (ADR-027).
+          #  - 5 core apps: neo4j, vault, proxy, ui, catalog-enricher.
           #  - 8 EDC apps: ADR-024 provisioned the full EDC stack at min=1.
           #    ADR-027 adds them here so they no longer bill nights + weekends.
+          #  - 5 CFM apps: the shim and the four provisioning agents (#318),
+          #    deployed 2026-09-29 and in neither list until 2026-09-30, so
+          #    they billed every night and no start ever restored them.
           # Stop order is irrelevant; start order is not (see the start job).
           # mvhd-postgres and mvhd-keycloak are deliberately NOT in this list
           # since 2026-09-13, and mvhd-claude-federation never was.
@@ -127,7 +128,7 @@ jobs:
           # needs Postgres, and the quota counter is in the same database, so
           # both have to stay.
           #
-          # 12 of 15 apps still scale down, which keeps most of the saving that
+          # 18 of 21 apps still scale down, which keeps most of the saving that
           # ADR-027 was after. Revisit if the identity and quota state moves out
           # of this cluster.
           APPS=(
@@ -144,6 +145,11 @@ jobs:
             mvhd-issuerservice
             mvhd-tenant-mgr
             mvhd-provision-mgr
+            mvhd-cfm-cp-shim
+            mvhd-cfm-kcagent
+            mvhd-cfm-edcvagent
+            mvhd-cfm-regagent
+            mvhd-cfm-obagent
           )
           echo "=== Scaling ${#APPS[@]} Container Apps to min=0 (scale-to-zero) ==="
           # ACA requires maxReplicas >= 1; scale-to-zero is min=0 + max=1, not
@@ -185,7 +191,7 @@ jobs:
           echo "## Off-Hours Scale-Down" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
           echo "**Time:** $(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_STEP_SUMMARY"
-          echo "**Status:** 15 Container Apps (7 core + 8 EDC) scaled to 0" >> "$GITHUB_STEP_SUMMARY"
+          echo "**Status:** 18 Container Apps (5 core + 8 EDC + 5 CFM) scaled to 0" >> "$GITHUB_STEP_SUMMARY"
           echo "**Next start:** Monday-Friday 05:00 UTC (07:00 Europe/Berlin CEST)" >> "$GITHUB_STEP_SUMMARY"
 
   start:
@@ -308,6 +314,30 @@ jobs:
               -o none || echo "::warning::Failed to scale $app"
           done
 
+      # The CFM provisioning agents and the shim they reach the control plane
+      # through (#318). They were deployed on 2026-09-29 and added to neither
+      # list here, so the evening stop left them running and no morning start
+      # ever restored them.
+      #
+      # min=1 is not a preference. The four agents are NATS consumers with no
+      # HTTP ingress, so nothing can wake them from zero: no request arrives
+      # to trigger a scaler, and a participant onboarded while they are at
+      # zero keeps all three activities pending for ever, which is the whole
+      # of #318. They start after the EDC stack because the EDC-V agent wants
+      # the identity hub and the control plane, and last of all so a slow
+      # upstream does not leave an agent looping on a refused connection.
+      - name: Restore CFM provisioning agents (#318)
+        run: |
+          echo "=== Restoring the shim and 4 CFM agents to 1/1 ==="
+          for app in mvhd-cfm-cp-shim mvhd-cfm-kcagent mvhd-cfm-edcvagent \
+                     mvhd-cfm-regagent mvhd-cfm-obagent; do
+            echo "  $app -> 1/1"
+            az containerapp update \
+              --name "$app" --resource-group "$RESOURCE_GROUP" \
+              --min-replicas 1 --max-replicas 1 \
+              -o none || echo "::warning::Failed to scale $app"
+          done
+
       - name: Re-bootstrap Vault (in-memory gotcha #1)
         run: |
           echo "=== Re-running bootstrap job (Vault secrets + keys) ==="
@@ -339,6 +369,25 @@ jobs:
           done
           echo "::warning::UI did not return 200 within 300s — may need manual check"
 
+      # The one step in this job that is allowed to fail the run.
+      #
+      # On 2026-09-30 the start job was green while every sign-in on the live
+      # UI returned 500 and had done for over an hour. Three things hid it:
+      # "Ensure the Keycloak realm exists" is continue-on-error, so its
+      # failure is reported as `conclusion: success`; the script it calls read
+      # discovery, which Keycloak serves from cache with the `realm` table
+      # gone; and "Verify UI is reachable" only asks for the home page, which
+      # renders fine when nobody can log in.
+      #
+      # This runs last and deliberately carries no continue-on-error. A stack
+      # that cannot serve a login is not started, whatever the other steps
+      # said, and the run must be red so someone looks. Exit 2 means Postgres,
+      # not the realm: see docs/gotchas.md, 2026-09-30.
+      - name: Keycloak can actually serve a login
+        env:
+          KEYCLOAK_PUBLIC_URL: https://auth.ehds.mabu.red
+        run: ./scripts/azure/check-keycloak-health.sh "$KEYCLOAK_PUBLIC_URL" edcv
+
       - name: Start summary
         if: always()
         run: |
@@ -346,5 +395,5 @@ jobs:
           echo "" >> "$GITHUB_STEP_SUMMARY"
           echo "**Time:** $(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_STEP_SUMMARY"
           echo "**Target:** ${{ steps.verify.outputs.ui_url }}" >> "$GITHUB_STEP_SUMMARY"
-          echo "**Status:** PostgreSQL started, 15 Container Apps scaled up (7 core + 8 EDC), Vault re-bootstrapped (Neo4j data persists via Azure Files — see ADR-017)" >> "$GITHUB_STEP_SUMMARY"
+          echo "**Status:** PostgreSQL started, 18 Container Apps scaled up (5 core + 8 EDC + 5 CFM), Vault re-bootstrapped (Neo4j data persists via Azure Files — see ADR-017)" >> "$GITHUB_STEP_SUMMARY"
           echo "**Next stop:** Today 18:00 UTC (20:00 Europe/Berlin CEST)" >> "$GITHUB_STEP_SUMMARY"
