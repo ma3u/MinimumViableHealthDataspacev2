@@ -233,6 +233,33 @@ PY
     err "  ${app}: the cfm-config volume is not mounted (got '${mounted}')"
     exit 1
   fi
+
+  # Re-assert min=1. Measured on 2026-09-30: every one of the five apps this
+  # script creates was sitting at minReplicas=0 the morning after the first
+  # deployment, although the create path passes `--min-replicas 1` and nothing
+  # in .github/workflows/aca-schedule.yml touched them at the time. Point 4 of
+  # the header explains why zero is not survivable here: these are NATS
+  # consumers with no ingress, so no request exists that could scale them up,
+  # and a participant onboarded while they are at zero keeps all three
+  # activities pending for ever.
+  #
+  # I have not proven what resets it. The likeliest candidate is the
+  # `containerapp update --yaml` round-trip just above, but I did not get to
+  # measure that, so this asserts the invariant rather than claiming a cause.
+  # If it reports a correction on a run where nothing else changed, the
+  # round-trip is the culprit and belongs fixed at the source.
+  local min_now
+  min_now=$(az containerapp show --name "$app" --resource-group "$RG" \
+    --query "properties.template.scale.minReplicas" -o tsv 2>/dev/null || echo "")
+  if [ "$min_now" != "1" ]; then
+    log "  ${app}: minReplicas is ${min_now}, setting it back to 1"
+    az containerapp update --name "$app" --resource-group "$RG" \
+      --min-replicas 1 --max-replicas 1 -o none
+    min_now=$(az containerapp show --name "$app" --resource-group "$RG" \
+      --query "properties.template.scale.minReplicas" -o tsv 2>/dev/null || echo "")
+    [ "$min_now" = "1" ] || { err "  ${app}: minReplicas is still ${min_now}"; exit 1; }
+  fi
+  ok "  ${app}: minReplicas=1"
 }
 
 deploy_shim

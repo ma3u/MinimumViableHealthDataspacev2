@@ -218,26 +218,47 @@ RUN chmod +x /app/bootstrap.sh
 ENTRYPOINT ["/bin/sh", "/app/bootstrap.sh"]
 DOCKERFILE
 
+# Tag with the commit as well as :latest. ACA caches :latest and will not
+# re-pull it on a job start (CLAUDE.md gotcha 6), so a job left pointing at
+# :latest keeps running whatever image it first resolved. That is how the
+# provisioner JWT role added in b71fe62 could sit on main while every agent
+# on Azure still died on the pre-b71fe62 bootstrap. The job below is pointed
+# at the immutable tag, so a new build is actually what runs.
+VAULT_BOOTSTRAP_TAG="$(git -C "${REPO_ROOT}" rev-parse --short HEAD 2>/dev/null || date -u +%Y%m%d%H%M%S)"
+VAULT_BOOTSTRAP_IMAGE="${ACR_LOGIN_SERVER}/mvhd-vault-bootstrap:${VAULT_BOOTSTRAP_TAG}"
 docker buildx build --platform linux/amd64 \
+  -t "${VAULT_BOOTSTRAP_IMAGE}" \
   -t "${ACR_LOGIN_SERVER}/mvhd-vault-bootstrap:latest" --push "${VAULT_DIR}"
 rm -rf "${VAULT_DIR}"
-ok "Vault bootstrap image pushed"
+ok "Vault bootstrap image pushed (${VAULT_BOOTSTRAP_TAG})"
 
-log "Creating Vault bootstrap job..."
-az containerapp job create \
-  --name "$VAULT_BOOTSTRAP_JOB" --resource-group "$RG" --environment "$ACA_ENV" \
-  --image "${ACR_LOGIN_SERVER}/mvhd-vault-bootstrap:latest" \
-  --registry-server "$ACR_LOGIN_SERVER" \
-  --registry-username "$ACR_NAME" \
-  --registry-password "$ACR_PASSWORD" \
-  --cpu 0.25 --memory 0.5Gi \
-  --trigger-type Manual --replica-timeout 300 \
-  --env-vars \
-    "VAULT_ADDR=${VAULT_URL}" \
-    "VAULT_DEV_ROOT_TOKEN_ID=${VAULT_ROOT_TOKEN}" \
-    "KEYCLOAK_URL=${KEYCLOAK_INTERNAL_URL}" \
-  -o none
-ok "Vault bootstrap job created"
+# create fails when the job already exists, so update that case instead of
+# leaving a stale image behind.
+if az containerapp job show --name "$VAULT_BOOTSTRAP_JOB" --resource-group "$RG" -o none 2>/dev/null; then
+  log "Updating Vault bootstrap job to ${VAULT_BOOTSTRAP_TAG}..."
+  az containerapp job update \
+    --name "$VAULT_BOOTSTRAP_JOB" --resource-group "$RG" \
+    --image "$VAULT_BOOTSTRAP_IMAGE" \
+    --replica-timeout 300 \
+    -o none
+  ok "Vault bootstrap job updated"
+else
+  log "Creating Vault bootstrap job..."
+  az containerapp job create \
+    --name "$VAULT_BOOTSTRAP_JOB" --resource-group "$RG" --environment "$ACA_ENV" \
+    --image "$VAULT_BOOTSTRAP_IMAGE" \
+    --registry-server "$ACR_LOGIN_SERVER" \
+    --registry-username "$ACR_NAME" \
+    --registry-password "$ACR_PASSWORD" \
+    --cpu 0.25 --memory 0.5Gi \
+    --trigger-type Manual --replica-timeout 300 \
+    --env-vars \
+      "VAULT_ADDR=${VAULT_URL}" \
+      "VAULT_DEV_ROOT_TOKEN_ID=${VAULT_ROOT_TOKEN}" \
+      "KEYCLOAK_URL=${KEYCLOAK_INTERNAL_URL}" \
+    -o none
+  ok "Vault bootstrap job created"
+fi
 
 log "Starting Vault bootstrap job..."
 az containerapp job start --name "$VAULT_BOOTSTRAP_JOB" --resource-group "$RG" -o none
