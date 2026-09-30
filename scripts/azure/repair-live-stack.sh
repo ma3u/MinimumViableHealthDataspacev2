@@ -44,6 +44,27 @@ CFM_APPS=(mvhd-cfm-cp-shim mvhd-cfm-kcagent mvhd-cfm-edcvagent
 say()  { echo "[$(date -u +%H:%M:%S)] $*"; }
 die()  { echo "FAIL: $*" >&2; exit 1; }
 
+# An expired az token used to surface as a Python traceback out of the middle of
+# the check phase, because `containerapp show` printed the AADSTS70043 text to
+# stderr and an empty document to stdout. The token lifetime here is four hours
+# (conditional access), which is shorter than an incident, so this will happen
+# again. Say it in one line instead.
+require_az() {
+  # `az account show` is NOT the probe: it reads the cached profile and returns
+  # 0 with a dead token. Measured 2026-09-30 18:00Z against an expired session:
+  #   az account show             -> rc 0
+  #   az account get-access-token -> rc 1, AADSTS70043
+  # get-access-token actually attempts the refresh, so it is the one that knows.
+  az account get-access-token -o none >/dev/null 2>&1 || die "$(cat <<'MSG'
+the Azure CLI is not logged in, or its token has expired.
+Conditional access caps it at 4 hours, so a session that worked this morning
+will not work this evening. Re-authenticate and re-run:
+
+  az login --tenant 8b87af7d-8647-4dc7-8df4-5f69a2011bb5
+MSG
+)"
+}
+
 # ── check ───────────────────────────────────────────────────────────────────
 phase_check() {
   say "Keycloak"
@@ -238,12 +259,12 @@ phase_6() {
 }
 
 case "${1:-}" in
-  check) phase_check ;;
-  1) phase_1 ;;
-  2) phase_2 ;;
-  3) phase_3 ;;
-  4) phase_4 ;;
-  5) phase_5 ;;
-  6) phase_6 ;;
+  check) require_az; phase_check ;;
+  1) require_az; phase_1 ;;
+  2) require_az; phase_2 ;;
+  3) require_az; phase_3 ;;
+  4) require_az; phase_4 ;;
+  5) require_az; phase_5 ;;
+  6) require_az; phase_6 ;;
   *) sed -n '15,21p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'; exit 1 ;;
 esac
