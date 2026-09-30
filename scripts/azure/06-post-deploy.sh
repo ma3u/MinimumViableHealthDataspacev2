@@ -187,9 +187,15 @@ vault_api POST /auth/jwt/role/participant '{"role_type":"jwt","bound_audiences":
 #   role "provisioner" could not be found
 #
 # and that is #318's last blocker for the Keycloak and EDC-V agents. Measured
-# on the live stack 2026-09-29. Mirrors the local role: matched on the `role`
-# claim the provisioner client carries, keyed on `azp`, with the issuer as
+# on the live stack 2026-09-29. Mirrors the local role: matched on the 'role'
+# claim the provisioner client carries, keyed on 'azp', with the issuer as
 # this deployment presents it.
+#
+# Quote words in here with '' and never with backticks. This is an UNQUOTED
+# heredoc (<<VAULTSCRIPT), so a backtick is command substitution even inside a
+# comment: the two words above used to be backticked, which ran them as
+# commands, printed "command not found" on every deploy, and landed in the
+# generated bootstrap.sh as empty strings.
 header "Create provisioner JWT role"
 vault_api POST /auth/jwt/role/provisioner "{\"role_type\":\"jwt\",\"user_claim\":\"azp\",\"bound_issuer\":\"\${KC_URL}/realms/edcv\",\"bound_claims\":{\"role\":\"provisioner\"},\"token_policies\":[\"provisioner\"],\"clock_skew_leeway\":60}"
 
