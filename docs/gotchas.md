@@ -3,6 +3,104 @@
 Non-obvious pitfalls across the stack. Ordered newest first; add a new
 entry at the top when you hit something that cost you more than 30 minutes.
 
+## 2026-09-30: a declared volume that nothing mounts, and three guards that called it green
+
+Every token grant and every browser sign-in on the live stack returned **500**
+for an hour and a half, and the deploy that ran through the middle of it was
+green.
+
+```
+POST /realms/master/.../token   (admin-cli, password grant)   500
+GET  /realms/edcv/.../auth      (browser sign-in entry)       500
+POST /realms/edcv/.../token     (provisioner, WRONG secret)   401
+GET  /realms/edcv               (discovery)                   200
+```
+
+The 401 is what makes the rest readable. The endpoint routes and validates
+credentials fine, and only falls over once it has something to accept and has
+to attach a session. Keycloak's log:
+
+```
+Caused by: org.postgresql.util.PSQLException: ERROR: relation "offline_user_session" does not exist
+	at ...JpaUserSessionPersisterProvider.loadUserSession(...)
+	at ...AuthenticationProcessor.attachSession(...)
+```
+
+Not one table. Grouped by the missing relation, Log Analytics returned
+`offline_user_session`, `offline_client_session`, `realm`,
+`client_initial_access`, `realm_attribute` and `revoked_token`, all first seen
+that morning and none in the thirteen days before. `mvhd-postgres` said why:
+
+```
+04:00:05Z  fixing permissions on existing directory /var/lib/postgresql/data/pgdata ... ok
+04:00:05Z  running bootstrap script ... ok
+04:00:06Z  database system is ready to accept connections
+```
+
+`initdb` ran. ACA had recreated the replica at 03:59:55Z on its own, with no
+workflow within seven hours either side, and Postgres came up on an empty
+cluster. The `keycloak` and `cfm` databases went with it.
+
+**The cause.** The app declared the volume and mounted nothing:
+
+```
+volumes:       [{"name": "pgdata", "storageName": "pg-data", "storageType": "AzureFile"}]
+volumeMounts:  null
+PGDATA=/var/lib/postgresql/data/pgdata
+```
+
+`scripts/azure/02-data-layer.sh` adds both, so the live app had drifted from
+its own script. `PGDATA` was therefore ordinary container-local storage and had
+been since revision `0000148` on 2026-09-14. The data lasted sixteen days only
+because nothing restarted the replica in between. `mvhd-neo4j` and `mvhd-vault`
+mount their shares correctly, so this was one app, not the pattern.
+
+This is also the answer to the question `.github/workflows/aca-schedule.yml`
+had carried open since 2026-09-14, about why the `edcv` realm does not survive
+a stop/start when `KC_DB=postgres` says it should. It does not persist because
+Postgres does not persist.
+
+**Why nothing caught it.** Three guards, three different ways of being wrong:
+
+1. `restore-keycloak-realm.sh` decided the realm was fine from
+   `GET /realms/edcv`. Keycloak serves realm metadata from its Infinispan
+   cache, so discovery answers 200 long after the `realm` table has gone. The
+   morning scale-up printed `realm edcv is present` and repaired nothing.
+2. That step is `continue-on-error: true`. The script did fail, and the GitHub
+   jobs API still reports `conclusion: success` for a continue-on-error step,
+   so the run was green and the step looked green in the API too.
+3. `Verify UI is reachable` and `E2E Tests (Azure)` both only prove the home
+   page renders, which it does perfectly well for a visitor who cannot log in.
+   All three E2E steps also carry `continue-on-error: true`.
+
+**The probe that does work** is the authorize endpoint, because it has to
+reach the database to look up a realm and a client before it can reject
+anything:
+
+```
+healthy  -> 200 login form, or 400/404 for a bad client or a missing realm
+broken   -> 5xx
+```
+
+It needs no client id, no redirect URI and no secret: a request that is wrong
+in every one of those ways still has to hit the database to find that out.
+Measured against the broken stack, a bogus client and even a realm that does
+not exist both returned 500. That is `scripts/azure/check-keycloak-health.sh`,
+which now gates the deploy and the morning scale-up with no
+`continue-on-error`, and exits 2 specifically for "the database is gone, do not
+bother importing the realm".
+
+Three things to take from it:
+
+- A declared volume is not a mounted one. `02-data-layer.sh` now reads the
+  mount back and refuses rather than reporting "volume attached".
+- `az containerapp show -o yaml` returns secrets with names and no values, so
+  feeding that back into `az containerapp update --yaml` blanks them. Drop the
+  block. `05-cfm-agents.sh:mount_config` already did; `02-data-layer.sh` was
+  round-tripping the Postgres password and the registry pull credential.
+- A 200 from a cache is not a health check. Ask the question that has to touch
+  the thing you are actually worried about.
+
 ## 2026-09-28: an EDC web context you do not configure still binds, somewhere else
 
 `GET /api/credentials/definitions` answered **502** on the Azure demo and

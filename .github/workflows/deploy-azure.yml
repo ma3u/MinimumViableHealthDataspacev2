@@ -113,6 +113,22 @@ jobs:
           done
           echo "::warning::UI did not return 200 within 5 minutes"
 
+      # The home page returning 200 is not the same as the deployment working.
+      # On 2026-09-30 this job was green, and so was "E2E Tests (Azure)", over
+      # a stack where every sign-in had been returning 500 for an hour: the
+      # home page renders for an anonymous visitor, and all three E2E steps
+      # below carry continue-on-error, so the job reports success whatever the
+      # tests do. That is the shape ADR-031 exists to prevent.
+      #
+      # This step carries no continue-on-error on purpose. It asks the one
+      # question the others do not: can anybody actually log in. Exit 2 means
+      # Keycloak is up but its database is gone, which is a Postgres problem
+      # and not a realm one (docs/gotchas.md, 2026-09-30).
+      - name: Auth is actually working
+        env:
+          KEYCLOAK_PUBLIC_URL: https://auth.ehds.mabu.red
+        run: ./scripts/azure/check-keycloak-health.sh "$KEYCLOAK_PUBLIC_URL" edcv
+
   # -------------------------------------------------------------------
   # E2E Tests against live Azure deployment
   # -------------------------------------------------------------------

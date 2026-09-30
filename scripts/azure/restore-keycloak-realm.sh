@@ -39,6 +39,31 @@ realm_present() {
   [[ "$(curl -s -o /dev/null -w '%{http_code}' "$DISCOVERY")" == "200" ]]
 }
 
+# Before trusting anything below, prove Keycloak can reach its database.
+# `realm_present` reads discovery, which Keycloak serves from its Infinispan
+# cache and which therefore answers 200 with the `realm` table gone. On
+# 2026-09-30 that is exactly what happened: this script printed "realm edcv is
+# present", repaired nothing, and every sign-in on the live UI was returning
+# 500 the whole time. Exit 2 from the health check means the database is the
+# problem and importing the realm cannot fix it, so stop here and say so
+# rather than failing later on a misleading "admin login failed; the password
+# in Key Vault may be stale".
+# `rc=$?` inside `if ! cmd; then` reads 0, because $? is the result of the
+# negation and not of the command. Capture it on the `||` instead.
+HEALTH_RC=0
+./check-keycloak-health.sh "$KEYCLOAK_PUBLIC_URL" edcv || HEALTH_RC=$?
+if [[ "$HEALTH_RC" == "2" || "$HEALTH_RC" == "3" ]]; then
+  echo "" >&2
+  echo "Not importing the realm: Keycloak's database is the problem, not the" >&2
+  echo "realm. Fix Postgres first, restart mvhd-keycloak so Liquibase rebuilds" >&2
+  echo "the schema, then re-run this script." >&2
+  exit "$HEALTH_RC"
+fi
+# HEALTH_RC=1 is "realm missing", which is precisely what this script is for.
+if [[ "$HEALTH_RC" == "1" ]]; then
+  echo "realm is missing; continuing with the import"
+fi
+
 if realm_present; then
   echo "realm edcv is present"
   $CHECK_ONLY && exit 0

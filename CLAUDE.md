@@ -70,6 +70,12 @@ docs/                   — see "Knowledge & planning" below
    `docs/knowledge/runbooks/keycloak-realm-drift.md`.
 6. **ACA caches `:latest` images** — a job/app won't re-pull on restart; deploy pushes a
    new revision (see `docs/gotchas.md` for the full operational gotcha log).
+7. **A 200 from Keycloak discovery proves nothing.** It is served from the Infinispan
+   cache and keeps answering with the `realm` table gone. Prove auth with
+   `scripts/azure/check-keycloak-health.sh` (the authorize endpoint, which must reach the
+   database); exit 2 means Postgres, not the realm. On 2026-09-30 `mvhd-postgres` had
+   `pg-data` declared and `volumeMounts: null`, so an ACA replica restart ran `initdb` and
+   wiped `keycloak` + `cfm`; see `docs/gotchas.md` (2026-09-30).
 
 ## Knowledge & planning
 

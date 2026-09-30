@@ -69,13 +69,42 @@ for c in tpl['containers']:
     if not any((m or {}).get('volumeName') == 'pgdata' for m in mounts):
         mounts.append({'volumeName': 'pgdata', 'mountPath': '/var/lib/postgresql/data'})
     c['volumeMounts'] = mounts
+# `az containerapp show` returns every secret with its name and no value:
+#   [{"name": "pg-password"}, {"name": "acrmvhdehdsazurecrio-acrmvhdehds"}]
+# Feeding that straight back sets both to empty, which takes out Postgres
+# authentication and the registry pull credential in one update. Drop the
+# block instead and the existing values are kept, the way
+# 05-cfm-agents.sh:mount_config already does it.
+doc['properties']['configuration'].pop('secrets', None)
 with open(path, 'w') as f:
     yaml.safe_dump(doc, f)
 PY
 
 az containerapp update --name "$PG_APP" --resource-group "$RG" --yaml "$PG_YAML" -o none
 rm -f "$PG_YAML"
-ok "Postgres volume attached (pg-data → /var/lib/postgresql/data)"
+
+# Read the mount back. On 2026-09-30 the live app had the pgdata volume
+# declared and `volumeMounts: null`, so PGDATA was ordinary container-local
+# storage. It went unnoticed until ACA recreated the replica, initdb ran, and
+# the keycloak and cfm databases were gone (docs/gotchas.md, 2026-09-30).
+# A phase that says "volume attached" while nothing is mounted is how that
+# happens twice.
+PG_MOUNT=$(az containerapp show --name "$PG_APP" --resource-group "$RG" \
+  --query "properties.template.containers[0].volumeMounts[?volumeName=='pgdata'].mountPath | [0]" \
+  -o tsv 2>/dev/null || echo "")
+if [ "$PG_MOUNT" != "/var/lib/postgresql/data" ]; then
+  err "pgdata is not mounted (got '${PG_MOUNT}'). Postgres would run on"
+  err "ephemeral storage and lose every database on the next replica restart."
+  exit 1
+fi
+
+PG_SECRETS=$(az containerapp secret list --name "$PG_APP" --resource-group "$RG" \
+  --query "[?name=='pg-password'] | length(@)" -o tsv 2>/dev/null || echo "0")
+if [ "$PG_SECRETS" != "1" ]; then
+  err "the pg-password secret did not survive the YAML update."
+  exit 1
+fi
+ok "Postgres volume attached and verified (pg-data → /var/lib/postgresql/data)"
 
 # ── Push Neo4j image to ACR ─────────────────────────────────────────────────
 log "Pulling and pushing Neo4j image..."
