@@ -9,11 +9,12 @@
 # Every token grant and every browser sign-in returned 500 for an hour and a
 # half while discovery kept answering 200 from the Infinispan cache.
 #
-# Phase 1 is the fix. Phases 2 to 6 are the recovery, and they are what to run
-# whenever this database is lost for any other reason.
+# Phase 1 was believed to be the fix. It was not, and it is now withdrawn: see
+# ADR-041 and the banner on phase_1 below. Phases 2 to 6 are the recovery, and
+# they are what to run whenever this database is lost.
 #
 #   ./scripts/azure/repair-live-stack.sh check  # read-only, safe any time
-#   ./scripts/azure/repair-live-stack.sh 1      # mount pg-data on mvhd-postgres
+#   ./scripts/azure/repair-live-stack.sh 1      # WITHDRAWN, refuses and explains
 #   ./scripts/azure/repair-live-stack.sh 2      # recreate the 6 other databases
 #   ./scripts/azure/repair-live-stack.sh 3      # restart Keycloak (Liquibase)
 #   ./scripts/azure/repair-live-stack.sh 4      # re-import the edcv realm
@@ -23,12 +24,10 @@
 # Run them in order and read the output. Each phase verifies itself and exits
 # non-zero rather than continuing on a bad state.
 #
-# Phase 1 restarts Postgres, so expect a short outage. When the cluster is
-# already empty nothing is lost that is not lost already; when it is NOT empty,
-# mounting an empty share hides the running data rather than migrating it, so
-# dump first.
+# This recovery does not make Postgres durable, because on ACA it cannot be.
+# It puts the stack back. ADR-041 is the decision that stops it recurring.
 #
-# Needs: az (logged in), gh (phase 2), docker + PyYAML (phases 1 and 5).
+# Needs: az (logged in), gh (phase 2), docker + PyYAML (phase 5).
 # =============================================================================
 set -euo pipefail
 
@@ -84,6 +83,13 @@ for c in t['containers']:
     --query "[].{created:properties.createdTime,state:properties.runningState}" \
     -o table || true
   echo "  (a replica created minutes ago means initdb re-ran and the cluster is empty)"
+  echo "  (mounts should be null: Postgres crash-loops on an SMB mount, ADR-041)"
+  # Single revision mode keeps the previous replica serving when a new revision
+  # never goes healthy, so the site can look fine while the active revision is
+  # Failed. Print both or that reads as success.
+  az containerapp revision list --name "$PG_APP" --resource-group "$RG" \
+    --query "[].{rev:name,health:properties.healthState,state:properties.runningState,traffic:properties.trafficWeight}" \
+    -o table || true
 
   echo ""
   say "CFM agents"
@@ -98,50 +104,40 @@ for c in t['containers']:
   done
 }
 
-# ── 1: mount pg-data ────────────────────────────────────────────────────────
+# ── 1: withdrawn (ADR-041) ──────────────────────────────────────────────────
+# This phase used to mount `pg-data` on mvhd-postgres, on the theory that the
+# 2026-09-30 wipe was caused by the mount being missing. That theory was wrong.
+#
+# Run on the live app 2026-10-02, the mount did not make Postgres durable, it
+# made it crash-loop:
+#
+#   chmod: changing permissions of '/var/lib/postgresql/data/pgdata': Operation not permitted
+#   initdb: error: could not change permissions of directory ".../pgdata": Operation not permitted
+#
+# `initdb` chmods PGDATA unconditionally; SMB cannot. The replica went
+# NotRunning and the revision Failed. ACA was in Single revision mode, so the
+# previous replica kept serving and the site stayed up by luck, not design.
+#
+# It is kept as a loud refusal rather than deleted, because the printed runbook
+# and the commit history both still say "run phase 1" and a silently missing
+# phase would read as a no-op.
 phase_1() {
-  say "Phase 1: mount pg-data on ${PG_APP}"
-  local yaml mount secret
-  yaml="$(mktemp)"
-  az containerapp show --name "$PG_APP" --resource-group "$RG" -o yaml > "$yaml"
+  cat >&2 <<'MSG'
+Phase 1 is withdrawn. Do not mount pg-data.
 
-  python3 - "$yaml" <<'PY'
-import sys, yaml
-p = sys.argv[1]
-d = yaml.safe_load(open(p))
-tpl = d['properties']['template']
-vols = tpl.get('volumes') or []
-if not any((v or {}).get('name') == 'pgdata' for v in vols):
-    vols.append({'name': 'pgdata', 'storageType': 'AzureFile', 'storageName': 'pg-data'})
-tpl['volumes'] = vols
-for c in tpl['containers']:
-    m = c.get('volumeMounts') or []
-    if not any((x or {}).get('volumeName') == 'pgdata' for x in m):
-        m.append({'volumeName': 'pgdata', 'mountPath': '/var/lib/postgresql/data'})
-    c['volumeMounts'] = m
-# `containerapp show` returns every secret with a name and no value. Feeding
-# that back sets pg-password and the registry pull credential to empty, which
-# takes out database authentication and image pulls in one update.
-d['properties']['configuration'].pop('secrets', None)
-yaml.safe_dump(d, open(p, 'w'))
-PY
+Postgres cannot initdb on an SMB Azure Files share: initdb chmods PGDATA and
+SMB returns EPERM, so the mount crash-loops the database instead of persisting
+it. No mountOptions fixes it, and NFS needs a Premium FileStorage account plus
+a VNet-injected ACA environment, neither of which this estate has.
 
-  az containerapp update --name "$PG_APP" --resource-group "$RG" --yaml "$yaml" -o none
-  rm -f "$yaml"
+Durability comes from Azure Database for PostgreSQL Flexible Server.
+  decision: docs/ADRs/ADR-041-managed-postgres-on-azure-containerised-locally.md
+  evidence: docs/gotchas.md (2026-10-02)
 
-  mount=$(az containerapp show --name "$PG_APP" --resource-group "$RG" \
-    --query "properties.template.containers[0].volumeMounts[?volumeName=='pgdata'].mountPath | [0]" \
-    -o tsv 2>/dev/null || echo "")
-  [ "$mount" = "/var/lib/postgresql/data" ] || die "pgdata still not mounted (got '${mount}')"
-
-  secret=$(az containerapp secret list --name "$PG_APP" --resource-group "$RG" \
-    --query "[?name=='pg-password'] | length(@)" -o tsv 2>/dev/null || echo "0")
-  [ "$secret" = "1" ] || die "the pg-password secret did not survive the YAML update"
-
-  say "mounted, pg-password intact. Waiting 90s for Postgres to initdb on the share"
-  sleep 90
-  az containerapp logs show --name "$PG_APP" --resource-group "$RG" --tail 20 2>/dev/null | tail -10
-  say "Phase 1 done. Look for 'database system is ready to accept connections'."
+Until that cutover lands, mvhd-postgres is ephemeral by design and a replica
+restart empties it. Recover with phases 2 to 6; phase 4 brings the realm back.
+MSG
+  exit 1
 }
 
 # ── 2: the six non-keycloak databases ───────────────────────────────────────

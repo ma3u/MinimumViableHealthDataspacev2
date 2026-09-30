@@ -2,8 +2,10 @@
 # Phase 2: Data layer — Postgres (container app + Azure Files) + Neo4j.
 #
 # Workaround B (ADR-018): Postgres runs as an ACA container app with TCP ingress
-# on port 5432 and a persistent Azure Files volume at /var/lib/postgresql/data.
-# Neo4j mounts neo4j-data + neo4j-logs per ADR-017.
+# on port 5432 and NO data volume. Postgres cannot initdb on an SMB Azure Files
+# share, so its durability comes from Flexible Server instead (ADR-041).
+# Neo4j mounts neo4j-data + neo4j-logs per ADR-017; Neo4j tolerates SMB, Postgres
+# does not.
 #
 # Two-step pattern: create each app with CLI flags (no volumes), then patch
 # with `az containerapp update --yaml` to attach Azure Files volumes. The
@@ -49,62 +51,43 @@ az containerapp create \
   -o none
 ok "Postgres container app created"
 
-# ── Postgres (step 2: patch YAML to add Azure Files volume) ────────────────
-log "Patching Postgres to mount pg-data Azure Files share..."
-PG_YAML=$(mktemp)
-az containerapp show --name "$PG_APP" --resource-group "$RG" -o yaml > "$PG_YAML"
-
-python3 - "$PG_YAML" <<'PY'
-import sys, yaml
-path = sys.argv[1]
-with open(path) as f:
-    doc = yaml.safe_load(f)
-tpl = doc['properties']['template']
-vols = tpl.get('volumes') or []
-if not any((v or {}).get('name') == 'pgdata' for v in vols):
-    vols.append({'name': 'pgdata', 'storageType': 'AzureFile', 'storageName': 'pg-data'})
-tpl['volumes'] = vols
-for c in tpl['containers']:
-    mounts = c.get('volumeMounts') or []
-    if not any((m or {}).get('volumeName') == 'pgdata' for m in mounts):
-        mounts.append({'volumeName': 'pgdata', 'mountPath': '/var/lib/postgresql/data'})
-    c['volumeMounts'] = mounts
-# `az containerapp show` returns every secret with its name and no value:
-#   [{"name": "pg-password"}, {"name": "acrmvhdehdsazurecrio-acrmvhdehds"}]
-# Feeding that straight back sets both to empty, which takes out Postgres
-# authentication and the registry pull credential in one update. Drop the
-# block instead and the existing values are kept, the way
-# 05-cfm-agents.sh:mount_config already does it.
-doc['properties']['configuration'].pop('secrets', None)
-with open(path, 'w') as f:
-    yaml.safe_dump(doc, f)
-PY
-
-az containerapp update --name "$PG_APP" --resource-group "$RG" --yaml "$PG_YAML" -o none
-rm -f "$PG_YAML"
-
-# Read the mount back. On 2026-09-30 the live app had the pgdata volume
-# declared and `volumeMounts: null`, so PGDATA was ordinary container-local
-# storage. It went unnoticed until ACA recreated the replica, initdb ran, and
-# the keycloak and cfm databases were gone (docs/gotchas.md, 2026-09-30).
-# A phase that says "volume attached" while nothing is mounted is how that
-# happens twice.
+# ── Postgres storage: deliberately none (ADR-041) ──────────────────────────
+# This phase used to mount the `pg-data` AzureFile share here. It must not.
+#
+# `initdb` chmods PGDATA unconditionally and SMB cannot do POSIX chmod, so the
+# mount does not give Postgres a durable disk, it stops Postgres booting at all.
+# Measured 2026-10-02 on the live app:
+#
+#   chmod: changing permissions of '/var/lib/postgresql/data/pgdata': Operation not permitted
+#   initdb: error: could not change permissions of directory ".../pgdata": Operation not permitted
+#
+# No mountOptions (uid, gid, dir_mode, file_mode) changes that. NFS would, but
+# it needs a Premium FileStorage account and a VNet-injected ACA environment,
+# and this estate has neither. See docs/gotchas.md (2026-10-02) and ADR-041.
+#
+# So this container app runs on ephemeral storage on purpose, and durability
+# comes from Azure Database for PostgreSQL Flexible Server instead (ADR-041).
+# Until that cutover lands, a replica restart still empties the cluster and
+# `restore-keycloak-realm.sh` is how the realm comes back.
+#
+# The guard below is the opposite of the one that used to be here: it fails if
+# anything has re-added the mount, because that is a crash loop, not a fix.
 PG_MOUNT=$(az containerapp show --name "$PG_APP" --resource-group "$RG" \
   --query "properties.template.containers[0].volumeMounts[?volumeName=='pgdata'].mountPath | [0]" \
   -o tsv 2>/dev/null || echo "")
-if [ "$PG_MOUNT" != "/var/lib/postgresql/data" ]; then
-  err "pgdata is not mounted (got '${PG_MOUNT}'). Postgres would run on"
-  err "ephemeral storage and lose every database on the next replica restart."
+if [ -n "$PG_MOUNT" ] && [ "$PG_MOUNT" != "None" ]; then
+  err "pgdata is mounted at '${PG_MOUNT}'. Postgres cannot initdb on an SMB"
+  err "share and will crash-loop. Remove the mount; see ADR-041."
   exit 1
 fi
 
 PG_SECRETS=$(az containerapp secret list --name "$PG_APP" --resource-group "$RG" \
   --query "[?name=='pg-password'] | length(@)" -o tsv 2>/dev/null || echo "0")
 if [ "$PG_SECRETS" != "1" ]; then
-  err "the pg-password secret did not survive the YAML update."
+  err "the pg-password secret is missing from ${PG_APP}."
   exit 1
 fi
-ok "Postgres volume attached and verified (pg-data → /var/lib/postgresql/data)"
+ok "Postgres created without a data volume, as ADR-041 requires"
 
 # ── Push Neo4j image to ACR ─────────────────────────────────────────────────
 log "Pulling and pushing Neo4j image..."
@@ -176,6 +159,6 @@ done
 
 # ── Summary ──────────────────────────────────────────────────────────────────
 log "Data layer complete"
-echo "  Postgres:  ${PG_APP} (internal TCP 5432, Azure Files pg-data)"
+echo "  Postgres:  ${PG_APP} (internal TCP 5432, ephemeral storage, see ADR-041)"
 echo "  Databases: (created in phase 6 after PG is reachable)"
 echo "  Neo4j:     ${NEO4J_APP} (internal TCP 7687, Azure Files /data + /logs)"
