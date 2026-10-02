@@ -5,13 +5,13 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { useEffect, useState } from "react";
 import "@scalar/api-reference-react/style.css";
+import { IS_STATIC } from "@/lib/static-export";
 
 const ApiReferenceReact = dynamic(
   () => import("@scalar/api-reference-react").then((m) => m.ApiReferenceReact),
   { ssr: false },
 );
 
-const IS_STATIC = process.env.NEXT_PUBLIC_STATIC_EXPORT === "true";
 const SPEC_URL = IS_STATIC
   ? "/MinimumViableHealthDataspacev2/openapi.yaml"
   : "/openapi.yaml";

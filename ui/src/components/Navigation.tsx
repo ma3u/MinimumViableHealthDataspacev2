@@ -42,8 +42,7 @@ import { deriveParticipantType, derivePersonaId } from "@/lib/auth";
 import { useDemoPersona } from "@/lib/use-demo-persona";
 import { useTabSession } from "@/lib/use-tab-session";
 import type { LucideProps } from "lucide-react";
-
-const IS_STATIC = process.env.NEXT_PUBLIC_STATIC_EXPORT === "true";
+import { IS_STATIC } from "@/lib/static-export";
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 

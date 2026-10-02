@@ -3,6 +3,7 @@ import { edcClient, EDC_CONTEXT } from "@/lib/edc";
 import { requireAuth, isAuthError } from "@/lib/auth-guard";
 import { promises as fs } from "fs";
 import path from "path";
+import { NEO4J_PROXY_URL } from "@/lib/proxy";
 
 export const dynamic = "force-dynamic";
 
@@ -202,9 +203,8 @@ export async function GET() {
     tasks.sort((a, b) => b.timestamp - a.timestamp);
 
     // 4. Sync tasks to persistent storage (neo4j-proxy → PostgreSQL)
-    const NEO4J_PROXY = process.env.NEO4J_PROXY_URL ?? "http://localhost:9090";
     try {
-      await fetch(`${NEO4J_PROXY}/tasks/sync`, {
+      await fetch(`${NEO4J_PROXY_URL}/tasks/sync`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -250,9 +250,8 @@ export async function GET() {
     console.error("Failed to aggregate tasks from EDC-V:", err);
 
     // Fall back to persistent task storage (PostgreSQL via neo4j-proxy)
-    const NEO4J_PROXY = process.env.NEO4J_PROXY_URL ?? "http://localhost:9090";
     try {
-      const fallbackRes = await fetch(`${NEO4J_PROXY}/tasks`, {
+      const fallbackRes = await fetch(`${NEO4J_PROXY_URL}/tasks`, {
         signal: AbortSignal.timeout(5000),
       });
       if (fallbackRes.ok) {

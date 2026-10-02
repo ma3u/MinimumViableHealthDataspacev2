@@ -3,8 +3,7 @@
 import { signIn, useSession } from "next-auth/react";
 import { Shield, LogIn } from "lucide-react";
 import { DEMO_PERSONAS, ROLE_LABELS, landingFor } from "@/lib/auth";
-
-const IS_STATIC = process.env.NEXT_PUBLIC_STATIC_EXPORT === "true";
+import { IS_STATIC } from "@/lib/static-export";
 
 /**
  * Demo persona cards showing available users and their roles.

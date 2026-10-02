@@ -151,8 +151,10 @@ session is a defect, not a policy.
 `isAuthError()` returns false for every test that does not say otherwise. That
 is deliberate, so route tests exercise business logic, but it means a route
 that forgets `requireAuth()` passes its unit tests. A test that means to pin a
-gate must close the guard itself; see the no-session block in
-`ui/__tests__/unit/api/patient-route.test.ts`. The API collection's
+gate must close the guard itself: either `vi.unmock("@/lib/auth-guard")` at the top of the
+file, so the real `requireAuth()` runs against the mocked `getServerSession` (the admin and
+patient route tests do this), or override it per test as the no-session block in
+`ui/__tests__/unit/api/patient-route.test.ts` does. The API collection's
 `09 Access control` folder is the check that runs against a real server.
 
 ## Data Models
