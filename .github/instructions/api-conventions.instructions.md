@@ -32,9 +32,28 @@ export async function POST(request: NextRequest): Promise<NextResponse> { ... }
 - Success: `NextResponse.json(data)`. Errors always take the shape
   `{ error: string }` — 401 unauthenticated, 403 wrong role, 404 not found,
   502 backend failure.
-- Auth: `getServerSession(authOptions)` from `next-auth/next`; roles from
-  `(session as { roles?: string[] }).roles ?? []`. Enforce role checks manually in
-  routes middleware does not cover — `/api/admin/*` requires `EDC_ADMIN`.
+- Auth: every route gates with `requireAuth()` from `@/lib/auth-guard`, never a
+  hand-rolled `getServerSession()` + `roles.includes(...)` check:
+
+  ```typescript
+  const auth = await requireAuth(["EDC_ADMIN"]); // no argument: any signed-in user
+  if (isAuthError(auth)) return auth; // 401 without a session, 403 without the role
+  const { roles, accessToken } = auth.session;
+  ```
+
+  Call `getServerSession(authOptions)` only _after_ the gate, and only for a field
+  `AuthSession` does not carry (e.g. `preferredUsername` to narrow a PATIENT to
+  their own record, as `/api/patient` does). `/api/admin/*` requires `EDC_ADMIN`.
+
+- Routes that answer without a session by decision (middleware skips `/api/*`):
+  `/api/nlq/backend`, the public HDAB register/information/report (`/api/permits`,
+  `/api/information`, `/api/activity-report`, Art. 58-59), `/api/graph` (demo
+  landing), the sign-in routes (`/api/auth/*`, `/api/keycloak-config`),
+  `/api/health`, and `/api/mock-dsp/*`. Full reasons in `.claude/rules/api-conventions.md`.
+  Any other route that does is a defect; a new public route joins that list in the same PR.
+- Route unit tests do not check the gate: `ui/__tests__/setup.ts` mocks the guard
+  open. A test that pins a 401/403 puts `vi.unmock("@/lib/auth-guard")` at the top
+  so the real guard runs against the mocked `getServerSession`.
 - Query Neo4j only through parameterised `runQuery()`. Never string-interpolate
   user input into Cypher.
 - **Every route needs a mock twin** in `ui/public/mock/`, matching the live
