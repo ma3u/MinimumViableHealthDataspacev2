@@ -1,7 +1,8 @@
 /**
  * Every API route needs a session (#404, ADR-044). The only exceptions are
- * the routes that make signing in possible, the liveness probe, and the
- * demo DSP endpoint the catalog crawler calls as a machine.
+ * the routes that make signing in possible and the liveness probe. The demo
+ * DSP endpoint the catalog crawler calls takes a session or its bearer token
+ * (requireSessionOrToken, lib/service-auth.ts), which counts as a gate.
  *
  * Two checks. The inventory fails when a route file never calls
  * requireAuth() and is not on the list below, so a new anonymous route
@@ -28,8 +29,6 @@ const ANONYMOUS: Record<string, string> = {
   "auth/eudi/status": "polled by the QR page until the wallet sign-in lands",
   "keycloak-config": "tells the sign-in banner where Keycloak is",
   health: "the liveness and readiness probe (k8s/probes.yaml)",
-  "mock-dsp/[participant]/catalog/request":
-    "the demo DSP catalogue; the catalog crawler calls it with no session (open question in #404)",
 };
 
 function routeFiles(dir: string): string[] {
@@ -65,6 +64,7 @@ describe("every API route needs a session (ADR-044)", () => {
       for (const [, method, body] of handlers) {
         const gated =
           body.includes("requireAuth(") ||
+          body.includes("requireSessionOrToken(") ||
           helpers.some((h) => new RegExp(`\\b${h}\\(`).test(body));
         if (!gated) ungated.push(`${method} ${route}`);
       }

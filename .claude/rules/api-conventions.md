@@ -133,10 +133,16 @@ signing in possible and the probe that keeps the container alive:
   the sign-in flows themselves.
 - `/api/keycloak-config`: tells the sign-in banner where Keycloak is.
 - `/api/health`: the liveness and readiness probe (`k8s/probes.yaml`).
-- `/api/mock-dsp/[participant]/catalog/request`: **open question.** The
-  catalog crawler POSTs to it as a machine, with no session, to drive
-  federated discovery (ADR-020). Gating it needs a machine credential first;
-  see #404.
+
+One route takes a machine credential instead of, or as well as, a session:
+`/api/mock-dsp/[participant]/catalog/request`, which the catalog crawler
+POSTs to every five minutes (ADR-020). It calls `requireSessionOrToken()`
+from `@/lib/service-auth`: a session, or `Authorization: Bearer
+<DSP_CATALOG_TOKEN>`. The token lives once in Key Vault and reaches the UI
+and the crawler as a `keyvaultref` (ADR-036,
+`scripts/azure/wire-dsp-catalog-token.sh`); the crawler sends it only to
+`DSP_CATALOG_TOKEN_HOSTS`. A wrong token is a 401, never a fallback to the
+session.
 
 `ui/__tests__/unit/api/every-route-needs-a-session.test.ts` enforces this per
 handler, not per file (a file-level scan passed `GET /api/compliance/results`
