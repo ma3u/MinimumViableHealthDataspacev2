@@ -22,6 +22,8 @@ const STATIC_MOCK_MAP: Record<string, string> = {
   "/api/nlq": "/mock/nlq_templates.json",
   "/api/federated": "/mock/federated_stats.json",
   "/api/credentials": "/mock/credentials.json",
+  "/api/credentials/definitions": "/mock/credential_definitions.json",
+  "/api/trust-center": "/mock/trust_center.json",
   "/api/participants": "/mock/participants.json",
   "/api/participants/me": "/mock/participants_me.json",
   "/api/assets": "/mock/assets.json",

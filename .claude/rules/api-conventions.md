@@ -209,8 +209,11 @@ Each mock file maps 1:1 to an API endpoint:
 | `compliance.json`               | `/api/compliance`                   |
 | `analytics.json`                | `/api/analytics`                    |
 | `credentials.json`              | `/api/credentials`                  |
+| `credential_definitions.json`   | `/api/credentials/definitions`      |
+| `trust_center.json`             | `/api/trust-center`                 |
 
-When adding a new API route, always add a corresponding mock fixture.
+When adding a new API route, always add a corresponding mock fixture. `__tests__/unit/lib/static-mock-coverage.test.ts`
+fails when a page GETs an `/api/...` path that resolves to no file under `public/mock/`.
 
 ## DID Conventions
 
