@@ -1,6 +1,6 @@
 # ADR-027: EDC Stack in Off-Hours Scale-Down (FinOps Cost Correction)
 
-**Status:** Accepted
+**Status:** Superseded by [ADR-042](ADR-042-off-hours-scaledown-current-state.md) (2026-10-02)
 **Date:** 2026-05-18
 **Relates to:** [ADR-016](ADR-016-aca-off-hours-scaledown.md), [ADR-022](ADR-022-edc-connector-cost-vs-function.md), [ADR-023](ADR-023-reinstate-off-hours-scaledown.md), [ADR-024](ADR-024-full-edc-provisioning-per-participant.md)
 **Tracking:** FinOps cost review on subscription `INF-STG-EU_EHDS` (DISIT Cloud Team, May 2026)

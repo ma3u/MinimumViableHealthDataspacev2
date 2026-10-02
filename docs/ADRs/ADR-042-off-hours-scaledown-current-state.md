@@ -1,8 +1,8 @@
 # ADR-042: Off-hours scale-down, the state that runs today
 
-**Status:** Proposed
+**Status:** Accepted (2026-10-02, #404)
 **Date:** 2026-10-02
-**Supersedes (on acceptance):** [ADR-016](ADR-016-aca-off-hours-scaledown.md), section 1 of [ADR-018](ADR-018-24x7-workaround-b.md) ("Disable the off-hours scale-down"), [ADR-023](ADR-023-reinstate-off-hours-scaledown.md), [ADR-027](ADR-027-edc-stack-off-hours-scaledown.md)
+**Supersedes:** [ADR-016](ADR-016-aca-off-hours-scaledown.md), section 1 of [ADR-018](ADR-018-24x7-workaround-b.md) ("Disable the off-hours scale-down"), [ADR-023](ADR-023-reinstate-off-hours-scaledown.md), [ADR-027](ADR-027-edc-stack-off-hours-scaledown.md)
 **Does not supersede:** the rest of ADR-018 (Postgres as a Container App), ADR-041
 **Tracks:** [#404](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/404)
 

@@ -1,6 +1,6 @@
 # ADR-039: Published reference ranges are quoted alongside the printed one, never in place of it
 
-**Status:** Proposed
+**Status:** Accepted (2026-10-02, #404)
 **Date:** 2026-09-19
 **Relates to:** [ADR-033](ADR-033-lab-report-extraction-pipeline.md), [ADR-038](ADR-038-scan-retained-diagnostics-export.md)
 **Tracks:** [#186](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/186)

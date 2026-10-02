@@ -1,6 +1,6 @@
 # ADR-043: UI routes read the graph directly; the proxy serves the data planes and what needs its credentials
 
-**Status:** Proposed
+**Status:** Accepted (2026-10-02, #404)
 **Date:** 2026-10-02
 **Relates to:** [ADR-002](ADR-002-edc-data-plane-architecture.md), [ADR-004](ADR-004-nextjs-unified-frontend.md), [ADR-019](ADR-019-gds-apoc-azure-ai-foundry-graphrag.md), [ADR-020](ADR-020-cross-participant-dataset-discovery.md)
 **Tracks:** [#404](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/404)
