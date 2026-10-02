@@ -156,7 +156,7 @@ MERGE (rp1:ResearchPseudonym {rpsnId: "rpsn-study-diabetes-patient-A"})
 SET rp1 += {
   studyId: "study-diabetes-de-nl-2025",
   revoked: false,
-  issuedBy: "did:web:rki.de:trustcenter",
+  issuedBy: "did:web:medreg.de:trustcentre",
   issuedAt: datetime("2025-03-15T09:06:00Z"),
   mode: "stateless"
 };

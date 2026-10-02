@@ -22,7 +22,7 @@ test.describe("N · Trust Center — EHDS Art. 50/51", () => {
     expect(Array.isArray(data.trustCenters)).toBe(true);
   });
 
-  test("J131 — /api/trust-center returns RKI trust center after seeding", async ({
+  test("J131 — /api/trust-center returns the MedReg DE Trust Centre after seeding", async ({
     page,
   }) => {
     await skipIfNeo4jDown(page);
@@ -36,16 +36,16 @@ test.describe("N · Trust Center — EHDS Art. 50/51", () => {
       return;
     }
 
-    const rki = data.trustCenters.find(
-      (tc: { name: string }) => tc.name === "RKI Trust Center DE",
+    const de = data.trustCenters.find(
+      (tc: { name: string }) => tc.name === "MedReg DE Trust Centre",
     );
-    expect(rki).toBeDefined();
-    expect(rki.country).toBe("DE");
-    expect(rki.status).toBe("active");
-    expect(rki.did).toBe("did:web:rki.de:trustcenter");
+    expect(de).toBeDefined();
+    expect(de.country).toBe("DE");
+    expect(de.status).toBe("active");
+    expect(de.did).toBe("did:web:medreg.de:trustcentre");
   });
 
-  test("J132 — /api/trust-center returns RIVM trust center after seeding", async ({
+  test("J132 — /api/trust-center returns the Limburg Trust Centre NL after seeding", async ({
     page,
   }) => {
     await skipIfNeo4jDown(page);
@@ -56,12 +56,12 @@ test.describe("N · Trust Center — EHDS Art. 50/51", () => {
       return;
     }
 
-    const rivm = data.trustCenters.find(
-      (tc: { name: string }) => tc.name === "RIVM Trust Center NL",
+    const nl = data.trustCenters.find(
+      (tc: { name: string }) => tc.name === "Limburg Trust Centre NL",
     );
-    expect(rivm).toBeDefined();
-    expect(rivm.country).toBe("NL");
-    expect(rivm.status).toBe("active");
+    expect(nl).toBeDefined();
+    expect(nl.country).toBe("NL");
+    expect(nl.status).toBe("active");
   });
 
   test("J133 — Trust centers include mutual recognition countries", async ({
@@ -75,10 +75,10 @@ test.describe("N · Trust Center — EHDS Art. 50/51", () => {
       return;
     }
 
-    const rki = data.trustCenters.find(
-      (tc: { name: string }) => tc.name === "RKI Trust Center DE",
+    const de = data.trustCenters.find(
+      (tc: { name: string }) => tc.name === "MedReg DE Trust Centre",
     );
-    expect(rki?.recognisedCountries).toContain("NL");
+    expect(de?.recognisedCountries).toContain("NL");
   });
 
   test("J134 — /api/trust-center returns SPE sessions array", async ({

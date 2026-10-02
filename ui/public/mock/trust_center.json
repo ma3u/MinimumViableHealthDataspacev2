@@ -1,0 +1,50 @@
+{
+  "trustCenters": [
+    {
+      "name": "MedReg DE Trust Centre",
+      "operatedBy": "MedReg DE",
+      "country": "DE",
+      "status": "active",
+      "protocol": "deterministic-pseudonym-v1",
+      "did": "did:web:medreg.de:trustcentre",
+      "hdabApprovalId": null,
+      "hdabApprovalStatus": null,
+      "datasetCount": 0,
+      "recognisedCountries": ["NL"],
+      "activeRpsnCount": 1
+    },
+    {
+      "name": "Limburg Trust Centre NL",
+      "operatedBy": "Limburg Medical Centre",
+      "country": "NL",
+      "status": "active",
+      "protocol": "deterministic-pseudonym-v1",
+      "did": "did:web:lmc.nl:trustcentre",
+      "hdabApprovalId": null,
+      "hdabApprovalStatus": null,
+      "datasetCount": 0,
+      "recognisedCountries": ["DE"],
+      "activeRpsnCount": 0
+    }
+  ],
+  "speSessions": [
+    {
+      "sessionId": "spe-session-001",
+      "studyId": "study-diabetes-de-nl-2025",
+      "status": "active",
+      "createdBy": "did:web:medreg.de:hdab",
+      "createdAt": "2025-03-15T09:00:00Z",
+      "kAnonymityThreshold": 5,
+      "outputPolicy": "aggregate-only"
+    },
+    {
+      "sessionId": "spe-session-002",
+      "studyId": "study-cardio-nl-2025",
+      "status": "completed",
+      "createdBy": "did:web:medreg.de:hdab",
+      "createdAt": "2025-02-10T14:30:00Z",
+      "kAnonymityThreshold": 5,
+      "outputPolicy": "aggregate-only"
+    }
+  ]
+}
