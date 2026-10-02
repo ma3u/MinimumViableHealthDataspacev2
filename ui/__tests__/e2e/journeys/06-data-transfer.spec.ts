@@ -16,6 +16,7 @@ import {
   apiGet,
   skipIfNeo4jDown,
 } from "./helpers";
+import { signInOrSkip } from "../helpers/forged-session";
 
 test.describe("F · Data Transfer & Viewing", () => {
   /* ── J41: Transfer page is protected ─────────────────────── */
@@ -87,6 +88,8 @@ test.describe("F · Data Transfer & Viewing", () => {
   }) => {
     await skipIfNeo4jDown(page);
 
+    // Every API route needs a session since #404 (ADR-044).
+    await signInOrSkip(page, test.skip);
     await page.goto("/graph");
     await expect(page.getByText("Data layers").first()).toBeVisible({
       timeout: T,

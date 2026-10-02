@@ -45,12 +45,11 @@ export async function POST(request: NextRequest): Promise<NextResponse> { ... }
   `AuthSession` does not carry (e.g. `preferredUsername` to narrow a PATIENT to
   their own record, as `/api/patient` does). `/api/admin/*` requires `EDC_ADMIN`.
 
-- Routes that answer without a session by decision (middleware skips `/api/*`):
-  `/api/nlq/backend`, the public HDAB register/information/report (`/api/permits`,
-  `/api/information`, `/api/activity-report`, Art. 58-59), `/api/graph` (demo
-  landing), the sign-in routes (`/api/auth/*`, `/api/keycloak-config`),
-  `/api/health`, and `/api/mock-dsp/*`. Full reasons in `.claude/rules/api-conventions.md`.
-  Any other route that does is a defect; a new public route joins that list in the same PR.
+- Every API route needs a session (ADR-044, #404). The only exceptions make
+  signing in possible or keep the container alive: `/api/auth/*`,
+  `/api/keycloak-config`, `/api/health`; plus `/api/mock-dsp/*`, which the catalog
+  crawler calls as a machine (open question in #404). `every-route-needs-a-session.test.ts`
+  checks each handler; a new anonymous route needs a superseding ADR.
 - Route unit tests do not check the gate: `ui/__tests__/setup.ts` mocks the guard
   open. A test that pins a 401/403 puts `vi.unmock("@/lib/auth-guard")` at the top
   so the real guard runs against the mocked `getServerSession`.

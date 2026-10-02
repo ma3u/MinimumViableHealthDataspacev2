@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { requireAuth, isAuthError } from "@/lib/auth-guard";
 import { runQuery } from "@/lib/neo4j";
 import {
   LABEL_LAYER,
@@ -517,10 +518,11 @@ async function buildDefaultGraph() {
  *   edc-admin      — operator: participants + products + transfers
  *   hdab           — authority: approvals + credentials + TC governance
  */
-// Public endpoint — the /graph page is the demo landing view and must
-// work without authentication. Data is fully synthetic (127 fictional
-// patients seeded from Synthea).
+// Any signed-in participant. Until #404 this was public as the demo landing
+// view; Every API route needs a session since #404 (ADR-044), and /graph sends an anonymous visitor to sign in.
 export async function GET(req: Request) {
+  const auth = await requireAuth();
+  if (isAuthError(auth)) return auth;
   const { searchParams } = new URL(req.url);
   const persona = (searchParams.get("persona") ?? "default") as PersonaId;
 

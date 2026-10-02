@@ -130,11 +130,13 @@ describe("GET /api/permits", () => {
     ).toHaveLength(3);
   });
 
-  it("needs no session: the register is public", async () => {
+  it("asks for a session: public until #404, signed-in since (ADR-044)", async () => {
     graphAnswers(ROWS, []);
     const res = await GET();
     expect(res.status).toBe(200);
-    expect(requireAuth).not.toHaveBeenCalled();
+    // Any signed-in participant, no particular role. The 401 is pinned in
+    // every-route-needs-a-session.test.ts.
+    expect(requireAuth).toHaveBeenCalledWith();
   });
 
   it("lists decisions with outcome, deadline and conditions, and pending applications with the clock", async () => {

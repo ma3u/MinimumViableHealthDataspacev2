@@ -120,6 +120,9 @@ jobs:
       - name: Smoke against ${{ env.DEMO_URL }}
         env:
           PLAYWRIGHT_BASE_URL: ${{ env.DEMO_URL }}
+          # #404 (ADR-044): /graph needs a session. smoke.spec.ts forges one
+          # with the live secret, and fails in CI without it rather than skip.
+          NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
         run: npx playwright test __tests__/e2e/smoke.spec.ts --project=chromium
       - uses: actions/upload-artifact@v4
         if: always()

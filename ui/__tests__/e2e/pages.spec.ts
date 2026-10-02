@@ -11,13 +11,6 @@ const TIMEOUT = 15_000;
 /* ── Public Explore pages ─────────────────────────────────────── */
 
 test.describe("Explore Pages (public)", () => {
-  test("Graph Explorer renders layer sidebar", async ({ page }) => {
-    await page.goto("/graph");
-    await expect(page.locator("text=Layers").first()).toBeVisible({
-      timeout: TIMEOUT,
-    });
-  });
-
   test("Dataset Catalog renders heading", async ({ page }) => {
     await page.goto("/catalog");
     await expect(
@@ -47,6 +40,20 @@ test.describe("Protected Pages (redirect to sign-in)", () => {
   // PROTECTED_PATHS with #357/#376; it was listed as public because it used
   // to be. The static export has no middleware, so this passed there either
   // way, and the spec's workflows are continue-on-error, so nothing said.
+  // /graph and the access body's pages joined PROTECTED_PATHS with #404:
+  // every API route needs a session (ADR-044).
+  for (const path of [
+    "/graph",
+    "/permits",
+    "/information",
+    "/activity-report",
+  ]) {
+    test(`${path} redirects unauthenticated users`, async ({ page }) => {
+      await page.goto(path);
+      await expect(page).toHaveURL(/signin/, { timeout: TIMEOUT });
+    });
+  }
+
   test("Patient Journey redirects unauthenticated users", async ({ page }) => {
     await page.goto("/patient");
     await expect(page).toHaveURL(/signin/, { timeout: TIMEOUT });

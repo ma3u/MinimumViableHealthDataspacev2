@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { requireAuth, isAuthError } from "@/lib/auth-guard";
 import { runQuery } from "@/lib/neo4j";
 import {
   PUBLISH_WORKING_DAYS,
@@ -13,7 +14,8 @@ export const dynamic = "force-dynamic";
 
 /**
  * GET /api/permits: the public register of the health data access body.
- * No session: Regulation (EU) 2025/327 wants this public.
+ * Any signed-in participant. Regulation (EU) 2025/327 wants this public;
+ * Every API route needs a session since #404 (ADR-044), which puts the register behind a login.
  *
  *   Art. 57(1)(j)(ii)  every application received, without undue delay
  *   Art. 57(1)(j)(iii) permits issued and refusals with their justification,
@@ -60,6 +62,8 @@ interface RegisterRow {
 }
 
 export async function GET() {
+  const auth = await requireAuth();
+  if (isAuthError(auth)) return auth;
   try {
     const rows = await runQuery<RegisterRow>(
       `MATCH (app:AccessApplication)

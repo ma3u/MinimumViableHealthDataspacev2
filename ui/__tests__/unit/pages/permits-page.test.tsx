@@ -117,7 +117,7 @@ describe("/permits", () => {
     expect(screen.getByText("fetch failed")).toBeInTheDocument();
   });
 
-  it("is public: not on the protected path list", () => {
+  it("needs a session: on the protected path list since #404 (ADR-044)", () => {
     const middleware = readFileSync(
       path.join(process.cwd(), "src/middleware.ts"),
       "utf-8",
@@ -126,6 +126,6 @@ describe("/permits", () => {
       middleware.indexOf("const PROTECTED_PATHS"),
       middleware.indexOf("] as const;"),
     );
-    expect(list).not.toContain('"/permits"');
+    expect(list).toContain('"/permits"');
   });
 });

@@ -10,6 +10,8 @@
  *     indexes OR no embeddings backend.
  *   - LLM write-guard test skips when chat backend is "none".
  *   - Authenticated body skips when PLAYWRIGHT_KEYCLOAK_URL is unset.
+ *   - /api/nlq/backend needs a session since #404. Section A forges one from
+ *     NEXTAUTH_SECRET and skips, saying so, when the secret is not set.
  *
  * Prerequisites:
  *   - UI on PLAYWRIGHT_BASE_URL (local 3000, JAD 3003, prod ehds.mabu.red)
@@ -20,6 +22,7 @@
  */
 import { test, expect, type APIRequestContext } from "@playwright/test";
 import { keycloakLogin } from "../helpers/keycloak-login";
+import { signedInRequest, NO_FORGED_SESSION } from "../helpers/forged-session";
 
 const BASE = process.env.PLAYWRIGHT_BASE_URL ?? "http://localhost:3000";
 const API = `${BASE}/api`;
@@ -37,17 +40,38 @@ async function fetchBackend(
   req: APIRequestContext,
 ): Promise<BackendStatus | null> {
   const r = await req.get(`${API}/nlq/backend`);
+  // A 401 or 403 is a session the hub refused, not an environment without
+  // GraphRAG. Returning null would turn it into a quiet skip (ADR-031).
+  if (r.status() === 401 || r.status() === 403) {
+    throw new Error(`/api/nlq/backend refused the session: ${r.status()}`);
+  }
   if (r.status() !== 200) return null;
   return (await r.json()) as BackendStatus;
 }
 
-/* ── A. Backend status shape (no auth required) ──────────────────────── */
+/* ── A. Backend status shape (forged session, no Keycloak) ──────────── */
 
 test.describe("A · GraphRAG backend status", () => {
-  test("J610 GET /api/nlq/backend returns 200 with the documented shape", async ({
+  let api: APIRequestContext | null = null;
+
+  test.beforeAll(async () => {
+    api = await signedInRequest(BASE);
+  });
+  test.afterAll(async () => {
+    await api?.dispose();
+  });
+
+  test("J609 GET /api/nlq/backend without a session answers 401 (#404)", async ({
     request,
   }) => {
     const r = await request.get(`${API}/nlq/backend`);
+    expect(r.status()).toBe(401);
+    expect((await r.json()).error).toBe("Unauthorized");
+  });
+
+  test("J610 GET /api/nlq/backend returns 200 with the documented shape", async () => {
+    test.skip(!api, NO_FORGED_SESSION);
+    const r = await api!.get(`${API}/nlq/backend`);
     expect(r.status(), "backend probe must reach neo4j-proxy").toBe(200);
     const body = (await r.json()) as BackendStatus;
     expect(body).toHaveProperty("chat");
@@ -65,30 +89,27 @@ test.describe("A · GraphRAG backend status", () => {
     ]);
   });
 
-  test("J611 chat backend value is one of the declared options", async ({
-    request,
-  }) => {
-    const b = await fetchBackend(request);
+  test("J611 chat backend value is one of the declared options", async () => {
+    test.skip(!api, NO_FORGED_SESSION);
+    const b = await fetchBackend(api!);
     expect(b).not.toBeNull();
     expect(["azure-openai", "openai", "ollama", "anthropic", "none"]).toContain(
       b!.chat,
     );
   });
 
-  test("J612 embeddings backend value is one of the declared options", async ({
-    request,
-  }) => {
-    const b = await fetchBackend(request);
+  test("J612 embeddings backend value is one of the declared options", async () => {
+    test.skip(!api, NO_FORGED_SESSION);
+    const b = await fetchBackend(api!);
     expect(b).not.toBeNull();
     expect(["azure-openai", "openai", "ollama", "none"]).toContain(
       b!.embeddings,
     );
   });
 
-  test("J613 graphragReady ⇔ (vectorIndexes.length > 0 ∧ embeddings != none)", async ({
-    request,
-  }) => {
-    const b = await fetchBackend(request);
+  test("J613 graphragReady ⇔ (vectorIndexes.length > 0 ∧ embeddings != none)", async () => {
+    test.skip(!api, NO_FORGED_SESSION);
+    const b = await fetchBackend(api!);
     expect(b).not.toBeNull();
     const expected = b!.vectorIndexes.length > 0 && b!.embeddings !== "none";
     expect(b!.graphragReady).toBe(expected);
@@ -149,9 +170,8 @@ test.describe("C · GraphRAG pipeline", () => {
 
   test("J616 free-form question produces either graphrag, llm or explicit none", async ({
     page,
-    request,
   }) => {
-    const b = await fetchBackend(request);
+    const b = await fetchBackend(page.request);
     expect(b).not.toBeNull();
 
     const r = await page.request.post(`${API}/nlq`, {
@@ -166,9 +186,8 @@ test.describe("C · GraphRAG pipeline", () => {
 
   test("J617 when graphragReady, a free-form question returns graphrag (or llm) with trace[]", async ({
     page,
-    request,
   }) => {
-    const b = await fetchBackend(request);
+    const b = await fetchBackend(page.request);
     test.skip(
       !b?.graphragReady,
       "GraphRAG not ready — need GDS + vector index + embeddings backend",
@@ -195,9 +214,8 @@ test.describe("C · GraphRAG pipeline", () => {
 
   test("J618 write-guard blocks a generated mutation (requires chat LLM)", async ({
     page,
-    request,
   }) => {
-    const b = await fetchBackend(request);
+    const b = await fetchBackend(page.request);
     test.skip(b?.chat === "none", "No chat backend — LLM branch disabled");
 
     // A prompt that an LLM might try to satisfy with a write; the guard in
