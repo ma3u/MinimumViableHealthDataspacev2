@@ -15,6 +15,7 @@
 #   ./scripts/azure/13-postgres-flexible-server.sh 1       # create the server
 #   ./scripts/azure/13-postgres-flexible-server.sh 2       # create the 7 databases
 #   ./scripts/azure/13-postgres-flexible-server.sh 3       # cut Keycloak over
+#   ./scripts/azure/13-postgres-flexible-server.sh 3b      # move EDC + CFM over
 #   ./scripts/azure/13-postgres-flexible-server.sh 4       # retire mvhd-postgres
 #
 # Run them in order and read the output. Each phase verifies itself and exits
@@ -253,6 +254,117 @@ phase_3() {
   say "Phase 3 done. Sign in at https://${CUSTOM_DOMAIN}/auth/signin and prove it by hand."
 }
 
+# ── 3b: move every other consumer ───────────────────────────────────────────
+# The five EDC services and the two CFM managers. Measured 2026-10-02: all
+# seven named mvhd-postgres, and all seven carried the shared mvhdadmin
+# password in a plaintext env var, the one committed in env.sh. After this
+# phase they carry the Key Vault password as an ACA secret and nothing else.
+#
+# Pool budget (ADR-041): B1ms gives users 35 connections. Keycloak holds 10.
+#
+# EDC: commons-pool defaults max-total to 8, so five services alone would want
+# 40. The cap cannot go in as an env var: EDC maps EDC_FOO_BAR to edc.foo.bar,
+# and the key is `pool.connections.max-total`, whose hyphen no env name can
+# spell. EDC also reads JVM system properties (ConfigurationLoader takes
+# SystemProperties.ofDefault()), and the JVM honours JAVA_TOOL_OPTIONS by
+# itself, so that is the way in. None of these apps set it before.
+#
+# CFM: the managers use database/sql with lib/pq, which leaves open
+# connections unbounded and has no DSN parameter to cap them. At demo load
+# they hold a handful; if `too many clients` ever appears, they are the first
+# suspect and the fix is upstream (SetMaxOpenConns).
+EDC_DB_APPS=(
+  "mvhd-controlplane:controlplane"
+  "mvhd-dp-fhir:dataplane"
+  "mvhd-dp-omop:dataplane_omop"
+  "mvhd-identityhub:identityhub"
+  "mvhd-issuerservice:issuerservice"
+)
+CFM_DB_APPS=(mvhd-tenant-mgr mvhd-provision-mgr)
+EDC_POOL_MAX=3
+
+phase_3b() {
+  say "Phase 3b: move the EDC services and CFM managers to ${PG_FLEX_FQDN}"
+  local pw entry app db
+  pw="$(pg_admin_password)"
+  [ -n "$pw" ] || die "no ${PG_SECRET_NAME} in ${KEY_VAULT_NAME}; run phase 1 first"
+
+  # The old password stays in env.sh and in the mvhd-postgres secret until
+  # phase 4, so the way back is not lost by this phase.
+  say "rollback, per app, if one does not come back:"
+  say "  az containerapp update -n <app> -g ${RG} --set-env-vars \\"
+  say "    'EDC_DATASOURCE_DEFAULT_URL=jdbc:postgresql://${PG_APP}:5432/<db>' \\"
+  say "    'EDC_DATASOURCE_DEFAULT_USER=mvhdadmin' 'EDC_DATASOURCE_DEFAULT_PASSWORD=<env.sh PG_PASSWORD>'"
+
+  for entry in "${EDC_DB_APPS[@]}"; do
+    app="${entry%%:*}"
+    db="${entry##*:}"
+    say "  ${app} -> ${db}"
+    az containerapp secret set --name "$app" --resource-group "$RG" \
+      --secrets "pg-flex-password=${pw}" -o none || die "could not set the secret on ${app}"
+    az containerapp update --name "$app" --resource-group "$RG" \
+      --set-env-vars \
+        "EDC_DATASOURCE_DEFAULT_URL=jdbc:postgresql://${PG_FLEX_FQDN}:5432/${db}?sslmode=require" \
+        "EDC_DATASOURCE_DEFAULT_USER=${PG_FLEX_ADMIN}" \
+        "EDC_DATASOURCE_DEFAULT_PASSWORD=secretref:pg-flex-password" \
+        "JAVA_TOOL_OPTIONS=-Dedc.datasource.default.pool.connections.max-total=${EDC_POOL_MAX}" \
+      -o none || die "could not update ${app}"
+  done
+
+  # lib/pq takes the whole DSN, password included, so the DSN itself is the
+  # secret. The generated password is base64 with /+= stripped plus "Aa1!",
+  # and "!" is legal in URL userinfo, so it needs no escaping.
+  local dsn
+  dsn="postgresql://${PG_FLEX_ADMIN}:${pw}@${PG_FLEX_FQDN}:5432/cfm?sslmode=require"
+  for app in "${CFM_DB_APPS[@]}"; do
+    say "  ${app} -> cfm"
+    az containerapp secret set --name "$app" --resource-group "$RG" \
+      --secrets "cfm-database-url=${dsn}" -o none || die "could not set the secret on ${app}"
+    az containerapp update --name "$app" --resource-group "$RG" \
+      --set-env-vars "DATABASE_URL=secretref:cfm-database-url" \
+      -o none || die "could not update ${app}"
+  done
+  unset pw dsn
+
+  # The process, not the knob: read each app's newest revision health back.
+  say "waiting 120s for the new revisions to start"
+  sleep 120
+  local bad="" health
+  for entry in "${EDC_DB_APPS[@]}" "${CFM_DB_APPS[@]}"; do
+    app="${entry%%:*}"
+    health=$(az containerapp revision list --name "$app" --resource-group "$RG" \
+      --query "sort_by([?properties.active], &properties.createdTime)[-1].properties.healthState" \
+      -o tsv 2>/dev/null || echo "unknown")
+    printf '  %-22s %s\n' "$app" "$health"
+    [ "$health" = "Healthy" ] || bad="${bad} ${app}"
+  done
+  [ -z "$bad" ] || die "not healthy:${bad}. Read 'az containerapp logs show -n <app> -g ${RG} --tail 50'."
+
+  local left
+  left=$(pg_app_consumers)
+  if [ -n "$left" ]; then
+    echo "still pointing at ${PG_APP}:" >&2
+    printf '%s' "$left" >&2
+    die "some consumers were not moved"
+  fi
+  say "Phase 3b done. No app but ${PG_APP} itself names ${PG_APP} any more."
+  say "Next: reseed CFM with 'gh workflow run cfm-seed.yml', then phase 4."
+}
+
+# Every app other than mvhd-postgres and Keycloak whose env still names it.
+pg_app_consumers() {
+  local app hits out=""
+  for app in $(az containerapp list --resource-group "$RG" --query '[].name' -o tsv 2>/dev/null); do
+    [ "$app" = "$PG_APP" ] && continue
+    [ "$app" = "$KEYCLOAK_APP" ] && continue
+    hits=$(az containerapp show --name "$app" --resource-group "$RG" \
+      --query "properties.template.containers[].env[?contains(to_string(value),'${PG_APP}')].name" \
+      -o tsv 2>/dev/null | tr '\n' ' ')
+    [ -n "$hits" ] && out="${out}  ${app}: ${hits}"$'\n'
+  done
+  printf '%s' "$out"
+}
+
 # ── 4: retire the container app ─────────────────────────────────────────────
 phase_4() {
   say "Phase 4: retire ${PG_APP}"
@@ -269,17 +381,10 @@ phase_4() {
   # EDC_DATASOURCE_DEFAULT_URL, plus mvhd-tenant-mgr and mvhd-provision-mgr via
   # DATABASE_URL. They sit at minReplicas 0 and mostly fail to activate
   # (ADR-022), which is exactly why deleting their database would go unnoticed
-  # until someone tried to use them. Enumerate rather than assume.
-  local app others hits
-  others=""
-  for app in $(az containerapp list --resource-group "$RG" --query '[].name' -o tsv 2>/dev/null); do
-    [ "$app" = "$PG_APP" ] && continue
-    [ "$app" = "$KEYCLOAK_APP" ] && continue
-    hits=$(az containerapp show --name "$app" --resource-group "$RG" \
-      --query "properties.template.containers[].env[?contains(to_string(value),'${PG_APP}')].name" \
-      -o tsv 2>/dev/null | tr '\n' ' ')
-    [ -n "$hits" ] && others="${others}  ${app}: ${hits}"$'\n'
-  done
+  # until someone tried to use them. Enumerate rather than assume; phase 3b
+  # moves them.
+  local others
+  others=$(pg_app_consumers)
 
   if [ -n "$others" ]; then
     echo "These apps still point at ${PG_APP}:" >&2
@@ -309,6 +414,7 @@ case "${1:-}" in
   1) require_az; phase_1 ;;
   2) require_az; phase_2 ;;
   3) require_az; phase_3 ;;
+  3b) require_az; phase_3b ;;
   4) require_az; phase_4 ;;
-  *) sed -n '14,18p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'; exit 1 ;;
+  *) sed -n '14,19p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'; exit 1 ;;
 esac

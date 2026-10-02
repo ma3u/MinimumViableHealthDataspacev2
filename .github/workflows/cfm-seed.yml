@@ -81,6 +81,18 @@ jobs:
       # internal TCP ingress and needs no exec shell at all.
       - name: Ensure the cfm database exists
         run: |
+          # ADR-041: once the TenantManager reads its DSN from the
+          # cfm-database-url secret, the database lives on Flexible Server,
+          # where 13-postgres-flexible-server.sh phase 2 created it. Creating
+          # it again in mvhd-postgres would only make a copy nothing reads.
+          TM_DSN_REF=$(az containerapp show -n "$TM_APP" -g "$RESOURCE_GROUP" \
+            --query "properties.template.containers[0].env[?name=='DATABASE_URL'].secretRef | [0]" \
+            -o tsv 2>/dev/null || echo "")
+          if [ "$TM_DSN_REF" = "cfm-database-url" ]; then
+            echo "TenantManager is on Flexible Server (ADR-041); cfm exists there, nothing to create."
+            exit 0
+          fi
+
           PG_APP=mvhd-postgres
           PG_ADMIN=$(az containerapp show -n "$PG_APP" -g "$RESOURCE_GROUP" \
             --query "properties.template.containers[0].env[?name=='POSTGRES_USER'].value" \
