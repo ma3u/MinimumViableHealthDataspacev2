@@ -6,6 +6,21 @@
 //     cypher-shell -u neo4j -p healthdataspace
 
 // ============================================================
+// 0. Remove the trust centres this seed used to create
+// ============================================================
+
+// Until the rename to fictional names, this file created "RKI Trust Center
+// DE" and "RIVM Trust Center NL", named after real institutions. The seed
+// only MERGEs, so a graph seeded before the rename kept both next to the new
+// ones: the live demo listed four trust centres on 2026-10-02 (#404). Delete
+// them by their exact old names and DIDs. A no-op on a graph that never had
+// them, so it is as idempotent as the rest of the file.
+MATCH (old:TrustCenter)
+WHERE old.name IN ["RKI Trust Center DE", "RIVM Trust Center NL"]
+   OR old.did IN ["did:web:rki.de:trustcenter", "did:web:rivm.nl:trustcenter"]
+DETACH DELETE old;
+
+// ============================================================
 // 1. Trust Center nodes (Layer 1 extension)
 // ============================================================
 
